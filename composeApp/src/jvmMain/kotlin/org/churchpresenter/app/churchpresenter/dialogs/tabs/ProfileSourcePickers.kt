@@ -2,18 +2,18 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.bible
-import churchpresenter.composeapp.generated.resources.songs
-import churchpresenter.composeapp.generated.resources.output_profile_add_language
-import churchpresenter.composeapp.generated.resources.add_bible_translation
-import churchpresenter.composeapp.generated.resources.output_profile_bible_count
-import churchpresenter.composeapp.generated.resources.output_profile_bible_none_loaded
-import churchpresenter.composeapp.generated.resources.output_profile_bible_off
-import churchpresenter.composeapp.generated.resources.output_profile_bible_order_header
-import churchpresenter.composeapp.generated.resources.output_profile_song_count
-import churchpresenter.composeapp.generated.resources.output_profile_song_order_header
-import churchpresenter.composeapp.generated.resources.output_profile_songs_off
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.bible
+import org.churchpresenter.strings.generated.resources.songs
+import org.churchpresenter.strings.generated.resources.output_profile_add_language
+import org.churchpresenter.strings.generated.resources.add_bible_translation
+import org.churchpresenter.strings.generated.resources.output_profile_bible_count
+import org.churchpresenter.strings.generated.resources.output_profile_bible_none_loaded
+import org.churchpresenter.strings.generated.resources.output_profile_bible_off
+import org.churchpresenter.strings.generated.resources.output_profile_bible_order_header
+import org.churchpresenter.strings.generated.resources.output_profile_song_count
+import org.churchpresenter.strings.generated.resources.output_profile_song_order_header
+import org.churchpresenter.strings.generated.resources.output_profile_songs_off
 import org.churchpresenter.settings.OutputProfile
 import org.jetbrains.compose.resources.stringResource
 

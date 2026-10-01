@@ -40,39 +40,40 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.use_default_directory
-import churchpresenter.composeapp.generated.resources.ic_storage_calendar
-import churchpresenter.composeapp.generated.resources.calendar_storage_status_default
-import churchpresenter.composeapp.generated.resources.calendar_storage
-import churchpresenter.composeapp.generated.resources.bible
-import churchpresenter.composeapp.generated.resources.browse_directory
-import churchpresenter.composeapp.generated.resources.ic_storage_bible
-import churchpresenter.composeapp.generated.resources.ic_storage_lower_third
-import churchpresenter.composeapp.generated.resources.ic_storage_media
-import churchpresenter.composeapp.generated.resources.ic_storage_pictures
-import churchpresenter.composeapp.generated.resources.ic_storage_presentation
-import churchpresenter.composeapp.generated.resources.ic_storage_songs
-import churchpresenter.composeapp.generated.resources.display_lower_third
-import churchpresenter.composeapp.generated.resources.media
-import churchpresenter.composeapp.generated.resources.no_directory_selected
-import churchpresenter.composeapp.generated.resources.pictures
-import churchpresenter.composeapp.generated.resources.presentation
-import churchpresenter.composeapp.generated.resources.set_all_directories
-import churchpresenter.composeapp.generated.resources.songs
-import churchpresenter.composeapp.generated.resources.system_storage
-import churchpresenter.composeapp.generated.resources.system_storage_linked_count
-import churchpresenter.composeapp.generated.resources.system_storage_needs_attention_count
-import churchpresenter.composeapp.generated.resources.system_storage_status_file_count
-import churchpresenter.composeapp.generated.resources.system_storage_status_linked
-import churchpresenter.composeapp.generated.resources.system_storage_status_needs_converting
-import churchpresenter.composeapp.generated.resources.system_storage_status_not_found
-import churchpresenter.composeapp.generated.resources.shortcut_unbound
-import churchpresenter.composeapp.generated.resources.system_storage_status_read_only
-import churchpresenter.composeapp.generated.resources.system_storage_subtitle
-import churchpresenter.composeapp.generated.resources.tooltip_directory_not_found
-import churchpresenter.composeapp.generated.resources.tooltip_directory_not_writable
-import churchpresenter.composeapp.generated.resources.tooltip_directory_writable
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.use_default_directory
+import org.churchpresenter.icons.generated.resources.ic_storage_calendar
+import org.churchpresenter.strings.generated.resources.calendar_storage_status_default
+import org.churchpresenter.strings.generated.resources.calendar_storage
+import org.churchpresenter.strings.generated.resources.bible
+import org.churchpresenter.strings.generated.resources.browse_directory
+import org.churchpresenter.icons.generated.resources.ic_storage_bible
+import org.churchpresenter.icons.generated.resources.ic_storage_lower_third
+import org.churchpresenter.icons.generated.resources.ic_storage_media
+import org.churchpresenter.icons.generated.resources.ic_storage_pictures
+import org.churchpresenter.icons.generated.resources.ic_storage_presentation
+import org.churchpresenter.icons.generated.resources.ic_storage_songs
+import org.churchpresenter.strings.generated.resources.display_lower_third
+import org.churchpresenter.strings.generated.resources.media
+import org.churchpresenter.strings.generated.resources.no_directory_selected
+import org.churchpresenter.strings.generated.resources.pictures
+import org.churchpresenter.strings.generated.resources.presentation
+import org.churchpresenter.strings.generated.resources.set_all_directories
+import org.churchpresenter.strings.generated.resources.songs
+import org.churchpresenter.strings.generated.resources.system_storage
+import org.churchpresenter.strings.generated.resources.system_storage_linked_count
+import org.churchpresenter.strings.generated.resources.system_storage_needs_attention_count
+import org.churchpresenter.strings.generated.resources.system_storage_status_file_count
+import org.churchpresenter.strings.generated.resources.system_storage_status_linked
+import org.churchpresenter.strings.generated.resources.system_storage_status_needs_converting
+import org.churchpresenter.strings.generated.resources.system_storage_status_not_found
+import org.churchpresenter.strings.generated.resources.shortcut_unbound
+import org.churchpresenter.strings.generated.resources.system_storage_status_read_only
+import org.churchpresenter.strings.generated.resources.system_storage_subtitle
+import org.churchpresenter.strings.generated.resources.tooltip_directory_not_found
+import org.churchpresenter.strings.generated.resources.tooltip_directory_not_writable
+import org.churchpresenter.strings.generated.resources.tooltip_directory_writable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -222,31 +223,33 @@ private fun storageFolders(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ): List<StorageFolder> = listOf(
     StorageFolder(
-        stringResource(Res.string.bible), Res.drawable.ic_storage_bible, MaterialTheme.semantic.contentBible,
+        stringResource(Res.string.bible), IconRes.drawable.ic_storage_bible, MaterialTheme.semantic.contentBible,
         settings.bibleSettings.storageDirectory,
     ) { dir -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(storageDirectory = dir)) } },
     StorageFolder(
-        stringResource(Res.string.songs), Res.drawable.ic_storage_songs, MaterialTheme.semantic.contentSongs,
+        stringResource(Res.string.songs), IconRes.drawable.ic_storage_songs, MaterialTheme.semantic.contentSongs,
         settings.songSettings.storageDirectory,
     ) { dir -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(storageDirectory = dir)) } },
     StorageFolder(
-        stringResource(Res.string.pictures), Res.drawable.ic_storage_pictures, MaterialTheme.semantic.contentPictures,
+        stringResource(Res.string.pictures),
+        IconRes.drawable.ic_storage_pictures,
+        MaterialTheme.semantic.contentPictures,
         settings.pictureSettings.storageDirectory,
     ) { dir -> onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = dir)) } },
     StorageFolder(
-        stringResource(Res.string.display_lower_third), Res.drawable.ic_storage_lower_third,
+        stringResource(Res.string.display_lower_third), IconRes.drawable.ic_storage_lower_third,
         MaterialTheme.semantic.contentLowerThird, settings.streamingSettings.lowerThirdFolder,
     ) { dir -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(lowerThirdFolder = dir)) } },
     StorageFolder(
-        stringResource(Res.string.presentation), Res.drawable.ic_storage_presentation,
+        stringResource(Res.string.presentation), IconRes.drawable.ic_storage_presentation,
         MaterialTheme.semantic.contentPresentation, settings.presentationStorageDirectory,
     ) { dir -> onSettingsChange { s -> s.copy(presentationStorageDirectory = dir) } },
     StorageFolder(
-        stringResource(Res.string.media), Res.drawable.ic_storage_media, MaterialTheme.semantic.contentMedia,
+        stringResource(Res.string.media), IconRes.drawable.ic_storage_media, MaterialTheme.semantic.contentMedia,
         settings.mediaStorageDirectory,
     ) { dir -> onSettingsChange { s -> s.copy(mediaStorageDirectory = dir) } },
     StorageFolder(
-        stringResource(Res.string.calendar_storage), Res.drawable.ic_storage_calendar,
+        stringResource(Res.string.calendar_storage), IconRes.drawable.ic_storage_calendar,
         MaterialTheme.semantic.contentCalendar,
         // The chosen folder, or the machine's app data folder — which the picture prints, so a test
         // can pin the fallback through [LocalDefaultCalendarFolder]. Null, which is what the app

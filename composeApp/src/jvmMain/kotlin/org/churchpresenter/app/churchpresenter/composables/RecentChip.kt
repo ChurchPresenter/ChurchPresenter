@@ -25,11 +25,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_star
-import churchpresenter.composeapp.generated.resources.ic_star_filled
-import churchpresenter.composeapp.generated.resources.recent_pin
-import churchpresenter.composeapp.generated.resources.recent_unpin
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.icons.generated.resources.ic_star
+import org.churchpresenter.icons.generated.resources.ic_star_filled
+import org.churchpresenter.strings.generated.resources.recent_pin
+import org.churchpresenter.strings.generated.resources.recent_unpin
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.semantic
@@ -84,7 +85,7 @@ fun RecentChip(
         )
         KeyIconButton(onClick = onTogglePin, modifier = Modifier.size(24.dp)) {
             Icon(
-                painter = painterResource(if (isPinned) Res.drawable.ic_star_filled else Res.drawable.ic_star),
+                painter = painterResource(if (isPinned) IconRes.drawable.ic_star_filled else IconRes.drawable.ic_star),
                 contentDescription = stringResource(if (isPinned) Res.string.recent_unpin else Res.string.recent_pin),
                 modifier = Modifier.size(13.dp),
                 tint = if (isPinned) MaterialTheme.semantic.favorite else fill.ink.copy(alpha = STAR_OFF_ALPHA)

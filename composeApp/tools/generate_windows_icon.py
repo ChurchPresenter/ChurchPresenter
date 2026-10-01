@@ -12,7 +12,7 @@ downscaled from the 1024 px master with Lanczos, never from another small frame.
 
 Writes:
   composeApp/src/jvmMain/appResources/windows/icon.ico   -- the installer, taskbar and Start menu
-  composeApp/src/jvmMain/resources/app-icon/icon-<n>.png -- what the app's own windows hand to
+  icons/src/main/resources/app-icon/icon-<n>.png         -- what the app's own windows hand to
                                                            Window.setIconImages (title bar, Alt+Tab)
 
 Run from the repository root after changing the macOS iconset:
@@ -25,7 +25,7 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parent.parent.parent
 ICONSET = ROOT / "composeApp/src/jvmMain/appResources/macos/icon.iconset"
 ICO = ROOT / "composeApp/src/jvmMain/appResources/windows/icon.ico"
-WINDOW_FRAMES = ROOT / "composeApp/src/jvmMain/resources/app-icon"
+WINDOW_FRAMES = ROOT / "icons/src/main/resources/app-icon"
 
 # Every size Windows asks an .ico for across 100-300% scaling: the shell's small and large icons,
 # the taskbar, Alt+Tab and Explorer's views.

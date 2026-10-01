@@ -19,9 +19,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.runComposeUiTest
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.stock_photo_browse_photos_title
-import churchpresenter.composeapp.generated.resources.stock_photo_search_placeholder_photo
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.stock_photo_browse_photos_title
+import org.churchpresenter.strings.generated.resources.stock_photo_search_placeholder_photo
 import io.mockk.coEvery
 import io.mockk.mockkObject
 import io.mockk.unmockkObject

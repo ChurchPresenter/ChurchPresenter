@@ -21,10 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.hide_from_slideshow
-import churchpresenter.composeapp.generated.resources.show_in_slideshow
-import churchpresenter.composeapp.generated.resources.slideshow_hidden
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.hide_from_slideshow
+import org.churchpresenter.strings.generated.resources.show_in_slideshow
+import org.churchpresenter.strings.generated.resources.slideshow_hidden
 import org.churchpresenter.theme.components.KeyIconButton
 import org.jetbrains.compose.resources.stringResource
 

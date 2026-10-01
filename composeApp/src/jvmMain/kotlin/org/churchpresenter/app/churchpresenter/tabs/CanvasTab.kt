@@ -26,7 +26,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.app.churchpresenter.composables.SceneCanvas
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.models.ShortcutAction
@@ -34,14 +34,14 @@ import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.jetbrains.compose.resources.stringResource
-import churchpresenter.composeapp.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.canvas_dual_layout_off_confirm
-import churchpresenter.composeapp.generated.resources.canvas_layer_placement_in
-import churchpresenter.composeapp.generated.resources.canvas_layout_landscape_short
-import churchpresenter.composeapp.generated.resources.canvas_layout_portrait_short
-import churchpresenter.composeapp.generated.resources.remove
-import churchpresenter.composeapp.generated.resources.canvas_layer_outside
-import churchpresenter.composeapp.generated.resources.canvas_layer_partly_outside
+import org.churchpresenter.strings.generated.resources.cancel
+import org.churchpresenter.strings.generated.resources.canvas_dual_layout_off_confirm
+import org.churchpresenter.strings.generated.resources.canvas_layer_placement_in
+import org.churchpresenter.strings.generated.resources.canvas_layout_landscape_short
+import org.churchpresenter.strings.generated.resources.canvas_layout_portrait_short
+import org.churchpresenter.strings.generated.resources.remove
+import org.churchpresenter.strings.generated.resources.canvas_layer_outside
+import org.churchpresenter.strings.generated.resources.canvas_layer_partly_outside
 
 internal const val CANVAS_SCENE_LIST_WEIGHT = 0.4f
 internal const val CANVAS_SOURCE_LIST_WEIGHT = 0.6f

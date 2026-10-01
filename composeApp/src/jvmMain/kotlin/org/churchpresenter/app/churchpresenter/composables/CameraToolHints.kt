@@ -1,10 +1,10 @@
 package org.churchpresenter.app.churchpresenter.composables
 
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.canvas_camera_ffmpeg_required
-import churchpresenter.composeapp.generated.resources.canvas_camera_none_found
-import churchpresenter.composeapp.generated.resources.canvas_camera_unopenable_listing
-import churchpresenter.composeapp.generated.resources.canvas_camera_v4l2_hint
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.canvas_camera_ffmpeg_required
+import org.churchpresenter.strings.generated.resources.canvas_camera_none_found
+import org.churchpresenter.strings.generated.resources.canvas_camera_unopenable_listing
+import org.churchpresenter.strings.generated.resources.canvas_camera_v4l2_hint
 import org.jetbrains.compose.resources.StringResource
 
 /**

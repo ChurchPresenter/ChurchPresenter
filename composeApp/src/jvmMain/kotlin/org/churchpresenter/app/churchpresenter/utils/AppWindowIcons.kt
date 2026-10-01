@@ -21,7 +21,7 @@ import javax.imageio.ImageIO
  */
 internal object AppWindowIcons {
 
-    /** The frames `composeApp/tools/generate_windows_icon.py` writes under `resources/app-icon/`. */
+    /** The frames `composeApp/tools/generate_windows_icon.py` writes under `:icons`' `app-icon/`. */
     internal val SIZES = listOf(16, 20, 24, 32, 40, 48, 64, 128, 256)
 
     /** Every frame that could be read, smallest first; empty only if the resources are missing. */

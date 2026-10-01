@@ -48,12 +48,13 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.stock_library_empty
-import churchpresenter.composeapp.generated.resources.stock_library_search_placeholder
-import churchpresenter.composeapp.generated.resources.stock_library_title_photos
-import churchpresenter.composeapp.generated.resources.stock_library_title_videos
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.cancel
+import org.churchpresenter.strings.generated.resources.stock_library_empty
+import org.churchpresenter.strings.generated.resources.stock_library_search_placeholder
+import org.churchpresenter.strings.generated.resources.stock_library_title_photos
+import org.churchpresenter.strings.generated.resources.stock_library_title_videos
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -118,7 +119,7 @@ internal fun scanDownloadedFiles(storageDir: File, mediaType: StockMediaClient.S
 internal suspend fun loadBundledFileNames(mediaType: StockMediaClient.StockMediaType): List<String> {
     if (mediaType != StockMediaClient.StockMediaType.PHOTO) return emptyList()
     return try {
-        Res.readBytes("$BUNDLED_BACKGROUNDS_PATH/index.txt")
+        AppRes.readBytes("$BUNDLED_BACKGROUNDS_PATH/index.txt")
             .toString(Charsets.UTF_8)
             .lines()
             .filter { it.isNotBlank() }
@@ -133,7 +134,7 @@ internal suspend fun materializeBundledEntry(fileName: String): File = withConte
     dir.mkdirs()
     val target = File(dir, fileName)
     if (!target.exists()) {
-        target.writeBytes(Res.readBytes("$BUNDLED_BACKGROUNDS_PATH/$fileName"))
+        target.writeBytes(AppRes.readBytes("$BUNDLED_BACKGROUNDS_PATH/$fileName"))
     }
     target
 }
@@ -288,7 +289,7 @@ internal fun LocalLibraryDialogContent(
 internal suspend fun loadThumbnailBitmap(entry: LibraryEntry): ImageBitmap? = try {
     val bytes = when (entry) {
         is DownloadedEntry -> entry.file.readBytes()
-        is BundledEntry -> Res.readBytes("$BUNDLED_BACKGROUNDS_PATH/${entry.name}")
+        is BundledEntry -> AppRes.readBytes("$BUNDLED_BACKGROUNDS_PATH/${entry.name}")
     }
     SkiaImage.makeFromEncoded(bytes).toComposeImageBitmap()
 } catch (_: Exception) {

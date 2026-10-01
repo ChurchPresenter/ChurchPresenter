@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import churchpresenter.composeapp.generated.resources.quick_backgrounds
+import org.churchpresenter.strings.generated.resources.quick_backgrounds
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -37,10 +37,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.quick_background_hint
-import churchpresenter.composeapp.generated.resources.quick_background_reset
-import churchpresenter.composeapp.generated.resources.background_scope_title
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.quick_background_hint
+import org.churchpresenter.strings.generated.resources.quick_background_reset
+import org.churchpresenter.strings.generated.resources.background_scope_title
 import org.churchpresenter.app.churchpresenter.dialogs.SongBackgroundFill
 import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.utils.label

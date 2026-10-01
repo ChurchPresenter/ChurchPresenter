@@ -69,40 +69,41 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.dictionary_definition
-import churchpresenter.composeapp.generated.resources.dictionary_entry_count
-import churchpresenter.composeapp.generated.resources.dictionary_filter_all
-import churchpresenter.composeapp.generated.resources.dictionary_filter_greek
-import churchpresenter.composeapp.generated.resources.dictionary_filter_hebrew
-import churchpresenter.composeapp.generated.resources.dictionary_back
-import churchpresenter.composeapp.generated.resources.dictionary_forward
-import churchpresenter.composeapp.generated.resources.dictionary_switch_language
-import churchpresenter.composeapp.generated.resources.dictionary_bible_primary
-import churchpresenter.composeapp.generated.resources.dictionary_bible_select
-import churchpresenter.composeapp.generated.resources.ic_redo
-import churchpresenter.composeapp.generated.resources.ic_undo
-import churchpresenter.composeapp.generated.resources.dictionary_go_to_verse
-import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_count
-import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_header
-import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_loading
-import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_none
-import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_show_more
-import churchpresenter.composeapp.generated.resources.dictionary_kjv_usage
-import churchpresenter.composeapp.generated.resources.dictionary_loading
-import churchpresenter.composeapp.generated.resources.dictionary_no_results
-import churchpresenter.composeapp.generated.resources.dictionary_pronunciation
-import churchpresenter.composeapp.generated.resources.dictionary_search_hint
-import churchpresenter.composeapp.generated.resources.dictionary_select_entry
-import churchpresenter.composeapp.generated.resources.dictionary_transliteration
-import churchpresenter.composeapp.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.book
-import churchpresenter.composeapp.generated.resources.chapter
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_search
-import churchpresenter.composeapp.generated.resources.search_clear
-import churchpresenter.composeapp.generated.resources.verse
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.add_to_schedule
+import org.churchpresenter.strings.generated.resources.dictionary_definition
+import org.churchpresenter.strings.generated.resources.dictionary_entry_count
+import org.churchpresenter.strings.generated.resources.dictionary_filter_all
+import org.churchpresenter.strings.generated.resources.dictionary_filter_greek
+import org.churchpresenter.strings.generated.resources.dictionary_filter_hebrew
+import org.churchpresenter.strings.generated.resources.dictionary_back
+import org.churchpresenter.strings.generated.resources.dictionary_forward
+import org.churchpresenter.strings.generated.resources.dictionary_switch_language
+import org.churchpresenter.strings.generated.resources.dictionary_bible_primary
+import org.churchpresenter.strings.generated.resources.dictionary_bible_select
+import org.churchpresenter.icons.generated.resources.ic_redo
+import org.churchpresenter.icons.generated.resources.ic_undo
+import org.churchpresenter.strings.generated.resources.dictionary_go_to_verse
+import org.churchpresenter.strings.generated.resources.dictionary_in_scripture_count
+import org.churchpresenter.strings.generated.resources.dictionary_in_scripture_header
+import org.churchpresenter.strings.generated.resources.dictionary_in_scripture_loading
+import org.churchpresenter.strings.generated.resources.dictionary_in_scripture_none
+import org.churchpresenter.strings.generated.resources.dictionary_in_scripture_show_more
+import org.churchpresenter.strings.generated.resources.dictionary_kjv_usage
+import org.churchpresenter.strings.generated.resources.dictionary_loading
+import org.churchpresenter.strings.generated.resources.dictionary_no_results
+import org.churchpresenter.strings.generated.resources.dictionary_pronunciation
+import org.churchpresenter.strings.generated.resources.dictionary_search_hint
+import org.churchpresenter.strings.generated.resources.dictionary_select_entry
+import org.churchpresenter.strings.generated.resources.dictionary_transliteration
+import org.churchpresenter.strings.generated.resources.go_live
+import org.churchpresenter.strings.generated.resources.book
+import org.churchpresenter.strings.generated.resources.chapter
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_search
+import org.churchpresenter.strings.generated.resources.search_clear
+import org.churchpresenter.strings.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
@@ -596,7 +597,7 @@ private fun DictionaryDetailActionRow(
                 onClick = onGoBack,
                 enabled = canGoBack,
                 tooltipText = backStr,
-                painter = painterResource(Res.drawable.ic_undo),
+                painter = painterResource(IconRes.drawable.ic_undo),
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -604,7 +605,7 @@ private fun DictionaryDetailActionRow(
                 onClick = onGoForward,
                 enabled = canGoForward,
                 tooltipText = forwardStr,
-                painter = painterResource(Res.drawable.ic_redo),
+                painter = painterResource(IconRes.drawable.ic_redo),
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -1102,7 +1103,7 @@ private fun DictionarySearchField(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(Res.drawable.ic_search),
+            painter = painterResource(IconRes.drawable.ic_search),
             contentDescription = null,
             modifier = Modifier.padding(start = 11.dp).size(14.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
@@ -1134,7 +1135,7 @@ private fun DictionarySearchField(
         if (value.isNotEmpty()) {
             KeyIconButton(onClick = onClear, modifier = Modifier.size(30.dp)) {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_close),
+                    painter = painterResource(IconRes.drawable.ic_close),
                     contentDescription = stringResource(Res.string.search_clear),
                     modifier = Modifier.size(14.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant

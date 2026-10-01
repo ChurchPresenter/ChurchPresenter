@@ -5,10 +5,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.full_screen
-import churchpresenter.composeapp.generated.resources.display_lower_third
-import churchpresenter.composeapp.generated.resources.display_stage_monitor
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.full_screen
+import org.churchpresenter.strings.generated.resources.display_lower_third
+import org.churchpresenter.strings.generated.resources.display_stage_monitor
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 

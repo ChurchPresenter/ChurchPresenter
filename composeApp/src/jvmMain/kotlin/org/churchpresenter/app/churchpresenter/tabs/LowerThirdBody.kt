@@ -46,18 +46,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Warning
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.atem_upload_error
-import churchpresenter.composeapp.generated.resources.atem_uploading_image
-import churchpresenter.composeapp.generated.resources.atem_uploading_video
-import churchpresenter.composeapp.generated.resources.atem_processing
-import churchpresenter.composeapp.generated.resources.confirm_delete
-import churchpresenter.composeapp.generated.resources.confirm_delete_file
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.scanning_directory
-import churchpresenter.composeapp.generated.resources.no_lottie_files
-import churchpresenter.composeapp.generated.resources.no_directory_selected
-import churchpresenter.composeapp.generated.resources.tooltip_remove
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.atem_upload_error
+import org.churchpresenter.strings.generated.resources.atem_uploading_image
+import org.churchpresenter.strings.generated.resources.atem_uploading_video
+import org.churchpresenter.strings.generated.resources.atem_processing
+import org.churchpresenter.strings.generated.resources.confirm_delete
+import org.churchpresenter.strings.generated.resources.confirm_delete_file
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.strings.generated.resources.scanning_directory
+import org.churchpresenter.strings.generated.resources.no_lottie_files
+import org.churchpresenter.strings.generated.resources.no_directory_selected
+import org.churchpresenter.strings.generated.resources.tooltip_remove
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -69,7 +70,7 @@ import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
 import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import churchpresenter.composeapp.generated.resources.generate_lower_third
+import org.churchpresenter.strings.generated.resources.generate_lower_third
 import java.awt.Window
 import java.io.File
 import javax.swing.SwingUtilities
@@ -219,7 +220,7 @@ private fun LowerThirdTabScope.LowerThirdFileRow(file: File) {
                 }
             }
             Icon(
-                painter = painterResource(Res.drawable.ic_close),
+                painter = painterResource(IconRes.drawable.ic_close),
                 contentDescription = stringResource(Res.string.tooltip_remove),
                 modifier = Modifier.size(14.dp).initialPassClickable {
                     SwingUtilities.invokeLater {

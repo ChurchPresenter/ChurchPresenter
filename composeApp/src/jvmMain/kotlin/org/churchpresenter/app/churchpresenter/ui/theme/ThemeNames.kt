@@ -1,21 +1,21 @@
 package org.churchpresenter.app.churchpresenter.ui.theme
 
 import androidx.compose.runtime.Composable
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.custom_theme
-import churchpresenter.composeapp.generated.resources.dark_theme
-import churchpresenter.composeapp.generated.resources.forest_theme
-import churchpresenter.composeapp.generated.resources.light_theme
-import churchpresenter.composeapp.generated.resources.midnight_theme
-import churchpresenter.composeapp.generated.resources.mocha_theme
-import churchpresenter.composeapp.generated.resources.ocean_theme
-import churchpresenter.composeapp.generated.resources.plum_theme
-import churchpresenter.composeapp.generated.resources.rose_theme
-import churchpresenter.composeapp.generated.resources.sand_theme
-import churchpresenter.composeapp.generated.resources.slate_theme
-import churchpresenter.composeapp.generated.resources.studio_theme
-import churchpresenter.composeapp.generated.resources.system_theme
-import churchpresenter.composeapp.generated.resources.warm_theme
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.custom_theme
+import org.churchpresenter.strings.generated.resources.dark_theme
+import org.churchpresenter.strings.generated.resources.forest_theme
+import org.churchpresenter.strings.generated.resources.light_theme
+import org.churchpresenter.strings.generated.resources.midnight_theme
+import org.churchpresenter.strings.generated.resources.mocha_theme
+import org.churchpresenter.strings.generated.resources.ocean_theme
+import org.churchpresenter.strings.generated.resources.plum_theme
+import org.churchpresenter.strings.generated.resources.rose_theme
+import org.churchpresenter.strings.generated.resources.sand_theme
+import org.churchpresenter.strings.generated.resources.slate_theme
+import org.churchpresenter.strings.generated.resources.studio_theme
+import org.churchpresenter.strings.generated.resources.system_theme
+import org.churchpresenter.strings.generated.resources.warm_theme
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.stringResource
 

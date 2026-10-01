@@ -39,19 +39,21 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberWindowState
 import org.churchpresenter.theme.AppShape
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_app_icon
-import churchpresenter.composeapp.generated.resources.license_accept_button
-import churchpresenter.composeapp.generated.resources.license_decline_button
-import churchpresenter.composeapp.generated.resources.license_prompt
-import churchpresenter.composeapp.generated.resources.license_title
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.icons.generated.resources.ic_app_icon
+import org.churchpresenter.strings.generated.resources.license_accept_button
+import org.churchpresenter.strings.generated.resources.license_decline_button
+import org.churchpresenter.strings.generated.resources.license_prompt
+import org.churchpresenter.strings.generated.resources.license_title
 import org.churchpresenter.app.churchpresenter.utils.MacMenuBarActivationFix
 import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /** The EULA text shown in [LicenseDialog], read from the bundled resource file. */
-internal suspend fun loadEulaText(): String = Res.readBytes("files/eula.txt").toString(Charsets.UTF_8)
+internal suspend fun loadEulaText(): String = AppRes.readBytes("files/eula.txt").toString(Charsets.UTF_8)
 
 /**
  * Hosts the EULA window content. Overridable so tests can reach the state/effect logic around it
@@ -98,7 +100,7 @@ fun LicenseDialog(
 
     windowHost(
         stringResource(Res.string.license_title),
-        painterResource(Res.drawable.ic_app_icon),
+        painterResource(IconRes.drawable.ic_app_icon),
         windowState,
         onDecline
     ) {

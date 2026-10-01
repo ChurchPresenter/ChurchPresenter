@@ -41,12 +41,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.bible_history
-import churchpresenter.composeapp.generated.resources.bible_history_clear
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.ic_arrow_up
-import churchpresenter.composeapp.generated.resources.ic_delete
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.bible_history
+import org.churchpresenter.strings.generated.resources.bible_history_clear
+import org.churchpresenter.icons.generated.resources.ic_arrow_down
+import org.churchpresenter.icons.generated.resources.ic_arrow_up
+import org.churchpresenter.icons.generated.resources.ic_delete
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.theme.semantic
@@ -76,7 +77,7 @@ internal fun BibleHistoryPanel(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    painter = painterResource(if (expanded) Res.drawable.ic_arrow_down else Res.drawable.ic_arrow_up),
+                    painterResource(if (expanded) IconRes.drawable.ic_arrow_down else IconRes.drawable.ic_arrow_up),
                     contentDescription = null,
                     modifier = Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -109,7 +110,7 @@ internal fun BibleHistoryPanel(
                 ) {
                     KeyIconButton(onClick = onClear) {
                         Icon(
-                            painter = painterResource(Res.drawable.ic_delete),
+                            painter = painterResource(IconRes.drawable.ic_delete),
                             contentDescription = stringResource(Res.string.bible_history_clear),
                             modifier = Modifier.size(20.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant

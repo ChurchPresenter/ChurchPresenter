@@ -27,17 +27,18 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_delete
-import churchpresenter.composeapp.generated.resources.preview_layout_default_name
-import churchpresenter.composeapp.generated.resources.preview_layout_edit
-import churchpresenter.composeapp.generated.resources.preview_layout_fills_panel
-import churchpresenter.composeapp.generated.resources.preview_layout_list_unplaced
-import churchpresenter.composeapp.generated.resources.preview_layout_new
-import churchpresenter.composeapp.generated.resources.preview_layout_none
-import churchpresenter.composeapp.generated.resources.preview_layout_delete
-import churchpresenter.composeapp.generated.resources.preview_settings_show_labels
-import churchpresenter.composeapp.generated.resources.preview_settings_show_modes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.icons.generated.resources.ic_delete
+import org.churchpresenter.strings.generated.resources.preview_layout_default_name
+import org.churchpresenter.strings.generated.resources.preview_layout_edit
+import org.churchpresenter.strings.generated.resources.preview_layout_fills_panel
+import org.churchpresenter.strings.generated.resources.preview_layout_list_unplaced
+import org.churchpresenter.strings.generated.resources.preview_layout_new
+import org.churchpresenter.strings.generated.resources.preview_layout_none
+import org.churchpresenter.strings.generated.resources.preview_layout_delete
+import org.churchpresenter.strings.generated.resources.preview_settings_show_labels
+import org.churchpresenter.strings.generated.resources.preview_settings_show_modes
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.activeLayout
 import org.churchpresenter.settings.newPreviewLayout
@@ -176,7 +177,7 @@ private fun LayoutList(proj: ProjectionSettings, onChange: (ProjectionSettings) 
                 )
             }
             TooltipIconButton(
-                painter = painterResource(Res.drawable.ic_delete),
+                painter = painterResource(IconRes.drawable.ic_delete),
                 text = stringResource(Res.string.preview_layout_delete),
                 onClick = {
                     val rest = proj.previewLayouts.filterNot { it.id == layout.id }

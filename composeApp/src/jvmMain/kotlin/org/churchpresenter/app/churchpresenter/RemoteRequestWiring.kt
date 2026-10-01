@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.input.key.type
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.remote_api_calendar_enroll_code
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.remote_api_calendar_enroll_code
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEvent
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType

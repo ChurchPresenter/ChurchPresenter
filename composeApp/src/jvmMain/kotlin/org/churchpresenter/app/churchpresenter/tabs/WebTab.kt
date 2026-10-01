@@ -26,31 +26,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.desktop_view
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.ic_arrow_left
-import churchpresenter.composeapp.generated.resources.ic_arrow_right
-import churchpresenter.composeapp.generated.resources.ic_arrow_up
-import churchpresenter.composeapp.generated.resources.ic_clear_cache
-import churchpresenter.composeapp.generated.resources.ic_refresh
-import churchpresenter.composeapp.generated.resources.mobile_view
-import churchpresenter.composeapp.generated.resources.web_back
-import churchpresenter.composeapp.generated.resources.web_engine_unavailable_body
-import churchpresenter.composeapp.generated.resources.web_engine_unavailable_policy_body
-import churchpresenter.composeapp.generated.resources.web_engine_unavailable_policy_title
-import churchpresenter.composeapp.generated.resources.web_engine_unavailable_title
-import churchpresenter.composeapp.generated.resources.web_engine_unavailable_macos_body
-import churchpresenter.composeapp.generated.resources.web_engine_unavailable_macos_title
-import churchpresenter.composeapp.generated.resources.web_engine_unavailable_windows_body
-import churchpresenter.composeapp.generated.resources.web_engine_unavailable_windows_title
-import churchpresenter.composeapp.generated.resources.web_clear_cache
-import churchpresenter.composeapp.generated.resources.web_forward
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.desktop_view
+import org.churchpresenter.icons.generated.resources.ic_arrow_down
+import org.churchpresenter.icons.generated.resources.ic_arrow_left
+import org.churchpresenter.icons.generated.resources.ic_arrow_right
+import org.churchpresenter.icons.generated.resources.ic_arrow_up
+import org.churchpresenter.icons.generated.resources.ic_clear_cache
+import org.churchpresenter.icons.generated.resources.ic_refresh
+import org.churchpresenter.strings.generated.resources.mobile_view
+import org.churchpresenter.strings.generated.resources.web_back
+import org.churchpresenter.strings.generated.resources.web_engine_unavailable_body
+import org.churchpresenter.strings.generated.resources.web_engine_unavailable_policy_body
+import org.churchpresenter.strings.generated.resources.web_engine_unavailable_policy_title
+import org.churchpresenter.strings.generated.resources.web_engine_unavailable_title
+import org.churchpresenter.strings.generated.resources.web_engine_unavailable_macos_body
+import org.churchpresenter.strings.generated.resources.web_engine_unavailable_macos_title
+import org.churchpresenter.strings.generated.resources.web_engine_unavailable_windows_body
+import org.churchpresenter.strings.generated.resources.web_engine_unavailable_windows_title
+import org.churchpresenter.strings.generated.resources.web_clear_cache
+import org.churchpresenter.strings.generated.resources.web_forward
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Warning
-import churchpresenter.composeapp.generated.resources.web_refresh
-import churchpresenter.composeapp.generated.resources.web_zoom_in
-import churchpresenter.composeapp.generated.resources.web_zoom_out
+import org.churchpresenter.strings.generated.resources.web_refresh
+import org.churchpresenter.strings.generated.resources.web_zoom_in
+import org.churchpresenter.strings.generated.resources.web_zoom_out
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
@@ -220,7 +221,7 @@ internal fun RowScope.NavButtons(
             if (isLive && !useInteractivePreview && live != null) live.goBack() else navController.goBack()
         },
         tooltipText = stringResource(Res.string.web_back),
-        painter = painterResource(Res.drawable.ic_arrow_left),
+        painter = painterResource(IconRes.drawable.ic_arrow_left),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -231,7 +232,7 @@ internal fun RowScope.NavButtons(
             if (isLive && !useInteractivePreview && live != null) live.goForward() else navController.goForward()
         },
         tooltipText = stringResource(Res.string.web_forward),
-        painter = painterResource(Res.drawable.ic_arrow_right),
+        painter = painterResource(IconRes.drawable.ic_arrow_right),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -242,7 +243,7 @@ internal fun RowScope.NavButtons(
             if (isLive && !useInteractivePreview && live != null) live.reload() else navController.browser?.reload()
         },
         tooltipText = stringResource(Res.string.web_refresh),
-        painter = painterResource(Res.drawable.ic_refresh),
+        painter = painterResource(IconRes.drawable.ic_refresh),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -258,7 +259,7 @@ internal fun RowScope.NavButtons(
             }
         },
         tooltipText = stringResource(Res.string.web_clear_cache),
-        painter = painterResource(Res.drawable.ic_clear_cache),
+        painter = painterResource(IconRes.drawable.ic_clear_cache),
         containerColor = MaterialTheme.colorScheme.errorContainer,
         contentColor = MaterialTheme.colorScheme.onErrorContainer
     )
@@ -267,7 +268,7 @@ internal fun RowScope.NavButtons(
     ActionIconButton(
         onClick = { applyZoom(zoomLevel - ZOOM_STEP) },
         tooltipText = stringResource(Res.string.web_zoom_out),
-        painter = painterResource(Res.drawable.ic_arrow_down),
+        painter = painterResource(IconRes.drawable.ic_arrow_down),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -281,7 +282,7 @@ internal fun RowScope.NavButtons(
     ActionIconButton(
         onClick = { applyZoom(zoomLevel + ZOOM_STEP) },
         tooltipText = stringResource(Res.string.web_zoom_in),
-        painter = painterResource(Res.drawable.ic_arrow_up),
+        painter = painterResource(IconRes.drawable.ic_arrow_up),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )

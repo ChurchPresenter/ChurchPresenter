@@ -23,11 +23,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.tooltip_clear_display
-import churchpresenter.composeapp.generated.resources.tooltip_preview_settings
-import churchpresenter.composeapp.generated.resources.tooltip_toggle_displays
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.strings.generated.resources.tooltip_clear_display
+import org.churchpresenter.strings.generated.resources.tooltip_preview_settings
+import org.churchpresenter.strings.generated.resources.tooltip_toggle_displays
 import org.churchpresenter.app.churchpresenter.composables.CompanionConnectionChipRow
 import org.churchpresenter.app.churchpresenter.composables.CompanionSurfacePanel
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
@@ -96,7 +97,7 @@ internal fun PreviewSidebar(
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                 )
                 TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_close),
+                    painter = painterResource(IconRes.drawable.ic_close),
                     text = stringResource(Res.string.tooltip_clear_display),
                     onClick = {
                         mediaViewModel?.pause()

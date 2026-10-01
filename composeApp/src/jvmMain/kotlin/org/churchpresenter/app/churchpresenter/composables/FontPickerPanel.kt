@@ -38,21 +38,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.font_category_display
-import churchpresenter.composeapp.generated.resources.font_category_mono
-import churchpresenter.composeapp.generated.resources.font_category_sans
-import churchpresenter.composeapp.generated.resources.font_category_serif
-import churchpresenter.composeapp.generated.resources.font_picker_clear_search
-import churchpresenter.composeapp.generated.resources.font_picker_keys
-import churchpresenter.composeapp.generated.resources.font_picker_search
-import churchpresenter.composeapp.generated.resources.preview
-import churchpresenter.composeapp.generated.resources.font_warning_no_cyrillic
-import churchpresenter.composeapp.generated.resources.font_warning_no_hebrew
-import churchpresenter.composeapp.generated.resources.ic_check
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_search
-import churchpresenter.composeapp.generated.resources.ic_warning
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.font_category_display
+import org.churchpresenter.strings.generated.resources.font_category_mono
+import org.churchpresenter.strings.generated.resources.font_category_sans
+import org.churchpresenter.strings.generated.resources.font_category_serif
+import org.churchpresenter.strings.generated.resources.font_picker_clear_search
+import org.churchpresenter.strings.generated.resources.font_picker_keys
+import org.churchpresenter.strings.generated.resources.font_picker_search
+import org.churchpresenter.strings.generated.resources.preview
+import org.churchpresenter.strings.generated.resources.font_warning_no_cyrillic
+import org.churchpresenter.strings.generated.resources.font_warning_no_hebrew
+import org.churchpresenter.icons.generated.resources.ic_check
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_search
+import org.churchpresenter.icons.generated.resources.ic_warning
 import org.churchpresenter.app.churchpresenter.utils.FontCategory
 import org.churchpresenter.app.churchpresenter.utils.FontFace
 import org.churchpresenter.theme.semantic
@@ -89,7 +90,7 @@ internal fun FontSearchRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            painter = painterResource(Res.drawable.ic_search),
+            painter = painterResource(IconRes.drawable.ic_search),
             contentDescription = null,
             modifier = Modifier.size(12.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
@@ -135,7 +136,7 @@ internal fun FontSearchRow(
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_close),
+                    painter = painterResource(IconRes.drawable.ic_close),
                     contentDescription = stringResource(Res.string.font_picker_clear_search),
                     modifier = Modifier.size(9.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -207,7 +208,7 @@ internal fun FontFamilyRow(
         Box(Modifier.size(12.dp), contentAlignment = Alignment.Center) {
             if (selected) {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_check),
+                    painter = painterResource(IconRes.drawable.ic_check),
                     contentDescription = null,
                     modifier = Modifier.size(10.dp),
                     tint = MaterialTheme.colorScheme.primary,
@@ -342,7 +343,7 @@ private fun FontScriptWarning(name: String, script: PreviewScript) {
         verticalAlignment = Alignment.Top,
     ) {
         Icon(
-            painter = painterResource(Res.drawable.ic_warning),
+            painter = painterResource(IconRes.drawable.ic_warning),
             contentDescription = null,
             modifier = Modifier.size(12.dp),
             tint = semantic.warning,

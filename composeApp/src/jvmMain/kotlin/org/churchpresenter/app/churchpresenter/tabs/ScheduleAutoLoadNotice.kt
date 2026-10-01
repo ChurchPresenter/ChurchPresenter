@@ -22,23 +22,24 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.schedule_load_confirm_append
-import churchpresenter.composeapp.generated.resources.schedule_load_confirm_body
-import churchpresenter.composeapp.generated.resources.schedule_load_confirm_replace
-import churchpresenter.composeapp.generated.resources.schedule_load_confirm_title
-import churchpresenter.composeapp.generated.resources.ic_save
-import churchpresenter.composeapp.generated.resources.schedule_calendar_add
-import churchpresenter.composeapp.generated.resources.schedule_calendar_not_in
-import churchpresenter.composeapp.generated.resources.schedule_calendar_save
-import churchpresenter.composeapp.generated.resources.schedule_calendar_unsaved
-import churchpresenter.composeapp.generated.resources.schedule_autoload_days_hours
-import churchpresenter.composeapp.generated.resources.schedule_autoload_hours_minutes
-import churchpresenter.composeapp.generated.resources.schedule_autoload_load_now
-import churchpresenter.composeapp.generated.resources.schedule_autoload_minutes
-import churchpresenter.composeapp.generated.resources.schedule_autoload_notice
-import churchpresenter.composeapp.generated.resources.schedule_autoload_notice_now
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.cancel
+import org.churchpresenter.strings.generated.resources.schedule_load_confirm_append
+import org.churchpresenter.strings.generated.resources.schedule_load_confirm_body
+import org.churchpresenter.strings.generated.resources.schedule_load_confirm_replace
+import org.churchpresenter.strings.generated.resources.schedule_load_confirm_title
+import org.churchpresenter.icons.generated.resources.ic_save
+import org.churchpresenter.strings.generated.resources.schedule_calendar_add
+import org.churchpresenter.strings.generated.resources.schedule_calendar_not_in
+import org.churchpresenter.strings.generated.resources.schedule_calendar_save
+import org.churchpresenter.strings.generated.resources.schedule_calendar_unsaved
+import org.churchpresenter.strings.generated.resources.schedule_autoload_days_hours
+import org.churchpresenter.strings.generated.resources.schedule_autoload_hours_minutes
+import org.churchpresenter.strings.generated.resources.schedule_autoload_load_now
+import org.churchpresenter.strings.generated.resources.schedule_autoload_minutes
+import org.churchpresenter.strings.generated.resources.schedule_autoload_notice
+import org.churchpresenter.strings.generated.resources.schedule_autoload_notice_now
 import kotlinx.coroutines.delay
 import org.churchpresenter.calendar.ScheduleServiceLink
 import org.churchpresenter.calendar.model.UpcomingLoad
@@ -93,7 +94,7 @@ internal fun ScheduleSaveToCalendarNotice(
     modifier: Modifier = Modifier,
 ) {
     NoticeRow(
-        icon = painterResource(Res.drawable.ic_save),
+        icon = painterResource(IconRes.drawable.ic_save),
         text = stringResource(Res.string.schedule_calendar_unsaved, service.serviceName),
         action = stringResource(Res.string.schedule_calendar_save),
         onAction = onSave,

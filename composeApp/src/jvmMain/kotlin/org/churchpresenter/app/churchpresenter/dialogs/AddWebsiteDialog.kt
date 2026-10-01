@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import churchpresenter.composeapp.generated.resources.web_url_hint
+import org.churchpresenter.strings.generated.resources.web_url_hint
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -31,14 +31,14 @@ import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.ok
-import churchpresenter.composeapp.generated.resources.website_disclaimer
-import churchpresenter.composeapp.generated.resources.website_dialog_title
-import churchpresenter.composeapp.generated.resources.website_title_hint
-import churchpresenter.composeapp.generated.resources.website_title_label
-import churchpresenter.composeapp.generated.resources.website_url_label
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.cancel
+import org.churchpresenter.strings.generated.resources.ok
+import org.churchpresenter.strings.generated.resources.website_disclaimer
+import org.churchpresenter.strings.generated.resources.website_dialog_title
+import org.churchpresenter.strings.generated.resources.website_title_hint
+import org.churchpresenter.strings.generated.resources.website_title_label
+import org.churchpresenter.strings.generated.resources.website_url_label
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

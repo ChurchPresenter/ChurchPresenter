@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import org.churchpresenter.app.churchpresenter.presenter.liveMerges
 import org.churchpresenter.app.churchpresenter.presenter.sizedAs
-import churchpresenter.composeapp.generated.resources.preview_merged_label
+import org.churchpresenter.strings.generated.resources.preview_merged_label
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -10,8 +10,8 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.platform.testTag
-import churchpresenter.composeapp.generated.resources.preview_layout_done
-import churchpresenter.composeapp.generated.resources.preview_layout_edit
+import org.churchpresenter.strings.generated.resources.preview_layout_done
+import org.churchpresenter.strings.generated.resources.preview_layout_edit
 import org.churchpresenter.app.churchpresenter.utils.contentScale
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import androidx.compose.animation.Crossfade
@@ -74,28 +74,29 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.output_profile_blank
-import churchpresenter.composeapp.generated.resources.output_profile_swap_menu_tooltip
-import churchpresenter.composeapp.generated.resources.ic_pause
-import churchpresenter.composeapp.generated.resources.ic_play
-import churchpresenter.composeapp.generated.resources.fill_badge
-import churchpresenter.composeapp.generated.resources.browser_source_output_label
-import churchpresenter.composeapp.generated.resources.ndi_output_numbered
-import churchpresenter.composeapp.generated.resources.omt_output_numbered
-import churchpresenter.composeapp.generated.resources.display_stage_monitor
-import churchpresenter.composeapp.generated.resources.collapse_preview
-import churchpresenter.composeapp.generated.resources.expand_preview
-import churchpresenter.composeapp.generated.resources.full_screen
-import churchpresenter.composeapp.generated.resources.display_lower_third
-import churchpresenter.composeapp.generated.resources.live_preview_nothing
-import churchpresenter.composeapp.generated.resources.live_preview_title
-import churchpresenter.composeapp.generated.resources.lock_screen_to_tab
-import churchpresenter.composeapp.generated.resources.screen_locked_badge
-import churchpresenter.composeapp.generated.resources.screen_number
-import churchpresenter.composeapp.generated.resources.unlock_screen
-import churchpresenter.composeapp.generated.resources.pause
-import churchpresenter.composeapp.generated.resources.play
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.output_profile_blank
+import org.churchpresenter.strings.generated.resources.output_profile_swap_menu_tooltip
+import org.churchpresenter.icons.generated.resources.ic_pause
+import org.churchpresenter.icons.generated.resources.ic_play
+import org.churchpresenter.strings.generated.resources.fill_badge
+import org.churchpresenter.strings.generated.resources.browser_source_output_label
+import org.churchpresenter.strings.generated.resources.ndi_output_numbered
+import org.churchpresenter.strings.generated.resources.omt_output_numbered
+import org.churchpresenter.strings.generated.resources.display_stage_monitor
+import org.churchpresenter.strings.generated.resources.collapse_preview
+import org.churchpresenter.strings.generated.resources.expand_preview
+import org.churchpresenter.strings.generated.resources.full_screen
+import org.churchpresenter.strings.generated.resources.display_lower_third
+import org.churchpresenter.strings.generated.resources.live_preview_nothing
+import org.churchpresenter.strings.generated.resources.live_preview_title
+import org.churchpresenter.strings.generated.resources.lock_screen_to_tab
+import org.churchpresenter.strings.generated.resources.screen_locked_badge
+import org.churchpresenter.strings.generated.resources.screen_number
+import org.churchpresenter.strings.generated.resources.unlock_screen
+import org.churchpresenter.strings.generated.resources.pause
+import org.churchpresenter.strings.generated.resources.play
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.showsOutputBackground
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
@@ -1176,7 +1177,7 @@ private fun MediaPreviewControls(
         ) {
             Icon(
                 painter = painterResource(
-                    if (isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play
+                    if (isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play
                 ),
                 contentDescription = stringResource(
                     if (isPlaying) Res.string.pause else Res.string.play

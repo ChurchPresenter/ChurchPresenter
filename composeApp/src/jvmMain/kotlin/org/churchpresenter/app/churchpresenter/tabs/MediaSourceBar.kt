@@ -45,21 +45,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.save_preset
-import churchpresenter.composeapp.generated.resources.clear
-import churchpresenter.composeapp.generated.resources.clear_recents
-import churchpresenter.composeapp.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_folder
-import churchpresenter.composeapp.generated.resources.media_load
-import churchpresenter.composeapp.generated.resources.media_no_source
-import churchpresenter.composeapp.generated.resources.media_now_playing
-import churchpresenter.composeapp.generated.resources.media_select_file
-import churchpresenter.composeapp.generated.resources.media_url_placeholder
-import churchpresenter.composeapp.generated.resources.play
-import churchpresenter.composeapp.generated.resources.recent
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.add_to_schedule
+import org.churchpresenter.strings.generated.resources.save_preset
+import org.churchpresenter.strings.generated.resources.clear
+import org.churchpresenter.strings.generated.resources.clear_recents
+import org.churchpresenter.strings.generated.resources.go_live
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_folder
+import org.churchpresenter.strings.generated.resources.media_load
+import org.churchpresenter.strings.generated.resources.media_no_source
+import org.churchpresenter.strings.generated.resources.media_now_playing
+import org.churchpresenter.strings.generated.resources.media_select_file
+import org.churchpresenter.strings.generated.resources.media_url_placeholder
+import org.churchpresenter.strings.generated.resources.play
+import org.churchpresenter.strings.generated.resources.recent
 import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
 import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
 import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
@@ -189,7 +190,7 @@ private fun MediaTabScope.MediaLocalSource(viewModel: MediaViewModel, modifier: 
         ),
         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
     ) {
-        Icon(painterResource(Res.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
+        Icon(painterResource(IconRes.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
         Spacer(Modifier.width(7.dp))
         Text(
             stringResource(Res.string.media_select_file),
@@ -370,7 +371,7 @@ private fun MediaTabScope.MediaRecentBar(viewModel: MediaViewModel) {
             ) {
                 KeyIconButton(onClick = { RecentMediaFiles.clear() }, modifier = Modifier.size(20.dp)) {
                     Icon(
-                        painterResource(Res.drawable.ic_close),
+                        painterResource(IconRes.drawable.ic_close),
                         contentDescription = stringResource(Res.string.clear),
                         modifier = Modifier.size(14.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),

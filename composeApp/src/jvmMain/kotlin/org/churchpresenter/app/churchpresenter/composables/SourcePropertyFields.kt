@@ -26,8 +26,8 @@ import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.canvas_opacity
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.canvas_opacity
 
 @Composable
 internal fun PropertyTextField(

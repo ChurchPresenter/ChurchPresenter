@@ -30,8 +30,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_playlist_add
+import org.churchpresenter.icons.generated.resources.Res
+import org.churchpresenter.icons.generated.resources.ic_playlist_add
 import org.jetbrains.compose.resources.painterResource
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised

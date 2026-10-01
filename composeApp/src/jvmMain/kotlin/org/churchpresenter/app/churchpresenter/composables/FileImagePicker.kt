@@ -17,10 +17,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_folder
-import churchpresenter.composeapp.generated.resources.image_files_filter
-import churchpresenter.composeapp.generated.resources.no_image_selected
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.icons.generated.resources.ic_folder
+import org.churchpresenter.strings.generated.resources.image_files_filter
+import org.churchpresenter.strings.generated.resources.no_image_selected
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.settings.utils.Constants
@@ -93,7 +94,7 @@ fun FileImagePicker(
             modifier = Modifier.weight(1f)
         )
         Icon(
-            painter = painterResource(Res.drawable.ic_folder),
+            painter = painterResource(IconRes.drawable.ic_folder),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary
         )

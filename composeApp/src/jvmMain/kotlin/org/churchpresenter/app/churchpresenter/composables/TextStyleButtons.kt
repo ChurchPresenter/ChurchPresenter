@@ -30,24 +30,25 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.arrow_down
-import churchpresenter.composeapp.generated.resources.backdrop_title
-import churchpresenter.composeapp.generated.resources.text_style_backdrop
-import churchpresenter.composeapp.generated.resources.text_style_bold
-import churchpresenter.composeapp.generated.resources.text_style_italic
-import churchpresenter.composeapp.generated.resources.text_style_shadow
-import churchpresenter.composeapp.generated.resources.text_style_outline
-import churchpresenter.composeapp.generated.resources.text_style_strikethrough
-import churchpresenter.composeapp.generated.resources.text_style_underline
-import churchpresenter.composeapp.generated.resources.tooltip_backdrop_options
-import churchpresenter.composeapp.generated.resources.tooltip_bold
-import churchpresenter.composeapp.generated.resources.tooltip_italic
-import churchpresenter.composeapp.generated.resources.text_outline
-import churchpresenter.composeapp.generated.resources.tooltip_outline_options
-import churchpresenter.composeapp.generated.resources.tooltip_shadow
-import churchpresenter.composeapp.generated.resources.tooltip_strikethrough
-import churchpresenter.composeapp.generated.resources.tooltip_underline
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.icons.generated.resources.arrow_down
+import org.churchpresenter.strings.generated.resources.backdrop_title
+import org.churchpresenter.strings.generated.resources.text_style_backdrop
+import org.churchpresenter.strings.generated.resources.text_style_bold
+import org.churchpresenter.strings.generated.resources.text_style_italic
+import org.churchpresenter.strings.generated.resources.text_style_shadow
+import org.churchpresenter.strings.generated.resources.text_style_outline
+import org.churchpresenter.strings.generated.resources.text_style_strikethrough
+import org.churchpresenter.strings.generated.resources.text_style_underline
+import org.churchpresenter.strings.generated.resources.tooltip_backdrop_options
+import org.churchpresenter.strings.generated.resources.tooltip_bold
+import org.churchpresenter.strings.generated.resources.tooltip_italic
+import org.churchpresenter.strings.generated.resources.text_outline
+import org.churchpresenter.strings.generated.resources.tooltip_outline_options
+import org.churchpresenter.strings.generated.resources.tooltip_shadow
+import org.churchpresenter.strings.generated.resources.tooltip_strikethrough
+import org.churchpresenter.strings.generated.resources.tooltip_underline
 import androidx.compose.material3.Text
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
@@ -210,7 +211,7 @@ internal fun TextOutlineButton(
             onClick = { showDialog = true },
         ) { content ->
             Icon(
-                painter = painterResource(Res.drawable.arrow_down),
+                painter = painterResource(IconRes.drawable.arrow_down),
                 contentDescription = null,
                 tint = content,
                 modifier = Modifier.size(CARET_SIZE),
@@ -280,7 +281,7 @@ internal fun TextBackdropButton(
             onClick = { showDialog = true },
         ) { content ->
             Icon(
-                painter = painterResource(Res.drawable.arrow_down),
+                painter = painterResource(IconRes.drawable.arrow_down),
                 contentDescription = null,
                 tint = content,
                 modifier = Modifier.size(CARET_SIZE),

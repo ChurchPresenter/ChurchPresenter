@@ -31,30 +31,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Movie
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_pause
-import churchpresenter.composeapp.generated.resources.ic_play
-import churchpresenter.composeapp.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.atem_clip_too_long
-import churchpresenter.composeapp.generated.resources.atem_golive_key
-import churchpresenter.composeapp.generated.resources.atem_unreachable
-import churchpresenter.composeapp.generated.resources.atem_quick_clip_tooltip
-import churchpresenter.composeapp.generated.resources.atem_quick_still_tooltip
-import churchpresenter.composeapp.generated.resources.atem_send_to_atem
-import churchpresenter.composeapp.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_key
-import churchpresenter.composeapp.generated.resources.ic_upload
-import churchpresenter.composeapp.generated.resources.lottie_select_preset
-import churchpresenter.composeapp.generated.resources.pause
-import churchpresenter.composeapp.generated.resources.play
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.icons.generated.resources.ic_pause
+import org.churchpresenter.icons.generated.resources.ic_play
+import org.churchpresenter.strings.generated.resources.add_to_schedule
+import org.churchpresenter.strings.generated.resources.atem_clip_too_long
+import org.churchpresenter.strings.generated.resources.atem_golive_key
+import org.churchpresenter.strings.generated.resources.atem_unreachable
+import org.churchpresenter.strings.generated.resources.atem_quick_clip_tooltip
+import org.churchpresenter.strings.generated.resources.atem_quick_still_tooltip
+import org.churchpresenter.strings.generated.resources.atem_send_to_atem
+import org.churchpresenter.strings.generated.resources.cancel
+import org.churchpresenter.strings.generated.resources.go_live
+import org.churchpresenter.icons.generated.resources.ic_key
+import org.churchpresenter.icons.generated.resources.ic_upload
+import org.churchpresenter.strings.generated.resources.lottie_select_preset
+import org.churchpresenter.strings.generated.resources.pause
+import org.churchpresenter.strings.generated.resources.play
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
 import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import churchpresenter.composeapp.generated.resources.aspect_ratio_mismatch
+import org.churchpresenter.strings.generated.resources.aspect_ratio_mismatch
 import org.churchpresenter.app.churchpresenter.utils.PreviewOutput
 import androidx.compose.material3.IconButtonColors
 
@@ -159,7 +160,7 @@ private fun LowerThirdTabScope.LowerThirdAtemButtons() {
                 )
             ) {
                 Icon(
-                    painterResource(Res.drawable.ic_key),
+                    painterResource(IconRes.drawable.ic_key),
                     contentDescription = goLiveKeyLabel,
                     modifier = Modifier.size(16.dp),
                 )
@@ -187,7 +188,7 @@ private fun LowerThirdTabScope.LowerThirdAtemButtons() {
                     colors = atemButtonColors
                 ) {
                     Icon(
-                        painterResource(Res.drawable.ic_upload),
+                        painterResource(IconRes.drawable.ic_upload),
                         contentDescription = stringResource(Res.string.atem_send_to_atem),
                         modifier = Modifier.size(16.dp),
                     )
@@ -284,7 +285,7 @@ private fun LowerThirdTabScope.LowerThirdPlayButton() {
             )
         ) {
             Icon(
-                painterResource(if (isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
+                painterResource(if (isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play),
                 contentDescription = stringResource(if (isPlaying) Res.string.pause else Res.string.play),
                 modifier = Modifier.size(15.dp),
             )

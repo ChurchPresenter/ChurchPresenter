@@ -46,27 +46,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
-import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.cormorant_garamond_italic
-import churchpresenter.composeapp.generated.resources.ic_check
-import churchpresenter.composeapp.generated.resources.ic_mail
-import churchpresenter.composeapp.generated.resources.share_story_screenshot_dark
-import churchpresenter.composeapp.generated.resources.share_story_screenshot_light
-import churchpresenter.composeapp.generated.resources.story_prompt_badge
-import churchpresenter.composeapp.generated.resources.story_prompt_body_1
-import churchpresenter.composeapp.generated.resources.story_prompt_body_2
-import churchpresenter.composeapp.generated.resources.story_prompt_body_3
-import churchpresenter.composeapp.generated.resources.story_prompt_body_4
-import churchpresenter.composeapp.generated.resources.story_prompt_example_1
-import churchpresenter.composeapp.generated.resources.story_prompt_example_2
-import churchpresenter.composeapp.generated.resources.story_prompt_example_3
-import churchpresenter.composeapp.generated.resources.story_prompt_heading
-import churchpresenter.composeapp.generated.resources.story_prompt_later
-import churchpresenter.composeapp.generated.resources.story_prompt_quote
-import churchpresenter.composeapp.generated.resources.story_prompt_reassurance
-import churchpresenter.composeapp.generated.resources.story_prompt_screenshot
-import churchpresenter.composeapp.generated.resources.story_prompt_share
-import churchpresenter.composeapp.generated.resources.story_prompt_window_title
+import org.churchpresenter.icons.generated.resources.ic_check
+import org.churchpresenter.icons.generated.resources.ic_mail
+import org.churchpresenter.icons.generated.resources.share_story_screenshot_dark
+import org.churchpresenter.icons.generated.resources.share_story_screenshot_light
+import org.churchpresenter.strings.generated.resources.story_prompt_badge
+import org.churchpresenter.strings.generated.resources.story_prompt_body_1
+import org.churchpresenter.strings.generated.resources.story_prompt_body_2
+import org.churchpresenter.strings.generated.resources.story_prompt_body_3
+import org.churchpresenter.strings.generated.resources.story_prompt_body_4
+import org.churchpresenter.strings.generated.resources.story_prompt_example_1
+import org.churchpresenter.strings.generated.resources.story_prompt_example_2
+import org.churchpresenter.strings.generated.resources.story_prompt_example_3
+import org.churchpresenter.strings.generated.resources.story_prompt_heading
+import org.churchpresenter.strings.generated.resources.story_prompt_later
+import org.churchpresenter.strings.generated.resources.story_prompt_quote
+import org.churchpresenter.strings.generated.resources.story_prompt_reassurance
+import org.churchpresenter.strings.generated.resources.story_prompt_screenshot
+import org.churchpresenter.strings.generated.resources.story_prompt_share
+import org.churchpresenter.strings.generated.resources.story_prompt_window_title
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.theme.ProvideUiFontScale
@@ -200,7 +202,7 @@ private fun StoryIllustrationColumn() {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            val quoteFont = FontFamily(Font(Res.font.cormorant_garamond_italic))
+            val quoteFont = FontFamily(Font(AppRes.font.cormorant_garamond_italic))
             Text(
                 text = stringResource(Res.string.story_prompt_quote),
                 fontFamily = quoteFont,
@@ -228,9 +230,9 @@ private fun StoryMonitor(palette: StoryPanelPalette) {
                 .padding(5.dp)
         ) {
             val screenshot = if (isDarkScheme(MaterialTheme.colorScheme)) {
-                Res.drawable.share_story_screenshot_dark
+                IconRes.drawable.share_story_screenshot_dark
             } else {
-                Res.drawable.share_story_screenshot_light
+                IconRes.drawable.share_story_screenshot_light
             }
             Image(
                 painter = painterResource(screenshot),
@@ -348,7 +350,7 @@ private fun StoryExamples() {
         examples.forEach { example ->
             Row(verticalAlignment = Alignment.Top) {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_check),
+                    painter = painterResource(IconRes.drawable.ic_check),
                     contentDescription = null,
                     tint = MaterialTheme.semantic.success,
                     modifier = Modifier.size(14.dp).padding(top = 2.dp),
@@ -392,7 +394,7 @@ private fun StoryFooter(onShare: () -> Unit, onDismiss: () -> Unit) {
             modifier = Modifier.height(STORY_BUTTON_HEIGHT),
         ) {
             Icon(
-                painter = painterResource(Res.drawable.ic_mail),
+                painter = painterResource(IconRes.drawable.ic_mail),
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
             )

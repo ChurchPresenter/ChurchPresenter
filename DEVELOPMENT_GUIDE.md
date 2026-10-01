@@ -29,7 +29,7 @@ The following are **NOT** acceptable in any commit (each is explained in CODING_
 
 ## 📝 Strings and constants
 
-**User-facing strings** go in `composeApp/src/jvmMain/composeResources/values/strings.xml` —
+**User-facing strings** go in `strings/src/main/composeResources/values/strings.xml` —
 English only; the other locales are managed separately (see AGENT.md). Modules with their own UI
 (`calendar`, `songlibrary`) keep their own `composeResources`; `converter` and `lottieGenerator` use
 a `ResourceBundle`-backed `Strings`.
@@ -89,7 +89,7 @@ grep -rnE 'Text\("[^a-zA-Z0-9" %$]{1,2}"' --include="*.kt" composeApp/src/jvmMai
 
 # Unused string resources (keys in values/strings.xml never referenced from Kotlin)
 comm -23 \
-  <(grep -oE '<(string|plurals|string-array) name="[^"]+"' composeApp/src/jvmMain/composeResources/values/strings.xml | sed -E 's/.*name="//;s/"//' | sort -u) \
+  <(grep -oE '<(string|plurals|string-array) name="[^"]+"' strings/src/main/composeResources/values/strings.xml | sed -E 's/.*name="//;s/"//' | sort -u) \
   <(git grep -hoE '(Res\.(string|plurals|array)\.|generated\.resources\.)[A-Za-z0-9_]+' -- '*.kt' | sed -E 's/.*\.//' | sort -u)
 ```
 

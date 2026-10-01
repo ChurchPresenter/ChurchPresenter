@@ -38,21 +38,22 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.loading_slides
-import churchpresenter.composeapp.generated.resources.remove
-import churchpresenter.composeapp.generated.resources.select_presentation_file
-import churchpresenter.composeapp.generated.resources.presentation_focus_lost
-import churchpresenter.composeapp.generated.resources.media_vlc_install
-import churchpresenter.composeapp.generated.resources.media_vlc_arch_mismatch
-import churchpresenter.composeapp.generated.resources.media_vlc_load_failed
-import churchpresenter.composeapp.generated.resources.presentation_static_note
-import churchpresenter.composeapp.generated.resources.presentation_error_password_protected
-import churchpresenter.composeapp.generated.resources.presentation_error_empty_document
-import churchpresenter.composeapp.generated.resources.presentation_error_library_missing
-import churchpresenter.composeapp.generated.resources.presentation_error_render_failed
-import churchpresenter.composeapp.generated.resources.supported_formats
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.strings.generated.resources.loading_slides
+import org.churchpresenter.strings.generated.resources.remove
+import org.churchpresenter.strings.generated.resources.select_presentation_file
+import org.churchpresenter.strings.generated.resources.presentation_focus_lost
+import org.churchpresenter.strings.generated.resources.media_vlc_install
+import org.churchpresenter.strings.generated.resources.media_vlc_arch_mismatch
+import org.churchpresenter.strings.generated.resources.media_vlc_load_failed
+import org.churchpresenter.strings.generated.resources.presentation_static_note
+import org.churchpresenter.strings.generated.resources.presentation_error_password_protected
+import org.churchpresenter.strings.generated.resources.presentation_error_empty_document
+import org.churchpresenter.strings.generated.resources.presentation_error_library_missing
+import org.churchpresenter.strings.generated.resources.presentation_error_render_failed
+import org.churchpresenter.strings.generated.resources.supported_formats
 import org.churchpresenter.app.churchpresenter.composables.FocusLostBanner
 import org.churchpresenter.presentationengine.model.LayerSpec
 import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
@@ -117,7 +118,7 @@ internal fun PresentationTabScope.PresentationBody(viewModel: PresentationViewMo
                                 viewModel.removePresentation(f, isInRecentsOrPinned = inRecents || inPinned)
                             }, modifier = Modifier.size(16.dp)) {
                                 Icon(
-                                    painterResource(Res.drawable.ic_close),
+                                    painterResource(IconRes.drawable.ic_close),
                                     contentDescription = stringResource(Res.string.remove),
                                     modifier = Modifier.size(10.dp),
                                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),

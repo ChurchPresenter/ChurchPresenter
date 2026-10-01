@@ -70,106 +70,107 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.setup_wizard_title
-import churchpresenter.composeapp.generated.resources.appearance
-import churchpresenter.composeapp.generated.resources.background
-import churchpresenter.composeapp.generated.resources.bible
-import churchpresenter.composeapp.generated.resources.content_outputs
-import churchpresenter.composeapp.generated.resources.content_outputs_enabled_short
-import churchpresenter.composeapp.generated.resources.detected_screens
-import churchpresenter.composeapp.generated.resources.full_screen
-import churchpresenter.composeapp.generated.resources.display_mode
-import churchpresenter.composeapp.generated.resources.ic_app_icon
-import churchpresenter.composeapp.generated.resources.ic_settings
-import churchpresenter.composeapp.generated.resources.identify_screen
-import churchpresenter.composeapp.generated.resources.key_output
-import churchpresenter.composeapp.generated.resources.key_output_none
-import churchpresenter.composeapp.generated.resources.loading
-import churchpresenter.composeapp.generated.resources.media
-import churchpresenter.composeapp.generated.resources.menu_language
-import churchpresenter.composeapp.generated.resources.presenter_windows_count
-import churchpresenter.composeapp.generated.resources.projection
-import churchpresenter.composeapp.generated.resources.projection_auto_display
-import churchpresenter.composeapp.generated.resources.projection_target_display
-import churchpresenter.composeapp.generated.resources.screen_assignment
-import churchpresenter.composeapp.generated.resources.setup_bible_choose_folder
-import churchpresenter.composeapp.generated.resources.setup_bible_pick_translations
-import churchpresenter.composeapp.generated.resources.setup_language_count
-import churchpresenter.composeapp.generated.resources.setup_language_none
-import churchpresenter.composeapp.generated.resources.setup_language_search
-import churchpresenter.composeapp.generated.resources.setup_media_ready
-import churchpresenter.composeapp.generated.resources.setup_media_why_body
-import churchpresenter.composeapp.generated.resources.setup_media_why_title
-import churchpresenter.composeapp.generated.resources.setup_proj_assign_note
-import churchpresenter.composeapp.generated.resources.setup_proj_lang_note
-import churchpresenter.composeapp.generated.resources.setup_proj_rows_note
-import churchpresenter.composeapp.generated.resources.setup_proj_step1
-import churchpresenter.composeapp.generated.resources.setup_proj_step2
-import churchpresenter.composeapp.generated.resources.setup_proj_step5
-import churchpresenter.composeapp.generated.resources.setup_proj_subtitle
-import churchpresenter.composeapp.generated.resources.setup_proj_tip
-import churchpresenter.composeapp.generated.resources.setup_proj_tip2
-import churchpresenter.composeapp.generated.resources.setup_proj_title
-import churchpresenter.composeapp.generated.resources.setup_rail_appearance
-import churchpresenter.composeapp.generated.resources.setup_rail_ready
-import churchpresenter.composeapp.generated.resources.setup_rail_songs
-import churchpresenter.composeapp.generated.resources.setup_rail_welcome
-import churchpresenter.composeapp.generated.resources.setup_songs_converter_body
-import churchpresenter.composeapp.generated.resources.shortcut_description_open_converter
-import churchpresenter.composeapp.generated.resources.setup_songs_format_note
-import churchpresenter.composeapp.generated.resources.setup_songs_samples_note
-import churchpresenter.composeapp.generated.resources.setup_step0_subtitle
-import churchpresenter.composeapp.generated.resources.setup_step0_title
-import churchpresenter.composeapp.generated.resources.setup_step1_body
-import churchpresenter.composeapp.generated.resources.setup_step1_theme_subtitle
-import churchpresenter.composeapp.generated.resources.setup_step1_theme_title
-import churchpresenter.composeapp.generated.resources.setup_step1_title
-import churchpresenter.composeapp.generated.resources.setup_step2_download_hint
-import churchpresenter.composeapp.generated.resources.setup_step2_step1
-import churchpresenter.composeapp.generated.resources.setup_step2_step2
-import churchpresenter.composeapp.generated.resources.setup_step2_step5
-import churchpresenter.composeapp.generated.resources.setup_step2_subtitle
-import churchpresenter.composeapp.generated.resources.setup_step2_tip
-import churchpresenter.composeapp.generated.resources.setup_step2_tip2
-import churchpresenter.composeapp.generated.resources.setup_step2_title
-import churchpresenter.composeapp.generated.resources.setup_step3_step3
-import churchpresenter.composeapp.generated.resources.setup_step3_step4
-import churchpresenter.composeapp.generated.resources.setup_step3_subtitle
-import churchpresenter.composeapp.generated.resources.setup_step3_title
-import churchpresenter.composeapp.generated.resources.setup_step4_body
-import churchpresenter.composeapp.generated.resources.setup_step4_hint
-import churchpresenter.composeapp.generated.resources.setup_step4_title
-import churchpresenter.composeapp.generated.resources.setup_step5_download
-import churchpresenter.composeapp.generated.resources.setup_step5_download_intel
-import churchpresenter.composeapp.generated.resources.setup_step5_download_silicon
-import churchpresenter.composeapp.generated.resources.setup_step5_linux_tip
-import churchpresenter.composeapp.generated.resources.setup_step5_recheck
-import churchpresenter.composeapp.generated.resources.setup_step5_subtitle
-import churchpresenter.composeapp.generated.resources.setup_step5_title
-import churchpresenter.composeapp.generated.resources.setup_step5_vlc_load_failed
-import churchpresenter.composeapp.generated.resources.setup_step5_vlc_load_failed_detail
-import churchpresenter.composeapp.generated.resources.setup_step5_vlc_missing
-import churchpresenter.composeapp.generated.resources.setup_step5_vlc_ok
-import churchpresenter.composeapp.generated.resources.setup_step5_vlc_wrong_arch
-import churchpresenter.composeapp.generated.resources.setup_step5_vlc_wrong_arch_detail
-import churchpresenter.composeapp.generated.resources.setup_summary_bible
-import churchpresenter.composeapp.generated.resources.setup_summary_bible_value
-import churchpresenter.composeapp.generated.resources.setup_summary_songs_value
-import churchpresenter.composeapp.generated.resources.setup_theme_section_dark
-import churchpresenter.composeapp.generated.resources.setup_theme_section_light
-import churchpresenter.composeapp.generated.resources.setup_theme_section_system
-import churchpresenter.composeapp.generated.resources.setup_theme_count
-import churchpresenter.composeapp.generated.resources.setup_welcome_bible_body
-import churchpresenter.composeapp.generated.resources.setup_welcome_bible_title
-import churchpresenter.composeapp.generated.resources.setup_welcome_card_step
-import churchpresenter.composeapp.generated.resources.setup_welcome_projection_body
-import churchpresenter.composeapp.generated.resources.setup_welcome_projection_title
-import churchpresenter.composeapp.generated.resources.setup_welcome_songs_body
-import churchpresenter.composeapp.generated.resources.setup_welcome_songs_title
-import churchpresenter.composeapp.generated.resources.setup_wizard_done
-import churchpresenter.composeapp.generated.resources.shortcut_description_settings
-import churchpresenter.composeapp.generated.resources.song
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.setup_wizard_title
+import org.churchpresenter.strings.generated.resources.appearance
+import org.churchpresenter.strings.generated.resources.background
+import org.churchpresenter.strings.generated.resources.bible
+import org.churchpresenter.strings.generated.resources.content_outputs
+import org.churchpresenter.strings.generated.resources.content_outputs_enabled_short
+import org.churchpresenter.strings.generated.resources.detected_screens
+import org.churchpresenter.strings.generated.resources.full_screen
+import org.churchpresenter.strings.generated.resources.display_mode
+import org.churchpresenter.icons.generated.resources.ic_app_icon
+import org.churchpresenter.icons.generated.resources.ic_settings
+import org.churchpresenter.strings.generated.resources.identify_screen
+import org.churchpresenter.strings.generated.resources.key_output
+import org.churchpresenter.strings.generated.resources.key_output_none
+import org.churchpresenter.strings.generated.resources.loading
+import org.churchpresenter.strings.generated.resources.media
+import org.churchpresenter.strings.generated.resources.menu_language
+import org.churchpresenter.strings.generated.resources.presenter_windows_count
+import org.churchpresenter.strings.generated.resources.projection
+import org.churchpresenter.strings.generated.resources.projection_auto_display
+import org.churchpresenter.strings.generated.resources.projection_target_display
+import org.churchpresenter.strings.generated.resources.screen_assignment
+import org.churchpresenter.strings.generated.resources.setup_bible_choose_folder
+import org.churchpresenter.strings.generated.resources.setup_bible_pick_translations
+import org.churchpresenter.strings.generated.resources.setup_language_count
+import org.churchpresenter.strings.generated.resources.setup_language_none
+import org.churchpresenter.strings.generated.resources.setup_language_search
+import org.churchpresenter.strings.generated.resources.setup_media_ready
+import org.churchpresenter.strings.generated.resources.setup_media_why_body
+import org.churchpresenter.strings.generated.resources.setup_media_why_title
+import org.churchpresenter.strings.generated.resources.setup_proj_assign_note
+import org.churchpresenter.strings.generated.resources.setup_proj_lang_note
+import org.churchpresenter.strings.generated.resources.setup_proj_rows_note
+import org.churchpresenter.strings.generated.resources.setup_proj_step1
+import org.churchpresenter.strings.generated.resources.setup_proj_step2
+import org.churchpresenter.strings.generated.resources.setup_proj_step5
+import org.churchpresenter.strings.generated.resources.setup_proj_subtitle
+import org.churchpresenter.strings.generated.resources.setup_proj_tip
+import org.churchpresenter.strings.generated.resources.setup_proj_tip2
+import org.churchpresenter.strings.generated.resources.setup_proj_title
+import org.churchpresenter.strings.generated.resources.setup_rail_appearance
+import org.churchpresenter.strings.generated.resources.setup_rail_ready
+import org.churchpresenter.strings.generated.resources.setup_rail_songs
+import org.churchpresenter.strings.generated.resources.setup_rail_welcome
+import org.churchpresenter.strings.generated.resources.setup_songs_converter_body
+import org.churchpresenter.strings.generated.resources.shortcut_description_open_converter
+import org.churchpresenter.strings.generated.resources.setup_songs_format_note
+import org.churchpresenter.strings.generated.resources.setup_songs_samples_note
+import org.churchpresenter.strings.generated.resources.setup_step0_subtitle
+import org.churchpresenter.strings.generated.resources.setup_step0_title
+import org.churchpresenter.strings.generated.resources.setup_step1_body
+import org.churchpresenter.strings.generated.resources.setup_step1_theme_subtitle
+import org.churchpresenter.strings.generated.resources.setup_step1_theme_title
+import org.churchpresenter.strings.generated.resources.setup_step1_title
+import org.churchpresenter.strings.generated.resources.setup_step2_download_hint
+import org.churchpresenter.strings.generated.resources.setup_step2_step1
+import org.churchpresenter.strings.generated.resources.setup_step2_step2
+import org.churchpresenter.strings.generated.resources.setup_step2_step5
+import org.churchpresenter.strings.generated.resources.setup_step2_subtitle
+import org.churchpresenter.strings.generated.resources.setup_step2_tip
+import org.churchpresenter.strings.generated.resources.setup_step2_tip2
+import org.churchpresenter.strings.generated.resources.setup_step2_title
+import org.churchpresenter.strings.generated.resources.setup_step3_step3
+import org.churchpresenter.strings.generated.resources.setup_step3_step4
+import org.churchpresenter.strings.generated.resources.setup_step3_subtitle
+import org.churchpresenter.strings.generated.resources.setup_step3_title
+import org.churchpresenter.strings.generated.resources.setup_step4_body
+import org.churchpresenter.strings.generated.resources.setup_step4_hint
+import org.churchpresenter.strings.generated.resources.setup_step4_title
+import org.churchpresenter.strings.generated.resources.setup_step5_download
+import org.churchpresenter.strings.generated.resources.setup_step5_download_intel
+import org.churchpresenter.strings.generated.resources.setup_step5_download_silicon
+import org.churchpresenter.strings.generated.resources.setup_step5_linux_tip
+import org.churchpresenter.strings.generated.resources.setup_step5_recheck
+import org.churchpresenter.strings.generated.resources.setup_step5_subtitle
+import org.churchpresenter.strings.generated.resources.setup_step5_title
+import org.churchpresenter.strings.generated.resources.setup_step5_vlc_load_failed
+import org.churchpresenter.strings.generated.resources.setup_step5_vlc_load_failed_detail
+import org.churchpresenter.strings.generated.resources.setup_step5_vlc_missing
+import org.churchpresenter.strings.generated.resources.setup_step5_vlc_ok
+import org.churchpresenter.strings.generated.resources.setup_step5_vlc_wrong_arch
+import org.churchpresenter.strings.generated.resources.setup_step5_vlc_wrong_arch_detail
+import org.churchpresenter.strings.generated.resources.setup_summary_bible
+import org.churchpresenter.strings.generated.resources.setup_summary_bible_value
+import org.churchpresenter.strings.generated.resources.setup_summary_songs_value
+import org.churchpresenter.strings.generated.resources.setup_theme_section_dark
+import org.churchpresenter.strings.generated.resources.setup_theme_section_light
+import org.churchpresenter.strings.generated.resources.setup_theme_section_system
+import org.churchpresenter.strings.generated.resources.setup_theme_count
+import org.churchpresenter.strings.generated.resources.setup_welcome_bible_body
+import org.churchpresenter.strings.generated.resources.setup_welcome_bible_title
+import org.churchpresenter.strings.generated.resources.setup_welcome_card_step
+import org.churchpresenter.strings.generated.resources.setup_welcome_projection_body
+import org.churchpresenter.strings.generated.resources.setup_welcome_projection_title
+import org.churchpresenter.strings.generated.resources.setup_welcome_songs_body
+import org.churchpresenter.strings.generated.resources.setup_welcome_songs_title
+import org.churchpresenter.strings.generated.resources.setup_wizard_done
+import org.churchpresenter.strings.generated.resources.shortcut_description_settings
+import org.churchpresenter.strings.generated.resources.song
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -244,7 +245,7 @@ fun SetupWizardDialog(
     Window(
         onCloseRequest = onDismiss,
         title = stringResource(Res.string.setup_wizard_title),
-        icon = painterResource(Res.drawable.ic_app_icon),
+        icon = painterResource(IconRes.drawable.ic_app_icon),
         state = windowState,
         resizable = true,
         alwaysOnTop = alwaysOnTop
@@ -694,7 +695,7 @@ private fun WelcomeStep(onGoToStep: (Int) -> Unit) {
             contentAlignment = Alignment.Center,
         ) {
             Image(
-                painter = painterResource(Res.drawable.ic_app_icon),
+                painter = painterResource(IconRes.drawable.ic_app_icon),
                 contentDescription = null,
                 modifier = Modifier.size(30.dp),
             )
@@ -1296,7 +1297,7 @@ internal fun withoutLeadingNumber(text: String): String = text.replace(LEADING_N
 private fun OpenSettingsButton(onOpenSettings: () -> Unit) {
     KeyButton(shape = AppShape(8.dp), onClick = onOpenSettings) {
         Image(
-            painter = painterResource(Res.drawable.ic_settings),
+            painter = painterResource(IconRes.drawable.ic_settings),
             contentDescription = null,
             modifier = Modifier.size(15.dp),
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),

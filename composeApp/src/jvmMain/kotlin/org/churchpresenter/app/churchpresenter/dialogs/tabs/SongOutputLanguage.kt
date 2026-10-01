@@ -3,8 +3,8 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.song_language_both
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.song_language_both
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.settings.AppSettings

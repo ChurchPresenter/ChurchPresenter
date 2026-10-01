@@ -26,13 +26,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_check
-import churchpresenter.composeapp.generated.resources.media_subtitles_all_outputs
-import churchpresenter.composeapp.generated.resources.media_subtitles_embedded
-import churchpresenter.composeapp.generated.resources.media_subtitles_off
-import churchpresenter.composeapp.generated.resources.media_subtitles_output_count
-import churchpresenter.composeapp.generated.resources.media_subtitles_show_on
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.icons.generated.resources.ic_check
+import org.churchpresenter.strings.generated.resources.media_subtitles_all_outputs
+import org.churchpresenter.strings.generated.resources.media_subtitles_embedded
+import org.churchpresenter.strings.generated.resources.media_subtitles_off
+import org.churchpresenter.strings.generated.resources.media_subtitles_output_count
+import org.churchpresenter.strings.generated.resources.media_subtitles_show_on
 import org.churchpresenter.app.churchpresenter.viewmodel.SidecarSubtitle
 import org.churchpresenter.app.churchpresenter.viewmodel.SubtitleTrack
 import org.churchpresenter.settings.OutputProfile
@@ -250,7 +251,7 @@ private fun routingSummary(track: SidecarSubtitle, profiles: List<OutputProfile>
 
 @Composable
 private fun CheckMark() {
-    Icon(painterResource(Res.drawable.ic_check), null, Modifier.size(CHECK_SIZE))
+    Icon(painterResource(IconRes.drawable.ic_check), null, Modifier.size(CHECK_SIZE))
 }
 
 /** Test handle for the Off row. */

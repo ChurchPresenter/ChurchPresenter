@@ -20,8 +20,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
-import churchpresenter.composeapp.generated.resources.close
-import churchpresenter.composeapp.generated.resources.ic_close
+import org.churchpresenter.strings.generated.resources.close
+import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -45,13 +45,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.background
-import churchpresenter.composeapp.generated.resources.song_background_applies_to
-import churchpresenter.composeapp.generated.resources.song_background_full_screen
-import churchpresenter.composeapp.generated.resources.song_background_inherit
-import churchpresenter.composeapp.generated.resources.song_background_lower_third
-import churchpresenter.composeapp.generated.resources.song_background_own
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.background
+import org.churchpresenter.strings.generated.resources.song_background_applies_to
+import org.churchpresenter.strings.generated.resources.song_background_full_screen
+import org.churchpresenter.strings.generated.resources.song_background_inherit
+import org.churchpresenter.strings.generated.resources.song_background_lower_third
+import org.churchpresenter.strings.generated.resources.song_background_own
 import org.churchpresenter.app.churchpresenter.utils.FALLBACK_STAGE_ASPECT
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.core.models.songs.SongBackground
@@ -59,10 +60,10 @@ import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import churchpresenter.composeapp.generated.resources.song_background_preset_cinema
-import churchpresenter.composeapp.generated.resources.song_background_preset_legible
-import churchpresenter.composeapp.generated.resources.none
-import churchpresenter.composeapp.generated.resources.song_background_preset_soft
+import org.churchpresenter.strings.generated.resources.song_background_preset_cinema
+import org.churchpresenter.strings.generated.resources.song_background_preset_legible
+import org.churchpresenter.strings.generated.resources.none
+import org.churchpresenter.strings.generated.resources.song_background_preset_soft
 
 internal const val SONG_BACKGROUND_PANEL_TAG = "song_background_panel"
 
@@ -328,7 +329,7 @@ private fun PanelHeader(
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                painter = painterResource(Res.drawable.ic_close),
+                painter = painterResource(IconRes.drawable.ic_close),
                 contentDescription = stringResource(Res.string.close),
                 modifier = Modifier.size(11.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
