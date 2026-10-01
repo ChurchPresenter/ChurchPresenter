@@ -19,6 +19,8 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
 import java.io.File
 import java.io.IOException
+import org.churchpresenter.lottiegen.lottie.LottieTextShaping
+import org.churchpresenter.lottiegen.lottie.TextShaping
 
 /** A named span of a template's timeline, in frames. */
 internal data class LottieSegment(val startFrame: Float, val durationFrames: Float) {
@@ -47,8 +49,9 @@ internal data class LottieTemplateSize(
 
 /**
  * What the generator wrote under `cp` for the player: the text motions it drives, pinned
- * alignments, and how long a verse takes to give way to the next — null in files from before
- * that was a setting, which are swapped in the time their text segments take.
+ * alignments, how long a verse takes to give way to the next — null in files from before
+ * that was a setting, which are swapped in the time their text segments take — and whether its
+ * text is drawn as whole lines or letter by letter.
  */
 internal data class BandTemplateMeta(
     val textMotion: BandTextMotion = BandTextMotion.NONE,
@@ -56,6 +59,7 @@ internal data class BandTemplateMeta(
     val textAlign: BandTextAlign? = null,
     val referenceAlign: BandTextAlign? = null,
     val swapMs: Long? = null,
+    val textShaping: TextShaping = TextShaping.AUTO,
 )
 
 /**
@@ -251,6 +255,7 @@ internal fun parseBibleLottieTemplate(json: String): BibleLottieTemplate? = try 
                 textAlign = readAlign(meta, "textAlign"),
                 referenceAlign = readAlign(meta, "referenceAlign"),
                 swapMs = meta?.get("swapMs")?.jsonPrimitive?.longOrNull,
+                textShaping = LottieTextShaping.modeOf(obj),
             ),
         )
     }

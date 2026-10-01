@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.app.churchpresenter.utils.LiveHistoryLogger
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.utils.Constants
@@ -20,6 +21,7 @@ internal fun MainDesktopScope.presentBibleFromSchedule(item: ScheduleItem.BibleV
 internal fun MainDesktopScope.presentSongFromSchedule(item: ScheduleItem.SongItem) {
     selectTab(Tabs.SONGS)
     state.select(item)
+    LiveHistoryLogger.noteLiveSong(item.songId, item.songbook, item.songNumber, item.title, "schedule")
     live.onSongItemSelected(
         LyricSection(
             title = item.title,
@@ -28,12 +30,8 @@ internal fun MainDesktopScope.presentSongFromSchedule(item: ScheduleItem.SongIte
             type = Constants.SECTION_TYPE_SONG
         )
     )
-    statisticsManager?.recordSongDisplay(
-        songId = item.songId,
-        songNumber = item.songNumber,
-        title = item.title,
-        songbook = item.songbook
-    )
+    // No statistics here: selecting the row makes the Songs tab push it, and with lyrics now the
+    // live mode that push is the go-live it counts. Counting here as well logged every song twice.
     live.presenting(Presenting.LYRICS)
 }
 

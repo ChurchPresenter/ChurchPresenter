@@ -8,11 +8,20 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import androidx.compose.runtime.mutableStateOf
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import org.churchpresenter.app.churchpresenter.utils.LiveHistoryEntry
+import org.churchpresenter.app.churchpresenter.utils.LiveHistoryLogger
+import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class SongsTabGoLiveTelemetryTest {
@@ -133,6 +142,52 @@ class SongsTabGoLiveTelemetryTest {
             goLiveWith("Amazing Grace")
 
             assertTrue(reports.presenting.isNotEmpty(), "the song still reaches the output")
+        }
+    }
+
+    @Test
+    fun `a song previewed from the schedule is recorded when it then goes live`() {
+        // The service flow: click the song's schedule row (which previews it), then Go Live. The
+        // preview used to mark the song as the live one, so the Go Live looked like a section change
+        // on a song already up and was never counted.
+        isolateHome()
+        val statistics = StatisticsManager()
+        val selection = mutableStateOf<ScheduleItem.SongItem?>(null)
+
+        songsTab(statistics = statistics, scheduleSelection = selection) { _, _ ->
+            selection.value =
+                ScheduleItem.SongItem(id = "row-1", songNumber = 1, title = "Amazing Grace", songbook = "Hymnal")
+            waitForIdle()
+            assertTrue(statisticsFor(statistics).isEmpty(), "a preview is not a go-live")
+
+            onAllNodes(hasContentDescription("Go Live"))[0].performClick()
+            waitForIdle()
+
+            assertEquals(listOf("Amazing Grace" to 1), statisticsFor(statistics).map { it.title to it.count })
+        }
+    }
+
+    @Test
+    fun `the song taken live is the row its lyric lines are logged under`() {
+        isolateHome()
+        TrainingDataLogger.sessionId = "songs-tab-history"
+        try {
+            songsTab { _, reports ->
+                goLiveWith("Be Thou My Vision")
+                val section = assertNotNull(reports.selectedSection)
+
+                // What the presenter would report for the section the tab just pushed.
+                LiveHistoryLogger.logLiveState(
+                    LiveHistoryEntry("LYRICS", songNumber = section.songNumber, songTitle = section.title),
+                )
+
+                val line = File(tempHome, ".churchpresenter/bible-stt-logs/live-content-songs-tab-history.jsonl")
+                    .readLines().last().let { Json.parseToJsonElement(it).jsonObject }
+                assertEquals("Hymnal::2", line["songId"]?.jsonPrimitive?.content)
+                assertEquals("manual", line["source"]?.jsonPrimitive?.content)
+            }
+        } finally {
+            TrainingDataLogger.sessionId = null
         }
     }
 }

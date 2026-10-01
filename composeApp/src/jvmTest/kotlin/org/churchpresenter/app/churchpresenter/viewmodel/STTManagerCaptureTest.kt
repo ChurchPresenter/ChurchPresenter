@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
 import org.churchpresenter.app.churchpresenter.TestSingletons
+import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
 import java.io.File
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -13,11 +14,13 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
- * The two things [STTManager] pulls over REST rather than receiving on the socket: the
- * highlighted-word list, and the Help Dev capture of the live session's `.db`.
+ * The three things [STTManager] pulls over REST rather than receiving on the socket: the
+ * highlighted-word list, the Help Dev capture of the live session's `.db`, and the session id the
+ * training-data and on-screen history logs are named after.
  *
  * Both run against a real loopback `HttpServer` on an ephemeral port. The point of a real server
  * rather than a stubbed client is that the failure cases are the interesting ones and they are HTTP
@@ -54,6 +57,8 @@ class STTManagerCaptureTest {
     private var wordsResponse: Pair<Int, String> = 200 to """{"success":true,"enabled":true,"words":[]}"""
     private var statusResponse: Pair<Int, String> = 200 to """{"state":{"db_name":"session.db"}}"""
     private var downloadResponse: Pair<Int, ByteArray> = 200 to ByteArray(0)
+    /** Not found unless a test says otherwise, so the capture tests leave the session id alone. */
+    private var healthResponse: Pair<Int, String> = 404 to ""
 
     @BeforeTest
     fun startServer() {
@@ -74,6 +79,10 @@ class STTManagerCaptureTest {
             requested.add(exchange.requestURI.toString())
             respond(exchange, statusResponse.first, statusResponse.second.toByteArray())
         }
+        server.createContext("/api/health") { exchange ->
+            requested.add(exchange.requestURI.toString())
+            respond(exchange, healthResponse.first, healthResponse.second.toByteArray())
+        }
         server.createContext("/api/file-manager/download") { exchange ->
             requested.add(exchange.requestURI.toString())
             respond(exchange, downloadResponse.first, downloadResponse.second)
@@ -87,6 +96,7 @@ class STTManagerCaptureTest {
         created.forEach { runCatching { it.dispose() } }
         created.clear()
         server.stop(0)
+        TrainingDataLogger.sessionId = null
         realHome?.let { System.setProperty("user.home", it) }
         tempHome.deleteRecursively()
     }
@@ -314,5 +324,57 @@ class STTManagerCaptureTest {
         stt.disconnect()
 
         awaitUntil("the closing snapshot") { File(logDir, "live.db").readText() == "the last word" }
+    }
+
+    // ── Session id ──────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the session id is read from the health endpoint`() {
+        healthResponse = 200 to """{"status":"ok","session_id":"2026-09-30_095812"}"""
+
+        assertEquals("2026-09-30_095812", stt().fetchSessionId(baseUrl))
+        assertEquals(listOf("/api/health"), requested.toList())
+    }
+
+    @Test
+    fun `no session id comes from a failed, empty or missing answer`() {
+        healthResponse = 500 to """{"session_id":"from-an-error-page"}"""
+        assertNull(stt().fetchSessionId(baseUrl), "a non-200 is not an answer")
+
+        healthResponse = 200 to """{"status":"ok"}"""
+        assertNull(stt().fetchSessionId(baseUrl), "an STT with no session yet")
+
+        healthResponse = 200 to """{"status":"ok","session_id":""}"""
+        assertNull(stt().fetchSessionId(baseUrl), "a blank id would name a file live-content-.jsonl")
+
+        healthResponse = 200 to "not json"
+        assertNull(stt().fetchSessionId(baseUrl))
+
+        assertNull(stt().fetchSessionId(deadUrl()), "an unreachable server")
+    }
+
+    @Test
+    fun `the session id names the logs, and nothing leaves the last one in place`() {
+        val stt = stt()
+
+        stt.applySessionId("service-1")
+        assertEquals("service-1", TrainingDataLogger.sessionId)
+
+        stt.applySessionId(null)
+        assertEquals("service-1", TrainingDataLogger.sessionId, "a failed poll must not unname the logs")
+    }
+
+    @Test
+    fun `the poll picks the session id up on its first tick, with Help Dev off`() {
+        // A service's opening songs come before any Bible detection, which used to be the only thing
+        // that named the logs, so they landed in a file named after the app's start time.
+        healthResponse = 200 to """{"session_id":"opening-songs"}"""
+        val stt = stt()
+        stt.helpDevModeEnabled = false
+
+        stt.startDbCapture(baseUrl)
+
+        awaitUntil("the session id from the first tick") { TrainingDataLogger.sessionId == "opening-songs" }
+        assertFalse("/api/transcription/status" in requested, "the .db capture itself stays behind Help Dev")
     }
 }

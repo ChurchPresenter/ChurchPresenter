@@ -29,6 +29,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.churchpresenter.lottiegen.lottie.LottieTextShaping
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.atem.AtemClient
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
@@ -122,6 +123,9 @@ internal class LowerThirdTabScope(
     val listWidthDp get() = with(density) { listWidthPx.toDp() }
     val atemConfigured get() = appSettings.atemSettings.host.isNotBlank()
     val canPlay get() = composition != null && jsonContent.isNotBlank()
+
+    /** Whether the file's text is drawn as whole lines, as its generator's Text shaping asked. */
+    val groupsText by lazy { LottieTextShaping.groupsText(jsonContent) }
     val animatedProgress get() = ui.animatedProgress
     var refreshKey by ui::refreshKey
     var animJob by ui::animJob

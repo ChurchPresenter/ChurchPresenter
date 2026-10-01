@@ -76,6 +76,7 @@ import churchpresenter.composeapp.generated.resources.title
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.composables.finalPassCombinedClickable
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.operatorSongSettings
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -142,7 +143,7 @@ internal fun RowScope.SongLyricsPanel(
             onAddToSchedule = onAddToSchedule,
             onPresenting = onPresenting,
             sendToPresenter = sendToPresenter,
-            songSettings = appSettings.songSettings,
+            songSettings = appSettings.operatorSongSettings(),
             onMoveLanguage = onMoveLanguage,
         )
         FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))
@@ -176,7 +177,7 @@ internal fun RowScope.SongLyricsPanel(
         // Navigation hint — only in line mode, and drawn from the live bindings so a rebind is
         // reflected here. Hidden when both pairs are unbound: a sentence naming keys that do
         // nothing is worse than no hint.
-        val isLineModeHint = isSongLineMode(appSettings.songSettings)
+        val isLineModeHint = isSongLineMode(appSettings.operatorSongSettings())
         if (isLineModeHint && lineNavHintStr.isNotEmpty()) {
             Text(
                 text = lineNavHintStr,
@@ -382,7 +383,7 @@ private fun LyricsList(
 ) {
     Box {
         val lyricsListState = rememberLazyListState()
-        val titleSlideEnabled = appSettings.songSettings.titleSlideEnabled
+        val titleSlideEnabled = appSettings.operatorSongSettings().titleSlideEnabled
 
         LaunchedEffect(selectedSectionIndex, live.titleSlideSelected) {
             if (live.titleSlideSelected) {
@@ -407,7 +408,7 @@ private fun LyricsList(
                 item {
                     TitleSlideEntry(
                         currentSong = currentSong,
-                        showSongNumber = appSettings.songSettings.titleSlideShowSongNumber,
+                        showSongNumber = appSettings.operatorSongSettings().titleSlideShowSongNumber,
                         isPresenting = isPresenting,
                         live = live,
                         tabFocusRequester = tabFocusRequester,
@@ -423,7 +424,7 @@ private fun LyricsList(
                     LyricSectionEntry(
                         section = section,
                         sectionIndex = sectionIndex,
-                        isPerLineMode = isSongLineMode(appSettings.songSettings),
+                        isPerLineMode = isSongLineMode(appSettings.operatorSongSettings()),
                         selectedSectionIndex = selectedSectionIndex,
                         selectedLineIndex = selectedLineIndex,
                         isPresenting = isPresenting,

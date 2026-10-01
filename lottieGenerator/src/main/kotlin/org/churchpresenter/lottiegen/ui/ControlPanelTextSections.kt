@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.lottiegen.LottieGenState
 import org.churchpresenter.lottiegen.band.BandFontPicker
+import org.churchpresenter.lottiegen.lottie.TextShaping
 import org.churchpresenter.lottiegen.lottie.rememberSystemFonts
 import org.churchpresenter.lottiegen.model.LottieFont
 import org.churchpresenter.lottiegen.ui.components.CollapsibleSection
@@ -86,7 +87,34 @@ internal fun TextStyleSection(viewModel: LottieGenState, fontPicker: BandFontPic
         WeightRow(viewModel)
         CaseRow(viewModel)
         DetailWeightAndCaseRow(viewModel)
+        TextShapingRow(viewModel)
     }
+}
+
+/** Whole lines or letter by letter: written into the file, so the app draws it the same way. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TextShapingRow(viewModel: LottieGenState) {
+    val selected = TextShaping.fromKey(viewModel.config.textShaping)
+    var expanded by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(expanded, { expanded = it }, Modifier.fillMaxWidth()) {
+        LottieDropdown(
+            label = Strings.textShaping,
+            value = Strings.bandEnumLabel("shaping", selected.key),
+            expanded = expanded,
+            modifier = Modifier.fillMaxWidth()
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+        )
+        ExposedDropdownMenu(expanded, { expanded = false }) {
+            TextShaping.entries.forEach { mode ->
+                DropdownMenuItem(
+                    { Text(Strings.bandEnumLabel("shaping", mode.key)) },
+                    { viewModel.updateConfig { it.copy(textShaping = mode.key) }; expanded = false },
+                )
+            }
+        }
+    }
+    Text(Strings.textShapingHint, fontSize = 10.sp, color = Tokens.UnitText)
 }
 
 

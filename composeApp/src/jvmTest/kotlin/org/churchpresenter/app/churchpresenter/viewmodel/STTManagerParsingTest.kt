@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
 import org.json.JSONObject
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -14,6 +15,8 @@ import kotlin.test.assertTrue
  * result read back through the public state. What matters: optional fields fall back to sane
  * defaults, translation prefers `translated_text` but degrades to `text`, `in_progress` may arrive
  * as a string OR an object OR null, and highlighted words whose colour group is disabled are dropped.
+ * Every payload may also carry STT's `session_id`, which names the training-data and on-screen
+ * history logs.
  */
 class STTManagerParsingTest {
 
@@ -25,6 +28,7 @@ class STTManagerParsingTest {
     fun cleanUp() {
         created.forEach { runCatching { it.dispose() } }
         created.clear()
+        TrainingDataLogger.sessionId = null
     }
 
     private fun STTManager.transcription(json: String) = handleTranscriptionUpdate(JSONObject(json))
@@ -299,5 +303,44 @@ class STTManagerParsingTest {
         stt.transcription("""{"segments":[]}""")
 
         assertTrue(stt.segments.isEmpty())
+    }
+
+    // ── Session id ───────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a transcription payload names the session the logs belong to`() {
+        manager().transcription("""{"session_id":"2026-10-04_095812","segments":[]}""")
+
+        assertEquals("2026-10-04_095812", TrainingDataLogger.sessionId)
+    }
+
+    @Test
+    fun `a translation payload names it too`() {
+        manager().translation("""{"session_id":"translated-service","segments":[]}""")
+
+        assertEquals("translated-service", TrainingDataLogger.sessionId)
+    }
+
+    @Test
+    fun `a new session id in a later payload moves the logs to it`() {
+        // STT starts a new session per service; the socket hears it on the next payload rather
+        // than at the next minute's health poll.
+        val stt = manager()
+        stt.transcription("""{"session_id":"first","segments":[]}""")
+        stt.transcription("""{"session_id":"second","segments":[]}""")
+
+        assertEquals("second", TrainingDataLogger.sessionId)
+    }
+
+    @Test
+    fun `a payload without a session id leaves the current one alone`() {
+        val stt = manager()
+        stt.transcription("""{"session_id":"kept","segments":[]}""")
+
+        stt.transcription("""{"segments":[]}""")
+        stt.transcription("""{"session_id":null,"segments":[]}""")
+        stt.transcription("""{"session_id":"  ","segments":[]}""")
+
+        assertEquals("kept", TrainingDataLogger.sessionId, "an STT that has not shipped the field yet")
     }
 }

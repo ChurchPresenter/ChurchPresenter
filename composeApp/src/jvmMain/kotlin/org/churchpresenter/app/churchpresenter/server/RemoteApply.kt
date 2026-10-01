@@ -24,6 +24,7 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
+import org.churchpresenter.app.churchpresenter.utils.LiveHistoryLogger
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 
@@ -240,6 +241,9 @@ internal suspend fun applyRemoteLiveState(
         Presenting.BIBLE ->
             applyRemoteBible(state, presenterManager, bibleSyncMode, localPrimaryBible)
         Presenting.LYRICS -> if (state.songTitle != null) {
+            // Positions first: setLyricSection reports the change, and reads them.
+            presenterManager.setSongDisplaySectionIndex(state.songSectionIndex ?: -1)
+            presenterManager.setSongDisplayLineIndex(state.songLineIndex ?: -1)
             presenterManager.setLyricSection(
                 LyricSection(
                     title = state.songTitle,
@@ -248,8 +252,6 @@ internal suspend fun applyRemoteLiveState(
                     lines = state.lines ?: emptyList()
                 )
             )
-            presenterManager.setSongDisplaySectionIndex(state.songSectionIndex ?: -1)
-            presenterManager.setSongDisplayLineIndex(state.songLineIndex ?: -1)
             InstanceLinkLogger.log(
                 InstanceLinkLogSide.FOLLOWER,
                 "apply_live_state",
@@ -451,6 +453,7 @@ internal fun executeProjectItem(
         is ScheduleItem.SongItem -> {
             // Add to schedule AND select the song so the Songs tab navigates to it
             scheduleActions.addSong(item.songNumber, item.title, item.songbook, item.songId)
+            LiveHistoryLogger.noteLiveSong(item.songId, item.songbook, item.songNumber, item.title, "remote")
             presenterManager.setLyricSection(
                 LyricSection(
                     title = item.title,

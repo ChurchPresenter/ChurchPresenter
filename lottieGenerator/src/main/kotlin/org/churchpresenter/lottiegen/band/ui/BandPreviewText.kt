@@ -20,6 +20,7 @@ import org.churchpresenter.lottiegen.band.BibleLottieGenConfig
 import org.churchpresenter.lottiegen.band.SlotBox
 import org.churchpresenter.lottiegen.band.TextAnimation
 import org.churchpresenter.lottiegen.band.computeSlots
+import org.churchpresenter.lottiegen.lottie.LottieTextShaping
 import org.churchpresenter.lottiegen.lottie.TextMeasurer
 import kotlin.math.ceil
 
@@ -117,7 +118,7 @@ private fun revealedText(motion: TextAnimation, t: BandTimeline, text: String, f
         else -> 0f
     }.coerceIn(0f, 1f)
     return when (motion) {
-        TextAnimation.TYPEWRITER -> text.take(ceil(text.length * fraction).toInt())
+        TextAnimation.TYPEWRITER -> LottieTextShaping.typedText(text, fraction)
         else -> {
             val words = text.split(' ')
             words.take(ceil(words.size * fraction).toInt()).joinToString(" ")

@@ -30,6 +30,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import org.churchpresenter.app.churchpresenter.utils.withBibleEverywhere
 
 class BibleTabScreenshotTest {
 
@@ -331,7 +332,7 @@ class BibleTabScreenshotTest {
     )
 
     private fun splitting(app: AppSettings) =
-        app.copy(bibleSettings = app.bibleSettings.copy(splitLongVerses = true))
+        app.withBibleEverywhere(app.bibleSettings.copy(splitLongVerses = true))
 
     /** A presenter already showing [half], as going live with that half would leave it. */
     private fun showing(half: String) = PresenterManager().apply {

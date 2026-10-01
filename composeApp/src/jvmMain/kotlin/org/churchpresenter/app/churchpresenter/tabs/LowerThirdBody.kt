@@ -324,6 +324,7 @@ private fun LowerThirdTabScope.LowerThirdPreviewCard(previewOutput: PreviewOutpu
                         composition = composition,
                         progress = { animatedProgress.value },
                         fontManager = LottieFonts,
+                        enableTextGrouping = groupsText,
                     ), contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize())
                 } else if (selectedFile != null && isCompositionLoading) {
                     CircularProgressIndicator(modifier = Modifier.size(36.dp))

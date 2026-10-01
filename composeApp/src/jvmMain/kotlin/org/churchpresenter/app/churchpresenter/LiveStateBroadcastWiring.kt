@@ -2,10 +2,14 @@ package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import java.io.File
+import java.util.Locale
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.app.churchpresenter.utils.LiveHistoryEntry
+import org.churchpresenter.app.churchpresenter.utils.LiveHistoryLogger
 import org.churchpresenter.app.churchpresenter.utils.UsageEvent
 import org.churchpresenter.app.churchpresenter.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.utils.hasAudienceOutput
@@ -44,8 +48,9 @@ internal fun LiveStateBroadcastWiring(
                 UsageEvents.recordOncePerInstall(UsageEvent.FIRST_LIVE_ON_SCREEN)
             }
             val liveVerse = pm.selectedVerse.value
-            val verseCode = liveVerseCode(
-                source = source,
+            // Resolved whatever this change was: the history logs the verse for as long as it is up.
+            val liveCode = liveVerseCode(
+                source = Presenting.BIBLE,
                 bookName = liveVerse.bookName,
                 chapter = liveVerse.chapter,
                 verseNumber = liveVerse.verseNumber,
@@ -54,6 +59,9 @@ internal fun LiveStateBroadcastWiring(
                     primaryBible()?.getCodeReference(bookId, chapter, verse)
                 },
             )
+            val verseCode = liveCode.takeIf { source == Presenting.BIBLE }
+            // Beside the broadcast and ahead of it, so it is written whether or not the server runs.
+            LiveHistoryLogger.logLiveState(liveHistoryEntryOf(pm, liveCode))
             companionServer.updateLiveState(
                 mode = source.name,
                 bibleVerse = pm.selectedVerse.value,
@@ -78,3 +86,54 @@ internal fun LiveStateBroadcastWiring(
         }
     }
 }
+
+/**
+ * The on-screen history line for what [pm] has live right now. It follows the live mode, not the
+ * content type of the change that triggered it, so content pushed ahead of a mode switch (a song
+ * staged while a verse is up) does not appear until it is actually on screen. Identifiers only.
+ *
+ * [verseCode] is the canonical code of [PresenterManager.selectedVerse] through the primary Bible,
+ * null when it cannot be resolved; it is only written while BIBLE is the mode.
+ */
+internal fun liveHistoryEntryOf(pm: PresenterManager, verseCode: Triple<Int, Int, Int>?): LiveHistoryEntry {
+    val mode = pm.presentingMode.value
+    val none = LiveHistoryEntry(Presenting.NONE.name)
+    return when (mode) {
+        Presenting.LYRICS -> {
+            val section = pm.lyricSection.value
+            if (section.title.isBlank() && section.lines.isEmpty()) none
+            else LiveHistoryEntry(
+                contentType = mode.name,
+                songNumber = section.songNumber,
+                songTitle = section.title,
+                sectionIndex = pm.songDisplaySectionIndex.value,
+                sectionType = section.type.ifEmpty { null },
+                lineIndex = pm.songDisplayLineIndex.value,
+            )
+        }
+        Presenting.BIBLE -> {
+            val verse = pm.selectedVerse.value
+            val verses = verse.verseRange.ifBlank { verse.verseNumber.toString() }
+            if (verse.bookName.isBlank()) none
+            else LiveHistoryEntry(
+                contentType = mode.name,
+                verseCode = verseCode?.let { (b, c, v) -> "B%03dC%03dV%03d".format(Locale.ROOT, b, c, v) },
+                reference = "${verse.bookName} ${verse.chapter}:$verses",
+            )
+        }
+        Presenting.PRESENTATION -> {
+            val slide = pm.liveSlide.value
+            LiveHistoryEntry(mode.name, fileName = slide?.fileName, slideIndex = slide?.index)
+        }
+        Presenting.PICTURES -> pm.selectedImagePath.value?.takeIf { it.isNotBlank() }
+            ?.let { LiveHistoryEntry(mode.name, fileName = File(it).name) } ?: none
+        Presenting.MEDIA -> pm.currentMediaUrl.value.takeIf { it.isNotBlank() }
+            ?.let { LiveHistoryEntry(mode.name, fileName = fileNameOf(it)) } ?: none
+        else -> LiveHistoryEntry(mode.name)
+    }
+}
+
+/** The last path segment of a file path or URL, query and fragment dropped. */
+private fun fileNameOf(pathOrUrl: String): String =
+    pathOrUrl.substringBefore('?').substringBefore('#').trimEnd('/', '\\')
+        .substringAfterLast('/').substringAfterLast('\\')

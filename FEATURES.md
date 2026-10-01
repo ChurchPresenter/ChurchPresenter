@@ -73,6 +73,15 @@
 - `dialogs/tabs/BibleSettingsTab.kt`
 - `core-models/src/main/kotlin/.../models/bible/SelectedVerse.kt` (the `:core-models` module)
 - `bible-engine/` (the `:bible-engine` Gradle module, at the repo root) — Bible Lookup Engine (speech-to-reference detection)
+- `utils/TrainingDataLogger.kt`, `utils/LiveHistoryLogger.kt` — the session logs in
+  `~/.churchpresenter/bible-stt-logs/`, named after the STT session id (read from STT's
+  `/api/health` on connect and from its socket payloads) or else the app's start time, opened by one `{"type":"session"}` header
+  line and deleted after 30 days. `live-content-<session>.jsonl` is the on-screen history, one JSON
+  line per change of what is on screen, repeats dropped: `ts_ms`, `sessionId`, `contentType` (a
+  `Presenting` name, `NONE` when cleared), `source` when known, plus identifiers only — never text.
+  For lyrics: `songId`, `songbook`, `songNumber`, `songTitle`, `sectionIndex`, `sectionType`,
+  `lineIndex`. For Bible: `verseCode` (canonical `BxxxCxxxVxxx`) and `reference`. For presentations:
+  `fileName` and `slideIndex`. For media and pictures: `fileName`.
 
 ## Slides & Presentations
 - **PowerPoint, Keynote & PDF** — drop in `.pptx`, `.ppt`, `.key` or `.pdf` files and present them as slides — no Microsoft or Apple software required.

@@ -12,6 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.utils.withBibleEverywhere
 
 /** The setting's default; the suite's fixture verse is 60 words, on the far side of it. */
 private const val DEFAULT_WORD_COUNT = 45
@@ -58,8 +59,8 @@ class BibleVerseSplitTest {
     )
 
     private fun viewModel(split: Boolean, words: Int = DEFAULT_WORD_COUNT) = BibleViewModel(
-        AppSettings(
-            bibleSettings = BibleSettings(
+        AppSettings().withBibleEverywhere(
+            BibleSettings(
                 storageDirectory = dir.absolutePath,
                 primaryBible = "test.spb",
                 splitLongVerses = split,

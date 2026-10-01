@@ -17,6 +17,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.utils.withBibleEverywhere
+import org.churchpresenter.app.churchpresenter.utils.withSongsEverywhere
 
 @OptIn(ExperimentalTestApi::class)
 class PresenterTransitionAnimationTest {
@@ -282,7 +284,7 @@ class PresenterTransitionAnimationTest {
     @Test
     fun `clearing a verse cuts instead of fading when fade-out is off`() = runComposeUiTest {
         val manager = PresenterManager()
-        effects(manager, AppSettings(bibleSettings = BibleSettings(fadeOut = false)))
+        effects(manager, AppSettings().withBibleEverywhere(BibleSettings(fadeOut = false)))
         manager.setSelectedVerses(listOf(VERSE))
         waitUntil("the verse is live") { manager.bibleTransitionAlpha.value == 1f }
         manager.setPresentingMode(Presenting.BIBLE)
@@ -296,7 +298,7 @@ class PresenterTransitionAnimationTest {
     @Test
     fun `clearing lyrics fades the song alpha away`() = runComposeUiTest {
         val manager = PresenterManager()
-        effects(manager, AppSettings(songSettings = SongSettings(fadeOut = true)))
+        effects(manager, AppSettings().withSongsEverywhere(SongSettings(fadeOut = true)))
         manager.setPresentingMode(Presenting.LYRICS)
 
         manager.requestClearDisplay()

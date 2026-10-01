@@ -366,7 +366,7 @@ class SettingsManagerTest {
         )
         assertEquals(
             "#ABCDEF",
-            migrated.bibleSettings.translations[0].textColor,
+            migrated.operatorBibleSettings().translations[0].textColor,
             "styling has to come across, or everyone's bible resets to the defaults on upgrade",
         )
     }
