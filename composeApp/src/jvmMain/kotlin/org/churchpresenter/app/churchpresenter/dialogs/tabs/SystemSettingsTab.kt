@@ -2,12 +2,12 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.material3.minimumInteractiveComponentSize
-import churchpresenter.composeapp.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.export_settings_no_passwords
-import churchpresenter.composeapp.generated.resources.import_settings_keep_secrets
-import churchpresenter.composeapp.generated.resources.import_settings_secrets
-import churchpresenter.composeapp.generated.resources.import_settings_use_file_secrets
-import churchpresenter.composeapp.generated.resources.settings_exported_no_passwords
+import org.churchpresenter.strings.generated.resources.cancel
+import org.churchpresenter.strings.generated.resources.export_settings_no_passwords
+import org.churchpresenter.strings.generated.resources.import_settings_keep_secrets
+import org.churchpresenter.strings.generated.resources.import_settings_secrets
+import org.churchpresenter.strings.generated.resources.import_settings_use_file_secrets
+import org.churchpresenter.strings.generated.resources.settings_exported_no_passwords
 import org.churchpresenter.theme.components.toggleRow
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.BorderStroke
