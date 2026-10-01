@@ -451,7 +451,10 @@ class PicturesViewModel(
         _selectedFolder.value = displayFolder
         _remoteFolderPath.value = displayFolder to folderPath
         _hiddenNames.value = hiddenStore.hiddenPictures(displayFolder.absolutePath)
-        val cacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/picture-folders/$folderId")
+        val cacheDir = File(
+            System.getProperty("user.home"),
+            ".churchpresenter/instance-link/cache/picture-folders/$folderId"
+        )
         cacheDir.mkdirs()
         remoteLoadJob = scope.launch {
             for (index in 0 until imageCount) {

@@ -110,7 +110,11 @@ internal fun BibleProperties(
     val selectedBookIndex = bibleVm?.selectedBookIndex?.value ?: 0
     val selectedChapter = bibleVm?.selectedChapter?.value ?: 1
 
-    Text(stringResource(Res.string.canvas_source_bible), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(
+        stringResource(Res.string.canvas_source_bible),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
 
     if (bibleOptions.isNotEmpty()) {
         DropdownSelector(
@@ -242,7 +246,11 @@ internal fun BibleProperties(
     HorizontalDivider()
     Spacer(modifier = Modifier.height(4.dp))
 
-    Text(stringResource(Res.string.canvas_verse_style), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(
+        stringResource(Res.string.canvas_verse_style),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -312,7 +320,11 @@ internal fun BibleProperties(
 
     Spacer(modifier = Modifier.height(4.dp))
 
-    Text(stringResource(Res.string.canvas_reference_style), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(
+        stringResource(Res.string.canvas_reference_style),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -354,7 +366,11 @@ internal fun BibleProperties(
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Column {
-            Text(stringResource(Res.string.canvas_align_horizontal), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                stringResource(Res.string.canvas_align_horizontal),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             HorizontalAlignmentButtons(
                 selectedAlignment = source.horizontalAlignment,
                 onAlignmentChange = { onUpdate(source.copy(horizontalAlignment = it)) },
@@ -364,7 +380,11 @@ internal fun BibleProperties(
             )
         }
         Column {
-            Text(stringResource(Res.string.canvas_align_vertical), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                stringResource(Res.string.canvas_align_vertical),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             VerticalAlignmentButtons(
                 selectedAlignment = source.verticalAlignment,
                 onAlignmentChange = { onUpdate(source.copy(verticalAlignment = it)) },

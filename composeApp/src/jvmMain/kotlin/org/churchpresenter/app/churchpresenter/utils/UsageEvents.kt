@@ -25,7 +25,9 @@ enum class UsageEvent(
     /** A passage went live with two or more translations on screen at once. */
     BIBLE_MULTI_TRANSLATION("bibleMultiTranslation"),
 
-    /** A Blackmagic DeckLink output was opened on real hardware. Once per run — see [UsageEventStore.recordOncePerRun]. */
+    /**
+     * A Blackmagic DeckLink output was opened on real hardware. Once per run — see [UsageEventStore.recordOncePerRun].
+     */
     DECKLINK_OUTPUT("decklinkOutput"),
 
     /**

@@ -135,7 +135,8 @@ private object JfxInit {
                     // the JVM's default handler.
                     Platform.runLater {
                         val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
-                        Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { thread, throwable ->
+                        Thread.currentThread()
+                            .uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { thread, throwable ->
                             if (isJavaFxScreenReconfigRace(throwable)) {
                                 CrashReporter.reportWarning(
                                     "JavaFX screen-reconfiguration NPE (suppressed, known Prism/Glass race)",

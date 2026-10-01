@@ -93,7 +93,10 @@ fun DropdownSettingsField(
             .then(if (width != null) Modifier.width(width) else Modifier)
             .heightIn(min = 42.dp)
             .dropdownField(AppShape(8.dp), open = expanded)
-            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { expanded = true }
             .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
         contentAlignment = Alignment.CenterStart
     ) {

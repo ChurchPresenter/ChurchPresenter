@@ -187,11 +187,19 @@ fun SceneCanvas(
                                                 // Store start/end as normalized points within bounding box
                                                 val minX = minOf(drawStartNorm.x, drawCurrentNorm.x)
                                                 val minY = minOf(drawStartNorm.y, drawCurrentNorm.y)
-                                                val rangeX = (maxOf(drawStartNorm.x, drawCurrentNorm.x) - minX).coerceAtLeast(0.01f)
-                                                val rangeY = (maxOf(drawStartNorm.y, drawCurrentNorm.y) - minY).coerceAtLeast(0.01f)
+                                                val rangeX = (maxOf(drawStartNorm.x, drawCurrentNorm.x) - minX)
+                                                    .coerceAtLeast(0.01f)
+                                                val rangeY = (maxOf(drawStartNorm.y, drawCurrentNorm.y) - minY)
+                                                    .coerceAtLeast(0.01f)
                                                 listOf(
-                                                    PathPoint((drawStartNorm.x - minX) / rangeX, (drawStartNorm.y - minY) / rangeY),
-                                                    PathPoint((drawCurrentNorm.x - minX) / rangeX, (drawCurrentNorm.y - minY) / rangeY)
+                                                    PathPoint(
+                                                        (drawStartNorm.x - minX) / rangeX,
+                                                        (drawStartNorm.y - minY) / rangeY
+                                                    ),
+                                                    PathPoint(
+                                                        (drawCurrentNorm.x - minX) / rangeX,
+                                                        (drawCurrentNorm.y - minY) / rangeY
+                                                    )
                                                 )
                                             } else if (activeTool == "freehand") {
                                                 // Normalize points relative to bounding box

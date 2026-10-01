@@ -155,7 +155,8 @@ internal fun activeStageTypes(
     when (presentingMode) {
         Presenting.BIBLE -> { add(StageMonitorContentType.BIBLE); add(StageMonitorContentType.NEXT) }
         Presenting.LYRICS -> { add(StageMonitorContentType.SONGS); add(StageMonitorContentType.NEXT) }
-        Presenting.PRESENTATION -> { add(StageMonitorContentType.PRESENTATION); add(StageMonitorContentType.PRESENTATION_NOTES) }
+        Presenting.PRESENTATION ->
+            { add(StageMonitorContentType.PRESENTATION); add(StageMonitorContentType.PRESENTATION_NOTES) }
         Presenting.PICTURES -> add(StageMonitorContentType.PICTURES)
         Presenting.MEDIA -> add(StageMonitorContentType.MEDIA)
         Presenting.LOWER_THIRD -> add(StageMonitorContentType.LOWER_THIRD)
@@ -596,7 +597,10 @@ private fun ZoneContent(
         StageMonitorContentType.ANNOUNCEMENT_TEXT -> CenteredText(data.timerText, style)
         StageMonitorContentType.CANVAS -> ScenePresenter(modifier = Modifier.fillMaxSize(), scene = data.activeScene)
         StageMonitorContentType.QA -> QAPresenter(question = data.displayedQuestion, qaSettings = data.qaSettings)
-        StageMonitorContentType.DICTIONARY -> DictionaryPresenter(entry = data.displayedDictionaryEntry, dictionarySettings = data.dictionarySettings)
+        StageMonitorContentType.DICTIONARY -> DictionaryPresenter(
+            entry = data.displayedDictionaryEntry,
+            dictionarySettings = data.dictionarySettings
+        )
         StageMonitorContentType.NEXT ->
             ZoneTextTransition(sm, data.nextText) {
                 if (data.nextChordLines.isEmpty()) FittedTextContent(style, it)

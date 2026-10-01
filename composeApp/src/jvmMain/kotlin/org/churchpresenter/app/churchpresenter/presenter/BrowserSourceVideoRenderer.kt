@@ -191,7 +191,11 @@ class BrowserSourceVideoRenderer(
             val periodicReseedDue = elapsedMs - lastFullFrameAtMs >= FULL_FRAME_RESEED_MS
             if (!contentChanged && !newSubscriberJoined && !periodicReseedDue) return null
             val forceFullFrame = previous == null || newSubscriberJoined || periodicReseedDue
-            val rect = if (forceFullFrame) DirtyRect(0, 0, width, height) else computeDirtyRect(intBuf, previous, width, height)
+            val rect = if (forceFullFrame) {
+                DirtyRect(0, 0, width, height)
+            } else {
+                computeDirtyRect(intBuf, previous, width, height)
+            }
             return TickDecision(rect, forceFullFrame, contentChanged)
         }
 

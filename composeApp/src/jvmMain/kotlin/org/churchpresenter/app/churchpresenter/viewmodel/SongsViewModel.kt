@@ -178,7 +178,13 @@ class SongsViewModel(
         songFolderWatcher.dispose()
         val items = catalog?.songBook?.flatMap { entry ->
             entry.songs.map { dto ->
-                SongItem(number = dto.number, title = dto.title, songbook = entry.bookName, tune = dto.tune, author = dto.author)
+                SongItem(
+                    number = dto.number,
+                    title = dto.title,
+                    songbook = entry.bookName,
+                    tune = dto.tune,
+                    author = dto.author
+                )
             }
         } ?: emptyList()
         applySongList(items)
@@ -229,7 +235,11 @@ class SongsViewModel(
      *  — lets [splitLyricsIntoSections] work unchanged on remotely-fetched songs. Original header
      *  text (e.g. "Verse 2") isn't preserved by the API, only the section type. */
     private fun SongDetailDto.toRawLyrics(): List<String> = sections.flatMap { section ->
-        val header = if (section.type == Constants.SECTION_TYPE_CHORUS) "{Chorus}" else "[${section.type.replaceFirstChar(Char::uppercase)}]"
+        val header = if (section.type == Constants.SECTION_TYPE_CHORUS) {
+            "{Chorus}"
+        } else {
+            "[${section.type.replaceFirstChar(Char::uppercase)}]"
+        }
         listOf(header) + section.lines
     }
 
@@ -1189,7 +1199,9 @@ class SongsViewModel(
      * Adds the currently selected song to the schedule.
      * Returns true if successfully added, false otherwise.
      */
-    fun addCurrentSongToSchedule(onAdd: (songNumber: Int, title: String, songbook: String, songId: String) -> Unit): Boolean {
+    fun addCurrentSongToSchedule(
+        onAdd: (songNumber: Int, title: String, songbook: String, songId: String) -> Unit
+    ): Boolean {
         val items = _filteredSongItems.value
         val idx = _selectedSongIndex.value
         if (idx < 0 || idx >= items.size) return false

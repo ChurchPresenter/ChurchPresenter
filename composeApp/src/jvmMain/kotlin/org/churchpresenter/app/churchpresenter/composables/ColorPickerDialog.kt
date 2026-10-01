@@ -304,7 +304,12 @@ internal fun SvPanel(
             val cx = saturation * size.width
             val cy = (1f - brightness) * size.height
             drawCircle(Color.White, radius = 8.dp.toPx(), center = Offset(cx, cy), style = Stroke(2.dp.toPx()))
-            drawCircle(Color.Black.copy(alpha = 0.4f), radius = 9.dp.toPx(), center = Offset(cx, cy), style = Stroke(1.dp.toPx()))
+            drawCircle(
+                Color.Black.copy(alpha = 0.4f),
+                radius = 9.dp.toPx(),
+                center = Offset(cx, cy),
+                style = Stroke(1.dp.toPx())
+            )
         }
     }
 }
@@ -347,7 +352,12 @@ internal fun HueBar(
             // Thumb line
             val x = hue / 360f * size.width
             drawLine(Color.White, Offset(x, 0f), Offset(x, size.height), strokeWidth = 3.dp.toPx())
-            drawLine(Color.Black.copy(alpha = 0.35f), Offset(x - 1.dp.toPx(), 0f), Offset(x - 1.dp.toPx(), size.height), strokeWidth = 1.dp.toPx())
+            drawLine(
+                Color.Black.copy(alpha = 0.35f),
+                Offset(x - 1.dp.toPx(), 0f),
+                Offset(x - 1.dp.toPx(), size.height),
+                strokeWidth = 1.dp.toPx()
+            )
         }
     }
 }

@@ -42,7 +42,10 @@ fun rememberScreenDevices(): Array<GraphicsDevice> {
     return devices
 }
 
-/** The 1080p bounds [ScaledPresenterContent][org.churchpresenter.app.churchpresenter.composables.ScaledPresenterContent] assumes when no real display exists to ask (headless). */
+/**
+ * The 1080p bounds [ScaledPresenterContent][org.churchpresenter.app.churchpresenter.composables.ScaledPresenterContent]
+ * assumes when no real display exists to ask (headless).
+ */
 private val HEADLESS_PRESENTER_BOUNDS = Rectangle(0, 0, 1920, 1080)
 
 /** Returns the presenter screen bounds (first non-primary screen if available, else primary). */

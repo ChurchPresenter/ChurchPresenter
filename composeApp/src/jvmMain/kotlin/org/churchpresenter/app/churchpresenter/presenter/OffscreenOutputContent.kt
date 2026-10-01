@@ -317,10 +317,21 @@ internal fun OffscreenOutputContent(
                                     val showQRCode = presenterManager.showQRCodeOnDisplay.value
                                     val qaTransitionAlpha = presenterManager.qaTransitionAlpha.value
                                     if (showQRCode) {
-                                        val base = qaDisplayUrlState?.value?.ifEmpty { serverUrlState?.value ?: "" } ?: (serverUrlState?.value ?: "")
-                                        QAQRCodePresenter(url = "$base/qa", qaSettings = appSettings.qaSettings, outputRole = outputRole, transitionAlpha = qaTransitionAlpha)
+                                        val base = qaDisplayUrlState?.value?.ifEmpty { serverUrlState?.value ?: "" }
+                                            ?: (serverUrlState?.value ?: "")
+                                        QAQRCodePresenter(
+                                            url = "$base/qa",
+                                            qaSettings = appSettings.qaSettings,
+                                            outputRole = outputRole,
+                                            transitionAlpha = qaTransitionAlpha
+                                        )
                                     } else {
-                                        QAPresenter(question = presenterManager.displayedQuestion.value, qaSettings = appSettings.qaSettings, outputRole = outputRole, transitionAlpha = qaTransitionAlpha)
+                                        QAPresenter(
+                                            question = presenterManager.displayedQuestion.value,
+                                            qaSettings = appSettings.qaSettings,
+                                            outputRole = outputRole,
+                                            transitionAlpha = qaTransitionAlpha
+                                        )
                                     }
                                 }
                                 Presenting.STT -> {

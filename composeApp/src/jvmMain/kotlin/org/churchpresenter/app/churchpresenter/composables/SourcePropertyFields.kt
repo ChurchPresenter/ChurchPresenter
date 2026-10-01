@@ -24,9 +24,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.canvas_opacity
 
 @Composable
-internal fun PropertyTextField(label: String, value: String, modifier: Modifier = Modifier, onValueChange: (String) -> Unit) {
+internal fun PropertyTextField(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    onValueChange: (String) -> Unit
+) {
     var text by remember(value) { mutableStateOf(value) }
     StyledTextField(
         value = text,
@@ -108,7 +117,12 @@ internal fun PropertyIntField(
 }
 
 @Composable
-internal fun PropertyFloatField(label: String, value: Float, modifier: Modifier = Modifier, onValueChange: (Float) -> Unit) {
+internal fun PropertyFloatField(
+    label: String,
+    value: Float,
+    modifier: Modifier = Modifier,
+    onValueChange: (Float) -> Unit
+) {
     var text by remember(value) { mutableStateOf("%.3f".format(value)) }
     var hasFocus by remember { mutableStateOf(false) }
     StyledTextField(
@@ -130,6 +144,11 @@ internal fun PropertyFloatField(label: String, value: Float, modifier: Modifier 
     )
 }
 
+/** A colour's opacity slider label: "<colour> <Opacity>". */
+@Composable
+internal fun opacityLabel(color: StringResource): String =
+    "${stringResource(color)} ${stringResource(Res.string.canvas_opacity)}"
+
 @Composable
 internal fun PropertySlider(label: String, value: Float, min: Float, max: Float, onValueChange: (Float) -> Unit) {
     Column {
@@ -149,7 +168,14 @@ internal fun PropertySlider(label: String, value: Float, min: Float, max: Float,
 }
 
 @Composable
-internal fun PropertySliderWithInput(label: String, value: Float, min: Float, max: Float, suffix: String = "", onValueChange: (Float) -> Unit) {
+internal fun PropertySliderWithInput(
+    label: String,
+    value: Float,
+    min: Float,
+    max: Float,
+    suffix: String = "",
+    onValueChange: (Float) -> Unit
+) {
     var textValue by remember(value) { mutableStateOf(value.toInt().toString()) }
     Column {
         Text(
@@ -183,7 +209,12 @@ internal fun PropertySliderWithInput(label: String, value: Float, min: Float, ma
                     hasFocus = state.isFocused
                 },
                 trailingIcon = if (suffix.isNotEmpty()) { {
-                    Text(suffix, style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f), modifier = Modifier.padding(end = 6.dp))
+                    Text(
+                        suffix,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        modifier = Modifier.padding(end = 6.dp)
+                    )
                 } } else null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { commitValue() })

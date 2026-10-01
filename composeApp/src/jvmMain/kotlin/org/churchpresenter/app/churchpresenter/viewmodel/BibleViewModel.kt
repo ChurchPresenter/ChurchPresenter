@@ -215,7 +215,8 @@ class BibleViewModel(
         val verseText: String,
         val verseRange: String = ""
     ) {
-        val displayText: String get() = if (verseRange.isNotEmpty()) "$bookName $chapter:$verseRange" else "$bookName $chapter:$verseNumber"
+        val displayText: String
+            get() = if (verseRange.isNotEmpty()) "$bookName $chapter:$verseRange" else "$bookName $chapter:$verseNumber"
     }
 
     private val _history = mutableStateListOf<HistoryEntry>()
@@ -224,7 +225,10 @@ class BibleViewModel(
     fun addToHistory(bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String = "") {
         val entry = HistoryEntry(bookName, chapter, verseNumber, verseText, verseRange)
 
-        _history.removeAll { it.bookName == bookName && it.chapter == chapter && it.verseNumber == verseNumber && it.verseRange == verseRange }
+        _history.removeAll {
+            it.bookName == bookName && it.chapter == chapter && it.verseNumber == verseNumber &&
+                it.verseRange == verseRange
+        }
 
         _history.add(0, entry)
 
@@ -461,7 +465,14 @@ class BibleViewModel(
         return result
     }
 
-    fun selectVerseByDetails(bookName: String, chapter: Int, verseNumber: Int, verseRange: String = "", goLiveSource: String? = null, bookId: Int = 0): Boolean {
+    fun selectVerseByDetails(
+        bookName: String,
+        chapter: Int,
+        verseNumber: Int,
+        verseRange: String = "",
+        goLiveSource: String? = null,
+        bookId: Int = 0
+    ): Boolean {
         val bookIndex = resolveBookIndex(bookName, bookId)
         if (bookIndex < 0) return false
 
@@ -787,7 +798,14 @@ class BibleViewModel(
     }
 
     fun addCurrentVerseToSchedule(
-        onAdd: (bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String, bookId: Int) -> Unit
+        onAdd: (
+            bookName: String,
+            chapter: Int,
+            verseNumber: Int,
+            verseText: String,
+            verseRange: String,
+            bookId: Int
+        ) -> Unit
     ): Boolean {
         if (_verses.value.isEmpty()) return false
         val idx = _selectedVerseIndex.value
@@ -807,7 +825,14 @@ class BibleViewModel(
         bookId: Int,
         chapter: Int,
         verse: Int,
-        onAdd: (bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String, bookId: Int) -> Unit,
+        onAdd: (
+            bookName: String,
+            chapter: Int,
+            verseNumber: Int,
+            verseText: String,
+            verseRange: String,
+            bookId: Int
+        ) -> Unit,
     ): Boolean {
         val bible = _primaryBible.value ?: return false
         val details = bible.getVerseDetailsByCode(bookId, chapter, verse) ?: return false
@@ -905,7 +930,10 @@ class BibleViewModel(
     internal var remoteBibleCacheFile: File? = null
     internal var remoteSecondaryBibleCacheFile: File? = null
     internal var remoteTranslationCacheFiles: List<Pair<String, File>> = emptyList()
-    internal val remoteBibleCacheDir = File(System.getProperty("user.home"), ".churchpresenter/instance-link/cache/bibles")
+    internal val remoteBibleCacheDir = File(
+        System.getProperty("user.home"),
+        ".churchpresenter/instance-link/cache/bibles"
+    )
     internal val actedDetectionKeys = HashSet<String>()
 
     val nextVerses: State<List<SelectedVerse>> = derivedStateOf { getNextVerses() }

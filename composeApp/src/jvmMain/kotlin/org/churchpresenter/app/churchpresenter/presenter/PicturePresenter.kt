@@ -56,7 +56,11 @@ fun PicturePresenter(
     when {
         // Key mode: always solid white at the appropriate alpha
         isKey -> {
-            Box(modifier = modifier.fillMaxSize().background(Color.White).alpha(pictureKeyAlpha(animationType, transitionAlpha)))
+            Box(
+                modifier = modifier.fillMaxSize()
+                    .background(Color.White)
+                    .alpha(pictureKeyAlpha(animationType, transitionAlpha))
+            )
         }
 
         // Crossfade: both images visible simultaneously, old fades out as new fades in
@@ -83,7 +87,10 @@ fun PicturePresenter(
                 Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = -slideOffset * screenWidthPx }) {
                     ImageContent(previousImagePath, contentScale)
                 }
-                Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = (1f - slideOffset) * screenWidthPx }) {
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                        .graphicsLayer { translationX = (1f - slideOffset) * screenWidthPx }
+                ) {
                     ImageContent(imagePath, contentScale)
                 }
             }
@@ -98,7 +105,10 @@ fun PicturePresenter(
                 Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = slideOffset * screenWidthPx }) {
                     ImageContent(previousImagePath, contentScale)
                 }
-                Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = -(1f - slideOffset) * screenWidthPx }) {
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                        .graphicsLayer { translationX = -(1f - slideOffset) * screenWidthPx }
+                ) {
                     ImageContent(imagePath, contentScale)
                 }
             }
@@ -190,7 +200,11 @@ fun SlidePresenter(
 
     when {
         isKey -> {
-            Box(modifier = modifier.fillMaxSize().background(Color.White).alpha(pictureKeyAlpha(animationType, transitionAlpha)))
+            Box(
+                modifier = modifier.fillMaxSize()
+                    .background(Color.White)
+                    .alpha(pictureKeyAlpha(animationType, transitionAlpha))
+            )
         }
 
         animationType == AnimationType.CROSSFADE && previousSlide != null -> {
@@ -215,7 +229,10 @@ fun SlidePresenter(
                 Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = -slideOffset * screenWidthPx }) {
                     SlideBitmapContent(previousSlide)
                 }
-                Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = (1f - slideOffset) * screenWidthPx }) {
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                        .graphicsLayer { translationX = (1f - slideOffset) * screenWidthPx }
+                ) {
                     SlideBitmapContent(slide)
                 }
             }
@@ -229,7 +246,10 @@ fun SlidePresenter(
                 Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = slideOffset * screenWidthPx }) {
                     SlideBitmapContent(previousSlide)
                 }
-                Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = -(1f - slideOffset) * screenWidthPx }) {
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                        .graphicsLayer { translationX = -(1f - slideOffset) * screenWidthPx }
+                ) {
                     SlideBitmapContent(slide)
                 }
             }
