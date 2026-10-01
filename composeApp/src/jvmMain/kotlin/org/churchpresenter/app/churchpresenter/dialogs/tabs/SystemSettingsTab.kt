@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.material3.minimumInteractiveComponentSize
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.export_settings_no_passwords
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -349,34 +349,51 @@ private fun ManageSettingsCard(companionServer: CompanionServer?) {
     val uploadsClearedMsg = stringResource(Res.string.remote_uploads_cleared)
 
     SettingsCard(title = stringResource(Res.string.system_manage_settings)) {
-        FlowRow(
+        // Two rows: what saves or loads the file, then what destroys something. A weighted spacer
+        // between them in one wrapping row stranded a red button at the far end of whichever line
+        // it wrapped onto.
+        Column(
             modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 13.dp, bottom = 15.dp),
-            horizontalArrangement = Arrangement.spacedBy(9.dp),
             verticalArrangement = Arrangement.spacedBy(9.dp),
-            itemVerticalAlignment = Alignment.CenterVertically
         ) {
-            ManageButton(exportTitle) {
-                scope.launch { exportSettings(exportTitle, exportedMsg, exportFailedMsg) }
-            }
-            ManageButton(exportSafeTitle) {
-                scope.launch {
-                    exportSettings(exportSafeTitle, exportedSafeMsg, exportFailedMsg, withoutSecrets = true)
+            ManageRow {
+                ManageButton(exportTitle) {
+                    scope.launch { exportSettings(exportTitle, exportedMsg, exportFailedMsg) }
+                }
+                ManageButton(exportSafeTitle) {
+                    scope.launch {
+                        exportSettings(exportSafeTitle, exportedSafeMsg, exportFailedMsg, withoutSecrets = true)
+                    }
+                }
+                ManageButton(importTitle) {
+                    scope.launch {
+                        importSettings(importTitle, importConfirmMsg, importFailedMsg, companionServer, secrets)
+                    }
                 }
             }
-            ManageButton(importTitle) {
-                scope.launch {
-                    importSettings(importTitle, importConfirmMsg, importFailedMsg, companionServer, secrets)
+            ManageRow {
+                ManageButton(clearUploadsTitle, danger = true) {
+                    clearRemoteUploads(clearUploadsTitle, clearUploadsConfirmMsg, uploadsClearedMsg)
                 }
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            ManageButton(clearUploadsTitle, danger = true) {
-                clearRemoteUploads(clearUploadsTitle, clearUploadsConfirmMsg, uploadsClearedMsg)
-            }
-            ManageButton(resetTitle, danger = true) {
-                resetAllSettings(resetTitle, resetConfirmMsg, clearCacheMsg, companionServer)
+                ManageButton(resetTitle, danger = true) {
+                    resetAllSettings(resetTitle, resetConfirmMsg, clearCacheMsg, companionServer)
+                }
             }
         }
     }
+}
+
+/** One wrapping line of the Manage settings buttons. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ManageRow(content: @Composable FlowRowScope.() -> Unit) {
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(9.dp),
+        verticalArrangement = Arrangement.spacedBy(9.dp),
+        itemVerticalAlignment = Alignment.CenterVertically,
+        content = content,
+    )
 }
 
 @Composable
