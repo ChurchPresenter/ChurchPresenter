@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.sharedui.screenshot
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,7 +27,6 @@ import org.churchpresenter.sharedui.composables.FocusLostRescueState
 import org.churchpresenter.sharedui.composables.GoLiveButton
 import org.churchpresenter.sharedui.composables.TooltipIconButton
 import kotlin.test.Test
-import org.churchpresenter.sharedui.screenshot.captureComponent
 
 class TabControlsScreenshotTest {
 
