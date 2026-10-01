@@ -38,7 +38,8 @@ object SlideFontRegistry {
     private val availableFamilies = ConcurrentHashMap<String, String>()
 
     /** Normalized file name (sans extension) → font file, from the system-directory scan. */
-    private val systemFontFileIndex = ConcurrentHashMap<String, File>()
+    private val systemFontFileIndex =
+        FontFileIndex({ systemFontDirs }, FONT_SCAN_DEPTH) { normalizeName(it.nameWithoutExtension) }
 
     /**
      * Office-font substitution preferences. First installed candidate wins; every list ends in a
@@ -126,9 +127,9 @@ object SlideFontRegistry {
         for (dir in systemFontDirs) {
             if (!dir.isDirectory) continue
             dir.walkTopDown().maxDepth(FONT_SCAN_DEPTH)
-                .filter { it.isFile && it.extension.lowercase() in setOf("ttf", "otf", "ttc") }
+                .filter { it.isFile && it.extension.lowercase() in FontFileIndex.FONT_FILE_EXTENSIONS }
                 .forEach { fontFile ->
-                    systemFontFileIndex.putIfAbsent(normalizeName(fontFile.nameWithoutExtension), fontFile)
+                    systemFontFileIndex.add(fontFile)
                     registerFileIfUnknown(fontFile)
                 }
         }
@@ -184,22 +185,13 @@ object SlideFontRegistry {
      * regular cut.
      */
     fun findSystemFontFile(family: String, wantBold: Boolean): File? {
-        if (systemFontFileIndex.isEmpty()) {
-            // Build just the filename index without registering anything (cheap).
-            for (dir in systemFontDirs) {
-                if (!dir.isDirectory) continue
-                dir.walkTopDown().maxDepth(FONT_SCAN_DEPTH)
-                    .filter { it.isFile && it.extension.lowercase() in setOf("ttf", "otf", "ttc") }
-                    .forEach { systemFontFileIndex.putIfAbsent(normalizeName(it.nameWithoutExtension), it) }
-            }
-        }
         val base = normalizeName(family)
         if (base.isEmpty()) return null
         val boldKeys = listOf("${base}bold", "${base}bd", "${base}b")
         val regularKeys = listOf(base, "${base}regular")
         val keys = if (wantBold) boldKeys + regularKeys else regularKeys
         for (key in keys) {
-            systemFontFileIndex[key]?.let { return it }
+            systemFontFileIndex.find(key)?.let { return it }
         }
         return null
     }
