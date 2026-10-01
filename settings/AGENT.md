@@ -131,6 +131,11 @@ named in `BIBLE_GLOBAL_KEYS`, `SONG_GLOBAL_KEYS`, `STT_GLOBAL_KEYS` and `QA_GLOB
 - **Version 19** moves the four per-translation Bible offsets onto boxes (`migrateBibleOffsetsToBoxes`),
   and **version 20** turns preview groups into one layout (`migratePreviewGroupsToLayout`), leaving
   outputs no group held out of the panel as they were.
+- **Version 21** drops the document's copies of the caption, Q&A, dictionary and subtitle looks
+  (`migrateTopLevelStylingOut`), and `saveSettings` keeps them dropped
+  (`stripProfileOwnedStyling`). The document's `sttSettings`/`qaSettings` save only their
+  `*_GLOBAL_KEYS`, and its `dictionarySettings`/`mediaSettings` are not saved at all. Read those
+  looks from a profile, never from the document.
 
 ## Gates
 

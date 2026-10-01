@@ -2,14 +2,19 @@ package org.churchpresenter.settings
 
 import java.io.File
 import java.nio.file.Files
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 /**
  * Versions 14 and 15: captions, the dictionary card, Q&A, video subtitles and Fit/Fill/Stretch
- * moving from one copy for the install onto every profile.
+ * moving from one copy for the install onto every profile. Version 21: the document's copies of the
+ * first four going, and staying gone on every save.
  *
  * The profile fields are new, so without these steps an existing file decodes cleanly and every
  * profile silently takes the class defaults -- a church with yellow captions and a filled picture
@@ -129,5 +134,76 @@ class ProfileStylingMigrationTest {
             .projectionSettings.outputProfiles.single()
         assertEquals(STTSettings(), bare.sttSettings)
         assertEquals(OutputScaleMode.FIT, bare.pictureScaleMode)
+    }
+
+    /** A version-20 document: the profile carries its own looks, the document a drifted copy. */
+    private val v20 = """
+        {"settingsVersion":20,
+         "sttSettings":{"serverUrl":"http://stt.local","lastConnectedUrl":"http://stt.local","fontSize":80},
+         "qaSettings":{"textColor":"#00FF00","rateLimitCooldownSeconds":45,"votingEnabled":false,"qrCodeMessage":"Hi"},
+         "dictionarySettings":{"wordColor":"#FF00FF"},
+         "mediaSettings":{"textColor":"#00FFFF"},
+         "projectionSettings":{"outputProfiles":[
+            {"id":"a","sttSettings":{"fontSize":42},"qaSettings":{"textColor":"#0000FF"},
+             "dictionarySettings":{"wordColor":"#111111"},"mediaSettings":{"textColor":"#222222"}},
+            {"id":"b"}
+         ]}}
+    """.trimIndent()
+
+    private fun root(raw: String): JsonObject = Json.parseToJsonElement(raw).jsonObject
+
+    @Test
+    fun `version 21 leaves the document only its install-wide keys`() {
+        val stripped = root(SettingsManager().stripProfileOwnedStyling(v20))
+
+        assertEquals(STT_GLOBAL_KEYS, stripped.getValue("sttSettings").jsonObject.keys)
+        assertEquals(QA_GLOBAL_KEYS, stripped.getValue("qaSettings").jsonObject.keys)
+        assertFalse("dictionarySettings" in stripped)
+        assertFalse("mediaSettings" in stripped)
+        assertEquals(root(v20).getValue("projectionSettings"), stripped.getValue("projectionSettings"))
+    }
+
+    @Test
+    fun `version 21 gives a profile without a look the document's before dropping it`() {
+        val settings = decode(v20)
+        val (a, b) = settings.projectionSettings.outputProfiles
+
+        assertEquals(42, a.sttSettings.fontSize, "a keeps its own")
+        assertEquals("#111111", a.dictionarySettings.wordColor)
+        assertEquals(80, b.sttSettings.fontSize, "b had none, so it takes the document's")
+        assertEquals("#FF00FF", b.dictionarySettings.wordColor)
+        assertEquals("#00FFFF", b.mediaSettings.textColor)
+        assertEquals("#00FF00", b.qaSettings.textColor)
+    }
+
+    @Test
+    fun `version 21 keeps the install-wide keys and what the outputs draw`() {
+        val settings = decode(v20)
+        val rendered = settings.resolvedFor(settings.projectionSettings.outputProfiles.first())
+
+        assertEquals("http://stt.local", settings.sttSettings.serverUrl)
+        assertEquals("http://stt.local", settings.sttSettings.lastConnectedUrl)
+        assertEquals(45, settings.qaSettings.rateLimitCooldownSeconds)
+        assertEquals("Hi", settings.qaSettings.qrCodeMessage)
+        assertEquals(42, rendered.sttSettings.fontSize)
+        assertEquals("http://stt.local", rendered.sttSettings.serverUrl)
+        assertEquals("#0000FF", rendered.qaSettings.textColor)
+    }
+
+    @Test
+    fun `a save never writes the document-level looks back`() {
+        val manager = SettingsManager()
+        val settings = manager.migrateAndDecode(v20)
+        manager.saveSettings(settings)
+
+        val saved = root(File(home, ".churchpresenter/settings.json").readText())
+        assertEquals(STT_GLOBAL_KEYS, saved.getValue("sttSettings").jsonObject.keys)
+        assertEquals(QA_GLOBAL_KEYS, saved.getValue("qaSettings").jsonObject.keys)
+        assertFalse("dictionarySettings" in saved)
+        assertFalse("mediaSettings" in saved)
+        val reloaded = SettingsManager().loadSettings()
+        val profile = reloaded.projectionSettings.outputProfiles.first()
+        assertEquals(settings.resolvedFor(profile).sttSettings, reloaded.resolvedFor(profile).sttSettings)
+        assertEquals(settings.projectionSettings.outputProfiles, reloaded.projectionSettings.outputProfiles)
     }
 }

@@ -146,6 +146,7 @@ class SettingsManager {
         16 to ::migrateTitleSlideNumberStyle,
         18 to ::migrateSectionLabelStyle,
         19 to ::migrateBibleOffsetsToBoxes,
+        21 to ::migrateTopLevelStylingOut,
     )
 
     /** The flat song-number field each [SongCreditStyle] property of the title slide's is seeded from. */
@@ -384,9 +385,7 @@ class SettingsManager {
      * it drew before the move. A profile that already carries one -- written by a build that had
      * this, then opened by one that briefly did not -- keeps its own.
      *
-     * The document keeps its copies too: resolution still reads the install-wide keys from them
-     * ([STT_GLOBAL_KEYS], [QA_GLOBAL_KEYS]), and they are what a document downgraded to an older
-     * build falls back on.
+     * The document's copies are removed at version 21 ([migrateTopLevelStylingOut]).
      */
     private fun migrateStylingIntoProfiles(raw: String): String {
         val root = parseSettingsRoot(raw) ?: return raw
@@ -402,6 +401,38 @@ class SettingsManager {
         }
         val newProjection = JsonObject(projection + ("outputProfiles" to JsonArray(seeded)))
         return JsonObject(root + ("projectionSettings" to newProjection)).toString()
+    }
+
+    /**
+     * Schema version 21. The document stops carrying the looks version 14 moved onto the profiles:
+     * nothing draws from them, so all they did was drift from what the outputs actually show.
+     *
+     * Any profile still without its own copy is given the document's first, so none falls back to
+     * the class defaults; then the document's copies go ([stripProfileOwnedStyling]).
+     */
+    private fun migrateTopLevelStylingOut(raw: String): String =
+        stripProfileOwnedStyling(migrateStylingIntoProfiles(raw))
+
+    /**
+     * [raw] without the document-level styling the profiles own: captions and Q&A keep only their
+     * install-wide keys ([STT_GLOBAL_KEYS], [QA_GLOBAL_KEYS]), and the dictionary card and video
+     * subtitles, which have none, are dropped whole. The profiles' own copies are untouched.
+     *
+     * Run on every save as well as by the migration, since the encoder writes every field back.
+     */
+    internal fun stripProfileOwnedStyling(raw: String): String {
+        val root = parseSettingsRoot(raw) ?: return raw
+        val stripped = root.toMutableMap()
+        stripped.keepOnly("sttSettings", STT_GLOBAL_KEYS)
+        stripped.keepOnly("qaSettings", QA_GLOBAL_KEYS)
+        stripped.remove("dictionarySettings")
+        stripped.remove("mediaSettings")
+        return JsonObject(stripped).toString()
+    }
+
+    private fun MutableMap<String, JsonElement>.keepOnly(key: String, keys: Set<String>) {
+        val block = this[key] as? JsonObject ?: return
+        this[key] = JsonObject(block.filterKeys { it in keys })
     }
 
     fun loadSettings(): AppSettings {
@@ -1327,7 +1358,7 @@ class SettingsManager {
     fun saveSettings(settings: AppSettings) {
         cachedSettings = settings
         try {
-            val json = jsonFormat.encodeToString(settings)
+            val json = stripProfileOwnedStyling(jsonFormat.encodeToString(settings))
             // Write to a temp file first, then atomically swap it into place — a process kill
             // mid-write (e.g. during the self-updater's exit race) leaves the temp file
             // incomplete but never touches the live settings.json.
