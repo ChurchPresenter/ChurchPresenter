@@ -945,6 +945,12 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
     maxHeapSize = "1g"
     jvmArgs("-XX:MaxMetaspaceSize=512m")
 
+    // mockk installs its ByteBuddy agent on first use. A JVM that may not attach to itself makes
+    // ByteBuddy spawn a helper process to do it, and under four loaded forks that helper can fail —
+    // taking every mock in the fork down with "Could not self-attach to current VM". Allowing the
+    // self-attach keeps it in-process; the second flag is JDK 21's opt-in for that dynamic load.
+    jvmArgs("-Djdk.attach.allowAttachSelf=true", "-XX:+EnableDynamicAgentLoading")
+
     // JaCoCo instrumentation costs ~15-25% and is only wanted on `check`. `-PfastTest` drops it for
     // the inner loop; ./test-changed.sh passes it.
     if (project.hasProperty("fastTest")) {

@@ -33,6 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -102,6 +103,15 @@ internal const val MEDIA_DISABLED_TRANSPORT_ALPHA = 0.38f
 internal val MEDIA_TRANSPORT_KEY_SIZE = 30.dp
 internal val MEDIA_PLAY_KEY_SIZE = 38.dp
 internal val MEDIA_VOLUME_SLIDER_WIDTH = 150.dp
+
+/**
+ * Whether the tab composes the hidden VLC players behind its preview. Always true in the app.
+ *
+ * The tab's tests turn it off: on a machine with VLC installed those players really open the test's
+ * made-up URL, and VLC's error for it pauses the view model at a moment of its own choosing, partway
+ * through a test. The same reason `vlcAvailable` is a parameter, one level further in.
+ */
+internal val LocalMediaVlcPlayers = staticCompositionLocalOf { true }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -263,8 +273,9 @@ private fun MediaTabScope.MediaPreviewCard(viewModel: MediaViewModel, modifier: 
         val isPresenting =
             presenterManager?.presentingMode?.value == Presenting.MEDIA && presenterManager.showPresenterWindow.value
 
+        val vlcPlayers = LocalMediaVlcPlayers.current
         if (viewModel.isLoaded && viewModel.isAudioFile) {
-            VideoPlayer(viewModel = viewModel, modifier = Modifier.size(0.dp))
+            if (vlcPlayers) VideoPlayer(viewModel = viewModel, modifier = Modifier.size(0.dp))
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
                     stringResource(Res.string.media_audio_continues),
@@ -273,7 +284,9 @@ private fun MediaTabScope.MediaPreviewCard(viewModel: MediaViewModel, modifier: 
                 )
             }
         } else {
-            if (viewModel.isLoaded) SoftwareVideoPlayer(viewModel = viewModel, modifier = Modifier.size(0.dp))
+            if (viewModel.isLoaded && vlcPlayers) {
+                SoftwareVideoPlayer(viewModel = viewModel, modifier = Modifier.size(0.dp))
+            }
 
 
             // The shape of the output this media actually goes out on. Media can be routed to

@@ -17,11 +17,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
+import org.churchpresenter.app.churchpresenter.composables.FontPreviewText
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.LocalFontPreviewFace
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 /**
@@ -33,6 +35,14 @@ import kotlin.test.Test
  * field turning up inside a dozen tab screenshots.
  */
 class SettingsFieldsScreenshotTest {
+
+    /**
+     * The open font picker quotes Genesis 1:1 from whatever Bible an earlier test in this JVM left
+     * loaded, and falls back to its own sample text when there is none — so forget the verses first,
+     * or the picture depends on test order.
+     */
+    @BeforeTest
+    fun forgetPreviewVerses() = FontPreviewText.clear()
 
     private fun field(name: String, width: Dp = 220.dp, content: @Composable () -> Unit) =
         captureComponent(SECTION, name) { Box(Modifier.width(width)) { content() } }

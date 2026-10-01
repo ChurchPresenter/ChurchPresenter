@@ -9,6 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.hasScrollToIndexAction
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
@@ -18,6 +19,8 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.dialogs.SONG_BACKGROUND_COLORS
 import org.churchpresenter.app.churchpresenter.dialogs.SONG_BACKGROUND_PANEL_HEIGHT
 import org.churchpresenter.app.churchpresenter.dialogs.SONG_BACKGROUND_PANEL_WIDTH
+import org.churchpresenter.app.churchpresenter.dialogs.SONG_BACKGROUND_THUMBNAIL_LOADING_TAG
+import org.churchpresenter.app.churchpresenter.dialogs.SONG_BACKGROUND_THUMBNAIL_TAG
 import org.churchpresenter.app.churchpresenter.dialogs.SongBackgroundPanel
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
@@ -111,7 +114,13 @@ class SongBackgroundPanelScreenshotTest {
     @Test
     fun `the pictures category`() = shoot("images", background = DUSK) {
         onNodeWithText(IMAGES).performClick()
-        waitForIdle()
+        // The thumbnails decode on the IO dispatcher, which `waitForIdle` does not wait for.
+        waitUntil("every visible picture's thumbnail is drawn") {
+            onAllNodesWithTag(SONG_BACKGROUND_THUMBNAIL_TAG, useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty() &&
+                onAllNodesWithTag(SONG_BACKGROUND_THUMBNAIL_LOADING_TAG, useUnmergedTree = true)
+                    .fetchSemanticsNodes().isEmpty()
+        }
     }
 
     @Test
