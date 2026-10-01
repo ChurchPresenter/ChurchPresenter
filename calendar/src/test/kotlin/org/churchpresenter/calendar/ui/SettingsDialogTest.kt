@@ -21,7 +21,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.pressKey
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.calendar.CalendarCloudSync
 import org.churchpresenter.calendar.model.CalendarPreferences
 import org.churchpresenter.calendar.model.SECTION_SWATCHES

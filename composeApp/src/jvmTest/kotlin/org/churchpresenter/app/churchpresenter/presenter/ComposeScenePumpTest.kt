@@ -19,11 +19,15 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import java.util.concurrent.atomic.AtomicLong
 
 private const val W = 8
 private const val H = 4
 private const val POLL_MS = 2L
 private const val WAIT_MS = 4_000L
+
+/** No frame seen yet; the pump's elapsed clock never goes negative. */
+private const val UNSET = -1L
 
 /**
  * The frame pump both off-screen outputs run on.
@@ -96,15 +100,16 @@ class ComposeScenePumpTest {
     @Test
     fun `the elapsed clock advances with the frames rather than standing still`() {
         val pump = redPump()
-        val first = AtomicReference<Long?>(null)
-        val later = AtomicReference<Long?>(null)
+        // AtomicLong rather than AtomicReference<Long>: the reference compares boxes by identity.
+        val first = AtomicLong(UNSET)
+        val later = AtomicLong(UNSET)
         pump.start(scope) { _, _, _, elapsed ->
-            if (!first.compareAndSet(null, elapsed) && elapsed > first.get()!!) later.compareAndSet(null, elapsed)
+            if (!first.compareAndSet(UNSET, elapsed) && elapsed > first.get()) later.compareAndSet(UNSET, elapsed)
         }
-        waitFor("a second, later frame") { later.get() != null }
+        waitFor("a second, later frame") { later.get() != UNSET }
         pump.stop()
 
-        assertTrue(later.get()!! > first.get()!!, "an animation driven off this clock has to move")
+        assertTrue(later.get() > first.get(), "an animation driven off this clock has to move")
     }
 
     @Test

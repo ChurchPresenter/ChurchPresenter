@@ -9,6 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * The bundled cross-reference dataset and the parsing that turns it into references.
@@ -100,6 +101,7 @@ class CrossReferenceRepositoryTest {
     }
 
     @Test
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun `a caller arriving mid-load waits for it instead of seeing an empty index`() = runTest {
         // The panel resolves its rows the instant ensureLoaded returns, so a second caller that
         // returned early while the first load was still in flight would render "no cross

@@ -43,7 +43,7 @@ internal fun stripUnsupportedHighlights(xml: XmlObject): Int {
             }
         }
     } finally {
-        cursor.dispose()
+        cursor.close()
     }
     return removed
 }
@@ -58,7 +58,7 @@ private fun hasSrgbColour(highlight: XmlObject): Boolean {
         } while (cursor.toNextSibling())
         return false
     } finally {
-        cursor.dispose()
+        cursor.close()
     }
 }
 

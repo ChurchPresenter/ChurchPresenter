@@ -5,6 +5,12 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+/** Reads settings the way the app does, ignoring keys this build does not know. */
+private val lenientJson = Json { ignoreUnknownKeys = true }
+
+/** Writes settings the way the app does, defaults included. */
+private val defaultsJson = Json { encodeDefaults = true }
+
 /**
  * The song number is drawn from its own stored style now; it used to borrow the title's.
  *
@@ -85,9 +91,9 @@ class SongNumberStyleMigrationTest {
             lowerThirdLookAheadNextHorizontalAlignment = Constants.LEFT,
         )
 
-        val restored = Json { ignoreUnknownKeys = true }.decodeFromString(
+        val restored = lenientJson.decodeFromString(
             SongSettings.serializer(),
-            Json { encodeDefaults = true }.encodeToString(SongSettings.serializer(), styled),
+            defaultsJson.encodeToString(SongSettings.serializer(), styled),
         )
 
         assertEquals(styled, restored)
@@ -97,7 +103,7 @@ class SongNumberStyleMigrationTest {
     fun `a settings file written before the new fields existed still reads`() {
         val older = """{"lyricsFontSize":88}"""
 
-        val decoded = Json { ignoreUnknownKeys = true }.decodeFromString(SongSettings.serializer(), older)
+        val decoded = lenientJson.decodeFromString(SongSettings.serializer(), older)
 
         assertEquals(88, decoded.lyricsFontSize)
         assertEquals(Constants.TEXT_TRANSFORM_NONE, decoded.lyricsTransform)

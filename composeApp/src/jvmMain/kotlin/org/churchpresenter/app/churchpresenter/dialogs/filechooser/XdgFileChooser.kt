@@ -277,7 +277,7 @@ object XdgFileChooser : FileChooser() {
                     // An unanswered method call fails on dbus-java's own reply timeout, so only the
                     // wait below is open-ended — as it must be, since it is the operator deciding.
                     val handle = fileChooser.dbusMethod("", title, options)
-                    extraResponsePath(requestPath, handle?.path)?.let { actualPath ->
+                    extraResponsePath(requestPath, handle.path)?.let { actualPath ->
                         conn.addGenericSigHandler(responseMatchRule(actualPath)) { signal ->
                             response.complete(parseResponse(signal.parameters))
                         }

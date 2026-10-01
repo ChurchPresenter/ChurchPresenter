@@ -7,6 +7,9 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
+/** Reads settings the way the app does, ignoring keys this build does not know. */
+private val lenientJson = Json { ignoreUnknownKeys = true }
+
 /**
  * How big each zone is, and what moving one does to the others.
  *
@@ -223,7 +226,7 @@ class StageMonitorZoneSizeTest {
     @Test
     fun `zone sizes survive a save and a load`() {
         val resized = classic.withZoneWidth(StageMonitorStyleZone.C, 50f).withZoneHeight(StageMonitorStyleZone.A, 75f)
-        val json = Json { ignoreUnknownKeys = true }
+        val json = lenientJson
 
         val loaded = json.decodeFromString(
             StageMonitorSettings.serializer(),
@@ -237,7 +240,7 @@ class StageMonitorZoneSizeTest {
 
     @Test
     fun `settings written before zone sizing existed open at the catalog shape`() {
-        val old = Json { ignoreUnknownKeys = true }
+        val old = lenientJson
             .decodeFromString(StageMonitorSettings.serializer(), """{"layout":"CLASSIC"}""")
 
         assertEquals(StageMonitorZoneSizes.of(StageMonitorLayout.CLASSIC), old.layoutSizes())

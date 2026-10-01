@@ -100,7 +100,7 @@ class ElementMovesTest {
             Adjustable(ALL_TRANSLATIONS) {},
         )
         assertTrue(model.positions!!.moved)
-        model.positions!!.onReset()
+        model.positions.onReset()
         assertFalse(draft.bibleSettings.translations.single().movedOn(false))
         assertFalse(draft.bibleSettings.allTranslationStyle!!.movedOn(false))
     }

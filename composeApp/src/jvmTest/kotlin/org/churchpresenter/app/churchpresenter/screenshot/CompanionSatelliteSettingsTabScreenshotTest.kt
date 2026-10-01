@@ -270,7 +270,7 @@ class CompanionSatelliteSettingsTabScreenshotTest {
             val reader = socket.getInputStream().bufferedReader()
             val writer = socket.getOutputStream().bufferedWriter()
             if (registration == Registration.STALL) {
-                while (reader.readLine() != null) Unit
+                reader.readLines() // hold the connection until the client hangs up
                 return
             }
             writer.write("BEGIN CompanionVersion=3.0 ApiVersion=1.7.0\n")
@@ -281,7 +281,7 @@ class CompanionSatelliteSettingsTabScreenshotTest {
                 else "ADD-DEVICE DEVICEID=$DEVICE_ID MESSAGE=\"Surface not found in Companion\"\n"
             )
             writer.flush()
-            while (reader.readLine() != null) Unit
+            reader.readLines() // hold the connection until the client hangs up
         }
 
         fun stop() {

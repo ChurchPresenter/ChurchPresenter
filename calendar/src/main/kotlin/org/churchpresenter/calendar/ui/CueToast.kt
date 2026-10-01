@@ -125,7 +125,7 @@ fun CueToast(event: FiredCue, onDismiss: () -> Unit, modifier: Modifier = Modifi
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                if (payload != null && cue != null) ToastTarget(payload, cue.plays)
+                if (payload != null) ToastTarget(payload, cue.plays)
                 if (event.skipped) {
                     Text(
                         text = stringResource(Res.string.calendar_cue_skipped_reason),

@@ -33,6 +33,7 @@ class SafeClipboardTest {
 
         override suspend fun setClipEntry(clipEntry: ClipEntry?): Unit = error(WINDOWS_MESSAGE)
 
+        @Deprecated("Use platform-specific extension to get platform reference.")
         override val nativeClipboard: Any get() = "native"
     }
 
@@ -43,6 +44,7 @@ class SafeClipboardTest {
             setCalls++
             entry = clipEntry
         }
+        @Deprecated("Use platform-specific extension to get platform reference.")
         override val nativeClipboard: Any get() = "native"
     }
 
@@ -86,6 +88,7 @@ class SafeClipboardTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `the native clipboard is handed over as-is`() {
         // Wrapping it would misrepresent what the caller was given; the failure this class exists
         // for happens on use, not on access.

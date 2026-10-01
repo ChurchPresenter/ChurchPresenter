@@ -51,6 +51,9 @@ import kotlin.math.abs
 import kotlin.test.assertTrue
 import java.nio.file.Path as NioPath
 
+/** Reads settings the way the app does, ignoring keys this build does not know. */
+private val lenientJson = Json { ignoreUnknownKeys = true }
+
 /**
  * The System settings tab: every button clicked, and everything it displays asserted.
  *
@@ -157,7 +160,6 @@ class SystemSettingsTabTest {
         }
         every { JOptionPane.showMessageDialog(any(), any(), any(), any()) } answers {
             told += secondArg<Any?>().toString()
-            Unit
         }
     }
 
@@ -1001,7 +1003,7 @@ class SystemSettingsTabTest {
         assertTrue(written.exists(), "the export lands on a .json file even when the chosen name had none")
         val json = written.readText()
         assertTrue("\n" in json, "the export is pretty-printed for humans")
-        Json { ignoreUnknownKeys = true }.decodeFromString<AppSettings>(json)   // throws if malformed
+        lenientJson.decodeFromString<AppSettings>(json)   // throws if malformed
         assertEquals("Settings exported successfully.", told.single())
     }
 

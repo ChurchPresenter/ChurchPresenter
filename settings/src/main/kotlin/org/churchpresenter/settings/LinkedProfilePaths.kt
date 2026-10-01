@@ -116,7 +116,7 @@ internal fun setAt(root: JsonObject, path: List<PathStep>, value: JsonElement): 
         rest.isEmpty() -> value
         current != null && current !is JsonObject -> null
         // A key the object does not have yet -- an entry of a map the master left empty -- is added.
-        else -> setAt(current as? JsonObject ?: JsonObject(emptyMap()), rest, value)
+        else -> setAt(current ?: JsonObject(emptyMap()), rest, value)
     }
     return replaced?.let { JsonObject(root + (step.key to it)) }
 }

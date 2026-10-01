@@ -248,7 +248,7 @@ object DetectionLogger {
             // (Ps 23 = "Господь — Пастырь мой"). Anything joining this log to the app's ground truth
             // or to a replay must therefore compare the module-independent canonical code, not the
             // numbers above — so log it explicitly rather than making every consumer infer it.
-            append("\"canonicalStart\":\"").append(esc(r.canonicalCodeStart ?: "")).append("\",")
+            append("\"canonicalStart\":\"").append(esc(r.canonicalCodeStart)).append("\",")
             append("\"canonicalEnd\":\"").append(esc(r.canonicalCodeEnd ?: "")).append("\",")
             event.tier?.let { append("\"tier\":").append(it).append(',') }
             event.bm25Score?.let { append("\"bm25Score\":").append(it).append(',') }

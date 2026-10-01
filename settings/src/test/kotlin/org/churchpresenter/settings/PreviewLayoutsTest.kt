@@ -145,7 +145,7 @@ class PreviewLayoutsTest {
     fun `groups that are all hidden become one empty area, as they drew nothing`() {
         val layout = layoutFromGroups(listOf(PreviewGroup(id = "g", members = listOf(bs0), hidden = true)), name = "")
         assertTrue(layout?.root?.isLeaf == true)
-        assertEquals(emptyList(), layout?.root?.outputs())
+        assertEquals(emptyList(), layout.root.outputs())
     }
 
     @Test

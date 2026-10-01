@@ -173,6 +173,9 @@ private const val MAX_ERROR_CHARS = 200
 private const val CLIENT_KEY_ERROR = "\"client_key\""
 private const val BANNED_ERROR = "\"banned\""
 
+/** Reads the client-key reply, which may carry fields this build does not know. */
+private val lenientJson = Json { ignoreUnknownKeys = true }
+
 /** What a non-2xx reply means; [registering] because 409 is "instance id taken" only on register. */
 private fun failureFor(reply: RelayReply, registering: Boolean): RelayFailure = when (reply.status) {
     HTTP_UNAUTHORIZED ->
@@ -192,7 +195,7 @@ fun fetchClientKey(url: String, transport: RelayTransport): String? {
     }
     if (reply.status !in 200..299) return null
     return try {
-        val response = Json { ignoreUnknownKeys = true }.decodeFromString(ClientKeyResponse.serializer(), reply.body)
+        val response = lenientJson.decodeFromString(ClientKeyResponse.serializer(), reply.body)
         response.clientKey.takeIf { it.isNotBlank() }
     } catch (_: IllegalArgumentException) {
         null

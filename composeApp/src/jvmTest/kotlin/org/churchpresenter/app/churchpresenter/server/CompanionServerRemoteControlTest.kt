@@ -587,7 +587,9 @@ class CompanionServerRemoteControlTest {
         withTimeoutOrNull(quietMs + 10_000) {
             client.webSocket(urlString = "ws://127.0.0.1:$port${Constants.ENDPOINT_WS}") {
                 // Drain the connect snapshot first so it is not mistaken for a reply.
-                while (withTimeoutOrNull(quietMs) { incoming.receive() } != null) Unit
+                do {
+                    val snapshot = withTimeoutOrNull(quietMs) { incoming.receive() }
+                } while (snapshot != null)
                 frames.forEach { send(Frame.Text(it)) }
                 while (true) {
                     val frame = withTimeoutOrNull(quietMs) { incoming.receive() } ?: break

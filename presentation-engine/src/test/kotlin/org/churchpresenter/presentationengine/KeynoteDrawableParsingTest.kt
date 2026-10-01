@@ -290,7 +290,7 @@ class KeynoteDrawableParsingTest {
         )
         val slide = scene.slides.single()
         assertNotNull(slide.gateReason, "an undrawable image must gate rather than leave a hole")
-        assertTrue(slide.gateReason!!.contains("heic"), "the reason names the format: ${slide.gateReason}")
+        assertTrue(slide.gateReason.contains("heic"), "the reason names the format: ${slide.gateReason}")
     }
 
     @Test

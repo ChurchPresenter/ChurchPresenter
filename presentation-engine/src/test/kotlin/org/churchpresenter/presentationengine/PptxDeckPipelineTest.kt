@@ -57,7 +57,7 @@ class PptxDeckPipelineTest {
             val notesSlide = ppt.getNotesSlide(slide)
             val placeholder = notesSlide.placeholders.filterIsInstance<XSLFTextShape>()
                 .firstOrNull { it.textType?.name?.contains("BODY") == true }
-                ?: notesSlide.placeholders.getOrNull(1) as? XSLFTextShape
+                ?: notesSlide.placeholders.getOrNull(1)
             placeholder?.text = notes
             file.outputStream().use { ppt.write(it) }
         }
