@@ -3,7 +3,6 @@
     <string name="mode">模式</string>
     <string name="scope">范围</string>
     <string name="title">标题</string>
-    <string name="number">编号</string>
     <string name="go_live">上屏</string>
     <string name="add_to_schedule">添加到程序单</string>
     <string name="copy_verse">复制经文</string>
@@ -12,7 +11,6 @@
     <string name="search">搜索</string>
     <string name="bible_smart_search_hint">经文出处或内容——例如 约 3:16、太 1，或某个词</string>
     <string name="bible_search_mode_auto">自动</string>
-    <string name="bible_search_mode_reference">出处</string>
     <string name="bible_search_mode_text">经文</string>
     <string name="bible_search_mode_tooltip">点击切换——自动：识别出处则跳转，其余作搜索。出处：仅导航。经文：始终搜索经文内容。</string>
     <string name="bible_verse_selection_hint">Ctrl+点击可切换选择，Shift+点击可选择范围</string>
@@ -82,17 +80,11 @@
     <string name="bible_cross_references_close">关闭面板</string>
     <string name="bible_cross_references_dismiss_hint">按 Esc 关闭</string>
     <string name="menu_file">文件</string>
-    <string name="menu_new_schedule">新建程序单</string>
-    <string name="menu_open_schedule">打开程序单</string>
-    <string name="menu_save_schedule">保存程序单</string>
     <string name="menu_save_schedule_as">程序单另存为…</string>
     <string name="menu_close_schedule">关闭程序单</string>
     <string name="menu_exit">退出</string>
     <string name="file_chooser_save_schedule">程序单另存为</string>
-    <string name="file_chooser_open_schedule">打开程序单</string>
     <string name="file_filter_schedule">Church Presenter 程序单 (*.cps)</string>
-    <string name="menu_schedule">程序单</string>
-    <string name="menu_add_to_schedule">添加到程序单</string>
     <string name="menu_remove_from_schedule">从程序单移除</string>
     <string name="menu_clear_schedule">清空程序单</string>
 
@@ -111,7 +103,6 @@
     <string name="instance_link_description">跟随网络中另一台 ChurchPresenter 实例——在此镜像它的上屏内容，也可以选择向它的程序单添加项目。</string>
     <string name="instance_link_host">主机</string>
     <string name="instance_link_host_hint">例如 192.168.1.10</string>
-    <string name="instance_link_port">端口</string>
     <string name="instance_link_autoconnect">启动时自动连接</string>
     <string name="instance_link_reconnect_delay">最短重连间隔</string>
     <string name="instance_link_reconnect_delay_hint">链接断开后重试前的最短等待时间。反复失败会自动延长间隔。</string>
@@ -466,15 +457,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">默认</string>
-    <string name="background_color_option">颜色</string>
-    <string name="background_image_option">图片</string>
     <string name="background_video_option">循环视频</string>
     <string name="background_transparent_option">透明</string>
     <string name="background_follow_default_option">跟随默认</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">网页</string>
-    <string name="projection_content_background">背景</string>
     <string name="projection_content_lt_background">字幕条背景</string>
     <string name="browser_source_resolution">分辨率</string>
     <string name="browser_source_fps">最大 FPS</string>
@@ -556,7 +544,6 @@
     <string name="tooltip_schedule_zoom_out">缩小</string>
     <string name="tooltip_add_to_schedule">添加到程序单</string>
     <string name="tooltip_clear_display">清除画面</string>
-    <string name="remote_action_clear_display">清除画面</string>
     <string name="schedule_add_files_title">向程序单添加文件</string>
     <string name="tooltip_toggle_displays">切换投放窗口</string>
     <string name="tooltip_settings">设置</string>
@@ -578,7 +565,6 @@
     <string name="schedule_density_compact">紧凑</string>
     <string name="schedule_density_normal">标准</string>
     <string name="schedule_density_detailed">详细</string>
-    <string name="schedule_kind_lower_third">字幕条</string>
     <string name="tooltip_schedule_options">程序单选项</string>
     <string name="schedule_show_buttons_under_title">在标题下方显示按钮</string>
     <string name="schedule_option_item_count">项目数量</string>
@@ -589,7 +575,6 @@
     <string name="edit_label">编辑标签</string>
     <string name="label_text">标签文字</string>
     <string name="text_color">文字颜色</string>
-    <string name="background_color_label">背景颜色</string>
     <string name="enter_label_text">输入标签文字…</string>
 
     <!-- Pictures Tab Strings -->
@@ -619,7 +604,6 @@
     <string name="animation_slide_left">向左滑动</string>
     <string name="animation_slide_right">向右滑动</string>
     <string name="animation_none">无</string>
-    <string name="milliseconds_suffix">毫秒</string>
     <string name="pictures_arrow_key_hint">%1$s 上一张/下一张图片  ·  %2$s 上下移动行</string>
     <string name="presentation_arrow_key_hint">%1$s —— 上一步/下一步与幻灯片  ·  %2$s —— 播放/暂停  ·  %3$s —— 黑屏</string>
     <string name="pictures_reorder_hint">按住 Shift 拖动缩略图可重新排序</string>
@@ -682,14 +666,10 @@
     <string name="content_bible_background">圣经背景</string>
     <string name="content_songs_background">歌曲背景</string>
     <string name="content_pictures">图片/演示文稿</string>
-    <string name="content_media">媒体</string>
-    <string name="content_streaming">字幕条</string>
     <string name="content_announcements">通告</string>
     <string name="display_mode">显示模式</string>
-    <string name="display_fullscreen">全屏</string>
     <string name="display_lower_third">字幕条</string>
     <string name="full_screen">全屏</string>
-    <string name="lower_third_size">字幕条</string>
     <string name="identify_screen">识别</string>
     <string name="projection_target_display">显示器</string>
     <string name="projection_auto_display">自动</string>
@@ -765,7 +745,6 @@
     <string name="settings_import_failed">导入设置失败。文件可能无效。</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">媒体</string>
     <string name="media_local_file">本地文件</string>
     <string name="media_network_url">网络 URL</string>
     <string name="media_url_placeholder">输入 URL (http://、rtsp://、…)</string>
@@ -809,7 +788,6 @@
     <string name="center_left">左侧居中</string>
     <string name="center_right">右侧居中</string>
     <string name="bottom_center">底部居中</string>
-    <string name="announcement_background_color_label">背景颜色</string>
     <string name="transparent_default">透明（默认）</string>
     <string name="announcement_animation">动画</string>
     <string name="anim_slide_from_left">从左侧滑入</string>
@@ -882,7 +860,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">添加到程序单</string>
     <string name="web_go_live">上屏</string>
     <string name="web_bookmark_add">添加书签</string>
     <string name="web_bookmark_remove">移除书签</string>
@@ -946,7 +923,6 @@
     <string name="canvas_shape_fill_color">填充</string>
     <string name="canvas_shape_stroke_width">描边宽度</string>
     <string name="canvas_rename_scene">重命名</string>
-    <string name="canvas_remove_scene">移除</string>
     <string name="canvas_add_source">添加源</string>
     <string name="canvas_delete_source">删除源</string>
     <string name="canvas_source_move_forward">上移一层</string>
@@ -974,7 +950,6 @@
     <string name="canvas_render_height">高度</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">自定义 CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">选择图片</string>
     <string name="canvas_select_video_title">选择视频</string>
     <string name="canvas_image_files">图片文件</string>
@@ -986,7 +961,6 @@
     <string name="canvas_qr_type_sms">短信</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">时钟</string>
     <string name="canvas_clock_mode_countdown">倒计时</string>
     <string name="canvas_clock_mode_count_up">正计时</string>
     <string name="canvas_decklink_io_warning">此设备当前用于输出。不支持同时输入输出的设备可能无法用作输入。</string>
@@ -1004,7 +978,6 @@
     <string name="canvas_text_curve">弧度</string>
     <string name="canvas_letter_spacing">字间距</string>
     <string name="canvas_source_qrcode">二维码</string>
-    <string name="canvas_source_camera">摄像头</string>
     <string name="canvas_source_screen_capture">屏幕捕捉</string>
     <string name="canvas_source_bible">圣经</string>
     <string name="canvas_bible_version">圣经译本</string>
@@ -1017,7 +990,6 @@
     <string name="canvas_bible_ref_color">出处颜色</string>
     <string name="canvas_verse_style">经文样式</string>
     <string name="canvas_reference_style">出处样式</string>
-    <string name="canvas_text_color">文字颜色</string>
     <string name="canvas_text_bg_color">背景颜色</string>
     <string name="canvas_clock_mode">模式</string>
     <string name="canvas_clock_format">格式</string>
@@ -1042,7 +1014,6 @@
     <string name="canvas_camera_format">视频格式</string>
     <string name="canvas_camera_format_auto">自动（默认）</string>
     <string name="canvas_camera_connection">视频接口</string>
-    <string name="canvas_camera_mode">模式</string>
     <string name="canvas_camera_mode_auto">自动</string>
     <string name="canvas_capture_x">捕捉 X</string>
     <string name="canvas_capture_y">捕捉 Y</string>
@@ -1053,9 +1024,7 @@
     <string name="canvas_capture_mode_window">窗口</string>
     <string name="canvas_capture_refresh_windows">刷新窗口列表</string>
     <string name="canvas_capture_interval">捕捉间隔</string>
-    <string name="canvas_placeholder_qr">二维码</string>
     <string name="canvas_placeholder_camera">摄像头：%1$s</string>
-    <string name="canvas_placeholder_camera_default">摄像头</string>
     <string name="canvas_placeholder_screen_capture">屏幕捕捉</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1177,7 +1146,6 @@
     <string name="remote_activity_removed_from_schedule">已从程序单移除</string>
     <string name="remote_activity_projected">已投放（上屏）</string>
     <string name="remote_activity_presentation_connect">已连接到演示文稿遥控</string>
-    <string name="remote_activity_presentation_connect_detail">现已连接</string>
     <string name="remote_activity_qa_admin_connect">已连接到问答管理</string>
     <string name="remote_activity_qa_admin_connect_detail">现已连接</string>
     <string name="remote_activity_presented">正在投放</string>
@@ -1217,7 +1185,6 @@
     <string name="instance_link_primary_badge">主机 — 已连接 %1$d 个从机</string>
     <string name="client_label_placeholder">输入一个易记的名称…</string>
     <string name="client_label_edit_tooltip">设置易记名称</string>
-    <string name="client_label_save">保存</string>
     <string name="client_label_cancel">取消</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1338,7 +1305,6 @@
     <string name="system_storage_subtitle">Church Presenter 在哪里查找您的内容</string>
     <string name="system_storage_linked_count">已链接 %1$d 个</string>
     <string name="system_storage_needs_attention_count">%1$d 个需要处理</string>
-    <string name="system_storage_status_not_set">未设置</string>
     <string name="system_storage_status_not_found">未找到文件夹</string>
     <string name="system_storage_status_read_only">只读</string>
     <string name="system_storage_status_linked">已链接</string>
@@ -1380,7 +1346,6 @@
     <string name="show_song_number_before_title">在标题前显示诗歌编号</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">舞台监视器</string>
     <string name="general">常规</string>
     <string name="display_stage_monitor">舞台监视器</string>
     <string name="stage_monitor_quadrant_next">下一张</string>
@@ -1465,7 +1430,6 @@
     <string name="qa_confirm_go_live">确认上屏</string>
     <string name="qa_add_question_hint">添加问题…</string>
     <string name="qa_edit_question_hint">编辑问题文字…</string>
-    <string name="qa_delete_question">删除</string>
     <string name="qa_confirm_delete_prompt">要删除吗？</string>
     <string name="qa_submitter_device">设备：%1$s</string>
     <string name="qa_public_access">公开访问</string>
@@ -1502,14 +1466,11 @@
     <string name="stt_live_preview">实时预览</string>
     <string name="stt_not_connected">未连接。请输入 STT 服务器网址并点击“连接”。</string>
     <string name="stt_waiting_for_transcription">正在等待转写…</string>
-    <string name="stt_transcription_label">转写</string>
     <string name="stt_translation_label">翻译</string>
     <string name="stt_settings_dialog_title">STT 显示设置</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">CCLI 报表</string>
-    <string name="ccli_tab_songs">诗歌</string>
-    <string name="ccli_tab_bible">圣经</string>
     <string name="ccli_tab_activity">活动</string>
     <string name="ccli_songs_summary">%1$d 首不同诗歌 · 共 %2$d 次</string>
     <string name="ccli_bible_summary">%1$d 节不同经文 · 共 %2$d 次</string>
@@ -1520,7 +1481,6 @@
     <string name="ccli_activity_title">各时期的投放次数</string>
     <string name="ccli_from">从：</string>
     <string name="ccli_to">到：</string>
-    <string name="ccli_legend_songs">诗歌</string>
     <string name="ccli_legend_bible">圣经经文</string>
     <string name="ccli_stat_songs_presented">已投放的诗歌</string>
     <string name="ccli_stat_bible_verses">圣经经文</string>
@@ -1534,7 +1494,6 @@
     <string name="ccli_col_first">首次</string>
     <string name="ccli_col_last">最近</string>
     <string name="ccli_col_verse">经节</string>
-    <string name="ccli_col_bible">圣经</string>
     <string name="ccli_export_csv">导出 CCLI CSV</string>
     <string name="ccli_export_xls">导出 XLS</string>
     <string name="ccli_exported_success">报表已成功导出。</string>
@@ -1615,7 +1574,6 @@
     <string name="obs_mode_bible">圣经</string>
     <string name="obs_mode_songs">诗歌</string>
     <string name="obs_mode_pictures">图片</string>
-    <string name="obs_mode_presentation">演示文稿</string>
     <string name="obs_mode_media">媒体</string>
     <string name="obs_mode_lower_third">下三分之一</string>
     <string name="obs_mode_announcements">通知</string>
@@ -1810,7 +1768,6 @@
     <string name="companion_satellite_no_host">请在“设置 → Companion Satellite”中填写 Companion 主机后再连接。</string>
     <string name="companion_satellite_status_connecting">正在连接…</string>
     <string name="companion_satellite_status_disconnected">已断开</string>
-    <string name="companion_satellite_status_error">错误：%1$s</string>
     <string name="companion_satellite_connection_name">名称</string>
     <string name="companion_satellite_product_name">产品名称</string>
     <string name="companion_satellite_reconnect_delay">重连延迟（ms）</string>
@@ -1874,7 +1831,6 @@
     <string name="bible_engine_detect">识别经文</string>
     <string name="bible_engine_run_local">在本机运行引擎</string>
     <string name="bible_engine_host">引擎主机</string>
-    <string name="bible_engine_port">端口</string>
     <string name="stt_help_dev_mode">协助开发者——在圣经选项卡上显示实时反馈按钮（经段不对 / 跳得太早 / 漏掉的经段）</string>
     <string name="dictionary_back">后退</string>
     <string name="dictionary_forward">前进</string>
@@ -1963,7 +1919,6 @@
     <string name="font_category_serif">衬线</string>
     <string name="font_category_mono">等宽</string>
     <string name="font_category_display">展示</string>
-    <string name="font_preview">预览</string>
     <string name="font_preview_sample">所选字体的示例文本</string>
     <string name="font_warning_no_cyrillic">%1$s 没有西里尔字形 — 西里尔文经文将在屏幕上以其他字体显示。</string>
     <string name="font_warning_no_hebrew">%1$s 没有希伯来字形 — 希伯来文将在屏幕上以其他字体显示。</string>
@@ -1973,7 +1928,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">删除线</string>
     <string name="bible_custom_name">名称</string>
-    <string name="bible_custom_abbreviation">缩写</string>
     <string name="bible_translations">译本</string>
     <string name="bible_miscellaneous">其他</string>
     <string name="bible_font">字体</string>
@@ -1988,10 +1942,7 @@
     <string name="bible_preview_sample_book">约翰福音</string>
     <string name="bible_preview_no_translations">添加译本后即可在此查看</string>
     <string name="song_element_number">编号</string>
-    <string name="song_element_title">标题</string>
     <string name="song_element_lyrics">歌词</string>
-    <string name="song_element_author">作词</string>
-    <string name="song_element_composer">作曲</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">速度</string>
     <string name="song_target_title_slide">标题幻灯片</string>
@@ -2004,7 +1955,6 @@
     <string name="song_chunk">分段</string>
     <string name="song_language_scope">语言</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">背景</string>
     <string name="song_background_full_screen">全屏</string>
     <string name="song_background_lower_third">下三分之一</string>
     <string name="song_background_inherit">继承</string>
@@ -2019,7 +1969,6 @@
     <string name="song_background_your_color">你的颜色</string>
     <string name="song_background_browse">浏览…</string>
     <string name="song_background_look">外观</string>
-    <string name="song_background_preset_none">无</string>
     <string name="song_background_preset_soft">柔和</string>
     <string name="song_background_preset_legible">清晰</string>
     <string name="song_background_preset_cinema">电影</string>
@@ -2040,7 +1989,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">背景</string>
     <string name="background_group_defaults">默认</string>
-    <string name="background_scope_default">默认</string>
     <string name="background_scope_default_lower_third">默认字幕条</string>
     <string name="background_scope_default_meta">当圣经或歌曲设为“默认”时</string>
     <string name="background_scope_default_lower_third_meta">当字幕条设为“默认”时</string>
@@ -2049,16 +1997,13 @@
     <string name="background_following_default">跟随默认</string>
     <string name="background_use_default">使用默认</string>
     <string name="background_set_explicitly">为此画面单独设置</string>
-    <string name="background_type_caption">类型</string>
     <string name="background_color_caption">颜色</string>
     <string name="background_image_file">图片文件</string>
     <string name="background_video_file">视频文件</string>
-    <string name="background_opacity_caption">不透明度</string>
     <string name="background_above_band_caption">条带上方</string>
     <string name="background_above_band_fill">填充颜色</string>
     <string name="background_above_band_opacity">填充不透明度</string>
     <string name="quick_background_reset">恢复正常</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · 在设置中管理</string>
     <string name="quick_backgrounds">快捷背景</string>
     <string name="quick_backgrounds_help">预览面板随手可取的背景。点击方块选择它显示的内容，拖动可更改对应的快捷键。在聚会中选用会覆盖所有屏幕，直到你恢复正常；这里不会有任何改动。</string>
@@ -2084,16 +2029,10 @@
     <string name="output_profile_swap_menu_tooltip">切换输出配置文件</string>
     <string name="output_profile_new_name_default">新配置文件</string>
     <string name="output_profile_empty_state">创建一个配置文件以开始设置样式</string>
-    <string name="customize_bible">圣经</string>
-    <string name="customize_songs">歌曲</string>
     <string name="customize_group_verse_text">经文文本</string>
     <string name="customize_group_reference">出处</string>
     <string name="customize_background_type">类型</string>
-    <string name="customize_type_color">颜色</string>
     <string name="customize_type_image">图片</string>
-    <string name="customize_type_video">视频</string>
-    <string name="customize_type_default">默认</string>
-    <string name="customize_type_gradient">渐变</string>
     <string name="customize_show_abbreviation">缩写</string>
     <string name="customize_background_opacity">不透明度</string>
     <string name="slate_theme">石板主题</string>
@@ -2139,7 +2078,6 @@
     <string name="song_lottie_unsupported_note">模板决定版式和标题的位置。下三分之一样式设置字体、大小、颜色、对齐、字间距、大小写和阴影；文字背景、下划线、删除线、词间距、下一段预览和和弦不适用。</string>
     <string name="bible_lottie_unsupported_note">模板决定版式、经文出处的位置以及两种语言如何共用字幕条。下三分之一样式设置字体、大小、颜色、对齐、字间距、大小写和阴影；文字背景、下划线、删除线和词间距不适用。</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">描边</string>
     <string name="tooltip_outline_options">描边选项</string>
     <string name="text_outline">描边</string>
     <string name="text_outline_width">宽度</string>
@@ -2207,7 +2145,6 @@
     <string name="add_ndi_output">添加输出</string>
     <string name="ndi_output_numbered">NDI 输出 %1$d</string>
     <string name="preview_output">预览输出</string>
-    <string name="output_resolution">分辨率</string>
     <string name="output_resolution_custom">自定义…</string>
     <string name="output_resolution_custom_title">自定义分辨率</string>
     <string name="output_resolution_width">宽度</string>
@@ -2311,7 +2248,6 @@
     <string name="calendar_sync_description">整周都可以通过移动应用规划聚会，即使这台电脑处于关机状态。这台电脑始终是权威数据源。</string>
     <string name="calendar_sync_enable">将日历与手机同步</string>
     <string name="calendar_sync_relay_url">中继</string>
-    <string name="calendar_sync_status_off">关闭</string>
     <string name="calendar_sync_status_unpaired">尚未注册 — 首次开启同步时，这台电脑会向中继注册</string>
     <string name="calendar_sync_status_syncing">正在同步…</string>
     <string name="calendar_sync_status_synced">已同步 %1$s</string>

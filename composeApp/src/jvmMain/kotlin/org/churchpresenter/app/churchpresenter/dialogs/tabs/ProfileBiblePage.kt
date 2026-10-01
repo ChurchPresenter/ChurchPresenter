@@ -7,7 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.content_bible_translations_all
-import churchpresenter.composeapp.generated.resources.customize_bible
+import churchpresenter.composeapp.generated.resources.bible
 import churchpresenter.composeapp.generated.resources.customize_group_reference
 import churchpresenter.composeapp.generated.resources.customize_group_verse_text
 import churchpresenter.composeapp.generated.resources.customize_show_abbreviation
@@ -74,7 +74,7 @@ internal fun ProfileBiblePage(
     val edit = BibleEdit(draft.bibleSettings, profile, translationIndex, element, lowerThird, onSettingsChange)
     ContentBackgroundGroup(
         scope = if (lowerThird) BackgroundScope.BIBLE_LOWER_THIRD else BackgroundScope.BIBLE,
-        contentLabel = stringResource(Res.string.customize_bible),
+        contentLabel = stringResource(Res.string.bible),
         draft = draft,
         profile = profile,
         onProfileChange = onProfileChange,

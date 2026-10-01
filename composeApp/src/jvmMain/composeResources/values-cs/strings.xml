@@ -3,7 +3,6 @@
     <string name="mode">Režim</string>
     <string name="scope">Rozsah</string>
     <string name="title">Název</string>
-    <string name="number">Číslo</string>
     <string name="go_live">Zobrazit</string>
     <string name="add_to_schedule">Přidat do programu</string>
     <string name="no_lyrics_available">Pro tuto píseň nejsou k dispozici texty</string>
@@ -67,18 +66,12 @@
     <string name="copy_verse">Kopírovat verš</string>
     <string name="announcements">Oznámení</string>
     <string name="menu_file">Soubor</string>
-    <string name="menu_new_schedule">Nový program</string>
-    <string name="menu_open_schedule">Otevřít program</string>
-    <string name="menu_save_schedule">Uložit program</string>
     <string name="menu_save_schedule_as">Uložit jako...</string>
     <string name="file_chooser_save_schedule">Uložit program jako</string>
-    <string name="file_chooser_open_schedule">Otevřít program</string>
     <string name="file_filter_schedule">Program Church Presenter (*.cps)</string>
     <string name="menu_close_schedule">Zavřít program</string>
     <string name="menu_exit">Ukončit</string>
 
-    <string name="menu_schedule">Program</string>
-    <string name="menu_add_to_schedule">Přidat do programu</string>
     <string name="menu_remove_from_schedule">Odebrat z programu</string>
     <string name="menu_clear_schedule">Vymazat program</string>
 
@@ -209,7 +202,6 @@
     <string name="label_text">Text štítku</string>
     <string name="enter_label_text">Zadejte text štítku</string>
     <string name="text_color">Barva textu</string>
-    <string name="background_color_label">Barva pozadí</string>
     <string name="tooltip_remove">Odebrat</string>
     <string name="tooltip_go_live">Zobrazit</string>
     <string name="tooltip_presentation_remote">Otevřít dálkové ovládání</string>
@@ -366,8 +358,6 @@
 
     <!-- Background Type Options -->
     <string name="background_default">Výchozí</string>
-    <string name="background_color_option">Barva</string>
-    <string name="background_image_option">Obrázek</string>
 
     <!-- Position Options -->
 
@@ -409,7 +399,6 @@
     <string name="animation_slide_left">Posun doleva</string>
     <string name="animation_slide_right">Posun doprava</string>
     <string name="animation_none">Bez animace</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s další/předchozí obrázek  ·  %2$s navigace v řádcích</string>
     <string name="presentation_arrow_key_hint">%1$s — předchozí/další krok a snímek  ·  %2$s — přehrát/pozastavit  ·  %3$s — prázdná obrazovka</string>
     <string name="pictures_reorder_hint">Shift+přetáhnout pro změnu pořadí</string>
@@ -453,7 +442,6 @@
     <!-- Background Settings Tab -->
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">Média</string>
     <string name="media_local_file">Místní soubor</string>
     <string name="media_network_url">Síťová URL</string>
     <string name="media_url_placeholder">Zadejte URL (http://, rtsp://, ...)</string>
@@ -481,7 +469,6 @@
     <string name="announcement_animation_speed">Rychlost</string>
     <string name="announcement_loop_count">Počet opakování</string>
     <string name="announcement_loop_tooltip">0 = nekonečná smyčka</string>
-    <string name="announcement_background_color_label">Barva pozadí</string>
     <string name="announcement_text_hint">Zadejte text oznámení…</string>
     <string name="top_center">Nahoře uprostřed</string>
     <string name="bottom_center">Dole uprostřed</string>
@@ -490,18 +477,14 @@
     <string name="content_bible_background">Pozadí Bible</string>
     <string name="content_songs_background">Pozadí písní</string>
     <string name="content_pictures">Fotky/Prezentace</string>
-    <string name="content_media">Média</string>
-    <string name="content_streaming">Spodní třetina</string>
     <string name="content_announcements">Oznámení</string>
     <string name="detected_screens">Zjištěné obrazovky: %1$d</string>
     <string name="presenter_windows_count">Okna prezentace: %1$d</string>
     <string name="screen_col_label">Obrazovka %1$d</string>
     <string name="screen_assignment">Přiřazení obrazovek</string>
     <string name="display_mode">Režim zobrazení</string>
-    <string name="display_fullscreen">Celá obrazovka</string>
     <string name="display_lower_third">Spodní třetina</string>
     <string name="full_screen">Celá obrazovka</string>
-    <string name="lower_third_size">Spodní třetina</string>
     <string name="identify_screen">Identifikovat</string>
     <string name="no_lottie_files">Žádné JSON soubory nenalezeny</string>
     <string name="generate_lower_third">Vytvořit</string>
@@ -709,7 +692,6 @@
     <string name="schedule_density_compact">Kompaktní</string>
     <string name="schedule_density_normal">Normální</string>
     <string name="schedule_density_detailed">Podrobný</string>
-    <string name="schedule_kind_lower_third">Spodní třetina</string>
     <string name="tooltip_schedule_options">Možnosti programu</string>
     <string name="schedule_show_buttons_under_title">Zobrazit tlačítka pod názvem</string>
     <string name="schedule_option_item_count">Počet položek</string>
@@ -754,7 +736,6 @@
     <string name="timer_mode_clock">Konkrétní čas</string>
     <string name="timer_target_time">Odpočítávat do</string>
     <string name="tooltip_clear_display">Vymazat zobrazení</string>
-    <string name="remote_action_clear_display">Vymazat zobrazení</string>
     <string name="schedule_add_files_title">Přidat soubory do programu</string>
     <string name="tooltip_toggle_displays">Přepnout zobrazení prezentace</string>
     <string name="tooltip_collapse_schedule">Sbalit program</string>
@@ -762,7 +743,6 @@
     <string name="tooltip_theme_dark">Tmavý motiv</string>
     <string name="tooltip_theme_system">Systémový motiv</string>
     <string name="transparent_default">Průhledné (Výchozí)</string>
-    <string name="web_add_to_schedule">Přidat do programu</string>
     <string name="web_bookmark_add">Záložka</string>
     <string name="web_bookmark_remove">Odebrat</string>
     <string name="web_clear_cache">Vymazat mezipaměť</string>
@@ -839,7 +819,6 @@
     <string name="blocked_clients_description">Požadavky od těchto klientů jsou automaticky odmítnuty bez zobrazení dialogu.</string>
     <string name="client_label_placeholder">Zadejte popisné jméno…</string>
     <string name="client_label_edit_tooltip">Nastavit popisné jméno</string>
-    <string name="client_label_save">Uložit</string>
     <string name="client_label_cancel">Zrušit</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -935,7 +914,6 @@
     <string name="system_storage_subtitle">Kde Church Presenter hledá váš obsah</string>
     <string name="system_storage_linked_count">%1$d propojeno</string>
     <string name="system_storage_needs_attention_count">%1$d vyžaduje pozornost</string>
-    <string name="system_storage_status_not_set">Nenastaveno</string>
     <string name="system_storage_status_not_found">Složka nenalezena</string>
     <string name="system_storage_status_read_only">Jen pro čtení</string>
     <string name="system_storage_status_linked">Propojeno</string>
@@ -1016,9 +994,7 @@
     <string name="canvas_text_curve">Křivka</string>
     <string name="canvas_letter_spacing">Prostrkání</string>
     <string name="canvas_source_qrcode">QR kód</string>
-    <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Záznam obrazovky</string>
-    <string name="canvas_text_color">Barva textu</string>
     <string name="canvas_text_bg_color">Barva pozadí</string>
     <string name="canvas_clock_mode">Režim</string>
     <string name="canvas_clock_format">Formát</string>
@@ -1041,7 +1017,6 @@
     <string name="canvas_camera_format">Formát videa</string>
     <string name="canvas_camera_format_auto">Automaticky (výchozí)</string>
     <string name="canvas_camera_connection">Připojení videa</string>
-    <string name="canvas_camera_mode">Režim</string>
     <string name="canvas_camera_mode_auto">Automaticky</string>
     <string name="canvas_capture_x">X snímání</string>
     <string name="canvas_capture_y">Y snímání</string>
@@ -1052,12 +1027,9 @@
     <string name="canvas_capture_mode_window">Okno</string>
     <string name="canvas_capture_refresh_windows">Obnovit seznam oken</string>
     <string name="canvas_capture_interval">Interval snímání</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Kamera: %1$s</string>
-    <string name="canvas_placeholder_camera_default">Kamera</string>
     <string name="canvas_placeholder_screen_capture">Záznam obrazovky</string>
     <string name="canvas_rename_scene">Přejmenovat</string>
-    <string name="canvas_remove_scene">Odebrat</string>
     <string name="canvas_add_source">Přidat zdroj</string>
     <string name="canvas_delete_source">Smazat zdroj</string>
     <string name="canvas_source_move_forward">Přesunout dopředu</string>
@@ -1083,7 +1055,6 @@
     <string name="canvas_render_height">Výška</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">Custom CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">Vybrat obrázek</string>
     <string name="canvas_select_video_title">Vybrat video</string>
     <string name="canvas_image_files">Soubory obrázků</string>
@@ -1095,7 +1066,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">Hodiny</string>
     <string name="canvas_clock_mode_countdown">Odpočítávání</string>
     <string name="canvas_clock_mode_count_up">Stopky</string>
     <string name="canvas_decklink_io_warning">Toto zařízení se aktuálně používá pro výstup. Vstup nemusí být dostupný na zařízeních, která nepodporují současný I/O.</string>
@@ -1136,7 +1106,6 @@
     <string name="update_interval_never">Nikdy</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">Monitor scény</string>
     <string name="display_stage_monitor">Monitor scény</string>
     <string name="general">Obecné</string>
     <string name="stage_monitor_quadrant_next">Vlevo dole: další snímek</string>
@@ -1223,7 +1192,6 @@
     <string name="qa_confirm_go_live_prompt">Jít živě?</string>
     <string name="qa_confirm_go_live">Potvrdit živé vysílání</string>
     <string name="qa_edit_question_hint">Upravit text otázky…</string>
-    <string name="qa_delete_question">Smazat</string>
     <string name="qa_confirm_delete_prompt">Smazat?</string>
     <string name="qa_submitter_device">Zařízení: %1$s</string>
     <string name="qa_public_access">Veřejný přístup</string>
@@ -1259,13 +1227,10 @@
     <string name="stt_live_preview">Živý náhled</string>
     <string name="stt_not_connected">Nepřipojeno. Zadejte URL serveru STT a klikněte na Připojit.</string>
     <string name="stt_waiting_for_transcription">Čekání na přepis…</string>
-    <string name="stt_transcription_label">Přepis</string>
     <string name="stt_translation_label">Překlad</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">Zpráva o využití CCLI</string>
-    <string name="ccli_tab_songs">Písně</string>
-    <string name="ccli_tab_bible">Bible</string>
     <string name="ccli_tab_activity">Aktivita</string>
     <string name="ccli_songs_summary">%1$d jedinečných písní · %2$d celkových přehrání</string>
     <string name="ccli_bible_summary">%1$d jedinečných veršů · %2$d celkových přehrání</string>
@@ -1276,7 +1241,6 @@
     <string name="ccli_activity_title">Prezentace v čase</string>
     <string name="ccli_from">Od:</string>
     <string name="ccli_to">Do:</string>
-    <string name="ccli_legend_songs">Písně</string>
     <string name="ccli_legend_bible">Biblické verše</string>
     <string name="ccli_stat_songs_presented">Prezentované písně</string>
     <string name="ccli_stat_bible_verses">Biblické verše</string>
@@ -1290,7 +1254,6 @@
     <string name="ccli_col_first">První</string>
     <string name="ccli_col_last">Poslední</string>
     <string name="ccli_col_verse">Verš</string>
-    <string name="ccli_col_bible">Bible</string>
     <string name="ccli_export_csv">Exportovat CCLI CSV</string>
     <string name="ccli_export_xls">Exportovat XLS</string>
     <string name="ccli_exported_success">Zpráva úspěšně exportována.</string>
@@ -1347,7 +1310,6 @@
     <string name="obs_mode_bible">Bible</string>
     <string name="obs_mode_songs">Písně</string>
     <string name="obs_mode_pictures">Obrázky</string>
-    <string name="obs_mode_presentation">Prezentace</string>
     <string name="obs_mode_media">Média</string>
     <string name="obs_mode_lower_third">Dolní třetina</string>
     <string name="obs_mode_announcements">Oznámení</string>
@@ -1403,13 +1365,11 @@
     <string name="open_converter">Převodník písní a Bible</string>
     <string name="open_song_library">Správce knihovny písní</string>
     <string name="projection_content_web">Web</string>
-    <string name="projection_content_background">Pozadí</string>
     <string name="projection_content_lt_background">Pozadí spodní třetiny</string>
     <string name="qa_add_question_hint">Přidat otázku…</string>
     <string name="remote_activity_added_to_schedule">Přidáno do programu</string>
     <string name="remote_activity_projected">Promítáno (živě)</string>
     <string name="remote_activity_presentation_connect">Připojeno k dálkovému ovládání prezentace</string>
-    <string name="remote_activity_presentation_connect_detail">Nyní připojeno</string>
     <string name="remote_activity_qa_admin_connect">Připojeno k administraci Q&amp;A</string>
     <string name="remote_activity_qa_admin_connect_detail">Nyní připojeno</string>
     <string name="remote_activity_presented">Prezentuje se</string>
@@ -1567,7 +1527,6 @@
     <string name="companion_satellite_no_host">Nastavte hostitele Companion v Nastavení → Companion Satellite pro připojení.</string>
     <string name="companion_satellite_status_connecting">Připojování…</string>
     <string name="companion_satellite_status_disconnected">Odpojeno</string>
-    <string name="companion_satellite_status_error">Chyba: %1$s</string>
     <string name="companion_satellite_connection_name">Název</string>
     <string name="companion_satellite_product_name">Název produktu</string>
     <string name="companion_satellite_reconnect_delay">Prodleva opětovného připojení (ms)</string>
@@ -1605,7 +1564,6 @@
     <string name="em_dash">—</string>
     <string name="bible_smart_search_hint">Odkaz nebo text — např. Jan 3:16, Mat 1 nebo slovo</string>
     <string name="bible_search_mode_auto">Auto</string>
-    <string name="bible_search_mode_reference">Odkaz</string>
     <string name="bible_search_mode_text">Text</string>
     <string name="bible_search_mode_tooltip">Klepnutím přepnete — Auto: přechod na odkaz, hledání ostatního. Odkaz: pouze navigace. Text: vždy hledat v textu verše.</string>
     <string name="swap_bibles_hint">Prohodit primární a sekundární Bibli</string>
@@ -1656,7 +1614,6 @@
     <string name="bible_engine_detect">Detekovat Písmo</string>
     <string name="bible_engine_run_local">Spustit engine lokálně</string>
     <string name="bible_engine_host">Hostitel enginu</string>
-    <string name="bible_engine_port">Port</string>
     <!-- Contact / feedback form (Help -> Contact) -->
     <string name="menu_contact_us">Kontakt</string>
     <string name="contact_us_title">Kontaktujte nás</string>
@@ -1692,7 +1649,6 @@
     <string name="instance_link_description">Sledujte jinou instanci ChurchPresenter ve své síti — zrcadlete zde její živý obsah a volitelně přidávejte položky do jejího programu.</string>
     <string name="instance_link_host">Hostitel</string>
     <string name="instance_link_host_hint">např. 192.168.1.10</string>
-    <string name="instance_link_port">Port</string>
     <string name="instance_link_autoconnect">Připojit automaticky při spuštění</string>
     <string name="instance_link_allow_push_to_schedule">Povolit přidávání položek do programu primární instance</string>
     <string name="instance_link_mirror_backgrounds">Zrcadlit také pozadí primární instance</string>
@@ -1928,7 +1884,6 @@
     <string name="font_category_serif">Patkové</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Ozdobné</string>
-    <string name="font_preview">Náhled</string>
     <string name="font_preview_sample">Ukázkový text vybraným písmem</string>
     <string name="font_warning_no_cyrillic">%1$s nemá znaky cyrilice – verše v cyrilici se na obrazovce zobrazí jiným písmem.</string>
     <string name="font_warning_no_hebrew">%1$s nemá hebrejské znaky – hebrejský text se na obrazovce zobrazí jiným písmem.</string>
@@ -1938,7 +1893,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">Přeškrtnutí</string>
     <string name="bible_custom_name">Název</string>
-    <string name="bible_custom_abbreviation">Zkratka</string>
     <string name="bible_translations">Překlady</string>
     <string name="bible_miscellaneous">Různé</string>
     <string name="bible_font">Písmo</string>
@@ -1953,10 +1907,7 @@
     <string name="bible_preview_sample_book">Jan</string>
     <string name="bible_preview_no_translations">Přidejte překlad, abyste jej zde viděli</string>
     <string name="song_element_number">Číslo</string>
-    <string name="song_element_title">Název</string>
     <string name="song_element_lyrics">Text</string>
-    <string name="song_element_author">Autor</string>
-    <string name="song_element_composer">Skladatel</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Titulní snímek</string>
@@ -1969,7 +1920,6 @@
     <string name="song_chunk">Úsek</string>
     <string name="song_language_scope">Jazyk</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">Pozadí</string>
     <string name="song_background_full_screen">Celá obrazovka</string>
     <string name="song_background_lower_third">Dolní třetina</string>
     <string name="song_background_inherit">Zdědit</string>
@@ -1984,7 +1934,6 @@
     <string name="song_background_your_color">Vaše barva</string>
     <string name="song_background_browse">Procházet…</string>
     <string name="song_background_look">Vzhled</string>
-    <string name="song_background_preset_none">Žádný</string>
     <string name="song_background_preset_soft">Jemný</string>
     <string name="song_background_preset_legible">Čitelný</string>
     <string name="song_background_preset_cinema">Kino</string>
@@ -2005,7 +1954,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Pozadí</string>
     <string name="background_group_defaults">Výchozí</string>
-    <string name="background_scope_default">Výchozí</string>
     <string name="background_scope_default_lower_third">Výchozí spodní třetina</string>
     <string name="background_scope_default_meta">Když je u Bible nebo Písní nastaveno Výchozí</string>
     <string name="background_scope_default_lower_third_meta">Když je u spodní třetiny nastaveno Výchozí</string>
@@ -2014,16 +1962,13 @@
     <string name="background_following_default">Dědí výchozí</string>
     <string name="background_use_default">Použít výchozí</string>
     <string name="background_set_explicitly">Nastaveno zvlášť pro tuto plochu</string>
-    <string name="background_type_caption">Typ</string>
     <string name="background_color_caption">Barva</string>
     <string name="background_image_file">Soubor obrázku</string>
     <string name="background_video_file">Soubor videa</string>
-    <string name="background_opacity_caption">Neprůhlednost</string>
     <string name="background_above_band_caption">Nad pásem</string>
     <string name="background_above_band_fill">Barva výplně</string>
     <string name="background_above_band_opacity">Neprůhlednost výplně</string>
     <string name="quick_background_reset">Zpět do normálu</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · správa v nastavení</string>
     <string name="quick_backgrounds">Rychlá pozadí</string>
     <string name="quick_backgrounds_help">Pozadí, která má panel náhledu na jedno kliknutí. Klepnutím na dlaždici zvolíte, co ukazuje, přetažením změníte, která klávesa ji vyvolá. Výběr při bohoslužbě přepíše všechny obrazovky, dokud se nevrátíte do normálu — zde nic nemění.</string>
@@ -2049,16 +1994,10 @@
     <string name="output_profile_swap_menu_tooltip">Přepnout výstupní profil</string>
     <string name="output_profile_new_name_default">Nový profil</string>
     <string name="output_profile_empty_state">Vytvořte profil a začněte s úpravou stylu</string>
-    <string name="customize_bible">Bible</string>
-    <string name="customize_songs">Písně</string>
     <string name="customize_group_verse_text">Text verše</string>
     <string name="customize_group_reference">Odkaz</string>
     <string name="customize_background_type">Typ</string>
-    <string name="customize_type_color">Barva</string>
     <string name="customize_type_image">Obrázek</string>
-    <string name="customize_type_video">Video</string>
-    <string name="customize_type_default">Výchozí</string>
-    <string name="customize_type_gradient">Přechod</string>
     <string name="customize_show_abbreviation">Zkratka</string>
     <string name="customize_background_opacity">Neprůhlednost</string>
     <string name="slate_theme">Motiv Břidlice</string>
@@ -2104,7 +2043,6 @@
     <string name="song_lottie_unsupported_note">Šablona určuje rozvržení a umístění názvu. Styl spodní třetiny nastavuje písmo, velikost, barvu, zarovnání, proklad písmen, velikost písmen a stín; podklad, podtržení, přeškrtnutí, mezery mezi slovy, náhled další části a akordy se nepoužijí.</string>
     <string name="bible_lottie_unsupported_note">Šablona určuje rozvržení, umístění odkazu a to, jak si dva jazyky pruh rozdělí. Styl spodní třetiny nastavuje písmo, velikost, barvu, zarovnání, proklad písmen, velikost písmen a stín; podklad, podtržení, přeškrtnutí a mezery mezi slovy se nepoužijí.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Obrys</string>
     <string name="tooltip_outline_options">Možnosti obrysu</string>
     <string name="text_outline">Obrys</string>
     <string name="text_outline_width">Šířka</string>
@@ -2172,7 +2110,6 @@
     <string name="add_ndi_output">Přidat výstup</string>
     <string name="ndi_output_numbered">Výstup NDI %1$d</string>
     <string name="preview_output">Náhled výstupu</string>
-    <string name="output_resolution">Rozlišení</string>
     <string name="output_resolution_custom">Vlastní…</string>
     <string name="output_resolution_custom_title">Vlastní rozlišení</string>
     <string name="output_resolution_width">Šířka</string>
@@ -2276,7 +2213,6 @@
     <string name="calendar_sync_description">Plánujte bohoslužby v mobilní aplikaci celý týden, i když je tento počítač vypnutý. Tento počítač zůstává zdrojem pravdy.</string>
     <string name="calendar_sync_enable">Synchronizovat kalendář s telefony</string>
     <string name="calendar_sync_relay_url">Relé</string>
-    <string name="calendar_sync_status_off">Vypnuto</string>
     <string name="calendar_sync_status_unpaired">Zatím nezaregistrováno — tento počítač se u relé zaregistruje při prvním zapnutí synchronizace</string>
     <string name="calendar_sync_status_syncing">Synchronizace…</string>
     <string name="calendar_sync_status_synced">Synchronizováno %1$s</string>

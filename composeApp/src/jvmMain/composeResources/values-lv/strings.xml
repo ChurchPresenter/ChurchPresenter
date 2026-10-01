@@ -3,7 +3,6 @@
     <string name="mode">Režīms</string>
     <string name="scope">Tvērums</string>
     <string name="title">Nosaukums</string>
-    <string name="number">Numurs</string>
     <string name="go_live">Rādīt ekrānā</string>
     <string name="add_to_schedule">Pievienot programmai</string>
     <string name="copy_verse">Kopēt pantu</string>
@@ -12,7 +11,6 @@
     <string name="search">Meklēt</string>
     <string name="bible_smart_search_hint">Norāde vai teksts — piem., Jņ 3:16, mat 1 vai kāds vārds</string>
     <string name="bible_search_mode_auto">Auto</string>
-    <string name="bible_search_mode_reference">Norāde</string>
     <string name="bible_search_mode_text">Teksts</string>
     <string name="bible_search_mode_tooltip">Nospiediet, lai pārslēgtu — Auto: pāriet uz norādi, visu pārējo meklē. Norāde: tikai pārvietošanās. Teksts: vienmēr meklē pantu tekstā.</string>
     <string name="bible_verse_selection_hint">Ctrl+klikšķis pārslēdz, Shift+klikšķis atlasa diapazonu</string>
@@ -82,17 +80,11 @@
     <string name="bible_cross_references_close">Aizvērt paneli</string>
     <string name="bible_cross_references_dismiss_hint">Esc aizver</string>
     <string name="menu_file">Fails</string>
-    <string name="menu_new_schedule">Jauna programma</string>
-    <string name="menu_open_schedule">Atvērt programmu</string>
-    <string name="menu_save_schedule">Saglabāt programmu</string>
     <string name="menu_save_schedule_as">Saglabāt programmu kā...</string>
     <string name="menu_close_schedule">Aizvērt programmu</string>
     <string name="menu_exit">Iziet</string>
     <string name="file_chooser_save_schedule">Saglabāt programmu kā</string>
-    <string name="file_chooser_open_schedule">Atvērt programmu</string>
     <string name="file_filter_schedule">Church Presenter programma (*.cps)</string>
-    <string name="menu_schedule">Programma</string>
-    <string name="menu_add_to_schedule">Pievienot programmai</string>
     <string name="menu_remove_from_schedule">Noņemt no programmas</string>
     <string name="menu_clear_schedule">Notīrīt programmu</string>
 
@@ -111,7 +103,6 @@
     <string name="instance_link_description">Sekojiet citai ChurchPresenter instancei savā tīklā — atspoguļojiet šeit to, ko tā rāda ekrānā, un, ja vēlaties, pievienojiet vienības tās programmai.</string>
     <string name="instance_link_host">Resursdators</string>
     <string name="instance_link_host_hint">piem., 192.168.1.10</string>
-    <string name="instance_link_port">Ports</string>
     <string name="instance_link_autoconnect">Savienoties automātiski, palaižot programmu</string>
     <string name="instance_link_reconnect_delay">Minimālā atkārtotās savienošanās pauze</string>
     <string name="instance_link_reconnect_delay_hint">Īsākais gaidīšanas laiks pirms pārtrauktas saites atjaunošanas. Ja neizdodas vairākkārt, pauze pagarinās pati.</string>
@@ -466,15 +457,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">Noklusējums</string>
-    <string name="background_color_option">Krāsa</string>
-    <string name="background_image_option">Attēls</string>
     <string name="background_video_option">Video cilpa</string>
     <string name="background_transparent_option">Caurspīdīgs</string>
     <string name="background_follow_default_option">Kā noklusējumā</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">Tīmeklis</string>
-    <string name="projection_content_background">Fons</string>
     <string name="projection_content_lt_background">Apakšjoslas fons</string>
     <string name="browser_source_resolution">Izšķirtspēja</string>
     <string name="browser_source_fps">Maks. FPS</string>
@@ -556,7 +544,6 @@
     <string name="tooltip_schedule_zoom_out">Tālināt</string>
     <string name="tooltip_add_to_schedule">Pievienot programmai</string>
     <string name="tooltip_clear_display">Notīrīt ekrānu</string>
-    <string name="remote_action_clear_display">Notīrīt ekrānu</string>
     <string name="schedule_add_files_title">Pievienot failus programmai</string>
     <string name="tooltip_toggle_displays">Ieslēgt vai izslēgt projekcijas logus</string>
     <string name="tooltip_settings">Iestatījumi</string>
@@ -578,7 +565,6 @@
     <string name="schedule_density_compact">Kompakts</string>
     <string name="schedule_density_normal">Parasts</string>
     <string name="schedule_density_detailed">Detalizēts</string>
-    <string name="schedule_kind_lower_third">Apakšjosla</string>
     <string name="tooltip_schedule_options">Programmas opcijas</string>
     <string name="schedule_show_buttons_under_title">Rādīt pogas zem nosaukuma</string>
     <string name="schedule_option_item_count">Vienību skaits</string>
@@ -589,7 +575,6 @@
     <string name="edit_label">Rediģēt etiķeti</string>
     <string name="label_text">Etiķetes teksts</string>
     <string name="text_color">Teksta krāsa</string>
-    <string name="background_color_label">Fona krāsa</string>
     <string name="enter_label_text">Ievadiet etiķetes tekstu...</string>
 
     <!-- Pictures Tab Strings -->
@@ -619,7 +604,6 @@
     <string name="animation_slide_left">Slīdēšana pa kreisi</string>
     <string name="animation_slide_right">Slīdēšana pa labi</string>
     <string name="animation_none">Nav</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s nākamais/iepriekšējais attēls  ·  %2$s pārvietošanās pa rindām</string>
     <string name="presentation_arrow_key_hint">%1$s — iepriekšējais/nākamais solis un slaids  ·  %2$s — atskaņot/pauzēt  ·  %3$s — aptumšot ekrānu</string>
     <string name="pictures_reorder_hint">Velciet sīktēlus ar Shift, lai pārkārtotu</string>
@@ -682,14 +666,10 @@
     <string name="content_bible_background">Bībeles fons</string>
     <string name="content_songs_background">Dziesmu fons</string>
     <string name="content_pictures">Attēli/prezentācijas</string>
-    <string name="content_media">Multivide</string>
-    <string name="content_streaming">Apakšjosla</string>
     <string name="content_announcements">Paziņojumi</string>
     <string name="display_mode">Attēlošanas režīms</string>
-    <string name="display_fullscreen">Pilnekrāns</string>
     <string name="display_lower_third">Apakšjosla</string>
     <string name="full_screen">Pilnekrāns</string>
-    <string name="lower_third_size">Apakšjosla</string>
     <string name="identify_screen">Noteikt</string>
     <string name="projection_target_display">Displejs</string>
     <string name="projection_auto_display">Auto</string>
@@ -765,7 +745,6 @@
     <string name="settings_import_failed">Neizdevās importēt iestatījumus. Fails var būt nederīgs.</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">Multivide</string>
     <string name="media_local_file">Vietējais fails</string>
     <string name="media_network_url">Tīkla URL</string>
     <string name="media_url_placeholder">Ievadiet URL (http://, rtsp://, ...)</string>
@@ -809,7 +788,6 @@
     <string name="center_left">Vidū pa kreisi</string>
     <string name="center_right">Vidū pa labi</string>
     <string name="bottom_center">Apakšā centrā</string>
-    <string name="announcement_background_color_label">Fona krāsa</string>
     <string name="transparent_default">Caurspīdīgs (noklusējums)</string>
     <string name="announcement_animation">Animācija</string>
     <string name="anim_slide_from_left">Ieslīd no kreisās puses</string>
@@ -882,7 +860,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">Pievienot programmai</string>
     <string name="web_go_live">Rādīt ekrānā</string>
     <string name="web_bookmark_add">Pievienot grāmatzīmi</string>
     <string name="web_bookmark_remove">Noņemt grāmatzīmi</string>
@@ -946,7 +923,6 @@
     <string name="canvas_shape_fill_color">Aizpildījums</string>
     <string name="canvas_shape_stroke_width">Kontūras platums</string>
     <string name="canvas_rename_scene">Pārsaukt</string>
-    <string name="canvas_remove_scene">Noņemt</string>
     <string name="canvas_add_source">Pievienot avotu</string>
     <string name="canvas_delete_source">Dzēst avotu</string>
     <string name="canvas_source_move_forward">Pārvietot uz priekšu</string>
@@ -974,7 +950,6 @@
     <string name="canvas_render_height">Augstums</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">Pielāgots CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">Izvēlēties attēlu</string>
     <string name="canvas_select_video_title">Izvēlēties video</string>
     <string name="canvas_image_files">Attēlu faili</string>
@@ -986,7 +961,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">Pulkstenis</string>
     <string name="canvas_clock_mode_countdown">Laika atskaite</string>
     <string name="canvas_clock_mode_count_up">Hronometrs</string>
     <string name="canvas_decklink_io_warning">Šī ierīce pašlaik tiek izmantota izvadei. Ievade var nebūt pieejama ierīcēs, kas neatbalsta vienlaicīgu ievadi un izvadi.</string>
@@ -1004,7 +978,6 @@
     <string name="canvas_text_curve">Līkne</string>
     <string name="canvas_letter_spacing">Burtu atstarpes</string>
     <string name="canvas_source_qrcode">QR kods</string>
-    <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Ekrāna tveršana</string>
     <string name="canvas_source_bible">Bībele</string>
     <string name="canvas_bible_version">Bībeles tulkojums</string>
@@ -1017,7 +990,6 @@
     <string name="canvas_bible_ref_color">Norādes krāsa</string>
     <string name="canvas_verse_style">Panta stils</string>
     <string name="canvas_reference_style">Norādes stils</string>
-    <string name="canvas_text_color">Teksta krāsa</string>
     <string name="canvas_text_bg_color">Fona krāsa</string>
     <string name="canvas_clock_mode">Režīms</string>
     <string name="canvas_clock_format">Formāts</string>
@@ -1042,7 +1014,6 @@
     <string name="canvas_camera_format">Video formāts</string>
     <string name="canvas_camera_format_auto">Auto (noklusējums)</string>
     <string name="canvas_camera_connection">Video pieslēgums</string>
-    <string name="canvas_camera_mode">Režīms</string>
     <string name="canvas_camera_mode_auto">Auto</string>
     <string name="canvas_capture_x">Tveršanas X</string>
     <string name="canvas_capture_y">Tveršanas Y</string>
@@ -1053,9 +1024,7 @@
     <string name="canvas_capture_mode_window">Logs</string>
     <string name="canvas_capture_refresh_windows">Atsvaidzināt logu sarakstu</string>
     <string name="canvas_capture_interval">Tveršanas intervāls</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Kamera: %1$s</string>
-    <string name="canvas_placeholder_camera_default">Kamera</string>
     <string name="canvas_placeholder_screen_capture">Ekrāna tveršana</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1177,7 +1146,6 @@
     <string name="remote_activity_removed_from_schedule">Noņemts no plāna</string>
     <string name="remote_activity_projected">Projicēts (rādīts ēterā)</string>
     <string name="remote_activity_presentation_connect">Savienots ar prezentācijas tālvadību</string>
-    <string name="remote_activity_presentation_connect_detail">Tagad savienots</string>
     <string name="remote_activity_qa_admin_connect">Savienots ar jautājumu administrēšanu</string>
     <string name="remote_activity_qa_admin_connect_detail">Tagad savienots</string>
     <string name="remote_activity_presented">Tiek rādīts</string>
@@ -1217,7 +1185,6 @@
     <string name="instance_link_primary_badge">Galvenā — savienoti %1$d sekotāji</string>
     <string name="client_label_placeholder">Ievadiet saprotamu nosaukumu…</string>
     <string name="client_label_edit_tooltip">Iestatīt saprotamu nosaukumu</string>
-    <string name="client_label_save">Saglabāt</string>
     <string name="client_label_cancel">Atcelt</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1338,7 +1305,6 @@
     <string name="system_storage_subtitle">Kur Church Presenter meklē jūsu saturu</string>
     <string name="system_storage_linked_count">%1$d saistītas</string>
     <string name="system_storage_needs_attention_count">%1$d nepieciešama uzmanība</string>
-    <string name="system_storage_status_not_set">Nav iestatīts</string>
     <string name="system_storage_status_not_found">Mape nav atrasta</string>
     <string name="system_storage_status_read_only">Tikai lasāms</string>
     <string name="system_storage_status_linked">Saistīta</string>
@@ -1380,7 +1346,6 @@
     <string name="show_song_number_before_title">Rādīt dziesmas numuru pirms nosaukuma</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">Skatuves monitors</string>
     <string name="general">Vispārīgi</string>
     <string name="display_stage_monitor">Skatuves monitors</string>
     <string name="stage_monitor_quadrant_next">Nākamais</string>
@@ -1465,7 +1430,6 @@
     <string name="qa_confirm_go_live">Apstiprināt rādīšanu ēterā</string>
     <string name="qa_add_question_hint">Pievienojiet jautājumu…</string>
     <string name="qa_edit_question_hint">Rediģējiet jautājuma tekstu…</string>
-    <string name="qa_delete_question">Dzēst</string>
     <string name="qa_confirm_delete_prompt">Dzēst?</string>
     <string name="qa_submitter_device">Ierīce: %1$s</string>
     <string name="qa_public_access">Publiskā piekļuve</string>
@@ -1502,14 +1466,11 @@
     <string name="stt_live_preview">Priekšskatījums reāllaikā</string>
     <string name="stt_not_connected">Nav savienots. Ievadiet STT servera adresi un noklikšķiniet uz “Savienot”.</string>
     <string name="stt_waiting_for_transcription">Gaida atšifrējumu…</string>
-    <string name="stt_transcription_label">Atšifrējums</string>
     <string name="stt_translation_label">Tulkojums</string>
     <string name="stt_settings_dialog_title">STT rādīšanas iestatījumi</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">CCLI atskaites</string>
-    <string name="ccli_tab_songs">Dziesmas</string>
-    <string name="ccli_tab_bible">Bībele</string>
     <string name="ccli_tab_activity">Aktivitāte</string>
     <string name="ccli_songs_summary">%1$d dažādas dziesmas · %2$d reizes kopā</string>
     <string name="ccli_bible_summary">%1$d dažādi panti · %2$d reizes kopā</string>
@@ -1520,7 +1481,6 @@
     <string name="ccli_activity_title">Rādīšanas reizes laika gaitā</string>
     <string name="ccli_from">No:</string>
     <string name="ccli_to">Līdz:</string>
-    <string name="ccli_legend_songs">Dziesmas</string>
     <string name="ccli_legend_bible">Bībeles panti</string>
     <string name="ccli_stat_songs_presented">Rādītās dziesmas</string>
     <string name="ccli_stat_bible_verses">Bībeles panti</string>
@@ -1534,7 +1494,6 @@
     <string name="ccli_col_first">Pirmoreiz</string>
     <string name="ccli_col_last">Pēdējoreiz</string>
     <string name="ccli_col_verse">Pants</string>
-    <string name="ccli_col_bible">Bībele</string>
     <string name="ccli_export_csv">Eksportēt CCLI CSV</string>
     <string name="ccli_export_xls">Eksportēt XLS</string>
     <string name="ccli_exported_success">Atskaite veiksmīgi eksportēta.</string>
@@ -1615,7 +1574,6 @@
     <string name="obs_mode_bible">Bībele</string>
     <string name="obs_mode_songs">Dziesmas</string>
     <string name="obs_mode_pictures">Attēli</string>
-    <string name="obs_mode_presentation">Prezentācija</string>
     <string name="obs_mode_media">Mediji</string>
     <string name="obs_mode_lower_third">Apakšjosla</string>
     <string name="obs_mode_announcements">Paziņojumi</string>
@@ -1810,7 +1768,6 @@
     <string name="companion_satellite_no_host">Lai savienotos, norādiet Companion resursdatoru sadaļā Iestatījumi → Companion Satellite.</string>
     <string name="companion_satellite_status_connecting">Savienojas…</string>
     <string name="companion_satellite_status_disconnected">Atvienots</string>
-    <string name="companion_satellite_status_error">Kļūda: %1$s</string>
     <string name="companion_satellite_connection_name">Nosaukums</string>
     <string name="companion_satellite_product_name">Produkta nosaukums</string>
     <string name="companion_satellite_reconnect_delay">Atkārtotas savienošanās aizture (ms)</string>
@@ -1874,7 +1831,6 @@
     <string name="bible_engine_detect">Atpazīt Rakstu vietas</string>
     <string name="bible_engine_run_local">Darbināt dzinēju uz šī datora</string>
     <string name="bible_engine_host">Dzinēja resursdators</string>
-    <string name="bible_engine_port">Ports</string>
     <string name="stt_help_dev_mode">Palīdzēt izstrādātājam — rādīt atsauksmju pogas Bībeles cilnē (nepareizs fragments / pāragrs / nepamanīts fragments)</string>
     <string name="dictionary_back">Atpakaļ</string>
     <string name="dictionary_forward">Uz priekšu</string>
@@ -1963,7 +1919,6 @@
     <string name="font_category_serif">Antīkva</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Priekšskatījums</string>
     <string name="font_preview_sample">Parauga teksts izvēlētajā fontā</string>
     <string name="font_warning_no_cyrillic">%1$s nav kirilicas zīmju – kirilicas panti ekrānā tiks rādīti citā fontā.</string>
     <string name="font_warning_no_hebrew">%1$s nav ebreju zīmju – ebreju teksts ekrānā tiks rādīts citā fontā.</string>
@@ -1973,7 +1928,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">Pārsvītrots</string>
     <string name="bible_custom_name">Nosaukums</string>
-    <string name="bible_custom_abbreviation">Saīsinājums</string>
     <string name="bible_translations">Tulkojumi</string>
     <string name="bible_miscellaneous">Dažādi</string>
     <string name="bible_font">Fonts</string>
@@ -1988,10 +1942,7 @@
     <string name="bible_preview_sample_book">Jāņa</string>
     <string name="bible_preview_no_translations">Pievienojiet tulkojumu, lai to redzētu šeit</string>
     <string name="song_element_number">Numurs</string>
-    <string name="song_element_title">Nosaukums</string>
     <string name="song_element_lyrics">Dziesmas teksts</string>
-    <string name="song_element_author">Autors</string>
-    <string name="song_element_composer">Komponists</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Temps</string>
     <string name="song_target_title_slide">Nosaukuma slaids</string>
@@ -2004,7 +1955,6 @@
     <string name="song_chunk">Fragments</string>
     <string name="song_language_scope">Valoda</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">Fons</string>
     <string name="song_background_full_screen">Pilnekrāns</string>
     <string name="song_background_lower_third">Apakšējā trešdaļa</string>
     <string name="song_background_inherit">Mantot</string>
@@ -2019,7 +1969,6 @@
     <string name="song_background_your_color">Tava krāsa</string>
     <string name="song_background_browse">Pārlūkot…</string>
     <string name="song_background_look">Izskats</string>
-    <string name="song_background_preset_none">Nav</string>
     <string name="song_background_preset_soft">Maigs</string>
     <string name="song_background_preset_legible">Salasāms</string>
     <string name="song_background_preset_cinema">Kino</string>
@@ -2040,7 +1989,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Foni</string>
     <string name="background_group_defaults">Noklusējumi</string>
-    <string name="background_scope_default">Noklusējums</string>
     <string name="background_scope_default_lower_third">Noklusējuma apakšjosla</string>
     <string name="background_scope_default_meta">Kad Bībelei vai Dziesmām iestatīts Noklusējums</string>
     <string name="background_scope_default_lower_third_meta">Kad apakšjoslai iestatīts Noklusējums</string>
@@ -2049,16 +1997,13 @@
     <string name="background_following_default">Seko noklusējumam</string>
     <string name="background_use_default">Lietot noklusējumu</string>
     <string name="background_set_explicitly">Iestatīts atsevišķi šai virsmai</string>
-    <string name="background_type_caption">Veids</string>
     <string name="background_color_caption">Krāsa</string>
     <string name="background_image_file">Attēla fails</string>
     <string name="background_video_file">Video fails</string>
-    <string name="background_opacity_caption">Necaurredzamība</string>
     <string name="background_above_band_caption">Virs joslas</string>
     <string name="background_above_band_fill">Aizpildījuma krāsa</string>
     <string name="background_above_band_opacity">Aizpildījuma necaurredzamība</string>
     <string name="quick_background_reset">Atpakaļ uz parasto</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · pārvalda iestatījumos</string>
     <string name="quick_backgrounds">Ātrie foni</string>
     <string name="quick_backgrounds_help">Foni, ko priekšskatījuma panelis tur viena klikšķa attālumā. Noklikšķiniet uz elementa, lai izvēlētos, ko tas rāda, velciet to, lai mainītu, kurš taustiņš to sasniedz. Izvēloties vienu dievkalpojuma laikā, tas pārraksta katru ekrānu, līdz atgriežaties pie parastā — šeit tas neko nemaina.</string>
@@ -2084,16 +2029,10 @@
     <string name="output_profile_swap_menu_tooltip">Mainīt izvades profilu</string>
     <string name="output_profile_new_name_default">Jauns profils</string>
     <string name="output_profile_empty_state">Izveidojiet profilu, lai sāktu tā noformēšanu</string>
-    <string name="customize_bible">Bībele</string>
-    <string name="customize_songs">Dziesmas</string>
     <string name="customize_group_verse_text">Panta teksts</string>
     <string name="customize_group_reference">Norāde</string>
     <string name="customize_background_type">Veids</string>
-    <string name="customize_type_color">Krāsa</string>
     <string name="customize_type_image">Attēls</string>
-    <string name="customize_type_video">Video</string>
-    <string name="customize_type_default">Noklusējums</string>
-    <string name="customize_type_gradient">Gradients</string>
     <string name="customize_show_abbreviation">Saīsinājums</string>
     <string name="customize_background_opacity">Necaurredzamība</string>
     <string name="slate_theme">Slānekļa tēma</string>
@@ -2139,7 +2078,6 @@
     <string name="song_lottie_unsupported_note">Veidne nosaka izkārtojumu un nosaukuma vietu. Apakšējās trešdaļas stils nosaka fontu, izmēru, krāsu, līdzinājumu, burtu atstarpi, burtu reģistru un ēnu; teksta fons, pasvītrojums, pārsvītrojums, vārdu atstarpe, nākamās daļas priekšskatījums un akordi netiek piemēroti.</string>
     <string name="bible_lottie_unsupported_note">Veidne nosaka izkārtojumu, atsauces vietu un to, kā divas valodas dala joslu. Apakšējās trešdaļas stils nosaka fontu, izmēru, krāsu, līdzinājumu, burtu atstarpi, burtu reģistru un ēnu; teksta fons, pasvītrojums, pārsvītrojums un vārdu atstarpe netiek piemēroti.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Kontūra</string>
     <string name="tooltip_outline_options">Kontūras opcijas</string>
     <string name="text_outline">Kontūra</string>
     <string name="text_outline_width">Platums</string>
@@ -2207,7 +2145,6 @@
     <string name="add_ndi_output">Pievienot izeju</string>
     <string name="ndi_output_numbered">NDI izeja %1$d</string>
     <string name="preview_output">Izejas priekšskatījums</string>
-    <string name="output_resolution">Izšķirtspēja</string>
     <string name="output_resolution_custom">Pielāgota…</string>
     <string name="output_resolution_custom_title">Pielāgota izšķirtspēja</string>
     <string name="output_resolution_width">Platums</string>
@@ -2311,7 +2248,6 @@
     <string name="calendar_sync_description">Plānojiet dievkalpojumus mobilajā lietotnē visu nedēļu, pat kad šis dators ir izslēgts. Šis dators paliek galvenais avots.</string>
     <string name="calendar_sync_enable">Sinhronizēt kalendāru ar tālruņiem</string>
     <string name="calendar_sync_relay_url">Relejs</string>
-    <string name="calendar_sync_status_off">Izslēgts</string>
     <string name="calendar_sync_status_unpaired">Vēl nav reģistrēts — šis dators reģistrējas relejā, kad sinhronizācija pirmo reizi tiek ieslēgta</string>
     <string name="calendar_sync_status_syncing">Sinhronizē…</string>
     <string name="calendar_sync_status_synced">Sinhronizēts %1$s</string>

@@ -17,12 +17,12 @@ import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.content_announcements
 import churchpresenter.composeapp.generated.resources.content_bible_background
-import churchpresenter.composeapp.generated.resources.content_media
+import churchpresenter.composeapp.generated.resources.media
 import churchpresenter.composeapp.generated.resources.content_pictures
 import churchpresenter.composeapp.generated.resources.content_songs_background
-import churchpresenter.composeapp.generated.resources.content_streaming
-import churchpresenter.composeapp.generated.resources.customize_bible
-import churchpresenter.composeapp.generated.resources.customize_songs
+import churchpresenter.composeapp.generated.resources.display_lower_third
+import churchpresenter.composeapp.generated.resources.bible
+import churchpresenter.composeapp.generated.resources.songs
 import churchpresenter.composeapp.generated.resources.media_subtitles
 import churchpresenter.composeapp.generated.resources.output_profile_content_all_shown
 import churchpresenter.composeapp.generated.resources.output_profile_content_some_shown
@@ -38,7 +38,7 @@ import churchpresenter.composeapp.generated.resources.profile_group_placement
 import churchpresenter.composeapp.generated.resources.profile_nav_live_captions
 import churchpresenter.composeapp.generated.resources.profile_source_bible
 import churchpresenter.composeapp.generated.resources.profile_source_songs
-import churchpresenter.composeapp.generated.resources.projection_content_background
+import churchpresenter.composeapp.generated.resources.background
 import churchpresenter.composeapp.generated.resources.projection_content_lt_background
 import churchpresenter.composeapp.generated.resources.profile_song_look_ahead
 import churchpresenter.composeapp.generated.resources.projection_content_web
@@ -88,12 +88,12 @@ private fun languageMode(on: Boolean): String = if (on) Constants.SONG_LANG_BOTH
 private fun contentSwitches(profile: OutputProfile): ContentGroups {
     val stageMonitor = profile.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
     val scripture = buildList {
-        add(ContentSwitch(stringResource(Res.string.customize_bible), profile.showBible) { p, v ->
+        add(ContentSwitch(stringResource(Res.string.bible), profile.showBible) { p, v ->
             // Keeping the language mode it had when switched back on is not possible -- off is one
             // of its values -- so on is "both", which every presenter reads as "whatever is picked".
             p.copy(bibleMode = if (v == p.showBible) p.bibleMode else languageMode(v))
         })
-        add(ContentSwitch(stringResource(Res.string.customize_songs), profile.showSongs) { p, v ->
+        add(ContentSwitch(stringResource(Res.string.songs), profile.showSongs) { p, v ->
             if (v == p.showSongs) p else p.copy(songMode = languageMode(v), songLookAhead = v && p.songLookAhead)
         })
         if (profile.showSongs) {
@@ -120,7 +120,7 @@ private fun contentSwitches(profile: OutputProfile): ContentGroups {
         ContentSwitch(stringResource(Res.string.content_pictures), profile.showPictures) { p, v ->
             p.copy(showPictures = v)
         },
-        ContentSwitch(stringResource(Res.string.content_media), profile.showMedia) { p, v -> p.copy(showMedia = v) },
+        ContentSwitch(stringResource(Res.string.media), profile.showMedia) { p, v -> p.copy(showMedia = v) },
         // Whether video carries its subtitle overlay on this output; read by MediaPresenter.
         ContentSwitch(stringResource(Res.string.media_subtitles), profile.showSubtitles) { p, v ->
             p.copy(showSubtitles = v)
@@ -129,7 +129,7 @@ private fun contentSwitches(profile: OutputProfile): ContentGroups {
             p.copy(showWebsite = v)
         },
         ContentSwitch(stringResource(Res.string.tab_canvas), profile.showCanvas) { p, v -> p.copy(showCanvas = v) },
-        ContentSwitch(stringResource(Res.string.content_streaming), profile.showStreaming) { p, v ->
+        ContentSwitch(stringResource(Res.string.display_lower_third), profile.showStreaming) { p, v ->
             p.copy(showStreaming = v)
         },
     )
@@ -145,7 +145,7 @@ private fun contentSwitches(profile: OutputProfile): ContentGroups {
     )
     val backgrounds = listOf(
         ContentSwitch(
-            stringResource(Res.string.projection_content_background),
+            stringResource(Res.string.background),
             profile.showFullscreenBackground,
         ) { p, v -> p.copy(showFullscreenBackground = v) },
         ContentSwitch(

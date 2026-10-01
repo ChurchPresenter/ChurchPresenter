@@ -2,8 +2,8 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.content_media
-import churchpresenter.composeapp.generated.resources.lower_third_placement_full_screen
+import churchpresenter.composeapp.generated.resources.media
+import churchpresenter.composeapp.generated.resources.profile_mode_full
 import churchpresenter.composeapp.generated.resources.lower_third_placement_in_band
 import churchpresenter.composeapp.generated.resources.pictures
 import churchpresenter.composeapp.generated.resources.presentation
@@ -27,7 +27,7 @@ internal fun OutputProfile.placeableShown(): List<PlaceableContent> = buildList 
 }
 
 internal fun PlaceableContent.label(): StringResource = when (this) {
-    PlaceableContent.MEDIA -> Res.string.content_media
+    PlaceableContent.MEDIA -> Res.string.media
     PlaceableContent.PRESENTATION -> Res.string.presentation
     PlaceableContent.PICTURES -> Res.string.pictures
     PlaceableContent.WEBSITE -> Res.string.projection_content_web
@@ -35,7 +35,7 @@ internal fun PlaceableContent.label(): StringResource = when (this) {
 }
 
 private fun LowerThirdPlacement.label(): StringResource = when (this) {
-    LowerThirdPlacement.FULL_SCREEN -> Res.string.lower_third_placement_full_screen
+    LowerThirdPlacement.FULL_SCREEN -> Res.string.profile_mode_full
     LowerThirdPlacement.IN_BAND -> Res.string.lower_third_placement_in_band
 }
 

@@ -78,7 +78,7 @@ import churchpresenter.composeapp.generated.resources.bible
 import churchpresenter.composeapp.generated.resources.content_outputs
 import churchpresenter.composeapp.generated.resources.content_outputs_enabled_short
 import churchpresenter.composeapp.generated.resources.detected_screens
-import churchpresenter.composeapp.generated.resources.display_fullscreen
+import churchpresenter.composeapp.generated.resources.full_screen
 import churchpresenter.composeapp.generated.resources.display_mode
 import churchpresenter.composeapp.generated.resources.ic_app_icon
 import churchpresenter.composeapp.generated.resources.ic_settings
@@ -947,7 +947,7 @@ private fun ScreenAssignmentHint() {
                     stringResource(Res.string.projection_auto_display),
                 )
                 MockColumn(stringResource(Res.string.key_output), stringResource(Res.string.key_output_none))
-                MockColumn(stringResource(Res.string.display_mode), stringResource(Res.string.display_fullscreen))
+                MockColumn(stringResource(Res.string.display_mode), stringResource(Res.string.full_screen))
                 MockColumn(
                     stringResource(Res.string.content_outputs),
                     stringResource(Res.string.content_outputs_enabled_short, SAMPLE_OUTPUTS_ON, SAMPLE_OUTPUTS_TOTAL),

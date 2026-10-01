@@ -11,7 +11,7 @@ import androidx.compose.ui.platform.testTag
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.content_bible_translations_all
-import churchpresenter.composeapp.generated.resources.customize_songs
+import churchpresenter.composeapp.generated.resources.songs
 import churchpresenter.composeapp.generated.resources.middle
 import churchpresenter.composeapp.generated.resources.profile_end_marker
 import churchpresenter.composeapp.generated.resources.profile_end_marker_spacing
@@ -19,7 +19,7 @@ import churchpresenter.composeapp.generated.resources.profile_fit_languages
 import churchpresenter.composeapp.generated.resources.profile_fit_languages_each
 import churchpresenter.composeapp.generated.resources.profile_fit_languages_same
 import churchpresenter.composeapp.generated.resources.profile_fit_languages_sub
-import churchpresenter.composeapp.generated.resources.profile_group_languages
+import churchpresenter.composeapp.generated.resources.profile_box_languages
 import churchpresenter.composeapp.generated.resources.profile_group_slides
 import churchpresenter.composeapp.generated.resources.profile_group_text
 import churchpresenter.composeapp.generated.resources.profile_language_gap
@@ -82,7 +82,7 @@ internal fun ProfileSongsPage(
 
     ContentBackgroundGroup(
         scope = if (lowerThird) BackgroundScope.SONG_LOWER_THIRD else BackgroundScope.SONG,
-        contentLabel = stringResource(Res.string.customize_songs),
+        contentLabel = stringResource(Res.string.songs),
         draft = draft,
         profile = profile,
         onProfileChange = onProfileChange,
@@ -100,7 +100,7 @@ internal fun ProfileSongsPage(
         targets,
     )
     if (profile.songMode == Constants.SONG_LANG_BOTH) {
-        SettingsGroup(stringResource(Res.string.profile_group_languages), paths = SONG_LAYOUT_PATHS) {
+        SettingsGroup(stringResource(Res.string.profile_box_languages), paths = SONG_LAYOUT_PATHS) {
             SettingsRow(stringResource(Res.string.profile_layout), paths = SONG_LAYOUT_PATHS) {
                 RowSegmented(
                     options = bilingualLayoutRowOptions(),

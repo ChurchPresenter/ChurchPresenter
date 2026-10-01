@@ -44,7 +44,7 @@ import churchpresenter.composeapp.generated.resources.interactive_mode
 import churchpresenter.composeapp.generated.resources.mirror_mode
 import churchpresenter.composeapp.generated.resources.web_bookmark_add
 import churchpresenter.composeapp.generated.resources.web_bookmark_remove
-import churchpresenter.composeapp.generated.resources.web_add_to_schedule
+import churchpresenter.composeapp.generated.resources.tooltip_add_to_schedule
 import churchpresenter.composeapp.generated.resources.web_clear_typed_text
 import churchpresenter.composeapp.generated.resources.web_clear_url
 import androidx.compose.material.icons.Icons
@@ -275,7 +275,7 @@ private fun WebTabScope.WebActionButtons(hasSecondaryDisplay: Boolean, hasWebCap
                 onAddToSchedule(url, title)
             },
             enabled = urlInput.isNotBlank(),
-            tooltipText = stringResource(Res.string.web_add_to_schedule)
+            tooltipText = stringResource(Res.string.tooltip_add_to_schedule)
         )
     }
 

@@ -197,7 +197,6 @@
     <ID>MaxLineLength:CCLIReportDialog.kt$TableCell(song.ccliNumber.ifBlank { "—" }, fixedWidth = 66.dp.value, muted = song.ccliNumber.isBlank())</ID>
     <ID>MaxLineLength:CCLIReportDialog.kt$Text(stringResource(Res.string.ccli_from), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
     <ID>MaxLineLength:CCLIReportDialog.kt$Text(stringResource(Res.string.ccli_legend_bible), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
-    <ID>MaxLineLength:CCLIReportDialog.kt$Text(stringResource(Res.string.ccli_legend_songs), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
     <ID>MaxLineLength:CCLIReportDialog.kt$Text(stringResource(Res.string.ccli_to), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)</ID>
     <ID>MaxLineLength:CCLIReportDialog.kt$Text(text, style = style, color = textColor, modifier = mod, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = align)</ID>
     <ID>MaxLineLength:CCLIReportDialog.kt$color = if (statusIsSuccess) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error</ID>
@@ -228,7 +227,6 @@
     <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$onRowsChange = { v -&gt; tabRowsText = v; v.toIntOrNull()?.let { onUpdate { copy(tabRows = it.coerceAtLeast(1)) } } }</ID>
     <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$stringResource(Res.string.companion_satellite_status_connecting) to MaterialTheme.semantic.warning</ID>
     <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$stringResource(Res.string.companion_satellite_status_disconnected) to MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)</ID>
-    <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$stringResource(Res.string.companion_satellite_status_error, state.errorMessage) to MaterialTheme.colorScheme.error</ID>
     <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$v.toIntOrNull()?.let { onUpdate { copy(reconnectDelayMs = it.coerceAtLeast(MIN_RECONNECT_DELAY_MS)) } }</ID>
     <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$var leftBitmapSizeText by remember(connection.id, connection.leftSidebarBitmapSize) { mutableStateOf(connection.leftSidebarBitmapSize.toString()) }</ID>
     <ID>MaxLineLength:CompanionSatelliteSettingsTab.kt$var leftColumnsText by remember(connection.id, connection.leftSidebarColumns) { mutableStateOf(connection.leftSidebarColumns.toString()) }</ID>
@@ -264,7 +262,6 @@
     <ID>MaxLineLength:CompanionServer.kt$CompanionServer$val</ID>
     <ID>MaxLineLength:CompanionSurfacePanel.kt$stringResource(Res.string.companion_satellite_status_connecting) to MaterialTheme.semantic.warning</ID>
     <ID>MaxLineLength:CompanionSurfacePanel.kt$stringResource(Res.string.companion_satellite_status_disconnected) to MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)</ID>
-    <ID>MaxLineLength:CompanionSurfacePanel.kt$stringResource(Res.string.companion_satellite_status_error, state.errorMessage) to MaterialTheme.colorScheme.error</ID>
     <ID>MaxLineLength:ConnectionStatusRow.kt$InstanceLinkStatus.DISCONNECTED -&gt; MaterialTheme.colorScheme.onSurfaceVariant to Res.string.instance_link_status_disconnected</ID>
     <ID>MaxLineLength:Constants.kt$/** The 1080p bounds [ScaledPresenterContent][org.churchpresenter.app.churchpresenter.composables.ScaledPresenterContent] assumes when no real display exists to ask (headless). */</ID>
     <ID>MaxLineLength:CrosswordData.kt$CrosswordDecoder$fun</ID>
@@ -347,7 +344,6 @@
     <ID>MaxLineLength:MediaAndAssetRoutes.kt$val index = call.parameters["index"]?.toIntOrNull() ?: run { call.respond(HttpStatusCode.BadRequest, "Invalid index"); return@get }</ID>
     <ID>MaxLineLength:MediaAndAssetRoutes.kt$val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_uploads/$dateStr").also { it.mkdirs() }</ID>
     <ID>MaxLineLength:MediaSettingsTab.kt$trailingLabel = "${settings.pictureSettings.autoScrollInterval.toInt()}${stringResource(Res.string.seconds_suffix)}"</ID>
-    <ID>MaxLineLength:MediaSettingsTab.kt$trailingLabel = "${settings.pictureSettings.transitionDuration.toInt()}${stringResource(Res.string.milliseconds_suffix)}"</ID>
     <ID>MaxLineLength:MediaViewModel.kt$MediaViewModel$fun markFinished()</ID>
     <ID>MaxLineLength:NavigationTopBar.kt$Item(stringResource(Res.string.menu_keyboard_shortcuts), onClick = onKeyboardShortcuts, shortcut = accel(ShortcutAction.KEYBOARD_SHORTCUTS))</ID>
     <ID>MaxLineLength:OBSSettingsTab.kt$"${stringResource(Res.string.obs_status_error)}: $errorMessage" to MaterialTheme.colorScheme.error</ID>
@@ -510,7 +506,6 @@
     <ID>MaxLineLength:QaRoutes.kt$val textEsc = dto.text.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r")</ID>
     <ID>MaxLineLength:RecentMediaFiles.kt$RecentMediaFiles$try { if (file.exists()) { val json = Json { ignoreUnknownKeys = true }; val list = json.decodeFromString&lt;List&lt;String&gt;&gt;(file.readText()); paths.clear(); paths.addAll(list.take(MAX)) } } catch (_: Exception) {}</ID>
     <ID>MaxLineLength:RecentMediaFiles.kt$RecentMediaFiles$try { if (pinnedFile.exists()) { val json = Json { ignoreUnknownKeys = true }; val list = json.decodeFromString&lt;List&lt;String&gt;&gt;(pinnedFile.readText()); pinned.clear(); pinned.addAll(list) } } catch (_: Exception) {}</ID>
-    <ID>MaxLineLength:RemoteActivityToast.kt$RemoteEventType.PRESENTATION_CONNECT -&gt; stringResource(Res.string.remote_activity_presentation_connect_detail)</ID>
     <ID>MaxLineLength:RemoteActivityToast.kt$isInstanceLinkFollower = current.clientId.isNotBlank() &amp;&amp; current.clientId in connectedInstanceLinkFollowers</ID>
     <ID>MaxLineLength:RemoteCommandEffects.kt$onSettingsChange { s -&gt; s.copy(presentationSettings = s.presentationSettings.copy(isLooping = presentationViewModel.isLooping)) }</ID>
     <ID>MaxLineLength:RemoteEventDialog.kt$RemoteEventPresentation$*</ID>
@@ -521,7 +516,6 @@
     <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { onSettingsChange { s -&gt; s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(host = it)) } }</ID>
     <ID>MaxLineLength:STTSettingsDialog.kt$onValueChange = { v -&gt; v.toIntOrNull()?.let { p -&gt; onSettingsChange { s -&gt; s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(port = p)) } } }</ID>
     <ID>MaxLineLength:STTTab.kt$Text(stringResource(Res.string.stt_live_preview), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)</ID>
-    <ID>MaxLineLength:STTTab.kt$Text(stringResource(Res.string.stt_transcription_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)</ID>
     <ID>MaxLineLength:STTTab.kt$Text(stringResource(Res.string.stt_translation_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)</ID>
     <ID>MaxLineLength:STTTab.kt$text = applyHighlighting(segment.text, highlightedWords, highlightingEnabled, MaterialTheme.colorScheme.onSurface)</ID>
     <ID>MaxLineLength:STTTab.kt$text = applyHighlighting(segment.text, highlightedWords, highlightingEnabled, MaterialTheme.colorScheme.primary)</ID>

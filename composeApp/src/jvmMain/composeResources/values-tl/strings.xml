@@ -3,7 +3,6 @@
     <string name="mode">Mode</string>
     <string name="scope">Saklaw</string>
     <string name="title">Pamagat</string>
-    <string name="number">Numero</string>
     <string name="go_live">I-Live</string>
     <string name="add_to_schedule">Idagdag sa Schedule</string>
     <string name="copy_verse">Kopyahin ang Talata</string>
@@ -12,7 +11,6 @@
     <string name="search">Maghanap</string>
     <string name="bible_smart_search_hint">Reperensya o teksto — hal. Juan 3:16, mat 1, o isang salita</string>
     <string name="bible_search_mode_auto">Auto</string>
-    <string name="bible_search_mode_reference">Reperensya</string>
     <string name="bible_search_mode_text">Teksto</string>
     <string name="bible_search_mode_tooltip">I-tap para magpalit — Auto: tumalon sa reperensya, hanapin ang lahat ng iba. Reperensya: mag-navigate lamang. Teksto: laging hanapin sa teksto ng talata.</string>
     <string name="bible_verse_selection_hint">Ctrl+Click para pumili, Shift+Click para sa saklaw</string>
@@ -82,17 +80,11 @@
     <string name="bible_cross_references_close">Isara ang panel</string>
     <string name="bible_cross_references_dismiss_hint">Esc para isara</string>
     <string name="menu_file">File</string>
-    <string name="menu_new_schedule">Bagong Schedule</string>
-    <string name="menu_open_schedule">Buksan ang Schedule</string>
-    <string name="menu_save_schedule">I-save ang Schedule</string>
     <string name="menu_save_schedule_as">I-save ang Schedule Bilang...</string>
     <string name="menu_close_schedule">Isara ang Schedule</string>
     <string name="menu_exit">Lumabas</string>
     <string name="file_chooser_save_schedule">I-save ang Schedule Bilang</string>
-    <string name="file_chooser_open_schedule">Buksan ang Schedule</string>
     <string name="file_filter_schedule">Schedule ng Church Presenter (*.cps)</string>
-    <string name="menu_schedule">Schedule</string>
-    <string name="menu_add_to_schedule">Idagdag sa Schedule</string>
     <string name="menu_remove_from_schedule">Alisin sa Schedule</string>
     <string name="menu_clear_schedule">I-clear ang Schedule</string>
 
@@ -111,7 +103,6 @@
     <string name="instance_link_description">Sundan ang ibang ChurchPresenter instance sa network mo — i-mirror dito ang live content nito, at puwede ring magdagdag ng item sa schedule nito.</string>
     <string name="instance_link_host">Host</string>
     <string name="instance_link_host_hint">hal. 192.168.1.10</string>
-    <string name="instance_link_port">Port</string>
     <string name="instance_link_autoconnect">Kumonekta agad sa pagbukas</string>
     <string name="instance_link_reconnect_delay">Pinakamaikling delay bago mag-reconnect</string>
     <string name="instance_link_reconnect_delay_hint">Pinakamaikling paghihintay bago subukan muli ang naputol na link. Ang paulit-ulit na pagkabigo ay lalo pang magpapatagal nito.</string>
@@ -466,15 +457,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">Default</string>
-    <string name="background_color_option">Kulay</string>
-    <string name="background_image_option">Larawan</string>
     <string name="background_video_option">Video Loop</string>
     <string name="background_transparent_option">Transparent</string>
     <string name="background_follow_default_option">Sumunod sa Default</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">Web</string>
-    <string name="projection_content_background">Background</string>
     <string name="projection_content_lt_background">Background ng Lower Third</string>
     <string name="browser_source_resolution">Resolution</string>
     <string name="browser_source_fps">Max FPS</string>
@@ -556,7 +544,6 @@
     <string name="tooltip_schedule_zoom_out">Zoom Out</string>
     <string name="tooltip_add_to_schedule">Idagdag sa Schedule</string>
     <string name="tooltip_clear_display">I-clear ang Display</string>
-    <string name="remote_action_clear_display">I-clear ang Display</string>
     <string name="schedule_add_files_title">Magdagdag ng mga File sa Schedule</string>
     <string name="tooltip_toggle_displays">I-toggle ang mga Presenter Display</string>
     <string name="tooltip_settings">Mga Setting</string>
@@ -578,7 +565,6 @@
     <string name="schedule_density_compact">Siksik</string>
     <string name="schedule_density_normal">Normal</string>
     <string name="schedule_density_detailed">Detalyado</string>
-    <string name="schedule_kind_lower_third">Lower Third</string>
     <string name="tooltip_schedule_options">Mga Opsyon ng Schedule</string>
     <string name="schedule_show_buttons_under_title">Ipakita ang mga button sa ilalim ng pamagat</string>
     <string name="schedule_option_item_count">Bilang ng Item</string>
@@ -589,7 +575,6 @@
     <string name="edit_label">I-edit ang Label</string>
     <string name="label_text">Teksto ng Label</string>
     <string name="text_color">Kulay ng Teksto</string>
-    <string name="background_color_label">Kulay ng Background</string>
     <string name="enter_label_text">Ilagay ang teksto ng label...</string>
 
     <!-- Pictures Tab Strings -->
@@ -619,7 +604,6 @@
     <string name="animation_slide_left">Slide sa Kaliwa</string>
     <string name="animation_slide_right">Slide sa Kanan</string>
     <string name="animation_none">Wala</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s susunod/nakaraang larawan  ·  %2$s paglipat ng row</string>
     <string name="presentation_arrow_key_hint">%1$s — nakaraan/susunod na build at slide  ·  %2$s — play/pause  ·  %3$s — blangkong screen</string>
     <string name="pictures_reorder_hint">Shift+drag ang mga thumbnail para baguhin ang pagkakasunod</string>
@@ -682,14 +666,10 @@
     <string name="content_bible_background">Background ng Biblia</string>
     <string name="content_songs_background">Background ng mga Awit</string>
     <string name="content_pictures">Mga Larawan/Presentasyon</string>
-    <string name="content_media">Media</string>
-    <string name="content_streaming">Lower Third</string>
     <string name="content_announcements">Mga Anunsyo</string>
     <string name="display_mode">Display Mode</string>
-    <string name="display_fullscreen">Full Screen</string>
     <string name="display_lower_third">Lower Third</string>
     <string name="full_screen">Full Screen</string>
-    <string name="lower_third_size">Lower Third</string>
     <string name="identify_screen">Tukuyin</string>
     <string name="projection_target_display">Display</string>
     <string name="projection_auto_display">Auto</string>
@@ -765,7 +745,6 @@
     <string name="settings_import_failed">Nabigong i-import ang mga setting. Maaaring hindi valid ang file.</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">Media</string>
     <string name="media_local_file">Lokal na File</string>
     <string name="media_network_url">Network URL</string>
     <string name="media_url_placeholder">Ilagay ang URL (http://, rtsp://, ...)</string>
@@ -809,7 +788,6 @@
     <string name="center_left">Gitnang Kaliwa</string>
     <string name="center_right">Gitnang Kanan</string>
     <string name="bottom_center">Gitnang Ibaba</string>
-    <string name="announcement_background_color_label">Kulay ng Background</string>
     <string name="transparent_default">Transparent (Default)</string>
     <string name="announcement_animation">Animation</string>
     <string name="anim_slide_from_left">Slide Mula sa Kaliwa</string>
@@ -882,7 +860,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">Idagdag sa Schedule</string>
     <string name="web_go_live">I-Live</string>
     <string name="web_bookmark_add">Magdagdag ng Bookmark</string>
     <string name="web_bookmark_remove">Alisin ang Bookmark</string>
@@ -946,7 +923,6 @@
     <string name="canvas_shape_fill_color">Fill</string>
     <string name="canvas_shape_stroke_width">Lapad ng Stroke</string>
     <string name="canvas_rename_scene">Palitan ang pangalan</string>
-    <string name="canvas_remove_scene">Alisin</string>
     <string name="canvas_add_source">Magdagdag ng source</string>
     <string name="canvas_delete_source">Burahin ang source</string>
     <string name="canvas_source_move_forward">Ilipat pasulong</string>
@@ -974,7 +950,6 @@
     <string name="canvas_render_height">Taas</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">Custom CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">Piliin ang Larawan</string>
     <string name="canvas_select_video_title">Piliin ang Video</string>
     <string name="canvas_image_files">Mga Image File</string>
@@ -986,7 +961,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">Orasan</string>
     <string name="canvas_clock_mode_countdown">Countdown</string>
     <string name="canvas_clock_mode_count_up">Stopwatch</string>
     <string name="canvas_decklink_io_warning">Ginagamit na ngayon ang device na ito para sa output. Maaaring hindi available ang input sa mga device na hindi sumusuporta sa sabay na I/O.</string>
@@ -1004,7 +978,6 @@
     <string name="canvas_text_curve">Kurba</string>
     <string name="canvas_letter_spacing">Agwat ng Letra</string>
     <string name="canvas_source_qrcode">QR Code</string>
-    <string name="canvas_source_camera">Camera</string>
     <string name="canvas_source_screen_capture">Screen Capture</string>
     <string name="canvas_source_bible">Biblia</string>
     <string name="canvas_bible_version">Bersyon ng Biblia</string>
@@ -1017,7 +990,6 @@
     <string name="canvas_bible_ref_color">Kulay ng Reperensya</string>
     <string name="canvas_verse_style">Estilo ng Talata</string>
     <string name="canvas_reference_style">Estilo ng Reperensya</string>
-    <string name="canvas_text_color">Kulay ng Teksto</string>
     <string name="canvas_text_bg_color">Kulay ng Background</string>
     <string name="canvas_clock_mode">Mode</string>
     <string name="canvas_clock_format">Format</string>
@@ -1042,7 +1014,6 @@
     <string name="canvas_camera_format">Video Format</string>
     <string name="canvas_camera_format_auto">Auto (default)</string>
     <string name="canvas_camera_connection">Video Connection</string>
-    <string name="canvas_camera_mode">Mode</string>
     <string name="canvas_camera_mode_auto">Auto</string>
     <string name="canvas_capture_x">Capture X</string>
     <string name="canvas_capture_y">Capture Y</string>
@@ -1053,9 +1024,7 @@
     <string name="canvas_capture_mode_window">Window</string>
     <string name="canvas_capture_refresh_windows">I-refresh ang Listahan ng Window</string>
     <string name="canvas_capture_interval">Interval ng Capture</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Camera: %1$s</string>
-    <string name="canvas_placeholder_camera_default">Camera</string>
     <string name="canvas_placeholder_screen_capture">Screen Capture</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1177,7 +1146,6 @@
     <string name="remote_activity_removed_from_schedule">Naalis sa Schedule</string>
     <string name="remote_activity_projected">Na-project (I-Live)</string>
     <string name="remote_activity_presentation_connect">Nakakonekta sa Presentation Remote</string>
-    <string name="remote_activity_presentation_connect_detail">Nakakonekta na</string>
     <string name="remote_activity_qa_admin_connect">Nakakonekta sa Q&amp;A Admin</string>
     <string name="remote_activity_qa_admin_connect_detail">Nakakonekta na</string>
     <string name="remote_activity_presented">Ipinapakita</string>
@@ -1217,7 +1185,6 @@
     <string name="instance_link_primary_badge">Primary — %1$d follower ang nakakonekta</string>
     <string name="client_label_placeholder">Ilagay ang madaling pangalan…</string>
     <string name="client_label_edit_tooltip">Itakda ang madaling pangalan</string>
-    <string name="client_label_save">I-save</string>
     <string name="client_label_cancel">Kanselahin</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1338,7 +1305,6 @@
     <string name="system_storage_subtitle">Kung saan hinahanap ng Church Presenter ang iyong nilalaman</string>
     <string name="system_storage_linked_count">%1$d naka-link</string>
     <string name="system_storage_needs_attention_count">%1$d kailangang asikasuhin</string>
-    <string name="system_storage_status_not_set">Hindi nakatakda</string>
     <string name="system_storage_status_not_found">Hindi nahanap ang folder</string>
     <string name="system_storage_status_read_only">Basahin lamang</string>
     <string name="system_storage_status_linked">Naka-link</string>
@@ -1380,7 +1346,6 @@
     <string name="show_song_number_before_title">Ipakita ang numero ng awit bago ang pamagat</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">Stage Monitor</string>
     <string name="general">Pangkalahatan</string>
     <string name="display_stage_monitor">Stage Monitor</string>
     <string name="stage_monitor_quadrant_next">Susunod</string>
@@ -1465,7 +1430,6 @@
     <string name="qa_confirm_go_live">Kumpirmahin ang I-Live</string>
     <string name="qa_add_question_hint">Magdagdag ng tanong…</string>
     <string name="qa_edit_question_hint">I-edit ang teksto ng tanong…</string>
-    <string name="qa_delete_question">Burahin</string>
     <string name="qa_confirm_delete_prompt">Burahin?</string>
     <string name="qa_submitter_device">Device: %1$s</string>
     <string name="qa_public_access">Pampublikong Access</string>
@@ -1502,14 +1466,11 @@
     <string name="stt_live_preview">Live na preview</string>
     <string name="stt_not_connected">Hindi nakakonekta. Ilagay ang URL ng STT server at pindutin ang Kumonekta.</string>
     <string name="stt_waiting_for_transcription">Naghihintay ng transkripsyon…</string>
-    <string name="stt_transcription_label">Transkripsyon</string>
     <string name="stt_translation_label">Salin</string>
     <string name="stt_settings_dialog_title">Mga setting ng STT display</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">Mga ulat sa CCLI</string>
-    <string name="ccli_tab_songs">Mga awit</string>
-    <string name="ccli_tab_bible">Bibliya</string>
     <string name="ccli_tab_activity">Aktibidad</string>
     <string name="ccli_songs_summary">%1$d natatanging awit · %2$d beses ipinakita</string>
     <string name="ccli_bible_summary">%1$d natatanging talata · %2$d beses ipinakita</string>
@@ -1520,7 +1481,6 @@
     <string name="ccli_activity_title">Mga presentasyon sa paglipas ng panahon</string>
     <string name="ccli_from">Mula:</string>
     <string name="ccli_to">Hanggang:</string>
-    <string name="ccli_legend_songs">Mga awit</string>
     <string name="ccli_legend_bible">Mga talata sa Bibliya</string>
     <string name="ccli_stat_songs_presented">Mga awit na ipinakita</string>
     <string name="ccli_stat_bible_verses">Mga talata sa Bibliya</string>
@@ -1534,7 +1494,6 @@
     <string name="ccli_col_first">Una</string>
     <string name="ccli_col_last">Huli</string>
     <string name="ccli_col_verse">Talata</string>
-    <string name="ccli_col_bible">Bibliya</string>
     <string name="ccli_export_csv">I-export ang CCLI CSV</string>
     <string name="ccli_export_xls">I-export ang XLS</string>
     <string name="ccli_exported_success">Matagumpay na na-export ang ulat.</string>
@@ -1615,7 +1574,6 @@
     <string name="obs_mode_bible">Bibliya</string>
     <string name="obs_mode_songs">Mga awit</string>
     <string name="obs_mode_pictures">Mga larawan</string>
-    <string name="obs_mode_presentation">Presentasyon</string>
     <string name="obs_mode_media">Media</string>
     <string name="obs_mode_lower_third">Lower third</string>
     <string name="obs_mode_announcements">Mga anunsyo</string>
@@ -1810,7 +1768,6 @@
     <string name="companion_satellite_no_host">Magtakda ng Companion host sa Mga Setting → Companion Satellite para makakonekta.</string>
     <string name="companion_satellite_status_connecting">Kumokonekta…</string>
     <string name="companion_satellite_status_disconnected">Nadiskonekta</string>
-    <string name="companion_satellite_status_error">May mali: %1$s</string>
     <string name="companion_satellite_connection_name">Pangalan</string>
     <string name="companion_satellite_product_name">Pangalan ng produkto</string>
     <string name="companion_satellite_reconnect_delay">Antala bago kumonekta muli (ms)</string>
@@ -1874,7 +1831,6 @@
     <string name="bible_engine_detect">Tukuyin ang kasulatan</string>
     <string name="bible_engine_run_local">Patakbuhin ang engine dito sa computer</string>
     <string name="bible_engine_host">Host ng engine</string>
-    <string name="bible_engine_port">Port</string>
     <string name="stt_help_dev_mode">Tumulong sa developer — ipakita ang mga buton ng live na feedback sa tab na Bibliya (maling sipi / maaga / nalaktawang sipi)</string>
     <string name="dictionary_back">Bumalik</string>
     <string name="dictionary_forward">Sumulong</string>
@@ -1963,7 +1919,6 @@
     <string name="font_category_serif">Serif</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Preview</string>
     <string name="font_preview_sample">Halimbawang teksto sa piniling font</string>
     <string name="font_warning_no_cyrillic">%1$s ay walang mga titik na Cyrillic — ang mga talatang Cyrillic ay lalabas sa screen sa ibang font.</string>
     <string name="font_warning_no_hebrew">%1$s ay walang mga titik na Hebreo — ang tekstong Hebreo ay lalabas sa screen sa ibang font.</string>
@@ -1973,7 +1928,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">May guhit sa gitna</string>
     <string name="bible_custom_name">Pangalan</string>
-    <string name="bible_custom_abbreviation">Daglat</string>
     <string name="bible_translations">Mga salin</string>
     <string name="bible_miscellaneous">Iba pa</string>
     <string name="bible_font">Font</string>
@@ -1988,10 +1942,7 @@
     <string name="bible_preview_sample_book">Juan</string>
     <string name="bible_preview_no_translations">Magdagdag ng salin upang makita ito rito</string>
     <string name="song_element_number">Numero</string>
-    <string name="song_element_title">Pamagat</string>
     <string name="song_element_lyrics">Lyrics</string>
-    <string name="song_element_author">May-akda</string>
-    <string name="song_element_composer">Kompositor</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Title slide</string>
@@ -2004,7 +1955,6 @@
     <string name="song_chunk">Bahagi</string>
     <string name="song_language_scope">Wika</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">Background</string>
     <string name="song_background_full_screen">Buong screen</string>
     <string name="song_background_lower_third">Lower third</string>
     <string name="song_background_inherit">Manahin</string>
@@ -2019,7 +1969,6 @@
     <string name="song_background_your_color">Iyong kulay</string>
     <string name="song_background_browse">Mag-browse…</string>
     <string name="song_background_look">Anyo</string>
-    <string name="song_background_preset_none">Wala</string>
     <string name="song_background_preset_soft">Malambot</string>
     <string name="song_background_preset_legible">Nababasa</string>
     <string name="song_background_preset_cinema">Sine</string>
@@ -2040,7 +1989,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Mga Background</string>
     <string name="background_group_defaults">Default</string>
-    <string name="background_scope_default">Default</string>
     <string name="background_scope_default_lower_third">Default na Lower Third</string>
     <string name="background_scope_default_meta">Kapag naka-Default ang Biblia o Mga Awit</string>
     <string name="background_scope_default_lower_third_meta">Kapag naka-Default ang lower third</string>
@@ -2049,16 +1997,13 @@
     <string name="background_following_default">Sumusunod sa Default</string>
     <string name="background_use_default">Gamitin ang Default</string>
     <string name="background_set_explicitly">Hiwalay na itinakda para sa surface na ito</string>
-    <string name="background_type_caption">Uri</string>
     <string name="background_color_caption">Kulay</string>
     <string name="background_image_file">File ng Larawan</string>
     <string name="background_video_file">File ng Video</string>
-    <string name="background_opacity_caption">Opacity</string>
     <string name="background_above_band_caption">Sa Itaas ng Banda</string>
     <string name="background_above_band_fill">Kulay ng Fill</string>
     <string name="background_above_band_opacity">Opacity ng Fill</string>
     <string name="quick_background_reset">Balik sa normal</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · pamahalaan sa Mga Setting</string>
     <string name="quick_backgrounds">Mabilisang background</string>
     <string name="quick_backgrounds_help">Mga background na iniingatan ng preview panel nang isang click lang ang layo. I-click ang isang tile para piliin kung ano ang ipapakita nito, i-drag para baguhin kung aling key ang aabot dito. Ang pagpili sa gitna ng serbisyo ay nag-o-override sa bawat screen hanggang bumalik ka sa normal — walang binabago rito.</string>
@@ -2084,16 +2029,10 @@
     <string name="output_profile_swap_menu_tooltip">Palitan ang output profile</string>
     <string name="output_profile_new_name_default">Bagong Profile</string>
     <string name="output_profile_empty_state">Gumawa ng profile para simulan itong i-style</string>
-    <string name="customize_bible">Biblia</string>
-    <string name="customize_songs">Mga Awit</string>
     <string name="customize_group_verse_text">Teksto ng talata</string>
     <string name="customize_group_reference">Reperensya</string>
     <string name="customize_background_type">Uri</string>
-    <string name="customize_type_color">Kulay</string>
     <string name="customize_type_image">Larawan</string>
-    <string name="customize_type_video">Video</string>
-    <string name="customize_type_default">Default</string>
-    <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Daglat</string>
     <string name="customize_background_opacity">Opacity</string>
     <string name="slate_theme">Temang Pisara</string>
@@ -2139,7 +2078,6 @@
     <string name="song_lottie_unsupported_note">Ang template ang nagpapasya sa layout at kung saan ilalagay ang pamagat. Ang estilo ng lower third ang nagtatakda ng font, laki, kulay, pagkakahanay, pagitan ng mga titik, case at anino; hindi umiiral ang backdrop ng teksto, salungguhit, strikethrough, pagitan ng mga salita, look-ahead at mga chord.</string>
     <string name="bible_lottie_unsupported_note">Ang template ang nagpapasya sa layout, sa posisyon ng reference at kung paano paghahatian ng dalawang wika ang banda. Ang estilo ng lower third ang nagtatakda ng font, laki, kulay, pagkakahanay, pagitan ng mga titik, case at anino; hindi umiiral ang backdrop ng teksto, salungguhit, strikethrough at pagitan ng mga salita.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Balangkas</string>
     <string name="tooltip_outline_options">Mga opsyon sa balangkas</string>
     <string name="text_outline">Balangkas</string>
     <string name="text_outline_width">Lapad</string>
@@ -2207,7 +2145,6 @@
     <string name="add_ndi_output">Magdagdag ng Output</string>
     <string name="ndi_output_numbered">NDI Output %1$d</string>
     <string name="preview_output">I-preview ang output</string>
-    <string name="output_resolution">Resolution</string>
     <string name="output_resolution_custom">Custom…</string>
     <string name="output_resolution_custom_title">Custom na resolution</string>
     <string name="output_resolution_width">Lapad</string>
@@ -2311,7 +2248,6 @@
     <string name="calendar_sync_description">Magplano ng mga serbisyo mula sa mobile app buong linggo, kahit naka-off ang computer na ito. Nananatiling pinagmumulan ng katotohanan ang computer na ito.</string>
     <string name="calendar_sync_enable">I-sync ang kalendaryo sa mga telepono</string>
     <string name="calendar_sync_relay_url">Relay</string>
-    <string name="calendar_sync_status_off">Naka-off</string>
     <string name="calendar_sync_status_unpaired">Hindi pa nakarehistro — nagrerehistro ang computer na ito sa relay sa unang pagkakataong naka-on ang sync</string>
     <string name="calendar_sync_status_syncing">Nagsi-sync…</string>
     <string name="calendar_sync_status_synced">Na-sync %1$s</string>

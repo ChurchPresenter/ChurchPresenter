@@ -54,10 +54,9 @@ import churchpresenter.composeapp.generated.resources.remote_activity_qa_done
 import churchpresenter.composeapp.generated.resources.remote_activity_qa_display
 import churchpresenter.composeapp.generated.resources.remote_activity_qa_clear_display
 import churchpresenter.composeapp.generated.resources.remote_activity_presentation_connect
-import churchpresenter.composeapp.generated.resources.remote_activity_presentation_connect_detail
+import churchpresenter.composeapp.generated.resources.remote_activity_qa_admin_connect_detail
 import churchpresenter.composeapp.generated.resources.remote_activity_qa_admin_connect
 import churchpresenter.composeapp.generated.resources.remote_activity_musician_connect
-import churchpresenter.composeapp.generated.resources.remote_activity_qa_admin_connect_detail
 import churchpresenter.composeapp.generated.resources.instance_link_follower_badge
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
@@ -168,7 +167,7 @@ private fun RemoteActivityToast(
 
     val bodyTitle = notification.title.ifBlank {
         when (notification.type) {
-            RemoteEventType.PRESENTATION_CONNECT -> stringResource(Res.string.remote_activity_presentation_connect_detail)
+            RemoteEventType.PRESENTATION_CONNECT -> stringResource(Res.string.remote_activity_qa_admin_connect_detail)
             RemoteEventType.QA_ADMIN_CONNECT -> stringResource(Res.string.remote_activity_qa_admin_connect_detail)
             RemoteEventType.MUSICIAN_CONNECT -> stringResource(Res.string.remote_activity_qa_admin_connect_detail)
             else -> ""

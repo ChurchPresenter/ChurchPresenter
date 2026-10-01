@@ -43,7 +43,7 @@ import churchpresenter.composeapp.generated.resources.calendar_sync_no_devices
 import churchpresenter.composeapp.generated.resources.calendar_sync_relay_url
 import churchpresenter.composeapp.generated.resources.calendar_sync_revoke
 import churchpresenter.composeapp.generated.resources.calendar_sync_status_failed
-import churchpresenter.composeapp.generated.resources.calendar_sync_status_off
+import churchpresenter.composeapp.generated.resources.media_subtitles_off
 import churchpresenter.composeapp.generated.resources.calendar_sync_status_other_desktop
 import churchpresenter.composeapp.generated.resources.calendar_sync_status_synced
 import churchpresenter.composeapp.generated.resources.calendar_sync_status_synced_changes
@@ -220,7 +220,7 @@ internal fun CalendarSyncCardContent(
 @Composable
 internal fun calendarSyncStatusText(status: CalendarSyncStatus, clock: LocalTimeText = LocalTimeText.system()): String =
     when (status) {
-        CalendarSyncStatus.Off -> stringResource(Res.string.calendar_sync_status_off)
+        CalendarSyncStatus.Off -> stringResource(Res.string.media_subtitles_off)
         CalendarSyncStatus.Unpaired -> stringResource(Res.string.calendar_sync_status_unpaired)
         CalendarSyncStatus.Syncing -> stringResource(Res.string.calendar_sync_status_syncing)
         is CalendarSyncStatus.Synced -> syncedText(status, clock)

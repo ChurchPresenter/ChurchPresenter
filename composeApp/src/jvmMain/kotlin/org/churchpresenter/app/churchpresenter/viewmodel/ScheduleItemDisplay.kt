@@ -4,12 +4,12 @@ import org.churchpresenter.core.models.songs.SongItem
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.announcements
 import churchpresenter.composeapp.generated.resources.bible
-import churchpresenter.composeapp.generated.resources.media_tab_title
+import churchpresenter.composeapp.generated.resources.media
 import churchpresenter.composeapp.generated.resources.pictures
 import churchpresenter.composeapp.generated.resources.presentation
 import churchpresenter.composeapp.generated.resources.schedule_kind_cue
 import churchpresenter.composeapp.generated.resources.schedule_kind_ministry
-import churchpresenter.composeapp.generated.resources.schedule_kind_lower_third
+import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.songs
 import churchpresenter.composeapp.generated.resources.tab_canvas
 import churchpresenter.composeapp.generated.resources.tab_dictionary
@@ -95,8 +95,8 @@ internal fun scheduleItemKindLabel(item: ScheduleItem): StringResource = when (i
     is ScheduleItem.BibleVerseItem -> Res.string.bible
     is ScheduleItem.PresentationItem -> Res.string.presentation
     is ScheduleItem.PictureItem -> Res.string.pictures
-    is ScheduleItem.MediaItem -> Res.string.media_tab_title
-    is ScheduleItem.LowerThirdItem -> Res.string.schedule_kind_lower_third
+    is ScheduleItem.MediaItem -> Res.string.media
+    is ScheduleItem.LowerThirdItem -> Res.string.display_lower_third
     is ScheduleItem.AnnouncementItem -> Res.string.announcements
     is ScheduleItem.WebsiteItem -> Res.string.tab_web
     is ScheduleItem.SceneItem -> Res.string.tab_canvas

@@ -3,7 +3,6 @@
     <string name="mode">Rejim</string>
     <string name="scope">Qamrov</string>
     <string name="title">Sarlavha</string>
-    <string name="number">Raqam</string>
     <string name="go_live">Ekranga chiqarish</string>
     <string name="add_to_schedule">Jadvalga qoʻshish</string>
     <string name="copy_verse">Oyatni nusxalash</string>
@@ -12,7 +11,6 @@
     <string name="search">Qidirish</string>
     <string name="bible_smart_search_hint">Havola yoki matn — masalan, Yuhanno 3:16, mat 1 yoki biror soʻz</string>
     <string name="bible_search_mode_auto">Avto</string>
-    <string name="bible_search_mode_reference">Havola</string>
     <string name="bible_search_mode_text">Matn</string>
     <string name="bible_search_mode_tooltip">Almashtirish uchun bosing — Avto: havolalarga oʻtadi, qolganini qidiradi. Havola: faqat oʻtish. Matn: har doim oyat matnidan qidiradi.</string>
     <string name="bible_verse_selection_hint">Belgilash uchun Ctrl+bosish, oraliq uchun Shift+bosish</string>
@@ -82,17 +80,11 @@
     <string name="bible_cross_references_close">Panelni yopish</string>
     <string name="bible_cross_references_dismiss_hint">Yopish uchun Esc</string>
     <string name="menu_file">Fayl</string>
-    <string name="menu_new_schedule">Yangi jadval</string>
-    <string name="menu_open_schedule">Jadvalni ochish</string>
-    <string name="menu_save_schedule">Jadvalni saqlash</string>
     <string name="menu_save_schedule_as">Jadvalni boshqa nom bilan saqlash...</string>
     <string name="menu_close_schedule">Jadvalni yopish</string>
     <string name="menu_exit">Chiqish</string>
     <string name="file_chooser_save_schedule">Jadvalni boshqa nom bilan saqlash</string>
-    <string name="file_chooser_open_schedule">Jadvalni ochish</string>
     <string name="file_filter_schedule">Church Presenter jadvali (*.cps)</string>
-    <string name="menu_schedule">Jadval</string>
-    <string name="menu_add_to_schedule">Jadvalga qoʻshish</string>
     <string name="menu_remove_from_schedule">Jadvaldan olib tashlash</string>
     <string name="menu_clear_schedule">Jadvalni tozalash</string>
 
@@ -111,7 +103,6 @@
     <string name="instance_link_description">Tarmoqdagi boshqa ChurchPresenter nusxasini kuzatib boring — uning jonli tarkibini shu yerda takrorlang, xohlasangiz uning jadvaliga elementlar qoʻshing.</string>
     <string name="instance_link_host">Xost</string>
     <string name="instance_link_host_hint">masalan, 192.168.1.10</string>
-    <string name="instance_link_port">Port</string>
     <string name="instance_link_autoconnect">Ishga tushganda avtomatik ulanish</string>
     <string name="instance_link_reconnect_delay">Qayta ulanish uchun eng kam kutish</string>
     <string name="instance_link_reconnect_delay_hint">Uzilgan aloqani qayta urinishdan oldingi eng qisqa kutish. Takroriy muvaffaqiyatsizlikda kutish vaqti oʻzi uzayadi.</string>
@@ -466,15 +457,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">Standart</string>
-    <string name="background_color_option">Rang</string>
-    <string name="background_image_option">Rasm</string>
     <string name="background_video_option">Takroriy video</string>
     <string name="background_transparent_option">Shaffof</string>
     <string name="background_follow_default_option">Standartga muvofiq</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">Veb</string>
-    <string name="projection_content_background">Fon</string>
     <string name="projection_content_lt_background">Pastki titr foni</string>
     <string name="browser_source_resolution">Aniqlik</string>
     <string name="browser_source_fps">Maksimal FPS</string>
@@ -556,7 +544,6 @@
     <string name="tooltip_schedule_zoom_out">Kichraytirish</string>
     <string name="tooltip_add_to_schedule">Jadvalga qoʻshish</string>
     <string name="tooltip_clear_display">Ekranni tozalash</string>
-    <string name="remote_action_clear_display">Ekranni tozalash</string>
     <string name="schedule_add_files_title">Jadvalga fayllar qoʻshish</string>
     <string name="tooltip_toggle_displays">Koʻrsatuv ekranlarini yoqish/oʻchirish</string>
     <string name="tooltip_settings">Sozlamalar</string>
@@ -578,7 +565,6 @@
     <string name="schedule_density_compact">Ixcham</string>
     <string name="schedule_density_normal">Oddiy</string>
     <string name="schedule_density_detailed">Batafsil</string>
-    <string name="schedule_kind_lower_third">Pastki titr</string>
     <string name="tooltip_schedule_options">Jadval parametrlari</string>
     <string name="schedule_show_buttons_under_title">Tugmalarni sarlavha ostida koʻrsatish</string>
     <string name="schedule_option_item_count">Elementlar soni</string>
@@ -589,7 +575,6 @@
     <string name="edit_label">Yorliqni tahrirlash</string>
     <string name="label_text">Yorliq matni</string>
     <string name="text_color">Matn rangi</string>
-    <string name="background_color_label">Fon rangi</string>
     <string name="enter_label_text">Yorliq matnini kiriting...</string>
 
     <!-- Pictures Tab Strings -->
@@ -619,7 +604,6 @@
     <string name="animation_slide_left">Chapga sirpanish</string>
     <string name="animation_slide_right">Oʻngga sirpanish</string>
     <string name="animation_none">Yoʻq</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s keyingi/oldingi rasm  ·  %2$s qatorlar boʻylab</string>
     <string name="presentation_arrow_key_hint">%1$s — oldingi/keyingi qadam va slayd  ·  %2$s — ijro/pauza  ·  %3$s — ekranni boʻshatish</string>
     <string name="pictures_reorder_hint">Tartibni oʻzgartirish uchun eskizlarni Shift+sudrash</string>
@@ -682,14 +666,10 @@
     <string name="content_bible_background">Muqaddas Kitob foni</string>
     <string name="content_songs_background">Qoʻshiqlar foni</string>
     <string name="content_pictures">Rasmlar/Taqdimot</string>
-    <string name="content_media">Media</string>
-    <string name="content_streaming">Pastki titr</string>
     <string name="content_announcements">Eʼlonlar</string>
     <string name="display_mode">Koʻrsatish rejimi</string>
-    <string name="display_fullscreen">Toʻliq ekran</string>
     <string name="display_lower_third">Pastki titr</string>
     <string name="full_screen">Toʻliq ekran</string>
-    <string name="lower_third_size">Pastki titr</string>
     <string name="identify_screen">Aniqlash</string>
     <string name="projection_target_display">Displey</string>
     <string name="projection_auto_display">Avto</string>
@@ -765,7 +745,6 @@
     <string name="settings_import_failed">Sozlamalarni import qilib boʻlmadi. Fayl notoʻgʻri boʻlishi mumkin.</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">Media</string>
     <string name="media_local_file">Kompyuterdagi fayl</string>
     <string name="media_network_url">Tarmoq URLi</string>
     <string name="media_url_placeholder">URL kiriting (http://, rtsp://, ...)</string>
@@ -809,7 +788,6 @@
     <string name="center_left">Oʻrta chap</string>
     <string name="center_right">Oʻrta oʻng</string>
     <string name="bottom_center">Past markaz</string>
-    <string name="announcement_background_color_label">Fon rangi</string>
     <string name="transparent_default">Shaffof (standart)</string>
     <string name="announcement_animation">Animatsiya</string>
     <string name="anim_slide_from_left">Chapdan sirpanib chiqish</string>
@@ -882,7 +860,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">Jadvalga qoʻshish</string>
     <string name="web_go_live">Ekranga chiqarish</string>
     <string name="web_bookmark_add">Xatchoʻp qoʻshish</string>
     <string name="web_bookmark_remove">Xatchoʻpni olib tashlash</string>
@@ -946,7 +923,6 @@
     <string name="canvas_shape_fill_color">Ichki rang</string>
     <string name="canvas_shape_stroke_width">Chiziq qalinligi</string>
     <string name="canvas_rename_scene">Nomini oʻzgartirish</string>
-    <string name="canvas_remove_scene">Olib tashlash</string>
     <string name="canvas_add_source">Manba qoʻshish</string>
     <string name="canvas_delete_source">Manbani oʻchirish</string>
     <string name="canvas_source_move_forward">Oldinga surish</string>
@@ -974,7 +950,6 @@
     <string name="canvas_render_height">Balandlik</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">Maxsus CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">Rasm tanlash</string>
     <string name="canvas_select_video_title">Video tanlash</string>
     <string name="canvas_image_files">Rasm fayllari</string>
@@ -986,7 +961,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">Soat</string>
     <string name="canvas_clock_mode_countdown">Teskari sanoq</string>
     <string name="canvas_clock_mode_count_up">Sekundomer</string>
     <string name="canvas_decklink_io_warning">Bu qurilma hozir chiqish uchun ishlatilmoqda. Bir vaqtda kirish/chiqishni qoʻllamaydigan qurilmalarda kirish ishlamasligi mumkin.</string>
@@ -1004,7 +978,6 @@
     <string name="canvas_text_curve">Egrilik</string>
     <string name="canvas_letter_spacing">Harflar oralig'i</string>
     <string name="canvas_source_qrcode">QR kod</string>
-    <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Ekran tasviri</string>
     <string name="canvas_source_bible">Muqaddas Kitob</string>
     <string name="canvas_bible_version">Tarjima</string>
@@ -1017,7 +990,6 @@
     <string name="canvas_bible_ref_color">Havola rangi</string>
     <string name="canvas_verse_style">Oyat uslubi</string>
     <string name="canvas_reference_style">Havola uslubi</string>
-    <string name="canvas_text_color">Matn rangi</string>
     <string name="canvas_text_bg_color">Fon rangi</string>
     <string name="canvas_clock_mode">Rejim</string>
     <string name="canvas_clock_format">Format</string>
@@ -1042,7 +1014,6 @@
     <string name="canvas_camera_format">Video format</string>
     <string name="canvas_camera_format_auto">Avto (standart)</string>
     <string name="canvas_camera_connection">Video ulanish</string>
-    <string name="canvas_camera_mode">Rejim</string>
     <string name="canvas_camera_mode_auto">Avto</string>
     <string name="canvas_capture_x">Tasvir X</string>
     <string name="canvas_capture_y">Tasvir Y</string>
@@ -1053,9 +1024,7 @@
     <string name="canvas_capture_mode_window">Oyna</string>
     <string name="canvas_capture_refresh_windows">Oynalar roʻyxatini yangilash</string>
     <string name="canvas_capture_interval">Suratga olish oraligʻi</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Kamera: %1$s</string>
-    <string name="canvas_placeholder_camera_default">Kamera</string>
     <string name="canvas_placeholder_screen_capture">Ekranni suratga olish</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1177,7 +1146,6 @@
     <string name="remote_activity_removed_from_schedule">Dasturdan olib tashlandi</string>
     <string name="remote_activity_projected">Koʻrsatildi (efirga chiqdi)</string>
     <string name="remote_activity_presentation_connect">Taqdimot pultiga ulandi</string>
-    <string name="remote_activity_presentation_connect_detail">Endi ulangan</string>
     <string name="remote_activity_qa_admin_connect">Savollar boshqaruviga ulandi</string>
     <string name="remote_activity_qa_admin_connect_detail">Endi ulangan</string>
     <string name="remote_activity_presented">Koʻrsatilmoqda</string>
@@ -1217,7 +1185,6 @@
     <string name="instance_link_primary_badge">Asosiy — %1$d ta izdosh ulangan</string>
     <string name="client_label_placeholder">Tushunarli nom kiriting…</string>
     <string name="client_label_edit_tooltip">Tushunarli nom berish</string>
-    <string name="client_label_save">Saqlash</string>
     <string name="client_label_cancel">Bekor qilish</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1338,7 +1305,6 @@
     <string name="system_storage_subtitle">Church Presenter kontentingizni qayerdan qidiradi</string>
     <string name="system_storage_linked_count">%1$d ulangan</string>
     <string name="system_storage_needs_attention_count">%1$d e'tibor talab qiladi</string>
-    <string name="system_storage_status_not_set">Belgilanmagan</string>
     <string name="system_storage_status_not_found">Papka topilmadi</string>
     <string name="system_storage_status_read_only">Faqat o'qish</string>
     <string name="system_storage_status_linked">Ulangan</string>
@@ -1380,7 +1346,6 @@
     <string name="show_song_number_before_title">Qoʻshiq raqamini sarlavhadan oldin koʻrsatish</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">Sahna monitori</string>
     <string name="general">Umumiy</string>
     <string name="display_stage_monitor">Sahna monitori</string>
     <string name="stage_monitor_quadrant_next">Keyingi</string>
@@ -1465,7 +1430,6 @@
     <string name="qa_confirm_go_live">Efirga chiqarishni tasdiqlash</string>
     <string name="qa_add_question_hint">Savol qoʻshing…</string>
     <string name="qa_edit_question_hint">Savol matnini tahrirlang…</string>
-    <string name="qa_delete_question">Oʻchirish</string>
     <string name="qa_confirm_delete_prompt">Oʻchirilsinmi?</string>
     <string name="qa_submitter_device">Qurilma: %1$s</string>
     <string name="qa_public_access">Ommaviy kirish</string>
@@ -1502,14 +1466,11 @@
     <string name="stt_live_preview">Jonli koʻrinish</string>
     <string name="stt_not_connected">Ulanmagan. STT server manzilini kiriting va “Ulanish”ni bosing.</string>
     <string name="stt_waiting_for_transcription">Matnga oʻgirish kutilmoqda…</string>
-    <string name="stt_transcription_label">Matnga oʻgirish</string>
     <string name="stt_translation_label">Tarjima</string>
     <string name="stt_settings_dialog_title">STT koʻrsatish sozlamalari</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">CCLI hisobotlari</string>
-    <string name="ccli_tab_songs">Qoʻshiqlar</string>
-    <string name="ccli_tab_bible">Injil</string>
     <string name="ccli_tab_activity">Faollik</string>
     <string name="ccli_songs_summary">%1$d ta har xil qoʻshiq · jami %2$d marta</string>
     <string name="ccli_bible_summary">%1$d ta har xil oyat · jami %2$d marta</string>
@@ -1520,7 +1481,6 @@
     <string name="ccli_activity_title">Vaqt boʻyicha koʻrsatuvlar</string>
     <string name="ccli_from">Dan:</string>
     <string name="ccli_to">Gacha:</string>
-    <string name="ccli_legend_songs">Qoʻshiqlar</string>
     <string name="ccli_legend_bible">Injil oyatlari</string>
     <string name="ccli_stat_songs_presented">Koʻrsatilgan qoʻshiqlar</string>
     <string name="ccli_stat_bible_verses">Injil oyatlari</string>
@@ -1534,7 +1494,6 @@
     <string name="ccli_col_first">Birinchi</string>
     <string name="ccli_col_last">Oxirgi</string>
     <string name="ccli_col_verse">Oyat</string>
-    <string name="ccli_col_bible">Injil</string>
     <string name="ccli_export_csv">CCLI CSV eksport qilish</string>
     <string name="ccli_export_xls">XLS eksport qilish</string>
     <string name="ccli_exported_success">Hisobot muvaffaqiyatli eksport qilindi.</string>
@@ -1615,7 +1574,6 @@
     <string name="obs_mode_bible">Injil</string>
     <string name="obs_mode_songs">Qoʻshiqlar</string>
     <string name="obs_mode_pictures">Rasmlar</string>
-    <string name="obs_mode_presentation">Taqdimot</string>
     <string name="obs_mode_media">Media</string>
     <string name="obs_mode_lower_third">Quyi lavha</string>
     <string name="obs_mode_announcements">Eʼlonlar</string>
@@ -1810,7 +1768,6 @@
     <string name="companion_satellite_no_host">Ulanish uchun “Sozlamalar → Companion Satellite” da Companion xostini koʻrsating.</string>
     <string name="companion_satellite_status_connecting">Ulanmoqda…</string>
     <string name="companion_satellite_status_disconnected">Uzilgan</string>
-    <string name="companion_satellite_status_error">Xato: %1$s</string>
     <string name="companion_satellite_connection_name">Nom</string>
     <string name="companion_satellite_product_name">Mahsulot nomi</string>
     <string name="companion_satellite_reconnect_delay">Qayta ulanish kechikishi (ms)</string>
@@ -1874,7 +1831,6 @@
     <string name="bible_engine_detect">Muqaddas Bitik havolalarini aniqlash</string>
     <string name="bible_engine_run_local">Dvigatelni shu kompyuterda ishga tushirish</string>
     <string name="bible_engine_host">Dvigatel xosti</string>
-    <string name="bible_engine_port">Port</string>
     <string name="stt_help_dev_mode">Dasturchiga yordam — Injil boʻlimida jonli fikr tugmalarini koʻrsatish (notoʻgʻri parcha / erta / oʻtkazib yuborilgan parcha)</string>
     <string name="dictionary_back">Orqaga</string>
     <string name="dictionary_forward">Oldinga</string>
@@ -1963,7 +1919,6 @@
     <string name="font_category_serif">Serifli</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Koʻrib chiqish</string>
     <string name="font_preview_sample">Tanlangan shriftdagi namuna matn</string>
     <string name="font_warning_no_cyrillic">%1$s kirill belgilariga ega emas — kirill oyatlari ekranda boshqa shriftda koʻrinadi.</string>
     <string name="font_warning_no_hebrew">%1$s ibroniy belgilariga ega emas — ibroniy matn ekranda boshqa shriftda koʻrinadi.</string>
@@ -1973,7 +1928,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">Chizilgan</string>
     <string name="bible_custom_name">Nomi</string>
-    <string name="bible_custom_abbreviation">Qisqartma</string>
     <string name="bible_translations">Tarjimalar</string>
     <string name="bible_miscellaneous">Boshqa</string>
     <string name="bible_font">Shrift</string>
@@ -1988,10 +1942,7 @@
     <string name="bible_preview_sample_book">Yuhanno</string>
     <string name="bible_preview_no_translations">Bu yerda ko'rish uchun tarjima qo'shing</string>
     <string name="song_element_number">Raqam</string>
-    <string name="song_element_title">Sarlavha</string>
     <string name="song_element_lyrics">Qoʻshiq matni</string>
-    <string name="song_element_author">Muallif</string>
-    <string name="song_element_composer">Bastakor</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Temp</string>
     <string name="song_target_title_slide">Sarlavha slaydi</string>
@@ -2004,7 +1955,6 @@
     <string name="song_chunk">Bo'lak</string>
     <string name="song_language_scope">Til</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">Fon</string>
     <string name="song_background_full_screen">Toʻliq ekran</string>
     <string name="song_background_lower_third">Pastki uchdan bir</string>
     <string name="song_background_inherit">Meros</string>
@@ -2019,7 +1969,6 @@
     <string name="song_background_your_color">Sizning rangingiz</string>
     <string name="song_background_browse">Tanlash…</string>
     <string name="song_background_look">Koʻrinish</string>
-    <string name="song_background_preset_none">Yoʻq</string>
     <string name="song_background_preset_soft">Yumshoq</string>
     <string name="song_background_preset_legible">Oʻqilishi oson</string>
     <string name="song_background_preset_cinema">Kino</string>
@@ -2040,7 +1989,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Fonlar</string>
     <string name="background_group_defaults">Standart</string>
-    <string name="background_scope_default">Standart</string>
     <string name="background_scope_default_lower_third">Standart pastki titr</string>
     <string name="background_scope_default_meta">Muqaddas Kitob yoki Qoʻshiqlar «Standart» boʻlganda</string>
     <string name="background_scope_default_lower_third_meta">Pastki titr «Standart» boʻlganda</string>
@@ -2049,16 +1997,13 @@
     <string name="background_following_default">Standartga ergashadi</string>
     <string name="background_use_default">Standartni ishlatish</string>
     <string name="background_set_explicitly">Bu sirt uchun alohida belgilangan</string>
-    <string name="background_type_caption">Turi</string>
     <string name="background_color_caption">Rangi</string>
     <string name="background_image_file">Rasm fayli</string>
     <string name="background_video_file">Video fayli</string>
-    <string name="background_opacity_caption">Shaffofligi</string>
     <string name="background_above_band_caption">Chiziq ustida</string>
     <string name="background_above_band_fill">Toʻldirish rangi</string>
     <string name="background_above_band_opacity">Toʻldirish shaffofligi</string>
     <string name="quick_background_reset">Odatdagiga qaytish</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · sozlamalarda boshqariladi</string>
     <string name="quick_backgrounds">Tez fonlar</string>
     <string name="quick_backgrounds_help">Koʻrib chiqish paneli bir bosish naridagina saqlaydigan fonlar. Nima koʻrsatishini tanlash uchun katakchani bosing, unga qaysi tugma yetib borishini oʻzgartirish uchun suring. Xizmat vaqtida bittasini tanlash odatdagiga qaytmaguningizcha har bir ekranni qoplaydi — bu yerda hech narsani oʻzgartirmaydi.</string>
@@ -2084,16 +2029,10 @@
     <string name="output_profile_swap_menu_tooltip">Chiqish profilini almashtirish</string>
     <string name="output_profile_new_name_default">Yangi profil</string>
     <string name="output_profile_empty_state">Uslub berishni boshlash uchun profil yarating</string>
-    <string name="customize_bible">Muqaddas Kitob</string>
-    <string name="customize_songs">Qoʻshiqlar</string>
     <string name="customize_group_verse_text">Oyat matni</string>
     <string name="customize_group_reference">Havola</string>
     <string name="customize_background_type">Turi</string>
-    <string name="customize_type_color">Rang</string>
     <string name="customize_type_image">Rasm</string>
-    <string name="customize_type_video">Video</string>
-    <string name="customize_type_default">Standart</string>
-    <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Qisqartma</string>
     <string name="customize_background_opacity">Shaffofligi</string>
     <string name="slate_theme">«Slanets» mavzusi</string>
@@ -2139,7 +2078,6 @@
     <string name="song_lottie_unsupported_note">Shablon joylashuvni va sarlavha o‘rnini belgilaydi. Pastki uchdan bir uslubi shrift, o‘lcham, rang, tekislash, harflar oralig‘i, registr va soyani belgilaydi; matn foni, tagiga chizish, ustidan chizish, so‘zlar oralig‘i, keyingisini oldindan ko‘rish va akkordlar qo‘llanilmaydi.</string>
     <string name="bible_lottie_unsupported_note">Shablon joylashuvni, havola o‘rnini va ikki til tasmani qanday bo‘lishishini belgilaydi. Pastki uchdan bir uslubi shrift, o‘lcham, rang, tekislash, harflar oralig‘i, registr va soyani belgilaydi; matn foni, tagiga chizish, ustidan chizish va so‘zlar oralig‘i qo‘llanilmaydi.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Kontur</string>
     <string name="tooltip_outline_options">Kontur sozlamalari</string>
     <string name="text_outline">Kontur</string>
     <string name="text_outline_width">Qalinligi</string>
@@ -2207,7 +2145,6 @@
     <string name="add_ndi_output">Chiqish qo‘shish</string>
     <string name="ndi_output_numbered">NDI chiqishi %1$d</string>
     <string name="preview_output">Chiqishni oldindan ko‘rish</string>
-    <string name="output_resolution">Ruxsat</string>
     <string name="output_resolution_custom">Maxsus…</string>
     <string name="output_resolution_custom_title">Maxsus ruxsat</string>
     <string name="output_resolution_width">Kengligi</string>
@@ -2311,7 +2248,6 @@
     <string name="calendar_sync_description">Xizmatlarni mobil ilova orqali butun hafta, hatto bu kompyuter o‘chiq bo‘lganda ham rejalashtiring. Bu kompyuter asosiy manba bo‘lib qoladi.</string>
     <string name="calendar_sync_enable">Taqvimni telefonlar bilan sinxronlash</string>
     <string name="calendar_sync_relay_url">Rele</string>
-    <string name="calendar_sync_status_off">O‘chirilgan</string>
     <string name="calendar_sync_status_unpaired">Hali ro‘yxatdan o‘tmagan — sinxronlash birinchi marta yoqilganda bu kompyuter relega ro‘yxatdan o‘tadi</string>
     <string name="calendar_sync_status_syncing">Sinxronlanmoqda…</string>
     <string name="calendar_sync_status_synced">Sinxronlandi %1$s</string>

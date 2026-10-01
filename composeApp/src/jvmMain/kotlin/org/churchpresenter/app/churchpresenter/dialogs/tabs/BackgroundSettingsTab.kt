@@ -78,15 +78,14 @@ import churchpresenter.composeapp.generated.resources.atem_upload_background_1_t
 import churchpresenter.composeapp.generated.resources.atem_upload_background_2_tooltip
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.ok
-import churchpresenter.composeapp.generated.resources.background_color_option
+import churchpresenter.composeapp.generated.resources.canvas_source_color
 import churchpresenter.composeapp.generated.resources.background_default
 import churchpresenter.composeapp.generated.resources.background_follow_default_option
 import churchpresenter.composeapp.generated.resources.background_lottie_option
 import churchpresenter.composeapp.generated.resources.background_follows_default
 import churchpresenter.composeapp.generated.resources.background_following_default
 import churchpresenter.composeapp.generated.resources.background_group_defaults
-import churchpresenter.composeapp.generated.resources.background_image_option
-import churchpresenter.composeapp.generated.resources.background_scope_default
+import churchpresenter.composeapp.generated.resources.customize_type_image
 import churchpresenter.composeapp.generated.resources.background_scope_default_lower_third
 import churchpresenter.composeapp.generated.resources.background_scope_default_lower_third_meta
 import churchpresenter.composeapp.generated.resources.background_scope_default_meta
@@ -637,7 +636,7 @@ internal fun backgroundGroupLabel(group: BackgroundScopeGroup): StringResource =
 }
 
 internal fun backgroundScopeName(scope: BackgroundScope): StringResource = when (scope) {
-    BackgroundScope.DEFAULT -> Res.string.background_scope_default
+    BackgroundScope.DEFAULT -> Res.string.background_default
     BackgroundScope.DEFAULT_LOWER_THIRD -> Res.string.background_scope_default_lower_third
     else -> if (scope.lowerThird) Res.string.display_lower_third else Res.string.full_screen
 }
@@ -653,8 +652,8 @@ internal fun backgroundScopeTitle(scope: BackgroundScope): String =
     )
 
 internal fun backgroundTypeLabel(type: String): StringResource = when (type) {
-    Constants.BACKGROUND_COLOR -> Res.string.background_color_option
-    Constants.BACKGROUND_IMAGE -> Res.string.background_image_option
+    Constants.BACKGROUND_COLOR -> Res.string.canvas_source_color
+    Constants.BACKGROUND_IMAGE -> Res.string.customize_type_image
     Constants.BACKGROUND_VIDEO -> Res.string.background_video_option
     Constants.BACKGROUND_CAMERA -> Res.string.background_camera_option
     Constants.BACKGROUND_TRANSPARENT -> Res.string.background_transparent_option

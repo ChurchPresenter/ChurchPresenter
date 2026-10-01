@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.remote_action_clear_display
+import churchpresenter.composeapp.generated.resources.tooltip_clear_display
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -206,7 +206,7 @@ internal fun MainWindowScope.ServerBroadcastWiring() {
         }
 
         val clearDisplayTitle by rememberUpdatedState(
-            stringResource(Res.string.remote_action_clear_display)
+            stringResource(Res.string.tooltip_clear_display)
         )
         LaunchedEffect(Unit) {
             companionServer.onInstantAction.collect { action ->

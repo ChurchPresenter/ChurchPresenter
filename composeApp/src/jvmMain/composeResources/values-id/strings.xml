@@ -3,7 +3,6 @@
     <string name="mode">Mode</string>
     <string name="scope">Cakupan</string>
     <string name="title">Judul</string>
-    <string name="number">Nomor</string>
     <string name="go_live">Tayangkan</string>
     <string name="add_to_schedule">Tambahkan ke Jadwal</string>
     <string name="copy_verse">Salin Ayat</string>
@@ -12,7 +11,6 @@
     <string name="search">Cari</string>
     <string name="bible_smart_search_hint">Referensi atau teks — mis. Yoh 3:16, mat 1, atau sebuah kata</string>
     <string name="bible_search_mode_auto">Otomatis</string>
-    <string name="bible_search_mode_reference">Referensi</string>
     <string name="bible_search_mode_text">Teks</string>
     <string name="bible_search_mode_tooltip">Klik untuk berganti — Otomatis: langsung ke referensi, cari untuk yang lain. Referensi: hanya navigasi. Teks: selalu cari di dalam teks ayat.</string>
     <string name="bible_verse_selection_hint">Ctrl+Klik untuk memilih, Shift+Klik untuk rentang</string>
@@ -82,17 +80,11 @@
     <string name="bible_cross_references_close">Tutup panel</string>
     <string name="bible_cross_references_dismiss_hint">Esc untuk menutup</string>
     <string name="menu_file">File</string>
-    <string name="menu_new_schedule">Jadwal Baru</string>
-    <string name="menu_open_schedule">Buka Jadwal</string>
-    <string name="menu_save_schedule">Simpan Jadwal</string>
     <string name="menu_save_schedule_as">Simpan Jadwal Sebagai...</string>
     <string name="menu_close_schedule">Tutup Jadwal</string>
     <string name="menu_exit">Keluar</string>
     <string name="file_chooser_save_schedule">Simpan Jadwal Sebagai</string>
-    <string name="file_chooser_open_schedule">Buka Jadwal</string>
     <string name="file_filter_schedule">Jadwal Church Presenter (*.cps)</string>
-    <string name="menu_schedule">Jadwal</string>
-    <string name="menu_add_to_schedule">Tambahkan ke Jadwal</string>
     <string name="menu_remove_from_schedule">Hapus dari Jadwal</string>
     <string name="menu_clear_schedule">Bersihkan Jadwal</string>
 
@@ -111,7 +103,6 @@
     <string name="instance_link_description">Ikuti instance ChurchPresenter lain di jaringan Anda — cerminkan konten yang sedang tayang di sini, dan bila perlu tambahkan item ke jadwalnya.</string>
     <string name="instance_link_host">Host</string>
     <string name="instance_link_host_hint">mis. 192.168.1.10</string>
-    <string name="instance_link_port">Port</string>
     <string name="instance_link_autoconnect">Sambungkan otomatis saat aplikasi dijalankan</string>
     <string name="instance_link_reconnect_delay">Jeda minimum penyambungan ulang</string>
     <string name="instance_link_reconnect_delay_hint">Waktu tunggu terpendek sebelum mencoba menyambung ulang. Kegagalan berulang akan menunda lebih lama dengan sendirinya.</string>
@@ -466,15 +457,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">Bawaan</string>
-    <string name="background_color_option">Warna</string>
-    <string name="background_image_option">Gambar</string>
     <string name="background_video_option">Video Berulang</string>
     <string name="background_transparent_option">Transparan</string>
     <string name="background_follow_default_option">Ikuti Bawaan</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">Web</string>
-    <string name="projection_content_background">Latar Belakang</string>
     <string name="projection_content_lt_background">Latar Belakang Lower Third</string>
     <string name="browser_source_resolution">Resolusi</string>
     <string name="browser_source_fps">FPS Maks</string>
@@ -556,7 +544,6 @@
     <string name="tooltip_schedule_zoom_out">Perkecil</string>
     <string name="tooltip_add_to_schedule">Tambahkan ke Jadwal</string>
     <string name="tooltip_clear_display">Bersihkan Tampilan</string>
-    <string name="remote_action_clear_display">Bersihkan Tampilan</string>
     <string name="schedule_add_files_title">Tambahkan Berkas ke Jadwal</string>
     <string name="tooltip_toggle_displays">Alihkan Layar Presenter</string>
     <string name="tooltip_settings">Pengaturan</string>
@@ -578,7 +565,6 @@
     <string name="schedule_density_compact">Ringkas</string>
     <string name="schedule_density_normal">Normal</string>
     <string name="schedule_density_detailed">Rinci</string>
-    <string name="schedule_kind_lower_third">Lower Third</string>
     <string name="tooltip_schedule_options">Opsi Jadwal</string>
     <string name="schedule_show_buttons_under_title">Tampilkan tombol di bawah judul</string>
     <string name="schedule_option_item_count">Jumlah Item</string>
@@ -589,7 +575,6 @@
     <string name="edit_label">Edit Label</string>
     <string name="label_text">Teks Label</string>
     <string name="text_color">Warna Teks</string>
-    <string name="background_color_label">Warna Latar Belakang</string>
     <string name="enter_label_text">Masukkan teks label...</string>
 
     <!-- Pictures Tab Strings -->
@@ -619,7 +604,6 @@
     <string name="animation_slide_left">Geser ke Kiri</string>
     <string name="animation_slide_right">Geser ke Kanan</string>
     <string name="animation_none">Tidak ada</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s gambar berikutnya/sebelumnya  ·  %2$s pindah baris</string>
     <string name="presentation_arrow_key_hint">%1$s — tahap &amp; slide sebelumnya/berikutnya  ·  %2$s — putar/jeda  ·  %3$s — kosongkan layar</string>
     <string name="pictures_reorder_hint">Shift+tarik gambar mini untuk mengubah urutan</string>
@@ -682,14 +666,10 @@
     <string name="content_bible_background">Latar Belakang Alkitab</string>
     <string name="content_songs_background">Latar Belakang Lagu</string>
     <string name="content_pictures">Gambar/Presentasi</string>
-    <string name="content_media">Media</string>
-    <string name="content_streaming">Lower Third</string>
     <string name="content_announcements">Pengumuman</string>
     <string name="display_mode">Mode Tampilan</string>
-    <string name="display_fullscreen">Layar Penuh</string>
     <string name="display_lower_third">Lower Third</string>
     <string name="full_screen">Layar Penuh</string>
-    <string name="lower_third_size">Lower Third</string>
     <string name="identify_screen">Identifikasi</string>
     <string name="projection_target_display">Layar</string>
     <string name="projection_auto_display">Otomatis</string>
@@ -765,7 +745,6 @@
     <string name="settings_import_failed">Gagal mengimpor pengaturan. File mungkin tidak valid.</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">Media</string>
     <string name="media_local_file">File Lokal</string>
     <string name="media_network_url">URL Jaringan</string>
     <string name="media_url_placeholder">Masukkan URL (http://, rtsp://, ...)</string>
@@ -809,7 +788,6 @@
     <string name="center_left">Kiri Tengah</string>
     <string name="center_right">Kanan Tengah</string>
     <string name="bottom_center">Tengah Bawah</string>
-    <string name="announcement_background_color_label">Warna Latar Belakang</string>
     <string name="transparent_default">Transparan (Bawaan)</string>
     <string name="announcement_animation">Animasi</string>
     <string name="anim_slide_from_left">Geser dari Kiri</string>
@@ -882,7 +860,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">Tambahkan ke Jadwal</string>
     <string name="web_go_live">Tayangkan</string>
     <string name="web_bookmark_add">Tambah Bookmark</string>
     <string name="web_bookmark_remove">Hapus Bookmark</string>
@@ -946,7 +923,6 @@
     <string name="canvas_shape_fill_color">Isi</string>
     <string name="canvas_shape_stroke_width">Ketebalan Garis</string>
     <string name="canvas_rename_scene">Ganti Nama</string>
-    <string name="canvas_remove_scene">Hapus</string>
     <string name="canvas_add_source">Tambah sumber</string>
     <string name="canvas_delete_source">Hapus sumber</string>
     <string name="canvas_source_move_forward">Pindahkan ke depan</string>
@@ -974,7 +950,6 @@
     <string name="canvas_render_height">Tinggi</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">CSS Khusus</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">Pilih Gambar</string>
     <string name="canvas_select_video_title">Pilih Video</string>
     <string name="canvas_image_files">File Gambar</string>
@@ -986,7 +961,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">Jam</string>
     <string name="canvas_clock_mode_countdown">Hitung Mundur</string>
     <string name="canvas_clock_mode_count_up">Stopwatch</string>
     <string name="canvas_decklink_io_warning">Perangkat ini sedang dipakai untuk keluaran. Masukan mungkin tidak tersedia pada perangkat yang tidak mendukung I/O bersamaan.</string>
@@ -1004,7 +978,6 @@
     <string name="canvas_text_curve">Lengkung</string>
     <string name="canvas_letter_spacing">Spasi Huruf</string>
     <string name="canvas_source_qrcode">Kode QR</string>
-    <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Tangkapan Layar</string>
     <string name="canvas_source_bible">Alkitab</string>
     <string name="canvas_bible_version">Versi Alkitab</string>
@@ -1017,7 +990,6 @@
     <string name="canvas_bible_ref_color">Warna Referensi</string>
     <string name="canvas_verse_style">Gaya Ayat</string>
     <string name="canvas_reference_style">Gaya Referensi</string>
-    <string name="canvas_text_color">Warna Teks</string>
     <string name="canvas_text_bg_color">Warna Latar Belakang</string>
     <string name="canvas_clock_mode">Mode</string>
     <string name="canvas_clock_format">Format</string>
@@ -1042,7 +1014,6 @@
     <string name="canvas_camera_format">Format Video</string>
     <string name="canvas_camera_format_auto">Otomatis (bawaan)</string>
     <string name="canvas_camera_connection">Sambungan Video</string>
-    <string name="canvas_camera_mode">Mode</string>
     <string name="canvas_camera_mode_auto">Otomatis</string>
     <string name="canvas_capture_x">Tangkap X</string>
     <string name="canvas_capture_y">Tangkap Y</string>
@@ -1053,9 +1024,7 @@
     <string name="canvas_capture_mode_window">Jendela</string>
     <string name="canvas_capture_refresh_windows">Muat Ulang Daftar Jendela</string>
     <string name="canvas_capture_interval">Jeda Tangkapan</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Kamera: %1$s</string>
-    <string name="canvas_placeholder_camera_default">Kamera</string>
     <string name="canvas_placeholder_screen_capture">Tangkapan Layar</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1177,7 +1146,6 @@
     <string name="remote_activity_removed_from_schedule">Dihapus dari Jadwal</string>
     <string name="remote_activity_projected">Ditayangkan</string>
     <string name="remote_activity_presentation_connect">Tersambung ke Kendali Presentasi</string>
-    <string name="remote_activity_presentation_connect_detail">Sudah tersambung</string>
     <string name="remote_activity_qa_admin_connect">Tersambung ke Admin Tanya Jawab</string>
     <string name="remote_activity_qa_admin_connect_detail">Sudah tersambung</string>
     <string name="remote_activity_presented">Menayangkan</string>
@@ -1217,7 +1185,6 @@
     <string name="instance_link_primary_badge">Utama — %1$d pengikut tersambung</string>
     <string name="client_label_placeholder">Masukkan nama yang mudah dikenali…</string>
     <string name="client_label_edit_tooltip">Beri nama yang mudah dikenali</string>
-    <string name="client_label_save">Simpan</string>
     <string name="client_label_cancel">Batal</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1338,7 +1305,6 @@
     <string name="system_storage_subtitle">Tempat Church Presenter mencari konten Anda</string>
     <string name="system_storage_linked_count">%1$d tertaut</string>
     <string name="system_storage_needs_attention_count">%1$d perlu perhatian</string>
-    <string name="system_storage_status_not_set">Belum diatur</string>
     <string name="system_storage_status_not_found">Folder tidak ditemukan</string>
     <string name="system_storage_status_read_only">Hanya baca</string>
     <string name="system_storage_status_linked">Tertaut</string>
@@ -1380,7 +1346,6 @@
     <string name="show_song_number_before_title">Tampilkan nomor lagu sebelum judul</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">Monitor Panggung</string>
     <string name="general">Umum</string>
     <string name="display_stage_monitor">Monitor Panggung</string>
     <string name="stage_monitor_quadrant_next">Berikutnya</string>
@@ -1465,7 +1430,6 @@
     <string name="qa_confirm_go_live">Konfirmasi tayang</string>
     <string name="qa_add_question_hint">Tambahkan pertanyaan…</string>
     <string name="qa_edit_question_hint">Ubah teks pertanyaan…</string>
-    <string name="qa_delete_question">Hapus</string>
     <string name="qa_confirm_delete_prompt">Hapus?</string>
     <string name="qa_submitter_device">Perangkat: %1$s</string>
     <string name="qa_public_access">Akses publik</string>
@@ -1502,14 +1466,11 @@
     <string name="stt_live_preview">Pratinjau langsung</string>
     <string name="stt_not_connected">Tidak tersambung. Masukkan URL server STT lalu klik Sambungkan.</string>
     <string name="stt_waiting_for_transcription">Menunggu transkripsi…</string>
-    <string name="stt_transcription_label">Transkripsi</string>
     <string name="stt_translation_label">Terjemahan</string>
     <string name="stt_settings_dialog_title">Pengaturan tampilan STT</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">Laporan CCLI</string>
-    <string name="ccli_tab_songs">Lagu</string>
-    <string name="ccli_tab_bible">Alkitab</string>
     <string name="ccli_tab_activity">Aktivitas</string>
     <string name="ccli_songs_summary">%1$d lagu berbeda · %2$d kali ditampilkan</string>
     <string name="ccli_bible_summary">%1$d ayat berbeda · %2$d kali ditampilkan</string>
@@ -1520,7 +1481,6 @@
     <string name="ccli_activity_title">Penayangan dari waktu ke waktu</string>
     <string name="ccli_from">Dari:</string>
     <string name="ccli_to">Sampai:</string>
-    <string name="ccli_legend_songs">Lagu</string>
     <string name="ccli_legend_bible">Ayat Alkitab</string>
     <string name="ccli_stat_songs_presented">Lagu yang ditayangkan</string>
     <string name="ccli_stat_bible_verses">Ayat Alkitab</string>
@@ -1534,7 +1494,6 @@
     <string name="ccli_col_first">Pertama</string>
     <string name="ccli_col_last">Terakhir</string>
     <string name="ccli_col_verse">Ayat</string>
-    <string name="ccli_col_bible">Alkitab</string>
     <string name="ccli_export_csv">Ekspor CSV CCLI</string>
     <string name="ccli_export_xls">Ekspor XLS</string>
     <string name="ccli_exported_success">Laporan berhasil diekspor.</string>
@@ -1615,7 +1574,6 @@
     <string name="obs_mode_bible">Alkitab</string>
     <string name="obs_mode_songs">Lagu</string>
     <string name="obs_mode_pictures">Gambar</string>
-    <string name="obs_mode_presentation">Presentasi</string>
     <string name="obs_mode_media">Media</string>
     <string name="obs_mode_lower_third">Lower third</string>
     <string name="obs_mode_announcements">Pengumuman</string>
@@ -1810,7 +1768,6 @@
     <string name="companion_satellite_no_host">Setel host Companion di Pengaturan → Companion Satellite untuk menyambung.</string>
     <string name="companion_satellite_status_connecting">Menyambung…</string>
     <string name="companion_satellite_status_disconnected">Terputus</string>
-    <string name="companion_satellite_status_error">Kesalahan: %1$s</string>
     <string name="companion_satellite_connection_name">Nama</string>
     <string name="companion_satellite_product_name">Nama produk</string>
     <string name="companion_satellite_reconnect_delay">Jeda sambung ulang (ms)</string>
@@ -1874,7 +1831,6 @@
     <string name="bible_engine_detect">Deteksi ayat Alkitab</string>
     <string name="bible_engine_run_local">Jalankan mesin secara lokal</string>
     <string name="bible_engine_host">Host mesin</string>
-    <string name="bible_engine_port">Port</string>
     <string name="stt_help_dev_mode">Bantu pengembang — tampilkan tombol umpan balik langsung di tab Alkitab (perikop salah / terlalu dini / perikop terlewat)</string>
     <string name="dictionary_back">Kembali</string>
     <string name="dictionary_forward">Maju</string>
@@ -1963,7 +1919,6 @@
     <string name="font_category_serif">Berkait</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Pratinjau</string>
     <string name="font_preview_sample">Teks contoh dengan font yang dipilih</string>
     <string name="font_warning_no_cyrillic">%1$s tidak memiliki glif Kiril — ayat berhuruf Kiril akan tampil di layar dengan font lain.</string>
     <string name="font_warning_no_hebrew">%1$s tidak memiliki glif Ibrani — teks Ibrani akan tampil di layar dengan font lain.</string>
@@ -1973,7 +1928,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">Coret</string>
     <string name="bible_custom_name">Nama</string>
-    <string name="bible_custom_abbreviation">Singkatan</string>
     <string name="bible_translations">Terjemahan</string>
     <string name="bible_miscellaneous">Lain-lain</string>
     <string name="bible_font">Fon</string>
@@ -1988,10 +1942,7 @@
     <string name="bible_preview_sample_book">Yohanes</string>
     <string name="bible_preview_no_translations">Tambahkan terjemahan untuk melihatnya di sini</string>
     <string name="song_element_number">Nomor</string>
-    <string name="song_element_title">Judul</string>
     <string name="song_element_lyrics">Lirik</string>
-    <string name="song_element_author">Penulis</string>
-    <string name="song_element_composer">Komposer</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Slide judul</string>
@@ -2004,7 +1955,6 @@
     <string name="song_chunk">Bagian</string>
     <string name="song_language_scope">Bahasa</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">Latar Belakang</string>
     <string name="song_background_full_screen">Layar penuh</string>
     <string name="song_background_lower_third">Lower third</string>
     <string name="song_background_inherit">Mewarisi</string>
@@ -2019,7 +1969,6 @@
     <string name="song_background_your_color">Warna Anda</string>
     <string name="song_background_browse">Telusuri…</string>
     <string name="song_background_look">Tampilan</string>
-    <string name="song_background_preset_none">Tidak ada</string>
     <string name="song_background_preset_soft">Lembut</string>
     <string name="song_background_preset_legible">Terbaca</string>
     <string name="song_background_preset_cinema">Sinema</string>
@@ -2040,7 +1989,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Latar Belakang</string>
     <string name="background_group_defaults">Bawaan</string>
-    <string name="background_scope_default">Bawaan</string>
     <string name="background_scope_default_lower_third">Lower Third bawaan</string>
     <string name="background_scope_default_meta">Saat Alkitab atau Lagu diatur ke Bawaan</string>
     <string name="background_scope_default_lower_third_meta">Saat lower third diatur ke Bawaan</string>
@@ -2049,16 +1997,13 @@
     <string name="background_following_default">Mengikuti bawaan</string>
     <string name="background_use_default">Gunakan bawaan</string>
     <string name="background_set_explicitly">Diatur terpisah untuk permukaan ini</string>
-    <string name="background_type_caption">Jenis</string>
     <string name="background_color_caption">Warna</string>
     <string name="background_image_file">Berkas gambar</string>
     <string name="background_video_file">Berkas video</string>
-    <string name="background_opacity_caption">Opasitas</string>
     <string name="background_above_band_caption">Di Atas Bilah</string>
     <string name="background_above_band_fill">Warna Isian</string>
     <string name="background_above_band_opacity">Opasitas Isian</string>
     <string name="quick_background_reset">Kembali normal</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · dikelola di Pengaturan</string>
     <string name="quick_backgrounds">Latar cepat</string>
     <string name="quick_backgrounds_help">Latar belakang yang disimpan panel pratinjau dalam satu klik. Klik ubin untuk memilih apa yang ditampilkannya, seret untuk mengubah tombol yang menjangkaunya. Memilih satu saat ibadah menimpa semua layar sampai Anda kembali normal — di sini tidak mengubah apa pun.</string>
@@ -2084,16 +2029,10 @@
     <string name="output_profile_swap_menu_tooltip">Ganti profil keluaran</string>
     <string name="output_profile_new_name_default">Profil Baru</string>
     <string name="output_profile_empty_state">Buat profil untuk mulai mengatur gayanya</string>
-    <string name="customize_bible">Alkitab</string>
-    <string name="customize_songs">Lagu</string>
     <string name="customize_group_verse_text">Teks ayat</string>
     <string name="customize_group_reference">Referensi</string>
     <string name="customize_background_type">Jenis</string>
-    <string name="customize_type_color">Warna</string>
     <string name="customize_type_image">Gambar</string>
-    <string name="customize_type_video">Video</string>
-    <string name="customize_type_default">Bawaan</string>
-    <string name="customize_type_gradient">Gradien</string>
     <string name="customize_show_abbreviation">Singkatan</string>
     <string name="customize_background_opacity">Opasitas</string>
     <string name="slate_theme">Tema Batu Tulis</string>
@@ -2139,7 +2078,6 @@
     <string name="song_lottie_unsupported_note">Templat menentukan tata letak dan posisi judul. Gaya sepertiga bawah mengatur fon, ukuran, warna, perataan, jarak huruf, kapitalisasi, dan bayangan; latar teks, garis bawah, coretan, jarak kata, pratinjau bagian berikutnya, dan kunci gitar tidak berlaku.</string>
     <string name="bible_lottie_unsupported_note">Templat menentukan tata letak, posisi referensi, dan cara dua bahasa berbagi pita. Gaya sepertiga bawah mengatur fon, ukuran, warna, perataan, jarak huruf, kapitalisasi, dan bayangan; latar teks, garis bawah, coretan, dan jarak kata tidak berlaku.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Garis luar</string>
     <string name="tooltip_outline_options">Opsi garis luar</string>
     <string name="text_outline">Garis luar</string>
     <string name="text_outline_width">Lebar</string>
@@ -2207,7 +2145,6 @@
     <string name="add_ndi_output">Tambah Output</string>
     <string name="ndi_output_numbered">Output NDI %1$d</string>
     <string name="preview_output">Pratinjau output</string>
-    <string name="output_resolution">Resolusi</string>
     <string name="output_resolution_custom">Kustom…</string>
     <string name="output_resolution_custom_title">Resolusi kustom</string>
     <string name="output_resolution_width">Lebar</string>
@@ -2311,7 +2248,6 @@
     <string name="calendar_sync_description">Rencanakan ibadah dari aplikasi seluler sepanjang minggu, bahkan saat komputer ini mati. Komputer ini tetap menjadi sumber utama.</string>
     <string name="calendar_sync_enable">Sinkronkan kalender dengan ponsel</string>
     <string name="calendar_sync_relay_url">Relai</string>
-    <string name="calendar_sync_status_off">Nonaktif</string>
     <string name="calendar_sync_status_unpaired">Belum terdaftar — komputer ini mendaftar ke relai saat sinkronisasi pertama kali diaktifkan</string>
     <string name="calendar_sync_status_syncing">Menyinkronkan…</string>
     <string name="calendar_sync_status_synced">Tersinkron %1$s</string>

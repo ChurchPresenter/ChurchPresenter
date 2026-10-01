@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.content_media
+import churchpresenter.composeapp.generated.resources.media
 import churchpresenter.composeapp.generated.resources.pictures
 import org.churchpresenter.app.churchpresenter.utils.label
 import org.churchpresenter.settings.OutputProfile
@@ -24,7 +24,7 @@ internal fun ScaleRows(profile: OutputProfile, onProfileChange: (OutputProfile) 
         }
     }
     if (profile.showMedia) {
-        SettingsRow(stringResource(Res.string.content_media), paths = listOf("mediaScaleMode")) {
+        SettingsRow(stringResource(Res.string.media), paths = listOf("mediaScaleMode")) {
             ScaleSegments(profile.mediaScaleMode) { onProfileChange(profile.copy(mediaScaleMode = it)) }
         }
     }

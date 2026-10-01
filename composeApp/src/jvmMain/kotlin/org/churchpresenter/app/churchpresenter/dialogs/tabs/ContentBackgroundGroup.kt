@@ -41,7 +41,6 @@ import churchpresenter.composeapp.generated.resources.profile_bg_set_for
 import churchpresenter.composeapp.generated.resources.profile_bg_sub_app
 import churchpresenter.composeapp.generated.resources.profile_bg_sub_app_surface
 import churchpresenter.composeapp.generated.resources.profile_bg_sub_profile
-import churchpresenter.composeapp.generated.resources.profile_group_background
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
@@ -113,7 +112,7 @@ internal fun ContentBackgroundGroup(
         else -> stringResource(Res.string.profile_bg_sub_app)
     }
     SettingsGroup(
-        caption = stringResource(Res.string.profile_group_background),
+        caption = stringResource(Res.string.profile_bg_row),
         paths = scope.surfacePaths(),
         footer = {
             ComesFromStrip(

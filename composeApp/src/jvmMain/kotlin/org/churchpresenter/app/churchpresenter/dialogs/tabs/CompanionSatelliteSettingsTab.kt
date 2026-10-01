@@ -65,7 +65,7 @@ import churchpresenter.composeapp.generated.resources.companion_satellite_show_i
 import churchpresenter.composeapp.generated.resources.companion_satellite_show_in_tab
 import churchpresenter.composeapp.generated.resources.companion_satellite_status_connecting
 import churchpresenter.composeapp.generated.resources.companion_satellite_status_disconnected
-import churchpresenter.composeapp.generated.resources.companion_satellite_status_error
+import churchpresenter.composeapp.generated.resources.atem_status_error
 import org.churchpresenter.companionsatellite.CompanionConnectionStatus
 import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
@@ -244,7 +244,8 @@ private fun CompanionConnectionCard(
                                 CompanionConnectionStatus.CONNECTING ->
                                     stringResource(Res.string.companion_satellite_status_connecting) to MaterialTheme.semantic.warning
                                 CompanionConnectionStatus.ERROR ->
-                                    stringResource(Res.string.companion_satellite_status_error, state.errorMessage) to MaterialTheme.colorScheme.error
+                                    stringResource(Res.string.atem_status_error, state.errorMessage) to
+                                        MaterialTheme.colorScheme.error
                                 else ->
                                     stringResource(Res.string.companion_satellite_status_disconnected) to MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             }

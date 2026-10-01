@@ -3,10 +3,10 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.runtime.Composable
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background
-import churchpresenter.composeapp.generated.resources.customize_bible
-import churchpresenter.composeapp.generated.resources.customize_songs
+import churchpresenter.composeapp.generated.resources.bible
+import churchpresenter.composeapp.generated.resources.songs
 import churchpresenter.composeapp.generated.resources.media_subtitles
-import churchpresenter.composeapp.generated.resources.stage_monitor
+import churchpresenter.composeapp.generated.resources.display_stage_monitor
 import churchpresenter.composeapp.generated.resources.tab_dictionary
 import churchpresenter.composeapp.generated.resources.tab_qa
 import churchpresenter.composeapp.generated.resources.tab_stt
@@ -62,9 +62,9 @@ internal fun customizePanes(displayMode: String): List<CustomizePane> =
 
 @Composable
 internal fun CustomizePane.label(): String = when (this) {
-    CustomizePane.STAGE_MONITOR -> stringResource(Res.string.stage_monitor)
-    CustomizePane.BIBLE -> stringResource(Res.string.customize_bible)
-    CustomizePane.SONGS -> stringResource(Res.string.customize_songs)
+    CustomizePane.STAGE_MONITOR -> stringResource(Res.string.display_stage_monitor)
+    CustomizePane.BIBLE -> stringResource(Res.string.bible)
+    CustomizePane.SONGS -> stringResource(Res.string.songs)
     CustomizePane.BACKGROUND -> stringResource(Res.string.background)
     CustomizePane.CAPTIONS -> stringResource(Res.string.tab_stt)
     CustomizePane.SUBTITLES -> stringResource(Res.string.media_subtitles)
