@@ -3,7 +3,7 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.withQuickBackground
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType

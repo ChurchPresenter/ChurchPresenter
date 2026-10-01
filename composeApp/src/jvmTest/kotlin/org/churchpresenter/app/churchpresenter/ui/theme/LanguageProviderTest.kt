@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.ui.theme
 
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.data.Language
 import kotlin.test.Test
 import kotlin.test.assertEquals

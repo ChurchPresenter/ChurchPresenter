@@ -119,7 +119,11 @@ class LowerThirdAtemUploadTest {
                 onNodeWithText("Upload").performClick()
 
                 // The upload runs off the click, so the datagrams are the signal — not the click.
-                val locks = fake.awaitCommandsNamed("LOCK", 2)
+                // Waited for through Compose rather than the fake's blocking poll: the upload
+                // coroutine resumes on the composition's test dispatcher after each IO step, and
+                // only a wait that keeps that dispatcher running lets it reach the transfer.
+                waitUntil(timeoutMillis = 5_000) { fake.commandsNamed("LOCK").size >= 2 }
+                val locks = fake.commandsNamed("LOCK")
                 assertEquals(1, locks.first()[2].toInt(), "the media store is locked before the transfer")
                 assertEquals(0, locks.last()[2].toInt(), "and released after it")
 
