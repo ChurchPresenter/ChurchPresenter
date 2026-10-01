@@ -13,9 +13,13 @@ import churchpresenter.composeapp.generated.resources.profile_caption_all_caps
 import churchpresenter.composeapp.generated.resources.profile_caption_band_edge
 import churchpresenter.composeapp.generated.resources.profile_caption_band_edge_sub
 import churchpresenter.composeapp.generated.resources.profile_caption_both
+import churchpresenter.composeapp.generated.resources.profile_caption_first
 import churchpresenter.composeapp.generated.resources.profile_caption_highlight
 import churchpresenter.composeapp.generated.resources.profile_caption_in_progress
 import churchpresenter.composeapp.generated.resources.profile_caption_layout
+import churchpresenter.composeapp.generated.resources.profile_caption_layout_interleaved
+import churchpresenter.composeapp.generated.resources.profile_caption_layout_interleaved_sub
+import churchpresenter.composeapp.generated.resources.profile_caption_separate_boxes
 import churchpresenter.composeapp.generated.resources.profile_caption_shape
 import churchpresenter.composeapp.generated.resources.profile_caption_shape_band
 import churchpresenter.composeapp.generated.resources.profile_caption_shape_card
@@ -25,9 +29,7 @@ import churchpresenter.composeapp.generated.resources.profile_caption_translatio
 import churchpresenter.composeapp.generated.resources.profile_caption_translation_size
 import churchpresenter.composeapp.generated.resources.profile_caption_translation_size_sub
 import churchpresenter.composeapp.generated.resources.profile_layout_side_by_side
-import churchpresenter.composeapp.generated.resources.profile_caption_layout_side_inverse
 import churchpresenter.composeapp.generated.resources.profile_layout_stacked
-import churchpresenter.composeapp.generated.resources.profile_caption_layout_stacked_inverse
 import churchpresenter.composeapp.generated.resources.profile_caption_lines
 import churchpresenter.composeapp.generated.resources.profile_caption_mode
 import churchpresenter.composeapp.generated.resources.profile_caption_segments
@@ -46,6 +48,7 @@ import churchpresenter.composeapp.generated.resources.profile_margins
 import churchpresenter.composeapp.generated.resources.profile_ms
 import churchpresenter.composeapp.generated.resources.profile_text_size_unit
 import org.churchpresenter.app.churchpresenter.dialogs.DisplayTextStyle
+import org.churchpresenter.app.churchpresenter.presenter.LAYOUT_INTERLEAVED
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.CAPTION_BOX_BAND
 import org.churchpresenter.settings.CAPTION_BOX_CARD
@@ -189,23 +192,7 @@ private fun CaptionShowGroup(stt: STTSettings, update: ((STTSettings) -> STTSett
                 onSelect = { v -> update { it.copy(displayMode = v) } },
             )
         }
-        if (stt.displayMode == MODE_BOTH) {
-            SettingsRow(stringResource(Res.string.profile_caption_layout), paths = listOf("$STT.layout")) {
-                RowSegmented(
-                    options = listOf(
-                        RowOption("stacked", stringResource(Res.string.profile_layout_stacked)),
-                        RowOption("stacked_inverse", stringResource(Res.string.profile_caption_layout_stacked_inverse)),
-                        RowOption("side_by_side", stringResource(Res.string.profile_layout_side_by_side)),
-                        RowOption(
-                            "side_by_side_inverse",
-                            stringResource(Res.string.profile_caption_layout_side_inverse),
-                        ),
-                    ),
-                    selected = stt.layout,
-                    onSelect = { v -> update { it.copy(layout = v) } },
-                )
-            }
-        }
+        if (stt.displayMode == MODE_BOTH) BothLanguagesRows(stt, update)
         SettingsSwitchRow(
             stringResource(Res.string.profile_caption_highlight),
             stt.showWordHighlighting,
@@ -343,3 +330,55 @@ private fun CaptionTextRows(stt: STTSettings, update: ((STTSettings) -> STTSetti
         paths = listOf("$STT.translationItalic"),
     )
 }
+
+/**
+ * With both languages shown: how they are arranged -- stacked, side by side, or each line with its
+ * translation -- which comes first, and whether they share a box. Stored as one layout value, the
+ * arrangement with `_inverse` for the translation first, as it always was.
+ */
+@Composable
+private fun BothLanguagesRows(stt: STTSettings, update: ((STTSettings) -> STTSettings) -> Unit) {
+    val inverse = stt.layout.endsWith(INVERSE)
+    val arrangement = stt.layout.removeSuffix(INVERSE)
+    val write = { arranged: String, translationFirst: Boolean ->
+        update { it.copy(layout = arranged + if (translationFirst) INVERSE else "") }
+    }
+    SettingsRow(
+        stringResource(Res.string.profile_caption_layout),
+        sub = stringResource(Res.string.profile_caption_layout_interleaved_sub)
+            .takeIf { arrangement == LAYOUT_INTERLEAVED },
+        paths = listOf("$STT.layout"),
+    ) {
+        RowSegmented(
+            options = listOf(
+                RowOption(LAYOUT_STACKED, stringResource(Res.string.profile_layout_stacked)),
+                RowOption(LAYOUT_SIDE_BY_SIDE, stringResource(Res.string.profile_layout_side_by_side)),
+                RowOption(LAYOUT_INTERLEAVED, stringResource(Res.string.profile_caption_layout_interleaved)),
+            ),
+            selected = arrangement,
+            onSelect = { v -> write(v, inverse) },
+        )
+    }
+    SettingsRow(stringResource(Res.string.profile_caption_first), paths = listOf("$STT.layout")) {
+        RowSegmented(
+            options = listOf(
+                RowOption(false, stringResource(Res.string.profile_caption_transcription)),
+                RowOption(true, stringResource(Res.string.profile_caption_translation)),
+            ),
+            selected = inverse,
+            onSelect = { v -> write(arrangement, v) },
+        )
+    }
+    if (arrangement != LAYOUT_INTERLEAVED) {
+        SettingsSwitchRow(
+            stringResource(Res.string.profile_caption_separate_boxes),
+            stt.separateLanguageBoxes,
+            { v -> update { it.copy(separateLanguageBoxes = v) } },
+            paths = listOf("$STT.separateLanguageBoxes"),
+        )
+    }
+}
+
+private const val INVERSE = "_inverse"
+private const val LAYOUT_STACKED = "stacked"
+private const val LAYOUT_SIDE_BY_SIDE = "side_by_side"

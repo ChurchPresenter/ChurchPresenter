@@ -2946,8 +2946,10 @@
     <string name="profile_caption_translation">Translation</string>
     <string name="profile_caption_both">Both</string>
     <string name="profile_caption_layout">Layout</string>
-    <string name="profile_caption_layout_stacked_inverse">Stacked, translation first</string>
-    <string name="profile_caption_layout_side_inverse">Side by side, translation first</string>
+    <string name="profile_caption_layout_interleaved">Interleaved</string>
+    <string name="profile_caption_layout_interleaved_sub">Each line with its translation straight after it.</string>
+    <string name="profile_caption_first">Show first</string>
+    <string name="profile_caption_separate_boxes">Each language in its own box</string>
     <string name="profile_caption_highlight">Highlight the word being spoken</string>
     <string name="profile_caption_in_progress">Show words still being spoken</string>
     <string name="profile_caption_translation_in_progress">Show translation still being spoken</string>

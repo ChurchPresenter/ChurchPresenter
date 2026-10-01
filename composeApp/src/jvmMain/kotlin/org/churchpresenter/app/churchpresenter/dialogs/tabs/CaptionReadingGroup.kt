@@ -52,7 +52,6 @@ private const val FADE_MS_STEP = 100
 private val READING_CPS_RANGE = 5..40
 private val SLIDE_MS_RANGE = 50..2000
 private const val SLIDE_MS_STEP = 50
-private val PERCENT_RANGE = 0..100
 private const val PERCENT_STEP = 5
 private val MAX_CHARS_RANGE = 0..120
 private val TICKER_SPEED_RANGE = 20..1000

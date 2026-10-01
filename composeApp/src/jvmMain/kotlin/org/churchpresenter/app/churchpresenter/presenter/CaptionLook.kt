@@ -81,9 +81,9 @@ internal fun Modifier.captionMargins(s: STTSettings): Modifier {
     )
 }
 
-private val CARD_SHAPE = RoundedCornerShape(16.dp)
-private val CARD_PADDING = 24.dp
-private val BAND_PADDING = 16.dp
+private val CAPTION_CARD_SHAPE = RoundedCornerShape(16.dp)
+private val CAPTION_CARD_PADDING = 24.dp
+private val CAPTION_BAND_PADDING = 16.dp
 
 /**
  * The box behind the captions in [background]: today's rounded card, or a square band the full
@@ -92,14 +92,14 @@ private val BAND_PADDING = 16.dp
  */
 internal fun Modifier.captionCard(s: STTSettings, background: Color, inTextBox: Boolean = false): Modifier =
     if (!s.isBand) {
-        fillMaxWidth().clip(CARD_SHAPE).background(background).padding(CARD_PADDING)
+        fillMaxWidth().clip(CAPTION_CARD_SHAPE).background(background).padding(CAPTION_CARD_PADDING)
     } else {
-        val side = if (inTextBox) CARD_PADDING else 0.dp
+        val side = if (inTextBox) CAPTION_CARD_PADDING else 0.dp
         fillMaxWidth().background(background).absolutePadding(
             left = if (inTextBox) side else s.marginLeft.dp,
             right = if (inTextBox) side else s.marginRight.dp,
-            top = BAND_PADDING,
-            bottom = BAND_PADDING,
+            top = CAPTION_BAND_PADDING,
+            bottom = CAPTION_BAND_PADDING,
         )
     }
 

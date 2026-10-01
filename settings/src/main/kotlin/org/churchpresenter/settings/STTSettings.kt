@@ -10,7 +10,9 @@ data class STTSettings(
     val serverUrl: String = "http://localhost:80",
     val lastConnectedUrl: String = "", // URL of the last successful connection; gates the Bible-tab connect button
     val displayMode: String = "transcribe", // "transcribe", "translate", "both"
-    val layout: String = "stacked", // "stacked", "stacked_inverse", "side_by_side", "side_by_side_inverse"
+    // "stacked", "side_by_side" or "interleaved" (each line with its translation under it), each with
+    // "_inverse" for the translation first
+    val layout: String = "stacked",
     val showWordHighlighting: Boolean = false,
     val maxSegments: Int = 5, // last N segments shown on an output and in the STT tab (0 = unlimited)
     val maxLines: Int = 3, // max visible lines on projection display (0 = unlimited)
@@ -65,6 +67,8 @@ data class STTSettings(
     val boxShape: String = CAPTION_BOX_CARD,
     /** A band flush with the screen's bottom or top edge; off, it is held in by the margin on that side. */
     val bandTouchesEdge: Boolean = true,
+    /** With both languages shown, each in a box of its own rather than the two sharing one. */
+    val separateLanguageBoxes: Boolean = false,
 )
 
 const val CAPTION_BOX_CARD = "card"

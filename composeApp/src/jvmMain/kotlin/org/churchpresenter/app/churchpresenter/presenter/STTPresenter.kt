@@ -4,11 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
@@ -26,21 +23,17 @@ import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.app.churchpresenter.utils.spacingEm
 import org.churchpresenter.settings.CAPTION_STYLE_TICKER
 import org.churchpresenter.settings.CAPTION_TRANSCRIPT_BOX
 import org.churchpresenter.settings.CAPTION_TRANSLATION_BOX
-import org.churchpresenter.settings.CaptionReading
 import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.settings.TextBox
 import org.churchpresenter.settings.boxAt
@@ -123,19 +116,21 @@ fun STTPresenter(
     // A ticker only ever adds words, so it never shows the ones still being rewritten
     val ticker = reading.style == CAPTION_STYLE_TICKER
     val highlights = highlightedWords.takeIf { sttSettings.showWordHighlighting }.orEmpty()
+    val transcriptInk = CaptionInk(textColor, highlights, spaceTrackingEm)
+    val translationInk = CaptionInk(translationColor, highlights, spaceTrackingEm)
     val transcriptionText = buildDisplayText(
         captionBody(
             keptTranscription, inProgressText.takeIf { sttSettings.showInProgress && !ticker }, reading,
             sttSettings.transcriptAllCaps,
         ),
-        keptTranscription.isNotEmpty(), reading, CaptionInk(textColor, highlights, spaceTrackingEm),
+        keptTranscription.isNotEmpty(), reading, transcriptInk,
     )
     val translationText = buildDisplayText(
         captionBody(
             keptTranslation, inProgressTranslation.takeIf { sttSettings.showTranslationInProgress && !ticker }, reading,
             sttSettings.translationAllCaps,
         ),
-        keptTranslation.isNotEmpty(), reading, CaptionInk(translationColor, highlights, spaceTrackingEm),
+        keptTranslation.isNotEmpty(), reading, translationInk,
     )
     val silenceFade = rememberSilenceFade(transcriptionText.text + "\u0000" + translationText.text, reading)
     val faded = modifier.graphicsLayer {
@@ -146,7 +141,22 @@ fun STTPresenter(
     // A ticker is one line, so two of them always stack
     val isSideBySide = (sttSettings.layout == "side_by_side" || sttSettings.layout == "side_by_side_inverse") &&
         reading.style != CAPTION_STYLE_TICKER
-    val isInverse = sttSettings.layout == "stacked_inverse" || sttSettings.layout == "side_by_side_inverse"
+    val isInverse = sttSettings.layout.endsWith("_inverse")
+    val interleavedText = if (isBothMode && sttSettings.layout.startsWith(LAYOUT_INTERLEAVED)) {
+        interleavedCaption(
+            CaptionSide(
+                keptTranscription, inProgressText.takeIf { sttSettings.showInProgress && !ticker }, transcriptInk,
+                sttSettings.transcriptAllCaps,
+            ),
+            CaptionSide(
+                keptTranslation, inProgressTranslation.takeIf { sttSettings.showTranslationInProgress && !ticker },
+                translationInk, sttSettings.translationAllCaps,
+            ),
+            translationLook, translationFirst = isInverse, sttSettings,
+        )
+    } else {
+        null
+    }
     val maxLines = sttSettings.maxLines
 
     val transcriptBox = sttSettings.textBoxes.boxAt(textBoxKey(CAPTION_TRANSCRIPT_BOX, lowerThird = false))
@@ -171,76 +181,29 @@ fun STTPresenter(
         modifier = faded.fillMaxSize().captionMargins(sttSettings),
         contentAlignment = boxAlignment
     ) {
-        if (transcriptionText.isNotEmpty() || translationText.isNotEmpty() || isBothMode) {
-            Box(
-                modifier = Modifier
-                    .captionCard(sttSettings, cardBg)
-            ) {
-                if (isBothMode) {
-                    val first = if (isInverse) translationText else transcriptionText
-                    val firstStyle = if (isInverse) translationLook else transcriptLook
-                    val second = if (isInverse) transcriptionText else translationText
-                    val secondStyle = if (isInverse) transcriptLook else translationLook
-
-                    if (isSideBySide) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(24.dp),
-                            verticalAlignment = Alignment.Bottom
-                        ) {
-                            CaptionLines(
-                                text = first,
-                                style = firstStyle,
-                                s = sttSettings,
-                                modifier = Modifier.weight(1f),
-                            )
-                            CaptionLines(
-                                text = second,
-                                style = secondStyle,
-                                s = sttSettings,
-                                modifier = Modifier.weight(1f),
-                            )
-                        }
-                    } else {
-                        Column(modifier = Modifier.fillMaxWidth().fillMaxSize()) {
-                            Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = boxAlignment) {
-                                CaptionLines(
-                                    text = first,
-                                    style = firstStyle,
-                                    s = sttSettings,
-                                    modifier = Modifier.fillMaxWidth(),
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = boxAlignment) {
-                                CaptionLines(
-                                    text = second,
-                                    style = secondStyle,
-                                    s = sttSettings,
-                                    modifier = Modifier.fillMaxWidth(),
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    val displayText = when {
-                        showTranscription && transcriptionText.isNotEmpty() -> transcriptionText
-                        showTranslation && translationText.isNotEmpty() -> translationText
-                        transcriptionText.isNotEmpty() -> transcriptionText
-                        else -> translationText
-                    }
-                    val displayStyle = when {
-                        showTranscription && transcriptionText.isNotEmpty() -> transcriptLook
-                        showTranslation && translationText.isNotEmpty() -> translationLook
-                        else -> transcriptLook
-                    }
-                    CaptionLines(
-                        text = displayText,
-                        style = displayStyle,
-                        s = sttSettings,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
+        when {
+            interleavedText != null -> CaptionCard(sttSettings, cardBg) {
+                CaptionLines(interleavedText, transcriptLook, sttSettings, Modifier.fillMaxWidth())
+            }
+            isBothMode -> BothLanguages(
+                first = if (isInverse) translationText else transcriptionText,
+                firstStyle = if (isInverse) translationLook else transcriptLook,
+                second = if (isInverse) transcriptionText else translationText,
+                secondStyle = if (isInverse) transcriptLook else translationLook,
+                s = sttSettings,
+                cardBg = cardBg,
+                sideBySide = isSideBySide,
+                alignment = boxAlignment,
+            )
+            transcriptionText.isNotEmpty() || translationText.isNotEmpty() -> CaptionCard(sttSettings, cardBg) {
+                val showOwn = showTranscription && transcriptionText.isNotEmpty() ||
+                    !(showTranslation && translationText.isNotEmpty()) && transcriptionText.isNotEmpty()
+                CaptionLines(
+                    text = if (showOwn) transcriptionText else translationText,
+                    style = if (showOwn) transcriptLook else translationLook,
+                    s = sttSettings,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }
@@ -289,80 +252,6 @@ private fun BoxedCaptions(
         }
     }
 }
-
-/** What a side's caption is painted with: its colour, the words to highlight, and its word spacing. */
-private class CaptionInk(val baseColor: Color, val highlights: List<HighlightedWord>, val spaceTrackingEm: Float?)
-
-private fun buildDisplayText(
-    body: CaptionBody,
-    hasSegments: Boolean,
-    reading: CaptionReading,
-    ink: CaptionInk,
-): AnnotatedString {
-    val baseColor = ink.baseColor
-    val fullText = body.text
-    if (fullText.isEmpty()) return AnnotatedString("")
-
-    // Build per-character color array then construct contiguous runs
-    val colors = Array(fullText.length) { baseColor }
-
-    // Older units fainter; the in-progress words, which are no unit's age, stay out of the count
-    val progressFrom = body.inProgressStart ?: fullText.length
-    val settled = body.units.filter { it.first < progressFrom }
-    unitAlphas(settled.size, reading).forEachIndexed { i, alpha ->
-        if (alpha < 1f) for (j in settled[i]) colors[j] = baseColor.copy(alpha = baseColor.alpha * alpha)
-    }
-
-    // Dim in-progress text
-    if (body.inProgressStart != null && hasSegments) {
-        for (j in body.inProgressStart until fullText.length) colors[j] = baseColor.copy(alpha = 0.6f)
-    }
-
-    // Apply word highlighting with Unicode word boundaries
-    ink.highlights.forEach { applyHighlight(it, fullText, colors) }
-
-    return runsOf(fullText, colors, ink.spaceTrackingEm)
-}
-
-/** Paints every match of one highlighted word into [colors]. A pattern that won't compile is skipped. */
-private fun applyHighlight(hw: HighlightedWord, fullText: String, colors: Array<Color>) {
-    if (hw.word.isBlank()) return
-    try {
-        val highlightColor = parseHexColor(hw.color)
-        val wb = "(?<![\\p{L}\\p{N}])"
-        val we = "(?![\\p{L}\\p{N}])"
-        val rawPattern = if (hw.isRegex) "$wb(?:${hw.word})$we" else "$wb${Regex.escape(hw.word)}$we"
-        var flags = java.util.regex.Pattern.UNICODE_CHARACTER_CLASS
-        if (!hw.caseSensitive) {
-            flags = flags or java.util.regex.Pattern.CASE_INSENSITIVE or java.util.regex.Pattern.UNICODE_CASE
-        }
-        java.util.regex.Pattern.compile(rawPattern, flags).toRegex().findAll(fullText).forEach { match ->
-            for (j in match.range) colors[j] = highlightColor
-        }
-    } catch (_: Exception) {}
-}
-
-/**
- * The per-character colours collapsed into contiguous styled runs, each space widened by
- * [spaceTrackingEm] when word spacing is set (see `styledDisplayText`).
- */
-private fun runsOf(fullText: String, colors: Array<Color>, spaceTrackingEm: Float?): AnnotatedString =
-    buildAnnotatedString {
-        var i = 0
-        while (i < fullText.length) {
-            val color = colors[i]
-            val start = i
-            while (i < fullText.length && colors[i] == color) i++
-            withStyle(SpanStyle(color = color)) {
-                append(fullText.substring(start, i))
-            }
-        }
-        if (spaceTrackingEm != null) {
-            fullText.forEachIndexed { index, c ->
-                if (c == ' ') addStyle(SpanStyle(letterSpacing = spaceTrackingEm.em), index, index + 1)
-            }
-        }
-    }
 
 /**
  * Drip feed: reveals the caption letter-by-letter (ChatGPT-style) at [delayMs] per character.
