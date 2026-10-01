@@ -5,6 +5,7 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.utils.sharedScaleMode
 import org.churchpresenter.app.churchpresenter.utils.ScaleButtonContent
 import org.churchpresenter.app.churchpresenter.utils.scaleButtonLabel
@@ -79,7 +80,7 @@ import androidx.compose.material3.IconButtonColors
 
 /** Transport, loop, scale, subtitles and volume. */
 @Composable
-internal fun MediaTabScope.MediaControlsBar() {
+internal fun MediaTabScope.MediaControlsBar(viewModel: MediaViewModel) {
     // ── Playback controls bar ─────────────────────────────────────
     FlowRow(
         modifier = Modifier
@@ -107,7 +108,7 @@ internal fun MediaTabScope.MediaControlsBar() {
             disabledContentColor = transportTint,
         )
 
-        MediaTransport(keyColors, litKeyColors)
+        MediaTransport(viewModel, keyColors, litKeyColors)
 
         // (Elapsed / total time now flank the seek bar below, so the combined time is
         // no longer shown here.)
@@ -115,25 +116,29 @@ internal fun MediaTabScope.MediaControlsBar() {
         // Divider
         Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
 
-        MediaLoopControls(keyColors, litKeyColors)
+        MediaLoopControls(viewModel, keyColors, litKeyColors)
 
-        MediaScaleButton(keyColors, litKeyColors)
-
-        // Divider
-        Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
-
-        MediaSubtitlesButton(keyColors, litKeyColors)
+        MediaScaleButton(viewModel, keyColors, litKeyColors)
 
         // Divider
         Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
 
-        MediaVolume(keyColors)
+        MediaSubtitlesButton(viewModel, keyColors, litKeyColors)
+
+        // Divider
+        Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
+
+        MediaVolume(viewModel, keyColors)
     }
 }
 
 /** Raised keys, Play the biggest and lit. */
 @Composable
-private fun MediaTabScope.MediaTransport(keyColors: IconButtonColors, litKeyColors: IconButtonColors) {
+private fun MediaTabScope.MediaTransport(
+    viewModel: MediaViewModel,
+    keyColors: IconButtonColors,
+    litKeyColors: IconButtonColors,
+) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         TooltipArea(
             tooltip = { TransportTooltip(stringResource(Res.string.media_seek_backward)) },
@@ -155,7 +160,7 @@ private fun MediaTabScope.MediaTransport(keyColors: IconButtonColors, litKeyColo
                 )
             }
         }
-        MediaPlayKey(litKeyColors)
+        MediaPlayKey(viewModel, litKeyColors)
         TooltipArea(
             tooltip = { TransportTooltip(stringResource(Res.string.stop)) },
             tooltipPlacement = TooltipPlacement.ComponentRect(
@@ -200,7 +205,7 @@ private fun MediaTabScope.MediaTransport(keyColors: IconButtonColors, litKeyColo
 }
 
 @Composable
-private fun MediaTabScope.MediaPlayKey(litKeyColors: IconButtonColors) {
+private fun MediaTabScope.MediaPlayKey(viewModel: MediaViewModel, litKeyColors: IconButtonColors) {
     TooltipArea(
         tooltip = { TransportTooltip(stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play)) },
         tooltipPlacement = TooltipPlacement.ComponentRect(
@@ -228,7 +233,11 @@ private fun MediaTabScope.MediaPlayKey(litKeyColors: IconButtonColors) {
 
 /** The loop key, and while looping the count of repeats beside it. */
 @Composable
-private fun MediaTabScope.MediaLoopControls(keyColors: IconButtonColors, litKeyColors: IconButtonColors) {
+private fun MediaTabScope.MediaLoopControls(
+    viewModel: MediaViewModel,
+    keyColors: IconButtonColors,
+    litKeyColors: IconButtonColors,
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -281,7 +290,11 @@ private fun MediaTabScope.MediaLoopControls(keyColors: IconButtonColors, litKeyC
 
 /** Each click moves Fit → Fill → Stretch on every profile at once, like the Pictures tab's button. */
 @Composable
-private fun MediaTabScope.MediaScaleButton(keyColors: IconButtonColors, litKeyColors: IconButtonColors) {
+private fun MediaTabScope.MediaScaleButton(
+    viewModel: MediaViewModel,
+    keyColors: IconButtonColors,
+    litKeyColors: IconButtonColors,
+) {
     val shared = sharedScaleMode(appSettings.projectionSettings.outputProfiles) { it.mediaScaleMode }
     val scaleMode = shared ?: OutputScaleMode.FIT
     val scaled = shared != OutputScaleMode.FIT
@@ -313,7 +326,11 @@ private fun MediaTabScope.MediaScaleButton(keyColors: IconButtonColors, litKeyCo
 
 /** Subtitles: off, one of the tracks VLC found, or a file of the operator's own. */
 @Composable
-private fun MediaTabScope.MediaSubtitlesButton(keyColors: IconButtonColors, litKeyColors: IconButtonColors) {
+private fun MediaTabScope.MediaSubtitlesButton(
+    viewModel: MediaViewModel,
+    keyColors: IconButtonColors,
+    litKeyColors: IconButtonColors,
+) {
     var subtitlesExpanded by remember { mutableStateOf(false) }
     val subtitlesLabel = stringResource(Res.string.media_subtitles)
     val subtitlesShowing = viewModel.subtitlesVisible
@@ -383,7 +400,7 @@ private fun MediaTabScope.MediaSubtitlesButton(keyColors: IconButtonColors, litK
 
 /** A mute key with the slider beside it, both always in the bar. */
 @Composable
-private fun MediaTabScope.MediaVolume(keyColors: IconButtonColors) {
+private fun MediaTabScope.MediaVolume(viewModel: MediaViewModel, keyColors: IconButtonColors) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)

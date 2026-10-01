@@ -5,6 +5,7 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.utils.sharedScaleMode
 import org.churchpresenter.app.churchpresenter.utils.ScaleButtonContent
 import org.churchpresenter.app.churchpresenter.utils.scaleButtonLabel
@@ -97,7 +98,7 @@ import androidx.compose.material3.IconButtonColors
 
 /** Transport, the counter, loop, scale, and the interval, transition and animation settings. */
 @Composable
-internal fun PicturesTabScope.PicturesControlsBar() {
+internal fun PicturesTabScope.PicturesControlsBar(viewModel: PicturesViewModel) {
     // ── Playback controls bar ─────────────────────────────────────
     FlowRow(
         modifier = Modifier
@@ -116,11 +117,11 @@ internal fun PicturesTabScope.PicturesControlsBar() {
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
         )
-        PicturesTransport(neutralKeyColors)
+        PicturesTransport(viewModel, neutralKeyColors)
 
-        PicturesImageCounter()
+        PicturesImageCounter(viewModel)
 
-        PicturesLoopButton(accentKeyColors, neutralKeyColors)
+        PicturesLoopButton(viewModel, accentKeyColors, neutralKeyColors)
 
         PicturesScaleButton(accentKeyColors, neutralKeyColors)
 
@@ -129,11 +130,11 @@ internal fun PicturesTabScope.PicturesControlsBar() {
 
         // Settings display boxes
         if (appSettings != null) {
-            PicturesIntervalSetting(appSettings)
+            PicturesIntervalSetting(viewModel, appSettings)
 
-            PicturesTransitionSetting(appSettings)
+            PicturesTransitionSetting(viewModel, appSettings)
 
-            PicturesAnimationDropdown(appSettings)
+            PicturesAnimationDropdown(viewModel, appSettings)
         }
     }
 
@@ -141,7 +142,7 @@ internal fun PicturesTabScope.PicturesControlsBar() {
 
 /** Raised keys either side of the biggest one, Play. */
 @Composable
-private fun PicturesTabScope.PicturesTransport(neutralKeyColors: IconButtonColors) {
+private fun PicturesTabScope.PicturesTransport(viewModel: PicturesViewModel, neutralKeyColors: IconButtonColors) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -179,7 +180,7 @@ private fun PicturesTabScope.PicturesTransport(neutralKeyColors: IconButtonColor
                 )
             }
         }
-        PicturesPlayKey()
+        PicturesPlayKey(viewModel)
         TooltipArea(
             tooltip = {
                 Surface(
@@ -218,7 +219,7 @@ private fun PicturesTabScope.PicturesTransport(neutralKeyColors: IconButtonColor
 
 /** The biggest key, Play/Pause. */
 @Composable
-private fun PicturesTabScope.PicturesPlayKey() {
+private fun PicturesTabScope.PicturesPlayKey(viewModel: PicturesViewModel) {
     TooltipArea(
         tooltip = {
             Surface(
@@ -259,7 +260,7 @@ private fun PicturesTabScope.PicturesPlayKey() {
 }
 
 @Composable
-private fun PicturesTabScope.PicturesImageCounter() {
+private fun PicturesTabScope.PicturesImageCounter(viewModel: PicturesViewModel) {
     if (viewModel.images.isNotEmpty()) {
         val hiddenCount = viewModel.imagesSnapshot().count { viewModel.isHidden(it) }
         Text(
@@ -285,7 +286,11 @@ private fun PicturesTabScope.PicturesImageCounter() {
 }
 
 @Composable
-private fun PicturesTabScope.PicturesLoopButton(accentKeyColors: IconButtonColors, neutralKeyColors: IconButtonColors) {
+private fun PicturesTabScope.PicturesLoopButton(
+    viewModel: PicturesViewModel,
+    accentKeyColors: IconButtonColors,
+    neutralKeyColors: IconButtonColors,
+) {
     TooltipArea(
         tooltip = {
             Surface(
@@ -381,7 +386,7 @@ private fun PicturesTabScope.PicturesScaleButton(
 
 /** The auto-scroll interval box and the dialog that edits it. */
 @Composable
-private fun PicturesTabScope.PicturesIntervalSetting(appSettings: AppSettings) {
+private fun PicturesTabScope.PicturesIntervalSetting(viewModel: PicturesViewModel, appSettings: AppSettings) {
     var editingInterval by remember { mutableStateOf(false) }
     var intervalInput by remember(appSettings.pictureSettings.autoScrollInterval) {
         mutableStateOf(appSettings.pictureSettings.autoScrollInterval.toInt().toString())
@@ -458,7 +463,7 @@ private fun PicturesTabScope.PicturesIntervalSetting(appSettings: AppSettings) {
 
 /** The transition duration box and the dialog that edits it. */
 @Composable
-private fun PicturesTabScope.PicturesTransitionSetting(appSettings: AppSettings) {
+private fun PicturesTabScope.PicturesTransitionSetting(viewModel: PicturesViewModel, appSettings: AppSettings) {
     var editingTransition by remember { mutableStateOf(false) }
     var transitionInput by remember(appSettings.pictureSettings.transitionDuration) {
         mutableStateOf(appSettings.pictureSettings.transitionDuration.toInt().toString())
@@ -538,7 +543,7 @@ private fun PicturesTabScope.PicturesTransitionSetting(appSettings: AppSettings)
 }
 
 @Composable
-private fun PicturesTabScope.PicturesAnimationDropdown(appSettings: AppSettings) {
+private fun PicturesTabScope.PicturesAnimationDropdown(viewModel: PicturesViewModel, appSettings: AppSettings) {
     val crossfadeText = stringResource(Res.string.animation_crossfade)
     val fadeText = stringResource(Res.string.animation_fade)
     val slideLeftText = stringResource(Res.string.animation_slide_left)

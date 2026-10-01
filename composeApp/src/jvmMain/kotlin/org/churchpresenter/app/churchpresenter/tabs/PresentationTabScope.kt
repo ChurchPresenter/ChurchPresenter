@@ -50,7 +50,6 @@ internal class PresentationTabScope(
     val presenterManager: PresenterManager?,
     val onSlidesLoaded: PresentationSlidesLoaded?,
     val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    val viewModel: PresentationViewModel,
     val tunnelStatus: TunnelStatus,
     val tunnelUrl: String,
     val serverUrl: String,
@@ -78,13 +77,13 @@ internal class PresentationTabScope(
     // selected deck, next/prev first advances/rewinds its build steps (PowerPoint click
     // semantics). The identity/visibility guard lives in PresenterManager — in every other
     // situation (not live, cleared display, different deck/slide) arrows change slides.
-    val goNext: () -> Unit get() = {
+    fun goNext(viewModel: PresentationViewModel) {
         val deck = viewModel.deck
         val stepped = deck != null && presenterManager
             ?.advancePresentationStep(deck, viewModel.selectedSlideIndex) == true
         if (!stepped) viewModel.nextSlide(onInstanceLinkSendNextSlide)
     }
-    val goPrevious: () -> Unit get() = {
+    fun goPrevious(viewModel: PresentationViewModel) {
         val deck = viewModel.deck
         val stepped = deck != null && presenterManager
             ?.rewindPresentationStep(deck, viewModel.selectedSlideIndex) == true
@@ -92,7 +91,7 @@ internal class PresentationTabScope(
     }
 
     /** The tab's key handler: slides, play/pause and blank, and Instance Link next/previous. */
-    fun handleKey(keyEvent: KeyEvent): Boolean {
+    fun handleKey(viewModel: PresentationViewModel, keyEvent: KeyEvent): Boolean {
         if (keyEvent.type != KeyEventType.KeyDown) return false
         if (viewModel.slideFiles.isEmpty()) {
             // Instance Link Controller mode: next/prev must still reach the primary's own
@@ -108,8 +107,8 @@ internal class PresentationTabScope(
             } else false
         }
         return when {
-            goesBack(shortcuts, keyEvent) -> { goPrevious(); true }
-            goesForward(shortcuts, keyEvent) -> { goNext(); true }
+            goesBack(shortcuts, keyEvent) -> { goPrevious(viewModel); true }
+            goesForward(shortcuts, keyEvent) -> { goNext(viewModel); true }
             shortcuts.matches(ShortcutAction.PRESENTATION_PLAY_PAUSE, keyEvent) -> { viewModel.togglePlayPause(); true }
             // Clicker blank-screen button ('b' or '.' depending on model): toggle the
             // same Blank Output state as the eye button — a truly blank output
@@ -128,7 +127,7 @@ internal class PresentationTabScope(
 
 /** Loads what the Schedule hands the tab, publishes what it loads, and keeps the live slide in step. */
 @Composable
-internal fun PresentationTabScope.PresentationLoadEffects() {
+internal fun PresentationTabScope.PresentationLoadEffects(viewModel: PresentationViewModel) {
     LaunchedEffect(selectedPresentationItem, selectedPresentationItemVersion) {
         selectedPresentationItem?.let { item ->
             val file = File(item.filePath)
@@ -186,7 +185,7 @@ internal fun PresentationTabScope.PresentationLoadEffects() {
 }
 
 @Composable
-internal fun PresentationTabScope.PresentationLiveEffects() {
+internal fun PresentationTabScope.PresentationLiveEffects(viewModel: PresentationViewModel) {
     LaunchedEffect(viewModel.isPlaying, viewModel.selectedSlideIndex, viewModel.autoScrollInterval) {
         if (viewModel.isPlaying && viewModel.slideFiles.isNotEmpty()) {
             delay((viewModel.autoScrollInterval * PRESENTATION_MILLIS_PER_SECOND).toLong())

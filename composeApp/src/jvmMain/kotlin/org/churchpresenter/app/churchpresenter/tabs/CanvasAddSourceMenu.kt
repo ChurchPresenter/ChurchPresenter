@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -49,7 +50,7 @@ import churchpresenter.composeapp.generated.resources.canvas_add_source
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-internal fun CanvasTabScope.AddSourceButton() {
+internal fun CanvasTabScope.AddSourceButton(sceneViewModel: SceneViewModel) {
     var showAddMenu by remember { mutableStateOf(false) }
 
     Box {
@@ -90,14 +91,14 @@ internal fun CanvasTabScope.AddSourceButton() {
             expanded = showAddMenu,
             onDismissRequest = { showAddMenu = false }
         ) {
-            AddSourceItemsFirst { showAddMenu = false }
-            AddSourceItemsSecond { showAddMenu = false }
+            AddSourceItemsFirst(sceneViewModel) { showAddMenu = false }
+            AddSourceItemsSecond(sceneViewModel) { showAddMenu = false }
         }
     }
 }
 
 @Composable
-private fun CanvasTabScope.AddSourceItemsFirst(onClose: () -> Unit) {
+private fun CanvasTabScope.AddSourceItemsFirst(sceneViewModel: SceneViewModel, onClose: () -> Unit) {
     DropdownMenuItem(
         text = { Text(stringResource(Res.string.canvas_source_image)) },
         onClick = {
@@ -184,7 +185,7 @@ private fun CanvasTabScope.AddSourceItemsFirst(onClose: () -> Unit) {
 }
 
 @Composable
-private fun CanvasTabScope.AddSourceItemsSecond(onClose: () -> Unit) {
+private fun CanvasTabScope.AddSourceItemsSecond(sceneViewModel: SceneViewModel, onClose: () -> Unit) {
     DropdownMenuItem(
         text = { Text(stringResource(Res.string.canvas_source_camera)) },
         onClick = {

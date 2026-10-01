@@ -29,14 +29,13 @@ internal class PicturesTabScope(
     val onInstanceLinkSendPreviousPicture: (() -> Unit)?,
     val presenterManager: PresenterManager?,
     val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    val viewModel: PicturesViewModel,
     val folderDialogTitle: String,
     val gridState: LazyGridState,
     val shortcuts: ShortcutMap,
     val wentLive: (ScheduleItem) -> Unit,
 ) {
     /** Previous/next, row up/down and play/pause; Instance Link next/previous with an empty folder. */
-    fun handleKey(keyEvent: KeyEvent): Boolean {
+    fun handleKey(viewModel: PicturesViewModel, keyEvent: KeyEvent): Boolean {
         if (keyEvent.type != KeyEventType.KeyDown) return false
         if (viewModel.images.isEmpty()) {
             // Instance Link Controller mode: next/prev must still reach the primary's own

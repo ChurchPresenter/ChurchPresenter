@@ -87,13 +87,12 @@ fun CanvasTab(
     // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
     // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
     val scope = remember(
-        appSettings, presenterManager, sceneViewModel, onAddToSchedule, onSavePreset, cameraHost, density,
+        appSettings, presenterManager, onAddToSchedule, onSavePreset, cameraHost, density,
         onSettingsChangeState, isMaximized, sourceNames, wentLive, state
     ) {
         CanvasTabScope(
             appSettings = appSettings,
             presenterManager = presenterManager,
-            sceneViewModel = sceneViewModel,
             onAddToSchedule = onAddToSchedule,
             onSavePreset = onSavePreset,
             cameraHost = cameraHost,
@@ -120,8 +119,8 @@ fun CanvasTab(
             focusRequester.requestFocus()
         }
         // Re-grab focus whenever a source is selected so Delete key works right after clicking canvas items
-        LaunchedEffect(selectedSourceId) {
-            if (selectedSourceId != null) {
+        LaunchedEffect(sceneViewModel.selectedSourceId.value) {
+            if (sceneViewModel.selectedSourceId.value != null) {
                 focusRequester.requestFocus()
             }
         }
@@ -138,7 +137,7 @@ fun CanvasTab(
                         shortcuts.matches(ShortcutAction.CANVAS_DELETE_SOURCE, event) &&
                         renamingSceneId == null
                     ) {
-                        val sourceId = selectedSourceId
+                        val sourceId = sceneViewModel.selectedSourceId.value
                         if (sourceId != null) {
                             sceneViewModel.removeSource(sourceId)
                             true
@@ -147,7 +146,7 @@ fun CanvasTab(
                 }
         ) {
             // Left panel: Scene selector + Source list
-            CanvasLeftPanel()
+            CanvasLeftPanel(sceneViewModel)
 
             // Draggable separator: left panel | center
             DragHandle(onDragEnd = { saveLeftPanel() }) { delta ->
@@ -155,7 +154,7 @@ fun CanvasTab(
             }
 
             // Center panel: Toolbar + Canvas
-            CanvasCenterPanel(Modifier.weight(1f))
+            CanvasCenterPanel(sceneViewModel, Modifier.weight(1f))
 
             // Draggable separator: center | right panel
             DragHandle(onDragEnd = { saveRightPanel() }) { delta ->
@@ -163,7 +162,7 @@ fun CanvasTab(
             }
 
             // Right panel: Properties
-            CanvasPropertiesPanel()
+            CanvasPropertiesPanel(sceneViewModel)
         }
     }
 }

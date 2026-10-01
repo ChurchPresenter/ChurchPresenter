@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -60,7 +61,7 @@ import androidx.compose.ui.text.style.TextOverflow
 
 /** The thumbnail grid, its drag-to-reorder ghost, and the scroll to the selected picture. */
 @Composable
-internal fun PicturesTabScope.PicturesGrid() {
+internal fun PicturesTabScope.PicturesGrid(viewModel: PicturesViewModel) {
     val drag = remember { PictureDragState() }
 
     // The grid is given an immutable copy, never the view model's live SnapshotStateList.
@@ -85,12 +86,12 @@ internal fun PicturesTabScope.PicturesGrid() {
             contentPadding = PaddingValues(vertical = 18.dp)
         ) {
             items(shownImages, key = { it.absolutePath }) { imageFile ->
-                PictureThumbnail(shownImages, imageFile, drag, Modifier.animateItem())
+                PictureThumbnail(viewModel, shownImages, imageFile, drag, Modifier.animateItem())
             }
         }
 
         // Floating drag preview — follows cursor, rendered above the grid
-        PictureDragPreview(drag)
+        PictureDragPreview(viewModel, drag)
         VerticalScrollbar(
             adapter = rememberScrollbarAdapter(gridState),
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(vertical = 8.dp),
@@ -107,6 +108,7 @@ internal fun PicturesTabScope.PicturesGrid() {
 
 @Composable
 private fun PicturesTabScope.PictureThumbnail(
+    viewModel: PicturesViewModel,
     shownImages: List<File>,
     imageFile: File,
     drag: PictureDragState,
@@ -131,7 +133,7 @@ private fun PicturesTabScope.PictureThumbnail(
                 .hoverLift(AppShape(8.dp))
                 .border(2.dp, borderColor, AppShape(8.dp))
                 .clip(AppShape(8.dp))
-                .then(reorderDrag(imageFile, drag))
+                .then(reorderDrag(viewModel, imageFile, drag))
                 // Final pass, so the hide eye in the nameplate gets its own click
                 // first: taken in the initial pass, a click on the eye selected the
                 // picture instead, and put it on screen when live.
@@ -149,14 +151,18 @@ private fun PicturesTabScope.PictureThumbnail(
                     }
                 )
         ) {
-            PictureTileImage(imageFile, isHidden)
-            PictureNameplate(imageFile, index, isSelected, isHidden)
+            PictureTileImage(viewModel, imageFile, isHidden)
+            PictureNameplate(viewModel, imageFile, index, isSelected, isHidden)
         }
     }
 }
 
 /** Shift+press starts a drag; moves track the drop target, and release moves the picture there. */
-private fun PicturesTabScope.reorderDrag(imageFile: File, drag: PictureDragState): Modifier =
+private fun PicturesTabScope.reorderDrag(
+    viewModel: PicturesViewModel,
+    imageFile: File,
+    drag: PictureDragState,
+): Modifier =
     Modifier.pointerInput(imageFile) {
         with(drag) {
             awaitPointerEventScope {
@@ -183,7 +189,7 @@ private fun PicturesTabScope.reorderDrag(imageFile: File, drag: PictureDragState
                         )
                     } else startPos
 
-                    followReorderDrag(this@reorderDrag, drag, startPos)
+                    followReorderDrag(this@reorderDrag, viewModel, drag, startPos)
                 }
             }
         }
@@ -192,6 +198,7 @@ private fun PicturesTabScope.reorderDrag(imageFile: File, drag: PictureDragState
 /** Follows one shift-drag from [startPos] to its release, then moves the picture to where it was dropped. */
 private suspend fun AwaitPointerEventScope.followReorderDrag(
     tab: PicturesTabScope,
+    viewModel: PicturesViewModel,
     drag: PictureDragState,
     startPos: Offset,
 ) {
@@ -217,7 +224,7 @@ private suspend fun AwaitPointerEventScope.followReorderDrag(
             PointerEventType.Release -> {
                 val from = drag.draggingFromIndex
                 val to = drag.dropTargetIndex ?: from
-                if (from >= 0 && from != to) tab.viewModel.moveImage(from, to)
+                if (from >= 0 && from != to) viewModel.moveImage(from, to)
                 drag.draggingFile = null
                 drag.draggingFromIndex = -1
                 drag.dropTargetIndex = null
@@ -231,7 +238,7 @@ private suspend fun AwaitPointerEventScope.followReorderDrag(
 }
 
 @Composable
-private fun PicturesTabScope.PictureTileImage(imageFile: File, isHidden: Boolean) {
+private fun PicturesTabScope.PictureTileImage(viewModel: PicturesViewModel, imageFile: File, isHidden: Boolean) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -267,7 +274,13 @@ private fun PicturesTabScope.PictureTileImage(imageFile: File, isHidden: Boolean
 }
 
 @Composable
-private fun PicturesTabScope.PictureNameplate(imageFile: File, index: Int, isSelected: Boolean, isHidden: Boolean) {
+private fun PicturesTabScope.PictureNameplate(
+    viewModel: PicturesViewModel,
+    imageFile: File,
+    index: Int,
+    isSelected: Boolean,
+    isHidden: Boolean,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -298,7 +311,7 @@ private fun PicturesTabScope.PictureNameplate(imageFile: File, index: Int, isSel
 
 /** The floating preview that follows the cursor, drawn above the grid. */
 @Composable
-private fun PicturesTabScope.PictureDragPreview(drag: PictureDragState) {
+private fun PicturesTabScope.PictureDragPreview(viewModel: PicturesViewModel, drag: PictureDragState) {
     with(drag) {
         if (isDragActive) {
             draggingFile?.let { file ->
