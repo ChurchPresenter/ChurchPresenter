@@ -3,7 +3,6 @@
     <string name="mode">モード</string>
     <string name="scope">範囲</string>
     <string name="title">タイトル</string>
-    <string name="number">番号</string>
     <string name="go_live">ライブ表示</string>
     <string name="add_to_schedule">進行表に追加</string>
     <string name="copy_verse">節をコピー</string>
@@ -12,7 +11,6 @@
     <string name="search">検索</string>
     <string name="bible_smart_search_hint">箇所または語句 — 例：ヨハネ 3:16、マタ 1、または単語</string>
     <string name="bible_search_mode_auto">自動</string>
-    <string name="bible_search_mode_reference">箇所</string>
     <string name="bible_search_mode_text">本文</string>
     <string name="bible_search_mode_tooltip">タップで切り替え — 自動：箇所はその場所へ移動し、それ以外は検索します。箇所：移動のみ。本文：常に節の本文を検索します。</string>
     <string name="bible_verse_selection_hint">Ctrl+クリックで選択の切り替え、Shift+クリックで範囲選択</string>
@@ -82,17 +80,11 @@
     <string name="bible_cross_references_close">パネルを閉じる</string>
     <string name="bible_cross_references_dismiss_hint">Esc で閉じる</string>
     <string name="menu_file">ファイル</string>
-    <string name="menu_new_schedule">新しい進行表</string>
-    <string name="menu_open_schedule">進行表を開く</string>
-    <string name="menu_save_schedule">進行表を保存</string>
     <string name="menu_save_schedule_as">進行表を別名で保存...</string>
     <string name="menu_close_schedule">進行表を閉じる</string>
     <string name="menu_exit">終了</string>
     <string name="file_chooser_save_schedule">進行表を別名で保存</string>
-    <string name="file_chooser_open_schedule">進行表を開く</string>
     <string name="file_filter_schedule">Church Presenter 進行表 (*.cps)</string>
-    <string name="menu_schedule">進行表</string>
-    <string name="menu_add_to_schedule">進行表に追加</string>
     <string name="menu_remove_from_schedule">進行表から削除</string>
     <string name="menu_clear_schedule">進行表をクリア</string>
 
@@ -111,7 +103,6 @@
     <string name="instance_link_description">ネットワーク上の別の ChurchPresenter に追従します。相手がライブ表示している内容をここに同期し、必要に応じて相手の進行表に項目を追加できます。</string>
     <string name="instance_link_host">ホスト</string>
     <string name="instance_link_host_hint">例：192.168.1.10</string>
-    <string name="instance_link_port">ポート</string>
     <string name="instance_link_autoconnect">起動時に自動的に接続する</string>
     <string name="instance_link_reconnect_delay">最短の再接続間隔</string>
     <string name="instance_link_reconnect_delay_hint">接続が切れてから再試行するまでの最短の待ち時間です。失敗が続くと間隔は自動的に延びます。</string>
@@ -466,15 +457,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">既定</string>
-    <string name="background_color_option">色</string>
-    <string name="background_image_option">画像</string>
     <string name="background_video_option">ループ動画</string>
     <string name="background_transparent_option">透過</string>
     <string name="background_follow_default_option">既定に従う</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">Web</string>
-    <string name="projection_content_background">背景</string>
     <string name="projection_content_lt_background">下部テロップの背景</string>
     <string name="browser_source_resolution">解像度</string>
     <string name="browser_source_fps">最大 FPS</string>
@@ -556,7 +544,6 @@
     <string name="tooltip_schedule_zoom_out">縮小</string>
     <string name="tooltip_add_to_schedule">進行表に追加</string>
     <string name="tooltip_clear_display">表示をクリア</string>
-    <string name="remote_action_clear_display">表示をクリア</string>
     <string name="schedule_add_files_title">進行表にファイルを追加</string>
     <string name="tooltip_toggle_displays">プレゼンター画面の表示を切り替え</string>
     <string name="tooltip_settings">設定</string>
@@ -578,7 +565,6 @@
     <string name="schedule_density_compact">コンパクト</string>
     <string name="schedule_density_normal">標準</string>
     <string name="schedule_density_detailed">詳細</string>
-    <string name="schedule_kind_lower_third">下部テロップ</string>
     <string name="tooltip_schedule_options">進行表のオプション</string>
     <string name="schedule_show_buttons_under_title">タイトルの下にボタンを表示</string>
     <string name="schedule_option_item_count">項目数</string>
@@ -589,7 +575,6 @@
     <string name="edit_label">ラベルを編集</string>
     <string name="label_text">ラベルの文字</string>
     <string name="text_color">文字色</string>
-    <string name="background_color_label">背景色</string>
     <string name="enter_label_text">ラベルの文字を入力...</string>
 
     <!-- Pictures Tab Strings -->
@@ -619,7 +604,6 @@
     <string name="animation_slide_left">左へスライド</string>
     <string name="animation_slide_right">右へスライド</string>
     <string name="animation_none">なし</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s 次／前の画像  ·  %2$s 行の移動</string>
     <string name="presentation_arrow_key_hint">%1$s — 前／次のビルドとスライド  ·  %2$s — 再生／一時停止  ·  %3$s — 画面を暗転</string>
     <string name="pictures_reorder_hint">Shift+ドラッグでサムネイルを並べ替え</string>
@@ -682,14 +666,10 @@
     <string name="content_bible_background">聖書の背景</string>
     <string name="content_songs_background">賛美歌の背景</string>
     <string name="content_pictures">画像／プレゼンテーション</string>
-    <string name="content_media">メディア</string>
-    <string name="content_streaming">下部テロップ</string>
     <string name="content_announcements">お知らせ</string>
     <string name="display_mode">表示モード</string>
-    <string name="display_fullscreen">全画面</string>
     <string name="display_lower_third">下部テロップ</string>
     <string name="full_screen">全画面</string>
-    <string name="lower_third_size">下部テロップ</string>
     <string name="identify_screen">画面を識別</string>
     <string name="projection_target_display">ディスプレイ</string>
     <string name="projection_auto_display">自動</string>
@@ -765,7 +745,6 @@
     <string name="settings_import_failed">設定をインポートできませんでした。ファイルが正しくない可能性があります。</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">メディア</string>
     <string name="media_local_file">ローカルファイル</string>
     <string name="media_network_url">ネットワーク URL</string>
     <string name="media_url_placeholder">URL を入力（http://、rtsp:// など）</string>
@@ -809,7 +788,6 @@
     <string name="center_left">左中央</string>
     <string name="center_right">右中央</string>
     <string name="bottom_center">中央下</string>
-    <string name="announcement_background_color_label">背景色</string>
     <string name="transparent_default">透過（既定）</string>
     <string name="announcement_animation">アニメーション</string>
     <string name="anim_slide_from_left">左から入る</string>
@@ -882,7 +860,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">進行表に追加</string>
     <string name="web_go_live">ライブ表示</string>
     <string name="web_bookmark_add">ブックマークに追加</string>
     <string name="web_bookmark_remove">ブックマークから削除</string>
@@ -946,7 +923,6 @@
     <string name="canvas_shape_fill_color">塗り</string>
     <string name="canvas_shape_stroke_width">線の太さ</string>
     <string name="canvas_rename_scene">名前を変更</string>
-    <string name="canvas_remove_scene">削除</string>
     <string name="canvas_add_source">ソースを追加</string>
     <string name="canvas_delete_source">ソースを削除</string>
     <string name="canvas_source_move_forward">前面へ移動</string>
@@ -974,7 +950,6 @@
     <string name="canvas_render_height">高さ</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">カスタム CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">画像を選択</string>
     <string name="canvas_select_video_title">動画を選択</string>
     <string name="canvas_image_files">画像ファイル</string>
@@ -986,7 +961,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">時計</string>
     <string name="canvas_clock_mode_countdown">カウントダウン</string>
     <string name="canvas_clock_mode_count_up">カウントアップ</string>
     <string name="canvas_decklink_io_warning">この機器は現在、出力に使用されています。同時入出力に対応していない機器では、入力を使えないことがあります。</string>
@@ -1004,7 +978,6 @@
     <string name="canvas_text_curve">カーブ</string>
     <string name="canvas_letter_spacing">文字間隔</string>
     <string name="canvas_source_qrcode">QR コード</string>
-    <string name="canvas_source_camera">カメラ</string>
     <string name="canvas_source_screen_capture">画面キャプチャ</string>
     <string name="canvas_source_bible">聖書</string>
     <string name="canvas_bible_version">聖書の訳</string>
@@ -1017,7 +990,6 @@
     <string name="canvas_bible_ref_color">箇所の色</string>
     <string name="canvas_verse_style">節のスタイル</string>
     <string name="canvas_reference_style">箇所のスタイル</string>
-    <string name="canvas_text_color">文字色</string>
     <string name="canvas_text_bg_color">背景色</string>
     <string name="canvas_clock_mode">モード</string>
     <string name="canvas_clock_format">形式</string>
@@ -1042,7 +1014,6 @@
     <string name="canvas_camera_format">映像フォーマット</string>
     <string name="canvas_camera_format_auto">自動（既定）</string>
     <string name="canvas_camera_connection">映像入力端子</string>
-    <string name="canvas_camera_mode">モード</string>
     <string name="canvas_camera_mode_auto">自動</string>
     <string name="canvas_capture_x">キャプチャ X</string>
     <string name="canvas_capture_y">キャプチャ Y</string>
@@ -1053,9 +1024,7 @@
     <string name="canvas_capture_mode_window">ウィンドウ</string>
     <string name="canvas_capture_refresh_windows">ウィンドウ一覧を更新</string>
     <string name="canvas_capture_interval">キャプチャ間隔</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">カメラ：%1$s</string>
-    <string name="canvas_placeholder_camera_default">カメラ</string>
     <string name="canvas_placeholder_screen_capture">画面キャプチャ</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1177,7 +1146,6 @@
     <string name="remote_activity_removed_from_schedule">進行表から削除しました</string>
     <string name="remote_activity_projected">投影しました（ライブ表示）</string>
     <string name="remote_activity_presentation_connect">プレゼンテーションのリモコンに接続しました</string>
-    <string name="remote_activity_presentation_connect_detail">接続しました</string>
     <string name="remote_activity_qa_admin_connect">Q&amp;A 管理画面に接続しました</string>
     <string name="remote_activity_qa_admin_connect_detail">接続しました</string>
     <string name="remote_activity_presented">表示中</string>
@@ -1217,7 +1185,6 @@
     <string name="instance_link_primary_badge">メイン機 — 従属機 %1$d 台が接続中</string>
     <string name="client_label_placeholder">わかりやすい名前を入力…</string>
     <string name="client_label_edit_tooltip">わかりやすい名前を設定</string>
-    <string name="client_label_save">保存</string>
     <string name="client_label_cancel">キャンセル</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1338,7 +1305,6 @@
     <string name="system_storage_subtitle">Church Presenter がコンテンツを探す場所</string>
     <string name="system_storage_linked_count">%1$d 件リンク済み</string>
     <string name="system_storage_needs_attention_count">%1$d 件が要確認</string>
-    <string name="system_storage_status_not_set">未設定</string>
     <string name="system_storage_status_not_found">フォルダーが見つかりません</string>
     <string name="system_storage_status_read_only">読み取り専用</string>
     <string name="system_storage_status_linked">リンク済み</string>
@@ -1380,7 +1346,6 @@
     <string name="show_song_number_before_title">曲番号をタイトルの前に表示</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">ステージモニター</string>
     <string name="general">全般</string>
     <string name="display_stage_monitor">ステージモニター</string>
     <string name="stage_monitor_quadrant_next">次</string>
@@ -1465,7 +1430,6 @@
     <string name="qa_confirm_go_live">表示を確定</string>
     <string name="qa_add_question_hint">質問を追加…</string>
     <string name="qa_edit_question_hint">質問の文章を編集…</string>
-    <string name="qa_delete_question">削除</string>
     <string name="qa_confirm_delete_prompt">削除しますか？</string>
     <string name="qa_submitter_device">端末: %1$s</string>
     <string name="qa_public_access">公開アクセス</string>
@@ -1502,14 +1466,11 @@
     <string name="stt_live_preview">ライブプレビュー</string>
     <string name="stt_not_connected">接続されていません。STT サーバーの URL を入力して「接続」を押してください。</string>
     <string name="stt_waiting_for_transcription">文字起こしを待っています…</string>
-    <string name="stt_transcription_label">文字起こし</string>
     <string name="stt_translation_label">翻訳</string>
     <string name="stt_settings_dialog_title">STT 表示設定</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">CCLI レポート</string>
-    <string name="ccli_tab_songs">曲</string>
-    <string name="ccli_tab_bible">聖書</string>
     <string name="ccli_tab_activity">活動</string>
     <string name="ccli_songs_summary">%1$d 曲 · 合計 %2$d 回</string>
     <string name="ccli_bible_summary">%1$d 節 · 合計 %2$d 回</string>
@@ -1520,7 +1481,6 @@
     <string name="ccli_activity_title">期間ごとの表示回数</string>
     <string name="ccli_from">開始:</string>
     <string name="ccli_to">終了:</string>
-    <string name="ccli_legend_songs">曲</string>
     <string name="ccli_legend_bible">聖句</string>
     <string name="ccli_stat_songs_presented">表示した曲</string>
     <string name="ccli_stat_bible_verses">聖句</string>
@@ -1534,7 +1494,6 @@
     <string name="ccli_col_first">初回</string>
     <string name="ccli_col_last">最終</string>
     <string name="ccli_col_verse">節</string>
-    <string name="ccli_col_bible">聖書</string>
     <string name="ccli_export_csv">CCLI CSV を書き出す</string>
     <string name="ccli_export_xls">XLS を書き出す</string>
     <string name="ccli_exported_success">レポートを書き出しました。</string>
@@ -1615,7 +1574,6 @@
     <string name="obs_mode_bible">聖書</string>
     <string name="obs_mode_songs">曲</string>
     <string name="obs_mode_pictures">画像</string>
-    <string name="obs_mode_presentation">プレゼンテーション</string>
     <string name="obs_mode_media">メディア</string>
     <string name="obs_mode_lower_third">ローワーサード</string>
     <string name="obs_mode_announcements">お知らせ</string>
@@ -1810,7 +1768,6 @@
     <string name="companion_satellite_no_host">接続するには、設定 → Companion Satellite で Companion のホストを指定してください。</string>
     <string name="companion_satellite_status_connecting">接続中…</string>
     <string name="companion_satellite_status_disconnected">切断されました</string>
-    <string name="companion_satellite_status_error">エラー: %1$s</string>
     <string name="companion_satellite_connection_name">名前</string>
     <string name="companion_satellite_product_name">製品名</string>
     <string name="companion_satellite_reconnect_delay">再接続までの待ち時間（ms）</string>
@@ -1874,7 +1831,6 @@
     <string name="bible_engine_detect">聖書箇所を検出する</string>
     <string name="bible_engine_run_local">エンジンをこのパソコンで動かす</string>
     <string name="bible_engine_host">エンジンのホスト</string>
-    <string name="bible_engine_port">ポート</string>
     <string name="stt_help_dev_mode">開発への協力 — 聖書タブにフィードバックのボタンを表示する（箇所が違う／早すぎる／見落とし）</string>
     <string name="dictionary_back">戻る</string>
     <string name="dictionary_forward">進む</string>
@@ -1963,7 +1919,6 @@
     <string name="font_category_serif">セリフ</string>
     <string name="font_category_mono">等幅</string>
     <string name="font_category_display">ディスプレイ</string>
-    <string name="font_preview">プレビュー</string>
     <string name="font_preview_sample">選択したフォントのサンプルテキスト</string>
     <string name="font_warning_no_cyrillic">%1$s にはキリル文字がありません — キリル文字の聖句は画面上で別のフォントで表示されます。</string>
     <string name="font_warning_no_hebrew">%1$s にはヘブライ文字がありません — ヘブライ語のテキストは画面上で別のフォントで表示されます。</string>
@@ -1973,7 +1928,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">取り消し線</string>
     <string name="bible_custom_name">名前</string>
-    <string name="bible_custom_abbreviation">略称</string>
     <string name="bible_translations">翻訳</string>
     <string name="bible_miscellaneous">その他</string>
     <string name="bible_font">フォント</string>
@@ -1988,10 +1942,7 @@
     <string name="bible_preview_sample_book">ヨハネ</string>
     <string name="bible_preview_no_translations">翻訳を追加するとここに表示されます</string>
     <string name="song_element_number">番号</string>
-    <string name="song_element_title">タイトル</string>
     <string name="song_element_lyrics">歌詞</string>
-    <string name="song_element_author">作詞者</string>
-    <string name="song_element_composer">作曲者</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">テンポ</string>
     <string name="song_target_title_slide">タイトルスライド</string>
@@ -2004,7 +1955,6 @@
     <string name="song_chunk">区切り</string>
     <string name="song_language_scope">言語</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">背景</string>
     <string name="song_background_full_screen">全画面</string>
     <string name="song_background_lower_third">ローワーサード</string>
     <string name="song_background_inherit">継承</string>
@@ -2019,7 +1969,6 @@
     <string name="song_background_your_color">任意の色</string>
     <string name="song_background_browse">参照…</string>
     <string name="song_background_look">仕上がり</string>
-    <string name="song_background_preset_none">なし</string>
     <string name="song_background_preset_soft">ソフト</string>
     <string name="song_background_preset_legible">くっきり</string>
     <string name="song_background_preset_cinema">シネマ</string>
@@ -2040,7 +1989,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">背景</string>
     <string name="background_group_defaults">既定</string>
-    <string name="background_scope_default">既定</string>
     <string name="background_scope_default_lower_third">既定の下部テロップ</string>
     <string name="background_scope_default_meta">聖書または賛美歌が「既定」のとき</string>
     <string name="background_scope_default_lower_third_meta">下部テロップが「既定」のとき</string>
@@ -2049,16 +1997,13 @@
     <string name="background_following_default">既定に従う</string>
     <string name="background_use_default">既定を使う</string>
     <string name="background_set_explicitly">この面に個別に設定</string>
-    <string name="background_type_caption">種類</string>
     <string name="background_color_caption">色</string>
     <string name="background_image_file">画像ファイル</string>
     <string name="background_video_file">動画ファイル</string>
-    <string name="background_opacity_caption">不透明度</string>
     <string name="background_above_band_caption">帯の上</string>
     <string name="background_above_band_fill">塗りの色</string>
     <string name="background_above_band_opacity">塗りの不透明度</string>
     <string name="quick_background_reset">元に戻す</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · 設定で管理</string>
     <string name="quick_backgrounds">クイック背景</string>
     <string name="quick_backgrounds_help">プレビューパネルがワンクリックで呼び出せる背景です。タイルをクリックすると表示内容を選べ、ドラッグすると割り当てキーを変えられます。礼拝中に選ぶと、元に戻すまですべての画面を上書きします。ここには何も影響しません。</string>
@@ -2084,16 +2029,10 @@
     <string name="output_profile_swap_menu_tooltip">出力プロファイルを切り替え</string>
     <string name="output_profile_new_name_default">新しいプロファイル</string>
     <string name="output_profile_empty_state">プロファイルを作成してスタイルを設定しましょう</string>
-    <string name="customize_bible">聖書</string>
-    <string name="customize_songs">賛美歌</string>
     <string name="customize_group_verse_text">聖句テキスト</string>
     <string name="customize_group_reference">箇所</string>
     <string name="customize_background_type">種類</string>
-    <string name="customize_type_color">色</string>
     <string name="customize_type_image">画像</string>
-    <string name="customize_type_video">動画</string>
-    <string name="customize_type_default">既定</string>
-    <string name="customize_type_gradient">グラデーション</string>
     <string name="customize_show_abbreviation">略称</string>
     <string name="customize_background_opacity">不透明度</string>
     <string name="slate_theme">スレートテーマ</string>
@@ -2139,7 +2078,6 @@
     <string name="song_lottie_unsupported_note">レイアウトとタイトルの位置はテンプレートが決めます。ローワーサードのスタイルはフォント、サイズ、色、配置、文字間隔、大文字小文字、影を設定します。テキスト背景、下線、取り消し線、単語間隔、次のプレビュー、コードは適用されません。</string>
     <string name="bible_lottie_unsupported_note">レイアウト、聖句参照の位置、2 言語のバンドの分け方はテンプレートが決めます。ローワーサードのスタイルはフォント、サイズ、色、配置、文字間隔、大文字小文字、影を設定します。テキスト背景、下線、取り消し線、単語間隔は適用されません。</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">縁取り</string>
     <string name="tooltip_outline_options">縁取りのオプション</string>
     <string name="text_outline">縁取り</string>
     <string name="text_outline_width">太さ</string>
@@ -2207,7 +2145,6 @@
     <string name="add_ndi_output">出力を追加</string>
     <string name="ndi_output_numbered">NDI 出力 %1$d</string>
     <string name="preview_output">出力をプレビュー</string>
-    <string name="output_resolution">解像度</string>
     <string name="output_resolution_custom">カスタム…</string>
     <string name="output_resolution_custom_title">カスタム解像度</string>
     <string name="output_resolution_width">幅</string>
@@ -2311,7 +2248,6 @@
     <string name="calendar_sync_description">このコンピューターの電源が切れていても、週を通してモバイルアプリから礼拝を計画できます。このコンピューターが正となるデータ元です。</string>
     <string name="calendar_sync_enable">カレンダーを電話と同期する</string>
     <string name="calendar_sync_relay_url">リレー</string>
-    <string name="calendar_sync_status_off">オフ</string>
     <string name="calendar_sync_status_unpaired">未登録 — 同期を初めてオンにしたときに、このコンピューターがリレーに登録されます</string>
     <string name="calendar_sync_status_syncing">同期中…</string>
     <string name="calendar_sync_status_synced">同期済み %1$s</string>

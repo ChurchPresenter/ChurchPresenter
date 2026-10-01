@@ -86,7 +86,7 @@ import churchpresenter.composeapp.generated.resources.omt_output_numbered
 import churchpresenter.composeapp.generated.resources.display_stage_monitor
 import churchpresenter.composeapp.generated.resources.collapse_preview
 import churchpresenter.composeapp.generated.resources.expand_preview
-import churchpresenter.composeapp.generated.resources.display_fullscreen
+import churchpresenter.composeapp.generated.resources.full_screen
 import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.live_preview_nothing
 import churchpresenter.composeapp.generated.resources.live_preview_title
@@ -586,7 +586,7 @@ private fun SingleDisplayPreview(
         // Full screen is the remaining mode, and it used to be the one with no chip at all -- so a
         // stack of previews named the two special outputs and left the ordinary ones to be guessed
         // at. It is also the row that has to be there for the header below to be clickable.
-        else -> stringResource(Res.string.display_fullscreen)
+        else -> stringResource(Res.string.full_screen)
     }
 
     // Session-only, and deliberately not persisted: collapsing is something an operator does to get

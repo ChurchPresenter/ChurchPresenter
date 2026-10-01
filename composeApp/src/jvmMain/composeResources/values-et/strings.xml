@@ -3,7 +3,6 @@
     <string name="mode">Režiim</string>
     <string name="scope">Ulatus</string>
     <string name="title">Pealkiri</string>
-    <string name="number">Number</string>
     <string name="go_live">Mine eetrisse</string>
     <string name="add_to_schedule">Lisa kavasse</string>
     <string name="copy_verse">Kopeeri salm</string>
@@ -12,7 +11,6 @@
     <string name="search">Otsi</string>
     <string name="bible_smart_search_hint">Viide või tekst — nt Jh 3:16, mat 1 või sõna</string>
     <string name="bible_search_mode_auto">Automaatne</string>
-    <string name="bible_search_mode_reference">Viide</string>
     <string name="bible_search_mode_text">Tekst</string>
     <string name="bible_search_mode_tooltip">Puuduta vahetamiseks — Automaatne: hüppab viidete juurde, otsib kõike muud. Viide: ainult navigeerimine. Tekst: otsib alati salmi teksti.</string>
     <string name="search_songs">Otsi laule...</string>
@@ -75,18 +73,12 @@
     <string name="bible_cross_references_close">Sulge paneel</string>
     <string name="bible_cross_references_dismiss_hint">Esc sulgeb</string>
     <string name="menu_file">Fail</string>
-    <string name="menu_new_schedule">Uus kava</string>
-    <string name="menu_open_schedule">Ava kava</string>
-    <string name="menu_save_schedule">Salvesta kava</string>
     <string name="menu_save_schedule_as">Salvesta kava kui...</string>
     <string name="menu_close_schedule">Sulge kava</string>
     <string name="menu_exit">Välju</string>
     <string name="file_chooser_save_schedule">Salvesta kava kui</string>
-    <string name="file_chooser_open_schedule">Ava kava</string>
     <string name="file_filter_schedule">Church Presenter kava (*.cps)</string>
 
-    <string name="menu_schedule">Kava</string>
-    <string name="menu_add_to_schedule">Lisa kavasse</string>
     <string name="menu_remove_from_schedule">Eemalda kavast</string>
     <string name="menu_clear_schedule">Tühjenda kava</string>
 
@@ -369,15 +361,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">Vaikimisi</string>
-    <string name="background_color_option">Värv</string>
-    <string name="background_image_option">Pilt</string>
     <string name="background_video_option">Video tsükkel</string>
     <string name="background_transparent_option">Läbipaistev</string>
     <string name="background_follow_default_option">Järgi vaikeväärtust</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">Veeb</string>
-    <string name="projection_content_background">Taust</string>
     <string name="projection_content_lt_background">Alumise kolmandiku taust</string>
     <string name="projection_decklink_io_conflict_tooltip">Kasutusel ka sisendina — ei pruugi töötada seadmetel, mis ei toeta samaaegset sisend/väljundit</string>
 
@@ -454,7 +443,6 @@
     <string name="tooltip_move_down">Liiguta alla</string>
     <string name="tooltip_add_to_schedule">Lisa kavasse</string>
     <string name="tooltip_clear_display">Tühjenda kuva</string>
-    <string name="remote_action_clear_display">Tühjenda kuva</string>
     <string name="schedule_add_files_title">Lisa failid kavasse</string>
     <string name="tooltip_toggle_displays">Lülita esitluskuvad</string>
     <string name="tooltip_settings">Seaded</string>
@@ -475,7 +463,6 @@
     <string name="schedule_density_compact">Kompaktne</string>
     <string name="schedule_density_normal">Tavaline</string>
     <string name="schedule_density_detailed">Üksikasjalik</string>
-    <string name="schedule_kind_lower_third">Alumine kolmandik</string>
     <string name="tooltip_schedule_options">Kava suvandid</string>
     <string name="schedule_show_buttons_under_title">Näita nuppe pealkirja all</string>
     <string name="schedule_option_item_count">Elementide arv</string>
@@ -486,7 +473,6 @@
     <string name="edit_label">Muuda silti</string>
     <string name="label_text">Sildi tekst</string>
     <string name="text_color">Teksti värv</string>
-    <string name="background_color_label">Taustavärv</string>
     <string name="enter_label_text">Sisesta sildi tekst...</string>
 
     <!-- Pictures Tab Strings -->
@@ -515,7 +501,6 @@
     <string name="animation_slide_left">Libista vasakule</string>
     <string name="animation_slide_right">Libista paremale</string>
     <string name="animation_none">Puudub</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s järgmine/eelmine pilt  ·  %2$s liikumine ridade vahel</string>
     <string name="presentation_arrow_key_hint">%1$s — eelmine/järgmine samm ja slaid  ·  %2$s — esita/paus  ·  %3$s — tühi ekraan</string>
     <string name="pictures_reorder_hint">Shift+lohista pisipilte ümberjärjestamiseks</string>
@@ -561,14 +546,10 @@
     <string name="content_bible_background">Piibli taust</string>
     <string name="content_songs_background">Laulude taust</string>
     <string name="content_pictures">Pildid/Esitlus</string>
-    <string name="content_media">Meedia</string>
-    <string name="content_streaming">Alumine kolmandik</string>
     <string name="content_announcements">Teated</string>
     <string name="display_mode">Kuvarežiim</string>
-    <string name="display_fullscreen">Täisekraan</string>
     <string name="display_lower_third">Alumine kolmandik</string>
     <string name="full_screen">Täisekraan</string>
-    <string name="lower_third_size">Alumine kolmandik</string>
     <string name="identify_screen">Tuvasta</string>
     <string name="projection_target_display">Kuva</string>
     <string name="projection_auto_display">Automaatne</string>
@@ -638,7 +619,6 @@
     <string name="settings_import_failed">Seadete importimine ebaõnnestus. Fail võib olla vigane.</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">Meedia</string>
     <string name="media_local_file">Kohalik fail</string>
     <string name="media_network_url">Võrgu URL</string>
     <string name="media_url_placeholder">Sisesta URL (http://, rtsp://, ...)</string>
@@ -682,7 +662,6 @@
     <string name="center_left">Keskel vasakul</string>
     <string name="center_right">Keskel paremal</string>
     <string name="bottom_center">All keskel</string>
-    <string name="announcement_background_color_label">Taustavärv</string>
     <string name="transparent_default">Läbipaistev (vaikimisi)</string>
     <string name="announcement_animation">Animatsioon</string>
     <string name="anim_slide_from_left">Libista vasakult</string>
@@ -755,7 +734,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">Lisa kavasse</string>
     <string name="web_go_live">Mine eetrisse</string>
     <string name="web_bookmark_add">Lisa järjehoidja</string>
     <string name="web_bookmark_remove">Eemalda järjehoidja</string>
@@ -817,7 +795,6 @@
     <string name="canvas_shape_fill_color">Täidis</string>
     <string name="canvas_shape_stroke_width">Kontuuri laius</string>
     <string name="canvas_rename_scene">Nimeta ümber</string>
-    <string name="canvas_remove_scene">Eemalda</string>
     <string name="canvas_add_source">Lisa allikas</string>
     <string name="canvas_delete_source">Kustuta allikas</string>
     <string name="canvas_source_move_forward">Liiguta ettepoole</string>
@@ -844,7 +821,6 @@
     <string name="canvas_render_height">Kõrgus</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">Kohandatud CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">Vali pilt</string>
     <string name="canvas_select_video_title">Vali video</string>
     <string name="canvas_image_files">Pildifailid</string>
@@ -856,7 +832,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">Kell</string>
     <string name="canvas_clock_mode_countdown">Loendus</string>
     <string name="canvas_clock_mode_count_up">Stopper</string>
     <string name="canvas_decklink_io_warning">See seade on praegu kasutusel väljundina. Sisend ei pruugi olla saadaval seadmetel, mis ei toeta samaaegset sisend/väljundit.</string>
@@ -874,7 +849,6 @@
     <string name="canvas_text_curve">Kõverus</string>
     <string name="canvas_letter_spacing">Tähevahe</string>
     <string name="canvas_source_qrcode">QR-kood</string>
-    <string name="canvas_source_camera">Kaamera</string>
     <string name="canvas_source_screen_capture">Ekraanihõive</string>
     <string name="canvas_source_bible">Piibel</string>
     <string name="canvas_bible_version">Piibli versioon</string>
@@ -887,7 +861,6 @@
     <string name="canvas_bible_ref_color">Viite värv</string>
     <string name="canvas_verse_style">Salmi stiil</string>
     <string name="canvas_reference_style">Viite stiil</string>
-    <string name="canvas_text_color">Teksti värv</string>
     <string name="canvas_text_bg_color">Taustavärv</string>
     <string name="canvas_clock_mode">Režiim</string>
     <string name="canvas_clock_format">Vorming</string>
@@ -912,7 +885,6 @@
     <string name="canvas_camera_format">Videovorming</string>
     <string name="canvas_camera_format_auto">Automaatne (vaikimisi)</string>
     <string name="canvas_camera_connection">Video ühendus</string>
-    <string name="canvas_camera_mode">Režiim</string>
     <string name="canvas_camera_mode_auto">Automaatne</string>
     <string name="canvas_capture_x">Hõive X</string>
     <string name="canvas_capture_y">Hõive Y</string>
@@ -923,9 +895,7 @@
     <string name="canvas_capture_mode_window">Aken</string>
     <string name="canvas_capture_refresh_windows">Värskenda akende loendit</string>
     <string name="canvas_capture_interval">Hõive intervall</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Kaamera: %1$s</string>
-    <string name="canvas_placeholder_camera_default">Kaamera</string>
     <string name="canvas_placeholder_screen_capture">Ekraanihõive</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1042,7 +1012,6 @@
     <string name="remote_activity_added_to_schedule">Lisatud kavasse</string>
     <string name="remote_activity_projected">Projitseeritud (eetris)</string>
     <string name="remote_activity_presentation_connect">Ühendatud esitluse kaugjuhtimisega</string>
-    <string name="remote_activity_presentation_connect_detail">Nüüd ühendatud</string>
     <string name="remote_activity_qa_admin_connect">Ühendatud K&amp;V administraatoriga</string>
     <string name="remote_activity_qa_admin_connect_detail">Nüüd ühendatud</string>
     <string name="remote_activity_presented">Esitamisel</string>
@@ -1077,7 +1046,6 @@
     <string name="no_blocked_clients">Jäädavalt blokeeritud kliente pole.</string>
     <string name="client_label_placeholder">Sisesta sõbralik nimi…</string>
     <string name="client_label_edit_tooltip">Määra sõbralik nimi</string>
-    <string name="client_label_save">Salvesta</string>
     <string name="client_label_cancel">Tühista</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1173,7 +1141,6 @@
     <string name="system_storage_subtitle">Kust Church Presenter sinu sisu otsib</string>
     <string name="system_storage_linked_count">%1$d ühendatud</string>
     <string name="system_storage_needs_attention_count">%1$d vajab tähelepanu</string>
-    <string name="system_storage_status_not_set">Määramata</string>
     <string name="system_storage_status_not_found">Kausta ei leitud</string>
     <string name="system_storage_status_read_only">Ainult lugemiseks</string>
     <string name="system_storage_status_linked">Ühendatud</string>
@@ -1215,7 +1182,6 @@
     <string name="show_song_number_before_title">Kuva laulu number enne pealkirja</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">Lavamonitor</string>
     <string name="general">Üldine</string>
     <string name="display_stage_monitor">Lavamonitor</string>
     <string name="stage_monitor_quadrant_next">Järgmine</string>
@@ -1300,7 +1266,6 @@
     <string name="qa_confirm_go_live">Kinnita eetrisse minek</string>
     <string name="qa_add_question_hint">Lisa küsimus…</string>
     <string name="qa_edit_question_hint">Muuda küsimuse teksti…</string>
-    <string name="qa_delete_question">Kustuta</string>
     <string name="qa_confirm_delete_prompt">Kas kustutada?</string>
     <string name="qa_submitter_device">Seade: %1$s</string>
     <string name="qa_public_access">Avalik juurdepääs</string>
@@ -1337,13 +1302,10 @@
     <string name="stt_live_preview">Live-eelvaade</string>
     <string name="stt_not_connected">Pole ühendatud. Sisesta STT serveri URL ja klõpsa Ühenda.</string>
     <string name="stt_waiting_for_transcription">Ootan transkriptsiooni…</string>
-    <string name="stt_transcription_label">Transkriptsioon</string>
     <string name="stt_translation_label">Tõlge</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">CCLI kasutusraport</string>
-    <string name="ccli_tab_songs">Laulud</string>
-    <string name="ccli_tab_bible">Piibel</string>
     <string name="ccli_tab_activity">Tegevus</string>
     <string name="ccli_songs_summary">%1$d unikaalset laulu · %2$d esitust kokku</string>
     <string name="ccli_bible_summary">%1$d unikaalset salmi · %2$d esitust kokku</string>
@@ -1354,7 +1316,6 @@
     <string name="ccli_activity_title">Esitlused aja jooksul</string>
     <string name="ccli_from">Alates:</string>
     <string name="ccli_to">Kuni:</string>
-    <string name="ccli_legend_songs">Laulud</string>
     <string name="ccli_legend_bible">Piiblisalmid</string>
     <string name="ccli_stat_songs_presented">Esitatud laulud</string>
     <string name="ccli_stat_bible_verses">Piiblisalmid</string>
@@ -1368,7 +1329,6 @@
     <string name="ccli_col_first">Esimene</string>
     <string name="ccli_col_last">Viimane</string>
     <string name="ccli_col_verse">Salm</string>
-    <string name="ccli_col_bible">Piibel</string>
     <string name="ccli_export_csv">Ekspordi CCLI CSV</string>
     <string name="ccli_export_xls">Ekspordi XLS</string>
     <string name="ccli_exported_success">Raport eksporditi edukalt.</string>
@@ -1447,7 +1407,6 @@
     <string name="obs_mode_bible">Piibel</string>
     <string name="obs_mode_songs">Laulud</string>
     <string name="obs_mode_pictures">Pildid</string>
-    <string name="obs_mode_presentation">Esitlus</string>
     <string name="obs_mode_media">Meedia</string>
     <string name="obs_mode_lower_third">Alumine kolmandik</string>
     <string name="obs_mode_announcements">Teated</string>
@@ -1633,7 +1592,6 @@
     <string name="companion_satellite_no_host">Ühenduse loomiseks määra Companioni host jaotises Seaded → Companion Satellite.</string>
     <string name="companion_satellite_status_connecting">Ühendamine…</string>
     <string name="companion_satellite_status_disconnected">Ühendus katkestatud</string>
-    <string name="companion_satellite_status_error">Viga: %1$s</string>
     <string name="companion_satellite_connection_name">Nimi</string>
     <string name="companion_satellite_product_name">Toote nimi</string>
     <string name="companion_satellite_reconnect_delay">Taasühendamise viivitus (ms)</string>
@@ -1682,7 +1640,6 @@
     <string name="bible_engine_detect">Tuvasta pühakiri</string>
     <string name="bible_engine_run_local">Käivita mootor kohapeal</string>
     <string name="bible_engine_host">Mootori host</string>
-    <string name="bible_engine_port">Port</string>
     <string name="dictionary_back">Tagasi</string>
     <string name="dictionary_forward">Edasi</string>
     <string name="dictionary_switch_language">Vaheta sõnastiku keelt</string>
@@ -1715,7 +1672,6 @@
     <string name="instance_link_description">Jälgi teist ChurchPresenteri instantsi oma võrgus — peegelda siin selle live-sisu ja soovi korral lisa üksusi selle kavasse.</string>
     <string name="instance_link_host">Host</string>
     <string name="instance_link_host_hint">nt 192.168.1.10</string>
-    <string name="instance_link_port">Port</string>
     <string name="instance_link_autoconnect">Ühenda käivitamisel automaatselt</string>
     <string name="instance_link_allow_push_to_schedule">Luba lisada üksusi peamise kavasse</string>
     <string name="instance_link_mirror_backgrounds">Peegelda ka peamise taustu</string>
@@ -1951,7 +1907,6 @@
     <string name="font_category_serif">Antiikva</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Eelvaade</string>
     <string name="font_preview_sample">Näidistekst valitud fondiga</string>
     <string name="font_warning_no_cyrillic">%1$s ei sisalda kirillitsa märke – kirillitsas salmid kuvatakse ekraanil teise fondiga.</string>
     <string name="font_warning_no_hebrew">%1$s ei sisalda heebrea märke – heebrea tekst kuvatakse ekraanil teise fondiga.</string>
@@ -1961,7 +1916,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">Läbikriipsutatud</string>
     <string name="bible_custom_name">Nimi</string>
-    <string name="bible_custom_abbreviation">Lühend</string>
     <string name="bible_translations">Tõlked</string>
     <string name="bible_miscellaneous">Muu</string>
     <string name="bible_font">Font</string>
@@ -1976,10 +1930,7 @@
     <string name="bible_preview_sample_book">Johannese</string>
     <string name="bible_preview_no_translations">Lisage tõlge, et seda siin näha</string>
     <string name="song_element_number">Number</string>
-    <string name="song_element_title">Pealkiri</string>
     <string name="song_element_lyrics">Sõnad</string>
-    <string name="song_element_author">Autor</string>
-    <string name="song_element_composer">Helilooja</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Pealkirjaslaid</string>
@@ -1992,7 +1943,6 @@
     <string name="song_chunk">Osa</string>
     <string name="song_language_scope">Keel</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">Taust</string>
     <string name="song_background_full_screen">Täisekraan</string>
     <string name="song_background_lower_third">Alumine kolmandik</string>
     <string name="song_background_inherit">Päri</string>
@@ -2007,7 +1957,6 @@
     <string name="song_background_your_color">Sinu värv</string>
     <string name="song_background_browse">Sirvi…</string>
     <string name="song_background_look">Ilme</string>
-    <string name="song_background_preset_none">Puudub</string>
     <string name="song_background_preset_soft">Pehme</string>
     <string name="song_background_preset_legible">Loetav</string>
     <string name="song_background_preset_cinema">Kino</string>
@@ -2028,7 +1977,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Taustad</string>
     <string name="background_group_defaults">Vaikeväärtused</string>
-    <string name="background_scope_default">Vaikimisi</string>
     <string name="background_scope_default_lower_third">Vaikimisi alumine kolmandik</string>
     <string name="background_scope_default_meta">Kui Piibel või Laulud on seatud valikule Vaikimisi</string>
     <string name="background_scope_default_lower_third_meta">Kui alumine kolmandik on seatud valikule Vaikimisi</string>
@@ -2037,16 +1985,13 @@
     <string name="background_following_default">Järgib vaikeväärtust</string>
     <string name="background_use_default">Kasuta vaikeväärtust</string>
     <string name="background_set_explicitly">Määratud eraldi sellele pinnale</string>
-    <string name="background_type_caption">Tüüp</string>
     <string name="background_color_caption">Värv</string>
     <string name="background_image_file">Pildifail</string>
     <string name="background_video_file">Videofail</string>
-    <string name="background_opacity_caption">Läbipaistmatus</string>
     <string name="background_above_band_caption">Riba kohal</string>
     <string name="background_above_band_fill">Täitevärv</string>
     <string name="background_above_band_opacity">Täite läbipaistmatus</string>
     <string name="quick_background_reset">Tagasi tavaolekusse</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · hallatakse seadetes</string>
     <string name="quick_backgrounds">Kiirtaustad</string>
     <string name="quick_backgrounds_help">Taustad, mida eelvaatepaneel hoiab ühe klõpsu kaugusel. Klõpsa paanil, et valida, mida see näitab, lohista seda, et muuta, milline klahv selleni jõuab. Ühe valimine jumalateenistuse ajal alistab kõik ekraanid, kuni lähed tagasi tavaolekusse — siin ei muuda see midagi.</string>
@@ -2072,16 +2017,10 @@
     <string name="output_profile_swap_menu_tooltip">Vaheta väljundi profiili</string>
     <string name="output_profile_new_name_default">Uus profiil</string>
     <string name="output_profile_empty_state">Loo profiil, et selle kujundamist alustada</string>
-    <string name="customize_bible">Piibel</string>
-    <string name="customize_songs">Laulud</string>
     <string name="customize_group_verse_text">Salmi tekst</string>
     <string name="customize_group_reference">Viide</string>
     <string name="customize_background_type">Tüüp</string>
-    <string name="customize_type_color">Värv</string>
     <string name="customize_type_image">Pilt</string>
-    <string name="customize_type_video">Video</string>
-    <string name="customize_type_default">Vaikimisi</string>
-    <string name="customize_type_gradient">Üleminek</string>
     <string name="customize_show_abbreviation">Lühend</string>
     <string name="customize_background_opacity">Läbipaistmatus</string>
     <string name="slate_theme">Kiltkivi teema</string>
@@ -2127,7 +2066,6 @@
     <string name="song_lottie_unsupported_note">Mall määrab paigutuse ja pealkirja koha. Alumise kolmandiku stiil määrab fondi, suuruse, värvi, joonduse, tähevahe, tähesuuruse ja varju; teksti taust, allajoonimine, läbikriipsutus, sõnavahe, järgmise eelvaade ja akordid ei kehti.</string>
     <string name="bible_lottie_unsupported_note">Mall määrab paigutuse, viite koha ja selle, kuidas kaks keelt riba jagavad. Alumise kolmandiku stiil määrab fondi, suuruse, värvi, joonduse, tähevahe, tähesuuruse ja varju; teksti taust, allajoonimine, läbikriipsutus ja sõnavahe ei kehti.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Kontuur</string>
     <string name="tooltip_outline_options">Kontuuri suvandid</string>
     <string name="text_outline">Kontuur</string>
     <string name="text_outline_width">Laius</string>
@@ -2195,7 +2133,6 @@
     <string name="add_ndi_output">Lisa väljund</string>
     <string name="ndi_output_numbered">NDI väljund %1$d</string>
     <string name="preview_output">Väljundi eelvaade</string>
-    <string name="output_resolution">Eraldusvõime</string>
     <string name="output_resolution_custom">Kohandatud…</string>
     <string name="output_resolution_custom_title">Kohandatud eraldusvõime</string>
     <string name="output_resolution_width">Laius</string>
@@ -2299,7 +2236,6 @@
     <string name="calendar_sync_description">Planeeri teenistusi mobiilirakendusest terve nädala, ka siis, kui see arvuti on välja lülitatud. See arvuti jääb tõe allikaks.</string>
     <string name="calendar_sync_enable">Sünkrooni kalender telefonidega</string>
     <string name="calendar_sync_relay_url">Relee</string>
-    <string name="calendar_sync_status_off">Väljas</string>
     <string name="calendar_sync_status_unpaired">Pole veel registreeritud — see arvuti registreerub relees, kui sünkroonimine esimest korda sisse lülitatakse</string>
     <string name="calendar_sync_status_syncing">Sünkroonimine…</string>
     <string name="calendar_sync_status_synced">Sünkroonitud %1$s</string>

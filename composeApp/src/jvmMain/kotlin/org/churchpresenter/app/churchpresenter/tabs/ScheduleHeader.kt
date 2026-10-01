@@ -78,7 +78,7 @@ import churchpresenter.composeapp.generated.resources.planning_center_import_tit
 import churchpresenter.composeapp.generated.resources.schedule
 import churchpresenter.composeapp.generated.resources.schedule_item_count
 import churchpresenter.composeapp.generated.resources.schedule_icon_size_large
-import churchpresenter.composeapp.generated.resources.schedule_icon_size_medium
+import churchpresenter.composeapp.generated.resources.omt_quality_medium
 import churchpresenter.composeapp.generated.resources.schedule_icon_size_small
 import churchpresenter.composeapp.generated.resources.schedule_option_icon_size
 import churchpresenter.composeapp.generated.resources.schedule_option_item_count
@@ -289,7 +289,7 @@ private fun ScheduleOptionsButton(
 @Composable
 private fun scheduleToolbarIconSizeLabel(size: ScheduleToolbarIconSize): String = when (size) {
     ScheduleToolbarIconSize.SMALL -> stringResource(Res.string.schedule_icon_size_small)
-    ScheduleToolbarIconSize.MEDIUM -> stringResource(Res.string.schedule_icon_size_medium)
+    ScheduleToolbarIconSize.MEDIUM -> stringResource(Res.string.omt_quality_medium)
     ScheduleToolbarIconSize.LARGE -> stringResource(Res.string.schedule_icon_size_large)
 }
 

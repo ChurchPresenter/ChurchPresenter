@@ -3,7 +3,6 @@
     <string name="mode">Tryb</string>
     <string name="scope">Zakres</string>
     <string name="title">Tytuł</string>
-    <string name="number">Numer</string>
     <string name="go_live">Na żywo</string>
     <string name="add_to_schedule">Dodaj do programu</string>
     <string name="no_lyrics_available">Tekst pieśni niedostępny</string>
@@ -51,18 +50,12 @@
     <string name="hold_live">Wstrzymaj na żywo</string>
     <string name="announcements">Ogłoszenia</string>
     <string name="menu_file">Plik</string>
-    <string name="menu_new_schedule">Nowy program</string>
-    <string name="menu_open_schedule">Otwórz program</string>
-    <string name="menu_save_schedule">Zapisz program</string>
     <string name="menu_save_schedule_as">Zapisz jako...</string>
     <string name="file_chooser_save_schedule">Zapisz program jako</string>
-    <string name="file_chooser_open_schedule">Otwórz program</string>
     <string name="file_filter_schedule">Program Church Presenter (*.cps)</string>
     <string name="menu_close_schedule">Zamknij program</string>
     <string name="menu_exit">Wyjście</string>
 
-    <string name="menu_schedule">Program</string>
-    <string name="menu_add_to_schedule">Dodaj do programu</string>
     <string name="menu_remove_from_schedule">Usuń z programu</string>
     <string name="menu_clear_schedule">Wyczyść program</string>
 
@@ -258,8 +251,6 @@
 
     <!-- Background Type Options -->
     <string name="background_default">Domyślne</string>
-    <string name="background_color_option">Kolor</string>
-    <string name="background_image_option">Obraz</string>
 
     <!-- Position Options -->
 
@@ -343,7 +334,6 @@
     <string name="label_text">Tekst etykiety</string>
     <string name="enter_label_text">Wprowadź tekst etykiety...</string>
     <string name="text_color">Kolor tekstu</string>
-    <string name="background_color_label">Kolor tła</string>
 
     <!-- Pictures Tab Strings -->
     <string name="select_folder">Wybierz folder</string>
@@ -369,7 +359,6 @@
     <string name="animation_slide_left">Przesunięcie w lewo</string>
     <string name="animation_slide_right">Przesunięcie w prawo</string>
     <string name="animation_none">Bez animacji</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s następny/poprzedni obraz  ·  %2$s nawigacja po wierszach</string>
     <string name="presentation_arrow_key_hint">%1$s — poprzedni/następny krok i slajd  ·  %2$s — odtwórz/pauza  ·  %3$s — pusty ekran</string>
     <string name="pictures_reorder_hint">Shift+przeciągnij aby zmienić kolejność</string>
@@ -413,7 +402,6 @@
     <!-- Background Settings Tab -->
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">Media</string>
     <string name="media_local_file">Plik lokalny</string>
     <string name="media_network_url">URL sieciowy</string>
     <string name="media_url_placeholder">Wprowadź URL (http://, rtsp://, ...)</string>
@@ -440,7 +428,6 @@
     <string name="announcement_animation_speed">Prędkość</string>
     <string name="announcement_loop_count">Liczba powtórzeń</string>
     <string name="announcement_loop_tooltip">0 = nieskończona pętla</string>
-    <string name="announcement_background_color_label">Kolor tła</string>
     <string name="announcement_text_hint">Wprowadź tekst ogłoszenia…</string>
     <string name="top_center">Góra centrum</string>
     <string name="bottom_center">Dół centrum</string>
@@ -449,18 +436,14 @@
     <string name="content_bible_background">Tło Biblii</string>
     <string name="content_songs_background">Tło pieśni</string>
     <string name="content_pictures">Zdjęcia/Prezentacja</string>
-    <string name="content_media">Media</string>
-    <string name="content_streaming">Dolna trzecia</string>
     <string name="content_announcements">Ogłoszenia</string>
     <string name="detected_screens">Wykryte ekrany: %1$d</string>
     <string name="presenter_windows_count">Okna prezentacji: %1$d</string>
     <string name="screen_col_label">Ekran %1$d</string>
     <string name="screen_assignment">Przypisanie ekranów</string>
     <string name="display_mode">Tryb wyświetlania</string>
-    <string name="display_fullscreen">Pełny ekran</string>
     <string name="display_lower_third">Dolna trzecia</string>
     <string name="full_screen">Pełny ekran</string>
-    <string name="lower_third_size">Dolna trzecia</string>
     <string name="identify_screen">Identyfikuj</string>
     <string name="no_lottie_files">Nie znaleziono plików JSON</string>
     <string name="generate_lower_third">Generuj</string>
@@ -662,7 +645,6 @@
     <string name="schedule_density_compact">Kompaktowy</string>
     <string name="schedule_density_normal">Normalny</string>
     <string name="schedule_density_detailed">Szczegółowy</string>
-    <string name="schedule_kind_lower_third">Dolna trzecia</string>
     <string name="tooltip_schedule_options">Ustawienia programu</string>
     <string name="schedule_show_buttons_under_title">Pokaż przyciski pod tytułem</string>
     <string name="schedule_option_item_count">Liczba pozycji</string>
@@ -704,7 +686,6 @@
     <string name="timer_start">Start</string>
     <string name="timer_title">Minutnik</string>
     <string name="tooltip_clear_display">Wyczyść wyświetlacz</string>
-    <string name="remote_action_clear_display">Wyczyść wyświetlacz</string>
     <string name="schedule_add_files_title">Dodaj pliki do programu</string>
     <string name="tooltip_toggle_displays">Przełącz ekrany prezentacji</string>
     <string name="tooltip_collapse_schedule">Zwiń program</string>
@@ -712,7 +693,6 @@
     <string name="tooltip_theme_dark">Ciemny motyw</string>
     <string name="tooltip_theme_system">Motyw systemowy</string>
     <string name="transparent_default">Przezroczyste (domyślne)</string>
-    <string name="web_add_to_schedule">Dodaj do programu</string>
     <string name="web_bookmark_add">Dodaj zakładkę</string>
     <string name="web_bookmark_remove">Usuń</string>
     <string name="web_clear_cache">Wyczyść pamięć podręczną</string>
@@ -789,7 +769,6 @@
     <string name="blocked_clients_description">Żądania od tych klientów są automatycznie odrzucane bez wyświetlania dialogu.</string>
     <string name="client_label_placeholder">Wpisz przyjazną nazwę…</string>
     <string name="client_label_edit_tooltip">Ustaw przyjazną nazwę</string>
-    <string name="client_label_save">Zapisz</string>
     <string name="client_label_cancel">Anuluj</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -885,7 +864,6 @@
     <string name="system_storage_subtitle">Gdzie Church Presenter szuka Twoich treści</string>
     <string name="system_storage_linked_count">%1$d powiązanych</string>
     <string name="system_storage_needs_attention_count">%1$d wymaga uwagi</string>
-    <string name="system_storage_status_not_set">Nie ustawiono</string>
     <string name="system_storage_status_not_found">Nie znaleziono folderu</string>
     <string name="system_storage_status_read_only">Tylko do odczytu</string>
     <string name="system_storage_status_linked">Powiązany</string>
@@ -972,9 +950,7 @@
     <string name="canvas_text_curve">Krzywa</string>
     <string name="canvas_letter_spacing">Odstęp liter</string>
     <string name="canvas_source_qrcode">Kod QR</string>
-    <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Przechwytywanie ekranu</string>
-    <string name="canvas_text_color">Kolor tekstu</string>
     <string name="canvas_text_bg_color">Kolor tła</string>
     <string name="canvas_clock_mode">Tryb</string>
     <string name="canvas_clock_format">Format</string>
@@ -997,7 +973,6 @@
     <string name="canvas_camera_format">Format wideo</string>
     <string name="canvas_camera_format_auto">Auto (domyślnie)</string>
     <string name="canvas_camera_connection">Połączenie wideo</string>
-    <string name="canvas_camera_mode">Tryb</string>
     <string name="canvas_camera_mode_auto">Auto</string>
     <string name="canvas_capture_x">X przechwytywania</string>
     <string name="canvas_capture_y">Y przechwytywania</string>
@@ -1008,12 +983,9 @@
     <string name="canvas_capture_mode_window">Okno</string>
     <string name="canvas_capture_refresh_windows">Odśwież listę okien</string>
     <string name="canvas_capture_interval">Interwał przechwytywania</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Kamera: %1$s</string>
-    <string name="canvas_placeholder_camera_default">Kamera</string>
     <string name="canvas_placeholder_screen_capture">Przechwytywanie ekranu</string>
     <string name="canvas_rename_scene">Zmień nazwę</string>
-    <string name="canvas_remove_scene">Usuń</string>
     <string name="canvas_add_source">Dodaj źródło</string>
     <string name="canvas_delete_source">Usuń źródło</string>
     <string name="canvas_source_move_forward">Przesuń do przodu</string>
@@ -1039,7 +1011,6 @@
     <string name="canvas_render_height">Wysokość</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">Custom CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">Wybierz obraz</string>
     <string name="canvas_select_video_title">Wybierz wideo</string>
     <string name="canvas_image_files">Pliki obrazów</string>
@@ -1051,7 +1022,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">Zegar</string>
     <string name="canvas_clock_mode_countdown">Odliczanie</string>
     <string name="canvas_clock_mode_count_up">Stoper</string>
     <string name="canvas_decklink_io_warning">To urządzenie jest aktualnie używane do wyjścia. Wejście może być niedostępne na urządzeniach bez obsługi jednoczesnego I/O.</string>
@@ -1092,7 +1062,6 @@
     <string name="update_interval_never">Nigdy</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">Monitor sceny</string>
     <string name="display_stage_monitor">Monitor sceny</string>
     <string name="general">Ogólne</string>
     <string name="stage_monitor_quadrant_next">Lewy dolny: następny slajd</string>
@@ -1176,7 +1145,6 @@
     <string name="qa_confirm_go_live_prompt">Nadawać na żywo?</string>
     <string name="qa_confirm_go_live">Potwierdź nadawanie na żywo</string>
     <string name="qa_edit_question_hint">Edytuj tekst pytania…</string>
-    <string name="qa_delete_question">Usuń</string>
     <string name="qa_confirm_delete_prompt">Usunąć?</string>
     <string name="qa_submitter_device">Urządzenie: %1$s</string>
     <string name="qa_public_access">Dostęp publiczny</string>
@@ -1212,13 +1180,10 @@
     <string name="stt_live_preview">Podgląd na żywo</string>
     <string name="stt_not_connected">Niepołączono. Wprowadź URL serwera STT i kliknij Połącz.</string>
     <string name="stt_waiting_for_transcription">Oczekiwanie na transkrypcję…</string>
-    <string name="stt_transcription_label">Transkrypcja</string>
     <string name="stt_translation_label">Tłumaczenie</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">Raport wykorzystania CCLI</string>
-    <string name="ccli_tab_songs">Pieśni</string>
-    <string name="ccli_tab_bible">Biblia</string>
     <string name="ccli_tab_activity">Aktywność</string>
     <string name="ccli_songs_summary">%1$d unikalnych pieśni · %2$d odtworzeń łącznie</string>
     <string name="ccli_bible_summary">%1$d unikalnych wersetów · %2$d odtworzeń łącznie</string>
@@ -1229,7 +1194,6 @@
     <string name="ccli_activity_title">Prezentacje w czasie</string>
     <string name="ccli_from">Od:</string>
     <string name="ccli_to">Do:</string>
-    <string name="ccli_legend_songs">Pieśni</string>
     <string name="ccli_legend_bible">Wersety Biblii</string>
     <string name="ccli_stat_songs_presented">Zaprezentowane pieśni</string>
     <string name="ccli_stat_bible_verses">Wersety Biblii</string>
@@ -1243,7 +1207,6 @@
     <string name="ccli_col_first">Pierwsze</string>
     <string name="ccli_col_last">Ostatnie</string>
     <string name="ccli_col_verse">Werset</string>
-    <string name="ccli_col_bible">Biblia</string>
     <string name="ccli_export_csv">Eksportuj CCLI CSV</string>
     <string name="ccli_export_xls">Eksportuj XLS</string>
     <string name="ccli_exported_success">Raport wyeksportowany pomyślnie.</string>
@@ -1300,7 +1263,6 @@
     <string name="obs_mode_bible">Biblia</string>
     <string name="obs_mode_songs">Pieśni</string>
     <string name="obs_mode_pictures">Obrazy</string>
-    <string name="obs_mode_presentation">Prezentacja</string>
     <string name="obs_mode_media">Media</string>
     <string name="obs_mode_lower_third">Pasek dolny</string>
     <string name="obs_mode_announcements">Ogłoszenia</string>
@@ -1352,13 +1314,11 @@
     <string name="open_converter">Konwerter pieśni i Biblii</string>
     <string name="open_song_library">Menedżer biblioteki pieśni</string>
     <string name="projection_content_web">Sieć</string>
-    <string name="projection_content_background">Tło</string>
     <string name="projection_content_lt_background">Tło dolnej trzeciej</string>
     <string name="qa_add_question_hint">Dodaj pytanie…</string>
     <string name="remote_activity_added_to_schedule">Dodano do harmonogramu</string>
     <string name="remote_activity_projected">Wyświetlone (na żywo)</string>
     <string name="remote_activity_presentation_connect">Połączono ze zdalnym sterowaniem prezentacji</string>
-    <string name="remote_activity_presentation_connect_detail">Teraz połączono</string>
     <string name="remote_activity_qa_admin_connect">Połączono z panelem administratora P&amp;O</string>
     <string name="remote_activity_qa_admin_connect_detail">Teraz połączono</string>
     <string name="remote_activity_presented">Prezentowane</string>
@@ -1557,7 +1517,6 @@
     <string name="companion_satellite_no_host">Ustaw hosta Companion w Ustawienia → Companion Satellite, aby się połączyć.</string>
     <string name="companion_satellite_status_connecting">Łączenie…</string>
     <string name="companion_satellite_status_disconnected">Rozłączono</string>
-    <string name="companion_satellite_status_error">Błąd: %1$s</string>
     <string name="companion_satellite_connection_name">Nazwa</string>
     <string name="companion_satellite_product_name">Nazwa produktu</string>
     <string name="companion_satellite_reconnect_delay">Opóźnienie ponownego łączenia (ms)</string>
@@ -1595,7 +1554,6 @@
     <string name="em_dash">—</string>
     <string name="bible_smart_search_hint">Odwołanie lub tekst — np. Jan 3:16, Mat 1 lub słowo</string>
     <string name="bible_search_mode_auto">Auto</string>
-    <string name="bible_search_mode_reference">Odwołanie</string>
     <string name="bible_search_mode_text">Tekst</string>
     <string name="bible_search_mode_tooltip">Dotknij, aby przełączyć — Auto: skocz do odwołań, szukaj reszty. Odwołanie: tylko nawigacja. Tekst: zawsze szukaj w tekście wersetu.</string>
     <string name="swap_bibles_hint">Zamień miejscami główną i poboczną Biblię</string>
@@ -1646,7 +1604,6 @@
     <string name="bible_engine_detect">Wykrywaj Pismo Święte</string>
     <string name="bible_engine_run_local">Uruchom silnik lokalnie</string>
     <string name="bible_engine_host">Host silnika</string>
-    <string name="bible_engine_port">Port</string>
     <!-- Contact / feedback form (Help -> Contact) -->
     <string name="menu_contact_us">Kontakt</string>
     <string name="contact_us_title">Kontakt</string>
@@ -1682,7 +1639,6 @@
     <string name="instance_link_description">Śledź inną instancję ChurchPresenter w Twojej sieci — odzwierciedlaj tutaj jej treść na żywo i opcjonalnie dodawaj elementy do jej harmonogramu.</string>
     <string name="instance_link_host">Host</string>
     <string name="instance_link_host_hint">np. 192.168.1.10</string>
-    <string name="instance_link_port">Port</string>
     <string name="instance_link_autoconnect">Łącz automatycznie przy uruchomieniu</string>
     <string name="instance_link_allow_push_to_schedule">Zezwól na dodawanie elementów do harmonogramu instancji głównej</string>
     <string name="instance_link_mirror_backgrounds">Odzwierciedlaj również tła instancji głównej</string>
@@ -1918,7 +1874,6 @@
     <string name="font_category_serif">Szeryfowa</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Ozdobna</string>
-    <string name="font_preview">Podgląd</string>
     <string name="font_preview_sample">Przykładowy tekst wybraną czcionką</string>
     <string name="font_warning_no_cyrillic">%1$s nie ma znaków cyrylicy – wersety cyrylicą pojawią się na ekranie w innej czcionce.</string>
     <string name="font_warning_no_hebrew">%1$s nie ma znaków hebrajskich – tekst hebrajski pojawi się na ekranie w innej czcionce.</string>
@@ -1928,7 +1883,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">Przekreślenie</string>
     <string name="bible_custom_name">Nazwa</string>
-    <string name="bible_custom_abbreviation">Skrót</string>
     <string name="bible_translations">Przekłady</string>
     <string name="bible_miscellaneous">Różne</string>
     <string name="bible_font">Czcionka</string>
@@ -1943,10 +1897,7 @@
     <string name="bible_preview_sample_book">Jana</string>
     <string name="bible_preview_no_translations">Dodaj przekład, aby zobaczyć go tutaj</string>
     <string name="song_element_number">Numer</string>
-    <string name="song_element_title">Tytuł</string>
     <string name="song_element_lyrics">Tekst</string>
-    <string name="song_element_author">Autor</string>
-    <string name="song_element_composer">Kompozytor</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Slajd tytułowy</string>
@@ -1959,7 +1910,6 @@
     <string name="song_chunk">Fragment</string>
     <string name="song_language_scope">Język</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">Tło</string>
     <string name="song_background_full_screen">Pełny ekran</string>
     <string name="song_background_lower_third">Belka dolna</string>
     <string name="song_background_inherit">Dziedzicz</string>
@@ -1974,7 +1924,6 @@
     <string name="song_background_your_color">Twój kolor</string>
     <string name="song_background_browse">Przeglądaj…</string>
     <string name="song_background_look">Wygląd</string>
-    <string name="song_background_preset_none">Brak</string>
     <string name="song_background_preset_soft">Łagodny</string>
     <string name="song_background_preset_legible">Czytelny</string>
     <string name="song_background_preset_cinema">Kino</string>
@@ -1995,7 +1944,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Tła</string>
     <string name="background_group_defaults">Domyślne</string>
-    <string name="background_scope_default">Domyślne</string>
     <string name="background_scope_default_lower_third">Domyślna dolna trzecia</string>
     <string name="background_scope_default_meta">Gdy Biblia lub Pieśni są ustawione na Domyślne</string>
     <string name="background_scope_default_lower_third_meta">Gdy dolna trzecia jest ustawiona na Domyślne</string>
@@ -2004,16 +1952,13 @@
     <string name="background_following_default">Dziedziczy domyślne</string>
     <string name="background_use_default">Użyj domyślnego</string>
     <string name="background_set_explicitly">Ustawione osobno dla tej powierzchni</string>
-    <string name="background_type_caption">Typ</string>
     <string name="background_color_caption">Kolor</string>
     <string name="background_image_file">Plik obrazu</string>
     <string name="background_video_file">Plik wideo</string>
-    <string name="background_opacity_caption">Przezroczystość</string>
     <string name="background_above_band_caption">Nad paskiem</string>
     <string name="background_above_band_fill">Kolor wypełnienia</string>
     <string name="background_above_band_opacity">Przezroczystość wypełnienia</string>
     <string name="quick_background_reset">Powrót do normalnego</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · zarządzanie w ustawieniach</string>
     <string name="quick_backgrounds">Szybkie tła</string>
     <string name="quick_backgrounds_help">Tła, które panel podglądu trzyma o jedno kliknięcie od Ciebie. Kliknij kafelek, aby wybrać, co pokazuje, przeciągnij, aby zmienić przypisany klawisz. Wybranie tła podczas nabożeństwa nadpisuje wszystkie ekrany, dopóki nie wrócisz do normalnego — tutaj nic nie zmienia.</string>
@@ -2039,16 +1984,10 @@
     <string name="output_profile_swap_menu_tooltip">Zmień profil wyjścia</string>
     <string name="output_profile_new_name_default">Nowy profil</string>
     <string name="output_profile_empty_state">Utwórz profil, aby zacząć go stylizować</string>
-    <string name="customize_bible">Biblia</string>
-    <string name="customize_songs">Pieśni</string>
     <string name="customize_group_verse_text">Tekst wersetu</string>
     <string name="customize_group_reference">Odwołanie</string>
     <string name="customize_background_type">Typ</string>
-    <string name="customize_type_color">Kolor</string>
     <string name="customize_type_image">Obraz</string>
-    <string name="customize_type_video">Wideo</string>
-    <string name="customize_type_default">Domyślne</string>
-    <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Skrót</string>
     <string name="customize_background_opacity">Przezroczystość</string>
     <string name="slate_theme">Motyw Łupek</string>
@@ -2094,7 +2033,6 @@
     <string name="song_lottie_unsupported_note">Szablon decyduje o układzie i miejscu tytułu. Styl dolnego paska ustala czcionkę, rozmiar, kolor, wyrównanie, odstępy między literami, wielkość liter i cień; tło tekstu, podkreślenie, przekreślenie, odstępy między wyrazami, podgląd następnej części i akordy nie mają zastosowania.</string>
     <string name="bible_lottie_unsupported_note">Szablon decyduje o układzie, miejscu odnośnika i o tym, jak dwa języki dzielą pasek. Styl dolnego paska ustala czcionkę, rozmiar, kolor, wyrównanie, odstępy między literami, wielkość liter i cień; tło tekstu, podkreślenie, przekreślenie i odstępy między wyrazami nie mają zastosowania.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Obrys</string>
     <string name="tooltip_outline_options">Opcje obrysu</string>
     <string name="text_outline">Obrys</string>
     <string name="text_outline_width">Szerokość</string>
@@ -2162,7 +2100,6 @@
     <string name="add_ndi_output">Dodaj wyjście</string>
     <string name="ndi_output_numbered">Wyjście NDI %1$d</string>
     <string name="preview_output">Podgląd wyjścia</string>
-    <string name="output_resolution">Rozdzielczość</string>
     <string name="output_resolution_custom">Własna…</string>
     <string name="output_resolution_custom_title">Własna rozdzielczość</string>
     <string name="output_resolution_width">Szerokość</string>
@@ -2266,7 +2203,6 @@
     <string name="calendar_sync_description">Planuj nabożeństwa w aplikacji mobilnej przez cały tydzień, nawet gdy ten komputer jest wyłączony. Ten komputer pozostaje źródłem prawdy.</string>
     <string name="calendar_sync_enable">Synchronizuj kalendarz z telefonami</string>
     <string name="calendar_sync_relay_url">Przekaźnik</string>
-    <string name="calendar_sync_status_off">Wył.</string>
     <string name="calendar_sync_status_unpaired">Jeszcze nie zarejestrowano — ten komputer rejestruje się w przekaźniku przy pierwszym włączeniu synchronizacji</string>
     <string name="calendar_sync_status_syncing">Synchronizowanie…</string>
     <string name="calendar_sync_status_synced">Zsynchronizowano %1$s</string>

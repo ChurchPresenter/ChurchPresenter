@@ -49,7 +49,7 @@ import androidx.compose.ui.window.PopupProperties
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.save
-import churchpresenter.composeapp.generated.resources.song_background
+import churchpresenter.composeapp.generated.resources.background
 import org.churchpresenter.core.models.songs.SongBackground
 import org.jetbrains.compose.resources.stringResource
 
@@ -108,7 +108,7 @@ internal fun SongBackgroundButton(
         ) {
             BackgroundChipSwatch(shown)
             Text(
-                text = stringResource(Res.string.song_background),
+                text = stringResource(Res.string.background),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,

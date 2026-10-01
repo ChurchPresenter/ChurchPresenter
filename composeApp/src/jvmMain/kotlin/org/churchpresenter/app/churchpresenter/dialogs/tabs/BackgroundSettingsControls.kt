@@ -45,8 +45,8 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background_camera_required
 import churchpresenter.composeapp.generated.resources.background_color_caption
 import churchpresenter.composeapp.generated.resources.background_image_file
-import churchpresenter.composeapp.generated.resources.background_opacity_caption
-import churchpresenter.composeapp.generated.resources.background_type_caption
+import churchpresenter.composeapp.generated.resources.customize_background_opacity
+import churchpresenter.composeapp.generated.resources.customize_background_type
 import churchpresenter.composeapp.generated.resources.background_video_file
 import churchpresenter.composeapp.generated.resources.gradient_bottom_color
 import churchpresenter.composeapp.generated.resources.gradient_bottom_opacity
@@ -152,7 +152,7 @@ private fun BackgroundTypeSegments(
         captureAvailable = withContext(Dispatchers.IO) { isFfmpegAvailable() || DeckLinkManager.isAvailable() }
     }
     BackgroundTypeRow(
-        caption = stringResource(Res.string.background_type_caption),
+        caption = stringResource(Res.string.customize_background_type),
         options = scope.typeOptions(),
         selected = config.backgroundType,
         onSelect = { type ->
@@ -379,7 +379,7 @@ private fun BackgroundLookSliders(config: BackgroundConfig, onConfigChange: (Bac
             }
         }
         CaptionedSlider(
-            caption = stringResource(Res.string.background_opacity_caption),
+            caption = stringResource(Res.string.customize_background_opacity),
             readout = percentReadout(config.backgroundOpacity),
             value = config.backgroundOpacity,
             onValueChange = { onConfigChange(config.copy(backgroundOpacity = it)) }

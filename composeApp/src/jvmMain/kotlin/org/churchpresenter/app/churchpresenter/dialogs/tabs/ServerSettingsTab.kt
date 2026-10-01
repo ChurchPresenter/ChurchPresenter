@@ -106,7 +106,7 @@ import churchpresenter.composeapp.generated.resources.blocked_clients_descriptio
 import churchpresenter.composeapp.generated.resources.client_label_cancel
 import churchpresenter.composeapp.generated.resources.client_label_edit_tooltip
 import churchpresenter.composeapp.generated.resources.client_label_placeholder
-import churchpresenter.composeapp.generated.resources.client_label_save
+import churchpresenter.composeapp.generated.resources.save
 import churchpresenter.composeapp.generated.resources.companion_server
 import churchpresenter.composeapp.generated.resources.close
 import churchpresenter.composeapp.generated.resources.copy_api_key
@@ -1060,7 +1060,7 @@ private fun ClientRow(
                 ) {
                     Icon(
                         Icons.Filled.Check,
-                        contentDescription = stringResource(Res.string.client_label_save),
+                        contentDescription = stringResource(Res.string.save),
                         modifier = Modifier.size(18.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )

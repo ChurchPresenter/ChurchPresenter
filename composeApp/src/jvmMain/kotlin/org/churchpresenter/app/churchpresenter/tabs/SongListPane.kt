@@ -83,7 +83,7 @@ import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.song_favorites
 import churchpresenter.composeapp.generated.resources.song_favorites_clear
 import churchpresenter.composeapp.generated.resources.song_play_count
-import churchpresenter.composeapp.generated.resources.number
+import churchpresenter.composeapp.generated.resources.song_element_number
 import churchpresenter.composeapp.generated.resources.search
 import churchpresenter.composeapp.generated.resources.search_clear
 import churchpresenter.composeapp.generated.resources.search_songs
@@ -259,7 +259,7 @@ private fun SongListScope.SongListColumn(modifier: Modifier) {
     Column(modifier = modifier) {
         // Pre-compute column labels (stringResource is @Composable, can't be called in forEach)
         val colHeaderLabels = mapOf(
-            SongColumnId.NUMBER     to stringResource(Res.string.number),
+            SongColumnId.NUMBER     to stringResource(Res.string.song_element_number),
             SongColumnId.TITLE      to stringResource(Res.string.title),
             SongColumnId.SONGBOOK   to stringResource(Res.string.song_book),
             SongColumnId.TUNE       to stringResource(Res.string.tune),

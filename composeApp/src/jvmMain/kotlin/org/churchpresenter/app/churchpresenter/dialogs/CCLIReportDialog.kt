@@ -78,7 +78,7 @@ import churchpresenter.composeapp.generated.resources.ccli_activity_title
 import churchpresenter.composeapp.generated.resources.ccli_bible_books_chart
 import churchpresenter.composeapp.generated.resources.ccli_bible_summary
 import churchpresenter.composeapp.generated.resources.ccli_col_author
-import churchpresenter.composeapp.generated.resources.ccli_col_bible
+import churchpresenter.composeapp.generated.resources.obs_mode_bible
 import churchpresenter.composeapp.generated.resources.ccli_col_ccli
 import churchpresenter.composeapp.generated.resources.ccli_col_first
 import churchpresenter.composeapp.generated.resources.ccli_col_last
@@ -97,7 +97,7 @@ import churchpresenter.composeapp.generated.resources.ccli_file_filter_csv
 import churchpresenter.composeapp.generated.resources.ccli_file_filter_xls
 import churchpresenter.composeapp.generated.resources.ccli_from
 import churchpresenter.composeapp.generated.resources.ccli_legend_bible
-import churchpresenter.composeapp.generated.resources.ccli_legend_songs
+import churchpresenter.composeapp.generated.resources.obs_mode_songs
 import churchpresenter.composeapp.generated.resources.ccli_no_data
 import churchpresenter.composeapp.generated.resources.ccli_no_events
 import churchpresenter.composeapp.generated.resources.cancel
@@ -124,8 +124,6 @@ import churchpresenter.composeapp.generated.resources.ccli_stat_bible_verses
 import churchpresenter.composeapp.generated.resources.ccli_stat_busiest
 import churchpresenter.composeapp.generated.resources.ccli_stat_songs_presented
 import churchpresenter.composeapp.generated.resources.ccli_tab_activity
-import churchpresenter.composeapp.generated.resources.ccli_tab_bible
-import churchpresenter.composeapp.generated.resources.ccli_tab_songs
 import churchpresenter.composeapp.generated.resources.ccli_to
 import churchpresenter.composeapp.generated.resources.ccli_month_january
 import churchpresenter.composeapp.generated.resources.ccli_month_february
@@ -454,9 +452,9 @@ internal fun CCLIReportContent(
                     // ── Tabs ─────────────────────────────────────────────
                     PrimaryTabRow(selectedTabIndex = selectedTab) {
                         Tab(selected = selectedTab == SONGS_TAB, onClick = { selectedTab = SONGS_TAB },
-                            text = { Text(stringResource(Res.string.ccli_tab_songs) + " (${shownSongs.size})") })
+                            text = { Text(stringResource(Res.string.obs_mode_songs) + " (${shownSongs.size})") })
                         Tab(selected = selectedTab == BIBLE_TAB, onClick = { selectedTab = BIBLE_TAB },
-                            text = { Text(stringResource(Res.string.ccli_tab_bible) + " (${shownVerses.size})") })
+                            text = { Text(stringResource(Res.string.obs_mode_bible) + " (${shownVerses.size})") })
                         Tab(selected = selectedTab == ACTIVITY_TAB, onClick = { selectedTab = ACTIVITY_TAB },
                             text = { Text(stringResource(Res.string.ccli_tab_activity)) })
                     }
@@ -739,7 +737,11 @@ internal fun ActivityContent(activity: List<ActivityPoint>) {
         ) {
             LegendDot(primary)
             Spacer(Modifier.width(4.dp))
-            Text(stringResource(Res.string.ccli_legend_songs), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                stringResource(Res.string.obs_mode_songs),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             Spacer(Modifier.width(16.dp))
             LegendDot(verseColor)
             Spacer(Modifier.width(4.dp))
@@ -825,7 +827,7 @@ private fun VerseTable(verses: List<VerseSummary>, onClear: (VerseSummary) -> Un
         ) {
             TableHeader(stringResource(Res.string.ccli_col_rank), 28.dp.value)
             TableHeader(stringResource(Res.string.ccli_col_verse), null, weight = 2f)
-            TableHeader(stringResource(Res.string.ccli_col_bible), null, weight = 1f)
+            TableHeader(stringResource(Res.string.obs_mode_bible), null, weight = 1f)
             TableHeader(stringResource(Res.string.ccli_col_used), 52.dp.value)
             TableHeader(stringResource(Res.string.ccli_col_first), 90.dp.value)
             TableHeader(stringResource(Res.string.ccli_col_last), 90.dp.value)
@@ -1026,7 +1028,7 @@ private fun ActivityBarChart(
     val maxTotal = data.maxOf { it.songCount + it.verseCount }.coerceAtLeast(1)
     val gridColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
     val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
-    val songsLabel = stringResource(Res.string.ccli_legend_songs)
+    val songsLabel = stringResource(Res.string.obs_mode_songs)
     val versesLabel = stringResource(Res.string.ccli_legend_bible)
     val barCorner = AppShape(topStart = 4.dp, topEnd = 4.dp)
     // Lighter at the top, fading down to the series color.

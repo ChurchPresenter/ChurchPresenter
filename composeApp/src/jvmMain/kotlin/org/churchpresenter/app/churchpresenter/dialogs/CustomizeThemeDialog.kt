@@ -43,13 +43,13 @@ import churchpresenter.composeapp.generated.resources.apply
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.customize_theme_accent
 import churchpresenter.composeapp.generated.resources.customize_theme_auto
-import churchpresenter.composeapp.generated.resources.customize_theme_background
+import churchpresenter.composeapp.generated.resources.profile_bg_row
 import churchpresenter.composeapp.generated.resources.customize_theme_base
 import churchpresenter.composeapp.generated.resources.setup_theme_section_dark
 import churchpresenter.composeapp.generated.resources.setup_theme_section_light
 import churchpresenter.composeapp.generated.resources.customize_theme_colors
 import churchpresenter.composeapp.generated.resources.customize_theme_error
-import churchpresenter.composeapp.generated.resources.customize_theme_font
+import churchpresenter.composeapp.generated.resources.profile_text_font
 import churchpresenter.composeapp.generated.resources.customize_theme_font_default
 import churchpresenter.composeapp.generated.resources.customize_theme_margin
 import churchpresenter.composeapp.generated.resources.customize_theme_margin_normal
@@ -61,13 +61,13 @@ import churchpresenter.composeapp.generated.resources.customize_theme_reset_colo
 import churchpresenter.composeapp.generated.resources.customize_theme_secondary
 import churchpresenter.composeapp.generated.resources.customize_theme_selection
 import churchpresenter.composeapp.generated.resources.customize_theme_success
-import churchpresenter.composeapp.generated.resources.customize_theme_text
-import churchpresenter.composeapp.generated.resources.customize_theme_text_size
-import churchpresenter.composeapp.generated.resources.customize_theme_text_size_default
+import churchpresenter.composeapp.generated.resources.profile_group_text
+import churchpresenter.composeapp.generated.resources.profile_box_size
+import churchpresenter.composeapp.generated.resources.profile_default_value
 import churchpresenter.composeapp.generated.resources.customize_theme_text_size_extra_large
 import churchpresenter.composeapp.generated.resources.customize_theme_text_size_hint
-import churchpresenter.composeapp.generated.resources.customize_theme_text_size_large
-import churchpresenter.composeapp.generated.resources.customize_theme_text_size_small
+import churchpresenter.composeapp.generated.resources.schedule_icon_size_large
+import churchpresenter.composeapp.generated.resources.schedule_icon_size_small
 import churchpresenter.composeapp.generated.resources.customize_theme_title
 import churchpresenter.composeapp.generated.resources.customize_theme_use_custom_colors
 import churchpresenter.composeapp.generated.resources.customize_theme_use_custom_colors_hint
@@ -110,9 +110,9 @@ private const val DISABLED_ALPHA = 0.45f
 
 /** The labels of [UI_FONT_SCALES], in the same order. */
 private val FONT_SCALE_LABELS: List<StringResource> = listOf(
-    Res.string.customize_theme_text_size_small,
-    Res.string.customize_theme_text_size_default,
-    Res.string.customize_theme_text_size_large,
+    Res.string.schedule_icon_size_small,
+    Res.string.profile_default_value,
+    Res.string.schedule_icon_size_large,
     Res.string.customize_theme_text_size_extra_large,
 )
 
@@ -345,10 +345,10 @@ private fun MoreColorsGrid(
     val scheme = remember(derived) { customColorScheme(derived) }
     val status = remember(derived) { customSemanticColorsFor(derived) }
     val entries = listOf(
-        OptionalColor(Res.string.customize_theme_background, colors.background, scheme.background) { c, v ->
+        OptionalColor(Res.string.profile_bg_row, colors.background, scheme.background) { c, v ->
             c.copy(background = v)
         },
-        OptionalColor(Res.string.customize_theme_text, colors.text, scheme.onSurface) { c, v -> c.copy(text = v) },
+        OptionalColor(Res.string.profile_group_text, colors.text, scheme.onSurface) { c, v -> c.copy(text = v) },
         OptionalColor(Res.string.customize_theme_secondary, colors.secondary, scheme.secondary) { c, v ->
             c.copy(secondary = v)
         },
@@ -420,7 +420,7 @@ private fun TextSection(
     onRowSpacingChange: (ListRowSpacing) -> Unit,
 ) {
     val fonts = rememberSystemFonts()
-    SettingsSection(title = stringResource(Res.string.customize_theme_font)) {
+    SettingsSection(title = stringResource(Res.string.profile_text_font)) {
         Column(modifier = Modifier.padding(SECTION_PADDING), verticalArrangement = Arrangement.spacedBy(ROW_GAP)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FontSettingsDropdown(
@@ -435,7 +435,7 @@ private fun TextSection(
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FieldLabel(stringResource(Res.string.customize_theme_text_size))
+                FieldLabel(stringResource(Res.string.profile_box_size))
                 SegmentTrack(modifier = Modifier.weight(1f).height(SEGMENT_TRACK_HEIGHT)) {
                     UI_FONT_SCALES.forEachIndexed { index, scale ->
                         SegmentTrackItem(

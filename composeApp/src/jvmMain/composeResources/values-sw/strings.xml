@@ -3,7 +3,6 @@
     <string name="mode">Hali</string>
     <string name="scope">Wigo</string>
     <string name="title">Kichwa</string>
-    <string name="number">Nambari</string>
     <string name="go_live">Onyesha Live</string>
     <string name="add_to_schedule">Ongeza kwenye Ratiba</string>
     <string name="copy_verse">Nakili Mstari</string>
@@ -12,7 +11,6 @@
     <string name="search">Tafuta</string>
     <string name="bible_smart_search_hint">Rejeleo au maandishi — k.m. Yohana 3:16, mat 1, au neno</string>
     <string name="bible_search_mode_auto">Otomatiki</string>
-    <string name="bible_search_mode_reference">Rejeleo</string>
     <string name="bible_search_mode_text">Maandishi</string>
     <string name="bible_search_mode_tooltip">Gusa kubadili — Otomatiki: rukia marejeleo, tafuta kila kitu kingine. Rejeleo: kuelekeza tu. Maandishi: tafuta maandishi ya mstari kila wakati.</string>
     <string name="bible_verse_selection_hint">Ctrl+Bofya kuwasha au kuzima, Shift+Bofya kwa mfululizo</string>
@@ -82,17 +80,11 @@
     <string name="bible_cross_references_close">Funga kidirisha</string>
     <string name="bible_cross_references_dismiss_hint">Esc kufunga</string>
     <string name="menu_file">Faili</string>
-    <string name="menu_new_schedule">Ratiba Mpya</string>
-    <string name="menu_open_schedule">Fungua Ratiba</string>
-    <string name="menu_save_schedule">Hifadhi Ratiba</string>
     <string name="menu_save_schedule_as">Hifadhi Ratiba Kama...</string>
     <string name="menu_close_schedule">Funga Ratiba</string>
     <string name="menu_exit">Toka</string>
     <string name="file_chooser_save_schedule">Hifadhi Ratiba Kama</string>
-    <string name="file_chooser_open_schedule">Fungua Ratiba</string>
     <string name="file_filter_schedule">Ratiba ya Church Presenter (*.cps)</string>
-    <string name="menu_schedule">Ratiba</string>
-    <string name="menu_add_to_schedule">Ongeza kwenye Ratiba</string>
     <string name="menu_remove_from_schedule">Ondoa kwenye Ratiba</string>
     <string name="menu_clear_schedule">Futa Ratiba</string>
 
@@ -111,7 +103,6 @@
     <string name="instance_link_description">Fuata programu nyingine ya ChurchPresenter kwenye mtandao wako — onyesha maudhui yake ya live hapa, na kwa hiari ongeza vipengee kwenye ratiba yake.</string>
     <string name="instance_link_host">Host</string>
     <string name="instance_link_host_hint">k.m. 192.168.1.10</string>
-    <string name="instance_link_port">Mlango</string>
     <string name="instance_link_autoconnect">Unganisha kiotomatiki unapoanzisha programu</string>
     <string name="instance_link_reconnect_delay">Muda wa chini wa kuunganisha tena</string>
     <string name="instance_link_reconnect_delay_hint">Muda mfupi zaidi wa kusubiri kabla ya kujaribu tena kiungo kilichokatika. Kushindwa mara kwa mara huongeza muda huo wenyewe.</string>
@@ -466,15 +457,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">Chaguo-msingi</string>
-    <string name="background_color_option">Rangi</string>
-    <string name="background_image_option">Picha</string>
     <string name="background_video_option">Video Inayojirudia</string>
     <string name="background_transparent_option">Wazi</string>
     <string name="background_follow_default_option">Fuata Chaguo-msingi</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">Wavuti</string>
-    <string name="projection_content_background">Usuli</string>
     <string name="projection_content_lt_background">Usuli wa Lower Third</string>
     <string name="browser_source_resolution">Ubora</string>
     <string name="browser_source_fps">FPS ya Juu</string>
@@ -556,7 +544,6 @@
     <string name="tooltip_schedule_zoom_out">Punguza</string>
     <string name="tooltip_add_to_schedule">Ongeza kwenye Ratiba</string>
     <string name="tooltip_clear_display">Futa Onyesho</string>
-    <string name="remote_action_clear_display">Futa Onyesho</string>
     <string name="schedule_add_files_title">Ongeza Faili kwenye Ratiba</string>
     <string name="tooltip_toggle_displays">Washa au Zima Maonyesho ya Mwasilishaji</string>
     <string name="tooltip_settings">Mipangilio</string>
@@ -578,7 +565,6 @@
     <string name="schedule_density_compact">Fupi</string>
     <string name="schedule_density_normal">Kawaida</string>
     <string name="schedule_density_detailed">Kwa Kina</string>
-    <string name="schedule_kind_lower_third">Lower Third</string>
     <string name="tooltip_schedule_options">Machaguo ya Ratiba</string>
     <string name="schedule_show_buttons_under_title">Onyesha vitufe chini ya kichwa</string>
     <string name="schedule_option_item_count">Idadi ya Vipengee</string>
@@ -589,7 +575,6 @@
     <string name="edit_label">Hariri Lebo</string>
     <string name="label_text">Maandishi ya Lebo</string>
     <string name="text_color">Rangi ya Maandishi</string>
-    <string name="background_color_label">Rangi ya Usuli</string>
     <string name="enter_label_text">Weka maandishi ya lebo...</string>
 
     <!-- Pictures Tab Strings -->
@@ -619,7 +604,6 @@
     <string name="animation_slide_left">Telezesha Kushoto</string>
     <string name="animation_slide_right">Telezesha Kulia</string>
     <string name="animation_none">Hakuna</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s picha inayofuata au ya nyuma  ·  %2$s sogea safu</string>
     <string name="presentation_arrow_key_hint">%1$s — hatua na slaidi ya nyuma/inayofuata  ·  %2$s — cheza/simamisha  ·  %3$s — skrini tupu</string>
     <string name="pictures_reorder_hint">Shift+vuta vijipicha kupanga upya</string>
@@ -682,14 +666,10 @@
     <string name="content_bible_background">Usuli wa Biblia</string>
     <string name="content_songs_background">Usuli wa Nyimbo</string>
     <string name="content_pictures">Picha na Wasilisho</string>
-    <string name="content_media">Media</string>
-    <string name="content_streaming">Lower Third</string>
     <string name="content_announcements">Matangazo</string>
     <string name="display_mode">Hali ya Onyesho</string>
-    <string name="display_fullscreen">Skrini Kamili</string>
     <string name="display_lower_third">Lower Third</string>
     <string name="full_screen">Skrini Kamili</string>
-    <string name="lower_third_size">Lower Third</string>
     <string name="identify_screen">Tambua</string>
     <string name="projection_target_display">Onyesho</string>
     <string name="projection_auto_display">Otomatiki</string>
@@ -765,7 +745,6 @@
     <string name="settings_import_failed">Kuingiza mipangilio kumeshindikana. Faili inaweza kuwa si sahihi.</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">Media</string>
     <string name="media_local_file">Faili ya Kwenye Kompyuta</string>
     <string name="media_network_url">URL ya Mtandao</string>
     <string name="media_url_placeholder">Weka URL (http://, rtsp://, ...)</string>
@@ -809,7 +788,6 @@
     <string name="center_left">Katikati Kushoto</string>
     <string name="center_right">Katikati Kulia</string>
     <string name="bottom_center">Chini Katikati</string>
-    <string name="announcement_background_color_label">Rangi ya Usuli</string>
     <string name="transparent_default">Wazi (Chaguo-msingi)</string>
     <string name="announcement_animation">Uhuishaji</string>
     <string name="anim_slide_from_left">Telezesha Kutoka Kushoto</string>
@@ -882,7 +860,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">Ongeza kwenye Ratiba</string>
     <string name="web_go_live">Onyesha Live</string>
     <string name="web_bookmark_add">Ongeza Alamisho</string>
     <string name="web_bookmark_remove">Ondoa Alamisho</string>
@@ -946,7 +923,6 @@
     <string name="canvas_shape_fill_color">Rangi ya Ndani</string>
     <string name="canvas_shape_stroke_width">Unene wa Mstari</string>
     <string name="canvas_rename_scene">Badilisha jina</string>
-    <string name="canvas_remove_scene">Ondoa</string>
     <string name="canvas_add_source">Ongeza chanzo</string>
     <string name="canvas_delete_source">Futa chanzo</string>
     <string name="canvas_source_move_forward">Hamisha mbele</string>
@@ -974,7 +950,6 @@
     <string name="canvas_render_height">Kimo</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">CSS Maalum</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">Chagua Picha</string>
     <string name="canvas_select_video_title">Chagua Video</string>
     <string name="canvas_image_files">Faili za Picha</string>
@@ -986,7 +961,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">Saa</string>
     <string name="canvas_clock_mode_countdown">Kuhesabu Kurudi</string>
     <string name="canvas_clock_mode_count_up">Kipima saa</string>
     <string name="canvas_decklink_io_warning">Kifaa hiki kinatumika kwa utoaji sasa. Ingizo linaweza kutopatikana kwenye vifaa visivyoruhusu ingizo na utoaji kwa wakati mmoja.</string>
@@ -1004,7 +978,6 @@
     <string name="canvas_text_curve">Mpinde</string>
     <string name="canvas_letter_spacing">Nafasi ya herufi</string>
     <string name="canvas_source_qrcode">Msimbo wa QR</string>
-    <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Kunasa Skrini</string>
     <string name="canvas_source_bible">Biblia</string>
     <string name="canvas_bible_version">Toleo la Biblia</string>
@@ -1017,7 +990,6 @@
     <string name="canvas_bible_ref_color">Rangi ya Rejeleo</string>
     <string name="canvas_verse_style">Mtindo wa Mstari</string>
     <string name="canvas_reference_style">Mtindo wa Rejeleo</string>
-    <string name="canvas_text_color">Rangi ya Maandishi</string>
     <string name="canvas_text_bg_color">Rangi ya Usuli</string>
     <string name="canvas_clock_mode">Hali</string>
     <string name="canvas_clock_format">Muundo</string>
@@ -1042,7 +1014,6 @@
     <string name="canvas_camera_format">Muundo wa Video</string>
     <string name="canvas_camera_format_auto">Otomatiki (chaguo-msingi)</string>
     <string name="canvas_camera_connection">Muunganisho wa Video</string>
-    <string name="canvas_camera_mode">Hali</string>
     <string name="canvas_camera_mode_auto">Otomatiki</string>
     <string name="canvas_capture_x">Kunasa X</string>
     <string name="canvas_capture_y">Kunasa Y</string>
@@ -1053,9 +1024,7 @@
     <string name="canvas_capture_mode_window">Dirisha</string>
     <string name="canvas_capture_refresh_windows">Onyesha upya orodha ya madirisha</string>
     <string name="canvas_capture_interval">Muda kati ya kunasa</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Kamera: %1$s</string>
-    <string name="canvas_placeholder_camera_default">Kamera</string>
     <string name="canvas_placeholder_screen_capture">Kunasa skrini</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1177,7 +1146,6 @@
     <string name="remote_activity_removed_from_schedule">Imeondolewa kwenye ratiba</string>
     <string name="remote_activity_projected">Imeonyeshwa (moja kwa moja)</string>
     <string name="remote_activity_presentation_connect">Imeunganishwa na kidhibiti cha wasilisho</string>
-    <string name="remote_activity_presentation_connect_detail">Sasa imeunganishwa</string>
     <string name="remote_activity_qa_admin_connect">Imeunganishwa na usimamizi wa maswali</string>
     <string name="remote_activity_qa_admin_connect_detail">Sasa imeunganishwa</string>
     <string name="remote_activity_presented">Inaonyeshwa</string>
@@ -1217,7 +1185,6 @@
     <string name="instance_link_primary_badge">Kuu — wafuasi %1$d wameunganishwa</string>
     <string name="client_label_placeholder">Weka jina rahisi…</string>
     <string name="client_label_edit_tooltip">Weka jina rahisi</string>
-    <string name="client_label_save">Hifadhi</string>
     <string name="client_label_cancel">Ghairi</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1338,7 +1305,6 @@
     <string name="system_storage_subtitle">Mahali Church Presenter hutafuta maudhui yako</string>
     <string name="system_storage_linked_count">%1$d zimeunganishwa</string>
     <string name="system_storage_needs_attention_count">%1$d zinahitaji uangalizi</string>
-    <string name="system_storage_status_not_set">Haijawekwa</string>
     <string name="system_storage_status_not_found">Folda haikupatikana</string>
     <string name="system_storage_status_read_only">Kusoma tu</string>
     <string name="system_storage_status_linked">Imeunganishwa</string>
@@ -1380,7 +1346,6 @@
     <string name="show_song_number_before_title">Onyesha namba ya wimbo kabla ya kichwa</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">Kioo cha jukwaani</string>
     <string name="general">Kwa jumla</string>
     <string name="display_stage_monitor">Kioo cha jukwaani</string>
     <string name="stage_monitor_quadrant_next">Ifuatayo</string>
@@ -1465,7 +1430,6 @@
     <string name="qa_confirm_go_live">Thibitisha kuonyesha</string>
     <string name="qa_add_question_hint">Ongeza swali…</string>
     <string name="qa_edit_question_hint">Hariri maandishi ya swali…</string>
-    <string name="qa_delete_question">Futa</string>
     <string name="qa_confirm_delete_prompt">Ufute?</string>
     <string name="qa_submitter_device">Kifaa: %1$s</string>
     <string name="qa_public_access">Ufikiaji wa umma</string>
@@ -1502,14 +1466,11 @@
     <string name="stt_live_preview">Onyesho la moja kwa moja</string>
     <string name="stt_not_connected">Haijaunganishwa. Weka anwani ya seva ya STT kisha bofya Unganisha.</string>
     <string name="stt_waiting_for_transcription">Inasubiri manukuu…</string>
-    <string name="stt_transcription_label">Manukuu</string>
     <string name="stt_translation_label">Tafsiri</string>
     <string name="stt_settings_dialog_title">Mipangilio ya onyesho la STT</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">Ripoti za CCLI</string>
-    <string name="ccli_tab_songs">Nyimbo</string>
-    <string name="ccli_tab_bible">Biblia</string>
     <string name="ccli_tab_activity">Shughuli</string>
     <string name="ccli_songs_summary">nyimbo %1$d tofauti · mara %2$d kwa jumla</string>
     <string name="ccli_bible_summary">mistari %1$d tofauti · mara %2$d kwa jumla</string>
@@ -1520,7 +1481,6 @@
     <string name="ccli_activity_title">Maonyesho kwa muda</string>
     <string name="ccli_from">Kuanzia:</string>
     <string name="ccli_to">Hadi:</string>
-    <string name="ccli_legend_songs">Nyimbo</string>
     <string name="ccli_legend_bible">Mistari ya Biblia</string>
     <string name="ccli_stat_songs_presented">Nyimbo zilizoonyeshwa</string>
     <string name="ccli_stat_bible_verses">Mistari ya Biblia</string>
@@ -1534,7 +1494,6 @@
     <string name="ccli_col_first">Mara ya kwanza</string>
     <string name="ccli_col_last">Mara ya mwisho</string>
     <string name="ccli_col_verse">Mstari</string>
-    <string name="ccli_col_bible">Biblia</string>
     <string name="ccli_export_csv">Hamisha CSV ya CCLI</string>
     <string name="ccli_export_xls">Hamisha XLS</string>
     <string name="ccli_exported_success">Ripoti imehamishwa kwa mafanikio.</string>
@@ -1615,7 +1574,6 @@
     <string name="obs_mode_bible">Biblia</string>
     <string name="obs_mode_songs">Nyimbo</string>
     <string name="obs_mode_pictures">Picha</string>
-    <string name="obs_mode_presentation">Wasilisho</string>
     <string name="obs_mode_media">Midia</string>
     <string name="obs_mode_lower_third">Mstari wa chini</string>
     <string name="obs_mode_announcements">Matangazo</string>
@@ -1810,7 +1768,6 @@
     <string name="companion_satellite_no_host">Weka mwenyeji wa Companion kwenye Mipangilio → Companion Satellite ili kuunganisha.</string>
     <string name="companion_satellite_status_connecting">Inaunganisha…</string>
     <string name="companion_satellite_status_disconnected">Imetenganishwa</string>
-    <string name="companion_satellite_status_error">Hitilafu: %1$s</string>
     <string name="companion_satellite_connection_name">Jina</string>
     <string name="companion_satellite_product_name">Jina la bidhaa</string>
     <string name="companion_satellite_reconnect_delay">Kusubiri kabla ya kuunganisha tena (ms)</string>
@@ -1874,7 +1831,6 @@
     <string name="bible_engine_detect">Tambua Maandiko</string>
     <string name="bible_engine_run_local">Endesha injini kwenye kompyuta hii</string>
     <string name="bible_engine_host">Mwenyeji wa injini</string>
-    <string name="bible_engine_port">Mlango</string>
     <string name="stt_help_dev_mode">Saidia mtengenezaji — onyesha vitufe vya maoni kwenye kichupo cha Biblia (fungu si sahihi / mapema mno / fungu lililokosekana)</string>
     <string name="dictionary_back">Rudi</string>
     <string name="dictionary_forward">Endelea</string>
@@ -1963,7 +1919,6 @@
     <string name="font_category_serif">Serif</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Onyesho la awali</string>
     <string name="font_preview_sample">Maandishi ya mfano kwa fonti iliyochaguliwa</string>
     <string name="font_warning_no_cyrillic">%1$s haina herufi za Kikrili — mistari ya Kikrili itaonekana skrini kwa fonti nyingine.</string>
     <string name="font_warning_no_hebrew">%1$s haina herufi za Kiebrania — maandishi ya Kiebrania yataonekana skrini kwa fonti nyingine.</string>
@@ -1973,7 +1928,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">Mstari katikati</string>
     <string name="bible_custom_name">Jina</string>
-    <string name="bible_custom_abbreviation">Kifupi</string>
     <string name="bible_translations">Tafsiri</string>
     <string name="bible_miscellaneous">Nyingine</string>
     <string name="bible_font">Fonti</string>
@@ -1988,10 +1942,7 @@
     <string name="bible_preview_sample_book">Yohana</string>
     <string name="bible_preview_no_translations">Ongeza tafsiri ili kuiona hapa</string>
     <string name="song_element_number">Nambari</string>
-    <string name="song_element_title">Kichwa</string>
     <string name="song_element_lyrics">Maneno ya Wimbo</string>
-    <string name="song_element_author">Mwandishi</string>
-    <string name="song_element_composer">Mtunzi</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Mwendo</string>
     <string name="song_target_title_slide">Slaidi ya kichwa</string>
@@ -2004,7 +1955,6 @@
     <string name="song_chunk">Sehemu</string>
     <string name="song_language_scope">Lugha</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">Usuli</string>
     <string name="song_background_full_screen">Skrini nzima</string>
     <string name="song_background_lower_third">Theluthi ya chini</string>
     <string name="song_background_inherit">Rithi</string>
@@ -2019,7 +1969,6 @@
     <string name="song_background_your_color">Rangi yako</string>
     <string name="song_background_browse">Vinjari…</string>
     <string name="song_background_look">Muonekano</string>
-    <string name="song_background_preset_none">Hakuna</string>
     <string name="song_background_preset_soft">Laini</string>
     <string name="song_background_preset_legible">Inasomeka</string>
     <string name="song_background_preset_cinema">Sinema</string>
@@ -2040,7 +1989,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Usuli</string>
     <string name="background_group_defaults">Chaguo-msingi</string>
-    <string name="background_scope_default">Chaguo-msingi</string>
     <string name="background_scope_default_lower_third">Lower Third ya chaguo-msingi</string>
     <string name="background_scope_default_meta">Biblia au Nyimbo zinapowekwa kwenye Chaguo-msingi</string>
     <string name="background_scope_default_lower_third_meta">Lower third inapowekwa kwenye Chaguo-msingi</string>
@@ -2049,16 +1997,13 @@
     <string name="background_following_default">Inafuata chaguo-msingi</string>
     <string name="background_use_default">Tumia chaguo-msingi</string>
     <string name="background_set_explicitly">Imewekwa peke yake kwa uso huu</string>
-    <string name="background_type_caption">Aina</string>
     <string name="background_color_caption">Rangi</string>
     <string name="background_image_file">Faili ya picha</string>
     <string name="background_video_file">Faili ya video</string>
-    <string name="background_opacity_caption">Ukolezi</string>
     <string name="background_above_band_caption">Juu ya Mstari</string>
     <string name="background_above_band_fill">Rangi ya Kujaza</string>
     <string name="background_above_band_opacity">Ukolezi wa Kujaza</string>
     <string name="quick_background_reset">Rudi kawaida</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · dhibiti katika Mipangilio</string>
     <string name="quick_backgrounds">Usuli wa haraka</string>
     <string name="quick_backgrounds_help">Usuli ambao paneli ya onyesho la awali huuweka mbali kwa mbofyo mmoja. Bofya kigae ili kuchagua kinachoonyesha, kikokote ili kubadilisha kitufe kinachokifikia. Kuchagua kimoja wakati wa ibada hubatilisha kila skrini hadi urudi kawaida — hapa hakibadilishi chochote.</string>
@@ -2084,16 +2029,10 @@
     <string name="output_profile_swap_menu_tooltip">Badilisha wasifu wa toleo</string>
     <string name="output_profile_new_name_default">Wasifu Mpya</string>
     <string name="output_profile_empty_state">Unda wasifu ili kuanza kuupamba</string>
-    <string name="customize_bible">Biblia</string>
-    <string name="customize_songs">Nyimbo</string>
     <string name="customize_group_verse_text">Maandishi ya mstari</string>
     <string name="customize_group_reference">Rejeleo</string>
     <string name="customize_background_type">Aina</string>
-    <string name="customize_type_color">Rangi</string>
     <string name="customize_type_image">Picha</string>
-    <string name="customize_type_video">Video</string>
-    <string name="customize_type_default">Chaguo-msingi</string>
-    <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Kifupi</string>
     <string name="customize_background_opacity">Ukolezi</string>
     <string name="slate_theme">Mandhari ya Jiwe</string>
@@ -2139,7 +2078,6 @@
     <string name="song_lottie_unsupported_note">Kiolezo huamua mpangilio na mahali pa kichwa. Mtindo wa theluthi ya chini huweka fonti, ukubwa, rangi, mpangilio wa maandishi, nafasi ya herufi, herufi kubwa/ndogo na kivuli; mandhari ya maandishi, mstari chini, mstari wa kufuta, nafasi ya maneno, hakikisho la sehemu inayofuata na kodi hazitumiki.</string>
     <string name="bible_lottie_unsupported_note">Kiolezo huamua mpangilio, mahali pa rejeleo na jinsi lugha mbili zinavyogawana mkanda. Mtindo wa theluthi ya chini huweka fonti, ukubwa, rangi, mpangilio wa maandishi, nafasi ya herufi, herufi kubwa/ndogo na kivuli; mandhari ya maandishi, mstari chini, mstari wa kufuta na nafasi ya maneno hazitumiki.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Mstari wa nje</string>
     <string name="tooltip_outline_options">Chaguo za mstari wa nje</string>
     <string name="text_outline">Mstari wa nje</string>
     <string name="text_outline_width">Upana</string>
@@ -2207,7 +2145,6 @@
     <string name="add_ndi_output">Ongeza Tokeo</string>
     <string name="ndi_output_numbered">Tokeo la NDI %1$d</string>
     <string name="preview_output">Onyesho la awali la tokeo</string>
-    <string name="output_resolution">Ubora wa picha</string>
     <string name="output_resolution_custom">Maalum…</string>
     <string name="output_resolution_custom_title">Ubora maalum wa picha</string>
     <string name="output_resolution_width">Upana</string>
@@ -2311,7 +2248,6 @@
     <string name="calendar_sync_description">Panga ibada kutoka programu ya simu wiki nzima, hata kompyuta hii ikiwa imezimwa. Kompyuta hii inabaki kuwa chanzo kikuu.</string>
     <string name="calendar_sync_enable">Sawazisha kalenda na simu</string>
     <string name="calendar_sync_relay_url">Relei</string>
-    <string name="calendar_sync_status_off">Zima</string>
     <string name="calendar_sync_status_unpaired">Bado haijasajiliwa — kompyuta hii hujisajili kwenye relei mara ya kwanza usawazishaji unapowashwa</string>
     <string name="calendar_sync_status_syncing">Inasawazisha…</string>
     <string name="calendar_sync_status_synced">Imesawazishwa %1$s</string>

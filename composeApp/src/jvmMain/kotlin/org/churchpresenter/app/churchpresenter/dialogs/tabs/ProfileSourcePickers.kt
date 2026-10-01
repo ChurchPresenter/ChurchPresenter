@@ -3,8 +3,8 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.customize_bible
-import churchpresenter.composeapp.generated.resources.customize_songs
+import churchpresenter.composeapp.generated.resources.bible
+import churchpresenter.composeapp.generated.resources.songs
 import churchpresenter.composeapp.generated.resources.output_profile_add_language
 import churchpresenter.composeapp.generated.resources.add_bible_translation
 import churchpresenter.composeapp.generated.resources.output_profile_bible_count
@@ -35,7 +35,7 @@ internal fun BibleSourcePicker(
         items = stack,
         shown = shown,
         strings = OrderedSourceStrings(
-            label = stringResource(Res.string.customize_bible),
+            label = stringResource(Res.string.bible),
             offLabel = stringResource(Res.string.output_profile_bible_off),
             countFormat = stringResource(Res.string.output_profile_bible_count, shown.size, stack.size),
             noneLoaded = stringResource(Res.string.output_profile_bible_none_loaded),
@@ -72,7 +72,7 @@ internal fun SongSourcePicker(
         items = languages,
         shown = shown,
         strings = OrderedSourceStrings(
-            label = stringResource(Res.string.customize_songs),
+            label = stringResource(Res.string.songs),
             offLabel = stringResource(Res.string.output_profile_songs_off),
             countFormat = stringResource(Res.string.output_profile_song_count, shown.size, languages.size),
             noneLoaded = stringResource(Res.string.output_profile_bible_none_loaded),

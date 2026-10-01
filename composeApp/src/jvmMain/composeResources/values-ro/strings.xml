@@ -3,7 +3,6 @@
     <string name="mode">Mod</string>
     <string name="scope">Domeniu</string>
     <string name="title">Titlu</string>
-    <string name="number">Număr</string>
     <string name="go_live">Proiectează</string>
     <string name="add_to_schedule">Adaugă la Program</string>
     <string name="no_lyrics_available">Nu există versuri disponibile pentru această cântare</string>
@@ -70,18 +69,12 @@
     <string name="bible_cross_references_dismiss_hint">Esc pentru închidere</string>
     <string name="copy_verse">Copiați Versetul</string>
     <string name="menu_file">Fișier</string>
-    <string name="menu_new_schedule">Program Nou</string>
-    <string name="menu_open_schedule">Deschide Program</string>
-    <string name="menu_save_schedule">Salvează Program</string>
     <string name="menu_save_schedule_as">Salvează Programul Ca...</string>
     <string name="menu_close_schedule">Închide Program</string>
     <string name="menu_exit">Ieșire</string>
     <string name="file_chooser_save_schedule">Salvează Programul Ca</string>
-    <string name="file_chooser_open_schedule">Deschide Program</string>
     <string name="file_filter_schedule">Program Church Presenter (*.cps)</string>
 
-    <string name="menu_schedule">Program</string>
-    <string name="menu_add_to_schedule">Adaugă la Program</string>
     <string name="menu_remove_from_schedule">Elimină din Program</string>
     <string name="menu_clear_schedule">Golește Programul</string>
 
@@ -364,15 +357,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">Implicit</string>
-    <string name="background_color_option">Culoare</string>
-    <string name="background_image_option">Imagine</string>
     <string name="background_video_option">Buclă Video</string>
     <string name="background_transparent_option">Transparent</string>
     <string name="background_follow_default_option">Urmează Implicit</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">Web</string>
-    <string name="projection_content_background">Fundal</string>
     <string name="projection_content_lt_background">Fundal Lower Third</string>
 
     <!-- Bible Tab -->
@@ -420,7 +410,6 @@
     <string name="tooltip_move_down">Mută Jos</string>
     <string name="tooltip_add_to_schedule">Adaugă la Program</string>
     <string name="tooltip_clear_display">Golește Ecranul</string>
-    <string name="remote_action_clear_display">Golește Ecranul</string>
     <string name="schedule_add_files_title">Adaugă fișiere la program</string>
     <string name="tooltip_toggle_displays">Comută Ecranele Prezentatorului</string>
     <string name="tooltip_settings">Setări</string>
@@ -442,7 +431,6 @@
     <string name="schedule_density_compact">Compact</string>
     <string name="schedule_density_normal">Normal</string>
     <string name="schedule_density_detailed">Detaliat</string>
-    <string name="schedule_kind_lower_third">Lower Third</string>
     <string name="tooltip_schedule_options">Opțiuni program</string>
     <string name="schedule_show_buttons_under_title">Afișează butoanele sub titlu</string>
     <string name="schedule_option_item_count">Număr de elemente</string>
@@ -453,7 +441,6 @@
     <string name="edit_label">Editează Etichetă</string>
     <string name="label_text">Text Etichetă</string>
     <string name="text_color">Culoare Text</string>
-    <string name="background_color_label">Culoare Fundal</string>
     <string name="enter_label_text">Introduceți textul etichetei...</string>
 
     <!-- Pictures Tab Strings -->
@@ -483,7 +470,6 @@
     <string name="animation_slide_left">Glisare Stânga</string>
     <string name="animation_slide_right">Glisare Dreapta</string>
     <string name="animation_none">Niciuna</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s imaginea următoare/anterioară  ·  %2$s navigare rânduri</string>
     <string name="presentation_arrow_key_hint">%1$s — pasul și slide-ul anterior/următor  ·  %2$s — redare/pauză  ·  %3$s — ecran gol</string>
     <string name="pictures_reorder_hint">Shift+glisare miniaturi pentru reordonare</string>
@@ -529,14 +515,10 @@
     <string name="content_bible_background">Fundal Biblie</string>
     <string name="content_songs_background">Fundal cântări</string>
     <string name="content_pictures">Imagini/Prezentare</string>
-    <string name="content_media">Media</string>
-    <string name="content_streaming">Lower Third</string>
     <string name="content_announcements">Anunțuri</string>
     <string name="display_mode">Mod Afișare</string>
-    <string name="display_fullscreen">Ecran Complet</string>
     <string name="display_lower_third">Lower Third</string>
     <string name="full_screen">Ecran Complet</string>
-    <string name="lower_third_size">Lower Third</string>
     <string name="identify_screen">Identificare</string>
     <string name="projection_target_display">Monitor</string>
     <string name="projection_auto_display">Auto</string>
@@ -594,7 +576,6 @@
     <string name="settings_import_failed">Importul setărilor a eșuat. Fișierul poate fi invalid.</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">Media</string>
     <string name="media_local_file">Fișier Local</string>
     <string name="media_network_url">URL Rețea</string>
     <string name="media_url_placeholder">Introduceți URL (http://, rtsp://, ...)</string>
@@ -637,7 +618,6 @@
     <string name="center_left">Centru Stânga</string>
     <string name="center_right">Centru Dreapta</string>
     <string name="bottom_center">Centru Jos</string>
-    <string name="announcement_background_color_label">Culoare Fundal</string>
     <string name="transparent_default">Transparent (Implicit)</string>
     <string name="announcement_animation">Animație</string>
     <string name="anim_slide_from_left">Glisare din Stânga</string>
@@ -711,7 +691,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">Adaugă la Program</string>
     <string name="web_go_live">Proiectează</string>
     <string name="web_bookmark_add">Adaugă Marcaj</string>
     <string name="web_bookmark_remove">Elimină Marcaj</string>
@@ -775,7 +754,6 @@
     <string name="canvas_shape_fill_color">Umplere</string>
     <string name="canvas_shape_stroke_width">Grosimea Conturului</string>
     <string name="canvas_rename_scene">Redenumește</string>
-    <string name="canvas_remove_scene">Elimină</string>
     <string name="canvas_add_source">Adaugă sursă</string>
     <string name="canvas_delete_source">Șterge sursă</string>
     <string name="canvas_source_move_forward">Mută în față</string>
@@ -802,7 +780,6 @@
     <string name="canvas_render_height">Înălțime</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">CSS Personalizat</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">Selectați Imaginea</string>
     <string name="canvas_select_video_title">Selectați Videoul</string>
     <string name="canvas_image_files">Fișiere Imagine</string>
@@ -814,7 +791,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">Ceas</string>
     <string name="canvas_clock_mode_countdown">Numărătoare Inversă</string>
     <string name="canvas_clock_mode_count_up">Cronometru</string>
     <string name="canvas_decklink_io_warning">Acest dispozitiv este utilizat în prezent pentru ieșire. Intrarea poate să nu fie disponibilă pe dispozitivele care nu suportă I/O simultan.</string>
@@ -832,7 +808,6 @@
     <string name="canvas_text_curve">Curbă</string>
     <string name="canvas_letter_spacing">Spațiere litere</string>
     <string name="canvas_source_qrcode">Cod QR</string>
-    <string name="canvas_source_camera">Cameră</string>
     <string name="canvas_source_screen_capture">Captură Ecran</string>
     <string name="canvas_source_bible">Biblie</string>
     <string name="canvas_bible_version">Versiunea Bibliei</string>
@@ -843,7 +818,6 @@
     <string name="canvas_bible_end_verse">Versetul Final</string>
     <string name="canvas_bible_ref_font_size">Dimensiunea Fontului Referinței</string>
     <string name="canvas_bible_ref_color">Culoarea Referinței</string>
-    <string name="canvas_text_color">Culoare Text</string>
     <string name="canvas_text_bg_color">Culoare Fundal</string>
     <string name="canvas_clock_mode">Mod</string>
     <string name="canvas_clock_format">Format</string>
@@ -868,7 +842,6 @@
     <string name="canvas_camera_format">Format Video</string>
     <string name="canvas_camera_format_auto">Auto (implicit)</string>
     <string name="canvas_camera_connection">Conexiune Video</string>
-    <string name="canvas_camera_mode">Mod</string>
     <string name="canvas_camera_mode_auto">Auto</string>
     <string name="canvas_capture_x">Captură X</string>
     <string name="canvas_capture_y">Captură Y</string>
@@ -879,9 +852,7 @@
     <string name="canvas_capture_mode_window">Fereastră</string>
     <string name="canvas_capture_refresh_windows">Reîmprospătare Listă Ferestre</string>
     <string name="canvas_capture_interval">Interval Captură</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Cameră: %1$s</string>
-    <string name="canvas_placeholder_camera_default">Cameră</string>
     <string name="canvas_placeholder_screen_capture">Captură Ecran</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -997,7 +968,6 @@
     <string name="remote_activity_added_to_schedule">Adăugat la Program</string>
     <string name="remote_activity_projected">Proiectat (Live)</string>
     <string name="remote_activity_presentation_connect">Conectat la Telecomanda Prezentării</string>
-    <string name="remote_activity_presentation_connect_detail">Acum conectat</string>
     <string name="remote_activity_qa_admin_connect">Conectat la Admin Î&amp;R</string>
     <string name="remote_activity_qa_admin_connect_detail">Acum conectat</string>
     <string name="remote_activity_presented">Se Prezintă</string>
@@ -1032,7 +1002,6 @@
     <string name="no_blocked_clients">Niciun client permanent blocat.</string>
     <string name="client_label_placeholder">Introduceți un nume prietenos…</string>
     <string name="client_label_edit_tooltip">Setați numele prietenos</string>
-    <string name="client_label_save">Salvează</string>
     <string name="client_label_cancel">Anulează</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1128,7 +1097,6 @@
     <string name="system_storage_subtitle">Unde caută Church Presenter conținutul tău</string>
     <string name="system_storage_linked_count">%1$d conectate</string>
     <string name="system_storage_needs_attention_count">%1$d necesită atenție</string>
-    <string name="system_storage_status_not_set">Nesetat</string>
     <string name="system_storage_status_not_found">Dosarul nu a fost găsit</string>
     <string name="system_storage_status_read_only">Doar citire</string>
     <string name="system_storage_status_linked">Conectat</string>
@@ -1170,7 +1138,6 @@
     <string name="show_song_number_before_title">Afișează numărul cântării înaintea titlului</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">Monitor Scenă</string>
     <string name="general">General</string>
     <string name="display_stage_monitor">Monitor Scenă</string>
     <string name="stage_monitor_quadrant_next">Stânga Jos: Slide Următor</string>
@@ -1255,7 +1222,6 @@
     <string name="qa_confirm_go_live">Confirmați Proiecția</string>
     <string name="qa_add_question_hint">Adaugă o întrebare…</string>
     <string name="qa_edit_question_hint">Editați textul întrebării…</string>
-    <string name="qa_delete_question">Șterge</string>
     <string name="qa_confirm_delete_prompt">Șterge?</string>
     <string name="qa_submitter_device">Dispozitiv: %1$s</string>
     <string name="qa_public_access">Acces Public</string>
@@ -1292,13 +1258,10 @@
     <string name="stt_live_preview">Previzualizare Live</string>
     <string name="stt_not_connected">Neconectat. Introduceți URL-ul serverului STT și faceți clic pe Conectare.</string>
     <string name="stt_waiting_for_transcription">Se așteaptă transcrierea…</string>
-    <string name="stt_transcription_label">Transcriere</string>
     <string name="stt_translation_label">Traducere</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">Raport de Utilizare CCLI</string>
-    <string name="ccli_tab_songs">Cântări</string>
-    <string name="ccli_tab_bible">Biblie</string>
     <string name="ccli_tab_activity">Activitate</string>
     <string name="ccli_songs_summary">%1$d cântări unice · %2$d redări totale</string>
     <string name="ccli_bible_summary">%1$d versete unice · %2$d afișări totale</string>
@@ -1309,7 +1272,6 @@
     <string name="ccli_activity_title">Prezentări în Timp</string>
     <string name="ccli_from">De la:</string>
     <string name="ccli_to">Până la:</string>
-    <string name="ccli_legend_songs">Cântări</string>
     <string name="ccli_legend_bible">Versete Biblice</string>
     <string name="ccli_stat_songs_presented">Cântări prezentate</string>
     <string name="ccli_stat_bible_verses">Versete biblice</string>
@@ -1323,7 +1285,6 @@
     <string name="ccli_col_first">Prima</string>
     <string name="ccli_col_last">Ultima</string>
     <string name="ccli_col_verse">Verset</string>
-    <string name="ccli_col_bible">Biblie</string>
     <string name="ccli_export_csv">Exportă CSV CCLI</string>
     <string name="ccli_export_xls">Exportă XLS</string>
     <string name="ccli_exported_success">Raportul a fost exportat cu succes.</string>
@@ -1402,7 +1363,6 @@
     <string name="obs_mode_bible">Biblie</string>
     <string name="obs_mode_songs">Cântări</string>
     <string name="obs_mode_pictures">Imagini</string>
-    <string name="obs_mode_presentation">Prezentare</string>
     <string name="obs_mode_media">Media</string>
     <string name="obs_mode_lower_third">Lower Third</string>
     <string name="obs_mode_announcements">Anunțuri</string>
@@ -1587,7 +1547,6 @@
     <string name="companion_satellite_no_host">Setați o gazdă Companion în Setări → Companion Satellite pentru a vă conecta.</string>
     <string name="companion_satellite_status_connecting">Se conectează…</string>
     <string name="companion_satellite_status_disconnected">Deconectat</string>
-    <string name="companion_satellite_status_error">Eroare: %1$s</string>
     <string name="companion_satellite_connection_name">Nume</string>
     <string name="companion_satellite_product_name">Nume produs</string>
     <string name="companion_satellite_reconnect_delay">Întârziere reconectare (ms)</string>
@@ -1625,7 +1584,6 @@
     <string name="em_dash">—</string>
     <string name="bible_smart_search_hint">Referință sau text — ex. Ioan 3:16, Mat 1 sau un cuvânt</string>
     <string name="bible_search_mode_auto">Auto</string>
-    <string name="bible_search_mode_reference">Referință</string>
     <string name="bible_search_mode_text">Text</string>
     <string name="bible_search_mode_tooltip">Atingeți pentru a schimba — Auto: salt la referințe, căutați restul. Referință: numai navigare. Text: căutați întotdeauna în textul versetului.</string>
     <string name="swap_bibles_hint">Schimbați Bibliile primară și secundară</string>
@@ -1676,7 +1634,6 @@
     <string name="bible_engine_detect">Detectați Scriptura</string>
     <string name="bible_engine_run_local">Rulați motorul local</string>
     <string name="bible_engine_host">Gazda motorului</string>
-    <string name="bible_engine_port">Port</string>
     <!-- Contact / feedback form (Help -> Contact) -->
     <string name="menu_contact_us">Contact</string>
     <string name="contact_us_title">Contactează-ne</string>
@@ -1712,7 +1669,6 @@
     <string name="instance_link_description">Urmăriți o altă instanță ChurchPresenter din rețeaua dvs. — oglindiți conținutul ei live aici și, opțional, adăugați elemente în programul ei.</string>
     <string name="instance_link_host">Gazdă</string>
     <string name="instance_link_host_hint">ex. 192.168.1.10</string>
-    <string name="instance_link_port">Port</string>
     <string name="instance_link_autoconnect">Conectare automată la pornire</string>
     <string name="instance_link_allow_push_to_schedule">Permite adăugarea de elemente în programul instanței primare</string>
     <string name="instance_link_mirror_backgrounds">Oglindește și fundalurile instanței primare</string>
@@ -1948,7 +1904,6 @@
     <string name="font_category_serif">Cu serife</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Decorativ</string>
-    <string name="font_preview">Previzualizare</string>
     <string name="font_preview_sample">Text de exemplu cu fontul ales</string>
     <string name="font_warning_no_cyrillic">%1$s nu are glife chirilice – versetele în chirilic vor apărea pe ecran cu alt font.</string>
     <string name="font_warning_no_hebrew">%1$s nu are glife ebraice – textul ebraic va apărea pe ecran cu alt font.</string>
@@ -1958,7 +1913,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">Tăiat</string>
     <string name="bible_custom_name">Nume</string>
-    <string name="bible_custom_abbreviation">Abreviere</string>
     <string name="bible_translations">Traduceri</string>
     <string name="bible_miscellaneous">Diverse</string>
     <string name="bible_font">Font</string>
@@ -1973,10 +1927,7 @@
     <string name="bible_preview_sample_book">Ioan</string>
     <string name="bible_preview_no_translations">Adăugați o traducere pentru a o vedea aici</string>
     <string name="song_element_number">Număr</string>
-    <string name="song_element_title">Titlu</string>
     <string name="song_element_lyrics">Versuri</string>
-    <string name="song_element_author">Autor</string>
-    <string name="song_element_composer">Compozitor</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Diapozitiv de titlu</string>
@@ -1989,7 +1940,6 @@
     <string name="song_chunk">Fragment</string>
     <string name="song_language_scope">Limbă</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">Fundal</string>
     <string name="song_background_full_screen">Ecran complet</string>
     <string name="song_background_lower_third">Treimea inferioară</string>
     <string name="song_background_inherit">Moștenit</string>
@@ -2004,7 +1954,6 @@
     <string name="song_background_your_color">Culoarea ta</string>
     <string name="song_background_browse">Răsfoiește…</string>
     <string name="song_background_look">Aspect</string>
-    <string name="song_background_preset_none">Niciunul</string>
     <string name="song_background_preset_soft">Blând</string>
     <string name="song_background_preset_legible">Lizibil</string>
     <string name="song_background_preset_cinema">Cinema</string>
@@ -2025,7 +1974,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Fundaluri</string>
     <string name="background_group_defaults">Implicite</string>
-    <string name="background_scope_default">Implicit</string>
     <string name="background_scope_default_lower_third">Lower Third implicit</string>
     <string name="background_scope_default_meta">Când Biblia sau Cântările sunt pe Implicit</string>
     <string name="background_scope_default_lower_third_meta">Când lower third este pe Implicit</string>
@@ -2034,16 +1982,13 @@
     <string name="background_following_default">Urmează fundalul implicit</string>
     <string name="background_use_default">Folosește implicitul</string>
     <string name="background_set_explicitly">Setat separat pentru această suprafață</string>
-    <string name="background_type_caption">Tip</string>
     <string name="background_color_caption">Culoare</string>
     <string name="background_image_file">Fișier imagine</string>
     <string name="background_video_file">Fișier video</string>
-    <string name="background_opacity_caption">Opacitate</string>
     <string name="background_above_band_caption">Deasupra benzii</string>
     <string name="background_above_band_fill">Culoare de umplere</string>
     <string name="background_above_band_opacity">Opacitate umplere</string>
     <string name="quick_background_reset">Înapoi la normal</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · se administrează în Setări</string>
     <string name="quick_backgrounds">Fundaluri rapide</string>
     <string name="quick_backgrounds_help">Fundaluri pe care panoul de previzualizare le ține la un clic distanță. Apasă pe o plăcuță ca să alegi ce arată, trage-o ca să schimbi tasta care o cheamă. Alegerea unuia în timpul slujbei suprascrie fiecare ecran până revii la normal — aici nu schimbă nimic.</string>
@@ -2069,16 +2014,10 @@
     <string name="output_profile_swap_menu_tooltip">Schimbă profilul de ieșire</string>
     <string name="output_profile_new_name_default">Profil nou</string>
     <string name="output_profile_empty_state">Creează un profil pentru a începe să-l stilizezi</string>
-    <string name="customize_bible">Biblie</string>
-    <string name="customize_songs">Cântări</string>
     <string name="customize_group_verse_text">Textul versetului</string>
     <string name="customize_group_reference">Referință</string>
     <string name="customize_background_type">Tip</string>
-    <string name="customize_type_color">Culoare</string>
     <string name="customize_type_image">Imagine</string>
-    <string name="customize_type_video">Video</string>
-    <string name="customize_type_default">Implicit</string>
-    <string name="customize_type_gradient">Gradient</string>
     <string name="customize_show_abbreviation">Abreviere</string>
     <string name="customize_background_opacity">Opacitate</string>
     <string name="slate_theme">Tema Ardezie</string>
@@ -2124,7 +2063,6 @@
     <string name="song_lottie_unsupported_note">Șablonul decide aspectul și locul titlului. Stilul treimii inferioare stabilește fontul, mărimea, culoarea, alinierea, spațierea literelor, majusculele și umbra; fundalul textului, sublinierea, tăierea, spațierea cuvintelor, previzualizarea următoarei părți și acordurile nu se aplică.</string>
     <string name="bible_lottie_unsupported_note">Șablonul decide aspectul, poziția referinței și felul în care două limbi împart banda. Stilul treimii inferioare stabilește fontul, mărimea, culoarea, alinierea, spațierea literelor, majusculele și umbra; fundalul textului, sublinierea, tăierea și spațierea cuvintelor nu se aplică.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Contur</string>
     <string name="tooltip_outline_options">Opțiuni contur</string>
     <string name="text_outline">Contur</string>
     <string name="text_outline_width">Lățime</string>
@@ -2192,7 +2130,6 @@
     <string name="add_ndi_output">Adaugă ieșire</string>
     <string name="ndi_output_numbered">Ieșire NDI %1$d</string>
     <string name="preview_output">Previzualizare ieșire</string>
-    <string name="output_resolution">Rezoluție</string>
     <string name="output_resolution_custom">Personalizată…</string>
     <string name="output_resolution_custom_title">Rezoluție personalizată</string>
     <string name="output_resolution_width">Lățime</string>
@@ -2296,7 +2233,6 @@
     <string name="calendar_sync_description">Planifică servicii din aplicația mobilă toată săptămâna, chiar și când acest computer este oprit. Acest computer rămâne sursa de adevăr.</string>
     <string name="calendar_sync_enable">Sincronizează calendarul cu telefoanele</string>
     <string name="calendar_sync_relay_url">Releu</string>
-    <string name="calendar_sync_status_off">Oprit</string>
     <string name="calendar_sync_status_unpaired">Neînregistrat încă — acest computer se înregistrează la releu prima dată când sincronizarea este pornită</string>
     <string name="calendar_sync_status_syncing">Se sincronizează…</string>
     <string name="calendar_sync_status_synced">Sincronizat %1$s</string>
