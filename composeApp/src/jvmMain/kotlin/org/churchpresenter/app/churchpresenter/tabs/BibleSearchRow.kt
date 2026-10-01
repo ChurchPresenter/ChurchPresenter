@@ -29,13 +29,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.bible_search_mode_auto
 import org.churchpresenter.strings.generated.resources.customize_group_reference
 import org.churchpresenter.strings.generated.resources.bible_search_mode_text
 import org.churchpresenter.strings.generated.resources.bible_search_mode_tooltip
-import churchpresenter.composeapp.generated.resources.ic_search
+import org.churchpresenter.icons.generated.resources.ic_search
 import org.churchpresenter.strings.generated.resources.mode
 import org.churchpresenter.strings.generated.resources.scope
 import org.churchpresenter.strings.generated.resources.search
@@ -67,7 +67,7 @@ private fun SearchSubmitButton(onSubmit: () -> Unit) {
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            painter = painterResource(AppRes.drawable.ic_search),
+            painter = painterResource(IconRes.drawable.ic_search),
             contentDescription = stringResource(Res.string.search),
             modifier = Modifier.size(16.dp),
             tint = elevationPalette().accent.ink

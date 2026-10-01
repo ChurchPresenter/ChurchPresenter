@@ -1,6 +1,13 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.material3.minimumInteractiveComponentSize
+import org.churchpresenter.strings.generated.resources.cancel
+import org.churchpresenter.strings.generated.resources.export_settings_no_passwords
+import org.churchpresenter.strings.generated.resources.import_settings_keep_secrets
+import org.churchpresenter.strings.generated.resources.import_settings_secrets
+import org.churchpresenter.strings.generated.resources.import_settings_use_file_secrets
+import org.churchpresenter.strings.generated.resources.settings_exported_no_passwords
 import org.churchpresenter.theme.components.toggleRow
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.BorderStroke
@@ -13,7 +20,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -322,6 +328,14 @@ private fun TestEventRow(scope: CoroutineScope) {
 private fun ManageSettingsCard(companionServer: CompanionServer?) {
     val scope = rememberCoroutineScope()
     val exportTitle = stringResource(Res.string.export_settings)
+    val exportSafeTitle = stringResource(Res.string.export_settings_no_passwords)
+    val exportedSafeMsg = stringResource(Res.string.settings_exported_no_passwords)
+    val secrets = SecretsChoice(
+        question = stringResource(Res.string.import_settings_secrets),
+        keep = stringResource(Res.string.import_settings_keep_secrets),
+        useFile = stringResource(Res.string.import_settings_use_file_secrets),
+        cancel = stringResource(Res.string.cancel),
+    )
     val importTitle = stringResource(Res.string.import_settings)
     val resetTitle = stringResource(Res.string.reset_settings)
     val clearUploadsTitle = stringResource(Res.string.clear_remote_uploads)
@@ -335,27 +349,51 @@ private fun ManageSettingsCard(companionServer: CompanionServer?) {
     val uploadsClearedMsg = stringResource(Res.string.remote_uploads_cleared)
 
     SettingsCard(title = stringResource(Res.string.system_manage_settings)) {
-        FlowRow(
+        // Two rows: what saves or loads the file, then what destroys something. A weighted spacer
+        // between them in one wrapping row stranded a red button at the far end of whichever line
+        // it wrapped onto.
+        Column(
             modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 13.dp, bottom = 15.dp),
-            horizontalArrangement = Arrangement.spacedBy(9.dp),
             verticalArrangement = Arrangement.spacedBy(9.dp),
-            itemVerticalAlignment = Alignment.CenterVertically
         ) {
-            ManageButton(exportTitle) {
-                scope.launch { exportSettings(exportTitle, exportedMsg, exportFailedMsg) }
+            ManageRow {
+                ManageButton(exportTitle) {
+                    scope.launch { exportSettings(exportTitle, exportedMsg, exportFailedMsg) }
+                }
+                ManageButton(exportSafeTitle) {
+                    scope.launch {
+                        exportSettings(exportSafeTitle, exportedSafeMsg, exportFailedMsg, withoutSecrets = true)
+                    }
+                }
+                ManageButton(importTitle) {
+                    scope.launch {
+                        importSettings(importTitle, importConfirmMsg, importFailedMsg, companionServer, secrets)
+                    }
+                }
             }
-            ManageButton(importTitle) {
-                scope.launch { importSettings(importTitle, importConfirmMsg, importFailedMsg, companionServer) }
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            ManageButton(clearUploadsTitle, danger = true) {
-                clearRemoteUploads(clearUploadsTitle, clearUploadsConfirmMsg, uploadsClearedMsg)
-            }
-            ManageButton(resetTitle, danger = true) {
-                resetAllSettings(resetTitle, resetConfirmMsg, clearCacheMsg, companionServer)
+            ManageRow {
+                ManageButton(clearUploadsTitle, danger = true) {
+                    clearRemoteUploads(clearUploadsTitle, clearUploadsConfirmMsg, uploadsClearedMsg)
+                }
+                ManageButton(resetTitle, danger = true) {
+                    resetAllSettings(resetTitle, resetConfirmMsg, clearCacheMsg, companionServer)
+                }
             }
         }
     }
+}
+
+/** One wrapping line of the Manage settings buttons. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ManageRow(content: @Composable FlowRowScope.() -> Unit) {
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(9.dp),
+        verticalArrangement = Arrangement.spacedBy(9.dp),
+        itemVerticalAlignment = Alignment.CenterVertically,
+        content = content,
+    )
 }
 
 @Composable

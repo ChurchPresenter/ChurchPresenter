@@ -13,10 +13,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.browser_source_output_label
-import churchpresenter.composeapp.generated.resources.ic_warning
+import org.churchpresenter.icons.generated.resources.ic_warning
 import org.churchpresenter.strings.generated.resources.ndi_output_numbered
 import org.churchpresenter.strings.generated.resources.omt_output_numbered
 import org.churchpresenter.strings.generated.resources.preview_output
@@ -229,7 +229,7 @@ internal fun PreviewOutputWarning(text: String, modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            painter = painterResource(AppRes.drawable.ic_warning),
+            painter = painterResource(IconRes.drawable.ic_warning),
             contentDescription = null,
             modifier = Modifier.size(11.dp),
             tint = MaterialTheme.colorScheme.error,

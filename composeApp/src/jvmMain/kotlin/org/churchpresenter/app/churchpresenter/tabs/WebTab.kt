@@ -26,15 +26,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.desktop_view
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.ic_arrow_left
-import churchpresenter.composeapp.generated.resources.ic_arrow_right
-import churchpresenter.composeapp.generated.resources.ic_arrow_up
-import churchpresenter.composeapp.generated.resources.ic_clear_cache
-import churchpresenter.composeapp.generated.resources.ic_refresh
+import org.churchpresenter.icons.generated.resources.ic_arrow_down
+import org.churchpresenter.icons.generated.resources.ic_arrow_left
+import org.churchpresenter.icons.generated.resources.ic_arrow_right
+import org.churchpresenter.icons.generated.resources.ic_arrow_up
+import org.churchpresenter.icons.generated.resources.ic_clear_cache
+import org.churchpresenter.icons.generated.resources.ic_refresh
 import org.churchpresenter.strings.generated.resources.mobile_view
 import org.churchpresenter.strings.generated.resources.web_back
 import org.churchpresenter.strings.generated.resources.web_engine_unavailable_body
@@ -221,7 +221,7 @@ internal fun RowScope.NavButtons(
             if (isLive && !useInteractivePreview && live != null) live.goBack() else navController.goBack()
         },
         tooltipText = stringResource(Res.string.web_back),
-        painter = painterResource(AppRes.drawable.ic_arrow_left),
+        painter = painterResource(IconRes.drawable.ic_arrow_left),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -232,7 +232,7 @@ internal fun RowScope.NavButtons(
             if (isLive && !useInteractivePreview && live != null) live.goForward() else navController.goForward()
         },
         tooltipText = stringResource(Res.string.web_forward),
-        painter = painterResource(AppRes.drawable.ic_arrow_right),
+        painter = painterResource(IconRes.drawable.ic_arrow_right),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -243,7 +243,7 @@ internal fun RowScope.NavButtons(
             if (isLive && !useInteractivePreview && live != null) live.reload() else navController.browser?.reload()
         },
         tooltipText = stringResource(Res.string.web_refresh),
-        painter = painterResource(AppRes.drawable.ic_refresh),
+        painter = painterResource(IconRes.drawable.ic_refresh),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -259,7 +259,7 @@ internal fun RowScope.NavButtons(
             }
         },
         tooltipText = stringResource(Res.string.web_clear_cache),
-        painter = painterResource(AppRes.drawable.ic_clear_cache),
+        painter = painterResource(IconRes.drawable.ic_clear_cache),
         containerColor = MaterialTheme.colorScheme.errorContainer,
         contentColor = MaterialTheme.colorScheme.onErrorContainer
     )
@@ -268,7 +268,7 @@ internal fun RowScope.NavButtons(
     ActionIconButton(
         onClick = { applyZoom(zoomLevel - ZOOM_STEP) },
         tooltipText = stringResource(Res.string.web_zoom_out),
-        painter = painterResource(AppRes.drawable.ic_arrow_down),
+        painter = painterResource(IconRes.drawable.ic_arrow_down),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -282,7 +282,7 @@ internal fun RowScope.NavButtons(
     ActionIconButton(
         onClick = { applyZoom(zoomLevel + ZOOM_STEP) },
         tooltipText = stringResource(Res.string.web_zoom_in),
-        painter = painterResource(AppRes.drawable.ic_arrow_up),
+        painter = painterResource(IconRes.drawable.ic_arrow_up),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )

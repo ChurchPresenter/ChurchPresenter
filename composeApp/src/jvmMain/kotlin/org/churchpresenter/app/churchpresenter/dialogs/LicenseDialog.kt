@@ -40,8 +40,9 @@ import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberWindowState
 import org.churchpresenter.theme.AppShape
 import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_app_icon
+import org.churchpresenter.icons.generated.resources.ic_app_icon
 import org.churchpresenter.strings.generated.resources.license_accept_button
 import org.churchpresenter.strings.generated.resources.license_decline_button
 import org.churchpresenter.strings.generated.resources.license_prompt
@@ -99,7 +100,7 @@ fun LicenseDialog(
 
     windowHost(
         stringResource(Res.string.license_title),
-        painterResource(AppRes.drawable.ic_app_icon),
+        painterResource(IconRes.drawable.ic_app_icon),
         windowState,
         onDecline
     ) {

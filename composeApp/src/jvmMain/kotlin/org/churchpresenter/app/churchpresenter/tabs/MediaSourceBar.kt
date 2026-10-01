@@ -45,15 +45,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.add_to_schedule
 import org.churchpresenter.strings.generated.resources.save_preset
 import org.churchpresenter.strings.generated.resources.clear
 import org.churchpresenter.strings.generated.resources.clear_recents
 import org.churchpresenter.strings.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.ic_folder
+import org.churchpresenter.icons.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_folder
 import org.churchpresenter.strings.generated.resources.media_load
 import org.churchpresenter.strings.generated.resources.media_no_source
 import org.churchpresenter.strings.generated.resources.media_now_playing
@@ -190,7 +190,7 @@ private fun MediaTabScope.MediaLocalSource(viewModel: MediaViewModel, modifier: 
         ),
         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
     ) {
-        Icon(painterResource(AppRes.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
+        Icon(painterResource(IconRes.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
         Spacer(Modifier.width(7.dp))
         Text(
             stringResource(Res.string.media_select_file),
@@ -371,7 +371,7 @@ private fun MediaTabScope.MediaRecentBar(viewModel: MediaViewModel) {
             ) {
                 KeyIconButton(onClick = { RecentMediaFiles.clear() }, modifier = Modifier.size(20.dp)) {
                     Icon(
-                        painterResource(AppRes.drawable.ic_close),
+                        painterResource(IconRes.drawable.ic_close),
                         contentDescription = stringResource(Res.string.clear),
                         modifier = Modifier.size(14.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),

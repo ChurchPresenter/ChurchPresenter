@@ -316,6 +316,7 @@ kotlin {
             // loads as-is.
             implementation(projects.calendar)
             implementation(projects.strings)
+            implementation(projects.icons)
             implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source
             // directory, wrapped by CompanionSatelliteViewModel.

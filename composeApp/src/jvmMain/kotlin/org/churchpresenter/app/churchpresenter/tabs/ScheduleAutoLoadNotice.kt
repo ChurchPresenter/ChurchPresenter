@@ -22,14 +22,14 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.schedule_load_confirm_append
 import org.churchpresenter.strings.generated.resources.schedule_load_confirm_body
 import org.churchpresenter.strings.generated.resources.schedule_load_confirm_replace
 import org.churchpresenter.strings.generated.resources.schedule_load_confirm_title
-import churchpresenter.composeapp.generated.resources.ic_save
+import org.churchpresenter.icons.generated.resources.ic_save
 import org.churchpresenter.strings.generated.resources.schedule_calendar_add
 import org.churchpresenter.strings.generated.resources.schedule_calendar_not_in
 import org.churchpresenter.strings.generated.resources.schedule_calendar_save
@@ -94,7 +94,7 @@ internal fun ScheduleSaveToCalendarNotice(
     modifier: Modifier = Modifier,
 ) {
     NoticeRow(
-        icon = painterResource(AppRes.drawable.ic_save),
+        icon = painterResource(IconRes.drawable.ic_save),
         text = stringResource(Res.string.schedule_calendar_unsaved, service.serviceName),
         action = stringResource(Res.string.schedule_calendar_save),
         onAction = onSave,

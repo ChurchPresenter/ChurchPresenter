@@ -68,19 +68,19 @@ import org.churchpresenter.strings.generated.resources.songs_indexing
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.add_to_favorites
 import org.churchpresenter.strings.generated.resources.add_to_schedule
 import org.churchpresenter.strings.generated.resources.edit_song
 import org.churchpresenter.strings.generated.resources.go_live
 import androidx.compose.material.icons.filled.Tv
-import churchpresenter.composeapp.generated.resources.ic_delete
+import org.churchpresenter.icons.generated.resources.ic_delete
 import org.churchpresenter.strings.generated.resources.delete_saved_string
-import churchpresenter.composeapp.generated.resources.ic_star
-import churchpresenter.composeapp.generated.resources.ic_star_filled
-import churchpresenter.composeapp.generated.resources.ic_edit
-import churchpresenter.composeapp.generated.resources.ic_playlist_add
+import org.churchpresenter.icons.generated.resources.ic_star
+import org.churchpresenter.icons.generated.resources.ic_star_filled
+import org.churchpresenter.icons.generated.resources.ic_edit
+import org.churchpresenter.icons.generated.resources.ic_playlist_add
 import org.churchpresenter.strings.generated.resources.remove_from_favorites
 import org.churchpresenter.strings.generated.resources.title
 import org.churchpresenter.strings.generated.resources.tune
@@ -342,7 +342,7 @@ private fun SongListScope.SongActionCell(colId: String, song: SongItem) {
             modifier = Modifier.size(24.dp)
         ) {
             Icon(
-                painter = painterResource(AppRes.drawable.ic_playlist_add),
+                painter = painterResource(IconRes.drawable.ic_playlist_add),
                 contentDescription = stringResource(Res.string.add_to_schedule),
                 modifier = Modifier.size(16.dp),
                 tint = MaterialTheme.colorScheme.secondary
@@ -358,7 +358,7 @@ private fun SongListScope.SongActionCell(colId: String, song: SongItem) {
             ) {
                 Icon(
                     painter = painterResource(
-                        if (isFav) AppRes.drawable.ic_star_filled else AppRes.drawable.ic_star
+                        if (isFav) IconRes.drawable.ic_star_filled else IconRes.drawable.ic_star
                     ),
                     contentDescription = if (isFav)
                         stringResource(Res.string.remove_from_favorites)
@@ -392,7 +392,7 @@ private fun SongListScope.SongRowContextMenu(
                 text = { Text(stringResource(Res.string.add_to_schedule)) },
                 leadingIcon = {
                     Icon(
-                        painter = painterResource(AppRes.drawable.ic_playlist_add),
+                        painter = painterResource(IconRes.drawable.ic_playlist_add),
                         contentDescription = null,
                         modifier = Modifier.size(18.dp),
                         tint = MaterialTheme.colorScheme.secondary
@@ -412,7 +412,7 @@ private fun SongListScope.SongRowContextMenu(
             leadingIcon = {
                 val isFav = song.songId in favorites
                 Icon(
-                    painter = painterResource(if (isFav) AppRes.drawable.ic_star_filled else AppRes.drawable.ic_star),
+                    painter = painterResource(if (isFav) IconRes.drawable.ic_star_filled else IconRes.drawable.ic_star),
                     contentDescription = null,
                     modifier = Modifier.size(18.dp),
                     tint = if (isFav) MaterialTheme.semantic.favorite else MaterialTheme.colorScheme.onSurfaceVariant
@@ -427,7 +427,7 @@ private fun SongListScope.SongRowContextMenu(
             text = { Text(stringResource(Res.string.edit_song)) },
             leadingIcon = {
                 Icon(
-                    painter = painterResource(AppRes.drawable.ic_edit),
+                    painter = painterResource(IconRes.drawable.ic_edit),
                     contentDescription = null,
                     modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.tertiary
@@ -444,7 +444,7 @@ private fun SongListScope.SongRowContextMenu(
             text = { Text(stringResource(Res.string.delete_saved_string), color = MaterialTheme.colorScheme.error) },
             leadingIcon = {
                 Icon(
-                    painter = painterResource(AppRes.drawable.ic_delete),
+                    painter = painterResource(IconRes.drawable.ic_delete),
                     contentDescription = null,
                     modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.error

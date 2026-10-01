@@ -61,14 +61,14 @@ import org.churchpresenter.strings.generated.resources.songs_no_db_title
 import org.churchpresenter.strings.generated.resources.songs_no_db_hint
 import org.churchpresenter.strings.generated.resources.songs_no_db_step
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.add_to_schedule
 import org.churchpresenter.strings.generated.resources.edit_song
 import org.churchpresenter.strings.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_add
-import churchpresenter.composeapp.generated.resources.ic_note
-import churchpresenter.composeapp.generated.resources.ic_edit
+import org.churchpresenter.icons.generated.resources.ic_add
+import org.churchpresenter.icons.generated.resources.ic_note
+import org.churchpresenter.icons.generated.resources.ic_edit
 import org.churchpresenter.strings.generated.resources.no_lyrics_available
 import org.churchpresenter.strings.generated.resources.songs_search_focus_hint
 import org.churchpresenter.strings.generated.resources.tab_focus_lost
@@ -280,7 +280,7 @@ private fun LyricsActionBar(
             ActionIconButton(
                 onClick = { dialogs.edit(currentSong); tabFocusRequester.requestFocus() },
                 tooltipText = editSongStr,
-                painter = painterResource(AppRes.drawable.ic_edit),
+                painter = painterResource(IconRes.drawable.ic_edit),
                 containerColor = MaterialTheme.colorScheme.tertiary,
                 contentColor = MaterialTheme.colorScheme.onTertiary
             )
@@ -290,7 +290,7 @@ private fun LyricsActionBar(
         ActionIconButton(
             onClick = { dialogs.createNew(); tabFocusRequester.requestFocus() },
             tooltipText = newSongStr,
-            painter = painterResource(AppRes.drawable.ic_add),
+            painter = painterResource(IconRes.drawable.ic_add),
             containerColor = MaterialTheme.colorScheme.tertiary,
             contentColor = MaterialTheme.colorScheme.onTertiary
         )
@@ -342,7 +342,7 @@ private fun NoSongDatabaseCard() {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Icon(
-                    painter = painterResource(AppRes.drawable.ic_note),
+                    painter = painterResource(IconRes.drawable.ic_note),
                     contentDescription = null,
                     modifier = Modifier.size(48.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)

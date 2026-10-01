@@ -41,7 +41,7 @@ private val ICON_KEY_INSET = 2.dp
  *
  * [iconTint] defaults to [colors]' content colour — so an icon is drawn in the theme's content
  * colour, and dimmed by the *disabled* one when `enabled` is false.
- * Every drawable in `composeResources/drawable` bakes `android:fillColor="#FF000000"`, so an
+ * Every drawable in `:icons` bakes `android:fillColor="#FF000000"`, so an
  * untinted `Image` painted a hard black glyph regardless of theme or state: invisible against the
  * dark theme, and a disabled button that looked exactly as live as an enabled one.
  */

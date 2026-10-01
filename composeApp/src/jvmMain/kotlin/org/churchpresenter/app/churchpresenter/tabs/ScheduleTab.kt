@@ -60,14 +60,14 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.jetbrains.compose.resources.getString
 import org.churchpresenter.strings.generated.resources.schedule_add_files_title
 import org.churchpresenter.strings.generated.resources.tooltip_open_schedule
 import org.churchpresenter.strings.generated.resources.file_chooser_save_schedule
 import org.churchpresenter.strings.generated.resources.file_filter_schedule
-import churchpresenter.composeapp.generated.resources.ic_delete
+import org.churchpresenter.icons.generated.resources.ic_delete
 import org.churchpresenter.strings.generated.resources.autosave_restore_confirm
 import org.churchpresenter.strings.generated.resources.autosave_restore_discard
 import org.churchpresenter.strings.generated.resources.autosave_restore_message
@@ -687,7 +687,7 @@ fun ScheduleTab(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painter = painterResource(AppRes.drawable.ic_delete),
+                        painter = painterResource(IconRes.drawable.ic_delete),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onError
                     )

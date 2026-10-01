@@ -37,7 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.preview
 import org.churchpresenter.strings.generated.resources.song_chords_used
@@ -65,10 +65,10 @@ import org.churchpresenter.strings.generated.resources.song_chord_build
 import org.churchpresenter.strings.generated.resources.song_chord_major
 import org.churchpresenter.strings.generated.resources.song_chord_prefer_flats
 import org.churchpresenter.strings.generated.resources.song_chord_prefer_sharps
-import churchpresenter.composeapp.generated.resources.ic_remove
-import churchpresenter.composeapp.generated.resources.ic_arrow_up
-import churchpresenter.composeapp.generated.resources.ic_arrow_down
-import churchpresenter.composeapp.generated.resources.ic_add
+import org.churchpresenter.icons.generated.resources.ic_remove
+import org.churchpresenter.icons.generated.resources.ic_arrow_up
+import org.churchpresenter.icons.generated.resources.ic_arrow_down
+import org.churchpresenter.icons.generated.resources.ic_add
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
@@ -348,11 +348,11 @@ fun SongChordPreview(
                         label = stringResource(Res.string.song_chords_in),
                         value = songKey,
                         down = StepAction(
-                            AppRes.drawable.ic_remove,
+                            IconRes.drawable.ic_remove,
                             stringResource(Res.string.song_key_down),
                             onKeyDown,
                         ),
-                        up = StepAction(AppRes.drawable.ic_add, stringResource(Res.string.song_key_up), onKeyUp),
+                        up = StepAction(IconRes.drawable.ic_add, stringResource(Res.string.song_key_up), onKeyUp),
                     )
                     HorizontalDivider(
                         color = MaterialTheme.colorScheme.outlineVariant,
@@ -415,11 +415,11 @@ private fun PreviewHeader(
             label = stringResource(Res.string.song_transpose),
             value = null,
             down = StepAction(
-                AppRes.drawable.ic_arrow_down,
+                IconRes.drawable.ic_arrow_down,
                 stringResource(Res.string.song_transpose_down),
                 onTransposeDown,
             ),
-            up = StepAction(AppRes.drawable.ic_arrow_up, stringResource(Res.string.song_transpose_up), onTransposeUp),
+            up = StepAction(IconRes.drawable.ic_arrow_up, stringResource(Res.string.song_transpose_up), onTransposeUp),
         )
     }
 }
@@ -449,7 +449,7 @@ private fun ChordPicker(songKey: String, flats: Boolean, onInsertChord: (String)
     ) {
         ZoneLabel(stringResource(Res.string.song_chord_build))
         Icon(
-            painter = painterResource(if (open) AppRes.drawable.ic_arrow_up else AppRes.drawable.ic_arrow_down),
+            painter = painterResource(if (open) IconRes.drawable.ic_arrow_up else IconRes.drawable.ic_arrow_down),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(12.dp),

@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Warning
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.atem_upload_error
 import org.churchpresenter.strings.generated.resources.atem_uploading_image
@@ -54,7 +54,7 @@ import org.churchpresenter.strings.generated.resources.atem_uploading_video
 import org.churchpresenter.strings.generated.resources.atem_processing
 import org.churchpresenter.strings.generated.resources.confirm_delete
 import org.churchpresenter.strings.generated.resources.confirm_delete_file
-import churchpresenter.composeapp.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.strings.generated.resources.scanning_directory
 import org.churchpresenter.strings.generated.resources.no_lottie_files
 import org.churchpresenter.strings.generated.resources.no_directory_selected
@@ -220,7 +220,7 @@ private fun LowerThirdTabScope.LowerThirdFileRow(file: File) {
                 }
             }
             Icon(
-                painter = painterResource(AppRes.drawable.ic_close),
+                painter = painterResource(IconRes.drawable.ic_close),
                 contentDescription = stringResource(Res.string.tooltip_remove),
                 modifier = Modifier.size(14.dp).initialPassClickable {
                     SwingUtilities.invokeLater {

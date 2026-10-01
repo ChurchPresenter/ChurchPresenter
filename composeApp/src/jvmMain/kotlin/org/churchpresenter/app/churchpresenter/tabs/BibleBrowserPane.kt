@@ -38,15 +38,15 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.add_to_schedule
 import org.churchpresenter.strings.generated.resources.book
 import org.churchpresenter.strings.generated.resources.chapter
 import org.churchpresenter.strings.generated.resources.copy_verse
 import org.churchpresenter.strings.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_copy
-import churchpresenter.composeapp.generated.resources.ic_playlist_add
+import org.churchpresenter.icons.generated.resources.ic_copy
+import org.churchpresenter.icons.generated.resources.ic_playlist_add
 import kotlinx.coroutines.flow.first
 import org.churchpresenter.app.churchpresenter.viewmodel.verseNumberOf
 import org.jetbrains.compose.resources.painterResource
@@ -320,7 +320,7 @@ private fun VerseCard(
                     text = { Text(stringResource(Res.string.copy_verse)) },
                     leadingIcon = {
                         Icon(
-                            painter = painterResource(AppRes.drawable.ic_copy),
+                            painter = painterResource(IconRes.drawable.ic_copy),
                             contentDescription = null,
                             modifier = Modifier.size(18.dp),
                             tint = MaterialTheme.colorScheme.onSurface
@@ -332,7 +332,7 @@ private fun VerseCard(
                     text = { Text(stringResource(Res.string.add_to_schedule)) },
                     leadingIcon = {
                         Icon(
-                            painter = painterResource(AppRes.drawable.ic_playlist_add),
+                            painter = painterResource(IconRes.drawable.ic_playlist_add),
                             contentDescription = null,
                             modifier = Modifier.size(18.dp),
                             tint = MaterialTheme.colorScheme.secondary

@@ -31,10 +31,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Movie
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_pause
-import churchpresenter.composeapp.generated.resources.ic_play
+import org.churchpresenter.icons.generated.resources.ic_pause
+import org.churchpresenter.icons.generated.resources.ic_play
 import org.churchpresenter.strings.generated.resources.add_to_schedule
 import org.churchpresenter.strings.generated.resources.atem_clip_too_long
 import org.churchpresenter.strings.generated.resources.atem_golive_key
@@ -44,8 +44,8 @@ import org.churchpresenter.strings.generated.resources.atem_quick_still_tooltip
 import org.churchpresenter.strings.generated.resources.atem_send_to_atem
 import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_key
-import churchpresenter.composeapp.generated.resources.ic_upload
+import org.churchpresenter.icons.generated.resources.ic_key
+import org.churchpresenter.icons.generated.resources.ic_upload
 import org.churchpresenter.strings.generated.resources.lottie_select_preset
 import org.churchpresenter.strings.generated.resources.pause
 import org.churchpresenter.strings.generated.resources.play
@@ -160,7 +160,7 @@ private fun LowerThirdTabScope.LowerThirdAtemButtons() {
                 )
             ) {
                 Icon(
-                    painterResource(AppRes.drawable.ic_key),
+                    painterResource(IconRes.drawable.ic_key),
                     contentDescription = goLiveKeyLabel,
                     modifier = Modifier.size(16.dp),
                 )
@@ -188,7 +188,7 @@ private fun LowerThirdTabScope.LowerThirdAtemButtons() {
                     colors = atemButtonColors
                 ) {
                     Icon(
-                        painterResource(AppRes.drawable.ic_upload),
+                        painterResource(IconRes.drawable.ic_upload),
                         contentDescription = stringResource(Res.string.atem_send_to_atem),
                         modifier = Modifier.size(16.dp),
                     )
@@ -285,7 +285,7 @@ private fun LowerThirdTabScope.LowerThirdPlayButton() {
             )
         ) {
             Icon(
-                painterResource(if (isPlaying) AppRes.drawable.ic_pause else AppRes.drawable.ic_play),
+                painterResource(if (isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play),
                 contentDescription = stringResource(if (isPlaying) Res.string.pause else Res.string.play),
                 modifier = Modifier.size(15.dp),
             )

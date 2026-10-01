@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.canvas_dual_layout
 import org.churchpresenter.strings.generated.resources.canvas_size
@@ -38,7 +38,7 @@ import org.churchpresenter.strings.generated.resources.canvas_size_custom
 import org.churchpresenter.strings.generated.resources.canvas_size_match_output
 import org.churchpresenter.strings.generated.resources.canvas_size_set
 import org.churchpresenter.strings.generated.resources.canvas_size_tooltip
-import churchpresenter.composeapp.generated.resources.ic_check
+import org.churchpresenter.icons.generated.resources.ic_check
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.PreviewShapePreset
 import org.churchpresenter.app.churchpresenter.viewmodel.CANVAS_SIDE_RANGE
@@ -191,7 +191,7 @@ private fun SizeItem(
 @Composable
 private fun Tick() {
     Icon(
-        painterResource(AppRes.drawable.ic_check),
+        painterResource(IconRes.drawable.ic_check),
         contentDescription = null,
         modifier = Modifier.size(CHECK_SIZE),
     )

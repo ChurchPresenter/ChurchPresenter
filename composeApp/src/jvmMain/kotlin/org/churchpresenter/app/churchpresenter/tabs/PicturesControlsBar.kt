@@ -56,9 +56,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_refresh
+import org.churchpresenter.icons.generated.resources.ic_refresh
 import org.churchpresenter.strings.generated.resources.animation_crossfade
 import org.churchpresenter.strings.generated.resources.animation_fade
 import org.churchpresenter.strings.generated.resources.animation_none
@@ -68,10 +68,10 @@ import org.churchpresenter.strings.generated.resources.animation_type
 import org.churchpresenter.strings.generated.resources.auto_scroll_interval
 import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.ok
-import churchpresenter.composeapp.generated.resources.ic_pause
-import churchpresenter.composeapp.generated.resources.ic_play
-import churchpresenter.composeapp.generated.resources.ic_skip_next
-import churchpresenter.composeapp.generated.resources.ic_skip_previous
+import org.churchpresenter.icons.generated.resources.ic_pause
+import org.churchpresenter.icons.generated.resources.ic_play
+import org.churchpresenter.icons.generated.resources.ic_skip_next
+import org.churchpresenter.icons.generated.resources.ic_skip_previous
 import org.churchpresenter.strings.generated.resources.image_counter
 import org.churchpresenter.strings.generated.resources.image_counter_with_hidden
 import org.churchpresenter.strings.generated.resources.loop_off
@@ -175,7 +175,7 @@ private fun PicturesTabScope.PicturesTransport(viewModel: PicturesViewModel, neu
                 colors = neutralKeyColors
             ) {
                 Icon(
-                    painter = painterResource(AppRes.drawable.ic_skip_previous),
+                    painter = painterResource(IconRes.drawable.ic_skip_previous),
                     contentDescription = stringResource(Res.string.previous_image),
                     modifier = Modifier.size(16.dp)
                 )
@@ -209,7 +209,7 @@ private fun PicturesTabScope.PicturesTransport(viewModel: PicturesViewModel, neu
                 colors = neutralKeyColors
             ) {
                 Icon(
-                    painter = painterResource(AppRes.drawable.ic_skip_next),
+                    painter = painterResource(IconRes.drawable.ic_skip_next),
                     contentDescription = stringResource(Res.string.next_image),
                     modifier = Modifier.size(16.dp)
                 )
@@ -253,7 +253,7 @@ private fun PicturesTabScope.PicturesPlayKey(viewModel: PicturesViewModel) {
         ) {
             Icon(
                 painter = painterResource(
-                    if (viewModel.isPlaying) AppRes.drawable.ic_pause else AppRes.drawable.ic_play,
+                    if (viewModel.isPlaying) IconRes.drawable.ic_pause else IconRes.drawable.ic_play,
                 ),
                 contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
                 modifier = Modifier.size(15.dp)
@@ -327,7 +327,7 @@ private fun PicturesTabScope.PicturesLoopButton(
         ) {
             // Same text the tooltip shows: TooltipArea is a hover popup and contributes no
             // semantics, so without this the button has no name at all.
-            Icon(painterResource(AppRes.drawable.ic_refresh), contentDescription = stringResource(
+            Icon(painterResource(IconRes.drawable.ic_refresh), contentDescription = stringResource(
                 if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off,
             ), modifier = Modifier.size(16.dp))
         }

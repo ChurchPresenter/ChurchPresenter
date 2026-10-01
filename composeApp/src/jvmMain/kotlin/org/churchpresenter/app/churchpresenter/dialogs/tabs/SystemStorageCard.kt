@@ -40,20 +40,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.use_default_directory
-import churchpresenter.composeapp.generated.resources.ic_storage_calendar
+import org.churchpresenter.icons.generated.resources.ic_storage_calendar
 import org.churchpresenter.strings.generated.resources.calendar_storage_status_default
 import org.churchpresenter.strings.generated.resources.calendar_storage
 import org.churchpresenter.strings.generated.resources.bible
 import org.churchpresenter.strings.generated.resources.browse_directory
-import churchpresenter.composeapp.generated.resources.ic_storage_bible
-import churchpresenter.composeapp.generated.resources.ic_storage_lower_third
-import churchpresenter.composeapp.generated.resources.ic_storage_media
-import churchpresenter.composeapp.generated.resources.ic_storage_pictures
-import churchpresenter.composeapp.generated.resources.ic_storage_presentation
-import churchpresenter.composeapp.generated.resources.ic_storage_songs
+import org.churchpresenter.icons.generated.resources.ic_storage_bible
+import org.churchpresenter.icons.generated.resources.ic_storage_lower_third
+import org.churchpresenter.icons.generated.resources.ic_storage_media
+import org.churchpresenter.icons.generated.resources.ic_storage_pictures
+import org.churchpresenter.icons.generated.resources.ic_storage_presentation
+import org.churchpresenter.icons.generated.resources.ic_storage_songs
 import org.churchpresenter.strings.generated.resources.display_lower_third
 import org.churchpresenter.strings.generated.resources.media
 import org.churchpresenter.strings.generated.resources.no_directory_selected
@@ -223,33 +223,33 @@ private fun storageFolders(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ): List<StorageFolder> = listOf(
     StorageFolder(
-        stringResource(Res.string.bible), AppRes.drawable.ic_storage_bible, MaterialTheme.semantic.contentBible,
+        stringResource(Res.string.bible), IconRes.drawable.ic_storage_bible, MaterialTheme.semantic.contentBible,
         settings.bibleSettings.storageDirectory,
     ) { dir -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(storageDirectory = dir)) } },
     StorageFolder(
-        stringResource(Res.string.songs), AppRes.drawable.ic_storage_songs, MaterialTheme.semantic.contentSongs,
+        stringResource(Res.string.songs), IconRes.drawable.ic_storage_songs, MaterialTheme.semantic.contentSongs,
         settings.songSettings.storageDirectory,
     ) { dir -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(storageDirectory = dir)) } },
     StorageFolder(
         stringResource(Res.string.pictures),
-        AppRes.drawable.ic_storage_pictures,
+        IconRes.drawable.ic_storage_pictures,
         MaterialTheme.semantic.contentPictures,
         settings.pictureSettings.storageDirectory,
     ) { dir -> onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = dir)) } },
     StorageFolder(
-        stringResource(Res.string.display_lower_third), AppRes.drawable.ic_storage_lower_third,
+        stringResource(Res.string.display_lower_third), IconRes.drawable.ic_storage_lower_third,
         MaterialTheme.semantic.contentLowerThird, settings.streamingSettings.lowerThirdFolder,
     ) { dir -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(lowerThirdFolder = dir)) } },
     StorageFolder(
-        stringResource(Res.string.presentation), AppRes.drawable.ic_storage_presentation,
+        stringResource(Res.string.presentation), IconRes.drawable.ic_storage_presentation,
         MaterialTheme.semantic.contentPresentation, settings.presentationStorageDirectory,
     ) { dir -> onSettingsChange { s -> s.copy(presentationStorageDirectory = dir) } },
     StorageFolder(
-        stringResource(Res.string.media), AppRes.drawable.ic_storage_media, MaterialTheme.semantic.contentMedia,
+        stringResource(Res.string.media), IconRes.drawable.ic_storage_media, MaterialTheme.semantic.contentMedia,
         settings.mediaStorageDirectory,
     ) { dir -> onSettingsChange { s -> s.copy(mediaStorageDirectory = dir) } },
     StorageFolder(
-        stringResource(Res.string.calendar_storage), AppRes.drawable.ic_storage_calendar,
+        stringResource(Res.string.calendar_storage), IconRes.drawable.ic_storage_calendar,
         MaterialTheme.semantic.contentCalendar,
         // The chosen folder, or the machine's app data folder — which the picture prints, so a test
         // can pin the fallback through [LocalDefaultCalendarFolder]. Null, which is what the app

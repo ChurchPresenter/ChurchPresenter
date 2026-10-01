@@ -38,17 +38,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.Res as AppRes
+import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.add_to_schedule
 import org.churchpresenter.strings.generated.resources.save_preset
-import churchpresenter.composeapp.generated.resources.ic_folder
-import churchpresenter.composeapp.generated.resources.ic_stop
+import org.churchpresenter.icons.generated.resources.ic_folder
+import org.churchpresenter.icons.generated.resources.ic_stop
 import org.churchpresenter.strings.generated.resources.tooltip_presentation_remote
 import org.churchpresenter.strings.generated.resources.clear
 import org.churchpresenter.strings.generated.resources.clear_recents
 import org.churchpresenter.strings.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_close
+import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.strings.generated.resources.no_file_selected_presentation
 import org.churchpresenter.strings.generated.resources.presentation_clear
 import org.churchpresenter.strings.generated.resources.presentation_freeze_output
@@ -193,7 +193,7 @@ private fun PresentationTabScope.OpenPresentationButton(viewModel: PresentationV
         ),
         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp)
     ) {
-        Icon(painterResource(AppRes.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
+        Icon(painterResource(IconRes.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
         Spacer(Modifier.width(7.dp))
         Text(
             stringResource(Res.string.select_presentation_file_button),
@@ -304,7 +304,7 @@ private fun PresentationTabScope.PresentationRecentFiles(viewModel: Presentation
             ) {
                 KeyIconButton(onClick = { RecentPresentationFiles.clear() }, modifier = Modifier.size(20.dp)) {
                     Icon(
-                        painterResource(AppRes.drawable.ic_close),
+                        painterResource(IconRes.drawable.ic_close),
                         contentDescription = stringResource(Res.string.clear),
                         modifier = Modifier.size(14.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
@@ -376,7 +376,7 @@ private fun PresentationTabScope.PresentationOutputButtons(viewModel: Presentati
         onClick = { viewModel.clearPresentations(); onClearPresentation() },
         enabled = viewModel.slideFiles.isNotEmpty(),
         tooltipText = stringResource(Res.string.presentation_clear),
-        painter = painterResource(AppRes.drawable.ic_stop),
+        painter = painterResource(IconRes.drawable.ic_stop),
         containerColor = MaterialTheme.colorScheme.errorContainer,
         contentColor = MaterialTheme.colorScheme.onErrorContainer
     )
