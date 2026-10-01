@@ -11,12 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.remote_action_clear_display
+import churchpresenter.composeapp.generated.resources.tooltip_clear_display
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteActivityNotification
-import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
 import org.churchpresenter.calendar.CalendarFileWatcher
@@ -50,8 +49,10 @@ internal fun MainWindowScope.CalendarAutomationWiring() {
                     },
                 ),
                 operatorLive = {
-                    presenterManager.presentingMode.value != Presenting.NONE &&
-                        engineLiveItem?.let { liveDurationLog.showing(it) } != true
+                    isOperatorLive(
+                        presenterManager.presentingMode.value,
+                        engineLiveItem?.let { liveDurationLog.showing(it) },
+                    )
                 },
             )
         }
@@ -206,7 +207,7 @@ internal fun MainWindowScope.ServerBroadcastWiring() {
         }
 
         val clearDisplayTitle by rememberUpdatedState(
-            stringResource(Res.string.remote_action_clear_display)
+            stringResource(Res.string.tooltip_clear_display)
         )
         LaunchedEffect(Unit) {
             companionServer.onInstantAction.collect { action ->
@@ -214,11 +215,7 @@ internal fun MainWindowScope.ServerBroadcastWiring() {
                 remoteActivityNotifications.add(
                     RemoteActivityNotification(
                         type = type,
-                        title = if (type == RemoteEventType.CLEAR) {
-                            clearDisplayTitle
-                        } else {
-                            action.title.text()
-                        },
+                        title = remoteActivityTitle(type, clearDisplayTitle, action.title.text()),
                         detail = action.detail.text(),
                         clientId = action.clientId,
                         clientLabel = remoteClientManager.getLabel(action.clientId)

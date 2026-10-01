@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.churchpresenter.app.churchpresenter.presenter.liveMerges
 import churchpresenter.composeapp.generated.resources.preview_merged_label
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -68,7 +69,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.canvas_rename_confirm
 import churchpresenter.composeapp.generated.resources.canvas_rename_scene
-import churchpresenter.composeapp.generated.resources.canvas_remove_scene
+import churchpresenter.composeapp.generated.resources.tooltip_remove
 import churchpresenter.composeapp.generated.resources.canvas_size_screen
 import churchpresenter.composeapp.generated.resources.canvas_duplicate_scene
 import churchpresenter.composeapp.generated.resources.canvas_scene_copy_name
@@ -83,7 +84,7 @@ import org.churchpresenter.core.models.scene.Scene
 /* The Canvas tab's left panel: the scenes, and the selected scene's sources. */
 
 @Composable
-internal fun CanvasTabScope.CanvasLeftPanel() {
+internal fun CanvasTabScope.CanvasLeftPanel(sceneViewModel: SceneViewModel) {
     Column(
         modifier = Modifier
             .width(with(density) { leftPanelPx.toDp() })
@@ -99,7 +100,7 @@ internal fun CanvasTabScope.CanvasLeftPanel() {
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(4.dp))
-        CanvasSceneList(Modifier.weight(CANVAS_SCENE_LIST_WEIGHT).fillMaxWidth())
+        CanvasSceneList(sceneViewModel, Modifier.weight(CANVAS_SCENE_LIST_WEIGHT).fillMaxWidth())
 
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             RaisedButton(
@@ -124,16 +125,16 @@ internal fun CanvasTabScope.CanvasLeftPanel() {
         )
         Spacer(Modifier.height(4.dp))
 
-        val currentScene = currentScene
+        val currentScene = sceneViewModel.currentScene
 
         if (currentScene != null) {
-            CanvasSourcePanel(currentScene, Modifier.weight(CANVAS_SOURCE_LIST_WEIGHT).fillMaxWidth())
+            CanvasSourcePanel(sceneViewModel, currentScene, Modifier.weight(CANVAS_SOURCE_LIST_WEIGHT).fillMaxWidth())
         }
     }
 }
 
 @Composable
-private fun CanvasTabScope.CanvasSceneList(listModifier: Modifier) {
+private fun CanvasTabScope.CanvasSceneList(sceneViewModel: SceneViewModel, listModifier: Modifier) {
     // Resolve live presentation display for aspect ratio checks
     val presentationAssignment0 = appSettings.projectionSettings.getAssignment(0)
     val presentationBounds0 = remember(
@@ -179,7 +180,7 @@ private fun CanvasTabScope.CanvasSceneList(listModifier: Modifier) {
         verticalArrangement = Arrangement.spacedBy(rowPad(2.dp)),
     ) {
         items(sceneViewModel.scenes) { scene ->
-            SceneRow(scene, presentationBounds0, displayAr0, canvasOutputs)
+            SceneRow(sceneViewModel, scene, presentationBounds0, displayAr0, canvasOutputs)
         }
     }
 }
@@ -188,6 +189,7 @@ private fun CanvasTabScope.CanvasSceneList(listModifier: Modifier) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CanvasTabScope.SceneRow(
+    sceneViewModel: SceneViewModel,
     scene: Scene,
     presentationBounds0: Rectangle,
     displayAr0: Float,
@@ -263,7 +265,7 @@ private fun CanvasTabScope.SceneRow(
                     tint = MaterialTheme.colorScheme.error,
                 )
             }
-            SceneRowActions(scene, canvasOutputs)
+            SceneRowActions(sceneViewModel, scene, canvasOutputs)
         }
     }
 }
@@ -271,7 +273,11 @@ private fun CanvasTabScope.SceneRow(
 /** Rename, duplicate, size and remove, for one scene. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun CanvasTabScope.SceneRowActions(scene: Scene, canvasOutputs: List<CanvasOutputSize>) {
+private fun CanvasTabScope.SceneRowActions(
+    sceneViewModel: SceneViewModel,
+    scene: Scene,
+    canvasOutputs: List<CanvasOutputSize>,
+) {
     TooltipArea(
         tooltip = {
             Surface(
@@ -340,13 +346,17 @@ private fun CanvasTabScope.SceneRowActions(scene: Scene, canvasOutputs: List<Can
             )
         }
     }
-    SceneRowSizeAndRemove(scene, canvasOutputs)
+    SceneRowSizeAndRemove(sceneViewModel, scene, canvasOutputs)
 }
 
 /** The scene's size menu and its remove button. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun CanvasTabScope.SceneRowSizeAndRemove(scene: Scene, canvasOutputs: List<CanvasOutputSize>) {
+private fun CanvasTabScope.SceneRowSizeAndRemove(
+    sceneViewModel: SceneViewModel,
+    scene: Scene,
+    canvasOutputs: List<CanvasOutputSize>,
+) {
     CanvasSizeMenu(
         width = scene.canvasWidth,
         height = scene.canvasHeight,
@@ -369,7 +379,7 @@ private fun CanvasTabScope.SceneRowSizeAndRemove(scene: Scene, canvasOutputs: Li
                 tonalElevation = 4.dp,
             ) {
                 Text(
-                    stringResource(Res.string.canvas_remove_scene),
+                    stringResource(Res.string.tooltip_remove),
                     color = MaterialTheme.colorScheme.inverseOnSurface,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     style = MaterialTheme.typography.bodySmall,
@@ -387,7 +397,7 @@ private fun CanvasTabScope.SceneRowSizeAndRemove(scene: Scene, canvasOutputs: Li
         ) {
             Icon(
                 painterResource(Res.drawable.ic_close),
-                contentDescription = stringResource(Res.string.canvas_remove_scene),
+                contentDescription = stringResource(Res.string.tooltip_remove),
                 modifier = Modifier.size(14.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -396,7 +406,11 @@ private fun CanvasTabScope.SceneRowSizeAndRemove(scene: Scene, canvasOutputs: Li
 }
 
 @Composable
-private fun CanvasTabScope.CanvasSourcePanel(currentScene: Scene, listModifier: Modifier) {
+private fun CanvasTabScope.CanvasSourcePanel(
+    sceneViewModel: SceneViewModel,
+    currentScene: Scene,
+    listModifier: Modifier,
+) {
     val sourceLayouts = remember(currentScene) { currentScene.editorLayouts() }
     val placementTexts = placementTexts(dual = sourceLayouts.size > 1)
     LazyColumn(
@@ -405,7 +419,7 @@ private fun CanvasTabScope.CanvasSourcePanel(currentScene: Scene, listModifier: 
     ) {
         // Render in reverse order so top item = front
         items(currentScene.sources.reversed()) { source ->
-            SourceRow(source, sourceLayouts, placementTexts)
+            SourceRow(sceneViewModel, source, sourceLayouts, placementTexts)
         }
     }
 
@@ -414,8 +428,8 @@ private fun CanvasTabScope.CanvasSourcePanel(currentScene: Scene, listModifier: 
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        AddSourceButton()
-        SelectedSourceButtons()
+        AddSourceButton(sceneViewModel)
+        SelectedSourceButtons(sceneViewModel)
     }
 }
 
@@ -423,10 +437,12 @@ private fun CanvasTabScope.CanvasSourcePanel(currentScene: Scene, listModifier: 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CanvasTabScope.SourceRow(
+    sceneViewModel: SceneViewModel,
     source: SceneSource,
     sourceLayouts: List<EditorLayout>,
     placementTexts: Map<Pair<Boolean, CanvasPlacement>, String>,
 ) {
+    val selectedSourceId = sceneViewModel.selectedSourceId.value
     val isSelected = source.id == selectedSourceId
     val (sourceHover, sourceHovered) = rememberRowHover()
     val sourceColors = bibleRowColors(isSelected, sourceHovered)
@@ -439,7 +455,7 @@ private fun CanvasTabScope.SourceRow(
             .padding(start = 4.dp, end = 4.dp, top = rowPad(2.dp), bottom = rowPad(2.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        SourceRowToggles(source)
+        SourceRowToggles(sceneViewModel, source)
 
         Text(
             source.name,
@@ -491,7 +507,7 @@ private fun CanvasTabScope.SourceRow(
 /** Show or hide, and lock or unlock, one layer. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun CanvasTabScope.SourceRowToggles(source: SceneSource) {
+private fun CanvasTabScope.SourceRowToggles(sceneViewModel: SceneViewModel, source: SceneSource) {
     // Visibility toggle
     TooltipArea(
         tooltip = {
@@ -564,7 +580,8 @@ private fun CanvasTabScope.SourceRowToggles(source: SceneSource) {
 /** Delete, bring forward and send back, for the selected layer. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun CanvasTabScope.SelectedSourceButtons() {
+private fun CanvasTabScope.SelectedSourceButtons(sceneViewModel: SceneViewModel) {
+    val selectedSourceId = sceneViewModel.selectedSourceId.value
     val currentSelectedId = selectedSourceId
     if (currentSelectedId != null) {
         TooltipArea(
@@ -599,14 +616,14 @@ private fun CanvasTabScope.SelectedSourceButtons() {
                 )
             }
         }
-        SourceOrderButtons(currentSelectedId)
+        SourceOrderButtons(sceneViewModel, currentSelectedId)
     }
 }
 
 /** Bring the selected layer forward, or send it back. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun CanvasTabScope.SourceOrderButtons(currentSelectedId: String) {
+private fun CanvasTabScope.SourceOrderButtons(sceneViewModel: SceneViewModel, currentSelectedId: String) {
     TooltipArea(
         tooltip = {
             Surface(

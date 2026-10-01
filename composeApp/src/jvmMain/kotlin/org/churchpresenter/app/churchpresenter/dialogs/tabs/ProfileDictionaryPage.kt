@@ -13,7 +13,7 @@ import churchpresenter.composeapp.generated.resources.profile_card_color
 import churchpresenter.composeapp.generated.resources.profile_card_opacity
 import churchpresenter.composeapp.generated.resources.dictionary_definition
 import churchpresenter.composeapp.generated.resources.profile_dict_kjv
-import churchpresenter.composeapp.generated.resources.profile_dict_reference
+import churchpresenter.composeapp.generated.resources.profile_reference
 import churchpresenter.composeapp.generated.resources.profile_dict_word
 import churchpresenter.composeapp.generated.resources.profile_group_card
 import churchpresenter.composeapp.generated.resources.profile_group_show
@@ -216,7 +216,7 @@ private fun DictionaryPartRows(look: DictionaryLook, onChange: (DictionaryLook) 
 private fun DictionaryPart.label(): String = stringResource(
     when (this) {
         DictionaryPart.WORD -> Res.string.profile_dict_word
-        DictionaryPart.REFERENCE -> Res.string.profile_dict_reference
+        DictionaryPart.REFERENCE -> Res.string.profile_reference
         DictionaryPart.DEFINITION -> Res.string.dictionary_definition
         DictionaryPart.KJV_USAGE -> Res.string.profile_dict_kjv
     },

@@ -43,7 +43,7 @@ import churchpresenter.composeapp.generated.resources.text_style_underline
 import churchpresenter.composeapp.generated.resources.tooltip_backdrop_options
 import churchpresenter.composeapp.generated.resources.tooltip_bold
 import churchpresenter.composeapp.generated.resources.tooltip_italic
-import churchpresenter.composeapp.generated.resources.tooltip_outline
+import churchpresenter.composeapp.generated.resources.text_outline
 import churchpresenter.composeapp.generated.resources.tooltip_outline_options
 import churchpresenter.composeapp.generated.resources.tooltip_shadow
 import churchpresenter.composeapp.generated.resources.tooltip_strikethrough
@@ -188,7 +188,7 @@ internal fun TextOutlineButton(
     val isActive = outline.enabled
     Row(verticalAlignment = Alignment.CenterVertically) {
         StyleSegment(
-            tooltip = stringResource(Res.string.tooltip_outline),
+            tooltip = stringResource(Res.string.text_outline),
             isActive = isActive,
             shape = segmentShape(index = 0, count = 2),
             modifier = Modifier.width(buttonSize).height(buttonSize),

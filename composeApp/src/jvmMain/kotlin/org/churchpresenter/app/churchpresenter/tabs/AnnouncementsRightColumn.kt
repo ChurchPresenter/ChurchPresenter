@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.AnnouncementsViewModel
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.SlimSlider
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -75,7 +76,7 @@ import churchpresenter.composeapp.generated.resources.announcement_animation_spe
 import churchpresenter.composeapp.generated.resources.announcement_loop_count
 import churchpresenter.composeapp.generated.resources.announcement_loop_tooltip
 import churchpresenter.composeapp.generated.resources.preview
-import churchpresenter.composeapp.generated.resources.announcement_background_color_label
+import churchpresenter.composeapp.generated.resources.canvas_text_bg_color
 import churchpresenter.composeapp.generated.resources.transparent_default
 import churchpresenter.composeapp.generated.resources.position_on_screen
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
@@ -99,7 +100,7 @@ import org.churchpresenter.app.churchpresenter.utils.PreviewOutput
  */
 
 @Composable
-internal fun AnnouncementsTabScope.AnnouncementsRightColumn(modifier: Modifier) {
+internal fun AnnouncementsTabScope.AnnouncementsRightColumn(viewModel: AnnouncementsViewModel, modifier: Modifier) {
     Column(
         modifier = modifier.fillMaxHeight().padding(top = 4.dp).bibleListCard()
             .padding(16.dp),
@@ -118,22 +119,26 @@ internal fun AnnouncementsTabScope.AnnouncementsRightColumn(modifier: Modifier) 
             mode = Presenting.ANNOUNCEMENTS,
             onSettingsChange = onSettingsChange,
         )
-        AnnouncementsPreview(previewOutput, Modifier.weight(1f).fillMaxWidth())
+        AnnouncementsPreview(viewModel, previewOutput, Modifier.weight(1f).fillMaxWidth())
         // Where the announcement sits, what it sits on and how it moves, stacked along the
         // bottom. Shared by the text and the timer, so it lives here rather than in either card.
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            AnnouncementsPositionCard()
-            AnnouncementsBackgroundCard()
-            AnnouncementsAnimationCard()
+            AnnouncementsPositionCard(viewModel)
+            AnnouncementsBackgroundCard(viewModel)
+            AnnouncementsAnimationCard(viewModel)
         }
     }
 }
 
 @Composable
-private fun AnnouncementsTabScope.AnnouncementsPreview(previewOutput: PreviewOutput, modifier: Modifier) {
+private fun AnnouncementsTabScope.AnnouncementsPreview(
+    viewModel: AnnouncementsViewModel,
+    previewOutput: PreviewOutput,
+    modifier: Modifier,
+) {
     var previewWidthPx by remember { mutableStateOf(0) }
     var previewHeightPx by remember { mutableStateOf(0) }
     // Both the frame and the type inside it are measured against the SAME output.
@@ -178,32 +183,32 @@ private fun AnnouncementsTabScope.AnnouncementsPreview(previewOutput: PreviewOut
         ) {
             val previewContainerWidthPx = previewWidthPx.toFloat()
             val previewContainerHeightPx = previewHeightPx.toFloat()
-            key(scrollDurationMs, movesPositive) {
+            key(viewModel.scrollDurationMs, viewModel.movesPositive) {
                 val infiniteTransition = rememberInfiniteTransition(label = "previewScroll")
                 val offsetFractionState = infiniteTransition.animateFloat(
-                        initialValue = if (movesPositive) -1f else 1f,
-                        targetValue  = if (movesPositive) 1f else -1f,
+                        initialValue = if (viewModel.movesPositive) -1f else 1f,
+                        targetValue  = if (viewModel.movesPositive) 1f else -1f,
                         animationSpec = infiniteRepeatable(
-                            animation = tween(durationMillis = scrollDurationMs, easing = LinearEasing),
+                            animation = tween(durationMillis = viewModel.scrollDurationMs, easing = LinearEasing),
                             repeatMode = RepeatMode.Restart
                         ),
                         label = "previewOffset"
                     )
                 val look = AnnouncementPreviewLook(
-                    text = previewText,
+                    text = viewModel.previewText,
                     textStyle = previewTextStyle,
                     fontSize = scaledFontSize,
                     pad = DpSize(scaledPadH, scaledPadV),
                     scaleFactor = scaleFactor,
-                    textAlign = previewTextAlign,
+                    textAlign = viewModel.previewTextAlign,
                 )
-                if (isDirectional) {
-                    DirectionalPreview(
-                        look, isHorizontal, slideAlignment,
+                if (viewModel.isDirectional) {
+                    DirectionalPreview(viewModel, 
+                        look, viewModel.isHorizontal, viewModel.slideAlignment,
                         previewContainerWidthPx, previewContainerHeightPx, offsetFractionState,
                     )
                 } else {
-                    StaticPreview(look, isShowingLiveTimerValue, durationMs)
+                    StaticPreview(viewModel, look, viewModel.isShowingLiveTimerValue, viewModel.durationMs)
                 }
             }
         } // end preview Box
@@ -223,6 +228,7 @@ internal class AnnouncementPreviewLook(
 /** The text sliding across the preview, repeating, as the configured animation moves it on screen. */
 @Composable
 private fun AnnouncementsTabScope.DirectionalPreview(
+    viewModel: AnnouncementsViewModel,
     look: AnnouncementPreviewLook,
     isHorizontal: Boolean,
     slideAlignment: Alignment,
@@ -291,6 +297,7 @@ private fun AnnouncementsTabScope.DirectionalPreview(
 /** The text in its place on the preview, faded in and out where the animation fades. */
 @Composable
 private fun AnnouncementsTabScope.StaticPreview(
+    viewModel: AnnouncementsViewModel,
     look: AnnouncementPreviewLook,
     isShowingLiveTimerValue: Boolean,
     durationMs: Int,
@@ -359,7 +366,7 @@ private fun AnnouncementsTabScope.StaticPreview(
 }
 
 @Composable
-private fun AnnouncementsTabScope.AnnouncementsPositionCard() {
+private fun AnnouncementsTabScope.AnnouncementsPositionCard(viewModel: AnnouncementsViewModel) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -381,7 +388,7 @@ private fun AnnouncementsTabScope.AnnouncementsPositionCard() {
 }
 
 @Composable
-private fun AnnouncementsTabScope.AnnouncementsBackgroundCard() {
+private fun AnnouncementsTabScope.AnnouncementsBackgroundCard(viewModel: AnnouncementsViewModel) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -421,7 +428,7 @@ private fun AnnouncementsTabScope.AnnouncementsBackgroundCard() {
             } else {
                 val colorField: @Composable (Modifier) -> Unit = { fieldModifier ->
                     ColorPickerField(
-                        label = stringResource(Res.string.announcement_background_color_label),
+                        label = stringResource(Res.string.canvas_text_bg_color),
                         color = viewModel.backgroundColor,
                         onColorChange = {
                             viewModel.setBackgroundColor(it)
@@ -481,7 +488,7 @@ private fun AnnouncementsTabScope.AnnouncementsBackgroundCard() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun AnnouncementsTabScope.AnnouncementsAnimationCard() {
+private fun AnnouncementsTabScope.AnnouncementsAnimationCard(viewModel: AnnouncementsViewModel) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -508,7 +515,7 @@ private fun AnnouncementsTabScope.AnnouncementsAnimationCard() {
             DropdownSelector(
                 label = stringResource(Res.string.announcement_animation),
                 items = animItems,
-                selected = selectedAnim,
+                selected = viewModel.selectedAnim,
                 onSelectedChange = { sel ->
                     val key = when (sel) {
                         slideFromLeftText       -> Constants.ANIMATION_SLIDE_FROM_LEFT
@@ -554,7 +561,7 @@ private fun AnnouncementsTabScope.AnnouncementsAnimationCard() {
             } // end inner Row (animation + loop count)
             SectionLabel(stringResource(Res.string.announcement_animation_speed))
             SlimSlider(
-                value = (sliderSum - durationMs.toFloat()),
+                value = (sliderSum - viewModel.durationMs.toFloat()),
                 onValueChange = { v ->
                     val dur = (sliderSum - v)
                     val snapped = (dur / sliderMin).toInt() * sliderMin.toInt()
@@ -565,7 +572,7 @@ private fun AnnouncementsTabScope.AnnouncementsAnimationCard() {
                 },
                 valueRange = sliderMin..sliderMax,
                 trailingLabel =
-                    "${"%.1f".format((sliderSum - durationMs) / ANNOUNCEMENT_MILLIS_PER_SECOND_F)}s",
+                    "${"%.1f".format((sliderSum - viewModel.durationMs) / ANNOUNCEMENT_MILLIS_PER_SECOND_F)}s",
                 modifier = Modifier.fillMaxWidth()
             )
         }

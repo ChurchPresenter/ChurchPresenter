@@ -3,7 +3,6 @@
     <string name="mode">Mod</string>
     <string name="scope">Kapsam</string>
     <string name="title">Başlık</string>
-    <string name="number">Numara</string>
     <string name="go_live">Yayına Al</string>
     <string name="add_to_schedule">Programa Ekle</string>
     <string name="copy_verse">Ayeti Kopyala</string>
@@ -12,7 +11,6 @@
     <string name="search">Ara</string>
     <string name="bible_smart_search_hint">Referans veya metin — örn. Yuhanna 3:16, mat 1 ya da bir sözcük</string>
     <string name="bible_search_mode_auto">Otomatik</string>
-    <string name="bible_search_mode_reference">Referans</string>
     <string name="bible_search_mode_text">Metin</string>
     <string name="bible_search_mode_tooltip">Değiştirmek için dokunun — Otomatik: referanslara atla, geri kalan her şeyi ara. Referans: yalnızca git. Metin: her zaman ayet metninde ara.</string>
     <string name="bible_verse_selection_hint">Seçimi değiştirmek için Ctrl+Tık, aralık için Shift+Tık</string>
@@ -82,17 +80,11 @@
     <string name="bible_cross_references_close">Paneli kapat</string>
     <string name="bible_cross_references_dismiss_hint">Kapatmak için Esc</string>
     <string name="menu_file">Dosya</string>
-    <string name="menu_new_schedule">Yeni Program</string>
-    <string name="menu_open_schedule">Program Aç</string>
-    <string name="menu_save_schedule">Programı Kaydet</string>
     <string name="menu_save_schedule_as">Programı Farklı Kaydet...</string>
     <string name="menu_close_schedule">Programı Kapat</string>
     <string name="menu_exit">Çıkış</string>
     <string name="file_chooser_save_schedule">Programı Farklı Kaydet</string>
-    <string name="file_chooser_open_schedule">Program Aç</string>
     <string name="file_filter_schedule">Church Presenter Programı (*.cps)</string>
-    <string name="menu_schedule">Program</string>
-    <string name="menu_add_to_schedule">Programa Ekle</string>
     <string name="menu_remove_from_schedule">Programdan Çıkar</string>
     <string name="menu_clear_schedule">Programı Temizle</string>
 
@@ -111,7 +103,6 @@
     <string name="instance_link_description">Ağınızdaki başka bir ChurchPresenter kopyasını izleyin — yayındaki içeriğini burada yansıtın, isterseniz onun programına öğe ekleyin.</string>
     <string name="instance_link_host">Sunucu</string>
     <string name="instance_link_host_hint">örn. 192.168.1.10</string>
-    <string name="instance_link_port">Port</string>
     <string name="instance_link_autoconnect">Açılışta otomatik bağlan</string>
     <string name="instance_link_reconnect_delay">En kısa yeniden bağlanma gecikmesi</string>
     <string name="instance_link_reconnect_delay_hint">Kopan bir bağlantı yeniden denenmeden önceki en kısa bekleme. Hatalar sürerse süre kendiliğinden uzar.</string>
@@ -466,15 +457,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">Varsayılan</string>
-    <string name="background_color_option">Renk</string>
-    <string name="background_image_option">Resim</string>
     <string name="background_video_option">Video Döngüsü</string>
     <string name="background_transparent_option">Saydam</string>
     <string name="background_follow_default_option">Varsayılanı İzle</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">Web</string>
-    <string name="projection_content_background">Arka Plan</string>
     <string name="projection_content_lt_background">Alt Bant Arka Planı</string>
     <string name="browser_source_resolution">Çözünürlük</string>
     <string name="browser_source_fps">En yüksek FPS</string>
@@ -556,7 +544,6 @@
     <string name="tooltip_schedule_zoom_out">Uzaklaştır</string>
     <string name="tooltip_add_to_schedule">Programa Ekle</string>
     <string name="tooltip_clear_display">Ekranı Temizle</string>
-    <string name="remote_action_clear_display">Ekranı Temizle</string>
     <string name="schedule_add_files_title">Programa Dosya Ekle</string>
     <string name="tooltip_toggle_displays">Sunum Ekranlarını Aç/Kapat</string>
     <string name="tooltip_settings">Ayarlar</string>
@@ -578,7 +565,6 @@
     <string name="schedule_density_compact">Sık</string>
     <string name="schedule_density_normal">Normal</string>
     <string name="schedule_density_detailed">Ayrıntılı</string>
-    <string name="schedule_kind_lower_third">Alt Bant</string>
     <string name="tooltip_schedule_options">Program Seçenekleri</string>
     <string name="schedule_show_buttons_under_title">Düğmeleri başlığın altında göster</string>
     <string name="schedule_option_item_count">Öğe Sayısı</string>
@@ -589,7 +575,6 @@
     <string name="edit_label">Etiketi Düzenle</string>
     <string name="label_text">Etiket Metni</string>
     <string name="text_color">Metin Rengi</string>
-    <string name="background_color_label">Arka Plan Rengi</string>
     <string name="enter_label_text">Etiket metnini girin...</string>
 
     <!-- Pictures Tab Strings -->
@@ -619,7 +604,6 @@
     <string name="animation_slide_left">Sola Kaydır</string>
     <string name="animation_slide_right">Sağa Kaydır</string>
     <string name="animation_none">Yok</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s sonraki/önceki resim  ·  %2$s satırlar arasında gezin</string>
     <string name="presentation_arrow_key_hint">%1$s — önceki/sonraki adım ve slayt  ·  %2$s — oynat/duraklat  ·  %3$s — ekranı karart</string>
     <string name="pictures_reorder_hint">Sıralamayı değiştirmek için küçük resimleri Shift+sürükleyin</string>
@@ -682,14 +666,10 @@
     <string name="content_bible_background">Kutsal Kitap Arka Planı</string>
     <string name="content_songs_background">Şarkı Arka Planı</string>
     <string name="content_pictures">Resimler/Sunum</string>
-    <string name="content_media">Medya</string>
-    <string name="content_streaming">Alt Bant</string>
     <string name="content_announcements">Duyurular</string>
     <string name="display_mode">Görüntüleme Modu</string>
-    <string name="display_fullscreen">Tam Ekran</string>
     <string name="display_lower_third">Alt Bant</string>
     <string name="full_screen">Tam Ekran</string>
-    <string name="lower_third_size">Alt Bant</string>
     <string name="identify_screen">Tanımla</string>
     <string name="projection_target_display">Ekran</string>
     <string name="projection_auto_display">Otomatik</string>
@@ -765,7 +745,6 @@
     <string name="settings_import_failed">Ayarlar içe aktarılamadı. Dosya geçersiz olabilir.</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">Medya</string>
     <string name="media_local_file">Yerel Dosya</string>
     <string name="media_network_url">Ağ URL'si</string>
     <string name="media_url_placeholder">URL girin (http://, rtsp://, ...)</string>
@@ -809,7 +788,6 @@
     <string name="center_left">Orta Sol</string>
     <string name="center_right">Orta Sağ</string>
     <string name="bottom_center">Alt Orta</string>
-    <string name="announcement_background_color_label">Arka Plan Rengi</string>
     <string name="transparent_default">Saydam (Varsayılan)</string>
     <string name="announcement_animation">Animasyon</string>
     <string name="anim_slide_from_left">Soldan Kaydır</string>
@@ -882,7 +860,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">Programa Ekle</string>
     <string name="web_go_live">Yayına Al</string>
     <string name="web_bookmark_add">Yer İmi Ekle</string>
     <string name="web_bookmark_remove">Yer İmini Kaldır</string>
@@ -946,7 +923,6 @@
     <string name="canvas_shape_fill_color">Dolgu</string>
     <string name="canvas_shape_stroke_width">Kontur Kalınlığı</string>
     <string name="canvas_rename_scene">Yeniden Adlandır</string>
-    <string name="canvas_remove_scene">Kaldır</string>
     <string name="canvas_add_source">Kaynak ekle</string>
     <string name="canvas_delete_source">Kaynağı sil</string>
     <string name="canvas_source_move_forward">Öne getir</string>
@@ -974,7 +950,6 @@
     <string name="canvas_render_height">Yükseklik</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">Özel CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">Resim Seç</string>
     <string name="canvas_select_video_title">Video Seç</string>
     <string name="canvas_image_files">Resim Dosyaları</string>
@@ -986,7 +961,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">Saat</string>
     <string name="canvas_clock_mode_countdown">Geri Sayım</string>
     <string name="canvas_clock_mode_count_up">Kronometre</string>
     <string name="canvas_decklink_io_warning">Bu aygıt şu anda çıkış için kullanılıyor. Eşzamanlı giriş/çıkış desteklemeyen aygıtlarda giriş kullanılamayabilir.</string>
@@ -1004,7 +978,6 @@
     <string name="canvas_text_curve">Eğri</string>
     <string name="canvas_letter_spacing">Harf Aralığı</string>
     <string name="canvas_source_qrcode">QR Kodu</string>
-    <string name="canvas_source_camera">Kamera</string>
     <string name="canvas_source_screen_capture">Ekran Yakalama</string>
     <string name="canvas_source_bible">Kutsal Kitap</string>
     <string name="canvas_bible_version">Kutsal Kitap Çevirisi</string>
@@ -1017,7 +990,6 @@
     <string name="canvas_bible_ref_color">Referans Rengi</string>
     <string name="canvas_verse_style">Ayet Stili</string>
     <string name="canvas_reference_style">Referans Stili</string>
-    <string name="canvas_text_color">Metin Rengi</string>
     <string name="canvas_text_bg_color">Arka Plan Rengi</string>
     <string name="canvas_clock_mode">Mod</string>
     <string name="canvas_clock_format">Biçim</string>
@@ -1042,7 +1014,6 @@
     <string name="canvas_camera_format">Video Biçimi</string>
     <string name="canvas_camera_format_auto">Otomatik (varsayılan)</string>
     <string name="canvas_camera_connection">Video Bağlantısı</string>
-    <string name="canvas_camera_mode">Mod</string>
     <string name="canvas_camera_mode_auto">Otomatik</string>
     <string name="canvas_capture_x">Yakalama X</string>
     <string name="canvas_capture_y">Yakalama Y</string>
@@ -1053,9 +1024,7 @@
     <string name="canvas_capture_mode_window">Pencere</string>
     <string name="canvas_capture_refresh_windows">Pencere Listesini Yenile</string>
     <string name="canvas_capture_interval">Yakalama Aralığı</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Kamera: %1$s</string>
-    <string name="canvas_placeholder_camera_default">Kamera</string>
     <string name="canvas_placeholder_screen_capture">Ekran Yakalama</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1177,7 +1146,6 @@
     <string name="remote_activity_removed_from_schedule">Programdan Çıkarıldı</string>
     <string name="remote_activity_projected">Yansıtıldı (Yayına Alındı)</string>
     <string name="remote_activity_presentation_connect">Sunum Kumandasına Bağlandı</string>
-    <string name="remote_activity_presentation_connect_detail">Bağlantı kuruldu</string>
     <string name="remote_activity_qa_admin_connect">Soru-Cevap Yönetimine Bağlandı</string>
     <string name="remote_activity_qa_admin_connect_detail">Bağlantı kuruldu</string>
     <string name="remote_activity_presented">Gösteriliyor</string>
@@ -1217,7 +1185,6 @@
     <string name="instance_link_primary_badge">Ana kopya — %1$d izleyici bağlı</string>
     <string name="client_label_placeholder">Tanıdık bir ad girin…</string>
     <string name="client_label_edit_tooltip">Tanıdık ad ver</string>
-    <string name="client_label_save">Kaydet</string>
     <string name="client_label_cancel">İptal</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1338,7 +1305,6 @@
     <string name="system_storage_subtitle">Church Presenter içeriğinizi nerede arıyor</string>
     <string name="system_storage_linked_count">%1$d bağlı</string>
     <string name="system_storage_needs_attention_count">%1$d ilgi gerektiriyor</string>
-    <string name="system_storage_status_not_set">Atanmadı</string>
     <string name="system_storage_status_not_found">Klasör bulunamadı</string>
     <string name="system_storage_status_read_only">Salt okunur</string>
     <string name="system_storage_status_linked">Bağlı</string>
@@ -1380,7 +1346,6 @@
     <string name="show_song_number_before_title">İlahi numarasını başlıktan önce göster</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">Sahne monitörü</string>
     <string name="general">Genel</string>
     <string name="display_stage_monitor">Sahne monitörü</string>
     <string name="stage_monitor_quadrant_next">Sonraki</string>
@@ -1465,7 +1430,6 @@
     <string name="qa_confirm_go_live">Yayına almayı onayla</string>
     <string name="qa_add_question_hint">Soru ekle…</string>
     <string name="qa_edit_question_hint">Soru metnini düzenle…</string>
-    <string name="qa_delete_question">Sil</string>
     <string name="qa_confirm_delete_prompt">Silinsin mi?</string>
     <string name="qa_submitter_device">Cihaz: %1$s</string>
     <string name="qa_public_access">Herkese açık erişim</string>
@@ -1502,14 +1466,11 @@
     <string name="stt_live_preview">Canlı önizleme</string>
     <string name="stt_not_connected">Bağlı değil. STT sunucu URL'sini girip Bağlan'a tıklayın.</string>
     <string name="stt_waiting_for_transcription">Yazıya dökme bekleniyor…</string>
-    <string name="stt_transcription_label">Yazıya dökme</string>
     <string name="stt_translation_label">Çeviri</string>
     <string name="stt_settings_dialog_title">STT gösterim ayarları</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">CCLI raporları</string>
-    <string name="ccli_tab_songs">İlahiler</string>
-    <string name="ccli_tab_bible">Kutsal Kitap</string>
     <string name="ccli_tab_activity">Etkinlik</string>
     <string name="ccli_songs_summary">%1$d farklı ilahi · toplam %2$d gösterim</string>
     <string name="ccli_bible_summary">%1$d farklı ayet · toplam %2$d gösterim</string>
@@ -1520,7 +1481,6 @@
     <string name="ccli_activity_title">Zaman içindeki gösterimler</string>
     <string name="ccli_from">Başlangıç:</string>
     <string name="ccli_to">Bitiş:</string>
-    <string name="ccli_legend_songs">İlahiler</string>
     <string name="ccli_legend_bible">Kutsal Kitap ayetleri</string>
     <string name="ccli_stat_songs_presented">Gösterilen ilahiler</string>
     <string name="ccli_stat_bible_verses">Kutsal Kitap ayetleri</string>
@@ -1534,7 +1494,6 @@
     <string name="ccli_col_first">İlk</string>
     <string name="ccli_col_last">Son</string>
     <string name="ccli_col_verse">Ayet</string>
-    <string name="ccli_col_bible">Kutsal Kitap</string>
     <string name="ccli_export_csv">CCLI CSV dışa aktar</string>
     <string name="ccli_export_xls">XLS dışa aktar</string>
     <string name="ccli_exported_success">Rapor başarıyla dışa aktarıldı.</string>
@@ -1615,7 +1574,6 @@
     <string name="obs_mode_bible">Kutsal Kitap</string>
     <string name="obs_mode_songs">İlahiler</string>
     <string name="obs_mode_pictures">Resimler</string>
-    <string name="obs_mode_presentation">Sunum</string>
     <string name="obs_mode_media">Ortam</string>
     <string name="obs_mode_lower_third">Alt bant</string>
     <string name="obs_mode_announcements">Duyurular</string>
@@ -1810,7 +1768,6 @@
     <string name="companion_satellite_no_host">Bağlanmak için Ayarlar → Companion Satellite bölümünde bir Companion sunucusu belirtin.</string>
     <string name="companion_satellite_status_connecting">Bağlanıyor…</string>
     <string name="companion_satellite_status_disconnected">Bağlantı kesildi</string>
-    <string name="companion_satellite_status_error">Hata: %1$s</string>
     <string name="companion_satellite_connection_name">Ad</string>
     <string name="companion_satellite_product_name">Ürün adı</string>
     <string name="companion_satellite_reconnect_delay">Yeniden bağlanma gecikmesi (ms)</string>
@@ -1874,7 +1831,6 @@
     <string name="bible_engine_detect">Kutsal Yazıları algıla</string>
     <string name="bible_engine_run_local">Motoru bu bilgisayarda çalıştır</string>
     <string name="bible_engine_host">Motor sunucusu</string>
-    <string name="bible_engine_port">Port</string>
     <string name="stt_help_dev_mode">Geliştiriciye yardım et — Kutsal Kitap sekmesinde canlı geri bildirim düğmelerini göster (yanlış bölüm / erken / kaçırılan bölüm)</string>
     <string name="dictionary_back">Geri</string>
     <string name="dictionary_forward">İleri</string>
@@ -1963,7 +1919,6 @@
     <string name="font_category_serif">Tırnaklı</string>
     <string name="font_category_mono">Eş aralıklı</string>
     <string name="font_category_display">Gösterim</string>
-    <string name="font_preview">Ön izleme</string>
     <string name="font_preview_sample">Seçilen yazı tipiyle örnek metin</string>
     <string name="font_warning_no_cyrillic">%1$s Kiril harflerini içermiyor — Kiril ayetler ekranda başka bir yazı tipiyle görünür.</string>
     <string name="font_warning_no_hebrew">%1$s İbranice harfleri içermiyor — İbranice metin ekranda başka bir yazı tipiyle görünür.</string>
@@ -1973,7 +1928,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">Üstü çizili</string>
     <string name="bible_custom_name">Ad</string>
-    <string name="bible_custom_abbreviation">Kısaltma</string>
     <string name="bible_translations">Çeviriler</string>
     <string name="bible_miscellaneous">Çeşitli</string>
     <string name="bible_font">Yazı tipi</string>
@@ -1988,10 +1942,7 @@
     <string name="bible_preview_sample_book">Yuhanna</string>
     <string name="bible_preview_no_translations">Burada görmek için bir çeviri ekleyin</string>
     <string name="song_element_number">Numara</string>
-    <string name="song_element_title">Başlık</string>
     <string name="song_element_lyrics">Sözler</string>
-    <string name="song_element_author">Söz Yazarı</string>
-    <string name="song_element_composer">Besteci</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Başlık slaydı</string>
@@ -2004,7 +1955,6 @@
     <string name="song_chunk">Bölüm</string>
     <string name="song_language_scope">Dil</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">Arka Plan</string>
     <string name="song_background_full_screen">Tam ekran</string>
     <string name="song_background_lower_third">Alt bant</string>
     <string name="song_background_inherit">Devral</string>
@@ -2019,7 +1969,6 @@
     <string name="song_background_your_color">Renginiz</string>
     <string name="song_background_browse">Gözat…</string>
     <string name="song_background_look">Görünüm</string>
-    <string name="song_background_preset_none">Yok</string>
     <string name="song_background_preset_soft">Yumuşak</string>
     <string name="song_background_preset_legible">Okunaklı</string>
     <string name="song_background_preset_cinema">Sinema</string>
@@ -2040,7 +1989,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Arka Planlar</string>
     <string name="background_group_defaults">Varsayılanlar</string>
-    <string name="background_scope_default">Varsayılan</string>
     <string name="background_scope_default_lower_third">Varsayılan Alt Bant</string>
     <string name="background_scope_default_meta">Kutsal Kitap veya Şarkılar Varsayılan olduğunda</string>
     <string name="background_scope_default_lower_third_meta">Alt bant Varsayılan olduğunda</string>
@@ -2049,16 +1997,13 @@
     <string name="background_following_default">Varsayılanı izliyor</string>
     <string name="background_use_default">Varsayılanı kullan</string>
     <string name="background_set_explicitly">Bu yüzey için ayrıca ayarlandı</string>
-    <string name="background_type_caption">Tür</string>
     <string name="background_color_caption">Renk</string>
     <string name="background_image_file">Resim Dosyası</string>
     <string name="background_video_file">Video Dosyası</string>
-    <string name="background_opacity_caption">Opaklık</string>
     <string name="background_above_band_caption">Bandın Üstü</string>
     <string name="background_above_band_fill">Dolgu Rengi</string>
     <string name="background_above_band_opacity">Dolgu Opaklığı</string>
     <string name="quick_background_reset">Normale dön</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · ayarlardan yönetilir</string>
     <string name="quick_backgrounds">Hızlı arka planlar</string>
     <string name="quick_backgrounds_help">Önizleme panelinin bir tık uzakta tuttuğu arka planlar. Bir kutucuğa tıklayarak ne göstereceğini seçin, sürükleyerek hangi tuşun ona ulaştığını değiştirin. Hizmet sırasında birini seçmek, normale dönene kadar tüm ekranları geçersiz kılar — burada hiçbir şeyi değiştirmez.</string>
@@ -2084,16 +2029,10 @@
     <string name="output_profile_swap_menu_tooltip">Çıkış profilini değiştir</string>
     <string name="output_profile_new_name_default">Yeni Profil</string>
     <string name="output_profile_empty_state">Biçimlendirmeye başlamak için bir profil oluşturun</string>
-    <string name="customize_bible">Kutsal Kitap</string>
-    <string name="customize_songs">Şarkılar</string>
     <string name="customize_group_verse_text">Ayet metni</string>
     <string name="customize_group_reference">Referans</string>
     <string name="customize_background_type">Tür</string>
-    <string name="customize_type_color">Renk</string>
     <string name="customize_type_image">Resim</string>
-    <string name="customize_type_video">Video</string>
-    <string name="customize_type_default">Varsayılan</string>
-    <string name="customize_type_gradient">Renk Geçişi</string>
     <string name="customize_show_abbreviation">Kısaltma</string>
     <string name="customize_background_opacity">Opaklık</string>
     <string name="slate_theme">Arduvaz Teması</string>
@@ -2139,7 +2078,6 @@
     <string name="song_lottie_unsupported_note">Şablon, yerleşimi ve başlığın yerini belirler. Alt üçte bir stili yazı tipini, boyutu, rengi, hizalamayı, harf aralığını, büyük/küçük harfi ve gölgeyi ayarlar; metin arka planı, altı çizili, üstü çizili, kelime aralığı, sonrakini önizleme ve akorlar uygulanmaz.</string>
     <string name="bible_lottie_unsupported_note">Şablon, yerleşimi, referansın konumunu ve iki dilin bandı nasıl paylaşacağını belirler. Alt üçte bir stili yazı tipini, boyutu, rengi, hizalamayı, harf aralığını, büyük/küçük harfi ve gölgeyi ayarlar; metin arka planı, altı çizili, üstü çizili ve kelime aralığı uygulanmaz.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Dış çizgi</string>
     <string name="tooltip_outline_options">Dış çizgi seçenekleri</string>
     <string name="text_outline">Dış çizgi</string>
     <string name="text_outline_width">Kalınlık</string>
@@ -2207,7 +2145,6 @@
     <string name="add_ndi_output">Çıkış Ekle</string>
     <string name="ndi_output_numbered">NDI Çıkışı %1$d</string>
     <string name="preview_output">Çıkışı önizle</string>
-    <string name="output_resolution">Çözünürlük</string>
     <string name="output_resolution_custom">Özel…</string>
     <string name="output_resolution_custom_title">Özel çözünürlük</string>
     <string name="output_resolution_width">Genişlik</string>
@@ -2311,7 +2248,6 @@
     <string name="calendar_sync_description">Hizmetleri tüm hafta boyunca, bu bilgisayar kapalıyken bile mobil uygulamadan planlayın. Bu bilgisayar asıl kaynak olmaya devam eder.</string>
     <string name="calendar_sync_enable">Takvimi telefonlarla eşitle</string>
     <string name="calendar_sync_relay_url">Röle</string>
-    <string name="calendar_sync_status_off">Kapalı</string>
     <string name="calendar_sync_status_unpaired">Henüz kayıtlı değil — eşitleme ilk kez açıldığında bu bilgisayar röleye kaydolur</string>
     <string name="calendar_sync_status_syncing">Eşitleniyor…</string>
     <string name="calendar_sync_status_synced">Eşitlendi %1$s</string>

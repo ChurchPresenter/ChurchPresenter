@@ -53,7 +53,7 @@ import churchpresenter.composeapp.generated.resources.stt_server_url
 import churchpresenter.composeapp.generated.resources.stt_status_connecting
 import churchpresenter.composeapp.generated.resources.stt_status_unreachable
 import churchpresenter.composeapp.generated.resources.stt_status_reconnecting
-import churchpresenter.composeapp.generated.resources.stt_transcription_label
+import churchpresenter.composeapp.generated.resources.obs_mode_stt
 import churchpresenter.composeapp.generated.resources.stt_translation_label
 import churchpresenter.composeapp.generated.resources.stt_waiting_for_transcription
 import churchpresenter.composeapp.generated.resources.tooltip_stt_settings
@@ -264,7 +264,12 @@ fun STTTab(
                         Column(
                             modifier = Modifier.fillMaxSize().verticalScroll(transcriptionScrollState).padding(4.dp)
                         ) {
-                            Text(stringResource(Res.string.stt_transcription_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                            Text(
+                                stringResource(Res.string.obs_mode_stt),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
                             Spacer(Modifier.height(4.dp))
                             displaySegments.forEach { segment ->
                                 Text(

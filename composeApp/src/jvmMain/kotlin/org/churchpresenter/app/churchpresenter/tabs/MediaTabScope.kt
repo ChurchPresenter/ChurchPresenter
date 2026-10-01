@@ -40,7 +40,6 @@ internal class MediaTabScope(
     val onSavePreset: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)?,
     val presenterManager: PresenterManager?,
     val onInstanceLinkSendProject: ((ScheduleItem) -> Unit)?,
-    val viewModel: MediaViewModel,
     val state: MediaTabState,
     val scope: CoroutineScope,
     val sourceTypeItems: List<SegmentedButtonItem<String>>,
@@ -53,7 +52,7 @@ internal class MediaTabScope(
     var urlInput by state::urlInput
 
     /** Clear Output, play/pause and mute. */
-    fun handleKey(keyEvent: KeyEvent): Boolean {
+    fun handleKey(viewModel: MediaViewModel, keyEvent: KeyEvent): Boolean {
         return if (keyEvent.type == KeyEventType.KeyDown) {
             when {
                 // Clear Output is a global action, but it is claimed here too so the media
@@ -79,6 +78,7 @@ internal class MediaTabScope(
 /** Loads what the Schedule hands the tab, blanking the output while a live file changes. */
 @Composable
 internal fun MediaTabScope.MediaTabEffects(
+    viewModel: MediaViewModel,
     selectedMediaItem: ScheduleItem.MediaItem?,
     selectedMediaItemVersion: Int,
     instanceLinkMediaStreamUrl: ((itemId: String) -> String)?,

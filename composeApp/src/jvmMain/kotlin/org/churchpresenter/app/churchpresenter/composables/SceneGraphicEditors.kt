@@ -46,7 +46,7 @@ import churchpresenter.composeapp.generated.resources.timer_minutes
 import churchpresenter.composeapp.generated.resources.timer_seconds
 import churchpresenter.composeapp.generated.resources.timer_target_time
 import churchpresenter.composeapp.generated.resources.timer_expired_text_label
-import churchpresenter.composeapp.generated.resources.canvas_text_color
+import churchpresenter.composeapp.generated.resources.text_color
 import churchpresenter.composeapp.generated.resources.canvas_text_bg_color
 import churchpresenter.composeapp.generated.resources.canvas_letter_spacing
 import churchpresenter.composeapp.generated.resources.canvas_text_curve
@@ -67,7 +67,7 @@ import churchpresenter.composeapp.generated.resources.canvas_qr_type_phone
 import churchpresenter.composeapp.generated.resources.canvas_qr_type_sms
 import churchpresenter.composeapp.generated.resources.canvas_qr_type_wifi
 import churchpresenter.composeapp.generated.resources.canvas_qr_type_vcard
-import churchpresenter.composeapp.generated.resources.canvas_clock_mode_clock
+import churchpresenter.composeapp.generated.resources.canvas_source_clock
 import churchpresenter.composeapp.generated.resources.canvas_clock_mode_countdown
 import churchpresenter.composeapp.generated.resources.canvas_clock_format_24h
 import churchpresenter.composeapp.generated.resources.canvas_clock_format_12h
@@ -270,7 +270,7 @@ internal fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSo
             color = source.fontColor,
             onColorChange = { onUpdate(source.copy(fontColor = it)) },
             modifier = Modifier.weight(1f),
-            label = stringResource(Res.string.canvas_text_color)
+            label = stringResource(Res.string.text_color)
         )
         ColorPickerField(
             color = source.backgroundColor,
@@ -294,7 +294,7 @@ internal fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSo
 @Composable
 private fun ClockModeDropdown(source: SceneSource.ClockSource, onUpdate: (SceneSource) -> Unit, modifier: Modifier) {
     val modes = listOf(
-        ClockModes.CLOCK to stringResource(Res.string.canvas_clock_mode_clock),
+        ClockModes.CLOCK to stringResource(Res.string.canvas_source_clock),
         ClockModes.COUNTDOWN to stringResource(Res.string.canvas_clock_mode_countdown),
         ClockModes.COUNT_UP to stringResource(Res.string.canvas_clock_mode_count_up),
         ClockModes.TARGET_TIME to stringResource(Res.string.timer_mode_clock),

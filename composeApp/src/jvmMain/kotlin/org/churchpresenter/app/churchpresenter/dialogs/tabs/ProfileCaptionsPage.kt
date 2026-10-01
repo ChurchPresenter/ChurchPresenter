@@ -8,15 +8,14 @@ import churchpresenter.composeapp.generated.resources.bible_word_spacing
 import churchpresenter.composeapp.generated.resources.percent_suffix
 import churchpresenter.composeapp.generated.resources.pixels_short
 import churchpresenter.composeapp.generated.resources.profile_box_item_transcript
-import churchpresenter.composeapp.generated.resources.profile_box_item_translation
 import churchpresenter.composeapp.generated.resources.profile_caption_all_caps
 import churchpresenter.composeapp.generated.resources.profile_caption_band_edge
 import churchpresenter.composeapp.generated.resources.profile_caption_band_edge_sub
+import churchpresenter.composeapp.generated.resources.profile_caption_translation
 import churchpresenter.composeapp.generated.resources.profile_caption_both
 import churchpresenter.composeapp.generated.resources.profile_caption_first
 import churchpresenter.composeapp.generated.resources.profile_caption_highlight
 import churchpresenter.composeapp.generated.resources.profile_caption_in_progress
-import churchpresenter.composeapp.generated.resources.profile_caption_layout
 import churchpresenter.composeapp.generated.resources.profile_caption_layout_interleaved
 import churchpresenter.composeapp.generated.resources.profile_caption_layout_interleaved_sub
 import churchpresenter.composeapp.generated.resources.profile_caption_separate_boxes
@@ -28,18 +27,17 @@ import churchpresenter.composeapp.generated.resources.profile_caption_translatio
 import churchpresenter.composeapp.generated.resources.profile_caption_translation_italic
 import churchpresenter.composeapp.generated.resources.profile_caption_translation_size
 import churchpresenter.composeapp.generated.resources.profile_caption_translation_size_sub
+import churchpresenter.composeapp.generated.resources.profile_layout
 import churchpresenter.composeapp.generated.resources.profile_layout_side_by_side
 import churchpresenter.composeapp.generated.resources.profile_layout_stacked
 import churchpresenter.composeapp.generated.resources.profile_caption_lines
 import churchpresenter.composeapp.generated.resources.profile_caption_mode
 import churchpresenter.composeapp.generated.resources.profile_caption_segments
 import churchpresenter.composeapp.generated.resources.profile_caption_transcription
-import churchpresenter.composeapp.generated.resources.profile_caption_translation
 import churchpresenter.composeapp.generated.resources.profile_caption_translation_color
 import churchpresenter.composeapp.generated.resources.profile_caption_translation_in_progress
 import churchpresenter.composeapp.generated.resources.profile_caption_type_out
 import churchpresenter.composeapp.generated.resources.profile_caption_type_out_sub
-import churchpresenter.composeapp.generated.resources.profile_group_lines
 import churchpresenter.composeapp.generated.resources.profile_group_position
 import churchpresenter.composeapp.generated.resources.profile_group_show
 import churchpresenter.composeapp.generated.resources.profile_group_text
@@ -94,7 +92,7 @@ internal fun ProfileCaptionsPage(draft: AppSettings, onSettingsChange: ((AppSett
     }
     CaptionShowGroup(stt, update)
     SettingsGroup(
-        stringResource(Res.string.profile_group_lines),
+        stringResource(Res.string.profile_caption_lines),
         paths = listOf("$STT.maxSegments", "$STT.maxLines", "$STT.lineSpacing"),
     ) {
         SettingsRow(stringResource(Res.string.profile_caption_lines), paths = listOf("$STT.maxLines")) {
@@ -165,7 +163,7 @@ internal fun ProfileCaptionsPage(draft: AppSettings, onSettingsChange: ((AppSett
             ),
             BoxItem(
                 CAPTION_TRANSLATION_BOX,
-                stringResource(Res.string.profile_box_item_translation),
+                stringResource(Res.string.profile_caption_translation),
                 TextBox(xPercent = 5f, yPercent = 77f, widthPercent = 90f, heightPercent = 20f),
             ),
         ),
@@ -344,7 +342,7 @@ private fun BothLanguagesRows(stt: STTSettings, update: ((STTSettings) -> STTSet
         update { it.copy(layout = arranged + if (translationFirst) INVERSE else "") }
     }
     SettingsRow(
-        stringResource(Res.string.profile_caption_layout),
+        stringResource(Res.string.profile_layout),
         sub = stringResource(Res.string.profile_caption_layout_interleaved_sub)
             .takeIf { arrangement == LAYOUT_INTERLEAVED },
         paths = listOf("$STT.layout"),

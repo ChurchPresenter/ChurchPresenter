@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,6 +22,7 @@ import org.churchpresenter.settings.operatorBibleSettings
 /** Reloads on a settings change, resolves a scheduled verse, and takes focus back after a dialog. */
 @Composable
 internal fun BibleTabScope.BibleTabEffects(
+    viewModel: BibleViewModel,
     selectedVerseItem: ScheduleItem.BibleVerseItem?,
     selectedVerseItemVersion: Int,
     dialogDismissSignal: Int,
@@ -83,7 +85,7 @@ internal fun BibleTabScope.BibleTabEffects(
 
 /** Keeps the split-browse live panel on the chapter that is live, and sends its key-press steps. */
 @Composable
-internal fun BibleTabScope.BibleSplitLiveEffects() {
+internal fun BibleTabScope.BibleSplitLiveEffects(viewModel: BibleViewModel) {
     LaunchedEffect(displayedVerses, splitBrowseMode) {
         if (!splitBrowseMode || displayedVerses.isEmpty()) return@LaunchedEffect
         val first = displayedVerses.first()
@@ -144,13 +146,13 @@ internal fun BibleTabScope.BibleSplitLiveEffects() {
 
 /** Auto-follow, selection publishing, the navigate-away hold, and STT bookkeeping. */
 @Composable
-internal fun BibleTabScope.BibleSelectionEffects() {
+internal fun BibleTabScope.BibleSelectionEffects(viewModel: BibleViewModel) {
     val autoFollowLiveToken by viewModel.autoFollowLiveToken
 
     val autoFollowTokenGate = rememberTokenGate(autoFollowLiveToken)
     LaunchedEffect(autoFollowLiveToken) {
         if (!autoFollowTokenGate.consume()) return@LaunchedEffect
-        goLiveWithHistory(
+        goLiveWithHistory(viewModel, 
             source = viewModel.autoFollowLiveSource.value,
             matchType = viewModel.autoFollowLiveMatchType.value,
         )

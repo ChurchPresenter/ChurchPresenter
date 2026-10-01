@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.languageDisplayOrder
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.songLanguageName
-import churchpresenter.composeapp.generated.resources.song_language_order_label
+import churchpresenter.composeapp.generated.resources.profile_box_languages
 import churchpresenter.composeapp.generated.resources.song_language_order_subtitle
 import churchpresenter.composeapp.generated.resources.move_language_up
 import churchpresenter.composeapp.generated.resources.move_language_down
@@ -71,7 +71,6 @@ import churchpresenter.composeapp.generated.resources.ic_edit
 import churchpresenter.composeapp.generated.resources.no_lyrics_available
 import churchpresenter.composeapp.generated.resources.songs_search_focus_hint
 import churchpresenter.composeapp.generated.resources.tab_focus_lost
-import churchpresenter.composeapp.generated.resources.number
 import churchpresenter.composeapp.generated.resources.song_title_slide
 import churchpresenter.composeapp.generated.resources.title
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
@@ -259,7 +258,7 @@ private fun LyricsActionBar(
         val languages = currentSong?.let { 1 + it.extraTranslations().size } ?: 0
         if (languages > 1) {
             OrderSelector(
-                label = stringResource(Res.string.song_language_order_label),
+                label = stringResource(Res.string.profile_box_languages),
                 entries = songSettings.languageDisplayOrder()
                     .filter { it < languages }
                     .map { slot -> OrderEntry(slot.toString(), songLanguageName(songSettings, slot)) },

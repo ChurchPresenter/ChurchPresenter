@@ -3,7 +3,6 @@
     <string name="mode">الوضع</string>
     <string name="scope">النطاق</string>
     <string name="title">العنوان</string>
-    <string name="number">الرقم</string>
     <string name="go_live">عرض مباشر</string>
     <string name="add_to_schedule">إضافة إلى البرنامج</string>
     <string name="copy_verse">نسخ الآية</string>
@@ -12,7 +11,6 @@
     <string name="search">بحث</string>
     <string name="bible_smart_search_hint">مرجع أو نص — مثل يوحنا 3:16، مت 1، أو كلمة</string>
     <string name="bible_search_mode_auto">تلقائي</string>
-    <string name="bible_search_mode_reference">مرجع</string>
     <string name="bible_search_mode_text">نص</string>
     <string name="bible_search_mode_tooltip">اضغط للتبديل — تلقائي: الانتقال إلى المراجع والبحث عن كل ما عداها. مرجع: الانتقال فقط. نص: البحث دائمًا في نص الآيات.</string>
     <string name="bible_verse_selection_hint">Ctrl+نقر للتحديد، Shift+نقر لتحديد نطاق</string>
@@ -82,17 +80,11 @@
     <string name="bible_cross_references_close">إغلاق اللوحة</string>
     <string name="bible_cross_references_dismiss_hint">Esc للإغلاق</string>
     <string name="menu_file">ملف</string>
-    <string name="menu_new_schedule">برنامج جديد</string>
-    <string name="menu_open_schedule">فتح برنامج</string>
-    <string name="menu_save_schedule">حفظ البرنامج</string>
     <string name="menu_save_schedule_as">حفظ البرنامج باسم...</string>
     <string name="menu_close_schedule">إغلاق البرنامج</string>
     <string name="menu_exit">خروج</string>
     <string name="file_chooser_save_schedule">حفظ البرنامج باسم</string>
-    <string name="file_chooser_open_schedule">فتح برنامج</string>
     <string name="file_filter_schedule">برنامج Church Presenter (*.cps)</string>
-    <string name="menu_schedule">البرنامج</string>
-    <string name="menu_add_to_schedule">إضافة إلى البرنامج</string>
     <string name="menu_remove_from_schedule">إزالة من البرنامج</string>
     <string name="menu_clear_schedule">إفراغ البرنامج</string>
 
@@ -111,7 +103,6 @@
     <string name="instance_link_description">تابِع نسخة أخرى من ChurchPresenter على شبكتك — اعرض محتواها المباشر هنا، ويمكنك أيضًا إضافة عناصر إلى برنامجها.</string>
     <string name="instance_link_host">المضيف</string>
     <string name="instance_link_host_hint">مثل 192.168.1.10</string>
-    <string name="instance_link_port">المنفذ</string>
     <string name="instance_link_autoconnect">الاتصال تلقائيًا عند بدء التشغيل</string>
     <string name="instance_link_reconnect_delay">أدنى مهلة لإعادة الاتصال</string>
     <string name="instance_link_reconnect_delay_hint">أقصر انتظار قبل إعادة محاولة الاتصال بعد انقطاعه. تتزايد المهلة تلقائيًا عند تكرار الفشل.</string>
@@ -466,15 +457,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">افتراضية</string>
-    <string name="background_color_option">لون</string>
-    <string name="background_image_option">صورة</string>
     <string name="background_video_option">فيديو متكرر</string>
     <string name="background_transparent_option">شفافة</string>
     <string name="background_follow_default_option">اتّباع الافتراضية</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">الويب</string>
-    <string name="projection_content_background">الخلفية</string>
     <string name="projection_content_lt_background">خلفية الثلث السفلي</string>
     <string name="browser_source_resolution">الدقة</string>
     <string name="browser_source_fps">أقصى FPS</string>
@@ -556,7 +544,6 @@
     <string name="tooltip_schedule_zoom_out">تصغير</string>
     <string name="tooltip_add_to_schedule">إضافة إلى البرنامج</string>
     <string name="tooltip_clear_display">مسح الشاشة</string>
-    <string name="remote_action_clear_display">مسح الشاشة</string>
     <string name="schedule_add_files_title">إضافة ملفات إلى البرنامج</string>
     <string name="tooltip_toggle_displays">تبديل شاشات العرض</string>
     <string name="tooltip_settings">الإعدادات</string>
@@ -578,7 +565,6 @@
     <string name="schedule_density_compact">مضغوط</string>
     <string name="schedule_density_normal">عادي</string>
     <string name="schedule_density_detailed">مفصّل</string>
-    <string name="schedule_kind_lower_third">الثلث السفلي</string>
     <string name="tooltip_schedule_options">خيارات البرنامج</string>
     <string name="schedule_show_buttons_under_title">عرض الأزرار تحت العنوان</string>
     <string name="schedule_option_item_count">عدد العناصر</string>
@@ -589,7 +575,6 @@
     <string name="edit_label">تحرير الملصق</string>
     <string name="label_text">نص الملصق</string>
     <string name="text_color">لون النص</string>
-    <string name="background_color_label">لون الخلفية</string>
     <string name="enter_label_text">أدخل نص الملصق...</string>
 
     <!-- Pictures Tab Strings -->
@@ -619,7 +604,6 @@
     <string name="animation_slide_left">انزلاق إلى اليسار</string>
     <string name="animation_slide_right">انزلاق إلى اليمين</string>
     <string name="animation_none">بلا</string>
-    <string name="milliseconds_suffix">مل.ث</string>
     <string name="pictures_arrow_key_hint">%1$s الصورة التالية/السابقة  ·  %2$s التنقل بين الصفوف</string>
     <string name="presentation_arrow_key_hint">%1$s — البناء والشريحة السابقة/التالية  ·  %2$s — تشغيل/إيقاف مؤقت  ·  %3$s — تعتيم الشاشة</string>
     <string name="pictures_reorder_hint">Shift+سحب المصغّرات لإعادة الترتيب</string>
@@ -682,14 +666,10 @@
     <string name="content_bible_background">خلفية الكتاب المقدس</string>
     <string name="content_songs_background">خلفية الترانيم</string>
     <string name="content_pictures">الصور/العروض التقديمية</string>
-    <string name="content_media">الوسائط</string>
-    <string name="content_streaming">الثلث السفلي</string>
     <string name="content_announcements">الإعلانات</string>
     <string name="display_mode">وضع العرض</string>
-    <string name="display_fullscreen">شاشة كاملة</string>
     <string name="display_lower_third">الثلث السفلي</string>
     <string name="full_screen">شاشة كاملة</string>
-    <string name="lower_third_size">الثلث السفلي</string>
     <string name="identify_screen">تعريف</string>
     <string name="projection_target_display">الشاشة</string>
     <string name="projection_auto_display">تلقائي</string>
@@ -765,7 +745,6 @@
     <string name="settings_import_failed">فشل استيراد الإعدادات. قد يكون الملف غير صالح.</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">الوسائط</string>
     <string name="media_local_file">ملف محلي</string>
     <string name="media_network_url">رابط شبكي</string>
     <string name="media_url_placeholder">أدخل الرابط (http://، rtsp://، ...)</string>
@@ -809,7 +788,6 @@
     <string name="center_left">وسط اليسار</string>
     <string name="center_right">وسط اليمين</string>
     <string name="bottom_center">أسفل الوسط</string>
-    <string name="announcement_background_color_label">لون الخلفية</string>
     <string name="transparent_default">شفافة (افتراضي)</string>
     <string name="announcement_animation">الحركة</string>
     <string name="anim_slide_from_left">انزلاق من اليسار</string>
@@ -882,7 +860,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">إضافة إلى البرنامج</string>
     <string name="web_go_live">عرض مباشر</string>
     <string name="web_bookmark_add">إضافة إشارة مرجعية</string>
     <string name="web_bookmark_remove">إزالة الإشارة المرجعية</string>
@@ -946,7 +923,6 @@
     <string name="canvas_shape_fill_color">التعبئة</string>
     <string name="canvas_shape_stroke_width">سماكة الحدود</string>
     <string name="canvas_rename_scene">إعادة تسمية</string>
-    <string name="canvas_remove_scene">إزالة</string>
     <string name="canvas_add_source">إضافة مصدر</string>
     <string name="canvas_delete_source">حذف المصدر</string>
     <string name="canvas_source_move_forward">تحريك إلى الأمام</string>
@@ -974,7 +950,6 @@
     <string name="canvas_render_height">الارتفاع</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">CSS مخصص</string>
-    <string name="canvas_browser_url">الرابط</string>
     <string name="canvas_select_image_title">اختيار صورة</string>
     <string name="canvas_select_video_title">اختيار فيديو</string>
     <string name="canvas_image_files">ملفات الصور</string>
@@ -986,7 +961,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">ساعة</string>
     <string name="canvas_clock_mode_countdown">عد تنازلي</string>
     <string name="canvas_clock_mode_count_up">عد تصاعدي</string>
     <string name="canvas_decklink_io_warning">هذا الجهاز مستخدم حاليًا للإخراج. قد لا يتوفر الإدخال على الأجهزة التي لا تدعم الإدخال والإخراج في الوقت نفسه.</string>
@@ -1004,7 +978,6 @@
     <string name="canvas_text_curve">منحنى</string>
     <string name="canvas_letter_spacing">تباعد الأحرف</string>
     <string name="canvas_source_qrcode">رمز QR</string>
-    <string name="canvas_source_camera">كاميرا</string>
     <string name="canvas_source_screen_capture">تصوير الشاشة</string>
     <string name="canvas_source_bible">الكتاب المقدس</string>
     <string name="canvas_bible_version">نسخة الكتاب المقدس</string>
@@ -1017,7 +990,6 @@
     <string name="canvas_bible_ref_color">لون المرجع</string>
     <string name="canvas_verse_style">نمط الآية</string>
     <string name="canvas_reference_style">نمط المرجع</string>
-    <string name="canvas_text_color">لون النص</string>
     <string name="canvas_text_bg_color">لون الخلفية</string>
     <string name="canvas_clock_mode">الوضع</string>
     <string name="canvas_clock_format">التنسيق</string>
@@ -1042,7 +1014,6 @@
     <string name="canvas_camera_format">تنسيق الفيديو</string>
     <string name="canvas_camera_format_auto">تلقائي (افتراضي)</string>
     <string name="canvas_camera_connection">وصلة الفيديو</string>
-    <string name="canvas_camera_mode">الوضع</string>
     <string name="canvas_camera_mode_auto">تلقائي</string>
     <string name="canvas_capture_x">س التصوير</string>
     <string name="canvas_capture_y">ع التصوير</string>
@@ -1053,9 +1024,7 @@
     <string name="canvas_capture_mode_window">نافذة</string>
     <string name="canvas_capture_refresh_windows">تحديث قائمة النوافذ</string>
     <string name="canvas_capture_interval">فاصل التصوير</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">كاميرا: %1$s</string>
-    <string name="canvas_placeholder_camera_default">كاميرا</string>
     <string name="canvas_placeholder_screen_capture">تصوير الشاشة</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -1177,7 +1146,6 @@
     <string name="remote_activity_removed_from_schedule">تمت الإزالة من البرنامج</string>
     <string name="remote_activity_projected">تم العرض (مباشر)</string>
     <string name="remote_activity_presentation_connect">تم الاتصال بالتحكم عن بُعد بالعرض</string>
-    <string name="remote_activity_presentation_connect_detail">متصل الآن</string>
     <string name="remote_activity_qa_admin_connect">تم الاتصال بلوحة إدارة الأسئلة</string>
     <string name="remote_activity_qa_admin_connect_detail">متصل الآن</string>
     <string name="remote_activity_presented">قيد العرض</string>
@@ -1217,7 +1185,6 @@
     <string name="instance_link_primary_badge">رئيسية — %1$d نسخة تابعة متصلة</string>
     <string name="client_label_placeholder">أدخل اسمًا مألوفًا…</string>
     <string name="client_label_edit_tooltip">تعيين اسم مألوف</string>
-    <string name="client_label_save">حفظ</string>
     <string name="client_label_cancel">إلغاء</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1338,7 +1305,6 @@
     <string name="system_storage_subtitle">أين يبحث Church Presenter عن المحتوى الخاص بك</string>
     <string name="system_storage_linked_count">%1$d مرتبط</string>
     <string name="system_storage_needs_attention_count">%1$d يحتاج إلى انتباه</string>
-    <string name="system_storage_status_not_set">غير محدد</string>
     <string name="system_storage_status_not_found">لم يتم العثور على المجلد</string>
     <string name="system_storage_status_read_only">للقراءة فقط</string>
     <string name="system_storage_status_linked">مرتبط</string>
@@ -1380,7 +1346,6 @@
     <string name="show_song_number_before_title">إظهار رقم الترنيمة قبل العنوان</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">شاشة المنصة</string>
     <string name="general">عام</string>
     <string name="display_stage_monitor">شاشة المنصة</string>
     <string name="stage_monitor_quadrant_next">التالي</string>
@@ -1465,7 +1430,6 @@
     <string name="qa_confirm_go_live">تأكيد العرض المباشر</string>
     <string name="qa_add_question_hint">أضف سؤالًا…</string>
     <string name="qa_edit_question_hint">عدّل نص السؤال…</string>
-    <string name="qa_delete_question">حذف</string>
     <string name="qa_confirm_delete_prompt">هل تريد الحذف؟</string>
     <string name="qa_submitter_device">الجهاز: %1$s</string>
     <string name="qa_public_access">الوصول العام</string>
@@ -1502,14 +1466,11 @@
     <string name="stt_live_preview">معاينة مباشرة</string>
     <string name="stt_not_connected">غير متصل. أدخل رابط خادم STT ثم اضغط "اتصال".</string>
     <string name="stt_waiting_for_transcription">في انتظار النص المنطوق…</string>
-    <string name="stt_transcription_label">النص المنطوق</string>
     <string name="stt_translation_label">الترجمة</string>
     <string name="stt_settings_dialog_title">إعدادات عرض STT</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">تقارير CCLI</string>
-    <string name="ccli_tab_songs">الترانيم</string>
-    <string name="ccli_tab_bible">الكتاب المقدس</string>
     <string name="ccli_tab_activity">النشاط</string>
     <string name="ccli_songs_summary">%1$d ترنيمة مختلفة · %2$d عرضًا إجمالًا</string>
     <string name="ccli_bible_summary">%1$d آية مختلفة · %2$d عرضًا إجمالًا</string>
@@ -1520,7 +1481,6 @@
     <string name="ccli_activity_title">العروض عبر الزمن</string>
     <string name="ccli_from">من:</string>
     <string name="ccli_to">إلى:</string>
-    <string name="ccli_legend_songs">الترانيم</string>
     <string name="ccli_legend_bible">آيات الكتاب المقدس</string>
     <string name="ccli_stat_songs_presented">الترانيم المعروضة</string>
     <string name="ccli_stat_bible_verses">آيات الكتاب المقدس</string>
@@ -1534,7 +1494,6 @@
     <string name="ccli_col_first">الأول</string>
     <string name="ccli_col_last">الأخير</string>
     <string name="ccli_col_verse">الآية</string>
-    <string name="ccli_col_bible">الكتاب المقدس</string>
     <string name="ccli_export_csv">تصدير CSV لـ CCLI</string>
     <string name="ccli_export_xls">تصدير XLS</string>
     <string name="ccli_exported_success">تم تصدير التقرير بنجاح.</string>
@@ -1615,7 +1574,6 @@
     <string name="obs_mode_bible">الكتاب المقدس</string>
     <string name="obs_mode_songs">الترانيم</string>
     <string name="obs_mode_pictures">الصور</string>
-    <string name="obs_mode_presentation">العرض التقديمي</string>
     <string name="obs_mode_media">الوسائط</string>
     <string name="obs_mode_lower_third">الشريط السفلي</string>
     <string name="obs_mode_announcements">الإعلانات</string>
@@ -1810,7 +1768,6 @@
     <string name="companion_satellite_no_host">اضبط مضيف Companion في الإعدادات → Companion Satellite للاتصال.</string>
     <string name="companion_satellite_status_connecting">جارٍ الاتصال…</string>
     <string name="companion_satellite_status_disconnected">انقطع الاتصال</string>
-    <string name="companion_satellite_status_error">خطأ: %1$s</string>
     <string name="companion_satellite_connection_name">الاسم</string>
     <string name="companion_satellite_product_name">اسم المنتج</string>
     <string name="companion_satellite_reconnect_delay">مهلة إعادة الاتصال (ms)</string>
@@ -1874,7 +1831,6 @@
     <string name="bible_engine_detect">اكتشاف الشواهد الكتابية</string>
     <string name="bible_engine_run_local">تشغيل المحرك محليًا</string>
     <string name="bible_engine_host">مضيف المحرك</string>
-    <string name="bible_engine_port">المنفذ</string>
     <string name="stt_help_dev_mode">ساعد المطوّر — أظهر أزرار الملاحظات المباشرة في تبويب الكتاب المقدس (مقطع خاطئ / سابق لأوانه / مقطع فائت)</string>
     <string name="dictionary_back">رجوع</string>
     <string name="dictionary_forward">تقدّم</string>
@@ -1963,7 +1919,6 @@
     <string name="font_category_serif">بزوائد</string>
     <string name="font_category_mono">أحادي</string>
     <string name="font_category_display">زخرفي</string>
-    <string name="font_preview">معاينة</string>
     <string name="font_preview_sample">نص تجريبي بالخط المختار</string>
     <string name="font_warning_no_cyrillic">%1$s لا يحتوي على حروف سيريلية — ستظهر الآيات السيريلية على الشاشة بخط آخر.</string>
     <string name="font_warning_no_hebrew">%1$s لا يحتوي على حروف عبرية — سيظهر النص العبري على الشاشة بخط آخر.</string>
@@ -1973,7 +1928,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">يتوسطه خط</string>
     <string name="bible_custom_name">الاسم</string>
-    <string name="bible_custom_abbreviation">الاختصار</string>
     <string name="bible_translations">الترجمات</string>
     <string name="bible_miscellaneous">متنوعة</string>
     <string name="bible_font">الخط</string>
@@ -1988,10 +1942,7 @@
     <string name="bible_preview_sample_book">يوحنا</string>
     <string name="bible_preview_no_translations">أضف ترجمة لعرضها هنا</string>
     <string name="song_element_number">الرقم</string>
-    <string name="song_element_title">العنوان</string>
     <string name="song_element_lyrics">الكلمات</string>
-    <string name="song_element_author">المؤلف</string>
-    <string name="song_element_composer">الملحّن</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">الإيقاع</string>
     <string name="song_target_title_slide">شريحة العنوان</string>
@@ -2004,7 +1955,6 @@
     <string name="song_chunk">مقطع</string>
     <string name="song_language_scope">اللغة</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">الخلفية</string>
     <string name="song_background_full_screen">ملء الشاشة</string>
     <string name="song_background_lower_third">الثلث السفلي</string>
     <string name="song_background_inherit">موروثة</string>
@@ -2019,7 +1969,6 @@
     <string name="song_background_your_color">لونك</string>
     <string name="song_background_browse">استعراض…</string>
     <string name="song_background_look">المظهر</string>
-    <string name="song_background_preset_none">بلا</string>
     <string name="song_background_preset_soft">خفيف</string>
     <string name="song_background_preset_legible">واضح</string>
     <string name="song_background_preset_cinema">سينمائي</string>
@@ -2040,7 +1989,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">الخلفيات</string>
     <string name="background_group_defaults">الافتراضية</string>
-    <string name="background_scope_default">افتراضية</string>
     <string name="background_scope_default_lower_third">الثلث السفلي الافتراضي</string>
     <string name="background_scope_default_meta">عندما يكون الكتاب المقدس أو الترانيم على الافتراضية</string>
     <string name="background_scope_default_lower_third_meta">عندما يكون الثلث السفلي على الافتراضية</string>
@@ -2049,16 +1997,13 @@
     <string name="background_following_default">يتبع الافتراضية</string>
     <string name="background_use_default">استخدام الافتراضية</string>
     <string name="background_set_explicitly">مضبوطة على حدة لهذا السطح</string>
-    <string name="background_type_caption">النوع</string>
     <string name="background_color_caption">اللون</string>
     <string name="background_image_file">ملف الصورة</string>
     <string name="background_video_file">ملف الفيديو</string>
-    <string name="background_opacity_caption">العتامة</string>
     <string name="background_above_band_caption">فوق الشريط</string>
     <string name="background_above_band_fill">لون التعبئة</string>
     <string name="background_above_band_opacity">عتامة التعبئة</string>
     <string name="quick_background_reset">العودة إلى الوضع الطبيعي</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · تُدار في الإعدادات</string>
     <string name="quick_backgrounds">خلفيات سريعة</string>
     <string name="quick_backgrounds_help">خلفيات تبقيها لوحة المعاينة على بعد نقرة واحدة. انقر على مربّع لتختار ما يعرضه، واسحبه لتغيير المفتاح الذي يصل إليه. اختيار واحدة أثناء الخدمة يتجاوز كل الشاشات حتى تعود إلى الوضع الطبيعي، ولا يغيّر شيئًا هنا.</string>
@@ -2084,16 +2029,10 @@
     <string name="output_profile_swap_menu_tooltip">تبديل ملف تعريف المخرج</string>
     <string name="output_profile_new_name_default">ملف تعريف جديد</string>
     <string name="output_profile_empty_state">أنشئ ملف تعريف لبدء تنسيقه</string>
-    <string name="customize_bible">الكتاب المقدس</string>
-    <string name="customize_songs">الترانيم</string>
     <string name="customize_group_verse_text">نص الآية</string>
     <string name="customize_group_reference">مرجع</string>
     <string name="customize_background_type">النوع</string>
-    <string name="customize_type_color">لون</string>
     <string name="customize_type_image">صورة</string>
-    <string name="customize_type_video">فيديو</string>
-    <string name="customize_type_default">افتراضية</string>
-    <string name="customize_type_gradient">تدرّج لوني</string>
     <string name="customize_show_abbreviation">الاختصار</string>
     <string name="customize_background_opacity">العتامة</string>
     <string name="slate_theme">سمة الأردواز</string>
@@ -2139,7 +2078,6 @@
     <string name="song_lottie_unsupported_note">يحدد القالب التخطيط وموضع العنوان. يضبط نمط الثلث السفلي الخط والحجم واللون والمحاذاة وتباعد الأحرف وحالة الأحرف والظل؛ ولا تُطبَّق خلفية النص والتسطير والشطب وتباعد الكلمات ومعاينة التالي والأوتار.</string>
     <string name="bible_lottie_unsupported_note">يحدد القالب التخطيط وموضع المرجع وكيفية تقاسم لغتين للشريط. يضبط نمط الثلث السفلي الخط والحجم واللون والمحاذاة وتباعد الأحرف وحالة الأحرف والظل؛ ولا تُطبَّق خلفية النص والتسطير والشطب وتباعد الكلمات.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">حد خارجي</string>
     <string name="tooltip_outline_options">خيارات الحد الخارجي</string>
     <string name="text_outline">حد خارجي</string>
     <string name="text_outline_width">العرض</string>
@@ -2207,7 +2145,6 @@
     <string name="add_ndi_output">إضافة مخرج</string>
     <string name="ndi_output_numbered">مخرج NDI %1$d</string>
     <string name="preview_output">معاينة المخرج</string>
-    <string name="output_resolution">الدقة</string>
     <string name="output_resolution_custom">مخصصة…</string>
     <string name="output_resolution_custom_title">دقة مخصصة</string>
     <string name="output_resolution_width">العرض</string>
@@ -2311,7 +2248,6 @@
     <string name="calendar_sync_description">خطّط الخدمات من تطبيق الجوال طوال الأسبوع، حتى عندما يكون هذا الحاسوب مطفأً. يبقى هذا الحاسوب هو المصدر الأساسي.</string>
     <string name="calendar_sync_enable">مزامنة التقويم مع الهواتف</string>
     <string name="calendar_sync_relay_url">المُرحِّل</string>
-    <string name="calendar_sync_status_off">إيقاف</string>
     <string name="calendar_sync_status_unpaired">غير مسجَّل بعد — يسجّل هذا الحاسوب لدى المُرحِّل عند تشغيل المزامنة لأول مرة</string>
     <string name="calendar_sync_status_syncing">جارٍ المزامنة…</string>
     <string name="calendar_sync_status_synced">تمت المزامنة %1$s</string>

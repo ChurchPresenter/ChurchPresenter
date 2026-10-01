@@ -46,7 +46,7 @@ import churchpresenter.composeapp.generated.resources.font_category_serif
 import churchpresenter.composeapp.generated.resources.font_picker_clear_search
 import churchpresenter.composeapp.generated.resources.font_picker_keys
 import churchpresenter.composeapp.generated.resources.font_picker_search
-import churchpresenter.composeapp.generated.resources.font_preview
+import churchpresenter.composeapp.generated.resources.preview
 import churchpresenter.composeapp.generated.resources.font_warning_no_cyrillic
 import churchpresenter.composeapp.generated.resources.font_warning_no_hebrew
 import churchpresenter.composeapp.generated.resources.ic_check
@@ -281,7 +281,7 @@ internal fun FontPreviewPane(face: FontFace, measured: Boolean, lines: List<Stri
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = stringResource(Res.string.font_preview).uppercase(),
+                text = stringResource(Res.string.preview).uppercase(),
                 fontSize = 9.sp,
                 lineHeight = 10.sp,
                 fontWeight = FontWeight.ExtraBold,

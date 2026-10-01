@@ -1,5 +1,11 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.DetectedReference
+import org.churchpresenter.app.churchpresenter.viewmodel.ContinuationSpeed
+import org.churchpresenter.app.churchpresenter.viewmodel.TextMatchLevel
+import org.churchpresenter.app.churchpresenter.viewmodel.BibleSearchMode
+import org.churchpresenter.bible.BibleSearch
+import org.churchpresenter.bible.BibleLoadError
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -59,7 +65,7 @@ import org.churchpresenter.app.churchpresenter.utils.ShortcutMap
  */
 @Suppress("LongParameterList")
 internal class BibleTabScope(
-    val viewModel: BibleViewModel,
+    val states: BibleTabStates,
     val appSettings: AppSettings,
     val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     val onAddToSchedule: ((
@@ -98,27 +104,27 @@ internal class BibleTabScope(
     val translationSelectionKey get() = appSettings.bibleSettings.translationSelectionKey()
     val sttConnected get() = sttManager?.connected?.value == true
     val engineSettings get() = appSettings.bibleEngineSettings
-    val detectedReferences by viewModel.detectedReferences
-    val autoFollowEnabled by viewModel.autoFollowEnabled
-    val textMatchLevel by viewModel.textMatchLevel
-    val continuationSpeed by viewModel.continuationSpeed
+    val detectedReferences by states.detectedReferences
+    val autoFollowEnabled by states.autoFollowEnabled
+    val textMatchLevel by states.textMatchLevel
+    val continuationSpeed by states.continuationSpeed
 
-    val books by viewModel.books
-    val loadErrors by viewModel.loadErrors
-    val selectedBookIndex by viewModel.selectedBookIndex
-    val selectedChapter by viewModel.selectedChapter
-    val selectedVerseIndex by viewModel.selectedVerseIndex
-    val verses by viewModel.verses
-    val searchQuery by viewModel.searchQuery
-    val searchResults by viewModel.searchResults
-    val isSearchMode by viewModel.isSearchMode
-    val searchMode by viewModel.searchMode
-    val filteredBooks by viewModel.filteredBooks
-    val filteredChapters by viewModel.filteredChapters
-    val filteredVerses by viewModel.filteredVerses
-    val selectedScopeIndex by viewModel.selectedScopeIndex
-    val selectedModeIndex by viewModel.selectedModeIndex
-    val verseSelectionToken by viewModel.verseSelectionToken
+    val books by states.books
+    val loadErrors by states.loadErrors
+    val selectedBookIndex by states.selectedBookIndex
+    val selectedChapter by states.selectedChapter
+    val selectedVerseIndex by states.selectedVerseIndex
+    val verses by states.verses
+    val searchQuery by states.searchQuery
+    val searchResults by states.searchResults
+    val isSearchMode by states.isSearchMode
+    val searchMode by states.searchMode
+    val filteredBooks by states.filteredBooks
+    val filteredChapters by states.filteredChapters
+    val filteredVerses by states.filteredVerses
+    val selectedScopeIndex by states.selectedScopeIndex
+    val selectedModeIndex by states.selectedModeIndex
+    val verseSelectionToken by states.verseSelectionToken
     val currentIsPresenting by currentIsPresentingState
     val splitBrowseMode get() = appSettings.bibleSettings.splitBrowseMode
     val isSplitActive get() = splitBrowseMode
@@ -147,19 +153,19 @@ internal class BibleTabScope(
 
     fun saveColWCrossRef() = widths.saveColWCrossRef()
 
-    fun openCrossRef(row: CrossRefRow) {
+    fun openCrossRef(viewModel: BibleViewModel, row: CrossRefRow) {
         crossRefs.followed(row)
         viewModel.selectVerseByCanonicalRef(row.bookId, row.chapter, row.verse)
         focusRequester.requestFocus()
     }
 
-    fun goLiveCrossRef(row: CrossRefRow) {
+    fun goLiveCrossRef(viewModel: BibleViewModel, row: CrossRefRow) {
         crossRefs.followed(row)
         viewModel.selectVerseByCanonicalRef(row.bookId, row.chapter, row.verse, goLiveSource = "crossref")
         focusRequester.requestFocus()
     }
 
-    fun scheduleCrossRef(row: CrossRefRow) {
+    fun scheduleCrossRef(viewModel: BibleViewModel, row: CrossRefRow) {
         viewModel.addCanonicalRefToSchedule(row.bookId, row.chapter, row.verse) {
                 bookName, chapter, verseNumber, verseText, verseRange, bookId ->
             onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange, bookId)
@@ -167,7 +173,7 @@ internal class BibleTabScope(
         focusRequester.requestFocus()
     }
 
-    fun goLiveWithHistory(source: String = "manual", matchType: String? = null) {
+    fun goLiveWithHistory(viewModel: BibleViewModel, source: String = "manual", matchType: String? = null) {
         val selectedVerses = viewModel.getSelectedVerses()
         selectedVerses.firstOrNull()?.let { v ->
             if (viewModel.multiVerseEnabled.value) {
@@ -256,7 +262,7 @@ internal class BibleTabScope(
         onPresenting(Presenting.BIBLE)
     }
 
-    fun handleKeyEvent(event: KeyEvent): Boolean {
+    fun handleKeyEvent(viewModel: BibleViewModel, event: KeyEvent): Boolean {
         if (event.type != KeyEventType.KeyDown) return false
 
         if (searchFieldFocused) return false
@@ -396,3 +402,51 @@ internal fun rememberBibleColumnWidths(
         )
     }
 }
+
+/** The Bible ViewModel's state the tab's pieces read, as states, so the scope never holds the ViewModel. */
+@Suppress("LongParameterList")
+internal class BibleTabStates(
+    val detectedReferences: State<List<DetectedReference>>,
+    val autoFollowEnabled: State<Boolean>,
+    val textMatchLevel: State<TextMatchLevel>,
+    val continuationSpeed: State<ContinuationSpeed>,
+    val books: State<List<String>>,
+    val loadErrors: State<List<BibleLoadError>>,
+    val selectedBookIndex: State<Int>,
+    val selectedChapter: State<Int>,
+    val selectedVerseIndex: State<Int>,
+    val verses: State<List<String>>,
+    val searchQuery: State<String>,
+    val searchResults: State<List<BibleSearch>>,
+    val isSearchMode: State<Boolean>,
+    val searchMode: State<BibleSearchMode>,
+    val filteredBooks: State<List<String>>,
+    val filteredChapters: State<List<String>>,
+    val filteredVerses: State<List<String>>,
+    val selectedScopeIndex: State<Int>,
+    val selectedModeIndex: State<Int>,
+    val verseSelectionToken: State<Int>,
+)
+
+internal fun BibleViewModel.tabStates() = BibleTabStates(
+    detectedReferences = detectedReferences,
+    autoFollowEnabled = autoFollowEnabled,
+    textMatchLevel = textMatchLevel,
+    continuationSpeed = continuationSpeed,
+    books = books,
+    loadErrors = loadErrors,
+    selectedBookIndex = selectedBookIndex,
+    selectedChapter = selectedChapter,
+    selectedVerseIndex = selectedVerseIndex,
+    verses = verses,
+    searchQuery = searchQuery,
+    searchResults = searchResults,
+    isSearchMode = isSearchMode,
+    searchMode = searchMode,
+    filteredBooks = filteredBooks,
+    filteredChapters = filteredChapters,
+    filteredVerses = filteredVerses,
+    selectedScopeIndex = selectedScopeIndex,
+    selectedModeIndex = selectedModeIndex,
+    verseSelectionToken = verseSelectionToken,
+)

@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.profile_group_layout
+import churchpresenter.composeapp.generated.resources.profile_layout
 import churchpresenter.composeapp.generated.resources.profile_group_what_goes_where
 import churchpresenter.composeapp.generated.resources.profile_stage_arrangement
 import churchpresenter.composeapp.generated.resources.profile_stage_zones
@@ -138,7 +138,7 @@ private fun StageLayoutGroup(
     val resetLabel = stringResource(Res.string.stage_monitor_size_reset)
     val contents = StageMonitorZone.entries.associateWith { zone -> sm.typesIn(zone).map { contentTypeLabel(it) } }
     SettingsGroup(
-        stringResource(Res.string.profile_group_layout),
+        stringResource(Res.string.profile_layout),
         action = if (sm.hasCustomZoneSizes()) {
             { GroupCaptionAction(resetLabel, { update { withDefaultZoneSizes() } }) }
         } else {
@@ -163,7 +163,7 @@ private fun StageLayoutGroup(
                 )
             }
         }
-        SettingsWideRow(searchTerms = stringResource(Res.string.profile_group_layout)) {
+        SettingsWideRow(searchTerms = stringResource(Res.string.profile_layout)) {
             Text(
                 stringResource(Res.string.stage_monitor_size_hint),
                 fontSize = 11.sp,
@@ -181,7 +181,7 @@ private fun StageLayoutGroup(
                 onHeightChange = { zone, percent -> update { withZoneHeight(zone, percent) } },
             )
         }
-        SettingsWideRow(advanced = true, searchTerms = stringResource(Res.string.profile_group_layout)) {
+        SettingsWideRow(advanced = true, searchTerms = stringResource(Res.string.profile_layout)) {
             ZoneSizeControls(
                 selectedLabel = zoneLabel(selected.toZone()),
                 widthPercent = sm.zoneWidthPercent(selected),

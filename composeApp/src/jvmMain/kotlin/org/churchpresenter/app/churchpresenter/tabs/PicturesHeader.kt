@@ -5,6 +5,7 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.TooltipArea
@@ -67,20 +68,20 @@ import org.churchpresenter.app.churchpresenter.composables.RecentChip
 
 /** The top card: the folder bar, the recent folders, the playback controls and the key hints. */
 @Composable
-internal fun PicturesTabScope.PicturesHeader() {
+internal fun PicturesTabScope.PicturesHeader(viewModel: PicturesViewModel) {
     Column(modifier = Modifier.fillMaxWidth().topBarCard()) {
-        PicturesFolderBar()
+        PicturesFolderBar(viewModel)
 
-        PicturesRecentBar()
+        PicturesRecentBar(viewModel)
 
-        PicturesControlsBar()
+        PicturesControlsBar(viewModel)
 
         PicturesHintRow()
     }
 }
 
 @Composable
-private fun PicturesTabScope.PicturesFolderBar() {
+private fun PicturesTabScope.PicturesFolderBar(viewModel: PicturesViewModel) {
     // ── Folder bar ────────────────────────────────────────────────
     Row(
         modifier = Modifier
@@ -156,7 +157,7 @@ private fun PicturesTabScope.PicturesFolderBar() {
 }
 
 @Composable
-private fun PicturesTabScope.PicturesRecentBar() {
+private fun PicturesTabScope.PicturesRecentBar(viewModel: PicturesViewModel) {
     // ── Recent folders bar ────────────────────────────────────────
     val recentOrdered =
         RecentPictureFolders.pinned + RecentPictureFolders.folders.filter { it !in RecentPictureFolders.pinned }

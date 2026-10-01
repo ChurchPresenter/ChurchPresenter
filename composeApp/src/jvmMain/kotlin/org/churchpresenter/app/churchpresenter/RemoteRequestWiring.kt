@@ -23,7 +23,6 @@ import org.churchpresenter.app.churchpresenter.server.remoteAccessDecision
 import org.churchpresenter.app.churchpresenter.server.addScheduleItem
 import org.churchpresenter.app.churchpresenter.server.batchEventSummary
 import org.churchpresenter.app.churchpresenter.server.emitRemoteTabSelection
-import org.churchpresenter.app.churchpresenter.server.RemoteAccess
 import org.churchpresenter.app.churchpresenter.server.RemoteApproval
 import org.churchpresenter.app.churchpresenter.server.remoteApproval
 import org.churchpresenter.app.churchpresenter.server.executeProjectItem
@@ -94,19 +93,15 @@ internal fun MainWindowScope.RemoteEnrollRequests() {
         val enrollCodeFormat = stringResource(Res.string.remote_api_calendar_enroll_code)
         LaunchedEffect(Unit) {
             companionServer.onCalendarEnroll.collect { pending ->
-                // Sync off means no relay, so there is nothing to enroll into.
-                if (!appSettings.calendarSync.enabled) {
-                    pending.decision.complete(CalendarEnrollDecision.SyncOff)
-                    return@collect
-                }
                 val clientId = pending.clientId
                 val access = remoteAccessDecision(
                     clientId,
                     remoteClientManager.allowedClients, remoteClientManager.blockedClients,
                     sessionAllowedClients, sessionBlockedClients,
                 )
-                if (access == RemoteAccess.AUTO_REJECT) {
-                    pending.decision.complete(CalendarEnrollDecision.Denied)
+                // Sync off means no relay, so there is nothing to enroll into; a blocked phone is refused.
+                calendarEnrollGate(appSettings.calendarSync.enabled, access)?.let { answer ->
+                    pending.decision.complete(answer)
                     return@collect
                 }
                 val enroll: () -> Unit = {

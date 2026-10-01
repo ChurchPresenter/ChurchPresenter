@@ -3,7 +3,6 @@
     <string name="mode">Modus</string>
     <string name="scope">Bereik</string>
     <string name="title">Titel</string>
-    <string name="number">Nummer</string>
     <string name="go_live">Live gaan</string>
     <string name="add_to_schedule">Toevoegen aan programma</string>
     <string name="no_lyrics_available">Geen tekst beschikbaar voor dit lied</string>
@@ -54,18 +53,12 @@
     <string name="shadow_opacity">Intensiteit (%)</string>
     <string name="hold_live">Live vasthouden</string>
     <string name="menu_file">Bestand</string>
-    <string name="menu_new_schedule">Nieuw programma</string>
-    <string name="menu_open_schedule">Programma openen</string>
-    <string name="menu_save_schedule">Programma opslaan</string>
     <string name="menu_save_schedule_as">Programma opslaan als...</string>
     <string name="menu_close_schedule">Programma sluiten</string>
     <string name="menu_exit">Afsluiten</string>
     <string name="file_chooser_save_schedule">Programma opslaan als</string>
-    <string name="file_chooser_open_schedule">Programma openen</string>
     <string name="file_filter_schedule">Church Presenter programma (*.cps)</string>
 
-    <string name="menu_schedule">Programma</string>
-    <string name="menu_add_to_schedule">Toevoegen aan programma</string>
     <string name="menu_remove_from_schedule">Verwijderen uit programma</string>
     <string name="menu_clear_schedule">Programma wissen</string>
 
@@ -336,15 +329,12 @@
 
     <!-- Background Type Options -->
     <string name="background_default">Standaard</string>
-    <string name="background_color_option">Kleur</string>
-    <string name="background_image_option">Afbeelding</string>
     <string name="background_video_option">Videolus</string>
     <string name="background_transparent_option">Transparant</string>
     <string name="background_follow_default_option">Standaard volgen</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">Web</string>
-    <string name="projection_content_background">Achtergrond</string>
     <string name="projection_content_lt_background">Lower Third achtergrond</string>
 
     <!-- Bible Tab -->
@@ -392,7 +382,6 @@
     <string name="tooltip_move_down">Omlaag verplaatsen</string>
     <string name="tooltip_add_to_schedule">Toevoegen aan programma</string>
     <string name="tooltip_clear_display">Scherm wissen</string>
-    <string name="remote_action_clear_display">Scherm wissen</string>
     <string name="schedule_add_files_title">Bestanden toevoegen aan programma</string>
     <string name="tooltip_toggle_displays">Presentatieschermen in-/uitschakelen</string>
     <string name="tooltip_settings">Instellingen</string>
@@ -414,7 +403,6 @@
     <string name="schedule_density_compact">Compact</string>
     <string name="schedule_density_normal">Normaal</string>
     <string name="schedule_density_detailed">Gedetailleerd</string>
-    <string name="schedule_kind_lower_third">Lower Third</string>
     <string name="tooltip_schedule_options">Programma-opties</string>
     <string name="schedule_show_buttons_under_title">Knoppen onder de titel tonen</string>
     <string name="schedule_option_item_count">Aantal items</string>
@@ -425,7 +413,6 @@
     <string name="edit_label">Label bewerken</string>
     <string name="label_text">Labeltekst</string>
     <string name="text_color">Tekstkleur</string>
-    <string name="background_color_label">Achtergrondkleur</string>
     <string name="enter_label_text">Voer labeltekst in...</string>
 
     <!-- Pictures Tab Strings -->
@@ -454,7 +441,6 @@
     <string name="animation_slide_left">Naar links schuiven</string>
     <string name="animation_slide_right">Naar rechts schuiven</string>
     <string name="animation_none">Geen</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s volgende/vorige afbeelding  ·  %2$s door rijen navigeren</string>
     <string name="presentation_arrow_key_hint">%1$s — vorige/volgende stap en dia  ·  %2$s — afspelen/pauze  ·  %3$s — zwart scherm</string>
     <string name="pictures_reorder_hint">Shift+slepen om miniaturen te herordenen</string>
@@ -500,14 +486,10 @@
     <string name="content_bible_background">Bijbelachtergrond</string>
     <string name="content_songs_background">Liedachtergrond</string>
     <string name="content_pictures">Afbeeldingen/Presentatie</string>
-    <string name="content_media">Media</string>
-    <string name="content_streaming">Lower Third</string>
     <string name="content_announcements">Mededelingen</string>
     <string name="display_mode">Weergavemodus</string>
-    <string name="display_fullscreen">Volledig scherm</string>
     <string name="display_lower_third">Lower Third</string>
     <string name="full_screen">Volledig scherm</string>
-    <string name="lower_third_size">Lower Third</string>
     <string name="identify_screen">Identificeren</string>
     <string name="projection_target_display">Scherm</string>
     <string name="projection_auto_display">Automatisch</string>
@@ -565,7 +547,6 @@
     <string name="settings_import_failed">Importeren van instellingen mislukt. Het bestand is mogelijk ongeldig.</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">Media</string>
     <string name="media_local_file">Lokaal bestand</string>
     <string name="media_network_url">Netwerk-URL</string>
     <string name="media_url_placeholder">Voer URL in (http://, rtsp://, ...)</string>
@@ -608,7 +589,6 @@
     <string name="center_left">Midden links</string>
     <string name="center_right">Midden rechts</string>
     <string name="bottom_center">Onder midden</string>
-    <string name="announcement_background_color_label">Achtergrondkleur</string>
     <string name="transparent_default">Transparant (standaard)</string>
     <string name="announcement_animation">Animatie</string>
     <string name="anim_slide_from_left">Schuiven van links</string>
@@ -674,7 +654,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://voorbeeld.nl</string>
-    <string name="web_add_to_schedule">Toevoegen aan programma</string>
     <string name="web_go_live">Live gaan</string>
     <string name="web_bookmark_add">Bladwijzer toevoegen</string>
     <string name="web_bookmark_remove">Bladwijzer verwijderen</string>
@@ -736,7 +715,6 @@
     <string name="canvas_shape_fill_color">Vulling</string>
     <string name="canvas_shape_stroke_width">Randbreedte</string>
     <string name="canvas_rename_scene">Hernoemen</string>
-    <string name="canvas_remove_scene">Verwijderen</string>
     <string name="canvas_add_source">Bron toevoegen</string>
     <string name="canvas_delete_source">Bron verwijderen</string>
     <string name="canvas_source_move_forward">Naar voren brengen</string>
@@ -763,7 +741,6 @@
     <string name="canvas_render_height">Hoogte</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">Aangepaste CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">Afbeelding selecteren</string>
     <string name="canvas_select_video_title">Video selecteren</string>
     <string name="canvas_image_files">Afbeeldingsbestanden</string>
@@ -775,7 +752,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">Klok</string>
     <string name="canvas_clock_mode_countdown">Aftellen</string>
     <string name="canvas_clock_mode_count_up">Stopwatch</string>
     <string name="canvas_decklink_io_warning">Dit apparaat wordt momenteel gebruikt voor uitvoer. Invoer is mogelijk niet beschikbaar op apparaten die geen gelijktijdige I/O ondersteunen.</string>
@@ -793,7 +769,6 @@
     <string name="canvas_text_curve">Kromming</string>
     <string name="canvas_letter_spacing">Letterspatiëring</string>
     <string name="canvas_source_qrcode">QR-code</string>
-    <string name="canvas_source_camera">Camera</string>
     <string name="canvas_source_screen_capture">Schermopname</string>
     <string name="canvas_source_bible">Bijbel</string>
     <string name="canvas_bible_version">Bijbelversie</string>
@@ -804,7 +779,6 @@
     <string name="canvas_bible_end_verse">Eindvers</string>
     <string name="canvas_bible_ref_font_size">Verwijzing lettergrootte</string>
     <string name="canvas_bible_ref_color">Verwijzingskleur</string>
-    <string name="canvas_text_color">Tekstkleur</string>
     <string name="canvas_text_bg_color">Achtergrondkleur</string>
     <string name="canvas_clock_mode">Modus</string>
     <string name="canvas_clock_format">Formaat</string>
@@ -829,7 +803,6 @@
     <string name="canvas_camera_format">Videoformaat</string>
     <string name="canvas_camera_format_auto">Automatisch (standaard)</string>
     <string name="canvas_camera_connection">Videoverbinding</string>
-    <string name="canvas_camera_mode">Modus</string>
     <string name="canvas_camera_mode_auto">Automatisch</string>
     <string name="canvas_capture_x">Opname X</string>
     <string name="canvas_capture_y">Opname Y</string>
@@ -840,9 +813,7 @@
     <string name="canvas_capture_mode_window">Venster</string>
     <string name="canvas_capture_refresh_windows">Vensterlijst vernieuwen</string>
     <string name="canvas_capture_interval">Opname-interval</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Camera: %1$s</string>
-    <string name="canvas_placeholder_camera_default">Camera</string>
     <string name="canvas_placeholder_screen_capture">Schermopname</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
@@ -958,7 +929,6 @@
     <string name="remote_activity_added_to_schedule">Toegevoegd aan programma</string>
     <string name="remote_activity_projected">Geprojecteerd (live gegaan)</string>
     <string name="remote_activity_presentation_connect">Verbonden met presentatie-afstandsbediening</string>
-    <string name="remote_activity_presentation_connect_detail">Nu verbonden</string>
     <string name="remote_activity_qa_admin_connect">Verbonden met V&amp;A-beheer</string>
     <string name="remote_activity_qa_admin_connect_detail">Nu verbonden</string>
     <string name="remote_activity_presented">Presenteren</string>
@@ -993,7 +963,6 @@
     <string name="no_blocked_clients">Geen permanent geblokkeerde clients.</string>
     <string name="client_label_placeholder">Voer een vriendelijke naam in…</string>
     <string name="client_label_edit_tooltip">Vriendelijke naam instellen</string>
-    <string name="client_label_save">Opslaan</string>
     <string name="client_label_cancel">Annuleren</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1089,7 +1058,6 @@
     <string name="system_storage_subtitle">Waar Church Presenter naar je content zoekt</string>
     <string name="system_storage_linked_count">%1$d gekoppeld</string>
     <string name="system_storage_needs_attention_count">%1$d vereisen aandacht</string>
-    <string name="system_storage_status_not_set">Niet ingesteld</string>
     <string name="system_storage_status_not_found">Map niet gevonden</string>
     <string name="system_storage_status_read_only">Alleen-lezen</string>
     <string name="system_storage_status_linked">Gekoppeld</string>
@@ -1131,7 +1099,6 @@
     <string name="show_song_number_before_title">Liednummer vóór de titel weergeven</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">Stage monitor</string>
     <string name="general">Algemeen</string>
     <string name="display_stage_monitor">Stage monitor</string>
     <string name="stage_monitor_quadrant_next">Linksonder: volgende dia</string>
@@ -1210,7 +1177,6 @@
     <string name="qa_confirm_go_live">Live gaan bevestigen</string>
     <string name="qa_add_question_hint">Vraag toevoegen…</string>
     <string name="qa_edit_question_hint">Vraagtekst bewerken…</string>
-    <string name="qa_delete_question">Verwijderen</string>
     <string name="qa_confirm_delete_prompt">Verwijderen?</string>
     <string name="qa_submitter_device">Apparaat: %1$s</string>
     <string name="qa_public_access">Openbare toegang</string>
@@ -1247,13 +1213,10 @@
     <string name="stt_live_preview">Live voorbeeld</string>
     <string name="stt_not_connected">Niet verbonden. Voer de STT server-URL in en klik op Verbinden.</string>
     <string name="stt_waiting_for_transcription">Wachten op transcriptie…</string>
-    <string name="stt_transcription_label">Transcriptie</string>
     <string name="stt_translation_label">Vertaling</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">CCLI-gebruiksrapport</string>
-    <string name="ccli_tab_songs">Liederen</string>
-    <string name="ccli_tab_bible">Bijbel</string>
     <string name="ccli_tab_activity">Activiteit</string>
     <string name="ccli_songs_summary">%1$d unieke liederen · %2$d totaal afgespeeld</string>
     <string name="ccli_bible_summary">%1$d unieke verzen · %2$d totaal afgespeeld</string>
@@ -1264,7 +1227,6 @@
     <string name="ccli_activity_title">Presentaties in de loop van de tijd</string>
     <string name="ccli_from">Van:</string>
     <string name="ccli_to">Tot:</string>
-    <string name="ccli_legend_songs">Liederen</string>
     <string name="ccli_legend_bible">Bijbelverzen</string>
     <string name="ccli_stat_songs_presented">Liederen gepresenteerd</string>
     <string name="ccli_stat_bible_verses">Bijbelverzen</string>
@@ -1278,7 +1240,6 @@
     <string name="ccli_col_first">Eerste</string>
     <string name="ccli_col_last">Laatste</string>
     <string name="ccli_col_verse">Vers</string>
-    <string name="ccli_col_bible">Bijbel</string>
     <string name="ccli_export_csv">CCLI CSV exporteren</string>
     <string name="ccli_export_xls">XLS exporteren</string>
     <string name="ccli_exported_success">Rapport succesvol geëxporteerd.</string>
@@ -1357,7 +1318,6 @@
     <string name="obs_mode_bible">Bijbel</string>
     <string name="obs_mode_songs">Liederen</string>
     <string name="obs_mode_pictures">Afbeeldingen</string>
-    <string name="obs_mode_presentation">Presentatie</string>
     <string name="obs_mode_media">Media</string>
     <string name="obs_mode_lower_third">Lower Third</string>
     <string name="obs_mode_announcements">Mededelingen</string>
@@ -1582,7 +1542,6 @@
     <string name="companion_satellite_no_host">Stel een Companion-host in bij Instellingen → Companion Satellite om verbinding te maken.</string>
     <string name="companion_satellite_status_connecting">Verbinden…</string>
     <string name="companion_satellite_status_disconnected">Niet verbonden</string>
-    <string name="companion_satellite_status_error">Fout: %1$s</string>
     <string name="companion_satellite_connection_name">Naam</string>
     <string name="companion_satellite_product_name">Productnaam</string>
     <string name="companion_satellite_reconnect_delay">Vertraging opnieuw verbinden (ms)</string>
@@ -1620,7 +1579,6 @@
     <string name="em_dash">—</string>
     <string name="bible_smart_search_hint">Referentie of tekst — bijv. Johannes 3:16, Mat 1 of een woord</string>
     <string name="bible_search_mode_auto">Auto</string>
-    <string name="bible_search_mode_reference">Referentie</string>
     <string name="bible_search_mode_text">Tekst</string>
     <string name="bible_search_mode_tooltip">Tik om te wisselen — Auto: ga naar referenties, zoek de rest. Referentie: alleen navigeren. Tekst: altijd zoeken in de verstekst.</string>
     <string name="swap_bibles_hint">Primaire en secundaire Bijbel omwisselen</string>
@@ -1671,7 +1629,6 @@
     <string name="bible_engine_detect">Schrift detecteren</string>
     <string name="bible_engine_run_local">Engine lokaal uitvoeren</string>
     <string name="bible_engine_host">Engine-host</string>
-    <string name="bible_engine_port">Poort</string>
     <string name="qa_qr_message_label">QR-codebericht</string>
     <string name="qa_qr_message_reset">Terugzetten naar standaard</string>
     <string name="qa_admin_uses_api_key">Beheerderstoegang gebruikt de API-sleutel van uw server (Serverinstellingen).</string>
@@ -1710,7 +1667,6 @@
     <string name="instance_link_description">Volg een andere ChurchPresenter-instantie op uw netwerk — spiegel de live-inhoud hier, en voeg optioneel items toe aan het programma ervan.</string>
     <string name="instance_link_host">Host</string>
     <string name="instance_link_host_hint">bijv. 192.168.1.10</string>
-    <string name="instance_link_port">Poort</string>
     <string name="instance_link_autoconnect">Automatisch verbinden bij opstarten</string>
     <string name="instance_link_allow_push_to_schedule">Toestaan dat items worden toegevoegd aan het programma van de primaire instantie</string>
     <string name="instance_link_mirror_backgrounds">Ook de achtergronden van de primaire instantie spiegelen</string>
@@ -1946,7 +1902,6 @@
     <string name="font_category_serif">Schreef</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Voorbeeld</string>
     <string name="font_preview_sample">Voorbeeldtekst in het gekozen lettertype</string>
     <string name="font_warning_no_cyrillic">%1$s heeft geen Cyrillische tekens – Cyrillische verzen verschijnen op het scherm in een ander lettertype.</string>
     <string name="font_warning_no_hebrew">%1$s heeft geen Hebreeuwse tekens – Hebreeuwse tekst verschijnt op het scherm in een ander lettertype.</string>
@@ -1956,7 +1911,6 @@
     <string name="text_style_strikethrough">S</string>
     <string name="tooltip_strikethrough">Doorhalen</string>
     <string name="bible_custom_name">Naam</string>
-    <string name="bible_custom_abbreviation">Afkorting</string>
     <string name="bible_translations">Vertalingen</string>
     <string name="bible_miscellaneous">Overig</string>
     <string name="bible_font">Lettertype</string>
@@ -1971,10 +1925,7 @@
     <string name="bible_preview_sample_book">Johannes</string>
     <string name="bible_preview_no_translations">Voeg een vertaling toe om deze hier te zien</string>
     <string name="song_element_number">Nummer</string>
-    <string name="song_element_title">Titel</string>
     <string name="song_element_lyrics">Liedtekst</string>
-    <string name="song_element_author">Auteur</string>
-    <string name="song_element_composer">Componist</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Titeldia</string>
@@ -1987,7 +1938,6 @@
     <string name="song_chunk">Fragment</string>
     <string name="song_language_scope">Taal</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">Achtergrond</string>
     <string name="song_background_full_screen">Volledig scherm</string>
     <string name="song_background_lower_third">Onderste derde</string>
     <string name="song_background_inherit">Overnemen</string>
@@ -2002,7 +1952,6 @@
     <string name="song_background_your_color">Jouw kleur</string>
     <string name="song_background_browse">Bladeren…</string>
     <string name="song_background_look">Uiterlijk</string>
-    <string name="song_background_preset_none">Geen</string>
     <string name="song_background_preset_soft">Zacht</string>
     <string name="song_background_preset_legible">Leesbaar</string>
     <string name="song_background_preset_cinema">Cinema</string>
@@ -2023,7 +1972,6 @@
     <string name="unit_px">px</string>
     <string name="background_surfaces">Achtergronden</string>
     <string name="background_group_defaults">Standaard</string>
-    <string name="background_scope_default">Standaard</string>
     <string name="background_scope_default_lower_third">Standaard Lower Third</string>
     <string name="background_scope_default_meta">Wanneer Bijbel of Liederen op Standaard staan</string>
     <string name="background_scope_default_lower_third_meta">Wanneer de lower third op Standaard staat</string>
@@ -2032,16 +1980,13 @@
     <string name="background_following_default">Volgt Standaard</string>
     <string name="background_use_default">Standaard gebruiken</string>
     <string name="background_set_explicitly">Apart ingesteld voor dit vlak</string>
-    <string name="background_type_caption">Type</string>
     <string name="background_color_caption">Kleur</string>
     <string name="background_image_file">Afbeeldingsbestand</string>
     <string name="background_video_file">Videobestand</string>
-    <string name="background_opacity_caption">Dekking</string>
     <string name="background_above_band_caption">Boven de balk</string>
     <string name="background_above_band_fill">Vulkleur</string>
     <string name="background_above_band_opacity">Dekking van vulling</string>
     <string name="quick_background_reset">Terug naar normaal</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · beheer in Instellingen</string>
     <string name="quick_backgrounds">Snelle achtergronden</string>
     <string name="quick_backgrounds_help">Achtergronden die het voorbeeldpaneel op één klik afstand houdt. Klik op een tegel om te kiezen wat die toont, sleep hem om te wijzigen welke toets hem oproept. Eén kiezen tijdens een dienst overschrijft elk scherm tot je terug naar normaal gaat — hier verandert het niets.</string>
@@ -2067,16 +2012,10 @@
     <string name="output_profile_swap_menu_tooltip">Uitvoerprofiel wisselen</string>
     <string name="output_profile_new_name_default">Nieuw profiel</string>
     <string name="output_profile_empty_state">Maak een profiel om het te gaan opmaken</string>
-    <string name="customize_bible">Bijbel</string>
-    <string name="customize_songs">Liederen</string>
     <string name="customize_group_verse_text">Verstekst</string>
     <string name="customize_group_reference">Referentie</string>
     <string name="customize_background_type">Type</string>
-    <string name="customize_type_color">Kleur</string>
     <string name="customize_type_image">Afbeelding</string>
-    <string name="customize_type_video">Video</string>
-    <string name="customize_type_default">Standaard</string>
-    <string name="customize_type_gradient">Verloop</string>
     <string name="customize_show_abbreviation">Afkorting</string>
     <string name="customize_background_opacity">Dekking</string>
     <string name="slate_theme">Leisteen-thema</string>
@@ -2122,7 +2061,6 @@
     <string name="song_lottie_unsupported_note">Het sjabloon bepaalt de indeling en waar de titel staat. De stijl van het onderste derde bepaalt lettertype, grootte, kleur, uitlijning, letterafstand, hoofdlettergebruik en schaduw; tekstachtergrond, onderstrepen, doorhalen, woordafstand, vooruitblik en akkoorden gelden niet.</string>
     <string name="bible_lottie_unsupported_note">Het sjabloon bepaalt de indeling, de plaats van de verwijzing en hoe twee talen de band delen. De stijl van het onderste derde bepaalt lettertype, grootte, kleur, uitlijning, letterafstand, hoofdlettergebruik en schaduw; tekstachtergrond, onderstrepen, doorhalen en woordafstand gelden niet.</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Omtrek</string>
     <string name="tooltip_outline_options">Omtrekopties</string>
     <string name="text_outline">Omtrek</string>
     <string name="text_outline_width">Breedte</string>
@@ -2190,7 +2128,6 @@
     <string name="add_ndi_output">Uitgang toevoegen</string>
     <string name="ndi_output_numbered">NDI-uitgang %1$d</string>
     <string name="preview_output">Uitgang voorvertonen</string>
-    <string name="output_resolution">Resolutie</string>
     <string name="output_resolution_custom">Aangepast…</string>
     <string name="output_resolution_custom_title">Aangepaste resolutie</string>
     <string name="output_resolution_width">Breedte</string>
@@ -2294,7 +2231,6 @@
     <string name="calendar_sync_description">Plan de hele week diensten vanuit de mobiele app, ook als deze computer uit staat. Deze computer blijft de bron van waarheid.</string>
     <string name="calendar_sync_enable">De kalender synchroniseren met telefoons</string>
     <string name="calendar_sync_relay_url">Relay</string>
-    <string name="calendar_sync_status_off">Uit</string>
     <string name="calendar_sync_status_unpaired">Nog niet geregistreerd — deze computer registreert zich bij de relay zodra synchronisatie voor het eerst aanstaat</string>
     <string name="calendar_sync_status_syncing">Synchroniseren…</string>
     <string name="calendar_sync_status_synced">Gesynchroniseerd %1$s</string>

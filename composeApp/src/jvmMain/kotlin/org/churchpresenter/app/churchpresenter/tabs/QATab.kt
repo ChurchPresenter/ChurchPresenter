@@ -79,7 +79,7 @@ import churchpresenter.composeapp.generated.resources.qa_clear_question_text
 import churchpresenter.composeapp.generated.resources.qa_confirm_go_live
 import churchpresenter.composeapp.generated.resources.qa_confirm_go_live_prompt
 import churchpresenter.composeapp.generated.resources.qa_delete_all_history
-import churchpresenter.composeapp.generated.resources.qa_delete_question
+import churchpresenter.composeapp.generated.resources.delete_saved_string
 import churchpresenter.composeapp.generated.resources.qa_deny
 import churchpresenter.composeapp.generated.resources.qa_displaying
 import churchpresenter.composeapp.generated.resources.qa_done_clear
@@ -775,7 +775,7 @@ private fun QuestionRow(
     val strDoneClear = stringResource(Res.string.qa_done_clear)
     val strBackToIncoming = stringResource(Res.string.qa_back_to_incoming)
     val strConfirmGoLive = stringResource(Res.string.qa_confirm_go_live)
-    val strDelete = stringResource(Res.string.qa_delete_question)
+    val strDelete = stringResource(Res.string.delete_saved_string)
     val strConfirmDelete = stringResource(Res.string.qa_confirm_delete_prompt)
 
     Column(

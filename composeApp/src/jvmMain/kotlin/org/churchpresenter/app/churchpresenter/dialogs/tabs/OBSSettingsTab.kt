@@ -48,7 +48,7 @@ import churchpresenter.composeapp.generated.resources.obs_mode_lower_third
 import churchpresenter.composeapp.generated.resources.obs_mode_media
 import churchpresenter.composeapp.generated.resources.obs_mode_none
 import churchpresenter.composeapp.generated.resources.obs_mode_pictures
-import churchpresenter.composeapp.generated.resources.obs_mode_presentation
+import churchpresenter.composeapp.generated.resources.presentation
 import churchpresenter.composeapp.generated.resources.obs_mode_qa
 import churchpresenter.composeapp.generated.resources.obs_mode_songs
 import churchpresenter.composeapp.generated.resources.obs_mode_stt
@@ -254,7 +254,7 @@ fun OBSSettingsTab(
                         Presenting.BIBLE to stringResource(Res.string.obs_mode_bible),
                         Presenting.LYRICS to stringResource(Res.string.obs_mode_songs),
                         Presenting.PICTURES to stringResource(Res.string.obs_mode_pictures),
-                        Presenting.PRESENTATION to stringResource(Res.string.obs_mode_presentation),
+                        Presenting.PRESENTATION to stringResource(Res.string.presentation),
                         Presenting.MEDIA to stringResource(Res.string.obs_mode_media),
                         Presenting.LOWER_THIRD to stringResource(Res.string.obs_mode_lower_third),
                         Presenting.ANNOUNCEMENTS to stringResource(Res.string.obs_mode_announcements),

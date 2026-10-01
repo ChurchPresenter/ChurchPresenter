@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.focusRequester
@@ -22,7 +23,7 @@ import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
 /* What the Bible tab's clicks do, pulled out of the browser pane's long argument list. */
 
 /** A verse's cross-reference chip: select the verse, then open or close its popover. */
-internal fun BibleTabScope.refsChipClicked(index: Int) {
+internal fun BibleTabScope.refsChipClicked(viewModel: BibleViewModel, index: Int) {
     val verseText = filteredVerses.getOrNull(index)
     val realIndex = verseText?.let { verses.indexOf(it) } ?: -1
     if (realIndex >= 0) viewModel.selectVerse(realIndex)
@@ -43,14 +44,14 @@ internal fun BibleTabScope.refsChipClicked(index: Int) {
     focusRequester.requestFocus()
 }
 
-internal fun BibleTabScope.selectFilteredBook(index: Int) {
+internal fun BibleTabScope.selectFilteredBook(viewModel: BibleViewModel, index: Int) {
     filteredBooks.getOrNull(index)?.let {
         val realIndex = books.indexOf(it)
         if (realIndex >= 0) viewModel.selectBook(realIndex)
     }
 }
 
-internal fun BibleTabScope.clickFilteredVerse(index: Int) {
+internal fun BibleTabScope.clickFilteredVerse(viewModel: BibleViewModel, index: Int) {
     filteredVerses.getOrNull(index)?.let {
         val realIndex = verses.indexOf(it)
         if (realIndex >= 0) viewModel.selectVerse(realIndex)
@@ -67,7 +68,7 @@ internal fun BibleTabScope.copySelectedVerse() {
     SystemClipboard.copy("$reference\n${verseTextOf(verseStr)}")
 }
 
-internal fun BibleTabScope.scheduleCurrentVerse() {
+internal fun BibleTabScope.scheduleCurrentVerse(viewModel: BibleViewModel) {
     viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
         onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange, bookId)
     }
@@ -75,7 +76,7 @@ internal fun BibleTabScope.scheduleCurrentVerse() {
 }
 
 /** A verse clicked in the split-browse live panel goes straight to the output. */
-internal fun BibleTabScope.liveVerseClicked(verseNum: Int) {
+internal fun BibleTabScope.liveVerseClicked(viewModel: BibleViewModel, verseNum: Int) {
     scope.launch {
         val shown = viewModel.getVersesForDisplay(liveBookName, liveChapterNum, verseNum)
         if (shown.isNotEmpty()) {

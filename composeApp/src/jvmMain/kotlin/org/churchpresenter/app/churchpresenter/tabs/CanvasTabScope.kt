@@ -18,11 +18,10 @@ import churchpresenter.composeapp.generated.resources.canvas_source_video
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.canvas_source_timer
 import churchpresenter.composeapp.generated.resources.canvas_source_qrcode
-import churchpresenter.composeapp.generated.resources.canvas_source_camera
+import churchpresenter.composeapp.generated.resources.background_camera_option
 import churchpresenter.composeapp.generated.resources.canvas_source_screen_capture
 import churchpresenter.composeapp.generated.resources.canvas_source_ndi
 import churchpresenter.composeapp.generated.resources.canvas_source_omt
@@ -40,7 +39,6 @@ import org.churchpresenter.settings.WindowLayoutSettings
 internal class CanvasTabScope(
     val appSettings: AppSettings,
     val presenterManager: PresenterManager,
-    val sceneViewModel: SceneViewModel,
     val onAddToSchedule: (sceneId: String, sceneName: String) -> Unit,
     val onSavePreset: ((sceneId: String, sceneName: String) -> Unit)?,
     val cameraHost: CameraHost?,
@@ -87,9 +85,6 @@ internal class CanvasTabScope(
         onSettingsChangeState.value { s -> withCanvasRightPanelWidth(s, isMaximized, dp) }
     }
 
-    val currentScene get() = sceneViewModel.currentScene
-    val selectedSourceId: String? get() = sceneViewModel.selectedSourceId.value
-    val selectedSource get() = sceneViewModel.selectedSource
 }
 
 /** The source types' default names, localised in composable scope for the menu's onClick lambdas. */
@@ -119,7 +114,7 @@ internal fun rememberCanvasSourceNames(): CanvasSourceNames {
     val strVideo         = stringResource(Res.string.canvas_source_video)
     val strTimer         = stringResource(Res.string.canvas_source_timer)
     val strQrCode        = stringResource(Res.string.canvas_source_qrcode)
-    val strCamera        = stringResource(Res.string.canvas_source_camera)
+    val strCamera        = stringResource(Res.string.background_camera_option)
     val strScreenCapture = stringResource(Res.string.canvas_source_screen_capture)
     val strNdi           = stringResource(Res.string.canvas_source_ndi)
     val strOmt           = stringResource(Res.string.canvas_source_omt)

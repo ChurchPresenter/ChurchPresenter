@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import org.churchpresenter.app.churchpresenter.utils.mediaDurationSeconds
-import org.churchpresenter.app.churchpresenter.utils.slideshowSeconds
 import churchpresenter.composeapp.generated.resources.Res
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -144,26 +143,16 @@ internal fun MainWindowScope.CalendarManagerWindow() {
  */
 private suspend fun AppRootState.calendarItemRunSeconds(item: ScheduleItem): Int? =
     withContext(Dispatchers.IO) {
-        // What it is known to take, else what it has
-        // actually taken here -- see LiveDurationLog.
-        when (item) {
-            is ScheduleItem.MediaItem ->
-                mediaDurationSeconds(item.mediaUrl)
-            is ScheduleItem.PictureItem -> slideshowSeconds(
-                item.imageCount,
-                appSettings.pictureSettings.autoScrollInterval,
-            )
-            is ScheduleItem.PresentationItem -> slideshowSeconds(
-                item.slideCount,
-                appSettings.presentationSettings.autoScrollInterval,
-            )
-            else -> null
-        } ?: liveDurationLog.median(item)
+        knownRunSeconds(
+            item,
+            appSettings.pictureSettings.autoScrollInterval,
+            appSettings.presentationSettings.autoScrollInterval,
+        ) { mediaDurationSeconds(it) } ?: liveDurationLog.median(item)
     }
 
 /** The run-of-show PDF's font. OpenSans covers Cyrillic, which PDFBox's built-in Helvetica does not. */
 private fun calendarPdfFont(bold: Boolean): ByteArray? {
-    val name = if (bold) "OpenSans-Bold" else "OpenSans-Regular"
+    val name = calendarPdfFontName(bold)
     return object {}.javaClass
         .getResourceAsStream("/fonts/$name.ttf")
         ?.use { it.readBytes() }

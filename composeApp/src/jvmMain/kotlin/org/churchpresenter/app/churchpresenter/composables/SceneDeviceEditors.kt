@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.canvas_source_camera
+import churchpresenter.composeapp.generated.resources.background_camera_option
 import churchpresenter.composeapp.generated.resources.canvas_source_screen_capture
 import churchpresenter.composeapp.generated.resources.canvas_camera_device
 import churchpresenter.composeapp.generated.resources.canvas_camera_open_privacy_settings
@@ -27,7 +27,7 @@ import churchpresenter.composeapp.generated.resources.canvas_camera_refresh
 import churchpresenter.composeapp.generated.resources.canvas_camera_format
 import churchpresenter.composeapp.generated.resources.canvas_camera_format_auto
 import churchpresenter.composeapp.generated.resources.canvas_camera_connection
-import churchpresenter.composeapp.generated.resources.canvas_camera_mode
+import churchpresenter.composeapp.generated.resources.canvas_clock_mode
 import churchpresenter.composeapp.generated.resources.canvas_camera_mode_auto
 import churchpresenter.composeapp.generated.resources.canvas_capture_x
 import churchpresenter.composeapp.generated.resources.canvas_capture_y
@@ -207,7 +207,7 @@ internal fun CameraProperties(
     host: CameraHost? = null,
 ) {
     Text(
-        stringResource(Res.string.canvas_source_camera),
+        stringResource(Res.string.background_camera_option),
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -314,7 +314,7 @@ internal fun CameraProperties(
             val autoLabel = stringResource(Res.string.canvas_camera_mode_auto)
             val modeItems = listOf(autoLabel) + modes.map { it.name }
             DropdownSelector(
-                label = stringResource(Res.string.canvas_camera_mode),
+                label = stringResource(Res.string.canvas_clock_mode),
                 items = modeItems,
                 selected = selectedModeName(modes, source.videoFormat, autoLabel),
                 onSelectedChange = { selected ->

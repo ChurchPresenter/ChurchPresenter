@@ -3,7 +3,6 @@
     <string name="mode">Mode</string>
     <string name="scope">Scope</string>
     <string name="title">Title</string>
-    <string name="number">Number</string>
     <string name="go_live">Go Live</string>
     <string name="add_to_schedule">Add to Schedule</string>
     <string name="save_preset">Save preset</string>
@@ -16,7 +15,6 @@
     <string name="search">Search</string>
     <string name="bible_smart_search_hint">Reference or text — e.g. John 3:16, mat 1, or a word</string>
     <string name="bible_search_mode_auto">Auto</string>
-    <string name="bible_search_mode_reference">Reference</string>
     <string name="bible_search_mode_text">Text</string>
     <string name="bible_search_mode_tooltip">Tap to switch — Auto: jump to references, search everything else. Reference: navigate only. Text: always search verse text.</string>
     <string name="bible_verse_selection_hint">Ctrl+Click to toggle, Shift+Click for range</string>
@@ -117,18 +115,12 @@
     <string name="bible_cross_references_close">Close panel</string>
     <string name="bible_cross_references_dismiss_hint">Esc to close</string>
     <string name="menu_file">File</string>
-    <string name="menu_new_schedule">New Schedule</string>
-    <string name="menu_open_schedule">Open Schedule</string>
-    <string name="menu_save_schedule">Save Schedule</string>
     <string name="menu_save_schedule_as">Save Schedule As...</string>
     <string name="menu_close_schedule">Close Schedule</string>
     <string name="menu_exit">Exit</string>
     <string name="file_chooser_save_schedule">Save Schedule As</string>
-    <string name="file_chooser_open_schedule">Open Schedule</string>
     <string name="file_filter_schedule">Church Presenter Schedule (*.cps)</string>
 
-    <string name="menu_schedule">Schedule</string>
-    <string name="menu_add_to_schedule">Add to Schedule</string>
     <string name="menu_remove_from_schedule">Remove from Schedule</string>
     <string name="menu_clear_schedule">Clear Schedule</string>
 
@@ -150,7 +142,6 @@
     <string name="instance_link_description">Follow another ChurchPresenter instance on your network — mirror its live content here, and optionally add items to its schedule.</string>
     <string name="instance_link_host">Host</string>
     <string name="instance_link_host_hint">e.g. 192.168.1.10</string>
-    <string name="instance_link_port">Port</string>
     <string name="instance_link_autoconnect">Connect automatically on launch</string>
     <string name="instance_link_reconnect_delay">Minimum reconnect delay</string>
     <string name="instance_link_reconnect_delay_hint">Shortest wait before retrying a dropped link. Repeated failures back off further on their own.</string>
@@ -374,13 +365,8 @@
     <string name="customize_theme_use_custom_colors_hint">Off keeps the current theme's colors and applies only the font and text size.</string>
     <string name="customize_theme_accent">Accent color</string>
     <string name="customize_theme_base">Base</string>
-    <string name="customize_theme_font">Font</string>
     <string name="customize_theme_font_default">System default</string>
     <string name="customize_theme_use_default_font">Use default</string>
-    <string name="customize_theme_text_size">Text size</string>
-    <string name="customize_theme_text_size_small">Small</string>
-    <string name="customize_theme_text_size_default">Default</string>
-    <string name="customize_theme_text_size_large">Large</string>
     <string name="customize_theme_text_size_extra_large">Extra large</string>
     <string name="customize_theme_margin">Margin</string>
     <string name="customize_theme_margin_normal">Normal</string>
@@ -393,8 +379,6 @@
     <string name="customize_theme_preview_button">Go Live</string>
     <string name="customize_theme_preview_secondary">Add to Schedule</string>
     <string name="customize_theme_reset">Reset to defaults</string>
-    <string name="customize_theme_background">Background</string>
-    <string name="customize_theme_text">Text</string>
     <string name="customize_theme_secondary">Secondary</string>
     <string name="customize_theme_selection">Selection</string>
     <string name="customize_theme_success">Success</string>
@@ -551,7 +535,6 @@
     <!-- Bible Settings -->
     <string name="position">Position</string>
     <string name="bible_custom_name">Name</string>
-    <string name="bible_custom_abbreviation">Abbreviation</string>
 
     <!-- Dialog Messages -->
     <string name="confirm_delete">Confirm Delete</string>
@@ -559,8 +542,6 @@
 
     <!-- Background Type Options -->
     <string name="background_default">Default</string>
-    <string name="background_color_option">Color</string>
-    <string name="background_image_option">Image</string>
     <string name="background_video_option">Video Loop</string>
     <string name="background_camera_option">Camera</string>
     <string name="background_transparent_option">Transparent</string>
@@ -569,7 +550,6 @@
 
     <!-- Projection Settings -->
     <string name="projection_content_web">Web</string>
-    <string name="projection_content_background">Background</string>
     <string name="projection_content_lt_background">Lower Third Background</string>
     <string name="browser_source_resolution">Resolution</string>
     <string name="browser_source_fps">Max FPS</string>
@@ -662,7 +642,6 @@
     <string name="tooltip_schedule_zoom_out">Zoom Out</string>
     <string name="tooltip_add_to_schedule">Add to Schedule</string>
     <string name="tooltip_clear_display">Clear Display</string>
-    <string name="remote_action_clear_display">Clear Display</string>
     <string name="schedule_add_files_title">Add Files to Schedule</string>
     <string name="tooltip_toggle_displays">Toggle Presenter Displays</string>
     <string name="tooltip_preview_settings">Preview Settings</string>
@@ -702,7 +681,6 @@
     <string name="schedule_density_compact">Compact</string>
     <string name="schedule_density_normal">Normal</string>
     <string name="schedule_density_detailed">Detailed</string>
-    <string name="schedule_kind_lower_third">Lower Third</string>
     <string name="schedule_kind_cue">Cue</string>
     <string name="schedule_kind_ministry">Ministry</string>
     <string name="schedule_cue_fired">Fired %1$s</string>
@@ -720,7 +698,6 @@
     <string name="schedule_option_zoom">Zoom Controls</string>
     <string name="schedule_option_icon_size">Toolbar icon size</string>
     <string name="schedule_icon_size_small">Small</string>
-    <string name="schedule_icon_size_medium">Medium</string>
     <string name="schedule_icon_size_large">Large</string>
 
     <!-- Add Label Dialog -->
@@ -728,7 +705,6 @@
     <string name="edit_label">Edit Label</string>
     <string name="label_text">Label Text</string>
     <string name="text_color">Text Color</string>
-    <string name="background_color_label">Background Color</string>
     <string name="enter_label_text">Enter label text...</string>
 
     <!-- Pictures Tab Strings -->
@@ -769,7 +745,6 @@
     <string name="animation_slide_left">Slide Left</string>
     <string name="animation_slide_right">Slide Right</string>
     <string name="animation_none">None</string>
-    <string name="milliseconds_suffix">ms</string>
     <string name="pictures_arrow_key_hint">%1$s next/prev image  ·  %2$s navigate rows</string>
     <string name="presentation_arrow_key_hint">%1$s — prev/next build &amp; slide  ·  %2$s — play/pause  ·  %3$s — blank screen</string>
     <string name="pictures_reorder_hint">Shift+drag thumbnails to reorder</string>
@@ -829,7 +804,6 @@
     <string name="preview_sample_medium">Medium</string>
     <string name="preview_sample_long">Long</string>
     <string name="preview_background_actual">Actual</string>
-    <string name="preview_background_off">Off</string>
     <string name="preview_background_checker">Checker</string>
     <string name="profile_preview_caption">Preview · %1$s</string>
     <string name="profile_preview_note_video">Videos preview as their first frame.</string>
@@ -842,13 +816,10 @@
     <string name="song_background_untitled_section">Untitled section</string>
     <string name="song_insert_slide_break">Slide Break</string>
     <string name="song_element_number">Number</string>
-    <string name="song_element_title">Title</string>
     <string name="song_element_lyrics">Lyrics</string>
     <string name="song_element_look_ahead">Look Ahead</string>
     <string name="song_element_section_label">Section Label</string>
     <string name="song_element_section_label_short">Label</string>
-    <string name="song_element_author">Author</string>
-    <string name="song_element_composer">Composer</string>
     <string name="song_element_ccli">CCLI</string>
     <string name="song_element_tempo">Tempo</string>
     <string name="song_target_title_slide">Title Slide</string>
@@ -865,7 +836,6 @@
     <string name="text_outline">Outline</string>
     <string name="text_outline_width">Width</string>
     <string name="text_style_outline">O</string>
-    <string name="tooltip_outline">Outline</string>
     <string name="tooltip_outline_options">Outline options</string>
     <string name="outline_show">Show outline</string>
     <string name="pixels_short">px</string>
@@ -886,7 +856,6 @@
 
     <!-- Projection Settings Tab -->
     <string name="window_position">Window Position</string>
-    <string name="element_offset_enabled">Position</string>
     <string name="element_offset_x">X %</string>
     <string name="element_offset_y">Y %</string>
     <string name="auto_fit_scope">Auto fits</string>
@@ -903,11 +872,8 @@
     <string name="content_bible_background">Bible Background</string>
     <string name="content_songs_background">Songs Background</string>
     <string name="content_pictures">Pictures/Presentation</string>
-    <string name="content_media">Media</string>
-    <string name="content_streaming">Lower Third</string>
     <string name="content_announcements">Announcements</string>
     <string name="display_mode">Display Mode</string>
-    <string name="display_fullscreen">Full Screen</string>
     <string name="display_lower_third">Lower Third</string>
     <string name="lower_third_animation_file">Template</string>
     <string name="profile_bg_lottie_picker_elsewhere">Set in Lower third band, below.</string>
@@ -917,7 +883,6 @@
     <string name="song_lottie_unsupported_note">The template decides the layout and where the title sits. The Lower Third style sets the font, size, color, alignment, letter spacing, case and shadow; backdrop, underline, strikethrough, word spacing, look-ahead and chords do not apply.</string>
     <string name="bible_lottie_unsupported_note">The template decides the layout, the reference position and how two languages share the band. The Lower Third style sets the font, size, color, alignment, letter spacing, case and shadow; backdrop, underline, strikethrough and word spacing do not apply.</string>
     <string name="full_screen">Full Screen</string>
-    <string name="lower_third_size">Lower Third</string>
     <string name="identify_screen">Identify</string>
     <string name="projection_target_display">Display</string>
     <string name="projection_auto_display">Auto</string>
@@ -962,7 +927,6 @@
     <string name="output_profile_move_up">Move up</string>
     <string name="output_profile_move_down">Move down</string>
     <string name="output_profile_scale">Scale</string>
-    <string name="lower_third_placement_full_screen">Full screen</string>
     <string name="lower_third_placement_in_band">In band</string>
     <string name="output_profile_sample_caption_earlier">and the light shines in the darkness,</string>
     <string name="output_profile_sample_caption">and the darkness has not overcome it.</string>
@@ -971,22 +935,15 @@
     <string name="output_profile_sample_question">How can we pray for the mission team this week?</string>
     <string name="output_profile_sample_dictionary_definition">word, speech, a saying; the Word as the title of Christ</string>
     <string name="output_profile_sample_dictionary_usage">word (218x), saying (50x), account (8x), speech (8x)</string>
-    <string name="output_profile_shape_custom">Custom</string>
     <string name="output_profile_shape_ratio">Ratio</string>
     <string name="output_profile_shape_resolution">Resolution</string>
     <string name="output_profile_shape_width">Width</string>
     <string name="output_profile_shape_height">Height</string>
     <string name="output_profile_shape_tooltip">Preview shape only — it never sets an output's real resolution</string>
-    <string name="customize_bible">Bible</string>
-    <string name="customize_songs">Songs</string>
     <string name="customize_group_verse_text">Verse text</string>
     <string name="customize_group_reference">Reference</string>
     <string name="customize_background_type">Type</string>
-    <string name="customize_type_color">Color</string>
     <string name="customize_type_image">Image</string>
-    <string name="customize_type_video">Video</string>
-    <string name="customize_type_default">Default</string>
-    <string name="customize_type_gradient">Gradient</string>
     <string name="percent_suffix">%</string>
     <string name="customize_show_abbreviation">Abbreviation</string>
     <string name="customize_background_opacity">Opacity</string>
@@ -1011,7 +968,6 @@
     <string name="ndi_output_numbered">NDI Output %1$d</string>
     <string name="preview_output">Preview output</string>
     <string name="preview_output_mode_disabled_warning">This output does not currently show this content.</string>
-    <string name="output_resolution">Resolution</string>
     <string name="output_resolution_custom">Custom…</string>
     <string name="output_resolution_custom_title">Custom resolution</string>
     <string name="output_resolution_width">Width</string>
@@ -1081,7 +1037,6 @@
     <!-- Background Settings Tab: the surface rail and the editor beside it -->
     <string name="background_surfaces">Backgrounds</string>
     <string name="background_group_defaults">Defaults</string>
-    <string name="background_scope_default">Default</string>
     <string name="background_scope_default_lower_third">Default Lower Third</string>
     <string name="background_scope_default_meta">Bible or Songs set to Default</string>
     <string name="background_scope_default_lower_third_meta">Lower third set to Default</string>
@@ -1090,7 +1045,6 @@
     <string name="background_following_default">Following Default</string>
     <string name="background_use_default">Use Default</string>
     <string name="background_set_explicitly">Set explicitly for this surface</string>
-    <string name="background_type_caption">Type</string>
     <string name="background_color_caption">Color</string>
     <string name="background_image_file">Image File</string>
     <string name="background_video_file">Video File</string>
@@ -1098,7 +1052,6 @@
     <string name="background_camera_format">Format</string>
     <string name="background_camera_connection">Input</string>
     <string name="background_camera_auto">Auto</string>
-    <string name="background_opacity_caption">Opacity</string>
     <string name="background_above_band_caption">Above The Band</string>
     <string name="background_above_band_fill">Fill Color</string>
     <string name="background_above_band_opacity">Fill Opacity</string>
@@ -1154,7 +1107,6 @@
     <string name="settings_import_failed">Failed to import settings. The file may be invalid.</string>
 
     <!-- Media Tab Strings -->
-    <string name="media_tab_title">Media</string>
     <string name="media_local_file">Local File</string>
     <string name="media_network_url">Network URL</string>
     <string name="media_url_placeholder">Enter URL (http://, rtsp://, ...)</string>
@@ -1211,7 +1163,6 @@
     <string name="center_left">Center Left</string>
     <string name="center_right">Center Right</string>
     <string name="bottom_center">Bottom Center</string>
-    <string name="announcement_background_color_label">Background Color</string>
     <string name="transparent_default">Transparent (Default)</string>
     <string name="announcement_animation">Animation</string>
     <string name="anim_slide_from_left">Slide From Left</string>
@@ -1284,7 +1235,6 @@
 
     <!-- Website / Web Tab -->
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_add_to_schedule">Add to Schedule</string>
     <string name="web_go_live">Go Live</string>
     <string name="web_bookmark_add">Add Bookmark</string>
     <string name="web_bookmark_remove">Remove Bookmark</string>
@@ -1372,7 +1322,6 @@
     <string name="canvas_layout_portrait_short">Portrait</string>
     <string name="canvas_layer_placement_in">%1$s: %2$s</string>
     <string name="canvas_dual_layout_off_confirm">Remove the portrait/landscape layout? Its positions will be lost.</string>
-    <string name="canvas_remove_scene">Remove</string>
     <string name="canvas_add_source">Add source</string>
     <string name="canvas_delete_source">Delete source</string>
     <string name="canvas_source_move_forward">Move forward</string>
@@ -1401,7 +1350,6 @@
     <string name="canvas_render_height">Height</string>
     <string name="canvas_fps">FPS</string>
     <string name="canvas_custom_css">Custom CSS</string>
-    <string name="canvas_browser_url">URL</string>
     <string name="canvas_select_image_title">Select Image</string>
     <string name="canvas_select_video_title">Select Video</string>
     <string name="canvas_image_files">Image Files</string>
@@ -1413,7 +1361,6 @@
     <string name="canvas_qr_type_sms">SMS</string>
     <string name="canvas_qr_type_wifi">WiFi</string>
     <string name="canvas_qr_type_vcard">vCard</string>
-    <string name="canvas_clock_mode_clock">Clock</string>
     <string name="canvas_clock_mode_countdown">Countdown</string>
     <string name="canvas_clock_mode_count_up">Count Up</string>
     <string name="canvas_decklink_io_warning">This device is currently used for output. Input may not be available on devices that don't support simultaneous I/O.</string>
@@ -1429,7 +1376,6 @@
     <string name="canvas_source_clock">Clock</string>
     <string name="canvas_source_timer">Clock &amp; Timer</string>
     <string name="canvas_source_qrcode">QR Code</string>
-    <string name="canvas_source_camera">Camera</string>
     <string name="canvas_source_screen_capture">Screen Capture</string>
     <string name="canvas_source_ndi">NDI Source</string>
     <string name="canvas_source_omt">OMT Source</string>
@@ -1444,7 +1390,6 @@
     <string name="canvas_bible_ref_color">Reference Color</string>
     <string name="canvas_verse_style">Verse Style</string>
     <string name="canvas_reference_style">Reference Style</string>
-    <string name="canvas_text_color">Text Color</string>
     <string name="canvas_text_bg_color">Background Color</string>
     <string name="canvas_clock_mode">Mode</string>
     <string name="canvas_clock_format">Format</string>
@@ -1492,7 +1437,6 @@
     <string name="canvas_camera_format">Video Format</string>
     <string name="canvas_camera_format_auto">Auto (default)</string>
     <string name="canvas_camera_connection">Video Connection</string>
-    <string name="canvas_camera_mode">Mode</string>
     <string name="canvas_camera_mode_auto">Auto</string>
     <string name="canvas_capture_x">Capture X</string>
     <string name="canvas_capture_y">Capture Y</string>
@@ -1503,9 +1447,7 @@
     <string name="canvas_capture_mode_window">Window</string>
     <string name="canvas_capture_refresh_windows">Refresh Window List</string>
     <string name="canvas_capture_interval">Capture Interval</string>
-    <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Camera: %1$s</string>
-    <string name="canvas_placeholder_camera_default">Camera</string>
     <string name="canvas_placeholder_screen_capture">Screen Capture</string>
     <string name="canvas_ndi_source">Source</string>
     <string name="canvas_ndi_refresh">Refresh Sources</string>
@@ -1658,7 +1600,6 @@
     <string name="remote_activity_projected">Projected (Go Live)</string>
     <string name="remote_activity_presentation_connect">Connected to Presentation Remote</string>
     <string name="remote_activity_calendar_enroll">Enrolled to plan the calendar</string>
-    <string name="remote_activity_presentation_connect_detail">Now connected</string>
     <string name="remote_activity_qa_admin_connect">Connected to Q&amp;A Admin</string>
     <string name="remote_activity_qa_admin_connect_detail">Now connected</string>
     <string name="remote_activity_musician_connect">Transpose control connected</string>
@@ -1699,7 +1640,6 @@
     <string name="instance_link_primary_badge">Primary — %1$d follower(s) connected</string>
     <string name="client_label_placeholder">Enter a friendly name…</string>
     <string name="client_label_edit_tooltip">Set friendly name</string>
-    <string name="client_label_save">Save</string>
     <string name="client_label_cancel">Cancel</string>
 
     <!-- Edit Song Dialog - Secondary Content -->
@@ -1718,7 +1658,6 @@
     <string name="enter_translation_lyrics_here">Enter translation %1$d lyrics here...</string>
     <string name="song_add_translation">Add a language</string>
     <string name="song_translation_label">Language name</string>
-    <string name="song_language_order_label">Languages</string>
     <string name="song_language_order_subtitle">Every output showing more than one language follows this order</string>
     <string name="move_language_up">Move language up</string>
     <string name="move_language_down">Move language down</string>
@@ -1854,7 +1793,6 @@
     <string name="system_storage_subtitle">Where Church Presenter looks for your content</string>
     <string name="system_storage_linked_count">%1$d linked</string>
     <string name="system_storage_needs_attention_count">%1$d need attention</string>
-    <string name="system_storage_status_not_set">Not set</string>
     <string name="system_storage_status_not_found">Folder not found</string>
     <string name="system_storage_status_read_only">Read only</string>
     <string name="system_storage_status_linked">Linked</string>
@@ -1904,7 +1842,6 @@
     <string name="show_song_number_before_title">Show song number before title</string>
 
     <!-- Stage Monitor Settings -->
-    <string name="stage_monitor">Stage Monitor</string>
     <string name="general">General</string>
     <string name="display_stage_monitor">Stage Monitor</string>
     <string name="stage_monitor_quadrant_next">Next</string>
@@ -1989,7 +1926,6 @@
     <string name="qa_confirm_go_live">Confirm Go Live</string>
     <string name="qa_add_question_hint">Add a question…</string>
     <string name="qa_edit_question_hint">Edit question text…</string>
-    <string name="qa_delete_question">Delete</string>
     <string name="qa_confirm_delete_prompt">Delete?</string>
     <string name="qa_submitter_device">Device: %1$s</string>
     <string name="qa_public_access">Public Access</string>
@@ -2026,14 +1962,11 @@
     <string name="stt_live_preview">Live Preview</string>
     <string name="stt_not_connected">Not connected. Enter the STT server URL and click Connect.</string>
     <string name="stt_waiting_for_transcription">Waiting for transcription…</string>
-    <string name="stt_transcription_label">Transcription</string>
     <string name="stt_translation_label">Translation</string>
     <string name="stt_settings_dialog_title">STT Display Settings</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report_title">CCLI Reports</string>
-    <string name="ccli_tab_songs">Songs</string>
-    <string name="ccli_tab_bible">Bible</string>
     <string name="ccli_tab_activity">Activity</string>
     <string name="ccli_songs_summary">%1$d unique songs · %2$d total plays</string>
     <string name="ccli_bible_summary">%1$d unique verses · %2$d total plays</string>
@@ -2044,7 +1977,6 @@
     <string name="ccli_activity_title">Presentations Over Time</string>
     <string name="ccli_from">From:</string>
     <string name="ccli_to">To:</string>
-    <string name="ccli_legend_songs">Songs</string>
     <string name="ccli_legend_bible">Bible Verses</string>
     <string name="ccli_stat_songs_presented">Songs presented</string>
     <string name="ccli_stat_bible_verses">Bible verses</string>
@@ -2058,7 +1990,6 @@
     <string name="ccli_col_first">First</string>
     <string name="ccli_col_last">Last</string>
     <string name="ccli_col_verse">Verse</string>
-    <string name="ccli_col_bible">Bible</string>
     <string name="ccli_export_csv">Export CCLI CSV</string>
     <string name="ccli_export_xls">Export XLS</string>
     <string name="ccli_exported_success">Report exported successfully.</string>
@@ -2139,7 +2070,6 @@
     <string name="obs_mode_bible">Bible</string>
     <string name="obs_mode_songs">Songs</string>
     <string name="obs_mode_pictures">Pictures</string>
-    <string name="obs_mode_presentation">Presentation</string>
     <string name="obs_mode_media">Media</string>
     <string name="obs_mode_lower_third">Lower Third</string>
     <string name="obs_mode_announcements">Announcements</string>
@@ -2336,7 +2266,6 @@
     <string name="companion_satellite_no_host">Set a Companion host in Settings → Companion Satellite to connect.</string>
     <string name="companion_satellite_status_connecting">Connecting…</string>
     <string name="companion_satellite_status_disconnected">Disconnected</string>
-    <string name="companion_satellite_status_error">Error: %1$s</string>
     <string name="companion_satellite_connection_name">Name</string>
     <string name="companion_satellite_product_name">Product name</string>
     <string name="companion_satellite_reconnect_delay">Reconnect delay (ms)</string>
@@ -2399,7 +2328,6 @@
     <string name="bible_engine_detect">Detect scripture</string>
     <string name="bible_engine_run_local">Run engine locally</string>
     <string name="bible_engine_host">Engine host</string>
-    <string name="bible_engine_port">Port</string>
     <string name="stt_help_dev_mode">Help Dev — show live feedback buttons on the Bible tab (wrong passage / premature / missed passage)</string>
     <string name="dictionary_back">Back</string>
     <string name="dictionary_forward">Forward</string>
@@ -2494,7 +2422,6 @@
     <string name="font_category_serif">Serif</string>
     <string name="font_category_mono">Mono</string>
     <string name="font_category_display">Display</string>
-    <string name="font_preview">Preview</string>
     <string name="font_preview_sample">Amazing grace, how sweet the sound</string>
     <string name="font_warning_no_cyrillic">%1$s has no Cyrillic glyphs — Cyrillic verses fall back to another font on screen.</string>
     <string name="font_warning_no_hebrew">%1$s has no Hebrew glyphs — Hebrew text falls back to another font on screen.</string>
@@ -2502,7 +2429,6 @@
     <string name="font_shown_note">Showing %1$d of %2$d</string>
     <string name="font_picker_keys">↑↓ move · ⏎ choose · esc close</string>
     <!-- Per-song background: the Edit Song dialog's Background panel -->
-    <string name="song_background">Background</string>
     <string name="song_background_full_screen">Full screen</string>
     <string name="song_background_lower_third">Lower third</string>
     <string name="song_background_inherit">Inherit</string>
@@ -2518,7 +2444,6 @@
     <string name="song_background_your_color">Your color</string>
     <string name="song_background_browse">Browse…</string>
     <string name="song_background_look">Look</string>
-    <string name="song_background_preset_none">None</string>
     <string name="song_background_preset_soft">Soft</string>
     <string name="song_background_preset_legible">Legible</string>
     <string name="song_background_preset_cinema">Cinema</string>
@@ -2542,7 +2467,6 @@
     <string name="unit_px">px</string>
     <!-- Quick backgrounds: the preview panel's tray, set up in Settings -> Background -->
     <string name="quick_background_reset">Back to normal</string>
-    <string name="quick_background_slot_hint">%1$s · %2$s</string>
     <string name="quick_background_hint">%1$s–%2$s · manage in Settings</string>
     <string name="quick_backgrounds">Quick backgrounds</string>
     <string name="quick_backgrounds_help">Backgrounds the preview panel keeps one click away. Click a tile to choose what it shows, drag it to change which key reaches it. Picking one during a service overrides every screen until you go back to normal — it changes nothing here.</string>
@@ -2621,7 +2545,6 @@
     <string name="calendar_sync_description">Plan services from the mobile app all week, even while this computer is off. This computer stays the source of truth.</string>
     <string name="calendar_sync_enable">Sync the calendar with phones</string>
     <string name="calendar_sync_relay_url">Relay</string>
-    <string name="calendar_sync_status_off">Off</string>
     <string name="calendar_sync_status_unpaired">Not registered yet — this computer registers with the relay the first time sync is on</string>
     <string name="calendar_sync_status_syncing">Syncing…</string>
     <string name="calendar_sync_status_synced">Synced %1$s</string>
@@ -2643,9 +2566,7 @@
     <string name="calendar_sync_instance">Instance</string>
     <!-- Settings → Profiles: the four-column layout -->
     <string name="profile_nav_profile">Profile</string>
-    <string name="profile_nav_stage_monitor">Stage monitor</string>
     <string name="profile_nav_general">General</string>
-    <string name="profile_nav_outputs">Outputs</string>
     <string name="profile_nav_content">Content &amp; sources</string>
     <string name="profile_nav_stage_layout">Stage layout</string>
     <string name="profile_nav_live_captions">Live captions</string>
@@ -2661,7 +2582,6 @@
     <string name="profile_list_new">New profile</string>
     <string name="profile_list_hint">Drag to reorder. Create linked profiles, duplicate or delete in General.</string>
     <string name="profile_not_in_use">Not in use</string>
-    <string name="profile_group_profile">Profile</string>
     <string name="profile_name">Name</string>
     <string name="profile_display_mode">Display mode</string>
     <string name="profile_mode_full">Full screen</string>
@@ -2693,7 +2613,6 @@
     <string name="profile_text_outline">Outline</string>
     <string name="profile_text_highlight">Highlight behind text</string>
     <string name="profile_text_shadow">Shadow</string>
-    <string name="profile_group_background">Background</string>
     <string name="profile_bg_row">Background</string>
     <string name="profile_bg_profile_default">Profile default</string>
     <string name="profile_bg_own">Own</string>
@@ -2737,7 +2656,6 @@
     <string name="profile_applies_to">Applies to</string>
     <string name="profile_group_text">Text</string>
     <string name="profile_group_translations">Translations</string>
-    <string name="profile_group_languages">Languages</string>
     <string name="profile_layout">Layout</string>
     <string name="profile_region_moves_background">Background follows Content Region</string>
     <string name="profile_region_moves_background_sub">On: the background shrinks and moves with the text. Off: the background fills the screen and only the text moves.</string>
@@ -2763,10 +2681,8 @@
     <string name="profile_box_item">Item</string>
     <string name="profile_box_item_subtitle">Subtitle</string>
     <string name="profile_box_item_question">Question</string>
-    <string name="profile_box_item_qr_code">QR code</string>
     <string name="profile_box_item_qr_message">QR message</string>
     <string name="profile_box_item_transcript">Transcript</string>
-    <string name="profile_box_item_translation">Translation</string>
     <string name="profile_box_sub">Place this item in a box of its own, drawn and resized on the preview. Its text fits inside the box.</string>
     <string name="profile_box_vertical">Vertical</string>
     <string name="profile_box_pick_translation">Each translation has its own box. Pick a translation above to place it, or set Languages to Share one box under Advanced.</string>
@@ -2778,8 +2694,6 @@
     <string name="profile_box_place">Box position</string>
     <string name="profile_box_x">X</string>
     <string name="profile_box_y">Y</string>
-    <string name="profile_box_width">Width</string>
-    <string name="profile_box_height">Height</string>
     <string name="profile_box_size">Text size</string>
     <string name="profile_box_size_up_to">Up to Size</string>
     <string name="profile_box_size_fill">Fill the box</string>
@@ -2825,9 +2739,7 @@
     <string name="profile_group_look">Look</string>
     <string name="profile_live_on">Live on %1$s. Changes show there right away.</string>
     <string name="profile_live_none">Not shown on any output yet.</string>
-    <string name="profile_live_outputs">Outputs</string>
     <string name="profile_context_standalone">Standalone. Link it to a master in General.</string>
-    <string name="profile_context_open_general">General</string>
     <string name="profile_song_look_ahead">Song look-ahead</string>
     <string name="profile_text_autofit_scope">Fit across</string>
     <string name="profile_menu_rename">Rename</string>
@@ -2844,7 +2756,6 @@
     <string name="profile_banner_unlinked_rest">All values were kept. Changes to %1$s no longer apply.</string>
     <string name="profile_undo">Undo</string>
     <string name="profile_inherited_tooltip">From %1$s. Change it to set it for %2$s only.</string>
-    <string name="profile_master_value">%1$s: %2$s</string>
     <string name="profile_defaults">defaults</string>
     <string name="profile_default_value">Default</string>
     <string name="profile_revert">Revert</string>
@@ -2883,8 +2794,6 @@
     <string name="profile_adjust_size">%1$d pt</string>
     <string name="profile_adjust_width">W %1$d%</string>
     <string name="profile_preview_larger">Larger</string>
-    <string name="profile_preview_done">Done</string>
-    <string name="profile_group_layout">Layout</string>
     <string name="profile_group_what_goes_where">What goes where</string>
     <string name="profile_stage_zones">Zones</string>
     <string name="profile_stage_arrangement">Arrangement</string>
@@ -2893,7 +2802,6 @@
     <string name="profile_shift_element_sub">Moves this element from where the layout puts it, in output pixels.</string>
     <string name="profile_adjust_guide_blocks">Click a block of text to point the rows at it, and drag it to move it on its own. On the Bible page, click or drag the orange-outlined reference to move it anywhere on its own.</string>
     <string name="profile_group_show">Show</string>
-    <string name="profile_group_lines">Lines</string>
     <string name="profile_group_reading">Reading</string>
     <string name="profile_caption_style">Presentation</string>
     <string name="profile_caption_style_roll_up">Roll-up</string>
@@ -2938,18 +2846,18 @@
     <string name="profile_group_box">Box</string>
     <string name="profile_group_qr">QR code</string>
     <string name="profile_group_card">Card</string>
-    <string name="profile_box_color">Background</string>
     <string name="profile_box_opacity">Opacity</string>
     <string name="profile_place_on_screen">Place on screen</string>
     <string name="profile_caption_mode">Captions show</string>
     <string name="profile_caption_transcription">Transcription</string>
     <string name="profile_caption_translation">Translation</string>
     <string name="profile_caption_both">Both</string>
-    <string name="profile_caption_layout">Layout</string>
     <string name="profile_caption_layout_interleaved">Interleaved</string>
     <string name="profile_caption_layout_interleaved_sub">Each line with its translation straight after it.</string>
     <string name="profile_caption_first">Show first</string>
     <string name="profile_caption_separate_boxes">Each language in its own box</string>
+    <string name="profile_caption_layout_stacked_inverse">Stacked, translation first</string>
+    <string name="profile_caption_layout_side_inverse">Side by side, translation first</string>
     <string name="profile_caption_highlight">Highlight the word being spoken</string>
     <string name="profile_caption_in_progress">Show words still being spoken</string>
     <string name="profile_caption_translation_in_progress">Show translation still being spoken</string>
@@ -2961,7 +2869,6 @@
     <string name="profile_qr_foreground">QR code color</string>
     <string name="profile_qr_background">QR code background</string>
     <string name="profile_dict_word">Word</string>
-    <string name="profile_dict_reference">Reference</string>
     <string name="profile_dict_kjv">KJV usage</string>
     <string name="profile_card_color">Card color</string>
     <string name="profile_card_opacity">Card opacity</string>

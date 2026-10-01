@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.preview_background_actual
 import churchpresenter.composeapp.generated.resources.preview_background_checker
-import churchpresenter.composeapp.generated.resources.preview_background_off
+import churchpresenter.composeapp.generated.resources.profile_value_off
 import churchpresenter.composeapp.generated.resources.preview_sample_long
 import churchpresenter.composeapp.generated.resources.preview_sample_medium
 import churchpresenter.composeapp.generated.resources.preview_sample_short
@@ -84,7 +84,7 @@ internal fun PreviewToolbar(
                             ),
                             SegmentedButtonItem(
                                 PreviewBackgroundMode.OFF,
-                                stringResource(Res.string.preview_background_off),
+                                stringResource(Res.string.profile_value_off),
                                 testTag = previewBackgroundTag(PreviewBackgroundMode.OFF),
                             ),
                             SegmentedButtonItem(

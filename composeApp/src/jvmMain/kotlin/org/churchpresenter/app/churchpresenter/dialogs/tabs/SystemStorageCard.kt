@@ -53,7 +53,7 @@ import churchpresenter.composeapp.generated.resources.ic_storage_media
 import churchpresenter.composeapp.generated.resources.ic_storage_pictures
 import churchpresenter.composeapp.generated.resources.ic_storage_presentation
 import churchpresenter.composeapp.generated.resources.ic_storage_songs
-import churchpresenter.composeapp.generated.resources.lower_third_size
+import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.media
 import churchpresenter.composeapp.generated.resources.no_directory_selected
 import churchpresenter.composeapp.generated.resources.pictures
@@ -67,7 +67,7 @@ import churchpresenter.composeapp.generated.resources.system_storage_status_file
 import churchpresenter.composeapp.generated.resources.system_storage_status_linked
 import churchpresenter.composeapp.generated.resources.system_storage_status_needs_converting
 import churchpresenter.composeapp.generated.resources.system_storage_status_not_found
-import churchpresenter.composeapp.generated.resources.system_storage_status_not_set
+import churchpresenter.composeapp.generated.resources.shortcut_unbound
 import churchpresenter.composeapp.generated.resources.system_storage_status_read_only
 import churchpresenter.composeapp.generated.resources.system_storage_subtitle
 import churchpresenter.composeapp.generated.resources.tooltip_directory_not_found
@@ -234,7 +234,7 @@ private fun storageFolders(
         settings.pictureSettings.storageDirectory,
     ) { dir -> onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = dir)) } },
     StorageFolder(
-        stringResource(Res.string.lower_third_size), Res.drawable.ic_storage_lower_third,
+        stringResource(Res.string.display_lower_third), Res.drawable.ic_storage_lower_third,
         MaterialTheme.semantic.contentLowerThird, settings.streamingSettings.lowerThirdFolder,
     ) { dir -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(lowerThirdFolder = dir)) } },
     StorageFolder(
@@ -358,7 +358,7 @@ private val CONTROL_HEIGHT = 34.dp
 @Composable
 private fun statusLineFor(status: DirStatus, healthy: StorageStatusLine?): StorageStatusLine = when (status) {
     DirStatus.NOT_SET -> StorageStatusLine(
-        stringResource(Res.string.system_storage_status_not_set),
+        stringResource(Res.string.shortcut_unbound),
         MaterialTheme.colorScheme.onSurfaceVariant,
     )
     DirStatus.CHECKING -> StorageStatusLine("…", MaterialTheme.colorScheme.onSurfaceVariant)
