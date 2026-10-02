@@ -75,6 +75,8 @@ import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 
+/** OBS WebSocket's own default port, used when the field does not hold a number. */
+private const val DEFAULT_OBS_PORT = 4455
 private const val TRAILING_SPACER_WEIGHT = 3f
 
 @Composable
@@ -179,147 +181,168 @@ fun OBSSettingsTab(
                     Spacer(Modifier.height(12.dp))
 
                     // Connect/Disconnect + status
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        if (status == OBSWebSocketManager.ConnectionStatus.CONNECTED) {
-                            RaisedButton(
-                                shape = AppShape(6.dp),
-                                onClick = { obsManager.disconnect() },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.error
-                                )
-                            ) {
-                                Text(stringResource(Res.string.obs_disconnect))
-                            }
-                        } else {
-                            RaisedButton(
-                                shape = AppShape(6.dp),
-                                onClick = {
-                                    val port = portText.toIntOrNull() ?: 4455
-                                    obsManager.connect(hostText, port, passwordText)
-                                },
-                                enabled = status != OBSWebSocketManager.ConnectionStatus.CONNECTING
-                            ) {
-                                Text(stringResource(Res.string.obs_connect))
-                            }
-                        }
-
-                        val (statusText, statusColor) = when (status) {
-                            OBSWebSocketManager.ConnectionStatus.CONNECTED ->
-                                stringResource(Res.string.obs_status_connected) to MaterialTheme.semantic.success
-                            OBSWebSocketManager.ConnectionStatus.CONNECTING ->
-                                stringResource(Res.string.obs_status_connecting) to MaterialTheme.semantic.warning
-                            OBSWebSocketManager.ConnectionStatus.ERROR ->
-                                "${stringResource(Res.string.obs_status_error)}: $errorMessage" to
-                                    MaterialTheme.colorScheme.error
-                            OBSWebSocketManager.ConnectionStatus.DISCONNECTED ->
-                                stringResource(Res.string.obs_status_disconnected) to
-                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                        }
-                        Text(statusText, style = MaterialTheme.typography.bodySmall, color = statusColor)
-                    }
+                    ObsConnectionControls(
+                        status = status,
+                        errorMessage = errorMessage,
+                        onConnect = {
+                            obsManager.connect(hostText, portText.toIntOrNull() ?: DEFAULT_OBS_PORT, passwordText)
+                        },
+                        onDisconnect = { obsManager.disconnect() },
+                    )
                 }
             }
 
             // ── Scene Mappings card ────────────────────────────────────────────
-            if (obs.enabled) {
-                SettingsSection(
-                    title = stringResource(Res.string.obs_scene_mappings),
-                    modifier = Modifier.fillMaxWidth().widthIn(max = 460.dp)
-                ) {
-                    Text(
-                        text = stringResource(Res.string.obs_scene_mappings_desc),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                    Spacer(Modifier.height(12.dp))
-
-                    // Default scene
-                    SettingRow(label = stringResource(Res.string.obs_default_scene)) {
-                        SettingsTextField(
-                            value = obs.defaultScene,
-                            onValueChange = { update { copy(defaultScene = it) } },
-                            placeholder = { Text(stringResource(Res.string.obs_default_scene_hint)) },
-                            singleLine = true,
-                            modifier = Modifier.widthIn(max = 350.dp)
-                        )
-                    }
-
-                    Spacer(Modifier.height(8.dp))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                    Spacer(Modifier.height(8.dp))
-
-                    // Two scene mappings per row
-                    val modes = listOf(
-                        Presenting.BIBLE to stringResource(Res.string.obs_mode_bible),
-                        Presenting.LYRICS to stringResource(Res.string.obs_mode_songs),
-                        Presenting.PICTURES to stringResource(Res.string.obs_mode_pictures),
-                        Presenting.PRESENTATION to stringResource(Res.string.presentation),
-                        Presenting.MEDIA to stringResource(Res.string.obs_mode_media),
-                        Presenting.LOWER_THIRD to stringResource(Res.string.obs_mode_lower_third),
-                        Presenting.ANNOUNCEMENTS to stringResource(Res.string.obs_mode_announcements),
-                        Presenting.WEBSITE to stringResource(Res.string.obs_mode_website),
-                        Presenting.CANVAS to stringResource(Res.string.obs_mode_canvas),
-                        Presenting.QA to stringResource(Res.string.obs_mode_qa),
-                        Presenting.STT to stringResource(Res.string.obs_mode_stt),
-                        Presenting.NONE to stringResource(Res.string.obs_mode_none),
-                    )
-                    modes.chunked(2).forEach { pair ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            val (mode0, label0) = pair[0]
-                            Text(
-                                text = label0,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                modifier = Modifier.weight(1f)
-                            )
-                            SettingsTextField(
-                                value = obs.sceneMappings[mode0.name] ?: "",
-                                onValueChange = { scene ->
-                                    val updated = obs.sceneMappings.toMutableMap()
-                                    if (scene.isBlank()) updated.remove(mode0.name) else updated[mode0.name] = scene
-                                    update { copy(sceneMappings = updated) }
-                                },
-                                placeholder = { Text(stringResource(Res.string.obs_scene_hint)) },
-                                singleLine = true,
-                                modifier = Modifier.weight(2f)
-                            )
-                            if (pair.size == 2) {
-                                val (mode1, label1) = pair[1]
-                                Text(
-                                    text = label1,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                SettingsTextField(
-                                    value = obs.sceneMappings[mode1.name] ?: "",
-                                    onValueChange = { scene ->
-                                        val updated = obs.sceneMappings.toMutableMap()
-                                        if (scene.isBlank()) updated.remove(mode1.name) else updated[mode1.name] = scene
-                                        update { copy(sceneMappings = updated) }
-                                    },
-                                    placeholder = { Text(stringResource(Res.string.obs_scene_hint)) },
-                                    singleLine = true,
-                                    modifier = Modifier.weight(2f)
-                                )
-                            } else {
-                                Spacer(Modifier.weight(TRAILING_SPACER_WEIGHT))
-                            }
-                        }
-                        Spacer(Modifier.height(6.dp))
-                    }
-                }
-            }
+            if (obs.enabled) ObsSceneMappingsCard(obs, ::update)
         }
         SettingsScrollbar(scrollState)
     }
+}
+
+/** Connect or disconnect, and what state the connection is in. */
+@Composable
+private fun ObsConnectionControls(
+    status: OBSWebSocketManager.ConnectionStatus,
+    errorMessage: String?,
+    onConnect: () -> Unit,
+    onDisconnect: () -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        if (status == OBSWebSocketManager.ConnectionStatus.CONNECTED) {
+            RaisedButton(
+                shape = AppShape(6.dp),
+                onClick = onDisconnect,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Text(stringResource(Res.string.obs_disconnect))
+            }
+        } else {
+            RaisedButton(
+                shape = AppShape(6.dp),
+                onClick = onConnect,
+                enabled = status != OBSWebSocketManager.ConnectionStatus.CONNECTING
+            ) {
+                Text(stringResource(Res.string.obs_connect))
+            }
+        }
+
+        val (statusText, statusColor) = when (status) {
+            OBSWebSocketManager.ConnectionStatus.CONNECTED ->
+                stringResource(Res.string.obs_status_connected) to MaterialTheme.semantic.success
+            OBSWebSocketManager.ConnectionStatus.CONNECTING ->
+                stringResource(Res.string.obs_status_connecting) to MaterialTheme.semantic.warning
+            OBSWebSocketManager.ConnectionStatus.ERROR ->
+                "${stringResource(Res.string.obs_status_error)}: $errorMessage" to
+                    MaterialTheme.colorScheme.error
+            OBSWebSocketManager.ConnectionStatus.DISCONNECTED ->
+                stringResource(Res.string.obs_status_disconnected) to
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+        }
+        Text(statusText, style = MaterialTheme.typography.bodySmall, color = statusColor)
+    }
+}
+
+/** The default scene, then the scene each kind of content switches OBS to, two to a row. */
+@Composable
+private fun ObsSceneMappingsCard(obs: OBSSettings, update: (OBSSettings.() -> OBSSettings) -> Unit) {
+    SettingsSection(
+        title = stringResource(Res.string.obs_scene_mappings),
+        modifier = Modifier.fillMaxWidth().widthIn(max = 460.dp)
+    ) {
+        Text(
+            text = stringResource(Res.string.obs_scene_mappings_desc),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
+        Spacer(Modifier.height(12.dp))
+
+        // Default scene
+        SettingRow(label = stringResource(Res.string.obs_default_scene)) {
+            SettingsTextField(
+                value = obs.defaultScene,
+                onValueChange = { update { copy(defaultScene = it) } },
+                placeholder = { Text(stringResource(Res.string.obs_default_scene_hint)) },
+                singleLine = true,
+                modifier = Modifier.widthIn(max = 350.dp)
+            )
+        }
+
+        Spacer(Modifier.height(8.dp))
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        Spacer(Modifier.height(8.dp))
+
+        // Two scene mappings per row
+        val modes = listOf(
+            Presenting.BIBLE to stringResource(Res.string.obs_mode_bible),
+            Presenting.LYRICS to stringResource(Res.string.obs_mode_songs),
+            Presenting.PICTURES to stringResource(Res.string.obs_mode_pictures),
+            Presenting.PRESENTATION to stringResource(Res.string.presentation),
+            Presenting.MEDIA to stringResource(Res.string.obs_mode_media),
+            Presenting.LOWER_THIRD to stringResource(Res.string.obs_mode_lower_third),
+            Presenting.ANNOUNCEMENTS to stringResource(Res.string.obs_mode_announcements),
+            Presenting.WEBSITE to stringResource(Res.string.obs_mode_website),
+            Presenting.CANVAS to stringResource(Res.string.obs_mode_canvas),
+            Presenting.QA to stringResource(Res.string.obs_mode_qa),
+            Presenting.STT to stringResource(Res.string.obs_mode_stt),
+            Presenting.NONE to stringResource(Res.string.obs_mode_none),
+        )
+        modes.chunked(2).forEach { pair ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val (mode0, label0) = pair[0]
+                Text(
+                    text = label0,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f)
+                )
+                SceneMappingField(obs, mode0, update, Modifier.weight(2f))
+                if (pair.size == 2) {
+                    val (mode1, label1) = pair[1]
+                    Text(
+                        text = label1,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        modifier = Modifier.weight(1f)
+                    )
+                    SceneMappingField(obs, mode1, update, Modifier.weight(2f))
+                } else {
+                    Spacer(Modifier.weight(TRAILING_SPACER_WEIGHT))
+                }
+            }
+            Spacer(Modifier.height(6.dp))
+        }
+    }
+
+}
+
+/** The OBS scene [mode] switches to; blank removes the mapping. */
+@Composable
+private fun SceneMappingField(
+    obs: OBSSettings,
+    mode: Presenting,
+    update: (OBSSettings.() -> OBSSettings) -> Unit,
+    modifier: Modifier,
+) {
+    SettingsTextField(
+        value = obs.sceneMappings[mode.name] ?: "",
+        onValueChange = { scene ->
+            val updated = obs.sceneMappings.toMutableMap()
+            if (scene.isBlank()) updated.remove(mode.name) else updated[mode.name] = scene
+            update { copy(sceneMappings = updated) }
+        },
+        placeholder = { Text(stringResource(Res.string.obs_scene_hint)) },
+        singleLine = true,
+        modifier = modifier
+    )
 }
