@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.withFrameMillis
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
@@ -31,6 +34,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.sharedui.utils.spacingEm
+import org.churchpresenter.settings.CAPTION_STYLE_RSVP
 import org.churchpresenter.settings.CAPTION_STYLE_TICKER
 import org.churchpresenter.settings.CAPTION_TRANSCRIPT_BOX
 import org.churchpresenter.settings.CAPTION_TRANSLATION_BOX
@@ -101,36 +105,51 @@ fun STTPresenter(
     val showTranscription = sttSettings.displayMode == "transcribe" || sttSettings.displayMode == "both"
     val showTranslation = sttSettings.displayMode == "translate" || sttSettings.displayMode == "both"
 
-    // Drip feed and the reading-speed limit: the newest words revealed at a pace, not all at once
-    val pace = revealPace(sttSettings)
-    val dripTranscription = useDripFeed(segments, pace.takeIf { !sttSettings.showInProgress })
-    val dripTranslation = useDripFeed(translationSegments, pace.takeIf { !sttSettings.showTranslationInProgress })
+    // Drip feed and the reading-speed limit: the newest words revealed at a pace, not all at once.
+    // Matching the speaker, each track is paced by its own segments' timings -- a translation has
+    // more or fewer letters for the same seconds of speech, and has to finish when the speaker does.
+    val transcriptPace = revealPace(sttSettings, rememberSpeakerPace(sttSettings, segments))
+    val translationPace = revealPace(sttSettings, rememberSpeakerPace(sttSettings, translationSegments))
+    // RSVP leaves the words still being spoken out, as the ticker does, so it is paced either way
+    val rsvp = reading.style == CAPTION_STYLE_RSVP
+    val dripTranscription = useDripFeed(segments, transcriptPace.takeIf { rsvp || !sttSettings.showInProgress })
+    val dripTranslation = useDripFeed(
+        translationSegments,
+        translationPace.takeIf { rsvp || !sttSettings.showTranslationInProgress },
+    )
 
     // Only the newest [STTSettings.maxSegments] of them (0 keeps every one): how much of the
     // running transcript this output keeps is set per profile. `maxLines` still trims whatever is
     // left to what fits.
-    val keptTranscription = keepNewest(dripTranscription, sttSettings.maxSegments)
-    val keptTranslation = keepNewest(dripTranslation, sttSettings.maxSegments)
+    val keptTranscription = keepNewest(dripTranscription.segments, sttSettings.maxSegments)
+    val keptTranslation = keepNewest(dripTranslation.segments, sttSettings.maxSegments)
     val wordEm = spacingEm(sttSettings.wordSpacing, sttSettings.fontSize)
     val spaceTrackingEm = (spacingEm(sttSettings.letterSpacing, sttSettings.fontSize) + wordEm).takeIf { wordEm != 0f }
-    // A ticker only ever adds words, so it never shows the ones still being rewritten
-    val ticker = reading.style == CAPTION_STYLE_TICKER
+    // A ticker only ever adds words, so it never shows the ones still being rewritten; nor does RSVP,
+    // which flashes each word once
+    val ticker = reading.style == CAPTION_STYLE_TICKER || rsvp
     val highlights = highlightedWords.takeIf { sttSettings.showWordHighlighting }.orEmpty()
     val transcriptInk = CaptionInk(textColor, highlights, spaceTrackingEm)
     val translationInk = CaptionInk(translationColor, highlights, spaceTrackingEm)
-    val transcriptionText = buildDisplayText(
-        captionBody(
-            keptTranscription, inProgressText.takeIf { sttSettings.showInProgress && !ticker }, reading,
-            sttSettings.transcriptAllCaps,
+    val transcriptionText = withReadingAids(
+        buildDisplayText(
+            captionBody(
+                keptTranscription, inProgressText.takeIf { sttSettings.showInProgress && !ticker }, reading,
+                sttSettings.transcriptAllCaps,
+            ),
+            keptTranscription.isNotEmpty(), reading, transcriptInk,
         ),
-        keptTranscription.isNotEmpty(), reading, transcriptInk,
+        dripTranscription.flashWords, reading,
     )
-    val translationText = buildDisplayText(
-        captionBody(
-            keptTranslation, inProgressTranslation.takeIf { sttSettings.showTranslationInProgress && !ticker }, reading,
-            sttSettings.translationAllCaps,
+    val translationText = withReadingAids(
+        buildDisplayText(
+            captionBody(
+                keptTranslation, inProgressTranslation.takeIf { sttSettings.showTranslationInProgress && !ticker },
+                reading, sttSettings.translationAllCaps,
+            ),
+            keptTranslation.isNotEmpty(), reading, translationInk,
         ),
-        keptTranslation.isNotEmpty(), reading, translationInk,
+        dripTranslation.flashWords, reading,
     )
     val silenceFade = rememberSilenceFade(transcriptionText.text + "\u0000" + translationText.text, reading)
     val faded = modifier.graphicsLayer {
@@ -142,7 +161,8 @@ fun STTPresenter(
     val isSideBySide = (sttSettings.layout == "side_by_side" || sttSettings.layout == "side_by_side_inverse") &&
         reading.style != CAPTION_STYLE_TICKER
     val isInverse = sttSettings.layout.endsWith("_inverse")
-    val interleavedText = if (isBothMode && sttSettings.layout.startsWith(LAYOUT_INTERLEAVED)) {
+    // RSVP flashes each side on its own, so an interleaved layout stacks them instead
+    val interleavedText = if (isBothMode && sttSettings.layout.startsWith(LAYOUT_INTERLEAVED) && !rsvp) {
         interleavedCaption(
             CaptionSide(
                 keptTranscription, inProgressText.takeIf { sttSettings.showInProgress && !ticker }, transcriptInk,
@@ -153,7 +173,7 @@ fun STTPresenter(
                 translationInk, sttSettings.translationAllCaps,
             ),
             translationLook, translationFirst = isInverse, sttSettings,
-        )
+        ).let { withReadingAids(it, flashWords = 0, reading) }
     } else {
         null
     }
@@ -260,29 +280,53 @@ private fun BoxedCaptions(
  * mid-reveal extends the text to type out instead of snapping its predecessor to full. The cursor
  * starts at the end of whatever is already on screen — an output opened mid-service shows the
  * backlog it inherits, it does not re-type it. Speed changes apply to the reveal in flight, since
- * the effect is keyed on [delayMs].
+ * the effect is keyed on [pace]. The caption the cursor was last anchored to is kept outside the
+ * effect, so a restart -- once the speed follows the speaker it moves with every segment -- still
+ * re-anchors the cursor when the server's window has dropped text off the front meanwhile.
  *
  * The character arithmetic lives in `SttDripFeed.kt`.
  */
+/** The speaker's pace over [segments] while [s] matches it, else null -- see [speakerMsPerChar]. */
 @Composable
-private fun useDripFeed(segments: List<STTSegment>, pace: RevealPace?): List<STTSegment> {
-    if (pace == null) return segments
+private fun rememberSpeakerPace(s: STTSettings, segments: List<STTSegment>): Long? =
+    remember(s.matchSpeakerPace, segments) { if (s.matchSpeakerPace) speakerMsPerChar(segments) else null }
+
+@Composable
+private fun useDripFeed(segments: List<STTSegment>, pace: RevealPace?): RevealedCaption {
+    if (pace == null) return RevealedCaption(segments)
 
     val fullText = captionText(segments)
     val latestFullText = rememberUpdatedState(fullText)
     val latestSegments = rememberUpdatedState(segments)
     val revealed = remember { mutableIntStateOf(fullText.length) }
+    val anchoredTo = remember { mutableStateOf(fullText) }
+    // The words in the RSVP flash the reveal stepped to last -- a phrase flash varies in size
+    val flashWords = remember { mutableIntStateOf(lastFlashWords(fullText, pace.wordsPerStep)) }
+    // When the RSVP flash on screen has been up long enough, on the frame clock. Kept outside the
+    // effect so a segment landing mid-hold -- which restarts the collection -- cannot cut it short.
+    val flashHeldUntil = remember { mutableLongStateOf(0L) }
 
     LaunchedEffect(pace) {
-        var previous = latestFullText.value
         snapshotFlow { latestFullText.value }.collectLatest { current ->
-            if (current != previous) {
-                revealed.intValue = reanchorCursor(previous, revealed.intValue, current)
-                previous = current
+            if (current != anchoredTo.value) {
+                revealed.intValue = reanchorCursor(anchoredTo.value, revealed.intValue, current)
+                anchoredTo.value = current
             }
             while (revealed.intValue < current.length) {
                 val speedUp = revealStep(revealed.intValue, current.length)
-                if (pace.unit != RevealUnit.LETTER) {
+                if (pace.unit == RevealUnit.FLASH) {
+                    // An RSVP flash goes up as soon as the one before has had its time -- at once after a
+                    // pause -- and is then held for its own. Never sped up to catch up, so it falls
+                    // behind a speaker past its ceiling.
+                    val wait = flashHeldUntil.longValue - withFrameMillis { it }
+                    if (wait > 0) delay(wait)
+                    val next = flashEnd(current, revealed.intValue, pace.wordsPerStep)
+                        .coerceIn(revealed.intValue + 1, current.length)
+                    flashHeldUntil.longValue =
+                        withFrameMillis { it } + flashDelayMs(pace, current, revealed.intValue, next)
+                    flashWords.intValue = wordsBetween(current, revealed.intValue, next).coerceAtLeast(1)
+                    revealed.intValue = next
+                } else if (pace.unit != RevealUnit.LETTER) {
                     // Whole words or segments, each held back for as long as its letters would take to type
                     val next = when (pace.unit) {
                         RevealUnit.SEGMENT -> nextSegmentEnd(latestSegments.value, revealed.intValue)
@@ -298,9 +342,12 @@ private fun useDripFeed(segments: List<STTSegment>, pace: RevealPace?): List<STT
         }
     }
 
-    if (revealed.intValue >= fullText.length) return segments
-    return applyRevealBudget(segments, revealed.intValue)
+    val shown = if (revealed.intValue >= fullText.length) segments else applyRevealBudget(segments, revealed.intValue)
+    return RevealedCaption(shown, flashWords.intValue.takeIf { pace.unit == RevealUnit.FLASH } ?: 0)
 }
+
+/** What a reveal has put on screen: its [segments], and the words in its RSVP flash -- 0 when it has none. */
+private class RevealedCaption(val segments: List<STTSegment>, val flashWords: Int = 0)
 
 internal fun sttPositionToAlignment(position: String): Alignment = when (position) {
     Constants.TOP_LEFT -> Alignment.TopStart

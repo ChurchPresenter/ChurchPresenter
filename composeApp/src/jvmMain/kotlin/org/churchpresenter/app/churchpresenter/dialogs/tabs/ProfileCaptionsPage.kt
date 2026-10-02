@@ -38,6 +38,10 @@ import org.churchpresenter.strings.generated.resources.profile_caption_translati
 import org.churchpresenter.strings.generated.resources.profile_caption_translation_in_progress
 import org.churchpresenter.strings.generated.resources.profile_caption_type_out
 import org.churchpresenter.strings.generated.resources.profile_caption_type_out_sub
+import org.churchpresenter.strings.generated.resources.profile_caption_show_speed
+import org.churchpresenter.strings.generated.resources.profile_caption_speed_fixed
+import org.churchpresenter.strings.generated.resources.profile_caption_speed_speaker
+import org.churchpresenter.strings.generated.resources.profile_caption_speed_speaker_sub
 import org.churchpresenter.strings.generated.resources.profile_group_position
 import org.churchpresenter.strings.generated.resources.profile_group_show
 import org.churchpresenter.strings.generated.resources.profile_group_text
@@ -52,6 +56,8 @@ import org.churchpresenter.settings.CAPTION_BOX_BAND
 import org.churchpresenter.settings.CAPTION_BOX_CARD
 import org.churchpresenter.settings.CAPTION_TRANSCRIPT_BOX
 import org.churchpresenter.settings.CAPTION_TRANSLATION_BOX
+import org.churchpresenter.settings.CAPTION_STYLE_POP_ON
+import org.churchpresenter.settings.CAPTION_STYLE_TICKER
 import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.settings.TextBox
 import org.jetbrains.compose.resources.stringResource
@@ -120,7 +126,9 @@ internal fun ProfileCaptionsPage(draft: AppSettings, onSettingsChange: ((AppSett
             )
         }
     }
-    CaptionReadingGroup(stt.reading) { t -> update { it.copy(reading = t(it.reading)) } }
+    CaptionReadingGroup(stt.reading, matchSpeaker = stt.matchSpeakerPace) { t ->
+        update { it.copy(reading = t(it.reading)) }
+    }
     SettingsGroup(
         stringResource(Res.string.profile_group_text),
         key = "text",
@@ -182,6 +190,8 @@ internal fun ProfileCaptionsPage(draft: AppSettings, onSettingsChange: ((AppSett
 /** SHOW: transcription, translation or both, and how the words arrive. */
 @Composable
 private fun CaptionShowGroup(stt: STTSettings, update: ((STTSettings) -> STTSettings) -> Unit) {
+    // Matching the speaker, the typing follows them and the fixed speed only stands in until it can.
+    val typedAtFixedSpeed = stt.dripFeedEnabled && !stt.matchSpeakerPace
     SettingsGroup(stringResource(Res.string.profile_group_show), key = "show") {
         SettingsRow(stringResource(Res.string.profile_caption_mode), paths = listOf("$STT.displayMode")) {
             RowSegmented(
@@ -218,11 +228,11 @@ private fun CaptionShowGroup(stt: STTSettings, update: ((STTSettings) -> STTSett
             stringResource(Res.string.profile_caption_type_out),
             stt.dripFeedEnabled,
             { v -> update { it.copy(dripFeedEnabled = v) } },
-            sub = if (stt.dripFeedEnabled) stringResource(Res.string.profile_caption_type_out_sub) else null,
+            sub = if (typedAtFixedSpeed) stringResource(Res.string.profile_caption_type_out_sub) else null,
             advanced = true,
             paths = listOf("$STT.dripFeedEnabled", "$STT.dripFeedSpeed"),
             extra = {
-                if (stt.dripFeedEnabled) {
+                if (typedAtFixedSpeed) {
                     RowStepper(
                         stt.dripFeedSpeed,
                         { v -> update { it.copy(dripFeedSpeed = v) } },
@@ -233,6 +243,30 @@ private fun CaptionShowGroup(stt: STTSettings, update: ((STTSettings) -> STTSett
                     )
                 }
             },
+        )
+        ShowSpeedRow(stt, update)
+    }
+}
+
+/**
+ * SHOW SPEED: new words at a fixed speed, or at the pace the speaker is talking. Pop-on brings whole
+ * segments and the ticker has its own speed, so neither offers it.
+ */
+@Composable
+private fun ShowSpeedRow(stt: STTSettings, update: ((STTSettings) -> STTSettings) -> Unit) {
+    if (stt.reading.style == CAPTION_STYLE_POP_ON || stt.reading.style == CAPTION_STYLE_TICKER) return
+    SettingsRow(
+        stringResource(Res.string.profile_caption_show_speed),
+        sub = if (stt.matchSpeakerPace) stringResource(Res.string.profile_caption_speed_speaker_sub) else null,
+        paths = listOf("$STT.matchSpeakerPace"),
+    ) {
+        RowSegmented(
+            options = listOf(
+                RowOption(false, stringResource(Res.string.profile_caption_speed_fixed)),
+                RowOption(true, stringResource(Res.string.profile_caption_speed_speaker)),
+            ),
+            selected = stt.matchSpeakerPace,
+            onSelect = { v -> update { it.copy(matchSpeakerPace = v) } },
         )
     }
 }

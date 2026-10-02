@@ -1,9 +1,6 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
 import org.churchpresenter.app.churchpresenter.viewmodel.STTSegment
-import org.churchpresenter.settings.CAPTION_STYLE_POP_ON
-import org.churchpresenter.settings.CAPTION_STYLE_TICKER
-import org.churchpresenter.settings.STTSettings
 
 /**
  * The character arithmetic behind the STT drip feed (the letter-by-letter caption reveal).
@@ -111,41 +108,24 @@ private fun overlapLength(a: String, b: String): Int {
 internal fun revealStep(revealed: Int, target: Int): Int =
     1 + (target - revealed).coerceAtLeast(0) / CATCH_UP_CHARS
 
-/** What the reveal steps over: a letter, a whole word, or a whole segment. */
-internal enum class RevealUnit { LETTER, WORD, SEGMENT }
-
-/** How the caption is revealed: [delayMs] per character, stepping a [unit] at a time. */
-internal data class RevealPace(val delayMs: Long, val unit: RevealUnit)
-
-private const val READING_MS_PER_SECOND = 1000L
-
-/**
- * The pace [s] reveals its captions at, or null when they appear all at once.
- *
- * The drip feed types letter by letter at its own speed. The reading-speed limit never lets words
- * arrive faster than that many characters a second: on its own it brings them a word at a time, and
- * with the drip feed it slows the typing down to it when the drip feed is faster. Pop-on never types
- * -- its words arrive in whole segments -- so there the limit holds each segment back instead.
- */
-internal fun revealPace(s: STTSettings): RevealPace? {
-    val reading = s.reading
-    val cps = reading.readingSpeedCps.coerceAtLeast(1)
-    val limitMs = if (reading.readingSpeedLimit) READING_MS_PER_SECOND / cps else 0L
-    return when {
-        reading.style == CAPTION_STYLE_POP_ON -> RevealPace(limitMs, RevealUnit.SEGMENT).takeIf { limitMs > 0 }
-        // A ticker adds what is new as one piece, so it types nothing either: the limit paces words
-        reading.style == CAPTION_STYLE_TICKER -> RevealPace(limitMs, RevealUnit.WORD).takeIf { limitMs > 0 }
-        s.dripFeedEnabled -> RevealPace(maxOf(s.dripFeedSpeed.toLong().coerceAtLeast(1L), limitMs), RevealUnit.LETTER)
-        limitMs > 0 -> RevealPace(limitMs, RevealUnit.WORD)
-        else -> null
-    }
-}
-
 /** Where the word after [from] in [text] ends: past any spaces, then up to the next space or the end. */
 internal fun nextWordEnd(text: String, from: Int): Int {
     var i = from.coerceIn(0, text.length)
     while (i < text.length && text[i] == ' ') i++
     while (i < text.length && text[i] != ' ') i++
+    return i
+}
+
+/**
+ * Where the newest [words] words of [text] start -- what an RSVP flash shows of everything revealed
+ * so far. Line breaks count as spaces: a flash is one line.
+ */
+internal fun lastWordsStart(text: String, words: Int): Int {
+    var i = text.length
+    repeat(words.coerceAtLeast(1)) {
+        while (i > 0 && text[i - 1].isWhitespace()) i--
+        while (i > 0 && !text[i - 1].isWhitespace()) i--
+    }
     return i
 }
 

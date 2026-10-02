@@ -15,6 +15,7 @@ import org.churchpresenter.app.churchpresenter.composables.BottomAlignedText
 import org.churchpresenter.settings.CAPTION_BOX_BAND
 import org.churchpresenter.settings.CAPTION_STYLE_POP_ON
 import org.churchpresenter.settings.CAPTION_STYLE_ROLL_UP
+import org.churchpresenter.settings.CAPTION_STYLE_RSVP
 import org.churchpresenter.settings.CAPTION_STYLE_TICKER
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -104,13 +105,22 @@ internal fun Modifier.captionCard(s: STTSettings, background: Color, inTextBox: 
     }
 
 /**
- * One side's caption text the way the profile presents it: a crawling ticker, a pop-on block that
- * fills and clears, or the rolling transcript.
+ * One side's caption text the way the profile presents it: a crawling ticker, an RSVP flash of the
+ * newest words, a pop-on block that fills and clears, or the rolling transcript.
  */
 @Composable
 internal fun CaptionLines(text: AnnotatedString, style: TextStyle, s: STTSettings, modifier: Modifier = Modifier) {
     when (s.reading.style) {
         CAPTION_STYLE_TICKER -> CaptionTicker(text, style, s.outline, s.reading.tickerSpeed, modifier)
+        CAPTION_STYLE_RSVP -> BottomAlignedText(
+            // Already cut down to the flash on screen -- see withReadingAids
+            text = text,
+            style = style,
+            maxLines = RSVP_MAX_LINES,
+            modifier = modifier,
+            backdrop = s.backdrop,
+            outline = s.outline,
+        )
         else -> BottomAlignedText(
             text = text,
             style = style,
@@ -123,6 +133,9 @@ internal fun CaptionLines(text: AnnotatedString, style: TextStyle, s: STTSetting
         )
     }
 }
+
+/** A flash of a word or three fits one line at caption sizes; a long one may take a second. */
+private const val RSVP_MAX_LINES = 2
 
 /** The translation's look: the transcript's, with its own size, and bold or italic on top when asked. */
 internal fun translationTextStyle(base: TextStyle, s: STTSettings): TextStyle {

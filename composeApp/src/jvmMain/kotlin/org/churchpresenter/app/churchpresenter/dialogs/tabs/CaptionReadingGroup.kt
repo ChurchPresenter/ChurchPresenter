@@ -30,6 +30,17 @@ import org.churchpresenter.strings.generated.resources.profile_caption_style_pop
 import org.churchpresenter.strings.generated.resources.profile_caption_style_roll_up
 import org.churchpresenter.strings.generated.resources.profile_caption_style_roll_up_sub
 import org.churchpresenter.strings.generated.resources.profile_caption_style_ticker
+import org.churchpresenter.strings.generated.resources.profile_caption_bionic_sub
+import org.churchpresenter.strings.generated.resources.profile_caption_bionic
+import org.churchpresenter.strings.generated.resources.profile_caption_rsvp_phrase_sub
+import org.churchpresenter.strings.generated.resources.profile_caption_rsvp_phrase
+import org.churchpresenter.strings.generated.resources.profile_caption_rsvp_wpm
+import org.churchpresenter.strings.generated.resources.profile_caption_rsvp_max_speed_sub
+import org.churchpresenter.strings.generated.resources.profile_caption_rsvp_max_speed
+import org.churchpresenter.strings.generated.resources.profile_caption_rsvp_speed
+import org.churchpresenter.strings.generated.resources.profile_caption_rsvp_words
+import org.churchpresenter.strings.generated.resources.profile_caption_style_rsvp_sub
+import org.churchpresenter.strings.generated.resources.profile_caption_style_rsvp
 import org.churchpresenter.strings.generated.resources.profile_caption_style_ticker_sub
 import org.churchpresenter.strings.generated.resources.profile_caption_ticker_speed
 import org.churchpresenter.strings.generated.resources.profile_caption_ticker_speed_unit
@@ -41,7 +52,9 @@ import org.churchpresenter.settings.CAPTION_BREAK_SEGMENT
 import org.churchpresenter.settings.CAPTION_BREAK_SENTENCE
 import org.churchpresenter.settings.CAPTION_STYLE_POP_ON
 import org.churchpresenter.settings.CAPTION_STYLE_ROLL_UP
+import org.churchpresenter.settings.CAPTION_STYLE_RSVP
 import org.churchpresenter.settings.CAPTION_STYLE_TICKER
+import org.churchpresenter.settings.RSVP_FLASH_PHRASE
 import org.churchpresenter.settings.CaptionReading
 import org.jetbrains.compose.resources.stringResource
 
@@ -56,18 +69,34 @@ private const val PERCENT_STEP = 5
 private val MAX_CHARS_RANGE = 0..120
 private val TICKER_SPEED_RANGE = 20..1000
 private const val TICKER_SPEED_STEP = 10
+private val RSVP_WORDS_RANGE = 1..3
+private val RSVP_WPM_RANGE = 60..1000
+private const val RSVP_WPM_STEP = 10
 
 /**
  * READING: when captions leave the screen, how fast words may arrive, how the lines move and break,
  * and how the newest words stand out. The everyday switches are Basic; their fine values Advanced.
  */
 @Composable
-internal fun CaptionReadingGroup(reading: CaptionReading, update: ((CaptionReading) -> CaptionReading) -> Unit) {
+internal fun CaptionReadingGroup(
+    reading: CaptionReading,
+    /** Whether the profile's show speed follows the speaker -- RSVP's speed is then its ceiling. */
+    matchSpeaker: Boolean,
+    update: ((CaptionReading) -> CaptionReading) -> Unit,
+) {
     val path = { field: String -> listOf("$READING.$field") }
     val ms = stringResource(Res.string.profile_ms)
     val percent = stringResource(Res.string.percent_suffix)
     SettingsGroup(stringResource(Res.string.profile_group_reading), key = "reading", paths = listOf(READING)) {
         StyleRows(reading, update, path)
+        if (reading.style == CAPTION_STYLE_RSVP) RsvpRows(reading, matchSpeaker, update, path)
+        SettingsSwitchRow(
+            stringResource(Res.string.profile_caption_bionic),
+            reading.bionicReading,
+            { v -> update { it.copy(bionicReading = v) } },
+            sub = stringResource(Res.string.profile_caption_bionic_sub),
+            paths = path("bionicReading"),
+        )
         TimingRows(reading, update, path)
         if (reading.style == CAPTION_STYLE_ROLL_UP) {
             SettingsSwitchRow(
@@ -94,42 +123,101 @@ internal fun CaptionReadingGroup(reading: CaptionReading, update: ((CaptionReadi
                 )
             }
         }
-        SettingsSwitchRow(
-            stringResource(Res.string.profile_caption_dim),
-            reading.dimOlderLines,
-            { v -> update { it.copy(dimOlderLines = v) } },
-            sub = stringResource(Res.string.profile_caption_dim_sub),
-            paths = path("dimOlderLines"),
-        )
-        if (reading.dimOlderLines) {
-            SettingsRow(
-                stringResource(Res.string.profile_caption_dim_step),
-                advanced = true,
-                paths = path("dimStepPercent"),
-            ) {
-                RowStepper(
-                    reading.dimStepPercent,
-                    { v -> update { it.copy(dimStepPercent = v) } },
-                    PERCENT_RANGE,
-                    step = PERCENT_STEP,
-                    unit = percent,
-                )
-            }
-            SettingsRow(
-                stringResource(Res.string.profile_caption_dim_floor),
-                advanced = true,
-                paths = path("dimFloorPercent"),
-            ) {
-                RowStepper(
-                    reading.dimFloorPercent,
-                    { v -> update { it.copy(dimFloorPercent = v) } },
-                    PERCENT_RANGE,
-                    step = PERCENT_STEP,
-                    unit = percent,
-                )
-            }
+        // A flash has no older lines to dim and no lines to break
+        if (reading.style != CAPTION_STYLE_RSVP) DimRows(reading, update, path, percent)
+        if (reading.style != CAPTION_STYLE_TICKER && reading.style != CAPTION_STYLE_RSVP) {
+            LineBreakRows(reading, update, path)
         }
-        if (reading.style != CAPTION_STYLE_TICKER) LineBreakRows(reading, update, path)
+    }
+}
+
+/** Dim older lines, and -- Advanced -- by how much each and how far at most. */
+@Composable
+private fun DimRows(
+    reading: CaptionReading,
+    update: ((CaptionReading) -> CaptionReading) -> Unit,
+    path: (String) -> List<String>,
+    percent: String,
+) {
+    SettingsSwitchRow(
+        stringResource(Res.string.profile_caption_dim),
+        reading.dimOlderLines,
+        { v -> update { it.copy(dimOlderLines = v) } },
+        sub = stringResource(Res.string.profile_caption_dim_sub),
+        paths = path("dimOlderLines"),
+    )
+    if (reading.dimOlderLines) {
+        SettingsRow(
+            stringResource(Res.string.profile_caption_dim_step),
+            advanced = true,
+            paths = path("dimStepPercent"),
+        ) {
+            RowStepper(
+                reading.dimStepPercent,
+                { v -> update { it.copy(dimStepPercent = v) } },
+                PERCENT_RANGE,
+                step = PERCENT_STEP,
+                unit = percent,
+            )
+        }
+        SettingsRow(
+            stringResource(Res.string.profile_caption_dim_floor),
+            advanced = true,
+            paths = path("dimFloorPercent"),
+        ) {
+            RowStepper(
+                reading.dimFloorPercent,
+                { v -> update { it.copy(dimFloorPercent = v) } },
+                PERCENT_RANGE,
+                step = PERCENT_STEP,
+                unit = percent,
+            )
+        }
+    }
+}
+
+/**
+ * RSVP: how many words each flash shows, and its words a minute -- the speed at a fixed show speed,
+ * the ceiling when it follows the speaker.
+ */
+@Composable
+private fun RsvpRows(
+    reading: CaptionReading,
+    matchSpeaker: Boolean,
+    update: ((CaptionReading) -> CaptionReading) -> Unit,
+    path: (String) -> List<String>,
+) {
+    SettingsRow(
+        stringResource(Res.string.profile_caption_rsvp_words),
+        sub = if (reading.rsvpWordsPerFlash == RSVP_FLASH_PHRASE) {
+            stringResource(Res.string.profile_caption_rsvp_phrase_sub)
+        } else {
+            null
+        },
+        paths = path("rsvpWordsPerFlash"),
+    ) {
+        RowSegmented(
+            options = RSVP_WORDS_RANGE.map { RowOption(it, it.toString()) } +
+                RowOption(RSVP_FLASH_PHRASE, stringResource(Res.string.profile_caption_rsvp_phrase)),
+            selected = reading.rsvpWordsPerFlash,
+            onSelect = { v -> update { it.copy(rsvpWordsPerFlash = v) } },
+        )
+    }
+    SettingsRow(
+        stringResource(
+            if (matchSpeaker) Res.string.profile_caption_rsvp_max_speed else Res.string.profile_caption_rsvp_speed,
+        ),
+        sub = if (matchSpeaker) stringResource(Res.string.profile_caption_rsvp_max_speed_sub) else null,
+        paths = path("rsvpWpm"),
+    ) {
+        RowStepper(
+            reading.rsvpWpm,
+            { v -> update { it.copy(rsvpWpm = v) } },
+            RSVP_WPM_RANGE,
+            step = RSVP_WPM_STEP,
+            unit = stringResource(Res.string.profile_caption_rsvp_wpm),
+            fieldWidth = 76.dp,
+        )
     }
 }
 
@@ -145,6 +233,7 @@ private fun StyleRows(
         sub = when (reading.style) {
             CAPTION_STYLE_POP_ON -> stringResource(Res.string.profile_caption_style_pop_on_sub)
             CAPTION_STYLE_TICKER -> stringResource(Res.string.profile_caption_style_ticker_sub)
+            CAPTION_STYLE_RSVP -> stringResource(Res.string.profile_caption_style_rsvp_sub)
             else -> stringResource(Res.string.profile_caption_style_roll_up_sub)
         },
         paths = path("style"),
@@ -154,6 +243,7 @@ private fun StyleRows(
                 RowOption(CAPTION_STYLE_ROLL_UP, stringResource(Res.string.profile_caption_style_roll_up)),
                 RowOption(CAPTION_STYLE_POP_ON, stringResource(Res.string.profile_caption_style_pop_on)),
                 RowOption(CAPTION_STYLE_TICKER, stringResource(Res.string.profile_caption_style_ticker)),
+                RowOption(CAPTION_STYLE_RSVP, stringResource(Res.string.profile_caption_style_rsvp)),
             ),
             selected = reading.style,
             onSelect = { v -> update { it.copy(style = v) } },
