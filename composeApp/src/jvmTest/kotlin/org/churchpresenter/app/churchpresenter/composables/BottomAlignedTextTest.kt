@@ -12,7 +12,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import kotlin.test.assertTrue
 import org.churchpresenter.core.models.text.TextBackdrop
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp

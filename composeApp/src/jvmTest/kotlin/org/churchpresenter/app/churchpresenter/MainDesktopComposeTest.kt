@@ -15,7 +15,7 @@ import androidx.compose.ui.test.doubleClick
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.core.models.songs.SongFileParser
