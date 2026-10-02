@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.performClick
@@ -29,7 +30,7 @@ class ProfileCaptionReadingTest {
     private fun captions(stt: STTSettings = STTSettings()) =
         profileDocument(profile = OutputProfile(sttSettings = stt))
 
-    private fun androidx.compose.ui.test.ComposeUiTest.isShown(label: String) =
+    private fun ComposeUiTest.isShown(label: String) =
         onAllNodes(hasTextExactly(label), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
 
     @Test
