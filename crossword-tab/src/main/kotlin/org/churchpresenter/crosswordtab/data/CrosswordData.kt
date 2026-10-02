@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.crosswordtab.data
 
 import java.util.Base64
 

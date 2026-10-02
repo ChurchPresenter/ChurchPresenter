@@ -321,6 +321,7 @@ kotlin {
             implementation(projects.slides)
             implementation(projects.media)
             implementation(projects.web)
+            implementation(projects.crosswordTab)
             implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source
             // directory, wrapped by CompanionSatelliteViewModel.
@@ -1507,23 +1508,6 @@ tasks.register("signLinuxDeb") {
     }
 }
 
-// ── Crossword puzzle sync ─────────────────────────────────────────────────────
-// Copies encrypted .xwp files from the :crossword module into composeResources so they are
-// bundled with the app. Edit the puzzles in that module's `encoded/` directory, then rebuild.
-val syncCrosswordFiles = tasks.register<Copy>("syncCrosswordFiles") {
-    from(rootProject.file("crossword/encoded"))
-    include("*.xwp")
-    into(layout.projectDirectory.file("src/jvmMain/composeResources/files/crossword"))
-    doFirst {
-        destinationDir.mkdirs()
-    }
-}
-tasks.matching {
-    it.name.contains("ProcessResources", ignoreCase = true) ||
-    it.name.contains("ResourcesForJvmMain", ignoreCase = true)
-}.configureEach {
-    dependsOn(syncCrosswordFiles)
-}
 
 
 

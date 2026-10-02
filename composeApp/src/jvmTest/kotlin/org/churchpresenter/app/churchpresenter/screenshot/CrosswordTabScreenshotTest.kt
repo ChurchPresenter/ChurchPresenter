@@ -18,7 +18,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.tabs.CrosswordTab
+import org.churchpresenter.crosswordtab.CrosswordTab
 import org.churchpresenter.sharedui.testing.showsExactly
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test

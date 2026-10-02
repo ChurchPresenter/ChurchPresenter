@@ -363,7 +363,7 @@
 - `dialogs/SetupWizardDialog.kt`
 - `dialogs/KeyboardShortcutsDialog.kt`, `dialogs/ShortcutBindingRow.kt`, `dialogs/ShortcutCapture.kt`, `dialogs/ShortcutCategoryRail.kt` — the shortcut list and rebinding
 - `composables/LabeledTab.kt`, `dialogs/tabs/TabLabelsRow.kt` — tab label styles
-- `tabs/CrosswordTab.kt`, `data/CrosswordData.kt` — a hidden tab (←→←→); `crossword/` (the `:crossword` Gradle module) is its authoring tool and the encoded puzzles
+- `crossword-tab/…/CrosswordTab.kt`, `crossword-tab/…/data/CrosswordData.kt` (the `:crossword-tab` module) — a hidden tab (←→←→); `crossword/` (the `:crossword` Gradle module) is its authoring tool and the encoded puzzles
 - `dialogs/OptionsDialog.kt`
 - `data/SettingsManager.kt`, `data/settings/AppSettings.kt`, `data/settings/WindowLayoutSettings.kt`
 - `utils/AutoStartManager.kt`, `utils/UpdateChecker.kt`
