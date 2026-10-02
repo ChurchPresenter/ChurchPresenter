@@ -113,6 +113,47 @@ import org.churchpresenter.sharedui.utils.UrlOpener
 
 private const val PILL_CORNER_PERCENT = 50
 
+/** The small window that connects to Planning Center before anything can be imported. */
+@Composable
+private fun PlanningCenterConnectWindow(
+    theme: ThemeMode,
+    onDismiss: () -> Unit,
+    onConnected: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long, personName: String) -> Unit,
+) {
+    val mainWindowState = LocalMainWindowState.current
+    var isConnecting by remember { mutableStateOf(false) }
+    var connectionError by remember { mutableStateOf<String?>(null) }
+    val connectScope = rememberCoroutineScope()
+    DialogWindow(
+        onCloseRequest = onDismiss,
+        state = rememberDialogState(
+            position = centeredOnMainWindow(mainWindowState, 460.dp, 260.dp),
+            width = 460.dp,
+            height = 260.dp
+        ),
+        title = stringResource(Res.string.planning_center_import_title)
+    ) {
+        AppWindowRoot(theme = theme) {
+            PlanningCenterConnectDialogContent(
+                isConnecting = isConnecting,
+                connectionError = connectionError,
+                onDismiss = onDismiss,
+                onConnectClick = {
+                    isConnecting = true
+                    connectionError = null
+                    connectScope.launch {
+                        try {
+                            connectToPlanningCenter(onConnected = onConnected, onError = { connectionError = it })
+                        } finally {
+                            isConnecting = false
+                        }
+                    }
+                }
+            )
+        }
+    }
+}
+
 /**
  * Lets the operator pick a Planning Center Services plan and import its songs (matched against
  * the local library, or added on the spot via [EditSongDialog]) and section headers (as schedule
@@ -142,38 +183,7 @@ fun PlanningCenterImportDialog(
 
     if (settings.accessToken.isBlank()) {
         // No dedicated settings tab anymore — connecting happens right here, on demand.
-        val mainWindowState = LocalMainWindowState.current
-        var isConnecting by remember { mutableStateOf(false) }
-        var connectionError by remember { mutableStateOf<String?>(null) }
-        val connectScope = rememberCoroutineScope()
-        DialogWindow(
-            onCloseRequest = onDismiss,
-            state = rememberDialogState(
-                position = centeredOnMainWindow(mainWindowState, 460.dp, 260.dp),
-                width = 460.dp,
-                height = 260.dp
-            ),
-            title = stringResource(Res.string.planning_center_import_title)
-        ) {
-            AppWindowRoot(theme = theme) {
-                PlanningCenterConnectDialogContent(
-                    isConnecting = isConnecting,
-                    connectionError = connectionError,
-                    onDismiss = onDismiss,
-                    onConnectClick = {
-                        isConnecting = true
-                        connectionError = null
-                        connectScope.launch {
-                            try {
-                                connectToPlanningCenter(onConnected = onConnected, onError = { connectionError = it })
-                            } finally {
-                                isConnecting = false
-                            }
-                        }
-                    }
-                )
-            }
-        }
+        PlanningCenterConnectWindow(theme, onDismiss, onConnected)
         return
     }
 

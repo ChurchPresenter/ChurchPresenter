@@ -97,48 +97,20 @@ internal fun AddWebsiteDialogContent(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     // Title field (first)
-                    Column {
-                        Text(
-                            text = stringResource(Res.string.website_title_label),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        SettingsTextField(
-                            value = displayTitle,
-                            onValueChange = { displayTitle = it },
-                            placeholder = {
-                                Text(
-                                    stringResource(Res.string.website_title_hint),
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                        )
-                    }
+                    WebsiteField(
+                        label = stringResource(Res.string.website_title_label),
+                        hint = stringResource(Res.string.website_title_hint),
+                        value = displayTitle,
+                        onValueChange = { displayTitle = it },
+                    )
 
                     // URL field (second)
-                    Column {
-                        Text(
-                            text = stringResource(Res.string.website_url_label),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        SettingsTextField(
-                            value = url,
-                            onValueChange = { url = it },
-                            placeholder = {
-                                Text(
-                                    stringResource(Res.string.web_url_hint),
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                        )
-                    }
+                    WebsiteField(
+                        label = stringResource(Res.string.website_url_label),
+                        hint = stringResource(Res.string.web_url_hint),
+                        value = url,
+                        onValueChange = { url = it },
+                    )
 
                     // Disclaimer
                     Text(
@@ -186,3 +158,23 @@ internal fun AddWebsiteDialogContent(
             }
         }
     }
+
+/** One labelled single-line field of the dialog, with its hint shown while it is empty. */
+@Composable
+private fun WebsiteField(label: String, hint: String, value: String, onValueChange: (String) -> Unit) {
+    Column {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        SettingsTextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = { Text(hint, style = MaterialTheme.typography.bodyMedium) },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+        )
+    }
+}
