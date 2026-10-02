@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q&A Admin</title>
+<style>
+/*QA_SHARED_CSS*/
+:root{--qa-bg:#1e1e2e;--qa-surface:#2a2a3e;--qa-ink:#e0e0e0;--qa-muted:#a0a0ad;--qa-border:#3b3b5c}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--qa-bg);color:var(--qa-ink);min-height:100vh;padding:16px}
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px;margin-bottom:16px}
+h1{font-size:22px}
+.tabs{display:flex;gap:8px;margin-bottom:16px;padding:0 16px}
+.tab{min-height:44px;padding:8px 20px;border-radius:8px;border:1px solid var(--qa-border);background:transparent;color:var(--qa-ink);cursor:pointer;font-size:14px;transition:background .2s,border-color .2s}
+.tab.active{background:var(--qa-primary);border-color:var(--qa-primary);color:#fff}
+.tab .count{background:rgba(255,255,255,.2);border-radius:10px;padding:1px 8px;margin-left:6px;font-size:12px}
+.list{padding:0 16px}
+.q{background:var(--qa-surface);border-radius:12px;padding:16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.q.live{border:2px solid var(--qa-success)}
+.q-text{flex:1;font-size:15px;line-height:1.4;min-width:150px}
+.q-time{color:var(--qa-muted);font-size:12px;white-space:nowrap;padding-top:3px}
+.q-label{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:600}
+.q-label.done{background:#42a5f5;color:#08233b}
+.q-label.denied{background:var(--qa-danger);color:#fff}
+.q-actions{display:flex;gap:6px;flex-wrap:wrap}
+.btn{min-height:44px;padding:8px 14px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:background .2s}
+.btn-approve{background:var(--qa-success);color:#fff}.btn-approve:hover{background:var(--qa-success-hover)}
+.btn-deny{background:var(--qa-danger);color:#fff}.btn-deny:hover{background:var(--qa-danger-hover)}
+.btn-live{background:var(--qa-primary);color:#fff}.btn-live:hover{background:var(--qa-primary-hover)}
+.btn-done{background:#42a5f5;color:#08233b}.btn-done:hover{background:#1e88e5;color:#fff}
+.btn-back{background:#ff9800;color:#3d2600}.btn-back:hover{background:#f57c00;color:#fff}
+.btn-golive-confirm{background:var(--qa-primary);color:#fff;opacity:0.6}.btn-golive-confirm:hover{opacity:1}
+.btn-edit{background:#ff9800;color:#3d2600}.btn-edit:hover{background:#f57c00;color:#fff}
+.btn-del{background:#4a4a5e;color:#e0e0e0}.btn-del:hover{background:#5e5e77}
+.edit-area{width:100%;display:flex;gap:6px;align-items:center;margin-top:8px}
+.edit-area textarea{flex:1;background:var(--qa-bg);color:var(--qa-ink);border:2px solid var(--qa-primary);border-radius:8px;padding:8px;font-size:14px;font-family:inherit;resize:vertical;min-height:40px}
+.edit-area .btn{white-space:nowrap}
+.empty{text-align:center;padding:48px;color:var(--qa-muted);font-size:16px}
+.status-bar{padding:8px 16px;background:var(--qa-success);color:#fff;border-radius:8px;margin:0 16px 16px;display:flex;align-items:center;justify-content:space-between}
+.status-bar .btn{background:rgba(255,255,255,.2);color:#fff}
+.add-bar{display:flex;gap:8px;padding:0 16px;margin-bottom:16px}
+.add-bar input{flex:1;min-height:44px;background:var(--qa-surface);color:var(--qa-ink);border:1px solid var(--qa-border);border-radius:8px;padding:10px 14px;font-size:14px;font-family:inherit}
+.add-bar input:focus{outline:none;border-color:var(--qa-primary)}
+.login{max-width:360px;margin:80px auto;text-align:center}
+.login input{width:100%;min-height:48px;background:var(--qa-surface);color:var(--qa-ink);border:2px solid var(--qa-border);border-radius:12px;padding:14px;font-size:16px;margin:16px 0;text-align:center}
+.login input:focus{outline:none;border-color:var(--qa-primary)}
+.login .btn{width:100%;padding:14px;font-size:16px}
+.login .err{color:#ef9a9a;margin-top:8px;font-size:14px}
+</style>
+</head>
+<body>
+<div id="login-screen" class="login" style="display:none">
+<h1>Q&A Admin</h1>
+<p style="color:var(--qa-muted);margin-top:8px">Enter admin password to continue</p>
+<label class="sr-only" for="pw-input">Admin password</label>
+<input type="password" id="pw-input" aria-label="Admin password" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+<button class="btn btn-live" id="login-btn" onclick="doLogin()">Login</button>
+<p id="connecting-msg" style="display:none;color:var(--qa-muted);margin-top:8px">Waiting for approval on the desktop…</p>
+<div class="err" id="pw-err" style="display:none"></div>
+</div>
+
+<div id="main-app" style="display:none">
+<div class="header">
+<h1>Q&A Admin</h1>
+<span id="status" role="status" aria-live="polite" style="font-size:13px;color:var(--qa-muted)">Connecting...</span>
+</div>
+
+<div id="display-bar" class="status-bar" style="display:none">
+<span id="display-text">Displaying question...</span>
+<button class="btn" onclick="clearDisplay()">Clear Display</button>
+</div>
+
+<div class="add-bar">
+<label class="sr-only" for="add-input">Add a question</label>
+<input type="text" id="add-input" aria-label="Add a question" placeholder="Add a question..." spellcheck="true" onkeydown="if(event.key==='Enter')addQ()">
+<button class="btn btn-approve" onclick="addQ()">Add</button>
+</div>
+
+<div class="tabs" style="flex-wrap:wrap;gap:4px">
+<button class="tab active" onclick="setFilter('ALL',this)">All <span class="count" id="cnt-all">0</span></button>
+<button class="tab" onclick="setFilter('INCOMING',this)">Incoming <span class="count" id="cnt-incoming">0</span></button>
+<button class="tab" onclick="setFilter('APPROVED',this)">Approved <span class="count" id="cnt-approved">0</span></button>
+<button class="tab" onclick="setFilter('INCOMING_APPROVED',this)">Incoming+Approved <span class="count" id="cnt-ia">0</span></button>
+<button class="tab" onclick="setFilter('DONE',this)">Done <span class="count" id="cnt-done">0</span></button>
+<button class="tab" onclick="setFilter('DENIED',this)">Denied <span class="count" id="cnt-denied">0</span></button>
+<button class="tab" id="sort-btn" onclick="toggleSort()" style="margin-left:auto">Sort: Time</button>
+</div>
+
+<div class="list" id="list"></div>
+</div>
+
+<script>
+let questions=[],filter='ALL',sortBy='time',displayedId=null,editingId=null,authed=false;
+let password=new URLSearchParams(window.location.search).get('password')||localStorage.getItem('qa_admin_pw')||'';
+if(password){localStorage.setItem('qa_admin_pw',password);document.getElementById('pw-input').value=password;}
+let deviceId=localStorage.getItem('qa_admin_device_id');
+if(!deviceId){deviceId=(crypto.randomUUID?crypto.randomUUID():(Date.now()+'-'+Math.random().toString(36).slice(2)));localStorage.setItem('qa_admin_device_id',deviceId);}
+const headers={'Content-Type':'application/json','X-Device-Id':deviceId};
+
+function setHeaders(){
+  if(password)headers['X-QA-Password']=password;
+}
+setHeaders();
+
+// Sends /api/qa/auth and waits for the desktop operator to approve this device — mirrors the
+// presentation remote's connection handshake, showing a "waiting for approval" state meanwhile.
+async function attemptAuth(){
+  const btn=document.getElementById('login-btn');
+  const msg=document.getElementById('connecting-msg');
+  const errEl=document.getElementById('pw-err');
+  document.getElementById('login-screen').style.display='block';
+  document.getElementById('main-app').style.display='none';
+  errEl.style.display='none';
+  btn.disabled=true;msg.style.display='block';
+  try{
+    const r=await fetch('/api/qa/auth',{method:'POST',headers});
+    if(r.ok){authed=true;document.getElementById('login-screen').style.display='none';document.getElementById('main-app').style.display='block';load();checkStatus();return true}
+    errEl.textContent=r.status===403?'Connection request denied':'Incorrect password';
+    errEl.style.display='block';
+    document.getElementById('pw-input').focus();
+    return false
+  }catch(e){
+    errEl.textContent='Could not reach the app';
+    errEl.style.display='block';
+    return false
+  }finally{
+    btn.disabled=false;msg.style.display='none';
+  }
+}
+async function doLogin(){
+  password=document.getElementById('pw-input').value;
+  localStorage.setItem('qa_admin_pw',password);
+  headers['X-QA-Password']=password;
+  await attemptAuth();
+}
+
+// Auto-connect on load — approval popup (if any) surfaces on the desktop while this awaits
+attemptAuth();
+
+function lockOut(){
+  authed=false;password='';localStorage.removeItem('qa_admin_pw');
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('login-screen').style.display='block';
+  document.getElementById('pw-err').textContent='Session expired. Please log in again.';
+  document.getElementById('pw-err').style.display='block';
+  document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();
+}
+let lastLoadSig='';
+async function load(){
+  if(!authed)return;
+  try{
+    const r=await fetch('/api/qa/questions',{headers});
+    if(r.status===401){lockOut();return}
+    if(r.ok)questions=await r.json();
+    // Skip the full innerHTML rebuild when nothing relevant changed (prevents flicker/mis-taps).
+    const sig=JSON.stringify(questions.map(q=>[q.id,q.status,q.text,q.upvotes,q.downvotes,q.submitterName]))+'|'+displayedId;
+    if(sig===lastLoadSig)return;
+    lastLoadSig=sig;
+    if(!editingId)render();
+  }catch(e){}
+}
+
+function render(){
+  // Show/hide clear display bar
+  const dbar=document.getElementById('display-bar');
+  if(displayedId){
+    const dq=questions.find(q=>q.id===displayedId);
+    document.getElementById('display-text').textContent='Displaying: '+(dq?dq.text.substring(0,50):'...');
+    dbar.style.display='flex';
+  }else{dbar.style.display='none'}
+  let filtered;
+  if(filter==='ALL')filtered=questions;
+  else if(filter==='INCOMING')filtered=questions.filter(q=>q.status==='PENDING');
+  else if(filter==='APPROVED')filtered=questions.filter(q=>q.status==='APPROVED');
+  else if(filter==='INCOMING_APPROVED')filtered=questions.filter(q=>q.status==='PENDING'||q.status==='APPROVED');
+  else if(filter==='DONE')filtered=questions.filter(q=>q.status==='DONE');
+  else if(filter==='DENIED')filtered=questions.filter(q=>q.status==='DENIED');
+  else filtered=questions;
+  const list=document.getElementById('list');
+  document.getElementById('cnt-all').textContent=questions.length;
+  document.getElementById('cnt-incoming').textContent=questions.filter(q=>q.status==='PENDING').length;
+  document.getElementById('cnt-approved').textContent=questions.filter(q=>q.status==='APPROVED').length;
+  document.getElementById('cnt-ia').textContent=questions.filter(q=>q.status==='PENDING'||q.status==='APPROVED').length;
+  document.getElementById('cnt-done').textContent=questions.filter(q=>q.status==='DONE').length;
+  document.getElementById('cnt-denied').textContent=questions.filter(q=>q.status==='DENIED').length;
+
+  if(sortBy==='votes')filtered=[...filtered].sort((a,b)=>b.voteCount-a.voteCount);
+  else filtered=[...filtered].sort((a,b)=>a.timestamp-b.timestamp);
+  if(!filtered.length){list.innerHTML='<div class="empty">No questions</div>';return}
+  list.innerHTML=filtered.map(q=>{
+    const time=new Date(q.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    const isLive=q.id===displayedId;
+    let label='';
+    if(q.status==='DONE')label='<span class="q-label done">Done</span> ';
+    else if(q.status==='DENIED')label='<span class="q-label denied">Denied</span> ';
+    let actions='<button class="btn btn-edit" onclick="editQ(\''+q.id+'\')">Edit</button>';
+    if(q.status==='PENDING'){
+      actions+='<button class="btn btn-approve" onclick="action(\'approve\',\''+q.id+'\')">Approve</button><button class="btn btn-deny" onclick="action(\'deny\',\''+q.id+'\')">Deny</button>';
+    }else if(q.status==='APPROVED'){
+      actions+=(isLive?'':'<button class="btn btn-live" onclick="action(\'display\',\''+q.id+'\')">Go Live</button>')+'<button class="btn btn-done" onclick="action(\'done\',\''+q.id+'\')">Done</button><button class="btn btn-deny" onclick="action(\'deny\',\''+q.id+'\')">Deny</button>';
+    }else if(q.status==='DONE'){
+      actions+='<button class="btn btn-back" onclick="action(\'approve\',\''+q.id+'\')">Back to Incoming</button>';
+      actions+='<button class="btn btn-golive-confirm" onclick="confirmGoLive(\''+q.id+'\')">Go Live</button>';
+    }else if(q.status==='DENIED'){
+      actions+='<button class="btn btn-approve" onclick="action(\'approve\',\''+q.id+'\')">Approve</button>';
+      actions+='<button class="btn btn-golive-confirm" onclick="confirmGoLive(\''+q.id+'\')">Go Live</button>';
+    }
+    actions+='<button class="btn btn-del" onclick="del(\''+q.id+'\')">Del</button>';
+    const nameTag=q.submitterName?'<span style="color:#888;font-size:12px">'+esc(q.submitterName)+':</span> ':'';
+    const upTag=q.upvotes>0?'<span style="display:inline-block;background:#e3f2fd;color:#1565c0;font-size:11px;font-weight:700;padding:2px 4px;border-radius:4px;margin-right:2px">&#9650; '+q.upvotes+'</span>':'';
+    const dnTag=q.downvotes>0?'<span style="display:inline-block;background:#ffebee;color:#c62828;font-size:11px;font-weight:700;padding:2px 4px;border-radius:4px;margin-right:4px">&#9660; '+q.downvotes+'</span>':'';
+    const voteTag=upTag+dnTag;
+    return '<div class="q'+(isLive?' live':'')+'" id="q-'+q.id+'"><span class="q-time">'+time+'</span><span class="q-text" id="qt-'+q.id+'">'+voteTag+label+nameTag+esc(q.text)+'</span><div class="q-actions">'+actions+'</div></div>';
+  }).join('');
+}
+
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+let pendingConfirm=null;
+function confirmGoLive(id){
+  if(pendingConfirm===id){
+    pendingConfirm=null;
+    action('approve',id).then(()=>action('display',id));
+    return;
+  }
+  pendingConfirm=id;
+  const el=document.getElementById('q-'+id);
+  if(el){const btns=el.querySelectorAll('.btn-golive-confirm');btns.forEach(b=>{b.textContent='Confirm Go Live?';b.style.opacity='1'})}
+  setTimeout(()=>{if(pendingConfirm===id){pendingConfirm=null;load()}},3000);
+}
+async function action(act,id){
+  try{const r=await fetch('/api/qa/questions/'+id+'/'+act,{method:'POST',headers});
+    if(r.status===401){lockOut();return}
+    if(r.ok&&act==='display')displayedId=id;
+    if(r.ok&&(act==='done'||act==='deny'))if(displayedId===id)displayedId=null;
+    load();
+  }catch(e){}
+}
+async function del(id){
+  if(!confirm('Delete this question? This cannot be undone.'))return;
+  try{const r=await fetch('/api/qa/questions/'+id,{method:'DELETE',headers});if(r.status===401){lockOut();return}load()}catch(e){}
+}
+function editQ(id){
+  const q=questions.find(q=>q.id===id);if(!q)return;
+  editingId=id;
+  const el=document.getElementById('qt-'+id);if(!el)return;
+  el.innerHTML='<div class="edit-area"><textarea id="edit-'+id+'" spellcheck="true" aria-label="Edit question"></textarea><button class="btn btn-approve" onclick="saveEdit(\''+id+'\')">Save</button><button class="btn btn-del" onclick="cancelEdit()">Cancel</button></div>';
+  const ta=document.getElementById('edit-'+id);if(ta){ta.value=q.text;ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}
+}
+async function saveEdit(id){
+  const ta=document.getElementById('edit-'+id);if(!ta)return;
+  const text=ta.value.trim();if(!text)return;
+  editingId=null;
+  try{const r=await fetch('/api/qa/questions/'+id+'/edit',{method:'POST',headers,body:JSON.stringify({text})});if(r.status===401){lockOut();return}load()}catch(e){}
+}
+function cancelEdit(){editingId=null;render()}
+async function addQ(){
+  const inp=document.getElementById('add-input');const text=inp.value.trim();if(!text)return;
+  inp.value='';
+  try{const r=await fetch('/api/qa/add',{method:'POST',headers,body:JSON.stringify({text})});if(r.status===401){lockOut();return}load()}catch(e){}
+}
+async function clearDisplay(){
+  try{await fetch('/api/qa/clear-display',{method:'POST',headers});displayedId=null;render();load()}catch(e){}
+}
+function setFilter(f,el){
+  filter=f;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+function toggleSort(){
+  sortBy=sortBy==='time'?'votes':'time';
+  document.getElementById('sort-btn').textContent='Sort: '+(sortBy==='votes'?'Votes':'Time');
+  render();
+}
+async function checkStatus(){
+  if(!authed)return;
+  try{const r=await fetch('/api/qa/status');const d=await r.json();
+    document.getElementById('status').textContent=d.sessionActive?'Session Active':'Session Inactive';
+    document.getElementById('status').style.color=d.sessionActive?'#66bb6a':'#ef5350';
+    const newDisplayed=d.displayedQuestionId||null;
+    if(newDisplayed!==displayedId){displayedId=newDisplayed;render()}
+  }catch(e){document.getElementById('status').textContent='Disconnected';document.getElementById('status').style.color='#ef5350'}
+}
+
+setInterval(()=>{if(authed)load()},3000);
+setInterval(()=>{if(authed)checkStatus()},3000);
+</script>
+</body>
+</html>

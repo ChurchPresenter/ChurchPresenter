@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vote on Questions</title>
+<style>
+/*QA_SHARED_CSS*/
+:root{--qa-bg:#f5f5f5;--qa-surface:#fff;--qa-ink:#1e1e2e;--qa-sub:#5f5f6b;--qa-muted:#616161;--qa-up-bg:#e3f2fd;--qa-down-bg:#ffebee;--qa-score-pos:#2e7d32;--qa-score-neg:#c62828}
+@media(prefers-color-scheme:dark){:root{--qa-bg:#16161f;--qa-surface:#22222e;--qa-ink:#e8e8ef;--qa-sub:#a8a8b5;--qa-muted:#9a9aa6;--qa-up-bg:#12314a;--qa-down-bg:#3a1c1f;--qa-score-pos:#81c784;--qa-score-neg:#ef9a9a}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--qa-bg);color:var(--qa-ink);min-height:100vh;padding:16px}
+.container{max-width:600px;margin:0 auto}
+h1{font-size:24px;color:var(--qa-ink);text-align:center;margin-bottom:4px}
+p.sub{color:var(--qa-sub);text-align:center;margin-bottom:24px;font-size:14px}
+.question-card{background:var(--qa-surface);border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:16px}
+.vote-btns{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:44px}
+.vote-btn{display:flex;align-items:center;justify-content:center;border:none;background:none;cursor:pointer;padding:6px;border-radius:8px;transition:background .2s,color .2s;width:44px;height:44px}
+.vote-btn:hover{background:var(--qa-up-bg)}
+.vote-btn.voted{color:var(--qa-primary);background:var(--qa-up-bg)}
+.vote-btn:disabled{cursor:default}
+.vote-arrow{font-size:18px;line-height:1;color:var(--qa-muted);transition:color .2s}
+.vote-btn.voted .vote-arrow{color:var(--qa-primary)}
+.vote-btn.down-voted{color:var(--qa-danger);background:var(--qa-down-bg)}
+.vote-btn.down-voted .vote-arrow{color:var(--qa-danger)}
+.vote-score{font-size:13px;font-weight:700;text-align:center;line-height:1;min-width:20px}
+.q-content{flex:1;min-width:0}
+.q-text{font-size:16px;color:var(--qa-ink);line-height:1.4;word-wrap:break-word}
+.q-meta{font-size:12px;color:var(--qa-muted);margin-top:6px}
+.msg{text-align:center;padding:16px;border-radius:8px;font-size:14px;margin-top:16px}
+.msg.off{background:#fff3e0;color:#e65100}
+.empty{text-align:center;color:var(--qa-muted);font-size:14px;margin-top:40px}
+a.back{display:block;text-align:center;margin-top:20px;text-decoration:none;padding:14px;min-height:48px;background:var(--qa-primary);color:#fff;border-radius:12px;font-size:16px;font-weight:600;transition:background .2s}
+a.back:hover{background:var(--qa-primary-hover)}
+@media(prefers-color-scheme:dark){.msg.off{background:#3a2a12;color:#ffcc80}}
+</style>
+</head>
+<body>
+<main class="container">
+<h1 id="page-title">Vote on Questions</h1>
+<p class="sub" id="page-sub">Vote on the questions you'd like answered</p>
+<div id="questions"></div>
+<div id="msg" class="msg" role="status" aria-live="polite" style="display:none"></div>
+<a class="back" href="/qa">&larr; Submit a question</a>
+</main>
+<script>
+const questionsEl=document.getElementById('questions'),msgEl=document.getElementById('msg');
+const voted=JSON.parse(sessionStorage.getItem('qa_voted')||'{}'); // {id: "up"|"down"}
+let lastDataHash='';
+
+async function loadQuestions(){
+  try{
+    const r=await fetch('/api/qa/approved');
+    if(r.status===403){
+      document.getElementById('page-title').style.display='none';
+      document.getElementById('page-sub').style.display='none';
+      questionsEl.innerHTML='';
+      msgEl.textContent='Voting is not enabled right now.';
+      msgEl.className='msg off';msgEl.style.display='block';
+      lastDataHash='';
+      return;
+    }
+    const data=await r.json();
+    if(!Array.isArray(data)||data.length===0){
+      const sr=await fetch('/api/qa/status');
+      const sd=await sr.json();
+      if(!sd.sessionActive){
+        document.getElementById('page-title').style.display='none';
+        document.getElementById('page-sub').style.display='none';
+        questionsEl.innerHTML='';
+        msgEl.textContent='Q&A session is not active right now.';
+        msgEl.className='msg off';msgEl.style.display='block';
+      } else {
+        document.getElementById('page-title').style.display='';
+        document.getElementById('page-sub').style.display='';
+        msgEl.style.display='none';
+        questionsEl.innerHTML='<div class="empty">No questions yet. Check back soon!</div>';
+      }
+      lastDataHash='';
+      return;
+    }
+    // Only rebuild DOM if data changed (prevents wrong-question clicks during refresh)
+    const newHash=data.map(q=>q.id).join(',');
+    if(newHash===lastDataHash){
+      // Just update vote states without rebuilding
+      data.forEach(q=>{
+        const dir=q.voted||voted[q.id]||null;
+        updateBtns(q.id,dir);
+      });
+      return;
+    }
+    lastDataHash=newHash;
+    document.getElementById('page-title').style.display='';
+    document.getElementById('page-sub').style.display='';
+    msgEl.style.display='none';
+    questionsEl.innerHTML=data.map(q=>{
+      const dir=q.voted||voted[q.id]||null;
+      const score=(q.upvotes||0)-(q.downvotes||0);
+      const scoreColor=score>0?'var(--qa-score-pos)':score<0?'var(--qa-score-neg)':'var(--qa-muted)';
+      return '<div class="question-card" id="qc-'+q.id+'">'
+        +'<div class="vote-btns">'
+        +'<button class="vote-btn'+(dir==='up'?' voted':'')+'" id="up-'+q.id+'" aria-label="Upvote" aria-pressed="'+(dir==='up')+'" onclick="vote(\''+q.id+'\',\'up\')"><span class="vote-arrow" aria-hidden="true">&#9650;</span></button>'
+        +'<span class="vote-score" id="vs-'+q.id+'" data-score="'+score+'" style="color:'+scoreColor+'">'+score+'</span>'
+        +'<button class="vote-btn'+(dir==='down'?' down-voted':'')+'" id="dn-'+q.id+'" aria-label="Downvote" aria-pressed="'+(dir==='down')+'" onclick="vote(\''+q.id+'\',\'down\')"><span class="vote-arrow" aria-hidden="true">&#9660;</span></button>'
+        +'</div>'
+        +'<div class="q-content">'
+        +'<div class="q-text">'+escHtml(q.text)+'</div>'
+        +'</div></div>';
+    }).join('');
+  }catch(e){console.error(e)}
+}
+
+async function vote(id,dir){
+  try{
+    const prevDir=voted[id]||null;
+    const r=await fetch('/api/qa/vote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({questionId:id,direction:dir})});
+    if(r.ok){
+      const d=await r.json();
+      const newDir=d.voted||null;
+      if(newDir){voted[id]=newDir}else{delete voted[id]}
+      sessionStorage.setItem('qa_voted',JSON.stringify(voted));
+      updateBtns(id,newDir,prevDir);
+    }
+  }catch(e){}
+}
+function updateBtns(id,dir,prevDir){
+  const up=document.getElementById('up-'+id);
+  const dn=document.getElementById('dn-'+id);
+  const vs=document.getElementById('vs-'+id);
+  if(up){up.className='vote-btn'+(dir==='up'?' voted':'');up.setAttribute('aria-pressed',dir==='up')}
+  if(dn){dn.className='vote-btn'+(dir==='down'?' down-voted':'');dn.setAttribute('aria-pressed',dir==='down')}
+  if(vs){
+    let s=parseInt(vs.dataset.score)||0;
+    if(prevDir==='up')s--;else if(prevDir==='down')s++;
+    if(dir==='up')s++;else if(dir==='down')s--;
+    vs.dataset.score=s;vs.textContent=s;
+    vs.style.color=s>0?'var(--qa-score-pos)':s<0?'var(--qa-score-neg)':'var(--qa-muted)';
+  }
+}
+
+function escHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+loadQuestions();
+setInterval(loadQuestions,5000);
+</script>
+</body>
+</html>
