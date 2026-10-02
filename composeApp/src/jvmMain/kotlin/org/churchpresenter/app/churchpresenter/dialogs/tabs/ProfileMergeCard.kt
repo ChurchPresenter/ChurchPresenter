@@ -113,7 +113,7 @@ internal fun ProfileMergeCard(
     val candidates = mergeCandidates(profile, proj, tiles, deckLinkSize)
     val merge = profile.merge
     val labels = tiles.associate { it.key to it.label }
-    SettingsGroup(caption = stringResource(Res.string.profile_merge_caption)) {
+    SettingsGroup(caption = stringResource(Res.string.profile_merge_caption), key = "merge") {
         SettingsSwitchRow(
             label = stringResource(Res.string.profile_merge_switch),
             sub = stringResource(

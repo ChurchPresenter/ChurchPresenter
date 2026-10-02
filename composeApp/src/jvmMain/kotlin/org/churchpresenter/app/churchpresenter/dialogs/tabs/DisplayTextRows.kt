@@ -24,8 +24,6 @@ import org.churchpresenter.strings.generated.resources.profile_pos_top_right
 import org.churchpresenter.strings.generated.resources.profile_text_alignment
 import org.churchpresenter.strings.generated.resources.profile_text_color
 import org.churchpresenter.strings.generated.resources.profile_text_font
-import org.churchpresenter.strings.generated.resources.profile_text_highlight
-import org.churchpresenter.strings.generated.resources.profile_text_outline
 import org.churchpresenter.strings.generated.resources.profile_text_shadow
 import org.churchpresenter.strings.generated.resources.profile_text_size
 import org.churchpresenter.strings.generated.resources.profile_text_size_unit
@@ -33,8 +31,6 @@ import org.churchpresenter.strings.generated.resources.profile_text_style
 import org.churchpresenter.strings.generated.resources.right
 import org.churchpresenter.app.churchpresenter.composables.ScreenPositionPicker
 import org.churchpresenter.sharedui.composables.ShadowDetailRow
-import org.churchpresenter.sharedui.composables.TextBackdropButton
-import org.churchpresenter.sharedui.composables.TextOutlineButton
 import org.churchpresenter.sharedui.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.dialogs.DisplayTextStyle
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
@@ -83,7 +79,8 @@ internal fun DisplayTextRows(
     extraBasic()
     SettingsRow(
         stringResource(Res.string.profile_text_style),
-        paths = path("bold") + path("italic") + path("underline"),
+        searchTerms = styleSearchTerms(),
+        paths = path("bold") + path("italic") + path("underline") + path("outline") + path("backdrop"),
     ) {
         TextStyleButtons(
             bold = style.bold,
@@ -96,13 +93,11 @@ internal fun DisplayTextRows(
             onShadowChange = { onChange(style.copy(shadow = it)) },
             showShadow = false,
             buttonSize = DISPLAY_STYLE_BUTTON,
+            outline = style.outline,
+            onOutlineChange = { onChange(style.copy(outline = it)) },
+            backdrop = style.backdrop,
+            onBackdropChange = { onChange(style.copy(backdrop = it)) },
         )
-    }
-    SettingsRow(stringResource(Res.string.profile_text_outline), advanced = true, paths = path("outline")) {
-        TextOutlineButton(style.outline, { onChange(style.copy(outline = it)) }, DISPLAY_STYLE_BUTTON)
-    }
-    SettingsRow(stringResource(Res.string.profile_text_highlight), advanced = true, paths = path("backdrop")) {
-        TextBackdropButton(style.backdrop, { onChange(style.copy(backdrop = it)) }, DISPLAY_STYLE_BUTTON)
     }
     SettingsSwitchRow(
         stringResource(Res.string.profile_text_shadow),
@@ -139,7 +134,9 @@ internal fun DisplayBoxGroup(
 ) {
     SettingsGroup(
         stringResource(Res.string.profile_group_box),
+        key = "box",
         paths = listOf("$prefix.backgroundColor", "$prefix.backgroundOpacity") + leadingPaths,
+        summary = { "$color · $opacity${stringResource(Res.string.percent_suffix)}" },
     ) {
         leading()
         SettingsRow(stringResource(Res.string.profile_bg_row), paths = listOf("$prefix.backgroundColor")) {
@@ -213,7 +210,7 @@ internal fun DisplayAlignmentRow(alignment: String, onAlignment: (String) -> Uni
 /** A short explanation at the top of a page, in its own card. */
 @Composable
 internal fun PageNote(text: String) {
-    SettingsGroup("") {
+    SettingsGroup("", key = "note") {
         SettingsWideRow { Text(text, fontSize = 12.sp, color = profilesPalette().faintText) }
     }
 }

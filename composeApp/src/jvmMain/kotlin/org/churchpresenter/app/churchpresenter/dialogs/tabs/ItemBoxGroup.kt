@@ -33,7 +33,7 @@ internal fun ItemBoxGroup(
     var picked by remember { mutableStateOf(items.first().key) }
     val item = items.firstOrNull { it.key == picked } ?: items.first()
     val key = textBoxKey(item.key, lowerThird = false)
-    SettingsGroup(stringResource(Res.string.profile_group_boxes), paths = paths) {
+    SettingsGroup(stringResource(Res.string.profile_group_boxes), key = "boxes", paths = paths) {
         if (items.size > 1) {
             SettingsRow(stringResource(Res.string.profile_box_item)) {
                 RowSegmented(

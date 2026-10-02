@@ -183,8 +183,12 @@ internal fun ProfileContentPage(
 ) {
     val groups = contentSwitches(profile)
     ContentSummary(profile, groups.all, onProfileChange)
-    ContentGroup(groups.scripture, profile, onProfileChange)
-    SettingsGroup(stringResource(Res.string.output_profile_sources), paths = BIBLE_SOURCE_PATHS + SONG_SOURCE_PATHS) {
+    ContentGroup("scripture", groups.scripture, profile, onProfileChange)
+    SettingsGroup(
+        stringResource(Res.string.output_profile_sources),
+        key = "sources",
+        paths = BIBLE_SOURCE_PATHS + SONG_SOURCE_PATHS,
+    ) {
         SettingsRow(stringResource(Res.string.profile_source_bible), paths = BIBLE_SOURCE_PATHS) {
             BibleSourcePicker(
                 profile = profile,
@@ -202,22 +206,26 @@ internal fun ProfileContentPage(
             )
         }
     }
-    ContentGroup(groups.media, profile, onProfileChange)
-    ContentGroup(groups.overlays, profile, onProfileChange)
+    ContentGroup("media", groups.media, profile, onProfileChange)
+    ContentGroup("overlays", groups.overlays, profile, onProfileChange)
     // Only for what this profile shows: a screen that never draws a picture has nothing to fit.
     // Nor on a stage monitor, which always fits its slide and video into their zone.
     if (profile.displayMode != Constants.DISPLAY_MODE_STAGE_MONITOR) {
-        SettingsGroup(stringResource(Res.string.output_profile_scale), paths = SCALE_PATHS) {
+        SettingsGroup(stringResource(Res.string.output_profile_scale), key = "scale", paths = SCALE_PATHS) {
             ScaleRows(profile, onProfileChange)
         }
     }
     // A lower third only: on a full screen there is nowhere else for the content to go.
     if (profile.isLowerThird) {
-        SettingsGroup(stringResource(Res.string.profile_group_placement), paths = listOf(PLACEMENTS_PATH)) {
+        SettingsGroup(
+            stringResource(Res.string.profile_group_placement),
+            key = "placement",
+            paths = listOf(PLACEMENTS_PATH),
+        ) {
             PlacementRows(profile, onProfileChange)
         }
     }
-    ContentGroup(groups.backgrounds, profile, onProfileChange, advanced = true)
+    ContentGroup("backgrounds", groups.backgrounds, profile, onProfileChange, advanced = true)
 }
 
 private val SOURCE_PICKER_WIDTH = 260.dp
@@ -231,6 +239,7 @@ internal const val PLACEMENTS_PATH = "lowerThirdPlacements"
 
 @Composable
 private fun ContentGroup(
+    key: String,
     group: Pair<String, List<ContentSwitch>>,
     profile: OutputProfile,
     onProfileChange: (OutputProfile) -> Unit,
@@ -246,7 +255,7 @@ private fun ContentGroup(
     } else {
         emptyMap()
     }
-    SettingsGroup(group.first, advanced = advanced, paths = paths.values.flatten().distinct()) {
+    SettingsGroup(group.first, key = key, advanced = advanced, paths = paths.values.flatten().distinct()) {
         group.second.forEach { switch ->
             SettingsSwitchRow(
                 label = switch.label,
