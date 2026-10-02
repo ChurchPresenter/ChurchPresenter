@@ -5,7 +5,7 @@ package org.churchpresenter.sharedui.utils
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.core.models.shortcuts.KeyChord
 import kotlin.test.Test

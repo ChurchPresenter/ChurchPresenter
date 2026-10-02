@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter
 import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.runBlocking
@@ -48,21 +48,26 @@ class RemoteCommandEffectsTest {
     private var songVersionBumps = 0
     private var slidePushes = 0
 
+    /**
+     * Each with room for one value, so [emit] hands it over without waiting for the collector: the
+     * collector runs on the composition's test dispatcher, which cannot run while [emit] blocks the
+     * test thread, and an unbuffered emit would wait for it forever.
+     */
     private class Flows {
-        val playPause = MutableSharedFlow<Unit>()
-        val loopToggle = MutableSharedFlow<Unit>()
-        val goto = MutableSharedFlow<Int>()
-        val selectPicture = MutableSharedFlow<Pair<String, Int>>()
-        val nextPicture = MutableSharedFlow<Unit>()
-        val previousPicture = MutableSharedFlow<Unit>()
-        val nextSlide = MutableSharedFlow<Unit>()
-        val previousSlide = MutableSharedFlow<Unit>()
-        val selectSlide = MutableSharedFlow<Pair<String, Int>>()
-        val selectVerse = MutableSharedFlow<SelectBibleVerseRequest>()
-        val selectSong = MutableSharedFlow<ScheduleItem.SongItem>()
-        val selectPictureItem = MutableSharedFlow<ScheduleItem.PictureItem>()
-        val selectPresentation = MutableSharedFlow<ScheduleItem.PresentationItem>()
-        val selectMedia = MutableSharedFlow<ScheduleItem.MediaItem>()
+        val playPause = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+        val loopToggle = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+        val goto = MutableSharedFlow<Int>(extraBufferCapacity = 1)
+        val selectPicture = MutableSharedFlow<Pair<String, Int>>(extraBufferCapacity = 1)
+        val nextPicture = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+        val previousPicture = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+        val nextSlide = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+        val previousSlide = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+        val selectSlide = MutableSharedFlow<Pair<String, Int>>(extraBufferCapacity = 1)
+        val selectVerse = MutableSharedFlow<SelectBibleVerseRequest>(extraBufferCapacity = 1)
+        val selectSong = MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = 1)
+        val selectPictureItem = MutableSharedFlow<ScheduleItem.PictureItem>(extraBufferCapacity = 1)
+        val selectPresentation = MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = 1)
+        val selectMedia = MutableSharedFlow<ScheduleItem.MediaItem>(extraBufferCapacity = 1)
     }
 
     @BeforeTest
