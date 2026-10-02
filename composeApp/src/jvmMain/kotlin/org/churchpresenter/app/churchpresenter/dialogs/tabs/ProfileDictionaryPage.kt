@@ -1,11 +1,14 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.percent_suffix
@@ -20,8 +23,6 @@ import org.churchpresenter.strings.generated.resources.profile_group_show
 import org.churchpresenter.strings.generated.resources.profile_group_text
 import org.churchpresenter.strings.generated.resources.profile_text_color
 import org.churchpresenter.strings.generated.resources.profile_text_font
-import org.churchpresenter.strings.generated.resources.profile_text_highlight
-import org.churchpresenter.strings.generated.resources.profile_text_outline
 import org.churchpresenter.strings.generated.resources.profile_text_shadow
 import org.churchpresenter.strings.generated.resources.profile_text_size
 import org.churchpresenter.strings.generated.resources.profile_text_size_unit
@@ -55,7 +56,7 @@ internal fun ProfileDictionaryPage(draft: AppSettings, onSettingsChange: ((AppSe
         onSettingsChange { s -> s.copy(dictionarySettings = t(s.dictionarySettings)) }
     }
     var part by remember { mutableStateOf(DictionaryPart.WORD) }
-    SettingsGroup(stringResource(Res.string.profile_group_show)) {
+    SettingsGroup(stringResource(Res.string.profile_group_show), key = "show") {
         DictionaryPart.entries.forEach { p ->
             SettingsSwitchRow(
                 p.label(),
@@ -67,6 +68,7 @@ internal fun ProfileDictionaryPage(draft: AppSettings, onSettingsChange: ((AppSe
     }
     SettingsGroup(
         stringResource(Res.string.profile_group_text),
+        key = "text",
         paths = part.fields.map { "$DICT.$it" },
         header = {
             AppliesToStrip(
@@ -83,6 +85,7 @@ internal fun ProfileDictionaryPage(draft: AppSettings, onSettingsChange: ((AppSe
     }
     SettingsGroup(
         stringResource(Res.string.profile_group_card),
+        key = "card",
         paths = listOf("$DICT.cardBackgroundColor", "$DICT.cardBackgroundOpacity"),
     ) {
         SettingsRow(stringResource(Res.string.profile_card_color), paths = listOf("$DICT.cardBackgroundColor")) {
@@ -136,6 +139,56 @@ private const val DICT_BOX_TOP = 10f
 private const val DICT_BOX_STEP = 21f
 private const val DICT_BOX_HEIGHT = 19f
 
+/**
+ * One part's Style row: bold and italic, the outline and the highlight -- whichever of them the part
+ * has a setting for, and no row at all when it has none.
+ */
+@Composable
+private fun DictionaryStyleRow(
+    look: DictionaryLook,
+    onChange: (DictionaryLook) -> Unit,
+    p: (String?) -> List<String>,
+) {
+    val hasWeight = look.bold != null && look.italic != null
+    if (!hasWeight && look.outline == null && look.backdrop == null) return
+    val names = look.names
+    SettingsRow(
+        stringResource(Res.string.profile_text_style),
+        searchTerms = styleSearchTerms(),
+        paths = p(names.bold) + p(names.italic) + p(names.outline) + p(names.backdrop),
+    ) {
+        if (look.bold != null && look.italic != null) {
+            TextStyleButtons(
+                bold = look.bold,
+                italic = look.italic,
+                underline = false,
+                shadow = false,
+                onBoldChange = { onChange(look.copy(bold = it)) },
+                onItalicChange = { onChange(look.copy(italic = it)) },
+                onUnderlineChange = {},
+                onShadowChange = {},
+                showShadow = false,
+                showUnderline = false,
+                buttonSize = DICT_STYLE_BUTTON,
+                outline = look.outline,
+                onOutlineChange = { onChange(look.copy(outline = it)) },
+                backdrop = look.backdrop,
+                onBackdropChange = { onChange(look.copy(backdrop = it)) },
+            )
+        } else {
+            // No weight to set: only the outline and highlight, spaced as the style buttons are.
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+                look.outline?.let {
+                    TextOutlineButton(it, { v -> onChange(look.copy(outline = v)) }, DICT_STYLE_BUTTON)
+                }
+                look.backdrop?.let {
+                    TextBackdropButton(it, { v -> onChange(look.copy(backdrop = v)) }, DICT_STYLE_BUTTON)
+                }
+            }
+        }
+    }
+}
+
 /** One part's rows: only the ones that part has a setting for. */
 @Composable
 private fun DictionaryPartRows(look: DictionaryLook, onChange: (DictionaryLook) -> Unit) {
@@ -157,37 +210,7 @@ private fun DictionaryPartRows(look: DictionaryLook, onChange: (DictionaryLook) 
     SettingsRow(stringResource(Res.string.profile_text_color), paths = p(look.names.color)) {
         RowColor(look.color, { onChange(look.copy(color = it)) })
     }
-    if (look.bold != null && look.italic != null) {
-        SettingsRow(stringResource(Res.string.profile_text_style), paths = p(look.names.bold) + p(look.names.italic)) {
-            TextStyleButtons(
-                bold = look.bold,
-                italic = look.italic,
-                underline = false,
-                shadow = false,
-                onBoldChange = { onChange(look.copy(bold = it)) },
-                onItalicChange = { onChange(look.copy(italic = it)) },
-                onUnderlineChange = {},
-                onShadowChange = {},
-                showShadow = false,
-                showUnderline = false,
-                buttonSize = DICT_STYLE_BUTTON,
-            )
-        }
-    }
-    look.outline?.let { outline ->
-        SettingsRow(stringResource(Res.string.profile_text_outline), advanced = true, paths = p(look.names.outline)) {
-            TextOutlineButton(outline, { onChange(look.copy(outline = it)) }, DICT_STYLE_BUTTON)
-        }
-    }
-    look.backdrop?.let { backdrop ->
-        SettingsRow(
-            stringResource(Res.string.profile_text_highlight),
-            advanced = true,
-            paths = p(look.names.backdrop),
-        ) {
-            TextBackdropButton(backdrop, { onChange(look.copy(backdrop = it)) }, DICT_STYLE_BUTTON)
-        }
-    }
+    DictionaryStyleRow(look, onChange, p)
     look.shadow?.let { shadow ->
         SettingsSwitchRow(
             stringResource(Res.string.profile_text_shadow),
