@@ -19,6 +19,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
 import java.io.File
+import java.net.URISyntaxException
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 import org.churchpresenter.bibleengine.version.VersionScorer
@@ -141,7 +142,8 @@ object EngineServer {
                         onSttStatus = { connected -> broadcaster.broadcastStatus(statusJson(connected)) }
                     ).also { it.connect() }
                 } else null
-            } catch (e: Exception) {
+            } catch (e: URISyntaxException) {
+                // IO.socket's one failure: the url does not parse. Connecting itself is asynchronous.
                 System.err.println("bible-engine: failed to connect STT client — ${e.message}")
                 runCatching { server.stop(500, 1000) }
                 runCatching { broadcaster.close() }

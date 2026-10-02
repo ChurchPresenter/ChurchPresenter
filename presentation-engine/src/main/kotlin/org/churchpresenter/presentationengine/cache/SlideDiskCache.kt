@@ -220,12 +220,13 @@ class SlideDiskCache(
 
         init {
             activeWriters[key] = this
+            var created = false
             try {
                 dir.deleteRecursively()
                 ensureDir()
-            } catch (e: Throwable) {
-                activeWriters.remove(key, this)
-                throw e
+                created = true
+            } finally {
+                if (!created) activeWriters.remove(key, this)
             }
         }
 
