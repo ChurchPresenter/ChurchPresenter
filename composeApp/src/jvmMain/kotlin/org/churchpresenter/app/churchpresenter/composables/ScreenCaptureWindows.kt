@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import org.churchpresenter.app.churchpresenter.utils.WindowsWindowCapture
+import org.churchpresenter.sharedui.utils.CommandRunner
+import org.churchpresenter.sharedui.utils.readCommandOutput
 
 private const val HEX_RADIX = 16
 private const val WINDOW_LINE_FIELDS = 4

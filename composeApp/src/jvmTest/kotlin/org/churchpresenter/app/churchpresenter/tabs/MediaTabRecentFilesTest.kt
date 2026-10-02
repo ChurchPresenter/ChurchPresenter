@@ -8,6 +8,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.slides.tabs.PicturesTabRecentFoldersTest
+import org.churchpresenter.sharedui.testing.renderedText
+import org.churchpresenter.sharedui.testing.showsExactly
 
 /**
  * The recent-files bar in the Media tab: which files it offers and in what order.

@@ -29,6 +29,16 @@ dependencies {
     implementation(projects.theme)
     implementation(projects.songChords)
     implementation(projects.bible)
+    implementation(projects.diagnostics)
+
+    // The file chooser: DBus for the Linux portal, FileKit for the native Windows and macOS
+    // dialogs. FileKit's own native UNIX transport conflicts with the junixsocket one, so it is
+    // excluded -- see the same note in composeApp/build.gradle.kts.
+    implementation("com.github.hypfvieh:dbus-java-core:5.2.0")
+    implementation("com.github.hypfvieh:dbus-java-transport-junixsocket:5.2.0")
+    implementation("io.github.vinceglb:filekit-dialogs:${libs.versions.filekit.get()}") {
+        exclude(group = "com.github.hypfvieh", module = "dbus-java-transport-native-unixsocket")
+    }
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
@@ -49,6 +59,8 @@ dependencies {
     testFixturesImplementation(libs.compose.uiTest)
     testFixturesImplementation(libs.roborazzi.composeDesktop)
     testFixturesImplementation(projects.theme)
+    testFixturesImplementation(projects.settings)
+    testFixturesImplementation(kotlin("test"))
     testImplementation(libs.roborazzi.composeDesktop)
     testImplementation(libs.compose.uiTest)
     testImplementation(libs.compose.uiTestJunit4)

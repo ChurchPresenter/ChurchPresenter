@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
+import org.churchpresenter.slides.presenter.SlidePresenter
+import org.churchpresenter.slides.presenter.zeroSizeWindowInfo
 
 class SlidePresenterRenderTest {
 

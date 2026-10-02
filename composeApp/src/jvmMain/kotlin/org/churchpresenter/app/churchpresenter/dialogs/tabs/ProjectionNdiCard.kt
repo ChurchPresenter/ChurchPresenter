@@ -47,7 +47,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.presenter.NdiManager
 import org.churchpresenter.app.churchpresenter.presenter.NdiVideoRenderer
 import org.churchpresenter.ndi.NdiOutputMode

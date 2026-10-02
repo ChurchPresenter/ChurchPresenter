@@ -20,7 +20,7 @@ import org.churchpresenter.app.churchpresenter.MainDesktopPublishers
 import org.churchpresenter.app.churchpresenter.WebAccessState
 import org.churchpresenter.app.churchpresenter.ScheduleActions
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.data.RecentPresentationFiles
+import org.churchpresenter.slides.data.RecentPresentationFiles
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.AnnouncementsSettings

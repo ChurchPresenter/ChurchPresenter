@@ -27,7 +27,7 @@ import org.churchpresenter.settings.AtemSettings
 import androidx.compose.runtime.withFrameNanos
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrameStream
-import org.churchpresenter.app.churchpresenter.presenter.PresentationFrame
+import org.churchpresenter.slides.presenter.PresentationFrame
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPlayer
 import org.churchpresenter.presentationengine.model.Deck
 import org.churchpresenter.app.churchpresenter.presenter.BandOutgoing
@@ -41,6 +41,7 @@ import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import org.churchpresenter.settings.utils.Constants
 import java.io.IOException
+import org.churchpresenter.slides.SlidesOutput
 
 private const val WATCHDOG_INTERVAL_MS = 5_000L
 
@@ -55,12 +56,12 @@ private const val SECONDS_PER_MINUTE = 60
 /** A live presentation slide by identity: the deck's file name and the slide's index in it. */
 data class LiveSlide(val fileName: String?, val index: Int)
 
-class PresenterManager(showPresenterWindowInitially: Boolean = true) {
+class PresenterManager(showPresenterWindowInitially: Boolean = true) : SlidesOutput {
 
     private val preRenderScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var preRenderJob: Job? = null
     private val _presentingMode = mutableStateOf(Presenting.NONE)
-    val presentingMode: State<Presenting> = _presentingMode
+    override val presentingMode: State<Presenting> = _presentingMode
 
     /** Notified whenever live-content state changes (mode, verse, lyric section, picture, media,
      *  announcement, website, scene, Q&A, dictionary) — wired in main.kt to broadcast an
@@ -135,7 +136,7 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
     // Per-screen lock: maps screen slot index -> locked Presenting mode.
     // Null entry means the screen follows the global presentingMode.
     private val _screenLocks = mutableStateOf<Map<Int, Presenting>>(emptyMap())
-    val screenLocks: State<Map<Int, Presenting>> = _screenLocks
+    override val screenLocks: State<Map<Int, Presenting>> = _screenLocks
 
     fun setScreenLock(screenIndex: Int, mode: Presenting?) {
         val updated = _screenLocks.value.toMutableMap()
@@ -386,7 +387,7 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         notifyLiveStateChanged(Presenting.MEDIA)
     }
 
-    fun setPresentingMode(mode: Presenting) {
+    override fun setPresentingMode(mode: Presenting) {
         if (_presentingMode.value != mode) {
             CrashReporter.setTag("presenting", mode.name)
             CrashReporter.breadcrumb("Presenting: ${mode.name}", category = "presenter")
@@ -499,7 +500,7 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         _allLyricSections.value = sections
     }
 
-    fun setSelectedImagePath(imagePath: String?) {
+    override fun setSelectedImagePath(imagePath: String?) {
         _selectedImagePath.value = imagePath
         notifyLiveStateChanged(Presenting.PICTURES)
     }
@@ -508,7 +509,7 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         _displayedImagePath.value = path
     }
 
-    fun setNextImagePath(path: String?) {
+    override fun setNextImagePath(path: String?) {
         _nextImagePath.value = path
     }
 
@@ -524,11 +525,11 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         _pictureSlideOffset.value = offset
     }
 
-    fun setAnimationType(type: AnimationType) {
+    override fun setAnimationType(type: AnimationType) {
         _animationType.value = type
     }
 
-    fun setTransitionDuration(duration: Int) {
+    override fun setTransitionDuration(duration: Int) {
         _transitionDuration.value = duration
     }
 
@@ -536,7 +537,7 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         _showPresenterWindow.value = !_showPresenterWindow.value
     }
 
-    fun setShowPresenterWindow(show: Boolean) {
+    override fun setShowPresenterWindow(show: Boolean) {
         _showPresenterWindow.value = show
     }
 
@@ -632,7 +633,7 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         _devWindowAlwaysOnTop.value = alwaysOnTop
     }
 
-    fun setSelectedSlide(slide: ImageBitmap?) {
+    override fun setSelectedSlide(slide: ImageBitmap?) {
         _selectedSlide.value = slide
     }
 
@@ -645,7 +646,7 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
      * Names the slide just pushed with [setSelectedSlide]. Reported only while PRESENTATION is the
      * live mode: a slide pushed ahead of the mode switch is picked up when [setPresentingMode] reports.
      */
-    fun setLiveSlide(fileName: String?, index: Int) {
+    override fun setLiveSlide(fileName: String?, index: Int) {
         _liveSlide.value = LiveSlide(fileName, index)
         if (_presentingMode.value == Presenting.PRESENTATION) notifyLiveStateChanged(Presenting.PRESENTATION)
     }
@@ -655,7 +656,7 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
     // frame, published here, drawn by every output window's PresentationPresenter.
 
     private val _presentationFrame = mutableStateOf<PresentationFrame?>(null)
-    val presentationFrame: State<PresentationFrame?> = _presentationFrame
+    override val presentationFrame: State<PresentationFrame?> = _presentationFrame
 
     internal var presentationPlayer: PresentationPlayer? = null
 
@@ -669,7 +670,7 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
      * the *previous* slide) — real PowerPoint/Keynote show that slide fully built, as the
      * audience last saw it, rather than resetting it to the pre-click state.
      */
-    fun presentationShowSlide(deck: Deck, slideIndex: Int, enterAtLastStep: Boolean = false) {
+    override fun presentationShowSlide(deck: Deck, slideIndex: Int, enterAtLastStep: Boolean) {
         val deckIsAnimated = deck.slides.any { it.timeline != null || it.transition != null }
         if (!deckIsAnimated) {
             clearPresentationPlayback()
@@ -698,11 +699,11 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
      * player created ahead of the grid selection).
      * False = caller changes the slide instead.
      */
-    fun advancePresentationStep(deck: Deck, slideIndex: Int): Boolean =
+    override fun advancePresentationStep(deck: Deck, slideIndex: Int): Boolean =
         steppablePlayer(deck, slideIndex)?.advance(System.nanoTime()) ?: false
 
     /** Steps one build back. Same identity guard; false = caller changes the slide instead. */
-    fun rewindPresentationStep(deck: Deck, slideIndex: Int): Boolean =
+    override fun rewindPresentationStep(deck: Deck, slideIndex: Int): Boolean =
         steppablePlayer(deck, slideIndex)?.rewind() ?: false
 
     internal fun steppablePlayer(deck: Deck, slideIndex: Int): PresentationPlayer? {
@@ -715,7 +716,7 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         return if (visibleViaMode || visibleViaLock) player else null
     }
 
-    fun clearPresentationPlayback() {
+    override fun clearPresentationPlayback() {
         presentationPlayer?.close()
         presentationPlayer = null
         _presentationFrame.value = null
@@ -749,11 +750,11 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         _displayedSlide.value = slide
     }
 
-    fun setNextSlide(slide: ImageBitmap?) {
+    override fun setNextSlide(slide: ImageBitmap?) {
         _nextSlide.value = slide
     }
 
-    fun setPresenterNotes(notes: String) {
+    override fun setPresenterNotes(notes: String) {
         _presenterNotes.value = notes
     }
 

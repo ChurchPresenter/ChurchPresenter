@@ -5,7 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.WindowPlacement
-import org.churchpresenter.app.churchpresenter.LocalWentLive
+import org.churchpresenter.sharedui.composables.LocalWentLive
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.composables.CameraHost
 import androidx.compose.foundation.layout.Row
@@ -42,6 +42,7 @@ import org.churchpresenter.strings.generated.resources.canvas_layout_portrait_sh
 import org.churchpresenter.strings.generated.resources.remove
 import org.churchpresenter.strings.generated.resources.canvas_layer_outside
 import org.churchpresenter.strings.generated.resources.canvas_layer_partly_outside
+import org.churchpresenter.sharedui.composables.DragHandle
 
 internal const val CANVAS_SCENE_LIST_WEIGHT = 0.4f
 internal const val CANVAS_SOURCE_LIST_WEIGHT = 0.6f

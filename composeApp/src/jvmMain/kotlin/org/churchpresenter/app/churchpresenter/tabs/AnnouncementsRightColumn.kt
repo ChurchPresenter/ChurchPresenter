@@ -93,6 +93,8 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
 import org.churchpresenter.sharedui.utils.PreviewOutput
+import org.churchpresenter.sharedui.composables.bibleInsetFill
+import org.churchpresenter.sharedui.composables.bibleListCard
 
 /*
  * The Announcements tab's right column: the preview of what goes on screen, and where it sits,

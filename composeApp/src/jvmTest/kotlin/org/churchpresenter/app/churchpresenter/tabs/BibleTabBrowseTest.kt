@@ -10,6 +10,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.testing.showsContainingText
+import org.churchpresenter.sharedui.testing.showsExactly
 
 /**
  * Browsing in `BibleTab`: the three columns, and what changes when a row in one of them is clicked.

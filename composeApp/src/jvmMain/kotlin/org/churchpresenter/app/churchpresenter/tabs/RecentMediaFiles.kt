@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.runtime.mutableStateListOf
 import kotlinx.serialization.json.Json
 import org.churchpresenter.core.models.io.writeTextAtomically
+import org.churchpresenter.slides.tabs.PicturesTab
 
 /**
  * Recent media files, mirroring `RecentPictureFolders` in `PicturesTab.kt`.

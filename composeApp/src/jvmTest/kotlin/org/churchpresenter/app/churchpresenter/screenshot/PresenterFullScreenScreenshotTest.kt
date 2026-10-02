@@ -41,8 +41,8 @@ import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
-import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
-import org.churchpresenter.app.churchpresenter.presenter.PresentationPresenter
+import org.churchpresenter.slides.presenter.PicturePresenter
+import org.churchpresenter.slides.presenter.PresentationPresenter
 import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter

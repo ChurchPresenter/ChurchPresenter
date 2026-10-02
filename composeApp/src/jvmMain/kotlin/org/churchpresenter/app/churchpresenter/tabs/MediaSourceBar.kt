@@ -65,7 +65,7 @@ import org.churchpresenter.sharedui.composables.AddToScheduleButton
 import org.churchpresenter.sharedui.composables.SavePresetButton
 import org.churchpresenter.sharedui.composables.GoLiveButton
 import org.churchpresenter.sharedui.composables.SegmentedButton
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
@@ -80,6 +80,7 @@ import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.sharedui.composables.RecentChip
+import org.churchpresenter.sharedui.composables.topBarCard
 
 /** The top card: the source bar, the recent files, and the playback controls. */
 @Composable

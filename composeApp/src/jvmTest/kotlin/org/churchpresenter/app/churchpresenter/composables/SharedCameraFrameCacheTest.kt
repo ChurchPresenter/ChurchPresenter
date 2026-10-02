@@ -6,6 +6,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.utils.FfmpegBinary
 
 /**
  * The pure parts of camera capture: frame conversion, the ffmpeg command, and why a run gave up.
@@ -277,42 +278,5 @@ class SharedCameraFrameCacheTest {
         // Everything that is not a negotiated input flag stays: this is the same capture, asked for
         // less specifically, not a different one.
         assertTrue(cmd.containsAll(listOf("-f", "avfoundation", "-i", "0:none", "rawvideo")), cmd.toString())
-    }
-
-    @Test
-    fun `ffmpeg is looked for where it is installed, not only where PATH points`() {
-        // A desktop app does not inherit the shell's PATH: a Finder-launched macOS .app gets
-        // launchd's default, which has neither Homebrew prefix on it. Resolving only the bare name
-        // is what made a camera appear in the dropdown and then never show a picture (issue #431).
-        val mac = ffmpegCandidatePaths("Mac OS X") { null }
-        assertEquals("ffmpeg", mac.first(), "a configured PATH must still win: $mac")
-        assertTrue("/opt/homebrew/bin/ffmpeg" in mac, mac.toString())
-        assertTrue("/usr/local/bin/ffmpeg" in mac, mac.toString())
-
-        val linux = ffmpegCandidatePaths("Linux") { null }
-        assertTrue("/usr/bin/ffmpeg" in linux, linux.toString())
-        assertTrue("/snap/bin/ffmpeg" in linux, linux.toString())
-
-        val windows = ffmpegCandidatePaths("Windows 11") { if (it == "ProgramFiles") "C:\\Program Files" else null }
-        assertTrue(windows.any { it.endsWith("ffmpeg.exe") }, windows.toString())
-        assertTrue(windows.none { it.startsWith("/") }, "no POSIX paths on Windows: $windows")
-    }
-
-    @Test
-    fun `resolution takes the first candidate that actually runs`() {
-        val candidates = listOf("ffmpeg", "/opt/homebrew/bin/ffmpeg")
-
-        val tried = mutableListOf<String>()
-        val resolved = resolveFfmpegPath(candidates, isExecutable = { false }) { tried += it; false }
-        // Nothing answered, so the bare name is reported and the callers say "install ffmpeg" —
-        // which is the right thing to say when no candidate exists.
-        assertEquals("ffmpeg", resolved)
-        assertEquals(listOf("ffmpeg"), tried, "an absolute path that does not exist must not be launched")
-
-        // The Homebrew install a Finder-launched app cannot see on its PATH, but can still run.
-        assertEquals(
-            "/opt/homebrew/bin/ffmpeg",
-            resolveFfmpegPath(candidates, isExecutable = { true }) { it != "ffmpeg" }
-        )
     }
 }

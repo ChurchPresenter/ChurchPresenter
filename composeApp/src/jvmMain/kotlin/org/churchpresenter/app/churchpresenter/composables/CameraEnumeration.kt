@@ -10,6 +10,9 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.core.models.scene.SceneSource
 import java.io.File
 import org.churchpresenter.diagnostics.Log
+import org.churchpresenter.sharedui.utils.FfmpegBinary
+import org.churchpresenter.sharedui.utils.CommandRunner
+import org.churchpresenter.sharedui.utils.readCommandOutput
 
 internal fun selectedCameraName(devices: List<CameraDevice>, source: SceneSource.CameraSource): String =
     if (source.isDeckLink) {

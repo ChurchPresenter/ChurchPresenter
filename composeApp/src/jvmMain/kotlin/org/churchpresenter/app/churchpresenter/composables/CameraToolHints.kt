@@ -6,6 +6,7 @@ import org.churchpresenter.strings.generated.resources.canvas_camera_none_found
 import org.churchpresenter.strings.generated.resources.canvas_camera_unopenable_listing
 import org.churchpresenter.strings.generated.resources.canvas_camera_v4l2_hint
 import org.jetbrains.compose.resources.StringResource
+import org.churchpresenter.sharedui.utils.FfmpegBinary
 
 /**
  * What to tell the operator about the tools a camera needs, given what enumeration found.

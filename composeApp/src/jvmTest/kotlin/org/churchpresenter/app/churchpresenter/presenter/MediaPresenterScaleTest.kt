@@ -19,6 +19,7 @@ import org.churchpresenter.settings.OutputScaleMode
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import org.churchpresenter.sharedui.testing.OutputScaleFixture
 
 /**
  * The Media tab's scale button, as the output draws it: a 4:3 video frame on a 16:9 screen, once per

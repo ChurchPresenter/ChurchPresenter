@@ -63,6 +63,8 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.ScrollState
+import org.churchpresenter.sharedui.composables.DragHandle
+import org.churchpresenter.sharedui.composables.bibleListCardFill
 
 /**
  * The column header row: sortable, resizable and reorderable cells that scroll with the list, the

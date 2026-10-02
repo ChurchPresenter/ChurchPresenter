@@ -74,7 +74,7 @@ import org.churchpresenter.strings.generated.resources.canvas_video_volume
 import org.churchpresenter.strings.generated.resources.canvas_transparent_bg
 import org.churchpresenter.icons.generated.resources.ic_folder
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import androidx.compose.ui.window.DialogWindow

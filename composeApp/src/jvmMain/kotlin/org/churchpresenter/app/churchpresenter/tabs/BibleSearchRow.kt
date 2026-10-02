@@ -48,6 +48,7 @@ import org.churchpresenter.theme.elevationPalette
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.ui.semantics.Role
 import org.churchpresenter.theme.raisedHover
+import org.churchpresenter.sharedui.composables.searchBarCard
 
 /**
  * The smart search box, its scope and mode selectors, and the search button.

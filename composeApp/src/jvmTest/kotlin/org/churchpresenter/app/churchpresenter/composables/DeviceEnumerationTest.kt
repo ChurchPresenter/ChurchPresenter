@@ -3,6 +3,9 @@ package org.churchpresenter.app.churchpresenter.composables
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.utils.FfmpegBinary
+import org.churchpresenter.sharedui.utils.CommandResult
+import org.churchpresenter.sharedui.utils.CommandRunner
 
 /**
  * How the camera and window listings *drive* the tools whose output

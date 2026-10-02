@@ -23,6 +23,7 @@ import org.churchpresenter.app.churchpresenter.utils.draggedColumnIndex
 import org.churchpresenter.app.churchpresenter.utils.songColumnSortKey
 import org.churchpresenter.app.churchpresenter.viewmodel.SongSearchMatch
 import androidx.compose.ui.unit.Density
+import org.churchpresenter.sharedui.composables.DragHandle
 
 /**
  * Everything the song list's pieces read, for one composition: the pane's parameters and the column

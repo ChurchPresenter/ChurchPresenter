@@ -43,7 +43,7 @@ import org.churchpresenter.app.churchpresenter.composables.CameraBackground
 import org.churchpresenter.app.churchpresenter.composables.CameraDevice
 import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
-import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
+import org.churchpresenter.slides.utils.PictureDecoder
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.core.models.songs.SongBackground

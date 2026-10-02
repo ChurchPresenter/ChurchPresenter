@@ -23,7 +23,7 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.no_video_selected
 import org.churchpresenter.strings.generated.resources.video_files_filter
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.jetbrains.compose.resources.stringResource
 
 import javax.swing.filechooser.FileNameExtensionFilter

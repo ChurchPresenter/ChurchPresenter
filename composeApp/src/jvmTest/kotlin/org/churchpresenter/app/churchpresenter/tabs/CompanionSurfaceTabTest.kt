@@ -27,6 +27,9 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.testing.renderedText
+import org.churchpresenter.sharedui.testing.showsContainingText
+import org.churchpresenter.sharedui.testing.showsExactly
 
 /**
  * Which Companion surface the tab shows, and what happens to that choice when the surfaces change

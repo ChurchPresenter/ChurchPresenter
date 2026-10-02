@@ -60,6 +60,8 @@ import org.churchpresenter.sharedui.composables.SettingsScrollbarGutter
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.sharedui.composables.DragHandle
+import org.churchpresenter.sharedui.composables.bibleListCard
 
 /*
  * The Announcements tab's left column: the text card, with its actions, input and formatting, and

@@ -54,6 +54,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.submitSmartQuery
 import org.churchpresenter.app.churchpresenter.viewmodel.liveVerseSplitMark
 import androidx.compose.foundation.layout.ColumnScope
 import org.churchpresenter.sharedui.composables.FocusLostRescueState
+import org.churchpresenter.sharedui.composables.bibleListCard
 
 /** The tab's body under its key handler: the search row, detections, and the browser or a notice. */
 @Composable

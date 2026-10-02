@@ -22,6 +22,9 @@ import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.sharedui.testing.renderedText
+import org.churchpresenter.sharedui.testing.showsContainingText
+import org.churchpresenter.sharedui.testing.showsExactly
 
 /**
  * Harness and fixtures for the `MediaTab` test classes.

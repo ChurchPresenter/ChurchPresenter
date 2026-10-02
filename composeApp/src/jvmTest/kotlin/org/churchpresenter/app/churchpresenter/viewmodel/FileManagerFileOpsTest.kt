@@ -7,7 +7,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path

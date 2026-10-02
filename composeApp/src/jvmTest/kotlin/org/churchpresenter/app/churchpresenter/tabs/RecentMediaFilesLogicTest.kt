@@ -1,12 +1,13 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
-import org.churchpresenter.app.churchpresenter.RecentFilesSwap
+import org.churchpresenter.sharedui.testing.RecentFilesSwap
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.slides.tabs.RecentPictureFoldersLogicTest
 
 /**
  * [RecentMediaFiles]'s own logic — add, pin, clear, and the JSON round-trip behind them.

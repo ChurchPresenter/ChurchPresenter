@@ -33,7 +33,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import java.io.File
 import java.nio.file.Files

@@ -51,6 +51,8 @@ import kotlinx.coroutines.flow.first
 import org.churchpresenter.app.churchpresenter.viewmodel.verseNumberOf
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.composables.DragHandle
+import org.churchpresenter.sharedui.composables.bibleListCard
 
 /**
  * The three-column browser: books, chapters, verses, and whatever is docked beside them.

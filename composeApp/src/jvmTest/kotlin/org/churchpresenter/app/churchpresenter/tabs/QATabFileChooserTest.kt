@@ -8,7 +8,7 @@ import androidx.compose.ui.test.performClick
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.sharedui.models.Presenting
 import java.io.File
 import java.nio.file.Files

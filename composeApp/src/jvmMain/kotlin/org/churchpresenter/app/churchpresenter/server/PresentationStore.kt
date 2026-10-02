@@ -19,7 +19,7 @@ import org.churchpresenter.presentationengine.PresentationLoader
 import org.churchpresenter.presentationengine.cache.SlideCacheSupersededException
 import org.churchpresenter.presentationengine.cache.SlideDiskCache
 import org.churchpresenter.presentationengine.model.Deck
-import org.churchpresenter.app.churchpresenter.utils.reportDegradedSlide
+import org.churchpresenter.slides.utils.reportDegradedSlide
 import org.churchpresenter.settings.utils.Constants
 
 /**

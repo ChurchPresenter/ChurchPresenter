@@ -28,7 +28,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
+import org.churchpresenter.sharedui.utils.HeicDecoder
 
 /** nginx's convention for a request the client abandoned before its response finished. */
 private const val STATUS_CLIENT_CLOSED_REQUEST = 499

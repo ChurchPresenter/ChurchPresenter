@@ -6,7 +6,7 @@ import org.churchpresenter.core.models.songs.SongItem
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline

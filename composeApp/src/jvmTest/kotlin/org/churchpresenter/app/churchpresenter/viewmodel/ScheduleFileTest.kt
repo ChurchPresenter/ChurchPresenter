@@ -9,7 +9,7 @@ import io.mockk.slot
 import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import java.io.File
 import java.nio.file.Files

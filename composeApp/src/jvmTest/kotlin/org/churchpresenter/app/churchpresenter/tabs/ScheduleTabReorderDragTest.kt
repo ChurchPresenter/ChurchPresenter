@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performMouseInput
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.slides.tabs.PicturesTab
 
 /**
  * Dragging a schedule row by its grip to reorder it.

@@ -24,10 +24,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
-import org.churchpresenter.app.churchpresenter.composables.FfmpegBinary
+import org.churchpresenter.sharedui.utils.FfmpegBinary
 import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.theme.components.SettingsTextField
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 import org.churchpresenter.settings.AppSettings

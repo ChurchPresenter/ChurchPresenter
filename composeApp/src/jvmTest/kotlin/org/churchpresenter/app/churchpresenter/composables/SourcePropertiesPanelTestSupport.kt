@@ -40,7 +40,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.uniquelyNamedFont
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.core.models.scene.SceneSource
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

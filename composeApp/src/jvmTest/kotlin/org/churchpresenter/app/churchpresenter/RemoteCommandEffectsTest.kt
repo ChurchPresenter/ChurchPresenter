@@ -13,8 +13,8 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
+import org.churchpresenter.slides.viewmodel.PicturesViewModel
+import org.churchpresenter.slides.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream

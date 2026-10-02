@@ -4,7 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import org.churchpresenter.strings.generated.resources.canvas_bible_select_verse
 import org.churchpresenter.strings.generated.resources.canvas_browser_no_url
-import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
+import org.churchpresenter.slides.utils.PictureDecoder
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -101,6 +101,8 @@ import org.churchpresenter.sharedui.composables.OutlinedText
 import org.churchpresenter.sharedui.composables.backdropRoom
 import org.churchpresenter.sharedui.composables.mode
 import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
+import org.churchpresenter.sharedui.utils.CommandRunner
+import org.churchpresenter.sharedui.utils.readCommandOutput
 
 private const val URL_DEBOUNCE_MS = 800L
 private const val ERROR_TEXT_COLOR = 0xFFFF8888

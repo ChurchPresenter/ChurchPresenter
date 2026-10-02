@@ -66,6 +66,7 @@ import java.util.Locale
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.WindowState
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.sharedui.composables.LocalWentLive
 
 /** The work done once the window is up: the server's first start, the update check and the story prompt. */
 @Composable
