@@ -68,7 +68,6 @@
     <ID>TooManyFunctions:InstanceLinkViewModel.kt$InstanceLinkViewModel</ID>
     <ID>TooManyFunctions:LiveMapReporter.kt$LiveMapReporter</ID>
     <ID>TooManyFunctions:LowerThirdAndAtemRoutes.kt$org.churchpresenter.app.churchpresenter.server.LowerThirdAndAtemRoutes.kt</ID>
-    <ID>TooManyFunctions:MainLogic.kt$org.churchpresenter.app.churchpresenter.MainLogic.kt</ID>
     <ID>TooManyFunctions:PlanningCenterImportViewModel.kt$PlanningCenterImportViewModel</ID>
     <ID>TooManyFunctions:PresentationPlayer.kt$PresentationPlayer</ID>
     <ID>TooManyFunctions:PresenterManager.kt$PresenterManager</ID>
