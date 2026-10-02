@@ -36,17 +36,6 @@ class PlanningCenterSongMatchTest {
         home.deleteRecursively()
     }
 
-    private val viewModel by lazy {
-        PlanningCenterImportViewModel(
-            initialAccessToken = "valid-token",
-            initialRefreshToken = "refresh-token",
-            initialExpiresAtEpochMs = System.currentTimeMillis() + 3_600_000,
-            initialServiceTypeId = "st-1",
-            importSongbookName = "Planning Center",
-            onTokensRefreshed = { _, _, _ -> },
-        )
-    }
-
     private fun song(number: String, title: String, ccli: String = "") =
         SongItem(number = number, title = title, songbook = "Hymnal", ccliNumber = ccli)
 
@@ -68,31 +57,31 @@ class PlanningCenterSongMatchTest {
     @Test
     fun `a plan item that is not a song is never matched`() {
         // A header row carrying a song's title must not pull that song into the schedule.
-        assertNull(viewModel.matchLocalSong(item("Amazing Grace", itemType = "header"), catalog))
+        assertNull(matchLocalSong(item("Amazing Grace", itemType = "header"), catalog))
     }
 
     @Test
     fun `a ccli number matches whatever the title says`() {
-        val matched = viewModel.matchLocalSong(item("Renamed In Planning Center", ccli = "22025"), catalog)
+        val matched = matchLocalSong(item("Renamed In Planning Center", ccli = "22025"), catalog)
         assertEquals("0042", matched?.number)
     }
 
     @Test
     fun `a ccli number nothing in the library carries falls through to the title`() {
-        val matched = viewModel.matchLocalSong(item("How Great Thou Art", ccli = "99999"), catalog)
+        val matched = matchLocalSong(item("How Great Thou Art", ccli = "99999"), catalog)
         assertEquals("0100", matched?.number)
     }
 
     @Test
     fun `a song with no ccli number of its own is still reachable by title`() {
         // The catalogue entry's blank ccliNumber must not be treated as matching a blank query.
-        val matched = viewModel.matchLocalSong(item("how great thou art"), catalog)
+        val matched = matchLocalSong(item("how great thou art"), catalog)
         assertEquals("0100", matched?.number)
     }
 
     @Test
     fun `a leading four-digit number matches the song bearing it`() {
-        val matched = viewModel.matchLocalSong(item("0100 Something Else Entirely"), catalog)
+        val matched = matchLocalSong(item("0100 Something Else Entirely"), catalog)
         assertEquals("0100", matched?.number)
     }
 
@@ -100,22 +89,22 @@ class PlanningCenterSongMatchTest {
     fun `a leading number the library does not have leaves the item unmatched`() {
         // The title tier compares the whole title, number and all, so "0777 Amazing Grace" does
         // not quietly become the library's "Amazing Grace" under a different number.
-        assertNull(viewModel.matchLocalSong(item("0777 Amazing Grace"), catalog))
+        assertNull(matchLocalSong(item("0777 Amazing Grace"), catalog))
     }
 
     @Test
     fun `the song title field is preferred over the item title`() {
-        val matched = viewModel.matchLocalSong(item("Opening", songTitle = "Amazing Grace"), catalog)
+        val matched = matchLocalSong(item("Opening", songTitle = "Amazing Grace"), catalog)
         assertEquals("0042", matched?.number)
     }
 
     @Test
     fun `an item matching nothing at all is left unmatched`() {
-        assertNull(viewModel.matchLocalSong(item("A Song Nobody Here Has"), catalog))
+        assertNull(matchLocalSong(item("A Song Nobody Here Has"), catalog))
     }
 
     @Test
     fun `an empty library matches nothing`() {
-        assertNull(viewModel.matchLocalSong(item("Amazing Grace", ccli = "22025"), emptyList()))
+        assertNull(matchLocalSong(item("Amazing Grace", ccli = "22025"), emptyList()))
     }
 }

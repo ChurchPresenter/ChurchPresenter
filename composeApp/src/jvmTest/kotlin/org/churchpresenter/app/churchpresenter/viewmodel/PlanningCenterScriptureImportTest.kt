@@ -314,7 +314,7 @@ class PlanningCenterScriptureImportTest {
     @Test
     fun `a created song is returned with its source file populated`() {
         val created = assertNotNull(
-            viewModel().createLocalSong(
+            createLocalSong(
                 SongItem(number = "0500", title = "Imported", songbook = "Hymnal", lyrics = listOf("line")),
             ),
         )
@@ -326,7 +326,7 @@ class PlanningCenterScriptureImportTest {
     @Test
     fun `a song with no number is filed under its title`() {
         val created = assertNotNull(
-            viewModel().createLocalSong(SongItem(
+            createLocalSong(SongItem(
                 number = "",
                 title = "No Number",
                 songbook = "Hymnal",
@@ -339,7 +339,7 @@ class PlanningCenterScriptureImportTest {
     @Test
     fun `a song with no songbook is refused`() {
         assertNull(
-            viewModel().createLocalSong(SongItem(number = "1", title = "Orphan", songbook = "", lyrics = listOf("l"))),
+            createLocalSong(SongItem(number = "1", title = "Orphan", songbook = "", lyrics = listOf("l"))),
         )
     }
 }

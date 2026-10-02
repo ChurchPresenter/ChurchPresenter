@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.app.churchpresenter.viewmodel.createLocalSong
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -200,7 +201,7 @@ fun PlanningCenterImportDialog(
         },
         // Tempo and capo are not offered here (showTuningFields defaults off), so they come back unset.
         onSave = { savedSong, _ ->
-            val saved = viewModel.createLocalSong(savedSong)
+            val saved = createLocalSong(savedSong)
             if (saved != null && targetItem != null) {
                 viewModel.markItemResolved(targetItem.id, saved.songId)
             }
