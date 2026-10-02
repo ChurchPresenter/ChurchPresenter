@@ -50,6 +50,15 @@ for arg in "$@"; do
   esac
 done
 
+# The full suite, for every fallback below. Prints the command like a filtered run does, and
+# under --dry-run stops there -- a fallback used to exec straight past it.
+run_full_suite() {
+  local cmd="./gradlew :composeApp:jvmTest -PfastTest"
+  echo; echo "$cmd"
+  if [ "$DRY_RUN" -eq 1 ]; then exit 0; fi
+  exec $cmd
+}
+
 # ── 1. What changed ──────────────────────────────────────────────────────────
 changed_files() {
   git diff --name-only HEAD                       # unstaged + staged vs HEAD
@@ -98,7 +107,7 @@ if [ -z "$KT_CHANGED" ]; then
   report_modules
   [ "$FALLBACK" -eq 1 ] || { echo ">> --no-fallback: running nothing."; exit 0; }
   echo ">> nothing to map from; running the full suite."
-  exec ./gradlew :composeApp:jvmTest -PfastTest
+  run_full_suite
 fi
 
 # ── 2. Symbols to look for ───────────────────────────────────────────────────
@@ -188,12 +197,12 @@ if [ "$COUNT" -eq 0 ]; then
     echo ">> --no-fallback: running nothing."; exit 0
   fi
   echo ">> That usually means the change is untested. Running the full suite so you find out."
-  exec ./gradlew :composeApp:jvmTest -PfastTest
+  run_full_suite
 fi
 
 if [ "$COUNT" -gt "$MAX_PATTERNS" ]; then
   echo "$COUNT candidate suites — past the point where filtering pays. Running the full suite."
-  exec ./gradlew :composeApp:jvmTest -PfastTest
+  run_full_suite
 fi
 
 ARGS=""
