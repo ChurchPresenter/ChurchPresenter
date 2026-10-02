@@ -319,7 +319,7 @@ class CompanionServer {
     // Current data — thread-safe StateFlows
     // All songs flat list
     // Current catalog — rebuilt whenever songs are updated
-    private val _catalog = MutableStateFlow(SongCatalogResponse(emptyList(), 0, 0))
+    internal val _catalog = MutableStateFlow(SongCatalogResponse(emptyList(), 0, 0))
     /** Raw song list kept in sync with _catalog for per-number detail lookups */
     @Volatile internal var _songs: List<SongItem> = emptyList()
 
@@ -332,7 +332,7 @@ class CompanionServer {
     /** The library as songbook records, with each song's usual length, for a phone planning a service. */
     fun songCatalog(): SongCatalogRecordsResponse =
         SongCatalogRecordsResponse(Projection.catalog(_songs, typicalSeconds).values.toList())
-    private val _bibleCatalog = MutableStateFlow<BibleCatalogResponse?>(null)
+    internal val _bibleCatalog = MutableStateFlow<BibleCatalogResponse?>(null)
     private val _bible = MutableStateFlow<Bible?>(null)
     /** Absolute path to the primary bible's .spb file — serves GET /api/bible/file for InstanceLink followers. */
     @Volatile internal var _bibleFilePath: String = ""
@@ -343,14 +343,14 @@ class CompanionServer {
     /** Current background settings — serves GET /api/backgrounds for a follower that opted in to
      *  mirroring backgrounds. The image/video fields are still local file paths on this machine;
      *  GET /api/backgrounds/asset/{slot} resolves the current path for a given slot on demand. */
-    private val _backgroundSettings = MutableStateFlow(BackgroundSettings())
-    private val _schedule = MutableStateFlow<List<ScheduleItemDto>>(emptyList())
+    internal val _backgroundSettings = MutableStateFlow(BackgroundSettings())
+    internal val _schedule = MutableStateFlow<List<ScheduleItemDto>>(emptyList())
     /** Snapshot of whatever is currently live — see [LiveStateDto]. */
-    private val _liveState = MutableStateFlow<LiveStateDto?>(null)
+    internal val _liveState = MutableStateFlow<LiveStateDto?>(null)
     internal val liveState: StateFlow<LiveStateDto?> = _liveState.asStateFlow()
     /** Device IDs of currently-connected WS clients that identified as an Instance Link follower
      *  (as opposed to a regular mobile/browser companion client) — see [Constants.HEADER_CLIENT_ROLE]. */
-    private val _connectedInstanceLinkFollowers = MutableStateFlow<Set<String>>(emptySet())
+    internal val _connectedInstanceLinkFollowers = MutableStateFlow<Set<String>>(emptySet())
     val connectedInstanceLinkFollowers: StateFlow<Set<String>> = _connectedInstanceLinkFollowers.asStateFlow()
 
     /**
@@ -370,7 +370,7 @@ class CompanionServer {
     internal fun isClientBlocked(clientId: String): Boolean =
         clientId.isNotBlank() && clientId in blockedClientIds
     /** schedule item UUID → absolute local media file path — populated by updateSchedule, serves /api/media/stream */
-    private val _scheduleItemToMediaPath = ConcurrentHashMap<String, String>()
+    internal val _scheduleItemToMediaPath = ConcurrentHashMap<String, String>()
 
 
 
@@ -380,13 +380,13 @@ class CompanionServer {
     internal val pictures = PictureLibrary()
 
     // API key config (updated from settings without restart)
-    private val _apiKeyEnabled = MutableStateFlow(false)
-    private val _apiKey = MutableStateFlow("")
+    internal val _apiKeyEnabled = MutableStateFlow(false)
+    internal val _apiKey = MutableStateFlow("")
 
     // File upload permission (updated from settings without restart)
-    private val _fileUploadEnabled = MutableStateFlow(true)
+    internal val _fileUploadEnabled = MutableStateFlow(true)
     // Max media-upload size in MB (updated from settings without restart)
-    private val _maxMediaUploadMb = MutableStateFlow(Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB)
+    internal val _maxMediaUploadMb = MutableStateFlow(Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB)
 
     // Outgoing WebSocket broadcast channel. Buffer sized generously: it is shared by every
     // connected client's collector, and DROP_OLDEST means an overflow silently loses a message
@@ -1085,32 +1085,16 @@ class CompanionServer {
                 certificateRoutes()
 
                 // ── API endpoints (require API key when enabled) ────────────────────────────
-                infoAndSongRoutes(
-                    this@CompanionServer, _bibleCatalog, _catalog, _fileUploadEnabled,
-                    _maxMediaUploadMb, json, scope
-                )
+                infoAndSongRoutes(this@CompanionServer, json, scope)
                 scheduleRoutes(this@CompanionServer, _schedule, json, scope)
                 bibleAndDictionaryRoutes(
                     this@CompanionServer, _bible, _bibleCatalog, json, scope
                 )
-                presentationRoutes(
-                    this@CompanionServer, _fileUploadEnabled, _maxMediaUploadMb, presentations._presentationCatalog,
-                    presentations._presentationCatalogs, presentations._scheduleItemToPresentationId,
-                    presentations._slideBytes, json, scope
-                )
+                presentationRoutes(this@CompanionServer, json, scope)
                 presentationRemoteRoutes(this@CompanionServer, presentations._presentationNotes, scope)
                 calendarSyncRoutes(this@CompanionServer, json)
-                mediaAndAssetRoutes(
-                    this@CompanionServer, PictureLibrary.DEVICE_UPLOADS_FOLDER_ID, _backgroundSettings,
-                    _fileUploadEnabled, pictures.catalog, pictures.catalogs, pictures.files,
-                    _scheduleItemToMediaPath, json, scope
-                )
-                webSocketRoute(
-                    this@CompanionServer, _apiKey, _apiKeyEnabled, _bibleCatalog, _catalog,
-                    _connectedInstanceLinkFollowers, _liveState, pictures.catalog, pictures.catalogs,
-                    presentations._presentationCatalog, presentations._presentationCatalogs, _schedule,
-                    presentations._scheduleItemToPresentationId, json, scope
-                )
+                mediaAndAssetRoutes(this@CompanionServer, json, scope)
+                webSocketRoute(this@CompanionServer, json, scope)
                 lowerThirdAndAtemRoutes(this@CompanionServer, json, scope)
                 browserSourceRoutes(
                     this@CompanionServer, browserSource._browserSourceFrameFlows,
