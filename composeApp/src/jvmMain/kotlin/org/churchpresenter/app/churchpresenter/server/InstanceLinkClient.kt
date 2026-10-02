@@ -169,18 +169,18 @@ class InstanceLinkClient(
         currentApiKey = apiKey
         val myGeneration = ++generation
         connectJob = scope.launch {
-            connectLoop(host, port, apiKey, deviceId, reconnectDelayMs, myGeneration)
+            connectLoop(PrimaryAddress(host, port, apiKey, deviceId), reconnectDelayMs, myGeneration)
         }
     }
 
-    private suspend fun connectLoop(
-        host: String,
-        port: Int,
-        apiKey: String,
-        deviceId: String,
-        reconnectDelayMs: Long,
-        myGeneration: Long
-    ) {
+    /** Where the primary is, and who this follower says it is when it gets there. */
+    private data class PrimaryAddress(val host: String, val port: Int, val apiKey: String, val deviceId: String)
+
+    private suspend fun connectLoop(primary: PrimaryAddress, reconnectDelayMs: Long, myGeneration: Long) {
+        val host = primary.host
+        val port = primary.port
+        val apiKey = primary.apiKey
+        val deviceId = primary.deviceId
         // A peer that's simply offline (not started yet, or closed) is an expected, benign state —
         // don't let the retry cadence flood Sentry with one warning per attempt. Report the
         // first failure of a streak, then only every 10th thereafter; reset once connected again.

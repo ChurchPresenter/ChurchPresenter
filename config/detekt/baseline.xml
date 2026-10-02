@@ -52,10 +52,7 @@
     <ID>LongParameterList:BibleSttStatus.kt$( engineStartFailed: Boolean, noBibleSelected: Boolean, sttConnected: Boolean, engineConnected: Boolean, engineSttDown: Boolean, sttReceiving: Boolean, hasDetectedReferences: Boolean, sttReconnecting: Boolean, sttConnectError: Boolean, sttConnecting: Boolean, )</ID>
     <ID>LongParameterList:BibleViewModelDetection.kt$( bookId: Int, chapter: Int, verseStart: Int, verseEnd: Int?, verseText: String, matchType: String, canonicalCodeStart: String? = null, canonicalCodeEnd: String? = null, segmentId: String? = null, sessionId: String? = null, tracks: List&lt;String&gt; = emptyList(), detectedVersion: String? = null, )</ID>
     <ID>LongParameterList:BibleViewModelDetection.kt$( displayBookIndex: Int, chapter: Int, verseStart: Int?, verseEnd: Int?, source: String, autoFollow: Boolean, matchType: String? = null, )</ID>
-    <ID>LongParameterList:InstanceLinkClient.kt$InstanceLinkClient$( host: String, port: Int, apiKey: String, deviceId: String, reconnectDelayMs: Long, myGeneration: Long )</ID>
     <ID>LongParameterList:SceneCanvas.kt$( x: Float, y: Float, w: Float, h: Float, sources: List&lt;SceneSource&gt;, excludeId: String, canvasWidth: Float, canvasHeight: Float )</ID>
-    <ID>LongParameterList:SharedBrowserFrameCache.kt$SharedBrowserFrameCache$( cdp: CdpConnection, url: String, renderWidth: Int, renderHeight: Int, customCss: String, forceTransparent: Boolean, )</ID>
-    <ID>LongParameterList:SharedBrowserFrameCache.kt$SharedBrowserFrameCache$( entry: CacheEntry, url: String, renderWidth: Int, renderHeight: Int, customCss: String, fps: Int, forceTransparent: Boolean )</ID>
     <ID>LongParameterList:SharedBrowserFrameCache.kt$SharedBrowserFrameCache$( sourceId: String, url: String, renderWidth: Int, renderHeight: Int, customCss: String, fps: Int, forceTransparent: Boolean )</ID>
     <ID>TooManyFunctions:AutoStartManager.kt$AutoStartManager</ID>
     <ID>TooManyFunctions:BackgroundSettingsTab.kt$org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab.kt</ID>
