@@ -45,7 +45,7 @@ class ScheduleTabRowLayoutTest {
 
     /** A song row's own type chip, which is `CenterVertically` and so marks the row's centreline. */
     private fun ComposeUiTest.chipCentreY(): Float =
-        onNodeWithText("♪").fetchSemanticsNode().boundsInRoot.center.y
+        onNodeWithTag(SCHEDULE_ROW_TYPE_CHIP_TAG).fetchSemanticsNode().boundsInRoot.center.y
 
     private fun ComposeUiTest.titleCentreY(): Float =
         onNodeWithText("Amazing Grace", substring = true).fetchSemanticsNode().boundsInRoot.center.y
@@ -85,7 +85,7 @@ class ScheduleTabRowLayoutTest {
                 // intrinsic-height fix changed. Cheap insurance that the fix did not trade the
                 // Compact bug for a Detailed one.
                 val card = onNodeWithTag(SCHEDULE_ROW_CARD_TAG).fetchSemanticsNode().boundsInRoot
-                val chip = onNodeWithText("\u266a").fetchSemanticsNode().boundsInRoot
+                val chip = onNodeWithTag(SCHEDULE_ROW_TYPE_CHIP_TAG).fetchSemanticsNode().boundsInRoot
 
                 assertTrue(
                     abs(chip.center.y - card.center.y) <= 3f,

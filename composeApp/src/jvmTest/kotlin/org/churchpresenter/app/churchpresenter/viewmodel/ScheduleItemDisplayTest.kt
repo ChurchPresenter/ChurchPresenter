@@ -18,58 +18,73 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Label
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Slideshow
+import androidx.compose.material.icons.filled.Subtitles
 
 /**
- * How schedule rows are labelled — the type glyph, the grey detail line, and the timer preview.
- * The glyph `when` was duplicated at two sites in ScheduleTab; the detail line and timer preview
+ * How schedule rows are labelled — the type icon, the grey detail line, and the timer preview.
+ * The icon `when` was duplicated at two sites in ScheduleTab; the detail line and timer preview
  * carried real formatting (verse truncation, uppercase type tags, the count-up/clock "no preview"
  * rule) that was never tested.
  */
 class ScheduleItemDisplayTest {
 
-    // ── glyph (exhaustive over the sealed type) ────────────────────────────────
+    // ── icon (exhaustive over the sealed type) ────────────────────────────────
 
     @Test
-    fun `every schedule item type has its own glyph`() {
+    fun `every schedule item type has its tab's icon`() {
         val cases = listOf(
-            ScheduleItem.SongItem(id = "1", songNumber = 1, title = "t", songbook = "b") to "♪",
+            ScheduleItem.SongItem(id = "1", songNumber = 1, title = "t", songbook = "b") to Icons.Filled.MusicNote,
             ScheduleItem.BibleVerseItem(
                 id = "2",
                 bookName = "John",
                 chapter = 3,
                 verseNumber = 16,
                 verseText = "x",
-            ) to "✝",
-            ScheduleItem.LabelItem(id = "3", text = "l", textColor = "#fff", backgroundColor = "#000") to "🏷",
-            ScheduleItem.PictureItem(id = "4", folderPath = "/p", folderName = "p", imageCount = 1) to "📷",
+            ) to Icons.AutoMirrored.Filled.MenuBook,
+            ScheduleItem.LabelItem(id = "3", text = "l", textColor = "#fff", backgroundColor = "#000")
+                to Icons.AutoMirrored.Filled.Label,
+            ScheduleItem.PictureItem(id = "4", folderPath = "/p", folderName = "p", imageCount = 1)
+                to Icons.Filled.Image,
             ScheduleItem.PresentationItem(
                 id = "5",
                 filePath = "/d.pptx",
                 fileName = "d",
                 slideCount = 1,
                 fileType = "pptx",
-            ) to "📊",
-            ScheduleItem.MediaItem(id = "6", mediaUrl = "/m.mp4", mediaTitle = "m", mediaType = "local") to "🎬",
+            ) to Icons.Filled.Slideshow,
+            ScheduleItem.MediaItem(id = "6", mediaUrl = "/m.mp4", mediaTitle = "m", mediaType = "local")
+                to Icons.Filled.Movie,
             ScheduleItem.LowerThirdItem(
                 id = "7",
                 presetId = "p",
                 presetLabel = "p",
                 pauseAtFrame = false,
                 pauseDurationMs = 0L,
-            ) to "▼",
-            ScheduleItem.AnnouncementItem(id = "8", text = "a") to "📢",
-            ScheduleItem.WebsiteItem(id = "9", url = "https://x") to "🌐",
-            ScheduleItem.SceneItem(id = "10", sceneId = "s", sceneName = "s") to "🎬",
+            ) to Icons.Filled.Subtitles,
+            ScheduleItem.AnnouncementItem(id = "8", text = "a") to Icons.Filled.Campaign,
+            ScheduleItem.WebsiteItem(id = "9", url = "https://x") to Icons.Filled.Language,
+            ScheduleItem.SceneItem(id = "10", sceneId = "s", sceneName = "s") to Icons.Filled.Dashboard,
             ScheduleItem.DictionaryItem(
                 id = "11",
                 number = "1",
                 word = "w",
                 transliteration = "t",
                 definition = "d",
-            ) to "📖",
+            ) to Icons.Filled.Book,
         )
-        for ((item, glyph) in cases) {
-            assertEquals(glyph, scheduleItemGlyph(item), item::class.simpleName)
+        for ((item, icon) in cases) {
+            assertEquals(icon, scheduleItemIcon(item), item::class.simpleName)
         }
     }
 
