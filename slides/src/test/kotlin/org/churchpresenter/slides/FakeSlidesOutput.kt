@@ -27,6 +27,10 @@ class FakeSlidesOutput : SlidesOutput {
     val animationType = mutableStateOf<AnimationType?>(null)
     val transitionDuration = mutableStateOf<Int?>(null)
     val shownSlides = mutableListOf<Int>()
+
+    /** Build steps the live slide still has to play forward, and back; each step taken uses one up. */
+    var stepsAhead = 0
+    var stepsBehind = 0
     var playbackClears = 0
         private set
 
@@ -78,9 +82,11 @@ class FakeSlidesOutput : SlidesOutput {
         shownSlides += slideIndex
     }
 
-    override fun advancePresentationStep(deck: Deck, slideIndex: Int): Boolean = false
+    override fun advancePresentationStep(deck: Deck, slideIndex: Int): Boolean =
+        (stepsAhead > 0).also { if (it) stepsAhead-- }
 
-    override fun rewindPresentationStep(deck: Deck, slideIndex: Int): Boolean = false
+    override fun rewindPresentationStep(deck: Deck, slideIndex: Int): Boolean =
+        (stepsBehind > 0).also { if (it) stepsBehind-- }
 
     override fun clearPresentationPlayback() {
         playbackClears++
