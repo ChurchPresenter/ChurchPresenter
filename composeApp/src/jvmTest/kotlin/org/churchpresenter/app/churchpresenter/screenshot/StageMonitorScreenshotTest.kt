@@ -40,7 +40,7 @@ import kotlin.test.Test
 import org.churchpresenter.settings.withZoneWidth
 import org.churchpresenter.settings.withZoneHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.test.runDesktopComposeUiTest
+import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 

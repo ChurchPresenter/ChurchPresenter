@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -132,6 +133,32 @@ internal fun BibleLoadErrorBanner(errors: List<BibleLoadError>, modifier: Modifi
     }
 }
 
+/**
+ * How far to scroll so the two verses after [anchorIndex] come into view, once the anchor has
+ * reached the bottom of the list — or 0 when it has not.
+ *
+ * Never more than the anchor's own distance from the top: a verse taller than the panel (a narrow
+ * window wraps it to a word per line) would otherwise be scrolled out of sight to make room for
+ * the verses after it, leaving the operator looking at everything but what they selected.
+ */
+internal fun scrollAheadAmount(layoutInfo: LazyListLayoutInfo, anchorIndex: Int): Float {
+    val visibleItems = layoutInfo.visibleItemsInfo
+    val lastVisible = visibleItems.lastOrNull() ?: return 0f
+    if (anchorIndex < lastVisible.index - 1) return 0f
+    val viewportEnd = layoutInfo.viewportEndOffset
+    val itemHeight = lastVisible.size.toFloat()
+    val target2 = visibleItems.firstOrNull { it.index == anchorIndex + 2 }
+    val target1 = visibleItems.firstOrNull { it.index == anchorIndex + 1 }
+    val wanted = when {
+        target2 != null -> ((target2.offset + target2.size) - viewportEnd).toFloat()
+        target1 != null -> ((target1.offset + target1.size) - viewportEnd + itemHeight)
+        else -> itemHeight * 2
+    }
+    val anchor = visibleItems.firstOrNull { it.index == anchorIndex }
+    val limit = anchor?.let { (it.offset - layoutInfo.viewportStartOffset).toFloat() } ?: wanted
+    return wanted.coerceAtMost(limit).coerceAtLeast(0f)
+}
+
 @Composable
 internal fun LiveChapterPanel(
     verses: List<String>,
@@ -149,19 +176,7 @@ internal fun LiveChapterPanel(
     LaunchedEffect(liveVerseNumbers) {
         val firstLiveIndex = indexOfFirstLiveVerse(verses, liveVerseNumbers)
         if (firstLiveIndex < 0 || firstLiveIndex + 1 >= verses.size) return@LaunchedEffect
-        val layoutInfo = listState.layoutInfo
-        val visibleItems = layoutInfo.visibleItemsInfo
-        val lastVisible = visibleItems.lastOrNull() ?: return@LaunchedEffect
-        if (firstLiveIndex < lastVisible.index - 1) return@LaunchedEffect
-        val viewportEnd = layoutInfo.viewportEndOffset
-        val itemHeight = lastVisible.size.toFloat()
-        val target2 = visibleItems.firstOrNull { it.index == firstLiveIndex + 2 }
-        val target1 = visibleItems.firstOrNull { it.index == firstLiveIndex + 1 }
-        val scrollAmount = when {
-            target2 != null -> ((target2.offset + target2.size) - viewportEnd).toFloat().coerceAtLeast(0f)
-            target1 != null -> ((target1.offset + target1.size) - viewportEnd + itemHeight).coerceAtLeast(0f)
-            else -> itemHeight * 2
-        }
+        val scrollAmount = scrollAheadAmount(listState.layoutInfo, firstLiveIndex)
         if (scrollAmount > 0f) listState.scroll { scrollBy(scrollAmount) }
     }
 
@@ -380,19 +395,7 @@ internal fun BibleVerseColumn(
     }
     LaunchedEffect(selectedIndex) {
         if (selectedIndex < 0 || selectedIndex + 1 >= verses.size) return@LaunchedEffect
-        val layoutInfo = listState.layoutInfo
-        val visibleItems = layoutInfo.visibleItemsInfo
-        val lastVisible = visibleItems.lastOrNull() ?: return@LaunchedEffect
-        if (selectedIndex < lastVisible.index - 1) return@LaunchedEffect
-        val viewportEnd = layoutInfo.viewportEndOffset
-        val itemHeight = lastVisible.size.toFloat()
-        val target2 = visibleItems.firstOrNull { it.index == selectedIndex + 2 }
-        val target1 = visibleItems.firstOrNull { it.index == selectedIndex + 1 }
-        val scrollAmount = when {
-            target2 != null -> ((target2.offset + target2.size) - viewportEnd).toFloat().coerceAtLeast(0f)
-            target1 != null -> ((target1.offset + target1.size) - viewportEnd + itemHeight).coerceAtLeast(0f)
-            else -> itemHeight * 2
-        }
+        val scrollAmount = scrollAheadAmount(listState.layoutInfo, selectedIndex)
         if (scrollAmount > 0f) listState.scroll { scrollBy(scrollAmount) }
     }
     Box(modifier = Modifier.fillMaxSize()) {

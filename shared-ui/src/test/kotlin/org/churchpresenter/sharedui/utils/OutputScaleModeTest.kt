@@ -6,7 +6,7 @@ import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.FitScreen
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.OutputScaleMode
 import org.jetbrains.compose.resources.stringResource
 import kotlin.test.Test
