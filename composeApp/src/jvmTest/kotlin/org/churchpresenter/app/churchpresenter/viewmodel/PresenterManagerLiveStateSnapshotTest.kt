@@ -65,6 +65,11 @@ class PresenterManagerLiveStateSnapshotTest {
         assertEquals("their first line", pm.displayedLyricSection.value.lines.single())
         assertEquals(1, pm.songDisplaySectionIndex.value)
         assertEquals(2, pm.songDisplayLineIndex.value)
+        assertEquals(
+            DisplayedSongPosition(pm.allLyricSections.value, sectionIndex = 1, lineIndex = 2),
+            pm.displayedSongPosition.value,
+            "the outputs draw the restored section at the restored place, not the preview's",
+        )
         assertEquals(false, pm.showPresenterWindow.value, "a hidden output window stays hidden")
     }
 
