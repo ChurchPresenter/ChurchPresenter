@@ -75,7 +75,6 @@
     <ID>TooManyFunctions:Songs.kt$Songs</ID>
     <ID>TooManyFunctions:SongsViewModel.kt$SongsViewModel</ID>
     <ID>TooManyFunctions:SslCertificateManager.kt$SslCertificateManager</ID>
-    <ID>TooManyFunctions:StageMonitorScreen.kt$org.churchpresenter.app.churchpresenter.StageMonitorScreen.kt</ID>
     <ID>TooManyFunctions:StatisticsManager.kt$StatisticsManager</ID>
     <ID>TooManyFunctions:WindowsWindowCapture.kt$WindowsWindowCapture</ID>
   </CurrentIssues>
