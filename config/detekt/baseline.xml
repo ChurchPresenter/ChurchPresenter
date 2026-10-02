@@ -2,7 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>LongMethod:AtemSettingsTab.kt$@Composable fun AtemSettingsTab( settings: AppSettings, onSettingsChange: ((AppSettings) -&gt; AppSettings) -&gt; Unit )</ID>
     <ID>LongMethod:BibleCatalogBrowserDialog.kt$@Composable internal fun BibleCatalogBrowserDialogContent( viewModels: List&lt;BibleCatalogViewModel&gt;, tabLabels: List&lt;String&gt;, onDismiss: () -&gt; Unit, onBibleInstalled: (fileName: String) -&gt; Unit )</ID>
     <ID>LongMethod:BibleCatalogLicence.kt$@Composable internal fun LicenceConfirmation( module: BibleModule, isReinstall: Boolean, onConfirm: () -&gt; Unit, onDismiss: () -&gt; Unit )</ID>
     <ID>LongMethod:BibleCatalogModuleRow.kt$@Composable internal fun ModuleRow( module: BibleModule, showDate: Boolean, isInstalled: Boolean, isInstalling: Boolean, phase: InstallPhase?, progress: Float, anyInstallRunning: Boolean, onInstall: () -&gt; Unit )</ID>
