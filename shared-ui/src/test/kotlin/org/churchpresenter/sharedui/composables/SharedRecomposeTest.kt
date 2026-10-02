@@ -10,7 +10,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.theme.ChurchPresenterTheme
@@ -18,6 +18,9 @@ import org.churchpresenter.theme.ThemeMode
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+// `{ gen }` is not dead code: capturing the generation makes every recomposition hand the child a
+// new lambda, which is what forces it to recompose with the flipped state.
+@Suppress("UNUSED_EXPRESSION")
 @OptIn(ExperimentalTestApi::class)
 class SharedRecomposeTest {
 

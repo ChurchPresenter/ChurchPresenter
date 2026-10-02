@@ -156,7 +156,7 @@
 - **NDI sources on the canvas** — receive any NDI source on your network as a layer: a camera from another machine, a graphics feed, an overflow room's output. Pick it from a list of what is sending, or drop to the sender's low-bandwidth proxy for a small layer on a busy network. Needs the same free NDI Runtime as NDI output.
 
 **Source locations:**
-- `tabs/WebTab.kt` — web browser UI; its pieces in `tabs/WebTabScope.kt`, `WebToolbar.kt`, `WebPreview.kt`
+- `web/…/tabs/WebTab.kt` (the `:web` module) — web browser UI; its pieces in `WebTabScope.kt`, `WebToolbar.kt`, `WebPreview.kt`; the app fills in the live output and the preview picker in `tabs/AppWebTab.kt`
 - `tabs/CanvasTab.kt` — scene compositor UI; its pieces in `tabs/CanvasTabScope.kt`, `CanvasLeftPanel.kt`, `CanvasAddSourceMenu.kt`, `CanvasCenterPanel.kt`
 - `viewmodel/SceneViewModel.kt`
 - `core-models/src/main/kotlin/.../models/scene/SceneModels.kt` (the `:core-models` module) — including a scene's second layout and which one an output draws
@@ -167,7 +167,7 @@
 - `composables/OmtFrameCache.kt`, `composables/SceneOmtEditor.kt`, `composables/ReceivedFrameCache.kt` — receiving OMT sources onto the canvas, choosing one, and the capture loop both protocols share
 - `shared-ui/…/utils/FfmpegBinary.kt`, `dialogs/tabs/ProjectionFfmpegCard.kt` — which ffmpeg cameras are opened with: the bundled one, an override, or whatever is installed
 - `gradle/ffmpeg-builds.properties`, `THIRD_PARTY_FFMPEG.md` — where the bundled ffmpeg comes from, and its licence
-- `presenter/ScenePresenter.kt`, `presenter/WebsitePresenter.kt`
+- `presenter/ScenePresenter.kt`, `web/…/presenter/WebsitePresenter.kt` (the `:web` module: JCEF, `CefManager`, the embedded browser)
 - `data/settings/WebBookmark.kt`
 
 ## Live Captions & Translation

@@ -17,12 +17,12 @@ import org.churchpresenter.app.churchpresenter.composables.isVlcArchMismatch
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.composables.isVlcLoadFailed
 import org.churchpresenter.sharedui.models.Tabs
-import org.churchpresenter.app.churchpresenter.tabs.WebTab
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.utils.Constants
 import java.util.UUID
+import org.churchpresenter.app.churchpresenter.tabs.AppWebTab
 
 /*
  * The content tabs as the main screen composes them, one pane each, wired to its state and the
@@ -195,7 +195,7 @@ internal fun MainDesktopScope.AnnouncementsTabPane() {
 
 @Composable
 internal fun MainDesktopScope.WebTabPane() {
-    WebTab(
+    AppWebTab(
         modifier = Modifier.fillMaxSize(),
         presenterManager = presenterManager,
         selectedWebsiteItem = state.selectedWebsiteItem,

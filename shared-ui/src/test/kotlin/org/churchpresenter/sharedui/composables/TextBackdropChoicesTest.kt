@@ -208,6 +208,6 @@ class TextBackdropChoicesTest {
 
     @Test
     fun `every built-in choice carries a name to show in its tooltip`() {
-        assertTrue(backdropChoices(emptyList()).all { assertNotNull(it.label) != null })
+        backdropChoices(emptyList()).forEach { assertNotNull(it.label, "a choice with no name to show") }
     }
 }

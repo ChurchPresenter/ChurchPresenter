@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.web.tabs
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -8,9 +8,10 @@ import androidx.compose.runtime.setValue
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.presenter.WebNavController
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.web.presenter.WebNavController
+import org.churchpresenter.web.WebOutput
 import androidx.compose.runtime.Stable
+import androidx.compose.ui.Modifier
 
 /** What the Web tab remembers while it is composed: the address, the page, and the preview's mode. */
 @Stable
@@ -41,7 +42,7 @@ internal class WebTabState(savedUrl: String, savedTitle: String) {
 /** Everything the Web tab's pieces read, for one composition, and the navigation they share. */
 @Suppress("LongParameterList")
 internal class WebTabScope(
-    val presenterManager: PresenterManager?,
+    val output: WebOutput?,
     val appSettings: AppSettings,
     val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     val onAddToSchedule: ((url: String, title: String) -> Unit)?,
@@ -51,6 +52,7 @@ internal class WebTabScope(
     val isLive: Boolean,
     val navController: WebNavController,
     val previewAspectRatio: Float,
+    val outputPicker: @Composable (Modifier) -> Unit,
 ) {
     var urlInput by state::urlInput
     var liveUrl by state::liveUrl
@@ -67,16 +69,16 @@ internal class WebTabScope(
     fun onPreviewNavigated(newUrl: String) {
         urlInput = newUrl
         liveUrl = newUrl
-        presenterManager?.setWebsiteUrl(newUrl)
+        output?.setWebsiteUrl(newUrl)
         // Directly navigate the presenter browser so it updates immediately
         if (isLive) {
-            presenterManager?.liveBrowser?.value?.loadURL(newUrl)
+            output?.liveBrowser?.value?.loadURL(newUrl)
         }
     }
 
     fun onTitleChanged(title: String) {
         pageTitle = title
-        presenterManager?.setWebPageTitle(title)
+        output?.setWebPageTitle(title)
         // Update the schedule item title if it was added before the page finished loading
         if (liveUrl.isNotBlank()) onUpdateScheduleTitle?.invoke(liveUrl, title)
     }
@@ -84,7 +86,7 @@ internal class WebTabScope(
     fun applyZoom(level: Double) {
         zoomLevel = level
         val browser = if (isLive && !useInteractivePreview)
-            presenterManager?.liveBrowser?.value else navController.browser
+            output?.liveBrowser?.value else navController.browser
         browser?.setZoomLevel(level)
     }
 
@@ -93,7 +95,7 @@ internal class WebTabScope(
         navController.setMobileEmulation(mobile)
         // Also toggle on the live browser if presenting
         if (isLive) {
-            presenterManager?.liveBrowser?.value?.let { liveBrowser ->
+            output?.liveBrowser?.value?.let { liveBrowser ->
                 // The live browser uses a separate NavController, so override UA + reload directly
                 liveBrowser.reload()
             }
@@ -113,7 +115,7 @@ internal fun WebTabScope.WebTabEffects(
 
     // Clear snapshot when no longer live
     LaunchedEffect(isLive) {
-        if (!isLive) presenterManager?.setWebSnapshot(null)
+        if (!isLive) output?.setWebSnapshot(null)
     }
 
     // When a schedule item selects this tab, restore its URL and go live
@@ -122,15 +124,15 @@ internal fun WebTabScope.WebTabEffects(
             urlInput = item.url
             liveUrl = item.url
             pageTitle = item.title
-            presenterManager?.setWebsiteUrl(item.url)
-            presenterManager?.setWebPageTitle(item.title)
-            presenterManager?.setPresentingMode(Presenting.WEBSITE)
+            output?.setWebsiteUrl(item.url)
+            output?.setWebPageTitle(item.title)
+            output?.setPresentingMode(Presenting.WEBSITE)
         }
     }
 
     // Sync URL bar from presenter when the presenter navigates (Mirror mode clicks)
-    val presenterUrl = presenterManager?.websiteUrl?.value ?: ""
-    val presenterTitle = presenterManager?.webPageTitle?.value ?: ""
+    val presenterUrl = output?.websiteUrl?.value ?: ""
+    val presenterTitle = output?.webPageTitle?.value ?: ""
     LaunchedEffect(presenterUrl) {
         if (isLive && !useInteractivePreview && presenterUrl.isNotBlank()) {
             urlInput = presenterUrl
@@ -145,7 +147,7 @@ internal fun WebTabScope.WebTabEffects(
     }
 
     // Apply zoom level when presenter browser becomes available
-    val liveBrowserRef = presenterManager?.liveBrowser?.value
+    val liveBrowserRef = output?.liveBrowser?.value
     LaunchedEffect(liveBrowserRef) {
         if (liveBrowserRef != null && isLive) {
             liveBrowserRef.setZoomLevel(zoomLevel)
