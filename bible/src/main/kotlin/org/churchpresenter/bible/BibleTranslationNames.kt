@@ -2,6 +2,9 @@ package org.churchpresenter.bible
 
 import java.io.File
 
+/** Folder depth searched for Bible files — deep enough for language/publisher/edition nesting. */
+const val MAX_BIBLE_SCAN_DEPTH = 6
+
 /**
  * Naming installed `.spb` translations for the user.
  *

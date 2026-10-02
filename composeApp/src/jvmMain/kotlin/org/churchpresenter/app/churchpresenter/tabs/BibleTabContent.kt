@@ -41,7 +41,7 @@ import org.churchpresenter.sharedui.composables.FocusLostBanner
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.moveBibleTranslation
 import org.churchpresenter.settings.swapBibleTranslations
-import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.churchpresenter.stt.STTManager
 import org.churchpresenter.app.churchpresenter.viewmodel.bibleSttStatus
 import org.churchpresenter.app.churchpresenter.viewmodel.filteredSelectionIndices
 import org.jetbrains.compose.resources.stringResource

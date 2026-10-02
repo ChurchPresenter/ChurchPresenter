@@ -2,7 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
-import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.churchpresenter.stt.STTManager
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertFalse

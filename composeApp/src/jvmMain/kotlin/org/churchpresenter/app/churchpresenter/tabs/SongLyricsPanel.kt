@@ -91,6 +91,7 @@ import androidx.compose.foundation.layout.RowScope
 import org.churchpresenter.sharedui.composables.bibleListCard
 import org.churchpresenter.sharedui.composables.bibleRowColors
 import org.churchpresenter.sharedui.composables.rememberRowHover
+import org.churchpresenter.sharedui.composables.rowPad
 
 /**
  * The lyrics panel down the right of the Songs tab.

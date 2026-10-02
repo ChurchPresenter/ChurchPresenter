@@ -6,7 +6,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.app.churchpresenter.viewmodel.STTSegment
+import org.churchpresenter.stt.STTSegment
 import org.churchpresenter.settings.CAPTION_BREAK_SEGMENT
 import org.churchpresenter.settings.CAPTION_BREAK_SENTENCE
 import org.churchpresenter.settings.CAPTION_STYLE_POP_ON

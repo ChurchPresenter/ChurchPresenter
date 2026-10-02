@@ -244,6 +244,77 @@ jobs:
               - 'diagnostics/**'          # implementation(projects.diagnostics)
               - 'song-chords/**'          # via :shared-ui
               - 'bible/**'                # via :shared-ui
+            qa:
+              - *shared
+              - 'qa/**'
+              - 'shared-ui/**'            # implementation(projects.sharedUi)
+              - 'strings/**'              # implementation(projects.strings)
+              - 'icons/**'                # implementation(projects.icons)
+              - 'core-models/**'          # implementation(projects.coreModels)
+              - 'settings/**'             # implementation(projects.settings)
+              - 'theme/**'                # implementation(projects.theme)
+              - 'diagnostics/**'          # implementation(projects.diagnostics)
+              - 'song-chords/**'          # via :shared-ui
+              - 'bible/**'                # via :shared-ui
+            dictionary:
+              - *shared
+              - 'dictionary/**'
+              - 'shared-ui/**'            # implementation(projects.sharedUi)
+              - 'strings/**'              # implementation(projects.strings)
+              - 'icons/**'                # implementation(projects.icons)
+              - 'settings/**'             # implementation(projects.settings)
+              - 'theme/**'                # implementation(projects.theme)
+              - 'bible/**'                # implementation(projects.bible)
+              - 'song-chords/**'          # via :shared-ui
+              - 'core-models/**'          # via :shared-ui
+              - 'diagnostics/**'          # via :shared-ui
+            stt:
+              - *shared
+              - 'stt/**'
+              - 'shared-ui/**'            # implementation(projects.sharedUi)
+              - 'strings/**'              # implementation(projects.strings)
+              - 'settings/**'             # implementation(projects.settings)
+              - 'theme/**'                # implementation(projects.theme)
+              - 'icons/**'                # via :shared-ui
+              - 'core-models/**'          # via :shared-ui
+              - 'song-chords/**'          # via :shared-ui
+              - 'bible/**'                # via :shared-ui
+              - 'diagnostics/**'          # via :shared-ui
+            announcements:
+              - *shared
+              - 'announcements/**'
+              - 'shared-ui/**'            # implementation(projects.sharedUi)
+              - 'strings/**'              # implementation(projects.strings)
+              - 'icons/**'                # implementation(projects.icons)
+              - 'core-models/**'          # implementation(projects.coreModels)
+              - 'settings/**'             # implementation(projects.settings)
+              - 'theme/**'                # implementation(projects.theme)
+              - 'song-chords/**'          # via :shared-ui
+              - 'bible/**'                # via :shared-ui
+              - 'diagnostics/**'          # via :shared-ui
+            lowerthird:
+              - *shared
+              - 'lower-third/**'
+              - 'shared-ui/**'            # implementation(projects.sharedUi)
+              - 'strings/**'              # implementation(projects.strings)
+              - 'icons/**'                # implementation(projects.icons)
+              - 'core-models/**'          # implementation(projects.coreModels)
+              - 'settings/**'             # implementation(projects.settings)
+              - 'theme/**'                # implementation(projects.theme)
+              - 'diagnostics/**'          # implementation(projects.diagnostics)
+              - 'atem/**'                 # implementation(projects.atem)
+              - 'lottieGenerator/**'      # implementation(projects.lottieGenerator)
+              - 'presentation-engine/**'  # implementation(projects.presentationEngine)
+              - 'song-chords/**'          # via :shared-ui
+              - 'bible/**'                # via :shared-ui
+            crosswordtab:
+              - *shared
+              - 'crossword-tab/**'
+              - 'crossword/encoded/**'    # the puzzles, copied in by syncCrosswordFiles
+              - 'strings/**'              # implementation(projects.strings)
+              - 'theme/**'                # implementation(projects.theme)
+              - 'settings/**'             # implementation(projects.settings)
+              - 'shared-ui/**'            # testFixtures(projects.sharedUi)
             media:
               - *shared
               - 'media/**'
@@ -285,7 +356,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -655,6 +726,54 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.web == 'true' }}
         run: ./gradlew :web:test
 
+      - name: Crossword tab tests
+        if: ${{ !cancelled() && steps.modules.outputs.crosswordtab == 'true' }}
+        run: ./gradlew :crossword-tab:test
+
+      - name: Crossword tab coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.crosswordtab == 'true' }}
+        run: ./gradlew :crossword-tab:jacocoTestCoverageVerification -x test
+
+      - name: QA tests
+        if: ${{ !cancelled() && steps.modules.outputs.qa == 'true' }}
+        run: ./gradlew :qa:test
+
+      - name: QA coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.qa == 'true' }}
+        run: ./gradlew :qa:jacocoTestCoverageVerification -x test
+
+      - name: Dictionary tests
+        if: ${{ !cancelled() && steps.modules.outputs.dictionary == 'true' }}
+        run: ./gradlew :dictionary:test
+
+      - name: Dictionary coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.dictionary == 'true' }}
+        run: ./gradlew :dictionary:jacocoTestCoverageVerification -x test
+
+      - name: STT tests
+        if: ${{ !cancelled() && steps.modules.outputs.stt == 'true' }}
+        run: ./gradlew :stt:test
+
+      - name: STT coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.stt == 'true' }}
+        run: ./gradlew :stt:jacocoTestCoverageVerification -x test
+
+      - name: Announcements tests
+        if: ${{ !cancelled() && steps.modules.outputs.announcements == 'true' }}
+        run: ./gradlew :announcements:test
+
+      - name: Announcements coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.announcements == 'true' }}
+        run: ./gradlew :announcements:jacocoTestCoverageVerification -x test
+
+      - name: Lower Third tests
+        if: ${{ !cancelled() && steps.modules.outputs.lowerthird == 'true' }}
+        run: ./gradlew :lower-third:test
+
+      - name: Lower Third coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.lowerthird == 'true' }}
+        run: ./gradlew :lower-third:jacocoTestCoverageVerification -x test
+
       # No "Web coverage floor" step yet: :web measures under the shared 85% and the tests that bring
       # it there are still to be written (see web/AGENT.md). The step goes in with them.
 
@@ -698,6 +817,12 @@ jobs:
             slides/build/test-results/**/TEST-*.xml
             media/build/test-results/**/TEST-*.xml
             web/build/test-results/**/TEST-*.xml
+            crossword-tab/build/test-results/**/TEST-*.xml
+            qa/build/test-results/**/TEST-*.xml
+            dictionary/build/test-results/**/TEST-*.xml
+            stt/build/test-results/**/TEST-*.xml
+            announcements/build/test-results/**/TEST-*.xml
+            lower-third/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
           # every row after the insertion, so core-models was reported under "Companion Satellite"
@@ -727,6 +852,12 @@ jobs:
             Slides
             Media
             Web
+            Crossword tab
+            QA
+            Dictionary
+            STT
+            Announcements
+            Lower Third
           detailed_summary: true
           include_passed: false
           # Without this the second table is one row of "No test annotations available" per
@@ -906,3 +1037,15 @@ jobs:
             media/build/test-results/
             web/build/reports/tests/
             web/build/test-results/
+            crossword-tab/build/reports/tests/
+            crossword-tab/build/test-results/
+            qa/build/reports/tests/
+            qa/build/test-results/
+            dictionary/build/reports/tests/
+            dictionary/build/test-results/
+            stt/build/reports/tests/
+            stt/build/test-results/
+            announcements/build/reports/tests/
+            announcements/build/test-results/
+            lower-third/build/reports/tests/
+            lower-third/build/test-results/

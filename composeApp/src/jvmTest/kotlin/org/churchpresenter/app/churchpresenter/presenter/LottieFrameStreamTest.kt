@@ -5,7 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
+import org.churchpresenter.lowerthird.render.LottieRenderCache
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.file.Files

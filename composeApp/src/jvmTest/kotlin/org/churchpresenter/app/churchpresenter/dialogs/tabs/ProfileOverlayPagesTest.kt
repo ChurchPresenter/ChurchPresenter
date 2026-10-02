@@ -6,7 +6,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import org.churchpresenter.app.churchpresenter.composables.screenPositionTag
+import org.churchpresenter.sharedui.composables.screenPositionTag
 import androidx.compose.ui.test.hasTextExactly
 import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.MediaSettings

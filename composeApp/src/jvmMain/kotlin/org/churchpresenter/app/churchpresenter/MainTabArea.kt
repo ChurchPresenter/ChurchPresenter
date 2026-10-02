@@ -41,9 +41,8 @@ import org.churchpresenter.app.churchpresenter.composables.ToolbarKeyStyle
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.tabs.BibleTab
 import org.churchpresenter.app.churchpresenter.tabs.CompanionSurfaceTab
-import org.churchpresenter.app.churchpresenter.tabs.CrosswordTab
-import org.churchpresenter.app.churchpresenter.tabs.QATab
-import org.churchpresenter.app.churchpresenter.tabs.STTTab
+import org.churchpresenter.crosswordtab.CrosswordTab
+import org.churchpresenter.app.churchpresenter.tabs.AppSTTTab
 import org.churchpresenter.app.churchpresenter.tabs.SongsTab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.sharedui.models.Tabs
@@ -53,6 +52,7 @@ import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedCheckbox
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.app.churchpresenter.tabs.AppQATab
 
 private const val CONTENT_CROSSFADE_MS = 120
 private val TOOLBAR_KEY_SIZE = 40.dp
@@ -170,7 +170,7 @@ private fun MainDesktopScope.TabContent(modifier: Modifier) {
             Tabs.WEB -> WebTabPane()
             Tabs.CANVAS -> CanvasTabPane()
             Tabs.QA -> if (qaManager != null) {
-                QATab(
+                AppQATab(
                     modifier = Modifier.fillMaxSize(),
                     qaManager = qaManager,
                     presenterManager = presenterManager,
@@ -187,7 +187,7 @@ private fun MainDesktopScope.TabContent(modifier: Modifier) {
                 )
             }
             Tabs.STT -> if (sttManager != null) {
-                STTTab(
+                AppSTTTab(
                     modifier = Modifier.fillMaxSize(),
                     sttManager = sttManager,
                     presenterManager = presenterManager,

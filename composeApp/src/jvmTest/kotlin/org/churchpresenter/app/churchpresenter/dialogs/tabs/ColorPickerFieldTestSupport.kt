@@ -6,13 +6,11 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SemanticsNodeInteractionCollection
 import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performTextReplacement
 import kotlin.test.assertEquals
+import org.churchpresenter.sharedui.testing.confirmColorDialogWith as confirmColorPickerDialogWith
 
 /**
  * Helpers for driving `ColorPickerField`, shared by the settings-tab test classes.
@@ -46,15 +44,8 @@ internal fun ComposeUiTest.openColorField(showingHex: String) {
     waitForIdle()
 }
 
-/** In an open colour dialog: types [hex] and confirms. The hex box is the only editable "#" field. */
-internal fun ComposeUiTest.confirmColorDialogWith(hex: String) {
-    onAllNodes(hasSetTextAction() and hasText("#", substring = true))
-        .firstOrFail("the colour dialog must offer a hex field")
-        .performTextReplacement(hex)
-    waitForIdle()
-    onNodeWithText("OK").performClick()
-    waitForIdle()
-}
+/** In an open colour dialog: types [hex] and confirms; see `:shared-ui`'s own copy, which this is. */
+internal fun ComposeUiTest.confirmColorDialogWith(hex: String) = confirmColorPickerDialogWith(hex)
 
 /** Opens the colour field showing [fromHex], types [toHex] and confirms — the whole round trip. */
 internal fun ComposeUiTest.recolor(fromHex: String, toHex: String) {

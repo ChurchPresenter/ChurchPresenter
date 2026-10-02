@@ -37,13 +37,16 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.bible.SelectedVerse
-import org.churchpresenter.app.churchpresenter.data.StrongsEntry
-import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
+import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.lowerthird.render.LottieRenderCache
 import org.churchpresenter.settings.utils.Constants
 import java.io.IOException
 import org.churchpresenter.media.MediaOutput
 import org.churchpresenter.slides.SlidesOutput
 import org.churchpresenter.web.WebOutput
+import org.churchpresenter.qa.QAOutput
+import org.churchpresenter.announcements.AnnouncementsOutput
+import org.churchpresenter.announcements.AnnouncementsViewModel
 
 private const val WATCHDOG_INTERVAL_MS = 5_000L
 
@@ -66,6 +69,12 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
 
     /** This manager as the Web tab sees it -- see [PresenterWebOutput]. */
     val webOutput: WebOutput by lazy { PresenterWebOutput(this) }
+
+    /** This manager as the Q&A tab sees it -- see [PresenterQAOutput]. */
+    val qaOutput: QAOutput by lazy { PresenterQAOutput(this) }
+
+    /** This manager as the Announcements tab sees it -- see [PresenterAnnouncementsOutput]. */
+    val announcementsOutput: AnnouncementsOutput by lazy { PresenterAnnouncementsOutput(this) }
 
     private val preRenderScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var preRenderJob: Job? = null

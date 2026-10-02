@@ -5,7 +5,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
-import org.churchpresenter.app.churchpresenter.viewmodel.STTSegment
+import org.churchpresenter.stt.STTSegment
 import org.churchpresenter.settings.CAPTION_BREAK_NONE
 import org.churchpresenter.settings.STTSettings
 

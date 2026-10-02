@@ -54,16 +54,17 @@
 
 **Source locations:**
 - `tabs/BibleTab.kt` — main UI; its pieces in `tabs/BibleTab*.kt`
-- `tabs/DictionaryTab.kt` — Strong's dictionary UI
+- `dictionary/` (the `:dictionary` Gradle module) — the Strong's dictionary tab (`DictionaryTab.kt` and
+  its panes), `DictionaryViewModel`, the interlinear index and the bundled Strong's/interlinear data;
+  `server/StrongsDictionaryRepository.kt` serves the same data to the companion API
 - `dialogs/tabs/ProfileDictionaryPage.kt`, `dialogs/tabs/DictionaryPart.kt` — how the dictionary card looks on each output, edited on Profiles → Dictionary
-- `viewmodel/BibleViewModel.kt`, `viewmodel/DictionaryViewModel.kt`
+- `viewmodel/BibleViewModel.kt`
 - `tabs/BibleCrossReferences.kt`, `tabs/BibleCrossReferenceState.kt`, `tabs/BibleHistoryPanel.kt`, `tabs/BibleDetectionPanel.kt`, `tabs/BibleTranslationOrder.kt`
 - `viewmodel/BibleEngineClient.kt` — auto-follow speech detection client
 - `bible/` (the `:bible` Gradle module) — `Bible.kt`, `BibleBook.kt`, `BibleSearch.kt`,
   `BibleVerse.kt`, `BibleTranslationNames.kt` and the `.spb` format helpers in `SpbFormat.kt`
 - `data/BibleBookNames.kt`, `data/BibleBookAbbreviations.kt` — these stay in the app: they resolve
   Compose string resources, which `:bible` deliberately has no access to
-- `data/StrongsEntry.kt`
 - `bible-formats/` (the `:bible-formats` Gradle module) — the download catalogues and the `.spb` converters behind them
 - `bible-formats/src/main/kotlin/.../catalog/` — `EBibleSource` (eBible.org, USFX), `ZefaniaSource` + `ZefaniaRepositoryIndex`, `BebliaSource` + `BebliaCatalogIndex`
 - `viewmodel/BibleCatalogViewModel.kt`, `dialogs/BibleCatalogBrowserDialog.kt` — download browser UI
@@ -127,10 +128,13 @@
 - **Animated Bible lower third** — opt in to a Lottie band for scripture: the band slides, wipes, unrolls or fades in on Go Live, each verse types, scrolls like a ticker, fades or slides in as you step through a passage, and everything animates out on Escape. Design it in the built-in Bible band generator, with your Bible fonts, sizes and colors filled in live, for one or two languages.
 
 **Source locations:**
-- `tabs/LowerThird.kt` — main UI; its pieces in `tabs/LowerThird*.kt`
-- `presenter/LowerThirdPresenter.kt`, `presenter/LowerThirdOffscreenRenderer.kt`
+- `lower-third/` (the `:lower-third` Gradle module) — the tab (`LowerThird.kt` and its pieces in
+  `LowerThird*.kt`), `LowerThirdSequencer.kt`, and under `render/` the ATEM render cache
+  (`LottieRenderCache.kt` with `LottieRenderSizes.kt`, `LottieCacheFiles.kt`, `ArgbRle.kt`), the
+  off-screen renderer, `LottieFonts` and the bundled fonts
+- `tabs/AppLowerThirdTab.kt` — the app's wrapper, which supplies the preview output and its picker
+- `presenter/LowerThirdPresenter.kt` — the lower third on the output
 - `lottieGenerator/.../lottie/TextShaping.kt` — the Text shaping setting every Lottie player reads from the file
-- `server/LowerThirdSequencer.kt`
 - `presenter/BibleLottieBand.kt`, `presenter/BibleLottieTemplate.kt`, `presenter/BibleLottieTextFit.kt`, `presenter/BibleBandClock.kt` — the Bible band at run time; driven from `PresenterTransitionEffects.kt`
 - `dialogs/tabs/BibleLottieBandPicker.kt` — the template picker, the Bible tab's Lower Third Animation section and the generator window
 - `lottieGenerator/src/main/kotlin/.../band/` (the `:lottieGenerator` module) — the Bible band generator
@@ -140,8 +144,10 @@
 - **Countdown timers** — count down to a duration or to a specific clock time, with custom colors and an end-of-countdown message — perfect for "service starts in…".
 
 **Source locations:**
-- `tabs/AnnouncementsTab.kt` — main UI; its pieces in `tabs/Announcements*.kt`
-- `viewmodel/AnnouncementsViewModel.kt`
+- `announcements/` (the `:announcements` Gradle module) — `AnnouncementsTab.kt` and its pieces
+  (`Announcements*.kt`), `AnnouncementsViewModel.kt` with its timer parts in `AnnouncementsTimerParts.kt`
+- `tabs/AppAnnouncementsTab.kt` — the app's wrapper: the live output, the stage monitors and the
+  preview-output picker; `viewmodel/PresenterAnnouncementsOutput.kt` — the tab's `AnnouncementsOutput`
 - `data/settings/AnnouncementsSettings.kt`
 - `presenter/AnnouncementsPresenter.kt`
 - `utils/TimerStateManager.kt`
@@ -179,8 +185,9 @@
 - **Two languages your way** — stacked, side by side, or interleaved with each line followed by its translation; either language first; sharing a box or each in its own; the translation in its own size, capitals, weight and slant.
 
 **Source locations:**
-- `tabs/STTTab.kt` — main UI
-- `viewmodel/STTManager.kt`
+- `stt/` (the `:stt` Gradle module) — `STTTab.kt` (with `STTTabParts.kt`) and `STTManager.kt` (with
+  `STTTranscript.kt` and the Help Dev `STTCapture.kt`)
+- `tabs/AppSTTTab.kt` — the app's wrapper, which supplies the live mode and the caption settings dialog
 - `data/settings/STTSettings.kt`
 - `presenter/STTPresenter.kt`
 - `dialogs/tabs/ProfileCaptionsPage.kt`, `dialogs/tabs/CaptionReadingGroup.kt` — the caption look and reading settings, edited on Profiles → Live captions
@@ -196,8 +203,10 @@
 - **Styled per screen** — each output profile sets how a question and its QR code look on it.
 
 **Source locations:**
-- `tabs/QATab.kt` — main UI
-- `viewmodel/QAManager.kt`
+- `qa/…/QATab.kt` (with `QATabBars.kt`, `QATabList.kt`, `QuestionRow.kt`, `QuestionRowActions.kt`)
+  and `qa/…/QAManager.kt` (with `QAStore.kt`, `QAActions.kt`) — the `:qa` module
+- `tabs/AppQATab.kt` — the app's wrapper, which supplies the remote-access dialog;
+  `viewmodel/PresenterQAOutput.kt` — the tab's `QAOutput`, over `PresenterManager`
 - `data/settings/QASettings.kt`
 - `presenter/QAPresenter.kt`
 - `dialogs/tabs/ProfileOverlayPages.kt` — the question and QR look, edited on Profiles → Q&A
@@ -363,7 +372,7 @@
 - `dialogs/SetupWizardDialog.kt`
 - `dialogs/KeyboardShortcutsDialog.kt`, `dialogs/ShortcutBindingRow.kt`, `dialogs/ShortcutCapture.kt`, `dialogs/ShortcutCategoryRail.kt` — the shortcut list and rebinding
 - `composables/LabeledTab.kt`, `dialogs/tabs/TabLabelsRow.kt` — tab label styles
-- `tabs/CrosswordTab.kt`, `data/CrosswordData.kt` — a hidden tab (←→←→); `crossword/` (the `:crossword` Gradle module) is its authoring tool and the encoded puzzles
+- `crossword-tab/…/CrosswordTab.kt`, `crossword-tab/…/data/CrosswordData.kt` (the `:crossword-tab` module) — a hidden tab (←→←→); `crossword/` (the `:crossword` Gradle module) is its authoring tool and the encoded puzzles
 - `dialogs/OptionsDialog.kt`
 - `data/SettingsManager.kt`, `data/settings/AppSettings.kt`, `data/settings/WindowLayoutSettings.kt`
 - `utils/AutoStartManager.kt`, `utils/UpdateChecker.kt`

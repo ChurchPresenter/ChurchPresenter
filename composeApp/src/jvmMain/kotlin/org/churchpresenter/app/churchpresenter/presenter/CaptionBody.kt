@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
-import org.churchpresenter.app.churchpresenter.viewmodel.STTSegment
+import org.churchpresenter.stt.STTSegment
 import org.churchpresenter.settings.CAPTION_BREAK_SEGMENT
 import org.churchpresenter.settings.CAPTION_BREAK_SENTENCE
 import org.churchpresenter.settings.CaptionReading

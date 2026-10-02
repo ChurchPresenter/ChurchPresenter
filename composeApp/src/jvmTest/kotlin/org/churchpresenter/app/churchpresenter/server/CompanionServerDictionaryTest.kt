@@ -27,13 +27,9 @@ import org.churchpresenter.app.churchpresenter.testPort
  * untouched by every other `CompanionServer*Test`.
  *
  * `StrongsDictionaryRepositoryTest` already pins the repository's own filtering/sorting/scoping
- * logic against a tiny stubbed fixture (`Res.readBytes` mocked via `DictionaryFixture`). That
- * approach does not carry over here: the mock is installed from the JUnit test thread, but Ktor
- * dispatches the request handler onto its own Netty worker thread pool, and empirically the mocked
- * `Res` is not visible there — the route ends up reading the real bundled dictionary regardless.
- * Rather than chase that cross-thread mocking gap, these tests exercise only the route's own
- * behaviour that holds against the *real* dictionary: the request/response plumbing (status codes,
- * param parsing), not exact result content, which `StrongsDictionaryRepositoryTest` already owns.
+ * logic against a tiny fixture. The route answers from the server's own repository over the real
+ * bundled dictionary, so these tests exercise only the route's behaviour that holds against it: the
+ * request/response plumbing (status codes, param parsing), not exact result content.
  */
 class CompanionServerDictionaryTest {
 
@@ -44,11 +40,6 @@ class CompanionServerDictionaryTest {
 
     @BeforeTest
     fun setUp() {
-        // This test deliberately reads the real bundled dictionary (see class doc comment); reset
-        // first so it never depends on whatever another test already loaded into these singletons.
-        StrongsDictionaryRepository.cache.clear()
-        StrongsDictionaryRepository.interlinear.resetForTest()
-
         server = CompanionServer()
         // Its own port: every CompanionServer suite claims a distinct one, and 39_721 is
         // CompanionServerQaModerationTest's. Sharing it means a bind failure whenever the previous

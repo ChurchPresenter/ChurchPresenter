@@ -126,7 +126,7 @@ private fun Route.dictionaryRoutes(
                     val chapter = call.request.queryParameters["chapter"]?.toIntOrNull()
                     val verse   = call.request.queryParameters["verse"]?.toIntOrNull()
                     val results = try {
-                        StrongsDictionaryRepository.search(q, lang, filter, limit, book, chapter, verse)
+                        strongsDictionary.search(q, lang, filter, limit, book, chapter, verse)
                     } catch (_: Exception) {
                         call.respond(HttpStatusCode.ServiceUnavailable, """{"error":"dictionary unavailable"}""")
                         return@get
@@ -150,7 +150,7 @@ private fun Route.dictionaryRoutes(
                     }
                     val lang = call.request.queryParameters["lang"]
                     val entry = try {
-                        StrongsDictionaryRepository.lookup(number, lang)
+                        strongsDictionary.lookup(number, lang)
                     } catch (_: Exception) {
                         call.respond(HttpStatusCode.ServiceUnavailable, """{"error":"dictionary unavailable"}""")
                         return@get
@@ -190,7 +190,7 @@ private fun Route.dictionaryRoutes(
                         return@get
                     }
                     val (total, refs) = try {
-                        StrongsDictionaryRepository.versesFor(number, limit, book, chapter, verse)
+                        strongsDictionary.versesFor(number, limit, book, chapter, verse)
                     } catch (_: Exception) {
                         call.respond(HttpStatusCode.ServiceUnavailable, """{"error":"dictionary unavailable"}""")
                         return@get

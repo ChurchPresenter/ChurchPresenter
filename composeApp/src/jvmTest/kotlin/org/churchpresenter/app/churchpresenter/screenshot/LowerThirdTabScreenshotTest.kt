@@ -2,6 +2,9 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
+import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
@@ -15,15 +18,15 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.atem.AtemMediaSlot
 import org.churchpresenter.atem.AtemState
 import org.churchpresenter.atem.AtemUploadStatus
-import org.churchpresenter.app.churchpresenter.tabs.LowerThirdLabel
-import org.churchpresenter.app.churchpresenter.tabs.lottieFolder
-import org.churchpresenter.app.churchpresenter.tabs.lottieFolderWithContent
-import org.churchpresenter.app.churchpresenter.tabs.lottieSized
-import org.churchpresenter.app.churchpresenter.tabs.lowerThirdTab
-import org.churchpresenter.app.churchpresenter.tabs.ltButton
-import org.churchpresenter.app.churchpresenter.tabs.openAtemDialog
-import org.churchpresenter.app.churchpresenter.tabs.waitForAtemPrepared
-import org.churchpresenter.app.churchpresenter.tabs.selectPreset
+import org.churchpresenter.lowerthird.LowerThirdLabel
+import org.churchpresenter.lowerthird.lottieFolder
+import org.churchpresenter.lowerthird.lottieFolderWithContent
+import org.churchpresenter.lowerthird.lottieSized
+import org.churchpresenter.lowerthird.lowerThirdTab
+import org.churchpresenter.lowerthird.ltButton
+import org.churchpresenter.lowerthird.openAtemDialog
+import org.churchpresenter.lowerthird.waitForAtemPrepared
+import org.churchpresenter.lowerthird.selectPreset
 import java.io.File
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -89,6 +92,11 @@ class LowerThirdTabScreenshotTest {
             settings = settings,
             width = width,
             themeMode = mode,
+            // The app's own preview output and picker, as AppLowerThirdTab supplies them.
+            previewFor = { s -> rememberPreviewOutput(s, Constants.PREVIEW_TAB_LOWER_THIRD, Presenting.LOWER_THIRD) },
+            pickerFor = { s, change, modifier ->
+                PreviewOutputPicker(s, Constants.PREVIEW_TAB_LOWER_THIRD, Presenting.LOWER_THIRD, change, modifier)
+            },
         ) { _ ->
             drive()
             captureTo(file, rootIndex)

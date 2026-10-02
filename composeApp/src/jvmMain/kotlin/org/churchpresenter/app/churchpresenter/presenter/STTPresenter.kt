@@ -45,8 +45,8 @@ import org.churchpresenter.settings.textBoxKey
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
-import org.churchpresenter.app.churchpresenter.viewmodel.HighlightedWord
-import org.churchpresenter.app.churchpresenter.viewmodel.STTSegment
+import org.churchpresenter.stt.HighlightedWord
+import org.churchpresenter.stt.STTSegment
 import org.churchpresenter.sharedui.presenter.BoxedItem
 import org.churchpresenter.sharedui.presenter.rectIn
 import org.churchpresenter.sharedui.presenter.sttPositionToAlignment

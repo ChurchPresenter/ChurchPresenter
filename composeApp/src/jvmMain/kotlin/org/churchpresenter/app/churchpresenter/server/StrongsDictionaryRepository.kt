@@ -1,15 +1,12 @@
 package org.churchpresenter.app.churchpresenter.server
 
-import churchpresenter.composeapp.generated.resources.Res
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.data.InterlinearRepository
-import org.churchpresenter.app.churchpresenter.data.StrongsEntry
-import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.churchpresenter.dictionary.data.DictionaryFiles
+import org.churchpresenter.dictionary.data.InterlinearRepository
+import org.churchpresenter.dictionary.data.StrongsEntry
 
 private const val MAX_SEARCH_RESULTS = 500
 private const val MAX_OCCURRENCE_RESULTS = 200
@@ -56,18 +53,19 @@ data class DictionaryVersesResponse(
 )
 
 /**
- * Loads the bundled Strong's dictionary JSON (`files/dictionary/strongs_h*.json`,
- * `strongs_g*.json`) and serves search / lookup over it for the companion REST API.
+ * Loads the Strong's dictionary (`strongs_h*.json`, `strongs_g*.json`, through [files]) and serves
+ * search / lookup over it for the companion REST API.
  *
- * Entries are loaded lazily on first request and cached per language. Mirrors the
- * loading logic in [org.churchpresenter.app.churchpresenter.viewmodel.DictionaryViewModel].
+ * Entries are loaded lazily on first request and cached per language. Mirrors the loading logic in
+ * `DictionaryViewModel`. The server holds one for the life of the process ([strongsDictionary]); a
+ * test builds its own over a fixture.
  */
-object StrongsDictionaryRepository {
+class StrongsDictionaryRepository(private val files: DictionaryFiles = DictionaryFiles.Bundled) {
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
     private val mutex = Mutex()
-    internal val cache = mutableMapOf<String, List<StrongsEntry>>()
+    private val cache = mutableMapOf<String, List<StrongsEntry>>()
 
-    internal val interlinear = InterlinearRepository()
+    private val interlinear = InterlinearRepository(files)
     private val strongsRef = Regex("[HG]\\d{1,5}")
 
     internal fun normalizeLang(lang: String?): String = if (lang?.lowercase() == "ru") "ru" else "en"
@@ -97,19 +95,14 @@ object StrongsDictionaryRepository {
     )
 
     /** All entries (Hebrew + Greek) for the given language, loaded once and cached. */
-    @OptIn(ExperimentalResourceApi::class)
     suspend fun all(lang: String?): List<StrongsEntry> {
         val key = normalizeLang(lang)
         cache[key]?.let { return it }
         return mutex.withLock {
             cache[key]?.let { return it }
-            val hFile = if (key == "ru") "files/dictionary/strongs_h_ru.json" else "files/dictionary/strongs_h.json"
-            val gFile = if (key == "ru") "files/dictionary/strongs_g_ru.json" else "files/dictionary/strongs_g.json"
-            val loaded = withContext(Dispatchers.IO) {
-                val h = json.decodeFromString<List<StrongsEntry>>(Res.readBytes(hFile).decodeToString())
-                val g = json.decodeFromString<List<StrongsEntry>>(Res.readBytes(gFile).decodeToString())
-                h + g
-            }
+            val (hFile, gFile) = DictionaryFiles.strongsFor(key)
+            val loaded = json.decodeFromString<List<StrongsEntry>>(files.read(hFile).decodeToString()) +
+                json.decodeFromString<List<StrongsEntry>>(files.read(gFile).decodeToString())
             cache[key] = loaded
             loaded
         }
@@ -208,3 +201,6 @@ object StrongsDictionaryRepository {
         return inScope + rest
     }
 }
+
+/** The dictionary the companion server answers from, loaded on first use and kept. */
+internal val strongsDictionary = StrongsDictionaryRepository()
