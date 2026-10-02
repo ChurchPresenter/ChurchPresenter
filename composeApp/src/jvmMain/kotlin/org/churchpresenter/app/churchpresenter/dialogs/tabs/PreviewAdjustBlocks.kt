@@ -19,7 +19,7 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
+import org.churchpresenter.sharedui.presenter.PresentedBlock
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.semantic
 import java.awt.Cursor

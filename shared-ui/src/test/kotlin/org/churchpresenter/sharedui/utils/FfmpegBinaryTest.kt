@@ -150,6 +150,25 @@ class FfmpegBinaryTest {
     }
 
     @Test
+    fun `an os reported only as darwin or as another unix still finds its directory`() {
+        assertEquals("macos", appResourcesOsDirName("Darwin"), "some JVMs report the kernel, not the product")
+        assertEquals("linux", appResourcesOsDirName("Unix"), "a non-Linux unix uses the Linux layout")
+        assertTrue("/opt/homebrew/bin/ffmpeg" in ffmpegCandidatePaths("Darwin") { null })
+    }
+
+    @Test
+    fun `windows looks where each variable points, and only where one is set`() {
+        val both = ffmpegCandidatePaths("Windows 11") {
+            mapOf("LOCALAPPDATA" to "C:\\Users\\pastor\\AppData\\Local", "ProgramFiles" to "C:\\Program Files")[it]
+        }
+        assertTrue(both.any { it.endsWith("Microsoft\\WindowsApps\\ffmpeg.exe") }, both.toString())
+        assertTrue(both.any { it.startsWith("C:\\Program Files\\ffmpeg") }, both.toString())
+
+        val neither = ffmpegCandidatePaths("Windows 11") { null }
+        assertEquals(listOf("ffmpeg", "C:\\ffmpeg\\bin\\ffmpeg.exe"), neither, "nothing guessed from an unset variable")
+    }
+
+    @Test
     fun `the search stops at the first candidate that actually runs`() {
         val resources = newFolder()
         val bundled = File(resources, "ffmpeg").apply { writeText("x"); setExecutable(true) }

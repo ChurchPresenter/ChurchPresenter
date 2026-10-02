@@ -75,8 +75,8 @@ import org.churchpresenter.strings.generated.resources.customize_theme_use_defau
 import org.churchpresenter.strings.generated.resources.customize_theme_warning
 import org.churchpresenter.strings.generated.resources.ok
 import org.churchpresenter.strings.generated.resources.preview
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
+import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.sharedui.composables.ColorPickerField
 import org.churchpresenter.sharedui.composables.FontSettingsDropdown
 import org.churchpresenter.sharedui.composables.SettingsSection

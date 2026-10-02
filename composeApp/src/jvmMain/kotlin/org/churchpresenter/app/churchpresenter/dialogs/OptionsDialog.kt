@@ -41,10 +41,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import org.churchpresenter.app.churchpresenter.dialogSizeWithin
-import org.churchpresenter.app.churchpresenter.primaryScreenSizeDp
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
+import org.churchpresenter.sharedui.utils.centeredOnMainWindow
+import org.churchpresenter.sharedui.utils.dialogSizeWithin
+import org.churchpresenter.sharedui.utils.primaryScreenSizeDp
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.appearance

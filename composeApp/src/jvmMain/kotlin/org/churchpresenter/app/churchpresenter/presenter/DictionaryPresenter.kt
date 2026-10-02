@@ -47,6 +47,10 @@ import org.churchpresenter.settings.textBoxKey
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.sharedui.presenter.BoxFitText
+import org.churchpresenter.sharedui.presenter.BoxedItem
+import org.churchpresenter.sharedui.presenter.fitInBox
+import org.churchpresenter.sharedui.presenter.rectIn
 
 @Composable
 fun DictionaryPresenter(

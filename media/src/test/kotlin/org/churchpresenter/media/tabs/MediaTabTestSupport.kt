@@ -1,0 +1,161 @@
+@file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
+
+package org.churchpresenter.media.tabs
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.theme.ChurchPresenterTheme
+import org.churchpresenter.theme.ThemeMode
+import org.churchpresenter.media.viewmodel.LocalMediaViewModel
+import org.churchpresenter.media.viewmodel.MediaViewModel
+import org.churchpresenter.media.MediaOutput
+import org.churchpresenter.sharedui.filechooser.FileChooser
+import org.churchpresenter.sharedui.testing.FakeFileChooser
+
+/**
+ * Harness and fixtures for the `MediaTab` test classes.
+ *
+ * The tab had **no test file at all** before this one. It was written off as VLC-bound, but only its
+ * playback surface is: the source picker, the URL entry, the recents bar and the transport controls are
+ * ordinary Compose and render without VLC anywhere in sight. `WebTab` established the same thing for
+ * JCEF, and `MediaViewModel` (97%) and `LocalMediaViewModel` (100%) show the logic underneath was never
+ * the problem — only the tab.
+ *
+ * **[vlcAvailable] is the reason this works.** `isVlcAvailable` is a top-level `val` in
+ * `composables/VideoPlayer.kt` that caches its answer in a process-wide field, so without a seam the tab
+ * renders one thing on a developer's Mac with VLC installed and another on CI — neither branch testable
+ * on purpose. The tab now takes it as a parameter defaulting to the real check, so a test names which
+ * world it wants. Same shape as `WebTab`'s `cefInitialized`.
+ */
+
+// ── Harness ─────────────────────────────────────────────────────────────────────────────────────
+
+/** What the tab reported back, so a test asserts on the choice rather than on a stub. */
+internal class MediaReports {
+    /** mediaUrl, mediaTitle, mediaType — exactly what the schedule would be given. */
+    val scheduled = mutableListOf<Triple<String, String, String>>()
+
+    /** The subtitle file each of those schedule calls carried, in the same order. */
+    val scheduledSubtitles = mutableListOf<String>()
+
+    /** The settings the tab's last write would produce, applied to the ones it was composed with. */
+    var settingsAfterChange: AppSettings? = null
+}
+
+@OptIn(ExperimentalTestApi::class)
+internal fun mediaTab(
+    settings: (AppSettings) -> AppSettings = { it },
+    selectedMediaItem: ScheduleItem.MediaItem? = null,
+    presenterManager: MediaOutput? = null,
+    /** Which VLC world to compose in — see the note above. Defaults to "installed and working". */
+    vlcAvailable: Boolean = true,
+    vlcArchMismatch: Boolean = false,
+    vlcLoadFailed: Boolean = false,
+    /** Fixed panel width, for the narrow-layout screenshots; unconstrained when null. */
+    width: Dp? = null,
+    /** Which theme to compose in; the plain M3 default when null. */
+    themeMode: ThemeMode? = null,
+    instanceLinkMediaStreamUrl: ((itemId: String) -> String)? = null,
+    onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
+    fileChooser: FileChooser = FakeFileChooser(answer = null),
+    onSavePreset: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)? = null,
+    block: ComposeUiTest.(vm: MediaViewModel, reports: MediaReports) -> Unit,
+) {
+    val appSettings = settings(AppSettings())
+    val reports = MediaReports()
+    // The tab's very first line is `LocalMediaViewModel.current ?: return`, so without this the whole
+    // composable is a no-op and every assertion below would be about an empty screen.
+    val vm = MediaViewModel()
+    runComposeUiTest {
+        setContent {
+            ThemedForTest(themeMode) {
+                // No real VLC behind the preview: where it is installed, its error for the made-up
+                // URLs these tests load would pause the view model mid-test (see LocalMediaVlcPlayers).
+                CompositionLocalProvider(LocalMediaViewModel provides vm, LocalMediaVlcPlayers provides false) {
+                Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
+                MediaTab(
+                    appSettings = appSettings,
+                    selectedMediaItem = selectedMediaItem,
+                    presenterManager = presenterManager,
+                    onAddToSchedule = { url, title, type, subtitle ->
+                        reports.scheduled += Triple(url, title, type)
+                        reports.scheduledSubtitles += subtitle
+                    },
+                    vlcAvailable = vlcAvailable,
+                    vlcArchMismatch = vlcArchMismatch,
+                    vlcLoadFailed = vlcLoadFailed,
+                    instanceLinkMediaStreamUrl = instanceLinkMediaStreamUrl,
+                    onInstanceLinkSendProject = onInstanceLinkSendProject,
+                    onSettingsChange = { transform -> reports.settingsAfterChange = transform(appSettings) },
+                    fileChooser = fileChooser,
+                    onSavePreset = onSavePreset,
+                )
+                }
+                }
+            }
+        }
+        block(vm, reports)
+    }
+}
+
+// ── Labels, as the tab renders them ─────────────────────────────────────────────────────────────
+
+internal object MediaLabel {
+    const val VLC_REQUIRED = "VLC media player is required for media playback"
+    const val VLC_INSTALL = "Please install VLC from videolan.org and restart the application"
+    const val LOCAL_FILE = "Local File"
+    const val NETWORK_URL = "Network URL"
+    const val SELECT_FILE = "Select File"
+    const val URL_PLACEHOLDER = "Enter URL (http://, rtsp://, ...)"
+    const val ADD_TO_SCHEDULE = "Add to Schedule"
+    const val GO_LIVE = "Go Live"
+    const val PLAY = "Play"
+    const val PAUSE = "Pause"
+    const val STOP = "Stop"
+    const val SEEK_BACKWARD = "Seek Backward 10s"
+    const val SEEK_FORWARD = "Seek Forward 10s"
+    const val VOLUME = "Volume"
+    const val MUTE = "Mute"
+    const val UNMUTE = "Unmute"
+    const val LOOP_ON = "Loop On"
+    const val LOOP_OFF = "Loop Off"
+    const val SUBTITLES = "Subtitles"
+    const val SUBTITLES_OFF = "Off"
+    const val SUBTITLES_LOAD_FILE = "Load subtitle file…"
+
+    /** The loop-count field's label, which NumberSettingsTextField renders uppercased. */
+    const val LOOP_COUNT = "LOOPS"
+    const val NOW_PRESENTING = "Now presenting on screen"
+    const val NO_SOURCE = "No media loaded"
+}
+
+// ── Reading and driving what was rendered ───────────────────────────────────────────────────────
+
+// renderedText/showsExactly/showsContainingText live in TabRenderedText.kt — shared with the other
+// tab suites in this package. Do not redeclare them.
+
+/** A button, addressed by the content description its tooltip gives it. */
+internal fun ComposeUiTest.mediaButton(label: String) = onNodeWithContentDescription(label)
+
+internal fun ComposeUiTest.hasMediaButton(label: String): Boolean =
+    onAllNodesWithContentDescription(label)
+        .fetchSemanticsNodes(atLeastOneRootRequired = false)
+        .isNotEmpty()
+
+@Composable
+private fun ThemedForTest(themeMode: ThemeMode?, content: @Composable () -> Unit) {
+    if (themeMode == null) MaterialTheme(content = content)
+    else ChurchPresenterTheme(themeMode = themeMode, content = content)
+}

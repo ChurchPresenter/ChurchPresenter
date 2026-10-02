@@ -6,6 +6,7 @@ import kotlin.test.assertTrue
 import org.churchpresenter.sharedui.utils.FfmpegBinary
 import org.churchpresenter.sharedui.utils.CommandResult
 import org.churchpresenter.sharedui.utils.CommandRunner
+import org.churchpresenter.sharedui.testing.FakeCommandRunner
 
 /**
  * How the camera and window listings *drive* the tools whose output

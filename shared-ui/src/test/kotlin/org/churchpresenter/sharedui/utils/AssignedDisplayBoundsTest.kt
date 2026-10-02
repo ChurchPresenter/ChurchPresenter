@@ -58,6 +58,16 @@ class AssignedDisplayBoundsTest {
     }
 
     @Test
+    fun `stacked screens sharing a left edge are told apart by their top`() {
+        // A confidence monitor mounted above the main display sits at the same x; matching on x
+        // alone would send the audience output to whichever of the two is listed first.
+        val lower = screen(0, 0, 1920, 1080)
+        val upper = screen(0, -1080, 1920, 1080)
+        val assignment = ScreenAssignment(targetDisplay = 0, targetBoundsX = 0, targetBoundsY = -1080)
+        assertEquals(Rectangle(0, -1080, 1920, 1080), assignedBoundsOf(arrayOf(lower, upper), lower, assignment))
+    }
+
+    @Test
     fun `the index is used when no bounds were stored`() {
         val assignment = ScreenAssignment(targetDisplay = 2)
         assertEquals(Rectangle(-1080, 0, 1080, 1920), assignedBoundsOf(all, primary, assignment))

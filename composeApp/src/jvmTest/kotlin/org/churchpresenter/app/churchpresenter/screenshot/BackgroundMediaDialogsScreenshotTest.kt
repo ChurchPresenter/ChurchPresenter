@@ -6,24 +6,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.churchpresenter.strings.generated.resources.Res
-import org.churchpresenter.strings.generated.resources.stock_photo_browse_photos_title
-import org.churchpresenter.strings.generated.resources.stock_photo_search_placeholder_photo
-import org.churchpresenter.app.churchpresenter.data.StockMediaClient
+import org.churchpresenter.media.data.StockMediaClient
 import org.churchpresenter.app.churchpresenter.dialogs.LocalLibraryDialogContent
-import org.churchpresenter.app.churchpresenter.dialogs.StockMediaBrowserDialogContent
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.viewmodel.StockMediaViewModel
 import java.awt.Color
 import java.awt.GradientPaint
 import java.awt.image.BufferedImage
@@ -35,29 +26,21 @@ import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
- * The two dialogs the Background tab's image row opens: the downloaded library, and the stock search.
+ * The downloaded library the Background tab's image row opens; the stock search beside it is
+ * `:media`'s `StockMediaBrowserScreenshotTest`.
  *
- * Both are shot through their `…Content` composables, since each real one is a `DialogWindow`.
+ * Shot through its `…Content` composable, since the real one is a `DialogWindow`.
  *
  * A bundled entry is listed by name and its artwork is loaded from the app's own resources, so the
  * fixture names below arrive as placeholder tiles rather than pictures. That is what these images are
  * for: which entries are listed, in what order, and that a bundled name already downloaded is not
  * listed twice — not what the bundled artwork looks like.
- *
- * **The stock search's result grid is not shot.** Its items only arrive from a live Pexels or Pixabay
- * query — `StockMediaViewModel` fills them itself from a client it constructs, with no seam to hand
- * it a fixed page — so an image of results would need the network and would change with whatever the
- * service returned that day. What *is* shot is everything reachable without it: the key prompt an
- * operator meets first, and the empty state once a key is saved.
+
  */
 class BackgroundMediaDialogsScreenshotTest {
 
-    private val models = mutableListOf<StockMediaViewModel>()
-
     @AfterTest
     fun cleanUp() {
-        models.forEach { runCatching { it.dispose() } }
-        models.clear()
         FIXTURES.deleteRecursively()
     }
 
@@ -84,22 +67,6 @@ class BackgroundMediaDialogsScreenshotTest {
     fun `a library search that finds nothing`() =
         library("library_search_empty", downloaded = photos(), bundled = BUNDLED) { type("zzzz") }
 
-    // ── The stock search ────────────────────────────────────────────────────────────────────────
-
-    /** No key saved: the dialog asks for one rather than searching. */
-    @Test
-    fun `the stock browser with no API key`() = stock("stock_no_key", pexelsKey = "", pixabayKey = "")
-
-    /** A key saved, nothing searched for yet. */
-    @Test
-    fun `the stock browser ready to search`() =
-        stock("stock_ready", pexelsKey = "pexels-key", pixabayKey = "pixabay-key")
-
-    /** The second source's tab, which carries its own key. */
-    @Test
-    fun `the stock browser's second source`() =
-        stock("stock_second_source", pexelsKey = "pexels-key", pixabayKey = "", selectedTab = 1)
-
     // ── Harness ─────────────────────────────────────────────────────────────────────────────────
 
     private fun library(
@@ -115,33 +82,6 @@ class BackgroundMediaDialogsScreenshotTest {
                 bundledFileNames = bundled,
                 onDismiss = {},
                 onMediaSelected = {},
-            )
-        }
-    }
-
-    private fun stock(
-        name: String,
-        pexelsKey: String,
-        pixabayKey: String,
-        selectedTab: Int = 0,
-    ) = stackedThemes(SECTION, name) { mode, file ->
-        val pexels = viewModel(StockMediaClient.StockSource.PEXELS)
-        val pixabay = viewModel(StockMediaClient.StockSource.PIXABAY)
-        render(mode, file, drive = {}) {
-            var tab by remember { mutableStateOf(selectedTab) }
-            StockMediaBrowserDialogContent(
-                titleRes = Res.string.stock_photo_browse_photos_title,
-                searchPlaceholderRes = Res.string.stock_photo_search_placeholder_photo,
-                pexelsViewModel = pexels,
-                pixabayViewModel = pixabay,
-                pexelsApiKey = pexelsKey,
-                onPexelsApiKeyChange = {},
-                pixabayApiKey = pixabayKey,
-                onPixabayApiKeyChange = {},
-                selectedTab = tab,
-                onSelectedTabChange = { tab = it },
-                onDismiss = {},
-                onDownloadedAndClose = {},
             )
         }
     }
@@ -163,9 +103,6 @@ class BackgroundMediaDialogsScreenshotTest {
         waitForIdle()
         captureTo(file)
     }
-
-    private fun viewModel(source: StockMediaClient.StockSource) =
-        StockMediaViewModel(StockMediaClient.StockMediaType.PHOTO, source).also { models += it }
 
     private fun ComposeUiTest.type(text: String) {
         onAllNodes(hasSetTextAction())[0].performTextReplacement(text)

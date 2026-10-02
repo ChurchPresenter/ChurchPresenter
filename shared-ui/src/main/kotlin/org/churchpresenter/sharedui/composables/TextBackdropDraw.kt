@@ -68,7 +68,7 @@ private fun DrawScope.drawLineBands(
     layout: TextLayoutResult,
     backdrop: TextBackdrop,
     scale: Float,
-    sharedExtent: Pair<Float, Float>? = null,
+    sharedExtent: Pair<Float, Float>?,
 ) {
     val fill = backdrop.lineBackgroundColor.toBackdropColor(backdrop.lineBackgroundOpacity)
     val grow = backdrop.lineBackgroundHeight.sp.toPx() * scale

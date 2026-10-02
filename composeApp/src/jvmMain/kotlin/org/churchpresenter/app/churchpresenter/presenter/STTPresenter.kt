@@ -47,6 +47,9 @@ import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.viewmodel.HighlightedWord
 import org.churchpresenter.app.churchpresenter.viewmodel.STTSegment
+import org.churchpresenter.sharedui.presenter.BoxedItem
+import org.churchpresenter.sharedui.presenter.rectIn
+import org.churchpresenter.sharedui.presenter.sttPositionToAlignment
 
 @Composable
 fun STTPresenter(
@@ -348,23 +351,6 @@ private fun useDripFeed(segments: List<STTSegment>, pace: RevealPace?): Revealed
 
 /** What a reveal has put on screen: its [segments], and the words in its RSVP flash -- 0 when it has none. */
 private class RevealedCaption(val segments: List<STTSegment>, val flashWords: Int = 0)
-
-internal fun sttPositionToAlignment(position: String): Alignment = when (position) {
-    Constants.TOP_LEFT -> Alignment.TopStart
-    Constants.TOP_CENTER -> Alignment.TopCenter
-    Constants.TOP_RIGHT -> Alignment.TopEnd
-    Constants.CENTER_LEFT -> Alignment.CenterStart
-    Constants.CENTER -> Alignment.Center
-    Constants.CENTER_RIGHT -> Alignment.CenterEnd
-    Constants.BOTTOM_LEFT -> Alignment.BottomStart
-    Constants.BOTTOM_CENTER -> Alignment.BottomCenter
-    Constants.BOTTOM_RIGHT -> Alignment.BottomEnd
-    Constants.BOTTOM -> Alignment.BottomCenter
-    Constants.TOP -> Alignment.TopCenter
-    Constants.MIDDLE -> Alignment.Center
-    else -> Alignment.BottomCenter
-}
-
 /** The last [count] of [segments], or all of them when [count] is 0 or less. */
 internal fun <T> keepNewest(segments: List<T>, count: Int): List<T> =
     if (count > 0) segments.takeLast(count) else segments

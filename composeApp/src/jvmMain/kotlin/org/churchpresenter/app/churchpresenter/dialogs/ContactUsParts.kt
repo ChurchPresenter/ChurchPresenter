@@ -25,7 +25,7 @@ import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.contact_open_browser
 import org.churchpresenter.strings.generated.resources.contact_send
 import org.churchpresenter.strings.generated.resources.contact_sending
-import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
+import org.churchpresenter.sharedui.composables.CopyLinkIconButton
 import org.churchpresenter.app.churchpresenter.utils.ContactReporter
 import org.jetbrains.compose.resources.stringResource
 

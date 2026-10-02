@@ -209,7 +209,7 @@ internal fun MainDesktopScope.presentScene(sceneId: String) {
 private fun MainDesktopScope.playSlideshow(item: ScheduleItem, plays: Int) {
     when (item) {
         is ScheduleItem.MediaItem ->
-            mediaViewModel?.requestPlayback(plays, item.mediaUrl)
+            mediaViewModel?.cue?.requestPlayback(plays, item.mediaUrl)
         is ScheduleItem.PictureItem ->
             picturesViewModel.requestPlayback(plays, item.folderPath)
         is ScheduleItem.PresentationItem ->

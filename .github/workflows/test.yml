@@ -244,6 +244,18 @@ jobs:
               - 'diagnostics/**'          # implementation(projects.diagnostics)
               - 'song-chords/**'          # via :shared-ui
               - 'bible/**'                # via :shared-ui
+            media:
+              - *shared
+              - 'media/**'
+              - 'shared-ui/**'            # implementation(projects.sharedUi)
+              - 'strings/**'              # implementation(projects.strings)
+              - 'icons/**'                # implementation(projects.icons)
+              - 'core-models/**'          # implementation(projects.coreModels)
+              - 'settings/**'             # implementation(projects.settings)
+              - 'theme/**'                # implementation(projects.theme)
+              - 'diagnostics/**'          # implementation(projects.diagnostics)
+              - 'song-chords/**'          # via :shared-ui
+              - 'bible/**'                # via :shared-ui
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -273,7 +285,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :web:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -631,6 +643,14 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.slides == 'true' }}
         run: ./gradlew :slides:jacocoTestCoverageVerification -x test
 
+      - name: Media tests
+        if: ${{ !cancelled() && steps.modules.outputs.media == 'true' }}
+        run: ./gradlew :media:test
+
+      - name: Media coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.media == 'true' }}
+        run: ./gradlew :media:jacocoTestCoverageVerification -x test
+
       - name: Web tests
         if: ${{ !cancelled() && steps.modules.outputs.web == 'true' }}
         run: ./gradlew :web:test
@@ -676,6 +696,7 @@ jobs:
             calendar/build/test-results/**/TEST-*.xml
             shared-ui/build/test-results/**/TEST-*.xml
             slides/build/test-results/**/TEST-*.xml
+            media/build/test-results/**/TEST-*.xml
             web/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
@@ -704,6 +725,7 @@ jobs:
             Calendar
             Shared UI
             Slides
+            Media
             Web
           detailed_summary: true
           include_passed: false
@@ -880,5 +902,7 @@ jobs:
             shared-ui/build/test-results/
             slides/build/reports/tests/
             slides/build/test-results/
+            media/build/reports/tests/
+            media/build/test-results/
             web/build/reports/tests/
             web/build/test-results/

@@ -102,9 +102,9 @@ import org.churchpresenter.theme.components.SettingsTextField
 import org.jetbrains.compose.resources.stringResource
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
-import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
+import org.churchpresenter.sharedui.composables.CopyLinkIconButton
 import org.churchpresenter.sharedui.utils.SystemClipboard
-import org.churchpresenter.app.churchpresenter.utils.UrlOpener
+import org.churchpresenter.sharedui.utils.UrlOpener
 
 private const val DISABLED_ALPHA = 0.5f
 private val NAME_FIELD_WIDTH = 150.dp

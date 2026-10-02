@@ -9,6 +9,7 @@ import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.core.models.camera.asCameraSource
 import java.io.File
 import org.churchpresenter.slides.utils.PictureDecoder
+import org.churchpresenter.media.utils.VideoFirstFrame
 
 /**
  * The still pictures a settings preview draws a background with: a picture decoded at the size it

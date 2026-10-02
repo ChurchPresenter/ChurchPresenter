@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
+import org.churchpresenter.sharedui.presenter.PresentedBlock
 import org.churchpresenter.settings.ContentRegion
 import org.churchpresenter.settings.TextBox
 import org.churchpresenter.settings.TextBoxOptions

@@ -1,0 +1,189 @@
+@file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
+
+package org.churchpresenter.media.screenshot
+
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import org.churchpresenter.media.tabs.MediaLabel
+import org.churchpresenter.media.tabs.RecentMediaFiles
+import org.churchpresenter.media.tabs.mediaButton
+import org.churchpresenter.media.tabs.mediaTab
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.sharedui.utils.withMediaScaleEverywhere
+import org.churchpresenter.settings.OutputScaleMode
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.media.viewmodel.MediaViewModel
+import org.churchpresenter.media.viewmodel.SubtitleTrack
+import org.churchpresenter.media.FakeMediaOutput
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
+
+/**
+ * The Media tab's states, in both themes.
+ *
+ * Media was the only one of the three content tabs (Pictures, Presentation, Media) without a
+ * screenshot suite, which is how its bar heights and action-button placement drifted away from the
+ * other two unnoticed — the drift was only ever visible in `previewApp/media_*.png`, where the tab
+ * is one panel of a whole-window shot. Shoot the states here and the next drift shows up in review.
+ *
+ * Nothing here needs VLC: `loadMedia` is plain state assignment, so a fixture path that does not
+ * exist still drives the loaded, playing and seek-bar layouts. The one state that genuinely depends
+ * on VLC is its absence, which the harness models with `vlcAvailable = false`.
+ */
+class MediaTabScreenshotTest {
+
+    private fun shoot(
+        name: String,
+        presenter: Boolean = true,
+        vlcAvailable: Boolean = true,
+        width: Dp? = null,
+        /** 1 to photograph an open popup, which is its own compose root. */
+        rootIndex: Int = 0,
+        settings: (AppSettings) -> AppSettings = { it },
+        drive: ComposeUiTest.(MediaViewModel) -> Unit = { waitForIdle() },
+    ) = stackedThemes(SECTION, name) { mode, file ->
+        mediaTab(
+            settings = settings,
+            presenterManager = if (presenter) FakeMediaOutput() else null,
+            vlcAvailable = vlcAvailable,
+            width = width,
+            themeMode = mode,
+        ) { vm, _ ->
+            drive(vm)
+            captureTo(file, rootIndex)
+        }
+    }
+
+    /** Puts the tab in its loaded-video state, exactly as picking a file would. */
+    private fun ComposeUiTest.loadVideo(vm: MediaViewModel) {
+        vm.loadMedia("$FIXTURES/Welcome Loop.mp4", Constants.MEDIA_TYPE_LOCAL)
+        waitForIdle()
+    }
+
+    private lateinit var savedPaths: List<String>
+    private lateinit var savedPinned: List<String>
+
+    @BeforeTest
+    fun snapshotRecents() {
+        savedPaths = RecentMediaFiles.paths.toList()
+        savedPinned = RecentMediaFiles.pinned.toList()
+        RecentMediaFiles.paths.clear()
+        RecentMediaFiles.pinned.clear()
+    }
+
+    @AfterTest
+    fun restoreRecents() {
+        RecentMediaFiles.paths.clear()
+        RecentMediaFiles.paths.addAll(savedPaths)
+        RecentMediaFiles.pinned.clear()
+        RecentMediaFiles.pinned.addAll(savedPinned)
+    }
+
+    @Test
+    fun `nothing loaded yet`() = shoot("no_file")
+
+    @Test
+    fun `a local video loaded`() = shoot("local_loaded") { vm -> loadVideo(vm) }
+
+    @Test
+    fun `playing, with the seek bar showing a position`() = shoot("playing") { vm ->
+        loadVideo(vm)
+        vm.position.setDuration(SEEK_DURATION_MS)
+        vm.position.setCurrentPosition(SEEK_POSITION_MS)
+        mediaButton(MediaLabel.PLAY).performClick()
+        waitForIdle()
+    }
+
+    @Test
+    fun `looping armed, with the repeat count beside the button`() = shoot("looping") { vm ->
+        loadVideo(vm)
+        vm.position.setDuration(SEEK_DURATION_MS)
+        vm.position.setCurrentPosition(SEEK_POSITION_MS)
+        vm.looping.toggleLooping()
+        vm.looping.setLoopCount(LOOP_COUNT)
+        waitForIdle()
+    }
+
+    @Test
+    fun `scaled to fill, the button lit`() = shoot(
+        "scale_fill",
+        settings = { it.withMediaScaleEverywhere(OutputScaleMode.FILL) },
+    ) { vm -> loadVideo(vm) }
+
+    @Test
+    fun `scaled to stretch`() = shoot(
+        "scale_stretch",
+        settings = { it.withMediaScaleEverywhere(OutputScaleMode.STRETCH) },
+    ) { vm -> loadVideo(vm) }
+
+    @Test
+    fun `subtitles showing, the button lit`() = shoot("subtitles_on") { vm ->
+        loadVideo(vm)
+        vm.subtitles.setSubtitleFile("$FIXTURES/Welcome Loop.srt")
+        vm.subtitles.setSubtitleTracks(listOf(SubtitleTrack(id = 2, name = "Track 1 - [English]")))
+        waitForIdle()
+    }
+
+    @Test
+    fun `the subtitle menu open, with an embedded track ticked`() = shoot("subtitles_menu", rootIndex = 1) { vm ->
+        loadVideo(vm)
+        vm.subtitles.setSubtitleTracks(
+            listOf(
+                SubtitleTrack(id = 2, name = "Track 1 - [English]"),
+                SubtitleTrack(id = 3, name = "Track 2 - [Spanish]"),
+            )
+        )
+        vm.subtitles.selectSubtitleTrack(2)
+        mediaButton(MediaLabel.SUBTITLES).performClick()
+        waitForIdle()
+    }
+
+    @Test
+    fun `the recents bar, one entry pinned`()= shoot("recent_files") { vm ->
+        RecentMediaFiles.add("$FIXTURES/Baptism Testimony.mp4")
+        RecentMediaFiles.add("$FIXTURES/Welcome Loop.mp4")
+        RecentMediaFiles.togglePin("$FIXTURES/Welcome Loop.mp4")
+        loadVideo(vm)
+    }
+
+    @Test
+    fun `the network URL source`() = shoot("network_url") {
+        onNodeWithText(MediaLabel.NETWORK_URL).performClick()
+        waitForIdle()
+    }
+
+    @Test
+    fun `with no output to go live on the button is gone`() =
+        shoot("no_presenter", presenter = false) { vm -> loadVideo(vm) }
+
+    @Test
+    fun `a narrow panel wraps the controls`() = shoot("narrow_panel", width = 420.dp) { vm ->
+        loadVideo(vm)
+    }
+
+    @Test
+    fun `VLC missing`() = shoot("vlc_missing", vlcAvailable = false)
+
+    private companion object {
+        const val SECTION = "mediaTab"
+
+        /**
+         * A neutral root, not a repo-relative one: the tab prints the file name in every shot, and
+         * a repo-relative fixture resolves through the developer's home directory — their name,
+         * committed into the PNG for ever. Fixed, not a temp dir, so a re-record is not a diff.
+         */
+        const val FIXTURES = "/tmp/churchpresenter-screenshots/media"
+
+        const val SEEK_DURATION_MS = 214_000L
+        const val SEEK_POSITION_MS = 72_000L
+
+        /** A finite repeat count, so the field is not shot on its "forever" default. */
+        const val LOOP_COUNT = 3
+    }
+}

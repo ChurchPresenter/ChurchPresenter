@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.ui.Alignment
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.sharedui.presenter.sttPositionToAlignment
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -15,7 +16,8 @@ import kotlin.test.assertEquals
  * sits somewhere else — on the output screen only, which nobody is looking at while configuring.
  *
  * So this pins each table against the picker's own nine values, and the three against each other.
- * All three are private, so they are reached by reflection on their file classes.
+ * The announcement and question tables are private, so they are reached by reflection on their
+ * file classes; the caption table is `:shared-ui`'s `sttPositionToAlignment`.
  */
 class PresenterPositioningTest {
 
@@ -28,7 +30,7 @@ class PresenterPositioningTest {
 
     private val announcements = mapper("AnnouncementsPresenterKt", "positionToAlignment")
     private val questions = mapper("QAPresenterKt", "positionToAlignment")
-    private val captions = mapper("STTPresenterKt", "sttPositionToAlignment")
+    private val captions: (String) -> Alignment = ::sttPositionToAlignment
 
     private val allThree = mapOf(
         "announcements" to announcements,

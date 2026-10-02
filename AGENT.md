@@ -60,7 +60,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `data/`          | File I/O, database, song parsing, Bible data                        |
 | `data/settings/` | Only `ObsSceneSelection.kt` — the rest is the `:settings` module    |
 | `models/`        | Only what needs the app: `PresetItems`, the two Companion UI states — `ShortcutAction` is `:shared-ui` |
-| `composables/`   | UI components with app or feature ties (VideoPlayer, SceneCanvas, etc.) — the shared ones are `:shared-ui` |
+| `composables/`   | UI components with app or feature ties (SceneCanvas, LivePreviewPanel, etc.) — the shared ones are `:shared-ui`, the video player `:media` |
 | `dialogs/`       | All dialogs and settings dialog tabs                                |
 | `utils/`         | Stateless helpers (UpdateChecker, etc.) — the shared ones (AutoFit, screen bounds) are `:shared-ui`, crash reporting is `:diagnostics` |
 | `ui/theme/`      | `LanguageProvider` and the theme-customization settings — the theme itself is the `:theme` module |
@@ -107,6 +107,7 @@ module-specific notes there, not here.**
 | `icons/`               | `:icons`               | The UI drawables and the window-icon frames — not the installer icons               | [AGENT.md](icons/AGENT.md)               |
 | `shared-ui/`           | `:shared-ui`           | The composables and helpers more than one feature uses — fields, pickers, buttons, text styling | [AGENT.md](shared-ui/AGENT.md)           |
 | `slides/`              | `:slides`              | The Pictures and Presentation tabs: their viewmodels, presenters, picture decoding and recent files | [AGENT.md](slides/AGENT.md)              |
+| `media/`               | `:media`               | The Media tab and the VLC playback under it: player, decoder, subtitles, stock media search | [AGENT.md](media/AGENT.md)               |
 | `web/`                 | `:web`                 | The Web tab and the embedded Chromium (JCEF) it and the output window browse with | [AGENT.md](web/AGENT.md)                 |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
@@ -204,9 +205,10 @@ Thresholds are deliberately not detekt's defaults: `LongMethod` 100, `LargeClass
 not flagged.
 
 ### Screenshots
-- **Committed, beside the module that shoots them** — `composeApp/screenshots/` for tabs, dialogs
-  and outputs, `shared-ui/screenshots/` for the shared components. The harness (`ScreenshotSupport`,
-  `captureComponent`, `stackedThemes`) is `:shared-ui`'s test fixtures, used by both. They are what
+- **Committed, beside the module that shoots them** — `composeApp/screenshots/` for the app's tabs,
+  dialogs and outputs, `<module>/screenshots/` for each module's own (`shared-ui`, `slides`, `media`).
+  The harness (`ScreenshotSupport`, `captureComponent`, `stackedThemes`) is `:shared-ui`'s test
+  fixtures, used by all of them. They are what
   a reviewer opens and approves before a UI change merges. **Re-record and commit the images
   whenever a state you touched changed.**
 - **NEVER move them, and NEVER put them under `build/`** — not `SCREENSHOT_ROOT`,

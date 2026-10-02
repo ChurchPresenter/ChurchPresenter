@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.dialogs
 
 import churchpresenter.composeapp.generated.resources.Res
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.app.churchpresenter.data.StockMediaClient
+import org.churchpresenter.media.data.StockMediaClient
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

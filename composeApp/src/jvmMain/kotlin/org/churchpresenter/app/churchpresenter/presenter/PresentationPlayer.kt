@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap
 import org.churchpresenter.slides.presenter.PlacedLayer
 import org.churchpresenter.slides.presenter.PresentationFrame
 import org.churchpresenter.slides.presenter.TransitionOverlay
+import org.churchpresenter.media.presenter.EmbeddedVideoDecoder
 
 /**
  * Playback runtime for animated decks. Owns the layer bitmaps of the current slide (rasterized
