@@ -89,7 +89,7 @@ class WiringWithViewModelsTest {
         waitForIdle()
         media.togglePlayPause()
         media.stop()
-        media.toggleMute()
+        media.audio.toggleMute()
         waitForIdle()
     }
 

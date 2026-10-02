@@ -21,6 +21,8 @@ import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.media.MediaOutput
+import org.churchpresenter.sharedui.filechooser.FileChooser
+import org.churchpresenter.sharedui.testing.FakeFileChooser
 
 /**
  * Harness and fixtures for the `MediaTab` test classes.
@@ -67,6 +69,8 @@ internal fun mediaTab(
     themeMode: ThemeMode? = null,
     instanceLinkMediaStreamUrl: ((itemId: String) -> String)? = null,
     onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
+    fileChooser: FileChooser = FakeFileChooser(answer = null),
+    onSavePreset: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)? = null,
     block: ComposeUiTest.(vm: MediaViewModel, reports: MediaReports) -> Unit,
 ) {
     val appSettings = settings(AppSettings())
@@ -95,6 +99,8 @@ internal fun mediaTab(
                     instanceLinkMediaStreamUrl = instanceLinkMediaStreamUrl,
                     onInstanceLinkSendProject = onInstanceLinkSendProject,
                     onSettingsChange = { transform -> reports.settingsAfterChange = transform(appSettings) },
+                    fileChooser = fileChooser,
+                    onSavePreset = onSavePreset,
                 )
                 }
                 }

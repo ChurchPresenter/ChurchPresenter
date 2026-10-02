@@ -5,11 +5,14 @@ package org.churchpresenter.media.tabs
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.sharedui.testing.FakeFileChooser
+import kotlin.io.path.Path
 import kotlin.io.path.createTempFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -54,7 +57,7 @@ class MediaTabSubtitleRoutingTest {
     fun `a loaded file is listed and routed everywhere to begin with`() =
         mediaTab(settings = ::twoProfiles) { vm, _ ->
             vm.loadMedia("/media/clip.mp4", org.churchpresenter.settings.utils.Constants.MEDIA_TYPE_LOCAL)
-            vm.addSubtitleFile(srt())
+            vm.subtitles.addSubtitleFile(srt())
             openSubtitles()
 
             onNodeWithTag(subtitleTrackTag(0)).assertIsDisplayed()
@@ -65,7 +68,7 @@ class MediaTabSubtitleRoutingTest {
     fun `routing one file to one output writes just that output`() =
         mediaTab(settings = ::twoProfiles) { vm, _ ->
             vm.loadMedia("/media/clip.mp4", org.churchpresenter.settings.utils.Constants.MEDIA_TYPE_LOCAL)
-            vm.addSubtitleFile(srt())
+            vm.subtitles.addSubtitleFile(srt())
             openSubtitles()
 
             onNodeWithTag(subtitleShowOnTag(0)).performClick()
@@ -80,8 +83,8 @@ class MediaTabSubtitleRoutingTest {
     fun `unticking the last named output falls back to every output`() =
         mediaTab(settings = ::twoProfiles) { vm, _ ->
             vm.loadMedia("/media/clip.mp4", org.churchpresenter.settings.utils.Constants.MEDIA_TYPE_LOCAL)
-            vm.addSubtitleFile(srt())
-            vm.setSidecarOutputs(0, setOf("lobby"))
+            vm.subtitles.addSubtitleFile(srt())
+            vm.subtitles.setSidecarOutputs(0, setOf("lobby"))
             openSubtitles()
 
             onNodeWithTag(subtitleShowOnTag(0)).performClick()
@@ -98,8 +101,8 @@ class MediaTabSubtitleRoutingTest {
     fun `all outputs puts a routed file back everywhere`() =
         mediaTab(settings = ::twoProfiles) { vm, _ ->
             vm.loadMedia("/media/clip.mp4", org.churchpresenter.settings.utils.Constants.MEDIA_TYPE_LOCAL)
-            vm.addSubtitleFile(srt())
-            vm.setSidecarOutputs(0, setOf("main"))
+            vm.subtitles.addSubtitleFile(srt())
+            vm.subtitles.setSidecarOutputs(0, setOf("main"))
             openSubtitles()
 
             onNodeWithTag(subtitleShowOnTag(0)).performClick()
@@ -114,7 +117,7 @@ class MediaTabSubtitleRoutingTest {
     fun `clicking a file's own row turns it off without unloading it`() =
         mediaTab(settings = ::twoProfiles) { vm, _ ->
             vm.loadMedia("/media/clip.mp4", org.churchpresenter.settings.utils.Constants.MEDIA_TYPE_LOCAL)
-            vm.addSubtitleFile(srt())
+            vm.subtitles.addSubtitleFile(srt())
             openSubtitles()
 
             onNodeWithTag(subtitleTrackTag(0)).performClick()
@@ -128,8 +131,8 @@ class MediaTabSubtitleRoutingTest {
     fun `Off turns every loaded file off at once`() =
         mediaTab(settings = ::twoProfiles) { vm, _ ->
             vm.loadMedia("/media/clip.mp4", org.churchpresenter.settings.utils.Constants.MEDIA_TYPE_LOCAL)
-            vm.addSubtitleFile(srt("English"))
-            vm.addSubtitleFile(srt("Spanish"))
+            vm.subtitles.addSubtitleFile(srt("English"))
+            vm.subtitles.addSubtitleFile(srt("Spanish"))
             openSubtitles()
 
             onNodeWithTag(SUBTITLE_OFF_TAG).performClick()
@@ -145,7 +148,7 @@ class MediaTabSubtitleRoutingTest {
             // One profile means the handle could only ever open a list holding one always-on entry,
             // which is what "Show on" with a lone tick beside it looked like.
             vm.loadMedia("/media/clip.mp4", org.churchpresenter.settings.utils.Constants.MEDIA_TYPE_LOCAL)
-            vm.addSubtitleFile(srt())
+            vm.subtitles.addSubtitleFile(srt())
             openSubtitles()
 
             onNodeWithTag(subtitleTrackTag(0)).assertIsDisplayed()
@@ -156,8 +159,8 @@ class MediaTabSubtitleRoutingTest {
     fun `two files each get their own row and their own routing`() =
         mediaTab(settings = ::twoProfiles) { vm, _ ->
             vm.loadMedia("/media/clip.mp4", org.churchpresenter.settings.utils.Constants.MEDIA_TYPE_LOCAL)
-            vm.addSubtitleFile(srt("English"))
-            vm.addSubtitleFile(srt("Spanish"))
+            vm.subtitles.addSubtitleFile(srt("English"))
+            vm.subtitles.addSubtitleFile(srt("Spanish"))
             openSubtitles()
 
             onNodeWithTag(subtitleShowOnTag(1)).performClick()
@@ -168,4 +171,43 @@ class MediaTabSubtitleRoutingTest {
             assertTrue(vm.sidecarSubtitles[0].outputs.isEmpty(), "the first was not touched")
             assertEquals(setOf("lobby"), vm.sidecarSubtitles[1].outputs)
         }
+
+    @Test
+    fun `a file routed to two outputs says how many`() =
+        mediaTab(settings = ::twoProfiles) { vm, _ ->
+            vm.loadMedia("/media/clip.mp4", org.churchpresenter.settings.utils.Constants.MEDIA_TYPE_LOCAL)
+            vm.subtitles.addSubtitleFile(srt())
+            vm.subtitles.setSidecarOutputs(0, setOf("main", "lobby"))
+            openSubtitles()
+            onNodeWithText("2 outputs").assertExists()
+        }
+
+    @Test
+    fun `a subtitle file picked from the menu is added beside the clip's own`() {
+        val picked = srt("Picked")
+        val chooser = FakeFileChooser(answer = Path(picked))
+        val folder = Path(picked).parent
+        mediaTab(settings = ::twoProfiles, fileChooser = chooser) { vm, _ ->
+            val clip = folder.resolve("clip.mp4").toString()
+            vm.loadMedia(clip, org.churchpresenter.settings.utils.Constants.MEDIA_TYPE_LOCAL)
+            openSubtitles()
+            onNodeWithText(MediaLabel.SUBTITLES_LOAD_FILE).performClick()
+            waitUntil(timeoutMillis = 5_000) { vm.sidecarSubtitles.isNotEmpty() }
+            assertEquals(picked, vm.sidecarSubtitles.single().path)
+            assertEquals(folder, chooser.lastPath)
+        }
+    }
+
+    @Test
+    fun `a subtitle pick that is cancelled adds nothing`() {
+        val chooser = FakeFileChooser(answer = null)
+        mediaTab(fileChooser = chooser) { vm, _ ->
+            vm.loadMedia("https://example.org/clip.mp4", org.churchpresenter.settings.utils.Constants.MEDIA_TYPE_URL)
+            openSubtitles()
+            onNodeWithText(MediaLabel.SUBTITLES_LOAD_FILE).performClick()
+            waitUntil(timeoutMillis = 5_000) { chooser.callCount == 1 }
+            waitForIdle()
+            assertTrue(vm.sidecarSubtitles.isEmpty())
+        }
+    }
 }

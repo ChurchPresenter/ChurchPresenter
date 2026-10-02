@@ -276,4 +276,18 @@ class ShortcutLabelsTest {
     fun `an unbound action has nothing to search`() {
         assertEquals("", composed { map().searchText(action) })
     }
+
+    @Test
+    fun `spelled out, each modifier is its own word, in a fixed order`() {
+        val all = chord(Key.N, ctrl = true, shift = true, alt = true, meta = true)
+        assertEquals("Ctrl|Meta|Alt|Shift|N", composed { all.keyCaps(useSymbols = false).joinToString("|") })
+        assertEquals("Shift|N", composed { chord(Key.N, shift = true).keyCaps(useSymbols = false).joinToString("|") })
+    }
+
+    @Test
+    fun `as symbols, each modifier is its own glyph, in the Mac's order`() {
+        val all = chord(Key.N, ctrl = true, shift = true, alt = true, meta = true)
+        assertEquals("⌃|⌥|⇧|⌘|N", composed { all.keyCaps(useSymbols = true).joinToString("|") })
+        assertEquals("N", composed { chord(Key.N).keyCaps(useSymbols = true).joinToString("|") })
+    }
 }

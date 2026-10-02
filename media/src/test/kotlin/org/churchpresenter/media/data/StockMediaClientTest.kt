@@ -488,4 +488,17 @@ class StockMediaClientTest {
             "one unreachable thumbnail must not take the whole search result down",
         )
     }
+
+    @Test
+    fun `an informational status is not taken for a result`() {
+        val odd = HttpStatusCode(199, "Odd")
+        respondWith("""{}""", odd)
+        assertEquals(StockMediaClient.SearchOutcome.Failure, search(pexels, photo))
+        respondWithBytes(byteArrayOf(1), odd)
+        assertNull(runBlocking { StockMediaClient.fetchThumbnailBytes("https://img/odd.jpg", http = http) })
+        assertEquals(
+            StockMediaClient.DownloadOutcome.Failure,
+            runBlocking { StockMediaClient.download(item(), http = http, downloadDir = downloadDir) },
+        )
+    }
 }

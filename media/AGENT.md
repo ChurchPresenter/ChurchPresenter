@@ -31,6 +31,19 @@ presenter window is up, and the calls that put media on screen or clear it. The 
 `presenterManager.mediaOutput`); the tab takes it, never the manager. Tests use `FakeMediaOutput`.
 A new need from the output is a new member here, not a reference to the app.
 
+## How the pieces fit
+
+- **`MediaViewModel` is split by concern.** It owns loading and play/pause; seeking and the
+  position are `position`, repeats `looping`, volume `audio`, subtitles `subtitles`, and a cue's
+  pending playback `cue`. The view model's own properties (`currentPosition`, `isLooping`, …) read
+  through to them, so a caller reads `vm.currentPosition` and acts with `vm.position.seekTo(…)`.
+- **The players are thin shells.** `VideoPlayer` and `SoftwareVideoPlayer` only open VLC and draw;
+  everything they do with the player is `EmbeddedPlayback`/`SoftwarePlayback`, with the effects
+  both share in `PlaybackSync`. Those take a plain `MediaPlayer`, so a test drives them with a mock.
+- **Opening VLC is one step a test can replace.** `openSoftwareVlc` (`SoftwareVideo` and
+  `EmbeddedVideoDecoder` take it as a parameter) and `FileChooser` (the tab takes it as
+  `fileChooser`) are the only calls that need a real device; keep any new one the same shape.
+
 ## Package
 
 **`org.churchpresenter.media`**, with `.tabs`, `.viewmodel`, `.presenter`, `.composables`, `.data`,

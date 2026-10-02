@@ -84,6 +84,7 @@ import org.churchpresenter.media.composables.isVlcAvailable
 import org.churchpresenter.media.composables.isVlcLoadFailed
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
@@ -96,6 +97,7 @@ import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.media.MediaOutput
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.bibleListCard
+import org.churchpresenter.media.viewmodel.formatMediaTime
 
 private const val HANDLE_VISIBLE_ALPHA = 0.01f
 
@@ -151,6 +153,7 @@ fun MediaTab(
     vlcAvailable: Boolean = isVlcAvailable,
     vlcArchMismatch: Boolean = isVlcArchMismatch,
     vlcLoadFailed: Boolean = isVlcLoadFailed,
+    fileChooser: FileChooser = FileChooser.platformInstance,
     /** Draws the picker for which output the preview stands for, and returns the one picked. */
     previewOutputPicker: @Composable (Modifier) -> PreviewOutput = { fallbackPreviewOutput() },
 ) {
@@ -182,7 +185,7 @@ fun MediaTab(
     // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
     val tab = remember(
         appSettings, onSettingsChange, onAddToSchedule, onSavePreset, presenterManager, onInstanceLinkSendProject,
-        state, scope, sourceTypeItems, selectFileLabel, mediaFilesLabel, shortcuts, wentLive
+        state, scope, sourceTypeItems, selectFileLabel, mediaFilesLabel, shortcuts, wentLive, fileChooser,
     ) {
         MediaTabScope(
             appSettings = appSettings,
@@ -198,6 +201,7 @@ fun MediaTab(
             mediaFilesLabel = mediaFilesLabel,
             shortcuts = shortcuts,
             wentLive = wentLive,
+            fileChooser = fileChooser,
         )
     }
     tab.MediaTabEffects(
@@ -269,8 +273,8 @@ private fun MediaTabScope.MediaPreviewCard(
                 // No buffered-position feed from the player yet; wire this to VLC's cached
                 // position later to reveal the loaded-ahead region.
                 bufferedPosition = viewModel.currentPosition,
-                onSeek = { viewModel.seekTo(it) },
-                formatTime = { viewModel.formatTime(it) },
+                onSeek = { viewModel.position.seekTo(it) },
+                formatTime = { formatMediaTime(it) },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp)
             )
         } else if (viewModel.isLoaded && viewModel.isPlaying) {

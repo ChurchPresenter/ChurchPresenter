@@ -115,7 +115,7 @@ class MediaPresenterRenderTest {
     fun `an active subtitle cue draws the overlay when showSubtitles is on`() = runComposeUiTest {
         val temp = kotlin.io.path.createTempFile(suffix = ".srt").toFile()
         temp.writeText("1\n00:00:00,000 --> 00:00:10,000\nHello\n")
-        val viewModel = loadedViewModel().apply { setSubtitleFile(temp.absolutePath) }
+        val viewModel = loadedViewModel().apply { subtitles.setSubtitleFile(temp.absolutePath) }
 
         try {
             setContent {
@@ -145,7 +145,7 @@ class MediaPresenterRenderTest {
     fun `an active subtitle cue draws nothing when showSubtitles is off`() = runComposeUiTest {
         val temp = kotlin.io.path.createTempFile(suffix = ".srt").toFile()
         temp.writeText("1\n00:00:00,000 --> 00:00:10,000\nHello\n")
-        val viewModel = loadedViewModel().apply { setSubtitleFile(temp.absolutePath) }
+        val viewModel = loadedViewModel().apply { subtitles.setSubtitleFile(temp.absolutePath) }
 
         try {
             setContent {

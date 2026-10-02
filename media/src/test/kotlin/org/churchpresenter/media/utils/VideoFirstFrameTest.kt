@@ -1,5 +1,6 @@
 package org.churchpresenter.media.utils
 
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -7,6 +8,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * The cache and the command. Running ffmpeg itself is left out: whether a bundled one exists
@@ -75,5 +77,52 @@ class VideoFirstFrameTest {
     @Test
     fun `there is no frame for a clip that is not there`() {
         assertNull(VideoFirstFrame.extract(File(dir, "missing.mp4"), cache))
+    }
+
+    private val isWindows = System.getProperty("os.name").lowercase().contains("win")
+
+    private fun stub(name: String, script: String) = File(dir, name).apply {
+        writeText("#!/bin/sh\n$script\n")
+        setExecutable(true)
+    }
+
+    @Test
+    fun `with no ffmpeg there is no frame`() {
+        assertNull(VideoFirstFrame.extract(video(), cache, ffmpeg = null))
+    }
+
+    @Test
+    fun `the frame ffmpeg writes is kept under the clip's cache name`() {
+        assumeTrue(!isWindows, "needs a shell script to stand in for ffmpeg")
+        val clip = video()
+        // The output path is the last argument ffmpeg is given.
+        val ffmpeg = stub("ffmpeg-ok", "for last; do :; done; printf 'jpeg' > \"${'$'}last\"")
+        val frame = VideoFirstFrame.extract(clip, cache, ffmpeg = ffmpeg.path)
+        assertEquals(VideoFirstFrame.cacheFileFor(clip, cache), frame)
+        assertEquals("jpeg", frame?.readText())
+    }
+
+    @Test
+    fun `a clip ffmpeg cannot read leaves no frame behind`() {
+        assumeTrue(!isWindows, "needs a shell script to stand in for ffmpeg")
+        val clip = video()
+        val ffmpeg = stub("ffmpeg-fails", "exit 1")
+        assertNull(VideoFirstFrame.extract(clip, cache, ffmpeg = ffmpeg.path))
+        assertTrue(cache.listFiles().orEmpty().isEmpty(), "no partial frame may be left")
+    }
+
+    @Test
+    fun `an ffmpeg that cannot be started is no frame, not an error`() {
+        assertNull(VideoFirstFrame.extract(video(), cache, ffmpeg = File(dir, "no-such-ffmpeg").path))
+    }
+
+    @Test
+    fun `frames are kept in the app's own cache, run through the bundled ffmpeg`() {
+        val clip = video()
+        val home = File(System.getProperty("user.home"))
+        assertEquals(File(home, ".churchpresenter/cache/preview-frames"), VideoFirstFrame.cacheDir())
+        assertEquals(VideoFirstFrame.cacheDir(), VideoFirstFrame.cacheFileFor(clip).parentFile)
+        val command = VideoFirstFrame.ffmpegFirstFrameCommand(clip, File(dir, "out.jpg"))
+        assertEquals(org.churchpresenter.sharedui.utils.FfmpegBinary.path, command.first())
     }
 }

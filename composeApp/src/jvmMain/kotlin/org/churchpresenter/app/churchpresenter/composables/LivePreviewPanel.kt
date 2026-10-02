@@ -148,6 +148,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.SlimSlider
 import org.churchpresenter.sharedui.composables.mode
+import org.churchpresenter.media.viewmodel.formatMediaTime
 
 private const val PREVIEW_BACKGROUND = 0xFF121212
 private const val LIVE_BADGE_COLOR = 0xFF2196F3
@@ -254,9 +255,9 @@ fun LivePreviewPanel(
                     isPlaying = mediaViewModel.isPlaying,
                     duration = mediaViewModel.duration,
                     currentPosition = mediaViewModel.currentPosition,
-                    formatTime = { mediaViewModel.formatTime(it) },
+                    formatTime = { formatMediaTime(it) },
                     onTogglePlayPause = { mediaViewModel.togglePlayPause() },
-                    onSeekTo = { mediaViewModel.seekTo(it) }
+                    onSeekTo = { mediaViewModel.position.seekTo(it) }
                 )
         }
     }

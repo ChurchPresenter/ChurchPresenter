@@ -103,6 +103,14 @@ private const val HALF_WIDTH = 0.5f
 private const val THUMB_ASPECT_W = 4f
 private const val THUMB_ASPECT_H = 3f
 
+/** The browser's window title and search placeholder, which name what it browses. */
+internal fun stockBrowserText(mediaType: StockMediaClient.StockMediaType): Pair<StringResource, StringResource> =
+    if (mediaType == StockMediaClient.StockMediaType.PHOTO) {
+        Res.string.stock_photo_browse_photos_title to Res.string.stock_photo_search_placeholder_photo
+    } else {
+        Res.string.stock_photo_browse_videos_title to Res.string.stock_photo_search_placeholder_video
+    }
+
 /**
  * Lets the user search Pexels/Pixabay and download a photo or video directly into
  * the background file pickers. Each source gets its own tab with its own API key
@@ -130,16 +138,7 @@ fun StockMediaBrowserDialog(
 
     var selectedTab by remember { mutableStateOf(0) }
 
-    val titleRes = if (mediaType == StockMediaClient.StockMediaType.PHOTO) {
-        Res.string.stock_photo_browse_photos_title
-    } else {
-        Res.string.stock_photo_browse_videos_title
-    }
-    val searchPlaceholderRes = if (mediaType == StockMediaClient.StockMediaType.PHOTO) {
-        Res.string.stock_photo_search_placeholder_photo
-    } else {
-        Res.string.stock_photo_search_placeholder_video
-    }
+    val (titleRes, searchPlaceholderRes) = stockBrowserText(mediaType)
 
     val onDownloadedAndClose: (String) -> Unit = { path ->
         onMediaDownloaded(path)

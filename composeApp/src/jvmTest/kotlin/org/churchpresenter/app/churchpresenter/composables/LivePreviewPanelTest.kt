@@ -768,7 +768,7 @@ class LivePreviewPanelTest {
         pm.setPresentingMode(Presenting.MEDIA)
         val media = MediaViewModel().apply {
             loadMedia("/tmp/song.mp3", "audio")
-            setDuration(90_000L)
+            position.setDuration(90_000L)
         }
         setContent {
             MaterialTheme {

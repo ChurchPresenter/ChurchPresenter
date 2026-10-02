@@ -128,9 +128,9 @@ class EmbeddedVideoDecoderTest {
     fun `allocateDecodedFrame clamps zero or negative VLC-reported dimensions to 1`() {
         val target = decoder()
 
-        assertEquals(1 to 1, target.allocateDecodedFrame(0, 0).let { it.width to it.height })
-        assertEquals(1 to 1, target.allocateDecodedFrame(-5, -5).let { it.width to it.height })
-        assertEquals(640 to 360, target.allocateDecodedFrame(640, 360).let { it.width to it.height })
+        assertEquals(1 to 1, target.frames.allocateDecodedFrame(0, 0).let { it.width to it.height })
+        assertEquals(1 to 1, target.frames.allocateDecodedFrame(-5, -5).let { it.width to it.height })
+        assertEquals(640 to 360, target.frames.allocateDecodedFrame(640, 360).let { it.width to it.height })
     }
 
     @Test
@@ -140,7 +140,7 @@ class EmbeddedVideoDecoderTest {
         val buf = ByteBuffer.allocate(4 * 4).order(ByteOrder.BIG_ENDIAN)
         buf.asIntBuffer().put(intArrayOf(0x11, 0x22, 0x33, 0x44))
 
-        val copied = target.copyFrameBytes(buf, pixelData)
+        val copied = target.frames.copyFrameBytes(buf, pixelData)
 
         assertEquals(4, copied)
         assertEquals(listOf(0x11, 0x22, 0x33, 0x44), pixelData.toList())
@@ -153,7 +153,7 @@ class EmbeddedVideoDecoderTest {
         val buf = ByteBuffer.allocate(2 * 4).order(ByteOrder.BIG_ENDIAN)
         buf.asIntBuffer().put(intArrayOf(0x11, 0x22))
 
-        val copied = target.copyFrameBytes(buf, pixelData)
+        val copied = target.frames.copyFrameBytes(buf, pixelData)
 
         assertEquals(2, copied)
         assertEquals(listOf(0x11, 0x22, 0, 0), pixelData.toList())

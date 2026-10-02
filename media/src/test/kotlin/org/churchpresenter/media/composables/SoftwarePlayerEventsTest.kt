@@ -61,7 +61,7 @@ class SoftwarePlayerEventsTest {
     @Test
     fun `lengthChanged ignores a non-positive length`() {
         val vm = MediaViewModel()
-        vm.setDuration(60_000L)
+        vm.position.setDuration(60_000L)
         listener(vm).lengthChanged(mediaPlayer(), 0L)
         assertEquals(60_000L, vm.duration, "the earlier real length must survive a spurious 0")
     }

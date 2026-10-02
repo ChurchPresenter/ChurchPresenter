@@ -49,18 +49,24 @@ object VideoFirstFrame {
     /**
      * [video]'s first frame, extracting it if it is not cached yet, or null when there is no such
      * clip, no ffmpeg, or ffmpeg could not read it. Blocks: call it off the UI thread.
+     *
+     * [ffmpeg] is the executable to run, null when there is none.
      */
-    fun extract(video: File, dir: File = cacheDir()): File? {
+    fun extract(
+        video: File,
+        dir: File = cacheDir(),
+        ffmpeg: String? = FfmpegBinary.path.takeIf { FfmpegBinary.isAvailable },
+    ): File? {
         if (!video.isFile) return null
         val cached = cacheFileFor(video, dir)
         if (cached.isFile && cached.length() > 0) return cached
-        if (!FfmpegBinary.isAvailable) return null
+        if (ffmpeg == null) return null
         dir.mkdirs()
         // Written beside the final name and renamed into place, so a run cut short never leaves a
         // truncated JPEG that every later preview would read as the frame.
         val partial = File(dir, cached.nameWithoutExtension + ".partial.jpg")
         return try {
-            val process = ProcessBuilder(ffmpegFirstFrameCommand(video, partial))
+            val process = ProcessBuilder(ffmpegFirstFrameCommand(video, partial, ffmpeg))
                 .redirectOutput(ProcessBuilder.Redirect.DISCARD)
                 .redirectError(ProcessBuilder.Redirect.DISCARD)
                 .start()

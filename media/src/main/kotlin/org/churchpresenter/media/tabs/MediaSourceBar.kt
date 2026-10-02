@@ -65,7 +65,6 @@ import org.churchpresenter.sharedui.composables.AddToScheduleButton
 import org.churchpresenter.sharedui.composables.SavePresetButton
 import org.churchpresenter.sharedui.composables.GoLiveButton
 import org.churchpresenter.sharedui.composables.SegmentedButton
-import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
@@ -143,7 +142,7 @@ private fun MediaTabScope.MediaLocalSource(viewModel: MediaViewModel, modifier: 
     RaisedButton(
         onClick = {
             scope.launch {
-                val f = FileChooser.platformInstance.chooseSingle(
+                val f = fileChooser.chooseSingle(
                     path = Path(appSettings.mediaStorageDirectory),
                     title = selectFileLabel,
                     filters = listOf(FileNameExtensionFilter(

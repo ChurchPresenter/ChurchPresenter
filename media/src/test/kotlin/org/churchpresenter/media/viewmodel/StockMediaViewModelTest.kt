@@ -334,6 +334,25 @@ class StockMediaViewModelTest {
         assertEquals(listOf("a", "b"), vm.items.map { it.id }, "what was already found stays")
     }
 
+    @Test
+    fun `asking for more while a search is still running does nothing`() {
+        val started = CompletableDeferred<Unit>()
+        val release = CompletableDeferred<Unit>()
+        coEvery { StockMediaClient.search(any(), any(), any(), any(), any(), any()) } coAnswers {
+            started.complete(Unit)
+            release.await()
+            success("a", hasMore = true)
+        }
+        val vm = vm()
+        vm.query = "mountains"
+        vm.search("api-key")
+        awaitUntil("the search to reach the network") { started.isCompleted && vm.isLoading }
+        vm.loadMore("api-key")
+        release.complete(Unit)
+        awaitUntil("the search to land") { !vm.isLoading }
+        coVerify(exactly = 1) { StockMediaClient.search(any(), any(), any(), any(), any(), any()) }
+    }
+
     // ── Superseded searches ─────────────────────────────────────────────────────
 
     @Test

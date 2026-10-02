@@ -67,7 +67,6 @@ import org.churchpresenter.strings.generated.resources.play
 import org.churchpresenter.strings.generated.resources.stop
 import org.churchpresenter.sharedui.composables.NumberSettingsTextField
 import org.churchpresenter.sharedui.composables.SlimSlider
-import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.settings.OutputScaleMode
 import org.churchpresenter.sharedui.utils.icon
 import org.churchpresenter.sharedui.utils.label
@@ -149,7 +148,7 @@ private fun MediaTabScope.MediaTransport(
             )
         ) {
             RaisedIconButton(
-                onClick = { viewModel.seekBackward() },
+                onClick = { viewModel.position.seekBackward() },
                 enabled = viewModel.isLoaded,
                 modifier = Modifier.size(MEDIA_TRANSPORT_KEY_SIZE),
                 colors = keyColors
@@ -190,7 +189,7 @@ private fun MediaTabScope.MediaTransport(
             )
         ) {
             RaisedIconButton(
-                onClick = { viewModel.seekForward() },
+                onClick = { viewModel.position.seekForward() },
                 enabled = viewModel.isLoaded,
                 modifier = Modifier.size(MEDIA_TRANSPORT_KEY_SIZE),
                 colors = keyColors
@@ -252,7 +251,7 @@ private fun MediaTabScope.MediaLoopControls(
             )
         ) {
             RaisedIconButton(
-                onClick = { viewModel.toggleLooping() },
+                onClick = { viewModel.looping.toggleLooping() },
                 enabled = viewModel.isLoaded,
                 modifier = Modifier.size(MEDIA_TRANSPORT_KEY_SIZE),
                 colors = if (viewModel.isLooping) litKeyColors else keyColors
@@ -282,7 +281,7 @@ private fun MediaTabScope.MediaLoopControls(
                     label = stringResource(Res.string.media_loop_count),
                     initialText = viewModel.loopCount,
                     range = 0..MEDIA_MAX_LOOP_COUNT,
-                    onValueChange = { viewModel.setLoopCount(it) }
+                    onValueChange = { viewModel.looping.setLoopCount(it) }
                 )
             }
         }
@@ -367,10 +366,10 @@ private fun MediaTabScope.MediaSubtitlesButton(
                     selectedEmbeddedTrack = viewModel.selectedSubtitleTrack,
                 ),
                 actions = SubtitleMenuActions(
-                    onTurnOff = viewModel::turnSubtitlesOff,
-                    onSidecarEnabled = viewModel::setSidecarEnabled,
-                    onSidecarOutputs = viewModel::setSidecarOutputs,
-                    onSelectEmbedded = viewModel::selectSubtitleTrack,
+                    onTurnOff = viewModel.subtitles::turnSubtitlesOff,
+                    onSidecarEnabled = viewModel.subtitles::setSidecarEnabled,
+                    onSidecarOutputs = viewModel.subtitles::setSidecarOutputs,
+                    onSelectEmbedded = viewModel.subtitles::selectSubtitleTrack,
                 ),
                 profiles = appSettings.projectionSettings.outputProfiles,
                 loadFileLabel = subtitleFileTitle,
@@ -380,7 +379,7 @@ private fun MediaTabScope.MediaSubtitlesButton(
                         // The video's own folder, where a subtitle for it almost always
                         // sits, rather than the top of the media library.
                         val beside = runCatching { Path(viewModel.mediaUrl).parent }.getOrNull()
-                        val f = FileChooser.platformInstance.chooseSingle(
+                        val f = fileChooser.chooseSingle(
                             path = beside ?: Path(appSettings.mediaStorageDirectory),
                             title = subtitleFileTitle,
                             filters = listOf(
@@ -391,7 +390,7 @@ private fun MediaTabScope.MediaSubtitlesButton(
                             selectDirectory = false
                         )
                         // Added, not substituted: a second file is a second language.
-                        if (f != null) viewModel.addSubtitleFile(f.absolutePathString())
+                        if (f != null) viewModel.subtitles.addSubtitleFile(f.absolutePathString())
                     }
                 },
             )
@@ -417,7 +416,7 @@ private fun MediaTabScope.MediaVolume(viewModel: MediaViewModel, keyColors: Icon
             )
         ) {
             RaisedIconButton(
-                onClick = { viewModel.toggleMute() },
+                onClick = { viewModel.audio.toggleMute() },
                 enabled = viewModel.isLoaded,
                 modifier = Modifier.size(MEDIA_TRANSPORT_KEY_SIZE),
                 colors = keyColors
@@ -432,7 +431,7 @@ private fun MediaTabScope.MediaVolume(viewModel: MediaViewModel, keyColors: Icon
         }
         SlimSlider(
             value = if (viewModel.isMuted) 0f else viewModel.volume,
-            onValueChange = { viewModel.setVolume(it) },
+            onValueChange = { viewModel.audio.setVolume(it) },
             valueRange = 0f..1f,
             enabled = viewModel.isLoaded,
             modifier = Modifier.width(MEDIA_VOLUME_SLIDER_WIDTH),

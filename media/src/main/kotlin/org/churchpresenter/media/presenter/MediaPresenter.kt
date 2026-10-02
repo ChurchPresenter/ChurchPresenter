@@ -64,7 +64,7 @@ fun MediaPresenter(
             // two outputs draw different tracks of the same video. An embedded track cannot do
             // either -- VLC burns it into the one frame they all share.
             if (showSubtitles) {
-                val cues = viewModel.activeSubtitleCues(profileId)
+                val cues = viewModel.subtitles.activeSubtitleCues(profileId)
                 if (cues.isNotEmpty()) {
                     SubtitleOverlay(cues = cues, mediaSettings = mediaSettings, outputRole = outputRole)
                 }

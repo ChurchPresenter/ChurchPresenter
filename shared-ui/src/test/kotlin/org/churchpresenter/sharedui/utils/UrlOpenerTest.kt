@@ -230,4 +230,18 @@ class UrlOpenerTest {
         assertFalse(UrlOpener.isWebUrl(windowsSettingsUri))
         assertFalse(UrlOpener.isWebUrl("churchpresenter.org"), "no scheme is not a web url")
     }
+
+    @Test
+    fun `a desktop that names its browser has it tried after xdg-open`() {
+        assertEquals(
+            listOf(listOf("xdg-open", url), listOf("firefox", url)),
+            UrlOpener.fallbackCommands("Linux", url, browser = "firefox"),
+        )
+    }
+
+    @Test
+    fun `a blank or missing browser variable adds nothing`() {
+        assertEquals(listOf(listOf("xdg-open", url)), UrlOpener.fallbackCommands("Linux", url, browser = " "))
+        assertEquals(listOf(listOf("xdg-open", url)), UrlOpener.fallbackCommands("Linux", url, browser = null))
+    }
 }

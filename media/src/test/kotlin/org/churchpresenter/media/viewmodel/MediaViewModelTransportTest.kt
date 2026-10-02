@@ -28,56 +28,56 @@ class MediaViewModelTransportTest {
 
     @Test
     fun `an http url is named by its last path segment`() {
-        assertEquals("sermon.mp4", model.deriveTitleFromUrl("https://example.org/media/sermon.mp4"))
+        assertEquals("sermon.mp4", mediaTitleFromUrl("https://example.org/media/sermon.mp4"))
     }
 
     @Test
     fun `a plain http url is named the same way as an https one`() {
-        assertEquals("sermon.mp4", model.deriveTitleFromUrl("http://example.org/media/sermon.mp4"))
+        assertEquals("sermon.mp4", mediaTitleFromUrl("http://example.org/media/sermon.mp4"))
     }
 
     @Test
     fun `an rtsp stream is named by its last path segment`() {
-        assertEquals("stream1", model.deriveTitleFromUrl("rtsp://camera.local/live/stream1"))
+        assertEquals("stream1", mediaTitleFromUrl("rtsp://camera.local/live/stream1"))
     }
 
     @Test
     fun `an rtp url is named by its last path segment`() {
-        assertEquals("feed", model.deriveTitleFromUrl("rtp://239.0.0.1/feed"))
+        assertEquals("feed", mediaTitleFromUrl("rtp://239.0.0.1/feed"))
     }
 
     @Test
     fun `an mms url is named by its last path segment`() {
-        assertEquals("feed", model.deriveTitleFromUrl("mms://server/feed"))
+        assertEquals("feed", mediaTitleFromUrl("mms://server/feed"))
     }
 
     @Test
     fun `a udp url is named by its last path segment`() {
-        assertEquals("feed", model.deriveTitleFromUrl("udp://239.0.0.1/feed"))
+        assertEquals("feed", mediaTitleFromUrl("udp://239.0.0.1/feed"))
     }
 
     @Test
     fun `a url ending in a slash keeps the whole url as its name`() {
-        assertEquals("https://example.org/", model.deriveTitleFromUrl("https://example.org/"))
+        assertEquals("https://example.org/", mediaTitleFromUrl("https://example.org/"))
     }
 
     @Test
     fun `a local file is named without its extension`() {
         val file = File(dir, "Opening Video.mp4").apply { writeBytes(ByteArray(4)) }
 
-        assertEquals("Opening Video", model.deriveTitleFromUrl(file.absolutePath))
+        assertEquals("Opening Video", mediaTitleFromUrl(file.absolutePath))
     }
 
     @Test
     fun `a local path that does not exist keeps its file name with the extension`() {
         val missing = File(dir, "gone.mp4").absolutePath
 
-        assertEquals("gone.mp4", model.deriveTitleFromUrl(missing))
+        assertEquals("gone.mp4", mediaTitleFromUrl(missing))
     }
 
     @Test
     fun `a bare name with no separators is its own title`() {
-        assertEquals("clip.mp4", model.deriveTitleFromUrl("clip.mp4"))
+        assertEquals("clip.mp4", mediaTitleFromUrl("clip.mp4"))
     }
 
     @Test
@@ -156,8 +156,8 @@ class MediaViewModelTransportTest {
     @Test
     fun `stopping rewinds to the start and asks the player to seek`() {
         model.loadMedia("https://example.org/sermon.mp4", Constants.MEDIA_TYPE_LOCAL)
-        model.setDuration(60_000L)
-        model.setCurrentPosition(30_000L)
+        model.position.setDuration(60_000L)
+        model.position.setCurrentPosition(30_000L)
         val before = model.seekVersion
 
         model.stop()
@@ -169,45 +169,45 @@ class MediaViewModelTransportTest {
 
     @Test
     fun `seeking past the end stops at the end`() {
-        model.setDuration(60_000L)
+        model.position.setDuration(60_000L)
 
-        model.seekTo(90_000L)
+        model.position.seekTo(90_000L)
 
         assertEquals(60_000L, model.currentPosition)
     }
 
     @Test
     fun `seeking before the start stops at the start`() {
-        model.setDuration(60_000L)
+        model.position.setDuration(60_000L)
 
-        model.seekTo(-5_000L)
+        model.position.seekTo(-5_000L)
 
         assertEquals(0L, model.currentPosition)
     }
 
     @Test
     fun `seeking with no known duration is not clamped to zero`() {
-        model.seekTo(30_000L)
+        model.position.seekTo(30_000L)
 
         assertEquals(30_000L, model.currentPosition, "a live stream reports no duration but still seeks")
     }
 
     @Test
     fun `seeking forward stops at the end`() {
-        model.setDuration(15_000L)
-        model.setCurrentPosition(10_000L)
+        model.position.setDuration(15_000L)
+        model.position.setCurrentPosition(10_000L)
 
-        model.seekForward()
+        model.position.seekForward()
 
         assertEquals(15_000L, model.currentPosition)
     }
 
     @Test
     fun `seeking forward does nothing with no known duration`() {
-        model.setCurrentPosition(5_000L)
+        model.position.setCurrentPosition(5_000L)
         val before = model.seekVersion
 
-        model.seekForward()
+        model.position.seekForward()
 
         assertEquals(5_000L, model.currentPosition)
         assertEquals(before, model.seekVersion)
@@ -215,10 +215,10 @@ class MediaViewModelTransportTest {
 
     @Test
     fun `seeking backward stops at the start`() {
-        model.setDuration(60_000L)
-        model.setCurrentPosition(4_000L)
+        model.position.setDuration(60_000L)
+        model.position.setCurrentPosition(4_000L)
 
-        model.seekBackward()
+        model.position.seekBackward()
 
         assertEquals(0L, model.currentPosition)
     }
@@ -226,8 +226,8 @@ class MediaViewModelTransportTest {
     @Test
     fun `unloading clears everything and asks the player to reset`() {
         model.loadMedia("https://example.org/track.mp3", Constants.MEDIA_TYPE_LOCAL)
-        model.setDuration(60_000L)
-        model.setCurrentPosition(30_000L)
+        model.position.setDuration(60_000L)
+        model.position.setCurrentPosition(30_000L)
         val before = model.seekVersion
 
         model.unload()
@@ -242,28 +242,28 @@ class MediaViewModelTransportTest {
 
     @Test
     fun `the volume is held between silence and full`() {
-        model.setVolume(2f)
+        model.audio.setVolume(2f)
         assertEquals(1f, model.volume)
 
-        model.setVolume(-1f)
+        model.audio.setVolume(-1f)
         assertEquals(0f, model.volume)
     }
 
     @Test
     fun `raising the volume takes the mute off`() {
-        model.toggleMute()
+        model.audio.toggleMute()
         assertTrue(model.isMuted)
 
-        model.setVolume(0.5f)
+        model.audio.setVolume(0.5f)
 
         assertFalse(model.isMuted)
     }
 
     @Test
     fun `setting the volume to silence leaves the mute alone`() {
-        model.toggleMute()
+        model.audio.toggleMute()
 
-        model.setVolume(0f)
+        model.audio.setVolume(0f)
 
         assertTrue(model.isMuted)
     }
@@ -272,7 +272,7 @@ class MediaViewModelTransportTest {
     fun `the position reported by the player does not count as a seek`() {
         val before = model.seekVersion
 
-        model.setCurrentPosition(1_234L)
+        model.position.setCurrentPosition(1_234L)
 
         assertEquals(1_234L, model.currentPosition)
         assertEquals(before, model.seekVersion)
@@ -280,16 +280,16 @@ class MediaViewModelTransportTest {
 
     @Test
     fun `a time under an hour is minutes and seconds`() {
-        assertEquals("3:05", model.formatTime(185_000L))
+        assertEquals("3:05", formatMediaTime(185_000L))
     }
 
     @Test
     fun `a time over an hour carries the hour`() {
-        assertEquals("1:02:03", model.formatTime(3_723_000L))
+        assertEquals("1:02:03", formatMediaTime(3_723_000L))
     }
 
     @Test
     fun `the start of a clip formats as zero`() {
-        assertEquals("0:00", model.formatTime(0L))
+        assertEquals("0:00", formatMediaTime(0L))
     }
 }

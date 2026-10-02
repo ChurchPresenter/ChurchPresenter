@@ -1,49 +1,26 @@
 package org.churchpresenter.media.composables
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.churchpresenter.sharedui.filechooser.FileChooser
+import org.churchpresenter.sharedui.testing.FakeFileChooser
 import java.nio.file.Files
-import java.nio.file.Path
-import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 /**
  * The video-file picker row — the same shape as `FileImagePickerTest` but for video filters. See
- * that class's doc comment for why [FakeFileChooser] stands in for the real chooser.
+ * that class's doc comment for why `FakeFileChooser` stands in for the real chooser.
  */
 @OptIn(ExperimentalTestApi::class)
 class FileVideoPickerTest {
-
-    private class FakeFileChooser(private val answer: Path?) : FileChooser() {
-        var lastFilters: List<FileNameExtensionFilter>? = null
-        var callCount = 0
-
-        override suspend fun chooseImpl(
-            path: Path,
-            filters: List<FileNameExtensionFilter>,
-            title: String,
-            selectDirectory: Boolean,
-            multiple: Boolean,
-        ): List<Path>? {
-            callCount++
-            lastFilters = filters
-            return answer?.let { listOf(it) }
-        }
-
-        override suspend fun saveImpl(
-            location: Path,
-            suggestedName: String,
-            filters: List<FileNameExtensionFilter>,
-            title: String,
-        ): Path? = error("not used by FileVideoPicker")
-    }
 
     @Test
     fun `with no path chosen, the placeholder text shows`() = runComposeUiTest {
@@ -122,5 +99,32 @@ class FileVideoPickerTest {
 
         val extensions = chooser.lastFilters?.single()?.extensions?.toList()
         assertEquals(listOf("mp4", "mov", "avi", "mkv", "webm"), extensions)
+    }
+
+    @Test
+    fun `a picker handed a new path and chooser uses them`() {
+        val dir = Files.createTempDirectory("cp-picker-recompose")
+        val chosen = dir.resolve("next.mp4")
+        val first = FakeFileChooser(answer = null)
+        val second = FakeFileChooser(answer = chosen)
+        var reported: String? = null
+        runComposeUiTest {
+            var chooser by mutableStateOf(first)
+            var path by mutableStateOf("")
+            var onChange by mutableStateOf<(String) -> Unit>({})
+            setContent {
+                MaterialTheme { FileVideoPicker(videoPath = path, onVideoPathChange = onChange, fileChooser = chooser) }
+            }
+            waitForIdle()
+            chooser = second
+            path = dir.resolve("old.mp4").toString()
+            onChange = { reported = it }
+            waitForIdle()
+            onNodeWithText("old.mp4").performClick()
+            waitUntil(timeoutMillis = 5_000) { reported != null }
+        }
+        assertEquals(chosen.toAbsolutePath().toString(), reported)
+        assertEquals(0, first.callCount)
+        dir.toFile().deleteRecursively()
     }
 }

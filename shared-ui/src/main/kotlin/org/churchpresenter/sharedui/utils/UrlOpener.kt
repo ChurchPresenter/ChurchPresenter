@@ -39,8 +39,15 @@ object UrlOpener {
         return scheme == "http" || scheme == "https"
     }
 
-    /** Per-platform "open this URL" commands, tried in order after AWT declines. */
-    internal fun fallbackCommands(osName: String, url: String): List<List<String>> {
+    /**
+     * Per-platform "open this URL" commands, tried in order after AWT declines. [browser] is the
+     * `BROWSER` environment variable a minimal window manager sets.
+     */
+    internal fun fallbackCommands(
+        osName: String,
+        url: String,
+        browser: String? = System.getenv("BROWSER"),
+    ): List<List<String>> {
         val name = osName.lowercase()
         return when {
             name.contains("mac") || name.contains("darwin") -> listOf(listOf("open", url))
@@ -49,7 +56,7 @@ object UrlOpener {
             // has; the browser variables are what a minimal window manager tends to set instead.
             else -> listOfNotNull(
                 listOf("xdg-open", url),
-                System.getenv("BROWSER")?.takeIf { it.isNotBlank() }?.let { listOf(it, url) },
+                browser?.takeIf { it.isNotBlank() }?.let { listOf(it, url) },
             )
         }
     }

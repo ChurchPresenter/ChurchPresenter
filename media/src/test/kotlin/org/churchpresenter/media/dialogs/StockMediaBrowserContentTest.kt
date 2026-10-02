@@ -16,12 +16,16 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.stock_photo_browse_photos_title
 import org.churchpresenter.strings.generated.resources.stock_photo_search_placeholder_photo
+import org.churchpresenter.strings.generated.resources.stock_photo_search_placeholder_video
+import org.churchpresenter.strings.generated.resources.stock_photo_browse_videos_title
 import io.mockk.coEvery
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
@@ -473,4 +477,44 @@ class StockMediaBrowserContentTest {
     // with nothing stubbed -- which on macOS fell through to the shell fallback and opened
     // pexels.com in the developer's browser on every run. UrlOpenerTest covers that contract
     // directly, without a composition or a browser.
+
+    @Test
+    fun `the key can be shown and hidden again`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+        onNodeWithContentDescription("Show API key").performClick()
+        waitForIdle()
+        onNodeWithText("a-key").assertExists()
+        onNodeWithContentDescription("Hide API key").performClick()
+        waitForIdle()
+        onNodeWithContentDescription("Show API key").assertExists()
+    }
+
+    @Test
+    fun `the search key searches what was typed`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+        searchReturns(StockMediaClient.SearchOutcome.Success(listOf(item("7")), hasMore = false))
+        onNodeWithText("Search for photos…").performTextInput("candles")
+        waitForIdle()
+        onNodeWithContentDescription("Search for photos…").performClick()
+        awaitUntil { onAllNodesWithContentDescription("Browse stock photos/videos").fetchSemanticsNodes().isNotEmpty() }
+    }
+
+    @Test
+    fun `hovering Get a free key says what signing up involves`() = dialog { _, _ ->
+        onNodeWithText("Get a free key →").performMouseInput { moveTo(center) }
+        waitUntil(timeoutMillis = 5_000) {
+            onAllNodesWithText("Free, no credit card — the key appears immediately after you sign up.")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    @Test
+    fun `photos and videos are each named for what they are`() {
+        assertEquals(
+            Res.string.stock_photo_browse_photos_title to Res.string.stock_photo_search_placeholder_photo,
+            stockBrowserText(StockMediaClient.StockMediaType.PHOTO),
+        )
+        assertEquals(
+            Res.string.stock_photo_browse_videos_title to Res.string.stock_photo_search_placeholder_video,
+            stockBrowserText(StockMediaClient.StockMediaType.VIDEO),
+        )
+    }
 }

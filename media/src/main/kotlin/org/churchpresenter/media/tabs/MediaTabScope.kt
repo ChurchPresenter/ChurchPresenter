@@ -23,6 +23,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.churchpresenter.sharedui.utils.ShortcutMap
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import androidx.compose.ui.input.key.KeyEvent
+import org.churchpresenter.sharedui.filechooser.FileChooser
 
 /** Which kind of source the tab is choosing, and the address typed for a network one. */
 @Stable
@@ -47,6 +48,7 @@ internal class MediaTabScope(
     val mediaFilesLabel: String,
     val shortcuts: ShortcutMap,
     val wentLive: (ScheduleItem) -> Unit,
+    val fileChooser: FileChooser,
 ) {
     var selectedSourceType by state::selectedSourceType
     var urlInput by state::urlInput
@@ -66,7 +68,7 @@ internal class MediaTabScope(
                     true
                 }
                 viewModel.isLoaded && shortcuts.matches(ShortcutAction.MEDIA_MUTE, keyEvent) -> {
-                    viewModel.toggleMute()
+                    viewModel.audio.toggleMute()
                     true
                 }
                 else -> false

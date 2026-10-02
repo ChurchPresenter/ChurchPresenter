@@ -132,4 +132,17 @@ class WindowUtilsTest {
     fun `there is no usable area without a display`() {
         assertNull(usableScreenArea(null))
     }
+
+    @Test
+    fun `there is no primary screen size without a display`() {
+        assertEquals(androidx.compose.ui.unit.DpSize(0.dp, 0.dp), primaryScreenSizeDp())
+    }
+
+    @OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
+    @Test
+    fun `with no main window provided, dialogs have nothing to centre on`() {
+        var state: androidx.compose.ui.window.WindowState? = androidx.compose.ui.window.WindowState()
+        androidx.compose.ui.test.v2.runComposeUiTest { setContent { state = LocalMainWindowState.current } }
+        assertNull(state)
+    }
 }

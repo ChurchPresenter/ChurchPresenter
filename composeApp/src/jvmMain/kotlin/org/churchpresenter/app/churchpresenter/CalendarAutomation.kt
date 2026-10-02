@@ -45,8 +45,8 @@ internal fun AppRootState.projectFromCalendar(item: ScheduleItem, plays: Int) {
                 statisticsManager,
             )
             if (shown is ScheduleItem.MediaItem) {
-                mediaViewModel.setLooping(plays != 1)
-                mediaViewModel.setLoopCount(calendarMediaLoopCount(plays))
+                mediaViewModel.looping.setLooping(plays != 1)
+                mediaViewModel.looping.setLoopCount(calendarMediaLoopCount(plays))
             }
             currentScheduleActions.playSlideshow(shown, plays)
             coroutineScope.launch {

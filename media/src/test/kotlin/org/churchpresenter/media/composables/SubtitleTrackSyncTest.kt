@@ -30,7 +30,7 @@ class SubtitleTrackSyncTest {
     @Test
     fun `a resolved track is applied to VLC when the app is not rendering subtitles itself`() = runComposeUiTest {
         val (mp, subpictures) = mediaPlayer()
-        val viewModel = MediaViewModel().apply { selectSubtitleTrack(3) }
+        val viewModel = MediaViewModel().apply { subtitles.selectSubtitleTrack(3) }
 
         setContent {
             SubtitleTrackSync(viewModel = viewModel, mp = mp, gate = PlayerReleaseGate())
@@ -61,7 +61,7 @@ class SubtitleTrackSyncTest {
         temp.writeText("1\n00:00:00,000 --> 00:00:10,000\nHello\n")
         val (mp, subpictures) = mediaPlayer()
         // setSubtitleFile selects the sidecar track itself -- that is what the operator picked.
-        val viewModel = MediaViewModel().apply { setSubtitleFile(temp.absolutePath) }
+        val viewModel = MediaViewModel().apply { subtitles.setSubtitleFile(temp.absolutePath) }
 
         try {
             setContent {
@@ -84,8 +84,8 @@ class SubtitleTrackSyncTest {
         temp.writeText("1\n00:00:00,000 --> 00:00:10,000\nHello\n")
         val (mp, subpictures) = mediaPlayer()
         val viewModel = MediaViewModel().apply {
-            setSubtitleFile(temp.absolutePath)
-            selectSubtitleTrack(3)
+            subtitles.setSubtitleFile(temp.absolutePath)
+            subtitles.selectSubtitleTrack(3)
         }
 
         try {
@@ -104,7 +104,7 @@ class SubtitleTrackSyncTest {
     @Test
     fun `turning subtitles off disables VLC's own subtitles`() = runComposeUiTest {
         val (mp, subpictures) = mediaPlayer()
-        val viewModel = MediaViewModel().apply { selectSubtitleTrack(MediaViewModel.SUBTITLES_OFF) }
+        val viewModel = MediaViewModel().apply { subtitles.selectSubtitleTrack(MediaViewModel.SUBTITLES_OFF) }
 
         setContent {
             SubtitleTrackSync(viewModel = viewModel, mp = mp, gate = PlayerReleaseGate())

@@ -10,15 +10,11 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import org.churchpresenter.media.composables.createMediaPlayerComponent
-import org.churchpresenter.media.composables.isVlcAvailable
-import org.churchpresenter.media.composables.mediaPlayer
-import org.churchpresenter.media.composables.releasePlayer
 import org.churchpresenter.diagnostics.Log
-import uk.co.caprica.vlcj.factory.MediaPlayerFactory
+import org.churchpresenter.media.composables.SoftwareVlc
+import org.churchpresenter.media.composables.openSoftwareVlc
 import uk.co.caprica.vlcj.player.base.MediaPlayer
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter
-import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCallback
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback
@@ -39,38 +35,89 @@ private const val VLC_OPT_FAST_DECODE = ":avcodec-fast"
 private const val VLC_OPT_TIGHT_CLOCK = ":clock-jitter=0"
 
 /**
+ * The decoded-frame side of [EmbeddedVideoDecoder]: the buffer VLC renders into, sized when VLC
+ * reports the video's dimensions, and a count of the frames delivered so far.
+ */
+internal class DecodedFrames {
+    @Volatile var frame: BufferedImage? = null
+    @Volatile var version = 0L
+        private set
+
+    /** Source dimensions VLC reports can be 0 (not yet known); a zero-sized BufferedImage throws. */
+    fun allocateDecodedFrame(sourceWidth: Int, sourceHeight: Int): BufferedImage {
+        val w = sourceWidth.coerceAtLeast(1)
+        val h = sourceHeight.coerceAtLeast(1)
+        return BufferedImage(w, h, BufferedImage.TYPE_INT_RGB)
+    }
+
+    /** Copies as many whole pixels as [buf] actually holds — a short native buffer must not overrun [pixelData]. */
+    fun copyFrameBytes(buf: ByteBuffer, pixelData: IntArray): Int {
+        buf.rewind()
+        val count = pixelData.size.coerceAtMost(buf.remaining() / 4)
+        buf.asIntBuffer().get(pixelData, 0, count)
+        return count
+    }
+
+    val bufferFormatCallback = object : BufferFormatCallback {
+        override fun getBufferFormat(sourceWidth: Int, sourceHeight: Int): BufferFormat {
+            val allocated = allocateDecodedFrame(sourceWidth, sourceHeight)
+            frame = allocated
+            return RV32BufferFormat(allocated.width, allocated.height)
+        }
+        override fun allocatedBuffers(buffers: Array<out ByteBuffer>) = Unit
+    }
+
+    val renderCallback = RenderCallback { _, nativeBuffers, _ ->
+        val img = frame ?: return@RenderCallback
+        val buf = nativeBuffers?.firstOrNull() ?: return@RenderCallback
+        val pixelData = (img.raster.dataBuffer as? DataBufferInt)?.data ?: return@RenderCallback
+        try {
+            copyFrameBytes(buf, pixelData)
+            version++
+        } catch (_: Throwable) {
+        }
+    }
+}
+
+/**
  * Decodes one embedded presentation video (Keynote or PowerPoint) live and republishes it as an
  * [ImageBitmap] sized/offset identically to the poster frame it replaces, so
  * `PresentationPresenter`'s layer draw needs no changes. A new instance per active video layer —
- * NOT the [org.churchpresenter.app.churchpresenter.composables.SharedVideoOutput] singleton, which
+ * NOT the [org.churchpresenter.media.composables.SharedVideoOutput] singleton, which
  * stays scoped to the Media tab's one master video.
  *
  * Starts muted and paused; [resume] unmutes and plays, [pause] silences without releasing the
  * decoder (cheap to call every frame — libvlc play/pause on an already-playing/paused player is
- * a documented no-op, same rationale as [org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer]).
+ * a documented no-op, same rationale as [org.churchpresenter.media.composables.SoftwareVideoPlayer]).
  */
-class EmbeddedVideoDecoder(
+class EmbeddedVideoDecoder internal constructor(
     private val videoFile: File,
     /** Full padded-canvas poster bitmap already rasterized by the engine — the compositing base. */
     private val posterCanvas: BufferedImage,
     /** Where within [posterCanvas], in its own pixel space, decoded frames should be blitted. */
-    private val contentRectPx: Rectangle
+    private val contentRectPx: Rectangle,
+    /** Opens VLC for callback rendering, or null when it cannot be. */
+    private val openVlc: () -> SoftwareVlc?,
 ) : AutoCloseable {
+
+    constructor(videoFile: File, posterCanvas: BufferedImage, contentRectPx: Rectangle) :
+        this(videoFile, posterCanvas, contentRectPx, ::openSoftwareVlc)
 
     @Volatile var latestFrame: ImageBitmap? = null
         private set
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var pollJob: Job? = null
-    // internal (not private): EmbeddedMediaPlayer can't be constructed without a real libvlc
-    // native handle, so tests inject a mock here to exercise resume()/pause()'s guard logic.
-    internal var mp: EmbeddedMediaPlayer? = null
-    private var component: java.awt.Component? = null
-    private var surfaceFactory: MediaPlayerFactory? = null
+    // internal (not private): a MediaPlayer can't be constructed without a real libvlc native
+    // handle, so tests inject a mock here to exercise resume()/pause()'s guard logic.
+    internal var mp: MediaPlayer? = null
+    private var release: (() -> Unit)? = null
+    internal val frames = DecodedFrames()
     // internal: lets tests drive composite() directly with a decoded frame instead of needing a
     // real VLC render callback to populate it.
-    internal var decodedFrame: BufferedImage? = null
-    @Volatile private var frameVersion = 0L
+    internal var decodedFrame: BufferedImage?
+        get() = frames.frame
+        set(value) { frames.frame = value }
     @Volatile private var resumed = false
     @Volatile private var closed = false
     // Confirmed via vlcj's own playing()/paused() events — resume()/pause() only reissue the
@@ -81,55 +128,30 @@ class EmbeddedVideoDecoder(
     @Volatile internal var confirmedPaused = false
 
     fun start() {
-        if (!isVlcAvailable || closed) return
-        val comp = createMediaPlayerComponent() ?: return
-        val factory = try {
-            MediaPlayerFactory()
-        } catch (_: Throwable) {
-            null
-        }
-        if (factory == null) {
-            comp.releasePlayer()
-            return
-        }
-        component = comp
-        surfaceFactory = factory
-        val player = comp.mediaPlayer()
-        mp = player
+        if (closed) return
+        val vlc = openVlc() ?: return
+        mp = vlc.mp
+        release = vlc.release
+        vlc.attachSurface(frames.bufferFormatCallback, frames.renderCallback)
+        begin(vlc.mp)
+    }
 
-        val bufferFormatCallback = object : BufferFormatCallback {
-            override fun getBufferFormat(sourceWidth: Int, sourceHeight: Int): BufferFormat {
-                val frame = allocateDecodedFrame(sourceWidth, sourceHeight)
-                decodedFrame = frame
-                return RV32BufferFormat(frame.width, frame.height)
-            }
-            override fun allocatedBuffers(buffers: Array<out ByteBuffer>) = Unit
+    /** The player's events, as this decoder needs them. */
+    internal val events = object : MediaPlayerEventAdapter() {
+        override fun error(mediaPlayer: MediaPlayer) {
+            onErrorEvent()
         }
-        val renderCallback = RenderCallback { _, nativeBuffers, _ ->
-            val img = decodedFrame ?: return@RenderCallback
-            val buf = nativeBuffers?.firstOrNull() ?: return@RenderCallback
-            val pixelData = (img.raster.dataBuffer as? DataBufferInt)?.data ?: return@RenderCallback
-            try {
-                copyFrameBytes(buf, pixelData)
-                frameVersion++
-            } catch (_: Throwable) {
-            }
+        override fun playing(mediaPlayer: MediaPlayer) {
+            onPlayingConfirmed()
         }
-        player.videoSurface().set(
-            factory.videoSurfaces().newVideoSurface(bufferFormatCallback, renderCallback, true)
-        )
-        player.events().addMediaPlayerEventListener(object : MediaPlayerEventAdapter() {
-            override fun error(mediaPlayer: MediaPlayer) {
-                onErrorEvent()
-            }
-            override fun playing(mediaPlayer: MediaPlayer) {
-                onPlayingConfirmed()
-            }
-            override fun paused(mediaPlayer: MediaPlayer) {
-                onPausedConfirmed()
-            }
-        })
+        override fun paused(mediaPlayer: MediaPlayer) {
+            onPausedConfirmed()
+        }
+    }
 
+    /** Listens to [player], opens the video silently, and composites each new frame as it lands. */
+    internal fun begin(player: MediaPlayer) {
+        player.events().addMediaPlayerEventListener(events)
         player.audio().setVolume(0)
         // media().play() only queues the open/play command — libvlc transitions to actually
         // playing asynchronously, so a pause() issued synchronously right here can (and, observed
@@ -143,7 +165,7 @@ class EmbeddedVideoDecoder(
         pollJob = scope.launch {
             var lastVersion = 0L
             while (isActive) {
-                val v = frameVersion
+                val v = frames.version
                 if (v != lastVersion) {
                     lastVersion = v
                     composite()
@@ -151,21 +173,6 @@ class EmbeddedVideoDecoder(
                 delay(FRAME_INTERVAL_MS) // ~60fps cap, off the VLC render thread
             }
         }
-    }
-
-    /** Source dimensions VLC reports can be 0 (not yet known); a zero-sized BufferedImage throws. */
-    internal fun allocateDecodedFrame(sourceWidth: Int, sourceHeight: Int): BufferedImage {
-        val w = sourceWidth.coerceAtLeast(1)
-        val h = sourceHeight.coerceAtLeast(1)
-        return BufferedImage(w, h, BufferedImage.TYPE_INT_RGB)
-    }
-
-    /** Copies as many whole pixels as [buf] actually holds — a short native buffer must not overrun [pixelData]. */
-    internal fun copyFrameBytes(buf: ByteBuffer, pixelData: IntArray): Int {
-        buf.rewind()
-        val count = pixelData.size.coerceAtMost(buf.remaining() / 4)
-        buf.asIntBuffer().get(pixelData, 0, count)
-        return count
     }
 
     internal fun onErrorEvent() {
@@ -225,8 +232,7 @@ class EmbeddedVideoDecoder(
         scope.cancel()
         try {
             mp?.controls()?.stop()
-            component?.releasePlayer()
-            surfaceFactory?.release()
+            release?.invoke()
         } catch (_: Throwable) {
         }
     }

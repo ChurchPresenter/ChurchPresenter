@@ -69,9 +69,9 @@ class MediaViewModelTest {
     @Test
     fun `loading new media resets the previous playback state`() {
         val vm = loaded()
-        vm.setDuration(60_000)
+        vm.position.setDuration(60_000)
         vm.play()
-        vm.seekTo(30_000)
+        vm.position.seekTo(30_000)
 
         vm.loadMedia("/media/other.mp4", Constants.MEDIA_TYPE_LOCAL)
         assertFalse(vm.isPlaying, "the previous clip must not keep playing")
@@ -82,7 +82,7 @@ class MediaViewModelTest {
     @Test
     fun `unloading clears everything`() {
         val vm = loaded()
-        vm.setDuration(60_000)
+        vm.position.setDuration(60_000)
         vm.play()
 
         vm.unload()
@@ -114,9 +114,9 @@ class MediaViewModelTest {
     @Test
     fun `stop rewinds to the start and requests a seek`() {
         val vm = loaded()
-        vm.setDuration(60_000)
+        vm.position.setDuration(60_000)
         vm.play()
-        vm.seekTo(30_000)
+        vm.position.seekTo(30_000)
         val version = vm.seekVersion
 
         vm.stop()
@@ -128,9 +128,9 @@ class MediaViewModelTest {
     @Test
     fun `finishing stops playback and rewinds`() {
         val vm = loaded()
-        vm.setDuration(60_000)
+        vm.position.setDuration(60_000)
         vm.play()
-        vm.seekTo(59_000)
+        vm.position.seekTo(59_000)
 
         vm.markFinished()
         assertTrue(vm.mediaFinished)
@@ -146,18 +146,18 @@ class MediaViewModelTest {
     @Test
     fun `seeking forward stops at the end of the clip`() {
         val vm = loaded()
-        vm.setDuration(10_000)
-        vm.seekTo(9_000)
-        vm.seekForward(10_000)
+        vm.position.setDuration(10_000)
+        vm.position.seekTo(9_000)
+        vm.position.seekForward(10_000)
         assertEquals(10_000L, vm.currentPosition, "must not seek past the end")
     }
 
     @Test
     fun `seeking backward stops at zero`() {
         val vm = loaded()
-        vm.setDuration(10_000)
-        vm.seekTo(2_000)
-        vm.seekBackward(10_000)
+        vm.position.setDuration(10_000)
+        vm.position.seekTo(2_000)
+        vm.position.seekBackward(10_000)
         assertEquals(0L, vm.currentPosition, "must not seek to a negative position")
     }
 
@@ -165,32 +165,32 @@ class MediaViewModelTest {
     fun `seeking forward before the duration is known does nothing`() {
         // VLC reports duration asynchronously; until then there is no end to clamp against.
         val vm = loaded()
-        vm.seekForward(5_000)
+        vm.position.seekForward(5_000)
         assertEquals(0L, vm.currentPosition)
     }
 
     @Test
     fun `seekTo clamps into the clip`() {
         val vm = loaded()
-        vm.setDuration(10_000)
-        vm.seekTo(99_000)
+        vm.position.setDuration(10_000)
+        vm.position.seekTo(99_000)
         assertEquals(10_000L, vm.currentPosition)
-        vm.seekTo(-5_000)
+        vm.position.seekTo(-5_000)
         assertEquals(0L, vm.currentPosition)
     }
 
     @Test
     fun `every seek bumps the version but a reported position does not`() {
         val vm = loaded()
-        vm.setDuration(60_000)
+        vm.position.setDuration(60_000)
         val start = vm.seekVersion
 
-        vm.seekTo(1_000)
-        vm.seekForward(1_000)
-        vm.seekBackward(500)
+        vm.position.seekTo(1_000)
+        vm.position.seekForward(1_000)
+        vm.position.seekBackward(500)
         assertEquals(start + 3, vm.seekVersion)
 
-        vm.setCurrentPosition(42_000)
+        vm.position.setCurrentPosition(42_000)
         assertEquals(start + 3, vm.seekVersion, "a progress report must not be mistaken for a seek")
         assertEquals(42_000L, vm.currentPosition)
     }
@@ -200,19 +200,19 @@ class MediaViewModelTest {
     @Test
     fun `volume is clamped to the valid range`() {
         val vm = loaded()
-        vm.setVolume(2.5f)
+        vm.audio.setVolume(2.5f)
         assertEquals(1f, vm.volume)
-        vm.setVolume(-1f)
+        vm.audio.setVolume(-1f)
         assertEquals(0f, vm.volume)
     }
 
     @Test
     fun `raising the volume while muted unmutes`() {
         val vm = loaded()
-        vm.toggleMute()
+        vm.audio.toggleMute()
         assertTrue(vm.isMuted)
 
-        vm.setVolume(0.5f)
+        vm.audio.setVolume(0.5f)
         assertFalse(vm.isMuted, "reaching for the slider means the operator wants to hear it")
         assertEquals(0.5f, vm.volume)
     }
@@ -220,29 +220,29 @@ class MediaViewModelTest {
     @Test
     fun `setting the volume to zero while muted stays muted`() {
         val vm = loaded()
-        vm.toggleMute()
-        vm.setVolume(0f)
+        vm.audio.toggleMute()
+        vm.audio.setVolume(0f)
         assertTrue(vm.isMuted)
     }
 
     @Test
     fun `muting silences the effective volume without losing the setting`() {
         val vm = loaded()
-        vm.setVolume(0.8f)
+        vm.audio.setVolume(0.8f)
         assertEquals(0.8f, vm.effectiveVolume)
 
-        vm.toggleMute()
+        vm.audio.toggleMute()
         assertEquals(0f, vm.effectiveVolume, "muted output is silent")
         assertEquals(0.8f, vm.volume, "the remembered level must survive the mute")
 
-        vm.toggleMute()
+        vm.audio.toggleMute()
         assertEquals(0.8f, vm.effectiveVolume, "unmuting restores the previous level")
     }
 
     // ── Looping ─────────────────────────────────────────────────────────────────
 
     private fun playing(): MediaViewModel = loaded().also {
-        it.setDuration(60_000)
+        it.position.setDuration(60_000)
         it.play()
     }
 
@@ -257,9 +257,9 @@ class MediaViewModelTest {
     @Test
     fun `a loop restarts the clip instead of finishing it`() {
         val vm = playing()
-        vm.toggleLooping()
+        vm.looping.toggleLooping()
         val restarts = vm.loopRestartVersion
-        vm.seekTo(59_000)
+        vm.position.seekTo(59_000)
 
         vm.markFinished()
         assertFalse(vm.mediaFinished, "a loop must not clear the output")
@@ -272,8 +272,8 @@ class MediaViewModelTest {
     @Test
     fun `a loop count of zero repeats forever`() {
         val vm = playing()
-        vm.toggleLooping()
-        vm.setLoopCount(0)
+        vm.looping.toggleLooping()
+        vm.looping.setLoopCount(0)
         repeat(20) { vm.markFinished() }
         assertFalse(vm.mediaFinished, "zero means forever, not zero repeats")
         assertTrue(vm.isPlaying)
@@ -282,8 +282,8 @@ class MediaViewModelTest {
     @Test
     fun `a finite loop count plays that many repeats and then finishes`() {
         val vm = playing()
-        vm.toggleLooping()
-        vm.setLoopCount(2)
+        vm.looping.toggleLooping()
+        vm.looping.setLoopCount(2)
 
         vm.markFinished()
         assertEquals(1, vm.loopsPlayed)
@@ -305,7 +305,7 @@ class MediaViewModelTest {
     @Test
     fun `the same end of file reported twice only clears the output once`() {
         val vm = playing()
-        vm.seekTo(59_000)
+        vm.position.seekTo(59_000)
         val version = vm.seekVersion
 
         vm.markFinished()
@@ -331,11 +331,11 @@ class MediaViewModelTest {
     @Test
     fun `disarming looping lets the next end finish the media`() {
         val vm = playing()
-        vm.toggleLooping()
+        vm.looping.toggleLooping()
         vm.markFinished()
         assertFalse(vm.mediaFinished)
 
-        vm.toggleLooping()
+        vm.looping.toggleLooping()
         assertFalse(vm.isLooping)
         vm.markFinished()
         assertTrue(vm.mediaFinished)
@@ -344,40 +344,40 @@ class MediaViewModelTest {
     @Test
     fun `arming looping again starts the tally over`() {
         val vm = playing()
-        vm.toggleLooping()
-        vm.setLoopCount(5)
+        vm.looping.toggleLooping()
+        vm.looping.setLoopCount(5)
         vm.markFinished()
         assertEquals(1, vm.loopsPlayed)
 
-        vm.toggleLooping()
-        vm.toggleLooping()
+        vm.looping.toggleLooping()
+        vm.looping.toggleLooping()
         assertEquals(0, vm.loopsPlayed, "re-arming must not carry the old tally over")
     }
 
     @Test
     fun `changing the loop count starts the tally over`() {
         val vm = playing()
-        vm.toggleLooping()
-        vm.setLoopCount(5)
+        vm.looping.toggleLooping()
+        vm.looping.setLoopCount(5)
         vm.markFinished()
         assertEquals(1, vm.loopsPlayed)
 
-        vm.setLoopCount(2)
+        vm.looping.setLoopCount(2)
         assertEquals(0, vm.loopsPlayed, "a new count counts from this play, not the last one")
     }
 
     @Test
     fun `a negative loop count is treated as forever`() {
         val vm = MediaViewModel()
-        vm.setLoopCount(-3)
+        vm.looping.setLoopCount(-3)
         assertEquals(0, vm.loopCount)
     }
 
     @Test
     fun `stopping clears the repeats already played`() {
         val vm = playing()
-        vm.toggleLooping()
-        vm.setLoopCount(3)
+        vm.looping.toggleLooping()
+        vm.looping.setLoopCount(3)
         vm.markFinished()
         assertEquals(1, vm.loopsPlayed)
 
@@ -389,8 +389,8 @@ class MediaViewModelTest {
     @Test
     fun `loading other media clears the repeats but keeps the loop armed`() {
         val vm = playing()
-        vm.toggleLooping()
-        vm.setLoopCount(3)
+        vm.looping.toggleLooping()
+        vm.looping.setLoopCount(3)
         vm.markFinished()
 
         vm.loadMedia("/media/next.mp4", Constants.MEDIA_TYPE_LOCAL)
@@ -402,7 +402,7 @@ class MediaViewModelTest {
     @Test
     fun `unloading clears the repeats already played`() {
         val vm = playing()
-        vm.toggleLooping()
+        vm.looping.toggleLooping()
         vm.markFinished()
 
         vm.unload()
@@ -414,24 +414,24 @@ class MediaViewModelTest {
     @Test
     fun `times under an hour omit the hour field`() {
         val vm = MediaViewModel()
-        assertEquals("0:00", vm.formatTime(0))
-        assertEquals("0:05", vm.formatTime(5_000))
-        assertEquals("1:05", vm.formatTime(65_000))
-        assertEquals("59:59", vm.formatTime(3_599_000))
+        assertEquals("0:00", formatMediaTime(0))
+        assertEquals("0:05", formatMediaTime(5_000))
+        assertEquals("1:05", formatMediaTime(65_000))
+        assertEquals("59:59", formatMediaTime(3_599_000))
     }
 
     @Test
     fun `times of an hour or more include it, zero-padded`() {
         val vm = MediaViewModel()
-        assertEquals("1:00:00", vm.formatTime(3_600_000))
-        assertEquals("1:02:03", vm.formatTime(3_723_000))
-        assertEquals("10:00:00", vm.formatTime(36_000_000))
+        assertEquals("1:00:00", formatMediaTime(3_600_000))
+        assertEquals("1:02:03", formatMediaTime(3_723_000))
+        assertEquals("10:00:00", formatMediaTime(36_000_000))
     }
 
     @Test
     fun `sub-second remainders are truncated, not rounded up`() {
         val vm = MediaViewModel()
-        assertEquals("0:01", vm.formatTime(1_999), "1.999s is still in its first second")
+        assertEquals("0:01", formatMediaTime(1_999), "1.999s is still in its first second")
     }
 
     // ── A cue's play request ────────────────────────────────────────────────────
@@ -439,7 +439,7 @@ class MediaViewModelTest {
     @Test
     fun `a request for a clip not yet loaded waits for it`() {
         val vm = MediaViewModel()
-        vm.requestPlayback(plays = 1, url = "/media/clip.mp4")
+        vm.cue.requestPlayback(plays = 1, url = "/media/clip.mp4")
         assertFalse(vm.isPlaying, "nothing to play yet")
 
         vm.loadMediaFromSchedule("/media/clip.mp4", "Clip", Constants.MEDIA_TYPE_LOCAL)
@@ -452,7 +452,7 @@ class MediaViewModelTest {
     @Test
     fun `a request for one clip does not start another`() {
         val vm = loaded("/media/last-week.mp4")
-        vm.requestPlayback(plays = 1, url = "/media/this-week.mp4")
+        vm.cue.requestPlayback(plays = 1, url = "/media/this-week.mp4")
         assertFalse(vm.isPlaying, "last week's clip was loaded, not the one asked for")
 
         vm.loadMediaFromSchedule("/media/this-week.mp4", "Clip", Constants.MEDIA_TYPE_LOCAL)
@@ -466,7 +466,7 @@ class MediaViewModelTest {
         val vm = loaded("/media/clip.mp4")
         vm.onCuePlaybackStarted = { url, type -> started.add(url to type) }
 
-        vm.requestPlayback(plays = 3, url = "/media/clip.mp4")
+        vm.cue.requestPlayback(plays = 3, url = "/media/clip.mp4")
 
         assertTrue(vm.isPlaying)
         assertTrue(vm.isLooping)
@@ -478,7 +478,7 @@ class MediaViewModelTest {
     fun `zero plays loops until something else goes live`() {
         val vm = loaded("/media/clip.mp4")
 
-        vm.requestPlayback(plays = 0, url = "/media/clip.mp4")
+        vm.cue.requestPlayback(plays = 0, url = "/media/clip.mp4")
 
         assertTrue(vm.isLooping)
         assertEquals(0, vm.loopCount, "no count means for ever")
@@ -487,7 +487,7 @@ class MediaViewModelTest {
     @Test
     fun `a request is spent once carried out`() {
         val vm = loaded("/media/clip.mp4")
-        vm.requestPlayback(plays = 1, url = "/media/clip.mp4")
+        vm.cue.requestPlayback(plays = 1, url = "/media/clip.mp4")
         vm.pause()
 
         vm.loadMediaFromSchedule("/media/clip.mp4", "Clip", Constants.MEDIA_TYPE_LOCAL)
@@ -512,7 +512,7 @@ class MediaViewModelTest {
     fun `embedded tracks start hidden`() {
         val vm = loaded()
 
-        vm.setSubtitleTracks(listOf(english, spanish))
+        vm.subtitles.setSubtitleTracks(listOf(english, spanish))
 
         assertEquals(listOf(english, spanish), vm.subtitleTracks)
         assertEquals(MediaViewModel.SUBTITLES_OFF, vm.selectedSubtitleTrack)
@@ -521,9 +521,9 @@ class MediaViewModelTest {
     @Test
     fun `a subtitle file the operator chose is shown once VLC lists it`() {
         val vm = loaded()
-        vm.setSubtitleFile("/media/en.srt")
+        vm.subtitles.setSubtitleFile("/media/en.srt")
 
-        vm.setSubtitleTracks(listOf(english, spanish))
+        vm.subtitles.setSubtitleTracks(listOf(english, spanish))
 
         assertEquals("/media/en.srt", vm.subtitleUrl)
         assertEquals(spanish.id, vm.selectedSubtitleTrack, "the file is the last track VLC adds")
@@ -532,9 +532,9 @@ class MediaViewModelTest {
     @Test
     fun `a file whose track never appears leaves subtitles off`() {
         val vm = loaded()
-        vm.setSubtitleFile("/media/broken.srt")
+        vm.subtitles.setSubtitleFile("/media/broken.srt")
 
-        vm.setSubtitleTracks(emptyList())
+        vm.subtitles.setSubtitleTracks(emptyList())
 
         assertEquals(MediaViewModel.SUBTITLES_OFF, vm.selectedSubtitleTrack)
     }
@@ -542,10 +542,10 @@ class MediaViewModelTest {
     @Test
     fun `a track the operator picked survives the list being reported again`() {
         val vm = loaded()
-        vm.setSubtitleTracks(listOf(english, spanish))
-        vm.selectSubtitleTrack(english.id)
+        vm.subtitles.setSubtitleTracks(listOf(english, spanish))
+        vm.subtitles.selectSubtitleTrack(english.id)
 
-        vm.setSubtitleTracks(listOf(english, spanish))
+        vm.subtitles.setSubtitleTracks(listOf(english, spanish))
 
         assertEquals(english.id, vm.selectedSubtitleTrack)
     }
@@ -553,11 +553,11 @@ class MediaViewModelTest {
     @Test
     fun `turning subtitles off survives the list being reported again`() {
         val vm = loaded()
-        vm.setSubtitleFile("/media/en.srt")
-        vm.setSubtitleTracks(listOf(english))
-        vm.selectSubtitleTrack(MediaViewModel.SUBTITLES_OFF)
+        vm.subtitles.setSubtitleFile("/media/en.srt")
+        vm.subtitles.setSubtitleTracks(listOf(english))
+        vm.subtitles.selectSubtitleTrack(MediaViewModel.SUBTITLES_OFF)
 
-        vm.setSubtitleTracks(listOf(english))
+        vm.subtitles.setSubtitleTracks(listOf(english))
 
         assertEquals(MediaViewModel.SUBTITLES_OFF, vm.selectedSubtitleTrack)
     }
@@ -565,10 +565,10 @@ class MediaViewModelTest {
     @Test
     fun `a chosen track that has gone from the list falls back to off`() {
         val vm = loaded()
-        vm.setSubtitleTracks(listOf(english, spanish))
-        vm.selectSubtitleTrack(spanish.id)
+        vm.subtitles.setSubtitleTracks(listOf(english, spanish))
+        vm.subtitles.selectSubtitleTrack(spanish.id)
 
-        vm.setSubtitleTracks(listOf(english))
+        vm.subtitles.setSubtitleTracks(listOf(english))
 
         assertEquals(MediaViewModel.SUBTITLES_OFF, vm.selectedSubtitleTrack)
     }
@@ -576,10 +576,10 @@ class MediaViewModelTest {
     @Test
     fun `choosing another subtitle file forgets the old tracks and the old choice`() {
         val vm = loaded()
-        vm.setSubtitleFile("/media/en.srt")
-        vm.setSubtitleTracks(listOf(english))
+        vm.subtitles.setSubtitleFile("/media/en.srt")
+        vm.subtitles.setSubtitleTracks(listOf(english))
 
-        vm.setSubtitleFile("/media/es.srt")
+        vm.subtitles.setSubtitleFile("/media/es.srt")
 
         assertEquals("/media/es.srt", vm.subtitleUrl)
         assertTrue(vm.subtitleTracks.isEmpty())
@@ -589,8 +589,8 @@ class MediaViewModelTest {
     @Test
     fun `loading other media drops the subtitle file`() {
         val vm = loaded()
-        vm.setSubtitleFile("/media/en.srt")
-        vm.setSubtitleTracks(listOf(english))
+        vm.subtitles.setSubtitleFile("/media/en.srt")
+        vm.subtitles.setSubtitleTracks(listOf(english))
 
         vm.loadMedia("/media/other.mp4", Constants.MEDIA_TYPE_LOCAL)
 
@@ -611,7 +611,7 @@ class MediaViewModelTest {
     @Test
     fun `a schedule item without one clears the previous subtitle file`() {
         val vm = loaded()
-        vm.setSubtitleFile("/media/en.srt")
+        vm.subtitles.setSubtitleFile("/media/en.srt")
 
         vm.loadMediaFromSchedule("/media/clip.mp4", "Clip", Constants.MEDIA_TYPE_LOCAL)
 
@@ -621,8 +621,8 @@ class MediaViewModelTest {
     @Test
     fun `unloading clears the subtitles`() {
         val vm = loaded()
-        vm.setSubtitleFile("/media/en.srt")
-        vm.setSubtitleTracks(listOf(english))
+        vm.subtitles.setSubtitleFile("/media/en.srt")
+        vm.subtitles.setSubtitleTracks(listOf(english))
 
         vm.unload()
 
@@ -644,7 +644,7 @@ class MediaViewModelTest {
     fun `an srt file is parsed into cues the app renders itself`() {
         val vm = loaded()
 
-        vm.setSubtitleFile(srtFile())
+        vm.subtitles.setSubtitleFile(srtFile())
 
         assertEquals(
             listOf(1_000L to 4_000L),
@@ -657,7 +657,7 @@ class MediaViewModelTest {
     fun `an unparsed subtitle format leaves no app-rendered cues`() {
         val vm = loaded()
 
-        vm.setSubtitleFile("/media/en.ass")
+        vm.subtitles.setSubtitleFile("/media/en.ass")
 
         assertTrue(vm.sidecarSubtitles.isEmpty(), "VLC renders this format directly; the app draws nothing")
         assertEquals("/media/en.ass", vm.subtitleUrl, "and VLC is handed the file instead")
@@ -666,9 +666,9 @@ class MediaViewModelTest {
     @Test
     fun `clearing the subtitle file clears its cues too`() {
         val vm = loaded()
-        vm.setSubtitleFile(srtFile())
+        vm.subtitles.setSubtitleFile(srtFile())
 
-        vm.setSubtitleFile("")
+        vm.subtitles.setSubtitleFile("")
 
         assertTrue(vm.sidecarSubtitles.isEmpty())
     }
@@ -676,25 +676,25 @@ class MediaViewModelTest {
     @Test
     fun `the active cue follows the current playback position`() {
         val vm = loaded()
-        vm.setSubtitleFile(srtFile())
+        vm.subtitles.setSubtitleFile(srtFile())
 
-        vm.setCurrentPosition(2_000L) // inside the cue's 1_000..4_000 window
-        assertEquals(listOf("Hello there"), vm.activeSubtitleCues(ANY_OUTPUT).map { it.text })
+        vm.position.setCurrentPosition(2_000L) // inside the cue's 1_000..4_000 window
+        assertEquals(listOf("Hello there"), vm.subtitles.activeSubtitleCues(ANY_OUTPUT).map { it.text })
 
-        vm.setCurrentPosition(0L) // before the cue starts
-        assertTrue(vm.activeSubtitleCues(ANY_OUTPUT).isEmpty())
+        vm.position.setCurrentPosition(0L) // before the cue starts
+        assertTrue(vm.subtitles.activeSubtitleCues(ANY_OUTPUT).isEmpty())
     }
 
     @Test
     fun `turning subtitles off stops the app drawing its own file`() {
         val vm = loaded()
-        vm.setSubtitleFile(srtFile())
-        vm.setCurrentPosition(2_000L)
+        vm.subtitles.setSubtitleFile(srtFile())
+        vm.position.setCurrentPosition(2_000L)
         assertTrue(vm.subtitlesVisible)
 
-        vm.turnSubtitlesOff()
+        vm.subtitles.turnSubtitlesOff()
 
-        assertTrue(vm.activeSubtitleCues(ANY_OUTPUT).isEmpty(), "Off has to reach the app-drawn path too")
+        assertTrue(vm.subtitles.activeSubtitleCues(ANY_OUTPUT).isEmpty(), "Off has to reach the app-drawn path too")
         assertFalse(vm.subtitlesVisible)
     }
 
@@ -703,8 +703,8 @@ class MediaViewModelTest {
     @Test
     fun `a second file is added rather than replacing the first`() {
         val vm = loaded()
-        vm.addSubtitleFile(srtFile())
-        vm.addSubtitleFile(srtFile())
+        vm.subtitles.addSubtitleFile(srtFile())
+        vm.subtitles.addSubtitleFile(srtFile())
 
         assertEquals(2, vm.sidecarSubtitles.size)
     }
@@ -714,8 +714,8 @@ class MediaViewModelTest {
         val vm = loaded()
         val path = srtFile()
 
-        vm.addSubtitleFile(path)
-        vm.addSubtitleFile(path)
+        vm.subtitles.addSubtitleFile(path)
+        vm.subtitles.addSubtitleFile(path)
 
         assertEquals(1, vm.sidecarSubtitles.size, "the sibling scan and a hand pick can name the same file")
     }
@@ -723,22 +723,22 @@ class MediaViewModelTest {
     @Test
     fun `an unrouted track is drawn on every output`() {
         val vm = loaded()
-        vm.setSubtitleFile(srtFile())
-        vm.setCurrentPosition(2_000L)
+        vm.subtitles.setSubtitleFile(srtFile())
+        vm.position.setCurrentPosition(2_000L)
 
-        assertEquals(1, vm.activeSubtitleCues("sanctuary").size)
-        assertEquals(1, vm.activeSubtitleCues("lobby").size)
+        assertEquals(1, vm.subtitles.activeSubtitleCues("sanctuary").size)
+        assertEquals(1, vm.subtitles.activeSubtitleCues("lobby").size)
     }
 
     @Test
     fun `a routed track is drawn only on the outputs it names`() {
         val vm = loaded()
-        vm.addSubtitleFile(srtFile())
-        vm.setSidecarOutputs(0, setOf("sanctuary"))
-        vm.setCurrentPosition(2_000L)
+        vm.subtitles.addSubtitleFile(srtFile())
+        vm.subtitles.setSidecarOutputs(0, setOf("sanctuary"))
+        vm.position.setCurrentPosition(2_000L)
 
-        assertEquals(1, vm.activeSubtitleCues("sanctuary").size)
-        assertTrue(vm.activeSubtitleCues("lobby").isEmpty())
+        assertEquals(1, vm.subtitles.activeSubtitleCues("sanctuary").size)
+        assertTrue(vm.subtitles.activeSubtitleCues("lobby").isEmpty())
     }
 
     @Test
@@ -749,25 +749,25 @@ class MediaViewModelTest {
             writeText("1\n00:00:01,000 --> 00:00:04,000\nHola\n")
             deleteOnExit()
         }.absolutePath
-        vm.addSubtitleFile(first)
-        vm.addSubtitleFile(second)
-        vm.setSidecarOutputs(0, setOf("sanctuary"))
-        vm.setSidecarOutputs(1, setOf("sanctuary"))
-        vm.setCurrentPosition(2_000L)
+        vm.subtitles.addSubtitleFile(first)
+        vm.subtitles.addSubtitleFile(second)
+        vm.subtitles.setSidecarOutputs(0, setOf("sanctuary"))
+        vm.subtitles.setSidecarOutputs(1, setOf("sanctuary"))
+        vm.position.setCurrentPosition(2_000L)
 
         // Bilingual: one output drawing both, in the order they were loaded.
-        assertEquals(listOf("Hello there", "Hola"), vm.activeSubtitleCues("sanctuary").map { it.text })
+        assertEquals(listOf("Hello there", "Hola"), vm.subtitles.activeSubtitleCues("sanctuary").map { it.text })
     }
 
     @Test
     fun `a track that is switched off is drawn nowhere`() {
         val vm = loaded()
-        vm.setSubtitleFile(srtFile())
-        vm.setCurrentPosition(2_000L)
+        vm.subtitles.setSubtitleFile(srtFile())
+        vm.position.setCurrentPosition(2_000L)
 
-        vm.setSidecarEnabled(0, false)
+        vm.subtitles.setSidecarEnabled(0, false)
 
-        assertTrue(vm.activeSubtitleCues(ANY_OUTPUT).isEmpty())
+        assertTrue(vm.subtitles.activeSubtitleCues(ANY_OUTPUT).isEmpty())
     }
 
     // ── Subtitles sitting beside the video ───────────────────────────────────────

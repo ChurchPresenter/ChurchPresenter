@@ -94,8 +94,8 @@ class MediaTabScreenshotTest {
     @Test
     fun `playing, with the seek bar showing a position`() = shoot("playing") { vm ->
         loadVideo(vm)
-        vm.setDuration(SEEK_DURATION_MS)
-        vm.setCurrentPosition(SEEK_POSITION_MS)
+        vm.position.setDuration(SEEK_DURATION_MS)
+        vm.position.setCurrentPosition(SEEK_POSITION_MS)
         mediaButton(MediaLabel.PLAY).performClick()
         waitForIdle()
     }
@@ -103,10 +103,10 @@ class MediaTabScreenshotTest {
     @Test
     fun `looping armed, with the repeat count beside the button`() = shoot("looping") { vm ->
         loadVideo(vm)
-        vm.setDuration(SEEK_DURATION_MS)
-        vm.setCurrentPosition(SEEK_POSITION_MS)
-        vm.toggleLooping()
-        vm.setLoopCount(LOOP_COUNT)
+        vm.position.setDuration(SEEK_DURATION_MS)
+        vm.position.setCurrentPosition(SEEK_POSITION_MS)
+        vm.looping.toggleLooping()
+        vm.looping.setLoopCount(LOOP_COUNT)
         waitForIdle()
     }
 
@@ -125,21 +125,21 @@ class MediaTabScreenshotTest {
     @Test
     fun `subtitles showing, the button lit`() = shoot("subtitles_on") { vm ->
         loadVideo(vm)
-        vm.setSubtitleFile("$FIXTURES/Welcome Loop.srt")
-        vm.setSubtitleTracks(listOf(SubtitleTrack(id = 2, name = "Track 1 - [English]")))
+        vm.subtitles.setSubtitleFile("$FIXTURES/Welcome Loop.srt")
+        vm.subtitles.setSubtitleTracks(listOf(SubtitleTrack(id = 2, name = "Track 1 - [English]")))
         waitForIdle()
     }
 
     @Test
     fun `the subtitle menu open, with an embedded track ticked`() = shoot("subtitles_menu", rootIndex = 1) { vm ->
         loadVideo(vm)
-        vm.setSubtitleTracks(
+        vm.subtitles.setSubtitleTracks(
             listOf(
                 SubtitleTrack(id = 2, name = "Track 1 - [English]"),
                 SubtitleTrack(id = 3, name = "Track 2 - [Spanish]"),
             )
         )
-        vm.selectSubtitleTrack(2)
+        vm.subtitles.selectSubtitleTrack(2)
         mediaButton(MediaLabel.SUBTITLES).performClick()
         waitForIdle()
     }

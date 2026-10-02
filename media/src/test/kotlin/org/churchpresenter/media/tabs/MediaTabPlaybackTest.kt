@@ -105,7 +105,7 @@ class MediaTabPlaybackTest {
     @Test
     fun `seeking forward and backward moves the position`() = mediaTab { vm, _ ->
         loadUrl(vm)
-        vm.setDuration(60_000L)
+        vm.position.setDuration(60_000L)
 
         mediaButton(MediaLabel.SEEK_FORWARD).performClick()
         waitForIdle()
@@ -141,7 +141,7 @@ class MediaTabPlaybackTest {
     @Test
     fun `the subtitle menu lists off, every track and the file picker`() = mediaTab { vm, _ ->
         loadUrl(vm)
-        vm.setSubtitleTracks(listOf(SubtitleTrack(3, "English"), SubtitleTrack(4, "Spanish")))
+        vm.subtitles.setSubtitleTracks(listOf(SubtitleTrack(3, "English"), SubtitleTrack(4, "Spanish")))
         mediaButton(MediaLabel.SUBTITLES).performClick()
         waitForIdle()
 
@@ -154,7 +154,7 @@ class MediaTabPlaybackTest {
     @Test
     fun `picking a track in the menu selects it`() = mediaTab { vm, _ ->
         loadUrl(vm)
-        vm.setSubtitleTracks(listOf(SubtitleTrack(3, "English"), SubtitleTrack(4, "Spanish")))
+        vm.subtitles.setSubtitleTracks(listOf(SubtitleTrack(3, "English"), SubtitleTrack(4, "Spanish")))
         mediaButton(MediaLabel.SUBTITLES).performClick()
         waitForIdle()
 
@@ -170,8 +170,8 @@ class MediaTabPlaybackTest {
     @Test
     fun `choosing off in the menu hides the subtitles again`() = mediaTab { vm, _ ->
         loadUrl(vm)
-        vm.setSubtitleTracks(listOf(SubtitleTrack(3, "English")))
-        vm.selectSubtitleTrack(3)
+        vm.subtitles.setSubtitleTracks(listOf(SubtitleTrack(3, "English")))
+        vm.subtitles.selectSubtitleTrack(3)
         mediaButton(MediaLabel.SUBTITLES).performClick()
         waitForIdle()
 
@@ -184,7 +184,7 @@ class MediaTabPlaybackTest {
     @Test
     fun `a media item added to the schedule carries the subtitle file`() = mediaTab { vm, reports ->
         loadUrl(vm)
-        vm.setSubtitleFile("/media/en.srt")
+        vm.subtitles.setSubtitleFile("/media/en.srt")
         waitForIdle()
 
         mediaButton(MediaLabel.ADD_TO_SCHEDULE).performClick()
@@ -292,7 +292,7 @@ class MediaTabPlaybackTest {
     @Test
     fun `once a duration is known the seek bar shows elapsed and total time`() = mediaTab { vm, _ ->
         loadUrl(vm)
-        vm.setDuration(125_000L)
+        vm.position.setDuration(125_000L)
 
         assertTrue(showsContainingText("2:05"), "got ${renderedText()}")
     }

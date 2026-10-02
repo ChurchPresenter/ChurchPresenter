@@ -15,6 +15,7 @@ import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.media.viewmodel.formatMediaTime
 
 /**
  * The Media tab's seek bar — the widest single piece of the tab that was never driven.
@@ -42,7 +43,7 @@ class MediaTabSeekBarTest {
     private fun seekBarTab(durationMs: Long = 200_000L, block: ComposeUiTest.(vm: MediaViewModel) -> Unit) =
         mediaTab { vm, _ ->
             vm.loadMedia("http://example.test/service.mp4", Constants.MEDIA_TYPE_URL)
-            vm.setDuration(durationMs)
+            vm.position.setDuration(durationMs)
             waitForIdle()
             block(vm)
         }
@@ -89,7 +90,7 @@ class MediaTabSeekBarTest {
             "with no duration reported yet there is nothing to seek along"
         )
 
-        vm.setDuration(200_000L)
+        vm.position.setDuration(200_000L)
         waitForIdle()
         onNodeWithText("3:20").assertExists()
         onNodeWithText("0:00").assertExists()
@@ -97,7 +98,7 @@ class MediaTabSeekBarTest {
 
     @Test
     fun `the elapsed label follows playback without any interaction`() = seekBarTab { vm ->
-        vm.setCurrentPosition(65_000L)
+        vm.position.setCurrentPosition(65_000L)
         waitForIdle()
 
         onNodeWithText("1:05").assertExists()
@@ -106,7 +107,7 @@ class MediaTabSeekBarTest {
 
     @Test
     fun `an hour-long file is labelled in hours at both ends`() = seekBarTab(3_725_000L) { vm ->
-        vm.setCurrentPosition(3_600_000L)
+        vm.position.setCurrentPosition(3_600_000L)
         waitForIdle()
 
         onNodeWithText("1:00:00").assertExists()
@@ -129,14 +130,14 @@ class MediaTabSeekBarTest {
         assertNear(0.25f, quarter, vm.duration)
 
         // The label has moved, so the track is re-derived against what is on screen now.
-        clickTrackAt(0.75f, elapsed = vm.formatTime(quarter), total = "3:20")
+        clickTrackAt(0.75f, elapsed = formatMediaTime(quarter), total = "3:20")
         assertNear(0.75f, vm.currentPosition, vm.duration)
         assertTrue(vm.currentPosition > quarter, "seeking right of the last position must move forward")
     }
 
     @Test
     fun `clicking near the left end rewinds to near the start`() = seekBarTab { vm ->
-        vm.setCurrentPosition(150_000L)
+        vm.position.setCurrentPosition(150_000L)
         waitForIdle()
 
         // Not 0f: the track begins one arrangement gap right of the label's edge, so a click at
@@ -181,7 +182,7 @@ class MediaTabSeekBarTest {
 
     @Test
     fun `dragging back towards the start scrubs backwards`() = seekBarTab { vm ->
-        vm.setCurrentPosition(180_000L)
+        vm.position.setCurrentPosition(180_000L)
         waitForIdle()
         val track = trackBounds("3:00", "3:20")
         val y = track.center.y
