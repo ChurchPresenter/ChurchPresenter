@@ -106,6 +106,34 @@ class DictionaryTabFiltersTest {
         assertFalse(listShows(DictionaryFixture.elohim), "elohim is not, so it must drop out")
     }
 
+    /** The width of the one node captioned [label] — the entry list's chapter and verse filters have no twin. */
+    private fun ComposeUiTest.widthOf(label: String): Float =
+        onAllNodesWithText(label, substring = true).fetchSemanticsNodes().single().boundsInRoot.width
+
+    @Test
+    fun `the entry-list chapter and verse filters share the row with the book filter`() = dictionaryTab(
+        booksWithGreekData = listOf(43),
+        chaptersForBook = mapOf(43 to listOf(3, 15)),
+        versesInChapter = mapOf((43 to 15) to listOf(12, 13)),
+        strongsForBookChapter = mapOf(43 to setOf(DictionaryFixture.agape.number)),
+        getBookName = { "John" },
+    ) { _, _ ->
+        onNodeWithText("BOOK", substring = true).performClick()
+        waitForIdle()
+        onNodeWithText("John").performClick()
+        waitForIdle()
+        assertTrue(widthOf("CHAPTER") > 0f, "the chapter filter must not be squeezed out by the book filter")
+
+        onNodeWithText("CHAPTER", substring = true).performClick()
+        waitForIdle()
+        onNodeWithText("15").performClick()
+        waitForIdle()
+
+        assertTrue(widthOf("BOOK") > 0f)
+        assertTrue(widthOf("CHAPTER") > 0f)
+        assertTrue(widthOf("VERSE") > 0f, "the verse filter must not be squeezed out either")
+    }
+
     @Test
     fun `the entry-list filter is not offered before any book has tagged data`() = dictionaryTab { _, _ ->
         assertEquals(
