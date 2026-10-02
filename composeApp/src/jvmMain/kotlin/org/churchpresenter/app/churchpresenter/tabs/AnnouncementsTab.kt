@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.WindowPlacement
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign

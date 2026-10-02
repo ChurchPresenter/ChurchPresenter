@@ -20,7 +20,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.composables.VlcAudioDevice
+import org.churchpresenter.media.composables.VlcAudioDevice
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.ndi.NdiRuntimeStatus
 import org.churchpresenter.omt.OmtRuntimeStatus

@@ -5,7 +5,7 @@ package org.churchpresenter.app.churchpresenter.presenter
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
+import org.churchpresenter.media.viewmodel.MediaViewModel
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

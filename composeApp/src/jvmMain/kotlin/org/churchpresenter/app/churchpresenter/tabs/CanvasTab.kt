@@ -6,7 +6,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.WindowPlacement
 import org.churchpresenter.sharedui.composables.LocalWentLive
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.composables.CameraHost
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize

@@ -154,8 +154,8 @@ import org.churchpresenter.strings.generated.resources.close
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
+import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.app.churchpresenter.data.ActivityPoint
 import org.churchpresenter.app.churchpresenter.data.ROLLING_MONTHS

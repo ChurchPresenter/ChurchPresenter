@@ -34,6 +34,7 @@ import org.churchpresenter.app.churchpresenter.composables.resizedPanelWidth
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
 
 private const val PANEL_COLLAPSE_ANIM_MS = 220
 private val SCHEDULE_MIN_WIDTH = 160.dp

@@ -11,7 +11,7 @@ import kotlin.test.Test
 /**
  * [LoopingVideoBackground] needs a real, working native VLC install to get past its
  * `!isVlcAvailable` guard — which, like every other VLC-backed composable in this codebase
- * (see [SceneSourceRendererTest], [VideoPlayerTest]), varies by machine and is not exercised here.
+ * (see [SceneSourceRendererTest], `VideoPlayerTest`), varies by machine and is not exercised here.
  * Only its two guard clauses that return *before* that check — a blank path and a nonexistent
  * file — are deterministic on every machine, so those are what this class covers.
  */

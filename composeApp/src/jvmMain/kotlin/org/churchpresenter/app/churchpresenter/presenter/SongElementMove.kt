@@ -12,6 +12,9 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.songShiftKey
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.translationElement
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.elementShift
+import org.churchpresenter.sharedui.presenter.LocalPresentedBlocks
+import org.churchpresenter.sharedui.presenter.PresentedBlock
+import org.churchpresenter.sharedui.presenter.reportsBlock
 
 /**
  * How far [element] is moved on [lowerThird]'s output, in output pixels: its own move, and -- for

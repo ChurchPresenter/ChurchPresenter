@@ -35,8 +35,8 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberUpdatedState
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
-import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
+import org.churchpresenter.media.viewmodel.LocalMediaViewModel
+import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants

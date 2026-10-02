@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
+import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 
 private const val SEEK_SETTLE_MS = 500L
@@ -57,9 +57,9 @@ internal fun MediaRemoteWiring(
     // Media transport controls from a companion remote (mobile Media tab).
     LaunchedEffect(Unit) { companionServer.onMediaPlayPause.collect { mediaViewModel.togglePlayPause() } }
     LaunchedEffect(Unit) { companionServer.onMediaStop.collect { mediaViewModel.stop() } }
-    LaunchedEffect(Unit) { companionServer.onMediaSeekForward.collect { mediaViewModel.seekForward() } }
-    LaunchedEffect(Unit) { companionServer.onMediaSeekBackward.collect { mediaViewModel.seekBackward() } }
-    LaunchedEffect(Unit) { companionServer.onMediaSeekTo.collect { mediaViewModel.seekTo(it) } }
-    LaunchedEffect(Unit) { companionServer.onMediaSetVolume.collect { mediaViewModel.setVolume(it) } }
-    LaunchedEffect(Unit) { companionServer.onMediaMuteToggle.collect { mediaViewModel.toggleMute() } }
+    LaunchedEffect(Unit) { companionServer.onMediaSeekForward.collect { mediaViewModel.position.seekForward() } }
+    LaunchedEffect(Unit) { companionServer.onMediaSeekBackward.collect { mediaViewModel.position.seekBackward() } }
+    LaunchedEffect(Unit) { companionServer.onMediaSeekTo.collect { mediaViewModel.position.seekTo(it) } }
+    LaunchedEffect(Unit) { companionServer.onMediaSetVolume.collect { mediaViewModel.audio.setVolume(it) } }
+    LaunchedEffect(Unit) { companionServer.onMediaMuteToggle.collect { mediaViewModel.audio.toggleMute() } }
 }

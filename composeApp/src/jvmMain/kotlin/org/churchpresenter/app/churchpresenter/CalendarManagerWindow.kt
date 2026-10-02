@@ -5,7 +5,7 @@ import java.io.File
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
-import org.churchpresenter.app.churchpresenter.utils.mediaDurationSeconds
+import org.churchpresenter.media.utils.mediaDurationSeconds
 import org.churchpresenter.strings.generated.resources.Res
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

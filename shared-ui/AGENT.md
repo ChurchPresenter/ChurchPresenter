@@ -7,8 +7,9 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 The composables and helpers that more than one feature uses — settings fields, sliders, segmented
 buttons, the color and font pickers, the text outline and backdrop controls, tooltips, auto-fit,
 screen bounds, keyboard-shortcut labels, the tabs' list and top-bar card styling, the native file
-chooser, and the ffmpeg/HEIC helpers. A real Gradle module of this build — `include(":shared-ui")`,
-`implementation(projects.sharedUi)`. `:composeApp` and `:slides` consume it.
+chooser, the dialog-placement and link-opening helpers, the presenters' shared text-box layout and
+scale, and the ffmpeg/HEIC helpers. A real Gradle module of this build — `include(":shared-ui")`,
+`implementation(projects.sharedUi)`. `:composeApp`, `:slides` and `:media` consume it.
 
 It takes `:strings` and `:icons` (as `api`, so a caller sees the same `Res`), `:core-models`,
 `:settings`, `:theme`, `:song-chords`, `:bible` and `:diagnostics`, plus FileKit and dbus-java for the
@@ -24,16 +25,16 @@ reachable — move it here because it is shared.
 ## Package
 
 **`org.churchpresenter.sharedui`**, with the same sub-packages the code had in the app:
-`.composables`, `.utils`, `.models`, plus `.filechooser`. `models` also holds the two enums every
-layer names — `Tabs` and `Presenting` (the live-content enum).
+`.composables`, `.utils`, `.models`, `.presenter`, plus `.filechooser`. `models` also holds the two
+enums every layer names — `Tabs` and `Presenting` (the live-content enum).
 
 ## Test fixtures
 
 `src/testFixtures` is shared test code for every module above this one
 (`testImplementation(testFixtures(projects.sharedUi))`): the screenshot harness
 (`.screenshot.ScreenshotSupport`) and `.testing` — reading back what a tab rendered
-(`renderedText`, `showsExactly`, `button`), `RecentFilesSwap`, `OutputScaleFixture` and
-`assertColorAt`. A helper two modules' tests need goes here, never into a second copy.
+(`renderedText`, `showsExactly`, `button`), `RecentFilesSwap`, `FakeCommandRunner`,
+`OutputScaleFixture` and `assertColorAt`. A helper two modules' tests need goes here, never into a second copy.
 
 `utils/Constants.kt` holds top-level functions, so its file class is
 `org.churchpresenter.sharedui.utils.ConstantsKt` — the `SceneViewModel` suites in `:composeApp`

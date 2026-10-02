@@ -69,8 +69,8 @@ import org.churchpresenter.strings.generated.resources.story_prompt_reassurance
 import org.churchpresenter.strings.generated.resources.story_prompt_screenshot
 import org.churchpresenter.strings.generated.resources.story_prompt_share
 import org.churchpresenter.strings.generated.resources.story_prompt_window_title
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
+import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.isDarkScheme
 import org.churchpresenter.theme.semantic

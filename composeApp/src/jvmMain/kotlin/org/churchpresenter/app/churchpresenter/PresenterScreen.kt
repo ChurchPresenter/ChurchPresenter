@@ -30,8 +30,8 @@ import org.churchpresenter.sharedui.composables.keySignal
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.presenter.BACKGROUND_BLUR_OVERSCAN
-import org.churchpresenter.app.churchpresenter.presenter.BACKGROUND_REFERENCE_WIDTH
-import org.churchpresenter.app.churchpresenter.presenter.REFERENCE_HEIGHT
+import org.churchpresenter.sharedui.presenter.BACKGROUND_REFERENCE_WIDTH
+import org.churchpresenter.sharedui.presenter.REFERENCE_HEIGHT
 import org.churchpresenter.app.churchpresenter.presenter.backgroundBlurRadius
 import org.churchpresenter.app.churchpresenter.presenter.LocalTransparentBlanking
 import org.churchpresenter.app.churchpresenter.presenter.PERCENT

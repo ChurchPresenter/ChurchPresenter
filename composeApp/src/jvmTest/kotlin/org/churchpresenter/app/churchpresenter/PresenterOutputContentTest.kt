@@ -12,7 +12,7 @@ import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
+import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import kotlin.test.Test

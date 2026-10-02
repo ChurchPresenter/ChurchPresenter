@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.ui.window.WindowPlacement
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import org.churchpresenter.settings.SongColumnId

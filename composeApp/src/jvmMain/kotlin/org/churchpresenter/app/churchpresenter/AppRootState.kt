@@ -24,7 +24,7 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.theme.themeFromSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkCommandFailure
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
+import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.app.churchpresenter.server.CompanionServer

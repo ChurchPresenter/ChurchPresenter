@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
+import org.churchpresenter.sharedui.presenter.PresentedBlock
 import org.churchpresenter.app.churchpresenter.presenter.songBoxKey
 import org.churchpresenter.app.churchpresenter.presenter.titleSlideBoxKey
 import org.churchpresenter.settings.AppSettings

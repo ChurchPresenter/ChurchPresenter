@@ -57,8 +57,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
+import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.semantic
 import org.churchpresenter.strings.generated.resources.Res

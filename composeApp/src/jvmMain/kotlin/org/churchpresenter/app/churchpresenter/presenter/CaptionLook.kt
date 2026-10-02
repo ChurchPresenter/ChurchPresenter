@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
-import org.churchpresenter.app.churchpresenter.composables.BottomAlignedText
+import org.churchpresenter.sharedui.composables.BottomAlignedText
 import org.churchpresenter.settings.CAPTION_BOX_BAND
 import org.churchpresenter.settings.CAPTION_STYLE_POP_ON
 import org.churchpresenter.settings.CAPTION_STYLE_ROLL_UP
@@ -31,6 +31,7 @@ import kotlinx.coroutines.delay
 import org.churchpresenter.sharedui.utils.spacingEm
 import org.churchpresenter.settings.CaptionReading
 import org.churchpresenter.settings.STTSettings
+import org.churchpresenter.sharedui.presenter.sttPositionToAlignment
 
 /**
  * Fades the captions out once [shown] has stayed the same for [CaptionReading.clearAfterSeconds],

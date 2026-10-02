@@ -43,6 +43,9 @@ import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.viewmodel.HighlightedWord
 import org.churchpresenter.app.churchpresenter.viewmodel.STTSegment
+import org.churchpresenter.sharedui.presenter.BoxedItem
+import org.churchpresenter.sharedui.presenter.rectIn
+import org.churchpresenter.sharedui.presenter.sttPositionToAlignment
 
 @Composable
 fun STTPresenter(
@@ -300,22 +303,6 @@ private fun useDripFeed(segments: List<STTSegment>, pace: RevealPace?): List<STT
 
     if (revealed.intValue >= fullText.length) return segments
     return applyRevealBudget(segments, revealed.intValue)
-}
-
-internal fun sttPositionToAlignment(position: String): Alignment = when (position) {
-    Constants.TOP_LEFT -> Alignment.TopStart
-    Constants.TOP_CENTER -> Alignment.TopCenter
-    Constants.TOP_RIGHT -> Alignment.TopEnd
-    Constants.CENTER_LEFT -> Alignment.CenterStart
-    Constants.CENTER -> Alignment.Center
-    Constants.CENTER_RIGHT -> Alignment.CenterEnd
-    Constants.BOTTOM_LEFT -> Alignment.BottomStart
-    Constants.BOTTOM_CENTER -> Alignment.BottomCenter
-    Constants.BOTTOM_RIGHT -> Alignment.BottomEnd
-    Constants.BOTTOM -> Alignment.BottomCenter
-    Constants.TOP -> Alignment.TopCenter
-    Constants.MIDDLE -> Alignment.Center
-    else -> Alignment.BottomCenter
 }
 
 /** The last [count] of [segments], or all of them when [count] is 0 or less. */

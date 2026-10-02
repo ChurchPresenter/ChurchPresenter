@@ -126,8 +126,8 @@ import org.churchpresenter.strings.generated.resources.song_named_title
 import org.churchpresenter.strings.generated.resources.song_translation_title
 import org.churchpresenter.strings.generated.resources.tune
 import org.churchpresenter.strings.generated.resources.unit_bpm
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
+import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
 import org.churchpresenter.app.churchpresenter.composables.PaneTab
 import org.churchpresenter.app.churchpresenter.composables.PaneTabRow

@@ -55,7 +55,7 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.presenter.NdiManager
 import org.churchpresenter.ndi.NdiSourceInfo
 import org.churchpresenter.core.models.scene.SceneSource
-import org.churchpresenter.app.churchpresenter.utils.UrlOpener
+import org.churchpresenter.sharedui.utils.UrlOpener
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.theme.components.RaisedButton
 import org.churchpresenter.sharedui.composables.LabeledCheckbox

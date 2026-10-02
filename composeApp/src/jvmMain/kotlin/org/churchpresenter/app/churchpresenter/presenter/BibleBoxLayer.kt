@@ -37,6 +37,11 @@ import org.churchpresenter.settings.TextBox
 import org.churchpresenter.settings.boxAt
 import org.churchpresenter.settings.textBoxKey
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.sharedui.presenter.BoxFitText
+import org.churchpresenter.sharedui.presenter.BoxedItem
+import org.churchpresenter.sharedui.presenter.clearOf
+import org.churchpresenter.sharedui.presenter.fitInBox
+import org.churchpresenter.sharedui.presenter.rectIn
 
 /** The item name [this] element's boxes are stored under. */
 private val BibleStyleElement.boxItem: String

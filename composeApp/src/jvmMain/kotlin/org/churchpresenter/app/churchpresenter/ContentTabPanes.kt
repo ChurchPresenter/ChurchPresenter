@@ -4,18 +4,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.churchpresenter.app.churchpresenter.models.announcementPresetItem
+import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
+import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.tabs.AnnouncementsTab
 import org.churchpresenter.app.churchpresenter.tabs.CanvasTab
 import org.churchpresenter.app.churchpresenter.tabs.DictionaryTab
 import org.churchpresenter.app.churchpresenter.tabs.LowerThirdTab
-import org.churchpresenter.app.churchpresenter.tabs.MediaTab
+import org.churchpresenter.media.tabs.MediaTab
 import org.churchpresenter.slides.tabs.PicturesTab
 import org.churchpresenter.slides.tabs.PresentationTab
 import org.churchpresenter.app.churchpresenter.dialogs.PresentationRemoteDialog
-import org.churchpresenter.app.churchpresenter.composables.isVlcArchMismatch
-import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
-import org.churchpresenter.app.churchpresenter.composables.isVlcLoadFailed
+import org.churchpresenter.media.composables.isVlcArchMismatch
+import org.churchpresenter.media.composables.isVlcAvailable
+import org.churchpresenter.media.composables.isVlcLoadFailed
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
@@ -120,9 +122,15 @@ internal fun MainDesktopScope.MediaTabPane() {
         },
         selectedMediaItem = state.selectedMediaItem,
         selectedMediaItemVersion = state.selectedMediaItemVersion,
-        presenterManager = presenterManager,
+        presenterManager = presenterManager.mediaOutput,
         instanceLinkMediaStreamUrl = link.mediaStreamUrl,
-        onInstanceLinkSendProject = link.sendProject
+        onInstanceLinkSendProject = link.sendProject,
+        previewOutputPicker = { pickerModifier ->
+            PreviewOutputPicker(
+                appSettings, Constants.PREVIEW_TAB_MEDIA, Presenting.MEDIA, onSettingsChange, pickerModifier,
+            )
+            rememberPreviewOutput(appSettings, Constants.PREVIEW_TAB_MEDIA, Presenting.MEDIA)
+        },
     )
 }
 

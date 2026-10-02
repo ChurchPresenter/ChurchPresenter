@@ -7,6 +7,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.churchpresenter.sharedui.utils.CommandResult
 import org.churchpresenter.sharedui.utils.CommandRunner
+import org.churchpresenter.sharedui.testing.FakeCommandRunner
 
 /**
  * Finding the window a Screen Capture source is pointed at.
