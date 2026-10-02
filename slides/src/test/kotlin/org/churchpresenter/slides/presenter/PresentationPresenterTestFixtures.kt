@@ -5,12 +5,9 @@ import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.PixelMap
 import org.churchpresenter.presentationengine.model.LayerSpec
 import org.churchpresenter.presentationengine.model.LayerState
 import org.churchpresenter.presentationengine.model.RectPt
-import kotlin.math.abs
-import kotlin.test.assertTrue
 
 internal fun solidColorBitmap(width: Int, height: Int, color: Color): ImageBitmap =
     ImageBitmap(width, height).also { bitmap ->

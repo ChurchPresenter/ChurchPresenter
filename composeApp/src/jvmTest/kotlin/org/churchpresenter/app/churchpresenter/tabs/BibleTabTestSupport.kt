@@ -43,9 +43,6 @@ import org.churchpresenter.app.churchpresenter.data.CrossReferenceRepository
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
 import java.nio.file.Files
-import org.churchpresenter.sharedui.testing.renderedText
-import org.churchpresenter.sharedui.testing.showsContainingText
-import org.churchpresenter.sharedui.testing.showsExactly
 
 /**
  * Harness and fixtures shared by the `BibleTab` test classes.

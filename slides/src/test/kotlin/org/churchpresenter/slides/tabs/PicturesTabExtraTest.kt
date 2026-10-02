@@ -15,7 +15,6 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.slides.FakeSlidesOutput
-import org.churchpresenter.slides.SlidesOutput
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -29,8 +29,6 @@ import org.json.JSONObject
 import java.net.InetAddress
 import java.net.ServerSocket
 import org.churchpresenter.sharedui.testing.renderedText
-import org.churchpresenter.sharedui.testing.showsContainingText
-import org.churchpresenter.sharedui.testing.showsExactly
 
 /**
  * Harness and fixtures shared by the `STTTab` test classes.

@@ -10,7 +10,6 @@ import androidx.compose.ui.test.performTextReplacement
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.slides.FakeSlidesOutput
-import org.churchpresenter.slides.SlidesOutput
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

@@ -1,6 +1,5 @@
 package org.churchpresenter.sharedui.utils
 
-import io.mockk.every
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.File

@@ -20,7 +20,6 @@ import org.churchpresenter.sharedui.utils.UsageEvent
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Image as SkiaImage
 import java.util.concurrent.ConcurrentHashMap
-import org.churchpresenter.slides.viewmodel.PresentationViewModel
 
 private const val ALPHA_BYTE_OFFSET = 3
 private const val RGB_BYTES_PER_PIXEL = 3

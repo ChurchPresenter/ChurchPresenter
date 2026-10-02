@@ -28,15 +28,11 @@ import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.sharedui.utils.ShortcutMap
 import org.churchpresenter.slides.viewmodel.PicturesViewModel
-import org.churchpresenter.slides.FakeSlidesOutput
 import org.churchpresenter.slides.SlidesOutput
 import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Files
 import javax.imageio.ImageIO
-import org.churchpresenter.sharedui.testing.renderedText
-import org.churchpresenter.sharedui.testing.showsContainingText
-import org.churchpresenter.sharedui.testing.showsExactly
 
 /**
  * Harness and fixtures shared by the `PicturesTab` test classes.

@@ -49,7 +49,7 @@ internal fun MainDesktopScope.PicturesTabPane() {
         instanceLinkFetchPictureImageBytes = link.fetchPictureImageBytes,
         selectedPictureItem = state.selectedPictureItem,
         selectedPictureItemVersion = state.selectedPictureItemVersion,
-        presenterManager = presenterManager,
+        presenterManager = presenterManager.slidesOutput,
         onSettingsChange = onSettingsChange,
         viewModel = picturesViewModel
     )
@@ -75,7 +75,7 @@ internal fun MainDesktopScope.PresentationTabPane() {
         instanceLinkFetchPresentationSlideBytes = link.fetchPresentationSlideBytes,
         selectedPresentationItem = state.selectedPresentationItem,
         selectedPresentationItemVersion = state.selectedPresentationItemVersion,
-        presenterManager = presenterManager,
+        presenterManager = presenterManager.slidesOutput,
         onSlidesLoaded = publish.onPresentationSlidesLoaded,
         onSettingsChange = onSettingsChange,
         viewModel = presentationViewModel,

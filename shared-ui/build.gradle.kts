@@ -41,6 +41,7 @@ dependencies {
     }
 
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.swing)
     implementation(libs.kotlinx.serialization.json)
 
     implementation(compose.desktop.currentOs)

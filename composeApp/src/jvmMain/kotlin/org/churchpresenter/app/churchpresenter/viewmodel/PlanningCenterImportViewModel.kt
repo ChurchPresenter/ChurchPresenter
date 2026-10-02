@@ -27,7 +27,6 @@ import org.churchpresenter.presentationengine.LoadResult
 import org.churchpresenter.presentationengine.PresentationLoader
 import java.io.File
 import org.jetbrains.compose.resources.StringResource
-import org.churchpresenter.slides.viewmodel.PresentationViewModel
 
 private const val TOKEN_REFRESH_MARGIN_MS = 60_000
 

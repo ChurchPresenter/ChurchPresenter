@@ -24,7 +24,6 @@ import org.churchpresenter.slides.tabs.presentationTab
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.slides.viewmodel.PresentationViewModel
 import org.churchpresenter.slides.FakeSlidesOutput
-import org.churchpresenter.slides.SlidesOutput
 import org.churchpresenter.presentationengine.LoadResult
 import org.churchpresenter.presentationengine.model.Deck
 import org.churchpresenter.presentationengine.model.DeckLoadError

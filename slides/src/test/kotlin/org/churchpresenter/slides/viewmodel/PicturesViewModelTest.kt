@@ -18,7 +18,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.churchpresenter.slides.FakeSlidesOutput
-import org.churchpresenter.slides.SlidesOutput
 
 /**
  * The image slideshow: which files a folder offers, where next/previous land, and what reaches the

@@ -18,15 +18,11 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.slides.viewmodel.PresentationViewModel
-import org.churchpresenter.slides.FakeSlidesOutput
 import org.churchpresenter.slides.SlidesOutput
 import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Files
 import javax.imageio.ImageIO
-import org.churchpresenter.sharedui.testing.renderedText
-import org.churchpresenter.sharedui.testing.showsContainingText
-import org.churchpresenter.sharedui.testing.showsExactly
 
 /**
  * Harness and fixtures for the `PresentationTab` test classes.

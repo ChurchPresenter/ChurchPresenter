@@ -255,13 +255,13 @@ private fun RemotePictureEffects(
     LaunchedEffect(nextPictureFlow) {
         nextPictureFlow?.collect {
             picturesViewModel.nextImage()
-            picturesViewModel.syncWithPresenter(presenterManager)
+            picturesViewModel.syncWithPresenter(presenterManager.slidesOutput)
         }
     }
     LaunchedEffect(previousPictureFlow) {
         previousPictureFlow?.collect {
             picturesViewModel.previousImage()
-            picturesViewModel.syncWithPresenter(presenterManager)
+            picturesViewModel.syncWithPresenter(presenterManager.slidesOutput)
         }
     }
 }

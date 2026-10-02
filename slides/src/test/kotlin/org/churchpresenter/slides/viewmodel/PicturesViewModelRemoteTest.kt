@@ -14,7 +14,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.churchpresenter.slides.FakeSlidesOutput
-import org.churchpresenter.slides.SlidesOutput
 
 /**
  * A picture folder mirrored from an Instance Link primary, plus the thumbnail downscale that every

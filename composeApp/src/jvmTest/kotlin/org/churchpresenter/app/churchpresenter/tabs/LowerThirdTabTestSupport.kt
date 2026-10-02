@@ -33,9 +33,6 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
 import java.io.File
 import java.nio.file.Files
-import org.churchpresenter.sharedui.testing.renderedText
-import org.churchpresenter.sharedui.testing.showsContainingText
-import org.churchpresenter.sharedui.testing.showsExactly
 
 /**
  * Harness and fixtures shared by the `LowerThirdTab` test classes.

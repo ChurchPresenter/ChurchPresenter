@@ -32,7 +32,6 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import java.awt.image.BufferedImage
 import java.io.File
-import org.churchpresenter.slides.SlidesOutput
 
 /**
  * Orchestrates presentation loading for the Presentation tab. All parsing and rendering lives in

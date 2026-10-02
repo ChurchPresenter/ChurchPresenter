@@ -30,7 +30,14 @@ dependencies {
     api(projects.presentationEngine)
 
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.swing)
     implementation(libs.kotlinx.serialization.json)
+
+    // ImageIO readers for what Skia refuses -- see PictureDecoder. jpeg covers CMYK/YCCK JPEGs, psd
+    // a Photoshop file saved with a picture's name.
+    implementation(libs.twelvemonkeys.imageio.core)
+    implementation(libs.twelvemonkeys.imageio.jpeg)
+    implementation(libs.twelvemonkeys.imageio.psd)
 
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.components.resources)

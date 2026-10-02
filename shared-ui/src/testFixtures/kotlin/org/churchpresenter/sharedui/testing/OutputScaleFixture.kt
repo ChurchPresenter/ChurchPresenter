@@ -58,7 +58,11 @@ object OutputScaleFixture {
         }
     }
 
-    private fun Color.isBlack() = red < 0.1f && green < 0.1f && blue < 0.1f
-    private fun Color.isRed() = red > 0.9f && green < 0.1f && blue < 0.1f
-    private fun Color.isBlue() = red < 0.1f && green < 0.1f && blue > 0.9f
+    private fun Color.isBlack() = red < OFF && green < OFF && blue < OFF
+    private fun Color.isRed() = red > ON && green < OFF && blue < OFF
+    private fun Color.isBlue() = red < OFF && green < OFF && blue > ON
+
+    /** A channel this far from 0 or 1 still reads as off or on: room for antialiasing at an edge. */
+    private const val OFF = 0.1f
+    private const val ON = 0.9f
 }

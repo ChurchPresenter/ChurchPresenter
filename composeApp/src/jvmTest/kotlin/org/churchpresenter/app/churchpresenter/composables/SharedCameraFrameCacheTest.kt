@@ -6,7 +6,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.churchpresenter.sharedui.utils.FfmpegBinary
 
 /**
  * The pure parts of camera capture: frame conversion, the ffmpeg command, and why a run gave up.

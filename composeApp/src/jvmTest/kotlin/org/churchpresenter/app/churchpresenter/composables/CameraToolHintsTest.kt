@@ -8,7 +8,6 @@ import org.churchpresenter.strings.generated.resources.canvas_camera_v4l2_hint
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.churchpresenter.sharedui.utils.FfmpegBinary
 
 /**
  * What the operator is told about the tools their cameras need.

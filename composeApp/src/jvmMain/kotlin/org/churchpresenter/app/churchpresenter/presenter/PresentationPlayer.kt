@@ -12,7 +12,6 @@ import org.churchpresenter.slides.utils.reportDegradedSlide
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.presentationengine.DeckRasterizer
 import org.churchpresenter.presentationengine.model.Deck
-import org.churchpresenter.presentationengine.model.Direction
 import org.churchpresenter.presentationengine.model.LayerSpec
 import org.churchpresenter.presentationengine.model.LayerState
 import org.churchpresenter.presentationengine.model.SlideTransitionSpec

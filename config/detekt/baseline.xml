@@ -99,14 +99,8 @@
     <ID>LongParameterList:SharedBrowserFrameCache.kt$SharedBrowserFrameCache$( entry: CacheEntry, url: String, renderWidth: Int, renderHeight: Int, customCss: String, fps: Int, forceTransparent: Boolean )</ID>
     <ID>LongParameterList:SharedBrowserFrameCache.kt$SharedBrowserFrameCache$( sourceId: String, url: String, renderWidth: Int, renderHeight: Int, customCss: String, fps: Int, forceTransparent: Boolean )</ID>
     <ID>LongParameterList:SharedBrowserFrameCache.kt$SharedBrowserFrameCache.CacheEntry$( val frame: MutableStateFlow&lt;ImageBitmap?&gt; = MutableStateFlow(null), val error: MutableStateFlow&lt;String?&gt; = MutableStateFlow(null), val currentUrl: MutableStateFlow&lt;String&gt; = MutableStateFlow(""), var refCount: Int = 0, var browserProcess: Process? = null, var captureJob: Job? = null, var cdpConnection: CdpConnection? = null, var debugPort: Int = 0, var userDataDir: java.io.File? = null, @Volatile var captureIntervalMs: Long = 33 )</ID>
-    <ID>LongParameterList:SwingFileChooser.kt$SwingFileChooser$( location: Path, suggestedName: String, filters: List&lt;FileNameExtensionFilter&gt;, title: String, frame: JFrame, showDialog: (JFileChooser, JFrame) -&gt; Int )</ID>
-    <ID>LongParameterList:SwingFileChooser.kt$SwingFileChooser$( path: Path, filters: List&lt;FileNameExtensionFilter&gt;, title: String, selectDirectory: Boolean, multiple: Boolean, frame: JFrame, showDialog: (JFileChooser, JFrame) -&gt; Int )</ID>
-    <ID>LongParameterList:SwingFileChooser.kt$SwingFileChooser$( path: Path, filters: List&lt;FileNameExtensionFilter&gt;, title: String, selectDirectory: Boolean, multiple: Boolean, show: (JFileChooser) -&gt; Int )</ID>
     <ID>LongParameterList:WebSocketRoute.kt$( server: CompanionServer, _apiKey: MutableStateFlow&lt;String&gt;, _apiKeyEnabled: MutableStateFlow&lt;Boolean&gt;, _bibleCatalog: MutableStateFlow&lt;BibleCatalogResponse?&gt;, _catalog: MutableStateFlow&lt;SongCatalogResponse&gt;, _connectedInstanceLinkFollowers: MutableStateFlow&lt;Set&lt;String&gt;&gt;, _liveState: MutableStateFlow&lt;LiveStateDto?&gt;, _pictureCatalog: MutableStateFlow&lt;PictureFolderResponse?&gt;, _pictureCatalogs: ConcurrentHashMap&lt;String, PictureFolderResponse&gt;, _presentationCatalog: MutableStateFlow&lt;PresentationCatalogResponse&gt;, _presentationCatalogs: ConcurrentHashMap&lt;String, PresentationDto&gt;, _schedule: MutableStateFlow&lt;List&lt;ScheduleItemDto&gt;&gt;, _scheduleItemToPresentationId: ConcurrentHashMap&lt;String, String&gt;, json: Json, scope: CoroutineScope, )</ID>
     <ID>LongParameterList:X11WindowCapture.kt$X11WindowCapture.X11$(display: Pointer, drawable: NativeLong, x: Int, y: Int, width: Int, height: Int, planeMask: NativeLong, format: Int)</ID>
-    <ID>LongParameterList:XdgFileChooser.kt$XdgFileChooser$( path: Path, filters: List&lt;FileNameExtensionFilter&gt;, suggestedName: String?, selectDirectory: Boolean, multiple: Boolean, token: String )</ID>
-    <ID>LongParameterList:XdgFileChooser.kt$XdgFileChooser$( path: Path, filters: List&lt;FileNameExtensionFilter&gt;, suggestedName: String?, selectDirectory: Boolean, multiple: Boolean, uniqueName: String, token: String, ask: suspend (options: Map&lt;String, Variant&lt;*&gt;&gt;, requestPath: String) -&gt; List&lt;String&gt;? )</ID>
-    <ID>LongParameterList:XdgFileChooser.kt$XdgFileChooser$( path: Path, filters: List&lt;FileNameExtensionFilter&gt;, title: String, suggestedName: String?, selectDirectory: Boolean, multiple: Boolean, // crossinline: invoked from inside the request lambda below, so it cannot return non-locally crossinline dbusMethod: DBusFileChooser.(String, String, Map&lt;String, Variant&lt;*&gt;&gt;) -&gt; DBusPath )</ID>
     <ID>TooManyFunctions:AnnouncementsViewModel.kt$AnnouncementsViewModel</ID>
     <ID>TooManyFunctions:AutoStartManager.kt$AutoStartManager</ID>
     <ID>TooManyFunctions:BackgroundSettingsTab.kt$org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab.kt</ID>
@@ -122,7 +116,6 @@
     <ID>TooManyFunctions:DictionaryTab.kt$org.churchpresenter.app.churchpresenter.tabs.DictionaryTab.kt</ID>
     <ID>TooManyFunctions:DictionaryViewModel.kt$DictionaryViewModel</ID>
     <ID>TooManyFunctions:EditSongDialog.kt$org.churchpresenter.app.churchpresenter.dialogs.EditSongDialog.kt</ID>
-    <ID>TooManyFunctions:FileKitFileChooser.kt$FileKitFileChooser : FileChooser</ID>
     <ID>TooManyFunctions:FileManager.kt$FileManager</ID>
     <ID>TooManyFunctions:InstanceLinkClient.kt$InstanceLinkClient</ID>
     <ID>TooManyFunctions:InstanceLinkViewModel.kt$InstanceLinkViewModel</ID>
@@ -131,10 +124,8 @@
     <ID>TooManyFunctions:LowerThirdAndAtemRoutes.kt$org.churchpresenter.app.churchpresenter.server.LowerThirdAndAtemRoutes.kt</ID>
     <ID>TooManyFunctions:MainLogic.kt$org.churchpresenter.app.churchpresenter.MainLogic.kt</ID>
     <ID>TooManyFunctions:MediaViewModel.kt$MediaViewModel</ID>
-    <ID>TooManyFunctions:PicturesViewModel.kt$PicturesViewModel</ID>
     <ID>TooManyFunctions:PlanningCenterImportViewModel.kt$PlanningCenterImportViewModel</ID>
     <ID>TooManyFunctions:PresentationPlayer.kt$PresentationPlayer</ID>
-    <ID>TooManyFunctions:PresentationViewModel.kt$PresentationViewModel</ID>
     <ID>TooManyFunctions:PresenterManager.kt$PresenterManager</ID>
     <ID>TooManyFunctions:QAManager.kt$QAManager</ID>
     <ID>TooManyFunctions:RemoteApply.kt$org.churchpresenter.app.churchpresenter.server.RemoteApply.kt</ID>
@@ -152,9 +143,7 @@
     <ID>TooManyFunctions:SslCertificateManager.kt$SslCertificateManager</ID>
     <ID>TooManyFunctions:StageMonitorScreen.kt$org.churchpresenter.app.churchpresenter.StageMonitorScreen.kt</ID>
     <ID>TooManyFunctions:StatisticsManager.kt$StatisticsManager</ID>
-    <ID>TooManyFunctions:SwingFileChooser.kt$SwingFileChooser : FileChooser</ID>
     <ID>TooManyFunctions:VideoPlayer.kt$org.churchpresenter.app.churchpresenter.composables.VideoPlayer.kt</ID>
     <ID>TooManyFunctions:WindowsWindowCapture.kt$WindowsWindowCapture</ID>
-    <ID>TooManyFunctions:XdgFileChooser.kt$XdgFileChooser : FileChooser</ID>
   </CurrentIssues>
 </SmellBaseline>

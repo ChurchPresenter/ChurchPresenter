@@ -27,9 +27,6 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import java.io.File
 import java.nio.file.Files
-import org.churchpresenter.sharedui.testing.renderedText
-import org.churchpresenter.sharedui.testing.showsContainingText
-import org.churchpresenter.sharedui.testing.showsExactly
 
 /**
  * Harness and fixtures shared by the `CanvasTab` test classes.

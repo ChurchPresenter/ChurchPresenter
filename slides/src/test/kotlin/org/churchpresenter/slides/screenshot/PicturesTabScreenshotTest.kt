@@ -20,7 +20,6 @@ import org.churchpresenter.slides.tabs.picturesTab
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.slides.viewmodel.PicturesViewModel
 import org.churchpresenter.slides.FakeSlidesOutput
-import org.churchpresenter.slides.SlidesOutput
 import java.awt.Color
 import java.awt.GradientPaint
 import java.awt.image.BufferedImage
