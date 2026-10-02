@@ -35,6 +35,10 @@ data class LiveHistoryEntry(
  * Content setters fire on every call even when nothing changed, so a line is only written when it
  * differs from the previous line in the same file.
  *
+ * While STT is transcribing, each line also carries `sttSeconds`: where in the STT recording it
+ * falls ([SttClock]), so a song can be cut from the recording by the recording's own time. A line
+ * written with STT off, or before it has transcribed anything, has none.
+ *
  * `PresenterManager` knows a live section's title and number but not its songbook. The go-live
  * paths that do know the song row report it through [noteLiveSong]; a LYRICS line is stamped with
  * that `songId` while its title and number still match.
@@ -42,6 +46,9 @@ data class LiveHistoryEntry(
 object LiveHistoryLogger {
 
     internal const val PREFIX = "live-content-"
+
+    // The STT clock is good to the lag of a transcription update, so a tenth of a second is plenty
+    private const val TENTHS = 10.0
 
     private data class NotedSong(
         val songId: String,
@@ -130,8 +137,10 @@ object LiveHistoryLogger {
     }
 
     private fun lineOf(e: LiveHistoryEntry, source: String?): String = buildString {
-        append("{\"ts_ms\":").append(System.currentTimeMillis())
+        val now = System.currentTimeMillis()
+        append("{\"ts_ms\":").append(now)
         appendSessionId()
+        appendField("sttSeconds", SttClock.secondsAt(now)?.let { Math.round(it * TENTHS) / TENTHS })
         appendField("contentType", e.contentType)
         appendField("source", source)
         appendField("songId", e.songId)

@@ -35,6 +35,7 @@ class LiveHistoryLoggerTest {
     @AfterTest
     fun clearSession() {
         TrainingDataLogger.sessionId = null
+        SttClock.reset()
     }
 
     private fun useSession(name: String): String {
@@ -69,6 +70,23 @@ class LiveHistoryLoggerTest {
     )
 
     // ── File format ─────────────────────────────────────────────────────────────
+
+    @Test
+    fun `while STT is transcribing, each line says where in its recording it falls`() {
+        val session = useSession("stt-clock")
+        SttClock.observe(sttSeconds = 600.0, atMs = System.currentTimeMillis())
+        LiveHistoryLogger.logLiveState(lyrics("Clocked", 501))
+        val at = changes(session).single().str("sttSeconds")!!.toDouble()
+        assertTrue(at in 600.0..601.0, "a line written just after 600 s of recording sits at ~600 s, was $at")
+    }
+
+    @Test
+    fun `a line written with STT off carries no recording time`() {
+        val session = useSession("no-stt-clock")
+        LiveHistoryLogger.logLiveState(lyrics("Unclocked", 502))
+        assertNull(changes(session).single()["sttSeconds"])
+    }
+
 
     @Test
     fun `each change is one JSON line and a repeat of the last one writes nothing`() {

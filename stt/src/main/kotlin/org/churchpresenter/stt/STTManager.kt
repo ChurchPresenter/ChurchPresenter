@@ -189,6 +189,7 @@ class STTManager {
         _connectError.value = false
         _reconnecting.value = false
         capture.stop()
+        leaveSession()
     }
 
     fun dispose() {
