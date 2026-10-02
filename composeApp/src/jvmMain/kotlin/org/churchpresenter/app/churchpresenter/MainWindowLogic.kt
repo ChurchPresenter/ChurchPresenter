@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEvent
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
 import org.churchpresenter.theme.ThemeMode
 

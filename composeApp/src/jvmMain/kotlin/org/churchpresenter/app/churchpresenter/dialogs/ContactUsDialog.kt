@@ -59,7 +59,7 @@ import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.app.churchpresenter.utils.ContactReporter
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
+import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint

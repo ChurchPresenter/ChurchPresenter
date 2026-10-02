@@ -46,8 +46,8 @@ import org.churchpresenter.strings.generated.resources.song_background_look
 import org.churchpresenter.strings.generated.resources.song_background_sample_line
 import org.churchpresenter.strings.generated.resources.song_background_your_color
 import org.churchpresenter.strings.generated.resources.unit_px
-import org.churchpresenter.app.churchpresenter.composables.RecentColors
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.composables.RecentColors
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.core.models.songs.SONG_BACKGROUND_MAX_BLUR
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType

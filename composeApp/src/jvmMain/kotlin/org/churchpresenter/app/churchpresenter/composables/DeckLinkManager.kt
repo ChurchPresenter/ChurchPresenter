@@ -2,9 +2,10 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.scene.SceneSource
-import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.addGuardedShutdownHook
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
+import org.churchpresenter.sharedui.composables.mode
 
 private const val OPEN_RETRY_ATTEMPTS = 3
 private const val OPEN_RETRY_DELAY_MS = 100L

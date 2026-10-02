@@ -1,9 +1,9 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
-import org.churchpresenter.app.churchpresenter.composables.ActionIconButton
-import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.sharedui.composables.ActionIconButton
+import org.churchpresenter.sharedui.composables.AddToScheduleButton
+import org.churchpresenter.sharedui.composables.SavePresetButton
+import org.churchpresenter.sharedui.composables.GoLiveButton
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -57,8 +57,8 @@ import org.churchpresenter.strings.generated.resources.timer_title
 import org.churchpresenter.strings.generated.resources.timer_mode_duration
 import org.churchpresenter.strings.generated.resources.timer_mode_clock
 import org.churchpresenter.strings.generated.resources.timer_target_time
-import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.composables.DropdownSettingsField
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.isSystemUsing24HourFormat
 import org.churchpresenter.app.churchpresenter.viewmodel.AnnouncementsViewModel

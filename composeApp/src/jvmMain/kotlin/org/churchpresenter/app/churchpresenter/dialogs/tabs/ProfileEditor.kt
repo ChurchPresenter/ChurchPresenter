@@ -33,7 +33,7 @@ import org.churchpresenter.strings.generated.resources.output_profile_delete_con
 import org.churchpresenter.strings.generated.resources.profile_delete_blocked_master
 import org.churchpresenter.strings.generated.resources.profile_mode_locked_sub
 import org.churchpresenter.strings.generated.resources.profile_page_not_shown
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
+import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.OutputStyleScope

@@ -25,12 +25,14 @@ import kotlinx.coroutines.runBlocking
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OBSSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.OBSSettingsTab
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.theme.ThemeMode
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
  * The OBS tab of the settings dialog, in both themes.

@@ -23,6 +23,7 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.models.Presenting
 
 private const val LIB_PATH = "/opt/omt/libomt.dylib"
 private const val WAIT_MS = 4_000L

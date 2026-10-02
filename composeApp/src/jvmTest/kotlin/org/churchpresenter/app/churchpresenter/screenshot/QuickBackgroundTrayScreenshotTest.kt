@@ -2,7 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
-import org.churchpresenter.app.churchpresenter.utils.FALLBACK_STAGE_ASPECT
+import org.churchpresenter.sharedui.utils.FALLBACK_STAGE_ASPECT
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
@@ -12,6 +12,7 @@ import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.settings.QuickBackground
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureComponent
 
 /**
  * The quick backgrounds tray, as it sits under the live preview.

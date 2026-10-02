@@ -3,7 +3,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.ui.test.performClick
-import org.churchpresenter.app.churchpresenter.utils.withPictureScaleEverywhere
+import org.churchpresenter.sharedui.utils.withPictureScaleEverywhere
 import org.churchpresenter.settings.OutputScaleMode
 import kotlin.test.Test
 import kotlin.test.assertEquals

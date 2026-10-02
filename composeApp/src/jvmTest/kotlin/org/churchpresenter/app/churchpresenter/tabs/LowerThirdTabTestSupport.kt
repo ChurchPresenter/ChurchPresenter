@@ -12,7 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
-import org.churchpresenter.app.churchpresenter.screenshot.RENDER_TIMEOUT_MS
+import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasContentDescription

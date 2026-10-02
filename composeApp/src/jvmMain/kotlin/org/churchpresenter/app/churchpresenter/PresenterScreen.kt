@@ -26,7 +26,7 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.app.churchpresenter.composables.CameraBackground
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
-import org.churchpresenter.app.churchpresenter.composables.keySignal
+import org.churchpresenter.sharedui.composables.keySignal
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.app.churchpresenter.presenter.BACKGROUND_BLUR_OVERSCAN
@@ -37,7 +37,7 @@ import org.churchpresenter.app.churchpresenter.presenter.LocalTransparentBlankin
 import org.churchpresenter.app.churchpresenter.presenter.PERCENT
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import java.io.File
 

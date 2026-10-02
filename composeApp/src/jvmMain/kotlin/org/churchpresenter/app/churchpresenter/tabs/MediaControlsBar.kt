@@ -6,10 +6,10 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
-import org.churchpresenter.app.churchpresenter.utils.sharedScaleMode
-import org.churchpresenter.app.churchpresenter.utils.ScaleButtonContent
-import org.churchpresenter.app.churchpresenter.utils.scaleButtonLabel
-import org.churchpresenter.app.churchpresenter.utils.withMediaScaleEverywhere
+import org.churchpresenter.sharedui.utils.sharedScaleMode
+import org.churchpresenter.sharedui.utils.ScaleButtonContent
+import org.churchpresenter.sharedui.utils.scaleButtonLabel
+import org.churchpresenter.sharedui.utils.withMediaScaleEverywhere
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -65,12 +65,12 @@ import org.churchpresenter.strings.generated.resources.media_unmute
 import org.churchpresenter.strings.generated.resources.pause
 import org.churchpresenter.strings.generated.resources.play
 import org.churchpresenter.strings.generated.resources.stop
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
-import org.churchpresenter.app.churchpresenter.composables.SlimSlider
+import org.churchpresenter.sharedui.composables.NumberSettingsTextField
+import org.churchpresenter.sharedui.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.settings.OutputScaleMode
-import org.churchpresenter.app.churchpresenter.utils.icon
-import org.churchpresenter.app.churchpresenter.utils.label
+import org.churchpresenter.sharedui.utils.icon
+import org.churchpresenter.sharedui.utils.label
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import javax.swing.filechooser.FileNameExtensionFilter

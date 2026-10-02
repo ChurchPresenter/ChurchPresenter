@@ -132,11 +132,11 @@ import org.churchpresenter.strings.generated.resources.server_host_hint
 import org.churchpresenter.strings.generated.resources.server_host_label
 import org.churchpresenter.strings.generated.resources.server_host_note
 import org.churchpresenter.strings.generated.resources.server_url_label
-import org.churchpresenter.app.churchpresenter.composables.SettingRow
-import org.churchpresenter.app.churchpresenter.composables.SettingSwitchRow
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbar
-import org.churchpresenter.app.churchpresenter.composables.SettingsScrollbarGutter
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.sharedui.composables.SettingRow
+import org.churchpresenter.sharedui.composables.SettingSwitchRow
+import org.churchpresenter.sharedui.composables.SettingsScrollbar
+import org.churchpresenter.sharedui.composables.SettingsScrollbarGutter
+import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.settings.ServerSettings
 import org.churchpresenter.settings.AtemSettings
 import java.net.URLEncoder
@@ -150,7 +150,7 @@ import org.jetbrains.compose.resources.stringResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.UUID
-import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
+import org.churchpresenter.sharedui.utils.SystemClipboard
 
 @Composable
 fun ServerSettingsTab(

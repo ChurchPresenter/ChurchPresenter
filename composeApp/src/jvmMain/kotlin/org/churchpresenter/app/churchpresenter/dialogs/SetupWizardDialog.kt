@@ -183,7 +183,7 @@ import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
 import org.churchpresenter.app.churchpresenter.ui.theme.themeDisplayName
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
-import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
+import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.theme.colorSchemeFor

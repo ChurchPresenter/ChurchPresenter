@@ -7,6 +7,7 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.bibleTranslationPositions
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.sharedui.utils.UsageEvent
 
 /**
  * Whether what is going live right now is genuinely a *multi-language* presentation.

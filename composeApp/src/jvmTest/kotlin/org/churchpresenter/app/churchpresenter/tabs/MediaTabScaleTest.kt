@@ -8,7 +8,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
-import org.churchpresenter.app.churchpresenter.utils.withMediaScaleEverywhere
+import org.churchpresenter.sharedui.utils.withMediaScaleEverywhere
 import org.churchpresenter.settings.OutputScaleMode
 import kotlin.test.Test
 import kotlin.test.assertEquals

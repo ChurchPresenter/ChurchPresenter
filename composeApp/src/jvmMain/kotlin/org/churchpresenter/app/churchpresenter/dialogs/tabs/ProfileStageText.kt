@@ -23,11 +23,11 @@ import org.churchpresenter.strings.generated.resources.profile_text_style
 import org.churchpresenter.strings.generated.resources.profile_vertical_alignment
 import org.churchpresenter.strings.generated.resources.right
 import org.churchpresenter.strings.generated.resources.top
-import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
-import org.churchpresenter.app.churchpresenter.composables.TextBackdropButton
-import org.churchpresenter.app.churchpresenter.composables.TextOutlineButton
-import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.sharedui.composables.ShadowDetailRow
+import org.churchpresenter.sharedui.composables.TextBackdropButton
+import org.churchpresenter.sharedui.composables.TextOutlineButton
+import org.churchpresenter.sharedui.composables.TextStyleButtons
+import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.settings.StageMonitorSettings
 import org.churchpresenter.settings.StageMonitorStyleZone
 import org.churchpresenter.settings.StageMonitorZoneStyle

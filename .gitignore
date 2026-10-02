@@ -69,3 +69,5 @@ composeApp/src/jvmMain/appResources/*/omt/
 # Roborazzi writes each theme's half here before stacking them into the committed golden.
 # Scratch: cleaned up after every run, and never something to commit.
 composeApp/screenshots/.parts/
+shared-ui/screenshots/.parts/
+screenshots-compare/

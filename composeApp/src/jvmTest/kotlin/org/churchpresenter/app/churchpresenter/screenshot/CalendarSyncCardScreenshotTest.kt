@@ -27,6 +27,7 @@ import java.time.ZoneId
 import java.util.Locale
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.sharedui.screenshot.captureComponent
 
 /**
  * The "Calendar on phones" card of the Server tab, in each state it reports, and the QR the

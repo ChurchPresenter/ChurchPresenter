@@ -12,6 +12,7 @@ import org.churchpresenter.app.churchpresenter.composables.OmtProperties
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.omt.OmtRuntimeStatus
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureComponent
 
 private val READY = OmtRuntimeStatus.Ready("/app/omt/libomt.dylib", bundled = true)
 

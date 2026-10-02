@@ -12,7 +12,7 @@ import androidx.compose.ui.focus.focusRequester
 import org.churchpresenter.strings.generated.resources.chapter
 import org.churchpresenter.app.churchpresenter.composables.rememberTokenGate
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.app.churchpresenter.viewmodel.getSelectedVerses
 import org.churchpresenter.app.churchpresenter.viewmodel.logLiveReference

@@ -35,10 +35,11 @@ import org.churchpresenter.strings.generated.resources.output_resolution_custom
 import org.churchpresenter.strings.generated.resources.output_resolution_custom_title
 import org.churchpresenter.strings.generated.resources.output_resolution_height
 import org.churchpresenter.strings.generated.resources.output_resolution_width
-import org.churchpresenter.app.churchpresenter.utils.OUTPUT_RESOLUTIONS
-import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
+import org.churchpresenter.sharedui.utils.OUTPUT_RESOLUTIONS
+import org.churchpresenter.sharedui.utils.formatAspectRatio
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.components.KeyButton
+import org.churchpresenter.sharedui.composables.NumberSettingsTextField
 
 /** The widest and narrowest an output may be set to. Wide enough for 8K, narrow enough to stay sane. */
 private val RESOLUTION_RANGE = 16..8192

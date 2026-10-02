@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.server
 
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import kotlinx.serialization.json.Json
@@ -10,8 +10,8 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.liveHistoryEntryOf
-import org.churchpresenter.app.churchpresenter.utils.LiveHistoryLogger
-import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
+import org.churchpresenter.sharedui.utils.LiveHistoryLogger
+import org.churchpresenter.sharedui.utils.TrainingDataLogger
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals

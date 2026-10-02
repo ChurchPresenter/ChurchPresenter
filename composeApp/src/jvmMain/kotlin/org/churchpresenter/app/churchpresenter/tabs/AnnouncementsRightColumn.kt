@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import org.churchpresenter.app.churchpresenter.viewmodel.AnnouncementsViewModel
 import org.churchpresenter.theme.components.DropdownSelector
-import org.churchpresenter.app.churchpresenter.composables.SlimSlider
+import org.churchpresenter.sharedui.composables.SlimSlider
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -79,20 +79,20 @@ import org.churchpresenter.strings.generated.resources.preview
 import org.churchpresenter.strings.generated.resources.canvas_text_bg_color
 import org.churchpresenter.strings.generated.resources.transparent_default
 import org.churchpresenter.strings.generated.resources.position_on_screen
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
+import org.churchpresenter.sharedui.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
 import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.composables.NumberSettingsTextField
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
-import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
+import org.churchpresenter.sharedui.utils.Utils
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.ScreenPositionPicker
 import androidx.compose.runtime.State
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
-import org.churchpresenter.app.churchpresenter.utils.PreviewOutput
+import org.churchpresenter.sharedui.utils.PreviewOutput
 
 /*
  * The Announcements tab's right column: the preview of what goes on screen, and where it sits,

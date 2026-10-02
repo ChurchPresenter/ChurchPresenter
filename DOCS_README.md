@@ -21,9 +21,7 @@ bash cleanup_check.sh          # wildcard imports, Material 2, prints, fully qua
 
 - **String resources:** `strings/src/main/composeResources/values/strings.xml` (English only)
 - **Constants:** `settings/src/main/kotlin/org/churchpresenter/settings/utils/Constants.kt` (anything
-  persisted or shared with the settings) and
-  `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpresenter/utils/Constants.kt` (the app's
-  own)
+  persisted or shared with the settings)
 
 Older notes (`CODING_STANDARDS_SUMMARY.md`, `TODO_CLEANUP.md`, …) are kept in `docs_archive/` for
 history only.

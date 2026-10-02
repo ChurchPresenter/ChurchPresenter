@@ -4,7 +4,7 @@ package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import org.churchpresenter.app.churchpresenter.composables.cpColorToHex
+import org.churchpresenter.sharedui.composables.cpColorToHex
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
 import androidx.compose.ui.test.ComposeUiTest
@@ -24,9 +24,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import androidx.compose.ui.test.onNodeWithTag
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.composables.LABEL_PRESET_TAG
-import org.churchpresenter.app.churchpresenter.composables.LabelColors
-import org.churchpresenter.app.churchpresenter.composables.RecentLabelColors
+import org.churchpresenter.sharedui.composables.LABEL_PRESET_TAG
+import org.churchpresenter.sharedui.composables.LabelColors
+import org.churchpresenter.sharedui.composables.RecentLabelColors
 import java.nio.file.Files
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull

@@ -7,6 +7,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.FfmpegStatus
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureComponent
 
 /**
  * The Camera Capture card, in each of the three states it can report.

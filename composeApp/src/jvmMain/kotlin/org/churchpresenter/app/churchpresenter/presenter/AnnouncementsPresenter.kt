@@ -35,13 +35,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
-import org.churchpresenter.app.churchpresenter.composables.OutlinedText
+import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
+import org.churchpresenter.sharedui.composables.OutlinedText
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
+import org.churchpresenter.sharedui.utils.calculateAutoFitFontSize
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
 
 /** The inset the announcement text is drawn inside, and so the inset auto-fit measures against. */
 internal val TEXT_PADDING_HORIZONTAL = 32.dp

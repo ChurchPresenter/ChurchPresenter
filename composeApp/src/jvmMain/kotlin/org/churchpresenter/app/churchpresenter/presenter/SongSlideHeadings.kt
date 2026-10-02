@@ -16,11 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.composables.OutlinedText
-import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
+import org.churchpresenter.sharedui.composables.OutlinedText
+import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
-import org.churchpresenter.app.churchpresenter.utils.spacingEm
-import org.churchpresenter.app.churchpresenter.utils.styledDisplayText
+import org.churchpresenter.sharedui.utils.spacingEm
+import org.churchpresenter.sharedui.utils.styledDisplayText
 import org.churchpresenter.settings.utils.Constants
 
 /* A song slide's title, number and section label, and the lyrics with what is held on them. */

@@ -10,8 +10,9 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.sharedui.models.Tabs
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
 
 class AppPreviewDictionaryScreenshotTest {
 

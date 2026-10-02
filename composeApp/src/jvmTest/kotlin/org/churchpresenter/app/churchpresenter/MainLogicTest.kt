@@ -16,7 +16,7 @@ import org.churchpresenter.settings.OBSSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.ServerSettings
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus

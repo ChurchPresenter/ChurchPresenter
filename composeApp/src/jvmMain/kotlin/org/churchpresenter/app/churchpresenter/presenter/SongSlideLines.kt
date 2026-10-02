@@ -15,10 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.composables.OutlinedText
+import org.churchpresenter.sharedui.composables.OutlinedText
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
-import org.churchpresenter.app.churchpresenter.utils.spacingEm
-import org.churchpresenter.app.churchpresenter.utils.styledDisplayText
+import org.churchpresenter.sharedui.utils.spacingEm
+import org.churchpresenter.sharedui.utils.styledDisplayText
 import org.churchpresenter.settings.utils.Constants
 
 /* A song slide's lyric and next-section lines, drawn per language. */

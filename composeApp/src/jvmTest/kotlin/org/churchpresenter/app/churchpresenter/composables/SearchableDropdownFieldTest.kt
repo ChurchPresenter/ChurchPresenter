@@ -19,6 +19,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import org.churchpresenter.sharedui.composables.FontSettingsDropdown
 
 /**
  * The searchable dropdown, driven through its two configurations.

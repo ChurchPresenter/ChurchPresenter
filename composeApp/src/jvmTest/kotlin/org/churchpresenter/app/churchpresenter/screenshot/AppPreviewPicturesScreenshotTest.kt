@@ -5,8 +5,9 @@ package org.churchpresenter.app.churchpresenter.screenshot
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.sharedui.models.Tabs
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
 
 class AppPreviewPicturesScreenshotTest {
 

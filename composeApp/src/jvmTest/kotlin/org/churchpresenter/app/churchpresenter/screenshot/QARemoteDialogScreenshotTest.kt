@@ -18,6 +18,8 @@ import org.churchpresenter.app.churchpresenter.dialogs.QARemoteContent
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
  * The Q&A sharing dialog — the two QR codes, one for the room to post questions and one for a second

@@ -49,6 +49,7 @@ import org.churchpresenter.theme.components.SegmentTrackItem
 import org.churchpresenter.theme.components.toggleRow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.composables.TooltipIconButton
 
 /** Test handles for the switches, which carry no text of their own. */
 internal const val TAG_SHOW_LABELS = "preview_show_labels"

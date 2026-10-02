@@ -7,10 +7,10 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.composables.quickBackgroundSlotFor
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.models.ShortcutScope
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.sharedui.models.ShortcutAction
+import org.churchpresenter.sharedui.models.ShortcutScope
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.sharedui.models.Tabs
 
 /** Konami code: ↑↑↓↓←→←→BA */
 private val KONAMI_SEQUENCE = listOf(

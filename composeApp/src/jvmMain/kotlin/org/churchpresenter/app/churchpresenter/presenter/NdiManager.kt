@@ -8,7 +8,7 @@ import org.churchpresenter.ndi.NdiReceiver
 import org.churchpresenter.ndi.NdiRuntimeStatus
 import org.churchpresenter.ndi.NdiSourceInfo
 import org.churchpresenter.settings.ScreenAssignment
-import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
+import org.churchpresenter.sharedui.utils.addGuardedShutdownHook
 
 /**
  * The app's single NDI runtime: the senders opened over it, and the receivers taking sources back

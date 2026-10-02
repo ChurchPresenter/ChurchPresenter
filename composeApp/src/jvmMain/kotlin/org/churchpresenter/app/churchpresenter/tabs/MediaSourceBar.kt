@@ -61,13 +61,13 @@ import org.churchpresenter.strings.generated.resources.media_select_file
 import org.churchpresenter.strings.generated.resources.media_url_placeholder
 import org.churchpresenter.strings.generated.resources.play
 import org.churchpresenter.strings.generated.resources.recent
-import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
-import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
+import org.churchpresenter.sharedui.composables.AddToScheduleButton
+import org.churchpresenter.sharedui.composables.SavePresetButton
+import org.churchpresenter.sharedui.composables.GoLiveButton
+import org.churchpresenter.sharedui.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -79,7 +79,7 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
-import org.churchpresenter.app.churchpresenter.composables.RecentChip
+import org.churchpresenter.sharedui.composables.RecentChip
 
 /** The top card: the source bar, the recent files, and the playback controls. */
 @Composable

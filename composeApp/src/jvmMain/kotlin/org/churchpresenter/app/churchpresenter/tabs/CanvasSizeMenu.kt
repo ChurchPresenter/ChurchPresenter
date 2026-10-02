@@ -39,7 +39,7 @@ import org.churchpresenter.strings.generated.resources.canvas_size_match_output
 import org.churchpresenter.strings.generated.resources.canvas_size_set
 import org.churchpresenter.strings.generated.resources.canvas_size_tooltip
 import org.churchpresenter.icons.generated.resources.ic_check
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.sharedui.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.PreviewShapePreset
 import org.churchpresenter.app.churchpresenter.viewmodel.CANVAS_SIDE_RANGE
 import org.churchpresenter.theme.AppShape

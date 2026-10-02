@@ -30,7 +30,7 @@ import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.calendar.ScheduleServiceLink
 import org.churchpresenter.calendar.model.UpcomingLoad
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import java.io.File
 import java.nio.file.Files

@@ -44,7 +44,7 @@ import org.churchpresenter.strings.generated.resources.web_snapshot_screen_recor
 import org.churchpresenter.strings.generated.resources.web_snapshot_waiting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.presenter.EmbeddedWebView
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
 import org.jetbrains.compose.resources.stringResource
 import java.awt.event.InputEvent

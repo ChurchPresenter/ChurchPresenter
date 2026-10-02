@@ -18,6 +18,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.models.Presenting
 
 private const val LIB_PATH = "/opt/ndi/libndi.dylib"
 

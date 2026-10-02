@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.data
 
-import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
-import org.churchpresenter.app.churchpresenter.utils.songBackgroundDirectiveOf
+import org.churchpresenter.sharedui.utils.isHeaderLine
+import org.churchpresenter.sharedui.utils.songBackgroundDirectiveOf
 import org.churchpresenter.core.models.songs.SONG_BACKGROUND_PREFIX
 import org.churchpresenter.core.models.songs.SONG_LOWER_THIRD_BACKGROUND_PREFIX
 import org.churchpresenter.core.models.songs.SongBackground

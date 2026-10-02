@@ -26,11 +26,11 @@ import org.churchpresenter.strings.generated.resources.profile_text_shadow
 import org.churchpresenter.strings.generated.resources.profile_text_size
 import org.churchpresenter.strings.generated.resources.profile_text_size_unit
 import org.churchpresenter.strings.generated.resources.profile_text_style
-import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
-import org.churchpresenter.app.churchpresenter.composables.TextBackdropButton
-import org.churchpresenter.app.churchpresenter.composables.TextOutlineButton
-import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.sharedui.composables.ShadowDetailRow
+import org.churchpresenter.sharedui.composables.TextBackdropButton
+import org.churchpresenter.sharedui.composables.TextOutlineButton
+import org.churchpresenter.sharedui.composables.TextStyleButtons
+import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.TextBox

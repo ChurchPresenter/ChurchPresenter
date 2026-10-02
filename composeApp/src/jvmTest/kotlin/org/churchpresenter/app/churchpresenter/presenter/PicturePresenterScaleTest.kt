@@ -10,7 +10,7 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.utils.contentScale
+import org.churchpresenter.sharedui.utils.contentScale
 import org.churchpresenter.settings.OutputScaleMode
 import java.io.File
 import javax.imageio.ImageIO

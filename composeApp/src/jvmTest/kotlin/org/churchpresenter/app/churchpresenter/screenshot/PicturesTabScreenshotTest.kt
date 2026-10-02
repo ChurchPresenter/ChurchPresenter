@@ -8,7 +8,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.utils.withPictureScaleEverywhere
+import org.churchpresenter.sharedui.utils.withPictureScaleEverywhere
 import org.churchpresenter.settings.OutputScaleMode
 import org.churchpresenter.app.churchpresenter.tabs.PictureLabel
 import org.churchpresenter.app.churchpresenter.tabs.RecentPictureFolders
@@ -29,6 +29,9 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 class PicturesTabScreenshotTest {
 

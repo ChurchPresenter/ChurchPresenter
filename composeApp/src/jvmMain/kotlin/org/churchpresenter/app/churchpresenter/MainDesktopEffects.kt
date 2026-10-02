@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.diagnostics.CrashReporter
 import java.awt.GraphicsEnvironment
 

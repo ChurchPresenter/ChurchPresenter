@@ -30,11 +30,11 @@ import org.churchpresenter.strings.generated.resources.lower_third_animation_gen
 import org.churchpresenter.strings.generated.resources.lower_third_animation_none
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
-import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
+import org.churchpresenter.sharedui.composables.ColorPickerField
+import org.churchpresenter.sharedui.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.dialogs.PanelCaption
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.lottiegen.band.BandColorField
 import org.churchpresenter.lottiegen.band.BandContentKind
 import org.churchpresenter.lottiegen.band.BandFontPicker

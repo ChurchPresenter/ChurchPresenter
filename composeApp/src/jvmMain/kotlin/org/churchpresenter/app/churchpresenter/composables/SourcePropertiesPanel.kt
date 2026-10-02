@@ -30,6 +30,12 @@ import org.churchpresenter.strings.generated.resources.canvas_transform_h
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.scene.SceneSource
+import org.churchpresenter.sharedui.composables.PropertyFloatField
+import org.churchpresenter.sharedui.composables.PropertySlider
+import org.churchpresenter.sharedui.composables.PropertySliderWithInput
+import org.churchpresenter.sharedui.composables.PropertyTextField
+import org.churchpresenter.sharedui.composables.updateName
+import org.churchpresenter.sharedui.composables.updateTransform
 
 private const val MIN_SOURCE_SIZE = 0.01f
 private const val MAX_ROTATION_DEGREES = 180f

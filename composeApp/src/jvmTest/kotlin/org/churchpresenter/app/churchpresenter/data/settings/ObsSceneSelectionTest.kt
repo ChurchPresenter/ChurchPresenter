@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data.settings
 
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.OBSSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals

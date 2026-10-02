@@ -31,7 +31,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.composables.LocalFontPreviewFace
+import org.churchpresenter.sharedui.composables.LocalFontPreviewFace
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ADJUST_REFERENCE_TAG
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ADJUST_SWITCH_TAG
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.toggleCheckbox
@@ -61,6 +61,9 @@ import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.withLinksResolved
 import org.churchpresenter.theme.ChurchPresenterTheme
+import org.churchpresenter.sharedui.screenshot.PinnedRecentColors
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
  * The Profiles tab of the settings dialog, in both themes.

@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.foundation.Image
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
@@ -54,9 +55,9 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.composables.OutlinedText
-import org.churchpresenter.app.churchpresenter.composables.backdropRoom
-import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
+import org.churchpresenter.sharedui.composables.OutlinedText
+import org.churchpresenter.sharedui.composables.backdropRoom
+import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.presenter.BoxedItem
 import org.churchpresenter.app.churchpresenter.presenter.rectIn
@@ -77,12 +78,12 @@ import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.settings.utils.isSystemUsing24HourFormat
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
@@ -92,8 +93,8 @@ import org.churchpresenter.strings.generated.resources.song_play
 import org.churchpresenter.strings.generated.resources.unit_bpm
 import org.churchpresenter.strings.generated.resources.Res
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
-import org.churchpresenter.app.churchpresenter.utils.calculateChordChartFontSize
+import org.churchpresenter.sharedui.utils.calculateAutoFitFontSize
+import org.churchpresenter.sharedui.utils.calculateChordChartFontSize
 import org.churchpresenter.app.churchpresenter.composables.ChordChart
 import org.churchpresenter.app.churchpresenter.composables.songInfoOf
 import org.churchpresenter.app.churchpresenter.composables.MetronomeDot
@@ -473,8 +474,7 @@ private fun ZoneChordChart(
                 textMeasurer = measurer,
                 lines = lines,
                 baseStyle = baseStyle,
-                availableWidth = maxWidth.value.toInt(),
-                availableHeight = maxHeight.value.toInt(),
+                available = IntSize(maxWidth.value.toInt(), maxHeight.value.toInt()),
                 maxFontSize = style.fontSize,
                 hasInfoLine = !songInfo.isNullOrBlank(),
             )

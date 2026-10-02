@@ -40,8 +40,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.type
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
-import org.churchpresenter.app.churchpresenter.composables.focusRescuePressHook
-import org.churchpresenter.app.churchpresenter.composables.rememberFocusLostRescue
+import org.churchpresenter.sharedui.composables.focusRescuePressHook
+import org.churchpresenter.sharedui.composables.rememberFocusLostRescue
 import java.awt.Window as AwtWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -59,7 +59,7 @@ import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.starts_with
 import org.churchpresenter.strings.generated.resources.title
 import org.churchpresenter.strings.generated.resources.author
-import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
+import org.churchpresenter.sharedui.composables.initialPassCombinedClickable
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.dialogs.EditSongDialog
@@ -67,16 +67,16 @@ import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.app.churchpresenter.lottieBandPath
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
+import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
-import org.churchpresenter.app.churchpresenter.utils.pairLabel
+import org.churchpresenter.sharedui.utils.LocalShortcuts
+import org.churchpresenter.sharedui.utils.pairLabel
 import org.churchpresenter.app.churchpresenter.utils.availableSongColumns
-import org.churchpresenter.app.churchpresenter.utils.LiveHistoryLogger
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.LiveHistoryLogger
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.stageMonitorScreenIndices
 import org.churchpresenter.app.churchpresenter.utils.songLanguageEvent
 import org.churchpresenter.app.churchpresenter.utils.isLiveOutput

@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import io.mockk.every
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
-import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
+import org.churchpresenter.sharedui.utils.presenterScreenBounds
 import java.awt.Rectangle
 import java.io.File
 import kotlin.test.AfterTest
@@ -25,14 +25,14 @@ class SceneViewModelCanvasSizeTest {
 
     @BeforeTest
     fun stubScreenBoundsAndClearState() {
-        mockkStatic("org.churchpresenter.app.churchpresenter.utils.ConstantsKt")
+        mockkStatic("org.churchpresenter.sharedui.utils.ConstantsKt")
         every { presenterScreenBounds() } returns Rectangle(0, 0, 1920, 1080)
         scenesFile.delete()
     }
 
     @AfterTest
     fun unstub() {
-        unmockkStatic("org.churchpresenter.app.churchpresenter.utils.ConstantsKt")
+        unmockkStatic("org.churchpresenter.sharedui.utils.ConstantsKt")
         scenesFile.delete()
     }
 

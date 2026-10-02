@@ -85,7 +85,7 @@ import org.churchpresenter.app.churchpresenter.utils.DeviceInfoReport
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.icons.generated.resources.ic_app_icon
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerDialog
+import org.churchpresenter.sharedui.composables.ColorPickerDialog
 import org.churchpresenter.calendar.CalendarHost
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.calendar.ui.CalendarApp
@@ -106,10 +106,10 @@ import kotlin.io.path.extension
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.writeText
 import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
-import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
+import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.utils.converterEvent
 import org.churchpresenter.app.churchpresenter.utils.songLibraryUsageEvent
 

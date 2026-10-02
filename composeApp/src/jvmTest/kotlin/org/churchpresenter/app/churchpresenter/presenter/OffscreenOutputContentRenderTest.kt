@@ -23,6 +23,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.models.Presenting
 
 /**
  * What a Browser Source output actually draws.

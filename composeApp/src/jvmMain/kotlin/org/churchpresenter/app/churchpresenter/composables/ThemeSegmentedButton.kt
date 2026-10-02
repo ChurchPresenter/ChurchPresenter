@@ -8,6 +8,8 @@ import org.churchpresenter.strings.generated.resources.light_theme
 import org.churchpresenter.strings.generated.resources.tooltip_theme_system
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.composables.SegmentedButton
+import org.churchpresenter.sharedui.composables.SegmentedButtonItem
 
 @Composable
 fun ThemeSegmentedButton(

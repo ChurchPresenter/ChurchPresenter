@@ -13,12 +13,12 @@ import org.churchpresenter.diagnostics.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import org.churchpresenter.app.churchpresenter.utils.AppWindowIcons
-import org.churchpresenter.app.churchpresenter.utils.addGuardedShutdownHook
+import org.churchpresenter.sharedui.utils.addGuardedShutdownHook
 import org.churchpresenter.app.churchpresenter.utils.deleteLeftoverUpdateInstallers
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.utils.GpuInfo
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
-import org.churchpresenter.app.churchpresenter.utils.SystemFonts
+import org.churchpresenter.sharedui.utils.SystemFonts
 import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
 import churchpresenter.composeapp.generated.resources.Res
 import kotlinx.coroutines.runBlocking
@@ -42,7 +42,7 @@ import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.diagnostics.BuildIdentity
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.UsageEvents
 import java.io.File
 import java.io.IOException
 import kotlinx.coroutines.CoroutineExceptionHandler

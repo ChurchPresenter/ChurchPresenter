@@ -20,6 +20,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.models.Presenting
 
 private const val OUTPUT_NAME = "Lower Third"
 private const val W = 8

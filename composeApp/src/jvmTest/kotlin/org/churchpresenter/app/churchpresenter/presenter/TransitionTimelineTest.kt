@@ -16,6 +16,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import org.churchpresenter.app.churchpresenter.utils.withSongsEverywhere
+import org.churchpresenter.sharedui.models.Presenting
 
 /**
  * What the text does over the course of every kind of transition, frame by frame.

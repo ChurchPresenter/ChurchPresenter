@@ -10,7 +10,7 @@ import androidx.compose.ui.test.performTextInput
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.core.models.qa.QuestionStatus
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

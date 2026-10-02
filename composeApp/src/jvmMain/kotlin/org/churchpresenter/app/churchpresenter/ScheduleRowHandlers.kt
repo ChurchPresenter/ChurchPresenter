@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
-import org.churchpresenter.app.churchpresenter.utils.LiveHistoryLogger
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.sharedui.models.Tabs
+import org.churchpresenter.sharedui.utils.LiveHistoryLogger
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.utils.Constants

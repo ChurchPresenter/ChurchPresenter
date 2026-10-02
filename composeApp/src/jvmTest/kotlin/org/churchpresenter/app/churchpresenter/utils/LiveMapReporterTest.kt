@@ -18,6 +18,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration
+import org.churchpresenter.sharedui.utils.UsageEvent
 
 /**
  * [LiveMapReporter] fires an anonymous city-level ping on launch. The launch/retry is network and

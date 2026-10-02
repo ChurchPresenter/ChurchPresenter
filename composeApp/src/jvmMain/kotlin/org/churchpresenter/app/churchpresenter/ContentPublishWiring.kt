@@ -5,7 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
-import org.churchpresenter.app.churchpresenter.composables.FontPreviewText
+import org.churchpresenter.sharedui.composables.FontPreviewText
 import java.io.File
 
 /**

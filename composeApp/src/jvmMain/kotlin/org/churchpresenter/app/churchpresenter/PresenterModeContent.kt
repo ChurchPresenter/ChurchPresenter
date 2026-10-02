@@ -24,14 +24,14 @@ import org.churchpresenter.app.churchpresenter.presenter.PresentationPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LocalBandOutgoing
 import org.churchpresenter.app.churchpresenter.presenter.LocalBandSongLineIndex
 import org.churchpresenter.app.churchpresenter.presenter.LocalLottieBandClock
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.QAQRCodePresenter
 import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.presenter.WebsitePresenter
-import org.churchpresenter.app.churchpresenter.utils.contentScale
+import org.churchpresenter.sharedui.utils.contentScale
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager

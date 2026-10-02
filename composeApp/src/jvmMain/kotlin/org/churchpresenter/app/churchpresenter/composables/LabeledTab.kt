@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
+import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
 
 private val TAB_ICON_SIZE = 20.dp
 

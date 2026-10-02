@@ -2,8 +2,8 @@ package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.runtime.State
 import kotlinx.coroutines.CoroutineScope
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.ndi.NdiOutputMode
 import org.churchpresenter.ndi.NdiSender
 import org.churchpresenter.settings.ScreenAssignment

@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import io.github.alexzhirkevich.compottie.LottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
-import org.churchpresenter.app.churchpresenter.composables.keyColorFilter
+import org.churchpresenter.sharedui.composables.keyColorFilter
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
 import org.churchpresenter.lottiegen.render.lottieDrawProgress

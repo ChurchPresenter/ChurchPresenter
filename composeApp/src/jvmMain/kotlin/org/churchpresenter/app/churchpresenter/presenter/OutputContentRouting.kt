@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.sharedui.models.Presenting
 
 /**
  * Whether an output shows a given kind of content -- the per-content-type visibility gate every

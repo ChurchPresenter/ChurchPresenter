@@ -39,9 +39,9 @@ import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.tabs.RecentMediaFiles
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
@@ -58,6 +58,9 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
+import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.sharedui.screenshot.THEMES
+import org.churchpresenter.sharedui.screenshot.captureTo
 
 private const val ROOT = "$SCREENSHOT_ROOT/previewApp"
 /**

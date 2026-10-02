@@ -53,11 +53,11 @@ import org.churchpresenter.strings.generated.resources.shortcut_recording_stop
 import org.churchpresenter.strings.generated.resources.shortcut_settings_clear
 import org.churchpresenter.strings.generated.resources.shortcut_settings_reset
 import org.churchpresenter.strings.generated.resources.shortcut_unbound
-import org.churchpresenter.app.churchpresenter.composables.ConditionalTooltipArea
-import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
+import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
+import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.core.models.shortcuts.KeyChord
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.utils.keyCaps
+import org.churchpresenter.sharedui.models.ShortcutAction
+import org.churchpresenter.sharedui.utils.keyCaps
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 

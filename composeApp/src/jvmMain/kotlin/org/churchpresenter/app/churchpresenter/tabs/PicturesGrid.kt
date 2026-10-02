@@ -11,10 +11,10 @@ import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isShiftPressed
-import org.churchpresenter.app.churchpresenter.composables.HIDDEN_TILE_ALPHA
-import org.churchpresenter.app.churchpresenter.composables.HiddenBadge
-import org.churchpresenter.app.churchpresenter.composables.finalPassCombinedClickable
-import org.churchpresenter.app.churchpresenter.composables.SlideshowHideToggle
+import org.churchpresenter.sharedui.composables.HIDDEN_TILE_ALPHA
+import org.churchpresenter.sharedui.composables.HiddenBadge
+import org.churchpresenter.sharedui.composables.finalPassCombinedClickable
+import org.churchpresenter.sharedui.composables.SlideshowHideToggle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues

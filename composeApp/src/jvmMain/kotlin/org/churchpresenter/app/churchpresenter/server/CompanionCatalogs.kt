@@ -3,8 +3,8 @@ package org.churchpresenter.app.churchpresenter.server
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.isChorusHeader
-import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
+import org.churchpresenter.sharedui.utils.isChorusHeader
+import org.churchpresenter.sharedui.utils.isHeaderLine
 
 /**
  * Builders that turn the desktop's own song/Bible/presentation models into the wire catalogues the

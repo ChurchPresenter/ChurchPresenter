@@ -10,7 +10,7 @@ import org.churchpresenter.strings.generated.resources.scope
 import org.churchpresenter.strings.generated.resources.verse
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.data.formatCrossRefLabel
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.formatVerseReference
 import org.churchpresenter.app.churchpresenter.viewmodel.verseNumberOf
 import org.churchpresenter.app.churchpresenter.viewmodel.verseTextOf
@@ -18,7 +18,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.canonicalRefForBookName
 import org.churchpresenter.app.churchpresenter.viewmodel.canonicalRefForDisplay
 import org.churchpresenter.app.churchpresenter.viewmodel.displayIndexForBookName
 import org.churchpresenter.app.churchpresenter.viewmodel.logLiveReference
-import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
+import org.churchpresenter.sharedui.utils.SystemClipboard
 
 /* What the Bible tab's clicks do, pulled out of the browser pane's long argument list. */
 

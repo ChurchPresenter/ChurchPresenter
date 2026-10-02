@@ -25,7 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.app.churchpresenter.composables.rememberTextBackdropPainter
+import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongElementStyle
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleTarget
@@ -34,11 +34,11 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.isCredit
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.isLowerThird
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.shownOnTitleSlide
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.titleSlideOffset
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
-import org.churchpresenter.app.churchpresenter.utils.combinedTextDecoration
-import org.churchpresenter.app.churchpresenter.utils.spacingEm
-import org.churchpresenter.app.churchpresenter.utils.styledDisplayText
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.sharedui.utils.combinedTextDecoration
+import org.churchpresenter.sharedui.utils.spacingEm
+import org.churchpresenter.sharedui.utils.styledDisplayText
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.SongSettings

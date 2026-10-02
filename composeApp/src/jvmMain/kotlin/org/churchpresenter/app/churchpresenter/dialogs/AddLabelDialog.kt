@@ -39,12 +39,12 @@ import org.churchpresenter.strings.generated.resources.enter_label_text
 import org.churchpresenter.strings.generated.resources.label_text
 import org.churchpresenter.strings.generated.resources.ok
 import org.churchpresenter.strings.generated.resources.text_color
-import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
-import org.churchpresenter.app.churchpresenter.composables.LabelColorColumns
-import org.churchpresenter.app.churchpresenter.composables.LabelColors
-import org.churchpresenter.app.churchpresenter.composables.RecentLabelColors
-import org.churchpresenter.app.churchpresenter.composables.matches
-import org.churchpresenter.app.churchpresenter.composables.themeLabelPresets
+import org.churchpresenter.sharedui.composables.ColorPickerField
+import org.churchpresenter.sharedui.composables.LabelColorColumns
+import org.churchpresenter.sharedui.composables.LabelColors
+import org.churchpresenter.sharedui.composables.RecentLabelColors
+import org.churchpresenter.sharedui.composables.matches
+import org.churchpresenter.sharedui.composables.themeLabelPresets
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

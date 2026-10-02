@@ -14,9 +14,9 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.tabs.SCHEDULE_ROW_CARD_TAG
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
-import org.churchpresenter.app.churchpresenter.utils.LiveHistoryLogger
-import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
+import org.churchpresenter.sharedui.models.Tabs
+import org.churchpresenter.sharedui.utils.LiveHistoryLogger
+import org.churchpresenter.sharedui.utils.TrainingDataLogger
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.core.models.songs.SongFileParser

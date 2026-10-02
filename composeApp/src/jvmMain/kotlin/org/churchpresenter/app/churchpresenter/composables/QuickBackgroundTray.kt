@@ -42,10 +42,11 @@ import org.churchpresenter.strings.generated.resources.quick_background_hint
 import org.churchpresenter.strings.generated.resources.quick_background_reset
 import org.churchpresenter.strings.generated.resources.background_scope_title
 import org.churchpresenter.app.churchpresenter.dialogs.SongBackgroundFill
-import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
-import org.churchpresenter.app.churchpresenter.utils.label
+import org.churchpresenter.sharedui.utils.LocalShortcuts
+import org.churchpresenter.sharedui.utils.label
 import org.churchpresenter.settings.QuickBackground
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
 
 internal const val QUICK_BACKGROUND_TRAY_TAG = "quick_background_tray"
 internal const val QUICK_BACKGROUND_HEADER_TAG = "quick_background_header"

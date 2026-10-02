@@ -26,6 +26,7 @@ import org.churchpresenter.core.models.text.TextBackdrop
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.composables.rememberTextBlockBackdrop
 
 /**
  * What a backdrop draws, in pixels: that it scales with the type when a preview shrinks it, and that

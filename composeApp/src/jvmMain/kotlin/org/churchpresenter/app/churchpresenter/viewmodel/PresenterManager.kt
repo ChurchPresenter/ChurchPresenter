@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.churchpresenter.lottiegen.lottie.LottieTextShaping
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
@@ -33,7 +33,7 @@ import org.churchpresenter.presentationengine.model.Deck
 import org.churchpresenter.app.churchpresenter.presenter.BandOutgoing
 import org.churchpresenter.app.churchpresenter.presenter.BibleBandClock
 import org.churchpresenter.app.churchpresenter.presenter.BibleBandPhase
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.bible.SelectedVerse

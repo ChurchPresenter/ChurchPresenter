@@ -63,6 +63,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import javax.imageio.ImageIO
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 
 /**
  * The portrait/mobile-aspect counterpart of [PresenterFullScreenScreenshotTest] -- every one of its

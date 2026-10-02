@@ -21,6 +21,7 @@ import java.awt.Rectangle
 import java.awt.Robot
 import java.awt.image.BufferedImage
 import org.churchpresenter.diagnostics.Log
+import org.churchpresenter.sharedui.composables.mode
 
 /** The floor on how often a capture repeats, whatever the source asks for. */
 private const val MIN_CAPTURE_INTERVAL_MS = 33L

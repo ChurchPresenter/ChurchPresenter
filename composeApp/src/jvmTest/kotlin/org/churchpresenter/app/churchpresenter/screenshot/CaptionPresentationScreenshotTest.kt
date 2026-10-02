@@ -22,6 +22,7 @@ import org.churchpresenter.settings.CAPTION_STYLE_POP_ON
 import org.churchpresenter.settings.CaptionReading
 import org.churchpresenter.settings.STTSettings
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 
 /**
  * The ways captions can be put on screen: pop-on, a full-width band (flush and floating), the two

@@ -31,8 +31,9 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.contentScale
+import org.churchpresenter.sharedui.utils.contentScale
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
+import org.churchpresenter.sharedui.models.Presenting
 
 
 /**

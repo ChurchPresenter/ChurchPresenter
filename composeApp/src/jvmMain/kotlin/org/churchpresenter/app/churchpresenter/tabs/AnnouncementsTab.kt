@@ -46,8 +46,8 @@ import org.churchpresenter.strings.generated.resources.timer_pm
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
-import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.sharedui.utils.rememberSystemFonts
+import org.churchpresenter.sharedui.utils.Utils
 import org.churchpresenter.app.churchpresenter.viewmodel.AnnouncementsViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource

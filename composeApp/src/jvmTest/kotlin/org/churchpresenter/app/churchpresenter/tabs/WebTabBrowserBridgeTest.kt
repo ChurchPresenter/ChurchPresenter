@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import io.mockk.mockk
 import io.mockk.verify
 import org.cef.browser.CefBrowser
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

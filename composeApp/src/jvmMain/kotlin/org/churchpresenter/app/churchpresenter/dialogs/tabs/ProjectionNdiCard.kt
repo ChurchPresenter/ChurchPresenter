@@ -96,14 +96,14 @@ import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.addNdiOutput
 import org.churchpresenter.settings.removeNdiOutput
 import org.churchpresenter.settings.withNdiOutput
-import org.churchpresenter.app.churchpresenter.composables.LabeledSwitch
-import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.sharedui.composables.LabeledSwitch
+import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.theme.components.SettingsTextField
 import org.jetbrains.compose.resources.stringResource
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
-import org.churchpresenter.app.churchpresenter.utils.SystemClipboard
+import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.app.churchpresenter.utils.UrlOpener
 
 private const val DISABLED_ALPHA = 0.5f

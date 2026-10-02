@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.app.churchpresenter.utils.songBackgroundDirectiveOf
+import org.churchpresenter.sharedui.utils.songBackgroundDirectiveOf
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.core.models.songs.SongTuning

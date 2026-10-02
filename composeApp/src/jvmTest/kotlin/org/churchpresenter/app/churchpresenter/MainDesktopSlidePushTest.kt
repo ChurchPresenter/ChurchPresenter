@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Files

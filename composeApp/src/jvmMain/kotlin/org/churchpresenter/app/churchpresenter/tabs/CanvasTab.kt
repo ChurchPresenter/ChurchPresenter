@@ -29,8 +29,8 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.app.churchpresenter.composables.SceneCanvas
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
+import org.churchpresenter.sharedui.models.ShortcutAction
+import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.jetbrains.compose.resources.stringResource

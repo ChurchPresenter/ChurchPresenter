@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.scene.Scene
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

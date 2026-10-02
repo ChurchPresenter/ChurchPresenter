@@ -12,6 +12,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import org.churchpresenter.theme.ThemeMode
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.sharedui.composables.SegmentedButton
 
 /**
  * The three-way Light/Dark/System theme picker — a thin [SegmentedButton] wrapper whose own

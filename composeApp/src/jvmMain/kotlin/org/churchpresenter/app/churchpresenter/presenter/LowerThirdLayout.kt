@@ -24,6 +24,7 @@ import org.churchpresenter.settings.LowerThirdPlacement
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.PlaceableContent
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.sharedui.models.Presenting
 
 /** Which [PlaceableContent] [this] mode is, or null for one that places itself or draws nothing. */
 internal fun Presenting.placeableContent(): PlaceableContent? = when (this) {

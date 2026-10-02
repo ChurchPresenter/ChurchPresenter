@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.app.churchpresenter.utils.MIN_AUTO_FIT_FONT_SIZE
+import org.churchpresenter.sharedui.utils.MIN_AUTO_FIT_FONT_SIZE
 import org.churchpresenter.settings.TextBox
 import org.churchpresenter.settings.TextBoxOptions
 import org.churchpresenter.settings.TextBoxOverflow

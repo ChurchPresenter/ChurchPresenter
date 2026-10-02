@@ -49,9 +49,9 @@ import org.churchpresenter.strings.generated.resources.tooltip_undo
 import org.churchpresenter.strings.generated.resources.tooltip_undo_unbound
 import org.churchpresenter.app.churchpresenter.composables.ToolbarKey
 import org.churchpresenter.app.churchpresenter.composables.ToolbarKeyStyle
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.utils.LocalShortcuts
-import org.churchpresenter.app.churchpresenter.utils.label
+import org.churchpresenter.sharedui.models.ShortcutAction
+import org.churchpresenter.sharedui.utils.LocalShortcuts
+import org.churchpresenter.sharedui.utils.label
 import org.churchpresenter.app.churchpresenter.utils.ScheduleDensity
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource

@@ -39,7 +39,7 @@ import io.github.alexzhirkevich.compottie.dynamic.rememberLottieDynamicPropertie
 import io.github.alexzhirkevich.compottie.internal.helpers.text.TextJustify
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
-import org.churchpresenter.app.churchpresenter.composables.keyColorFilter
+import org.churchpresenter.sharedui.composables.keyColorFilter
 import org.churchpresenter.app.churchpresenter.utils.LottieFonts
 import org.churchpresenter.lottiegen.lottie.LottieTextShaping
 import org.churchpresenter.lottiegen.render.lottieDrawProgress

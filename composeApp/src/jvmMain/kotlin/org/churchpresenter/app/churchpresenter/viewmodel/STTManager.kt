@@ -12,7 +12,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
+import org.churchpresenter.sharedui.utils.TrainingDataLogger
 import org.churchpresenter.app.churchpresenter.utils.stringOr
 import org.churchpresenter.app.churchpresenter.utils.stringOrNull
 import org.json.JSONObject

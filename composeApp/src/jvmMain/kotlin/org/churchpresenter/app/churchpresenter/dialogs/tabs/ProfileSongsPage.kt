@@ -40,7 +40,7 @@ import org.churchpresenter.strings.generated.resources.profile_title_slide_sub
 import org.churchpresenter.strings.generated.resources.profile_title_slide_valign
 import org.churchpresenter.strings.generated.resources.profile_word_wrap
 import org.churchpresenter.strings.generated.resources.top
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.DEFAULT_STACKED_LANGUAGE_GAP

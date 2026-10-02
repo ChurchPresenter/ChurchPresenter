@@ -12,8 +12,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.ui.platform.testTag
 import org.churchpresenter.strings.generated.resources.preview_layout_done
 import org.churchpresenter.strings.generated.resources.preview_layout_edit
-import org.churchpresenter.app.churchpresenter.utils.contentScale
-import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
+import org.churchpresenter.sharedui.utils.contentScale
+import org.churchpresenter.sharedui.utils.rememberScreenDevices
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -124,7 +124,7 @@ import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.LocalBandOutgoing
 import org.churchpresenter.app.churchpresenter.presenter.LocalBandSongLineIndex
 import org.churchpresenter.app.churchpresenter.presenter.LocalLottieBandClock
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
 import org.churchpresenter.app.churchpresenter.presenter.QAQRCodePresenter
@@ -135,10 +135,10 @@ import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.presenter.showsContentFor
-import org.churchpresenter.app.churchpresenter.utils.OutputKind
+import org.churchpresenter.sharedui.utils.OutputKind
 import org.churchpresenter.settings.ProjectionSettings
-import org.churchpresenter.app.churchpresenter.utils.OutputSize
-import org.churchpresenter.app.churchpresenter.utils.outputSizeOf
+import org.churchpresenter.sharedui.utils.OutputSize
+import org.churchpresenter.sharedui.utils.outputSizeOf
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
@@ -146,6 +146,8 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.composables.SlimSlider
+import org.churchpresenter.sharedui.composables.mode
 
 private const val PREVIEW_BACKGROUND = 0xFF121212
 private const val LIVE_BADGE_COLOR = 0xFF2196F3

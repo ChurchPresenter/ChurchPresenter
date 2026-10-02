@@ -40,6 +40,7 @@ import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 import org.jetbrains.compose.resources.decodeToImageBitmap
 
 /**

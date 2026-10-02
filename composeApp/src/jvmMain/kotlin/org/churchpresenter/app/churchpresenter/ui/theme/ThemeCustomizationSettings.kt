@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.ui.theme
 
-import org.churchpresenter.app.churchpresenter.composables.cpColorToHex
-import org.churchpresenter.app.churchpresenter.composables.cpTryParseHex
+import org.churchpresenter.sharedui.composables.cpColorToHex
+import org.churchpresenter.sharedui.composables.cpTryParseHex
 import org.churchpresenter.app.churchpresenter.dialogs.ThemeCustomizationChoice
 import org.churchpresenter.app.churchpresenter.dialogs.toCustomization
 import org.churchpresenter.settings.AppSettings

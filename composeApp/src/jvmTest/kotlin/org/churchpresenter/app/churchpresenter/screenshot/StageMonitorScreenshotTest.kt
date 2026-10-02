@@ -34,13 +34,15 @@ import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.scene.SourceTransform
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import org.churchpresenter.settings.withZoneWidth
 import org.churchpresenter.settings.withZoneHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.test.runDesktopComposeUiTest
+import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
+import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 
 /**
  * The stage monitor — the screen the worship leader and the speaker read from.

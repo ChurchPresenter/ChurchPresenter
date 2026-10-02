@@ -11,9 +11,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.ui.draw.alpha
-import org.churchpresenter.app.churchpresenter.composables.AddToScheduleButton
-import org.churchpresenter.app.churchpresenter.composables.SavePresetButton
-import org.churchpresenter.app.churchpresenter.composables.GoLiveButton
+import org.churchpresenter.sharedui.composables.AddToScheduleButton
+import org.churchpresenter.sharedui.composables.SavePresetButton
+import org.churchpresenter.sharedui.composables.GoLiveButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
@@ -57,15 +57,15 @@ import org.churchpresenter.strings.generated.resources.no_folder_selected
 import org.churchpresenter.strings.generated.resources.select_folder
 import org.churchpresenter.strings.generated.resources.pictures_arrow_key_hint
 import org.churchpresenter.strings.generated.resources.pictures_reorder_hint
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.utils.pairLabel
+import org.churchpresenter.sharedui.models.ShortcutAction
+import org.churchpresenter.sharedui.utils.pairLabel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items as lazyItems
 import androidx.compose.ui.text.style.TextOverflow
-import org.churchpresenter.app.churchpresenter.composables.RecentChip
+import org.churchpresenter.sharedui.composables.RecentChip
 
 /** The top card: the folder bar, the recent folders, the playback controls and the key hints. */
 @Composable

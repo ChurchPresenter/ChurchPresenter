@@ -101,7 +101,7 @@ import org.churchpresenter.strings.generated.resources.stt_status_not_connected
 import org.churchpresenter.strings.generated.resources.stt_status_reconnecting
 import org.churchpresenter.strings.generated.resources.stt_status_unreachable
 import kotlinx.coroutines.delay
-import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
+import org.churchpresenter.sharedui.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleSttStatus
 import org.churchpresenter.app.churchpresenter.viewmodel.DetectedReference
 import org.churchpresenter.app.churchpresenter.viewmodel.ContinuationSpeed

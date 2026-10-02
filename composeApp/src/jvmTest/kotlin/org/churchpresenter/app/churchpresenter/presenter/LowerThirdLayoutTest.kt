@@ -26,6 +26,7 @@ import javax.imageio.ImageIO
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import org.churchpresenter.sharedui.models.Presenting
 
 /**
  * Where band-less content lands on a lower-third output, and what the standalone Lottie lower third

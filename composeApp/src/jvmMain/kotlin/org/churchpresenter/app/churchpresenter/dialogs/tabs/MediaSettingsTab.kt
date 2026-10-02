@@ -40,7 +40,7 @@ import org.churchpresenter.strings.generated.resources.slideshow_settings
 import org.churchpresenter.strings.generated.resources.transition_duration
 import org.churchpresenter.strings.generated.resources.transition_settings
 import org.churchpresenter.theme.components.DropdownSelector
-import org.churchpresenter.app.churchpresenter.composables.SlimSlider
+import org.churchpresenter.sharedui.composables.SlimSlider
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.settings.utils.Constants

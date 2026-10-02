@@ -6,8 +6,8 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.calendar.CalendarHost
 import org.churchpresenter.core.models.schedule.RowTiming
-import org.churchpresenter.app.churchpresenter.utils.UsageEvent
-import org.churchpresenter.app.churchpresenter.utils.UsageEvents
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.settings.shown
 import org.churchpresenter.app.churchpresenter.server.emitRemoteTabSelection
 import org.churchpresenter.app.churchpresenter.server.executeProjectItem

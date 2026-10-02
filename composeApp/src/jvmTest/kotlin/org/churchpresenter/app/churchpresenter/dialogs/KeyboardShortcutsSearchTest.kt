@@ -20,8 +20,8 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.test.withKeyDown
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.models.ShortcutAction
-import org.churchpresenter.app.churchpresenter.models.ShortcutScope
+import org.churchpresenter.sharedui.models.ShortcutAction
+import org.churchpresenter.sharedui.models.ShortcutScope
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.InstanceLinkRole
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import java.io.File
 

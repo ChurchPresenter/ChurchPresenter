@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.media
 import org.churchpresenter.strings.generated.resources.pictures
-import org.churchpresenter.app.churchpresenter.utils.label
+import org.churchpresenter.sharedui.utils.label
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.OutputScaleMode
 import org.jetbrains.compose.resources.stringResource

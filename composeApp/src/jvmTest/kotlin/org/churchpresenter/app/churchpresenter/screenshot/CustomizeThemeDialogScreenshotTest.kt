@@ -14,6 +14,8 @@ import org.churchpresenter.app.churchpresenter.dialogs.ThemeCustomizationChoice
 import org.churchpresenter.settings.CustomThemeColors
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
  * The Customize Theme window, opened from View → Customize Theme…, in both themes.

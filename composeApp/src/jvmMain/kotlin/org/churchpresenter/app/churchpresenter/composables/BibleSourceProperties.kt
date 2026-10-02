@@ -50,7 +50,7 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.core.models.scene.SceneSource
-import org.churchpresenter.app.churchpresenter.utils.rememberSystemFonts
+import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import androidx.compose.runtime.produceState
@@ -58,6 +58,15 @@ import java.io.File
 import org.churchpresenter.bible.readTranslationTitle
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.theme.components.RaisedButton
+import org.churchpresenter.sharedui.composables.ColorPickerField
+import org.churchpresenter.sharedui.composables.FontSettingsDropdown
+import org.churchpresenter.sharedui.composables.HorizontalAlignmentButtons
+import org.churchpresenter.sharedui.composables.PropertyIntField
+import org.churchpresenter.sharedui.composables.PropertySliderWithInput
+import org.churchpresenter.sharedui.composables.StyledTextField
+import org.churchpresenter.sharedui.composables.TextStyleButtons
+import org.churchpresenter.sharedui.composables.VerticalAlignmentButtons
+import org.churchpresenter.sharedui.composables.previewLinesFrom
 
 /** Two full turns of curve either way; past that the line runs into itself. */
 /** The font name needs the room; its size is three digits. */

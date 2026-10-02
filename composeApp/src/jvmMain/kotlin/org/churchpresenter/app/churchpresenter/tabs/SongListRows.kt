@@ -86,10 +86,10 @@ import org.churchpresenter.strings.generated.resources.title
 import org.churchpresenter.strings.generated.resources.tune
 import org.churchpresenter.strings.generated.resources.author
 import org.churchpresenter.strings.generated.resources.composer
-import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
-import org.churchpresenter.app.churchpresenter.composables.finalPassCombinedClickable
+import org.churchpresenter.sharedui.composables.initialPassCombinedClickable
+import org.churchpresenter.sharedui.composables.finalPassCombinedClickable
 import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -97,7 +97,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.Dp
 import org.churchpresenter.strings.generated.resources.song_search_match_lyrics
 import org.churchpresenter.strings.generated.resources.song_search_match_translation
-import org.churchpresenter.app.churchpresenter.utils.highlightedText
+import org.churchpresenter.sharedui.utils.highlightedText
 import org.churchpresenter.app.churchpresenter.viewmodel.SongMatchKind
 import org.churchpresenter.app.churchpresenter.viewmodel.SongSearchMatch
 import androidx.compose.foundation.ScrollState

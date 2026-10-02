@@ -1,0 +1,296 @@
+package org.churchpresenter.sharedui.utils
+
+import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.concurrent.atomic.AtomicBoolean
+
+/**
+ * Best-effort JSONL logger for Bible reference training data.
+ * Writes session-keyed files to ~/.churchpresenter/bible-stt-logs/:
+ *   live-references-<sessionId>.jsonl       — ground truth: which verse went live and why
+ *   suggestion-outcomes-<sessionId>.jsonl   — operator reactions to detection chips
+ *   operator-flags-<sessionId>.jsonl        — live "Help Dev" flags (wrong/premature/missed)
+ *
+ * [LiveHistoryLogger]'s `live-content-<sessionId>.jsonl` (what was on screen, and when) shares this
+ * folder, this [sessionId] and this retention sweep.
+ *
+ * When STT has supplied a stable [sessionId] (forwarded from the engine via BibleViewModel) the file
+ * is keyed by it, giving an exact 1:1 join with the STT db and the engine detection-log and letting a
+ * ChurchPresenter restart mid-service re-attach to the SAME file and append (no fragmentation). Until
+ * the session id is known the name falls back to the process-start timestamp
+ * (`live-references-YYYY-MM-DD_HH-mm-ss.jsonl`) — zero behaviour change. The target is chosen lazily
+ * per write, so a detection-driven go-live always lands in the session-keyed file once STT has spoken.
+ *
+ * Files older than [MAX_AGE_DAYS] are deleted once per process (size control — see CrashReporter for
+ * the same pattern). All writes are best-effort: errors are swallowed, never thrown into the UI path.
+ */
+object TrainingDataLogger {
+
+    private const val MAX_AGE_DAYS = 30L
+    private const val LIVE_REF_PREFIX = "live-references-"
+    private const val OUTCOME_PREFIX = "suggestion-outcomes-"
+    private const val FLAG_PREFIX = "operator-flags-"
+
+    /**
+     * BibleEngineClient's error log, appended to for ever and named after no session, so it matched
+     * none of the prefixes above and outlived every sweep. It shares this folder and this policy.
+     */
+    private const val ENGINE_ERRORS_FILE = "engine-errors.jsonl"
+
+    // Stable per-service session id from STT (db base name or UUID), set by STTManager from STT's
+    // /api/health (on connect and on its poll) and from every socket payload, and again by
+    // BibleViewModel on each engine detection. Null until then; the filename falls back to [runStamp].
+    @Volatile var sessionId: String? = null
+
+    private val lock = Any()
+    private val cleanedUp = AtomicBoolean(false)
+    // Files (by absolute path) that have already had their one session header written. A set rather
+    // than a flag, so each session-keyed file gets exactly one header and a CP restart that re-attaches
+    // to an existing file just continues it.
+    private val headerWritten = java.util.Collections.synchronizedSet(HashSet<String>())
+
+    // Frozen at first use (≈ app start), down to the second so quick restarts never share a file.
+    private val runStamp: String =
+        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))
+
+    // Resolved from user.home on every access, as CrashReporter does: a once-per-JVM lazy keeps
+    // whatever user.home said the first time, which in a test is a temp dir deleted afterwards.
+    private val logDir: File
+        get() = File(System.getProperty("user.home"), ".churchpresenter/bible-stt-logs").also { it.mkdirs() }
+
+    /** Session-keyed suffix when STT has provided an id, else the process-start timestamp. */
+    private fun suffix(): String = sessionId?.let { sanitize(it) } ?: runStamp
+    private fun pathFor(prefix: String) = File(logDir, "$prefix${suffix()}.jsonl").absolutePath
+
+    /** Keeps `[A-Za-z0-9._-]`, replacing anything else with `_`, so any session id is filename-safe. */
+    private fun sanitize(raw: String): String =
+        raw.map { if (it.isLetterOrDigit() || it in ".-_") it else '_' }
+            .joinToString("")
+
+    /**
+     * Writes a one-time per-file session header (the session id this file's rows belong to) as the
+     * first line, so the file ties back to the STT db + engine detection-log even in isolation. Keyed
+     * per file: a CP restart re-attaching to an existing file does not add a second header.
+     */
+    private fun ensureSessionHeader(path: String) {
+        if (!headerWritten.add(path)) return
+        val file = File(path)
+        if (file.exists() && file.length() > 0L) return
+        runCatching {
+            val line = buildString {
+                append("{\"type\":\"session\"")
+                append(",\"ts_ms\":").append(System.currentTimeMillis())
+                if (sessionId != null) append(",\"sessionId\":\"").append(esc(sessionId!!)).append("\"")
+                else append(",\"sessionId\":null")
+                append("}")
+            }
+            synchronized(lock) { file.appendText(line + "\n", Charsets.UTF_8) }
+        }
+    }
+
+    /**
+     * Deletes dated training-data logs older than [MAX_AGE_DAYS]. Runs at most once per process
+     * (first write triggers it). Mirrors CrashReporter's age-based cleanup. Best-effort.
+     * Also sweeps the `.db` snapshots `STTManager`'s
+     * "Help Dev" capture writes into this same folder — they bypass this object's own write path
+     * entirely, but share its retention policy, so `internal` lets STTManager trigger this sweep too
+     * (idempotent either way; whichever of the two runs first each process wins).
+     */
+    fun cleanupOldLogsOnce() {
+        if (!cleanedUp.compareAndSet(false, true)) return
+        runCatching {
+            val cutoff = System.currentTimeMillis() - MAX_AGE_DAYS * 24 * 60 * 60 * 1000
+            logDir.listFiles()?.forEach { file ->
+                val n = file.name
+                val dated = file.isFile && (
+                    (
+                        n.endsWith(".jsonl") &&
+                            (
+                                n.startsWith(LIVE_REF_PREFIX) || n.startsWith(OUTCOME_PREFIX) ||
+                                    n.startsWith(FLAG_PREFIX) || n.startsWith(LiveHistoryLogger.PREFIX)
+                                )
+                        ) || n == ENGINE_ERRORS_FILE || n.endsWith(".db") || n.endsWith(".db.tmp")
+                )
+                if (dated && file.lastModified() < cutoff) file.delete()
+            }
+        }
+    }
+
+    /**
+     * Call when a Bible verse actually goes live on the output screen.
+     * [book]/[chapter]/[verseStart]/[verseEnd] are **canonical** (Hebrew, `BXXXCXXXVXXX`)
+     * numbering — 1=Genesis … 66=Revelation — the same space the engine's detection log uses, so
+     * the two are directly comparable. That matters beyond book order: a Synodal module follows the
+     * LXX, where the Psalm a Russian congregation sees as 23 is canonical 24, so logging the
+     * displayed number would score every Psalm as a miss. Map with
+     * `BibleViewModel.canonicalRefForDisplay`.
+     * [displayChapter]/[displayVerseStart]/[displayVerseEnd] are what the operator actually saw on
+     * screen, in the primary Bible's own numbering — kept alongside so a log stays readable by hand.
+     * [source] is "manual" (operator button/double-click/Enter), "auto" (auto-follow drove the
+     * go-live from an engine detection), or "remote" (companion API).
+     * [autoFollow] is whether auto-follow was ENABLED at the time — distinct from [source], so a
+     * manual override while auto-follow is on is still distinguishable for analysis.
+     * [matchType] is the detection's engine match type ("explicit"/"continuation"/"chapter-scan"/
+     * "chapter-history"/"reverse") when this go-live traces back to a specific detection, else null
+     * (e.g. free browsing, typed reference). Lets offline analysis measure acceptance-by-tier for
+     * auto-follow's instant-vs-staged split (see AGENT.md "Bible Follow Along — Tiered Auto-Follow").
+     */
+    fun logLiveReference(
+        book: Int,
+        chapter: Int,
+        verseStart: Int?,
+        verseEnd: Int?,
+        source: String,
+        segmentId: String? = null,
+        autoFollow: Boolean = false,
+        matchType: String? = null,
+        displayChapter: Int? = null,
+        displayVerseStart: Int? = null,
+        displayVerseEnd: Int? = null,
+    ) {
+        cleanupOldLogsOnce()
+        val p = pathFor(LIVE_REF_PREFIX)
+        ensureSessionHeader(p)
+        runCatching {
+            val line = buildString {
+                append("{\"ts_ms\":").append(System.currentTimeMillis())
+                append(",\"book\":").append(book)
+                append(",\"chapter\":").append(chapter)
+                if (verseStart != null) append(",\"verseStart\":").append(verseStart)
+                else append(",\"verseStart\":null")
+                if (verseEnd != null) append(",\"verseEnd\":").append(verseEnd)
+                else append(",\"verseEnd\":null")
+                // What was on screen, in the primary Bible's own numbering (null when unmapped).
+                if (displayChapter != null) append(",\"displayChapter\":").append(displayChapter)
+                else append(",\"displayChapter\":null")
+                if (displayVerseStart != null) append(",\"displayVerseStart\":").append(displayVerseStart)
+                else append(",\"displayVerseStart\":null")
+                if (displayVerseEnd != null) append(",\"displayVerseEnd\":").append(displayVerseEnd)
+                else append(",\"displayVerseEnd\":null")
+                // Stable per-service session id — exact join key to the STT db + engine detection-log.
+                if (sessionId != null) append(",\"sessionId\":\"").append(esc(sessionId!!)).append("\"")
+                else append(",\"sessionId\":null")
+                // Clock-free correlation key back to the STT transcript + engine detection (no NTP).
+                if (segmentId != null) append(",\"segmentId\":\"").append(esc(segmentId)).append("\"")
+                else append(",\"segmentId\":null")
+                append(",\"autoFollow\":").append(autoFollow)
+                if (matchType != null) append(",\"matchType\":\"").append(esc(matchType)).append("\"")
+                else append(",\"matchType\":null")
+                append(",\"source\":\"").append(source).append("\"}")
+            }
+            synchronized(lock) { File(p).appendText(line + "\n", Charsets.UTF_8) }
+        }
+    }
+
+    private fun esc(s: String): String =
+        s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ").replace("\r", " ")
+
+    /**
+     * Call when the operator acts on a suggestion chip shown by the detection engine.
+     * [suggestedBook]/[suggestedChapter]/[suggestedVerse] are canonical numbering, exactly as in
+     * [logLiveReference] — never the chip's display position or the primary Bible's own chapter
+     * number. [displayChapter]/[displayVerse] carry what the chip showed, for readability.
+     * [action] is "accepted" (chip clicked), "dismissed" (operator clear), "corrected" (a different
+     * verse went live, overriding this suggestion — [correctedRef] holds what was actually shown),
+     * "ignored" (the chip scrolled off the list without ever being clicked), or "expired" (the
+     * engine/STT link stopped while the chip was still showing). Every staged suggestion now
+     * produces exactly one outcome row, so acceptance-by-tier is computable from this log alone.
+     * [matchType] is the suggested detection's engine match type (see [logLiveReference]) — lets
+     * offline analysis measure acceptance/dismissal/correction rate by tier.
+     */
+    fun logSuggestionOutcome(
+        suggestedBook: Int,
+        suggestedChapter: Int,
+        suggestedVerse: Int?,
+        action: String,
+        correctedRef: String? = null,
+        matchType: String? = null,
+        displayChapter: Int? = null,
+        displayVerse: Int? = null,
+    ) {
+        cleanupOldLogsOnce()
+        val p = pathFor(OUTCOME_PREFIX)
+        ensureSessionHeader(p)
+        runCatching {
+            val line = buildString {
+                append("{\"ts_ms\":").append(System.currentTimeMillis())
+                if (sessionId != null) append(",\"sessionId\":\"").append(esc(sessionId!!)).append("\"")
+                else append(",\"sessionId\":null")
+                append(",\"suggestedBook\":").append(suggestedBook)
+                append(",\"suggestedChapter\":").append(suggestedChapter)
+                if (suggestedVerse != null) append(",\"suggestedVerse\":").append(suggestedVerse)
+                else append(",\"suggestedVerse\":null")
+                if (displayChapter != null) append(",\"displayChapter\":").append(displayChapter)
+                else append(",\"displayChapter\":null")
+                if (displayVerse != null) append(",\"displayVerse\":").append(displayVerse)
+                else append(",\"displayVerse\":null")
+                append(",\"action\":\"").append(action).append("\"")
+                if (correctedRef != null) append(",\"correctedRef\":\"").append(correctedRef).append("\"")
+                if (matchType != null) append(",\"matchType\":\"").append(esc(matchType)).append("\"")
+                else append(",\"matchType\":null")
+                append("}")
+            }
+            synchronized(lock) { File(p).appendText(line + "\n", Charsets.UTF_8) }
+        }
+    }
+
+    /**
+     * Call when the operator uses a "Help Dev" button (STTTab's `helpDevMode` toggle) to flag a
+     * BLE issue live, in real time during a service.
+     * [kind] is "wrong_passage" (the currently-live reference is confidently wrong), "premature"
+     * (the engine landed on the right book/chapter but the wrong verse, before the sentence
+     * finished — a `Stabilizer`/debounce signal, distinct from a parsing bug), or "missed_passage"
+     * (the engine detected nothing while a reference was actually being read/cited).
+     * [book]/[chapter]/[verseStart]/[verseEnd] are the flagged reference's canonical numbers (see
+     * [logLiveReference] — the same mapping applies, so a flagged Psalm names the verse the engine
+     * would) — null for "missed_passage", since there is no detection to anchor to; triage
+     * cross-references the STT db by [ts_ms]/[segmentId] instead, the same way an FN is found today.
+     * [displayChapter]/[displayVerseStart]/[displayVerseEnd] are what was on screen when flagged.
+     * [matchType] is the flagged detection's engine match type when known (see [logLiveReference]).
+     */
+    fun logOperatorFlag(
+        kind: String,
+        book: Int? = null,
+        chapter: Int? = null,
+        verseStart: Int? = null,
+        verseEnd: Int? = null,
+        segmentId: String? = null,
+        matchType: String? = null,
+        displayChapter: Int? = null,
+        displayVerseStart: Int? = null,
+        displayVerseEnd: Int? = null,
+    ) {
+        cleanupOldLogsOnce()
+        val p = pathFor(FLAG_PREFIX)
+        ensureSessionHeader(p)
+        runCatching {
+            val line = buildString {
+                append("{\"ts_ms\":").append(System.currentTimeMillis())
+                if (sessionId != null) append(",\"sessionId\":\"").append(esc(sessionId!!)).append("\"")
+                else append(",\"sessionId\":null")
+                append(",\"kind\":\"").append(esc(kind)).append("\"")
+                if (book != null) append(",\"book\":").append(book) else append(",\"book\":null")
+                if (chapter != null) append(",\"chapter\":").append(chapter) else append(",\"chapter\":null")
+                if (verseStart != null) {
+                    append(",\"verseStart\":").append(verseStart)
+                } else {
+                    append(",\"verseStart\":null")
+                }
+                if (verseEnd != null) append(",\"verseEnd\":").append(verseEnd) else append(",\"verseEnd\":null")
+                if (displayChapter != null) append(",\"displayChapter\":").append(displayChapter)
+                else append(",\"displayChapter\":null")
+                if (displayVerseStart != null) append(",\"displayVerseStart\":").append(displayVerseStart)
+                else append(",\"displayVerseStart\":null")
+                if (displayVerseEnd != null) append(",\"displayVerseEnd\":").append(displayVerseEnd)
+                else append(",\"displayVerseEnd\":null")
+                if (segmentId != null) append(",\"segmentId\":\"").append(esc(segmentId)).append("\"")
+                else append(",\"segmentId\":null")
+                if (matchType != null) append(",\"matchType\":\"").append(esc(matchType)).append("\"")
+                else append(",\"matchType\":null")
+                append("}")
+            }
+            synchronized(lock) { File(p).appendText(line + "\n", Charsets.UTF_8) }
+        }
+    }
+}

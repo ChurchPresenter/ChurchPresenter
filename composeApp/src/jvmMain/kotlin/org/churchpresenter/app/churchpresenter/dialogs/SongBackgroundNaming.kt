@@ -37,7 +37,7 @@ import org.churchpresenter.strings.generated.resources.song_background_video_loo
 import org.churchpresenter.strings.generated.resources.unit_px
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
+import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import androidx.compose.ui.draw.alpha
 import org.churchpresenter.core.models.songs.SONG_BACKGROUND_FULL_OPACITY
 import org.churchpresenter.core.models.songs.SongBackground

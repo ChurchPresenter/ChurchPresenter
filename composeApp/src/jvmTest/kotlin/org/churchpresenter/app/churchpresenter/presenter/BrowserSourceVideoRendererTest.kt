@@ -21,6 +21,7 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.models.Presenting
 
 private const val W = 8
 private const val H = 4

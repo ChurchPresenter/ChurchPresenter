@@ -29,6 +29,8 @@ import java.net.ServerSocket
 import java.net.Socket
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
  * The Companion Satellite tab of the settings dialog, in both themes.

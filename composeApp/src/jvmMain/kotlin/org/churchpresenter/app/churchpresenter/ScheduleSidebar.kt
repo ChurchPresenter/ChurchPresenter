@@ -33,11 +33,11 @@ import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.composables.CompanionConnectionChipRow
 import org.churchpresenter.app.churchpresenter.composables.CompanionSurfacePanel
 import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTab
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarIconSize
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.core.models.schedule.ScheduleItem

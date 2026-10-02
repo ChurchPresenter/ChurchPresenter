@@ -26,8 +26,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.text.input.ImeAction
-import org.churchpresenter.app.churchpresenter.utils.FontCatalog
-import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.sharedui.utils.FontCatalog
+import org.churchpresenter.sharedui.utils.Utils
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 

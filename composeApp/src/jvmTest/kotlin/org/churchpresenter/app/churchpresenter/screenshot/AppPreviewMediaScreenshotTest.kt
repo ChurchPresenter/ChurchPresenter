@@ -2,7 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
-import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.sharedui.models.Tabs
 import kotlin.test.Test
 
 class AppPreviewMediaScreenshotTest {
