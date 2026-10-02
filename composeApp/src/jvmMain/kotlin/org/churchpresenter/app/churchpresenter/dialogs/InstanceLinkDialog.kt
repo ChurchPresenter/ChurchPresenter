@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import androidx.compose.runtime.Stable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -172,31 +173,7 @@ internal fun InstanceLinkDialogContent(
     onDisconnect: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    var host by remember(isVisible) { mutableStateOf(settings.primaryHost) }
-    var portText by remember(isVisible) {
-        mutableStateOf(if (settings.primaryPort > 0) settings.primaryPort.toString() else "")
-    }
-    var apiKey by remember(isVisible) { mutableStateOf(settings.apiKey) }
-    var autoConnect by remember(isVisible) { mutableStateOf(settings.autoConnect) }
-    var reconnectDelayText by remember(isVisible) { mutableStateOf(settings.reconnectDelayMs.toString()) }
-    var allowPushToSchedule by remember(isVisible) { mutableStateOf(settings.allowPushToSchedule) }
-    var bibleSyncMode by remember(isVisible) { mutableStateOf(settings.bibleSyncMode) }
-    var mirrorBackgrounds by remember(isVisible) { mutableStateOf(settings.mirrorBackgrounds) }
-    var role by remember(isVisible) { mutableStateOf(settings.role) }
-
-    // Everything the operator has edited, folded back onto the settings this dialog was opened with
-    // so the fields it does not show (deviceId, enabled) are carried through untouched.
-    fun edited(): InstanceLinkSettings = settings.copy(
-        primaryHost = host.trim(),
-        primaryPort = portText.toIntOrNull() ?: settings.primaryPort,
-        apiKey = apiKey.trim(),
-        autoConnect = autoConnect,
-        reconnectDelayMs = parseReconnectDelayMs(reconnectDelayText, settings.reconnectDelayMs),
-        allowPushToSchedule = allowPushToSchedule,
-        bibleSyncMode = bibleSyncMode,
-        mirrorBackgrounds = mirrorBackgrounds,
-        role = role
-    )
+    val form = remember(isVisible) { InstanceLinkForm(settings) }
 
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -235,94 +212,10 @@ internal fun InstanceLinkDialogContent(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         ConnectionStatusRow(connectionStatus)
-
                         if (connectionStatus == InstanceLinkStatus.CONNECTED) {
-                            Text(
-                                text = stringResource(Res.string.instance_link_schedule_count, remoteScheduleCount),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            if (lastMessageAtMs != null) {
-                                // 1s ticker keeps the age readout current while the dialog is open
-                                var ageNowMs by remember { mutableStateOf(System.currentTimeMillis()) }
-                                LaunchedEffect(Unit) {
-                                    while (true) {
-                                        ageNowMs = System.currentTimeMillis()
-                                        delay(STATUS_POLL_MS)
-                                    }
-                                }
-                                val ageSeconds = ((ageNowMs - lastMessageAtMs) / 1000).coerceAtLeast(0)
-                                val ageText = formatInstanceLinkAge(ageSeconds)
-                                Text(
-                                    text = stringResource(Res.string.instance_link_last_update_age, ageText),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            remoteLiveState?.let { state ->
-                                Text(
-                                    text = stringResource(
-                                        Res.string.instance_link_last_received,
-                                        liveStateSummary(state)
-                                    ),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                            LinkStatusLines(remoteScheduleCount, lastMessageAtMs, remoteLiveState)
                         }
-
-                        SettingRow(label = stringResource(Res.string.instance_link_host)) {
-                            SettingsTextField(
-                                value = host,
-                                onValueChange = { host = it },
-                                placeholder = { Text(stringResource(Res.string.instance_link_host_hint)) },
-                                modifier = Modifier.fillMaxWidth(),
-                                singleLine = true
-                            )
-                        }
-
-                        SettingRow(label = stringResource(Res.string.server_port)) {
-                            SettingsTextField(
-                                value = portText,
-                                onValueChange = { new -> if (new.all(Char::isDigit)) portText = new },
-                                modifier = Modifier.fillMaxWidth(),
-                                singleLine = true
-                            )
-                        }
-
-                        SettingRow(label = stringResource(Res.string.api_key_label)) {
-                            SettingsTextField(
-                                value = apiKey,
-                                onValueChange = { apiKey = it },
-                                placeholder = { Text(stringResource(Res.string.api_key_hint)) },
-                                modifier = Modifier.fillMaxWidth(),
-                                singleLine = true
-                            )
-                        }
-
-                        LabeledSwitch(
-                            checked = autoConnect,
-                            onCheckedChange = { autoConnect = it },
-                            label = stringResource(Res.string.instance_link_autoconnect),
-                            modifier = Modifier.fillMaxWidth(),
-                            style = MaterialTheme.typography.bodyMedium,
-                            spacing = 12.dp,
-                        )
-
-                        SettingRow(label = stringResource(Res.string.instance_link_reconnect_delay)) {
-                            SettingsTextField(
-                                value = reconnectDelayText,
-                                onValueChange = { new -> if (new.all(Char::isDigit)) reconnectDelayText = new },
-                                placeholder = { Text(stringResource(Res.string.unit_ms)) },
-                                modifier = Modifier.fillMaxWidth(),
-                                singleLine = true
-                            )
-                        }
-                        Text(
-                            text = stringResource(Res.string.instance_link_reconnect_delay_hint),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        ConnectionFields(form)
                     }
 
                     VerticalDivider()
@@ -333,77 +226,7 @@ internal fun InstanceLinkDialogContent(
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Text(
-                            stringResource(Res.string.instance_link_role),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        LabeledRadioButton(
-                            selected = role == InstanceLinkRole.CONTROLLED,
-                            onClick = { role = InstanceLinkRole.CONTROLLED },
-                            label = stringResource(Res.string.instance_link_role_controlled),
-                            modifier = Modifier.fillMaxWidth(),
-                            style = MaterialTheme.typography.bodyMedium,
-                            spacing = 12.dp,
-                        )
-
-                        LabeledRadioButton(
-                            selected = role == InstanceLinkRole.CONTROLLER,
-                            onClick = { role = InstanceLinkRole.CONTROLLER },
-                            label = stringResource(Res.string.instance_link_role_controller),
-                            modifier = Modifier.fillMaxWidth(),
-                            style = MaterialTheme.typography.bodyMedium,
-                            spacing = 12.dp,
-                        )
-
-                        // Pushing to the schedule, the Bible sync mode and background mirroring only
-                        // matter in Controlled mode — a Controller keeps its own local content
-                        // entirely, and its schedule is never the primary's, so a push has nothing
-                        // to push to. Shown only where they do something.
-                        if (role == InstanceLinkRole.CONTROLLED) {
-                            LabeledSwitch(
-                                checked = allowPushToSchedule,
-                                onCheckedChange = { allowPushToSchedule = it },
-                                label = stringResource(Res.string.instance_link_allow_push_to_schedule),
-                                modifier = Modifier.fillMaxWidth(),
-                                style = MaterialTheme.typography.bodyMedium,
-                                spacing = 12.dp,
-                            )
-
-                            Text(
-                                stringResource(Res.string.instance_link_bible_sync_mode),
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-
-                            LabeledRadioButton(
-                                selected = bibleSyncMode == BibleSyncMode.FULL_REPLICA,
-                                onClick = { bibleSyncMode = BibleSyncMode.FULL_REPLICA },
-                                label = stringResource(Res.string.instance_link_bible_sync_full_replica),
-                                modifier = Modifier.fillMaxWidth(),
-                                style = MaterialTheme.typography.bodyMedium,
-                                spacing = 12.dp,
-                            )
-
-                            LabeledRadioButton(
-                                selected = bibleSyncMode == BibleSyncMode.REFERENCE_ONLY,
-                                onClick = { bibleSyncMode = BibleSyncMode.REFERENCE_ONLY },
-                                label = stringResource(Res.string.instance_link_bible_sync_reference_only),
-                                modifier = Modifier.fillMaxWidth(),
-                                style = MaterialTheme.typography.bodyMedium,
-                                spacing = 12.dp,
-                            )
-
-                            LabeledSwitch(
-                                checked = mirrorBackgrounds,
-                                onCheckedChange = { mirrorBackgrounds = it },
-                                label = stringResource(Res.string.instance_link_mirror_backgrounds),
-                                modifier = Modifier.fillMaxWidth(),
-                                style = MaterialTheme.typography.bodyMedium,
-                                spacing = 12.dp,
-                            )
-                        }
+                        RoleOptions(form)
                     }
                 }
 
@@ -411,66 +234,7 @@ internal fun InstanceLinkDialogContent(
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (connectionStatus != InstanceLinkStatus.DISCONNECTED) {
-                        GhostButton(shape = AppShape(6.dp), onClick = onDisconnect) {
-                            Text(
-                                stringResource(Res.string.menu_disconnect),
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-
-                    GhostButton(shape = AppShape(6.dp), onClick = onDismiss) {
-                        Text(
-                            stringResource(Res.string.cancel),
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    // Always available, including with no host yet: turning autoConnect back off, or
-                    // switching role, is a legitimate edit on its own and must not require a live
-                    // connection to persist.
-                    GhostButton(
-                        shape = AppShape(6.dp),
-                        onClick = {
-                            onSave(edited())
-                            onDismiss()
-                        }
-                    ) {
-                        Text(
-                            stringResource(Res.string.save),
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    RaisedButton(
-                        shape = AppShape(6.dp),
-                        onClick = {
-                            if (portText.toIntOrNull() == null) return@RaisedButton
-                            onConnect(edited())
-                            onDismiss()
-                        },
-                        enabled = host.isNotBlank() && portText.toIntOrNull() != null,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Text(
-                            stringResource(Res.string.connect),
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-                }
+                InstanceLinkButtons(form, connectionStatus, onConnect, onSave, onDisconnect, onDismiss)
             }
         }
     }
@@ -500,4 +264,274 @@ internal fun liveStateSummary(state: LiveStateDto): String = when (state.content
     else -> state.contentType
 }
 
+/**
+ * What the dialog edits, seeded from the settings it opened with. [edited] folds the edits back onto
+ * those settings, so the fields it does not show (deviceId, enabled) are carried through untouched.
+ */
+@Stable
+private class InstanceLinkForm(private val settings: InstanceLinkSettings) {
+    var host by mutableStateOf(settings.primaryHost)
+    var portText by mutableStateOf(if (settings.primaryPort > 0) settings.primaryPort.toString() else "")
+    var apiKey by mutableStateOf(settings.apiKey)
+    var autoConnect by mutableStateOf(settings.autoConnect)
+    var reconnectDelayText by mutableStateOf(settings.reconnectDelayMs.toString())
+    var allowPushToSchedule by mutableStateOf(settings.allowPushToSchedule)
+    var bibleSyncMode by mutableStateOf(settings.bibleSyncMode)
+    var mirrorBackgrounds by mutableStateOf(settings.mirrorBackgrounds)
+    var role by mutableStateOf(settings.role)
 
+    fun edited(): InstanceLinkSettings = settings.copy(
+        primaryHost = host.trim(),
+        primaryPort = portText.toIntOrNull() ?: settings.primaryPort,
+        apiKey = apiKey.trim(),
+        autoConnect = autoConnect,
+        reconnectDelayMs = parseReconnectDelayMs(reconnectDelayText, settings.reconnectDelayMs),
+        allowPushToSchedule = allowPushToSchedule,
+        bibleSyncMode = bibleSyncMode,
+        mirrorBackgrounds = mirrorBackgrounds,
+        role = role
+    )
+}
+
+/** While connected: how many schedule items arrived, how long since the last message, what is live. */
+@Composable
+private fun LinkStatusLines(remoteScheduleCount: Int, lastMessageAtMs: Long?, remoteLiveState: LiveStateDto?) {
+    Text(
+        text = stringResource(Res.string.instance_link_schedule_count, remoteScheduleCount),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    if (lastMessageAtMs != null) {
+        // 1s ticker keeps the age readout current while the dialog is open
+        var ageNowMs by remember { mutableStateOf(System.currentTimeMillis()) }
+        LaunchedEffect(Unit) {
+            while (true) {
+                ageNowMs = System.currentTimeMillis()
+                delay(STATUS_POLL_MS)
+            }
+        }
+        val ageSeconds = ((ageNowMs - lastMessageAtMs) / 1000).coerceAtLeast(0)
+        val ageText = formatInstanceLinkAge(ageSeconds)
+        Text(
+            text = stringResource(Res.string.instance_link_last_update_age, ageText),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+    remoteLiveState?.let { state ->
+        Text(
+            text = stringResource(
+                Res.string.instance_link_last_received,
+                liveStateSummary(state)
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+
+}
+
+/** Where the primary is, its API key, and how this instance reconnects to it. */
+@Composable
+private fun ConnectionFields(form: InstanceLinkForm) {
+SettingRow(label = stringResource(Res.string.instance_link_host)) {
+    SettingsTextField(
+        value = form.host,
+        onValueChange = { form.host = it },
+        placeholder = { Text(stringResource(Res.string.instance_link_host_hint)) },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true
+    )
+}
+
+SettingRow(label = stringResource(Res.string.server_port)) {
+    SettingsTextField(
+        value = form.portText,
+        onValueChange = { new -> if (new.all(Char::isDigit)) form.portText = new },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true
+    )
+}
+
+SettingRow(label = stringResource(Res.string.api_key_label)) {
+    SettingsTextField(
+        value = form.apiKey,
+        onValueChange = { form.apiKey = it },
+        placeholder = { Text(stringResource(Res.string.api_key_hint)) },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true
+    )
+}
+
+LabeledSwitch(
+    checked = form.autoConnect,
+    onCheckedChange = { form.autoConnect = it },
+    label = stringResource(Res.string.instance_link_autoconnect),
+    modifier = Modifier.fillMaxWidth(),
+    style = MaterialTheme.typography.bodyMedium,
+    spacing = 12.dp,
+)
+
+SettingRow(label = stringResource(Res.string.instance_link_reconnect_delay)) {
+    SettingsTextField(
+        value = form.reconnectDelayText,
+        onValueChange = { new -> if (new.all(Char::isDigit)) form.reconnectDelayText = new },
+        placeholder = { Text(stringResource(Res.string.unit_ms)) },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true
+    )
+}
+Text(
+    text = stringResource(Res.string.instance_link_reconnect_delay_hint),
+    style = MaterialTheme.typography.bodySmall,
+    color = MaterialTheme.colorScheme.onSurfaceVariant
+)
+}
+
+/** Controlled or controller, and what a controlled instance follows. */
+@Composable
+private fun RoleOptions(form: InstanceLinkForm) {
+Text(
+    stringResource(Res.string.instance_link_role),
+    style = MaterialTheme.typography.labelLarge,
+    color = MaterialTheme.colorScheme.onSurfaceVariant
+)
+
+LabeledRadioButton(
+    selected = form.role == InstanceLinkRole.CONTROLLED,
+    onClick = { form.role = InstanceLinkRole.CONTROLLED },
+    label = stringResource(Res.string.instance_link_role_controlled),
+    modifier = Modifier.fillMaxWidth(),
+    style = MaterialTheme.typography.bodyMedium,
+    spacing = 12.dp,
+)
+
+LabeledRadioButton(
+    selected = form.role == InstanceLinkRole.CONTROLLER,
+    onClick = { form.role = InstanceLinkRole.CONTROLLER },
+    label = stringResource(Res.string.instance_link_role_controller),
+    modifier = Modifier.fillMaxWidth(),
+    style = MaterialTheme.typography.bodyMedium,
+    spacing = 12.dp,
+)
+
+// Pushing to the schedule, the Bible sync mode and background mirroring only
+// matter in Controlled mode — a Controller keeps its own local content
+// entirely, and its schedule is never the primary's, so a push has nothing
+// to push to. Shown only where they do something.
+if (form.role == InstanceLinkRole.CONTROLLED) {
+    LabeledSwitch(
+        checked = form.allowPushToSchedule,
+        onCheckedChange = { form.allowPushToSchedule = it },
+        label = stringResource(Res.string.instance_link_allow_push_to_schedule),
+        modifier = Modifier.fillMaxWidth(),
+        style = MaterialTheme.typography.bodyMedium,
+        spacing = 12.dp,
+    )
+
+    Text(
+        stringResource(Res.string.instance_link_bible_sync_mode),
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+
+    LabeledRadioButton(
+        selected = form.bibleSyncMode == BibleSyncMode.FULL_REPLICA,
+        onClick = { form.bibleSyncMode = BibleSyncMode.FULL_REPLICA },
+        label = stringResource(Res.string.instance_link_bible_sync_full_replica),
+        modifier = Modifier.fillMaxWidth(),
+        style = MaterialTheme.typography.bodyMedium,
+        spacing = 12.dp,
+    )
+
+    LabeledRadioButton(
+        selected = form.bibleSyncMode == BibleSyncMode.REFERENCE_ONLY,
+        onClick = { form.bibleSyncMode = BibleSyncMode.REFERENCE_ONLY },
+        label = stringResource(Res.string.instance_link_bible_sync_reference_only),
+        modifier = Modifier.fillMaxWidth(),
+        style = MaterialTheme.typography.bodyMedium,
+        spacing = 12.dp,
+    )
+
+    LabeledSwitch(
+        checked = form.mirrorBackgrounds,
+        onCheckedChange = { form.mirrorBackgrounds = it },
+        label = stringResource(Res.string.instance_link_mirror_backgrounds),
+        modifier = Modifier.fillMaxWidth(),
+        style = MaterialTheme.typography.bodyMedium,
+        spacing = 12.dp,
+    )
+}
+}
+
+/** Disconnect while linked, cancel, save without reconnecting, and connect. */
+@Composable
+private fun InstanceLinkButtons(
+    form: InstanceLinkForm,
+    connectionStatus: InstanceLinkStatus,
+    onConnect: (InstanceLinkSettings) -> Unit,
+    onSave: (InstanceLinkSettings) -> Unit,
+    onDisconnect: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+Row(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.End,
+    verticalAlignment = Alignment.CenterVertically
+) {
+    if (connectionStatus != InstanceLinkStatus.DISCONNECTED) {
+        GhostButton(shape = AppShape(6.dp), onClick = onDisconnect) {
+            Text(
+                stringResource(Res.string.menu_disconnect),
+                style = MaterialTheme.typography.labelLarge
+            )
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+    }
+
+    GhostButton(shape = AppShape(6.dp), onClick = onDismiss) {
+        Text(
+            stringResource(Res.string.cancel),
+            style = MaterialTheme.typography.labelLarge
+        )
+    }
+
+    Spacer(modifier = Modifier.width(8.dp))
+
+    // Always available, including with no form.host yet: turning form.autoConnect back off, or
+    // switching form.role, is a legitimate edit on its own and must not require a live
+    // connection to persist.
+    GhostButton(
+        shape = AppShape(6.dp),
+        onClick = {
+            onSave(form.edited())
+            onDismiss()
+        }
+    ) {
+        Text(
+            stringResource(Res.string.save),
+            style = MaterialTheme.typography.labelLarge
+        )
+    }
+
+    Spacer(modifier = Modifier.width(8.dp))
+
+    RaisedButton(
+        shape = AppShape(6.dp),
+        onClick = {
+            if (form.portText.toIntOrNull() == null) return@RaisedButton
+            onConnect(form.edited())
+            onDismiss()
+        },
+        enabled = form.host.isNotBlank() && form.portText.toIntOrNull() != null,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary
+        )
+    ) {
+        Text(
+            stringResource(Res.string.connect),
+            style = MaterialTheme.typography.labelLarge
+        )
+    }
+}
+}

@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.AfterTest
@@ -22,6 +23,32 @@ class PresenterManagerAnnouncementTimerTest {
     private val managers = mutableListOf<PresenterManager>()
 
     private fun manager() = PresenterManager().also { managers.add(it) }
+
+    /** A timer row as the schedule holds it; every field the timer reads is named. */
+    private fun timerItem(
+        timerMode: String = Constants.TIMER_MODE_DURATION,
+        timerHours: Int = 0,
+        timerMinutes: Int = 0,
+        timerSeconds: Int = 0,
+        targetHour: Int = 0,
+        targetMinute: Int = 0,
+        targetSecond: Int = 0,
+        liveClockFormat: String = "HH:mm",
+        timerExpiredText: String = "",
+    ) = ScheduleItem.AnnouncementItem(
+        id = "timer",
+        text = "",
+        isTimer = true,
+        timerMode = timerMode,
+        timerHours = timerHours,
+        timerMinutes = timerMinutes,
+        timerSeconds = timerSeconds,
+        targetHour = targetHour,
+        targetMinute = targetMinute,
+        targetSecond = targetSecond,
+        liveClockFormat = liveClockFormat,
+        timerExpiredText = timerExpiredText,
+    )
 
     @AfterTest
     fun stopTickers() {
@@ -119,10 +146,12 @@ class PresenterManagerAnnouncementTimerTest {
         val pm = manager()
 
         pm.goLiveAnnouncementTimer(
-            timerMode = Constants.TIMER_MODE_DURATION,
-            timerHours = 0, timerMinutes = 1, timerSeconds = 30,
-            targetHour = 0, targetMinute = 0, targetSecond = 0,
-            liveClockFormat = "HH:mm", timerExpiredText = "Time's up",
+            timerItem(
+                timerMode = Constants.TIMER_MODE_DURATION,
+                timerHours = 0, timerMinutes = 1, timerSeconds = 30,
+                targetHour = 0, targetMinute = 0, targetSecond = 0,
+                liveClockFormat = "HH:mm", timerExpiredText = "Time's up",
+            ),
         )
 
         assertTrue(pm.announcementTickerLive.value, "going live must mark the ticker live")
@@ -139,10 +168,12 @@ class PresenterManagerAnnouncementTimerTest {
         val pm = manager()
 
         pm.goLiveAnnouncementTimer(
-            timerMode = Constants.TIMER_MODE_CLOCK_DISPLAY,
-            timerHours = 0, timerMinutes = 0, timerSeconds = 0,
-            targetHour = 0, targetMinute = 0, targetSecond = 0,
-            liveClockFormat = "HH:mm", timerExpiredText = "",
+            timerItem(
+                timerMode = Constants.TIMER_MODE_CLOCK_DISPLAY,
+                timerHours = 0, timerMinutes = 0, timerSeconds = 0,
+                targetHour = 0, targetMinute = 0, targetSecond = 0,
+                liveClockFormat = "HH:mm", timerExpiredText = "",
+            ),
         )
 
         assertTrue(pm.announcementTickerLive.value)
@@ -258,10 +289,12 @@ class PresenterManagerAnnouncementTimerTest {
         val pm = manager()
 
         pm.goLiveAnnouncementTimer(
-            timerMode = Constants.TIMER_MODE_CLOCK,
-            timerHours = 0, timerMinutes = 0, timerSeconds = 0,
-            targetHour = 10, targetMinute = 30, targetSecond = 0,
-            liveClockFormat = "HH:mm", timerExpiredText = "",
+            timerItem(
+                timerMode = Constants.TIMER_MODE_CLOCK,
+                timerHours = 0, timerMinutes = 0, timerSeconds = 0,
+                targetHour = 10, targetMinute = 30, targetSecond = 0,
+                liveClockFormat = "HH:mm", timerExpiredText = "",
+            ),
         )
 
         assertTrue(pm.announcementTickerLive.value)
@@ -273,19 +306,23 @@ class PresenterManagerAnnouncementTimerTest {
     fun `going live twice on a running duration timer does not restart it`() {
         val pm = manager()
         pm.goLiveAnnouncementTimer(
-            timerMode = Constants.TIMER_MODE_DURATION,
-            timerHours = 0, timerMinutes = 2, timerSeconds = 0,
-            targetHour = 0, targetMinute = 0, targetSecond = 0,
-            liveClockFormat = "HH:mm", timerExpiredText = "",
+            timerItem(
+                timerMode = Constants.TIMER_MODE_DURATION,
+                timerHours = 0, timerMinutes = 2, timerSeconds = 0,
+                targetHour = 0, targetMinute = 0, targetSecond = 0,
+                liveClockFormat = "HH:mm", timerExpiredText = "",
+            ),
         )
         assertTrue(pm.announcementTickerActive.value)
 
         // A second go-live of the same running duration timer resumes rather than resetting the clock.
         pm.goLiveAnnouncementTimer(
-            timerMode = Constants.TIMER_MODE_DURATION,
-            timerHours = 0, timerMinutes = 2, timerSeconds = 0,
-            targetHour = 0, targetMinute = 0, targetSecond = 0,
-            liveClockFormat = "HH:mm", timerExpiredText = "",
+            timerItem(
+                timerMode = Constants.TIMER_MODE_DURATION,
+                timerHours = 0, timerMinutes = 2, timerSeconds = 0,
+                targetHour = 0, targetMinute = 0, targetSecond = 0,
+                liveClockFormat = "HH:mm", timerExpiredText = "",
+            ),
         )
 
         assertTrue(pm.announcementTickerLive.value)
@@ -296,19 +333,23 @@ class PresenterManagerAnnouncementTimerTest {
     fun `going live twice on a running count-up does not restart it`() {
         val pm = manager()
         pm.goLiveAnnouncementTimer(
-            timerMode = Constants.TIMER_MODE_COUNT_UP,
-            timerHours = 0, timerMinutes = 0, timerSeconds = 0,
-            targetHour = 0, targetMinute = 0, targetSecond = 0,
-            liveClockFormat = "HH:mm", timerExpiredText = "",
+            timerItem(
+                timerMode = Constants.TIMER_MODE_COUNT_UP,
+                timerHours = 0, timerMinutes = 0, timerSeconds = 0,
+                targetHour = 0, targetMinute = 0, targetSecond = 0,
+                liveClockFormat = "HH:mm", timerExpiredText = "",
+            ),
         )
         assertTrue(pm.announcementTickerActive.value)
 
         // A second go-live of the same running count-up must resume, not reset the elapsed time.
         pm.goLiveAnnouncementTimer(
-            timerMode = Constants.TIMER_MODE_COUNT_UP,
-            timerHours = 0, timerMinutes = 0, timerSeconds = 0,
-            targetHour = 0, targetMinute = 0, targetSecond = 0,
-            liveClockFormat = "HH:mm", timerExpiredText = "",
+            timerItem(
+                timerMode = Constants.TIMER_MODE_COUNT_UP,
+                timerHours = 0, timerMinutes = 0, timerSeconds = 0,
+                targetHour = 0, targetMinute = 0, targetSecond = 0,
+                liveClockFormat = "HH:mm", timerExpiredText = "",
+            ),
         )
 
         assertTrue(pm.announcementTickerLive.value)

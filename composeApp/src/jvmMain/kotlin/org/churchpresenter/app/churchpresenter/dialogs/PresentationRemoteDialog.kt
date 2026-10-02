@@ -20,7 +20,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import org.churchpresenter.theme.components.RaisedButton
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -207,53 +206,7 @@ internal fun PresentationRemoteDialogContent(
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     Spacer(Modifier.height(12.dp))
 
-                    val qrDisplayUrl = "$qrBaseUrl/presentation-remote"
-                    val qrUrl = if (apiKeyEnabled && apiKey.isNotBlank()) {
-                        "$qrDisplayUrl?password=$apiKey"
-                    } else {
-                        qrDisplayUrl
-                    }
-                    val qrBitmap = remember(qrUrl) { generateQRCodeBitmap(qrUrl, 180) }
-                    Text(
-                        stringResource(Res.string.presentation_remote_uses_api_key),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    if (qrBitmap != null) {
-                        Image(bitmap = qrBitmap, contentDescription = null, modifier = Modifier.size(180.dp))
-                        Spacer(Modifier.height(8.dp))
-                    }
-                    Text(
-                        stringResource(Res.string.qa_qr_code_shows),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    SelectionContainer {
-                        Text(
-                            qrUrl,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    RaisedButton(
-                        shape = AppShape(6.dp),
-                        onClick = { copyText(qrUrl) },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                    ) {
-                        Text(
-                            stringResource(Res.string.presentation_remote_copy_url),
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
+                    PresentationRemoteQr(qrBaseUrl, apiKeyEnabled, apiKey, copyText)
 
                     Spacer(Modifier.height(16.dp))
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -271,129 +224,10 @@ internal fun PresentationRemoteDialogContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(8.dp))
-                    when (tunnelStatus) {
-                        is TunnelStatus.Idle -> {
-                            Text(
-                                stringResource(Res.string.presentation_public_access_description),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            RaisedButton(
-                                shape = AppShape(6.dp),
-                                onClick = onStartTunnel,
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                            ) {
-                                Text(
-                                    stringResource(Res.string.qa_enable_public_access),
-                                    style = MaterialTheme.typography.labelSmall
-                                )
-                            }
-                        }
-                        is TunnelStatus.Downloading -> {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                                Text(
-                                    stringResource(Res.string.qa_downloading_tunnel),
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        }
-                        is TunnelStatus.Starting -> {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                                Text(
-                                    stringResource(Res.string.qa_starting_tunnel),
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        }
-                        is TunnelStatus.Connected -> {
-                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                RaisedButton(
-                                    shape = AppShape(6.dp),
-                                    onClick = { onPresentationDisplayUrlChanged(serverUrl) },
-                                    colors = if (
-                                        presentationDisplayUrl.isEmpty() || presentationDisplayUrl == serverUrl
-                                    ) {
-                                        ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                                            contentColor = MaterialTheme.colorScheme.primary
-                                        )
-                                    } else {
-                                        ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                        )
-                                    }
-                                ) {
-                                    Text(
-                                        stringResource(Res.string.qa_local),
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                }
-                                RaisedButton(
-                                    shape = AppShape(6.dp),
-                                    onClick = { onPresentationDisplayUrlChanged(tunnelUrl) },
-                                    colors = if (presentationDisplayUrl == tunnelUrl) {
-                                        ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                                            contentColor = MaterialTheme.colorScheme.primary
-                                        )
-                                    } else {
-                                        ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                        )
-                                    }
-                                ) {
-                                    Text(
-                                        stringResource(Res.string.qa_public),
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                }
-                            }
-                            Spacer(Modifier.height(8.dp))
-                            RaisedButton(
-                                shape = AppShape(6.dp),
-                                onClick = onStopTunnel,
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                            ) {
-                                Text(
-                                    stringResource(Res.string.qa_disable_public_access),
-                                    style = MaterialTheme.typography.labelSmall
-                                )
-                            }
-                        }
-                        is TunnelStatus.Error -> {
-                            Text(
-                                tunnelStatus.message,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                            RaisedButton(
-                                shape = AppShape(6.dp),
-                                onClick = onStartTunnel,
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                            ) {
-                                Text(stringResource(Res.string.qa_retry), style = MaterialTheme.typography.labelSmall)
-                            }
-                        }
-                    }
+                    PresentationTunnelControls(
+                        tunnelStatus, tunnelUrl, serverUrl, presentationDisplayUrl,
+                        onPresentationDisplayUrlChanged, onStartTunnel, onStopTunnel,
+                    )
                 } else {
                     Spacer(Modifier.height(12.dp))
                     Text(
@@ -418,3 +252,191 @@ internal fun PresentationRemoteDialogContent(
             }
         }
     }
+
+/** The QR code and address a phone opens the remote with, and a button to copy the address. */
+@Composable
+private fun PresentationRemoteQr(
+    qrBaseUrl: String,
+    apiKeyEnabled: Boolean,
+    apiKey: String,
+    copyText: (String) -> Unit,
+) {
+    val qrDisplayUrl = "$qrBaseUrl/presentation-remote"
+    val qrUrl = if (apiKeyEnabled && apiKey.isNotBlank()) {
+        "$qrDisplayUrl?password=$apiKey"
+    } else {
+        qrDisplayUrl
+    }
+    val qrBitmap = remember(qrUrl) { generateQRCodeBitmap(qrUrl, 180) }
+    Text(
+        stringResource(Res.string.presentation_remote_uses_api_key),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center
+    )
+    Spacer(Modifier.height(8.dp))
+    if (qrBitmap != null) {
+        Image(bitmap = qrBitmap, contentDescription = null, modifier = Modifier.size(180.dp))
+        Spacer(Modifier.height(8.dp))
+    }
+    Text(
+        stringResource(Res.string.qa_qr_code_shows),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center
+    )
+    Spacer(Modifier.height(4.dp))
+    SelectionContainer {
+        Text(
+            qrUrl,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary,
+            textAlign = TextAlign.Center
+        )
+    }
+    Spacer(Modifier.height(8.dp))
+    RaisedButton(
+        shape = AppShape(6.dp),
+        onClick = { copyText(qrUrl) },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+    ) {
+        Text(
+            stringResource(Res.string.presentation_remote_copy_url),
+            style = MaterialTheme.typography.labelSmall
+        )
+    }
+}
+
+/** Public access through the tunnel: start it, watch it come up, pick local or public, stop it. */
+@Composable
+private fun PresentationTunnelControls(
+    tunnelStatus: TunnelStatus,
+    tunnelUrl: String,
+    serverUrl: String,
+    presentationDisplayUrl: String,
+    onPresentationDisplayUrlChanged: (String) -> Unit,
+    onStartTunnel: () -> Unit,
+    onStopTunnel: () -> Unit,
+) {
+    when (tunnelStatus) {
+        is TunnelStatus.Idle -> {
+            Text(
+                stringResource(Res.string.presentation_public_access_description),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            RaisedButton(
+                shape = AppShape(6.dp),
+                onClick = onStartTunnel,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            ) {
+                Text(
+                    stringResource(Res.string.qa_enable_public_access),
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        }
+        is TunnelStatus.Downloading -> {
+            TunnelBusyRow(stringResource(Res.string.qa_downloading_tunnel))
+        }
+        is TunnelStatus.Starting -> {
+            TunnelBusyRow(stringResource(Res.string.qa_starting_tunnel))
+        }
+        is TunnelStatus.Connected -> PresentationPublicToggle(
+            tunnelUrl, serverUrl, presentationDisplayUrl, onPresentationDisplayUrlChanged, onStopTunnel,
+        )
+        is TunnelStatus.Error -> {
+            Text(
+                tunnelStatus.message,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
+            RaisedButton(
+                shape = AppShape(6.dp),
+                onClick = onStartTunnel,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            ) {
+                Text(stringResource(Res.string.qa_retry), style = MaterialTheme.typography.labelSmall)
+            }
+        }
+    }
+}
+
+/** With the tunnel up: which address the QR code shows, and stopping the tunnel. */
+@Composable
+private fun PresentationPublicToggle(
+    tunnelUrl: String,
+    serverUrl: String,
+    presentationDisplayUrl: String,
+    onPresentationDisplayUrlChanged: (String) -> Unit,
+    onStopTunnel: () -> Unit,
+) {
+Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+    RaisedButton(
+        shape = AppShape(6.dp),
+        onClick = { onPresentationDisplayUrlChanged(serverUrl) },
+        colors = if (
+            presentationDisplayUrl.isEmpty() || presentationDisplayUrl == serverUrl
+        ) {
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                contentColor = MaterialTheme.colorScheme.primary
+            )
+        } else {
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        }
+    ) {
+        Text(
+            stringResource(Res.string.qa_local),
+            style = MaterialTheme.typography.labelSmall
+        )
+    }
+    RaisedButton(
+        shape = AppShape(6.dp),
+        onClick = { onPresentationDisplayUrlChanged(tunnelUrl) },
+        colors = if (presentationDisplayUrl == tunnelUrl) {
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                contentColor = MaterialTheme.colorScheme.primary
+            )
+        } else {
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        }
+    ) {
+        Text(
+            stringResource(Res.string.qa_public),
+            style = MaterialTheme.typography.labelSmall
+        )
+    }
+}
+Spacer(Modifier.height(8.dp))
+RaisedButton(
+    shape = AppShape(6.dp),
+    onClick = onStopTunnel,
+    colors = ButtonDefaults.buttonColors(
+        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+    )
+) {
+    Text(
+        stringResource(Res.string.qa_disable_public_access),
+        style = MaterialTheme.typography.labelSmall
+    )
+}
+        
+}

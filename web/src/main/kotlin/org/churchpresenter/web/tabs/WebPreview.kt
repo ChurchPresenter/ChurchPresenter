@@ -1,7 +1,5 @@
 package org.churchpresenter.web.tabs
 
-import java.awt.Component
-import java.lang.reflect.Method
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.nativeKeyCode
 import androidx.compose.ui.input.key.onKeyEvent
@@ -44,11 +41,6 @@ import org.churchpresenter.strings.generated.resources.web_snapshot_screen_recor
 import org.churchpresenter.strings.generated.resources.web_snapshot_waiting
 import org.churchpresenter.web.presenter.EmbeddedWebView
 import org.jetbrains.compose.resources.stringResource
-import java.awt.event.InputEvent
-import java.awt.event.KeyEvent as AwtKeyEvent
-import java.awt.event.MouseEvent
-import java.awt.event.MouseWheelEvent
-import javax.swing.SwingUtilities
 import kotlinx.coroutines.delay
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.runtime.State
@@ -134,6 +126,7 @@ private fun WebTabScope.WebMirrorPreview() {
 
 @Composable
 private fun WebSnapshotImage(webSnapshot: ImageBitmap, liveBrowser: CefBrowser?) {
+    val input = remember(liveBrowser) { liveBrowser?.let(::CefBrowserInput) }
     val imageSizeState = remember { mutableStateOf(IntSize.Zero) }
     var imageSize by imageSizeState
     Image(
@@ -142,173 +135,57 @@ private fun WebSnapshotImage(webSnapshot: ImageBitmap, liveBrowser: CefBrowser?)
         modifier = Modifier
             .fillMaxSize()
             .onSizeChanged { imageSize = it }
-            .forwardMouse(liveBrowser, imageSizeState)
-            .forwardWheel(liveBrowser, imageSizeState)
-            .forwardKeys(liveBrowser),
+            .forwardBrowserInput(input, imageSizeState),
         contentScale = ContentScale.Fit
     )
 }
 
+/**
+ * Forwards what the operator does over the mirrored image to the live browser: presses, releases and
+ * throttled moves, the wheel, and keys. With no [input] it forwards nothing.
+ */
+internal fun Modifier.forwardBrowserInput(input: BrowserInput?, imageSizeState: State<IntSize>): Modifier =
+    forwardMouse(input, imageSizeState)
+        .forwardWheel(input, imageSizeState)
+        .forwardKeys(input)
+
 /** Forwards presses, releases and throttled moves to the live browser. */
-private fun Modifier.forwardMouse(liveBrowser: CefBrowser?, imageSizeState: State<IntSize>): Modifier =
-    pointerInput(liveBrowser) {
-        val imageSize by imageSizeState
-        // Forward mouse events via CefBrowser_N.sendMouseEvent (reflection)
-        if (liveBrowser == null) return@pointerInput
-        val sendMouse = findMethod(liveBrowser, "sendMouseEvent", MouseEvent::class.java)
-        var lastMoveTime = 0L
+private fun Modifier.forwardMouse(input: BrowserInput?, imageSizeState: State<IntSize>): Modifier =
+    pointerInput(input) {
+        if (input == null) return@pointerInput
+        val throttle = MoveThrottle()
         awaitPointerEventScope {
             while (true) {
                 val event = awaitPointerEvent()
-                val comp = liveBrowser.getUIComponent()
                 val pos = event.changes.firstOrNull()?.position
-                val compReady = comp.isShowing && comp.width > 0 && comp.height > 0
-                val sizeReady = imageSize.width > 0 && imageSize.height > 0
-                val ready = compReady && sizeReady
-                if (sendMouse == null || pos == null || !ready) continue
-                val scaleX = comp.width.toFloat() / imageSize.width
-                val scaleY = comp.height.toFloat() / imageSize.height
-                val bx = (pos.x * scaleX).toInt().coerceIn(0, comp.width - 1)
-                val by = (pos.y * scaleY).toInt().coerceIn(0, comp.height - 1)
-                when (event.type) {
-                    PointerEventType.Press -> {
-                        val now = System.currentTimeMillis()
-                        sendMouseLater(sendMouse, liveBrowser, comp) {
-                            listOf(
-                                MouseEvent(comp, MouseEvent.MOUSE_ENTERED, now, 0, bx, by, 0, false),
-                                MouseEvent(comp, MouseEvent.MOUSE_MOVED, now, 0, bx, by, 0, false),
-                                MouseEvent(
-                                    comp, MouseEvent.MOUSE_PRESSED,
-                                    now,
-                                    InputEvent.BUTTON1_DOWN_MASK,
-                                    bx, by, 1, false, MouseEvent.BUTTON1
-                                ),
-                            )
-                        }
-                    }
-                    PointerEventType.Release -> {
-                        val now = System.currentTimeMillis()
-                        sendMouseLater(sendMouse, liveBrowser, comp) {
-                            listOf(
-                                MouseEvent(
-                                    comp, MouseEvent.MOUSE_RELEASED,
-                                    now, 0, bx, by, 1, false, MouseEvent.BUTTON1
-                                ),
-                                MouseEvent(
-                                    comp, MouseEvent.MOUSE_CLICKED,
-                                    now, 0, bx, by, 1, false, MouseEvent.BUTTON1
-                                ),
-                            )
-                        }
-                    }
-                    PointerEventType.Move -> {
-                        val now = System.currentTimeMillis()
-                        // Throttle to ~20fps
-                        if (now - lastMoveTime >= WEB_MOUSE_MOVE_THROTTLE_MS) {
-                            lastMoveTime = now
-                            sendMouseLater(sendMouse, liveBrowser, comp) {
-                                listOf(MouseEvent(comp, MouseEvent.MOUSE_MOVED, now, 0, bx, by, 0, false))
-                            }
-                        }
-                    }
-                    else -> Unit
-                }
+                input.forwardPointer(event.type, pos, imageSizeState.value, throttle, System.currentTimeMillis())
             }
         }
     }
 
-/** Sends the mouse [events] to the live browser on the AWT thread, while its component is still showing. */
-private fun sendMouseLater(
-    sendMouse: Method,
-    liveBrowser: CefBrowser,
-    comp: Component,
-    events: () -> List<MouseEvent>,
-) {
-    SwingUtilities.invokeLater {
-        try {
-            if (!comp.isShowing) return@invokeLater
-            events().forEach { sendMouse.invoke(liveBrowser, it) }
-        } catch (_: Exception) {}
-    }
-}
-
-private fun Modifier.forwardWheel(liveBrowser: CefBrowser?, imageSizeState: State<IntSize>): Modifier =
-    pointerInput(liveBrowser) {
-        val imageSize by imageSizeState
-        // Forward scroll via CefBrowser_N.sendMouseWheelEvent (reflection)
-        if (liveBrowser == null) return@pointerInput
-        val sendWheel = findMethod(liveBrowser, "sendMouseWheelEvent", MouseWheelEvent::class.java)
+/** Forwards the wheel to the live browser. */
+private fun Modifier.forwardWheel(input: BrowserInput?, imageSizeState: State<IntSize>): Modifier =
+    pointerInput(input) {
+        if (input == null) return@pointerInput
         awaitPointerEventScope {
             while (true) {
                 val event = awaitPointerEvent()
-                val comp = liveBrowser.getUIComponent()
-                val change = event.changes.firstOrNull()
-                val compReady = comp.isShowing && comp.width > 0 && comp.height > 0
-                val sizeReady = imageSize.width > 0 && imageSize.height > 0
-                val ready = compReady && sizeReady &&
-                    event.type == PointerEventType.Scroll
-                if (sendWheel == null || change == null || !ready) continue
-                val scaleX = comp.width.toFloat() / imageSize.width
-                val scaleY = comp.height.toFloat() / imageSize.height
-                val pos = change.position
-                val scroll = change.scrollDelta
-                val bx = (pos.x * scaleX).toInt().coerceIn(0, comp.width - 1)
-                val by = (pos.y * scaleY).toInt().coerceIn(0, comp.height - 1)
-                val vRotation = -(scroll.y * 15).toInt().coerceIn(-100, 100)
-                val hRotation = -(scroll.x * 15).toInt().coerceIn(-100, 100)
-                if (vRotation != 0 || hRotation != 0) {
-                    SwingUtilities.invokeLater {
-                        try {
-                            if (!comp.isShowing) return@invokeLater
-                            if (vRotation != 0) {
-                                sendWheel.invoke(liveBrowser, MouseWheelEvent(
-                                    comp, MouseWheelEvent.MOUSE_WHEEL,
-                                    System.currentTimeMillis(), 0, bx, by,
-                                    0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL,
-                                    1, vRotation
-                                ))
-                            }
-                            if (hRotation != 0) {
-                                sendWheel.invoke(liveBrowser, MouseWheelEvent(
-                                    comp, MouseWheelEvent.MOUSE_WHEEL,
-                                    System.currentTimeMillis(),
-                                    InputEvent.SHIFT_DOWN_MASK,
-                                    bx, by,
-                                    0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL,
-                                    1, hRotation
-                                ))
-                            }
-                        } catch (_: Exception) {}
-                    }
+                if (event.type == PointerEventType.Scroll) {
+                    val change = event.changes.firstOrNull()
+                    val now = System.currentTimeMillis()
+                    input.forwardScroll(change?.position, change?.scrollDelta, imageSizeState.value, now)
                 }
             }
         }
     }
 
-/** Forwards key presses and releases, through CefBrowser_N.sendKeyEvent. */
-private fun Modifier.forwardKeys(liveBrowser: CefBrowser?): Modifier =
+/** Forwards key presses and releases to the live browser, consuming each one it sends. */
+private fun Modifier.forwardKeys(input: BrowserInput?): Modifier =
     onKeyEvent { keyEvent ->
-        if (liveBrowser == null) return@onKeyEvent false
-        val sendKey = findMethod(liveBrowser, "sendKeyEvent", AwtKeyEvent::class.java)
+        if (input == null || input.showingSize() == null) return@onKeyEvent false
+        val event = keyEventFor(keyEvent.type, input.component, keyEvent.key.nativeKeyCode, System.currentTimeMillis())
             ?: return@onKeyEvent false
-        val awtType = when (keyEvent.type) {
-            KeyEventType.KeyDown -> AwtKeyEvent.KEY_PRESSED
-            KeyEventType.KeyUp -> AwtKeyEvent.KEY_RELEASED
-            else -> return@onKeyEvent false
-        }
-        val nativeCode = keyEvent.key.nativeKeyCode
-        val comp = liveBrowser.getUIComponent()
-        if (!comp.isShowing) return@onKeyEvent false
-        val now = System.currentTimeMillis()
-        SwingUtilities.invokeLater {
-            try {
-                if (!comp.isShowing) return@invokeLater
-                sendKey.invoke(liveBrowser, AwtKeyEvent(
-                    comp, awtType, now, 0,
-                    nativeCode, nativeCode.toChar()
-                ))
-            } catch (_: Exception) {}
-        }
+        input.sendKey(event)
         true
     }
 

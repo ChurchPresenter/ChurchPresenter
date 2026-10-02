@@ -291,7 +291,6 @@ fun ProjectionSettingsTab(
         numScreens = numScreens,
         screenAssignments = screenAssignments,
         displayOptions = displayOptions,
-        noneLabel = noneLabel,
     )
 
     BrowserSourceOutputsCard(

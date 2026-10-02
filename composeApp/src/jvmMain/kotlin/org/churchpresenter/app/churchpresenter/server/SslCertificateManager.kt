@@ -62,6 +62,8 @@ import java.util.Date
  */
 private const val CERT_RENEWAL_MARGIN_DAYS = 30L
 
+private val PASSWORD = Constants.SSL_KEYSTORE_PASSWORD.toCharArray()
+
 object SslCertificateManager {
 
     private val baseDir = File(System.getProperty("user.home"), ".churchpresenter").also { it.mkdirs() }
@@ -73,7 +75,6 @@ object SslCertificateManager {
 
     private const val CA_ALIAS = "church-presenter-ca"
     private val SERVER_ALIAS = Constants.SSL_KEY_ALIAS
-    private val PASSWORD     = Constants.SSL_KEYSTORE_PASSWORD.toCharArray()
 
     init {
         if (Security.getProvider("BC") == null) {
@@ -259,33 +260,33 @@ object SslCertificateManager {
         serverKeystoreFile.outputStream().use { ks.store(it, PASSWORD) }
         return ks
     }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
-    /**
-     * Generates an ECDSA P-256 key pair.
-     * P-256 is Apple's recommended curve for ATS forward-secrecy compliance and is
-     * universally supported by iOS (7.0+) and Android (4.0+).
-     */
-    private fun generateEcKeyPair(): KeyPair =
-        KeyPairGenerator.getInstance("EC", "BC")
-            .also { it.initialize(ECGenParameterSpec("P-256"), SecureRandom()) }
-            .generateKeyPair()
-
-    private fun sign(builder: JcaX509v3CertificateBuilder, key: PrivateKey): X509Certificate =
-        JcaX509CertificateConverter().setProvider("BC")
-            .getCertificate(
-                builder.build(JcaContentSignerBuilder("SHA256withECDSA").setProvider("BC").build(key))
-            )
-
-    private fun newKeyStore()              = KeyStore.getInstance("JKS").also { it.load(null, PASSWORD) }
-    private fun loadKeyStore(f: File)      = KeyStore.getInstance("JKS")
-        .also { ks -> f.inputStream().use { ks.load(it, PASSWORD) } }
-    private fun ipSan(ip: String)          =
-        GeneralName(GeneralName.iPAddress, DEROctetString(InetAddress.getByName(ip).address))
-    private fun isIpAddress(host: String)  = host.matches(Regex("""^\d{1,3}(\.\d{1,3}){3}$""")) || host.contains(":")
-
-    private fun extractSanNames(cert: X509Certificate): Set<String> = try {
-        cert.subjectAlternativeNames?.mapNotNull { it.getOrNull(1) as? String }?.toSet() ?: emptySet()
-    } catch (_: Exception) { emptySet() }
 }
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+
+/**
+ * Generates an ECDSA P-256 key pair.
+ * P-256 is Apple's recommended curve for ATS forward-secrecy compliance and is
+ * universally supported by iOS (7.0+) and Android (4.0+).
+ */
+private fun generateEcKeyPair(): KeyPair =
+    KeyPairGenerator.getInstance("EC", "BC")
+        .also { it.initialize(ECGenParameterSpec("P-256"), SecureRandom()) }
+        .generateKeyPair()
+
+private fun sign(builder: JcaX509v3CertificateBuilder, key: PrivateKey): X509Certificate =
+    JcaX509CertificateConverter().setProvider("BC")
+        .getCertificate(
+            builder.build(JcaContentSignerBuilder("SHA256withECDSA").setProvider("BC").build(key))
+        )
+
+private fun newKeyStore()              = KeyStore.getInstance("JKS").also { it.load(null, PASSWORD) }
+private fun loadKeyStore(f: File)      = KeyStore.getInstance("JKS")
+    .also { ks -> f.inputStream().use { ks.load(it, PASSWORD) } }
+private fun ipSan(ip: String)          =
+    GeneralName(GeneralName.iPAddress, DEROctetString(InetAddress.getByName(ip).address))
+private fun isIpAddress(host: String)  = host.matches(Regex("""^\d{1,3}(\.\d{1,3}){3}$""")) || host.contains(":")
+
+private fun extractSanNames(cert: X509Certificate): Set<String> = try {
+    cert.subjectAlternativeNames?.mapNotNull { it.getOrNull(1) as? String }?.toSet() ?: emptySet()
+} catch (_: Exception) { emptySet() }

@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -55,9 +54,9 @@ import org.churchpresenter.strings.generated.resources.web_zoom_out
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.web.presenter.CefManager
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.web.presenter.WebNavController
 import org.churchpresenter.web.presenter.rememberWebNavController
 import org.churchpresenter.web.WebOutput
+import org.churchpresenter.sharedui.utils.rememberScreenDevices
 import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -65,9 +64,7 @@ import org.jetbrains.compose.resources.stringResource
 /** A 16:9 output, for a preview with no output to measure. */
 private const val DEFAULT_PREVIEW_ASPECT_RATIO = 16f / 9f
 
-internal const val WEB_MOUSE_MOVE_THROTTLE_MS = 50
 internal const val WEB_SNAPSHOT_RETRY_DELAY_MS = 7000L
-private const val ZOOM_STEP = 0.5
 private const val ZOOM_FACTOR = 1.2
 private const val PERCENT_SCALE = 100
 private const val FIRST_PRINTABLE_CHAR = 0x20
@@ -92,6 +89,8 @@ fun WebTab(
     cefInitialized: Boolean = CefManager.initialized,
     cefMacOsUnsupported: Boolean = CefManager.macOsUnsupported,
     cefBlockedByPolicy: Boolean = CefManager.blockedByPolicy,
+    /** Whether a screen beyond the operator's own is attached; overridable for the same reason. */
+    hasSecondaryDisplay: Boolean = rememberScreenDevices().size > 1,
     /**
      * Width over height of the output the preview stands in for. The app reads it from the preview
      * output the operator picked, so the embedded browser lays the page out at the shape it goes
@@ -123,7 +122,7 @@ fun WebTab(
     // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
     val tab = remember(
         output, appSettings, onSettingsChange, onAddToSchedule, onUpdateScheduleTitle, state, isLive,
-        navController, previewAspectRatio, outputPicker
+        navController, previewAspectRatio, outputPicker, hasSecondaryDisplay
     ) {
         WebTabScope(
             output = output,
@@ -136,6 +135,7 @@ fun WebTab(
             navController = navController,
             previewAspectRatio = previewAspectRatio,
             outputPicker = outputPicker,
+            hasSecondaryDisplay = hasSecondaryDisplay,
         )
     }
     tab.WebTabEffects(selectedWebsiteItem, selectedWebsiteItemVersion)
@@ -208,60 +208,30 @@ internal fun WebEngineUnavailable(
 }
 
 @Composable
-internal fun RowScope.NavButtons(
-    navController: WebNavController,
-    output: WebOutput?,
-    isLive: Boolean,
-    useInteractivePreview: Boolean,
-    zoomLevel: Double,
-    isMobileView: Boolean,
-    applyZoom: (Double) -> Unit,
-    onMobileToggle: (Boolean) -> Unit
-) {
-    // Back
+internal fun WebTabScope.NavButtons() {
     ActionIconButton(
-        onClick = {
-            val live = output?.liveBrowser?.value
-            if (isLive && !useInteractivePreview && live != null) live.goBack() else navController.goBack()
-        },
+        onClick = { goBack() },
         tooltipText = stringResource(Res.string.web_back),
         painter = painterResource(IconRes.drawable.ic_arrow_left),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
-    // Forward
     ActionIconButton(
-        onClick = {
-            val live = output?.liveBrowser?.value
-            if (isLive && !useInteractivePreview && live != null) live.goForward() else navController.goForward()
-        },
+        onClick = { goForward() },
         tooltipText = stringResource(Res.string.web_forward),
         painter = painterResource(IconRes.drawable.ic_arrow_right),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
-    // Refresh
     ActionIconButton(
-        onClick = {
-            val live = output?.liveBrowser?.value
-            if (isLive && !useInteractivePreview && live != null) live.reload() else navController.browser?.reload()
-        },
+        onClick = { refresh() },
         tooltipText = stringResource(Res.string.web_refresh),
         painter = painterResource(IconRes.drawable.ic_refresh),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
-    // Clear cache
     ActionIconButton(
-        onClick = {
-            // Ask the engine where it installed rather than assuming the home directory —
-            // on Windows it prefers %ProgramData%, and this button used to clear an empty
-            // legacy folder there while the live cache stayed put.
-            CefManager.webviewCacheDir?.let { cacheDir ->
-                if (cacheDir.exists()) cacheDir.deleteRecursively()
-                cacheDir.mkdirs()
-            }
-        },
+        onClick = { clearWebCache() },
         tooltipText = stringResource(Res.string.web_clear_cache),
         painter = painterResource(IconRes.drawable.ic_clear_cache),
         containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -270,7 +240,7 @@ internal fun RowScope.NavButtons(
 
     // Zoom out
     ActionIconButton(
-        onClick = { applyZoom(zoomLevel - ZOOM_STEP) },
+        onClick = { stepZoom(zoomIn = false) },
         tooltipText = stringResource(Res.string.web_zoom_out),
         painter = painterResource(IconRes.drawable.ic_arrow_down),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -284,7 +254,7 @@ internal fun RowScope.NavButtons(
     )
     // Zoom in
     ActionIconButton(
-        onClick = { applyZoom(zoomLevel + ZOOM_STEP) },
+        onClick = { stepZoom(zoomIn = true) },
         tooltipText = stringResource(Res.string.web_zoom_in),
         painter = painterResource(IconRes.drawable.ic_arrow_up),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,

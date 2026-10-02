@@ -188,6 +188,7 @@ private fun PassageFilterRow(viewModel: DictionaryViewModel, getBookName: ((book
             availableBooks = viewModel.entryAvailableBooks,
             getBookName = getBookName,
             onSelect = viewModel::filterEntryListByBook,
+            modifier = Modifier.weight(BOOK_FILTER_WEIGHT),
         )
         if (viewModel.entryBookFilter != null && viewModel.entryAvailableChapters.size > 1) {
             InScriptureChapterDropdown(
@@ -195,6 +196,7 @@ private fun PassageFilterRow(viewModel: DictionaryViewModel, getBookName: ((book
                 selectedChapter = viewModel.entryChapterFilter,
                 availableChapters = viewModel.entryAvailableChapters,
                 onSelect = viewModel::filterEntryListByChapter,
+                modifier = Modifier.weight(1f),
             )
         }
         if (viewModel.entryChapterFilter != null && viewModel.entryAvailableVerses.size > 1) {
@@ -203,6 +205,7 @@ private fun PassageFilterRow(viewModel: DictionaryViewModel, getBookName: ((book
                 selectedVerse = viewModel.entryVerseFilter,
                 availableVerses = viewModel.entryAvailableVerses,
                 onSelect = viewModel::filterEntryListByVerse,
+                modifier = Modifier.weight(1f),
             )
         }
     }
@@ -337,3 +340,6 @@ private fun DictionaryEntryRow(
         }
     }
 }
+
+/** The book filter's share of the passage row against the chapter's and verse's 1 each: book names run long. */
+private const val BOOK_FILTER_WEIGHT = 1.5f

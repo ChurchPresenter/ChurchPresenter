@@ -12,6 +12,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
+import java.net.ServerSocket
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -131,6 +132,15 @@ class EngineServerTest {
             Charsets.UTF_8,
         )
         assertNull(EngineServer.start(sttUrl = "", bibleRoot = temp.absolutePath, port = 39_952))
+    }
+
+    @Test
+    fun `an stt url that does not parse is refused, and the server it bound is released`() {
+        writeSpb()
+        assertNull(EngineServer.start(sttUrl = "http://bad host", bibleRoot = temp.absolutePath, port = 39_954))
+
+        // The server it had already bound was stopped, so the port is free again.
+        ServerSocket(39_954).close()
     }
 
     @Test

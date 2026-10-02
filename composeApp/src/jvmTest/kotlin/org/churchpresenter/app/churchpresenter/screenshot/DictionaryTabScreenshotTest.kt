@@ -191,6 +191,23 @@ class DictionaryTabScreenshotTest {
         chooseOption("John")
     }
 
+    /** A chapter chosen too: book, chapter and verse share the row. */
+    @Test
+    fun `the entry list narrowed to one chapter`() = shoot(
+        "list_filter_chapter_applied",
+        booksWithGreekData = GREEK_BOOKS,
+        booksWithHebrewData = HEBREW_BOOKS,
+        chaptersForBook = CHAPTERS,
+        versesInChapter = VERSES,
+        strongsForBookChapter = mapOf(43 to setOf(AGAPE.number)),
+        getBookName = { id -> BOOK_NAMES[id] },
+    ) {
+        openFilter(0)
+        chooseOption("John")
+        openFilter(1)
+        chooseOption("15")
+    }
+
     /** The open entry's own verse cards, filtered by book — a different control from the list's. */
     @Test
     fun `the In Scripture card filter menu`() = shoot(

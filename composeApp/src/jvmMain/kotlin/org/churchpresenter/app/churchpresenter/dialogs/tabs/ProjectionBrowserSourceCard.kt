@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.mergingProfileOf
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -94,9 +96,6 @@ internal fun BrowserSourceOutputsCard(
     onIdentifyBrowserSource: (Int) -> Unit,
 ) {
     val proj = settings.projectionSettings
-    val langDropdownWidth = 95.dp
-    val cellWidth = 82.dp
-    val contentLabelHeight = 32.dp
 
 SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
     Text(
@@ -107,11 +106,13 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
     Spacer(modifier = Modifier.height(8.dp))
 
     val serverUrl by companionServer.serverUrl.collectAsState()
-    val copyText: (String) -> Unit = { text ->
-        SystemClipboard.copy(text)
-    }
 
     proj.browserSourceOutputs.forEachIndexed { i, output ->
+        val update: (ScreenAssignment) -> Unit = { updated ->
+            onSettingsChange { s ->
+                s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
+            }
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -121,7 +122,6 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
         ) {
             var showRemoveConfirm by remember { mutableStateOf(false) }
             val defaultLabel = stringResource(Res.string.browser_source_output_label, i + 1)
-            val outputLabel = output.browserSourceLabelOr(defaultLabel)
             val overlayUrl = if (serverUrl.isNotBlank()) {
                 "$serverUrl${Constants.ENDPOINT_BROWSER_SOURCE}/${i + 1}"
             } else {
@@ -129,140 +129,27 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
             }
             val apiKeyParam = if (output.browserSourceApiKeyRequired && settings.serverSettings.apiKey.isNotBlank())
                 "apiKey=${settings.serverSettings.apiKey}" else null
-            fun urlWithBg(bg: String): String =
-                (overlayUrl ?: "") + "?" + listOfNotNull(apiKeyParam, "bg=$bg").joinToString("&")
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Row(
-                    modifier = Modifier.weight(1f),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    LabeledSwitch(
-                        checked = output.browserSourceEnabled,
-                        onCheckedChange = { checked ->
-                            val updated = output.copy(browserSourceEnabled = checked)
-                            onSettingsChange { s ->
-                                s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
-                            }
-                        },
-                        label = stringResource(Res.string.browser_source_enabled),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        spacing = 4.dp,
-                    )
-                    @OptIn(ExperimentalMaterial3Api::class)
-                    TooltipBox(
-                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                        tooltip = { PlainTooltip { Text(stringResource(Res.string.browser_source_name_tooltip)) } },
-                        state = rememberTooltipState()
-                    ) {
-                        SettingsTextField(
-                            value = output.browserSourceName,
-                            onValueChange = { name ->
-                                val updated = output.copy(browserSourceName = name)
-                                onSettingsChange { s ->
-                                    s.copy(
-                                        projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated)
-                                    )
-                                }
-                            },
-                            placeholder = {
-                                Text(
-                                    text = defaultLabel,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            },
-                            modifier = Modifier.width(NAME_FIELD_WIDTH)
-                        )
-                    }
-                    if (overlayUrl != null) {
-                        Text(
-                            text = overlayUrl,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontFamily = FontFamily.Monospace,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (overlayUrl != null) {
-                        RaisedButton(
-                            shape = AppShape(6.dp),
-                            onClick = { copyText(urlWithBg("transparent")) },
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                        ) {
-                            Text(
-                                stringResource(Res.string.copy_url_transparent),
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                        }
-                        RaisedButton(
-                            shape = AppShape(6.dp),
-                            onClick = { copyText(urlWithBg("black")) },
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                        ) {
-                            Text(
-                                stringResource(Res.string.copy_url_black_bg),
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                        }
-                    }
-                    RaisedButton(
-                        shape = AppShape(6.dp),
-                        onClick = { onIdentifyBrowserSource(i) },
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text(stringResource(Res.string.identify_screen), style = MaterialTheme.typography.labelSmall)
-                    }
-                    RaisedButton(
-                        shape = AppShape(6.dp),
-                        onClick = { showRemoveConfirm = true },
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer
-                        )
-                    ) {
-                        Text(stringResource(Res.string.remove), style = MaterialTheme.typography.labelSmall)
-                    }
-                }
-            }
+            BrowserSourceHeaderRow(
+                output = output,
+                defaultLabel = defaultLabel,
+                overlayUrl = overlayUrl,
+                urlWithBg = { bg -> (overlayUrl ?: "") + "?" + listOfNotNull(apiKeyParam, "bg=$bg").joinToString("&") },
+                update = update,
+                onIdentify = { onIdentifyBrowserSource(i) },
+                onRemove = { showRemoveConfirm = true },
+            )
 
             if (showRemoveConfirm) {
-                AlertDialog(
-                    onDismissRequest = { showRemoveConfirm = false },
-                    title = { Text(stringResource(Res.string.confirm_delete)) },
-                    text = {
-                        Text(stringResource(Res.string.browser_source_confirm_remove_message, outputLabel))
-                    },
-                    confirmButton = {
-                        GhostButton(
-                            shape = AppShape(6.dp),
-                            onClick = {
-                                showRemoveConfirm = false
-                                onSettingsChange { s ->
-                                    s.copy(projectionSettings = s.projectionSettings.removeBrowserSourceOutput(i))
-                                }
-                            }
-                        ) {
-                            Text(stringResource(Res.string.remove), color = MaterialTheme.colorScheme.error)
+                RemoveBrowserSourceDialog(
+                    outputLabel = output.browserSourceLabelOr(defaultLabel),
+                    onRemove = {
+                        showRemoveConfirm = false
+                        onSettingsChange { s ->
+                            s.copy(projectionSettings = s.projectionSettings.removeBrowserSourceOutput(i))
                         }
                     },
-                    dismissButton = {
-                        GhostButton(shape = AppShape(6.dp), onClick = { showRemoveConfirm = false }) {
-                            Text(stringResource(Res.string.cancel))
-                        }
-                    }
+                    onDismiss = { showRemoveConfirm = false },
                 )
             }
 
@@ -270,151 +157,8 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
             // it's obvious at a glance which outputs are inactive — the controls underneath
             // still work normally if the output is re-enabled.
             Column(modifier = Modifier.alpha(if (output.browserSourceEnabled) 1f else DISABLED_ALPHA)) {
-            Row(verticalAlignment = Alignment.Top) {
-                Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    @OptIn(ExperimentalMaterial3Api::class)
-                    Column(
-                        modifier = Modifier.width(langDropdownWidth),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Box(
-                            modifier = Modifier.fillMaxWidth().height(contentLabelHeight),
-                            contentAlignment = Alignment.BottomCenter
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.output_profile_picker_tooltip),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        OutputProfilePicker(
-                            profiles = proj.outputProfiles,
-                            activeProfileId = output.activeProfileId,
-                            mergedBy = proj.outputProfiles.mergingProfileOf(
-                                Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_BROWSER_SOURCE, i),
-                                output.activeProfileId,
-                            ),
-                            onPick = { pickedId ->
-                                onSettingsChange { s ->
-                                    s.copy(
-                                        projectionSettings = s.projectionSettings.withBrowserSourceOutput(
-                                            i, output.copy(activeProfileId = pickedId),
-                                        ),
-                                    )
-                                }
-                            },
-                        )
-                    }
-                    ResolutionPicker(
-                        label = stringResource(Res.string.browser_source_resolution),
-                        width = output.browserSourceWidth,
-                        height = output.browserSourceHeight,
-                        cellWidth = langDropdownWidth,
-                        labelHeight = contentLabelHeight,
-                        onChange = { w, h ->
-                            val updated = output.copy(browserSourceWidth = w, browserSourceHeight = h)
-                            onSettingsChange { s ->
-                                s.copy(projectionSettings = s.projectionSettings.withBrowserSourceOutput(i, updated))
-                            }
-                        },
-                    )
-                    Column(modifier = Modifier.width(cellWidth), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(
-                            modifier = Modifier.fillMaxWidth().height(contentLabelHeight),
-                            contentAlignment = Alignment.BottomCenter
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.browser_source_fps),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        var fpsExpanded by remember { mutableStateOf(false) }
-                        KeyButton(
-                            shape = AppShape(6.dp),
-                            onClick = { fpsExpanded = true },
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = output.browserSourceFps.toString(),
-                                style = MaterialTheme.typography.labelSmall,
-                                maxLines = 1
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = fpsExpanded,
-                            onDismissRequest = { fpsExpanded = false }
-                        ) {
-                            BROWSER_SOURCE_FRAME_RATES.forEach { fps ->
-                                DropdownMenuItem(
-                                    text = { Text(fps.toString(), style = MaterialTheme.typography.bodySmall) },
-                                    onClick = {
-                                        fpsExpanded = false
-                                        val updated = output.copy(browserSourceFps = fps)
-                                        onSettingsChange { s ->
-                                            s.copy(
-                                                projectionSettings = s.projectionSettings.withBrowserSourceOutput(
-                                                    i,
-                                                    updated
-                                                )
-                                            )
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    @OptIn(ExperimentalMaterial3Api::class)
-                    Column(
-                        modifier = Modifier.width(langDropdownWidth),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Box(
-                            modifier = Modifier.fillMaxWidth().height(contentLabelHeight),
-                            contentAlignment = Alignment.BottomCenter
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.browser_source_require_api_key),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                textAlign = TextAlign.Center,
-                                maxLines = 2,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        TooltipBox(
-                            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
-                                TooltipAnchorPosition.Above
-                            ),
-                            tooltip = {
-                                PlainTooltip { Text(stringResource(Res.string.browser_source_uses_server_api_key)) }
-                            },
-                            state = rememberTooltipState()
-                        ) {
-                            RaisedCheckbox(
-                                checked = output.browserSourceApiKeyRequired,
-                                onCheckedChange = { checked ->
-                                    val updated = output.copy(browserSourceApiKeyRequired = checked)
-                                    onSettingsChange { s ->
-                                        s.copy(
-                                            projectionSettings = s.projectionSettings.withBrowserSourceOutput(
-                                                i,
-                                                updated
-                                            )
-                                        )
-                                    }
-                                }
-                            )
-                        }
-                    }
-                }
+                BrowserSourceOptions(proj, i, output, update)
             }
-            } // end alpha-dimmed Column
         }
     }
 
@@ -429,4 +173,298 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
         Text(stringResource(Res.string.add_browser_source_output), style = MaterialTheme.typography.labelSmall)
     }
 }
+}
+
+/** The column width of the profile and API-key cells, and the height of every cell's label. */
+private val OPTION_CELL_WIDTH = 95.dp
+private val FPS_CELL_WIDTH = 82.dp
+private val OPTION_LABEL_HEIGHT = 32.dp
+
+/** An output's on switch, its name, its address, and the copy, identify and remove buttons. */
+@Composable
+private fun BrowserSourceHeaderRow(
+    output: ScreenAssignment,
+    defaultLabel: String,
+    overlayUrl: String?,
+    urlWithBg: (String) -> String,
+    update: (ScreenAssignment) -> Unit,
+    onIdentify: () -> Unit,
+    onRemove: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            LabeledSwitch(
+                checked = output.browserSourceEnabled,
+                onCheckedChange = { checked -> update(output.copy(browserSourceEnabled = checked)) },
+                label = stringResource(Res.string.browser_source_enabled),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                spacing = 4.dp,
+            )
+        @OptIn(ExperimentalMaterial3Api::class)
+        TooltipBox(
+            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+            tooltip = { PlainTooltip { Text(stringResource(Res.string.browser_source_name_tooltip)) } },
+            state = rememberTooltipState()
+        ) {
+            SettingsTextField(
+                value = output.browserSourceName,
+                onValueChange = { name ->
+                    update(output.copy(browserSourceName = name))
+                },
+                placeholder = {
+                    Text(
+                        text = defaultLabel,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                modifier = Modifier.width(NAME_FIELD_WIDTH)
+            )
+        }
+            if (overlayUrl != null) {
+                Text(
+                    text = overlayUrl,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontFamily = FontFamily.Monospace,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+        BrowserSourceButtons(overlayUrl, urlWithBg, onIdentify, onRemove)
+    }
+}
+
+/** Copy the address with a transparent or a black background, identify the output, and remove it. */
+@Composable
+private fun BrowserSourceButtons(
+    overlayUrl: String?,
+    urlWithBg: (String) -> String,
+    onIdentify: () -> Unit,
+    onRemove: () -> Unit,
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (overlayUrl != null) {
+            RaisedButton(
+                shape = AppShape(6.dp),
+                onClick = { SystemClipboard.copy(urlWithBg("transparent")) },
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                Text(
+                    stringResource(Res.string.copy_url_transparent),
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+            RaisedButton(
+                shape = AppShape(6.dp),
+                onClick = { SystemClipboard.copy(urlWithBg("black")) },
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                Text(
+                    stringResource(Res.string.copy_url_black_bg),
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        }
+        RaisedButton(
+            shape = AppShape(6.dp),
+            onClick = onIdentify,
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+        ) {
+            Text(stringResource(Res.string.identify_screen), style = MaterialTheme.typography.labelSmall)
+        }
+        RaisedButton(
+            shape = AppShape(6.dp),
+            onClick = onRemove,
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer
+            )
+        ) {
+            Text(stringResource(Res.string.remove), style = MaterialTheme.typography.labelSmall)
+        }
+    }
+}
+
+/** Asks before an output is removed, naming it. */
+@Composable
+private fun RemoveBrowserSourceDialog(outputLabel: String, onRemove: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.confirm_delete)) },
+        text = {
+            Text(stringResource(Res.string.browser_source_confirm_remove_message, outputLabel))
+        },
+        confirmButton = {
+            GhostButton(
+                shape = AppShape(6.dp),
+                onClick = onRemove
+            ) {
+                Text(stringResource(Res.string.remove), color = MaterialTheme.colorScheme.error)
+            }
+        },
+        dismissButton = {
+            GhostButton(shape = AppShape(6.dp), onClick = onDismiss) {
+                Text(stringResource(Res.string.cancel))
+            }
+        }
+    )
+}
+
+/** The profile an output shows, its resolution and frame rate, and whether it asks for the API key. */
+@Composable
+private fun BrowserSourceOptions(
+    proj: ProjectionSettings,
+    i: Int,
+    output: ScreenAssignment,
+    update: (ScreenAssignment) -> Unit,
+) {
+    val langDropdownWidth = OPTION_CELL_WIDTH
+    val contentLabelHeight = OPTION_LABEL_HEIGHT
+    Row(verticalAlignment = Alignment.Top) {
+        Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            @OptIn(ExperimentalMaterial3Api::class)
+            Column(
+                modifier = Modifier.width(langDropdownWidth),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().height(contentLabelHeight),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    Text(
+                        text = stringResource(Res.string.output_profile_picker_tooltip),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                OutputProfilePicker(
+                    profiles = proj.outputProfiles,
+                    activeProfileId = output.activeProfileId,
+                    mergedBy = proj.outputProfiles.mergingProfileOf(
+                        Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_BROWSER_SOURCE, i),
+                        output.activeProfileId,
+                    ),
+                    onPick = { pickedId -> update(output.copy(activeProfileId = pickedId)) },
+                )
+            }
+            ResolutionPicker(
+                label = stringResource(Res.string.browser_source_resolution),
+                width = output.browserSourceWidth,
+                height = output.browserSourceHeight,
+                cellWidth = langDropdownWidth,
+                labelHeight = contentLabelHeight,
+                onChange = { w, h ->
+                    update(output.copy(browserSourceWidth = w, browserSourceHeight = h))
+                },
+            )
+            FpsCell(output, update)
+            ApiKeyRequiredCell(output, update)
+        }
+    }
+}
+
+/** The output's frame rate, picked from a short list. */
+@Composable
+private fun FpsCell(output: ScreenAssignment, update: (ScreenAssignment) -> Unit) {
+    val cellWidth = FPS_CELL_WIDTH
+    val contentLabelHeight = OPTION_LABEL_HEIGHT
+    Column(modifier = Modifier.width(cellWidth), horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier = Modifier.fillMaxWidth().height(contentLabelHeight),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Text(
+                text = stringResource(Res.string.browser_source_fps),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        var fpsExpanded by remember { mutableStateOf(false) }
+        KeyButton(
+            shape = AppShape(6.dp),
+            onClick = { fpsExpanded = true },
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = output.browserSourceFps.toString(),
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1
+            )
+        }
+        DropdownMenu(
+            expanded = fpsExpanded,
+            onDismissRequest = { fpsExpanded = false }
+        ) {
+            BROWSER_SOURCE_FRAME_RATES.forEach { fps ->
+                DropdownMenuItem(
+                    text = { Text(fps.toString(), style = MaterialTheme.typography.bodySmall) },
+                    onClick = {
+                        fpsExpanded = false
+                        update(output.copy(browserSourceFps = fps))
+                    }
+                )
+            }
+        }
+    }
+}
+
+/** Whether the output's page asks for the server's API key. */
+@Composable
+private fun ApiKeyRequiredCell(output: ScreenAssignment, update: (ScreenAssignment) -> Unit) {
+    val langDropdownWidth = OPTION_CELL_WIDTH
+    val contentLabelHeight = OPTION_LABEL_HEIGHT
+    @OptIn(ExperimentalMaterial3Api::class)
+    Column(
+        modifier = Modifier.width(langDropdownWidth),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth().height(contentLabelHeight),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Text(
+                text = stringResource(Res.string.browser_source_require_api_key),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        TooltipBox(
+            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
+                TooltipAnchorPosition.Above
+            ),
+            tooltip = {
+                PlainTooltip { Text(stringResource(Res.string.browser_source_uses_server_api_key)) }
+            },
+            state = rememberTooltipState()
+        ) {
+            RaisedCheckbox(
+                checked = output.browserSourceApiKeyRequired,
+                onCheckedChange = { checked ->
+                    update(output.copy(browserSourceApiKeyRequired = checked))
+                }
+            )
+        }
+    }
 }

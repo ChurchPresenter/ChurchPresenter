@@ -151,4 +151,29 @@ class WebsitePresenterComposeTest {
         }
         mainClock.advanceTimeBy(2_100)
     }
+
+    @Test
+    fun `WebsitePresenter takes everything the output window hands it`() = runComposeUiTest {
+        setContent {
+            Box(Modifier.size(200.dp, 200.dp)) {
+                WebsitePresenter(
+                    url = "https://example.com",
+                    modifier = Modifier.testTag("ws"),
+                    onSnapshot = {},
+                    onBrowserCreated = {},
+                    onUrlChanged = {},
+                    onTitleChanged = {},
+                    audioDeviceId = "",
+                    outputRole = Constants.OUTPUT_ROLE_NORMAL,
+                )
+            }
+        }
+        // A normal output is the browser alone, and with no engine in a test there is none to draw.
+        onNodeWithTag("ws").assertDoesNotExist()
+    }
+
+    @Test
+    fun `a headless machine has no screen to capture snapshots from`() {
+        assertNull(screenCapture())
+    }
 }

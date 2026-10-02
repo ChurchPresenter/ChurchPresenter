@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.utils
 
+import org.churchpresenter.app.churchpresenter.utils.AutoStartManager.Platform
 import com.sun.jna.platform.win32.Advapi32Util
 import com.sun.jna.platform.win32.WinReg
 import java.io.File
@@ -20,7 +21,7 @@ import org.churchpresenter.diagnostics.CrashReporter
 object AutoStartManager {
 
     private const val RUN_KEY = "Software\\Microsoft\\Windows\\CurrentVersion\\Run"
-    private const val APP_NAME = "ChurchPresenter"
+    internal const val APP_NAME = "ChurchPresenter"
 
     internal enum class Platform { WINDOWS, MAC, LINUX }
 
@@ -102,7 +103,7 @@ object AutoStartManager {
         enabled: Boolean,
         runKey: WindowsRunKey = realRunKey,
     ): Boolean = try {
-        if (enabled) register(exe, platform, runKey) else unregister(platform, runKey)
+        if (enabled) AutostartEntries.register(exe, platform, runKey) else AutostartEntries.unregister(platform, runKey)
         true
     } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
         CrashReporter.reportException(e, context = "AutoStartManager.setEnabled($enabled)")
@@ -123,16 +124,25 @@ object AutoStartManager {
             if (!isEnabledFor(platform, runKey)) return
             // Value/file removed or retyped between the checks (Task Manager, cleaner apps) is an
             // expected race, not a crash — just re-register.
-            if (readRegistration(platform, runKey) == registrationContent(exe, platform)) return
-            register(exe, platform, runKey)
+            val registered = AutostartEntries.readRegistration(platform, runKey)
+            if (registered == AutostartEntries.registrationContent(exe, platform)) return
+            AutostartEntries.register(exe, platform, runKey)
         } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
             CrashReporter.reportException(e, context = "AutoStartManager.syncRegistration")
         }
     }
 
     /** The currently-stored registration payload, or null if absent/removed/unreadable. */
-    private fun readRegistration(platform: Platform, runKey: WindowsRunKey): String? {
-        val file = autostartFile(platform)
+
+}
+
+/**
+ * What autostart registers on each platform — the Run value, the LaunchAgent plist, the .desktop
+ * entry — and writing, reading and removing it.
+ */
+internal object AutostartEntries {
+    internal fun readRegistration(platform: Platform, runKey: AutoStartManager.WindowsRunKey): String? {
+        val file = AutoStartManager.autostartFile(platform)
         return try {
             if (file != null) file.readText() else runKey.read()
         } catch (_: Throwable) {
@@ -140,23 +150,23 @@ object AutoStartManager {
         }
     }
 
+    internal fun register(exe: String, platform: Platform, runKey: AutoStartManager.WindowsRunKey) {
+        val file = AutoStartManager.autostartFile(platform)
+        if (file != null) file.apply { parentFile?.mkdirs() }.writeText(registrationContent(exe, platform))
+        else runKey.write(AutostartEntries.windowsRunValue(exe))
+    }
+
+    internal fun unregister(platform: Platform, runKey: AutoStartManager.WindowsRunKey) {
+        val file = AutoStartManager.autostartFile(platform)
+        if (file != null) file.delete()
+        else if (runKey.exists()) runKey.delete()
+    }
+
     /** The exact registration payload per platform — registry value or file content. */
     internal fun registrationContent(exe: String, platform: Platform): String = when (platform) {
         Platform.WINDOWS -> windowsRunValue(exe)
         Platform.MAC -> macPlistContent(exe)
         Platform.LINUX -> linuxDesktopContent(exe)
-    }
-
-    private fun register(exe: String, platform: Platform, runKey: WindowsRunKey) {
-        val file = autostartFile(platform)
-        if (file != null) file.apply { parentFile?.mkdirs() }.writeText(registrationContent(exe, platform))
-        else runKey.write(windowsRunValue(exe))
-    }
-
-    private fun unregister(platform: Platform, runKey: WindowsRunKey) {
-        val file = autostartFile(platform)
-        if (file != null) file.delete()
-        else if (runKey.exists()) runKey.delete()
     }
 
     internal fun windowsRunValue(exe: String): String = "\"$exe\""
@@ -181,7 +191,7 @@ object AutoStartManager {
     internal fun linuxDesktopContent(exe: String): String = """
         [Desktop Entry]
         Type=Application
-        Name=$APP_NAME
+        Name=${AutoStartManager.APP_NAME}
         Exec="${escapeExec(exe)}"
         X-GNOME-Autostart-enabled=true
         """.trimIndent()

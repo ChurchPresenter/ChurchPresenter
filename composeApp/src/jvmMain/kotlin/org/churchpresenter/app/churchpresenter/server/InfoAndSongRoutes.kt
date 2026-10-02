@@ -10,7 +10,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.BuildConfig
@@ -27,23 +26,15 @@ private val catalogJson = Json { encodeDefaults = true; explicitNulls = false }
 
 internal fun Route.infoAndSongRoutes(
     server: CompanionServer,
-    _bibleCatalog: MutableStateFlow<BibleCatalogResponse?>,
-    _catalog: MutableStateFlow<SongCatalogResponse>,
-    _fileUploadEnabled: MutableStateFlow<Boolean>,
-    _maxMediaUploadMb: MutableStateFlow<Int>,
     json: Json,
     scope: CoroutineScope,
 ) {
-    infoRoutes(server, _bibleCatalog, _catalog, _fileUploadEnabled, _maxMediaUploadMb)
-    songRoutes(server, _catalog, json, scope)
+    infoRoutes(server)
+    songRoutes(server, json, scope)
 }
 
 private fun Route.infoRoutes(
     server: CompanionServer,
-    _bibleCatalog: MutableStateFlow<BibleCatalogResponse?>,
-    _catalog: MutableStateFlow<SongCatalogResponse>,
-    _fileUploadEnabled: MutableStateFlow<Boolean>,
-    _maxMediaUploadMb: MutableStateFlow<Int>,
 ) {
                 get(Constants.ENDPOINT_INFO) {
                     if (!server.checkApiKey(call)) return@get
@@ -52,8 +43,8 @@ private fun Route.infoRoutes(
 
                 get(Constants.ENDPOINT_STATUS) {
                     if (!server.checkApiKey(call)) return@get
-                    val bibleNames = _bibleCatalog.value?.translation?.let { listOf(it) } ?: emptyList()
-                    val songbookNames = _catalog.value.songBook.map { it.bookName }
+                    val bibleNames = server._bibleCatalog.value?.translation?.let { listOf(it) } ?: emptyList()
+                    val songbookNames = server._catalog.value.songBook.map { it.bookName }
                     val exposedEndpoints = listOf(
                         "songs", "bible", "schedule", "presentations", "pictures", "status"
                     )
@@ -67,8 +58,8 @@ private fun Route.infoRoutes(
                             permissions = DevicePermissionsDto(
                                 canPresent       = true,
                                 canAddToSchedule = true,
-                                canUploadFiles   = _fileUploadEnabled.value,
-                                maxMediaUploadMb = _maxMediaUploadMb.value,
+                                canUploadFiles   = server._fileUploadEnabled.value,
+                                maxMediaUploadMb = server._maxMediaUploadMb.value,
                             ),
                         )
                     )
@@ -77,7 +68,6 @@ private fun Route.infoRoutes(
 
 private fun Route.songRoutes(
     server: CompanionServer,
-    _catalog: MutableStateFlow<SongCatalogResponse>,
     json: Json,
     scope: CoroutineScope,
 ) {
@@ -95,7 +85,7 @@ private fun Route.songRoutes(
                 get(Constants.ENDPOINT_SONGS) {
                     if (!server.checkApiKey(call)) return@get
                     val filter = call.request.queryParameters[Constants.QUERY_PARAM_SONGBOOK]
-                    val catalog = _catalog.value
+                    val catalog = server._catalog.value
                     if (filter.isNullOrBlank()) {
                         call.respond(catalog)
                     } else {

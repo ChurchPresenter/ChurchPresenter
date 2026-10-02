@@ -19,14 +19,11 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.Base64
-import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.HeicDecoder
 
@@ -107,33 +104,20 @@ private suspend fun ApplicationCall.respondBibleFile(server: CompanionServer, en
  */
 internal fun Route.mediaAndAssetRoutes(
     server: CompanionServer,
-    deviceUploadsFolderId: String,
-    _backgroundSettings: MutableStateFlow<BackgroundSettings>,
-    _fileUploadEnabled: MutableStateFlow<Boolean>,
-    _pictureCatalog: MutableStateFlow<PictureFolderResponse?>,
-    _pictureCatalogs: ConcurrentHashMap<String, PictureFolderResponse>,
-    _pictureFiles: ConcurrentHashMap<String, List<File>>,
-    _scheduleItemToMediaPath: ConcurrentHashMap<String, String>,
     json: Json,
     scope: CoroutineScope,
 ) {
-    pictureRoutes(server, _pictureCatalog, _pictureCatalogs, _pictureFiles)
-    mediaStreamAndBibleFileRoutes(server, _scheduleItemToMediaPath)
-    backgroundAndPictureUploadRoutes(
-        server, deviceUploadsFolderId, _backgroundSettings, _fileUploadEnabled,
-        _pictureCatalogs, _pictureFiles, json, scope
-    )
+    pictureRoutes(server)
+    mediaStreamAndBibleFileRoutes(server)
+    backgroundAndPictureUploadRoutes(server, json, scope)
 }
 
 private fun Route.pictureRoutes(
     server: CompanionServer,
-    _pictureCatalog: MutableStateFlow<PictureFolderResponse?>,
-    _pictureCatalogs: ConcurrentHashMap<String, PictureFolderResponse>,
-    _pictureFiles: ConcurrentHashMap<String, List<File>>,
 ) {
                 get(Constants.ENDPOINT_PICTURES) {
                     if (!server.checkApiKey(call)) return@get
-                    val catalog = _pictureCatalog.value
+                    val catalog = server.pictures.catalog.value
                     if (catalog == null) {
                         call.respond(HttpStatusCode.ServiceUnavailable, "No picture folder loaded")
                         return@get
@@ -153,7 +137,7 @@ private fun Route.pictureRoutes(
                         call.respond(HttpStatusCode.BadRequest, "Missing id")
                         return@get
                     }
-                    val catalog = _pictureCatalogs[id]
+                    val catalog = server.pictures.catalogs[id]
                     if (catalog == null) {
                         server.logRest("/api/pictures/{id}", HttpStatusCode.NotFound.value, "folder_not_found")
                         call.respond(HttpStatusCode.NotFound, "Picture folder not found")
@@ -177,7 +161,7 @@ private fun Route.pictureRoutes(
                         call.respond(HttpStatusCode.BadRequest, "Invalid index")
                         return@get
                     }
-                    val files = _pictureFiles[id]
+                    val files = server.pictures.files[id]
                     if (files == null) {
                         server.logRest(
                             "/api/pictures/{id}/images/{index}",
@@ -237,7 +221,6 @@ private fun Route.pictureRoutes(
 
 private fun Route.mediaStreamAndBibleFileRoutes(
     server: CompanionServer,
-    _scheduleItemToMediaPath: ConcurrentHashMap<String, String>,
 ) {
                 get("${Constants.ENDPOINT_MEDIA_STREAM}/{id}") {
                     if (!server.checkApiKey(call)) return@get
@@ -245,7 +228,7 @@ private fun Route.mediaStreamAndBibleFileRoutes(
                         call.respond(HttpStatusCode.BadRequest, "Missing id")
                         return@get
                     }
-                    val path = _scheduleItemToMediaPath[id]
+                    val path = server._scheduleItemToMediaPath[id]
                     if (path == null) {
                         server.logRest("/api/media/stream/{id}", HttpStatusCode.NotFound.value, "media_item_not_found")
                         call.respond(HttpStatusCode.NotFound, "Media item not found")
@@ -347,18 +330,13 @@ private fun Route.mediaStreamAndBibleFileRoutes(
 
 private fun Route.backgroundAndPictureUploadRoutes(
     server: CompanionServer,
-    deviceUploadsFolderId: String,
-    _backgroundSettings: MutableStateFlow<BackgroundSettings>,
-    _fileUploadEnabled: MutableStateFlow<Boolean>,
-    _pictureCatalogs: ConcurrentHashMap<String, PictureFolderResponse>,
-    _pictureFiles: ConcurrentHashMap<String, List<File>>,
     json: Json,
     scope: CoroutineScope,
 ) {
                 get(Constants.ENDPOINT_BACKGROUNDS) {
                     if (!server.checkApiKey(call)) return@get
                     server.logRest("/api/backgrounds", HttpStatusCode.OK.value)
-                    call.respond(_backgroundSettings.value)
+                    call.respond(server._backgroundSettings.value)
                 }
 
                 /**
@@ -372,7 +350,7 @@ private fun Route.backgroundAndPictureUploadRoutes(
                     if (!server.checkApiKey(call)) return@get
                     val slot = call.parameters["slot"] ?: ""
                     val isVideo = call.request.queryParameters["type"] == "video"
-                    val settings = _backgroundSettings.value
+                    val settings = server._backgroundSettings.value
                     val path = when (slot) {
                         Constants.BACKGROUND_SLOT_DEFAULT ->
                             if (isVideo) settings.defaultBackgroundVideo else settings.defaultBackgroundImage
@@ -437,23 +415,11 @@ private fun Route.backgroundAndPictureUploadRoutes(
                  * When "file-name" is provided the index is resolved by name so the correct
                  * image is displayed regardless of sort-order differences between clients.
                  */
-    pictureSelectAndUploadRoutes(
-        server,
-        deviceUploadsFolderId,
-        _fileUploadEnabled,
-        _pictureCatalogs,
-        _pictureFiles,
-        json,
-        scope
-    )
+    pictureSelectAndUploadRoutes(server, json, scope)
 }
 
 private fun Route.pictureSelectAndUploadRoutes(
     server: CompanionServer,
-    deviceUploadsFolderId: String,
-    _fileUploadEnabled: MutableStateFlow<Boolean>,
-    _pictureCatalogs: ConcurrentHashMap<String, PictureFolderResponse>,
-    _pictureFiles: ConcurrentHashMap<String, List<File>>,
     json: Json,
     scope: CoroutineScope,
 ) {
@@ -464,12 +430,14 @@ private fun Route.pictureSelectAndUploadRoutes(
                         // Resolve index by filename when provided — immune to sort-order mismatch
                         val resolvedIndex = req.fileName
                             ?.let { name ->
-                                _pictureFiles[req.folderId]?.indexOfFirst { it.name == name }?.takeIf { it >= 0 }
+                                server.pictures.files[req.folderId]
+                                    ?.indexOfFirst { it.name == name }
+                                    ?.takeIf { it >= 0 }
                             }
                             ?: req.index
                         val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                         scope.launch { server.onSelectPicture.emit(req.copy(index = resolvedIndex)) }
-                        val folderName = _pictureCatalogs[req.folderId]?.folderName ?: req.folderId
+                        val folderName = server.pictures.catalogs[req.folderId]?.folderName ?: req.folderId
                         val imageLabel = req.fileName?.let(RemoteLabel::Text) ?: RemoteLabel.Image(resolvedIndex)
                         scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
                             actionType = "present",
@@ -493,7 +461,7 @@ private fun Route.pictureSelectAndUploadRoutes(
                  */
                 post("${Constants.ENDPOINT_PICTURES}/upload") {
                     if (!server.checkApiKey(call)) return@post
-                    if (!_fileUploadEnabled.value) {
+                    if (!server._fileUploadEnabled.value) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
                         return@post
                     }
@@ -517,7 +485,7 @@ private fun Route.pictureSelectAndUploadRoutes(
                         // Each calendar day gets its own subfolder; the folderId includes the
                         // date so uploads from different days are catalogued separately.
                         val dateStr = java.time.LocalDate.now().toString()   // "yyyy-MM-dd"
-                        val dateFolderId = "${deviceUploadsFolderId}_$dateStr"
+                        val dateFolderId = "${PictureLibrary.DEVICE_UPLOADS_FOLDER_ID}_$dateStr"
                         val uploadDir = File(
                             System.getProperty("user.home"),
                             ".churchpresenter/device_uploads/$dateStr"
@@ -529,14 +497,14 @@ private fun Route.pictureSelectAndUploadRoutes(
                         // PicturesViewModel.loadImagesFromFolder which also sorts by name.
                         // Without this, upload order ≠ filename order, so index N on mobile
                         // points to a different photo than index N on the desktop.
-                        val existingFiles = (_pictureFiles[dateFolderId] ?: emptyList()).toMutableList()
+                        val existingFiles = (server.pictures.files[dateFolderId] ?: emptyList()).toMutableList()
                         existingFiles.add(file)
                         existingFiles.sortBy { it.name }          // ← match desktop sort order
                         val newIndex = existingFiles.indexOf(file) // recalculate after sort
-                        _pictureFiles[dateFolderId] = existingFiles
+                        server.pictures.files[dateFolderId] = existingFiles
                         val catalog = deviceUploadsCatalog(dateFolderId, dateStr, uploadDir, existingFiles)
-                        _pictureCatalogs[dateFolderId] = catalog
-                        // Do NOT update _pictureCatalog here — that would replace the desktop's
+                        server.pictures.catalogs[dateFolderId] = catalog
+                        // Do NOT update server.pictures.catalog here — that would replace the desktop's
                         // active folder with device_uploads, making GET /api/pictures return the
                         // wrong folder to the mobile companion app.
                         server.broadcast(WebSocketMessage(

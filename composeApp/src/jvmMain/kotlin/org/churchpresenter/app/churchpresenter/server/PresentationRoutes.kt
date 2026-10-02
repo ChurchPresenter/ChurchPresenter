@@ -15,10 +15,8 @@ import io.ktor.server.routing.post
 import java.io.File
 import java.io.IOException
 import java.util.Base64
-import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -39,39 +37,21 @@ private val UPLOADABLE_DECK_EXTENSIONS = setOf("pdf", "ppt", "pptx", "key")
  */
 internal fun Route.presentationRoutes(
     server: CompanionServer,
-    _fileUploadEnabled: MutableStateFlow<Boolean>,
-    _maxMediaUploadMb: MutableStateFlow<Int>,
-    _presentationCatalog: MutableStateFlow<PresentationCatalogResponse>,
-    _presentationCatalogs: ConcurrentHashMap<String, PresentationDto>,
-    _scheduleItemToPresentationId: ConcurrentHashMap<String, String>,
-    _slideBytes: ConcurrentHashMap<String, List<ByteArray>>,
     json: Json,
     scope: CoroutineScope,
 ) {
-    presentationCatalogRoutes(
-        server,
-        _presentationCatalog,
-        _presentationCatalogs,
-        _scheduleItemToPresentationId,
-        _slideBytes,
-        json,
-        scope
-    )
-    presentationUploadRoutes(server, _fileUploadEnabled, _maxMediaUploadMb, json, scope)
+    presentationCatalogRoutes(server, json, scope)
+    presentationUploadRoutes(server, json, scope)
 }
 
 private fun Route.presentationCatalogRoutes(
     server: CompanionServer,
-    _presentationCatalog: MutableStateFlow<PresentationCatalogResponse>,
-    _presentationCatalogs: ConcurrentHashMap<String, PresentationDto>,
-    _scheduleItemToPresentationId: ConcurrentHashMap<String, String>,
-    _slideBytes: ConcurrentHashMap<String, List<ByteArray>>,
     json: Json,
     scope: CoroutineScope,
 ) {
                 get(Constants.ENDPOINT_PRESENTATIONS) {
                     if (!server.checkApiKey(call)) return@get
-                    call.respond(_presentationCatalog.value)
+                    call.respond(server.presentations._presentationCatalog.value)
                 }
 
                 /**
@@ -91,8 +71,8 @@ private fun Route.presentationCatalogRoutes(
                         call.respond(HttpStatusCode.BadRequest, "Missing id")
                         return@get
                     }
-                    val resolvedId = _scheduleItemToPresentationId[id] ?: id
-                    val dto = _presentationCatalogs[resolvedId]
+                    val resolvedId = server.presentations._scheduleItemToPresentationId[id] ?: id
+                    val dto = server.presentations._presentationCatalogs[resolvedId]
                     if (dto == null) {
                         server.logRest(
                             "/api/presentations/{id}",
@@ -110,14 +90,11 @@ private fun Route.presentationCatalogRoutes(
                  * GET /api/presentations/{id}/slides/{index}
                  * Returns the slide at {index} as a JPEG image for the presentation with {id}.
                  */
-    presentationSlideRoutes(server, _presentationCatalogs, _scheduleItemToPresentationId, _slideBytes, json, scope)
+    presentationSlideRoutes(server, json, scope)
 }
 
 private fun Route.presentationSlideRoutes(
     server: CompanionServer,
-    _presentationCatalogs: ConcurrentHashMap<String, PresentationDto>,
-    _scheduleItemToPresentationId: ConcurrentHashMap<String, String>,
-    _slideBytes: ConcurrentHashMap<String, List<ByteArray>>,
     json: Json,
     scope: CoroutineScope,
 ) {
@@ -129,8 +106,8 @@ private fun Route.presentationSlideRoutes(
                     val index = call.parameters["index"]?.toIntOrNull() ?: run {
                         call.respond(HttpStatusCode.BadRequest, "Invalid index"); return@get
                     }
-                    val resolvedId = _scheduleItemToPresentationId[id] ?: id
-                    val slides = _slideBytes[resolvedId]
+                    val resolvedId = server.presentations._scheduleItemToPresentationId[id] ?: id
+                    val slides = server.presentations._slideBytes[resolvedId]
                     if (slides == null) {
                         server.logRest(
                             "/api/presentations/{id}/slides/{index}",
@@ -178,8 +155,9 @@ private fun Route.presentationSlideRoutes(
                     }
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                     scope.launch { server.onSelectSlide.emit(SelectSlideRequest(id = id, index = index)) }
-                    val presentationName =
-                        _presentationCatalogs[_scheduleItemToPresentationId[id] ?: id]?.fileName ?: id
+                    val presentations = server.presentations
+                    val presentationId = presentations._scheduleItemToPresentationId[id] ?: id
+                    val presentationName = presentations._presentationCatalogs[presentationId]?.fileName ?: id
                     scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
                         actionType = "present",
                         title = RemoteLabel.Text(presentationName),
@@ -204,14 +182,12 @@ private fun Route.presentationSlideRoutes(
 
 private fun Route.presentationUploadRoutes(
     server: CompanionServer,
-    _fileUploadEnabled: MutableStateFlow<Boolean>,
-    _maxMediaUploadMb: MutableStateFlow<Int>,
     json: Json,
     scope: CoroutineScope,
 ) {
                 post("${Constants.ENDPOINT_PRESENTATIONS}/upload") {
                     if (!server.checkApiKey(call)) return@post
-                    if (!_fileUploadEnabled.value) {
+                    if (!server._fileUploadEnabled.value) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
                         return@post
                     }
@@ -220,13 +196,11 @@ private fun Route.presentationUploadRoutes(
 
                 /**
                  * POST /api/media/upload?name=clip.mp4
-    mediaUploadRoutes(server, _fileUploadEnabled, _maxMediaUploadMb, scope)
+    mediaUploadRoutes(server, scope)
 }
 
 private fun Route.mediaUploadRoutes(
     server: CompanionServer,
-    _fileUploadEnabled: MutableStateFlow<Boolean>,
-    _maxMediaUploadMb: MutableStateFlow<Int>,
     scope: CoroutineScope,
 ) {
                  * Body: the raw file bytes (application/octet-stream), streamed straight to disk.
@@ -240,17 +214,17 @@ private fun Route.mediaUploadRoutes(
                  */
                 post(Constants.ENDPOINT_MEDIA_UPLOAD) {
                     if (!server.checkApiKey(call)) return@post
-                    if (!_fileUploadEnabled.value) {
+                    if (!server._fileUploadEnabled.value) {
                         call.respond(HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
                         return@post
                     }
                     try {
-                        val maxBytes = _maxMediaUploadMb.value.toLong() * 1024 * 1024
+                        val maxBytes = server._maxMediaUploadMb.value.toLong() * 1024 * 1024
                         val contentLength = call.request.headers["Content-Length"]?.toLongOrNull() ?: 0L
                         if (contentLength > maxBytes) {
                             call.respond(
                                 HttpStatusCode.PayloadTooLarge,
-                                """{"error":"file too large (max ${_maxMediaUploadMb.value} MB)"}"""
+                                """{"error":"file too large (max ${server._maxMediaUploadMb.value} MB)"}"""
                             )
                             return@post
                         }

@@ -92,9 +92,7 @@ class PresentationPlayer(
 
     // Deck-defined transition into the current slide. Starts on the first evaluated frame after
     // the incoming slide's layers are ready (so the outgoing image holds during rasterization).
-    @Volatile private var transitionSpec: SlideTransitionSpec? = null
-    @Volatile private var transitionFromLayers: List<PlacedLayer> = emptyList()
-    @Volatile private var transitionStartNanos: Long = 0L
+    private val slideTransition = SlideTransition()
     /** The last frame's placed layers — snapshot source for the next transition's "from" side. */
     @Volatile private var lastPlacedLayers: List<PlacedLayer> = emptyList()
 
@@ -109,9 +107,7 @@ class PresentationPlayer(
         val outgoing = lastPlacedLayers
         val spec = deck.slides[index].transition
         val specUsable = spec != null && spec.type != TransitionType.NONE && spec.durationMs > 0
-        transitionSpec = if (index != slideIndex && outgoing.isNotEmpty() && specUsable) spec else null
-        transitionFromLayers = if (transitionSpec != null) outgoing else emptyList()
-        transitionStartNanos = 0L
+        slideTransition.arm(if (index != slideIndex && outgoing.isNotEmpty() && specUsable) spec else null, outgoing)
         slideIndex = index
         stepIndex = -1
         stepStartNanos = 0L
@@ -175,7 +171,7 @@ class PresentationPlayer(
 
     /** True while the current step or a slide transition is still animating (clock keeps ticking). */
     fun isAnimating(nowNanos: Long): Boolean {
-        if (transitionSpec != null) return true
+        if (slideTransition.isRunning) return true
         val slide = slideCache[slideIndex] ?: return false
         val evaluator = slide.evaluator ?: return false
         if (stepIndex < 0) return false
@@ -224,24 +220,7 @@ class PresentationPlayer(
             layers = placed,
             completedSteps = (stepIndex + 1).coerceAtMost(evaluator?.stepCount ?: 0),
             stepCount = evaluator?.stepCount ?: 0,
-            transition = transitionOverlay(nowNanos)
-        )
-    }
-
-    private fun transitionOverlay(nowNanos: Long): TransitionOverlay? {
-        val spec = transitionSpec ?: return null
-        if (transitionStartNanos == 0L) transitionStartNanos = nowNanos
-        val progress = ((nowNanos - transitionStartNanos) / 1_000_000f) / spec.durationMs
-        if (progress >= 1f) {
-            transitionSpec = null
-            transitionFromLayers = emptyList()
-            return null
-        }
-        return TransitionOverlay(
-            type = spec.type,
-            direction = spec.direction,
-            progress = progress.coerceIn(0f, 1f),
-            fromLayers = transitionFromLayers
+            transition = slideTransition.overlay(nowNanos)
         )
     }
 
@@ -328,5 +307,39 @@ class PresentationPlayer(
     private fun evictBeyondWindow(current: Int) {
         slideCache.keys.filter { it < current - 1 || it > current + 1 }.forEach { slideCache.remove(it) }
         posterCanvases.keys.filter { it < current - 1 || it > current + 1 }.forEach { posterCanvases.remove(it) }
+    }
+}
+
+/** The deck-defined transition into the current slide, while one is running. */
+private class SlideTransition {
+    @Volatile private var spec: SlideTransitionSpec? = null
+    @Volatile private var fromLayers: List<PlacedLayer> = emptyList()
+    @Volatile private var startNanos: Long = 0L
+
+    val isRunning: Boolean get() = spec != null
+
+    /** Arms [spec], or none, over the outgoing slide's [outgoing] layers; it starts on the next frame. */
+    fun arm(spec: SlideTransitionSpec?, outgoing: List<PlacedLayer>) {
+        this.spec = spec
+        fromLayers = if (spec != null) outgoing else emptyList()
+        startNanos = 0L
+    }
+
+    /** Where the transition is at [nowNanos], or null once it has finished (or none is running). */
+    fun overlay(nowNanos: Long): TransitionOverlay? {
+        val spec = spec ?: return null
+        if (startNanos == 0L) startNanos = nowNanos
+        val progress = ((nowNanos - startNanos) / 1_000_000f) / spec.durationMs
+        if (progress >= 1f) {
+            this.spec = null
+            fromLayers = emptyList()
+            return null
+        }
+        return TransitionOverlay(
+            type = spec.type,
+            direction = spec.direction,
+            progress = progress.coerceIn(0f, 1f),
+            fromLayers = fromLayers
+        )
     }
 }

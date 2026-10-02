@@ -63,15 +63,8 @@ internal fun MainDesktopScope.presentAnnouncementFromSchedule(
     }
     if (item.isTimer) {
         presenterManager.goLiveAnnouncementTimer(
-            timerMode = item.timerMode,
-            timerHours = item.timerHours,
-            timerMinutes = item.timerMinutes,
-            timerSeconds = item.timerSeconds,
-            targetHour = item.targetHour,
-            targetMinute = item.targetMinute,
-            targetSecond = item.targetSecond,
-            liveClockFormat = item.liveClockFormat,
-            timerExpiredText = item.timerExpiredText.ifBlank { timerExpiredDefaultLabel }
+            item,
+            timerExpiredText = item.timerExpiredText.ifBlank { timerExpiredDefaultLabel },
         )
     } else {
         presenterManager.setAnnouncementText(item.text)

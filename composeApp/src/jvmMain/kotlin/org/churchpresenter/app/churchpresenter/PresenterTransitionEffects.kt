@@ -1,14 +1,14 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.settings.AnnouncementsSettings
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.operatorSongSettings
@@ -16,12 +16,10 @@ import org.churchpresenter.settings.operatorBibleSettings
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.songs.LyricSection
-import org.churchpresenter.app.churchpresenter.presenter.BandOutgoing
 import org.churchpresenter.app.churchpresenter.presenter.BibleBandClock
 import org.churchpresenter.app.churchpresenter.presenter.BibleBandPhase
 import org.churchpresenter.app.churchpresenter.presenter.BibleLottieTemplate
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.presenter.isRestatedAs
 import org.churchpresenter.app.churchpresenter.presenter.rememberBibleLottieTemplate
 import org.churchpresenter.app.churchpresenter.viewmodel.DisplayedSongPosition
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -64,31 +62,7 @@ fun templateFor(mode: Presenting): BibleLottieTemplate? = when (mode) {
 
 val clearRequested by presenterManager.clearDisplayRequested
 LaunchedEffect(clearRequested) {
-    if (!clearRequested) return@LaunchedEffect
-    val mode = presenterManager.presentingMode.value
-    val modeIsLocked = isAnyScreenLockedTo(presenterManager.screenLocks.value, mode)
-    // The fade is one clock for every output, so it follows the profile the main window does.
-    val operatorBible = appSettings.operatorBibleSettings()
-    val operatorSongs = appSettings.operatorSongSettings()
-    val template = templateFor(mode)
-    if (template != null && !modeIsLocked) {
-        presenterManager.runBandPhase(
-            BibleBandPhase.EXIT,
-            template.segmentMs(BibleLottieTemplate.SEGMENT_TEXT_OUT, BibleLottieTemplate.SEGMENT_BG_OUT),
-        )
-        presenterManager.setLottieBandClock(BibleBandClock(BibleBandPhase.IDLE, 0f))
-    } else if (shouldFadeOnClear(mode, modeIsLocked, operatorBible, operatorSongs)) {
-        val duration = fadeOutDuration(mode, operatorBible, operatorSongs)
-        val anim = Animatable(1f)
-        anim.animateTo(0f, tween(durationMillis = duration)) {
-            when (mode) {
-                Presenting.BIBLE -> presenterManager.setBibleTransitionAlpha(this.value)
-                Presenting.LYRICS -> presenterManager.setSongTransitionAlpha(this.value)
-                else -> {}
-            }
-        }
-    }
-    presenterManager.setPresentingMode(Presenting.NONE)
+    if (clearRequested) clearDisplay(presenterManager, appSettings, templateFor(presenterManager.presentingMode.value))
 }
 
 LaunchedEffect(presentingMode, bibleTemplate, songTemplate) {
@@ -159,47 +133,7 @@ LaunchedEffect(presenterManager, songTemplate, songBandLineMode) {
 }
 
 LaunchedEffect(selectedImagePath) {
-    val current = presenterManager.displayedImagePath.value
-    when {
-        current == null || animationType == AnimationType.NONE -> {
-            presenterManager.setDisplayedImagePath(selectedImagePath)
-            presenterManager.setPictureTransitionAlpha(1f)
-            presenterManager.setPreviousDisplayedImagePath(null)
-        }
-        animationType == AnimationType.FADE -> {
-            val halfDuration = transitionDuration / 2
-            val anim = Animatable(1f)
-            anim.animateTo(0f, tween(halfDuration)) {
-                presenterManager.setPictureTransitionAlpha(value)
-            }
-            presenterManager.setDisplayedImagePath(selectedImagePath)
-            anim.animateTo(1f, tween(halfDuration)) {
-                presenterManager.setPictureTransitionAlpha(value)
-            }
-        }
-        animationType == AnimationType.CROSSFADE -> {
-            presenterManager.setPreviousDisplayedImagePath(current)
-            presenterManager.setDisplayedImagePath(selectedImagePath)
-            presenterManager.setPictureTransitionAlpha(0f)
-            val anim = Animatable(0f)
-            anim.animateTo(1f, tween(transitionDuration)) {
-                presenterManager.setPictureTransitionAlpha(value)
-            }
-            presenterManager.setPreviousDisplayedImagePath(null)
-        }
-        animationType == AnimationType.SLIDE_LEFT || animationType == AnimationType.SLIDE_RIGHT -> {
-            presenterManager.setPreviousDisplayedImagePath(current)
-            presenterManager.setDisplayedImagePath(selectedImagePath)
-            presenterManager.setPictureTransitionAlpha(1f)
-            presenterManager.setPictureSlideOffset(0f)
-            val anim = Animatable(0f)
-            anim.animateTo(1f, tween(transitionDuration)) {
-                presenterManager.setPictureSlideOffset(value)
-            }
-            presenterManager.setPreviousDisplayedImagePath(null)
-            presenterManager.setPictureSlideOffset(1f)
-        }
-    }
+    animatePictureChange(presenterManager, selectedImagePath, animationType, transitionDuration)
 }
 
 LaunchedEffect(Unit) {
@@ -207,193 +141,214 @@ LaunchedEffect(Unit) {
 }
 
 LaunchedEffect(selectedSlide) {
-    val current = presenterManager.displayedSlide.value
-    when {
-        current == null || animationType == AnimationType.NONE -> {
-            presenterManager.setDisplayedSlide(selectedSlide)
-            presenterManager.setSlideTransitionAlpha(1f)
-            presenterManager.setPreviousDisplayedSlide(null)
-        }
-        animationType == AnimationType.FADE -> {
-            val halfDuration = transitionDuration / 2
-            val anim = Animatable(1f)
-            anim.animateTo(0f, tween(halfDuration)) {
-                presenterManager.setSlideTransitionAlpha(value)
-            }
-            presenterManager.setDisplayedSlide(selectedSlide)
-            anim.animateTo(1f, tween(halfDuration)) {
-                presenterManager.setSlideTransitionAlpha(value)
-            }
-        }
-        animationType == AnimationType.CROSSFADE -> {
-            presenterManager.setPreviousDisplayedSlide(current)
-            presenterManager.setDisplayedSlide(selectedSlide)
-            presenterManager.setSlideTransitionAlpha(0f)
-            val anim = Animatable(0f)
-            anim.animateTo(1f, tween(transitionDuration)) {
-                presenterManager.setSlideTransitionAlpha(value)
-            }
-            presenterManager.setPreviousDisplayedSlide(null)
-        }
-        animationType == AnimationType.SLIDE_LEFT || animationType == AnimationType.SLIDE_RIGHT -> {
-            presenterManager.setPreviousDisplayedSlide(current)
-            presenterManager.setDisplayedSlide(selectedSlide)
-            presenterManager.setSlideTransitionAlpha(1f)
-            presenterManager.setSlideSlideOffset(0f)
-            val anim = Animatable(0f)
-            anim.animateTo(1f, tween(transitionDuration)) {
-                presenterManager.setSlideSlideOffset(value)
-            }
-            presenterManager.setPreviousDisplayedSlide(null)
-            presenterManager.setSlideSlideOffset(1f)
-        }
-    }
+    animateSlideChange(presenterManager, selectedSlide, animationType, transitionDuration)
 }
 
 LaunchedEffect(announcementText) {
-    val annSettings = appSettings.announcementsSettings
-    val isFade = isFadeAnnouncement(annSettings.animationType)
-    val wasEmpty = presenterManager.displayedAnnouncementText.value.isEmpty()
-    val fadeDuration = 500
-    val sliderSum = 30500L // 500 + 30000, matches AnnouncementsTab speed slider
-    val loopCount = annSettings.loopCount
-
-    if (isSlidingAnnouncement(annSettings.animationType)) {
-        presenterManager.setDisplayedAnnouncementText(announcementText)
-        presenterManager.setAnnouncementTransitionAlpha(1f)
-    } else if (announcementText.isEmpty()) {
-        if (shouldFadeOutAnnouncement(isFade, wasEmpty)) {
-            val anim = Animatable(1f)
-            anim.animateTo(0f, tween(fadeDuration)) {
-                presenterManager.setAnnouncementTransitionAlpha(value)
-            }
-        }
-        presenterManager.setDisplayedAnnouncementText("")
-        presenterManager.setAnnouncementTransitionAlpha(1f)
-    } else {
-        presenterManager.setDisplayedAnnouncementText(announcementText)
-
-        if (isFade) {
-            presenterManager.setAnnouncementTransitionAlpha(0f)
-            val anim = Animatable(0f)
-            anim.animateTo(1f, tween(fadeDuration)) {
-                presenterManager.setAnnouncementTransitionAlpha(value)
-            }
-        } else {
-            presenterManager.setAnnouncementTransitionAlpha(1f)
-        }
-
-        if (isFiniteAnnouncementLoop(loopCount)) {
-            delay(announcementDisplayMs(sliderSum, annSettings.animationDuration.toLong(), loopCount))
-
-            if (isFade) {
-                val anim = Animatable(1f)
-                anim.animateTo(0f, tween(fadeDuration)) {
-                    presenterManager.setAnnouncementTransitionAlpha(value)
-                }
-            }
-            presenterManager.setAnnouncementText("")
-            presenterManager.setDisplayedAnnouncementText("")
-            presenterManager.requestClearDisplay()
-        }
-    }
+    showAnnouncementText(presenterManager, announcementText, appSettings.announcementsSettings)
 }
-}
-
-/** Plays one band phase from [from] to 1 over [durationMs], publishing every frame to the clock. */
-private suspend fun PresenterManager.runBandPhase(phase: BibleBandPhase, durationMs: Long) {
-    setLottieBandClock(BibleBandClock(phase, 0f))
-    val anim = Animatable(0f)
-    anim.animateTo(1f, tween(durationMillis = durationMs.toInt().coerceAtLeast(1), easing = LinearEasing)) {
-        setLottieBandClock(BibleBandClock(phase, this.value))
-    }
-    setLottieBandClock(BibleBandClock(phase, 1f))
-}
-
-/** Whether the band is on screen and not on its way out — the only time a text swap is animated. */
-private fun PresenterManager.bandIsUp(): Boolean {
-    val phase = lottieBandClock.value.phase
-    return phase != BibleBandPhase.IDLE && phase != BibleBandPhase.EXIT
-}
-
-/**
- * Crossfades to the new text: publishes [outgoing] as the words to play out, applies [swap] and
- * starts the phase that plays the two together, then settles on the hold. The three writes are
- * contiguous, so one recomposition sees all of them and no output ever draws the new text at the
- * settled frame for a frame before the swap begins.
- *
- * The entrance is allowed to land first: both drivers write the one band clock, and a swap
- * starting under a running `ENTER` would fight it for every frame.
- */
-private suspend fun PresenterManager.swapBandText(
-    template: BibleLottieTemplate,
-    outgoing: BandOutgoing,
-    swap: () -> Unit,
-) {
-    snapshotFlow { lottieBandClock.value.phase }.first { it != BibleBandPhase.ENTER }
-    setBandOutgoing(outgoing)
-    swap()
-    runBandPhase(BibleBandPhase.TEXT_SWAP, template.swapMs())
-    setLottieBandClock(BibleBandClock(BibleBandPhase.HOLD, 1f))
-    setBandOutgoing(BandOutgoing())
 }
 
 /** What the Bible band should be showing, and whether hold is staging the selection instead. */
-private data class BibleBandTarget(val verses: List<SelectedVerse>, val hold: Boolean)
+internal data class BibleBandTarget(val verses: List<SelectedVerse>, val hold: Boolean)
 
 /**
  * What the song band should be showing. The version makes re-picking the same section a change;
  * [position] is published with the section, so no output pairs one with the other's place.
  */
-private data class SongBandTarget(
+internal data class SongBandTarget(
     val section: LyricSection,
     val version: Int,
     val lineIndex: Int,
     val position: DisplayedSongPosition,
 )
 
-/** The line the band is on, or [WHOLE_SECTION] when it is not showing one line at a time. */
-private fun PresenterManager.bandLineIndex(lineMode: Boolean): Int =
-    if (lineMode) songDisplayLineIndex.value else WHOLE_SECTION
-
-/** No single line: the band is drawing the section entire, so the selected line does not reach it. */
-private const val WHOLE_SECTION = -1
-
-/** Moves the Bible band — and the classic band's displayed verses — onto [target]. */
-private suspend fun PresenterManager.applyBibleTarget(target: BibleBandTarget, template: BibleLottieTemplate?) {
-    if (target.hold) return
-    val animating = template?.takeIf {
-        presentingMode.value == Presenting.BIBLE && bandIsUp() && displayedVerses.value != target.verses
-    }
-    if (animating == null) {
-        setDisplayedVerses(target.verses)
-        setBibleTransitionAlpha(1f)
-        return
-    }
-    swapBandText(animating, BandOutgoing(verses = displayedVerses.value)) { setDisplayedVerses(target.verses) }
+/** Moves the output to [selectedImagePath] by the configured picture transition. */
+private suspend fun animatePictureChange(
+    presenterManager: PresenterManager,
+    selectedImagePath: String?,
+    animationType: AnimationType,
+    transitionDuration: Int,
+) {
+        val current = presenterManager.displayedImagePath.value
+        when {
+            current == null || animationType == AnimationType.NONE -> {
+                presenterManager.setDisplayedImagePath(selectedImagePath)
+                presenterManager.setPictureTransitionAlpha(1f)
+                presenterManager.setPreviousDisplayedImagePath(null)
+            }
+            animationType == AnimationType.FADE -> {
+                val halfDuration = transitionDuration / 2
+                val anim = Animatable(1f)
+                anim.animateTo(0f, tween(halfDuration)) {
+                    presenterManager.setPictureTransitionAlpha(value)
+                }
+                presenterManager.setDisplayedImagePath(selectedImagePath)
+                anim.animateTo(1f, tween(halfDuration)) {
+                    presenterManager.setPictureTransitionAlpha(value)
+                }
+            }
+            animationType == AnimationType.CROSSFADE -> {
+                presenterManager.setPreviousDisplayedImagePath(current)
+                presenterManager.setDisplayedImagePath(selectedImagePath)
+                presenterManager.setPictureTransitionAlpha(0f)
+                val anim = Animatable(0f)
+                anim.animateTo(1f, tween(transitionDuration)) {
+                    presenterManager.setPictureTransitionAlpha(value)
+                }
+                presenterManager.setPreviousDisplayedImagePath(null)
+            }
+            animationType == AnimationType.SLIDE_LEFT || animationType == AnimationType.SLIDE_RIGHT -> {
+                presenterManager.setPreviousDisplayedImagePath(current)
+                presenterManager.setDisplayedImagePath(selectedImagePath)
+                presenterManager.setPictureTransitionAlpha(1f)
+                presenterManager.setPictureSlideOffset(0f)
+                val anim = Animatable(0f)
+                anim.animateTo(1f, tween(transitionDuration)) {
+                    presenterManager.setPictureSlideOffset(value)
+                }
+                presenterManager.setPreviousDisplayedImagePath(null)
+                presenterManager.setPictureSlideOffset(1f)
+            }
+        }
 }
 
-/** Moves the song band — and the classic band's displayed section — onto [target]. */
-private suspend fun PresenterManager.applySongTarget(target: SongBandTarget, template: BibleLottieTemplate?) {
-    val animating = template?.takeIf {
-        // A section re-sent with only its tuning changed reads the same, and swapping it plays the
-        // band's text out and back in over identical words.
-        val settled = displayedLyricSection.value.isRestatedAs(target.section) &&
-            target.lineIndex == bandSongLineIndex.value
-        presentingMode.value == Presenting.LYRICS && bandIsUp() && !settled
+/** Moves the output to [selectedSlide] by the configured slide transition. */
+private suspend fun animateSlideChange(
+    presenterManager: PresenterManager,
+    selectedSlide: ImageBitmap?,
+    animationType: AnimationType,
+    transitionDuration: Int,
+) {
+        val current = presenterManager.displayedSlide.value
+        when {
+            current == null || animationType == AnimationType.NONE -> {
+                presenterManager.setDisplayedSlide(selectedSlide)
+                presenterManager.setSlideTransitionAlpha(1f)
+                presenterManager.setPreviousDisplayedSlide(null)
+            }
+            animationType == AnimationType.FADE -> {
+                val halfDuration = transitionDuration / 2
+                val anim = Animatable(1f)
+                anim.animateTo(0f, tween(halfDuration)) {
+                    presenterManager.setSlideTransitionAlpha(value)
+                }
+                presenterManager.setDisplayedSlide(selectedSlide)
+                anim.animateTo(1f, tween(halfDuration)) {
+                    presenterManager.setSlideTransitionAlpha(value)
+                }
+            }
+            animationType == AnimationType.CROSSFADE -> {
+                presenterManager.setPreviousDisplayedSlide(current)
+                presenterManager.setDisplayedSlide(selectedSlide)
+                presenterManager.setSlideTransitionAlpha(0f)
+                val anim = Animatable(0f)
+                anim.animateTo(1f, tween(transitionDuration)) {
+                    presenterManager.setSlideTransitionAlpha(value)
+                }
+                presenterManager.setPreviousDisplayedSlide(null)
+            }
+            animationType == AnimationType.SLIDE_LEFT || animationType == AnimationType.SLIDE_RIGHT -> {
+                presenterManager.setPreviousDisplayedSlide(current)
+                presenterManager.setDisplayedSlide(selectedSlide)
+                presenterManager.setSlideTransitionAlpha(1f)
+                presenterManager.setSlideSlideOffset(0f)
+                val anim = Animatable(0f)
+                anim.animateTo(1f, tween(transitionDuration)) {
+                    presenterManager.setSlideSlideOffset(value)
+                }
+                presenterManager.setPreviousDisplayedSlide(null)
+                presenterManager.setSlideSlideOffset(1f)
+            }
+        }
+}
+
+/**
+ * Puts [announcementText] up -- fading it in or out where the animation fades -- and, for a finite
+ * loop, takes it down again once it has played.
+ */
+private suspend fun showAnnouncementText(
+    presenterManager: PresenterManager,
+    announcementText: String,
+    annSettings: AnnouncementsSettings,
+) {
+        val isFade = isFadeAnnouncement(annSettings.animationType)
+        val wasEmpty = presenterManager.displayedAnnouncementText.value.isEmpty()
+        val fadeDuration = 500
+        val sliderSum = 30500L // 500 + 30000, matches AnnouncementsTab speed slider
+        val loopCount = annSettings.loopCount
+
+        if (isSlidingAnnouncement(annSettings.animationType)) {
+            presenterManager.setDisplayedAnnouncementText(announcementText)
+            presenterManager.setAnnouncementTransitionAlpha(1f)
+        } else if (announcementText.isEmpty()) {
+            if (shouldFadeOutAnnouncement(isFade, wasEmpty)) {
+                val anim = Animatable(1f)
+                anim.animateTo(0f, tween(fadeDuration)) {
+                    presenterManager.setAnnouncementTransitionAlpha(value)
+                }
+            }
+            presenterManager.setDisplayedAnnouncementText("")
+            presenterManager.setAnnouncementTransitionAlpha(1f)
+        } else {
+            presenterManager.setDisplayedAnnouncementText(announcementText)
+
+            if (isFade) {
+                presenterManager.setAnnouncementTransitionAlpha(0f)
+                val anim = Animatable(0f)
+                anim.animateTo(1f, tween(fadeDuration)) {
+                    presenterManager.setAnnouncementTransitionAlpha(value)
+                }
+            } else {
+                presenterManager.setAnnouncementTransitionAlpha(1f)
+            }
+
+            if (isFiniteAnnouncementLoop(loopCount)) {
+                delay(announcementDisplayMs(sliderSum, annSettings.animationDuration.toLong(), loopCount))
+
+                if (isFade) {
+                    val anim = Animatable(1f)
+                    anim.animateTo(0f, tween(fadeDuration)) {
+                        presenterManager.setAnnouncementTransitionAlpha(value)
+                    }
+                }
+                presenterManager.setAnnouncementText("")
+                presenterManager.setDisplayedAnnouncementText("")
+                presenterManager.requestClearDisplay()
+            }
+        }
+}
+
+/**
+ * Takes the live content down: the band plays its exit when [template] is one and the mode is not
+ * locked to a screen, the classic outputs fade where their settings fade, and then nothing is live.
+ */
+private suspend fun clearDisplay(
+    presenterManager: PresenterManager,
+    appSettings: AppSettings,
+    template: BibleLottieTemplate?,
+) {
+    val mode = presenterManager.presentingMode.value
+    val modeIsLocked = isAnyScreenLockedTo(presenterManager.screenLocks.value, mode)
+    // The fade is one clock for every output, so it follows the profile the main window does.
+    val operatorBible = appSettings.operatorBibleSettings()
+    val operatorSongs = appSettings.operatorSongSettings()
+    if (template != null && !modeIsLocked) {
+        presenterManager.runBandPhase(
+            BibleBandPhase.EXIT,
+            template.segmentMs(BibleLottieTemplate.SEGMENT_TEXT_OUT, BibleLottieTemplate.SEGMENT_BG_OUT),
+        )
+        presenterManager.setLottieBandClock(BibleBandClock(BibleBandPhase.IDLE, 0f))
+    } else if (shouldFadeOnClear(mode, modeIsLocked, operatorBible, operatorSongs)) {
+        val duration = fadeOutDuration(mode, operatorBible, operatorSongs)
+        val anim = Animatable(1f)
+        anim.animateTo(0f, tween(durationMillis = duration)) {
+            when (mode) {
+                Presenting.BIBLE -> presenterManager.setBibleTransitionAlpha(this.value)
+                Presenting.LYRICS -> presenterManager.setSongTransitionAlpha(this.value)
+                else -> {}
+            }
+        }
     }
-    if (animating == null) {
-        setDisplayedLyricSection(target.section, target.position)
-        setBandSongLineIndex(target.lineIndex)
-        setSongTransitionAlpha(1f)
-        return
-    }
-    val outgoing = BandOutgoing(
-        lyricSection = displayedLyricSection.value,
-        lyricLineIndex = bandSongLineIndex.value,
-    )
-    swapBandText(animating, outgoing) {
-        setDisplayedLyricSection(target.section, target.position)
-        setBandSongLineIndex(target.lineIndex)
-    }
+    presenterManager.setPresentingMode(Presenting.NONE)
 }

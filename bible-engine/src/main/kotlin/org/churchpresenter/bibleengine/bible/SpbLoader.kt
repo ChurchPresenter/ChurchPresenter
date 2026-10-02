@@ -2,6 +2,7 @@ package org.churchpresenter.bibleengine.bible
 
 import org.churchpresenter.bibleengine.Config
 import java.io.File
+import java.io.IOException
 
 object SpbLoader {
 
@@ -32,7 +33,7 @@ object SpbLoader {
                 val t = parseFile(file, seenIds) ?: continue
                 if (t.byBCV.size < 10) continue
                 translations.add(t)
-            } catch (e: Exception) {
+            } catch (e: IOException) {
                 System.err.println("Warning: failed to parse ${file.name}: ${e.message}")
             }
         }
@@ -66,7 +67,7 @@ object SpbLoader {
             try {
                 val t = parseFile(file, seenIds) ?: continue
                 if (t.byBCV.size >= 10) translations.add(t)
-            } catch (e: Exception) {
+            } catch (e: IOException) {
                 System.err.println("Warning: failed to parse ${file.name}: ${e.message}")
             }
         }
@@ -106,7 +107,7 @@ object SpbLoader {
             try {
                 val t = parseFile(file, parseSeenIds) ?: continue
                 if (t.byBCV.size >= 10) results.add(t)
-            } catch (e: Exception) {
+            } catch (e: IOException) {
                 System.err.println("Warning: failed to parse ${file.name}: ${e.message}")
             }
         }

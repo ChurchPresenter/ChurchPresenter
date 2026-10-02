@@ -73,6 +73,7 @@ internal fun webTab(
     cefInitialized: Boolean = true,
     cefMacOsUnsupported: Boolean = false,
     cefBlockedByPolicy: Boolean = false,
+    hasSecondaryDisplay: Boolean = false,
     includeAddToSchedule: Boolean = true,
     /**
      * Constrains the tab's width.
@@ -106,6 +107,7 @@ internal fun webTab(
                         cefInitialized = cefInitialized,
                         cefMacOsUnsupported = cefMacOsUnsupported,
                         cefBlockedByPolicy = cefBlockedByPolicy,
+                        hasSecondaryDisplay = hasSecondaryDisplay,
                     )
                 }
             }
@@ -177,6 +179,9 @@ internal object WebLabel {
     const val MIRROR = "Mirror"
     const val INTERACTIVE = "Interactive"
     const val URL_PLACEHOLDER_DEFAULT = "https://"
+    const val URL_HINT = "https://example.com"
+    const val CLEAR_URL = "Clear address"
+    const val CLEAR_TYPED_TEXT = "Clear text"
     const val PREVIEW_HINT = "Enter a URL above and tap Go Live"
     const val TYPE_TO_PAGE_PLACEHOLDER = "Click an input on the live page first"
     const val ENGINE_UNAVAILABLE_TITLE = "Web browser unavailable"
