@@ -153,7 +153,7 @@ class WindowsWindowCaptureTest {
     fun `the pixel conversion maps each channel to its ARGB slot`() {
         val buffer = bufferOf(0x11, 0x22, 0x33, 0xFF, 0xAA, 0xBB, 0xCC, 0x00)
 
-        val img = WindowsWindowCapture.bgraBufferToImage(buffer, width = 2, height = 1)
+        val img = bgraBufferToImage(buffer, width = 2, height = 1)
 
         assertEquals(2, img.width)
         assertEquals(1, img.height)
@@ -165,7 +165,7 @@ class WindowsWindowCaptureTest {
     fun `every produced pixel is fully opaque regardless of the source alpha byte`() {
         val buffer = bufferOf(0x01, 0x02, 0x03, 0x00)
 
-        val img = WindowsWindowCapture.bgraBufferToImage(buffer, width = 1, height = 1)
+        val img = bgraBufferToImage(buffer, width = 1, height = 1)
 
         assertEquals(0xFF, img.getRGB(0, 0) ushr 24, "alpha must be forced opaque")
     }
@@ -174,7 +174,7 @@ class WindowsWindowCaptureTest {
     fun `rows are read at the right stride`() {
         val buffer = bufferOf(0x01, 0x02, 0x03, 0x00, 0x04, 0x05, 0x06, 0x00)
 
-        val img = WindowsWindowCapture.bgraBufferToImage(buffer, width = 1, height = 2)
+        val img = bgraBufferToImage(buffer, width = 1, height = 2)
 
         assertEquals(0xFF010203.toInt(), img.getRGB(0, 0))
         assertEquals(0xFF040506.toInt(), img.getRGB(0, 1))
@@ -182,13 +182,13 @@ class WindowsWindowCaptureTest {
 
     @Test
     fun `the produced image is ARGB`() {
-        val img = WindowsWindowCapture.bgraBufferToImage(bufferOf(0, 0, 0, 0), width = 1, height = 1)
+        val img = bgraBufferToImage(bufferOf(0, 0, 0, 0), width = 1, height = 1)
         assertEquals(BufferedImage.TYPE_INT_ARGB, img.type)
     }
 
     @Test
     fun `bounds are the rect origin with width and height derived from the edges`() {
-        val bounds = WindowsWindowCapture.rectToBounds(left = 10, top = 20, right = 110, bottom = 220)
+        val bounds = rectToBounds(left = 10, top = 20, right = 110, bottom = 220)
         assertEquals(10, bounds.x)
         assertEquals(20, bounds.y)
         assertEquals(100, bounds.width, "width is right - left, not right")
@@ -197,7 +197,7 @@ class WindowsWindowCaptureTest {
 
     @Test
     fun `bounds handle a negative origin from an off-screen window`() {
-        val bounds = WindowsWindowCapture.rectToBounds(left = -50, top = -30, right = 150, bottom = 90)
+        val bounds = rectToBounds(left = -50, top = -30, right = 150, bottom = 90)
         assertEquals(-50, bounds.x)
         assertEquals(-30, bounds.y)
         assertEquals(200, bounds.width)

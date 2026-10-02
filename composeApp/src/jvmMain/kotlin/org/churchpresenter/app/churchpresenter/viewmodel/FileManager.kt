@@ -6,8 +6,6 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.BibleSettings
 import java.io.File
 import java.io.IOException
-import javax.swing.JOptionPane
-import java.awt.Window
 import java.nio.file.Path
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
@@ -169,56 +167,5 @@ class FileManager {
         }
 
         return errors
-    }
-
-    /**
-     * Show confirmation dialog
-     * Returns true if user confirmed
-     */
-    fun showConfirmDialog(
-        message: String,
-        title: String = "Confirm",
-        parentWindow: Window? = null
-    ): Boolean {
-        val result = JOptionPane.showConfirmDialog(
-            parentWindow,
-            message,
-            title,
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.WARNING_MESSAGE
-        )
-        return result == JOptionPane.YES_OPTION
-    }
-
-    /**
-     * Show warning dialog
-     */
-    fun showWarning(
-        message: String,
-        title: String = "Warning",
-        parentWindow: Window? = null
-    ) {
-        JOptionPane.showMessageDialog(
-            parentWindow,
-            message,
-            title,
-            JOptionPane.WARNING_MESSAGE
-        )
-    }
-
-    /**
-     * Show error dialog
-     */
-    fun showError(
-        message: String,
-        title: String = "Error",
-        parentWindow: Window? = null
-    ) {
-        JOptionPane.showMessageDialog(
-            parentWindow,
-            message,
-            title,
-            JOptionPane.ERROR_MESSAGE
-        )
     }
 }

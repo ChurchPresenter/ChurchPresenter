@@ -23,28 +23,13 @@ data class RemoteClientLists(
  * any composable that reads them will recompose when the lists change.
  */
 class RemoteClientManager {
-    private val appDataDir = File(System.getProperty("user.home"), ".churchpresenter")
-    private val clientsFile = File(appDataDir, "remote_clients.json")
+    private val file = RemoteClientsFile()
 
-    private val jsonFormat = Json { ignoreUnknownKeys = true; encodeDefaults = true }
-
-    private var _lists by mutableStateOf(load())
+    private var _lists by mutableStateOf(file.load())
 
     val allowedClients: Set<String> get() = _lists.allowedClients
     val blockedClients: Set<String> get() = _lists.blockedClients
     val clientLabels: Map<String, String> get() = _lists.clientLabels
-
-    private fun load(): RemoteClientLists = try {
-        if (clientsFile.exists()) jsonFormat.decodeFromString(clientsFile.readText())
-        else RemoteClientLists()
-    } catch (_: Exception) { RemoteClientLists() }
-
-    private fun save() {
-        try {
-            appDataDir.mkdirs()
-            clientsFile.writeText(jsonFormat.encodeToString(_lists))
-        } catch (_: Exception) {}
-    }
 
     fun isAllowed(clientId: String): Boolean =
         clientId.isNotBlank() && clientId in _lists.allowedClients
@@ -62,7 +47,7 @@ class RemoteClientManager {
             allowedClients = _lists.allowedClients + clientId,
             blockedClients = _lists.blockedClients - clientId
         )
-        save()
+        file.save(_lists)
     }
 
     /** Adds to permanent block list and removes from allow list if present. */
@@ -72,17 +57,17 @@ class RemoteClientManager {
             blockedClients = _lists.blockedClients + clientId,
             allowedClients = _lists.allowedClients - clientId
         )
-        save()
+        file.save(_lists)
     }
 
     fun removeAllowed(clientId: String) {
         _lists = _lists.copy(allowedClients = _lists.allowedClients - clientId)
-        save()
+        file.save(_lists)
     }
 
     fun removeBlocked(clientId: String) {
         _lists = _lists.copy(blockedClients = _lists.blockedClients - clientId)
-        save()
+        file.save(_lists)
     }
 
     /** Returns the human-readable label for the given device ID, or empty string if none set. */
@@ -96,8 +81,28 @@ class RemoteClientManager {
             clientLabels = if (trimmed.isEmpty()) _lists.clientLabels - clientId
                            else _lists.clientLabels + (clientId to trimmed)
         )
-        save()
+        file.save(_lists)
     }
 
-    fun reload() { _lists = load() }
+    fun reload() { _lists = file.load() }
+}
+
+/** Where the lists are kept between runs: `~/.churchpresenter/remote_clients.json`. */
+private class RemoteClientsFile {
+    private val appDataDir = File(System.getProperty("user.home"), ".churchpresenter")
+    private val clientsFile = File(appDataDir, "remote_clients.json")
+
+    private val jsonFormat = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+
+    fun load(): RemoteClientLists = try {
+        if (clientsFile.exists()) jsonFormat.decodeFromString(clientsFile.readText())
+        else RemoteClientLists()
+    } catch (_: Exception) { RemoteClientLists() }
+
+    fun save(lists: RemoteClientLists) {
+        try {
+            appDataDir.mkdirs()
+            clientsFile.writeText(jsonFormat.encodeToString(lists))
+        } catch (_: Exception) {}
+    }
 }

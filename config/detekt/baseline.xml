@@ -52,18 +52,13 @@
     <ID>TooManyFunctions:BibleViewModel.kt$BibleViewModel</ID>
     <ID>TooManyFunctions:BibleViewModelDetection.kt$org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModelDetection.kt</ID>
     <ID>TooManyFunctions:BibleViewModelSmartSearch.kt$org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModelSmartSearch.kt</ID>
-    <ID>TooManyFunctions:CompanionSatelliteViewModel.kt$CompanionSatelliteViewModel</ID>
     <ID>TooManyFunctions:CompanionServer.kt$CompanionServer</ID>
     <ID>TooManyFunctions:DeckLinkManager.kt$DeckLinkManager</ID>
     <ID>TooManyFunctions:EditSongDialog.kt$org.churchpresenter.app.churchpresenter.dialogs.EditSongDialog.kt</ID>
-    <ID>TooManyFunctions:FileManager.kt$FileManager</ID>
     <ID>TooManyFunctions:InstanceLinkClient.kt$InstanceLinkClient</ID>
     <ID>TooManyFunctions:InstanceLinkViewModel.kt$InstanceLinkViewModel</ID>
-    <ID>TooManyFunctions:LiveMapReporter.kt$LiveMapReporter</ID>
     <ID>TooManyFunctions:PlanningCenterImportViewModel.kt$PlanningCenterImportViewModel</ID>
-    <ID>TooManyFunctions:PresentationPlayer.kt$PresentationPlayer</ID>
     <ID>TooManyFunctions:PresenterManager.kt$PresenterManager</ID>
-    <ID>TooManyFunctions:RemoteClientManager.kt$RemoteClientManager</ID>
     <ID>TooManyFunctions:SceneSourceRenderer.kt$org.churchpresenter.app.churchpresenter.composables.SceneSourceRenderer.kt</ID>
     <ID>TooManyFunctions:SceneViewModel.kt$SceneViewModel</ID>
     <ID>TooManyFunctions:ScheduleViewModel.kt$ScheduleViewModel</ID>
@@ -73,6 +68,5 @@
     <ID>TooManyFunctions:SongsViewModel.kt$SongsViewModel</ID>
     <ID>TooManyFunctions:SslCertificateManager.kt$SslCertificateManager</ID>
     <ID>TooManyFunctions:StatisticsManager.kt$StatisticsManager</ID>
-    <ID>TooManyFunctions:WindowsWindowCapture.kt$WindowsWindowCapture</ID>
   </CurrentIssues>
 </SmellBaseline>
