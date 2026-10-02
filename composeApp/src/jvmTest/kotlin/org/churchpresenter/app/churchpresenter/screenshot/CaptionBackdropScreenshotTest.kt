@@ -14,21 +14,19 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import io.github.takahirom.roborazzi.captureRoboImage
 import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
-import org.churchpresenter.media.presenter.SubtitleOverlay
-import org.churchpresenter.media.subtitles.SubtitleCue
 import org.churchpresenter.app.churchpresenter.viewmodel.STTSegment
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
-import org.churchpresenter.settings.MediaSettings
 import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 
 /**
- * Live captions and video subtitles carrying a backdrop, which nothing photographed before.
+ * Live captions carrying a backdrop, which nothing photographed before. Video subtitles, the other
+ * half of the same rendering, are `:media`'s `SubtitleBackdropScreenshotTest`.
  *
- * These two share one rendering — `BottomAlignedText` — and it was the **worst** of the surfaces the
+ * The two share one rendering — `BottomAlignedText` — and it was the **worst** of the surfaces the
  * backdrop-clipping audit turned up. It clips at the direct parent of the text and hands the text the
  * whole clip, so any Left or Right position lost that edge outright; and because it reports exactly
  * the text's height and places it at `y = 0`, even *centred* text lost its top and bottom. The
@@ -97,45 +95,12 @@ class CaptionBackdropScreenshotTest {
         STTSettings(outline = GLYPH_STROKE, backgroundColor = "#101820", backgroundOpacity = 100),
     )
 
-    // ── Video subtitles ─────────────────────────────────────────────────────────────────────────
-
-    private fun shootSubtitles(name: String, settings: MediaSettings) = shoot(name) {
-        SubtitleOverlay(cue = CUE, mediaSettings = settings)
-    }
-
-    @Test
-    fun `subtitles on a plate`() = shootSubtitles("subtitle_backdrop", subtitles(LINE_PLATE))
-
-    @Test
-    fun `subtitles in a bordered box`() = shootSubtitles("subtitle_backdrop_border", subtitles(BORDER_BOX))
-
-    /**
-     * Bottom **Left**, which is where the subtitle card loses its own left edge.
-     *
-     * `MediaSettings.position` carries the alignment for subtitles rather than a separate field, so
-     * this is one setting doing both jobs — the card moves and the text aligns with it.
-     */
-    @Test
-    fun `subtitles bottom left in a bordered box`() =
-        shootSubtitles("subtitle_border_left", subtitles(BORDER_BOX, Constants.BOTTOM_LEFT))
-
-    @Test
-    fun `subtitles bottom right in a bordered box`() =
-        shootSubtitles("subtitle_border_right", subtitles(BORDER_BOX, Constants.BOTTOM_RIGHT))
-
     // ── Fixtures ────────────────────────────────────────────────────────────────────────────────
 
     private fun captions(backdrop: TextBackdrop, position: String = Constants.BOTTOM_CENTER) = STTSettings(
         backdrop = backdrop,
         position = position,
         // An opaque card, so the plate and the box read against something rather than over black.
-        backgroundColor = "#101820",
-        backgroundOpacity = 100,
-    )
-
-    private fun subtitles(backdrop: TextBackdrop, position: String = Constants.BOTTOM_CENTER) = MediaSettings(
-        backdrop = backdrop,
-        position = position,
         backgroundColor = "#101820",
         backgroundOpacity = 100,
     )
@@ -162,8 +127,6 @@ class CaptionBackdropScreenshotTest {
                 completed = true,
             ),
         )
-
-        val CUE = SubtitleCue(startMs = 0, endMs = 5_000, text = "And he said unto them, go ye into all the world.")
 
         /** A band behind each line. Not near-black: the card it sits on is dark. */
         val LINE_PLATE = TextBackdrop(
