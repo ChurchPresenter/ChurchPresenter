@@ -66,7 +66,7 @@ internal fun CaptionReadingGroup(reading: CaptionReading, update: ((CaptionReadi
     val path = { field: String -> listOf("$READING.$field") }
     val ms = stringResource(Res.string.profile_ms)
     val percent = stringResource(Res.string.percent_suffix)
-    SettingsGroup(stringResource(Res.string.profile_group_reading), paths = listOf(READING)) {
+    SettingsGroup(stringResource(Res.string.profile_group_reading), key = "reading", paths = listOf(READING)) {
         StyleRows(reading, update, path)
         TimingRows(reading, update, path)
         if (reading.style == CAPTION_STYLE_ROLL_UP) {

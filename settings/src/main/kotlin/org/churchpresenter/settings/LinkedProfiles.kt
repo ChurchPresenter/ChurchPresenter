@@ -15,10 +15,14 @@ package org.churchpresenter.settings
  * look of its own; any other list is one value.
  */
 
-/** The profiles following [id], in list order. */
-fun ProjectionSettings.linkedTo(id: String): List<OutputProfile> = outputProfiles.filter { it.parentId == id }
+/**
+ * The profiles following [id], in list order: those it is the main master of, and those following
+ * it in one section or more ([OutputProfile.sectionMasters]).
+ */
+fun ProjectionSettings.linkedTo(id: String): List<OutputProfile> =
+    outputProfiles.filter { it.parentId == id || it.followsInSection(id) }
 
-/** The master [profile] follows, if it follows one that exists. */
+/** The master [profile] follows -- its main master -- if it follows one that exists. */
 fun ProjectionSettings.masterOf(profile: OutputProfile): OutputProfile? =
     profile.parentId?.let { id -> outputProfiles.find { it.id == id && it.parentId == null } }
 
@@ -34,10 +38,20 @@ fun ProjectionSettings.withLinksResolved(): ProjectionSettings {
     val fixed = outputProfiles.map { profile ->
         val master = profile.parentId?.let(byId::get)
         when {
-            profile.parentId == null -> profile
+            profile.parentId == null ->
+                if (profile.sectionMasters.isEmpty()) profile else profile.copy(sectionMasters = emptyMap())
             master == null || master.parentId != null || master.id == profile.id ->
-                profile.copy(parentId = null, overrides = emptySet())
-            else -> materialize(master, profile)
+                profile.copy(parentId = null, overrides = emptySet(), sectionMasters = emptyMap())
+            else -> {
+                val linked = profile.copy(sectionMasters = profile.checkedSectionMasters(byId))
+                materialize(master, linked) { section ->
+                    when (val id = linked.sectionMasters[section.id]) {
+                        null -> master
+                        OWN_SECTION -> null
+                        else -> byId.getValue(id)
+                    }
+                }
+            }
         }
     }
     return copy(outputProfiles = fixed.inBlocks())
@@ -57,8 +71,10 @@ fun List<OutputProfile>.inBlocks(): List<OutputProfile> {
  * [this] with the profile [id] edited by [transform], the way an edit on the Profiles tab applies.
  *
  * On a linked profile every value the edit changed becomes its own (joins [OutputProfile.overrides]),
- * and its display mode stays its master's. On a master, every profile linked to it is brought back
- * in line, so the change reaches each of them except where one has a value of its own.
+ * and its display mode stays its master's. A change in a section that follows no master is only a
+ * value -- resolution drops it from the overrides again (see [materialize]). On a master, every
+ * profile linked to it is brought back in line, so the change reaches each of them except where one
+ * has a value of its own.
  */
 fun ProjectionSettings.editProfile(id: String, transform: (OutputProfile) -> OutputProfile): ProjectionSettings {
     val old = outputProfiles.find { it.id == id } ?: return this
@@ -74,7 +90,10 @@ fun ProjectionSettings.editProfile(id: String, transform: (OutputProfile) -> Out
     return copy(outputProfiles = outputProfiles.map { if (it.id == id) edited else it }).withLinksResolved()
 }
 
-/** [this] with the linked profile [id] taking its master's value again at every path under [prefixes]. */
+/**
+ * [this] with the linked profile [id] taking its master's value again at every path under [prefixes]
+ * -- each from the master of the section it is in.
+ */
 fun ProjectionSettings.revertToMaster(id: String, prefixes: Collection<String>): ProjectionSettings =
     copy(
         outputProfiles = outputProfiles.map { p ->
@@ -87,13 +106,13 @@ fun ProjectionSettings.revertToMaster(id: String, prefixes: Collection<String>):
     ).withLinksResolved()
 
 /**
- * [this] with [id] following nothing, its values exactly as they were -- so what its outputs draw
- * does not change -- placed directly after its old master's block.
+ * [this] with [id] following nothing, in any section, its values exactly as they were -- so what its
+ * outputs draw does not change -- placed directly after its old master's block.
  */
 fun ProjectionSettings.unlinkProfile(id: String): ProjectionSettings {
     val profile = outputProfiles.find { it.id == id } ?: return this
     val masterId = profile.parentId ?: return this
-    val freed = profile.copy(parentId = null, overrides = emptySet())
+    val freed = profile.copy(parentId = null, overrides = emptySet(), sectionMasters = emptyMap())
     val rest = outputProfiles.filterNot { it.id == id }
     val lastOfBlock = rest.indexOfLast { it.id == masterId || it.parentId == masterId }
     val list = rest.toMutableList().apply { add(lastOfBlock + 1, freed) }

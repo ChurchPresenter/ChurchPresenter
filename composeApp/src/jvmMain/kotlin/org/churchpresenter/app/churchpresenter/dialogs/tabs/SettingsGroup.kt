@@ -15,11 +15,14 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,14 +34,19 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.profile_group_fold
+import org.churchpresenter.strings.generated.resources.profile_group_open
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedSwitch
+import org.jetbrains.compose.resources.stringResource
 
 private val CARD_RADIUS = 10.dp
 private val GROUP_GAP = 16.dp
@@ -62,10 +70,18 @@ private val WRAP_GAP = 6.dp
  * The rows are a column on the divider colour with a hairline gap between them, each row painting
  * itself in the card colour ([SettingsRow]), which is what draws the dividers without a row having
  * to know whether it is first.
+ *
+ * Where [LocalFoldedGroups] is provided, the caption folds the group away: it becomes a card of its
+ * own with [summary] at its end, and the amber dot when a linked profile has made one of [paths] its
+ * own. [key] names the group among its page's for that, and so must not change. A folded group's
+ * rows are still composed and measured -- only not placed -- so one with nothing to show is still
+ * left out whole; and while a search is typed, a group with a match opens without its fold being
+ * forgotten. A group without a caption never folds.
  */
 @Composable
 internal fun SettingsGroup(
     caption: String,
+    key: String,
     modifier: Modifier = Modifier,
     advanced: Boolean = false,
     action: (@Composable RowScope.() -> Unit)? = null,
@@ -73,11 +89,24 @@ internal fun SettingsGroup(
     footer: (@Composable () -> Unit)? = null,
     /** The settings the group edits: on a linked profile its caption offers to revert them instead. */
     paths: List<String> = emptyList(),
+    /** What a folded group says at its end -- "Bottom · margins 40". */
+    summary: (@Composable () -> String)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     if (advanced && LocalSettingsDetail.current == SettingsDetail.BASIC) return
     val palette = profilesPalette()
-    val shownAction = linkedGroupAction(LocalProfileLink.current, paths, action)
+    val link = LocalProfileLink.current
+    val shownAction = linkedGroupAction(link, paths, action)
+    val folds = LocalFoldedGroups.current?.takeIf { caption.isNotEmpty() }
+    if (folds != null) {
+        // Keyed on the page's set, which outlives the holder rebuilt on every fold.
+        val present = folds.present
+        DisposableEffect(present, key) {
+            present += key
+            onDispose { present -= key }
+        }
+    }
+    val folded = folds != null && key in folds.folded && LocalSettingsQuery.current.isBlank()
     val radius = CARD_RADIUS
     val topRounded = if (header == null) radius else 0.dp
     val bottomRounded = if (footer == null) radius else 0.dp
@@ -85,12 +114,21 @@ internal fun SettingsGroup(
     Layout(
         contents = listOf(
             {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    GroupCaption(caption, Modifier.weight(1f))
-                    shownAction?.invoke(this)
+                when {
+                    folds == null -> Row(
+                        modifier = Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        GroupCaption(caption, Modifier.weight(1f))
+                        shownAction?.invoke(this)
+                    }
+                    folded -> FoldableCaption(caption, folded = true, onToggle = { folds.toggle(key) }, key = key) {
+                        if (link?.follows(paths) == true && link.owns(paths)) OverrideDot()
+                        summary?.let { GroupSummary(it()) }
+                    }
+                    else -> FoldableCaption(caption, folded = false, onToggle = { folds.toggle(key) }, key = key) {
+                        shownAction?.invoke(this)
+                    }
                 }
             },
             { header?.let { Box(Modifier.fillMaxWidth().clip(AppShape(radius, radius, 0.dp, 0.dp))) { it() } } },
@@ -127,6 +165,13 @@ internal fun SettingsGroup(
             return@Layout layout(width, 0) {}
         }
         val captionP = captionM.firstOrNull()?.measure(loose)
+        if (folded && captionP != null) {
+            // Only the caption, as a card of its own: the rows stay composed, unplaced.
+            val gap = GROUP_GAP.roundToPx()
+            card.top = gap.toFloat()
+            card.height = captionP.height.toFloat()
+            return@Layout layout(width, gap + captionP.height) { captionP.place(0, gap) }
+        }
         val headerP = headerM.firstOrNull()?.measure(loose)
         val footerP = footerM.firstOrNull()?.measure(loose)
         val gap = GROUP_GAP.roundToPx()
@@ -146,9 +191,59 @@ internal fun SettingsGroup(
     }
 }
 
-/** Where the card sits inside the group, written by the layout and read when it is drawn. */
 /** Where the footer's content is among the group's four slots. */
 private const val FOOTER_SLOT = 3
+
+/**
+ * A caption that folds its group: the whole line is the button, a chevron at its start saying which
+ * way it goes. Folded, it is padded into a card of its own; [end] follows the caption either way --
+ * the summary while folded, the caption's action while open.
+ */
+@Composable
+private fun FoldableCaption(
+    caption: String,
+    folded: Boolean,
+    onToggle: () -> Unit,
+    key: String,
+    end: @Composable RowScope.() -> Unit,
+) {
+    val padding = if (folded) Modifier.padding(horizontal = 12.dp, vertical = 11.dp) else Modifier.padding(4.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(AppShape(CARD_RADIUS))
+            .clickable(role = Role.Button, onClick = onToggle)
+            .testTag(groupFoldTag(key))
+            .then(padding),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Icon(
+            if (folded) Icons.Filled.ChevronRight else Icons.Filled.KeyboardArrowDown,
+            contentDescription = stringResource(
+                if (folded) Res.string.profile_group_open else Res.string.profile_group_fold,
+            ),
+            modifier = Modifier.size(16.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        GroupCaption(caption, Modifier.weight(1f))
+        end()
+    }
+}
+
+/** A folded group's one-line summary, at the end of its caption. */
+@Composable
+private fun GroupSummary(text: String) {
+    Text(
+        text,
+        fontSize = 12.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
+}
+
+/** Where the card sits inside the group, written by the layout and read when it is drawn. */
 
 private class CardBounds {
     var top = 0f

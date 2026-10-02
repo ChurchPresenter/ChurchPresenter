@@ -34,7 +34,18 @@ internal fun ProfileBackgroundPage(
     val scope = if (profile.isLowerThird) BackgroundScope.DEFAULT_LOWER_THIRD else BackgroundScope.DEFAULT
     val owned = scope.name in profile.backgroundOverrides
     val backgrounds = draft.backgroundSettings
-    SettingsGroup(stringResource(Res.string.profile_bg_default_group), paths = scope.surfacePaths()) {
+    SettingsGroup(
+        stringResource(Res.string.profile_bg_default_group),
+        key = "default_background",
+        paths = scope.surfacePaths(),
+        summary = {
+            if (owned) {
+                backgroundSummary(stringResource(Res.string.profile_bg_own), backgrounds.configFor(scope))
+            } else {
+                stringResource(Res.string.profile_bg_app_default)
+            }
+        },
+    ) {
         SettingsRow(
             stringResource(Res.string.profile_bg_row),
             sub = if (owned) {
@@ -66,7 +77,7 @@ internal fun ProfileBackgroundPage(
         }
         if (owned) BackgroundSurfaceRows(scope, draft, onSettingsChange)
     }
-    SettingsGroup(stringResource(Res.string.profile_bg_used_by)) {
+    SettingsGroup(stringResource(Res.string.profile_bg_used_by), key = "used_by") {
         listOf(
             Triple(BackgroundScope.BIBLE, BackgroundScope.BIBLE_LOWER_THIRD, CustomizePane.BIBLE),
             Triple(BackgroundScope.SONG, BackgroundScope.SONG_LOWER_THIRD, CustomizePane.SONGS),

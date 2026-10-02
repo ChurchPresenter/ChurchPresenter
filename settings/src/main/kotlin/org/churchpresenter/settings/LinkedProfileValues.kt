@@ -33,13 +33,31 @@ private fun OutputProfile.usesPath(path: String): Boolean {
 }
 
 /**
- * [child] as its master [master] has it, except at each of [child]'s own paths: [master]'s values,
- * [child]'s values where it has overridden them, and [child]'s identity throughout.
+ * [child] as its masters have it, except at each of [child]'s own paths: [master]'s values, the
+ * values of the master [sectionMaster] names for each section that follows another -- [child]'s own
+ * for a section that follows none -- [child]'s values where it has overridden them, and [child]'s
+ * identity throughout. The display mode is always [master]'s.
+ *
+ * An override in a section that follows no master is no override, only a value, and is dropped.
  */
-fun materialize(master: OutputProfile, child: OutputProfile): OutputProfile {
+fun materialize(
+    master: OutputProfile,
+    child: OutputProfile,
+    sectionMaster: (ProfileSection) -> OutputProfile? = { master },
+): OutputProfile {
     var tree = master.tree()
+    val ownTree = child.tree()
+    ProfileSection.entries.forEach { section ->
+        val from = sectionMaster(section)
+        if (from?.id == master.id) return@forEach
+        val source = from?.tree() ?: ownTree
+        section.prefixes.forEach { key -> source[key]?.let { tree = JsonObject(tree + (key to it)) } }
+    }
+    val followed = child.overrides.filterTo(LinkedHashSet()) { path ->
+        ProfileSection.of(path).let { it == null || sectionMaster(it) != null }
+    }
     val own = child.settingPaths()
-    child.overrides.forEach { path ->
+    followed.forEach { path ->
         val value = own[path] ?: return@forEach
         tree = setAt(tree, parsePath(path), value) ?: tree
     }
@@ -47,7 +65,8 @@ fun materialize(master: OutputProfile, child: OutputProfile): OutputProfile {
         id = child.id,
         name = child.name,
         parentId = child.parentId,
-        overrides = child.overrides,
+        overrides = followed,
+        sectionMasters = child.sectionMasters,
         previewWidth = child.previewWidth,
         previewHeight = child.previewHeight,
         merge = child.merge,

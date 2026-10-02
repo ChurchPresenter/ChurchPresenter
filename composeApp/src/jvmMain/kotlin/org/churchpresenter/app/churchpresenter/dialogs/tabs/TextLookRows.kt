@@ -28,8 +28,6 @@ import org.churchpresenter.strings.generated.resources.profile_text_size_unit
 import org.churchpresenter.strings.generated.resources.profile_text_style
 import org.churchpresenter.strings.generated.resources.right
 import org.churchpresenter.sharedui.composables.ShadowDetailRow
-import org.churchpresenter.sharedui.composables.TextBackdropButton
-import org.churchpresenter.sharedui.composables.TextOutlineButton
 import org.churchpresenter.sharedui.composables.TextStyleButtons
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
@@ -41,12 +39,13 @@ private const val SIZE_STEP = 2
 private val STYLE_BUTTON = 26.dp
 
 /**
- * The Text group's rows: font, size, auto-fit, colour, style and alignment in Basic, and the letter
- * case, spacing, outline, highlight and shadow in Advanced.
+ * The Text group's rows: font, size, auto-fit, colour, style -- outline and highlight among its
+ * buttons -- and alignment in Basic, and the letter case, spacing and shadow in Advanced.
  *
- * [autoFitScope] is drawn beside Auto-fit while it is on -- the song's Whole song / Each slide.
- * [extraBasic] and [extraAdvanced] are rows the page adds for its element: the reference's
- * position and abbreviation, the number's corner.
+ * [leading] are the rows about the element itself rather than its look, drawn first: a song
+ * element's own options, the reference's abbreviation. [autoFitScope] is drawn beside Auto-fit while
+ * it is on -- the song's Whole song / Each slide. [extraBasic] and [extraAdvanced] are rows the page
+ * adds after the look for its element: the reference's position, the number's corner.
  */
 @Composable
 internal fun TextLookRows(
@@ -54,12 +53,14 @@ internal fun TextLookRows(
     onChange: (TextLook) -> Unit,
     fonts: List<String>,
     autoFitScope: (@Composable () -> Unit)? = null,
+    leading: @Composable () -> Unit = {},
     extraBasic: @Composable () -> Unit = {},
     extraAdvanced: @Composable () -> Unit = {},
     /** Where each row's value is stored, for a linked profile to mark it -- see [probeTextLookPaths]. */
     paths: TextLookPaths = TextLookPaths.NONE,
 ) {
     val autoFitOn = look.autoFit == true
+    leading()
     SettingsRow(stringResource(Res.string.profile_text_font), paths = paths[TextLookField.FONT]) {
         RowFont(look.fontType, fonts) { onChange(look.copy(fontType = it)) }
     }
@@ -88,7 +89,12 @@ internal fun TextLookRows(
     SettingsRow(stringResource(Res.string.profile_text_color), paths = paths[TextLookField.COLOR]) {
         RowColor(look.color, { onChange(look.copy(color = it)) })
     }
-    SettingsRow(stringResource(Res.string.profile_text_style), paths = paths[TextLookField.STYLE]) {
+    SettingsRow(
+        stringResource(Res.string.profile_text_style),
+        // The outline and highlight are buttons of this row, so the search finds it by their names.
+        searchTerms = styleSearchTerms(),
+        paths = paths[TextLookField.STYLE] + paths[TextLookField.OUTLINE] + paths[TextLookField.BACKDROP],
+    ) {
         TextStyleButtons(
             bold = look.bold,
             italic = look.italic,
@@ -102,6 +108,10 @@ internal fun TextLookRows(
             onStrikethroughChange = { onChange(look.copy(strikethrough = it)) },
             showShadow = false,
             buttonSize = STYLE_BUTTON,
+            outline = look.outline,
+            onOutlineChange = { onChange(look.copy(outline = it)) },
+            backdrop = look.backdrop,
+            onBackdropChange = { onChange(look.copy(backdrop = it)) },
         )
     }
     SettingsRow(stringResource(Res.string.profile_text_alignment), paths = paths[TextLookField.ALIGNMENT]) {
@@ -120,7 +130,7 @@ internal fun TextLookRows(
     extraAdvanced()
 }
 
-/** The Text group's Advanced rows: chord colour, letter case, spacing, outline, highlight, shadow. */
+/** The Text group's Advanced rows: chord colour, letter case, spacing, shadow. */
 @Composable
 private fun AdvancedTextRows(look: TextLook, onChange: (TextLook) -> Unit, paths: TextLookPaths) {
     look.chordColor?.let { chord ->
@@ -172,20 +182,6 @@ private fun AdvancedTextRows(look: TextLook, onChange: (TextLook) -> Unit, paths
     ) {
         RowStepper(look.wordSpacing, { onChange(look.copy(wordSpacing = it)) }, WORD_SPACING_RANGE, unit = px)
     }
-    SettingsRow(
-        stringResource(Res.string.profile_text_outline),
-        advanced = true,
-        paths = paths[TextLookField.OUTLINE],
-    ) {
-        TextOutlineButton(look.outline, { onChange(look.copy(outline = it)) }, STYLE_BUTTON)
-    }
-    SettingsRow(
-        stringResource(Res.string.profile_text_highlight),
-        advanced = true,
-        paths = paths[TextLookField.BACKDROP],
-    ) {
-        TextBackdropButton(look.backdrop, { onChange(look.copy(backdrop = it)) }, STYLE_BUTTON)
-    }
     SettingsSwitchRow(
         stringResource(Res.string.profile_text_shadow),
         look.shadow,
@@ -206,6 +202,11 @@ private fun AdvancedTextRows(look: TextLook, onChange: (TextLook) -> Unit, paths
         }
     }
 }
+
+/** What a Style row carrying the outline and highlight buttons is also found by. */
+@Composable
+internal fun styleSearchTerms(): String =
+    stringResource(Res.string.profile_text_outline) + " " + stringResource(Res.string.profile_text_highlight)
 
 /** Test handle for the Text group's size field. */
 internal const val TEXT_SIZE_FIELD_TAG = "profile_text_size"
