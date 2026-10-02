@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.ui.unit.Dp
+import androidx.compose.runtime.MutableState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -159,62 +161,6 @@ private fun CompanionConnectionCard(
     onUpdate: (CompanionSatelliteSettings.() -> CompanionSatelliteSettings) -> Unit,
     onRemove: () -> Unit
 ) {
-    var nameText by remember(connection.id, connection.name) { mutableStateOf(connection.name) }
-    var hostText by remember(connection.id, connection.host) { mutableStateOf(connection.host) }
-    var portText by remember(connection.id, connection.port) { mutableStateOf(connection.port.toString()) }
-    var portFocused by remember { mutableStateOf(false) }
-    // Saved on Enter or on leaving the field, never per keystroke: each save reconnects, and typing
-    // 70000 used to save 7000 on the way -- a port nobody asked for. Anything unusable reverts.
-    fun commitPort() {
-        val port = portText.trim().toIntOrNull()?.takeIf { it in CompanionSatelliteClient.VALID_PORTS }
-        if (port == null) portText = connection.port.toString()
-        else if (port != connection.port) onUpdate { copy(port = port) }
-    }
-    var deviceIdText by remember(connection.id, connection.deviceId) { mutableStateOf(connection.deviceId) }
-    var leftSidebarDeviceIdText by remember(connection.id, connection.leftSidebarDeviceId) {
-        mutableStateOf(connection.leftSidebarDeviceId)
-    }
-    var rightSidebarDeviceIdText by remember(connection.id, connection.rightSidebarDeviceId) {
-        mutableStateOf(connection.rightSidebarDeviceId)
-    }
-    var productNameText by remember(connection.id, connection.productName) { mutableStateOf(connection.productName) }
-    var reconnectDelayText by remember(connection.id, connection.reconnectDelayMs) {
-        mutableStateOf(connection.reconnectDelayMs.toString())
-    }
-    var tabRowsText by remember(connection.id, connection.tabRows) { mutableStateOf(connection.tabRows.toString()) }
-    var tabColumnsText by remember(connection.id, connection.tabColumns) {
-        mutableStateOf(connection.tabColumns.toString())
-    }
-    var tabBitmapSizeText by remember(connection.id, connection.tabBitmapSize) {
-        mutableStateOf(connection.tabBitmapSize.toString())
-    }
-    var leftRowsText by remember(connection.id, connection.leftSidebarRows) {
-        mutableStateOf(connection.leftSidebarRows.toString())
-    }
-    var leftColumnsText by remember(connection.id, connection.leftSidebarColumns) {
-        mutableStateOf(connection.leftSidebarColumns.toString())
-    }
-    var leftBitmapSizeText by remember(connection.id, connection.leftSidebarBitmapSize) {
-        mutableStateOf(connection.leftSidebarBitmapSize.toString())
-    }
-    var rightRowsText by remember(connection.id, connection.rightSidebarRows) {
-        mutableStateOf(connection.rightSidebarRows.toString())
-    }
-    var rightColumnsText by remember(connection.id, connection.rightSidebarColumns) {
-        mutableStateOf(connection.rightSidebarColumns.toString())
-    }
-    var rightBitmapSizeText by remember(connection.id, connection.rightSidebarBitmapSize) {
-        mutableStateOf(connection.rightSidebarBitmapSize.toString())
-    }
-    var tabMaxButtonSizeText by remember(connection.id, connection.tabMaxButtonSizeDp) {
-        mutableStateOf(connection.tabMaxButtonSizeDp.toString())
-    }
-    var leftMaxButtonSizeText by remember(connection.id, connection.leftSidebarMaxButtonSizeDp) {
-        mutableStateOf(connection.leftSidebarMaxButtonSizeDp.toString())
-    }
-    var rightMaxButtonSizeText by remember(connection.id, connection.rightSidebarMaxButtonSizeDp) {
-        mutableStateOf(connection.rightSidebarMaxButtonSizeDp.toString())
-    }
 
     SettingsSection(
         title = connection.name.ifBlank { stringResource(Res.string.companion_satellite_settings) },
@@ -234,173 +180,11 @@ private fun CompanionConnectionCard(
                 Spacer(Modifier.height(12.dp))
 
                 if (viewModel != null) {
-                    val primary = primaryPlacement(connection)
-                    val state = primary?.let { viewModel.connectionStates[CompanionSurfaceSlot(connection.id, it)] }
-                        ?: CompanionConnectionUiState(
-                            CompanionSurfaceSlot(connection.id, CompanionSurfacePlacement.TAB)
-                        )
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        if (
-                            state.status == CompanionConnectionStatus.CONNECTED ||
-                            state.status == CompanionConnectionStatus.CONNECTING
-                        ) {
-                            KeyButton(onClick = { viewModel.disconnectAll(connection) }) {
-                                Text(stringResource(Res.string.companion_satellite_disconnect))
-                            }
-                        } else {
-                            RaisedButton(
-                                onClick = {
-                                    // Companion requires a non-empty DEVICEID ("Missing DEVICEID"
-                                    // otherwise) — generate one on the fly if the field was cleared,
-                                    // same as a brand-new connection already gets by default.
-                                    val effective = if (connection.deviceId.isBlank()) {
-                                        val generated = java.util.UUID.randomUUID().toString()
-                                        deviceIdText = generated
-                                        onUpdate { copy(deviceId = generated) }
-                                        connection.copy(deviceId = generated)
-                                    } else connection
-                                    viewModel.connectAll(effective)
-                                },
-                                enabled = connection.host.isNotBlank() && primary != null
-                            ) {
-                                Text(stringResource(Res.string.companion_satellite_connect))
-                            }
-                        }
-
-                        // Only surface a status label when something needs attention — the
-                        // Connect/Disconnect button itself already reflects the connected state.
-                        if (state.status != CompanionConnectionStatus.CONNECTED) {
-                            val (statusText, statusColor) = when (state.status) {
-                                CompanionConnectionStatus.CONNECTING ->
-                                    stringResource(Res.string.companion_satellite_status_connecting) to
-                                        MaterialTheme.semantic.warning
-                                CompanionConnectionStatus.ERROR ->
-                                    stringResource(Res.string.atem_status_error, state.errorMessage) to
-                                        MaterialTheme.colorScheme.error
-                                else ->
-                                    stringResource(Res.string.companion_satellite_status_disconnected) to
-                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            }
-                            Text(statusText, style = MaterialTheme.typography.bodySmall, color = statusColor)
-                        }
-                    }
+                    CompanionConnectRow(connection, viewModel, onUpdate)
                     Spacer(Modifier.height(12.dp))
                 }
 
-                SettingRow(label = stringResource(Res.string.companion_satellite_connection_name)) {
-                    SettingsTextField(
-                        value = nameText,
-                        onValueChange = {
-                            nameText = it
-                            onUpdate { copy(name = it) }
-                        },
-                        singleLine = true,
-                        modifier = Modifier.widthIn(max = 250.dp)
-                    )
-                }
-
-                SettingRow(label = stringResource(Res.string.companion_satellite_host)) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.widthIn(max = 350.dp)
-                    ) {
-                        SettingsTextField(
-                            value = hostText,
-                            onValueChange = {
-                                hostText = it
-                                onUpdate { copy(host = it) }
-                            },
-                            placeholder = { Text(stringResource(Res.string.companion_satellite_host_hint)) },
-                            singleLine = true,
-                            modifier = Modifier.weight(1f)
-                        )
-                        SettingsTextField(
-                            value = portText,
-                            onValueChange = { portText = it },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Number,
-                                imeAction = ImeAction.Done,
-                            ),
-                            keyboardActions = KeyboardActions(onDone = { commitPort() }),
-                            modifier = Modifier.width(68.dp).onFocusChanged { state ->
-                                if (portFocused && !state.isFocused) commitPort()
-                                portFocused = state.isFocused
-                            }
-                        )
-                    }
-                }
-
-                val deviceIdHint = stringResource(Res.string.companion_satellite_device_id_hint)
-
-                SettingRow(label = stringResource(Res.string.companion_satellite_device_id)) {
-                    SettingsTextField(
-                        value = deviceIdText,
-                        onValueChange = {
-                            deviceIdText = it
-                            onUpdate { copy(deviceId = it) }
-                        },
-                        placeholder = { Text(deviceIdHint) },
-                        singleLine = true,
-                        modifier = Modifier.widthIn(max = 350.dp)
-                    )
-                }
-
-                SettingRow(label = stringResource(Res.string.companion_satellite_left_sidebar_device_id)) {
-                    SettingsTextField(
-                        value = leftSidebarDeviceIdText,
-                        onValueChange = {
-                            leftSidebarDeviceIdText = it
-                            onUpdate { copy(leftSidebarDeviceId = it) }
-                        },
-                        placeholder = { Text(deviceIdHint) },
-                        singleLine = true,
-                        modifier = Modifier.widthIn(max = 350.dp)
-                    )
-                }
-
-                SettingRow(label = stringResource(Res.string.companion_satellite_right_sidebar_device_id)) {
-                    SettingsTextField(
-                        value = rightSidebarDeviceIdText,
-                        onValueChange = {
-                            rightSidebarDeviceIdText = it
-                            onUpdate { copy(rightSidebarDeviceId = it) }
-                        },
-                        placeholder = { Text(deviceIdHint) },
-                        singleLine = true,
-                        modifier = Modifier.widthIn(max = 350.dp)
-                    )
-                }
-
-                SettingRow(label = stringResource(Res.string.companion_satellite_product_name)) {
-                    SettingsTextField(
-                        value = productNameText,
-                        onValueChange = {
-                            productNameText = it
-                            onUpdate { copy(productName = it) }
-                        },
-                        singleLine = true,
-                        modifier = Modifier.widthIn(max = 250.dp)
-                    )
-                }
-
-                SettingRow(label = stringResource(Res.string.companion_satellite_reconnect_delay)) {
-                    SettingsTextField(
-                        value = reconnectDelayText,
-                        onValueChange = { v ->
-                            reconnectDelayText = v
-                            v.toIntOrNull()?.let {
-                                onUpdate { copy(reconnectDelayMs = it.coerceAtLeast(MIN_RECONNECT_DELAY_MS)) }
-                            }
-                        },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.width(120.dp)
-                    )
-                }
+                CompanionConnectionFields(connection, onUpdate)
             }
 
             // Right column — where this connection's grid appears, and each placement's own grid
@@ -408,95 +192,7 @@ private fun CompanionConnectionCard(
             // starts on and which sub-rectangle of a larger page it shows are configured in
             // Companion itself, not here — see the note below.
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    stringResource(Res.string.companion_satellite_show_in),
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    stringResource(Res.string.companion_satellite_companion_config_note),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-                Spacer(Modifier.height(4.dp))
-
-                CompanionPlacementBlock(
-                    label = stringResource(Res.string.companion_satellite_show_in_tab),
-                    checked = connection.showInTab,
-                    onCheckedChange = { onUpdate { copy(showInTab = it) } },
-                    rowsText = tabRowsText,
-                    onRowsChange = { v ->
-                        tabRowsText = v
-                        v.toIntOrNull()?.let { onUpdate { copy(tabRows = it.coerceAtLeast(1)) } }
-                    },
-                    columnsText = tabColumnsText,
-                    onColumnsChange = { v ->
-                        tabColumnsText = v
-                        v.toIntOrNull()?.let { onUpdate { copy(tabColumns = it.coerceAtLeast(1)) } }
-                    },
-                    bitmapSizeText = tabBitmapSizeText,
-                    onBitmapSizeChange = { v ->
-                        tabBitmapSizeText = v
-                        v.toIntOrNull()?.let { onUpdate { copy(tabBitmapSize = it.coerceAtLeast(1)) } }
-                    },
-                    maxButtonSizeText = tabMaxButtonSizeText,
-                    onMaxButtonSizeChange = { v ->
-                        tabMaxButtonSizeText = v
-                        v.toIntOrNull()?.let { onUpdate { copy(tabMaxButtonSizeDp = it.coerceAtLeast(0)) } }
-                    }
-                )
-
-                CompanionPlacementBlock(
-                    label = stringResource(Res.string.companion_satellite_show_in_left_sidebar),
-                    checked = connection.showInLeftSidebar,
-                    onCheckedChange = { onUpdate { copy(showInLeftSidebar = it) } },
-                    rowsText = leftRowsText,
-                    onRowsChange = { v ->
-                        leftRowsText = v
-                        v.toIntOrNull()?.let { onUpdate { copy(leftSidebarRows = it.coerceAtLeast(1)) } }
-                    },
-                    columnsText = leftColumnsText,
-                    onColumnsChange = { v ->
-                        leftColumnsText = v
-                        v.toIntOrNull()?.let { onUpdate { copy(leftSidebarColumns = it.coerceAtLeast(1)) } }
-                    },
-                    bitmapSizeText = leftBitmapSizeText,
-                    onBitmapSizeChange = { v ->
-                        leftBitmapSizeText = v
-                        v.toIntOrNull()?.let { onUpdate { copy(leftSidebarBitmapSize = it.coerceAtLeast(1)) } }
-                    },
-                    maxButtonSizeText = leftMaxButtonSizeText,
-                    onMaxButtonSizeChange = { v ->
-                        leftMaxButtonSizeText = v
-                        v.toIntOrNull()?.let { onUpdate { copy(leftSidebarMaxButtonSizeDp = it.coerceAtLeast(0)) } }
-                    }
-                )
-
-                CompanionPlacementBlock(
-                    label = stringResource(Res.string.companion_satellite_show_in_right_sidebar),
-                    checked = connection.showInRightSidebar,
-                    onCheckedChange = { onUpdate { copy(showInRightSidebar = it) } },
-                    rowsText = rightRowsText,
-                    onRowsChange = { v ->
-                        rightRowsText = v
-                        v.toIntOrNull()?.let { onUpdate { copy(rightSidebarRows = it.coerceAtLeast(1)) } }
-                    },
-                    columnsText = rightColumnsText,
-                    onColumnsChange = { v ->
-                        rightColumnsText = v
-                        v.toIntOrNull()?.let { onUpdate { copy(rightSidebarColumns = it.coerceAtLeast(1)) } }
-                    },
-                    bitmapSizeText = rightBitmapSizeText,
-                    onBitmapSizeChange = { v ->
-                        rightBitmapSizeText = v
-                        v.toIntOrNull()?.let { onUpdate { copy(rightSidebarBitmapSize = it.coerceAtLeast(1)) } }
-                    },
-                    maxButtonSizeText = rightMaxButtonSizeText,
-                    onMaxButtonSizeChange = { v ->
-                        rightMaxButtonSizeText = v
-                        v.toIntOrNull()?.let { onUpdate { copy(rightSidebarMaxButtonSizeDp = it.coerceAtLeast(0)) } }
-                    }
-                )
+                CompanionPlacements(connection, onUpdate)
             }
         }
 
@@ -592,5 +288,300 @@ private fun CompanionPlacementBlock(
                 modifier = Modifier.width(130.dp)
             )
         }
+    }
+}
+
+/** A field's text, following [value] whenever it changes from outside -- and per connection [key]. */
+@Composable
+private fun rememberFieldText(key: String, value: Any): MutableState<String> =
+    remember(key, value) { mutableStateOf(value.toString()) }
+
+/** One placement's grid: rows, columns, the button bitmap size, and the largest a button is drawn. */
+private data class PlacementShape(val rows: Int, val columns: Int, val bitmapSize: Int, val maxButtonSizeDp: Int)
+
+/**
+ * A placement's checkbox and grid fields over [shape]. Each field keeps its own text and reports a
+ * whole new shape when it parses: sizes are at least 1, the button cap at least 0 (no cap).
+ */
+@Composable
+private fun CompanionPlacement(
+    connectionId: String,
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    shape: PlacementShape,
+    onShapeChange: (PlacementShape) -> Unit,
+) {
+    var rowsText by rememberFieldText(connectionId, shape.rows)
+    var columnsText by rememberFieldText(connectionId, shape.columns)
+    var bitmapSizeText by rememberFieldText(connectionId, shape.bitmapSize)
+    var maxButtonSizeText by rememberFieldText(connectionId, shape.maxButtonSizeDp)
+    CompanionPlacementBlock(
+        label = label,
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        rowsText = rowsText,
+        onRowsChange = { v ->
+            rowsText = v
+            v.toIntOrNull()?.let { onShapeChange(shape.copy(rows = it.coerceAtLeast(1))) }
+        },
+        columnsText = columnsText,
+        onColumnsChange = { v ->
+            columnsText = v
+            v.toIntOrNull()?.let { onShapeChange(shape.copy(columns = it.coerceAtLeast(1))) }
+        },
+        bitmapSizeText = bitmapSizeText,
+        onBitmapSizeChange = { v ->
+            bitmapSizeText = v
+            v.toIntOrNull()?.let { onShapeChange(shape.copy(bitmapSize = it.coerceAtLeast(1))) }
+        },
+        maxButtonSizeText = maxButtonSizeText,
+        onMaxButtonSizeChange = { v ->
+            maxButtonSizeText = v
+            v.toIntOrNull()?.let { onShapeChange(shape.copy(maxButtonSizeDp = it.coerceAtLeast(0))) }
+        }
+    )
+}
+
+/** Connect or disconnect every placement of [connection], and say what needs attention. */
+@Composable
+private fun CompanionConnectRow(
+    connection: CompanionSatelliteSettings,
+    viewModel: CompanionSatelliteViewModel,
+    onUpdate: (CompanionSatelliteSettings.() -> CompanionSatelliteSettings) -> Unit,
+) {
+    val primary = primaryPlacement(connection)
+    val state = primary?.let { viewModel.connectionStates[CompanionSurfaceSlot(connection.id, it)] }
+        ?: CompanionConnectionUiState(
+            CompanionSurfaceSlot(connection.id, CompanionSurfacePlacement.TAB)
+        )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        if (
+            state.status == CompanionConnectionStatus.CONNECTED ||
+            state.status == CompanionConnectionStatus.CONNECTING
+        ) {
+            KeyButton(onClick = { viewModel.disconnectAll(connection) }) {
+                Text(stringResource(Res.string.companion_satellite_disconnect))
+            }
+        } else {
+            RaisedButton(
+                onClick = {
+                    // Companion requires a non-empty DEVICEID ("Missing DEVICEID"
+                    // otherwise) — generate one on the fly if the field was cleared,
+                    // same as a brand-new connection already gets by default.
+                    val effective = if (connection.deviceId.isBlank()) {
+                        val generated = java.util.UUID.randomUUID().toString()
+                            onUpdate { copy(deviceId = generated) }
+                        connection.copy(deviceId = generated)
+                    } else connection
+                    viewModel.connectAll(effective)
+                },
+                enabled = connection.host.isNotBlank() && primary != null
+            ) {
+                Text(stringResource(Res.string.companion_satellite_connect))
+            }
+        }
+
+        // Only surface a status label when something needs attention — the
+        // Connect/Disconnect button itself already reflects the connected state.
+        if (state.status != CompanionConnectionStatus.CONNECTED) {
+            val (statusText, statusColor) = when (state.status) {
+                CompanionConnectionStatus.CONNECTING ->
+                    stringResource(Res.string.companion_satellite_status_connecting) to
+                        MaterialTheme.semantic.warning
+                CompanionConnectionStatus.ERROR ->
+                    stringResource(Res.string.atem_status_error, state.errorMessage) to
+                        MaterialTheme.colorScheme.error
+                else ->
+                    stringResource(Res.string.companion_satellite_status_disconnected) to
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            }
+            Text(statusText, style = MaterialTheme.typography.bodySmall, color = statusColor)
+        }
+    }
+
+}
+
+/** The connection's name, address, device ids, product name and reconnect delay. */
+@Composable
+private fun CompanionConnectionFields(
+    connection: CompanionSatelliteSettings,
+    onUpdate: (CompanionSatelliteSettings.() -> CompanionSatelliteSettings) -> Unit,
+) {
+    var hostText by rememberFieldText(connection.id, connection.host)
+    var portText by rememberFieldText(connection.id, connection.port)
+    var portFocused by remember { mutableStateOf(false) }
+    // Saved on Enter or on leaving the field, never per keystroke: each save reconnects, and typing
+    // 70000 used to save 7000 on the way -- a port nobody asked for. Anything unusable reverts.
+    fun commitPort() {
+        val port = portText.trim().toIntOrNull()?.takeIf { it in CompanionSatelliteClient.VALID_PORTS }
+        if (port == null) portText = connection.port.toString()
+        else if (port != connection.port) onUpdate { copy(port = port) }
+    }
+    var reconnectDelayText by rememberFieldText(connection.id, connection.reconnectDelayMs)
+
+
+    CompanionTextRow(
+        stringResource(Res.string.companion_satellite_connection_name),
+        connection.id, connection.name, null, 250.dp,
+    ) { value -> onUpdate { copy(name = value) } }
+
+    SettingRow(label = stringResource(Res.string.companion_satellite_host)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.widthIn(max = 350.dp)
+        ) {
+            SettingsTextField(
+                value = hostText,
+                onValueChange = {
+                    hostText = it
+                    onUpdate { copy(host = it) }
+                },
+                placeholder = { Text(stringResource(Res.string.companion_satellite_host_hint)) },
+                singleLine = true,
+                modifier = Modifier.weight(1f)
+            )
+            SettingsTextField(
+                value = portText,
+                onValueChange = { portText = it },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done,
+                ),
+                keyboardActions = KeyboardActions(onDone = { commitPort() }),
+                modifier = Modifier.width(68.dp).onFocusChanged { state ->
+                    if (portFocused && !state.isFocused) commitPort()
+                    portFocused = state.isFocused
+                }
+            )
+        }
+    }
+
+    val deviceIdHint = stringResource(Res.string.companion_satellite_device_id_hint)
+
+    CompanionTextRow(
+        stringResource(Res.string.companion_satellite_device_id),
+        connection.id, connection.deviceId, deviceIdHint, 350.dp,
+    ) { value -> onUpdate { copy(deviceId = value) } }
+
+    CompanionTextRow(
+        stringResource(Res.string.companion_satellite_left_sidebar_device_id),
+        connection.id, connection.leftSidebarDeviceId, deviceIdHint, 350.dp,
+    ) { value -> onUpdate { copy(leftSidebarDeviceId = value) } }
+
+    CompanionTextRow(
+        stringResource(Res.string.companion_satellite_right_sidebar_device_id),
+        connection.id, connection.rightSidebarDeviceId, deviceIdHint, 350.dp,
+    ) { value -> onUpdate { copy(rightSidebarDeviceId = value) } }
+
+    CompanionTextRow(
+        stringResource(Res.string.companion_satellite_product_name),
+        connection.id, connection.productName, null, 250.dp,
+    ) { value -> onUpdate { copy(productName = value) } }
+
+    SettingRow(label = stringResource(Res.string.companion_satellite_reconnect_delay)) {
+        SettingsTextField(
+            value = reconnectDelayText,
+            onValueChange = { v ->
+                reconnectDelayText = v
+                v.toIntOrNull()?.let {
+                    onUpdate { copy(reconnectDelayMs = it.coerceAtLeast(MIN_RECONNECT_DELAY_MS)) }
+                }
+            },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.width(120.dp)
+        )
+    }
+}
+
+/** Where this connection's grid appears, and each placement's own grid shape. */
+@Composable
+private fun CompanionPlacements(
+    connection: CompanionSatelliteSettings,
+    onUpdate: (CompanionSatelliteSettings.() -> CompanionSatelliteSettings) -> Unit,
+) {
+    Text(
+        stringResource(Res.string.companion_satellite_show_in),
+        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+    )
+    Spacer(Modifier.height(2.dp))
+    Text(
+        stringResource(Res.string.companion_satellite_companion_config_note),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+    )
+    Spacer(Modifier.height(4.dp))
+
+    CompanionPlacement(
+        connection.id,
+        stringResource(Res.string.companion_satellite_show_in_tab),
+        connection.showInTab,
+        { onUpdate { copy(showInTab = it) } },
+        PlacementShape(connection.tabRows, connection.tabColumns, connection.tabBitmapSize,
+            connection.tabMaxButtonSizeDp),
+    ) { shape ->
+        onUpdate {
+            copy(tabRows = shape.rows, tabColumns = shape.columns, tabBitmapSize = shape.bitmapSize,
+                tabMaxButtonSizeDp = shape.maxButtonSizeDp)
+        }
+    }
+
+    CompanionPlacement(
+        connection.id,
+        stringResource(Res.string.companion_satellite_show_in_left_sidebar),
+        connection.showInLeftSidebar,
+        { onUpdate { copy(showInLeftSidebar = it) } },
+        PlacementShape(connection.leftSidebarRows, connection.leftSidebarColumns,
+            connection.leftSidebarBitmapSize, connection.leftSidebarMaxButtonSizeDp),
+    ) { shape ->
+        onUpdate {
+            copy(leftSidebarRows = shape.rows, leftSidebarColumns = shape.columns,
+                leftSidebarBitmapSize = shape.bitmapSize, leftSidebarMaxButtonSizeDp = shape.maxButtonSizeDp)
+        }
+    }
+
+    CompanionPlacement(
+        connection.id,
+        stringResource(Res.string.companion_satellite_show_in_right_sidebar),
+        connection.showInRightSidebar,
+        { onUpdate { copy(showInRightSidebar = it) } },
+        PlacementShape(connection.rightSidebarRows, connection.rightSidebarColumns,
+            connection.rightSidebarBitmapSize, connection.rightSidebarMaxButtonSizeDp),
+    ) { shape ->
+        onUpdate {
+            copy(rightSidebarRows = shape.rows, rightSidebarColumns = shape.columns,
+                rightSidebarBitmapSize = shape.bitmapSize,
+                rightSidebarMaxButtonSizeDp = shape.maxButtonSizeDp)
+        }
+    }
+}
+
+/** One labelled text setting of a connection, saved on every keystroke. */
+@Composable
+private fun CompanionTextRow(
+    label: String,
+    connectionId: String,
+    value: String,
+    placeholder: String?,
+    maxWidth: Dp,
+    onChange: (String) -> Unit,
+) {
+    var text by rememberFieldText(connectionId, value)
+    SettingRow(label = label) {
+        SettingsTextField(
+            value = text,
+            onValueChange = {
+                text = it
+                onChange(it)
+            },
+            placeholder = placeholder?.let { hint -> { Text(hint) } },
+            singleLine = true,
+            modifier = Modifier.widthIn(max = maxWidth)
+        )
     }
 }
