@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.announcements
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -11,9 +11,10 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.up
-import org.churchpresenter.app.churchpresenter.composables.screenPositionTag
+import org.churchpresenter.sharedui.composables.screenPositionTag
+import org.churchpresenter.sharedui.utils.OutputSize
+import org.churchpresenter.sharedui.utils.PreviewOutput
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
@@ -102,7 +103,7 @@ class AnnouncementsTabLayoutTest {
 
     @Test
     fun `a portrait output's preview fits above its controls instead of running off the bottom`() =
-        announcementsTab(projectionSettings = portraitBrowserSource()) { _, _ ->
+        announcementsTab(previewOutput = portraitOutput) { _, _ ->
             val preview = bounds(ANNOUNCEMENTS_PREVIEW_TAG)
             val position = bounds(screenPositionTag(Constants.CENTER))
             val loopCount = loopCountIncrement().fetchSemanticsNode().boundsInRoot
@@ -120,12 +121,13 @@ class AnnouncementsTabLayoutTest {
         )
     }
 
-    private fun portraitBrowserSource() = ProjectionSettings(
-        browserSourceOutputs = listOf(ScreenAssignment(browserSourceWidth = 1080, browserSourceHeight = 1920)),
-        previewOutputSelections = mapOf(
-            Constants.PREVIEW_TAB_ANNOUNCEMENTS to
-                Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_BROWSER_SOURCE, 0),
-        ),
+    /** A 1080x1920 browser source, as the app would pick it for this tab's preview. */
+    private val portraitOutput = PreviewOutput(
+        key = "browser-source-0",
+        label = "Browser Source 1",
+        size = OutputSize(1080, 1920),
+        showsMode = true,
+        assignment = ScreenAssignment(browserSourceWidth = 1080, browserSourceHeight = 1920),
     )
 }
 

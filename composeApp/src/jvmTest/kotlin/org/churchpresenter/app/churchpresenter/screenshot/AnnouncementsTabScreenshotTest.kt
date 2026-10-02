@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
+import org.churchpresenter.app.churchpresenter.stageMonitorScreenIndices
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
@@ -12,10 +13,10 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
-import org.churchpresenter.app.churchpresenter.tabs.AnnouncementLabel
-import org.churchpresenter.app.churchpresenter.tabs.annButton
-import org.churchpresenter.app.churchpresenter.tabs.announcementsTab
-import org.churchpresenter.app.churchpresenter.tabs.timerButton
+import org.churchpresenter.announcements.AnnouncementLabel
+import org.churchpresenter.announcements.annButton
+import org.churchpresenter.announcements.announcementsTab
+import org.churchpresenter.announcements.timerButton
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
@@ -53,6 +54,8 @@ class AnnouncementsTabScreenshotTest {
             withPresenter = presenter,
             withOnAddToSchedule = schedule,
             projectionSettings = projectionSettings,
+            // As the app's own wrapper works them out.
+            stageMonitorScreens = stageMonitorScreenIndices(projectionSettings),
             settings = settings,
             width = width,
             themeMode = mode,

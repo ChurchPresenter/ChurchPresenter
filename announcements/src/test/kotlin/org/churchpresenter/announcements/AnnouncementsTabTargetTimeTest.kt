@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.announcements
 
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onNodeWithText

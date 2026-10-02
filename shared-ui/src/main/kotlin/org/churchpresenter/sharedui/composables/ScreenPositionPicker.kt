@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.sharedui.composables
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -178,4 +178,4 @@ private fun PositionCell(
 }
 
 /** Test handle for the spot of [value] in a [ScreenPositionPicker]. */
-internal fun screenPositionTag(value: String): String = "screen_position_$value"
+fun screenPositionTag(value: String): String = "screen_position_$value"

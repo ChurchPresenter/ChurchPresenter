@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.announcements
 
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.hasClickAction
@@ -12,7 +12,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.text.input.ImeAction
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.confirmColorDialogWith
+import org.churchpresenter.sharedui.testing.confirmColorDialogWith
 import org.churchpresenter.settings.AnnouncementsSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -7,7 +7,7 @@ import org.churchpresenter.app.churchpresenter.models.announcementPresetItem
 import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
 import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.tabs.AnnouncementsTab
+import org.churchpresenter.app.churchpresenter.tabs.AppAnnouncementsTab
 import org.churchpresenter.app.churchpresenter.tabs.CanvasTab
 import org.churchpresenter.dictionary.DictionaryTab
 import org.churchpresenter.app.churchpresenter.tabs.LowerThirdTab
@@ -156,7 +156,7 @@ internal fun MainDesktopScope.LowerThirdTabPane() {
 
 @Composable
 internal fun MainDesktopScope.AnnouncementsTabPane() {
-    AnnouncementsTab(
+    AppAnnouncementsTab(
         modifier = Modifier.fillMaxSize(),
         appSettings = appSettings,
         onSettingsChange = onSettingsChange,

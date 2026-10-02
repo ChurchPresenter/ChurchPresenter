@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.announcements
 
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.settings.AnnouncementsSettings
@@ -19,8 +19,9 @@ import kotlin.test.assertTrue
  * Sending the announcement (or the timer) to a dedicated Stage Monitor screen, locking it there
  * without disturbing whatever the main projection screen(s) are currently live with.
  *
- * Needs `AppSettings.projectionSettings` to actually assign a screen to Stage Monitor — with the
- * default single-screen setup nothing here is reachable at all, which is why none of the other
+ * Needs a screen assigned to Stage Monitor, which the app works out from the projection settings and
+ * hands the tab — each test passes both. With the default single-screen setup nothing here is
+ * reachable at all, which is why none of the other
  * `AnnouncementsTab*Test` files exercise it. See `AnnouncementsTabTestSupport.kt` for the harness.
  */
 class AnnouncementsTabStageMonitorTest {
@@ -51,7 +52,7 @@ class AnnouncementsTabStageMonitorTest {
 
     @Test
     fun `with a separate main screen, sending locks only the Stage Monitor screen`() =
-        announcementsTab(projectionSettings = separateMainScreen) { presenter, _ ->
+        announcementsTab(projectionSettings = separateMainScreen, stageMonitorScreens = listOf(1)) { presenter, _ ->
             typeAnnouncement("Notices")
 
             annButton(AnnouncementLabel.SEND_TO_STAGE_MONITOR).performClick()
@@ -65,7 +66,7 @@ class AnnouncementsTabStageMonitorTest {
 
     @Test
     fun `hiding from the Stage Monitor releases its lock`() =
-        announcementsTab(projectionSettings = separateMainScreen) { presenter, _ ->
+        announcementsTab(projectionSettings = separateMainScreen, stageMonitorScreens = listOf(1)) { presenter, _ ->
             typeAnnouncement("Notices")
             annButton(AnnouncementLabel.SEND_TO_STAGE_MONITOR).performClick()
             waitForIdle()
@@ -79,7 +80,7 @@ class AnnouncementsTabStageMonitorTest {
 
     @Test
     fun `when every screen is Stage Monitor, sending just goes live directly`() =
-        announcementsTab(projectionSettings = onlyStageMonitorScreen) { presenter, _ ->
+        announcementsTab(projectionSettings = onlyStageMonitorScreen, stageMonitorScreens = listOf(0)) { presenter, _ ->
             typeAnnouncement("Notices")
 
             annButton(AnnouncementLabel.SEND_TO_STAGE_MONITOR).performClick()
@@ -95,7 +96,7 @@ class AnnouncementsTabStageMonitorTest {
 
     @Test
     fun `hiding when every screen is Stage Monitor asks to clear the display`() =
-        announcementsTab(projectionSettings = onlyStageMonitorScreen) { presenter, _ ->
+        announcementsTab(projectionSettings = onlyStageMonitorScreen, stageMonitorScreens = listOf(0)) { presenter, _ ->
             typeAnnouncement("Notices")
             annButton(AnnouncementLabel.SEND_TO_STAGE_MONITOR).performClick()
             waitForIdle()
@@ -108,7 +109,7 @@ class AnnouncementsTabStageMonitorTest {
 
     @Test
     fun `sending a Specific Time to the Stage Monitor also starts it`() =
-        announcementsTab(projectionSettings = separateMainScreen) { presenter, _ ->
+        announcementsTab(projectionSettings = separateMainScreen, stageMonitorScreens = listOf(1)) { presenter, _ ->
             clickLabel(AnnouncementLabel.CLOCK_MODE)
 
             timerButton(AnnouncementLabel.SEND_TO_STAGE_MONITOR).performClick()
@@ -123,12 +124,66 @@ class AnnouncementsTabStageMonitorTest {
         announcementsTab(
             initial = AnnouncementsSettings(timerMinutes = 5),
             projectionSettings = separateMainScreen,
+            stageMonitorScreens = listOf(1),
         ) { presenter, _ ->
             timerButton(AnnouncementLabel.SEND_TO_STAGE_MONITOR).performClick()
             waitForIdle()
 
             assertEquals(Presenting.ANNOUNCEMENTS, presenter.screenLocks.value[1])
             assertTrue(presenter.announcementTickerLive.value)
+            assertEquals("05:00", presenter.announcementText.value)
+        }
+
+    private val twoStageMonitors = ProjectionSettings(
+        outputProfiles = listOf(
+            OutputProfile(id = "main", displayMode = Constants.DISPLAY_MODE_FULLSCREEN),
+            OutputProfile(id = "stage", displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR),
+        ),
+        screenAssignments = listOf(
+            ScreenAssignment(activeProfileId = "main"),
+            ScreenAssignment(activeProfileId = "stage"),
+            ScreenAssignment(activeProfileId = "stage"),
+        ),
+    )
+
+    @Test
+    fun `with two Stage Monitors, it counts as sent only once both show it`() =
+        announcementsTab(projectionSettings = twoStageMonitors, stageMonitorScreens = listOf(1, 2)) { presenter, _ ->
+            typeAnnouncement("Notices")
+            presenter.setScreenLock(1, Presenting.ANNOUNCEMENTS)
+            waitForIdle()
+            assertTrue(hasAnnButton(AnnouncementLabel.SEND_TO_STAGE_MONITOR), "one of two is not sent")
+
+            annButton(AnnouncementLabel.SEND_TO_STAGE_MONITOR).performClick()
+            waitForIdle()
+
+            assertEquals(Presenting.ANNOUNCEMENTS, presenter.screenLocks.value[2])
+            assertTrue(hasAnnButton(AnnouncementLabel.HIDE_FROM_STAGE_MONITOR))
+        }
+
+    @Test
+    fun `with no output to send to, the Stage Monitor is not offered even when one is set up`() =
+        announcementsTab(
+            projectionSettings = separateMainScreen,
+            stageMonitorScreens = listOf(1),
+            withPresenter = false,
+        ) { _, _ ->
+            typeAnnouncement("Notices")
+
+            assertFalse(hasAnnButton(AnnouncementLabel.SEND_TO_STAGE_MONITOR))
+        }
+
+    @Test
+    fun `the timer sent where every screen is Stage Monitor goes live as it stands`() =
+        announcementsTab(
+            initial = AnnouncementsSettings(timerMinutes = 5),
+            projectionSettings = onlyStageMonitorScreen,
+            stageMonitorScreens = listOf(0),
+        ) { presenter, _ ->
+            timerButton(AnnouncementLabel.SEND_TO_STAGE_MONITOR).performClick()
+            waitForIdle()
+
+            assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
             assertEquals("05:00", presenter.announcementText.value)
         }
 }

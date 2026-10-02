@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.announcements
 
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.utils.Constants
@@ -93,7 +93,7 @@ class AnnouncementsSettingsSyncTest {
     fun `an edit after reloading is what gets saved`() {
         val vm = vm()
         vm.syncFromSettings(fullSettings())
-        vm.setText("Changed my mind")
+        vm.text = "Changed my mind"
         assertEquals("Changed my mind", vm.buildSettings().text)
     }
 
@@ -131,7 +131,7 @@ class AnnouncementsSettingsSyncTest {
         vm.syncFromSettings(fullSettings()) // target is 11:22:33 from a previous session
 
         val before = LocalTime.now().toSecondOfDay()
-        vm.setTimerMode(Constants.TIMER_MODE_CLOCK)
+        vm.timerMode = Constants.TIMER_MODE_CLOCK
         val after = LocalTime.now().toSecondOfDay()
 
         val target = vm.targetHour * 3600 + vm.targetMinute * 60 + vm.targetSecond
@@ -144,12 +144,12 @@ class AnnouncementsSettingsSyncTest {
     @Test
     fun `re-selecting the mode already active leaves the target alone`() {
         val vm = vm()
-        vm.setTimerMode(Constants.TIMER_MODE_CLOCK)
-        vm.setTargetHour(11)
-        vm.setTargetMinute(22)
-        vm.setTargetSecond(33)
+        vm.timerMode = Constants.TIMER_MODE_CLOCK
+        vm.targetHour = 11
+        vm.targetMinute = 22
+        vm.targetSecond = 33
 
-        vm.setTimerMode(Constants.TIMER_MODE_CLOCK)
+        vm.timerMode = Constants.TIMER_MODE_CLOCK
 
         assertEquals(11, vm.targetHour, "re-clicking the mode must not wipe the time just typed")
         assertEquals(22, vm.targetMinute)
@@ -159,10 +159,10 @@ class AnnouncementsSettingsSyncTest {
     @Test
     fun `switching back to a duration restores the configured duration`() {
         val vm = vm()
-        vm.setTimerMinutes(5)
-        vm.setTimerMode(Constants.TIMER_MODE_CLOCK)
+        vm.timerMinutes = 5
+        vm.timerMode = Constants.TIMER_MODE_CLOCK
 
-        vm.setTimerMode(Constants.TIMER_MODE_DURATION)
+        vm.timerMode = Constants.TIMER_MODE_DURATION
 
         assertEquals(300, vm.timerRemaining, "the countdown must come back to what the H/M/S fields say")
     }
@@ -170,10 +170,10 @@ class AnnouncementsSettingsSyncTest {
     @Test
     fun `editing the duration fields does nothing in specific-time mode`() {
         val vm = vm()
-        vm.setTimerMode(Constants.TIMER_MODE_CLOCK)
+        vm.timerMode = Constants.TIMER_MODE_CLOCK
         val remaining = vm.timerRemaining
 
-        vm.setTimerMinutes(30)
+        vm.timerMinutes = 30
         vm.stepTimerSeconds(1)
 
         assertEquals(remaining, vm.timerRemaining, "the H/M/S fields do not apply to a target time")
@@ -183,11 +183,11 @@ class AnnouncementsSettingsSyncTest {
     @Test
     fun `editing the target does nothing in duration mode`() {
         val vm = vm()
-        vm.setTimerMode(Constants.TIMER_MODE_DURATION)
-        vm.setTimerMinutes(5)
+        vm.timerMode = Constants.TIMER_MODE_DURATION
+        vm.timerMinutes = 5
 
-        vm.setTargetHour(23)
-        vm.setTargetMinute(59)
+        vm.targetHour = 23
+        vm.targetMinute = 59
 
         assertEquals(300, vm.timerRemaining, "a target time does not apply to a plain countdown")
         assertEquals(23, vm.targetHour)
@@ -196,9 +196,9 @@ class AnnouncementsSettingsSyncTest {
     @Test
     fun `editing the target in specific-time mode recomputes the countdown`() {
         val vm = vm()
-        vm.setTimerMode(Constants.TIMER_MODE_CLOCK)
+        vm.timerMode = Constants.TIMER_MODE_CLOCK
 
-        vm.setTargetHour((LocalTime.now().hour + 2) % 24)
+        vm.targetHour = (LocalTime.now().hour + 2) % 24
 
         assertTrue(vm.timerRemaining in 1..86_400, "got ${vm.timerRemaining}")
     }
@@ -219,9 +219,9 @@ class AnnouncementsSettingsSyncTest {
     @Test
     fun `choosing the clock format puts a real clock on screen`() {
         val vm = vm()
-        vm.setTimerMode(Constants.TIMER_MODE_CLOCK_DISPLAY)
+        vm.timerMode = Constants.TIMER_MODE_CLOCK_DISPLAY
 
-        vm.setLiveClockFormat("HH:mm")
+        vm.liveClockFormat = "HH:mm"
 
         assertEquals("HH:mm", vm.liveClockFormat)
         assertTrue(
@@ -233,10 +233,10 @@ class AnnouncementsSettingsSyncTest {
     @Test
     fun `a second format change keeps a real clock on screen`() {
         val vm = vm()
-        vm.setTimerMode(Constants.TIMER_MODE_CLOCK_DISPLAY)
-        vm.setLiveClockFormat("HH:mm")
+        vm.timerMode = Constants.TIMER_MODE_CLOCK_DISPLAY
+        vm.liveClockFormat = "HH:mm"
 
-        vm.setLiveClockFormat("HH:mm:ss")
+        vm.liveClockFormat = "HH:mm:ss"
 
         assertEquals("HH:mm:ss", vm.liveClockFormat, "the ticker formats from this on its next tick")
         assertTrue(
@@ -248,9 +248,9 @@ class AnnouncementsSettingsSyncTest {
     @Test
     fun `choosing a format outside clock mode changes nothing on screen`() {
         val vm = vm()
-        vm.setTimerMode(Constants.TIMER_MODE_DURATION)
+        vm.timerMode = Constants.TIMER_MODE_DURATION
 
-        vm.setLiveClockFormat("HH:mm")
+        vm.liveClockFormat = "HH:mm"
 
         assertEquals("HH:mm", vm.liveClockFormat, "the preference is still remembered")
         assertEquals("", vm.liveClockText, "but no clock is being shown to restate")

@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.announcements
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.platform.LocalDensity
@@ -29,6 +29,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import org.churchpresenter.sharedui.utils.PreviewOutput
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,6 +37,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.churchpresenter.settings.utils.isSystemUsing24HourFormat
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
 import androidx.compose.material.icons.Icons
@@ -48,8 +51,6 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.sharedui.utils.Utils
-import org.churchpresenter.app.churchpresenter.viewmodel.AnnouncementsViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.components.SegmentTrackItem
 import org.churchpresenter.theme.sunken
@@ -74,6 +75,15 @@ internal const val ANNOUNCEMENTS_TEXT_DIVIDER_TAG = "announcements_text_divider"
 /** The scrolling timer card under the divider. */
 internal const val ANNOUNCEMENTS_TIMER_CARD_TAG = "announcements_timer_card"
 
+/** The divider between the text and timer column and the preview column, dragged to resize them. */
+internal const val ANNOUNCEMENTS_SPLIT_DIVIDER_TAG = "announcements_split_divider"
+
+/** A time picker unit's + key ([up]) or - key, by the unit's label. */
+internal fun timerStepTag(label: String, up: Boolean) = "announcements_step_${label}_${if (up) "up" else "down"}"
+
+/** A time picker unit's digits, by the unit's label. */
+internal fun timerFieldTag(label: String) = "announcements_field_$label"
+
 /** The shortest the dragged text box may be: one line and its inset. */
 internal val ANNOUNCEMENT_MIN_TEXT_HEIGHT = 40.dp
 
@@ -85,9 +95,9 @@ internal val ANNOUNCEMENT_DIVIDER_HEIGHT = 8.dp
 
 /** The split panel's bottom padding and the text card's top padding. */
 internal val ANNOUNCEMENT_SPLIT_PANEL_INSETS = 8.dp
-internal val ANNOUNCEMENT_STEP_KEY_WIDTH = 40.dp
+private val ANNOUNCEMENT_STEP_KEY_WIDTH = 40.dp
 internal val ANNOUNCEMENT_STEP_GAP = 3.dp
-internal val ANNOUNCEMENT_WELL_WIDTH = 46.dp
+private val ANNOUNCEMENT_WELL_WIDTH = 46.dp
 internal val ANNOUNCEMENT_WELL_HEIGHT = 36.dp
 internal const val ANNOUNCEMENT_HOURS_PER_HALF_DAY = 12
 internal const val ANNOUNCEMENT_HOUR_WRAP_OFFSET = 11
@@ -101,10 +111,18 @@ fun AnnouncementsTab(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
-    presenterManager: PresenterManager? = null,
+    output: AnnouncementsOutput? = null,
     onAddToSchedule: ((settings: AnnouncementsSettings) -> Unit)? = null,
     /** Save preset, to the left of Add to Schedule: the same text or timer, kept for the Calendar Manager. */
-    onSavePreset: ((settings: AnnouncementsSettings) -> Unit)? = null
+    onSavePreset: ((settings: AnnouncementsSettings) -> Unit)? = null,
+    /** The output the preview stands for; 1920x1080 when the app has not said. */
+    previewOutput: PreviewOutput = FallbackPreviewOutput,
+    /** The screens set up as stage monitors, which Send to Stage Monitor locks to announcements. */
+    stageMonitorScreens: List<Int> = emptyList(),
+    /** The app's picker for which output the preview stands for; drawn above the preview. */
+    outputPicker: @Composable () -> Unit = {},
+    /** Whether the Specific Time picker counts hours 0-23 rather than 1-12 with AM/PM; the system's choice. */
+    use24HourClock: Boolean = isSystemUsing24HourFormat(),
 ) {
     val viewModel = remember { AnnouncementsViewModel() }
 
@@ -127,21 +145,26 @@ fun AnnouncementsTab(
     // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
     // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
     val scope = remember(
-        appSettings, onSettingsChange, presenterManager, onAddToSchedule, onSavePreset, availableFonts,
-        labels, density, onSettingsChangeState, isMaximized, panels
+        appSettings, onSettingsChange, output, onAddToSchedule, onSavePreset, availableFonts,
+        labels, density, onSettingsChangeState, isMaximized, panels, previewOutput, stageMonitorScreens, outputPicker,
+        use24HourClock,
     ) {
         AnnouncementsTabScope(
-            appSettings = appSettings,
-            onSettingsChange = onSettingsChange,
-            presenterManager = presenterManager,
-            onAddToSchedule = onAddToSchedule,
-            onSavePreset = onSavePreset,
-            availableFonts = availableFonts,
-            labels = labels,
-            density = density,
-            onSettingsChangeState = onSettingsChangeState,
-            isMaximized = isMaximized,
-            panels = panels,
+            AnnouncementsTabInputs(
+                appSettings = appSettings,
+                onSettingsChange = onSettingsChange,
+                output = output,
+                onAddToSchedule = onAddToSchedule,
+                onSavePreset = onSavePreset,
+                screens = AnnouncementsScreens(previewOutput, stageMonitorScreens, outputPicker),
+            ),
+            AnnouncementsTabEnvironment(
+                availableFonts = availableFonts,
+                labels = labels,
+                onSettingsChangeState = onSettingsChangeState,
+                panels = panels,
+                display = AnnouncementsDisplay(density, isMaximized, use24HourClock),
+            ),
         )
     }
     with(scope) {
@@ -156,7 +179,10 @@ fun AnnouncementsTab(
                     AnnouncementsLeftColumn(viewModel)
 
                     // Drag handle
-                    DragHandle(onDragEnd = { saveLeftPanel() }) { delta ->
+                    DragHandle(
+                        modifier = Modifier.testTag(ANNOUNCEMENTS_SPLIT_DIVIDER_TAG),
+                        onDragEnd = { saveLeftPanel() },
+                    ) { delta ->
                         leftPanelPx = (leftPanelPx + delta).coerceIn(
                             with(density) { 150.dp.toPx() },
                             (twoColWidthPx - with(density) { 100.dp.toPx() }).coerceAtLeast(
@@ -237,7 +263,8 @@ internal fun TimerColumn(
     ) {
         KeyButton(
             onClick = onIncrement,
-            modifier = Modifier.height(ANNOUNCEMENT_STEP_KEY_HEIGHT).width(ANNOUNCEMENT_STEP_KEY_WIDTH),
+            modifier = Modifier.height(ANNOUNCEMENT_STEP_KEY_HEIGHT).width(ANNOUNCEMENT_STEP_KEY_WIDTH)
+                .testTag(timerStepTag(label, up = true)),
             shape = keyShape,
             contentPadding = PaddingValues(0.dp),
         ) {
@@ -255,6 +282,7 @@ internal fun TimerColumn(
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             singleLine = true,
             modifier = Modifier
+                .testTag(timerFieldTag(label))
                 .size(ANNOUNCEMENT_WELL_WIDTH, ANNOUNCEMENT_WELL_HEIGHT)
                 .sunken(AppShape(10.dp), elevationPalette())
                 .padding(horizontal = 2.dp),
@@ -264,7 +292,8 @@ internal fun TimerColumn(
         )
         KeyButton(
             onClick = onDecrement,
-            modifier = Modifier.height(ANNOUNCEMENT_STEP_KEY_HEIGHT).width(ANNOUNCEMENT_STEP_KEY_WIDTH),
+            modifier = Modifier.height(ANNOUNCEMENT_STEP_KEY_HEIGHT).width(ANNOUNCEMENT_STEP_KEY_WIDTH)
+                .testTag(timerStepTag(label, up = false)),
             shape = keyShape,
             contentPadding = PaddingValues(0.dp),
         ) {

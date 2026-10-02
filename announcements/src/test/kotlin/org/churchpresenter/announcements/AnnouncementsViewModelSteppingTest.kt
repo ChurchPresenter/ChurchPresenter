@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.announcements
 
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.AfterTest
@@ -46,16 +46,16 @@ class AnnouncementsViewModelSteppingTest {
     @Test
     fun `minutes and seconds are clamped to 0-59`() {
         val vm = vm()
-        vm.setTimerMinutes(70); assertEquals(59, vm.timerMinutes)
-        vm.setTimerMinutes(-3); assertEquals(0, vm.timerMinutes)
-        vm.setTimerSeconds(90); assertEquals(59, vm.timerSeconds)
+        vm.timerMinutes = 70; assertEquals(59, vm.timerMinutes)
+        vm.timerMinutes = -3; assertEquals(0, vm.timerMinutes)
+        vm.timerSeconds = 90; assertEquals(59, vm.timerSeconds)
     }
 
     @Test
     fun `a negative loop count is floored at zero`() {
         val vm = vm()
-        vm.setLoopCount(-5); assertEquals(0, vm.loopCount)
-        vm.setLoopCount(4); assertEquals(4, vm.loopCount)
+        vm.loopCount = -5; assertEquals(0, vm.loopCount)
+        vm.loopCount = 4; assertEquals(4, vm.loopCount)
     }
 
     // ── stepTimerSeconds: rounds to fives and rolls into minutes ─────────────────
@@ -63,19 +63,19 @@ class AnnouncementsViewModelSteppingTest {
     @Test
     fun `stepping seconds up snaps to the next multiple of five`() {
         val vm = vm()
-        vm.setTimerSeconds(0); vm.stepTimerSeconds(1); assertEquals(5, vm.timerSeconds)
-        vm.setTimerSeconds(2); vm.stepTimerSeconds(1); assertEquals(
+        vm.timerSeconds = 0; vm.stepTimerSeconds(1); assertEquals(5, vm.timerSeconds)
+        vm.timerSeconds = 2; vm.stepTimerSeconds(1); assertEquals(
             5,
             vm.timerSeconds,
             "an off-grid value rounds up to 5",
         )
-        vm.setTimerSeconds(5); vm.stepTimerSeconds(1); assertEquals(10, vm.timerSeconds)
+        vm.timerSeconds = 5; vm.stepTimerSeconds(1); assertEquals(10, vm.timerSeconds)
     }
 
     @Test
     fun `stepping seconds up past 55 rolls the minute over`() {
         val vm = vm()
-        vm.setTimerMinutes(3); vm.setTimerSeconds(55)
+        vm.timerMinutes = 3; vm.timerSeconds = 55
 
         vm.stepTimerSeconds(1)
 
@@ -86,14 +86,14 @@ class AnnouncementsViewModelSteppingTest {
     @Test
     fun `stepping seconds down snaps to the previous multiple of five`() {
         val vm = vm()
-        vm.setTimerSeconds(7); vm.stepTimerSeconds(-1); assertEquals(5, vm.timerSeconds)
-        vm.setTimerSeconds(5); vm.stepTimerSeconds(-1); assertEquals(0, vm.timerSeconds)
+        vm.timerSeconds = 7; vm.stepTimerSeconds(-1); assertEquals(5, vm.timerSeconds)
+        vm.timerSeconds = 5; vm.stepTimerSeconds(-1); assertEquals(0, vm.timerSeconds)
     }
 
     @Test
     fun `stepping seconds down from zero borrows a minute when there is one`() {
         val vm = vm()
-        vm.setTimerMinutes(2); vm.setTimerSeconds(0)
+        vm.timerMinutes = 2; vm.timerSeconds = 0
 
         vm.stepTimerSeconds(-1)
 
@@ -117,7 +117,7 @@ class AnnouncementsViewModelSteppingTest {
     @Test
     fun `stepping minutes up past 59 rolls the hour over`() {
         val vm = vm()
-        vm.setTimerMinutes(59)
+        vm.timerMinutes = 59
 
         vm.stepTimerMinutes(1)
 
@@ -128,7 +128,7 @@ class AnnouncementsViewModelSteppingTest {
     @Test
     fun `stepping minutes down from zero borrows an hour when there is one`() {
         val vm = vm()
-        vm.setTimerHours(1); vm.setTimerMinutes(0)
+        vm.timerHours = 1; vm.timerMinutes = 0
 
         vm.stepTimerMinutes(-1)
 
@@ -151,11 +151,11 @@ class AnnouncementsViewModelSteppingTest {
     @Test
     fun `editing the configured duration shifts the remaining preview by the same delta`() {
         val vm = vm() // TIMER_MODE_DURATION by default
-        vm.setTimerMinutes(2) // total 120s -> remaining 120
+        vm.timerMinutes = 2 // total 120s -> remaining 120
 
         assertEquals(120, vm.timerRemaining)
 
-        vm.setTimerMinutes(3) // +60s
+        vm.timerMinutes = 3 // +60s
 
         assertEquals(180, vm.timerRemaining, "lengthening the duration extends the countdown, not resets it")
     }
@@ -165,7 +165,7 @@ class AnnouncementsViewModelSteppingTest {
     @Test
     fun `the target hour wraps forward past midnight`() {
         val vm = vm()
-        vm.setTargetHour(23)
+        vm.targetHour = 23
 
         vm.stepTargetHour(1)
 
@@ -175,7 +175,7 @@ class AnnouncementsViewModelSteppingTest {
     @Test
     fun `the target hour wraps backward past midnight`() {
         val vm = vm()
-        vm.setTargetHour(0)
+        vm.targetHour = 0
 
         vm.stepTargetHour(-1)
 
@@ -185,8 +185,8 @@ class AnnouncementsViewModelSteppingTest {
     @Test
     fun `the target hour is clamped to 0-23 when set directly`() {
         val vm = vm()
-        vm.setTargetHour(30); assertEquals(23, vm.targetHour)
-        vm.setTargetHour(-1); assertEquals(0, vm.targetHour)
+        vm.targetHour = 30; assertEquals(23, vm.targetHour)
+        vm.targetHour = -1; assertEquals(0, vm.targetHour)
     }
 
     // ── setTimerMode: switching to duration recomputes the remaining ────────────
@@ -194,10 +194,10 @@ class AnnouncementsViewModelSteppingTest {
     @Test
     fun `switching to duration mode seeds the remaining from the configured fields`() {
         val vm = vm()
-        vm.setTimerMinutes(5) // 300s configured
-        vm.setTimerMode(Constants.TIMER_MODE_COUNT_UP) // leave duration mode
+        vm.timerMinutes = 5 // 300s configured
+        vm.timerMode = Constants.TIMER_MODE_COUNT_UP // leave duration mode
 
-        vm.setTimerMode(Constants.TIMER_MODE_DURATION) // back to duration
+        vm.timerMode = Constants.TIMER_MODE_DURATION // back to duration
 
         assertEquals(300, vm.timerRemaining, "returning to duration mode shows the full configured time")
     }
@@ -210,7 +210,7 @@ class AnnouncementsViewModelSteppingTest {
         // plain add — and it still has to move the remaining preview with it, like every other
         // duration edit.
         val vm = vm()
-        vm.setTimerMinutes(30) // 1800s configured and remaining
+        vm.timerMinutes = 30 // 1800s configured and remaining
 
         vm.stepTimerHours(1)
 
@@ -247,7 +247,7 @@ class AnnouncementsViewModelSteppingTest {
         // The delta guard: a no-op edit must not re-seed the remaining time from the configured
         // fields, which would discard a countdown already part-way through.
         val vm = vm()
-        vm.setTimerMinutes(10)
+        vm.timerMinutes = 10
         vm.stepTimerHours(0)
 
         assertEquals(600, vm.timerRemaining)
@@ -262,11 +262,11 @@ class AnnouncementsViewModelSteppingTest {
         // announcement, and nothing else would catch it.
         val vm = vm()
 
-        vm.setFontType("Georgia")
-        vm.setUnderline(true)
-        vm.setShadow(true)
-        vm.setPosition(Constants.BOTTOM)
-        vm.setTimerTextColor("#FF0000")
+        vm.fontType = "Georgia"
+        vm.underline = true
+        vm.shadow = true
+        vm.position = Constants.BOTTOM
+        vm.timerTextColor = "#FF0000"
 
         assertEquals("Georgia", vm.fontType)
         assertEquals(true, vm.underline)
@@ -280,7 +280,7 @@ class AnnouncementsViewModelSteppingTest {
     fun `stepping seconds up at the end of the last minute rolls the hour too`() {
         // 0:59:55 + 5s is 1:00:00 — the carry has to go all the way through, not stop at the minute.
         val vm = vm()
-        vm.setTimerMinutes(59); vm.setTimerSeconds(55)
+        vm.timerMinutes = 59; vm.timerSeconds = 55
 
         vm.stepTimerSeconds(1)
 
@@ -293,7 +293,7 @@ class AnnouncementsViewModelSteppingTest {
     fun `stepping seconds down at the start of an hour borrows through the minute`() {
         // 1:00:00 - 5s is 0:59:55.
         val vm = vm()
-        vm.setTimerHours(1); vm.setTimerMinutes(0); vm.setTimerSeconds(0)
+        vm.timerHours = 1; vm.timerMinutes = 0; vm.timerSeconds = 0
 
         vm.stepTimerSeconds(-1)
 
@@ -305,7 +305,7 @@ class AnnouncementsViewModelSteppingTest {
     @Test
     fun `stepping minutes within the hour just adds and subtracts one`() {
         val vm = vm()
-        vm.setTimerMinutes(10)
+        vm.timerMinutes = 10
 
         vm.stepTimerMinutes(1); assertEquals(11, vm.timerMinutes)
         vm.stepTimerMinutes(-1); assertEquals(10, vm.timerMinutes)
@@ -317,7 +317,7 @@ class AnnouncementsViewModelSteppingTest {
     @Test
     fun `the target minute wraps forward into the next hour`() {
         val vm = vm()
-        vm.setTargetHour(9); vm.setTargetMinute(59)
+        vm.targetHour = 9; vm.targetMinute = 59
 
         vm.stepTargetMinute(1)
 
@@ -330,7 +330,7 @@ class AnnouncementsViewModelSteppingTest {
         // The carry goes through the wrapping hour step, so 00:00 goes back to 23:59 rather than
         // sticking at hour 0 — a countdown aimed at midnight was 23 hours out when it did.
         val vm = vm()
-        vm.setTargetHour(0); vm.setTargetMinute(0)
+        vm.targetHour = 0; vm.targetMinute = 0
 
         vm.stepTargetMinute(-1)
 
@@ -341,7 +341,7 @@ class AnnouncementsViewModelSteppingTest {
     @Test
     fun `the target second steps in fives and wraps into the minute`() {
         val vm = vm()
-        vm.setTargetMinute(10); vm.setTargetSecond(55)
+        vm.targetMinute = 10; vm.targetSecond = 55
 
         vm.stepTargetSecond(1)
 
@@ -352,7 +352,7 @@ class AnnouncementsViewModelSteppingTest {
     @Test
     fun `the target second wraps backward and borrows a minute`() {
         val vm = vm()
-        vm.setTargetMinute(10); vm.setTargetSecond(0)
+        vm.targetMinute = 10; vm.targetSecond = 0
 
         vm.stepTargetSecond(-1)
 
@@ -363,7 +363,7 @@ class AnnouncementsViewModelSteppingTest {
     @Test
     fun `the target second snaps to the grid without wrapping when it can`() {
         val vm = vm()
-        vm.setTargetSecond(7)
+        vm.targetSecond = 7
 
         vm.stepTargetSecond(-1); assertEquals(5, vm.targetSecond)
         vm.stepTargetSecond(1); assertEquals(10, vm.targetSecond)

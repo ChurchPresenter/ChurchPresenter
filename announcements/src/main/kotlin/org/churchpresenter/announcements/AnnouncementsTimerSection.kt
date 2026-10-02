@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.announcements
 
 import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.churchpresenter.sharedui.composables.AddToScheduleButton
@@ -60,8 +60,6 @@ import org.churchpresenter.strings.generated.resources.timer_target_time
 import org.churchpresenter.sharedui.composables.DropdownSettingsField
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.settings.utils.isSystemUsing24HourFormat
-import org.churchpresenter.app.churchpresenter.viewmodel.AnnouncementsViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.hoverTint
@@ -88,7 +86,7 @@ internal fun AnnouncementsTabScope.AnnouncementsTimerSection(viewModel: Announce
         val timerTargetTimeLabel = stringResource(Res.string.timer_target_time)
         // Not `remember`ed: re-checked every recomposition so a live OS format change
         // (12h <-> 24h) takes effect immediately without requiring an app restart.
-        val use24Hour = isSystemUsing24HourFormat()
+        val use24Hour = use24HourClock
         val targetIsPm = viewModel.targetHour >= 12
         fun displayHour(hour24: Int): Int =
             if (use24Hour) hour24 else ((hour24 + ANNOUNCEMENT_HOUR_WRAP_OFFSET) % ANNOUNCEMENT_HOURS_PER_HALF_DAY) + 1
@@ -102,12 +100,12 @@ internal fun AnnouncementsTabScope.AnnouncementsTimerSection(viewModel: Announce
             ),
             selected = viewModel.timerMode,
             onSelect = { mode ->
-                // Switching modes makes whatever was ticking on presenterManager stale
+                // Switching modes makes whatever was ticking on output stale
                 // (it's counting down/up for a mode that's no longer selected) — stop it,
                 // and release live status so the new mode starts as preview-only again.
-                presenterManager?.pauseAnnouncementTimer(0)
-                presenterManager?.setAnnouncementTickerLive(false)
-                viewModel.setTimerMode(mode)
+                output?.pauseAnnouncementTimer(0)
+                output?.setAnnouncementTickerLive(false)
+                viewModel.timerMode = mode
                 viewModel.saveToSettings(onSettingsChange)
             },
         )
@@ -194,7 +192,7 @@ private fun AnnouncementsTabScope.DurationSteppers(viewModel: AnnouncementsViewM
             onValueChange = { v ->
                 val d = v.filter { it.isDigit() }.take(2)
                 hrText = d
-                d.toIntOrNull()?.let { viewModel.setTimerHours(it); viewModel.saveToSettings(onSettingsChange) }
+                d.toIntOrNull()?.let { viewModel.timerHours = it; viewModel.saveToSettings(onSettingsChange) }
             }
         )
         sepBox()
@@ -204,7 +202,7 @@ private fun AnnouncementsTabScope.DurationSteppers(viewModel: AnnouncementsViewM
             onValueChange = { v ->
                 val d = v.filter { it.isDigit() }.take(2)
                 minText = d
-                d.toIntOrNull()?.let { viewModel.setTimerMinutes(it); viewModel.saveToSettings(onSettingsChange) }
+                d.toIntOrNull()?.let { viewModel.timerMinutes = it; viewModel.saveToSettings(onSettingsChange) }
             }
         )
         sepBox()
@@ -215,7 +213,7 @@ private fun AnnouncementsTabScope.DurationSteppers(viewModel: AnnouncementsViewM
                 val d = v.filter { it.isDigit() }.take(2)
                 secText = d
                 d.toIntOrNull()?.let {
-                    viewModel.setTimerSeconds(it.coerceIn(0, ANNOUNCEMENT_MAX_SECOND))
+                    viewModel.timerSeconds = it.coerceIn(0, ANNOUNCEMENT_MAX_SECOND)
                     viewModel.saveToSettings(onSettingsChange)
                 }
             }
@@ -258,18 +256,7 @@ private fun AnnouncementsTabScope.ClockSteppers(
                 val d = v.filter { it.isDigit() }.take(2)
                 tHrText = d
                 d.toIntOrNull()?.let { entered ->
-                    val hour24 = if (use24Hour) {
-                        entered
-                    } else {
-                        val clamped = entered.coerceIn(1, 12)
-                        when {
-                            targetIsPm && clamped == 12 -> 12
-                            targetIsPm -> clamped + 12
-                            !targetIsPm && clamped == 12 -> 0
-                            else -> clamped
-                        }
-                    }
-                    viewModel.setTargetHour(hour24)
+                    viewModel.targetHour = enteredHour24(entered, use24Hour, targetIsPm)
                     viewModel.saveToSettings(onSettingsChange)
                 }
             }
@@ -281,7 +268,7 @@ private fun AnnouncementsTabScope.ClockSteppers(
             onValueChange = { v ->
                 val d = v.filter { it.isDigit() }.take(2)
                 tMinText = d
-                d.toIntOrNull()?.let { viewModel.setTargetMinute(it); viewModel.saveToSettings(onSettingsChange) }
+                d.toIntOrNull()?.let { viewModel.targetMinute = it; viewModel.saveToSettings(onSettingsChange) }
             }
         )
         sepBox()
@@ -292,7 +279,7 @@ private fun AnnouncementsTabScope.ClockSteppers(
                 val d = v.filter { it.isDigit() }.take(2)
                 tSecText = d
                 d.toIntOrNull()?.let {
-                    viewModel.setTargetSecond(it.coerceIn(0, ANNOUNCEMENT_MAX_SECOND))
+                    viewModel.targetSecond = it.coerceIn(0, ANNOUNCEMENT_MAX_SECOND)
                     viewModel.saveToSettings(onSettingsChange)
                 }
             }
@@ -302,9 +289,8 @@ private fun AnnouncementsTabScope.ClockSteppers(
             AmPmToggle(
                 isPm = targetIsPm,
                 onToggle = {
-                    viewModel.setTargetHour(
-                        (viewModel.targetHour + ANNOUNCEMENT_HOURS_PER_HALF_DAY) % ANNOUNCEMENT_HOURS_PER_DAY,
-                    )
+                    viewModel.targetHour =
+                        (viewModel.targetHour + ANNOUNCEMENT_HOURS_PER_HALF_DAY) % ANNOUNCEMENT_HOURS_PER_DAY
                     viewModel.saveToSettings(onSettingsChange)
                 }
             )
@@ -327,7 +313,7 @@ private fun AnnouncementsTabScope.ClockFormatField(viewModel: AnnouncementsViewM
         options = clockFormatLabels.values.toList(),
         onValueChange = { picked ->
             patternForLabel[picked]?.let {
-                viewModel.setLiveClockFormat(it)
+                viewModel.liveClockFormat = it
                 viewModel.saveToSettings(onSettingsChange)
             }
         },
@@ -355,7 +341,7 @@ private fun AnnouncementsTabScope.TimerControls(viewModel: AnnouncementsViewMode
         ActionIconButton(
             onClick = {
                 viewModel.saveToSettings(onSettingsChange)
-                viewModel.startPauseTimer(presenterManager)
+                viewModel.startPauseTimer(output)
             },
             enabled = viewModel.timerMode != Constants.TIMER_MODE_DURATION || total > 0 || isTimerRunning,
             tooltipText = if (isTimerRunning) pauseLabel else startLabel,
@@ -376,7 +362,7 @@ private fun AnnouncementsTabScope.TimerControls(viewModel: AnnouncementsViewMode
         // clock automatically — there's nothing to reset back to.
         if (viewModel.isDurationOrCountUp) {
             ActionIconButton(
-                onClick = { viewModel.resetTimer(presenterManager) },
+                onClick = { viewModel.resetTimer(output) },
                 tooltipText = resetLabel,
                 painter = painterResource(IconRes.drawable.ic_refresh),
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -393,7 +379,7 @@ private fun AnnouncementsTabScope.TimerControls(viewModel: AnnouncementsViewMode
 /** Sends the timer to the stage monitor, or takes it off; the only other way (with Go live) to mark it live. */
 @Composable
 private fun AnnouncementsTabScope.TimerStageMonitorButton(viewModel: AnnouncementsViewModel) {
-    if (presenterManager != null &&
+    if (output != null &&
         canSendToStageMonitor &&
         viewModel.timerMode != Constants.TIMER_MODE_CLOCK_DISPLAY) {
         ActionIconButton(
@@ -404,13 +390,13 @@ private fun AnnouncementsTabScope.TimerStageMonitorButton(viewModel: Announcemen
                     // Sending Specific Time to Stage Monitor also (re)starts its
                     // ticker if it wasn't already running via the play/pause button.
                     if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK) {
-                        presenterManager.startAnnouncementSpecificTime(
+                        output.startAnnouncementSpecificTime(
                             viewModel.targetHour,
                             viewModel.targetMinute,
                             viewModel.targetSecond,
                         )
                     }
-                    presenterManager.setAnnouncementTickerLive(true)
+                    output.setAnnouncementTickerLive(true)
                 }
                 val liveText = AnnouncementsViewModel.formatTimer(viewModel.timerDisplayValue)
                 toggleStageMonitor(viewModel, liveText)
@@ -458,7 +444,7 @@ private fun AnnouncementsTabScope.TimerScheduleButtons(viewModel: AnnouncementsV
             tooltipText = stringResource(Res.string.tooltip_add_to_schedule)
         )
     }
-    if (presenterManager != null) {
+    if (output != null) {
         GoLiveButton(
             onClick = {
                 // Also (re)starts Specific Time / Clock Display's ticker if it
@@ -466,24 +452,24 @@ private fun AnnouncementsTabScope.TimerScheduleButtons(viewModel: AnnouncementsV
                 // is one of only two places (with Send to Stage Monitor) allowed
                 // to mark the ticker live — the play/pause button stays preview-only.
                 when (viewModel.timerMode) {
-                    Constants.TIMER_MODE_CLOCK -> presenterManager.startAnnouncementSpecificTime(
+                    Constants.TIMER_MODE_CLOCK -> output.startAnnouncementSpecificTime(
                         viewModel.targetHour,
                         viewModel.targetMinute,
                         viewModel.targetSecond,
                     )
-                    Constants.TIMER_MODE_CLOCK_DISPLAY -> presenterManager.startAnnouncementClockDisplay(
+                    Constants.TIMER_MODE_CLOCK_DISPLAY -> output.startAnnouncementClockDisplay(
                         viewModel.liveClockFormat,
                     )
                     else -> {}
                 }
-                presenterManager.setAnnouncementTickerLive(true)
+                output.setAnnouncementTickerLive(true)
                 val liveText = if (viewModel.timerMode == Constants.TIMER_MODE_CLOCK_DISPLAY) {
                     viewModel.liveClockText
                 } else {
                     AnnouncementsViewModel.formatTimer(viewModel.timerDisplayValue)
                 }
-                presenterManager.setAnnouncementText(liveText)
-                presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+                output.setAnnouncementText(liveText)
+                output.setPresentingMode(Presenting.ANNOUNCEMENTS)
             },
             tooltipText = stringResource(Res.string.tooltip_go_live)
         )
@@ -507,7 +493,7 @@ private fun AnnouncementsTabScope.ExpiredTextField(viewModel: AnnouncementsViewM
             BasicTextField(
                 value = viewModel.timerExpiredText,
                 onValueChange = {
-                    viewModel.setTimerExpiredText(it)
+                    viewModel.timerExpiredText = it
                     viewModel.saveToSettings(onSettingsChange)
                 },
                 textStyle = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurface),
@@ -527,4 +513,15 @@ private fun AnnouncementsTabScope.ExpiredTextField(viewModel: AnnouncementsViewM
             )
         }
     }
+}
+
+/**
+ * The 0-23 hour a typed hour means: itself on a 24-hour clock; on a 12-hour one, 1-12 in the half
+ * of the day [isPm] says, with 12 AM midnight and 12 PM noon.
+ */
+internal fun enteredHour24(entered: Int, use24Hour: Boolean, isPm: Boolean): Int {
+    if (use24Hour) return entered
+    val clamped = entered.coerceIn(1, ANNOUNCEMENT_HOURS_PER_HALF_DAY)
+    val hourInHalf = clamped % ANNOUNCEMENT_HOURS_PER_HALF_DAY
+    return if (isPm) hourInHalf + ANNOUNCEMENT_HOURS_PER_HALF_DAY else hourInHalf
 }

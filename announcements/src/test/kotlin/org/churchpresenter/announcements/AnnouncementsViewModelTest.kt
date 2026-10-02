@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.announcements
 
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.AfterTest
@@ -35,28 +35,28 @@ class AnnouncementsViewModelTest {
     @Test
     fun `minutes and seconds are clamped to 0-59 and hours cannot go negative`() {
         val vm = vm()
-        vm.setTimerMinutes(99)
+        vm.timerMinutes = 99
         assertEquals(59, vm.timerMinutes)
-        vm.setTimerMinutes(-5)
+        vm.timerMinutes = -5
         assertEquals(0, vm.timerMinutes)
 
-        vm.setTimerSeconds(120)
+        vm.timerSeconds = 120
         assertEquals(59, vm.timerSeconds)
-        vm.setTimerSeconds(-1)
+        vm.timerSeconds = -1
         assertEquals(0, vm.timerSeconds)
 
-        vm.setTimerHours(-3)
+        vm.timerHours = -3
         assertEquals(0, vm.timerHours, "a negative countdown makes no sense")
-        vm.setTimerHours(12)
+        vm.timerHours = 12
         assertEquals(12, vm.timerHours, "hours are deliberately uncapped")
     }
 
     @Test
     fun `loop count cannot go negative`() {
         val vm = vm()
-        vm.setLoopCount(-4)
+        vm.loopCount = -4
         assertEquals(0, vm.loopCount)
-        vm.setLoopCount(3)
+        vm.loopCount = 3
         assertEquals(3, vm.loopCount)
     }
 
@@ -65,8 +65,8 @@ class AnnouncementsViewModelTest {
     @Test
     fun `stepping minutes past 59 carries into hours`() {
         val vm = vm()
-        vm.setTimerHours(1)
-        vm.setTimerMinutes(59)
+        vm.timerHours = 1
+        vm.timerMinutes = 59
         vm.stepTimerMinutes(1)
         assertEquals(0, vm.timerMinutes)
         assertEquals(2, vm.timerHours, "59 -> 0 must carry an hour")
@@ -75,14 +75,14 @@ class AnnouncementsViewModelTest {
     @Test
     fun `stepping minutes below zero borrows an hour, or stops at zero`() {
         val vm = vm()
-        vm.setTimerHours(1)
-        vm.setTimerMinutes(0)
+        vm.timerHours = 1
+        vm.timerMinutes = 0
         vm.stepTimerMinutes(-1)
         assertEquals(59, vm.timerMinutes)
         assertEquals(0, vm.timerHours)
 
         // Now at 0:00 -- there is nothing left to borrow from.
-        vm.setTimerMinutes(0)
+        vm.timerMinutes = 0
         vm.stepTimerMinutes(-1)
         assertEquals(0, vm.timerMinutes, "must not underflow past zero")
         assertEquals(0, vm.timerHours)
@@ -91,19 +91,19 @@ class AnnouncementsViewModelTest {
     @Test
     fun `stepping seconds snaps to the nearest 5-second mark`() {
         val vm = vm()
-        vm.setTimerSeconds(0)
+        vm.timerSeconds = 0
         vm.stepTimerSeconds(1)
         assertEquals(5, vm.timerSeconds)
 
-        vm.setTimerSeconds(3) // off-grid value typed by hand
+        vm.timerSeconds = 3 // off-grid value typed by hand
         vm.stepTimerSeconds(1)
         assertEquals(5, vm.timerSeconds, "stepping up from an off-grid value lands on the grid")
 
-        vm.setTimerSeconds(7)
+        vm.timerSeconds = 7
         vm.stepTimerSeconds(-1)
         assertEquals(5, vm.timerSeconds)
 
-        vm.setTimerSeconds(5)
+        vm.timerSeconds = 5
         vm.stepTimerSeconds(-1)
         assertEquals(0, vm.timerSeconds)
     }
@@ -111,8 +111,8 @@ class AnnouncementsViewModelTest {
     @Test
     fun `stepping seconds past 55 carries into minutes`() {
         val vm = vm()
-        vm.setTimerMinutes(2)
-        vm.setTimerSeconds(55)
+        vm.timerMinutes = 2
+        vm.timerSeconds = 55
         vm.stepTimerSeconds(1)
         assertEquals(0, vm.timerSeconds)
         assertEquals(3, vm.timerMinutes)
@@ -121,8 +121,8 @@ class AnnouncementsViewModelTest {
     @Test
     fun `stepping seconds below zero borrows a minute`() {
         val vm = vm()
-        vm.setTimerMinutes(2)
-        vm.setTimerSeconds(0)
+        vm.timerMinutes = 2
+        vm.timerSeconds = 0
         vm.stepTimerSeconds(-1)
         assertEquals(55, vm.timerSeconds)
         assertEquals(1, vm.timerMinutes)
@@ -131,9 +131,9 @@ class AnnouncementsViewModelTest {
     @Test
     fun `stepping seconds down at zero total stays at zero`() {
         val vm = vm()
-        vm.setTimerHours(0)
-        vm.setTimerMinutes(0)
-        vm.setTimerSeconds(0)
+        vm.timerHours = 0
+        vm.timerMinutes = 0
+        vm.timerSeconds = 0
         vm.stepTimerSeconds(-1)
         assertEquals(0, vm.totalSeconds, "there is nothing to borrow from at 0:00:00")
     }
@@ -143,35 +143,35 @@ class AnnouncementsViewModelTest {
     @Test
     fun `editing the duration shifts the remaining time by the delta, not to the full duration`() {
         val vm = vm()
-        vm.setTimerMode(Constants.TIMER_MODE_DURATION)
-        vm.setTimerMinutes(5)
+        vm.timerMode = Constants.TIMER_MODE_DURATION
+        vm.timerMinutes = 5
         assertEquals(300, vm.timerRemaining, "setting 5 minutes from zero adds 300s")
 
-        vm.setTimerMinutes(6) // +60s
+        vm.timerMinutes = 6 // +60s
         assertEquals(360, vm.timerRemaining)
 
-        vm.setTimerMinutes(4) // -120s from 6
+        vm.timerMinutes = 4 // -120s from 6
         assertEquals(240, vm.timerRemaining, "shrinking the duration must subtract, not reset")
     }
 
     @Test
     fun `remaining time never goes negative when the duration is cut`() {
         val vm = vm()
-        vm.setTimerMode(Constants.TIMER_MODE_DURATION)
-        vm.setTimerMinutes(1)
-        vm.setTimerHours(5)
-        vm.setTimerHours(0)   // a large negative delta
-        vm.setTimerMinutes(0)
+        vm.timerMode = Constants.TIMER_MODE_DURATION
+        vm.timerMinutes = 1
+        vm.timerHours = 5
+        vm.timerHours = 0   // a large negative delta
+        vm.timerMinutes = 0
         assertTrue(vm.timerRemaining >= 0, "remaining was ${vm.timerRemaining}")
     }
 
     @Test
     fun `a no-op edit leaves the remaining time alone`() {
         val vm = vm()
-        vm.setTimerMode(Constants.TIMER_MODE_DURATION)
-        vm.setTimerMinutes(5)
+        vm.timerMode = Constants.TIMER_MODE_DURATION
+        vm.timerMinutes = 5
         val before = vm.timerRemaining
-        vm.setTimerMinutes(5) // same value -> zero delta
+        vm.timerMinutes = 5 // same value -> zero delta
         assertEquals(before, vm.timerRemaining)
     }
 
@@ -180,25 +180,25 @@ class AnnouncementsViewModelTest {
     @Test
     fun `target time components are clamped to real clock ranges`() {
         val vm = vm()
-        vm.setTargetHour(30)
+        vm.targetHour = 30
         assertEquals(23, vm.targetHour)
-        vm.setTargetHour(-1)
+        vm.targetHour = -1
         assertEquals(0, vm.targetHour)
 
-        vm.setTargetMinute(99)
+        vm.targetMinute = 99
         assertEquals(59, vm.targetMinute)
-        vm.setTargetSecond(99)
+        vm.targetSecond = 99
         assertEquals(59, vm.targetSecond)
     }
 
     @Test
     fun `stepping the target hour wraps around midnight in both directions`() {
         val vm = vm()
-        vm.setTargetHour(23)
+        vm.targetHour = 23
         vm.stepTargetHour(1)
         assertEquals(0, vm.targetHour, "23:00 + 1h should wrap to 00:00")
 
-        vm.setTargetHour(0)
+        vm.targetHour = 0
         vm.stepTargetHour(-1)
         assertEquals(23, vm.targetHour, "00:00 - 1h should wrap to 23:00")
     }
@@ -216,14 +216,14 @@ class AnnouncementsViewModelTest {
     @Test
     fun `stepping the minute across midnight wraps the hour rather than clamping it`() {
         val vm = vm()
-        vm.setTargetHour(23)
-        vm.setTargetMinute(59)
+        vm.targetHour = 23
+        vm.targetMinute = 59
         vm.stepTargetMinute(1)
         assertEquals(0, vm.targetMinute)
         assertEquals(0, vm.targetHour, "23:59 + 1min is 00:00, not 23:00")
 
-        vm.setTargetHour(0)
-        vm.setTargetMinute(0)
+        vm.targetHour = 0
+        vm.targetMinute = 0
         vm.stepTargetMinute(-1)
         assertEquals(59, vm.targetMinute)
         assertEquals(23, vm.targetHour, "00:00 - 1min is 23:59, not 00:59")
@@ -240,9 +240,9 @@ class AnnouncementsViewModelTest {
     @Test
     fun `stepping the second down from midnight carries all the way through the hour`() {
         val vm = vm()
-        vm.setTargetHour(0)
-        vm.setTargetMinute(0)
-        vm.setTargetSecond(0)
+        vm.targetHour = 0
+        vm.targetMinute = 0
+        vm.targetSecond = 0
 
         vm.stepTargetSecond(-1)
 
@@ -253,13 +253,13 @@ class AnnouncementsViewModelTest {
     @Test
     fun `stepping the target minute carries normally away from the clock boundaries`() {
         val vm = vm()
-        vm.setTargetHour(10)
-        vm.setTargetMinute(59)
+        vm.targetHour = 10
+        vm.targetMinute = 59
         vm.stepTargetMinute(1)
         assertEquals(0, vm.targetMinute)
         assertEquals(11, vm.targetHour, "away from midnight the carry works correctly")
 
-        vm.setTargetMinute(0)
+        vm.targetMinute = 0
         vm.stepTargetMinute(-1)
         assertEquals(59, vm.targetMinute)
         assertEquals(10, vm.targetHour)
@@ -268,13 +268,13 @@ class AnnouncementsViewModelTest {
     @Test
     fun `stepping the target second snaps to the 5-second grid and carries`() {
         val vm = vm()
-        vm.setTargetHour(10)
-        vm.setTargetMinute(30)
-        vm.setTargetSecond(0)
+        vm.targetHour = 10
+        vm.targetMinute = 30
+        vm.targetSecond = 0
         vm.stepTargetSecond(1)
         assertEquals(5, vm.targetSecond)
 
-        vm.setTargetSecond(55)
+        vm.targetSecond = 55
         vm.stepTargetSecond(1)
         assertEquals(0, vm.targetSecond)
         assertEquals(31, vm.targetMinute, "seconds rolling over should advance the minute")
@@ -285,10 +285,10 @@ class AnnouncementsViewModelTest {
     @Test
     fun `switching to clock mode computes a positive countdown to the target`() {
         val vm = vm()
-        vm.setTargetHour(12)
-        vm.setTargetMinute(0)
-        vm.setTargetSecond(0)
-        vm.setTimerMode(Constants.TIMER_MODE_CLOCK)
+        vm.targetHour = 12
+        vm.targetMinute = 0
+        vm.targetSecond = 0
+        vm.timerMode = Constants.TIMER_MODE_CLOCK
 
         assertEquals(Constants.TIMER_MODE_CLOCK, vm.timerMode)
         assertTrue(
@@ -300,11 +300,11 @@ class AnnouncementsViewModelTest {
     @Test
     fun `switching modes back and forth is stable`() {
         val vm = vm()
-        vm.setTimerMode(Constants.TIMER_MODE_COUNT_UP)
+        vm.timerMode = Constants.TIMER_MODE_COUNT_UP
         assertEquals(Constants.TIMER_MODE_COUNT_UP, vm.timerMode)
-        vm.setTimerMode(Constants.TIMER_MODE_DURATION)
+        vm.timerMode = Constants.TIMER_MODE_DURATION
         assertEquals(Constants.TIMER_MODE_DURATION, vm.timerMode)
-        vm.setTimerMode(Constants.TIMER_MODE_DURATION) // repeated set is a no-op
+        vm.timerMode = Constants.TIMER_MODE_DURATION // repeated set is a no-op
         assertEquals(Constants.TIMER_MODE_DURATION, vm.timerMode)
     }
 
@@ -313,15 +313,15 @@ class AnnouncementsViewModelTest {
     @Test
     fun `buildSettings round-trips through syncFromSettings`() {
         val vm = vm()
-        vm.setTextColor("#123456")
-        vm.setBackgroundColor("#654321")
-        vm.setFontSize(72)
-        vm.setBold(true)
-        vm.setItalic(true)
-        vm.setHorizontalAlignment("center")
-        vm.setAnimationDuration(1500)
-        vm.setLoopCount(4)
-        vm.setTimerExpiredText("We are starting!")
+        vm.textColor = "#123456"
+        vm.backgroundColor = "#654321"
+        vm.fontSize = 72
+        vm.bold = true
+        vm.italic = true
+        vm.horizontalAlignment = "center"
+        vm.animationDuration = 1500
+        vm.loopCount = 4
+        vm.timerExpiredText = "We are starting!"
 
         val restored = vm()
         restored.syncFromSettings(vm.buildSettings())

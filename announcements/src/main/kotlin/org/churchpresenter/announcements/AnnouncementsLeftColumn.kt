@@ -1,6 +1,5 @@
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.announcements
 
-import org.churchpresenter.app.churchpresenter.viewmodel.AnnouncementsViewModel
 import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.churchpresenter.sharedui.composables.AddToScheduleButton
 import org.churchpresenter.sharedui.composables.SavePresetButton
@@ -136,7 +135,7 @@ private fun AnnouncementsTabScope.AnnouncementsTextActions(viewModel: Announceme
         horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (presenterManager != null) {
+        if (output != null) {
             if (canSendToStageMonitor) {
                 ActionIconButton(
                     onClick = { toggleStageMonitor(viewModel, viewModel.text, stopTicker = true) },
@@ -192,9 +191,9 @@ private fun AnnouncementsTabScope.AnnouncementsTextActions(viewModel: Announceme
                 tooltipText = stringResource(Res.string.tooltip_add_to_schedule)
             )
         }
-        if (presenterManager != null) {
+        if (output != null) {
             GoLiveButton(
-                onClick = { viewModel.goLive(presenterManager, onSettingsChange) },
+                onClick = { viewModel.goLive(output, onSettingsChange) },
                 enabled = viewModel.text.isNotBlank(),
                 tooltipText = stringResource(Res.string.tooltip_go_live)
             )
@@ -221,7 +220,7 @@ private fun AnnouncementsTabScope.AnnouncementsTextInput(viewModel: Announcement
     ) {
         BasicTextField(
             value = viewModel.text,
-            onValueChange = { viewModel.setText(it); viewModel.saveToSettings(onSettingsChange) },
+            onValueChange = { viewModel.text = it; viewModel.saveToSettings(onSettingsChange) },
             textStyle = MaterialTheme.typography.bodyMedium.copy(
                 color = MaterialTheme.colorScheme.onSurface
             ),
@@ -259,7 +258,7 @@ private fun AnnouncementsTabScope.AnnouncementsFormattingBar(viewModel: Announce
         ColorPickerField(
             label = stringResource(Res.string.text_color),
             color = viewModel.textColor,
-            onColorChange = { viewModel.setTextColor(it); viewModel.saveToSettings(onSettingsChange) },
+            onColorChange = { viewModel.textColor = it; viewModel.saveToSettings(onSettingsChange) },
             modifier = Modifier.width(120.dp),
         )
         TextStyleButtons(
@@ -267,34 +266,34 @@ private fun AnnouncementsTabScope.AnnouncementsFormattingBar(viewModel: Announce
             italic = viewModel.italic,
             underline = viewModel.underline,
             shadow = viewModel.shadow,
-            onBoldChange = { viewModel.setBold(it); viewModel.saveToSettings(onSettingsChange) },
+            onBoldChange = { viewModel.bold = it; viewModel.saveToSettings(onSettingsChange) },
             onItalicChange = {
-                viewModel.setItalic(it)
+                viewModel.italic = it
                 viewModel.saveToSettings(onSettingsChange)
             },
             onUnderlineChange = {
-                viewModel.setUnderline(it)
+                viewModel.underline = it
                 viewModel.saveToSettings(onSettingsChange)
             },
             onShadowChange = {
-                viewModel.setShadow(it)
+                viewModel.shadow = it
                 viewModel.saveToSettings(onSettingsChange)
             },
             backdrop = viewModel.backdrop,
             onBackdropChange = { updated ->
-                viewModel.setBackdrop(updated)
+                viewModel.backdrop = updated
                 viewModel.saveToSettings(onSettingsChange)
             },
             outline = viewModel.outline,
             onOutlineChange = { updated ->
-                viewModel.setOutline(updated)
+                viewModel.outline = updated
                 viewModel.saveToSettings(onSettingsChange)
             },
         )
         HorizontalAlignmentButtons(
             selectedAlignment = viewModel.horizontalAlignment,
             onAlignmentChange = {
-                viewModel.setHorizontalAlignment(it)
+                viewModel.horizontalAlignment = it
                 viewModel.saveToSettings(onSettingsChange)
             },
             leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
@@ -303,13 +302,13 @@ private fun AnnouncementsTabScope.AnnouncementsFormattingBar(viewModel: Announce
             label = stringResource(Res.string.font_type),
             value = viewModel.fontType,
             fonts = availableFonts,
-            onValueChange = { viewModel.setFontType(it); viewModel.saveToSettings(onSettingsChange) },
+            onValueChange = { viewModel.fontType = it; viewModel.saveToSettings(onSettingsChange) },
         )
         NumberSettingsTextField(
             label = stringResource(Res.string.font_size),
             initialText = viewModel.fontSize,
             range = 8..200,
-            onValueChange = { viewModel.setFontSize(it); viewModel.saveToSettings(onSettingsChange) },
+            onValueChange = { viewModel.fontSize = it; viewModel.saveToSettings(onSettingsChange) },
         )
     }
 }

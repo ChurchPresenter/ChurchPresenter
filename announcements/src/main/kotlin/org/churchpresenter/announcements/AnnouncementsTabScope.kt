@@ -1,8 +1,10 @@
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.announcements
 
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.sharedui.utils.FallbackOutputSize
+import org.churchpresenter.sharedui.utils.PreviewOutput
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextAlign
-import org.churchpresenter.app.churchpresenter.stageMonitorScreenIndices
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,10 +39,9 @@ import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.viewmodel.AnnouncementsViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.ui.unit.Density
 import org.churchpresenter.settings.WindowLayoutSettings
@@ -50,19 +51,72 @@ import org.churchpresenter.settings.WindowLayoutSettings
  * ViewModel, the labels it resolves, the panel sizes it remembers, and what is derived from them.
  */
 @Suppress("LongParameterList")
-internal class AnnouncementsTabScope(
+/**
+ * What the app supplies about its outputs: the one the preview stands for, the screens that are
+ * stage monitors, and the picker for the first.
+ */
+internal class AnnouncementsScreens(
+    val preview: PreviewOutput,
+    val stageMonitors: List<Int>,
+    val picker: @Composable () -> Unit,
+)
+
+/** 1920x1080 and shown everywhere: what the preview stands for when the app has said nothing. */
+internal val FallbackPreviewOutput = PreviewOutput(
+    key = "",
+    label = "",
+    size = FallbackOutputSize,
+    showsMode = true,
+    assignment = ScreenAssignment(),
+)
+
+/** What the app hands the tab: the settings and where changes go, the output, and its screens. */
+internal class AnnouncementsTabInputs(
     val appSettings: AppSettings,
     val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    val presenterManager: PresenterManager?,
+    val output: AnnouncementsOutput?,
     val onAddToSchedule: ((settings: AnnouncementsSettings) -> Unit)?,
     val onSavePreset: ((settings: AnnouncementsSettings) -> Unit)?,
+    val screens: AnnouncementsScreens,
+)
+
+/** The window and the locale the tab is drawn in: its density, which layout it saves to, and the clock. */
+internal class AnnouncementsDisplay(
+    val density: Density,
+    val isMaximized: Boolean,
+    val use24HourClock: Boolean,
+)
+
+/** What the tab's composition supplies: fonts, labels, the panels and the display they are drawn on. */
+internal class AnnouncementsTabEnvironment(
     val availableFonts: List<String>,
     val labels: AnnouncementsLabels,
-    val density: Density,
     val onSettingsChangeState: State<((AppSettings) -> AppSettings) -> Unit>,
-    val isMaximized: Boolean,
-    panels: AnnouncementsPanelState,
-) {
+    val panels: AnnouncementsPanelState,
+    val display: AnnouncementsDisplay,
+)
+
+/**
+ * Everything the tab's pieces read and act on. Stable: what it exposes is snapshot state or an
+ * input it is rebuilt for (the tab remembers it keyed on all of them), so a piece handed the same
+ * scope can skip.
+ */
+@Stable
+internal class AnnouncementsTabScope(inputs: AnnouncementsTabInputs, environment: AnnouncementsTabEnvironment) {
+    val appSettings = inputs.appSettings
+    val onSettingsChange = inputs.onSettingsChange
+    val output = inputs.output
+    val onAddToSchedule = inputs.onAddToSchedule
+    val onSavePreset = inputs.onSavePreset
+    val screens = inputs.screens
+    val availableFonts = environment.availableFonts
+    val labels = environment.labels
+    val density = environment.display.density
+    val onSettingsChangeState = environment.onSettingsChangeState
+    val isMaximized = environment.display.isMaximized
+    val use24HourClock = environment.display.use24HourClock
+    private val panels = environment.panels
+
     val timerExpiredLabel get() = labels.timerExpiredLabel
     val startLabel get() = labels.startLabel
     val pauseLabel get() = labels.pauseLabel
@@ -79,12 +133,36 @@ internal class AnnouncementsTabScope(
     val positions get() = labels.positions
     val animItems get() = labels.animItems
 
-    var leftPanelPx by panels.leftPanelPx
-    var textHeightPx by panels.textHeightPx
-    var naturalTextHeightPx by panels.naturalTextHeightPx
-    var textCardHeightPx by panels.textCardHeightPx
-    var twoColHeightPx by panels.twoColHeightPx
-    var twoColWidthPx by panels.twoColWidthPx
+    var leftPanelPx
+        get() = panels.leftPanelPx.value
+        set(value) {
+            panels.leftPanelPx.value = value
+        }
+    var textHeightPx
+        get() = panels.textHeightPx.value
+        set(value) {
+            panels.textHeightPx.value = value
+        }
+    var naturalTextHeightPx
+        get() = panels.naturalTextHeightPx.value
+        set(value) {
+            panels.naturalTextHeightPx.value = value
+        }
+    var textCardHeightPx
+        get() = panels.textCardHeightPx.value
+        set(value) {
+            panels.textCardHeightPx.value = value
+        }
+    var twoColHeightPx
+        get() = panels.twoColHeightPx.value
+        set(value) {
+            panels.twoColHeightPx.value = value
+        }
+    var twoColWidthPx
+        get() = panels.twoColWidthPx.value
+        set(value) {
+            panels.twoColWidthPx.value = value
+        }
 
     // Screens configured as Stage Monitor — locking them to Announcements shows this content
     // there without disturbing whatever the main projection screen(s) are currently live with.
@@ -93,51 +171,51 @@ internal class AnnouncementsTabScope(
     // If Stage Monitor is the ONLY configured screen there's nothing else to protect from being
     // locked out, so the button instead behaves as a plain Go Live (global presenting mode, no
     // per-screen lock) — same visible result, without blocking Bible/Songs from ever showing.
-    val stageMonitorScreenIndices get() = stageMonitorScreenIndices(appSettings.projectionSettings)
+    val stageMonitorScreenIndices get() = screens.stageMonitors
     val hasSeparateMainScreen get() =
         stageMonitorScreenIndices.size < appSettings.projectionSettings.screenAssignments.size
     val canSendToStageMonitor get() = stageMonitorScreenIndices.isNotEmpty()
-    val currentScreenLocks get() = presenterManager?.screenLocks?.value ?: emptyMap()
+    val currentScreenLocks get() = output?.screenLocks?.value ?: emptyMap()
     val isSentToStageMonitor get() = if (hasSeparateMainScreen) {
         canSendToStageMonitor && stageMonitorScreenIndices.all { currentScreenLocks[it] == Presenting.ANNOUNCEMENTS }
     } else {
-        presenterManager?.presentingMode?.value == Presenting.ANNOUNCEMENTS
+        output?.presentingMode?.value == Presenting.ANNOUNCEMENTS
     }
     // [stopTicker] must be true when [text] is plain announcement text (the ticker would otherwise
     // silently overwrite it within a second) and false when [text] IS the timer/clock's own current
     // value (stopping the ticker there would freeze the very content being sent).
     fun toggleStageMonitor(viewModel: AnnouncementsViewModel, text: String, stopTicker: Boolean = false) {
-        if (presenterManager == null || !canSendToStageMonitor) return
+        if (output == null || !canSendToStageMonitor) return
         if (!hasSeparateMainScreen) {
             if (isSentToStageMonitor) {
-                presenterManager.requestClearDisplay()
+                output.requestClearDisplay()
             } else {
-                if (stopTicker) viewModel.pauseTimer(presenterManager)
-                presenterManager.setAnnouncementText(text)
-                presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+                if (stopTicker) viewModel.pauseTimer(output)
+                output.setAnnouncementText(text)
+                output.setPresentingMode(Presenting.ANNOUNCEMENTS)
             }
             return
         }
         if (isSentToStageMonitor) {
-            stageMonitorScreenIndices.forEach { presenterManager.setScreenLock(it, null) }
+            stageMonitorScreenIndices.forEach { output.setScreenLock(it, null) }
         } else {
-            if (stopTicker) viewModel.pauseTimer(presenterManager)
-            presenterManager.setAnnouncementText(text)
-            stageMonitorScreenIndices.forEach { presenterManager.setScreenLock(it, Presenting.ANNOUNCEMENTS) }
+            if (stopTicker) viewModel.pauseTimer(output)
+            output.setAnnouncementText(text)
+            stageMonitorScreenIndices.forEach { output.setScreenLock(it, Presenting.ANNOUNCEMENTS) }
         }
     }
 
-    // All four timer/clock modes now tick on presenterManager (see above), so "is it running" and
+    // All four timer/clock modes now tick on output (see above), so "is it running" and
     // "what's the current value" must be read from there rather than from the tab's own ViewModel,
     // which may have been recreated since the countdown was actually started. announcementTickerActive
     // (not timerRunning, which is only ever true for Duration/Count-Up) reflects all four.
     val AnnouncementsViewModel.isDurationOrCountUp get() =
         timerMode == Constants.TIMER_MODE_DURATION || timerMode == Constants.TIMER_MODE_COUNT_UP
-    val isTimerRunning get() = presenterManager?.announcementTickerActive?.value == true
+    val isTimerRunning get() = output?.announcementTickerActive?.value == true
     val AnnouncementsViewModel.isTimerExpired get() = timerMode == Constants.TIMER_MODE_DURATION &&
-        presenterManager?.announcementTimerExpired?.value == true
+        output?.announcementTimerExpired?.value == true
     val AnnouncementsViewModel.timerDisplayValue get() = when {
-        isTimerRunning && presenterManager != null -> presenterManager.timerRemainingSeconds.value
+        isTimerRunning && output != null -> output.timerRemainingSeconds.value
         timerMode == Constants.TIMER_MODE_COUNT_UP -> countUpElapsed
         else -> timerRemaining
     }

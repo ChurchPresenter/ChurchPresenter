@@ -1,6 +1,5 @@
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.announcements
 
-import org.churchpresenter.app.churchpresenter.viewmodel.AnnouncementsViewModel
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.sharedui.composables.SlimSlider
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -80,15 +79,12 @@ import org.churchpresenter.strings.generated.resources.canvas_text_bg_color
 import org.churchpresenter.strings.generated.resources.transparent_default
 import org.churchpresenter.strings.generated.resources.position_on_screen
 import org.churchpresenter.sharedui.composables.ColorPickerField
-import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
-import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.churchpresenter.sharedui.composables.NumberSettingsTextField
-import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
 import org.churchpresenter.sharedui.utils.Utils
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.composables.ScreenPositionPicker
+import org.churchpresenter.sharedui.composables.ScreenPositionPicker
 import androidx.compose.runtime.State
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
@@ -112,16 +108,8 @@ internal fun AnnouncementsTabScope.AnnouncementsRightColumn(viewModel: Announcem
         // Which output this preview stands for. Announcements can be routed to several
         // differently-shaped outputs at once, so the operator says which; the picker
         // draws nothing until there is more than one to choose between.
-        val previewOutput = rememberPreviewOutput(
-            appSettings, Constants.PREVIEW_TAB_ANNOUNCEMENTS, Presenting.ANNOUNCEMENTS
-        )
-        PreviewOutputPicker(
-            settings = appSettings,
-            tabId = Constants.PREVIEW_TAB_ANNOUNCEMENTS,
-            mode = Presenting.ANNOUNCEMENTS,
-            onSettingsChange = onSettingsChange,
-        )
-        AnnouncementsPreview(viewModel, previewOutput, Modifier.weight(1f).fillMaxWidth())
+        screens.picker()
+        AnnouncementsPreview(viewModel, screens.preview, Modifier.weight(1f).fillMaxWidth())
         // Where the announcement sits, what it sits on and how it moves, stacked along the
         // bottom. Shared by the text and the timer, so it lives here rather than in either card.
         Column(
@@ -382,7 +370,7 @@ private fun AnnouncementsTabScope.AnnouncementsPositionCard(viewModel: Announcem
             positions = positions,
             selected = viewModel.position,
             onSelect = { posConst ->
-                viewModel.setPosition(posConst)
+                viewModel.position = posConst
                 viewModel.saveToSettings(onSettingsChange)
             },
         )
@@ -408,7 +396,7 @@ private fun AnnouncementsTabScope.AnnouncementsBackgroundCard(viewModel: Announc
                     modifier = Modifier
                         .height(32.dp)
                         .clickable {
-                            viewModel.setBackgroundColor("#000000")
+                            viewModel.backgroundColor = "#000000"
                             viewModel.saveToSettings(onSettingsChange)
                         }
                         .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), AppShape(8.dp))
@@ -433,7 +421,7 @@ private fun AnnouncementsTabScope.AnnouncementsBackgroundCard(viewModel: Announc
                         label = stringResource(Res.string.canvas_text_bg_color),
                         color = viewModel.backgroundColor,
                         onColorChange = {
-                            viewModel.setBackgroundColor(it)
+                            viewModel.backgroundColor = it
                             viewModel.saveToSettings(onSettingsChange)
                         },
                         modifier = fieldModifier,
@@ -443,7 +431,7 @@ private fun AnnouncementsTabScope.AnnouncementsBackgroundCard(viewModel: Announc
                 val transparentButton: @Composable () -> Unit = {
                     KeyButton(
                         onClick = {
-                            viewModel.setBackgroundColor("transparent")
+                            viewModel.backgroundColor = "transparent"
                             viewModel.saveToSettings(onSettingsChange)
                         },
                         shape = AppShape(8.dp),
@@ -527,7 +515,7 @@ private fun AnnouncementsTabScope.AnnouncementsAnimationCard(viewModel: Announce
                         fadeText                -> Constants.ANIMATION_FADE
                         else                    -> Constants.ANIMATION_NONE
                     }
-                    viewModel.setAnimationType(key)
+                    viewModel.animationType = key
                     viewModel.saveToSettings(onSettingsChange)
                 }
             )
@@ -555,7 +543,7 @@ private fun AnnouncementsTabScope.AnnouncementsAnimationCard(viewModel: Announce
                     initialText = viewModel.loopCount,
                     range = 0..99,
                     onValueChange = { v ->
-                        viewModel.setLoopCount(v)
+                        viewModel.loopCount = v
                         viewModel.saveToSettings(onSettingsChange)
                     }
                 )
@@ -567,9 +555,7 @@ private fun AnnouncementsTabScope.AnnouncementsAnimationCard(viewModel: Announce
                 onValueChange = { v ->
                     val dur = (sliderSum - v)
                     val snapped = (dur / sliderMin).toInt() * sliderMin.toInt()
-                    viewModel.setAnimationDuration(
-                        snapped.coerceIn(sliderMin.toInt(), sliderMax.toInt())
-                    )
+                    viewModel.animationDuration = snapped.coerceIn(sliderMin.toInt(), sliderMax.toInt())
                     viewModel.saveToSettings(onSettingsChange)
                 },
                 valueRange = sliderMin..sliderMax,

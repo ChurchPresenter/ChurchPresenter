@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.announcements
 
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.ComposeUiTest
@@ -214,6 +214,30 @@ class AnnouncementsTabAppearanceTest {
         )
         assertTrue(magentaPixels(band) > 0, "the preview must paint the band the presenter will draw")
     }
+
+    @Test
+    fun `a slide comes in along the edge it is placed against`() =
+        announcementsTab(initial = AnnouncementsSettings(text = "Notices")) { _, reports ->
+            fun select(label: String) {
+                onNodeWithText("ANIMATION", substring = true).performClick()
+                waitForIdle()
+                onNodeWithText(label).performClick()
+                waitForIdle()
+            }
+
+            // Sideways slides keep the text's row, up-and-down slides keep its column.
+            for ((animation, positions) in listOf(
+                "Slide From Left" to listOf(Constants.TOP_LEFT, Constants.BOTTOM_LEFT, Constants.CENTER_LEFT),
+                "Slide From Top" to listOf(Constants.TOP_LEFT, Constants.TOP_RIGHT, Constants.TOP_CENTER),
+            )) {
+                select(animation)
+                positions.forEach { position ->
+                    clickPosition(position)
+                    assertEquals(position, reports.settings?.position)
+                    assertTrue(showsContainingText("Notices"), "$animation at $position still previews the text")
+                }
+            }
+        }
 }
 
 /** A Fade a few frames long: the fade branch still runs, without rendering seconds of it per click. */
