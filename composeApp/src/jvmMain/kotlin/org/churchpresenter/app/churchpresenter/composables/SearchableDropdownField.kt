@@ -126,12 +126,7 @@ fun SearchableDropdownField(
         if (query.isBlank()) options else options.filter { it.contains(query, ignoreCase = true) }
     }
 
-    val defaultValueStyle = MaterialTheme.typography.bodySmall.copy(
-        fontSize = 13.sp,
-        lineHeight = 14.sp,
-        fontWeight = FontWeight.Medium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
+    val defaultValueStyle = defaultValueStyle()
 
     Box(
         modifier = modifier
@@ -159,97 +154,52 @@ fun SearchableDropdownField(
                 modifier = if (fillWidth) Modifier.weight(1f) else Modifier,
                 verticalArrangement = Arrangement.Center
             ) {
-                if (label.isNotEmpty()) {
-                    Text(
-                        text = label.uppercase(),
-                        fontSize = 10.sp,
-                        lineHeight = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 0.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.height(1.dp))
-                }
-                BasicTextField(
-                    value = query,
-                    onValueChange = {
+                if (label.isNotEmpty()) FieldLabel(label)
+                SearchQueryField(
+                    query = query,
+                    shownValue = value,
+                    textStyle = valueTextStyle ?: defaultValueStyle,
+                    focusRequester = focusRequester,
+                    onQueryChange = {
                         query = it
                         expanded = true
                     },
-                    singleLine = true,
-                    maxLines = 1,
-                    textStyle = valueTextStyle ?: defaultValueStyle,
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurfaceVariant),
-                    interactionSource = remember { MutableInteractionSource() },
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = {
+                    onDone = {
                         filteredOptions.singleOrNull()?.let { sole ->
                             query = if (clearOnFocus) "" else sole
                             onValueChange(sole)
                             expanded = false
                         }
-                    }),
-                    decorationBox = { innerTextField ->
-                        Box(contentAlignment = Alignment.CenterStart) {
-                            // With clearOnFocus the field itself is empty, so the current pick is
-                            // what stands in for it — the field never looks blank.
-                            if (query.isEmpty() && value.isNotEmpty()) {
-                                Text(
-                                    text = value,
-                                    style = valueTextStyle ?: defaultValueStyle,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                            innerTextField()
+                    },
+                    onFocusChange = { focused ->
+                        if (focused) {
+                            expanded = true
+                        } else {
+                            expanded = false
+                            query = if (clearOnFocus) "" else value
                         }
                     },
-                    modifier = Modifier
-                        .focusRequester(focusRequester)
-                        .onFocusChanged { focusState ->
-                            if (focusState.isFocused) {
-                                expanded = true
-                            } else {
-                                expanded = false
-                                query = if (clearOnFocus) "" else value
-                            }
-                        }
                 )
             }
             Spacer(Modifier.width(4.dp))
-            if (onClear != null) {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_close),
-                    contentDescription = stringResource(Res.string.clear),
-                    modifier = Modifier
-                        .size(14.dp)
-                        .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
-                            // The typed text goes too: leaving a stale query behind would filter the
-                            // menu by a selection that no longer exists.
-                            query = if (clearOnFocus) "" else value
-                            expanded = false
-                            onClear()
-                        },
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(Modifier.width(6.dp))
-            }
-            Icon(
-                painter = painterResource(IconRes.drawable.ic_arrow_down),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(14.dp)
-                    .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
-                        if (expanded) {
-                            expanded = false
-                        } else {
-                            focusRequester.requestFocus()
-                            expanded = true
-                        }
-                    },
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            DropdownFieldIcons(
+                onClear = onClear?.let { clear ->
+                    {
+                        // The typed text goes too: leaving a stale query behind would filter the
+                        // menu by a selection that no longer exists.
+                        query = if (clearOnFocus) "" else value
+                        expanded = false
+                        clear()
+                    }
+                },
+                onChevron = {
+                    if (expanded) {
+                        expanded = false
+                    } else {
+                        focusRequester.requestFocus()
+                        expanded = true
+                    }
+                },
             )
         }
 
@@ -264,51 +214,161 @@ fun SearchableDropdownField(
             properties = PopupProperties(focusable = false),
             modifier = Modifier.width(menuWidth)
         ) {
-            val scrollState = rememberScrollState()
-            Box(modifier = Modifier.height(menuHeight).width(menuWidth)) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(menuHeight)
-                        .verticalScroll(scrollState)
-                        .padding(end = 10.dp)
-                ) {
-                    if (filteredOptions.isEmpty()) {
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    stringResource(Res.string.no_results_found, query),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                                )
-                            },
-                            onClick = {},
-                            enabled = false
-                        )
-                    } else {
-                        filteredOptions.forEach { option ->
-                            DropdownMenuItem(
-                                text = { itemContent(option) },
-                                onClick = {
-                                    query = if (clearOnFocus) "" else option
-                                    onValueChange(option)
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-                VerticalScrollbar(
-                    adapter = rememberScrollbarAdapter(scrollState),
-                    modifier = Modifier.align(Alignment.CenterEnd).height(menuHeight),
-                    style = LocalScrollbarStyle.current.copy(
-                        thickness = 8.dp,
-                        minimalHeight = 24.dp,
-                        unhoverColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
-                        hoverColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
-                    )
-                )
+            SearchableMenuItems(filteredOptions, query, menuWidth, menuHeight, itemContent) { option ->
+                query = if (clearOnFocus) "" else option
+                onValueChange(option)
+                expanded = false
             }
         }
     }
 }
+
+/** The clear button, when there is something to clear, then the chevron that opens or closes the menu. */
+@Composable
+private fun DropdownFieldIcons(onClear: (() -> Unit)?, onChevron: () -> Unit) {
+    if (onClear != null) {
+        Icon(
+            painter = painterResource(IconRes.drawable.ic_close),
+            contentDescription = stringResource(Res.string.clear),
+            modifier = Modifier
+                .size(14.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                ) { onClear() },
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.width(6.dp))
+    }
+    Icon(
+        painter = painterResource(IconRes.drawable.ic_arrow_down),
+        contentDescription = null,
+        modifier = Modifier
+            .size(14.dp)
+            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { onChevron() },
+        tint = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+}
+
+/** The menu's scrolling list: the options that match [query], or a line saying none do. */
+@Composable
+private fun SearchableMenuItems(
+    filteredOptions: List<String>,
+    query: String,
+    menuWidth: Dp,
+    menuHeight: Dp,
+    itemContent: @Composable (String) -> Unit,
+    onPick: (String) -> Unit,
+) {
+    val scrollState = rememberScrollState()
+    Box(modifier = Modifier.height(menuHeight).width(menuWidth)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(menuHeight)
+                .verticalScroll(scrollState)
+                .padding(end = 10.dp)
+        ) {
+            if (filteredOptions.isEmpty()) {
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            stringResource(Res.string.no_results_found, query),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    },
+                    onClick = {},
+                    enabled = false
+                )
+            } else {
+                filteredOptions.forEach { option ->
+                    DropdownMenuItem(
+                        text = { itemContent(option) },
+                        onClick = { onPick(option) }
+                    )
+                }
+            }
+        }
+        VerticalScrollbar(
+            adapter = rememberScrollbarAdapter(scrollState),
+            modifier = Modifier.align(Alignment.CenterEnd).height(menuHeight),
+            style = LocalScrollbarStyle.current.copy(
+                thickness = 8.dp,
+                minimalHeight = 24.dp,
+                unhoverColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+                hoverColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+            )
+        )
+    }
+}
+
+/** The small capitals above the value naming what the field is for. */
+@Composable
+private fun FieldLabel(label: String) {
+    Text(
+        text = label.uppercase(),
+        fontSize = 10.sp,
+        lineHeight = 11.sp,
+        fontWeight = FontWeight.SemiBold,
+        letterSpacing = 0.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
+    Spacer(Modifier.height(1.dp))
+}
+
+/**
+ * The search text itself. When [query] is empty the current pick, [shownValue], stands in for it,
+ * so the field never looks blank.
+ */
+@Composable
+private fun SearchQueryField(
+    query: String,
+    shownValue: String,
+    textStyle: TextStyle,
+    focusRequester: FocusRequester,
+    onQueryChange: (String) -> Unit,
+    onDone: () -> Unit,
+    onFocusChange: (Boolean) -> Unit,
+) {
+    BasicTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        singleLine = true,
+        maxLines = 1,
+        textStyle = textStyle,
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurfaceVariant),
+        interactionSource = remember { MutableInteractionSource() },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { onDone() }),
+        decorationBox = { innerTextField ->
+            Box(contentAlignment = Alignment.CenterStart) {
+                // With clearOnFocus the field itself is empty, so the current pick is
+                // what stands in for it — the field never looks blank.
+                if (query.isEmpty() && shownValue.isNotEmpty()) {
+                    Text(
+                        text = shownValue,
+                        style = textStyle,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                innerTextField()
+            }
+        },
+        modifier = Modifier
+            .focusRequester(focusRequester)
+            .onFocusChanged { focusState -> onFocusChange(focusState.isFocused) }
+    )
+}
+
+/** How the value reads when the caller gives no style of its own. */
+@Composable
+private fun defaultValueStyle(): TextStyle = MaterialTheme.typography.bodySmall.copy(
+    fontSize = 13.sp,
+    lineHeight = 14.sp,
+    fontWeight = FontWeight.Medium,
+    color = MaterialTheme.colorScheme.onSurfaceVariant
+)
