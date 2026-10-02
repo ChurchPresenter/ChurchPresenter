@@ -292,7 +292,7 @@ internal fun ElementPlacementRows(
 private val DURATION_RANGE_MS = 0..5000
 private const val DURATION_STEP = 100
 
-/** TRANSITION: fade in, fade out and how long; the crossfade between items is Advanced. */
+/** TRANSITION: fade in, fade out, the crossfade between items, and how long each takes. */
 @Composable
 internal fun TransitionGroup(
     fadeIn: Boolean,
@@ -331,7 +331,6 @@ internal fun TransitionGroup(
                 stringResource(Res.string.profile_crossfade),
                 crossfade,
                 onCrossfade,
-                advanced = true,
                 paths = path("crossfade"),
             )
         }

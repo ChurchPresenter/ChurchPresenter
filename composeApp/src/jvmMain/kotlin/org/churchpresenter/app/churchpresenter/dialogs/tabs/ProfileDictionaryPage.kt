@@ -216,7 +216,6 @@ private fun DictionaryPartRows(look: DictionaryLook, onChange: (DictionaryLook) 
             stringResource(Res.string.profile_text_shadow),
             shadow,
             { onChange(look.copy(shadow = it)) },
-            advanced = true,
             paths = p(look.names.shadow),
         )
         if (shadow) {

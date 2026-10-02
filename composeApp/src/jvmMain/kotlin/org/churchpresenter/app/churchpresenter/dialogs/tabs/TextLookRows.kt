@@ -40,7 +40,8 @@ private val STYLE_BUTTON = 26.dp
 
 /**
  * The Text group's rows: font, size, auto-fit, colour, style -- outline and highlight among its
- * buttons -- and alignment in Basic, and the letter case, spacing and shadow in Advanced.
+ * buttons -- alignment, letter case and shadow in Basic, and the chord colour, spacing and the
+ * shadow's own colour and size in Advanced.
  *
  * [leading] are the rows about the element itself rather than its look, drawn first: a song
  * element's own options, the reference's abbreviation. [autoFitScope] is drawn beside Auto-fit while
@@ -126,13 +127,16 @@ internal fun TextLookRows(
         )
     }
     extraBasic()
-    AdvancedTextRows(look, onChange, paths)
+    CaseSpacingShadowRows(look, onChange, paths)
     extraAdvanced()
 }
 
-/** The Text group's Advanced rows: chord colour, letter case, spacing, shadow. */
+/**
+ * The Text group's rows after alignment: the chord colour (Advanced), the letter case, the spacing
+ * (Advanced), and the shadow -- switched on in Basic, its colour and size Advanced.
+ */
 @Composable
-private fun AdvancedTextRows(look: TextLook, onChange: (TextLook) -> Unit, paths: TextLookPaths) {
+private fun CaseSpacingShadowRows(look: TextLook, onChange: (TextLook) -> Unit, paths: TextLookPaths) {
     look.chordColor?.let { chord ->
         SettingsRow(
             stringResource(Res.string.profile_text_chord_color),
@@ -144,7 +148,6 @@ private fun AdvancedTextRows(look: TextLook, onChange: (TextLook) -> Unit, paths
     }
     SettingsRow(
         stringResource(Res.string.profile_text_letter_case),
-        advanced = true,
         paths = paths[TextLookField.TRANSFORM],
     ) {
         RowSegmented(
@@ -186,7 +189,6 @@ private fun AdvancedTextRows(look: TextLook, onChange: (TextLook) -> Unit, paths
         stringResource(Res.string.profile_text_shadow),
         look.shadow,
         { onChange(look.copy(shadow = it)) },
-        advanced = true,
         paths = paths[TextLookField.SHADOW] + paths[TextLookField.SHADOW_DETAIL],
     )
     if (look.shadow) {
