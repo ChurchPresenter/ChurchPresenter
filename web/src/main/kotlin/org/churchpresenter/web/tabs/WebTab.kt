@@ -65,7 +65,6 @@ import org.jetbrains.compose.resources.stringResource
 /** A 16:9 output, for a preview with no output to measure. */
 private const val DEFAULT_PREVIEW_ASPECT_RATIO = 16f / 9f
 
-internal const val WEB_MOUSE_MOVE_THROTTLE_MS = 50
 internal const val WEB_SNAPSHOT_RETRY_DELAY_MS = 7000L
 private const val ZOOM_STEP = 0.5
 private const val ZOOM_FACTOR = 1.2

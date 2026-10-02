@@ -5,6 +5,7 @@ package org.churchpresenter.web.tabs
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
@@ -16,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import io.mockk.mockk
 import io.mockk.verify
 import org.cef.browser.CefBrowser
+import org.churchpresenter.settings.WebBookmark
 import org.churchpresenter.sharedui.models.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -177,6 +179,108 @@ class WebTabBrowserBridgeTest {
         val urlField = onAllNodes(hasSetTextAction())[0].fetchSemanticsNode().boundsInRoot
 
         assertTrue(urlField.top < back.bottom, "the URL bar shares the row with the toolbar at full width")
+    }
+
+    // ── Navigation while live ───────────────────────────────────────────────────
+
+    /** Live, mirroring, with [browser] as the live window's browser. */
+    private fun androidx.compose.ui.test.ComposeUiTest.liveWith(presenter: FakeWebOutput, browser: CefBrowser) {
+        presenter.setPresentingMode(Presenting.WEBSITE)
+        presenter.setLiveBrowser(browser)
+        waitForIdle()
+    }
+
+    @Test
+    fun `while mirroring, Back Forward and Refresh drive the live browser`() = webTab { presenter, _ ->
+        val browser = mockk<CefBrowser>(relaxed = true)
+        liveWith(presenter, browser)
+
+        webButton(WebLabel.BACK).performClick()
+        webButton(WebLabel.FORWARD).performClick()
+        webButton(WebLabel.REFRESH).performClick()
+
+        verify { browser.goBack() }
+        verify { browser.goForward() }
+        verify { browser.reload() }
+    }
+
+    @Test
+    fun `in interactive mode Back Forward and Refresh leave the live browser alone`() = webTab { presenter, _ ->
+        val browser = mockk<CefBrowser>(relaxed = true)
+        liveWith(presenter, browser)
+        onNodeWithText(WebLabel.MIRROR).performClick()
+        waitForIdle()
+
+        webButton(WebLabel.BACK).performClick()
+        webButton(WebLabel.FORWARD).performClick()
+        webButton(WebLabel.REFRESH).performClick()
+
+        verify(exactly = 0) { browser.goBack() }
+        verify(exactly = 0) { browser.goForward() }
+        verify(exactly = 0) { browser.reload() }
+    }
+
+    @Test
+    fun `a bookmark chip clicked while live loads it into the live browser`() = webTab(
+        settings = { it.copy(webBookmarks = listOf(WebBookmark(url = "https://a.example", title = ""))) },
+    ) { presenter, _ ->
+        val browser = mockk<CefBrowser>(relaxed = true)
+        liveWith(presenter, browser)
+
+        // A chip with no title shows its address instead.
+        onAllNodesWithText("https://a.example")[0].performClick()
+        waitForIdle()
+
+        assertEquals("https://a.example", presenter.websiteUrl.value)
+        verify { browser.loadURL("https://a.example") }
+    }
+
+    // ── Type to page ────────────────────────────────────────────────────────────
+
+    @Test
+    fun `shortening the typed text sends one backspace per removed character`() = webTab { presenter, _ ->
+        val browser = mockk<CefBrowser>(relaxed = true)
+        liveWith(presenter, browser)
+
+        onNodeWithText(WebLabel.TYPE_TO_PAGE_PLACEHOLDER).performTextInput("abc")
+        onNodeWithText("abc").performTextReplacement("a")
+        waitForIdle()
+
+        verify(exactly = 2) { browser.executeJavaScript(WEB_JS_BACKSPACE, "", 0) }
+    }
+
+    @Test
+    fun `the clear button empties the typed text without touching the page`() = webTab { presenter, _ ->
+        val browser = mockk<CefBrowser>(relaxed = true)
+        liveWith(presenter, browser)
+        onNodeWithText(WebLabel.TYPE_TO_PAGE_PLACEHOLDER).performTextInput("x")
+
+        webButton(WebLabel.CLEAR_TYPED_TEXT).performClick()
+        waitForIdle()
+
+        onNodeWithText(WebLabel.TYPE_TO_PAGE_PLACEHOLDER).assertExists()
+        verify(exactly = 0) { browser.executeJavaScript(WEB_JS_BACKSPACE, "", 0) }
+    }
+
+    @Test
+    fun `control characters are escaped before they reach the page`() {
+        assertTrue("\"\\n\"" in jsInsert('\n'))
+        assertTrue("\"\\r\"" in jsInsert('\r'))
+        assertTrue("\"\\t\"" in jsInsert('\t'))
+        assertTrue("\"\\u0001\"" in jsInsert('\u0001'))
+        assertTrue("\"é\"" in jsInsert('é'), "printable text goes through as itself")
+    }
+
+    // ── The address bar ─────────────────────────────────────────────────────────
+
+    @Test
+    fun `clearing the address shows the example address as a hint`() = webTab { _, _ ->
+        onNodeWithText(WebLabel.URL_PLACEHOLDER_DEFAULT).performTextReplacement("example.com")
+        webButton(WebLabel.CLEAR_URL).performClick()
+        waitForIdle()
+
+        onNodeWithText(WebLabel.URL_HINT).assertExists()
+        assertTrue(!hasWebButton(WebLabel.CLEAR_URL), "nothing left to clear")
     }
 
     // ── Real defaults ─────────────────────────────────────────────────────────────

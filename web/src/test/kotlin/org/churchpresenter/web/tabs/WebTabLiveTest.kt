@@ -5,6 +5,9 @@ package org.churchpresenter.web.tabs
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import io.mockk.mockk
+import io.mockk.verify
+import org.cef.browser.CefBrowser
 import org.churchpresenter.sharedui.models.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -77,5 +80,55 @@ class WebTabLiveTest {
 
         onNodeWithText(WebLabel.LIVE_BADGE).assertDoesNotExist()
         assertEquals(null, presenter.webSnapshot.value)
+    }
+
+    @Test
+    fun `a title the presenter reports for a loaded page retitles its schedule item`() = webTab { presenter, reports ->
+        presenter.setPresentingMode(Presenting.WEBSITE)
+        waitForIdle()
+        presenter.setWebsiteUrl("https://live.example")
+        waitForIdle()
+        presenter.setWebPageTitle("Loaded Later")
+        waitForIdle()
+
+        assertEquals(listOf("https://live.example" to "Loaded Later"), reports.titleUpdates)
+    }
+
+    @Test
+    fun `in interactive mode the presenter's navigation does not move the address bar`() =
+        webTab { presenter, reports ->
+        presenter.setPresentingMode(Presenting.WEBSITE)
+        waitForIdle()
+        onNodeWithText(WebLabel.MIRROR).performClick()
+        waitForIdle()
+
+        presenter.setWebsiteUrl("https://elsewhere.example")
+        presenter.setWebPageTitle("Elsewhere")
+        waitForIdle()
+
+        // The operator is browsing their own copy; the live window wandering off must not drag it along.
+        onNodeWithText("https://elsewhere.example").assertDoesNotExist()
+        assertEquals(emptyList(), reports.titleUpdates)
+    }
+
+    @Test
+    fun `a live browser that attaches while live is given the tab's zoom`() = webTab { presenter, _ ->
+        presenter.setPresentingMode(Presenting.WEBSITE)
+        waitForIdle()
+
+        val browser = mockk<CefBrowser>(relaxed = true)
+        presenter.setLiveBrowser(browser)
+        waitForIdle()
+
+        verify { browser.setZoomLevel(0.0) }
+    }
+
+    @Test
+    fun `a live browser that attaches while not live is left alone`() = webTab { presenter, _ ->
+        val browser = mockk<CefBrowser>(relaxed = true)
+        presenter.setLiveBrowser(browser)
+        waitForIdle()
+
+        verify(exactly = 0) { browser.setZoomLevel(any()) }
     }
 }
