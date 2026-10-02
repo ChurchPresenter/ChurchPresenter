@@ -128,4 +128,26 @@ class LottieBandDriverTest {
         }
         assertEquals(enterThenSwap, phases)
     }
+
+    @Test
+    fun `a section re-sent with a new capo leaves the song band holding`() = runComposeUiTest {
+        val manager = PresenterManager()
+        val section = LyricSection(type = "verse", lines = listOf("Amazing grace", "how sweet the sound"))
+        effects(manager, settings(bible = false, song = true))
+        manager.setLyricSection(section)
+        manager.setPresentingMode(Presenting.LYRICS)
+        waitUntil("the band holds") { manager.lottieBandClock.value.phase == BibleBandPhase.HOLD }
+
+        manager.setLyricSection(section.copy(capo = 3))
+        waitUntil("the re-tuned section is on the output and the band holds") {
+            manager.displayedLyricSection.value.capo == 3 &&
+                manager.lottieBandClock.value.phase == BibleBandPhase.HOLD
+        }
+        waitForIdle()
+        assertEquals(
+            listOf(BibleBandPhase.IDLE, BibleBandPhase.ENTER, BibleBandPhase.HOLD),
+            phases,
+            "the same words re-sent with a capo must not play the text out and back in",
+        )
+    }
 }
