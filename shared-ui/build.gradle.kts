@@ -34,9 +34,9 @@ dependencies {
     // The file chooser: DBus for the Linux portal, FileKit for the native Windows and macOS
     // dialogs. FileKit's own native UNIX transport conflicts with the junixsocket one, so it is
     // excluded -- see the same note in composeApp/build.gradle.kts.
-    implementation("com.github.hypfvieh:dbus-java-core:5.2.0")
-    implementation("com.github.hypfvieh:dbus-java-transport-junixsocket:5.2.0")
-    implementation("io.github.vinceglb:filekit-dialogs:${libs.versions.filekit.get()}") {
+    implementation(libs.dbus.java.core)
+    implementation(libs.dbus.java.transport.junixsocket)
+    implementation(libs.filekit.dialogs) {
         exclude(group = "com.github.hypfvieh", module = "dbus-java-transport-native-unixsocket")
     }
 

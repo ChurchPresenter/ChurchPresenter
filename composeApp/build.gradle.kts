@@ -405,16 +405,11 @@ kotlin {
                 }
             }
             // DBus for Linux file chooser integration.
-            implementation("com.github.hypfvieh:dbus-java-core:5.2.0")
-            implementation("com.github.hypfvieh:dbus-java-transport-junixsocket:5.2.0")
-            // FileKit — native OS file dialogs (Windows Explorer dialog, macOS NSOpenPanel).
-            // filekit-dialogs-jvm transitively pulls in dbus-java-transport-native-unixsocket,
-            // which conflicts with the junixsocket transport above — TransportBuilder throws
-            // TransportRegistrationException if both UNIX transport providers are on the
-            // classpath at once, so the native one must be excluded here.
-            implementation("io.github.vinceglb:filekit-dialogs:${libs.versions.filekit.get()}") {
-                exclude(group = "com.github.hypfvieh", module = "dbus-java-transport-native-unixsocket")
-            }
+            implementation(libs.dbus.java.core)
+            implementation(libs.dbus.java.transport.junixsocket)
+            // FileKit — native OS file dialogs (Windows Explorer dialog, macOS NSOpenPanel). Its
+            // native UNIX transport is excluded graph-wide below.
+            implementation(libs.filekit.dialogs)
         }
     }
 }
@@ -774,6 +769,11 @@ val generateBuildConfig = tasks.register("generateBuildConfig") {
 // through :presentation-engine or :converter can bring the lite jar back.
 configurations.configureEach {
     exclude(group = "org.apache.poi", module = "poi-ooxml-lite")
+    // filekit-dialogs-jvm transitively pulls in dbus-java-transport-native-unixsocket, which
+    // conflicts with the junixsocket transport the app uses -- TransportBuilder throws
+    // TransportRegistrationException if both UNIX transport providers are on the classpath at once.
+    // Excluded graph-wide so neither FileKit nor :shared-ui's file chooser can bring it back.
+    exclude(group = "com.github.hypfvieh", module = "dbus-java-transport-native-unixsocket")
 }
 
 kotlin {

@@ -29,6 +29,7 @@ pdfbox = "2.0.33"
 aircompressor = "2.0.2"
 junitJupiter = "5.10.2"
 filekit = "0.15.0"
+dbus-java = "5.2.0"
 twelvemonkeys-imageio = "3.10.1"
 
 [libraries]
@@ -90,6 +91,8 @@ aircompressor = { module = "io.airlift:aircompressor", version.ref = "aircompres
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junitJupiter" }
 socket-io-client = { module = "io.socket:socket.io-client", version = "2.1.1" }
 filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
+dbus-java-core = { module = "com.github.hypfvieh:dbus-java-core", version.ref = "dbus-java" }
+dbus-java-transport-junixsocket = { module = "com.github.hypfvieh:dbus-java-transport-junixsocket", version.ref = "dbus-java" }
 roborazzi-composeDesktop = { module = "io.github.takahirom.roborazzi:roborazzi-compose-desktop", version.ref = "roborazzi" }
 
 [plugins]
