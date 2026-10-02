@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -16,11 +15,8 @@ import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.graphics.Color
 import org.churchpresenter.sharedui.composables.LocalOutputCursorHidden
 import org.churchpresenter.sharedui.composables.outputCursorScript
-import org.churchpresenter.diagnostics.CrashReporter
-import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.settings.utils.Constants
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.toComposeImageBitmap
 import me.friwi.jcefmaven.CefAppBuilder
 import me.friwi.jcefmaven.MavenCefAppHandlerAdapter
 import me.friwi.jcefmaven.impl.progress.ConsoleProgressHandler
@@ -28,22 +24,15 @@ import org.cef.CefApp
 import org.cef.CefClient
 import org.cef.browser.CefBrowser
 import org.cef.browser.CefFrame
-import org.cef.handler.CefDisplayHandlerAdapter
-import org.cef.handler.CefLifeSpanHandlerAdapter
-import org.cef.handler.CefLoadHandlerAdapter
-import org.cef.handler.CefRequestHandlerAdapter
-import org.cef.handler.CefResourceRequestHandlerAdapter
-import org.cef.handler.CefResourceRequestHandler
-import org.cef.misc.BoolRef
 import org.cef.network.CefRequest
+import java.awt.Component
 import java.awt.Rectangle
 import java.awt.Robot
+import java.awt.image.BufferedImage
 import java.io.File
 import javax.swing.Timer
 import kotlinx.coroutines.delay
 import java.lang.invoke.MethodHandles
-
-private const val ASCII_MAX = 128
 
 /**
  * Free space JCEF needs to unpack, with room to spare — the download is a bundled Chromium and runs
@@ -51,6 +40,7 @@ private const val ASCII_MAX = 128
  */
 private const val JCEF_REQUIRED_BYTES = 400L * 1024 * 1024
 private const val AUDIO_INIT_DELAY_MS = 2000L
+private const val SNAPSHOT_INTERVAL_MS = 150
 private const val AUDIO_RETRY_DELAY_MS = 5000L
 
 /**
@@ -152,29 +142,37 @@ internal object JcefInstall {
      *
      * The throw is the point: it is what tells [installIntoFirstUsableRoot] this root did not work.
      */
-    fun buildCefApp(root: File): CefApp {
+    fun buildCefApp(root: File): CefApp =
+        CefAppBuilder().also { configure(it, root, readDmiTexts()) }.build()
+
+    /**
+     * Points [builder] at [root] — the engine under `jcef`, its cache under `webview-cache` — and
+     * falls back to software rendering when [dmiTexts] name a virtual machine, whose GPU drivers
+     * Chromium cannot rely on.
+     */
+    internal fun configure(builder: CefAppBuilder, root: File, dmiTexts: List<String>) {
         val installDir = File(root, "jcef")
         installDir.mkdirs()
         val cacheDir = File(root, "webview-cache")
         cacheDir.mkdirs()
 
-        val builder = CefAppBuilder()
         builder.setInstallDir(installDir)
         builder.setProgressHandler(ConsoleProgressHandler())
         builder.setAppHandler(object : MavenCefAppHandlerAdapter() {})
         builder.cefSettings.windowless_rendering_enabled = false
         builder.cefSettings.cache_path = cacheDir.absolutePath
-        // Fallback to software rendering on VMs / systems without proper GPU drivers
-        val dmiTexts = listOf("product_name", "sys_vendor").mapNotNull { file ->
-            runCatching { File("/sys/class/dmi/id/$file").readText().trim() }.getOrNull()
-        }
         if (isVirtualizedEnvironment(dmiTexts)) {
             builder.addJcefArgs("--disable-gpu")
             builder.addJcefArgs("--disable-gpu-compositing")
             builder.addJcefArgs("--enable-unsafe-swiftshader")
         }
-        return builder.build()
     }
+
+    /** The machine's DMI product and vendor names, where Linux exposes them; empty everywhere else. */
+    internal fun readDmiTexts(dmiDir: File = File("/sys/class/dmi/id")): List<String> =
+        listOf("product_name", "sys_vendor").mapNotNull { file ->
+            runCatching { File(dmiDir, file).readText().trim() }.getOrNull()
+        }
 
     /**
      * [build] against [root], and once more after wiping `root/jcef` when the native load fails.
@@ -254,25 +252,23 @@ internal object JcefInstall {
  * Must call [init] once at startup before any WebView is used.
  */
 object CefManager {
-    private var cefApp: CefApp? = null
+    /** The engine the app runs on: its state, and what an install's outcome means for it. */
+    private val engine = CefEngine()
 
     /**
-     * Whether a usable [CefApp] exists right now.
+     * Whether a usable engine exists right now.
      *
-     * Compose-backed rather than a plain `var` because it can go from true to false mid-session:
-     * [createClient] clears it when the native side turns out to be dead, and the tab's
-     * "web engine unavailable" panel is only reached if that write recomposes its reader.
+     * Compose-backed, because it can go from true to false mid-session: [createClient] clears it when
+     * the native side turns out to be dead, and the tab's "web engine unavailable" panel is only
+     * reached if that write recomposes its reader.
      */
-    var initialized by mutableStateOf(false)
-        private set
+    val initialized: Boolean get() = engine.initialized
 
     /** True when [init] was skipped because the running macOS version is below [MIN_MACOS_MAJOR]. */
-    var macOsUnsupported = false
-        private set
+    val macOsUnsupported: Boolean get() = engine.macOsUnsupported
 
     /** True when [init] was skipped because this Windows predates Windows 10 -- see [isUnsupportedWindowsForJcef]. */
-    var windowsUnsupported = false
-        private set
+    val windowsUnsupported: Boolean get() = engine.windowsUnsupported
 
     /**
      * The root the browser engine actually installed into, once it has.
@@ -282,8 +278,7 @@ object CefManager {
      * hardcoded home path names a directory the engine never used — deleting nothing while the
      * live cache stays where it is.
      */
-    @Volatile var installRoot: File? = null
-        private set
+    val installRoot: File? get() = engine.installRoot
 
     /** The engine's disk cache, or null before it has installed. */
     val webviewCacheDir: File? get() = installRoot?.let { File(it, "webview-cache") }
@@ -297,8 +292,7 @@ object CefManager {
      * that, and the operator cannot act on "install the Visual C++ Redistributable", which is what
      * the Web tab otherwise tells them.
      */
-    var blockedByPolicy = false
-        private set
+    val blockedByPolicy: Boolean get() = engine.blockedByPolicy
 
     /**
      * Chromium 139+ (bundled here as CEF 143, see build.gradle.kts) dropped support for
@@ -396,119 +390,18 @@ object CefManager {
         }.apply { isDaemon = true; name = "jcef-legacy-cleanup" }.start()
     }
 
-    fun init() {
-        if (initialized) return
-        if (isUnsupportedMacOS()) {
-            macOsUnsupported = true
-            return
-        }
-        if (isUnsupportedWindowsForJcef()) {
-            windowsUnsupported = true
-            return
-        }
+    fun init() = engine.init(isUnsupportedMacOS(), isUnsupportedWindowsForJcef()) {
         // Must run before any JCEF class is loaded — CefBrowserWindowMac.getWindowHandle()
         // directly references sun.awt.AWTAccessor which the JVM module system blocks by default.
         patchJcefModuleAccess()
-        applyInstallOutcome(
-            JcefInstall.install { root -> cefApp = JcefInstall.buildRepairing(root, JcefInstall::buildCefApp) }
-        )
-    }
-
-    /** Sets the engine's state from [outcome], reporting only a failure that is ours. */
-    private fun applyInstallOutcome(outcome: JcefInstall.Outcome) = when (outcome) {
-        is JcefInstall.Outcome.Installed -> {
-            initialized = true
-            installRoot = outcome.root
-            runCatching { CrashReporter.setTag("jcef.install_root", outcome.root.name) }
-            // Now that the relocated install works, reclaim the orphaned old footprint.
-            cleanupLegacyJcef(outcome.root)
-        }
-        is JcefInstall.Outcome.Blocked -> {
-            engineUnavailable()
-            Log.warn("JCEF", "Not installing: ${outcome.reason}")
-            // No event: web features simply stay unavailable, which jcef.available already
-            // says. The tag rides along on anything else this session reports.
-            runCatching { CrashReporter.setTag("jcef.blocked", outcome.reason) }
-            Unit
-        }
-        is JcefInstall.Outcome.Failed -> {
-            engineUnavailable()
-            reportInstallFailure(outcome)
+        JcefInstall.install { root ->
+            val app = JcefInstall.buildRepairing(root, JcefInstall::buildCefApp)
+            engine.clientSource = app::createClient
         }
     }
 
-    /** Leaves the web engine off for this session. */
-    private fun engineUnavailable() {
-        cefApp = null
-        initialized = false
-    }
-
-    /**
-     * Reports an install that ran and threw, after every candidate root had its turn — so this is
-     * the engine being genuinely unavailable, not one directory being unusable.
-     *
-     * JCEF native load can fail with UnsatisfiedLinkError (an Error, not an Exception) — e.g. a
-     * broken/partial chrome_elf.dll install, a missing VC++ runtime, or a non-ASCII install path.
-     * All of it is caught so the app does not crash at startup; embedded web features simply stay
-     * unavailable.
-     */
-    private fun reportInstallFailure(outcome: JcefInstall.Outcome.Failed) {
-        val installDir = File(outcome.root, "jcef")
-        // Best-effort telemetry: distinguish the accented-path theory from the
-        // VC++-runtime theory at a glance in Sentry. Never let telemetry throw.
-        runCatching {
-            CrashReporter.setTag("jcef.path_ascii", installDir.path.all { it.code < ASCII_MAX }.toString())
-            CrashReporter.setTag("jcef.install_root", outcome.root.name)
-            CrashReporter.setContext("jcef", mapOf(
-                "installDir" to installDir.path,
-                "os" to (System.getProperty("os.name") ?: ""),
-                "arch" to (System.getProperty("os.arch") ?: "")
-            ))
-        }
-        // A policy block is the machine, not a defect, and it recurs on every launch of every
-        // affected install — so it is tagged and told to the operator rather than reported,
-        // exactly as the two blockers checked before the download are.
-        val policy = JcefInstall.policyBlock(outcome.cause.message)
-        if (policy != null) {
-            blockedByPolicy = true
-            Log.warn("JCEF", "Blocked by this machine's software policy: ${outcome.cause.message}")
-            runCatching { CrashReporter.setTag("jcef.blocked", policy) }
-            return
-        }
-        CrashReporter.reportException(outcome.cause, context = "CefManager.init")
-    }
-
-    /**
-     * A client for a new browser, or null when the web engine cannot provide one.
-     *
-     * [CefAppBuilder.build] returning normally is not a promise that the native side came up:
-     * jcefmaven hands back the process-wide singleton, whose startup can fail afterwards and
-     * asynchronously, leaving it in `INITIALIZATION_FAILED`. `CefApp.createClient()` then throws —
-     * and the only caller is [EmbeddedWebView], inside a `remember`, so the throw landed in
-     * composition on the UI thread and took the whole app down.
-     *
-     * Recovering is simply returning null, which every caller already handles by drawing nothing.
-     * [initialized] is cleared with it so the tab falls back to its explanatory panel and nothing
-     * asks a second time. Filed as a warning, not an exception: the condition is recovered, and an
-     * exception here would write a `crash-reports/` file for a session that carries on.
-     */
-    fun createClient(): CefClient? {
-        val app = cefApp ?: return null
-        return try {
-            app.createClient()
-        } catch (@Suppress("TooGenericExceptionCaught") t: Throwable) {
-            // JCEF's native side fails with Errors (UnsatisfiedLinkError and the like), not Exceptions.
-            cefApp = null
-            initialized = false
-            runCatching { CrashReporter.setTag("jcef.blocked", "client_creation_failed") }
-            CrashReporter.reportWarning(
-                "JCEF client creation failed; web features disabled for this session",
-                throwable = t,
-                tags = mapOf("subsystem" to "webview", "jcef.recovered" to "true"),
-            )
-            null
-        }
-    }
+    /** A client for a new browser, or null when the web engine cannot provide one; see [CefEngine.createClient]. */
+    fun createClient(): CefClient? = engine.createClient()
 
     fun dispose() {
         // Intentionally no-op — calling CefApp.dispose() during shutdown
@@ -628,8 +521,47 @@ fun EmbeddedWebView(
     onBrowserCreated: ((CefBrowser) -> Unit)? = null
 ) {
     if (url.isBlank() || !CefManager.initialized) return
+    EmbeddedBrowser(
+        url = url,
+        modifier = modifier,
+        onUrlChanged = onUrlChanged,
+        onTitleChanged = onTitleChanged,
+        onSnapshot = onSnapshot,
+        navController = navController,
+        onBrowserCreated = onBrowserCreated,
+        createClient = CefManager::createClient,
+        capture = remember { screenCapture() },
+    )
+}
 
-    val client = remember { CefManager.createClient() } ?: return
+/** The screen capture snapshots are taken with, or null where there is none (a headless JVM). */
+private fun screenCapture(): ((Rectangle) -> BufferedImage)? =
+    runCatching { Robot() }.getOrNull()?.let { robot -> robot::createScreenCapture }
+
+/**
+ * [EmbeddedWebView] once the engine is up: a browser from [createClient]'s client, wired to the
+ * callbacks, and drawn by [panel].
+ *
+ * The three things only a running Chromium and a real screen provide come in as parameters — the
+ * client, the AWT bridge that draws the browser's component ([panel], a `SwingPanel`), and the
+ * screen [capture] snapshots are taken with — so everything else here runs under test.
+ */
+@Composable
+internal fun EmbeddedBrowser(
+    url: String,
+    modifier: Modifier,
+    onUrlChanged: ((String) -> Unit)?,
+    onTitleChanged: ((String) -> Unit)?,
+    onSnapshot: ((ImageBitmap) -> Unit)?,
+    navController: WebNavController?,
+    onBrowserCreated: ((CefBrowser) -> Unit)?,
+    createClient: () -> CefClient?,
+    capture: ((Rectangle) -> BufferedImage)?,
+    panel: @Composable (Component, Modifier) -> Unit = { component, panelModifier ->
+        SwingPanel(modifier = panelModifier, factory = { component })
+    },
+) {
+    val client = remember { createClient() } ?: return
     val initialUrl = remember { url }
     // createBrowser asks JCEF for the global CefRequestContext, which answers null once the native
     // side is down — and the caller then reads a field off it, so this arrived as
@@ -652,71 +584,16 @@ fun EmbeddedWebView(
     }
 
     DisposableEffect(Unit) {
-        val displayHandler = object : CefDisplayHandlerAdapter() {
-            override fun onAddressChange(browser: CefBrowser, frame: CefFrame, url: String) {
-                handleAddressChange(frame, url, onUrlChanged)
-            }
-            override fun onTitleChange(browser: CefBrowser, title: String) {
-                onTitleChanged?.invoke(title)
-            }
-        }
-        client.addDisplayHandler(displayHandler)
-
+        client.addDisplayHandler(PageDisplayHandler(onUrlChanged, onTitleChanged))
         // Intercept popups (target="_blank" links) — load in current browser instead
-        val lifeSpanHandler = object : CefLifeSpanHandlerAdapter() {
-            override fun onBeforePopup(
-                browser: CefBrowser, frame: CefFrame, targetUrl: String?, targetFrameName: String?
-            ): Boolean {
-                handlePopupTarget(browser, targetUrl)
-                return true // cancel the popup
-            }
-        }
-        client.addLifeSpanHandler(lifeSpanHandler)
+        client.addLifeSpanHandler(PopupsInPlace)
+        client.addRequestHandler(MobileUserAgentHandler { navController?.mobileMode == true })
+        client.addLoadHandler(CursorRestoringLoadHandler { hideCursorState.value })
 
-        // Override User-Agent for mobile emulation
-        val requestHandler = object : CefRequestHandlerAdapter() {
-            override fun getResourceRequestHandler(
-                browser: CefBrowser?, frame: CefFrame?, request: CefRequest?,
-                isNavigation: Boolean, isDownload: Boolean, requestInitiator: String?,
-                disableDefaultHandling: BoolRef?
-            ): CefResourceRequestHandler {
-                return object : CefResourceRequestHandlerAdapter() {
-                    override fun onBeforeResourceLoad(
-                        browser: CefBrowser?,
-                        frame: CefFrame?,
-                        request: CefRequest?
-                    ): Boolean {
-                        applyMobileUserAgent(navController?.mobileMode == true, request)
-                        return false
-                    }
-                }
-            }
-        }
-        client.addRequestHandler(requestHandler)
-
-        // A new page starts without the hidden-pointer style, so it is put back on every load.
-        val loadHandler = object : CefLoadHandlerAdapter() {
-            override fun onLoadEnd(browser: CefBrowser, frame: CefFrame, httpStatusCode: Int) {
-                if (frame.isMain && hideCursorState.value) {
-                    browser.executeJavaScript(outputCursorScript(hide = true), "", 0)
-                }
-            }
-        }
-        client.addLoadHandler(loadHandler)
-
-        // Snapshot timer — captures browser via Robot screen capture
-        val robot = try { Robot() } catch (_: Exception) { null }
-        val timer = if (onSnapshot != null && robot != null) {
-            Timer(150) {
-                try {
-                    val comp = browser.getUIComponent()
-                    if (comp.width > 0 && comp.height > 0 && comp.isShowing) {
-                        val loc = comp.locationOnScreen
-                        val rect = Rectangle(loc.x, loc.y, comp.width, comp.height)
-                        val img = robot.createScreenCapture(rect)
-                        onSnapshot(img.toComposeImageBitmap())
-                    }
-                } catch (_: Exception) {}
+        // Snapshot timer — captures the browser's area of the screen
+        val timer = if (onSnapshot != null && capture != null) {
+            Timer(SNAPSHOT_INTERVAL_MS) {
+                captureSnapshot(browser.getUIComponent(), capture)?.let(onSnapshot)
             }.also { it.start() }
         } else null
 
@@ -751,10 +628,7 @@ fun EmbeddedWebView(
     }
 
     Box(modifier = modifier.background(Color.Black)) {
-        SwingPanel(
-            modifier = Modifier.fillMaxSize(),
-            factory = { browser.getUIComponent() }
-        )
+        panel(browser.getUIComponent(), Modifier.fillMaxSize())
     }
 }
 

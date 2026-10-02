@@ -131,4 +131,15 @@ class WebTabLiveTest {
 
         verify(exactly = 0) { browser.setZoomLevel(any()) }
     }
+
+    @Test
+    fun `a title that arrives before its address has no schedule item to retitle yet`() = webTab { presenter, reports ->
+        presenter.setPresentingMode(Presenting.WEBSITE)
+        waitForIdle()
+        presenter.setWebPageTitle("Early Title")
+        waitForIdle()
+
+        onNodeWithText("Early Title").assertExists()
+        assertEquals(emptyList(), reports.titleUpdates)
+    }
 }

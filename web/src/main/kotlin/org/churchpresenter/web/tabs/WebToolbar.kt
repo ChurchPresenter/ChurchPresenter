@@ -59,9 +59,9 @@ import org.churchpresenter.strings.generated.resources.web_type_to_page_placehol
 import org.churchpresenter.strings.generated.resources.web_url_hint
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.profileFor
+import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.WebBookmark
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.sharedui.utils.rememberScreenDevices
 import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.churchpresenter.sharedui.composables.AddToScheduleButton
@@ -109,15 +109,8 @@ private fun WebTabScope.WebToolbar() {
     val actionButtonsWidth = 320.dp // bookmark + Add to Schedule + Go Live
     val minUrlWidth = 200.dp
 
-    val hasSecondaryDisplay = rememberScreenDevices().size > 1
-    // Web can only go live if at least one regular (non-DeckLink) fill output has showWebsite enabled
     val hasWebCapableOutput = remember(appSettings.projectionSettings) {
-        val proj = appSettings.projectionSettings
-        val assignments = (0 until proj.screenAssignments.size).map { proj.getAssignment(it) }
-        assignments.any {
-            it.targetType != Constants.TARGET_TYPE_DECKLINK && it.targetDisplay >= 0 &&
-                (proj.profileFor(it)?.showWebsite ?: false)
-        }
+        hasWebCapableOutput(appSettings.projectionSettings)
     }
 
     // Shared composables for URL bar and action buttons
@@ -473,3 +466,13 @@ private fun WebTabScope.WebTypeToPage() {
         )
     }
 }
+
+/**
+ * Whether a website can go live anywhere: on at least one regular (not DeckLink) output, assigned to
+ * a display, whose profile shows websites.
+ */
+internal fun hasWebCapableOutput(proj: ProjectionSettings): Boolean =
+    proj.screenAssignments.any {
+        it.targetType != Constants.TARGET_TYPE_DECKLINK && it.targetDisplay >= 0 &&
+            proj.profileFor(it)?.showWebsite == true
+    }

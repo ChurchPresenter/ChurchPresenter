@@ -58,6 +58,7 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.web.presenter.WebNavController
 import org.churchpresenter.web.presenter.rememberWebNavController
 import org.churchpresenter.web.WebOutput
+import org.churchpresenter.sharedui.utils.rememberScreenDevices
 import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -91,6 +92,8 @@ fun WebTab(
     cefInitialized: Boolean = CefManager.initialized,
     cefMacOsUnsupported: Boolean = CefManager.macOsUnsupported,
     cefBlockedByPolicy: Boolean = CefManager.blockedByPolicy,
+    /** Whether a screen beyond the operator's own is attached; overridable for the same reason. */
+    hasSecondaryDisplay: Boolean = rememberScreenDevices().size > 1,
     /**
      * Width over height of the output the preview stands in for. The app reads it from the preview
      * output the operator picked, so the embedded browser lays the page out at the shape it goes
@@ -122,7 +125,7 @@ fun WebTab(
     // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
     val tab = remember(
         output, appSettings, onSettingsChange, onAddToSchedule, onUpdateScheduleTitle, state, isLive,
-        navController, previewAspectRatio, outputPicker
+        navController, previewAspectRatio, outputPicker, hasSecondaryDisplay
     ) {
         WebTabScope(
             output = output,
@@ -135,6 +138,7 @@ fun WebTab(
             navController = navController,
             previewAspectRatio = previewAspectRatio,
             outputPicker = outputPicker,
+            hasSecondaryDisplay = hasSecondaryDisplay,
         )
     }
     tab.WebTabEffects(selectedWebsiteItem, selectedWebsiteItemVersion)

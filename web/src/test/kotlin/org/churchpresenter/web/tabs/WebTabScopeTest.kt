@@ -112,6 +112,25 @@ class WebTabScopeTest {
     }
 
     @Test
+    fun `a title for a loaded page with no schedule to retitle still reaches the output`() {
+        val s = WebTabScope(
+            output = output,
+            appSettings = AppSettings(),
+            onSettingsChange = {},
+            onAddToSchedule = null,
+            onUpdateScheduleTitle = null,
+            state = WebTabState(savedUrl = "https://a.org", savedTitle = ""),
+            isLive = false,
+            navController = WebNavController(),
+            previewAspectRatio = 1f,
+            outputPicker = {},
+        )
+        s.onTitleChanged("A")
+
+        assertEquals("A", output.webPageTitle.value)
+    }
+
+    @Test
     fun `with no output every handler still updates the tab`() {
         val s = scope(isLive = true, output = null)
         s.onPreviewNavigated("https://c.org")

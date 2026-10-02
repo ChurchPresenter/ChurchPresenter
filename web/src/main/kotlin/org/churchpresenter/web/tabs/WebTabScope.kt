@@ -53,6 +53,8 @@ internal class WebTabScope(
     val navController: WebNavController,
     val previewAspectRatio: Float,
     val outputPicker: @Composable (Modifier) -> Unit,
+    /** Whether a screen beyond the operator's own is attached, as Go Live needs. */
+    val hasSecondaryDisplay: Boolean = false,
 ) {
     var urlInput by state::urlInput
     var liveUrl by state::liveUrl

@@ -73,6 +73,7 @@ internal fun webTab(
     cefInitialized: Boolean = true,
     cefMacOsUnsupported: Boolean = false,
     cefBlockedByPolicy: Boolean = false,
+    hasSecondaryDisplay: Boolean = false,
     includeAddToSchedule: Boolean = true,
     /**
      * Constrains the tab's width.
@@ -106,6 +107,7 @@ internal fun webTab(
                         cefInitialized = cefInitialized,
                         cefMacOsUnsupported = cefMacOsUnsupported,
                         cefBlockedByPolicy = cefBlockedByPolicy,
+                        hasSecondaryDisplay = hasSecondaryDisplay,
                     )
                 }
             }
