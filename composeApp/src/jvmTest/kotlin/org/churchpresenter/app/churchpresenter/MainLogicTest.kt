@@ -279,7 +279,6 @@ class MainLogicTest {
     @Test
     fun `a verse reference is resolved through the loaded bible`() {
         val code = liveVerseCode(
-            source = Presenting.BIBLE,
             bookName = "John", chapter = 3, verseNumber = 16,
             bookIdByName = { 43 },
             codeReference = { bookId, chapter, verse -> Triple(bookId, chapter, verse) },
@@ -288,21 +287,9 @@ class MainLogicTest {
     }
 
     @Test
-    fun `no reference is announced when scripture is not what is live`() {
-        val code = liveVerseCode(
-            source = Presenting.LYRICS,
-            bookName = "John", chapter = 3, verseNumber = 16,
-            bookIdByName = { error("must not be consulted when scripture is not live") },
-            codeReference = { _, _, _ -> error("must not be consulted") },
-        )
-        assertEquals(null, code)
-    }
-
-    @Test
     fun `a half-filled verse has no reference rather than a wrong one`() {
         // Mid-selection the book can still be empty; resolving that would name the wrong passage.
         val code = liveVerseCode(
-            source = Presenting.BIBLE,
             bookName = "", chapter = 3, verseNumber = 16,
             bookIdByName = { error("must not be consulted without a book") },
             codeReference = { _, _, _ -> error("must not be consulted") },
@@ -313,7 +300,6 @@ class MainLogicTest {
     @Test
     fun `a book the loaded bible does not know has no reference`() {
         val code = liveVerseCode(
-            source = Presenting.BIBLE,
             bookName = "Some Other Book", chapter = 1, verseNumber = 1,
             bookIdByName = { null },
             codeReference = { _, _, _ -> error("must not be consulted for an unknown book") },
@@ -1198,7 +1184,7 @@ class MainLogicTest {
 
     @Test
     fun `without a hold the clip plays straight through`() {
-        val progress = { ms: Long -> lottieProgressAt(ms, 2_000L, false, 0f, -1L, 0L) }
+        val progress = { ms: Long -> lottieProgressAt(ms, 2_000L, hold = null) }
         assertEquals(0f, progress(0L))
         assertEquals(0.5f, progress(1_000L))
         assertEquals(1f, progress(2_000L))
@@ -1206,13 +1192,13 @@ class MainLogicTest {
 
     @Test
     fun `running past the end stays at the end`() {
-        assertEquals(1f, lottieProgressAt(9_999L, 2_000L, false, 0f, -1L, 0L))
+        assertEquals(1f, lottieProgressAt(9_999L, 2_000L, hold = null))
     }
 
     @Test
     fun `a held clip plays up to the hold, sits on it, then plays out`() {
         // 2s clip holding at the halfway frame for 3s: 5s of wall clock in three stretches.
-        val progress = { ms: Long -> lottieProgressAt(ms, 2_000L, true, 0.5f, 1_000L, 3_000L) }
+        val progress = { ms: Long -> lottieProgressAt(ms, 2_000L, LottieHold(0.5f, 1_000L, 3_000L)) }
         assertEquals(0.25f, progress(500L), "before the hold, at the clip's own rate")
         assertEquals(0.5f, progress(1_000L), "the hold begins")
         assertEquals(0.5f, progress(2_500L), "still on the same frame midway through the hold")
@@ -1224,7 +1210,7 @@ class MainLogicTest {
     fun `the stretch after a hold is re-scaled, not resumed at the old rate`() {
         // The hold has consumed wall-clock time the clip's own timeline knows nothing about, so
         // playing on at the original rate would run past the end well before the clock did.
-        val progress = { ms: Long -> lottieProgressAt(ms, 2_000L, true, 0.5f, 1_000L, 3_000L) }
+        val progress = { ms: Long -> lottieProgressAt(ms, 2_000L, LottieHold(0.5f, 1_000L, 3_000L)) }
         assertEquals(0.75f, progress(4_500L), "halfway through what is left, halfway through the rest")
     }
 
@@ -1232,7 +1218,7 @@ class MainLogicTest {
     fun `the stretch before a hold never overruns the held frame`() {
         // The hold's instant is stored separately from its fraction, so a rounded or edited pair
         // that disagree must still stop on the frame the hold names rather than sail past it.
-        assertEquals(0.1f, lottieProgressAt(500L, 2_000L, true, 0.1f, 1_000L, 3_000L))
+        assertEquals(0.1f, lottieProgressAt(500L, 2_000L, LottieHold(0.1f, 1_000L, 3_000L)))
     }
 
     @Test

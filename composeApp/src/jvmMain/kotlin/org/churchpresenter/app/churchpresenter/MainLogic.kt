@@ -176,21 +176,19 @@ internal fun livePositionOrNull(source: Presenting, forMode: Presenting, index: 
 internal fun nullIfEmpty(value: String): String? = value.ifEmpty { null }
 
 /**
- * The canonical verse reference to announce, or none.
+ * The canonical verse reference of the selected verse, or none.
  *
- * Only for scripture, and only once the verse names a book the loaded bible actually knows: the code
- * is resolved through that bible, so a verse from a translation that is no longer loaded — or a
+ * Only once the verse names a book the loaded bible actually knows: the code is resolved through
+ * that bible, so a verse from a translation that is no longer loaded — or a
  * partially-filled verse mid-selection — has no code rather than a wrong one.
  */
 internal fun <T> liveVerseCode(
-    source: Presenting,
     bookName: String,
     chapter: Int,
     verseNumber: Int,
     bookIdByName: (String) -> Int?,
     codeReference: (bookId: Int, chapter: Int, verse: Int) -> T?,
 ): T? {
-    if (source != Presenting.BIBLE) return null
     if (bookName.isEmpty()) return null
     val bookId = bookIdByName(bookName) ?: return null
     return codeReference(bookId, chapter, verseNumber)
@@ -691,25 +689,21 @@ internal fun lottieGrandTotalMs(
  * because the hold has already consumed wall-clock time the clip's own timeline does not know
  * about — playing on at the old rate would run past the end.
  */
-internal fun lottieProgressAt(
-    elapsedMs: Long,
-    totalDurationMs: Long,
-    hasPause: Boolean,
-    pauseFrame: Float,
-    pauseAtMs: Long,
-    pauseDurationMs: Long,
-): Float {
-    if (!hasPause) return (elapsedMs.toFloat() / totalDurationMs).coerceIn(0f, 1f)
+internal fun lottieProgressAt(elapsedMs: Long, totalDurationMs: Long, hold: LottieHold?): Float {
+    if (hold == null) return (elapsedMs.toFloat() / totalDurationMs).coerceIn(0f, 1f)
     return when {
-        elapsedMs < pauseAtMs -> (elapsedMs.toFloat() / totalDurationMs).coerceIn(0f, pauseFrame)
-        elapsedMs < pauseAtMs + pauseDurationMs -> pauseFrame
+        elapsedMs < hold.atMs -> (elapsedMs.toFloat() / totalDurationMs).coerceIn(0f, hold.frame)
+        elapsedMs < hold.atMs + hold.durationMs -> hold.frame
         else -> {
-            val postElapsed = elapsedMs - pauseAtMs - pauseDurationMs
-            val postTotalMs = (totalDurationMs - pauseAtMs).coerceAtLeast(1L)
-            (pauseFrame + (postElapsed.toFloat() / postTotalMs) * (1f - pauseFrame)).coerceIn(0f, 1f)
+            val postElapsed = elapsedMs - hold.atMs - hold.durationMs
+            val postTotalMs = (totalDurationMs - hold.atMs).coerceAtLeast(1L)
+            (hold.frame + (postElapsed.toFloat() / postTotalMs) * (1f - hold.frame)).coerceIn(0f, 1f)
         }
     }
 }
+
+/** Where a clip holds: on [frame] (a fraction of the clip), from [atMs] on the wall clock, for [durationMs]. */
+internal data class LottieHold(val frame: Float, val atMs: Long, val durationMs: Long)
 
 /** Which pre-rendered frame a fraction of the way through the clip lands on. */
 internal fun lottieFrameIndexFor(progress: Float, frameCount: Int): Int =

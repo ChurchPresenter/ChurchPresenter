@@ -93,7 +93,8 @@ class InstanceLinkClient(
     private val onSongSectionSelected: (Int) -> Unit,
     private val onPresentationSlideChanged: (id: String, index: Int, total: Int, isPlaying: Boolean,
         isLive: Boolean) -> Unit,
-    private val onSongsUpdated: (SongCatalogResponse) -> Unit,
+    /** The primary's song catalogue, sent on connect and whenever it changes. */
+    private val onSongsUpdated: (SongCatalogResponse) -> Unit = {},
     /** Every decoded WS message — application-level liveness ("last update Xs ago" in the UI). */
     private val onMessageReceived: () -> Unit = {},
     /** A reconnect was scheduled [delayMs] from now — drives the "reconnecting in Xs" indicator. */

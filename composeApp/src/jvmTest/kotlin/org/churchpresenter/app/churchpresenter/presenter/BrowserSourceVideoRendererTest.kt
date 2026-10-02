@@ -32,10 +32,12 @@ private const val WAIT_MS = 4_000L
 class BrowserSourceVideoRendererTest {
 
     private fun renderer(fps: Int = 30, onConsumerSeen: () -> Unit = {}) = BrowserSourceVideoRenderer(
-        presenterManager = PresenterManager(),
-        appSettingsState = mutableStateOf(AppSettings()),
-        screenAssignmentState = mutableStateOf(ScreenAssignment()),
-        effectiveModeState = mutableStateOf(Presenting.NONE),
+        OffscreenOutputContext(
+            presenterManager = PresenterManager(),
+            appSettingsState = mutableStateOf(AppSettings()),
+            screenAssignmentState = mutableStateOf(ScreenAssignment()),
+            effectiveModeState = mutableStateOf(Presenting.NONE),
+        ),
         fps = fps,
         onConsumerSeen = onConsumerSeen,
     )
@@ -84,9 +86,7 @@ class BrowserSourceVideoRendererTest {
             previous = null,
             width = 4,
             height = 4,
-            newSubscriberJoined = true,
-            elapsedMs = 10_000L,
-            lastFullFrameAtMs = 10_000L,
+            reseedDue = true
         )
         assertNotNull(decision)
         assertTrue(decision.forceFullFrame)
@@ -148,7 +148,9 @@ class BrowserSourceVideoRendererTest {
         val srcWidth = 4
         val src = IntArray(srcWidth * 4) { it }
 
-        val cropped = BrowserSourceVideoRenderer.cropPixels(src, srcWidth, x = 1, y = 1, w = 2, h = 2)
+        val cropped = BrowserSourceVideoRenderer.cropPixels(
+            src, srcWidth, BrowserSourceVideoRenderer.DirtyRect(x = 1, y = 1, w = 2, h = 2),
+        )
 
         assertEquals(listOf(5, 6, 9, 10), cropped.toList())
     }
@@ -179,7 +181,7 @@ class BrowserSourceVideoRendererTest {
 
         val decision = BrowserSourceVideoRenderer.decideTick(
             intBuf, previous = null, width = 2, height = 2,
-            newSubscriberJoined = false, elapsedMs = 0, lastFullFrameAtMs = 0
+            reseedDue = false
         )
 
         assertNotNull(decision)
@@ -194,7 +196,7 @@ class BrowserSourceVideoRendererTest {
 
         val decision = BrowserSourceVideoRenderer.decideTick(
             buf, previous = buf.copyOf(), width = 2, height = 2,
-            newSubscriberJoined = false, elapsedMs = 1000, lastFullFrameAtMs = 0
+            reseedDue = false
         )
 
         assertNull(decision)
@@ -208,7 +210,7 @@ class BrowserSourceVideoRendererTest {
 
         val decision = BrowserSourceVideoRenderer.decideTick(
             current, previous, width = 3, height = 3,
-            newSubscriberJoined = false, elapsedMs = 1000, lastFullFrameAtMs = 0
+            reseedDue = false
         )
 
         assertNotNull(decision)
@@ -223,7 +225,7 @@ class BrowserSourceVideoRendererTest {
 
         val decision = BrowserSourceVideoRenderer.decideTick(
             buf, previous = buf.copyOf(), width = 2, height = 2,
-            newSubscriberJoined = true, elapsedMs = 1000, lastFullFrameAtMs = 0
+            reseedDue = true
         )
 
         assertNotNull(decision)
@@ -235,16 +237,18 @@ class BrowserSourceVideoRendererTest {
     @Test
     fun `decideTick forces a periodic full-frame reseed on its own schedule`() {
         val buf = solid(2, 2, 7)
+        assertFalse(BrowserSourceVideoRenderer.isPeriodicReseedDue(elapsedMs = 4_999L, lastFullFrameAtMs = 0L))
+        assertTrue(BrowserSourceVideoRenderer.isPeriodicReseedDue(elapsedMs = 5_000L, lastFullFrameAtMs = 0L))
 
         val notYetDue = BrowserSourceVideoRenderer.decideTick(
             buf, previous = buf.copyOf(), width = 2, height = 2,
-            newSubscriberJoined = false, elapsedMs = 4999, lastFullFrameAtMs = 0
+            reseedDue = false
         )
         assertNull(notYetDue)
 
         val due = BrowserSourceVideoRenderer.decideTick(
             buf, previous = buf.copyOf(), width = 2, height = 2,
-            newSubscriberJoined = false, elapsedMs = 5000, lastFullFrameAtMs = 0
+            reseedDue = true
         )
 
         assertNotNull(due)
@@ -261,7 +265,7 @@ class BrowserSourceVideoRendererTest {
 
         val decision = BrowserSourceVideoRenderer.decideTick(
             current, previous, width = 2, height = 2,
-            newSubscriberJoined = true, elapsedMs = 1000, lastFullFrameAtMs = 0
+            reseedDue = true
         )
 
         assertNotNull(decision)

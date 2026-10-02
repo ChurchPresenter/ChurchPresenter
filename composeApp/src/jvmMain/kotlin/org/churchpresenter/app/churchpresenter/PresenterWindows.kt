@@ -579,9 +579,9 @@ internal fun LottiePlaybackEffect(
             val pauseAtMs = lottiePauseAtMs(totalDurMs, pauseFrame, hasPause)
             val grandTotalMs = lottieGrandTotalMs(totalDurMs, hasPause, pauseDurationMs)
 
-            fun progressAt(elapsedMs: Long): Float = lottieProgressAt(
-                elapsedMs, totalDurMs, hasPause, pauseFrame, pauseAtMs, pauseDurationMs,
-            )
+            val hold = if (hasPause) LottieHold(pauseFrame, pauseAtMs, pauseDurationMs) else null
+
+            fun progressAt(elapsedMs: Long): Float = lottieProgressAt(elapsedMs, totalDurMs, hold)
 
             val startNanos = withFrameNanos { it }
             var elapsedMs = 0L

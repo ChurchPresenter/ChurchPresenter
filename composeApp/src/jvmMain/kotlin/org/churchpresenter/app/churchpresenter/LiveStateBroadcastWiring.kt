@@ -50,7 +50,6 @@ internal fun LiveStateBroadcastWiring(
             val liveVerse = pm.selectedVerse.value
             // Resolved whatever this change was: the history logs the verse for as long as it is up.
             val liveCode = liveVerseCode(
-                source = Presenting.BIBLE,
                 bookName = liveVerse.bookName,
                 chapter = liveVerse.chapter,
                 verseNumber = liveVerse.verseNumber,

@@ -118,12 +118,14 @@ private fun AppRootState.BrowserSourceOutput(
         bsOutput.browserSourceFps
     ) {
         BrowserSourceVideoRenderer(
-            presenterManager, appSettingsState, screenAssignmentState, effectiveModeState,
-            outputIndex = i,
-            sttManager = sttManager,
-            mediaViewModel = mediaViewModel,
-            qaDisplayUrlState = qaDisplayUrlState,
-            serverUrlState = browserSourceServerUrlState,
+            OffscreenOutputContext(
+                presenterManager, appSettingsState, screenAssignmentState, effectiveModeState,
+                outputIndex = i,
+                sttManager = sttManager,
+                mediaViewModel = mediaViewModel,
+                qaDisplayUrlState = qaDisplayUrlState,
+                serverUrlState = browserSourceServerUrlState,
+            ),
             width = bsOutput.browserSourceWidth,
             height = bsOutput.browserSourceHeight,
             fps = bsOutput.browserSourceFps,
