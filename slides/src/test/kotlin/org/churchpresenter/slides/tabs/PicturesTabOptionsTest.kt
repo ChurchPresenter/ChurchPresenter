@@ -151,7 +151,7 @@ class PicturesTabOptionsTest {
 
     @Test
     fun `double-clicking a picture takes it live`() = tab { h ->
-        waitUntil("a thumbnail drawn", 5_000) { drawnThumbnails().isNotEmpty() }
+        waitUntil("two thumbnails drawn", 5_000) { drawnThumbnails().size >= 2 }
         onNodeWithContentDescription(drawnThumbnails()[1]).performTouchInput {
             down(center); up(); advanceEventTime(50); down(center); up()
         }
