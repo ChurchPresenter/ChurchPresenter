@@ -23,6 +23,7 @@ fun OutputProfile.defaultBaseline(): OutputProfile {
         name = name,
         parentId = parentId,
         overrides = overrides,
+        sectionMasters = sectionMasters,
         previewWidth = previewWidth,
         previewHeight = previewHeight,
         bibleSettings = fresh.bibleSettings.copy(

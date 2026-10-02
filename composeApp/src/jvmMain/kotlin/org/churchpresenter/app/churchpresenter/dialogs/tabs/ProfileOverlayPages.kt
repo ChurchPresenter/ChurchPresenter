@@ -75,7 +75,12 @@ internal fun ProfileSubtitlesPage(draft: AppSettings, onSettingsChange: ((AppSet
         onSettingsChange { s -> s.copy(mediaSettings = t(s.mediaSettings)) }
     }
     PageNote(stringResource(Res.string.media_subtitle_settings_hint))
-    SettingsGroup(stringResource(Res.string.profile_group_text), paths = displayTextPaths(MEDIA)) {
+    SettingsGroup(
+        stringResource(Res.string.profile_group_text),
+        key = "text",
+        paths = displayTextPaths(MEDIA),
+        summary = { media.displayStyle().let { textSummary(it.fontType, it.fontSize) } },
+    ) {
         DisplayTextRows(media.displayStyle(), { t -> update { it.withDisplayStyle(t) } }, MEDIA)
     }
     DisplayBoxGroup(
@@ -87,6 +92,7 @@ internal fun ProfileSubtitlesPage(draft: AppSettings, onSettingsChange: ((AppSet
     )
     SettingsGroup(
         stringResource(Res.string.profile_group_position),
+        key = "position",
         paths = listOf("$MEDIA.position", "$MEDIA.maxLines", "$MEDIA.lineSpacing"),
     ) {
         ScreenPlacementRow(media.position, { v -> update { it.copy(position = v) } }, MEDIA)
@@ -134,7 +140,12 @@ internal fun ProfileQaPage(draft: AppSettings, onSettingsChange: ((AppSettings) 
     val update: ((QASettings) -> QASettings) -> Unit = { t ->
         onSettingsChange { s -> s.copy(qaSettings = t(s.qaSettings)) }
     }
-    SettingsGroup(stringResource(Res.string.profile_group_text), paths = displayTextPaths(QA)) {
+    SettingsGroup(
+        stringResource(Res.string.profile_group_text),
+        key = "text",
+        paths = displayTextPaths(QA),
+        summary = { qa.displayStyle().let { textSummary(it.fontType, it.fontSize) } },
+    ) {
         DisplayTextRows(qa.displayStyle(), { t -> update { it.withDisplayStyle(t) } }, QA)
     }
     DisplayBoxGroup(
@@ -146,6 +157,7 @@ internal fun ProfileQaPage(draft: AppSettings, onSettingsChange: ((AppSettings) 
     )
     SettingsGroup(
         stringResource(Res.string.profile_group_position),
+        key = "position",
         paths = listOf("$QA.position", "$QA.horizontalAlignment"),
     ) {
         ScreenPlacementRow(qa.position, { v -> update { it.copy(position = v) } }, QA)
@@ -153,6 +165,7 @@ internal fun ProfileQaPage(draft: AppSettings, onSettingsChange: ((AppSettings) 
     }
     SettingsGroup(
         stringResource(Res.string.profile_group_qr),
+        key = "qr",
         paths = listOf("$QA.qrForegroundColor", "$QA.qrBackgroundColor", "$QA.qrBackgroundOpacity"),
     ) {
         SettingsRow(stringResource(Res.string.profile_qr_foreground), paths = listOf("$QA.qrForegroundColor")) {

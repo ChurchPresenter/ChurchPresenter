@@ -93,6 +93,7 @@ internal fun ProfileCaptionsPage(draft: AppSettings, onSettingsChange: ((AppSett
     CaptionShowGroup(stt, update)
     SettingsGroup(
         stringResource(Res.string.profile_caption_lines),
+        key = "lines",
         paths = listOf("$STT.maxSegments", "$STT.maxLines", "$STT.lineSpacing"),
     ) {
         SettingsRow(stringResource(Res.string.profile_caption_lines), paths = listOf("$STT.maxLines")) {
@@ -122,7 +123,9 @@ internal fun ProfileCaptionsPage(draft: AppSettings, onSettingsChange: ((AppSett
     CaptionReadingGroup(stt.reading) { t -> update { it.copy(reading = t(it.reading)) } }
     SettingsGroup(
         stringResource(Res.string.profile_group_text),
+        key = "text",
         paths = displayTextPaths(STT) + CAPTION_TEXT_PATHS,
+        summary = { stt.displayStyle().let { textSummary(it.fontType, it.fontSize) } },
     ) {
         DisplayTextRows(stt.displayStyle(), { t -> update { it.withDisplayStyle(t) } }, STT, extraBasic = {
             CaptionTextRows(stt, update)
@@ -139,6 +142,7 @@ internal fun ProfileCaptionsPage(draft: AppSettings, onSettingsChange: ((AppSett
     )
     SettingsGroup(
         stringResource(Res.string.profile_group_position),
+        key = "position",
         paths = listOf("$STT.position", "$STT.horizontalAlignment") + CAPTION_MARGIN_PATHS,
     ) {
         ScreenPlacementRow(stt.position, { v -> update { it.copy(position = v) } }, STT)
@@ -178,7 +182,7 @@ internal fun ProfileCaptionsPage(draft: AppSettings, onSettingsChange: ((AppSett
 /** SHOW: transcription, translation or both, and how the words arrive. */
 @Composable
 private fun CaptionShowGroup(stt: STTSettings, update: ((STTSettings) -> STTSettings) -> Unit) {
-    SettingsGroup(stringResource(Res.string.profile_group_show)) {
+    SettingsGroup(stringResource(Res.string.profile_group_show), key = "show") {
         SettingsRow(stringResource(Res.string.profile_caption_mode), paths = listOf("$STT.displayMode")) {
             RowSegmented(
                 options = listOf(

@@ -330,6 +330,18 @@ internal fun backgroundTypeWord(type: String): StringResource = when (type) {
 /** Test handle for one background type segment. */
 internal fun backgroundTypeTag(type: String): String = "profile_background_type_$type"
 
+/**
+ * A folded background group's summary: whose background it is -- [source] -- and, when it is the
+ * profile's [own], what that is: "Own · Color #000000".
+ */
+@Composable
+internal fun backgroundSummary(source: String, own: BackgroundConfig?): String {
+    if (own == null) return source
+    val kind = stringResource(backgroundTypeWord(own.backgroundType))
+    val what = describeBackground(own)
+    return "$source · " + if (what == kind) kind else "$kind $what"
+}
+
 /** A background in a few words: its colour, its file's name, or its kind. */
 @Composable
 internal fun describeBackground(config: BackgroundConfig): String = when (config.backgroundType) {

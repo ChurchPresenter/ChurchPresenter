@@ -59,7 +59,7 @@ private const val PILL_PERCENT = 50
  *
  * [linkState] is the start of the second line -- "Standalone profile" until a profile can be
  * linked -- and [usedBy] the outputs following it, each a chip; "Assign output" opens the Outputs
- * page, where one is picked.
+ * page, where one is picked. Fold all / Open all sit under Basic / Advanced when given.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -72,21 +72,33 @@ internal fun ProfilePageHeader(
     onAssignOutput: () -> Unit,
     modifier: Modifier = Modifier,
     linkState: @Composable RowScope.() -> Unit = { StandaloneLinkState() },
+    onFoldAll: (() -> Unit)? = null,
+    onOpenAll: (() -> Unit)? = null,
 ) {
     val palette = profilesPalette()
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(
-                    text = stringResource(Res.string.profile_page_title, profile.displayName(), page.label()),
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f, fill = false).testTag(PROFILE_PAGE_TITLE_TAG),
-                )
-                ProfileModeBadge(profile.displayMode)
+                // The title and its badge take the line, the title giving way only when it must.
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Text(
+                        text = stringResource(Res.string.profile_page_title, profile.displayName(), page.label()),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false).testTag(PROFILE_PAGE_TITLE_TAG),
+                    )
+                    ProfileModeBadge(profile.displayMode)
+                }
+                // Without Basic / Advanced to sit under, the links end the title line, leaving the
+                // line below its full width.
+                if (!page.hasDetailSwitch) FoldLinks(onFoldAll, onOpenAll)
             }
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -110,21 +122,29 @@ internal fun ProfilePageHeader(
             }
         }
         if (page.hasDetailSwitch) {
-            RowSegmented(
-                options = listOf(
-                    RowOption(SettingsDetail.BASIC, stringResource(Res.string.profile_detail_basic), DETAIL_BASIC_TAG),
-                    RowOption(
-                        SettingsDetail.ADVANCED,
-                        stringResource(Res.string.profile_detail_advanced),
-                        DETAIL_ADVANCED_TAG,
+            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                RowSegmented(
+                    options = listOf(
+                        RowOption(
+                            SettingsDetail.BASIC,
+                            stringResource(Res.string.profile_detail_basic),
+                            DETAIL_BASIC_TAG,
+                        ),
+                        RowOption(
+                            SettingsDetail.ADVANCED,
+                            stringResource(Res.string.profile_detail_advanced),
+                            DETAIL_ADVANCED_TAG,
+                        ),
                     ),
-                ),
-                selected = detail,
-                onSelect = onDetailChange,
-            )
+                    selected = detail,
+                    onSelect = onDetailChange,
+                )
+                FoldLinks(onFoldAll, onOpenAll)
+            }
         }
     }
 }
+
 
 /** "Standalone profile", with its icon -- a profile linked to nothing. */
 @Composable

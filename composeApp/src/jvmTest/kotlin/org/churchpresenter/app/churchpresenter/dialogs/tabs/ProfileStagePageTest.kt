@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.hasClickAction
@@ -156,10 +157,10 @@ class ProfileStagePageTest {
             val a = get().stage().styleFor(StageMonitorStyleZone.A)
             recolor(a.bgColor, "#123456")
             assertEquals("#123456", get().stage().styleFor(StageMonitorStyleZone.A).bgColor)
-            inRow("Outline", hasClickAction(), 0).performClick()
+            onNodeWithContentDescription("Outline").performScrollTo().performClick()
             waitForIdle()
             assertTrue(get().stage().styleFor(StageMonitorStyleZone.A).outline != a.outline)
-            inRow("Highlight behind text", hasClickAction(), 0).performClick()
+            onNodeWithContentDescription("Text backing").performScrollTo().performClick()
             waitForIdle()
             assertTrue(get().stage().styleFor(StageMonitorStyleZone.A).backdrop != a.backdrop)
             onNodeWithText("Chord color").assertExists()
