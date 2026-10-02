@@ -87,4 +87,32 @@ class CaptionTextRenderTest {
         val textTop = onAllNodes(hasText(paged)).fetchSemanticsNodes().single().boundsInRoot.top
         assertEquals(windowTop, textTop, 0.5f)
     }
+
+    @Test
+    fun `a caption given only its text, style and line limit draws with the defaults`() = runComposeUiTest {
+        // No backdrop, no outline, 1x, no roll-up, not paged: what a caller that styles nothing gets.
+        setContent { Box(Modifier.width(400.dp)) { BottomAlignedText(AnnotatedString("Amen"), style, 2) } }
+        assertEquals(listOf("Amen"), onAllNodes(hasText("Amen")).fetchSemanticsNodes()
+            .map { n -> n.config.getOrNull(SemanticsProperties.Text).orEmpty().joinToString("") { it.text } })
+    }
+
+    @Test
+    fun `a one-line window shows only the newest line`() = runComposeUiTest {
+        show(maxLines = 1)
+        val text = readable().single()
+        assertTrue(text.endsWith("word12"), "the newest line is the one kept: $text")
+        assertFalse(text.contains("word10"), "a single line holds one short word here: $text")
+    }
+
+    @Test
+    fun `an empty pop-on caption lays out without a page to show`() = runComposeUiTest {
+        // Pop-on reports its full window height only once there is a line on it.
+        setContent {
+            Box(Modifier.width(90.dp)) {
+                BottomAlignedText(AnnotatedString(""), style, maxLines = 3, paged = true)
+            }
+        }
+        waitForIdle()
+        assertTrue(onAllNodesWithAnyText().isEmpty(), "nothing to read on an empty caption")
+    }
 }
