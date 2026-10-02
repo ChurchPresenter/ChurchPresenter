@@ -1,8 +1,5 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
-import kotlinx.coroutines.channels.Channel
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -15,11 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -379,67 +372,29 @@ private fun BibleFrame.BibleTextArea() {
     }
 }
 
-/** Crossfades or fades from one set of verses to the next. */
+/**
+ * Crossfades or fades from one set of verses to the next. Fade in on first appearance and fade out
+ * on clear are driven from outside, through `transitionAlpha`.
+ */
 @Composable
 private fun BoxScope.BibleVerseTransition(frame: BibleFrame, innerModifier: Modifier) {
     with(frame) {
-        // Transition system:
-        // - Fade in: first appearance fades from transparent
-        // - Crossfade: switching verses blends old/new simultaneously
-        // - Fade out: handled externally when clearing display
-        val duration = bs.transitionDuration.toInt().coerceAtLeast(100)
-        val isCrossfade = crossfadeEnabled
-        var displayedCurrent by remember { mutableStateOf(effectiveVerses) }
-        var displayedPrevious by remember { mutableStateOf<List<SelectedVerse>>(emptyList()) }
-        var currentAlpha by remember { mutableStateOf(1f) }
-        var previousAlpha by remember { mutableStateOf(0f) }
-        val pendingQueue = remember { Channel<List<SelectedVerse>>(Channel.CONFLATED) }
-
-        // Queue verse changes
-        LaunchedEffect(effectiveVerses) {
-            if (displayedCurrent != effectiveVerses) {
-                pendingQueue.send(effectiveVerses)
-            }
-        }
-
-        // Process verse switches (crossfade between verses)
-        LaunchedEffect(Unit) {
-            for (nextVerses in pendingQueue) {
-                if (displayedCurrent == nextVerses) continue
-
-                if (isCrossfade) {
-                    // Crossfade: both layers animate simultaneously
-                    displayedPrevious = displayedCurrent
-                    displayedCurrent = nextVerses
-                    previousAlpha = 1f
-                    currentAlpha = 0f
-                    val anim = Animatable(0f)
-                    anim.animateTo(1f, tween(durationMillis = duration)) {
-                        currentAlpha = this.value
-                        previousAlpha = 1f - this.value
-                    }
-                } else {
-                    // No crossfade — just swap instantly
-                    displayedCurrent = nextVerses
-                }
-                currentAlpha = 1f
-                previousAlpha = 0f
-                displayedPrevious = emptyList()
-            }
-        }
-
-        // transitionAlpha handles fade out (driven from main.kt when clearing display)
+        val layers = rememberFadeLayers(
+            target = effectiveVerses,
+            crossfade = crossfadeEnabled,
+            durationMs = bs.transitionDuration.toInt().coerceAtLeast(100),
+            samePage = { _, _ -> false },
+        )
         Box(modifier = Modifier.matchParentSize().graphicsLayer { alpha = transitionAlpha }) {
-            if (displayedPrevious.isNotEmpty() && previousAlpha > 0f) {
-                Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = previousAlpha }) {
-                    TextContent(displayedPrevious, innerModifier)
+            for (layer in layers) {
+                key(layer) {
+                    val verses = layer.page
+                    Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = layer.alpha }) {
+                        TextContent(verses, innerModifier)
+                    }
+                    VerseBoxes(verses, layer.alpha)
                 }
-                VerseBoxes(displayedPrevious, previousAlpha)
             }
-            Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = currentAlpha }) {
-                TextContent(displayedCurrent, innerModifier)
-            }
-            VerseBoxes(displayedCurrent, currentAlpha)
         }
     }
 }
