@@ -106,7 +106,7 @@ comm -23 \
 | `!!` in `composeApp` | 0 | ✅ |
 | Unused string resources | 0 | ✅ |
 | Hardcoded UI strings | known exceptions only | `Text("$w×$h")` resolutions. Remote-activity toasts carry a `RemoteLabel` that the desktop words in the operator's language ✅ |
-| Emoji used as icons | pending | the icon maps in `ScheduleItemDisplay`, `ThemeSwitcher`, `RemoteActivityToast`, `ThemeSegmentedButton` and `BibleTab`'s 📖 — need icon assets |
+| Emoji used as icons | pending | the icon maps in `ScheduleItemDisplay`, `RemoteActivityToast` and `BibleTab`'s 📖 — need icon assets |
 
 ### Decision log
 
