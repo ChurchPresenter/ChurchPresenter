@@ -15,9 +15,10 @@ import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
+import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
 import com.github.takahirom.roborazzi.RoborazziOptions
 import com.github.takahirom.roborazzi.RoborazziTaskType
-import com.github.takahirom.roborazzi.roborazziEnabled
+import com.github.takahirom.roborazzi.roborazziSystemPropertyTaskType
 import io.github.takahirom.roborazzi.captureRoboImage
 import org.churchpresenter.sharedui.composables.RecentColors
 import org.churchpresenter.theme.ChurchPresenterTheme
@@ -157,8 +158,13 @@ private val GOLDEN_OPTIONS = RoborazziOptions(
  * quietly *re-record* it instead of checking it. That is exactly what happened the first time this
  * was wired up: verify came back green while overwriting eight `previewApp` images.
  */
+@OptIn(ExperimentalRoborazziApi::class)
 private val PART_OPTIONS =
-    if (roborazziEnabled()) RoborazziOptions(taskType = RoborazziTaskType.Record) else RoborazziOptions()
+    if (roborazziSystemPropertyTaskType().isEnabled()) {
+        RoborazziOptions(taskType = RoborazziTaskType.Record)
+    } else {
+        RoborazziOptions()
+    }
 
 /**
  * Captures a compose root to [file].

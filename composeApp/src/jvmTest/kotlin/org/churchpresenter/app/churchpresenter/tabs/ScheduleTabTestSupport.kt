@@ -36,6 +36,9 @@ import java.io.File
 import java.nio.file.Files
 import java.time.LocalTime
 
+/** Writes schedule items the way the app does, defaults included. */
+private val itemsJsonFormat = Json { encodeDefaults = true }
+
 /**
  * Harness and fixtures shared by the `ScheduleTab` test classes.
  *
@@ -216,7 +219,7 @@ internal fun plantAutoSave(vararg titles: String) {
     }
     // Serialized through the real ScheduleItem serializer so the polymorphic discriminator is
     // whatever the model actually declares, rather than a string this fixture guesses at.
-    val itemsJson = Json { encodeDefaults = true }
+    val itemsJson = itemsJsonFormat
         .encodeToString(ListSerializer(ScheduleItem.serializer()), items)
     val file = File(System.getProperty("user.home"), ".churchpresenter/autosave_schedule.tmp")
     file.parentFile.mkdirs()

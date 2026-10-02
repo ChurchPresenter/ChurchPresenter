@@ -1,7 +1,7 @@
 package org.churchpresenter.slides.viewmodel
 
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.presentation.PresentationLoadError
 import org.churchpresenter.presentationengine.model.DeckLoadError

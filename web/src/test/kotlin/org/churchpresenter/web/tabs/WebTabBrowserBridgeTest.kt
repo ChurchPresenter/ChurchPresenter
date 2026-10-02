@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.web.tabs
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.input.key.Key

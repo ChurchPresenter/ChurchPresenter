@@ -74,8 +74,8 @@ class FocusLostRescueWiringTest {
         }
         waitForIdle()
         if (state?.windowFocused == true) {
-            waitUntil(timeoutMillis = 5_000) { state?.tabHasFocus == true }
-            assertFalse(state!!.bannerVisible)
+            waitUntil(timeoutMillis = 5_000) { state.tabHasFocus }
+            assertFalse(state.bannerVisible)
         } else {
             assertTrue(state!!.bannerVisible)
         }
