@@ -90,9 +90,9 @@
 - **Presenter notes** — speaker notes from PowerPoint and Keynote flow straight to your stage monitor.
 
 **Source locations:**
-- `tabs/PresentationTab.kt` — main UI; its pieces in `tabs/PresentationTabScope.kt`, `PresentationTopBar.kt`, `PresentationControlsBar.kt`, `PresentationBody.kt`
-- `viewmodel/PresentationViewModel.kt`
-- `presenter/PresentationPlayer.kt`, `presenter/PresentationPresenter.kt` — animated playback
+- `slides/…/tabs/PresentationTab.kt` (the `:slides` module) — main UI; its pieces in `PresentationTabScope.kt`, `PresentationTopBar.kt`, `PresentationControlsBar.kt`, `PresentationBody.kt`
+- `slides/…/viewmodel/PresentationViewModel.kt`
+- `presenter/PresentationPlayer.kt` (the app), `slides/…/presenter/PresentationPresenter.kt` and `PresentationFrame.kt` — animated playback
 - `presentation-engine/` (the `:presentation-engine` Gradle module, at the repo root) — PPTX/Keynote parsing, timing and animation engine
 - `data/settings/PresentationSettings.kt`
 - `server/CompanionServer.kt` — slide API for mobile (background rendering)
@@ -107,12 +107,12 @@
 - **Subtitles styled per screen** — SRT/WebVTT subtitles take their colour, font, size and position from each output's profile.
 
 **Source locations:**
-- `tabs/PicturesTab.kt` — image slideshow UI; its pieces in `tabs/PicturesTabScope.kt`, `PicturesHeader.kt`, `PicturesControlsBar.kt`, `PicturesGrid.kt`
+- `slides/…/tabs/PicturesTab.kt` (the `:slides` module) — image slideshow UI; its pieces in `PicturesTabScope.kt`, `PicturesHeader.kt`, `PicturesControlsBar.kt`, `PicturesGrid.kt`
 - `tabs/MediaTab.kt` — audio/video UI; its pieces in `tabs/MediaTabScope.kt`, `MediaSourceBar.kt`, `MediaControlsBar.kt`
-- `viewmodel/PicturesViewModel.kt`, `viewmodel/MediaViewModel.kt`, `viewmodel/LocalMediaViewModel.kt`
-- `data/HiddenItemsStore.kt`, `shared-ui/…/composables/SlideshowHideToggle.kt` — hidden pictures and slides, remembered per folder and file, and the eye that hides them
+- `slides/…/viewmodel/PicturesViewModel.kt`, `viewmodel/MediaViewModel.kt`, `viewmodel/LocalMediaViewModel.kt`
+- `slides/…/data/HiddenItemsStore.kt`, `shared-ui/…/composables/SlideshowHideToggle.kt` — hidden pictures and slides, remembered per folder and file, and the eye that hides them
 - `data/settings/PictureSettings.kt`
-- `presenter/PicturePresenter.kt`, `presenter/MediaPresenter.kt`
+- `slides/…/presenter/PicturePresenter.kt`, `presenter/MediaPresenter.kt`
 - `composables/VideoPlayer.kt`
 - `dialogs/tabs/MediaSettingsTab.kt`
 - `dialogs/tabs/ProfileScaleRow.kt`, `shared-ui/…/utils/OutputScaleMode.kt` — per-profile scaling and the tabs' shortcut over it
@@ -165,7 +165,7 @@
 - `composables/SharedBrowserFrameCache.kt`, `composables/SharedCameraFrameCache.kt`
 - `composables/NdiFrameCache.kt`, `composables/NdiSourceDirectory.kt` — receiving NDI sources onto the canvas, and finding them
 - `composables/OmtFrameCache.kt`, `composables/SceneOmtEditor.kt`, `composables/ReceivedFrameCache.kt` — receiving OMT sources onto the canvas, choosing one, and the capture loop both protocols share
-- `composables/FfmpegBinary.kt`, `dialogs/tabs/ProjectionFfmpegCard.kt` — which ffmpeg cameras are opened with: the bundled one, an override, or whatever is installed
+- `shared-ui/…/utils/FfmpegBinary.kt`, `dialogs/tabs/ProjectionFfmpegCard.kt` — which ffmpeg cameras are opened with: the bundled one, an override, or whatever is installed
 - `gradle/ffmpeg-builds.properties`, `THIRD_PARTY_FFMPEG.md` — where the bundled ffmpeg comes from, and its licence
 - `presenter/ScenePresenter.kt`, `presenter/WebsitePresenter.kt`
 - `data/settings/WebBookmark.kt`

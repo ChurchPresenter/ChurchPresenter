@@ -23,7 +23,7 @@ import org.churchpresenter.icons.generated.resources.ic_folder
 import org.churchpresenter.strings.generated.resources.image_files_filter
 import org.churchpresenter.strings.generated.resources.no_image_selected
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource

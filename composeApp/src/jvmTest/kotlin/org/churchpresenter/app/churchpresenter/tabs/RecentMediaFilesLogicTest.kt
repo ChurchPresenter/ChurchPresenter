@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
-import org.churchpresenter.app.churchpresenter.RecentFilesSwap
+import org.churchpresenter.sharedui.testing.RecentFilesSwap
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -11,7 +11,7 @@ import kotlin.test.assertTrue
 /**
  * [RecentMediaFiles]'s own logic — add, pin, clear, and the JSON round-trip behind them.
  *
- * Same shape as [RecentPictureFoldersLogicTest]. [RecentMediaFiles.file] and
+ * Same shape as `RecentPictureFoldersLogicTest`. [RecentMediaFiles.file] and
  * [RecentMediaFiles.pinnedFile] are repointed at a temp directory for the duration of each test, so
  * `add`/`togglePin`/`clear` run for real without ever touching the developer's own recent/pinned
  * JSON files under `~/.churchpresenter`.

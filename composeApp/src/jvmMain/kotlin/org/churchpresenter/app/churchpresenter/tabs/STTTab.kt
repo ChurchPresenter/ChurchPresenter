@@ -71,6 +71,8 @@ import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.theme.semantic
 import androidx.compose.ui.text.AnnotatedString
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.composables.bibleListCard
+import org.churchpresenter.sharedui.composables.searchBarCard
 
 @Composable
 fun STTTab(

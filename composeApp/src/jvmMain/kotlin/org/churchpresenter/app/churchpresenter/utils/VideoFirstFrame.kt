@@ -1,10 +1,11 @@
 package org.churchpresenter.app.churchpresenter.utils
 
-import org.churchpresenter.app.churchpresenter.composables.FfmpegBinary
+import org.churchpresenter.sharedui.utils.FfmpegBinary
 import java.io.File
 import java.io.IOException
 import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
+import org.churchpresenter.sharedui.utils.HeicDecoder
 
 /**
  * A video's first frame as a JPEG on disk, for a preview that must show what a clip looks like

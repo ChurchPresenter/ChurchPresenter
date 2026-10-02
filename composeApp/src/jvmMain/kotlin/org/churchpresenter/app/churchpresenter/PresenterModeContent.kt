@@ -19,8 +19,8 @@ import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdLayout
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
-import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
-import org.churchpresenter.app.churchpresenter.presenter.PresentationPresenter
+import org.churchpresenter.slides.presenter.PicturePresenter
+import org.churchpresenter.slides.presenter.PresentationPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LocalBandOutgoing
 import org.churchpresenter.app.churchpresenter.presenter.LocalBandSongLineIndex
 import org.churchpresenter.app.churchpresenter.presenter.LocalLottieBandClock

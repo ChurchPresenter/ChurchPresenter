@@ -33,7 +33,7 @@ import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import org.churchpresenter.sharedui.composables.ColorPickerField
 import org.churchpresenter.sharedui.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.dialogs.PanelCaption
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.lottiegen.band.BandColorField
 import org.churchpresenter.lottiegen.band.BandContentKind

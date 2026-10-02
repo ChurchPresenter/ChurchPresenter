@@ -7,6 +7,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.utils.CommandRunner
 
 /**
  * The device and window listings behind the Camera and Screen Capture panels.

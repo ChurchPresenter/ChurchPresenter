@@ -27,7 +27,7 @@ import org.churchpresenter.settings.AtemSettings
 import androidx.compose.runtime.withFrameNanos
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrameStream
-import org.churchpresenter.app.churchpresenter.presenter.PresentationFrame
+import org.churchpresenter.slides.presenter.PresentationFrame
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPlayer
 import org.churchpresenter.presentationengine.model.Deck
 import org.churchpresenter.app.churchpresenter.presenter.BandOutgoing
@@ -41,6 +41,7 @@ import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import org.churchpresenter.settings.utils.Constants
 import java.io.IOException
+import org.churchpresenter.slides.SlidesOutput
 
 private const val WATCHDOG_INTERVAL_MS = 5_000L
 
@@ -56,6 +57,9 @@ private const val SECONDS_PER_MINUTE = 60
 data class LiveSlide(val fileName: String?, val index: Int)
 
 class PresenterManager(showPresenterWindowInitially: Boolean = true) {
+
+    /** This manager as the Pictures and Presentation tabs see it -- see [PresenterSlidesOutput]. */
+    val slidesOutput: SlidesOutput by lazy { PresenterSlidesOutput(this) }
 
     private val preRenderScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var preRenderJob: Job? = null

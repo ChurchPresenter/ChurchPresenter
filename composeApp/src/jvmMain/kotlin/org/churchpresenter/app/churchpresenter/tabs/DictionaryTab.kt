@@ -121,6 +121,11 @@ import org.churchpresenter.theme.components.RaisedChip
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.sharedui.composables.BibleListRowShape
+import org.churchpresenter.sharedui.composables.DragHandle
+import org.churchpresenter.sharedui.composables.bibleListCard
+import org.churchpresenter.sharedui.composables.bibleRowColors
+import org.churchpresenter.sharedui.composables.rememberRowHover
 
 private const val DEFINITION_PREVIEW_CHARS = 200
 

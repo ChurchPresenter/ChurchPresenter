@@ -30,7 +30,7 @@ import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.ui.theme.themeCustomizationFrom
 import org.churchpresenter.theme.LocalThemeCustomization
 import org.churchpresenter.theme.ThemeCustomization
-import org.churchpresenter.app.churchpresenter.composables.FfmpegBinary
+import org.churchpresenter.sharedui.utils.FfmpegBinary
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import org.churchpresenter.app.churchpresenter.server.CalendarSyncService

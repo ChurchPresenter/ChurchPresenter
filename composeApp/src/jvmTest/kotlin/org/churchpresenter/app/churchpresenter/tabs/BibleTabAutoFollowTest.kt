@@ -15,6 +15,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.churchpresenter.app.churchpresenter.viewmodel.onEngineScripture
+import org.churchpresenter.sharedui.testing.renderedText
+import org.churchpresenter.sharedui.testing.showsContainingText
+import org.churchpresenter.sharedui.testing.showsExactly
 
 /**
  * The Bible tab's auto-follow panel — the row that appears once speech-to-text is connected.

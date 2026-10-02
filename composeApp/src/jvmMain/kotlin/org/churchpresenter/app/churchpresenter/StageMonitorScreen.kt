@@ -86,7 +86,7 @@ import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.songchords.ChordTransposer
-import org.churchpresenter.app.churchpresenter.utils.PictureDecoder
+import org.churchpresenter.slides.utils.PictureDecoder
 import org.churchpresenter.strings.generated.resources.song_key
 import org.churchpresenter.strings.generated.resources.song_capo
 import org.churchpresenter.strings.generated.resources.song_play

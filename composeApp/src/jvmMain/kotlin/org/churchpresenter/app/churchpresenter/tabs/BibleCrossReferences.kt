@@ -80,6 +80,10 @@ import org.churchpresenter.app.churchpresenter.data.formatCrossRefLabel
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.composables.BibleListRowShape
+import org.churchpresenter.sharedui.composables.bibleListCard
+import org.churchpresenter.sharedui.composables.bibleRowColors
+import org.churchpresenter.sharedui.composables.rememberRowHover
 
 
 private val CROSS_REF_POPOVER_WIDTH = 380.dp

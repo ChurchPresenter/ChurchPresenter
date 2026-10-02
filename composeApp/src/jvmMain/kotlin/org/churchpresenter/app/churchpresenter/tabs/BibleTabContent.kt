@@ -54,6 +54,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.submitSmartQuery
 import org.churchpresenter.app.churchpresenter.viewmodel.liveVerseSplitMark
 import androidx.compose.foundation.layout.ColumnScope
 import org.churchpresenter.sharedui.composables.FocusLostRescueState
+import org.churchpresenter.sharedui.composables.bibleListCard
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material3.Icon

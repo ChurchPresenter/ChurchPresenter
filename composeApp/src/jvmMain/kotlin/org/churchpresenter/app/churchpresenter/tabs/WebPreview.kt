@@ -56,6 +56,7 @@ import kotlinx.coroutines.delay
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.runtime.State
 import org.cef.browser.CefBrowser
+import org.churchpresenter.sharedui.composables.bibleListCard
 
 /** The output picker and the preview: the live mirror, the embedded browser, or a hint. */
 @Composable

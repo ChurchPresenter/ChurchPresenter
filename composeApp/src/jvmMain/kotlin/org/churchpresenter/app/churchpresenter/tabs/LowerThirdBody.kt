@@ -78,6 +78,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.draw.clip
 import org.churchpresenter.sharedui.utils.PreviewOutput
 import org.churchpresenter.lottiegen.render.lottieDrawProgress
+import org.churchpresenter.sharedui.composables.BibleListRowShape
+import org.churchpresenter.sharedui.composables.DragHandle
+import org.churchpresenter.sharedui.composables.bibleListCard
+import org.churchpresenter.sharedui.composables.bibleRowColors
+import org.churchpresenter.sharedui.composables.rememberRowHover
 
 /** The file list, its drag handle, and the preview column. */
 @Composable

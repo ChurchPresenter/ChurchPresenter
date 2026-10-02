@@ -15,6 +15,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.slides.presenter.PresentationFrame
 
 /**
  * A static (never-animated) PDF deck has no timeline and no slide transitions, so it exercises

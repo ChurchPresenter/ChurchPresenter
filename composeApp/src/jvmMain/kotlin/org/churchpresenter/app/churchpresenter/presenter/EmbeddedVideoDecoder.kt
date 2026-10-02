@@ -28,6 +28,7 @@ import java.awt.image.BufferedImage
 import java.awt.image.DataBufferInt
 import java.io.File
 import java.nio.ByteBuffer
+import org.churchpresenter.slides.presenter.PresentationPresenter
 
 private const val FRAME_INTERVAL_MS = 16L
 private const val FULL_VOLUME = 100

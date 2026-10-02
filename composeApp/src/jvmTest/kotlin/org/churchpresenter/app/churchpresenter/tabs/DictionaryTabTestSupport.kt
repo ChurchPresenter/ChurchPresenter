@@ -32,6 +32,7 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryFixture
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryViewModel
+import org.churchpresenter.sharedui.testing.showsContainingText
 
 /**
  * Harness and fixtures shared by the `DictionaryTab` test classes.

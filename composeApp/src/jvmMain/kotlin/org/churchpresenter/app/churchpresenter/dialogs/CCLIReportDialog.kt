@@ -177,7 +177,7 @@ import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
 import javax.swing.filechooser.FileNameExtensionFilter
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.theme.semantic
 
 private const val LAST_HOUR = 23

@@ -71,6 +71,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.sharedui.composables.searchBarCard
 
 /** The top card: the toolbar, the bookmarks, and while live, the live bar and typing to the page. */
 @Composable

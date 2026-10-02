@@ -13,6 +13,7 @@ import org.churchpresenter.sharedui.models.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.testing.showsExactly
 
 class WebTabTest {
 

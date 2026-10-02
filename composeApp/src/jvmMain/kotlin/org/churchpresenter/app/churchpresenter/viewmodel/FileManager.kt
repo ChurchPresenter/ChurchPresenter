@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.BibleSettings
 import java.io.File

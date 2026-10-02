@@ -58,6 +58,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.strings.generated.resources.aspect_ratio_mismatch
 import org.churchpresenter.sharedui.utils.PreviewOutput
 import androidx.compose.material3.IconButtonColors
+import org.churchpresenter.sharedui.composables.topBarCard
 
 /** The one bar over the preview: the preset name, then ATEM, then Play, Add to Schedule and Go Live. */
 @Composable

@@ -5,6 +5,8 @@ package org.churchpresenter.app.churchpresenter.tabs
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.testing.renderedText
+import org.churchpresenter.sharedui.testing.showsContainingText
 
 /**
  * Clicking a lower third in the schedule and landing on it in this tab.

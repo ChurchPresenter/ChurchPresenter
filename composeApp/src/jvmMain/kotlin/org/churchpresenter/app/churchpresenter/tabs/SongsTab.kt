@@ -93,6 +93,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.resolveEditedSongPush
 import org.churchpresenter.app.churchpresenter.viewmodel.titleSlideSection
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.composables.DragHandle
 
 /** The toolbar button that adds the *selected* song, as opposed to any other "Add to Schedule". */
 internal const val SONGS_ADD_SELECTED_TAG = "songs_addSelectedToSchedule"

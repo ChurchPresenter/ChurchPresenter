@@ -67,7 +67,7 @@ import org.churchpresenter.strings.generated.resources.play
 import org.churchpresenter.strings.generated.resources.stop
 import org.churchpresenter.sharedui.composables.NumberSettingsTextField
 import org.churchpresenter.sharedui.composables.SlimSlider
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.settings.OutputScaleMode
 import org.churchpresenter.sharedui.utils.icon
 import org.churchpresenter.sharedui.utils.label
