@@ -60,6 +60,16 @@ import org.churchpresenter.strings.generated.resources.remote_activity_musician_
 import org.churchpresenter.strings.generated.resources.instance_link_follower_badge
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.Cast
+import androidx.compose.material.icons.filled.CancelPresentation
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PhoneAndroid
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.QuestionAnswer
+import androidx.compose.material.icons.filled.Upload
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.foundation.layout.size
 
 internal const val TOAST_AUTO_DISMISS_MS = 10_000L
 
@@ -139,26 +149,7 @@ private fun RemoteActivityToast(
         RemoteEventType.QA_ADMIN_CONNECT -> stringResource(Res.string.remote_activity_qa_admin_connect)
         RemoteEventType.MUSICIAN_CONNECT -> stringResource(Res.string.remote_activity_musician_connect)
     }
-    val icon = when (notification.type) {
-        RemoteEventType.ADD_TO_SCHEDULE -> "📋"
-        RemoteEventType.REMOVE_FROM_SCHEDULE -> "🗑️"
-        RemoteEventType.PROJECT         -> "📡"
-        RemoteEventType.PRESENTATION_CONNECT -> "📱"
-        RemoteEventType.CALENDAR_ENROLL -> "📱"
-        RemoteEventType.QA_ADMIN_CONNECT -> "📱"
-        RemoteEventType.MUSICIAN_CONNECT -> "📱"
-        RemoteEventType.PRESENT         -> "▶️"
-        RemoteEventType.UPLOAD          -> "📤"
-        RemoteEventType.CLEAR           -> "🔲"
-        RemoteEventType.QA_ADD,
-        RemoteEventType.QA_EDIT,
-        RemoteEventType.QA_DELETE,
-        RemoteEventType.QA_APPROVE,
-        RemoteEventType.QA_DENY,
-        RemoteEventType.QA_DONE,
-        RemoteEventType.QA_DISPLAY,
-        RemoteEventType.QA_CLEAR_DISPLAY -> "💬"
-    }
+    val icon = remoteEventIcon(notification.type)
 
     val clientDisplay = when {
         notification.clientLabel.isNotBlank() -> notification.clientLabel
@@ -190,7 +181,12 @@ private fun RemoteActivityToast(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Icon
-            Text(icon, style = MaterialTheme.typography.bodyMedium)
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp)
+            )
             Spacer(Modifier.width(8.dp))
 
             // Action + title + client
@@ -287,4 +283,26 @@ private fun RemoteActivityToast(
             }
         }
     }
+}
+
+/** The icon at the start of a remote-activity toast, one per kind of thing a remote did. */
+internal fun remoteEventIcon(type: RemoteEventType): ImageVector = when (type) {
+    RemoteEventType.ADD_TO_SCHEDULE -> Icons.AutoMirrored.Filled.PlaylistAdd
+    RemoteEventType.REMOVE_FROM_SCHEDULE -> Icons.Filled.Delete
+    RemoteEventType.PROJECT -> Icons.Filled.Cast
+    RemoteEventType.PRESENTATION_CONNECT,
+    RemoteEventType.CALENDAR_ENROLL,
+    RemoteEventType.QA_ADMIN_CONNECT,
+    RemoteEventType.MUSICIAN_CONNECT -> Icons.Filled.PhoneAndroid
+    RemoteEventType.PRESENT -> Icons.Filled.PlayArrow
+    RemoteEventType.UPLOAD -> Icons.Filled.Upload
+    RemoteEventType.CLEAR -> Icons.Filled.CancelPresentation
+    RemoteEventType.QA_ADD,
+    RemoteEventType.QA_EDIT,
+    RemoteEventType.QA_DELETE,
+    RemoteEventType.QA_APPROVE,
+    RemoteEventType.QA_DENY,
+    RemoteEventType.QA_DONE,
+    RemoteEventType.QA_DISPLAY,
+    RemoteEventType.QA_CLEAR_DISPLAY -> Icons.Filled.QuestionAnswer
 }

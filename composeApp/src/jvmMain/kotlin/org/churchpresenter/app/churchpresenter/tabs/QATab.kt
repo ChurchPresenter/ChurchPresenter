@@ -55,7 +55,7 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.diagnostics.CrashReporter
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -149,6 +149,10 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.sharedui.composables.BibleListRowShape
+import org.churchpresenter.sharedui.composables.bibleListCard
+import org.churchpresenter.sharedui.composables.bibleRowColors
+import org.churchpresenter.sharedui.composables.rememberRowHover
 
 private const val SORT_BY_VOTES = 3
 private const val DISPLAY_PREVIEW_CHARS = 50

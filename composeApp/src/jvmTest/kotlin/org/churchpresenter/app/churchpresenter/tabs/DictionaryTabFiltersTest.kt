@@ -11,6 +11,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.testing.showsContainingText
 
 /**
  * The two book/chapter filters — one over the entry *list*, gated on whatever books have tagged

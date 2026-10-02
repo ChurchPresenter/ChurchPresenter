@@ -27,7 +27,7 @@ import org.churchpresenter.strings.generated.resources.canvas_transform_x
 import org.churchpresenter.strings.generated.resources.canvas_transform_y
 import org.churchpresenter.strings.generated.resources.canvas_transform_w
 import org.churchpresenter.strings.generated.resources.canvas_transform_h
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.sharedui.composables.PropertyFloatField

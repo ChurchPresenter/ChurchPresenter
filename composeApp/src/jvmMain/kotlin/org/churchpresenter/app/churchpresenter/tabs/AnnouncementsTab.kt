@@ -56,6 +56,7 @@ import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.elevationPalette
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.LocalContentColor
+import org.churchpresenter.sharedui.composables.DragHandle
 
 internal val ANNOUNCEMENT_STEP_KEY_HEIGHT = 20.dp
 internal val ANNOUNCEMENT_TRANSPARENT_KEY_PADDING = 10.dp

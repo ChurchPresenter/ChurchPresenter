@@ -224,7 +224,20 @@ jobs:
               - 'theme/**'                # implementation(projects.theme)
               - 'song-chords/**'          # implementation(projects.songChords)
               - 'bible/**'                # implementation(projects.bible)
-              - 'diagnostics/**'          # via :bible
+              - 'diagnostics/**'          # via :bible and the file chooser
+            slides:
+              - *shared
+              - 'slides/**'
+              - 'shared-ui/**'            # implementation(projects.sharedUi)
+              - 'presentation-engine/**'  # api(projects.presentationEngine)
+              - 'strings/**'              # implementation(projects.strings)
+              - 'icons/**'                # implementation(projects.icons)
+              - 'core-models/**'          # implementation(projects.coreModels)
+              - 'settings/**'             # implementation(projects.settings)
+              - 'theme/**'                # implementation(projects.theme)
+              - 'diagnostics/**'          # implementation(projects.diagnostics)
+              - 'song-chords/**'          # via :shared-ui
+              - 'bible/**'                # via :shared-ui
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -254,7 +267,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -604,6 +617,14 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.sharedui == 'true' }}
         run: ./gradlew :shared-ui:jacocoTestCoverageVerification -x test
 
+      - name: Slides tests
+        if: ${{ !cancelled() && steps.modules.outputs.slides == 'true' }}
+        run: ./gradlew :slides:test
+
+      - name: Slides coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.slides == 'true' }}
+        run: ./gradlew :slides:jacocoTestCoverageVerification -x test
+
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,
       # instead of leaving a reviewer to download the report artifact below and open it locally.
@@ -641,6 +662,7 @@ jobs:
             bible/build/test-results/**/TEST-*.xml
             calendar/build/test-results/**/TEST-*.xml
             shared-ui/build/test-results/**/TEST-*.xml
+            slides/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
           # every row after the insertion, so core-models was reported under "Companion Satellite"
@@ -666,6 +688,7 @@ jobs:
             Bible
             Calendar
             Shared UI
+            Slides
           detailed_summary: true
           include_passed: false
           # Without this the second table is one row of "No test annotations available" per
@@ -839,3 +862,5 @@ jobs:
             song-chords/build/test-results/
             shared-ui/build/reports/tests/
             shared-ui/build/test-results/
+            slides/build/reports/tests/
+            slides/build/test-results/

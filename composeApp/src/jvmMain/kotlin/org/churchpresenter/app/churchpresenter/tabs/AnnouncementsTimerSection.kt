@@ -67,6 +67,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.sharedui.composables.bibleInsetFill
 
 /* The Announcements tab's timer: its mode, its display, its steppers, its controls. */
 

@@ -45,8 +45,8 @@ import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
-import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
-import org.churchpresenter.app.churchpresenter.presenter.PresentationPresenter
+import org.churchpresenter.slides.presenter.PicturePresenter
+import org.churchpresenter.slides.presenter.PresentationPresenter
 import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.QAQRCodePresenter
 import org.churchpresenter.app.churchpresenter.presenter.STTPresenter

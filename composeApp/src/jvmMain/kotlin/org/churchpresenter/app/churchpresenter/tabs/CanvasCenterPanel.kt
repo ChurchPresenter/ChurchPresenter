@@ -73,6 +73,7 @@ import org.churchpresenter.strings.generated.resources.canvas_layers_outside_one
 import org.churchpresenter.strings.generated.resources.canvas_aspect_ratio_warning
 import org.churchpresenter.strings.generated.resources.canvas_fix_aspect_ratio
 import org.churchpresenter.core.models.scene.Scene
+import org.churchpresenter.sharedui.composables.bibleListCard
 
 /* The Canvas tab's centre: the toolbar, the warnings, and the scene's canvas (or both layouts). */
 

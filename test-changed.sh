@@ -33,7 +33,7 @@ cd "$ROOT"
 
 MAIN_SRC="composeApp/src/jvmMain/kotlin composeApp/src/commonMain/kotlin"
 # The other modules of this build, by directory — each maps to a `:<dir>:test` task.
-MODULE_DIRS="converter|companion-satellite|theme|core-models|bible-engine|lottieGenerator|crossword|presentation-engine|settings|diagnostics|atem|planning-center|bible-formats|songlibrary|song-chords|bible|ndi|omt|calendar|shared-ui"
+MODULE_DIRS="converter|companion-satellite|theme|core-models|bible-engine|lottieGenerator|crossword|presentation-engine|settings|diagnostics|atem|planning-center|bible-formats|songlibrary|song-chords|bible|ndi|omt|calendar|shared-ui|slides"
 TEST_SRC="composeApp/src/jvmTest/kotlin"
 MAX_PATTERNS=120          # past this a full run is cheaper than a vast --tests filter
 BASE_REF="${BASE_REF:-origin/main}"
@@ -49,6 +49,15 @@ for arg in "$@"; do
     *) echo "unknown flag: $arg" >&2; exit 2 ;;
   esac
 done
+
+# The full suite, for every fallback below. Prints the command like a filtered run does, and
+# under --dry-run stops there -- a fallback used to exec straight past it.
+run_full_suite() {
+  local cmd="./gradlew :composeApp:jvmTest -PfastTest"
+  echo; echo "$cmd"
+  if [ "$DRY_RUN" -eq 1 ]; then exit 0; fi
+  exec $cmd
+}
 
 # ── 1. What changed ──────────────────────────────────────────────────────────
 changed_files() {
@@ -98,7 +107,7 @@ if [ -z "$KT_CHANGED" ]; then
   report_modules
   [ "$FALLBACK" -eq 1 ] || { echo ">> --no-fallback: running nothing."; exit 0; }
   echo ">> nothing to map from; running the full suite."
-  exec ./gradlew :composeApp:jvmTest -PfastTest
+  run_full_suite
 fi
 
 # ── 2. Symbols to look for ───────────────────────────────────────────────────
@@ -188,12 +197,12 @@ if [ "$COUNT" -eq 0 ]; then
     echo ">> --no-fallback: running nothing."; exit 0
   fi
   echo ">> That usually means the change is untested. Running the full suite so you find out."
-  exec ./gradlew :composeApp:jvmTest -PfastTest
+  run_full_suite
 fi
 
 if [ "$COUNT" -gt "$MAX_PATTERNS" ]; then
   echo "$COUNT candidate suites — past the point where filtering pays. Running the full suite."
-  exec ./gradlew :composeApp:jvmTest -PfastTest
+  run_full_suite
 fi
 
 ARGS=""

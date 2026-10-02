@@ -106,6 +106,7 @@ module-specific notes there, not here.**
 | `strings/`             | `:strings`             | The app's user-facing strings, every locale, and the `Res` class generated from them | [AGENT.md](strings/AGENT.md)             |
 | `icons/`               | `:icons`               | The UI drawables and the window-icon frames — not the installer icons               | [AGENT.md](icons/AGENT.md)               |
 | `shared-ui/`           | `:shared-ui`           | The composables and helpers more than one feature uses — fields, pickers, buttons, text styling | [AGENT.md](shared-ui/AGENT.md)           |
+| `slides/`              | `:slides`              | The Pictures and Presentation tabs: their viewmodels, presenters, picture decoding and recent files | [AGENT.md](slides/AGENT.md)              |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions
@@ -123,8 +124,8 @@ The JaCoCo wiring, `useJUnitPlatform()` and the six-counter floor (85% on all si
 **once** in the root `build.gradle.kts`, in the `subprojects { plugins.withId(...) }` block. A
 module's build file carries only what differs, set **above everything else** in the file:
 - `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults; name only the
-  counters that need a different number. `:converter`, `:companion-satellite`, `:bible-engine`
-  and `:presentation-engine` name two each; every other module names none.
+  counters that need a different number. `:converter`, `:companion-satellite`, `:bible-engine`,
+  `:presentation-engine` and `:slides` name two each; every other module names none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**
@@ -293,7 +294,8 @@ every `@BeforeClass`.
   after.
 - **No ad-hoc mutable `internal var` seams on singletons**, restored by hand per test. The one
   permitted seam is the recent-files singletons (`RecentPictureFolders`, `RecentMediaFiles`,
-  `RecentPresentationFiles`), and only through `RecentFilesSwap` — never assign their fields directly.
+  `RecentPresentationFiles`), and only through `RecentFilesSwap` (`:shared-ui`'s test fixtures) —
+  never assign their fields directly.
   A fourth such seam needs asking first. A *defaulted constructor parameter* is fine.
 - **Prefer `internal` over reflection** to reach non-public code (`jvmTest` is a friend of
   `jvmMain`). Reflection is the fallback for what genuinely cannot be widened, and only to READ

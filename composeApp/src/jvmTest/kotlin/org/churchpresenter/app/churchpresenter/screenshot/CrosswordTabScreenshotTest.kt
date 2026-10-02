@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.tabs.CrosswordTab
-import org.churchpresenter.app.churchpresenter.tabs.showsExactly
+import org.churchpresenter.sharedui.testing.showsExactly
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS

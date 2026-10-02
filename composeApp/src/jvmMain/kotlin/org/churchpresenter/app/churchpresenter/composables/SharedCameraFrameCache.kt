@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.diagnostics.Log
+import org.churchpresenter.sharedui.utils.FfmpegBinary
 
 private const val MAX_NULL_FRAMES_BEFORE_CLEAR = 30
 private const val DECKLINK_POLL_INTERVAL_MS = 16L

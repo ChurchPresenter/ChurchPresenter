@@ -54,6 +54,10 @@ import org.churchpresenter.app.churchpresenter.viewmodel.submitSmartQuery
 import org.churchpresenter.app.churchpresenter.viewmodel.liveVerseSplitMark
 import androidx.compose.foundation.layout.ColumnScope
 import org.churchpresenter.sharedui.composables.FocusLostRescueState
+import org.churchpresenter.sharedui.composables.bibleListCard
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material3.Icon
 
 /** The tab's body under its key handler: the search row, detections, and the browser or a notice. */
 @Composable
@@ -152,9 +156,11 @@ private fun ColumnScope.BibleNoPrimaryHint(appSettings: AppSettings) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
-                    text = "📖",
-                    style = MaterialTheme.typography.displaySmall
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(40.dp)
                 )
                 Text(
                     text = stringResource(Res.string.bible_no_primary_title),

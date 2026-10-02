@@ -74,7 +74,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Warning
-import org.churchpresenter.app.churchpresenter.LocalWentLive
+import org.churchpresenter.sharedui.composables.LocalWentLive
 import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
 import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.churchpresenter.sharedui.composables.SegmentedButtonItem
@@ -94,6 +94,7 @@ import org.churchpresenter.sharedui.utils.label
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.composables.bibleListCard
 
 private const val HANDLE_VISIBLE_ALPHA = 0.01f
 

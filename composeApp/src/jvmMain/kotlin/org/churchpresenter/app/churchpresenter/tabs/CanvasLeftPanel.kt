@@ -81,6 +81,10 @@ import org.churchpresenter.strings.generated.resources.canvas_toggle_visibility
 import org.churchpresenter.strings.generated.resources.canvas_toggle_lock
 import java.awt.Rectangle
 import org.churchpresenter.core.models.scene.Scene
+import org.churchpresenter.sharedui.composables.BibleListRowShape
+import org.churchpresenter.sharedui.composables.bibleListCard
+import org.churchpresenter.sharedui.composables.bibleRowColors
+import org.churchpresenter.sharedui.composables.rememberRowHover
 
 /* The Canvas tab's left panel: the scenes, and the selected scene's sources. */
 

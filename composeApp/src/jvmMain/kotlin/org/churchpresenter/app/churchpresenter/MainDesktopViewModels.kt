@@ -8,8 +8,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleEngineClient
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
+import org.churchpresenter.slides.viewmodel.PicturesViewModel
+import org.churchpresenter.slides.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel

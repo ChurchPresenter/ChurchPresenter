@@ -106,6 +106,8 @@ import java.io.File
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.raised
+import org.churchpresenter.sharedui.composables.bibleListCardFill
+import org.churchpresenter.sharedui.composables.topBarCard
 
 private const val MENU_OFFSET_DP = 8
 private const val DASH_ON_PX = 6f

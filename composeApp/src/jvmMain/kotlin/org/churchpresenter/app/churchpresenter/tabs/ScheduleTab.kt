@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -79,7 +78,7 @@ import kotlin.math.abs
 import kotlinx.coroutines.launch
 import org.churchpresenter.settings.PlanningCenterSettings
 import org.churchpresenter.app.churchpresenter.dialogs.PlanningCenterImportDialog
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.LocalOpenCalendar
 import org.churchpresenter.calendar.model.planDrift
 import kotlinx.coroutines.delay
@@ -100,7 +99,7 @@ import org.churchpresenter.app.churchpresenter.utils.scheduleDensityFor
 import org.churchpresenter.app.churchpresenter.utils.scheduleZoomIn
 import org.churchpresenter.app.churchpresenter.utils.scheduleZoomOut
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.scheduleItemGlyph
+import org.churchpresenter.app.churchpresenter.viewmodel.scheduleItemIcon
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
@@ -786,11 +785,11 @@ fun ScheduleTab(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = scheduleItemGlyph(item),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.width(24.dp)
+                        Icon(
+                            imageVector = scheduleItemIcon(item),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
                         )
                         Text(
                             text = item.displayText,

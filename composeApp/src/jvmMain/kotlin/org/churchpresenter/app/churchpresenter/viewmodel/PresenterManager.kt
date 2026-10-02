@@ -27,7 +27,7 @@ import org.churchpresenter.settings.AtemSettings
 import androidx.compose.runtime.withFrameNanos
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrameStream
-import org.churchpresenter.app.churchpresenter.presenter.PresentationFrame
+import org.churchpresenter.slides.presenter.PresentationFrame
 import org.churchpresenter.app.churchpresenter.presenter.PresentationPlayer
 import org.churchpresenter.presentationengine.model.Deck
 import org.churchpresenter.app.churchpresenter.presenter.BandOutgoing
@@ -41,6 +41,7 @@ import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import org.churchpresenter.settings.utils.Constants
 import java.io.IOException
+import org.churchpresenter.slides.SlidesOutput
 
 private const val WATCHDOG_INTERVAL_MS = 5_000L
 
@@ -56,6 +57,9 @@ private const val SECONDS_PER_MINUTE = 60
 data class LiveSlide(val fileName: String?, val index: Int)
 
 class PresenterManager(showPresenterWindowInitially: Boolean = true) {
+
+    /** This manager as the Pictures and Presentation tabs see it -- see [PresenterSlidesOutput]. */
+    val slidesOutput: SlidesOutput by lazy { PresenterSlidesOutput(this) }
 
     private val preRenderScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var preRenderJob: Job? = null
@@ -244,6 +248,10 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
     // Shared Song transition state
     private val _displayedLyricSection = mutableStateOf(LyricSection())
     val displayedLyricSection: State<LyricSection> = _displayedLyricSection
+
+    // The outputs' place in the song, moved only together with the displayed section.
+    private val _displayedSongPosition = mutableStateOf(DisplayedSongPosition())
+    val displayedSongPosition: State<DisplayedSongPosition> = _displayedSongPosition
 
     private val _songTransitionAlpha = mutableStateOf(1f)
     val songTransitionAlpha: State<Float> = _songTransitionAlpha
@@ -471,9 +479,23 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         notifyLiveStateChanged(Presenting.LYRICS)
     }
 
-    fun setDisplayedLyricSection(section: LyricSection) {
+    /**
+     * Puts [section] on the outputs at [position] -- by default the operator's position as it
+     * stands, which is where a section pushed after its position was set belongs.
+     */
+    fun setDisplayedLyricSection(section: LyricSection, position: DisplayedSongPosition = liveSongPosition()) {
         _displayedLyricSection.value = section
+        _displayedSongPosition.value = position
     }
+
+    /** Moves the outputs to [position] within the section already displayed. */
+    fun setDisplayedSongPosition(position: DisplayedSongPosition) {
+        _displayedSongPosition.value = position
+    }
+
+    /** The operator's place in the song, as the outputs will show it once the section follows. */
+    fun liveSongPosition(): DisplayedSongPosition =
+        DisplayedSongPosition(_allLyricSections.value, _songDisplaySectionIndex.value, _songDisplayLineIndex.value)
 
     fun setSongTransitionAlpha(alpha: Float) {
         _songTransitionAlpha.value = alpha
@@ -620,10 +642,10 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         _displayedVerses.value = snapshot.displayedVerses
         _lyricSection.value = snapshot.lyricSection
         _lyricSectionVersion.value++
-        _displayedLyricSection.value = snapshot.displayedLyricSection
         _allLyricSections.value = snapshot.allLyricSections
         _songDisplaySectionIndex.value = snapshot.songDisplaySectionIndex
         _songDisplayLineIndex.value = snapshot.songDisplayLineIndex
+        setDisplayedLyricSection(snapshot.displayedLyricSection)
         _showPresenterWindow.value = snapshot.showPresenterWindow
         setPresentingMode(snapshot.mode)
     }

@@ -102,6 +102,9 @@ import org.churchpresenter.app.churchpresenter.viewmodel.SongMatchKind
 import org.churchpresenter.app.churchpresenter.viewmodel.SongSearchMatch
 import androidx.compose.foundation.ScrollState
 import androidx.compose.runtime.MutableState
+import org.churchpresenter.sharedui.composables.BibleListRowShape
+import org.churchpresenter.sharedui.composables.bibleRowColors
+import org.churchpresenter.sharedui.composables.rememberRowHover
 
 /** The song rows, their scroll-to-selection, and both scrollbars. */
 @Composable

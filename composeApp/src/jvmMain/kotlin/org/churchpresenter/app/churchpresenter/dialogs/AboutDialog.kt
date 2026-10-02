@@ -56,7 +56,7 @@ import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.calendar_choose_logo_title
 import org.churchpresenter.strings.generated.resources.calendar_export_title
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.OwnedFileDialog
+import org.churchpresenter.sharedui.filechooser.OwnedFileDialog
 import org.churchpresenter.app.churchpresenter.utils.isMacOs
 import org.jetbrains.compose.resources.getString
 import org.churchpresenter.strings.generated.resources.about_copyright
@@ -77,7 +77,7 @@ import org.churchpresenter.strings.generated.resources.style_editor_window_title
 import org.churchpresenter.strings.generated.resources.submit_feature_request
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.app.churchpresenter.ui.theme.LocalLanguage
 import org.churchpresenter.theme.ThemeMode
