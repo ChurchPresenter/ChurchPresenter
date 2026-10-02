@@ -129,26 +129,7 @@ private fun RemoteActivityToast(
     onDismissAll: () -> Unit,
     onBlockForSession: () -> Unit,
 ) {
-    val actionLabel = when (notification.type) {
-        RemoteEventType.ADD_TO_SCHEDULE -> stringResource(Res.string.remote_activity_added_to_schedule)
-        RemoteEventType.REMOVE_FROM_SCHEDULE -> stringResource(Res.string.remote_activity_removed_from_schedule)
-        RemoteEventType.PROJECT         -> stringResource(Res.string.remote_activity_projected)
-        RemoteEventType.PRESENT         -> stringResource(Res.string.remote_activity_presented)
-        RemoteEventType.UPLOAD          -> stringResource(Res.string.remote_activity_uploaded)
-        RemoteEventType.CLEAR           -> stringResource(Res.string.remote_activity_cleared)
-        RemoteEventType.QA_ADD          -> stringResource(Res.string.remote_activity_qa_add)
-        RemoteEventType.QA_EDIT         -> stringResource(Res.string.remote_activity_qa_edit)
-        RemoteEventType.QA_DELETE       -> stringResource(Res.string.remote_activity_qa_delete)
-        RemoteEventType.QA_APPROVE      -> stringResource(Res.string.remote_activity_qa_approve)
-        RemoteEventType.QA_DENY         -> stringResource(Res.string.remote_activity_qa_deny)
-        RemoteEventType.QA_DONE         -> stringResource(Res.string.remote_activity_qa_done)
-        RemoteEventType.QA_DISPLAY      -> stringResource(Res.string.remote_activity_qa_display)
-        RemoteEventType.QA_CLEAR_DISPLAY -> stringResource(Res.string.remote_activity_qa_clear_display)
-        RemoteEventType.PRESENTATION_CONNECT -> stringResource(Res.string.remote_activity_presentation_connect)
-        RemoteEventType.CALENDAR_ENROLL -> stringResource(Res.string.remote_activity_calendar_enroll)
-        RemoteEventType.QA_ADMIN_CONNECT -> stringResource(Res.string.remote_activity_qa_admin_connect)
-        RemoteEventType.MUSICIAN_CONNECT -> stringResource(Res.string.remote_activity_musician_connect)
-    }
+    val actionLabel = remoteActionLabel(notification.type)
     val icon = remoteEventIcon(notification.type)
 
     val clientDisplay = when {
@@ -157,14 +138,7 @@ private fun RemoteActivityToast(
         else                                   -> ""
     }
 
-    val bodyTitle = notification.title.ifBlank {
-        when (notification.type) {
-            RemoteEventType.PRESENTATION_CONNECT -> stringResource(Res.string.remote_activity_qa_admin_connect_detail)
-            RemoteEventType.QA_ADMIN_CONNECT -> stringResource(Res.string.remote_activity_qa_admin_connect_detail)
-            RemoteEventType.MUSICIAN_CONNECT -> stringResource(Res.string.remote_activity_qa_admin_connect_detail)
-            else -> ""
-        }
-    }
+    val bodyTitle = notification.title.ifBlank { connectDetail(notification.type) }
 
     Surface(
         modifier = Modifier
@@ -254,33 +228,7 @@ private fun RemoteActivityToast(
 
             Spacer(Modifier.width(8.dp))
 
-            // Buttons
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                KeyButton(shape = AppShape(6.dp), onClick = onBlockForSession) {
-                    Icon(
-                        Icons.Filled.RemoveCircle,
-                        contentDescription = stringResource(Res.string.block_for_session),
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                }
-                GhostButton(shape = AppShape(6.dp), onClick = onDismiss) {
-                    Text(
-                        stringResource(Res.string.remote_activity_dismiss),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                if (remaining > 0) {
-                    GhostButton(shape = AppShape(6.dp), onClick = onDismissAll) {
-                        Text(
-                            stringResource(Res.string.remote_activity_dismiss_all),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-            }
+            ToastButtons(remaining, onDismiss, onDismissAll, onBlockForSession)
         }
     }
 }
@@ -305,4 +253,72 @@ internal fun remoteEventIcon(type: RemoteEventType): ImageVector = when (type) {
     RemoteEventType.QA_DONE,
     RemoteEventType.QA_DISPLAY,
     RemoteEventType.QA_CLEAR_DISPLAY -> Icons.Filled.QuestionAnswer
+}
+
+/** What the remote did, as the toast's first line names it. */
+@Composable
+private fun remoteActionLabel(type: RemoteEventType): String = when (type) {
+    RemoteEventType.ADD_TO_SCHEDULE -> stringResource(Res.string.remote_activity_added_to_schedule)
+    RemoteEventType.REMOVE_FROM_SCHEDULE -> stringResource(Res.string.remote_activity_removed_from_schedule)
+    RemoteEventType.PROJECT         -> stringResource(Res.string.remote_activity_projected)
+    RemoteEventType.PRESENT         -> stringResource(Res.string.remote_activity_presented)
+    RemoteEventType.UPLOAD          -> stringResource(Res.string.remote_activity_uploaded)
+    RemoteEventType.CLEAR           -> stringResource(Res.string.remote_activity_cleared)
+    RemoteEventType.QA_ADD          -> stringResource(Res.string.remote_activity_qa_add)
+    RemoteEventType.QA_EDIT         -> stringResource(Res.string.remote_activity_qa_edit)
+    RemoteEventType.QA_DELETE       -> stringResource(Res.string.remote_activity_qa_delete)
+    RemoteEventType.QA_APPROVE      -> stringResource(Res.string.remote_activity_qa_approve)
+    RemoteEventType.QA_DENY         -> stringResource(Res.string.remote_activity_qa_deny)
+    RemoteEventType.QA_DONE         -> stringResource(Res.string.remote_activity_qa_done)
+    RemoteEventType.QA_DISPLAY      -> stringResource(Res.string.remote_activity_qa_display)
+    RemoteEventType.QA_CLEAR_DISPLAY -> stringResource(Res.string.remote_activity_qa_clear_display)
+    RemoteEventType.PRESENTATION_CONNECT -> stringResource(Res.string.remote_activity_presentation_connect)
+    RemoteEventType.CALENDAR_ENROLL -> stringResource(Res.string.remote_activity_calendar_enroll)
+    RemoteEventType.QA_ADMIN_CONNECT -> stringResource(Res.string.remote_activity_qa_admin_connect)
+    RemoteEventType.MUSICIAN_CONNECT -> stringResource(Res.string.remote_activity_musician_connect)
+}
+
+/** Block the client for the session, dismiss this toast, and dismiss all of them when more wait. */
+@Composable
+private fun ToastButtons(
+    remaining: Int,
+    onDismiss: () -> Unit,
+    onDismissAll: () -> Unit,
+    onBlockForSession: () -> Unit,
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        KeyButton(shape = AppShape(6.dp), onClick = onBlockForSession) {
+            Icon(
+                Icons.Filled.RemoveCircle,
+                contentDescription = stringResource(Res.string.block_for_session),
+                tint = MaterialTheme.colorScheme.error
+            )
+        }
+        GhostButton(shape = AppShape(6.dp), onClick = onDismiss) {
+            Text(
+                stringResource(Res.string.remote_activity_dismiss),
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+        if (remaining > 0) {
+            GhostButton(shape = AppShape(6.dp), onClick = onDismissAll) {
+                Text(
+                    stringResource(Res.string.remote_activity_dismiss_all),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
+
+/** What a connect toast says when the event carried no title of its own; nothing for other kinds. */
+@Composable
+private fun connectDetail(type: RemoteEventType): String = when (type) {
+    RemoteEventType.PRESENTATION_CONNECT,
+    RemoteEventType.QA_ADMIN_CONNECT,
+    RemoteEventType.MUSICIAN_CONNECT -> stringResource(Res.string.remote_activity_qa_admin_connect_detail)
+    else -> ""
 }
