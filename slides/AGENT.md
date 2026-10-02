@@ -48,6 +48,15 @@ same split the code had in the app.
 - The viewmodels switch to `Dispatchers.Main`, which on the desktop is `kotlinx-coroutines-swing` —
   without it every load dies in the background and a test only sees it time out.
 
+## Coverage floor
+
+Branches **79%** and complexity **75%**; the other four counters keep the shared 85%. The gap is not
+untested behaviour: it is the coroutine plumbing the compiler generates around slide rendering (45
+branches on one `finally` line), Compose's per-value change checks on click handlers and effects,
+the shift-drag reorder in the picture grid (a test cannot hold Shift on a mouse event), and the native
+file pickers. Raise the floors when any of that becomes reachable; never lower them further without
+asking.
+
 ## Commands
 
 ```bash
