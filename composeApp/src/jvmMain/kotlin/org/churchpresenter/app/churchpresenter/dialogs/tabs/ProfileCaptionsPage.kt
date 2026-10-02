@@ -229,7 +229,6 @@ private fun CaptionShowGroup(stt: STTSettings, update: ((STTSettings) -> STTSett
             stt.dripFeedEnabled,
             { v -> update { it.copy(dripFeedEnabled = v) } },
             sub = if (typedAtFixedSpeed) stringResource(Res.string.profile_caption_type_out_sub) else null,
-            advanced = true,
             paths = listOf("$STT.dripFeedEnabled", "$STT.dripFeedSpeed"),
             extra = {
                 if (typedAtFixedSpeed) {
@@ -355,14 +354,12 @@ private fun CaptionTextRows(stt: STTSettings, update: ((STTSettings) -> STTSetti
         stringResource(Res.string.profile_caption_translation_bold),
         stt.translationBold,
         { v -> update { it.copy(translationBold = v) } },
-        advanced = true,
         paths = listOf("$STT.translationBold"),
     )
     SettingsSwitchRow(
         stringResource(Res.string.profile_caption_translation_italic),
         stt.translationItalic,
         { v -> update { it.copy(translationItalic = v) } },
-        advanced = true,
         paths = listOf("$STT.translationItalic"),
     )
 }

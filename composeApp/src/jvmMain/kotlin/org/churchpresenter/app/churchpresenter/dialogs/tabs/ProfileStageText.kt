@@ -95,8 +95,8 @@ internal fun StageTextGroup(
 }
 
 /**
- * Style -- outline and highlight among it -- and alignment in Basic; the vertical alignment, chord
- * colour and shadow in Advanced.
+ * Style -- outline and highlight among it -- alignment, vertical alignment and shadow in Basic; the
+ * chord colour and the shadow's own colour and size in Advanced.
  */
 @Composable
 private fun StageStyleRows(
@@ -140,7 +140,6 @@ private fun StageStyleRows(
     }
     SettingsRow(
         stringResource(Res.string.profile_vertical_alignment),
-        advanced = true,
         paths = path("verticalAlignment"),
     ) {
         RowSegmented(
@@ -163,7 +162,6 @@ private fun StageStyleRows(
         stringResource(Res.string.profile_text_shadow),
         style.shadow,
         { v -> write { copy(shadow = v) } },
-        advanced = true,
         paths = path("shadow"),
     )
     if (style.shadow) {

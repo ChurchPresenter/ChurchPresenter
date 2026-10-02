@@ -50,7 +50,8 @@ private const val OPACITY_STEP = 5
  */
 
 /**
- * The text's look: font, size, colour and style in Basic; outline, highlight and shadow in Advanced.
+ * The text's look: font, size, colour, style -- outline and highlight among it -- and shadow in
+ * Basic; the shadow's own colour and size in Advanced.
  * [prefix] is where the look is stored -- `sttSettings`, `qaSettings`, `mediaSettings`.
  */
 @Composable
@@ -103,7 +104,6 @@ internal fun DisplayTextRows(
         stringResource(Res.string.profile_text_shadow),
         style.shadow,
         { onChange(style.copy(shadow = it)) },
-        advanced = true,
         paths = path("shadow"),
     )
     if (style.shadow) {

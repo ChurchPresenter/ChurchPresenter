@@ -98,7 +98,7 @@ internal fun BackgroundSurfaceRows(
         SettingsRow(stringResource(Res.string.song_background_dim)) {
             RowStepper(config.dim, { onConfig(config.copy(dim = it)) }, PERCENT_RANGE, step = 5, unit = percent)
         }
-        SettingsRow(stringResource(Res.string.customize_background_opacity), advanced = true) {
+        SettingsRow(stringResource(Res.string.customize_background_opacity)) {
             RowStepper(
                 (config.backgroundOpacity * PERCENT).toInt(),
                 { onConfig(config.copy(backgroundOpacity = it / PERCENT)) },
@@ -257,7 +257,7 @@ private fun AboveBandRows(
         }
     }
     if (!config.aboveBandType.drawsAboveBand()) return
-    SettingsRow(stringResource(Res.string.background_above_band_opacity), advanced = true) {
+    SettingsRow(stringResource(Res.string.background_above_band_opacity)) {
         RowStepper(
             (config.aboveBandOpacity * PERCENT).toInt(),
             { onConfig(config.copy(aboveBandOpacity = it / PERCENT)) },
@@ -272,7 +272,6 @@ private fun AboveBandRows(
         stringResource(Res.string.background_above_band_fills_behind_band),
         config.aboveBandFillsBehindBand,
         { onConfig(config.copy(aboveBandFillsBehindBand = it)) },
-        advanced = true,
     )
 }
 
@@ -286,7 +285,7 @@ private fun GradientRows(config: BackgroundConfig, onConfig: (BackgroundConfig) 
     SettingsRow(stringResource(Res.string.bottom)) {
         RowColor(config.gradientBottomColor, { onConfig(config.copy(gradientBottomColor = it)) })
     }
-    SettingsRow(stringResource(Res.string.gradient_top_opacity), advanced = true) {
+    SettingsRow(stringResource(Res.string.gradient_top_opacity)) {
         RowStepper(
             (config.gradientTopOpacity * PERCENT).toInt(),
             { onConfig(config.copy(gradientTopOpacity = it / PERCENT)) },
@@ -295,7 +294,7 @@ private fun GradientRows(config: BackgroundConfig, onConfig: (BackgroundConfig) 
             unit = percent,
         )
     }
-    SettingsRow(stringResource(Res.string.gradient_bottom_opacity), advanced = true) {
+    SettingsRow(stringResource(Res.string.gradient_bottom_opacity)) {
         RowStepper(
             (config.gradientBottomOpacity * PERCENT).toInt(),
             { onConfig(config.copy(gradientBottomOpacity = it / PERCENT)) },
