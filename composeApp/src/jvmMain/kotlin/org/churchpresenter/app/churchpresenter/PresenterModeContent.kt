@@ -63,33 +63,11 @@ internal fun PresenterModeContent(
     showBg: Boolean,
     showBackgroundOverride: Boolean? = null,
 ) {
-    val selectedVerses by presenterManager.selectedVerses
-    val displayedVerses by presenterManager.displayedVerses
-    val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
-    val lyricSection by presenterManager.lyricSection
-    val displayedLyricSection by presenterManager.displayedLyricSection
-    val songTransitionAlpha by presenterManager.songTransitionAlpha
-    val songPosition by presenterManager.displayedSongPosition
-    val displayedImagePath by presenterManager.displayedImagePath
-    val pictureTransitionAlpha by presenterManager.pictureTransitionAlpha
-    val previousDisplayedImagePath by presenterManager.previousDisplayedImagePath
-    val pictureSlideOffset by presenterManager.pictureSlideOffset
-    val displayedSlide by presenterManager.displayedSlide
-    val slideFrozen by presenterManager.slideFrozen
-    val presentationFrame by presenterManager.presentationFrame
-    val slideTransitionAlpha by presenterManager.slideTransitionAlpha
-    val previousDisplayedSlide by presenterManager.previousDisplayedSlide
-    val slideSlideOffset by presenterManager.slideSlideOffset
-    val animationType by presenterManager.animationType
     val displayedAnnouncementText by presenterManager.displayedAnnouncementText
     val announcementTransitionAlpha by presenterManager.announcementTransitionAlpha
     val lottieFrame by presenterManager.lottieFrame
     val mediaTransitionAlpha by presenterManager.mediaTransitionAlpha
-    val websiteUrl by presenterManager.websiteUrl
     val activeScene by presenterManager.activeScene
-    val displayedQuestion by presenterManager.displayedQuestion
-    val qaTransitionAlpha by presenterManager.qaTransitionAlpha
-    val showQRCodeOnDisplay by presenterManager.showQRCodeOnDisplay
     val displayedDictionaryEntry by presenterManager.displayedDictionaryEntry
     val bandSongLineIndex by presenterManager.bandSongLineIndex
     val bandOutgoing by presenterManager.bandOutgoing
@@ -108,74 +86,22 @@ internal fun PresenterModeContent(
     LowerThirdLayout(mode, profile, appSettings, showBackgroundOverride ?: showBg) {
     when (mode) {
         Presenting.BIBLE ->
-            if (profile.showBible) {
-                BiblePresenter(
-                    modifier = if (profile.isLowerThird) {
-                        Modifier
-                    } else {
-                        Modifier.wholeOutputRegion(appSettings.bibleSettings.contentRegion)
-                    },
-                    textRegion = appSettings.bibleSettings.contentRegion.textOnly(profile.isLowerThird),
-                    selectedVerses = displayedVerses,
-                    appSettings = appSettings,
-                    isLowerThird = profile.isLowerThird,
-                    isLowerThirdVertical = profile.isLowerThirdVertical,
-                    outputRole = outputRole,
-                    transitionAlpha = bibleTransitionAlpha,
-                    showBackground = showBackgroundOverride ?: (showBg && profile.showBibleBackground),
-                    crossfadeEnabled = appSettings.bibleSettings.crossfade,
-                    bibleTranslations = profile.bibleTranslations,
-                )
-            }
+            BibleOutput(
+                profile, presenterManager, appSettings, outputRole,
+                showBackground = showBackgroundOverride ?: (showBg && profile.showBibleBackground),
+            )
 
         Presenting.LYRICS ->
-            if (profile.showSongs) {
-                SongPresenter(
-                    modifier = if (profile.isLowerThird) {
-                        Modifier
-                    } else {
-                        Modifier.wholeOutputRegion(appSettings.songSettings.layoutExtras.contentRegion)
-                    },
-                    textRegion = appSettings.songSettings.layoutExtras.contentRegion.textOnly(profile.isLowerThird),
-                    lyricSection = displayedLyricSection,
-                    appSettings = appSettings,
-                    isLowerThird = profile.isLowerThird,
-                    isLowerThirdVertical = profile.isLowerThirdVertical,
-                    outputRole = outputRole,
-                    transitionAlpha = songTransitionAlpha,
-                    displayLineIndex = songPosition.lineIndex,
-                    lookAheadEnabled = profile.songLookAhead,
-                    allLyricSections = songPosition.allSections,
-                    displaySectionIndex = songPosition.sectionIndex,
-                    showBackground = showBackgroundOverride ?: (showBg && profile.showSongsBackground),
-                    crossfadeEnabled = appSettings.songSettings.crossfade,
-                    languageOverride = profile.songMode,
-                    languageSelection = profile.songTranslations,
-                )
-            }
+            SongOutput(
+                profile, presenterManager, appSettings, outputRole,
+                showBackground = showBackgroundOverride ?: (showBg && profile.showSongsBackground),
+            )
 
         Presenting.PICTURES ->
-            if (profile.showPictures)
-                PicturePresenter(
-                    imagePath = displayedImagePath,
-                    previousImagePath = previousDisplayedImagePath,
-                    transitionAlpha = pictureTransitionAlpha,
-                    slideOffset = pictureSlideOffset,
-                    animationType = animationType,
-                    contentScale = appSettings.pictureSettings.scaleMode.contentScale,
-                )
+            if (profile.showPictures) PictureOutput(presenterManager, appSettings)
 
         Presenting.PRESENTATION ->
-            if (profile.showPictures)
-                PresentationPresenter(
-                    frame = presentationFrame,
-                    slide = displayedSlide,
-                    previousSlide = previousDisplayedSlide,
-                    transitionAlpha = slideTransitionAlpha,
-                    slideOffset = slideSlideOffset,
-                    animationType = animationType,
-                    frozen = slideFrozen
-                )
+            if (profile.showPictures) PresentationOutput(presenterManager)
 
         Presenting.MEDIA ->
             if (profile.showMedia) {
@@ -216,43 +142,12 @@ internal fun PresenterModeContent(
                 )
 
         Presenting.WEBSITE ->
-            if (profile.showWebsite && LocalInMergedTile.current) {
-                presenterManager.webSnapshot.value?.let { snapshot ->
-                    Image(
-                        bitmap = snapshot,
-                        contentDescription = null,
-                        contentScale = ContentScale.FillBounds,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                }
-            } else if (profile.showWebsite) WebsitePresenter(
-                url = websiteUrl,
-                modifier = Modifier.fillMaxSize(),
-                onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
-                onBrowserCreated = { browser -> presenterManager.setLiveBrowser(browser) },
-                onUrlChanged = { newUrl -> presenterManager.setWebsiteUrl(newUrl) },
-                onTitleChanged = { title -> presenterManager.setWebPageTitle(title) },
-                audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId
-            )
+            WebsiteOutput(profile, presenterManager, appSettings)
 
         Presenting.CANVAS -> { if (profile.showCanvas) ScenePresenter(scene = activeScene) }
 
         Presenting.QA ->
-            if (profile.showQA) {
-                if (showQRCodeOnDisplay) {
-                    QAQRCodePresenter(
-                        url = qaQrCodeUrl(qaDisplayUrl, serverUrl),
-                        qaSettings = appSettings.qaSettings,
-                        transitionAlpha = qaTransitionAlpha,
-                    )
-                } else {
-                    QAPresenter(
-                        question = displayedQuestion,
-                        qaSettings = appSettings.qaSettings,
-                        transitionAlpha = qaTransitionAlpha,
-                    )
-                }
-            }
+            QaOutput(profile, presenterManager, appSettings, qaQrCodeUrl(qaDisplayUrl, serverUrl))
 
         Presenting.STT ->
             if (profile.showSTT) {
@@ -278,4 +173,165 @@ internal fun PresenterModeContent(
     }
     }
     }
+}
+
+/** Scripture on this output, when its profile shows it. */
+@Composable
+private fun BibleOutput(
+    profile: OutputProfile,
+    presenterManager: PresenterManager,
+    appSettings: AppSettings,
+    outputRole: String,
+    showBackground: Boolean,
+) {
+    val displayedVerses by presenterManager.displayedVerses
+    val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
+    if (profile.showBible) {
+        BiblePresenter(
+            modifier = if (profile.isLowerThird) {
+                Modifier
+            } else {
+                Modifier.wholeOutputRegion(appSettings.bibleSettings.contentRegion)
+            },
+            textRegion = appSettings.bibleSettings.contentRegion.textOnly(profile.isLowerThird),
+            selectedVerses = displayedVerses,
+            appSettings = appSettings,
+            isLowerThird = profile.isLowerThird,
+            isLowerThirdVertical = profile.isLowerThirdVertical,
+            outputRole = outputRole,
+            transitionAlpha = bibleTransitionAlpha,
+            showBackground = showBackground,
+            crossfadeEnabled = appSettings.bibleSettings.crossfade,
+            bibleTranslations = profile.bibleTranslations,
+        )
+    }
+}
+
+/** The song on this output, when its profile shows songs. */
+@Composable
+private fun SongOutput(
+    profile: OutputProfile,
+    presenterManager: PresenterManager,
+    appSettings: AppSettings,
+    outputRole: String,
+    showBackground: Boolean,
+) {
+    val displayedLyricSection by presenterManager.displayedLyricSection
+    val songTransitionAlpha by presenterManager.songTransitionAlpha
+    val songPosition by presenterManager.displayedSongPosition
+    if (profile.showSongs) {
+        SongPresenter(
+            modifier = if (profile.isLowerThird) {
+                Modifier
+            } else {
+                Modifier.wholeOutputRegion(appSettings.songSettings.layoutExtras.contentRegion)
+            },
+            textRegion = appSettings.songSettings.layoutExtras.contentRegion.textOnly(profile.isLowerThird),
+            lyricSection = displayedLyricSection,
+            appSettings = appSettings,
+            isLowerThird = profile.isLowerThird,
+            isLowerThirdVertical = profile.isLowerThirdVertical,
+            outputRole = outputRole,
+            transitionAlpha = songTransitionAlpha,
+            displayLineIndex = songPosition.lineIndex,
+            lookAheadEnabled = profile.songLookAhead,
+            allLyricSections = songPosition.allSections,
+            displaySectionIndex = songPosition.sectionIndex,
+            showBackground = showBackground,
+            crossfadeEnabled = appSettings.songSettings.crossfade,
+            languageOverride = profile.songMode,
+            languageSelection = profile.songTranslations,
+        )
+    }
+}
+
+/** The live web page on this output; inside a merged tile, the snapshot of it instead. */
+@Composable
+private fun WebsiteOutput(profile: OutputProfile, presenterManager: PresenterManager, appSettings: AppSettings) {
+    val websiteUrl by presenterManager.websiteUrl
+    if (profile.showWebsite && LocalInMergedTile.current) {
+        presenterManager.webSnapshot.value?.let { snapshot ->
+            Image(
+                bitmap = snapshot,
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+    } else if (profile.showWebsite) WebsitePresenter(
+        url = websiteUrl,
+        modifier = Modifier.fillMaxSize(),
+        onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
+        onBrowserCreated = { browser -> presenterManager.setLiveBrowser(browser) },
+        onUrlChanged = { newUrl -> presenterManager.setWebsiteUrl(newUrl) },
+        onTitleChanged = { title -> presenterManager.setWebPageTitle(title) },
+        audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId
+    )
+}
+
+/** The question on display, or the QR code that leads to the submission page. */
+@Composable
+private fun QaOutput(
+    profile: OutputProfile,
+    presenterManager: PresenterManager,
+    appSettings: AppSettings,
+    qrCodeUrl: String,
+) {
+    val displayedQuestion by presenterManager.displayedQuestion
+    val qaTransitionAlpha by presenterManager.qaTransitionAlpha
+    val showQRCodeOnDisplay by presenterManager.showQRCodeOnDisplay
+    if (profile.showQA) {
+        if (showQRCodeOnDisplay) {
+            QAQRCodePresenter(
+                url = qrCodeUrl,
+                qaSettings = appSettings.qaSettings,
+                transitionAlpha = qaTransitionAlpha,
+            )
+        } else {
+            QAPresenter(
+                question = displayedQuestion,
+                qaSettings = appSettings.qaSettings,
+                transitionAlpha = qaTransitionAlpha,
+            )
+        }
+    }
+}
+
+/** The picture on this output, sliding or fading in over the one before. */
+@Composable
+private fun PictureOutput(presenterManager: PresenterManager, appSettings: AppSettings) {
+    val displayedImagePath by presenterManager.displayedImagePath
+    val pictureTransitionAlpha by presenterManager.pictureTransitionAlpha
+    val previousDisplayedImagePath by presenterManager.previousDisplayedImagePath
+    val pictureSlideOffset by presenterManager.pictureSlideOffset
+    val animationType by presenterManager.animationType
+    PicturePresenter(
+        imagePath = displayedImagePath,
+        previousImagePath = previousDisplayedImagePath,
+        transitionAlpha = pictureTransitionAlpha,
+        slideOffset = pictureSlideOffset,
+        animationType = animationType,
+        contentScale = appSettings.pictureSettings.scaleMode.contentScale,
+    )
+}
+
+/** The presentation's current slide on this output, or its frame while it animates. */
+@Composable
+private fun PresentationOutput(presenterManager: PresenterManager) {
+    val displayedSlide by presenterManager.displayedSlide
+    val slideFrozen by presenterManager.slideFrozen
+    val presentationFrame by presenterManager.presentationFrame
+    val slideTransitionAlpha by presenterManager.slideTransitionAlpha
+    val previousDisplayedSlide by presenterManager.previousDisplayedSlide
+    val slideSlideOffset by presenterManager.slideSlideOffset
+    val animationType by presenterManager.animationType
+    PresentationPresenter(
+        frame = presentationFrame,
+        slide = displayedSlide,
+        previousSlide = previousDisplayedSlide,
+        transitionAlpha = slideTransitionAlpha,
+        slideOffset = slideSlideOffset,
+        animationType = animationType,
+        frozen = slideFrozen
+    )
 }
