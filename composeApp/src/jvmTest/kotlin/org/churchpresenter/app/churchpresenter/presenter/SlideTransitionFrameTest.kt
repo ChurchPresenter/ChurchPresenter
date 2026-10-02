@@ -48,7 +48,11 @@ class SlideTransitionFrameTest {
     )
 
     // One long verse between two short ones: the long one sets a small size, the short ones a large.
-    private val song = listOf(verse(1, lines = 8, words = 6), verse(2, lines = 2, words = 1), verse(3, lines = 4, words = 3))
+    private val song = listOf(
+        verse(1, lines = 8, words = 6),
+        verse(2, lines = 2, words = 1),
+        verse(3, lines = 4, words = 3),
+    )
 
     private fun songSettings(crossfade: Boolean, eachSlide: Boolean = false) = AppSettings(
         songSettings = SongSettings(
@@ -69,7 +73,11 @@ class SlideTransitionFrameTest {
     }
 
     /** One output as the output window draws it, fed from [manager]. */
-    private fun ComposeUiTest.output(manager: PresenterManager, settings: AppSettings, content: @Composable () -> Unit) {
+    private fun ComposeUiTest.output(
+        manager: PresenterManager,
+        settings: AppSettings,
+        content: @Composable () -> Unit,
+    ) {
         setContent {
             PresenterTransitionEffects(manager, settings)
             MaterialTheme { Box(Modifier.size(640.dp, 360.dp).testTag(OUTPUT)) { content() } }
@@ -154,7 +162,9 @@ class SlideTransitionFrameTest {
     @Test
     fun `a Bible crossfade never draws a blank frame`() = runComposeUiTest {
         val manager = PresenterManager()
-        val settings = AppSettings(bibleSettings = BibleSettings(crossfade = true, transitionDuration = FADE_MS.toFloat()))
+        val settings = AppSettings(
+            bibleSettings = BibleSettings(crossfade = true, transitionDuration = FADE_MS.toFloat()),
+        )
         output(manager, settings) {
             val presenting by manager.presentingMode
             val verses by manager.displayedVerses
