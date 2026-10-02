@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.sharedui.composables
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -63,7 +63,7 @@ private const val HIDE_CURSOR_STYLE_ID = "churchpresenter-hide-cursor"
  * same way on every platform, and reapplying it is harmless. Run again after every page load, since
  * a new page starts without it.
  */
-internal fun outputCursorScript(hide: Boolean): String =
+fun outputCursorScript(hide: Boolean): String =
     if (hide) {
         "(function(){var s=document.getElementById('$HIDE_CURSOR_STYLE_ID');" +
             "if(!s){s=document.createElement('style');s.id='$HIDE_CURSOR_STYLE_ID';" +

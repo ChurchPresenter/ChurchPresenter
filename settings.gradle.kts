@@ -107,3 +107,7 @@ include(":icons")
 include(":shared-ui")
 
 include(":slides")
+
+// The Web tab and the embedded Chromium it and the output window browse with (JCEF). Depended on by
+// :composeApp, which hands it the live output through WebOutput.
+include(":web")

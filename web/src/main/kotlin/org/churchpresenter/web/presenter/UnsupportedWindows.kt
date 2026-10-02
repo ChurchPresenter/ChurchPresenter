@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.presenter
+package org.churchpresenter.web.presenter
 
 /** The `os.name` values of every Windows older than 10, desktop and server alike. */
 private val UNSUPPORTED_WINDOWS = setOf(

@@ -26,7 +26,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.withBundledBible
 import org.churchpresenter.app.churchpresenter.data.asDurationRow
 import org.churchpresenter.settings.SettingsManager
-import org.churchpresenter.app.churchpresenter.presenter.CefManager
+import org.churchpresenter.web.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.ui.theme.themeCustomizationFrom
 import org.churchpresenter.theme.LocalThemeCustomization
 import org.churchpresenter.theme.ThemeCustomization

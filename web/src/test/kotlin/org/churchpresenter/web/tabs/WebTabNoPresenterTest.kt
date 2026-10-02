@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.web.tabs
 
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -13,10 +13,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * The Web tab with no [org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager] behind it.
+ * The Web tab with no [org.churchpresenter.web.WebOutput] behind it.
  *
- * `WebTab` declares `presenterManager: PresenterManager? = null` and reaches it through roughly forty
- * `presenterManager?.` calls — restoring the saved URL and title, publishing what goes live, driving
+ * `WebTab` declares `output: WebOutput? = null` and reaches it through roughly forty
+ * `output?.` calls — restoring the saved URL and title, publishing what goes live, driving
  * the live browser, clearing the snapshot on the way out. Every other test in this suite hands it a
  * real manager, so none of those null sides was ever taken, and a null-hostile change to any one of
  * them would go unnoticed until someone composed the tab without one.
