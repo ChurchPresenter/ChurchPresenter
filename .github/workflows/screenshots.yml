@@ -98,9 +98,13 @@ jobs:
       # log lines the build now prints will name the offender if that is what it turns out to be.
       - name: Render screenshots
         timeout-minutes: 35
+        # `--tests` binds to the task named just before it, so each task needs its own: written once at
+        # the end it filtered only the last module, and the others recorded their whole unit suites.
         run: >-
-          ./gradlew :composeApp:recordRoborazziJvm :shared-ui:recordRoborazziJvm :slides:recordRoborazziJvm
-          --tests '*ScreenshotTest*'
+          ./gradlew
+          :composeApp:recordRoborazziJvm --tests '*ScreenshotTest*'
+          :shared-ui:recordRoborazziJvm --tests '*ScreenshotTest*'
+          :slides:recordRoborazziJvm --tests '*ScreenshotTest*'
 
       # So the rendered set can be fetched without running Gradle locally, and the source the
       # website's screenshots should be taken from — not because the images are uncommitted (they
