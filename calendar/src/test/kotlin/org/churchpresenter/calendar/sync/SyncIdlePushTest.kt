@@ -124,6 +124,24 @@ class SyncIdlePushTest {
     }
 
     @Test
+    fun `a remembered push with an unreadable time is no reason to skip one`() {
+        val token = registered()
+        store.save(CalendarDocument(services = listOf(service("s1", "Sunday"))))
+        val first = coordinator().sync(token, cursor = 0)
+        pushedStore.save(pushedStore.load().copy(at = "sometime"))
+
+        coordinator().sync(token, first.cursor)
+
+        assertEquals(2, statePushes())
+    }
+
+    @Test
+    fun `a state file that cannot be read is no memory at all`() {
+        pushedStore.file.writeText("{ not json")
+        assertEquals(PushedState(), pushedStore.load())
+    }
+
+    @Test
     fun `without a store every round pushes, as before`() {
         val token = registered()
         store.save(CalendarDocument(services = listOf(service("s1", "Sunday"))))

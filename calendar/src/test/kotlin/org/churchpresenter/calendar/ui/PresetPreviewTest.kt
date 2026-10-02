@@ -103,6 +103,24 @@ class PresetPreviewTest {
     }
 
     @Test
+    fun `only the pictures in a folder are counted`() {
+        val folder = Files.createTempDirectory("preview-mixed").toFile()
+        try {
+            writePng(File(folder, "one.PNG"))
+            writePng(File(folder, "two.png"))
+            File(folder, "notes.txt").writeText("not a picture")
+            File(folder, "nested.png").mkdirs()
+            val item = ScheduleItem.PictureItem(
+                id = "p", folderPath = folder.absolutePath, folderName = folder.name, imageCount = 4,
+            )
+
+            preview(item) { awaitText("2 pictures") }
+        } finally {
+            folder.deleteRecursively()
+        }
+    }
+
+    @Test
     fun `a folder that is not there says so rather than drawing nothing`() {
         val item = ScheduleItem.PictureItem(
             id = "p", folderPath = "/no/such/folder", folderName = "gone", imageCount = 3,
@@ -150,6 +168,65 @@ class PresetPreviewTest {
         val item = ScheduleItem.AnnouncementItem(id = "a", text = "Welcome to church")
 
         preview(item) { assertTrue(shows("Welcome to church")) }
+    }
+
+    @Test
+    fun `a row with nothing to say says there is nothing to preview`() {
+        preview(ScheduleItem.AnnouncementItem(id = "a", text = "")) { assertTrue(shows("Nothing to preview")) }
+        preview(ScheduleItem.MinistryItem(id = "m", title = "")) { assertTrue(shows("Nothing to preview")) }
+    }
+
+    @Test
+    fun `a file URI is a file, and one that cannot be read is no file`() {
+        val missing = ScheduleItem.MediaItem("m", "file:///no/such/clip.mp4", "clip", "local")
+        preview(missing, PreviewSources(video = { _, _ -> })) { assertTrue(shows("Not found")) }
+
+        val malformed = ScheduleItem.MediaItem("m", "file:not a uri", "clip", "local")
+        preview(malformed, PreviewSources(video = { _, _ -> })) { assertTrue(shows("Stream")) }
+    }
+
+    @Test
+    fun `slides that cannot be drawn still say how many there are`() {
+        val deck = Files.createTempFile("preview-deck", ".pptx").toFile()
+        try {
+            val item = ScheduleItem.PresentationItem("d", deck.absolutePath, "deck", 4, "pptx")
+            preview(item, PreviewSources(slideThumbnails = { _, _ -> error("no renderer") })) {
+                awaitText("4 slides")
+            }
+        } finally {
+            deck.delete()
+        }
+    }
+
+    @Test
+    fun `a clip plays for a few seconds, stops, and can be played again`() {
+        val clip = Files.createTempFile("preview-clip", ".mp4").toFile()
+        var drawn = 0
+        try {
+            runComposeUiTest {
+                mainClock.autoAdvance = false
+                setContent {
+                    AppThemeWrapper(theme = ThemeMode.LIGHT) {
+                        PresetPreview(
+                            item = ScheduleItem.MediaItem("m", clip.absolutePath, "clip", "local"),
+                            sources = PreviewSources(video = { _, _ -> drawn++ }),
+                        )
+                    }
+                }
+                mainClock.advanceTimeByFrame()
+                assertTrue(drawn > 0, "the player is drawn while it plays")
+                assertTrue(!shows("Play again"))
+
+                mainClock.advanceTimeBy(VIDEO_PREVIEW_MILLIS + 100)
+                assertTrue(shows("Preview stopped"))
+
+                clickFirst("Play again")
+                mainClock.advanceTimeBy(100)
+                assertTrue(!shows("Preview stopped"), "playing again")
+            }
+        } finally {
+            clip.delete()
+        }
     }
 
     /** The smallest real PNG the decoder will accept — a 1×1 white pixel. */

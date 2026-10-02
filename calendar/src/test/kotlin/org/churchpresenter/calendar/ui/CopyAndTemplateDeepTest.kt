@@ -5,6 +5,7 @@ package org.churchpresenter.calendar.ui
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import org.churchpresenter.calendar.CalendarStore
+import org.churchpresenter.calendar.model.DEFAULT_REPEAT_COUNT
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import java.io.File
 import kotlin.test.Test
@@ -98,6 +99,17 @@ class CopyAndTemplateDeepTest {
             clickLast("Create")
             assertEquals(53, stored(folder).services.size, "52 copies, plus the one copied from")
         }
+
+    @Test
+    fun `a letter typed into the count changes nothing`() = withCalendar(documentWith(service())) { folder ->
+        openCopy()
+        sheetButton("Weekly", anchor = "Paste on")
+
+        typeIntoLastField("x")
+
+        clickLast("Create")
+        assertEquals(DEFAULT_REPEAT_COUNT + 1, stored(folder).services.size, "the count it opened with")
+    }
 
     @Test
     fun `a copy can leave the run of show behind`() = withCalendar(documentWith(service())) { folder ->

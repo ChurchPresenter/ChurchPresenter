@@ -319,4 +319,21 @@ class CueRunnerTest {
 
         assertEquals(listOf("project:ax1", "project:bx1"), outputs.done)
     }
+
+    @Test
+    fun `the row handed on to with no timing of its own plays once and holds`() {
+        val rows = listOf(song("a"), song("b"), song("c"))
+        val timing = mapOf("a" to RowTiming(startAt = "10:00", runSeconds = 60, atEnd = RowEnd.NEXT))
+        val outputs = Outputs()
+        var clock = at(10, 0)
+        val runner = runner(rows, timing, outputs, { clock })
+
+        runner.tick()
+        clock = at(10, 1)
+        runner.tick()
+        clock = at(10, 30)
+        runner.tick()
+
+        assertEquals(listOf("project:ax1", "project:bx1"), outputs.done, "b has no end of its own")
+    }
 }

@@ -7,12 +7,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.calendar.CalendarStore
@@ -108,6 +110,42 @@ class TimingPanelTypedTest {
 
         field(0).performTextInput("9:30")
         assertEquals("9:30", latest().startText, "the clock field is the first one left")
+    }
+
+    @Test
+    fun `a clock after the start has no minutes before it, and an unreadable one is kept as typed`() =
+        withPanel { latest ->
+            field(1).performTextInput("10:30")
+            assertEquals("10:30", latest().startText)
+            assertEquals("", field(0).fetchSemanticsNode().config[SemanticsProperties.EditableText].text)
+
+            field(1).performTextClearance()
+            field(1).performTextInput("25:99")
+            assertEquals("25:99", latest().startText, "kept, so it can be corrected")
+            assertNull(latest().startTime())
+        }
+
+    @Test
+    fun `clearing the minutes clears the start`() = withPanel { latest ->
+        field(0).performTextInput("15")
+        assertEquals("09:45", latest().startText)
+        field(0).performTextClearance()
+        assertEquals("", latest().startText)
+    }
+
+    @Test
+    fun `a length that cannot be read is no length`() = withPanel { latest ->
+        field(2).performTextInput("soon")
+        assertEquals("soon", latest().durationText)
+        assertNull(latest().runSeconds())
+    }
+
+    @Test
+    fun `a time typed after choosing after-previous still follows the previous row`() = withPanel { latest ->
+        onNodeWithText("After previous").performClick()
+        field(1).performTextInput("10:30")
+        assertTrue(latest().followsPrevious)
+        assertEquals("10:30", latest().startText)
     }
 
     // ── Cue status ──────────────────────────────────────────────────────────────

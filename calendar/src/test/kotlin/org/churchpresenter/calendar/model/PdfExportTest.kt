@@ -107,6 +107,20 @@ class PdfExportTest {
     }
 
     @Test
+    fun `an address alone is a letterhead, and so is a name alone`() {
+        val addressOnly = textOf(PdfAudience.PUBLIC, PdfExportSettings(churchAddress = "1 Main St"))
+        assertTrue(addressOnly.indexOf("1 Main St") in 0 until addressOnly.indexOf("Sunday Morning"))
+
+        val nameOnly = textOf(PdfAudience.PUBLIC, PdfExportSettings(churchName = "Grace Chapel"))
+        assertTrue(nameOnly.indexOf("Grace Chapel") in 0 until nameOnly.indexOf("Sunday Morning"))
+    }
+
+    @Test
+    fun `a logo with no name or address is a letterhead on its own`() {
+        assertEquals(1, imagesIn(PdfExportSettings(logoPath = png().absolutePath, churchName = "", churchAddress = "")))
+    }
+
+    @Test
     fun `a logo is drawn onto the first page`() {
         assertEquals(1, imagesIn(PdfExportSettings(logoPath = png().absolutePath)))
     }

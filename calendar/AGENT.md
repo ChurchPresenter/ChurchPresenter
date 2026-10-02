@@ -163,6 +163,14 @@ the user asked to be able to lose without losing anything else.
 ## Coverage
 
 No `extra["coverageFloors"]` and no `extra["coverageExcludes"]`: the root build's 85% on all six
-counters applies. `model/` is pure and carries the logic worth pinning — the duration and reference
-parsers, the month grid, the document's service list — and `CalendarStore`'s backup and recovery
-paths are reachable against a temp directory without composing anything.
+counters applies, and CI enforces it. `model/` is pure and carries the logic worth pinning — the
+duration and reference parsers, the month grid, the document's service list — and `CalendarStore`'s
+backup and recovery paths are reachable against a temp directory without composing anything.
+
+**Branches have the least room — about 85%.** Most of what stays uncovered is the Compose compiler's
+own bookkeeping (the changed-argument checks on every lambda and composable parameter), which no
+test reaches. A real condition inside `ui/` is reached most cheaply by composing that piece on its
+own — `PickerResultListsTest`, `AddItemSheetAloneTest`, `ServiceSheetAloneTest`, `SmallPartsTest` —
+rather than through the whole window, so a change that adds branches to `ui/` needs tests that take
+them. Do not put an exclude in to make room; see **NEVER exclude code from coverage without asking
+first** in the root `AGENT.md`.
