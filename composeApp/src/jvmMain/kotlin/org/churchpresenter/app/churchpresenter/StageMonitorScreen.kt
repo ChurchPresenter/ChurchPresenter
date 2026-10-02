@@ -58,7 +58,7 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.sharedui.composables.OutlinedText
 import org.churchpresenter.sharedui.composables.backdropRoom
 import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
-import org.churchpresenter.app.churchpresenter.data.StrongsEntry
+import org.churchpresenter.dictionary.data.StrongsEntry
 import org.churchpresenter.sharedui.presenter.BoxedItem
 import org.churchpresenter.sharedui.presenter.rectIn
 import org.churchpresenter.settings.DictionarySettings

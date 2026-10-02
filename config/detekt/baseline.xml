@@ -24,7 +24,6 @@
     <ID>LongMethod:CompanionWebPages.kt$internal fun qaSubmissionPageHtml(): String</ID>
     <ID>LongMethod:CompanionWebPages.kt$internal fun qaVotingPageHtml(): String</ID>
     <ID>LongMethod:DictionaryPresenter.kt$@Composable fun DictionaryPresenter( modifier: Modifier = Modifier, entry: StrongsEntry?, dictionarySettings: DictionarySettings, outputRole: String = Constants.OUTPUT_ROLE_NORMAL, transitionAlpha: Float = 1f, )</ID>
-    <ID>LongMethod:DictionaryTab.kt$@OptIn(ExperimentalLayoutApi::class) @Composable private fun DictionaryListPane( modifier: Modifier = Modifier, viewModel: DictionaryViewModel, getBookName: ((bookId: Int) -&gt; String?)? = null, )</ID>
     <ID>LongMethod:EditSongDialog.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable internal fun EditSongContent( song: SongItem, songbooks: List&lt;String&gt;, existingSongs: List&lt;SongItem&gt;, isNewSong: Boolean, theme: ThemeMode, tuning: SongTuning = SongTuning(), showTuningFields: Boolean = false, chordsVisible: Boolean = true, /** How long this song usually runs here -- measured, see [EditSongDialog]. */ typicalSeconds: Int? = null, onChordsVisibleChange: (Boolean) -&gt; Unit = {}, isVisible: Boolean = true, onApplyBackgroundToSongbook: ((songbook: String, background: SongBackground, lowerThirdBackground: SongBackground) -&gt; Unit)? = null, /** What each language is called install-wide -- see [EditSongDialog]. */ languageNames: List&lt;String&gt; = emptyList(), onLanguageNamesChange: ((List&lt;String&gt;) -&gt; Unit)? = null, onDismiss: () -&gt; Unit, onSave: (SongItem, SongTuning) -&gt; Unit )</ID>
     <ID>LongMethod:InstanceLinkDialog.kt$@Composable internal fun InstanceLinkDialogContent( isVisible: Boolean, settings: InstanceLinkSettings, connectionStatus: InstanceLinkStatus, remoteLiveState: LiveStateDto?, remoteScheduleCount: Int, lastMessageAtMs: Long? = null, onConnect: (InstanceLinkSettings) -&gt; Unit, /** * Persists the edited settings and leaves the connection alone. Connect used to be the only way * to save, so changing a setting that is consumed reactively — the role, Bible sync mode, * background mirroring — forced a reconnect that nothing about the change required. */ onSave: (InstanceLinkSettings) -&gt; Unit, onDisconnect: () -&gt; Unit, onDismiss: () -&gt; Unit )</ID>
     <ID>LongMethod:KeyboardShortcutsDialog.kt$@Composable internal fun KeyboardShortcutsDialogContent( initialSettings: AppSettings, onSave: (AppSettings) -&gt; Unit, onDismiss: () -&gt; Unit, )</ID>
@@ -109,8 +108,6 @@
     <ID>TooManyFunctions:CompanionSatelliteViewModel.kt$CompanionSatelliteViewModel</ID>
     <ID>TooManyFunctions:CompanionServer.kt$CompanionServer</ID>
     <ID>TooManyFunctions:DeckLinkManager.kt$DeckLinkManager</ID>
-    <ID>TooManyFunctions:DictionaryTab.kt$org.churchpresenter.app.churchpresenter.tabs.DictionaryTab.kt</ID>
-    <ID>TooManyFunctions:DictionaryViewModel.kt$DictionaryViewModel</ID>
     <ID>TooManyFunctions:EditSongDialog.kt$org.churchpresenter.app.churchpresenter.dialogs.EditSongDialog.kt</ID>
     <ID>TooManyFunctions:FileManager.kt$FileManager</ID>
     <ID>TooManyFunctions:InstanceLinkClient.kt$InstanceLinkClient</ID>

@@ -256,6 +256,18 @@ jobs:
               - 'diagnostics/**'          # implementation(projects.diagnostics)
               - 'song-chords/**'          # via :shared-ui
               - 'bible/**'                # via :shared-ui
+            dictionary:
+              - *shared
+              - 'dictionary/**'
+              - 'shared-ui/**'            # implementation(projects.sharedUi)
+              - 'strings/**'              # implementation(projects.strings)
+              - 'icons/**'                # implementation(projects.icons)
+              - 'settings/**'             # implementation(projects.settings)
+              - 'theme/**'                # implementation(projects.theme)
+              - 'bible/**'                # implementation(projects.bible)
+              - 'song-chords/**'          # via :shared-ui
+              - 'core-models/**'          # via :shared-ui
+              - 'diagnostics/**'          # via :shared-ui
             crosswordtab:
               - *shared
               - 'crossword-tab/**'
@@ -305,7 +317,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -691,6 +703,14 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.qa == 'true' }}
         run: ./gradlew :qa:jacocoTestCoverageVerification -x test
 
+      - name: Dictionary tests
+        if: ${{ !cancelled() && steps.modules.outputs.dictionary == 'true' }}
+        run: ./gradlew :dictionary:test
+
+      - name: Dictionary coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.dictionary == 'true' }}
+        run: ./gradlew :dictionary:jacocoTestCoverageVerification -x test
+
       # No "Web coverage floor" step yet: :web measures under the shared 85% and the tests that bring
       # it there are still to be written (see web/AGENT.md). The step goes in with them.
 
@@ -736,6 +756,7 @@ jobs:
             web/build/test-results/**/TEST-*.xml
             crossword-tab/build/test-results/**/TEST-*.xml
             qa/build/test-results/**/TEST-*.xml
+            dictionary/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
           # every row after the insertion, so core-models was reported under "Companion Satellite"
@@ -767,6 +788,7 @@ jobs:
             Web
             Crossword tab
             QA
+            Dictionary
           detailed_summary: true
           include_passed: false
           # Without this the second table is one row of "No test annotations available" per
@@ -950,3 +972,5 @@ jobs:
             crossword-tab/build/test-results/
             qa/build/reports/tests/
             qa/build/test-results/
+            dictionary/build/reports/tests/
+            dictionary/build/test-results/

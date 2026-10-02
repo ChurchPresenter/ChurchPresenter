@@ -1,15 +1,11 @@
 package org.churchpresenter.app.churchpresenter.server
 
-import churchpresenter.composeapp.generated.resources.Res
-import io.mockk.coEvery
-import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.data.StrongsEntry
-import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryFixture
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
+import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.dictionary.DictionaryFixture
+import org.churchpresenter.dictionary.data.DictionaryFiles
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -18,17 +14,13 @@ import kotlin.test.assertTrue
 /**
  * The pure lookup/formatting helpers behind the dictionary REST endpoints, plus the suspend loaders
  * ([StrongsDictionaryRepository.all]/[lookup]/[search]/[versesFor]) — driven with
- * [DictionaryFixture]'s stubbed `Res.readBytes` (the same fixture `DictionaryViewModel`'s tests use,
- * since it is the same bundled dictionary) plus a small stubbed interlinear index, rather than the
- * real ~14k-entry files.
+ * [DictionaryFixture]'s files (the same fixture `DictionaryViewModel`'s tests use, since it is the
+ * same bundled dictionary) plus a small interlinear index, rather than the real ~14k-entry files.
  *
- * [StrongsDictionaryRepository] is a singleton with its own load-once [StrongsDictionaryRepository.cache]
- * — cleared before and after every test here so this class can neither read another test's real data
- * nor leave stubbed data behind for one.
+ * Each test gets a repository of its own over the fixture, so none shares a load-once cache.
  */
 class StrongsDictionaryRepositoryTest {
 
-    private val repo = StrongsDictionaryRepository
 
     private val greekInterlinear = """
         [
@@ -44,21 +36,11 @@ class StrongsDictionaryRepositoryTest {
         ]
     """.trimIndent()
 
-    @BeforeTest
-    fun stubDictionary() {
-        repo.cache.clear()
-        repo.interlinear.resetForTest()
-        DictionaryFixture.stubResources()
-        coEvery { Res.readBytes("files/dictionary/interlinear_g.json") } returns greekInterlinear.toByteArray()
-        coEvery { Res.readBytes("files/dictionary/interlinear_h.json") } returns hebrewInterlinear.toByteArray()
-    }
-
-    @AfterTest
-    fun tearDown() {
-        repo.cache.clear()
-        repo.interlinear.resetForTest()
-        unmockkObject(Res)
-    }
+    private val files = DictionaryFixture.files(
+        interlinearGreek = greekInterlinear,
+        interlinearHebrew = hebrewInterlinear,
+    )
+    private val repo = StrongsDictionaryRepository(files)
 
     // ── all() ──────────────────────────────────────────────────────────────────
 
@@ -74,9 +56,10 @@ class StrongsDictionaryRepositoryTest {
     @Test
     fun `all is cached -- a second call does not re-read resources`() = runBlocking {
         repo.all("en")
-        unmockkObject(Res) // if a second call re-read, it would now throw instead of returning stale data
         val entries = repo.all("en")
         assertEquals(4, entries.size)
+        assertEquals(1, files.readsOf(DictionaryFiles.STRONGS_HEBREW))
+        assertEquals(1, files.readsOf(DictionaryFiles.STRONGS_GREEK))
     }
 
     @Test

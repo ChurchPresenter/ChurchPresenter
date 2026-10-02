@@ -121,3 +121,4 @@ include(":crossword-tab")
 // The Q&A tab and QAManager, the questions a congregation sends from their phones. Depended on by
 // :composeApp, which hands it the live output through QAOutput and draws the remote dialog.
 include(":qa")
+include(":dictionary")

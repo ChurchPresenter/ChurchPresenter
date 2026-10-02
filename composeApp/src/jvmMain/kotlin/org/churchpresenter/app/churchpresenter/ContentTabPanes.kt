@@ -9,7 +9,7 @@ import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.tabs.AnnouncementsTab
 import org.churchpresenter.app.churchpresenter.tabs.CanvasTab
-import org.churchpresenter.app.churchpresenter.tabs.DictionaryTab
+import org.churchpresenter.dictionary.DictionaryTab
 import org.churchpresenter.app.churchpresenter.tabs.LowerThirdTab
 import org.churchpresenter.media.tabs.MediaTab
 import org.churchpresenter.slides.tabs.PicturesTab
