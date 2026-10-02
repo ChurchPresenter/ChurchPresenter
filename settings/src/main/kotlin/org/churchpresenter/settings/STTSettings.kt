@@ -20,6 +20,13 @@ data class STTSettings(
     val showTranslationInProgress: Boolean = false,
     val dripFeedEnabled: Boolean = true,
     val dripFeedSpeed: Int = 25, // ms per character
+    /**
+     * Reveal new words at the pace the speaker is talking -- measured from the audio timings of the
+     * newest segments -- instead of at [dripFeedSpeed]: slower when they slow down, faster when they
+     * speed up. Until enough timed speech has arrived to measure, [dripFeedSpeed] stands in for the
+     * typing, and an ordinary speaking pace for words brought in a word at a time.
+     */
+    val matchSpeakerPace: Boolean = false,
     val textColor: String = "#FFFFFF",
     val translationTextColor: String = "#FFFFFF",
     val backgroundColor: String = Constants.COLOR_VALUE_TRANSPARENT,
@@ -83,7 +90,10 @@ const val DEFAULT_CAPTION_MARGIN = 32
  */
 @Serializable
 data class CaptionReading(
-    /** How captions are put on screen: [CAPTION_STYLE_ROLL_UP], [CAPTION_STYLE_POP_ON] or [CAPTION_STYLE_TICKER]. */
+    /**
+     * How captions are put on screen: [CAPTION_STYLE_ROLL_UP], [CAPTION_STYLE_POP_ON],
+     * [CAPTION_STYLE_TICKER] or [CAPTION_STYLE_RSVP].
+     */
     val style: String = CAPTION_STYLE_ROLL_UP,
     /** How fast the ticker crawls, in pixels a second. */
     val tickerSpeed: Int = 150,
@@ -107,7 +117,23 @@ data class CaptionReading(
     val blankLineBetween: Boolean = false,
     /** Wrap at this many characters as well as at the edge; 0 wraps at the edge only. */
     val maxCharsPerLine: Int = 0,
+    /** RSVP: how many words each flash shows, 1 to 3 -- or [RSVP_FLASH_PHRASE], a natural phrase at a time. */
+    val rsvpWordsPerFlash: Int = 1,
+    /**
+     * RSVP: words a minute -- the speed it flashes at, or, matching the speaker, the speed it never
+     * goes past. A speaker faster than that is not caught up with by dropping words: the flashes fall
+     * behind and catch up when the speaker pauses.
+     */
+    val rsvpWpm: Int = 300,
+    /**
+     * Bionic reading: the first part of each word drawn bold and the rest regular -- whatever the
+     * caption's own weight -- so the eye can skim the bold starts and let the reader fill in the rest.
+     */
+    val bionicReading: Boolean = false,
 )
+
+/** [CaptionReading.rsvpWordsPerFlash] for a natural phrase per flash rather than a set number of words. */
+const val RSVP_FLASH_PHRASE = 0
 
 /** A running transcript that grows at the bottom and pushes old lines off the top. */
 const val CAPTION_STYLE_ROLL_UP = "roll_up"
@@ -117,6 +143,9 @@ const val CAPTION_STYLE_POP_ON = "pop_on"
 
 /** One line crawling sideways along its band. */
 const val CAPTION_STYLE_TICKER = "ticker"
+
+/** Rapid serial visual presentation: a word, or a few, at a time, each in the same place. */
+const val CAPTION_STYLE_RSVP = "rsvp"
 
 const val CAPTION_BREAK_NONE = "none"
 const val CAPTION_BREAK_SEGMENT = "segment"
