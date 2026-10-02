@@ -21,6 +21,7 @@ import org.churchpresenter.app.churchpresenter.presenter.BibleBandClock
 import org.churchpresenter.app.churchpresenter.presenter.BibleBandPhase
 import org.churchpresenter.app.churchpresenter.presenter.BibleLottieTemplate
 import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.app.churchpresenter.presenter.isRestatedAs
 import org.churchpresenter.app.churchpresenter.presenter.rememberBibleLottieTemplate
 import org.churchpresenter.app.churchpresenter.viewmodel.DisplayedSongPosition
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -375,7 +376,10 @@ private suspend fun PresenterManager.applyBibleTarget(target: BibleBandTarget, t
 /** Moves the song band — and the classic band's displayed section — onto [target]. */
 private suspend fun PresenterManager.applySongTarget(target: SongBandTarget, template: BibleLottieTemplate?) {
     val animating = template?.takeIf {
-        val settled = target.section == displayedLyricSection.value && target.lineIndex == bandSongLineIndex.value
+        // A section re-sent with only its tuning changed reads the same, and swapping it plays the
+        // band's text out and back in over identical words.
+        val settled = displayedLyricSection.value.isRestatedAs(target.section) &&
+            target.lineIndex == bandSongLineIndex.value
         presentingMode.value == Presenting.LYRICS && bandIsUp() && !settled
     }
     if (animating == null) {
