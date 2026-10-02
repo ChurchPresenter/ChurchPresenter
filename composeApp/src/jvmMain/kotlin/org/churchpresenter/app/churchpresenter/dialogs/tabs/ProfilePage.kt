@@ -30,6 +30,7 @@ import org.churchpresenter.strings.generated.resources.profile_mode_stage
 import org.churchpresenter.strings.generated.resources.tab_dictionary
 import org.churchpresenter.strings.generated.resources.tab_qa
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.ProfileSection
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
@@ -82,6 +83,10 @@ internal fun ProfilePage.label(): String = when (this) {
     ProfilePage.Content -> stringResource(Res.string.profile_nav_content)
     is ProfilePage.Appearance -> pane.navLabel()
 }
+
+/** What [this] section is called: the name of the page that edits it. */
+@Composable
+internal fun ProfileSection.label(): String = page().label()
 
 /** An appearance page's name in the section list -- fuller than the old tab labels had room for. */
 @Composable

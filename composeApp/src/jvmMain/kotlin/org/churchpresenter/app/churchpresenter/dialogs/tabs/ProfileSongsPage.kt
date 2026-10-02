@@ -100,7 +100,7 @@ internal fun ProfileSongsPage(
         targets,
     )
     if (profile.songMode == Constants.SONG_LANG_BOTH) {
-        SettingsGroup(stringResource(Res.string.profile_box_languages), paths = SONG_LAYOUT_PATHS) {
+        SettingsGroup(stringResource(Res.string.profile_box_languages), key = "languages", paths = SONG_LAYOUT_PATHS) {
             SettingsRow(stringResource(Res.string.profile_layout), paths = SONG_LAYOUT_PATHS) {
                 RowSegmented(
                     options = bilingualLayoutRowOptions(),
@@ -155,8 +155,9 @@ internal fun ProfileSongsPage(
 }
 
 /**
- * The Text group: the strip picking the language and element, then the element's look, then what
- * the element shows -- the song tab's own options for it.
+ * The Text group: the strip picking the language and element, then everything about the element
+ * itself -- what it shows, the song tab's own options for it, its label switch and its place -- and
+ * only then its look.
  */
 @Composable
 private fun SongTextGroup(
@@ -186,8 +187,10 @@ private fun SongTextGroup(
     val allLabel = stringResource(Res.string.content_bible_translations_all)
     SettingsGroup(
         caption = stringResource(Res.string.profile_group_text),
+        key = "text",
         paths = lookPaths.all,
         action = ResetAction(edit.resettable) { edit.reset() },
+        summary = { style.toLook(styleElement).let { textSummary(it.fontType, it.fontSize) } },
         header = {
             AppliesToStrip(
                 targets = if (perLanguage) {
@@ -205,6 +208,7 @@ private fun SongTextGroup(
         },
     ) {
         if (titleSlideView) SlideElementRow(slideElement, targets.slideElement.onChange)
+        SongElementRow(draft, profile, styleElement, target, titleSlideView, onSettingsChange, onProfileChange)
         key(styleElement, editingLanguage) { CompositionLocalProvider(LocalStyleTarget provides edit.styleTarget()) {
             // One language picked: its own Auto-fit only means something while languages are
             // fitted one by one; fitted together, All's switch decides for every one of them.
@@ -236,7 +240,7 @@ private fun SongTextGroup(
                 } else {
                     null
                 },
-                extraBasic = {
+                leading = {
                     if (styleElement == SongStyleElement.SECTION_LABEL) {
                         SectionLabelSwitch(song.layoutExtras.sectionLabel.enabled, updateSong)
                     }
@@ -253,24 +257,10 @@ private fun SongTextGroup(
                             },
                         )
                     }
-                    SongBoxRows(boxes, song, lowerThird, perLanguage, updateSong)
                 },
+                extraBasic = { SongBoxRows(boxes, song, lowerThird, perLanguage, updateSong) },
             )
         } }
-        // What the element shows and where the number goes: the song tab's own options for it,
-        // which have no simpler row of their own -- the slide chunk, the languages on screen, when
-        // the number and title appear, the number's corner, the title slide's own placements.
-        SettingsWideRow {
-            SongElementOptions(
-                settings = draft,
-                onSettingsChange = onSettingsChange,
-                element = styleElement,
-                target = target,
-                titleSlideView = titleSlideView,
-                outputMode = profile.songMode,
-                onOutputModeChange = { onProfileChange(profile.copy(songMode = it)) },
-            )
-        }
     }
 }
 
@@ -400,7 +390,22 @@ private val END_MARKER_SPACING = 0..20
  */
 @Composable
 private fun SlidesGroup(song: SongSettings, lowerThird: Boolean, updateSong: ((SongSettings) -> SongSettings) -> Unit) {
-    SettingsGroup(stringResource(Res.string.profile_group_slides), paths = SLIDES_PATHS) {
+    val titleSlide = stringResource(Res.string.profile_title_slide)
+    val wordWrap = stringResource(Res.string.profile_word_wrap)
+    val repeatChorus = stringResource(Res.string.profile_repeat_chorus)
+    SettingsGroup(
+        stringResource(Res.string.profile_group_slides),
+        key = "slides",
+        paths = SLIDES_PATHS,
+        // The switches that are on, by name.
+        summary = {
+            listOfNotNull(
+                titleSlide.takeIf { song.titleSlideEnabled },
+                wordWrap.takeIf { song.wordWrap },
+                repeatChorus.takeIf { song.autoRepeatChorus },
+            ).joinToString(" · ")
+        },
+    ) {
         SettingsSwitchRow(
             stringResource(Res.string.profile_title_slide),
             song.titleSlideEnabled,

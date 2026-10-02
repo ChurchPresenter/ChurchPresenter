@@ -27,25 +27,32 @@ import org.churchpresenter.strings.generated.resources.profile_link_no_master
 import org.churchpresenter.strings.generated.resources.profile_linking_differ
 import org.churchpresenter.strings.generated.resources.profile_linking_link_to
 import org.churchpresenter.strings.generated.resources.profile_linking_master
+import org.churchpresenter.strings.generated.resources.profile_link_sections
+import org.churchpresenter.strings.generated.resources.profile_link_sections_sub
+import org.churchpresenter.strings.generated.resources.profile_section_main
+import org.churchpresenter.strings.generated.resources.profile_section_own
 import org.churchpresenter.strings.generated.resources.profile_linking_unlink_note
 import org.churchpresenter.strings.generated.resources.profile_menu_create_linked
 import org.churchpresenter.strings.generated.resources.profile_unlink
+import org.churchpresenter.settings.OWN_SECTION
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.ProfileSection
 import org.churchpresenter.theme.components.DropdownSelector
 import org.jetbrains.compose.resources.stringResource
 
 private val MASTER_PICKER_WIDTH = 220.dp
 
 /**
- * LINKING, on General: the master a linked profile follows and how far it differs, with Unlink; the
- * profiles following a master; or, on a standalone profile, a master to follow -- keeping its own
- * values where they differ, or matching the master's entirely.
+ * LINKING, on General: the master a linked profile follows and how far it differs, with Unlink, and
+ * the master each of its sections follows; the profiles following a master; or, on a standalone
+ * profile, a master to follow -- keeping its own values where they differ, or matching the master's
+ * entirely.
  *
  * [candidates] are the profiles this one could follow: those that follow nothing, itself aside.
  */
 @Composable
 internal fun LinkingGroup(link: ProfileLink, candidates: List<OutputProfile>, actions: ProfileLinkActions) {
-    SettingsGroup(stringResource(Res.string.profile_group_linking)) {
+    SettingsGroup(stringResource(Res.string.profile_group_linking), key = "linking") {
         val master = link.master
         when {
             master != null -> {
@@ -56,10 +63,11 @@ internal fun LinkingGroup(link: ProfileLink, candidates: List<OutputProfile>, ac
                     ActionKey(Icons.Filled.LinkOff, stringResource(Res.string.profile_unlink), actions.onUnlink)
                 }
                 SettingsWideRow { LinkingNote(stringResource(Res.string.profile_linking_unlink_note)) }
+                SectionMasterRows(link.profile, master, candidates, actions)
             }
             link.followers.isNotEmpty() -> SettingsWideRow {
                 Text(
-                    stringResource(Res.string.profile_linking_master, joinNames(link.followers)),
+                    stringResource(Res.string.profile_linking_master, joinFollowers(link)),
                     fontSize = 13.sp,
                 )
             }
@@ -104,6 +112,42 @@ private fun LinkToMasterRows(candidates: List<OutputProfile>, actions: ProfileLi
     }
 }
 
+/**
+ * Sections, under a linked profile's link: one row per section the profile shows, each with the master
+ * it follows -- [main] by default, another master, or Own.
+ */
+@Composable
+private fun SectionMasterRows(
+    profile: OutputProfile,
+    main: OutputProfile,
+    candidates: List<OutputProfile>,
+    actions: ProfileLinkActions,
+) {
+    SettingsWideRow {
+        Text(stringResource(Res.string.profile_link_sections), fontSize = 13.sp)
+        LinkingNote(stringResource(Res.string.profile_link_sections_sub, main.displayName()))
+    }
+    val options = listOf(main.id to stringResource(Res.string.profile_section_main, main.displayName())) +
+        candidates.filter { it.id != main.id }.map { it.id to it.displayName() } +
+        (OWN_SECTION to stringResource(Res.string.profile_section_own))
+    shownSections(profile).forEach { section ->
+        SettingsRow(section.label()) {
+            DropdownSelector(
+                label = "",
+                value = profile.sectionMasters[section.id] ?: main.id,
+                options = options,
+                onValueChange = { id -> actions.onSectionMaster(section, id.takeIf { it != main.id }) },
+                modifier = Modifier.width(MASTER_PICKER_WIDTH).testTag(sectionMasterTag(section)),
+                compact = true,
+            )
+        }
+    }
+}
+
+/** The sections [profile] has a page for: Content, then its appearance pages -- the stage's only on a stage. */
+private fun shownSections(profile: OutputProfile): List<ProfileSection> =
+    listOf(ProfileSection.CONTENT) + customizePanes(profile.displayMode).map { it.section() }
+
 /** Create linked profile, among General's actions -- for a profile that follows nothing. */
 @Composable
 internal fun CreateLinkedAction(onCreate: () -> Unit) {
@@ -122,3 +166,6 @@ private fun LinkingNote(text: String) {
 
 /** Test handle for the master picker. */
 internal const val MASTER_PICKER_TAG = "profile_master_picker"
+
+/** Test handle for the picker of the master [section] follows. */
+internal fun sectionMasterTag(section: ProfileSection): String = "profile_section_master_${section.id}"

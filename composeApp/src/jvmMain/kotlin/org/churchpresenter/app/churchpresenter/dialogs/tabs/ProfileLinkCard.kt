@@ -28,6 +28,7 @@ import org.churchpresenter.strings.generated.resources.content_bible_translation
 import org.churchpresenter.strings.generated.resources.profile_default_value
 import org.churchpresenter.strings.generated.resources.profile_defaults
 import org.churchpresenter.strings.generated.resources.profile_different_from
+import org.churchpresenter.strings.generated.resources.profile_different_from_masters
 import org.churchpresenter.strings.generated.resources.profile_linked_profiles
 import org.churchpresenter.strings.generated.resources.profile_no_changes
 import org.churchpresenter.strings.generated.resources.profile_show_more
@@ -41,6 +42,7 @@ import kotlinx.serialization.json.intOrNull
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.defaultBaseline
 import org.churchpresenter.settings.defaultChanges
+import org.churchpresenter.settings.changesFrom
 import org.churchpresenter.settings.pathWithin
 import org.churchpresenter.settings.plainText
 import org.churchpresenter.settings.valueAt
@@ -83,8 +85,13 @@ internal fun LinkContextCard(
                             .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(follower.displayName(), fontSize = 12.sp, modifier = Modifier.weight(1f))
-                        if (follower.overrides.isNotEmpty()) ChangesChip(follower.overrides.size)
+                        Text(
+                            followerLabel(follower, link.profile.id),
+                            fontSize = 12.sp,
+                            modifier = Modifier.weight(1f),
+                        )
+                        val changes = follower.changesFrom(link.profile.id)
+                        if (changes > 0) ChangesChip(changes)
                     }
                 }
             }
@@ -187,8 +194,15 @@ private fun DifferencesCard(
 ) {
     var expanded by remember(link.profile.id) { mutableStateOf(false) }
     val changes = link.profile.overrides.sorted()
+    // Named for the master while there is one; a profile following several says so rather than
+    // naming one of them for changes made against another.
+    val title = if (link.sectionMasters.values.all { it.id == master.id }) {
+        stringResource(Res.string.profile_different_from, master.displayName())
+    } else {
+        stringResource(Res.string.profile_different_from_masters)
+    }
     PreviewSideCard(Modifier.testTag(CONTEXT_CARD_TAG)) {
-        CardTitle(stringResource(Res.string.profile_different_from, master.displayName()), changes.size)
+        CardTitle(title, changes.size)
         if (changes.isEmpty()) {
             Text(
                 stringResource(Res.string.profile_no_changes, master.displayName()),
@@ -198,7 +212,8 @@ private fun DifferencesCard(
         }
         val shown = if (expanded) changes else changes.take(SHOWN_CHANGES)
         shown.forEach { path ->
-            ChangeRow(path, link.profile, master.displayName(), master.valueAt(path), onOpenPage, onValueChange) {
+            val from = link.masterFor(listOf(path)) ?: master
+            ChangeRow(path, link.profile, from.displayName(), from.valueAt(path), onOpenPage, onValueChange) {
                 link.onRevert(listOf(path))
             }
         }

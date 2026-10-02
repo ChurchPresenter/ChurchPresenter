@@ -75,11 +75,14 @@ import org.churchpresenter.strings.generated.resources.output_profiles_tab
 import org.churchpresenter.strings.generated.resources.profile_list_hint
 import org.churchpresenter.strings.generated.resources.profile_list_new
 import org.churchpresenter.strings.generated.resources.profile_menu_create_linked
+import org.churchpresenter.strings.generated.resources.profile_list_more_master
+import org.churchpresenter.strings.generated.resources.profile_list_more_masters
 import org.churchpresenter.strings.generated.resources.output_profile_move_down
 import org.churchpresenter.strings.generated.resources.output_profile_move_up
 import org.churchpresenter.strings.generated.resources.profile_menu_rename
 import kotlin.math.roundToInt
 import org.churchpresenter.sharedui.composables.SettingsScrollbar
+import org.churchpresenter.settings.OWN_SECTION
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.KeyIconButton
@@ -396,7 +399,7 @@ private fun ProfileListRow(
                     )
                 }
                 Text(
-                    text = usageText(usedBy),
+                    text = listOfNotNull(usageText(usedBy), moreMastersNote(profile)).joinToString(" · "),
                     fontSize = 11.sp,
                     color = scheme.onSurfaceVariant,
                     maxLines = 1,
@@ -409,6 +412,20 @@ private fun ProfileListRow(
                 profile.overrides.isNotEmpty() -> ChangesChip(profile.overrides.size)
             }
         }
+    }
+}
+
+/**
+ * "+1 master" for a linked profile some of whose sections follow another master than the one it is
+ * listed under, or null.
+ */
+@Composable
+private fun moreMastersNote(profile: OutputProfile): String? {
+    val more = profile.sectionMasters.values.filter { it != OWN_SECTION && it != profile.parentId }.distinct().size
+    return when {
+        more == 0 -> null
+        more == 1 -> stringResource(Res.string.profile_list_more_master, more)
+        else -> stringResource(Res.string.profile_list_more_masters, more)
     }
 }
 

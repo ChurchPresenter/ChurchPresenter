@@ -102,10 +102,11 @@ internal fun ProfileEditor(
     val searchIndex = profileSearchIndex(profile)
     val detail = if (settings.profilesAdvanced) SettingsDetail.ADVANCED else SettingsDetail.BASIC
     val scope = if (profile.isLowerThird) OutputStyleScope.LOWER_THIRD else OutputStyleScope.FULL_SCREEN
-    val prefixes = shownPage.pathPrefixes()
-    val link = settings.projectionSettings.linkOf(profile, onlyChanges && prefixes.isNotEmpty(), onRevert)
+    val proj = settings.projectionSettings
+    val link = proj.linkOf(profile, onlyChanges && proj.followsOn(profile, shownPage), onRevert)
+    val folds = rememberFoldedGroups(settings, shownPage, onSettingsChange)
 
-    CompositionLocalProvider(LocalProfileLink provides link) {
+    CompositionLocalProvider(LocalProfileLink provides link, LocalFoldedGroups provides folds) {
         Row(modifier = modifier) {
             ProfileSectionNav(
                 profile = profile,
@@ -118,7 +119,7 @@ internal fun ProfileEditor(
             )
             VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             ProfileSettingsColumn(
-                header = { EditorHeader(link, shownPage, usedBy, detail, onSettingsChange, onPageChange) },
+                header = { EditorHeader(link, shownPage, usedBy, detail, folds, onSettingsChange, onPageChange) },
                 detail = if (shownPage.hasDetailSwitch) detail else SettingsDetail.ADVANCED,
                 query = query,
                 scope = scope,
@@ -127,7 +128,7 @@ internal fun ProfileEditor(
                 // Keyed on the page and the profile: one page's fields must never hand their typing to
                 // the same slot of the next.
                 key(profile.id, shownPage) {
-                    LinkBanner(link, prefixes, linkActions, onOnlyChanges = { onlyChanges = it })
+                    LinkBanner(link, shownPage.pathPrefixes(), linkActions, onOnlyChanges = { onlyChanges = it })
                     PageBody(
                         page = shownPage,
                         settings = settings,
@@ -208,6 +209,7 @@ private fun EditorHeader(
     page: ProfilePage,
     usedBy: List<String>,
     detail: SettingsDetail,
+    folds: FoldedGroups,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     onPageChange: (ProfilePage) -> Unit,
 ) {
@@ -220,6 +222,8 @@ private fun EditorHeader(
         onAssignOutput = { onPageChange(ProfilePage.Outputs) },
         modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 18.dp, bottom = 4.dp),
         linkState = { LinkHeaderState(link) },
+        onFoldAll = folds::foldAll,
+        onOpenAll = folds::openAll,
     )
 }
 

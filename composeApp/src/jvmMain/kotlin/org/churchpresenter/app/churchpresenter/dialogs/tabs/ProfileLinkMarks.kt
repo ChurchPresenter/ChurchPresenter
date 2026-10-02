@@ -94,13 +94,13 @@ internal fun RevertLink(onClick: () -> Unit, modifier: Modifier = Modifier) {
 }
 
 /**
- * The control of a value taken from the master: framed in a dashed line with a small link icon,
- * and a tooltip saying where it comes from. Changing it makes it this profile's own.
+ * The control of a value taken from the master of [paths]' section: framed in a dashed line with a
+ * small link icon, and a tooltip saying where it comes from. Changing it makes it this profile's own.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-internal fun InheritedFrame(link: ProfileLink, control: @Composable RowScope.() -> Unit) {
-    val master = link.master?.displayName().orEmpty()
+internal fun InheritedFrame(link: ProfileLink, paths: List<String>, control: @Composable RowScope.() -> Unit) {
+    val master = link.masterFor(paths)?.displayName().orEmpty()
     ConditionalTooltipArea(
         tooltip = {
             ControlTooltip(stringResource(Res.string.profile_inherited_tooltip, master, link.profile.displayName()))
@@ -128,7 +128,7 @@ internal fun InheritedFrame(link: ProfileLink, control: @Composable RowScope.() 
 /**
  * [control] as a row of [link]'s profile draws it for [paths]: with the master's value and Revert
  * when the profile owns one of them, dashed when it takes them all from its master, and plain when
- * the row names none.
+ * the row names none or its section follows no master.
  */
 @Composable
 internal fun RowScope.LinkedControl(
@@ -137,22 +137,23 @@ internal fun RowScope.LinkedControl(
     control: @Composable RowScope.() -> Unit,
 ) {
     when {
-        link == null || !link.isLinked || paths.isEmpty() -> control()
+        link == null || !link.follows(paths) -> control()
         link.owns(paths) -> {
             val on = stringResource(Res.string.profile_value_on)
             val value = link.masterValue(paths, on, stringResource(Res.string.profile_value_off))
-            if (value != null) MasterValueText(link.master?.displayName().orEmpty(), value)
+            if (value != null) MasterValueText(link.masterFor(paths)?.displayName().orEmpty(), value)
             control()
             RevertLink({ link.onRevert(paths) })
         }
-        else -> InheritedFrame(link, control)
+        else -> InheritedFrame(link, paths, control)
     }
 }
 
 /**
- * The caption action of a group editing [paths] on [link]'s profile: "Revert to {master}" while the
- * profile has made any of them its own, nothing while it has not -- a linked profile's values are
- * its master's until changed, so "Reset to defaults" is not the way back. [action] everywhere else.
+ * The caption action of a group editing [paths] on [link]'s profile: "Revert to {master}" -- the
+ * master of their section -- while the profile has made any of them its own, nothing while it has
+ * not -- a linked profile's values are its master's until changed, so "Reset to defaults" is not
+ * the way back. [action] everywhere else.
  */
 @Composable
 internal fun linkedGroupAction(
@@ -160,9 +161,9 @@ internal fun linkedGroupAction(
     paths: List<String>,
     action: (@Composable RowScope.() -> Unit)?,
 ): (@Composable RowScope.() -> Unit)? {
-    if (link == null || !link.isLinked || paths.isEmpty()) return action
+    if (link == null || !link.follows(paths)) return action
     if (!link.owns(paths)) return null
-    val label = stringResource(Res.string.profile_revert_to, link.master?.displayName().orEmpty())
+    val label = stringResource(Res.string.profile_revert_to, link.masterFor(paths)?.displayName().orEmpty())
     return { GroupCaptionAction(label, { link.onRevert(paths) }) }
 }
 
