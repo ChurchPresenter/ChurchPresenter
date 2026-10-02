@@ -232,6 +232,12 @@ jobs:
               - 'presentation-engine/**'  # api(projects.presentationEngine)
               - 'strings/**'              # implementation(projects.strings)
               - 'icons/**'                # implementation(projects.icons)
+            web:
+              - *shared
+              - 'web/**'
+              - 'shared-ui/**'            # implementation(projects.sharedUi)
+              - 'strings/**'              # implementation(projects.strings)
+              - 'icons/**'                # implementation(projects.icons)
               - 'core-models/**'          # implementation(projects.coreModels)
               - 'settings/**'             # implementation(projects.settings)
               - 'theme/**'                # implementation(projects.theme)
@@ -279,7 +285,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -645,6 +651,13 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.media == 'true' }}
         run: ./gradlew :media:jacocoTestCoverageVerification -x test
 
+      - name: Web tests
+        if: ${{ !cancelled() && steps.modules.outputs.web == 'true' }}
+        run: ./gradlew :web:test
+
+      # No "Web coverage floor" step yet: :web measures under the shared 85% and the tests that bring
+      # it there are still to be written (see web/AGENT.md). The step goes in with them.
+
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,
       # instead of leaving a reviewer to download the report artifact below and open it locally.
@@ -684,6 +697,7 @@ jobs:
             shared-ui/build/test-results/**/TEST-*.xml
             slides/build/test-results/**/TEST-*.xml
             media/build/test-results/**/TEST-*.xml
+            web/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
           # every row after the insertion, so core-models was reported under "Companion Satellite"
@@ -703,6 +717,7 @@ jobs:
             Diagnostics
             ATEM client
             NDI client
+            OMT client
             Planning Center
             Bible formats
             Song chords
@@ -711,6 +726,7 @@ jobs:
             Shared UI
             Slides
             Media
+            Web
           detailed_summary: true
           include_passed: false
           # Without this the second table is one row of "No test annotations available" per
@@ -888,3 +904,5 @@ jobs:
             slides/build/test-results/
             media/build/reports/tests/
             media/build/test-results/
+            web/build/reports/tests/
+            web/build/test-results/

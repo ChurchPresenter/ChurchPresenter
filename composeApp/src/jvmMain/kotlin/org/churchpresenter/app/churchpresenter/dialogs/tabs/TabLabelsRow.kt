@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.width
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.Label
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.SpaceBar
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material3.Icon
@@ -65,7 +65,7 @@ private fun tabLabelMarginName(margin: TabLabelMargin): String = when (margin) {
 
 private fun tabLabelStyleIcon(style: TabLabelStyle): ImageVector = when (style) {
     TabLabelStyle.TEXT -> Icons.Filled.TextFields
-    TabLabelStyle.ICONS_AND_TEXT -> Icons.Filled.Label
+    TabLabelStyle.ICONS_AND_TEXT -> Icons.AutoMirrored.Filled.Label
     TabLabelStyle.ICONS -> Icons.Filled.Category
 }
 

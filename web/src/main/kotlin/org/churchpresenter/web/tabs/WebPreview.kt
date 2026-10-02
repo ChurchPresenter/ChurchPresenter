@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.web.tabs
 
 import java.awt.Component
 import java.lang.reflect.Method
@@ -42,10 +42,7 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.web_preview_hint
 import org.churchpresenter.strings.generated.resources.web_snapshot_screen_recording_hint
 import org.churchpresenter.strings.generated.resources.web_snapshot_waiting
-import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.presenter.EmbeddedWebView
-import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
+import org.churchpresenter.web.presenter.EmbeddedWebView
 import org.jetbrains.compose.resources.stringResource
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent as AwtKeyEvent
@@ -67,13 +64,7 @@ internal fun WebTabScope.WebPreviewCard(modifier: Modifier) {
             .bibleListCard()
     ) {
         // ── Preview WebView ────────────────────────────────────────────────
-        PreviewOutputPicker(
-            settings = appSettings,
-            tabId = Constants.PREVIEW_TAB_WEB,
-            mode = Presenting.WEBSITE,
-            onSettingsChange = onSettingsChange,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-        )
+        outputPicker(Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
         // Fit preview to remaining space while keeping the output's aspect ratio
         BoxWithConstraints(
             modifier = Modifier.weight(1f).fillMaxWidth().padding(start = 10.dp, end = 10.dp, bottom = 10.dp),
@@ -132,8 +123,8 @@ internal fun WebTabScope.WebPreviewCard(modifier: Modifier) {
 /** Mirror mode: the presenter's screenshot, with input forwarded to the live browser. */
 @Composable
 private fun WebTabScope.WebMirrorPreview() {
-    val webSnapshot = presenterManager?.webSnapshot?.value
-    val liveBrowser = presenterManager?.liveBrowser?.value
+    val webSnapshot = output?.webSnapshot?.value
+    val liveBrowser = output?.liveBrowser?.value
     if (webSnapshot != null) {
         WebSnapshotImage(webSnapshot, liveBrowser)
     } else {

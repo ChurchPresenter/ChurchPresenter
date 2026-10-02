@@ -147,8 +147,8 @@ class AnnouncementsTabTest {
 
             val settings = reports.settings
             assertTrue(settings?.bold == true, "bold survived the round trip")
-            assertTrue(settings?.shadow == true, "and so did the shadow")
-            assertTrue(settings?.italic == true, "alongside the new one")
+            assertTrue(settings.shadow, "and so did the shadow")
+            assertTrue(settings.italic, "alongside the new one")
         }
 
     // ── Position ────────────────────────────────────────────────────────────────

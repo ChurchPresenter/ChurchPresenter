@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.web.tabs
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -52,17 +52,18 @@ import androidx.compose.material.icons.outlined.Warning
 import org.churchpresenter.strings.generated.resources.web_refresh
 import org.churchpresenter.strings.generated.resources.web_zoom_in
 import org.churchpresenter.strings.generated.resources.web_zoom_out
-import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.presenter.CefManager
+import org.churchpresenter.web.presenter.CefManager
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.presenter.WebNavController
-import org.churchpresenter.app.churchpresenter.presenter.rememberWebNavController
-import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.web.presenter.WebNavController
+import org.churchpresenter.web.presenter.rememberWebNavController
+import org.churchpresenter.web.WebOutput
 import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+
+/** A 16:9 output, for a preview with no output to measure. */
+private const val DEFAULT_PREVIEW_ASPECT_RATIO = 16f / 9f
 
 internal const val WEB_MOUSE_MOVE_THROTTLE_MS = 50
 internal const val WEB_SNAPSHOT_RETRY_DELAY_MS = 7000L
@@ -75,7 +76,7 @@ private const val FIRST_PRINTABLE_CHAR = 0x20
 @Composable
 fun WebTab(
     modifier: Modifier = Modifier,
-    presenterManager: PresenterManager? = null,
+    output: WebOutput? = null,
     selectedWebsiteItem: ScheduleItem.WebsiteItem? = null,
     /**
      * Bumped by the caller on every schedule click, so clicking the *same* item twice re-runs the
@@ -91,6 +92,14 @@ fun WebTab(
     cefInitialized: Boolean = CefManager.initialized,
     cefMacOsUnsupported: Boolean = CefManager.macOsUnsupported,
     cefBlockedByPolicy: Boolean = CefManager.blockedByPolicy,
+    /**
+     * Width over height of the output the preview stands in for. The app reads it from the preview
+     * output the operator picked, so the embedded browser lays the page out at the shape it goes
+     * out at.
+     */
+    previewAspectRatio: Float = DEFAULT_PREVIEW_ASPECT_RATIO,
+    /** The output picker above the preview, drawn by the app, which owns the outputs. */
+    outputPicker: @Composable (Modifier) -> Unit = {},
 ) {
     // JCEF's native engine can fail to load at startup (broken chrome_elf.dll, missing
     // VC++ runtime, etc.). CefManager.init() catches that and leaves the engine down for
@@ -100,30 +109,24 @@ fun WebTab(
         return
     }
 
-    // Recomputed as the settings change, not cached once: this was a keyless `remember`, so a
-    // projector plugged in mid-service never reached the preview. It also sizes a real JCEF native
-    // viewport, so the wrong shape lays the page out differently from the way it will go out.
-    val previewOutput = rememberPreviewOutput(appSettings, Constants.PREVIEW_TAB_WEB, Presenting.WEBSITE)
-    val previewAspectRatio = previewOutput.size.aspectRatio
-
     // Restore URL / title from PresenterManager so state survives tab switches
-    val savedUrl = presenterManager?.websiteUrl?.value ?: ""
-    val savedTitle = presenterManager?.webPageTitle?.value ?: ""
+    val savedUrl = output?.websiteUrl?.value ?: ""
+    val savedTitle = output?.webPageTitle?.value ?: ""
     val state = remember { WebTabState(savedUrl, savedTitle) }
 
     // Derive isLive from the presenter mode — clears automatically on "Clear Display"
-    val presentingMode = presenterManager?.presentingMode?.value ?: Presenting.NONE
+    val presentingMode = output?.presentingMode?.value ?: Presenting.NONE
     val isLive = presentingMode == Presenting.WEBSITE
 
     val navController = rememberWebNavController()
     // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
     // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
     val tab = remember(
-        presenterManager, appSettings, onSettingsChange, onAddToSchedule, onUpdateScheduleTitle, state, isLive,
-        navController, previewAspectRatio
+        output, appSettings, onSettingsChange, onAddToSchedule, onUpdateScheduleTitle, state, isLive,
+        navController, previewAspectRatio, outputPicker
     ) {
         WebTabScope(
-            presenterManager = presenterManager,
+            output = output,
             appSettings = appSettings,
             onSettingsChange = onSettingsChange,
             onAddToSchedule = onAddToSchedule,
@@ -132,6 +135,7 @@ fun WebTab(
             isLive = isLive,
             navController = navController,
             previewAspectRatio = previewAspectRatio,
+            outputPicker = outputPicker,
         )
     }
     tab.WebTabEffects(selectedWebsiteItem, selectedWebsiteItemVersion)
@@ -206,7 +210,7 @@ internal fun WebEngineUnavailable(
 @Composable
 internal fun RowScope.NavButtons(
     navController: WebNavController,
-    presenterManager: PresenterManager?,
+    output: WebOutput?,
     isLive: Boolean,
     useInteractivePreview: Boolean,
     zoomLevel: Double,
@@ -217,7 +221,7 @@ internal fun RowScope.NavButtons(
     // Back
     ActionIconButton(
         onClick = {
-            val live = presenterManager?.liveBrowser?.value
+            val live = output?.liveBrowser?.value
             if (isLive && !useInteractivePreview && live != null) live.goBack() else navController.goBack()
         },
         tooltipText = stringResource(Res.string.web_back),
@@ -228,7 +232,7 @@ internal fun RowScope.NavButtons(
     // Forward
     ActionIconButton(
         onClick = {
-            val live = presenterManager?.liveBrowser?.value
+            val live = output?.liveBrowser?.value
             if (isLive && !useInteractivePreview && live != null) live.goForward() else navController.goForward()
         },
         tooltipText = stringResource(Res.string.web_forward),
@@ -239,7 +243,7 @@ internal fun RowScope.NavButtons(
     // Refresh
     ActionIconButton(
         onClick = {
-            val live = presenterManager?.liveBrowser?.value
+            val live = output?.liveBrowser?.value
             if (isLive && !useInteractivePreview && live != null) live.reload() else navController.browser?.reload()
         },
         tooltipText = stringResource(Res.string.web_refresh),

@@ -41,9 +41,9 @@ import java.awt.GraphicsDevice
 import java.awt.GraphicsEnvironment
 import kotlinx.coroutines.CancellationException
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
-import org.churchpresenter.app.churchpresenter.composables.HideOutputWindowCursor
-import org.churchpresenter.app.churchpresenter.composables.LocalOutputCursorHidden
-import org.churchpresenter.app.churchpresenter.composables.hiddenOutputCursor
+import org.churchpresenter.sharedui.composables.HideOutputWindowCursor
+import org.churchpresenter.sharedui.composables.LocalOutputCursorHidden
+import org.churchpresenter.sharedui.composables.hiddenOutputCursor
 import org.churchpresenter.app.churchpresenter.presenter.DeckLinkComposeOutput
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.utils.OutputKind

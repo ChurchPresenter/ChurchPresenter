@@ -320,6 +320,7 @@ kotlin {
             implementation(projects.sharedUi)
             implementation(projects.slides)
             implementation(projects.media)
+            implementation(projects.web)
             implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source
             // directory, wrapped by CompanionSatelliteViewModel.

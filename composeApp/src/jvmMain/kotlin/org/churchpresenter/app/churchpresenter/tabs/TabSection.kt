@@ -10,7 +10,7 @@ import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.MusicNote
@@ -124,7 +124,7 @@ internal fun getStringName(tabs: Tabs): String {
 }
 
 internal fun tabIcon(tab: Tabs): ImageVector = when (tab) {
-    Tabs.BIBLE -> Icons.Filled.MenuBook
+    Tabs.BIBLE -> Icons.AutoMirrored.Filled.MenuBook
     Tabs.SONGS -> Icons.Filled.MusicNote
     Tabs.PICTURES -> Icons.Filled.Image
     Tabs.PRESENTATION -> Icons.Filled.Slideshow
