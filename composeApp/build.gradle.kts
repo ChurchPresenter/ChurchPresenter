@@ -945,8 +945,10 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
     // mid-run, and PerForkTestHome's port banding depends on those ids being stable.
 
     // Gradle's default is 512 MB, which is not enough for a Compose/Skia suite and shows up as GC
-    // thrash rather than as an OOM.
-    maxHeapSize = "1g"
+    // thrash rather than as an OOM. -PtestHeap raises it for one run: CI's screenshot render passes
+    // 2g, because its two forks each shoot half the suite and ran out of 1g there (never locally,
+    // where four forks split it).
+    maxHeapSize = providers.gradleProperty("testHeap").orNull ?: "1g"
     jvmArgs("-XX:MaxMetaspaceSize=512m")
 
     // mockk installs its ByteBuddy agent on first use. A JVM that may not attach to itself makes

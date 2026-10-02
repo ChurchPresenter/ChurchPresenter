@@ -98,7 +98,7 @@ jobs:
       # log lines the build now prints will name the offender if that is what it turns out to be.
       - name: Render screenshots
         timeout-minutes: 35
-        run: ./gradlew :composeApp:recordRoborazziJvm :shared-ui:recordRoborazziJvm --tests '*ScreenshotTest*'
+        run: ./gradlew :composeApp:recordRoborazziJvm :shared-ui:recordRoborazziJvm --tests '*ScreenshotTest*' -PtestHeap=2g
 
       # So the rendered set can be fetched without running Gradle locally, and the source the
       # website's screenshots should be taken from — not because the images are uncommitted (they
@@ -133,7 +133,7 @@ jobs:
       - name: Render homepage screenshots at 2x
         timeout-minutes: 10
         run: |
-          ./gradlew :composeApp:recordRoborazziJvm -PpreviewDensity=2 \
+          ./gradlew :composeApp:recordRoborazziJvm -PpreviewDensity=2 -PtestHeap=2g \
             --tests '*AppPreviewBibleScreenshotTest' \
             --tests '*AppPreviewSongsScreenshotTest' \
             --tests '*AppPreviewCanvasScreenshotTest' \
@@ -157,7 +157,7 @@ jobs:
       # compares against the same density the committed baseline and the `screenshots` artifact use.
       - name: Restore homepage screenshots to 1x
         run: |
-          ./gradlew :composeApp:recordRoborazziJvm \
+          ./gradlew :composeApp:recordRoborazziJvm -PtestHeap=2g \
             --tests '*AppPreviewBibleScreenshotTest' \
             --tests '*AppPreviewSongsScreenshotTest' \
             --tests '*AppPreviewCanvasScreenshotTest' \
