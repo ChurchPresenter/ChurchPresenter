@@ -97,7 +97,9 @@ class BibleListStyleTest {
     fun `a list card can be drawn in either theme`() {
         listOf(ThemeMode.LIGHT, ThemeMode.DARK).forEach { mode ->
             runComposeUiTest {
-                setContent { ChurchPresenterTheme(themeMode = mode) { Box(Modifier.size(40.dp).testTag("card").bibleListCard()) } }
+                setContent {
+                    ChurchPresenterTheme(themeMode = mode) { Box(Modifier.size(40.dp).testTag("card").bibleListCard()) }
+                }
                 onNodeWithTag("card").assertExists()
             }
         }

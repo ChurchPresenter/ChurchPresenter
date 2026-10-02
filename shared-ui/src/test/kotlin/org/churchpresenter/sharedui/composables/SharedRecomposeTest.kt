@@ -44,8 +44,12 @@ class SharedRecomposeTest {
             ChurchPresenterTheme(themeMode = f.theme) {
                 val gen = f.generation
                 Column {
-                    GoLiveButton(onClick = { lives++; gen }, tooltipText = "Go Live", enabled = f.enabled, dimmed = f.on)
-                    AddToScheduleButton(onClick = { gen }, tooltipText = "Add", enabled = f.enabled, modifier = Modifier)
+                    GoLiveButton(
+                        onClick = { lives++; gen }, tooltipText = "Go Live", enabled = f.enabled, dimmed = f.on,
+                    )
+                    AddToScheduleButton(
+                        onClick = { gen }, tooltipText = "Add", enabled = f.enabled, modifier = Modifier,
+                    )
                     SavePresetButton(onClick = { gen }, tooltipText = "Save", enabled = f.enabled, modifier = Modifier)
                 }
             }
@@ -97,7 +101,8 @@ class SharedRecomposeTest {
                 val gen = f.generation
                 TextStyleButtons(
                     bold = f.on, italic = !f.on, underline = f.on, shadow = !f.on,
-                    onBoldChange = { gen }, onItalicChange = { gen }, onUnderlineChange = { gen }, onShadowChange = { gen },
+                    onBoldChange = { gen }, onItalicChange = { gen },
+                    onUnderlineChange = { gen }, onShadowChange = { gen },
                     buttonSize = if (f.on) 30.dp else 28.dp,
                     strikethrough = f.on,
                     onStrikethroughChange = if (f.atEnd) { { gen } } else null,

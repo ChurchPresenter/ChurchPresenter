@@ -81,7 +81,9 @@ class PicturesTabOptionsTest {
         fetch: (suspend (String, Int) -> ByteArray?)? = null,
         block: ComposeUiTest.(Harness) -> Unit,
     ) {
-        val settings = AppSettings(pictureSettings = PictureSettings(storageDirectory = startFolder?.absolutePath ?: ""))
+        val settings = AppSettings(
+            pictureSettings = PictureSettings(storageDirectory = startFolder?.absolutePath ?: ""),
+        )
         val vm = PicturesViewModel(settings)
         startFolder?.let { vm.selectFolder(it) }
         val calls = Calls()

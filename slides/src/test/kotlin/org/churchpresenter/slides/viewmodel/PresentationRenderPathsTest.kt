@@ -61,7 +61,8 @@ class PresentationRenderPathsTest {
     fun `a deck carrying warnings still renders every slide`() = runComposeUiTest {
         val vm = vm()
         val f = file("warned.pdf")
-        vm.loadDeck = { LoadResult.Success(pdfDeck(f, listOf(slide(0), slide(1)), warnings = listOf("fonts substituted"))) }
+        val warned = pdfDeck(f, listOf(slide(0), slide(1)), warnings = listOf("fonts substituted"))
+        vm.loadDeck = { LoadResult.Success(warned) }
         vm.renderSlideFrame = { _, _ -> frame() }
         val before = vm.loadGeneration
         vm.addPresentation(f)

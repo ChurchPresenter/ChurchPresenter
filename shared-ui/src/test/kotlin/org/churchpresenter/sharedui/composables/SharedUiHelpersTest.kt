@@ -26,6 +26,8 @@ import kotlin.test.assertTrue
 class SharedUiHelpersTest {
 
     private val java = File(System.getProperty("java.home"), "bin/java").path
+    private val welcome =
+        ScheduleItem.LabelItem(id = "l", text = "Welcome", textColor = "#FFFFFF", backgroundColor = "#000000")
 
     @Test
     fun `a top bar card adds its margins around the content`() = runComposeUiTest {
@@ -67,7 +69,7 @@ class SharedUiHelpersTest {
     fun `going live with nothing listening is a no-op`() = runComposeUiTest {
         var called = false
         setContent {
-            LocalWentLive.current(ScheduleItem.LabelItem(id = "l", text = "Welcome", textColor = "#FFFFFF", backgroundColor = "#000000"))
+            LocalWentLive.current(welcome)
             called = true
         }
         waitForIdle()
@@ -79,7 +81,7 @@ class SharedUiHelpersTest {
         val reported = mutableListOf<ScheduleItem>()
         setContent {
             CompositionLocalProvider(LocalWentLive provides { reported += it }) {
-                LocalWentLive.current(ScheduleItem.LabelItem(id = "l", text = "Welcome", textColor = "#FFFFFF", backgroundColor = "#000000"))
+                LocalWentLive.current(welcome)
             }
         }
         waitForIdle()
