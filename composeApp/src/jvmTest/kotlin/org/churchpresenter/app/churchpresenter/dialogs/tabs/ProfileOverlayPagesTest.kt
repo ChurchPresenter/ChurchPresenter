@@ -13,6 +13,9 @@ import org.churchpresenter.settings.MediaSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.settings.STTSettings
+import org.churchpresenter.settings.RSVP_FLASH_PHRASE
+import org.churchpresenter.settings.CaptionReading
+import org.churchpresenter.settings.CAPTION_STYLE_RSVP
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -67,6 +70,42 @@ class ProfileOverlayPagesTest {
         toggleCheckbox("Type words out as they arrive")
         assertFalse(get().profile().sttSettings.dripFeedEnabled)
     }
+
+    @Test
+    fun `captions show at a fixed speed or match the speaker`() = profilesTab(
+        profileDocument(profile = OutputProfile(sttSettings = STTSettings(dripFeedEnabled = true))),
+    ) { get ->
+        openCustomizePane(CustomizePane.CAPTIONS)
+        segment("Match the speaker").performScrollTo().performClick()
+        waitForIdle()
+        assertTrue(get().profile().sttSettings.matchSpeakerPace)
+        onNodeWithText("The speed is in milliseconds per letter.").assertDoesNotExist()
+        segment("Fixed").performScrollTo().performClick()
+        waitForIdle()
+        assertFalse(get().profile().sttSettings.matchSpeakerPace)
+        onNodeWithText("The speed is in milliseconds per letter.").assertExists()
+    }
+
+    @Test
+    fun `captions can flash RSVP words or phrases at a words-a-minute speed, and read bionically`() =
+        profilesTab(profileDocument()) { get ->
+            openCustomizePane(CustomizePane.CAPTIONS)
+            segment("RSVP").performScrollTo().performClick()
+            waitForIdle()
+            segment("Phrase").performScrollTo().performClick()
+            waitForIdle()
+            stepUp("Speed")
+            val reading = { get().profile().sttSettings.reading }
+            assertEquals(CAPTION_STYLE_RSVP, reading().style)
+            assertEquals(RSVP_FLASH_PHRASE, reading().rsvpWordsPerFlash)
+            assertEquals(CaptionReading().rsvpWpm + 10, reading().rsvpWpm)
+            segment("Match the speaker").performScrollTo().performClick()
+            waitForIdle()
+            onNodeWithText("Max speed").assertExists()
+            toggleCheckbox("Bionic reading")
+            assertTrue(reading().bionicReading)
+            assertEquals(STTSettings().reading, get().sttSettings.reading, "the document is untouched")
+        }
 
     @Test
     fun `captions carry the shared text, box and position rows`() = profilesTab(profileDocument()) { get ->

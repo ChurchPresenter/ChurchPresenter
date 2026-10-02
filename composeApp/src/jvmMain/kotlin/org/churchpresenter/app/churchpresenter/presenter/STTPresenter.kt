@@ -318,12 +318,12 @@ private fun useDripFeed(segments: List<STTSegment>, pace: RevealPace?): Revealed
                     // An RSVP flash goes up as soon as the one before has had its time -- at once after a
                     // pause -- and is then held for its own. Never sped up to catch up, so it falls
                     // behind a speaker past its ceiling.
-                    val wait = flashHeldUntil.longValue - withFrameMillis { it }
+                    val now = withFrameMillis { it }
+                    val wait = (flashHeldUntil.longValue - now).coerceAtLeast(0)
                     if (wait > 0) delay(wait)
                     val next = flashEnd(current, revealed.intValue, pace.wordsPerStep)
                         .coerceIn(revealed.intValue + 1, current.length)
-                    flashHeldUntil.longValue =
-                        withFrameMillis { it } + flashDelayMs(pace, current, revealed.intValue, next)
+                    flashHeldUntil.longValue = now + wait + flashDelayMs(pace, current, revealed.intValue, next)
                     flashWords.intValue = wordsBetween(current, revealed.intValue, next).coerceAtLeast(1)
                     revealed.intValue = next
                 } else if (pace.unit != RevealUnit.LETTER) {
