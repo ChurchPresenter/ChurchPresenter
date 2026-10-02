@@ -58,7 +58,6 @@
     <ID>TooManyFunctions:BibleViewModelDetection.kt$org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModelDetection.kt</ID>
     <ID>TooManyFunctions:BibleViewModelSmartSearch.kt$org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModelSmartSearch.kt</ID>
     <ID>TooManyFunctions:CCLIReportDialog.kt$org.churchpresenter.app.churchpresenter.dialogs.CCLIReportDialog.kt</ID>
-    <ID>TooManyFunctions:CameraEnumeration.kt$org.churchpresenter.app.churchpresenter.composables.CameraEnumeration.kt</ID>
     <ID>TooManyFunctions:CompanionSatelliteViewModel.kt$CompanionSatelliteViewModel</ID>
     <ID>TooManyFunctions:CompanionServer.kt$CompanionServer</ID>
     <ID>TooManyFunctions:DeckLinkManager.kt$DeckLinkManager</ID>
