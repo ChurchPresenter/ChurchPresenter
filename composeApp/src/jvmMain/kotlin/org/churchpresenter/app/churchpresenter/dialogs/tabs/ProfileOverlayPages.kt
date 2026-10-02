@@ -176,7 +176,6 @@ internal fun ProfileQaPage(draft: AppSettings, onSettingsChange: ((AppSettings) 
         }
         SettingsRow(
             stringResource(Res.string.profile_box_opacity),
-            advanced = true,
             paths = listOf("$QA.qrBackgroundOpacity"),
         ) {
             RowStepper(

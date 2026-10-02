@@ -448,7 +448,6 @@ private fun SlidesGroup(song: SongSettings, lowerThird: Boolean, updateSong: ((S
             stringResource(Res.string.profile_end_marker),
             song.showEndOfSongIndicator,
             { v -> updateSong { it.copy(showEndOfSongIndicator = v) } },
-            advanced = true,
             paths = listOf("songSettings.showEndOfSongIndicator", "songSettings.endOfSongIndicatorSpacing"),
             extra = {
                 if (song.showEndOfSongIndicator) {

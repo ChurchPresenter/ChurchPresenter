@@ -58,6 +58,8 @@ private const val DIALOG_HEIGHT = 900f
 internal fun profilesTab(
     initial: AppSettings,
     onIdentify: () -> Unit = {},
+    /** False to open the editor in Basic, for a test of what Basic shows. */
+    advanced: Boolean = true,
     block: SkikoComposeUiTest.(get: () -> AppSettings) -> Unit,
 ) {
     lateinit var doc: MutableState<AppSettings>
@@ -69,7 +71,7 @@ internal fun profilesTab(
             // the second silently discards the first -- which reads as "only the last control
             // works" and is a fault in the harness, not in the editor.
             // Advanced, so every row a test reaches for is on screen; Basic hides the rarer ones.
-            val state = remember { mutableStateOf(initial.copy(profilesAdvanced = true)) }
+            val state = remember { mutableStateOf(initial.copy(profilesAdvanced = advanced)) }
             doc = state
             ProfilesSettingsTab(
                 settings = state.value,
