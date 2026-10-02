@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.onNodeWithText
@@ -73,9 +74,9 @@ class ProfileOverlayPagesTest {
         stepUp("Size")
         inRow("Style", hasClickAction(), 0).performClick()
         waitForIdle()
-        inRow("Outline", hasClickAction(), 0).performClick()
+        onNodeWithContentDescription("Outline").performScrollTo().performClick()
         waitForIdle()
-        inRow("Highlight behind text", hasClickAction(), 0).performClick()
+        onNodeWithContentDescription("Text backing").performScrollTo().performClick()
         waitForIdle()
         toggleCheckbox("Shadow")
         stepUp("Opacity")
@@ -151,7 +152,7 @@ class ProfileOverlayPagesTest {
             stepUp("Size")
             assertEquals(d.referenceFontSize + 2, get().profile().dictionarySettings.referenceFontSize)
             tap(dictionaryPartTag(DictionaryPart.DEFINITION))
-            inRow("Outline", hasClickAction(), 0).performClick()
+            onNodeWithContentDescription("Outline").performScrollTo().performClick()
             waitForIdle()
             assertNotEquals(d.definitionOutline, get().profile().dictionarySettings.definitionOutline)
             tap(dictionaryPartTag(DictionaryPart.KJV_USAGE))

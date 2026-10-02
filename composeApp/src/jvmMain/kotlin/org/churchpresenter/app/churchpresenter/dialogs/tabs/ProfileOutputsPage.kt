@@ -151,6 +151,7 @@ internal fun ProfileOutputsPage(
     val tiles = outputTiles(proj)
     SettingsGroup(
         caption = stringResource(Res.string.profile_outputs_group),
+        key = "outputs",
         action = {
             KeyButton(
                 onClick = onIdentify,

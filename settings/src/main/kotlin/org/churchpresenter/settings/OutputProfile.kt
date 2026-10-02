@@ -154,6 +154,15 @@ data class OutputProfile(
      */
     val overrides: Set<String> = emptySet(),
     /**
+     * The sections of a linked profile that follow another master than [parentId], by
+     * [ProfileSection.id]: a master's id, or [OWN_SECTION] for a section that follows nobody. A
+     * section not named here follows [parentId] -- so a file written before sections could follow
+     * apart reads as every section following it, exactly as before. Empty on a profile that follows
+     * nothing; [parentId] stays the main master, which places the profile in the list and decides its
+     * display mode.
+     */
+    val sectionMasters: Map<String, String> = emptyMap(),
+    /**
      * This profile's outputs merged into one picture, or null when each draws on its own -- see
      * `OutputMerge.kt`. Never followed from a master: its members are the outputs following *this*
      * profile, which a linked profile does not share. See `LinkedProfilePaths.IDENTITY_KEYS`.

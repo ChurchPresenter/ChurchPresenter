@@ -139,6 +139,7 @@ private fun StageLayoutGroup(
     val contents = StageMonitorZone.entries.associateWith { zone -> sm.typesIn(zone).map { contentTypeLabel(it) } }
     SettingsGroup(
         stringResource(Res.string.profile_layout),
+        key = "layout",
         action = if (sm.hasCustomZoneSizes()) {
             { GroupCaptionAction(resetLabel, { update { withDefaultZoneSizes() } }) }
         } else {
@@ -207,6 +208,7 @@ private fun WhatGoesWhereGroup(
     val drawn = sm.layout.slots.map { it.toZone() } + listOf(StageMonitorZone.FULL_SCREEN, StageMonitorZone.NONE)
     SettingsGroup(
         stringResource(Res.string.profile_group_what_goes_where),
+        key = "what_goes_where",
         paths = listOf("$STAGE_PATH.contentZones", "$STAGE_PATH.metronomePosition"),
     ) {
         val ordered = BASIC_CONTENT + StageMonitorContentType.entries.filterNot { it in BASIC_CONTENT }

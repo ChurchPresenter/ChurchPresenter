@@ -34,6 +34,7 @@ import org.churchpresenter.settings.linkProfile
 import org.churchpresenter.settings.masterOf
 import org.churchpresenter.settings.moveOutputProfileBy
 import org.churchpresenter.settings.revertToMaster
+import org.churchpresenter.settings.setSectionMaster
 import org.churchpresenter.settings.unlinkProfile
 import org.churchpresenter.settings.withLinksResolved
 import org.churchpresenter.settings.newOutputProfile
@@ -204,13 +205,17 @@ private fun UnlinkState.actionsFor(
 ): ProfileLinkActions = ProfileLinkActions(
     onUnlink = {
         if (master != null) {
-            last = UnlinkedProfile(profile.id, master.first, master.second, profile.overrides)
+            last = UnlinkedProfile(profile.id, master.first, master.second, profile.overrides, profile.sectionMasters)
             update { it.unlinkProfile(profile.id) }
         }
     },
     onLink = { masterId, keep ->
         last = null
         update { it.linkProfile(profile.id, masterId, keep) }
+    },
+    onSectionMaster = { section, masterId ->
+        last = null
+        update { it.setSectionMaster(profile.id, section, masterId) }
     },
     onCreateLinked = { createLinked(profile.id) },
     onSelectProfile = select,
@@ -226,18 +231,26 @@ private class UnlinkState {
     var last by mutableStateOf<UnlinkedProfile?>(null)
 }
 
-/** A profile just unlinked from [masterId], with the values it had of its own then -- for Undo. */
+/**
+ * A profile just unlinked from [masterId], with the values it had of its own then and the masters its
+ * sections followed -- for Undo.
+ */
 private data class UnlinkedProfile(
     val id: String,
     val masterId: String,
     val masterName: String,
     val overrides: Set<String>,
+    val sectionMasters: Map<String, String>,
 )
 
 /** [this] with [u]'s profile following its master again, with the values it had of its own. */
 private fun ProjectionSettings.relinked(u: UnlinkedProfile): ProjectionSettings = copy(
     outputProfiles = outputProfiles.map { p ->
-        if (p.id == u.id) p.copy(parentId = u.masterId, overrides = u.overrides) else p
+        if (p.id != u.id) {
+            p
+        } else {
+            p.copy(parentId = u.masterId, overrides = u.overrides, sectionMasters = u.sectionMasters)
+        }
     },
 ).withLinksResolved()
 
