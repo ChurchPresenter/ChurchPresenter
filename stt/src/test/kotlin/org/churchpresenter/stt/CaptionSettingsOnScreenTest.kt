@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.stt
 
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile

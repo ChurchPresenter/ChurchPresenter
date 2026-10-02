@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.stt
 
 import org.json.JSONObject
 import kotlin.test.AfterTest
@@ -39,9 +39,9 @@ class STTManagerTest {
     }
 
     // The `handle*Update(JSONObject)` parsers are `internal`, so they are called straight from here.
-    private fun STTManager.transcription(payload: String) = handleTranscriptionUpdate(JSONObject(payload))
-    private fun STTManager.translation(payload: String) = handleTranslationUpdate(JSONObject(payload))
-    private fun STTManager.highlighting(payload: String) = handleWordHighlightingUpdate(JSONObject(payload))
+    private fun STTManager.transcription(payload: String) = transcript.handleTranscriptionUpdate(JSONObject(payload))
+    private fun STTManager.translation(payload: String) = transcript.handleTranslationUpdate(JSONObject(payload))
+    private fun STTManager.highlighting(payload: String) = transcript.handleWordHighlightingUpdate(JSONObject(payload))
 
     // ── Baseline ────────────────────────────────────────────────────────────────
 
@@ -460,21 +460,21 @@ class STTManagerTest {
     @Test
     fun `disconnecting pulls a final snapshot when Help Dev is on and a server is known`() {
         val s = stt()
-        assertTrue(s.shouldCaptureFinalSnapshot(helpDev = true, baseUrl = "http://192.168.2.62"))
+        assertTrue(s.capture.shouldCaptureFinalSnapshot(helpDev = true, baseUrl = "http://192.168.2.62"))
     }
 
     @Test
     fun `no final snapshot without Help Dev, or without a server to ask`() {
         val s = stt()
         assertFalse(
-            s.shouldCaptureFinalSnapshot(helpDev = false, baseUrl = "http://192.168.2.62"),
+            s.capture.shouldCaptureFinalSnapshot(helpDev = false, baseUrl = "http://192.168.2.62"),
             "ordinary users must not pay for a download nothing will read",
         )
         assertFalse(
-            s.shouldCaptureFinalSnapshot(helpDev = true, baseUrl = null),
+            s.capture.shouldCaptureFinalSnapshot(helpDev = true, baseUrl = null),
             "never connected, so there is nothing to pull from",
         )
-        assertFalse(s.shouldCaptureFinalSnapshot(helpDev = true, baseUrl = "  "))
+        assertFalse(s.capture.shouldCaptureFinalSnapshot(helpDev = true, baseUrl = "  "))
     }
 
     @Test

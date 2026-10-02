@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.stt
 
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -25,9 +25,8 @@ import org.churchpresenter.sharedui.testing.showsExactly
  * own socket transitions (`applyConnected` and friends) rather than through a socket — see
  * `STTTabTestSupport.kt`.
  *
- * Not covered here: the settings dialog the Tune button opens is a real `DialogWindow`, which cannot
- * be composed headless; its body is covered by `STTSettingsContentTest` /
- * `STTSettingsDialogContentTest` instead, so only the click that sets the flag is untested.
+ * The settings dialog the Tune button opens is the app's, drawn into the tab's `settingsDialog`
+ * slot; its body is covered in the app by `STTSettingsContentTest` / `STTSettingsDialogContentTest`.
  */
 class STTTabTest {
 
@@ -220,15 +219,15 @@ class STTTabTest {
 
     @Test
     fun `Go Live asks for STT and then stops offering`() {
-        sttTab(seed = { live("a caption") }) { _, presenter, reports ->
+        sttTab(seed = { live("a caption") }) { _, presentingMode, reports ->
             sttButton(STTLabel.GO_LIVE).assertIsEnabled()
 
             sttButton(STTLabel.GO_LIVE).performClick()
 
             assertEquals(listOf(Presenting.STT), reports.presenting)
 
-            // The tab dims Go Live off the presenter's mode, not off its own click.
-            presenter.setPresentingMode(Presenting.STT)
+            // The tab dims Go Live off the output's mode, not off its own click.
+            presentingMode.value = Presenting.STT
             waitForIdle()
             sttButton(STTLabel.GO_LIVE).assertIsNotEnabled()
         }

@@ -33,7 +33,7 @@ import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
 import org.churchpresenter.media.presenter.SubtitleOverlay
 import org.churchpresenter.media.subtitles.SubtitleCue
-import org.churchpresenter.app.churchpresenter.viewmodel.STTSegment
+import org.churchpresenter.stt.STTSegment
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.settings.AppSettings
 import org.jetbrains.compose.resources.stringResource

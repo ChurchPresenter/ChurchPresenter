@@ -34,7 +34,7 @@ import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
 import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
 import org.churchpresenter.qa.QAManager
-import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.churchpresenter.stt.STTManager
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.theme.ThemeMode

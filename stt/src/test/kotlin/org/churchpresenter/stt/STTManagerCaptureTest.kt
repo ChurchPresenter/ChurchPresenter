@@ -1,9 +1,9 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.stt
 
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
-import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.sharedui.utils.TrainingDataLogger
+import org.json.JSONObject
 import java.io.File
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -62,10 +62,6 @@ class STTManagerCaptureTest {
 
     @BeforeTest
     fun startServer() {
-        // The Instance Link logger resolves its directory once per JVM; pin it to the real home
-        // before the swap below so a later test is not left writing into a deleted temp dir.
-        TestSingletons.latchToTestHome()
-
         realHome = System.getProperty("user.home")
         tempHome = Files.createTempDirectory("cp-stt-capture-test").toFile()
         System.setProperty("user.home", tempHome.absolutePath)
@@ -147,7 +143,7 @@ class STTManagerCaptureTest {
         """.trimIndent()
         val stt = stt()
 
-        stt.fetchWordHighlighting(baseUrl)
+        stt.transcript.fetchWordHighlighting(baseUrl)
 
         awaitUntil("both words to be applied") { stt.highlightedWords.size == 2 }
         assertTrue(stt.wordHighlightingEnabled.value)
@@ -170,7 +166,7 @@ class STTManagerCaptureTest {
         """.trimIndent()
         val stt = stt()
 
-        stt.fetchWordHighlighting(baseUrl)
+        stt.transcript.fetchWordHighlighting(baseUrl)
 
         awaitUntil("the surviving word") { stt.highlightedWords.size == 1 }
         assertEquals("shown", stt.highlightedWords.single().word)
@@ -181,7 +177,7 @@ class STTManagerCaptureTest {
         wordsResponse = 200 to """{"success":true,"enabled":false,"words":[{"word":"grace","color":"#ffff00"}]}"""
         val stt = stt()
 
-        stt.fetchWordHighlighting(baseUrl)
+        stt.transcript.fetchWordHighlighting(baseUrl)
 
         awaitUntil("the word list to arrive") { stt.highlightedWords.isNotEmpty() }
         assertFalse(stt.wordHighlightingEnabled.value, "the words are known but must not be painted")
@@ -192,7 +188,7 @@ class STTManagerCaptureTest {
         wordsResponse = 200 to """{"success":true,"words":[{"word":"grace"}]}"""
         val stt = stt()
 
-        stt.fetchWordHighlighting(baseUrl)
+        stt.transcript.fetchWordHighlighting(baseUrl)
 
         awaitUntil("the word to arrive") { stt.highlightedWords.isNotEmpty() }
         assertEquals("#ffff00", stt.highlightedWords.single().color)
@@ -201,10 +197,10 @@ class STTManagerCaptureTest {
     @Test
     fun `a server that reports failure leaves the existing words alone`() {
         val stt = stt()
-        stt.handleWordHighlightingUpdate(org.json.JSONObject("""{"words":[{"word":"kept","color":"#ffff00"}]}"""))
+        stt.transcript.handleWordHighlightingUpdate(JSONObject("""{"words":[{"word":"kept","color":"#ffff00"}]}"""))
         wordsResponse = 200 to """{"success":false}"""
 
-        stt.fetchWordHighlighting(baseUrl)
+        stt.transcript.fetchWordHighlighting(baseUrl)
 
         awaitUntil("the request to be answered") { requested.any { it.startsWith("/api/word-highlighting/words") } }
         assertEquals(listOf("kept"), stt.highlightedWords.map { it.word })
@@ -215,7 +211,7 @@ class STTManagerCaptureTest {
         val stt = stt()
         wordsResponse = 500 to "upstream exploded"
 
-        stt.fetchWordHighlighting(baseUrl)
+        stt.transcript.fetchWordHighlighting(baseUrl)
 
         awaitUntil("the request to be answered") { requested.any { it.startsWith("/api/word-highlighting/words") } }
         assertTrue(stt.highlightedWords.isEmpty())
@@ -226,7 +222,7 @@ class STTManagerCaptureTest {
     fun `a server that is not there at all is ignored`() {
         val stt = stt()
 
-        stt.fetchWordHighlighting(deadUrl())
+        stt.transcript.fetchWordHighlighting(deadUrl())
 
         assertTrue(stt.highlightedWords.isEmpty(), "highlighting is optional; a refused connection must not throw")
     }
@@ -240,7 +236,7 @@ class STTManagerCaptureTest {
         downloadResponse = 200 to "sqlite bytes".toByteArray()
         val stt = stt()
 
-        stt.captureDbSnapshot(baseUrl)
+        stt.capture.captureDbSnapshot(baseUrl)
 
         assertEquals(listOf("2026-08-02_101010.db"), snapshots())
         assertEquals("sqlite bytes", File(logDir, "2026-08-02_101010.db").readText())
@@ -255,10 +251,10 @@ class STTManagerCaptureTest {
         statusResponse = 200 to """{"state":{"db_name":"session.db"}}"""
         downloadResponse = 200 to "first".toByteArray()
         val stt = stt()
-        stt.captureDbSnapshot(baseUrl)
+        stt.capture.captureDbSnapshot(baseUrl)
 
         downloadResponse = 200 to "second, longer".toByteArray()
-        stt.captureDbSnapshot(baseUrl)
+        stt.capture.captureDbSnapshot(baseUrl)
 
         assertEquals(listOf("session.db"), snapshots(), "the archive keeps one file per session, not one per tick")
         assertEquals("second, longer", File(logDir, "session.db").readText())
@@ -269,7 +265,7 @@ class STTManagerCaptureTest {
         statusResponse = 500 to "no"
         val stt = stt()
 
-        stt.captureDbSnapshot(baseUrl)
+        stt.capture.captureDbSnapshot(baseUrl)
 
         assertTrue(snapshots().isEmpty())
     }
@@ -279,9 +275,9 @@ class STTManagerCaptureTest {
         val stt = stt()
 
         statusResponse = 200 to """{"ok":true}"""
-        stt.captureDbSnapshot(baseUrl)
+        stt.capture.captureDbSnapshot(baseUrl)
         statusResponse = 200 to """{"state":{}}"""
-        stt.captureDbSnapshot(baseUrl)
+        stt.capture.captureDbSnapshot(baseUrl)
 
         assertTrue(snapshots().isEmpty(), "no recording in progress is normal, not an error")
     }
@@ -292,7 +288,7 @@ class STTManagerCaptureTest {
         downloadResponse = 404 to ByteArray(0)
         val stt = stt()
 
-        stt.captureDbSnapshot(baseUrl)
+        stt.capture.captureDbSnapshot(baseUrl)
 
         assertTrue(snapshots().isEmpty(), "neither a partial .db nor a leftover .tmp")
     }
@@ -304,7 +300,7 @@ class STTManagerCaptureTest {
         val stt = stt()
         stt.helpDevModeEnabled = true
 
-        stt.startDbCapture(baseUrl)
+        stt.capture.startDbCapture(baseUrl)
 
         awaitUntil("the first snapshot") { snapshots() == listOf("live.db") }
     }
@@ -317,7 +313,7 @@ class STTManagerCaptureTest {
         downloadResponse = 200 to "during".toByteArray()
         val stt = stt()
         stt.helpDevModeEnabled = true
-        stt.startDbCapture(baseUrl)
+        stt.capture.startDbCapture(baseUrl)
         awaitUntil("the loop's own snapshot") { snapshots() == listOf("live.db") }
 
         downloadResponse = 200 to "the last word".toByteArray()
@@ -332,35 +328,35 @@ class STTManagerCaptureTest {
     fun `the session id is read from the health endpoint`() {
         healthResponse = 200 to """{"status":"ok","session_id":"2026-09-30_095812"}"""
 
-        assertEquals("2026-09-30_095812", stt().fetchSessionId(baseUrl))
+        assertEquals("2026-09-30_095812", stt().capture.fetchSessionId(baseUrl))
         assertEquals(listOf("/api/health"), requested.toList())
     }
 
     @Test
     fun `no session id comes from a failed, empty or missing answer`() {
         healthResponse = 500 to """{"session_id":"from-an-error-page"}"""
-        assertNull(stt().fetchSessionId(baseUrl), "a non-200 is not an answer")
+        assertNull(stt().capture.fetchSessionId(baseUrl), "a non-200 is not an answer")
 
         healthResponse = 200 to """{"status":"ok"}"""
-        assertNull(stt().fetchSessionId(baseUrl), "an STT with no session yet")
+        assertNull(stt().capture.fetchSessionId(baseUrl), "an STT with no session yet")
 
         healthResponse = 200 to """{"status":"ok","session_id":""}"""
-        assertNull(stt().fetchSessionId(baseUrl), "a blank id would name a file live-content-.jsonl")
+        assertNull(stt().capture.fetchSessionId(baseUrl), "a blank id would name a file live-content-.jsonl")
 
         healthResponse = 200 to "not json"
-        assertNull(stt().fetchSessionId(baseUrl))
+        assertNull(stt().capture.fetchSessionId(baseUrl))
 
-        assertNull(stt().fetchSessionId(deadUrl()), "an unreachable server")
+        assertNull(stt().capture.fetchSessionId(deadUrl()), "an unreachable server")
     }
 
     @Test
     fun `the session id names the logs, and nothing leaves the last one in place`() {
         val stt = stt()
 
-        stt.applySessionId("service-1")
+        applySessionId("service-1")
         assertEquals("service-1", TrainingDataLogger.sessionId)
 
-        stt.applySessionId(null)
+        applySessionId(null)
         assertEquals("service-1", TrainingDataLogger.sessionId, "a failed poll must not unname the logs")
     }
 
@@ -372,7 +368,7 @@ class STTManagerCaptureTest {
         val stt = stt()
         stt.helpDevModeEnabled = false
 
-        stt.startDbCapture(baseUrl)
+        stt.capture.startDbCapture(baseUrl)
 
         awaitUntil("the session id from the first tick") { TrainingDataLogger.sessionId == "opening-songs" }
         assertFalse("/api/transcription/status" in requested, "the .db capture itself stays behind Help Dev")

@@ -1,8 +1,7 @@
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.stt
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
-import org.churchpresenter.app.churchpresenter.viewmodel.HighlightedWord
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

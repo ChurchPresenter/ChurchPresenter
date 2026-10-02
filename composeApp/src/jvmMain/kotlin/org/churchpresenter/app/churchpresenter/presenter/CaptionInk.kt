@@ -7,7 +7,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.em
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.viewmodel.HighlightedWord
+import org.churchpresenter.stt.HighlightedWord
 import org.churchpresenter.settings.CaptionReading
 
 /** What a side's caption is painted with: its colour, the words to highlight, and its word spacing. */

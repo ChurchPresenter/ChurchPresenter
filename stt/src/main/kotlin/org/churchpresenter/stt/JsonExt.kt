@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.stt
 
 import org.json.JSONArray
 import org.json.JSONObject

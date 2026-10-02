@@ -122,3 +122,4 @@ include(":crossword-tab")
 // :composeApp, which hands it the live output through QAOutput and draws the remote dialog.
 include(":qa")
 include(":dictionary")
+include(":stt")

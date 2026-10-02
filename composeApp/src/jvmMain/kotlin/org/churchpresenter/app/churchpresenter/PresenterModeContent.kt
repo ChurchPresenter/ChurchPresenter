@@ -34,7 +34,7 @@ import org.churchpresenter.web.presenter.WebsitePresenter
 import org.churchpresenter.sharedui.utils.contentScale
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.churchpresenter.stt.STTManager
 
 /**
  * Draws whatever [mode] means for one output: the dispatch from [Presenting] to the matching

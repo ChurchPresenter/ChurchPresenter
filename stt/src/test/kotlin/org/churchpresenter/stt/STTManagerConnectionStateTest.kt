@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.stt
 
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -115,9 +115,9 @@ class STTManagerConnectionStateTest {
     fun `a snapshot is only worth pulling with help dev on and a server known`() {
         val stt = manager()
 
-        assertTrue(stt.shouldCaptureFinalSnapshot(helpDev = true, baseUrl = "http://192.0.2.1:1"))
-        assertFalse(stt.shouldCaptureFinalSnapshot(helpDev = false, baseUrl = "http://192.0.2.1:1"))
-        assertFalse(stt.shouldCaptureFinalSnapshot(helpDev = true, baseUrl = null))
-        assertFalse(stt.shouldCaptureFinalSnapshot(helpDev = true, baseUrl = ""))
+        assertTrue(stt.capture.shouldCaptureFinalSnapshot(helpDev = true, baseUrl = "http://192.0.2.1:1"))
+        assertFalse(stt.capture.shouldCaptureFinalSnapshot(helpDev = false, baseUrl = "http://192.0.2.1:1"))
+        assertFalse(stt.capture.shouldCaptureFinalSnapshot(helpDev = true, baseUrl = null))
+        assertFalse(stt.capture.shouldCaptureFinalSnapshot(helpDev = true, baseUrl = ""))
     }
 }

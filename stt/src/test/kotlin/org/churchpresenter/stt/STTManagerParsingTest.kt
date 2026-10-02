@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.stt
 
 import org.churchpresenter.sharedui.utils.TrainingDataLogger
 import org.json.JSONObject
@@ -31,9 +31,9 @@ class STTManagerParsingTest {
         TrainingDataLogger.sessionId = null
     }
 
-    private fun STTManager.transcription(json: String) = handleTranscriptionUpdate(JSONObject(json))
-    private fun STTManager.translation(json: String) = handleTranslationUpdate(JSONObject(json))
-    private fun STTManager.highlighting(json: String) = handleWordHighlightingUpdate(JSONObject(json))
+    private fun STTManager.transcription(json: String) = transcript.handleTranscriptionUpdate(JSONObject(json))
+    private fun STTManager.translation(json: String) = transcript.handleTranslationUpdate(JSONObject(json))
+    private fun STTManager.highlighting(json: String) = transcript.handleWordHighlightingUpdate(JSONObject(json))
 
     // ── Transcription ────────────────────────────────────────────────────────────
 
