@@ -78,7 +78,7 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.utils.Utils
 import org.churchpresenter.app.churchpresenter.utils.ScheduleDensity
 import org.churchpresenter.app.churchpresenter.utils.scheduleShowDetailLine
-import org.churchpresenter.app.churchpresenter.viewmodel.scheduleItemGlyph
+import org.churchpresenter.app.churchpresenter.viewmodel.scheduleItemIcon
 import org.churchpresenter.app.churchpresenter.viewmodel.scheduleItemPaletteIndex
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -132,6 +132,12 @@ private val ACCENT_WIDTH = 3.dp
 private val ACCENT_INSET = 4.dp
 
 internal const val SCHEDULE_ROW_ACTIONS_TAG = "schedule_row_actions"
+
+/** The type chip at a row's start, the row's `CenterVertically` reference. */
+internal const val SCHEDULE_ROW_TYPE_CHIP_TAG = "schedule_row_type_chip"
+
+/** The type icon inside that 26dp chip. */
+private val SCHEDULE_TYPE_ICON_SIZE = 16.dp
 
 /** The legacy layout's action line — its own tag so a test can tell the two layouts apart. */
 internal const val SCHEDULE_ROW_LEGACY_ACTIONS_TAG = "schedule_row_legacy_actions"
@@ -341,14 +347,16 @@ internal fun ScheduleItemRow(
                         val (chipBg, chipFg) = scheduleChipColors(scheduleItemPaletteIndex(item))
                         Box(
                             modifier = Modifier
+                                .testTag(SCHEDULE_ROW_TYPE_CHIP_TAG)
                                 .size(26.dp)
                                 .background(chipBg, AppShape(7.dp)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = scheduleItemGlyph(item),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = chipFg
+                            Icon(
+                                imageVector = scheduleItemIcon(item),
+                                contentDescription = null,
+                                tint = chipFg,
+                                modifier = Modifier.size(SCHEDULE_TYPE_ICON_SIZE)
                             )
                         }
                     }

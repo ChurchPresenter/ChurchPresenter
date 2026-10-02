@@ -14,8 +14,6 @@ import org.churchpresenter.strings.generated.resources.profile_text_alignment
 import org.churchpresenter.strings.generated.resources.profile_text_chord_color
 import org.churchpresenter.strings.generated.resources.profile_text_color
 import org.churchpresenter.strings.generated.resources.profile_text_font
-import org.churchpresenter.strings.generated.resources.profile_text_highlight
-import org.churchpresenter.strings.generated.resources.profile_text_outline
 import org.churchpresenter.strings.generated.resources.profile_text_shadow
 import org.churchpresenter.strings.generated.resources.profile_text_size
 import org.churchpresenter.strings.generated.resources.profile_text_size_unit
@@ -24,8 +22,6 @@ import org.churchpresenter.strings.generated.resources.profile_vertical_alignmen
 import org.churchpresenter.strings.generated.resources.right
 import org.churchpresenter.strings.generated.resources.top
 import org.churchpresenter.sharedui.composables.ShadowDetailRow
-import org.churchpresenter.sharedui.composables.TextBackdropButton
-import org.churchpresenter.sharedui.composables.TextOutlineButton
 import org.churchpresenter.sharedui.composables.TextStyleButtons
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.settings.StageMonitorSettings
@@ -61,6 +57,7 @@ internal fun StageTextGroup(
     }
     SettingsGroup(
         stringResource(Res.string.profile_group_text),
+        key = "text",
         paths = listOf(base),
         header = {
             AppliesToStrip(
@@ -97,7 +94,10 @@ internal fun StageTextGroup(
     }
 }
 
-/** Style and alignment in Basic; the vertical alignment, chord colour, outline, highlight and shadow in Advanced. */
+/**
+ * Style -- outline and highlight among it -- and alignment in Basic; the vertical alignment, chord
+ * colour and shadow in Advanced.
+ */
 @Composable
 private fun StageStyleRows(
     zone: StageMonitorStyleZone,
@@ -107,7 +107,8 @@ private fun StageStyleRows(
 ) {
     SettingsRow(
         stringResource(Res.string.profile_text_style),
-        paths = path("bold") + path("italic") + path("underline"),
+        searchTerms = styleSearchTerms(),
+        paths = path("bold") + path("italic") + path("underline") + path("outline") + path("backdrop"),
     ) {
         TextStyleButtons(
             bold = style.bold,
@@ -120,6 +121,10 @@ private fun StageStyleRows(
             onShadowChange = { v -> write { copy(shadow = v) } },
             showShadow = false,
             buttonSize = STAGE_STYLE_BUTTON,
+            outline = style.outline,
+            onOutlineChange = { v -> write { copy(outline = v) } },
+            backdrop = style.backdrop,
+            onBackdropChange = { v -> write { copy(backdrop = v) } },
         )
     }
     SettingsRow(stringResource(Res.string.profile_text_alignment), paths = path("horizontalAlignment")) {
@@ -153,12 +158,6 @@ private fun StageStyleRows(
         SettingsRow(stringResource(Res.string.profile_text_chord_color), advanced = true, paths = path("chordColor")) {
             RowColor(style.chordColor, { v -> write { copy(chordColor = v) } })
         }
-    }
-    SettingsRow(stringResource(Res.string.profile_text_outline), advanced = true, paths = path("outline")) {
-        TextOutlineButton(style.outline, { v -> write { copy(outline = v) } }, STAGE_STYLE_BUTTON)
-    }
-    SettingsRow(stringResource(Res.string.profile_text_highlight), advanced = true, paths = path("backdrop")) {
-        TextBackdropButton(style.backdrop, { v -> write { copy(backdrop = v) } }, STAGE_STYLE_BUTTON)
     }
     SettingsSwitchRow(
         stringResource(Res.string.profile_text_shadow),

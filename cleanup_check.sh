@@ -37,7 +37,7 @@ else
     echo "   ✅ PASS"
 fi
 
-# Count fully qualified type names used inline (e.g. in a function signature). Three kinds of line
+# Count fully qualified type names used inline (e.g. in a function signature). Four kinds of line
 # are excluded, because none of them is the thing the rule forbids — writing the long form where an
 # import already binds the name:
 #
@@ -45,6 +45,9 @@ fi
 #   @file:OptIn(...::class)     a file-level annotation, which sits above the import block and is
 #                               conventionally written out in full; 283 of these alone, so leaving
 #                               them in made the count permanently non-zero
+#   ...Api::class,              an opt-in annotation's marker arguments when it is wrapped over
+#                               several lines -- an `Api` class literal alone on its line, which
+#                               grep sees apart from the @OptIn that opened it
 #   * / // / /*                 KDoc links like [androidx.compose.ui.test.ComposeUiTest], which need
 #                               the full path precisely when the type is NOT imported
 #
@@ -53,6 +56,7 @@ fi
 QUALIFIED=$(grep -rE 'androidx\.compose\.[a-z]*\.[a-zA-Z]*\.[A-Z]' --include='*.kt' composeApp/src/ 2>/dev/null \
     | grep -vE '^\S*:\s*import\b' \
     | grep -vE '@file:OptIn|@OptIn' \
+    | grep -vE '^\S*:\s*[A-Za-z0-9_.]+Api::class,?\s*$' \
     | grep -vE '^\S*:\s*(\*|//|/\*)' \
     | wc -l | tr -d ' ')
 echo "📝 Fully qualified type names: $QUALIFIED"
@@ -84,6 +88,7 @@ for MOD in $MODULES; do
     M_FQN=$(grep -rE 'androidx\.compose\.[a-z]*\.[a-zA-Z]*\.[A-Z]' --include='*.kt' "$MOD/src" 2>/dev/null \
         | grep -vE '^\S*:\s*import\b' \
         | grep -vE '@file:OptIn|@OptIn' \
+        | grep -vE '^\S*:\s*[A-Za-z0-9_.]+Api::class,?\s*$' \
         | grep -vE '^\S*:\s*(\*|//|/\*)' \
         | wc -l | tr -d ' ')
     MOD_CRITICAL=$((MOD_CRITICAL + M_WILD + M_M2))

@@ -31,7 +31,7 @@ import kotlin.test.assertTrue
  * branches pointing at the same scheme, or a dark scheme wired to a light mode, compiles perfectly
  * and is only visible when somebody selects that theme mid-service. The wrappers around it are just
  * as easy to get wrong quietly: `AppThemeWrapper` has to supply a `ThemeManager`, because without
- * one a `ThemeSwitcher` inside it edits a throwaway.
+ * one a theme control inside it edits a throwaway.
  *
  * SYSTEM is deliberately asserted loosely — it follows the host OS, so a test that pinned it to
  * light would pass on one machine and fail on the next.
@@ -228,7 +228,7 @@ class ThemeRenderTest {
 
     @Test
     fun `the app wrapper supplies a theme manager to what it wraps`() {
-        // Without one, a ThemeSwitcher inside would edit a manager nothing else can see.
+        // Without one, a theme control inside would edit a manager nothing else can see.
         var manager: ThemeManager? = null
         runComposeUiTest {
             setContent { AppThemeWrapper { manager = LocalThemeManager.current } }

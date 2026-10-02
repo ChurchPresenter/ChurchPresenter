@@ -31,15 +31,21 @@ import org.churchpresenter.strings.generated.resources.profile_banner_linked_lea
 import org.churchpresenter.strings.generated.resources.profile_banner_linked_rest
 import org.churchpresenter.strings.generated.resources.profile_banner_master_lead
 import org.churchpresenter.strings.generated.resources.profile_banner_master_rest
+import org.churchpresenter.strings.generated.resources.profile_banner_own_lead
+import org.churchpresenter.strings.generated.resources.profile_banner_own_rest
 import org.churchpresenter.strings.generated.resources.profile_banner_unlinked_lead
 import org.churchpresenter.strings.generated.resources.profile_banner_unlinked_rest
 import org.churchpresenter.strings.generated.resources.profile_changes_chip
+import org.churchpresenter.strings.generated.resources.profile_followed_in
 import org.churchpresenter.strings.generated.resources.profile_link_linked
 import org.churchpresenter.strings.generated.resources.profile_link_master
 import org.churchpresenter.strings.generated.resources.profile_names_and
 import org.churchpresenter.strings.generated.resources.profile_only_changes
 import org.churchpresenter.strings.generated.resources.profile_undo
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.ProfileSection
+import org.churchpresenter.settings.followsInSection
+import org.churchpresenter.settings.sectionsFollowing
 import org.churchpresenter.settings.overrideCount
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedSwitch
@@ -56,6 +62,8 @@ private const val CHIP_PILL_PERCENT = 50
 internal class ProfileLinkActions(
     val onUnlink: () -> Unit,
     val onLink: (masterId: String, keepOwnValues: Boolean) -> Unit,
+    /** Points a linked profile's section at another master: null for its main master, or [OWN_SECTION]. */
+    val onSectionMaster: (section: ProfileSection, masterId: String?) -> Unit,
     val onCreateLinked: () -> Unit,
     val onSelectProfile: (String) -> Unit,
     /** The master the profile was unlinked from just now, or null. */
@@ -101,9 +109,9 @@ internal fun ChangesChip(count: Int, modifier: Modifier = Modifier, short: Boole
 }
 
 /**
- * The band at the top of a page saying how the profile is linked: which master it follows and how
- * many of the page's settings are its own, with Only changes; which profiles follow it; or that it
- * was unlinked just now, with Undo. Nothing on a standalone profile.
+ * The band at the top of a page saying how the profile is linked: which master the page follows and
+ * how many of its settings are its own, with Only changes, or that it follows none; which profiles
+ * follow it; or that it was unlinked just now, with Undo. Nothing on a standalone profile.
  */
 @Composable
 internal fun LinkBanner(
@@ -117,17 +125,25 @@ internal fun LinkBanner(
     val unlinkedFrom = actions.unlinkedFrom
     when {
         master != null -> if (prefixes.isNotEmpty()) {
-            val count = overrideCount(link.profile, prefixes)
+            val pageMaster = link.masterFor(prefixes)
             BannerBox(modifier) {
-                BannerText(
-                    lead = stringResource(Res.string.profile_banner_linked_lead, master.displayName(), count),
-                    rest = stringResource(
-                        Res.string.profile_banner_linked_rest,
-                        master.displayName(),
-                        link.profile.displayName(),
-                    ),
-                )
-                OnlyChangesSwitch(link.onlyChanges, onOnlyChanges)
+                if (pageMaster == null) {
+                    BannerText(
+                        lead = stringResource(Res.string.profile_banner_own_lead),
+                        rest = stringResource(Res.string.profile_banner_own_rest),
+                    )
+                } else {
+                    val count = overrideCount(link.profile, prefixes)
+                    BannerText(
+                        lead = stringResource(Res.string.profile_banner_linked_lead, pageMaster.displayName(), count),
+                        rest = stringResource(
+                            Res.string.profile_banner_linked_rest,
+                            pageMaster.displayName(),
+                            link.profile.displayName(),
+                        ),
+                    )
+                    OnlyChangesSwitch(link.onlyChanges, onOnlyChanges)
+                }
             }
         }
         unlinkedFrom != null -> BannerBox(modifier) {
@@ -139,17 +155,36 @@ internal fun LinkBanner(
         }
         link.followers.isNotEmpty() -> BannerBox(modifier) {
             BannerText(
-                lead = stringResource(Res.string.profile_banner_master_lead, joinNames(link.followers)),
+                lead = stringResource(Res.string.profile_banner_master_lead, joinFollowers(link)),
                 rest = stringResource(Res.string.profile_banner_master_rest),
             )
         }
     }
 }
 
+/**
+ * The profiles following [link]'s profile, joined: one following it in some sections only is named
+ * with them -- "Sign language (Bible)".
+ */
+@Composable
+internal fun joinFollowers(link: ProfileLink): String =
+    joinLabels(link.followers.map { followerLabel(it, link.profile.id) })
+
+/** [follower] as a list of [masterId]'s followers names it: with its sections, when it follows only some. */
+@Composable
+internal fun followerLabel(follower: OutputProfile, masterId: String): String {
+    if (!follower.followsInSection(masterId)) return follower.displayName()
+    val sections = follower.sectionsFollowing(masterId).map { it.label() }.joinToString(", ")
+    return stringResource(Res.string.profile_followed_in, follower.displayName(), sections)
+}
+
 /** "A", "A and B", "A, B and C". */
 @Composable
-internal fun joinNames(profiles: List<OutputProfile>): String {
-    val names = profiles.map { it.displayName() }
+internal fun joinNames(profiles: List<OutputProfile>): String = joinLabels(profiles.map { it.displayName() })
+
+/** [names] joined: "A", "A and B", "A, B and C". */
+@Composable
+private fun joinLabels(names: List<String>): String {
     if (names.size < 2) return names.firstOrNull().orEmpty()
     return stringResource(Res.string.profile_names_and, names.dropLast(1).joinToString(", "), names.last())
 }

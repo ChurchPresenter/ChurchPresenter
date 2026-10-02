@@ -251,6 +251,10 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
     private val _displayedLyricSection = mutableStateOf(LyricSection())
     val displayedLyricSection: State<LyricSection> = _displayedLyricSection
 
+    // The outputs' place in the song, moved only together with the displayed section.
+    private val _displayedSongPosition = mutableStateOf(DisplayedSongPosition())
+    val displayedSongPosition: State<DisplayedSongPosition> = _displayedSongPosition
+
     private val _songTransitionAlpha = mutableStateOf(1f)
     val songTransitionAlpha: State<Float> = _songTransitionAlpha
 
@@ -477,9 +481,23 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         notifyLiveStateChanged(Presenting.LYRICS)
     }
 
-    fun setDisplayedLyricSection(section: LyricSection) {
+    /**
+     * Puts [section] on the outputs at [position] -- by default the operator's position as it
+     * stands, which is where a section pushed after its position was set belongs.
+     */
+    fun setDisplayedLyricSection(section: LyricSection, position: DisplayedSongPosition = liveSongPosition()) {
         _displayedLyricSection.value = section
+        _displayedSongPosition.value = position
     }
+
+    /** Moves the outputs to [position] within the section already displayed. */
+    fun setDisplayedSongPosition(position: DisplayedSongPosition) {
+        _displayedSongPosition.value = position
+    }
+
+    /** The operator's place in the song, as the outputs will show it once the section follows. */
+    fun liveSongPosition(): DisplayedSongPosition =
+        DisplayedSongPosition(_allLyricSections.value, _songDisplaySectionIndex.value, _songDisplayLineIndex.value)
 
     fun setSongTransitionAlpha(alpha: Float) {
         _songTransitionAlpha.value = alpha
@@ -626,10 +644,10 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
         _displayedVerses.value = snapshot.displayedVerses
         _lyricSection.value = snapshot.lyricSection
         _lyricSectionVersion.value++
-        _displayedLyricSection.value = snapshot.displayedLyricSection
         _allLyricSections.value = snapshot.allLyricSections
         _songDisplaySectionIndex.value = snapshot.songDisplaySectionIndex
         _songDisplayLineIndex.value = snapshot.songDisplayLineIndex
+        setDisplayedLyricSection(snapshot.displayedLyricSection)
         _showPresenterWindow.value = snapshot.showPresenterWindow
         setPresentingMode(snapshot.mode)
     }

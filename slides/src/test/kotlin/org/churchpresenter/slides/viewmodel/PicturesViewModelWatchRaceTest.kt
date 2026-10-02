@@ -88,7 +88,7 @@ class PicturesViewModelWatchRaceTest {
             // Both lanes are a watcher draining ENTRY_DELETE events for every file — the outgoing
             // one and its replacement, which is exactly the overlap selectFolder leaves behind.
             val thrown = raceInPairs {
-                runBlocking { with(viewModel) { files.forEach { removeWatchedImage(it) } } }
+                runBlocking { with(viewModel.watching) { files.forEach { removeWatchedImage(it) } } }
             }
 
             assertTrue(thrown.isEmpty(), "round $round threw: ${thrown.firstOrNull()}")
@@ -107,7 +107,7 @@ class PicturesViewModelWatchRaceTest {
         val thrown = raceInPairs { lane ->
             repeat(12) {
                 if (lane == 0) {
-                    runBlocking { with(viewModel) { files.forEach { file -> removeWatchedImage(file) } } }
+                    runBlocking { with(viewModel.watching) { files.forEach { file -> removeWatchedImage(file) } } }
                 } else {
                     viewModel.clearImages()
                     viewModel.loadImagesFromFolder(folder)
@@ -133,7 +133,7 @@ class PicturesViewModelWatchRaceTest {
         val removed = runBlocking {
             val cancelled = CoroutineScope(Job())
             cancelled.cancel()
-            with(viewModel) { with(cancelled) { removeWatchedImage(file) } }
+            with(viewModel.watching) { with(cancelled) { removeWatchedImage(file) } }
         }
 
         assertEquals(false, removed, "a cancelled watcher reports no change")

@@ -113,7 +113,15 @@ internal fun ContentBackgroundGroup(
     }
     SettingsGroup(
         caption = stringResource(Res.string.profile_bg_row),
+        key = "background",
         paths = scope.surfacePaths(),
+        summary = {
+            if (source == ContentBackgroundSource.OWN) {
+                backgroundSummary(stringResource(Res.string.profile_bg_own), config)
+            } else {
+                stringResource(Res.string.profile_bg_profile_default)
+            }
+        },
         footer = {
             ComesFromStrip(
                 scope = scope,

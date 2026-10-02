@@ -57,7 +57,7 @@ internal fun ProfileGeneralPage(
     extraActions: @Composable () -> Unit = {},
     deleteBlockedNote: String? = null,
 ) {
-    SettingsGroup(stringResource(Res.string.profile_nav_profile)) {
+    SettingsGroup(stringResource(Res.string.profile_nav_profile), key = "profile") {
         SettingsRow(stringResource(Res.string.profile_name)) {
             SettingsTextField(
                 value = profile.name,
@@ -72,7 +72,7 @@ internal fun ProfileGeneralPage(
         }
     }
     extraGroups()
-    SettingsGroup(stringResource(Res.string.profile_actions)) {
+    SettingsGroup(stringResource(Res.string.profile_actions), key = "actions") {
         SettingsRow(
             stringResource(Res.string.output_profile_duplicate),
             sub = stringResource(Res.string.profile_duplicate_sub),

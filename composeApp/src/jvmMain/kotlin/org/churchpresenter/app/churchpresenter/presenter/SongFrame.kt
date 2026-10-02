@@ -1,8 +1,6 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.ui.unit.Dp
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -13,11 +11,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -33,7 +28,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.channels.Channel
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.text.TextOutline
@@ -58,6 +52,9 @@ internal class SongFrame(
     val maxWidth: Dp,
     val maxHeight: Dp,
     val songFit: SongFit?,
+    /** The song and the place in it this frame's slide is drawn against -- the look's, unless a layer's own. */
+    val allLyricSections: List<LyricSection> = look.allLyricSections,
+    val displaySectionIndex: Int = look.displaySectionIndex,
 ) {
     val isKey get() = look.isKey
     val ss get() = look.ss
@@ -112,8 +109,6 @@ internal class SongFrame(
     val transitionAlpha get() = look.transitionAlpha
     val displayLineIndex get() = look.displayLineIndex
     val lookAheadEnabled get() = look.lookAheadEnabled
-    val allLyricSections get() = look.allLyricSections
-    val displaySectionIndex get() = look.displaySectionIndex
     val showBackground get() = look.showBackground
     val crossfadeEnabled get() = look.crossfadeEnabled
     val languageOverride get() = look.languageOverride
@@ -207,6 +202,17 @@ internal class SongFrame(
     // BoxWithConstraints' maxWidth/maxHeight from a Box nested inside it.
     val outputWidth = maxWidth
     val outputHeight = maxHeight
+
+    /**
+     * This frame drawing [page] -- a crossfade layer's own slide -- at the fit it was measured at and
+     * against its own place in the song, rather than the slide arriving's.
+     */
+    fun forPage(page: SongCrossfadePage): SongFrame =
+        if (page.fit == songFit && page.allSections == allLyricSections && page.sectionIndex == displaySectionIndex) {
+            this
+        } else {
+            SongFrame(look, backdrop, blurRadius, maxWidth, maxHeight, page.fit, page.allSections, page.sectionIndex)
+        }
 }
 
 /** Whether a song is fitted slide by slide rather than as a whole -- see `autoFitEachSlide`. */
@@ -414,70 +420,34 @@ private fun SongFrame.SongTextArea() {
     }
 }
 
-/** Crossfades or fades from one slide to the next, each layer carrying the line it draws. */
+/**
+ * Crossfades or fades from one slide to the next. Each layer carries the line it draws, the fit it
+ * was measured at and its place in the song: the frame's own are the incoming slide's, and an
+ * outgoing slide drawn at them -- under "Auto-fit each slide", or across a change of song -- jumped
+ * to the new slide's size, and showed the look-ahead of the slide after the new one.
+ */
 @Composable
 private fun BoxScope.SongSlideTransition(frame: SongFrame, innerModifier: Modifier) {
     with(frame) {
-        val duration = ss.transitionDuration.toInt().coerceAtLeast(100)
-        val isCrossfade = crossfadeEnabled
-        // Each layer carries the line it draws, not just its section. Sharing one live line
-        // index made the outgoing layer redraw its old section at the incoming line for as
-        // long as the crossfade ran, which is a flash of a line that was never on that page.
-        var displayedCurrent by remember {
-            mutableStateOf(SongCrossfadePage(lyricSection, displayLineIndex))
-        }
-        var displayedPrevious by remember { mutableStateOf(SongCrossfadePage(LyricSection(), -1)) }
-        var currentAlpha by remember { mutableStateOf(1f) }
-        var previousAlpha by remember { mutableStateOf(0f) }
-        val pendingQueue = remember { Channel<SongCrossfadePage>(Channel.CONFLATED) }
-
-        // Queue section changes
-        LaunchedEffect(lyricSection, displayLineIndex) {
-            val target = SongCrossfadePage(lyricSection, displayLineIndex)
-            when {
-                displayedCurrent == target -> Unit
-                // Stepping a line inside the section already up has never crossfaded, and
-                // queueing it would fade the section out against itself.
-                displayedCurrent.section == target.section -> displayedCurrent = target
-                else -> pendingQueue.send(target)
-            }
-        }
-
-        // Process section switches (crossfade between sections)
-        LaunchedEffect(Unit) {
-            for (nextPage in pendingQueue) {
-                if (displayedCurrent == nextPage) continue
-
-                if (isCrossfade) {
-                    displayedPrevious = displayedCurrent
-                    displayedCurrent = nextPage
-                    previousAlpha = 1f
-                    currentAlpha = 0f
-                    val anim = Animatable(0f)
-                    anim.animateTo(1f, tween(durationMillis = duration)) {
-                        currentAlpha = this.value
-                        previousAlpha = 1f - this.value
-                    }
-                } else {
-                    displayedCurrent = nextPage
-                }
-                currentAlpha = 1f
-                previousAlpha = 0f
-                displayedPrevious = SongCrossfadePage(LyricSection(), -1)
-            }
-        }
-
+        val layers = rememberFadeLayers(
+            target = SongCrossfadePage(lyricSection, displayLineIndex, songFit, allLyricSections, displaySectionIndex),
+            crossfade = crossfadeEnabled,
+            durationMs = ss.transitionDuration.toInt().coerceAtLeast(100),
+            // Stepping a line inside the section already up has never crossfaded, nor has the same
+            // section sent again with only its tuning changed, nor a new fit for the same slide.
+            samePage = { shown, next -> shown.section.isRestatedAs(next.section) },
+        )
         Box(modifier = Modifier.matchParentSize().graphicsLayer { alpha = transitionAlpha }) {
-            if (displayedPrevious.section.lines.isNotEmpty() && previousAlpha > 0f) {
-                Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = previousAlpha }) {
-                    TextContent(displayedPrevious.section, displayedPrevious.lineIndex, innerModifier)
+            for (layer in layers) {
+                key(layer) {
+                    val page = layer.page
+                    val layerFrame = forPage(page)
+                    Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = layer.alpha }) {
+                        layerFrame.TextContent(page.section, page.lineIndex, innerModifier)
+                    }
+                    layerFrame.SlideBoxes(page.section, page.lineIndex, layer.alpha)
                 }
-                SlideBoxes(displayedPrevious.section, displayedPrevious.lineIndex, previousAlpha)
             }
-            Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = currentAlpha }) {
-                TextContent(displayedCurrent.section, displayedCurrent.lineIndex, innerModifier)
-            }
-            SlideBoxes(displayedCurrent.section, displayedCurrent.lineIndex, currentAlpha)
         }
     }
 }

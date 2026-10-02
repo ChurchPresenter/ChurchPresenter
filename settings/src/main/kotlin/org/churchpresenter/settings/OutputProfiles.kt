@@ -70,7 +70,14 @@ fun ProjectionSettings.duplicateOutputProfile(id: String, newName: String): Proj
     // A standalone copy with the values the source draws with: a duplicate of a linked profile does
     // not follow its master too. No merge either: no output follows the copy yet.
     return addOutputProfile(
-        source.copy(id = fresh.id, name = newName, parentId = null, overrides = emptySet(), merge = null),
+        source.copy(
+            id = fresh.id,
+            name = newName,
+            parentId = null,
+            overrides = emptySet(),
+            sectionMasters = emptyMap(),
+            merge = null,
+        ),
     )
 }
 

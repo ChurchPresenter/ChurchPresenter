@@ -205,7 +205,7 @@ internal class BibleEdit(
     }
 }
 
-/** TEXT: the "Applies to" strip, then the element's look, and the reference's abbreviation. */
+/** TEXT: the "Applies to" strip, the reference's abbreviation -- the element's own -- then its look. */
 @Composable
 private fun BibleTextGroup(
     edit: BibleEdit,
@@ -218,7 +218,9 @@ private fun BibleTextGroup(
     val lookPaths = edit.lookPaths()
     SettingsGroup(
         caption = stringResource(Res.string.profile_group_text),
+        key = "text",
         paths = lookPaths.all,
+        summary = { style.toLook().let { textSummary(it.fontType, it.fontSize) } },
         action = ResetAction(style != defaults || edit.referenceShift != (0 to 0)) { edit.reset(defaults) },
         header = {
             AppliesToStrip(
@@ -253,7 +255,7 @@ private fun BibleTextGroup(
                 onChange = { look -> edit.writeStyle(style.withLook(look)) },
                 fonts = rememberSystemFonts(),
                 paths = lookPaths,
-                extraBasic = {
+                leading = {
                     if (edit.styleElement == BibleStyleElement.REFERENCE) {
                         SettingsSwitchRow(
                             stringResource(Res.string.customize_show_abbreviation),
@@ -261,8 +263,8 @@ private fun BibleTextGroup(
                             { v -> edit.updateEntry { it.copy(showAbbreviation = v) } },
                         )
                     }
-                    BibleBoxRows(boxes, edit)
                 },
+                extraBasic = { BibleBoxRows(boxes, edit) },
                 extraAdvanced = {
                     when {
                         boxed -> Unit
@@ -478,10 +480,7 @@ private const val SPACING_STEP = 4
  * The layout is only offered where two translations can actually reach this output.
  */
 @Composable
-private fun TranslationsGroup(
-    edit: BibleEdit,
-    profile: OutputProfile,
-) {
+private fun TranslationsGroup(edit: BibleEdit, profile: OutputProfile) {
     val bs = edit.bs
     val stack = edit.stack
     val lowerThird = edit.lowerThird
@@ -491,7 +490,7 @@ private fun TranslationsGroup(
         stack.size > 1
     val d = BibleSettings()
     SettingsGroup(
-        caption = stringResource(Res.string.profile_group_translations),
+        caption = stringResource(Res.string.profile_group_translations), key = "translations",
         paths = TRANSLATIONS_PATHS,
         action = ResetAction(
             bs.bilingualLayout != d.bilingualLayout || bs.bilingualLayoutLowerThird != d.bilingualLayoutLowerThird ||

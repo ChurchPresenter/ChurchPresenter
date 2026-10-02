@@ -49,17 +49,12 @@ class PresentationViewModelSettingsTest {
 
     // ── exposableDeck: whether a deck is handed to the animated player ───────────
     //
-    // exposableDeck is private, so it is reached by reflection (as CrashReporterTest does for
-    // scrubPii). A mock Deck only needs its `format` stubbed; the decision is a pure function of
-    // that plus the "Animate Keynote" setting.
+    // A mock Deck only needs its `format` stubbed; the decision is a pure function of that plus
+    // the "Animate Keynote" setting.
 
     private fun deck(format: DeckFormat): Deck = mockk { every { this@mockk.format } returns format }
 
-    private fun PresentationViewModel.exposableDeck(deck: Deck?): Deck? =
-        PresentationViewModel::class.java
-            .getDeclaredMethod("exposableDeck", Deck::class.java)
-            .apply { isAccessible = true }
-            .invoke(this, deck) as Deck?
+    private fun PresentationViewModel.exposableDeck(deck: Deck?): Deck? = loading.exposableDeck(deck)
 
     @Test
     fun `a keynote deck is withheld from playback when Animate Keynote is off`() {

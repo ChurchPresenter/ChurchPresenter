@@ -484,9 +484,6 @@ class XdgPortalRequestTest {
 
     // ── The filters the portal is given ─────────────────────────────────────────
 
-    private fun toDBusFilters(filters: List<FileNameExtensionFilter>) =
-        XdgFileChooser.toDBusFilters(filters)
-
     @Test
     fun `a filter becomes a named struct of glob patterns`() {
         val structs = toDBusFilters(listOf(filter("Songs (*.sps)", "sps")))
@@ -536,7 +533,7 @@ class XdgPortalRequestTest {
         multiple: Boolean = false,
         token: String = "deadbeef",
     ): Map<String, Variant<*>> =
-        XdgFileChooser.buildOptions(path, filters, suggestedName, selectDirectory, multiple, token)
+        buildOptions(DialogRequest(path, filters, "", suggestedName, selectDirectory, multiple), token)
 
     @Test
     fun `an open dialog is told where to start and what it may select`() {
@@ -606,9 +603,6 @@ class XdgPortalRequestTest {
 
     // ── The path the portal will answer on ──────────────────────────────────────
 
-    private fun requestPath(uniqueName: String, token: String) =
-        XdgFileChooser.requestPath(uniqueName, token)
-
     @Test
     fun `the request path is built from the connection's unique name`() {
         // ":1.42" -> "1_42": the leading colon is dropped and dots become underscores. A wrong path
@@ -653,7 +647,7 @@ class XdgPortalRequestTest {
     // ── What the portal answers ─────────────────────────────────────────────────
 
     private fun parseResponse(response: Int, results: Map<String, Variant<*>>) =
-        XdgFileChooser.parseResponse(arrayOf(UInt32(response.toLong()), results))
+        parseResponse(arrayOf(UInt32(response.toLong()), results))
 
     private fun uris(vararg values: String) = mapOf("uris" to Variant(values.toList(), "as"))
 
@@ -688,11 +682,14 @@ class XdgPortalRequestTest {
         var seenRequestPath: String? = null
 
         XdgFileChooser.requestPaths(
-            path = Path("/home/leader/Songs"),
-            filters = listOf(filter("Songs", "sps")),
-            suggestedName = null,
-            selectDirectory = false,
-            multiple = true,
+            request = DialogRequest(
+                path = Path("/home/leader/Songs"),
+                filters = listOf(filter("Songs", "sps")),
+                title = "",
+                suggestedName = null,
+                selectDirectory = false,
+                multiple = true,
+            ),
             uniqueName = ":1.42",
             token = "deadbeef",
         ) { options, requestPath ->
@@ -714,11 +711,14 @@ class XdgPortalRequestTest {
     @Test
     fun `the uris the portal answered with come back as paths`() = runBlocking {
         val picked = XdgFileChooser.requestPaths(
-            path = Path("/home/leader"),
-            filters = emptyList(),
-            suggestedName = null,
-            selectDirectory = false,
-            multiple = true,
+            request = DialogRequest(
+                path = Path("/home/leader"),
+                filters = emptyList(),
+                title = "",
+                suggestedName = null,
+                selectDirectory = false,
+                multiple = true,
+            ),
             uniqueName = ":1.42",
             token = "tok",
         ) { _, _ -> listOf("file:///home/leader/a.sps", "file:///home/leader/b.sps") }
@@ -729,11 +729,14 @@ class XdgPortalRequestTest {
     @Test
     fun `a cancelled portal request comes back as nothing`() = runBlocking {
         val picked = XdgFileChooser.requestPaths(
-            path = Path("/home/leader"),
-            filters = emptyList(),
-            suggestedName = null,
-            selectDirectory = false,
-            multiple = false,
+            request = DialogRequest(
+                path = Path("/home/leader"),
+                filters = emptyList(),
+                title = "",
+                suggestedName = null,
+                selectDirectory = false,
+                multiple = false,
+            ),
             uniqueName = ":1.42",
             token = "tok",
         ) { _, _ -> null }
@@ -746,11 +749,14 @@ class XdgPortalRequestTest {
         var seenOptions: Map<String, Variant<*>>? = null
 
         XdgFileChooser.requestPaths(
-            path = Path("/home/leader"),
-            filters = emptyList(),
-            suggestedName = "schedule.cps",
-            selectDirectory = false,
-            multiple = false,
+            request = DialogRequest(
+                path = Path("/home/leader"),
+                filters = emptyList(),
+                title = "",
+                suggestedName = "schedule.cps",
+                selectDirectory = false,
+                multiple = false,
+            ),
             uniqueName = ":1.42",
             token = "tok",
         ) { options, _ -> seenOptions = options; null }
@@ -764,7 +770,7 @@ class XdgPortalRequestTest {
     fun `a save takes the one path the portal named`() {
         assertEquals(
             Path("/home/leader/sunday.cps"),
-            XdgFileChooser.saveSelection(listOf(Path("/home/leader/sunday.cps"))),
+            saveSelection(listOf(Path("/home/leader/sunday.cps"))),
         )
     }
 
@@ -772,14 +778,12 @@ class XdgPortalRequestTest {
     fun `a save that somehow named several files saves none of them`() {
         // A save dialog can only name one file, so more than one is a result that cannot be
         // honoured — better no save than silently writing to whichever came first.
-        assertNull(XdgFileChooser.saveSelection(listOf(Path("/a.cps"), Path("/b.cps"))))
-        assertNull(XdgFileChooser.saveSelection(emptyList()))
-        assertNull(XdgFileChooser.saveSelection(null))
+        assertNull(saveSelection(listOf(Path("/a.cps"), Path("/b.cps"))))
+        assertNull(saveSelection(emptyList()))
+        assertNull(saveSelection(null))
     }
 
     // ── Turning the answer into paths ───────────────────────────────────────────
-
-    private fun toPaths(uris: List<String>?) = XdgFileChooser.toPaths(uris)
 
     @Test
     fun `file uris become paths`() {

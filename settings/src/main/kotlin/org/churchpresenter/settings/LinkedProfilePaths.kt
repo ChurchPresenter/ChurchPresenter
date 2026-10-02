@@ -24,7 +24,9 @@ private val linkJson = Json {
  */
 // `merge` names this profile's own outputs, which a linked profile does not share, so it is
 // never followed from a master and never listed as a change.
-private val IDENTITY_KEYS = setOf("id", "name", "parentId", "overrides", "previewWidth", "previewHeight", "merge")
+private val IDENTITY_KEYS = setOf(
+    "id", "name", "parentId", "overrides", "sectionMasters", "previewWidth", "previewHeight", "merge",
+)
 
 /**
  * The settings a profile carries but never actually uses -- the ones resolution takes from the

@@ -69,9 +69,7 @@ internal fun PresenterModeContent(
     val lyricSection by presenterManager.lyricSection
     val displayedLyricSection by presenterManager.displayedLyricSection
     val songTransitionAlpha by presenterManager.songTransitionAlpha
-    val songDisplayLineIndex by presenterManager.songDisplayLineIndex
-    val allLyricSections by presenterManager.allLyricSections
-    val songDisplaySectionIndex by presenterManager.songDisplaySectionIndex
+    val songPosition by presenterManager.displayedSongPosition
     val displayedImagePath by presenterManager.displayedImagePath
     val pictureTransitionAlpha by presenterManager.pictureTransitionAlpha
     val previousDisplayedImagePath by presenterManager.previousDisplayedImagePath
@@ -145,10 +143,10 @@ internal fun PresenterModeContent(
                     isLowerThirdVertical = profile.isLowerThirdVertical,
                     outputRole = outputRole,
                     transitionAlpha = songTransitionAlpha,
-                    displayLineIndex = songDisplayLineIndex,
+                    displayLineIndex = songPosition.lineIndex,
                     lookAheadEnabled = profile.songLookAhead,
-                    allLyricSections = allLyricSections,
-                    displaySectionIndex = songDisplaySectionIndex,
+                    allLyricSections = songPosition.allSections,
+                    displaySectionIndex = songPosition.sectionIndex,
                     showBackground = showBackgroundOverride ?: (showBg && profile.showSongsBackground),
                     crossfadeEnabled = appSettings.songSettings.crossfade,
                     languageOverride = profile.songMode,

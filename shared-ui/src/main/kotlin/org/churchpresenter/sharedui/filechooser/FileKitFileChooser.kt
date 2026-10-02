@@ -27,44 +27,6 @@ object FileKitFileChooser : FileChooser() {
     internal enum class PickerMode { DIRECTORY, MULTIPLE_FILES, SINGLE_FILE }
 
     /**
-     * The picker a request maps to. No call site selects multiple directories, so a directory
-     * request is always a single pick even when [multiple] is set.
-     */
-    internal fun pickerMode(selectDirectory: Boolean, multiple: Boolean): PickerMode = when {
-        selectDirectory -> PickerMode.DIRECTORY
-        multiple -> PickerMode.MULTIPLE_FILES
-        else -> PickerMode.SINGLE_FILE
-    }
-
-    /** One picked file as the list the base class expects, or null if nothing usable came back. */
-    internal fun singleSelection(file: File?): List<Path>? =
-        file?.toPathOrNull()?.let { listOf(it) }
-
-    /**
-     * Several picked files, with anything unconvertible dropped.
-     *
-     * An empty result becomes null: the base class reads null as "cancelled", and an empty list
-     * would be unwrapped as a selection of nothing.
-     */
-    internal fun multipleSelection(files: List<File>?): List<Path>? =
-        files?.mapNotNull { it.toPathOrNull() }?.takeIf { it.isNotEmpty() }
-
-    /**
-     * Splits [suggestedName] into the base name and default extension FileKit wants.
-     *
-     * [FileChooser.baseName] has already taken a matching extension off, so this normally only
-     * names the default extension for the saver to add. It still strips, because the split is
-     * cheap and a name that reached here whole — a caller that bypassed [FileChooser.save] — would
-     * otherwise open the dialog offering "schedule.cps.cps".
-     */
-    internal fun saveNameParts(suggestedName: String, extensions: List<String>): Pair<String, String?> {
-        val matched = extensions.firstOrNull { suggestedName.endsWith(".$it", ignoreCase = true) }
-        val extension = matched ?: extensions.firstOrNull()
-        val baseName = matched?.let { suggestedName.dropLast(it.length + 1) } ?: suggestedName
-        return baseName to extension
-    }
-
-    /**
      * Settings shared by every native dialog: the title, owned by whatever window is active.
      *
      * A null [parentWindow] stays null rather than becoming a parent wrapping nothing: FileKit
@@ -76,15 +38,6 @@ object FileKitFileChooser : FileChooser() {
             title = title,
             parent = parentWindow()?.let { FileKitDialogParent.awt(it) }
         )
-
-    /**
-     * The extensions the native saver restricts to, or null for no restriction.
-     *
-     * An empty set is not the same as null here: FileKit reads null as "any file" but an empty set
-     * as a saver that permits nothing, which would leave the operator unable to save at all.
-     */
-    internal fun allowedExtensions(extensions: List<String>): Set<String>? =
-        extensions.takeIf { it.isNotEmpty() }?.toSet()
 
     /**
      * The whole open interaction: work out which picker the request needs, hand [openNative] the
@@ -208,45 +161,93 @@ object FileKitFileChooser : FileChooser() {
             java.awt.Window.getWindows()
         )
 
-    /**
-     * Which window a native dialog should hang off, given the [activeWindow] the toolkit reports
-     * (if any) and every [window] in the JVM.
-     *
-     * Order matters: the active window wins outright; failing that, a window that is both showing
-     * and focused; failing that, the largest one still visible. The size tiebreak exists so a
-     * hidden helper window — JCEF's, JavaFX's — is never chosen over the real app window, which
-     * would put the dialog behind it with no icon and the wrong modality. Null means no owner, and
-     * the dialog is centred on the screen instead.
-     */
-    internal fun chooseParentWindow(
-        activeWindow: java.awt.Window?,
-        windows: Array<java.awt.Window>
-    ): java.awt.Window? =
-        activeWindow
-            ?: windows.firstOrNull { it.isShowing && it.isFocused }
-            ?: windows.filter { it.isShowing && it.width > 0 && it.height > 0 }
-                .maxByOrNull { it.width.toLong() * it.height }
+}
 
-    /** Flattens all filters into one extension list (native dialogs get a single combined filter). */
-    internal fun List<FileNameExtensionFilter>.allExtensions(): List<String> =
-        flatMap { it.extensions.toList() }.distinct()
+/**
+ * The picker a request maps to. No call site selects multiple directories, so a directory
+ * request is always a single pick even when [multiple] is set.
+ */
+internal fun pickerMode(selectDirectory: Boolean, multiple: Boolean): FileKitFileChooser.PickerMode = when {
+    selectDirectory -> FileKitFileChooser.PickerMode.DIRECTORY
+    multiple -> FileKitFileChooser.PickerMode.MULTIPLE_FILES
+    else -> FileKitFileChooser.PickerMode.SINGLE_FILE
+}
 
-    internal fun List<FileNameExtensionFilter>.toFileKitType(): FileKitType =
-        allExtensions()
-            .takeIf { it.isNotEmpty() }
-            ?.let { FileKitType.File(it) }
-            ?: FileKitType.File()
+/** One picked file as the list the base class expects, or null if nothing usable came back. */
+internal fun singleSelection(file: File?): List<Path>? =
+    file?.toPathOrNull()?.let { listOf(it) }
 
-    /**
-     * Windows can hand back a virtual shell item (e.g. the "This PC" node,
-     * `::{20D04FE0-3AEA-1069-A2D8-08002B30309D}`) when a user selects a special
-     * folder in the native picker's navigation pane. Such paths have no real
-     * filesystem representation, so [File.toPath] throws; treat that as no
-     * selection rather than letting it bubble up as a "native dialogs broken" crash.
-     */
-    internal fun File.toPathOrNull(): Path? = try {
-        toPath()
-    } catch (_: InvalidPathException) {
-        null
-    }
+/**
+ * Several picked files, with anything unconvertible dropped.
+ *
+ * An empty result becomes null: the base class reads null as "cancelled", and an empty list
+ * would be unwrapped as a selection of nothing.
+ */
+internal fun multipleSelection(files: List<File>?): List<Path>? =
+    files?.mapNotNull { it.toPathOrNull() }?.takeIf { it.isNotEmpty() }
+
+/**
+ * Splits [suggestedName] into the base name and default extension FileKit wants.
+ *
+ * [FileChooser.baseName] has already taken a matching extension off, so this normally only
+ * names the default extension for the saver to add. It still strips, because the split is
+ * cheap and a name that reached here whole — a caller that bypassed [FileChooser.save] — would
+ * otherwise open the dialog offering "schedule.cps.cps".
+ */
+internal fun saveNameParts(suggestedName: String, extensions: List<String>): Pair<String, String?> {
+    val matched = extensions.firstOrNull { suggestedName.endsWith(".$it", ignoreCase = true) }
+    val extension = matched ?: extensions.firstOrNull()
+    val baseName = matched?.let { suggestedName.dropLast(it.length + 1) } ?: suggestedName
+    return baseName to extension
+}
+
+/**
+ * The extensions the native saver restricts to, or null for no restriction.
+ *
+ * An empty set is not the same as null here: FileKit reads null as "any file" but an empty set
+ * as a saver that permits nothing, which would leave the operator unable to save at all.
+ */
+internal fun allowedExtensions(extensions: List<String>): Set<String>? =
+    extensions.takeIf { it.isNotEmpty() }?.toSet()
+
+/**
+ * Which window a native dialog should hang off, given the [activeWindow] the toolkit reports
+ * (if any) and every [window] in the JVM.
+ *
+ * Order matters: the active window wins outright; failing that, a window that is both showing
+ * and focused; failing that, the largest one still visible. The size tiebreak exists so a
+ * hidden helper window — JCEF's, JavaFX's — is never chosen over the real app window, which
+ * would put the dialog behind it with no icon and the wrong modality. Null means no owner, and
+ * the dialog is centred on the screen instead.
+ */
+internal fun chooseParentWindow(
+    activeWindow: java.awt.Window?,
+    windows: Array<java.awt.Window>
+): java.awt.Window? =
+    activeWindow
+        ?: windows.firstOrNull { it.isShowing && it.isFocused }
+        ?: windows.filter { it.isShowing && it.width > 0 && it.height > 0 }
+            .maxByOrNull { it.width.toLong() * it.height }
+
+/** Flattens all filters into one extension list (native dialogs get a single combined filter). */
+internal fun List<FileNameExtensionFilter>.allExtensions(): List<String> =
+    flatMap { it.extensions.toList() }.distinct()
+
+internal fun List<FileNameExtensionFilter>.toFileKitType(): FileKitType =
+    allExtensions()
+        .takeIf { it.isNotEmpty() }
+        ?.let { FileKitType.File(it) }
+        ?: FileKitType.File()
+
+/**
+ * Windows can hand back a virtual shell item (e.g. the "This PC" node,
+ * `::{20D04FE0-3AEA-1069-A2D8-08002B30309D}`) when a user selects a special
+ * folder in the native picker's navigation pane. Such paths have no real
+ * filesystem representation, so [File.toPath] throws; treat that as no
+ * selection rather than letting it bubble up as a "native dialogs broken" crash.
+ */
+internal fun File.toPathOrNull(): Path? = try {
+    toPath()
+} catch (_: InvalidPathException) {
+    null
 }

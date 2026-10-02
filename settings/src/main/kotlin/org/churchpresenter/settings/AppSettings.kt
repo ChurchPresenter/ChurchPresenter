@@ -68,6 +68,12 @@ data class AppSettings(
      */
     val profilesAdvanced: Boolean = false,
     /**
+     * The settings groups the operator has folded away on each page of Settings → Profiles: the
+     * page's key to the keys of its folded groups. Like [profilesAdvanced], how the operator likes to
+     * work -- one set per page, whichever profile is open.
+     */
+    val profilesFoldedGroups: Map<String, Set<String>> = emptyMap(),
+    /**
      * Schedule toolbar buttons the operator has turned off, by `ScheduleToolbarButton` name — the
      * same shape as [hiddenTabs], so an unknown name from a newer build is simply ignored.
      *

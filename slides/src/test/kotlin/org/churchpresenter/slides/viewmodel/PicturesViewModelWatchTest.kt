@@ -48,13 +48,13 @@ class PicturesViewModelWatchTest {
     }
 
     private fun added(file: File): Boolean =
-        runBlocking { with(model) { this@runBlocking.addWatchedImage(file) } }
+        runBlocking { with(model.watching) { this@runBlocking.addWatchedImage(file) } }
 
     private fun fire(kind: WatchEvent.Kind<*>, file: File): Boolean =
-        runBlocking { with(model) { this@runBlocking.applyWatchEvent(kind, file) } }
+        runBlocking { with(model.watching) { this@runBlocking.applyWatchEvent(kind, file) } }
 
     private fun removed(file: File): Boolean =
-        runBlocking { with(model) { this@runBlocking.removeWatchedImage(file) } }
+        runBlocking { with(model.watching) { this@runBlocking.removeWatchedImage(file) } }
 
     private class PathEvent(private val name: String, private val eventKind: WatchEvent.Kind<Path>) :
         WatchEvent<Path> {
@@ -281,26 +281,26 @@ class PicturesViewModelWatchTest {
 
     @Test
     fun `an overflow event is skipped without its context being read`() {
-        assertNull(model.watchedImageName(OverflowEvent()))
+        assertNull(model.watching.watchedImageName(OverflowEvent()))
     }
 
     @Test
     fun `an event with no context is skipped rather than crashing the watcher`() {
-        assertNull(model.watchedImageName(NullContextEvent()))
+        assertNull(model.watching.watchedImageName(NullContextEvent()))
     }
 
     @Test
     fun `a picture event yields its file name`() {
-        assertEquals("b.jpg", model.watchedImageName(PathEvent("b.jpg", StandardWatchEventKinds.ENTRY_CREATE)))
+        assertEquals("b.jpg", model.watching.watchedImageName(PathEvent("b.jpg", StandardWatchEventKinds.ENTRY_CREATE)))
     }
 
     @Test
     fun `an event for a file that is not a picture is skipped`() {
-        assertNull(model.watchedImageName(PathEvent("notes.txt", StandardWatchEventKinds.ENTRY_CREATE)))
+        assertNull(model.watching.watchedImageName(PathEvent("notes.txt", StandardWatchEventKinds.ENTRY_CREATE)))
     }
 
     @Test
     fun `the picture extension is matched whatever case it was written in`() {
-        assertEquals("B.JPG", model.watchedImageName(PathEvent("B.JPG", StandardWatchEventKinds.ENTRY_CREATE)))
+        assertEquals("B.JPG", model.watching.watchedImageName(PathEvent("B.JPG", StandardWatchEventKinds.ENTRY_CREATE)))
     }
 }

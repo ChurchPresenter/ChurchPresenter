@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.presenter
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasText
@@ -78,7 +79,7 @@ class CaptionPresentationRenderTest {
         STTSettings(displayMode = "both", layout = "interleaved", maxLines = 6),
     ) {
         val node = onNodeWithText("Gracia y paz", substring = true).fetchSemanticsNode()
-        val text = node.config[androidx.compose.ui.semantics.SemanticsProperties.Text].joinToString("") { it.text }
+        val text = node.config[SemanticsProperties.Text].joinToString("") { it.text }
         assertEquals("Grace and peace\nGracia y paz\nLet us pray\nOremos", text)
     }
 

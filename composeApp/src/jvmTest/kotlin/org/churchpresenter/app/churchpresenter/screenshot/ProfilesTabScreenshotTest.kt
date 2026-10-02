@@ -230,6 +230,22 @@ class ProfilesTabScreenshotTest {
     @Test
     fun `a master's General page`() = shoot("master_general", settings = linkedLibrary())
 
+    @Test
+    fun `a follower whose Bible follows another master`() =
+        shoot("linked_section_masters", settings = sectionMastersLibrary()) {
+            onNodeWithTag(profileRowTag("youth")).performClick()
+        }
+
+    // ── Folded groups ───────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the Songs page with groups folded`() = shoot(
+        "songs_folded",
+        settings = library().copy(
+            profilesFoldedGroups = mapOf(railTag(CustomizePane.SONGS.name) to setOf("background", "text")),
+        ),
+    ) { tab(CustomizePane.SONGS) }
+
     // ── Adjust on preview ───────────────────────────────────────────────────────────────────────
 
     @Test
@@ -410,6 +426,16 @@ class ProfilesTabScreenshotTest {
         val easter = OutputProfile(id = "easter", name = "Easter", parentId = "main")
         val proj = base.projectionSettings
         val profiles = proj.outputProfiles + youth + easter
+        return base.copy(projectionSettings = proj.copy(outputProfiles = profiles).withLinksResolved())
+    }
+
+    /** [linkedLibrary], with Youth night's Bible following Livestream and its captions its own. */
+    private fun sectionMastersLibrary(): AppSettings {
+        val base = linkedLibrary()
+        val proj = base.projectionSettings
+        val profiles = proj.outputProfiles.map {
+            if (it.id == "youth") it.copy(sectionMasters = mapOf("bible" to "stream", "captions" to "")) else it
+        }
         return base.copy(projectionSettings = proj.copy(outputProfiles = profiles).withLinksResolved())
     }
 

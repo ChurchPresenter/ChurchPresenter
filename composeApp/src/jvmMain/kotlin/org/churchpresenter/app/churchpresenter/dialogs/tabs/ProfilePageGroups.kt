@@ -17,6 +17,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.profile_summary_margins
+import org.churchpresenter.strings.generated.resources.profile_text_size_unit
 import org.churchpresenter.strings.generated.resources.bilingual_grid_1x3
 import org.churchpresenter.strings.generated.resources.bilingual_grid_1x4
 import org.churchpresenter.strings.generated.resources.bilingual_grid_2x2
@@ -107,7 +109,13 @@ internal fun PositionGroup(
     /** What the margins are taken from -- the screen, or the band on a lower third. */
     room: MarginRoom = MarginRoom.FULL_SCREEN,
 ) {
-    SettingsGroup(stringResource(Res.string.profile_group_position), action = reset, paths = paths.all) {
+    SettingsGroup(
+        stringResource(Res.string.profile_group_position),
+        key = "position",
+        action = reset,
+        paths = paths.all,
+        summary = { positionSummary(verticalAlignment, margins) },
+    ) {
         if (verticalAlignment != null) {
             SettingsRow(stringResource(Res.string.profile_vertical_alignment), paths = paths.vertical) {
                 RowSegmented(
@@ -174,6 +182,26 @@ internal fun PositionGroup(
         extraAdvanced()
     }
 }
+
+/** A folded Position group's summary: where the block sits, and its margins -- "Bottom · margins 40". */
+@Composable
+private fun positionSummary(verticalAlignment: String?, margins: Margins): String {
+    val where = when (verticalAlignment) {
+        Constants.TOP -> stringResource(Res.string.top)
+        Constants.MIDDLE -> stringResource(Res.string.middle)
+        Constants.BOTTOM -> stringResource(Res.string.bottom)
+        else -> null
+    }
+    val all = listOf(margins.top, margins.bottom, margins.left, margins.right)
+    val numbers = if (all.distinct().size == 1) "${margins.top}" else all.joinToString(" / ")
+    return listOfNotNull(where, stringResource(Res.string.profile_summary_margins, numbers)).joinToString(" · ")
+}
+
+/** A folded Text group's summary: the font and its size -- "Arial · 48 pt". */
+@Composable
+internal fun textSummary(font: String, size: Int): String =
+    listOf(font, "$size ${stringResource(Res.string.profile_text_size_unit)}").filter { it.isNotBlank() }
+        .joinToString(" · ")
 
 private val MARGIN_FIELD = 56.dp
 
@@ -282,6 +310,7 @@ internal fun TransitionGroup(
     val path = { field: String -> listOfNotNull(prefix?.let { "$it.$field" }) }
     SettingsGroup(
         stringResource(Res.string.profile_group_transition),
+        key = "transition",
         action = reset,
         paths = listOf("fadeIn", "fadeOut", "crossfade", "transitionDuration").flatMap(path),
     ) {
@@ -343,6 +372,7 @@ internal fun BandGroup(
     val config = draft.backgroundSettings.configFor(scope)
     SettingsGroup(
         stringResource(Res.string.profile_group_band),
+        key = "band",
         action = reset,
         paths = heightPaths + surfacePaths,
     ) {

@@ -19,31 +19,49 @@ import org.churchpresenter.calendar.model.localeUses24HourClock
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.StringResource
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Label
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.RecordVoiceOver
+import androidx.compose.material.icons.filled.Slideshow
+import androidx.compose.material.icons.filled.Subtitles
+import androidx.compose.ui.graphics.vector.ImageVector
 
 private const val VERSE_PREVIEW_CHARS = 100
 private const val PALETTE_INDEX_FOURTH = 3
 
 /**
- * How a schedule item is labelled in the list — its type glyph, its grey detail line, and an
- * announcement timer's preview. Extracted from ScheduleTab (the glyph `when` was duplicated at two
+ * How a schedule item is labelled in the list — its type icon, its grey detail line, and an
+ * announcement timer's preview. Extracted from ScheduleTab (the icon `when` was duplicated at two
  * sites) so the per-type mapping is exhaustive over the sealed [ScheduleItem] and tested in one place.
  */
 
-/** The single-glyph type indicator shown on a schedule row and its drag preview. */
-internal fun scheduleItemGlyph(item: ScheduleItem): String = when (item) {
-    is ScheduleItem.SongItem -> "♪"
-    is ScheduleItem.BibleVerseItem -> "✝"
-    is ScheduleItem.LabelItem -> "🏷"
-    is ScheduleItem.PictureItem -> "📷"
-    is ScheduleItem.PresentationItem -> "📊"
-    is ScheduleItem.MediaItem -> "🎬"
-    is ScheduleItem.LowerThirdItem -> "▼"
-    is ScheduleItem.AnnouncementItem -> "📢"
-    is ScheduleItem.WebsiteItem -> "🌐"
-    is ScheduleItem.SceneItem -> "🎬"
-    is ScheduleItem.DictionaryItem -> "📖"
-    is ScheduleItem.CueItem -> "⚡"
-    is ScheduleItem.MinistryItem -> "🎤"
+/**
+ * The type icon shown on a schedule row and its drag preview — the same icon as the item's own tab
+ * where it has one (`tabIcon` in `TabSection`).
+ */
+internal fun scheduleItemIcon(item: ScheduleItem): ImageVector = when (item) {
+    is ScheduleItem.SongItem -> Icons.Filled.MusicNote
+    is ScheduleItem.BibleVerseItem -> Icons.AutoMirrored.Filled.MenuBook
+    is ScheduleItem.LabelItem -> Icons.AutoMirrored.Filled.Label
+    is ScheduleItem.PictureItem -> Icons.Filled.Image
+    is ScheduleItem.PresentationItem -> Icons.Filled.Slideshow
+    is ScheduleItem.MediaItem -> Icons.Filled.Movie
+    is ScheduleItem.LowerThirdItem -> Icons.Filled.Subtitles
+    is ScheduleItem.AnnouncementItem -> Icons.Filled.Campaign
+    is ScheduleItem.WebsiteItem -> Icons.Filled.Language
+    is ScheduleItem.SceneItem -> Icons.Filled.Dashboard
+    is ScheduleItem.DictionaryItem -> Icons.Filled.Book
+    is ScheduleItem.CueItem -> Icons.Filled.Bolt
+    is ScheduleItem.MinistryItem -> Icons.Filled.RecordVoiceOver
 }
 
 /**
