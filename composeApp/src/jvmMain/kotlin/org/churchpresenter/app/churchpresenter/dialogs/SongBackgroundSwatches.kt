@@ -33,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +54,7 @@ import org.churchpresenter.strings.generated.resources.song_background_option_co
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 import org.churchpresenter.media.data.StockMediaClient
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
@@ -235,8 +237,9 @@ private fun MediaTileFill(entry: LibraryEntry, isVideo: Boolean) {
     }
     var bitmap by remember(entry.key) { mutableStateOf<ImageBitmap?>(null) }
     var loading by remember(entry.key) { mutableStateOf(true) }
+    val decodeOn = LocalThumbnailContext.current
     LaunchedEffect(entry.key) {
-        bitmap = withContext(Dispatchers.IO) { loadThumbnailBitmap(entry) }
+        bitmap = withContext(decodeOn) { loadThumbnailBitmap(entry) }
         loading = false
     }
     val shot = bitmap
@@ -252,6 +255,13 @@ private fun MediaTileFill(entry: LibraryEntry, isVideo: Boolean) {
         )
     }
 }
+
+/**
+ * Where a library tile's thumbnail is decoded: off the UI thread, on the IO pool. A screenshot test
+ * provides [kotlinx.coroutines.Dispatchers.Unconfined] so the decode runs inside the composition's own
+ * work and `waitForIdle` covers it -- otherwise it can only poll for the thumbnails against a clock.
+ */
+internal val LocalThumbnailContext = staticCompositionLocalOf<CoroutineContext> { Dispatchers.IO }
 
 /** A library picture whose thumbnail has been decoded and drawn. */
 internal const val SONG_BACKGROUND_THUMBNAIL_TAG = "song_background_thumbnail"
