@@ -7,6 +7,9 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
@@ -55,6 +58,11 @@ class WebToolbarTest {
         assertFalse(hasWebCapableOutput(projection(onDisplay(-1))))
         assertFalse(hasWebCapableOutput(projection(onDisplay(1), showWebsite = false)))
         assertFalse(hasWebCapableOutput(projection()))
+    }
+
+    @Test
+    fun `an output whose profile has gone cannot take one`() {
+        assertFalse(hasWebCapableOutput(projection(onDisplay(1, profile = "deleted"))))
     }
 
     @Test
@@ -180,10 +188,50 @@ class WebToolbarTest {
     }
 
     @Test
+    fun `the app's own extras reach the tab - its modifier, the item version, the output's shape and its picker`() =
+        runComposeUiTest {
+            var pickerDrawn = false
+            setContent {
+                MaterialTheme {
+                    WebTab(
+                        modifier = Modifier.testTag("web"),
+                        selectedWebsiteItemVersion = 1,
+                        cefInitialized = true,
+                        cefMacOsUnsupported = false,
+                        cefBlockedByPolicy = false,
+                        hasSecondaryDisplay = false,
+                        previewAspectRatio = 4f / 3f,
+                        outputPicker = { pickerDrawn = true },
+                    )
+                }
+            }
+
+            onNodeWithTag("web").assertExists()
+            assertTrue(pickerDrawn)
+        }
+
+    @Test
     fun `the unavailable panel works on its own defaults`() = runComposeUiTest {
         setContent { MaterialTheme { WebEngineUnavailable() } }
 
         onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_TITLE).assertExists()
+    }
+
+    @Test
+    fun `the unavailable panel takes every reason it is given`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                WebEngineUnavailable(
+                    modifier = Modifier.testTag("unavailable"),
+                    macOsUnsupported = false,
+                    blockedByPolicy = false,
+                    windowsUnsupported = false,
+                )
+            }
+        }
+
+        onNodeWithTag("unavailable").assertExists()
+        onNodeWithText(WebLabel.ENGINE_UNAVAILABLE_BODY).assertExists()
     }
 
     private companion object {

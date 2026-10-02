@@ -156,4 +156,24 @@ class CefEngineTest {
         assertEquals(1, asked)
         assertEquals("true", warnings.single().second["jcef.recovered"])
     }
+
+    // ── The defaults the app runs with ──────────────────────────────────────────────────────────
+
+    @Test
+    fun `on its own defaults a failed install lands in the crash log, and a client failure only warns`() {
+        // The app makes this at startup; the reporter writes into it but does not make it.
+        val crashDir = File(System.getProperty("user.home"), ".churchpresenter/crash-reports").apply { mkdirs() }
+        val before = crashDir.listFiles()?.size ?: 0
+        val defaults = CefEngine()
+
+        defaults.applyInstallOutcome(JcefInstall.Outcome.Failed(root, UnsatisfiedLinkError("chrome_elf.dll")))
+        defaults.applyInstallOutcome(JcefInstall.Outcome.Installed(root))
+        defaults.clientSource = { error("INITIALIZATION_FAILED") }
+        assertNull(defaults.createClient())
+
+        val logs = crashDir.listFiles().orEmpty()
+        assertEquals(before + 1, logs.size, "the install failure, and only it, was written")
+        assertTrue(logs.any { "chrome_elf.dll" in it.readText() })
+        assertNull(defaults.clientSource, "the failed source is dropped")
+    }
 }

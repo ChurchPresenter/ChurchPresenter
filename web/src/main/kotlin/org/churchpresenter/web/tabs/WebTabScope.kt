@@ -47,7 +47,7 @@ internal class WebTabScope(
     val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     val onAddToSchedule: ((url: String, title: String) -> Unit)?,
     val onUpdateScheduleTitle: ((url: String, title: String) -> Unit)?,
-    val state: WebTabState,
+    private val state: WebTabState,
     /** Whether the website is what is on screen, as of this composition. */
     val isLive: Boolean,
     val navController: WebNavController,
@@ -56,13 +56,27 @@ internal class WebTabScope(
     /** Whether a screen beyond the operator's own is attached, as Go Live needs. */
     val hasSecondaryDisplay: Boolean = false,
 ) {
-    var urlInput by state::urlInput
-    var liveUrl by state::liveUrl
-    var pageTitle by state::pageTitle
-    var useInteractivePreview by state::useInteractivePreview
-    var zoomLevel by state::zoomLevel
-    var isMobileView by state::isMobileView
-    var typeBuffer by state::typeBuffer
+    var urlInput: String
+        get() = state.urlInput
+        set(value) { state.urlInput = value }
+    var liveUrl: String
+        get() = state.liveUrl
+        set(value) { state.liveUrl = value }
+    var pageTitle: String
+        get() = state.pageTitle
+        set(value) { state.pageTitle = value }
+    var useInteractivePreview: Boolean
+        get() = state.useInteractivePreview
+        set(value) { state.useInteractivePreview = value }
+    var zoomLevel: Double
+        get() = state.zoomLevel
+        set(value) { state.zoomLevel = value }
+    var isMobileView: Boolean
+        get() = state.isMobileView
+        set(value) { state.isMobileView = value }
+    var typeBuffer: String
+        get() = state.typeBuffer
+        set(value) { state.typeBuffer = value }
     val bookmarks get() = appSettings.webBookmarks
     val currentUrlNormalised get() = normaliseUrl(urlInput)
     val isBookmarked get() = bookmarks.any { it.url == currentUrlNormalised }

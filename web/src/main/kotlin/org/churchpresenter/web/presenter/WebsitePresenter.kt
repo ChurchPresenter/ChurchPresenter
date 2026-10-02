@@ -535,7 +535,7 @@ fun EmbeddedWebView(
 }
 
 /** The screen capture snapshots are taken with, or null where there is none (a headless JVM). */
-private fun screenCapture(): ((Rectangle) -> BufferedImage)? =
+internal fun screenCapture(): ((Rectangle) -> BufferedImage)? =
     runCatching { Robot() }.getOrNull()?.let { robot -> robot::createScreenCapture }
 
 /**

@@ -166,4 +166,12 @@ class EmbeddedWebViewHandlersTest {
         assertEquals(listOf("VirtualBox"), JcefInstall.readDmiTexts(tmp))
         assertEquals(emptyList(), JcefInstall.readDmiTexts(File(tmp, "missing")))
     }
+
+    @Test
+    fun `the real DMI directory and the real OS name can be read without failing`() {
+        // Whatever this machine is, the reads answer rather than throw: on macOS and Windows there is
+        // no DMI directory, and the running OS is a supported one or the suite could not run here.
+        JcefInstall.readDmiTexts()
+        assertFalse(isUnsupportedWindowsForJcef())
+    }
 }

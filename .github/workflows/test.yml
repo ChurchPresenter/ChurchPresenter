@@ -726,6 +726,10 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.web == 'true' }}
         run: ./gradlew :web:test
 
+      - name: Web coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.web == 'true' }}
+        run: ./gradlew :web:jacocoTestCoverageVerification -x test
+
       - name: Crossword tab tests
         if: ${{ !cancelled() && steps.modules.outputs.crosswordtab == 'true' }}
         run: ./gradlew :crossword-tab:test
@@ -774,8 +778,6 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.lowerthird == 'true' }}
         run: ./gradlew :lower-third:jacocoTestCoverageVerification -x test
 
-      # No "Web coverage floor" step yet: :web measures under the shared 85% and the tests that bring
-      # it there are still to be written (see web/AGENT.md). The step goes in with them.
 
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,

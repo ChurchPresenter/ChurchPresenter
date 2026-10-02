@@ -1,5 +1,12 @@
+@file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
+
 package org.churchpresenter.web.tabs
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.v2.runComposeUiTest
 import io.mockk.mockk
 import io.mockk.verify
 import org.cef.browser.CefBrowser
@@ -163,5 +170,31 @@ class WebTabScopeTest {
         assertTrue(s.isBookmarked)
         s.urlInput = "b.org"
         assertEquals(false, s.isBookmarked)
+    }
+
+    @Test
+    fun `a live tab with no output behind it waits for a snapshot rather than failing`() = runComposeUiTest {
+        val s = WebTabScope(
+            output = null,
+            appSettings = AppSettings(),
+            onSettingsChange = {},
+            onAddToSchedule = null,
+            onUpdateScheduleTitle = null,
+            state = WebTabState(savedUrl = "https://a.org", savedTitle = "A"),
+            isLive = true,
+            navController = WebNavController(),
+            previewAspectRatio = 1f,
+            outputPicker = {},
+        )
+        setContent {
+            MaterialTheme {
+                s.WebTabEffects(selectedWebsiteItem = null, selectedWebsiteItemVersion = 0)
+                s.WebPreviewCard(Modifier)
+            }
+        }
+        waitForIdle()
+
+        onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)).assertExists()
+        assertEquals("https://a.org", s.liveUrl, "nothing from an absent presenter overwrote the bar")
     }
 }

@@ -60,8 +60,6 @@ import org.churchpresenter.strings.generated.resources.web_url_hint
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.ProjectionSettings
-import org.churchpresenter.settings.WebBookmark
-import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.churchpresenter.sharedui.composables.AddToScheduleButton
@@ -127,8 +125,7 @@ private fun WebTabScope.WebToolbar() {
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                NavButtons(navController, output, isLive, useInteractivePreview,
-                    zoomLevel, isMobileView, ::applyZoom, ::onMobileToggle)
+                NavButtons()
                 urlBar()
                 actionButtons()
             }
@@ -140,8 +137,7 @@ private fun WebTabScope.WebToolbar() {
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    NavButtons(navController, output, isLive, useInteractivePreview,
-                        zoomLevel, isMobileView, ::applyZoom, ::onMobileToggle)
+                    NavButtons()
                     Spacer(Modifier.weight(1f))
                     actionButtons()
                 }
@@ -183,16 +179,9 @@ private fun WebTabScope.WebUrlBar(modifier: Modifier) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .onKeyEvent { event ->
-                        if (event.type == KeyEventType.KeyUp && event.key == Key.Enter) {
-                            val url = normaliseUrl(urlInput)
-                            urlInput = url
-                            liveUrl = url
-                            output?.setWebsiteUrl(url)
-                            if (isLive) {
-                                output?.liveBrowser?.value?.loadURL(url)
-                            }
-                            true
-                        } else false
+                        val submit = event.type == KeyEventType.KeyUp && event.key == Key.Enter
+                        if (submit) submitUrl()
+                        submit
                     },
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
@@ -233,20 +222,8 @@ private fun WebTabScope.WebUrlBar(modifier: Modifier) {
 private fun WebTabScope.WebActionButtons(hasSecondaryDisplay: Boolean, hasWebCapableOutput: Boolean) {
     // Star bookmark toggle
     ActionIconButton(
-        onClick = {
-            val url = normaliseUrl(urlInput)
-            if (isBookmarked) {
-                onSettingsChange { s ->
-                    s.copy(webBookmarks = s.webBookmarks.filter { it.url != url })
-                }
-            } else {
-                val title = pageTitle.ifBlank { url }
-                onSettingsChange { s ->
-                    s.copy(webBookmarks = s.webBookmarks + WebBookmark(url = url, title = title))
-                }
-            }
-        },
-        enabled = urlInput.isNotBlank() && urlInput != "https://",
+        onClick = { toggleBookmark() },
+        enabled = hasAddress,
         tooltipText = stringResource(if (isBookmarked) Res.string.web_bookmark_remove else Res.string.web_bookmark_add),
         icon = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.StarBorder,
         containerColor = if (isBookmarked) {
@@ -264,11 +241,7 @@ private fun WebTabScope.WebActionButtons(hasSecondaryDisplay: Boolean, hasWebCap
     // Add to Schedule
     if (onAddToSchedule != null) {
         AddToScheduleButton(
-            onClick = {
-                val url = normaliseUrl(urlInput)
-                val title = pageTitle.ifBlank { url }
-                onAddToSchedule(url, title)
-            },
+            onClick = { addToSchedule() },
             enabled = urlInput.isNotBlank(),
             tooltipText = stringResource(Res.string.tooltip_add_to_schedule)
         )
@@ -277,13 +250,7 @@ private fun WebTabScope.WebActionButtons(hasSecondaryDisplay: Boolean, hasWebCap
     // Go Live
     val goLiveEnabled = urlInput.isNotBlank() && hasSecondaryDisplay && hasWebCapableOutput
     GoLiveButton(
-        onClick = {
-            val url = normaliseUrl(urlInput)
-            urlInput = url
-            liveUrl = url
-            output?.setWebsiteUrl(url)
-            output?.setPresentingMode(Presenting.WEBSITE)
-        },
+        onClick = { goLive() },
         enabled = goLiveEnabled,
         tooltipText = stringResource(Res.string.web_go_live)
     )
@@ -308,15 +275,7 @@ private fun WebTabScope.WebBookmarksBar() {
                 shape = AppShape(4.dp),
                 color = if (liveUrl == bookmark.url) MaterialTheme.colorScheme.primaryContainer
                 else MaterialTheme.colorScheme.surface,
-                modifier = Modifier.clickable {
-                    urlInput = bookmark.url
-                    liveUrl = bookmark.url
-                    pageTitle = bookmark.title
-                    output?.setWebsiteUrl(bookmark.url)
-                    if (isLive) {
-                        output?.liveBrowser?.value?.loadURL(bookmark.url)
-                    }
-                }
+                modifier = Modifier.clickable { openBookmark(bookmark) }
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -334,11 +293,7 @@ private fun WebTabScope.WebBookmarksBar() {
                         text = "\u2715",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        modifier = Modifier.clickable {
-                            onSettingsChange { s ->
-                                s.copy(webBookmarks = s.webBookmarks.filter { it.url != bookmark.url })
-                            }
-                        }
+                        modifier = Modifier.clickable { removeBookmark(bookmark) }
                     )
                 }
             }
@@ -376,7 +331,7 @@ private fun WebTabScope.WebLiveBadgeRow() {
             shape = AppShape(4.dp),
             color = if (useInteractivePreview) MaterialTheme.colorScheme.tertiaryContainer
                     else MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.clickable { useInteractivePreview = !useInteractivePreview }
+            modifier = Modifier.clickable { toggleInteractivePreview() }
         ) {
             Text(
                 text = stringResource(
@@ -406,26 +361,13 @@ private fun WebTabScope.WebTypeToPage() {
             Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
                 BasicTextField(
                     value = typeBuffer,
-                    onValueChange = { next ->
-                        val browser = output?.liveBrowser?.value
-                        if (browser == null) { typeBuffer = next; return@BasicTextField }
-                        val old = typeBuffer
-                        val common = commonPrefixLength(old, next)
-                        val toDelete = old.length - common
-                        val toInsert = next.substring(common)
-                        repeat(toDelete) { browser.executeJavaScript(WEB_JS_BACKSPACE, "", 0) }
-                        toInsert.forEach { ch -> browser.executeJavaScript(jsInsert(ch), "", 0) }
-                        typeBuffer = next
-                    },
+                    onValueChange = { typeToPage(it) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .onKeyEvent { event ->
-                            if (event.type == KeyEventType.KeyDown && event.key == Key.Enter) {
-                                output?.liveBrowser?.value
-                                    ?.executeJavaScript(WEB_JS_ENTER, "", 0)
-                                typeBuffer = ""
-                                true
-                            } else false
+                            val submit = event.type == KeyEventType.KeyDown && event.key == Key.Enter
+                            if (submit) submitTypeToPage()
+                            submit
                         },
                     singleLine = true,
                     textStyle = MaterialTheme.typography.bodyMedium.copy(
@@ -459,10 +401,7 @@ private fun WebTabScope.WebTypeToPage() {
         TooltipIconButton(
             painter = painterResource(IconRes.drawable.ic_cast),
             text = stringResource(Res.string.web_focus_first_input),
-            onClick = {
-                output?.liveBrowser?.value
-                    ?.executeJavaScript(WEB_JS_FOCUS_FIRST_INPUT, "", 0)
-            }
+            onClick = { focusFirstInput() }
         )
     }
 }

@@ -27,9 +27,13 @@ import java.awt.event.KeyEvent as AwtKeyEvent
 import java.awt.event.MouseEvent
 import java.awt.event.MouseWheelEvent
 import javax.swing.SwingUtilities
+import io.mockk.every
+import io.mockk.mockk
+import org.cef.browser.CefBrowser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 /** A [BrowserInput] that records what it is sent, on a component of [size] (null: not on screen). */
@@ -237,6 +241,17 @@ class WebBrowserInputTest {
         drainEdt()
 
         assertEquals(4, browser.received.size, "two mouse events, one wheel, one key")
+    }
+
+    @Test
+    fun `over a real browser handle the sender addresses its UI component, and needs both dimensions`() {
+        val screen = ScreenComponent(showing = true).apply { setSize(40, 0) }
+        val browser = mockk<CefBrowser> { every { uiComponent } returns screen }
+
+        val input = CefBrowserInput(browser)
+
+        assertSame(screen, input.component)
+        assertNull(input.showingSize(), "no height yet")
     }
 
     @Test
