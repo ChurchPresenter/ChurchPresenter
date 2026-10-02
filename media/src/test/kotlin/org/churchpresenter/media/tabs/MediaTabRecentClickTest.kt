@@ -65,6 +65,20 @@ class MediaTabRecentClickTest {
     }
 
     @Test
+    fun `clicking a recent plain http address loads it as a url`() {
+        // Shown by its full address like the other streams, not cut down to a file name.
+        seed("http://radio.example.org/live")
+
+        mediaTab { vm, _ ->
+            onNodeWithText("http://radio.example.org/live").performClick()
+            waitForIdle()
+
+            assertEquals("http://radio.example.org/live", vm.mediaUrl)
+            assertEquals(Constants.MEDIA_TYPE_URL, vm.mediaType)
+        }
+    }
+
+    @Test
     fun `clicking a recent rtsp stream loads it as a url`() {
         seed("rtsp://camera.local/live")
 

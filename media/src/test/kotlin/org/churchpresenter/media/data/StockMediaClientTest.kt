@@ -188,6 +188,15 @@ class StockMediaClientTest {
         )
     }
 
+    @Test
+    fun `a further page of pexels videos is offered only when there is one`() {
+        respondWith("""{"videos":[],"next_page":"https://api.pexels.com/videos/search?page=2"}""")
+        assertTrue(assertIs<StockMediaClient.SearchOutcome.Success>(search(pexels, video)).hasMore)
+
+        respondWith("""{"videos":[]}""")
+        assertTrue(!assertIs<StockMediaClient.SearchOutcome.Success>(search(pexels, video)).hasMore)
+    }
+
     // ── Pixabay photos ──────────────────────────────────────────────────────────
 
     @Test
@@ -238,6 +247,23 @@ class StockMediaClientTest {
         respondWith("""{"hits":[{"id":55,"videos":{"tiny":{"url":"https://v/tiny.mp4"}}}]}""")
 
         assertEquals("https://v/tiny.mp4", items(search(pixabay, video)).single().downloadUrl)
+    }
+
+    @Test
+    fun `a pixabay video offered only large is still taken`() {
+        respondWith("""{"hits":[{"id":55,"videos":{"large":{"url":"https://v/large.mp4"}}}]}""")
+
+        assertEquals("https://v/large.mp4", items(search(pixabay, video)).single().downloadUrl)
+    }
+
+    @Test
+    fun `pixabay offers another page of videos only when this one came back full`() {
+        val full = (1..24).joinToString(",") { """{"id":$it,"videos":{"small":{"url":"s$it"}}}""" }
+        respondWith("""{"hits":[$full]}""")
+        assertTrue(assertIs<StockMediaClient.SearchOutcome.Success>(search(pixabay, video)).hasMore)
+
+        respondWith("""{"hits":[{"id":1,"videos":{"small":{"url":"s"}}}]}""")
+        assertTrue(!assertIs<StockMediaClient.SearchOutcome.Success>(search(pixabay, video)).hasMore)
     }
 
     @Test
