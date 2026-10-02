@@ -41,6 +41,5 @@
     <ID>TooManyFunctions:SongChordPreview.kt$org.churchpresenter.app.churchpresenter.composables.SongChordPreview.kt</ID>
     <ID>TooManyFunctions:Songs.kt$Songs</ID>
     <ID>TooManyFunctions:SongsViewModel.kt$SongsViewModel</ID>
-    <ID>TooManyFunctions:StatisticsManager.kt$StatisticsManager</ID>
   </CurrentIssues>
 </SmellBaseline>

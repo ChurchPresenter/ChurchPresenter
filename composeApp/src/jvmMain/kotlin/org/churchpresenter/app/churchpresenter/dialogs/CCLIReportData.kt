@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.app.churchpresenter.data.hasEventLog
+import org.churchpresenter.app.churchpresenter.data.getEarliestEventTime
+import org.churchpresenter.app.churchpresenter.data.getActivityByPeriod
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.Stable
