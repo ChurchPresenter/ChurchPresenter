@@ -113,7 +113,7 @@ class InstanceLinkClient(
     private val onCommandFailed: (commandType: String, reason: String?) -> Unit = { _, _ -> },
     /** The primary never acked a command (older version?) — fired at most once per connection. */
     private val onCommandNoAck: () -> Unit = {},
-) {
+) : InstanceLinkCommands, InstanceLinkFetches {
     private companion object {
         /** Protocol-level WS ping cadence; a dead link surfaces within ~[WS_TIMEOUT_MS]. */
         const val WS_PING_INTERVAL_MS = 10_000L
@@ -122,16 +122,6 @@ class InstanceLinkClient(
         const val MAX_RECONNECT_DELAY_MS = 30_000L
         /** How long a controller-mode command waits for its command_ack before soft-warning. */
         const val ACK_TIMEOUT_MS = 5_000L
-
-        /**
-         * The peer's address inside a connect failure's message, with the port kept.
-         *
-         * Group 1 is the scheme, group 2 the port and the rest of the URL, so the host between them
-         * is what [redactedConnectFailure] replaces. Deliberately narrow: it matches an address in a
-         * `ws://`/`wss://` URL and leaves every other word of ktor's message alone, because the rest
-         * of it is the diagnosis.
-         */
-        val PEER_URL = Regex("""(wss?://)[^/\s\]:]+(:\d+)?""")
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -188,8 +178,8 @@ class InstanceLinkClient(
         fun connectFailed(e: Exception) {
             consecutiveFailures++
             Log.warn("InstanceLink", "connect to ws://$host:$port${Constants.ENDPOINT_WS} failed — ${e.message}")
-            val failureKind = classifyConnectFailure(e)
-            if (shouldReportConnectFailure(failureKind, consecutiveFailures)) {
+            val failureKind = ConnectFailures.classifyConnectFailure(e)
+            if (ConnectFailures.shouldReportConnectFailure(failureKind, consecutiveFailures)) {
                 CrashReporter.reportWarning(
                     "InstanceLink: connection failed",
                     tags = mapOf(
@@ -197,7 +187,7 @@ class InstanceLinkClient(
                         "consecutive_failures" to consecutiveFailures.toString(),
                         "failure_kind" to failureKind
                     ),
-                    extras = mapOf("reason" to redactedConnectFailure(e.message))
+                    extras = mapOf("reason" to ConnectFailures.redactedConnectFailure(e.message))
                 )
             }
             InstanceLinkLogger.log(
@@ -280,89 +270,6 @@ class InstanceLinkClient(
         }
     }
 
-    /**
-     * Whether a connect failure this far into a run of them is worth a warning.
-     *
-     * A follower is configured once and then starts with the room, routinely before the primary
-     * does, so "refused" and "dns" on the first attempt are the ordinary startup order rather than
-     * a fault — and reporting them there made the follower's own boot sequence the single noisiest
-     * signal in the project. Those two therefore wait for the run to persist through
-     * [FAILURE_LOG_INTERVAL] attempts, by which point the backoff has carried it well past any
-     * plausible "primary is still coming up" window and the link genuinely is not working.
-     *
-     * The kinds that suggest a regression rather than an ordering — a timeout, a certificate, or
-     * something unrecognised — still report on the first failure, because those are worth seeing
-     * once even if they never recur.
-     *
-     * The interval itself widens with the length of the run ([reportIntervalFor]) so a peer that is
-     * *permanently* unreachable — wrong IP, powered off, a blocked port — does not cost one warning
-     * every [FAILURE_LOG_INTERVAL] attempts forever. CHURCH-PRESENTER-DESKTOP-68 reached 780
-     * consecutive connect-timeout failures and 78 Sentry warnings from a single dead peer, still
-     * climbing, before this backoff existed.
-     */
-    internal fun shouldReportConnectFailure(kind: String, consecutiveFailures: Int): Boolean {
-        val atInterval = consecutiveFailures % reportIntervalFor(consecutiveFailures) == 0
-        return if (kind in BENIGN_CONNECT_FAILURES) atInterval else consecutiveFailures == 1 || atInterval
-    }
-
-    /**
-     * The reporting cadence for [shouldReportConnectFailure]: every 10th failure through the first
-     * 99, every 100th through the first 999, every 1000th beyond that — applied to how often a
-     * still-failing streak is worth telling Sentry about, separate from [MAX_RECONNECT_DELAY_MS]'s
-     * own backoff on how often a reconnect is actually retried.
-     */
-    internal fun reportIntervalFor(consecutiveFailures: Int): Int = when {
-        consecutiveFailures < REPORT_INTERVAL_WIDEN_AT_100 -> FAILURE_LOG_INTERVAL
-        consecutiveFailures < REPORT_INTERVAL_WIDEN_AT_1000 -> FAILURE_LOG_INTERVAL * DECADE
-        else -> FAILURE_LOG_INTERVAL * DECADE * DECADE
-    }
-
-    /**
-     * Buckets a connect failure so Sentry can be filtered/grouped by cause: "refused"/"dns" are
-     * the expected, benign case (primary not started yet or misconfigured host/port), while
-     * "timeout"/"tls"/"other" are more likely to indicate an actual regression (e.g. a primary
-     * that crashed mid-session, or a protocol/certificate bug).
-     */
-    /**
-     * A connect failure's message with the peer's address taken out of it.
-     *
-     * The message used to be interpolated into the report's *title*, which did two things. It put
-     * the address of a church's own machine — `ws://192.168.1.100:8765/ws` — into an issue title,
-     * where nothing scrubs it: `CrashReporter` redacts home directories and the OS username, not
-     * private addresses. And because Sentry groups on the title, one failure arrived as **fourteen
-     * separate issues**, one per address and port, none of which looked related to the others.
-     *
-     * `PicturesViewModel.reportThumbnailFailures` fixed the same shape for file names and says why:
-     * a constant title so the class of failure is one issue, and what distinguishes an occurrence in
-     * the detail.
-     *
-     * The port is kept. It is not anyone's address, and a follower pointed at the wrong port is a
-     * real misconfiguration worth being able to see.
-     */
-    internal fun redactedConnectFailure(message: String?): String =
-        message?.replace(PEER_URL, "$1<peer>$2") ?: "none"
-
-    internal fun classifyConnectFailure(e: Exception): String = when {
-        // ktor's own pinger raises this when the primary misses the keepalive window, which is what
-        // the heartbeat is for: the link drops, the backoff reconnects, and the operator sees the
-        // status change. On a hall's wifi that is ordinary churn — five churches filed it — so it
-        // belongs with "refused" and "dns" rather than being reported the first time it happens.
-        e is IOException && e.message?.contains("Ping timeout", ignoreCase = true) == true -> "ping_timeout"
-        else -> classifyConnectFailureByType(e)
-    }
-
-    private fun classifyConnectFailureByType(e: Exception): String = when (e) {
-        // Ktor's ConnectTimeoutException extends java.net.ConnectException, so it must be matched
-        // first or every connect timeout is filed as "refused" — the one bucket that says the
-        // operator simply has not started the primary yet.
-        is ConnectTimeoutException -> "timeout"
-        is ConnectException -> "refused"
-        is UnknownHostException -> "dns"
-        is SocketTimeoutException -> "timeout"
-        is SSLException -> "tls"
-        else -> "other"
-    }
-
     /** Decodes one payload, logging the decode failure the follower log expects, or null. */
     private fun <T> decodePayload(payload: String, context: String, serializer: KSerializer<T>): T? {
         val decoded = runCatching { json.decodeFromString(serializer, payload) }.getOrNull()
@@ -419,7 +326,7 @@ class InstanceLinkClient(
      * The primary acks "pending_approval" when queued; the operator's eventual decision is
      * observed via the next schedule_updated broadcast (a denial is the absence of one).
      */
-    fun sendAddToSchedule(item: ScheduleItem) {
+    override fun sendAddToSchedule(item: ScheduleItem) {
         sendCommand(
             Constants.WS_CMD_ADD_TO_SCHEDULE,
             json.encodeToString(AddToScheduleRequest.serializer(), AddToScheduleRequest(item))
@@ -432,7 +339,7 @@ class InstanceLinkClient(
      * mobile client would go through). Fire-and-forget: approval/denial is observed indirectly via
      * the next schedule_updated broadcast.
      */
-    fun sendRemoveFromSchedule(id: String) {
+    override fun sendRemoveFromSchedule(id: String) {
         sendCommand(
             Constants.WS_CMD_REMOVE_FROM_SCHEDULE,
             json.encodeToString(RemoveFromScheduleRequest.serializer(), RemoveFromScheduleRequest(id))
@@ -520,14 +427,20 @@ class InstanceLinkClient(
      *  primary the first time this device is seen (same [dialogs.RemoteEventDialog] flow a mobile
      *  client goes through), instant afterwards once trusted. Covers Bible/Songs/Pictures/
      *  Presentations/Media alike via the primary's existing per-subtype `executeProjectItem` dispatch. */
-    fun sendProject(item: ScheduleItem) {
+    override fun sendProject(item: ScheduleItem) {
         sendCommand(Constants.WS_CMD_PROJECT, json.encodeToString(ProjectRequest.serializer(), ProjectRequest(item)))
     }
 
     /** Instantly displays a Bible verse — [Constants.WS_CMD_SELECT_BIBLE_VERSE], no approval gate on
      *  the primary (same as a mobile client). Used for every verse go-live in Controller mode, not
      *  just the first — the command is already instant either way. */
-    fun sendSelectBibleVerse(bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) {
+    override fun sendSelectBibleVerse(
+        bookName: String,
+        chapter: Int,
+        verseNumber: Int,
+        verseText: String,
+        verseRange: String,
+    ) {
         sendCommand(
             Constants.WS_CMD_SELECT_BIBLE_VERSE,
             json.encodeToString(
@@ -538,7 +451,7 @@ class InstanceLinkClient(
     }
 
     /** Instantly displays a picture — [Constants.WS_CMD_SELECT_PICTURE], no approval gate. */
-    fun sendSelectPicture(folderId: String, index: Int, fileName: String?) {
+    override fun sendSelectPicture(folderId: String, index: Int, fileName: String?) {
         sendCommand(
             Constants.WS_CMD_SELECT_PICTURE,
             json.encodeToString(SelectPictureRequest.serializer(), SelectPictureRequest(folderId, index, fileName))
@@ -548,7 +461,7 @@ class InstanceLinkClient(
     /** Instantly navigates within an already-live song — [Constants.WS_CMD_SELECT_SONG_SECTION], no
      *  approval gate. Picking a *different* song still needs [sendProject] first. [lineIndex] carries
      *  "one line at a time" display-mode navigation (-1 = section-level only, no specific line). */
-    fun sendSelectSongSection(number: String, section: Int, lineIndex: Int = -1) {
+    override fun sendSelectSongSection(number: String, section: Int, lineIndex: Int) {
         sendCommand(
             Constants.WS_CMD_SELECT_SONG_SECTION,
             json.encodeToString(
@@ -560,7 +473,7 @@ class InstanceLinkClient(
 
     /** Instantly navigates within an already-live presentation — [Constants.WS_CMD_SELECT_SLIDE], no
      *  approval gate. Picking a *different* presentation still needs [sendProject] first. */
-    fun sendSelectSlide(id: String, index: Int) {
+    override fun sendSelectSlide(id: String, index: Int) {
         sendCommand(
             Constants.WS_CMD_SELECT_SLIDE,
             json.encodeToString(SelectSlideRequest.serializer(), SelectSlideRequest(id, index))
@@ -568,14 +481,14 @@ class InstanceLinkClient(
     }
 
     /** Instantly clears the primary's display — [Constants.WS_CMD_CLEAR], no payload, no approval gate. */
-    fun sendClear() {
+    override fun sendClear() {
         sendCommand(Constants.WS_CMD_CLEAR, "")
     }
 
     /** Toggles Bible hold on the primary — [Constants.WS_CMD_BIBLE_HOLD]. No formal DTO exists for
      *  this on the primary either (it parses the raw `{"hold":bool}` JSON directly), so this builds
      *  the same ad-hoc payload rather than introducing a serializer class for a single boolean. */
-    fun sendBibleHold(hold: Boolean) {
+    override fun sendBibleHold(hold: Boolean) {
         sendCommand(Constants.WS_CMD_BIBLE_HOLD, """{"hold":$hold}""")
     }
 
@@ -583,16 +496,16 @@ class InstanceLinkClient(
      *  no payload, no id. Unlike [sendSelectPicture]/[sendSelectSlide], these don't need the
      *  primary's internally-assigned folderId/presentationId (which a Controller has no way to
      *  learn), since they operate on "whatever is live now" rather than a specific item. */
-    fun sendNextPicture() = sendCommand(Constants.WS_CMD_NEXT_PICTURE, "")
-    fun sendPreviousPicture() = sendCommand(Constants.WS_CMD_PREVIOUS_PICTURE, "")
-    fun sendNextSlide() = sendCommand(Constants.WS_CMD_NEXT_SLIDE, "")
-    fun sendPreviousSlide() = sendCommand(Constants.WS_CMD_PREVIOUS_SLIDE, "")
+    override fun sendNextPicture() = sendCommand(Constants.WS_CMD_NEXT_PICTURE, "")
+    override fun sendPreviousPicture() = sendCommand(Constants.WS_CMD_PREVIOUS_PICTURE, "")
+    override fun sendNextSlide() = sendCommand(Constants.WS_CMD_NEXT_SLIDE, "")
+    override fun sendPreviousSlide() = sendCommand(Constants.WS_CMD_PREVIOUS_SLIDE, "")
 
     /**
      * Builds the streaming URL for one of the primary's local media files (PartialContent, so
      * the player can seek) — used to mirror MEDIA live state. Null while not connected.
      */
-    fun mediaStreamUrl(mediaId: String): String? {
+    override fun mediaStreamUrl(mediaId: String): String? {
         if (currentHost.isEmpty()) return null
         val keyParam = if (currentApiKey.isNotEmpty()) "?${Constants.QUERY_PARAM_API_KEY}=$currentApiKey" else ""
         return "http://$currentHost:$currentPort${Constants.ENDPOINT_MEDIA_STREAM}/$mediaId$keyParam"
@@ -613,7 +526,7 @@ class InstanceLinkClient(
      * actually selected rather than for the whole library upfront (which could mean thousands of
      * requests for a large library).
      */
-    suspend fun fetchSongDetail(number: String, songbook: String): SongDetailDto? {
+    override suspend fun fetchSongDetail(number: String, songbook: String): SongDetailDto? {
         if (currentHost.isEmpty()) {
             logFetch("song_detail", success = false, reason = "not_connected")
             return null
@@ -634,7 +547,7 @@ class InstanceLinkClient(
 
     /** Fetches one picture's raw bytes from the primary — used to mirror a live picture (resolved
      *  via [LiveStateDto.pictureFolderId]/[LiveStateDto.pictureIndex]) without a local copy of it. */
-    suspend fun fetchPictureImageBytes(folderId: String, index: Int): ByteArray? {
+    override suspend fun fetchPictureImageBytes(folderId: String, index: Int): ByteArray? {
         if (currentHost.isEmpty()) {
             logFetch("picture_bytes", success = false, reason = "not_connected")
             return null
@@ -656,7 +569,7 @@ class InstanceLinkClient(
 
     /** Fetches one presentation slide's raw bytes from the primary — mirrors [RemotePresentationSlide]
      *  (from the existing presentation_slide_changed broadcast) without a local copy of the file. */
-    suspend fun fetchPresentationSlideBytes(id: String, index: Int): ByteArray? {
+    override suspend fun fetchPresentationSlideBytes(id: String, index: Int): ByteArray? {
         if (currentHost.isEmpty()) {
             logFetch("presentation_slide", success = false, reason = "not_connected")
             return null
@@ -680,7 +593,7 @@ class InstanceLinkClient(
      * Downloads the primary's raw .spb bible file bytes — the caller loads it through the same
      * Bible.loadFromSpb() used for local files instead of reimplementing that engine against the API.
      */
-    suspend fun fetchBibleFile(): ByteArray? {
+    override suspend fun fetchBibleFile(): ByteArray? {
         if (currentHost.isEmpty()) {
             logFetch("bible_file", success = false, reason = "not_connected")
             return null
@@ -700,7 +613,7 @@ class InstanceLinkClient(
 
     /** Downloads the primary's raw secondary .spb bible file — only used when the follower opted in
      *  to mirroring the primary's secondary bible instead of keeping its own local one. */
-    suspend fun fetchSecondaryBibleFile(): ByteArray? {
+    override suspend fun fetchSecondaryBibleFile(): ByteArray? {
         if (currentHost.isEmpty()) {
             logFetch("secondary_bible_file", success = false, reason = "not_connected")
             return null
@@ -726,7 +639,7 @@ class InstanceLinkClient(
     }
 
     /** Downloads every Bible module advertised by the primary, preserving manifest order. */
-    suspend fun fetchBibleTranslations(): List<Pair<String, ByteArray>> {
+    override suspend fun fetchBibleTranslations(): List<Pair<String, ByteArray>> {
         if (currentHost.isEmpty()) return emptyList()
         return runCatching {
             val manifestResponse = httpClient.get(
@@ -750,7 +663,7 @@ class InstanceLinkClient(
     }
 
     /** Fetches one lower-third preset's raw Lottie JSON by name — see [Constants.ENDPOINT_LOWER_THIRDS]. */
-    suspend fun fetchLowerThirdJson(name: String): ByteArray? {
+    override suspend fun fetchLowerThirdJson(name: String): ByteArray? {
         if (currentHost.isEmpty()) {
             logFetch("lower_third_json", success = false, reason = "not_connected")
             return null
@@ -777,7 +690,7 @@ class InstanceLinkClient(
     /** Fetches the primary's current background settings — only used when the follower opted in to
      *  mirroring backgrounds (InstanceLinkSettings.mirrorBackgrounds). Image/video fields are still
      *  the primary's own local file paths; use [fetchBackgroundAsset] (keyed by slot) for bytes. */
-    suspend fun fetchBackgroundSettings(): BackgroundSettings? {
+    override suspend fun fetchBackgroundSettings(): BackgroundSettings? {
         if (currentHost.isEmpty()) {
             logFetch("background_settings", success = false, reason = "not_connected")
             return null
@@ -797,7 +710,7 @@ class InstanceLinkClient(
 
     /** Fetches one background slot's raw image/video bytes by slot name — see
      *  [Constants.BACKGROUND_SLOT_DEFAULT] and siblings for the shared slot vocabulary. */
-    suspend fun fetchBackgroundAsset(slot: String, isVideo: Boolean): ByteArray? {
+    override suspend fun fetchBackgroundAsset(slot: String, isVideo: Boolean): ByteArray? {
         if (currentHost.isEmpty()) {
             logFetch("background_asset", success = false, reason = "not_connected")
             return null
@@ -832,5 +745,104 @@ class InstanceLinkClient(
         disconnect()
         runCatching { httpClient.close() }
         scope.cancel()
+    }
+}
+
+/**
+ * How a failed connect to the primary is classified, redacted and rate-limited before it is
+ * reported. None of it depends on a connection's state.
+ */
+internal object ConnectFailures {
+    /**
+     * The peer's address inside a connect failure's message, with the port kept.
+     *
+     * Group 1 is the scheme, group 2 the port and the rest of the URL, so the host between them
+     * is what [redactedConnectFailure] replaces. Deliberately narrow: it matches an address in a
+     * `ws://`/`wss://` URL and leaves every other word of ktor's message alone, because the rest
+     * of it is the diagnosis.
+     */
+    private val PEER_URL = Regex("""(wss?://)[^/\s\]:]+(:\d+)?""")
+
+    /**
+     * Whether a connect failure this far into a run of them is worth a warning.
+     *
+     * A follower is configured once and then starts with the room, routinely before the primary
+     * does, so "refused" and "dns" on the first attempt are the ordinary startup order rather than
+     * a fault — and reporting them there made the follower's own boot sequence the single noisiest
+     * signal in the project. Those two therefore wait for the run to persist through
+     * [FAILURE_LOG_INTERVAL] attempts, by which point the backoff has carried it well past any
+     * plausible "primary is still coming up" window and the link genuinely is not working.
+     *
+     * The kinds that suggest a regression rather than an ordering — a timeout, a certificate, or
+     * something unrecognised — still report on the first failure, because those are worth seeing
+     * once even if they never recur.
+     *
+     * The interval itself widens with the length of the run ([reportIntervalFor]) so a peer that is
+     * *permanently* unreachable — wrong IP, powered off, a blocked port — does not cost one warning
+     * every [FAILURE_LOG_INTERVAL] attempts forever. CHURCH-PRESENTER-DESKTOP-68 reached 780
+     * consecutive connect-timeout failures and 78 Sentry warnings from a single dead peer, still
+     * climbing, before this backoff existed.
+     */
+    internal fun shouldReportConnectFailure(kind: String, consecutiveFailures: Int): Boolean {
+        val atInterval = consecutiveFailures % reportIntervalFor(consecutiveFailures) == 0
+        return if (kind in BENIGN_CONNECT_FAILURES) atInterval else consecutiveFailures == 1 || atInterval
+    }
+
+    /**
+     * The reporting cadence for [shouldReportConnectFailure]: every 10th failure through the first
+     * 99, every 100th through the first 999, every 1000th beyond that — applied to how often a
+     * still-failing streak is worth telling Sentry about, separate from [MAX_RECONNECT_DELAY_MS]'s
+     * own backoff on how often a reconnect is actually retried.
+     */
+    internal fun reportIntervalFor(consecutiveFailures: Int): Int = when {
+        consecutiveFailures < REPORT_INTERVAL_WIDEN_AT_100 -> FAILURE_LOG_INTERVAL
+        consecutiveFailures < REPORT_INTERVAL_WIDEN_AT_1000 -> FAILURE_LOG_INTERVAL * DECADE
+        else -> FAILURE_LOG_INTERVAL * DECADE * DECADE
+    }
+
+    /**
+     * Buckets a connect failure so Sentry can be filtered/grouped by cause: "refused"/"dns" are
+     * the expected, benign case (primary not started yet or misconfigured host/port), while
+     * "timeout"/"tls"/"other" are more likely to indicate an actual regression (e.g. a primary
+     * that crashed mid-session, or a protocol/certificate bug).
+     */
+    /**
+     * A connect failure's message with the peer's address taken out of it.
+     *
+     * The message used to be interpolated into the report's *title*, which did two things. It put
+     * the address of a church's own machine — `ws://192.168.1.100:8765/ws` — into an issue title,
+     * where nothing scrubs it: `CrashReporter` redacts home directories and the OS username, not
+     * private addresses. And because Sentry groups on the title, one failure arrived as **fourteen
+     * separate issues**, one per address and port, none of which looked related to the others.
+     *
+     * `PicturesViewModel.reportThumbnailFailures` fixed the same shape for file names and says why:
+     * a constant title so the class of failure is one issue, and what distinguishes an occurrence in
+     * the detail.
+     *
+     * The port is kept. It is not anyone's address, and a follower pointed at the wrong port is a
+     * real misconfiguration worth being able to see.
+     */
+    internal fun redactedConnectFailure(message: String?): String =
+        message?.replace(PEER_URL, "$1<peer>$2") ?: "none"
+
+    internal fun classifyConnectFailure(e: Exception): String = when {
+        // ktor's own pinger raises this when the primary misses the keepalive window, which is what
+        // the heartbeat is for: the link drops, the backoff reconnects, and the operator sees the
+        // status change. On a hall's wifi that is ordinary churn — five churches filed it — so it
+        // belongs with "refused" and "dns" rather than being reported the first time it happens.
+        e is IOException && e.message?.contains("Ping timeout", ignoreCase = true) == true -> "ping_timeout"
+        else -> classifyConnectFailureByType(e)
+    }
+
+    private fun classifyConnectFailureByType(e: Exception): String = when (e) {
+        // Ktor's ConnectTimeoutException extends java.net.ConnectException, so it must be matched
+        // first or every connect timeout is filed as "refused" — the one bucket that says the
+        // operator simply has not started the primary yet.
+        is ConnectTimeoutException -> "timeout"
+        is ConnectException -> "refused"
+        is UnknownHostException -> "dns"
+        is SocketTimeoutException -> "timeout"
+        is SSLException -> "tls"
+        else -> "other"
     }
 }

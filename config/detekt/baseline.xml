@@ -30,8 +30,6 @@
     <ID>TooManyFunctions:CompanionServer.kt$CompanionServer</ID>
     <ID>TooManyFunctions:DeckLinkManager.kt$DeckLinkManager</ID>
     <ID>TooManyFunctions:EditSongDialog.kt$org.churchpresenter.app.churchpresenter.dialogs.EditSongDialog.kt</ID>
-    <ID>TooManyFunctions:InstanceLinkClient.kt$InstanceLinkClient</ID>
-    <ID>TooManyFunctions:InstanceLinkViewModel.kt$InstanceLinkViewModel</ID>
     <ID>TooManyFunctions:PresenterManager.kt$PresenterManager</ID>
     <ID>TooManyFunctions:SceneSourceRenderer.kt$org.churchpresenter.app.churchpresenter.composables.SceneSourceRenderer.kt</ID>
     <ID>TooManyFunctions:SceneViewModel.kt$SceneViewModel</ID>
