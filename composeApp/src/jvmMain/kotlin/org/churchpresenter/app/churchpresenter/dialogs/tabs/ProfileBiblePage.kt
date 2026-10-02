@@ -26,7 +26,7 @@ import org.churchpresenter.strings.generated.resources.bible_split_long_verses
 import org.churchpresenter.strings.generated.resources.profile_split_words
 import org.churchpresenter.strings.generated.resources.profile_translation_divider
 import org.churchpresenter.strings.generated.resources.words_suffix
-import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
+import org.churchpresenter.sharedui.presenter.PresentedBlock
 import org.churchpresenter.app.churchpresenter.presenter.bibleBoxKey
 import org.churchpresenter.app.churchpresenter.presenter.movedOn
 import org.churchpresenter.app.churchpresenter.presenter.referenceShiftFor

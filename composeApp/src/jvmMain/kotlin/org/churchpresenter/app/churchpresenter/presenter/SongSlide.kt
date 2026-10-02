@@ -27,6 +27,8 @@ import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.bilingualGrid
 import org.churchpresenter.sharedui.composables.TextBlockBackdrop
+import org.churchpresenter.sharedui.presenter.BoxMargins
+import org.churchpresenter.sharedui.presenter.textBoxArea
 
 /**
  * One slide of a song as the frame draws it: which lines of which languages, the chart rows, and

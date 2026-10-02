@@ -71,8 +71,8 @@ import org.churchpresenter.strings.generated.resources.update_interval_weekly
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
+import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.settings.utils.UpdateCheckInterval
 import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
@@ -86,11 +86,11 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URI
 import kotlin.system.exitProcess
-import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
+import org.churchpresenter.sharedui.composables.CopyLinkIconButton
 import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.app.churchpresenter.utils.UPDATE_INSTALLER_PREFIX
-import org.churchpresenter.app.churchpresenter.utils.UrlOpener
+import org.churchpresenter.sharedui.utils.UrlOpener
 
 /**
  * The temp-file suffix for a downloaded installer, inferred from the release asset's URL so the

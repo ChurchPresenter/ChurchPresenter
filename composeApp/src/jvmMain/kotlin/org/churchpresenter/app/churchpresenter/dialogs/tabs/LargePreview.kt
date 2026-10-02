@@ -33,8 +33,8 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.preview_layout_done
-import org.churchpresenter.app.churchpresenter.presenter.LocalPresentedBlocks
-import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
+import org.churchpresenter.sharedui.presenter.LocalPresentedBlocks
+import org.churchpresenter.sharedui.presenter.PresentedBlock
 import org.churchpresenter.sharedui.utils.OutputSize
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile

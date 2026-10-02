@@ -1,0 +1,520 @@
+@file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
+
+package org.churchpresenter.media.dialogs
+
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.performImeAction
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.v2.runComposeUiTest
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.stock_photo_browse_photos_title
+import org.churchpresenter.strings.generated.resources.stock_photo_search_placeholder_photo
+import org.churchpresenter.strings.generated.resources.stock_photo_search_placeholder_video
+import org.churchpresenter.strings.generated.resources.stock_photo_browse_videos_title
+import io.mockk.coEvery
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import kotlinx.coroutines.CompletableDeferred
+import org.churchpresenter.media.data.StockMediaClient
+import org.churchpresenter.media.viewmodel.StockMediaViewModel
+import java.awt.image.BufferedImage
+import java.io.ByteArrayOutputStream
+import java.io.File
+import javax.imageio.ImageIO
+import javax.swing.SwingUtilities
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+
+class StockMediaBrowserContentTest {
+
+    @BeforeTest
+    fun stubClient() {
+        mockkObject(StockMediaClient)
+        coEvery { StockMediaClient.fetchThumbnailBytes(any(), any()) } returns null
+    }
+
+    @AfterTest
+    fun cleanUp() {
+        unmockkObject(StockMediaClient)
+    }
+
+    private fun settle() = repeat(2) { SwingUtilities.invokeAndWait { } }
+
+    /** Polls until [condition] is true, settling the Swing/Compose queues between checks. */
+    private fun ComposeUiTest.awaitUntil(timeoutMs: Long = 5_000, condition: () -> Boolean) {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            settle()
+            waitForIdle()
+            if (condition()) return
+            Thread.sleep(10)
+        }
+        throw AssertionError("timed out after ${timeoutMs}ms waiting for condition")
+    }
+
+    private fun item(id: String, isVideo: Boolean = false) = StockMediaClient.StockMediaItem(
+        id = id,
+        source = StockMediaClient.StockSource.PEXELS,
+        isVideo = isVideo,
+        thumbnailUrl = "https://example.test/$id/thumb.jpg",
+        downloadUrl = "https://example.test/$id/full.jpg",
+    )
+
+    private fun searchReturns(outcome: StockMediaClient.SearchOutcome) {
+        coEvery { StockMediaClient.search(any(), any(), any(), any(), any(), any()) } returns outcome
+    }
+
+    private fun tinyPngBytes(): ByteArray {
+        val image = BufferedImage(2, 2, BufferedImage.TYPE_INT_ARGB)
+        val out = ByteArrayOutputStream()
+        ImageIO.write(image, "png", out)
+        return out.toByteArray()
+    }
+
+    private val progressSpinner = SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)
+
+    private fun dialog(
+        pexelsApiKey: String = "",
+        // Defaulted to a no-op, never to the real opener: a click that reached UrlOpener would
+        // launch the machine's browser, which the headless JVM does not prevent.
+        openUrl: (String) -> Unit = {},
+        // Same reason as openUrl: a real copy would take the developer's own clipboard.
+        copyText: (String) -> Unit = {},
+        block: ComposeUiTest.(dismissed: () -> Int, downloaded: () -> String?) -> Unit,
+    ) {
+        var dismissed = 0
+        var downloaded: String? = null
+        runComposeUiTest {
+            setContent {
+                MaterialTheme {
+                    var key by remember { mutableStateOf(pexelsApiKey) }
+                    var tab by remember { mutableStateOf(0) }
+                    val pexelsVm = remember { StockMediaViewModel(
+                        StockMediaClient.StockMediaType.PHOTO,
+                        StockMediaClient.StockSource.PEXELS,
+                    ) }
+                    val pixabayVm = remember { StockMediaViewModel(
+                        StockMediaClient.StockMediaType.PHOTO,
+                        StockMediaClient.StockSource.PIXABAY,
+                    ) }
+                    StockMediaBrowserDialogContent(
+                        openUrl = openUrl,
+                        copyText = copyText,
+                        titleRes = Res.string.stock_photo_browse_photos_title,
+                        searchPlaceholderRes = Res.string.stock_photo_search_placeholder_photo,
+                        pexelsViewModel = pexelsVm,
+                        pixabayViewModel = pixabayVm,
+                        pexelsApiKey = key,
+                        onPexelsApiKeyChange = { key = it },
+                        pixabayApiKey = "",
+                        onPixabayApiKeyChange = {},
+                        selectedTab = tab,
+                        onSelectedTabChange = { tab = it },
+                        onDismiss = { dismissed++ },
+                        onDownloadedAndClose = { downloaded = it },
+                    )
+                }
+            }
+            waitForIdle()
+            block({ dismissed }, { downloaded })
+        }
+    }
+
+    @Test
+    fun `with no api key the search box is replaced with a hint`() = dialog { _, _ ->
+        onNodeWithText("Add your Pexels API key above to search.").assertExists()
+        onNodeWithText("Search for photos…").assertDoesNotExist()
+    }
+
+    @Test
+    fun `typing an api key reveals the search box`() = dialog { _, _ ->
+        onAllNodes(hasSetTextAction())[0].performTextInput("a-key")
+        waitForIdle()
+
+        onNodeWithText("Search for photos…").assertExists()
+    }
+
+    @Test
+    fun `a search with results shows them and offers Load more`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+        searchReturns(StockMediaClient.SearchOutcome.Success(listOf(item("1"), item("2")), hasMore = true))
+
+        onNodeWithText("Search for photos…").performTextInput("worship")
+        onNodeWithText("worship").performImeAction()
+        settle()
+        waitForIdle()
+
+        onNodeWithText("Load more").assertExists()
+    }
+
+    @Test
+    fun `an invalid api key error is shown after a failed search`() = dialog(pexelsApiKey = "bad-key") { _, _ ->
+        searchReturns(StockMediaClient.SearchOutcome.InvalidKey)
+
+        onNodeWithText("Search for photos…").performTextInput("worship")
+        onNodeWithText("worship").performImeAction()
+        settle()
+        waitForIdle()
+
+        onNodeWithText("Invalid API key").assertExists()
+    }
+
+    @Test
+    fun `a network error is shown after a failed search`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+        searchReturns(StockMediaClient.SearchOutcome.NetworkError)
+
+        onNodeWithText("Search for photos…").performTextInput("worship")
+        onNodeWithText("worship").performImeAction()
+        settle()
+        waitForIdle()
+
+        onNodeWithText("Network error — check your connection").assertExists()
+    }
+
+    @Test
+    fun `a search with no matches shows the no-results message`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+        searchReturns(StockMediaClient.SearchOutcome.Success(emptyList(), hasMore = false))
+
+        onNodeWithText("Search for photos…").performTextInput("no such thing")
+        onNodeWithText("no such thing").performImeAction()
+        settle()
+        waitForIdle()
+
+        onNodeWithText("No results found").assertExists()
+    }
+
+    @Test
+    fun `switching tabs switches the key label shown`() = dialog { _, _ ->
+        onNodeWithText("Pixabay").performClick()
+        onNodeWithText("PIXABAY API KEY").assertExists()
+    }
+
+    @Test
+    fun `switching to Pixabay and back to Pexels restores the Pexels key label`() = dialog { _, _ ->
+        onNodeWithText("Pixabay").performClick()
+        onNodeWithText("PIXABAY API KEY").assertExists()
+
+        onNodeWithText("Pexels").performClick()
+        onNodeWithText("PEXELS API KEY").assertExists()
+    }
+
+    @Test
+    fun `Cancel dismisses the dialog`() = dialog { dismissed, _ ->
+        onNodeWithText("Cancel").performClick()
+        assertEquals(1, dismissed())
+    }
+
+    // ── Search error variants ────────────────────────────────────────────────────
+
+    @Test
+    fun `a rate-limited error is shown after a failed search`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+        searchReturns(StockMediaClient.SearchOutcome.RateLimited)
+
+        onNodeWithText("Search for photos…").performTextInput("worship")
+        onNodeWithText("worship").performImeAction()
+        settle()
+        waitForIdle()
+
+        onNodeWithText("Rate limit reached — try again later").assertExists()
+    }
+
+    @Test
+    fun `a generic failure is shown after a failed search`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+        searchReturns(StockMediaClient.SearchOutcome.Failure)
+
+        onNodeWithText("Search for photos…").performTextInput("worship")
+        onNodeWithText("worship").performImeAction()
+        settle()
+        waitForIdle()
+
+        onNodeWithText("Something went wrong. Please try again.").assertExists()
+    }
+
+    // ── Loading indicator ────────────────────────────────────────────────────────
+
+    @Test
+    fun `a spinner shows while a search is in flight and clears once it resolves`() =
+        dialog(pexelsApiKey = "a-key") { _, _ ->
+        coEvery { StockMediaClient.fetchThumbnailBytes(any(), any()) } returns tinyPngBytes()
+        val gate = CompletableDeferred<StockMediaClient.SearchOutcome>()
+        coEvery { StockMediaClient.search(any(), any(), any(), any(), any(), any()) } coAnswers { gate.await() }
+
+        onNodeWithText("Search for photos…").performTextInput("worship")
+        onNodeWithText("worship").performImeAction()
+        awaitUntil { onAllNodes(progressSpinner).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
+
+        gate.complete(StockMediaClient.SearchOutcome.Success(listOf(item("1")), hasMore = false))
+        awaitUntil { onAllNodes(progressSpinner).fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty() }
+    }
+
+    // ── Load more ─────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `clicking Load more fetches the next page and appends its results`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+        coEvery { StockMediaClient.search(any(), any(), any(), any(), 1, any()) } returns
+            StockMediaClient.SearchOutcome.Success(listOf(item("1")), hasMore = true)
+        coEvery { StockMediaClient.search(any(), any(), any(), any(), 2, any()) } returns
+            StockMediaClient.SearchOutcome.Success(listOf(item("2")), hasMore = false)
+
+        onNodeWithText("Search for photos…").performTextInput("worship")
+        onNodeWithText("worship").performImeAction()
+        settle()
+        waitForIdle()
+        onNodeWithText("Load more").assertExists()
+
+        onNodeWithText("Load more").performClick()
+        settle()
+        waitForIdle()
+
+        onNodeWithText("Load more").assertDoesNotExist()
+        onAllNodesWithContentDescription("Browse stock photos/videos").assertCountEquals(2)
+    }
+
+    @Test
+    fun `a spinner replaces Load more while the next page is in flight`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+        coEvery { StockMediaClient.fetchThumbnailBytes(any(), any()) } returns tinyPngBytes()
+        coEvery { StockMediaClient.search(any(), any(), any(), any(), 1, any()) } returns
+            StockMediaClient.SearchOutcome.Success(listOf(item("1")), hasMore = true)
+        val gate = CompletableDeferred<StockMediaClient.SearchOutcome>()
+        coEvery { StockMediaClient.search(any(), any(), any(), any(), 2, any()) } coAnswers { gate.await() }
+
+        onNodeWithText("Search for photos…").performTextInput("worship")
+        onNodeWithText("worship").performImeAction()
+        settle()
+        waitForIdle()
+        onNodeWithText("Load more").performClick()
+
+        awaitUntil { onAllNodes(progressSpinner).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
+        onNodeWithText("Load more").assertDoesNotExist()
+
+        gate.complete(StockMediaClient.SearchOutcome.Success(listOf(item("2")), hasMore = false))
+        awaitUntil { onAllNodes(progressSpinner).fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty() }
+    }
+
+    // ── Thumbnails ────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a decodable thumbnail replaces the loading spinner with the image`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+        coEvery { StockMediaClient.fetchThumbnailBytes(any(), any()) } returns tinyPngBytes()
+        searchReturns(StockMediaClient.SearchOutcome.Success(listOf(item("1")), hasMore = false))
+
+        onNodeWithText("Search for photos…").performTextInput("worship")
+        onNodeWithText("worship").performImeAction()
+        settle()
+        waitForIdle()
+
+        awaitUntil { onAllNodes(progressSpinner).fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty() }
+    }
+
+    @Test
+    fun `corrupt thumbnail bytes leave the loading spinner showing`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+        coEvery { StockMediaClient.fetchThumbnailBytes(any(), any()) } returns "not a real image".toByteArray()
+        searchReturns(StockMediaClient.SearchOutcome.Success(listOf(item("1")), hasMore = false))
+
+        onNodeWithText("Search for photos…").performTextInput("worship")
+        onNodeWithText("worship").performImeAction()
+        settle()
+        waitForIdle()
+
+        assertTrue(onAllNodes(progressSpinner).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty())
+    }
+
+    @Test
+    fun `a video result shows a play icon over its thumbnail`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+        searchReturns(StockMediaClient.SearchOutcome.Success(listOf(item("1", isVideo = true)), hasMore = false))
+
+        onNodeWithText("Search for photos…").performTextInput("worship")
+        onNodeWithText("worship").performImeAction()
+        settle()
+        waitForIdle()
+
+        onAllNodesWithContentDescription("Browse stock photos/videos").assertCountEquals(1)
+    }
+
+    // ── Downloading ───────────────────────────────────────────────────────────────
+
+    @Test
+    fun `downloading a result invokes the onMediaDownloaded callback with the saved file's path`() =
+        dialog(pexelsApiKey = "a-key") { _, downloaded ->
+        val saved = File.createTempFile("stock", ".jpg").also { it.deleteOnExit() }
+        coEvery { StockMediaClient.download(
+            any(),
+            any(),
+            any(),
+        ) } returns StockMediaClient.DownloadOutcome.Success(saved)
+        searchReturns(StockMediaClient.SearchOutcome.Success(listOf(item("1")), hasMore = false))
+
+        onNodeWithText("Search for photos…").performTextInput("worship")
+        onNodeWithText("worship").performImeAction()
+        settle()
+        waitForIdle()
+
+        onNodeWithContentDescription("Browse stock photos/videos").performClick()
+        awaitUntil { downloaded() != null }
+
+        assertEquals(saved.absolutePath, downloaded())
+    }
+
+    @Test
+    fun `a downloading tile shows a spinner on its own download button while it runs`() =
+        dialog(pexelsApiKey = "a-key") { _, _ ->
+        coEvery { StockMediaClient.fetchThumbnailBytes(any(), any()) } returns tinyPngBytes()
+        val gate = CompletableDeferred<StockMediaClient.DownloadOutcome>()
+        coEvery { StockMediaClient.download(any(), any(), any()) } coAnswers { gate.await() }
+        searchReturns(StockMediaClient.SearchOutcome.Success(listOf(item("1")), hasMore = false))
+
+        onNodeWithText("Search for photos…").performTextInput("worship")
+        onNodeWithText("worship").performImeAction()
+        settle()
+        waitForIdle()
+
+        onNodeWithContentDescription("Browse stock photos/videos").performClick()
+        awaitUntil { onAllNodes(progressSpinner).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty() }
+
+        gate.complete(StockMediaClient.DownloadOutcome.NetworkError)
+        awaitUntil { onAllNodes(progressSpinner).fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty() }
+    }
+
+    @Test
+    fun `a network error while downloading shows its own message`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+        coEvery { StockMediaClient.download(any(), any(), any()) } returns StockMediaClient.DownloadOutcome.NetworkError
+        searchReturns(StockMediaClient.SearchOutcome.Success(listOf(item("1")), hasMore = false))
+
+        onNodeWithText("Search for photos…").performTextInput("worship")
+        onNodeWithText("worship").performImeAction()
+        settle()
+        waitForIdle()
+
+        onNodeWithContentDescription("Browse stock photos/videos").performClick()
+        settle()
+        waitForIdle()
+
+        onNodeWithText("Download failed — check your connection").assertExists()
+    }
+
+    @Test
+    fun `a generic failure while downloading shows its own message`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+        coEvery { StockMediaClient.download(any(), any(), any()) } returns StockMediaClient.DownloadOutcome.Failure
+        searchReturns(StockMediaClient.SearchOutcome.Success(listOf(item("1")), hasMore = false))
+
+        onNodeWithText("Search for photos…").performTextInput("worship")
+        onNodeWithText("worship").performImeAction()
+        settle()
+        waitForIdle()
+
+        onNodeWithContentDescription("Browse stock photos/videos").performClick()
+        settle()
+        waitForIdle()
+
+        onNodeWithText("Download failed. Please try again.").assertExists()
+    }
+
+    // ── Get-a-key link ────────────────────────────────────────────────────────────
+
+    @Test
+    fun `clicking Get a free key browses to the Pexels signup page`() {
+        var opened: String? = null
+        dialog(openUrl = { opened = it }) { _, _ ->
+            onNodeWithText("Get a free key →").performClick()
+        }
+
+        assertEquals("https://www.pexels.com/api/", opened)
+    }
+
+    @Test
+    fun `clicking Get a free key on the Pixabay tab browses to the Pixabay signup page`() {
+        var opened: String? = null
+        dialog(openUrl = { opened = it }) { _, _ ->
+            onNodeWithText("Pixabay").performClick()
+
+            onNodeWithText("Get a free key →").performClick()
+        }
+
+        assertEquals("https://pixabay.com/api/docs/", opened)
+    }
+
+    /**
+     * The copy button beside the link is for a browser that opens on the wrong display — which
+     * screen it lands on is the operating system's choice, and on a two-screen setup that is
+     * regularly the projection output. It carries the tab's own signup address, and opens nothing.
+     */
+    @Test
+    fun `Copy link copies the signup page of whichever tab is showing`() {
+        var opened: String? = null
+        var copied: String? = null
+        dialog(openUrl = { opened = it }, copyText = { copied = it }) { _, _ ->
+            onNodeWithContentDescription("Copy link").performClick()
+            assertEquals("https://www.pexels.com/api/", copied)
+
+            onNodeWithText("Pixabay").performClick()
+            onNodeWithContentDescription("Copy link").performClick()
+        }
+
+        assertEquals("https://pixabay.com/api/docs/", copied)
+        assertNull(opened, "copying must not also launch a browser")
+    }
+
+    // "Clicking with no desktop available does not crash" used to live here. It exercised
+    // UrlOpener's own swallowing of an unsupported BROWSE, and did it by clicking the real link
+    // with nothing stubbed -- which on macOS fell through to the shell fallback and opened
+    // pexels.com in the developer's browser on every run. UrlOpenerTest covers that contract
+    // directly, without a composition or a browser.
+
+    @Test
+    fun `the key can be shown and hidden again`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+        onNodeWithContentDescription("Show API key").performClick()
+        waitForIdle()
+        onNodeWithText("a-key").assertExists()
+        onNodeWithContentDescription("Hide API key").performClick()
+        waitForIdle()
+        onNodeWithContentDescription("Show API key").assertExists()
+    }
+
+    @Test
+    fun `the search key searches what was typed`() = dialog(pexelsApiKey = "a-key") { _, _ ->
+        searchReturns(StockMediaClient.SearchOutcome.Success(listOf(item("7")), hasMore = false))
+        onNodeWithText("Search for photos…").performTextInput("candles")
+        waitForIdle()
+        onNodeWithContentDescription("Search for photos…").performClick()
+        awaitUntil { onAllNodesWithContentDescription("Browse stock photos/videos").fetchSemanticsNodes().isNotEmpty() }
+    }
+
+    @Test
+    fun `hovering Get a free key says what signing up involves`() = dialog { _, _ ->
+        onNodeWithText("Get a free key →").performMouseInput { moveTo(center) }
+        waitUntil(timeoutMillis = 5_000) {
+            onAllNodesWithText("Free, no credit card — the key appears immediately after you sign up.")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    @Test
+    fun `photos and videos are each named for what they are`() {
+        assertEquals(
+            Res.string.stock_photo_browse_photos_title to Res.string.stock_photo_search_placeholder_photo,
+            stockBrowserText(StockMediaClient.StockMediaType.PHOTO),
+        )
+        assertEquals(
+            Res.string.stock_photo_browse_videos_title to Res.string.stock_photo_search_placeholder_video,
+            stockBrowserText(StockMediaClient.StockMediaType.VIDEO),
+        )
+    }
+}

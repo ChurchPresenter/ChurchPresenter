@@ -35,6 +35,8 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.bilingualColumns
 import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
+import org.churchpresenter.sharedui.presenter.PresentedBlock
+import org.churchpresenter.sharedui.presenter.reportsBlock
 
 /*
  * The ways one output lays out its verses: the full-screen stack, the lower third's grid of three

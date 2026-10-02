@@ -32,6 +32,8 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.bilingualColumns
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.sharedui.presenter.PresentedBlock
+import org.churchpresenter.sharedui.presenter.reportsBlock
 
 /**
  * The verses one output draws right now, and how each translation among them is styled. Forwards

@@ -24,7 +24,7 @@ import androidx.compose.ui.window.WindowPlacement
 import org.churchpresenter.strings.generated.resources.book
 import org.churchpresenter.strings.generated.resources.chapter
 import org.churchpresenter.strings.generated.resources.verse
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
 import org.churchpresenter.settings.AppSettings

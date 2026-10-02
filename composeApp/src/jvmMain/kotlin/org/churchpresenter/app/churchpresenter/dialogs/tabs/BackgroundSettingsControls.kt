@@ -64,7 +64,7 @@ import org.churchpresenter.sharedui.composables.SettingsScrollbarGutter
 import org.churchpresenter.sharedui.composables.SlimSlider
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.isFfmpegAvailable
-import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
+import org.churchpresenter.media.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.dialogs.PanelCaption
 import org.churchpresenter.app.churchpresenter.dialogs.PresetButton
 import org.churchpresenter.app.churchpresenter.dialogs.SONG_BACKGROUND_LOOKS

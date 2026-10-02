@@ -7,9 +7,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
-import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
-import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
+import org.churchpresenter.media.composables.SoftwareVideoPlayer
+import org.churchpresenter.media.composables.VideoPlayer
+import org.churchpresenter.media.composables.isVlcAvailable
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.diagnostics.CrashReporter
 import java.awt.GraphicsEnvironment

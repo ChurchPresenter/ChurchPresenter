@@ -28,8 +28,8 @@ import org.churchpresenter.strings.generated.resources.image_files_filter
 import org.churchpresenter.strings.generated.resources.lower_third_animation_file
 import org.churchpresenter.strings.generated.resources.lower_third_animation_generate
 import org.churchpresenter.strings.generated.resources.lower_third_animation_none
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
+import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.sharedui.composables.ColorPickerField
 import org.churchpresenter.sharedui.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.dialogs.PanelCaption

@@ -92,8 +92,8 @@ import org.churchpresenter.strings.generated.resources.planning_center_status_co
 import org.churchpresenter.strings.generated.resources.atem_status_error
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.BuildConfig
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
+import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.sharedui.composables.LabeledCheckbox
 import org.churchpresenter.sharedui.composables.cpColorToHex
@@ -109,7 +109,7 @@ import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image as SkiaImage
-import org.churchpresenter.app.churchpresenter.utils.UrlOpener
+import org.churchpresenter.sharedui.utils.UrlOpener
 
 private const val PILL_CORNER_PERCENT = 50
 

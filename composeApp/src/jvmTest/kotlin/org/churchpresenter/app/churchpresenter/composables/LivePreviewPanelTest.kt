@@ -23,8 +23,8 @@ import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.screenKey
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
+import org.churchpresenter.media.viewmodel.LocalMediaViewModel
+import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import kotlin.test.Test
@@ -768,7 +768,7 @@ class LivePreviewPanelTest {
         pm.setPresentingMode(Presenting.MEDIA)
         val media = MediaViewModel().apply {
             loadMedia("/tmp/song.mp3", "audio")
-            setDuration(90_000L)
+            position.setDuration(90_000L)
         }
         setContent {
             MaterialTheme {

@@ -12,7 +12,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import churchpresenter.composeapp.generated.resources.Res
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.app.churchpresenter.data.StockMediaClient
+import org.churchpresenter.media.data.StockMediaClient
 import java.io.File
 import java.nio.file.Files
 import javax.swing.SwingUtilities

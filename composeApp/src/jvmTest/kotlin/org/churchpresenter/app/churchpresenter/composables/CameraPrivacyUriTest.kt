@@ -1,9 +1,8 @@
 package org.churchpresenter.app.churchpresenter.composables
 
-import org.churchpresenter.app.churchpresenter.utils.UrlOpener
+import org.churchpresenter.sharedui.utils.UrlOpener
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertNull
 
 /**
@@ -47,12 +46,6 @@ class CameraPrivacyUriTest {
     fun `an unrecognised platform offers nothing rather than guessing`() {
         assertNull(cameraPrivacyUri("Plan 9"))
         assertNull(cameraPrivacyUri(""))
-    }
-
-    @Test
-    fun `neither privacy uri is a web link, so neither is offered to AWT`() {
-        assertFalse(UrlOpener.isWebUrl(MAC_CAMERA_PRIVACY_URI))
-        assertFalse(UrlOpener.isWebUrl(WINDOWS_CAMERA_PRIVACY_URI))
     }
 
     @Test

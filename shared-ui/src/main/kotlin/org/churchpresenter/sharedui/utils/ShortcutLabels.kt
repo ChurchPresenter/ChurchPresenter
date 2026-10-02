@@ -119,8 +119,8 @@ fun KeyChord.label(useSymbols: Boolean): String {
  * work on Windows and Linux and produce one wide cap on a Mac.
  */
 @Composable
-fun KeyChord.keyCaps(): List<String> = buildList {
-    if (isMac) {
+fun KeyChord.keyCaps(useSymbols: Boolean = isMac): List<String> = buildList {
+    if (useSymbols) {
         // Same fixed order as the label, which is the Mac convention regardless of press order.
         if (ctrl) add("⌃")
         if (alt) add("⌥")

@@ -18,6 +18,8 @@ import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.presenter.MIN_PRESENTER_SCALE
+import org.churchpresenter.sharedui.presenter.presenterScale
 
 /**
  * "Nothing on the audience screen may be drawn outside the box it was given" -- checked directly

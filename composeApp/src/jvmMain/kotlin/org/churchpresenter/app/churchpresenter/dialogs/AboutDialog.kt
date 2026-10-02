@@ -28,7 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import org.churchpresenter.app.churchpresenter.usableScreenArea
+import org.churchpresenter.sharedui.utils.usableScreenArea
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,8 +50,8 @@ import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.ui.window.rememberWindowState
 import org.churchpresenter.theme.AppShape
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
+import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.calendar_choose_logo_title
@@ -105,9 +105,9 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.extension
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.writeText
-import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
+import org.churchpresenter.sharedui.composables.CopyLinkIconButton
 import org.churchpresenter.sharedui.utils.SystemClipboard
-import org.churchpresenter.app.churchpresenter.utils.UrlOpener
+import org.churchpresenter.sharedui.utils.UrlOpener
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.utils.converterEvent

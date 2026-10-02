@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.app.churchpresenter.server.CalendarEnrollDecision
 import org.churchpresenter.app.churchpresenter.server.RemoteAccess
-import org.churchpresenter.app.churchpresenter.utils.slideshowSeconds
+import org.churchpresenter.media.utils.slideshowSeconds
 import org.churchpresenter.core.models.schedule.ScheduleItem
 
 /*

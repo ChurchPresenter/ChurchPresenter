@@ -71,4 +71,5 @@ composeApp/src/jvmMain/appResources/*/omt/
 composeApp/screenshots/.parts/
 shared-ui/screenshots/.parts/
 slides/screenshots/.parts/
+media/screenshots/.parts/
 screenshots-compare/

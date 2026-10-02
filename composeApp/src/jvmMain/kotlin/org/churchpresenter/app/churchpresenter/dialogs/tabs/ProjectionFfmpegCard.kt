@@ -23,13 +23,13 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.composables.CopyLinkIconButton
+import org.churchpresenter.sharedui.composables.CopyLinkIconButton
 import org.churchpresenter.sharedui.utils.FfmpegBinary
 import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.sharedui.utils.SystemClipboard
-import org.churchpresenter.app.churchpresenter.utils.UrlOpener
+import org.churchpresenter.sharedui.utils.UrlOpener
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.ffmpeg_browse

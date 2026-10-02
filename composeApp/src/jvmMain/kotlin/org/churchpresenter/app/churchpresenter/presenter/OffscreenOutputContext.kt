@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.presenter
 
 import org.churchpresenter.settings.utils.Constants
 import androidx.compose.runtime.State
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
+import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment

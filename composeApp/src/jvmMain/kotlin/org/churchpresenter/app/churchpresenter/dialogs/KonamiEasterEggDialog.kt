@@ -37,8 +37,8 @@ import org.churchpresenter.strings.generated.resources.konami_dialog_button
 import org.churchpresenter.strings.generated.resources.konami_dialog_headline
 import org.churchpresenter.strings.generated.resources.konami_dialog_message
 import org.churchpresenter.strings.generated.resources.konami_dialog_title
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
+import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.sin
