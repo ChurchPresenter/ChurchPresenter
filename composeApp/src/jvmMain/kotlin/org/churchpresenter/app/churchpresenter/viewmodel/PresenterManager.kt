@@ -44,6 +44,7 @@ import java.io.IOException
 import org.churchpresenter.media.MediaOutput
 import org.churchpresenter.slides.SlidesOutput
 import org.churchpresenter.web.WebOutput
+import org.churchpresenter.qa.QAOutput
 
 private const val WATCHDOG_INTERVAL_MS = 5_000L
 
@@ -66,6 +67,9 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
 
     /** This manager as the Web tab sees it -- see [PresenterWebOutput]. */
     val webOutput: WebOutput by lazy { PresenterWebOutput(this) }
+
+    /** This manager as the Q&A tab sees it -- see [PresenterQAOutput]. */
+    val qaOutput: QAOutput by lazy { PresenterQAOutput(this) }
 
     private val preRenderScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var preRenderJob: Job? = null

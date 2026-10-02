@@ -12,6 +12,8 @@ import org.churchpresenter.theme.ThemeCustomization
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.composables.rowPad
+import org.churchpresenter.sharedui.composables.rowSpan
 
 /**
  * [rowPad] and [rowSpan], through which every list row takes the Margin chosen in Customize Theme.

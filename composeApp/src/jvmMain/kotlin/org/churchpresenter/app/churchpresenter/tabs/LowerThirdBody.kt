@@ -83,6 +83,8 @@ import org.churchpresenter.sharedui.composables.DragHandle
 import org.churchpresenter.sharedui.composables.bibleListCard
 import org.churchpresenter.sharedui.composables.bibleRowColors
 import org.churchpresenter.sharedui.composables.rememberRowHover
+import org.churchpresenter.sharedui.composables.rowPad
+import org.churchpresenter.sharedui.composables.rowSpan
 
 /** The file list, its drag handle, and the preview column. */
 @Composable

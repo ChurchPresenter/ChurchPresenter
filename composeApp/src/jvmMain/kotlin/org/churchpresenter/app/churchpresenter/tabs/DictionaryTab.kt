@@ -126,6 +126,7 @@ import org.churchpresenter.sharedui.composables.DragHandle
 import org.churchpresenter.sharedui.composables.bibleListCard
 import org.churchpresenter.sharedui.composables.bibleRowColors
 import org.churchpresenter.sharedui.composables.rememberRowHover
+import org.churchpresenter.sharedui.composables.rowPad
 
 private const val DEFINITION_PREVIEW_CHARS = 200
 

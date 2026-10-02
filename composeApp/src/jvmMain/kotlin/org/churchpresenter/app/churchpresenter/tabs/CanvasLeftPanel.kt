@@ -85,6 +85,7 @@ import org.churchpresenter.sharedui.composables.BibleListRowShape
 import org.churchpresenter.sharedui.composables.bibleListCard
 import org.churchpresenter.sharedui.composables.bibleRowColors
 import org.churchpresenter.sharedui.composables.rememberRowHover
+import org.churchpresenter.sharedui.composables.rowPad
 
 /* The Canvas tab's left panel: the scenes, and the selected scene's sources. */
 

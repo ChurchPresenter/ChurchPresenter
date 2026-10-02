@@ -8,18 +8,19 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.QASettings
-import org.churchpresenter.app.churchpresenter.tabs.QALabel
-import org.churchpresenter.app.churchpresenter.tabs.clickQaLabel
-import org.churchpresenter.app.churchpresenter.tabs.qaButton
-import org.churchpresenter.app.churchpresenter.tabs.qaButton2
-import org.churchpresenter.app.churchpresenter.tabs.qaTab
-import org.churchpresenter.app.churchpresenter.tabs.selectFilter
-import org.churchpresenter.app.churchpresenter.tabs.selectSort
-import org.churchpresenter.app.churchpresenter.tabs.typeQuestion
-import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
+import org.churchpresenter.qa.QALabel
+import org.churchpresenter.qa.clickQaLabel
+import org.churchpresenter.qa.qaButton
+import org.churchpresenter.qa.qaButton2
+import org.churchpresenter.qa.qaTab
+import org.churchpresenter.qa.selectFilter
+import org.churchpresenter.qa.selectSort
+import org.churchpresenter.qa.typeQuestion
+import org.churchpresenter.qa.QAManager
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.app.churchpresenter.TestSingletons
 
 /**
  * Every state of the Q&A tab, in both themes.
@@ -41,6 +42,7 @@ class QATabScreenshotTest {
         rootIndex: Int = 0,
         drive: ComposeUiTest.(QAManager) -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
+        TestSingletons.latchToTestHome()
         qaTab(settings = settings, seed = seed, width = width, themeMode = mode) { qa, _, _ ->
             drive(qa)
             waitForIdle()
@@ -59,6 +61,7 @@ class QATabScreenshotTest {
     /** No server means no QR code and nowhere for a phone to post — the tab says so. */
     @Test
     fun `the server is not running`() = stackedThemes(SECTION, "no_server") { mode, file ->
+        TestSingletons.latchToTestHome()
         qaTab(serverUrl = "", themeMode = mode) { _, _, _ ->
             waitForIdle()
             captureTo(file)

@@ -38,6 +38,7 @@ import org.churchpresenter.sharedui.composables.BibleVerseRowShape
 import org.churchpresenter.sharedui.composables.bibleListCard
 import org.churchpresenter.sharedui.composables.bibleRowColors
 import org.churchpresenter.sharedui.composables.rememberRowHover
+import org.churchpresenter.sharedui.composables.rowPad
 
 /**
  * The list a text search produced, with the matched words picked out of each verse.

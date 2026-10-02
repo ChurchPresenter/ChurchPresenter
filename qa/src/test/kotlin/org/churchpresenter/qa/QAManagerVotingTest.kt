@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.qa
 
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionStatus

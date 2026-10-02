@@ -34,8 +34,8 @@ import org.churchpresenter.strings.generated.resources.customize_theme_preview_s
 import org.churchpresenter.strings.generated.resources.customize_theme_preview_song_selected
 import org.churchpresenter.strings.generated.resources.customize_theme_preview_success
 import org.churchpresenter.strings.generated.resources.customize_theme_preview_warning
-import org.churchpresenter.app.churchpresenter.tabs.rowPad
-import org.churchpresenter.app.churchpresenter.tabs.rowSpan
+import org.churchpresenter.sharedui.composables.rowPad
+import org.churchpresenter.sharedui.composables.rowSpan
 import org.churchpresenter.theme.components.KeyButton
 import org.churchpresenter.theme.components.RaisedButton
 import org.churchpresenter.theme.components.RaisedFilterChip

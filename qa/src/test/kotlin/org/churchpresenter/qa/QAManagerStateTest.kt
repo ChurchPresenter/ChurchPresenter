@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.qa
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

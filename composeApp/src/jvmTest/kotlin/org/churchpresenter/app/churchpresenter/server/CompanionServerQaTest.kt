@@ -24,7 +24,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
+import org.churchpresenter.qa.QAManager
 import java.io.File
 import org.junit.AfterClass
 import org.junit.BeforeClass

@@ -55,7 +55,7 @@ import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceFrame
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
-import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
+import org.churchpresenter.qa.QAManager
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.toDto

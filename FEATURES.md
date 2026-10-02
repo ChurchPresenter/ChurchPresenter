@@ -196,8 +196,10 @@
 - **Styled per screen** — each output profile sets how a question and its QR code look on it.
 
 **Source locations:**
-- `tabs/QATab.kt` — main UI
-- `viewmodel/QAManager.kt`
+- `qa/…/QATab.kt` (with `QATabBars.kt`, `QATabList.kt`, `QuestionRow.kt`, `QuestionRowActions.kt`)
+  and `qa/…/QAManager.kt` (with `QAStore.kt`, `QAActions.kt`) — the `:qa` module
+- `tabs/AppQATab.kt` — the app's wrapper, which supplies the remote-access dialog;
+  `viewmodel/PresenterQAOutput.kt` — the tab's `QAOutput`, over `PresenterManager`
 - `data/settings/QASettings.kt`
 - `presenter/QAPresenter.kt`
 - `dialogs/tabs/ProfileOverlayPages.kt` — the question and QR look, edited on Profiles → Q&A
