@@ -103,6 +103,8 @@ import org.churchpresenter.sharedui.composables.mode
 import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
 import org.churchpresenter.sharedui.utils.CommandRunner
 import org.churchpresenter.sharedui.utils.readCommandOutput
+import org.churchpresenter.media.composables.isVlcAvailable
+import org.churchpresenter.media.composables.isVlcLoadFailed
 
 private const val URL_DEBOUNCE_MS = 800L
 private const val ERROR_TEXT_COLOR = 0xFFFF8888

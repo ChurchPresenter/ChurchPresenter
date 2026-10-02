@@ -108,13 +108,13 @@
 
 **Source locations:**
 - `slides/…/tabs/PicturesTab.kt` (the `:slides` module) — image slideshow UI; its pieces in `PicturesTabScope.kt`, `PicturesHeader.kt`, `PicturesControlsBar.kt`, `PicturesGrid.kt`
-- `tabs/MediaTab.kt` — audio/video UI; its pieces in `tabs/MediaTabScope.kt`, `MediaSourceBar.kt`, `MediaControlsBar.kt`
-- `slides/…/viewmodel/PicturesViewModel.kt`, `viewmodel/MediaViewModel.kt`, `viewmodel/LocalMediaViewModel.kt`
+- `media/…/tabs/MediaTab.kt` (the `:media` module) — audio/video UI; its pieces in `MediaTabScope.kt`, `MediaSourceBar.kt`, `MediaControlsBar.kt`
+- `slides/…/viewmodel/PicturesViewModel.kt`, `media/…/viewmodel/MediaViewModel.kt`, `media/…/viewmodel/LocalMediaViewModel.kt`
 - `slides/…/data/HiddenItemsStore.kt`, `shared-ui/…/composables/SlideshowHideToggle.kt` — hidden pictures and slides, remembered per folder and file, and the eye that hides them
 - `data/settings/PictureSettings.kt`
-- `slides/…/presenter/PicturePresenter.kt`, `presenter/MediaPresenter.kt`
-- `composables/VideoPlayer.kt`
-- `dialogs/tabs/MediaSettingsTab.kt`
+- `slides/…/presenter/PicturePresenter.kt`, `media/…/presenter/MediaPresenter.kt`
+- `media/…/composables/VideoPlayer.kt`
+- `media/…/dialogs/tabs/MediaSettingsTab.kt`
 - `dialogs/tabs/ProfileScaleRow.kt`, `shared-ui/…/utils/OutputScaleMode.kt` — per-profile scaling and the tabs' shortcut over it
 - `dialogs/tabs/ProfileOverlayPages.kt`, `dialogs/tabs/DisplayTextRows.kt` — the subtitle look, edited on Profiles → Subtitles
 
@@ -260,7 +260,7 @@
 - `omt/` (the `:omt` Gradle module) — OMT itself: `OmtRuntime`, `OmtLibrary`/`JnaOmtLibrary`, `OmtSender`, `OmtReceiver`, `OmtDiscovery`
 - `presenter/OmtVideoRenderer.kt`, `presenter/OmtOutputRegistry.kt`, `presenter/OmtManager.kt`, `dialogs/tabs/ProjectionOmtCard.kt` — the app-side OMT wiring and its settings card
 - `gradle/omt-builds.properties`, `.github/workflows/omt-linux.yml`, `THIRD_PARTY_OMT.md` — where the bundled OMT libraries come from, and their licence
-- `data/StockMediaClient.kt`, `dialogs/StockMediaBrowserDialog.kt`, `viewmodel/StockMediaViewModel.kt`, `data/settings/StockPhotoSettings.kt`
+- `media/…/data/StockMediaClient.kt`, `media/…/dialogs/StockMediaBrowserDialog.kt`, `media/…/viewmodel/StockMediaViewModel.kt`, `data/settings/StockPhotoSettings.kt`
 - `composables/DeckLinkManager.kt`, `composables/DeckLinkInputGate.kt`, `composables/LivePreviewPanel.kt`, `composables/LoopingVideoBackground.kt`
 - `viewmodel/PresenterManager.kt`, `viewmodel/BackgroundSettingsViewModel.kt`
 - `data/settings/BackgroundConfig.kt`, `data/settings/BackgroundSettings.kt`, `data/settings/ProjectionSettings.kt`, `data/settings/ScreenAssignment.kt`

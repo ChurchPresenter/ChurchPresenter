@@ -40,13 +40,13 @@ import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.tabs.RecentMediaFiles
+import org.churchpresenter.media.tabs.RecentMediaFiles
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
+import org.churchpresenter.media.viewmodel.LocalMediaViewModel
+import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager

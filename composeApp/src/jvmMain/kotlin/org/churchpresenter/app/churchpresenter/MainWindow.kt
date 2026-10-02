@@ -40,7 +40,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
 import org.churchpresenter.app.churchpresenter.dialogs.SetupWizardDialog
 import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
 import org.churchpresenter.theme.ThemeCustomization
-import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
+import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.composables.isJavaFxAvailable
 import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
 import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
@@ -67,6 +67,7 @@ import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.WindowState
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.sharedui.composables.LocalWentLive
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
 
 /** The work done once the window is up: the server's first start, the update check and the story prompt. */
 @Composable

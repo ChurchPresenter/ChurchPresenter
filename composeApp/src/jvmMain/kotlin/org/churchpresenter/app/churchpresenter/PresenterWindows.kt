@@ -48,10 +48,10 @@ import org.churchpresenter.app.churchpresenter.presenter.DeckLinkComposeOutput
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.utils.OutputKind
 import org.churchpresenter.sharedui.utils.outputSizeOf
-import org.churchpresenter.app.churchpresenter.utils.DevFlags
+import org.churchpresenter.sharedui.utils.DevFlags
 import org.churchpresenter.sharedui.utils.findScreenIndexByBounds
-import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
+import org.churchpresenter.media.viewmodel.LocalMediaViewModel
+import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.diagnostics.CrashReporter

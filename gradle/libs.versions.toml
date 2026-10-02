@@ -1,5 +1,6 @@
 [versions]
 jna = "5.18.1"
+vlcj = "4.8.3"
 androidx-lifecycle = "2.11.0"
 sentry = "8.58.0"
 sentryPlugin = "6.23.0"
@@ -35,6 +36,7 @@ twelvemonkeys-imageio = "3.10.1"
 [libraries]
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
+vlcj = { module = "uk.co.caprica:vlcj", version.ref = "vlcj" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }

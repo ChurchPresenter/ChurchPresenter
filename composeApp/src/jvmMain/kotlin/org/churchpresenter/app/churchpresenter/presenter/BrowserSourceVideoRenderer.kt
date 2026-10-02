@@ -14,7 +14,7 @@ import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEventStore
 import org.churchpresenter.sharedui.utils.UsageEvents
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
+import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import java.awt.image.BufferedImage

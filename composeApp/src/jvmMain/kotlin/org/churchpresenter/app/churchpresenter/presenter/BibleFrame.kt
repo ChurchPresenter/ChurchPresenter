@@ -45,6 +45,9 @@ import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import org.churchpresenter.sharedui.presenter.BoxMargins
+import org.churchpresenter.sharedui.presenter.presenterScale
+import org.churchpresenter.sharedui.presenter.textBoxArea
 
 /**
  * The verses on one output once its size is known: the scale, the scaled styles and sizes, and the

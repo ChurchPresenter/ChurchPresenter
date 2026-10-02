@@ -6,7 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import org.churchpresenter.app.churchpresenter.utils.DevFlags
+import org.churchpresenter.sharedui.utils.DevFlags
 import kotlinx.coroutines.launch
 import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -14,7 +14,7 @@ import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
 import java.io.File
 import java.util.Locale
 import org.churchpresenter.app.churchpresenter.server.shouldUseRemoteContent
-import org.churchpresenter.app.churchpresenter.utils.UrlOpener
+import org.churchpresenter.sharedui.utils.UrlOpener
 import org.churchpresenter.calendar.model.UpcomingLoad
 import org.churchpresenter.settings.InstanceLinkSettings
 import org.churchpresenter.calendar.ScheduleServiceLink

@@ -68,8 +68,8 @@ import org.churchpresenter.strings.generated.resources.qa_retry
 import org.churchpresenter.strings.generated.resources.qa_server_hint
 import org.churchpresenter.strings.generated.resources.qa_starting_tunnel
 import org.churchpresenter.strings.generated.resources.qa_submit_questions
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
+import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.sharedui.composables.NumberSettingsTextField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.QASettings

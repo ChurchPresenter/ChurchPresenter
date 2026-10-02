@@ -41,6 +41,7 @@ import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
 import org.churchpresenter.settings.utils.Constants
 import java.io.IOException
+import org.churchpresenter.media.MediaOutput
 import org.churchpresenter.slides.SlidesOutput
 
 private const val WATCHDOG_INTERVAL_MS = 5_000L
@@ -60,6 +61,7 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
 
     /** This manager as the Pictures and Presentation tabs see it -- see [PresenterSlidesOutput]. */
     val slidesOutput: SlidesOutput by lazy { PresenterSlidesOutput(this) }
+    val mediaOutput: MediaOutput by lazy { PresenterMediaOutput(this) }
 
     private val preRenderScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var preRenderJob: Job? = null

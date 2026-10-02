@@ -36,10 +36,10 @@ import org.churchpresenter.strings.generated.resources.profile_adjust_band
 import org.churchpresenter.strings.generated.resources.profile_adjust_size
 import org.churchpresenter.strings.generated.resources.profile_adjust_width
 import kotlin.math.roundToInt
-import org.churchpresenter.app.churchpresenter.presenter.BoxMargins
-import org.churchpresenter.app.churchpresenter.presenter.LocalPresentedBlocks
-import org.churchpresenter.app.churchpresenter.presenter.PresentedBlock
-import org.churchpresenter.app.churchpresenter.presenter.textBoxArea
+import org.churchpresenter.sharedui.presenter.BoxMargins
+import org.churchpresenter.sharedui.presenter.LocalPresentedBlocks
+import org.churchpresenter.sharedui.presenter.PresentedBlock
+import org.churchpresenter.sharedui.presenter.textBoxArea
 import org.churchpresenter.sharedui.utils.OutputSize
 import org.churchpresenter.settings.ContentRegion
 import org.churchpresenter.theme.AppShape

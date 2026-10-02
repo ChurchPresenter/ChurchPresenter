@@ -16,7 +16,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.app.churchpresenter.data.StockMediaClient
+import org.churchpresenter.media.data.StockMediaClient
 import org.churchpresenter.core.models.songs.SongBackground
 import kotlin.test.Test
 import kotlin.test.assertEquals

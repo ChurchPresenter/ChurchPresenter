@@ -18,7 +18,7 @@ import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdLayout
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
-import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
+import org.churchpresenter.media.presenter.MediaPresenter
 import org.churchpresenter.slides.presenter.PicturePresenter
 import org.churchpresenter.slides.presenter.PresentationPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LocalBandOutgoing
@@ -32,7 +32,7 @@ import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.presenter.WebsitePresenter
 import org.churchpresenter.sharedui.utils.contentScale
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
+import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 

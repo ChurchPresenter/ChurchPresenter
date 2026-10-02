@@ -21,8 +21,8 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.presenter.overlapsOf
-import org.churchpresenter.app.churchpresenter.presenter.rectIn
+import org.churchpresenter.sharedui.presenter.overlapsOf
+import org.churchpresenter.sharedui.presenter.rectIn
 import org.churchpresenter.settings.TextBox
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.semantic

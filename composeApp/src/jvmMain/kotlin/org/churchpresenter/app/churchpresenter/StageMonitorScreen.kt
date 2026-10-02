@@ -59,8 +59,8 @@ import org.churchpresenter.sharedui.composables.OutlinedText
 import org.churchpresenter.sharedui.composables.backdropRoom
 import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
-import org.churchpresenter.app.churchpresenter.presenter.BoxedItem
-import org.churchpresenter.app.churchpresenter.presenter.rectIn
+import org.churchpresenter.sharedui.presenter.BoxedItem
+import org.churchpresenter.sharedui.presenter.rectIn
 import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.settings.StageMonitorContentType
@@ -98,10 +98,10 @@ import org.churchpresenter.sharedui.utils.calculateChordChartFontSize
 import org.churchpresenter.app.churchpresenter.composables.ChordChart
 import org.churchpresenter.app.churchpresenter.composables.songInfoOf
 import org.churchpresenter.app.churchpresenter.composables.MetronomeDot
-import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
+import org.churchpresenter.media.composables.SoftwareVideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.toAlignment
-import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
+import org.churchpresenter.media.viewmodel.LocalMediaViewModel
+import org.churchpresenter.media.viewmodel.MediaViewModel
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import java.io.File
 import java.time.LocalTime

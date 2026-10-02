@@ -53,7 +53,7 @@ import org.churchpresenter.strings.generated.resources.song_background_option_co
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.data.StockMediaClient
+import org.churchpresenter.media.data.StockMediaClient
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.composables.CameraDevice

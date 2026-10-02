@@ -27,6 +27,11 @@ import org.churchpresenter.settings.TextBox
 import org.churchpresenter.settings.boxAt
 import org.churchpresenter.settings.textBoxKey
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.sharedui.presenter.BoxFitText
+import org.churchpresenter.sharedui.presenter.BoxedItem
+import org.churchpresenter.sharedui.presenter.clearOf
+import org.churchpresenter.sharedui.presenter.fitInBox
+import org.churchpresenter.sharedui.presenter.rectIn
 
 /** The song elements drawn once per language, and so boxed once per language unless they share a box. */
 internal val SongStyleElement.boxedPerLanguage: Boolean

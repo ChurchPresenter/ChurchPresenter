@@ -319,6 +319,7 @@ kotlin {
             implementation(projects.icons)
             implementation(projects.sharedUi)
             implementation(projects.slides)
+            implementation(projects.media)
             implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source
             // directory, wrapped by CompanionSatelliteViewModel.
@@ -380,7 +381,7 @@ kotlin {
             implementation(libs.bouncycastle.pkix)
             implementation(libs.bouncycastle.prov)
             // VLCJ for media playback (requires VLC installed on system)
-            implementation("uk.co.caprica:vlcj:4.8.3")
+            implementation(libs.vlcj)
             implementation(libs.jna)
             implementation(libs.jna.platform)
             implementation("com.google.zxing:core:3.5.3")

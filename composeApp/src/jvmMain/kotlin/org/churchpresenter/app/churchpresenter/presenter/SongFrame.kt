@@ -41,6 +41,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.SongSettings
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
+import org.churchpresenter.sharedui.presenter.presenterScale
 
 /**
  * A song on one output once its size is known: the scale, the fitted lyric size and the scaled

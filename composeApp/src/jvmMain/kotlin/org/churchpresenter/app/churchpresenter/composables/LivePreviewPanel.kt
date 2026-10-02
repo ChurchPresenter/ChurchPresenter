@@ -119,7 +119,7 @@ import org.churchpresenter.app.churchpresenter.presenter.contentRegion
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdLayout
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
-import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
+import org.churchpresenter.media.presenter.MediaPresenter
 import org.churchpresenter.slides.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.LocalBandOutgoing
 import org.churchpresenter.app.churchpresenter.presenter.LocalBandSongLineIndex
@@ -133,7 +133,7 @@ import org.churchpresenter.slides.presenter.PresentationPresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.DevFlags
+import org.churchpresenter.sharedui.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.presenter.showsContentFor
 import org.churchpresenter.sharedui.utils.OutputKind
 import org.churchpresenter.settings.ProjectionSettings
@@ -141,7 +141,7 @@ import org.churchpresenter.sharedui.utils.OutputSize
 import org.churchpresenter.sharedui.utils.outputSizeOf
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
-import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
+import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.jetbrains.compose.resources.painterResource

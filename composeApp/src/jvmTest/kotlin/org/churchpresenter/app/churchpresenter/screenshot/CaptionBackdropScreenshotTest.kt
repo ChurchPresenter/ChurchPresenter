@@ -14,8 +14,8 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import io.github.takahirom.roborazzi.captureRoboImage
 import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
-import org.churchpresenter.app.churchpresenter.presenter.SubtitleOverlay
-import org.churchpresenter.app.churchpresenter.subtitles.SubtitleCue
+import org.churchpresenter.media.presenter.SubtitleOverlay
+import org.churchpresenter.media.subtitles.SubtitleCue
 import org.churchpresenter.app.churchpresenter.viewmodel.STTSegment
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline

@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
+import org.churchpresenter.media.composables.isVlcAvailable
 
 /** How often the shared conversion loop looks for a new decoded frame — about 60fps. */
 private const val VIDEO_POLL_MS = 16L

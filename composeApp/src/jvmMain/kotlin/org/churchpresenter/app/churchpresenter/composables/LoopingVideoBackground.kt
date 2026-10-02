@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.churchpresenter.diagnostics.CrashReporter
 import java.io.File
+import org.churchpresenter.media.composables.isVlcAvailable
 
 /** A background is silent; the file may still carry an audio track. */
 private const val SILENT = 0f

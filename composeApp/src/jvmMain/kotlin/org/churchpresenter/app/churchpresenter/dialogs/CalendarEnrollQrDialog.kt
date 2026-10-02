@@ -29,8 +29,8 @@ import org.churchpresenter.strings.generated.resources.calendar_enroll_invite_fa
 import org.churchpresenter.strings.generated.resources.calendar_enroll_qr_title
 import org.churchpresenter.strings.generated.resources.close
 import kotlinx.coroutines.delay
-import org.churchpresenter.app.churchpresenter.LocalMainWindowState
-import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
+import org.churchpresenter.sharedui.utils.LocalMainWindowState
+import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.connectionQrBitmap
 import org.churchpresenter.app.churchpresenter.server.CalendarEnrollment
 import org.churchpresenter.app.churchpresenter.server.CalendarInvite

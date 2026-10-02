@@ -58,6 +58,10 @@ import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.sharedui.utils.calculateAutoFitFontSize
 import java.awt.image.BufferedImage
+import org.churchpresenter.sharedui.presenter.BoxFitText
+import org.churchpresenter.sharedui.presenter.BoxedItem
+import org.churchpresenter.sharedui.presenter.fitInBox
+import org.churchpresenter.sharedui.presenter.rectIn
 
 /** The card the question is drawn in, and so the space auto-fit measures against. */
 internal val CARD_PADDING = 64.dp
