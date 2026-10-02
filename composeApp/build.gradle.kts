@@ -326,6 +326,7 @@ kotlin {
             implementation(projects.dictionary)
             implementation(projects.stt)
             implementation(projects.announcements)
+            implementation(projects.lowerThird)
             implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source
             // directory, wrapped by CompanionSatelliteViewModel.
@@ -457,6 +458,7 @@ dependencies {
     add("jvmTestImplementation", testFixtures(projects.dictionary))
     add("jvmTestImplementation", testFixtures(projects.stt))
     add("jvmTestImplementation", testFixtures(projects.announcements))
+    add("jvmTestImplementation", testFixtures(projects.lowerThird))
     // CrashReportSweep: the Bible tab and view-model failure tests exercise paths that really
     // write a crash report. It lives with :diagnostics because it exists for CrashReporter's own
     // design -- the report directory is resolved once per JVM and cannot be redirected after.
@@ -998,17 +1000,12 @@ val serialTestClasses = listOf(
     "*AtemUploadTracedTest",
     "*CompanionServerAtemKeyTest",
     "*CompanionServerAtemUploadTest",
-    "*LowerThirdAtemUploadTest",
-    "*LowerThirdSequencerKeyTest",
-    // The other three suites that open the ATEM upload dialog. Doing so renders a Lottie frame and
-    // encodes it for the switcher behind three 5s deadlines -- the upload button enabling, the
-    // dialog's rows composing, and `waitForAtemPrepared` (LowerThirdTabTestSupport.kt:263). That is
-    // real work against a wall clock, so on a runner with four forks competing for the CPU it is the
-    // machine being measured, not the code: LowerThirdAtemDialogExtraTest timed out at exactly that
-    // wait on main. LowerThirdAtemUploadTest above was in this list from the start and never failed,
-    // which is the tell -- these three simply had not drawn the short straw yet.
-    "*LowerThirdAtemDialogTest",
-    "*LowerThirdAtemDialogExtraTest",
+    // The suite that opens the ATEM upload dialog. Doing so renders a Lottie frame and encodes it for
+    // the switcher behind 5s deadlines -- the upload button enabling, the dialog's rows composing, and
+    // `waitForAtemPrepared` (`:lower-third`'s LowerThirdTabTestSupport.kt). That is real work against a
+    // wall clock, so on a runner with four forks competing for the CPU it is the machine being
+    // measured, not the code. The Lower Third tab's own suites moved to `:lower-third`, whose `test`
+    // task forks once, so they are already alone in their JVM there.
     "*LowerThirdTabScreenshotTest",
     // Here for a different reason: it binds a fixed port AND draws that port into the image (the
     // Server URL row, the connection QR). Shifting the port per fork would rewrite every one of its

@@ -30,7 +30,7 @@ import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
-import org.churchpresenter.app.churchpresenter.presenter.LowerThirdOffscreenRenderer
+import org.churchpresenter.lowerthird.render.LowerThirdOffscreenRenderer
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.slides.presenter.PicturePresenter
 import org.churchpresenter.slides.presenter.PresentationPresenter

@@ -38,7 +38,7 @@ import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.dictionary.data.StrongsEntry
-import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
+import org.churchpresenter.lowerthird.render.LottieRenderCache
 import org.churchpresenter.settings.utils.Constants
 import java.io.IOException
 import org.churchpresenter.media.MediaOutput

@@ -17,7 +17,7 @@ import org.churchpresenter.sharedui.utils.addGuardedShutdownHook
 import org.churchpresenter.app.churchpresenter.utils.deleteLeftoverUpdateInstallers
 import org.churchpresenter.sharedui.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.utils.GpuInfo
-import org.churchpresenter.app.churchpresenter.utils.LottieFonts
+import org.churchpresenter.lowerthird.render.LottieFonts
 import org.churchpresenter.sharedui.utils.SystemFonts
 import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
 import churchpresenter.composeapp.generated.resources.Res
@@ -32,7 +32,7 @@ import org.churchpresenter.theme.LocalThemeCustomization
 import org.churchpresenter.theme.ThemeCustomization
 import org.churchpresenter.sharedui.utils.FfmpegBinary
 import org.churchpresenter.media.composables.vlcCustomPath
-import org.churchpresenter.app.churchpresenter.server.LottieRenderCache
+import org.churchpresenter.lowerthird.render.LottieRenderCache
 import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.settings.utils.AppDataDir

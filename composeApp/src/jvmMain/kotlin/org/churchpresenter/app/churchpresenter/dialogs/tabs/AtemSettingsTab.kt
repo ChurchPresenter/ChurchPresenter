@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.atem.formatAtemFps
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -598,9 +599,4 @@ fun AtemSettingsTab(
         SettingsScrollbar(scrollState)
     }
 }
-
-/** "25", "59.94" — exact fps without truncation, locale-independent decimal point. */
-internal fun formatAtemFps(fps: Double): String =
-    if (fps == kotlin.math.floor(fps)) fps.toInt().toString()
-    else String.format(java.util.Locale.US, "%.2f", fps).trimEnd('0').trimEnd('.')
 

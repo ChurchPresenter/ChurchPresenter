@@ -10,7 +10,7 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.tabs.AppAnnouncementsTab
 import org.churchpresenter.app.churchpresenter.tabs.CanvasTab
 import org.churchpresenter.dictionary.DictionaryTab
-import org.churchpresenter.app.churchpresenter.tabs.LowerThirdTab
+import org.churchpresenter.app.churchpresenter.tabs.AppLowerThirdTab
 import org.churchpresenter.media.tabs.MediaTab
 import org.churchpresenter.slides.tabs.PicturesTab
 import org.churchpresenter.slides.tabs.PresentationTab
@@ -136,7 +136,7 @@ internal fun MainDesktopScope.MediaTabPane() {
 
 @Composable
 internal fun MainDesktopScope.LowerThirdTabPane() {
-    LowerThirdTab(
+    AppLowerThirdTab(
         modifier = Modifier.fillMaxSize(),
         appSettings = appSettings,
         selectedLowerThirdItem = state.selectedLowerThirdItem,

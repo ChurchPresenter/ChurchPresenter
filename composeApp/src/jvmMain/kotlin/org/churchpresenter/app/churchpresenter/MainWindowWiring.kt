@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteActivityNotification
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
+import org.churchpresenter.lowerthird.LowerThirdSequencer
 import org.churchpresenter.calendar.CalendarFileWatcher
 import org.churchpresenter.calendar.seedCalendarFolder
 import org.churchpresenter.calendar.CueRunner

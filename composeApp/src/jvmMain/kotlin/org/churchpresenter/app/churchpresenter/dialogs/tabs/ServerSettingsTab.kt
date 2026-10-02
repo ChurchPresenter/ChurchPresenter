@@ -145,7 +145,7 @@ import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
+import org.churchpresenter.lowerthird.render.isLottieFile
 import org.jetbrains.compose.resources.stringResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

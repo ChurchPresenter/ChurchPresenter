@@ -114,6 +114,7 @@ module-specific notes there, not here.**
 | `dictionary/`          | `:dictionary`          | The Strong's dictionary tab, its view model, and the Strong's and interlinear data   | [AGENT.md](dictionary/AGENT.md)          |
 | `stt/`                 | `:stt`                 | The STT tab and `STTManager`, the caption server's socket.io client                 | [AGENT.md](stt/AGENT.md)                 |
 | `announcements/`       | `:announcements`       | The Announcements tab and its timer                                                 | [AGENT.md](announcements/AGENT.md)       |
+| `lower-third/`         | `:lower-third`         | The Lower Third tab, its ATEM render cache and sequencer, and the bundled lottie fonts | [AGENT.md](lower-third/AGENT.md)         |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions
