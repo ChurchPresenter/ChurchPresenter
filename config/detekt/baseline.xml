@@ -47,7 +47,6 @@
     <ID>LongParameterList:BibleViewModelDetection.kt$( displayBookIndex: Int, chapter: Int, verseStart: Int?, verseEnd: Int?, source: String, autoFollow: Boolean, matchType: String? = null, )</ID>
     <ID>LongParameterList:SceneCanvas.kt$( x: Float, y: Float, w: Float, h: Float, sources: List&lt;SceneSource&gt;, excludeId: String, canvasWidth: Float, canvasHeight: Float )</ID>
     <ID>LongParameterList:SharedBrowserFrameCache.kt$SharedBrowserFrameCache$( sourceId: String, url: String, renderWidth: Int, renderHeight: Int, customCss: String, fps: Int, forceTransparent: Boolean )</ID>
-    <ID>TooManyFunctions:AutoStartManager.kt$AutoStartManager</ID>
     <ID>TooManyFunctions:BibleEngineClient.kt$BibleEngineClient</ID>
     <ID>TooManyFunctions:BibleViewModel.kt$BibleViewModel</ID>
     <ID>TooManyFunctions:BibleViewModelDetection.kt$org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModelDetection.kt</ID>

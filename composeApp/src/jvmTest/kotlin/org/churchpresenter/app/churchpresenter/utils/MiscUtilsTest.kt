@@ -110,16 +110,16 @@ class AutoStartManagerTest {
     fun `registration content is the payload for the platform`() {
         val exe = "/opt/CP/cp"
         assertEquals(
-            AutoStartManager.windowsRunValue(exe),
-            AutoStartManager.registrationContent(exe, AutoStartManager.Platform.WINDOWS),
+            AutostartEntries.windowsRunValue(exe),
+            AutostartEntries.registrationContent(exe, AutoStartManager.Platform.WINDOWS),
         )
         assertEquals(
-            AutoStartManager.macPlistContent(exe),
-            AutoStartManager.registrationContent(exe, AutoStartManager.Platform.MAC),
+            AutostartEntries.macPlistContent(exe),
+            AutostartEntries.registrationContent(exe, AutoStartManager.Platform.MAC),
         )
         assertEquals(
-            AutoStartManager.linuxDesktopContent(exe),
-            AutoStartManager.registrationContent(exe, AutoStartManager.Platform.LINUX),
+            AutostartEntries.linuxDesktopContent(exe),
+            AutostartEntries.registrationContent(exe, AutoStartManager.Platform.LINUX),
         )
     }
 
@@ -127,34 +127,34 @@ class AutoStartManagerTest {
     fun `the windows run value quotes the launcher path`() {
         assertEquals(
             "\"C:\\Program Files\\CP\\CP.exe\"",
-            AutoStartManager.windowsRunValue("C:\\Program Files\\CP\\CP.exe"),
+            AutostartEntries.windowsRunValue("C:\\Program Files\\CP\\CP.exe"),
         )
     }
 
     @Test
     fun `xml escaping neutralises every markup character`() {
-        assertEquals("&amp;", AutoStartManager.escapeXml("&"))
-        assertEquals("&lt;", AutoStartManager.escapeXml("<"))
-        assertEquals("&gt;", AutoStartManager.escapeXml(">"))
-        assertEquals("&quot;", AutoStartManager.escapeXml("\""))
-        assertEquals("&apos;", AutoStartManager.escapeXml("'"))
+        assertEquals("&amp;", AutostartEntries.escapeXml("&"))
+        assertEquals("&lt;", AutostartEntries.escapeXml("<"))
+        assertEquals("&gt;", AutostartEntries.escapeXml(">"))
+        assertEquals("&quot;", AutostartEntries.escapeXml("\""))
+        assertEquals("&apos;", AutostartEntries.escapeXml("'"))
         // Ampersand must be escaped first, or the '&' introduced for '<' would itself be re-escaped.
-        assertEquals("&amp;lt;", AutoStartManager.escapeXml("&lt;"))
+        assertEquals("&amp;lt;", AutostartEntries.escapeXml("&lt;"))
     }
 
     @Test
     fun `exec escaping backslash-escapes each freedesktop reserved character`() {
-        assertEquals("\\\\", AutoStartManager.escapeExec("\\"))
-        assertEquals("\\\"", AutoStartManager.escapeExec("\""))
-        assertEquals("\\\$", AutoStartManager.escapeExec("\$"))
-        assertEquals("\\`", AutoStartManager.escapeExec("`"))
+        assertEquals("\\\\", AutostartEntries.escapeExec("\\"))
+        assertEquals("\\\"", AutostartEntries.escapeExec("\""))
+        assertEquals("\\\$", AutostartEntries.escapeExec("\$"))
+        assertEquals("\\`", AutostartEntries.escapeExec("`"))
         // Backslash first, or the backslashes added for the others would themselves be doubled.
-        assertEquals("\\\\\\\"", AutoStartManager.escapeExec("\\\""))
+        assertEquals("\\\\\\\"", AutostartEntries.escapeExec("\\\""))
     }
 
     @Test
     fun `the mac plist embeds the launcher path xml-escaped and runs at load`() {
-        val plist = AutoStartManager.macPlistContent("/Apps/Church & Co/CP")
+        val plist = AutostartEntries.macPlistContent("/Apps/Church & Co/CP")
         assertTrue(plist.startsWith("<?xml"))
         assertTrue("<key>RunAtLoad</key>" in plist)
         assertTrue("<true/>" in plist)
@@ -164,7 +164,7 @@ class AutoStartManagerTest {
 
     @Test
     fun `the linux desktop entry escapes the exec path and enables autostart`() {
-        val entry = AutoStartManager.linuxDesktopContent("/opt/\$weird/cp")
+        val entry = AutostartEntries.linuxDesktopContent("/opt/\$weird/cp")
         assertTrue("[Desktop Entry]" in entry)
         assertTrue("Type=Application" in entry)
         assertTrue("X-GNOME-Autostart-enabled=true" in entry)
@@ -179,7 +179,7 @@ class AutoStartManagerTest {
 
         assertTrue(AutoStartManager.setEnabledFor(exe, platform, enabled = true), "register reports success")
         assertTrue(file.exists(), "registration writes the backing file")
-        assertEquals(AutoStartManager.registrationContent(exe, platform), file.readText(), "writes the exact payload")
+        assertEquals(AutostartEntries.registrationContent(exe, platform), file.readText(), "writes the exact payload")
         assertTrue(AutoStartManager.isEnabledFor(platform), "now reported enabled")
 
         assertTrue(AutoStartManager.setEnabledFor(exe, platform, enabled = false), "unregister reports success")
@@ -217,7 +217,7 @@ class AutoStartManagerTest {
         val mac = AutoStartManager.Platform.MAC
         AutoStartManager.setEnabledFor("/old/location/cp", mac, enabled = true)
         AutoStartManager.syncRegistrationFor("/new/location/cp", mac)
-        assertEquals(AutoStartManager.registrationContent("/new/location/cp", mac), macPlist.readText())
+        assertEquals(AutostartEntries.registrationContent("/new/location/cp", mac), macPlist.readText())
     }
 
     @Test
@@ -248,7 +248,7 @@ class AutoStartManagerTest {
 
         assertFalse(AutoStartManager.isEnabledFor(win, key))
         assertTrue(AutoStartManager.setEnabledFor(exe, win, enabled = true, runKey = key))
-        assertEquals(AutoStartManager.windowsRunValue(exe), key.value, "writes the quoted launcher path")
+        assertEquals(AutostartEntries.windowsRunValue(exe), key.value, "writes the quoted launcher path")
         assertTrue(AutoStartManager.isEnabledFor(win, key))
 
         assertTrue(AutoStartManager.setEnabledFor(exe, win, enabled = false, runKey = key))
@@ -279,7 +279,7 @@ class AutoStartManagerTest {
         assertEquals(matching, key.value, "matching value must not be rewritten")
 
         AutoStartManager.syncRegistrationFor("C:\\new\\CP.exe", win, key)
-        assertEquals(AutoStartManager.windowsRunValue("C:\\new\\CP.exe"), key.value, "stale value re-registered")
+        assertEquals(AutostartEntries.windowsRunValue("C:\\new\\CP.exe"), key.value, "stale value re-registered")
     }
 
     // ── a broken JNA native library is "unavailable", not fatal (CHURCH-PRESENTER-DESKTOP-6D/-6E) ─
