@@ -19,7 +19,7 @@ import org.churchpresenter.sharedui.testing.showsExactly
  * I/O and no `user.home` swap.
  *
  * `add`/`togglePin`/`clear` themselves — and the JSON they read and write — are covered separately
- * in [RecentPictureFoldersLogicTest], which repoints [RecentPictureFolders.file] and
+ * in `RecentPictureFoldersLogicTest`, which repoints [RecentPictureFolders.file] and
  * [RecentPictureFolders.pinnedFile] at a temp dir rather than clicking through this bar; nothing here
  * clicks a chip, a star or the clear button.
  *

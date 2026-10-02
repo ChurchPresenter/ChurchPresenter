@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.slides.tabs
 
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -9,8 +9,6 @@ import org.churchpresenter.sharedui.composables.SLIDESHOW_HIDE_TOGGLE_TAG
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.churchpresenter.slides.tabs.picturesTab
-import org.churchpresenter.slides.tabs.presentationTab
 
 /**
  * The eye on each picture and slide tile (#676), clicked for real.

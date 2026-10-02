@@ -37,15 +37,6 @@ internal fun placedLayer(
     state = state,
 )
 
-internal fun assertColorAt(pixelMap: PixelMap, x: Int, y: Int, expected: Color, tolerance: Float = 0.02f) {
-    val actual = pixelMap[x, y]
-    assertTrue(
-        abs(actual.red - expected.red) < tolerance &&
-            abs(actual.green - expected.green) < tolerance &&
-            abs(actual.blue - expected.blue) < tolerance,
-        "expected $expected at ($x, $y) but was $actual",
-    )
-}
 
 internal fun presentationFrame(
     layers: List<PlacedLayer>,

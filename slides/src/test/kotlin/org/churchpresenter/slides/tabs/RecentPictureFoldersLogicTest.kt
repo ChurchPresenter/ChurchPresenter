@@ -11,7 +11,7 @@ import kotlin.test.assertTrue
 /**
  * [RecentPictureFolders]'s own logic — add, pin, clear, and the JSON round-trip behind them.
  *
- * [PicturesTabRecentFoldersTest] covers what the bar renders; this covers what happens when a
+ * `PicturesTabRecentFoldersTest` covers what the bar renders; this covers what happens when a
  * button is actually pressed. [RecentPictureFolders.file] and [RecentPictureFolders.pinnedFile] are
  * repointed at a temp directory for the duration of each test, so `add`/`togglePin`/`clear` run for
  * real without ever touching the developer's own recent/pinned JSON files under `~/.churchpresenter`.

@@ -7,12 +7,11 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.churchpresenter.slides.tabs.RecentPictureFoldersLogicTest
 
 /**
  * [RecentMediaFiles]'s own logic — add, pin, clear, and the JSON round-trip behind them.
  *
- * Same shape as [RecentPictureFoldersLogicTest]. [RecentMediaFiles.file] and
+ * Same shape as `RecentPictureFoldersLogicTest`. [RecentMediaFiles.file] and
  * [RecentMediaFiles.pinnedFile] are repointed at a temp directory for the duration of each test, so
  * `add`/`togglePin`/`clear` run for real without ever touching the developer's own recent/pinned
  * JSON files under `~/.churchpresenter`.

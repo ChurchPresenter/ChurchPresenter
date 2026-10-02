@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.presentationengine.model.Direction
 import org.churchpresenter.presentationengine.model.TransitionType
 import kotlin.test.Test
+import org.churchpresenter.sharedui.testing.assertColorAt
 
 class PresentationPresenterTransitionTest {
 

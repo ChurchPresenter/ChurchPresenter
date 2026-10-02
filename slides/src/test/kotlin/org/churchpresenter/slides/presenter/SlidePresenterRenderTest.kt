@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.presenter
+package org.churchpresenter.slides.presenter
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -16,8 +16,6 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
-import org.churchpresenter.slides.presenter.SlidePresenter
-import org.churchpresenter.slides.presenter.zeroSizeWindowInfo
 
 class SlidePresenterRenderTest {
 

@@ -70,4 +70,5 @@ composeApp/src/jvmMain/appResources/*/omt/
 # Scratch: cleaned up after every run, and never something to commit.
 composeApp/screenshots/.parts/
 shared-ui/screenshots/.parts/
+slides/screenshots/.parts/
 screenshots-compare/

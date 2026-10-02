@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.presentationengine.model.RevealClip
 import org.churchpresenter.presentationengine.model.LayerState
 import kotlin.test.Test
+import org.churchpresenter.sharedui.testing.assertColorAt
 
 class PresentationPresenterDrawTest {
 
