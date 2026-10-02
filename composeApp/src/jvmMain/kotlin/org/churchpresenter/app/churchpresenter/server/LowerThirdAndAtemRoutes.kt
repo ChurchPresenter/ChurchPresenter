@@ -186,7 +186,7 @@ private fun Route.atemClipRoutes(
                     }
                     server.atem.trackUpload(
                         scope.launch {
-                            uploadClipFrames(file, atem, slot, key, name, lottieJson, fps, frameCount)
+                            uploadClipFrames(AtemClip(file, name, lottieJson, fps, frameCount), atem, slot, key)
                         }
                     )
                     val keyInfoClip = when {
@@ -316,24 +316,24 @@ private fun atemKeyTarget(call: ApplicationCall, server: CompanionServer, atem: 
     )
 }
 
+/** A lower third about to become an ATEM clip: its file, the name it was asked for by, and its timing. */
+private data class AtemClip(
+    val file: java.io.File,
+    val name: String,
+    val lottieJson: String,
+    val fps: Double,
+    val frameCount: Int,
+)
+
 /** Renders the named lower third to an ATEM clip, uploads it, and keys it if asked. */
-private suspend fun uploadClipFrames(
-    file: java.io.File,
-    atem: AtemSettings,
-    slot: Int,
-    key: AtemKeyTarget,
-    name: String,
-    lottieJson: String,
-    fps: Double,
-    frameCount: Int,
-) {
-    val uploadId = AtemUploadStatus.begin(file.nameWithoutExtension, clip = true, slot = slot + 1)
+private suspend fun uploadClipFrames(clip: AtemClip, atem: AtemSettings, slot: Int, key: AtemKeyTarget) {
+    val uploadId = AtemUploadStatus.begin(clip.file.nameWithoutExtension, clip = true, slot = slot + 1)
     try {
-        val variant = LottieRenderCache.atemVariant(lottieJson, atem, clip = true, fps = fps)
-        val cached = LottieRenderCache.prepare(lottieJson, variant).await()
+        val variant = LottieRenderCache.atemVariant(clip.lottieJson, atem, clip = true, fps = clip.fps)
+        val cached = LottieRenderCache.prepare(clip.lottieJson, variant).await()
         AtemConnectionManager.use(atem.host, atem.port, needsState = true) { client ->
             LottieRenderCache.Reader(cached).use { reader ->
-                client.uploadClipEncoded(slot, reader.frameCount, file.nameWithoutExtension,
+                client.uploadClipEncoded(slot, reader.frameCount, clip.file.nameWithoutExtension,
                     nextFrame = { reader.nextAtemFrame(atem.renderWidth, atem.renderHeight) }
                 ) { p -> AtemUploadStatus.progress(uploadId, p) }
             }
@@ -341,7 +341,7 @@ private suspend fun uploadClipFrames(
             // over a half-processed clip. Best-effort: key anyway if the device never reports ready
             // within the timeout.
             AtemUploadStatus.startProcessing(uploadId)
-            client.awaitClipReady(slot, frameCount) { p -> AtemUploadStatus.progress(uploadId, p) }
+            client.awaitClipReady(slot, clip.frameCount) { p -> AtemUploadStatus.progress(uploadId, p) }
             if (key.on) client.setKeyOnAir(AtemKey(key.useDsk, key.mixEffect, key.keyer), true)
         }
         AtemUploadStatus.complete(uploadId)
@@ -350,7 +350,7 @@ private suspend fun uploadClipFrames(
         // Wait for the clip to finish playing, then turn the key off automatically. The mutex is
         // released between the two use() calls so other operations can proceed.
         if (key.on) {
-            delay(if (fps > 0.0) ((frameCount.toDouble() * MILLIS_PER_SECOND) / fps).toLong() else 0L)
+            delay(if (clip.fps > 0.0) ((clip.frameCount.toDouble() * MILLIS_PER_SECOND) / clip.fps).toLong() else 0L)
             AtemConnectionManager.use(atem.host, atem.port, needsState = false) { client ->
                 client.setKeyOnAir(AtemKey(key.useDsk, key.mixEffect, key.keyer), false)
             }
@@ -363,12 +363,12 @@ private suspend fun uploadClipFrames(
         throw e
     } catch (e: IOException) {
         // The ATEM link (AtemProtocolException is one) or the render cache.
-        atemUploadFailed("clip", name, uploadId, e)
+        atemUploadFailed("clip", clip.name, uploadId, e)
     } catch (e: IllegalArgumentException) {
         // A lower third whose JSON will not parse.
-        atemUploadFailed("clip", name, uploadId, e)
+        atemUploadFailed("clip", clip.name, uploadId, e)
     } catch (e: IllegalStateException) {
-        atemUploadFailed("clip", name, uploadId, e)
+        atemUploadFailed("clip", clip.name, uploadId, e)
     }
 }
 

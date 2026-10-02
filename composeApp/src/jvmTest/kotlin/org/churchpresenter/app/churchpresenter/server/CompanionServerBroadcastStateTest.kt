@@ -213,9 +213,11 @@ class CompanionServerBroadcastStateTest {
     @Test
     fun `the media transport state reaches the mobile media tab`() {
         server.broadcastMediaState(
-            isLive = true, isLoaded = true, isPlaying = true, title = "Offering Video",
-            positionMs = 12_500, durationMs = 240_000, volume = 0.8f, muted = false,
-            mediaType = "video", source = "/media/offering.mp4",
+            MediaPlaybackState(
+                isLive = true, isLoaded = true, isPlaying = true, title = "Offering Video",
+                positionMs = 12_500, durationMs = 240_000, volume = 0.8f, muted = false,
+                mediaType = "video", source = "/media/offering.mp4",
+            ),
         )
 
         val p = awaitPayload(Constants.WS_EVENT_MEDIA_STATE_CHANGED)
@@ -237,9 +239,11 @@ class CompanionServerBroadcastStateTest {
         val awkward = "He said \"Go\"\n\tBack\\slash"
 
         server.broadcastMediaState(
-            isLive = true, isLoaded = true, isPlaying = false, title = awkward,
-            positionMs = 0, durationMs = 1_000, volume = 1f, muted = false,
-            mediaType = "audio", source = """C:\Media\hymn"1".mp3""",
+            MediaPlaybackState(
+                isLive = true, isLoaded = true, isPlaying = false, title = awkward,
+                positionMs = 0, durationMs = 1_000, volume = 1f, muted = false,
+                mediaType = "audio", source = """C:\Media\hymn"1".mp3""",
+            ),
         )
 
         val p = awaitPayload(Constants.WS_EVENT_MEDIA_STATE_CHANGED)
@@ -256,9 +260,11 @@ class CompanionServerBroadcastStateTest {
         // nothing loaded, otherwise it goes on showing the last clip's transport as though it were
         // still there.
         server.broadcastMediaState(
-            isLive = false, isLoaded = false, isPlaying = false, title = "",
-            positionMs = 0, durationMs = 0, volume = 0.5f, muted = true,
-            mediaType = "", source = "",
+            MediaPlaybackState(
+                isLive = false, isLoaded = false, isPlaying = false, title = "",
+                positionMs = 0, durationMs = 0, volume = 0.5f, muted = true,
+                mediaType = "", source = "",
+            ),
         )
 
         val p = awaitPayload(Constants.WS_EVENT_MEDIA_STATE_CHANGED)

@@ -47,3 +47,17 @@ data class PendingConnectionRequest(
     val clientId: String = "",
     val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
 )
+
+/** The desktop media player's state as the companion Media tab is told it. */
+data class MediaPlaybackState(
+    val isLive: Boolean,
+    val isLoaded: Boolean,
+    val isPlaying: Boolean,
+    val title: String,
+    val positionMs: Long,
+    val durationMs: Long,
+    val volume: Float,
+    val muted: Boolean,
+    val mediaType: String,
+    val source: String,
+)

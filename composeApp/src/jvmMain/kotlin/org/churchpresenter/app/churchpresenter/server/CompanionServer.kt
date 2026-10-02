@@ -51,16 +51,13 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.app.churchpresenter.data.Songs
-import org.churchpresenter.dictionary.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceFrame
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.qa.QAManager
-import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.toDto
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.calendar.sync.Projection
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.diagnostics.CrashReporter
@@ -208,18 +205,7 @@ class CompanionServer {
      * Broadcasts the desktop media player's playback state to companions (mobile Media tab).
      * Position ticks continuously, so callers poll this on a fixed cadence.
      */
-    fun broadcastMediaState(
-        isLive: Boolean,
-        isLoaded: Boolean,
-        isPlaying: Boolean,
-        title: String,
-        positionMs: Long,
-        durationMs: Long,
-        volume: Float,
-        muted: Boolean,
-        mediaType: String,
-        source: String,
-    ) {
+    fun broadcastMediaState(state: MediaPlaybackState) = with(state) {
         broadcast(WebSocketMessage(
             type = Constants.WS_EVENT_MEDIA_STATE_CHANGED,
             payload = """{"isLive":$isLive,"isLoaded":$isLoaded,"isPlaying":$isPlaying,""" +
@@ -920,32 +906,9 @@ class CompanionServer {
      * Broadcasts a snapshot of whatever is currently live — fills the gap for content types with
      * no dedicated "now live" event (bible, songs, pictures, media, lower thirds, announcements,
      * websites, scenes, Q&A, dictionary). Presentations rely on the existing slide-changed events
-     * instead — [mode] == "PRESENTATION" here is informational only.
+     * instead — [LiveContent.mode] == "PRESENTATION" here is informational only.
      */
-    fun updateLiveState(
-        mode: String,
-        bibleVerse: SelectedVerse?,
-        lyricSection: LyricSection?,
-        pictureImagePath: String?,
-        mediaUrl: String?,
-        mediaType: String?,
-        announcementText: String?,
-        websiteUrl: String?,
-        websiteTitle: String?,
-        sceneId: String?,
-        sceneName: String?,
-        questionId: String?,
-        questionText: String?,
-        dictionaryWord: String?,
-        dictionaryEntry: StrongsEntry? = null,
-        lowerThirdName: String? = null,
-        // Canonical verse code (book, chapter, verse) computed from this instance's OWN loaded bible —
-        // see LiveStateDto.verseCodeBook and BibleSyncMode.REFERENCE_ONLY. Null when not applicable.
-        verseCode: Triple<Int, Int, Int>? = null,
-        // Current line/section position within [lyricSection] — see LiveStateDto.songSectionIndex.
-        songSectionIndex: Int? = null,
-        songLineIndex: Int? = null
-    ) {
+    fun updateLiveState(content: LiveContent) = with(content) {
         val (pictureFolderId, pictureIndex) = pictures.locate(pictureImagePath)
         val mediaId = mediaUrl?.let { url -> _scheduleItemToMediaPath.entries.find { it.value == url }?.key }
         val dto = LiveStateDto(
@@ -983,7 +946,7 @@ class CompanionServer {
         // Skip byte-identical re-broadcasts (content setters fire on every call, even when
         // nothing changed) — same early-return pattern the other update* functions use. Protects
         // the shared broadcast buffer from floods that could evict messages for slow clients.
-        if (_liveState.value == dto) return
+        if (_liveState.value == dto) return@with
         _liveState.value = dto
         broadcast(WebSocketMessage(
             type = Constants.WS_EVENT_LIVE_STATE_CHANGED,

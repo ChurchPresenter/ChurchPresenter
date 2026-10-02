@@ -29,6 +29,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+
+private val TEXTS = ContactFailureTexts(error = "error", network = "network", rateLimited = "rate limited")
+
 class ContactUsContentTest {
 
     @BeforeTest
@@ -228,9 +231,7 @@ class ContactUsContentTest {
     fun `statusForOutcome maps Success to Sent`() {
         val status = statusForOutcome(
             ContactReporter.Outcome.Success,
-            errorText = "error",
-            networkText = "network",
-            rateLimitedText = "rate limited",
+            texts = TEXTS,
         )
 
         assertEquals(SendStatus.Sent, status)
@@ -240,9 +241,7 @@ class ContactUsContentTest {
     fun `statusForOutcome maps RateLimited to its own error text`() {
         val status = statusForOutcome(
             ContactReporter.Outcome.RateLimited,
-            errorText = "error",
-            networkText = "network",
-            rateLimitedText = "rate limited",
+            texts = TEXTS,
         )
 
         assertEquals(SendStatus.Error("rate limited"), status)
@@ -252,9 +251,7 @@ class ContactUsContentTest {
     fun `statusForOutcome maps NetworkError to its own error text`() {
         val status = statusForOutcome(
             ContactReporter.Outcome.NetworkError,
-            errorText = "error",
-            networkText = "network",
-            rateLimitedText = "rate limited",
+            texts = TEXTS,
         )
 
         assertEquals(SendStatus.Error("network"), status)
@@ -264,9 +261,7 @@ class ContactUsContentTest {
     fun `statusForOutcome maps Failure to the generic error text`() {
         val status = statusForOutcome(
             ContactReporter.Outcome.Failure,
-            errorText = "error",
-            networkText = "network",
-            rateLimitedText = "rate limited",
+            texts = TEXTS,
         )
 
         assertEquals(SendStatus.Error("error"), status)
@@ -276,9 +271,7 @@ class ContactUsContentTest {
     fun `statusForOutcome prefers the server's reason for an Invalid outcome`() {
         val status = statusForOutcome(
             ContactReporter.Outcome.Invalid("Message is required"),
-            errorText = "error",
-            networkText = "network",
-            rateLimitedText = "rate limited",
+            texts = TEXTS,
         )
 
         assertEquals(SendStatus.Error("Message is required"), status)
@@ -288,9 +281,7 @@ class ContactUsContentTest {
     fun `statusForOutcome falls back to the generic text when Invalid has no server reason`() {
         val status = statusForOutcome(
             ContactReporter.Outcome.Invalid(null),
-            errorText = "error",
-            networkText = "network",
-            rateLimitedText = "rate limited",
+            texts = TEXTS,
         )
 
         assertEquals(SendStatus.Error("error"), status)
@@ -305,9 +296,7 @@ class ContactUsContentTest {
             name = "A Church",
             email = "pastor@church.org",
             message = "Something's broken",
-            errorText = "error",
-            networkText = "network",
-            rateLimitedText = "rate limited",
+            texts = TEXTS,
         )
 
         assertEquals(SendStatus.Sent, status)
@@ -326,9 +315,7 @@ class ContactUsContentTest {
             name = "  A Church  ",
             email = " pastor@church.org ",
             message = "  Something's broken  ",
-            errorText = "error",
-            networkText = "network",
-            rateLimitedText = "rate limited",
+            texts = TEXTS,
         )
 
         assertEquals("bugReport", captured?.type)
@@ -346,9 +333,7 @@ class ContactUsContentTest {
             name = "A Church",
             email = "",
             message = "Loving the app!",
-            errorText = "error",
-            networkText = "network",
-            rateLimitedText = "rate limited",
+            texts = TEXTS,
         )
 
         assertEquals(SendStatus.Error("network"), status)
@@ -363,9 +348,7 @@ class ContactUsContentTest {
             name = "A Church",
             email = "",
             message = "Loving the app!",
-            errorText = "error",
-            networkText = "network",
-            rateLimitedText = "rate limited",
+            texts = TEXTS,
         )
 
         assertEquals(SendStatus.Error("rate limited"), status)

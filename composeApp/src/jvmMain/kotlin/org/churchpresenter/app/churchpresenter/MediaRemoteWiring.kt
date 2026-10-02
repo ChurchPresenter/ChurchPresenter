@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.server.MediaPlaybackState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.delay
@@ -29,25 +30,29 @@ internal fun MediaRemoteWiring(
             val loaded = mediaViewModel.isLoaded
             if (loaded) {
                 companionServer.broadcastMediaState(
-                    isLive = isMediaLive(presenterManager.presentingMode.value),
-                    isLoaded = true,
-                    isPlaying = mediaViewModel.isPlaying,
-                    title = mediaViewModel.mediaTitle,
-                    positionMs = mediaViewModel.currentPosition,
-                    durationMs = mediaViewModel.duration,
-                    volume = mediaViewModel.volume,
-                    muted = mediaViewModel.isMuted,
-                    mediaType = mediaViewModel.mediaType,
-                    source = mediaViewModel.mediaUrl,
+                    MediaPlaybackState(
+                        isLive = isMediaLive(presenterManager.presentingMode.value),
+                        isLoaded = true,
+                        isPlaying = mediaViewModel.isPlaying,
+                        title = mediaViewModel.mediaTitle,
+                        positionMs = mediaViewModel.currentPosition,
+                        durationMs = mediaViewModel.duration,
+                        volume = mediaViewModel.volume,
+                        muted = mediaViewModel.isMuted,
+                        mediaType = mediaViewModel.mediaType,
+                        source = mediaViewModel.mediaUrl,
+                    ),
                 )
                 wasLoaded = true
             } else if (shouldBroadcastMediaCleared(loaded, wasLoaded)) {
                 // One final "not loaded" so the mobile clears its now-playing view.
                 companionServer.broadcastMediaState(
-                    isLive = false, isLoaded = false, isPlaying = false,
-                    title = "", positionMs = 0L, durationMs = 0L,
-                    volume = mediaViewModel.volume, muted = mediaViewModel.isMuted,
-                    mediaType = mediaViewModel.mediaType, source = "",
+                    MediaPlaybackState(
+                        isLive = false, isLoaded = false, isPlaying = false,
+                        title = "", positionMs = 0L, durationMs = 0L,
+                        volume = mediaViewModel.volume, muted = mediaViewModel.isMuted,
+                        mediaType = mediaViewModel.mediaType, source = "",
+                    ),
                 )
                 wasLoaded = false
             }

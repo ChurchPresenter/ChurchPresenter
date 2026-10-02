@@ -97,6 +97,8 @@ object X11WindowCapture {
     internal interface X11 : Library {
         fun XOpenDisplay(name: String?): Pointer?
         fun XGetWindowAttributes(display: Pointer, window: NativeLong, attrs: XWindowAttributes): Int
+        // A JNA binding: the parameters are Xlib's own, and cannot be grouped.
+        @Suppress("LongParameterList")
         fun XGetImage(display: Pointer, drawable: NativeLong, x: Int, y: Int,
                       width: Int, height: Int, planeMask: NativeLong, format: Int): Pointer?
         fun XDestroyImage(image: Pointer): Int
