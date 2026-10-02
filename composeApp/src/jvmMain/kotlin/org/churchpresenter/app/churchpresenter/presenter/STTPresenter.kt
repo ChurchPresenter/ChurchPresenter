@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.settings.CaptionReading
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -62,44 +63,12 @@ fun STTPresenter(
     sttSettings: STTSettings,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
 ) {
-    val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
-    val textColor = if (isKey) Color.White else parseHexColor(sttSettings.textColor)
-    val translationColor = if (isKey) Color.White else parseHexColor(sttSettings.translationTextColor)
-    val bgOpacity = (sttSettings.backgroundOpacity / 100f).coerceIn(0f, 1f)
-    val cardBg = if (isKey) Color.White
-                 else parseHexColor(if (
-                     sttSettings.backgroundColor == Constants.COLOR_VALUE_TRANSPARENT
-                 ) "#1E1E2E" else sttSettings.backgroundColor).copy(alpha = bgOpacity)
-    val fontFamily = systemFontFamilyOrDefault(sttSettings.fontType)
-
-    val shadowColorBase = parseHexColor(sttSettings.shadowColor)
-    val shadowSizeMul = sttSettings.shadowSize / 100f
-    val shadowAlpha = (sttSettings.shadowOpacity / 100f).coerceIn(0f, 1f)
-    val sttShadow = Shadow(
-        color = shadowColorBase.copy(alpha = shadowAlpha),
-        offset = Offset(4f * shadowSizeMul, 4f * shadowSizeMul),
-        blurRadius = 8f * shadowSizeMul
-    )
-
-    val lineHeightSp = (sttSettings.fontSize * sttSettings.lineSpacing / 100f).sp
-
-    val baseTextStyle = TextStyle(
-        fontFamily = fontFamily,
-        fontWeight = if (sttSettings.bold) FontWeight.Bold else FontWeight.Normal,
-        fontStyle = if (sttSettings.italic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = if (sttSettings.underline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (sttSettings.shadow) sttShadow else null,
-        textAlign = when {
-            sttSettings.position.contains("Left") -> TextAlign.Left
-            sttSettings.position.contains("Right") -> TextAlign.Right
-            else -> TextAlign.Center
-        },
-        fontSize = sttSettings.fontSize.sp,
-        lineHeight = lineHeightSp,
-        letterSpacing = spacingEm(sttSettings.letterSpacing, sttSettings.fontSize).em,
-    )
-    val transcriptLook = baseTextStyle.copy(color = textColor)
-    val translationLook = translationTextStyle(baseTextStyle, sttSettings).copy(color = translationColor)
+    val look = remember(sttSettings, outputRole) { captionLook(sttSettings, outputRole) }
+    val textColor = look.textColor
+    val translationColor = look.translationColor
+    val cardBg = look.cardBg
+    val transcriptLook = look.transcript
+    val translationLook = look.translation
     val reading = sttSettings.reading
 
     val boxAlignment = sttPositionToAlignment(sttSettings.position)
@@ -134,26 +103,16 @@ fun STTPresenter(
     val highlights = highlightedWords.takeIf { sttSettings.showWordHighlighting }.orEmpty()
     val transcriptInk = CaptionInk(textColor, highlights, spaceTrackingEm)
     val translationInk = CaptionInk(translationColor, highlights, spaceTrackingEm)
-    val transcriptionText = withReadingAids(
-        buildDisplayText(
-            captionBody(
-                keptTranscription, inProgressText.takeIf { sttSettings.showInProgress && !ticker }, reading,
-                sttSettings.transcriptAllCaps,
-            ),
-            keptTranscription.isNotEmpty(), reading, transcriptInk,
-        ),
-        dripTranscription.flashWords, reading,
+    val transcriptSide = CaptionSide(
+        keptTranscription, inProgressText.takeIf { sttSettings.showInProgress && !ticker }, transcriptInk,
+        sttSettings.transcriptAllCaps,
     )
-    val translationText = withReadingAids(
-        buildDisplayText(
-            captionBody(
-                keptTranslation, inProgressTranslation.takeIf { sttSettings.showTranslationInProgress && !ticker },
-                reading, sttSettings.translationAllCaps,
-            ),
-            keptTranslation.isNotEmpty(), reading, translationInk,
-        ),
-        dripTranslation.flashWords, reading,
+    val translationSide = CaptionSide(
+        keptTranslation, inProgressTranslation.takeIf { sttSettings.showTranslationInProgress && !ticker },
+        translationInk, sttSettings.translationAllCaps,
     )
+    val transcriptionText = captionText(transcriptSide, dripTranscription.flashWords, reading)
+    val translationText = captionText(translationSide, dripTranslation.flashWords, reading)
     val silenceFade = rememberSilenceFade(transcriptionText.text + "\u0000" + translationText.text, reading)
     val faded = modifier.graphicsLayer {
         alpha = silenceFade.value
@@ -166,17 +125,8 @@ fun STTPresenter(
     val isInverse = sttSettings.layout.endsWith("_inverse")
     // RSVP flashes each side on its own, so an interleaved layout stacks them instead
     val interleavedText = if (isBothMode && sttSettings.layout.startsWith(LAYOUT_INTERLEAVED) && !rsvp) {
-        interleavedCaption(
-            CaptionSide(
-                keptTranscription, inProgressText.takeIf { sttSettings.showInProgress && !ticker }, transcriptInk,
-                sttSettings.transcriptAllCaps,
-            ),
-            CaptionSide(
-                keptTranslation, inProgressTranslation.takeIf { sttSettings.showTranslationInProgress && !ticker },
-                translationInk, sttSettings.translationAllCaps,
-            ),
-            translationLook, translationFirst = isInverse, sttSettings,
-        ).let { withReadingAids(it, flashWords = 0, reading) }
+        interleavedCaption(transcriptSide, translationSide, translationLook, translationFirst = isInverse, sttSettings)
+            .let { withReadingAids(it, flashWords = 0, reading) }
     } else {
         null
     }
@@ -354,3 +304,65 @@ private class RevealedCaption(val segments: List<STTSegment>, val flashWords: In
 /** The last [count] of [segments], or all of them when [count] is 0 or less. */
 internal fun <T> keepNewest(segments: List<T>, count: Int): List<T> =
     if (count > 0) segments.takeLast(count) else segments
+
+/** The colours, card and type captions are drawn in. */
+private data class CaptionColors(
+    val textColor: Color,
+    val translationColor: Color,
+    val cardBg: Color,
+    val transcript: TextStyle,
+    val translation: TextStyle,
+)
+
+/** How [s] draws captions on an output of [outputRole]: a key output draws everything white. */
+private fun captionLook(s: STTSettings, outputRole: String): CaptionColors {
+    val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
+    val textColor = if (isKey) Color.White else parseHexColor(s.textColor)
+    val translationColor = if (isKey) Color.White else parseHexColor(s.translationTextColor)
+    val bgOpacity = (s.backgroundOpacity / 100f).coerceIn(0f, 1f)
+    val cardBg = if (isKey) Color.White
+                 else parseHexColor(if (
+                     s.backgroundColor == Constants.COLOR_VALUE_TRANSPARENT
+                 ) "#1E1E2E" else s.backgroundColor).copy(alpha = bgOpacity)
+    val fontFamily = systemFontFamilyOrDefault(s.fontType)
+
+    val shadowColorBase = parseHexColor(s.shadowColor)
+    val shadowSizeMul = s.shadowSize / 100f
+    val shadowAlpha = (s.shadowOpacity / 100f).coerceIn(0f, 1f)
+    val sttShadow = Shadow(
+        color = shadowColorBase.copy(alpha = shadowAlpha),
+        offset = Offset(4f * shadowSizeMul, 4f * shadowSizeMul),
+        blurRadius = 8f * shadowSizeMul
+    )
+
+    val lineHeightSp = (s.fontSize * s.lineSpacing / 100f).sp
+
+    val baseTextStyle = TextStyle(
+        fontFamily = fontFamily,
+        fontWeight = if (s.bold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (s.italic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = if (s.underline) TextDecoration.Underline else TextDecoration.None,
+        shadow = if (s.shadow) sttShadow else null,
+        textAlign = when {
+            s.position.contains("Left") -> TextAlign.Left
+            s.position.contains("Right") -> TextAlign.Right
+            else -> TextAlign.Center
+        },
+        fontSize = s.fontSize.sp,
+        lineHeight = lineHeightSp,
+        letterSpacing = spacingEm(s.letterSpacing, s.fontSize).em,
+    )
+    val transcriptLook = baseTextStyle.copy(color = textColor)
+    val translationLook = translationTextStyle(baseTextStyle, s).copy(color = translationColor)
+    return CaptionColors(textColor, translationColor, cardBg, transcriptLook, translationLook)
+}
+
+/** One language's caption: its kept segments and the words still being spoken, inked and read-aided. */
+private fun captionText(side: CaptionSide, flashWords: Int, reading: CaptionReading): AnnotatedString =
+    withReadingAids(
+        buildDisplayText(
+            captionBody(side.segments, side.inProgress, reading, side.allCaps),
+            side.segments.isNotEmpty(), reading, side.ink,
+        ),
+        flashWords, reading,
+    )
