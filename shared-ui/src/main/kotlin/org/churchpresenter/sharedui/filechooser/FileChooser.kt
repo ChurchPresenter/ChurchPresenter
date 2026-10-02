@@ -232,3 +232,18 @@ abstract class FileChooser {
         }
     }
 }
+
+/**
+ * What one dialog is asked for: where it opens, what it offers, and what may be picked.
+ *
+ * [suggestedName] is set only for a save dialog — the XDG portal must not be sent the key at all
+ * for an open one. [selectDirectory] and [multiple] mean nothing to a save dialog.
+ */
+internal data class DialogRequest(
+    val path: Path,
+    val filters: List<FileNameExtensionFilter>,
+    val title: String,
+    val suggestedName: String? = null,
+    val selectDirectory: Boolean = false,
+    val multiple: Boolean = false,
+)

@@ -103,7 +103,7 @@ class PicturesThumbnailFailureTest {
         writeUndecodable("holiday snap.png")
         val vm = viewModel()
 
-        val reported = runBlocking { vm.decodeThumbnail(File(folder, "holiday snap.png")) }
+        val reported = runBlocking { vm.thumbnailing.decodeThumbnail(File(folder, "holiday snap.png")) }
 
         assertNotNull(reported, "an unreadable picture is worth a report")
         assertContains(reported, "ext=png")
@@ -123,7 +123,7 @@ class PicturesThumbnailFailureTest {
         val vm = viewModel()
         val empty = File(folder, "still-syncing.png")
 
-        val reported = runBlocking { vm.decodeThumbnail(empty) }
+        val reported = runBlocking { vm.thumbnailing.decodeThumbnail(empty) }
 
         assertNull(reported, "nothing to report: $reported")
         assertContains(

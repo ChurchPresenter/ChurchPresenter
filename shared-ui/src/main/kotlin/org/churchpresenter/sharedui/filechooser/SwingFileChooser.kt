@@ -12,7 +12,6 @@ import javax.swing.filechooser.FileNameExtensionFilter
 
 private const val FOCUS_RETRY_ATTEMPTS = 6
 
-
 object SwingFileChooser : FileChooser() {
 
     /** Bridges allowing FileKitFileChooser to fall back to the Swing dialog if the native one fails. */
@@ -41,150 +40,16 @@ object SwingFileChooser : FileChooser() {
     private val ownerFrame: JFrame by lazy { JFrame().apply { configureOwnerFrame(this) } }
 
     /**
-     * Makes [frame] the invisible, iconned owner a file dialog hangs off: no decorations, no size,
-     * centred, carrying the app icon.
-     *
-     * A frame that cannot take the icon is still a usable owner, so a failure there is swallowed —
-     * the alternative is no file dialogs at all on a machine whose icon is unreadable.
-     */
-    internal fun configureOwnerFrame(frame: JFrame) {
-        frame.isUndecorated = true
-        frame.setSize(0, 0)
-        frame.setLocationRelativeTo(null)
-        try {
-            frame.iconImage = loadAppIcon()
-        } catch (_: Exception) {}
-    }
-
-    /** Loads the app icon from appResources (packaged) or the source tree (IDE run). */
-    private fun loadAppIcon(): java.awt.Image? {
-        // 1. Packaged app: compose.application.resources.dir is set
-        System.getProperty("compose.application.resources.dir")?.let { resDir ->
-            listOf("icon-32.png", "icon-48.png", "icon.png")
-                .map { File(resDir, it) }
-                .firstOrNull { it.exists() }
-                ?.let { return ImageIO.read(it) }
-        }
-        // 2. IDE / development run: walk up from working directory to find appResources
-        var dir = File(System.getProperty("user.dir"))
-        repeat(FOCUS_RETRY_ATTEMPTS) {
-            val candidate = File(dir, "composeApp/src/jvmMain/appResources/common/icon-32.png")
-            if (candidate.exists()) return ImageIO.read(candidate)
-            dir = dir.parentFile ?: return@repeat
-        }
-        return null
-    }
-
-    /**
-     * Offers [filters] and pre-selects the first one, which is the filter the dialog opens showing.
-     *
-     * With filters present "All Files" is removed, so only supported types are selectable; with no
-     * filters nothing is added and the dialog keeps its default "All Files" entry.
-     */
-    internal fun JFileChooser.applyFilters(filters: List<FileNameExtensionFilter>) {
-        if (filters.isEmpty()) return
-        // Disable "All Files" so only the supported types are selectable
-        isAcceptAllFileFilterUsed = false
-        filters.forEach { addChoosableFileFilter(it) }
-        // Pre-select the first filter as the active one
-        fileFilter = filters.first()
-    }
-
-    /** Everything the open dialog is told before it is shown. */
-    internal fun configureOpen(
-        chooser: JFileChooser,
-        filters: List<FileNameExtensionFilter>,
-        title: String,
-        selectDirectory: Boolean,
-        multiple: Boolean
-    ) {
-        chooser.dialogTitle = title
-        chooser.fileSelectionMode =
-            if (selectDirectory) JFileChooser.DIRECTORIES_ONLY else JFileChooser.FILES_ONLY
-        chooser.isMultiSelectionEnabled = multiple
-        chooser.applyFilters(filters)
-    }
-
-    /** Everything the save dialog is told before it is shown, including the name it opens with. */
-    internal fun configureSave(
-        chooser: JFileChooser,
-        location: Path,
-        suggestedName: String,
-        filters: List<FileNameExtensionFilter>,
-        title: String
-    ) {
-        chooser.dialogTitle = title
-        chooser.selectedFile = location.resolve(suggestedName).toFile()
-        chooser.applyFilters(filters)
-    }
-
-    /**
-     * Reads the open dialog's outcome; anything but approval means the operator cancelled.
-     *
-     * Approval is not a promise of a selection: the Windows look-and-feel can approve a single choice
-     * with no file selected at all (Sentry CHURCH-PRESENTER-DESKTOP-7S). That comes back empty, the
-     * same as an approved multiple choice with nothing in it, rather than being dereferenced.
-     */
-    internal fun openResult(returnCode: Int, chooser: JFileChooser, multiple: Boolean): List<Path>? =
-        if (returnCode == JFileChooser.APPROVE_OPTION) {
-            val chosen = if (multiple) chooser.selectedFiles.orEmpty().toList() else listOfNotNull(chooser.selectedFile)
-            chosen.map { it.toPath() }
-        } else {
-            null
-        }
-
-    /** Reads the save dialog's outcome; anything but approval, or an approval naming nothing, is a cancel. */
-    internal fun saveResult(returnCode: Int, chooser: JFileChooser): Path? =
-        if (returnCode == JFileChooser.APPROVE_OPTION) chooser.selectedFile?.toPath() else null
-
-    /**
-     * Runs [block] on the event dispatch thread and hands back what it returned.
-     *
-     * Swing insists a dialog is opened from the EDT, but the callers are suspending functions on
-     * whatever dispatcher they happen to be on, so the value has to be carried back out by hand.
-     * A failure inside [block] surfaces as `InvocationTargetException`, and calling this from the
-     * EDT itself is an error — both are `invokeAndWait`'s own behaviour, unchanged.
-     */
-    internal fun <T> onEventDispatchThread(block: () -> T): T {
-        var result: T? = null
-        SwingUtilities.invokeAndWait { result = block() }
-        @Suppress("UNCHECKED_CAST")
-        return result as T
-    }
-
-    /**
-     * Shows [dialog] owned by [frame] and returns its return code.
-     *
-     * The frame exists only to give the dialog the app icon, so it is visible for exactly as long
-     * as the dialog is up and hidden again afterwards — leaving it showing would strand a
-     * zero-sized window on the desktop. [frame] is a parameter so this holds without a display;
-     * in production it is always [ownerFrame].
-     */
-    internal fun showOwned(frame: JFrame, dialog: (JFrame) -> Int): Int {
-        frame.isVisible = true
-        val returnCode = dialog(frame)
-        frame.isVisible = false
-        return returnCode
-    }
-
-    /**
      * The whole open interaction: build a chooser at [path], configure it, put it on screen with
      * [show], and read the outcome.
      *
      * [show] is a parameter rather than a direct call so the sequence can be exercised without a
      * display; in production it is always [showOwned].
      */
-    internal fun openWith(
-        path: Path,
-        filters: List<FileNameExtensionFilter>,
-        title: String,
-        selectDirectory: Boolean,
-        multiple: Boolean,
-        show: (JFileChooser) -> Int
-    ): List<Path>? {
-        val chooser = JFileChooser(path.toFile())
-        configureOpen(chooser, filters, title, selectDirectory, multiple)
-        return openResult(show(chooser), chooser, multiple)
+    internal fun openWith(request: DialogRequest, show: (JFileChooser) -> Int): List<Path>? {
+        val chooser = JFileChooser(request.path.toFile())
+        configureOpen(chooser, request.filters, request.title, request.selectDirectory, request.multiple)
+        return openResult(show(chooser), chooser, request.multiple)
     }
 
     /** The whole save interaction, with [show] standing in for the step that needs a display. */
@@ -207,36 +72,25 @@ object SwingFileChooser : FileChooser() {
      * one display call; in production they are [ownerFrame] and `JFileChooser.showOpenDialog`.
      */
     internal fun runOpen(
-        path: Path,
-        filters: List<FileNameExtensionFilter>,
-        title: String,
-        selectDirectory: Boolean,
-        multiple: Boolean,
+        request: DialogRequest,
         frame: JFrame,
         showDialog: (JFileChooser, JFrame) -> Int
     ): List<Path>? = onEventDispatchThread {
-        openWith(path, filters, title, selectDirectory, multiple) { chooser ->
+        openWith(request) { chooser ->
             showOwned(frame) { showDialog(chooser, it) }
         }
     }
 
     /** The full save path, with [frame] and [showDialog] injected as in [runOpen]. */
     internal fun runSave(
-        location: Path,
-        suggestedName: String,
-        filters: List<FileNameExtensionFilter>,
-        title: String,
+        request: DialogRequest,
         frame: JFrame,
         showDialog: (JFileChooser, JFrame) -> Int
     ): Path? = onEventDispatchThread {
-        saveWith(location, suggestedName, filters, title) { chooser ->
+        saveWith(request.path, request.suggestedName.orEmpty(), request.filters, request.title) { chooser ->
             showOwned(frame) { showDialog(chooser, it) }
         }
     }
-
-    /** The real cause of a failure inside [onEventDispatchThread], which reports it wrapped. */
-    internal fun unwrapDialogFault(failure: Exception): Throwable =
-        (failure as? InvocationTargetException)?.targetException ?: failure
 
     /**
      * Runs a dialog, treating one that throws as a cancel.
@@ -266,7 +120,8 @@ object SwingFileChooser : FileChooser() {
         selectDirectory: Boolean,
         multiple: Boolean
     ): List<Path>? = dialogOrCancelled("SwingFileChooser.chooseImpl") {
-        runOpen(path, filters, title, selectDirectory, multiple, ownerFrame) { chooser, frame ->
+        val request = DialogRequest(path, filters, title, selectDirectory = selectDirectory, multiple = multiple)
+        runOpen(request, ownerFrame) { chooser, frame ->
             chooser.showOpenDialog(frame)
         }
     }
@@ -278,8 +133,139 @@ object SwingFileChooser : FileChooser() {
         filters: List<FileNameExtensionFilter>,
         title: String
     ): Path? = dialogOrCancelled("SwingFileChooser.saveImpl") {
-        runSave(location, suggestedName, filters, title, ownerFrame) { chooser, frame ->
+        runSave(DialogRequest(location, filters, title, suggestedName = suggestedName), ownerFrame) { chooser, frame ->
             chooser.showSaveDialog(frame)
         }
     }
 }
+
+/**
+ * Makes [frame] the invisible, iconned owner a file dialog hangs off: no decorations, no size,
+ * centred, carrying the app icon.
+ *
+ * A frame that cannot take the icon is still a usable owner, so a failure there is swallowed —
+ * the alternative is no file dialogs at all on a machine whose icon is unreadable.
+ */
+internal fun configureOwnerFrame(frame: JFrame) {
+    frame.isUndecorated = true
+    frame.setSize(0, 0)
+    frame.setLocationRelativeTo(null)
+    try {
+        frame.iconImage = loadAppIcon()
+    } catch (_: Exception) {}
+}
+
+/** Loads the app icon from appResources (packaged) or the source tree (IDE run). */
+internal fun loadAppIcon(): java.awt.Image? {
+    // 1. Packaged app: compose.application.resources.dir is set
+    System.getProperty("compose.application.resources.dir")?.let { resDir ->
+        listOf("icon-32.png", "icon-48.png", "icon.png")
+            .map { File(resDir, it) }
+            .firstOrNull { it.exists() }
+            ?.let { return ImageIO.read(it) }
+    }
+    // 2. IDE / development run: walk up from working directory to find appResources
+    var dir = File(System.getProperty("user.dir"))
+    repeat(FOCUS_RETRY_ATTEMPTS) {
+        val candidate = File(dir, "composeApp/src/jvmMain/appResources/common/icon-32.png")
+        if (candidate.exists()) return ImageIO.read(candidate)
+        dir = dir.parentFile ?: return@repeat
+    }
+    return null
+}
+
+/**
+ * Offers [filters] and pre-selects the first one, which is the filter the dialog opens showing.
+ *
+ * With filters present "All Files" is removed, so only supported types are selectable; with no
+ * filters nothing is added and the dialog keeps its default "All Files" entry.
+ */
+internal fun JFileChooser.applyFilters(filters: List<FileNameExtensionFilter>) {
+    if (filters.isEmpty()) return
+    // Disable "All Files" so only the supported types are selectable
+    isAcceptAllFileFilterUsed = false
+    filters.forEach { addChoosableFileFilter(it) }
+    // Pre-select the first filter as the active one
+    fileFilter = filters.first()
+}
+
+/** Everything the open dialog is told before it is shown. */
+internal fun configureOpen(
+    chooser: JFileChooser,
+    filters: List<FileNameExtensionFilter>,
+    title: String,
+    selectDirectory: Boolean,
+    multiple: Boolean
+) {
+    chooser.dialogTitle = title
+    chooser.fileSelectionMode =
+        if (selectDirectory) JFileChooser.DIRECTORIES_ONLY else JFileChooser.FILES_ONLY
+    chooser.isMultiSelectionEnabled = multiple
+    chooser.applyFilters(filters)
+}
+
+/** Everything the save dialog is told before it is shown, including the name it opens with. */
+internal fun configureSave(
+    chooser: JFileChooser,
+    location: Path,
+    suggestedName: String,
+    filters: List<FileNameExtensionFilter>,
+    title: String
+) {
+    chooser.dialogTitle = title
+    chooser.selectedFile = location.resolve(suggestedName).toFile()
+    chooser.applyFilters(filters)
+}
+
+/**
+ * Reads the open dialog's outcome; anything but approval means the operator cancelled.
+ *
+ * Approval is not a promise of a selection: the Windows look-and-feel can approve a single choice
+ * with no file selected at all (Sentry CHURCH-PRESENTER-DESKTOP-7S). That comes back empty, the
+ * same as an approved multiple choice with nothing in it, rather than being dereferenced.
+ */
+internal fun openResult(returnCode: Int, chooser: JFileChooser, multiple: Boolean): List<Path>? =
+    if (returnCode == JFileChooser.APPROVE_OPTION) {
+        val chosen = if (multiple) chooser.selectedFiles.orEmpty().toList() else listOfNotNull(chooser.selectedFile)
+        chosen.map { it.toPath() }
+    } else {
+        null
+    }
+
+/** Reads the save dialog's outcome; anything but approval, or an approval naming nothing, is a cancel. */
+internal fun saveResult(returnCode: Int, chooser: JFileChooser): Path? =
+    if (returnCode == JFileChooser.APPROVE_OPTION) chooser.selectedFile?.toPath() else null
+
+/**
+ * Runs [block] on the event dispatch thread and hands back what it returned.
+ *
+ * Swing insists a dialog is opened from the EDT, but the callers are suspending functions on
+ * whatever dispatcher they happen to be on, so the value has to be carried back out by hand.
+ * A failure inside [block] surfaces as `InvocationTargetException`, and calling this from the
+ * EDT itself is an error — both are `invokeAndWait`'s own behaviour, unchanged.
+ */
+internal fun <T> onEventDispatchThread(block: () -> T): T {
+    var result: T? = null
+    SwingUtilities.invokeAndWait { result = block() }
+    @Suppress("UNCHECKED_CAST")
+    return result as T
+}
+
+/**
+ * Shows [dialog] owned by [frame] and returns its return code.
+ *
+ * The frame exists only to give the dialog the app icon, so it is visible for exactly as long
+ * as the dialog is up and hidden again afterwards — leaving it showing would strand a
+ * zero-sized window on the desktop. [frame] is a parameter so this holds without a display;
+ * in production it is always [ownerFrame].
+ */
+internal fun showOwned(frame: JFrame, dialog: (JFrame) -> Int): Int {
+    frame.isVisible = true
+    val returnCode = dialog(frame)
+    frame.isVisible = false
+    return returnCode
+}
+
+/** The real cause of a failure inside [onEventDispatchThread], which reports it wrapped. */
+internal fun unwrapDialogFault(failure: Exception): Throwable =
+    (failure as? InvocationTargetException)?.targetException ?: failure

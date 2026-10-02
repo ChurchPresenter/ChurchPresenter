@@ -39,8 +39,7 @@ import kotlin.test.assertTrue
  * the whole sequence runs under test with only that step stood in for.
  *
  * Touching these objects builds no window: the Swing owner frame is created lazily, on first use of
- * a real dialog. `loadAppIcon` is still reached by reflection because it is private for its own
- * reasons; new tests should widen to `internal` instead.
+ * a real dialog.
  *
  * [FileChooserTest] covers the shared base class, which is where most of the behaviour lives.
  */
@@ -80,12 +79,6 @@ class PlatformFileChooserTest {
     }
 
     // ── SwingFileChooser: finding the app icon ──────────────────────────────────
-
-    private fun loadAppIcon(): Image? =
-        SwingFileChooser::class.java
-            .getDeclaredMethod("loadAppIcon")
-            .apply { isAccessible = true }
-            .invoke(SwingFileChooser) as Image?
 
     @Test
     fun `a packaged app takes its icon from the resources directory`() {
@@ -166,7 +159,7 @@ class PlatformFileChooserTest {
     fun `the owner frame is invisible and unobtrusive`() {
         val frame = recordingFrame()
 
-        SwingFileChooser.configureOwnerFrame(frame)
+        configureOwnerFrame(frame)
 
         assertTrue(frame.isUndecorated, "a decorated owner would flash a title bar behind the dialog")
         verify { frame.setSize(0, 0) }
@@ -181,7 +174,7 @@ class PlatformFileChooserTest {
         val icons = mutableListOf<Image?>()
         every { frame.iconImage = any() } answers { icons += firstArg<Image?>() }
 
-        SwingFileChooser.configureOwnerFrame(frame)
+        configureOwnerFrame(frame)
 
         assertEquals(32, icons.single()?.getWidth(null), "the dialog shows the app icon, not a coffee cup")
     }
@@ -193,7 +186,7 @@ class PlatformFileChooserTest {
         val frame = recordingFrame()
         every { frame.iconImage = any() } throws RuntimeException("no icon for you")
 
-        SwingFileChooser.configureOwnerFrame(frame)
+        configureOwnerFrame(frame)
 
         assertTrue(frame.isUndecorated, "the frame must still be a usable owner")
     }
@@ -205,7 +198,7 @@ class PlatformFileChooserTest {
         val frame = recordingFrame()
         var visibleDuringDialog: Boolean? = null
 
-        SwingFileChooser.showOwned(frame) {
+        showOwned(frame) {
             visibleDuringDialog = it.isVisible
             JFileChooser.APPROVE_OPTION
         }
@@ -219,7 +212,7 @@ class PlatformFileChooserTest {
         val frame = recordingFrame()
         var owner: JFrame? = null
 
-        SwingFileChooser.showOwned(frame) { owner = it; JFileChooser.CANCEL_OPTION }
+        showOwned(frame) { owner = it; JFileChooser.CANCEL_OPTION }
 
         assertEquals(frame, owner, "an unowned dialog loses the app icon and the modality")
     }
@@ -230,11 +223,11 @@ class PlatformFileChooserTest {
 
         assertEquals(
             JFileChooser.APPROVE_OPTION,
-            SwingFileChooser.showOwned(frame) { JFileChooser.APPROVE_OPTION },
+            showOwned(frame) { JFileChooser.APPROVE_OPTION },
         )
         assertEquals(
             JFileChooser.ERROR_OPTION,
-            SwingFileChooser.showOwned(frame) { JFileChooser.ERROR_OPTION },
+            showOwned(frame) { JFileChooser.ERROR_OPTION },
         )
     }
 
@@ -246,21 +239,23 @@ class PlatformFileChooserTest {
      */
     private fun chooser() = JFileChooser(dir)
 
-    private fun configureOpen(
+    /** [configureOpen] with the defaults most of these cases share. */
+    private fun openDialog(
         chooser: JFileChooser,
         filters: List<FileNameExtensionFilter>,
         title: String = "",
         selectDirectory: Boolean = false,
         multiple: Boolean = false,
-    ) = SwingFileChooser.configureOpen(chooser, filters, title, selectDirectory, multiple)
+    ) = configureOpen(chooser, filters, title, selectDirectory, multiple)
 
-    private fun configureSave(
+    /** [configureSave] with no title, which none of these cases looks at. */
+    private fun saveDialog(
         chooser: JFileChooser,
         location: Path,
         suggestedName: String,
         filters: List<FileNameExtensionFilter>,
         title: String = "",
-    ) = SwingFileChooser.configureSave(chooser, location, suggestedName, filters, title)
+    ) = configureSave(chooser, location, suggestedName, filters, title)
 
     private fun filter(description: String, vararg extensions: String) =
         FileNameExtensionFilter(description, *extensions)
@@ -269,7 +264,7 @@ class PlatformFileChooserTest {
     fun `the open dialog is given its title and selection mode`() {
         val chooser = chooser()
 
-        configureOpen(chooser, emptyList(), title = "Open Schedule", multiple = true)
+        openDialog(chooser, emptyList(), title = "Open Schedule", multiple = true)
 
         assertEquals("Open Schedule", chooser.dialogTitle)
         assertEquals(JFileChooser.FILES_ONLY, chooser.fileSelectionMode)
@@ -280,7 +275,7 @@ class PlatformFileChooserTest {
     fun `picking a folder restricts the dialog to directories`() {
         val chooser = chooser()
 
-        configureOpen(chooser, emptyList(), selectDirectory = true)
+        openDialog(chooser, emptyList(), selectDirectory = true)
 
         assertEquals(
             JFileChooser.DIRECTORIES_ONLY,
@@ -295,7 +290,7 @@ class PlatformFileChooserTest {
         val songs = filter("Songs (*.sps)", "sps")
         val chooser = chooser()
 
-        configureOpen(chooser, listOf(songs))
+        openDialog(chooser, listOf(songs))
 
         assertFalse(
             chooser.isAcceptAllFileFilterUsed,
@@ -310,7 +305,7 @@ class PlatformFileChooserTest {
         val pdf = filter("PDF", "pdf")
         val chooser = chooser()
 
-        configureOpen(chooser, listOf(powerPoint, pdf))
+        openDialog(chooser, listOf(powerPoint, pdf))
 
         assertEquals(powerPoint, chooser.fileFilter, "the preselected filter decides what is listed")
         assertEquals(listOf(powerPoint, pdf), chooser.choosableFileFilters.toList())
@@ -320,7 +315,7 @@ class PlatformFileChooserTest {
     fun `with no filters the dialog keeps All Files`() {
         val chooser = chooser()
 
-        configureOpen(chooser, emptyList())
+        openDialog(chooser, emptyList())
 
         assertTrue(
             chooser.isAcceptAllFileFilterUsed,
@@ -332,7 +327,7 @@ class PlatformFileChooserTest {
     fun `the save dialog opens on the suggested name inside the given folder`() {
         val chooser = chooser()
 
-        configureSave(chooser, dir.toPath(), "schedule.cps", listOf(filter("Schedule", "cps")), "Save As")
+        saveDialog(chooser, dir.toPath(), "schedule.cps", listOf(filter("Schedule", "cps")), "Save As")
 
         assertEquals("Save As", chooser.dialogTitle)
         assertEquals(File(dir, "schedule.cps"), chooser.selectedFile)
@@ -348,7 +343,7 @@ class PlatformFileChooserTest {
     fun `a suggested name the filter rejects is dropped`() {
         val chooser = chooser()
 
-        configureSave(chooser, dir.toPath(), "schedule.txt", listOf(filter("Schedule", "cps")))
+        saveDialog(chooser, dir.toPath(), "schedule.txt", listOf(filter("Schedule", "cps")))
 
         assertNull(chooser.selectedFile, "Swing drops a selection the active filter does not accept")
     }
@@ -358,7 +353,7 @@ class PlatformFileChooserTest {
         val schedule = filter("Schedule", "cps")
         val chooser = chooser()
 
-        configureSave(chooser, dir.toPath(), "schedule.cps", listOf(schedule))
+        saveDialog(chooser, dir.toPath(), "schedule.cps", listOf(schedule))
 
         assertFalse(chooser.isAcceptAllFileFilterUsed)
         assertEquals(schedule, chooser.fileFilter)
@@ -368,19 +363,13 @@ class PlatformFileChooserTest {
     fun `a save dialog with no filters keeps All Files`() {
         val chooser = chooser()
 
-        configureSave(chooser, dir.toPath(), "notes", emptyList())
+        saveDialog(chooser, dir.toPath(), "notes", emptyList())
 
         assertTrue(chooser.isAcceptAllFileFilterUsed)
         assertEquals(File(dir, "notes"), chooser.selectedFile, "no filter can reject the name")
     }
 
     // ── SwingFileChooser: what comes back out of it ─────────────────────────────
-
-    private fun openResult(returnCode: Int, chooser: JFileChooser, multiple: Boolean): List<Path>? =
-        SwingFileChooser.openResult(returnCode, chooser, multiple)
-
-    private fun saveResult(returnCode: Int, chooser: JFileChooser): Path? =
-        SwingFileChooser.saveResult(returnCode, chooser)
 
     @Test
     fun `an approved single choice comes back as one path`() {
@@ -453,9 +442,6 @@ class PlatformFileChooserTest {
 
     // ── SwingFileChooser: getting the answer off the dispatch thread ────────────
 
-    private fun <T> onEventDispatchThread(block: () -> T): T =
-        SwingFileChooser.onEventDispatchThread(block)
-
     @Test
     fun `the dialog is opened from the event dispatch thread`() {
         assertTrue(
@@ -501,11 +487,13 @@ class PlatformFileChooserTest {
         var shownWith: JFileChooser? = null
 
         SwingFileChooser.openWith(
-            path = dir.toPath(),
-            filters = listOf(filter("Songs", "sps")),
-            title = "Open Song",
-            selectDirectory = false,
-            multiple = false,
+            request = DialogRequest(
+                path = dir.toPath(),
+                filters = listOf(filter("Songs", "sps")),
+                title = "Open Song",
+                selectDirectory = false,
+                multiple = false,
+            ),
         ) { chooser ->
             // Whatever the operator sees must already be configured by the time it is on screen.
             shownWith = chooser
@@ -521,11 +509,13 @@ class PlatformFileChooserTest {
     @Test
     fun `an approved open returns what the dialog was left holding`() {
         val picked = SwingFileChooser.openWith(
-            path = dir.toPath(),
-            filters = emptyList(),
-            title = "",
-            selectDirectory = false,
-            multiple = false,
+            request = DialogRequest(
+                path = dir.toPath(),
+                filters = emptyList(),
+                title = "",
+                selectDirectory = false,
+                multiple = false,
+            ),
         ) { chooser ->
             chooser.selectedFile = File(dir, "song.sps")
             JFileChooser.APPROVE_OPTION
@@ -537,11 +527,13 @@ class PlatformFileChooserTest {
     @Test
     fun `an approved multi-select open returns every file`() {
         val picked = SwingFileChooser.openWith(
-            path = dir.toPath(),
-            filters = emptyList(),
-            title = "",
-            selectDirectory = false,
-            multiple = true,
+            request = DialogRequest(
+                path = dir.toPath(),
+                filters = emptyList(),
+                title = "",
+                selectDirectory = false,
+                multiple = true,
+            ),
         ) { chooser ->
             chooser.selectedFiles = arrayOf(File(dir, "a.sps"), File(dir, "b.sps"))
             JFileChooser.APPROVE_OPTION
@@ -553,11 +545,13 @@ class PlatformFileChooserTest {
     @Test
     fun `a cancelled open returns nothing even though a file was selected`() {
         val picked = SwingFileChooser.openWith(
-            path = dir.toPath(),
-            filters = emptyList(),
-            title = "",
-            selectDirectory = false,
-            multiple = false,
+            request = DialogRequest(
+                path = dir.toPath(),
+                filters = emptyList(),
+                title = "",
+                selectDirectory = false,
+                multiple = false,
+            ),
         ) { chooser ->
             chooser.selectedFile = File(dir, "song.sps")
             JFileChooser.CANCEL_OPTION
@@ -628,11 +622,13 @@ class PlatformFileChooserTest {
         var shownChooser: JFileChooser? = null
 
         val picked = SwingFileChooser.runOpen(
-            path = dir.toPath(),
-            filters = listOf(filter("Songs", "sps")),
-            title = "Open Song",
-            selectDirectory = false,
-            multiple = false,
+            request = DialogRequest(
+                path = dir.toPath(),
+                filters = listOf(filter("Songs", "sps")),
+                title = "Open Song",
+                selectDirectory = false,
+                multiple = false,
+            ),
             frame = frame,
         ) { chooser, ownerFrame ->
             onEdt = SwingUtilities.isEventDispatchThread()
@@ -654,11 +650,13 @@ class PlatformFileChooserTest {
         val frame = recordingFrame()
 
         val picked = SwingFileChooser.runOpen(
-            path = dir.toPath(),
-            filters = emptyList(),
-            title = "",
-            selectDirectory = false,
-            multiple = false,
+            request = DialogRequest(
+                path = dir.toPath(),
+                filters = emptyList(),
+                title = "",
+                selectDirectory = false,
+                multiple = false,
+            ),
             frame = frame,
         ) { _, _ -> JFileChooser.CANCEL_OPTION }
 
@@ -672,10 +670,12 @@ class PlatformFileChooserTest {
         var titleWhenShown: String? = null
 
         val saved = SwingFileChooser.runSave(
-            location = dir.toPath(),
-            suggestedName = "schedule.cps",
-            filters = listOf(filter("Schedule", "cps")),
-            title = "Save As",
+            request = DialogRequest(
+                path = dir.toPath(),
+                suggestedName = "schedule.cps",
+                filters = listOf(filter("Schedule", "cps")),
+                title = "Save As",
+            ),
             frame = frame,
         ) { chooser, _ ->
             // Read the configuration the operator would see, before standing in for their pick.
@@ -695,10 +695,12 @@ class PlatformFileChooserTest {
         val frame = recordingFrame()
 
         val saved = SwingFileChooser.runSave(
-            location = dir.toPath(),
-            suggestedName = "schedule.cps",
-            filters = emptyList(),
-            title = "",
+            request = DialogRequest(
+                path = dir.toPath(),
+                suggestedName = "schedule.cps",
+                filters = emptyList(),
+                title = "",
+            ),
             frame = frame,
         ) { _, _ -> JFileChooser.CANCEL_OPTION }
 
@@ -708,10 +710,10 @@ class PlatformFileChooserTest {
     // ── FileKitFileChooser: what the native dialog is told ──────────────────────
 
     private fun allExtensions(filters: List<FileNameExtensionFilter>): List<String> =
-        with(FileKitFileChooser) { filters.allExtensions() }
+        filters.allExtensions()
 
     private fun toFileKitType(filters: List<FileNameExtensionFilter>): FileKitType =
-        with(FileKitFileChooser) { filters.toFileKitType() }
+        filters.toFileKitType()
 
     @Test
     fun `filters are flattened into one extension list`() {
@@ -763,7 +765,7 @@ class PlatformFileChooserTest {
     fun `a plain request opens the single-file picker`() {
         assertEquals(
             FileKitFileChooser.PickerMode.SINGLE_FILE,
-            FileKitFileChooser.pickerMode(selectDirectory = false, multiple = false),
+            pickerMode(selectDirectory = false, multiple = false),
         )
     }
 
@@ -771,7 +773,7 @@ class PlatformFileChooserTest {
     fun `a multiple request opens the multi-file picker`() {
         assertEquals(
             FileKitFileChooser.PickerMode.MULTIPLE_FILES,
-            FileKitFileChooser.pickerMode(selectDirectory = false, multiple = true),
+            pickerMode(selectDirectory = false, multiple = true),
         )
     }
 
@@ -781,11 +783,11 @@ class PlatformFileChooserTest {
         // so selectDirectory has to win, or the request would open a file picker instead.
         assertEquals(
             FileKitFileChooser.PickerMode.DIRECTORY,
-            FileKitFileChooser.pickerMode(selectDirectory = true, multiple = false),
+            pickerMode(selectDirectory = true, multiple = false),
         )
         assertEquals(
             FileKitFileChooser.PickerMode.DIRECTORY,
-            FileKitFileChooser.pickerMode(selectDirectory = true, multiple = true),
+            pickerMode(selectDirectory = true, multiple = true),
         )
     }
 
@@ -794,34 +796,34 @@ class PlatformFileChooserTest {
     @Test
     fun `a suggested name loses the extension the picker will add back`() {
         // FileKit appends the default extension itself; leaving it on offers "schedule.cps.cps".
-        assertEquals("schedule" to "cps", FileKitFileChooser.saveNameParts("schedule.cps", listOf("cps")))
+        assertEquals("schedule" to "cps", saveNameParts("schedule.cps", listOf("cps")))
     }
 
     @Test
     fun `stripping the extension ignores case`() {
-        assertEquals("SUNDAY" to "cps", FileKitFileChooser.saveNameParts("SUNDAY.CPS", listOf("cps")))
+        assertEquals("SUNDAY" to "cps", saveNameParts("SUNDAY.CPS", listOf("cps")))
     }
 
     @Test
     fun `a name carrying a different offered extension keeps that one as the default`() {
-        val parts = FileKitFileChooser.saveNameParts("deck.pdf", listOf("pptx", "pdf"))
+        val parts = saveNameParts("deck.pdf", listOf("pptx", "pdf"))
 
         assertEquals("deck" to "pdf", parts, "saving a PDF must not default the dialog back to pptx")
     }
 
     @Test
     fun `a name with no offered extension is left whole and gains the first`() {
-        assertEquals("notes.txt" to "cps", FileKitFileChooser.saveNameParts("notes.txt", listOf("cps")))
+        assertEquals("notes.txt" to "cps", saveNameParts("notes.txt", listOf("cps")))
     }
 
     @Test
     fun `with no extensions on offer the name is passed through as typed`() {
-        assertEquals("whatever" to null, FileKitFileChooser.saveNameParts("whatever", emptyList()))
+        assertEquals("whatever" to null, saveNameParts("whatever", emptyList()))
     }
 
     // ── FileKitFileChooser: what comes back out of it ───────────────────────────
 
-    private fun toPathOrNull(file: File): Path? = with(FileKitFileChooser) { file.toPathOrNull() }
+    private fun toPathOrNull(file: File): Path? = file.toPathOrNull()
 
     @Test
     fun `a real selection converts to a path`() {
@@ -848,15 +850,15 @@ class PlatformFileChooserTest {
     fun `one picked file comes back as a one-item selection`() {
         assertEquals(
             listOf(File(dir, "song.sps").toPath()),
-            FileKitFileChooser.singleSelection(File(dir, "song.sps")),
+            singleSelection(File(dir, "song.sps")),
         )
     }
 
     @Test
     fun `picking nothing is not a selection`() {
-        assertNull(FileKitFileChooser.singleSelection(null))
+        assertNull(singleSelection(null))
         assertNull(
-            FileKitFileChooser.singleSelection(virtualShellItem),
+            singleSelection(virtualShellItem),
             "an unconvertible pick must read as cancelled, not crash",
         )
     }
@@ -865,7 +867,7 @@ class PlatformFileChooserTest {
     fun `several picked files come back in order`() {
         assertEquals(
             listOf(File(dir, "a.sps").toPath(), File(dir, "b.sps").toPath()),
-            FileKitFileChooser.multipleSelection(listOf(File(dir, "a.sps"), File(dir, "b.sps"))),
+            multipleSelection(listOf(File(dir, "a.sps"), File(dir, "b.sps"))),
         )
     }
 
@@ -873,7 +875,7 @@ class PlatformFileChooserTest {
     fun `unconvertible files are dropped from a multiple selection`() {
         assertEquals(
             listOf(File(dir, "a.sps").toPath()),
-            FileKitFileChooser.multipleSelection(listOf(File(dir, "a.sps"), virtualShellItem)),
+            multipleSelection(listOf(File(dir, "a.sps"), virtualShellItem)),
             "one virtual shell item must not lose the real files picked alongside it",
         )
     }
@@ -882,9 +884,9 @@ class PlatformFileChooserTest {
     fun `a multiple selection left with nothing reads as cancelled`() {
         // The base class reads null as "cancelled"; an empty list would instead be unwrapped as a
         // selection, so both of these have to collapse to null.
-        assertNull(FileKitFileChooser.multipleSelection(emptyList()))
-        assertNull(FileKitFileChooser.multipleSelection(listOf(virtualShellItem)))
-        assertNull(FileKitFileChooser.multipleSelection(null))
+        assertNull(multipleSelection(emptyList()))
+        assertNull(multipleSelection(listOf(virtualShellItem)))
+        assertNull(multipleSelection(null))
     }
 
     // ── FileKitFileChooser: running the native dialog end to end ────────────────
@@ -1043,7 +1045,7 @@ class PlatformFileChooserTest {
     @Test
     fun `the parent window is resolved directly when already on the dispatch thread`() {
         // invokeAndWait from the EDT is an error, so this path must not marshal.
-        assertNull(SwingFileChooser.onEventDispatchThread { FileKitFileChooser.parentWindow() })
+        assertNull(onEventDispatchThread { FileKitFileChooser.parentWindow() })
     }
 
     /** A stand-in AWT window with the properties the owner-selection reads. */
@@ -1063,7 +1065,7 @@ class PlatformFileChooserTest {
 
         assertEquals(
             active,
-            FileKitFileChooser.chooseParentWindow(active, arrayOf(bigger, active)),
+            chooseParentWindow(active, arrayOf(bigger, active)),
             "the window the toolkit reports as active is the one the operator is looking at",
         )
     }
@@ -1073,7 +1075,7 @@ class PlatformFileChooserTest {
         val focused = window(showing = true, focused = true, width = 400, height = 300)
         val unfocused = window(showing = true, focused = false, width = 1920, height = 1080)
 
-        assertEquals(focused, FileKitFileChooser.chooseParentWindow(null, arrayOf(unfocused, focused)))
+        assertEquals(focused, chooseParentWindow(null, arrayOf(unfocused, focused)))
     }
 
     @Test
@@ -1084,7 +1086,7 @@ class PlatformFileChooserTest {
         val big = window(showing = true, focused = false, width = 1920, height = 1080)
         val hiddenButHuge = window(showing = false, focused = false, width = 3000, height = 2000)
 
-        assertEquals(big, FileKitFileChooser.chooseParentWindow(null, arrayOf(small, big, hiddenButHuge)))
+        assertEquals(big, chooseParentWindow(null, arrayOf(small, big, hiddenButHuge)))
     }
 
     @Test
@@ -1092,13 +1094,13 @@ class PlatformFileChooserTest {
         // The Swing owner frame is a 0x0 helper; it must not end up owning a native dialog.
         val zeroSized = window(showing = true, focused = false, width = 0, height = 0)
 
-        assertNull(FileKitFileChooser.chooseParentWindow(null, arrayOf(zeroSized)))
+        assertNull(chooseParentWindow(null, arrayOf(zeroSized)))
     }
 
     @Test
     fun `no windows at all means no owner`() {
         assertNull(
-            FileKitFileChooser.chooseParentWindow(null, emptyArray()),
+            chooseParentWindow(null, emptyArray()),
             "a dialog with no owner centres on screen — better than crashing",
         )
     }
@@ -1203,13 +1205,13 @@ class PlatformFileChooserTest {
         // dialog threw wrapped in an InvocationTargetException — useless as a crash-report title.
         val real = NullPointerException("Cannot read field \"x\" because \"<parameter1>\" is null")
 
-        assertSame(real, SwingFileChooser.unwrapDialogFault(InvocationTargetException(real)))
+        assertSame(real, unwrapDialogFault(InvocationTargetException(real)))
     }
 
     @Test
     fun `a fault that is not wrapped is reported as itself`() {
         val direct = IllegalStateException("no display")
 
-        assertSame(direct, SwingFileChooser.unwrapDialogFault(direct))
+        assertSame(direct, unwrapDialogFault(direct))
     }
 }
