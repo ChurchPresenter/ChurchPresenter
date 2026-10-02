@@ -108,7 +108,7 @@ class BackdropTextTest {
         }
         waitForIdle()
         assertNotNull(seen, "the wrapper must chain onto the caller's onTextLayout, not replace it")
-        assertEquals(1, seen!!.lineCount, "one short line")
+        assertEquals(1, seen.lineCount, "one short line")
     }
 
     @Test

@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.presenter
+package org.churchpresenter.web.presenter
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -14,8 +14,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.graphics.Color
-import org.churchpresenter.app.churchpresenter.composables.LocalOutputCursorHidden
-import org.churchpresenter.app.churchpresenter.composables.outputCursorScript
+import org.churchpresenter.sharedui.composables.LocalOutputCursorHidden
+import org.churchpresenter.sharedui.composables.outputCursorScript
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.settings.utils.Constants

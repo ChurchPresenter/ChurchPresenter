@@ -2,7 +2,7 @@ package org.churchpresenter.sharedui.utils
 
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.core.models.shortcuts.KeyChord
 import kotlin.test.Test
 import kotlin.test.assertTrue

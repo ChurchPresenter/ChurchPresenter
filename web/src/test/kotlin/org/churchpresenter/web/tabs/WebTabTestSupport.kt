@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.web.tabs
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
@@ -14,12 +14,49 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.ImageBitmap
+import org.cef.browser.CefBrowser
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.web.WebOutput
+
+/**
+ * A [WebOutput] that only remembers what it is told, standing in for the app's `PresenterManager`.
+ *
+ * [setLiveBrowser] is the one call the output window makes rather than the tab: a test makes it to
+ * stand in for the window having opened its browser.
+ */
+internal class FakeWebOutput : WebOutput {
+    override val presentingMode = mutableStateOf(Presenting.NONE)
+    override val websiteUrl = mutableStateOf("")
+    override val webPageTitle = mutableStateOf("")
+    override val liveBrowser = mutableStateOf<CefBrowser?>(null)
+    override val webSnapshot = mutableStateOf<ImageBitmap?>(null)
+
+    override fun setPresentingMode(mode: Presenting) {
+        presentingMode.value = mode
+    }
+
+    override fun setWebsiteUrl(url: String) {
+        websiteUrl.value = url
+    }
+
+    override fun setWebPageTitle(title: String) {
+        webPageTitle.value = title
+    }
+
+    override fun setWebSnapshot(bitmap: ImageBitmap?) {
+        webSnapshot.value = bitmap
+    }
+
+    fun setLiveBrowser(browser: CefBrowser?) {
+        liveBrowser.value = browser
+    }
+}
 
 internal class WebReports {
     val scheduled = mutableListOf<Pair<String, String>>()
@@ -30,7 +67,7 @@ internal class WebReports {
 
 @OptIn(ExperimentalTestApi::class)
 internal fun webTab(
-    presenterManager: PresenterManager = PresenterManager(),
+    presenterManager: FakeWebOutput = FakeWebOutput(),
     selectedWebsiteItem: ScheduleItem.WebsiteItem? = null,
     settings: (AppSettings) -> AppSettings = { it },
     cefInitialized: Boolean = true,
@@ -47,17 +84,16 @@ internal fun webTab(
      */
     width: Dp? = null,
     themeMode: ThemeMode? = null,
-    block: ComposeUiTest.(presenter: PresenterManager, reports: WebReports) -> Unit,
+    block: ComposeUiTest.(presenter: FakeWebOutput, reports: WebReports) -> Unit,
 ) {
-    TestSingletons.latchToTestHome()
     val appSettings = settings(AppSettings())
     val reports = WebReports()
     runComposeUiTest {
         setContent {
             ThemedForTest(themeMode) {
                 Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
-                    AppWebTab(
-                        presenterManager = presenterManager,
+                    WebTab(
+                        output = presenterManager,
                         selectedWebsiteItem = selectedWebsiteItem,
                         appSettings = appSettings,
                         onSettingsChange = { transform ->
@@ -79,12 +115,12 @@ internal fun webTab(
 }
 
 /**
- * Renders the tab with **no** [PresenterManager] at all — the parameter's own default.
+ * Renders the tab with **no** [WebOutput] at all — the parameter's own default.
  *
- * `WebTab` reaches the presenter through about forty `presenterManager?.` calls, and [webTab] always
- * supplies one, so every null side of those went untaken. This is not a synthetic case: the tab is
- * declared with `presenterManager: PresenterManager? = null` and previews and the setup wizard
- * compose it that way, so the whole toolbar has to stay usable with nothing behind it.
+ * `WebTab` reaches the output through about forty `output?.` calls, and [webTab] always supplies
+ * one, so every null side of those went untaken. This is not a synthetic case: the tab is declared
+ * with `output: WebOutput? = null` and previews and the setup wizard compose it that way, so the
+ * whole toolbar has to stay usable with nothing behind it.
  */
 @OptIn(ExperimentalTestApi::class)
 internal fun webTabWithoutPresenter(
@@ -93,14 +129,13 @@ internal fun webTabWithoutPresenter(
     themeMode: ThemeMode? = null,
     block: ComposeUiTest.(reports: WebReports) -> Unit,
 ) {
-    TestSingletons.latchToTestHome()
     val appSettings = settings(AppSettings())
     val reports = WebReports()
     runComposeUiTest {
         setContent {
             ThemedForTest(themeMode) {
-                AppWebTab(
-                    presenterManager = null,
+                WebTab(
+                    output = null,
                     selectedWebsiteItem = selectedWebsiteItem,
                     appSettings = appSettings,
                     onSettingsChange = { transform ->

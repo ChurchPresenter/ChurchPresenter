@@ -2,7 +2,7 @@ package org.churchpresenter.slides.viewmodel
 
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.core.models.presentation.PresentationLoadError
 import org.churchpresenter.presentationengine.LoadResult
 import org.churchpresenter.presentationengine.cache.SlideCacheSupersededException

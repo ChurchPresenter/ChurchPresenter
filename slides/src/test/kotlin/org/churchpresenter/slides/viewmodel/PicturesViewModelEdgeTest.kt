@@ -1,7 +1,7 @@
 package org.churchpresenter.slides.viewmodel
 
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.PictureSettings
 import org.churchpresenter.sharedui.models.Presenting

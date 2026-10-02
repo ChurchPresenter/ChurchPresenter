@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.tabs
+package org.churchpresenter.web.tabs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -134,7 +134,7 @@ private fun WebTabScope.WebToolbar() {
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                NavButtons(navController, presenterManager, isLive, useInteractivePreview,
+                NavButtons(navController, output, isLive, useInteractivePreview,
                     zoomLevel, isMobileView, ::applyZoom, ::onMobileToggle)
                 urlBar()
                 actionButtons()
@@ -147,7 +147,7 @@ private fun WebTabScope.WebToolbar() {
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    NavButtons(navController, presenterManager, isLive, useInteractivePreview,
+                    NavButtons(navController, output, isLive, useInteractivePreview,
                         zoomLevel, isMobileView, ::applyZoom, ::onMobileToggle)
                     Spacer(Modifier.weight(1f))
                     actionButtons()
@@ -194,9 +194,9 @@ private fun WebTabScope.WebUrlBar(modifier: Modifier) {
                             val url = normaliseUrl(urlInput)
                             urlInput = url
                             liveUrl = url
-                            presenterManager?.setWebsiteUrl(url)
+                            output?.setWebsiteUrl(url)
                             if (isLive) {
-                                presenterManager?.liveBrowser?.value?.loadURL(url)
+                                output?.liveBrowser?.value?.loadURL(url)
                             }
                             true
                         } else false
@@ -288,8 +288,8 @@ private fun WebTabScope.WebActionButtons(hasSecondaryDisplay: Boolean, hasWebCap
             val url = normaliseUrl(urlInput)
             urlInput = url
             liveUrl = url
-            presenterManager?.setWebsiteUrl(url)
-            presenterManager?.setPresentingMode(Presenting.WEBSITE)
+            output?.setWebsiteUrl(url)
+            output?.setPresentingMode(Presenting.WEBSITE)
         },
         enabled = goLiveEnabled,
         tooltipText = stringResource(Res.string.web_go_live)
@@ -319,9 +319,9 @@ private fun WebTabScope.WebBookmarksBar() {
                     urlInput = bookmark.url
                     liveUrl = bookmark.url
                     pageTitle = bookmark.title
-                    presenterManager?.setWebsiteUrl(bookmark.url)
+                    output?.setWebsiteUrl(bookmark.url)
                     if (isLive) {
-                        presenterManager?.liveBrowser?.value?.loadURL(bookmark.url)
+                        output?.liveBrowser?.value?.loadURL(bookmark.url)
                     }
                 }
             ) {
@@ -414,7 +414,7 @@ private fun WebTabScope.WebTypeToPage() {
                 BasicTextField(
                     value = typeBuffer,
                     onValueChange = { next ->
-                        val browser = presenterManager?.liveBrowser?.value
+                        val browser = output?.liveBrowser?.value
                         if (browser == null) { typeBuffer = next; return@BasicTextField }
                         val old = typeBuffer
                         val common = commonPrefixLength(old, next)
@@ -428,7 +428,7 @@ private fun WebTabScope.WebTypeToPage() {
                         .fillMaxWidth()
                         .onKeyEvent { event ->
                             if (event.type == KeyEventType.KeyDown && event.key == Key.Enter) {
-                                presenterManager?.liveBrowser?.value
+                                output?.liveBrowser?.value
                                     ?.executeJavaScript(WEB_JS_ENTER, "", 0)
                                 typeBuffer = ""
                                 true
@@ -467,7 +467,7 @@ private fun WebTabScope.WebTypeToPage() {
             painter = painterResource(IconRes.drawable.ic_cast),
             text = stringResource(Res.string.web_focus_first_input),
             onClick = {
-                presenterManager?.liveBrowser?.value
+                output?.liveBrowser?.value
                     ?.executeJavaScript(WEB_JS_FOCUS_FIRST_INPUT, "", 0)
             }
         )
