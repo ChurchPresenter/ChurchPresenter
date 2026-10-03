@@ -4,10 +4,10 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.CompanionSatelliteSettings
-import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkCommandFailure
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.InstanceLinkCommandFailure
+import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
+import org.churchpresenter.server.InstanceLinkViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager

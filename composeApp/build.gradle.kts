@@ -327,6 +327,7 @@ kotlin {
             implementation(projects.announcements)
             implementation(projects.songs)
             implementation(projects.bibleTab)
+            implementation(projects.server)
             implementation(projects.lowerThird)
             implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source

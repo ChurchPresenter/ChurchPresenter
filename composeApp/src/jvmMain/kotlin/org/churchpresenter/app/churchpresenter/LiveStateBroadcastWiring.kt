@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.server.updateLiveState
-import org.churchpresenter.app.churchpresenter.server.LiveContent
+import org.churchpresenter.server.updateLiveState
+import org.churchpresenter.server.LiveContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import java.io.File
@@ -9,7 +9,7 @@ import java.util.Locale
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.sharedui.utils.LiveHistoryEntry
 import org.churchpresenter.sharedui.utils.LiveHistoryLogger
 import org.churchpresenter.sharedui.utils.UsageEvent

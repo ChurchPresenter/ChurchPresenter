@@ -66,7 +66,7 @@ import org.churchpresenter.strings.generated.resources.remove
 import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.theme.components.SettingsTextField
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.composables.ResolutionPicker
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.addBrowserSourceOutput

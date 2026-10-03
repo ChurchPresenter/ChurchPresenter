@@ -10,7 +10,7 @@ import kotlinx.coroutines.runBlocking
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
+import org.churchpresenter.server.SelectBibleVerseRequest
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.bibletab.BibleViewModel
 import org.churchpresenter.slides.viewmodel.PicturesViewModel

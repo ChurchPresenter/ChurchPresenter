@@ -14,8 +14,8 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.dialogs.CalendarEnrollQrContent
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.CalendarSyncCardContent
-import org.churchpresenter.app.churchpresenter.server.CalendarEnrollment
-import org.churchpresenter.app.churchpresenter.server.CalendarSyncStatus
+import org.churchpresenter.server.CalendarEnrollment
+import org.churchpresenter.server.CalendarSyncStatus
 import org.churchpresenter.calendar.sync.PairedDevice
 import org.churchpresenter.calendar.sync.SyncOutcome
 import org.churchpresenter.settings.AppSettings

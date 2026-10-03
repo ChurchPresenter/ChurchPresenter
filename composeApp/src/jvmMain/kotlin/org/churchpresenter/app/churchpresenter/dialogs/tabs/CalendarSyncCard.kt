@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.app.churchpresenter.builtInRelayEndpoints
 import androidx.compose.material3.minimumInteractiveComponentSize
 import org.churchpresenter.theme.components.toggleRow
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -57,13 +58,13 @@ import org.churchpresenter.strings.generated.resources.calendar_sync_title
 import org.churchpresenter.strings.generated.resources.calendar_sync_unpair
 import org.churchpresenter.strings.generated.resources.calendar_sync_unpair_available_on
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.server.RelayEndpoints
+import org.churchpresenter.server.RelayEndpoints
 import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.dialogs.CalendarEnrollQrDialog
-import org.churchpresenter.app.churchpresenter.server.CalendarInvite
-import org.churchpresenter.app.churchpresenter.server.asInvite
-import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
-import org.churchpresenter.app.churchpresenter.server.CalendarSyncStatus
+import org.churchpresenter.server.CalendarInvite
+import org.churchpresenter.server.asInvite
+import org.churchpresenter.server.CalendarSyncService
+import org.churchpresenter.server.CalendarSyncStatus
 import org.churchpresenter.calendar.sync.PairedDevice
 import org.churchpresenter.settings.AppSettings
 import org.jetbrains.compose.resources.stringResource
@@ -206,7 +207,7 @@ internal fun CalendarSyncCardContent(
                 DevicesList(devices = devices, labelFor = labelFor, clock = clock, onRevoke = onRevoke)
                 Text(
                     text = "${stringResource(Res.string.calendar_sync_relay_url)}: " +
-                        "${current.relayUrl.ifBlank { RelayEndpoints.BUILT_IN.relayUrl }} · " +
+                        "${current.relayUrl.ifBlank { builtInRelayEndpoints.relayUrl }} · " +
                         "${stringResource(Res.string.calendar_sync_instance)}: ${current.instanceId}",
                     style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

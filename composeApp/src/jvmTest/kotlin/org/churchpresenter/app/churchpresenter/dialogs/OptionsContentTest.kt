@@ -34,7 +34,7 @@ import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager

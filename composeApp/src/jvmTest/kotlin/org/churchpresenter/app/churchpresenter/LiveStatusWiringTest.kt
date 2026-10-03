@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.server.browserSourceOutput
+import org.churchpresenter.server.browserSourceOutput
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
@@ -9,7 +9,7 @@ import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.CompanionServer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

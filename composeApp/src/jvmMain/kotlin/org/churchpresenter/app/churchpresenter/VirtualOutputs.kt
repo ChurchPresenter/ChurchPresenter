@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.server.registerBrowserSourceFrames
+import org.churchpresenter.server.registerBrowserSourceFrames
 import org.churchpresenter.app.churchpresenter.presenter.liveMerges
 import org.churchpresenter.app.churchpresenter.presenter.mergeHostIndex
 import androidx.compose.runtime.getValue

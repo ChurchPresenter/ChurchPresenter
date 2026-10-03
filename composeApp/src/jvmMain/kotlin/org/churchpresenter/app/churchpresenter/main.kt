@@ -33,7 +33,7 @@ import org.churchpresenter.theme.ThemeCustomization
 import org.churchpresenter.sharedui.utils.FfmpegBinary
 import org.churchpresenter.media.composables.vlcCustomPath
 import org.churchpresenter.lowerthird.render.LottieRenderCache
-import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
+import org.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
@@ -290,6 +290,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                     settingsManager.saveSettings(appSettings)
                 },
                 typicalSeconds = { song -> liveDurationLog.median(song.asDurationRow()) },
+                endpoints = builtInRelayEndpoints,
             )
         }
         DisposableEffect(Unit) {

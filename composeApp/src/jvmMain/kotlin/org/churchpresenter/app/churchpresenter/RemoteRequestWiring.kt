@@ -10,25 +10,25 @@ import androidx.compose.runtime.LaunchedEffect
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.remote_api_calendar_enroll_code
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.dialogs.RemoteEvent
-import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
+import org.churchpresenter.server.RemoteEvent
+import org.churchpresenter.server.RemoteEventType
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.server.CalendarEnrollDecision
-import org.churchpresenter.app.churchpresenter.server.asReply
+import org.churchpresenter.server.CalendarEnrollDecision
+import org.churchpresenter.server.asReply
 import org.churchpresenter.app.churchpresenter.dialogs.enrollCodeText
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.server.remoteAccessDecision
-import org.churchpresenter.app.churchpresenter.server.addScheduleItem
-import org.churchpresenter.app.churchpresenter.server.batchEventSummary
-import org.churchpresenter.app.churchpresenter.server.emitRemoteTabSelection
-import org.churchpresenter.app.churchpresenter.server.RemoteApproval
-import org.churchpresenter.app.churchpresenter.server.remoteApproval
-import org.churchpresenter.app.churchpresenter.server.executeProjectItem
-import org.churchpresenter.app.churchpresenter.server.qaActionType
-import org.churchpresenter.app.churchpresenter.server.remoteEventLabel
-import org.churchpresenter.app.churchpresenter.server.withAnnouncement
+import org.churchpresenter.server.remoteAccessDecision
+import org.churchpresenter.app.churchpresenter.remote.addScheduleItem
+import org.churchpresenter.app.churchpresenter.remote.batchEventSummary
+import org.churchpresenter.app.churchpresenter.remote.emitRemoteTabSelection
+import org.churchpresenter.server.RemoteApproval
+import org.churchpresenter.server.remoteApproval
+import org.churchpresenter.app.churchpresenter.remote.executeProjectItem
+import org.churchpresenter.app.churchpresenter.remote.qaActionType
+import org.churchpresenter.app.churchpresenter.remote.remoteEventLabel
+import org.churchpresenter.app.churchpresenter.remote.withAnnouncement
 
 /*
  * The requests remote devices make of this app, each allowed, refused or put to the operator

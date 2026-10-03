@@ -1,15 +1,15 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.server.InstanceLinkCommandFailure
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.server.instanceLinkPictureCacheDir
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
-import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkCommandFailure
-import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
+import org.churchpresenter.app.churchpresenter.remote.instanceLinkPictureCacheDir
+import org.churchpresenter.server.InstanceLinkLogSide
+import org.churchpresenter.server.InstanceLinkLogger
+import org.churchpresenter.server.InstanceLinkViewModel
 
 /**
  * Collects the failures a follower reports back, so a command that silently did nothing on the

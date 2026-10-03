@@ -80,8 +80,8 @@ import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.settings.BibleSyncMode
 import org.churchpresenter.settings.InstanceLinkRole
 import org.churchpresenter.settings.InstanceLinkSettings
-import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
-import org.churchpresenter.app.churchpresenter.server.LiveStateDto
+import org.churchpresenter.server.InstanceLinkStatus
+import org.churchpresenter.server.LiveStateDto
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.sharedui.composables.LabeledRadioButton

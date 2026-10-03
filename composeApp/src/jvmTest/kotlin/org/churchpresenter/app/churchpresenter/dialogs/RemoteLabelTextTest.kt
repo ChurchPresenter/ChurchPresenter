@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.dialogs
 
 import org.churchpresenter.sharedui.testing.ComposeResourceEnvironmentTestSupport
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.app.churchpresenter.server.RemoteLabel
+import org.churchpresenter.server.RemoteLabel
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

@@ -24,10 +24,10 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ServerSettings
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.diagnostics.CrashReporter
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
+import org.churchpresenter.server.InstanceLinkLogSide
+import org.churchpresenter.server.InstanceLinkLogger
 import java.io.File
 import java.net.ServerSocket
 import java.nio.file.Files

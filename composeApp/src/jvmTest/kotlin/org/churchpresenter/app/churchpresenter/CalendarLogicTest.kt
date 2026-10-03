@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.server.CalendarEnrollDecision
-import org.churchpresenter.app.churchpresenter.server.RemoteAccess
+import org.churchpresenter.server.CalendarEnrollDecision
+import org.churchpresenter.server.RemoteAccess
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import kotlin.test.Test
 import kotlin.test.assertEquals

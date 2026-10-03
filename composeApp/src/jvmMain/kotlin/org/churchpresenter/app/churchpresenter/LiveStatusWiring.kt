@@ -1,9 +1,9 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.server.updateBackgroundSettings
-import org.churchpresenter.app.churchpresenter.server.updateBrowserSourceOutputs
-import org.churchpresenter.app.churchpresenter.server.updatePresentationLiveStatus
-import org.churchpresenter.app.churchpresenter.server.updateTransposeControls
+import org.churchpresenter.server.updateBackgroundSettings
+import org.churchpresenter.server.updateBrowserSourceOutputs
+import org.churchpresenter.server.updatePresentationLiveStatus
+import org.churchpresenter.server.updateTransposeControls
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import org.churchpresenter.settings.AppSettings
@@ -12,7 +12,7 @@ import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.CompanionServer
 
 /**
  * Whether an output on this profile offers the musicians' transpose: a Stage Monitor drawing

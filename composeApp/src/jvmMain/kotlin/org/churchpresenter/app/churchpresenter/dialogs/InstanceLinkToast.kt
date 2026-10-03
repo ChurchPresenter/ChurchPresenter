@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.server.InstanceLinkCommandFailure
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -31,7 +32,6 @@ import org.churchpresenter.strings.generated.resources.instance_link_command_fai
 import org.churchpresenter.strings.generated.resources.instance_link_command_no_ack
 import org.churchpresenter.strings.generated.resources.remote_activity_dismiss
 import kotlinx.coroutines.delay
-import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkCommandFailure
 import org.jetbrains.compose.resources.stringResource
 
 private const val INSTANCE_LINK_TOAST_AUTO_DISMISS_MS = 6_000L

@@ -21,7 +21,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.text.input.ImeAction
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.QASettings
-import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.server.TunnelStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
