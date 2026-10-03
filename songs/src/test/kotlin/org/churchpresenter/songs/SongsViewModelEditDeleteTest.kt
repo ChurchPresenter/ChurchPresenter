@@ -1,0 +1,247 @@
+package org.churchpresenter.songs
+
+import kotlinx.coroutines.Dispatchers
+import org.churchpresenter.core.models.songs.SongFileParser
+import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.SongSettings
+import java.io.File
+import java.nio.file.Files
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+
+/**
+ * Editing and deleting songs, which rewrite and move `.song` files on disk.
+ *
+ * The subtlety is the file bookkeeping: changing a song's songbook must move its file into the new
+ * folder and tidy the old folder if it is now empty; changing the title or number renames the file;
+ * a lyrics-only edit must NOT move anything. Deletion removes the file and cleans an emptied folder
+ * but leaves a shared one alone. Getting this wrong strands orphan files or deletes a folder still
+ * holding other songs — the library tests only cover the simplest in-place edit.
+ */
+class SongsViewModelEditDeleteTest {
+
+    private lateinit var dir: File
+    private val created = mutableListOf<SongsViewModel>()
+
+    @BeforeTest
+    fun createLibrary() {
+        dir = Files.createTempDirectory("cp-songs-edit-test").toFile()
+        writeSong("Hymnal", "0001", "Amazing Grace")
+        writeSong("Hymnal", "0002", "How Great Thou Art")
+        writeSong("Solo", "0003", "Alone Song") // Solo holds only this song
+    }
+
+    @AfterTest
+    fun cleanUp() {
+        created.forEach { runCatching { it.dispose() } }
+        created.clear()
+        dir.deleteRecursively()
+    }
+
+    private fun writeSong(songbook: String, number: String, title: String) {
+        val target = File(File(dir, songbook), "$number - $title.song")
+        SongFileParser().writeSongFile(
+            SongItem(number = number, title = title, songbook = songbook, lyrics = listOf("[Verse 1]", "a line")),
+            target.absolutePath,
+        )
+    }
+
+    private fun viewModel(): SongsViewModel {
+        val vm = SongsViewModel(
+            AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)),
+            dispatcher = Dispatchers.Unconfined,
+            ioDispatcher = Dispatchers.Unconfined,
+            enableFolderWatcher = false,
+        )
+        created.add(vm)
+        awaitUntil("songs") { vm.filteredSongItems.value.size >= 3 }
+        return vm
+    }
+
+    /**
+     * Asserts [what] has already happened.
+     *
+     * The view model is built on an immediate dispatcher for both its scope and its file reads, so a
+     * load is complete by the time the constructor or the call returns — there is nothing to wait
+     * for. This used to poll a wall clock for up to 5s, which is what made these tests fail on a
+     * loaded CI runner (issue #56): the condition was right, the coroutine just had not been
+     * scheduled yet. Nothing here now depends on timing.
+     */
+    private fun awaitUntil(what: String, condition: () -> Boolean) {
+        if (!condition()) throw AssertionError("expected $what to have completed synchronously")
+    }
+
+    private fun SongsViewModel.songTitled(title: String): SongItem =
+        filteredSongItems.value.first { it.title == title }
+
+    // ── updateSong: moving between songbooks ─────────────────────────────────────
+
+    @Test
+    fun `moving a song to another songbook relocates its file and tidies the empty folder`() {
+        val vm = viewModel()
+        val song = vm.songTitled("Alone Song")
+
+        val ok = vm.updateSong(song, song.copy(songbook = "Worship"))
+
+        assertTrue(ok)
+        awaitUntil("reload") { vm.filteredSongItems.value.any { it.songbook == "Worship" } }
+        assertTrue(File(dir, "Worship/0003 - Alone Song.song").exists(), "the file moved into the new songbook folder")
+        assertFalse(File(dir, "Solo/0003 - Alone Song.song").exists(), "the old copy is gone")
+        assertFalse(File(dir, "Solo").exists(), "the now-empty old songbook folder is removed")
+    }
+
+    @Test
+    fun `renaming the title renames the file in the same folder`() {
+        val vm = viewModel()
+        val song = vm.songTitled("Amazing Grace")
+
+        val ok = vm.updateSong(song, song.copy(title = "Amazing Grace (Renamed)"))
+
+        assertTrue(ok)
+        awaitUntil("reload") { vm.filteredSongItems.value.any { it.title == "Amazing Grace (Renamed)" } }
+        assertTrue(File(dir, "Hymnal/0001 - Amazing Grace (Renamed).song").exists())
+        assertFalse(File(dir, "Hymnal/0001 - Amazing Grace.song").exists(), "the old filename is gone")
+        assertTrue(File(dir, "Hymnal").exists(), "the shared songbook folder stays — it still has other songs")
+    }
+
+    @Test
+    fun `a lyrics-only edit keeps the very same file`() {
+        val vm = viewModel()
+        val song = vm.songTitled("How Great Thou Art")
+        val originalPath = song.sourceFile
+
+        val ok = vm.updateSong(song, song.copy(lyrics = listOf("[Verse 1]", "edited line")))
+
+        assertTrue(ok)
+        awaitUntil("reload") { vm.songTitled("How Great Thou Art").lyrics.contains("edited line") }
+        assertTrue(File(originalPath).exists(), "no title/number/songbook change means no move or rename")
+    }
+
+    @Test
+    fun `editing a song whose file has vanished still saves the new copy`() {
+        val vm = viewModel()
+        val song = vm.songTitled("Amazing Grace")
+        File(song.sourceFile).delete() // the file disappeared out from under us
+
+        val ok = vm.updateSong(song, song.copy(title = "Recreated"))
+
+        assertTrue(ok, "a missing source file skips the move and just writes the song")
+        awaitUntil("reload") { vm.filteredSongItems.value.any { it.title == "Recreated" } }
+    }
+
+    @Test
+    fun `a song given a number is renamed to it, padded, and one losing its number is named by its title`() {
+        val vm = viewModel()
+        val song = vm.songTitled("How Great Thou Art")
+
+        assertTrue(vm.updateSong(song, song.copy(number = "7")))
+        assertTrue(File(dir, "Hymnal/0007 - How Great Thou Art.song").exists())
+
+        val renumbered = vm.songTitled("How Great Thou Art")
+        assertTrue(vm.updateSong(renumbered, renumbered.copy(number = "")))
+        assertTrue(File(dir, "Hymnal/How Great Thou Art.song").exists())
+        assertFalse(File(dir, "Hymnal/0007 - How Great Thou Art.song").exists())
+    }
+
+    // ── createSong ───────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a new song is written into its songbook's folder, named by number or by title`() {
+        val vm = viewModel()
+
+        assertTrue(vm.createSong(SongItem(number = "12", title = "New Hymn", songbook = "Fresh")))
+        assertTrue(vm.createSong(SongItem(number = "", title = "Unnumbered", songbook = "Fresh")))
+
+        assertTrue(File(dir, "Fresh/0012 - New Hymn.song").exists())
+        assertTrue(File(dir, "Fresh/Unnumbered.song").exists())
+        assertTrue(vm.filteredSongItems.value.any { it.title == "Unnumbered" })
+    }
+
+    @Test
+    fun `a new song needs a songbook, and is refused while following a remote primary`() {
+        val vm = viewModel()
+        assertFalse(vm.createSong(SongItem(number = "1", title = "Homeless", songbook = " ")))
+
+        vm.setInstanceLinkSource(active = true, catalog = null, fetchLyrics = null)
+        assertFalse(vm.createSong(SongItem(number = "1", title = "Mirrored", songbook = "Fresh")))
+        assertFalse(File(dir, "Fresh").exists())
+    }
+
+    // ── deleteSong ───────────────────────────────────────────────────────────────
+
+    @Test
+    fun `deleting a song removes its file and its now-empty folder`() {
+        val vm = viewModel()
+        val song = vm.songTitled("Alone Song")
+
+        val ok = vm.deleteSong(song)
+
+        assertTrue(ok)
+        awaitUntil("reload") { vm.filteredSongItems.value.none { it.title == "Alone Song" } }
+        assertFalse(File(song.sourceFile).exists())
+        assertFalse(File(dir, "Solo").exists(), "an emptied songbook folder is cleaned up")
+    }
+
+    @Test
+    fun `deleting one song leaves a folder that still holds others`() {
+        val vm = viewModel()
+        val song = vm.songTitled("Amazing Grace")
+
+        vm.deleteSong(song)
+
+        awaitUntil("reload") { vm.filteredSongItems.value.none { it.title == "Amazing Grace" } }
+        assertFalse(File(song.sourceFile).exists())
+        assertTrue(File(dir, "Hymnal").exists(), "How Great Thou Art still lives in Hymnal")
+        assertTrue(File(dir, "Hymnal/0002 - How Great Thou Art.song").exists())
+    }
+
+    @Test
+    fun `moving a song out of a shared songbook leaves that folder in place`() {
+        val vm = viewModel()
+        val song = vm.songTitled("Amazing Grace") // Hymnal also holds How Great Thou Art
+
+        vm.updateSong(song, song.copy(songbook = "Worship"))
+
+        awaitUntil("reload") { vm.filteredSongItems.value.any { it.songbook == "Worship" } }
+        assertTrue(File(dir, "Worship/0001 - Amazing Grace.song").exists())
+        assertTrue(File(dir, "Hymnal").exists(), "the old folder still has another song and must not be deleted")
+        assertTrue(File(dir, "Hymnal/0002 - How Great Thou Art.song").exists())
+    }
+
+    @Test
+    fun `deleting a song whose file has already vanished still succeeds`() {
+        val vm = viewModel()
+        val song = vm.songTitled("Alone Song")
+        File(song.sourceFile).delete() // gone before the delete call
+
+        val ok = vm.deleteSong(song)
+
+        assertTrue(ok, "a missing file is nothing to delete, not an error")
+    }
+
+    // ── Refused while mirroring an Instance Link primary ─────────────────────────
+
+    @Test
+    fun `editing is refused while following a remote primary`() {
+        val vm = viewModel()
+        vm.setInstanceLinkSource(active = true, catalog = null, fetchLyrics = null)
+
+        val ghost = SongItem(number = "0009", title = "Ghost", songbook = "X")
+        assertFalse(
+            vm.updateSong(ghost, ghost.copy(title = "Renamed")),
+            "a follower's library mirrors the primary; it must not write local files",
+        )
+    }
+
+    @Test
+    fun `deleting is refused while following a remote primary`() {
+        val vm = viewModel()
+        vm.setInstanceLinkSource(active = true, catalog = null, fetchLyrics = null)
+
+        assertFalse(vm.deleteSong(SongItem(number = "0009", title = "Ghost", songbook = "X")))
+    }
+}

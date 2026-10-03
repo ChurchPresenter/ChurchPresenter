@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data
 
+import org.churchpresenter.songs.SongPlayCounts
 import org.churchpresenter.core.models.io.writeTextAtomically
 import java.io.File
 import kotlinx.serialization.Serializable
@@ -160,7 +161,7 @@ internal fun csvQuote(s: String): String = "\"${s.replace("\"", "\"\"")}\""
 
 // ── Manager ───────────────────────────────────────────────────────────────────
 
-class StatisticsManager {
+class StatisticsManager : SongPlayCounts {
     private val lock = Any()
     private val files = StatisticsFiles()
     private var statistics: DisplayStatistics = files.loadStatistics()
@@ -214,7 +215,7 @@ class StatisticsManager {
         }
     }
 
-    fun getSongPlayCount(songId: String): Int =
+    override fun getSongPlayCount(songId: String): Int =
         synchronized(lock) { statistics.songDisplayCounts[songId]?.count ?: 0 }
 
     fun getAllSongsInRange(fromMs: Long, toMs: Long): List<SongSummary> {

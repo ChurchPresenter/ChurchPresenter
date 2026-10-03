@@ -1,18 +1,12 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
-import org.churchpresenter.strings.generated.resources.Res
-import org.churchpresenter.strings.generated.resources.song_fourth_language
-import org.churchpresenter.strings.generated.resources.song_language_primary
-import org.churchpresenter.strings.generated.resources.song_language_secondary
-import org.churchpresenter.strings.generated.resources.song_third_language
 import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.settings.SongSettings
-import org.churchpresenter.settings.languageLabel
 import org.churchpresenter.settings.songLanguageSelection
 import org.churchpresenter.settings.translationSettings
 import org.churchpresenter.settings.withTranslationSettings
-import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.utils.songLanguageName
 
 /**
  * Which language of a bilingual song the tab is styling.
@@ -33,25 +27,6 @@ internal val SongStyleLanguage.isTranslation: Boolean get() = translation > 0
 /** The switch's label in the per-output dialog, which names them. */
 @Composable
 internal fun SongStyleLanguage.nameLabel(song: SongSettings): String = songLanguageName(song, translation)
-
-/**
- * What language [slot] -- `0` being the primary -- is called: the name the operator gave it in the
- * song editor, or "Language N" while it has none.
- */
-@Composable
-internal fun songLanguageName(song: SongSettings, slot: Int): String =
-    song.languageLabel(slot).trim().ifBlank { defaultSongLanguageName(slot) }
-
-/** "Language N" for [slot] -- `0` being the primary -- which is what an unnamed language is called. */
-@Composable
-internal fun defaultSongLanguageName(slot: Int): String = stringResource(
-    when (slot) {
-        0 -> Res.string.song_language_primary
-        1 -> Res.string.song_language_secondary
-        2 -> Res.string.song_third_language
-        else -> Res.string.song_fourth_language
-    },
-)
 
 /**
  * The languages an output offers to style, given what it has been told to show.

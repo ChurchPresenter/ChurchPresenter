@@ -1,5 +1,9 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.sharedui.composables.SongSectionKind
+import org.churchpresenter.sharedui.composables.sectionKindOf
+import org.churchpresenter.sharedui.composables.SectionLabelRow
+import org.churchpresenter.sharedui.composables.ZoneLabel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -48,9 +52,6 @@ import org.churchpresenter.strings.generated.resources.song_transpose_up
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.songchords.ChordSegment
 import org.churchpresenter.songchords.ChordTransposer
-import org.churchpresenter.songchords.SongSectionWordGroup
-import org.churchpresenter.songchords.SongSectionWords
-import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.DrawableResource
@@ -79,9 +80,6 @@ import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
 
 private const val CHORD_SPACING_RATIO = 0.42f
 
-/** How a section reads in the preview — the colour tells verses from choruses at a glance. */
-enum class SongSectionKind { VERSE, CHORUS, BRIDGE, TAG }
-
 /**
  * A section of the song as the preview draws it: a label, and its lines already split into runs.
  *
@@ -105,24 +103,6 @@ data class PreviewSection(
  * counting it as two would tell the person editing that they had written a section they had not.
  */
 data class SongStats(val sections: Int, val lines: Int, val words: Int)
-
-/**
- * Which kind of section a header names.
- *
- * Matched on the section words the song format itself uses, in every language at once — see
- * [SongSectionWords], which the wrapping and importing sides read too, so a song written with
- * Polish or Russian markers colours like the English one it would import to.
- *
- * Only the four kinds that have an ink of their own are distinguished. Everything else — an intro,
- * an instrumental, a pre-chorus, an unrecognised name — reads as a verse, which is what an
- * unlabelled block is anyway.
- */
-fun sectionKindOf(label: String): SongSectionKind = when (SongSectionWords.groupOf(label)) {
-    SongSectionWordGroup.CHORUS -> SongSectionKind.CHORUS
-    SongSectionWordGroup.BRIDGE -> SongSectionKind.BRIDGE
-    SongSectionWordGroup.TAG -> SongSectionKind.TAG
-    else -> SongSectionKind.VERSE
-}
 
 /**
  * Splits raw lyric text into the sections the preview draws.
@@ -197,78 +177,6 @@ fun songStatsOf(sections: List<PreviewSection>): SongStats {
         }
     }
     return SongStats(sections.count { it.slideIndex == 0 }, lines, words)
-}
-
-/**
- * Ink for each section kind.
- *
- * A legend — verse, chorus, bridge, tag — so these do not follow the theme *accent*; a legend whose
- * colours move with the accent stops being one. They do follow light and dark, which is why they are
- * theme tokens rather than literals here: the pair that holds its contrast on a light ground is not
- * the pair that holds it on a dark one, and the theme is the one place that knows which is in force.
- */
-internal object SectionInk {
-    @Composable
-    internal fun of(kind: SongSectionKind): Color = with(MaterialTheme.semantic) {
-        when (kind) {
-            SongSectionKind.VERSE -> chordVerse
-            SongSectionKind.CHORUS -> chordChorus
-            SongSectionKind.BRIDGE -> chordBridge
-            SongSectionKind.TAG -> chordTag
-        }
-    }
-}
-
-/**
- * A section's name as a coloured chip with a rule running off it — verse amber, chorus purple,
- * bridge green, tag red.
- *
- * Shared by the song editor's preview and the Songs tab's list so a section is recognised the same
- * way in both; [label] is the bare name, with any `[]`/`{}` already off it.
- */
-@Composable
-fun SectionLabelRow(
-    label: String,
-    modifier: Modifier = Modifier,
-    slideIndex: Int = 0,
-    slideCount: Int = 1,
-) {
-    val ink = SectionInk.of(sectionKindOf(label))
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        ZoneLabel(
-            text = label,
-            color = ink,
-            modifier = Modifier
-                .background(ink.copy(alpha = 0.16f), AppShape(6.dp))
-                .padding(horizontal = 9.dp, vertical = 3.dp),
-        )
-        // Which slide of the section this is, shown only when there is more than one — otherwise
-        // every unsplit verse in the library would carry a "1/1" that tells nobody anything. Digits
-        // and a slash, so there is nothing here to translate.
-        if (slideCount > 1) {
-            ZoneLabel(text = "${slideIndex + 1}/$slideCount")
-        }
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant,
-            modifier = Modifier.weight(1f),
-        )
-    }
-}
-
-@Composable
-private fun ZoneLabel(text: String, modifier: Modifier = Modifier, color: Color? = null) {
-    Text(
-        text = text.uppercase(),
-        fontSize = 9.5.sp,
-        fontWeight = FontWeight.Bold,
-        letterSpacing = 1.0.sp,
-        color = color ?: MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = modifier,
-    )
 }
 
 /**

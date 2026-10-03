@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import org.churchpresenter.app.churchpresenter.viewmodel.invalidateInstanceLinkBibleCache
 import org.churchpresenter.app.churchpresenter.viewmodel.setInstanceLinkSource
+import org.churchpresenter.app.churchpresenter.viewmodel.toRawLyrics
+import org.churchpresenter.app.churchpresenter.viewmodel.toSongItems
 
 /**
  * Mirrors the primary's songs, Bible and schedule into this instance's ViewModels while it follows
@@ -17,8 +19,10 @@ internal fun MainDesktopScope.InstanceLinkMirrorWiring() {
     LaunchedEffect(link.connectionStatus, link.remoteSongCatalog, link.role) {
         songsViewModel.setInstanceLinkSource(
             active = shouldMirrorFromPrimary(link.connectionStatus, link.role),
-            catalog = link.remoteSongCatalog,
-            fetchDetail = link.fetchSongDetail
+            catalog = link.remoteSongCatalog?.toSongItems(),
+            fetchLyrics = link.fetchSongDetail?.let { fetch ->
+                { number, songbook -> fetch(number, songbook)?.toRawLyrics() }
+            },
         )
     }
 
