@@ -114,7 +114,7 @@ tasks.register("coverageFloors") {
 }
 
 // Every module's project dependencies, test fixtures included, one module per line:
-// `MODULE <path> <dependency path>...`. CI's change detection (scripts/affected_modules.py) reads
+// `MODULE <path> <dependency path>...`. CI's change detection (.github/ci/affected_modules.py) reads
 // this to decide which suites a change can affect, so the graph is the build's own, not a copy.
 tasks.register("moduleGraph") {
     group = "help"

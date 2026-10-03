@@ -110,7 +110,7 @@ jobs:
       # Which modules' suites this change can affect, read off the build's own dependency graph
       # (`./gradlew moduleGraph`): a module runs when a file in its directory changed or when a
       # module it depends on -- transitively, test fixtures included -- did. There is no list here to
-      # keep in step with the build files; scripts/affected_modules.py says what it does and the few
+      # keep in step with the build files; .github/ci/affected_modules.py says what it does and the few
       # files that run everything. :composeApp consumes almost every module and runs regardless.
       #
       # The base is the pull request's or merge group's base commit, or the commit before a push.
@@ -126,7 +126,7 @@ jobs:
           if [ -n "$BASE_SHA" ] && ! git fetch --no-tags --depth=1 origin "$BASE_SHA"; then
             BASE_SHA=""
           fi
-          python3 scripts/affected_modules.py --graph module-graph.txt --base "$BASE_SHA" >> "$GITHUB_OUTPUT"
+          python3 .github/ci/affected_modules.py --graph module-graph.txt --base "$BASE_SHA" >> "$GITHUB_OUTPUT"
 
       # Static analysis, ~5s, ahead of the 14-minute suite so a style regression fails fast.
       # Pre-existing findings are baselined per module -- config/detekt/baseline.xml for

@@ -274,7 +274,7 @@ keep passing, and a test your change invalidated is fixed or deleted as part of 
 
 `composeApp/src/jvmTest/` — run with `./gradlew :composeApp:check`. CI (`.github/workflows/test.yml`)
 runs these on every push, plus each module's suite when the change touched that module or one it
-depends on — worked out from `./gradlew moduleGraph` by `scripts/affected_modules.py`, so a new
+depends on — worked out from `./gradlew moduleGraph` by `.github/ci/affected_modules.py`, so a new
 `projects.*` dependency needs no CI edit.
 
 ### The suite runs in parallel forks
