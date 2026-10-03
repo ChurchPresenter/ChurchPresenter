@@ -1,0 +1,36 @@
+{
+  "run": {
+    "os": "Linux 6.18.44-fc-v64",
+    "arch": "amd64",
+    "cpus": 4,
+    "jvm": "OpenJDK 64-Bit Server VM 21.0.11",
+    "warmupFrames": 30,
+    "measuredFrames": 120
+  },
+  "results": [
+    {"scenario": "song verse", "width": 1920, "height": 1080, "renderMs": {"p50": 11.58, "p95": 15.12, "p99": 34.67, "max": 52.59}, "readbackMs": {"p50": 6.83, "p95": 10.52, "p99": 11.53, "max": 11.54}, "budgetMs": 16.70},
+    {"scenario": "song bilingual", "width": 1920, "height": 1080, "renderMs": {"p50": 12.33, "p95": 18.15, "p99": 22.35, "max": 23.17}, "readbackMs": {"p50": 6.72, "p95": 10.33, "p99": 12.28, "max": 12.52}, "budgetMs": 16.70},
+    {"scenario": "song chord chart", "width": 1920, "height": 1080, "renderMs": {"p50": 5.28, "p95": 7.22, "p99": 7.79, "max": 7.81}, "readbackMs": {"p50": 6.56, "p95": 9.37, "p99": 10.24, "max": 10.51}, "budgetMs": 16.70},
+    {"scenario": "bible verse", "width": 1920, "height": 1080, "renderMs": {"p50": 4.17, "p95": 6.37, "p99": 6.69, "max": 6.83}, "readbackMs": {"p50": 6.53, "p95": 10.22, "p99": 10.51, "max": 10.52}, "budgetMs": 16.70},
+    {"scenario": "bible two translations", "width": 1920, "height": 1080, "renderMs": {"p50": 4.90, "p95": 6.12, "p99": 6.41, "max": 6.50}, "readbackMs": {"p50": 6.36, "p95": 7.39, "p99": 8.87, "max": 8.90}, "budgetMs": 16.70},
+    {"scenario": "announcement scrolling", "width": 1920, "height": 1080, "renderMs": {"p50": 1.29, "p95": 1.83, "p99": 2.13, "max": 2.21}, "readbackMs": {"p50": 6.23, "p95": 9.73, "p99": 11.96, "max": 12.11}, "budgetMs": 16.70},
+    {"scenario": "question", "width": 1920, "height": 1080, "renderMs": {"p50": 2.85, "p95": 3.70, "p99": 4.28, "max": 5.02}, "readbackMs": {"p50": 6.34, "p95": 9.37, "p99": 9.85, "max": 12.26}, "budgetMs": 16.70},
+    {"scenario": "dictionary entry", "width": 1920, "height": 1080, "renderMs": {"p50": 5.56, "p95": 7.11, "p99": 7.47, "max": 8.10}, "readbackMs": {"p50": 6.61, "p95": 9.71, "p99": 10.91, "max": 11.27}, "budgetMs": 16.70},
+    {"scenario": "captions", "width": 1920, "height": 1080, "renderMs": {"p50": 2.87, "p95": 3.82, "p99": 4.44, "max": 4.87}, "readbackMs": {"p50": 6.30, "p95": 6.70, "p99": 7.58, "max": 8.01}, "budgetMs": 16.70},
+    {"scenario": "picture", "width": 1920, "height": 1080, "renderMs": {"p50": 2.15, "p95": 2.79, "p99": 3.59, "max": 3.64}, "readbackMs": {"p50": 6.27, "p95": 7.75, "p99": 9.63, "max": 9.71}, "budgetMs": 16.70},
+    {"scenario": "canvas scene", "width": 1920, "height": 1080, "renderMs": {"p50": 2.99, "p95": 4.18, "p99": 6.15, "max": 7.28}, "readbackMs": {"p50": 6.38, "p95": 9.82, "p99": 11.83, "max": 12.66}, "budgetMs": 16.70},
+    {"scenario": "lottie lower third", "width": 1920, "height": 1080, "renderMs": {"p50": 1.07, "p95": 1.25, "p99": 1.43, "max": 2.09}, "readbackMs": {"p50": 6.01, "p95": 6.56, "p99": 7.15, "max": 7.26}, "budgetMs": 16.70},
+    {"scenario": "song verse", "width": 3840, "height": 2160, "renderMs": {"p50": 16.58, "p95": 19.78, "p99": 23.43, "max": 23.53}, "readbackMs": {"p50": 27.14, "p95": 31.75, "p99": 45.50, "max": 47.42}, "budgetMs": 33.30},
+    {"scenario": "song bilingual", "width": 3840, "height": 2160, "renderMs": {"p50": 17.40, "p95": 20.81, "p99": 23.67, "max": 24.10}, "readbackMs": {"p50": 27.49, "p95": 33.83, "p99": 51.20, "max": 54.60}, "budgetMs": 33.30},
+    {"scenario": "song chord chart", "width": 3840, "height": 2160, "renderMs": {"p50": 17.33, "p95": 20.03, "p99": 20.97, "max": 22.21}, "readbackMs": {"p50": 27.91, "p95": 38.83, "p99": 45.81, "max": 46.94}, "budgetMs": 33.30},
+    {"scenario": "bible verse", "width": 3840, "height": 2160, "renderMs": {"p50": 15.07, "p95": 18.15, "p99": 24.99, "max": 34.85}, "readbackMs": {"p50": 27.42, "p95": 33.81, "p99": 43.97, "max": 45.16}, "budgetMs": 33.30},
+    {"scenario": "bible two translations", "width": 3840, "height": 2160, "renderMs": {"p50": 19.95, "p95": 24.04, "p99": 28.65, "max": 32.51}, "readbackMs": {"p50": 27.72, "p95": 36.71, "p99": 43.89, "max": 43.94}, "budgetMs": 33.30},
+    {"scenario": "announcement scrolling", "width": 3840, "height": 2160, "renderMs": {"p50": 5.87, "p95": 6.43, "p99": 8.16, "max": 8.28}, "readbackMs": {"p50": 27.18, "p95": 32.83, "p99": 41.11, "max": 42.45}, "budgetMs": 33.30},
+    {"scenario": "question", "width": 3840, "height": 2160, "renderMs": {"p50": 7.57, "p95": 8.75, "p99": 10.22, "max": 13.13}, "readbackMs": {"p50": 27.44, "p95": 34.04, "p99": 46.48, "max": 46.60}, "budgetMs": 33.30},
+    {"scenario": "dictionary entry", "width": 3840, "height": 2160, "renderMs": {"p50": 14.05, "p95": 16.21, "p99": 17.70, "max": 19.72}, "readbackMs": {"p50": 27.84, "p95": 34.87, "p99": 38.47, "max": 40.44}, "budgetMs": 33.30},
+    {"scenario": "captions", "width": 3840, "height": 2160, "renderMs": {"p50": 7.74, "p95": 8.79, "p99": 9.34, "max": 12.48}, "readbackMs": {"p50": 27.63, "p95": 37.95, "p99": 51.10, "max": 51.71}, "budgetMs": 33.30},
+    {"scenario": "picture", "width": 3840, "height": 2160, "renderMs": {"p50": 16.02, "p95": 19.02, "p99": 20.53, "max": 23.35}, "readbackMs": {"p50": 28.38, "p95": 38.72, "p99": 41.28, "max": 41.69}, "budgetMs": 33.30},
+    {"scenario": "canvas scene", "width": 3840, "height": 2160, "renderMs": {"p50": 14.51, "p95": 18.20, "p99": 20.62, "max": 21.14}, "readbackMs": {"p50": 27.18, "p95": 36.17, "p99": 44.24, "max": 51.53}, "budgetMs": 33.30},
+    {"scenario": "lottie lower third", "width": 3840, "height": 2160, "renderMs": {"p50": 6.51, "p95": 7.35, "p99": 7.94, "max": 15.54}, "readbackMs": {"p50": 27.29, "p95": 35.54, "p99": 39.21, "max": 39.80}, "budgetMs": 33.30}
+  ]
+}
