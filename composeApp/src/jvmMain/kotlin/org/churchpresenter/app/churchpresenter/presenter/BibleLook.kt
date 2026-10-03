@@ -115,21 +115,16 @@ internal class BibleStyle(
     val isKey get() = look.isKey
     val bs get() = look.bs
     val translationStack get() = look.translationStack
-    val assignedFileNames get() = look.assignedFileNames
     val effectiveVerses get() = look.effectiveVerses
     val t0 get() = look.t0
     val t1 get() = look.t1
-    val t2 get() = look.t2
-    val t3 get() = look.t3
     val bgConfig get() = look.bgConfig
-    val selectedVerses get() = look.selectedVerses
     val appSettings get() = look.appSettings
     val isLowerThird get() = look.isLowerThird
     val isLowerThirdVertical get() = look.isLowerThirdVertical
     val transitionAlpha get() = look.transitionAlpha
     val showBackground get() = look.showBackground
     val crossfadeEnabled get() = look.crossfadeEnabled
-    val bibleTranslations get() = look.bibleTranslations
 
     fun versesForOutput(verses: List<SelectedVerse>): List<SelectedVerse> = look.versesForOutput(verses)
 
