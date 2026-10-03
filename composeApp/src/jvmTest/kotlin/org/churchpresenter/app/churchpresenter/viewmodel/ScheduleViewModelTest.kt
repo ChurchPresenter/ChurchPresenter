@@ -173,6 +173,47 @@ class ScheduleViewModelTest {
     }
 
     @Test
+    fun `moving the bottom item to the bottom changes nothing, and an unknown row is not found`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B")
+        val undoable = vm.canUndo
+        assertEquals(1, vm.moveItemToBottom(vm.scheduleItems.last().id))
+        assertEquals(-1, vm.moveItemToBottom("no-such-row"))
+        assertEquals(listOf("A", "B"), vm.titles)
+        assertEquals(undoable, vm.canUndo, "nothing moved, so nothing to undo")
+    }
+
+    @Test
+    fun `a website's page title replaces its address once, and never a title someone set`() {
+        val vm = newViewModel()
+        vm.addWebsite("https://example.org", "")
+        vm.addWebsite("https://named.example", "Our Church")
+        fun titleOf(url: String) =
+            vm.scheduleItems.filterIsInstance<ScheduleItem.WebsiteItem>().single { it.url == url }.title
+
+        vm.updateWebsiteTitle("https://example.org", " ")
+        assertEquals("https://example.org", titleOf("https://example.org"), "a blank title is no title")
+
+        vm.updateWebsiteTitle("https://example.org", "Example")
+        vm.updateWebsiteTitle("https://named.example", "Page Title")
+        vm.updateWebsiteTitle("https://unknown.example", "Nobody")
+        assertEquals("Example", titleOf("https://example.org"))
+        assertEquals("Our Church", titleOf("https://named.example"))
+    }
+
+    @Test
+    fun `redo does nothing while following another instance`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B")
+        vm.undo()
+        assertTrue(vm.canRedo)
+        vm.applyRemoteSchedule(emptyList())
+
+        vm.redo()
+        assertTrue(vm.scheduleItems.isEmpty(), "the follower's schedule is the primary's")
+    }
+
+    @Test
     fun `drag-reorder by index moves the item and shifts the rest`() {
         val vm = newViewModel()
         vm.addSongs("A", "B", "C", "D")
