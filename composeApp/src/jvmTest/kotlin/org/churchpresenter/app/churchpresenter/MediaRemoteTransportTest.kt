@@ -12,7 +12,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
-class MediaRemoteWiringBranchCoverageTest {
+class MediaRemoteTransportTest {
 
     @Test
     fun `a file loaded, played live and then unloaded is reported and then cleared`() = runComposeUiTest {

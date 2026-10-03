@@ -37,6 +37,7 @@ class SongListPaneRecompositionTest {
         val byDetails = mutableListOf<String>()
         val scheduled = mutableListOf<String>()
         val queries = mutableListOf<String>()
+        var last = 0
     }
 
     @Composable
@@ -83,25 +84,25 @@ class SongListPaneRecompositionTest {
             playCountFor = { v },
             searchMatchFor = { null },
             onSearchQueryChange = { seen.queries += "$v:$it" },
-            onSearchFocusChanged = { v },
-            onFilterTypeChange = { v },
-            onSongbookChange = { v },
-            onSortChange = { v },
-            onSelectSong = { v },
+            onSearchFocusChanged = { seen.last = v },
+            onFilterTypeChange = { seen.last = v },
+            onSongbookChange = { seen.last = v },
+            onSortChange = { seen.last = v },
+            onSelectSong = { seen.last = v },
             onSelectSongByDetails = { _, title, _, _ -> seen.byDetails += "$v:$title" },
-            onSelectSection = { v },
-            onToggleFavorite = { v },
-            onClearFavorites = { v },
-            onReloadSongs = { v },
-            onSaveColumnWidths = { v },
-            onSaveColumnOrder = { v },
-            onSaveHiddenColumns = { v },
-            onSaveFavPanelHeight = { v },
-            onFavoritesExpandedChange = { v },
-            onFavPanelHeightChange = { v },
+            onSelectSection = { seen.last = v },
+            onToggleFavorite = { seen.last = v },
+            onClearFavorites = { seen.last = v },
+            onReloadSongs = { seen.last = v },
+            onSaveColumnWidths = { seen.last = v },
+            onSaveColumnOrder = { seen.last = v },
+            onSaveHiddenColumns = { seen.last = v },
+            onSaveFavPanelHeight = { seen.last = v },
+            onFavoritesExpandedChange = { seen.last = v },
+            onFavPanelHeightChange = { seen.last = v },
             onAddToSchedule = { _, title, _, _ -> seen.scheduled += "$v:$title" },
-            onPresenting = { v },
-            sendToPresenter = { v },
+            onPresenting = { seen.last = v },
+            sendToPresenter = { seen.last = v },
         )
     }
 

@@ -33,7 +33,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
-class RemoteCommandEffectsBranchCoverageTest {
+class RemoteCommandFlowLifecycleTest {
 
     private lateinit var dir: File
     private lateinit var home: File
@@ -55,7 +55,11 @@ class RemoteCommandEffectsBranchCoverageTest {
         dir = Files.createTempDirectory("cp-remote-branches").toFile()
         pictures = PicturesViewModel()
         presentations = PresentationViewModel()
-        bible = BibleViewModel(AppSettings(), dispatcher = Dispatchers.Unconfined, ioDispatcher = Dispatchers.Unconfined)
+        bible = BibleViewModel(
+            AppSettings(),
+            dispatcher = Dispatchers.Unconfined,
+            ioDispatcher = Dispatchers.Unconfined,
+        )
         presenter = PresenterManager()
     }
 
@@ -152,7 +156,9 @@ class RemoteCommandEffectsBranchCoverageTest {
             song = flowOf(ScheduleItem.SongItem(id = "s", songNumber = 1, title = "A", songbook = "B")),
             picture = flowOf(ScheduleItem.PictureItem(id = "p", folderPath = "/x", folderName = "x", imageCount = 0)),
             presentation = flowOf(
-                ScheduleItem.PresentationItem(id = "d", filePath = "/d", fileName = "d", slideCount = 0, fileType = "pdf"),
+                ScheduleItem.PresentationItem(
+                    id = "d", filePath = "/d", fileName = "d", slideCount = 0, fileType = "pdf",
+                ),
             ),
             media = flowOf(ScheduleItem.MediaItem(id = "m", mediaUrl = "u", mediaTitle = "t", mediaType = "local")),
         )
@@ -222,7 +228,9 @@ class RemoteCommandEffectsBranchCoverageTest {
             {
                 Wired(
                     verse = flowOf(
-                        SelectBibleVerseRequest(bookName = "John", chapter = 3, verseNumber = 16, verseText = "For God"),
+                        SelectBibleVerseRequest(
+                            bookName = "John", chapter = 3, verseNumber = 16, verseText = "For God",
+                        ),
                     ),
                 )
             },

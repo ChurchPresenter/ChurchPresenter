@@ -25,7 +25,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 @OptIn(ExperimentalTestApi::class)
-class LiveStateBroadcastWiringBranchCoverageTest {
+class LiveStateBroadcastVerseCodeTest {
 
     private lateinit var dir: File
 
