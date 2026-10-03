@@ -14,6 +14,11 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import org.churchpresenter.settings.SongNumberOffset
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.performTextReplacement
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -104,9 +109,18 @@ class ProfilesCustomizeSongExtrasTest {
             waitForIdle()
 
             assertEquals(Constants.BOTTOM_LEFT, get().song().layoutExtras.titleSlideNumber.corner)
-            onNodeWithTag("title_slide_number_offset_x").assertExists()
-            onNodeWithTag("title_slide_number_offset_y").assertExists()
+            nudge("title_slide_number_offset_x", 12)
+            nudge("title_slide_number_offset_y", 7)
+            assertEquals(SongNumberOffset(12, 7), get().song().layoutExtras.titleSlideNumber.offset)
         }
+    }
+
+    /** Types [to] into the number field of the slider row tagged [tag]. */
+    private fun SkikoComposeUiTest.nudge(tag: String, to: Int) {
+        onNode(hasAnyAncestor(hasTestTag(tag)) and hasSetTextAction())
+            .performScrollTo()
+            .performTextReplacement(to.toString())
+        waitForIdle()
     }
 
     // ── Where the number sits ───────────────────────────────────────────────────────────────────

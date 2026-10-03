@@ -20,6 +20,9 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.ContentRegion
+import org.churchpresenter.settings.DICTIONARY_DEFINITION_BOX
+import org.churchpresenter.settings.DICTIONARY_KJV_BOX
+import org.churchpresenter.settings.DICTIONARY_REFERENCE_BOX
 import org.churchpresenter.settings.DICTIONARY_WORD_BOX
 import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.QASettings
@@ -172,6 +175,26 @@ class TextBoxRenderTest {
         }
         assertTrue(word.inside(Rect(0f, 0f, WIDTH * 0.5f, HEIGHT * 0.25f)), "word $word")
         assertTrue(definition.top > HEIGHT * 0.25f, "the rest stays in the card")
+    }
+
+    @Test
+    fun `every boxed dictionary part is drawn in its own box`() {
+        fun box(y: Float) =
+            TextBox(enabled = true, xPercent = 0f, yPercent = y, widthPercent = 50f, heightPercent = 20f)
+        val ds = DictionarySettings(
+            textBoxes = mapOf(
+                textBoxKey(DICTIONARY_REFERENCE_BOX, lowerThird = false) to box(0f),
+                textBoxKey(DICTIONARY_DEFINITION_BOX, lowerThird = false) to box(40f),
+                textBoxKey(DICTIONARY_KJV_BOX, lowerThird = false) to box(70f),
+            ),
+        )
+        val entry = StrongsEntry("G26", "ἀγάπη", "agape", "ag-ah'-pay", "love, affection", kjvUsage = "charity (27x)")
+        val (number, definition, kjv) = bounds("G26", "love, affection", "charity (27x)") {
+            DictionaryPresenter(entry = entry, dictionarySettings = ds)
+        }
+        assertTrue(number.inside(Rect(0f, 0f, WIDTH * 0.5f, HEIGHT * 0.2f)), "number $number")
+        assertTrue(definition.inside(Rect(0f, HEIGHT * 0.4f, WIDTH * 0.5f, HEIGHT * 0.6f)), "definition $definition")
+        assertTrue(kjv.inside(Rect(0f, HEIGHT * 0.7f, WIDTH * 0.5f, HEIGHT * 0.9f)), "usage $kjv")
     }
 
     private companion object {
