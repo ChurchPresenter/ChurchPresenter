@@ -116,6 +116,7 @@ module-specific notes there, not here.**
 | `announcements/`       | `:announcements`       | The Announcements tab and its timer                                                 | [AGENT.md](announcements/AGENT.md)       |
 | `lower-third/`         | `:lower-third`         | The Lower Third tab, its ATEM render cache and sequencer, and the bundled lottie fonts | [AGENT.md](lower-third/AGENT.md)         |
 | `songs/`               | `:songs`               | The Songs tab, `SongsViewModel` and the song library on disk                        | [AGENT.md](songs/AGENT.md)               |
+| `bible-tab/`           | `:bible-tab`           | The Bible tab, `BibleViewModel`, the cross references and the verse-sequence log     | [AGENT.md](bible-tab/AGENT.md)           |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions
@@ -272,7 +273,9 @@ it", "add tests now"). Tests written against the first version get thrown away. 
 keep passing, and a test your change invalidated is fixed or deleted as part of the change.
 
 `composeApp/src/jvmTest/` — run with `./gradlew :composeApp:check`. CI (`.github/workflows/test.yml`)
-runs these plus each module's suite, only for the modules whose directory the change touched.
+runs these on every push, plus each module's suite when the change touched that module or one it
+depends on — worked out from `./gradlew moduleGraph` by `scripts/affected_modules.py`, so a new
+`projects.*` dependency needs no CI edit.
 
 ### The suite runs in parallel forks
 `jvmTest` runs on up to 4 parallel JVMs (`-PtestForks=N` to override). Breaking these produces

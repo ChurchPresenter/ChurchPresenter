@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.bibletab.getVersesForDisplay
+import org.churchpresenter.bibletab.resolveBookIndex
+import org.churchpresenter.bibletab.LiveReference
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -15,13 +18,13 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
 import org.churchpresenter.sharedui.models.Tabs
-import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
+import org.churchpresenter.bibletab.BibleViewModel
 import org.churchpresenter.slides.viewmodel.PicturesViewModel
 import org.churchpresenter.slides.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 
 import java.io.File
-import org.churchpresenter.app.churchpresenter.viewmodel.logLiveReference
+import org.churchpresenter.bibletab.logLiveReference
 
 /**
  * Everything the app does because a *remote* asked it to — a Companion button, a phone, a linked
@@ -313,14 +316,14 @@ private fun RemoteBibleEffects(
                 // Capture the full span the client asked for: parse req.verseRange ("1-3", "2,4,5")
                 // and take its max as the end, rather than hardcoding null (which dropped the range).
                 val verseEnd = parseVerseRangeEnd(req.verseRange, req.verseNumber)
-                bibleViewModel.logLiveReference(
+                bibleViewModel.logLiveReference(LiveReference(
                     displayBookIndex = bookIndex,
                     chapter    = req.chapter,
                     verseStart = req.verseNumber,
                     verseEnd   = verseEnd,
                     source     = "remote",
                     autoFollow = bibleViewModel.autoFollowEnabled.value,
-                )
+                ))
             }
         }
     }

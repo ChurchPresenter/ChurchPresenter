@@ -225,9 +225,9 @@ wrapper:
 ./gradlew :calendar:test               # Calendar Manager
 ```
 
-`:composeApp:check` does **not** reach any of them. CI runs each as its own step, only for the
-modules whose directory (or the shared build files) the change touched; `bash test-changed.sh` names
-the module tasks a change implies.
+`:composeApp:check` does **not** reach any of them. CI runs each as its own step, only when the
+change touched that module, a module it depends on (from `./gradlew moduleGraph`) or the shared build
+files; `bash test-changed.sh` names the module tasks a change implies.
 
 ### DeckLink hardware tests
 

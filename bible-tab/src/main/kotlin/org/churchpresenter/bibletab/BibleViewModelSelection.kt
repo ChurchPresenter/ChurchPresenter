@@ -1,0 +1,250 @@
+package org.churchpresenter.bibletab
+
+import kotlinx.coroutines.flow.first
+import org.churchpresenter.bible.Bible
+import org.churchpresenter.core.models.bible.SelectedVerse
+
+/**
+ * What is currently selected, resolved into the verses that go on screen — including the
+ * look-ahead list the stage monitor shows next.
+ */
+
+fun BibleViewModel.getSelectedVerses(): List<SelectedVerse> {
+    return selectedVersesUnsplit().versePage(currentVersePage(), splitLongVersesEnabled, longVerseWordCount)
+}
+
+/** The selection as the modules hold it, before a long verse is broken into pages. */
+internal fun BibleViewModel.selectedVersesUnsplit(): List<SelectedVerse> {
+    if (_verses.value.isEmpty()) return emptyList()
+
+    val bookId = _primaryBible.value?.getBookId(_selectedBookIndex.value) ?: (_selectedBookIndex.value + 1)
+    return if (_multiVerseEnabled.value && _selectedVerseIndices.isNotEmpty()) {
+        multiVerseSelection(bookId)
+    } else {
+        singleVerseSelection(bookId)
+    }
+}
+
+/** Ctrl/Shift-selected verses, joined into one primary entry plus one per parallel translation. */
+private fun BibleViewModel.multiVerseSelection(bookId: Int): List<SelectedVerse> {
+    val verseList = mutableListOf<SelectedVerse>()
+        val sortedIndices = _selectedVerseIndices.sorted()
+        val primaryTexts = mutableListOf<String>()
+        val parallelTexts = _loadedBibles.value.drop(1).map { mutableListOf<String>() }
+        val verseNumbers = mutableListOf<Int>()
+        var bookName = ""
+        val parallelBookNames = MutableList(parallelTexts.size) { "" }
+        val parallelBookIds = MutableList(parallelTexts.size) { bookId }
+
+        for (idx in sortedIndices) {
+            val vNum = _verses.value.getOrNull(idx)?.let(::verseNumberOf) ?: continue
+            val verse = _verses.value[idx]
+            verseNumbers.add(vNum)
+
+            val primaryText = verseTextOf(verse)
+            if (primaryText.isNotEmpty()) {
+                if (bookName.isEmpty()) bookName = _primaryBible.value?.getBookName(bookId) ?: ""
+                primaryTexts.add(primaryText)
+            }
+
+            val codeRef = _primaryBible.value?.getCodeReference(bookId, _selectedChapter.value, vNum)
+            val sB = codeRef?.first ?: bookId
+            val sCh = codeRef?.second ?: _selectedChapter.value
+            val sV = codeRef?.third ?: vNum
+            _loadedBibles.value.drop(1).forEachIndexed { bibleIndex, bible ->
+                bible.takeIf { it.getVerseCount() > 0 }
+                    ?.getVerseDetailsByCode(sB, sCh, sV)?.let { result ->
+                if (parallelBookNames[bibleIndex].isEmpty()) {
+                    parallelBookNames[bibleIndex] = result.bookName
+                    parallelBookIds[bibleIndex] = sB
+                }
+                parallelTexts[bibleIndex].add(result.verseText)
+                }
+            }
+        }
+
+        val rangeStr = formatVerseRange(verseNumbers)
+
+        if (primaryTexts.isNotEmpty()) {
+            verseList.add(
+                SelectedVerse(
+                    translationFileName = _loadedTranslations.value.firstOrNull()?.fileName.orEmpty(),
+                    bibleAbbreviation = _primaryBible.value?.getBibleAbbreviation() ?: "",
+                    bibleName = _primaryBible.value?.getBibleTitle() ?: "",
+                    bookName = bookName,
+                    chapter = _selectedChapter.value,
+                    verseNumber = verseNumbers.first(),
+                    verseText = primaryTexts.joinToString(" "),
+                    verseRange = rangeStr,
+                    bookId = bookId
+                )
+            )
+        }
+        parallelTexts.forEachIndexed { index, texts ->
+            if (texts.isNotEmpty()) verseList.add(
+                SelectedVerse(
+                    translationFileName = _loadedTranslations.value[index + 1].fileName,
+                    bibleAbbreviation = _loadedBibles.value[index + 1].getBibleAbbreviation(),
+                    bibleName = _loadedBibles.value[index + 1].getBibleTitle(),
+                    bookName = parallelBookNames[index],
+                    chapter = _selectedChapter.value,
+                    verseNumber = verseNumbers.first(),
+                    verseText = texts.joinToString(" "),
+                    verseRange = rangeStr,
+                    bookId = parallelBookIds[index]
+                )
+            )
+        }
+    return verseList
+}
+
+/** The single selected verse, with the same verse from every other loaded translation. */
+private fun BibleViewModel.singleVerseSelection(bookId: Int): List<SelectedVerse> {
+    val verseList = mutableListOf<SelectedVerse>()
+
+    val safeIndex = _selectedVerseIndex.value.coerceIn(0, _verses.value.size - 1)
+
+    if (safeIndex != _selectedVerseIndex.value) {
+        _selectedVerseIndex.value = safeIndex
+    }
+
+    val verse = _verses.value[safeIndex]
+    val verseNumber = verseNumberOf(verse) ?: 1
+
+    val primaryVerseText = verseTextOf(verse)
+    val primaryBookName = _primaryBible.value?.getBookName(bookId) ?: ""
+    if (primaryVerseText.isNotEmpty()) {
+        verseList.add(
+            SelectedVerse(
+                translationFileName = _loadedTranslations.value.firstOrNull()?.fileName.orEmpty(),
+                bibleAbbreviation = _primaryBible.value?.getBibleAbbreviation() ?: "",
+                bibleName = _primaryBible.value?.getBibleTitle() ?: "",
+                bookName = primaryBookName,
+                chapter = _selectedChapter.value,
+                verseNumber = verseNumber,
+                verseText = primaryVerseText,
+                bookId = bookId
+            )
+        )
+    }
+
+    val codeRef = _primaryBible.value?.getCodeReference(bookId, _selectedChapter.value, verseNumber)
+    val secBook = codeRef?.first ?: bookId
+    val secChapter = codeRef?.second ?: _selectedChapter.value
+    val secVerse = codeRef?.third ?: verseNumber
+    _loadedTranslations.value.drop(1).forEach { loadedTranslation ->
+        val bible = loadedTranslation.bible
+        bible.takeIf { it.getVerseCount() > 0 }
+            ?.getVerseDetailsByCode(secBook, secChapter, secVerse)?.let { result ->
+            verseList.add(SelectedVerse(
+                translationFileName = loadedTranslation.fileName,
+                bibleAbbreviation = bible.getBibleAbbreviation(),
+                bibleName = bible.getBibleTitle(),
+                bookName = result.bookName,
+                chapter = result.displayChapter,
+                verseNumber = result.displayVerse,
+                verseText = result.verseText,
+                bookId = secBook
+            ))
+        }
+    }
+
+    return verseList
+}
+
+internal fun BibleViewModel.getNextVerses(): List<SelectedVerse> {
+    if (_verses.value.isEmpty()) return emptyList()
+
+    // The second half of the live verse is what comes next, before the next verse does.
+    secondHalfOfLiveVerse()?.let { return it }
+
+    val referenceIndex = if (_multiVerseEnabled.value && _selectedVerseIndices.isNotEmpty()) {
+        _selectedVerseIndices.max()
+    } else {
+        _selectedVerseIndex.value.coerceIn(0, _verses.value.size - 1)
+    }
+
+    val bookId = _primaryBible.value?.getBookId(_selectedBookIndex.value) ?: (_selectedBookIndex.value + 1)
+
+    val next = if (referenceIndex < _verses.value.size - 1) {
+        val verse = _verses.value[referenceIndex + 1]
+        verseNumberOf(verse)?.let { verseNumber ->
+            buildNextVerseList(bookId, _selectedChapter.value, verseNumber, verseTextOf(verse))
+        }.orEmpty()
+    } else {
+        firstVersesOfNextChapter()
+    }
+    // The verse after this one is looked ahead to at its own first half, for the same reason.
+    return next.versePage(VERSE_PAGE_FIRST, splitLongVersesEnabled, longVerseWordCount)
+}
+
+/** The other half of the verse on screen, when it is split and its first half is what is showing. */
+private fun BibleViewModel.secondHalfOfLiveVerse(): List<SelectedVerse>? {
+    if (!splitLongVersesEnabled) return null
+    val current = selectedVersesUnsplit()
+    val onFirstHalf = currentVersePage() == VERSE_PAGE_FIRST
+    val splits = current.firstOrNull()?.let { isLongVerse(it.verseText, longVerseWordCount) } == true
+    return if (onFirstHalf && splits) {
+        current.versePage(VERSE_PAGE_SECOND, enabled = true, wordThreshold = longVerseWordCount)
+    } else {
+        null
+    }
+}
+
+private fun BibleViewModel.firstVersesOfNextChapter(): List<SelectedVerse> {
+    val bible = _primaryBible.value ?: return emptyList()
+    val (nextBookIndex, nextChapter) = nextChapterPosition(bible) ?: return emptyList()
+    val nextBookId = bible.getBookId(nextBookIndex)
+    val firstVerse = bible.getChapter(nextBookId, nextChapter).verses.firstOrNull() ?: return emptyList()
+    val verseNumber = verseNumberOf(firstVerse) ?: return emptyList()
+    return buildNextVerseList(nextBookId, nextChapter, verseNumber, verseTextOf(firstVerse))
+}
+
+private fun BibleViewModel.nextChapterPosition(bible: Bible): Pair<Int, Int>? {
+    val bookIndex = _selectedBookIndex.value
+    val chapter = _selectedChapter.value + 1
+    if (chapter <= bible.getChapterCount(bookIndex)) return bookIndex to chapter
+    return (bookIndex + 1).takeIf { it < _books.value.size }?.let { it to 1 }
+}
+
+internal fun BibleViewModel.buildNextVerseList(
+    bookId: Int,
+    chapter: Int,
+    verseNumber: Int,
+    verseText: String
+): List<SelectedVerse> {
+    val verseList = mutableListOf<SelectedVerse>()
+    if (verseText.isNotEmpty()) {
+        verseList.add(
+            SelectedVerse(
+                translationFileName = _loadedTranslations.value.firstOrNull()?.fileName.orEmpty(),
+                bibleAbbreviation = _primaryBible.value?.getBibleAbbreviation() ?: "",
+                bibleName = _primaryBible.value?.getBibleTitle() ?: "",
+                bookName = _primaryBible.value?.getBookName(bookId) ?: "",
+                chapter = chapter,
+                verseNumber = verseNumber,
+                verseText = verseText
+            )
+        )
+    }
+    val codeRef = _primaryBible.value?.getCodeReference(bookId, chapter, verseNumber)
+    val secBook = codeRef?.first ?: bookId
+    val secChapter = codeRef?.second ?: chapter
+    val secVerse = codeRef?.third ?: verseNumber
+    _loadedTranslations.value.drop(1).forEach { loadedTranslation ->
+        val bible = loadedTranslation.bible
+        bible.takeIf { it.getVerseCount() > 0 }
+            ?.getVerseDetailsByCode(secBook, secChapter, secVerse)?.let { result ->
+        verseList.add(SelectedVerse(
+                translationFileName = loadedTranslation.fileName,
+                bibleAbbreviation = bible.getBibleAbbreviation(),
+                bibleName = bible.getBibleTitle(),
+                bookName = result.bookName,
+                chapter = result.displayChapter,
+                verseNumber = result.displayVerse,
+                verseText = result.verseText
+            ))
+        }
+    }
+    return verseList
+}

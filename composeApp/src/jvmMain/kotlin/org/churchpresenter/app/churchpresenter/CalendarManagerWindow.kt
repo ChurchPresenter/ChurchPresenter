@@ -10,7 +10,7 @@ import org.churchpresenter.strings.generated.resources.Res
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.data.BibleBookAbbreviations
+import org.churchpresenter.bibletab.BibleBookAbbreviations
 import org.churchpresenter.app.churchpresenter.data.asDurationRow
 import org.churchpresenter.app.churchpresenter.dialogs.CalendarWindow
 import org.churchpresenter.strings.generated.resources.calendar_locate_folder_title
@@ -32,7 +32,7 @@ import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.utils.calendarUsageEvent
-import org.churchpresenter.app.churchpresenter.data.BibleBookNames
+import org.churchpresenter.bibletab.BibleBookNames
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.getString
 import javax.swing.filechooser.FileNameExtensionFilter

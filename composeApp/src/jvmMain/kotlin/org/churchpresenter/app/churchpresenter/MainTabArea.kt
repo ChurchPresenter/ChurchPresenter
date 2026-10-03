@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.tabs.recordBibleWentLive
+import org.churchpresenter.app.churchpresenter.data.sharedCrossReferences
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -39,7 +41,7 @@ import org.churchpresenter.strings.generated.resources.tooltip_settings
 import org.churchpresenter.app.churchpresenter.composables.ToolbarKey
 import org.churchpresenter.app.churchpresenter.composables.ToolbarKeyStyle
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.tabs.BibleTab
+import org.churchpresenter.bibletab.BibleTab
 import org.churchpresenter.app.churchpresenter.tabs.CompanionSurfaceTab
 import org.churchpresenter.crosswordtab.CrosswordTab
 import org.churchpresenter.app.churchpresenter.tabs.AppSTTTab
@@ -232,12 +234,14 @@ private fun MainDesktopScope.BibleTabPane() {
         onInstanceLinkSendBibleHold = link.sendBibleHold,
         onPresenting = live.presenting,
         isPresenting = presentingMode == Presenting.BIBLE,
-        presenterManager = presenterManager,
-        statisticsManager = statisticsManager,
+        bibleOutput = presenterManager,
+        verseStatistics = statisticsManager,
+        onVerseWentLive = { recordBibleWentLive(appSettings) },
         verseSequenceLog = verseSequenceLog,
+        crossReferences = sharedCrossReferences,
         dialogDismissSignal = dialogDismissSignal,
         sttManager = sttManager,
-        bibleEngineClient = bibleEngineClient
+        engineStatus = bibleEngineClient
     )
 }
 

@@ -1,0 +1,327 @@
+package org.churchpresenter.bibletab
+
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.TooltipPlacement
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.dp
+import org.churchpresenter.settings.BibleTranslationSettings
+import androidx.compose.ui.unit.sp
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.add_to_schedule
+import org.churchpresenter.strings.generated.resources.bible_translation_order
+import org.churchpresenter.strings.generated.resources.bible_verse_selection_hint
+import org.churchpresenter.strings.generated.resources.go_live
+import org.churchpresenter.strings.generated.resources.hold_live
+import org.churchpresenter.strings.generated.resources.swap_bibles
+import org.churchpresenter.strings.generated.resources.bible_cross_references
+import org.churchpresenter.strings.generated.resources.bible_cross_references_title
+import org.churchpresenter.strings.generated.resources.hold_live_modifier_hint
+import org.churchpresenter.icons.generated.resources.ic_link
+import org.churchpresenter.icons.generated.resources.ic_pause
+import org.churchpresenter.icons.generated.resources.ic_swap
+import org.churchpresenter.strings.generated.resources.stt_connect
+import org.churchpresenter.strings.generated.resources.stt_disconnect
+import org.churchpresenter.strings.generated.resources.swap_bibles_hint
+import org.churchpresenter.strings.generated.resources.verse
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.churchpresenter.sharedui.composables.ActionIconButton
+import org.churchpresenter.sharedui.composables.AddToScheduleButton
+import org.churchpresenter.sharedui.composables.GoLiveButton
+import org.churchpresenter.bible.bibleDisplayNames
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.theme.components.RaisedFilterChip
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
+@Composable
+internal fun BibleVerseHeader(
+    crossRefsVisible: Boolean,
+    crossRefsDocked: Boolean,
+    holdAvailable: Boolean,
+    holdLive: Boolean,
+    sttToggleVisible: Boolean,
+    sttConnected: Boolean,
+    translations: List<BibleTranslationSettings>,
+    storageDirectory: String,
+    translationSelectionKey: List<String>,
+    onCrossReferencesToggle: () -> Unit,
+    onHoldLiveToggle: () -> Unit,
+    onSttToggle: () -> Unit,
+    onSwapTranslations: () -> Unit,
+    onMoveTranslation: (index: Int, offset: Int) -> Unit,
+    onAddToSchedule: () -> Unit,
+    onGoLive: () -> Unit,
+    showLabel: Boolean = true,
+) {
+    val holdLiveStr = stringResource(Res.string.hold_live)
+    val verseSelectionHint = stringResource(Res.string.bible_verse_selection_hint)
+    val goLiveStr = stringResource(Res.string.go_live)
+    val addScheduleStr = stringResource(Res.string.add_to_schedule)
+    // Wraps rather than clips: in split mode the verse card is narrow, and a Row squeezed the
+    // trailing Go Live button to nothing.
+    FlowRow(
+        // The same height as the Book and Chapter headings, so the label and the buttons sit on their
+        // center line and all three lists start level.
+        modifier = Modifier.fillMaxWidth().heightIn(min = BIBLE_HEADER_HEIGHT)
+            .padding(start = 16.dp, end = 10.dp),
+        itemVerticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
+        verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
+    ) {
+        // Without the label the spacer keeps the actions right-aligned, as the label's weight did.
+        // Its own vertical padding is lost inside the 48dp row and only shows when a narrow card
+        // wraps the buttons below it, where it keeps the label off the card's top edge.
+        if (showLabel) {
+            BibleListHeaderLabel(stringResource(Res.string.verse), Modifier.weight(1f).padding(vertical = 7.dp))
+        }
+        else Spacer(Modifier.weight(1f))
+
+        if (crossRefsVisible) CrossRefsPill(crossRefsDocked, onCrossReferencesToggle)
+
+        HoldLivePill(holdAvailable, holdLive, holdLiveStr, verseSelectionHint, onHoldLiveToggle)
+
+        TranslationControls(
+            translations, storageDirectory, translationSelectionKey, onSwapTranslations, onMoveTranslation,
+        )
+
+        // Beside Add to Schedule rather than out among the translation controls: this is
+        // what opens the Bible Lookup Engine, so it belongs with the actions rather than
+        // with the things that choose what is being read.
+        if (sttToggleVisible) {
+            val sttActionStr = if (sttConnected) {
+                stringResource(Res.string.stt_disconnect)
+            } else {
+                stringResource(Res.string.stt_connect)
+            }
+            ActionIconButton(
+                onClick = {
+                    onSttToggle()
+                },
+                tooltipText = sttActionStr,
+                icon = Icons.Filled.Mic,
+                containerColor = if (sttConnected) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                },
+                contentColor = if (sttConnected) {
+                    MaterialTheme.colorScheme.onPrimary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                }
+            )
+        }
+
+        AddToScheduleButton(
+            onClick = {
+                onAddToSchedule()
+            },
+            tooltipText = addScheduleStr
+        )
+
+        GoLiveButton(
+            onClick = onGoLive,
+            tooltipText = goLiveStr
+        )
+    }
+}
+
+@Composable
+internal fun BibleListHeaderLabel(text: String, modifier: Modifier = Modifier) {
+    Text(
+        text = text.uppercase(),
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = modifier,
+    )
+}
+
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun CrossRefsPill(crossRefsDocked: Boolean, onCrossReferencesToggle: () -> Unit) {
+    TooltipArea(
+        tooltip = { HeaderTooltip(stringResource(Res.string.bible_cross_references)) },
+        tooltipPlacement = TooltipPlacement.ComponentRect(
+            anchor = Alignment.BottomCenter,
+            offset = DpOffset(0.dp, 4.dp)
+        ),
+    ) {
+        RaisedFilterChip(
+            selected = crossRefsDocked,
+            onClick = onCrossReferencesToggle,
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(IconRes.drawable.ic_link),
+                    contentDescription = stringResource(Res.string.bible_cross_references),
+                    modifier = Modifier.size(12.dp),
+                )
+            },
+            label = { HeaderChipLabel(stringResource(Res.string.bible_cross_references_title)) },
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun HoldLivePill(
+    holdAvailable: Boolean,
+    holdLive: Boolean,
+    holdLiveStr: String,
+    verseSelectionHint: String,
+    onHoldLiveToggle: () -> Unit,
+) {
+    TooltipArea(
+        tooltip = { HeaderTooltip(if (holdAvailable) holdLiveStr else verseSelectionHint) },
+        tooltipPlacement = TooltipPlacement.ComponentRect(
+            anchor = Alignment.BottomCenter,
+            offset = DpOffset(0.dp, 4.dp)
+        ),
+    ) {
+        val icon: @Composable () -> Unit = {
+            Icon(
+                painter = painterResource(IconRes.drawable.ic_pause),
+                contentDescription = null,
+                modifier = Modifier.size(10.dp),
+            )
+        }
+        val label: @Composable () -> Unit = { HeaderChipLabel(stringResource(Res.string.hold_live_modifier_hint)) }
+        // Red while the hold is live. Where it cannot apply it is shown but not pressable -- its
+        // tooltip then explains Ctrl/Shift selection instead.
+        if (holdAvailable) {
+            RaisedFilterChip(
+                selected = holdLive,
+                onClick = onHoldLiveToggle,
+                selectedContainerColor = MaterialTheme.colorScheme.error,
+                selectedLabelColor = MaterialTheme.colorScheme.onError,
+                leadingIcon = icon,
+                label = label,
+            )
+        } else {
+            InertChip(leadingIcon = icon, label = label)
+        }
+    }
+}
+
+@Composable
+private fun TranslationControls(
+    translations: List<BibleTranslationSettings>,
+    storageDirectory: String,
+    translationSelectionKey: List<String>,
+    onSwapTranslations: () -> Unit,
+    onMoveTranslation: (index: Int, offset: Int) -> Unit,
+) {
+    val swapBiblesStr = stringResource(Res.string.swap_bibles)
+    val translationOrderStr = stringResource(Res.string.bible_translation_order)
+    if (translations.size == 2) {
+        ActionIconButton(
+            onClick = {
+                onSwapTranslations()
+            },
+            tooltipText = swapBiblesStr,
+            painter = painterResource(IconRes.drawable.ic_swap),
+            containerColor = MaterialTheme.colorScheme.tertiary,
+            contentColor = MaterialTheme.colorScheme.onTertiary,
+            tooltipContent = {
+                val pair = translations
+                Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+                    Text(
+                        stringResource(Res.string.swap_bibles_hint),
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    pair.forEachIndexed { position, item ->
+                        Text(
+                            "${position + 1}. ${item.fileName.substringBeforeLast('.').ifEmpty { "-" }}",
+                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                }
+            }
+        )
+    } else if (translations.size > 2) {
+
+        // The renames come in on `translations` -- each entry carries its own --
+        // so this reads them without a parameter of its own.
+        val customNames = translations
+            .associate { it.fileName to it.customName.trim() }
+            .filterValues { it.isNotBlank() }
+        val translationDisplayNames by produceState(
+            initialValue = emptyMap<String, String>(),
+            storageDirectory,
+            customNames,
+            translationSelectionKey,
+        ) {
+            value = withContext(Dispatchers.IO) {
+                bibleDisplayNames(
+                    storageDirectory,
+                    translations.map { it.fileName },
+                    customNames,
+                )
+            }
+        }
+        TranslationOrderSelector(
+            label = translationOrderStr,
+            translations = translations,
+            displayNames = translationDisplayNames,
+            onMove = { index, offset ->
+                onMoveTranslation(index, offset)
+            },
+            modifier = Modifier
+                .widthIn(min = 127.dp, max = 174.dp),
+        )
+    }
+
+}
+
+@Composable
+private fun HeaderTooltip(text: String) {
+    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
+        Text(
+            text,
+            color = MaterialTheme.colorScheme.inverseOnSurface,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.bodySmall,
+        )
+    }
+}
+
+@Composable
+private fun HeaderChipLabel(text: String) {
+    Text(text, style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp), maxLines = 1)
+}
+
+/** The height of every Bible list card's heading row: the buttons' touch target. */
+internal val BIBLE_HEADER_HEIGHT = 48.dp

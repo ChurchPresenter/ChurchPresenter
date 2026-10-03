@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import kotlinx.coroutines.CoroutineScope
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
-import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
+import org.churchpresenter.bibletab.VerseSequenceLog
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.sharedui.utils.ShortcutMap

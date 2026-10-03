@@ -23,12 +23,13 @@ A real Gradle module of this build: `include(":bible")`, `implementation(project
 
 `Bible` (loading and every query), `BibleBook`, `BibleVerse`, `BibleSearch`, `ChapterResult`,
 `BibleLoadError`, and `readTranslationTitle`/`bibleDisplayNames` for the translation picker.
-Fifteen files in the app import it, most of them `BibleViewModel*`.
+`:bible-tab` is now the main consumer (`BibleViewModel*`, the tab), and the app imports it for the
+presenter, the catalog and the server.
 
 Two things that look like they belong here and deliberately do not:
 
-- **`BibleBookNames` and `BibleBookAbbreviations` stay in `:composeApp`.** They resolve Compose
-  string resources, and this module has no Compose on its classpath by design.
+- **`BibleBookNames` and `BibleBookAbbreviations` are in `:bible-tab`, not here.** They resolve
+  Compose string resources, and this module has no Compose on its classpath by design.
 - **`BibleFolderListing` stays too**, because it goes through the app's `FileManager`.
 
 ## Layout

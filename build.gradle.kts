@@ -112,3 +112,20 @@ tasks.register("coverageFloors") {
         }
     }
 }
+
+// Every module's project dependencies, test fixtures included, one module per line:
+// `MODULE <path> <dependency path>...`. CI's change detection (scripts/affected_modules.py) reads
+// this to decide which suites a change can affect, so the graph is the build's own, not a copy.
+tasks.register("moduleGraph") {
+    group = "help"
+    description = "Prints each module's project dependencies, for CI's change detection."
+    val graph = subprojects.sortedBy { it.path }.map { project ->
+        val dependencies = project.configurations
+            .flatMap { configuration -> configuration.dependencies.withType(ProjectDependency::class.java) }
+            .map { it.path }
+            .filter { it != project.path }
+            .toSortedSet()
+        "MODULE ${project.path} ${dependencies.joinToString(" ")}".trimEnd()
+    }
+    doLast { graph.forEach(::println) }
+}
