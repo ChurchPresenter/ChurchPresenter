@@ -7,8 +7,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.Key
+import org.churchpresenter.settings.QuickBackground
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.isRoot
+import org.churchpresenter.calendar.PresetStore
+import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.hasSetTextAction
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.doubleClick
@@ -112,6 +120,7 @@ class MainDesktopComposeTest {
         val picturesLoaded = mutableListOf<String>()
         val slidesLoaded = mutableListOf<String>()
         val tabChanges = mutableListOf<Int>()
+        val quickPicked = mutableListOf<QuickBackground?>()
     }
 
     /** Composes the root with [appSettings], then lets everything it launched settle. */
@@ -127,6 +136,7 @@ class MainDesktopComposeTest {
             MaterialTheme {
                 MainDesktop(
                     appSettings = appSettings,
+                    onQuickBackgroundPicked = { wiring.quickPicked += it },
                     presenterManager = presenterManager,
                     companionSatelliteViewModel = CompanionSatelliteViewModel(),
                     live = LiveOutputCallbacks(
@@ -884,4 +894,72 @@ class MainDesktopComposeTest {
     fun `a title slide adds an entry ahead of the song`() =
         root(settings().copy(songSettings = settings().songSettings.copy(titleSlideEnabled = true)))
 
+
+    // ── Global shortcuts and their effect ──────────────────────────────────────
+
+    private fun ComposeUiTest.press(key: Key, ctrl: Boolean = false, shift: Boolean = false) {
+        onAllNodes(isRoot())[0].performKeyInput {
+            if (ctrl) keyDown(Key.CtrlLeft)
+            if (shift) keyDown(Key.ShiftLeft)
+            pressKey(key)
+            if (shift) keyUp(Key.ShiftLeft)
+            if (ctrl) keyUp(Key.CtrlLeft)
+        }
+        waitForIdle()
+    }
+
+    @Test
+    fun `undo and redo take back the last schedule change and put it back`() {
+        val wiring = Wiring()
+        root(withOneSong(), wiring = wiring) { actions ->
+            actions.addSong(1, "A Test Song", "Hymnal", "Hymnal::1")
+            waitForIdle()
+            assertEquals(1, wiring.scheduleChanged.last())
+
+            press(Key.Z, ctrl = true)
+            assertEquals(0, wiring.scheduleChanged.last(), "undone")
+            press(Key.Z, ctrl = true, shift = true)
+            assertEquals(1, wiring.scheduleChanged.last(), "redone")
+        }
+    }
+
+    @Test
+    fun `a tab's function key opens it`() {
+        val wiring = Wiring()
+        root(withOneSong(), wiring = wiring) { _ ->
+            val before = wiring.tabChanges.lastOrNull()
+            press(Key.F7)
+            assertTrue(wiring.tabChanges.last() != before, "F7 (Songs) moved off the opening tab: ${wiring.tabChanges}")
+        }
+    }
+
+    @Test
+    fun `a quick background is picked by its slot, an empty slot is swallowed, and reset clears it`() {
+        val wiring = Wiring()
+        val tray = withOneSong().copy(quickBackgrounds = listOf(QuickBackground(id = "q1", label = "Blue")))
+        root(tray, wiring = wiring) { _ ->
+            press(Key.One, ctrl = true)
+            press(Key.Two, ctrl = true)
+            press(Key.Zero, ctrl = true)
+            assertEquals(listOf("q1", null), wiring.quickPicked.map { it?.id })
+        }
+    }
+
+    @Test
+    fun `an announcement saved as a preset lands in the calendar's presets`() {
+        val presets = File(dir, "calendar").apply { mkdirs() }
+        val announcements = showingOnly(Tabs.ANNOUNCEMENTS).copy(calendarStorageDirectory = presets.absolutePath)
+        root(announcements) { _ ->
+            onAllNodes(hasSetTextAction())[0].performTextInput("Coffee after the service")
+            waitForIdle()
+            onAllNodesWithContentDescription("Save preset")[0].performClick()
+            waitForIdle()
+            onAllNodes(hasSetTextAction()).let { it[it.fetchSemanticsNodes().size - 1] }
+                .performTextReplacement("Coffee")
+            onAllNodesWithText("OK").let { it[it.fetchSemanticsNodes().size - 1] }.performClick()
+            waitForIdle()
+
+            assertEquals(listOf("Coffee"), PresetStore(presets).load().presets.map { it.name })
+        }
+    }
 }
