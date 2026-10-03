@@ -37,7 +37,7 @@ import org.churchpresenter.settings.TabLabelStyle
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
+import org.churchpresenter.obs.OBSWebSocketManager
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

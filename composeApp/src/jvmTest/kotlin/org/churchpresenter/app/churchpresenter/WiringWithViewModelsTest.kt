@@ -9,7 +9,7 @@ import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
+import org.churchpresenter.obs.OBSWebSocketManager
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.sharedui.models.Presenting
 import kotlin.test.Test

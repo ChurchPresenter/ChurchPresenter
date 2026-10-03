@@ -133,3 +133,7 @@ include(":songs")
 // The Bible tab, BibleViewModel, the cross references and the verse-sequence log. Depended on by
 // :composeApp, which hands it the live output, the detection engine's status and statistics.
 include(":bible-tab")
+
+// The OBS Studio integration: the obs-websocket client, the scene each content type switches to,
+// and the settings page. Depended on by :composeApp.
+include(":obs")

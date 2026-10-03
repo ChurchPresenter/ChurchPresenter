@@ -6,8 +6,7 @@
 >
 > Except `data/settings/…` and `data/SettingsManager.kt`, which are shorthand for the `:settings`
 > module: every one of those files sits flat in `settings/src/main/kotlin/org/churchpresenter/settings/`
-> (package `org.churchpresenter.settings`). Only `data/settings/ObsSceneSelection.kt` is really under
-> the app's `data/settings/`.
+> (package `org.churchpresenter.settings`).
 
 ## Songs & Lyrics
 - **Unlimited song library** — organize thousands of songs across as many songbooks as you like, indexed straight from a folder.
@@ -343,11 +342,11 @@
 **Source locations:**
 - `atem/` (the `:atem` Gradle module, at the repo root) — the ATEM protocol client itself: `AtemClient`, `AtemConnectionManager`, `AtemFrameEncoder`, `AtemUploadStatus`
 - `server/AtemBridge.kt` — the app-side wiring between that client, `AtemSettings` and the lower third
-- `viewmodel/OBSWebSocketManager.kt`
+- `obs/` (the `:obs` Gradle module, at the repo root) — `OBSWebSocketManager`, `obsSceneFor` (`ObsSceneSelection.kt`) and `OBSSettingsTab`; `ObsSceneWiring.kt` in the app
 - `tabs/CompanionSurfaceTab.kt`, `viewmodel/CompanionSatelliteViewModel.kt`, `composables/CompanionSurfacePanel.kt`, `composables/CompanionConnectionChipRow.kt`
 - `companion-satellite/` (repository root) — native Companion Satellite protocol client
 - `data/settings/AtemSettings.kt`, `data/settings/OBSSettings.kt`, `data/settings/CompanionSatelliteSettings.kt`
-- `dialogs/tabs/AtemSettingsTab.kt`, `dialogs/tabs/OBSSettingsTab.kt`, `dialogs/tabs/CompanionSatelliteSettingsTab.kt`
+- `dialogs/tabs/AtemSettingsTab.kt`, `dialogs/tabs/CompanionSatelliteSettingsTab.kt`
 
 ## Reporting & Licensing
 - **One statistics window** — every song and verse you present is tracked automatically, then reported in one place: songs, Bible and activity-over-time tabs over whichever period you pick.

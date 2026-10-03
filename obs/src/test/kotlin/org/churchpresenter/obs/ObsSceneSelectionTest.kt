@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data.settings
+package org.churchpresenter.obs
 
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.OBSSettings

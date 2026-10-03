@@ -58,7 +58,6 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `presenter/`     | Output window rendering (what the audience sees), plus the off-screen outputs (`BrowserSourceVideoRenderer`, `NdiVideoRenderer`, `OmtVideoRenderer`) on the shared `ComposeScenePump` |
 | `server/`        | Ktor REST/WebSocket server, ATEM *bridge*, tunnel, SSL — the ATEM client is `:atem`, the PCO OAuth callback listener is `:planning-center` |
 | `data/`          | File I/O, database, song parsing, Bible data                        |
-| `data/settings/` | Only `ObsSceneSelection.kt` — the rest is the `:settings` module    |
 | `models/`        | Only what needs the app: `PresetItems`, the two Companion UI states — `ShortcutAction` is `:shared-ui` |
 | `composables/`   | UI components with app or feature ties (SceneCanvas, LivePreviewPanel, etc.) — the shared ones are `:shared-ui`, the video player `:media` |
 | `dialogs/`       | All dialogs and settings dialog tabs                                |
@@ -117,6 +116,7 @@ module-specific notes there, not here.**
 | `lower-third/`         | `:lower-third`         | The Lower Third tab, its ATEM render cache and sequencer, and the bundled lottie fonts | [AGENT.md](lower-third/AGENT.md)         |
 | `songs/`               | `:songs`               | The Songs tab, `SongsViewModel` and the song library on disk                        | [AGENT.md](songs/AGENT.md)               |
 | `bible-tab/`           | `:bible-tab`           | The Bible tab, `BibleViewModel`, the cross references and the verse-sequence log     | [AGENT.md](bible-tab/AGENT.md)           |
+| `obs/`                 | `:obs`                 | The OBS Studio integration — the obs-websocket client, scene mapping and its settings page | [AGENT.md](obs/AGENT.md)                 |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions

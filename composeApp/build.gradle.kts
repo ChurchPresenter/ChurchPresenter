@@ -332,6 +332,8 @@ kotlin {
             // The Companion Satellite protocol client: a real module rather than a mounted source
             // directory, wrapped by CompanionSatelliteViewModel.
             implementation(projects.companionSatellite)
+            // The OBS Studio integration: client, scene mapping and settings page.
+            implementation(projects.obs)
             // The ATEM protocol client: the UDP conversation with the switcher — connect, state
             // dump, key control and media-pool upload. AtemBridge is the app-side wiring.
             implementation(projects.atem)
