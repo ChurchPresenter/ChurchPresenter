@@ -355,7 +355,6 @@ jobs:
               - 'song-chords/**'          # via :shared-ui
               - 'bible/**'                # via :shared-ui
 
->>>>>>> origin/main
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -405,10 +404,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-<<<<<<< HEAD
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :companion-surface:detekt
-=======
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :companion-surface:detekt
       - name: App unit tests
         id: unit_tests
         # Tighter than the job's own deadline so a hang here is attributed to this step and the

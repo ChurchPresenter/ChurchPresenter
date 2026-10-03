@@ -41,10 +41,9 @@ import org.churchpresenter.strings.generated.resources.tooltip_settings
 import org.churchpresenter.app.churchpresenter.composables.ToolbarKey
 import org.churchpresenter.app.churchpresenter.composables.ToolbarKeyStyle
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.tabs.BibleTab
-import org.churchpresenter.companionsurface.CompanionSurfaceTab
 import org.churchpresenter.bibletab.BibleTab
-import org.churchpresenter.app.churchpresenter.tabs.CompanionSurfaceTabimport org.churchpresenter.crosswordtab.CrosswordTab
+import org.churchpresenter.companionsurface.CompanionSurfaceTab
+import org.churchpresenter.crosswordtab.CrosswordTab
 import org.churchpresenter.app.churchpresenter.tabs.AppSTTTab
 import org.churchpresenter.songs.SongsTab
 import org.churchpresenter.app.churchpresenter.tabs.AppSongEditor
