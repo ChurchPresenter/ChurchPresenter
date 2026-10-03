@@ -950,7 +950,8 @@ jobs:
             Songs
             Companion Surface
           report_paths: ${{ steps.junit_inputs.outputs.paths }}
-          check_name: ${{ steps.junit_inputs.outputs.names }}          detailed_summary: true
+          check_name: ${{ steps.junit_inputs.outputs.names }}
+          detailed_summary: true
           include_passed: false
           # Without this the second table is one row of "No test annotations available" per
           # check_name on every green run -- `include_passed: false` leaves it nothing to list when

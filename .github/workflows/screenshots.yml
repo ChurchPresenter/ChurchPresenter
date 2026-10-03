@@ -166,7 +166,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: screenshots-bible-tab
-          path: bible-tab/screenshots          retention-days: 30
+          path: bible-tab/screenshots
+          retention-days: 30
           if-no-files-found: error
 
       # Retina renders for the website's homepage only — the wiki and blog take the 1x capture
