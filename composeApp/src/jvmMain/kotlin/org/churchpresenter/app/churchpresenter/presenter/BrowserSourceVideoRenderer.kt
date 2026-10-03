@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -9,14 +8,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.CoroutineScope
-import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEventStore
 import org.churchpresenter.sharedui.utils.UsageEvents
-import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.stt.STTManager
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
@@ -77,15 +72,7 @@ data class BrowserSourceFrame(
  */
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalCoroutinesApi::class)
 class BrowserSourceVideoRenderer(
-    private val presenterManager: PresenterManager,
-    private val appSettingsState: State<AppSettings>,
-    private val screenAssignmentState: State<ScreenAssignment>,
-    private val effectiveModeState: State<Presenting>,
-    private val outputIndex: Int = 0,
-    private val sttManager: STTManager? = null,
-    private val mediaViewModel: MediaViewModel? = null,
-    private val qaDisplayUrlState: State<String>? = null,
-    private val serverUrlState: State<String>? = null,
+    private val context: OffscreenOutputContext,
     private val width: Int = 1920,
     private val height: Int = 1080,
     fps: Int = 30,
@@ -109,23 +96,11 @@ class BrowserSourceVideoRenderer(
         height = height,
         fps = fps,
         shouldRender = {
-            shouldRenderTick(screenAssignmentState.value.browserSourceEnabled, frames.subscriptionCount.value)
+            shouldRenderTick(context.screenAssignmentState.value.browserSourceEnabled, frames.subscriptionCount.value)
         },
         onPark = ::onPark,
     ) {
-        OffscreenOutputContent(
-            OffscreenOutputContext(
-                presenterManager = presenterManager,
-                appSettingsState = appSettingsState,
-                screenAssignmentState = screenAssignmentState,
-                effectiveModeState = effectiveModeState,
-                outputIndex = outputIndex,
-                sttManager = sttManager,
-                mediaViewModel = mediaViewModel,
-                qaDisplayUrlState = qaDisplayUrlState,
-                serverUrlState = serverUrlState,
-            )
-        )
+        OffscreenOutputContent(context)
     }
 
     // Sampling cadence from the per-output fps setting; only changed frames are actually
@@ -175,23 +150,20 @@ class BrowserSourceVideoRenderer(
         /**
          * Pure per-tick decision of whether this frame is worth sending and, if so, which
          * rectangle: a dirty-rect delta on plain content change, or the full canvas when a
-         * client needs reseeding (first frame, a newly-attached subscriber, or the periodic
-         * reseed schedule). Returns null when nothing changed and no reseed is due. Split out
-         * from [start] so the decision is testable without an [ImageComposeScene].
+         * client needs reseeding (first frame, or [reseedDue]: a newly-attached subscriber or the
+         * periodic reseed schedule). Returns null when nothing changed and no reseed is due. Split
+         * out from [start] so the decision is testable without an [ImageComposeScene].
          */
         internal fun decideTick(
             intBuf: IntArray,
             previous: IntArray?,
             width: Int,
             height: Int,
-            newSubscriberJoined: Boolean,
-            elapsedMs: Long,
-            lastFullFrameAtMs: Long,
+            reseedDue: Boolean,
         ): TickDecision? {
             val contentChanged = previous == null || !intBuf.contentEquals(previous)
-            val periodicReseedDue = elapsedMs - lastFullFrameAtMs >= FULL_FRAME_RESEED_MS
-            if (!contentChanged && !newSubscriberJoined && !periodicReseedDue) return null
-            val forceFullFrame = previous == null || newSubscriberJoined || periodicReseedDue
+            if (!contentChanged && !reseedDue) return null
+            val forceFullFrame = previous == null || reseedDue
             val rect = if (forceFullFrame) {
                 DirtyRect(0, 0, width, height)
             } else {
@@ -255,10 +227,14 @@ class BrowserSourceVideoRenderer(
             return java.util.Arrays.equals(a, start, start + width, b, start, start + width)
         }
 
-        internal fun cropPixels(src: IntArray, srcWidth: Int, x: Int, y: Int, w: Int, h: Int): IntArray {
-            val out = IntArray(w * h)
-            for (row in 0 until h) {
-                System.arraycopy(src, (y + row) * srcWidth + x, out, row * w, w)
+        /** Whether the periodic full-frame reseed (see [FULL_FRAME_RESEED_MS]) has come round again. */
+        internal fun isPeriodicReseedDue(elapsedMs: Long, lastFullFrameAtMs: Long): Boolean =
+            elapsedMs - lastFullFrameAtMs >= FULL_FRAME_RESEED_MS
+
+        internal fun cropPixels(src: IntArray, srcWidth: Int, rect: DirtyRect): IntArray {
+            val out = IntArray(rect.w * rect.h)
+            for (row in 0 until rect.h) {
+                System.arraycopy(src, (rect.y + row) * srcWidth + rect.x, out, row * rect.w, rect.w)
             }
             return out
         }
@@ -382,14 +358,14 @@ class BrowserSourceVideoRenderer(
         lastSeenSubscriberCount = subscriberCount
 
         val lastBuf = if (hasPrevious) previousBuf else null
-        val decision = decideTick(intBuf, lastBuf, w, h, newSubscriberJoined, elapsedMs, lastFullFrameAtMs)
-            ?: return
+        val reseedDue = newSubscriberJoined || isPeriodicReseedDue(elapsedMs, lastFullFrameAtMs)
+        val decision = decideTick(intBuf, lastBuf, w, h, reseedDue) ?: return
 
         val rect = decision.rect
         val frame = if (decision.forceFullFrame) {
             BrowserSourceFrame(rect.x, rect.y, rect.w, rect.h, w, h, encodeFrame(intBuf, w, h))
         } else {
-            val cropped = cropPixels(intBuf, w, rect.x, rect.y, rect.w, rect.h)
+            val cropped = cropPixels(intBuf, w, rect)
             BrowserSourceFrame(rect.x, rect.y, rect.w, rect.h, w, h, encodeFrame(cropped, rect.w, rect.h))
         }
         frames.emit(frame)

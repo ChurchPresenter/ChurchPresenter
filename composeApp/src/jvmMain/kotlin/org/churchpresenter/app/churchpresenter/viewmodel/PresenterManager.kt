@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.lottiegen.lottie.LottieTextShaping
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
@@ -1164,25 +1165,21 @@ class PresenterManager(showPresenterWindowInitially: Boolean = true) {
      * ever been opened.
      */
     fun goLiveAnnouncementTimer(
-        timerMode: String,
-        timerHours: Int,
-        timerMinutes: Int,
-        timerSeconds: Int,
-        targetHour: Int,
-        targetMinute: Int,
-        targetSecond: Int,
-        liveClockFormat: String,
-        timerExpiredText: String
+        item: ScheduleItem.AnnouncementItem,
+        timerExpiredText: String = item.timerExpiredText,
     ) {
+        val timerMode = item.timerMode
+        val liveClockFormat = item.liveClockFormat
         val skipRestart = _announcementTickerActive.value &&
             (timerMode == Constants.TIMER_MODE_DURATION || timerMode == Constants.TIMER_MODE_COUNT_UP)
         if (!skipRestart) {
             when (timerMode) {
                 Constants.TIMER_MODE_COUNT_UP -> startAnnouncementCountUp(0)
-                Constants.TIMER_MODE_CLOCK -> startAnnouncementSpecificTime(targetHour, targetMinute, targetSecond)
+                Constants.TIMER_MODE_CLOCK ->
+                    startAnnouncementSpecificTime(item.targetHour, item.targetMinute, item.targetSecond)
                 Constants.TIMER_MODE_CLOCK_DISPLAY -> startAnnouncementClockDisplay(liveClockFormat)
                 else -> startAnnouncementCountdown(
-                    timerHours * SECONDS_PER_HOUR + timerMinutes * SECONDS_PER_MINUTE + timerSeconds,
+                    item.timerHours * SECONDS_PER_HOUR + item.timerMinutes * SECONDS_PER_MINUTE + item.timerSeconds,
                     timerExpiredText
                 )
             }

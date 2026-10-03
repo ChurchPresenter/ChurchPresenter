@@ -221,10 +221,10 @@ class InstanceLinkMessageTest {
 
         // The follower shows this to whoever is setting the link up, and each one points at a
         // different fix: the port, the hostname, the network, or the certificate.
-        assertEquals("refused", c.classifyConnectFailure(ConnectException("no")))
-        assertEquals("dns", c.classifyConnectFailure(UnknownHostException("no")))
-        assertEquals("timeout", c.classifyConnectFailure(SocketTimeoutException("no")))
-        assertEquals("tls", c.classifyConnectFailure(SSLException("no")))
+        assertEquals("refused", ConnectFailures.classifyConnectFailure(ConnectException("no")))
+        assertEquals("dns", ConnectFailures.classifyConnectFailure(UnknownHostException("no")))
+        assertEquals("timeout", ConnectFailures.classifyConnectFailure(SocketTimeoutException("no")))
+        assertEquals("tls", ConnectFailures.classifyConnectFailure(SSLException("no")))
     }
 
     @Test
@@ -232,7 +232,7 @@ class InstanceLinkMessageTest {
         val c = clientWith(Recorder())
 
         // The message ktor actually produces, from a report in the field.
-        val redacted = c.redactedConnectFailure(
+        val redacted = ConnectFailures.redactedConnectFailure(
             "Connect timeout has expired [url=ws://192.168.1.100:8765/ws, connect_timeout=5000 ms]"
         )
 
@@ -248,9 +248,9 @@ class InstanceLinkMessageTest {
     fun `redacting a connect failure leaves the diagnosis intact`() {
         val c = clientWith(Recorder())
 
-        assertEquals("No route to host", c.redactedConnectFailure("No route to host"))
+        assertEquals("No route to host", ConnectFailures.redactedConnectFailure("No route to host"))
         assertEquals(
-            "none", c.redactedConnectFailure(null),
+            "none", ConnectFailures.redactedConnectFailure(null),
             "a null message used to arrive as the literal title \"connection failed — null\"",
         )
     }
@@ -261,7 +261,7 @@ class InstanceLinkMessageTest {
 
         assertEquals(
             "failed [url=wss://<peer>:443/ws]",
-            c.redactedConnectFailure("failed [url=wss://studio.example.org:443/ws]"),
+            ConnectFailures.redactedConnectFailure("failed [url=wss://studio.example.org:443/ws]"),
             "a hostname names the church as surely as its address does",
         )
     }
@@ -274,15 +274,15 @@ class InstanceLinkMessageTest {
         // the heartbeat exists to notice: the link drops, the backoff reconnects, the operator sees
         // the status change. Five churches filed it as a defect because "other" reports the first
         // time it ever happens.
-        val kind = c.classifyConnectFailure(IOException("Ping timeout"))
+        val kind = ConnectFailures.classifyConnectFailure(IOException("Ping timeout"))
 
         assertEquals("ping_timeout", kind)
         assertFalse(
-            c.shouldReportConnectFailure(kind, consecutiveFailures = 1),
+            ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 1),
             "one dropped keepalive on a hall's wifi is not worth an issue",
         )
         assertTrue(
-            c.shouldReportConnectFailure(kind, consecutiveFailures = 10),
+            ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 10),
             "a link that keeps dropping still has to surface",
         )
     }
@@ -296,17 +296,17 @@ class InstanceLinkMessageTest {
         // out on every attempt, and `consecutiveFailures` restarts with the loop. Whether an absent
         // primary refuses a connection or never answers it is a property of the network between the
         // two machines, not of anything the operator did — so the two belong in the same bucket.
-        val kind = c.classifyConnectFailure(
+        val kind = ConnectFailures.classifyConnectFailure(
             ConnectTimeoutException("Connect timeout has expired [url=ws://host:8765/ws]"),
         )
 
         assertEquals("timeout", kind)
         assertFalse(
-            c.shouldReportConnectFailure(kind, consecutiveFailures = 1),
+            ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 1),
             "a primary that is simply switched off is not a defect to file",
         )
         assertTrue(
-            c.shouldReportConnectFailure(kind, consecutiveFailures = 10),
+            ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 10),
             "a link that never comes up still has to surface",
         )
     }
@@ -314,17 +314,17 @@ class InstanceLinkMessageTest {
     @Test
     fun `an IOException that is not a ping timeout is still reported the first time`() {
         val c = clientWith(Recorder())
-        val kind = c.classifyConnectFailure(IOException("broken pipe"))
+        val kind = ConnectFailures.classifyConnectFailure(IOException("broken pipe"))
 
         assertEquals("other", kind)
-        assertTrue(c.shouldReportConnectFailure(kind, consecutiveFailures = 1))
+        assertTrue(ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 1))
     }
 
     @Test
     fun `an unrecognised failure is classified rather than dropped`() {
         val c = clientWith(Recorder())
 
-        assertEquals("other", c.classifyConnectFailure(IllegalStateException("something else")))
+        assertEquals("other", ConnectFailures.classifyConnectFailure(IllegalStateException("something else")))
     }
 
     @Test
@@ -337,7 +337,7 @@ class InstanceLinkMessageTest {
         // different fixes, so the order of the arms is the behaviour here.
         assertEquals(
             "timeout",
-            c.classifyConnectFailure(
+            ConnectFailures.classifyConnectFailure(
                 ConnectTimeoutException("Connect timeout has expired [url=ws://host:8763/ws]")
             )
         )
@@ -349,9 +349,9 @@ class InstanceLinkMessageTest {
 
         // A follower routinely starts before its primary; the first refusals are that ordering.
         for (kind in listOf("refused", "dns")) {
-            assertFalse(c.shouldReportConnectFailure(kind, consecutiveFailures = 1), kind)
-            assertFalse(c.shouldReportConnectFailure(kind, consecutiveFailures = 9), kind)
-            assertTrue(c.shouldReportConnectFailure(kind, consecutiveFailures = 10), kind)
+            assertFalse(ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 1), kind)
+            assertFalse(ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 9), kind)
+            assertTrue(ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 10), kind)
         }
     }
 
@@ -363,7 +363,7 @@ class InstanceLinkMessageTest {
         // or an unrecognised exception says something is broken, where a connect that never answers
         // says only that the machine at the other end is off. See the timeout test above.
         for (kind in listOf("tls", "other")) {
-            assertTrue(c.shouldReportConnectFailure(kind, consecutiveFailures = 1), kind)
+            assertTrue(ConnectFailures.shouldReportConnectFailure(kind, consecutiveFailures = 1), kind)
         }
     }
 
@@ -374,14 +374,14 @@ class InstanceLinkMessageTest {
         // CHURCH-PRESENTER-DESKTOP-68: a permanently unreachable peer (wrong IP, powered off)
         // reached 780 consecutive "timeout" failures and 78 Sentry warnings under the old flat
         // modulo-10 cadence. The interval must widen a decade at a time instead.
-        assertEquals(10, c.reportIntervalFor(consecutiveFailures = 1))
-        assertEquals(10, c.reportIntervalFor(consecutiveFailures = 99))
-        assertEquals(100, c.reportIntervalFor(consecutiveFailures = 100))
-        assertEquals(100, c.reportIntervalFor(consecutiveFailures = 999))
-        assertEquals(1000, c.reportIntervalFor(consecutiveFailures = 1000))
+        assertEquals(10, ConnectFailures.reportIntervalFor(consecutiveFailures = 1))
+        assertEquals(10, ConnectFailures.reportIntervalFor(consecutiveFailures = 99))
+        assertEquals(100, ConnectFailures.reportIntervalFor(consecutiveFailures = 100))
+        assertEquals(100, ConnectFailures.reportIntervalFor(consecutiveFailures = 999))
+        assertEquals(1000, ConnectFailures.reportIntervalFor(consecutiveFailures = 1000))
         assertEquals(
             100,
-            c.reportIntervalFor(consecutiveFailures = 780),
+            ConnectFailures.reportIntervalFor(consecutiveFailures = 780),
             "780 is the reported issue's own streak length",
         )
     }
@@ -393,7 +393,7 @@ class InstanceLinkMessageTest {
         // Counting every report a "timeout" streak would generate from 1 through 780 consecutive
         // failures: the old behaviour reported 78 times (every 10th, forever); the new cadence must
         // report noticeably fewer times over the same run while still surfacing periodically.
-        val reportsUnderNewCadence = (1..780).count { n -> c.shouldReportConnectFailure("timeout", n) }
+        val reportsUnderNewCadence = (1..780).count { n -> ConnectFailures.shouldReportConnectFailure("timeout", n) }
         assertTrue(
             reportsUnderNewCadence < 30,
             "expected the widened cadence to report well under the old flat rate of 78, got $reportsUnderNewCadence",

@@ -328,55 +328,7 @@ internal fun RemoteEventDialogContent(
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 // ── Header ────────────────────────────────────────────────────
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    Box(
-                        modifier = Modifier
-                            .size(38.dp)
-                            .clip(AppShape(10.dp))
-                            .background(typeAccent.copy(alpha = 0.15f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(typeIcon, contentDescription = null, tint = typeAccent, modifier = Modifier.size(20.dp))
-                    }
-                    Spacer(Modifier.width(10.dp))
-                    Text(
-                        text = actionLabel,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = typeAccent,
-                        modifier = Modifier.weight(1f)
-                    )
-                    // Badge showing how many are queued behind this one
-                    if (remaining > 0) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .size(28.dp)
-                                .background(MaterialTheme.colorScheme.error, CircleShape)
-                        ) {
-                            Text(
-                                text = "+$remaining",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onError,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Spacer(Modifier.width(8.dp))
-                    }
-                    // Prominent one-tap allow (mirrors the ✓ button below)
-                    RaisedButton(
-                        onClick = onAllow,
-                        shape = AppShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.semantic.success,
-                            contentColor = MaterialTheme.semantic.onSuccess
-                        ),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp)
-                    ) {
-                        Text(stringResource(Res.string.allow), fontWeight = FontWeight.Bold)
-                    }
-                }
-
+                RemoteEventHeader(actionLabel, typeIcon, typeAccent, remaining, onAllow)
                 Spacer(Modifier.height(8.dp))
                 HorizontalDivider()
                 Spacer(Modifier.height(8.dp))
@@ -392,57 +344,7 @@ internal fun RemoteEventDialogContent(
                     // Show client identity if present
                     if (event.clientId.isNotBlank()) {
                         Spacer(Modifier.height(4.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(stringResource(Res.string.remote_client_label),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                            Spacer(Modifier.width(4.dp))
-                            Column {
-                                // Label (if set) shown as primary identifier
-                                if (event.clientLabel.isNotBlank()) {
-                                    Text(
-                                        text = event.clientLabel,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = when {
-                                            isClientKnownAllowed -> MaterialTheme.colorScheme.primary
-                                            isClientKnownBlocked -> MaterialTheme.colorScheme.error
-                                            else -> MaterialTheme.colorScheme.onSurface
-                                        },
-                                        maxLines = 1, overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                                // Raw device ID always shown (smaller when label present)
-                                Text(
-                                    text = event.clientId,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontFamily = FontFamily.Monospace,
-                                    color = when {
-                                        isClientKnownAllowed -> MaterialTheme.colorScheme.primary
-                                        isClientKnownBlocked -> MaterialTheme.colorScheme.error
-                                        else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                    },
-                                    maxLines = 1, overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                            if (isClientKnownAllowed) {
-                                Spacer(Modifier.width(4.dp))
-                                Text(stringResource(Res.string.remote_client_allowed_badge),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.primary)
-                            } else if (isClientKnownBlocked) {
-                                Spacer(Modifier.width(4.dp))
-                                Text(stringResource(Res.string.remote_client_blocked_badge),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.error)
-                            }
-                            if (isInstanceLinkFollower) {
-                                Spacer(Modifier.width(4.dp))
-                                Text(stringResource(Res.string.instance_link_follower_badge),
-                                    style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.primary)
-                            }
-                        }
+                        RemoteClientIdentity(event, isClientKnownAllowed, isClientKnownBlocked, isInstanceLinkFollower)
                     }
                 }
 
@@ -583,4 +485,125 @@ private fun ActionIconButton(
             ) { Icon(icon, contentDescription = tooltip) }
         }
     }
+}
+
+/** The request's kind and action, how many more wait behind it, and the one-tap allow. */
+@Composable
+private fun RemoteEventHeader(
+    actionLabel: String,
+    typeIcon: ImageVector,
+    typeAccent: Color,
+    remaining: Int,
+    onAllow: () -> Unit,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .size(38.dp)
+                .clip(AppShape(10.dp))
+                .background(typeAccent.copy(alpha = 0.15f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(typeIcon, contentDescription = null, tint = typeAccent, modifier = Modifier.size(20.dp))
+        }
+        Spacer(Modifier.width(10.dp))
+        Text(
+            text = actionLabel,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = typeAccent,
+            modifier = Modifier.weight(1f)
+        )
+        // Badge showing how many are queued behind this one
+        if (remaining > 0) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(28.dp)
+                    .background(MaterialTheme.colorScheme.error, CircleShape)
+            ) {
+                Text(
+                    text = "+$remaining",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onError,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+        }
+        // Prominent one-tap allow (mirrors the ✓ button below)
+        RaisedButton(
+            onClick = onAllow,
+            shape = AppShape(8.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.semantic.success,
+                contentColor = MaterialTheme.semantic.onSuccess
+            ),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp)
+        ) {
+            Text(stringResource(Res.string.allow), fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+/** Who sent the request: its label and device id, coloured and badged by what is known of it. */
+@Composable
+private fun RemoteClientIdentity(
+    event: RemoteEvent,
+    isClientKnownAllowed: Boolean,
+    isClientKnownBlocked: Boolean,
+    isInstanceLinkFollower: Boolean,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(Res.string.remote_client_label),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+        Spacer(Modifier.width(4.dp))
+        Column {
+            // Label (if set) shown as primary identifier
+            if (event.clientLabel.isNotBlank()) {
+                Text(
+                    text = event.clientLabel,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = when {
+                        isClientKnownAllowed -> MaterialTheme.colorScheme.primary
+                        isClientKnownBlocked -> MaterialTheme.colorScheme.error
+                        else -> MaterialTheme.colorScheme.onSurface
+                    },
+                    maxLines = 1, overflow = TextOverflow.Ellipsis
+                )
+            }
+            // Raw device ID always shown (smaller when label present)
+            Text(
+                text = event.clientId,
+                style = MaterialTheme.typography.labelSmall,
+                fontFamily = FontFamily.Monospace,
+                color = when {
+                    isClientKnownAllowed -> MaterialTheme.colorScheme.primary
+                    isClientKnownBlocked -> MaterialTheme.colorScheme.error
+                    else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                },
+                maxLines = 1, overflow = TextOverflow.Ellipsis
+            )
+        }
+        if (isClientKnownAllowed) {
+            Spacer(Modifier.width(4.dp))
+            Text(stringResource(Res.string.remote_client_allowed_badge),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary)
+        } else if (isClientKnownBlocked) {
+            Spacer(Modifier.width(4.dp))
+            Text(stringResource(Res.string.remote_client_blocked_badge),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.error)
+        }
+        if (isInstanceLinkFollower) {
+            Spacer(Modifier.width(4.dp))
+            Text(stringResource(Res.string.instance_link_follower_badge),
+                style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary)
+        }
+    }
+
 }

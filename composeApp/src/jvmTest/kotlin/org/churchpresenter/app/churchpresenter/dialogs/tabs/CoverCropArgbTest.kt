@@ -17,7 +17,7 @@ import kotlin.test.assertTrue
  */
 class CoverCropArgbTest {
 
-    private val method = Class.forName("org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTabKt")
+    private val method = Class.forName("org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundPickersKt")
         .getDeclaredMethod(
             "coverCropArgb",
             IntArray::class.java,

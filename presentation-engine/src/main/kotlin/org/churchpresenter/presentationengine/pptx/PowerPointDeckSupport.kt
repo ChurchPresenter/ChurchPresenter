@@ -17,6 +17,7 @@ import org.churchpresenter.presentationengine.model.SlideTransitionSpec
 import org.churchpresenter.presentationengine.model.Timeline
 import org.churchpresenter.presentationengine.timeline.TimelineCompiler
 import java.io.File
+import java.io.IOException
 
 /** Per-slide parse results. */
 internal data class PowerPointSlideMeta(
@@ -101,7 +102,7 @@ internal object PowerPointDeckSupport {
             }
         } catch (e: EncryptedDocumentException) {
             PowerPointMetadataResult.Failure(DeckLoadError.PASSWORD_PROTECTED, e.message)
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             PowerPointMetadataResult.Failure(DeckLoadError.PARSE_FAILED, e.message)
         }
     }
@@ -144,7 +145,9 @@ internal object PowerPointDeckSupport {
                     }
                 }
             }
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            // One slide's animation is parsed by POI out of arbitrary XML, which throws whatever its
+            // internals do; the slide drops to static rather than failing the deck.
             warnings.add("Slide ${slideIndex + 1}: animation parse failed (${e.message}) — static")
             layers = null
             timeline = null

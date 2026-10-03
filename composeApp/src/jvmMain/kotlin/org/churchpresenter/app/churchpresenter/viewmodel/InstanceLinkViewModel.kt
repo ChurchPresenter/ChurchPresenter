@@ -1,19 +1,18 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.app.churchpresenter.server.InstanceLinkFetches
+import org.churchpresenter.app.churchpresenter.server.InstanceLinkCommands
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.churchpresenter.settings.BackgroundSettings
-import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkClient
 import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.app.churchpresenter.server.LiveStateDto
 import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
 import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
-import org.churchpresenter.app.churchpresenter.server.SongDetailDto
 
 /**
  * One surfaced InstanceLink command failure — a controller-mode command the primary rejected
@@ -41,7 +40,45 @@ data class RemotePresentationSlide(
  * [PresenterManager] or any other ViewModel; MainDesktop (which owns both) observes these flows
  * and drives the local presenter, per this project's ViewModel-ownership rule.
  */
-class InstanceLinkViewModel {
+class InstanceLinkViewModel private constructor(
+    private val state: InstanceLinkState,
+    private val client: InstanceLinkClient,
+) : InstanceLinkCommands by client, InstanceLinkFetches by client {
+
+    constructor() : this(InstanceLinkState())
+
+    private constructor(state: InstanceLinkState) : this(state, state.newClient())
+
+    val connectionStatus: StateFlow<InstanceLinkStatus> = state.connectionStatus
+    val remoteSchedule: StateFlow<List<ScheduleItemDto>> = state.remoteSchedule
+    val remoteSongCatalog: StateFlow<SongCatalogResponse?> = state.remoteSongCatalog
+    val remoteLiveState: StateFlow<LiveStateDto?> = state.remoteLiveState
+    val remoteSongSectionIndex: StateFlow<Int?> = state.remoteSongSectionIndex
+    val remotePresentationSlide: StateFlow<RemotePresentationSlide?> = state.remotePresentationSlide
+    val displayClearedSignal: StateFlow<Int> = state.displayClearedSignal
+    val lastMessageAtMs: StateFlow<Long?> = state.lastMessageAtMs
+    val nextRetryAtMs: StateFlow<Long?> = state.nextRetryAtMs
+    val bibleUpdatedSignal: StateFlow<Int> = state.bibleUpdatedSignal
+    val secondaryBibleUpdatedSignal: StateFlow<Int> = state.secondaryBibleUpdatedSignal
+    val picturesUpdatedSignal: StateFlow<Int> = state.picturesUpdatedSignal
+    val backgroundsUpdatedSignal: StateFlow<Int> = state.backgroundsUpdatedSignal
+    val commandFailures: SharedFlow<InstanceLinkCommandFailure> = state.commandFailures
+
+    fun connect(host: String, port: Int, apiKey: String, deviceId: String, reconnectDelayMs: Long) {
+        client.connect(host, port, apiKey, deviceId, reconnectDelayMs)
+    }
+
+    fun disconnect() {
+        client.disconnect()
+    }
+
+    fun dispose() {
+        client.dispose()
+    }
+}
+
+/** The link's typed state, fed by the client's callbacks; [InstanceLinkViewModel] exposes it. */
+internal class InstanceLinkState {
 
     private val _connectionStatus = MutableStateFlow(InstanceLinkStatus.DISCONNECTED)
     val connectionStatus: StateFlow<InstanceLinkStatus> = _connectionStatus.asStateFlow()
@@ -95,7 +132,7 @@ class InstanceLinkViewModel {
     private val _commandFailures = MutableSharedFlow<InstanceLinkCommandFailure>(extraBufferCapacity = 8)
     val commandFailures: SharedFlow<InstanceLinkCommandFailure> = _commandFailures.asSharedFlow()
 
-    private val client = InstanceLinkClient(
+    fun newClient(): InstanceLinkClient = InstanceLinkClient(
         onStatusChanged = { status ->
             _connectionStatus.value = status
             if (status != InstanceLinkStatus.ERROR) _nextRetryAtMs.value = null
@@ -122,83 +159,5 @@ class InstanceLinkViewModel {
             _commandFailures.tryEmit(InstanceLinkCommandFailure(commandType = "", reason = null, soft = true))
         }
     )
-
-    fun connect(host: String, port: Int, apiKey: String, deviceId: String, reconnectDelayMs: Long) {
-        client.connect(host, port, apiKey, deviceId, reconnectDelayMs)
-    }
-
-    fun disconnect() {
-        client.disconnect()
-    }
-
-    /** Adds an item to the primary's schedule — still gated by its own operator-approval dialog. */
-    fun sendAddToSchedule(item: ScheduleItem) {
-        client.sendAddToSchedule(item)
-    }
-
-    /** Removes an item from the primary's schedule — still gated by its own operator-approval dialog. */
-    fun sendRemoveFromSchedule(id: String) {
-        client.sendRemoveFromSchedule(id)
-    }
-
-    // ── Instance Link "Controller" mode — see InstanceLinkClient for the full doc comment on each. ──
-
-    fun sendProject(item: ScheduleItem) = client.sendProject(item)
-
-    fun sendSelectBibleVerse(bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) =
-        client.sendSelectBibleVerse(bookName, chapter, verseNumber, verseText, verseRange)
-
-    fun sendSelectPicture(folderId: String, index: Int, fileName: String?) =
-        client.sendSelectPicture(folderId, index, fileName)
-
-    fun sendSelectSongSection(number: String, section: Int, lineIndex: Int = -1) =
-        client.sendSelectSongSection(number, section, lineIndex)
-
-    fun sendSelectSlide(id: String, index: Int) = client.sendSelectSlide(id, index)
-
-    fun sendClear() = client.sendClear()
-
-    fun sendBibleHold(hold: Boolean) = client.sendBibleHold(hold)
-
-    fun sendNextPicture() = client.sendNextPicture()
-    fun sendPreviousPicture() = client.sendPreviousPicture()
-    fun sendNextSlide() = client.sendNextSlide()
-    fun sendPreviousSlide() = client.sendPreviousSlide()
-
-    /** Fetches one song's full lyrics from the primary on demand — see [InstanceLinkClient.fetchSongDetail]. */
-    suspend fun fetchSongDetail(number: String, songbook: String): SongDetailDto? =
-        client.fetchSongDetail(number, songbook)
-
-    /** Streaming URL for one of the primary's media files — see [InstanceLinkClient.mediaStreamUrl]. */
-    fun mediaStreamUrl(mediaId: String): String? = client.mediaStreamUrl(mediaId)
-
-    /** Fetches one live picture's bytes — see [InstanceLinkClient.fetchPictureImageBytes]. */
-    suspend fun fetchPictureImageBytes(folderId: String, index: Int): ByteArray? =
-        client.fetchPictureImageBytes(folderId, index)
-
-    /** Fetches one live presentation slide's bytes — see [InstanceLinkClient.fetchPresentationSlideBytes]. */
-    suspend fun fetchPresentationSlideBytes(id: String, index: Int): ByteArray? =
-        client.fetchPresentationSlideBytes(id, index)
-
-    /** Downloads the primary's raw bible file — see [InstanceLinkClient.fetchBibleFile]. */
-    suspend fun fetchBibleFile(): ByteArray? = client.fetchBibleFile()
-
-    /** Downloads the primary's raw secondary bible file — see [InstanceLinkClient.fetchSecondaryBibleFile]. */
-    suspend fun fetchSecondaryBibleFile(): ByteArray? = client.fetchSecondaryBibleFile()
-
-    suspend fun fetchBibleTranslations(): List<Pair<String, ByteArray>> = client.fetchBibleTranslations()
-
-    /** Fetches one lower-third preset's Lottie JSON by name — see [InstanceLinkClient.fetchLowerThirdJson]. */
-    suspend fun fetchLowerThirdJson(name: String): ByteArray? = client.fetchLowerThirdJson(name)
-
-    /** Fetches the primary's current background settings — see [InstanceLinkClient.fetchBackgroundSettings]. */
-    suspend fun fetchBackgroundSettings(): BackgroundSettings? = client.fetchBackgroundSettings()
-
-    /** Fetches one background slot's raw asset bytes — see [InstanceLinkClient.fetchBackgroundAsset]. */
-    suspend fun fetchBackgroundAsset(slot: String, isVideo: Boolean): ByteArray? =
-        client.fetchBackgroundAsset(slot, isVideo)
-
-    fun dispose() {
-        client.dispose()
-    }
 }
+

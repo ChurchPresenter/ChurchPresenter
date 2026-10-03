@@ -12,12 +12,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.ui.platform.testTag
 import org.churchpresenter.strings.generated.resources.preview_layout_done
 import org.churchpresenter.strings.generated.resources.preview_layout_edit
-import org.churchpresenter.sharedui.utils.contentScale
 import org.churchpresenter.sharedui.utils.rememberScreenDevices
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -41,8 +38,6 @@ import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -66,7 +61,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -80,57 +74,28 @@ import org.churchpresenter.strings.generated.resources.output_profile_blank
 import org.churchpresenter.strings.generated.resources.output_profile_swap_menu_tooltip
 import org.churchpresenter.icons.generated.resources.ic_pause
 import org.churchpresenter.icons.generated.resources.ic_play
-import org.churchpresenter.strings.generated.resources.fill_badge
 import org.churchpresenter.strings.generated.resources.browser_source_output_label
 import org.churchpresenter.strings.generated.resources.ndi_output_numbered
 import org.churchpresenter.strings.generated.resources.omt_output_numbered
-import org.churchpresenter.strings.generated.resources.display_stage_monitor
 import org.churchpresenter.strings.generated.resources.collapse_preview
 import org.churchpresenter.strings.generated.resources.expand_preview
-import org.churchpresenter.strings.generated.resources.full_screen
-import org.churchpresenter.strings.generated.resources.display_lower_third
-import org.churchpresenter.strings.generated.resources.live_preview_nothing
 import org.churchpresenter.strings.generated.resources.live_preview_title
-import org.churchpresenter.strings.generated.resources.lock_screen_to_tab
-import org.churchpresenter.strings.generated.resources.screen_locked_badge
 import org.churchpresenter.strings.generated.resources.screen_number
-import org.churchpresenter.strings.generated.resources.unlock_screen
 import org.churchpresenter.strings.generated.resources.pause
 import org.churchpresenter.strings.generated.resources.play
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.showsOutputBackground
-import org.churchpresenter.app.churchpresenter.StageMonitorScreen
-import org.churchpresenter.app.churchpresenter.offersTranspose
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
-import org.churchpresenter.settings.getBrowserSourceOutput
-import org.churchpresenter.settings.getNdiOutput
-import org.churchpresenter.settings.getOmtOutput
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.resolvedFor
-import org.churchpresenter.settings.withBrowserSourceOutput
-import org.churchpresenter.settings.withNdiOutput
-import org.churchpresenter.settings.withOmtOutput
-import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
-import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
-import org.churchpresenter.app.churchpresenter.presenter.contentRegion
-import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdLayout
-import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
-import org.churchpresenter.media.presenter.MediaPresenter
-import org.churchpresenter.slides.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.LocalBandOutgoing
 import org.churchpresenter.app.churchpresenter.presenter.LocalBandSongLineIndex
 import org.churchpresenter.app.churchpresenter.presenter.LocalLottieBandClock
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
-import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
-import org.churchpresenter.app.churchpresenter.presenter.QAQRCodePresenter
-import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
-import org.churchpresenter.slides.presenter.PresentationPresenter
-import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.DevFlags
@@ -139,8 +104,6 @@ import org.churchpresenter.sharedui.utils.OutputKind
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.sharedui.utils.OutputSize
 import org.churchpresenter.sharedui.utils.outputSizeOf
-import io.github.alexzhirkevich.compottie.LottieCompositionSpec
-import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.stt.STTManager
@@ -150,9 +113,6 @@ import org.churchpresenter.sharedui.composables.SlimSlider
 import org.churchpresenter.sharedui.composables.mode
 import org.churchpresenter.media.viewmodel.formatMediaTime
 
-private const val PREVIEW_BACKGROUND = 0xFF121212
-private const val LIVE_BADGE_COLOR = 0xFF2196F3
-private const val LOCK_BADGE_COLOR = 0xFFFFC107
 private const val AUDIO_LEVEL_COLOR = 0xFF4CAF50
 
 /** Half a pulse of the LIVE badge, in milliseconds; it reverses, so a full cycle is twice this. */
@@ -515,43 +475,11 @@ private fun SingleDisplayPreview(
     }
     val presentingMode by presenterManager.presentingMode
     val effectiveMode = locks[screenIndex] ?: presentingMode
-    val displayedVerses by presenterManager.displayedVerses
-    val nextVerses by presenterManager.nextVerses
-    val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
     // The clock stays wrapped: unwrapping it here would recompose this panel on every band frame.
     val bandSongLineIndex by presenterManager.bandSongLineIndex
     val bandOutgoing by presenterManager.bandOutgoing
-    val displayedLyricSection by presenterManager.displayedLyricSection
-    val songTransitionAlpha by presenterManager.songTransitionAlpha
-    val songPosition by presenterManager.displayedSongPosition
-    val displayedImagePath by presenterManager.displayedImagePath
-    val previousDisplayedImagePath by presenterManager.previousDisplayedImagePath
-    val pictureTransitionAlpha by presenterManager.pictureTransitionAlpha
-    val pictureSlideOffset by presenterManager.pictureSlideOffset
-    val displayedSlide by presenterManager.displayedSlide
-    val previousDisplayedSlide by presenterManager.previousDisplayedSlide
-    val slideFrozen by presenterManager.slideFrozen
-    val presentationFrame by presenterManager.presentationFrame
-    val slideTransitionAlpha by presenterManager.slideTransitionAlpha
-    val slideSlideOffset by presenterManager.slideSlideOffset
-    val animationType by presenterManager.animationType
-    val lottieJsonContent by presenterManager.lottieJsonContent
-    val lottieComposition by rememberLottieComposition(lottieJsonContent) {
-        LottieCompositionSpec.JsonString(lottieJsonContent)
-    }
-    val lottieProgress by presenterManager.lottieProgress
-    val displayedAnnouncementText by presenterManager.displayedAnnouncementText
-    val announcementTransitionAlpha by presenterManager.announcementTransitionAlpha
-    val mediaTransitionAlpha by presenterManager.mediaTransitionAlpha
-    val websiteUrl by presenterManager.websiteUrl
-    val webSnapshot by presenterManager.webSnapshot
-    val activeScene by presenterManager.activeScene
-    val displayedQuestion by presenterManager.displayedQuestion
-    val displayedDictionaryEntry by presenterManager.displayedDictionaryEntry
-    val presenterNotes by presenterManager.presenterNotes
     val mediaViewModel = LocalMediaViewModel.current
 
-    val isLowerThirdVertical = profile.isLowerThirdVertical
     val isLowerThird = profile.isLowerThird
 
     // The same background switches every real output obeys — this layout's own
@@ -569,27 +497,9 @@ private fun SingleDisplayPreview(
     val outputSize = outputSizeOf(rawAssignment, outputKind)
 
     val isLive = effectiveMode != Presenting.NONE && showsContent
-    val borderColor by animateColorAsState(
-        targetValue = if (isLive) Color.Red.copy(alpha = 0.85f)
-                      else MaterialTheme.colorScheme.outlineVariant,
-        animationSpec = tween(300),
-        label = "border_color"
-    )
+    val borderColor = previewBorderColor(isLive)
 
-    val isStageMonitor = profile.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
-    val displayModeChipLabel = when (profile.displayMode) {
-        Constants.DISPLAY_MODE_STAGE_MONITOR -> stringResource(Res.string.display_stage_monitor)
-        // One label for both stored modes. Vertical is an orientation the app works out from the
-        // output's own shape, not a mode the operator picks -- the Display Mode dropdown offers a
-        // single "Lower Third" entry -- so naming it here invented a distinction the rest of the UI
-        // does not have.
-        Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
-        Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL -> stringResource(Res.string.display_lower_third)
-        // Full screen is the remaining mode, and it used to be the one with no chip at all -- so a
-        // stack of previews named the two special outputs and left the ordinary ones to be guessed
-        // at. It is also the row that has to be there for the header below to be clickable.
-        else -> stringResource(Res.string.full_screen)
-    }
+    val displayModeChipLabel = displayModeLabel(profile.displayMode)
 
     // Session-only, and deliberately not persisted: collapsing is something an operator does to get
     // a long sidebar out of the way for a moment, not a property of the output. Nothing here is
@@ -606,26 +516,7 @@ private fun SingleDisplayPreview(
             onToggle = { expanded = !expanded },
             profiles = appSettings.projectionSettings.outputProfiles,
             activeProfileId = rawAssignment.activeProfileId,
-            onPickProfile = { pickedId ->
-                onSettingsChange { s ->
-                    val proj = s.projectionSettings
-                    val updatedProj = when (outputKind) {
-                        OutputKind.SCREEN -> proj.withAssignment(
-                            screenIndex, proj.getAssignment(screenIndex).copy(activeProfileId = pickedId),
-                        )
-                        OutputKind.BROWSER_SOURCE -> proj.withBrowserSourceOutput(
-                            screenIndex, proj.getBrowserSourceOutput(screenIndex).copy(activeProfileId = pickedId),
-                        )
-                        OutputKind.NDI -> proj.withNdiOutput(
-                            screenIndex, proj.getNdiOutput(screenIndex).copy(activeProfileId = pickedId),
-                        )
-                        OutputKind.OMT -> proj.withOmtOutput(
-                            screenIndex, proj.getOmtOutput(screenIndex).copy(activeProfileId = pickedId),
-                        )
-                    }
-                    s.copy(projectionSettings = updatedProj)
-                }
-            },
+            onPickProfile = { pickedId -> onSettingsChange(withPreviewProfile(outputKind, screenIndex, pickedId)) },
         )
 
         if (expanded || !collapsible) {
@@ -640,30 +531,7 @@ private fun SingleDisplayPreview(
 
         // ── Stage Monitor: dedicated presenter-confidence layout, not the normal presenter ──
         if (profile.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR) {
-            ScaledPresenterContent(output = outputSize) {
-                StageMonitorScreen(
-                    sm = outputSettings.stageMonitorSettings,
-                    presentingMode = presentingMode,
-                    showChords = profile.showChords,
-                    transposeSteps = transposeSteps,
-                    announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS,
-                    currentLyricSection = displayedLyricSection,
-                    allLyricSections = songPosition.allSections,
-                    songDisplaySectionIndex = songPosition.sectionIndex,
-                    displayedVerses = displayedVerses,
-                    nextVerses = nextVerses,
-                    announcementText = displayedAnnouncementText,
-                    displayedImagePath = displayedImagePath,
-                    displayedSlide = displayedSlide,
-                    presenterNotes = presenterNotes,
-                    activeScene = activeScene,
-                    displayedQuestion = displayedQuestion,
-                    qaSettings = outputSettings.qaSettings,
-                    displayedDictionaryEntry = displayedDictionaryEntry,
-                    dictionarySettings = outputSettings.dictionarySettings,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
+            PreviewStageMonitor(presenterManager, profile, outputSettings, outputSize, effectiveMode, transposeSteps)
         } else
         // ── Scaled presenter content (all modes except WEBSITE) ───────────────
         // JavaFX/Swing heavyweight components cannot be scaled by Compose layout,
@@ -676,18 +544,11 @@ private fun SingleDisplayPreview(
                     isLowerThird = isLowerThird,
                     showBackground = showsBackground,
                 ) {
+                    val qaUrl = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa"
                     if (effectiveMode != Presenting.NONE && showsContent) {
-                        val modeCrossfadeOn = outputSettings.bibleSettings.crossfade ||
-                            outputSettings.songSettings.crossfade
-                        val modeCrossfadeDur = maxOf(
-                            if (outputSettings.bibleSettings.crossfade)
-                                outputSettings.bibleSettings.transitionDuration.toInt() else 0,
-                            if (outputSettings.songSettings.crossfade)
-                                outputSettings.songSettings.transitionDuration.toInt() else 0
-                        ).coerceAtLeast(100)
                         Crossfade(
                             targetState = effectiveMode,
-                            animationSpec = tween(if (modeCrossfadeOn) modeCrossfadeDur else 0)
+                            animationSpec = tween(previewCrossfadeMs(outputSettings))
                         ) { mode ->
                         CompositionLocalProvider(
                             LocalLottieBandClock provides presenterManager.lottieBandClock,
@@ -695,129 +556,10 @@ private fun SingleDisplayPreview(
                             LocalBandOutgoing provides bandOutgoing,
                         ) {
                         LowerThirdLayout(mode, profile, outputSettings, showsBackground) {
-                        when (mode) {
-                            Presenting.BIBLE ->
-                                BiblePresenter(
-                                    modifier = if (isLowerThird) {
-                                        Modifier
-                                    } else {
-                                        Modifier.contentRegion(outputSettings.bibleSettings.contentRegion)
-                                    },
-                                    selectedVerses = displayedVerses,
-                                    appSettings = outputSettings,
-                                    isLowerThird = isLowerThird,
-                                    isLowerThirdVertical = isLowerThirdVertical,
-                                    outputRole = primaryRole,
-                                    transitionAlpha = bibleTransitionAlpha,
-                                    showBackground = showsBackground && profile.showBibleBackground,
-                                    crossfadeEnabled = outputSettings.bibleSettings.crossfade,
-                                    bibleTranslations = profile.bibleTranslations,
-                                )
-                            Presenting.LYRICS ->
-                                SongPresenter(
-                                    modifier = if (isLowerThird) {
-                                        Modifier
-                                    } else {
-                                        Modifier.contentRegion(outputSettings.songSettings.layoutExtras.contentRegion)
-                                    },
-                                    lyricSection = displayedLyricSection,
-                                    appSettings = outputSettings,
-                                    isLowerThird = isLowerThird,
-                                    isLowerThirdVertical = isLowerThirdVertical,
-                                    outputRole = primaryRole,
-                                    transitionAlpha = songTransitionAlpha,
-                                    displayLineIndex = songPosition.lineIndex,
-                                    lookAheadEnabled = profile.songLookAhead,
-                                    allLyricSections = songPosition.allSections,
-                                    displaySectionIndex = songPosition.sectionIndex,
-                                    showBackground = showsBackground && profile.showSongsBackground,
-                                    crossfadeEnabled = outputSettings.songSettings.crossfade,
-                                    languageOverride = profile.songMode,
-                                    languageSelection = profile.songTranslations,
-                                )
-                            Presenting.PICTURES ->
-                                PicturePresenter(
-                                    imagePath = displayedImagePath,
-                                    previousImagePath = previousDisplayedImagePath,
-                                    transitionAlpha = pictureTransitionAlpha,
-                                    slideOffset = pictureSlideOffset,
-                                    animationType = animationType,
-                                    contentScale = outputSettings.pictureSettings.scaleMode.contentScale,
-                                )
-                            Presenting.PRESENTATION ->
-                                PresentationPresenter(
-                                    frame = presentationFrame,
-                                    slide = displayedSlide,
-                                    previousSlide = previousDisplayedSlide,
-                                    transitionAlpha = slideTransitionAlpha,
-                                    slideOffset = slideSlideOffset,
-                                    animationType = animationType,
-                                    frozen = slideFrozen
-                                )
-                            Presenting.MEDIA ->
-                                if (mediaViewModel != null && !mediaViewModel.isAudioFile) {
-                                    // The preview is this output, so it takes the same three
-                                    // subtitle decisions the real one does. It used to pass none
-                                    // of them, and so always drew every track in default styling
-                                    // however the profile was configured.
-                                    MediaPresenter(
-                                        modifier = Modifier.fillMaxSize(),
-                                        transitionAlpha = mediaTransitionAlpha,
-                                        showSubtitles = profile.showSubtitles,
-                                        profileId = profile.id,
-                                        mediaSettings = outputSettings.mediaSettings,
-                                        contentScale = outputSettings.mediaScaleMode.contentScale,
-                                    )
-                                }
-                            Presenting.LOWER_THIRD ->
-                                LowerThirdPresenter(
-                                    composition = lottieComposition,
-                                    progress = { presenterManager.lottieProgress.value },
-                                    frame = presenterManager.lottieFrame.value,
-                                    groupsText = presenterManager.lottieGroupsText.value,
-                                )
-                            Presenting.ANNOUNCEMENTS ->
-                                AnnouncementsPresenter(
-                                    text = displayedAnnouncementText,
-                                    appSettings = outputSettings,
-                                    outputRole = primaryRole,
-                                    transitionAlpha = announcementTransitionAlpha
-                                )
-                            Presenting.CANVAS ->
-                                ScenePresenter(scene = activeScene)
-                            Presenting.QA -> {
-                                val showQRCode by presenterManager.showQRCodeOnDisplay
-                                if (showQRCode) {
-                                    QAQRCodePresenter(
-                                        url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa",
-                                        qaSettings = outputSettings.qaSettings,
-                                    )
-                                } else {
-                                    QAPresenter(question = displayedQuestion, qaSettings = outputSettings.qaSettings)
-                                }
-                            }
-                            Presenting.STT -> {
-                                if (sttManager != null) {
-                                    STTPresenter(
-                                        segments = sttManager.segments,
-                                        inProgressText = sttManager.inProgressText.value,
-                                        translationSegments = sttManager.translationSegments,
-                                        inProgressTranslation = sttManager.inProgressTranslation.value,
-                                        highlightedWords = sttManager.highlightedWords,
-                                        sttSettings = outputSettings.sttSettings,
-                                        outputRole = primaryRole,
-                                    )
-                                }
-                            }
-                            Presenting.DICTIONARY ->
-                                DictionaryPresenter(
-                                    entry = displayedDictionaryEntry,
-                                    dictionarySettings = outputSettings.dictionarySettings,
-                                    outputRole = primaryRole,
-                                    transitionAlpha = 1f,
-                                )
-                            else -> {}
-                        }
+                        PreviewMode(
+                            mode, presenterManager, profile, outputSettings, showsBackground, primaryRole, qaUrl,
+                            sttManager,
+                        )
                         }
                         }
                         }
@@ -831,28 +573,7 @@ private fun SingleDisplayPreview(
         // Instead, WebTab pushes a snapshot bitmap every 200ms via PresenterManager
         // so this panel shows a pixel-accurate mirror including scroll position.
         if (profile.displayMode != Constants.DISPLAY_MODE_STAGE_MONITOR && effectiveMode == Presenting.WEBSITE) {
-            val snapshot = webSnapshot
-            if (snapshot != null) {
-                Image(
-                    bitmap = snapshot,
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.FillBounds
-                )
-            } else {
-                Box(
-                    modifier = Modifier.fillMaxSize().background(Color(PREVIEW_BACKGROUND)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = if (websiteUrl.isBlank()) stringResource(Res.string.live_preview_nothing)
-                               else websiteUrl,
-                        color = Color.White.copy(alpha = 0.5f),
-                        fontSize = 11.sp,
-                        maxLines = 2
-                    )
-                }
-            }
+            PreviewWebsiteMirror(presenterManager)
         }
 
         // "LIVE" badge — only when this screen is showing content
@@ -860,105 +581,18 @@ private fun SingleDisplayPreview(
             LiveBadge(Modifier.align(Alignment.TopStart))
         }
 
-        // FILL badge when key output is configured
-        if (rawAssignment.hasKeyOutput) {
-            Text(
-                text = stringResource(Res.string.fill_badge),
-                color = Color.White,
-                fontSize = 9.sp,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(4.dp)
-                    .background(Color(LIVE_BADGE_COLOR), AppShape(3.dp))
-                    .padding(horizontal = 5.dp, vertical = 2.dp)
-            )
-        }
-
-        // LOCKED badge + lock toggle — not applicable to Stage Monitor screens, which route
-        // their own content dynamically and are never locked to a single tab.
-        val lockedMode = locks[screenIndex]
-        if (!isStageMonitor) {
-            if (lockedMode != null) {
-                Text(
-                    text = stringResource(Res.string.screen_locked_badge),
-                    color = Color.White,
-                    fontSize = 9.sp,
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(start = 4.dp, bottom = if (rawAssignment.hasKeyOutput) 24.dp else 4.dp)
-                        .background(Color(LOCK_BADGE_COLOR), AppShape(3.dp))
-                        .padding(horizontal = 5.dp, vertical = 2.dp)
-                )
-            }
-
-            // Lock toggle button — bottom-right corner
-            KeyIconButton(
-                onClick = {
-                    if (lockedMode != null) {
-                        onToggleLock(null)
-                    } else {
-                        onToggleLock(effectiveMode)
-                    }
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(2.dp)
-                    .size(24.dp),
-                colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = if (lockedMode != null) Color(LOCK_BADGE_COLOR) else Color.White.copy(alpha = 0.5f)
-                )
-            ) {
-                Icon(
-                    imageVector = if (lockedMode != null) Icons.Filled.Lock else Icons.Filled.LockOpen,
-                    contentDescription = if (lockedMode != null) {
-                        stringResource(Res.string.unlock_screen)
-                    } else {
-                        stringResource(Res.string.lock_screen_to_tab)
-                    },
-                    modifier = Modifier.size(13.dp)
-                )
-            }
-        }
-
-        // The musicians' transpose, on an output whose profile offers it. A Stage Monitor has no
-        // lock toggle, so it takes that corner. The same offset the output's page buttons move.
-        if (profile.offersTranspose() && onTranspose != null) {
-            TransposeOverlay(
-                steps = transposeSteps,
-                onStep = onTranspose,
-                modifier = Modifier.align(Alignment.BottomEnd).padding(3.dp),
-            )
-        }
-
-        // Screen/output label
-        if (showLabel) {
-            Text(
-                text = label,
-                color = Color.White.copy(alpha = 0.6f),
-                fontSize = 9.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(4.dp)
-                    .background(Color.Black.copy(alpha = 0.5f), AppShape(3.dp))
-                    .padding(horizontal = 5.dp, vertical = 2.dp)
-            )
-        }
-
-        // Animated audio indicator — only when presenting and media is playing
-        val mediaAudible = mediaViewModel != null && mediaViewModel.isLoaded && mediaViewModel.isPlaying
-        if (effectiveMode != Presenting.NONE && mediaAudible) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 6.dp)
-                    .background(Color.Black.copy(alpha = 0.6f), AppShape(4.dp))
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-            ) {
-                AnimatedEqualizer()
-            }
-        }
+        PreviewBadges(
+            screenIndex = screenIndex,
+            rawAssignment = rawAssignment,
+            profile = profile,
+            effectiveMode = effectiveMode,
+            locks = locks,
+            onToggleLock = onToggleLock,
+            transposeSteps = transposeSteps,
+            onTranspose = onTranspose,
+            label = if (showLabel) label else null,
+            mediaAudible = mediaViewModel != null && mediaViewModel.isLoaded && mediaViewModel.isPlaying,
+        )
         }
         }
     }
@@ -1122,7 +756,7 @@ private fun LiveBadge(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun AnimatedEqualizer() {
+internal fun AnimatedEqualizer() {
     val transition = rememberInfiniteTransition()
     val barHeights = (0..3).map { index ->
         transition.animateFloat(
@@ -1210,7 +844,7 @@ private fun MediaPreviewControls(
  * against one screen and framed against another.
  */
 @Composable
-private fun ScaledPresenterContent(
+internal fun ScaledPresenterContent(
     output: OutputSize,
     content: @Composable () -> Unit
 ) {

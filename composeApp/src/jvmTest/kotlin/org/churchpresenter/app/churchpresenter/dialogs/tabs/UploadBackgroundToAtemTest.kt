@@ -23,7 +23,7 @@ import kotlin.test.assertFailsWith
  */
 class UploadBackgroundToAtemTest {
 
-    private val method = Class.forName("org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTabKt")
+    private val method = Class.forName("org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundPickersKt")
         .declaredMethods
         .first { it.name == "uploadBackgroundToAtem" }
         .apply { isAccessible = true }

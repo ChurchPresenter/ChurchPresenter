@@ -48,7 +48,9 @@ object PresentationLoader {
                 "key" -> loadKeynote(file)
                 else -> LoadResult.Failure(DeckLoadError.UNSUPPORTED_FORMAT, file.extension)
             }
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            // A deck is parsed by POI and PDFBox, which throw whatever their internals do (NPEs and
+            // class-cast errors from a malformed file included) -- not a set this code can enumerate.
             LoadResult.Failure(DeckLoadError.PARSE_FAILED, e.message)
         }
     }

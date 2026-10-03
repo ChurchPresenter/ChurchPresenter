@@ -1,19 +1,11 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
-import androidx.compose.ui.semantics.Role
-import androidx.compose.material3.minimumInteractiveComponentSize
-import org.churchpresenter.planningcenter.PcoItemType
-import org.churchpresenter.theme.components.toggleRow
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.Image
+import org.churchpresenter.app.churchpresenter.viewmodel.createLocalSong
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -27,27 +19,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.CircleShape
 import org.churchpresenter.theme.AppShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Label
-import androidx.compose.material.icons.filled.AttachFile
-import androidx.compose.material.icons.filled.Campaign
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Label
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material.icons.filled.Slideshow
 import org.churchpresenter.theme.components.RaisedButton
-import androidx.compose.material3.ButtonDefaults
-import org.churchpresenter.theme.components.RaisedCheckbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.theme.components.KeyButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import org.churchpresenter.theme.components.GhostButton
@@ -60,14 +36,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.toComposeImageBitmap
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
@@ -75,27 +43,14 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.planning_center_connect
 import org.churchpresenter.strings.generated.resources.planning_center_description
-import org.churchpresenter.strings.generated.resources.planning_center_disconnect
-import org.churchpresenter.strings.generated.resources.planning_center_import_add_song
-import org.churchpresenter.strings.generated.resources.planning_center_import_button
-import org.churchpresenter.strings.generated.resources.planning_center_import_deselect_all
-import org.churchpresenter.strings.generated.resources.planning_center_import_file_count
-import org.churchpresenter.strings.generated.resources.planning_center_import_items
-import org.churchpresenter.strings.generated.resources.planning_center_import_matched
 import org.churchpresenter.strings.generated.resources.planning_center_import_no_plans
-import org.churchpresenter.strings.generated.resources.planning_center_import_select_all
-import org.churchpresenter.strings.generated.resources.planning_center_import_select_plan
-import org.churchpresenter.strings.generated.resources.planning_center_import_service_type
 import org.churchpresenter.strings.generated.resources.planning_center_import_title
-import org.churchpresenter.strings.generated.resources.planning_center_status_connected
 import org.churchpresenter.strings.generated.resources.planning_center_status_connecting
 import org.churchpresenter.strings.generated.resources.atem_status_error
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.sharedui.utils.centeredOnMainWindow
-import org.churchpresenter.theme.components.DropdownSelector
-import org.churchpresenter.sharedui.composables.LabeledCheckbox
 import org.churchpresenter.sharedui.composables.cpColorToHex
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
@@ -106,12 +61,49 @@ import org.churchpresenter.planningcenter.PlanningCenterClient
 import org.churchpresenter.settings.PlanningCenterSettings
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.skia.Image as SkiaImage
 import org.churchpresenter.sharedui.utils.UrlOpener
 
-private const val PILL_CORNER_PERCENT = 50
+/** The small window that connects to Planning Center before anything can be imported. */
+@Composable
+private fun PlanningCenterConnectWindow(
+    theme: ThemeMode,
+    onDismiss: () -> Unit,
+    onConnected: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long, personName: String) -> Unit,
+) {
+    val mainWindowState = LocalMainWindowState.current
+    var isConnecting by remember { mutableStateOf(false) }
+    var connectionError by remember { mutableStateOf<String?>(null) }
+    val connectScope = rememberCoroutineScope()
+    DialogWindow(
+        onCloseRequest = onDismiss,
+        state = rememberDialogState(
+            position = centeredOnMainWindow(mainWindowState, 460.dp, 260.dp),
+            width = 460.dp,
+            height = 260.dp
+        ),
+        title = stringResource(Res.string.planning_center_import_title)
+    ) {
+        AppWindowRoot(theme = theme) {
+            PlanningCenterConnectDialogContent(
+                isConnecting = isConnecting,
+                connectionError = connectionError,
+                onDismiss = onDismiss,
+                onConnectClick = {
+                    isConnecting = true
+                    connectionError = null
+                    connectScope.launch {
+                        try {
+                            connectToPlanningCenter(onConnected = onConnected, onError = { connectionError = it })
+                        } finally {
+                            isConnecting = false
+                        }
+                    }
+                }
+            )
+        }
+    }
+}
 
 /**
  * Lets the operator pick a Planning Center Services plan and import its songs (matched against
@@ -142,38 +134,7 @@ fun PlanningCenterImportDialog(
 
     if (settings.accessToken.isBlank()) {
         // No dedicated settings tab anymore — connecting happens right here, on demand.
-        val mainWindowState = LocalMainWindowState.current
-        var isConnecting by remember { mutableStateOf(false) }
-        var connectionError by remember { mutableStateOf<String?>(null) }
-        val connectScope = rememberCoroutineScope()
-        DialogWindow(
-            onCloseRequest = onDismiss,
-            state = rememberDialogState(
-                position = centeredOnMainWindow(mainWindowState, 460.dp, 260.dp),
-                width = 460.dp,
-                height = 260.dp
-            ),
-            title = stringResource(Res.string.planning_center_import_title)
-        ) {
-            AppWindowRoot(theme = theme) {
-                PlanningCenterConnectDialogContent(
-                    isConnecting = isConnecting,
-                    connectionError = connectionError,
-                    onDismiss = onDismiss,
-                    onConnectClick = {
-                        isConnecting = true
-                        connectionError = null
-                        connectScope.launch {
-                            try {
-                                connectToPlanningCenter(onConnected = onConnected, onError = { connectionError = it })
-                            } finally {
-                                isConnecting = false
-                            }
-                        }
-                    }
-                )
-            }
-        }
+        PlanningCenterConnectWindow(theme, onDismiss, onConnected)
         return
     }
 
@@ -240,7 +201,7 @@ fun PlanningCenterImportDialog(
         },
         // Tempo and capo are not offered here (showTuningFields defaults off), so they come back unset.
         onSave = { savedSong, _ ->
-            val saved = viewModel.createLocalSong(savedSong)
+            val saved = createLocalSong(savedSong)
             if (saved != null && targetItem != null) {
                 viewModel.markItemResolved(targetItem.id, saved.songId)
             }
@@ -368,55 +329,7 @@ internal fun PlanningCenterImportDialogContent(
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                DropdownSelector(
-                    label = stringResource(Res.string.planning_center_import_service_type),
-                    value = viewModel.selectedServiceTypeId,
-                    options = viewModel.serviceTypes.map { it.id to it.name },
-                    onValueChange = { id -> viewModel.selectServiceType(id) },
-                    modifier = Modifier.weight(1f)
-                )
-                if (viewModel.plans.isNotEmpty() && !viewModel.isLoadingPlans) {
-                    Spacer(Modifier.width(12.dp))
-                    DropdownSelector(
-                        label = stringResource(Res.string.planning_center_import_select_plan),
-                        value = viewModel.selectedPlanId ?: "",
-                        options = viewModel.plans.map { plan ->
-                            plan.id to "${plan.title}${if (plan.dates.isNotBlank()) " — ${plan.dates}" else ""}"
-                        },
-                        onValueChange = { viewModel.selectPlan(it) },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                Spacer(Modifier.width(12.dp))
-                Box(
-                    modifier = Modifier.size(8.dp).clip(CircleShape).background(MaterialTheme.semantic.success)
-                )
-                Spacer(Modifier.width(6.dp))
-                Text(
-                    stringResource(
-                        Res.string.planning_center_status_connected,
-                        settings.connectedPersonName.ifBlank { "?" }
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.semantic.success
-                )
-                Spacer(Modifier.width(10.dp))
-                KeyButton(
-                    onClick = onDisconnect,
-                    shape = AppShape(8.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                    modifier = Modifier.height(32.dp)
-                ) {
-                    Text(
-                        stringResource(Res.string.planning_center_disconnect),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
+            PcoImportHeader(viewModel, settings, onDisconnect)
 
             Spacer(Modifier.height(12.dp))
 
@@ -442,45 +355,7 @@ internal fun PlanningCenterImportDialogContent(
             if (viewModel.selectedPlanId != null) {
                 HorizontalDivider()
                 Spacer(Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        stringResource(Res.string.planning_center_import_items),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    val selectAllInteraction = remember { MutableInteractionSource() }
-                    val canSelect = viewModel.planItems.isNotEmpty()
-                    Row(
-                        modifier = Modifier.toggleRow(
-                            checked = viewModel.allSelected,
-                            onCheckedChange = { viewModel.setAllSelected(it) },
-                            interaction = selectAllInteraction,
-                            role = Role.Checkbox,
-                            enabled = canSelect,
-                        ),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RaisedCheckbox(
-                            checked = viewModel.allSelected,
-                            onCheckedChange = null,
-                            enabled = canSelect,
-                            interactionSource = selectAllInteraction,
-                            modifier = Modifier.minimumInteractiveComponentSize(),
-                        )
-                        Text(
-                            if (viewModel.allSelected) {
-                                stringResource(Res.string.planning_center_import_deselect_all)
-                            } else {
-                                stringResource(Res.string.planning_center_import_select_all)
-                            },
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
+                PcoItemsHeader(viewModel)
                 Spacer(Modifier.height(4.dp))
 
                 if (viewModel.isLoadingItems) {
@@ -493,218 +368,11 @@ internal fun PlanningCenterImportDialogContent(
                         modifier = Modifier.fillMaxSize().padding(end = 12.dp)
                     ) {
                         items(viewModel.planItems) { entry ->
-                            val pco = entry.pco
-                            // Scoped to the whole row (not just the button's branch) so the
-                            // attachments list below can also check it — a real accordion.
-                            var expanded by remember(pco.id) { mutableStateOf(false) }
-                            val hasScripture = viewModel.detectedScripturesByItemId[pco.id]?.isNotEmpty() == true
-                            val isExpandable = pco.itemType == PcoItemType.ITEM && !hasScripture &&
-                                viewModel.attachmentsByItemId.containsKey(pco.id) &&
-                                (viewModel.attachmentsByItemId[pco.id]?.size ?: 0) > 0
-                            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth()
-                                        .then(
-                                            if (isExpandable) Modifier.clickable { expanded = !expanded } else Modifier
-                                        ),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    when (pco.itemType) {
-                                        PcoItemType.SONG -> {
-                                            RaisedCheckbox(
-                                                checked = entry.selected && entry.matchedSongId != null,
-                                                enabled = entry.matchedSongId != null,
-                                                onCheckedChange = { viewModel.toggleItemSelected(pco.id) }
-                                            )
-                                            PlanItemTypeIcon(Icons.Filled.MusicNote)
-                                            Text(pco.songTitle ?: pco.title, modifier = Modifier.weight(1f))
-                                            if (entry.matchedSongId != null) {
-                                                MatchedTag()
-                                            } else if (isFetchingArrangement == pco.id) {
-                                                CircularProgressIndicator(
-                                                    modifier = Modifier.size(16.dp),
-                                                    strokeWidth = 2.dp
-                                                )
-                                            } else {
-                                                RaisedButton(
-                                                    shape = AppShape(8.dp),
-                                                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp),
-                                                    modifier = Modifier.height(32.dp),
-                                                    onClick = {
-                                                        isFetchingArrangement = pco.id
-                                                        scope.launch {
-                                                            val detail = viewModel.fetchArrangementForAddSong(pco)
-                                                            val prefill = SongItem(
-                                                                number = "",
-                                                                title = pco.songTitle ?: pco.title,
-                                                                songbook = viewModel.defaultSongbookForNewSongs(),
-                                                                author = pco.songAuthor ?: "",
-                                                                lyrics = (detail?.lyrics ?: "").split("\n"),
-                                                                ccliNumber = pco.songCcliNumber ?: ""
-                                                            )
-                                                            onAddSongRequested(pco, prefill)
-                                                            isFetchingArrangement = null
-                                                        }
-                                                    }
-                                                ) {
-                                                    Text(
-                                                        stringResource(Res.string.planning_center_import_add_song),
-                                                        style = MaterialTheme.typography.labelMedium
-                                                    )
-                                                }
-                                            }
-                                        }
-                                        PcoItemType.HEADER -> {
-                                            RaisedCheckbox(
-                                                checked = entry.selected,
-                                                onCheckedChange = { viewModel.toggleItemSelected(pco.id) }
-                                            )
-                                            PlanItemTypeIcon(
-                                                Icons.AutoMirrored.Filled.Label,
-                                                tint = MaterialTheme.semantic.warning
-                                            )
-                                            Text(
-                                                pco.title,
-                                                style = MaterialTheme.typography.titleSmall,
-                                                fontWeight = FontWeight.Bold,
-                                                modifier = Modifier.weight(1f)
-                                            )
-                                        }
-                                        PcoItemType.MEDIA -> {
-                                            // PCO "media" items reference video/audio that lives
-                                            // in the Media Library, not the Attachments API — the
-                                            // "attachments" this endpoint would return are incidental
-                                            // files, not the actual media, so there's nothing usable
-                                            // to import. Show the row disabled — a greyed,
-                                            // uncheckable checkbox and muted title (e.g. YouTube/
-                                            // Vimeo videos, which are external links, not files).
-                                            // Non-null (no-op) onCheckedChange keeps the same
-                                            // minimumInteractiveComponentSize footprint as the
-                                            // interactive rows so the checkbox stays aligned.
-                                            RaisedCheckbox(checked = false, enabled = false, onCheckedChange = {})
-                                            PlanItemTypeIcon(
-                                                Icons.Filled.PlayCircle,
-                                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                                            )
-                                            Text(
-                                                pco.title,
-                                                modifier = Modifier.weight(1f),
-                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                                textDecoration = TextDecoration.LineThrough
-                                            )
-                                        }
-                                        else -> {
-                                            // Generic "item" rows: if scripture references were
-                                            // detected (see below), that accordion IS the selection
-                                            // mechanism — no separate announcement checkbox needed.
-                                            // Otherwise fall back to a plain checkbox (import the
-                                            // title as an announcement). hasScripture is hoisted above.
-                                            if (!hasScripture) {
-                                                RaisedCheckbox(
-                                                    checked = entry.selected,
-                                                    onCheckedChange = { viewModel.toggleItemSelected(pco.id) }
-                                                )
-                                            } else {
-                                                Spacer(Modifier.width(40.dp))
-                                            }
-                                            PlanItemTypeIcon(
-                                                if (hasScripture) Icons.Filled.MenuBook else Icons.Filled.Campaign
-                                            )
-                                            Text(
-                                                pco.title,
-                                                modifier = Modifier.weight(1f),
-                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                            )
-                                            // Attachments are now loaded eagerly (see selectPlan),
-                                            // so the button only appears once we actually know
-                                            // there's something to show — never a dead-end click.
-                                            val attachmentsLoaded = viewModel.attachmentsByItemId.containsKey(pco.id)
-                                            val fileCount = viewModel.attachmentsByItemId[pco.id]?.size ?: 0
-                                            if (!attachmentsLoaded) {
-                                                CircularProgressIndicator(
-                                                    modifier = Modifier.size(16.dp),
-                                                    strokeWidth = 2.dp
-                                                )
-                                            } else if (fileCount > 0) {
-                                                // Plain badge — the whole row is the click target
-                                                // for expand/collapse (see isExpandable above).
-                                                Box(
-                                                    modifier = Modifier
-                                                        .clip(AppShape(PILL_CORNER_PERCENT))
-                                                        .background(
-                                                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-                                                        )
-                                                        .border(
-                                                            1.dp,
-                                                            MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
-                                                            AppShape(PILL_CORNER_PERCENT)
-                                                        )
-                                                        .padding(horizontal = 12.dp, vertical = 5.dp)
-                                                ) {
-                                                    Text(
-                                                        stringResource(
-                                                            Res.string.planning_center_import_file_count,
-                                                            fileCount
-                                                        ),
-                                                        style = MaterialTheme.typography.labelMedium,
-                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                val scriptures = viewModel.detectedScripturesByItemId[pco.id].orEmpty()
-                                if (scriptures.isNotEmpty()) {
-                                    val selectedScriptureIdx = viewModel.selectedScriptureIndices[pco.id].orEmpty()
-                                    scriptures.forEachIndexed { index, verse ->
-                                        LabeledCheckbox(
-                                            checked = index in selectedScriptureIdx,
-                                            onCheckedChange = { viewModel.toggleScriptureSelected(pco.id, index) },
-                                            label = verse.displayReference,
-                                            modifier = Modifier.fillMaxWidth().padding(start = 40.dp),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            spacing = 8.dp,
-                                        )
-                                    }
-                                }
-
-                                if (expanded && pco.itemType == PcoItemType.ITEM) {
-                                    val attachments = viewModel.attachmentsByItemId[pco.id].orEmpty()
-                                    val selectedIds = viewModel.selectedAttachmentIds[pco.id].orEmpty()
-                                    attachments.forEach { att ->
-                                        val ext = att.filename.substringAfterLast('.', "").lowercase()
-                                        val supported = isSupportedAttachment(att.filename)
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth().padding(start = 40.dp),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                        ) {
-                                            RaisedCheckbox(
-                                                checked = supported && att.id in selectedIds,
-                                                enabled = supported,
-                                                onCheckedChange = { viewModel.toggleAttachmentSelected(pco.id, att.id) }
-                                            )
-                                            val thumbUrl = att.thumbnailUrl
-                                            if (thumbUrl != null && ext in IMAGE_EXTENSIONS) {
-                                                AttachmentThumbnail(thumbUrl, viewModel)
-                                            } else {
-                                                PlanItemTypeIcon(attachmentExtensionIcon(ext))
-                                            }
-                                            Text(
-                                                att.filename,
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = if (supported) {
-                                                    Color.Unspecified
-                                                } else {
-                                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                                                },
-                                                textDecoration = if (supported) null else TextDecoration.LineThrough
-                                            )
-                                        }
-                                    }
+                            PcoPlanItemRow(entry, viewModel, isFetchingArrangement) { pco ->
+                                isFetchingArrangement = pco.id
+                                scope.launch {
+                                    onAddSongRequested(pco, newSongPrefill(viewModel, pco))
+                                    isFetchingArrangement = null
                                 }
                             }
                         }
@@ -719,240 +387,30 @@ internal fun PlanningCenterImportDialogContent(
                 Box(modifier = Modifier.weight(1f))
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
+            var isImporting by remember { mutableStateOf(false) }
+            val planId = viewModel.selectedPlanId
+            PcoImportFooter(
+                isImporting = isImporting,
+                canImport = planId != null && canImportSelection(viewModel),
+                onDismiss = onDismiss,
             ) {
-                KeyButton(
-                    onClick = onDismiss,
-                    shape = AppShape(8.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
-                    modifier = Modifier.padding(end = 8.dp)
-                ) {
-                    Text(stringResource(Res.string.cancel))
-                }
-                var isImporting by remember { mutableStateOf(false) }
-                val planId = viewModel.selectedPlanId
-                RaisedButton(
-                    shape = AppShape(6.dp),
-                    enabled = !isImporting && planId != null && viewModel.planItems.any { entry ->
-                        val pco = entry.pco
-                        val hasScripture = viewModel.detectedScripturesByItemId[pco.id]?.isNotEmpty() == true
-                        when (pco.itemType) {
-                            PcoItemType.HEADER -> entry.selected
-                            PcoItemType.SONG -> entry.matchedSongId != null
-                            PcoItemType.ITEM -> if (hasScripture) {
-                                viewModel.selectedScriptureIndices[pco.id]?.isNotEmpty() == true
-                            } else {
-                                val selectedAttachmentIds = viewModel.selectedAttachmentIds[pco.id].orEmpty()
-                                entry.selected || viewModel.attachmentsByItemId[pco.id].orEmpty()
-                                    .any { it.id in selectedAttachmentIds && isSupportedAttachment(it.filename) }
-                            }
-                            else -> false
-                        }
-                    },
-                    onClick = {
-                        if (planId == null) return@RaisedButton
-                        UsageEvents.record(UsageEvent.PLANNING_CENTER_IMPORT)
-                        isImporting = true
-                        scope.launch {
-                            for (entry in viewModel.planItems) {
-                                val pco = entry.pco
-                                when (pco.itemType) {
-                                    PcoItemType.SONG -> {
-                                        val songId = entry.matchedSongId.takeIf { entry.selected }
-                                        if (songId != null) {
-                                            val parts = songId.split("::", limit = 2)
-                                            val songbook = parts.getOrNull(0) ?: ""
-                                            val songNumber = parts.getOrNull(1)?.toIntOrNull() ?: 0
-                                            onAddSong(songNumber, pco.songTitle ?: pco.title, songbook, songId)
-                                        }
-                                    }
-                                    PcoItemType.HEADER -> {
-                                        if (entry.selected) {
-                                            onAddLabel(pco.title, defaultHeaderTextColor, defaultHeaderBackgroundColor)
-                                        }
-                                    }
-                                    PcoItemType.ITEM -> {
-                                        // Scripture and attachment checkboxes are independent of
-                                        // the row's own checkbox (matching the button's enabled
-                                        // check above) — unchecking the row while leaving one of
-                                        // those checked must still import just that one thing.
-                                        val scriptures = viewModel.detectedScripturesByItemId[pco.id].orEmpty()
-                                        val selectedAttachmentIds = viewModel.selectedAttachmentIds[pco.id].orEmpty()
-                                        val hasSelectedAttachments = viewModel.attachmentsByItemId[pco.id].orEmpty()
-                                            .any {
-                                                it.id in selectedAttachmentIds && isSupportedAttachment(it.filename)
-                                            }
-                                        if (scriptures.isNotEmpty()) {
-                                            val selectedIdx = viewModel.selectedScriptureIndices[pco.id].orEmpty()
-                                            scriptures.forEachIndexed { index, verse ->
-                                                if (index !in selectedIdx) return@forEachIndexed
-                                                onAddBibleVerse(
-                                                    verse.bookName,
-                                                    verse.chapter,
-                                                    verse.verseNumber,
-                                                    verse.verseText,
-                                                    verse.verseRange,
-                                                    verse.bookId
-                                                )
-                                            }
-                                        } else if (entry.selected && !hasSelectedAttachments) {
-                                            // Only fall back to a text announcement when there's
-                                            // no attached file — a file import already becomes its
-                                            // own Presentation/Picture/Media schedule entry below,
-                                            // so adding an announcement too would just duplicate it.
-                                            onAddAnnouncement(pco.description.ifBlank { pco.title })
-                                        }
-                                    }
-                                    else -> continue
-                                }
-                                // Attachments are their own per-file checkboxes, independent of
-                                // the row's main checkbox.
-                                if (pco.itemType == PcoItemType.ITEM) {
-                                    val attachments = viewModel.attachmentsByItemId[pco.id].orEmpty()
-                                    val selectedIds = viewModel.selectedAttachmentIds[pco.id].orEmpty()
-                                    // All selected images for this item share one cache folder
-                                    // (keyed by item id) — collect them into a single Picture
-                                    // schedule entry (one slideshow) instead of one per image.
-                                    var pictureFolderPath: String? = null
-                                    var pictureFolderName: String? = null
-                                    var pictureCount = 0
-                                    for (att in attachments) {
-                                        if (att.id !in selectedIds || !isSupportedAttachment(att.filename)) continue
-                                        // The schedule item's title should read as the plan item's
-                                        // own title (e.g. "Guest Speaker Presentation"), not the
-                                        // raw uploaded filename — fall back to the filename only
-                                        // when the plan item has no title.
-                                        when (val imported = viewModel.importAttachment(planId, pco.id, att)) {
-                                            is PlanningCenterImportViewModel.ImportedMedia.Presentation ->
-                                                onAddPresentation(
-                                                    imported.filePath,
-                                                    pco.title.ifBlank { imported.fileName },
-                                                    imported.slideCount,
-                                                    imported.fileType
-                                                )
-                                            is PlanningCenterImportViewModel.ImportedMedia.Picture -> {
-                                                pictureFolderPath = imported.folderPath
-                                                pictureFolderName = pco.title.ifBlank { imported.folderName }
-                                                pictureCount++
-                                            }
-                                            is PlanningCenterImportViewModel.ImportedMedia.Media ->
-                                                onAddMedia(
-                                                    imported.mediaUrl,
-                                                    pco.title.ifBlank { imported.mediaTitle },
-                                                    "local"
-                                                )
-                                            null -> {}
-                                        }
-                                    }
-                                    if (pictureFolderPath != null && pictureFolderName != null) {
-                                        onAddPicture(pictureFolderPath, pictureFolderName, pictureCount)
-                                    }
-                                }
-                            }
-                            isImporting = false
-                            onDismiss()
-                        }
-                    }
-                ) {
-                    if (isImporting) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            strokeWidth = 2.dp,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                        Spacer(Modifier.width(8.dp))
-                    }
-                    Text(stringResource(Res.string.planning_center_import_button))
+                if (planId == null) return@PcoImportFooter
+                UsageEvents.record(UsageEvent.PLANNING_CENTER_IMPORT)
+                isImporting = true
+                scope.launch {
+                    importSelection(
+                        viewModel, planId,
+                        PcoImportActions(
+                            onAddSong, onAddLabel, onAddPresentation, onAddPicture, onAddMedia,
+                            onAddAnnouncement, onAddBibleVerse,
+                            headerTextColor = defaultHeaderTextColor,
+                            headerBackgroundColor = defaultHeaderBackgroundColor,
+                        ),
+                    )
+                    isImporting = false
+                    onDismiss()
                 }
             }
-        }
-    }
-}
-
-
-private val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "gif", "bmp", "webp")
-private val VIDEO_EXTENSIONS = setOf("mp4", "avi", "mov", "mkv", "webm")
-private val AUDIO_EXTENSIONS = setOf("mp3", "wav", "flac")
-private val PRESENTATION_EXTENSIONS = setOf("ppt", "pptx", "key", "pdf")
-
-/** Mirrors [PlanningCenterImportViewModel.importAttachment]'s extension classification. */
-private fun isSupportedAttachment(filename: String): Boolean {
-    val ext = filename.substringAfterLast('.', "").lowercase()
-    return ext in IMAGE_EXTENSIONS || ext in VIDEO_EXTENSIONS || ext in AUDIO_EXTENSIONS ||
-        ext in PRESENTATION_EXTENSIONS
-}
-
-/** Material icon for the file kind an attachment will become. */
-private fun attachmentExtensionIcon(ext: String): ImageVector = when (ext) {
-    in PRESENTATION_EXTENSIONS -> Icons.Filled.Slideshow
-    in IMAGE_EXTENSIONS -> Icons.Filled.Image
-    in VIDEO_EXTENSIONS, in AUDIO_EXTENSIONS -> Icons.Filled.Movie
-    else -> Icons.Filled.AttachFile
-}
-
-/** A green "✓ Matched" tag shown on song rows already matched to the local library. */
-@Composable
-private fun MatchedTag() {
-    Box(
-        modifier = Modifier
-            .clip(AppShape(PILL_CORNER_PERCENT))
-            .background(MaterialTheme.semantic.successContainer)
-            .padding(horizontal = 10.dp, vertical = 4.dp)
-    ) {
-        // The string already carries a leading "✓".
-        Text(
-            stringResource(Res.string.planning_center_import_matched),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.semantic.onSuccessContainer
-        )
-    }
-}
-
-/** Row-leading type icon inside a small tinted rounded badge (matches the design's item tree). */
-@Composable
-private fun PlanItemTypeIcon(
-    icon: ImageVector,
-    tint: Color = MaterialTheme.colorScheme.primary
-) {
-    Box(
-        modifier = Modifier
-            .size(28.dp)
-            .clip(AppShape(7.dp))
-            .background(tint.copy(alpha = 0.15f)),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(16.dp))
-    }
-}
-
-/** Small thumbnail preview for an image attachment in the import picker, fetched on demand. */
-@Composable
-private fun AttachmentThumbnail(thumbnailUrl: String, viewModel: PlanningCenterImportViewModel) {
-    var bitmap by remember(thumbnailUrl) { mutableStateOf<ImageBitmap?>(null) }
-    LaunchedEffect(thumbnailUrl) {
-        val bytes = viewModel.fetchThumbnailBytes(thumbnailUrl)
-        bitmap = bytes?.let {
-            try {
-                SkiaImage.makeFromEncoded(it).toComposeImageBitmap()
-            } catch (_: Exception) {
-                null
-            }
-        }
-    }
-    Box(modifier = Modifier.size(28.dp), contentAlignment = Alignment.Center) {
-        val loadedBitmap = bitmap
-        if (loadedBitmap != null) {
-            Image(
-                bitmap = loadedBitmap,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-        } else {
-            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
         }
     }
 }

@@ -93,22 +93,21 @@ internal fun buildContactRequest(
     context = ContactReporter.defaultContext(),
 )
 
+/** What the dialog says when a send fails: in general, for want of a network, and when throttled. */
+internal data class ContactFailureTexts(val error: String, val network: String, val rateLimited: String)
+
 /**
  * Turns a [ContactReporter.submit] outcome into the status the dialog should show, using
  * the caller-supplied fallback texts. Split out for the same reason as [buildContactRequest].
  */
-internal fun statusForOutcome(
-    outcome: ContactReporter.Outcome,
-    errorText: String,
-    networkText: String,
-    rateLimitedText: String,
-): SendStatus = when (outcome) {
-    ContactReporter.Outcome.Success -> SendStatus.Sent
-    ContactReporter.Outcome.RateLimited -> SendStatus.Error(rateLimitedText)
-    is ContactReporter.Outcome.Invalid -> SendStatus.Error(outcome.error ?: errorText)
-    ContactReporter.Outcome.NetworkError -> SendStatus.Error(networkText)
-    ContactReporter.Outcome.Failure -> SendStatus.Error(errorText)
-}
+internal fun statusForOutcome(outcome: ContactReporter.Outcome, texts: ContactFailureTexts): SendStatus =
+    when (outcome) {
+        ContactReporter.Outcome.Success -> SendStatus.Sent
+        ContactReporter.Outcome.RateLimited -> SendStatus.Error(texts.rateLimited)
+        is ContactReporter.Outcome.Invalid -> SendStatus.Error(outcome.error ?: texts.error)
+        ContactReporter.Outcome.NetworkError -> SendStatus.Error(texts.network)
+        ContactReporter.Outcome.Failure -> SendStatus.Error(texts.error)
+    }
 
 /**
  * Submits the contact form and turns the result into the status the dialog should show. Split out
@@ -121,12 +120,10 @@ internal suspend fun submitContactRequest(
     name: String,
     email: String,
     message: String,
-    errorText: String,
-    networkText: String,
-    rateLimitedText: String,
+    texts: ContactFailureTexts,
 ): SendStatus {
     val outcome = ContactReporter.submit(buildContactRequest(type, name, email, message))
-    return statusForOutcome(outcome, errorText, networkText, rateLimitedText)
+    return statusForOutcome(outcome, texts)
 }
 
 @Composable
@@ -153,9 +150,11 @@ fun ContactUsDialog(
 
     // Captured here (composable scope) so the coroutine can use them without stringResource.
     val sentText = stringResource(Res.string.contact_sent)
-    val errorText = stringResource(Res.string.contact_error)
-    val networkText = stringResource(Res.string.contact_network_error)
-    val rateLimitedText = stringResource(Res.string.contact_rate_limited_browser)
+    val failureTexts = ContactFailureTexts(
+        error = stringResource(Res.string.contact_error),
+        network = stringResource(Res.string.contact_network_error),
+        rateLimited = stringResource(Res.string.contact_rate_limited_browser),
+    )
 
     val scope = rememberCoroutineScope()
     val mainWindowState = LocalMainWindowState.current
@@ -187,7 +186,7 @@ fun ContactUsDialog(
                     status = SendStatus.Sending
                     scope.launch {
                         status = submitContactRequest(
-                            selectedType.second, name, email, message, errorText, networkText, rateLimitedText
+                            selectedType.second, name, email, message, failureTexts
                         )
                         if (status == SendStatus.Sent) {
                             delay(SENT_CONFIRMATION_MS)

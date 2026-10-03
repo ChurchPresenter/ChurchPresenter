@@ -46,10 +46,6 @@
     <ID>ReturnCount:TimelineCompiler.kt$TimelineCompiler$private fun translateCurves(behavior: TimingBehavior.AnimateValue, boundsPt: RectPt): PropertyCurve?</ID>
     <ID>ReturnCount:TimelineEvaluator.kt$TimelineEvaluator$private fun interpolate(curve: PropertyCurve, p: Double): Double?</ID>
     <ID>ThrowsCount:SlideDiskCache.kt$SlideDiskCache.Writer$fun putSlide( index: Int, image: BufferedImage, note: String, fidelity: Fidelity, hasTimeline: Boolean ): File</ID>
-    <ID>TooGenericExceptionCaught:PdfDeckSupport.kt$PdfDeckSupport$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:PowerPointDeckSupport.kt$PowerPointDeckSupport$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:PresentationLoader.kt$PresentationLoader$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:SlideDiskCache.kt$SlideDiskCache.Writer$e: Throwable</ID>
     <ID>TooManyFunctions:IwaMessage.kt$IwaMessage</ID>
     <ID>TooManyFunctions:KeynoteDeckParser.kt$KeynoteDeckParser</ID>
     <ID>TooManyFunctions:KeynoteSceneRasterizer.kt$KeynoteSceneRasterizer : AutoCloseable</ID>

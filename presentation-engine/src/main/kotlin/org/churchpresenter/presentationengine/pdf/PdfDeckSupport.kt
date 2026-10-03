@@ -36,7 +36,9 @@ internal object PdfDeckSupport {
             }
         } catch (e: InvalidPasswordException) {
             PdfMetadataResult.Failure(DeckLoadError.PASSWORD_PROTECTED, e.message)
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            // PDFBox throws whatever its internals do on a malformed file (NPEs and class-cast errors
+            // included), and a Keynote's preview PDF failing here must fall through to its thumbnails.
             PdfMetadataResult.Failure(DeckLoadError.PARSE_FAILED, e.message)
         }
     }

@@ -141,21 +141,21 @@ object WindowsWindowCapture {
 
         return bgraBufferToImage(buffer, width, height)
     }
+}
 
-    internal fun rectToBounds(left: Int, top: Int, right: Int, bottom: Int): Rectangle =
-        Rectangle(left, top, right - left, bottom - top)
+internal fun rectToBounds(left: Int, top: Int, right: Int, bottom: Int): Rectangle =
+    Rectangle(left, top, right - left, bottom - top)
 
-    internal fun bgraBufferToImage(buffer: Pointer, width: Int, height: Int): BufferedImage {
-        val img = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
-        val pixels = IntArray(width * height)
-        for (i in pixels.indices) {
-            val bgra = buffer.getInt((i * 4).toLong())
-            val b = (bgra shr 16) and 0xFF
-            val g = (bgra shr 8) and 0xFF
-            val r = bgra and 0xFF
-            pixels[i] = (OPAQUE_ALPHA shl ALPHA_SHIFT) or (r shl RED_SHIFT) or (g shl GREEN_SHIFT) or b
-        }
-        img.setRGB(0, 0, width, height, pixels, 0, width)
-        return img
+internal fun bgraBufferToImage(buffer: Pointer, width: Int, height: Int): BufferedImage {
+    val img = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+    val pixels = IntArray(width * height)
+    for (i in pixels.indices) {
+        val bgra = buffer.getInt((i * 4).toLong())
+        val b = (bgra shr 16) and 0xFF
+        val g = (bgra shr 8) and 0xFF
+        val r = bgra and 0xFF
+        pixels[i] = (OPAQUE_ALPHA shl ALPHA_SHIFT) or (r shl RED_SHIFT) or (g shl GREEN_SHIFT) or b
     }
+    img.setRGB(0, 0, width, height, pixels, 0, width)
+    return img
 }

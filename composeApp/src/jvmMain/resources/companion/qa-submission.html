@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ask a Question</title>
+<style>
+/*QA_SHARED_CSS*/
+:root{--qa-bg:#f5f5f5;--qa-surface:#fff;--qa-ink:#1e1e2e;--qa-sub:#5f5f6b;--qa-border:#e0e0e0;--qa-muted:#616161}
+@media(prefers-color-scheme:dark){:root{--qa-bg:#16161f;--qa-surface:#22222e;--qa-ink:#e8e8ef;--qa-sub:#a8a8b5;--qa-border:#3a3a4a;--qa-muted:#9a9aa6}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--qa-bg);color:var(--qa-ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{background:var(--qa-surface);border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.1);padding:32px;max-width:480px;width:100%}
+h1{font-size:24px;margin-bottom:8px;color:var(--qa-ink)}
+p.sub{color:var(--qa-sub);margin-bottom:24px;font-size:14px}
+label.field-label{display:block;font-size:13px;font-weight:600;color:var(--qa-ink);margin-bottom:6px}
+input.name-input{width:100%;border:2px solid var(--qa-border);border-radius:12px;padding:12px 16px;font-size:15px;font-family:inherit;margin-bottom:16px;background:var(--qa-surface);color:var(--qa-ink);transition:border-color .2s}
+input.name-input:focus{outline:none;border-color:var(--qa-primary)}
+textarea{width:100%;min-height:120px;border:2px solid var(--qa-border);border-radius:12px;padding:16px;font-size:16px;resize:vertical;font-family:inherit;background:var(--qa-surface);color:var(--qa-ink);transition:border-color .2s}
+textarea:focus{outline:none;border-color:var(--qa-primary)}
+input.name-input::placeholder,textarea::placeholder{color:var(--qa-muted)}
+button{width:100%;min-height:48px;padding:14px;background:var(--qa-primary);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;margin-top:16px;transition:background .2s}
+button:hover{background:var(--qa-primary-hover)}
+button:disabled{background:#9aa0a6;cursor:not-allowed}
+.msg{text-align:center;padding:12px;border-radius:8px;margin-top:16px;font-size:14px}
+.msg.ok{background:#e8f5e9;color:#1b5e20}
+.msg.err{background:#ffebee;color:#b71c1c}
+.msg.off{background:#fff3e0;color:#e65100}
+#charcount{text-align:right;font-size:12px;color:var(--qa-muted);margin-top:4px}
+@media(prefers-color-scheme:dark){.msg.ok{background:#1b3a24;color:#a5d6a7}.msg.err{background:#3a1c1f;color:#ef9a9a}.msg.off{background:#3a2a12;color:#ffcc80}.card{box-shadow:0 2px 12px rgba(0,0,0,.4)}}
+</style>
+</head>
+<body>
+<main class="card">
+<h1 id="page-title">Ask a Question</h1>
+<p class="sub" id="page-sub">Your question will be reviewed before being displayed.</p>
+<div id="form-area">
+<label class="sr-only" for="name">Your name (optional)</label>
+<input type="text" id="name" class="name-input" placeholder="Your name">
+<label class="sr-only" for="q">Your question</label>
+<textarea id="q" maxlength="500" placeholder="Type your question here..."></textarea>
+<div id="charcount" aria-live="polite">0 / 500</div>
+<button id="btn" onclick="submit()">Submit Question</button>
+</div>
+<div id="msg" class="msg" role="status" aria-live="polite" style="display:none"></div>
+<a id="vote-link" href="/qa/vote" style="display:none;text-align:center;margin-top:12px;text-decoration:none;width:100%;min-height:48px;padding:14px;background:var(--qa-success);color:#fff;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:background .2s;box-sizing:border-box">Vote on Questions</a>
+</main>
+<script>
+const q=document.getElementById('q'),btn=document.getElementById('btn'),msg=document.getElementById('msg'),cc=document.getElementById('charcount'),nameField=document.getElementById('name');
+let submitted=false,cooldown=30,votingOn=false;
+const submitTime=parseInt(sessionStorage.getItem('qa_submit_time')||'0');
+if(submitTime>0){
+  const elapsed=Math.floor((Date.now()-submitTime)/1000);
+  const savedCooldown=parseInt(sessionStorage.getItem('qa_cooldown')||'30');
+  if(elapsed<savedCooldown){submitted=true;showThanks()}
+  else{sessionStorage.removeItem('qa_submit_time');sessionStorage.removeItem('qa_cooldown')}
+}
+q.addEventListener('input',()=>{cc.textContent=q.value.length+' / 500'});
+async function submit(){
+  const text=q.value.trim();
+  if(!text){show('Please enter a question','err');return}
+  btn.disabled=true;btn.textContent='Submitting...';
+  try{
+    const name=nameField.value.trim();
+    const r=await fetch('/api/qa/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,name})});
+    if(r.ok){showThanks();sessionStorage.setItem('qa_submit_time',Date.now().toString());sessionStorage.setItem('qa_cooldown',cooldown.toString())}
+    else if(r.status===429){showThanks()}
+    else if(r.status===403){show('Q&A session is not active right now.','off')}
+    else{const d=await r.json().catch(()=>({}));show(d.error||'Submission failed','err');btn.disabled=false;btn.textContent='Submit Question'}
+  }catch(e){show('Network error. Please try again.','err');btn.disabled=false;btn.textContent='Submit Question'}
+}
+function showThanks(){
+  document.getElementById('form-area').style.display='none';
+  document.getElementById('page-title').style.display='none';
+  document.getElementById('page-sub').style.display='none';
+  msg.innerHTML='<strong>Thanks for submitting your question!</strong>';
+  msg.className='msg ok';msg.style.display='block';
+  submitted=true;
+}
+function show(t,c){msg.textContent=t;msg.className='msg '+c;msg.style.display='block'}
+// Check session status periodically
+async function checkStatus(){
+  try{const r=await fetch('/api/qa/status');const d=await r.json();
+    if(d.cooldownSeconds)cooldown=d.cooldownSeconds;
+    votingOn=!!d.votingEnabled;
+    const vl=document.getElementById('vote-link');if(vl)vl.style.display=votingOn?'block':'none';
+    if(submitted){
+      const st=parseInt(sessionStorage.getItem('qa_submit_time')||'0');
+      if(st>0&&Math.floor((Date.now()-st)/1000)>=cooldown){
+        submitted=false;sessionStorage.removeItem('qa_submit_time');sessionStorage.removeItem('qa_cooldown');
+        document.getElementById('form-area').style.display='block';msg.style.display='none';
+        document.getElementById('page-title').style.display='';document.getElementById('page-sub').style.display='';
+        btn.disabled=false;btn.textContent='Submit Question';q.value='';
+      }
+      return;
+    }
+    if(!d.sessionActive){document.getElementById('form-area').style.display='none';document.getElementById('page-title').style.display='none';document.getElementById('page-sub').style.display='none';show('Q&A session is not active right now.','off')}
+    else{document.getElementById('form-area').style.display='block';document.getElementById('page-title').style.display='';document.getElementById('page-sub').style.display='';if(msg.className.includes('off'))msg.style.display='none'}
+  }catch(e){}
+}
+checkStatus();setInterval(checkStatus,5000);
+</script>
+</body>
+</html>

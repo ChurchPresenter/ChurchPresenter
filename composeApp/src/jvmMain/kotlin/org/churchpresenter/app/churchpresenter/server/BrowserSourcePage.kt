@@ -73,6 +73,20 @@ $TRANSPOSE_CSS
 $TRANSPOSE_HTML
 <script>
 const wsUrl=(location.protocol==='https:'?'wss:':'ws:')+'//'+location.host+'$wsPath';
+${FRAME_SCRIPT}
+${transposeScript(apiBase, if (needsKey) apiKey else "")}
+connect();
+</script>
+</body>
+</html>
+""".trimIndent()
+}
+
+/**
+ * The page's frame script: draws each binary delta onto the persistent offscreen canvas, scales it
+ * into the window, and reconnects when the socket drops. `wsUrl` is set just above it.
+ */
+private val FRAME_SCRIPT = """
 const canvas=document.getElementById('frame');
 const ctx=canvas.getContext('2d');
 
@@ -207,13 +221,7 @@ if(event.reason){
 setTimeout(connect,2000);
   };
 }
-${transposeScript(apiBase, if (needsKey) apiKey else "")}
-connect();
-</script>
-</body>
-</html>
 """.trimIndent()
-}
 
 // ── The musicians' transpose buttons ──────────────────────────────────────────
 // Issue #649's pill: -1 / 0 / +1 over the stage monitor on a band member's tablet. Every page

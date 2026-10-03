@@ -80,9 +80,6 @@
     <ID>ReturnCount:StickyAudit.kt$internal fun classify(row: StickyRow): Verdict</ID>
     <ID>ReturnCount:VersionDetector.kt$VersionDetector$private fun evaluate(): Verdict?</ID>
     <ID>ReturnCount:VersionScorer.kt$VersionScorer$fun deltas( candidates: List&lt;VersionCandidate&gt;, anchorText: String, spoken: String, script: Script, ): List&lt;Delta&gt;</ID>
-    <ID>TooGenericExceptionCaught:EngineServer.kt$EngineServer$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:SocketHandler.kt$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:SpbLoader.kt$SpbLoader$e: Exception</ID>
     <ID>TooManyFunctions:BibleIndex.kt$BibleIndex</ID>
     <ID>TooManyFunctions:DetectionEngine.kt$DetectionEngine</ID>
     <ID>TooManyFunctions:DetectionLogger.kt$DetectionLogger</ID>

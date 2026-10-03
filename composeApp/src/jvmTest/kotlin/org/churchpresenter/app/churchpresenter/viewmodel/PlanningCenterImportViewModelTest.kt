@@ -490,7 +490,7 @@ class PlanningCenterImportViewModelTest {
     @Test
     fun `a confirmed song is written into the song library`() {
         val vm = viewModel()
-        val created = vm.createLocalSong(
+        val created = createLocalSong(
             SongItem(
                 number = "0500",
                 title = "Imported Song",

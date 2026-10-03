@@ -42,16 +42,28 @@ reference to the app.
 
 ## Coverage floor
 
-**Not enforced yet.** The module measures 74% of instructions and 59% of branches against the shared
-85%, and CI runs its tests but not its floor. The gap is the code that needs a real Chromium:
-`CefManager`/`JcefInstall` installing and starting JCEF, `WebsitePresenter` embedding a live browser,
-and `WebPreview`'s mouse, wheel and key forwarding into a `CefBrowser`. The tests that reach it —
-the native calls split from the decisions, as the root `AGENT.md`'s Tests section describes — are
-still to be written; the `Web coverage floor` step goes into `test.yml` with them, at the shared 85%.
+**The shared 85% on all six counters, enforced in CI** (`Web coverage floor`), with no overrides and
+no excludes. What needs a real Chromium is kept to a thin edge behind a seam, and everything that
+decides sits in front of it:
+
+- **`CefEngine`** holds the engine's state and decisions — whether to install, what an outcome
+  leaves, recovering from a dead client. `CefManager` keeps its API as getters over the one the app
+  runs on; a test builds its own, so the Web tab's defaults never see a test's engine.
+- **`EmbeddedBrowser`** is `EmbeddedWebView`'s body, taking the client source, the screen capture
+  and the `SwingPanel` as parameters. Its CEF handlers are the named classes in
+  `EmbeddedWebViewHandlers.kt`.
+- **`BrowserInput`** is all the mirrored preview needs of the live browser; `CefBrowserInput` is the
+  reflective sender behind it.
+- **The toolbar's handlers** are `WebTabScope` extensions (`WebTabNavigation.kt`,
+  `WebTabPageActions.kt`), tested on a scope directly; the composables only call them.
+
+Left uncovered, and why: the reflective `patchJcefModuleAccess` paths, `pactl` audio routing (Linux
+only), `buildCefApp`'s `build()`, `CefManager.init`'s install lambda, and the `SwingPanel` itself.
+Keep a new native call behind one of the seams above rather than in a composable.
 
 ## Commands
 
 ```bash
 ./gradlew :web:test :web:detekt
-./gradlew :web:jacocoTestReport   # what the floor will check
+./gradlew :web:jacocoTestReport :web:jacocoTestCoverageVerification   # the report, and the floor CI checks
 ```

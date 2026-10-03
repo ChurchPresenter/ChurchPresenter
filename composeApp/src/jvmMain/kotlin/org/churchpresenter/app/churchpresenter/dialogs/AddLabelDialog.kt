@@ -147,26 +147,7 @@ internal fun AddLabelDialogContent(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Label text input
-                Column {
-                    Text(
-                        text = stringResource(Res.string.label_text),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    SettingsTextField(
-                        value = labelText,
-                        onValueChange = { labelText = it },
-                        placeholder = {
-                            Text(
-                                stringResource(Res.string.enter_label_text),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                    )
-                }
+                LabelTextField(labelText) { labelText = it }
 
                 // Theme presets and this user's own history, side by side: pick a pair in one
                 // click, or fall through to the two pickers below for something new.
@@ -180,38 +161,10 @@ internal fun AddLabelDialogContent(
                 )
 
                 // Text color picker
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(Res.string.text_color),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    ColorPickerField(
-                        color = textColor,
-                        onColorChange = { textColor = it }
-                    )
-                }
+                LabelColorRow(stringResource(Res.string.text_color), textColor) { textColor = it }
 
                 // Background color picker
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(Res.string.canvas_text_bg_color),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    ColorPickerField(
-                        color = backgroundColor,
-                        onColorChange = { backgroundColor = it }
-                    )
-                }
+                LabelColorRow(stringResource(Res.string.canvas_text_bg_color), backgroundColor) { backgroundColor = it }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -260,3 +213,44 @@ internal fun AddLabelDialogContent(
     }
 }
 
+/** The label's text, with its heading and hint. */
+@Composable
+private fun LabelTextField(value: String, onValueChange: (String) -> Unit) {
+    Column {
+        Text(
+            text = stringResource(Res.string.label_text),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        SettingsTextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = {
+                Text(
+                    stringResource(Res.string.enter_label_text),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+        )
+    }
+}
+
+/** One of the two colour pickers: its name on the left, the picker on the right. */
+@Composable
+private fun LabelColorRow(label: String, color: String, onColorChange: (String) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        ColorPickerField(color = color, onColorChange = onColorChange)
+    }
+}

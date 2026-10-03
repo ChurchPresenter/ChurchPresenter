@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.atem.AtemState
 import org.churchpresenter.atem.formatAtemFps
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -87,37 +88,18 @@ import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.theme.semantic
 import java.io.IOException
 
+/** The port the ATEM listens on, used when the field does not hold a number. */
+private const val DEFAULT_ATEM_PORT = 9910
+
 @Composable
 fun AtemSettingsTab(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
 ) {
     val atem = settings.atemSettings
-    fun update(block: AtemSettings.() -> AtemSettings) {
+    val update: (AtemSettings.() -> AtemSettings) -> Unit = { block ->
         onSettingsChange { s -> s.copy(atemSettings = s.atemSettings.block()) }
     }
-
-    var hostText by remember(atem.host) { mutableStateOf(atem.host) }
-    var portText by remember(atem.port) { mutableStateOf(atem.port.toString()) }
-    // Slots are stored 0-based (protocol) but displayed 1-based like ATEM Software Control
-    var stillSlotText by remember(atem.defaultStillSlot) { mutableStateOf((atem.defaultStillSlot + 1).toString()) }
-    var clipSlotText by remember(atem.defaultClipSlot) { mutableStateOf((atem.defaultClipSlot + 1).toString()) }
-    var backgroundSlot1Text by remember(atem.backgroundSlot1) { mutableStateOf((atem.backgroundSlot1 + 1).toString()) }
-    var backgroundSlot2Text by remember(atem.backgroundSlot2) { mutableStateOf((atem.backgroundSlot2 + 1).toString()) }
-    var renderWidthText by remember(atem.renderWidth) { mutableStateOf(atem.renderWidth.toString()) }
-    var renderHeightText by remember(atem.renderHeight) { mutableStateOf(atem.renderHeight.toString()) }
-    var clipFpsText by remember(atem.clipFps) { mutableStateOf(formatAtemFps(atem.clipFps)) }
-    var meText by remember(atem.keyMixEffect) { mutableStateOf((atem.keyMixEffect + 1).toString()) }
-    var keyText by remember(atem.keyIndex) { mutableStateOf((atem.keyIndex + 1).toString()) }
-    var dskText by remember(atem.dskIndex) { mutableStateOf((atem.dskIndex + 1).toString()) }
-    var keyPreRollText by remember(atem.keyPreRollMs) { mutableStateOf(atem.keyPreRollMs.toString()) }
-    var keyPostRollText by remember(atem.keyPostRollMs) { mutableStateOf(atem.keyPostRollMs.toString()) }
-
-    var connectionStatus by remember { mutableStateOf<String?>(null) }
-    var connectionError by remember { mutableStateOf<String?>(null) }
-    var detectedVideoMode by remember { mutableStateOf<String?>(null) }
-    var isTesting by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
 
     val scrollState = rememberScrollState()
     Box(
@@ -133,470 +115,409 @@ fun AtemSettingsTab(
                 .padding(end = SettingsScrollbarGutter),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // ── Connection card ──────────────────────────────────────────────
-            SettingsSection(
-                title = stringResource(Res.string.atem_section_connection),
-                modifier = Modifier.fillMaxWidth().widthIn(max = 600.dp)
-            ) {
-                Text(
-                    text = stringResource(Res.string.atem_description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-                Spacer(Modifier.height(12.dp))
-
-                SettingRow(label = stringResource(Res.string.atem_host)) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.widthIn(max = 350.dp)
-                    ) {
-                        SettingsTextField(
-                            value = hostText,
-                            onValueChange = {
-                                hostText = it
-                                update { copy(host = it) }
-                            },
-                            placeholder = { Text(stringResource(Res.string.atem_host_hint)) },
-                            singleLine = true,
-                            modifier = Modifier.weight(1f)
-                        )
-                        SettingsTextField(
-                            value = portText,
-                            onValueChange = { v ->
-                                portText = v
-                                v.toIntOrNull()?.let { update { copy(port = it) } }
-                            },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.width(68.dp)
-                        )
-                    }
-                }
-
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    text = stringResource(Res.string.atem_render_resolution),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-                Spacer(Modifier.height(6.dp))
-                Row(
-                    modifier = Modifier.widthIn(max = 350.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    SettingsTextField(
-                        value = renderWidthText,
-                        onValueChange = { v ->
-                            renderWidthText = v
-                            v.toIntOrNull()?.let { update { copy(renderWidth = it) } }
-                        },
-                        label = stringResource(Res.string.atem_render_width),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    )
-                    SettingsTextField(
-                        value = renderHeightText,
-                        onValueChange = { v ->
-                            renderHeightText = v
-                            v.toIntOrNull()?.let { update { copy(renderHeight = it) } }
-                        },
-                        label = stringResource(Res.string.atem_render_height),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    )
-                    SettingsTextField(
-                        value = clipFpsText,
-                        onValueChange = { v ->
-                            clipFpsText = v
-                            v.toDoubleOrNull()?.let { update { copy(clipFps = it) } }
-                        },
-                        label = stringResource(Res.string.atem_clip_fps_unit),
-                        placeholder = { Text(stringResource(Res.string.atem_clip_fps_hint)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    )
-                }
-
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    stringResource(Res.string.atem_test_connection_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
-                )
-                Spacer(Modifier.height(8.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    RaisedButton(
-                        shape = AppShape(6.dp),
-                        onClick = {
-                            if (isTesting) return@RaisedButton
-                            isTesting = true
-                            connectionStatus = null
-                            connectionError = null
-                            detectedVideoMode = null
-                            scope.launch {
-                                try {
-                                    val state = withContext(Dispatchers.IO) {
-                                        AtemClient(hostText, portText.toIntOrNull() ?: 9910).queryState()
-                                    }
-                                    val fpsLabel = formatAtemFps(state.fps)
-                                    detectedVideoMode = buildString {
-                                        append("${state.videoMode} ($fpsLabel fps)")
-                                        if (state.clipMaxFrames.isNotEmpty()) {
-                                            val capacity = state.clipMaxFrames.distinct()
-                                                .joinToString("/") { frames ->
-                                                    val secs = String.format(
-                                                        java.util.Locale.US,
-                                                        "%.1f",
-                                                        frames / state.fps
-                                                    )
-                                                    "$frames frames (≈${secs}s)"
-                                                }
-                                            append(" — ${state.clipSlots.size} clips × up to $capacity")
-                                            if (state.unassignedFrames > 0) {
-                                                append(", ${state.unassignedFrames} frames unassigned")
-                                            }
-                                        }
-                                    }
-                                    clipFpsText = fpsLabel
-                                    update {
-                                        copy(
-                                            clipFps = state.fps,
-                                            detectedStillSlots = state.stillSlots.size,
-                                            detectedClipSlots = state.clipSlots.size,
-                                            detectedClipMaxFrames = state.clipMaxFrames,
-                                            detectedUnassignedFrames = state.unassignedFrames,
-                                            detectedMixEffects = state.mixEffectCount,
-                                            detectedKeyersPerMe = state.keyersPerMe,
-                                            detectedDownstreamKeyers = state.downstreamKeyers
-                                        )
-                                    }
-                                    connectionStatus = "connected"
-                                    connectionError = null
-                                } catch (e: CancellationException) {
-                                    throw e
-                                } catch (e: IOException) {
-                                    // The ATEM link: AtemProtocolException is one.
-                                    connectionStatus = "error"
-                                    connectionError = e.message ?: "Unknown error"
-                                } catch (e: IllegalStateException) {
-                                    connectionStatus = "error"
-                                    connectionError = e.message ?: "Unknown error"
-                                } catch (e: IllegalArgumentException) {
-                                    // A host or port the socket cannot be pointed at.
-                                    connectionStatus = "error"
-                                    connectionError = e.message ?: "Unknown error"
-                                } finally {
-                                    isTesting = false
-                                }
-                            }
-                        },
-                        enabled = hostText.isNotBlank() && !isTesting
-                    ) {
-                        if (isTesting) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp),
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                            Spacer(Modifier.width(8.dp))
-                        }
-                        Text(
-                            if (isTesting) stringResource(Res.string.atem_status_connecting)
-                            else stringResource(Res.string.atem_test_connection)
-                        )
-                    }
-
-                    val (statusText, statusColor) = when {
-                        isTesting ->
-                            stringResource(Res.string.atem_status_connecting) to MaterialTheme.semantic.warning
-                        connectionStatus == "connected" ->
-                            stringResource(Res.string.atem_status_connected) to MaterialTheme.semantic.success
-                        connectionStatus == "error" ->
-                            stringResource(Res.string.atem_status_error, connectionError ?: "") to
-                                MaterialTheme.colorScheme.error
-                        else ->
-                            stringResource(Res.string.atem_status_disconnected) to
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    }
-                    if (connectionStatus != null || isTesting) {
-                        Text(statusText, style = MaterialTheme.typography.bodySmall, color = statusColor)
-                    }
-                    val detectedMode = detectedVideoMode
-                    if (detectedMode != null && connectionStatus == "connected") {
-                        Text(
-                            stringResource(Res.string.atem_detected_video_mode, detectedMode),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.semantic.success
-                        )
-                    }
-                }
-            }
+            AtemConnectionCard(atem, update)
 
             // ── Lower Third Uploads + Background Uploads, side by side ──────
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-            SettingsSection(
-                title = stringResource(Res.string.atem_section_lower_third_uploads),
-                modifier = Modifier.weight(1f)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    SettingsTextField(
-                        value = stillSlotText,
-                        onValueChange = { v ->
-                            stillSlotText = v
-                            v.toIntOrNull()?.let { update { copy(defaultStillSlot = (it - 1).coerceAtLeast(0)) } }
-                        },
-                        label = run {
-                            val l = stringResource(Res.string.atem_default_still_slot)
-                            if (atem.detectedStillSlots > 0) "$l (1–${atem.detectedStillSlots})" else l
-                        },
-                        isError = atem.detectedStillSlots > 0 &&
-                            stillSlotText.toIntOrNull()?.let { it !in 1..atem.detectedStillSlots } != false,
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    )
-                    SettingsTextField(
-                        value = clipSlotText,
-                        onValueChange = { v ->
-                            clipSlotText = v
-                            v.toIntOrNull()?.let { update { copy(defaultClipSlot = (it - 1).coerceAtLeast(0)) } }
-                        },
-                        label = run {
-                            val l = stringResource(Res.string.atem_default_clip_slot)
-                            if (atem.detectedClipSlots > 0) "$l (1–${atem.detectedClipSlots})" else l
-                        },
-                        isError = atem.detectedClipSlots > 0 &&
-                            clipSlotText.toIntOrNull()?.let { it !in 1..atem.detectedClipSlots } != false,
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    )
-                }
-
-                Spacer(Modifier.height(4.dp))
-
-                // Standing reference: how much clip the ATEM can hold (persisted from the
-                // last successful Test Connection)
-                if (atem.detectedClipMaxFrames.isNotEmpty() && atem.clipFps > 0) {
-                    val banks = atem.detectedClipMaxFrames
-                    val distinct = banks.distinct()
-                    val fpsLabel = formatAtemFps(atem.clipFps)
-                    val base = if (distinct.size == 1) {
-                        val secs = String.format(java.util.Locale.US, "%.1f", distinct[0] / atem.clipFps)
-                        stringResource(Res.string.atem_capacity_equal, banks.size, distinct[0], secs, fpsLabel)
-                    } else {
-                        stringResource(
-                            Res.string.atem_capacity_mixed,
-                            banks.size,
-                            distinct.joinToString(" / "),
-                            fpsLabel
-                        )
-                    }
-                    val suffix = if (atem.detectedUnassignedFrames > 0) {
-                        stringResource(Res.string.atem_capacity_unassigned, atem.detectedUnassignedFrames)
-                    } else ""
-                    Text(
-                        base + suffix,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                } else {
-                    Text(
-                        stringResource(Res.string.atem_capacity_unknown),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
-                }
-
-                Spacer(Modifier.height(8.dp))
-
-                // Key sequencing defaults for the Companion / Go-Live trigger: an upstream keyer
-                // (M/E + keyer) or a downstream keyer (DSK), plus the margins around the animation.
-                val useDsk = atem.useDownstreamKey
-                val keyersOnMe = atem.detectedKeyersPerMe.getOrNull(atem.keyMixEffect) ?: 0
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    if (useDsk) {
-                        SettingsTextField(
-                            value = dskText,
-                            onValueChange = { v ->
-                                dskText = v
-                                v.toIntOrNull()?.let { update { copy(dskIndex = (it - 1).coerceAtLeast(0)) } }
-                            },
-                            label = if (atem.detectedDownstreamKeyers > 0) {
-                                "DSK (1–${atem.detectedDownstreamKeyers})"
-                            } else {
-                                "DSK"
-                            },
-                            isError = atem.detectedDownstreamKeyers > 0 &&
-                                dskText.toIntOrNull()?.let { it !in 1..atem.detectedDownstreamKeyers } != false,
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        )
-                    } else {
-                        SettingsTextField(
-                            value = meText,
-                            onValueChange = { v ->
-                                meText = v
-                                v.toIntOrNull()?.let { update { copy(keyMixEffect = (it - 1).coerceAtLeast(0)) } }
-                            },
-                            label = if (atem.detectedMixEffects > 0) "M/E (1–${atem.detectedMixEffects})" else "M/E",
-                            isError = atem.detectedMixEffects > 0 &&
-                                meText.toIntOrNull()?.let { it !in 1..atem.detectedMixEffects } != false,
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        )
-                        SettingsTextField(
-                            value = keyText,
-                            onValueChange = { v ->
-                                keyText = v
-                                v.toIntOrNull()?.let { update { copy(keyIndex = (it - 1).coerceAtLeast(0)) } }
-                            },
-                            label = if (keyersOnMe > 0) "Key (1–$keyersOnMe)" else "Key",
-                            isError = keyersOnMe > 0 &&
-                                keyText.toIntOrNull()?.let { it !in 1..keyersOnMe } != false,
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        )
-                    }
-                    SettingsTextField(
-                        value = keyPreRollText,
-                        onValueChange = { v ->
-                            keyPreRollText = v
-                            v.toIntOrNull()?.let { update { copy(keyPreRollMs = it.coerceAtLeast(0)) } }
-                        },
-                        label = stringResource(Res.string.atem_key_preroll),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    )
-                    SettingsTextField(
-                        value = keyPostRollText,
-                        onValueChange = { v ->
-                            keyPostRollText = v
-                            v.toIntOrNull()?.let { update { copy(keyPostRollMs = it.coerceAtLeast(0)) } }
-                        },
-                        label = stringResource(Res.string.atem_key_postroll),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    )
-                }
-
-                Spacer(Modifier.height(4.dp))
-
-                // Detected M/E + keyer matrix, so the user knows the valid ranges
-                if (atem.detectedKeyersPerMe.isNotEmpty()) {
-                    val perMe = atem.detectedKeyersPerMe.mapIndexed { i, k -> "M/E ${i + 1}: ${k} keys" }
-                        .joinToString("   ") +
-                        (if (atem.detectedDownstreamKeyers > 0) "   DSK: ${atem.detectedDownstreamKeyers}" else "")
-                    Text(
-                        stringResource(Res.string.atem_detected_keyers, perMe),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                } else {
-                    Text(
-                        stringResource(Res.string.atem_detected_keyers_unknown),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
-                }
-
-                Spacer(Modifier.height(4.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                Spacer(Modifier.height(8.dp))
-
-                // Key type: drive the API / Go Live key as a downstream keyer instead of upstream
-                LabeledSwitch(
-                    checked = atem.useDownstreamKey,
-                    onCheckedChange = { update { copy(useDownstreamKey = it) } },
-                    label = stringResource(Res.string.atem_downstream_keyer),
-                    supporting = stringResource(Res.string.atem_downstream_keyer_hint),
-                    modifier = Modifier.fillMaxWidth(),
-                    spacing = 12.dp,
-                )
-
-                Spacer(Modifier.height(8.dp))
-
-                // Quick upload: one-press upload to the default slots, no dialog
-                LabeledSwitch(
-                    checked = atem.quickUpload,
-                    onCheckedChange = { update { copy(quickUpload = it) } },
-                    label = stringResource(Res.string.atem_quick_upload),
-                    supporting = stringResource(Res.string.atem_quick_upload_hint),
-                    modifier = Modifier.fillMaxWidth(),
-                    spacing = 12.dp,
-                )
-
-                Spacer(Modifier.height(8.dp))
-
-                // Go Live drives the key: the tab's Go Live runs the timed key sequence
-                LabeledSwitch(
-                    checked = atem.goLiveKey,
-                    onCheckedChange = { update { copy(goLiveKey = it) } },
-                    label = stringResource(Res.string.atem_golive_key),
-                    supporting = stringResource(Res.string.atem_golive_key_hint),
-                    modifier = Modifier.fillMaxWidth(),
-                    spacing = 12.dp,
-                )
-            }
-
-            // Kept as its own card so background uploads (Settings → Backgrounds) are never
-            // confused with the lower-third slot fields to its left — background uploads
-            // always target one of these two slots, never the lower-third still/clip slots.
-            SettingsSection(
-                title = stringResource(Res.string.atem_section_background_uploads),
-                modifier = Modifier.weight(1f)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    SettingsTextField(
-                        value = backgroundSlot1Text,
-                        onValueChange = { v ->
-                            backgroundSlot1Text = v
-                            v.toIntOrNull()?.let { update { copy(backgroundSlot1 = (it - 1).coerceAtLeast(0)) } }
-                        },
-                        label = run {
-                            val l = stringResource(Res.string.atem_background_slot_1)
-                            if (atem.detectedStillSlots > 0) "$l (1–${atem.detectedStillSlots})" else l
-                        },
-                        isError = atem.detectedStillSlots > 0 &&
-                            backgroundSlot1Text.toIntOrNull()?.let { it !in 1..atem.detectedStillSlots } != false,
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    )
-                    SettingsTextField(
-                        value = backgroundSlot2Text,
-                        onValueChange = { v ->
-                            backgroundSlot2Text = v
-                            v.toIntOrNull()?.let { update { copy(backgroundSlot2 = (it - 1).coerceAtLeast(0)) } }
-                        },
-                        label = run {
-                            val l = stringResource(Res.string.atem_background_slot_2)
-                            if (atem.detectedStillSlots > 0) "$l (1–${atem.detectedStillSlots})" else l
-                        },
-                        isError = atem.detectedStillSlots > 0 &&
-                            backgroundSlot2Text.toIntOrNull()?.let { it !in 1..atem.detectedStillSlots } != false,
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    )
-                }
-            }
+                AtemLowerThirdUploadsCard(atem, update, Modifier.weight(1f))
+                AtemBackgroundUploadsCard(atem, update, Modifier.weight(1f))
             }
         }
         SettingsScrollbar(scrollState)
     }
 }
 
+/** Where the switcher is, the size and rate lower thirds render at, and the connection test. */
+@Composable
+private fun AtemConnectionCard(atem: AtemSettings, update: (AtemSettings.() -> AtemSettings) -> Unit) {
+    var hostText by remember(atem.host) { mutableStateOf(atem.host) }
+    var portText by remember(atem.port) { mutableStateOf(atem.port.toString()) }
+    var clipFpsText by remember(atem.clipFps) { mutableStateOf(formatAtemFps(atem.clipFps)) }
+    SettingsSection(
+        title = stringResource(Res.string.atem_section_connection),
+        modifier = Modifier.fillMaxWidth().widthIn(max = 600.dp)
+    ) {
+        Text(
+            text = stringResource(Res.string.atem_description),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
+        Spacer(Modifier.height(12.dp))
+
+        SettingRow(label = stringResource(Res.string.atem_host)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.widthIn(max = 350.dp)
+            ) {
+                SettingsTextField(
+                    value = hostText,
+                    onValueChange = {
+                        hostText = it
+                        update { copy(host = it) }
+                    },
+                    placeholder = { Text(stringResource(Res.string.atem_host_hint)) },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f)
+                )
+                SettingsTextField(
+                    value = portText,
+                    onValueChange = { v ->
+                        portText = v
+                        v.toIntOrNull()?.let { update { copy(port = it) } }
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.width(68.dp)
+                )
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = stringResource(Res.string.atem_render_resolution),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
+        Spacer(Modifier.height(6.dp))
+        Row(
+            modifier = Modifier.widthIn(max = 350.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            AtemNumberField(atem.renderWidth, stringResource(Res.string.atem_render_width)) {
+                update { copy(renderWidth = it) }
+            }
+            AtemNumberField(atem.renderHeight, stringResource(Res.string.atem_render_height)) {
+                update { copy(renderHeight = it) }
+            }
+            SettingsTextField(
+                value = clipFpsText,
+                onValueChange = { v ->
+                    clipFpsText = v
+                    v.toDoubleOrNull()?.let { update { copy(clipFps = it) } }
+                },
+                label = stringResource(Res.string.atem_clip_fps_unit),
+                placeholder = { Text(stringResource(Res.string.atem_clip_fps_hint)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            )
+        }
+
+        Spacer(Modifier.height(8.dp))
+        Text(
+            stringResource(Res.string.atem_test_connection_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+        )
+        Spacer(Modifier.height(8.dp))
+
+        AtemTestConnectionRow(hostText, portText.toIntOrNull() ?: DEFAULT_ATEM_PORT) { state ->
+            clipFpsText = formatAtemFps(state.fps)
+            update {
+                copy(
+                    clipFps = state.fps,
+                    detectedStillSlots = state.stillSlots.size,
+                    detectedClipSlots = state.clipSlots.size,
+                    detectedClipMaxFrames = state.clipMaxFrames,
+                    detectedUnassignedFrames = state.unassignedFrames,
+                    detectedMixEffects = state.mixEffectCount,
+                    detectedKeyersPerMe = state.keyersPerMe,
+                    detectedDownstreamKeyers = state.downstreamKeyers
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Test Connection: queries the switcher at [host]:[port], says how that went, and hands what it
+ * found to [onDetected] to store.
+ */
+@Composable
+private fun AtemTestConnectionRow(host: String, port: Int, onDetected: (AtemState) -> Unit) {
+    var connectionStatus by remember { mutableStateOf<String?>(null) }
+    var connectionError by remember { mutableStateOf<String?>(null) }
+    var detectedVideoMode by remember { mutableStateOf<String?>(null) }
+    var isTesting by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        RaisedButton(
+            shape = AppShape(6.dp),
+            onClick = {
+                if (isTesting) return@RaisedButton
+                isTesting = true
+                connectionStatus = null
+                connectionError = null
+                detectedVideoMode = null
+                scope.launch {
+                    try {
+                        val state = withContext(Dispatchers.IO) { AtemClient(host, port).queryState() }
+                        detectedVideoMode = describeAtemState(state)
+                        onDetected(state)
+                        connectionStatus = "connected"
+                        connectionError = null
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: IOException) {
+                        // The ATEM link: AtemProtocolException is one.
+                        connectionStatus = "error"
+                        connectionError = e.message ?: "Unknown error"
+                    } catch (e: IllegalStateException) {
+                        connectionStatus = "error"
+                        connectionError = e.message ?: "Unknown error"
+                    } catch (e: IllegalArgumentException) {
+                        // A host or port the socket cannot be pointed at.
+                        connectionStatus = "error"
+                        connectionError = e.message ?: "Unknown error"
+                    } finally {
+                        isTesting = false
+                    }
+                }
+            },
+            enabled = host.isNotBlank() && !isTesting
+        ) {
+            if (isTesting) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(16.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+                Spacer(Modifier.width(8.dp))
+            }
+            Text(
+                if (isTesting) stringResource(Res.string.atem_status_connecting)
+                else stringResource(Res.string.atem_test_connection)
+            )
+        }
+
+        val (statusText, statusColor) = when {
+            isTesting ->
+                stringResource(Res.string.atem_status_connecting) to MaterialTheme.semantic.warning
+            connectionStatus == "connected" ->
+                stringResource(Res.string.atem_status_connected) to MaterialTheme.semantic.success
+            connectionStatus == "error" ->
+                stringResource(Res.string.atem_status_error, connectionError ?: "") to
+                    MaterialTheme.colorScheme.error
+            else ->
+                stringResource(Res.string.atem_status_disconnected) to
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+        }
+        if (connectionStatus != null || isTesting) {
+            Text(statusText, style = MaterialTheme.typography.bodySmall, color = statusColor)
+        }
+        val detectedMode = detectedVideoMode
+        if (detectedMode != null && connectionStatus == "connected") {
+            Text(
+                stringResource(Res.string.atem_detected_video_mode, detectedMode),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.semantic.success
+            )
+        }
+    }
+}
+
+/** Default slots for lower-third uploads, the key they go on air with, and how uploads behave. */
+@Composable
+private fun AtemLowerThirdUploadsCard(
+    atem: AtemSettings,
+    update: (AtemSettings.() -> AtemSettings) -> Unit,
+    modifier: Modifier,
+) {
+    SettingsSection(
+        title = stringResource(Res.string.atem_section_lower_third_uploads),
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            AtemSlotField(
+                stringResource(Res.string.atem_default_still_slot),
+                atem.defaultStillSlot, atem.detectedStillSlots,
+            ) {
+                update { copy(defaultStillSlot = it) }
+            }
+            AtemSlotField(
+                stringResource(Res.string.atem_default_clip_slot),
+                atem.defaultClipSlot, atem.detectedClipSlots,
+            ) {
+                update { copy(defaultClipSlot = it) }
+            }
+        }
+
+        Spacer(Modifier.height(4.dp))
+        AtemClipCapacity(atem)
+        Spacer(Modifier.height(8.dp))
+        AtemKeyFields(atem, update)
+        Spacer(Modifier.height(4.dp))
+        AtemDetectedKeyers(atem)
+
+        Spacer(Modifier.height(4.dp))
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        Spacer(Modifier.height(8.dp))
+
+        AtemUploadSwitches(atem, update)
+    }
+}
+
+/**
+ * How much clip the ATEM can hold, persisted from the last successful Test Connection -- or that it
+ * is not known yet.
+ */
+@Composable
+private fun AtemClipCapacity(atem: AtemSettings) {
+    if (atem.detectedClipMaxFrames.isNotEmpty() && atem.clipFps > 0) {
+        val banks = atem.detectedClipMaxFrames
+        val distinct = banks.distinct()
+        val fpsLabel = formatAtemFps(atem.clipFps)
+        val base = if (distinct.size == 1) {
+            val secs = String.format(java.util.Locale.US, "%.1f", distinct[0] / atem.clipFps)
+            stringResource(Res.string.atem_capacity_equal, banks.size, distinct[0], secs, fpsLabel)
+        } else {
+            stringResource(
+                Res.string.atem_capacity_mixed,
+                banks.size,
+                distinct.joinToString(" / "),
+                fpsLabel
+            )
+        }
+        val suffix = if (atem.detectedUnassignedFrames > 0) {
+            stringResource(Res.string.atem_capacity_unassigned, atem.detectedUnassignedFrames)
+        } else ""
+        Text(
+            base + suffix,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
+    } else {
+        Text(
+            stringResource(Res.string.atem_capacity_unknown),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+        )
+    }
+}
+
+/**
+ * Key sequencing defaults for the Companion / Go-Live trigger: an upstream keyer (M/E + keyer) or a
+ * downstream keyer (DSK), plus the margins around the animation.
+ */
+@Composable
+private fun AtemKeyFields(atem: AtemSettings, update: (AtemSettings.() -> AtemSettings) -> Unit) {
+    val keyersOnMe = atem.detectedKeyersPerMe.getOrNull(atem.keyMixEffect) ?: 0
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        if (atem.useDownstreamKey) {
+            AtemSlotField("DSK", atem.dskIndex, atem.detectedDownstreamKeyers) { update { copy(dskIndex = it) } }
+        } else {
+            AtemSlotField("M/E", atem.keyMixEffect, atem.detectedMixEffects) { update { copy(keyMixEffect = it) } }
+            AtemSlotField("Key", atem.keyIndex, keyersOnMe) { update { copy(keyIndex = it) } }
+        }
+        AtemNumberField(atem.keyPreRollMs, stringResource(Res.string.atem_key_preroll)) {
+            update { copy(keyPreRollMs = it.coerceAtLeast(0)) }
+        }
+        AtemNumberField(atem.keyPostRollMs, stringResource(Res.string.atem_key_postroll)) {
+            update { copy(keyPostRollMs = it.coerceAtLeast(0)) }
+        }
+    }
+}
+
+/** The detected M/E and keyer matrix, so the user knows the valid ranges. */
+@Composable
+private fun AtemDetectedKeyers(atem: AtemSettings) {
+    if (atem.detectedKeyersPerMe.isNotEmpty()) {
+        val perMe = atem.detectedKeyersPerMe.mapIndexed { i, k -> "M/E ${i + 1}: ${k} keys" }
+            .joinToString("   ") +
+            (if (atem.detectedDownstreamKeyers > 0) "   DSK: ${atem.detectedDownstreamKeyers}" else "")
+        Text(
+            stringResource(Res.string.atem_detected_keyers, perMe),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
+    } else {
+        Text(
+            stringResource(Res.string.atem_detected_keyers_unknown),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+        )
+    }
+}
+
+/** Downstream keying, one-press quick upload, and Go Live driving the key. */
+@Composable
+private fun AtemUploadSwitches(atem: AtemSettings, update: (AtemSettings.() -> AtemSettings) -> Unit) {
+    // Key type: drive the API / Go Live key as a downstream keyer instead of upstream
+    LabeledSwitch(
+        checked = atem.useDownstreamKey,
+        onCheckedChange = { update { copy(useDownstreamKey = it) } },
+        label = stringResource(Res.string.atem_downstream_keyer),
+        supporting = stringResource(Res.string.atem_downstream_keyer_hint),
+        modifier = Modifier.fillMaxWidth(),
+        spacing = 12.dp,
+    )
+
+    Spacer(Modifier.height(8.dp))
+
+    // Quick upload: one-press upload to the default slots, no dialog
+    LabeledSwitch(
+        checked = atem.quickUpload,
+        onCheckedChange = { update { copy(quickUpload = it) } },
+        label = stringResource(Res.string.atem_quick_upload),
+        supporting = stringResource(Res.string.atem_quick_upload_hint),
+        modifier = Modifier.fillMaxWidth(),
+        spacing = 12.dp,
+    )
+
+    Spacer(Modifier.height(8.dp))
+
+    // Go Live drives the key: the tab's Go Live runs the timed key sequence
+    LabeledSwitch(
+        checked = atem.goLiveKey,
+        onCheckedChange = { update { copy(goLiveKey = it) } },
+        label = stringResource(Res.string.atem_golive_key),
+        supporting = stringResource(Res.string.atem_golive_key_hint),
+        modifier = Modifier.fillMaxWidth(),
+        spacing = 12.dp,
+    )
+}
+
+/**
+ * The two still slots background uploads (Settings → Backgrounds) go to. Its own card so they are
+ * never confused with the lower-third slot fields beside it.
+ */
+@Composable
+private fun AtemBackgroundUploadsCard(
+    atem: AtemSettings,
+    update: (AtemSettings.() -> AtemSettings) -> Unit,
+    modifier: Modifier,
+) {
+    SettingsSection(
+        title = stringResource(Res.string.atem_section_background_uploads),
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            AtemSlotField(
+                stringResource(Res.string.atem_background_slot_1),
+                atem.backgroundSlot1, atem.detectedStillSlots,
+            ) {
+                update { copy(backgroundSlot1 = it) }
+            }
+            AtemSlotField(
+                stringResource(Res.string.atem_background_slot_2),
+                atem.backgroundSlot2, atem.detectedStillSlots,
+            ) {
+                update { copy(backgroundSlot2 = it) }
+            }
+        }
+    }
+}

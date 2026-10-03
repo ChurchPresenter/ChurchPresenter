@@ -42,6 +42,7 @@ internal fun InScriptureBookDropdown(
     availableBooks: List<Int>,
     getBookName: ((bookId: Int) -> String?)?,
     onSelect: (Int?) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val options = listOf("" to allBooksLabel) +
         availableBooks.map { it.toString() to (getBookName?.invoke(it) ?: "Book $it") }
@@ -50,6 +51,7 @@ internal fun InScriptureBookDropdown(
         value = selectedBookId?.toString() ?: "",
         options = options,
         onValueChange = { onSelect(it.toIntOrNull()) },
+        modifier = modifier,
     )
 }
 
@@ -59,6 +61,7 @@ internal fun InScriptureChapterDropdown(
     selectedChapter: Int?,
     availableChapters: List<Int>,
     onSelect: (Int?) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val options = listOf("" to allChaptersLabel) +
         availableChapters.map { it.toString() to it.toString() }
@@ -67,6 +70,7 @@ internal fun InScriptureChapterDropdown(
         value = selectedChapter?.toString() ?: "",
         options = options,
         onValueChange = { onSelect(it.toIntOrNull()) },
+        modifier = modifier,
     )
 }
 
@@ -76,6 +80,7 @@ internal fun InScriptureVerseDropdown(
     selectedVerse: Int?,
     availableVerses: List<Int>,
     onSelect: (Int?) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val options = listOf("" to allVersesLabel) +
         availableVerses.map { it.toString() to it.toString() }
@@ -84,6 +89,7 @@ internal fun InScriptureVerseDropdown(
         value = selectedVerse?.toString() ?: "",
         options = options,
         onValueChange = { onSelect(it.toIntOrNull()) },
+        modifier = modifier,
     )
 }
 

@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.settings.AnnouncementsSettings
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -63,30 +64,7 @@ fun AnnouncementsPresenter(
     val bgColor    = if (!showBackground) Color.Transparent
                      else if (settings.backgroundColor == Constants.COLOR_VALUE_TRANSPARENT) Color.Transparent
                      else parseHexColor(settings.backgroundColor)
-    val fontFamily = systemFontFamilyOrDefault(settings.fontType)
-
-    val shadowColorBase = parseHexColor(settings.shadowColor)
-    val shadowSizeMul = settings.shadowSize / 100f
-    val shadowAlpha = (settings.shadowOpacity / 100f).coerceIn(0f, 1f)
-    val announcementShadow = Shadow(
-        color = shadowColorBase.copy(alpha = shadowAlpha),
-        offset = Offset(6f * shadowSizeMul, 6f * shadowSizeMul),
-        blurRadius = 12f * shadowSizeMul
-    )
-
-    val textStyle = TextStyle(
-        fontFamily     = fontFamily,
-        fontWeight     = if (settings.bold) FontWeight.Bold else FontWeight.Normal,
-        fontStyle      = if (settings.italic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = if (settings.underline) TextDecoration.Underline else TextDecoration.None,
-        shadow         = if (settings.shadow) announcementShadow else null,
-        textAlign = when (settings.horizontalAlignment) {
-            Constants.LEFT -> TextAlign.Left
-            Constants.RIGHT -> TextAlign.Right
-            else -> TextAlign.Center
-        },
-        color     = textColor
-    )
+    val textStyle = announcementTextStyle(settings, textColor)
 
     val isDirectional = settings.animationType in listOf(
         Constants.ANIMATION_SLIDE_FROM_LEFT,
@@ -101,25 +79,9 @@ fun AnnouncementsPresenter(
     val movesPositive = settings.animationType == Constants.ANIMATION_SLIDE_FROM_LEFT ||
                         settings.animationType == Constants.ANIMATION_SLIDE_FROM_TOP
 
-    // For horizontal slides: use position's vertical component (top/center/bottom)
-    // For vertical slides: use position's horizontal component (left/center/right)
-    val slideAlignment: Alignment = if (isHorizontal) {
-        when {
-            settings.position.startsWith("Top")    -> Alignment.TopCenter
-            settings.position.startsWith("Bottom") -> Alignment.BottomCenter
-            else                                   -> Alignment.Center
-        }
-    } else {
-        when {
-            settings.position.endsWith("Left")  -> Alignment.CenterStart
-            settings.position.endsWith("Right") -> Alignment.CenterEnd
-            else                                -> Alignment.Center
-        }
-    }
+    val slideAlignment = slideAlignmentFor(settings.position, isHorizontal)
 
     val scrollDurationMs = settings.animationDuration.coerceAtLeast(500)
-
-    val textMeasurer = rememberTextMeasurer()
 
     BoxWithConstraints(
         modifier = modifier
@@ -134,29 +96,9 @@ fun AnnouncementsPresenter(
         val availableWidth = (maxWidth - TEXT_PADDING_HORIZONTAL * 2).value.toInt()
         val availableHeight = (maxHeight - TEXT_PADDING_VERTICAL * 2).value.toInt()
 
-        val effectiveFontSize = if (!isDirectional) {
-            // Static/fade: fit to both width and height
-            remember(
-                text,
-                settings.fontSize,
-                availableWidth,
-                availableHeight,
-                textStyle.fontFamily,
-                textStyle.fontWeight
-            ) {
-                calculateAutoFitFontSize(textMeasurer, text, textStyle, availableWidth, availableHeight)
-                    .coerceAtMost(settings.fontSize)
-            }
-        } else if (!isHorizontal) {
-            // Vertical slide: fit to width only (scrolls vertically)
-            remember(text, settings.fontSize, availableWidth, textStyle.fontFamily, textStyle.fontWeight) {
-                calculateAutoFitFontSize(textMeasurer, text, textStyle, availableWidth, Int.MAX_VALUE)
-                    .coerceAtMost(settings.fontSize)
-            }
-        } else {
-            // Horizontal slide: no auto-fit (scrolls horizontally)
-            settings.fontSize
-        }
+        val effectiveFontSize = rememberAnnouncementFontSize(
+            text, textStyle, settings.fontSize, availableWidth, availableHeight, isDirectional, isHorizontal,
+        )
 
         val painter = rememberTextBackdropPainter(settings.backdrop)
         val textBlock: @Composable (Boolean) -> Unit = { wrap ->
@@ -213,38 +155,7 @@ fun AnnouncementsPresenter(
 
         if (isDirectional) {
             key(scrollDurationMs, movesPositive, settings.animationType, loopCount) {
-                if (loopCount > 0) {
-                    val startVal = if (movesPositive) -1f else 1f
-                    val endVal   = if (movesPositive) 1f else -1f
-                    val animatable = remember { Animatable(startVal) }
-
-                    LaunchedEffect(Unit) {
-                        animatable.animateTo(
-                            targetValue = endVal,
-                            animationSpec = repeatable(
-                                iterations = loopCount,
-                                animation = tween(durationMillis = scrollDurationMs, easing = LinearEasing),
-                                repeatMode = RepeatMode.Restart
-                            )
-                        )
-                        onFinished()
-                    }
-
-                    slideContent(animatable.value)
-                } else {
-                    val infiniteTransition = rememberInfiniteTransition(label = "presenterScroll")
-                    val offsetFraction by infiniteTransition.animateFloat(
-                        initialValue = if (movesPositive) -1f else 1f,
-                        targetValue  = if (movesPositive) 1f else -1f,
-                        animationSpec = infiniteRepeatable(
-                            animation  = tween(durationMillis = scrollDurationMs, easing = LinearEasing),
-                            repeatMode = RepeatMode.Restart
-                        ),
-                        label = "presenterOffset"
-                    )
-
-                    slideContent(offsetFraction)
-                }
+                SlideAnimation(scrollDurationMs, movesPositive, loopCount, onFinished, slideContent)
             }
         } else {
             // Static or fade — animation driven centrally via transitionAlpha
@@ -268,4 +179,142 @@ private fun positionToAlignment(position: String): Alignment = when (position) {
     Constants.BOTTOM_CENTER -> Alignment.BottomCenter
     Constants.BOTTOM_RIGHT  -> Alignment.BottomEnd
     else                    -> Alignment.Center
+}
+
+/** The announcement's type: its font, weight, style, shadow and alignment, in [textColor]. */
+private fun announcementTextStyle(settings: AnnouncementsSettings, textColor: Color): TextStyle {
+val fontFamily = systemFontFamilyOrDefault(settings.fontType)
+
+val shadowColorBase = parseHexColor(settings.shadowColor)
+val shadowSizeMul = settings.shadowSize / 100f
+val shadowAlpha = (settings.shadowOpacity / 100f).coerceIn(0f, 1f)
+val announcementShadow = Shadow(
+    color = shadowColorBase.copy(alpha = shadowAlpha),
+    offset = Offset(6f * shadowSizeMul, 6f * shadowSizeMul),
+    blurRadius = 12f * shadowSizeMul
+)
+
+return TextStyle(
+    fontFamily     = fontFamily,
+    fontWeight     = if (settings.bold) FontWeight.Bold else FontWeight.Normal,
+    fontStyle      = if (settings.italic) FontStyle.Italic else FontStyle.Normal,
+    textDecoration = if (settings.underline) TextDecoration.Underline else TextDecoration.None,
+    shadow         = if (settings.shadow) announcementShadow else null,
+    textAlign = when (settings.horizontalAlignment) {
+        Constants.LEFT -> TextAlign.Left
+        Constants.RIGHT -> TextAlign.Right
+        else -> TextAlign.Center
+    },
+    color     = textColor
+)
+}
+
+/**
+ * Where a sliding announcement rides: a horizontal slide keeps [position]'s vertical part
+ * (top, centre or bottom), and a vertical one its horizontal part.
+ */
+private fun slideAlignmentFor(position: String, isHorizontal: Boolean): Alignment {
+// For horizontal slides: use position's vertical component (top/center/bottom)
+// For vertical slides: use position's horizontal component (left/center/right)
+return if (isHorizontal) {
+    when {
+        position.startsWith("Top")    -> Alignment.TopCenter
+        position.startsWith("Bottom") -> Alignment.BottomCenter
+        else                                   -> Alignment.Center
+    }
+} else {
+    when {
+        position.endsWith("Left")  -> Alignment.CenterStart
+        position.endsWith("Right") -> Alignment.CenterEnd
+        else                                -> Alignment.Center
+    }
+}
+}
+
+/**
+ * Drives a slide from one edge to the other: [loopCount] times and then [onFinished], or for ever
+ * when it is 0. [content] draws the text at a fraction of the container from -1 to 1.
+ */
+@Composable
+private fun SlideAnimation(
+    scrollDurationMs: Int,
+    movesPositive: Boolean,
+    loopCount: Int,
+    onFinished: () -> Unit,
+    content: @Composable (Float) -> Unit,
+) {
+    if (loopCount > 0) {
+        val startVal = if (movesPositive) -1f else 1f
+        val endVal   = if (movesPositive) 1f else -1f
+        val animatable = remember { Animatable(startVal) }
+
+        LaunchedEffect(Unit) {
+            animatable.animateTo(
+                targetValue = endVal,
+                animationSpec = repeatable(
+                    iterations = loopCount,
+                    animation = tween(durationMillis = scrollDurationMs, easing = LinearEasing),
+                    repeatMode = RepeatMode.Restart
+                )
+            )
+            onFinished()
+        }
+
+        content(animatable.value)
+    } else {
+        val infiniteTransition = rememberInfiniteTransition(label = "presenterScroll")
+        val offsetFraction by infiniteTransition.animateFloat(
+            initialValue = if (movesPositive) -1f else 1f,
+            targetValue  = if (movesPositive) 1f else -1f,
+            animationSpec = infiniteRepeatable(
+                animation  = tween(durationMillis = scrollDurationMs, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "presenterOffset"
+        )
+
+        content(offsetFraction)
+    }
+
+}
+
+/**
+ * The size the announcement is drawn at, never above [fontSize]: fitted to the whole space when it
+ * stands still or fades, to the width alone when it slides vertically, and unfitted when it slides
+ * horizontally. The space is in dp -- see the caller.
+ */
+@Composable
+private fun rememberAnnouncementFontSize(
+    text: String,
+    textStyle: TextStyle,
+    fontSize: Int,
+    availableWidth: Int,
+    availableHeight: Int,
+    isDirectional: Boolean,
+    isHorizontal: Boolean,
+): Int {
+    val rememberedMeasurer = rememberTextMeasurer()
+    return if (!isDirectional) {
+        // Static/fade: fit to both width and height
+        remember(
+            text,
+            fontSize,
+            availableWidth,
+            availableHeight,
+            textStyle.fontFamily,
+            textStyle.fontWeight
+        ) {
+            calculateAutoFitFontSize(rememberedMeasurer, text, textStyle, availableWidth, availableHeight)
+                .coerceAtMost(fontSize)
+        }
+    } else if (!isHorizontal) {
+        // Vertical slide: fit to width only (scrolls vertically)
+        remember(text, fontSize, availableWidth, textStyle.fontFamily, textStyle.fontWeight) {
+            calculateAutoFitFontSize(rememberedMeasurer, text, textStyle, availableWidth, Int.MAX_VALUE)
+                .coerceAtMost(fontSize)
+        }
+    } else {
+        // Horizontal slide: no auto-fit (scrolls horizontally)
+        fontSize
+    }
 }

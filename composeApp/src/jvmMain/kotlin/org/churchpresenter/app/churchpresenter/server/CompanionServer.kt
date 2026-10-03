@@ -51,16 +51,13 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.app.churchpresenter.data.Songs
-import org.churchpresenter.dictionary.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceFrame
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.qa.QAManager
-import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.toDto
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.calendar.sync.Projection
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.diagnostics.CrashReporter
@@ -208,18 +205,7 @@ class CompanionServer {
      * Broadcasts the desktop media player's playback state to companions (mobile Media tab).
      * Position ticks continuously, so callers poll this on a fixed cadence.
      */
-    fun broadcastMediaState(
-        isLive: Boolean,
-        isLoaded: Boolean,
-        isPlaying: Boolean,
-        title: String,
-        positionMs: Long,
-        durationMs: Long,
-        volume: Float,
-        muted: Boolean,
-        mediaType: String,
-        source: String,
-    ) {
+    fun broadcastMediaState(state: MediaPlaybackState) = with(state) {
         broadcast(WebSocketMessage(
             type = Constants.WS_EVENT_MEDIA_STATE_CHANGED,
             payload = """{"isLive":$isLive,"isLoaded":$isLoaded,"isPlaying":$isPlaying,""" +
@@ -319,7 +305,7 @@ class CompanionServer {
     // Current data — thread-safe StateFlows
     // All songs flat list
     // Current catalog — rebuilt whenever songs are updated
-    private val _catalog = MutableStateFlow(SongCatalogResponse(emptyList(), 0, 0))
+    internal val _catalog = MutableStateFlow(SongCatalogResponse(emptyList(), 0, 0))
     /** Raw song list kept in sync with _catalog for per-number detail lookups */
     @Volatile internal var _songs: List<SongItem> = emptyList()
 
@@ -332,7 +318,7 @@ class CompanionServer {
     /** The library as songbook records, with each song's usual length, for a phone planning a service. */
     fun songCatalog(): SongCatalogRecordsResponse =
         SongCatalogRecordsResponse(Projection.catalog(_songs, typicalSeconds).values.toList())
-    private val _bibleCatalog = MutableStateFlow<BibleCatalogResponse?>(null)
+    internal val _bibleCatalog = MutableStateFlow<BibleCatalogResponse?>(null)
     private val _bible = MutableStateFlow<Bible?>(null)
     /** Absolute path to the primary bible's .spb file — serves GET /api/bible/file for InstanceLink followers. */
     @Volatile internal var _bibleFilePath: String = ""
@@ -343,14 +329,14 @@ class CompanionServer {
     /** Current background settings — serves GET /api/backgrounds for a follower that opted in to
      *  mirroring backgrounds. The image/video fields are still local file paths on this machine;
      *  GET /api/backgrounds/asset/{slot} resolves the current path for a given slot on demand. */
-    private val _backgroundSettings = MutableStateFlow(BackgroundSettings())
-    private val _schedule = MutableStateFlow<List<ScheduleItemDto>>(emptyList())
+    internal val _backgroundSettings = MutableStateFlow(BackgroundSettings())
+    internal val _schedule = MutableStateFlow<List<ScheduleItemDto>>(emptyList())
     /** Snapshot of whatever is currently live — see [LiveStateDto]. */
-    private val _liveState = MutableStateFlow<LiveStateDto?>(null)
+    internal val _liveState = MutableStateFlow<LiveStateDto?>(null)
     internal val liveState: StateFlow<LiveStateDto?> = _liveState.asStateFlow()
     /** Device IDs of currently-connected WS clients that identified as an Instance Link follower
      *  (as opposed to a regular mobile/browser companion client) — see [Constants.HEADER_CLIENT_ROLE]. */
-    private val _connectedInstanceLinkFollowers = MutableStateFlow<Set<String>>(emptySet())
+    internal val _connectedInstanceLinkFollowers = MutableStateFlow<Set<String>>(emptySet())
     val connectedInstanceLinkFollowers: StateFlow<Set<String>> = _connectedInstanceLinkFollowers.asStateFlow()
 
     /**
@@ -370,7 +356,7 @@ class CompanionServer {
     internal fun isClientBlocked(clientId: String): Boolean =
         clientId.isNotBlank() && clientId in blockedClientIds
     /** schedule item UUID → absolute local media file path — populated by updateSchedule, serves /api/media/stream */
-    private val _scheduleItemToMediaPath = ConcurrentHashMap<String, String>()
+    internal val _scheduleItemToMediaPath = ConcurrentHashMap<String, String>()
 
 
 
@@ -380,13 +366,13 @@ class CompanionServer {
     internal val pictures = PictureLibrary()
 
     // API key config (updated from settings without restart)
-    private val _apiKeyEnabled = MutableStateFlow(false)
-    private val _apiKey = MutableStateFlow("")
+    internal val _apiKeyEnabled = MutableStateFlow(false)
+    internal val _apiKey = MutableStateFlow("")
 
     // File upload permission (updated from settings without restart)
-    private val _fileUploadEnabled = MutableStateFlow(true)
+    internal val _fileUploadEnabled = MutableStateFlow(true)
     // Max media-upload size in MB (updated from settings without restart)
-    private val _maxMediaUploadMb = MutableStateFlow(Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB)
+    internal val _maxMediaUploadMb = MutableStateFlow(Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB)
 
     // Outgoing WebSocket broadcast channel. Buffer sized generously: it is shared by every
     // connected client's collector, and DROP_OLDEST means an overflow silently loses a message
@@ -920,32 +906,9 @@ class CompanionServer {
      * Broadcasts a snapshot of whatever is currently live — fills the gap for content types with
      * no dedicated "now live" event (bible, songs, pictures, media, lower thirds, announcements,
      * websites, scenes, Q&A, dictionary). Presentations rely on the existing slide-changed events
-     * instead — [mode] == "PRESENTATION" here is informational only.
+     * instead — [LiveContent.mode] == "PRESENTATION" here is informational only.
      */
-    fun updateLiveState(
-        mode: String,
-        bibleVerse: SelectedVerse?,
-        lyricSection: LyricSection?,
-        pictureImagePath: String?,
-        mediaUrl: String?,
-        mediaType: String?,
-        announcementText: String?,
-        websiteUrl: String?,
-        websiteTitle: String?,
-        sceneId: String?,
-        sceneName: String?,
-        questionId: String?,
-        questionText: String?,
-        dictionaryWord: String?,
-        dictionaryEntry: StrongsEntry? = null,
-        lowerThirdName: String? = null,
-        // Canonical verse code (book, chapter, verse) computed from this instance's OWN loaded bible —
-        // see LiveStateDto.verseCodeBook and BibleSyncMode.REFERENCE_ONLY. Null when not applicable.
-        verseCode: Triple<Int, Int, Int>? = null,
-        // Current line/section position within [lyricSection] — see LiveStateDto.songSectionIndex.
-        songSectionIndex: Int? = null,
-        songLineIndex: Int? = null
-    ) {
+    fun updateLiveState(content: LiveContent) = with(content) {
         val (pictureFolderId, pictureIndex) = pictures.locate(pictureImagePath)
         val mediaId = mediaUrl?.let { url -> _scheduleItemToMediaPath.entries.find { it.value == url }?.key }
         val dto = LiveStateDto(
@@ -983,7 +946,7 @@ class CompanionServer {
         // Skip byte-identical re-broadcasts (content setters fire on every call, even when
         // nothing changed) — same early-return pattern the other update* functions use. Protects
         // the shared broadcast buffer from floods that could evict messages for slow clients.
-        if (_liveState.value == dto) return
+        if (_liveState.value == dto) return@with
         _liveState.value = dto
         broadcast(WebSocketMessage(
             type = Constants.WS_EVENT_LIVE_STATE_CHANGED,
@@ -1085,32 +1048,16 @@ class CompanionServer {
                 certificateRoutes()
 
                 // ── API endpoints (require API key when enabled) ────────────────────────────
-                infoAndSongRoutes(
-                    this@CompanionServer, _bibleCatalog, _catalog, _fileUploadEnabled,
-                    _maxMediaUploadMb, json, scope
-                )
+                infoAndSongRoutes(this@CompanionServer, json, scope)
                 scheduleRoutes(this@CompanionServer, _schedule, json, scope)
                 bibleAndDictionaryRoutes(
                     this@CompanionServer, _bible, _bibleCatalog, json, scope
                 )
-                presentationRoutes(
-                    this@CompanionServer, _fileUploadEnabled, _maxMediaUploadMb, presentations._presentationCatalog,
-                    presentations._presentationCatalogs, presentations._scheduleItemToPresentationId,
-                    presentations._slideBytes, json, scope
-                )
+                presentationRoutes(this@CompanionServer, json, scope)
                 presentationRemoteRoutes(this@CompanionServer, presentations._presentationNotes, scope)
                 calendarSyncRoutes(this@CompanionServer, json)
-                mediaAndAssetRoutes(
-                    this@CompanionServer, PictureLibrary.DEVICE_UPLOADS_FOLDER_ID, _backgroundSettings,
-                    _fileUploadEnabled, pictures.catalog, pictures.catalogs, pictures.files,
-                    _scheduleItemToMediaPath, json, scope
-                )
-                webSocketRoute(
-                    this@CompanionServer, _apiKey, _apiKeyEnabled, _bibleCatalog, _catalog,
-                    _connectedInstanceLinkFollowers, _liveState, pictures.catalog, pictures.catalogs,
-                    presentations._presentationCatalog, presentations._presentationCatalogs, _schedule,
-                    presentations._scheduleItemToPresentationId, json, scope
-                )
+                mediaAndAssetRoutes(this@CompanionServer, json, scope)
+                webSocketRoute(this@CompanionServer, json, scope)
                 lowerThirdAndAtemRoutes(this@CompanionServer, json, scope)
                 browserSourceRoutes(
                     this@CompanionServer, browserSource._browserSourceFrameFlows,

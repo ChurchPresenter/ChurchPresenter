@@ -42,22 +42,6 @@ private const val ARGB_BYTES_PER_PIXEL = 4
  * only ever seed one-time defaults, live changes always flow in as explicit parameters).
  */
 class CompanionSatelliteViewModel {
-    /** The wire-registration-affecting settings a slot was last started with — used to detect when
-     * settings changed under a still-connected slot (e.g. columns edited from 8 to 2) so it can be
-     * torn down and re-registered. Companion has no "change my grid shape" message; only a fresh
-     * ADD-DEVICE can do that, so leaving a live slot alone after such an edit would silently keep it
-     * running with its old shape forever. */
-    private data class SlotRegistrationParams(
-        val host: String,
-        val port: Int,
-        val deviceId: String,
-        val rows: Int,
-        val columns: Int,
-        val bitmapSize: Int,
-        val productName: String,
-        val reconnectDelayMs: Int
-    )
-
     private val clients = mutableMapOf<CompanionSurfaceSlot, CompanionSatelliteClient>()
     private val activeParams = mutableMapOf<CompanionSurfaceSlot, SlotRegistrationParams>()
 
@@ -157,17 +141,6 @@ class CompanionSatelliteViewModel {
         _buttons.clear()
     }
 
-    private fun paramsFor(slot: CompanionSurfaceSlot, settings: CompanionSatelliteSettings) = SlotRegistrationParams(
-        host = settings.host,
-        port = settings.port,
-        deviceId = deviceIdFor(settings, slot.placement),
-        rows = settings.rowsFor(slot.placement),
-        columns = settings.columnsFor(slot.placement),
-        bitmapSize = settings.bitmapSizeFor(slot.placement),
-        productName = settings.productName,
-        reconnectDelayMs = settings.reconnectDelayMs
-    )
-
     private fun startSlot(slot: CompanionSurfaceSlot, params: SlotRegistrationParams) {
         activeParams[slot] = params
         // startRow/startColumn default to 0 (top-left) — ChurchPresenter no longer offers UI to
@@ -251,26 +224,56 @@ class CompanionSatelliteViewModel {
             }
         )
     }
-
-    /** Companion streams raw RGB pixels (3 bytes/px, [size]x[size]) for a plain grid device. */
-    private fun decodeBitmap(rgb: ByteArray, size: Int): ImageBitmap? = runCatching {
-        val pixelCount = rgb.size / 3
-        // N32 install expects 4 bytes/px in BGRA byte order (little-endian ARGB) — see the
-        // identical approach in presenter/LowerThirdPresenter.kt's intArrayToImageBitmap.
-        val argb = ByteArray(pixelCount * 4)
-        var src = 0
-        var dst = 0
-        while (src + 2 < rgb.size) {
-            argb[dst] = rgb[src + 2]
-            argb[dst + 1] = rgb[src + 1]
-            argb[dst + 2] = rgb[src]
-            argb[dst + ALPHA_BYTE_OFFSET] = 0xFF.toByte()
-            src += RGB_BYTES_PER_PIXEL
-            dst += ARGB_BYTES_PER_PIXEL
-        }
-        val bitmap = Bitmap()
-        bitmap.allocN32Pixels(size, size)
-        bitmap.installPixels(argb)
-        SkiaImage.makeFromBitmap(bitmap).toComposeImageBitmap()
-    }.getOrNull()
 }
+
+/** The wire-registration-affecting settings a slot was last started with — used to detect when
+ * settings changed under a still-connected slot (e.g. columns edited from 8 to 2) so it can be
+ * torn down and re-registered. Companion has no "change my grid shape" message; only a fresh
+ * ADD-DEVICE can do that, so leaving a live slot alone after such an edit would silently keep it
+ * running with its old shape forever. */
+private data class SlotRegistrationParams(
+    val host: String,
+    val port: Int,
+    val deviceId: String,
+    val rows: Int,
+    val columns: Int,
+    val bitmapSize: Int,
+    val productName: String,
+    val reconnectDelayMs: Int
+)
+
+private fun CompanionSatelliteViewModel.paramsFor(
+    slot: CompanionSurfaceSlot,
+    settings: CompanionSatelliteSettings,
+) = SlotRegistrationParams(
+    host = settings.host,
+    port = settings.port,
+    deviceId = deviceIdFor(settings, slot.placement),
+    rows = settings.rowsFor(slot.placement),
+    columns = settings.columnsFor(slot.placement),
+    bitmapSize = settings.bitmapSizeFor(slot.placement),
+    productName = settings.productName,
+    reconnectDelayMs = settings.reconnectDelayMs
+)
+
+/** Companion streams raw RGB pixels (3 bytes/px, [size]x[size]) for a plain grid device. */
+private fun decodeBitmap(rgb: ByteArray, size: Int): ImageBitmap? = runCatching {
+    val pixelCount = rgb.size / 3
+    // N32 install expects 4 bytes/px in BGRA byte order (little-endian ARGB) — see the
+    // identical approach in presenter/LowerThirdPresenter.kt's intArrayToImageBitmap.
+    val argb = ByteArray(pixelCount * 4)
+    var src = 0
+    var dst = 0
+    while (src + 2 < rgb.size) {
+        argb[dst] = rgb[src + 2]
+        argb[dst + 1] = rgb[src + 1]
+        argb[dst + 2] = rgb[src]
+        argb[dst + ALPHA_BYTE_OFFSET] = 0xFF.toByte()
+        src += RGB_BYTES_PER_PIXEL
+        dst += ARGB_BYTES_PER_PIXEL
+    }
+    val bitmap = Bitmap()
+    bitmap.allocN32Pixels(size, size)
+    bitmap.installPixels(argb)
+    SkiaImage.makeFromBitmap(bitmap).toComposeImageBitmap()
+}.getOrNull()

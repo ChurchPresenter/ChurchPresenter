@@ -124,7 +124,7 @@ object SharedBrowserFrameCache {
                 // Launching the process, its temp profile and the DevTools socket fail with I/O
                 // errors; a malformed reply or a closed socket with the two runtime ones.
                 try {
-                    startBrowser(entry, url, renderWidth, renderHeight, customCss, fps, forceTransparent)
+                    startBrowser(entry, BrowserPage(url, renderWidth, renderHeight, customCss, fps, forceTransparent))
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: IOException) {
@@ -368,15 +368,17 @@ object SharedBrowserFrameCache {
         return cdp
     }
 
-    private suspend fun startBrowser(
-        entry: CacheEntry,
-        url: String,
-        renderWidth: Int,
-        renderHeight: Int,
-        customCss: String,
-        fps: Int,
-        forceTransparent: Boolean
-    ) {
+    /** The page one browser source shows, and how it is rendered and captured. */
+    private data class BrowserPage(
+        val url: String,
+        val renderWidth: Int,
+        val renderHeight: Int,
+        val customCss: String,
+        val fps: Int,
+        val forceTransparent: Boolean,
+    )
+
+    private suspend fun startBrowser(entry: CacheEntry, page: BrowserPage) {
         // Kill any zombie browsers from previous runs (once per session)
         withContext(Dispatchers.IO) { killZombieBrowsers() }
 
@@ -408,7 +410,9 @@ object SharedBrowserFrameCache {
             "Launching headless browser: $browserPath on port $port (userData=$userDataDir)"
         )
 
-        val command = buildBrowserLaunchCommand(browserPath, port, userDataDir.absolutePath, renderWidth, renderHeight)
+        val command = buildBrowserLaunchCommand(
+            browserPath, port, userDataDir.absolutePath, page.renderWidth, page.renderHeight,
+        )
 
         val process = withContext(Dispatchers.IO) {
             ProcessBuilder(command).redirectErrorStream(true).start()
@@ -434,19 +438,17 @@ object SharedBrowserFrameCache {
         cdp.onUrlChanged = { url -> entry.currentUrl.value = url }
         Log.info("BrowserSource", "WebSocket connected")
 
-        configurePage(cdp, url, renderWidth, renderHeight, customCss, forceTransparent)
-        runCaptureLoop(entry, cdp, fps)
+        configurePage(cdp, page)
+        runCaptureLoop(entry, cdp, page.fps)
     }
 
     /** Viewport, transparency and navigation for a freshly connected page. */
-    private suspend fun configurePage(
-        cdp: CdpConnection,
-        url: String,
-        renderWidth: Int,
-        renderHeight: Int,
-        customCss: String,
-        forceTransparent: Boolean,
-    ) {
+    private suspend fun configurePage(cdp: CdpConnection, page: BrowserPage) {
+    val url = page.url
+    val renderWidth = page.renderWidth
+    val renderHeight = page.renderHeight
+    val customCss = page.customCss
+    val forceTransparent = page.forceTransparent
     // Configure viewport and transparency
     var resp = cdp.sendAsync("Emulation.setDeviceMetricsOverride", buildJsonObject {
         put("width", renderWidth)

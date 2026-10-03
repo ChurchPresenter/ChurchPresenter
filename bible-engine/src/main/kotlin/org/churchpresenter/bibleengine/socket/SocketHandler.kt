@@ -8,11 +8,13 @@ import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import java.io.IOException
 
 private val json = Json {
     ignoreUnknownKeys = true
@@ -39,7 +41,8 @@ fun Route.bibleEngineSocket(
 
                 val obj = try {
                     json.parseToJsonElement(raw).jsonObject
-                } catch (e: Exception) {
+                } catch (e: IllegalArgumentException) {
+                    // Malformed JSON (SerializationException) and a non-object payload both land here.
                     // The message, not just the payload: "Invalid JSON" over a 4 KB line says the
                     // parse failed and nothing about where, which is the half worth having.
                     System.err.println("Invalid JSON from $remoteAddr (${e.message}): $raw")
@@ -76,8 +79,11 @@ fun Route.bibleEngineSocket(
                     }
                 }
             }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             if (Config.verboseLog) println("WebSocket error ($remoteAddr): ${e.message}")
+        } catch (e: ClosedSendChannelException) {
+            // The client went away between a frame arriving and its answer going out.
+            if (Config.verboseLog) println("WebSocket closed ($remoteAddr): ${e.message}")
         } finally {
             broadcaster.unregister(this)
             if (Config.verboseLog) println("WebSocket disconnected: $remoteAddr")

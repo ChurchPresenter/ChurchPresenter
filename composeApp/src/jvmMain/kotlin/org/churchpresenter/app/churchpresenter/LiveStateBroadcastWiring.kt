@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.server.LiveContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import java.io.File
@@ -50,7 +51,6 @@ internal fun LiveStateBroadcastWiring(
             val liveVerse = pm.selectedVerse.value
             // Resolved whatever this change was: the history logs the verse for as long as it is up.
             val liveCode = liveVerseCode(
-                source = Presenting.BIBLE,
                 bookName = liveVerse.bookName,
                 chapter = liveVerse.chapter,
                 verseNumber = liveVerse.verseNumber,
@@ -63,25 +63,27 @@ internal fun LiveStateBroadcastWiring(
             // Beside the broadcast and ahead of it, so it is written whether or not the server runs.
             LiveHistoryLogger.logLiveState(liveHistoryEntryOf(pm, liveCode))
             companionServer.updateLiveState(
-                mode = source.name,
-                bibleVerse = pm.selectedVerse.value,
-                lyricSection = pm.lyricSection.value,
-                pictureImagePath = pm.selectedImagePath.value,
-                mediaUrl = nullIfEmpty(pm.currentMediaUrl.value),
-                mediaType = nullIfEmpty(pm.currentMediaType.value),
-                announcementText = nullIfEmpty(pm.announcementText.value),
-                websiteUrl = nullIfEmpty(pm.websiteUrl.value),
-                websiteTitle = nullIfEmpty(pm.webPageTitle.value),
-                sceneId = pm.activeScene.value?.id,
-                sceneName = pm.activeScene.value?.name,
-                questionId = pm.displayedQuestion.value?.id,
-                questionText = pm.displayedQuestion.value?.text,
-                dictionaryWord = pm.displayedDictionaryEntry.value?.word,
-                dictionaryEntry = pm.displayedDictionaryEntry.value,
-                lowerThirdName = nullIfEmpty(pm.currentLowerThirdName.value),
-                verseCode = verseCode,
-                songSectionIndex = livePositionOrNull(source, Presenting.LYRICS, pm.songDisplaySectionIndex.value),
-                songLineIndex = livePositionOrNull(source, Presenting.LYRICS, pm.songDisplayLineIndex.value)
+                LiveContent(
+                    mode = source.name,
+                    bibleVerse = pm.selectedVerse.value,
+                    lyricSection = pm.lyricSection.value,
+                    pictureImagePath = pm.selectedImagePath.value,
+                    mediaUrl = nullIfEmpty(pm.currentMediaUrl.value),
+                    mediaType = nullIfEmpty(pm.currentMediaType.value),
+                    announcementText = nullIfEmpty(pm.announcementText.value),
+                    websiteUrl = nullIfEmpty(pm.websiteUrl.value),
+                    websiteTitle = nullIfEmpty(pm.webPageTitle.value),
+                    sceneId = pm.activeScene.value?.id,
+                    sceneName = pm.activeScene.value?.name,
+                    questionId = pm.displayedQuestion.value?.id,
+                    questionText = pm.displayedQuestion.value?.text,
+                    dictionaryWord = pm.displayedDictionaryEntry.value?.word,
+                    dictionaryEntry = pm.displayedDictionaryEntry.value,
+                    lowerThirdName = nullIfEmpty(pm.currentLowerThirdName.value),
+                    verseCode = verseCode,
+                    songSectionIndex = livePositionOrNull(source, Presenting.LYRICS, pm.songDisplaySectionIndex.value),
+                    songLineIndex = livePositionOrNull(source, Presenting.LYRICS, pm.songDisplayLineIndex.value)
+                ),
             )
         }
     }
