@@ -25,6 +25,9 @@ import org.churchpresenter.sharedui.composables.FocusLostRescueState
  * the panel sizes, and every push to the output. The tab composes it, assigns the settings and
  * callbacks it was given on each composition, and draws its pieces as extensions of it.
  */
+/** Adds a song to the schedule: its number, title, songbook and id. */
+internal typealias AddSongToSchedule = (songNumber: Int, title: String, songbook: String, songId: String) -> Unit
+
 @Stable
 internal class SongsTabController(
     val viewModel: SongsViewModel,
@@ -35,9 +38,7 @@ internal class SongsTabController(
     // are skipped unless something they read has changed.
     var appSettings by mutableStateOf(AppSettings())
     var isPresenting by mutableStateOf(false)
-    var onAddToSchedule by mutableStateOf<((songNumber: Int, title: String, songbook: String, songId: String) -> Unit)?>(
-        null,
-    )
+    var onAddToSchedule by mutableStateOf<AddSongToSchedule?>(null)
     var onPresenting by mutableStateOf<(Presenting) -> Unit>({})
     var typicalSongSeconds by mutableStateOf<(SongItem) -> Int?>({ null })
     var playCounts by mutableStateOf<SongPlayCounts?>(null)

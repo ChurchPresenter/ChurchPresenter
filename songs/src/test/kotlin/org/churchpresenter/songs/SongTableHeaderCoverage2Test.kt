@@ -2,15 +2,14 @@
 
 package org.churchpresenter.songs
 
-import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
-import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.rightClick
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -20,8 +19,7 @@ class SongTableHeaderCoverage2Test {
     private fun ComposeUiTest.roots() = onAllNodes(isRoot()).fetchSemanticsNodes().size
 
     private fun ComposeUiTest.escapeTopPopup() {
-        val roots = onAllNodes(isRoot())
-        roots[roots.fetchSemanticsNodes().size - 1].performKeyInput { pressKey(Key.Escape) }
+        onAllNodes(isRoot())[0].performMouseInput { click(Offset(2f, bottom - 2f)) }
         waitForIdle()
     }
 
