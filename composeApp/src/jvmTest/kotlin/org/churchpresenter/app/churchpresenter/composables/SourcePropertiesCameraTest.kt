@@ -25,14 +25,15 @@ import kotlin.test.assertEquals
  * no enumerator, so Refresh spawns nothing either. "No cameras found" is a real state an operator
  * sees, and it is the one that can be asserted deterministically.
  *
- * Known gaps, all of them downstream of a device actually existing:
+ * A host can also list devices, which reaches the device dropdown, what choosing an entry writes,
+ * and the format dropdown -- empty but for Auto, as the faked OS has no format enumerator.
  *
- *  * **The device dropdown** and what choosing an entry writes (`devicePath`, `deviceName`, and the
- *    reset of format and connection that comes with it).
+ * Known gaps, all of them downstream of real hardware:
+ *
  *  * **The DeckLink branch** — the in-use warning, the video-connection dropdown and its auto-select,
  *    and the mode dropdown — all of which need `DeckLinkManager.isAvailable()` to be true, and that
  *    needs the native `decklink_jni` library the suite does not ship.
- *  * **The ffmpeg format dropdown**, which needs a non-DeckLink device path to enumerate against.
+ *  * **The formats ffmpeg lists** for a real device.
  *
  * *Which* hint each platform gets is pinned in `CameraToolHintsTest`; this suite checks that the
  * panel draws them.
@@ -164,5 +165,44 @@ class SourcePropertiesCameraTest {
             "", (get() as SceneSource.CameraSource).devicePath,
             "and renaming must not invent a device path",
         )
+    }
+
+    // ── A machine with cameras ────────────────────────────────────────────────
+
+    private val studio = CameraDevice("Studio Cam", "avfoundation://0", "Studio Cam")
+    private val balcony = CameraDevice("Balcony Cam", "avfoundation://1", "Balcony Cam")
+    private val screen = CameraDevice("Capture screen 0", "avfoundation://2", "Capture screen 0")
+    private val twoCameras = NO_CAMERAS.copy(devices = listOf(studio, balcony, screen))
+
+    @Test
+    fun `choosing a camera points the source at it, and its format starts on Auto`() =
+        cameraPanel(host = twoCameras) { get ->
+            assertEquals(0, countOf("Capture screen 0"), "a display is not offered as a camera")
+
+            chooseFromDropdown("Studio Cam", "Balcony Cam")
+
+            val chosen = get() as SceneSource.CameraSource
+            assertEquals("avfoundation://1", chosen.devicePath)
+            assertEquals("Balcony Cam", chosen.deviceName)
+            onNodeWithText("Auto (default)").assertExists()
+        }
+
+    @Test
+    fun `choosing Auto clears a format the camera was pinned to`() {
+        val pinned = Fixture.camera().copy(
+            devicePath = studio.path, deviceName = studio.name, videoFormat = "1920x1080@30",
+        )
+        cameraPanel(pinned, host = twoCameras) { get ->
+            chooseFromDropdown("Auto (default)", "Auto (default)")
+            assertEquals("", (get() as SceneSource.CameraSource).videoFormat)
+        }
+    }
+
+    @Test
+    fun `a source saved on a display says it is one`() {
+        val onScreen = Fixture.camera().copy(devicePath = screen.path, deviceName = screen.name)
+        cameraPanel(onScreen, host = twoCameras) { _ ->
+            onNodeWithText("This is a display, not a camera", substring = true).assertExists()
+        }
     }
 }

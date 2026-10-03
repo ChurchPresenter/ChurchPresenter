@@ -39,6 +39,7 @@ import org.churchpresenter.app.churchpresenter.composables.CameraDevice
 import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
 import org.churchpresenter.app.churchpresenter.composables.CameraFailure
 import org.churchpresenter.app.churchpresenter.composables.CameraFormat
+import org.churchpresenter.app.churchpresenter.composables.CameraHost
 import org.churchpresenter.app.churchpresenter.composables.CameraPrivacyHint
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.theme.components.DropdownSelector
@@ -69,19 +70,26 @@ import org.jetbrains.compose.resources.stringResource
  * straight from composition and this deliberately does not copy that.
  */
 @Composable
-internal fun CameraPickerRow(config: BackgroundConfig, onConfigChange: (BackgroundConfig) -> Unit) {
+internal fun CameraPickerRow(
+    config: BackgroundConfig,
+    /** The machine this row describes, or null to ask the real one -- as for `CameraProperties`. */
+    host: CameraHost? = null,
+    onConfigChange: (BackgroundConfig) -> Unit,
+) {
     val deckLinkLabel = stringResource(Res.string.canvas_decklink_device)
     val autoLabel = stringResource(Res.string.background_camera_auto)
-    val devices by CameraDeviceCatalog.devices.collectAsState()
-    LaunchedEffect(Unit) { CameraDeviceCatalog.refresh(deckLinkLabel) }
+    val catalog by CameraDeviceCatalog.devices.collectAsState()
+    val devices = host?.devices ?: catalog
+    LaunchedEffect(Unit) { if (host == null) CameraDeviceCatalog.refresh(deckLinkLabel) }
 
     // Probed off the composition thread. This file's own note above says it deliberately does not
     // copy the Canvas panel's habit of shelling out from composition — but this call did exactly
     // that, and `isFfmpegAvailable()` runs `ffmpeg -version` against each candidate install path in
     // turn with a five-second timeout each. Starts `true` so no hint flashes on a machine that has
     // ffmpeg.
-    var ffmpegAvailable by remember { mutableStateOf(true) }
-    LaunchedEffect(Unit) { ffmpegAvailable = withContext(Dispatchers.IO) { isFfmpegAvailable() } }
+    var probedFfmpeg by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) { if (host == null) probedFfmpeg = withContext(Dispatchers.IO) { isFfmpegAvailable() } }
+    val ffmpegAvailable = host?.ffmpegAvailable ?: probedFfmpeg
 
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         PanelCaption(stringResource(Res.string.background_camera_device))
@@ -96,7 +104,7 @@ internal fun CameraPickerRow(config: BackgroundConfig, onConfigChange: (Backgrou
             System.getProperty("os.name", ""),
             devices,
             ffmpegAvailable,
-            CameraDeviceCatalog.lastEnumeration?.enumerator,
+            if (host == null) CameraDeviceCatalog.lastEnumeration?.enumerator else null,
         ).forEach { hint ->
             Text(
                 text = stringResource(hint),

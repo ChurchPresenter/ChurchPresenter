@@ -268,7 +268,7 @@ private fun BackgroundSourceSection(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        Constants.BACKGROUND_CAMERA -> CameraPickerRow(config, onConfigChange)
+        Constants.BACKGROUND_CAMERA -> CameraPickerRow(config, onConfigChange = onConfigChange)
         Constants.BACKGROUND_GRADIENT -> BackgroundGradientSection(config, onConfigChange)
         Constants.BACKGROUND_LOTTIE -> {
             // The band generator seeds its sample from the Song/Bible look, which the document no

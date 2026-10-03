@@ -9,11 +9,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.MergeKind
 import org.churchpresenter.settings.MergeMember
@@ -220,6 +224,34 @@ class ProfileMergeCardTest {
             },
         ) { latest ->
             assertEquals(listOf("ndi:0", "ndi:1"), latest().merge!!.tiles.map { it.output })
+        }
+
+    // ── Dragging on the map ────────────────────────────────────────────────────
+
+    /** Drags across the map from [from] to [to], each a fraction of its width and height. */
+    private fun ComposeUiTest.dragOnMap(from: Offset, to: Offset) {
+        onNodeWithTag(MERGE_MAP_TAG).performTouchInput {
+            swipe(Offset(width * from.x, height * from.y), Offset(width * to.x, height * to.y), durationMillis = 200)
+        }
+        waitForIdle()
+    }
+
+    @Test
+    fun `a tile dragged on the map moves, and the other stays put`() = card(sideBySide) { latest ->
+        dragOnMap(Offset(0.75f, 0.5f), Offset(0.95f, 0.8f))
+
+        val (left, right) = latest().merge!!.tiles
+        assertEquals(MergeTile("ndi:0", 0, 0), left)
+        assertTrue(right.x > 1920, "moved right, to ${right.x}")
+        assertTrue(right.y > 0, "and down, to ${right.y}")
+    }
+
+    @Test
+    fun `real displays cannot be dragged on the map`() =
+        card(screens, proj = { displaysAt(it, 0, 1920) }, tiles = screenTiles) { latest ->
+            val before = latest().merge
+            dragOnMap(Offset(0.75f, 0.5f), Offset(0.95f, 0.8f))
+            assertEquals(before, latest().merge)
         }
 
     // ── Real displays ──────────────────────────────────────────────────────────
