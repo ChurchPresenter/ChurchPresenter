@@ -106,4 +106,19 @@ class LowerThirdBandOwnershipTest {
             )
         }
     }
+
+    @Test
+    fun `the band's own Uses row takes the band over, and hands it back`() {
+        profilesTab(doc()) { get ->
+            openCustomizePane(CustomizePane.BIBLE, CustomizeElement.BIBLE_TEXT)
+
+            onNodeWithTag(BAND_SOURCE_OWN_TAG, useUnmergedTree = true).performScrollTo().performClick()
+            waitForIdle()
+            assertEquals(setOf(BackgroundScope.BIBLE_LOWER_THIRD.name), get().profile().backgroundOverrides)
+
+            onNodeWithTag(BAND_SOURCE_APP_DEFAULT_TAG, useUnmergedTree = true).performScrollTo().performClick()
+            waitForIdle()
+            assertEquals(emptySet(), get().profile().backgroundOverrides)
+        }
+    }
 }

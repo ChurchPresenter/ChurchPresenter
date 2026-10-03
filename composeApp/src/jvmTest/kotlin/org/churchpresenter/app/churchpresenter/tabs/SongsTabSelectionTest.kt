@@ -6,6 +6,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -239,6 +240,17 @@ class SongsTabSelectionTest {
             reports.scheduled,
             "the song added must be the one selected, not whichever was first",
         )
+    }
+
+    @Test
+    fun `a row's own add-to-schedule icon sends that row's song, whichever is selected`() = songsTab { _, reports ->
+        val title = onNodeWithText("Be Thou My Vision").fetchSemanticsNode().boundsInRoot
+        val icons = onAllNodes(hasContentDescription(SongsLabel.ADD_TO_SCHEDULE)).fetchSemanticsNodes()
+        val onItsLine = icons.indices.single { icons[it].boundsInRoot.center.y in title.top..title.bottom }
+        onAllNodes(hasContentDescription(SongsLabel.ADD_TO_SCHEDULE))[onItsLine].performClick()
+        waitForIdle()
+
+        assertEquals(listOf("Be Thou My Vision"), reports.scheduled)
     }
 
     @Test
