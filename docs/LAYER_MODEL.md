@@ -1,7 +1,6 @@
 # Design note: the layer model
 
-Status: **approved** (roadmap step 1.1). Nothing on the live output path changes until
-this is approved.
+Status: **approved** (roadmap step 1.1). The migration below is roadmap step 2.1 onward.
 
 ## Why
 
