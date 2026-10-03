@@ -13,6 +13,7 @@ import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
+import androidx.compose.ui.test.onAllNodesWithTag
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -80,6 +81,31 @@ class ProfilesCustomizeSongExtrasTest {
             waitForIdle()
 
             assertTrue(get().song().titleSlideComposer.bold, "the composer line must have gone bold")
+        }
+    }
+
+    @Test
+    fun `the title slide's number comes before the title, or goes to a corner and is nudged from it`() {
+        profilesTab(output()) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
+            // The title slide's own Number part, below the editor's Number chip.
+            onAllNodesWithText("Number").let { it[it.fetchSemanticsNodes().size - 1] }.performScrollTo().performClick()
+            waitForIdle()
+            val before = get().song().titleSlideNumberBeforeTitle
+            onNodeWithTag("song_titleSlideNumberBeforeTitle").performScrollTo().performClick()
+            waitForIdle()
+            assertEquals(!before, get().song().titleSlideNumberBeforeTitle)
+            val nudges = onAllNodesWithTag("title_slide_number_offset_x").fetchSemanticsNodes()
+            assertEquals(0, nudges.size, "no corner, no nudge")
+
+            onNodeWithTag("title_slide_number_corner").performScrollTo().performClick()
+            waitForIdle()
+            onAllNodesWithText("Bottom Left").let { it[it.fetchSemanticsNodes().size - 1] }.performClick()
+            waitForIdle()
+
+            assertEquals(Constants.BOTTOM_LEFT, get().song().layoutExtras.titleSlideNumber.corner)
+            onNodeWithTag("title_slide_number_offset_x").assertExists()
+            onNodeWithTag("title_slide_number_offset_y").assertExists()
         }
     }
 

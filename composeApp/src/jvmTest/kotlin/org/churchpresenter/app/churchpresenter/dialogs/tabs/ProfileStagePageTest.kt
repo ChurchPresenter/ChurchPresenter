@@ -176,4 +176,26 @@ class ProfileStagePageTest {
         stepUp("Duration")
         assertTrue(get().stage().transitionDuration > StageMonitorSettings().transitionDuration)
     }
+
+    @Test
+    fun `a zone's italic and underline are its own, and the fades out and across are the profile's`() =
+        profilesTab(doc()) { get ->
+            open()
+            tap(stageZoneTag(StageMonitorStyleZone.C))
+            val before = get().stage().styleFor(StageMonitorStyleZone.C)
+            inRow("Style", hasClickAction(), 1).performScrollTo().performClick()
+            waitForIdle()
+            inRow("Style", hasClickAction(), 2).performScrollTo().performClick()
+            waitForIdle()
+            toggleCheckbox("Fade out")
+            toggleCheckbox("Crossfade between items")
+
+            val after = get().stage().styleFor(StageMonitorStyleZone.C)
+            assertEquals(!before.italic, after.italic)
+            assertEquals(!before.underline, after.underline)
+            assertEquals(!StageMonitorSettings().fadeOut, get().stage().fadeOut)
+            assertEquals(!StageMonitorSettings().crossfade, get().stage().crossfade)
+            val untouched = StageMonitorSettings().styleFor(StageMonitorStyleZone.B)
+            assertEquals(untouched, get().stage().styleFor(StageMonitorStyleZone.B))
+        }
 }
