@@ -1093,25 +1093,16 @@ jacoco {
     toolVersion = "0.8.15" // 0.8.12+ is required for JDK 21 class files
 }
 
-tasks.register<JacocoReport>("jacocoTestReport") {
-    group = "verification"
-    description = "Generates a coverage report for the app's own code from the jvmTest suite."
-    dependsOn("jvmTest", "jvmTestSerial")
-    // Point at the agent's .exec output explicitly. The `executionData(task)` overload resolves
-    // to the task's own binary-results directory here, not the JacocoTaskExtension destination,
-    // and fails with "Unable to read execution data file .../test-results/jvmTest/binary".
-    // BOTH exec files: the loopback-UDP suites run in the separate serial task, and leaving their
-    // data out would drop real coverage from the number and from the floor below.
-    executionData.setFrom(
-        layout.buildDirectory.file("jacoco/jvmTest.exec"),
-        layout.buildDirectory.file("jacoco/jvmTestSerial.exec"),
-    )
-
-    // Restrict to this app's package root. Nothing else compiles into this output directory any
-    // more — every module is a real Gradle module now — but the app's own generated and
-    // synthetic classes are excluded below, and the modules are measured by their own builds.
-    classDirectories.setFrom(
-        fileTree(layout.buildDirectory.dir("classes/kotlin/jvm/main")) {
+// The classes the app's coverage is measured over -- by the report (and so the CI summary and the
+// pull-request table, which read its XML) and by the floor alike, so the number printed is the number
+// enforced. Restricted to this app's package root: every module is a real Gradle module now and is
+// measured by its own build.
+//
+// The app-entry wiring at the end used to be excluded from the gate only, with the report kept
+// all-inclusive. That made the report and the table show the floor breached while the gate passed --
+// 4,918 lines of window/menu construction that only runs under a real display are 8.7% of the total.
+// One list, one number.
+fun coverableAppClasses() = fileTree(layout.buildDirectory.dir("classes/kotlin/jvm/main")) {
             include("org/churchpresenter/**")
             // Generated code -- no value in measuring, and it would inflate the denominator.
             exclude("**/BuildConfig*")
@@ -1145,8 +1136,53 @@ tasks.register<JacocoReport>("jacocoTestReport") {
             //    coverage from 76.2% to 76.4%. They are also hand-written, screenshot-tested UI, not
             //    generated code. The single largest drag is main.kt at 0.3% branch (711 of 28,137
             //    missed branches, 10.6% of the total), and the gate below already excludes it.
-        }
+
+            // The app entry point: `main` itself, which opens real windows and binds real ports and
+            // so only runs under a display. MainKt's ~200 synthetic lambda classes come along via
+            // the `$` globs.
+            //
+            // Two files have left this list rather than sitting on it out of habit.
+            // NavigationTopBar.kt is covered in full by NavigationTopBarTest. MainDesktop.kt is at
+            // ~70% via MainDesktopComposeTest and the extracted MainDesktopLogic — excluding it
+            // claimed a demonstrably testable file could not be tested, and kept ~960 covered lines
+            // out of the enforced number. Counting it costs the gate about half a point against a
+            // ~14 point margin. This list is only worth reading if every entry on it is still true.
+            exclude("org/churchpresenter/app/churchpresenter/MainKt*")
+            // The rest of main.kt, split out of it into its own files: the same window, menu and
+            // dialog construction, which only runs under a display. Its decisions are pulled out
+            // into CalendarLogic.kt and MainWindowLogic.kt, which are counted and tested. Temporary:
+            // it comes off this list once display-driven tests cover these files.
+            exclude("org/churchpresenter/app/churchpresenter/AppRootState.class")
+            exclude("org/churchpresenter/app/churchpresenter/AppRootState$*")
+            exclude("org/churchpresenter/app/churchpresenter/AppRootStateKt*")
+            exclude("org/churchpresenter/app/churchpresenter/AppWiringKt*")
+            exclude("org/churchpresenter/app/churchpresenter/CalendarAutomationKt*")
+            exclude("org/churchpresenter/app/churchpresenter/CalendarManagerWindowKt*")
+            exclude("org/churchpresenter/app/churchpresenter/MainWindowKt*")
+            exclude("org/churchpresenter/app/churchpresenter/MainWindowChromeKt*")
+            exclude("org/churchpresenter/app/churchpresenter/MainWindowDialogsKt*")
+            exclude("org/churchpresenter/app/churchpresenter/MainWindowScope*")
+            exclude("org/churchpresenter/app/churchpresenter/MainWindowState*")
+            exclude("org/churchpresenter/app/churchpresenter/MainWindowWiringKt*")
+            exclude("org/churchpresenter/app/churchpresenter/RemoteRequestWiringKt*")
+            exclude("org/churchpresenter/app/churchpresenter/VirtualOutputsKt*")
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    group = "verification"
+    description = "Generates a coverage report for the app's own code from the jvmTest suite."
+    dependsOn("jvmTest", "jvmTestSerial")
+    // Point at the agent's .exec output explicitly. The `executionData(task)` overload resolves
+    // to the task's own binary-results directory here, not the JacocoTaskExtension destination,
+    // and fails with "Unable to read execution data file .../test-results/jvmTest/binary".
+    // BOTH exec files: the loopback-UDP suites run in the separate serial task, and leaving their
+    // data out would drop real coverage from the number and from the floor below.
+    executionData.setFrom(
+        layout.buildDirectory.file("jacoco/jvmTest.exec"),
+        layout.buildDirectory.file("jacoco/jvmTestSerial.exec"),
     )
+
+    classDirectories.setFrom(coverableAppClasses())
     sourceDirectories.setFrom(files("src/jvmMain/kotlin", "src/commonMain/kotlin"))
 
     onlyIf {
@@ -1184,14 +1220,8 @@ tasks.register<JacocoReport>("jacocoTestReport") {
 // Wired into `check` (see the bottom of this file) as of 2026-07-30, when the gated scope first
 // cleared the floor. Run it on its own with:
 //   ./gradlew :composeApp:jacocoTestCoverageVerification
-// Same execution/class/source wiring as jacocoTestReport (app package only; modules measured by
-// their own builds), with ONE deliberate difference: the app-entry wiring is excluded here but NOT
-// from the report. The report stays all-inclusive so nothing is hidden -- its HTML still shows
-// main.kt at 0%, which is the truth. The gate excludes those files because they are 4,918 lines of
-// window/menu/composable-tree construction that only runs under a real display, i.e. permanently
-// uncoverable: they alone are 8.7% of the total, so gating on them would mean lowering the floor to
-// ~68% and the number would stop meaning "well tested". The gate measures the code someone can
-// actually cover; the report reports everything.
+// Same execution, class and source wiring as jacocoTestReport -- see coverableAppClasses() for why
+// the app-entry wiring is outside both.
 tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
     group = "verification"
     description = "Fails the build if coverage of the coverable code is below the line/branch targets."
@@ -1202,48 +1232,7 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
         layout.buildDirectory.file("jacoco/jvmTest.exec"),
         layout.buildDirectory.file("jacoco/jvmTestSerial.exec"),
     )
-    classDirectories.setFrom(
-        fileTree(layout.buildDirectory.dir("classes/kotlin/jvm/main")) {
-            include("org/churchpresenter/**")
-            exclude("**/BuildConfig*")
-            exclude("**/ComposableSingletons*")
-            // Kept in sync with jacocoTestReport above -- both are untestable-by-construction.
-            exclude("**/MacWindowActivationKt*")
-            exclude("**/KonamiEasterEggDialogKt*")
-            // Kept in sync with jacocoTestReport above -- a hidden easter egg, out of scope for the
-            // coverage floor regardless of how well tested it happens to be.
-            exclude("**/CrosswordTabKt*")
-            // The app entry point: `main` itself, which opens real windows and binds real ports and
-            // so only runs under a display. MainKt's ~200 synthetic lambda classes come along via
-            // the `$` globs.
-            //
-            // Two files have left this list rather than sitting on it out of habit.
-            // NavigationTopBar.kt is covered in full by NavigationTopBarTest. MainDesktop.kt is at
-            // ~70% via MainDesktopComposeTest and the extracted MainDesktopLogic — excluding it
-            // claimed a demonstrably testable file could not be tested, and kept ~960 covered lines
-            // out of the enforced number. Counting it costs the gate about half a point against a
-            // ~14 point margin. This list is only worth reading if every entry on it is still true.
-            exclude("org/churchpresenter/app/churchpresenter/MainKt*")
-            // The rest of main.kt, split out of it into its own files: the same window, menu and
-            // dialog construction, which only runs under a display. Its decisions are pulled out
-            // into CalendarLogic.kt and MainWindowLogic.kt, which are counted and tested. Temporary:
-            // it comes off this list once display-driven tests cover these files.
-            exclude("org/churchpresenter/app/churchpresenter/AppRootState.class")
-            exclude("org/churchpresenter/app/churchpresenter/AppRootState$*")
-            exclude("org/churchpresenter/app/churchpresenter/AppRootStateKt*")
-            exclude("org/churchpresenter/app/churchpresenter/AppWiringKt*")
-            exclude("org/churchpresenter/app/churchpresenter/CalendarAutomationKt*")
-            exclude("org/churchpresenter/app/churchpresenter/CalendarManagerWindowKt*")
-            exclude("org/churchpresenter/app/churchpresenter/MainWindowKt*")
-            exclude("org/churchpresenter/app/churchpresenter/MainWindowChromeKt*")
-            exclude("org/churchpresenter/app/churchpresenter/MainWindowDialogsKt*")
-            exclude("org/churchpresenter/app/churchpresenter/MainWindowScope*")
-            exclude("org/churchpresenter/app/churchpresenter/MainWindowState*")
-            exclude("org/churchpresenter/app/churchpresenter/MainWindowWiringKt*")
-            exclude("org/churchpresenter/app/churchpresenter/RemoteRequestWiringKt*")
-            exclude("org/churchpresenter/app/churchpresenter/VirtualOutputsKt*")
-        }
-    )
+    classDirectories.setFrom(coverableAppClasses())
     sourceDirectories.setFrom(files("src/jvmMain/kotlin", "src/commonMain/kotlin"))
     violationRules {
         rule {

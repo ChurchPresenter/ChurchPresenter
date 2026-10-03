@@ -548,80 +548,64 @@ jobs:
       # It never fails the job on its own (`fail_on_failure: false`): the test step that produced
       # the XML has already done that, and a reporter that can also fail turns one red step into
       # two for the same cause.
-      - name: Report failing tests on the pull request
+      # Only the modules that ran: a module whose suite was skipped (nothing it depends on changed)
+      # has no results on this runner, and listing it anyway put a "0 ran" row and an empty check in
+      # every pull request. The paths and names are built here, together, so they cannot drift apart.
+      - name: Which test results to report
+        id: junit_inputs
         if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import glob
+          MODULES = [
+              ("composeApp", "App"),
+              ("converter", "Converter"),
+              ("companion-satellite", "Companion Satellite"),
+              ("lottieGenerator", "Lower Third generator"),
+              ("crossword", "Crossword"),
+              ("presentation-engine", "Presentation Engine"),
+              ("theme", "Theme"),
+              ("core-models", "Core models"),
+              ("songlibrary", "Song library"),
+              ("bible-engine", "Bible Lookup Engine"),
+              ("settings", "Settings"),
+              ("diagnostics", "Diagnostics"),
+              ("atem", "ATEM client"),
+              ("ndi", "NDI client"),
+              ("omt", "OMT client"),
+              ("planning-center", "Planning Center"),
+              ("bible-formats", "Bible formats"),
+              ("song-chords", "Song chords"),
+              ("bible", "Bible"),
+              ("calendar", "Calendar"),
+              ("shared-ui", "Shared UI"),
+              ("slides", "Slides"),
+              ("media", "Media"),
+              ("web", "Web"),
+              ("crossword-tab", "Crossword tab"),
+              ("qa", "QA"),
+              ("dictionary", "Dictionary"),
+              ("stt", "STT"),
+              ("announcements", "Announcements"),
+              ("lower-third", "Lower Third"),
+              ("songs", "Songs"),
+              ("bible-tab", "Bible tab"),
+          ]
+          ran = [(d, n) for d, n in MODULES if glob.glob(f"{d}/build/test-results/**/TEST-*.xml", recursive=True)]
+          print("paths<<EOF")
+          print("\n".join(f"{d}/build/test-results/**/TEST-*.xml" for d, _ in ran))
+          print("EOF")
+          print("names<<EOF")
+          print("\n".join(n for _, n in ran))
+          print("EOF")
+          PY
+
+      - name: Report failing tests on the pull request
+        if: ${{ !cancelled() && github.event_name == 'pull_request' && steps.junit_inputs.outputs.paths != '' }}
         uses: mikepenz/action-junit-report@v5
         with:
-          report_paths: |
-            composeApp/build/test-results/**/TEST-*.xml
-            converter/build/test-results/**/TEST-*.xml
-            companion-satellite/build/test-results/**/TEST-*.xml
-            lottieGenerator/build/test-results/**/TEST-*.xml
-            crossword/build/test-results/**/TEST-*.xml
-            presentation-engine/build/test-results/**/TEST-*.xml
-            theme/build/test-results/**/TEST-*.xml
-            core-models/build/test-results/**/TEST-*.xml
-            songlibrary/build/test-results/**/TEST-*.xml
-            bible-engine/build/test-results/**/TEST-*.xml
-            settings/build/test-results/**/TEST-*.xml
-            diagnostics/build/test-results/**/TEST-*.xml
-            atem/build/test-results/**/TEST-*.xml
-            ndi/build/test-results/**/TEST-*.xml
-            omt/build/test-results/**/TEST-*.xml
-            planning-center/build/test-results/**/TEST-*.xml
-            bible-formats/build/test-results/**/TEST-*.xml
-            song-chords/build/test-results/**/TEST-*.xml
-            bible/build/test-results/**/TEST-*.xml
-            calendar/build/test-results/**/TEST-*.xml
-            shared-ui/build/test-results/**/TEST-*.xml
-            slides/build/test-results/**/TEST-*.xml
-            media/build/test-results/**/TEST-*.xml
-            web/build/test-results/**/TEST-*.xml
-            crossword-tab/build/test-results/**/TEST-*.xml
-            qa/build/test-results/**/TEST-*.xml
-            dictionary/build/test-results/**/TEST-*.xml
-            stt/build/test-results/**/TEST-*.xml
-            announcements/build/test-results/**/TEST-*.xml
-            lower-third/build/test-results/**/TEST-*.xml
-            songs/build/test-results/**/TEST-*.xml
-            bible-tab/build/test-results/**/TEST-*.xml
-          # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
-          # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
-          # every row after the insertion, so core-models was reported under "Companion Satellite"
-          # and the song library under "Theme", each with the other's numbers.
-          check_name: |
-            App
-            Converter
-            Companion Satellite
-            Lower Third generator
-            Crossword
-            Presentation Engine
-            Theme
-            Core models
-            Song library
-            Bible Lookup Engine
-            Settings
-            Diagnostics
-            ATEM client
-            NDI client
-            OMT client
-            Planning Center
-            Bible formats
-            Song chords
-            Bible
-            Calendar
-            Shared UI
-            Slides
-            Media
-            Web
-            Crossword tab
-            QA
-            Dictionary
-            STT
-            Announcements
-            Lower Third
-            Songs
-            Bible tab
+          report_paths: ${{ steps.junit_inputs.outputs.paths }}
+          check_name: ${{ steps.junit_inputs.outputs.names }}
           detailed_summary: true
           include_passed: false
           # Without this the second table is one row of "No test annotations available" per
@@ -658,30 +642,14 @@ jobs:
                   if len(parts) == 4 and parts[0] == "FLOOR":
                       floors.setdefault(parts[1], {})[parts[2]] = float(parts[3]) * 100
 
-          # Classes a module's verification task leaves out of its floor but its report keeps in.
-          # composeApp's report is all-inclusive on purpose (main.kt shows at 0%, which is the truth),
-          # while jacocoTestCoverageVerification excludes `MainKt*` -- the app entry, only runnable
-          # under a display. Reading the report's totals against the verification's floors compared
-          # two different sets of classes and flagged four counters on every PR while the real gate
-          # passed. Keep this in step with that task's `exclude(...)` list in composeApp/build.gradle.kts.
-          GATE_EXCLUDED = {"composeApp": ("org/churchpresenter/app/churchpresenter/MainKt",)}
-
-          def totals(root, excluded):
-              """Covered/total per counter: the report's own totals, or the sum over the gated classes."""
+          # Each report's own totals. composeApp's report is built over exactly the classes its floor
+          # is (coverableAppClasses() in composeApp/build.gradle.kts), so these are the gated numbers.
+          def totals(root):
+              """Covered/total per counter, from the report's own totals."""
               sums = {}
-              if excluded:
-                  counters = [
-                      c
-                      for cls in root.iter("class")
-                      if not any(cls.get("name", "").startswith(x) for x in excluded)
-                      for c in cls.findall("counter")
-                  ]
-              else:
-                  counters = root.findall("counter")
-              for c in counters:
+              for c in root.findall("counter"):
                   missed, covered = int(c.get("missed")), int(c.get("covered"))
-                  m, k = sums.get(c.get("type"), (0, 0))
-                  sums[c.get("type")] = (m + missed, k + covered)
+                  sums[c.get("type")] = (missed, covered)
               return {t: 100 * k / (m + k) for t, (m, k) in sums.items() if m + k}
 
           # Only modules that actually produced a report in THIS run. The sub-builds are gated on
@@ -694,7 +662,7 @@ jobs:
                       root = ET.parse(path).getroot()
                   except ET.ParseError:
                       continue
-                  ratios = totals(root, GATE_EXCLUDED.get(module))
+                  ratios = totals(root)
                   if ratios:
                       found[module] = ratios
 
