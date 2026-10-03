@@ -122,6 +122,7 @@ class MainDesktopComposeTest {
         val tabChanges = mutableListOf<Int>()
         val quickPicked = mutableListOf<QuickBackground?>()
         val settingsChanges = mutableListOf<(AppSettings) -> AppSettings>()
+        var developerUnlocks = 0
     }
 
     /** Composes the root with [appSettings], then lets everything it launched settle. */
@@ -139,6 +140,7 @@ class MainDesktopComposeTest {
                     appSettings = appSettings,
                     onQuickBackgroundPicked = { wiring.quickPicked += it },
                     onSettingsChange = { wiring.settingsChanges += it },
+                    onRequestDeveloperMenuUnlock = { wiring.developerUnlocks++ },
                     presenterManager = presenterManager,
                     companionSatelliteViewModel = CompanionSatelliteViewModel(),
                     live = LiveOutputCallbacks(
@@ -896,6 +898,29 @@ class MainDesktopComposeTest {
     private fun ComposeUiTest.takeLive(label: String) {
         onAllNodesWithText(label, substring = true)[0].performMouseInput { doubleClick() }
         waitForIdle()
+    }
+
+    @Test
+    fun `seven Ds unlock the developer menu, but not while something is live`() {
+        val wiring = Wiring()
+        root(withOneSong(), wiring = wiring) { _ ->
+            repeat(7) { press(Key.D) }
+        }
+        assertEquals(1, wiring.developerUnlocks)
+
+        val live = Wiring()
+        val manager = PresenterManager().apply { setPresentingMode(Presenting.LYRICS) }
+        root(withOneSong(), wiring = live, presenterManager = manager) { _ ->
+            repeat(7) { press(Key.D) }
+        }
+        assertEquals(0, live.developerUnlocks)
+    }
+
+    @Test
+    fun `left, right, left, right reveals the hidden crossword tab`() = root(withOneSong()) { _ ->
+        assertTrue(onAllNodesWithText("Crossword").fetchSemanticsNodes().isEmpty(), "hidden to begin with")
+        listOf(Key.DirectionLeft, Key.DirectionRight, Key.DirectionLeft, Key.DirectionRight).forEach { press(it) }
+        assertTrue(onAllNodesWithText("Crossword").fetchSemanticsNodes().isNotEmpty())
     }
 
     @Test
