@@ -1,6 +1,7 @@
 # Design note: the layer model
 
-Status: **proposal, for review** (roadmap step 1.1). Nothing on the live output path changes until
+Status: **in review** (roadmap step 1.1): layers, captions and preview decided; backgrounds and
+Instance Link still open. Nothing on the live output path changes until
 this is approved.
 
 ## Why
@@ -32,10 +33,11 @@ Every output composes the same fixed stack, bottom to top:
 |---|---|---|---|
 | 1 | **Background** | Colour, gradient, picture, looping video, camera, NDI/OMT input | The per-content backgrounds |
 | 2 | **Media** | A playing video or a picture slideshow, full frame | `MEDIA`, `PICTURES` |
-| 3 | **Slide** | One "slide" of content: song section, Bible verses, presentation slide, canvas scene, web page, Q&A question, dictionary entry, captions | `LYRICS`, `BIBLE`, `PRESENTATION`, `CANVAS`, `WEBSITE`, `QA`, `DICTIONARY`, `STT` |
-| 4 | **Graphics** | Lower third (Lottie), props (logo bug, clock, live badge) | `LOWER_THIRD` |
-| 5 | **Announcements** | Scrolling or static announcement, countdown | `ANNOUNCEMENTS` |
-| 6 | **Messages** | Short operator text that must never displace anything, e.g. a nursery call | — (new) |
+| 3 | **Slide** | One "slide" of content: song section, Bible verses, presentation slide, canvas scene, web page, Q&A question, dictionary entry | `LYRICS`, `BIBLE`, `PRESENTATION`, `CANVAS`, `WEBSITE`, `QA`, `DICTIONARY` |
+| 4 | **Captions** | Live transcription | `STT` |
+| 5 | **Graphics** | Lower third (Lottie), props (logo bug, clock, live badge) | `LOWER_THIRD` |
+| 6 | **Announcements** | Scrolling or static announcement, countdown | `ANNOUNCEMENTS` |
+| 7 | **Messages** | Short operator text that must never displace anything, e.g. a nursery call | — (new) |
 | — | **Audio** | Audio-only media, not drawn | Audio files under `MEDIA` |
 
 Rules:
@@ -43,9 +45,9 @@ Rules:
 - **Each layer holds at most one cue** and is independent: setting the Slide layer leaves Graphics,
   Announcements and Messages alone.
 - **Each layer has its own transition** (cut, fade, and the content's own animations) and its own
-  **Clear**. Clear All clears 2–6 and keeps the Background unless asked.
-- **Captions** sit on the Slide layer by default; a later look may move them to Graphics so they can
-  run over a song. Not in the first cut.
+  **Clear**. Clear All clears 2–7 and keeps the Background unless asked.
+- **Captions** have their own layer, so they run over a song, a verse or a video without
+  replacing it.
 
 ### Cues
 
@@ -63,7 +65,8 @@ sealed interface Cue {
     data class Announcement(val text: String, ...) : Cue
     data class Message(val text: String) : Cue
     data class Background(val config: BackgroundConfig) : Cue
-    // Scene, Web, Question, Dictionary, Captions
+    data class Captions(...) : Cue
+    // Scene, Web, Question, Dictionary
 }
 ```
 
@@ -119,6 +122,7 @@ Box {
     LayerSlot(Layer.Background) { BackgroundPresenter(...) }
     LayerSlot(Layer.Media)      { ... }
     LayerSlot(Layer.Slide)      { SlidePresenter(cue) }      // today's per-type presenters
+    LayerSlot(Layer.Captions)   { CaptionsPresenter(...) }
     LayerSlot(Layer.Graphics)   { LowerThirdPresenter(...) }
     LayerSlot(Layer.Announcements) { AnnouncementsPresenter(...) }
     LayerSlot(Layer.Messages)   { MessagePresenter(...) }
@@ -167,7 +171,7 @@ In order, each step shippable on its own and each keeping every existing test gr
    not change.
 3. **Backgrounds move to their layer.** Presenters stop drawing their own; the per-type background
    becomes the default Background cue. Screenshot suites must not change.
-4. **Independent layers.** Lower thirds, announcements and messages stop replacing the Slide layer.
+4. **Independent layers.** Lower thirds, captions, announcements and messages stop replacing the Slide layer.
    This is the first visible change, and the first screenshot re-record.
 5. **Per-layer Clear and Clear All**, in the UI, shortcuts and API.
 6. **Preview / Take** behind the preference.
@@ -184,12 +188,11 @@ The benchmark and soak test must show no regression at steps 2, 3 and 4.
   under a song).
 - The off-screen benchmark gains a "song + lower third + announcement" scenario at step 4.
 
-## Questions for the reviewer
+## Decisions
 
-1. **Layer list.** Six drawn layers plus audio, as above? In particular: should Media and Slide be
-   one layer (ProPresenter keeps them separate so a song can sit over a video)?
-2. **Captions** on the Slide layer for now, as proposed?
-3. **Backgrounds**: keep "each content type has a default background" (proposed, no visible change)
-   or move straight to one Background chosen per service?
-4. **Preview mode** as an opt-in preference, with direct Go Live staying the default?
-5. **Instance Link** followers mirroring the full layer stack?
+1. **Layers**: every layer separate — Background, Media, Slide, Captions, Graphics,
+   Announcements, Messages, plus Audio.
+2. **Captions** on a layer of their own.
+3. **Backgrounds**: open.
+4. **Preview mode** is opt-in; direct Go Live stays the default.
+5. **Instance Link**: open.
