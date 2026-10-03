@@ -3,6 +3,7 @@ package org.churchpresenter.sharedui.composables
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasContentDescription
@@ -10,7 +11,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
@@ -115,12 +116,12 @@ class OrderSelectorTest {
         selector(languages, moves)
         open()
 
-        onAllNodes(hasContentDescription("Drag to reorder"), useUnmergedTree = true)[0].performMouseInput {
-            press()
-            moveBy(androidx.compose.ui.geometry.Offset(0f, 30f))
-            moveBy(androidx.compose.ui.geometry.Offset(0f, 30f))
-            moveBy(androidx.compose.ui.geometry.Offset(0f, 40f))
-            release()
+        onAllNodes(hasContentDescription("Drag to reorder"), useUnmergedTree = true)[0].performTouchInput {
+            down(center)
+            moveBy(Offset(0f, 30f))
+            moveBy(Offset(0f, 30f))
+            moveBy(Offset(0f, 40f))
+            up()
         }
         waitForIdle()
 
@@ -134,11 +135,11 @@ class OrderSelectorTest {
         selector(languages, moves)
         open()
 
-        onAllNodes(hasContentDescription("Drag to reorder"), useUnmergedTree = true)[1].performMouseInput {
-            press()
-            moveBy(androidx.compose.ui.geometry.Offset(0f, 20f))
-            moveBy(androidx.compose.ui.geometry.Offset(0f, -20f))
-            release()
+        onAllNodes(hasContentDescription("Drag to reorder"), useUnmergedTree = true)[1].performTouchInput {
+            down(center)
+            moveBy(Offset(0f, 20f))
+            moveBy(Offset(0f, -20f))
+            up()
         }
         waitForIdle()
 

@@ -145,6 +145,7 @@ class SongsTabLiveCoverageTest {
             )
             val override = mutableStateOf<AppSettings?>(null)
             songsTab(settingsOverride = override) { vm, _ ->
+                waitForIdle()
                 override.value = AppSettings().withSongsEverywhere(SongSettings(storageDirectory = other.absolutePath))
                 waitForIdle()
 

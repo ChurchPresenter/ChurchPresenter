@@ -32,6 +32,23 @@ The tab and view model take what the app owns as parameters:
   that returns a song's raw lyrics. The app converts its wire DTOs (`RemoteSongCatalog.kt`).
   `remoteSyncLog` is where the follower's sync events go: `InstanceLinkLogger` in the app.
 
+## Layout
+
+- **`SongsViewModel`** keeps its state and lifecycle (load, dispose, settings, favorites, the
+  Instance Link source). Everything else is an extension on it, one file per concern:
+  `SongsViewModelSelection`, `…Navigation`, `…Sections`, `…Filtering`, `…Editing`, `…Loading`. The
+  state those files touch is `internal` and named `…State` (no `_` backing fields), so the class
+  stays under detekt's function limit without changing a single call site in the module.
+  - Outside the module the extensions need an import (`import org.churchpresenter.songs.selectSong`).
+- **`Songs`** is the library. The `.sps` format, text and SQLite, is in `SpsFormat.kt`.
+- **The tab** remembers a `@Stable` `SongsTabController`: the live song, the dialogs, the panel
+  sizes, and every push to the output. `SongsTab` assigns its parameters to it on each composition.
+  The pieces are extension composables on it, in `SongsTabParts.kt`. The keys are in
+  `SongsTabKeys.kt`.
+  - **Anything a piece reads while composing is snapshot state on the controller.** A plain `var`
+    is not re-read when the tab recomposes, because strong skipping skips a piece whose receiver is
+    the same instance. Only callbacks that are just invoked are plain fields.
+
 ## Package
 
 **`org.churchpresenter.songs`**. The tab harness (`songsTab`, `SongFixture`, `TabReports`,

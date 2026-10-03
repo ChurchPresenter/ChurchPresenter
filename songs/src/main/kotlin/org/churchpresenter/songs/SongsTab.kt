@@ -2,8 +2,6 @@ package org.churchpresenter.songs
 
 import androidx.compose.ui.window.WindowPlacement
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -13,9 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import org.churchpresenter.sharedui.composables.rememberFocusLostRescue
@@ -23,7 +18,6 @@ import java.awt.Window as AwtWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.strings.generated.resources.title
 import org.churchpresenter.sharedui.composables.initialPassCombinedClickable
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.songs.SongItem
@@ -32,9 +26,7 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.SongSettings
-import org.churchpresenter.sharedui.composables.DragHandle
 
-import org.churchpresenter.sharedui.composables.DragHandle
 
 /** The toolbar button that adds the *selected* song, as opposed to any other "Add to Schedule". */
 internal const val SONGS_ADD_SELECTED_TAG = "songs_addSelectedToSchedule"
@@ -119,6 +111,7 @@ fun SongsTab(
     controller.onAddToSchedule = onAddToSchedule
     controller.onPresenting = onPresenting
     controller.typicalSongSeconds = typicalSongSeconds
+    controller.playCounts = playCounts
     controller.songEditor = songEditor
     controller.density = density
     controller.isMaximized = isMaximized
@@ -140,7 +133,9 @@ fun SongsTab(
     // composables/FocusLostRescue.kt (shared with Presentation/Bible).
     controller.focusRescue = rememberFocusLostRescue(hostWindow, controller.tabFocusRequester)
 
-    controller.SongsTabEffects(playCounts, selectedSongItem, selectedSongItemVersion, dialogDismissSignal, searchIdleFocusMs)
+    controller.SongsTabEffects(
+        playCounts, selectedSongItem, selectedSongItemVersion, dialogDismissSignal, searchIdleFocusMs,
+    )
     controller.SongsTabPanes(modifier)
     controller.SongEditorDialogs()
     controller.DeleteSongDialog()
