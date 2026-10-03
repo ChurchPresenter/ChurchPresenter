@@ -23,7 +23,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class SongsTabControllerCoverage2Test {
+class SongsTabControllerTest {
 
     private lateinit var dir: File
     private val vms = mutableListOf<SongsViewModel>()

@@ -26,7 +26,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class SongListPaneDirectCoverage2Test {
+class SongListPaneRecompositionTest {
 
     private val songs = listOf(
         SongItem(number = "1", title = "Grace", songbook = "Hymnal"),

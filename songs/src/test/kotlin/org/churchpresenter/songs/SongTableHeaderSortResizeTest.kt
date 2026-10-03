@@ -21,7 +21,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class SongTableHeaderCoverageTest {
+class SongTableHeaderSortResizeTest {
 
     private val optional = setOf(
         SongColumnId.SONGBOOK, SongColumnId.TUNE, SongColumnId.PLAY_COUNT, SongColumnId.AUTHOR, SongColumnId.COMPOSER,

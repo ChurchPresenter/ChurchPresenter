@@ -19,7 +19,7 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
-class BibleLayoutsBranchCoverageTest {
+class BibleLayoutsBoxedAndGridRenderTest {
 
     private val files = listOf("kjv.spb", "rst.spb", "lsg.spb", "lut.spb")
     private val texts = listOf(

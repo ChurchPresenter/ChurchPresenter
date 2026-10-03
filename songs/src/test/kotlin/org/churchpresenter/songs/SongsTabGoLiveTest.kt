@@ -25,7 +25,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class SongsTabLiveCoverageTest {
+class SongsTabGoLiveTest {
 
     private fun ComposeUiTest.clickRow(title: String) {
         onAllNodes(hasText(title))[0].performClick()

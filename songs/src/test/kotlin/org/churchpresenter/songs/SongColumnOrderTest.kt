@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class SongColumnsCoverageTest {
+class SongColumnOrderTest {
 
     private val cols = listOf("a", "b", "c", "d")
 

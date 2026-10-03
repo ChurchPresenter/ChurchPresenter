@@ -16,7 +16,7 @@ import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class SongFolderWatcherCoverage2Test {
+class SongFolderWatcherEventFilterTest {
 
     private val dir: File = Files.createTempDirectory("cp-watch-events").toFile()
     private val service = FileSystems.getDefault().newWatchService()

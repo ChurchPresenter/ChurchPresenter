@@ -25,7 +25,7 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class SongsLogicCoverage2Test {
+class SongsViewModelEdgeCasesTest {
 
     private fun ComposeUiTest.press(key: Key) {
         onRoot().performKeyInput { pressKey(key) }

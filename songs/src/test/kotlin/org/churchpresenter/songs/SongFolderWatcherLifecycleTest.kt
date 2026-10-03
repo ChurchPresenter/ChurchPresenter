@@ -13,7 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class SongFolderWatcherCoverageTest {
+class SongFolderWatcherLifecycleTest {
 
     private lateinit var dir: File
     private val parent = Job()

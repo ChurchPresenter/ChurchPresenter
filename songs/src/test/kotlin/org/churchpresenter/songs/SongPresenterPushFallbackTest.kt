@@ -6,7 +6,7 @@ import org.churchpresenter.core.models.songs.SongTuning
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class SongPresenterPushCoverage2Test {
+class SongPresenterPushFallbackTest {
 
     @Test
     fun `the fallback slide for a song with a non-numeric number carries number zero`() =

@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class SongSearchMatchCoverageTest {
+class SongSearchMatchEdgeTest {
 
     private fun song(title: String = "Amazing Grace", lyrics: List<String> = emptyList()) =
         SongItem(number = "1", title = title, songbook = "Hymnal", lyrics = lyrics)

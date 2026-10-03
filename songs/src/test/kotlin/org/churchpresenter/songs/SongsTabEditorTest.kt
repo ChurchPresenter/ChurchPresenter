@@ -20,7 +20,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class SongsTabEditorCoverageTest {
+class SongsTabEditorTest {
 
     private class EditorSpy {
         var edit: SongEditorRequest? = null

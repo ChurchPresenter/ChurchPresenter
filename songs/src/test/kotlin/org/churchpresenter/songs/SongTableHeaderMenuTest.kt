@@ -14,7 +14,7 @@ import androidx.compose.ui.test.rightClick
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class SongTableHeaderCoverage2Test {
+class SongTableHeaderMenuTest {
 
     private fun ComposeUiTest.roots() = onAllNodes(isRoot()).fetchSemanticsNodes().size
 

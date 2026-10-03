@@ -17,7 +17,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class CCLIReportTablesBranchCoverageTest {
+class CCLIReportTablesRowsTest {
 
     @Test
     fun `songs never sung still draw their badges, and blanks read as dashes`() = runComposeUiTest {

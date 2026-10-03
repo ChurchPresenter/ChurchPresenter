@@ -22,7 +22,7 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
-class SongSlideBranchCoverageTest {
+class SongSlideBoxedAndModeRenderTest {
 
     private val current = LyricSection(
         header = "[Verse 1]",

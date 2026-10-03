@@ -17,7 +17,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class SongListRowsCoverageTest {
+class SongListRowsMatchChipsTest {
 
     private fun ComposeUiTest.count(text: String) =
         onAllNodesWithText(text).fetchSemanticsNodes(atLeastOneRootRequired = false).size

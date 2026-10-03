@@ -15,7 +15,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class SongsViewModelRemoteEditingCoverageTest {
+class SongsViewModelRemoteEditingTest {
 
     private lateinit var dir: File
     private val created = mutableListOf<SongsViewModel>()

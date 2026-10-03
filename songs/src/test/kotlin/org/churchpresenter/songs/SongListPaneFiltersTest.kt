@@ -25,7 +25,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class SongListPaneCoverageTest {
+class SongListPaneFiltersTest {
 
     private val onlyPlays = setOf(
         SongColumnId.SONGBOOK, SongColumnId.TUNE, SongColumnId.AUTHOR, SongColumnId.COMPOSER,

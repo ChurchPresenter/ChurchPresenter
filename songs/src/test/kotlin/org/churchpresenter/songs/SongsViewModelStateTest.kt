@@ -17,7 +17,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class SongsViewModelStateCoverageTest {
+class SongsViewModelStateTest {
 
     private lateinit var dir: File
     private val dirs = mutableListOf<File>()

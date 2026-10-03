@@ -23,7 +23,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class ProfileMergeCardBranchCoverageTest {
+class ProfileMergeCardEdgeCasesTest {
 
     private val wall = OutputProfile(id = "wall", name = "Sanctuary")
 

@@ -10,7 +10,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class SongsTabStateCoverageTest {
+class SongsTabStateTest {
 
     private val song = SongItem(number = "1", title = "Grace", songbook = "Hymnal")
 

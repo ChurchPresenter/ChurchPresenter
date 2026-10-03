@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class SongLyricsPanelCoverageTest {
+class SongLyricsPanelStatesTest {
 
     private fun ComposeUiTest.clickRow(title: String) {
         onAllNodes(hasText(title))[0].performClick()

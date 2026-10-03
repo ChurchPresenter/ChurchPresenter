@@ -13,7 +13,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class SongsLibraryCoverageTest {
+class SongsLibraryTest {
 
     private lateinit var dir: File
 

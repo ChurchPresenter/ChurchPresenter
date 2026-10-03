@@ -14,7 +14,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class BibleViewModelLoadingBranchCoverageTest {
+class BibleViewModelReloadTest {
 
     private lateinit var dir: File
 
@@ -94,7 +94,9 @@ class BibleViewModelLoadingBranchCoverageTest {
         val model = viewModel(settings)
         model.update(AppSettings().withBibleEverywhere(settings.copy(splitLongVerses = true)))
         assertTrue(model.splitLongVersesEnabled)
-        model.update(AppSettings().withBibleEverywhere(settings.copy(splitLongVerses = true, longVerseWordCount = 3)))
+        model.update(
+            AppSettings().withBibleEverywhere(settings.copy(splitLongVerses = true, longVerseWordCount = 3)),
+        )
         assertEquals(3, model.longVerseWordCount)
     }
 
@@ -121,7 +123,9 @@ class BibleViewModelLoadingBranchCoverageTest {
     fun `a rename with nothing loaded changes nothing`() {
         val settings = stack("gone.spb")
         val model = viewModel(settings)
-        val renamed = settings.withTranslations(listOf(BibleTranslationSettings(fileName = "gone.spb", customName = "X")))
+        val renamed = settings.withTranslations(
+            listOf(BibleTranslationSettings(fileName = "gone.spb", customName = "X")),
+        )
         model.update(AppSettings(bibleSettings = renamed))
         assertTrue(model.loadedTranslations.value.isEmpty())
         assertTrue(model.verses.value.isEmpty())

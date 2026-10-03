@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class BibleViewModelDetectionBranchCoverageTest {
+class BibleViewModelDetectionPathsTest {
 
     private lateinit var dir: File
     private lateinit var vm: BibleViewModel

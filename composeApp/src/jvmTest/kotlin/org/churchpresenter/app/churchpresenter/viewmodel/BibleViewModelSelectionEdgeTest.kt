@@ -12,7 +12,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class BibleViewModelSelectionBranchCoverageTest {
+class BibleViewModelSelectionEdgeTest {
 
     private lateinit var dir: File
 
@@ -92,7 +92,7 @@ class BibleViewModelSelectionBranchCoverageTest {
         vm.selectVerse(0)
         val next = vm.getNextVerses()
         assertEquals(listOf(1), next.map { it.verseNumber }, "the second half of verse one")
-        assertTrue(vm.stepVersePage(vm.getSelectedVerses().single().verseText, forward = true))
+        assertTrue(vm.stepVersePage(long, forward = true))
         assertEquals(listOf(2), vm.getNextVerses().map { it.verseNumber }, "then the next verse")
     }
 

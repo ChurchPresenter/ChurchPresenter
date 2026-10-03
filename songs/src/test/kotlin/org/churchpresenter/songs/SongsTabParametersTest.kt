@@ -37,7 +37,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class SongsTabParamsCoverage2Test {
+class SongsTabParametersTest {
 
     private fun withLibrary(
         settingsOf: (File) -> AppSettings,

@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class SongsEditingCoverage2Test {
+class SongsViewModelEditingTest {
 
     private val dir: File = Files.createTempDirectory("cp-editing2").toFile()
     private val vms = mutableListOf<SongsViewModel>()
