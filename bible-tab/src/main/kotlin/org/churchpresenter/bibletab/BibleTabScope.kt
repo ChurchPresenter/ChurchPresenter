@@ -74,56 +74,86 @@ internal class BibleTabScope(
     val live: BibleLiveNavState,
     val ui: BibleTabUiState,
     val widths: BibleColumnWidths,
-    displayedVersesState: State<List<SelectedVerse>>,
-    currentIsPresentingState: State<Boolean>,
+    private val displayedVersesState: State<List<SelectedVerse>>,
+    private val currentIsPresentingState: State<Boolean>,
     val scope: CoroutineScope,
     val shortcuts: ShortcutMap,
 ) {
     val translationSelectionKey get() = appSettings.bibleSettings.translationSelectionKey()
     val sttConnected get() = sttManager?.connected?.value == true
     val engineSettings get() = appSettings.bibleEngineSettings
-    val detectedReferences by states.detectedReferences
-    val autoFollowEnabled by states.autoFollowEnabled
-    val textMatchLevel by states.textMatchLevel
-    val continuationSpeed by states.continuationSpeed
+    val detectedReferences get() = states.detectedReferences.value
+    val autoFollowEnabled get() = states.autoFollowEnabled.value
+    val textMatchLevel get() = states.textMatchLevel.value
+    val continuationSpeed get() = states.continuationSpeed.value
 
-    val books by states.books
-    val loadErrors by states.loadErrors
-    val selectedBookIndex by states.selectedBookIndex
-    val selectedChapter by states.selectedChapter
-    val selectedVerseIndex by states.selectedVerseIndex
-    val verses by states.verses
-    val searchQuery by states.searchQuery
-    val searchResults by states.searchResults
-    val isSearchMode by states.isSearchMode
-    val searchMode by states.searchMode
-    val filteredBooks by states.filteredBooks
-    val filteredChapters by states.filteredChapters
-    val filteredVerses by states.filteredVerses
-    val selectedScopeIndex by states.selectedScopeIndex
-    val selectedModeIndex by states.selectedModeIndex
-    val verseSelectionToken by states.verseSelectionToken
-    val currentIsPresenting by currentIsPresentingState
+    val books get() = states.books.value
+    val loadErrors get() = states.loadErrors.value
+    val selectedBookIndex get() = states.selectedBookIndex.value
+    val selectedChapter get() = states.selectedChapter.value
+    val selectedVerseIndex get() = states.selectedVerseIndex.value
+    val verses get() = states.verses.value
+    val searchQuery get() = states.searchQuery.value
+    val searchResults get() = states.searchResults.value
+    val isSearchMode get() = states.isSearchMode.value
+    val searchMode get() = states.searchMode.value
+    val filteredBooks get() = states.filteredBooks.value
+    val filteredChapters get() = states.filteredChapters.value
+    val filteredVerses get() = states.filteredVerses.value
+    val selectedScopeIndex get() = states.selectedScopeIndex.value
+    val selectedModeIndex get() = states.selectedModeIndex.value
+    val verseSelectionToken get() = states.verseSelectionToken.value
+    val currentIsPresenting get() = currentIsPresentingState.value
     val splitBrowseMode get() = appSettings.bibleSettings.splitBrowseMode
     val isSplitActive get() = splitBrowseMode
     val crossRefsAvailable get() = appSettings.bibleSettings.crossReferencesEnabled
     val crossRefsDocked get() = crossRefsAvailable && appSettings.bibleSettings.crossReferencesPanel
-    val displayedVerses by displayedVersesState
-    var liveChapterVerses by live::liveChapterVerses
-    var liveBookName by live::liveBookName
-    var liveChapterNum by live::liveChapterNum
-    var liveVerseNumbers by live::liveVerseNumbers
-    var liveNavTargetVerse by live::liveNavTargetVerse
-    var liveNavToken by live::liveNavToken
-    var liveNavPageStep by live::liveNavPageStep
-    var historyExpanded by ui::historyExpanded
-    var selectedHistoryIdx by ui::selectedHistoryIdx
-    var selectedDetectionIdx by ui::selectedDetectionIdx
-    var searchFieldFocused by ui::searchFieldFocused
-    var colWBook by widths::colWBook
-    var colWChapter by widths::colWChapter
-    var colWSplit by widths::colWSplit
-    var colWCrossRef by widths::colWCrossRef
+    val displayedVerses get() = displayedVersesState.value
+    var liveChapterVerses
+        get() = live.liveChapterVerses
+        set(value) { live.liveChapterVerses = value }
+    var liveBookName
+        get() = live.liveBookName
+        set(value) { live.liveBookName = value }
+    var liveChapterNum
+        get() = live.liveChapterNum
+        set(value) { live.liveChapterNum = value }
+    var liveVerseNumbers
+        get() = live.liveVerseNumbers
+        set(value) { live.liveVerseNumbers = value }
+    var liveNavTargetVerse
+        get() = live.liveNavTargetVerse
+        set(value) { live.liveNavTargetVerse = value }
+    var liveNavToken
+        get() = live.liveNavToken
+        set(value) { live.liveNavToken = value }
+    var liveNavPageStep
+        get() = live.liveNavPageStep
+        set(value) { live.liveNavPageStep = value }
+    var historyExpanded
+        get() = ui.historyExpanded
+        set(value) { ui.historyExpanded = value }
+    var selectedHistoryIdx
+        get() = ui.selectedHistoryIdx
+        set(value) { ui.selectedHistoryIdx = value }
+    var selectedDetectionIdx
+        get() = ui.selectedDetectionIdx
+        set(value) { ui.selectedDetectionIdx = value }
+    var searchFieldFocused
+        get() = ui.searchFieldFocused
+        set(value) { ui.searchFieldFocused = value }
+    var colWBook
+        get() = widths.colWBook
+        set(value) { widths.colWBook = value }
+    var colWChapter
+        get() = widths.colWChapter
+        set(value) { widths.colWChapter = value }
+    var colWSplit
+        get() = widths.colWSplit
+        set(value) { widths.colWSplit = value }
+    var colWCrossRef
+        get() = widths.colWCrossRef
+        set(value) { widths.colWCrossRef = value }
 
     fun saveColWidths() = widths.saveColWidths()
 
