@@ -215,7 +215,7 @@ class PresenterManagerAnnouncementTimerTest {
      * `expected:<00:41> but was:<05:00>`.
      *
      * `_announcementTickerLive` is the only thing these tests need out of going live — it is half of
-     * what [PresenterManager.pushAnnouncementTextIfLive] gates on, the other half being a screen on
+     * what [LiveAnnouncementsState.pushAnnouncementTextIfLive] gates on, the other half being a screen on
      * announcements — and it has its own setter. `goLiveAnnouncementTimer` itself stays covered by
      * the go-live tests below.
      */
@@ -227,7 +227,7 @@ class PresenterManagerAnnouncementTimerTest {
         pm.armLiveTicker() // live, but no screen is on announcements
         pm.setAnnouncementText("SENTINEL")
 
-        pm.pushAnnouncementTextIfLive("TICK")
+        pm.announcements.pushAnnouncementTextIfLive("TICK")
 
         assertEquals("SENTINEL", pm.announcementText.value, "a background timer must not overwrite the live output")
     }
@@ -238,7 +238,7 @@ class PresenterManagerAnnouncementTimerTest {
         pm.setPresentingMode(Presenting.ANNOUNCEMENTS) // showing announcements, but nothing armed live
         pm.setAnnouncementText("SENTINEL")
 
-        pm.pushAnnouncementTextIfLive("TICK")
+        pm.announcements.pushAnnouncementTextIfLive("TICK")
 
         assertEquals("SENTINEL", pm.announcementText.value, "with no timer sent live there is nothing to push")
     }
@@ -250,7 +250,7 @@ class PresenterManagerAnnouncementTimerTest {
         pm.setScreenLock(screenIndex = 0, mode = Presenting.PRESENTATION) // a lock, but not announcements
         pm.setAnnouncementText("SENTINEL")
 
-        pm.pushAnnouncementTextIfLive("TICK")
+        pm.announcements.pushAnnouncementTextIfLive("TICK")
 
         assertEquals(
             "SENTINEL",
@@ -266,7 +266,7 @@ class PresenterManagerAnnouncementTimerTest {
         pm.setPresentingMode(Presenting.ANNOUNCEMENTS)
         pm.setAnnouncementText("SENTINEL")
 
-        pm.pushAnnouncementTextIfLive("00:42")
+        pm.announcements.pushAnnouncementTextIfLive("00:42")
 
         assertEquals("00:42", pm.announcementText.value)
     }
@@ -279,7 +279,7 @@ class PresenterManagerAnnouncementTimerTest {
         pm.setScreenLock(screenIndex = 0, mode = Presenting.ANNOUNCEMENTS) // live mode stays NONE
         pm.setAnnouncementText("SENTINEL")
 
-        pm.pushAnnouncementTextIfLive("00:41")
+        pm.announcements.pushAnnouncementTextIfLive("00:41")
 
         assertEquals("00:41", pm.announcementText.value)
     }

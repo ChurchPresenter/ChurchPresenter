@@ -3,10 +3,8 @@ package org.churchpresenter.app.churchpresenter.server
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
-import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.install
 import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.connector
@@ -17,8 +15,6 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.partialcontent.PartialContent
 import io.ktor.server.plugins.statuspages.StatusPages
-import io.ktor.server.request.receiveText
-import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
@@ -26,13 +22,9 @@ import io.ktor.server.websocket.WebSockets
 import java.io.File
 import java.io.IOException
 import java.net.ServerSocket
-import java.security.MessageDigest
-import java.sql.SQLException
-import java.util.Base64
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -41,31 +33,18 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 import org.churchpresenter.bible.Bible
-import org.churchpresenter.app.churchpresenter.data.Songs
-import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceFrame
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.qa.QAManager
 import org.churchpresenter.core.models.qa.Question
-import org.churchpresenter.core.models.qa.toDto
-import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.calendar.sync.Projection
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.diagnostics.CrashReporter
-import org.churchpresenter.diagnostics.Log
-import org.churchpresenter.settings.AtemSettings
 import org.churchpresenter.settings.BackgroundSettings
-import org.churchpresenter.settings.PresentationRemoteSettings
-import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 
 private const val PORT_SCAN_RANGE = 40
@@ -73,8 +52,6 @@ private const val WEBSOCKET_PING_PERIOD_MS = 10_000L
 private const val WEBSOCKET_TIMEOUT_MS = 20_000L
 private const val SHUTDOWN_GRACE_MS = 1_000L
 private const val SHUTDOWN_TIMEOUT_MS = 2_000L
-private const val MAX_UPLOAD_MB = 200
-private const val BYTES_PER_MB = 1024 * 1024
 
 // ── CompanionServer ───────────────────────────────────────────────────────────
 
@@ -86,11 +63,8 @@ private const val BYTES_PER_MB = 1024 * 1024
  * Data is pushed in via [updateSongs] / [updateSchedule].
  * Song-selection events from mobile arrive via [onSongSelected].
  */
-private val UPLOADABLE_EXTENSIONS = setOf("pdf", "ppt", "pptx", "key")
-
 class CompanionServer {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
+    internal val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private var _qaEventJob: Job? = null
     var qaManager: QAManager? = null
@@ -130,91 +104,6 @@ class CompanionServer {
     @Volatile internal var _autoScrollInterval: Int = 5
     @Volatile internal var _presentationIsLooping: Boolean = true
 
-    fun updatePresentationRemoteSettings(settings: PresentationRemoteSettings, apiKey: String) {
-        val wasEnabled = presentationRemoteEnabled
-        presentationRemoteEnabled = settings.remoteControlEnabled
-        presentationRemotePassword = apiKey
-        if (wasEnabled && !presentationRemoteEnabled) clearPresentationState()
-        InstanceLinkLogger.log(
-            InstanceLinkLogSide.PRIMARY, "state_updated",
-            mapOf("type" to "presentation_remote_settings", "remoteControlEnabled" to settings.remoteControlEnabled)
-        )
-    }
-
-    fun updateAutoScrollInterval(secs: Int) {
-        if (_autoScrollInterval == secs) return
-        _autoScrollInterval = secs
-        broadcast(WebSocketMessage(
-            type = Constants.WS_EVENT_PRESENTATION_AUTO_SCROLL_CHANGED,
-            payload = """{"autoScrollInterval":$secs}"""
-        ))
-    }
-
-    fun updateLoopingState(looping: Boolean) {
-        if (_presentationIsLooping == looping) return
-        _presentationIsLooping = looping
-        broadcast(WebSocketMessage(
-            type = Constants.WS_EVENT_PRESENTATION_LOOP_CHANGED,
-            payload = """{"looping":$looping}"""
-        ))
-    }
-
-    fun clearPresentationState() {
-        _currentPresentationId = ""
-        _currentSlideIndex = 0
-        _currentSlideTotalCount = 0
-        _presentationIsPlaying = false
-        _presentationIsLive = false
-        broadcast(WebSocketMessage(
-            type = Constants.WS_EVENT_PRESENTATION_SLIDE_CHANGED,
-            payload = """{"id":"","index":0,"total":0,"isPlaying":false,"isLive":false}"""
-        ))
-    }
-
-    fun updatePresentationLiveStatus(isLive: Boolean) {
-        if (_presentationIsLive == isLive) return
-        _presentationIsLive = isLive
-        broadcast(WebSocketMessage(
-            type = Constants.WS_EVENT_PRESENTATION_LIVE_CHANGED,
-            payload = """{"isLive":$isLive}"""
-        ))
-    }
-
-    fun broadcastSlideChange(id: String, index: Int, total: Int, isPlaying: Boolean) {
-        _currentPresentationId = id
-        _currentSlideIndex = index
-        _currentSlideTotalCount = total
-        _presentationIsPlaying = isPlaying
-        val note = presentations._presentationNotes[id]?.getOrNull(index) ?: ""
-        broadcast(WebSocketMessage(
-            type = Constants.WS_EVENT_PRESENTATION_SLIDE_CHANGED,
-            payload = """{"id":"$id","index":$index,"total":$total,"isPlaying":$isPlaying,"isLive":""" +
-                """$_presentationIsLive,"notes":"${jsonEscape(note)}"}"""
-        ))
-    }
-
-    fun broadcastFreezeChange(frozen: Boolean) {
-        _presentationFrozen = frozen
-        broadcast(WebSocketMessage(
-            type = Constants.WS_EVENT_PRESENTATION_FREEZE_CHANGED,
-            payload = """{"frozen":$frozen}"""
-        ))
-    }
-
-    /**
-     * Broadcasts the desktop media player's playback state to companions (mobile Media tab).
-     * Position ticks continuously, so callers poll this on a fixed cadence.
-     */
-    fun broadcastMediaState(state: MediaPlaybackState) = with(state) {
-        broadcast(WebSocketMessage(
-            type = Constants.WS_EVENT_MEDIA_STATE_CHANGED,
-            payload = """{"isLive":$isLive,"isLoaded":$isLoaded,"isPlaying":$isPlaying,""" +
-                """"title":"${jsonEscape(title)}","positionMs":$positionMs,"durationMs":$durationMs,""" +
-                """"volume":$volume,"muted":$muted,"mediaType":"${jsonEscape(mediaType)}",""" +
-                """"source":"${jsonEscape(source)}"}"""
-        ))
-    }
-
     /** Emitted when remote taps Go Live. */
     val onPresentationGoLive = MutableSharedFlow<Unit>(
         extraBufferCapacity = 4,
@@ -245,63 +134,6 @@ class CompanionServer {
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
-    fun updateAtemConfig(atem: AtemSettings, lowerThirdFolder: String) {
-        this.atem.updateConfig(atem, lowerThirdFolder)
-        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "atem_config"))
-    }
-
-    // ── Browser Source outputs (OBS/vMix overlay) ─────────────────────────────
-    // Content is rendered off-screen in main.kt (BrowserSourceVideoRenderer, the same
-    // BiblePresenter/SongPresenter/etc composables used everywhere else) and streamed here over
-    // a WebSocket as binary-framed PNG deltas — this class only owns serving, never
-    // PresenterManager/content state. (Previously HTTP multipart/x-mixed-replace; switched to
-    // WebSocket because that legacy MIME type turned out to be unreliable in both directions —
-    // Chrome's <img> support for it is inconsistent, and Safari's fetch()/ReadableStream failed
-    // outright with "Load failed" for this exact indefinitely-long streaming response pattern,
-    // even on localhost. WebSocket is what the rest of this server already uses for real-time
-    // push, and has none of that legacy baggage.)
-
-
-
-
-    /**
-     * The Browser Source overlay page for [index]. The page itself is
-     * [browserSourceOverlayPage] in BrowserSourcePage.kt; this reads the API-key state it
-     * needs so callers do not have to.
-     */
-    internal fun browserSourceOverlayPageHtml(
-        index: Int,
-        output: ScreenAssignment,
-        bgOverride: String? = null,
-    ): String = browserSourceOverlayPage(
-        index, output, _apiKeyEnabled.value, _apiKey.value, bgOverride
-    )
-
-    /**
-     * Asks the desktop operator to approve a tablet using a Browser Source page's transpose
-     * buttons, exactly as the presentation remote's handshake does. Called once per page load,
-     * never per press.
-     */
-    internal suspend fun checkMusicianConnect(call: ApplicationCall): Boolean {
-        val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
-        val pending = PendingConnectionRequest(clientId)
-        onMusicianConnect.emit(pending)
-        val approved = pending.decision.await()
-        if (approved) {
-            browserSource.approveMusician(clientId)
-        } else {
-            call.respond(HttpStatusCode.Forbidden, """{"error":"connection denied"}""")
-        }
-        return approved
-    }
-
-
-
-
-
-
-
-
     // Current data — thread-safe StateFlows
     // All songs flat list
     // Current catalog — rebuilt whenever songs are updated
@@ -315,11 +147,8 @@ class CompanionServer {
      */
     @Volatile var typicalSeconds: (SongItem) -> Int? = { null }
 
-    /** The library as songbook records, with each song's usual length, for a phone planning a service. */
-    fun songCatalog(): SongCatalogRecordsResponse =
-        SongCatalogRecordsResponse(Projection.catalog(_songs, typicalSeconds).values.toList())
     internal val _bibleCatalog = MutableStateFlow<BibleCatalogResponse?>(null)
-    private val _bible = MutableStateFlow<Bible?>(null)
+    internal val _bible = MutableStateFlow<Bible?>(null)
     /** Absolute path to the primary bible's .spb file — serves GET /api/bible/file for InstanceLink followers. */
     @Volatile internal var _bibleFilePath: String = ""
     /** Same as [_bibleFilePath] but for the secondary bible — serves GET /api/bible/file/secondary,
@@ -352,15 +181,8 @@ class CompanionServer {
     @Volatile
     var blockedClientIds: Set<String> = emptySet()
 
-    /** Blank ids are anonymous clients, which cannot be blocked (there is nothing to block). */
-    internal fun isClientBlocked(clientId: String): Boolean =
-        clientId.isNotBlank() && clientId in blockedClientIds
     /** schedule item UUID → absolute local media file path — populated by updateSchedule, serves /api/media/stream */
     internal val _scheduleItemToMediaPath = ConcurrentHashMap<String, String>()
-
-
-
-
 
     /** Everything the API can serve as a picture — see [PictureLibrary]. */
     internal val pictures = PictureLibrary()
@@ -585,11 +407,10 @@ class CompanionServer {
 
     val tunnelManager = TunnelManager()
 
-
     private var server: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>? = null
     internal var currentPort: Int = Constants.SERVER_DEFAULT_PORT
 
-    private val json = Json {
+    internal val json = Json {
         prettyPrint = false
         ignoreUnknownKeys = true
         // Without this, fields still at their Kotlin default value (e.g. an unmodified
@@ -605,356 +426,14 @@ class CompanionServer {
     /** Presentation catalogue, slide cache and background renders — see [PresentationStore]. */
     internal val presentations = PresentationStore(json, scope, ::broadcast)
 
-    /**
-     * Publishes a presentation and its slides to connected companions.
-     * The work is [PresentationStore]'s; this is the API main.kt calls.
-     */
-    fun updatePresentation(
-        id: String,
-        filePath: String,
-        fileName: String,
-        fileType: String,
-        slideFiles: List<File>,
-        slideNotes: List<String> = emptyList()
-    ) = presentations.updatePresentation(id, filePath, fileName, fileType, slideFiles, slideNotes)
-
     /** OBS/vMix Browser Source outputs and their frame streams — see [BrowserSourceHub]. */
     internal val browserSource = BrowserSourceHub(scope, _apiKey)
-
-    /** Publishes the configured Browser Source outputs. Called from main.kt. */
-    fun updateBrowserSourceOutputs(outputs: List<ScreenAssignment>) {
-        browserSource.updateBrowserSourceOutputs(outputs)
-        InstanceLinkLogger.log(
-            InstanceLinkLogSide.PRIMARY, "state_updated",
-            mapOf("type" to "browser_source_outputs", "count" to outputs.size)
-        )
-    }
-
-    /** The output configured at [index], or null. */
-    fun browserSourceOutput(index: Int): ScreenAssignment? = browserSource.browserSourceOutput(index)
-
-    /** Registers the frame flow an output's renderer produces. Called from main.kt. */
-    fun registerBrowserSourceFrames(index: Int, frames: SharedFlow<BrowserSourceFrame>) =
-        browserSource.registerBrowserSourceFrames(index, frames)
-
-    /** Publishes each output's current transpose to the pages that show it. Called from main.kt. */
-    fun updateBrowserSourceTranspose(transposes: Map<Int, Int>) {
-        browserSource.transposes.value = transposes
-    }
-
-    /** Publishes which outputs' pages offer the transpose buttons at all. Called from main.kt. */
-    fun updateTransposeControls(indices: Set<Int>) {
-        browserSource.transposeControls.value = indices
-    }
-
-    // ── Public API ────────────────────────────────────────────────────────────
-
-    /** Update API key settings without restarting the server. */
-    fun  updateApiKey(enabled: Boolean, key: String) {
-        _apiKeyEnabled.value = enabled
-        _apiKey.value = key
-    }
-
-    /** Allow or disallow file uploads from mobile devices without restarting the server. */
-    fun updateFileUploadEnabled(enabled: Boolean) {
-        _fileUploadEnabled.value = enabled
-        InstanceLinkLogger.log(
-            InstanceLinkLogSide.PRIMARY,
-            "state_updated",
-            mapOf("type" to "file_upload_enabled", "enabled" to enabled)
-        )
-    }
-
-    /** Update the max media-upload size (MB) without restarting the server. */
-    fun updateMaxMediaUploadMb(mb: Int) {
-        _maxMediaUploadMb.value = mb.coerceAtLeast(1)
-    }
-
-    /**
-     * Preloads songs and bible from disk on the server's IO scope.
-     * Safe to call at any time; re-call whenever settings change.
-     */
-    fun preloadData(
-        songStorageDir: String,
-        bibleStorageDir: String,
-        primaryBibleFileName: String
-    ) {
-        scope.launch {
-            // ── Songs ──────────────────────────────────────────────────────────
-            if (songStorageDir.isNotEmpty()) {
-                try {
-                    val dir = File(songStorageDir)
-                    if (dir.exists() && dir.isDirectory) {
-                        val songs = Songs()
-                        dir.listFiles { f -> f.extension.lowercase() == Constants.EXTENSION_SPS }
-                            ?.sortedBy { it.name }
-                            ?.forEach { file ->
-                                fun failed(e: Exception) = preloadFailed(
-                                    "Failed to load song ${file.name}: ${e.message}",
-                                    "Server: Failed to load song ${file.name}",
-                                    e,
-                                )
-                                // An unreadable file, a missing one, or a SongPresenter SQLite database
-                                // that will not open.
-                                try {
-                                    songs.loadFromSpsAppend(file.absolutePath)
-                                } catch (e: IOException) {
-                                    failed(e)
-                                } catch (e: IllegalArgumentException) {
-                                    failed(e)
-                                } catch (e: SQLException) {
-                                    failed(e)
-                                }
-                            }
-                        if (songs.getSongCount() > 0) {
-                            updateSongs(songs.getSongs())
-                        }
-                    }
-                } catch (e: SecurityException) {
-                    songFolderFailed(songStorageDir, e)
-                } catch (e: IllegalArgumentException) {
-                    // Publishing the catalog: serialization errors are this type.
-                    songFolderFailed(songStorageDir, e)
-                } catch (e: IllegalStateException) {
-                    songFolderFailed(songStorageDir, e)
-                }
-            }
-
-            // ── Bible ──────────────────────────────────────────────────────────
-            if (bibleStorageDir.isNotEmpty() && primaryBibleFileName.isNotEmpty()) {
-                try {
-                    val file = File(bibleStorageDir, primaryBibleFileName)
-                    if (file.exists()) {
-                        val bible = Bible()
-                        // Reports a bad module through loadError rather than throwing; what can
-                        // still fail is reaching the file and publishing what was read.
-                        bible.loadFromSpb(file.absolutePath)
-                        updateBible(bible, primaryBibleFileName)
-                    }
-                } catch (e: SecurityException) {
-                    bibleFailed(primaryBibleFileName, e)
-                } catch (e: IllegalArgumentException) {
-                    bibleFailed(primaryBibleFileName, e)
-                } catch (e: IllegalStateException) {
-                    bibleFailed(primaryBibleFileName, e)
-                }
-            }
-        }
-    }
-
-    private fun songFolderFailed(songStorageDir: String, e: Exception) = preloadFailed(
-        "Failed to load songs from $songStorageDir: ${e.message}",
-        "Server: Failed to load songs from storage",
-        e,
-    )
-
-    private fun bibleFailed(fileName: String, e: Exception) = preloadFailed(
-        "Failed to load bible $fileName: ${e.message}",
-        "Server: Failed to load bible $fileName",
-        e,
-    )
-
-    /** Logs a startup load that failed, and reports it as a warning: the server runs on without it. */
-    private fun preloadFailed(logMessage: String, report: String, e: Exception) {
-        Log.warn("CompanionServer", logMessage)
-        CrashReporter.reportWarning(report, throwable = e, tags = mapOf("subsystem" to "server"))
-    }
-
-    /** Feed the full song list — builds grouped catalog and broadcasts to WS clients. */
-    fun updateSongs(songs: List<SongItem>) {
-        _songs = songs
-        val catalog = buildCatalog(songs)
-        _catalog.value = catalog
-        broadcast(WebSocketMessage(
-            type = Constants.WS_EVENT_SONGS_UPDATED,
-            payload = json.encodeToString(SongCatalogResponse.serializer(), catalog)
-        ))
-    }
-
-    /** Feed the primary Bible — builds full nested catalog and broadcasts to WS clients. */
-    fun updateBible(bible: Bible, translation: String, filePath: String = "") {
-        _bible.value = bible
-        _bibleFilePath = filePath
-        val catalog = buildBibleCatalog(bible, translation)
-        _bibleCatalog.value = catalog
-        broadcast(WebSocketMessage(
-            type = Constants.WS_EVENT_BIBLE_UPDATED,
-            payload = json.encodeToString(BibleCatalogResponse.serializer(), catalog)
-        ))
-    }
-
-    /** Records the secondary bible's file path for GET /api/bible/file/secondary — no mobile
-     *  companion catalog/broadcast exists for the secondary bible, only InstanceLink uses this. */
-    fun updateSecondaryBibleFilePath(filePath: String) {
-        if (_secondaryBibleFilePath == filePath) return
-        _secondaryBibleFilePath = filePath
-        InstanceLinkLogger.log(
-            InstanceLinkLogSide.PRIMARY,
-            "state_updated",
-            mapOf("type" to "secondary_bible_file_path", "filePath" to filePath)
-        )
-        // Invalidation signal for followers mirroring the secondary bible — they re-download
-        // the .spb on this event instead of trusting their local cache forever.
-        broadcast(WebSocketMessage(type = Constants.WS_EVENT_SECONDARY_BIBLE_UPDATED, payload = ""))
-    }
-
-    /** Records every configured Bible module in presentation order for Instance Link replicas. */
-    fun updateBibleFilePaths(filePaths: List<String>) {
-        val existing = filePaths.filter { File(it).exists() }
-        if (_bibleFilePaths == existing) return
-        _bibleFilePaths = existing
-        broadcast(WebSocketMessage(type = Constants.WS_EVENT_SECONDARY_BIBLE_UPDATED, payload = ""))
-    }
-
-    /** Records the current background settings for GET /api/backgrounds — only consumed by a
-     *  follower that opted in to mirroring backgrounds (see InstanceLinkSettings.mirrorBackgrounds). */
-    fun updateBackgroundSettings(settings: BackgroundSettings) {
-        if (_backgroundSettings.value == settings) return
-        _backgroundSettings.value = settings
-        InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "state_updated", mapOf("type" to "background_settings"))
-        // Invalidation signal for followers mirroring backgrounds — they clear their asset
-        // cache and re-fetch on this event.
-        broadcast(WebSocketMessage(type = Constants.WS_EVENT_BACKGROUNDS_UPDATED, payload = ""))
-    }
-
-
-    /**
-     * Publishes a picture folder to connected companions and tells them it changed.
-     * The catalogue itself is built by [PictureLibrary].
-     */
-    fun updatePictures(
-        folderId: String,
-        folderName: String,
-        folderPath: String,
-        imageFiles: List<File>
-    ) {
-        val catalog = pictures.update(folderId, folderName, folderPath, imageFiles)
-        broadcast(WebSocketMessage(
-            type = Constants.WS_EVENT_PICTURES_UPDATED,
-            payload = json.encodeToString(PictureFolderResponse.serializer(), catalog)
-        ))
-    }
-
-    /**
-     * The [File] for a specific image by folder ID and zero-based index, or null if not found.
-     * Used by the remote-select handler in MainDesktop so the correct file is presented even when
-     * the requested folder differs from the one open in the Pictures tab (e.g. a `device_uploads`
-     * selection).
-     */
-    fun getImageFile(folderId: String, index: Int): File? = pictures.imageFile(folderId, index)
 
     /**
      * The folder-id of the currently active picture folder pushed to mobile companions via
      * GET /api/pictures.  Null until a folder has been loaded in the Pictures tab.
      */
     val activeFolderId: String? get() = pictures.activeFolderId
-
-
-
-
-
-    fun updateSchedule(items: List<ScheduleItem>) {
-        items.forEach(::registerScheduleItemResources)
-        val dtos = items.map { it.toDto() }
-        _schedule.value = dtos
-        broadcast(WebSocketMessage(
-            type = Constants.WS_EVENT_SCHEDULE_UPDATED,
-            payload = json.encodeToString(ScheduleResponse.serializer(), ScheduleResponse(dtos, dtos.size))
-        ))
-    }
-
-    /**
-     * Server-side resources a schedule item needs before clients can ask for it: picture folders
-     * are catalogued, presentations start rendering in the background, and local media paths are
-     * recorded so the media endpoint can serve them. Item types with nothing to register fall
-     * through.
-     *
-     * Split out of [updateSchedule]'s mapping loop so [toDto] stays a pure function of the item.
-     * Runs for every item before any is mapped; the DTOs don't read anything this writes, so the
-     * published schedule is identical either way.
-     */
-    private fun registerScheduleItemResources(item: ScheduleItem) {
-        when (item) {
-            is ScheduleItem.PictureItem -> scope.launch(Dispatchers.IO) {
-                pictures.registerScheduleFolder(item.id, item.folderPath, item.folderName)
-            }
-            is ScheduleItem.PresentationItem -> {
-                val presentationId = item.filePath.hashCode().toUInt().toString(16)
-                presentations._scheduleItemToPresentationId[item.id] = presentationId
-                presentations._presentationFilePaths[presentationId] = item.filePath
-                if (!presentations._slideBytes.containsKey(presentationId) &&
-                    presentations._renderingPresentations.putIfAbsent(presentationId, Unit) == null) {
-                    scope.launch(Dispatchers.IO) {
-                        try {
-                            // One render at a time — see presentations.presentationRenderMutex.
-                            presentations.presentationRenderMutex.withLock {
-                                presentations.renderPresentationForServer(presentationId, item.filePath)
-                            }
-                        } finally {
-                            presentations._renderingPresentations.remove(presentationId)
-                        }
-                    }
-                }
-            }
-            is ScheduleItem.MediaItem ->
-                if (item.mediaType == "local") _scheduleItemToMediaPath[item.id] = item.mediaUrl
-            else -> Unit
-        }
-    }
-
-    /**
-     * Broadcasts a snapshot of whatever is currently live — fills the gap for content types with
-     * no dedicated "now live" event (bible, songs, pictures, media, lower thirds, announcements,
-     * websites, scenes, Q&A, dictionary). Presentations rely on the existing slide-changed events
-     * instead — [LiveContent.mode] == "PRESENTATION" here is informational only.
-     */
-    fun updateLiveState(content: LiveContent) = with(content) {
-        val (pictureFolderId, pictureIndex) = pictures.locate(pictureImagePath)
-        val mediaId = mediaUrl?.let { url -> _scheduleItemToMediaPath.entries.find { it.value == url }?.key }
-        val dto = LiveStateDto(
-            contentType = mode,
-            bookName = bibleVerse?.bookName?.ifEmpty { null },
-            chapter = bibleVerse?.chapter,
-            verseNumber = bibleVerse?.verseNumber,
-            verseRange = bibleVerse?.verseRange?.ifEmpty { null },
-            verseText = bibleVerse?.verseText,
-            verseCodeBook = verseCode?.first,
-            verseCodeChapter = verseCode?.second,
-            verseCodeVerse = verseCode?.third,
-            songTitle = lyricSection?.title?.ifEmpty { null },
-            songNumber = lyricSection?.songNumber,
-            sectionType = lyricSection?.type?.ifEmpty { null },
-            lines = lyricSection?.lines,
-            songSectionIndex = songSectionIndex,
-            songLineIndex = songLineIndex,
-            pictureFolderId = pictureFolderId,
-            pictureIndex = pictureIndex,
-            mediaId = mediaId,
-            mediaUrl = mediaUrl?.ifEmpty { null },
-            mediaType = mediaType?.ifEmpty { null },
-            announcementText = announcementText?.ifEmpty { null },
-            websiteUrl = websiteUrl?.ifEmpty { null },
-            websiteTitle = websiteTitle?.ifEmpty { null },
-            sceneId = sceneId,
-            sceneName = sceneName,
-            questionId = questionId,
-            questionText = questionText,
-            dictionaryWord = dictionaryWord,
-            dictionaryEntry = dictionaryEntry,
-            lowerThirdName = lowerThirdName?.ifEmpty { null }
-        )
-        // Skip byte-identical re-broadcasts (content setters fire on every call, even when
-        // nothing changed) — same early-return pattern the other update* functions use. Protects
-        // the shared broadcast buffer from floods that could evict messages for slow clients.
-        if (_liveState.value == dto) return@with
-        _liveState.value = dto
-        broadcast(WebSocketMessage(
-            type = Constants.WS_EVENT_LIVE_STATE_CHANGED,
-            payload = json.encodeToString(LiveStateDto.serializer(), dto)
-        ))
-    }
-
-
 
     /**
      * Starts the companion server on [port].
@@ -1068,16 +547,6 @@ class CompanionServer {
             }
     }
 
-
-
-
-
-
-
-
-
-
-
     fun stop() {
         tunnelManager.stop()
         server?.stop(SHUTDOWN_GRACE_MS, SHUTDOWN_TIMEOUT_MS)
@@ -1093,226 +562,6 @@ class CompanionServer {
     // Several of these are `internal` rather than private because the route groups now live in
     // their own files (ScheduleRoutes.kt, QaRoutes.kt, …) and call back into them. Immutable state
     // is handed to those groups as parameters instead, so only behaviour is widened, not data.
-
-    /**
-     * Try to parse a [ScheduleItem] from raw JSON using the flat [RemoteItemRequest] format first,
-     * then fall back to the legacy sealed-class [AddToScheduleRequest] format.
-     */
-    internal fun parseRemoteItem(body: String): ScheduleItem? =
-        // 1. flat format: {"item":{"songNumber":42,"title":"…","songbook":"…"}}
-        runCatching { parseFlatRemoteItem(body) }.getOrNull()
-        // 2. legacy sealed-class format with discriminator
-            ?: runCatching { json.decodeFromString(AddToScheduleRequest.serializer(), body).item }.getOrNull()
-
-    private fun parseFlatRemoteItem(body: String): ScheduleItem? {
-        val dto = json.decodeFromString(RemoteItemRequest.serializer(), body).item
-        return pictureItemFor(dto) ?: presentationItemFor(dto) ?: dto.toScheduleItem()
-    }
-
-    // Picture identified by folder-id (companion app format): folderPath is null in that case —
-    // resolve it via the cached catalog.
-    private fun pictureItemFor(dto: RemoteItemDto): ScheduleItem.PictureItem? {
-        if (dto.folderId == null || dto.folderPath != null) return null
-        val catalog = pictures.catalogs[dto.folderId] ?: return null
-        return ScheduleItem.PictureItem(
-            id         = dto.id.ifBlank { java.util.UUID.randomUUID().toString() },
-            folderPath = catalog.folderPath,
-            folderName = catalog.folderName,
-            imageCount = catalog.imageTotal
-        )
-    }
-
-    // Presentation identified by id/fileHash (companion app format): filePath is not sent — resolve
-    // via presentations._presentationFilePaths (populated by updatePresentation and updateSchedule)
-    // then fall back to a _schedule scan.
-    // NOTE: mobile may omit the "type" field when it equals the default ("presentation"), so also
-    // accept type==null as long as the id resolves in presentations._presentationFilePaths.
-    private fun presentationItemFor(dto: RemoteItemDto): ScheduleItem.PresentationItem? {
-        val looksLikePresentation = dto.type == "presentation" || dto.type == null
-        val noExplicitTarget = dto.filePath == null && dto.folderId == null
-        if (!noExplicitTarget || dto.id.isBlank() || !looksLikePresentation) return null
-        val filePath = presentations._presentationFilePaths[dto.id]
-            ?: _schedule.value.firstOrNull { s ->
-                s.type == "presentation" && (
-                    s.id == dto.id ||
-                    s.filePath?.hashCode()?.toUInt()?.toString(16) == dto.id
-                )
-            }?.filePath
-            ?: return null
-        val catalog = presentations._presentationCatalogs[dto.id]
-        return ScheduleItem.PresentationItem(
-            id         = java.util.UUID.randomUUID().toString(),
-            filePath   = filePath,
-            fileName   = catalog?.fileName ?: dto.title ?: "",
-            slideCount = catalog?.slideTotal ?: 0,
-            fileType   = catalog?.fileType ?: ""
-        )
-    }
-
-    internal suspend fun checkApiKey(call: ApplicationCall): Boolean {
-        if (!_apiKeyEnabled.value || _apiKey.value.isEmpty()) return true
-        val provided = call.request.headers[Constants.HEADER_API_KEY]
-            ?: call.request.queryParameters[Constants.QUERY_PARAM_API_KEY]
-            ?: ""
-        return if (MessageDigest.isEqual(provided.toByteArray(), _apiKey.value.toByteArray())) {
-            true
-        } else {
-            call.respond(HttpStatusCode.Unauthorized, "Invalid API key")
-            false
-        }
-    }
-
-    internal suspend fun checkPresentationRemoteAuth(call: ApplicationCall): Boolean {
-        if (!presentationRemoteEnabled) {
-            call.respond(HttpStatusCode.Forbidden, """{"error":"remote control is disabled"}""")
-            return false
-        }
-        val pw = presentationRemotePassword
-        val provided = call.request.headers[Constants.HEADER_PRESENTATION_PASSWORD]
-            ?: call.request.queryParameters["password"]
-            ?: ""
-        return if (pw.isEmpty() || MessageDigest.isEqual(provided.toByteArray(), pw.toByteArray())) {
-            true
-        } else {
-            call.respond(HttpStatusCode.Unauthorized, """{"error":"Invalid password"}""")
-            false
-        }
-    }
-
-    /**
-     * Asks the desktop operator to approve/deny this device connecting to the presentation
-     * remote, exactly like any other remote action (add to schedule, QA moderation, etc.).
-     * Only called from the initial /auth handshake — not on every subsequent action —
-     * so an approved or session-approved device is never re-prompted mid-session.
-     */
-    internal suspend fun checkPresentationRemoteConnect(call: ApplicationCall): Boolean {
-        val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
-        val pending = PendingConnectionRequest(clientId)
-        onPresentationRemoteConnect.emit(pending)
-        val approved = pending.decision.await()
-        if (!approved) {
-            call.respond(HttpStatusCode.Forbidden, """{"error":"connection denied"}""")
-        }
-        return approved
-    }
-
-    /** The uploaded file's safe name and bytes, or null once the rejection has been responded with. */
-    private suspend fun receiveUploadedFile(call: ApplicationCall): Pair<String, ByteArray>? {
-        val contentLength = call.request.headers["Content-Length"]?.toLongOrNull() ?: 0L
-        if (contentLength > MAX_UPLOAD_MB * BYTES_PER_MB) {
-            call.respond(HttpStatusCode.PayloadTooLarge, """{"error":"file too large (max 200 MB)"}""")
-            return null
-        }
-        val parsed = json.parseToJsonElement(call.receiveText()) as? JsonObject
-        val name   = (parsed?.get("name") as? JsonPrimitive)?.content
-        val data   = (parsed?.get("data") as? JsonPrimitive)?.content
-        if (name.isNullOrBlank() || data.isNullOrBlank()) {
-            call.respond(HttpStatusCode.BadRequest, """{"error":"name and data are required"}""")
-            return null
-        }
-        return decodeUploadedFile(call, name, data)
-    }
-
-    private suspend fun decodeUploadedFile(
-        call: ApplicationCall,
-        name: String,
-        data: String
-    ): Pair<String, ByteArray>? {
-        val safeName = File(name).name.ifBlank { "upload.pdf" }
-        val ext = safeName.substringAfterLast('.', "").lowercase()
-        if (ext !in UPLOADABLE_EXTENSIONS) {
-            call.respond(HttpStatusCode.UnsupportedMediaType, """{"error":"unsupported file type: $ext"}""")
-            return null
-        }
-        val base64Match = Regex("^data:[^;]+;base64,(.+)$").find(data)
-        if (base64Match == null) {
-            call.respond(HttpStatusCode.BadRequest, """{"error":"data must be a base64 data URI"}""")
-            return null
-        }
-        return safeName to Base64.getDecoder().decode(base64Match.groupValues[1])
-    }
-
-    internal suspend fun handlePresentationFileUpload(call: ApplicationCall) {
-        try {
-            val (safeName, fileBytes) = receiveUploadedFile(call) ?: return
-            val ext = safeName.substringAfterLast('.', "").lowercase()
-            val uploadDir = deviceUploadDir.also { it.mkdirs() }
-            val uniqueName = if (File(uploadDir, safeName).exists()) {
-                val ts   = System.currentTimeMillis()
-                val base = safeName.substringBeforeLast('.', safeName)
-                "${base}_$ts.$ext"
-            } else safeName
-            val file = File(uploadDir, uniqueName)
-            file.writeBytes(fileBytes)
-            pruneDeviceUploads()
-            val id = file.absolutePath.hashCode().toUInt().toString(16)
-            presentations.evictPreviousDeviceUpload()
-            presentations._presentationFilePaths[id] = file.absolutePath
-            presentations._lastDeviceUploadedPresentationId = id
-            val uploadClientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
-            scope.launch { onPresentationUploaded.emit(file) }
-            scope.launch { onInstantAction.emit(RemoteInstantAction(
-                actionType = "upload",
-                title = RemoteLabel.Text(file.name),
-                detail = RemoteLabel.Size(fileBytes.size.toLong()),
-                clientId = uploadClientId
-            )) }
-            call.respondText(
-                """{"ok":true,"id":"$id","name":"${file.nameWithoutExtension.replace("\"", "\\\"")}"}""",
-                ContentType.Application.Json
-            )
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: IOException) {
-            // The client went away mid-upload, or the file could not be written.
-            uploadFailed(call, e)
-        } catch (e: IllegalArgumentException) {
-            // A body that is not JSON, or data that is not valid base64.
-            uploadFailed(call, e)
-        }
-    }
-
-    private suspend fun uploadFailed(call: ApplicationCall, e: Exception) {
-        call.respond(
-            HttpStatusCode.InternalServerError,
-            """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}"""
-        )
-    }
-
-    /** `internal` rather than private so the extracted [qaRoutes] group can call it. */
-    internal suspend fun checkQaAdmin(call: ApplicationCall): Boolean {
-        val pw = qaAdminPassword
-        if (pw.isEmpty()) return true
-        val provided = call.request.headers["X-QA-Password"]
-            ?: call.request.queryParameters["password"]
-            ?: ""
-        return if (MessageDigest.isEqual(provided.toByteArray(), pw.toByteArray())) {
-            true
-        } else {
-            call.respond(HttpStatusCode.Unauthorized, """{"error":"Invalid admin password"}""")
-            false
-        }
-    }
-
-    /**
-     * Asks the desktop operator to approve/deny this device connecting to the Q&A admin panel,
-     * exactly like the presentation remote's initial connection handshake.
-     * Only called from the initial /api/qa/auth handshake — not on every subsequent action —
-     * so an approved or session-approved device is never re-prompted mid-session.
-     *
-     * `internal` rather than private so the extracted [qaRoutes] group can call it.
-     */
-    internal suspend fun checkQaAdminConnect(call: ApplicationCall): Boolean {
-        val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
-        val pending = PendingConnectionRequest(clientId)
-        onQaAdminConnect.emit(pending)
-        val approved = pending.decision.await()
-        if (!approved) {
-            call.respond(HttpStatusCode.Forbidden, """{"error":"connection denied"}""")
-        }
-        return approved
-    }
-
 
     internal fun broadcast(msg: WebSocketMessage) {
         InstanceLinkLogger.log(InstanceLinkLogSide.PRIMARY, "broadcast", mapOf("type" to msg.type))
@@ -1330,17 +579,6 @@ class CompanionServer {
             mapOf("endpoint" to endpoint, "status" to status, "reason" to reason)
         )
     }
-
-    /** Broadcasts a display_cleared event to all connected mobile clients. */
-    fun broadcastDisplayCleared() {
-        broadcast(WebSocketMessage(type = Constants.WS_EVENT_DISPLAY_CLEARED, payload = ""))
-    }
-
-    /** Broadcasts the currently active song section index to all connected mobile clients. */
-    fun broadcastSongSectionSelected(sectionIndex: Int) {
-        broadcast(WebSocketMessage(type = Constants.WS_EVENT_SONG_SECTION_SELECTED, payload = sectionIndex.toString()))
-    }
-
 
 }
 
