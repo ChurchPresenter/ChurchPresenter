@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +31,7 @@ import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
+import org.churchpresenter.app.churchpresenter.qaQrCodeUrl
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.resolvedFor
@@ -326,10 +328,8 @@ private fun OffscreenQa(presenterManager: PresenterManager, appSettings: AppSett
     val showQRCode = presenterManager.showQRCodeOnDisplay.value
     val qaTransitionAlpha = presenterManager.qaTransitionAlpha.value
     if (showQRCode) {
-        val base = context.qaDisplayUrlState?.value?.ifEmpty { context.serverUrlState?.value ?: "" }
-            ?: (context.serverUrlState?.value ?: "")
         QAQRCodePresenter(
-            url = "$base/qa",
+            url = qaQrCodeUrl(context.qaDisplayUrlState?.value.orEmpty(), context.serverUrlState?.value.orEmpty()),
             qaSettings = appSettings.qaSettings,
             outputRole = outputRole,
             transitionAlpha = qaTransitionAlpha
@@ -416,7 +416,7 @@ private fun OffscreenMode(
                     bitmap = snapshot,
                     contentDescription = null,
                     contentScale = ContentScale.FillBounds,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize().testTag(WEB_SNAPSHOT_TAG)
                 )
             }
         }
@@ -444,3 +444,6 @@ private fun OffscreenMode(
         Presenting.NONE -> {}
     }
 }
+
+/** The website snapshot an offscreen output draws, for a test to find. */
+internal const val WEB_SNAPSHOT_TAG = "offscreen-web-snapshot"

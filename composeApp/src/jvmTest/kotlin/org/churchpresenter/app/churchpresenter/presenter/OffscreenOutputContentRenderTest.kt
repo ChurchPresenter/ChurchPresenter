@@ -4,9 +4,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
@@ -106,6 +110,7 @@ class OffscreenOutputContentRenderTest {
         outputIndex: Int = 0,
         kind: OffscreenOutputKind = OffscreenOutputKind.BROWSER_SOURCE,
         seed: PresenterManager.() -> Unit = {},
+        qaDisplayUrl: String? = null,
         body: ComposeUiTest.() -> Unit,
     ) = runComposeUiTest {
         val manager = PresenterManager().apply(seed)
@@ -119,6 +124,7 @@ class OffscreenOutputContentRenderTest {
                         effectiveModeState = mutableStateOf(mode),
                         outputIndex = outputIndex,
                         kind = kind,
+                        qaDisplayUrlState = qaDisplayUrl?.let { mutableStateOf(it) },
                     )
                 )
             }
@@ -310,6 +316,29 @@ class OffscreenOutputContentRenderTest {
         },
     ) {
         onNodeWithText("How do we know the canon is settled?", substring = true).assertExists()
+    }
+
+    @Test
+    fun `with the QR code on, the question gives way to it`() = render(
+        mode = Presenting.QA,
+        qaDisplayUrl = "https://abc.trycloudflare.com",
+        seed = {
+            setDisplayedQuestion(Question(id = "q1", text = "Is this question shown?", timestamp = 0L))
+            setShowQRCodeOnDisplay(true)
+        },
+    ) {
+        onNodeWithContentDescription("QR Code").assertExists()
+        onNodeWithText("Is this question shown?").assertDoesNotExist()
+    }
+
+    @Test
+    fun `a website is drawn from the live browser's snapshot, and nothing before there is one`() {
+        render(mode = Presenting.WEBSITE) {
+            onAllNodes(hasTestTag(WEB_SNAPSHOT_TAG)).assertCountEquals(0)
+        }
+        render(mode = Presenting.WEBSITE, seed = { setWebSnapshot(ImageBitmap(4, 4)) }) {
+            onAllNodes(hasTestTag(WEB_SNAPSHOT_TAG)).assertCountEquals(1)
+        }
     }
 
     @Test

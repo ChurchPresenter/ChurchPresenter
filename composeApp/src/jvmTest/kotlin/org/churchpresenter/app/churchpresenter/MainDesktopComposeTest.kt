@@ -890,6 +890,53 @@ class MainDesktopComposeTest {
         }
     }
 
+    /** Double-clicks the schedule row reading [label], which takes it live. */
+    private fun ComposeUiTest.takeLive(label: String) {
+        onAllNodesWithText(label, substring = true)[0].performMouseInput { doubleClick() }
+        waitForIdle()
+    }
+
+    @Test
+    fun `a timer taken live from the schedule starts counting on the output`() {
+        val manager = PresenterManager()
+        try {
+            root(withOneSong(), presenterManager = manager) { actions ->
+                actions.addAnnouncement(
+                    ScheduleItem.AnnouncementItem(id = "timer", text = "", isTimer = true, timerMinutes = 5),
+                )
+                waitForIdle()
+                takeLive("Timer 05:00")
+
+                assertTrue(manager.announcementTickerLive.value, "the countdown is what is live")
+                assertEquals("05:00", manager.announcementText.value.takeLast(5))
+            }
+        } finally {
+            manager.pauseAnnouncementTimer()
+        }
+    }
+
+    @Test
+    fun `a lower third taken live from the schedule plays its preset, and a missing one does nothing`() {
+        val folder = File(dir, "lower-thirds").apply { mkdirs() }
+        File(folder, "Pastor.json").writeText("""{"v":"5.7.4","fr":30,"ip":0,"op":30,"w":1920,"h":1080,"layers":[]}""")
+        val manager = PresenterManager()
+        val settings = withOneSong().let {
+            it.copy(streamingSettings = it.streamingSettings.copy(lowerThirdFolder = folder.absolutePath))
+        }
+        root(settings, presenterManager = manager) { actions ->
+            actions.addLowerThird("gone", "Gone", false, 0)
+            waitForIdle()
+            takeLive("Gone")
+            assertEquals(Presenting.NONE, manager.presentingMode.value, "no file, nothing to play")
+
+            actions.addLowerThird("pastor", "Pastor", false, 0)
+            waitForIdle()
+            takeLive("Pastor")
+            assertEquals(Presenting.LOWER_THIRD, manager.presentingMode.value)
+            assertTrue(manager.lottieJsonContent.value.isNotEmpty())
+        }
+    }
+
     @Test
     fun `a title slide adds an entry ahead of the song`() =
         root(settings().copy(songSettings = settings().songSettings.copy(titleSlideEnabled = true)))
