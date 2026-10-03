@@ -1,6 +1,12 @@
 package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.runtime.Composable
+import org.churchpresenter.app.churchpresenter.presenter.WEB_SNAPSHOT_TAG
+import org.churchpresenter.app.churchpresenter.presenter.LocalInMergedTile
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onAllNodesWithText
@@ -154,6 +160,53 @@ class PresenterModeBackgroundOverrideTest {
                     )
                 }
             }
+        }
+    }
+
+    @Test
+    fun `inside a merged tile a website is drawn from its snapshot, once there is one`() {
+        runComposeUiTest {
+            setContent {
+                CompositionLocalProvider(LocalInMergedTile provides true) {
+                    content(Presenting.WEBSITE, PresenterManager(), override = null)()
+                }
+            }
+            onAllNodes(hasTestTag(WEB_SNAPSHOT_TAG)).assertCountEquals(0)
+        }
+        val withSnapshot = PresenterManager().apply { setWebSnapshot(ImageBitmap(4, 4)) }
+        runComposeUiTest {
+            setContent {
+                CompositionLocalProvider(LocalInMergedTile provides true) {
+                    content(Presenting.WEBSITE, withSnapshot, override = null)()
+                }
+            }
+            onAllNodes(hasTestTag(WEB_SNAPSHOT_TAG)).assertCountEquals(1)
+        }
+    }
+
+    @Test
+    fun `a lower-third profile draws the verse and the lyrics in its band`() {
+        val band = OutputProfile(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL)
+        runComposeUiTest {
+            setContent(content(Presenting.BIBLE, bibleManager(), override = null, profile = band))
+            onNodeWithText(verse.verseText, substring = true).assertExists()
+        }
+        runComposeUiTest {
+            setContent(content(Presenting.LYRICS, songManager(), override = null, profile = band))
+            onNodeWithText(section.lines.first(), substring = true).assertExists()
+        }
+    }
+
+    @Test
+    fun `a profile with its backgrounds off still draws the words`() {
+        val bare = OutputProfile(showBibleBackground = false, showSongsBackground = false)
+        runComposeUiTest {
+            setContent(content(Presenting.BIBLE, bibleManager(), override = null, profile = bare))
+            onNodeWithText(verse.verseText, substring = true).assertExists()
+        }
+        runComposeUiTest {
+            setContent(content(Presenting.LYRICS, songManager(), override = null, profile = bare))
+            onNodeWithText(section.lines.first(), substring = true).assertExists()
         }
     }
 }

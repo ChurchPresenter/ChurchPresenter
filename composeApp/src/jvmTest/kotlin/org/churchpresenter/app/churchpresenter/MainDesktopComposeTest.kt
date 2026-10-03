@@ -121,6 +121,7 @@ class MainDesktopComposeTest {
         val slidesLoaded = mutableListOf<String>()
         val tabChanges = mutableListOf<Int>()
         val quickPicked = mutableListOf<QuickBackground?>()
+        val settingsChanges = mutableListOf<(AppSettings) -> AppSettings>()
     }
 
     /** Composes the root with [appSettings], then lets everything it launched settle. */
@@ -137,6 +138,7 @@ class MainDesktopComposeTest {
                 MainDesktop(
                     appSettings = appSettings,
                     onQuickBackgroundPicked = { wiring.quickPicked += it },
+                    onSettingsChange = { wiring.settingsChanges += it },
                     presenterManager = presenterManager,
                     companionSatelliteViewModel = CompanionSatelliteViewModel(),
                     live = LiveOutputCallbacks(
@@ -894,6 +896,28 @@ class MainDesktopComposeTest {
     private fun ComposeUiTest.takeLive(label: String) {
         onAllNodesWithText(label, substring = true)[0].performMouseInput { doubleClick() }
         waitForIdle()
+    }
+
+    @Test
+    fun `the tab visibility menu hides a tab, but never the last one showing`() {
+        val wiring = Wiring()
+        val base = withOneSong()
+        root(base, wiring = wiring) { _ ->
+            onAllNodesWithContentDescription("Tab Visibility")[0].performClick()
+            waitForIdle()
+            onAllNodesWithText("Songs").let { it[it.fetchSemanticsNodes().size - 1] }.performClick()
+            waitForIdle()
+        }
+        assertTrue(Tabs.SONGS.name in wiring.settingsChanges.single()(base).hiddenTabs)
+
+        val alone = Wiring()
+        root(showingOnly(Tabs.SONGS), wiring = alone) { _ ->
+            onAllNodesWithContentDescription("Tab Visibility")[0].performClick()
+            waitForIdle()
+            onAllNodesWithText("Songs").let { it[it.fetchSemanticsNodes().size - 1] }.performClick()
+            waitForIdle()
+        }
+        assertTrue(alone.settingsChanges.isEmpty(), "the only tab left cannot be hidden")
     }
 
     @Test

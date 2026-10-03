@@ -7,16 +7,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.media.data.StockMediaClient
+import org.churchpresenter.app.churchpresenter.composables.CameraDevice
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import kotlin.test.Test
@@ -31,6 +35,8 @@ class SongBackgroundLibraryTest {
 
     private fun library(
         background: SongBackground = SongBackground(),
+        devices: List<CameraDevice> = emptyList(),
+        onChange: (SongBackground) -> Unit = {},
         block: ComposeUiTest.() -> Unit,
     ) = runComposeUiTest {
         setContent {
@@ -38,9 +44,9 @@ class SongBackgroundLibraryTest {
                 Box(Modifier.size(LIBRARY_WIDTH, LIBRARY_HEIGHT)) {
                     SongBackgroundLibrary(
                         background = background,
-                        onChange = {},
+                        onChange = onChange,
                         swatchAspect = FALLBACK_STAGE_ASPECT,
-                        devices = emptyList(),
+                        devices = devices,
                     )
                 }
             }
@@ -99,6 +105,42 @@ class SongBackgroundLibraryTest {
         }
     }
 
+    @Test
+    fun `the cameras tab offers each camera but no display, marks the chosen one, and a tap picks another`() {
+        val webcam = CameraDevice("FaceTime HD Camera", "avfoundation://0", "FaceTime HD Camera")
+        val card = CameraDevice(
+            "DeckLink Mini", "decklink://0", "DeckLink: DeckLink Mini", isDeckLink = true, deckLinkIndex = 0,
+        )
+        val screen = CameraDevice("Capture screen 0", "avfoundation://1", "Capture screen 0")
+        val current = cameraBackground(SongBackground(), webcam)
+        val changes = mutableListOf<SongBackground>()
+        library(background = current, devices = listOf(webcam, card, screen), onChange = { changes += it }) {
+            onNodeWithText(webcam.displayName).assertIsDisplayed()
+            assertTrue(onAllNodesWithText(screen.displayName).fetchSemanticsNodes().isEmpty())
+
+            // The name is a caption under the swatch; the swatch above it is what takes the tap.
+            onNodeWithText(card.displayName).performTouchInput { click(Offset(width / 2f, -SWATCH_ABOVE_CAPTION)) }
+            waitForIdle()
+        }
+        assertTrue(changes.single().camera.isDeckLink)
+        assertEquals(0, changes.single().camera.deckLinkIndex)
+    }
+
+    @Test
+    fun `a stock picture tapped becomes the background`() {
+        val changes = mutableListOf<SongBackground>()
+        library(onChange = { changes += it }) {
+            onNodeWithText(IMAGES).performClick()
+            waitUntil(timeoutMillis = BUNDLED_TIMEOUT_MS) {
+                onAllNodesWithText(firstStockPicture).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+            }
+            onNodeWithText(firstStockPicture).performTouchInput { click(Offset(width / 2f, -SWATCH_ABOVE_CAPTION)) }
+            waitUntil(timeoutMillis = BUNDLED_TIMEOUT_MS) { changes.isNotEmpty() }
+        }
+        assertEquals(SongBackgroundType.IMAGE, changes.last().type)
+        assertTrue(changes.last().image.isNotBlank())
+    }
+
     private companion object {
         val LIBRARY_WIDTH = 448.dp
         val LIBRARY_HEIGHT = 560.dp
@@ -109,6 +151,7 @@ class SongBackgroundLibraryTest {
         const val IMAGES = "Images"
         const val VIDEOS = "Videos"
         const val BUNDLED_TIMEOUT_MS = 5_000L
+        const val SWATCH_ABOVE_CAPTION = 12f
 
         /**
          * The tile Browse… has to sit before, taken from the library itself rather than named here:

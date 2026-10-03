@@ -12,6 +12,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import java.io.File
 import kotlin.test.Test
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BackgroundConfig
 import kotlin.test.assertEquals
 
 /** The template row: a dropdown over the lower-thirds folder, and the Generate button beside it. */
@@ -58,6 +60,34 @@ class LottieBandPickerRowTest {
                 onNodeWithText("sunday").performClick()
                 onAllNodesWithText("No template selected").onLast().performClick()
                 assertEquals("", path)
+            }
+        }
+
+    @Test
+    fun `the section stores a pick, and offers Generate only with a folder to save in`() =
+        withLottieFolder("sunday.json" to lottieJson()) { folder ->
+            runComposeUiTest {
+                var config by mutableStateOf(BackgroundConfig())
+                var dir by mutableStateOf<File?>(null)
+                setContent {
+                    MaterialTheme {
+                        LottieBandSourceSection(
+                            scope = BackgroundScope.BIBLE_LOWER_THIRD,
+                            settings = AppSettings(),
+                            config = config,
+                            onConfigChange = { config = it },
+                            bibleLowerThirdsDir = dir,
+                        )
+                    }
+                }
+                onNodeWithText("Generate…").assertDoesNotExist()
+
+                dir = folder
+                waitForIdle()
+                onNodeWithText("Generate…").assertExists()
+                onNodeWithText("No template selected").performClick()
+                onAllNodesWithText("sunday").onLast().performClick()
+                assertEquals(File(folder, "sunday.json").absolutePath, config.backgroundLottie)
             }
         }
 }

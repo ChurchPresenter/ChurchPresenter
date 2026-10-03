@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.presenter.WEB_SNAPSHOT_TAG
 import org.churchpresenter.app.churchpresenter.presenter.LocalInMergedTile
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
@@ -8,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import io.github.alexzhirkevich.compottie.LottieComposition
 import org.churchpresenter.app.churchpresenter.presenter.textOnly
 import org.churchpresenter.app.churchpresenter.presenter.wholeOutputRegion
@@ -255,7 +257,7 @@ private fun WebsiteOutput(profile: OutputProfile, presenterManager: PresenterMan
                 bitmap = snapshot,
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().testTag(WEB_SNAPSHOT_TAG),
             )
         }
     } else if (profile.showWebsite) WebsitePresenter(
