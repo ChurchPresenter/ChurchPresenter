@@ -31,13 +31,13 @@ class ChordPickerBuildTest {
         waitForIdle()
         assertTrue(!has("maj"), "the picker starts folded")
 
-        tap("Build a chord")
+        tap("BUILD A CHORD")
         tap("Insert G")
         tap("A")
         tap("m7♭5")
         tap("Insert Am7b5")
         tap("♭")
-        tap("B♭")
+        tap("Bb")
         tap("maj")
         tap("Insert Bb")
         tap("♯")
@@ -45,7 +45,7 @@ class ChordPickerBuildTest {
 
         assertEquals(listOf("G", "Am7b5", "Bb", "A#"), inserted)
 
-        tap("Build a chord")
+        tap("BUILD A CHORD")
         assertTrue(!has("Insert A#"), "folded away again")
     }
 
@@ -55,7 +55,7 @@ class ChordPickerBuildTest {
         val inserted = mutableListOf<String>()
         setContent { MaterialTheme { ChordPicker(songKey = key, flats = key == "Eb") { inserted += it } } }
         waitForIdle()
-        tap("Build a chord")
+        tap("BUILD A CHORD")
 
         key = "Eb"
         waitForIdle()
