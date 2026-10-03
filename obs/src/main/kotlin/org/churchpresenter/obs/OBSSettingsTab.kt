@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.obs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -71,7 +71,6 @@ import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OBSSettings
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 

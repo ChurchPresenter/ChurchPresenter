@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.obs
 
 import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer

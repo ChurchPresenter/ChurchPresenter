@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.obs
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
@@ -21,7 +21,6 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OBSSettings
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import kotlin.test.assertEquals
 
 /**

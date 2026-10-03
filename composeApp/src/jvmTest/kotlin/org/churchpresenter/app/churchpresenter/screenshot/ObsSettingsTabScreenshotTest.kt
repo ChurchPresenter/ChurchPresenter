@@ -24,10 +24,10 @@ import io.ktor.websocket.readText
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OBSSettings
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.OBSSettingsTab
+import org.churchpresenter.obs.OBSSettingsTab
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.theme.ChurchPresenterTheme
-import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
+import org.churchpresenter.obs.OBSWebSocketManager
 import org.churchpresenter.theme.ThemeMode
 import kotlin.test.AfterTest
 import kotlin.test.Test
