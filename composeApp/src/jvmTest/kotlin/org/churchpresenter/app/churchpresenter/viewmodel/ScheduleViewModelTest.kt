@@ -5,6 +5,7 @@ import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import java.io.File
 import java.nio.file.Files
+import org.churchpresenter.sharedui.models.Presenting
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -169,6 +170,47 @@ class ScheduleViewModelTest {
         assertEquals(listOf("C", "A", "B", "D"), vm.titles)
         vm.moveItemToBottom(vm.scheduleItems[0].id)
         assertEquals(listOf("A", "B", "D", "C"), vm.titles)
+    }
+
+    @Test
+    fun `moving the bottom item to the bottom changes nothing, and an unknown row is not found`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B")
+        val undoable = vm.canUndo
+        assertEquals(1, vm.moveItemToBottom(vm.scheduleItems.last().id))
+        assertEquals(-1, vm.moveItemToBottom("no-such-row"))
+        assertEquals(listOf("A", "B"), vm.titles)
+        assertEquals(undoable, vm.canUndo, "nothing moved, so nothing to undo")
+    }
+
+    @Test
+    fun `a website's page title replaces its address once, and never a title someone set`() {
+        val vm = newViewModel()
+        vm.addWebsite("https://example.org", "")
+        vm.addWebsite("https://named.example", "Our Church")
+        fun titleOf(url: String) =
+            vm.scheduleItems.filterIsInstance<ScheduleItem.WebsiteItem>().single { it.url == url }.title
+
+        vm.updateWebsiteTitle("https://example.org", " ")
+        assertEquals("https://example.org", titleOf("https://example.org"), "a blank title is no title")
+
+        vm.updateWebsiteTitle("https://example.org", "Example")
+        vm.updateWebsiteTitle("https://named.example", "Page Title")
+        vm.updateWebsiteTitle("https://unknown.example", "Nobody")
+        assertEquals("Example", titleOf("https://example.org"))
+        assertEquals("Our Church", titleOf("https://named.example"))
+    }
+
+    @Test
+    fun `redo does nothing while following another instance`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B")
+        vm.undo()
+        assertTrue(vm.canRedo)
+        vm.applyRemoteSchedule(emptyList())
+
+        vm.redo()
+        assertTrue(vm.scheduleItems.isEmpty(), "the follower's schedule is the primary's")
     }
 
     @Test
@@ -551,5 +593,85 @@ class ScheduleViewModelTest {
 
         vm.setServiceStart(null)
         assertNull(vm.serviceStartTime)
+    }
+
+    // ── Presenting each kind of row ─────────────────────────────────────────────
+
+    private val everyKind: List<ScheduleItem> = listOf(
+        ScheduleItem.SongItem("s", 1, "Song", "Hymnal", "Hymnal::1"),
+        ScheduleItem.BibleVerseItem("b", "John", 3, 16, "For God so loved"),
+        ScheduleItem.PictureItem("p", "/pics", "Pictures", 3),
+        ScheduleItem.PresentationItem("d", "/deck.pptx", "Deck", 10, "pptx"),
+        ScheduleItem.MediaItem("m", "/clip.mp4", "Clip", "local"),
+        ScheduleItem.LowerThirdItem("l", "preset", "Name", false, 0L),
+        ScheduleItem.AnnouncementItem(id = "a", text = "Welcome"),
+        ScheduleItem.WebsiteItem("w", "https://church.example"),
+        ScheduleItem.SceneItem("sc", "scene-1", "Scene"),
+        ScheduleItem.DictionaryItem("x", "G26", "agape", "agapē", "love"),
+        ScheduleItem.CueItem(id = "c", action = "blank"),
+    )
+
+    @Test
+    fun `with no handler of its own each kind of row switches the output to its content`() {
+        val vm = newViewModel()
+        val modes = mutableListOf<Presenting>()
+        everyKind.forEach { vm.presentItem(item = it, onPresenting = { mode -> modes += mode }) }
+
+        assertEquals(
+            listOf(
+                Presenting.LYRICS, Presenting.BIBLE, Presenting.PICTURES, Presenting.PRESENTATION,
+                Presenting.MEDIA, Presenting.ANNOUNCEMENTS, Presenting.WEBSITE, Presenting.CANVAS,
+                Presenting.ANNOUNCEMENTS,
+            ),
+            modes,
+            "a lower third and a cue have nothing to fall back to",
+        )
+    }
+
+    @Test
+    fun `with its handler each kind of row goes to it instead`() {
+        val vm = newViewModel()
+        val handled = mutableListOf<String>()
+        val modes = mutableListOf<Presenting>()
+        everyKind.forEach { item ->
+            vm.presentItem(
+                item = item,
+                onPresenting = { modes += it },
+                onPresentSong = { handled += it.id },
+                onPresentBible = { handled += it.id },
+                onPresentPresentation = { handled += it.id },
+                onPresentPictures = { handled += it.id },
+                onPresentMedia = { handled += it.id },
+                onPresentAnnouncement = { handled += it.id },
+                onPresentLowerThird = { handled += it.id },
+                onPresentWebsite = { handled += it.id },
+                onPresentScene = { handled += it.id },
+                onPresentDictionary = { handled += it.id },
+                onPresentCue = { handled += it.id },
+            )
+        }
+        assertEquals(everyKind.map { it.id }, handled)
+        assertTrue(modes.isEmpty())
+    }
+
+    // ── Moving rows at the ends ─────────────────────────────────────────────────
+
+    @Test
+    fun `a row already at an end, or not in the schedule, does not move`() {
+        val vm = newViewModel()
+        vm.addSong(1, "A", "Hymnal")
+        vm.addSong(2, "B", "Hymnal")
+        val first = vm.scheduleItems[0].id
+        val last = vm.scheduleItems[1].id
+        val announced = notifications.size
+
+        assertEquals(1, vm.moveItemDown(last))
+        assertEquals(1, vm.moveItemToBottom(last))
+        assertEquals(0, vm.moveItemToTop(first))
+        assertEquals(-1, vm.moveItemDown("missing"))
+        vm.moveItem(0, 5)
+        vm.moveItem(1, 1)
+        assertEquals(listOf(first, last), vm.scheduleItems.map { it.id })
+        assertEquals(announced, notifications.size, "nothing moved, so nothing was announced")
     }
 }

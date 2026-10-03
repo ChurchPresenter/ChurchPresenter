@@ -112,6 +112,20 @@ class CefEngineTest {
     }
 
     @Test
+    fun `a library the Linux system lacks is named for the operator instead of reported`() {
+        // CHURCH-PRESENTER-DESKTOP-9P: the distribution's NSPR was not installed.
+        val cause = UnsatisfiedLinkError(
+            "/home/u/.churchpresenter/jcef/libjcef.so: libnspr4.so: " +
+                "cannot open shared object file: No such file or directory",
+        )
+        engine.applyInstallOutcome(JcefInstall.Outcome.Failed(root, cause))
+
+        assertEquals("libnspr4.so", engine.missingLibrary)
+        assertFalse(engine.initialized)
+        assertEquals(emptyList(), failures)
+    }
+
+    @Test
     fun `an install that fails after one that worked takes its clients away`() {
         engine.applyInstallOutcome(JcefInstall.Outcome.Installed(root))
         engine.clientSource = { mockk<CefClient>() }

@@ -1,9 +1,11 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.churchpresenter.core.models.songs.SongItem
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.sharedui.models.Presenting
@@ -18,6 +20,7 @@ import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.core.models.schedule.websiteDisplayText
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.settings.utils.Constants
 import java.io.File
 import java.io.IOException
@@ -475,12 +478,19 @@ class ScheduleViewModel(
             // The file dialog this runs behind is cancellable; abandoning it is not a fault.
             throw e
         } catch (e: IOException) {
-            CrashReporter.reportException(e, "Opening schedule file")
+            Log.warn("Schedule", "Could not read ${file.fileName}: ${e.message}")
+            openFailure = ScheduleOpenFailure(file.fileName.toString(), unreadable = true)
         } catch (e: IllegalArgumentException) {
-            // Not a schedule: serialization errors are this type.
-            CrashReporter.reportException(e, "Opening schedule file")
+            // Not a schedule: serialization errors are this type. The operator picked the file,
+            // so they are the one to tell -- a web page saved under a schedule's name is not a
+            // fault in the app (CHURCH-PRESENTER-DESKTOP-9N).
+            Log.warn("Schedule", "${file.fileName} is not a schedule: ${e.message?.take(OPEN_FAILURE_DETAIL)}")
+            openFailure = ScheduleOpenFailure(file.fileName.toString(), unreadable = false)
         }
     }
+
+    /** The file the last Open could not use, and why; the Schedule tab says so until dismissed. */
+    var openFailure by mutableStateOf<ScheduleOpenFailure?>(null)
 
     /** The schedule as it is written to disk: the rows, their notes and their timing. */
     private fun scheduleFileDocument(): ScheduleFileV2 =
@@ -993,3 +1003,9 @@ private data class ScheduleFileV2(
     /** How each row runs on its own -- start, length, repeats, end -- keyed by row id. See [RowTiming]. */
     val timing: Map<String, RowTiming> = emptyMap(),
 )
+
+/** How much of a decoder's message goes into the log -- the start says what it choked on. */
+private const val OPEN_FAILURE_DETAIL = 200
+
+/** A schedule file Open could not use: [fileName], and whether it could not be read at all. */
+data class ScheduleOpenFailure(val fileName: String, val unreadable: Boolean)

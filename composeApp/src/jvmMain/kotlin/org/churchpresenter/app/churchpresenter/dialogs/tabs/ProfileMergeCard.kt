@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -61,6 +62,9 @@ private val MAP_HEIGHT = 120.dp
 /** The widest the map is drawn, as a multiple of its height; a wider wall is drawn smaller. */
 private const val MAP_MAX_RATIO = 4f
 private const val POSITION_LIMIT = 30_000
+
+/** The merged picture's drawing, for a test to drag its tiles. */
+internal const val MERGE_MAP_TAG = "merge-map"
 
 /** The stored output key of an Outputs-page tile -- `screen:0`, `ndi:1`. */
 internal val OutputTile.key: String
@@ -266,6 +270,7 @@ private fun MergeMap(
             Modifier
                 .width(MAP_HEIGHT * ratio.coerceAtMost(MAP_MAX_RATIO))
                 .height(MAP_HEIGHT)
+                .testTag(MERGE_MAP_TAG)
                 .pointerInput(draggable, spanW, spanH) {
                     if (!draggable) return@pointerInput
                     val scale = minOf(size.width / spanW.toFloat(), size.height / spanH.toFloat())

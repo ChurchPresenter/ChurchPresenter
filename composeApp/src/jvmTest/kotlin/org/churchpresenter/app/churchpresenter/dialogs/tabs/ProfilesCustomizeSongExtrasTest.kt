@@ -13,6 +13,12 @@ import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import org.churchpresenter.settings.SongNumberOffset
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.performTextReplacement
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -81,6 +87,40 @@ class ProfilesCustomizeSongExtrasTest {
 
             assertTrue(get().song().titleSlideComposer.bold, "the composer line must have gone bold")
         }
+    }
+
+    @Test
+    fun `the title slide's number comes before the title, or goes to a corner and is nudged from it`() {
+        profilesTab(output()) { get ->
+            openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
+            // The title slide's own Number part, below the editor's Number chip.
+            onAllNodesWithText("Number").let { it[it.fetchSemanticsNodes().size - 1] }.performScrollTo().performClick()
+            waitForIdle()
+            val before = get().song().titleSlideNumberBeforeTitle
+            onNodeWithTag("song_titleSlideNumberBeforeTitle").performScrollTo().performClick()
+            waitForIdle()
+            assertEquals(!before, get().song().titleSlideNumberBeforeTitle)
+            val nudges = onAllNodesWithTag("title_slide_number_offset_x").fetchSemanticsNodes()
+            assertEquals(0, nudges.size, "no corner, no nudge")
+
+            onNodeWithTag("title_slide_number_corner").performScrollTo().performClick()
+            waitForIdle()
+            onAllNodesWithText("Bottom Left").let { it[it.fetchSemanticsNodes().size - 1] }.performClick()
+            waitForIdle()
+
+            assertEquals(Constants.BOTTOM_LEFT, get().song().layoutExtras.titleSlideNumber.corner)
+            nudge("title_slide_number_offset_x", 12)
+            nudge("title_slide_number_offset_y", 7)
+            assertEquals(SongNumberOffset(12, 7), get().song().layoutExtras.titleSlideNumber.offset)
+        }
+    }
+
+    /** Types [to] into the number field of the slider row tagged [tag]. */
+    private fun SkikoComposeUiTest.nudge(tag: String, to: Int) {
+        onNode(hasAnyAncestor(hasTestTag(tag)) and hasSetTextAction())
+            .performScrollTo()
+            .performTextReplacement(to.toString())
+        waitForIdle()
     }
 
     // ── Where the number sits ───────────────────────────────────────────────────────────────────

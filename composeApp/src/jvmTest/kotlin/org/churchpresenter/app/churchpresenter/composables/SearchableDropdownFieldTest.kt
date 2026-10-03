@@ -15,6 +15,8 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.v2.runComposeUiTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -138,6 +140,22 @@ class SearchableDropdownFieldTest {
         waitForIdle()
 
         assertNull(committed())
+    }
+
+    @Test
+    fun `Done on a query that leaves one option picks it, and on several picks nothing`() = runComposeUiTest {
+        val committed = field(initial = "")
+        open().performTextInput("a")
+        waitForIdle()
+        onNode(isEditable()).performImeAction()
+        waitForIdle()
+        assertNull(committed(), "Apple and Banana both match")
+
+        onNode(isEditable()).performTextReplacement("cher")
+        waitForIdle()
+        onNode(isEditable()).performImeAction()
+        waitForIdle()
+        assertEquals("Cherry", committed())
     }
 
     // --- the clear button ---

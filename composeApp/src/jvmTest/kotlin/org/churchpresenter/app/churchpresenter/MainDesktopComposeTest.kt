@@ -7,8 +7,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.Key
+import org.churchpresenter.settings.QuickBackground
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.isRoot
+import org.churchpresenter.calendar.PresetStore
+import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.hasSetTextAction
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.doubleClick
@@ -112,6 +120,9 @@ class MainDesktopComposeTest {
         val picturesLoaded = mutableListOf<String>()
         val slidesLoaded = mutableListOf<String>()
         val tabChanges = mutableListOf<Int>()
+        val quickPicked = mutableListOf<QuickBackground?>()
+        val settingsChanges = mutableListOf<(AppSettings) -> AppSettings>()
+        var developerUnlocks = 0
     }
 
     /** Composes the root with [appSettings], then lets everything it launched settle. */
@@ -127,6 +138,9 @@ class MainDesktopComposeTest {
             MaterialTheme {
                 MainDesktop(
                     appSettings = appSettings,
+                    onQuickBackgroundPicked = { wiring.quickPicked += it },
+                    onSettingsChange = { wiring.settingsChanges += it },
+                    onRequestDeveloperMenuUnlock = { wiring.developerUnlocks++ },
                     presenterManager = presenterManager,
                     companionSatelliteViewModel = CompanionSatelliteViewModel(),
                     live = LiveOutputCallbacks(
@@ -880,8 +894,187 @@ class MainDesktopComposeTest {
         }
     }
 
+    /** Double-clicks the schedule row reading [label], which takes it live. */
+    private fun ComposeUiTest.takeLive(label: String) {
+        onAllNodesWithText(label, substring = true)[0].performMouseInput { doubleClick() }
+        waitForIdle()
+    }
+
+    /** The root with a controller's link, counting the slide steps it forwards, while [presenting] is live. */
+    private fun clickerRoot(presenting: Presenting, block: ComposeUiTest.() -> Unit): Pair<Int, Int> {
+        var next = 0
+        var previous = 0
+        val manager = PresenterManager().apply { setPresentingMode(presenting) }
+        runComposeUiTest {
+            setContent {
+                MaterialTheme {
+                    MainDesktop(
+                        appSettings = withOneSong(),
+                        presenterManager = manager,
+                        companionSatelliteViewModel = CompanionSatelliteViewModel(),
+                        live = LiveOutputCallbacks(presenting = {}, onVerseSelected = {}, onSongItemSelected = {}),
+                        link = InstanceLinkBridge(sendNextSlide = { next++ }, sendPreviousSlide = { previous++ }),
+                    )
+                }
+            }
+            waitForIdle()
+            block()
+        }
+        return next to previous
+    }
+
+    @Test
+    fun `a clicker steps a live deck forward and back, and is left alone when no deck is live`() {
+        val live = clickerRoot(Presenting.PRESENTATION) {
+            press(Key.PageDown)
+            press(Key.PageUp)
+        }
+        assertEquals(1 to 1, live, "one step each way")
+
+        val idle = clickerRoot(Presenting.LYRICS) {
+            press(Key.PageDown)
+            press(Key.PageUp)
+        }
+        assertEquals(0 to 0, idle)
+    }
+
+    @Test
+    fun `seven Ds unlock the developer menu, but not while something is live`() {
+        val wiring = Wiring()
+        root(withOneSong(), wiring = wiring) { _ ->
+            repeat(7) { press(Key.D) }
+        }
+        assertEquals(1, wiring.developerUnlocks)
+
+        val live = Wiring()
+        val manager = PresenterManager().apply { setPresentingMode(Presenting.LYRICS) }
+        root(withOneSong(), wiring = live, presenterManager = manager) { _ ->
+            repeat(7) { press(Key.D) }
+        }
+        assertEquals(0, live.developerUnlocks)
+    }
+
+    @Test
+    fun `left, right, left, right reveals the hidden crossword tab`() = root(withOneSong()) { _ ->
+        assertTrue(onAllNodesWithText("Crossword").fetchSemanticsNodes().isEmpty(), "hidden to begin with")
+        listOf(Key.DirectionLeft, Key.DirectionRight, Key.DirectionLeft, Key.DirectionRight).forEach { press(it) }
+        assertTrue(onAllNodesWithText("Crossword").fetchSemanticsNodes().isNotEmpty())
+    }
+
+    @Test
+    fun `the tab visibility menu hides a tab, but never the last one showing`() {
+        val wiring = Wiring()
+        val base = withOneSong()
+        root(base, wiring = wiring) { _ ->
+            onAllNodesWithContentDescription("Tab Visibility")[0].performClick()
+            waitForIdle()
+            onAllNodesWithText("Songs").let { it[it.fetchSemanticsNodes().size - 1] }.performClick()
+            waitForIdle()
+        }
+        assertTrue(Tabs.SONGS.name in wiring.settingsChanges.single()(base).hiddenTabs)
+
+        val alone = Wiring()
+        root(showingOnly(Tabs.SONGS), wiring = alone) { _ ->
+            onAllNodesWithContentDescription("Tab Visibility")[0].performClick()
+            waitForIdle()
+            onAllNodesWithText("Songs").let { it[it.fetchSemanticsNodes().size - 1] }.performClick()
+            waitForIdle()
+        }
+        assertTrue(alone.settingsChanges.isEmpty(), "the only tab left cannot be hidden")
+    }
+
+    @Test
+    fun `a lower third taken live from the schedule plays its preset, and a missing one does nothing`() {
+        val folder = File(dir, "lower-thirds").apply { mkdirs() }
+        File(folder, "Pastor.json").writeText("""{"v":"5.7.4","fr":30,"ip":0,"op":30,"w":1920,"h":1080,"layers":[]}""")
+        val manager = PresenterManager()
+        val settings = withOneSong().let {
+            it.copy(streamingSettings = it.streamingSettings.copy(lowerThirdFolder = folder.absolutePath))
+        }
+        root(settings, presenterManager = manager) { actions ->
+            actions.addLowerThird("gone", "Gone", false, 0)
+            waitForIdle()
+            takeLive("Gone")
+            assertEquals(Presenting.NONE, manager.presentingMode.value, "no file, nothing to play")
+
+            actions.addLowerThird("pastor", "Pastor", false, 0)
+            waitForIdle()
+            takeLive("Pastor")
+            assertEquals(Presenting.LOWER_THIRD, manager.presentingMode.value)
+            assertTrue(manager.lottieJsonContent.value.isNotEmpty())
+        }
+    }
+
     @Test
     fun `a title slide adds an entry ahead of the song`() =
         root(settings().copy(songSettings = settings().songSettings.copy(titleSlideEnabled = true)))
 
+
+    // ── Global shortcuts and their effect ──────────────────────────────────────
+
+    private fun ComposeUiTest.press(key: Key, ctrl: Boolean = false, shift: Boolean = false) {
+        onAllNodes(isRoot())[0].performKeyInput {
+            if (ctrl) keyDown(Key.CtrlLeft)
+            if (shift) keyDown(Key.ShiftLeft)
+            pressKey(key)
+            if (shift) keyUp(Key.ShiftLeft)
+            if (ctrl) keyUp(Key.CtrlLeft)
+        }
+        waitForIdle()
+    }
+
+    @Test
+    fun `undo and redo take back the last schedule change and put it back`() {
+        val wiring = Wiring()
+        root(withOneSong(), wiring = wiring) { actions ->
+            actions.addSong(1, "A Test Song", "Hymnal", "Hymnal::1")
+            waitForIdle()
+            assertEquals(1, wiring.scheduleChanged.last())
+
+            press(Key.Z, ctrl = true)
+            assertEquals(0, wiring.scheduleChanged.last(), "undone")
+            press(Key.Z, ctrl = true, shift = true)
+            assertEquals(1, wiring.scheduleChanged.last(), "redone")
+        }
+    }
+
+    @Test
+    fun `a tab's function key opens it`() {
+        val wiring = Wiring()
+        root(withOneSong(), wiring = wiring) { _ ->
+            val before = wiring.tabChanges.lastOrNull()
+            press(Key.F7)
+            assertTrue(wiring.tabChanges.last() != before, "F7 (Songs) moved off the opening tab: ${wiring.tabChanges}")
+        }
+    }
+
+    @Test
+    fun `a quick background is picked by its slot, an empty slot is swallowed, and reset clears it`() {
+        val wiring = Wiring()
+        val tray = withOneSong().copy(quickBackgrounds = listOf(QuickBackground(id = "q1", label = "Blue")))
+        root(tray, wiring = wiring) { _ ->
+            press(Key.One, ctrl = true)
+            press(Key.Two, ctrl = true)
+            press(Key.Zero, ctrl = true)
+            assertEquals(listOf("q1", null), wiring.quickPicked.map { it?.id })
+        }
+    }
+
+    @Test
+    fun `an announcement saved as a preset lands in the calendar's presets`() {
+        val presets = File(dir, "calendar").apply { mkdirs() }
+        val announcements = showingOnly(Tabs.ANNOUNCEMENTS).copy(calendarStorageDirectory = presets.absolutePath)
+        root(announcements) { _ ->
+            onAllNodes(hasSetTextAction())[0].performTextInput("Coffee after the service")
+            waitForIdle()
+            onAllNodesWithContentDescription("Save preset")[0].performClick()
+            waitForIdle()
+            onAllNodes(hasSetTextAction()).let { it[it.fetchSemanticsNodes().size - 1] }
+                .performTextReplacement("Coffee")
+            onAllNodesWithText("OK").let { it[it.fetchSemanticsNodes().size - 1] }.performClick()
+            waitForIdle()
+
+            assertEquals(listOf("Coffee"), PresetStore(presets).load().presets.map { it.name })
+        }
+    }
 }

@@ -162,7 +162,7 @@ private fun SurfaceSourceRows(
             )
         }
         Constants.BACKGROUND_CAMERA -> SettingsRow(stringResource(Res.string.background_camera_option)) {
-            CameraPickerRow(config, onConfig)
+            CameraPickerRow(config, onConfigChange = onConfig)
         }
         Constants.BACKGROUND_GRADIENT -> GradientRows(config, onConfig)
         Constants.BACKGROUND_LOTTIE ->

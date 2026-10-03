@@ -3,6 +3,9 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -249,5 +252,19 @@ class PresenterManagerContentTest {
         assertTrue(pm.lottieGroupsText.value)
         pm.setLottieContent("""{"layers":[]}""", false, 0f, 0, "Latin")
         assertFalse(pm.lottieGroupsText.value, "auto with no text that needs shaping")
+    }
+
+    @Test
+    fun `a Strong's entry is counted once each time a different one goes up`() {
+        fun shown() = UsageEvents.unreported()[UsageEvent.STRONGS_SHOWN] ?: 0
+        val before = shown()
+        val manager = PresenterManager()
+        val love = StrongsEntry("G26", "ἀγάπη", "agape", "ag-ah'-pay", "love")
+        manager.setDisplayedDictionaryEntry(love)
+        manager.setDisplayedDictionaryEntry(love)
+        manager.setDisplayedDictionaryEntry(null)
+        manager.setDisplayedDictionaryEntry(love.copy(number = "G25"))
+
+        assertEquals(before + 2, shown(), "the same entry again, or clearing it, is not another showing")
     }
 }

@@ -278,6 +278,8 @@ fun ScheduleTab(
     }
     val scope = rememberCoroutineScope()
 
+    viewModel.openFailure?.let { failure -> ScheduleOpenFailedDialog(failure) { viewModel.openFailure = null } }
+
     var showAutoRestoreDialog by remember { mutableStateOf(viewModel.shouldPromptAutoRestore()) }
     var confirmLoadNow by remember { mutableStateOf(false) }
     if (showAutoRestoreDialog) {

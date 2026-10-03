@@ -53,7 +53,7 @@ internal fun CustomizePane?.hasPreviewBackground(): Boolean = this != null && th
 internal enum class PreviewBackgroundSurface { BIBLE, SONGS }
 
 /** How coarse the preview's checkerboard is: fine enough to read as one, coarse enough to see. */
-internal val PREVIEW_CHECKER_SQUARE = 14.dp
+private val PREVIEW_CHECKER_SQUARE = 14.dp
 
 /**
  * The preview checkerboard's two greys: mid-tones, whatever the app's theme, so white text and black

@@ -47,6 +47,26 @@ class WebTabEngineUnavailableTest {
     }
 
     @Test
+    fun `a Linux system without one of the engine's libraries is told which one to install`() = runComposeUiTest {
+        // Sentry CHURCH-PRESENTER-DESKTOP-9P: a Linux machine without libnspr4 was told to install
+        // a Windows runtime.
+        setContent {
+            MaterialTheme {
+                WebEngineUnavailable(
+                    macOsUnsupported = false,
+                    blockedByPolicy = false,
+                    windowsUnsupported = false,
+                    missingLibrary = "libnspr4.so",
+                )
+            }
+        }
+
+        onNodeWithText(Label.ENGINE_UNAVAILABLE_LIBRARY_TITLE).assertExists()
+        onNodeWithText(Label.ENGINE_UNAVAILABLE_LIBRARY_BODY).assertExists()
+        onNodeWithText(Label.ENGINE_UNAVAILABLE_BODY).assertDoesNotExist()
+    }
+
+    @Test
     fun `an unsupported Windows names Windows 10 rather than a redistributable`() = runComposeUiTest {
         // Sentry CHURCH-PRESENTER-DESKTOP-75: Chromium no longer loads on Windows 8.1, and the generic
         // message sent the operator after a Visual C++ runtime that could not help.
@@ -116,6 +136,10 @@ private object Label {
     const val ENGINE_UNAVAILABLE_WINDOWS_BODY =
         "ChurchPresenter's browser engine no longer supports this version of Windows. Update to Windows 10 " +
             "or later to use the Web tab and browser sources."
+    const val ENGINE_UNAVAILABLE_LIBRARY_TITLE = "Web browser needs a system library"
+    const val ENGINE_UNAVAILABLE_LIBRARY_BODY =
+        "This computer is missing libnspr4.so, which the browser engine needs. Install the package that " +
+            "provides it with your Linux distribution's package manager, then restart ChurchPresenter."
     const val ENGINE_UNAVAILABLE_POLICY_TITLE = "Web browser blocked by a policy on this computer"
     const val ENGINE_UNAVAILABLE_POLICY_BODY =
         "A software policy on this computer is blocking the browser engine ChurchPresenter downloads. Ask " +

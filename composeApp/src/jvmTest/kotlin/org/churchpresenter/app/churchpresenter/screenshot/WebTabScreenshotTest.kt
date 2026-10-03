@@ -47,6 +47,7 @@ class WebTabScreenshotTest {
         cefInitialized: Boolean = true,
         cefMacOsUnsupported: Boolean = false,
         cefBlockedByPolicy: Boolean = false,
+        cefMissingLibrary: String? = null,
         schedule: Boolean = true,
         width: Dp? = null,
         drive: ComposeUiTest.(PresenterManager) -> Unit = {},
@@ -57,6 +58,7 @@ class WebTabScreenshotTest {
             cefInitialized = cefInitialized,
             cefMacOsUnsupported = cefMacOsUnsupported,
             cefBlockedByPolicy = cefBlockedByPolicy,
+            cefMissingLibrary = cefMissingLibrary,
             includeAddToSchedule = schedule,
             width = width,
             themeMode = mode,
@@ -182,6 +184,11 @@ class WebTabScreenshotTest {
     @Test
     fun `the browser engine is blocked by a policy on this computer`() =
         shoot("engine_unavailable_policy", cefInitialized = false, cefBlockedByPolicy = true)
+
+    /** CHURCH-PRESENTER-DESKTOP-9P: a Linux system without the NSPR library the engine links against. */
+    @Test
+    fun `the browser engine needs a library this Linux system lacks`() =
+        shoot("engine_unavailable_library", cefInitialized = false, cefMissingLibrary = "libnspr4.so")
 
     // ── Toolbar widths ──────────────────────────────────────────────────────────────────────────
 

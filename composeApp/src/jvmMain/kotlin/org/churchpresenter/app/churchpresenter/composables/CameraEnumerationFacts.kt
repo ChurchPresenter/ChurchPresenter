@@ -86,13 +86,3 @@ internal data class CameraListing(
     val facts: CameraEnumerationFacts,
 )
 
-/** Facts for a process where enumeration has not run — honest, and itself diagnostic. */
-internal fun notEnumeratedFacts() = CameraEnumerationFacts(
-    enumerator = CameraEnumerator.NOT_RUN,
-    ffmpegListedCount = 0,
-    fallbackListedCount = 0,
-    deckLinkCount = 0,
-    ffmpegAvailable = false,
-    enumeratedAtMs = 0L,
-    names = emptySet(),
-)

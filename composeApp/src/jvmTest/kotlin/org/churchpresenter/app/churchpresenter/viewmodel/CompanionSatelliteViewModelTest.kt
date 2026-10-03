@@ -403,6 +403,24 @@ class CompanionSatelliteViewModelTest {
     }
 
     @Test
+    fun `a button's picture arrives as raw RGB and is drawn as a bitmap of its size`() {
+        val vm = vm()
+        vm.connectAll(settings(tab = true))
+        resetButtons(vm, slot(CompanionSurfacePlacement.TAB), 1)
+
+        val size = 2
+        val red = ByteArray(size * size * 3) { if (it % 3 == 0) 0xFF.toByte() else 0 }
+        updateButton(
+            vm, slot(CompanionSurfacePlacement.TAB),
+            CompanionButtonUpdate(index = 0, bitmapRgb = red, bitmapSize = size),
+        )
+
+        val bitmap = vm.buttonsFor(slot(CompanionSurfacePlacement.TAB))[0].bitmap
+        assertEquals(size, bitmap?.width)
+        assertEquals(size, bitmap?.height)
+    }
+
+    @Test
     fun `updating one button leaves the rest alone`() {
         val vm = vm()
         vm.connectAll(settings(tab = true))

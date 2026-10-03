@@ -58,8 +58,6 @@ internal class SongFrame(
 ) {
     val isKey get() = look.isKey
     val ss get() = look.ss
-    val effectiveLangDisplay get() = look.effectiveLangDisplay
-    val availableLanguages get() = look.availableLanguages
     val activeLanguages get() = look.activeLanguages
     val laFontSize get() = look.laFontSize
     val laBold get() = look.laBold
@@ -69,23 +67,14 @@ internal class SongFrame(
     val laShadowColor get() = look.laShadowColor
     val laShadowSizeMul get() = look.laShadowSizeMul
     val laShadowAlpha get() = look.laShadowAlpha
-    val titleBaseShadow get() = look.titleBaseShadow
-    val lyricsBaseShadow get() = look.lyricsBaseShadow
     val songTarget get() = look.songTarget
-    val effectiveTitleBold get() = look.effectiveTitleBold
-    val effectiveTitleItalic get() = look.effectiveTitleItalic
-    val effectiveTitleUnderline get() = look.effectiveTitleUnderline
     val effectiveTitleShadow get() = look.effectiveTitleShadow
     val titleStyleProfile get() = look.titleStyleProfile
     val titleTextStyle get() = look.titleTextStyle
     val numberStyleProfile get() = look.numberStyleProfile
-    val songNumberBaseShadow get() = look.songNumberBaseShadow
     val songNumberTextStyle get() = look.songNumberTextStyle
     val songNumberColor get() = look.songNumberColor
     val songNumberFontFamily get() = look.songNumberFontFamily
-    val effectiveLyricsBold get() = look.effectiveLyricsBold
-    val effectiveLyricsItalic get() = look.effectiveLyricsItalic
-    val effectiveLyricsUnderline get() = look.effectiveLyricsUnderline
     val effectiveLyricsShadow get() = look.effectiveLyricsShadow
     val lyricsStyleProfile get() = look.lyricsStyleProfile
     val lyricsTextStyle get() = look.lyricsTextStyle
@@ -111,12 +100,10 @@ internal class SongFrame(
     val lookAheadEnabled get() = look.lookAheadEnabled
     val showBackground get() = look.showBackground
     val crossfadeEnabled get() = look.crossfadeEnabled
-    val languageOverride get() = look.languageOverride
     val showChords get() = look.showChords
     val resolvedBg get() = backdrop.resolvedBg
     val backgroundImageBitmap get() = backdrop.backgroundImageBitmap
     val bgDimPercent get() = backdrop.bgDimPercent
-    val bgBlurReferencePx get() = backdrop.bgBlurReferencePx
     val effectiveOpacity get() = backdrop.effectiveOpacity
     val bgModifier get() = backdrop.bgModifier
     val blurred get() = backdrop.blurred
@@ -159,7 +146,7 @@ internal class SongFrame(
             if (isLowerThird) ss.lyricsLowerThirdShadowSize else ss.lyricsShadowSize,
             if (isLowerThird) ss.lyricsLowerThirdShadowOpacity else ss.lyricsShadowOpacity
         )) else lyricsTextStyle
-    val effectiveTitleFontSize = if (isLowerThird) ss.titleLowerThirdFontSize else ss.titleFontSize
+    private val effectiveTitleFontSize = if (isLowerThird) ss.titleLowerThirdFontSize else ss.titleFontSize
     val scaledTitleFontSize = (effectiveTitleFontSize * scaleFactor).sp
     val settingsLyricsFontSize = if (lookAheadEnabled) {
         if (isLowerThird) ss.lowerThirdLookAheadFontSize else ss.lookAheadFontSize

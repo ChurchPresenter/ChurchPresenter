@@ -64,8 +64,8 @@ import org.churchpresenter.sharedui.presenter.fitInBox
 import org.churchpresenter.sharedui.presenter.rectIn
 
 /** The card the question is drawn in, and so the space auto-fit measures against. */
-internal val CARD_PADDING = 64.dp
-internal val CARD_INNER_PADDING = 48.dp
+private val CARD_PADDING = 64.dp
+private val CARD_INNER_PADDING = 48.dp
 
 /** How much of the output's height a question may take before auto-fit shrinks it. */
 internal const val QUESTION_HEIGHT_FRACTION = 0.6f

@@ -773,19 +773,20 @@ internal object ConnectFailures {
      * [FAILURE_LOG_INTERVAL] attempts, by which point the backoff has carried it well past any
      * plausible "primary is still coming up" window and the link genuinely is not working.
      *
-     * The kinds that suggest a regression rather than an ordering — a timeout, a certificate, or
-     * something unrecognised — still report on the first failure, because those are worth seeing
-     * once even if they never recur.
+     * Once it has persisted, a benign run is reported **once**: the first warning says the link is
+     * not coming up, and every later one from the same run says only that it still is not —
+     * CHURCH-PRESENTER-DESKTOP-68 kept one follower pointed at an address that never answered
+     * filing a warning at 10, 20 … 100, 200 … 1000 consecutive timeouts, about nineteen per
+     * thousand, each telling Sentry nothing the first had not.
      *
-     * The interval itself widens with the length of the run ([reportIntervalFor]) so a peer that is
-     * *permanently* unreachable — wrong IP, powered off, a blocked port — does not cost one warning
-     * every [FAILURE_LOG_INTERVAL] attempts forever. CHURCH-PRESENTER-DESKTOP-68 reached 780
-     * consecutive connect-timeout failures and 78 Sentry warnings from a single dead peer, still
-     * climbing, before this backoff existed.
+     * The kinds that suggest a regression rather than an ordering — a certificate, or something
+     * unrecognised — report on the first failure and then on the widening cadence of
+     * [reportIntervalFor], because those are worth seeing even if they never recur and worth
+     * seeing again while they do.
      */
     internal fun shouldReportConnectFailure(kind: String, consecutiveFailures: Int): Boolean {
-        val atInterval = consecutiveFailures % reportIntervalFor(consecutiveFailures) == 0
-        return if (kind in BENIGN_CONNECT_FAILURES) atInterval else consecutiveFailures == 1 || atInterval
+        if (kind in BENIGN_CONNECT_FAILURES) return consecutiveFailures == FAILURE_LOG_INTERVAL
+        return consecutiveFailures == 1 || consecutiveFailures % reportIntervalFor(consecutiveFailures) == 0
     }
 
     /**

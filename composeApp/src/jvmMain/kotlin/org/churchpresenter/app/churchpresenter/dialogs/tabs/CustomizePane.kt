@@ -1,18 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.runtime.Composable
-import org.churchpresenter.strings.generated.resources.Res
-import org.churchpresenter.strings.generated.resources.background
-import org.churchpresenter.strings.generated.resources.bible
-import org.churchpresenter.strings.generated.resources.songs
-import org.churchpresenter.strings.generated.resources.media_subtitles
-import org.churchpresenter.strings.generated.resources.display_stage_monitor
-import org.churchpresenter.strings.generated.resources.tab_dictionary
-import org.churchpresenter.strings.generated.resources.tab_qa
-import org.churchpresenter.strings.generated.resources.tab_stt
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.utils.Constants
-import org.jetbrains.compose.resources.stringResource
 
 /**
  * One category of a profile's appearance — one of the Profiles tab's Style tabs.
@@ -59,18 +48,6 @@ internal fun customizePanes(displayMode: String): List<CustomizePane> =
             CustomizePane.DICTIONARY,
         )
     }
-
-@Composable
-internal fun CustomizePane.label(): String = when (this) {
-    CustomizePane.STAGE_MONITOR -> stringResource(Res.string.display_stage_monitor)
-    CustomizePane.BIBLE -> stringResource(Res.string.bible)
-    CustomizePane.SONGS -> stringResource(Res.string.songs)
-    CustomizePane.BACKGROUND -> stringResource(Res.string.background)
-    CustomizePane.CAPTIONS -> stringResource(Res.string.tab_stt)
-    CustomizePane.SUBTITLES -> stringResource(Res.string.media_subtitles)
-    CustomizePane.QA -> stringResource(Res.string.tab_qa)
-    CustomizePane.DICTIONARY -> stringResource(Res.string.tab_dictionary)
-}
 
 /** Test handle for one Style tab, by [CustomizePane] name. (Named for the rail it used to be.) */
 internal fun railTag(paneName: String): String = "customize_rail_$paneName"

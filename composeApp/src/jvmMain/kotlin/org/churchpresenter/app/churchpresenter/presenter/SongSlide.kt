@@ -46,8 +46,6 @@ internal class SongSlide(
 ) {
     val isKey get() = frame.isKey
     val ss get() = frame.ss
-    val effectiveLangDisplay get() = frame.effectiveLangDisplay
-    val availableLanguages get() = frame.availableLanguages
     val activeLanguages get() = frame.activeLanguages
     val laFontSize get() = frame.laFontSize
     val laBold get() = frame.laBold
@@ -57,32 +55,17 @@ internal class SongSlide(
     val laShadowColor get() = frame.laShadowColor
     val laShadowSizeMul get() = frame.laShadowSizeMul
     val laShadowAlpha get() = frame.laShadowAlpha
-    val titleBaseShadow get() = frame.titleBaseShadow
-    val lyricsBaseShadow get() = frame.lyricsBaseShadow
     val songTarget get() = frame.songTarget
-    val effectiveTitleBold get() = frame.effectiveTitleBold
-    val effectiveTitleItalic get() = frame.effectiveTitleItalic
-    val effectiveTitleUnderline get() = frame.effectiveTitleUnderline
-    val effectiveTitleShadow get() = frame.effectiveTitleShadow
     val titleStyleProfile get() = frame.titleStyleProfile
-    val titleTextStyle get() = frame.titleTextStyle
     val numberStyleProfile get() = frame.numberStyleProfile
-    val songNumberBaseShadow get() = frame.songNumberBaseShadow
-    val songNumberTextStyle get() = frame.songNumberTextStyle
     val songNumberColor get() = frame.songNumberColor
     val songNumberFontFamily get() = frame.songNumberFontFamily
-    val effectiveLyricsBold get() = frame.effectiveLyricsBold
-    val effectiveLyricsItalic get() = frame.effectiveLyricsItalic
-    val effectiveLyricsUnderline get() = frame.effectiveLyricsUnderline
-    val effectiveLyricsShadow get() = frame.effectiveLyricsShadow
     val lyricsStyleProfile get() = frame.lyricsStyleProfile
-    val lyricsTextStyle get() = frame.lyricsTextStyle
     val chartHorizontalAlignment get() = frame.chartHorizontalAlignment
     val contentAlignment get() = frame.contentAlignment
     val lyricsHorizontalAlignment get() = frame.lyricsHorizontalAlignment
     val titleHorizontalAlignment get() = frame.titleHorizontalAlignment
     val songNumberHorizontalAlignment get() = frame.songNumberHorizontalAlignment
-    val bgConfig get() = frame.bgConfig
     val titleFontFamily get() = frame.titleFontFamily
     val lyricsFontFamily get() = frame.lyricsFontFamily
     val titleColor get() = frame.titleColor
@@ -90,51 +73,24 @@ internal class SongSlide(
     val chordColor get() = frame.chordColor
     val laColor get() = frame.laColor
     val laFontFamily get() = frame.laFontFamily
-    val lyricSection get() = frame.lyricSection
     val appSettings get() = frame.appSettings
     val isLowerThird get() = frame.isLowerThird
     val isLowerThirdVertical get() = frame.isLowerThirdVertical
-    val transitionAlpha get() = frame.transitionAlpha
-    val displayLineIndex get() = frame.displayLineIndex
     val lookAheadEnabled get() = frame.lookAheadEnabled
     val allLyricSections get() = frame.allLyricSections
     val displaySectionIndex get() = frame.displaySectionIndex
-    val showBackground get() = frame.showBackground
-    val crossfadeEnabled get() = frame.crossfadeEnabled
-    val languageOverride get() = frame.languageOverride
     val showChords get() = frame.showChords
-    val resolvedBg get() = frame.resolvedBg
-    val backgroundImageBitmap get() = frame.backgroundImageBitmap
-    val bgDimPercent get() = frame.bgDimPercent
-    val bgBlurReferencePx get() = frame.bgBlurReferencePx
-    val effectiveOpacity get() = frame.effectiveOpacity
-    val bgModifier get() = frame.bgModifier
-    val blurred get() = frame.blurred
     val scaleFactor get() = frame.scaleFactor
     val titleTextStyleScaled get() = frame.titleTextStyleScaled
     val songNumberTextStyleScaled get() = frame.songNumberTextStyleScaled
     val lyricsTextStyleScaled get() = frame.lyricsTextStyleScaled
-    val effectiveTitleFontSize get() = frame.effectiveTitleFontSize
     val scaledTitleFontSize get() = frame.scaledTitleFontSize
-    val settingsLyricsFontSize get() = frame.settingsLyricsFontSize
-    val effectiveSongNumberFontSize get() = frame.effectiveSongNumberFontSize
-    val fitEachSlide get() = frame.fitEachSlide
     val autoFitFontSize get() = frame.autoFitFontSize
     val languageFitSizes get() = frame.languageFitSizes
     val autoFitEnabled get() = frame.autoFitEnabled
     val effectiveLyricsFontSize get() = frame.effectiveLyricsFontSize
     val scaledLyricsFontSize get() = frame.scaledLyricsFontSize
     val scaledSongNumberFontSize get() = frame.scaledSongNumberFontSize
-    val leftOffSet get() = frame.leftOffSet
-    val rightOffSet get() = frame.rightOffSet
-    val topOffSet get() = frame.topOffSet
-    val bottomOffSet get() = frame.bottomOffSet
-    val outputWidth get() = frame.outputWidth
-    val outputHeight get() = frame.outputHeight
-    val maxWidth get() = frame.maxWidth
-    val maxHeight get() = frame.maxHeight
-    val songFit get() = frame.songFit
-    val blurRadius get() = frame.blurRadius
 
     fun keyedOutline(outline: TextOutline): TextOutline = frame.keyedOutline(outline)
     fun scaleElementShadow(color: String, size: Int, opacity: Int): Shadow =
@@ -145,16 +101,16 @@ internal class SongSlide(
     /** Each language's backdrop block for its look-ahead lines, remembered by [TextContent]. */
     lateinit var laBlocks: List<TextBlockBackdrop>
 
-    val titleDisplay = if (isLowerThird) ss.titleLowerThirdDisplay else ss.titleDisplay
-    val numberDisplay = if (isLowerThird) ss.showNumberLowerThird else ss.showNumber
+    private val titleDisplay = if (isLowerThird) ss.titleLowerThirdDisplay else ss.titleDisplay
+    private val numberDisplay = if (isLowerThird) ss.showNumberLowerThird else ss.showNumber
     // The title slide's lines are the song's title and credit, so they take the Title
     // element's style -- what the settings tab's Title tab edits -- rather than the
     // lyrics', and the title row above the lyrics stays out of it: it would repeat the
     // slide.
     val isTitleSlide = section.type == Constants.SECTION_TYPE_TITLE_SLIDE
     // A boxed title or number is drawn in its box (`SlideBoxes`), never in the row.
-    val titleBoxed = ss.isBoxed(SongStyleElement.TITLE, isLowerThird)
-    val numberBoxed = ss.isBoxed(SongStyleElement.NUMBER, isLowerThird)
+    private val titleBoxed = ss.isBoxed(SongStyleElement.TITLE, isLowerThird)
+    private val numberBoxed = ss.isBoxed(SongStyleElement.NUMBER, isLowerThird)
     val shouldShowTitle =
         shouldShowText(titleDisplay, section, allLyricSections, displaySectionIndex) && !isTitleSlide &&
             !titleBoxed
@@ -180,7 +136,7 @@ internal class SongSlide(
     // heading and its credits, each drawn in its own element's profile -- so it is
     // drawn by its own composable, in the same box the lyrics would have had.
     val allDisplayLines = section.lines
-    val hasChart = showChords && section.chordLines.isNotEmpty()
+    private val hasChart = showChords && section.chordLines.isNotEmpty()
     // Resolve per-mode settings based on fullscreen vs lower third
     // When lookAheadEnabled, the entire screen uses lookahead's own display mode
     val displayMode = if (lookAheadEnabled) {
@@ -189,7 +145,7 @@ internal class SongSlide(
         if (isLowerThird) ss.lowerThirdDisplayMode else ss.fullscreenDisplayMode
     }
     // Look-ahead portion uses same display mode as the screen
-    val laDisplayMode = displayMode
+    private val laDisplayMode = displayMode
     val laIsLineMode = laDisplayMode == Constants.SONG_DISPLAY_MODE_LINE
 
     val isLineMode = displayMode == Constants.SONG_DISPLAY_MODE_LINE
@@ -255,7 +211,7 @@ internal class SongSlide(
     // one language shows that language's title rather than the primary's. Falls
     // back to the song's own whenever that language has none, which is the common
     // case: a second language is often lyrics with no separate title.
-    val titles = section.allLanguageTitles()
+    private val titles = section.allLanguageTitles()
     val effectiveTitle = slideBlocks.firstOrNull()
         ?.let { titles.getOrNull(it.index) }
         ?.takeIf { it.isNotEmpty() }
@@ -290,8 +246,8 @@ internal class SongSlide(
     // grid -- both fall through to the stacked branch below, which already
     // special-cases isLowerThird (true for vertical too) with a compact stack.
     private val grid = bilingualGrid(appSettings.songSettings.bilingualLayout)
-    val gridRows = grid.first
-    val gridCols = grid.second
+    private val gridRows = grid.first
+    private val gridCols = grid.second
     val useSideBySide = gridRows == 1 && gridCols > 1 && !isLowerThirdVertical
     val useGrid2x2 = gridRows == 2 && gridCols == 2 && !isLowerThirdVertical
 
@@ -301,7 +257,7 @@ internal class SongSlide(
         offset = Offset(6f * scaleFactor * laShadowSizeMul, 6f * scaleFactor * laShadowSizeMul),
         blurRadius = 12f * scaleFactor * laShadowSizeMul
     )
-    val laStyleProfile = ss.elementStyle(SongStyleElement.NEXT_SECTION, songTarget)
+    private val laStyleProfile = ss.elementStyle(SongStyleElement.NEXT_SECTION, songTarget)
 
     val lookAheadTextStyle = TextStyle(
         fontWeight = if (laBold) FontWeight.Bold else FontWeight.Normal,
@@ -316,7 +272,7 @@ internal class SongSlide(
     val effectiveLaFontSize = if (laAutoFitEnabled) {
         (autoFitFontSize ?: laFontSize).coerceAtMost(laFontSize)
     } else laFontSize
-    val scaledLaFontSize = (effectiveLaFontSize * scaleFactor).sp
+    private val scaledLaFontSize = (effectiveLaFontSize * scaleFactor).sp
 
     // How each language draws its lyric lines and its look-ahead lines.
     //

@@ -17,6 +17,7 @@ import org.churchpresenter.settings.RSVP_FLASH_PHRASE
 import org.churchpresenter.settings.CaptionReading
 import org.churchpresenter.settings.CAPTION_STYLE_RSVP
 import org.churchpresenter.settings.utils.Constants
+import kotlin.math.roundToInt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -173,6 +174,25 @@ class ProfileOverlayPagesTest {
         assertEquals(Constants.LEFT, qa.horizontalAlignment)
         assertEquals("#112233", qa.qrForegroundColor)
     }
+
+    @Test
+    fun `the dictionary card's italic, fade, opacity and timing are the profile's own`() =
+        profilesTab(profileDocument()) { get ->
+            openCustomizePane(CustomizePane.DICTIONARY)
+            inRow("Style", hasClickAction(), 1).performScrollTo().performClick()
+            waitForIdle()
+            toggleCheckbox("Fade out")
+            stepDown("Card opacity")
+            stepUp("Duration")
+
+            val d = DictionarySettings()
+            val mine = get().profile().dictionarySettings
+            assertEquals(!d.wordItalic, mine.wordItalic)
+            assertEquals(!d.fadeOut, mine.fadeOut)
+            assertEquals(((d.cardBackgroundOpacity * 100).roundToInt() - 5) / 100f, mine.cardBackgroundOpacity, 0.001f)
+            assertTrue(mine.transitionDuration > d.transitionDuration)
+            assertEquals(d, get().dictionarySettings, "the document is untouched")
+        }
 
     @Test
     fun `the dictionary shows each part or not, and styles the part picked on its strip`() =

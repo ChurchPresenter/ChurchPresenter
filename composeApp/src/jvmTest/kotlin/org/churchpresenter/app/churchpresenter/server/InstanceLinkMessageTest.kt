@@ -136,6 +136,54 @@ class InstanceLinkMessageTest {
     // ── Messages that are pure signals ──────────────────────────────────────────
 
     @Test
+    fun `a payload that cannot be read reaches nobody`() {
+        val r = Recorder()
+        val songs = mutableListOf<Any>()
+        val c = InstanceLinkClient(
+            onStatusChanged = { },
+            onScheduleUpdated = { r.schedules += it },
+            onLiveStateUpdated = { r.liveStates += it },
+            onDisplayCleared = { }, onSongSectionSelected = { r.songSections += it },
+            onPresentationSlideChanged = { id, _, _, _, _ -> r.slides += id },
+            onSongsUpdated = { songs += it },
+        )
+
+        c.handleMessage(envelope(Constants.WS_EVENT_SCHEDULE_UPDATED, "not json"))
+        c.handleMessage(envelope(Constants.WS_EVENT_SONGS_UPDATED, """{"song-book":"not a list"}"""))
+        c.handleMessage(envelope(Constants.WS_EVENT_SONG_SECTION_SELECTED, "three"))
+        c.handleMessage(envelope(Constants.WS_EVENT_COMMAND_ACK, """{"commandId":"nobody-asked","ok":true}"""))
+        c.handleMessage(envelope(Constants.WS_EVENT_COMMAND_ACK, "not json"))
+        c.handleMessage("this is not an envelope")
+
+        assertTrue(r.schedules.isEmpty() && songs.isEmpty() && r.songSections.isEmpty())
+    }
+
+    @Test
+    fun `a song catalog update hands the catalog over`() {
+        val songs = mutableListOf<Any>()
+        val c = InstanceLinkClient(
+            onStatusChanged = { }, onScheduleUpdated = { }, onLiveStateUpdated = { },
+            onDisplayCleared = { }, onSongSectionSelected = { },
+            onPresentationSlideChanged = { _, _, _, _, _ -> }, onSongsUpdated = { songs += it },
+        )
+        c.handleMessage(envelope(Constants.WS_EVENT_SONGS_UPDATED, """{"song-book":[],"songBooks":0,"total":0}"""))
+        assertEquals(1, songs.size)
+    }
+
+    @Test
+    fun `a slide change missing its id, position or count is dropped`() {
+        val r = Recorder()
+        val c = clientWith(r)
+        listOf(
+            "not json",
+            """{"index":1,"total":3}""",
+            """{"id":"d","total":3}""",
+            """{"id":"d","index":1}""",
+        ).forEach { c.handleMessage(envelope(Constants.WS_EVENT_PRESENTATION_SLIDE_CHANGED, it)) }
+        assertTrue(r.slides.isEmpty())
+    }
+
+    @Test
     fun `the signal-only messages each reach their own callback`() {
         val r = Recorder()
         val c = clientWith(r)
@@ -356,6 +404,28 @@ class InstanceLinkMessageTest {
     }
 
     @Test
+    fun `a benign run is reported once, however long it lasts`() {
+        val c = clientWith(Recorder())
+
+        // CHURCH-PRESENTER-DESKTOP-68: one follower pointed at an address that never answered still
+        // filed a warning at 10, 20 … 100, 200 … 1000 timeouts. After the first, each said only that
+        // the link was still down.
+        for (kind in listOf("refused", "dns", "ping_timeout", "timeout")) {
+            val reported = (1..5_000).filter { n -> ConnectFailures.shouldReportConnectFailure(kind, n) }
+            assertEquals(listOf(10), reported, kind)
+        }
+    }
+
+    @Test
+    fun `a failure that suggests a regression keeps reporting while it lasts`() {
+        val c = clientWith(Recorder())
+
+        val reported = (1..1_000).filter { n -> ConnectFailures.shouldReportConnectFailure("tls", n) }
+        assertEquals(listOf(1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100), reported.take(11))
+        assertEquals(1_000, reported.last())
+    }
+
+    @Test
     fun `a failure that suggests a regression reports the first time`() {
         val c = clientWith(Recorder())
 
@@ -390,10 +460,10 @@ class InstanceLinkMessageTest {
     fun `a long non-benign streak reports far less than once per 10 attempts`() {
         val c = clientWith(Recorder())
 
-        // Counting every report a "timeout" streak would generate from 1 through 780 consecutive
-        // failures: the old behaviour reported 78 times (every 10th, forever); the new cadence must
-        // report noticeably fewer times over the same run while still surfacing periodically.
-        val reportsUnderNewCadence = (1..780).count { n -> ConnectFailures.shouldReportConnectFailure("timeout", n) }
+        // Counting every report a certificate failure would generate from 1 through 780 consecutive
+        // failures: a flat every-10th cadence reports 78 times; the widening one must report
+        // noticeably fewer times over the same run while still surfacing periodically.
+        val reportsUnderNewCadence = (1..780).count { n -> ConnectFailures.shouldReportConnectFailure("tls", n) }
         assertTrue(
             reportsUnderNewCadence < 30,
             "expected the widened cadence to report well under the old flat rate of 78, got $reportsUnderNewCadence",

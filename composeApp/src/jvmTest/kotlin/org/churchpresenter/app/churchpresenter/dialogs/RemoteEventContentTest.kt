@@ -219,6 +219,37 @@ class RemoteEventContentTest {
     }
 
     @Test
+    fun `every kind of request is named, and a connection with no title says what is connecting`() {
+        val resolved = mutableMapOf<RemoteEventType, RemoteEventPresentation>()
+        runComposeUiTest {
+            setContent {
+                MaterialTheme {
+                    RemoteEventType.entries.forEach { type ->
+                        resolved[type] = resolveRemoteEventPresentation(RemoteEvent(type, title = ""), 1, false, false)
+                    }
+                }
+            }
+        }
+        RemoteEventType.entries.forEach { type ->
+            assertTrue(resolved.getValue(type).actionLabel.isNotBlank(), "$type has a label")
+        }
+        val connecting = listOf(
+            RemoteEventType.PRESENTATION_CONNECT,
+            RemoteEventType.CALENDAR_ENROLL,
+            RemoteEventType.QA_ADMIN_CONNECT,
+            RemoteEventType.MUSICIAN_CONNECT,
+        )
+        connecting.forEach { type ->
+            assertTrue(resolved.getValue(type).bodyTitle.isNotBlank(), "$type says what is connecting")
+            assertEquals(Icons.Filled.Smartphone, resolved.getValue(type).typeIcon)
+        }
+        listOf(RemoteEventType.PRESENT, RemoteEventType.UPLOAD, RemoteEventType.CLEAR).forEach { type ->
+            assertEquals(Icons.Filled.Notifications, resolved.getValue(type).typeIcon, "$type is a plain request")
+            assertEquals("", resolved.getValue(type).bodyTitle)
+        }
+    }
+
+    @Test
     fun `add to schedule resolves its label, icon and amber accent`() {
         val presentation = presentationFor(RemoteEvent(type = RemoteEventType.ADD_TO_SCHEDULE, title = "Song"))
         assertEquals("Add to Schedule", presentation.actionLabel)

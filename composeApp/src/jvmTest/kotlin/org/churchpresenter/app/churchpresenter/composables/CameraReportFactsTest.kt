@@ -117,6 +117,28 @@ class CameraReportFactsTest {
         )
     }
 
+    @Test
+    fun `facts recorded before any enumeration ran still read as not enumerated, with no age`() {
+        val unrun = facts(CameraEnumerator.NOT_RUN, enumeratedAtMs = 0L)
+        assertEquals("not_enumerated", cameraEnumerationTags(unrun, "Webcam", true)["camera.device_listed"])
+        assertTrue("enumerated_age_s=never" in cameraEnumerationExtra(unrun, "Webcam", true))
+    }
+
+    @Test
+    fun `each report goes once, whatever the saved index now holds`() {
+        val source = Fixture.camera().copy(devicePath = "avfoundation://0", deviceName = "Studio Cam")
+        listOf("", "Capture screen 0", "Other Cam").forEach { refused ->
+            val gate = ReportOnce()
+            reportAvfIndexDrift(source, refused, facts = null, gate = gate)
+            assertFalse(gate.claim(), "the drift report for '$refused' took its one chance")
+            reportAvfIndexDrift(source, refused, facts = null, gate = gate)
+        }
+        val gate = ReportOnce()
+        reportCameraFfmpegMissing(source, facts = null, gate = gate)
+        assertFalse(gate.claim(), "the missing-ffmpeg report took its one chance")
+        reportCameraFfmpegMissing(source, facts = null, gate = gate)
+    }
+
     // ── Privacy ───────────────────────────────────────────────────────────────────────────────
 
     @Test

@@ -5,6 +5,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import java.io.File
 import java.nio.file.Files
+import org.churchpresenter.bible.BibleSearch
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -430,5 +431,52 @@ class BibleViewModelNavigationTest {
         awaitToken(token)
         vm.updateVerseSearchQuery("")
         assertEquals(vm.verses.value, vm.getFilteredVerses())
+    }
+
+    // ── The smart search box ────────────────────────────────────────────────────
+
+    @Test
+    fun `a passage typed into the search box selects every verse in it`() {
+        val token = vm.verseSelectionToken.value
+        vm.onSmartQueryChanged("John 3:2-4")
+        awaitToken(token)
+
+        assertTrue(vm.multiVerseEnabled.value)
+        val numbers = vm.selectedVerseIndices.sorted().map { vm.verses.value[it].substringBefore('.').trim().toInt() }
+        assertEquals(listOf(2, 3, 4), numbers)
+    }
+
+    @Test
+    fun `in reference mode words go nowhere, and a reference is gone to when submitted`() {
+        vm.cycleSearchMode() // auto -> reference
+        assertEquals(BibleSearchMode.REFERENCE, vm.searchMode.value)
+
+        vm.onSmartQueryChanged("light and truth")
+        assertTrue(!vm.isSearchMode.value, "no text search in reference mode")
+
+        val token = vm.verseSelectionToken.value
+        vm.onSmartQueryChanged("John 3:13")
+        vm.submitSmartQuery()
+        awaitToken(token)
+        assertTrue(vm.verses.value[vm.selectedVerseIndex.value].startsWith("13. "))
+
+        vm.onSmartQueryChanged("   ")
+        vm.submitSmartQuery()
+        assertEquals("", vm.searchQuery.value, "an empty box clears the search")
+    }
+
+    @Test
+    fun `a search result whose chapter and verse cannot be read opens at the start of the book`() {
+        val untouched = vm.selectedBookIndex.value
+        vm.selectSearchResult(BibleSearch(book = "Nowhere", chapter = "3", verse = "16"))
+        assertEquals(untouched, vm.selectedBookIndex.value, "a book this module lacks moves nothing")
+
+        val token = vm.verseSelectionToken.value
+        vm.selectSearchResult(BibleSearch(book = "John", chapter = "three", verse = "x"))
+        awaitToken(token)
+
+        assertEquals(vm.books.value.indexOf("John"), vm.selectedBookIndex.value)
+        assertEquals(1, vm.selectedChapter.value)
+        assertEquals(0, vm.selectedVerseIndex.value)
     }
 }

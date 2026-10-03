@@ -193,7 +193,7 @@ internal fun LanguageDropdown(
     )
 }
 
-internal val SearchFieldShape = AppShape(10.dp)
+private val SearchFieldShape = AppShape(10.dp)
 
 @Composable
 internal fun SearchField(viewModel: BibleCatalogViewModel) {

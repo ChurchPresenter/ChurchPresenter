@@ -1248,6 +1248,8 @@
     <string name="web_engine_unavailable_body">The browser engine could not start. Install the Microsoft Visual C++ Redistributable (x64) and restart the app.</string>
     <string name="web_engine_unavailable_policy_title">Web browser blocked by a policy on this computer</string>
     <string name="web_engine_unavailable_policy_body">A software policy on this computer is blocking the browser engine ChurchPresenter downloads. Ask whoever manages the computer to allow ChurchPresenter, or use a computer without that restriction — the Web tab and browser sources need it.</string>
+    <string name="web_engine_unavailable_library_title">Web browser needs a system library</string>
+    <string name="web_engine_unavailable_library_body">This computer is missing %1$s, which the browser engine needs. Install the package that provides it with your Linux distribution's package manager, then restart ChurchPresenter.</string>
     <string name="web_engine_unavailable_macos_title">Web browser requires a newer macOS</string>
     <string name="web_engine_unavailable_macos_body">ChurchPresenter's browser engine no longer supports this version of macOS. Update to macOS 12 (Monterey) or later to use the Web tab and browser sources.</string>
     <string name="web_engine_unavailable_windows_title">Web browser requires Windows 10 or later</string>
@@ -2167,6 +2169,9 @@
     <string name="setup_step4_title">You're All Set!</string>
     <string name="setup_step4_body">You can always add more content or adjust settings later by clicking the ⚙ Settings button in the toolbar.</string>
     <string name="setup_step4_hint">This guide is available anytime from Help → Getting Started.</string>
+    <string name="schedule_open_failed_title">Couldn't open the schedule</string>
+    <string name="schedule_open_not_a_schedule">%1$s isn't a ChurchPresenter schedule, so nothing was opened and your schedule is unchanged. If it came from a download or an email, check that you saved the .cps file itself and not the page it was linked from.</string>
+    <string name="schedule_open_unreadable">%1$s could not be read, so nothing was opened and your schedule is unchanged. Check that the file is still there and that you have permission to open it.</string>
     <string name="autosave_restore_title">Restore unsaved schedule?</string>
     <string name="autosave_restore_message">An unsaved schedule from %1$s was found. Would you like to restore it?</string>
     <string name="autosave_restore_confirm">Restore</string>
