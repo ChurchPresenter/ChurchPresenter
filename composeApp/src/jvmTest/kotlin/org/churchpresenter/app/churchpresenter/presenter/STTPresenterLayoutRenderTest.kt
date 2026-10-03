@@ -8,7 +8,11 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.settings.CAPTION_TRANSCRIPT_BOX
 import org.churchpresenter.settings.STTSettings
+import org.churchpresenter.settings.TextBox
+import org.churchpresenter.settings.textBoxKey
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.stt.STTSegment
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -25,6 +29,7 @@ class STTPresenterLayoutRenderTest {
         settings: STTSettings,
         transcription: List<STTSegment> = emptyList(),
         translation: List<STTSegment> = emptyList(),
+        outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
         body: ComposeUiTest.() -> Unit,
     ) = runComposeUiTest {
         setContent {
@@ -36,6 +41,7 @@ class STTPresenterLayoutRenderTest {
                     inProgressTranslation = "",
                     highlightedWords = emptyList(),
                     sttSettings = settings,
+                    outputRole = outputRole,
                 )
             }
         }
@@ -113,5 +119,52 @@ class STTPresenterLayoutRenderTest {
             "Und mit deinem Geiste",
             substring = true,
         ).assertExists("a translation arriving before the transcription must still be shown")
+    }
+
+    // ── Placement, text boxes and the key output ────────────────────────────────
+
+    private val both = STTSettings(displayMode = "both", dripFeedEnabled = false)
+    private val grace = listOf(segment("Grace and peace", id = 1))
+    private val gnade = listOf(segment("Gnade und Frieden", id = 2))
+
+    private fun ComposeUiTest.leftOf(text: String) =
+        onNodeWithText(text, substring = true).fetchSemanticsNode().boundsInRoot.left
+
+    @Test
+    fun `a caption in a text box is drawn in its box, and the other language beside it as before`() = runStt(
+        both.copy(
+            position = "Top Right",
+            textBoxes = mapOf(
+                textBoxKey(CAPTION_TRANSCRIPT_BOX, lowerThird = false) to
+                    TextBox(enabled = true, xPercent = 5f, yPercent = 5f, widthPercent = 30f, heightPercent = 20f),
+            ),
+        ),
+        transcription = grace,
+        translation = gnade,
+    ) {
+        assertTrue(leftOf("Grace and peace") < 1920f * 0.4f, "inside the box at the left of the screen")
+        onNodeWithText("Gnade und Frieden", substring = true).assertExists()
+    }
+
+    @Test
+    fun `the interleaved layout puts each line's translation with it`() = runStt(
+        both.copy(layout = LAYOUT_INTERLEAVED),
+        transcription = grace,
+        // The same segment id: a pair is matched by it.
+        translation = listOf(segment("Gnade und Frieden", id = 1)),
+    ) {
+        onNodeWithText("Grace and peace", substring = true).assertExists()
+        onNodeWithText("Gnade und Frieden", substring = true).assertExists()
+    }
+
+    @Test
+    fun `a key output draws the caption too, and italic and underlined text is still text`() = runStt(
+        both.copy(italic = true, underline = true, position = "Top Left"),
+        transcription = grace,
+        translation = gnade,
+        outputRole = Constants.OUTPUT_ROLE_KEY,
+    ) {
+        onNodeWithText("Grace and peace", substring = true).assertExists()
+        onNodeWithText("Gnade und Frieden", substring = true).assertExists()
     }
 }

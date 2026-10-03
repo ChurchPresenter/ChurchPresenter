@@ -168,4 +168,31 @@ class CompanionServerDictionaryTest {
         assertEquals(0, body["book-total"]?.jsonPrimitive?.int)
         assertEquals(0, body["books"]!!.jsonArray.size)
     }
+
+    // ── GET /api/bible, by book id ─────────────────────────────────────────────
+
+    @Test
+    fun `a book asked for by id with a chapter comes back as that chapter's verses`() = runBlocking {
+        server.updateBible(SpbFixture.loadedBible(Files.createTempDirectory("cp-bible-route-id").toFile()), "KJV")
+
+        val found = client.get(url("${Constants.ENDPOINT_BIBLE}?book=1&chapter=1"))
+        assertEquals(HttpStatusCode.OK, found.status)
+        val body = json.parseToJsonElement(found.bodyAsText()).jsonObject
+        assertEquals(1, body["chapter"]?.jsonPrimitive?.int)
+        assertTrue(body["verses"]!!.jsonArray.isNotEmpty())
+
+        assertEquals(HttpStatusCode.NotFound, client.get(url("${Constants.ENDPOINT_BIBLE}?book=1&chapter=999")).status)
+    }
+
+    @Test
+    fun `a dictionary search and a number's verses take every filter they are given`() = runBlocking {
+        server.updateBible(SpbFixture.loadedBible(Files.createTempDirectory("cp-dictionary-filters").toFile()), "KJV")
+
+        val search = client.get(url("/api/dictionary?q=god&lang=hebrew&filter=word&limit=5&book=1&chapter=1&verse=1"))
+        assertEquals(HttpStatusCode.OK, search.status)
+        assertTrue(json.parseToJsonElement(search.bodyAsText()).jsonArray.size <= 5)
+
+        val verses = client.get(url("/api/dictionary/H430/verses?limit=2&book=1&chapter=1&verse=1"))
+        assertEquals(HttpStatusCode.OK, verses.status)
+    }
 }

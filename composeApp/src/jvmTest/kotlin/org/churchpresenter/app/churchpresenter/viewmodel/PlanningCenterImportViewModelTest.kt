@@ -11,6 +11,10 @@ import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.SettingsManager
 import java.io.File
 import java.nio.file.Files
+import org.churchpresenter.app.churchpresenter.dialogs.PcoImportActions
+import org.churchpresenter.app.churchpresenter.dialogs.canImportSelection
+import org.churchpresenter.app.churchpresenter.dialogs.importSelection
+import kotlinx.coroutines.runBlocking
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -551,5 +555,74 @@ class PlanningCenterImportViewModelTest {
 
         vm.markItemResolved("i1", "Hymnal::0500")
         assertEquals("Hymnal::0500", vm.planItems.single().matchedSongId)
+    }
+
+    // ── Importing the selection into the schedule ───────────────────────────────
+
+    private class Imported {
+        val rows = mutableListOf<String>()
+        fun actions() = PcoImportActions(
+            onAddSong = { number, title, songbook, _ -> rows += "song $songbook $number $title" },
+            onAddLabel = { text, _, _ -> rows += "heading $text" },
+            onAddPresentation = { _, name, _, type -> rows += "deck $name $type" },
+            onAddPicture = { _, name, count -> rows += "pictures $name $count" },
+            onAddMedia = { _, title, _ -> rows += "media $title" },
+            onAddAnnouncement = { text -> rows += "announcement $text" },
+            onAddBibleVerse = { book, chapter, verse, _, _, _ -> rows += "verse $book $chapter:$verse" },
+            headerTextColor = "#FFFFFF",
+            headerBackgroundColor = "#000000",
+        )
+    }
+
+    @Test
+    fun `an import brings in each selected row in plan order, and a row's images as one slideshow`() {
+        val vm = viewModel()
+        coEvery { PlanningCenterClient.getPlanItems(any(), any(), any(), any()) } returns
+            PlanningCenterClient.PlanItemsOutcome.Success(
+                listOf(
+                    planItem("h1", "Welcome", itemType = "header", sequence = 0),
+                    planItem("s1", "Grace", ccli = "22025", sequence = 1),
+                    planItem("n1", "Offering", itemType = "item", description = "Give online", sequence = 2),
+                    planItem("x1", "Skipped", itemType = "item", sequence = 3),
+                    planItem("p1", "Lobby Loop", itemType = "item", sequence = 4),
+                    planItem("m1", "Countdown video", itemType = "media", sequence = 5),
+                ),
+            )
+        val lobbyFiles = listOf(
+            PlanningCenterClient.PlanAttachment("a1", "one.png"),
+            PlanningCenterClient.PlanAttachment("a2", "two.png"),
+            PlanningCenterClient.PlanAttachment("a3", "notes.txt"),
+        )
+        coEvery { PlanningCenterClient.getItemAttachments(any(), any(), any(), any(), any()) } answers {
+            PlanningCenterClient.AttachmentsOutcome.Success(if (arg<String>(3) == "p1") lobbyFiles else emptyList())
+        }
+        coEvery { PlanningCenterClient.resolveAttachmentDownloadUrl(any(), any(), any()) } returns
+            PlanningCenterClient.AttachmentUrlOutcome.Success("https://files.example/x")
+        coEvery { PlanningCenterClient.downloadFile(any(), any(), any()) } answers {
+            val destination = secondArg<File>().apply { parentFile.mkdirs(); writeBytes(byteArrayOf(1)) }
+            PlanningCenterClient.FileDownloadOutcome.Success(destination)
+        }
+        vm.selectPlan("plan-1")
+        awaitUntil("plan items") { !vm.isLoadingItems && vm.planItems.size == 6 }
+        vm.loadAttachments("p1")
+        awaitUntil("attachments") { vm.attachmentsByItemId["p1"]?.size == 3 }
+        vm.toggleItemSelected("x1")
+
+        assertTrue(canImportSelection(vm))
+        val imported = Imported()
+        runBlocking { importSelection(vm, "plan-1", imported.actions()) }
+
+        assertEquals(
+            listOf("heading Welcome", "song Hymnal 42 Grace", "announcement Give online", "pictures Lobby Loop 2"),
+            imported.rows,
+        )
+    }
+
+    @Test
+    fun `with nothing selected that an import would bring in, there is nothing to import`() {
+        val vm = viewModel()
+        loadItems(vm, listOf(planItem("h1", "Welcome", itemType = "header"), planItem("u1", "Unknown Song")))
+        vm.toggleItemSelected("h1")
+        assertFalse(canImportSelection(vm), "a deselected heading and a song the library lacks")
     }
 }
