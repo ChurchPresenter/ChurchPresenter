@@ -23,7 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 /** The corner radius every System settings card is drawn with. */
-internal val SettingsCardShape = AppShape(12.dp)
+private val SettingsCardShape = AppShape(12.dp)
 
 /**
  * A titled card: a header strip carrying a name, an optional one-line explanation and any number of

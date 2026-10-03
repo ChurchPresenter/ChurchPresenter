@@ -166,7 +166,7 @@ internal class BibleSlide(val frame: BibleFrame, val verses: List<SelectedVerse>
     // of what is configured, exactly as the single Top/Bottom choice always has.
     // Every translation this band shows, laid out in whatever the arrangement means for
     // that many -- not `rows x cols` of them. Capped only by what a band can carry.
-    val lowerThirdSlots = verses.size.coerceAtMost(MAX_BIBLE_BAND_TRANSLATIONS)
+    private val lowerThirdSlots = verses.size.coerceAtMost(MAX_BIBLE_BAND_TRANSLATIONS)
     val lowerThirdGridCols = bilingualColumns(bs.bilingualLayoutLowerThird, lowerThirdSlots)
     val lowerThirdGridRows =
         ((lowerThirdSlots + lowerThirdGridCols - 1) / lowerThirdGridCols).coerceAtLeast(1)

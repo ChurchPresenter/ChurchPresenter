@@ -137,9 +137,9 @@ internal class SongLook(
     val songTarget = if (isLowerThird) SongStyleTarget.LOWER_THIRD else SongStyleTarget.FULL_SCREEN
 
     // Text styles derived from settings (resolved per fullscreen / lower third)
-    val effectiveTitleBold = if (isLowerThird) ss.titleLowerThirdBold else ss.titleBold
-    val effectiveTitleItalic = if (isLowerThird) ss.titleLowerThirdItalic else ss.titleItalic
-    val effectiveTitleUnderline = if (isLowerThird) ss.titleLowerThirdUnderline else ss.titleUnderline
+    private val effectiveTitleBold = if (isLowerThird) ss.titleLowerThirdBold else ss.titleBold
+    private val effectiveTitleItalic = if (isLowerThird) ss.titleLowerThirdItalic else ss.titleItalic
+    private val effectiveTitleUnderline = if (isLowerThird) ss.titleLowerThirdUnderline else ss.titleUnderline
     val effectiveTitleShadow = if (isLowerThird) ss.titleLowerThirdShadow else ss.titleShadow
     val titleStyleProfile = ss.elementStyle(SongStyleElement.TITLE, songTarget)
     val titleTextStyle = TextStyle(

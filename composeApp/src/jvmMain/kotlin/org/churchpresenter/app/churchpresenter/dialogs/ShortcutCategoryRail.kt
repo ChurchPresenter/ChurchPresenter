@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.sharedui.models.ShortcutScope
 
 /** Wide enough for "Presentation Tab" at the rail's text size without ellipsis. */
-internal val RAIL_WIDTH = 178.dp
+private val RAIL_WIDTH = 178.dp
 
 private val RAIL_ITEM_SHAPE = AppShape(8.dp)
 

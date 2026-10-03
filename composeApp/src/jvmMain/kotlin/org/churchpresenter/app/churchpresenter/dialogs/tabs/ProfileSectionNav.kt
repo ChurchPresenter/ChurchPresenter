@@ -47,7 +47,7 @@ import org.churchpresenter.theme.sunken
 import org.jetbrains.compose.resources.stringResource
 
 /** The section list is this wide: the longest page name and a count beside it. */
-internal val SECTION_NAV_WIDTH = 200.dp
+private val SECTION_NAV_WIDTH = 200.dp
 
 private const val HIDDEN_PAGE_ALPHA = 0.5f
 

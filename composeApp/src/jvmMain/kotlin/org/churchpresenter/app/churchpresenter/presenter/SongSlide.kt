@@ -101,16 +101,16 @@ internal class SongSlide(
     /** Each language's backdrop block for its look-ahead lines, remembered by [TextContent]. */
     lateinit var laBlocks: List<TextBlockBackdrop>
 
-    val titleDisplay = if (isLowerThird) ss.titleLowerThirdDisplay else ss.titleDisplay
-    val numberDisplay = if (isLowerThird) ss.showNumberLowerThird else ss.showNumber
+    private val titleDisplay = if (isLowerThird) ss.titleLowerThirdDisplay else ss.titleDisplay
+    private val numberDisplay = if (isLowerThird) ss.showNumberLowerThird else ss.showNumber
     // The title slide's lines are the song's title and credit, so they take the Title
     // element's style -- what the settings tab's Title tab edits -- rather than the
     // lyrics', and the title row above the lyrics stays out of it: it would repeat the
     // slide.
     val isTitleSlide = section.type == Constants.SECTION_TYPE_TITLE_SLIDE
     // A boxed title or number is drawn in its box (`SlideBoxes`), never in the row.
-    val titleBoxed = ss.isBoxed(SongStyleElement.TITLE, isLowerThird)
-    val numberBoxed = ss.isBoxed(SongStyleElement.NUMBER, isLowerThird)
+    private val titleBoxed = ss.isBoxed(SongStyleElement.TITLE, isLowerThird)
+    private val numberBoxed = ss.isBoxed(SongStyleElement.NUMBER, isLowerThird)
     val shouldShowTitle =
         shouldShowText(titleDisplay, section, allLyricSections, displaySectionIndex) && !isTitleSlide &&
             !titleBoxed
@@ -136,7 +136,7 @@ internal class SongSlide(
     // heading and its credits, each drawn in its own element's profile -- so it is
     // drawn by its own composable, in the same box the lyrics would have had.
     val allDisplayLines = section.lines
-    val hasChart = showChords && section.chordLines.isNotEmpty()
+    private val hasChart = showChords && section.chordLines.isNotEmpty()
     // Resolve per-mode settings based on fullscreen vs lower third
     // When lookAheadEnabled, the entire screen uses lookahead's own display mode
     val displayMode = if (lookAheadEnabled) {
@@ -145,7 +145,7 @@ internal class SongSlide(
         if (isLowerThird) ss.lowerThirdDisplayMode else ss.fullscreenDisplayMode
     }
     // Look-ahead portion uses same display mode as the screen
-    val laDisplayMode = displayMode
+    private val laDisplayMode = displayMode
     val laIsLineMode = laDisplayMode == Constants.SONG_DISPLAY_MODE_LINE
 
     val isLineMode = displayMode == Constants.SONG_DISPLAY_MODE_LINE
@@ -211,7 +211,7 @@ internal class SongSlide(
     // one language shows that language's title rather than the primary's. Falls
     // back to the song's own whenever that language has none, which is the common
     // case: a second language is often lyrics with no separate title.
-    val titles = section.allLanguageTitles()
+    private val titles = section.allLanguageTitles()
     val effectiveTitle = slideBlocks.firstOrNull()
         ?.let { titles.getOrNull(it.index) }
         ?.takeIf { it.isNotEmpty() }
@@ -246,8 +246,8 @@ internal class SongSlide(
     // grid -- both fall through to the stacked branch below, which already
     // special-cases isLowerThird (true for vertical too) with a compact stack.
     private val grid = bilingualGrid(appSettings.songSettings.bilingualLayout)
-    val gridRows = grid.first
-    val gridCols = grid.second
+    private val gridRows = grid.first
+    private val gridCols = grid.second
     val useSideBySide = gridRows == 1 && gridCols > 1 && !isLowerThirdVertical
     val useGrid2x2 = gridRows == 2 && gridCols == 2 && !isLowerThirdVertical
 
@@ -257,7 +257,7 @@ internal class SongSlide(
         offset = Offset(6f * scaleFactor * laShadowSizeMul, 6f * scaleFactor * laShadowSizeMul),
         blurRadius = 12f * scaleFactor * laShadowSizeMul
     )
-    val laStyleProfile = ss.elementStyle(SongStyleElement.NEXT_SECTION, songTarget)
+    private val laStyleProfile = ss.elementStyle(SongStyleElement.NEXT_SECTION, songTarget)
 
     val lookAheadTextStyle = TextStyle(
         fontWeight = if (laBold) FontWeight.Bold else FontWeight.Normal,
@@ -272,7 +272,7 @@ internal class SongSlide(
     val effectiveLaFontSize = if (laAutoFitEnabled) {
         (autoFitFontSize ?: laFontSize).coerceAtMost(laFontSize)
     } else laFontSize
-    val scaledLaFontSize = (effectiveLaFontSize * scaleFactor).sp
+    private val scaledLaFontSize = (effectiveLaFontSize * scaleFactor).sp
 
     // How each language draws its lyric lines and its look-ahead lines.
     //

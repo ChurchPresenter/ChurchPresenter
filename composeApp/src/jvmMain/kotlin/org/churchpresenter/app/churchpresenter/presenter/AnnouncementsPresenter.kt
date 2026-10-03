@@ -46,7 +46,7 @@ import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
 
 /** The inset the announcement text is drawn inside, and so the inset auto-fit measures against. */
 internal val TEXT_PADDING_HORIZONTAL = 32.dp
-internal val TEXT_PADDING_VERTICAL = 16.dp
+private val TEXT_PADDING_VERTICAL = 16.dp
 
 @Composable
 fun AnnouncementsPresenter(

@@ -35,7 +35,7 @@ import org.churchpresenter.theme.dropdownField
 /** Dimmed rather than hidden while a source is off, so the field still says what it is. */
 private const val OFF_ALPHA = 0.6f
 
-internal val SOURCE_FIELD_HEIGHT = 48.dp
+private val SOURCE_FIELD_HEIGHT = 48.dp
 
 /**
  * The stack positions a profile draws, in the order it draws them -- nothing while scripture is off.

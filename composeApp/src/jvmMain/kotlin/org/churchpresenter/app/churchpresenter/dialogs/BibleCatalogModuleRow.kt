@@ -244,4 +244,4 @@ internal fun moduleSubtitle(module: BibleModule, showDate: Boolean): String {
     return parts.joinToString(" · ")
 }
 
-internal val ACTION_COLUMN_WIDTH = 160.dp
+private val ACTION_COLUMN_WIDTH = 160.dp

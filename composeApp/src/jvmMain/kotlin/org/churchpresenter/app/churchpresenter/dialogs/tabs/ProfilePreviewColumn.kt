@@ -44,7 +44,7 @@ import org.churchpresenter.theme.AppShape
 import org.jetbrains.compose.resources.stringResource
 
 /** The preview column's width: a 400dp picture and its padding. */
-internal val PREVIEW_COLUMN_WIDTH = 440.dp
+private val PREVIEW_COLUMN_WIDTH = 440.dp
 
 /** How tall the picture may grow -- a portrait screen is drawn narrower rather than taller. */
 private val STAGE_MAX_HEIGHT = 320.dp

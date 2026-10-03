@@ -38,6 +38,6 @@ class SongSettingsViewModel {
 
     // ── Internal helpers ─────────────────────────────────────────────
 
-    val fileManager = FileManager()
+    private val fileManager = FileManager()
 }
 

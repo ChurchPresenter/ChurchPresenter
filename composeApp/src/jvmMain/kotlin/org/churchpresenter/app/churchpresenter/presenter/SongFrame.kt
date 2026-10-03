@@ -146,7 +146,7 @@ internal class SongFrame(
             if (isLowerThird) ss.lyricsLowerThirdShadowSize else ss.lyricsShadowSize,
             if (isLowerThird) ss.lyricsLowerThirdShadowOpacity else ss.lyricsShadowOpacity
         )) else lyricsTextStyle
-    val effectiveTitleFontSize = if (isLowerThird) ss.titleLowerThirdFontSize else ss.titleFontSize
+    private val effectiveTitleFontSize = if (isLowerThird) ss.titleLowerThirdFontSize else ss.titleFontSize
     val scaledTitleFontSize = (effectiveTitleFontSize * scaleFactor).sp
     val settingsLyricsFontSize = if (lookAheadEnabled) {
         if (isLowerThird) ss.lowerThirdLookAheadFontSize else ss.lookAheadFontSize

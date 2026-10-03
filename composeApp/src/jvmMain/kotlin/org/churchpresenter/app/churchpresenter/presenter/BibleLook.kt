@@ -141,37 +141,36 @@ internal class BibleStyle(
     val sTextPainter = painters.sTextPainter
     val sRefPainter = painters.sRefPainter
 
-    val secondaryBible = effectiveVerses.getOrNull(1)
 
     // Resolve bold/italic/underline/shadow — use lower-third-specific values when applicable
-    val pBold = if (isLowerThird) t0.lowerThirdTextBold else t0.textBold
-    val pItalic = if (isLowerThird) t0.lowerThirdTextItalic else t0.textItalic
-    val pUnderline = if (isLowerThird) t0.lowerThirdTextUnderline else t0.textUnderline
+    private val pBold = if (isLowerThird) t0.lowerThirdTextBold else t0.textBold
+    private val pItalic = if (isLowerThird) t0.lowerThirdTextItalic else t0.textItalic
+    private val pUnderline = if (isLowerThird) t0.lowerThirdTextUnderline else t0.textUnderline
     val pShadow = if (isLowerThird) t0.lowerThirdTextShadow else t0.textShadow
-    val prBold = if (isLowerThird) t0.lowerThirdReferenceBold else t0.referenceBold
-    val prItalic = if (isLowerThird) t0.lowerThirdReferenceItalic else t0.referenceItalic
-    val prUnderline = if (isLowerThird) t0.lowerThirdReferenceUnderline else t0.referenceUnderline
+    private val prBold = if (isLowerThird) t0.lowerThirdReferenceBold else t0.referenceBold
+    private val prItalic = if (isLowerThird) t0.lowerThirdReferenceItalic else t0.referenceItalic
+    private val prUnderline = if (isLowerThird) t0.lowerThirdReferenceUnderline else t0.referenceUnderline
     val prShadow = if (isLowerThird) t0.lowerThirdReferenceShadow else t0.referenceShadow
-    val sBold = if (isLowerThird) t1.lowerThirdTextBold else t1.textBold
-    val sItalic = if (isLowerThird) t1.lowerThirdTextItalic else t1.textItalic
-    val sUnderline = if (isLowerThird) t1.lowerThirdTextUnderline else t1.textUnderline
+    private val sBold = if (isLowerThird) t1.lowerThirdTextBold else t1.textBold
+    private val sItalic = if (isLowerThird) t1.lowerThirdTextItalic else t1.textItalic
+    private val sUnderline = if (isLowerThird) t1.lowerThirdTextUnderline else t1.textUnderline
     val sShadow = if (isLowerThird) t1.lowerThirdTextShadow else t1.textShadow
-    val srBold = if (isLowerThird) t1.lowerThirdReferenceBold else t1.referenceBold
-    val srItalic = if (isLowerThird) t1.lowerThirdReferenceItalic else t1.referenceItalic
-    val srUnderline = if (isLowerThird) t1.lowerThirdReferenceUnderline else t1.referenceUnderline
+    private val srBold = if (isLowerThird) t1.lowerThirdReferenceBold else t1.referenceBold
+    private val srItalic = if (isLowerThird) t1.lowerThirdReferenceItalic else t1.referenceItalic
+    private val srUnderline = if (isLowerThird) t1.lowerThirdReferenceUnderline else t1.referenceUnderline
     val srShadow = if (isLowerThird) t1.lowerThirdReferenceShadow else t1.referenceShadow
 
     // The four settings that reach the text rather than the TextStyle alone. Spacing is turned into
     // a fraction of the em here so it keeps its proportion through the resolution scale and the
     // auto-fit below -- see `spacingEm`.
-    val pStrike = if (isLowerThird) t0.lowerThirdTextStrikethrough else t0.textStrikethrough
-    val prStrike = if (isLowerThird) t0.lowerThirdReferenceStrikethrough else t0.referenceStrikethrough
-    val sStrike = if (isLowerThird) t1.lowerThirdTextStrikethrough else t1.textStrikethrough
-    val srStrike = if (isLowerThird) t1.lowerThirdReferenceStrikethrough else t1.referenceStrikethrough
-    val pTransform = if (isLowerThird) t0.lowerThirdTextTransform else t0.textTransform
-    val prTransform = if (isLowerThird) t0.lowerThirdReferenceTransform else t0.referenceTransform
-    val sTransform = if (isLowerThird) t1.lowerThirdTextTransform else t1.textTransform
-    val srTransform = if (isLowerThird) t1.lowerThirdReferenceTransform else t1.referenceTransform
+    private val pStrike = if (isLowerThird) t0.lowerThirdTextStrikethrough else t0.textStrikethrough
+    private val prStrike = if (isLowerThird) t0.lowerThirdReferenceStrikethrough else t0.referenceStrikethrough
+    private val sStrike = if (isLowerThird) t1.lowerThirdTextStrikethrough else t1.textStrikethrough
+    private val srStrike = if (isLowerThird) t1.lowerThirdReferenceStrikethrough else t1.referenceStrikethrough
+    private val pTransform = if (isLowerThird) t0.lowerThirdTextTransform else t0.textTransform
+    private val prTransform = if (isLowerThird) t0.lowerThirdReferenceTransform else t0.referenceTransform
+    private val sTransform = if (isLowerThird) t1.lowerThirdTextTransform else t1.textTransform
+    private val srTransform = if (isLowerThird) t1.lowerThirdReferenceTransform else t1.referenceTransform
     val pLsEm = spacingEm(
         if (isLowerThird) t0.lowerThirdTextLetterSpacing else t0.textLetterSpacing,
         if (isLowerThird) t0.lowerThirdTextFontSize else t0.textFontSize,

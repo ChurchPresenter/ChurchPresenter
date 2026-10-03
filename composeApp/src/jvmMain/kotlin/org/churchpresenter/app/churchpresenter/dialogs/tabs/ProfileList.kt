@@ -90,7 +90,7 @@ import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
 
 /** The profile list is this wide: a name, its badge, and what uses it under them. */
-internal val PROFILE_LIST_WIDTH = 250.dp
+private val PROFILE_LIST_WIDTH = 250.dp
 
 private const val HOVER_WASH_ALPHA = 0.06f
 private const val DRAGGED_ALPHA = 0.85f
