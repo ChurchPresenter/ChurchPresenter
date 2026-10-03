@@ -1,0 +1,63 @@
+package org.churchpresenter.server
+
+import org.churchpresenter.core.models.schedule.ScheduleItem
+
+/**
+ * Wraps an incoming remote request with a [CompletableDeferred] that the UI
+ * resolves once the user clicks Allow (true) or Deny/Block (false).
+ * The HTTP endpoint suspends on [decision] before sending a response, so the
+ * calling device receives the correct status code.
+ */
+data class PendingRemoteRequest(
+    val item: ScheduleItem,
+    val clientId: String = "",
+    val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
+)
+
+/**
+ * Same as [PendingRemoteRequest] but carries multiple items — used by the
+ * batch add endpoint so the user approves or denies the whole group at once.
+ */
+data class PendingBatchRequest(
+    val items: List<ScheduleItem>,
+    val clientId: String = "",
+    val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
+)
+
+/** Same shape as [PendingRemoteRequest] but for a remove request — carries just the target id and a
+ *  human-readable label (resolved from the current schedule, if still present) for the approval UI. */
+data class PendingRemoveRequest(
+    val id: String,
+    val label: String,
+    val clientId: String = "",
+    val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
+)
+
+/**
+ * A musician view's transpose press, for the Browser Source output at 0-based [index]: a step of
+ * [delta] semitones, or back to the key the song is written in when [reset] is set.
+ */
+data class BrowserSourceTransposeCommand(val index: Int, val delta: Int = 0, val reset: Boolean = false)
+
+/**
+ * Emitted when a device authenticates against the presentation remote for the first time
+ * this session, so the desktop operator can approve/deny it like any other remote action.
+ */
+data class PendingConnectionRequest(
+    val clientId: String = "",
+    val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
+)
+
+/** The desktop media player's state as the companion Media tab is told it. */
+data class MediaPlaybackState(
+    val isLive: Boolean,
+    val isLoaded: Boolean,
+    val isPlaying: Boolean,
+    val title: String,
+    val positionMs: Long,
+    val durationMs: Long,
+    val volume: Float,
+    val muted: Boolean,
+    val mediaType: String,
+    val source: String,
+)

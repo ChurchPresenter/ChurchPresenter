@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontFamily
 import org.churchpresenter.sharedui.composables.LocalFontPreviewFace
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LocalDefaultCalendarFolder
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialogContent
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.CompanionServer
 import java.io.File
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest

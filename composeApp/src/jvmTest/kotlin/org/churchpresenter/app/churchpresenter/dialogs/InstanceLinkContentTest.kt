@@ -21,8 +21,8 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.BibleSyncMode
 import org.churchpresenter.settings.InstanceLinkRole
 import org.churchpresenter.settings.InstanceLinkSettings
-import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
-import org.churchpresenter.app.churchpresenter.server.LiveStateDto
+import org.churchpresenter.server.InstanceLinkStatus
+import org.churchpresenter.server.LiveStateDto
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

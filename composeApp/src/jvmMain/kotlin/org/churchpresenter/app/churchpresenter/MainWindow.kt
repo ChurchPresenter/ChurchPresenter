@@ -1,11 +1,11 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.server.clearPresentationState
-import org.churchpresenter.app.churchpresenter.server.preloadData
-import org.churchpresenter.app.churchpresenter.server.updateApiKey
-import org.churchpresenter.app.churchpresenter.server.updateAtemConfig
-import org.churchpresenter.app.churchpresenter.server.updateFileUploadEnabled
-import org.churchpresenter.app.churchpresenter.server.updateMaxMediaUploadMb
+import org.churchpresenter.server.clearPresentationState
+import org.churchpresenter.server.preloadData
+import org.churchpresenter.server.updateApiKey
+import org.churchpresenter.server.updateAtemConfig
+import org.churchpresenter.server.updateFileUploadEnabled
+import org.churchpresenter.server.updateMaxMediaUploadMb
 import androidx.compose.ui.window.Window
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -49,7 +49,7 @@ import org.churchpresenter.theme.ThemeCustomization
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.composables.isJavaFxAvailable
 import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
-import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
+import org.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.calendar.CalendarStore
 import org.churchpresenter.calendar.ServiceAutoLoader
@@ -71,7 +71,7 @@ import java.awt.GraphicsEnvironment
 import java.util.Locale
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.WindowState
-import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.server.TunnelStatus
 import org.churchpresenter.sharedui.composables.LocalWentLive
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
 

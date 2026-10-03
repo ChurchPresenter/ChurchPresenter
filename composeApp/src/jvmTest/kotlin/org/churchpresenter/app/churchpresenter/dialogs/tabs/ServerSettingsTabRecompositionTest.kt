@@ -22,7 +22,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ServerSettings
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.CompanionServer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

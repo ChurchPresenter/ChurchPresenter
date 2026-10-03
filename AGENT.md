@@ -56,7 +56,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `tabs/`          | UI only — one file per tab, no logic                                |
 | `viewmodel/`     | State + business logic; owns its own ViewModel, never passed around |
 | `presenter/`     | Output window rendering (what the audience sees), plus the off-screen outputs (`BrowserSourceVideoRenderer`, `NdiVideoRenderer`, `OmtVideoRenderer`) on the shared `ComposeScenePump` |
-| `server/`        | Ktor REST/WebSocket server, ATEM *bridge*, tunnel, SSL — the ATEM client is `:atem`, the PCO OAuth callback listener is `:planning-center` |
+| `remote/`        | What a remote client or an Instance Link primary asks for, applied to the live output, the schedule and statistics — the server itself is `:server` |
 | `data/`          | File I/O, database, song parsing, Bible data                        |
 | `data/settings/` | Only `ObsSceneSelection.kt` — the rest is the `:settings` module    |
 | `models/`        | Only what needs the app: `PresetItems`, the two Companion UI states — `ShortcutAction` is `:shared-ui` |
@@ -67,7 +67,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 
 ```
 main.kt → MainDesktop.kt → tabs/* + PresenterManager → presenter/*
-                        ↘ CompanionServer (server/)
+                        ↘ CompanionServer (:server)
                         ↘ StageMonitorScreen.kt
 ```
 - `MainDesktop.kt` is the root composable; `Presenting` (in `:shared-ui`) is the live-content enum.
@@ -117,6 +117,7 @@ module-specific notes there, not here.**
 | `lower-third/`         | `:lower-third`         | The Lower Third tab, its ATEM render cache and sequencer, and the bundled lottie fonts | [AGENT.md](lower-third/AGENT.md)         |
 | `songs/`               | `:songs`               | The Songs tab, `SongsViewModel` and the song library on disk                        | [AGENT.md](songs/AGENT.md)               |
 | `bible-tab/`           | `:bible-tab`           | The Bible tab, `BibleViewModel`, the cross references and the verse-sequence log     | [AGENT.md](bible-tab/AGENT.md)           |
+| `server/`              | `:server`              | The companion server and Instance Link: the Ktor API, tunnel, SSL, ATEM bridge, calendar sync | [AGENT.md](server/AGENT.md)              |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions

@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
+import org.churchpresenter.server.SelectBibleVerseRequest
 
 /*
  * The Bible decisions the main screen makes while the Bible tab may not be composed: which Bibles the

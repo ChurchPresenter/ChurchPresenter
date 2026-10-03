@@ -144,7 +144,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -536,6 +536,14 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.bibletab == 'true' }}
         run: ./gradlew :bible-tab:jacocoTestCoverageVerification -x test
 
+      - name: Server tests
+        if: ${{ !cancelled() && steps.modules.outputs.server == 'true' }}
+        run: ./gradlew :server:test
+
+      - name: Server coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.server == 'true' }}
+        run: ./gradlew :server:jacocoTestCoverageVerification -x test
+
 
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,
@@ -590,6 +598,7 @@ jobs:
               ("lower-third", "Lower Third"),
               ("songs", "Songs"),
               ("bible-tab", "Bible tab"),
+              ("server", "Server"),
           ]
           ran = [(d, n) for d, n in MODULES if glob.glob(f"{d}/build/test-results/**/TEST-*.xml", recursive=True)]
           print("paths<<EOF")
@@ -785,3 +794,5 @@ jobs:
             songs/build/test-results/
             bible-tab/build/reports/tests/
             bible-tab/build/test-results/
+            server/build/reports/tests/
+            server/build/test-results/

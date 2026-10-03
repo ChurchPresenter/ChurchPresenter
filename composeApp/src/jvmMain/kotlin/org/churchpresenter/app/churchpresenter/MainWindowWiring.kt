@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.server.broadcastDisplayCleared
-import org.churchpresenter.app.churchpresenter.server.broadcastSongSectionSelected
-import org.churchpresenter.app.churchpresenter.server.updateBrowserSourceTranspose
+import org.churchpresenter.server.broadcastDisplayCleared
+import org.churchpresenter.server.broadcastSongSectionSelected
+import org.churchpresenter.server.updateBrowserSourceTranspose
 import org.churchpresenter.app.churchpresenter.dialogs.text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,7 +18,7 @@ import org.churchpresenter.strings.generated.resources.tooltip_clear_display
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.dialogs.RemoteActivityNotification
+import org.churchpresenter.server.RemoteActivityNotification
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.lowerthird.LowerThirdSequencer
 import org.churchpresenter.calendar.CalendarFileWatcher

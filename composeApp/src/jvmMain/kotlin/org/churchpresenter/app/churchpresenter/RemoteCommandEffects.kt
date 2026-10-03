@@ -16,7 +16,7 @@ import org.churchpresenter.slides.data.RecentPresentationFiles
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
+import org.churchpresenter.server.SelectBibleVerseRequest
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.bibletab.BibleViewModel
 import org.churchpresenter.slides.viewmodel.PicturesViewModel

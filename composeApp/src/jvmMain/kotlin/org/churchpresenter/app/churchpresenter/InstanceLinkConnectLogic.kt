@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.InstanceLinkRole
-import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
+import org.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.settings.InstanceLinkSettings
 import org.churchpresenter.settings.utils.Constants
 

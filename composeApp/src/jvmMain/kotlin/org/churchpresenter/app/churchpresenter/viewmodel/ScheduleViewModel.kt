@@ -9,10 +9,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
+import org.churchpresenter.server.ScheduleItemDto
 import org.churchpresenter.sharedui.utils.addGuardedShutdownHook
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
+import org.churchpresenter.server.InstanceLinkLogSide
+import org.churchpresenter.server.InstanceLinkLogger
 import org.churchpresenter.core.models.io.writeTextAtomically
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem

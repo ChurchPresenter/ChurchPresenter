@@ -9,9 +9,9 @@ import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.settings.shown
-import org.churchpresenter.app.churchpresenter.server.emitRemoteTabSelection
-import org.churchpresenter.app.churchpresenter.server.executeProjectItem
-import org.churchpresenter.app.churchpresenter.server.withAnnouncement
+import org.churchpresenter.app.churchpresenter.remote.emitRemoteTabSelection
+import org.churchpresenter.app.churchpresenter.remote.executeProjectItem
+import org.churchpresenter.app.churchpresenter.remote.withAnnouncement
 
 /*
  * What the calendar and its cue automation do to the live app. Plain functions over the app's

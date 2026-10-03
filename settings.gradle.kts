@@ -133,3 +133,8 @@ include(":songs")
 // The Bible tab, BibleViewModel, the cross references and the verse-sequence log. Depended on by
 // :composeApp, which hands it the live output, the detection engine's status and statistics.
 include(":bible-tab")
+
+// The companion server and Instance Link: the Ktor REST/WebSocket API phones and other instances
+// use, the tunnel, SSL and calendar sync. Depended on by :composeApp, which applies what remote
+// clients ask for to the live output.
+include(":server")
