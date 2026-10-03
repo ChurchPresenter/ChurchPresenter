@@ -1,12 +1,13 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.bibletab.EngineScripture
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleEngineClient
-import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
+import org.churchpresenter.bibletab.BibleViewModel
 import org.churchpresenter.dictionary.DictionaryViewModel
 import org.churchpresenter.slides.viewmodel.PicturesViewModel
 import org.churchpresenter.slides.viewmodel.PresentationViewModel
@@ -15,8 +16,8 @@ import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.songs.SongsViewModel
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
-import org.churchpresenter.app.churchpresenter.viewmodel.onEngineScripture
-import org.churchpresenter.app.churchpresenter.viewmodel.onEngineVersion
+import org.churchpresenter.bibletab.onEngineScripture
+import org.churchpresenter.bibletab.onEngineVersion
 import org.churchpresenter.settings.AppSettings
 
 /**
@@ -48,12 +49,13 @@ internal class MainDesktopViewModels(
         onBibleLoaded = { bible, translation -> publish.value.onBibleLoaded?.invoke(bible, translation) },
         onSecondaryBibleFilePathChanged = { path -> link.value.onSecondaryBibleFilePathChanged?.invoke(path) },
         onBibleFilePathsChanged = { paths -> link.value.onBibleFilePathsChanged?.invoke(paths) },
+        remoteSyncLog = { event, fields -> InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, event, fields) },
     )
 
     /** The Bible Lookup Engine client — feeds detected scripture into the Bible tab and forwards the
      *  reverse-lookup level to the engine. */
     val bibleEngineClient = BibleEngineClient(onScripture = { e ->
-        bibleViewModel.onEngineScripture(
+        bibleViewModel.onEngineScripture(EngineScripture(
             bookId = e.bookId,
             chapter = e.chapter,
             verseStart = e.verseStart,
@@ -66,7 +68,7 @@ internal class MainDesktopViewModels(
             sessionId = e.sessionId,
             tracks = e.tracks,
             detectedVersion = e.detectedVersion,
-        )
+        ))
     }, onVersion = { version ->
         bibleViewModel.onEngineVersion(version)
     }).also { client ->

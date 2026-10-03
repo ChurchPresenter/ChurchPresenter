@@ -27,10 +27,8 @@ name: Tests
 # `push` or `pull_request` event ever names, so it neither duplicates nor cancels them -- the
 # concurrency group below keys on `ref_name`, which is unique per queue entry.
 #
-# `dorny/paths-filter` needs nothing extra here. merge_group is not one of its pull-request events,
-# so it falls through to a git diff, and with no explicit `base` it uses the repository's default
-# branch -- main against the queue branch, which is exactly the set of files the queued pull
-# requests changed.
+# Change detection compares the queue branch with `merge_group.base_sha` -- main as it stood when the
+# group formed -- which is exactly the set of files the queued pull requests changed.
 on:
   push:
     branches: [main]
@@ -97,249 +95,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Which sub-builds a change actually touched. Each is its own Gradle build with its own
-      # wrapper, so a pull request that only edits app code has no reason to run five other suites --
-      # that was ~2 minutes of every run spent proving that untouched code still compiles.
-      #
-      # This only became possible when the sub-builds stopped being git submodules. A submodule bump
-      # is a one-line pointer change in the parent repo, so the module's real file paths never
-      # appeared in the diff and nothing could be filtered on them.
-      - name: Which sub-builds changed
-        id: modules
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            # These three configure every module at once — the version catalogue each one resolves
-            # from, the root build that owns their JaCoCo floors and `useJUnitPlatform()`, and the
-            # wrapper that decides which Gradle runs them. A change to any of them runs everything.
-            shared: &shared
-              - 'build.gradle.kts'
-              - 'gradle/libs.versions.toml'
-              - 'gradle/wrapper/**'
-            # Beyond that, one rule: a module's suite runs when its OWN directory changes, or when a
-            # module it consumes does — transitively, so :settings watches :core-models and anything
-            # depending on :settings watches both. The `projects.*` lines in each module's
-            # build.gradle.kts are the source of truth for these edges; add the edge in the same
-            # commit that adds the dependency.
-            #
-            # Three files are deliberately NOT in *shared, each for its own reason. They were, and
-            # the cost was that every module-extraction PR ran all thirteen suites: an extraction has
-            # to touch all three at once — the `include(...)`, the CI steps for the new module, and
-            # the baseline entries for the code that moved — so the fan-out fired on exactly the
-            # change least able to break another module.
-            #  - `settings.gradle.kts`: in practice it changes to `include(...)` a new module, which
-            #    cannot affect the modules already there. A `pluginManagement`/`repositories` edit
-            #    could, and `:composeApp` — which runs unconditionally, with no filter — is what
-            #    would surface that.
-            #  - `config/detekt/**`: that baseline is `:composeApp`'s (bible-engine/ and
-            #    presentation-engine/ keep their own, under their own directories), and no detekt
-            #    config can change a test result. The Detekt step below is unfiltered anyway, so
-            #    nothing stops gating.
-            #  - this workflow: a step added for one module cannot change another module's result.
-            converter:
-              - *shared
-              - 'converter/**'
-              - 'bible-formats/**'        # implementation(projects.bibleFormats)
-              - 'song-chords/**'          # implementation(projects.songChords)
-              - 'presentation-engine/**'  # implementation(projects.presentationEngine)
-            satellite:
-              - *shared
-              - 'companion-satellite/**'
-            lottiegen:
-              - *shared
-              - 'lottieGenerator/**'
-            cross:
-              - *shared
-              - 'crossword/**'
-            engine:
-              - *shared
-              - 'presentation-engine/**'
-            theme:
-              - *shared
-              - 'theme/**'
-            coremodels:
-              - *shared
-              - 'core-models/**'
-            songlibrary:
-              - *shared
-              - 'songlibrary/**'
-              - 'core-models/**'          # implementation(projects.coreModels)
-              - 'song-chords/**'          # implementation(projects.songChords)
-              - 'theme/**'                # implementation(projects.theme)
-            ble:
-              - *shared
-              - 'bible-engine/**'
-            # `settings/**` is the module directory. `settings.gradle.kts` is a different thing
-            # entirely, and — unlike before — a change to it no longer runs this suite; see above.
-            settingsmodule:
-              - *shared
-              - 'settings/**'
-              - 'core-models/**'          # implementation(projects.coreModels)
-            diagnostics:
-              - *shared
-              - 'diagnostics/**'
-            atem:
-              - *shared
-              - 'atem/**'
-              - 'diagnostics/**'          # implementation(projects.diagnostics)
-            ndi:
-              - *shared
-              - 'ndi/**'
-              - 'diagnostics/**'          # implementation(projects.diagnostics)
-            omt:
-              - *shared
-              - 'omt/**'
-              - 'diagnostics/**'          # implementation(projects.diagnostics)
-            planningcenter:
-              - *shared
-              - 'planning-center/**'
-              - 'settings/**'             # implementation(projects.settings)
-              - 'diagnostics/**'          # implementation(projects.diagnostics)
-              - 'core-models/**'          # via :settings
-            bibleformats:
-              - *shared
-              - 'bible-formats/**'
-              - 'settings/**'             # implementation(projects.settings)
-              - 'diagnostics/**'          # implementation(projects.diagnostics)
-              - 'core-models/**'          # via :settings
-            songchords:
-              - *shared
-              - 'song-chords/**'          # depends on nothing else: the grammar is pure text
-            bible:
-              - *shared
-              - 'bible/**'
-              - 'diagnostics/**'          # implementation(projects.diagnostics)
-            calendar:
-              - *shared
-              - 'calendar/**'
-              - 'core-models/**'          # implementation(projects.coreModels)
-              - 'theme/**'                # implementation(projects.theme)
-            sharedui:
-              - *shared
-              - 'shared-ui/**'
-              - 'strings/**'              # api(projects.strings)
-              - 'icons/**'                # api(projects.icons)
-              - 'core-models/**'          # implementation(projects.coreModels)
-              - 'settings/**'             # implementation(projects.settings)
-              - 'theme/**'                # implementation(projects.theme)
-              - 'song-chords/**'          # implementation(projects.songChords)
-              - 'bible/**'                # implementation(projects.bible)
-              - 'diagnostics/**'          # via :bible and the file chooser
-            slides:
-              - *shared
-              - 'slides/**'
-              - 'shared-ui/**'            # implementation(projects.sharedUi)
-              - 'presentation-engine/**'  # api(projects.presentationEngine)
-              - 'strings/**'              # implementation(projects.strings)
-              - 'icons/**'                # implementation(projects.icons)
-            web:
-              - *shared
-              - 'web/**'
-              - 'shared-ui/**'            # implementation(projects.sharedUi)
-              - 'strings/**'              # implementation(projects.strings)
-              - 'icons/**'                # implementation(projects.icons)
-              - 'core-models/**'          # implementation(projects.coreModels)
-              - 'settings/**'             # implementation(projects.settings)
-              - 'theme/**'                # implementation(projects.theme)
-              - 'diagnostics/**'          # implementation(projects.diagnostics)
-              - 'song-chords/**'          # via :shared-ui
-              - 'bible/**'                # via :shared-ui
-            qa:
-              - *shared
-              - 'qa/**'
-              - 'shared-ui/**'            # implementation(projects.sharedUi)
-              - 'strings/**'              # implementation(projects.strings)
-              - 'icons/**'                # implementation(projects.icons)
-              - 'core-models/**'          # implementation(projects.coreModels)
-              - 'settings/**'             # implementation(projects.settings)
-              - 'theme/**'                # implementation(projects.theme)
-              - 'diagnostics/**'          # implementation(projects.diagnostics)
-              - 'song-chords/**'          # via :shared-ui
-              - 'bible/**'                # via :shared-ui
-            dictionary:
-              - *shared
-              - 'dictionary/**'
-              - 'shared-ui/**'            # implementation(projects.sharedUi)
-              - 'strings/**'              # implementation(projects.strings)
-              - 'icons/**'                # implementation(projects.icons)
-              - 'settings/**'             # implementation(projects.settings)
-              - 'theme/**'                # implementation(projects.theme)
-              - 'bible/**'                # implementation(projects.bible)
-              - 'song-chords/**'          # via :shared-ui
-              - 'core-models/**'          # via :shared-ui
-              - 'diagnostics/**'          # via :shared-ui
-            stt:
-              - *shared
-              - 'stt/**'
-              - 'shared-ui/**'            # implementation(projects.sharedUi)
-              - 'strings/**'              # implementation(projects.strings)
-              - 'settings/**'             # implementation(projects.settings)
-              - 'theme/**'                # implementation(projects.theme)
-              - 'icons/**'                # via :shared-ui
-              - 'core-models/**'          # via :shared-ui
-              - 'song-chords/**'          # via :shared-ui
-              - 'bible/**'                # via :shared-ui
-              - 'diagnostics/**'          # via :shared-ui
-            announcements:
-              - *shared
-              - 'announcements/**'
-              - 'shared-ui/**'            # implementation(projects.sharedUi)
-              - 'strings/**'              # implementation(projects.strings)
-              - 'icons/**'                # implementation(projects.icons)
-              - 'core-models/**'          # implementation(projects.coreModels)
-              - 'settings/**'             # implementation(projects.settings)
-              - 'theme/**'                # implementation(projects.theme)
-              - 'song-chords/**'          # via :shared-ui
-              - 'bible/**'                # via :shared-ui
-              - 'diagnostics/**'          # via :shared-ui
-            lowerthird:
-              - *shared
-              - 'lower-third/**'
-              - 'shared-ui/**'            # implementation(projects.sharedUi)
-              - 'strings/**'              # implementation(projects.strings)
-              - 'icons/**'                # implementation(projects.icons)
-              - 'core-models/**'          # implementation(projects.coreModels)
-              - 'settings/**'             # implementation(projects.settings)
-              - 'theme/**'                # implementation(projects.theme)
-              - 'diagnostics/**'          # implementation(projects.diagnostics)
-              - 'atem/**'                 # implementation(projects.atem)
-              - 'lottieGenerator/**'      # implementation(projects.lottieGenerator)
-              - 'presentation-engine/**'  # implementation(projects.presentationEngine)
-              - 'song-chords/**'          # via :shared-ui
-              - 'bible/**'                # via :shared-ui
-            songs:
-              - *shared
-              - 'songs/**'
-              - 'shared-ui/**'            # implementation(projects.sharedUi)
-              - 'strings/**'              # implementation(projects.strings)
-              - 'icons/**'                # implementation(projects.icons)
-              - 'core-models/**'          # implementation(projects.coreModels)
-              - 'settings/**'             # implementation(projects.settings)
-              - 'theme/**'                # implementation(projects.theme)
-              - 'song-chords/**'          # implementation(projects.songChords)
-              - 'bible/**'                # via :shared-ui
-              - 'diagnostics/**'          # via :shared-ui
-            crosswordtab:
-              - *shared
-              - 'crossword-tab/**'
-              - 'crossword/encoded/**'    # the puzzles, copied in by syncCrosswordFiles
-              - 'strings/**'              # implementation(projects.strings)
-              - 'theme/**'                # implementation(projects.theme)
-              - 'settings/**'             # implementation(projects.settings)
-              - 'shared-ui/**'            # testFixtures(projects.sharedUi)
-            media:
-              - *shared
-              - 'media/**'
-              - 'shared-ui/**'            # implementation(projects.sharedUi)
-              - 'strings/**'              # implementation(projects.strings)
-              - 'icons/**'                # implementation(projects.icons)
-              - 'core-models/**'          # implementation(projects.coreModels)
-              - 'settings/**'             # implementation(projects.settings)
-              - 'theme/**'                # implementation(projects.theme)
-              - 'diagnostics/**'          # implementation(projects.diagnostics)
-              - 'song-chords/**'          # via :shared-ui
-              - 'bible/**'                # via :shared-ui
-
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -352,12 +107,33 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # Which modules' suites this change can affect, read off the build's own dependency graph
+      # (`./gradlew moduleGraph`): a module runs when a file in its directory changed or when a
+      # module it depends on -- transitively, test fixtures included -- did. There is no list here to
+      # keep in step with the build files; .github/ci/affected_modules.py says what it does and the few
+      # files that run everything. :composeApp consumes almost every module and runs regardless.
+      #
+      # The base is the pull request's or merge group's base commit, or the commit before a push.
+      # Only that one commit is fetched: `git diff` between two commits needs their trees, not the
+      # history between them. With no base -- workflow_dispatch, a new branch's all-zero `before` --
+      # or one that cannot be fetched, every suite runs.
+      - name: Which modules changed
+        id: modules
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+        run: |
+          ./gradlew -q moduleGraph > module-graph.txt
+          if [ -n "$BASE_SHA" ] && ! git fetch --no-tags --depth=1 origin "$BASE_SHA"; then
+            BASE_SHA=""
+          fi
+          python3 .github/ci/affected_modules.py --graph module-graph.txt --base "$BASE_SHA" >> "$GITHUB_OUTPUT"
+
       # Static analysis, ~5s, ahead of the 14-minute suite so a style regression fails fast.
       # Pre-existing findings are baselined per module -- config/detekt/baseline.xml for
       # :composeApp, and bible-engine/ and presentation-engine/ carry their own. Everything else
       # listed here has no baseline at all and has to be clean.
       #
-      # NOT paths-filtered, deliberately. A module's detekt task costs seconds, and the gate is
+      # NOT gated on which modules changed, deliberately. A module's detekt task costs seconds, and the gate is
       # worth nothing if a change that breaks it can skip it: the shared config/detekt/detekt.yml
       # governs every module at once, so "this PR didn't touch that folder" does not mean that
       # folder still passes.
@@ -368,7 +144,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -493,10 +269,6 @@ jobs:
         timeout-minutes: 10
         run: ./gradlew :composeApp:jacocoTestCoverageVerification -x jvmTest -x jvmTestSerial
 
-      # The converter is a module of THIS build (`include(":converter")`), not one of the separate
-      # builds below, so it is a task on the root wrapper and shares its daemon -- seconds rather
-      # than a fresh Gradle bootstrap. That is why it is not gated on `steps.modules` the way they
-      # are: there is nothing to save, and :composeApp depends on it, so an app change can break it.
       - name: Converter tests
         if: ${{ !cancelled() && steps.modules.outputs.converter == 'true' }}
         run: ./gradlew :converter:test
@@ -511,41 +283,41 @@ jobs:
       # Same reasoning as the converter above: a module of this build, so a root-wrapper task rather
       # than a separate Gradle bootstrap, and ungated because :composeApp depends on it.
       - name: Companion Satellite tests
-        if: ${{ !cancelled() && steps.modules.outputs.satellite == 'true' }}
+        if: ${{ !cancelled() && steps.modules.outputs.companionsatellite == 'true' }}
         run: ./gradlew :companion-satellite:test
 
       - name: Companion Satellite coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.satellite == 'true' }}
+        if: ${{ !cancelled() && steps.modules.outputs.companionsatellite == 'true' }}
         run: ./gradlew :companion-satellite:jacocoTestCoverageVerification -x test
 
       # Same reasoning as the converter above: a module of this build, so a root-wrapper task
       # rather than a wrapper of its own.
       - name: Lower Third generator tests
-        if: ${{ !cancelled() && steps.modules.outputs.lottiegen == 'true' }}
+        if: ${{ !cancelled() && steps.modules.outputs.lottiegenerator == 'true' }}
         run: ./gradlew :lottieGenerator:test
 
       - name: Lower Third generator coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.lottiegen == 'true' }}
+        if: ${{ !cancelled() && steps.modules.outputs.lottiegenerator == 'true' }}
         run: ./gradlew :lottieGenerator:jacocoTestCoverageVerification -x test
 
       # Same again: a module of this build, and its data layer carries the six-counter floor while
       # the Compose UI package is excluded from it.
       - name: Crossword tests
-        if: ${{ !cancelled() && steps.modules.outputs.cross == 'true' }}
+        if: ${{ !cancelled() && steps.modules.outputs.crossword == 'true' }}
         run: ./gradlew :crossword:test
 
       - name: Crossword coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.cross == 'true' }}
+        if: ${{ !cancelled() && steps.modules.outputs.crossword == 'true' }}
         run: ./gradlew :crossword:jacocoTestCoverageVerification -x test
 
       # The last module to be promoted out of the mounted sub-builds. Its floors are its measured
       # coverage rather than the 85% default — see the comment in its build file.
       - name: Presentation Engine tests
-        if: ${{ !cancelled() && steps.modules.outputs.engine == 'true' }}
+        if: ${{ !cancelled() && steps.modules.outputs.presentationengine == 'true' }}
         run: ./gradlew :presentation-engine:test
 
       - name: Presentation Engine coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.engine == 'true' }}
+        if: ${{ !cancelled() && steps.modules.outputs.presentationengine == 'true' }}
         run: ./gradlew :presentation-engine:jacocoTestCoverageVerification -x test
 
       - name: Theme tests
@@ -557,11 +329,11 @@ jobs:
         run: ./gradlew :theme:jacocoTestCoverageVerification -x test
 
       - name: Bible Lookup Engine tests
-        if: ${{ !cancelled() && steps.modules.outputs.ble == 'true' }}
+        if: ${{ !cancelled() && steps.modules.outputs.bibleengine == 'true' }}
         run: ./gradlew :bible-engine:test
 
       - name: Bible Lookup Engine coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.ble == 'true' }}
+        if: ${{ !cancelled() && steps.modules.outputs.bibleengine == 'true' }}
         run: ./gradlew :bible-engine:jacocoTestCoverageVerification -x test
 
       - name: Core models tests
@@ -581,11 +353,11 @@ jobs:
         run: ./gradlew :songlibrary:jacocoTestCoverageVerification -x test
 
       - name: Settings tests
-        if: ${{ !cancelled() && steps.modules.outputs.settingsmodule == 'true' }}
+        if: ${{ !cancelled() && steps.modules.outputs.settings == 'true' }}
         run: ./gradlew :settings:test
 
       - name: Settings coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.settingsmodule == 'true' }}
+        if: ${{ !cancelled() && steps.modules.outputs.settings == 'true' }}
         run: ./gradlew :settings:jacocoTestCoverageVerification -x test
 
       - name: Diagnostics tests
@@ -756,6 +528,14 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.songs == 'true' }}
         run: ./gradlew :songs:jacocoTestCoverageVerification -x test
 
+      - name: Bible tab tests
+        if: ${{ !cancelled() && steps.modules.outputs.bibletab == 'true' }}
+        run: ./gradlew :bible-tab:test
+
+      - name: Bible tab coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.bibletab == 'true' }}
+        run: ./gradlew :bible-tab:jacocoTestCoverageVerification -x test
+
 
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,
@@ -768,78 +548,64 @@ jobs:
       # It never fails the job on its own (`fail_on_failure: false`): the test step that produced
       # the XML has already done that, and a reporter that can also fail turns one red step into
       # two for the same cause.
-      - name: Report failing tests on the pull request
+      # Only the modules that ran: a module whose suite was skipped (nothing it depends on changed)
+      # has no results on this runner, and listing it anyway put a "0 ran" row and an empty check in
+      # every pull request. The paths and names are built here, together, so they cannot drift apart.
+      - name: Which test results to report
+        id: junit_inputs
         if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import glob
+          MODULES = [
+              ("composeApp", "App"),
+              ("converter", "Converter"),
+              ("companion-satellite", "Companion Satellite"),
+              ("lottieGenerator", "Lower Third generator"),
+              ("crossword", "Crossword"),
+              ("presentation-engine", "Presentation Engine"),
+              ("theme", "Theme"),
+              ("core-models", "Core models"),
+              ("songlibrary", "Song library"),
+              ("bible-engine", "Bible Lookup Engine"),
+              ("settings", "Settings"),
+              ("diagnostics", "Diagnostics"),
+              ("atem", "ATEM client"),
+              ("ndi", "NDI client"),
+              ("omt", "OMT client"),
+              ("planning-center", "Planning Center"),
+              ("bible-formats", "Bible formats"),
+              ("song-chords", "Song chords"),
+              ("bible", "Bible"),
+              ("calendar", "Calendar"),
+              ("shared-ui", "Shared UI"),
+              ("slides", "Slides"),
+              ("media", "Media"),
+              ("web", "Web"),
+              ("crossword-tab", "Crossword tab"),
+              ("qa", "QA"),
+              ("dictionary", "Dictionary"),
+              ("stt", "STT"),
+              ("announcements", "Announcements"),
+              ("lower-third", "Lower Third"),
+              ("songs", "Songs"),
+              ("bible-tab", "Bible tab"),
+          ]
+          ran = [(d, n) for d, n in MODULES if glob.glob(f"{d}/build/test-results/**/TEST-*.xml", recursive=True)]
+          print("paths<<EOF")
+          print("\n".join(f"{d}/build/test-results/**/TEST-*.xml" for d, _ in ran))
+          print("EOF")
+          print("names<<EOF")
+          print("\n".join(n for _, n in ran))
+          print("EOF")
+          PY
+
+      - name: Report failing tests on the pull request
+        if: ${{ !cancelled() && github.event_name == 'pull_request' && steps.junit_inputs.outputs.paths != '' }}
         uses: mikepenz/action-junit-report@v5
         with:
-          report_paths: |
-            composeApp/build/test-results/**/TEST-*.xml
-            converter/build/test-results/**/TEST-*.xml
-            companion-satellite/build/test-results/**/TEST-*.xml
-            lottieGenerator/build/test-results/**/TEST-*.xml
-            crossword/build/test-results/**/TEST-*.xml
-            presentation-engine/build/test-results/**/TEST-*.xml
-            theme/build/test-results/**/TEST-*.xml
-            core-models/build/test-results/**/TEST-*.xml
-            songlibrary/build/test-results/**/TEST-*.xml
-            bible-engine/build/test-results/**/TEST-*.xml
-            settings/build/test-results/**/TEST-*.xml
-            diagnostics/build/test-results/**/TEST-*.xml
-            atem/build/test-results/**/TEST-*.xml
-            ndi/build/test-results/**/TEST-*.xml
-            omt/build/test-results/**/TEST-*.xml
-            planning-center/build/test-results/**/TEST-*.xml
-            bible-formats/build/test-results/**/TEST-*.xml
-            song-chords/build/test-results/**/TEST-*.xml
-            bible/build/test-results/**/TEST-*.xml
-            calendar/build/test-results/**/TEST-*.xml
-            shared-ui/build/test-results/**/TEST-*.xml
-            slides/build/test-results/**/TEST-*.xml
-            media/build/test-results/**/TEST-*.xml
-            web/build/test-results/**/TEST-*.xml
-            crossword-tab/build/test-results/**/TEST-*.xml
-            qa/build/test-results/**/TEST-*.xml
-            dictionary/build/test-results/**/TEST-*.xml
-            stt/build/test-results/**/TEST-*.xml
-            announcements/build/test-results/**/TEST-*.xml
-            lower-third/build/test-results/**/TEST-*.xml
-            songs/build/test-results/**/TEST-*.xml
-          # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
-          # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
-          # every row after the insertion, so core-models was reported under "Companion Satellite"
-          # and the song library under "Theme", each with the other's numbers.
-          check_name: |
-            App
-            Converter
-            Companion Satellite
-            Lower Third generator
-            Crossword
-            Presentation Engine
-            Theme
-            Core models
-            Song library
-            Bible Lookup Engine
-            Settings
-            Diagnostics
-            ATEM client
-            NDI client
-            OMT client
-            Planning Center
-            Bible formats
-            Song chords
-            Bible
-            Calendar
-            Shared UI
-            Slides
-            Media
-            Web
-            Crossword tab
-            QA
-            Dictionary
-            STT
-            Announcements
-            Lower Third
-            Songs
+          report_paths: ${{ steps.junit_inputs.outputs.paths }}
+          check_name: ${{ steps.junit_inputs.outputs.names }}
           detailed_summary: true
           include_passed: false
           # Without this the second table is one row of "No test annotations available" per
@@ -876,30 +642,14 @@ jobs:
                   if len(parts) == 4 and parts[0] == "FLOOR":
                       floors.setdefault(parts[1], {})[parts[2]] = float(parts[3]) * 100
 
-          # Classes a module's verification task leaves out of its floor but its report keeps in.
-          # composeApp's report is all-inclusive on purpose (main.kt shows at 0%, which is the truth),
-          # while jacocoTestCoverageVerification excludes `MainKt*` -- the app entry, only runnable
-          # under a display. Reading the report's totals against the verification's floors compared
-          # two different sets of classes and flagged four counters on every PR while the real gate
-          # passed. Keep this in step with that task's `exclude(...)` list in composeApp/build.gradle.kts.
-          GATE_EXCLUDED = {"composeApp": ("org/churchpresenter/app/churchpresenter/MainKt",)}
-
-          def totals(root, excluded):
-              """Covered/total per counter: the report's own totals, or the sum over the gated classes."""
+          # Each report's own totals. composeApp's report is built over exactly the classes its floor
+          # is (coverableAppClasses() in composeApp/build.gradle.kts), so these are the gated numbers.
+          def totals(root):
+              """Covered/total per counter, from the report's own totals."""
               sums = {}
-              if excluded:
-                  counters = [
-                      c
-                      for cls in root.iter("class")
-                      if not any(cls.get("name", "").startswith(x) for x in excluded)
-                      for c in cls.findall("counter")
-                  ]
-              else:
-                  counters = root.findall("counter")
-              for c in counters:
+              for c in root.findall("counter"):
                   missed, covered = int(c.get("missed")), int(c.get("covered"))
-                  m, k = sums.get(c.get("type"), (0, 0))
-                  sums[c.get("type")] = (m + missed, k + covered)
+                  sums[c.get("type")] = (missed, covered)
               return {t: 100 * k / (m + k) for t, (m, k) in sums.items() if m + k}
 
           # Only modules that actually produced a report in THIS run. The sub-builds are gated on
@@ -912,7 +662,7 @@ jobs:
                       root = ET.parse(path).getroot()
                   except ET.ParseError:
                       continue
-                  ratios = totals(root, GATE_EXCLUDED.get(module))
+                  ratios = totals(root)
                   if ratios:
                       found[module] = ratios
 
@@ -1033,3 +783,5 @@ jobs:
             lower-third/build/test-results/
             songs/build/reports/tests/
             songs/build/test-results/
+            bible-tab/build/reports/tests/
+            bible-tab/build/test-results/

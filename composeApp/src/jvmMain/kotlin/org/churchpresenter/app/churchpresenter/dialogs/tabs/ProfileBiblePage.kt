@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.bibletab.LONG_VERSE_WORDS_MAX
+import org.churchpresenter.bibletab.LONG_VERSE_WORDS_MIN
+import org.churchpresenter.bibletab.LONG_VERSE_WORDS_STEP
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.key
@@ -33,9 +36,6 @@ import org.churchpresenter.app.churchpresenter.presenter.referenceShiftFor
 import org.churchpresenter.app.churchpresenter.presenter.withMovesCleared
 import org.churchpresenter.app.churchpresenter.presenter.withReferenceShift
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
-import org.churchpresenter.app.churchpresenter.viewmodel.LONG_VERSE_WORDS_MAX
-import org.churchpresenter.app.churchpresenter.viewmodel.LONG_VERSE_WORDS_MIN
-import org.churchpresenter.app.churchpresenter.viewmodel.LONG_VERSE_WORDS_STEP
 import org.churchpresenter.bible.defaultTranslationAbbreviation
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings

@@ -421,10 +421,10 @@ class BibleEngineClientMessageTest {
     @Test
     fun `an in-process engine with no bible folder reports a start failure`() {
         val c = client()
-        c.start(
+        c.start(EngineStart(
             sttUrl = "http://127.0.0.1:9999", bibleRoot = "", bibleFiles = emptyList(),
             runLocal = true, host = "127.0.0.1", port = 0, level = "off"
-        )
+        ))
         awaitUntil("the failed start to be reported") { c.startFailed.value }
         assertFalse(c.connected.value, "there is no engine to connect to, so the retry loop must not run")
     }
@@ -432,10 +432,10 @@ class BibleEngineClientMessageTest {
     @Test
     fun `stopping clears a start failure so the next attempt starts clean`() {
         val c = client()
-        c.start(
+        c.start(EngineStart(
             sttUrl = "http://127.0.0.1:9999", bibleRoot = "", bibleFiles = emptyList(),
             runLocal = true, host = "127.0.0.1", port = 0, level = "off"
-        )
+        ))
         awaitUntil("the failed start to be reported") { c.startFailed.value }
 
         c.stop()

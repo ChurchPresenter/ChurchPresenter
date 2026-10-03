@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.bibletab.loadChapter
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.layout.Arrangement
@@ -51,7 +52,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
-import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
+import org.churchpresenter.bibletab.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import androidx.compose.runtime.produceState
 import java.io.File

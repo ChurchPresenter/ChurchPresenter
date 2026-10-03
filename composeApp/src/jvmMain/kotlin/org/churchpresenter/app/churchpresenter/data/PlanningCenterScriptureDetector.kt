@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data
 
+import org.churchpresenter.bibletab.BibleBookAbbreviations
 import org.churchpresenter.bible.Bible
 /**
  * Detects plain-text scripture references (e.g. "Psalm 23:1-6", one per line) inside Planning

@@ -1,17 +1,18 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.bibletab.BibleOutput
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.sharedui.models.Presenting
 
 /** The verse the operator chose, and the verses the outputs are fading between. Part of [PresenterManager]. */
-interface LiveBible {
+interface LiveBible : BibleOutput {
     val selectedVerse: State<SelectedVerse>
     val selectedVerses: State<List<SelectedVerse>>
 
     /** What the outputs draw -- driven by a single animation so all windows stay in sync. */
-    val displayedVerses: State<List<SelectedVerse>>
+    override val displayedVerses: State<List<SelectedVerse>>
 
     /**
      * The verse after whatever is displayed, for the Stage Monitor's "Next" zone. Distinct from
@@ -25,7 +26,7 @@ interface LiveBible {
     val previousBibleAlpha: State<Float>
 
     /** Hold mode: while on, a verse chosen is staged and not sent to the outputs. */
-    val bibleHold: State<Boolean>
+    override val bibleHold: State<Boolean>
 
     fun setSelectedVerse(verse: SelectedVerse)
     fun setSelectedVerses(verses: List<SelectedVerse>)
@@ -34,7 +35,7 @@ interface LiveBible {
     fun setBibleTransitionAlpha(alpha: Float)
     fun setPreviousDisplayedVerses(verses: List<SelectedVerse>)
     fun setPreviousBibleAlpha(alpha: Float)
-    fun setBibleHold(hold: Boolean)
+    override fun setBibleHold(hold: Boolean)
 }
 
 internal class LiveBibleState(private val context: PresenterContext) : LiveBible {

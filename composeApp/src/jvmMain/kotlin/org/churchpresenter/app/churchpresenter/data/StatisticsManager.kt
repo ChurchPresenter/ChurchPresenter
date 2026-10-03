@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data
 
+import org.churchpresenter.bibletab.BibleVerseStatistics
 import org.churchpresenter.songs.SongPlayCounts
 import org.churchpresenter.core.models.io.writeTextAtomically
 import java.io.File
@@ -161,7 +162,7 @@ internal fun csvQuote(s: String): String = "\"${s.replace("\"", "\"\"")}\""
 
 // ── Manager ───────────────────────────────────────────────────────────────────
 
-class StatisticsManager : SongPlayCounts {
+class StatisticsManager : SongPlayCounts, BibleVerseStatistics {
     private val lock = Any()
     private val files = StatisticsFiles()
     private var statistics: DisplayStatistics = files.loadStatistics()
@@ -195,7 +196,7 @@ class StatisticsManager : SongPlayCounts {
         }
     }
 
-    fun recordVerseDisplay(bibleName: String, bookName: String, chapter: Int, verseNumber: Int) {
+    override fun recordVerseDisplay(bibleName: String, bookName: String, chapter: Int, verseNumber: Int) {
         synchronized(lock) {
             val key = "$bibleName::$bookName::$chapter::$verseNumber"
             val existing = statistics.verseDisplayCounts[key]

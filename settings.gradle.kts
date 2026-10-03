@@ -129,3 +129,7 @@ include(":lower-third")
 // The Songs tab, SongsViewModel and the song library on disk. Depended on by :composeApp, which
 // hands it the song editor, the title slide, statistics and the Instance Link catalog.
 include(":songs")
+
+// The Bible tab, BibleViewModel, the cross references and the verse-sequence log. Depended on by
+// :composeApp, which hands it the live output, the detection engine's status and statistics.
+include(":bible-tab")

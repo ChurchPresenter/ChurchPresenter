@@ -57,18 +57,20 @@
 - **Follow along automatically** — connect a live speech-to-text feed and the app listens for spoken Bible references — stated outright or simply the next verse in a passage being read — and stages or goes live with the matching verse on its own, tiered by confidence so only clear matches jump straight to the screen.
 
 **Source locations:**
-- `tabs/BibleTab.kt` — main UI; its pieces in `tabs/BibleTab*.kt`
+- `bible-tab/` (the `:bible-tab` Gradle module) — `BibleTab.kt` and its pieces (`BibleTab*.kt`,
+  `BibleColumns.kt`, `BibleCrossReferences.kt`, `BibleHistoryPanel.kt`, `BibleDetectionPanel.kt`,
+  `BibleTranslationOrder.kt`), `BibleViewModel.kt` with its parts in `BibleViewModel*.kt`, the
+  cross references (`CrossReferenceRepository.kt`), `VerseSequenceLog.kt`, `BibleBookNames.kt` and
+  `BibleBookAbbreviations.kt`
+- `tabs/AppBibleTab.kt` — what a verse going live records; `data/CrossReferenceData.kt` — the bundled
+  cross-reference dataset the tab is handed
 - `dictionary/` (the `:dictionary` Gradle module) — the Strong's dictionary tab (`DictionaryTab.kt` and
   its panes), `DictionaryViewModel`, the interlinear index and the bundled Strong's/interlinear data;
   `server/StrongsDictionaryRepository.kt` serves the same data to the companion API
 - `dialogs/tabs/ProfileDictionaryPage.kt`, `dialogs/tabs/DictionaryPart.kt` — how the dictionary card looks on each output, edited on Profiles → Dictionary
-- `viewmodel/BibleViewModel.kt`
-- `tabs/BibleCrossReferences.kt`, `tabs/BibleCrossReferenceState.kt`, `tabs/BibleHistoryPanel.kt`, `tabs/BibleDetectionPanel.kt`, `tabs/BibleTranslationOrder.kt`
 - `viewmodel/BibleEngineClient.kt` — auto-follow speech detection client
 - `bible/` (the `:bible` Gradle module) — `Bible.kt`, `BibleBook.kt`, `BibleSearch.kt`,
   `BibleVerse.kt`, `BibleTranslationNames.kt` and the `.spb` format helpers in `SpbFormat.kt`
-- `data/BibleBookNames.kt`, `data/BibleBookAbbreviations.kt` — these stay in the app: they resolve
-  Compose string resources, which `:bible` deliberately has no access to
 - `bible-formats/` (the `:bible-formats` Gradle module) — the download catalogues and the `.spb` converters behind them
 - `bible-formats/src/main/kotlin/.../catalog/` — `EBibleSource` (eBible.org, USFX), `ZefaniaSource` + `ZefaniaRepositoryIndex`, `BebliaSource` + `BebliaCatalogIndex`
 - `viewmodel/BibleCatalogViewModel.kt`, `dialogs/BibleCatalogBrowserDialog.kt` — download browser UI

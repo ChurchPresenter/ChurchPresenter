@@ -179,8 +179,10 @@ class BibleEngineClientLinkTest {
      */
     private fun BibleEngineClient.connect(level: String = "balanced", speed: String = "balanced") {
         start(
-            sttUrl = "http://127.0.0.1:1", bibleRoot = "", bibleFiles = emptyList(),
-            runLocal = false, host = "127.0.0.1", port = engine.port, level = level, continuationSpeed = speed
+            EngineStart(
+                sttUrl = "http://127.0.0.1:1", bibleRoot = "", bibleFiles = emptyList(),
+                runLocal = false, host = "127.0.0.1", port = engine.port, level = level, continuationSpeed = speed,
+            ),
         )
         awaitUntil("the engine link to come up") { connected.value && engine.sessions.isNotEmpty() }
     }
@@ -246,10 +248,10 @@ class BibleEngineClientLinkTest {
         val beforeSessions = engine.sessions.toList()
         val beforeCount = engine.connectionCount.get()
 
-        c.start(
+        c.start(EngineStart(
             sttUrl = "http://127.0.0.1:1", bibleRoot = "", bibleFiles = emptyList(),
             runLocal = false, host = "127.0.0.1", port = engine.port, level = "off"
-        )
+        ))
         awaitUntil("the second link to come up") {
             engine.connectionCount.get() > beforeCount && c.connected.value
         }

@@ -2,8 +2,8 @@ package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import org.churchpresenter.app.churchpresenter.viewmodel.invalidateInstanceLinkBibleCache
-import org.churchpresenter.app.churchpresenter.viewmodel.setInstanceLinkSource
+import org.churchpresenter.bibletab.invalidateInstanceLinkBibleCache
+import org.churchpresenter.bibletab.setInstanceLinkSource
 import org.churchpresenter.app.churchpresenter.viewmodel.toRawLyrics
 import org.churchpresenter.app.churchpresenter.viewmodel.toSongItems
 
