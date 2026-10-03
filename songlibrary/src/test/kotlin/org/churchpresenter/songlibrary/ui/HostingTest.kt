@@ -72,4 +72,26 @@ class HostingTest {
             assertFalse(isShowing("Done"), "the standalone window is not closed from inside")
             assertTrue(isShowing("Save Changes"), "the rest of the footer is still there")
         }
+
+    @Test
+    fun `the host's save puts the edited song in the grid, and its dismiss closes the editor`() {
+        var request: SongEditorRequest? = null
+        withLibrary(songEditor = { request = it; Text("editing ${it.song.title}") }) { _ ->
+            narrowToTitleOnly()
+            onAllNodesWithContentDescription("Edit song")[0].performClick()
+            waitForIdle()
+            val asked = request!!
+            runOnIdle { asked.onSave(asked.song.copy(title = "Edited Title")) }
+            waitForIdle()
+            assertTrue(isShowing("Edited Title"), "the saved song is in the grid")
+            assertTrue(!isShowing("editing ${asked.song.title}"), "saving closes the editor")
+
+            onAllNodesWithContentDescription("Edit song")[0].performClick()
+            waitForIdle()
+            val again = request!!
+            runOnIdle { again.onDismiss() }
+            waitForIdle()
+            assertTrue(!isShowing("editing ${again.song.title}"), "dismissing closes the editor")
+        }
+    }
 }

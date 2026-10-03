@@ -313,4 +313,40 @@ class ServiceAutoLoaderTest {
         loader(document(morning), replaced) { at(8, 0) }.loadNow("m", replace = true)
         assertEquals(morning.items, replaced.rows, "the operator's rows go when they say so")
     }
+
+    @Test
+    fun `loading a service that is not on the calendar loads nothing`() = runTest {
+        val schedule = FakeSchedule()
+        loader(document(service("m", "10:00")), schedule) { at(8, 0) }.loadNow("gone", replace = true)
+        assertEquals(0, schedule.loads)
+    }
+
+    @Test
+    fun `a refresh before anything was read reads the calendar, and a reread reads it again`() = runTest {
+        var document = document(service("m", "10:00"))
+        val loader = ServiceAutoLoader(document = { document }, host = FakeSchedule().host(), now = { at(8, 0) })
+
+        loader.refresh()
+        assertEquals("m", loader.upcoming.value?.serviceId)
+
+        document = document(service("e", "18:00"))
+        loader.refresh()
+        assertEquals("m", loader.upcoming.value?.serviceId, "a Schedule change reuses what was read")
+        loader.refresh(reread = true)
+        assertEquals("e", loader.upcoming.value?.serviceId)
+    }
+
+    @Test
+    fun `saving with no planned service in the Schedule writes nothing`() = runTest {
+        var saved = 0
+        val schedule = FakeSchedule().apply { rows = listOf(song("by-hand")) }
+        val loader = ServiceAutoLoader(
+            document = { document(service("m", "10:00")) },
+            host = schedule.host(),
+            now = { at(8, 0) },
+            save = { saved++ },
+        )
+        loader.saveScheduleToService()
+        assertEquals(0, saved)
+    }
 }

@@ -37,6 +37,20 @@ class RunOfShowGesturesTest {
     }
 
     @Test
+    fun `the keypad's Enter saves a typed length`() = withCalendar(documentWith(service())) { folder ->
+        awaitText("Amazing Grace")
+        clickFirst("5:00")
+        clearFirstField()
+        typeIntoFirstField("6:30")
+
+        onAllNodes(hasSetTextAction())[0].performKeyInput { pressKey(Key.NumPadEnter) }
+        waitForIdle()
+
+        assertEquals(390, stored(folder).services.single().plannedSeconds["a"])
+        assertEquals(0, onAllNodes(hasSetTextAction()).fetchSemanticsNodes().size, "the cell closed")
+    }
+
+    @Test
     fun `Escape throws a typed length away`() = withCalendar(documentWith(service())) { folder ->
         awaitText("Amazing Grace")
         clickFirst("5:00")

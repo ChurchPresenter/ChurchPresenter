@@ -188,4 +188,11 @@ class FireCueTest {
         fireCue(host, emptyList(), cue(CueAction.COUNTDOWN), at = LocalTime.of(10, 0), startTime = "10:30")
         return requireNotNull(fired) { "nothing was projected: ${outputs.done}" }
     }
+
+    @Test
+    fun `going live on a heading loads the rows and projects nothing`() {
+        val heading = ScheduleItem.LabelItem("h", "Worship", "#FFFFFF", "#5B9DF5")
+        val outputs = fire(cue(CueAction.GO_LIVE, payload = heading), rows = listOf(song("a")))
+        assertEquals(listOf("load:1:replace=true:armed=true"), outputs.done)
+    }
 }

@@ -76,5 +76,6 @@ class EnvelopeTest {
         assertContentEquals(fresh, Envelope.decodeKey(Envelope.encodeKey(fresh)))
         assertNull(Envelope.decodeKey("too-short"))
         assertNull(Envelope.decodeKey("***"))
+        assertNull(Envelope.decodeKey(Envelope.encodeKey(ByteArray(16))), "readable, but not a key")
     }
 }

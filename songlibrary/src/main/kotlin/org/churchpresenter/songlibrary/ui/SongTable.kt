@@ -319,7 +319,7 @@ internal fun columnLabel(field: SongField): String = when (field) {
     SongField.CCLI -> stringResource(Res.string.column_ccli)
 }
 
-private fun SongField.sortColumn(): SortColumn = when (this) {
+internal fun SongField.sortColumn(): SortColumn = when (this) {
     SongField.NUMBER -> SortColumn.NUMBER
     SongField.TITLE -> SortColumn.TITLE
     SongField.SECONDARY_TITLE -> SortColumn.SECONDARY_TITLE

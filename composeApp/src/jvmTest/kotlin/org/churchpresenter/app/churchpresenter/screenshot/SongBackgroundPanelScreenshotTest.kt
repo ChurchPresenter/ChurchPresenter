@@ -2,6 +2,10 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
+import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.dialogs.LocalThumbnailContext
+import kotlinx.coroutines.Dispatchers
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -64,6 +68,8 @@ class SongBackgroundPanelScreenshotTest {
     ) = stackedThemes(SECTION, name) { mode, file ->
         runComposeUiTest {
             setContent {
+                // Thumbnails decode inside the composition's own work, so waitForIdle covers them
+                CompositionLocalProvider(LocalThumbnailContext provides Dispatchers.Unconfined) {
                 ChurchPresenterTheme(themeMode = mode) {
                     Surface(color = MaterialTheme.colorScheme.background) {
                         Box(Modifier.size(SONG_BACKGROUND_PANEL_WIDTH, height)) {
@@ -78,6 +84,7 @@ class SongBackgroundPanelScreenshotTest {
                             )
                         }
                     }
+                }
                 }
             }
             drive()
@@ -117,13 +124,18 @@ class SongBackgroundPanelScreenshotTest {
     @Test
     fun `the pictures category`() = shoot("images", background = DUSK) {
         onNodeWithText(IMAGES).performClick()
-        // The thumbnails decode on the IO dispatcher, which `waitForIdle` does not wait for.
-        waitUntil("every visible picture's thumbnail is drawn") {
-            onAllNodesWithTag(SONG_BACKGROUND_THUMBNAIL_TAG, useUnmergedTree = true)
-                .fetchSemanticsNodes().isNotEmpty() &&
-                onAllNodesWithTag(SONG_BACKGROUND_THUMBNAIL_LOADING_TAG, useUnmergedTree = true)
-                    .fetchSemanticsNodes().isEmpty()
-        }
+        // The thumbnails decode on LocalThumbnailContext, pinned above to run inside the
+        // composition's own work, so being idle means every visible one is drawn.
+        waitForIdle()
+        assertTrue(
+            onAllNodesWithTag(SONG_BACKGROUND_THUMBNAIL_TAG, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty(),
+            "the pictures category should show its thumbnails",
+        )
+        assertTrue(
+            onAllNodesWithTag(SONG_BACKGROUND_THUMBNAIL_LOADING_TAG, useUnmergedTree = true)
+                .fetchSemanticsNodes().isEmpty(),
+            "no thumbnail should still be decoding once the panel is idle",
+        )
     }
 
     @Test

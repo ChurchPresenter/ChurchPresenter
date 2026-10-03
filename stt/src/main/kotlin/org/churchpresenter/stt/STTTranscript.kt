@@ -1,5 +1,6 @@
 package org.churchpresenter.stt
 
+import org.churchpresenter.sharedui.utils.SttClock
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -51,6 +52,8 @@ internal class STTTranscript(private val scope: CoroutineScope) {
         data.optJSONArray("segments")?.let { array ->
             _segments.clear()
             _segments.addAll(segmentsFrom(array) { it.stringOr("text") })
+            // How far into the recording STT has transcribed, as of now: the on-screen history's clock
+            _segments.maxOfOrNull { it.end }?.let { SttClock.observe(it) }
         }
 
         val inProgress = data.opt("in_progress")

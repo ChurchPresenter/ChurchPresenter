@@ -580,21 +580,7 @@ jobs:
 
       - name: Song library coverage floor
         if: ${{ !cancelled() && steps.modules.outputs.songlibrary == 'true' }}
-        # WARNING ONLY for now: Kotlin 2.4 emits extra branches in unchanged code and this floor
-        # dips below its minimum on that alone (PR #729). A coverage violation is reported as a
-        # warning annotation; any other failure still fails the step. Restore `run: ./gradlew :songlibrary:jacocoTestCoverageVerification -x test` once the
-        # floor is dealt with.
-        run: |
-          set +e
-          ./gradlew :songlibrary:jacocoTestCoverageVerification -x test 2>&1 | tee "$RUNNER_TEMP/floor.log"
-          status=${PIPESTATUS[0]}
-          if [ "$status" -ne 0 ] && grep -q 'Rule violated' "$RUNNER_TEMP/floor.log"; then
-            grep -o 'Rule violated.*' "$RUNNER_TEMP/floor.log" | sort -u | while read -r line; do
-              echo "::warning title=Song library coverage floor (not enforced)::$line"
-            done
-            exit 0
-          fi
-          exit "$status"
+        run: ./gradlew :songlibrary:jacocoTestCoverageVerification -x test
 
       - name: Settings tests
         if: ${{ !cancelled() && steps.modules.outputs.settingsmodule == 'true' }}
@@ -682,21 +668,7 @@ jobs:
 
       - name: Calendar coverage floor
         if: ${{ !cancelled() && steps.modules.outputs.calendar == 'true' }}
-        # WARNING ONLY for now: Kotlin 2.4 emits extra branches in unchanged code and this floor
-        # dips below its minimum on that alone (PR #729). A coverage violation is reported as a
-        # warning annotation; any other failure still fails the step. Restore `run: ./gradlew :calendar:jacocoTestCoverageVerification -x test` once the
-        # floor is dealt with.
-        run: |
-          set +e
-          ./gradlew :calendar:jacocoTestCoverageVerification -x test 2>&1 | tee "$RUNNER_TEMP/floor.log"
-          status=${PIPESTATUS[0]}
-          if [ "$status" -ne 0 ] && grep -q 'Rule violated' "$RUNNER_TEMP/floor.log"; then
-            grep -o 'Rule violated.*' "$RUNNER_TEMP/floor.log" | sort -u | while read -r line; do
-              echo "::warning title=Calendar coverage floor (not enforced)::$line"
-            done
-            exit 0
-          fi
-          exit "$status"
+        run: ./gradlew :calendar:jacocoTestCoverageVerification -x test
 
       - name: Shared UI tests
         if: ${{ !cancelled() && steps.modules.outputs.sharedui == 'true' }}

@@ -1,5 +1,7 @@
 package org.churchpresenter.stt
 
+import kotlin.test.assertNull
+import org.churchpresenter.sharedui.utils.SttClock
 import org.churchpresenter.sharedui.utils.TrainingDataLogger
 import org.json.JSONObject
 import kotlin.test.AfterTest
@@ -29,6 +31,7 @@ class STTManagerParsingTest {
         created.forEach { runCatching { it.dispose() } }
         created.clear()
         TrainingDataLogger.sessionId = null
+        SttClock.reset()
     }
 
     private fun STTManager.transcription(json: String) = transcript.handleTranscriptionUpdate(JSONObject(json))
@@ -342,5 +345,35 @@ class STTManagerParsingTest {
         stt.transcription("""{"session_id":"  ","segments":[]}""")
 
         assertEquals("kept", TrainingDataLogger.sessionId, "an STT that has not shipped the field yet")
+    }
+
+    // ── The recording's clock ────────────────────────────────────────────────────
+
+    @Test
+    fun `a transcription update tells the on-screen history how far into the recording STT is`() {
+        val before = System.currentTimeMillis()
+        manager().transcription(
+            """{"session_id":"clocked","segments":[{"id":1,"text":"a","start":10.0,"end":12.0},""" +
+                """{"id":2,"text":"b","start":12.0,"end":15.5}]}""",
+        )
+        val at = SttClock.secondsAt(before)!!
+        assertTrue(at in 14.5..15.5, "the newest segment ends at 15.5 s, so now is about then, was $at")
+    }
+
+    @Test
+    fun `a new session forgets the old recording's clock`() {
+        val stt = manager()
+        stt.transcription("""{"session_id":"first","segments":[{"id":1,"text":"a","start":0.0,"end":900.0}]}""")
+        stt.transcription("""{"session_id":"second","segments":[]}""")
+        assertNull(SttClock.secondsAt(System.currentTimeMillis()), "the second recording starts again at 0")
+    }
+
+    @Test
+    fun `disconnecting on purpose leaves the session and its clock`() {
+        val stt = manager()
+        stt.transcription("""{"session_id":"left","segments":[{"id":1,"text":"a","start":0.0,"end":30.0}]}""")
+        stt.disconnect()
+        assertNull(TrainingDataLogger.sessionId, "what goes on screen next is no longer that session's")
+        assertNull(SttClock.secondsAt(System.currentTimeMillis()))
     }
 }

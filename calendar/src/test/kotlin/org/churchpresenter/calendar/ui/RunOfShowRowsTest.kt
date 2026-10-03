@@ -172,4 +172,11 @@ class RunOfShowRowsTest {
 
             assertTrue(shows("0 items") || shows("Add song, verse or section"), "an empty plan reads as empty")
         }
+
+    @Test
+    fun `a service with no readable start counts its items instead of its times`() =
+        withCalendar(documentWith(service(start = ""))) {
+            awaitText("Amazing Grace")
+            assertTrue(shows("1 item · All manual"), "a length is planned, but there is nothing to add it to")
+        }
 }

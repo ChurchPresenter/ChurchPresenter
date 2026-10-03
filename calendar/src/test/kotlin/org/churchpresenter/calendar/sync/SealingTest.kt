@@ -72,4 +72,15 @@ class SealingTest {
 
         assertEquals(10, record.keepUntil.length)
     }
+
+    @Test
+    fun `a box past what the relay may hold is not opened`() {
+        assertNull(sealing.open(SealedRecord("svc", "2026-12-26", "x".repeat(256 * 1024 + 1))))
+    }
+
+    @Test
+    fun `a phone with no sealed name, or one too long to be a name, has none`() {
+        assertEquals("", sealing.openDeviceName(RemoteDevice("phone-1")))
+        assertEquals("", sealing.openDeviceName(RemoteDevice("phone-1", nameBox = "x".repeat(256 * 1024 + 1))))
+    }
 }

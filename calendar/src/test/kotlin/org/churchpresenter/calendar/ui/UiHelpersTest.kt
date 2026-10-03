@@ -167,6 +167,24 @@ class UiHelpersTest {
     }
 
     @Test
+    fun `the keypad's Enter commits a change too`() {
+        var commits = 0
+        themed({
+            onNode(hasSetTextAction()).performTextInput("x")
+            onNode(hasSetTextAction()).performKeyInput { pressKey(Key.NumPadEnter) }
+            waitForIdle()
+            assertEquals(1, commits)
+        }) {
+            var text by remember { mutableStateOf("") }
+            CompactTextField(
+                value = text,
+                onValueChange = { text = it },
+                modifier = Modifier.commitOnExit(hasChanges = text.isNotEmpty()) { commits++ },
+            )
+        }
+    }
+
+    @Test
     fun `Enter with nothing changed, and any other key, commit nothing`() {
         var commits = 0
         themed({

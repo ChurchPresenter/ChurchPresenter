@@ -6,6 +6,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import org.churchpresenter.sharedui.utils.SttClock
 import org.churchpresenter.sharedui.utils.TrainingDataLogger
 import org.json.JSONObject
 import java.io.File
@@ -26,10 +27,23 @@ private const val MODEL_POLL_INTERVAL_MS = 60_000L
  * (which still sets it too, as a fallback). Two sources feed it: `/api/health`, read on connect
  * and on every poll, which knows the session before anyone speaks; and the top-level
  * `session_id` STT puts on every socket payload, which follows a new session the moment it
- * starts. Null leaves the current id alone.
+ * starts. Null leaves the current id alone. A different id is a new recording, whose clock starts
+ * again at 0, so the [SttClock] learned from the old one is forgotten.
  */
 internal fun applySessionId(sessionId: String?) {
-    if (sessionId != null) TrainingDataLogger.sessionId = sessionId
+    if (sessionId == null || sessionId == TrainingDataLogger.sessionId) return
+    SttClock.reset()
+    TrainingDataLogger.sessionId = sessionId
+}
+
+/**
+ * Stops keying the logs by the session, and forgets its clock: STT was disconnected on purpose, so
+ * what goes on screen from now on is no longer part of that session's recording. Not called for a
+ * connection that drops and comes back -- the recording carries on through that.
+ */
+internal fun leaveSession() {
+    TrainingDataLogger.sessionId = null
+    SttClock.reset()
 }
 
 /**

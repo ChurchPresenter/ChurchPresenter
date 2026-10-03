@@ -50,6 +50,7 @@ class SettingsDialogTest {
         canInsert: Boolean = false,
         colorPicker: (@Composable (ColorPickerRequest) -> Unit)? = null,
         cloudSync: Boolean? = null,
+        sections: List<SectionStyle> = CalendarPreferences().sections,
         body: ComposeUiTest.(Heard) -> Unit,
     ) {
         val heard = Heard()
@@ -57,7 +58,7 @@ class SettingsDialogTest {
             setContent {
                 AppThemeWrapper(theme = ThemeMode.LIGHT) {
                     CalendarSettingsDialog(
-                        preferences = CalendarPreferences(),
+                        preferences = CalendarPreferences(sections = sections),
                         templates = emptyList(),
                         presets = emptyList(),
                         initialTab = initialTab,
@@ -158,6 +159,20 @@ class SettingsDialogTest {
         waitForIdle()
 
         assertEquals("Youth" to "#D4C25A", heard.added, "the seventh swatch: six are taken by the defaults")
+    }
+
+    @Test
+    fun `with every swatch taken a new section starts on the first again`() = withDialog(
+        sections = SECTION_SWATCHES.mapIndexed { index, hex -> SectionStyle("Section $index", hex.lowercase()) },
+    ) { heard ->
+        // Past the end of a long list: scrolled to, as the operator would.
+        onNodeWithText("Add a section name").performScrollTo().performClick()
+        waitForIdle()
+        lastField().performTextInput("Youth")
+        lastField().performKeyInput { pressKey(Key.Enter) }
+        waitForIdle()
+
+        assertEquals("Youth" to SECTION_SWATCHES.first(), heard.added, "matched whatever the stored case")
     }
 
     @Test

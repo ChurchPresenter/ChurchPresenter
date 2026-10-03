@@ -423,4 +423,54 @@ class SongLibraryStateTest {
         state.showAllColumns()
         assertTrue(state.showDuration)
     }
+
+    // ── The window's own calls ─────────────────────────────────────────────────
+
+    @Test
+    fun `the window's calls run on the IO pool by default`() = runBlocking {
+        // The window passes no dispatcher; every other test pins one, so these are the paths it takes
+        state.view = state.view.copy(songbook = "Hymns")
+        state.newSong("Fresh")
+        assertTrue(state.songs.any { it.title == "Fresh" }, "a new song lands in the book being filtered on")
+
+        assertTrue(state.createSongbook("Choir", assignSelected = false))
+        assertTrue(File(root, "Choir").isDirectory)
+
+        state.toggle(fileOf("Ten"))
+        assertEquals(1, state.deleteSelected().saved)
+        assertEquals(1, state.delete(listOf(state.songs.first { it.title == "Loose" })).saved)
+        assertFalse(File(root, "Loose.song").exists())
+
+        state.reloadAsync()
+        assertEquals(setOf("Fresh", "Rise", "Clap"), state.songs.map { it.title }.toSet())
+    }
+
+    @Test
+    fun `a new song that cannot be written is reported rather than thrown`() = runBlocking {
+        // The book being filtered on names a song file, so its folder cannot be made -- as in the
+        // save test above, deterministic and cross-platform where file permissions are not
+        state.view = state.view.copy(songbook = "Loose.song")
+        state.newSong("Nowhere", Dispatchers.Unconfined)
+
+        val outcome = state.lastOutcome!!
+        assertEquals(0, outcome.saved)
+        assertTrue(outcome.errors.single().startsWith("Nowhere:"), "the song it could not write is named")
+        assertTrue(state.songs.none { it.title == "Nowhere" })
+    }
+
+    @Test
+    fun `comparing a song's languages opens on it and closes again`() {
+        state.comparing = fileOf("Rise")
+        assertEquals("Rise", state.songOf(state.comparing!!)?.title)
+        state.comparing = null
+        assertNull(state.comparing)
+    }
+
+    @Test
+    fun `the window's save runs on the IO pool by default`() = runBlocking {
+        state.edit(fileOf("Ten"), SongField.AUTHOR, "Newton")
+        assertEquals(1, state.save().saved)
+        assertFalse(state.isDirty)
+        assertTrue(File(root, "Hymns/0010 - Ten.song").readText().contains("Newton"))
+    }
 }

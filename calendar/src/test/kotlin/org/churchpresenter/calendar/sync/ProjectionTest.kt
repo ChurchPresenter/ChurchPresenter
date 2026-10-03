@@ -47,6 +47,7 @@ class ProjectionTest {
             ScheduleItem.AnnouncementItem("j", "Welcome") to RemoteKind.ANNOUNCEMENT,
             ScheduleItem.WebsiteItem("k", "https://x", "Site") to RemoteKind.WEBSITE,
             ScheduleItem.SceneItem("l", "scene-1", "Scene") to RemoteKind.SCENE,
+            ScheduleItem.DictionaryItem("n", "G26", "agape", "agapē", "love") to RemoteKind.DICTIONARY,
             ScheduleItem.CueItem("m", action = "blank") to RemoteKind.CUE,
         )
         for ((item, kind) in kinds) assertEquals(kind, Projection.kindOf(item), item.toString())

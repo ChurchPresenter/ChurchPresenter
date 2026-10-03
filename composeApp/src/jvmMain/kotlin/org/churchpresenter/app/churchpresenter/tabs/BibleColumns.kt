@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
@@ -309,6 +311,12 @@ internal fun BibleSearchField(
     }
 }
 
+/** Whether row [index] lies wholly inside the list's viewport -- one cut off at an edge does not. */
+internal fun LazyListLayoutInfo.showsWhole(index: Int): Boolean {
+    val row = visibleItemsInfo.firstOrNull { it.index == index } ?: return false
+    return row.offset >= viewportStartOffset && row.offset + row.size <= viewportEndOffset
+}
+
 @Composable
 internal fun BibleBrowserColumn(
     items: List<String>,
@@ -319,10 +327,15 @@ internal fun BibleBrowserColumn(
     onItemSelected: (Int) -> Unit
 ) {
     val listState = rememberLazyListState()
+    // The row the operator just clicked is where they are already looking, so a click never scrolls
+    var clickedIndex by remember { mutableIntStateOf(-1) }
     LaunchedEffect(selectedIndex) {
-        if (selectedIndex >= 0 && selectedIndex < items.size) {
-            listState.animateScrollToItem(selectedIndex.coerceAtMost(items.size - 1))
-        }
+        val clicked = clickedIndex == selectedIndex
+        clickedIndex = -1
+        if (clicked || selectedIndex !in items.indices) return@LaunchedEffect
+        // Selected from anywhere else -- a search, a typed reference, the arrow keys, a detection --
+        // the row is brought into view, but only when it is not already wholly on screen
+        if (!listState.layoutInfo.showsWhole(selectedIndex)) listState.animateScrollToItem(selectedIndex)
     }
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -342,7 +355,10 @@ internal fun BibleBrowserColumn(
                         .clip(BibleListRowShape)
                         .background(colors.background)
                         .hoverable(hover)
-                        .clickable(interactionSource = hover, indication = null) { onItemSelected(index) }
+                        .clickable(interactionSource = hover, indication = null) {
+                            clickedIndex = index
+                            onItemSelected(index)
+                        }
                         .padding(horizontal = rowPad(10.dp)),
                     contentAlignment = if (centerText) Alignment.Center else Alignment.CenterStart
                 ) {

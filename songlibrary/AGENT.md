@@ -31,9 +31,9 @@ file explains.
   dense table wants is alpha over that scheme, never a darker literal. A color literal belongs in
   `:theme` or nowhere — and this window opens inside the app's `AppThemeWrapper`, including
   standalone (`Main.kt` wraps it), so it follows all nine themes.
-- **`SongLibraryState` sits outside `ui/` on purpose.** It is what detekt analyses and what JaCoCo
-  measures, and `songlibrary/ui/**` is excluded from both as Compose desktop needing a display — an
-  exclusion that is only honest while nothing with decisions in it is under `ui/`.
+- **`SongLibraryState` sits outside `ui/` on purpose.** It holds the window's decisions, so they are
+  tested as plain state; `ui/` is measured and analysed too, and its tests drive the window and
+  assert what each control does.
 - The logic the window runs on — filtering, sorting, pending edits, moving files — is in
   `:core-models` and tested there, so the window itself stays thin.
 
@@ -54,13 +54,9 @@ The root build's six counters at 85%, **no floor lowered** — this module decla
 `coverageFloors`. detekt runs against the app's shared config, over `src/main/kotlin` and
 `src/test/kotlin`, with no baseline.
 
-**Coverage does not currently pass, and that is the honest state.** With `coverageExcludes` removed
-the suite measures **2.7% of instructions (1,102 of 40,871)**: the 34 tests cover `SongLibraryState`
-and `MenuLayout` at 84.6%, and everything else at zero — 12,084 instructions of Compose UI in `ui/`
-and 27,484 in the generated resource accessor. The excluded list it used to carry is what made the
-same suite read 94.5%.
-
-The gap to close is `ui/`: the window is driven end to end by `SongLibraryScreenshotTest`, so the
-interactions are already reachable from a test — what is missing is assertions on what they do, not
-a way to reach them. Do not put an exclude back to make the number look better; see **NEVER exclude
-code from coverage without asking first** in the root `AGENT.md`.
+**Coverage passes on all six counters, with nothing excluded.** Complexity has the least room —
+about 85% — so a change that adds branches to `ui/` needs tests that take them. What stays
+uncovered, and why: the generated resource accessors, the standalone `main()`, and
+`CompareTranslationsDialog`'s `DialogWindow` (a real window, which cannot open headless —
+`CompareTranslationsContent` inside it is tested on its own). Do not put an exclude in to make
+room; see **NEVER exclude code from coverage without asking first** in the root `AGENT.md`.
