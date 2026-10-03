@@ -19,7 +19,12 @@ private const val DEVICE_STATUS_FIELDS = 3
  * Supports multiple simultaneous device outputs.
  * All operations are optional — if the native library is not installed,
  * isAvailable() returns false and all other methods are no-ops.
+ *
+ * Over detekt's function count on purpose: the `external` functions are bound by JNI to symbols
+ * named after this object (`Java_..._DeckLinkManager_native*`), so they cannot move to another
+ * class without rebuilding `decklink_jni`, and each has its Kotlin wrapper beside it.
  */
+@Suppress("TooManyFunctions")
 object DeckLinkManager {
 
     data class DeckLinkDevice(val index: Int, val name: String)
