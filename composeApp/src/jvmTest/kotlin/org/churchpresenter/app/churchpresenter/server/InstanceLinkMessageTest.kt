@@ -356,6 +356,28 @@ class InstanceLinkMessageTest {
     }
 
     @Test
+    fun `a benign run is reported once, however long it lasts`() {
+        val c = clientWith(Recorder())
+
+        // CHURCH-PRESENTER-DESKTOP-68: one follower pointed at an address that never answered still
+        // filed a warning at 10, 20 … 100, 200 … 1000 timeouts. After the first, each said only that
+        // the link was still down.
+        for (kind in listOf("refused", "dns", "ping_timeout", "timeout")) {
+            val reported = (1..5_000).filter { n -> ConnectFailures.shouldReportConnectFailure(kind, n) }
+            assertEquals(listOf(10), reported, kind)
+        }
+    }
+
+    @Test
+    fun `a failure that suggests a regression keeps reporting while it lasts`() {
+        val c = clientWith(Recorder())
+
+        val reported = (1..1_000).filter { n -> ConnectFailures.shouldReportConnectFailure("tls", n) }
+        assertEquals(listOf(1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100), reported.take(11))
+        assertEquals(1_000, reported.last())
+    }
+
+    @Test
     fun `a failure that suggests a regression reports the first time`() {
         val c = clientWith(Recorder())
 
@@ -390,10 +412,10 @@ class InstanceLinkMessageTest {
     fun `a long non-benign streak reports far less than once per 10 attempts`() {
         val c = clientWith(Recorder())
 
-        // Counting every report a "timeout" streak would generate from 1 through 780 consecutive
-        // failures: the old behaviour reported 78 times (every 10th, forever); the new cadence must
-        // report noticeably fewer times over the same run while still surfacing periodically.
-        val reportsUnderNewCadence = (1..780).count { n -> ConnectFailures.shouldReportConnectFailure("timeout", n) }
+        // Counting every report a certificate failure would generate from 1 through 780 consecutive
+        // failures: a flat every-10th cadence reports 78 times; the widening one must report
+        // noticeably fewer times over the same run while still surfacing periodically.
+        val reportsUnderNewCadence = (1..780).count { n -> ConnectFailures.shouldReportConnectFailure("tls", n) }
         assertTrue(
             reportsUnderNewCadence < 30,
             "expected the widened cadence to report well under the old flat rate of 78, got $reportsUnderNewCadence",
