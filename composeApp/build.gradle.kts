@@ -260,7 +260,6 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
-            implementation(libs.sqlite.jdbc)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.compottie)
             implementation(libs.compottie.dot)
@@ -326,6 +325,7 @@ kotlin {
             implementation(projects.dictionary)
             implementation(projects.stt)
             implementation(projects.announcements)
+            implementation(projects.songs)
             implementation(projects.lowerThird)
             implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source
@@ -458,6 +458,7 @@ dependencies {
     add("jvmTestImplementation", testFixtures(projects.dictionary))
     add("jvmTestImplementation", testFixtures(projects.stt))
     add("jvmTestImplementation", testFixtures(projects.announcements))
+    add("jvmTestImplementation", testFixtures(projects.songs))
     add("jvmTestImplementation", testFixtures(projects.lowerThird))
     // CrashReportSweep: the Bible tab and view-model failure tests exercise paths that really
     // write a crash report. It lives with :diagnostics because it exists for CrashReporter's own

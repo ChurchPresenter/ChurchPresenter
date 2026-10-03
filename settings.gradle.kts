@@ -125,3 +125,7 @@ include(":dictionary")
 include(":stt")
 include(":announcements")
 include(":lower-third")
+
+// The Songs tab, SongsViewModel and the song library on disk. Depended on by :composeApp, which
+// hands it the song editor, the title slide, statistics and the Instance Link catalog.
+include(":songs")

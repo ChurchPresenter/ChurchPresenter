@@ -43,7 +43,10 @@ import org.churchpresenter.app.churchpresenter.tabs.BibleTab
 import org.churchpresenter.app.churchpresenter.tabs.CompanionSurfaceTab
 import org.churchpresenter.crosswordtab.CrosswordTab
 import org.churchpresenter.app.churchpresenter.tabs.AppSTTTab
-import org.churchpresenter.app.churchpresenter.tabs.SongsTab
+import org.churchpresenter.songs.SongsTab
+import org.churchpresenter.app.churchpresenter.tabs.AppSongEditor
+import org.churchpresenter.app.churchpresenter.tabs.recordSongWentLive
+import org.churchpresenter.app.churchpresenter.viewmodel.titleSlideSection
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.app.churchpresenter.tabs.getStringName
@@ -246,7 +249,12 @@ private fun MainDesktopScope.SongsTabPane() {
         viewModel = songsViewModel,
         appSettings = appSettings,
         typicalSongSeconds = service.typicalSongSeconds,
-        onSongWentLive = { song -> live.onRowWentLive(song.asDurationRow()) },
+        onSongWentLive = { song ->
+            recordSongWentLive(song, appSettings, statisticsManager)
+            live.onRowWentLive(song.asDurationRow())
+        },
+        titleSlideFor = ::titleSlideSection,
+        songEditor = { request -> AppSongEditor(request, theme, appSettings) },
         onSettingsChange = onSettingsChange,
         onAddToSchedule = { songNumber, title, songbook, songId ->
             currentScheduleActions.addSong(songNumber, title, songbook, songId)
@@ -261,8 +269,7 @@ private fun MainDesktopScope.SongsTabPane() {
         onLineIndexChanged = live.onLineIndexChanged,
         onPresenting = live.presenting,
         isPresenting = presentingMode == Presenting.LYRICS,
-        theme = theme,
-        statisticsManager = statisticsManager,
+        playCounts = statisticsManager,
         dialogDismissSignal = dialogDismissSignal
     )
 }

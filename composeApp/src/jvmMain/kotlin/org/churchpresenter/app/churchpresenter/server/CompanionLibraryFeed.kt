@@ -6,7 +6,7 @@ import java.io.IOException
 import java.sql.SQLException
 import kotlinx.coroutines.launch
 import org.churchpresenter.bible.Bible
-import org.churchpresenter.app.churchpresenter.data.Songs
+import org.churchpresenter.songs.Songs
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
 import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.calendar.sync.Projection

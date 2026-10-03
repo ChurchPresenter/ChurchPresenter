@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.sharedui.composables.SongSectionKind
+import org.churchpresenter.sharedui.composables.sectionKindOf
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.songchords.ChordSegment
 import kotlin.test.Test

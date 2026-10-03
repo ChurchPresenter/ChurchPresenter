@@ -12,7 +12,9 @@ import org.churchpresenter.slides.viewmodel.PicturesViewModel
 import org.churchpresenter.slides.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
+import org.churchpresenter.songs.SongsViewModel
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
+import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
 import org.churchpresenter.app.churchpresenter.viewmodel.onEngineScripture
 import org.churchpresenter.app.churchpresenter.viewmodel.onEngineVersion
 import org.churchpresenter.settings.AppSettings
@@ -39,6 +41,7 @@ internal class MainDesktopViewModels(
     val songsViewModel = SongsViewModel(
         appSettings,
         onSongsLoaded = { songs -> publish.value.onSongsLoaded?.invoke(songs) },
+        remoteSyncLog = { event, fields -> InstanceLinkLogger.log(InstanceLinkLogSide.FOLLOWER, event, fields) },
     )
     val bibleViewModel = BibleViewModel(
         appSettings,

@@ -307,6 +307,18 @@ jobs:
               - 'presentation-engine/**'  # implementation(projects.presentationEngine)
               - 'song-chords/**'          # via :shared-ui
               - 'bible/**'                # via :shared-ui
+            songs:
+              - *shared
+              - 'songs/**'
+              - 'shared-ui/**'            # implementation(projects.sharedUi)
+              - 'strings/**'              # implementation(projects.strings)
+              - 'icons/**'                # implementation(projects.icons)
+              - 'core-models/**'          # implementation(projects.coreModels)
+              - 'settings/**'             # implementation(projects.settings)
+              - 'theme/**'                # implementation(projects.theme)
+              - 'song-chords/**'          # implementation(projects.songChords)
+              - 'bible/**'                # via :shared-ui
+              - 'diagnostics/**'          # via :shared-ui
             crosswordtab:
               - *shared
               - 'crossword-tab/**'
@@ -356,7 +368,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -736,6 +748,14 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.lowerthird == 'true' }}
         run: ./gradlew :lower-third:jacocoTestCoverageVerification -x test
 
+      - name: Songs tests
+        if: ${{ !cancelled() && steps.modules.outputs.songs == 'true' }}
+        run: ./gradlew :songs:test
+
+      - name: Songs coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.songs == 'true' }}
+        run: ./gradlew :songs:jacocoTestCoverageVerification -x test
+
 
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,
@@ -783,6 +803,7 @@ jobs:
             stt/build/test-results/**/TEST-*.xml
             announcements/build/test-results/**/TEST-*.xml
             lower-third/build/test-results/**/TEST-*.xml
+            songs/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
           # every row after the insertion, so core-models was reported under "Companion Satellite"
@@ -818,6 +839,7 @@ jobs:
             STT
             Announcements
             Lower Third
+            Songs
           detailed_summary: true
           include_passed: false
           # Without this the second table is one row of "No test annotations available" per
@@ -1009,3 +1031,5 @@ jobs:
             announcements/build/test-results/
             lower-third/build/reports/tests/
             lower-third/build/test-results/
+            songs/build/reports/tests/
+            songs/build/test-results/

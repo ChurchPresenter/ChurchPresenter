@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.sharedui.utils.songLanguageName
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth

@@ -23,10 +23,14 @@
 - **A background per song** — give a song, or one of its sections, its own colour, gradient, picture, video or camera, separately for full screen and lower third, with a look (dim, blur, opacity) on top — or let it follow the profile's background.
 
 **Source locations:**
-- `tabs/SongsTab.kt` — main UI
-- `viewmodel/SongsViewModel.kt`, `viewmodel/SongSettingsViewModel.kt`, `viewmodel/SongFolderWatcher.kt`
-- `data/Songs.kt`, `data/SpsConverter.kt`; `SongItem` and `SongFileParser` are in `:core-models` (`models/songs/`)
-- `viewmodel/SongSearchMatch.kt`, `tabs/SongListPane.kt` (with `SongListScope.kt`, `SongTableHeader.kt`, `SongListRows.kt`) — where each search hit matched, and the list that draws it
+- `songs/` (the `:songs` Gradle module) — `SongsTab.kt` and its panes (`SongListPane.kt` with
+  `SongListScope.kt`, `SongTableHeader.kt`, `SongListRows.kt`; `SongLyricsPanel.kt`),
+  `SongsViewModel.kt`, `SongFolderWatcher.kt`, `SongSearchMatch.kt` (where each search hit matched),
+  and `Songs.kt` (the library on disk, `.sps` included)
+- `tabs/AppSongsTab.kt` — the app's parts of the tab: the editor (`EditSongDialog`) and what a song
+  going live records; `viewmodel/TitleSlideSection.kt` — the title slide the tab sends
+- `viewmodel/SongSettingsViewModel.kt`, `data/SpsConverter.kt`; `SongItem` and `SongFileParser` are in
+  `:core-models` (`models/songs/`)
 - `dialogs/SongBackground*.kt` — the per-song background panel
 - `data/settings/SongSettings.kt`
 - `presenter/SongPresenter.kt`, with `SongLook.kt`, `SongFrame.kt`, `SongFitFrame.kt` and `SongSlide*.kt` beside it

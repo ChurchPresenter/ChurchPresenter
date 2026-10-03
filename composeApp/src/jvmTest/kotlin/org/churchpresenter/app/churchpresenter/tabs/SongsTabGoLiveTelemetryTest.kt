@@ -2,6 +2,10 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.songs.navigateNextSection
+import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.songs.songsTab
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -53,6 +57,10 @@ class SongsTabGoLiveTelemetryTest {
         waitForIdle()
     }
 
+    /** The app's went-live hook, as `MainTabArea` wires it, over [manager]. */
+    private fun wentLive(manager: StatisticsManager): (SongItem) -> Unit =
+        { song -> recordSongWentLive(song, AppSettings(), manager) }
+
     private fun statisticsFor(manager: StatisticsManager) =
         manager.getAllSongsInRange(0L, Long.MAX_VALUE)
 
@@ -61,7 +69,7 @@ class SongsTabGoLiveTelemetryTest {
         isolateHome()
         val statistics = StatisticsManager()
 
-        songsTab(statistics = statistics) { _, _ ->
+        songsTab(onSongWentLive = wentLive(statistics)) { _, _ ->
             goLiveWith("Amazing Grace")
 
             val logged = statisticsFor(statistics)
@@ -74,7 +82,7 @@ class SongsTabGoLiveTelemetryTest {
         isolateHome()
         val statistics = StatisticsManager()
 
-        songsTab(statistics = statistics) { _, _ ->
+        songsTab(onSongWentLive = wentLive(statistics)) { _, _ ->
             goLiveWith("Amazing Grace")
 
             val logged = statisticsFor(statistics).single()
@@ -89,7 +97,7 @@ class SongsTabGoLiveTelemetryTest {
         isolateHome()
         val statistics = StatisticsManager()
 
-        songsTab(statistics = statistics) { vm, _ ->
+        songsTab(onSongWentLive = wentLive(statistics)) { vm, _ ->
             goLiveWith("Amazing Grace")
             assertEquals(1, statisticsFor(statistics).size)
 
@@ -109,7 +117,7 @@ class SongsTabGoLiveTelemetryTest {
         isolateHome()
         val statistics = StatisticsManager()
 
-        songsTab(statistics = statistics) { _, _ ->
+        songsTab(onSongWentLive = wentLive(statistics)) { _, _ ->
             goLiveWith("Amazing Grace")
             goLiveWith("Be Thou My Vision")
 
@@ -125,7 +133,7 @@ class SongsTabGoLiveTelemetryTest {
         isolateHome()
         val statistics = StatisticsManager()
 
-        songsTab(statistics = statistics) { _, _ ->
+        songsTab(onSongWentLive = wentLive(statistics)) { _, _ ->
             onNodeWithText("Amazing Grace").performClick()
             waitForIdle()
 
@@ -154,7 +162,7 @@ class SongsTabGoLiveTelemetryTest {
         val statistics = StatisticsManager()
         val selection = mutableStateOf<ScheduleItem.SongItem?>(null)
 
-        songsTab(statistics = statistics, scheduleSelection = selection) { _, _ ->
+        songsTab(onSongWentLive = wentLive(statistics), scheduleSelection = selection) { _, _ ->
             selection.value =
                 ScheduleItem.SongItem(id = "row-1", songNumber = 1, title = "Amazing Grace", songbook = "Hymnal")
             waitForIdle()
