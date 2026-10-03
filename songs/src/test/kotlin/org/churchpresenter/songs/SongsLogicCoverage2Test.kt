@@ -169,4 +169,43 @@ class SongsLogicCoverage2Test {
             dir.deleteRecursively()
         }
     }
+
+    @Test
+    fun `the whole-song slide leaves background directives out`() {
+        val dir = Files.createTempDirectory("cp-logic2d").toFile()
+        val vm = SongsViewModel(
+            AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath)),
+            dispatcher = Dispatchers.Unconfined,
+            ioDispatcher = Dispatchers.Unconfined,
+            enableFolderWatcher = false,
+        )
+        try {
+            vm.setInstanceLinkSource(
+                active = true,
+                catalog = listOf(SongItem(number = "1", title = "A", lyrics = listOf("[background: color]", "one"))),
+                fetchLyrics = null,
+            )
+            vm.selectSong(0)
+            assertEquals(listOf("one"), vm.getSelectedSong()?.lines)
+        } finally {
+            vm.dispose()
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `there is no whole-song slide with nothing selected`() {
+        val vm = SongsViewModel(
+            AppSettings(songSettings = SongSettings(storageDirectory = "")),
+            dispatcher = Dispatchers.Unconfined,
+            ioDispatcher = Dispatchers.Unconfined,
+            enableFolderWatcher = false,
+        )
+        try {
+            vm.setInstanceLinkSource(active = true, catalog = emptyList(), fetchLyrics = null)
+            assertNull(vm.getSelectedSong())
+        } finally {
+            vm.dispose()
+        }
+    }
 }

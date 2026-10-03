@@ -56,10 +56,10 @@ class SongListPaneDirectCoverage2Test {
             columns = columns,
             dialogs = dialogs,
             live = live,
-            filteredSongs = songs.take(1 + v % 2),
+            filteredSongs = if (v == 2) emptyList() else songs.take(1 + v % 2),
             selectedSongIndex = v % 2,
             searchQuery = if (v == 0) "" else "g",
-            isLoading = false,
+            isLoading = v >= 2,
             isPresenting = v == 1,
             songbooks = listOf("Hymnal", "Choruses $v"),
             songbookOptions = listOf("All", "Hymnal", "Choruses $v"),
@@ -133,4 +133,18 @@ class SongListPaneDirectCoverage2Test {
         waitForIdle()
         assertTrue(seen.scheduled.isNotEmpty())
     }
+
+    @Test
+    fun `while indexing an empty library shows progress, and a loaded one still lists its songs`() =
+        runComposeUiTest {
+            var version by mutableStateOf(2)
+            setContent { MaterialTheme { Row(Modifier.fillMaxSize()) { Pane(version, Seen()) } } }
+            waitForIdle()
+            val indexing = onAllNodes(hasText("Indexing", substring = true)).fetchSemanticsNodes()
+            assertTrue(indexing.isNotEmpty())
+
+            version = 3
+            waitForIdle()
+            assertTrue(onAllNodes(hasText("Untitled Hymn")).fetchSemanticsNodes().isNotEmpty())
+        }
 }
