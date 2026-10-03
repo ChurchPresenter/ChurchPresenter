@@ -274,6 +274,33 @@ class ScheduleFileTest {
     }
 
     @Test
+    fun `a web page saved as a schedule is named to the operator, not reported`() = runBlocking {
+        // CHURCH-PRESENTER-DESKTOP-9N: the file opened was an HTML page, decoded as a schedule.
+        val file = scheduleFile("Sunday.cps")
+        file.writeText("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0//EN\"><html></html>")
+        chooseFile(file)
+
+        val vm = vm()
+        vm.addSong(1, "Still Here", "Hymnal")
+        vm.loadSchedule()
+
+        assertEquals(ScheduleOpenFailure("Sunday.cps", unreadable = false), vm.openFailure)
+        assertEquals(listOf("Still Here"), vm.titles)
+    }
+
+    @Test
+    fun `a file that cannot be read is named to the operator as unreadable`() = runBlocking {
+        // A folder exists but has no text to read -- the same IOException a file without permission gives.
+        val folder = scheduleFile("Folder.cps").apply { mkdirs() }
+        chooseFile(folder)
+
+        val vm = vm()
+        vm.loadSchedule()
+
+        assertEquals(ScheduleOpenFailure("Folder.cps", unreadable = true), vm.openFailure)
+    }
+
+    @Test
     fun `a missing file is a no-op`() = runBlocking {
         chooseFile(File(home, "does-not-exist.cps"))
         val vm = vm()

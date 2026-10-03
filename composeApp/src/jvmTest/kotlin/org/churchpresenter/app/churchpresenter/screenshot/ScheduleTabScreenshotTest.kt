@@ -16,6 +16,7 @@ import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarIconSize
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarTags
 import org.churchpresenter.app.churchpresenter.tabs.scheduleTab
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleOpenFailure
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import java.io.File
 import java.time.Instant
@@ -336,6 +337,19 @@ class ScheduleTabScreenshotTest {
     @Test
     fun `toolbar icons large`() =
         shoot("toolbar_icons_large", toolbarIconSize = ScheduleToolbarIconSize.LARGE, width = 400.dp)
+
+    /** CHURCH-PRESENTER-DESKTOP-9N: a file that is not a schedule is named, and nothing changes. */
+    @Test
+    fun `a file that is not a schedule is named in a dialog`() = shoot("open_not_a_schedule", rootIndex = 1) { vm ->
+        vm.openFailure = ScheduleOpenFailure("Sunday 10-05.cps", unreadable = false)
+        waitForIdle()
+    }
+
+    @Test
+    fun `a file that cannot be read is named in a dialog`() = shoot("open_unreadable", rootIndex = 1) { vm ->
+        vm.openFailure = ScheduleOpenFailure("Sunday 10-05.cps", unreadable = true)
+        waitForIdle()
+    }
 
     /** The options menu itself — an open menu is its own compose root, hence [rootIndex] 1. */
     @Test
