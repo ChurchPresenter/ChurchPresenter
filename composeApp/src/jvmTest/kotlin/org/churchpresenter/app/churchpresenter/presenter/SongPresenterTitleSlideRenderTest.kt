@@ -19,6 +19,8 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongCreditStyle
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.settings.TextBox
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongStyleElement
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -228,5 +230,18 @@ class SongPresenterTitleSlideRenderTest {
             lyric = onNodeWithText("How sweet the sound").fetchSemanticsNode().boundsInRoot.height
         }
         assertTrue(title < lyric / 2, "title $title vs lyric $lyric")
+    }
+
+    @Test
+    fun `a title slide with the title boxed draws it in the box, and the rest as before`() {
+        val boxed = SongSettings().let {
+            val key = it.titleSlideBoxKey(SongStyleElement.TITLE, lowerThird = false, language = 0)
+            val box = TextBox(enabled = true, xPercent = 0f, yPercent = 0f, widthPercent = 50f, heightPercent = 20f)
+            it.copy(layoutExtras = it.layoutExtras.copy(textBoxes = mapOf(key to box)))
+        }
+        present(settings(boxed)) {
+            assertShown("Amazing Grace")
+            assertShown("John Newton")
+        }
     }
 }
