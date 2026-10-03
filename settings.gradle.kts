@@ -137,3 +137,7 @@ include(":bible-tab")
 // The OBS Studio integration: the obs-websocket client, the scene each content type switches to,
 // and the settings page. Depended on by :composeApp.
 include(":obs")
+
+// The layer model: the layers, the cues that go on them, and what is on air and cued. Depended on
+// by :composeApp.
+include(":live-show")

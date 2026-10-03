@@ -1,11 +1,14 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.announcements.AnnouncementsOutput
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.liveshow.Cue
+import org.churchpresenter.liveshow.Layer
 import org.churchpresenter.media.MediaOutput
 import org.churchpresenter.qa.QAOutput
 import org.churchpresenter.settings.AppSettings
@@ -69,6 +72,13 @@ class PresenterManager private constructor(
     val announcementsOutput: AnnouncementsOutput by lazy { PresenterAnnouncementsOutput(this) }
 
     val presentingMode: State<Presenting> = context.presentingMode
+
+    /**
+     * What every output shows, as the layer model sees it -- for now derived from [presentingMode]
+     * and the content it names ([legacyProgram]), so at most one layer is ever set. Nothing reads it
+     * yet; the outputs move onto it in the next migration step.
+     */
+    val program: State<Map<Layer, Cue>> = derivedStateOf { legacyProgram(presentingMode.value, this) }
 
     /** Notified whenever live-content state changes (mode, verse, lyric section, picture, media,
      *  announcement, website, scene, Q&A, dictionary) — wired in main.kt to broadcast an
