@@ -15,7 +15,8 @@ import kotlin.test.assertTrue
 
 /**
  * [PresenterManager.program] while it is still derived from the single live mode: each mode puts
- * what the outputs draw on that content's layer, and nothing else is ever set.
+ * what the outputs draw on that content's layer, and nothing else is ever set. A mode has its cue
+ * even before its content arrives, because the outputs draw the mode's presenter regardless.
  */
 class PresenterManagerProgramTest {
 
@@ -59,8 +60,8 @@ class PresenterManagerProgramTest {
     }
 
     @Test
-    fun `pictures with none displayed yet put nothing on air`() {
-        assertTrue(live(Presenting.PICTURES).isEmpty())
+    fun `pictures with none displayed yet still hold the media layer`() {
+        assertEquals(mapOf(Layer.MEDIA to Cue.Picture(null)), live(Presenting.PICTURES))
     }
 
     @Test
@@ -72,8 +73,8 @@ class PresenterManagerProgramTest {
     }
 
     @Test
-    fun `a presentation with no live slide puts nothing on air`() {
-        assertTrue(live(Presenting.PRESENTATION).isEmpty())
+    fun `a presentation with no live slide still holds the slide layer`() {
+        assertEquals(mapOf(Layer.SLIDE to Cue.PresentationSlide(null, -1)), live(Presenting.PRESENTATION))
     }
 
     @Test
@@ -93,8 +94,8 @@ class PresenterManagerProgramTest {
     }
 
     @Test
-    fun `media with nothing playing puts nothing on air`() {
-        assertTrue(live(Presenting.MEDIA).isEmpty())
+    fun `media with nothing playing still holds the media layer`() {
+        assertEquals(mapOf(Layer.MEDIA to Cue.Video("")), live(Presenting.MEDIA))
     }
 
     @Test
@@ -128,8 +129,8 @@ class PresenterManagerProgramTest {
     }
 
     @Test
-    fun `a canvas with no scene puts nothing on air`() {
-        assertTrue(live(Presenting.CANVAS).isEmpty())
+    fun `a canvas with no scene still holds the slide layer`() {
+        assertEquals(mapOf(Layer.SLIDE to Cue.SceneCue(null)), live(Presenting.CANVAS))
     }
 
     @Test
@@ -154,7 +155,7 @@ class PresenterManagerProgramTest {
             mapOf(Layer.SLIDE to Cue.Dictionary("H430")),
             live(Presenting.DICTIONARY) { setDisplayedDictionaryEntry(entry) },
         )
-        assertTrue(live(Presenting.DICTIONARY).isEmpty())
+        assertEquals(mapOf(Layer.SLIDE to Cue.Dictionary(null)), live(Presenting.DICTIONARY))
     }
 
     @Test
@@ -169,4 +170,11 @@ class PresenterManagerProgramTest {
         assertTrue(pm.program.value.isEmpty())
     }
 
+
+    @Test
+    fun `every mode but none puts exactly one cue on air`() {
+        Presenting.entries.forEach { mode ->
+            assertEquals(if (mode == Presenting.NONE) 0 else 1, live(mode).size, "$mode")
+        }
+    }
 }

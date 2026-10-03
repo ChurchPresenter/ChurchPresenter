@@ -74,9 +74,9 @@ class PresenterManager private constructor(
     val presentingMode: State<Presenting> = context.presentingMode
 
     /**
-     * What every output shows, as the layer model sees it -- for now derived from [presentingMode]
-     * and the content it names ([legacyProgram]), so at most one layer is ever set. Nothing reads it
-     * yet; the outputs move onto it in the next migration step.
+     * What is on air, as the layer model sees it -- for now derived from [presentingMode] and the
+     * content it names ([legacyProgram]), so at most one layer is ever set. An output with a screen
+     * lock draws its own mode's program instead (`OutputLayers`).
      */
     val program: State<Map<Layer, Cue>> = derivedStateOf { legacyProgram(presentingMode.value, this) }
 

@@ -6,7 +6,6 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,15 +19,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import io.github.alexzhirkevich.compottie.LottieCompositionSpec
-import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.StageMonitorScreen
 import org.churchpresenter.app.churchpresenter.qaQrCodeUrl
@@ -36,12 +31,8 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.sharedui.utils.contentScale
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.slides.presenter.PicturePresenter
-import org.churchpresenter.slides.presenter.PresentationPresenter
-import org.churchpresenter.media.presenter.MediaPresenter
 
 
 /**
@@ -164,7 +155,23 @@ internal fun OffscreenOutputContent(
                                 LocalBandOutgoing provides presenterManager.bandOutgoing.value,
                             ) {
                             LowerThirdLayout(mode, profile, appSettings, showBg) {
-                            OffscreenMode(mode, context, profile, appSettings, showBg)
+                            OutputLayers(
+                                mode = mode,
+                                surface = OutputSurface(
+                                    kind = OutputSurfaceKind.OFFSCREEN,
+                                    profile = profile,
+                                    appSettings = appSettings,
+                                    presenterManager = presenterManager,
+                                    outputRole = outputRole,
+                                    showBg = showBg,
+                                    mediaViewModel = mediaViewModel,
+                                    sttManager = context.sttManager,
+                                    qrCodeUrl = qaQrCodeUrl(
+                                        context.qaDisplayUrlState?.value.orEmpty(),
+                                        context.serverUrlState?.value.orEmpty(),
+                                    ),
+                                ),
+                            )
                             }
                             }
                         }
@@ -235,214 +242,6 @@ private fun OffscreenStageMonitor(
         displayedDictionaryEntry = presenterManager.displayedDictionaryEntry.value,
         dictionarySettings = appSettings.dictionarySettings
     )
-}
-
-/** Scripture, as this output's profile lays it out. */
-@Composable
-private fun OffscreenBible(
-    presenterManager: PresenterManager,
-    appSettings: AppSettings,
-    profile: OutputProfile,
-    showBg: Boolean,
-) {
-    val isLowerThird = profile.isLowerThird
-    val isLowerThirdVertical = profile.isLowerThirdVertical
-    val outputRole = Constants.OUTPUT_ROLE_NORMAL
-    BiblePresenter(
-        modifier = if (isLowerThird) {
-            Modifier
-        } else {
-            Modifier.wholeOutputRegion(appSettings.bibleSettings.contentRegion)
-        },
-        textRegion = appSettings.bibleSettings.contentRegion.textOnly(isLowerThird),
-        selectedVerses = presenterManager.displayedVerses.value,
-        appSettings = appSettings,
-        isLowerThird = isLowerThird,
-        isLowerThirdVertical = isLowerThirdVertical,
-        outputRole = outputRole,
-        transitionAlpha = presenterManager.bibleTransitionAlpha.value,
-        showBackground = showBg && profile.showBibleBackground,
-        crossfadeEnabled = appSettings.bibleSettings.crossfade,
-        bibleTranslations = profile.bibleTranslations,
-    )
-}
-
-/** The song, as this output's profile lays it out. */
-@Composable
-private fun OffscreenSong(
-    presenterManager: PresenterManager,
-    appSettings: AppSettings,
-    profile: OutputProfile,
-    showBg: Boolean,
-) {
-    val isLowerThird = profile.isLowerThird
-    val isLowerThirdVertical = profile.isLowerThirdVertical
-    val outputRole = Constants.OUTPUT_ROLE_NORMAL
-    SongPresenter(
-        modifier = if (isLowerThird) {
-            Modifier
-        } else {
-            Modifier.wholeOutputRegion(appSettings.songSettings.layoutExtras.contentRegion)
-        },
-        textRegion = appSettings.songSettings.layoutExtras.contentRegion
-            .textOnly(isLowerThird),
-        lyricSection = presenterManager.displayedLyricSection.value,
-        appSettings = appSettings,
-        isLowerThird = isLowerThird,
-        isLowerThirdVertical = isLowerThirdVertical,
-        outputRole = outputRole,
-        transitionAlpha = presenterManager.songTransitionAlpha.value,
-        displayLineIndex = presenterManager.displayedSongPosition.value.lineIndex,
-        lookAheadEnabled = profile.songLookAhead,
-        allLyricSections = presenterManager.displayedSongPosition.value.allSections,
-        displaySectionIndex = presenterManager.displayedSongPosition.value.sectionIndex,
-        showBackground = showBg && profile.showSongsBackground,
-        crossfadeEnabled = appSettings.songSettings.crossfade,
-        languageOverride = profile.songMode,
-        languageSelection = profile.songTranslations,
-    )
-}
-
-/** The Lottie lower third, from the JSON the presenter manager holds. */
-@Composable
-private fun OffscreenLowerThird(presenterManager: PresenterManager) {
-    val outputRole = Constants.OUTPUT_ROLE_NORMAL
-    val lottieJsonContent = presenterManager.lottieJsonContent.value
-    val lottieComposition by rememberLottieComposition(lottieJsonContent) {
-        LottieCompositionSpec.JsonString(lottieJsonContent.ifBlank { "{}" })
-    }
-    LowerThirdPresenter(
-        composition = lottieComposition,
-        progress = { presenterManager.lottieProgress.value },
-        outputRole = outputRole,
-        frame = presenterManager.lottieFrame.value,
-        groupsText = presenterManager.lottieGroupsText.value,
-    )
-
-}
-
-/** The question on display, or the QR code leading to the submission page. */
-@Composable
-private fun OffscreenQa(presenterManager: PresenterManager, appSettings: AppSettings, context: OffscreenOutputContext) {
-    val outputRole = Constants.OUTPUT_ROLE_NORMAL
-    val showQRCode = presenterManager.showQRCodeOnDisplay.value
-    val qaTransitionAlpha = presenterManager.qaTransitionAlpha.value
-    if (showQRCode) {
-        QAQRCodePresenter(
-            url = qaQrCodeUrl(context.qaDisplayUrlState?.value.orEmpty(), context.serverUrlState?.value.orEmpty()),
-            qaSettings = appSettings.qaSettings,
-            outputRole = outputRole,
-            transitionAlpha = qaTransitionAlpha
-        )
-    } else {
-        QAPresenter(
-            question = presenterManager.displayedQuestion.value,
-            qaSettings = appSettings.qaSettings,
-            outputRole = outputRole,
-            transitionAlpha = qaTransitionAlpha
-        )
-    }
-
-}
-
-/** What this output draws for [mode], once the crossfade and the lower-third layout are in place. */
-@Composable
-private fun OffscreenMode(
-    mode: Presenting,
-    context: OffscreenOutputContext,
-    profile: OutputProfile,
-    appSettings: AppSettings,
-    showBg: Boolean,
-) {
-    val presenterManager = context.presenterManager
-    val mediaViewModel = context.mediaViewModel
-    val sttManager = context.sttManager
-    val outputRole = Constants.OUTPUT_ROLE_NORMAL
-    when (mode) {
-        Presenting.BIBLE -> OffscreenBible(presenterManager, appSettings, profile, showBg)
-        Presenting.LYRICS -> OffscreenSong(presenterManager, appSettings, profile, showBg)
-        Presenting.PICTURES -> PicturePresenter(
-            imagePath = presenterManager.displayedImagePath.value,
-            previousImagePath = presenterManager.previousDisplayedImagePath.value,
-            transitionAlpha = presenterManager.pictureTransitionAlpha.value,
-            slideOffset = presenterManager.pictureSlideOffset.value,
-            animationType = presenterManager.animationType.value,
-            contentScale = appSettings.pictureSettings.scaleMode.contentScale,
-        )
-        Presenting.ANNOUNCEMENTS -> AnnouncementsPresenter(
-            text = presenterManager.displayedAnnouncementText.value,
-            appSettings = appSettings,
-            outputRole = outputRole,
-            transitionAlpha = presenterManager.announcementTransitionAlpha.value,
-            showBackground = showBg
-        )
-        Presenting.PRESENTATION -> {
-            PresentationPresenter(
-                frame = presenterManager.presentationFrame.value,
-                slide = presenterManager.displayedSlide.value,
-                previousSlide = presenterManager.previousDisplayedSlide.value,
-                transitionAlpha = presenterManager.slideTransitionAlpha.value,
-                slideOffset = presenterManager.slideSlideOffset.value,
-                animationType = presenterManager.animationType.value,
-                outputRole = outputRole,
-                frozen = presenterManager.slideFrozen.value
-            )
-        }
-        Presenting.LOWER_THIRD -> OffscreenLowerThird(presenterManager)
-        Presenting.MEDIA -> {
-            // Same rule as the real output (main.kt): audio-only files
-            // show background only; video draws muted — frames come from
-            // the master player via SharedVideoOutput, audio stays on the
-            // main output's audio device.
-            if (mediaViewModel != null && !mediaViewModel.isAudioFile) {
-                MediaPresenter(
-                    modifier = Modifier.fillMaxSize(),
-                    transitionAlpha = presenterManager.mediaTransitionAlpha.value,
-                    outputRole = outputRole,
-                    showSubtitles = profile.showSubtitles,
-                    profileId = profile.id,
-                    mediaSettings = appSettings.mediaSettings,
-                    contentScale = appSettings.mediaScaleMode.contentScale,
-                )
-            }
-        }
-        Presenting.WEBSITE -> {
-            // Mirror of the live JCEF browser's periodic snapshot — only
-            // updates while the Web tab or a real output window shows the
-            // site (a Browser Source alone cannot drive a website). No
-            // snapshot yet -> nothing (transparent).
-            presenterManager.webSnapshot.value?.let { snapshot ->
-                Image(
-                    bitmap = snapshot,
-                    contentDescription = null,
-                    contentScale = ContentScale.FillBounds,
-                    modifier = Modifier.fillMaxSize().testTag(WEB_SNAPSHOT_TAG)
-                )
-            }
-        }
-        Presenting.CANVAS -> ScenePresenter(scene = presenterManager.activeScene.value)
-        Presenting.QA -> OffscreenQa(presenterManager, appSettings, context)
-        Presenting.STT -> {
-            sttManager?.let { stt ->
-                STTPresenter(
-                    segments = stt.segments,
-                    inProgressText = stt.inProgressText.value,
-                    translationSegments = stt.translationSegments,
-                    inProgressTranslation = stt.inProgressTranslation.value,
-                    highlightedWords = stt.highlightedWords,
-                    sttSettings = appSettings.sttSettings,
-                    outputRole = outputRole
-                )
-            }
-        }
-        Presenting.DICTIONARY -> DictionaryPresenter(
-            entry = presenterManager.displayedDictionaryEntry.value,
-            dictionarySettings = appSettings.dictionarySettings,
-            outputRole = outputRole,
-            transitionAlpha = 1f
-        )
-        Presenting.NONE -> {}
-    }
 }
 
 /** The website snapshot an offscreen output draws, for a test to find. */

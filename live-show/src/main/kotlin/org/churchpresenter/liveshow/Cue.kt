@@ -23,8 +23,8 @@ sealed interface Cue {
         override val layer get() = Layer.MEDIA
     }
 
-    /** One picture of a slideshow, full frame. */
-    data class Picture(val path: String) : Cue {
+    /** One picture of a slideshow, full frame; null while the first is still on its way. */
+    data class Picture(val path: String?) : Cue {
         override val layer get() = Layer.MEDIA
     }
 
@@ -38,13 +38,16 @@ sealed interface Cue {
         override val layer get() = Layer.SLIDE
     }
 
-    /** One slide of a presentation; [fileName] is null for a deck that has none. */
+    /**
+     * One slide of a presentation; [fileName] is null for a deck that has none, and [index] is -1
+     * while no slide has been shown yet.
+     */
     data class PresentationSlide(val fileName: String?, val index: Int) : Cue {
         override val layer get() = Layer.SLIDE
     }
 
-    /** A canvas scene. */
-    data class SceneCue(val scene: Scene) : Cue {
+    /** A canvas scene; null while none is chosen. */
+    data class SceneCue(val scene: Scene?) : Cue {
         override val layer get() = Layer.SLIDE
     }
 
@@ -58,8 +61,8 @@ sealed interface Cue {
         override val layer get() = Layer.SLIDE
     }
 
-    /** A Strong's dictionary entry, by its number. */
-    data class Dictionary(val number: String) : Cue {
+    /** A Strong's dictionary entry, by its number; null while none is chosen. */
+    data class Dictionary(val number: String?) : Cue {
         override val layer get() = Layer.SLIDE
     }
 
