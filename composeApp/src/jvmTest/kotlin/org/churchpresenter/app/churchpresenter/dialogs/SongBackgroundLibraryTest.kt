@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.media.data.StockMediaClient
 import org.churchpresenter.core.models.songs.SongBackground
+import org.churchpresenter.core.models.songs.SongBackgroundType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -28,12 +29,15 @@ import kotlin.test.assertTrue
  */
 class SongBackgroundLibraryTest {
 
-    private fun library(block: ComposeUiTest.() -> Unit) = runComposeUiTest {
+    private fun library(
+        background: SongBackground = SongBackground(),
+        block: ComposeUiTest.() -> Unit,
+    ) = runComposeUiTest {
         setContent {
             MaterialTheme {
                 Box(Modifier.size(LIBRARY_WIDTH, LIBRARY_HEIGHT)) {
                     SongBackgroundLibrary(
-                        background = SongBackground(),
+                        background = background,
                         onChange = {},
                         swatchAspect = FALLBACK_STAGE_ASPECT,
                         devices = emptyList(),
@@ -80,6 +84,19 @@ class SongBackgroundLibraryTest {
         onNodeWithText(VIDEOS).performClick()
         waitForIdle()
         onNodeWithText(BROWSE).assertIsDisplayed()
+    }
+
+    @Test
+    fun `a picture or clip chosen by browsing is named on the Browse tile`() {
+        val picture = SongBackground(type = SongBackgroundType.IMAGE, image = "/elsewhere/sunrise.png")
+        library(background = picture) {
+            onNodeWithText("sunrise.png").assertIsDisplayed()
+            assertTrue(onAllNodesWithText(BROWSE).fetchSemanticsNodes().isEmpty())
+        }
+        val clip = SongBackground(type = SongBackgroundType.VIDEO, video = "/elsewhere/waves.mp4")
+        library(background = clip) {
+            onNodeWithText("waves.mp4").assertIsDisplayed()
+        }
     }
 
     private companion object {

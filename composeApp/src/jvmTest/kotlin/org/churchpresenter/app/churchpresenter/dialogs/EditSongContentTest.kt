@@ -17,6 +17,7 @@ import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onLast
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -103,6 +104,7 @@ class EditSongContentTest {
         var song: SongItem? = null
         var tuning: SongTuning? = null
         var dismissed = 0
+        val chordsVisible = mutableListOf<Boolean>()
     }
 
     private fun aSong(
@@ -132,6 +134,7 @@ class EditSongContentTest {
         songbooks: List<String> = emptyList(),
         tuning: SongTuning = SongTuning(),
         showTuningFields: Boolean = false,
+        typicalSeconds: Int? = null,
         block: ComposeUiTest.(Saved) -> Unit,
     ) {
         val saved = Saved()
@@ -148,6 +151,8 @@ class EditSongContentTest {
                         showTuningFields = showTuningFields,
                         onDismiss = { saved.dismissed++ },
                         onSave = { song, savedTuning -> saved.song = song; saved.tuning = savedTuning },
+                        typicalSeconds = typicalSeconds,
+                        onChordsVisibleChange = { saved.chordsVisible += it },
                     )
                 }
             }
@@ -515,6 +520,41 @@ class EditSongContentTest {
             save()
             assertEquals("Youth Songbook", saved.song?.songbook)
         }
+
+    @Test
+    fun `a songbook started by hand can be abandoned for the one the song had`() =
+        editor(songbooks = listOf("Hymnal", "Chorus Book")) { saved ->
+            songbook().performClick()
+            waitForIdle()
+            tap(Label.ADD_NEW)
+            type(Field.SONGBOOK_TYPED, "Never Mind")
+
+            onNodeWithContentDescription(Label.CANCEL).performClick()
+            waitForIdle()
+            assertEquals(Field.COUNT, fieldCount(), "back to the picker")
+            save()
+            assertEquals("Hymnal", saved.song?.songbook)
+        }
+
+    // ── The footer and the chords switch ────────────────────────────────────────
+
+    @Test
+    fun `the footer says how long the song usually runs live, when that is known`() {
+        editor(typicalSeconds = 245) { _ ->
+            onNodeWithText("usually 4:05 live", substring = true).assertExists()
+        }
+        editor { _ ->
+            onNodeWithText("usually", substring = true).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `the chords switch flips, and says so each time`() = editor { saved ->
+        tap("Chords")
+        tap("Chords")
+        assertEquals(2, saved.chordsVisible.size)
+        assertEquals(saved.chordsVisible[0], !saved.chordsVisible[1])
+    }
 
     // ── Leaving ─────────────────────────────────────────────────────────────────
 
