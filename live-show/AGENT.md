@@ -16,9 +16,10 @@ models) and Compose's runtime for snapshot state, and nothing of `:composeApp`'s
 
 ## Where the migration stands
 
-Step 1 of the note's migration: `PresenterManager.program` is **derived** from the single live mode
-by `legacyProgram` in the app, so at most one layer is ever set, and nothing reads it yet.
-`LiveShow` itself is not wired in until the content setters write cues.
+Steps 1 and 2 of the note's migration. `PresenterManager.program` is **derived** from the single
+live mode by `legacyProgram` in the app, so exactly one layer is set for any mode but none. Every
+output (windows, NDI/OMT/Browser Source, preview tiles) draws it through the app's `OutputLayers` and
+`CueContent`. `LiveShow` itself is not wired in until the content setters write cues.
 
 ## Package
 
