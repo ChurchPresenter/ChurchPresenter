@@ -44,7 +44,7 @@ import org.churchpresenter.media.tabs.RecentMediaFiles
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.theme.ChurchPresenterTheme
-import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
+import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager

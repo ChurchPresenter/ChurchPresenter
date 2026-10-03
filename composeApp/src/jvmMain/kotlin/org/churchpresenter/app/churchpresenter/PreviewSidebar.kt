@@ -29,8 +29,8 @@ import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.strings.generated.resources.tooltip_clear_display
 import org.churchpresenter.strings.generated.resources.tooltip_preview_settings
 import org.churchpresenter.strings.generated.resources.tooltip_toggle_displays
-import org.churchpresenter.app.churchpresenter.composables.CompanionConnectionChipRow
-import org.churchpresenter.app.churchpresenter.composables.CompanionSurfacePanel
+import org.churchpresenter.companionsurface.CompanionConnectionChipRow
+import org.churchpresenter.companionsurface.CompanionSurfacePanel
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
 import org.churchpresenter.app.churchpresenter.composables.PreviewGroupsPopover
 import org.churchpresenter.app.churchpresenter.composables.QuickBackgroundTray
@@ -38,7 +38,7 @@ import org.churchpresenter.app.churchpresenter.composables.ToolbarKey
 import org.churchpresenter.app.churchpresenter.composables.ToolbarKeyStyle
 import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.previewOutputSize
-import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
+import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.stt.STTManager

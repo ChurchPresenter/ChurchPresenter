@@ -27,8 +27,8 @@ import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 class ScreenshotInvariantsTest {
 
     /**
-     * The app's screenshot package, the `:shared-ui`, `:slides`, `:media` and `:songs` suites, and
-     * their shared harness.
+     * The app's screenshot package, the `:shared-ui`, `:slides`, `:media`, `:songs` and
+     * `:companion-surface` suites, and their shared harness.
      */
     private val packageDirs = listOf(
         File("src/jvmTest/kotlin/org/churchpresenter/app/churchpresenter/screenshot"),
@@ -37,6 +37,7 @@ class ScreenshotInvariantsTest {
         File("../slides/src/test/kotlin/org/churchpresenter/slides/screenshot"),
         File("../media/src/test/kotlin/org/churchpresenter/media/screenshot"),
         File("../songs/src/test/kotlin/org/churchpresenter/songs/screenshot"),
+        File("../companion-surface/src/test/kotlin/org/churchpresenter/companionsurface/screenshot"),
     )
 
     /** Every `.kt` in the screenshot packages, paired with its text. */

@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.data
 
 import org.churchpresenter.bible.Bible
+import org.churchpresenter.planningcenter.ui.PlanningCenterScripture
 /**
  * Detects plain-text scripture references (e.g. "Psalm 23:1-6", one per line) inside Planning
  * Center plan item text and resolves them against a loaded [Bible] — used so a PCO-imported item
@@ -56,21 +57,8 @@ object PlanningCenterScriptureDetector {
             }
     }
 
-    data class ResolvedVerses(
-        val bookName: String,
-        val bookId: Int,
-        val chapter: Int,
-        val verseNumber: Int,
-        val verseText: String,
-        val verseRange: String
-    ) {
-        /** Short human-readable reference for a picker UI, e.g. "Psalm 23:1-6" or "John 3:16". */
-        val displayReference: String
-            get() = if (verseRange.isNotEmpty()) "$bookName $chapter:$verseRange" else "$bookName $chapter:$verseNumber"
-    }
-
     /** Looks up the actual verse text for a detected reference. Null if the chapter/verses don't exist. */
-    fun resolveVerses(reference: DetectedReference, bible: Bible): ResolvedVerses? {
+    fun resolveVerses(reference: DetectedReference, bible: Bible): PlanningCenterScripture? {
         val chapterVerses = bible.getChapterVerses(reference.bookId, reference.chapter)
         if (chapterVerses.isEmpty()) return null
         val selected = chapterVerses.filter { it.verseNumber in reference.verseStart..reference.verseEnd }
@@ -81,7 +69,7 @@ object PlanningCenterScriptureDetector {
         } else {
             ""
         }
-        return ResolvedVerses(
+        return PlanningCenterScripture(
             bookName = reference.bookName,
             bookId = reference.bookId,
             chapter = reference.chapter,

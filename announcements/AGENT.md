@@ -5,7 +5,8 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 ## What it is
 
 The **Announcements** tab: an announcement's text and look, and its timer (countdown, count-up,
-specific time or clock). The tab and `AnnouncementsViewModel` live here.
+specific time or clock). The tab, `AnnouncementsViewModel` and `AnnouncementsPresenter` (`presenter/`,
+the announcement on an output) live here.
 
 A real Gradle module of this build: `include(":announcements")`,
 `implementation(projects.announcements)`. `:composeApp` is its only consumer. `PresenterManager`
@@ -50,7 +51,7 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings` and `:t
 
 ## Package
 
-**`org.churchpresenter.announcements`**. The test helpers (`announcementsTab`, `FakeAnnouncementsOutput`,
+**`org.churchpresenter.announcements`**, with `.presenter`. The test helpers (`announcementsTab`, `FakeAnnouncementsOutput`,
 `AnnouncementLabel`, the finders) are in `src/testFixtures`. They are public, so the app's
 screenshot suite can use them.
 

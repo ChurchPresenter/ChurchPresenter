@@ -15,11 +15,11 @@ import org.churchpresenter.app.churchpresenter.presenter.textOnly
 import org.churchpresenter.app.churchpresenter.presenter.wholeOutputRegion
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
-import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
+import org.churchpresenter.announcements.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
-import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
+import org.churchpresenter.dictionary.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdLayout
-import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
+import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
 import org.churchpresenter.media.presenter.MediaPresenter
 import org.churchpresenter.slides.presenter.PicturePresenter
 import org.churchpresenter.slides.presenter.PresentationPresenter
@@ -27,9 +27,9 @@ import org.churchpresenter.app.churchpresenter.presenter.LocalBandOutgoing
 import org.churchpresenter.app.churchpresenter.presenter.LocalBandSongLineIndex
 import org.churchpresenter.app.churchpresenter.presenter.LocalLottieBandClock
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
-import org.churchpresenter.app.churchpresenter.presenter.QAQRCodePresenter
-import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
+import org.churchpresenter.qa.presenter.QAPresenter
+import org.churchpresenter.qa.presenter.QAQRCodePresenter
+import org.churchpresenter.stt.presenter.STTPresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.web.presenter.WebsitePresenter
@@ -128,7 +128,7 @@ internal fun PresenterModeContent(
                 LowerThirdPresenter(
                     composition = lottieComposition,
                     progress = { presenterManager.lottieProgress.value },
-                    frame = lottieFrame,
+                    frame = lottieFrame?.imageBitmap,
                     groupsText = presenterManager.lottieGroupsText.value,
                 )
 

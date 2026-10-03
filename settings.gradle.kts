@@ -129,3 +129,7 @@ include(":lower-third")
 // The Songs tab, SongsViewModel and the song library on disk. Depended on by :composeApp, which
 // hands it the song editor, the title slide, statistics and the Instance Link catalog.
 include(":songs")
+
+// The Companion Surface tab and CompanionSatelliteViewModel: the Compose face of
+// :companion-satellite, which stays free of any UI toolkit. Depended on by :composeApp.
+include(":companion-surface")

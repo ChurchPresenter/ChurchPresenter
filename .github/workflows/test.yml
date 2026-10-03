@@ -195,7 +195,12 @@ jobs:
               - 'planning-center/**'
               - 'settings/**'             # implementation(projects.settings)
               - 'diagnostics/**'          # implementation(projects.diagnostics)
-              - 'core-models/**'          # via :settings
+              - 'core-models/**'          # implementation(projects.coreModels)
+              - 'shared-ui/**'            # implementation(projects.sharedUi)
+              - 'strings/**'              # implementation(projects.strings)
+              - 'theme/**'                # implementation(projects.theme)
+              - 'song-chords/**'          # via :shared-ui
+              - 'bible/**'                # via :shared-ui
             bibleformats:
               - *shared
               - 'bible-formats/**'
@@ -319,6 +324,18 @@ jobs:
               - 'song-chords/**'          # implementation(projects.songChords)
               - 'bible/**'                # via :shared-ui
               - 'diagnostics/**'          # via :shared-ui
+            companionsurface:
+              - *shared
+              - 'companion-surface/**'
+              - 'companion-satellite/**'  # api(projects.companionSatellite)
+              - 'shared-ui/**'            # implementation(projects.sharedUi)
+              - 'strings/**'              # implementation(projects.strings)
+              - 'core-models/**'          # implementation(projects.coreModels)
+              - 'settings/**'             # implementation(projects.settings)
+              - 'theme/**'                # implementation(projects.theme)
+              - 'diagnostics/**'          # implementation(projects.diagnostics)
+              - 'song-chords/**'          # via :shared-ui
+              - 'bible/**'                # via :shared-ui
             crosswordtab:
               - *shared
               - 'crossword-tab/**'
@@ -368,7 +385,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :companion-surface:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -756,6 +773,14 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.songs == 'true' }}
         run: ./gradlew :songs:jacocoTestCoverageVerification -x test
 
+      - name: Companion Surface tests
+        if: ${{ !cancelled() && steps.modules.outputs.companionsurface == 'true' }}
+        run: ./gradlew :companion-surface:test
+
+      - name: Companion Surface coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.companionsurface == 'true' }}
+        run: ./gradlew :companion-surface:jacocoTestCoverageVerification -x test
+
 
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,
@@ -804,6 +829,7 @@ jobs:
             announcements/build/test-results/**/TEST-*.xml
             lower-third/build/test-results/**/TEST-*.xml
             songs/build/test-results/**/TEST-*.xml
+            companion-surface/build/test-results/**/TEST-*.xml
           # Paired with report_paths BY INDEX -- keep the two lists in the same order, and the same
           # LENGTH. A merge once left eight paths against six names, which does not fail: it shifts
           # every row after the insertion, so core-models was reported under "Companion Satellite"
@@ -840,6 +866,7 @@ jobs:
             Announcements
             Lower Third
             Songs
+            Companion Surface
           detailed_summary: true
           include_passed: false
           # Without this the second table is one row of "No test annotations available" per
@@ -1033,3 +1060,5 @@ jobs:
             lower-third/build/test-results/
             songs/build/reports/tests/
             songs/build/test-results/
+            companion-surface/build/reports/tests/
+            companion-surface/build/test-results/
