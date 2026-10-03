@@ -27,10 +27,7 @@
     <ID>TooManyFunctions:BibleViewModel.kt$BibleViewModel</ID>
     <ID>TooManyFunctions:BibleViewModelDetection.kt$org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModelDetection.kt</ID>
     <ID>TooManyFunctions:BibleViewModelSmartSearch.kt$org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModelSmartSearch.kt</ID>
-    <ID>TooManyFunctions:CompanionServer.kt$CompanionServer</ID>
-    <ID>TooManyFunctions:DeckLinkManager.kt$DeckLinkManager</ID>
     <ID>TooManyFunctions:EditSongDialog.kt$org.churchpresenter.app.churchpresenter.dialogs.EditSongDialog.kt</ID>
-    <ID>TooManyFunctions:PresenterManager.kt$PresenterManager</ID>
     <ID>TooManyFunctions:SceneSourceRenderer.kt$org.churchpresenter.app.churchpresenter.composables.SceneSourceRenderer.kt</ID>
     <ID>TooManyFunctions:SceneViewModel.kt$SceneViewModel</ID>
     <ID>TooManyFunctions:ScheduleViewModel.kt$ScheduleViewModel</ID>

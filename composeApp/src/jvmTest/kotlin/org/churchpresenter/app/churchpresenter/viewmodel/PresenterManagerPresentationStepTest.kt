@@ -88,11 +88,14 @@ class PresenterManagerPresentationStepTest {
         val deck = animatedDeck()
         val player = stubPlayer(deck, showingIndex = 0)
         pm.setPresentingMode(Presenting.PRESENTATION)
-        pm.presentationPlayer = player
+        pm.playback.presentationPlayer = player
 
         pm.presentationShowSlide(deck, slideIndex = 0) // same slide, visible -> idempotent
 
-        assertSame(player, pm.presentationPlayer, "the live slide's animation must not be torn down and restarted")
+        assertSame(
+            player, pm.playback.presentationPlayer,
+            "the live slide's animation must not be torn down and restarted",
+        )
         verify(exactly = 0) { player.close() }
         verify(exactly = 0) { player.showSlide(any(), any()) }
     }
@@ -103,11 +106,11 @@ class PresenterManagerPresentationStepTest {
         val deck = animatedDeck()
         val player = stubPlayer(deck, showingIndex = 5) // currently on slide 5
         pm.setPresentingMode(Presenting.PRESENTATION)
-        pm.presentationPlayer = player
+        pm.playback.presentationPlayer = player
 
         pm.presentationShowSlide(deck, slideIndex = 0) // different slide -> not idempotent, reuse
 
-        assertSame(player, pm.presentationPlayer, "the same deck's player is reused, not rebuilt")
+        assertSame(player, pm.playback.presentationPlayer, "the same deck's player is reused, not rebuilt")
         verify { player.showSlide(0, any()) }
     }
 
@@ -116,11 +119,14 @@ class PresenterManagerPresentationStepTest {
     @Test
     fun `showing a slide of a static deck tears down any player and starts none`() {
         val pm = manager()
-        pm.presentationPlayer = PresentationPlayer(staticDeck("previous.pdf"))
+        pm.playback.presentationPlayer = PresentationPlayer(staticDeck("previous.pdf"))
 
         pm.presentationShowSlide(staticDeck(), slideIndex = 0)
 
-        assertNull(pm.presentationPlayer, "a static deck plays through the JPEG path, so no animated player runs")
+        assertNull(
+            pm.playback.presentationPlayer,
+            "a static deck plays through the JPEG path, so no animated player runs",
+        )
     }
 
     // ── With no player, step keys fall through ───────────────────────────────────
@@ -146,7 +152,7 @@ class PresenterManagerPresentationStepTest {
     fun `no player means nothing is steppable`() {
         val pm = manager()
 
-        assertNull(pm.steppablePlayer(staticDeck(), slideIndex = 0))
+        assertNull(pm.playback.steppablePlayer(staticDeck(), slideIndex = 0))
     }
 
     // ── The identity guard ───────────────────────────────────────────────────────
@@ -156,10 +162,10 @@ class PresenterManagerPresentationStepTest {
         val pm = manager()
         val deck = staticDeck()
         pm.setPresentingMode(Presenting.PRESENTATION)
-        pm.presentationPlayer = PresentationPlayer(deck) // parked at index -1
+        pm.playback.presentationPlayer = PresentationPlayer(deck) // parked at index -1
 
         assertNull(
-            pm.steppablePlayer(deck, slideIndex = 3),
+            pm.playback.steppablePlayer(deck, slideIndex = 3),
             "the key is for a slide the player isn't on; it must fall through, not step the wrong slide",
         )
     }
@@ -168,10 +174,10 @@ class PresenterManagerPresentationStepTest {
     fun `a player showing a different deck is not steppable`() {
         val pm = manager()
         pm.setPresentingMode(Presenting.PRESENTATION)
-        pm.presentationPlayer = PresentationPlayer(staticDeck("live.pdf")) // parked at index -1
+        pm.playback.presentationPlayer = PresentationPlayer(staticDeck("live.pdf")) // parked at index -1
 
         assertNull(
-            pm.steppablePlayer(staticDeck("other.pdf"), slideIndex = -1),
+            pm.playback.steppablePlayer(staticDeck("other.pdf"), slideIndex = -1),
             "a step meant for another deck must not drive the live one",
         )
     }
@@ -184,9 +190,9 @@ class PresenterManagerPresentationStepTest {
         val deck = staticDeck()
         pm.setPresentingMode(Presenting.PRESENTATION)
         val player = PresentationPlayer(deck) // parked at index -1, which is what we ask for
-        pm.presentationPlayer = player
+        pm.playback.presentationPlayer = player
 
-        assertSame(player, pm.steppablePlayer(deck, slideIndex = -1))
+        assertSame(player, pm.playback.steppablePlayer(deck, slideIndex = -1))
     }
 
     @Test
@@ -195,9 +201,9 @@ class PresenterManagerPresentationStepTest {
         // step would be invisible; the key must fall through instead.
         val pm = manager()
         val deck = staticDeck()
-        pm.presentationPlayer = PresentationPlayer(deck)
+        pm.playback.presentationPlayer = PresentationPlayer(deck)
 
-        assertNull(pm.steppablePlayer(deck, slideIndex = -1))
+        assertNull(pm.playback.steppablePlayer(deck, slideIndex = -1))
     }
 
     @Test
@@ -205,11 +211,11 @@ class PresenterManagerPresentationStepTest {
         val pm = manager()
         val deck = staticDeck()
         pm.setPresentingMode(Presenting.PRESENTATION)
-        pm.presentationPlayer = PresentationPlayer(deck)
+        pm.playback.presentationPlayer = PresentationPlayer(deck)
         pm.requestClearDisplay()
 
         assertNull(
-            pm.steppablePlayer(deck, slideIndex = -1),
+            pm.playback.steppablePlayer(deck, slideIndex = -1),
             "a fade-out has blanked the mode-driven output, so steps there would be invisible",
         )
     }
@@ -221,9 +227,9 @@ class PresenterManagerPresentationStepTest {
         val pm = manager()
         val deck = staticDeck()
         pm.setScreenLock(screenIndex = 0, mode = Presenting.ANNOUNCEMENTS) // not PRESENTATION; live mode NONE
-        pm.presentationPlayer = PresentationPlayer(deck)
+        pm.playback.presentationPlayer = PresentationPlayer(deck)
 
-        assertNull(pm.steppablePlayer(deck, slideIndex = -1))
+        assertNull(pm.playback.steppablePlayer(deck, slideIndex = -1))
     }
 
     @Test
@@ -233,7 +239,7 @@ class PresenterManagerPresentationStepTest {
         val pm = manager()
         val deck = staticDeck()
         pm.setPresentingMode(Presenting.PRESENTATION)
-        pm.presentationPlayer = PresentationPlayer(deck) // parked at index -1, nothing loaded to step
+        pm.playback.presentationPlayer = PresentationPlayer(deck) // parked at index -1, nothing loaded to step
 
         assertFalse(pm.advancePresentationStep(deck, slideIndex = -1))
     }
@@ -243,7 +249,7 @@ class PresenterManagerPresentationStepTest {
         val pm = manager()
         val deck = staticDeck()
         pm.setPresentingMode(Presenting.PRESENTATION)
-        pm.presentationPlayer = PresentationPlayer(deck)
+        pm.playback.presentationPlayer = PresentationPlayer(deck)
 
         assertFalse(pm.rewindPresentationStep(deck, slideIndex = -1))
     }
@@ -256,8 +262,8 @@ class PresenterManagerPresentationStepTest {
         val deck = staticDeck()
         pm.setScreenLock(screenIndex = 0, mode = Presenting.PRESENTATION)
         val player = PresentationPlayer(deck)
-        pm.presentationPlayer = player
+        pm.playback.presentationPlayer = player
 
-        assertSame(player, pm.steppablePlayer(deck, slideIndex = -1))
+        assertSame(player, pm.playback.steppablePlayer(deck, slideIndex = -1))
     }
 }
