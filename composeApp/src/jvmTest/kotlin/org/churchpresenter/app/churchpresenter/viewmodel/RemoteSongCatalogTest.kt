@@ -1,10 +1,10 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
-import org.churchpresenter.app.churchpresenter.server.SongDetailDto
-import org.churchpresenter.app.churchpresenter.server.SongDto
-import org.churchpresenter.app.churchpresenter.server.SongSectionDto
-import org.churchpresenter.app.churchpresenter.server.SongbookEntry
+import org.churchpresenter.server.SongCatalogResponse
+import org.churchpresenter.server.SongDetailDto
+import org.churchpresenter.server.SongDto
+import org.churchpresenter.server.SongSectionDto
+import org.churchpresenter.server.SongbookEntry
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

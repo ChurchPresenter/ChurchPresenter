@@ -17,7 +17,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.retypeNumberField
-import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.server.TunnelStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

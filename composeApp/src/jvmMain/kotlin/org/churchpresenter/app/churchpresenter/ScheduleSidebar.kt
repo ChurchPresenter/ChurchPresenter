@@ -34,7 +34,7 @@ import org.churchpresenter.companionsurface.CompanionConnectionChipRow
 import org.churchpresenter.companionsurface.CompanionSurfacePanel
 import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
+import org.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTab
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarIconSize
 import org.churchpresenter.sharedui.models.Tabs

@@ -6,7 +6,7 @@ import org.churchpresenter.strings.generated.resources.remote_label_kilobytes
 import org.churchpresenter.strings.generated.resources.remote_label_section
 import org.churchpresenter.strings.generated.resources.remote_label_song
 import org.churchpresenter.strings.generated.resources.slide_number
-import org.churchpresenter.app.churchpresenter.server.RemoteLabel
+import org.churchpresenter.server.RemoteLabel
 import org.jetbrains.compose.resources.getString
 
 private const val BYTES_PER_KB = 1024L

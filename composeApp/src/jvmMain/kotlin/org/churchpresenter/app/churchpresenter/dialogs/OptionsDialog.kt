@@ -67,8 +67,8 @@ import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
-import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.CalendarSyncService
+import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.AtemSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LocalApplySettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.CompanionSatelliteSettingsTab

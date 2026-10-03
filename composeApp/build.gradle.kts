@@ -327,6 +327,7 @@ kotlin {
             implementation(projects.announcements)
             implementation(projects.songs)
             implementation(projects.bibleTab)
+            implementation(projects.server)
             implementation(projects.lowerThird)
             implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source
@@ -1001,9 +1002,8 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
 // Named individually rather than by a `*Atem*` glob so that adding a suite to this list is a
 // deliberate act with a reason, not something a class name does by accident.
 val serialTestClasses = listOf(
-    "*AtemUploadTracedTest",
-    "*CompanionServerAtemKeyTest",
-    "*CompanionServerAtemUploadTest",
+    // The ATEM upload suites that used to lead this list moved to `:server`, whose `test` task forks
+    // once, so they are alone in their JVM there.
     // The suite that opens the ATEM upload dialog. Doing so renders a Lottie frame and encodes it for
     // the switcher behind 5s deadlines -- the upload button enabling, the dialog's rows composing, and
     // `waitForAtemPrepared` (`:lower-third`'s LowerThirdTabTestSupport.kt). That is real work against a

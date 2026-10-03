@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
+import org.churchpresenter.server.InstanceLinkLogSide
+import org.churchpresenter.server.InstanceLinkLogger
 
 /**
  * Pins JVM-wide lazies that read a system property, forcing them to resolve against the real value

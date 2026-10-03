@@ -74,7 +74,8 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.sharedui.utils.generateQRCodeBitmap
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
-import org.churchpresenter.theme.ProvideUiFontScale
+import org.churchpresenter.app.churchpresenter.presenter.generateQRCodeBitmap
+import org.churchpresenter.server.TunnelStatusimport org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.theme.elevationPalette

@@ -68,7 +68,7 @@
   its panes), `DictionaryViewModel`, the interlinear index and the bundled Strong's/interlinear data;
   `server/StrongsDictionaryRepository.kt` serves the same data to the companion API
 - `dictionary/…/presenter/DictionaryPresenter.kt` — the dictionary card on the output
-- `dialogs/tabs/ProfileDictionaryPage.kt`, `dialogs/tabs/DictionaryPart.kt` — how the dictionary card looks on each output, edited on Profiles → Dictionary
+  `:server`'s `StrongsDictionaryRepository.kt` serves the same data to the companion API- `dialogs/tabs/ProfileDictionaryPage.kt`, `dialogs/tabs/DictionaryPart.kt` — how the dictionary card looks on each output, edited on Profiles → Dictionary
 - `viewmodel/BibleEngineClient.kt` — auto-follow speech detection client
 - `bible/` (the `:bible` Gradle module) — `Bible.kt`, `BibleBook.kt`, `BibleSearch.kt`,
   `BibleVerse.kt`, `BibleTranslationNames.kt` and the `.spb` format helpers in `SpbFormat.kt`
@@ -103,7 +103,7 @@
 - `presenter/PresentationPlayer.kt` (the app), `slides/…/presenter/PresentationPresenter.kt` and `PresentationFrame.kt` — animated playback
 - `presentation-engine/` (the `:presentation-engine` Gradle module, at the repo root) — PPTX/Keynote parsing, timing and animation engine
 - `data/settings/PresentationSettings.kt`
-- `server/CompanionServer.kt` — slide API for mobile (background rendering)
+- `:server`'s `CompanionServer.kt` — slide API for mobile (background rendering)
 
 ## Images & Media
 - **Image slideshows** — point to a folder and present photos with crossfade, fade and slide transitions, auto-advance and looping.
@@ -247,7 +247,9 @@
 - `dialogs/PlanningCenterImportDialog.kt` — the app's wrapper: the OAuth client, the windows, the song
   editor and the slide count; `data/PlanningCenterPrimaryBible.kt` and
   `data/PlanningCenterScriptureDetector.kt` — the scripture a plan names, found in the primary Bible
-
+- `dialogs/CalendarEnrollQrDialog.kt`, `dialogs/tabs/CalendarSyncCard.kt`, `:server`'s `CalendarRelayAccess.kt` — pairing a phone and syncing through the relay
+- `planning-center/` (the `:planning-center` Gradle module) — the Planning Center client
+- `dialogs/PlanningCenterImportDialog.kt`, `viewmodel/PlanningCenterImportViewModel.kt` — the import window
 ## Projection & Output
 - **Unlimited outputs** — drive as many screens as you have — one window per connected display, plus every DeckLink/SDI device. No artificial limit.
 - **Output profiles** — each output follows a named, reusable profile that says what it shows and how it looks: its content, its Bible translations in its own order, and its Bible, song, background, caption, subtitle, Q&A and dictionary styling, previewed live with its real background at any screen shape. Two screens that share a profile stay identical; change one profile to restyle them both.
@@ -312,7 +314,7 @@
 **Source locations:**
 - `StageMonitorScreen.kt`
 - `data/settings/StageMonitorSettings.kt`
-- `server/BrowserSourcePage.kt`, `server/BrowserSourceRoutes.kt` — the tablets' transpose buttons, and the routes that approve and apply them; `LiveStatusWiring.kt` (`offersTranspose`) says which outputs offer them
+- `:server`'s `BrowserSourcePage.kt`, `:server`'s `BrowserSourceRoutes.kt` — the tablets' transpose buttons, and the routes that approve and apply them; `LiveStatusWiring.kt` (`offersTranspose`) says which outputs offer them
 - `dialogs/tabs/ProfileStagePage.kt`, `dialogs/tabs/ProfileStageText.kt`, `dialogs/tabs/StageMonitorZoneGrid.kt` — the Stage layout page of a stage-monitor profile
 
 ## Mobile & Remote Control
@@ -321,8 +323,8 @@
 - **Real-time sync** — connected devices update instantly as the schedule and content change.
 
 **Source locations:**
-- `server/CompanionServer.kt` — Ktor REST + WebSocket server
-- `server/SslCertificateManager.kt`, `server/TunnelManager.kt`
+- `:server`'s `CompanionServer.kt` — Ktor REST + WebSocket server
+- `:server`'s `SslCertificateManager.kt`, `:server`'s `TunnelManager.kt`
 - `data/RemoteClientManager.kt`
 - `data/settings/ServerSettings.kt`
 - `dialogs/tabs/ServerSettingsTab.kt`
@@ -333,8 +335,8 @@
 - **Resilient by design** — automatic reconnect with backoff, a heartbeat that surfaces a dead link within seconds instead of freezing on stale content, and command acknowledgement so remote actions never silently fail.
 
 **Source locations:**
-- `server/InstanceLinkClient.kt`
-- `viewmodel/InstanceLinkViewModel.kt`
+- `:server`'s `InstanceLinkClient.kt`
+- `:server`'s `InstanceLinkViewModel.kt`
 - `data/settings/InstanceLinkSettings.kt`
 - `dialogs/InstanceLinkDialog.kt`, `dialogs/InstanceLinkToast.kt`
 - `composables/ConnectionStatusRow.kt`
@@ -346,7 +348,7 @@
 
 **Source locations:**
 - `atem/` (the `:atem` Gradle module, at the repo root) — the ATEM protocol client itself: `AtemClient`, `AtemConnectionManager`, `AtemFrameEncoder`, `AtemUploadStatus`
-- `server/AtemBridge.kt` — the app-side wiring between that client, `AtemSettings` and the lower third
+- `:server`'s `AtemBridge.kt` — the app-side wiring between that client, `AtemSettings` and the lower third
 - `viewmodel/OBSWebSocketManager.kt`
 - `companion-surface/` (the `:companion-surface` Gradle module) — `CompanionSurfaceTab.kt`, `CompanionSatelliteViewModel.kt`, `CompanionSurfacePanel.kt`, `CompanionConnectionChipRow.kt`: the surface in the tab and the sidebars
 - `companion-satellite/` (the `:companion-satellite` Gradle module) — native Companion Satellite protocol client
