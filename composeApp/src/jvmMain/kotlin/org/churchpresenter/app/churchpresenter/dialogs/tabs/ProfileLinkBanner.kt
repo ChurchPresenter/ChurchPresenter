@@ -178,10 +178,6 @@ internal fun followerLabel(follower: OutputProfile, masterId: String): String {
     return stringResource(Res.string.profile_followed_in, follower.displayName(), sections)
 }
 
-/** "A", "A and B", "A, B and C". */
-@Composable
-internal fun joinNames(profiles: List<OutputProfile>): String = joinLabels(profiles.map { it.displayName() })
-
 /** [names] joined: "A", "A and B", "A, B and C". */
 @Composable
 private fun joinLabels(names: List<String>): String {

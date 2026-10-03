@@ -79,10 +79,6 @@ private object JfxInit {
             }
         }
     }
-    fun initAsync() {
-        if (initialised) return
-        Thread(::ensureInit, "jfx-prewarm").apply { isDaemon = true; start() }
-    }
 }
 
 /** Call once from main() to initialise JavaFX before other native toolkits (JCEF). */

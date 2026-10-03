@@ -6,8 +6,6 @@ import org.churchpresenter.strings.generated.resources.song_fourth_language
 import org.churchpresenter.strings.generated.resources.song_language_primary
 import org.churchpresenter.strings.generated.resources.song_language_secondary
 import org.churchpresenter.strings.generated.resources.song_third_language
-import org.churchpresenter.strings.generated.resources.song_primary_language
-import org.churchpresenter.strings.generated.resources.song_secondary_language
 import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.languageLabel
@@ -31,17 +29,6 @@ internal enum class SongStyleLanguage(val translation: Int) { PRIMARY(0), SECOND
 
 /** True for every language beside the first, each of which has a look of its own to edit. */
 internal val SongStyleLanguage.isTranslation: Boolean get() = translation > 0
-
-/** The switch's label on the global tab, which numbers the languages. */
-@Composable
-internal fun SongStyleLanguage.ordinalLabel(): String = stringResource(
-    when (this) {
-        SongStyleLanguage.PRIMARY -> Res.string.song_primary_language
-        SongStyleLanguage.SECONDARY -> Res.string.song_secondary_language
-        SongStyleLanguage.THIRD -> Res.string.song_third_language
-        SongStyleLanguage.FOURTH -> Res.string.song_fourth_language
-    },
-)
 
 /** The switch's label in the per-output dialog, which names them. */
 @Composable
