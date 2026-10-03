@@ -48,8 +48,10 @@ dependencies {
     // JUnit 4 on junit-vintage, as the app's suite was -- the server tests use @get:Rule
     // TemporaryFolder and @BeforeClass, which a JUnit 5 run silently skips.
     testImplementation(kotlin("test"))
+    testImplementation(libs.kotlin.testJunit)
     testImplementation(libs.junit)
     testRuntimeOnly(libs.junit.vintage.engine)
+    testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.ktor.client.mock)
     testImplementation(libs.mockk)
