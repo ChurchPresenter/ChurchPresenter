@@ -3,10 +3,12 @@ package org.churchpresenter.app.churchpresenter
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.sharedui.models.Presenting
@@ -14,6 +16,7 @@ import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.stt.STTManager
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class PresenterModeBackgroundOverrideTest {
@@ -116,5 +119,41 @@ class PresenterModeBackgroundOverrideTest {
     @Test
     fun `nothing live draws nothing whatever the override says`() = runComposeUiTest {
         setContent(content(Presenting.NONE, bibleManager(), override = false))
+    }
+
+    /** A profile that shows nothing at all -- every kind of content switched off. */
+    private val showsNothing = OutputProfile(
+        bibleMode = Constants.SONG_LANG_OFF,
+        songMode = Constants.SONG_LANG_OFF,
+        showPictures = false,
+        showMedia = false,
+        showStreaming = false,
+        showAnnouncements = false,
+        showWebsite = false,
+        showQA = false,
+        showSTT = false,
+        showDictionary = false,
+        showCanvas = false,
+    )
+
+    @Test
+    fun `a profile that hides a kind of content draws none of it`() {
+        val manager = PresenterManager().apply {
+            setDisplayedVerses(listOf(verse))
+            setDisplayedLyricSection(section)
+            setDisplayedAnnouncementText("Service starts at 10")
+        }
+        Presenting.entries.forEach { mode ->
+            runComposeUiTest {
+                setContent(content(mode, manager, override = null, profile = showsNothing))
+                waitForIdle()
+                listOf(verse.verseText, section.lines.first(), "Service starts at 10").forEach { text ->
+                    assertTrue(
+                        onAllNodesWithText(text, substring = true).fetchSemanticsNodes().isEmpty(),
+                        "$mode drew '$text' on a profile that hides it",
+                    )
+                }
+            }
+        }
     }
 }

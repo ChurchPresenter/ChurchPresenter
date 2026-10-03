@@ -134,6 +134,44 @@ class SongsViewModelEditDeleteTest {
         awaitUntil("reload") { vm.filteredSongItems.value.any { it.title == "Recreated" } }
     }
 
+    @Test
+    fun `a song given a number is renamed to it, padded, and one losing its number is named by its title`() {
+        val vm = viewModel()
+        val song = vm.songTitled("How Great Thou Art")
+
+        assertTrue(vm.updateSong(song, song.copy(number = "7")))
+        assertTrue(File(dir, "Hymnal/0007 - How Great Thou Art.song").exists())
+
+        val renumbered = vm.songTitled("How Great Thou Art")
+        assertTrue(vm.updateSong(renumbered, renumbered.copy(number = "")))
+        assertTrue(File(dir, "Hymnal/How Great Thou Art.song").exists())
+        assertFalse(File(dir, "Hymnal/0007 - How Great Thou Art.song").exists())
+    }
+
+    // ── createSong ───────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a new song is written into its songbook's folder, named by number or by title`() {
+        val vm = viewModel()
+
+        assertTrue(vm.createSong(SongItem(number = "12", title = "New Hymn", songbook = "Fresh")))
+        assertTrue(vm.createSong(SongItem(number = "", title = "Unnumbered", songbook = "Fresh")))
+
+        assertTrue(File(dir, "Fresh/0012 - New Hymn.song").exists())
+        assertTrue(File(dir, "Fresh/Unnumbered.song").exists())
+        assertTrue(vm.filteredSongItems.value.any { it.title == "Unnumbered" })
+    }
+
+    @Test
+    fun `a new song needs a songbook, and is refused while following a remote primary`() {
+        val vm = viewModel()
+        assertFalse(vm.createSong(SongItem(number = "1", title = "Homeless", songbook = " ")))
+
+        vm.setInstanceLinkSource(active = true, catalog = null, fetchDetail = null)
+        assertFalse(vm.createSong(SongItem(number = "1", title = "Mirrored", songbook = "Fresh")))
+        assertFalse(File(dir, "Fresh").exists())
+    }
+
     // ── deleteSong ───────────────────────────────────────────────────────────────
 
     @Test
