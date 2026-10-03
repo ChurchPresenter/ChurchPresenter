@@ -1,7 +1,6 @@
 # Design note: the layer model
 
-Status: **in review** (roadmap step 1.1): layers, captions and preview decided; backgrounds and
-Instance Link still open. Nothing on the live output path changes until
+Status: **all five questions decided, awaiting final approval** (roadmap step 1.1). Nothing on the live output path changes until
 this is approved.
 
 ## Why
@@ -133,6 +132,24 @@ The presenters themselves do not change, except that **they stop drawing their o
 that moves to the Background layer, with each content type's configured background becoming the
 default Background cue that goes up with it (so existing setups look the same).
 
+### Backgrounds
+
+The Background layer persists while content changes above it. Going live with content puts that
+content's background on the layer, resolved as today (quick tray, then the song or section's own,
+then the content type's setting):
+
+- **Default** puts the Default background on the layer.
+- **Transparent** clears the layer, so the output is truly transparent behind the content even
+  when the Default is an image.
+- **Colour, image, video, camera, gradient** put that background on the layer.
+
+If the resolved background is the one already on the layer, nothing happens: no fade, and a video
+loop keeps playing. There is no "keep current" option.
+
+Transparency per output stays: today's per-profile background switches become the look including
+or excluding the Background layer, so an NDI/OMT alpha, DeckLink key or Browser Source output can
+carry text and graphics over transparency while the main screen shows the loop.
+
 The output windows and DeckLink fill/key go through `PresenterModeContent`. The off-screen outputs
 (NDI, OMT, Browser Source) dispatch in `OffscreenOutputContent`, and the preview tiles in
 `LivePreviewTileParts` — two more copies of the same `when`. Step 2 below folds all three into one
@@ -156,8 +173,13 @@ Instance Link (and later MIDI/OSC and cue actions):
 Existing endpoints map onto it: `POST /api/project` is `set`, `POST /api/clear` is `clearAll`.
 They keep working unchanged; the layer-aware forms are added beside them.
 
-Instance Link mirrors **program** (the layer map) rather than a mode, so a follower in an overflow
-room shows the same stack; a follower with a different look drops what its look excludes.
+Instance Link mirrors **program** (the layer map) rather than a mode. The follower still renders
+locally, on its own outputs with its own looks and settings; no video crosses the link.
+
+**Which layers a follower follows is set up with the link**: one checkbox per layer, all on by
+default. A layer left unticked is the follower's own to run, e.g. an overflow room that follows songs
+and verses but keeps its own background and nursery messages. Today's `mirrorBackgrounds` becomes
+the Background checkbox, so existing links behave as before.
 
 ## Migration
 
@@ -193,6 +215,7 @@ The benchmark and soak test must show no regression at steps 2, 3 and 4.
 1. **Layers**: every layer separate — Background, Media, Slide, Captions, Graphics,
    Announcements, Messages, plus Audio.
 2. **Captions** on a layer of their own.
-3. **Backgrounds**: open.
+3. **Backgrounds**: per content type, as today, onto a persistent Background layer; Default and
+   Transparent as above, no "keep current".
 4. **Preview mode** is opt-in; direct Go Live stays the default.
-5. **Instance Link**: open.
+5. **Instance Link**: followers mirror the layer stack, with the followed layers chosen per link.
