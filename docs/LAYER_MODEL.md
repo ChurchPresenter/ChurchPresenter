@@ -1,6 +1,6 @@
 # Design note: the layer model
 
-Status: **all five questions decided, awaiting final approval** (roadmap step 1.1). Nothing on the live output path changes until
+Status: **approved** (roadmap step 1.1). Nothing on the live output path changes until
 this is approved.
 
 ## Why
