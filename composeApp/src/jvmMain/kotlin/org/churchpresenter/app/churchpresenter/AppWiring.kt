@@ -1,10 +1,10 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.server.broadcastFreezeChange
-import org.churchpresenter.app.churchpresenter.server.clearPresentationState
-import org.churchpresenter.app.churchpresenter.server.updateAutoScrollInterval
-import org.churchpresenter.app.churchpresenter.server.updateLoopingState
-import org.churchpresenter.app.churchpresenter.server.updatePresentationRemoteSettings
+import org.churchpresenter.server.broadcastFreezeChange
+import org.churchpresenter.server.clearPresentationState
+import org.churchpresenter.server.updateAutoScrollInterval
+import org.churchpresenter.server.updateLoopingState
+import org.churchpresenter.server.updatePresentationRemoteSettings
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.collectAsState
@@ -21,14 +21,14 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.asDurationRow
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
-import org.churchpresenter.app.churchpresenter.server.applyRemoteLiveState
-import org.churchpresenter.app.churchpresenter.server.downloadMirroredBackgroundSettings
-import org.churchpresenter.app.churchpresenter.server.instanceLinkBackgroundCacheDir
-import org.churchpresenter.app.churchpresenter.server.shouldMirrorRemoteBackgrounds
-import org.churchpresenter.app.churchpresenter.server.shouldMirrorRemoteOutput
-import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.server.InstanceLinkLogSide
+import org.churchpresenter.server.InstanceLinkLogger
+import org.churchpresenter.app.churchpresenter.remote.applyRemoteLiveState
+import org.churchpresenter.app.churchpresenter.remote.downloadMirroredBackgroundSettings
+import org.churchpresenter.app.churchpresenter.remote.instanceLinkBackgroundCacheDir
+import org.churchpresenter.app.churchpresenter.remote.shouldMirrorRemoteBackgrounds
+import org.churchpresenter.app.churchpresenter.remote.shouldMirrorRemoteOutput
+import org.churchpresenter.server.TunnelStatus
 
 /** Effects driven straight off the settings: the ATEM render, the STT dev mode and Companion Satellite. */
 @Composable

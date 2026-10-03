@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import kotlinx.serialization.json.Json
 import org.churchpresenter.sharedui.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.CalendarSyncSettings
 import org.churchpresenter.settings.SettingsManager

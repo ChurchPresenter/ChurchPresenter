@@ -73,7 +73,7 @@ import org.churchpresenter.sharedui.composables.NumberSettingsTextField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.QASettings
 import org.churchpresenter.app.churchpresenter.presenter.generateQRCodeBitmap
-import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.server.TunnelStatus
 import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.utils.SystemClipboard

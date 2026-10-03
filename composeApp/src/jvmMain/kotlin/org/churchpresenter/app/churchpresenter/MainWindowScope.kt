@@ -7,12 +7,12 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
-import org.churchpresenter.app.churchpresenter.dialogs.RemoteActivityNotification
-import org.churchpresenter.app.churchpresenter.dialogs.RemoteEvent
+import org.churchpresenter.server.RemoteActivityNotification
+import org.churchpresenter.server.RemoteEvent
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.theme.ThemeCustomization
-import org.churchpresenter.app.churchpresenter.server.CalendarInvite
-import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
+import org.churchpresenter.server.CalendarInvite
+import org.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.calendar.CalendarHost
 import org.churchpresenter.calendar.ServiceAutoLoader
 import org.churchpresenter.calendar.fireCue
@@ -20,7 +20,7 @@ import java.io.File
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.window.FrameWindowScope
-import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.server.TunnelStatus
 
 /**
  * The main window's own state: the queue of remote requests waiting for the operator, which

@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.server.RemoteActivityNotification
+import org.churchpresenter.server.RemoteEventType
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut

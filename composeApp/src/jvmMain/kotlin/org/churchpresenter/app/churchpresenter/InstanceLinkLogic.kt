@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.InstanceLinkRole
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
+import org.churchpresenter.server.InstanceLinkStatus
 import java.io.File
 
 private const val MILLIS_PER_SECOND = 1000

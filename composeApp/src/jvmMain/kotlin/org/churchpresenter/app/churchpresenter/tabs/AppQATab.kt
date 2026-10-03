@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.churchpresenter.app.churchpresenter.dialogs.QARemoteDialog
-import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.server.TunnelStatus
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.qa.QAManager
 import org.churchpresenter.qa.QATab

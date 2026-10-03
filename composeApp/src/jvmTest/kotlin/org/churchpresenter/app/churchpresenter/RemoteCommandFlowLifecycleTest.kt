@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.yield
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
-import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
+import org.churchpresenter.server.SelectBibleVerseRequest
 import org.churchpresenter.bibletab.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.core.models.schedule.ScheduleItem

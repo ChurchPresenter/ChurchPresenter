@@ -10,7 +10,6 @@ import org.churchpresenter.calendar.model.UpcomingLoad
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarButton
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarIconSize
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarTags

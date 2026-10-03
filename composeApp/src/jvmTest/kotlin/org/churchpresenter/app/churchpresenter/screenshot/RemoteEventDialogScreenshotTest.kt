@@ -8,13 +8,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.dialogs.RemoteEvent
+import org.churchpresenter.server.RemoteEvent
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventDialogContent
-import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
+import org.churchpresenter.server.RemoteEventType
 import org.churchpresenter.app.churchpresenter.dialogs.resolveRemoteEventPresentation
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.server.batchEventSummary
-import org.churchpresenter.app.churchpresenter.server.remoteEventLabel
+import org.churchpresenter.app.churchpresenter.remote.batchEventSummary
+import org.churchpresenter.app.churchpresenter.remote.remoteEventLabel
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo

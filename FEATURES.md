@@ -66,7 +66,7 @@
   cross-reference dataset the tab is handed
 - `dictionary/` (the `:dictionary` Gradle module) — the Strong's dictionary tab (`DictionaryTab.kt` and
   its panes), `DictionaryViewModel`, the interlinear index and the bundled Strong's/interlinear data;
-  `server/StrongsDictionaryRepository.kt` serves the same data to the companion API
+  `:server`'s `StrongsDictionaryRepository.kt` serves the same data to the companion API
 - `dialogs/tabs/ProfileDictionaryPage.kt`, `dialogs/tabs/DictionaryPart.kt` — how the dictionary card looks on each output, edited on Profiles → Dictionary
 - `viewmodel/BibleEngineClient.kt` — auto-follow speech detection client
 - `bible/` (the `:bible` Gradle module) — `Bible.kt`, `BibleBook.kt`, `BibleSearch.kt`,
@@ -102,7 +102,7 @@
 - `presenter/PresentationPlayer.kt` (the app), `slides/…/presenter/PresentationPresenter.kt` and `PresentationFrame.kt` — animated playback
 - `presentation-engine/` (the `:presentation-engine` Gradle module, at the repo root) — PPTX/Keynote parsing, timing and animation engine
 - `data/settings/PresentationSettings.kt`
-- `server/CompanionServer.kt` — slide API for mobile (background rendering)
+- `:server`'s `CompanionServer.kt` — slide API for mobile (background rendering)
 
 ## Images & Media
 - **Image slideshows** — point to a folder and present photos with crossfade, fade and slide transitions, auto-advance and looping.
@@ -240,7 +240,7 @@
 
 **Source locations:**
 - `calendar/` (the `:calendar` Gradle module) — the Calendar Manager window, its model and the PDF export
-- `dialogs/CalendarEnrollQrDialog.kt`, `dialogs/tabs/CalendarSyncCard.kt`, `server/CalendarRelayAccess.kt` — pairing a phone and syncing through the relay
+- `dialogs/CalendarEnrollQrDialog.kt`, `dialogs/tabs/CalendarSyncCard.kt`, `:server`'s `CalendarRelayAccess.kt` — pairing a phone and syncing through the relay
 - `planning-center/` (the `:planning-center` Gradle module) — the Planning Center client
 - `dialogs/PlanningCenterImportDialog.kt`, `viewmodel/PlanningCenterImportViewModel.kt` — the import window
 
@@ -308,7 +308,7 @@
 **Source locations:**
 - `StageMonitorScreen.kt`
 - `data/settings/StageMonitorSettings.kt`
-- `server/BrowserSourcePage.kt`, `server/BrowserSourceRoutes.kt` — the tablets' transpose buttons, and the routes that approve and apply them; `LiveStatusWiring.kt` (`offersTranspose`) says which outputs offer them
+- `:server`'s `BrowserSourcePage.kt`, `:server`'s `BrowserSourceRoutes.kt` — the tablets' transpose buttons, and the routes that approve and apply them; `LiveStatusWiring.kt` (`offersTranspose`) says which outputs offer them
 - `dialogs/tabs/ProfileStagePage.kt`, `dialogs/tabs/ProfileStageText.kt`, `dialogs/tabs/StageMonitorZoneGrid.kt` — the Stage layout page of a stage-monitor profile
 
 ## Mobile & Remote Control
@@ -317,8 +317,8 @@
 - **Real-time sync** — connected devices update instantly as the schedule and content change.
 
 **Source locations:**
-- `server/CompanionServer.kt` — Ktor REST + WebSocket server
-- `server/SslCertificateManager.kt`, `server/TunnelManager.kt`
+- `:server`'s `CompanionServer.kt` — Ktor REST + WebSocket server
+- `:server`'s `SslCertificateManager.kt`, `:server`'s `TunnelManager.kt`
 - `data/RemoteClientManager.kt`
 - `data/settings/ServerSettings.kt`
 - `dialogs/tabs/ServerSettingsTab.kt`
@@ -329,8 +329,8 @@
 - **Resilient by design** — automatic reconnect with backoff, a heartbeat that surfaces a dead link within seconds instead of freezing on stale content, and command acknowledgement so remote actions never silently fail.
 
 **Source locations:**
-- `server/InstanceLinkClient.kt`
-- `viewmodel/InstanceLinkViewModel.kt`
+- `:server`'s `InstanceLinkClient.kt`
+- `:server`'s `InstanceLinkViewModel.kt`
 - `data/settings/InstanceLinkSettings.kt`
 - `dialogs/InstanceLinkDialog.kt`, `dialogs/InstanceLinkToast.kt`
 - `composables/ConnectionStatusRow.kt`
@@ -342,7 +342,7 @@
 
 **Source locations:**
 - `atem/` (the `:atem` Gradle module, at the repo root) — the ATEM protocol client itself: `AtemClient`, `AtemConnectionManager`, `AtemFrameEncoder`, `AtemUploadStatus`
-- `server/AtemBridge.kt` — the app-side wiring between that client, `AtemSettings` and the lower third
+- `:server`'s `AtemBridge.kt` — the app-side wiring between that client, `AtemSettings` and the lower third
 - `viewmodel/OBSWebSocketManager.kt`
 - `tabs/CompanionSurfaceTab.kt`, `viewmodel/CompanionSatelliteViewModel.kt`, `composables/CompanionSurfacePanel.kt`, `composables/CompanionConnectionChipRow.kt`
 - `companion-satellite/` (repository root) — native Companion Satellite protocol client
