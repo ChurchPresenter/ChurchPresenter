@@ -19,7 +19,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * What the companion server **refuses**, and with which status.

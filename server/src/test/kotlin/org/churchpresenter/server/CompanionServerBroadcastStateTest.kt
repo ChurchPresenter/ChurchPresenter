@@ -13,7 +13,6 @@ import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
-import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.settings.utils.Constants
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.test.AfterTest

@@ -13,7 +13,6 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.font.PDType1Font
-import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.junit.AfterClass
 import org.junit.BeforeClass
@@ -24,7 +23,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * What the server does when a presentation lands in the schedule: load the deck, rasterise every

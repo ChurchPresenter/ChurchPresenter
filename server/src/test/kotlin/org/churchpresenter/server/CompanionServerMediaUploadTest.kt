@@ -14,7 +14,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.settings.utils.Constants
 import org.junit.AfterClass
 import org.junit.BeforeClass
@@ -26,7 +25,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * Sending a video, a song file or a deck from a phone to the desktop.

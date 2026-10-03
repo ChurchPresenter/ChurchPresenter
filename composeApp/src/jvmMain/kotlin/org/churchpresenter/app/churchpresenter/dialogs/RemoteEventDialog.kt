@@ -55,7 +55,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
@@ -98,30 +97,6 @@ import org.churchpresenter.strings.generated.resources.remote_client_label
 import org.churchpresenter.strings.generated.resources.remote_queue_waiting_many
 import org.churchpresenter.strings.generated.resources.remote_queue_waiting_one
 import org.jetbrains.compose.resources.stringResource
-
-/**
- * Persistent dialog shown when a remote API event arrives.
- * Shows the front-of-queue item and a badge with how many more are waiting.
- *
- *  - **Allow**               — execute this action and move to next in queue
- *  - **Allow for Session**   — execute this action and auto-approve all future requests from the same client this
- *    session
- *  - **Allow Permanently**   — execute and permanently remember this client as allowed (only shown when the client is
- *    not in any permanent list)
- *  - **Deny**                — reject this item, move to next in queue
- *  - **Block for Session**   — deny all queued items from this client for the rest of the session
- *  - **Block Permanently**   — deny and permanently remember this client as blocked
- */
-internal data class RemoteEventPresentation(
-    val actionLabel: String,
-    val typeIcon: ImageVector,
-    val typeAccent: Color,
-    val bodyTitle: String,
-    val remaining: Int,
-    val showAllowPermanently: Boolean,
-    val dialogTitle: String,
-    val dialogHeight: Dp,
-)
 
 @Composable
 internal fun resolveRemoteEventPresentation(
@@ -206,6 +181,19 @@ internal fun resolveRemoteEventPresentation(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Persistent dialog shown when a remote API event arrives.
+ * Shows the front-of-queue item and a badge with how many more are waiting.
+ *
+ *  - **Allow**               — execute this action and move to next in queue
+ *  - **Allow for Session**   — execute this action and auto-approve all future requests from the same client this
+ *    session
+ *  - **Allow Permanently**   — execute and permanently remember this client as allowed (only shown when the client is
+ *    not in any permanent list)
+ *  - **Deny**                — reject this item, move to next in queue
+ *  - **Block for Session**   — deny all queued items from this client for the rest of the session
+ *  - **Block Permanently**   — deny and permanently remember this client as blocked
+ */
 @Composable
 fun RemoteEventDialog(
     event: RemoteEvent?,

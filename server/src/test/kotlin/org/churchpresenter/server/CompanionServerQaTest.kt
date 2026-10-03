@@ -35,7 +35,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * The audience Q&A HTTP API, driven over real HTTP against a running server.

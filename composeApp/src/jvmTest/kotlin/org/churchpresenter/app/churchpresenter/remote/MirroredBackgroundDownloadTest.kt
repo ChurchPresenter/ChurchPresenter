@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.remote
 
+import org.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.InstanceLinkStatus
+import org.churchpresenter.server.updateBackgroundSettings
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.churchpresenter.app.churchpresenter.TestSingletons

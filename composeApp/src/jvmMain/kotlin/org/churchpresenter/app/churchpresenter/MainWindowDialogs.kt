@@ -1,7 +1,5 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.server.InstanceLinkCommandFailure
-import org.churchpresenter.server.RemoteActivityNotification
 import org.churchpresenter.server.preloadData
 import org.churchpresenter.server.updateApiKey
 import org.churchpresenter.server.updateAtemConfig

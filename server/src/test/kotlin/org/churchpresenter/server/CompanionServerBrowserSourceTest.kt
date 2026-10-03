@@ -25,7 +25,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * `/browser-source/{index}` — the OBS overlay page and its guards. All configuration ([updateBrowserSourceOutputs]),

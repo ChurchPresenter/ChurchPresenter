@@ -58,7 +58,6 @@ import org.churchpresenter.strings.generated.resources.calendar_sync_title
 import org.churchpresenter.strings.generated.resources.calendar_sync_unpair
 import org.churchpresenter.strings.generated.resources.calendar_sync_unpair_available_on
 import kotlinx.coroutines.launch
-import org.churchpresenter.server.RelayEndpoints
 import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.dialogs.CalendarEnrollQrDialog
 import org.churchpresenter.server.CalendarInvite

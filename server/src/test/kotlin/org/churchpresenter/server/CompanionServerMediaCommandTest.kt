@@ -25,7 +25,6 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * The media transport commands a phone sends over the companion WebSocket, plus two small

@@ -28,7 +28,7 @@ class LiveStatusWiringTest {
         val server = CompanionServer()
         setContent { LiveStatusWiring(AppSettings(), server, Presenting.PRESENTATION) }
         waitForIdle()
-        assertTrue(server._presentationIsLive)
+        assertTrue(server.presentationIsLive)
     }
 
     @Test
@@ -36,7 +36,7 @@ class LiveStatusWiringTest {
         val server = CompanionServer()
         setContent { LiveStatusWiring(AppSettings(), server, Presenting.BIBLE) }
         waitForIdle()
-        assertFalse(server._presentationIsLive)
+        assertFalse(server.presentationIsLive)
     }
 
     @Test
@@ -44,7 +44,7 @@ class LiveStatusWiringTest {
         val server = CompanionServer()
         setContent { LiveStatusWiring(AppSettings(), server, Presenting.NONE) }
         waitForIdle()
-        assertFalse(server._presentationIsLive)
+        assertFalse(server.presentationIsLive)
     }
 
     @Test
@@ -104,7 +104,7 @@ class LiveStatusWiringTest {
         val settings = AppSettings().copy(projectionSettings = projection("musicians", "stage"))
         setContent { LiveStatusWiring(settings, server, Presenting.NONE) }
         waitForIdle()
-        assertTrue(server.browserSource.offersTranspose(0))
-        assertFalse(server.browserSource.offersTranspose(1))
+        assertTrue(server.offersTranspose(0))
+        assertFalse(server.offersTranspose(1))
     }
 }

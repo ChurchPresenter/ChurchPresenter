@@ -20,7 +20,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * The Strong's dictionary REST endpoints (`GET /api/dictionary`, `/{number}`, `/{number}/verses`) —

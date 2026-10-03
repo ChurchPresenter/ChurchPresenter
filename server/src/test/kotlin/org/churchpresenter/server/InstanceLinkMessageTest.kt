@@ -1,7 +1,6 @@
 package org.churchpresenter.server
 
 import io.ktor.client.network.sockets.ConnectTimeoutException
-import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.settings.utils.Constants
 import java.io.IOException
 import java.net.ConnectException

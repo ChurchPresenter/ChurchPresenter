@@ -24,7 +24,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.churchpresenter.core.models.qa.QuestionStatus
-import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.qa.QAManager
 import org.junit.AfterClass
 import org.junit.BeforeClass
@@ -35,7 +34,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import org.churchpresenter.app.churchpresenter.testPort
 
 /**
  * Moderating a Q&A session from a phone.

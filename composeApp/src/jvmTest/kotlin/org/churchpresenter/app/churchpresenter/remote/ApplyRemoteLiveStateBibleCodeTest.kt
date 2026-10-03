@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.remote
 
+import org.churchpresenter.server.LiveStateDto
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.bible.Bible

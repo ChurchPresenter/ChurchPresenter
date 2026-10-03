@@ -105,6 +105,9 @@ class CompanionServer(
     @Volatile internal var _presentationFrozen: Boolean = false
     @Volatile internal var _presentationIsPlaying: Boolean = false
     @Volatile internal var _presentationIsLive: Boolean = false
+
+    /** Whether the presentation on screen is live, as the companion feed last reported it. */
+    val presentationIsLive: Boolean get() = _presentationIsLive
     @Volatile internal var _autoScrollInterval: Int = 5
     @Volatile internal var _presentationIsLooping: Boolean = true
 
@@ -166,7 +169,7 @@ class CompanionServer(
     internal val _schedule = MutableStateFlow<List<ScheduleItemDto>>(emptyList())
     /** Snapshot of whatever is currently live — see [LiveStateDto]. */
     internal val _liveState = MutableStateFlow<LiveStateDto?>(null)
-    internal val liveState: StateFlow<LiveStateDto?> = _liveState.asStateFlow()
+    val liveState: StateFlow<LiveStateDto?> = _liveState.asStateFlow()
     /** Device IDs of currently-connected WS clients that identified as an Instance Link follower
      *  (as opposed to a regular mobile/browser companion client) — see [Constants.HEADER_CLIENT_ROLE]. */
     internal val _connectedInstanceLinkFollowers = MutableStateFlow<Set<String>>(emptySet())
@@ -432,6 +435,9 @@ class CompanionServer(
 
     /** OBS/vMix Browser Source outputs and their frame streams — see [BrowserSourceHub]. */
     internal val browserSource = BrowserSourceHub(scope, _apiKey)
+
+    /** Whether Browser Source output [index] offers its musicians a transpose control. */
+    fun offersTranspose(index: Int): Boolean = browserSource.offersTranspose(index)
 
     /**
      * The folder-id of the currently active picture folder pushed to mobile companions via

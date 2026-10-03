@@ -1,6 +1,5 @@
 package org.churchpresenter.server
 
-import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.junit.Assume
 import java.io.File
 import java.nio.file.Files

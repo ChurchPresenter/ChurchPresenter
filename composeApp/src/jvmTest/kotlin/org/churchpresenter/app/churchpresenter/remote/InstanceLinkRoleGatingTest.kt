@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.remote
 
+import org.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.settings.InstanceLinkRole
 import kotlin.test.Test
 import kotlin.test.assertEquals

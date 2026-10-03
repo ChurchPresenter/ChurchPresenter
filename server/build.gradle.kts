@@ -45,10 +45,33 @@ dependencies {
     implementation(libs.bouncycastle.pkix)
     implementation(libs.bouncycastle.prov)
 
+    // JUnit 4 on junit-vintage, as the app's suite was -- the server tests use @get:Rule
+    // TemporaryFolder and @BeforeClass, which a JUnit 5 run silently skips.
     testImplementation(kotlin("test"))
+    testImplementation(libs.junit)
+    testRuntimeOnly(libs.junit.vintage.engine)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.ktor.client.mock)
     testImplementation(libs.mockk)
+    testImplementation(testFixtures(projects.atem))
+    testImplementation(testFixtures(projects.bible))
+    testImplementation(testFixtures(projects.dictionary))
+    testImplementation(libs.pdfbox)
+}
+
+// Keeps `kotlin-test` on its JUnit 4 flavour: both flavours offer the same capability, and with
+// useJUnitPlatform() the Kotlin plugin otherwise picks junit5 -- see the same block in
+// composeApp/build.gradle.kts.
+configurations.configureEach {
+    resolutionStrategy.capabilitiesResolution.withCapability(
+        "org.jetbrains.kotlin:kotlin-test-framework-impl"
+    ) {
+        val junit4 = candidates.firstOrNull {
+            (it.id as? org.gradle.api.artifacts.component.ModuleComponentIdentifier)
+                ?.module == "kotlin-test-junit"
+        }
+        if (junit4 != null) select(junit4)
+    }
 }
 
 // The suite gets a home of its own under build/ so a test can never touch the real ~/.churchpresenter.

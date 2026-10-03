@@ -15,7 +15,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
-import org.churchpresenter.app.churchpresenter.testPort
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest

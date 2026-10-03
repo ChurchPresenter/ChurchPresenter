@@ -2,6 +2,8 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.server.RemoteEvent
+import org.churchpresenter.server.RemoteEventType
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Cast
