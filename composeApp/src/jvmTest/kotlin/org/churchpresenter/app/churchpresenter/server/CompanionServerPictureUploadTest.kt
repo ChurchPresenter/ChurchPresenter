@@ -266,6 +266,27 @@ class CompanionServerPictureUploadTest {
     }
 
     @Test
+    fun `a body that is not an object, or whose name or data is not text, is refused`() {
+        fun send(body: String) = runBlocking {
+            client.post(url("${Constants.ENDPOINT_PICTURES}/upload")) { setBody(body) }
+        }
+
+        assertEquals(HttpStatusCode.BadRequest, send("""[{"name":"a.png","data":"${dataUri()}"}]""").status)
+        assertEquals(HttpStatusCode.BadRequest, send("""{"name":{"first":"a.png"},"data":"${dataUri()}"}""").status)
+        assertEquals(HttpStatusCode.BadRequest, send("""{"name":"a.png","data":["x"]}""").status)
+        assertEquals(HttpStatusCode.BadRequest, send("""{"name":"a.png","data":"  "}""").status)
+        assertTrue(uploadDir.listFiles().isNullOrEmpty(), "nothing should have been written")
+    }
+
+    @Test
+    fun `a name with nothing left once its path is stripped is saved as upload`() {
+        val response = upload("/")
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertTrue(response.obj().str("file-name").startsWith("upload"), response.text())
+    }
+
+    @Test
     fun `data that is not a base64 uri is refused`() {
         val response = upload(uniqueName("bad.png"), data = "just some text")
 

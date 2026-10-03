@@ -496,4 +496,62 @@ class SongsFilteringTest {
         assertEquals(2, ids.size)
         assertEquals(2, ids.toSet().size, "song ids collided: $ids")
     }
+
+    // ── Lettered song numbers ───────────────────────────────────────────────────
+
+    private val lettered = arrayOf(
+        "Supplement" to listOf(
+            "12a" to "Abide With Me",
+            "12" to "Be Still My Soul",
+            "A1" to "Come Thou Fount",
+        ),
+    )
+
+    @Test
+    fun `a number with letters is found by starts-with and by exact match on its whole number`() {
+        val vm = vmWith(*lettered)
+
+        vm.updateFilterType(Constants.STARTS_WITH)
+        vm.updateSearchQuery("A")
+        assertEquals(listOf("Abide With Me", "Come Thou Fount"), vm.titles.sorted(), "A1 by number, Abide by title")
+
+        vm.updateFilterType(Constants.EXACT_MATCH)
+        vm.updateSearchQuery("a1")
+        assertEquals(listOf("Come Thou Fount"), vm.titles)
+    }
+
+    @Test
+    fun `a digits-only query matches numbers by the search mode chosen`() {
+        val vm = vmWith(*lettered)
+
+        vm.updateFilterType(Constants.CONTAINS)
+        vm.updateSearchQuery("2")
+        assertEquals(setOf("Abide With Me", "Be Still My Soul"), vm.titles.toSet())
+
+        vm.updateFilterType(Constants.EXACT_MATCH)
+        vm.updateSearchQuery("12")
+        assertEquals(listOf("Be Still My Soul"), vm.titles, "12, not 12a")
+    }
+
+    @Test
+    fun `a song whose number is not a plain number is selected by its title`() {
+        val vm = vmWith(*lettered)
+
+        assertTrue(vm.selectSongByDetails(0, "Come Thou Fount", "Supplement"))
+        assertEquals("Come Thou Fount", vm.filteredSongItems.value[vm.selectedSongIndex.value].title)
+    }
+
+    @Test
+    fun `adding the selected song to the schedule hands over a lettered number as unnumbered`() {
+        val vm = vmWith(*lettered)
+        val added = mutableListOf<Pair<Int, String>>()
+
+        vm.updateSearchQuery("no such hymn")
+        assertFalse(vm.addCurrentSongToSchedule { _, _, _, _ -> error("the list is empty") })
+        vm.updateSearchQuery("")
+
+        assertTrue(vm.selectSongByDetails(0, "Abide With Me", "Supplement"))
+        assertTrue(vm.addCurrentSongToSchedule { number, title, _, _ -> added += number to title })
+        assertEquals(listOf(0 to "Abide With Me"), added)
+    }
 }

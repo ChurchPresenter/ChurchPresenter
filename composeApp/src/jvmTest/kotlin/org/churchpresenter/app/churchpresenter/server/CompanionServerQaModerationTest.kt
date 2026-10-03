@@ -168,15 +168,24 @@ class CompanionServerQaModerationTest {
         return seen
     }
 
-    private fun post(path: String, body: String = "", password: String? = null): HttpResponse = runBlocking {
+    private fun post(
+        path: String,
+        body: String = "",
+        password: String? = null,
+        device: String? = null,
+    ): HttpResponse = runBlocking {
         client.post(url(path)) {
             password?.let { p -> header("X-QA-Password", p) }
+            device?.let { d -> header("X-Device-Id", d) }
             setBody(body)
         }
     }
 
-    private fun delete(path: String, password: String? = null): HttpResponse = runBlocking {
-        client.delete(url(path)) { password?.let { p -> header("X-QA-Password", p) } }
+    private fun delete(path: String, password: String? = null, device: String? = null): HttpResponse = runBlocking {
+        client.delete(url(path)) {
+            password?.let { p -> header("X-QA-Password", p) }
+            device?.let { d -> header("X-Device-Id", d) }
+        }
     }
 
     private fun get(path: String, password: String? = null): HttpResponse = runBlocking {
@@ -564,5 +573,52 @@ class CompanionServerQaModerationTest {
 
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(QuestionStatus.DENIED, qa.findQuestion(id)?.status)
+    }
+
+    @Test
+    fun `every moderation prompt names the phone that asked`() {
+        val qa = openSession()
+        val id = submitQuestion("which phone asked")
+        qa.approveQuestion(id)
+        val prompts = playOperator(allow = false)
+        val phone = "phone-7"
+
+        post("/api/qa/questions/$id/approve", device = phone)
+        post("/api/qa/questions/$id/edit", """{"text":"reworded","name":""}""", device = phone)
+        post("/api/qa/questions/$id/deny", device = phone)
+        post("/api/qa/questions/$id/done", device = phone)
+        post("/api/qa/questions/$id/display", device = phone)
+        delete("/api/qa/questions/$id", device = phone)
+        post("/api/qa/add", """{"text":"from the front","name":""}""", device = phone)
+        post("/api/qa/clear-display", device = phone)
+
+        assertEquals(
+            listOf("approve", "edit", "deny", "done", "display", "delete", "add", "clear-display"),
+            prompts.map { it.action },
+        )
+        assertEquals(setOf(phone), prompts.map { it.clientId }.toSet(), "the operator is told which phone it is")
+        assertEquals("which phone asked", qa.findQuestion(id)?.text, "and every refusal changed nothing")
+    }
+
+    @Test
+    fun `every moderation action is closed to a phone without the password`() {
+        val qa = openSession()
+        val id = submitQuestion("guarded")
+        qa.approveQuestion(id)
+        server.qaAdminPassword = "let-me-in"
+        val prompts = playOperator()
+
+        val refused = listOf(
+            post("/api/qa/questions/$id/approve"),
+            post("/api/qa/questions/$id/edit", """{"text":"x","name":""}"""),
+            post("/api/qa/questions/$id/done"),
+            post("/api/qa/questions/$id/display"),
+            post("/api/qa/add", """{"text":"x","name":""}"""),
+            post("/api/qa/clear-display"),
+        ).map { it.status }
+
+        assertEquals(List(refused.size) { HttpStatusCode.Unauthorized }, refused)
+        assertEquals(0, prompts.size, "the operator should never have been asked")
+        assertEquals(listOf(id), qa.questions.map { it.id })
     }
 }

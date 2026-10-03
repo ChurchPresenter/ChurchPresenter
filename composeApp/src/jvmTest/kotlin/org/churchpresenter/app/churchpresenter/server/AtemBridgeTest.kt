@@ -101,4 +101,18 @@ class AtemBridgeTest {
         val atem = AtemSettings(detectedMixEffects = 2, detectedKeyersPerMe = listOf(4, 0))
         assertNull(b.validateKeyTarget(atem, useDsk = false, mixEffect = 1, keyer = 3))
     }
+
+    @Test
+    fun `a negative index is refused wherever the topology is known`() {
+        // A phone sends 1-based numbers and the bridge takes one off; a 0 sent by mistake arrives here as -1.
+        val b = bridge()
+        val atem = AtemSettings(
+            detectedMixEffects = 2,
+            detectedDownstreamKeyers = 2,
+            detectedKeyersPerMe = listOf(4, 1),
+        )
+        assertNotNull(b.validateKeyTarget(atem, useDsk = true, mixEffect = 0, keyer = -1))
+        assertNotNull(b.validateKeyTarget(atem, useDsk = false, mixEffect = -1, keyer = 0))
+        assertNotNull(b.validateKeyTarget(atem, useDsk = false, mixEffect = 0, keyer = -1))
+    }
 }

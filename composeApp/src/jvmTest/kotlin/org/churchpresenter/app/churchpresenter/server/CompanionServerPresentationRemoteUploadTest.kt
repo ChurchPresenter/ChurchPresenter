@@ -265,6 +265,14 @@ class CompanionServerPresentationRemoteUploadTest {
     }
 
     @Test
+    fun `a body that is not an object, or whose fields are not text, is a 400`() {
+        val data = dataUri("x".toByteArray())
+        assertEquals(HttpStatusCode.BadRequest, upload("""[{"name":"sermon.pdf","data":"$data"}]""").status)
+        assertEquals(HttpStatusCode.BadRequest, upload("""{"name":["sermon.pdf"],"data":"$data"}""").status)
+        assertEquals(HttpStatusCode.BadRequest, upload("""{"name":"sermon.pdf","data":{"bytes":"x"}}""").status)
+    }
+
+    @Test
     fun `an unsupported file type is a 415 and names the extension`() {
         val response = upload(body("notes.txt", dataUri("hi".toByteArray(), mime = "text/plain")))
         assertEquals(HttpStatusCode.UnsupportedMediaType, response.status)
