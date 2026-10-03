@@ -284,6 +284,47 @@ class PlanningCenterImportViewModelTest {
         assertTrue(refreshed.isEmpty(), "a token good for an hour needs no refresh")
     }
 
+    @Test
+    fun `a session that cannot be renewed loads no plans and no plan items`() {
+        coEvery { PlanningCenterClient.refreshAccessToken(any(), any(), any(), any()) } returns
+            PlanningCenterClient.TokenOutcome.Failure
+        val vm = viewModel(expiresInMs = 30_000)
+
+        vm.selectServiceType("st-2")
+        awaitUntil("plans to give up") { !vm.isLoadingPlans }
+        vm.selectPlan("plan-1")
+        awaitUntil("items to give up") { !vm.isLoadingItems }
+
+        assertTrue(vm.plans.isEmpty())
+        assertTrue(vm.planItems.isEmpty())
+    }
+
+    @Test
+    fun `an expiring token with nothing to renew it is not refreshed`() {
+        val vm = viewModel(refreshToken = "", expiresInMs = 30_000)
+        vm.loadServiceTypes()
+        awaitUntil("loading to finish") { !vm.isLoadingServiceTypes }
+        assertTrue(vm.serviceTypes.isEmpty())
+    }
+
+    @Test
+    fun `attachments are fetched once per item, and a failed fetch has none`() {
+        val vm = viewModel()
+        vm.loadAttachments("item-1")
+        assertTrue(vm.attachmentsByItemId.isEmpty(), "with no plan chosen there is nothing to ask about")
+
+        loadItems(vm, listOf(planItem("item-1", "Amazing Grace")))
+        coEvery { PlanningCenterClient.getItemAttachments(any(), any(), any(), any(), any()) } returns
+            PlanningCenterClient.AttachmentsOutcome.NetworkError
+        vm.loadAttachments("item-2")
+        awaitUntil("the failed fetch") { vm.attachmentsByItemId.containsKey("item-2") }
+        assertEquals(emptyList(), vm.attachmentsByItemId.getValue("item-2"))
+
+        val known = vm.attachmentsByItemId
+        vm.loadAttachments("item-2")
+        assertEquals(known, vm.attachmentsByItemId, "asked again, nothing is fetched")
+    }
+
     // ── Matching against the local library ──────────────────────────────────────
 
     @Test
