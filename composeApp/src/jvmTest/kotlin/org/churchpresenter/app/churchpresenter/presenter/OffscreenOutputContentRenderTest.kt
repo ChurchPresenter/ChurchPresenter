@@ -342,6 +342,19 @@ class OffscreenOutputContentRenderTest {
     }
 
     @Test
+    fun `a live lower third draws its animation, not whatever text was up before`() = render(
+        mode = Presenting.LOWER_THIRD,
+        seed = {
+            setDisplayedAnnouncementText("Left over from before")
+            val json = """{"v":"5.7.4","fr":30,"ip":0,"op":30,"w":1920,"h":1080,"layers":[]}"""
+            setLottieContent(json, pauseAtFrame = false, pauseFrame = -1f, pauseDurationMs = 0L, presetName = "band")
+        },
+    ) {
+        waitForIdle()
+        onNodeWithText("Left over from before", substring = true).assertDoesNotExist()
+    }
+
+    @Test
     fun `a dictionary entry reaches the screen`() = render(
         mode = Presenting.DICTIONARY,
         seed = {
