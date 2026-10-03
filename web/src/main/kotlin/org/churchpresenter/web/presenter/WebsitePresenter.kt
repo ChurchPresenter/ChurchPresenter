@@ -185,7 +185,9 @@ internal object JcefInstall {
      */
     internal fun <T> buildRepairing(root: File, build: (File) -> T): T = try {
         build(root)
-    } catch (_: UnsatisfiedLinkError) {
+    } catch (e: UnsatisfiedLinkError) {
+        // A library the system lacks is missing from every extraction; re-downloading cannot help.
+        if (missingSystemLibrary(e) != null) throw e
         File(root, "jcef").deleteRecursively()
         build(root)
     }
@@ -202,7 +204,7 @@ internal object JcefInstall {
             val installDir = File(root, "jcef")
             installBlocker(directoryIsWritable(installDir), installDir.usableSpace)
         },
-        stopRetrying = { policyBlock(it.message) != null },
+        stopRetrying = { policyBlock(it.message) != null || missingSystemLibrary(it) != null },
         attempt = attempt,
     )
 
@@ -293,6 +295,12 @@ object CefManager {
      * the Web tab otherwise tells them.
      */
     val blockedByPolicy: Boolean get() = engine.blockedByPolicy
+
+    /**
+     * The Linux system library the engine needs and this machine lacks -- `libnspr4.so` -- or null.
+     * The operator can install it; nothing the app downloads can stand in for it.
+     */
+    val missingLibrary: String? get() = engine.missingLibrary
 
     /**
      * Chromium 139+ (bundled here as CEF 143, see build.gradle.kts) dropped support for

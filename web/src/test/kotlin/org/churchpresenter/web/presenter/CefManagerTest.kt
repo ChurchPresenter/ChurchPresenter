@@ -6,8 +6,10 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class CefManagerTest {
@@ -434,6 +436,60 @@ class CefManagerTest {
         // ever suppresses an event, so falling through is the safe direction to be wrong in.
         assertNull(JcefInstall.policyBlock("The specified module could not be found"))
         assertNull(JcefInstall.policyBlock(null))
+    }
+
+    @Test
+    fun `a library the system lacks is named, and the engine's own files are not`() {
+        val missingNspr = UnsatisfiedLinkError(
+            "/home/u/.churchpresenter/jcef/libjcef.so: libnspr4.so: " +
+                "cannot open shared object file: No such file or directory",
+        )
+        assertEquals("libnspr4.so", missingSystemLibrary(missingNspr))
+        assertEquals(
+            "libgbm.so.1",
+            missingSystemLibrary(
+                UnsatisfiedLinkError("/opt/jcef/libcef.so: libgbm.so.1: cannot open shared object file: No such file"),
+            ),
+        )
+
+        // A file of the engine's own is a broken extraction, which a fresh one can fix.
+        assertNull(
+            missingSystemLibrary(
+                UnsatisfiedLinkError("/home/u/.churchpresenter/jcef/libjcef.so: cannot open shared object file"),
+            ),
+        )
+        assertNull(missingSystemLibrary(UnsatisfiedLinkError("The specified procedure could not be found")))
+        assertNull(
+            missingSystemLibrary(IllegalStateException("libnspr4.so: cannot open shared object file")),
+            "only a failed native load",
+        )
+    }
+
+    @Test
+    fun `a broken extraction is wiped and built again, but a missing system library is not`() {
+        val root = File(dir, "root").apply { File(this, "jcef").mkdirs() }
+        var builds = 0
+        val rebuilt = JcefInstall.buildRepairing(root) {
+            builds++
+            if (builds == 1) throw UnsatisfiedLinkError("libcef.dll: The specified procedure could not be found")
+            "built"
+        }
+        assertEquals("built", rebuilt)
+        assertEquals(2, builds)
+        assertFalse(File(root, "jcef").exists(), "the mismatched files were wiped before the second try")
+
+        File(root, "jcef").mkdirs()
+        builds = 0
+        val missing = UnsatisfiedLinkError("/r/jcef/libjcef.so: libnspr4.so: cannot open shared object file")
+        val thrown = assertFailsWith<UnsatisfiedLinkError> {
+            JcefInstall.buildRepairing(root) {
+                builds++
+                throw missing
+            }
+        }
+        assertSame(missing, thrown)
+        assertEquals(1, builds, "a download cannot supply a library the system lacks")
+        assertTrue(File(root, "jcef").exists(), "and the install is left alone")
     }
 
     @Test

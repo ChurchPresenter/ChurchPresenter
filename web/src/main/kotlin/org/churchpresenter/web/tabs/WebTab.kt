@@ -37,6 +37,8 @@ import org.churchpresenter.icons.generated.resources.ic_refresh
 import org.churchpresenter.strings.generated.resources.mobile_view
 import org.churchpresenter.strings.generated.resources.web_back
 import org.churchpresenter.strings.generated.resources.web_engine_unavailable_body
+import org.churchpresenter.strings.generated.resources.web_engine_unavailable_library_body
+import org.churchpresenter.strings.generated.resources.web_engine_unavailable_library_title
 import org.churchpresenter.strings.generated.resources.web_engine_unavailable_policy_body
 import org.churchpresenter.strings.generated.resources.web_engine_unavailable_policy_title
 import org.churchpresenter.strings.generated.resources.web_engine_unavailable_title
@@ -89,6 +91,7 @@ fun WebTab(
     cefInitialized: Boolean = CefManager.initialized,
     cefMacOsUnsupported: Boolean = CefManager.macOsUnsupported,
     cefBlockedByPolicy: Boolean = CefManager.blockedByPolicy,
+    cefMissingLibrary: String? = CefManager.missingLibrary,
     /** Whether a screen beyond the operator's own is attached; overridable for the same reason. */
     hasSecondaryDisplay: Boolean = rememberScreenDevices().size > 1,
     /**
@@ -104,7 +107,7 @@ fun WebTab(
     // VC++ runtime, etc.). CefManager.init() catches that and leaves the engine down for
     // the whole session, so show an actionable panel instead of dead browser chrome.
     if (!cefInitialized) {
-        WebEngineUnavailable(modifier, cefMacOsUnsupported, cefBlockedByPolicy)
+        WebEngineUnavailable(modifier, cefMacOsUnsupported, cefBlockedByPolicy, missingLibrary = cefMissingLibrary)
         return
     }
 
@@ -160,6 +163,9 @@ internal fun WebEngineUnavailable(
     // position to install a redistributable sends them after something that will not help.
     blockedByPolicy: Boolean = CefManager.blockedByPolicy,
     windowsUnsupported: Boolean = CefManager.windowsUnsupported,
+    // On Linux the usual cause is a library the distribution did not install, which the
+    // Windows-only advice below would only confuse.
+    missingLibrary: String? = CefManager.missingLibrary,
 ) {
     Column(
         modifier = modifier
@@ -182,6 +188,7 @@ internal fun WebEngineUnavailable(
                     macOsUnsupported -> Res.string.web_engine_unavailable_macos_title
                     windowsUnsupported -> Res.string.web_engine_unavailable_windows_title
                     blockedByPolicy -> Res.string.web_engine_unavailable_policy_title
+                    missingLibrary != null -> Res.string.web_engine_unavailable_library_title
                     else -> Res.string.web_engine_unavailable_title
                 }
             ),
@@ -191,14 +198,13 @@ internal fun WebEngineUnavailable(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = stringResource(
-                when {
-                    macOsUnsupported -> Res.string.web_engine_unavailable_macos_body
-                    windowsUnsupported -> Res.string.web_engine_unavailable_windows_body
-                    blockedByPolicy -> Res.string.web_engine_unavailable_policy_body
-                    else -> Res.string.web_engine_unavailable_body
-                }
-            ),
+            text = when {
+                macOsUnsupported -> stringResource(Res.string.web_engine_unavailable_macos_body)
+                windowsUnsupported -> stringResource(Res.string.web_engine_unavailable_windows_body)
+                blockedByPolicy -> stringResource(Res.string.web_engine_unavailable_policy_body)
+                missingLibrary != null -> stringResource(Res.string.web_engine_unavailable_library_body, missingLibrary)
+                else -> stringResource(Res.string.web_engine_unavailable_body)
+            },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

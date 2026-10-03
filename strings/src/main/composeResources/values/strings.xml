@@ -1248,6 +1248,8 @@
     <string name="web_engine_unavailable_body">The browser engine could not start. Install the Microsoft Visual C++ Redistributable (x64) and restart the app.</string>
     <string name="web_engine_unavailable_policy_title">Web browser blocked by a policy on this computer</string>
     <string name="web_engine_unavailable_policy_body">A software policy on this computer is blocking the browser engine ChurchPresenter downloads. Ask whoever manages the computer to allow ChurchPresenter, or use a computer without that restriction — the Web tab and browser sources need it.</string>
+    <string name="web_engine_unavailable_library_title">Web browser needs a system library</string>
+    <string name="web_engine_unavailable_library_body">This computer is missing %1$s, which the browser engine needs. Install the package that provides it with your Linux distribution's package manager, then restart ChurchPresenter.</string>
     <string name="web_engine_unavailable_macos_title">Web browser requires a newer macOS</string>
     <string name="web_engine_unavailable_macos_body">ChurchPresenter's browser engine no longer supports this version of macOS. Update to macOS 12 (Monterey) or later to use the Web tab and browser sources.</string>
     <string name="web_engine_unavailable_windows_title">Web browser requires Windows 10 or later</string>

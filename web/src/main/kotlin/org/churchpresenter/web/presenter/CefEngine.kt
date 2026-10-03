@@ -44,6 +44,10 @@ internal class CefEngine(
     var blockedByPolicy = false
         private set
 
+    /** The system library the engine needs and this Linux machine lacks, once a load has said so. */
+    var missingLibrary: String? = null
+        private set
+
     /** Makes a client from the installed engine, or null while there is none to make one from. */
     @Volatile internal var clientSource: (() -> CefClient)? = null
 
@@ -124,6 +128,14 @@ internal class CefEngine(
             blockedByPolicy = true
             Log.warn("JCEF", "Blocked by this machine's software policy: ${outcome.cause.message}")
             runCatching { CrashReporter.setTag("jcef.blocked", policy) }
+            return
+        }
+        // So is a library the distribution did not install: the operator can add it, a report cannot.
+        val library = missingSystemLibrary(outcome.cause)
+        if (library != null) {
+            missingLibrary = library
+            Log.warn("JCEF", "This system is missing $library, which the browser engine needs")
+            runCatching { CrashReporter.setTag("jcef.blocked", "missing_library") }
             return
         }
         reportFailure(outcome.cause)

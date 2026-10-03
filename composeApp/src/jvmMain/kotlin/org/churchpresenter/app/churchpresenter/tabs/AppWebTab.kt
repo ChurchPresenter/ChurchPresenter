@@ -30,6 +30,7 @@ fun AppWebTab(
     cefInitialized: Boolean = CefManager.initialized,
     cefMacOsUnsupported: Boolean = CefManager.macOsUnsupported,
     cefBlockedByPolicy: Boolean = CefManager.blockedByPolicy,
+    cefMissingLibrary: String? = CefManager.missingLibrary,
 ) {
     // Recomputed as the settings change, not cached once: a keyless `remember` here meant a
     // projector plugged in mid-service never reached the preview. It also sizes a real JCEF native
@@ -47,6 +48,7 @@ fun AppWebTab(
         cefInitialized = cefInitialized,
         cefMacOsUnsupported = cefMacOsUnsupported,
         cefBlockedByPolicy = cefBlockedByPolicy,
+        cefMissingLibrary = cefMissingLibrary,
         previewAspectRatio = previewOutput.size.aspectRatio,
         outputPicker = { pickerModifier ->
             PreviewOutputPicker(

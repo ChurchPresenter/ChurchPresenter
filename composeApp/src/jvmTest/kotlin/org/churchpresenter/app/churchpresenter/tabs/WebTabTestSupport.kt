@@ -36,6 +36,7 @@ internal fun webTab(
     cefInitialized: Boolean = true,
     cefMacOsUnsupported: Boolean = false,
     cefBlockedByPolicy: Boolean = false,
+    cefMissingLibrary: String? = null,
     includeAddToSchedule: Boolean = true,
     /**
      * Constrains the tab's width.
@@ -70,6 +71,7 @@ internal fun webTab(
                         cefInitialized = cefInitialized,
                         cefMacOsUnsupported = cefMacOsUnsupported,
                         cefBlockedByPolicy = cefBlockedByPolicy,
+                        cefMissingLibrary = cefMissingLibrary,
                     )
                 }
             }
