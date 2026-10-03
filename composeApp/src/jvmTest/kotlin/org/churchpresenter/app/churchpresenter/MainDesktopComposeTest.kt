@@ -900,6 +900,44 @@ class MainDesktopComposeTest {
         waitForIdle()
     }
 
+    /** The root with a controller's link, counting the slide steps it forwards, while [presenting] is live. */
+    private fun clickerRoot(presenting: Presenting, block: ComposeUiTest.() -> Unit): Pair<Int, Int> {
+        var next = 0
+        var previous = 0
+        val manager = PresenterManager().apply { setPresentingMode(presenting) }
+        runComposeUiTest {
+            setContent {
+                MaterialTheme {
+                    MainDesktop(
+                        appSettings = withOneSong(),
+                        presenterManager = manager,
+                        companionSatelliteViewModel = CompanionSatelliteViewModel(),
+                        live = LiveOutputCallbacks(presenting = {}, onVerseSelected = {}, onSongItemSelected = {}),
+                        link = InstanceLinkBridge(sendNextSlide = { next++ }, sendPreviousSlide = { previous++ }),
+                    )
+                }
+            }
+            waitForIdle()
+            block()
+        }
+        return next to previous
+    }
+
+    @Test
+    fun `a clicker steps a live deck forward and back, and is left alone when no deck is live`() {
+        val live = clickerRoot(Presenting.PRESENTATION) {
+            press(Key.PageDown)
+            press(Key.PageUp)
+        }
+        assertEquals(1 to 1, live, "one step each way")
+
+        val idle = clickerRoot(Presenting.LYRICS) {
+            press(Key.PageDown)
+            press(Key.PageUp)
+        }
+        assertEquals(0 to 0, idle)
+    }
+
     @Test
     fun `seven Ds unlock the developer menu, but not while something is live`() {
         val wiring = Wiring()
