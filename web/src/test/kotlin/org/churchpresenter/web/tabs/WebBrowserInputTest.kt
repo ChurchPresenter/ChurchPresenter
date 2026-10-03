@@ -26,6 +26,7 @@ import java.awt.event.InputEvent
 import java.awt.event.KeyEvent as AwtKeyEvent
 import java.awt.event.MouseEvent
 import java.awt.event.MouseWheelEvent
+import java.util.concurrent.CountDownLatch
 import javax.swing.SwingUtilities
 import io.mockk.every
 import io.mockk.mockk
@@ -221,7 +222,7 @@ class WebBrowserInputTest {
     }
 
     /** A component that reports itself on screen while [showing] says so. */
-    private class ScreenComponent(var showing: Boolean) : Component() {
+    private class ScreenComponent(@Volatile var showing: Boolean) : Component() {
         override fun isShowing() = showing
     }
 
@@ -259,9 +260,14 @@ class WebBrowserInputTest {
         val browser = FakeCefBrowser()
         val screen = ScreenComponent(showing = true).apply { setSize(40, 30) }
         val input = CefBrowserInput(browser, screen)
+        // The AWT thread is held until the browser has gone, so the send it was handed always
+        // runs after -- the case under test, not a race with it.
+        val gone = CountDownLatch(1)
+        SwingUtilities.invokeLater { gone.await() }
 
         input.sendMouse(mouseEventsFor(PointerEventType.Move, screen, 0, 0, 0))
         screen.showing = false
+        gone.countDown()
         drainEdt()
 
         assertEquals(emptyList(), browser.received, "it went off screen before the AWT thread got to it")
