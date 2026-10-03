@@ -37,9 +37,9 @@ inside `ConstantsKt` is exactly how a sibling rename silently rewrote a `mockkSt
 `server/AtemBridge.kt` — the wiring: it reads `AtemSettings` and asks `viewmodel.isLottieFile` what
 it is uploading. Those are the two app-side dependencies the client itself does not have, and
 keeping them out is the whole reason this module cuts cleanly. `AtemBridgeTest`,
-`CompanionServerAtemUploadTest`, `CompanionServerAtemKeyTest`, `AtemUploadTracedTest`,
-`LowerThirdSequencerKeyTest`, `LowerThirdAtemUploadTest` and the `AtemSettingsTab*` suites stay with
-it; they drive `FakeAtemSwitcher` through `testFixtures(projects.atem)`.
+`CompanionServerAtemUploadTest`, `CompanionServerAtemKeyTest` and `AtemUploadTracedTest` stay with
+it; they, and `:lower-third`'s `LowerThirdSequencerKeyTest`, `LowerThirdAtemUploadTest` and
+`AtemSettingsTab*` suites, drive `FakeAtemSwitcher` through `testFixtures(projects.atem)`.
 
 **If a change here needs a setting or a ViewModel, it belongs in the bridge, not in this module.**
 

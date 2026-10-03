@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.lowerthird
 
 import org.churchpresenter.atem.AtemMediaSlot
 import org.churchpresenter.atem.AtemState
