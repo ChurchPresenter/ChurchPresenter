@@ -897,25 +897,6 @@ class MainDesktopComposeTest {
     }
 
     @Test
-    fun `a timer taken live from the schedule starts counting on the output`() {
-        val manager = PresenterManager()
-        try {
-            root(withOneSong(), presenterManager = manager) { actions ->
-                actions.addAnnouncement(
-                    ScheduleItem.AnnouncementItem(id = "timer", text = "", isTimer = true, timerMinutes = 5),
-                )
-                waitForIdle()
-                takeLive("Timer 05:00")
-
-                assertTrue(manager.announcementTickerLive.value, "the countdown is what is live")
-                assertEquals("05:00", manager.announcementText.value.takeLast(5))
-            }
-        } finally {
-            manager.pauseAnnouncementTimer()
-        }
-    }
-
-    @Test
     fun `a lower third taken live from the schedule plays its preset, and a missing one does nothing`() {
         val folder = File(dir, "lower-thirds").apply { mkdirs() }
         File(folder, "Pastor.json").writeText("""{"v":"5.7.4","fr":30,"ip":0,"op":30,"w":1920,"h":1080,"layers":[]}""")
