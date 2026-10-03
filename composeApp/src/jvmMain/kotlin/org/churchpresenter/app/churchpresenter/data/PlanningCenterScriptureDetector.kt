@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data
 
+import org.churchpresenter.bibletab.BibleBookAbbreviations
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.planningcenter.ui.PlanningCenterScripture
 /**

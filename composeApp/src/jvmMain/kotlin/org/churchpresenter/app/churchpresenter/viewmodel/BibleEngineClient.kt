@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.bibletab.BibleEngineStatus
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.bibleengine.EngineHandle
@@ -108,7 +109,7 @@ class BibleEngineClient(
     private val onScripture: (EngineScripture) -> Unit,
     private val onVersion: (String?) -> Unit,
     private val retryFloorMs: Long = DEFAULT_RETRY_FLOOR_MS,
-) {
+) : BibleEngineStatus {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val httpClient = HttpClient(CIO) {
         install(WebSockets)
@@ -118,19 +119,19 @@ class BibleEngineClient(
     }
 
     private val _connected = mutableStateOf(false)
-    val connected: State<Boolean> = _connected
+    override val connected: State<Boolean> = _connected
 
     // True when an in-process engine was requested but failed to start (e.g. port collision / bind
     // failure). Surfaced so the Bible tab can show "engine unavailable" instead of silently listening
     // forever. Cleared on each (re)start attempt.
     private val _startFailed = mutableStateOf(false)
-    val startFailed: State<Boolean> = _startFailed
+    override val startFailed: State<Boolean> = _startFailed
 
     // The engine's OWN upstream STT link, from its engine_status broadcasts. Null = unknown
     // (older engine that never sends the message, or not yet received) — callers keep their
     // previous proxy inference in that case. Reset on disconnect/stop.
     private val _engineSttConnected = mutableStateOf<Boolean?>(null)
-    val engineSttConnected: State<Boolean?> = _engineSttConnected
+    override val engineSttConnected: State<Boolean?> = _engineSttConnected
 
     private var engineHandle: EngineHandle? = null
     private var wsJob: Job? = null
@@ -144,16 +145,15 @@ class BibleEngineClient(
      * Starts (or restarts) the engine link. When [runLocal] is true the engine is launched in-process
      * pointed at [sttUrl] + [bibleRoot]; otherwise we just connect to an already-running engine.
      */
-    fun start(
-        sttUrl: String,
-        bibleRoot: String,
-        bibleFiles: List<String>,
-        runLocal: Boolean,
-        host: String,
-        port: Int,
-        level: String,
-        continuationSpeed: String = "balanced",
-    ) {
+    fun start(engine: EngineStart) {
+        val sttUrl = engine.sttUrl
+        val bibleRoot = engine.bibleRoot
+        val bibleFiles = engine.bibleFiles
+        val runLocal = engine.runLocal
+        val host = engine.host
+        val port = engine.port
+        val level = engine.level
+        val continuationSpeed = engine.continuationSpeed
         stop()
         currentLevel = level
         currentContinuationSpeed = continuationSpeed
@@ -296,9 +296,6 @@ class BibleEngineClient(
         scope.launch { runCatching { s.send(Frame.Text(tuningMessage(currentLevel, speed))) } }
     }
 
-    private fun tuningMessage(level: String, continuationSpeed: String) =
-        """{"type":"set_tuning","level":"$level","continuationSpeed":"$continuationSpeed"}"""
-
     /** Stops the WebSocket link and the in-process engine (if we started one). */
     fun stop() {
         wsJob?.cancel()
@@ -326,12 +323,30 @@ class BibleEngineClient(
         }
     }
 
-    private fun esc(s: String): String =
-        s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ").replace("\r", " ")
-
     fun dispose() {
         stop()
         runCatching { httpClient.close() }
         scope.cancel()
     }
 }
+
+private fun tuningMessage(level: String, continuationSpeed: String) =
+    """{"type":"set_tuning","level":"$level","continuationSpeed":"$continuationSpeed"}"""
+
+private fun esc(s: String): String =
+    s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ").replace("\r", " ")
+
+/**
+ * How [BibleEngineClient.start] reaches the engine: launched in-process against [sttUrl] and the
+ * modules under [bibleRoot] when [runLocal], otherwise already running at [host]:[port].
+ */
+data class EngineStart(
+    val sttUrl: String,
+    val bibleRoot: String,
+    val bibleFiles: List<String>,
+    val runLocal: Boolean,
+    val host: String,
+    val port: Int,
+    val level: String = "off",
+    val continuationSpeed: String = "balanced",
+)

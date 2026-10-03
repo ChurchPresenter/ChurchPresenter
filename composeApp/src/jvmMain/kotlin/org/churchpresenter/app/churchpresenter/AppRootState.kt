@@ -18,7 +18,7 @@ import org.churchpresenter.settings.reconcileScreenAssignments
 import org.churchpresenter.app.churchpresenter.data.LiveDurationLog
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
-import org.churchpresenter.app.churchpresenter.data.VerseSequenceLog
+import org.churchpresenter.bibletab.VerseSequenceLog
 import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.scene.Scene

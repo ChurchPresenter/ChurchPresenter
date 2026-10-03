@@ -29,7 +29,8 @@ class ScreenshotInvariantsTest {
     /**
      * The app's screenshot package, the `:shared-ui`, `:slides`, `:media`, `:songs` and
      * `:companion-surface` suites, and their shared harness.
-     */
+     * The app's screenshot package, the `:shared-ui`, `:slides`, `:media`, `:songs` and `:bible-tab`
+     * suites, and their shared harness.     */
     private val packageDirs = listOf(
         File("src/jvmTest/kotlin/org/churchpresenter/app/churchpresenter/screenshot"),
         File("../shared-ui/src/test/kotlin/org/churchpresenter/sharedui/screenshot"),
@@ -38,7 +39,7 @@ class ScreenshotInvariantsTest {
         File("../media/src/test/kotlin/org/churchpresenter/media/screenshot"),
         File("../songs/src/test/kotlin/org/churchpresenter/songs/screenshot"),
         File("../companion-surface/src/test/kotlin/org/churchpresenter/companionsurface/screenshot"),
-    )
+        File("../bible-tab/src/test/kotlin/org/churchpresenter/bibletab/screenshot"),    )
 
     /** Every `.kt` in the screenshot packages, paired with its text. */
     private fun sources(): List<Pair<File, String>> = packageDirs.flatMap { dir ->

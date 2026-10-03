@@ -2,6 +2,12 @@
 
 package org.churchpresenter.app.churchpresenter.tabs
 
+import org.churchpresenter.bibletab.ctrlClickVerse
+import org.churchpresenter.bibletab.BibleLabel
+import org.churchpresenter.bibletab.SECOND_MODULE
+import org.churchpresenter.bibletab.actionButton
+import org.churchpresenter.bibletab.bibleFixture
+import org.churchpresenter.bibletab.bibleTab
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick

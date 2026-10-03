@@ -1,14 +1,17 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.viewmodel.EngineStart
+import org.churchpresenter.bibletab.resolveVerseSelection
+import org.churchpresenter.bibletab.LiveReference
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import org.churchpresenter.app.churchpresenter.composables.rememberTokenGate
+import org.churchpresenter.sharedui.composables.rememberTokenGate
 import org.churchpresenter.sharedui.models.Tabs
-import org.churchpresenter.app.churchpresenter.viewmodel.clearDetectedReferences
-import org.churchpresenter.app.churchpresenter.viewmodel.getSelectedVerses
-import org.churchpresenter.app.churchpresenter.viewmodel.logLiveReference
+import org.churchpresenter.bibletab.clearDetectedReferences
+import org.churchpresenter.bibletab.getSelectedVerses
+import org.churchpresenter.bibletab.logLiveReference
 import org.churchpresenter.diagnostics.CrashReporter
 
 /**
@@ -37,7 +40,7 @@ internal fun MainDesktopScope.BibleWiring() {
         appSettings.bibleSettings.storageDirectory,
     ) {
         if (shouldRunBibleEngine(sttConnected, bibleEngineSettings.enabled, engineBibles)) {
-            bibleEngineClient.start(
+            bibleEngineClient.start(EngineStart(
                 sttUrl = appSettings.sttSettings.serverUrl,
                 bibleRoot = appSettings.bibleSettings.storageDirectory,
                 bibleFiles = engineBibles,
@@ -46,7 +49,7 @@ internal fun MainDesktopScope.BibleWiring() {
                 port = bibleEngineSettings.port,
                 level = bibleViewModel.textMatchLevel.value.name.lowercase(),
                 continuationSpeed = bibleViewModel.continuationSpeed.value.name.lowercase(),
-            )
+            ))
         } else {
             bibleEngineClient.stop()
             bibleViewModel.clearDetectedReferences(reason = "expired")
@@ -86,7 +89,7 @@ private fun MainDesktopScope.AutoFollowWiring() {
         if (verses.isNotEmpty()) {
             live.onVerseSelected(verses)
             val primary = verses.first()
-            bibleViewModel.logLiveReference(
+            bibleViewModel.logLiveReference(LiveReference(
                 displayBookIndex = bibleViewModel.selectedBookIndex.value,
                 chapter    = primary.chapter,
                 verseStart = primary.verseNumber,
@@ -94,7 +97,7 @@ private fun MainDesktopScope.AutoFollowWiring() {
                 source     = "auto",
                 autoFollow = true,
                 matchType  = bibleViewModel.autoFollowLiveMatchType.value,
-            )
+            ))
         }
     }
 }

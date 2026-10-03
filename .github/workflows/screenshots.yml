@@ -12,7 +12,7 @@ name: Screenshots
 #     deliberately does not have (`contents: read`).
 #
 # **The images ARE committed**, under each module's `screenshots/` (`composeApp`, `shared-ui`, `slides`, `media`, `songs`, `companion-surface`), so a reviewer can open and approve
-# what is on screen rather than take the diff on trust. This job is a second, independent view of
+# **The images ARE committed**, under each module's `screenshots/` (`composeApp`, `shared-ui`, `slides`, `media`, `songs`, `bible-tab`), so a reviewer can open and approve# what is on screen rather than take the diff on trust. This job is a second, independent view of
 # the same thing: it records the branch's images and reg-actions diffs them against the base
 # branch's, which it keeps on a `reg_actions` branch of its own. Note the record step below
 # overwrites the working copy before reg-actions reads it, so the comparison is always between two
@@ -108,7 +108,7 @@ jobs:
           :media:recordRoborazziJvm --tests '*ScreenshotTest*'
           :songs:recordRoborazziJvm --tests '*ScreenshotTest*'
           :companion-surface:recordRoborazziJvm --tests '*ScreenshotTest*'
-
+          :bible-tab:recordRoborazziJvm --tests '*ScreenshotTest*'
       # So the rendered set can be fetched without running Gradle locally, and the source the
       # website's screenshots should be taken from — not because the images are uncommitted (they
       # are committed, under composeApp/screenshots, and AGENT.md is emphatic that they stay that
@@ -162,7 +162,11 @@ jobs:
         with:
           name: screenshots-companion-surface
           path: companion-surface/screenshots
-          retention-days: 30
+      - name: Upload the rendered bible-tab screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-bible-tab
+          path: bible-tab/screenshots          retention-days: 30
           if-no-files-found: error
 
       # Retina renders for the website's homepage only — the wiki and blog take the 1x capture
@@ -213,13 +217,13 @@ jobs:
         run: |
           rm -rf screenshots-compare
           mkdir -p screenshots-compare/shared-ui screenshots-compare/slides screenshots-compare/media screenshots-compare/songs screenshots-compare/companion-surface
-          cp -R composeApp/screenshots/. screenshots-compare/
+          mkdir -p screenshots-compare/shared-ui screenshots-compare/slides screenshots-compare/media screenshots-compare/songs screenshots-compare/bible-tab          cp -R composeApp/screenshots/. screenshots-compare/
           cp -R shared-ui/screenshots/. screenshots-compare/shared-ui/
           cp -R slides/screenshots/. screenshots-compare/slides/
           cp -R media/screenshots/. screenshots-compare/media/
           cp -R songs/screenshots/. screenshots-compare/songs/
           cp -R companion-surface/screenshots/. screenshots-compare/companion-surface/
-
+          cp -R bible-tab/screenshots/. screenshots-compare/bible-tab/
       - name: Compare with the base branch
         uses: reg-viz/reg-actions@v3
         with:

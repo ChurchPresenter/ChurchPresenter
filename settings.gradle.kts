@@ -133,3 +133,6 @@ include(":songs")
 // The Companion Surface tab and CompanionSatelliteViewModel: the Compose face of
 // :companion-satellite, which stays free of any UI toolkit. Depended on by :composeApp.
 include(":companion-surface")
+// The Bible tab, BibleViewModel, the cross references and the verse-sequence log. Depended on by
+// :composeApp, which hands it the live output, the detection engine's status and statistics.
+include(":bible-tab")
