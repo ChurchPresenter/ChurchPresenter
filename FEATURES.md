@@ -346,7 +346,8 @@
 - `tabs/CompanionSurfaceTab.kt`, `viewmodel/CompanionSatelliteViewModel.kt`, `composables/CompanionSurfacePanel.kt`, `composables/CompanionConnectionChipRow.kt`
 - `companion-satellite/` (repository root) — native Companion Satellite protocol client
 - `data/settings/AtemSettings.kt`, `data/settings/OBSSettings.kt`, `data/settings/CompanionSatelliteSettings.kt`
-- `dialogs/tabs/AtemSettingsTab.kt`, `dialogs/tabs/CompanionSatelliteSettingsTab.kt`
+- `lower-third/` (the `:lower-third` Gradle module) — `AtemSettingsTab`, the ATEM settings page
+- `dialogs/tabs/CompanionSatelliteSettingsTab.kt`
 
 ## Reporting & Licensing
 - **One statistics window** — every song and verse you present is tracked automatically, then reported in one place: songs, Bible and activity-over-time tabs over whichever period you pick.

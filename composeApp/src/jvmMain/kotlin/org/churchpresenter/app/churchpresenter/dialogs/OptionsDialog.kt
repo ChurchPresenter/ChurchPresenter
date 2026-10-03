@@ -69,7 +69,7 @@ import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.AtemSettingsTab
+import org.churchpresenter.lowerthird.AtemSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LocalApplySettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.CompanionSatelliteSettingsTab
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
