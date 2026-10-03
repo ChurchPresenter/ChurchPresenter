@@ -59,7 +59,7 @@ import org.churchpresenter.strings.generated.resources.qa_starting_tunnel
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.presenter.generateQRCodeBitmap
+import org.churchpresenter.sharedui.utils.generateQRCodeBitmap
 import org.churchpresenter.server.TunnelStatus
 import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.stringResource

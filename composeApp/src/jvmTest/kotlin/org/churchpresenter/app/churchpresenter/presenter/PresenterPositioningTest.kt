@@ -16,20 +16,21 @@ import kotlin.test.assertEquals
  * sits somewhere else — on the output screen only, which nobody is looking at while configuring.
  *
  * So this pins each table against the picker's own nine values, and the three against each other.
- * The announcement and question tables are private, so they are reached by reflection on their
- * file classes; the caption table is `:shared-ui`'s `sttPositionToAlignment`.
+ * The announcement and question tables are private to `:announcements` and `:qa`, so they are
+ * reached by reflection on their file classes; the caption table is `:shared-ui`'s `sttPositionToAlignment`.
  */
 class PresenterPositioningTest {
 
     private fun mapper(fileClass: String, method: String): (String) -> Alignment {
-        val m = Class.forName("org.churchpresenter.app.churchpresenter.presenter.$fileClass")
+        val m = Class.forName(fileClass)
             .getDeclaredMethod(method, String::class.java)
             .apply { isAccessible = true }
         return { position -> m.invoke(null, position) as Alignment }
     }
 
-    private val announcements = mapper("AnnouncementsPresenterKt", "positionToAlignment")
-    private val questions = mapper("QAPresenterKt", "positionToAlignment")
+    private val announcements =
+        mapper("org.churchpresenter.announcements.presenter.AnnouncementsPresenterKt", "positionToAlignment")
+    private val questions = mapper("org.churchpresenter.qa.presenter.QAPresenterKt", "positionToAlignment")
     private val captions: (String) -> Alignment = ::sttPositionToAlignment
 
     private val allThree = mapOf(

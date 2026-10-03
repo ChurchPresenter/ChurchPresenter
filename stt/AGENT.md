@@ -7,13 +7,15 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 **Speech-to-text captions**:
 - the STT tab (`STTTab`);
 - `STTManager`, the socket.io client for the caption server. It also pulls the highlighted words
-  and the Help Dev `.db` capture over REST.
+  and the Help Dev `.db` capture over REST;
+- `STTPresenter` (`presenter/`), the captions on an output, with the caption text, look and
+  reveal pace it is built from (`Caption*.kt`, `SttDripFeed.kt`, `SttRevealPace.kt`).
 
 A real Gradle module of this build: `include(":stt")`, `implementation(projects.stt)`. `:composeApp`
 is its only consumer. The presenters, the stage monitor and the Bible tab's auto-follow read the
 same `STTManager`.
 
-It takes `:shared-ui`, `:strings`, `:settings` and `:theme`, plus socket.io (`org.json` comes with
+It takes `:shared-ui`, `:core-models`, `:strings`, `:settings` and `:theme`, plus socket.io (`org.json` comes with
 it). Nothing of `:composeApp`'s.
 
 ## Seams to the app
@@ -37,7 +39,7 @@ it). Nothing of `:composeApp`'s.
 
 ## Package
 
-**`org.churchpresenter.stt`**. The test helpers (`sttTab`, `STTLabel`, the `transcribe`/`translate`/
+**`org.churchpresenter.stt`**, with `.presenter`. The test helpers (`sttTab`, `STTLabel`, the `transcribe`/`translate`/
 `live` feeders, the finders and `SILENT_STT_URL`) are in `src/testFixtures`. They are public, so the
 app's screenshot suites can use them.
 

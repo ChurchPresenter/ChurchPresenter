@@ -8,11 +8,14 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 - the tab (`LowerThirdTab`), which lists the lottie presets in a folder, previews them, and puts them
   live or onto an ATEM;
 - what an ATEM upload needs: the render cache, the off-screen renderer and the key sequencer;
+- `LowerThirdPresenter` (`presenter/`), the animation on an output. It takes the frame to draw as
+  a plain `ImageBitmap`; the app's `LottieFrameStream` owns the native bitmap behind it.
+  `LowerThirdLayout` stays in the app, since it draws the app's camera and video backgrounds;
 - `LottieFonts` and the bundled fonts it reads, under `src/main/resources/fonts`. LottieGen's
   `FontRegistry` reads the same resources off the classpath.
 
 A real Gradle module of this build: `include(":lower-third")`, `implementation(projects.lowerThird)`.
-`:composeApp` is its only consumer. The app's output presenter, its ATEM bridge and routes, and the
+`:composeApp` is its only consumer. The app's outputs, its ATEM bridge and routes, and the
 Bible lottie band all use the render cache, the sequencer and `LottieFonts` from here.
 
 It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`, `:diagnostics`,
@@ -48,7 +51,7 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 
 ## Package
 
-**`org.churchpresenter.lowerthird`**, with `.render`. The test helpers (`lowerThirdTab`,
+**`org.churchpresenter.lowerthird`**, with `.render` and `.presenter`. The test helpers (`lowerThirdTab`,
 `LowerThirdLabel`, the folder fixtures and the finders) are in `src/testFixtures`. They are public,
 so the app's screenshot suite can use them. That suite passes the app's real preview output and
 picker through `previewFor` and `pickerFor`.

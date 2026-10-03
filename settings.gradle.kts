@@ -138,3 +138,7 @@ include(":bible-tab")
 // use, the tunnel, SSL and calendar sync. Depended on by :composeApp, which applies what remote
 // clients ask for to the live output.
 include(":server")
+
+// The Companion Surface tab and CompanionSatelliteViewModel: the Compose face of
+// :companion-satellite, which stays free of any UI toolkit. Depended on by :composeApp.
+include(":companion-surface")

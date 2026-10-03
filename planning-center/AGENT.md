@@ -5,14 +5,15 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 ## What it is
 
 **The Planning Center Online client**: the OAuth2 conversation, the Services/People REST calls, and
-the one-shot loopback listener that catches the consent redirect. A real Gradle module of this
-build: `include(":planning-center")`, `implementation(projects.planningCenter)`.
+the one-shot loopback listener that catches the consent redirect — and, under `ui/`, **the import
+window** that turns a plan into schedule items. A real Gradle module of this build:
+`include(":planning-center")`, `implementation(projects.planningCenter)`.
 
 No credentials ship with it. Each church registers its own free PCO Developer application and
 supplies its own client id and secret, the same bring-your-own-key shape as the Pexels/Pixabay
 stock media client. **One-way pull only** — nothing is ever written back to Planning Center.
 
-**The package is `org.churchpresenter.planningcenter`** — one package, flat. It held two of the
+**The package is `org.churchpresenter.planningcenter`**, with the import window in `.ui`. It held two of the
 app's own (`…churchpresenter.data` for the client and formatter, `…churchpresenter.server` for the
 callback listener), which `:composeApp` still owns and fills with 34 and 32 files respectively.
 Splitting this module's three files across two shared package names bought nothing: they are one
@@ -26,17 +27,36 @@ app.
 | `PlanningCenterClient.kt` | `object PlanningCenterClient` — OAuth token exchange and refresh, `/people/v2/me`, service types, plans, plan items, arrangement lyrics, attachment metadata, attachment download |
 | `PlanningCenterLyricsFormatter.kt` | Chord-chart → plain lyrics, and PCO's `html_details` rich text → plain text |
 | `PlanningCenterAuthServer.kt` | The loopback listener on the registered redirect port, started per connect attempt and torn down when the callback lands. The JDK's own `HttpServer`, not Ktor — see **Rules** |
+| `ui/PlanningCenterImportDialog.kt` | The connect window and the import window, the OAuth round trip (`connectToPlanningCenter`) |
+| `ui/PlanningCenterImportViewModel.kt` | The import's state: service types, plans, plan items, what is ticked; matching a plan song to the library and writing a new one (`matchLocalSong`, `createLocalSong`) |
+| `ui/PlanningCenterImportItems.kt`, `ui/PlanningCenterAttachments.kt` | One plan row, its scripture and its files |
+| `ui/PcoImportActions.kt` | What an import brings into the schedule from what is ticked |
+| `ui/PlanningCenterImportServices.kt` | What the import needs from its host, and `PlanningCenterScripture` |
+
+## Seams to the app
+
+The import window takes from the app, as parameters of `PlanningCenterImportDialog`:
+- **`services`** (`PlanningCenterImportServices`): the OAuth client id and secret this build is
+  registered as (`BuildConfig`), the scripture found in a plan item's text (the primary Bible), and
+  a downloaded deck's slide count (`:presentation-engine`). Neither the Bible nor POI is on this
+  module's classpath.
+- **`window`**: opens a window for a `PlanningCenterWindowSpec`. The app opens a `DialogWindow`
+  centred on the main window and wraps it in `AppWindowRoot`; a test draws the content in place,
+  which is how the entry point is tested headless.
+- **`editSong`**: the app's song editor, for a plan song the library lacks.
+
+`composeApp/…/dialogs/PlanningCenterImportDialog.kt` is the app's wrapper that fills them in, with
+the signature the Schedule tab calls.
 
 ## What deliberately stayed in `:composeApp`
 
-- **`data/PlanningCenterScriptureDetector.kt`** — it resolves references against a loaded `Bible`
-  and falls back to `BibleBookAbbreviations`, which reads Compose string resources. It is glue
-  between PCO text and the app's own Bible data, not part of the PCO protocol. It moves here only
-  if the Bible data layer becomes a module and the abbreviations stop needing `Res`.
-- **`viewmodel/PlanningCenterImportViewModel.kt`** and **`dialogs/PlanningCenterImportDialog.kt`** —
-  Compose state and UI.
-- **`data/settings/PlanningCenterSettings.kt`** — already in `:settings`, where every persisted
-  settings class lives.
+- **`data/PlanningCenterScriptureDetector.kt`** and **`data/PlanningCenterPrimaryBible.kt`** — they
+  resolve references against the operator's primary `Bible` and fall back to
+  `BibleBookAbbreviations`, which reads Compose string resources. They reach the import through
+  `PlanningCenterImportServices.detectScriptures`.
+- **`dialogs/PlanningCenterImportDialog.kt`** — the wrapper above.
+- **`PlanningCenterSettings`** — already in `:settings`, where every persisted settings class
+  lives.
 
 ## Rules
 
@@ -47,6 +67,8 @@ app.
   under them. The JDK server has written the whole page before its handler returns, and the handler
   hands the result over only after that, so tearing the server down cannot truncate it. Ktor's
   server libraries are test-only here now, for `PlanningCenterDownloadTest`'s fake host.
+- **The import window never opens a window itself.** It asks `window` for one, so nothing in `ui/`
+  needs a display and every line of it runs in the suite.
 - **Anything `:composeApp` calls has to be public here.** `internal` no longer reaches the app —
   which is why the `@Serializable` DTOs' construction test moved with the code, as
   `PlanningCenterDtoConstructionTest`.
@@ -79,8 +101,11 @@ app.
   `TooGenericExceptionCaught` entries were **not** carried over from `:composeApp`'s baseline — the
   catches were narrowed to the three clauses above instead, which is what the rule was asking for.
 - **Coverage**: the root build's default six counters at 85%, all of them — **no**
-  `coverageFloors`, **no** `coverageExcludes`. It currently runs 92.6% instructions / 87.5% methods,
-  the tightest counter being methods, so a new uncovered function is what will break it first.
+  `coverageFloors`, **no** `coverageExcludes`. It currently runs 87.0% complexity / 89.3% branches,
+  the tightest counters, so a new untested branch is what will break it first.
+  The import window is held to the same floor: its rows, its import and its entry point are
+  driven directly (`PcoImportSelectionTest`, `PlanningCenterImportRowsTest`,
+  `PlanningCenterImportDialogTest`).
 
 ## Tests
 
@@ -119,6 +144,6 @@ All three run in CI, gated on this directory or the shared build files changing.
 takes an `HttpClient`, so the type is part of this module's public surface and has to resolve at a
 caller that supplies its own engine. Then `ktor-client-cio` for the default engine,
 `kotlinx-serialization-json`,
-`:settings` for the one port constant, and `:diagnostics` for `CrashReporter.reportWarning`. No
-Compose, and no dependency on `:composeApp` — the import UI depends on this module, never the
-other way round.
+`:settings` for the one port constant, and `:diagnostics` for `CrashReporter.reportWarning`. The import
+window adds Compose, `:shared-ui`, `:strings`, `:theme` and `:core-models` (the song model a plan's
+songs are matched against and saved as). No dependency on `:composeApp`.
