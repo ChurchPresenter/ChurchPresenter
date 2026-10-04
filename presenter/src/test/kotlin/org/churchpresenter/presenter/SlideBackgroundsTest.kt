@@ -46,12 +46,16 @@ class SlideBackgroundsTest {
     private val red = Color(0xFFCC2200)
     private val under = Color(0xFF808080)
 
-    private fun colour(hex: String) = BackgroundConfig(backgroundType = Constants.BACKGROUND_COLOR, backgroundColor = hex)
+    private fun colour(hex: String) =
+        BackgroundConfig(backgroundType = Constants.BACKGROUND_COLOR, backgroundColor = hex)
 
     private fun settings(fadeIn: Boolean = false) = AppSettings(
         bibleSettings = BibleSettings(transitionDuration = 0f, fadeIn = fadeIn),
         songSettings = SongSettings(transitionDuration = 0f, fadeIn = fadeIn),
-        backgroundSettings = BackgroundSettings(bibleBackground = colour("#336699"), songBackground = colour("#336699")),
+        backgroundSettings = BackgroundSettings(
+            bibleBackground = colour("#336699"),
+            songBackground = colour("#336699"),
+        ),
     )
 
     private val verse = SelectedVerse(bookName = "John", chapter = 3, verseNumber = 16, verseText = "For God so loved")
@@ -157,8 +161,13 @@ class SlideBackgroundsTest {
 
     @Test
     fun `a picture that is gone is drawn as black rather than waited for`() {
-        val gone = BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE, backgroundImage = "/nowhere/at/all.png")
-        val pictured = settings().let { it.copy(backgroundSettings = it.backgroundSettings.copy(bibleBackground = gone)) }
+        val gone = BackgroundConfig(
+            backgroundType = Constants.BACKGROUND_IMAGE,
+            backgroundImage = "/nowhere/at/all.png",
+        )
+        val pictured = settings().let {
+            it.copy(backgroundSettings = it.backgroundSettings.copy(bibleBackground = gone))
+        }
         assertColour(Color.Black, drawn { Bible(appSettings = pictured) }, "a missing picture")
     }
 
