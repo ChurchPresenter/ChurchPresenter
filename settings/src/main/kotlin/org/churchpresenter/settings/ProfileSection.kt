@@ -48,4 +48,5 @@ val CONTENT_PATHS = listOf(
     "showQA", "showSTT", "showDictionary", "showCanvas", "showFullscreenBackground",
     "showLowerThirdBackground", "showBibleBackground", "showSongsBackground", "pictureScaleMode",
     "mediaScaleMode", "lowerThirdPlacements",
+    "lowerThirdOverContent", "announcementsOverContent", "captionsOverContent",
 )

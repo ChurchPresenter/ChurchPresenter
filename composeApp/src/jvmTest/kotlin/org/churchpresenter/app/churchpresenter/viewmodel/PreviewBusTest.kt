@@ -386,9 +386,13 @@ class PreviewBusTest {
     @Test
     fun `a schedule row names the content it puts on air`() {
         val song = ScheduleItem.SongItem(id = "s", songNumber = 1, title = "A", songbook = "B")
-        val verse = ScheduleItem.BibleVerseItem(id = "v", bookName = "John", chapter = 3, verseNumber = 16, verseText = "")
+        val verse = ScheduleItem.BibleVerseItem(
+            id = "v", bookName = "John", chapter = 3, verseNumber = 16, verseText = "",
+        )
         val pictures = ScheduleItem.PictureItem(id = "p", folderPath = "", folderName = "", imageCount = 0)
-        val deck = ScheduleItem.PresentationItem(id = "d", filePath = "", fileName = "", slideCount = 0, fileType = "pdf")
+        val deck = ScheduleItem.PresentationItem(
+            id = "d", filePath = "", fileName = "", slideCount = 0, fileType = "pdf",
+        )
         val label = ScheduleItem.LabelItem(id = "l", text = "Welcome", textColor = "", backgroundColor = "")
         assertEquals(Presenting.LYRICS, cuedModeOf(song))
         assertEquals(Presenting.BIBLE, cuedModeOf(verse))
