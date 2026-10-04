@@ -137,8 +137,11 @@ class PreviewBus internal constructor(private val program: PresenterManager) {
     fun take() {
         if (!anythingCued) return
         val slide = manager.presentingMode.value
-        if (slide != Presenting.NONE) transfer(slide)
-        manager.overlays.value.forEach(::transfer)
+        if (slide != Presenting.NONE) putOnAir(slide, from = manager, to = program)
+        manager.overlays.value.forEach { putOnAir(it, from = manager, to = program) }
+        // What was taken is on air now, so its next verse or section is a step there.
+        if (slide == Presenting.BIBLE) verseTarget = program
+        if (slide == Presenting.LYRICS) songTarget = program
         program.setShowPresenterWindow(true)
         clear()
     }
@@ -147,39 +150,38 @@ class PreviewBus internal constructor(private val program: PresenterManager) {
     fun clear() {
         if (manager.anythingLive) manager.setPresentingMode(Presenting.NONE)
     }
+}
 
-    private fun transfer(mode: Presenting) {
-        when (mode) {
-            Presenting.PICTURES -> {
-                program.setSelectedImagePath(manager.selectedImagePath.value)
-                program.setNextImagePath(manager.nextImagePath.value)
-            }
-            Presenting.LOWER_THIRD -> program.setLottieContent(
-                manager.lottieJsonContent.value,
-                manager.lottiePauseAtFrame.value,
-                manager.lottiePauseFrame.value,
-                manager.lottiePauseDurationMs.value,
-                manager.currentLowerThirdName.value,
-            )
-            Presenting.ANNOUNCEMENTS -> program.setAnnouncementText(manager.announcementText.value)
-            Presenting.BIBLE -> {
-                // A hold the tab put on air while another chapter was browsed must not keep the
-                // taken passage off it.
-                program.setBibleHold(false)
-                program.setSelectedVerses(manager.selectedVerses.value)
-                verseTarget = program
-            }
-            Presenting.LYRICS -> {
-                program.setAllLyricSections(manager.allLyricSections.value)
-                program.setSongDisplaySectionIndex(manager.songDisplaySectionIndex.value)
-                program.setSongDisplayLineIndex(manager.songDisplayLineIndex.value)
-                program.setLyricSection(manager.lyricSection.value)
-                songTarget = program
-            }
-            else -> return
+/** What [from] holds of [mode], put on [to] and taken live there. */
+private fun putOnAir(mode: Presenting, from: PresenterManager, to: PresenterManager) {
+    when (mode) {
+        Presenting.PICTURES -> {
+            to.setSelectedImagePath(from.selectedImagePath.value)
+            to.setNextImagePath(from.nextImagePath.value)
         }
-        program.setPresentingMode(mode)
+        Presenting.LOWER_THIRD -> to.setLottieContent(
+            from.lottieJsonContent.value,
+            from.lottiePauseAtFrame.value,
+            from.lottiePauseFrame.value,
+            from.lottiePauseDurationMs.value,
+            from.currentLowerThirdName.value,
+        )
+        Presenting.ANNOUNCEMENTS -> to.setAnnouncementText(from.announcementText.value)
+        Presenting.BIBLE -> {
+            // A hold the tab put on air while another chapter was browsed must not keep the
+            // taken passage off it.
+            to.setBibleHold(false)
+            to.setSelectedVerses(from.selectedVerses.value)
+        }
+        Presenting.LYRICS -> {
+            to.setAllLyricSections(from.allLyricSections.value)
+            to.setSongDisplaySectionIndex(from.songDisplaySectionIndex.value)
+            to.setSongDisplayLineIndex(from.songDisplayLineIndex.value)
+            to.setLyricSection(from.lyricSection.value)
+        }
+        else -> return
     }
+    to.setPresentingMode(mode)
 }
 
 /** Which chapter [verse] is from, as far as telling one passage from another goes. */
