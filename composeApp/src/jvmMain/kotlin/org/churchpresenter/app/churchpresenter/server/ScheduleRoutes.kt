@@ -125,6 +125,12 @@ internal fun Route.scheduleRoutes(
                     }
                 }
 
+                liveControlRoutes(server, scope)
+
+}
+
+/** POST /api/clear and POST /api/take: what is on air, taken down or put up without asking. */
+private fun Route.liveControlRoutes(server: CompanionServer, scope: CoroutineScope) {
                 /**
                  * POST /api/clear
                  * Instantly switches the presenter to display-none (Presenting.NONE).
@@ -163,5 +169,4 @@ internal fun Route.scheduleRoutes(
                     scope.launch { server.onTake.emit(Unit) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
-
 }

@@ -206,7 +206,11 @@ class PreviewBusTest {
         bus.take()
 
         assertEquals(Presenting.PICTURES, program.presentingMode.value)
-        assertEquals(setOf(Presenting.ANNOUNCEMENTS), program.overlays.value, "the pictures took the old lower third down")
+        assertEquals(
+            setOf(Presenting.ANNOUNCEMENTS),
+            program.overlays.value,
+            "the pictures took the old lower third down",
+        )
         assertEquals("Offering", program.announcementText.value)
         assertEquals(Presenting.ANNOUNCEMENTS, program.lastLive.value)
     }
