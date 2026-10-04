@@ -7,7 +7,9 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 The **Q&A** tab and the session behind it. It holds:
 - `QAManager`, the questions phones send in, what the operator does with them and what is on
   screen;
-- `QATab`, the operator's view of that session.
+- `QATab`, the operator's view of that session;
+- `QAPresenter` and `QAQRCodePresenter` (`presenter/`), the question and the QR code on an output.
+  The QR image is `generateQRCodeBitmap` in `:shared-ui`, which the presentation remote also draws.
 
 A real Gradle module of this build: `include(":qa")`, `implementation(projects.qa)`. `:composeApp`
 is its only consumer. The app's Companion server and the remote dialog drive the same `QAManager`.
@@ -38,7 +40,7 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 
 ## Package
 
-**`org.churchpresenter.qa`**. The test helpers (`qaTab`, `FakeQAOutput`, `QALabel`, the finders)
+**`org.churchpresenter.qa`**, with `.presenter`. The test helpers (`qaTab`, `FakeQAOutput`, `QALabel`, the finders)
 are in `src/testFixtures`. They are public, so the app's screenshot suite can use them.
 
 ## Rules

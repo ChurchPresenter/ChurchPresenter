@@ -18,9 +18,10 @@ point.
 ## What `:composeApp` uses from it
 
 `org.churchpresenter.companionsatellite.CompanionSatelliteClient` and its
-`CompanionConnectionStatus`,
-from `viewmodel/CompanionSatelliteViewModel.kt`, `composables/CompanionSurfacePanel.kt`,
-`models/CompanionConnectionUiState.kt` and `dialogs/tabs/CompanionSatelliteSettingsTab.kt`.
+`CompanionConnectionStatus`. The client is wrapped by `:companion-surface` (its
+`CompanionSatelliteViewModel`, `CompanionSurfacePanel` and `CompanionConnectionUiState`), which
+takes this module as an `api` dependency; the app's own `dialogs/tabs/CompanionSatelliteSettingsTab.kt`
+reads the status too.
 
 ## Layout
 
@@ -41,7 +42,7 @@ The whole module is one file plus its test:
 
 - **No UI-toolkit dependency, by design.** The client hands back raw RGB bytes through
   `onButtonUpdated` so any consumer — Compose, a CLI, a test — decodes them however it likes.
-  Never import Compose, AWT or an image type here; decoding belongs in `:composeApp`.
+  Never import Compose, AWT or an image type here; decoding belongs in `:companion-surface`.
 - **Registration uses the `LAYOUT_MANIFEST` `ADD-DEVICE` form**, where each button declares its own
   `(row, column)` on Companion's real page grid. The legacy `KEYS_TOTAL`/`KEYS_PER_ROW` form always
   anchors at row 0/column 0 and cannot offset into a page, which is what showing an arbitrary

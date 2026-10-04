@@ -30,7 +30,7 @@ import org.churchpresenter.bible.Bible
 import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.qa.QAManager
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
-import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
+import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.server.InstanceLinkViewModel
 import org.churchpresenter.stt.STTManager
 import org.churchpresenter.settings.utils.AppDataDir

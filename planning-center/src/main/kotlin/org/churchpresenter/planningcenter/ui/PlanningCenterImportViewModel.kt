@@ -1,0 +1,456 @@
+package org.churchpresenter.planningcenter.ui
+
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.planning_center_error_not_connected
+import org.churchpresenter.strings.generated.resources.planning_center_error_plan_items
+import org.churchpresenter.strings.generated.resources.planning_center_error_plans
+import org.churchpresenter.strings.generated.resources.planning_center_error_service_types
+import org.churchpresenter.strings.generated.resources.planning_center_error_session_expired
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.churchpresenter.planningcenter.PcoItemType
+import org.churchpresenter.planningcenter.PlanningCenterClient
+import org.churchpresenter.planningcenter.PlanningCenterLyricsFormatter
+import org.churchpresenter.settings.SettingsManager
+import org.churchpresenter.core.models.songs.SongFileParser
+import org.churchpresenter.core.models.songs.SongItem
+import java.io.File
+import org.jetbrains.compose.resources.StringResource
+
+private const val TOKEN_REFRESH_MARGIN_MS = 60_000
+
+/**
+ * Owns Planning Center Services API calls and per-item import state for
+ * [PlanningCenterImportDialog]. Created and used
+ * only inside that dialog (AGENT.md ViewModel-ownership rule) — it never receives or exposes
+ * another tab's ViewModel. Song catalog reads/writes go straight through [SongFileParser] (the
+ * same technique already used for the CCLI report lookup in `StatisticsManager`), mirroring
+ * exactly what `SongsViewModel.createSong` does on disk — the live Songs tab picks up the new
+ * file via its existing folder watcher, no direct coupling needed.
+ */
+class PlanningCenterImportViewModel(
+    initialAccessToken: String,
+    initialRefreshToken: String,
+    initialExpiresAtEpochMs: Long,
+    initialServiceTypeId: String,
+    private val importSongbookName: String,
+    private val onTokensRefreshed: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long) -> Unit,
+    private val services: PlanningCenterImportServices = PlanningCenterImportServices(clientId = "", clientSecret = ""),
+    private val selection: PlanSelection = PlanSelection(),
+) : PlanSelectionState by selection {
+    private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
+    private var accessToken = initialAccessToken
+    private var refreshToken = initialRefreshToken
+    private var expiresAtEpochMs = initialExpiresAtEpochMs
+
+    data class ImportPlanItem(
+        val pco: PlanningCenterClient.PlanItem,
+        val matchedSongId: String? = null,
+        val selected: Boolean = true
+    )
+
+    var serviceTypes by mutableStateOf<List<PlanningCenterClient.ServiceType>>(emptyList())
+        private set
+    var selectedServiceTypeId by mutableStateOf(initialServiceTypeId)
+        private set
+    var plans by mutableStateOf<List<PlanningCenterClient.Plan>>(emptyList())
+        private set
+    var selectedPlanId by mutableStateOf<String?>(null)
+        private set
+    var isLoadingServiceTypes by mutableStateOf(false)
+        private set
+    var isLoadingPlans by mutableStateOf(false)
+        private set
+    var isLoadingItems by mutableStateOf(false)
+        private set
+    var errorMessage by mutableStateOf<StringResource?>(null)
+        private set
+
+    private suspend fun ensureValidToken(): Boolean {
+        if (accessToken.isBlank()) return false
+        if (System.currentTimeMillis() < expiresAtEpochMs - TOKEN_REFRESH_MARGIN_MS) return true
+        if (refreshToken.isBlank()) return false
+        return when (
+            val outcome = PlanningCenterClient.refreshAccessToken(
+                services.clientId,
+                services.clientSecret,
+                refreshToken
+            )
+        ) {
+            is PlanningCenterClient.TokenOutcome.Success -> {
+                accessToken = outcome.tokens.accessToken
+                refreshToken = outcome.tokens.refreshToken
+                expiresAtEpochMs = outcome.tokens.expiresAtEpochMs
+                onTokensRefreshed(accessToken, refreshToken, expiresAtEpochMs)
+                true
+            }
+            else -> false
+        }
+    }
+
+    fun loadServiceTypes() {
+        viewModelScope.launch {
+            isLoadingServiceTypes = true
+            errorMessage = null
+            if (!ensureValidToken()) {
+                errorMessage = Res.string.planning_center_error_not_connected
+                isLoadingServiceTypes = false
+                return@launch
+            }
+            when (val outcome = PlanningCenterClient.listServiceTypes(accessToken)) {
+                is PlanningCenterClient.ServiceTypesOutcome.Success -> {
+                    serviceTypes = outcome.serviceTypes
+                    if (selectedServiceTypeId.isBlank()) {
+                        selectedServiceTypeId = outcome.serviceTypes.firstOrNull()?.id ?: ""
+                    }
+                    if (selectedServiceTypeId.isNotBlank()) loadPlans(selectedServiceTypeId)
+                }
+                PlanningCenterClient.ServiceTypesOutcome.Unauthorized ->
+                    errorMessage = Res.string.planning_center_error_session_expired
+                else -> errorMessage = Res.string.planning_center_error_service_types
+            }
+            isLoadingServiceTypes = false
+        }
+    }
+
+    fun selectServiceType(id: String) {
+        selectedServiceTypeId = id
+        selectedPlanId = null
+        selection.planItems = emptyList()
+        loadPlans(id)
+    }
+
+    private fun loadPlans(serviceTypeId: String) {
+        viewModelScope.launch {
+            isLoadingPlans = true
+            errorMessage = null
+            if (!ensureValidToken()) {
+                isLoadingPlans = false
+                return@launch
+            }
+            when (val outcome = PlanningCenterClient.listUpcomingPlans(accessToken, serviceTypeId)) {
+                is PlanningCenterClient.PlansOutcome.Success -> {
+                    plans = outcome.plans
+                    // Plans come back future-only, ordered by sort_date ascending, so the first
+                    // one is the closest upcoming plan. Auto-select it and preload its items so
+                    // the operator lands straight on the plan they'll most likely present.
+                    plans.firstOrNull()?.let { selectPlan(it.id) }
+                }
+                PlanningCenterClient.PlansOutcome.Unauthorized ->
+                    errorMessage = Res.string.planning_center_error_session_expired
+                else -> errorMessage = Res.string.planning_center_error_plans
+            }
+            isLoadingPlans = false
+        }
+    }
+
+    fun selectPlan(planId: String) {
+        selectedPlanId = planId
+        viewModelScope.launch {
+            isLoadingItems = true
+            errorMessage = null
+            if (!ensureValidToken()) {
+                isLoadingItems = false
+                return@launch
+            }
+            when (val outcome = PlanningCenterClient.getPlanItems(accessToken, selectedServiceTypeId, planId)) {
+                is PlanningCenterClient.PlanItemsOutcome.Success -> {
+                    val catalog = loadSongCatalog()
+                    selection.planItems = outcome.items.map { pco ->
+                        ImportPlanItem(pco = pco, matchedSongId = matchLocalSong(pco, catalog)?.songId)
+                    }
+                    // Scripture detection is local (regex + already-loaded Bible, no network call),
+                    // so it's cheap to run eagerly for every generic item as soon as items load —
+                    // unlike attachments, which stay lazy since they need a request per item.
+                    val scriptureMap = mutableMapOf<String, List<PlanningCenterScripture>>()
+                    for (pco in outcome.items) {
+                        if (pco.itemType != PcoItemType.ITEM) continue
+                        val combinedText = listOf(pco.title, pco.description)
+                            .filter { it.isNotBlank() }
+                            .joinToString("\n")
+                        val detected = services.detectScriptures(combinedText)
+                        if (detected.isNotEmpty()) scriptureMap[pco.id] = detected
+                    }
+                    selection.detectedScripturesByItemId = scriptureMap
+                    selection.selectedScriptureIndices =
+                        scriptureMap.mapValues { (_, verses) -> verses.indices.toSet() }
+
+                    // Eagerly check for attachments too, so the "Show Files" affordance can be
+                    // hidden entirely for items that don't have any (one request per item — plans
+                    // are small enough that this is fine, and it avoids showing dead-end buttons).
+                    // "media"-type plan items are deliberately excluded: their PCO attachments are
+                    // incidental files (lyric sheets, cue notes), not the actual media the item
+                    // represents, so surfacing them as importable is misleading — there's nothing
+                    // usable to fetch for these rows.
+                    for (pco in outcome.items) {
+                        if (pco.itemType == PcoItemType.ITEM) loadAttachments(pco.id)
+                    }
+                }
+                PlanningCenterClient.PlanItemsOutcome.Unauthorized ->
+                    errorMessage = Res.string.planning_center_error_session_expired
+                else -> errorMessage = Res.string.planning_center_error_plan_items
+            }
+            isLoadingItems = false
+        }
+    }
+
+    /**
+     * Fetches lyrics/chord-chart text for the add-song dialog's prefill. Prefers the song's
+     * Arrangement detail; when that's unavailable (no arrangement linked, request failure, or
+     * blank lyrics), falls back to the plan item's own "description" text, and then its
+     * "html_details" rich text — worship leaders sometimes paste lyrics into either of those
+     * instead of using Planning Center's Arrangement feature, and PCO's own item editor writes
+     * to whichever field the user's cursor happened to be in (plain "Description" vs. the rich
+     * "Details" box), so both need checking. Null only when none of the three has anything usable.
+     */
+    suspend fun fetchArrangementForAddSong(
+        pco: PlanningCenterClient.PlanItem
+    ): PlanningCenterClient.ArrangementDetail? {
+        val songId = pco.songId
+        val arrangementId = pco.arrangementId
+        if (songId != null && arrangementId != null && ensureValidToken()) {
+            val outcome = PlanningCenterClient.getArrangementDetail(accessToken, songId, arrangementId)
+            if (outcome is PlanningCenterClient.ArrangementOutcome.Success && outcome.detail.lyrics.isNotBlank()) {
+                return outcome.detail
+            }
+        }
+        pco.description.takeIf { it.isNotBlank() }?.let {
+            return PlanningCenterClient.ArrangementDetail(chordChart = "", lyrics = it)
+        }
+        return pco.htmlDetails.takeIf { it.isNotBlank() }
+            ?.let {
+                PlanningCenterClient.ArrangementDetail(
+                    chordChart = "",
+                    lyrics = PlanningCenterLyricsFormatter.htmlDetailsToPlainText(it)
+                )
+            }
+            ?.takeIf { it.lyrics.isNotBlank() }
+    }
+
+    fun defaultSongbookForNewSongs(): String = importSongbookName.ifBlank { "Planning Center" }
+
+    // ── Attachments (media backgrounds, slide decks) ────────────────────────────
+
+    fun loadAttachments(itemId: String) {
+        if (attachmentsByItemId.containsKey(itemId)) return
+        val planId = selectedPlanId ?: return
+        viewModelScope.launch {
+            selection.loadingAttachmentsForItemId = itemId
+            if (!ensureValidToken()) {
+                selection.loadingAttachmentsForItemId = null
+                return@launch
+            }
+            val outcome = PlanningCenterClient.getItemAttachments(accessToken, selectedServiceTypeId, planId, itemId)
+            val attachments = (outcome as? PlanningCenterClient.AttachmentsOutcome.Success)?.attachments ?: emptyList()
+            selection.attachmentsByItemId = attachmentsByItemId + (itemId to attachments)
+            selection.selectedAttachmentIds = selectedAttachmentIds + (itemId to attachments.map { it.id }.toSet())
+            selection.loadingAttachmentsForItemId = null
+        }
+    }
+
+    /** Thumbnail URLs are public S3 links — no token needed, just a thin passthrough. */
+    suspend fun fetchThumbnailBytes(url: String): ByteArray? = PlanningCenterClient.fetchThumbnailBytes(url)
+
+    sealed interface ImportedMedia {
+        data class Presentation(
+            val filePath: String,
+            val fileName: String,
+            val slideCount: Int,
+            val fileType: String
+        ) : ImportedMedia
+        data class Picture(val folderPath: String, val folderName: String, val imageCount: Int) : ImportedMedia
+        data class Media(val mediaUrl: String, val mediaTitle: String) : ImportedMedia
+    }
+
+    /**
+     * Downloads one attachment to `~/.churchpresenter/planning_center_cache/<planId>/<itemId>/`
+     * and classifies it by extension into the schedule item type it should become. `pptx`/`ppt`/
+     * `key`/`pdf` slide counts come from [PlanningCenterImportServices.countSlides]. Null on any
+     * download failure or unrecognized extension.
+     */
+    suspend fun importAttachment(
+        planId: String,
+        itemId: String,
+        attachment: PlanningCenterClient.PlanAttachment
+    ): ImportedMedia? = withContext(Dispatchers.IO) {
+        if (!ensureValidToken()) return@withContext null
+        val urlOutcome = PlanningCenterClient.resolveAttachmentDownloadUrl(accessToken, attachment.id)
+        val resolvedUrl = (urlOutcome as? PlanningCenterClient.AttachmentUrlOutcome.Success)?.url
+            ?: return@withContext null
+
+        val cacheDir = File(
+            System.getProperty("user.home"),
+            ".churchpresenter/planning_center_cache/$planId/$itemId"
+        )
+        val destination = File(cacheDir, attachment.filename)
+        val outcome = PlanningCenterClient.downloadFile(resolvedUrl, destination)
+        val file = (outcome as? PlanningCenterClient.FileDownloadOutcome.Success)?.file ?: return@withContext null
+
+        val ext = file.extension.lowercase()
+        when (ext) {
+            "ppt", "pptx", "key", "pdf" -> {
+                val slideCount = services.countSlides(file)
+                ImportedMedia.Presentation(
+                    filePath = file.absolutePath,
+                    fileName = file.nameWithoutExtension,
+                    slideCount = slideCount,
+                    fileType = ext
+                )
+            }
+            "jpg", "jpeg", "png", "gif", "bmp", "webp" ->
+                ImportedMedia.Picture(folderPath = cacheDir.absolutePath, folderName = cacheDir.name, imageCount = 1)
+            "mp4", "avi", "mov", "mkv", "webm", "mp3", "wav", "flac" ->
+                ImportedMedia.Media(mediaUrl = file.absolutePath, mediaTitle = file.nameWithoutExtension)
+            else -> null
+        }
+    }
+}
+
+/** What the import dialog has ticked: plan rows, the scripture detected in them, and their files. */
+interface PlanSelectionState {
+    val planItems: List<PlanningCenterImportViewModel.ImportPlanItem>
+    val detectedScripturesByItemId: Map<String, List<PlanningCenterScripture>>
+    val selectedScriptureIndices: Map<String, Set<Int>>
+    val attachmentsByItemId: Map<String, List<PlanningCenterClient.PlanAttachment>>
+    val loadingAttachmentsForItemId: String?
+    val selectedAttachmentIds: Map<String, Set<String>>
+    val allSelected: Boolean
+    fun toggleScriptureSelected(itemId: String, index: Int)
+    fun toggleItemSelected(pcoItemId: String)
+    fun setAllSelected(selectAll: Boolean)
+    fun markItemResolved(pcoItemId: String, songId: String)
+    fun toggleAttachmentSelected(itemId: String, attachmentId: String)
+}
+
+/** The selection behind [PlanSelectionState]; the view model fills it as plans and files load. */
+@Stable
+class PlanSelection : PlanSelectionState {
+    override var planItems by mutableStateOf<List<PlanningCenterImportViewModel.ImportPlanItem>>(emptyList())
+        internal set
+    override var detectedScripturesByItemId by
+        mutableStateOf<Map<String, List<PlanningCenterScripture>>>(emptyMap())
+        internal set
+    override var selectedScriptureIndices by mutableStateOf<Map<String, Set<Int>>>(emptyMap())
+        internal set
+    override var attachmentsByItemId by
+        mutableStateOf<Map<String, List<PlanningCenterClient.PlanAttachment>>>(emptyMap())
+        internal set
+    override var loadingAttachmentsForItemId by mutableStateOf<String?>(null)
+        internal set
+    override var selectedAttachmentIds by mutableStateOf<Map<String, Set<String>>>(emptyMap())
+        internal set
+
+        override fun toggleScriptureSelected(itemId: String, index: Int) {
+            val current = selectedScriptureIndices[itemId] ?: emptySet()
+            val updated = if (index in current) current - index else current + index
+            selectedScriptureIndices = selectedScriptureIndices + (itemId to updated)
+        }
+
+        override fun toggleItemSelected(pcoItemId: String) {
+            var newSelected = false
+            planItems = planItems.map {
+                if (it.pco.id == pcoItemId) {
+                    newSelected = !it.selected
+                    it.copy(selected = newSelected)
+                } else it
+            }
+            // The row's own checkbox is the master for its attached files too — checking/unchecking
+            // it should select/deselect all of them, not leave their checkboxes independently stale.
+            attachmentsByItemId[pcoItemId]?.let { files ->
+                selectedAttachmentIds = selectedAttachmentIds +
+                    (pcoItemId to if (newSelected) files.map { file -> file.id }.toSet() else emptySet())
+            }
+        }
+
+        /** True only when every row, detected scripture and attachment checkbox is currently checked. */
+        override val allSelected: Boolean
+            get() = planItems.isNotEmpty() &&
+                planItems.all { it.selected } &&
+                detectedScripturesByItemId.all { (id, verses) -> selectedScriptureIndices[id]?.size == verses.size } &&
+                attachmentsByItemId.all { (id, files) -> selectedAttachmentIds[id]?.size == files.size }
+
+        /** Master checkbox handler — selects or clears every row/scripture/attachment checkbox at once. */
+        override fun setAllSelected(selectAll: Boolean) {
+            planItems = planItems.map { it.copy(selected = selectAll) }
+            selectedScriptureIndices = detectedScripturesByItemId.mapValues { (_, verses) ->
+                if (selectAll) verses.indices.toSet() else emptySet()
+            }
+            selectedAttachmentIds = attachmentsByItemId.mapValues { (_, files) ->
+                if (selectAll) files.map { it.id }.toSet() else emptySet()
+            }
+        }
+
+        /** Marks an item as resolved to a just-created (or matched) local song, for the dialog's list state. */
+        override fun markItemResolved(pcoItemId: String, songId: String) {
+            planItems = planItems.map { if (it.pco.id == pcoItemId) it.copy(matchedSongId = songId) else it }
+        }
+
+        override fun toggleAttachmentSelected(itemId: String, attachmentId: String) {
+            val current = selectedAttachmentIds[itemId] ?: emptySet()
+            val updated = if (attachmentId in current) current - attachmentId else current + attachmentId
+            selectedAttachmentIds = selectedAttachmentIds + (itemId to updated)
+        }
+}
+
+private fun loadSongCatalog(): List<SongItem> {
+    val storageDir = SettingsManager().loadSettings().songSettings.storageDirectory
+    if (storageDir.isBlank()) return emptyList()
+    val cached = SongFileParser.loadCachedSongMap(storageDir)
+    return SongFileParser().loadSongsFromDirectory(storageDir, cached).map { it.song }
+}
+
+/** Matches only a leading 4-digit song number (e.g. "1234 Amazing Grace") — 3 or 5+ digits don't count. */
+private val leadingSongNumberRegex = Regex("""^(\d{4})(?!\d)""")
+
+internal fun matchLocalSong(pco: PlanningCenterClient.PlanItem, catalog: List<SongItem>): SongItem? {
+    if (pco.itemType != PcoItemType.SONG) return null
+    val ccli = pco.songCcliNumber
+    if (!ccli.isNullOrBlank()) {
+        catalog.firstOrNull { it.ccliNumber.isNotBlank() && it.ccliNumber == ccli }?.let { return it }
+    }
+    val title = pco.songTitle ?: pco.title
+    val leadingNumber = leadingSongNumberRegex.find(title.trim())?.groupValues?.get(1)?.toIntOrNull()
+    if (leadingNumber != null) {
+        catalog.firstOrNull { it.number.toIntOrNull() == leadingNumber }?.let { return it }
+    }
+    return catalog.firstOrNull { it.title.equals(title, ignoreCase = true) }
+}
+
+/**
+ * Writes a newly-confirmed song straight to the song storage directory, mirroring
+ * `SongsViewModel.createSong`'s file-naming/write logic exactly (mkdirs songbook folder,
+ * `"NNNN - Title.song"` filename, [SongFileParser.writeSongFile]) — deliberately not routed
+ * through `SongsViewModel` (owned exclusively by the Songs tab per the ViewModel-ownership
+ * rule). Returns the saved [SongItem] (with `sourceFile`/`songId` populated) so the caller can
+ * immediately add it to the schedule, or null on failure.
+ */
+internal fun createLocalSong(song: SongItem): SongItem? {
+    return try {
+        val storageDir = SettingsManager().loadSettings().songSettings.storageDirectory
+        if (storageDir.isBlank() || song.songbook.isBlank()) return null
+
+        val targetDir = File(storageDir, song.songbook)
+        if (!targetDir.exists()) targetDir.mkdirs()
+
+        val fileName = if (song.number.isNotBlank()) {
+            "${song.number.padStart(4, '0')} - ${song.title}.song"
+        } else {
+            "${song.title}.song"
+        }
+        val filePath = File(targetDir, fileName).absolutePath
+
+        val saved = song.copy(sourceFile = filePath)
+        SongFileParser().writeSongFile(saved, filePath)
+        saved
+    } catch (_: Exception) {
+        null
+    }
+}

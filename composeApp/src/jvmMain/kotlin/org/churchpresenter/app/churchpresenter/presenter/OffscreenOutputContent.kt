@@ -1,5 +1,11 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
+import org.churchpresenter.dictionary.presenter.DictionaryPresenter
+import org.churchpresenter.announcements.presenter.AnnouncementsPresenter
+import org.churchpresenter.stt.presenter.STTPresenter
+import org.churchpresenter.qa.presenter.QAQRCodePresenter
+import org.churchpresenter.qa.presenter.QAPresenter
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -315,7 +321,7 @@ private fun OffscreenLowerThird(presenterManager: PresenterManager) {
         composition = lottieComposition,
         progress = { presenterManager.lottieProgress.value },
         outputRole = outputRole,
-        frame = presenterManager.lottieFrame.value,
+        frame = presenterManager.lottieFrame.value?.imageBitmap,
         groupsText = presenterManager.lottieGroupsText.value,
     )
 

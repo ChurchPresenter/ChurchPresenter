@@ -8,14 +8,15 @@ The **Strong's dictionary**:
 - the tab (`DictionaryTab` and its panes);
 - `DictionaryViewModel`;
 - the interlinear index (`InterlinearRepository`);
+- `DictionaryPresenter` (`presenter/`), the entry's card on an output;
 - the data both read: the Strong's dictionaries, in English and Russian, and the Greek and Hebrew
   interlinear files.
 
 A real Gradle module of this build: `include(":dictionary")`, `implementation(projects.dictionary)`.
 `:composeApp` is its only consumer. Its companion server serves the same data through its own
-`StrongsDictionaryRepository`, and its presenter and stage monitor show a `StrongsEntry`.
+`StrongsDictionaryRepository`, and its stage monitor shows a `StrongsEntry`.
 
-It takes `:shared-ui`, `:strings`, `:icons`, `:settings`, `:theme` and `:bible`, and nothing of
+It takes `:shared-ui`, `:core-models`, `:strings`, `:icons`, `:settings`, `:theme` and `:bible`, and nothing of
 `:composeApp`'s.
 
 ## The data
@@ -47,7 +48,7 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:settings`, `:theme` and `:bible`,
 
 ## Package
 
-**`org.churchpresenter.dictionary`**, with `.data`. The test helpers (`dictionaryTab`,
+**`org.churchpresenter.dictionary`**, with `.data` and `.presenter`. The test helpers (`dictionaryTab`,
 `DictionaryFixture`, `FixtureFiles`, `DictionaryLabel`, the finders) are in `src/testFixtures`. They
 are public, so the app's screenshot suite and server tests can use them.
 

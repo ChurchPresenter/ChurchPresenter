@@ -42,7 +42,7 @@ import org.churchpresenter.sharedui.composables.ToolbarKey
 import org.churchpresenter.sharedui.composables.ToolbarKeyStyle
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.bibletab.BibleTab
-import org.churchpresenter.app.churchpresenter.tabs.CompanionSurfaceTab
+import org.churchpresenter.companionsurface.CompanionSurfaceTab
 import org.churchpresenter.crosswordtab.CrosswordTab
 import org.churchpresenter.app.churchpresenter.tabs.AppSTTTab
 import org.churchpresenter.songs.SongsTab

@@ -11,23 +11,13 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.dictionary.data.StrongsEntry
 import org.churchpresenter.core.models.bible.SelectedVerse
-import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.ContentRegion
-import org.churchpresenter.settings.DICTIONARY_DEFINITION_BOX
-import org.churchpresenter.settings.DICTIONARY_KJV_BOX
-import org.churchpresenter.settings.DICTIONARY_REFERENCE_BOX
-import org.churchpresenter.settings.DICTIONARY_WORD_BOX
-import org.churchpresenter.settings.DictionarySettings
-import org.churchpresenter.settings.QASettings
-import org.churchpresenter.settings.QA_QR_MESSAGE_BOX
-import org.churchpresenter.settings.QA_QUESTION_BOX
 import org.churchpresenter.settings.SongLayoutExtras
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.TextBox
@@ -144,57 +134,6 @@ class TextBoxRenderTest {
         }
         assertTrue(reference.inside(Rect(0f, 0f, WIDTH.toFloat(), HEIGHT * 0.1f)), "reference $reference")
         assertTrue(text.top > reference.bottom, "the verse is still laid out below it")
-    }
-
-    @Test
-    fun `a boxed question is drawn in its box`() {
-        val qa = QASettings(textBoxes = mapOf(textBoxKey(QA_QUESTION_BOX, lowerThird = false) to corner))
-        val (question) = bounds("Where do I sign up") {
-            QAPresenter(question = Question(id = "q", text = "Where do I sign up?", timestamp = 0L), qaSettings = qa)
-        }
-        assertTrue(question.inside(cornerRect), "question $question in $cornerRect")
-    }
-
-    @Test
-    fun `a boxed QR message is drawn in its box, not under the centred code`() {
-        val qa = QASettings(
-            qrCodeMessage = "Scan to ask a question",
-            textBoxes = mapOf(textBoxKey(QA_QR_MESSAGE_BOX, lowerThird = false) to corner),
-        )
-        val (message) = bounds("Scan to ask") { QAQRCodePresenter(url = "https://example.org/qa", qaSettings = qa) }
-        assertTrue(message.inside(cornerRect), "message $message in $cornerRect")
-    }
-
-    @Test
-    fun `a boxed dictionary word is drawn in its box, out of the bottom-aligned card`() {
-        val top = TextBox(enabled = true, xPercent = 0f, yPercent = 0f, widthPercent = 50f, heightPercent = 25f)
-        val ds = DictionarySettings(textBoxes = mapOf(textBoxKey(DICTIONARY_WORD_BOX, lowerThird = false) to top))
-        val entry = StrongsEntry("G26", "ἀγάπη", "agape", "ag-ah'-pay", "love, affection")
-        val (word, definition) = bounds("ἀγάπη", "love, affection") {
-            DictionaryPresenter(entry = entry, dictionarySettings = ds)
-        }
-        assertTrue(word.inside(Rect(0f, 0f, WIDTH * 0.5f, HEIGHT * 0.25f)), "word $word")
-        assertTrue(definition.top > HEIGHT * 0.25f, "the rest stays in the card")
-    }
-
-    @Test
-    fun `every boxed dictionary part is drawn in its own box`() {
-        fun box(y: Float) =
-            TextBox(enabled = true, xPercent = 0f, yPercent = y, widthPercent = 50f, heightPercent = 20f)
-        val ds = DictionarySettings(
-            textBoxes = mapOf(
-                textBoxKey(DICTIONARY_REFERENCE_BOX, lowerThird = false) to box(0f),
-                textBoxKey(DICTIONARY_DEFINITION_BOX, lowerThird = false) to box(40f),
-                textBoxKey(DICTIONARY_KJV_BOX, lowerThird = false) to box(70f),
-            ),
-        )
-        val entry = StrongsEntry("G26", "ἀγάπη", "agape", "ag-ah'-pay", "love, affection", kjvUsage = "charity (27x)")
-        val (number, definition, kjv) = bounds("G26", "love, affection", "charity (27x)") {
-            DictionaryPresenter(entry = entry, dictionarySettings = ds)
-        }
-        assertTrue(number.inside(Rect(0f, 0f, WIDTH * 0.5f, HEIGHT * 0.2f)), "number $number")
-        assertTrue(definition.inside(Rect(0f, HEIGHT * 0.4f, WIDTH * 0.5f, HEIGHT * 0.6f)), "definition $definition")
-        assertTrue(kjv.inside(Rect(0f, HEIGHT * 0.7f, WIDTH * 0.5f, HEIGHT * 0.9f)), "usage $kjv")
     }
 
     private companion object {

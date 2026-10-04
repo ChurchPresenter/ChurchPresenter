@@ -142,3 +142,7 @@ include(":server")
 // The Schedule tab and ScheduleViewModel: the running order, its rows, and the .schedule files it
 // opens and saves. Depended on by :composeApp, which hands it the Planning Center import.
 include(":schedule")
+
+// The Companion Surface tab and CompanionSatelliteViewModel: the Compose face of
+// :companion-satellite, which stays free of any UI toolkit. Depended on by :composeApp.
+include(":companion-surface")

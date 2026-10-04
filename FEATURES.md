@@ -67,6 +67,7 @@
 - `dictionary/` (the `:dictionary` Gradle module) — the Strong's dictionary tab (`DictionaryTab.kt` and
   its panes), `DictionaryViewModel`, the interlinear index and the bundled Strong's/interlinear data;
   `:server`'s `StrongsDictionaryRepository.kt` serves the same data to the companion API
+- `dictionary/…/presenter/DictionaryPresenter.kt` — the dictionary card on the output
 - `dialogs/tabs/ProfileDictionaryPage.kt`, `dialogs/tabs/DictionaryPart.kt` — how the dictionary card looks on each output, edited on Profiles → Dictionary
 - `viewmodel/BibleEngineClient.kt` — auto-follow speech detection client
 - `bible/` (the `:bible` Gradle module) — `Bible.kt`, `BibleBook.kt`, `BibleSearch.kt`,
@@ -139,7 +140,7 @@
   (`LottieRenderCache.kt` with `LottieRenderSizes.kt`, `LottieCacheFiles.kt`, `ArgbRle.kt`), the
   off-screen renderer, `LottieFonts` and the bundled fonts
 - `tabs/AppLowerThirdTab.kt` — the app's wrapper, which supplies the preview output and its picker
-- `presenter/LowerThirdPresenter.kt` — the lower third on the output
+- `lower-third/…/presenter/LowerThirdPresenter.kt` — the lower third on the output
 - `lottieGenerator/.../lottie/TextShaping.kt` — the Text shaping setting every Lottie player reads from the file
 - `presenter/BibleLottieBand.kt`, `presenter/BibleLottieTemplate.kt`, `presenter/BibleLottieTextFit.kt`, `presenter/BibleBandClock.kt` — the Bible band at run time; driven from `PresenterTransitionEffects.kt`
 - `dialogs/tabs/BibleLottieBandPicker.kt` — the template picker, the Bible tab's Lower Third Animation section and the generator window
@@ -155,7 +156,7 @@
 - `tabs/AppAnnouncementsTab.kt` — the app's wrapper: the live output, the stage monitors and the
   preview-output picker; `viewmodel/PresenterAnnouncementsOutput.kt` — the tab's `AnnouncementsOutput`
 - `data/settings/AnnouncementsSettings.kt`
-- `presenter/AnnouncementsPresenter.kt`
+- `announcements/…/presenter/AnnouncementsPresenter.kt` — the announcement on the output
 - `utils/TimerStateManager.kt`
 
 ## Web & Canvas
@@ -195,9 +196,9 @@
   `STTTranscript.kt` and the Help Dev `STTCapture.kt`)
 - `tabs/AppSTTTab.kt` — the app's wrapper, which supplies the live mode and the caption settings dialog
 - `data/settings/STTSettings.kt`
-- `presenter/STTPresenter.kt`
+- `stt/…/presenter/STTPresenter.kt` — the captions on the output
 - `dialogs/tabs/ProfileCaptionsPage.kt`, `dialogs/tabs/CaptionReadingGroup.kt` — the caption look and reading settings, edited on Profiles → Live captions
-- `presenter/CaptionBody.kt` (line breaks, wrapping, capitals, dimming), `presenter/CaptionLook.kt` (card, band, margins, silence fade), `presenter/CaptionTicker.kt`, `presenter/CaptionInterleave.kt`, `presenter/CaptionLanguages.kt`
+- `stt/…/presenter/` — `CaptionBody.kt` (line breaks, wrapping, capitals, dimming), `CaptionLook.kt` (card, band, margins, silence fade), `CaptionTicker.kt`, `CaptionInterleave.kt`, `CaptionLanguages.kt`, and the reveal pace in `SttDripFeed.kt` and `SttRevealPace.kt`
 - `composables/CaptionText.kt` — `BottomAlignedText`, which draws only the lines in its window (also used by video subtitles)
 - `dialogs/STTSettingsDialog.kt` — the install-wide Bible-engine options
 
@@ -214,7 +215,7 @@
 - `tabs/AppQATab.kt` — the app's wrapper, which supplies the remote-access dialog;
   `viewmodel/PresenterQAOutput.kt` — the tab's `QAOutput`, over `PresenterManager`
 - `data/settings/QASettings.kt`
-- `presenter/QAPresenter.kt`
+- `qa/…/presenter/QAPresenter.kt` — the question and the QR code on the output; the QR image itself is `generateQRCodeBitmap` in `:shared-ui`
 - `dialogs/tabs/ProfileOverlayPages.kt` — the question and QR look, edited on Profiles → Q&A
 - `dialogs/QARemoteDialog.kt` — links, public access, rate limit and the QR message
 - `core-models/src/main/kotlin/.../models/qa/Question.kt` (the `:core-models` module)
@@ -241,8 +242,11 @@
 **Source locations:**
 - `calendar/` (the `:calendar` Gradle module) — the Calendar Manager window, its model and the PDF export
 - `dialogs/CalendarEnrollQrDialog.kt`, `dialogs/tabs/CalendarSyncCard.kt`, `:server`'s `CalendarRelayAccess.kt` — pairing a phone and syncing through the relay
-- `planning-center/` (the `:planning-center` Gradle module) — the Planning Center client
-- `dialogs/PlanningCenterImportDialog.kt`, `viewmodel/PlanningCenterImportViewModel.kt` — the import window
+- `planning-center/` (the `:planning-center` Gradle module) — the Planning Center client, and under
+  `ui/` the import window (`PlanningCenterImportDialog.kt`, `PlanningCenterImportViewModel.kt`)
+- `dialogs/PlanningCenterImportDialog.kt` — the app's wrapper: the OAuth client, the windows, the song
+  editor and the slide count; `data/PlanningCenterPrimaryBible.kt` and
+  `data/PlanningCenterScriptureDetector.kt` — the scripture a plan names, found in the primary Bible
 
 ## Projection & Output
 - **Unlimited outputs** — drive as many screens as you have — one window per connected display, plus every DeckLink/SDI device. No artificial limit.
@@ -344,8 +348,8 @@
 - `atem/` (the `:atem` Gradle module, at the repo root) — the ATEM protocol client itself: `AtemClient`, `AtemConnectionManager`, `AtemFrameEncoder`, `AtemUploadStatus`
 - `:server`'s `AtemBridge.kt` — the app-side wiring between that client, `AtemSettings` and the lower third
 - `viewmodel/OBSWebSocketManager.kt`
-- `tabs/CompanionSurfaceTab.kt`, `viewmodel/CompanionSatelliteViewModel.kt`, `composables/CompanionSurfacePanel.kt`, `composables/CompanionConnectionChipRow.kt`
-- `companion-satellite/` (repository root) — native Companion Satellite protocol client
+- `companion-surface/` (the `:companion-surface` Gradle module) — `CompanionSurfaceTab.kt`, `CompanionSatelliteViewModel.kt`, `CompanionSurfacePanel.kt`, `CompanionConnectionChipRow.kt`: the surface in the tab and the sidebars
+- `companion-satellite/` (the `:companion-satellite` Gradle module) — native Companion Satellite protocol client
 - `data/settings/AtemSettings.kt`, `data/settings/OBSSettings.kt`, `data/settings/CompanionSatelliteSettings.kt`
 - `dialogs/tabs/AtemSettingsTab.kt`, `dialogs/tabs/OBSSettingsTab.kt`, `dialogs/tabs/CompanionSatelliteSettingsTab.kt`
 

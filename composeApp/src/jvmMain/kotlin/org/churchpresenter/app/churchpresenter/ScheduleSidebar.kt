@@ -30,8 +30,8 @@ import org.churchpresenter.strings.generated.resources.instance_link_status_reco
 import org.churchpresenter.strings.generated.resources.menu_disconnect
 import org.churchpresenter.strings.generated.resources.timer_expired
 import kotlinx.coroutines.delay
-import org.churchpresenter.app.churchpresenter.composables.CompanionConnectionChipRow
-import org.churchpresenter.app.churchpresenter.composables.CompanionSurfacePanel
+import org.churchpresenter.companionsurface.CompanionConnectionChipRow
+import org.churchpresenter.companionsurface.CompanionSurfacePanel
 import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.InstanceLinkStatus
@@ -39,7 +39,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.PlanningCenterImportDialo
 import org.churchpresenter.schedule.ScheduleTab
 import org.churchpresenter.schedule.ScheduleToolbarIconSize
 import org.churchpresenter.sharedui.models.Tabs
-import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
+import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.AppSettings
