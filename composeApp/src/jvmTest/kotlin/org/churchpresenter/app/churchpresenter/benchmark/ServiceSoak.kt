@@ -133,7 +133,7 @@ class ServiceSoak {
         )
     }
 
-    /** VmRSS from `/proc/self/status`, where there is one (Linux, which is where the nightly run is). */
+    /** VmRSS from `/proc/self/status`, where there is one (Linux, which is where the CI run is). */
     private fun residentMb(): Double? = runCatching {
         File("/proc/self/status").readLines().firstOrNull { it.startsWith("VmRSS:") }
             ?.split(Regex("\\s+"))?.getOrNull(1)?.toDouble()?.div(KB_PER_MB)
