@@ -14,6 +14,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.atem.FakeAtemSwitcher
 
 /**
  * The connection card: the four boxes that say where the ATEM is and what to render for it, plus the
@@ -25,8 +26,8 @@ import kotlin.test.assertEquals
  * not**, so a rejected value stays visible instead of being silently reverted; that is asserted
  * alongside every guard.
  *
- * The button cannot be driven to a connected ATEM from a unit test, so what is driven here are the
- * two states that need no switcher on the other end: in flight, and failed.
+ * The button is driven three ways: against a [FakeAtemSwitcher] that answers (connected), against a
+ * socket that never does (in flight), and at a port no socket can be opened on (failed).
  */
 class AtemSettingsTabConnectionTest {
 
@@ -248,6 +249,50 @@ class AtemSettingsTabConnectionTest {
                     get().atemSettings,
                     "an attempt in flight must leave every stored setting as it was",
                 )
+            }
+        }
+    }
+
+    /**
+     * Pressed against a switcher that answers, the button must say so, say what the switcher is, and
+     * write what it found back to the settings: the detected counts are what every slot and keyer range
+     * on the tab is judged against, and the switcher's own frame rate replaces whatever was typed.
+     */
+    @Test
+    fun `a successful Test Connection reports the switcher and records what it detected`() {
+        FakeAtemSwitcher(mixEffects = 2, keyersPerMe = 4, downstreamKeyers = 2, stillSlotCount = 20).use { switcher ->
+            val initial = atemSettings { copy(host = "127.0.0.1", port = switcher.port, clipFps = 25.0) }
+            atemTab(initial = initial) { get ->
+                testButton().performClick()
+                waitUntil(timeoutMillis = 5_000) {
+                    onAllNodes(hasText(AtemLabel.CONNECTED)).fetchSemanticsNodes().isNotEmpty()
+                }
+
+                onNodeWithText(
+                    "Detected: 1080p59.94 (59.94 fps) — 2 clips × up to 720 frames (≈12.0s), 1000 frames unassigned",
+                ).assertExists("the switcher's video mode and how much clip memory it holds")
+                testButton().assertIsEnabled() // and the button is handed back
+
+                val saved = get().atemSettings
+                assertEquals(20, saved.detectedStillSlots, "the still slots the media pool holds")
+                assertEquals(2, saved.detectedClipSlots, "the clip slots")
+                assertEquals(2, saved.detectedMixEffects, "the M/Es")
+                assertEquals(listOf(4, 4), saved.detectedKeyersPerMe, "the keyers on each M/E")
+                assertEquals(2, saved.detectedDownstreamKeyers, "the downstream keyers")
+                assertEquals(listOf(720, 720), saved.detectedClipMaxFrames, "the frames each clip bank holds")
+                assertEquals(1000, saved.detectedUnassignedFrames, "the frames not yet given to a bank")
+                assertEquals(60000.0 / 1001.0, saved.clipFps, 1e-9, "the switcher's rate, not the typed one")
+                assertEquals("127.0.0.1", saved.host, "where the switcher is must be left alone")
+                assertEquals(switcher.port, saved.port, "and so must the port")
+
+                atemFieldUnder(AtemLabel.FPS).assertShows("59.94", "the fps box, re-formatted to the detected rate")
+                assertEquals(
+                    "${AtemLabel.STILL_SLOT} (1–20)",
+                    captionOf(AtemLabel.STILL_SLOT),
+                    "and the ranges the detected counts drive must now be on screen",
+                )
+                onNodeWithText("Detected: M/E 1: 4 keys   M/E 2: 4 keys   DSK: 2")
+                    .assertExists("as must the detected hardware line")
             }
         }
     }
