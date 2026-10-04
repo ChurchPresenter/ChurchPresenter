@@ -1,5 +1,11 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.presenter.BibleBandClock
+import org.churchpresenter.presenter.BibleBandPhase
+import org.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.presenter.LocalBandOutgoing
+import org.churchpresenter.presenter.LocalBandSongLineIndex
+import org.churchpresenter.presenter.LocalLottieBandClock
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size

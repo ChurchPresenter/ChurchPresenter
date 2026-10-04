@@ -2,7 +2,6 @@ package org.churchpresenter.presenter
 
 import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.settings.songLanguageSelection
-
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants

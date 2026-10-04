@@ -1,5 +1,12 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.styleElement
+import org.churchpresenter.presenter.withElementStyle
+import org.churchpresenter.presenter.elementStyle
+import org.churchpresenter.presenter.BibleElementStyle
+import org.churchpresenter.presenter.BibleStyleElement
+import org.churchpresenter.presenter.BibleStyleTarget
+import org.churchpresenter.presenter.defaultElementStyle
 import org.churchpresenter.bibletab.LONG_VERSE_WORDS_MAX
 import org.churchpresenter.bibletab.LONG_VERSE_WORDS_MIN
 import org.churchpresenter.bibletab.LONG_VERSE_WORDS_STEP

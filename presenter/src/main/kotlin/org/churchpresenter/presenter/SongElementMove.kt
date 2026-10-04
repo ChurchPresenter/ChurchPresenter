@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.translationElement
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.elementShift
 import org.churchpresenter.settings.songElementShiftKey
@@ -78,7 +76,7 @@ internal fun ColumnScope.SongElementLines(
  * drawn once per language -- [language]'s own on top of it. The title on the title slide is its own:
  * moving it there must not move the title above every verse.
  */
-internal fun songShiftKey(
+fun songShiftKey(
     element: SongStyleElement,
     lowerThird: Boolean,
     language: Int? = null,

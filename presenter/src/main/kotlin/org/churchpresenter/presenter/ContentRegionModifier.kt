@@ -31,7 +31,7 @@ private const val FULL_PERCENT = 100f
  * A no-op at the default [ContentRegion] -- full width, no offset -- so a presenter with nothing
  * configured pays for no extra layout pass.
  */
-internal fun Modifier.contentRegion(region: ContentRegion): Modifier {
+fun Modifier.contentRegion(region: ContentRegion): Modifier {
     if (region.xOffsetPercent == 0 && region.yOffsetPercent == 0 && region.widthPercent >= FULL_WIDTH_PERCENT) {
         return this
     }
@@ -91,14 +91,14 @@ internal fun Modifier.elementOffset(offset: ElementOffset?): Modifier {
 }
 
 /** [region] applied to the whole presenter, background and all -- unless it keeps the background full screen. */
-internal fun Modifier.wholeOutputRegion(region: ContentRegion): Modifier =
+fun Modifier.wholeOutputRegion(region: ContentRegion): Modifier =
     if (region.movesBackground) contentRegion(region) else this
 
 /**
  * The region the presenter places its text in by itself: [this] when it keeps the background full
  * screen. None on a [lowerThird], whose band already is its region.
  */
-internal fun ContentRegion.textOnly(lowerThird: Boolean): ContentRegion? =
+fun ContentRegion.textOnly(lowerThird: Boolean): ContentRegion? =
     takeUnless { movesBackground || lowerThird }
 
 /**

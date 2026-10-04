@@ -23,21 +23,21 @@ import org.churchpresenter.lottiegen.lottie.LottieTextShaping
 import org.churchpresenter.lottiegen.lottie.TextShaping
 
 /** A named span of a template's timeline, in frames. */
-internal data class LottieSegment(val startFrame: Float, val durationFrames: Float) {
+data class LottieSegment(val startFrame: Float, val durationFrames: Float) {
     val endFrame: Float get() = startFrame + durationFrames
 }
 
 /** A text slot's wrap box, in the template's own pixels. */
-internal data class LottieSlotBox(val x: Float, val y: Float, val w: Float, val h: Float)
+data class LottieSlotBox(val x: Float, val y: Float, val w: Float, val h: Float)
 
 /** How the generator asked the player to move a slot's text, if it asked at all. */
-internal enum class BandTextMotion { NONE, TYPEWRITER, TYPEWRITER_WORDS, TICKER }
+enum class BandTextMotion { NONE, TYPEWRITER, TYPEWRITER_WORDS, TICKER }
 
 /** A justification the template pins; null means the Bible settings decide. */
-internal enum class BandTextAlign { LEFT, CENTER, RIGHT }
+enum class BandTextAlign { LEFT, CENTER, RIGHT }
 
 /** A template's frame timing and canvas, in its own pixels. */
-internal data class LottieTemplateSize(
+data class LottieTemplateSize(
     val frameRate: Float,
     val width: Float,
     val height: Float,
@@ -53,7 +53,7 @@ internal data class LottieTemplateSize(
  * that was a setting, which are swapped in the time their text segments take — and whether its
  * text is drawn as whole lines or letter by letter.
  */
-internal data class BandTemplateMeta(
+data class BandTemplateMeta(
     val textMotion: BandTextMotion = BandTextMotion.NONE,
     val tickerPxPerSecond: Float = DEFAULT_TICKER_SPEED,
     val textAlign: BandTextAlign? = null,
@@ -68,7 +68,7 @@ internal data class BandTemplateMeta(
  * default — a template with no markers is played in thirds, a slot with no box is left where
  * the file put it — so a hand-made Lottie still works, just with less finesse.
  */
-internal class BibleLottieTemplate(
+class BibleLottieTemplate(
     val json: String,
     val size: LottieTemplateSize,
     val segments: Map<String, LottieSegment>,
@@ -311,13 +311,13 @@ private fun readTextMotion(meta: JsonObject?): BandTextMotion =
 private val templateGeneration = mutableStateOf(0)
 
 /** Re-reads every band template from disk. Call after one has been written. */
-internal fun invalidateBibleLottieTemplates() {
+fun invalidateBibleLottieTemplates() {
     templateGeneration.value++
 }
 
 /** Reads and parses [path] off the UI thread; null while loading and for a file that is not a template. */
 @Composable
-internal fun rememberBibleLottieTemplate(path: String): State<BibleLottieTemplate?> {
+fun rememberBibleLottieTemplate(path: String): State<BibleLottieTemplate?> {
     val generation = templateGeneration.value
     // Held across a reload rather than reset to null the way produceState would: a null template
     // drops the presenter through to the classic band, so re-reading the file would flash the whole

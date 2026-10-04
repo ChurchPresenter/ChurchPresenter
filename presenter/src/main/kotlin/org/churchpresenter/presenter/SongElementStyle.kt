@@ -13,7 +13,7 @@ import org.churchpresenter.settings.SongTextStyle
  * own view of the tab. The number and the title are on both: the title slide draws them with the
  * same profiles the lyric slides do.
  */
-internal enum class SongStyleElement {
+enum class SongStyleElement {
     NUMBER,
     TITLE,
     LYRICS,
@@ -37,16 +37,16 @@ internal enum class SongStyleElement {
 }
 
 /** Which output the styling being edited belongs to. */
-internal enum class SongStyleTarget { FULL_SCREEN, LOWER_THIRD }
+enum class SongStyleTarget { FULL_SCREEN, LOWER_THIRD }
 
-internal val SongStyleTarget.isLowerThird: Boolean get() = this == SongStyleTarget.LOWER_THIRD
+val SongStyleTarget.isLowerThird: Boolean get() = this == SongStyleTarget.LOWER_THIRD
 
 /**
  * The two elements whose place is stored with their look, in [SongElementStyle.position]. The
  * section label and the next-section line are placed too, but keep theirs elsewhere -- see
  * [storedPosition].
  */
-internal val SongStyleElement.hasPosition: Boolean
+val SongStyleElement.hasPosition: Boolean
     get() = this == SongStyleElement.NUMBER || this == SongStyleElement.TITLE
 
 /**
@@ -56,28 +56,28 @@ internal val SongStyleElement.hasPosition: Boolean
  * slide while it is on. The number and the title have no such field -- they are short enough that
  * they never needed one.
  */
-internal val SongStyleElement.hasAutoFit: Boolean
+val SongStyleElement.hasAutoFit: Boolean
     get() = this == SongStyleElement.LYRICS ||
         this == SongStyleElement.LOOK_AHEAD ||
         this == SongStyleElement.NEXT_SECTION
 
 /** Chords are drawn over the lyrics and nowhere else, so only the lyrics carry a chord colour. */
-internal val SongStyleElement.hasChordColor: Boolean
+val SongStyleElement.hasChordColor: Boolean
     get() = this == SongStyleElement.LYRICS
 
 /** The two elements that only ever appear on a look-ahead slide. */
-internal val SongStyleElement.onLookAheadSlide: Boolean
+val SongStyleElement.onLookAheadSlide: Boolean
     get() = this == SongStyleElement.LOOK_AHEAD || this == SongStyleElement.NEXT_SECTION
 
 /** The four credit lines, which only the title slide draws. */
-internal val SongStyleElement.isCredit: Boolean
+val SongStyleElement.isCredit: Boolean
     get() = this == SongStyleElement.AUTHOR ||
         this == SongStyleElement.COMPOSER ||
         this == SongStyleElement.CCLI ||
         this == SongStyleElement.TEMPO
 
 /** What the title slide draws, in the order it draws them; the number's place depends on a setting. */
-internal val TITLE_SLIDE_ELEMENTS: List<SongStyleElement> = listOf(
+val TITLE_SLIDE_ELEMENTS: List<SongStyleElement> = listOf(
     SongStyleElement.TITLE_SLIDE_NUMBER,
     SongStyleElement.TITLE,
     SongStyleElement.AUTHOR,
@@ -86,7 +86,7 @@ internal val TITLE_SLIDE_ELEMENTS: List<SongStyleElement> = listOf(
     SongStyleElement.TEMPO,
 )
 
-internal val SongStyleElement.onTitleSlide: Boolean get() = this in TITLE_SLIDE_ELEMENTS
+val SongStyleElement.onTitleSlide: Boolean get() = this in TITLE_SLIDE_ELEMENTS
 
 /**
  * The appearance of one element on one output.
@@ -106,10 +106,10 @@ internal val SongStyleElement.onTitleSlide: Boolean get() = this in TITLE_SLIDE_
  * see [SongStyleElement.hasPosition] and [SongStyleElement.hasChordColor]. The others read the
  * default and drop it on write, so a control for them is hidden rather than silently ineffective.
  */
-internal typealias SongElementStyle = SongTextStyle
+typealias SongElementStyle = SongTextStyle
 
 /** What this song draws [element] with on [target]. */
-internal fun SongSettings.elementStyle(
+fun SongSettings.elementStyle(
     element: SongStyleElement,
     target: SongStyleTarget,
 ): SongElementStyle = when (element) {
@@ -140,7 +140,7 @@ internal fun SongSettings.elementStyle(
  *
  * The inverse of [elementStyle] -- read, `copy` the one property a control changed, write back.
  */
-internal fun SongSettings.withElementStyle(
+fun SongSettings.withElementStyle(
     element: SongStyleElement,
     target: SongStyleTarget,
     style: SongElementStyle,
@@ -185,7 +185,7 @@ internal fun SongSettings.withElementStyle(
  * Read off a default [SongSettings] rather than written out again here, so the Reset button and the
  * stored defaults can never drift apart -- the lower third's own smaller font sizes included.
  */
-internal fun defaultSongElementStyle(
+fun defaultSongElementStyle(
     element: SongStyleElement,
     target: SongStyleTarget,
 ): SongElementStyle = SongSettings().elementStyle(element, target)
@@ -424,7 +424,7 @@ private fun SongSettings.nextSectionStyle(target: SongStyleTarget): SongElementS
  * whenever it is drawing one -- so the look-ahead and next-section elements have to read and write
  * that pair, or their controls would appear to do nothing while the preview showed the truth.
  */
-internal fun SongSettings.chunkFor(element: SongStyleElement, target: SongStyleTarget): String = when {
+fun SongSettings.chunkFor(element: SongStyleElement, target: SongStyleTarget): String = when {
     element.onLookAheadSlide && target.isLowerThird -> lowerThirdLookAheadDisplayMode
     element.onLookAheadSlide -> lookAheadDisplayMode
     target.isLowerThird -> lowerThirdDisplayMode
@@ -432,7 +432,7 @@ internal fun SongSettings.chunkFor(element: SongStyleElement, target: SongStyleT
 }
 
 /** The inverse of [chunkFor]. */
-internal fun SongSettings.withChunk(
+fun SongSettings.withChunk(
     element: SongStyleElement,
     target: SongStyleTarget,
     mode: String,

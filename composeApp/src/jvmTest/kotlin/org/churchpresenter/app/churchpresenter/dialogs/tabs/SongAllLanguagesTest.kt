@@ -1,5 +1,10 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.SongStyleElement
+import org.churchpresenter.presenter.SongStyleTarget
+import org.churchpresenter.presenter.defaultSongElementStyle
+import org.churchpresenter.presenter.withElementStyle
+import org.churchpresenter.presenter.elementStyle
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.SongTextStyle
 import org.churchpresenter.settings.SongTranslationSettings

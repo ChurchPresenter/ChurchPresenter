@@ -42,7 +42,6 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.canvas.CameraBackground
 import org.churchpresenter.canvas.CameraDevice
 import org.churchpresenter.canvas.CameraDeviceCatalog
-
 import org.churchpresenter.slides.utils.PictureDecoder
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.core.models.camera.CameraDeviceRef
@@ -59,7 +58,7 @@ import org.churchpresenter.sharedui.presenter.REFERENCE_HEIGHT
 import org.churchpresenter.sharedui.presenter.presenterScale
 
 /** How far a blurred background is scaled up so its faded edge lands off screen. */
-internal const val BACKGROUND_BLUR_OVERSCAN = 1.08f
+const val BACKGROUND_BLUR_OVERSCAN = 1.08f
 
 /**
  * How far past its own edge a blurred layer has to be drawn for the fade to land out of sight,
@@ -79,10 +78,10 @@ internal const val BLUR_EDGE_BLEED = 3f
  * any realistic output, hidden under the band drawn after it. Guards against the two
  * independently-rounded complementary fractions leaving a real gap.
  */
-internal const val ABOVE_BAND_OVERLAP_FRACTION = 0.006f
+const val ABOVE_BAND_OVERLAP_FRACTION = 0.006f
 
 /** A percentage as a fraction. */
-internal const val PERCENT = 100f
+const val PERCENT = 100f
 
 /**
  * How tall the lower-third band is, as a fraction of the output — which is exactly how much of the
@@ -95,7 +94,7 @@ internal const val PERCENT = 100f
  * The presenters do not go through this: each draws its own band from its own setting. It is here
  * so a preview measures the band the same way the output does.
  */
-internal fun AppSettings.lowerThirdBandFraction(mode: Presenting?): Float = when (mode) {
+fun AppSettings.lowerThirdBandFraction(mode: Presenting?): Float = when (mode) {
     Presenting.BIBLE -> bibleSettings.lowerThirdHeightPercent
     Presenting.LYRICS -> songSettings.lowerThirdHeightPercent
     else -> maxOf(bibleSettings.lowerThirdHeightPercent, songSettings.lowerThirdHeightPercent)
@@ -112,11 +111,11 @@ internal fun AppSettings.lowerThirdBandFraction(mode: Presenting?): Float = when
  *
  * [presenterScale] measures the same way and for the same reason.
  */
-internal fun backgroundBlurRadius(blurReferencePx: Int, width: Dp): Dp =
+fun backgroundBlurRadius(blurReferencePx: Int, width: Dp): Dp =
     (blurReferencePx * (width.value / BACKGROUND_REFERENCE_WIDTH)).dp
 
 /** What a presenter actually draws, once every source has had its say. */
-internal data class ResolvedBackground(
+data class ResolvedBackground(
     val type: String,
     val imagePath: String,
     val videoPath: String,
@@ -262,7 +261,7 @@ private fun defaultBackground(settings: BackgroundSettings, isLowerThird: Boolea
  * The wash's colour (or null for nothing) and whether it is painted behind the band too — see
  * [resolveAboveBand].
  */
-internal data class AboveBand(
+data class AboveBand(
     val fill: Color?,
     val fillsBehindBand: Boolean,
     /** The picture, clip or camera drawn there instead of [fill]; null for a colour or nothing. */
@@ -293,7 +292,7 @@ internal data class AboveBand(
  * to key. [AboveBand.fillsBehindBand] follows the same defer chain independently of the colour, so
  * a surface can inherit the Default's wash colour while overriding just the behind-band choice.
  */
-internal fun resolveAboveBand(settings: BackgroundSettings, config: BackgroundConfig): AboveBand {
+fun resolveAboveBand(settings: BackgroundSettings, config: BackgroundConfig): AboveBand {
     val defers = config.aboveBandType == Constants.BACKGROUND_DEFAULT
     val fillsBehindBand =
         if (defers) settings.defaultLowerThirdAboveBandFillsBehindBand else config.aboveBandFillsBehindBand

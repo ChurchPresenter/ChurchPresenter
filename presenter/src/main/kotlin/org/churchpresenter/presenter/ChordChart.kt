@@ -167,7 +167,7 @@ private fun InlineChordRow(
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun ChordLine(
+fun ChordLine(
     segments: List<ChordSegment>,
     showChords: Boolean,
     textColor: Color = MaterialTheme.colorScheme.onSurface,

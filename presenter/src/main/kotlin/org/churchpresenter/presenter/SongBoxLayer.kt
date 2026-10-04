@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.sharedui.composables.OutlinedText
-
 import org.churchpresenter.sharedui.utils.spacingEm
 import org.churchpresenter.sharedui.utils.styledDisplayText
 import org.churchpresenter.core.models.text.TextOutline
@@ -32,7 +31,7 @@ import org.churchpresenter.sharedui.presenter.fitInBox
 import org.churchpresenter.sharedui.presenter.rectIn
 
 /** The song elements drawn once per language, and so boxed once per language unless they share a box. */
-internal val SongStyleElement.boxedPerLanguage: Boolean
+val SongStyleElement.boxedPerLanguage: Boolean
     get() = this == SongStyleElement.LYRICS || this == SongStyleElement.LOOK_AHEAD ||
         this == SongStyleElement.NEXT_SECTION
 
@@ -40,7 +39,7 @@ internal val SongStyleElement.boxedPerLanguage: Boolean
  * The key [element]'s box is stored under on [lowerThird]'s output -- with [language] for an element
  * drawn once per language, unless the page has its languages share one box.
  */
-internal fun SongSettings.songBoxKey(
+fun SongSettings.songBoxKey(
     element: SongStyleElement,
     lowerThird: Boolean,
     language: Int? = null,
@@ -56,7 +55,7 @@ private const val TITLE_SLIDE_BOX_PREFIX = "SLIDE_"
  * The key a title slide [element]'s box is stored under -- with [language] for a title line, which
  * the slide draws once per language, unless the page has its languages share one box.
  */
-internal fun SongSettings.titleSlideBoxKey(
+fun SongSettings.titleSlideBoxKey(
     element: SongStyleElement,
     lowerThird: Boolean,
     language: Int? = null,

@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import org.churchpresenter.canvas.CameraBackground
-
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.LowerThirdPlacement
@@ -55,7 +54,7 @@ internal fun placedBandFraction(appSettings: AppSettings): Float =
  *   says: the whole output, or clipped to the band's rectangle at the bottom.
  */
 @Composable
-internal fun LowerThirdLayout(
+fun LowerThirdLayout(
     mode: Presenting,
     profile: OutputProfile,
     appSettings: AppSettings,

@@ -18,7 +18,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.sharedui.composables.OutlinedText
 import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
-
 import org.churchpresenter.sharedui.utils.spacingEm
 import org.churchpresenter.sharedui.utils.styledDisplayText
 import org.churchpresenter.settings.utils.Constants

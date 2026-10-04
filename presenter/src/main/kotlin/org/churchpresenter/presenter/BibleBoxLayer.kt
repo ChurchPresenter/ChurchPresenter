@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.sharedui.composables.OutlinedText
-
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.sharedui.utils.combinedTextDecoration
@@ -48,7 +47,7 @@ private val BibleStyleElement.boxItem: String
  * The key [element]'s box is stored under for the translation in [fileName] on [lowerThird]'s
  * output -- one per translation, unless the page has its translations share one box.
  */
-internal fun BibleSettings.bibleBoxKey(element: BibleStyleElement, lowerThird: Boolean, fileName: String): String =
+fun BibleSettings.bibleBoxKey(element: BibleStyleElement, lowerThird: Boolean, fileName: String): String =
     textBoxKey(element.boxItem, lowerThird, fileName.takeUnless { textBoxOptions.sharedLanguageBox })
 
 /** Whether [item]'s [element] is drawn in a box of its own on [lowerThird]'s output, rather than laid out. */

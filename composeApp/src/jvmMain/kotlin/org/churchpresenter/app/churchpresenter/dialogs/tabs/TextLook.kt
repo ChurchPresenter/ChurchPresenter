@@ -1,5 +1,9 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.BibleElementStyle
+import org.churchpresenter.presenter.SongStyleElement
+import org.churchpresenter.presenter.hasAutoFit
+import org.churchpresenter.presenter.hasChordColor
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.SongTextStyle

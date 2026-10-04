@@ -20,5 +20,5 @@ internal data class SongCrossfadePage(
  * capo, so changing either re-sends a slide that looks exactly as it did -- and crossfading a slide
  * into itself dims it by a quarter at the midpoint.
  */
-internal fun LyricSection.isRestatedAs(next: LyricSection): Boolean =
+fun LyricSection.isRestatedAs(next: LyricSection): Boolean =
     this == next || copy(bpm = next.bpm, capo = next.capo) == next

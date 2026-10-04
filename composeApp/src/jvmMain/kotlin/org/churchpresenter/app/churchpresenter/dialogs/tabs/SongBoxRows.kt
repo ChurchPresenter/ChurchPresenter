@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.SongStyleElement
+import org.churchpresenter.presenter.hasPosition
+import org.churchpresenter.presenter.numberCorner
 import androidx.compose.runtime.Composable
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.profile_box

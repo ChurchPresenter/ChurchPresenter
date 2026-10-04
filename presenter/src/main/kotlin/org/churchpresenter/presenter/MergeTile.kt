@@ -34,11 +34,11 @@ internal fun Modifier.mergeTile(merge: ResolvedMerge?, output: String): Modifier
  * which cannot be shifted or clipped to a tile, so inside one the website is drawn from its
  * snapshot instead -- as the off-screen outputs always draw it.
  */
-internal val LocalInMergedTile = staticCompositionLocalOf { false }
+val LocalInMergedTile = staticCompositionLocalOf { false }
 
 /** [content] as [output]'s tile of [merge] -- see [mergeTile]; drawn as it is when there is none. */
 @Composable
-internal fun MergedTile(merge: ResolvedMerge?, output: String, content: @Composable BoxScope.() -> Unit) {
+fun MergedTile(merge: ResolvedMerge?, output: String, content: @Composable BoxScope.() -> Unit) {
     val inTile = merge?.tiles?.containsKey(output) == true
     CompositionLocalProvider(LocalInMergedTile provides inTile) {
         Box(Modifier.fillMaxSize().mergeTile(merge, output), content = content)
@@ -49,7 +49,7 @@ internal fun MergedTile(merge: ResolvedMerge?, output: String, content: @Composa
  * [this] output sized as the whole of [merge]'s picture, whatever kind it is -- how the preview
  * panel draws a merge: once, at the picture's shape, in place of its separate tiles.
  */
-internal fun ScreenAssignment.sizedAs(merge: ResolvedMerge): ScreenAssignment = copy(
+fun ScreenAssignment.sizedAs(merge: ResolvedMerge): ScreenAssignment = copy(
     targetBoundsW = if (targetBoundsW > 0) merge.width else 0,
     targetBoundsH = if (targetBoundsH > 0) merge.height else 0,
     devWindowWidth = merge.width,
@@ -67,7 +67,7 @@ internal fun ScreenAssignment.sizedAs(merge: ResolvedMerge): ScreenAssignment = 
  * holds the whole picture together -- every tile of one picture has to show the same thing. An
  * output outside every merge follows its own.
  */
-internal fun mergeHostIndex(merges: Map<String, ResolvedMerge>, kind: String, index: Int): Int {
+fun mergeHostIndex(merges: Map<String, ResolvedMerge>, kind: String, index: Int): Int {
     val host = merges[Constants.previewOutputKey(kind, index)]?.host ?: return index
     return host.substringAfter(':').toIntOrNull() ?: index
 }

@@ -49,6 +49,7 @@ dependencies {
     // The generated band template the Lottie suites point the settings at, shared with :composeApp's.
     testFixturesImplementation(projects.lottieGenerator)
     testFixturesImplementation(libs.kotlinx.serialization.json)
+    testFixturesImplementation(compose.desktop.currentOs)
 
     testImplementation(kotlin("test"))
     testImplementation(testFixtures(projects.sharedUi))

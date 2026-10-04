@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.presenter
 
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
@@ -15,7 +15,7 @@ import org.churchpresenter.settings.utils.Constants
  * off. Reinstated here, beside the chunk control, because "when does this element appear" and "how
  * much of the song is on a slide" are the same kind of question about the same two outputs.
  */
-internal fun SongSettings.showFor(element: SongStyleElement, target: SongStyleTarget): String? = when {
+fun SongSettings.showFor(element: SongStyleElement, target: SongStyleTarget): String? = when {
     element == SongStyleElement.NUMBER && target.isLowerThird -> showNumberLowerThird
     element == SongStyleElement.NUMBER -> showNumber
     element == SongStyleElement.TITLE && target.isLowerThird -> titleLowerThirdDisplay
@@ -29,7 +29,7 @@ internal fun SongSettings.showFor(element: SongStyleElement, target: SongStyleTa
  * Where they sit apart -- one above the lyrics, one below -- the slide's own layout already answers
  * which comes first, and offering a switch for it would be offering a choice with no effect.
  */
-internal fun SongSettings.numberSharesTitlePosition(target: SongStyleTarget): Boolean =
+fun SongSettings.numberSharesTitlePosition(target: SongStyleTarget): Boolean =
     // A cornered number is drawn over the slide and never in the title's row, so their order is not
     // a question there either -- see [numberCorner].
     if (numberCorner(target.isLowerThird) != Constants.NONE) {
@@ -43,7 +43,7 @@ internal fun SongSettings.numberSharesTitlePosition(target: SongStyleTarget): Bo
     }
 
 /** The inverse of [showFor]; a no-op for an element that has no such setting. */
-internal fun SongSettings.withShow(
+fun SongSettings.withShow(
     element: SongStyleElement,
     target: SongStyleTarget,
     value: String,
@@ -82,7 +82,7 @@ internal fun SongSettings.shownForPreview(
  * Not per output: the slide says the same things on the band as on the screen, and the two outputs
  * differ in how those things are drawn, which is what the per-target profiles are for.
  */
-internal fun SongSettings.shownOnTitleSlide(element: SongStyleElement): Boolean? = when (element) {
+fun SongSettings.shownOnTitleSlide(element: SongStyleElement): Boolean? = when (element) {
     // TITLE_SLIDE_NUMBER, not NUMBER: the lyric slides' number is not on this slide at all, and
     // these two `when`s take an `else` branch, so leaving NUMBER here would have compiled and then
     // silently detached the title slide's own Show switch from the element it governs.
@@ -96,7 +96,7 @@ internal fun SongSettings.shownOnTitleSlide(element: SongStyleElement): Boolean?
 }
 
 /** The inverse of [shownOnTitleSlide]; a no-op for an element the title slide never draws. */
-internal fun SongSettings.withShownOnTitleSlide(element: SongStyleElement, on: Boolean): SongSettings =
+fun SongSettings.withShownOnTitleSlide(element: SongStyleElement, on: Boolean): SongSettings =
     when (element) {
         SongStyleElement.TITLE_SLIDE_NUMBER -> copy(titleSlideShowSongNumber = on)
         SongStyleElement.TITLE -> copy(titleSlideShowTitle = on)

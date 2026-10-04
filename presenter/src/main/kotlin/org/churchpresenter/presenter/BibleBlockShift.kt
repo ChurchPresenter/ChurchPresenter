@@ -35,24 +35,24 @@ private fun Modifier.shifted(x: Int, y: Int, scaleFactor: Float): Modifier =
     if (x == 0 && y == 0) this else offset((x * scaleFactor).dp, (y * scaleFactor).dp)
 
 /** Whether this translation's block or its reference is moved on its own on [lowerThird]'s output. */
-internal fun BibleTranslationSettings.movedOn(lowerThird: Boolean): Boolean {
+fun BibleTranslationSettings.movedOn(lowerThird: Boolean): Boolean {
     val block = if (lowerThird) lowerThirdShiftX to lowerThirdShiftY else shiftX to shiftY
     return block != (0 to 0) || referenceShiftFor(lowerThird) != (0 to 0)
 }
 
 /** [this] with its block and its reference back where the layout puts them on [lowerThird]'s output. */
-internal fun BibleTranslationSettings.withMovesCleared(lowerThird: Boolean): BibleTranslationSettings {
+fun BibleTranslationSettings.withMovesCleared(lowerThird: Boolean): BibleTranslationSettings {
     val unmoved = withReferenceShift(lowerThird, 0, 0)
     return if (lowerThird) unmoved.copy(lowerThirdShiftX = 0, lowerThirdShiftY = 0)
     else unmoved.copy(shiftX = 0, shiftY = 0)
 }
 
 /** The reference's own move on [lowerThird]'s output, x to y. */
-internal fun BibleTranslationSettings.referenceShiftFor(lowerThird: Boolean): Pair<Int, Int> =
+fun BibleTranslationSettings.referenceShiftFor(lowerThird: Boolean): Pair<Int, Int> =
     if (lowerThird) lowerThirdReferenceShiftX to lowerThirdReferenceShiftY else referenceShiftX to referenceShiftY
 
 /** [this] with its reference moved to [x], [y] on [lowerThird]'s output. */
-internal fun BibleTranslationSettings.withReferenceShift(
+fun BibleTranslationSettings.withReferenceShift(
     lowerThird: Boolean,
     x: Int,
     y: Int,

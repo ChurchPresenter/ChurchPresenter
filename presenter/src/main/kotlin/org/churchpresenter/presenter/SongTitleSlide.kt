@@ -26,9 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
-
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.shownOnTitleSlide
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.titleSlideOffset
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.sharedui.utils.combinedTextDecoration

@@ -14,6 +14,8 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.presenter.isRestatedAs
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 
+
+
 /** Plays one band phase from [from] to 1 over [durationMs], publishing every frame to the clock. */
 internal suspend fun PresenterManager.runBandPhase(phase: BibleBandPhase, durationMs: Long) {
     setLottieBandClock(BibleBandClock(phase, 0f))

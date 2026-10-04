@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.presenter.usesBibleLottieBand
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.BackgroundConfig

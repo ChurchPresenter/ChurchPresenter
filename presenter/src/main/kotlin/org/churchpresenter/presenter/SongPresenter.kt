@@ -27,9 +27,7 @@ import androidx.compose.ui.unit.sp
 import java.io.File
 import org.churchpresenter.canvas.CameraDevice
 import org.churchpresenter.canvas.CameraDeviceCatalog
-
 import org.churchpresenter.canvas.cameraResolves
-
 import org.churchpresenter.sharedui.utils.calculateChordChartFontSize
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SongBackground

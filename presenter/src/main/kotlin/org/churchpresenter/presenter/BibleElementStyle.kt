@@ -11,12 +11,12 @@ import org.churchpresenter.settings.utils.Constants
  * The settings tab edits one at a time rather than showing both stacked, which is what lets a
  * single set of controls stand for what used to be four parallel copies of every field.
  */
-internal enum class BibleStyleElement { TEXT, REFERENCE }
+enum class BibleStyleElement { TEXT, REFERENCE }
 
 /** Which output the styling being edited belongs to. */
-internal enum class BibleStyleTarget { FULL_SCREEN, LOWER_THIRD }
+enum class BibleStyleTarget { FULL_SCREEN, LOWER_THIRD }
 
-internal val BibleStyleTarget.isLowerThird: Boolean get() = this == BibleStyleTarget.LOWER_THIRD
+val BibleStyleTarget.isLowerThird: Boolean get() = this == BibleStyleTarget.LOWER_THIRD
 
 /**
  * The appearance of one element on one output, lifted out of [BibleTranslationSettings].
@@ -31,7 +31,7 @@ internal val BibleStyleTarget.isLowerThird: Boolean get() = this == BibleStyleTa
  * Every property carries the same default its stored counterpart does, which is also what makes
  * `BibleElementStyle()` the value the panel's Reset button writes.
  */
-internal data class BibleElementStyle(
+data class BibleElementStyle(
     val color: String = "#FFFFFF",
     val fontType: String = "Arial",
     val fontSize: Int = 70,
@@ -56,7 +56,7 @@ internal data class BibleElementStyle(
 )
 
 /** What this translation currently draws [element] with on [target]. */
-internal fun BibleTranslationSettings.elementStyle(
+fun BibleTranslationSettings.elementStyle(
     element: BibleStyleElement,
     target: BibleStyleTarget,
 ): BibleElementStyle = when {
@@ -147,7 +147,7 @@ internal fun BibleTranslationSettings.elementStyle(
  * [BibleElementStyle.position] is dropped for [BibleStyleElement.TEXT], which has nowhere to store
  * it: only the reference moves above or below.
  */
-internal fun BibleTranslationSettings.withElementStyle(
+fun BibleTranslationSettings.withElementStyle(
     element: BibleStyleElement,
     target: BibleStyleTarget,
     style: BibleElementStyle,
@@ -247,7 +247,7 @@ private fun BibleTranslationSettings.withLowerThirdReference(s: BibleElementStyl
  * button and the stored defaults can never drift apart -- the lower third's own smaller default
  * font sizes included.
  */
-internal fun defaultElementStyle(
+fun defaultElementStyle(
     element: BibleStyleElement,
     target: BibleStyleTarget,
 ): BibleElementStyle = BibleTranslationSettings().elementStyle(element, target)

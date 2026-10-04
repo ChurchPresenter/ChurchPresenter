@@ -1,5 +1,13 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.styleElement
+import org.churchpresenter.presenter.withElementStyle
+import org.churchpresenter.presenter.elementStyle
+import org.churchpresenter.presenter.SongElementStyle
+import org.churchpresenter.presenter.SongStyleElement
+import org.churchpresenter.presenter.SongStyleTarget
+import org.churchpresenter.presenter.isLowerThird
+import org.churchpresenter.presenter.translationElement
 import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.settings.SongAllLanguages
 import org.churchpresenter.settings.SongSettings

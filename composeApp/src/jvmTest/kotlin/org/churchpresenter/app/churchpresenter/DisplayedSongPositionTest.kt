@@ -2,7 +2,6 @@ package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.churchpresenter.presenter.isSamePageAs
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.AppSettings
@@ -44,7 +43,7 @@ class DisplayedSongPositionTest {
             val position = manager.displayedSongPosition.value
             val shown = manager.displayedLyricSection.value
             assertTrue(
-                position.allSections.getOrNull(position.sectionIndex)?.isSamePageAs(shown) == true,
+                position.allSections.getOrNull(position.sectionIndex)?.let { it.header == shown.header && it.lines == shown.lines } == true,
                 "frame $frame: the outputs drew ${shown.header} at section ${position.sectionIndex}",
             )
             mainClock.advanceTimeByFrame()

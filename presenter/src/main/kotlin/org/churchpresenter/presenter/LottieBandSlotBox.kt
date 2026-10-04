@@ -9,7 +9,7 @@ package org.churchpresenter.presenter
  * Its own small file rather than a fourth (or twelfth) function on [BibleLottieTemplate] or
  * `BibleLottieBand.kt` — both already sit at the `TooManyFunctions` ceiling.
  */
-internal fun BibleLottieTemplate.effectiveBox(name: String, texts: Map<String, String?>): LottieSlotBox {
+fun BibleLottieTemplate.effectiveBox(name: String, texts: Map<String, String?>): LottieSlotBox {
     val paired = when (name) {
         BibleLottieTemplate.LAYER_TEXT_1 -> BibleLottieTemplate.LAYER_TEXT_2
         BibleLottieTemplate.LAYER_TEXT_2 -> BibleLottieTemplate.LAYER_TEXT_1

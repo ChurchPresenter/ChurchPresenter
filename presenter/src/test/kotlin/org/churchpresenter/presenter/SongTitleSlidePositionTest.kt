@@ -15,8 +15,6 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.v2.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
-
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.withTitleSlideOffset
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.ElementOffset

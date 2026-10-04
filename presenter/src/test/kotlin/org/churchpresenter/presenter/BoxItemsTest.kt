@@ -1,7 +1,6 @@
 package org.churchpresenter.presenter
 
 import androidx.compose.ui.geometry.Rect
-
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SectionTranslation

@@ -419,5 +419,5 @@ private fun tickerPosition(template: BibleLottieTemplate, r: SlotRender, seconds
  * then draws its own text and plays its own entrance and exit, so the fade on clear gives way to
  * the template's exit segment.
  */
-internal fun usesBibleLottieBand(config: BackgroundConfig): Boolean =
+fun usesBibleLottieBand(config: BackgroundConfig): Boolean =
     config.backgroundType == Constants.BACKGROUND_LOTTIE && config.backgroundLottie.isNotBlank()

@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.presenter
 
 import org.churchpresenter.settings.ElementOffset
 import org.churchpresenter.settings.OutputElementOffset
@@ -20,7 +20,7 @@ import org.churchpresenter.settings.SongTitleSlideOffsets
  * a nudge of its own instead, on `SongTitleSlideNumber`. A caller does not have to check either: an
  * element with nowhere to store an offset simply has none.
  */
-internal fun SongSettings.titleSlideOffset(
+fun SongSettings.titleSlideOffset(
     element: SongStyleElement,
     target: SongStyleTarget,
 ): ElementOffset? = layoutExtras.titleSlideOffsets
@@ -28,7 +28,7 @@ internal fun SongSettings.titleSlideOffset(
     ?.forOutput(target.isLowerThird)
 
 /** [titleSlideOffset]'s inverse: these settings with [element]'s offset on [target] set to [value]. */
-internal fun SongSettings.withTitleSlideOffset(
+fun SongSettings.withTitleSlideOffset(
     element: SongStyleElement,
     target: SongStyleTarget,
     value: ElementOffset?,
@@ -57,5 +57,5 @@ private fun SongTitleSlideOffsets.slotFor(element: SongStyleElement): OutputElem
 }
 
 /** Test handle for one title-slide element's positioning switch. */
-internal fun titleSlideOffsetTag(element: SongStyleElement): String =
+fun titleSlideOffsetTag(element: SongStyleElement): String =
     "title_slide_offset_${element.name.lowercase()}"

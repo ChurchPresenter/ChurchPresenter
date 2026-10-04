@@ -36,7 +36,7 @@ internal fun loopedProgress(holdProgress: Float, elapsedNanos: Long, durationNan
  * stage stays on the hold frame the screenshots were recorded with.
  */
 @Composable
-internal fun BibleLottieStillFrame(path: String, modifier: Modifier = Modifier) {
+fun BibleLottieStillFrame(path: String, modifier: Modifier = Modifier) {
     val template by rememberBibleLottieTemplate(path)
     val loaded = template ?: return
     val composition by rememberLottieComposition(loaded.json) { LottieCompositionSpec.JsonString(loaded.json) }

@@ -24,6 +24,8 @@ import org.churchpresenter.presenter.rememberBibleLottieTemplate
 import org.churchpresenter.app.churchpresenter.viewmodel.DisplayedSongPosition
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 
+
+
 /**
  * The cross-fades and slide transitions that move selected content to displayed content: the fade
  * on clear, and the per-type animations for verses, lyrics, pictures, slides and announcements.

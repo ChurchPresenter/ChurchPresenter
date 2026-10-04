@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.presenter
 
 import androidx.compose.runtime.Composable
 import org.churchpresenter.strings.generated.resources.Res
@@ -19,19 +19,19 @@ import org.jetbrains.compose.resources.stringResource
  * setting layered on it: while one is chosen the presenter draws the number over the slide and the
  * position and ordering controls have nothing left to say about it.
  */
-internal fun SongSettings.numberCorner(lowerThird: Boolean): String =
+fun SongSettings.numberCorner(lowerThird: Boolean): String =
     if (lowerThird) songNumberLowerThirdCorner else songNumberCorner
 
 /** The inverse of [numberCorner]. */
-internal fun SongSettings.withNumberCorner(lowerThird: Boolean, value: String): SongSettings =
+fun SongSettings.withNumberCorner(lowerThird: Boolean, value: String): SongSettings =
     if (lowerThird) copy(songNumberLowerThirdCorner = value) else copy(songNumberCorner = value)
 
 /** The fine X/Y nudge on top of [numberCorner], for [lowerThird]'s output. */
-internal fun SongSettings.numberOffset(lowerThird: Boolean): SongNumberOffset =
+fun SongSettings.numberOffset(lowerThird: Boolean): SongNumberOffset =
     if (lowerThird) layoutExtras.numberLowerThirdOffset else layoutExtras.numberOffset
 
 /** The inverse of [numberOffset]. */
-internal fun SongSettings.withNumberOffset(lowerThird: Boolean, value: SongNumberOffset): SongSettings =
+fun SongSettings.withNumberOffset(lowerThird: Boolean, value: SongNumberOffset): SongSettings =
     if (lowerThird) {
         copy(layoutExtras = layoutExtras.copy(numberLowerThirdOffset = value))
     } else {
@@ -40,7 +40,7 @@ internal fun SongSettings.withNumberOffset(lowerThird: Boolean, value: SongNumbe
 
 /** Off, then the four corners — the dropdown's options, keyed by what is stored. */
 @Composable
-internal fun songNumberCornerOptions(): List<Pair<String, String>> = listOf(
+fun songNumberCornerOptions(): List<Pair<String, String>> = listOf(
     Constants.NONE to stringResource(Res.string.song_number_corner_off),
     Constants.TOP_LEFT to stringResource(Res.string.top_left),
     Constants.TOP_RIGHT to stringResource(Res.string.top_right),

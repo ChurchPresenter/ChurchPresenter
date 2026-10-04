@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
 import java.io.File
-
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable

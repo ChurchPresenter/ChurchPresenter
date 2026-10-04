@@ -1,7 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.SongStyleElement
+import org.churchpresenter.presenter.songShiftKey
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.presenter.elementMove
 import org.churchpresenter.presenter.movedOn
 import org.churchpresenter.presenter.referenceShiftFor
 import org.churchpresenter.presenter.withMovesCleared
@@ -31,16 +32,6 @@ class ElementMovesTest {
             "TITLE_SLIDE_TITLE#0",
             songShiftKey(SongStyleElement.TITLE, lowerThird = false, language = 0, titleSlide = true),
         )
-    }
-
-    @Test
-    fun `a language's lines move by the element's move and their own together`() {
-        val song = SongSettings()
-            .shiftedAt(songShiftKey(SongStyleElement.LYRICS, false), 10, 5)
-            .shiftedAt(songShiftKey(SongStyleElement.LYRICS, false, 1), 3, -2)
-        assertEquals(13 to 3, song.elementMove(SongStyleElement.LYRICS, lowerThird = false, language = 1))
-        assertEquals(10 to 5, song.elementMove(SongStyleElement.LYRICS, lowerThird = false, language = 0))
-        assertEquals(0 to 0, song.elementMove(SongStyleElement.LYRICS, lowerThird = true, language = 1))
     }
 
     @Test

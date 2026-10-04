@@ -20,7 +20,6 @@ import org.churchpresenter.settings.SongCreditStyle
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.TextBox
-
 import kotlin.test.Test
 import kotlin.test.assertTrue
 

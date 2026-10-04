@@ -17,7 +17,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.sharedui.composables.rememberTextBlockBackdrop
-
 import org.churchpresenter.sharedui.utils.combinedTextDecoration
 import org.churchpresenter.sharedui.utils.spacingEm
 import org.churchpresenter.core.models.songs.LyricSection

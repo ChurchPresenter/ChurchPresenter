@@ -36,7 +36,7 @@ lower-third band** generator, opened from Settings → Bible → Lower Third Ani
 Background tab's Bible Lower Third surface (`dialogs/tabs/BibleLottieBandPicker.kt`). It takes an
 `outputDir`, an `onFileSaved: (File) -> Unit` and a `BibleLottieGenConfig` seed, and shares the
 engine, `PreviewPanel` and palette with the main generator. The app plays its files through
-`presenter/BibleLottieBand.kt`, which fills the named text layers at run time — see the contract
+`presenter/…/BibleLottieBand.kt`, which fills the named text layers at run time — see the contract
 under `band/` below.
 
 ## Layout

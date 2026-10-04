@@ -24,7 +24,7 @@ import kotlin.test.assertTrue
 class SongPresenterTitleRuleTest {
 
     private val songPresenterKt =
-        Class.forName("org.churchpresenter.app.churchpresenter.presenter.SongPresenterKt")
+        Class.forName("org.churchpresenter.presenter.SongPresenterKt")
 
     private fun shouldShowText(display: String, section: LyricSection): Boolean =
         songPresenterKt

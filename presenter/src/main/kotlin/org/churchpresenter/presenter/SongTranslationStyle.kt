@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.presenter
 
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.SongTranslationElement
@@ -11,7 +11,7 @@ import org.churchpresenter.settings.withTranslationSettings
  * The song number is `null`: the digits do not change with the language, so it has one profile and
  * not four. So are the title slide's credits, for the same reason.
  */
-internal val SongStyleElement.translationElement: SongTranslationElement?
+val SongStyleElement.translationElement: SongTranslationElement?
     get() = when (this) {
         // Neither number changes with the language: the digits are the digits.
         SongStyleElement.NUMBER, SongStyleElement.TITLE_SLIDE_NUMBER -> null
@@ -32,7 +32,7 @@ internal val SongStyleElement.translationElement: SongTranslationElement?
  * no per-language form, resolve straight to the flat fields [elementStyle] reads; the rest go
  * through [SongSettings.translationStyle], which applies the inheritance rule.
  */
-internal fun SongSettings.elementStyle(
+fun SongSettings.elementStyle(
     element: SongStyleElement,
     target: SongStyleTarget,
     translation: Int,
@@ -46,7 +46,7 @@ internal fun SongSettings.elementStyle(
 }
 
 /** The inverse of [SongStyleElement.translationElement]. */
-internal val SongTranslationElement.styleElement: SongStyleElement
+val SongTranslationElement.styleElement: SongStyleElement
     get() = when (this) {
         SongTranslationElement.TITLE -> SongStyleElement.TITLE
         SongTranslationElement.LYRICS -> SongStyleElement.LYRICS
@@ -61,7 +61,7 @@ internal val SongTranslationElement.styleElement: SongStyleElement
  * effect while that language has `overrideStyle` on -- the panel turns it on before offering the
  * controls, so there is no path here that writes somewhere nothing reads.
  */
-internal fun SongSettings.withElementStyle(
+fun SongSettings.withElementStyle(
     element: SongStyleElement,
     target: SongStyleTarget,
     translation: Int,

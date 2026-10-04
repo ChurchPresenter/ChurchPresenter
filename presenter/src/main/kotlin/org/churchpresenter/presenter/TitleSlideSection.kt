@@ -18,7 +18,7 @@ import org.churchpresenter.settings.utils.Constants
  * stage monitor and the companion app. Both come from [titleSlideLines], so they cannot disagree.
  * Its `songNumber` is the numeric part of the song number, or 0 when the number isn't numeric.
  */
-internal fun titleSlideSection(
+fun titleSlideSection(
     song: SongItem,
     tuning: SongTuning,
     settings: SongSettings = SongSettings(),

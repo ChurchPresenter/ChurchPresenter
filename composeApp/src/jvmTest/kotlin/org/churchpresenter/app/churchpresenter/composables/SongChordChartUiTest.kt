@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.presenter.ChordChart
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ComposeUiTest
