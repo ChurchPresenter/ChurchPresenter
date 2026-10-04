@@ -23,7 +23,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.composables.OverlayClearChips
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_close
@@ -112,8 +111,6 @@ internal fun PreviewSidebar(
                     onSettingsChange { s -> s.copy(projectionSettings = updated) }
                 }
             }
-            // What is up over the slide, each with its own way down.
-            OverlayClearChips(presenterManager.overlays.value, presenterManager::clearOverlay)
             // A layout filling the panel takes the column's spare height; otherwise it keeps its own.
             val previewFills = appSettings.projectionSettings.run { previewLayoutFillsPanel && activeLayout() != null }
             LivePreviewPanel(
