@@ -1,5 +1,15 @@
 package org.churchpresenter.app.churchpresenter.benchmark
 
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.mutableStateOf
+import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputContent
+import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputContext
+import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputKind
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.sharedui.models.Presenting
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -106,7 +116,41 @@ object BenchmarkScenarios {
             "lottie lower third" to { frame ->
                 Fill { LowerThirdPresenter(composition = lowerThird, progress = { (frame % LOOP) / LOOP.toFloat() }) }
             },
+            "song + lower third + announcement" to layered(),
         )
+    }
+
+    /**
+     * The layer stack as an output draws it, through the app's own off-screen output: a song on the
+     * slide, its background on the layer under it, and a lower third and a scrolling announcement
+     * up over it on an output that puts both over its content. The song and the lower third move on
+     * each frame; the content is pushed after the frame that draws it, as the app pushes it.
+     */
+    private fun layered(): @Composable (frame: Int) -> Unit {
+        val manager = PresenterManager(showPresenterWindowInitially = false).apply {
+            setLottieContent(lowerThirdJson(), false, -1f, 0L, "Pastor")
+            setDisplayedLyricSection(verse(0))
+            setPresentingMode(Presenting.LYRICS)
+            setPresentingMode(Presenting.LOWER_THIRD)
+            setDisplayedAnnouncementText(NOTICE)
+            setPresentingMode(Presenting.ANNOUNCEMENTS)
+        }
+        val profile = OutputProfile(id = "over", lowerThirdOverContent = true, announcementsOverContent = true)
+        val settings = SCROLLING_NOTICE.copy(projectionSettings = ProjectionSettings(outputProfiles = listOf(profile)))
+        val context = OffscreenOutputContext(
+            presenterManager = manager,
+            appSettingsState = mutableStateOf(settings),
+            screenAssignmentState = mutableStateOf(ScreenAssignment(activeProfileId = profile.id)),
+            effectiveModeState = mutableStateOf(Presenting.LYRICS),
+            kind = OffscreenOutputKind.NDI,
+        )
+        return { frame ->
+            OffscreenOutputContent(context, transparentBlanking = false)
+            SideEffect {
+                manager.setDisplayedLyricSection(verse(frame))
+                manager.setLottieProgress((frame % LOOP) / LOOP.toFloat())
+            }
+        }
     }
 
     @Composable
