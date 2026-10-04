@@ -9,7 +9,9 @@ What the song and Bible outputs draw:
 - the title slide (`SongTitleSlide`, `titleSlideSection`) and the song and Bible style models
   (`SongElementStyle`, `BibleElementStyle` and the per-language, visibility, number-corner and
   title-slide-offset access beside them);
-- the backgrounds (`PresenterBackground`, `LoopingVideoBackground`) and the lower-third layout;
+- the backgrounds (`PresenterBackground`, `LoopingVideoBackground`), the slide backgrounds an
+  output's background layer draws on their own (`BibleSlideBackground`, `SongSlideBackground`,
+  over `PersistentBackground`), and the lower-third layout;
 - the Lottie bands (`BibleLottieBand`, `BibleLottieTemplate`, `SongLottieBand` and their slots,
   text fitting and clock);
 - `ChordChart`, the chord rows a song slide draws.
