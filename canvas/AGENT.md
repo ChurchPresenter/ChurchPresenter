@@ -28,8 +28,9 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 - **`NetworkInputs`**: the app's NDI runtime and OMT library, as the canvas receives from them.
   The app owns and loads both (it sends its own outputs over them) and installs `AppNetworkInputs`
   once at startup, first thing in `main`. Until then every call answers as an unloaded library.
-- The Bible source lists translations with `:bible`'s `bibleFilesInDirectory`, the same function
-  the app's `FileManager` uses.
+- The Bible source lists translations with its own `bibleFilesInDirectory`, a copy of the app's
+  `FileManager.getBibleFilesInDirectory` kept here so the move did not touch `:bible` — every UI
+  module depends on it through `:shared-ui`, so a change there reruns nearly every suite in CI.
 
 ## Layout
 
@@ -45,7 +46,7 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 ## Coverage floor
 
 Branches **80%** and complexity **76%**; the other four counters keep the shared 85%. What is left is
-mostly not untested behaviour: building the libvlc player, killing zombie headless browsers (which on a
+mostly not untested behavior: building the libvlc player, killing zombie headless browsers (which on a
 developer's machine would kill their real ones), the coroutine plumbing around the ffmpeg pipe, the
 `minOf`/`maxOf` empty-list exits in shape math, and Compose's per-value change checks on click
 handlers. Raise the floors as any of that becomes reachable; never lower them without asking.

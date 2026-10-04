@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import org.churchpresenter.bible.bibleFilesInDirectory
+import org.churchpresenter.bible.MAX_BIBLE_SCAN_DEPTH
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.BibleSettings
@@ -86,7 +86,19 @@ class FileManager {
      * Callers resolve with `File(storageDirectory, value)`, which handles the embedded separators on
      * every platform — so previously stored bare filenames keep resolving unchanged.
      */
-    fun getBibleFilesInDirectory(directory: String): List<String> = bibleFilesInDirectory(directory)
+    fun getBibleFilesInDirectory(directory: String): List<String> {
+        if (directory.isEmpty()) return emptyList()
+
+        val dir = File(directory)
+        if (!dir.exists() || !dir.isDirectory) return emptyList()
+
+        // Bounded depth so a symlink cycle or a stray deep tree can't hang the settings dialog.
+        return dir.walkTopDown().maxDepth(MAX_BIBLE_SCAN_DEPTH)
+            .filter { it.isFile && it.extension.lowercase() == Constants.EXTENSION_SPB }
+            .map { it.toRelativeString(dir).replace('\\', '/') }
+            .sorted()
+            .toList()
+    }
 
     /**
      * Show directory chooser dialog and return selected directory path

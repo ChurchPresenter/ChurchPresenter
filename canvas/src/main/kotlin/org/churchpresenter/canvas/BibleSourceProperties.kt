@@ -54,7 +54,6 @@ import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.bibletab.BibleViewModel
 import org.churchpresenter.bible.Bible
-import org.churchpresenter.bible.bibleFilesInDirectory
 import androidx.compose.runtime.produceState
 import java.io.File
 import org.churchpresenter.bible.readTranslationTitle

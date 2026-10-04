@@ -1,5 +1,6 @@
-package org.churchpresenter.bible
+package org.churchpresenter.canvas
 
+import org.churchpresenter.bible.MAX_BIBLE_SCAN_DEPTH
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
