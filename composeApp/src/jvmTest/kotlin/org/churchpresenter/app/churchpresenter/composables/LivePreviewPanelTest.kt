@@ -16,6 +16,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runComposeUiTest
+import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
@@ -711,6 +712,29 @@ class LivePreviewPanelTest {
             }
         }
         onNodeWithText("https://example.com").assertDoesNotExist()
+        onNodeWithText("Nothing is live", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun `an overlay up over a web page shows over its snapshot`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setWebSnapshot(ImageBitmap(4, 4))
+        pm.setPresentingMode(Presenting.WEBSITE)
+        pm.setDisplayedAnnouncementText("Coffee after the service")
+        pm.setPresentingMode(Presenting.ANNOUNCEMENTS)
+        val overPage = AppSettings(
+            announcementsSettings = AnnouncementsSettings(animationType = Constants.ANIMATION_NONE),
+            projectionSettings = ProjectionSettings(
+                outputProfiles = listOf(OutputProfile(id = "over", announcementsOverContent = true)),
+                screenAssignments = listOf(ScreenAssignment(activeProfileId = "over")),
+            ),
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = pm, appSettings = overPage)
+            }
+        }
+        onNodeWithText("Coffee after the service").assertExists("the announcement, over the page")
         onNodeWithText("Nothing is live", substring = true).assertDoesNotExist()
     }
 
