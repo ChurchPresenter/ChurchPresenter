@@ -26,15 +26,15 @@ import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionStatus
 import org.churchpresenter.core.models.bible.SelectedVerse
-import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
+import org.churchpresenter.announcements.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
-import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
+import org.churchpresenter.dictionary.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
 import org.churchpresenter.lowerthird.render.LowerThirdOffscreenRenderer
-import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
+import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
 import org.churchpresenter.slides.presenter.PicturePresenter
 import org.churchpresenter.slides.presenter.PresentationPresenter
-import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
+import org.churchpresenter.qa.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.settings.utils.Constants
@@ -159,7 +159,7 @@ class AppPreviewOutputScreenshotTest {
             LowerThirdPresenter(
                 composition = null,
                 progress = { LOWER_THIRD_PROGRESS },
-                frame = frame,
+                frame = frame.imageBitmap,
             )
         }
     }

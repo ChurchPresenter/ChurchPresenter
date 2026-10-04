@@ -6,7 +6,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.server.InstanceLinkCommandFailure
 import org.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
+import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.server.InstanceLinkViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager

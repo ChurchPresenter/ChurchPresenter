@@ -17,7 +17,7 @@ import org.churchpresenter.app.churchpresenter.tabs.SCHEDULE_ROW_CARD_TAG
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.sharedui.utils.LiveHistoryLogger
 import org.churchpresenter.sharedui.utils.TrainingDataLogger
-import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
+import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem

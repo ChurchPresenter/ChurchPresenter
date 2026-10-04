@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.announcements.presenter.ANNOUNCEMENT_TEXT_INSET
+import org.churchpresenter.announcements.presenter.AnnouncementsPresenter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -204,7 +206,7 @@ class PresenterHiDpiRenderTest {
         const val EDGE_TOLERANCE_PX = 4
 
         /** The inset the announcement draws inside, in pixels at density 2. */
-        val ANNOUNCEMENT_INSET_PX = (TEXT_PADDING_HORIZONTAL.value * DENSITY_TWO).toInt()
+        val ANNOUNCEMENT_INSET_PX = (ANNOUNCEMENT_TEXT_INSET.value * DENSITY_TWO).toInt()
 
         /** The density every case is checked at, and the reason this file exists. */
         const val DENSITY_TWO = 2f

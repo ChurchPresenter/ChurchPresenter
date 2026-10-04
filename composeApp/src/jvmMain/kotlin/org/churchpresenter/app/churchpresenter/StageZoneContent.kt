@@ -42,8 +42,8 @@ import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
 import org.churchpresenter.settings.StageMonitorContentType
 import org.churchpresenter.settings.StageMonitorSettings
 import org.churchpresenter.settings.StageMonitorZoneStyle
-import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
-import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
+import org.churchpresenter.dictionary.presenter.DictionaryPresenter
+import org.churchpresenter.qa.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.settings.utils.Constants

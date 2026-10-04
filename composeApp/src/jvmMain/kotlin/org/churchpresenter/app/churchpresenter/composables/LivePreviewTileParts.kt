@@ -37,17 +37,17 @@ import org.churchpresenter.app.churchpresenter.offersTranspose
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
-import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
+import org.churchpresenter.announcements.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.contentRegion
-import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
-import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
+import org.churchpresenter.dictionary.presenter.DictionaryPresenter
+import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
 import org.churchpresenter.media.presenter.MediaPresenter
 import org.churchpresenter.slides.presenter.PicturePresenter
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
-import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
-import org.churchpresenter.app.churchpresenter.presenter.QAQRCodePresenter
+import org.churchpresenter.qa.presenter.QAPresenter
+import org.churchpresenter.stt.presenter.STTPresenter
+import org.churchpresenter.qa.presenter.QAQRCodePresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.slides.presenter.PresentationPresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
@@ -449,7 +449,7 @@ internal fun PreviewLowerThird(presenterManager: PresenterManager) {
         LowerThirdPresenter(
             composition = lottieComposition,
             progress = { presenterManager.lottieProgress.value },
-            frame = presenterManager.lottieFrame.value,
+            frame = presenterManager.lottieFrame.value?.imageBitmap,
             groupsText = presenterManager.lottieGroupsText.value,
         )
     
