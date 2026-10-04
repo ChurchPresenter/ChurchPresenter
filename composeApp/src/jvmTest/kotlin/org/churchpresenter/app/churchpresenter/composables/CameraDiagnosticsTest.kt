@@ -49,6 +49,30 @@ class CameraDiagnosticsTest {
     }
 
     @Test
+    fun `a refused selection is read from the selected-is-not-supported wording too`() {
+        assertEquals(
+            CameraFailure.UNSUPPORTED_PIXEL_FORMAT,
+            classifyCameraFfmpegStderr(listOf("Selected pixel format (yuyv422) is not supported by the input device.")),
+        )
+        assertEquals(
+            CameraFailure.UNSUPPORTED_FRAMERATE,
+            classifyCameraFfmpegStderr(listOf("Selected framerate (29.97) is not supported by the device.")),
+        )
+    }
+
+    @Test
+    fun `a selected format or rate that was accepted is not read as refused`() {
+        assertNotEquals(
+            CameraFailure.UNSUPPORTED_PIXEL_FORMAT,
+            classifyCameraFfmpegStderr(listOf("Selected pixel format: uyvy422")),
+        )
+        assertNotEquals(
+            CameraFailure.UNSUPPORTED_FRAMERATE,
+            classifyCameraFfmpegStderr(listOf("Selected framerate: 30")),
+        )
+    }
+
+    @Test
     fun `macOS refusing camera access is recognised as a permission problem`() {
         // The shape AVFoundation reports through ffmpeg when TCC has not granted camera access.
         val denied = listOf(

@@ -115,4 +115,25 @@ class BibleBandSlotsTest {
         val slots = bibleBandSlots(listOf(kjv, rst), listOf(t0, styled), isKey = false, availableSlots = 2)
         assertEquals(55, slots.getValue(TEXT_2).style.fontSizePt)
     }
+
+    @Test
+    fun `with no translation settings the verses still fill their slots`() {
+        val one = bibleBandSlots(listOf(kjv, rst), emptyList(), isKey = false, availableSlots = 1)
+        assertEquals("For God so loved the world\nИбо так возлюбил Бог мир", one.text(TEXT_1))
+
+        val two = bibleBandSlots(listOf(kjv, rst), emptyList(), isKey = false, availableSlots = 2)
+        assertEquals("Ибо так возлюбил Бог мир", two.text(TEXT_2))
+    }
+
+    @Test
+    fun `verses past the translations configured borrow the first translation's settings`() {
+        val stacked = bibleBandSlots(listOf(kjv, rst), listOf(t0), isKey = false, availableSlots = 1)
+        val apart = bibleBandSlots(listOf(kjv, rst), listOf(t0), isKey = false, availableSlots = 2)
+
+        assertEquals(
+            bibleBandSlots(listOf(rst), listOf(t0), isKey = false, availableSlots = 1).text(REFERENCE_1),
+            apart.text(REFERENCE_2),
+        )
+        assertEquals(true, stacked.text(REFERENCE_1).contains(apart.text(REFERENCE_2)))
+    }
 }

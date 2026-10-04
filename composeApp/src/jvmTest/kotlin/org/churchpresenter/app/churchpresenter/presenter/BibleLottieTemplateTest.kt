@@ -320,4 +320,17 @@ class BibleLottieTemplateTest {
         )
         assertEquals(TextShaping.WHOLE_LINES, lines.meta.textShaping)
     }
+
+    @Test
+    fun `a malformed font list or layer is skipped rather than failing the template`() {
+        val fonts = Json.parseToJsonElement(
+            """{"list":[{"ascent":80},{"fName":"Tall","ascent":90},"stray"]}""",
+        ).jsonObject
+        val unnamed = Json.parseToJsonElement("""{"ty":5,"t":{"d":{"k":[{"s":{"f":"Tall"}}]}}}""").jsonObject
+        val noDocument = Json.parseToJsonElement("""{"ty":5,"nm":"Empty"}""").jsonObject
+        val named = Json.parseToJsonElement("""{"ty":5,"nm":"A","t":{"d":{"k":[{"s":{"f":"Tall"}}]}}}""").jsonObject
+
+        assertEquals(mapOf("A" to 0.9f), readTextAscents(fonts, listOf(unnamed, noDocument, named)))
+        assertEquals(emptyMap(), readTextAscents(null, listOf(named)))
+    }
 }

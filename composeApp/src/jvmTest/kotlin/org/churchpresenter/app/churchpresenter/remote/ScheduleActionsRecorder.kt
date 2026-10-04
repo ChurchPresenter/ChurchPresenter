@@ -42,5 +42,8 @@ internal class ScheduleActionsRecorder {
             announcements += item
         },
         addWebsite = { url, title -> added += "website:$url:$title" },
+        addLabel = { text, textColor, background -> added += "label:$text:$textColor:$background" },
+        addLowerThird = { presetId, label, pause, pauseMs -> added += "lowerThird:$presetId:$label:$pause:$pauseMs" },
+        addCue = { cue -> added += "cue:${cue.id}" },
     )
 }
