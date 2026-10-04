@@ -3,7 +3,10 @@
 package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import org.churchpresenter.sharedui.utils.LocalShortcuts
+import org.churchpresenter.sharedui.utils.ShortcutMap
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.Key
@@ -144,6 +147,9 @@ class MainDesktopComposeTest {
     ) = runComposeUiTest {
         var actions = ScheduleActions()
         setContent {
+            // The bindings, as MainWindow provides them from the settings.
+            val shortcuts = ShortcutMap.from(appSettings.keyboardShortcutSettings)
+            CompositionLocalProvider(LocalShortcuts provides shortcuts) {
             MaterialTheme {
                 MainDesktop(
                     appSettings = appSettings,
@@ -183,6 +189,7 @@ class MainDesktopComposeTest {
                         uploadPresentationFlow = flows.uploadPresentation,
                     ),
                 )
+            }
             }
         }
         waitForIdle()

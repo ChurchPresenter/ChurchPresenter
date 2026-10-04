@@ -34,14 +34,14 @@ class PreviewBusTest {
 
     @Test
     fun `off, everything goes straight to air as it always did`() {
-        lowerThird()
-        cueOrSetAnnouncementText(program, "Welcome")
         program.slidesOutput.setSelectedImagePath(picture(folderA, "1.png"))
         bus.present(Presenting.PICTURES)
+        lowerThird()
+        cueOrSetAnnouncementText(program, "Welcome")
 
+        assertEquals(Presenting.PICTURES, program.presentingMode.value)
         assertTrue(program.isLive(Presenting.LOWER_THIRD))
         assertEquals("Welcome", program.announcementText.value)
-        assertEquals(Presenting.PICTURES, program.presentingMode.value)
         assertFalse(preview.anythingLive, "nothing reaches Preview while preview mode is off")
         assertFalse(bus.anythingCued)
     }
