@@ -2,6 +2,9 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.settings.LinkLayers
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -178,6 +181,26 @@ class InstanceLinkContentTest {
         assertEquals(8080, result.saved?.primaryPort)
         assertNull(result.connected, "Save must not open a connection")
         assertEquals(1, result.dismissed)
+    }
+
+    @Test
+    fun `every layer is followed by default, and one unticked is saved without it`() = dialog { result ->
+        LinkLayers.ALL.forEach { onNodeWithTag(followLayerTag(it)).assertIsOn() }
+        onNodeWithTag(followLayerTag(LinkLayers.LOWER_THIRD)).performScrollTo().performClick()
+        onNodeWithText("Save").performClick()
+        assertEquals(LinkLayers.ALL - LinkLayers.LOWER_THIRD, result.saved?.followedLayers)
+    }
+
+    @Test
+    fun `a layer ticked again goes back in its own place`() = dialog(
+        InstanceLinkSettings(followedLayers = listOf(LinkLayers.SLIDE, LinkLayers.ANNOUNCEMENTS)),
+    ) { result ->
+        onNodeWithTag(followLayerTag(LinkLayers.MEDIA)).performScrollTo().performClick()
+        onNodeWithText("Save").performClick()
+        assertEquals(
+            listOf(LinkLayers.SLIDE, LinkLayers.MEDIA, LinkLayers.ANNOUNCEMENTS),
+            result.saved?.followedLayers,
+        )
     }
 
     @Test
