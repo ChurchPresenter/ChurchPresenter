@@ -31,7 +31,6 @@ import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.raisedHover
 import org.churchpresenter.theme.flatDisabled
-import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
 
 private const val DISABLED_INK_ALPHA = 0.35f
 private val KEY_INSET = 2.dp

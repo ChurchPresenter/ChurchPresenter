@@ -307,8 +307,10 @@ class ComposeScenePump(
  *
  * **Not thread-safe**, and does not need to be: there is one per pump and only the pump's own
  * coroutine touches it.
+ *
+ * `internal` rather than private so the render benchmark reads frames back exactly as an output does.
  */
-private class FrameBuffer(width: Int, height: Int) : AutoCloseable {
+internal class FrameBuffer(width: Int, height: Int) : AutoCloseable {
 
     /**
      * BGRA, unpremultiplied, sRGB — the same destination format Compose's own `readPixels` asks

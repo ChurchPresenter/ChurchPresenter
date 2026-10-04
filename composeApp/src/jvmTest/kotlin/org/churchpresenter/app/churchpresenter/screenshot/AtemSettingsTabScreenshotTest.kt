@@ -15,7 +15,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.AtemSettings
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.AtemSettingsTab
+import org.churchpresenter.lowerthird.AtemSettingsTab
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo

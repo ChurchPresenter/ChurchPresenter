@@ -58,7 +58,6 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `presenter/`     | Output window rendering (what the audience sees), plus the off-screen outputs (`BrowserSourceVideoRenderer`, `NdiVideoRenderer`, `OmtVideoRenderer`) on the shared `ComposeScenePump` |
 | `remote/`        | What a remote client or an Instance Link primary asks for, applied to the live output, the schedule and statistics — the server itself is `:server` |
 | `data/`          | File I/O, database, song parsing, Bible data                        |
-| `data/settings/` | Only `ObsSceneSelection.kt` — the rest is the `:settings` module    |
 | `models/`        | Only what needs the app: `PresetItems` — `ShortcutAction` is `:shared-ui`, the Companion UI states `:companion-surface` |
 | `composables/`   | UI components with app or feature ties (SceneCanvas, LivePreviewPanel, etc.) — the shared ones are `:shared-ui`, the video player `:media` |
 | `dialogs/`       | All dialogs and settings dialog tabs                                |
@@ -121,6 +120,7 @@ module-specific notes there, not here.**
 | `canvas/`              | `:canvas`              | The Canvas tab, `SceneViewModel`, the scene renderer and its capture sources (cameras, screen, NDI/OMT in, DeckLink) | [AGENT.md](canvas/AGENT.md)              |
 | `server/`              | `:server`              | The companion server and Instance Link: the Ktor API, tunnel, SSL, ATEM bridge, calendar sync | [AGENT.md](server/AGENT.md)              |
 | `companion-surface/`   | `:companion-surface`   | The Companion Surface tab and panels, and `CompanionSatelliteViewModel`             | [AGENT.md](companion-surface/AGENT.md)   |
+| `obs/`                 | `:obs`                 | The OBS Studio integration — the obs-websocket client, scene mapping and its settings page | [AGENT.md](obs/AGENT.md)                 |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions
@@ -171,6 +171,8 @@ only — measure with the excludes removed before quoting it.
 ./gradlew :composeApp:check            # compile + all unit tests
 ./gradlew :composeApp:jacocoTestReport # coverage → build/reports/jacoco/jacocoTestReport/html/
 bash cleanup_check.sh                  # repo code-quality report
+./gradlew :composeApp:renderBenchmark  # off-screen render times per content type, 1080p and 4K — see composeApp/benchmarks/
+./gradlew :composeApp:soakTest -PsoakMinutes=10  # a scripted service on one output; fails on a leak or stall (CI: 240, on demand until it has run green)
 
 bash test-changed.sh                   # ONLY the suites your change touches — seconds, not minutes
 bash test-changed.sh --dry-run         # print the selection and the gradle command, run nothing

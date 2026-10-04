@@ -336,6 +336,8 @@ kotlin {
             // directory, wrapped by CompanionSatelliteViewModel.
             implementation(projects.companionSatellite)
             implementation(projects.companionSurface)
+            // The OBS Studio integration: client, scene mapping and settings page.
+            implementation(projects.obs)
             // The ATEM protocol client: the UDP conversation with the switcher — connect, state
             // dump, key control and media-pool upload. AtemBridge is the app-side wiring.
             implementation(projects.atem)
@@ -1004,6 +1006,11 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
 //
 // Named individually rather than by a `*Atem*` glob so that adding a suite to this list is a
 // deliberate act with a reason, not something a class name does by accident.
+// The render benchmark and the soak test: each run by its own task (`renderBenchmark`, `soakTest`)
+// and kept out of `jvmTest`.
+val renderBenchmarkClasses = "*.benchmark.RenderBenchmark"
+val soakTestClasses = "*.benchmark.ServiceSoak"
+
 val serialTestClasses = listOf(
     // The ATEM upload suites that used to lead this list moved to `:server`, whose `test` task forks
     // once, so they are alone in their JVM there.
@@ -1050,6 +1057,11 @@ tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest") {
     val filteredFromCommandLine = gradle.startParameter.taskRequests.any { request ->
         request.args.any { it == "--tests" }
     }
+    // The render benchmark and the soak test have their own tasks and never run in the parallel pass.
+    filter {
+        excludeTestsMatching(renderBenchmarkClasses)
+        excludeTestsMatching(soakTestClasses)
+    }
     if (!filteredFromCommandLine) {
         filter { serialTestClasses.forEach { excludeTestsMatching(it) } }
         // Only worth running when this task excluded them. A command-line `--tests` applies to EVERY
@@ -1066,6 +1078,70 @@ tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest") {
         // and pull request -- is exactly that case, and it raced the shared AppPreview library.
         // A named subset is small enough that one JVM costs little, and correctness is not optional.
         maxParallelForks = 1
+    }
+}
+
+// ── Render benchmark ──────────────────────────────────────────────────────────
+// How long each content type takes on an off-screen output, at 1080p and 4K -- see RenderBenchmark.
+//   ./gradlew :composeApp:renderBenchmark                         # report to build/reports/render-benchmark/
+//   ./gradlew :composeApp:renderBenchmark -PrecordRenderBaseline  # also overwrite composeApp/benchmarks/
+//   ./gradlew :composeApp:renderBenchmark -PenforceRenderBudget   # fail past one frame at p99
+// Alone in one JVM and never part of `jvmTest` or `check`: timings taken beside other forks measure
+// the machine, not the code. `renderBenchmarkClasses` is declared with `serialTestClasses` above.
+
+tasks.register<org.gradle.api.tasks.testing.Test>("renderBenchmark") {
+    group = "verification"
+    description = "Times every content type on an off-screen output, at 1080p and 4K."
+    val parallel = tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest").get()
+    testClassesDirs = parallel.testClassesDirs
+    classpath = parallel.classpath
+    maxParallelForks = 1
+    maxHeapSize = "2g"
+    filter { includeTestsMatching(renderBenchmarkClasses) }
+    extensions.getByType<JacocoTaskExtension>().isEnabled = false
+    // A measurement, so never up to date and never cached.
+    outputs.upToDateWhen { false }
+    val reportDir = layout.buildDirectory.dir("reports/render-benchmark").get().asFile
+    systemProperty("renderBenchmark.reportDir", reportDir.absolutePath)
+    systemProperty("renderBenchmark.baselineDir", layout.projectDirectory.dir("benchmarks").asFile.absolutePath)
+    systemProperty("renderBenchmark.record", project.hasProperty("recordRenderBaseline").toString())
+    systemProperty("renderBenchmark.enforce", project.hasProperty("enforceRenderBudget").toString())
+    providers.gradleProperty("renderBenchmarkFrames").orNull?.let { systemProperty("renderBenchmark.frames", it) }
+    doLast {
+        val report = reportDir.resolve("results.md")
+        if (report.exists()) logger.lifecycle(report.readText())
+    }
+}
+
+// ── Soak test ─────────────────────────────────────────────────────────────────
+// A service run for hours on one off-screen output, failing on a leak or a stall -- see ServiceSoak.
+//   ./gradlew :composeApp:soakTest                    # four hours, report to build/reports/soak/
+//   ./gradlew :composeApp:soakTest -PsoakMinutes=10   # a short local run
+// Run on demand by .github/workflows/soak.yml; never part of `jvmTest` or `check`.
+tasks.register<org.gradle.api.tasks.testing.Test>("soakTest") {
+    group = "verification"
+    description = "Runs a scripted service for hours on one off-screen output and fails on a leak or a stall."
+    val parallel = tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest").get()
+    testClassesDirs = parallel.testClassesDirs
+    classpath = parallel.classpath
+    maxParallelForks = 1
+    maxHeapSize = "2g"
+    filter { includeTestsMatching(soakTestClasses) }
+    extensions.getByType<JacocoTaskExtension>().isEnabled = false
+    outputs.upToDateWhen { false }
+    // The hung-test reporter's five minutes are for unit tests. This one runs for hours by design, so
+    // it is only called hung half an hour past the length of the run it was asked for.
+    val soakMinutes = providers.gradleProperty("soakMinutes").orNull?.toDoubleOrNull() ?: 240.0
+    systemProperty("churchpresenter.test.hangThresholdMs", ((soakMinutes + 30) * 60_000).toLong().toString())
+    val reportDir = layout.buildDirectory.dir("reports/soak").get().asFile
+    systemProperty("soak.reportDir", reportDir.absolutePath)
+    listOf("soakMinutes" to "soak.minutes", "soakFps" to "soak.fps", "soakCueSeconds" to "soak.cueSeconds",
+        "soakSampleSeconds" to "soak.sampleSeconds").forEach { (gradle, system) ->
+        providers.gradleProperty(gradle).orNull?.let { systemProperty(system, it) }
+    }
+    doLast {
+        val report = reportDir.resolve("soak.md")
+        if (report.exists()) logger.lifecycle(report.readText())
     }
 }
 

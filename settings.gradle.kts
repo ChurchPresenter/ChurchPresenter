@@ -150,3 +150,7 @@ include(":canvas")
 // The Companion Surface tab and CompanionSatelliteViewModel: the Compose face of
 // :companion-satellite, which stays free of any UI toolkit. Depended on by :composeApp.
 include(":companion-surface")
+
+// The OBS Studio integration: the obs-websocket client, the scene each content type switches to,
+// and the settings page. Depended on by :composeApp.
+include(":obs")
