@@ -107,7 +107,8 @@ private val OVERLAY_DRAW_ORDER = listOf(Presenting.STT, Presenting.LOWER_THIRD, 
  * The overlays this output draws over its content, each drawn by [content] exactly as it is drawn on
  * its own, stacked above whatever the caller drew before this: those up that [profile] puts over the
  * content. [shownMode] is what the output shows beneath them ([shownModeFor]); an output locked to
- * a mode of its own shows that and nothing over it.
+ * a mode of its own shows that and nothing over it. A lock to the mode already live cannot be told
+ * from no lock here, so such an output takes the overlays as an unlocked one would.
  */
 @Composable
 internal fun OverlayModes(

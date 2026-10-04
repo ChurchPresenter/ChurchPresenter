@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.referentialEqualityPolicy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -21,8 +22,11 @@ internal class PresenterContext {
     /** What the slide layers show -- see [PresenterManager.presentingMode]. */
     val presentingMode = mutableStateOf(Presenting.NONE)
 
-    /** The overlay content up over the slide -- see [PresenterManager.overlays]. */
-    val overlays = mutableStateOf<Set<Presenting>>(emptySet())
+    /**
+     * The overlay content up over the slide -- see [PresenterManager.overlays]. Compared by identity:
+     * the set's order is the order they went up in, and two sets in a different order are equal.
+     */
+    val overlays = mutableStateOf<Set<Presenting>>(emptySet(), referentialEqualityPolicy())
 
     /** Whatever was put live most recently, slide or overlay -- see [PresenterManager.lastLive]. */
     val lastLive = mutableStateOf(Presenting.NONE)
