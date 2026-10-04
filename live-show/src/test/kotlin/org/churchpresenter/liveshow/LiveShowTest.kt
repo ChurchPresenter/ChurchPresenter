@@ -161,4 +161,22 @@ class LiveShowTest {
         show.clearAll()
         assertEquals(mapOf(Layer.GRAPHICS to lowerThird), show.preview.value)
     }
+
+    @Test
+    fun `a message going live clears every other layer`() {
+        val show = LiveShow()
+        show.set(Cue.Background(BackgroundSource.SONGS))
+        show.set(Cue.LowerThird("Pastor"))
+        show.set(Cue.Message("Parent of child 12 to the nursery"))
+        assertEquals(mapOf(Layer.MESSAGES to Cue.Message("Parent of child 12 to the nursery")), show.program.value)
+    }
+
+    @Test
+    fun `a message taken from preview clears every other layer`() {
+        val show = LiveShow()
+        show.set(Cue.LowerThird("Pastor"))
+        show.cue(Cue.Message("Nursery"))
+        show.take()
+        assertEquals(mapOf(Layer.MESSAGES to Cue.Message("Nursery")), show.program.value)
+    }
 }

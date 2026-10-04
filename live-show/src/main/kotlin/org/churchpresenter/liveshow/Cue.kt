@@ -85,7 +85,7 @@ sealed interface Cue {
         override val layer get() = Layer.ANNOUNCEMENTS
     }
 
-    /** Short operator text that never displaces anything, e.g. a nursery call. */
+    /** Operator text, e.g. a nursery call; going live with one clears every other layer -- see [Layer]. */
     data class Message(val text: String) : Cue {
         override val layer get() = Layer.MESSAGES
     }

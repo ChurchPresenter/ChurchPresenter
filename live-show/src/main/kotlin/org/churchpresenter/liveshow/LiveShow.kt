@@ -16,9 +16,9 @@ class LiveShow {
     private val _preview = mutableStateOf<Map<Layer, Cue>>(emptyMap())
     val preview: State<Map<Layer, Cue>> = _preview
 
-    /** Puts [cue] straight on air on its layer, replacing what was there. */
+    /** Puts [cue] straight on air on its layer, replacing what was there -- and, for a message, everything else. */
     fun set(cue: Cue) {
-        if (_program.value[cue.layer] != cue) _program.value = _program.value + (cue.layer to cue)
+        if (_program.value[cue.layer] != cue) _program.value = _program.value.goingLive(mapOf(cue.layer to cue))
     }
 
     /** Cues [cue] on its layer, without touching what is on air. */
@@ -33,7 +33,7 @@ class LiveShow {
     fun take(layer: Layer? = null) {
         val taken = if (layer == null) _preview.value else _preview.value.filterKeys { it == layer }
         if (taken.isEmpty()) return
-        _program.value = _program.value + taken
+        _program.value = _program.value.goingLive(taken)
         _preview.value = _preview.value - taken.keys
     }
 
@@ -48,3 +48,7 @@ class LiveShow {
         if (kept != _program.value) _program.value = kept
     }
 }
+
+/** What is on air once [live] goes up over [this]: beside it, unless a message clears the rest first. */
+private fun Map<Layer, Cue>.goingLive(live: Map<Layer, Cue>): Map<Layer, Cue> =
+    live[Layer.MESSAGES]?.let { mapOf(Layer.MESSAGES to it) } ?: (this + live)

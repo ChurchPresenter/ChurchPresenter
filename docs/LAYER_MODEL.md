@@ -35,7 +35,7 @@ Every output composes the same fixed stack, bottom to top:
 | 4 | **Captions** | Live transcription | `STT` |
 | 5 | **Graphics** | Lower third (Lottie), props (logo bug, clock, live badge) | `LOWER_THIRD` |
 | 6 | **Announcements** | Scrolling or static announcement, countdown | `ANNOUNCEMENTS` |
-| 7 | **Messages** | Short operator text that must never displace anything, e.g. a nursery call | — (new) |
+| 7 | **Messages** | Operator text, e.g. a nursery call. Going live with one clears every other layer, as an announcement does today (decision 7) | — (new) |
 | — | **Audio** | Audio-only media, not drawn | Audio files under `MEDIA` |
 
 Rules:
@@ -219,7 +219,10 @@ The benchmark and soak test must show no regression at steps 2, 3 and 4.
 4. **Preview mode** is opt-in; direct Go Live stays the default.
 5. **Instance Link**: followers mirror the layer stack, with the followed layers chosen per link.
 6. **Step 4 in practice**: lower thirds and captions go up over the slide; announcements, being
-   full-screen messages, still replace it (short notices over a song are the Messages layer's job).
+   full-screen messages, still replace it (short notices over a song: see decision 7).
    Going live with slide content takes the overlays down. A lower third ending on its own clears the
    whole display by default, as before; a System setting takes down only the lower third instead.
    OBS scene switching, Instance Link and Companion follow the most recent go-live.
+7. **Messages** work as today's full-screen notices do: a message going live clears every other
+   layer, then goes up alone. It is not an overlay; notices over a song stay the per-display
+   "over content" choice for lower thirds and announcements.
