@@ -15,7 +15,7 @@ import org.churchpresenter.sharedui.utils.addGuardedShutdownHook
  * off the network into the Canvas.
  *
  * A process-level object for the same reason
- * [org.churchpresenter.app.churchpresenter.composables.DeckLinkManager] is one: the runtime is a
+ * [org.churchpresenter.canvas.DeckLinkManager] is one: the runtime is a
  * global in the native library, it is brought up once, and both the render wiring in `main.kt` and
  * the settings card that reports on it need to see the same instance without one being threaded
  * through the other.

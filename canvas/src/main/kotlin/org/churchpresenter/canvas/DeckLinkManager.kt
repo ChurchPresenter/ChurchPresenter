@@ -6,6 +6,13 @@ import org.churchpresenter.sharedui.utils.addGuardedShutdownHook
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.sharedui.composables.mode
+import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager as DeckLinkJni
+import org.churchpresenter.canvas.DeckLinkManager.AudioFrame
+import org.churchpresenter.canvas.DeckLinkManager.DeckLinkDevice
+import org.churchpresenter.canvas.DeckLinkManager.DeviceStatus
+import org.churchpresenter.canvas.DeckLinkManager.InputMode
+import org.churchpresenter.canvas.DeckLinkManager.OutputInfo
+import org.churchpresenter.canvas.DeckLinkManager.VideoConnection
 
 private const val OPEN_RETRY_ATTEMPTS = 3
 private const val OPEN_RETRY_DELAY_MS = 100L
@@ -15,17 +22,12 @@ private const val OUTPUT_INFO_FPS_DEN = 3
 private const val DEVICE_STATUS_FIELDS = 3
 
 /**
- * Kotlin wrapper for BlackMagic DeckLink JNI native library.
- * Supports multiple simultaneous device outputs.
- * All operations are optional — if the native library is not installed,
- * isAvailable() returns false and all other methods are no-ops.
- *
- * Over detekt's function count on purpose: the `external` functions are bound by JNI to symbols
- * named after this object (`Java_..._DeckLinkManager_native*`), so they cannot move to another
- * class without rebuilding `decklink_jni`, and each has its Kotlin wrapper beside it.
+ * BlackMagic DeckLink, through the `decklink_jni` native library: several device outputs at once,
+ * and inputs. Everything is optional -- without the library [isAvailable] is false and every other
+ * call is a no-op. The logic is [DeckLinkBridge]'s, over the JNI entry points.
  */
-@Suppress("TooManyFunctions")
-object DeckLinkManager {
+object DeckLinkManager : DeckLinkBridge(DeckLinkJni, ::loadDeckLinkLibrary) {
+
 
     data class DeckLinkDevice(val index: Int, val name: String)
 
@@ -47,82 +49,35 @@ object DeckLinkManager {
         val channels: Int,
         val samples: ShortArray
     )
+}
 
+/**
+ * What [DeckLinkManager] does, over [natives] -- the JNI entry points in the app, a fake card in a
+ * test -- and a library that [loadLibrary] loads once.
+ *
+ * Over detekt's function count on purpose: each JNI entry point has its wrapper here.
+ */
+@Suppress("TooManyFunctions")
+open class DeckLinkBridge internal constructor(
+    private val natives: DeckLinkNatives,
+    private val loadLibrary: () -> Boolean,
+) {
     private var available: Boolean? = null
     private val outputDevices: MutableSet<Int> = java.util.concurrent.ConcurrentHashMap.newKeySet()
     private val inputDevices: MutableSet<Int> = java.util.concurrent.ConcurrentHashMap.newKeySet()
     private var shutdownHookRegistered = false
 
-    // ── JNI native methods ──────────────────────────────────────────────
-
-    private external fun nativeListDevices(): Array<String>
-    private external fun nativeOpen(deviceIndex: Int, width: Int, height: Int): Boolean
-    private external fun nativeSendFrame(deviceIndex: Int, pixels: IntArray, width: Int, height: Int)
-    private external fun nativeStartScheduledPlayback(deviceIndex: Int, fps: Double): Boolean
-    private external fun nativeScheduleFrame(deviceIndex: Int, pixels: IntArray, width: Int, height: Int)
-    private external fun nativeStopPlayback(deviceIndex: Int)
-    private external fun nativeClose(deviceIndex: Int)
-    private external fun nativeGetOutputInfo(deviceIndex: Int): IntArray
-
-    // Input capture
-    private external fun nativeListInputModes(deviceIndex: Int): Array<String>
-    private external fun nativeListVideoConnections(deviceIndex: Int): Array<String>
-    private external fun nativeOpenInput(deviceIndex: Int, mode: String, connection: Int): Boolean
-    private external fun nativeGetInputFrame(deviceIndex: Int): IntArray?
-    private external fun nativeCloseInput(deviceIndex: Int)
-
-    // Audio input
-    private external fun nativeEnableAudioInput(deviceIndex: Int, channels: Int): Boolean
-    private external fun nativeGetInputAudio(deviceIndex: Int): ShortArray?
-
-    // Audio output
-    private external fun nativeEnableAudioOutput(deviceIndex: Int, channels: Int): Boolean
-    private external fun nativeWriteAudioSamples(deviceIndex: Int, samples: ShortArray, sampleFrameCount: Int): Int
-    private external fun nativeDisableAudioOutput(deviceIndex: Int)
-
-    // Keyer
-    private external fun nativeEnableKeyer(deviceIndex: Int, isExternal: Boolean): Boolean
-    private external fun nativeSetKeyerLevel(deviceIndex: Int, level: Int)
-    private external fun nativeKeyerRampUp(deviceIndex: Int, frames: Int)
-    private external fun nativeKeyerRampDown(deviceIndex: Int, frames: Int)
-    private external fun nativeDisableKeyer(deviceIndex: Int)
-
-    // Output connection
-    private external fun nativeSetOutputConnection(deviceIndex: Int, connectionType: Int): Boolean
-    private external fun nativeListOutputConnections(deviceIndex: Int): Array<String>
-
-    // Status
-    private external fun nativeGetDeviceStatus(deviceIndex: Int): IntArray
-
     // ── Public API ──────────────────────────────────────────────────────
 
     fun isAvailable(): Boolean {
-        if (available == null) {
-            available = try {
-                val resDir = System.getProperty("compose.application.resources.dir")
-                val libName = when {
-                    System.getProperty("os.name").lowercase().contains("win") -> "decklink_jni.dll"
-                    System.getProperty("os.name").lowercase().contains("mac") -> "libdecklink_jni.dylib"
-                    else -> "libdecklink_jni.so"
-                }
-                val libFile = resDir?.let { java.io.File(it, libName) }
-                if (libFile != null && libFile.exists()) {
-                    System.load(libFile.absolutePath)
-                } else {
-                    System.loadLibrary("decklink_jni")
-                }
-                true
-            } catch (_: UnsatisfiedLinkError) {
-                false
-            }
-        }
+        if (available == null) available = loadLibrary()
         return available ?: false
     }
 
     fun listDevices(): List<DeckLinkDevice> {
         if (!isAvailable()) return emptyList()
         return try {
-            nativeListDevices().mapIndexed { index, name ->
+            natives.nativeListDevices().mapIndexed { index, name ->
                 DeckLinkDevice(index, name)
             }
         } catch (_: Throwable) {
@@ -133,7 +88,7 @@ object DeckLinkManager {
     fun open(deviceIndex: Int, width: Int = 1920, height: Int = 1080): Boolean {
         if (!isAvailable()) return false
         return try {
-            val result = nativeOpen(deviceIndex, width, height)
+            val result = natives.nativeOpen(deviceIndex, width, height)
             if (result) {
                 outputDevices.add(deviceIndex)
                 registerShutdownHook()
@@ -162,10 +117,10 @@ object DeckLinkManager {
                 val h = info?.height ?: 1080
                 val blackPixels = IntArray(w * h)
                 repeat(OPEN_RETRY_ATTEMPTS) {
-                    nativeSendFrame(deviceIndex, blackPixels, w, h)
+                    natives.nativeSendFrame(deviceIndex, blackPixels, w, h)
                 }
                 Thread.sleep(OPEN_RETRY_DELAY_MS)
-                nativeClose(deviceIndex)
+                natives.nativeClose(deviceIndex)
             } catch (_: Throwable) {}
         }
         outputDevices.clear()
@@ -174,7 +129,7 @@ object DeckLinkManager {
     fun getOutputInfo(deviceIndex: Int): OutputInfo? {
         if (!isAvailable()) return null
         return try {
-            parseOutputInfo(nativeGetOutputInfo(deviceIndex))
+            parseOutputInfo(natives.nativeGetOutputInfo(deviceIndex))
         } catch (_: Throwable) {
             null
         }
@@ -183,7 +138,7 @@ object DeckLinkManager {
     fun sendFrame(deviceIndex: Int, pixels: IntArray, width: Int, height: Int) {
         if (!isAvailable()) return
         try {
-            nativeSendFrame(deviceIndex, pixels, width, height)
+            natives.nativeSendFrame(deviceIndex, pixels, width, height)
         } catch (_: Throwable) {
             // silently ignore
         }
@@ -192,7 +147,7 @@ object DeckLinkManager {
     fun startScheduledPlayback(deviceIndex: Int, fps: Double = 30.0): Boolean {
         if (!isAvailable()) return false
         return try {
-            nativeStartScheduledPlayback(deviceIndex, fps)
+            natives.nativeStartScheduledPlayback(deviceIndex, fps)
         } catch (_: Throwable) {
             false
         }
@@ -201,7 +156,7 @@ object DeckLinkManager {
     fun scheduleFrame(deviceIndex: Int, pixels: IntArray, width: Int, height: Int) {
         if (!isAvailable()) return
         try {
-            nativeScheduleFrame(deviceIndex, pixels, width, height)
+            natives.nativeScheduleFrame(deviceIndex, pixels, width, height)
         } catch (_: Throwable) {
             // silently ignore
         }
@@ -210,7 +165,7 @@ object DeckLinkManager {
     fun stopPlayback(deviceIndex: Int) {
         if (!isAvailable()) return
         try {
-            nativeStopPlayback(deviceIndex)
+            natives.nativeStopPlayback(deviceIndex)
         } catch (_: Throwable) {
             // silently ignore
         }
@@ -219,7 +174,7 @@ object DeckLinkManager {
     fun close(deviceIndex: Int) {
         if (!isAvailable()) return
         try {
-            nativeClose(deviceIndex)
+            natives.nativeClose(deviceIndex)
             outputDevices.remove(deviceIndex)
         } catch (_: Throwable) {
             // silently ignore
@@ -259,7 +214,7 @@ object DeckLinkManager {
     fun listInputModes(deviceIndex: Int): List<InputMode> {
         if (!isAvailable()) return emptyList()
         return try {
-            parseInputModes(nativeListInputModes(deviceIndex))
+            parseInputModes(natives.nativeListInputModes(deviceIndex))
         } catch (_: Throwable) { emptyList() }
     }
 
@@ -269,14 +224,14 @@ object DeckLinkManager {
     fun listVideoConnections(deviceIndex: Int): List<VideoConnection> {
         if (!isAvailable()) return emptyList()
         return try {
-            parseVideoConnections(nativeListVideoConnections(deviceIndex))
+            parseVideoConnections(natives.nativeListVideoConnections(deviceIndex))
         } catch (_: Throwable) { emptyList() }
     }
 
     fun openInput(deviceIndex: Int, mode: String = "", connection: Int = 0): Boolean {
         if (!isAvailable()) return false
         return try {
-            val result = nativeOpenInput(deviceIndex, mode, connection)
+            val result = natives.nativeOpenInput(deviceIndex, mode, connection)
             if (result) inputDevices.add(deviceIndex)
             result
         } catch (_: Throwable) { false }
@@ -285,14 +240,14 @@ object DeckLinkManager {
     fun getInputFrame(deviceIndex: Int): IntArray? {
         if (!isAvailable()) return null
         return try {
-            nativeGetInputFrame(deviceIndex)
+            natives.nativeGetInputFrame(deviceIndex)
         } catch (_: Throwable) { null }
     }
 
     fun closeInput(deviceIndex: Int) {
         if (!isAvailable()) return
         try {
-            nativeCloseInput(deviceIndex)
+            natives.nativeCloseInput(deviceIndex)
             inputDevices.remove(deviceIndex)
         } catch (_: Throwable) {
             // silently ignore
@@ -304,14 +259,14 @@ object DeckLinkManager {
     fun enableAudioInput(deviceIndex: Int, channels: Int = 2): Boolean {
         if (!isAvailable()) return false
         return try {
-            nativeEnableAudioInput(deviceIndex, channels)
+            natives.nativeEnableAudioInput(deviceIndex, channels)
         } catch (_: Throwable) { false }
     }
 
     fun getInputAudio(deviceIndex: Int): AudioFrame? {
         if (!isAvailable()) return null
         return try {
-            parseInputAudio(nativeGetInputAudio(deviceIndex) ?: return null)
+            parseInputAudio(natives.nativeGetInputAudio(deviceIndex) ?: return null)
         } catch (_: Throwable) { null }
     }
 
@@ -320,20 +275,20 @@ object DeckLinkManager {
     fun enableAudioOutput(deviceIndex: Int, channels: Int = 2): Boolean {
         if (!isAvailable()) return false
         return try {
-            nativeEnableAudioOutput(deviceIndex, channels)
+            natives.nativeEnableAudioOutput(deviceIndex, channels)
         } catch (_: Throwable) { false }
     }
 
     fun writeAudioSamples(deviceIndex: Int, samples: ShortArray, sampleFrameCount: Int): Int {
         if (!isAvailable()) return 0
         return try {
-            nativeWriteAudioSamples(deviceIndex, samples, sampleFrameCount)
+            natives.nativeWriteAudioSamples(deviceIndex, samples, sampleFrameCount)
         } catch (_: Throwable) { 0 }
     }
 
     fun disableAudioOutput(deviceIndex: Int) {
         if (!isAvailable()) return
-        try { nativeDisableAudioOutput(deviceIndex) } catch (_: Throwable) {}
+        try { natives.nativeDisableAudioOutput(deviceIndex) } catch (_: Throwable) {}
     }
 
     // ── Keyer API ──────────────────────────────────────────────────────
@@ -344,31 +299,31 @@ object DeckLinkManager {
     fun enableKeyer(deviceIndex: Int, isExternal: Boolean = false): Boolean {
         if (!isAvailable()) return false
         return try {
-            nativeEnableKeyer(deviceIndex, isExternal)
+            natives.nativeEnableKeyer(deviceIndex, isExternal)
         } catch (_: Throwable) { false }
     }
 
     /** Set keyer opacity level (0 = fully transparent, 255 = fully opaque). */
     fun setKeyerLevel(deviceIndex: Int, level: Int) {
         if (!isAvailable()) return
-        try { nativeSetKeyerLevel(deviceIndex, level) } catch (_: Throwable) {}
+        try { natives.nativeSetKeyerLevel(deviceIndex, level) } catch (_: Throwable) {}
     }
 
     /** Smoothly ramp the keyer overlay up over the given number of frames. */
     fun keyerRampUp(deviceIndex: Int, frames: Int = 30) {
         if (!isAvailable()) return
-        try { nativeKeyerRampUp(deviceIndex, frames) } catch (_: Throwable) {}
+        try { natives.nativeKeyerRampUp(deviceIndex, frames) } catch (_: Throwable) {}
     }
 
     /** Smoothly ramp the keyer overlay down over the given number of frames. */
     fun keyerRampDown(deviceIndex: Int, frames: Int = 30) {
         if (!isAvailable()) return
-        try { nativeKeyerRampDown(deviceIndex, frames) } catch (_: Throwable) {}
+        try { natives.nativeKeyerRampDown(deviceIndex, frames) } catch (_: Throwable) {}
     }
 
     fun disableKeyer(deviceIndex: Int) {
         if (!isAvailable()) return
-        try { nativeDisableKeyer(deviceIndex) } catch (_: Throwable) {}
+        try { natives.nativeDisableKeyer(deviceIndex) } catch (_: Throwable) {}
     }
 
     // ── Output connection API ──────────────────────────────────────────
@@ -376,14 +331,14 @@ object DeckLinkManager {
     fun setOutputConnection(deviceIndex: Int, connectionType: Int): Boolean {
         if (!isAvailable()) return false
         return try {
-            nativeSetOutputConnection(deviceIndex, connectionType)
+            natives.nativeSetOutputConnection(deviceIndex, connectionType)
         } catch (_: Throwable) { false }
     }
 
     fun listOutputConnections(deviceIndex: Int): List<VideoConnection> {
         if (!isAvailable()) return emptyList()
         return try {
-            parseVideoConnections(nativeListOutputConnections(deviceIndex))
+            parseVideoConnections(natives.nativeListOutputConnections(deviceIndex))
         } catch (_: Throwable) { emptyList() }
     }
 
@@ -392,7 +347,7 @@ object DeckLinkManager {
     fun getDeviceStatus(deviceIndex: Int): DeviceStatus? {
         if (!isAvailable()) return null
         return try {
-            parseDeviceStatus(nativeGetDeviceStatus(deviceIndex))
+            parseDeviceStatus(natives.nativeGetDeviceStatus(deviceIndex))
         } catch (_: Throwable) { null }
     }
 
@@ -438,4 +393,68 @@ object DeckLinkManager {
         val samples = data.copyOfRange(2, 2 + sampleFrames * channels)
         return AudioFrame(sampleFrames, channels, samples)
     }
+}
+
+/** The `decklink_jni` entry points [DeckLinkBridge] calls, by concern. */
+interface DeckLinkNatives : DeckLinkOutputNatives, DeckLinkInputNatives, DeckLinkAudioNatives, DeckLinkKeyerNatives
+
+/** The output side: devices, frames, playback. */
+interface DeckLinkOutputNatives {
+    fun nativeListDevices(): Array<String>
+    fun nativeOpen(deviceIndex: Int, width: Int, height: Int): Boolean
+    fun nativeSendFrame(deviceIndex: Int, pixels: IntArray, width: Int, height: Int)
+    fun nativeStartScheduledPlayback(deviceIndex: Int, fps: Double): Boolean
+    fun nativeScheduleFrame(deviceIndex: Int, pixels: IntArray, width: Int, height: Int)
+    fun nativeStopPlayback(deviceIndex: Int)
+    fun nativeClose(deviceIndex: Int)
+    fun nativeGetOutputInfo(deviceIndex: Int): IntArray
+}
+
+/** The input side: modes, connectors, frames, status. */
+interface DeckLinkInputNatives {
+    fun nativeListInputModes(deviceIndex: Int): Array<String>
+    fun nativeListVideoConnections(deviceIndex: Int): Array<String>
+    fun nativeOpenInput(deviceIndex: Int, mode: String, connection: Int): Boolean
+    fun nativeGetInputFrame(deviceIndex: Int): IntArray?
+    fun nativeCloseInput(deviceIndex: Int)
+    fun nativeGetDeviceStatus(deviceIndex: Int): IntArray
+}
+
+/** Embedded audio, in and out. */
+interface DeckLinkAudioNatives {
+    fun nativeEnableAudioInput(deviceIndex: Int, channels: Int): Boolean
+    fun nativeGetInputAudio(deviceIndex: Int): ShortArray?
+    fun nativeEnableAudioOutput(deviceIndex: Int, channels: Int): Boolean
+    fun nativeWriteAudioSamples(deviceIndex: Int, samples: ShortArray, sampleFrameCount: Int): Int
+    fun nativeDisableAudioOutput(deviceIndex: Int)
+}
+
+/** The hardware keyer and the output connector. */
+interface DeckLinkKeyerNatives {
+    fun nativeEnableKeyer(deviceIndex: Int, isExternal: Boolean): Boolean
+    fun nativeSetKeyerLevel(deviceIndex: Int, level: Int)
+    fun nativeKeyerRampUp(deviceIndex: Int, frames: Int)
+    fun nativeKeyerRampDown(deviceIndex: Int, frames: Int)
+    fun nativeDisableKeyer(deviceIndex: Int)
+    fun nativeSetOutputConnection(deviceIndex: Int, connectionType: Int): Boolean
+    fun nativeListOutputConnections(deviceIndex: Int): Array<String>
+}
+
+/** Loads `decklink_jni` from the app's resources, or from the library path; false when it is not there. */
+internal fun loadDeckLinkLibrary(): Boolean = try {
+    val resDir = System.getProperty("compose.application.resources.dir")
+    val libName = when {
+        System.getProperty("os.name").lowercase().contains("win") -> "decklink_jni.dll"
+        System.getProperty("os.name").lowercase().contains("mac") -> "libdecklink_jni.dylib"
+        else -> "libdecklink_jni.so"
+    }
+    val libFile = resDir?.let { java.io.File(it, libName) }
+    if (libFile != null && libFile.exists()) {
+        System.load(libFile.absolutePath)
+    } else {
+        System.loadLibrary("decklink_jni")
+    }
+    true
+} catch (_: UnsatisfiedLinkError) {
+    false
 }

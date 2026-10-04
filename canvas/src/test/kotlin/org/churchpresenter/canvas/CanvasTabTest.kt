@@ -15,7 +15,7 @@ import org.churchpresenter.sharedui.testing.showsExactly
  *
  * A scene is a stack of sources, and the order of that stack is what the audience sees — so what
  * these pin is the scene graph each control produces: which scene is current, what is in it, and in
- * what order. [org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel]'s own rules are
+ * what order. [SceneViewModel]'s own rules are
  * covered by the `SceneViewModel*` suites; nothing here re-tests those.
  *
  * See `CanvasTabTestSupport.kt` for the harness — and note the tab only became testable once

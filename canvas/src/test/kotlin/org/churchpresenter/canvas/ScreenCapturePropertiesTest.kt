@@ -28,7 +28,7 @@ class ScreenCapturePropertiesTest {
         var source by mutableStateOf(SceneSource.ScreenCaptureSource(id = "c", name = "Capture"))
         setContent {
             MaterialTheme {
-                Column { ScreenCaptureProperties(source) { source = it as SceneSource.ScreenCaptureSource } }
+                Column { ScreenCaptureProperties(source, onUpdate = { source = it as SceneSource.ScreenCaptureSource }) }
             }
         }
         waitForIdle()

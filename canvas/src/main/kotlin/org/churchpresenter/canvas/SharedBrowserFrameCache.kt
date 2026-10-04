@@ -293,7 +293,7 @@ object SharedBrowserFrameCache {
 
 
     /** Screenshots the page at [fps] into the entry until the coroutine is cancelled. */
-    private suspend fun runCaptureLoop(entry: CacheEntry, cdp: CdpConnection, fps: Int) {
+    internal suspend fun runCaptureLoop(entry: CacheEntry, cdp: CdpConnection, fps: Int) {
         entry.captureIntervalMs = (
             MILLIS_PER_SECOND / fps.coerceIn(MIN_FPS, MAX_FPS)
         ).coerceAtLeast(MIN_STARTUP_CAPTURE_INTERVAL_MS)

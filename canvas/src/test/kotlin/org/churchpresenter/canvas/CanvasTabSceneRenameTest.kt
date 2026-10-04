@@ -19,7 +19,7 @@ import kotlin.test.assertEquals
  *
  * The row swaps its label for an inline editor and back, and the only thing that actually commits the
  * new name is the tick beside the field — there is no Enter handler and no commit on focus loss. So a
- * rename that never reaches [org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel.renameScene]
+ * rename that never reaches [SceneViewModel.renameScene]
  * leaves the operator looking at the name they typed while the scene, the schedule and the saved
  * `scenes.json` all still hold the old one. That divergence is what these tests are for.
  *

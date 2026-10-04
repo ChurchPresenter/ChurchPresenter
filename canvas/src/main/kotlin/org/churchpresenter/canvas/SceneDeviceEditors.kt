@@ -83,7 +83,14 @@ private const val MAX_CAPTURE_INTERVAL_MS = 1000f
  * built.
  */
 @Composable
-internal fun NdiProperties(source: SceneSource.NdiSource, onUpdate: (SceneSource) -> Unit) {
+internal fun NdiProperties(
+    source: SceneSource.NdiSource,
+    onUpdate: (SceneSource) -> Unit,
+    /** The NDI runtime the panel reports on; a test passes its own. */
+    inputs: NetworkInputs = NetworkInputs.current,
+    /** Where discovery is shared from; a test passes one over a fake library. */
+    directory: NdiSourceDirectory = SharedNdiSources,
+) {
     Text(
         stringResource(Res.string.canvas_source_ndi),
         style = MaterialTheme.typography.labelMedium,
@@ -92,7 +99,7 @@ internal fun NdiProperties(source: SceneSource.NdiSource, onUpdate: (SceneSource
 
     // Collected rather than read once: an operator who installs the runtime and presses "check
     // again" in Settings should see this panel come to life, not have to reselect the layer.
-    val runtimeStatus by NetworkInputs.current.ndiStatus.collectAsState()
+    val runtimeStatus by inputs.ndiStatus.collectAsState()
     if (!runtimeStatus.isReady) {
         Text(
             text = stringResource(Res.string.canvas_ndi_runtime_missing),
@@ -111,14 +118,14 @@ internal fun NdiProperties(source: SceneSource.NdiSource, onUpdate: (SceneSource
     var looks by remember { mutableStateOf(0) }
 
     DisposableEffect(Unit) {
-        SharedNdiSources.acquire()
-        onDispose { SharedNdiSources.release() }
+        directory.acquire()
+        onDispose { directory.release() }
     }
     // One effect for the opening look and every refresh, so the two cannot drift apart — and so
     // both are cancelled with the panel rather than outliving it on a scope of their own.
     LaunchedEffect(looks) {
         looking = true
-        discovered = withContext(Dispatchers.IO) { SharedNdiSources.sources() }
+        discovered = withContext(Dispatchers.IO) { directory.sources() }
         looked = true
         looking = false
     }
@@ -272,7 +279,7 @@ internal fun CameraProperties(
         }
 
         if (source.isDeckLink && source.deckLinkIndex >= 0) {
-            DeckLinkInputSettings(source, onUpdate)
+            DeckLinkInputSettings(source, onUpdate, host?.deckLink ?: DeckLinkManagerInputs)
         } else if (source.devicePath.isNotEmpty() && !source.isDeckLink) {
             CameraFormatSettings(source, onUpdate)
         }
@@ -301,8 +308,12 @@ internal fun CameraProperties(
 
 /** A DeckLink input's connector and video mode, read off the card. */
 @Composable
-private fun DeckLinkInputSettings(source: SceneSource.CameraSource, onUpdate: (SceneSource) -> Unit) {
-    if (DeckLinkManager.isOutputActive(source.deckLinkIndex)) {
+private fun DeckLinkInputSettings(
+    source: SceneSource.CameraSource,
+    onUpdate: (SceneSource) -> Unit,
+    deckLink: DeckLinkInputs,
+) {
+    if (deckLink.isOutputActive(source.deckLinkIndex)) {
         Text(
             text = stringResource(Res.string.canvas_decklink_io_warning),
             color = MaterialTheme.colorScheme.error,
@@ -316,8 +327,8 @@ private fun DeckLinkInputSettings(source: SceneSource.CameraSource, onUpdate: (S
 
     LaunchedEffect(source.deckLinkIndex) {
         withContext(Dispatchers.IO) {
-            connections = DeckLinkManager.listVideoConnections(source.deckLinkIndex)
-            modes = DeckLinkManager.listInputModes(source.deckLinkIndex)
+            connections = deckLink.videoConnections(source.deckLinkIndex)
+            modes = deckLink.inputModes(source.deckLinkIndex)
         }
     }
 
@@ -462,7 +473,12 @@ fun CameraPrivacyHint(
 }
 
 @Composable
-internal fun ScreenCaptureProperties(source: SceneSource.ScreenCaptureSource, onUpdate: (SceneSource) -> Unit) {
+internal fun ScreenCaptureProperties(
+    source: SceneSource.ScreenCaptureSource,
+    onUpdate: (SceneSource) -> Unit,
+    /** The desktop's open windows, as the picker lists them; a test passes its own. */
+    listWindows: () -> List<WindowInfo> = ::listOpenWindows,
+) {
     Text(
         stringResource(Res.string.canvas_source_screen_capture),
         style = MaterialTheme.typography.labelMedium,
@@ -481,11 +497,11 @@ internal fun ScreenCaptureProperties(source: SceneSource.ScreenCaptureSource, on
         modifier = Modifier.fillMaxWidth()
     )
     if (source.captureMode == "window") {
-        var windows by remember { mutableStateOf(listOpenWindows()) }
+        var windows by remember { mutableStateOf(listWindows()) }
         val windowTitles = windows.map { it.title }
 
         RaisedButton(
-            onClick = { windows = listOpenWindows() },
+            onClick = { windows = listWindows() },
             modifier = Modifier.fillMaxWidth(),
             shape = AppShape(8.dp)
         ) {

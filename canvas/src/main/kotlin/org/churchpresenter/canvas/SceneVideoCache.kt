@@ -244,27 +244,13 @@ internal fun openVlcSceneVideo(spec: SceneVideoSpec): SceneVideoHandle? {
     if (!file.exists() || !isVlcAvailable) return null
     val (factory, player) = newVlcPlayer() ?: return null
 
-    val holder = AtomicReference<BufferedImage?>(null)
-    val version = AtomicLong(0)
-
+    val sink = VlcFrameSink()
     val bufferFormatCallback = object : BufferFormatCallback {
-        override fun getBufferFormat(sourceWidth: Int, sourceHeight: Int): BufferFormat {
-            holder.set(BufferedImage(sourceWidth, sourceHeight, BufferedImage.TYPE_INT_ARGB))
-            return RV32BufferFormat(sourceWidth, sourceHeight)
-        }
+        override fun getBufferFormat(sourceWidth: Int, sourceHeight: Int): BufferFormat =
+            sink.format(sourceWidth, sourceHeight)
         override fun allocatedBuffers(buffers: Array<out ByteBuffer>) = Unit
     }
-    val renderCallback = RenderCallback { _, nativeBuffers, _ ->
-        val img = holder.get() ?: return@RenderCallback
-        if (nativeBuffers.isNullOrEmpty()) return@RenderCallback
-        val pixels = (img.raster.dataBuffer as? DataBufferInt)?.data ?: return@RenderCallback
-        try {
-            val buf = nativeBuffers[0] ?: return@RenderCallback
-            buf.rewind()
-            buf.asIntBuffer().get(pixels, 0, pixels.size.coerceAtMost(buf.remaining() / BYTES_PER_PIXEL))
-            version.incrementAndGet()
-        } catch (_: Throwable) { }
-    }
+    val renderCallback = RenderCallback { _, nativeBuffers, _ -> sink.render(nativeBuffers) }
     player.videoSurface().set(factory.videoSurfaces().newVideoSurface(bufferFormatCallback, renderCallback, true))
 
     // The volume the layers last asked for. A volume set before libvlc has built its audio output
@@ -272,23 +258,17 @@ internal fun openVlcSceneVideo(spec: SceneVideoSpec): SceneVideoHandle? {
     // again the moment playback actually starts, and zero is a real mute rather than a level.
     // `playing` alone is not enough: the audio output is built when the audio track is selected,
     // which can be after that event, so it is applied again then and on the first clock tick.
-    val wantedPercent = AtomicInteger(VOLUME_PERCENT_SCALE)
-    fun applyVolume() {
-        val percent = wantedPercent.get()
+    val volume = VlcVolume { percent ->
         try {
             player.audio().isMute = percent == 0
             player.audio().setVolume(percent)
         } catch (_: Throwable) { }
     }
     player.events().addMediaPlayerEventListener(object : MediaPlayerEventAdapter() {
-        private val firstTick = AtomicBoolean(true)
-        override fun playing(mediaPlayer: MediaPlayer) = applyVolume()
-        override fun elementaryStreamSelected(mediaPlayer: MediaPlayer, type: TrackType, id: Int) {
-            if (type == TrackType.AUDIO) applyVolume()
-        }
-        override fun timeChanged(mediaPlayer: MediaPlayer, newTime: Long) {
-            if (firstTick.compareAndSet(true, false)) applyVolume()
-        }
+        override fun playing(mediaPlayer: MediaPlayer) = volume.applyNow()
+        override fun elementaryStreamSelected(mediaPlayer: MediaPlayer, type: TrackType, id: Int) =
+            volume.onStreamSelected(type)
+        override fun timeChanged(mediaPlayer: MediaPlayer, newTime: Long) = volume.onTimeChanged()
     })
 
     Thread.sleep(PLAYER_SETTLE_MS)
@@ -303,12 +283,9 @@ internal fun openVlcSceneVideo(spec: SceneVideoSpec): SceneVideoHandle? {
     } catch (_: Throwable) { }
 
     return object : SceneVideoHandle {
-        override val frameVersion: Long get() = version.get()
-        override val frame: BufferedImage? get() = holder.get()
-        override fun setVolume(percent: Int) {
-            wantedPercent.set(percent)
-            applyVolume()
-        }
+        override val frameVersion: Long get() = sink.frameVersion
+        override val frame: BufferedImage? get() = sink.frame
+        override fun setVolume(percent: Int) = volume.want(percent)
         override fun close() {
             try {
                 player.controls().stop()
@@ -316,6 +293,66 @@ internal fun openVlcSceneVideo(spec: SceneVideoSpec): SceneVideoHandle? {
                 factory.release()
             } catch (_: Throwable) { }
         }
+    }
+}
+
+/**
+ * Where libvlc's render callback writes: straight into the `BufferedImage`'s own int array, then a
+ * version bump -- no allocation, no conversion, nothing that can block the decoder.
+ */
+internal class VlcFrameSink {
+    private val holder = AtomicReference<BufferedImage?>(null)
+    private val version = AtomicLong(0)
+
+    val frameVersion: Long get() = version.get()
+    val frame: BufferedImage? get() = holder.get()
+
+    /** A new picture size from the decoder: a fresh image to write into, and the format to decode to. */
+    fun format(sourceWidth: Int, sourceHeight: Int): BufferFormat {
+        holder.set(BufferedImage(sourceWidth, sourceHeight, BufferedImage.TYPE_INT_ARGB))
+        return RV32BufferFormat(sourceWidth, sourceHeight)
+    }
+
+    /** One decoded picture, copied into the image if there is one to copy into. */
+    fun render(nativeBuffers: Array<out ByteBuffer?>?) {
+        val img = holder.get() ?: return
+        if (nativeBuffers.isNullOrEmpty()) return
+        val pixels = (img.raster.dataBuffer as? DataBufferInt)?.data ?: return
+        try {
+            val buf = nativeBuffers[0] ?: return
+            buf.rewind()
+            buf.asIntBuffer().get(pixels, 0, pixels.size.coerceAtMost(buf.remaining() / BYTES_PER_PIXEL))
+            version.incrementAndGet()
+        } catch (_: Throwable) { }
+    }
+}
+
+/**
+ * The volume the layers last asked for, applied through [apply].
+ *
+ * A volume set before libvlc has built its audio output is dropped on the floor -- which is how a
+ * "silent" background was heard -- so it is applied again the moment playback actually starts, and
+ * zero is a real mute rather than a level. `playing` alone is not enough: the audio output is built
+ * when the audio track is selected, which can be after that event, so it is applied again then and
+ * on the first clock tick.
+ */
+internal class VlcVolume(private val apply: (percent: Int) -> Unit) {
+    private val wantedPercent = AtomicInteger(VOLUME_PERCENT_SCALE)
+    private val firstTick = AtomicBoolean(true)
+
+    fun want(percent: Int) {
+        wantedPercent.set(percent)
+        applyNow()
+    }
+
+    fun applyNow() = apply(wantedPercent.get())
+
+    fun onStreamSelected(type: TrackType) {
+        if (type == TrackType.AUDIO) applyNow()
+    }
+
+    fun onTimeChanged() {
+        if (firstTick.compareAndSet(true, false)) applyNow()
     }
 }
 

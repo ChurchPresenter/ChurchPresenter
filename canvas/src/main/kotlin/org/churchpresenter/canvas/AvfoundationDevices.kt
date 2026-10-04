@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.diagnostics.Log
+import org.churchpresenter.sharedui.utils.CommandRunner
 import org.churchpresenter.sharedui.utils.readCommandOutput
 
 /** The scheme prefix every AVFoundation device path carries. */
@@ -93,12 +94,15 @@ internal suspend fun avfSourceToOpen(
     source: SceneSource.CameraSource,
     gate: ReportOnce,
     onRefused: (CameraFailure) -> Unit,
+    /** What the catalog has enumerated, or null when it has not answered yet. */
+    catalogDevices: List<CameraDevice>? = CameraDeviceCatalog.devices.value,
+    /** How the listing is asked for when the catalog has nothing; a test answers it itself. */
+    run: CommandRunner = ::readCommandOutput,
 ): SceneSource.CameraSource? {
     if (!needsAvfResolution(source)) return source
 
-    val catalogDevices = CameraDeviceCatalog.devices.value
     val listing = if (catalogDevices == null) {
-        withContext(Dispatchers.IO) { macListing(::readCommandOutput) }
+        withContext(Dispatchers.IO) { macListing(run) }
     } else null
     val known = catalogDevices ?: listing?.devices
 

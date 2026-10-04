@@ -146,6 +146,24 @@ class SceneVideoCacheTest {
         assertEquals(1, cache.liveDecodeCount, "a video that will not open is still one subscriber")
         assertEquals(null, frames.value)
     }
+
+    @Test
+    fun `a volume for a file nothing is playing is ignored`() {
+        val cache = SceneVideoCache(openPlayer = { FakePlayer() })
+
+        cache.setVolume(spec(), 0.5f)
+
+        assertEquals(0, cache.liveDecodeCount)
+    }
+
+    @Test
+    fun `letting go of a file nothing is playing does nothing`() {
+        val cache = SceneVideoCache(openPlayer = { FakePlayer() })
+
+        cache.release(spec())
+
+        assertEquals(0, cache.liveDecodeCount)
+    }
 }
 
 private const val VIDEO_WAIT_MS = 2_000L

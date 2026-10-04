@@ -24,6 +24,9 @@ import org.churchpresenter.core.models.scene.Scene
 
 import java.io.File
 import java.nio.file.Files
+import org.churchpresenter.sharedui.composables.LocalWentLive
+import org.churchpresenter.core.models.schedule.ScheduleItem
+import androidx.compose.runtime.CompositionLocalProvider
 
 /**
  * Harness and fixtures shared by the `CanvasTab` test classes.
@@ -49,6 +52,10 @@ internal class CanvasReports {
     var settingsChanges = 0
     /** Each scene Go Live put on the output, in order. */
     val presented = mutableListOf<Scene>()
+    /** What was reported as having gone live -- the statistics' and the schedule's record of it. */
+    val wentLive = mutableListOf<ScheduleItem>()
+    /** sceneId to sceneName, for each Save preset. */
+    val presets = mutableListOf<Pair<String, String>>()
 }
 
 /**
@@ -82,6 +89,8 @@ internal fun canvasTab(
      * Pass null to let a test exercise the real enumeration.
      */
     cameraHost: CameraHost? = CameraHost(PINNED_CAMERAS, ffmpegAvailable = true),
+    /** Whether the host offers Save preset, as the app does when the calendar is there to keep it. */
+    offerSavePreset: Boolean = false,
     block: ComposeUiTest.(vm: SceneViewModel, reports: CanvasReports) -> Unit,
 ) {
     val realHome = System.getProperty("user.home")
@@ -95,14 +104,17 @@ internal fun canvasTab(
             setContent {
                 ThemedForTest(themeMode) {
                     Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
+                        CompositionLocalProvider(LocalWentLive provides { reports.wentLive += it }) {
                         CanvasTab(
                             appSettings = settings(AppSettings()),
                             onSettingsChange = { reports.settingsChanges++ },
                             onPresentScene = { reports.presented += it },
                             sceneViewModel = vm,
                             onAddToSchedule = { id, name -> reports.scheduled += id to name },
+                            onSavePreset = if (offerSavePreset) ({ id, name -> reports.presets += id to name }) else null,
                             cameraHost = cameraHost,
                         )
+                        }
                     }
                 }
             }

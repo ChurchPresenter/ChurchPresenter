@@ -91,184 +91,69 @@ internal fun CanvasTabScope.AddSourceButton(sceneViewModel: SceneViewModel) {
             expanded = showAddMenu,
             onDismissRequest = { showAddMenu = false }
         ) {
-            AddSourceItemsFirst(sceneViewModel) { showAddMenu = false }
-            AddSourceItemsSecond(sceneViewModel) { showAddMenu = false }
+            sourceNames.newSourceItems().forEach { (label, make) ->
+                DropdownMenuItem(
+                    text = { Text(label) },
+                    onClick = {
+                        showAddMenu = false
+                        sceneViewModel.addSource(make(UUID.randomUUID().toString()))
+                    },
+                )
+            }
         }
     }
 }
 
-@Composable
-private fun CanvasTabScope.AddSourceItemsFirst(sceneViewModel: SceneViewModel, onClose: () -> Unit) {
-    DropdownMenuItem(
-        text = { Text(stringResource(Res.string.canvas_source_image)) },
-        onClick = {
-            onClose()
-            sceneViewModel.addSource(
-                SceneSource.ImageSource(
-                    id = UUID.randomUUID().toString(),
-                    name = strImage,
-                    filePath = "",
-                    transform = SourceTransform(width = 0.5f, height = 0.5f)
-                )
-            )
-        }
-    )
-    DropdownMenuItem(
-        text = { Text(stringResource(Res.string.canvas_source_text)) },
-        onClick = {
-            onClose()
-            sceneViewModel.addSource(
-                SceneSource.TextSource(
-                    id = UUID.randomUUID().toString(),
-                    name = strText,
-                    transform = SourceTransform(
-                        x = 0.25f, y = 0.4f,
-                        width = 0.5f, height = 0.2f
-                    )
-                )
-            )
-        }
-    )
-    DropdownMenuItem(
-        text = { Text(stringResource(Res.string.canvas_source_color)) },
-        onClick = {
-            onClose()
-            sceneViewModel.addSource(
-                SceneSource.ColorSource(
-                    id = UUID.randomUUID().toString(),
-                    name = strColor,
-                    transform = SourceTransform()
-                )
-            )
-        }
-    )
-    DropdownMenuItem(
-        text = { Text(stringResource(Res.string.canvas_source_video)) },
-        onClick = {
-            onClose()
-            sceneViewModel.addSource(
-                SceneSource.VideoSource(
-                    id = UUID.randomUUID().toString(),
-                    name = strVideo,
-                    filePath = "",
-                    transform = SourceTransform()
-                )
-            )
-        }
-    )
-    DropdownMenuItem(
-        text = { Text(stringResource(Res.string.canvas_source_timer)) },
-        onClick = {
-            onClose()
-            sceneViewModel.addSource(
-                SceneSource.ClockSource(
-                    id = UUID.randomUUID().toString(),
-                    name = strTimer,
-                    transform = SourceTransform(width = 0.4f, height = 0.15f)
-                )
-            )
-        }
-    )
-    DropdownMenuItem(
-        text = { Text(stringResource(Res.string.canvas_source_qrcode)) },
-        onClick = {
-            onClose()
-            sceneViewModel.addSource(
-                SceneSource.QRCodeSource(
-                    id = UUID.randomUUID().toString(),
-                    name = strQrCode,
-                    transform = SourceTransform(width = 0.2f, height = 0.2f)
-                )
-            )
-        }
-    )
-}
+/**
+ * The Add Source menu, in order: each entry's label -- which is also the new source's name -- and
+ * the source it adds under a given id, sized and placed where that kind of layer usually goes.
+ */
+internal fun CanvasSourceNames.newSourceItems(): List<Pair<String, (id: String) -> SceneSource>> = listOf(
+    strImage to { id ->
+        SceneSource.ImageSource(id = id, name = strImage, filePath = "", transform = SourceTransform(width = HALF, height = HALF))
+    },
+    strText to { id ->
+        SceneSource.TextSource(
+            id = id, name = strText,
+            transform = SourceTransform(x = QUARTER, y = TEXT_TOP, width = HALF, height = TEXT_HEIGHT),
+        )
+    },
+    strColor to { id -> SceneSource.ColorSource(id = id, name = strColor, transform = SourceTransform()) },
+    strVideo to { id -> SceneSource.VideoSource(id = id, name = strVideo, filePath = "", transform = SourceTransform()) },
+    strTimer to { id ->
+        SceneSource.ClockSource(id = id, name = strTimer, transform = SourceTransform(width = TIMER_WIDTH, height = TIMER_HEIGHT))
+    },
+    strQrCode to { id ->
+        SceneSource.QRCodeSource(id = id, name = strQrCode, transform = SourceTransform(width = QR_SIDE, height = QR_SIDE))
+    },
+    strCamera to { id -> SceneSource.CameraSource(id = id, name = strCamera, transform = SourceTransform()) },
+    strScreenCapture to { id ->
+        SceneSource.ScreenCaptureSource(id = id, name = strScreenCapture, transform = SourceTransform())
+    },
+    strNdi to { id -> SceneSource.NdiSource(id = id, name = strNdi, transform = SourceTransform()) },
+    strOmt to { id -> SceneSource.OmtSource(id = id, name = strOmt, transform = SourceTransform()) },
+    strBrowser to { id ->
+        SceneSource.BrowserSource(
+            id = id, name = strBrowser, url = "http://www.",
+            transform = SourceTransform(x = INSET, y = INSET, width = WIDE, height = WIDE),
+        )
+    },
+    strBible to { id ->
+        SceneSource.BibleSource(
+            id = id, name = strBible,
+            transform = SourceTransform(x = INSET, y = BIBLE_TOP, width = WIDE, height = BIBLE_HEIGHT),
+        )
+    },
+)
 
-@Composable
-private fun CanvasTabScope.AddSourceItemsSecond(sceneViewModel: SceneViewModel, onClose: () -> Unit) {
-    DropdownMenuItem(
-        text = { Text(stringResource(Res.string.background_camera_option)) },
-        onClick = {
-            onClose()
-            sceneViewModel.addSource(
-                SceneSource.CameraSource(
-                    id = UUID.randomUUID().toString(),
-                    name = strCamera,
-                    transform = SourceTransform()
-                )
-            )
-        }
-    )
-    DropdownMenuItem(
-        text = { Text(stringResource(Res.string.canvas_source_screen_capture)) },
-        onClick = {
-            onClose()
-            sceneViewModel.addSource(
-                SceneSource.ScreenCaptureSource(
-                    id = UUID.randomUUID().toString(),
-                    name = strScreenCapture,
-                    transform = SourceTransform()
-                )
-            )
-        }
-    )
-    DropdownMenuItem(
-        text = { Text(stringResource(Res.string.canvas_source_ndi)) },
-        onClick = {
-            onClose()
-            sceneViewModel.addSource(
-                SceneSource.NdiSource(
-                    id = UUID.randomUUID().toString(),
-                    name = strNdi,
-                    transform = SourceTransform()
-                )
-            )
-        }
-    )
-    DropdownMenuItem(
-        text = { Text(stringResource(Res.string.canvas_source_omt)) },
-        onClick = {
-            onClose()
-            sceneViewModel.addSource(
-                SceneSource.OmtSource(
-                    id = UUID.randomUUID().toString(),
-                    name = strOmt,
-                    transform = SourceTransform()
-                )
-            )
-        }
-    )
-    DropdownMenuItem(
-        text = { Text(stringResource(Res.string.canvas_source_browser)) },
-        onClick = {
-            onClose()
-            sceneViewModel.addSource(
-                SceneSource.BrowserSource(
-                    id = UUID.randomUUID().toString(),
-                    name = strBrowser,
-                    url = "http://www.",
-                    transform = SourceTransform(
-                        x = 0.1f, y = 0.1f,
-                        width = 0.8f, height = 0.8f
-                    )
-                )
-            )
-        }
-    )
-    DropdownMenuItem(
-        text = { Text(stringResource(Res.string.canvas_source_bible)) },
-        onClick = {
-            onClose()
-            sceneViewModel.addSource(
-                SceneSource.BibleSource(
-                    id = UUID.randomUUID().toString(),
-                    name = strBible,
-                    transform = SourceTransform(
-                        x = 0.1f, y = 0.2f,
-                        width = 0.8f, height = 0.6f
-                    )
-                )
-            )
-        }
-    )
-}
+private const val HALF = 0.5f
+private const val QUARTER = 0.25f
+private const val TEXT_TOP = 0.4f
+private const val TEXT_HEIGHT = 0.2f
+private const val TIMER_WIDTH = 0.4f
+private const val TIMER_HEIGHT = 0.15f
+private const val QR_SIDE = 0.2f
+private const val INSET = 0.1f
+private const val WIDE = 0.8f
+private const val BIBLE_TOP = 0.2f
+private const val BIBLE_HEIGHT = 0.6f

@@ -21,8 +21,9 @@ internal object CdpPages {
     internal suspend fun connectCdp(
         entry: SharedBrowserFrameCache.CacheEntry,
         port: Int,
+        readyTimeoutMs: Long = CDP_READY_TIMEOUT_MS,
     ): SharedBrowserFrameCache.CdpConnection? {
-        if (!BrowserProcesses.waitForCdpReady(port, timeoutMs = 15000)) {
+        if (!BrowserProcesses.waitForCdpReady(port, timeoutMs = readyTimeoutMs)) {
             Log.warn("BrowserSource", "CDP did not become ready in time")
             CrashReporter.reportWarning(
                 "BrowserSource: CDP did not become ready in time",
@@ -63,6 +64,7 @@ internal object CdpPages {
     internal suspend fun configurePage(
         cdp: SharedBrowserFrameCache.CdpConnection,
         page: SharedBrowserFrameCache.BrowserPage,
+        settleMs: Long = PAGE_LOAD_SETTLE_MS,
     ) {
         val url = page.url
         val renderWidth = page.renderWidth
@@ -98,7 +100,7 @@ internal object CdpPages {
             Log.info("BrowserSource", "Page.navigate($url): $resp")
 
             // Wait for page to load
-            delay(PAGE_LOAD_SETTLE_MS)
+            delay(settleMs)
 
             // Inject transparency CSS
             if (forceTransparent) {
@@ -159,3 +161,6 @@ internal object CdpPages {
 }
 
 private const val PAGE_LOAD_SETTLE_MS = 3000L
+
+/** How long a freshly launched browser has to answer on its debug port. */
+private const val CDP_READY_TIMEOUT_MS = 15_000L

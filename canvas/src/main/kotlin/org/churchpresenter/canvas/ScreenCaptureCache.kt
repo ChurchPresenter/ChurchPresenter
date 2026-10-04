@@ -168,24 +168,49 @@ private val screenRobot: Robot? by lazy {
  * behind another one — and falls back to grabbing the screen rectangle the window currently
  * occupies, which cannot. Region mode is the rectangle as given.
  */
-internal fun grabScreen(spec: ScreenCaptureSpec): BufferedImage? {
-    val robot = screenRobot ?: return null
+internal fun grabScreen(spec: ScreenCaptureSpec, grabber: ScreenGrabber = RobotScreenGrabber): BufferedImage? {
+    if (!grabber.available) return null
     return when {
         spec.mode == CAPTURE_MODE_WINDOW && spec.windowId.isNotBlank() -> {
             val wid = spec.windowId.removePrefix("0x").toLongOrNull(16) ?: 0L
-            WindowsWindowCapture.captureWindow(wid)
-                ?: X11WindowCapture.captureWindow(wid)
-                ?: robot.grabOrNull(findWindowBounds(spec.windowTitle))
+            grabber.captureWindow(wid) ?: grabber.grabOrNull(grabber.windowBounds(spec.windowTitle))
         }
         spec.mode == CAPTURE_MODE_WINDOW && spec.windowTitle.isNotBlank() ->
-            robot.grabOrNull(findWindowBounds(spec.windowTitle))
-        else -> robot.grabOrNull(Rectangle(spec.x, spec.y, spec.width, spec.height))
+            grabber.grabOrNull(grabber.windowBounds(spec.windowTitle))
+        else -> grabber.grabOrNull(Rectangle(spec.x, spec.y, spec.width, spec.height))
     }
 }
 
-/** Grabs [rect], or null when it names no area — `createScreenCapture` throws on an empty one. */
-private fun Robot.grabOrNull(rect: Rectangle?): BufferedImage? =
-    rect?.takeIf { it.width > 0 && it.height > 0 }?.let { createScreenCapture(it) }
+/** Grabs [rect], or null when it names no area -- `createScreenCapture` throws on an empty one. */
+private fun ScreenGrabber.grabOrNull(rect: Rectangle?): BufferedImage? =
+    rect?.takeIf { it.width > 0 && it.height > 0 }?.let { capture(it) }
+
+/** What [grabScreen] reads the screen with: [RobotScreenGrabber] in the app, a picture in a test. */
+internal interface ScreenGrabber {
+    /** Whether anything can be grabbed at all on this machine. */
+    val available: Boolean
+
+    /** The platform's own capture of window [windowId], which can read one that is covered. */
+    fun captureWindow(windowId: Long): BufferedImage?
+
+    /** Where the window titled [title] sits on screen now, or null when it is not there. */
+    fun windowBounds(title: String): Rectangle?
+
+    /** The screen inside [rect]. */
+    fun capture(rect: Rectangle): BufferedImage
+}
+
+/** The real screen: the AWT robot, and Windows' or X11's own window capture. */
+internal object RobotScreenGrabber : ScreenGrabber {
+    override val available: Boolean get() = screenRobot != null
+
+    override fun captureWindow(windowId: Long): BufferedImage? =
+        WindowsWindowCapture.captureWindow(windowId) ?: X11WindowCapture.captureWindow(windowId)
+
+    override fun windowBounds(title: String): Rectangle? = findWindowBounds(title)
+
+    override fun capture(rect: Rectangle): BufferedImage = checkNotNull(screenRobot).createScreenCapture(rect)
+}
 
 /**
  * The one cache the app draws screen-capture layers from.

@@ -21,7 +21,7 @@ import org.churchpresenter.sharedui.testing.showsExactly
 /**
  * That `CanvasTab` composes at all on a machine with no display.
  *
- * It did not until [assignedDisplayBounds][org.churchpresenter.app.churchpresenter.utils.assignedDisplayBounds]
+ * It did not until the app's `assignedDisplayBounds`
  * existed: the tab asked `GraphicsEnvironment` for the assigned output's bounds twice during
  * composition — once for the scene list's per-row aspect-ratio badge and once for the mismatch
  * warning under the canvas — and `screenDevices` throws `HeadlessException` when there is no screen.

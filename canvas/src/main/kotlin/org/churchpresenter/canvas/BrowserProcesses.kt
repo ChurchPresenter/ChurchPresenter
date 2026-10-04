@@ -23,7 +23,7 @@ internal object BrowserProcesses {
     @Volatile private var zombiesCleaned = false
 
     /** The executable `which`/`where` reports for [name], when it exists on disk. */
-    private fun browserOnPath(whichCmd: String, name: String): String? = try {
+    internal fun browserOnPath(whichCmd: String, name: String): String? = try {
         val proc = ProcessBuilder(whichCmd, name).redirectErrorStream(true).start()
         val output = proc.inputStream.bufferedReader().readText().trim()
         val path = output.lines().firstOrNull()?.trim()

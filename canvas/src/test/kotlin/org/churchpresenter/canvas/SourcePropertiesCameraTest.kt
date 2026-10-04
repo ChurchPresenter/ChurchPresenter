@@ -28,11 +28,8 @@ import kotlin.test.assertEquals
  * A host can also list devices, which reaches the device dropdown, what choosing an entry writes,
  * and the format dropdown -- empty but for Auto, as the faked OS has no format enumerator.
  *
- * Known gaps, all of them downstream of real hardware:
+ * The DeckLink branch is `SourcePropertiesDeckLinkTest`. Known gap, downstream of real hardware:
  *
- *  * **The DeckLink branch** — the in-use warning, the video-connection dropdown and its auto-select,
- *    and the mode dropdown — all of which need `DeckLinkManager.isAvailable()` to be true, and that
- *    needs the native `decklink_jni` library the suite does not ship.
  *  * **The formats ffmpeg lists** for a real device.
  *
  * *Which* hint each platform gets is pinned in `CameraToolHintsTest`; this suite checks that the

@@ -95,7 +95,12 @@ object CameraDeviceCatalog {
  * answer could land between two frames the test compared — so the panel changed under a test that
  * had changed nothing.
  */
-data class CameraHost(val devices: List<CameraDevice>, val ffmpegAvailable: Boolean)
+data class CameraHost(
+    val devices: List<CameraDevice>,
+    val ffmpegAvailable: Boolean,
+    /** The DeckLink cards' inputs the panel reads connectors and modes from. */
+    val deckLink: DeckLinkInputs = DeckLinkManagerInputs,
+)
 
 /**
  * Whether [camera] names a device this machine actually has, and so may be opened.
