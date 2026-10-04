@@ -10,6 +10,14 @@ plugins {
 
 group = "org.churchpresenter"
 
+// Below the shared 85% on two counters only: what is left is the native and process code the capture
+// sources run on (libvlc, the ffmpeg pipe's coroutine plumbing, headless Chrome's own processes) and
+// Compose's per-value change checks on click handlers. See AGENT.md.
+extra["coverageFloors"] = mapOf(
+    "BRANCH" to "0.80",
+    "COMPLEXITY" to "0.76",
+)
+
 kotlin {
     jvmToolchain(21)
 }

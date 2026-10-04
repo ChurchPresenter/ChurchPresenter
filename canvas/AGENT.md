@@ -42,6 +42,14 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 - **The renderer** is split by kind of source: `SceneSourceRenderer.kt`, `SceneTextSources.kt`,
   `SceneClockSource.kt`, `SceneDeviceSources.kt`, and `WindowBounds.kt` for window capture.
 
+## Coverage floor
+
+Branches **80%** and complexity **76%**; the other four counters keep the shared 85%. What is left is
+mostly not untested behaviour: building the libvlc player, killing zombie headless browsers (which on a
+developer's machine would kill their real ones), the coroutine plumbing around the ffmpeg pipe, the
+`minOf`/`maxOf` empty-list exits in shape math, and Compose's per-value change checks on click
+handlers. Raise the floors as any of that becomes reachable; never lower them without asking.
+
 ## Package
 
 **`org.churchpresenter.canvas`**; the screenshot suites are in `org.churchpresenter.canvas.screenshot`.
