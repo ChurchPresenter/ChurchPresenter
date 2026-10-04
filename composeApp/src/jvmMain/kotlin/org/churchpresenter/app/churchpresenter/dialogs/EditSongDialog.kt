@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.profiles.SongBackgroundButton
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background

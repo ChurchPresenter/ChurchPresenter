@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.profiles.openColorField
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import org.churchpresenter.sharedui.composables.cpColorToHex

@@ -25,7 +25,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.ConverterWindow
 import org.churchpresenter.app.churchpresenter.dialogs.SongLibraryWindow
 import org.churchpresenter.strings.generated.resources.bible_font
 import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.hostFontPicker
+import org.churchpresenter.profiles.hostFontPicker
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.dialogs.StyleEditorWindow
 import org.churchpresenter.app.churchpresenter.dialogs.MemoryMonitorWindow

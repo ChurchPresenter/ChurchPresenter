@@ -2,6 +2,9 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.profiles.NOT_LOTTIE_JSON
+import org.churchpresenter.profiles.lottieJson
+import org.churchpresenter.profiles.withLottieFolder
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText

@@ -33,7 +33,7 @@
 - `dialogs/SongBackground*.kt` — the per-song background panel
 - `data/settings/SongSettings.kt`
 - `presenter/…/SongPresenter.kt`, with `SongLook.kt`, `SongFrame.kt`, `SongFitFrame.kt` and `SongSlide*.kt` beside it
-- `dialogs/EditSongDialog.kt`, `dialogs/tabs/SongSettingsTab.kt`
+- `dialogs/EditSongDialog.kt`, `profiles/…/SongSettingsTab.kt`
 - `composables/SongChordPreview.kt` — the editor's chord preview: Transpose, the key's palette and the chord picker
 - `core-models/src/main/kotlin/.../models/songs/LyricSection.kt` (the `:core-models` module)
 - `converter/` (the `:converter` Gradle module, at the repo root) — format converter tool
@@ -67,7 +67,7 @@
   its panes), `DictionaryViewModel`, the interlinear index and the bundled Strong's/interlinear data;
   `:server`'s `StrongsDictionaryRepository.kt` serves the same data to the companion API
 - `dictionary/…/presenter/DictionaryPresenter.kt` — the dictionary card on the output
-- `dialogs/tabs/ProfileDictionaryPage.kt`, `dialogs/tabs/DictionaryPart.kt` — how the dictionary card looks on each output, edited on Profiles → Dictionary
+- `profiles/…/ProfileDictionaryPage.kt`, `profiles/…/DictionaryPart.kt` — how the dictionary card looks on each output, edited on Profiles → Dictionary
 - `viewmodel/BibleEngineClient.kt` — auto-follow speech detection client
 - `bible/` (the `:bible` Gradle module) — `Bible.kt`, `BibleBook.kt`, `BibleSearch.kt`,
   `BibleVerse.kt`, `BibleTranslationNames.kt` and the `.spb` format helpers in `SpbFormat.kt`
@@ -77,7 +77,7 @@
 - `bible-formats/src/main/kotlin/.../UsfxToSpbConverter.kt`, `XmlToSpbConverter.kt` — the conversions
 - `data/settings/BibleSettings.kt`, `data/settings/BibleEngineSettings.kt`
 - `presenter/…/BiblePresenter.kt`, with `BibleLook.kt`, `BibleFrame.kt`, `BibleSlide.kt`, `BibleLayouts.kt` and `PresenterBackdrop.kt` beside it
-- `dialogs/tabs/BibleSettingsTab.kt`
+- `profiles/…/BibleSettingsTab.kt`
 - `core-models/src/main/kotlin/.../models/bible/SelectedVerse.kt` (the `:core-models` module)
 - `bible-engine/` (the `:bible-engine` Gradle module, at the repo root) — Bible Lookup Engine (speech-to-reference detection)
 - `shared-ui/…/utils/TrainingDataLogger.kt`, `LiveHistoryLogger.kt` (the `:shared-ui` module) — the session logs in
@@ -122,8 +122,8 @@
 - `slides/…/presenter/PicturePresenter.kt`, `media/…/presenter/MediaPresenter.kt`
 - `media/…/composables/VideoPlayer.kt`
 - `media/…/dialogs/tabs/MediaSettingsTab.kt`
-- `dialogs/tabs/ProfileScaleRow.kt`, `shared-ui/…/utils/OutputScaleMode.kt` — per-profile scaling and the tabs' shortcut over it
-- `dialogs/tabs/ProfileOverlayPages.kt`, `dialogs/tabs/DisplayTextRows.kt` — the subtitle look, edited on Profiles → Subtitles
+- `profiles/…/ProfileScaleRow.kt`, `shared-ui/…/utils/OutputScaleMode.kt` — per-profile scaling and the tabs' shortcut over it
+- `profiles/…/ProfileOverlayPages.kt`, `profiles/…/DisplayTextRows.kt` — the subtitle look, edited on Profiles → Subtitles
 
 ## Lower Thirds & Graphics
 - **Animated lower thirds** — display polished Lottie animations for names, titles and welcomes.
@@ -142,7 +142,7 @@
 - `lower-third/…/presenter/LowerThirdPresenter.kt` — the lower third on the output
 - `lottieGenerator/.../lottie/TextShaping.kt` — the Text shaping setting every Lottie player reads from the file
 - `presenter/…/BibleLottieBand.kt`, `presenter/…/BibleLottieTemplate.kt`, `presenter/…/BibleLottieTextFit.kt`, `presenter/…/BibleBandClock.kt` — the Bible band at run time; driven from `PresenterTransitionEffects.kt`
-- `dialogs/tabs/BibleLottieBandPicker.kt` — the template picker, the Bible tab's Lower Third Animation section and the generator window
+- `profiles/…/BibleLottieBandPicker.kt` — the template picker, the Bible tab's Lower Third Animation section and the generator window
 - `lottieGenerator/src/main/kotlin/.../band/` (the `:lottieGenerator` module) — the Bible band generator
 
 ## Announcements & Timers
@@ -196,7 +196,7 @@
 - `tabs/AppSTTTab.kt` — the app's wrapper, which supplies the live mode and the caption settings dialog
 - `data/settings/STTSettings.kt`
 - `stt/…/presenter/STTPresenter.kt` — the captions on the output
-- `dialogs/tabs/ProfileCaptionsPage.kt`, `dialogs/tabs/CaptionReadingGroup.kt` — the caption look and reading settings, edited on Profiles → Live captions
+- `profiles/…/ProfileCaptionsPage.kt`, `profiles/…/CaptionReadingGroup.kt` — the caption look and reading settings, edited on Profiles → Live captions
 - `stt/…/presenter/` — `CaptionBody.kt` (line breaks, wrapping, capitals, dimming), `CaptionLook.kt` (card, band, margins, silence fade), `CaptionTicker.kt`, `CaptionInterleave.kt`, `CaptionLanguages.kt`, and the reveal pace in `SttDripFeed.kt` and `SttRevealPace.kt`
 - `composables/CaptionText.kt` — `BottomAlignedText`, which draws only the lines in its window (also used by video subtitles)
 - `dialogs/STTSettingsDialog.kt` — the install-wide Bible-engine options
@@ -215,7 +215,7 @@
   `viewmodel/PresenterQAOutput.kt` — the tab's `QAOutput`, over `PresenterManager`
 - `data/settings/QASettings.kt`
 - `qa/…/presenter/QAPresenter.kt` — the question and the QR code on the output; the QR image itself is `generateQRCodeBitmap` in `:shared-ui`
-- `dialogs/tabs/ProfileOverlayPages.kt` — the question and QR look, edited on Profiles → Q&A
+- `profiles/…/ProfileOverlayPages.kt` — the question and QR look, edited on Profiles → Q&A
 - `dialogs/QARemoteDialog.kt` — links, public access, rate limit and the QR message
 - `core-models/src/main/kotlin/.../models/qa/Question.kt` (the `:core-models` module)
 
@@ -228,7 +228,7 @@
 - `schedule/src/main/kotlin/org/churchpresenter/schedule/ScheduleTab.kt` — main UI (the `:schedule` module)
 - `schedule/src/main/kotlin/org/churchpresenter/schedule/ScheduleViewModel.kt`, plus its `ScheduleViewModel*.kt` extensions
 - `core-models/src/main/kotlin/.../models/schedule/ScheduleItem.kt` (the `:core-models` module)
-- `viewmodel/FileManager.kt`
+- `profiles/…/FileManager.kt`
 - `dialogs/AddLabelDialog.kt`
 
 ## Calendar & Planning
@@ -280,27 +280,27 @@
 - `gradle/omt-builds.properties`, `.github/workflows/omt-linux.yml`, `THIRD_PARTY_OMT.md` — where the bundled OMT libraries come from, and their licence
 - `media/…/data/StockMediaClient.kt`, `media/…/dialogs/StockMediaBrowserDialog.kt`, `media/…/viewmodel/StockMediaViewModel.kt`, `data/settings/StockPhotoSettings.kt`
 - `composables/DeckLinkManager.kt`, `composables/DeckLinkInputGate.kt`, `composables/LivePreviewPanel.kt`, `presenter/…/LoopingVideoBackground.kt`
-- `viewmodel/PresenterManager.kt`, `viewmodel/BackgroundSettingsViewModel.kt`
+- `viewmodel/PresenterManager.kt`, `profiles/…/BackgroundSettingsViewModel.kt`
 - `data/settings/BackgroundConfig.kt`, `data/settings/BackgroundSettings.kt`, `data/settings/ProjectionSettings.kt`, `data/settings/ScreenAssignment.kt`
-- `dialogs/tabs/BackgroundSettingsTab.kt`, `dialogs/tabs/ProjectionSettingsTab.kt`
+- `profiles/…/BackgroundSettingsTab.kt`, `dialogs/tabs/ProjectionSettingsTab.kt`
 - `shared-ui/…/utils/AutoFitUtils.kt`
-- `dialogs/tabs/ProfilesSettingsTab.kt`, `dialogs/tabs/ProfileEditor.kt`, `dialogs/tabs/ProfileHeader.kt` — the Profiles tab: the list, the editor, the header
-- `dialogs/tabs/ProfileContentPage.kt`, `dialogs/tabs/ProfileSourcePickers.kt`, `dialogs/tabs/ProfileSources.kt` — what a profile shows, and its Bible and song sources
-- `dialogs/tabs/PreviewShape.kt`, `dialogs/tabs/PreviewShapeChooser.kt` — the preview's shape: presets, a custom ratio or a custom resolution
-- `dialogs/tabs/ProfileList.kt`, `dialogs/tabs/ProfileListDrag.kt`, `data/settings/OutputProfileOrder.kt` — the profile list and its order: drag, Alt+↑/↓, the right-click menu
-- `dialogs/tabs/ProfileSectionNav.kt`, `dialogs/tabs/ProfilePage.kt`, `dialogs/tabs/SettingsGroup.kt`, `dialogs/tabs/SettingsRowControls.kt` — the section list, and the cards and rows every page is built from, with Basic / Advanced
-- `dialogs/tabs/ProfileGeneralPage.kt`, `dialogs/tabs/ProfileOutputsPage.kt`, `dialogs/tabs/ProfileBiblePage.kt`, `dialogs/tabs/ProfileSongsPage.kt`, `dialogs/tabs/ProfileBackgroundPage.kt`, `dialogs/tabs/ProfileStagePage.kt` — the pages
+- `profiles/…/ProfilesSettingsTab.kt`, `profiles/…/ProfileEditor.kt`, `profiles/…/ProfileHeader.kt` — the Profiles tab: the list, the editor, the header
+- `profiles/…/ProfileContentPage.kt`, `profiles/…/ProfileSourcePickers.kt`, `profiles/…/ProfileSources.kt` — what a profile shows, and its Bible and song sources
+- `dialogs/tabs/PreviewShape.kt`, `profiles/…/PreviewShapeChooser.kt` — the preview's shape: presets, a custom ratio or a custom resolution
+- `profiles/…/ProfileList.kt`, `profiles/…/ProfileListDrag.kt`, `data/settings/OutputProfileOrder.kt` — the profile list and its order: drag, Alt+↑/↓, the right-click menu
+- `profiles/…/ProfileSectionNav.kt`, `profiles/…/ProfilePage.kt`, `profiles/…/SettingsGroup.kt`, `profiles/…/SettingsRowControls.kt` — the section list, and the cards and rows every page is built from, with Basic / Advanced
+- `profiles/…/ProfileGeneralPage.kt`, `profiles/…/ProfileOutputsPage.kt`, `profiles/…/ProfileBiblePage.kt`, `profiles/…/ProfileSongsPage.kt`, `profiles/…/ProfileBackgroundPage.kt`, `profiles/…/ProfileStagePage.kt` — the pages
 - `data/settings/LinkedProfiles.kt`, `data/settings/LinkedProfilePaths.kt`, `data/settings/LinkedProfileValues.kt`, `dialogs/tabs/ProfileLink*.kt` — linked profiles: a master, and profiles that keep only what they change
-- `data/settings/BibleAllLayer.kt`, `dialogs/tabs/SongAllLanguages.kt`, `dialogs/tabs/ProfileStyleTarget.kt` — "Applies to": All, or one translation or language with values of its own
-- `dialogs/tabs/PreviewAdjust*.kt`, `dialogs/tabs/LargePreview.kt`, `presenter/PresentedBlock.kt` — adjusting a page from its preview, and the preview across the window
-- `dialogs/tabs/SongElementMove.kt`, `presenter/…/SongElementMove.kt`, `presenter/…/BibleBlockShift.kt` — moving one song element, one Bible translation or its reference on its own, and Reset positions
-- `data/settings/ProfileDefaults.kt`, `dialogs/tabs/ProfileLinkCard.kt` — what a profile changes from the defaults, listed beside the preview with Revert
-- `dialogs/tabs/CustomizePane.kt`, `dialogs/tabs/ProfileFormStages.kt`, `dialogs/tabs/PreviewBackgroundLayer.kt`, `dialogs/tabs/Customize*.kt` — the picture beside each page, with the output's real background
+- `data/settings/BibleAllLayer.kt`, `profiles/…/SongAllLanguages.kt`, `profiles/…/ProfileStyleTarget.kt` — "Applies to": All, or one translation or language with values of its own
+- `dialogs/tabs/PreviewAdjust*.kt`, `profiles/…/LargePreview.kt`, `presenter/PresentedBlock.kt` — adjusting a page from its preview, and the preview across the window
+- `profiles/…/SongElementMove.kt`, `presenter/…/SongElementMove.kt`, `presenter/…/BibleBlockShift.kt` — moving one song element, one Bible translation or its reference on its own, and Reset positions
+- `data/settings/ProfileDefaults.kt`, `profiles/…/ProfileLinkCard.kt` — what a profile changes from the defaults, listed beside the preview with Revert
+- `profiles/…/CustomizePane.kt`, `profiles/…/ProfileFormStages.kt`, `profiles/…/PreviewBackgroundLayer.kt`, `dialogs/tabs/Customize*.kt` — the picture beside each page, with the output's real background
 - `data/settings/OutputProfile.kt`, `data/settings/OutputProfileResolution.kt` — the profile, and what an output renders with
 - `data/settings/TextBox.kt` — text boxes: the box, its options and the keys items are boxed under
 - `presenter/TextBoxLayout.kt`, `presenter/…/SongBoxLayer.kt`, `presenter/…/BibleBoxLayer.kt`, `presenter/…/SongSlideFit.kt` — drawing boxed items, and fitting what is left and each language on its own
-- `dialogs/tabs/TextBoxRows.kt`, `dialogs/tabs/BoxItem.kt`, `dialogs/tabs/ItemBoxGroup.kt`, `dialogs/tabs/SongBoxRows.kt`, `dialogs/tabs/BibleBoxTarget.kt`, `dialogs/tabs/PreviewAdjustBoxes.kt` — a page's box rows, and moving and resizing boxes on the preview
-- `dialogs/tabs/MarginRoom.kt`, `presenter/…/ContentRegionModifier.kt`, `dialogs/tabs/ContentBackgroundOwn.kt` — how far margins go, a region that moves only the text, and a content background that remembers its own
+- `profiles/…/TextBoxRows.kt`, `profiles/…/BoxItem.kt`, `profiles/…/ItemBoxGroup.kt`, `profiles/…/SongBoxRows.kt`, `profiles/…/BibleBoxTarget.kt`, `profiles/…/PreviewAdjustBoxes.kt` — a page's box rows, and moving and resizing boxes on the preview
+- `profiles/…/MarginRoom.kt`, `presenter/…/ContentRegionModifier.kt`, `profiles/…/ContentBackgroundOwn.kt` — how far margins go, a region that moves only the text, and a content background that remembers its own
 - `data/settings/PreviewLayouts.kt`, `data/settings/PreviewLayoutSettings.kt` — preview layouts: the area tree and the layouts kept on the projection settings
 - `composables/PreviewLayoutView.kt`, `composables/PreviewLayoutTemplate.kt`, `composables/PreviewGroupsPopover.kt` — the panel drawn and edited as its layout says, the templates, and the gear's layout list
 
@@ -312,7 +312,7 @@
 - `StageMonitorScreen.kt`
 - `data/settings/StageMonitorSettings.kt`
 - `:server`'s `BrowserSourcePage.kt`, `:server`'s `BrowserSourceRoutes.kt` — the tablets' transpose buttons, and the routes that approve and apply them; `LiveStatusWiring.kt` (`offersTranspose`) says which outputs offer them
-- `dialogs/tabs/ProfileStagePage.kt`, `dialogs/tabs/ProfileStageText.kt`, `dialogs/tabs/StageMonitorZoneGrid.kt` — the Stage layout page of a stage-monitor profile
+- `profiles/…/ProfileStagePage.kt`, `profiles/…/ProfileStageText.kt`, `profiles/…/StageMonitorZoneGrid.kt` — the Stage layout page of a stage-monitor profile
 
 ## Mobile & Remote Control
 - **Control from your phone** — a built-in server lets phones and tablets browse songs and scripture, build the schedule and go live — all over your local network.

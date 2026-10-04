@@ -3,6 +3,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.test.ComposeUiTest
+import org.churchpresenter.profiles.retypeNumberField
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onAllNodesWithText

@@ -26,7 +26,7 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.calendar_choose_logo_title
 import org.churchpresenter.strings.generated.resources.calendar_export_title
 import org.churchpresenter.sharedui.filechooser.OwnedFileDialog
-import org.churchpresenter.app.churchpresenter.utils.isMacOs
+import org.churchpresenter.profiles.isMacOs
 import org.jetbrains.compose.resources.getString
 import org.churchpresenter.strings.generated.resources.converter_window_title
 import org.churchpresenter.strings.generated.resources.open_calendar_manager

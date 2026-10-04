@@ -144,7 +144,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :canvas:detekt :presenter:detekt :companion-surface:detekt :obs:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :canvas:detekt :presenter:detekt :profiles:detekt :companion-surface:detekt :obs:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -576,6 +576,14 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.presenter == 'true' }}
         run: ./gradlew :presenter:jacocoTestCoverageVerification -x test
 
+      - name: Profiles tests
+        if: ${{ !cancelled() && steps.modules.outputs.profiles == 'true' }}
+        run: ./gradlew :profiles:test
+
+      - name: Profiles coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.profiles == 'true' }}
+        run: ./gradlew :profiles:jacocoTestCoverageVerification -x test
+
       - name: Companion Surface tests
         if: ${{ !cancelled() && steps.modules.outputs.companionsurface == 'true' }}
         run: ./gradlew :companion-surface:test
@@ -643,6 +651,7 @@ jobs:
               ("schedule", "Schedule"),
               ("canvas", "Canvas"),
               ("presenter", "Presenter"),
+              ("profiles", "Profiles"),
               ("companion-surface", "Companion Surface"),
           ]
           ran = [(d, n) for d, n in MODULES if glob.glob(f"{d}/build/test-results/**/TEST-*.xml", recursive=True)]
@@ -849,5 +858,7 @@ jobs:
             canvas/build/test-results/
             presenter/build/reports/tests/
             presenter/build/test-results/
+            profiles/build/reports/tests/
+            profiles/build/test-results/
             companion-surface/build/reports/tests/
             companion-surface/build/test-results/

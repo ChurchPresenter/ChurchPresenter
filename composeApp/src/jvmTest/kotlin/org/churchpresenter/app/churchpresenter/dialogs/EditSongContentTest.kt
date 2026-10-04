@@ -2,6 +2,9 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.profiles.SONG_BACKGROUND_BUTTON_TAG
+import org.churchpresenter.profiles.SONG_BACKGROUND_SAVE_TAG
+import org.churchpresenter.profiles.SONG_BACKGROUND_SCOPE_TAG
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties

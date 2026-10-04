@@ -3,9 +3,9 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.churchpresenter.announcements.AnnouncementsTab
-import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
-import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
-import org.churchpresenter.app.churchpresenter.stageMonitorScreenIndices
+import org.churchpresenter.profiles.PreviewOutputPicker
+import org.churchpresenter.profiles.rememberPreviewOutput
+import org.churchpresenter.profiles.stageMonitorScreenIndices
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings

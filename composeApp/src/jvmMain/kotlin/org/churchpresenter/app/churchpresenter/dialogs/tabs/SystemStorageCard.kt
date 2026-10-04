@@ -77,7 +77,7 @@ import org.churchpresenter.strings.generated.resources.tooltip_directory_writabl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
+import org.churchpresenter.profiles.FileManager
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.theme.semantic

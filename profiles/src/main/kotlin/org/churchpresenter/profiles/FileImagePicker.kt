@@ -1,0 +1,103 @@
+package org.churchpresenter.profiles
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import org.churchpresenter.theme.AppShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import org.churchpresenter.icons.generated.resources.Res as IconRes
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.icons.generated.resources.ic_folder
+import org.churchpresenter.strings.generated.resources.image_files_filter
+import org.churchpresenter.strings.generated.resources.no_image_selected
+import kotlinx.coroutines.launch
+import org.churchpresenter.sharedui.filechooser.FileChooser
+import org.churchpresenter.settings.utils.Constants
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import javax.swing.filechooser.FileNameExtensionFilter
+import kotlin.io.path.Path
+
+@Composable
+fun FileImagePicker(
+    imagePath: String, // File path string
+    onImagePathChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    fileChooser: FileChooser = FileChooser.platformInstance,
+) {
+    val imageFilesFilterStr = stringResource(Res.string.image_files_filter)
+    val scope = rememberCoroutineScope()
+    Row(
+        modifier = modifier
+            .height(32.dp)
+            .clickable {
+                scope.launch {
+                    val path = if (imagePath.isNotEmpty()) {
+                        Path(imagePath)
+                    } else {
+                        Path(System.getProperty(Constants.SystemProperties.USER_HOME))
+                    }
+                    val file = fileChooser.chooseSingle(
+                        path = path,
+                        filters = listOf(
+                            FileNameExtensionFilter(
+                                imageFilesFilterStr,
+                                "jpg", "jpeg", "png", "gif", "bmp"
+                            )
+                        ),
+                        title = "",
+                        selectDirectory = false
+                    )
+                    if (file != null) {
+                        onImagePathChange(file.toString())
+                    }
+                }
+            }
+            .background(
+                color = MaterialTheme.colorScheme.surface,
+                shape = AppShape(4.dp)
+            )
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
+                shape = AppShape(4.dp)
+            )
+            .padding(horizontal = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = if (imagePath.isEmpty()) {
+                stringResource(Res.string.no_image_selected)
+            } else {
+                imagePath.substringAfterLast('/').substringAfterLast('\\')
+            },
+            style = MaterialTheme.typography.bodySmall,
+            color = if (imagePath.isEmpty())
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            else
+                MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        Icon(
+            painter = painterResource(IconRes.drawable.ic_folder),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
