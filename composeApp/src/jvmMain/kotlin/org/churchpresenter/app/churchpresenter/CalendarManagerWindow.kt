@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
 import java.io.File
-
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
@@ -26,7 +25,7 @@ import org.churchpresenter.server.calendarBibleBooks
 import org.churchpresenter.calendar.CalendarCloudSync
 import org.churchpresenter.calendar.CalendarHost
 import org.churchpresenter.calendar.ui.PreviewSources
-import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
+import org.churchpresenter.presenter.LoopingVideoBackground
 import org.churchpresenter.app.churchpresenter.utils.slideThumbnails
 import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.diagnostics.CrashReporter

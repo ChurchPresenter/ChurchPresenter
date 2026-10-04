@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.presenter.BibleBandClock
+import org.churchpresenter.presenter.BibleBandPhase
+import org.churchpresenter.presenter.LocalLottieBandClock
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.ExperimentalTestApi

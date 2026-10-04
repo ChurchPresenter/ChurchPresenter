@@ -1,5 +1,23 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.SongStyleElement
+import org.churchpresenter.presenter.SongStyleTarget
+import org.churchpresenter.presenter.chunkFor
+import org.churchpresenter.presenter.isLowerThird
+import org.churchpresenter.presenter.numberCorner
+import org.churchpresenter.presenter.numberOffset
+import org.churchpresenter.presenter.numberSharesTitlePosition
+import org.churchpresenter.presenter.showFor
+import org.churchpresenter.presenter.shownOnTitleSlide
+import org.churchpresenter.presenter.songNumberCornerOptions
+import org.churchpresenter.presenter.titleSlideOffset
+import org.churchpresenter.presenter.titleSlideOffsetTag
+import org.churchpresenter.presenter.withChunk
+import org.churchpresenter.presenter.withNumberCorner
+import org.churchpresenter.presenter.withNumberOffset
+import org.churchpresenter.presenter.withShow
+import org.churchpresenter.presenter.withShownOnTitleSlide
+import org.churchpresenter.presenter.withTitleSlideOffset
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow

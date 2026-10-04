@@ -156,4 +156,32 @@ class UpdateCheckerSelectUpdateTest {
 
         assertEquals("26.3.0", assertIs<UpdateCheckResult.Available>(result).info.latestVersion)
     }
+
+    @Test
+    fun `a release whose flags are not true or false is treated as a normal release`() {
+        val oddFlags = """{"tag_name":"v26.2.0","draft":"maybe","prerelease":"maybe","assets":$allInstallers}"""
+        val available = assertIs<UpdateCheckResult.Available>(select(releases(oddFlags)))
+        assertEquals(false, available.info.isPrerelease)
+    }
+
+    @Test
+    fun `a release with no flags at all, no page and no notes still offers its installer`() {
+        val bare = """{"tag_name":"v26.2.0","assets":$allInstallers}"""
+        val available = assertIs<UpdateCheckResult.Available>(select(releases(bare)))
+        assertTrue(available.info.releaseNotes.isEmpty())
+    }
+
+    @Test
+    fun `a rolling tag in front of a real release is stepped over`() {
+        val body = releases(release("nightly", prerelease = true), release("v26.3.0"))
+        val result = select(body, includePrereleases = true)
+        assertEquals("26.3.0", assertIs<UpdateCheckResult.Available>(result).info.latestVersion)
+    }
+
+    @Test
+    fun `a release with no tag or no installers is not offered`() {
+        val untagged = """{"assets":$allInstallers}"""
+        val noAssets = """{"tag_name":"v26.2.0"}"""
+        assertIs<UpdateCheckResult.UpToDate>(select(releases(untagged, noAssets)))
+    }
 }

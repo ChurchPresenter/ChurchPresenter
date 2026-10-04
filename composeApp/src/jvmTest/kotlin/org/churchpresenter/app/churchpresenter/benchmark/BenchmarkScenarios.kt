@@ -6,9 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import io.github.alexzhirkevich.compottie.LottieComposition
 import org.churchpresenter.announcements.presenter.AnnouncementsPresenter
-import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.canvas.ScenePresenter
-import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionStatus

@@ -1,10 +1,12 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.styleElement
+import org.churchpresenter.presenter.BibleStyleElement
 import androidx.compose.runtime.Composable
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.profile_box
 import org.churchpresenter.strings.generated.resources.profile_box_pick_translation
-import org.churchpresenter.app.churchpresenter.presenter.bibleBoxKey
+import org.churchpresenter.presenter.bibleBoxKey
 import org.churchpresenter.settings.TextBox
 import org.churchpresenter.settings.boxAt
 import org.churchpresenter.settings.withBox

@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.presenter.ChordLine
 import org.churchpresenter.sharedui.composables.SongSectionKind
 import org.churchpresenter.sharedui.composables.sectionKindOf
 import org.churchpresenter.sharedui.composables.SectionLabelRow

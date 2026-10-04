@@ -1,5 +1,11 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.BibleElementStyle
+import org.churchpresenter.presenter.BibleStyleElement
+import org.churchpresenter.presenter.BibleStyleTarget
+import org.churchpresenter.presenter.defaultElementStyle
+import org.churchpresenter.presenter.withElementStyle
+import org.churchpresenter.presenter.elementStyle
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.ProjectionSettings

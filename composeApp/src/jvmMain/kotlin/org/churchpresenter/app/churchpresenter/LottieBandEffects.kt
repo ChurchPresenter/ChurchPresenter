@@ -6,13 +6,15 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.first
-import org.churchpresenter.app.churchpresenter.presenter.BandOutgoing
-import org.churchpresenter.app.churchpresenter.presenter.BibleBandClock
-import org.churchpresenter.app.churchpresenter.presenter.BibleBandPhase
-import org.churchpresenter.app.churchpresenter.presenter.BibleLottieTemplate
+import org.churchpresenter.presenter.BandOutgoing
+import org.churchpresenter.presenter.BibleBandClock
+import org.churchpresenter.presenter.BibleBandPhase
+import org.churchpresenter.presenter.BibleLottieTemplate
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.presenter.isRestatedAs
+import org.churchpresenter.presenter.isRestatedAs
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+
+
 
 /** Plays one band phase from [from] to 1 over [durationMs], publishing every frame to the clock. */
 internal suspend fun PresenterManager.runBandPhase(phase: BibleBandPhase, durationMs: Long) {

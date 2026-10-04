@@ -1,13 +1,15 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.BibleStyleTarget
+import org.churchpresenter.presenter.isLowerThird
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
-import org.churchpresenter.app.churchpresenter.presenter.textOnly
-import org.churchpresenter.app.churchpresenter.presenter.wholeOutputRegion
+import org.churchpresenter.presenter.textOnly
+import org.churchpresenter.presenter.wholeOutputRegion
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,13 +28,13 @@ import org.churchpresenter.strings.generated.resources.bible_preview_sample_book
 import org.churchpresenter.strings.generated.resources.bible_preview_sample_verse
 import org.churchpresenter.strings.generated.resources.bible_preview_sample_verse_long
 import org.churchpresenter.strings.generated.resources.bible_preview_sample_verse_short
-import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
-import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
+import org.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.presenter.usesBibleLottieBand
 import org.churchpresenter.bible.PreviewVerse
 import org.churchpresenter.bible.defaultTranslationAbbreviation
 import org.churchpresenter.bible.VerseTarget
 import org.churchpresenter.core.models.bible.SelectedVerse
-import org.churchpresenter.app.churchpresenter.presenter.LocalTransparentBlanking
+import org.churchpresenter.presenter.LocalTransparentBlanking
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.jetbrains.compose.resources.stringResource

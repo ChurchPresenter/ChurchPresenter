@@ -7,6 +7,8 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.runBlocking
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
@@ -102,10 +104,17 @@ class RemoteCommandEffectsTest {
     private fun ComposeUiTest.effects(
         flows: Flows? = null,
         resolveImageFile: ((String, Int) -> File?)? = null,
+    ) = effectsWired(mutableStateOf(flows), resolveImageFile)
+
+    private fun ComposeUiTest.effectsWired(
+        wired: State<Flows?>,
+        resolveImageFile: ((String, Int) -> File?)? = null,
+        appSettings: State<AppSettings>? = null,
     ) {
         setContent {
+            val flows = wired.value
             RemoteCommandEffects(
-                appSettings = settings,
+                appSettings = appSettings?.value ?: settings,
                 picturesViewModel = pictures,
                 presentationViewModel = presentations,
                 bibleViewModel = bible,
@@ -151,6 +160,39 @@ class RemoteCommandEffectsTest {
         assertEquals(Presenting.NONE, presenter.presentingMode.value)
         assertTrue(selectedTabs.isEmpty())
         assertNull(presenter.selectedImagePath.value)
+    }
+
+    @Test
+    fun `a remote re-wired to new flows listens to the new ones and lets the old ones go`() = runComposeUiTest {
+        val first = Flows()
+        val wired = mutableStateOf<Flows?>(first)
+        val appSettings = mutableStateOf(AppSettings())
+        effectsWired(wired, appSettings = appSettings)
+        emit(first.nextSlide, Unit)
+
+        val second = Flows()
+        wired.value = second
+        appSettings.value = AppSettings(presentationSettings = settings.presentationSettings.copy(isLooping = true))
+        waitForIdle()
+        emit(second.nextSlide, Unit)
+        emit(second.previousSlide, Unit)
+
+        assertEquals(0, first.nextSlide.subscriptionCount.value, "the old remote is no longer heard")
+        assertEquals(3, slidePushes)
+    }
+
+    @Test
+    fun `unwiring the remote stops every command from reaching the app`() = runComposeUiTest {
+        val flows = Flows()
+        val wired = mutableStateOf<Flows?>(flows)
+        effectsWired(wired)
+        waitUntil("the effect subscribed") { flows.nextSlide.subscriptionCount.value > 0 }
+
+        wired.value = null
+        waitForIdle()
+
+        assertEquals(0, flows.nextSlide.subscriptionCount.value)
+        assertEquals(0, flows.selectSong.subscriptionCount.value)
     }
 
     @Test

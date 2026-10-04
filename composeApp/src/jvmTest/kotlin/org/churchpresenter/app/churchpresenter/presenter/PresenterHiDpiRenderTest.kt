@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.announcements.presenter.ANNOUNCEMENT_TEXT_INSET
 import org.churchpresenter.announcements.presenter.AnnouncementsPresenter
 import androidx.compose.foundation.background

@@ -50,7 +50,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.sharedui.utils.calculateAutoFitFontSize
 import org.churchpresenter.sharedui.utils.calculateChordChartFontSize
-import org.churchpresenter.app.churchpresenter.composables.ChordChart
+import org.churchpresenter.presenter.ChordChart
 import org.churchpresenter.media.composables.SoftwareVideoPlayer
 import org.churchpresenter.media.viewmodel.MediaViewModel
 

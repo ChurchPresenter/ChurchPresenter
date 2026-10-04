@@ -2,6 +2,8 @@
 
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.presenter.SongPresenter
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest

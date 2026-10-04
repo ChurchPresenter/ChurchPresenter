@@ -54,9 +54,9 @@ import org.churchpresenter.strings.generated.resources.full_screen
 import org.churchpresenter.strings.generated.resources.song_background_sample_line
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
 import org.churchpresenter.sharedui.presenter.BACKGROUND_REFERENCE_WIDTH
-import org.churchpresenter.app.churchpresenter.presenter.BibleLottieStillFrame
-import org.churchpresenter.app.churchpresenter.presenter.resolveAboveBand
-import org.churchpresenter.app.churchpresenter.presenter.backgroundBlurRadius
+import org.churchpresenter.presenter.BibleLottieStillFrame
+import org.churchpresenter.presenter.resolveAboveBand
+import org.churchpresenter.presenter.backgroundBlurRadius
 import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
 import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
 import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput

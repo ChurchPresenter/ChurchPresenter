@@ -16,13 +16,15 @@ import org.churchpresenter.settings.operatorBibleSettings
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.songs.LyricSection
-import org.churchpresenter.app.churchpresenter.presenter.BibleBandClock
-import org.churchpresenter.app.churchpresenter.presenter.BibleBandPhase
-import org.churchpresenter.app.churchpresenter.presenter.BibleLottieTemplate
+import org.churchpresenter.presenter.BibleBandClock
+import org.churchpresenter.presenter.BibleBandPhase
+import org.churchpresenter.presenter.BibleLottieTemplate
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.presenter.rememberBibleLottieTemplate
+import org.churchpresenter.presenter.rememberBibleLottieTemplate
 import org.churchpresenter.app.churchpresenter.viewmodel.DisplayedSongPosition
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+
+
 
 /**
  * The cross-fades and slide transitions that move selected content to displayed content: the fade

@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.runtime.Composable
 import org.churchpresenter.app.churchpresenter.presenter.WEB_SNAPSHOT_TAG
-import org.churchpresenter.app.churchpresenter.presenter.LocalInMergedTile
+import org.churchpresenter.presenter.LocalInMergedTile
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.graphics.ImageBitmap

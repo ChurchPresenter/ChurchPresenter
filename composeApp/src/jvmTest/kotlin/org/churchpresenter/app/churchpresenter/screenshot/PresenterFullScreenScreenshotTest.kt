@@ -45,8 +45,8 @@ import org.churchpresenter.slides.presenter.PicturePresenter
 import org.churchpresenter.slides.presenter.PresentationPresenter
 import org.churchpresenter.qa.presenter.QAPresenter
 import org.churchpresenter.canvas.ScenePresenter
-import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
-import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.settings.utils.Constants
 import java.awt.Color
 import java.awt.GradientPaint

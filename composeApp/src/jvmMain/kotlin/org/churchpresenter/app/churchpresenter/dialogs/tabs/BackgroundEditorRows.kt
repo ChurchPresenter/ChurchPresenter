@@ -8,7 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import org.churchpresenter.strings.generated.resources.Res
-import org.churchpresenter.app.churchpresenter.presenter.invalidateBibleLottieTemplates
+import org.churchpresenter.presenter.invalidateBibleLottieTemplates
 import org.churchpresenter.strings.generated.resources.song_lottie_unsupported_note
 import org.churchpresenter.strings.generated.resources.bible_lottie_unsupported_note
 import org.churchpresenter.strings.generated.resources.background_above_band_caption

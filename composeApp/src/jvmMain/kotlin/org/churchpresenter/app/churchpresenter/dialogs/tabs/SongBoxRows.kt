@@ -1,12 +1,15 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.SongStyleElement
+import org.churchpresenter.presenter.hasPosition
+import org.churchpresenter.presenter.numberCorner
 import androidx.compose.runtime.Composable
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.profile_box
 import org.churchpresenter.strings.generated.resources.profile_box_pick_language
-import org.churchpresenter.app.churchpresenter.presenter.boxedPerLanguage
-import org.churchpresenter.app.churchpresenter.presenter.songBoxKey
-import org.churchpresenter.app.churchpresenter.presenter.titleSlideBoxKey
+import org.churchpresenter.presenter.boxedPerLanguage
+import org.churchpresenter.presenter.songBoxKey
+import org.churchpresenter.presenter.titleSlideBoxKey
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.TextBox
 import org.churchpresenter.settings.boxAt

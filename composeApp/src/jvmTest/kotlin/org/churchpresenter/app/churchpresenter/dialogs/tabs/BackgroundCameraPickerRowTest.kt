@@ -73,4 +73,19 @@ class BackgroundCameraPickerRowTest {
         assertTrue(onAllNodesWithText("Studio Cam").fetchSemanticsNodes().isEmpty())
         onNodeWithText("Camera Device", ignoreCase = true).assertExists()
     }
+
+    @Test
+    fun `a DeckLink card whose driver lists no inputs or modes offers neither`() {
+        val card = CameraDevice(
+            "UltraStudio", "decklink://0", "DeckLink: UltraStudio", isDeckLink = true, deckLinkIndex = 0,
+        )
+        val saved = CameraDeviceRef(
+            devicePath = card.path, deviceName = card.name, isDeckLink = true, deckLinkIndex = 0,
+        )
+        row(BackgroundConfig(camera = saved), machine = CameraHost(listOf(card), ffmpegAvailable = true)) { _ ->
+            onAllNodesWithText("DeckLink: UltraStudio").onLast().assertExists()
+            assertTrue(onAllNodesWithText("Input").fetchSemanticsNodes().isEmpty())
+            assertTrue(onAllNodesWithText("Format").fetchSemanticsNodes().isEmpty())
+        }
+    }
 }

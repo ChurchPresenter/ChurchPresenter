@@ -38,8 +38,8 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.announcements.presenter.AnnouncementsPresenter
-import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
-import org.churchpresenter.app.churchpresenter.presenter.contentRegion
+import org.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.presenter.contentRegion
 import org.churchpresenter.dictionary.presenter.DictionaryPresenter
 import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
 import org.churchpresenter.media.presenter.MediaPresenter
@@ -50,7 +50,7 @@ import org.churchpresenter.stt.presenter.STTPresenter
 import org.churchpresenter.qa.presenter.QAQRCodePresenter
 import org.churchpresenter.canvas.ScenePresenter
 import org.churchpresenter.slides.presenter.PresentationPresenter
-import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.OutputSize
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec

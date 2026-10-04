@@ -51,8 +51,8 @@ import org.churchpresenter.qa.presenter.QAPresenter
 import org.churchpresenter.qa.presenter.QAQRCodePresenter
 import org.churchpresenter.stt.presenter.STTPresenter
 import org.churchpresenter.canvas.ScenePresenter
-import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
-import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.skia.Bitmap
 import java.awt.Color

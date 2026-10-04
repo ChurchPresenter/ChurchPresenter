@@ -44,7 +44,7 @@ import org.churchpresenter.lottiegen.band.ReferencePlacement
 import org.churchpresenter.lottiegen.band.SlotLayout
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
-import org.churchpresenter.app.churchpresenter.presenter.invalidateBibleLottieTemplates
+import org.churchpresenter.presenter.invalidateBibleLottieTemplates
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.components.DropdownSelector
