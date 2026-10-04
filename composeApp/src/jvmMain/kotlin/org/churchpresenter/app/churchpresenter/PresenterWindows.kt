@@ -2,9 +2,9 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.settings.ResolvedMerge
 import io.github.alexzhirkevich.compottie.LottieComposition
-import org.churchpresenter.app.churchpresenter.presenter.MergedTile
+import org.churchpresenter.presenter.MergedTile
 import org.churchpresenter.canvas.liveMerges
-import org.churchpresenter.app.churchpresenter.presenter.mergeHostIndex
+import org.churchpresenter.presenter.mergeHostIndex
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween

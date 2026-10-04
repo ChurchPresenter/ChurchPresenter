@@ -16,8 +16,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
-import org.churchpresenter.app.churchpresenter.presenter.BibleLottieStillFrame
-import org.churchpresenter.app.churchpresenter.presenter.resolveAboveBand
+import org.churchpresenter.presenter.BibleLottieStillFrame
+import org.churchpresenter.presenter.resolveAboveBand
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.OutputProfile

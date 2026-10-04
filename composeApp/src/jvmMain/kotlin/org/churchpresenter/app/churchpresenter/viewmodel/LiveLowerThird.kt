@@ -7,9 +7,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.presenter.BandOutgoing
-import org.churchpresenter.app.churchpresenter.presenter.BibleBandClock
-import org.churchpresenter.app.churchpresenter.presenter.BibleBandPhase
+import org.churchpresenter.presenter.BandOutgoing
+import org.churchpresenter.presenter.BibleBandClock
+import org.churchpresenter.presenter.BibleBandPhase
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrameStream
 import org.churchpresenter.diagnostics.CrashReporter

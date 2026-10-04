@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.presenter.isSamePageAs
+import org.churchpresenter.presenter.isSamePageAs
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.AppSettings

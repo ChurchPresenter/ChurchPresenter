@@ -1,0 +1,147 @@
+package org.churchpresenter.presenter
+
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.BoxWithConstraintsScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
+import org.churchpresenter.settings.ContentRegion
+import org.churchpresenter.settings.ElementOffset
+import org.churchpresenter.settings.SongNumberOffset
+import org.churchpresenter.settings.utils.Constants
+import kotlin.math.roundToInt
+
+private const val FULL_WIDTH_PERCENT = 100
+private const val FULL_PERCENT = 100f
+
+/**
+ * Narrows the presenter it wraps to [region]'s width, centered, then shifts that centered box by
+ * its X/Y offsets -- letting an operator free up screen space beside the lyrics or verse text for a
+ * video mixer, without either presenter's own margins, alignment or auto-fit sizing needing to know
+ * about it: they read whatever box `BoxWithConstraints` inside `SongPresenter`/`BiblePresenter`
+ * reports, and this is what narrows that box before they ever see it.
+ *
+ * [ContentRegion.xOffsetPercent] is a percentage of the *slack* narrowing the width freed up (not
+ * of the whole output), so -100/100 always reaches the left/right edge exactly regardless of
+ * [ContentRegion.widthPercent]. [ContentRegion.yOffsetPercent] is the same idea against the box's
+ * own full height, since nothing narrows that axis. Both are mathematically bounded by their own
+ * 100% reference, so the block can never be pushed off screen by any configured value.
+ *
+ * A no-op at the default [ContentRegion] -- full width, no offset -- so a presenter with nothing
+ * configured pays for no extra layout pass.
+ */
+internal fun Modifier.contentRegion(region: ContentRegion): Modifier {
+    if (region.xOffsetPercent == 0 && region.yOffsetPercent == 0 && region.widthPercent >= FULL_WIDTH_PERCENT) {
+        return this
+    }
+    return this.then(
+        Modifier.layout { measurable, constraints ->
+            val widthFraction = region.widthPercent.coerceIn(1, FULL_WIDTH_PERCENT) / FULL_WIDTH_PERCENT.toFloat()
+            val regionWidth = (constraints.maxWidth * widthFraction).roundToInt().coerceAtLeast(1)
+            val childConstraints = constraints.copy(minWidth = 0, maxWidth = regionWidth)
+            val placeable = measurable.measure(childConstraints)
+
+            val centeredX = (constraints.maxWidth - regionWidth) / 2
+            val maxY = (constraints.maxHeight - placeable.height).coerceAtLeast(0)
+            val xOffset = centeredX + (centeredX * (region.xOffsetPercent / FULL_PERCENT)).roundToInt()
+            val yOffset = (maxY * (region.yOffsetPercent / FULL_PERCENT)).roundToInt().coerceIn(0, maxY)
+
+            layout(constraints.maxWidth, constraints.maxHeight) {
+                placeable.place(xOffset.coerceIn(0, constraints.maxWidth - placeable.width), yOffset)
+            }
+        },
+    )
+}
+
+/**
+ * Places the element it wraps at [offset] within the frame, instead of wherever the flow put it.
+ *
+ * A no-op when [offset] is null, which is what every element defaults to and what keeps an
+ * untouched document drawing exactly as it did -- see [ElementOffset] for why that cannot be a
+ * pair of numbers instead.
+ *
+ * The element is measured at its natural size, not the frame's, because a child stretched to fill
+ * leaves no room to be moved through; a call site handing something to this drops its
+ * `fillMaxWidth()`. It reports the *frame's* size rather than the child's, so it belongs on a child
+ * of a `Box`, never of a `Column` or `Row`, where it would swallow the whole main axis.
+ *
+ * Every arithmetic guard here is a containment guarantee rather than defensive tidiness:
+ * `coerceIn(PERCENT_RANGE)` survives a hand-edited settings file, `coerceAtLeast(0)` handles an
+ * element larger than its frame (which then sits flush at the start, as overflow already does), and
+ * the final `coerceIn` makes leaving the frame arithmetically impossible at any configured value.
+ */
+internal fun Modifier.elementOffset(offset: ElementOffset?): Modifier {
+    if (offset == null) return this
+    return this.then(
+        Modifier.layout { measurable, constraints ->
+            val placeable = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
+            val maxX = (constraints.maxWidth - placeable.width).coerceAtLeast(0)
+            val maxY = (constraints.maxHeight - placeable.height).coerceAtLeast(0)
+            val xPercent = offset.xPercent.coerceIn(ElementOffset.PERCENT_RANGE)
+            val yPercent = offset.yPercent.coerceIn(ElementOffset.PERCENT_RANGE)
+            val xOffset = (maxX * (xPercent / FULL_PERCENT)).roundToInt().coerceIn(0, maxX)
+            val yOffset = (maxY * (yPercent / FULL_PERCENT)).roundToInt().coerceIn(0, maxY)
+
+            layout(constraints.maxWidth, constraints.maxHeight) {
+                placeable.place(xOffset, yOffset)
+            }
+        },
+    )
+}
+
+/** [region] applied to the whole presenter, background and all -- unless it keeps the background full screen. */
+internal fun Modifier.wholeOutputRegion(region: ContentRegion): Modifier =
+    if (region.movesBackground) contentRegion(region) else this
+
+/**
+ * The region the presenter places its text in by itself: [this] when it keeps the background full
+ * screen. None on a [lowerThird], whose band already is its region.
+ */
+internal fun ContentRegion.textOnly(lowerThird: Boolean): ContentRegion? =
+    takeUnless { movesBackground || lowerThird }
+
+/**
+ * The box a presenter lays its text out in, over a background that has already filled the screen:
+ * [region] when there is one, the whole presenter otherwise.
+ */
+@Composable
+internal fun TextRegionBox(region: ContentRegion?, content: @Composable BoxWithConstraintsScope.() -> Unit) {
+    val regionModifier = region?.let { Modifier.contentRegion(it) } ?: Modifier
+    BoxWithConstraints(Modifier.fillMaxSize().then(regionModifier), content = content)
+}
+
+/**
+ * Pins the song number to [corner], then walks it inward by [offset] -- the replacement for a
+ * plain `.align(corner).offset(...)` pair, which had no sense of how far "inward" could safely go.
+ *
+ * [offset] is an unsigned 0-100: a percentage of the *entire* room between the corner and the far
+ * side of the box the number sits in, same scale [Modifier.contentRegion] uses for its own offsets.
+ * 0 is flush against the corner (today's default); 100 is flush against the opposite edge -- the
+ * full width or height away. Which edge counts as "opposite," on both axes, is decided by [corner]
+ * alone, so there is no sign to apply in the wrong direction: raising either number always walks
+ * the number further into the frame.
+ */
+internal fun Modifier.songNumberCornerOffset(corner: String, offset: SongNumberOffset): Modifier {
+    return this.then(
+        Modifier.layout { measurable, constraints ->
+            val placeable = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
+
+            val maxX = (constraints.maxWidth - placeable.width).coerceAtLeast(0)
+            val maxY = (constraints.maxHeight - placeable.height).coerceAtLeast(0)
+            val isLeft = corner == Constants.TOP_LEFT || corner == Constants.BOTTOM_LEFT
+            val isTop = corner == Constants.TOP_LEFT || corner == Constants.TOP_RIGHT
+            val baseX = if (isLeft) 0 else maxX
+            val baseY = if (isTop) 0 else maxY
+
+            val xTravel = (maxX * (offset.xPercent / FULL_PERCENT)).roundToInt()
+            val yTravel = (maxY * (offset.yPercent / FULL_PERCENT)).roundToInt()
+            val xOffset = (baseX + (if (isLeft) xTravel else -xTravel)).coerceIn(0, maxX)
+            val yOffset = (baseY + (if (isTop) yTravel else -yTravel)).coerceIn(0, maxY)
+
+            layout(constraints.maxWidth, constraints.maxHeight) {
+                placeable.place(xOffset, yOffset)
+            }
+        },
+    )
+}

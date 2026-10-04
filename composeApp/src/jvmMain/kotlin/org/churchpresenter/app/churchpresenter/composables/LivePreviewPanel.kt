@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import org.churchpresenter.canvas.DeckLinkManager
 import org.churchpresenter.canvas.liveMerges
-import org.churchpresenter.app.churchpresenter.presenter.sizedAs
+import org.churchpresenter.presenter.sizedAs
 import org.churchpresenter.strings.generated.resources.preview_merged_label
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -92,15 +92,15 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.resolvedFor
-import org.churchpresenter.app.churchpresenter.presenter.LowerThirdLayout
-import org.churchpresenter.app.churchpresenter.presenter.LocalBandOutgoing
-import org.churchpresenter.app.churchpresenter.presenter.LocalBandSongLineIndex
-import org.churchpresenter.app.churchpresenter.presenter.LocalLottieBandClock
+import org.churchpresenter.presenter.LowerThirdLayout
+import org.churchpresenter.presenter.LocalBandOutgoing
+import org.churchpresenter.presenter.LocalBandSongLineIndex
+import org.churchpresenter.presenter.LocalLottieBandClock
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.DevFlags
-import org.churchpresenter.app.churchpresenter.presenter.showsContentFor
+import org.churchpresenter.presenter.showsContentFor
 import org.churchpresenter.sharedui.utils.OutputKind
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.sharedui.utils.OutputSize

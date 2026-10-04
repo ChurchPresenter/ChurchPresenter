@@ -10,26 +10,8 @@ import org.churchpresenter.strings.generated.resources.profile_shift_language_su
 import org.churchpresenter.settings.SongElementShift
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.elementShift
-import org.churchpresenter.settings.songElementShiftKey
 import org.churchpresenter.settings.withElementShift
 import org.jetbrains.compose.resources.stringResource
-
-/**
- * Where [element]'s move is stored on [lowerThird]'s output: the element as a whole, or -- for one
- * drawn once per language -- [language]'s own on top of it. The title on the title slide is its own:
- * moving it there must not move the title above every verse.
- */
-internal fun songShiftKey(
-    element: SongStyleElement,
-    lowerThird: Boolean,
-    language: Int? = null,
-    titleSlide: Boolean = false,
-): String {
-    val name = if (titleSlide && element == SongStyleElement.TITLE) TITLE_SLIDE_TITLE_KEY else element.name
-    return songElementShiftKey(name, lowerThird, language.takeIf { element.translationElement != null })
-}
-
-private const val TITLE_SLIDE_TITLE_KEY = "TITLE_SLIDE_TITLE"
 
 /** [key]'s move as the handles and rows read it, x to y. */
 internal fun SongSettings.shiftAt(key: String): Pair<Int, Int> = elementShift(key).let { it.x to it.y }

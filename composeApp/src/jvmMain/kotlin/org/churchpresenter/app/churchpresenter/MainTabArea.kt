@@ -48,7 +48,7 @@ import org.churchpresenter.app.churchpresenter.tabs.AppSTTTab
 import org.churchpresenter.songs.SongsTab
 import org.churchpresenter.app.churchpresenter.tabs.AppSongEditor
 import org.churchpresenter.app.churchpresenter.tabs.recordSongWentLive
-import org.churchpresenter.app.churchpresenter.viewmodel.titleSlideSection
+import org.churchpresenter.presenter.titleSlideSection
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.app.churchpresenter.tabs.getStringName

@@ -1,11 +1,11 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.presenter.elementMove
-import org.churchpresenter.app.churchpresenter.presenter.movedOn
-import org.churchpresenter.app.churchpresenter.presenter.referenceShiftFor
-import org.churchpresenter.app.churchpresenter.presenter.withMovesCleared
-import org.churchpresenter.app.churchpresenter.presenter.withReferenceShift
+import org.churchpresenter.presenter.elementMove
+import org.churchpresenter.presenter.movedOn
+import org.churchpresenter.presenter.referenceShiftFor
+import org.churchpresenter.presenter.withMovesCleared
+import org.churchpresenter.presenter.withReferenceShift
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.BibleSettings

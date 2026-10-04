@@ -7,7 +7,7 @@ package org.churchpresenter.app.churchpresenter.dialogs
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import org.churchpresenter.app.churchpresenter.presenter.backgroundBlurRadius
+import org.churchpresenter.presenter.backgroundBlurRadius
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.runtime.Composable

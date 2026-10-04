@@ -27,7 +27,7 @@ import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionStatus
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.announcements.presenter.AnnouncementsPresenter
-import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.dictionary.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
 import org.churchpresenter.lowerthird.render.LowerThirdOffscreenRenderer
@@ -36,7 +36,7 @@ import org.churchpresenter.slides.presenter.PicturePresenter
 import org.churchpresenter.slides.presenter.PresentationPresenter
 import org.churchpresenter.qa.presenter.QAPresenter
 import org.churchpresenter.canvas.ScenePresenter
-import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.skia.Bitmap
 import java.io.File

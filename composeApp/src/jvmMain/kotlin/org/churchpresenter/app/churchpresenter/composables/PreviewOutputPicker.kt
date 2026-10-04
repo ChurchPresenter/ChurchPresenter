@@ -25,7 +25,7 @@ import org.churchpresenter.strings.generated.resources.preview_output_mode_disab
 import org.churchpresenter.strings.generated.resources.screen_number
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.presenter.showsContentFor
+import org.churchpresenter.presenter.showsContentFor
 import org.churchpresenter.sharedui.utils.DevFlags
 import org.churchpresenter.sharedui.utils.FallbackOutputSize
 import org.churchpresenter.sharedui.utils.OutputKind

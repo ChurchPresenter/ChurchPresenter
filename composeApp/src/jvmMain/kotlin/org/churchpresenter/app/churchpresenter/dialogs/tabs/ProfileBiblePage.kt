@@ -30,11 +30,11 @@ import org.churchpresenter.strings.generated.resources.profile_split_words
 import org.churchpresenter.strings.generated.resources.profile_translation_divider
 import org.churchpresenter.strings.generated.resources.words_suffix
 import org.churchpresenter.sharedui.presenter.PresentedBlock
-import org.churchpresenter.app.churchpresenter.presenter.bibleBoxKey
-import org.churchpresenter.app.churchpresenter.presenter.movedOn
-import org.churchpresenter.app.churchpresenter.presenter.referenceShiftFor
-import org.churchpresenter.app.churchpresenter.presenter.withMovesCleared
-import org.churchpresenter.app.churchpresenter.presenter.withReferenceShift
+import org.churchpresenter.presenter.bibleBoxKey
+import org.churchpresenter.presenter.movedOn
+import org.churchpresenter.presenter.referenceShiftFor
+import org.churchpresenter.presenter.withMovesCleared
+import org.churchpresenter.presenter.withReferenceShift
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.bible.defaultTranslationAbbreviation
 import org.churchpresenter.settings.AppSettings

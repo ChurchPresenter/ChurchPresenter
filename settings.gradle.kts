@@ -147,6 +147,10 @@ include(":schedule")
 // screen and window capture, NDI and OMT input, DeckLink. Depended on by :composeApp.
 include(":canvas")
 
+// What the song and Bible outputs draw: the slides, their looks and layouts, the backgrounds and the
+// Lottie bands. Depended on by :composeApp, which keeps the windows and the off-screen outputs.
+include(":presenter")
+
 // The Companion Surface tab and CompanionSatelliteViewModel: the Compose face of
 // :companion-satellite, which stays free of any UI toolkit. Depended on by :composeApp.
 include(":companion-surface")

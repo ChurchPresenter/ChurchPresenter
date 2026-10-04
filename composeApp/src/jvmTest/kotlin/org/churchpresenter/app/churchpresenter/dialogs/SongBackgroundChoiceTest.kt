@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
-import org.churchpresenter.app.churchpresenter.presenter.songBackgroundResolves
-import org.churchpresenter.app.churchpresenter.presenter.songBackgroundTypeConstant
+import org.churchpresenter.presenter.songBackgroundResolves
+import org.churchpresenter.presenter.songBackgroundTypeConstant
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.settings.utils.Constants
