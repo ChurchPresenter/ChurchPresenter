@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import org.churchpresenter.bibletab.invalidateInstanceLinkBibleCache
 import org.churchpresenter.bibletab.setInstanceLinkSource
+import org.churchpresenter.app.churchpresenter.remote.applyRemoteSchedule
 import org.churchpresenter.app.churchpresenter.viewmodel.toRawLyrics
 import org.churchpresenter.app.churchpresenter.viewmodel.toSongItems
 
@@ -46,7 +47,7 @@ internal fun MainDesktopScope.InstanceLinkMirrorWiring() {
     }
 
     // Mirrors the primary's schedule, handing local editing back to the operator on disconnect
-    // (see ScheduleViewModel.applyRemoteSchedule/stopFollowingRemote).
+    // (see applyRemoteSchedule and ScheduleViewModel.stopFollowingRemote).
     LaunchedEffect(link.connectionStatus, link.remoteSchedule, link.role) {
         if (shouldMirrorFromPrimary(link.connectionStatus, link.role)) {
             scheduleViewModel.applyRemoteSchedule(link.remoteSchedule)

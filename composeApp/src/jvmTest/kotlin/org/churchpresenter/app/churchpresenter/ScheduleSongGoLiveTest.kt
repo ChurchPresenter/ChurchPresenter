@@ -13,7 +13,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
-import org.churchpresenter.app.churchpresenter.tabs.SCHEDULE_ROW_CARD_TAG
+import org.churchpresenter.schedule.SCHEDULE_ROW_CARD_TAG
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.sharedui.utils.LiveHistoryLogger
 import org.churchpresenter.sharedui.utils.TrainingDataLogger

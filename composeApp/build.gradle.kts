@@ -328,6 +328,7 @@ kotlin {
             implementation(projects.songs)
             implementation(projects.bibleTab)
             implementation(projects.server)
+            implementation(projects.schedule)
             implementation(projects.lowerThird)
             implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source
@@ -462,6 +463,7 @@ dependencies {
     add("jvmTestImplementation", testFixtures(projects.announcements))
     add("jvmTestImplementation", testFixtures(projects.songs))
     add("jvmTestImplementation", testFixtures(projects.bibleTab))
+    add("jvmTestImplementation", testFixtures(projects.schedule))
     add("jvmTestImplementation", testFixtures(projects.lowerThird))
     // CrashReportSweep: the Bible tab and view-model failure tests exercise paths that really
     // write a crash report. It lives with :diagnostics because it exists for CrashReporter's own

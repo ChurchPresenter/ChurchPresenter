@@ -138,3 +138,7 @@ include(":bible-tab")
 // use, the tunnel, SSL and calendar sync. Depended on by :composeApp, which applies what remote
 // clients ask for to the live output.
 include(":server")
+
+// The Schedule tab and ScheduleViewModel: the running order, its rows, and the .schedule files it
+// opens and saves. Depended on by :composeApp, which hands it the Planning Center import.
+include(":schedule")

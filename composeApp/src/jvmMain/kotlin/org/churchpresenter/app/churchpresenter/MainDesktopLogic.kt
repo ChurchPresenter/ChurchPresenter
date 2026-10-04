@@ -5,7 +5,7 @@ import androidx.compose.ui.input.key.Key
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarButton
+import org.churchpresenter.schedule.ScheduleToolbarButton
 import org.churchpresenter.sharedui.models.Tabs
 
 /**

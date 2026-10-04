@@ -35,8 +35,9 @@ import org.churchpresenter.app.churchpresenter.composables.CompanionSurfacePanel
 import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.InstanceLinkStatus
-import org.churchpresenter.app.churchpresenter.tabs.ScheduleTab
-import org.churchpresenter.app.churchpresenter.tabs.ScheduleToolbarIconSize
+import org.churchpresenter.app.churchpresenter.dialogs.PlanningCenterImportDialog
+import org.churchpresenter.schedule.ScheduleTab
+import org.churchpresenter.schedule.ScheduleToolbarIconSize
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
@@ -46,6 +47,13 @@ import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.InstanceLinkRole
 import org.churchpresenter.theme.components.GhostButton
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.schedule.addSong
+import org.churchpresenter.schedule.addPresentation
+import org.churchpresenter.schedule.addPicture
+import org.churchpresenter.schedule.addMedia
+import org.churchpresenter.schedule.addLabel
+import org.churchpresenter.schedule.addBibleVerse
+import org.churchpresenter.schedule.addAnnouncement
 
 private const val CLOCK_TICK_MS = 1000L
 
@@ -158,7 +166,6 @@ private fun MainDesktopScope.ScheduleTabPane() {
             publish.onScheduleItemSelected(id)
         },
         onScheduleChanged = publish.onScheduleChanged,
-        theme = theme,
         itemZoomPercent = appSettings.scheduleItemZoomPercent,
         onItemZoomChange = { percent ->
             onSettingsChange { settings -> settings.copy(scheduleItemZoomPercent = percent) }
@@ -180,18 +187,52 @@ private fun MainDesktopScope.ScheduleTabPane() {
                 )
             }
         },
-        planningCenterSettings = appSettings.planningCenterSettings,
-        onPlanningCenterTokensRefreshed = { accessToken, refreshToken, expiresAtEpochMs ->
+        planningCenterImport = { isVisible, onDismiss ->
+            PlanningCenterImport(isVisible = isVisible, onDismiss = onDismiss)
+        }
+    )
+}
+
+/** The Planning Center import, adding what it picks to the Schedule and saving its tokens. */
+@Composable
+private fun MainDesktopScope.PlanningCenterImport(isVisible: Boolean, onDismiss: () -> Unit) {
+    PlanningCenterImportDialog(
+        isVisible = isVisible,
+        theme = theme,
+        settings = appSettings.planningCenterSettings,
+        onDismiss = onDismiss,
+        onTokensRefreshed = { accessToken, refreshToken, expiresAtEpochMs ->
             onSettingsChange { settings ->
                 withPlanningCenterTokens(settings, accessToken, refreshToken, expiresAtEpochMs, personName = null)
             }
         },
-        onPlanningCenterConnected = { accessToken, refreshToken, expiresAtEpochMs, personName ->
+        onAddSong = { songNumber, title, songbook, songId ->
+            scheduleViewModel.addSong(songNumber, title, songbook, songId)
+        },
+        onAddLabel = { text, textColor, backgroundColor ->
+            scheduleViewModel.addLabel(text, textColor, backgroundColor)
+        },
+        onAddPresentation = { filePath, fileName, slideCount, fileType ->
+            scheduleViewModel.addPresentation(filePath, fileName, slideCount, fileType)
+        },
+        onAddPicture = { folderPath, folderName, imageCount ->
+            scheduleViewModel.addPicture(folderPath, folderName, imageCount)
+        },
+        onAddMedia = { mediaUrl, mediaTitle, mediaType ->
+            scheduleViewModel.addMedia(mediaUrl, mediaTitle, mediaType)
+        },
+        onAddAnnouncement = { text ->
+            scheduleViewModel.addAnnouncement(text = text)
+        },
+        onAddBibleVerse = { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
+            scheduleViewModel.addBibleVerse(bookName, chapter, verseNumber, verseText, verseRange, bookId)
+        },
+        onConnected = { accessToken, refreshToken, expiresAtEpochMs, personName ->
             onSettingsChange { settings ->
                 withPlanningCenterTokens(settings, accessToken, refreshToken, expiresAtEpochMs, personName)
             }
         },
-        onPlanningCenterDisconnect = {
+        onDisconnect = {
             onSettingsChange { settings -> withPlanningCenterTokens(settings, "", "", 0L, personName = "") }
         }
     )

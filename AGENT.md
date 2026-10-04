@@ -117,6 +117,7 @@ module-specific notes there, not here.**
 | `lower-third/`         | `:lower-third`         | The Lower Third tab, its ATEM render cache and sequencer, and the bundled lottie fonts | [AGENT.md](lower-third/AGENT.md)         |
 | `songs/`               | `:songs`               | The Songs tab, `SongsViewModel` and the song library on disk                        | [AGENT.md](songs/AGENT.md)               |
 | `bible-tab/`           | `:bible-tab`           | The Bible tab, `BibleViewModel`, the cross references and the verse-sequence log     | [AGENT.md](bible-tab/AGENT.md)           |
+| `schedule/`            | `:schedule`            | The Schedule tab, `ScheduleViewModel` and the `.schedule` files                      | [AGENT.md](schedule/AGENT.md)            |
 | `server/`              | `:server`              | The companion server and Instance Link: the Ktor API, tunnel, SSL, ATEM bridge, calendar sync | [AGENT.md](server/AGENT.md)              |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no

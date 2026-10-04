@@ -9,7 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.FocusRequester
-import org.churchpresenter.app.churchpresenter.tabs.ScheduleTabActions
+import org.churchpresenter.schedule.ScheduleTabActions
 import org.churchpresenter.core.models.schedule.ScheduleItem
 
 /**

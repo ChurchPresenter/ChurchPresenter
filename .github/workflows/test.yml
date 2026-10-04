@@ -144,7 +144,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -544,6 +544,14 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.server == 'true' }}
         run: ./gradlew :server:jacocoTestCoverageVerification -x test
 
+      - name: Schedule tests
+        if: ${{ !cancelled() && steps.modules.outputs.schedule == 'true' }}
+        run: ./gradlew :schedule:test
+
+      - name: Schedule coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.schedule == 'true' }}
+        run: ./gradlew :schedule:jacocoTestCoverageVerification -x test
+
 
 
       # Puts the failure message and stack trace of every failed test in the pull request itself,
@@ -599,6 +607,7 @@ jobs:
               ("songs", "Songs"),
               ("bible-tab", "Bible tab"),
               ("server", "Server"),
+              ("schedule", "Schedule"),
           ]
           ran = [(d, n) for d, n in MODULES if glob.glob(f"{d}/build/test-results/**/TEST-*.xml", recursive=True)]
           print("paths<<EOF")
@@ -796,3 +805,5 @@ jobs:
             bible-tab/build/test-results/
             server/build/reports/tests/
             server/build/test-results/
+            schedule/build/reports/tests/
+            schedule/build/test-results/

@@ -15,7 +15,7 @@ import org.churchpresenter.server.InstanceLinkLogger
  *
  * [InstanceLinkLogger] resolves its log directory in a `by lazy`, so it keeps whatever `user.home`
  * pointed at the *first* time anything logged, for the rest of the JVM. A test class that swaps
- * `user.home` to a temp dir and then exercises code that logs — `ScheduleViewModel.applyRemoteSchedule`,
+ * `user.home` to a temp dir and then exercises code that logs — `applyRemoteSchedule`,
  * the Bible/Songs follower paths, `InstanceLinkClient` — latches the logger onto that temp dir. The
  * dir is deleted in teardown, every later write fails silently (the logger is best-effort), and
  * `InstanceLinkLoggerTest` then counts lines in a file nothing is writing to any more. The failure
