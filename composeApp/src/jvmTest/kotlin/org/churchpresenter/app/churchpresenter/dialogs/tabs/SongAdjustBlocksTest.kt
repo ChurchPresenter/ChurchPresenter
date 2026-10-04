@@ -21,8 +21,8 @@ class SongAdjustBlocksTest {
         var slideElement: SongStyleElement = SongStyleElement.TITLE
         var language: SongStyleLanguage? = null
 
-        fun targets(startOn: CustomizeElement = element) = SongTargets(
-            element = Adjustable(startOn) { element = it },
+        fun targets() = SongTargets(
+            element = Adjustable(element) { element = it },
             slideElement = Adjustable(slideElement) { slideElement = it },
             language = Adjustable(language) { language = it },
         )
@@ -53,10 +53,8 @@ class SongAdjustBlocksTest {
 
     @Test
     fun `picking a block on the title slide points the slide's own element`() {
-        val picks = Picks()
-        val model = songAdjustModel(
-            AppSettings(), bilingual, picks.targets(startOn = CustomizeElement.SONG_TITLE_SLIDE),
-        ) {}
+        val picks = Picks().apply { element = CustomizeElement.SONG_TITLE_SLIDE }
+        val model = songAdjustModel(AppSettings(), bilingual, picks.targets()) {}
         val blocks = assertNotNull(model.blocks)
 
         val slideElements = blocks.keys.indices.map { i ->
