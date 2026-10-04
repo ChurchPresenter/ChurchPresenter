@@ -11,6 +11,11 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
+import org.churchpresenter.settings.MergeTile
+import org.churchpresenter.settings.OutputMerge
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -88,6 +93,57 @@ class CanvasTabCanvasSizeTest {
                     .fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty(),
                 "the banner is gone once nothing is outside",
             )
+        }
+    }
+
+    @Test
+    fun `two layers off the canvas are counted and both brought back`() {
+        val alsoFar = offCanvas.copy(id = "src-far-2", name = "Also far")
+        canvasTab(seed = { addScene("Scene"); addSource(offCanvas); addSource(alsoFar) }) { vm, _ ->
+            assertTrue(onAllNodesWithText("2 layers are outside the canvas").fetchSemanticsNodes().isNotEmpty())
+
+            onNodeWithTag(CANVAS_BRING_INTO_VIEW_TAG).performClick()
+            waitForIdle()
+
+            assertTrue(vm.currentScene!!.sources.all { it.transform.placement() == CanvasPlacement.INSIDE })
+        }
+    }
+
+    @Test
+    fun `the size menu offers each assigned screen and each merged picture`() {
+        val wall = OutputProfile(
+            id = "wall",
+            name = "Wall",
+            merge = OutputMerge(listOf(MergeTile("ndi:0", 0, 0), MergeTile("ndi:1", 1920, 0))),
+        )
+        val ndi = ScreenAssignment(ndiWidth = 1920, ndiHeight = 1080, activeProfileId = "wall")
+        val screens = listOf(
+            ScreenAssignment(targetDisplay = 1, screenName = "Stage"),
+            ScreenAssignment(targetDisplay = 2),
+            ScreenAssignment(targetDisplay = Constants.KEY_TARGET_NONE),
+        )
+        canvasTab(
+            seed = { addScene("Wall scene") },
+            settings = {
+                it.copy(
+                    projectionSettings = it.projectionSettings.copy(
+                        screenAssignments = screens,
+                        ndiOutputs = listOf(ndi, ndi),
+                        outputProfiles = listOf(wall),
+                    ),
+                )
+            },
+        ) { vm, _ ->
+            onNodeWithTag(CANVAS_SIZE_BUTTON_TAG).performClick()
+            waitForIdle()
+            assertTrue(onAllNodesWithText("Match Stage").fetchSemanticsNodes().isNotEmpty())
+            assertTrue(onAllNodesWithText("Match Screen 2").fetchSemanticsNodes().isNotEmpty())
+            assertTrue(onAllNodesWithText("Match Screen 3").fetchSemanticsNodes().isEmpty())
+
+            clickCanvasLabel("Match Wall (merged)")
+
+            val scene = vm.scenes.single()
+            assertEquals(3840 to 1080, scene.canvasWidth to scene.canvasHeight)
         }
     }
 }
