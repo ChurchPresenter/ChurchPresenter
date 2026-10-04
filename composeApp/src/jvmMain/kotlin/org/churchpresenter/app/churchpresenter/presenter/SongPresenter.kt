@@ -25,10 +25,10 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import java.io.File
-import org.churchpresenter.app.churchpresenter.composables.CameraDevice
-import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
+import org.churchpresenter.canvas.CameraDevice
+import org.churchpresenter.canvas.CameraDeviceCatalog
 import org.churchpresenter.app.churchpresenter.composables.ChordChart
-import org.churchpresenter.app.churchpresenter.composables.cameraResolves
+import org.churchpresenter.canvas.cameraResolves
 import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
 import org.churchpresenter.sharedui.utils.calculateChordChartFontSize
 import org.churchpresenter.core.models.songs.LyricSection

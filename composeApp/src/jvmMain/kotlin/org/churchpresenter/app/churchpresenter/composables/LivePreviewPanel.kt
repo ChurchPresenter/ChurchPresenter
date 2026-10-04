@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
-import org.churchpresenter.app.churchpresenter.presenter.liveMerges
+import org.churchpresenter.canvas.DeckLinkManager
+import org.churchpresenter.canvas.liveMerges
 import org.churchpresenter.app.churchpresenter.presenter.sizedAs
 import org.churchpresenter.strings.generated.resources.preview_merged_label
 import androidx.compose.animation.core.LinearEasing

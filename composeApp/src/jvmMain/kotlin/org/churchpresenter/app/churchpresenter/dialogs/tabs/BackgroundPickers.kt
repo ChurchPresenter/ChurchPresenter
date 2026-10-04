@@ -18,7 +18,7 @@ import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import org.churchpresenter.app.churchpresenter.composables.CenteredGlyphLine
+import org.churchpresenter.canvas.CenteredGlyphLine
 import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface

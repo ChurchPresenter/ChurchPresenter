@@ -62,7 +62,7 @@ import org.churchpresenter.strings.generated.resources.window_position
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.canvas.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.presenter.NdiManager
 import org.churchpresenter.app.churchpresenter.presenter.OmtManager
 import org.churchpresenter.ndi.NdiRuntimeStatus

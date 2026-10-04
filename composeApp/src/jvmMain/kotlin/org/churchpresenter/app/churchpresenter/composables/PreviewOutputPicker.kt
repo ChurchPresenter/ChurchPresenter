@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.canvas.DeckLinkManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

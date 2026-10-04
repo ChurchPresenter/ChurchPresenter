@@ -46,8 +46,10 @@ import org.churchpresenter.sharedui.utils.UsageEvents
 import java.io.File
 import java.io.IOException
 import kotlinx.coroutines.CoroutineExceptionHandler
-import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
-import org.churchpresenter.app.churchpresenter.composables.ResourceCensus
+import org.churchpresenter.app.churchpresenter.presenter.AppNetworkInputs
+import org.churchpresenter.canvas.CameraDeviceCatalog
+import org.churchpresenter.canvas.NetworkInputs
+import org.churchpresenter.canvas.ResourceCensus
 import org.jetbrains.compose.resources.MissingResourceException
 
 private const val MILLIS_PER_MINUTE = 60_000L
@@ -132,6 +134,9 @@ fun main() {
         System.exit(0)
         return
     }
+
+    // The Canvas receives NDI and OMT over the app's own libraries; hand it them before any UI.
+    NetworkInputs.install(AppNetworkInputs)
 
     // ImageIO caches its output stream in a temp file by default, so every slide JPEG the
     // presentation cache writes depended on java.io.tmpdir being writable — and where it was not,

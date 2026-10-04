@@ -16,7 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
-import org.churchpresenter.app.churchpresenter.composables.CameraBackground
+import org.churchpresenter.canvas.CameraBackground
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig

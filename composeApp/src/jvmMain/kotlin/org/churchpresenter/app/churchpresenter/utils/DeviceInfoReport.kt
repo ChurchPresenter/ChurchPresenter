@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter.utils
 
 import org.churchpresenter.app.churchpresenter.BuildConfig
-import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
-import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.canvas.CameraDeviceCatalog
+import org.churchpresenter.canvas.DeckLinkManager
 import org.churchpresenter.media.composables.isVlcAvailable
 import org.churchpresenter.media.composables.vlcUnavailableReason
 import org.churchpresenter.settings.AppSettings

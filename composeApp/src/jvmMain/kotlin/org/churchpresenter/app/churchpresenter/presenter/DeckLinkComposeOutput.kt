@@ -34,7 +34,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberUpdatedState
 import org.churchpresenter.app.churchpresenter.PresenterScreen
-import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.canvas.DeckLinkManager
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.diagnostics.CrashReporter

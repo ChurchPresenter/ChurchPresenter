@@ -1,5 +1,14 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.canvas.CustomShapeMode
+import org.churchpresenter.canvas.DEFAULT_RATIO
+import org.churchpresenter.canvas.PREVIEW_RATIO_RANGE
+import org.churchpresenter.canvas.PREVIEW_SIDE_RANGE
+import org.churchpresenter.canvas.PreviewShapePreset
+import org.churchpresenter.canvas.RATIO_STORED_HEIGHT
+import org.churchpresenter.canvas.previewShapeLabel
+import org.churchpresenter.canvas.reducedRatio
+import org.churchpresenter.canvas.sizeForRatio
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues

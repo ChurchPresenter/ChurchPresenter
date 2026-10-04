@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.canvas.ScenePresenter
+import org.churchpresenter.canvas.liveMerges
 import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
 import org.churchpresenter.dictionary.presenter.DictionaryPresenter
 import org.churchpresenter.announcements.presenter.AnnouncementsPresenter

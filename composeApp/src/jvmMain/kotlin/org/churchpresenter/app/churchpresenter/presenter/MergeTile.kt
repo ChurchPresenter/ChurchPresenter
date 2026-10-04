@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Constraints
-import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.canvas.DeckLinkManager
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ResolvedMerge
 import org.churchpresenter.settings.ScreenAssignment
@@ -47,13 +47,6 @@ internal fun MergedTile(merge: ResolvedMerge?, output: String, content: @Composa
         Box(Modifier.fillMaxSize().mergeTile(merge, output), content = content)
     }
 }
-
-/** A DeckLink device's output mode as width to height, or null when it cannot say. */
-internal fun deckLinkModeSize(device: Int): Pair<Int, Int>? =
-    DeckLinkManager.getOutputInfo(device)?.let { it.width to it.height }
-
-/** Every drawable merge by its members' output keys, DeckLink members sized by their device's mode. */
-internal fun ProjectionSettings.liveMerges(): Map<String, ResolvedMerge> = resolvedMerges(::deckLinkModeSize)
 
 /**
  * [this] output sized as the whole of [merge]'s picture, whatever kind it is -- how the preview

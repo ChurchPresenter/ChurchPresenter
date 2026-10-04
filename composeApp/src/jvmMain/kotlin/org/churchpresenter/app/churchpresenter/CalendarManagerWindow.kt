@@ -17,7 +17,7 @@ import org.churchpresenter.strings.generated.resources.calendar_locate_folder_ti
 import org.churchpresenter.strings.generated.resources.calendar_choose_logo_title
 import org.churchpresenter.strings.generated.resources.calendar_export_title
 import org.churchpresenter.strings.generated.resources.calendar_locate_file_title
-import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
+import org.churchpresenter.canvas.ScenePresenter
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.dialogs.CalendarEnrollQrDialog
 import org.churchpresenter.server.asInvite
