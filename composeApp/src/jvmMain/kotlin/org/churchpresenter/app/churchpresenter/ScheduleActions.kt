@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.tabs.ScheduleTabActions
+import org.churchpresenter.schedule.ScheduleTabActions
 
 // Kept for NavigationTopBar / menu — wraps ScheduleTabActions
 data class ScheduleActions(

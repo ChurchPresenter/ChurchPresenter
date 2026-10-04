@@ -11,6 +11,8 @@ import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.models.ShortcutScope
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.models.Tabs
+import org.churchpresenter.schedule.undo
+import org.churchpresenter.schedule.redo
 
 /** Konami code: ↑↑↓↓←→←→BA */
 private val KONAMI_SEQUENCE = listOf(
