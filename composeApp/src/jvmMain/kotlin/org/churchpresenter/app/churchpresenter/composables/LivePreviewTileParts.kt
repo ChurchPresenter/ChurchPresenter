@@ -311,6 +311,8 @@ internal fun PreviewModeLayers(
     primaryRole: String,
     qaUrl: String,
     sttManager: STTManager?,
+    /** Off for a web page, whose snapshot is drawn under the overlays instead of a slide. */
+    drawsSlide: Boolean = true,
 ) {
     // The clock stays wrapped: unwrapping it here would recompose the tile on every band frame.
     val bandSongLineIndex by presenterManager.bandSongLineIndex
@@ -328,7 +330,7 @@ internal fun PreviewModeLayers(
             }
         }
     }
-    if (effectiveMode != Presenting.NONE && showsContent) {
+    if (drawsSlide && effectiveMode != Presenting.NONE && showsContent) {
         Crossfade(
             targetState = effectiveMode,
             animationSpec = tween(previewCrossfadeMs(outputSettings)),

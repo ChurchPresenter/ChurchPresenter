@@ -590,6 +590,14 @@ private fun SingleDisplayPreview(
         // so this panel shows a pixel-accurate mirror including scroll position.
         if (profile.displayMode != Constants.DISPLAY_MODE_STAGE_MONITOR && effectiveMode == Presenting.WEBSITE) {
             PreviewWebsiteMirror(presenterManager)
+            // What goes up over the page, which its snapshot does not carry: drawn alone, with no
+            // screen of its own to hide the page under it.
+            ScaledPresenterContent(output = outputSize) {
+                PreviewModeLayers(
+                    presenterManager, effectiveMode, showsContent, profile, outputSettings,
+                    showsBackground, primaryRole, "", sttManager, drawsSlide = false,
+                )
+            }
         }
 
         // "LIVE" badge — only when this screen is showing content, and not while preview mode is on,
