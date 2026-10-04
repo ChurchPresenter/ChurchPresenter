@@ -152,4 +152,39 @@ class BoxItemsTest {
         assertEquals(1, items.size)
         assertEquals("For God so loved the world\n\nИбо так возлюбил Бог мир", items.single().text)
     }
+
+    @Test
+    fun `a shared box with nothing to say draws nothing, and empty slides are left out of its fit`() {
+        val s = song(mapOf("LYRICS" to on, "NEXT_SECTION" to on), shared = true)
+        val empty = listOf(SongLanguageBlock(0, emptyList(), emptyList()))
+        val slide = SongBoxSlide(blocks, listOf(blocks, empty), SongBoxTexts(null, null, null))
+
+        val items = songBoxItems(s, false, SongStyleElement.LYRICS, slide)
+
+        assertEquals(listOf(listOf("Amazing grace", "Удивительная")), items.first().fitLines)
+        val nothing = SongBoxSlide(empty, listOf(empty), slide.texts)
+        assertTrue(songBoxItems(s, false, SongStyleElement.LYRICS, nothing).isEmpty())
+    }
+
+    @Test
+    fun `a language's own box fits only the slides that carry that language`() {
+        val s = song(mapOf("LYRICS#1" to on))
+        val withoutIt = listOf(SongLanguageBlock(0, listOf("only primary"), emptyList()))
+        val emptyIt = listOf(SongLanguageBlock(1, emptyList(), emptyList()))
+        val slide = SongBoxSlide(blocks, listOf(blocks, withoutIt, emptyIt), SongBoxTexts(null, null, null))
+
+        val item = songBoxItems(s, false, SongStyleElement.LYRICS, slide).single()
+
+        assertEquals(listOf(listOf("Удивительная")), item.fitLines)
+    }
+
+    @Test
+    fun `a boxed translation with no text, or a lone one sharing a box, keeps to itself`() {
+        val bible = BibleSettings(
+            textBoxes = mapOf("TEXT" to on),
+            textBoxOptions = TextBoxOptions(sharedLanguageBox = true),
+        )
+        assertTrue(bibleBoxItems(bible, false, listOf(verse.copy(verseText = " ") to kjv)).isEmpty())
+        assertEquals(1, bibleBoxItems(bible, false, listOf(verse to kjv)).size)
+    }
 }
