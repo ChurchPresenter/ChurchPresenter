@@ -4,7 +4,10 @@ import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.songs.SongBackground
+import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.liveshow.BackgroundSource
 import org.churchpresenter.liveshow.Cue
 import org.churchpresenter.liveshow.Layer
 import org.churchpresenter.settings.utils.Constants
@@ -15,8 +18,9 @@ import kotlin.test.assertTrue
 
 /**
  * [PresenterManager.program] while it is still derived from the single live mode: each mode puts
- * what the outputs draw on that content's layer, and nothing else is ever set. A mode has its cue
- * even before its content arrives, because the outputs draw the mode's presenter regardless.
+ * what the outputs draw on that content's layer, and Bible and songs put their background up on the
+ * background layer with it. A mode has its cue even before its content arrives, because the outputs
+ * draw the mode's presenter regardless.
  */
 class PresenterManagerProgramTest {
 
@@ -39,7 +43,10 @@ class PresenterManagerProgramTest {
             setSelectedVerses(listOf(SelectedVerse(bookName = "Genesis")))
             setDisplayedVerses(verses)
         }
-        assertEquals(mapOf(Layer.SLIDE to Cue.Verses(verses)), program)
+        assertEquals(
+            mapOf(Layer.BACKGROUND to Cue.Background(BackgroundSource.BIBLE), Layer.SLIDE to Cue.Verses(verses)),
+            program,
+        )
     }
 
     @Test
@@ -48,7 +55,18 @@ class PresenterManagerProgramTest {
         val program = live(Presenting.LYRICS) {
             setDisplayedLyricSection(section, DisplayedSongPosition(listOf(section), sectionIndex = 2, lineIndex = 1))
         }
-        assertEquals(mapOf(Layer.SLIDE to Cue.Song(section, sectionIndex = 2, lineIndex = 1)), program)
+        assertEquals(Cue.Song(section, sectionIndex = 2, lineIndex = 1), program[Layer.SLIDE])
+    }
+
+    @Test
+    fun `a song puts the songs background up, carrying the section's own`() {
+        val own = SongBackground(type = SongBackgroundType.COLOR, color = "#336699")
+        val section = LyricSection(title = "Amazing Grace", background = own)
+        val program = live(Presenting.LYRICS) {
+            setDisplayedLyricSection(section, DisplayedSongPosition(listOf(section)))
+        }
+        assertEquals(Cue.Background(BackgroundSource.SONGS, own), program[Layer.BACKGROUND])
+        assertEquals(setOf(Layer.BACKGROUND, Layer.SLIDE), program.keys)
     }
 
     @Test
@@ -172,9 +190,14 @@ class PresenterManagerProgramTest {
 
 
     @Test
-    fun `every mode but none puts exactly one cue on air`() {
+    fun `only Bible and songs put a background up`() {
         Presenting.entries.forEach { mode ->
-            assertEquals(if (mode == Presenting.NONE) 0 else 1, live(mode).size, "$mode")
+            val expected = when (mode) {
+                Presenting.NONE -> 0
+                Presenting.BIBLE, Presenting.LYRICS -> 2
+                else -> 1
+            }
+            assertEquals(expected, live(mode).size, "$mode")
         }
     }
 }

@@ -4,7 +4,7 @@ import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.songs.LyricSection
-import org.churchpresenter.settings.BackgroundConfig
+import org.churchpresenter.core.models.songs.SongBackground
 
 /**
  * What one layer shows: a typed value naming its content. Two cues that are equal show the same
@@ -13,8 +13,12 @@ import org.churchpresenter.settings.BackgroundConfig
 sealed interface Cue {
     val layer: Layer
 
-    /** What sits under everything. */
-    data class Background(val config: BackgroundConfig) : Cue {
+    /**
+     * What sits under everything: the background [source]'s setting names, or [own] when the
+     * content carries one (a song's). Each output resolves it against its own settings, so one cue
+     * can be a picture on the projector and transparent on a stream key.
+     */
+    data class Background(val source: BackgroundSource, val own: SongBackground = SongBackground()) : Cue {
         override val layer get() = Layer.BACKGROUND
     }
 

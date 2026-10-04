@@ -4,7 +4,7 @@ import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.songs.LyricSection
-import org.churchpresenter.settings.BackgroundConfig
+import org.churchpresenter.core.models.songs.SongBackground
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -14,7 +14,7 @@ class CueTest {
     @Test
     fun `every cue lands on its decided layer`() {
         val expected = mapOf(
-            Cue.Background(BackgroundConfig()) to Layer.BACKGROUND,
+            Cue.Background(BackgroundSource.BIBLE) to Layer.BACKGROUND,
             Cue.Video("clip.mp4") to Layer.MEDIA,
             Cue.Picture("a.jpg") to Layer.MEDIA,
             Cue.Verses(listOf(SelectedVerse())) to Layer.SLIDE,
@@ -36,12 +36,15 @@ class CueTest {
 
     @Test
     fun `a cue keeps what it names`() {
-        val config = BackgroundConfig(backgroundColor = "#123456")
+        val own = SongBackground(color = "#123456")
         val verses = listOf(SelectedVerse(bookName = "John"))
         val section = LyricSection(title = "Amazing Grace")
         val scene = Scene(id = "s")
         val question = Question(id = "q", text = "Why?", timestamp = 0)
-        assertEquals(config, Cue.Background(config).config)
+        Cue.Background(BackgroundSource.SONGS, own).let {
+            assertEquals(BackgroundSource.SONGS, it.source)
+            assertEquals(own, it.own)
+        }
         assertEquals("clip.mp4", Cue.Video("clip.mp4").url)
         assertEquals("a.jpg", Cue.Picture("a.jpg").path)
         assertEquals(verses, Cue.Verses(verses).verses)

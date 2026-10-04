@@ -1,6 +1,5 @@
 package org.churchpresenter.liveshow
 
-import org.churchpresenter.settings.BackgroundConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
@@ -9,7 +8,7 @@ import kotlin.test.assertTrue
 class LiveShowTest {
 
     private val announcement = Cue.Announcement("Welcome")
-    private val background = Cue.Background(BackgroundConfig())
+    private val background = Cue.Background(BackgroundSource.BIBLE)
     private val lowerThird = Cue.LowerThird("Speaker")
     private val slide = Cue.Web("https://example.org")
 

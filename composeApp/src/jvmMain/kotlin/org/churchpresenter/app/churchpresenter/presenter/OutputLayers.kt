@@ -57,10 +57,10 @@ internal class OutputSurface(
 /**
  * Draws the layers [mode] puts on air, bottom to top, each through [CueContent].
  *
- * Program is still derived from the single live mode ([legacyProgram]), so exactly one layer is
- * ever set and every output looks as it did when it dispatched on [mode] itself. The layers are
- * emitted straight into the caller's container, so a lone layer lays out exactly as the presenter
- * did on its own; stacking several is step 4's, when layers stop replacing each other.
+ * Program is still derived from the single live mode ([legacyProgram]): one content layer, plus the
+ * background layer under Bible and songs. The layers are emitted straight into the caller's
+ * container -- a box in every output -- so they stack in [Layer] order, and a lone layer lays out
+ * exactly as its presenter did on its own.
  */
 @Composable
 internal fun OutputLayers(mode: Presenting, surface: OutputSurface) {
@@ -92,7 +92,8 @@ internal fun CueContent(cue: Cue, surface: OutputSurface) {
         is Cue.QuestionCue -> if (profile.showQA) QuestionCue(surface)
         is Cue.Captions -> if (profile.showSTT) CaptionsCue(surface)
         is Cue.Dictionary -> if (profile.showDictionary) DictionaryCue(surface)
-        // Not put on air until their own migration steps.
-        is Cue.Background, is Cue.Message -> Unit
+        is Cue.Background -> BackgroundCue(cue, surface)
+        // Not put on air until its own migration step.
+        is Cue.Message -> Unit
     }
 }

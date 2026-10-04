@@ -2,6 +2,9 @@ package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import org.churchpresenter.liveshow.BackgroundSource
+import org.churchpresenter.liveshow.Cue
+import org.churchpresenter.settings.ContentRegion
 import org.churchpresenter.settings.utils.Constants
 
 // What the text cues draw on one output -- see [CueContent]. Where the three kinds of output have
@@ -14,11 +17,7 @@ internal fun BibleCue(surface: OutputSurface) {
     val region = appSettings.bibleSettings.contentRegion
     val presenterManager = surface.presenterManager
     BiblePresenter(
-        modifier = when {
-            profile.isLowerThird -> Modifier
-            surface.kind == OutputSurfaceKind.PREVIEW -> Modifier.contentRegion(region)
-            else -> Modifier.wholeOutputRegion(region)
-        },
+        modifier = surface.slideModifier(region),
         textRegion = if (surface.kind == OutputSurfaceKind.PREVIEW) null else region.textOnly(profile.isLowerThird),
         selectedVerses = presenterManager.displayedVerses.value,
         appSettings = appSettings,
@@ -26,9 +25,10 @@ internal fun BibleCue(surface: OutputSurface) {
         isLowerThirdVertical = profile.isLowerThirdVertical,
         outputRole = surface.outputRole,
         transitionAlpha = presenterManager.bibleTransitionAlpha.value,
-        showBackground = surface.showBackgroundOverride ?: (surface.showBg && profile.showBibleBackground),
+        showBackground = surface.showsBackground(profile.showBibleBackground),
         crossfadeEnabled = appSettings.bibleSettings.crossfade,
         bibleTranslations = profile.bibleTranslations,
+        drawsBackground = false,
     )
 }
 
@@ -40,11 +40,7 @@ internal fun SongCue(surface: OutputSurface) {
     val presenterManager = surface.presenterManager
     val songPosition = presenterManager.displayedSongPosition.value
     SongPresenter(
-        modifier = when {
-            profile.isLowerThird -> Modifier
-            surface.kind == OutputSurfaceKind.PREVIEW -> Modifier.contentRegion(region)
-            else -> Modifier.wholeOutputRegion(region)
-        },
+        modifier = surface.slideModifier(region),
         textRegion = if (surface.kind == OutputSurfaceKind.PREVIEW) null else region.textOnly(profile.isLowerThird),
         lyricSection = presenterManager.displayedLyricSection.value,
         appSettings = appSettings,
@@ -56,12 +52,63 @@ internal fun SongCue(surface: OutputSurface) {
         lookAheadEnabled = profile.songLookAhead,
         allLyricSections = songPosition.allSections,
         displaySectionIndex = songPosition.sectionIndex,
-        showBackground = surface.showBackgroundOverride ?: (surface.showBg && profile.showSongsBackground),
+        showBackground = surface.showsBackground(profile.showSongsBackground),
         crossfadeEnabled = appSettings.songSettings.crossfade,
         languageOverride = profile.songMode,
         languageSelection = profile.songTranslations,
+        drawsBackground = false,
     )
 }
+
+/**
+ * The background a Bible or song slide puts up with it, on the background layer, drawn by the
+ * presenter's own background-only twin so it covers exactly what the presenter's box did.
+ */
+@Composable
+internal fun BackgroundCue(cue: Cue.Background, surface: OutputSurface) {
+    val profile = surface.profile
+    val appSettings = surface.appSettings
+    val presenterManager = surface.presenterManager
+    when (cue.source) {
+        BackgroundSource.BIBLE -> if (profile.showBible) {
+            BibleSlideBackground(
+                modifier = surface.slideModifier(appSettings.bibleSettings.contentRegion),
+                selectedVerses = presenterManager.displayedVerses.value,
+                appSettings = appSettings,
+                isLowerThird = profile.isLowerThird,
+                outputRole = surface.outputRole,
+                transitionAlpha = presenterManager.bibleTransitionAlpha.value,
+                showBackground = surface.showsBackground(profile.showBibleBackground),
+                bibleTranslations = profile.bibleTranslations,
+            )
+        }
+        BackgroundSource.SONGS -> if (profile.showSongs) {
+            SongSlideBackground(
+                modifier = surface.slideModifier(appSettings.songSettings.layoutExtras.contentRegion),
+                lyricSection = presenterManager.displayedLyricSection.value,
+                appSettings = appSettings,
+                isLowerThird = profile.isLowerThird,
+                transitionAlpha = presenterManager.songTransitionAlpha.value,
+                showBackground = surface.showsBackground(profile.showSongsBackground),
+            )
+        }
+    }
+}
+
+/**
+ * The box a Bible or song slide, and its background, take on this output: the whole output (with
+ * the text placed in [region]) on a real output, the region itself on a preview tile, and the
+ * band's own placement on a lower third.
+ */
+private fun OutputSurface.slideModifier(region: ContentRegion): Modifier = when {
+    profile.isLowerThird -> Modifier
+    kind == OutputSurfaceKind.PREVIEW -> Modifier.contentRegion(region)
+    else -> Modifier.wholeOutputRegion(region)
+}
+
+/** Whether a slide's background shows here, given the profile's switch for that content type. */
+private fun OutputSurface.showsBackground(contentTypeShows: Boolean): Boolean =
+    showBackgroundOverride ?: (showBg && contentTypeShows)
 
 @Composable
 internal fun AnnouncementCue(surface: OutputSurface) {

@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.liveshow.BackgroundSource
 import org.churchpresenter.liveshow.Cue
 import org.churchpresenter.liveshow.Layer
 import org.churchpresenter.settings.utils.Constants
@@ -8,16 +9,23 @@ import org.churchpresenter.sharedui.models.Presenting
 /**
  * The layer map today's single live mode amounts to: one cue for any mode but [Presenting.NONE], on
  * the layer the mode's content belongs to, built from what the outputs draw rather than what the
- * operator chose.
+ * operator chose -- and for Bible and songs, their background on the background layer.
  *
  * A mode always has its cue, even before its content arrives (no picture yet, no scene chosen):
  * the outputs drew that mode's presenter regardless, and a picture fading out still needs it.
  *
- * Steps 1 and 2 of the layer-model migration (`docs/LAYER_MODEL.md`): program is derived, and the
+ * Steps 1 to 3 of the layer-model migration (`docs/LAYER_MODEL.md`): program is derived, and the
  * outputs draw from it. It goes once the content setters write cues themselves.
  */
 internal fun legacyProgram(mode: Presenting, live: PresenterManager): Map<Layer, Cue> =
-    legacyCue(mode, live)?.let { mapOf(it.layer to it) }.orEmpty()
+    listOfNotNull(legacyBackground(mode, live), legacyCue(mode, live)).associateBy { it.layer }
+
+/** The content types with a background setting of their own put it up with them. */
+private fun legacyBackground(mode: Presenting, live: PresenterManager): Cue? = when (mode) {
+    Presenting.BIBLE -> Cue.Background(BackgroundSource.BIBLE)
+    Presenting.LYRICS -> Cue.Background(BackgroundSource.SONGS, live.displayedLyricSection.value.background)
+    else -> null
+}
 
 private fun legacyCue(mode: Presenting, live: PresenterManager): Cue? = when (mode) {
     Presenting.NONE -> null
