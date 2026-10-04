@@ -200,6 +200,13 @@ class OptionsContentTest {
         tab("Companion Satellite").assertIsSelected()
     }
 
+    /** With the OBS tab present Companion Satellite is one place further along, and still the last. */
+    @Test
+    fun `with an obs manager the last tab is still Companion Satellite`() =
+        dialog(initialTab = 999, obsManager = OBSWebSocketManager()) {
+            tab("Companion Satellite").assertIsSelected()
+        }
+
     @Test
     fun `Cancel dismisses without saving`() = dialog { result ->
         onNodeWithText("Cancel", substring = true).performClick()
@@ -379,9 +386,12 @@ class OptionsContentTest {
                 companionServer = CompanionServer(),
                 remoteClientManager = RemoteClientManager(),
                 onDismiss = {},
+                calendarSync = null,
                 onSave = {},
                 onIdentifyScreen = {},
                 onIdentifyBrowserSource = {},
+                onIdentifyNdi = {},
+                onIdentifyOmt = {},
                 scenes = emptyList(),
                 obsManager = null,
                 companionSatelliteViewModel = null,
@@ -401,9 +411,12 @@ class OptionsContentTest {
                 companionServer = CompanionServer(),
                 remoteClientManager = RemoteClientManager(),
                 onDismiss = {},
+                calendarSync = null,
                 onSave = {},
                 onIdentifyScreen = {},
                 onIdentifyBrowserSource = {},
+                onIdentifyNdi = {},
+                onIdentifyOmt = {},
                 scenes = emptyList(),
                 obsManager = null,
                 companionSatelliteViewModel = null,
