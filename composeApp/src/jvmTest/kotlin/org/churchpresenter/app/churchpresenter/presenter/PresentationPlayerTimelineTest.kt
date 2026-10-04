@@ -55,7 +55,9 @@ class PresentationPlayerTimelineTest {
         layers: List<LayerSpec> = listOf(shape()),
         timeline: Timeline? = null,
         transition: SlideTransitionSpec? = null,
-    ) = Slide(index, notes = "", transition = transition, layers = layers, timeline = timeline, fidelity = Fidelity.NATIVE)
+    ) = Slide(
+        index, notes = "", transition = transition, layers = layers, timeline = timeline, fidelity = Fidelity.NATIVE,
+    )
 
     private fun deck(vararg slides: Slide): Deck {
         val file = File(dir, "deck.pdf")

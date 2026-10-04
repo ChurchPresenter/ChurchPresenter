@@ -173,7 +173,8 @@ class UpdateCheckerSelectUpdateTest {
 
     @Test
     fun `a rolling tag in front of a real release is stepped over`() {
-        val result = select(releases(release("nightly", prerelease = true), release("v26.3.0")), includePrereleases = true)
+        val body = releases(release("nightly", prerelease = true), release("v26.3.0"))
+        val result = select(body, includePrereleases = true)
         assertEquals("26.3.0", assertIs<UpdateCheckResult.Available>(result).info.latestVersion)
     }
 

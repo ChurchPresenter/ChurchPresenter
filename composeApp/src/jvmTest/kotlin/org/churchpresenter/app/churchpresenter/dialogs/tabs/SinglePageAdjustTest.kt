@@ -13,6 +13,8 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+private typealias BoxMap = Map<String, TextBox>
+
 class SinglePageAdjustTest {
 
     private val on = TextBox(enabled = true, xPercent = 0f, yPercent = 0f, widthPercent = 50f, heightPercent = 50f)
@@ -25,7 +27,11 @@ class SinglePageAdjustTest {
         language = Adjustable(null) {},
     )
 
-    private fun modelFor(pane: CustomizePane, start: AppSettings, element: CustomizeElement? = null): Pair<AdjustModel?, () -> AppSettings> {
+    private fun modelFor(
+        pane: CustomizePane,
+        start: AppSettings,
+        element: CustomizeElement? = null,
+    ): Pair<AdjustModel?, () -> AppSettings> {
         var draft = start
         var model: AdjustModel? = null
         runComposeUiTest {
@@ -45,13 +51,14 @@ class SinglePageAdjustTest {
         return model to { draft }
     }
 
-    private val pages: List<Pair<CustomizePane, Pair<(AppSettings) -> AppSettings, (AppSettings) -> Map<String, TextBox>>>> =
+    private val pages: List<Pair<CustomizePane, Pair<(AppSettings) -> AppSettings, (AppSettings) -> BoxMap>>> =
         listOf(
             CustomizePane.CAPTIONS to Pair(
                 { s -> s.copy(sttSettings = s.sttSettings.copy(textBoxes = boxes)) }, { s -> s.sttSettings.textBoxes },
             ),
             CustomizePane.SUBTITLES to Pair(
-                { s -> s.copy(mediaSettings = s.mediaSettings.copy(textBoxes = boxes)) }, { s -> s.mediaSettings.textBoxes },
+                { s -> s.copy(mediaSettings = s.mediaSettings.copy(textBoxes = boxes)) },
+                { s -> s.mediaSettings.textBoxes },
             ),
             CustomizePane.QA to Pair(
                 { s -> s.copy(qaSettings = s.qaSettings.copy(textBoxes = boxes)) }, { s -> s.qaSettings.textBoxes },

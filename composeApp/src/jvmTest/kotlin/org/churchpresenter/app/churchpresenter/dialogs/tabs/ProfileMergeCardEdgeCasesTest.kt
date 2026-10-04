@@ -100,4 +100,27 @@ class ProfileMergeCardEdgeCasesTest {
 
         assertTrue(onAllNodesWithText("Drag a tile", substring = true).fetchSemanticsNodes().isNotEmpty())
     }
+
+    @Test
+    fun `a merge of an NDI output and an OMT output says only one kind can be merged`() = runComposeUiTest {
+        val profile = wall.copy(merge = OutputMerge(listOf(MergeTile("ndi:0"), MergeTile("omt:0"))))
+        val omt = ScreenAssignment(omtWidth = 1920, omtHeight = 1080, activeProfileId = "wall")
+        setContent {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                ProfileMergeCard(
+                    profile = profile,
+                    proj = ProjectionSettings(
+                        ndiOutputs = listOf(ndi()), omtOutputs = listOf(omt), outputProfiles = listOf(profile),
+                    ),
+                    tiles = listOf(tile(OutputKind.NDI, 0, "Lobby"), tile(OutputKind.OMT, 0, "Stream")),
+                    onMergeChange = {},
+                    onMac = false,
+                    deckLinkSize = { null },
+                )
+            }
+        }
+        waitForIdle()
+
+        assertTrue(onAllNodesWithText("Only outputs of one kind can be merged.").fetchSemanticsNodes().isNotEmpty())
+    }
 }
