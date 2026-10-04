@@ -7,7 +7,9 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import io.github.alexzhirkevich.compottie.LottieComposition
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.drawsOverContent
 import org.churchpresenter.app.churchpresenter.viewmodel.legacyProgram
+import org.churchpresenter.app.churchpresenter.viewmodel.unlockedModeFor
 import org.churchpresenter.liveshow.Cue
 import org.churchpresenter.liveshow.Layer
 import org.churchpresenter.media.viewmodel.MediaViewModel
@@ -98,21 +100,25 @@ internal fun CueContent(cue: Cue, surface: OutputSurface) {
     }
 }
 
-/** The overlays in the order they stack, bottom to top: captions, then the lower third. */
-private val OVERLAY_DRAW_ORDER = listOf(Presenting.STT, Presenting.LOWER_THIRD)
+/** The overlays in the order they stack, bottom to top: captions, lower third, announcements. */
+private val OVERLAY_DRAW_ORDER = listOf(Presenting.STT, Presenting.LOWER_THIRD, Presenting.ANNOUNCEMENTS)
 
 /**
- * The overlays up over the slide, each drawn by [content] exactly as it is drawn on its own, stacked
- * above whatever the caller drew before this. Nothing on an output locked to a mode other than the
- * slide's: a locked screen shows its own mode and nothing over it.
+ * The overlays this output draws over its content, each drawn by [content] exactly as it is drawn on
+ * its own, stacked above whatever the caller drew before this: those up that [profile] puts over the
+ * content. [shownMode] is what the output shows beneath them ([shownModeFor]); an output locked to
+ * a mode of its own shows that and nothing over it.
  */
 @Composable
 internal fun OverlayModes(
     presenterManager: PresenterManager,
-    effectiveMode: Presenting,
+    profile: OutputProfile,
+    shownMode: Presenting,
     content: @Composable (Presenting) -> Unit,
 ) {
-    if (effectiveMode != presenterManager.presentingMode.value) return
+    if (shownMode != presenterManager.unlockedModeFor(profile)) return
     val overlays = presenterManager.overlays.value
-    OVERLAY_DRAW_ORDER.forEach { mode -> if (mode in overlays) key(mode) { content(mode) } }
+    OVERLAY_DRAW_ORDER.forEach { mode ->
+        if (mode in overlays && mode != shownMode && profile.drawsOverContent(mode)) key(mode) { content(mode) }
+    }
 }

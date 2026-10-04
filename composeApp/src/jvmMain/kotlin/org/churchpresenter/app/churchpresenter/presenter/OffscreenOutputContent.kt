@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.presenter
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.shownModeFor
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
@@ -90,7 +91,7 @@ internal fun OffscreenOutputContent(
             val appSettings = remember(globalSettings, profile) {
                 globalSettings.resolvedFor(profile)
             }
-            val effectiveMode by effectiveModeState
+            val effectiveMode = presenterManager.shownModeFor(profile, effectiveModeState.value)
             val isIdentifying = when (context.kind) {
                 OffscreenOutputKind.BROWSER_SOURCE ->
                     presenterManager.browserSourceIdentifying.value.contains(outputIndex)
@@ -170,7 +171,7 @@ internal fun OffscreenOutputContent(
                         targetState = effectiveMode,
                         animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()
                     ) { mode -> modeContent(mode) }
-                    OverlayModes(presenterManager, effectiveMode, modeContent)
+                    OverlayModes(presenterManager, profile, effectiveMode, modeContent)
                 }
             }
             }

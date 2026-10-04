@@ -56,6 +56,7 @@ import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.presenter.OverlayModes
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.shownModeFor
 import org.churchpresenter.stt.STTManager
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.AppSettings
@@ -98,7 +99,10 @@ internal fun PresenterWindows(
     val clearAnnouncementOnFinish = {
         presenterManager.setAnnouncementText("")
         presenterManager.setDisplayedAnnouncementText("")
-        presenterManager.requestClearDisplay()
+        presenterManager.overlayFinished(
+            Presenting.ANNOUNCEMENTS,
+            appSettings.projectionSettings.overlayEndClearsDisplay,
+        )
     }
     val lottieJsonContent by presenterManager.lottieJsonContent
     val lottiePauseAtFrame by presenterManager.lottiePauseAtFrame
@@ -176,11 +180,7 @@ internal fun PresenterWindows(
             outputKey = outputKey,
             merge = merges[outputKey],
             // Every tile of one picture shows what its first output shows, lock and all.
-            effectiveMode = effectiveOutputMode(
-                screenLocks,
-                mergeHostIndex(merges, Constants.PREVIEW_OUTPUT_SCREEN, slotIndex),
-                presentingMode,
-            ),
+            effectiveMode = presenterManager.screenSlotMode(profile, screenLocks, merges, slotIndex, presentingMode),
         )
 
         when {
@@ -278,6 +278,7 @@ internal data class OutputEnvironment(
 @Composable
 private fun CrossfadedOutput(
     presenterManager: PresenterManager,
+    profile: OutputProfile,
     effectiveMode: Presenting,
     crossfadeMs: Int,
     outputSettings: AppSettings,
@@ -292,7 +293,7 @@ private fun CrossfadedOutput(
         targetState = effectiveMode,
         animationSpec = if (screenCrossfadeActive) tween(crossfadeMs) else snap()
     ) { mode -> content(mode) }
-    OverlayModes(presenterManager, effectiveMode, content)
+    OverlayModes(presenterManager, profile, effectiveMode, content)
 }
 
 /** One output's [mode], drawn with its background forced on as the key and DeckLink paths always have. */
@@ -321,6 +322,20 @@ private fun OutputModeContent(
         showBackgroundOverride = true,
     )
 }
+
+/** What screen slot [slotIndex] shows: its picture's first output's lock, else [profile]'s live mode. */
+private fun PresenterManager.screenSlotMode(
+    profile: OutputProfile,
+    screenLocks: Map<Int, Presenting>,
+    merges: Map<String, ResolvedMerge>,
+    slotIndex: Int,
+    presentingMode: Presenting,
+): Presenting = shownModeFor(
+    profile,
+    effectiveOutputMode(
+        screenLocks, mergeHostIndex(merges, Constants.PREVIEW_OUTPUT_SCREEN, slotIndex), presentingMode,
+    ),
+)
 
 /** One screen slot's output: its assignment, what it draws with, and the mode it shows. */
 private data class OutputSlot(
@@ -399,7 +414,9 @@ private fun DeckLinkOutputs(
             merge = slot.merge,
             mergeOutput = slot.outputKey,
         ) {
-            CrossfadedOutput(env.presenterManager, slot.effectiveMode, slot.crossfadeMs, slot.outputSettings) { mode ->
+            CrossfadedOutput(
+                env.presenterManager, slot.profile, slot.effectiveMode, slot.crossfadeMs, slot.outputSettings,
+            ) { mode ->
                 OutputModeContent(
                     mode, slot.profile, slot.outputSettings, deckLinkRole,
                     showsOutputBackground(slot.profile), env,
@@ -416,7 +433,9 @@ private fun DeckLinkOutputs(
             mediaViewModel = env.mediaViewModel,
             isLowerThird = slot.profile.isLowerThird,
         ) {
-            CrossfadedOutput(env.presenterManager, slot.effectiveMode, slot.crossfadeMs, slot.outputSettings) { mode ->
+            CrossfadedOutput(
+                env.presenterManager, slot.profile, slot.effectiveMode, slot.crossfadeMs, slot.outputSettings,
+            ) { mode ->
                 OutputModeContent(
                     mode, slot.profile, slot.outputSettings, Constants.OUTPUT_ROLE_KEY,
                     showsOutputBackground(slot.profile), env,
@@ -518,7 +537,7 @@ private fun ScreenOutputs(
                 isLowerThird = slot.profile.isLowerThird,
             ) {
                 CrossfadedOutput(
-                    env.presenterManager, slot.effectiveMode, slot.crossfadeMs, slot.outputSettings,
+                    env.presenterManager, slot.profile, slot.effectiveMode, slot.crossfadeMs, slot.outputSettings,
                 ) { mode ->
                     OutputModeContent(mode, slot.profile, slot.outputSettings, primaryRole, showBg, env)
                 }
@@ -592,7 +611,7 @@ private fun KeyOutputWindow(
                         }
                 ) {
                     CrossfadedOutput(
-                    env.presenterManager, slot.effectiveMode, slot.crossfadeMs, slot.outputSettings,
+                    env.presenterManager, slot.profile, slot.effectiveMode, slot.crossfadeMs, slot.outputSettings,
                 ) { mode ->
                         OutputModeContent(
                             mode, slot.profile, slot.outputSettings, Constants.OUTPUT_ROLE_KEY,

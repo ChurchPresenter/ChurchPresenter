@@ -53,6 +53,8 @@ import org.churchpresenter.app.churchpresenter.presenter.OutputLayers
 import org.churchpresenter.app.churchpresenter.presenter.OutputSurface
 import org.churchpresenter.app.churchpresenter.presenter.OutputSurfaceKind
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.drawsOverContent
+import org.churchpresenter.app.churchpresenter.viewmodel.unlockedModeFor
 import org.churchpresenter.stt.STTManager
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.mode
@@ -289,8 +291,8 @@ internal fun previewShowsSomething(
     profile: OutputProfile,
 ): Boolean =
     (effectiveMode != Presenting.NONE && showsContentFor(effectiveMode, profile)) ||
-        (effectiveMode == presenterManager.presentingMode.value &&
-            presenterManager.overlays.value.any { showsContentFor(it, profile) })
+        (effectiveMode == presenterManager.unlockedModeFor(profile) &&
+            presenterManager.overlays.value.any { profile.drawsOverContent(it) && showsContentFor(it, profile) })
 
 /**
  * The tile's slide crossfading between modes, and the overlays up over it, each inside the output's
@@ -330,7 +332,7 @@ internal fun PreviewModeLayers(
             animationSpec = tween(previewCrossfadeMs(outputSettings)),
         ) { mode -> modeContent(mode) }
     }
-    OverlayModes(presenterManager, effectiveMode) { mode ->
+    OverlayModes(presenterManager, profile, effectiveMode) { mode ->
         if (showsContentFor(mode, profile)) modeContent(mode)
     }
 }

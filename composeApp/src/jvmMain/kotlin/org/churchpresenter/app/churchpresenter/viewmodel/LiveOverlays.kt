@@ -6,7 +6,7 @@ import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.sharedui.models.Presenting
 
 /**
- * The overlays up over the slide -- lower thirds and captions ([OVERLAY_MODES]) --
+ * The overlays up over the slide -- captions, lower thirds and announcements ([OVERLAY_MODES]) --
  * and what was put live most recently. Part of [PresenterManager].
  */
 interface LiveOverlays {
@@ -35,7 +35,7 @@ interface LiveOverlays {
     fun clearOverlay(mode: Presenting)
 
     /**
-     * An overlay that ended on its own -- a lower third's run or its animation finishing. With
+     * An overlay that ended on its own -- a lower third's run, an announcement's last loop. With
      * [clearsDisplay] (the default setting, as it always was) the whole display clears; otherwise
      * only the overlay comes down and the slide under it stays.
      */
@@ -60,7 +60,8 @@ internal class LiveOverlaysState(private val context: PresenterContext) : LiveOv
         if (mode !in context.overlays.value) {
             CrashReporter.breadcrumb("Overlay: ${mode.name}", category = "presenter")
         }
-        context.overlays.value = context.overlays.value + mode
+        // Re-added at the end, so the set's order stays the order they went up in.
+        context.overlays.value = context.overlays.value - mode + mode
         context.lastLive.value = mode
         context.clearDisplayRequested.value = false
         context.notify(mode)

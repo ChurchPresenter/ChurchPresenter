@@ -82,6 +82,11 @@ data class OutputProfile(
     val showMedia: Boolean = true,
     val showSubtitles: Boolean = true,
     val showStreaming: Boolean = true,
+    // Whether a lower third, an announcement or captions go up over what is on screen here, or
+    // replace it as they always did (the default).
+    val lowerThirdOverContent: Boolean = false,
+    val announcementsOverContent: Boolean = false,
+    val captionsOverContent: Boolean = false,
     val showAnnouncements: Boolean = true,
     val showWebsite: Boolean = true,
     val songLookAhead: Boolean = false,

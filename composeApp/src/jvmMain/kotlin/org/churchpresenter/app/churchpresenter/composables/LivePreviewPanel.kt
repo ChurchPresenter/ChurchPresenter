@@ -101,6 +101,7 @@ import org.churchpresenter.sharedui.utils.OutputSize
 import org.churchpresenter.sharedui.utils.outputSizeOf
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.shownModeFor
 import org.churchpresenter.stt.STTManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -469,7 +470,7 @@ private fun SingleDisplayPreview(
         appSettings.resolvedFor(profile)
     }
     val presentingMode by presenterManager.presentingMode
-    val effectiveMode = locks[screenIndex] ?: presentingMode
+    val effectiveMode = presenterManager.shownModeFor(profile, locks[screenIndex] ?: presentingMode)
     val mediaViewModel = LocalMediaViewModel.current
 
     val isLowerThird = profile.isLowerThird

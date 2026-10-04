@@ -171,7 +171,7 @@ internal fun PresenterOutputContent(
                             targetState = effectiveMode,
                             animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()
                         ) { mode -> modeContent(mode) }
-                        OverlayModes(presenterManager, effectiveMode, modeContent)
+                        OverlayModes(presenterManager, profile, effectiveMode, modeContent)
 
                         ReleaseLiveBrowserOffWebsite(presenterManager, presentingMode)
 

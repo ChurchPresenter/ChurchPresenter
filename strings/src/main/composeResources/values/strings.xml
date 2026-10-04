@@ -1781,8 +1781,11 @@
     <string name="start_outputs_hidden_hint">Outputs stay off at launch until you press the display button in the sidebar</string>
     <string name="hide_cursor_on_outputs">Hide the mouse on output screens</string>
     <string name="hide_cursor_on_outputs_hint">The mouse pointer is never shown over a full-screen output, even when it passes across one</string>
-    <string name="overlay_end_clears_display">Clear the screen when a lower third ends</string>
-    <string name="overlay_end_clears_display_hint">When a lower third finishes on its own, clear everything. Turn off to take down only the lower third and leave the song, verse or slide under it on screen</string>
+    <string name="overlay_end_clears_display">Clear the screen when a lower third or announcement ends</string>
+    <string name="overlay_end_clears_display_hint">When a lower third or announcement finishes on its own, clear everything. Turn off to take down only the lower third or announcement; outputs that show it over the content keep the song, verse or slide under it</string>
+    <string name="profile_lower_third_over_content">Lower third goes over the content</string>
+    <string name="profile_announcements_over_content">Announcements go over the content</string>
+    <string name="profile_captions_over_content">Captions go over the content</string>
     <string name="analytics_reporting">Share anonymous crash &amp; analytics reports</string>
     <string name="send_test_event">Send test event</string>
     <string name="test_event_title">Sentry test event</string>

@@ -42,6 +42,9 @@ import org.churchpresenter.strings.generated.resources.profile_source_songs
 import org.churchpresenter.strings.generated.resources.background
 import org.churchpresenter.strings.generated.resources.projection_content_lt_background
 import org.churchpresenter.strings.generated.resources.profile_song_look_ahead
+import org.churchpresenter.strings.generated.resources.profile_announcements_over_content
+import org.churchpresenter.strings.generated.resources.profile_captions_over_content
+import org.churchpresenter.strings.generated.resources.profile_lower_third_over_content
 import org.churchpresenter.strings.generated.resources.projection_content_web
 import org.churchpresenter.strings.generated.resources.stage_monitor_show_chords
 import org.churchpresenter.strings.generated.resources.profile_show_transpose_controls
@@ -117,33 +120,45 @@ private fun contentSwitches(profile: OutputProfile): ContentGroups {
             p.copy(showDictionary = v)
         })
     }
-    val media = listOf(
-        ContentSwitch(stringResource(Res.string.content_pictures), profile.showPictures) { p, v ->
+    val media = buildList {
+        add(ContentSwitch(stringResource(Res.string.content_pictures), profile.showPictures) { p, v ->
             p.copy(showPictures = v)
-        },
-        ContentSwitch(stringResource(Res.string.media), profile.showMedia) { p, v -> p.copy(showMedia = v) },
+        })
+        add(ContentSwitch(stringResource(Res.string.media), profile.showMedia) { p, v -> p.copy(showMedia = v) })
         // Whether video carries its subtitle overlay on this output; read by MediaPresenter.
-        ContentSwitch(stringResource(Res.string.media_subtitles), profile.showSubtitles) { p, v ->
+        add(ContentSwitch(stringResource(Res.string.media_subtitles), profile.showSubtitles) { p, v ->
             p.copy(showSubtitles = v)
-        },
-        ContentSwitch(stringResource(Res.string.projection_content_web), profile.showWebsite) { p, v ->
+        })
+        add(ContentSwitch(stringResource(Res.string.projection_content_web), profile.showWebsite) { p, v ->
             p.copy(showWebsite = v)
-        },
-        ContentSwitch(stringResource(Res.string.tab_canvas), profile.showCanvas) { p, v -> p.copy(showCanvas = v) },
-        ContentSwitch(stringResource(Res.string.display_lower_third), profile.showStreaming) { p, v ->
+        })
+        add(ContentSwitch(stringResource(Res.string.tab_canvas), profile.showCanvas) { p, v -> p.copy(showCanvas = v) })
+        add(ContentSwitch(stringResource(Res.string.display_lower_third), profile.showStreaming) { p, v ->
             p.copy(showStreaming = v)
-        },
-    )
-    val overlays = listOf(
-        ContentSwitch(stringResource(Res.string.content_announcements), profile.showAnnouncements) { p, v ->
+        })
+        // Over the content or in place of it -- offered only while the lower third is shown here.
+        if (profile.showStreaming) {
+            val label = stringResource(Res.string.profile_lower_third_over_content)
+            add(ContentSwitch(label, profile.lowerThirdOverContent) { p, v -> p.copy(lowerThirdOverContent = v) })
+        }
+    }
+    val overlays = buildList {
+        add(ContentSwitch(stringResource(Res.string.content_announcements), profile.showAnnouncements) { p, v ->
             p.copy(showAnnouncements = v)
-        },
-        ContentSwitch(stringResource(Res.string.tab_qa), profile.showQA) { p, v -> p.copy(showQA = v) },
-        ContentSwitch(
-            stringResource(Res.string.profile_nav_live_captions),
-            profile.showSTT,
-        ) { p, v -> p.copy(showSTT = v) },
-    )
+        })
+        if (profile.showAnnouncements) {
+            val label = stringResource(Res.string.profile_announcements_over_content)
+            add(ContentSwitch(label, profile.announcementsOverContent) { p, v -> p.copy(announcementsOverContent = v) })
+        }
+        add(ContentSwitch(stringResource(Res.string.tab_qa), profile.showQA) { p, v -> p.copy(showQA = v) })
+        add(ContentSwitch(stringResource(Res.string.profile_nav_live_captions), profile.showSTT) { p, v ->
+            p.copy(showSTT = v)
+        })
+        if (profile.showSTT) {
+            val label = stringResource(Res.string.profile_captions_over_content)
+            add(ContentSwitch(label, profile.captionsOverContent) { p, v -> p.copy(captionsOverContent = v) })
+        }
+    }
     val backgrounds = listOf(
         ContentSwitch(
             stringResource(Res.string.background),
