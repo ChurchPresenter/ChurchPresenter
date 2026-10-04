@@ -6,11 +6,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 
 import java.io.File
 import java.nio.file.Files
@@ -37,7 +35,6 @@ import org.churchpresenter.sharedui.testing.showsExactly
 class CanvasTabSmokeTest {
 
     private fun canvasTab(settings: AppSettings, assertions: ComposeUiTest.(SceneViewModel) -> Unit) {
-        TestSingletons.latchToTestHome()
         val realHome = System.getProperty("user.home")
         val tempHome: File = Files.createTempDirectory("cp-canvas-tab").toFile()
         System.setProperty("user.home", tempHome.absolutePath)
@@ -48,13 +45,12 @@ class CanvasTabSmokeTest {
             // the aspect-ratio branch that used to throw is the one being exercised.
             scenes.addScene("Smoke Scene")
             scenes.updateCanvasSize(1024, 768)
-            val presenter = PresenterManager()
             runComposeUiTest {
                 setContent {
                     MaterialTheme {
                         CanvasTab(
                             appSettings = settings,
-                            presenterManager = presenter,
+                            onPresentScene = {},
                             sceneViewModel = scenes,
                             onAddToSchedule = { _, _ -> },
                         )

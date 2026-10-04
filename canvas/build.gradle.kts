@@ -60,6 +60,10 @@ dependencies {
     testImplementation(libs.compose.uiTest)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
+    // The browser source's page-discovery tests stand up a local DevTools endpoint.
+    testImplementation(libs.ktor.server.core)
+    testImplementation(libs.ktor.server.netty)
+    testImplementation(libs.ktor.server.websockets)
     testImplementation(libs.roborazzi.composeDesktop)
 }
 

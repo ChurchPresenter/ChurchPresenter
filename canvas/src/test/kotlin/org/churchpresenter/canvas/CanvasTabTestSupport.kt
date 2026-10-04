@@ -16,12 +16,11 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Dp
-import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.core.models.scene.Scene
 
 import java.io.File
 import java.nio.file.Files
@@ -48,6 +47,8 @@ internal class CanvasReports {
     /** sceneId to sceneName, exactly as the schedule would be given them. */
     val scheduled = mutableListOf<Pair<String, String>>()
     var settingsChanges = 0
+    /** Each scene Go Live put on the output, in order. */
+    val presented = mutableListOf<Scene>()
 }
 
 /**
@@ -83,12 +84,10 @@ internal fun canvasTab(
     cameraHost: CameraHost? = CameraHost(PINNED_CAMERAS, ffmpegAvailable = true),
     block: ComposeUiTest.(vm: SceneViewModel, reports: CanvasReports) -> Unit,
 ) {
-    TestSingletons.latchToTestHome()
     val realHome = System.getProperty("user.home")
     val tempHome: File = Files.createTempDirectory("cp-canvas-tab").toFile()
     System.setProperty("user.home", tempHome.absolutePath)
     val vm = SceneViewModel()
-    val presenter = PresenterManager()
     val reports = CanvasReports()
     try {
         vm.seed()
@@ -99,7 +98,7 @@ internal fun canvasTab(
                         CanvasTab(
                             appSettings = settings(AppSettings()),
                             onSettingsChange = { reports.settingsChanges++ },
-                            presenterManager = presenter,
+                            onPresentScene = { reports.presented += it },
                             sceneViewModel = vm,
                             onAddToSchedule = { id, name -> reports.scheduled += id to name },
                             cameraHost = cameraHost,

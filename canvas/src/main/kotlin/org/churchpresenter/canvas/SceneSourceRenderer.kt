@@ -292,7 +292,7 @@ private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier
  * angle its own centre sits at. That is also why the line cannot wrap — newlines become spaces.
  */
 @Composable
-internal fun CurvedText(
+fun CurvedText(
     text: String,
     curve: Float,
     style: TextStyle,
@@ -1134,7 +1134,7 @@ internal fun findWindowBounds(windowTitle: String): Rectangle? =
  * [osName] is a parameter rather than read from `os.name` here so a test can ask for each platform's
  * lookup without swapping the system property, which skiko latches JVM-wide.
  */
-internal fun windowBoundsFor(osName: String, windowTitle: String, run: CommandRunner): Rectangle? {
+fun windowBoundsFor(osName: String, windowTitle: String, run: CommandRunner): Rectangle? {
     return try {
         when {
             osName.contains("linux") -> linuxWindowBoundsFrom(windowTitle, run)
@@ -1154,7 +1154,7 @@ internal fun windowBoundsFor(osName: String, windowTitle: String, run: CommandRu
  * whose geometry comes back with a zero width or height is skipped rather than returned, so the walk
  * continues to the next candidate — a mapped-but-unrealised window reports exactly that.
  */
-internal fun linuxWindowBoundsFrom(title: String, run: CommandRunner): Rectangle? {
+fun linuxWindowBoundsFrom(title: String, run: CommandRunner): Rectangle? {
     val listOutput = run(listOf("xprop", "-root", "_NET_CLIENT_LIST_STACKING"), 0L).output
     val windowIds = Regex("0x[0-9a-fA-F]+").findAll(listOutput).map { it.value }.toList()
 
@@ -1177,7 +1177,7 @@ internal fun linuxWindowBoundsFrom(title: String, run: CommandRunner): Rectangle
  * `null` when the report carries no usable size, so the caller keeps looking rather than capturing an
  * empty rectangle.
  */
-internal fun parseXwininfoBounds(output: String): Rectangle? {
+fun parseXwininfoBounds(output: String): Rectangle? {
     var x = 0; var y = 0; var w = 0; var h = 0
     for (line in output.lines()) {
         val trimmed = line.trim()
@@ -1223,7 +1223,7 @@ internal fun macWindowBoundsScript(title: String): String = """
  * The script returns the four numbers on one comma-separated line, and anything else means no window
  * matched — an empty answer, or an error message osascript wrote to the stream instead.
  */
-internal fun macWindowBoundsFrom(title: String, run: CommandRunner): Rectangle? {
+fun macWindowBoundsFrom(title: String, run: CommandRunner): Rectangle? {
     val output = run(listOf("osascript", "-e", macWindowBoundsScript(title)), 0L).output.trim()
     val parts = output.split(",").mapNotNull { it.trim().toIntOrNull() }
     return if (parts.size == WINDOW_BOUNDS_FIELDS &&

@@ -348,7 +348,7 @@ object SharedCameraFrameCache {
      * whether the device opened at all, so an attempt that exits straight back out still carries
      * the reason it exited.
      */
-    internal suspend fun attemptCapture(command: List<String>, entry: CacheEntry): FfmpegAttempt? =
+    suspend fun attemptCapture(command: List<String>, entry: CacheEntry): FfmpegAttempt? =
         coroutineScope {
             // The source can be released or switched at any point from the moment the process
             // starts, and until streamFrames registers it nothing else knows it exists: release()
@@ -556,7 +556,7 @@ object SharedCameraFrameCache {
 }
 
 /** One camera's shared state: the frames on screen, why they stopped, and who is still watching. */
-internal class CacheEntry(
+class CacheEntry(
     val frame: MutableStateFlow<ImageBitmap?> = MutableStateFlow(null),
     val error: MutableStateFlow<CameraFailure?> = MutableStateFlow(null),
     var refCount: Int = 0,
@@ -572,7 +572,7 @@ internal class CacheEntry(
  * `System.err` and discard. A packaged `.app` has no stderr to print to, which is how 43 Sentry
  * warnings arrived carrying nothing but the fact of the failure.
  */
-internal class FfmpegAttempt(
+class FfmpegAttempt(
     val framesProduced: Boolean,
     val exitCode: Int,
     val stderrTail: List<String>,
@@ -677,7 +677,7 @@ internal fun deviceScheme(devicePath: String): String =
  * option, but two of them in one argv is a command nobody can read in a bug report. `-pixel_format`
  * has no counterpart in the requested args, so it is simply added.
  */
-internal fun applyCaptureOverride(requested: List<String>, override: CaptureOverride): List<String> {
+fun applyCaptureOverride(requested: List<String>, override: CaptureOverride): List<String> {
     if (override.useDeviceDefaults) return emptyList()
     val withoutFramerate = if (override.framerate == null) requested else buildList {
         var i = 0
@@ -775,7 +775,7 @@ internal fun bgraBytesToArgbPixels(frameBuf: ByteArray, pixelBuf: IntArray) {
  * ffmpeg on the computer, including the other camera sources' own processes and anything the
  * operator runs outside the app.
  */
-internal fun killFfmpegProcess(process: Process) {
+fun killFfmpegProcess(process: Process) {
     try {
         process.descendants().forEach { it.destroyForcibly() }
         if (System.getProperty("os.name", "").lowercase().contains("win")) {

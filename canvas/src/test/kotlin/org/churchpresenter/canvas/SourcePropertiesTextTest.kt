@@ -10,8 +10,6 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.recolor
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.uniquelyNamedFont
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.sharedui.utils.Utils
 import kotlin.test.Test

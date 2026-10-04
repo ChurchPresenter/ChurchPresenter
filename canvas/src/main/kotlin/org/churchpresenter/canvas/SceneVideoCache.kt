@@ -96,7 +96,7 @@ internal interface SceneVideoHandle {
  * not present in the test JVM. A constructor parameter, not the ad-hoc mutable `internal var` on a
  * singleton that AGENT.md rules out.
  */
-open class SceneVideoCache(
+open class SceneVideoCache internal constructor(
     private val openPlayer: (SceneVideoSpec) -> SceneVideoHandle?,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)

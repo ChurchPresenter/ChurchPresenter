@@ -26,7 +26,7 @@ import kotlin.test.assertTrue
 class CanvasTabAddSourceTest {
 
     /** The single source in the current scene, or null if the scene is empty. */
-    private fun soleSource(vm: org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel) =
+    private fun soleSource(vm: SceneViewModel) =
         vm.scenes.single().sources.singleOrNull()
 
     @Test

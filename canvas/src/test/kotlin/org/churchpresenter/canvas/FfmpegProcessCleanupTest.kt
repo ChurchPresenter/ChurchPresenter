@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.canvas
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -144,7 +144,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :companion-surface:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :canvas:detekt :companion-surface:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -552,6 +552,14 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.schedule == 'true' }}
         run: ./gradlew :schedule:jacocoTestCoverageVerification -x test
 
+      - name: Canvas tests
+        if: ${{ !cancelled() && steps.modules.outputs.canvas == 'true' }}
+        run: ./gradlew :canvas:test
+
+      - name: Canvas coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.canvas == 'true' }}
+        run: ./gradlew :canvas:jacocoTestCoverageVerification -x test
+
       - name: Companion Surface tests
         if: ${{ !cancelled() && steps.modules.outputs.companionsurface == 'true' }}
         run: ./gradlew :companion-surface:test
@@ -616,6 +624,7 @@ jobs:
               ("bible-tab", "Bible tab"),
               ("server", "Server"),
               ("schedule", "Schedule"),
+              ("canvas", "Canvas"),
               ("companion-surface", "Companion Surface"),
           ]
           ran = [(d, n) for d, n in MODULES if glob.glob(f"{d}/build/test-results/**/TEST-*.xml", recursive=True)]
@@ -816,5 +825,7 @@ jobs:
             server/build/test-results/
             schedule/build/reports/tests/
             schedule/build/test-results/
+            canvas/build/reports/tests/
+            canvas/build/test-results/
             companion-surface/build/reports/tests/
             companion-surface/build/test-results/

@@ -13,7 +13,7 @@ internal fun selectedCameraName(devices: List<CameraDevice>, source: SceneSource
             ?: if (source.devicePath.isNotEmpty()) source.devicePath else devices.first().displayName
     }
 
-internal fun cameraSourceOn(
+fun cameraSourceOn(
     source: SceneSource.CameraSource,
     device: CameraDevice
 ): SceneSource.CameraSource = source.copy(

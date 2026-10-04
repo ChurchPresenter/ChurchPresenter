@@ -1,6 +1,5 @@
 package org.churchpresenter.canvas
 
-import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
@@ -44,7 +43,6 @@ class DeckLinkManagerTest {
 
     @BeforeTest
     fun setUp() {
-        TestSingletons.latchToTestHome()
         realHome = System.getProperty("user.home")
         tempHome = Files.createTempDirectory("cp-decklink-test").toFile()
         System.setProperty("user.home", tempHome!!.absolutePath)

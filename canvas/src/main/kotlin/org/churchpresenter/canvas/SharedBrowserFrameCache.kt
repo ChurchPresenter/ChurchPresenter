@@ -806,7 +806,7 @@ object SharedBrowserFrameCache {
 }
 
 /** The three things a frame arriving on the CDP socket can turn out to be. */
-internal sealed interface CdpMessage {
+sealed interface CdpMessage {
     /** An answer to a command this end sent, identified by the id it was sent with. */
     data class Response(val id: Int, val result: JsonObject?, val error: JsonObject?) : CdpMessage
 
@@ -832,7 +832,7 @@ internal sealed interface CdpMessage {
  * callback thread, where an exception would take the connection down and freeze the source on its
  * last frame.
  */
-internal fun parseCdpMessage(text: String): CdpMessage {
+fun parseCdpMessage(text: String): CdpMessage {
     return try {
         val json = Json.parseToJsonElement(text).jsonObject
         val id = json["id"]?.jsonPrimitive?.intOrNull

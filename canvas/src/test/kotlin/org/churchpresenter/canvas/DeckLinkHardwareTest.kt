@@ -1,6 +1,5 @@
 package org.churchpresenter.canvas
 
-import org.churchpresenter.app.churchpresenter.TestSingletons
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -57,7 +56,6 @@ class DeckLinkHardwareTest {
     @BeforeTest
     fun setUp() {
         if (!HARDWARE_ENABLED) return
-        TestSingletons.latchToTestHome()
         realHome = System.getProperty("user.home")
         tempHome = Files.createTempDirectory("cp-decklink-hw").toFile()
         System.setProperty("user.home", tempHome!!.absolutePath)

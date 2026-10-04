@@ -13,10 +13,10 @@ import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.canvas.CANVAS_DUAL_LAYOUT_TAG
 import org.churchpresenter.canvas.CANVAS_SIZE_BUTTON_TAG
-import org.churchpresenter.app.churchpresenter.tabs.CanvasLabel
-import org.churchpresenter.app.churchpresenter.tabs.canvasButton
-import org.churchpresenter.app.churchpresenter.tabs.canvasButtonAt
-import org.churchpresenter.app.churchpresenter.tabs.canvasTab
+import org.churchpresenter.canvas.CanvasLabel
+import org.churchpresenter.canvas.canvasButton
+import org.churchpresenter.canvas.canvasButtonAt
+import org.churchpresenter.canvas.canvasTab
 import org.churchpresenter.canvas.SceneViewModel
 import java.awt.Color
 import java.awt.GradientPaint

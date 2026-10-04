@@ -1,5 +1,6 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.canvas
 
+import org.churchpresenter.canvas.X11WindowCapture
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertNull

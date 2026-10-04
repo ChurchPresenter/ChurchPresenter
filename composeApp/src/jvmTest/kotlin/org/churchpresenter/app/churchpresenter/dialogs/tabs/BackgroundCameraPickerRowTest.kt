@@ -16,8 +16,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.canvas.CameraDevice
 import org.churchpresenter.canvas.CameraHost
-import org.churchpresenter.app.churchpresenter.composables.OS_WITHOUT_ENUMERATOR
-import org.churchpresenter.app.churchpresenter.composables.withOsName
+import org.churchpresenter.app.churchpresenter.OS_WITHOUT_ENUMERATOR
+import org.churchpresenter.app.churchpresenter.withOsName
 import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.settings.BackgroundConfig
 import kotlin.test.Test

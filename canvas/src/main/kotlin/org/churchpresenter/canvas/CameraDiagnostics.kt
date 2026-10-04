@@ -258,7 +258,7 @@ private fun redactDeviceName(line: String, deviceName: String): String {
  * Empty means "let ffmpeg and the device negotiate", which is what every attempt used to do — and
  * kept doing, identically, five times over, after the device had already said no.
  */
-internal data class CaptureOverride(
+data class CaptureOverride(
     val pixelFormat: String? = null,
     val framerate: String? = null,
     /**

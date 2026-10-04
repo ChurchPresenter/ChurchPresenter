@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.canvas.PreviewShapePreset
 import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasAnyAncestor
