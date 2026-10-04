@@ -1,13 +1,13 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.presenter.LocalBandOutgoing
+import org.churchpresenter.presenter.LocalBandSongLineIndex
+import org.churchpresenter.presenter.LocalLottieBandClock
+import org.churchpresenter.presenter.LowerThirdLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import io.github.alexzhirkevich.compottie.LottieComposition
-import org.churchpresenter.app.churchpresenter.presenter.LocalBandOutgoing
-import org.churchpresenter.app.churchpresenter.presenter.LocalBandSongLineIndex
-import org.churchpresenter.app.churchpresenter.presenter.LocalLottieBandClock
-import org.churchpresenter.app.churchpresenter.presenter.LowerThirdLayout
 import org.churchpresenter.app.churchpresenter.presenter.OutputLayers
 import org.churchpresenter.app.churchpresenter.presenter.OutputSurface
 import org.churchpresenter.app.churchpresenter.presenter.OutputSurfaceKind

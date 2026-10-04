@@ -66,4 +66,11 @@ class IsNewerVersionTest {
         assertFalse(UpdateChecker.isNewerVersion("not-a-version", "26.1.0"))
         assertFalse(UpdateChecker.isNewerVersion("26.1.0", "26.1.0-beta"))
     }
+
+    @Test
+    fun `a version with fewer parts reads its missing parts as zero`() {
+        assertTrue(UpdateChecker.isNewerVersion("26.1.1", "26.1"))
+        assertFalse(UpdateChecker.isNewerVersion("26.1", "26.1.1"))
+        assertFalse(UpdateChecker.isNewerVersion("26.1", "26.1.0"), "26.1 and 26.1.0 are the same build")
+    }
 }

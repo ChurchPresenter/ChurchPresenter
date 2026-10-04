@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.server.InstanceLinkCommandFailure
 import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
@@ -9,7 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.canvas.DeckLinkManager
 import org.churchpresenter.settings.QuickBackground
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.CompanionSatelliteSettings
@@ -23,15 +24,14 @@ import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.theme.themeFromSettings
-import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkCommandFailure
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.bible.Bible
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.qa.QAManager
 import org.churchpresenter.obs.OBSWebSocketManager
-import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.InstanceLinkViewModel
+import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
+import org.churchpresenter.server.InstanceLinkViewModel
 import org.churchpresenter.stt.STTManager
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
@@ -94,7 +94,7 @@ internal class AppRootState(
     val mediaViewModel = MediaViewModel()
     var identifyingScreen by mutableStateOf(false)
     var theme by mutableStateOf(themeFromSettings(appSettings.theme))
-    val companionServer = CompanionServer()
+    val companionServer = CompanionServer(appVersion = BuildConfig.APP_VERSION)
     val qaManager = QAManager().also { companionServer.qaManager = it }
     val sttManager = STTManager()
     val obsManager = OBSWebSocketManager()

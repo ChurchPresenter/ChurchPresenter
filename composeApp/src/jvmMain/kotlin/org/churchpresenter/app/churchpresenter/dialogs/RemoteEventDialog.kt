@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.server.RemoteEvent
+import org.churchpresenter.server.RemoteEventType
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -53,7 +55,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
@@ -96,66 +97,6 @@ import org.churchpresenter.strings.generated.resources.remote_client_label
 import org.churchpresenter.strings.generated.resources.remote_queue_waiting_many
 import org.churchpresenter.strings.generated.resources.remote_queue_waiting_one
 import org.jetbrains.compose.resources.stringResource
-
-/**
- * Describes a pending remote API event waiting for user approval.
- */
-data class RemoteEvent(
-    val type: RemoteEventType,
-    val title: String,
-    val detail: String = "",
-    /** The value of the X-Device-Id header sent by the remote client. Empty if none provided. */
-    val clientId: String = "",
-    /** Human-readable label saved for this device. Empty if none has been set. */
-    val clientLabel: String = ""
-)
-
-enum class RemoteEventType {
-    ADD_TO_SCHEDULE,
-    REMOVE_FROM_SCHEDULE,
-    PROJECT,
-    PRESENTATION_CONNECT,
-    /** A phone asking to plan the calendar through the relay. */
-    CALENDAR_ENROLL,
-    PRESENT,    // instant: select_song_section / select_picture / select_slide / select_bible_verse
-    UPLOAD,     // instant: presentation or picture upload
-    CLEAR,      // instant: POST /api/clear
-    QA_ADD,
-    QA_EDIT,
-    QA_DELETE,
-    QA_APPROVE,
-    QA_DENY,
-    QA_DONE,
-    QA_DISPLAY,
-    QA_CLEAR_DISPLAY,
-    QA_ADMIN_CONNECT,
-    /** A tablet opening a Browser Source output's musician view, to transpose its chords. */
-    MUSICIAN_CONNECT,
-}
-
-/**
- * Persistent dialog shown when a remote API event arrives.
- * Shows the front-of-queue item and a badge with how many more are waiting.
- *
- *  - **Allow**               — execute this action and move to next in queue
- *  - **Allow for Session**   — execute this action and auto-approve all future requests from the same client this
- *    session
- *  - **Allow Permanently**   — execute and permanently remember this client as allowed (only shown when the client is
- *    not in any permanent list)
- *  - **Deny**                — reject this item, move to next in queue
- *  - **Block for Session**   — deny all queued items from this client for the rest of the session
- *  - **Block Permanently**   — deny and permanently remember this client as blocked
- */
-internal data class RemoteEventPresentation(
-    val actionLabel: String,
-    val typeIcon: ImageVector,
-    val typeAccent: Color,
-    val bodyTitle: String,
-    val remaining: Int,
-    val showAllowPermanently: Boolean,
-    val dialogTitle: String,
-    val dialogHeight: Dp,
-)
 
 @Composable
 internal fun resolveRemoteEventPresentation(
@@ -240,6 +181,19 @@ internal fun resolveRemoteEventPresentation(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Persistent dialog shown when a remote API event arrives.
+ * Shows the front-of-queue item and a badge with how many more are waiting.
+ *
+ *  - **Allow**               — execute this action and move to next in queue
+ *  - **Allow for Session**   — execute this action and auto-approve all future requests from the same client this
+ *    session
+ *  - **Allow Permanently**   — execute and permanently remember this client as allowed (only shown when the client is
+ *    not in any permanent list)
+ *  - **Deny**                — reject this item, move to next in queue
+ *  - **Block for Session**   — deny all queued items from this client for the rest of the session
+ *  - **Block Permanently**   — deny and permanently remember this client as blocked
+ */
 @Composable
 fun RemoteEventDialog(
     event: RemoteEvent?,

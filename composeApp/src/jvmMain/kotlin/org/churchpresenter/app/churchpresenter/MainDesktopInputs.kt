@@ -2,12 +2,12 @@ package org.churchpresenter.app.churchpresenter
 
 import kotlinx.coroutines.flow.Flow
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.server.InstanceLinkStatus
-import org.churchpresenter.app.churchpresenter.server.ScheduleItemDto
-import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
-import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
-import org.churchpresenter.app.churchpresenter.server.SongDetailDto
-import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.server.InstanceLinkStatus
+import org.churchpresenter.server.ScheduleItemDto
+import org.churchpresenter.server.SelectBibleVerseRequest
+import org.churchpresenter.server.SongCatalogResponse
+import org.churchpresenter.server.SongDetailDto
+import org.churchpresenter.server.TunnelStatus
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.calendar.ScheduleServiceLink
 import org.churchpresenter.calendar.model.UpcomingLoad

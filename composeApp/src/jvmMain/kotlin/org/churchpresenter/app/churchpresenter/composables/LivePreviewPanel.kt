@@ -1,7 +1,8 @@
 package org.churchpresenter.app.churchpresenter.composables
 
-import org.churchpresenter.app.churchpresenter.presenter.liveMerges
-import org.churchpresenter.app.churchpresenter.presenter.sizedAs
+import org.churchpresenter.canvas.DeckLinkManager
+import org.churchpresenter.canvas.liveMerges
+import org.churchpresenter.presenter.sizedAs
 import org.churchpresenter.strings.generated.resources.preview_merged_label
 import org.churchpresenter.strings.generated.resources.preview_bus_label
 import androidx.compose.animation.core.LinearEasing
@@ -95,7 +96,7 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.DevFlags
-import org.churchpresenter.app.churchpresenter.presenter.showsContentFor
+import org.churchpresenter.presenter.showsContentFor
 import org.churchpresenter.sharedui.utils.OutputKind
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.sharedui.utils.OutputSize

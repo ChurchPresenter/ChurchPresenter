@@ -28,9 +28,9 @@ import org.churchpresenter.strings.generated.resources.tab_dictionary
 import org.churchpresenter.strings.generated.resources.tab_qa
 import org.churchpresenter.strings.generated.resources.tab_stt
 import org.churchpresenter.dictionary.data.StrongsEntry
-import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
-import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
-import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
+import org.churchpresenter.dictionary.presenter.DictionaryPresenter
+import org.churchpresenter.qa.presenter.QAPresenter
+import org.churchpresenter.stt.presenter.STTPresenter
 import org.churchpresenter.media.presenter.SubtitleOverlay
 import org.churchpresenter.media.subtitles.SubtitleCue
 import org.churchpresenter.stt.STTSegment

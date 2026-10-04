@@ -42,15 +42,15 @@ import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
 import org.churchpresenter.settings.StageMonitorContentType
 import org.churchpresenter.settings.StageMonitorSettings
 import org.churchpresenter.settings.StageMonitorZoneStyle
-import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
-import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
-import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
+import org.churchpresenter.dictionary.presenter.DictionaryPresenter
+import org.churchpresenter.qa.presenter.QAPresenter
+import org.churchpresenter.canvas.ScenePresenter
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.songchords.ChordTransposer
 import org.churchpresenter.sharedui.utils.calculateAutoFitFontSize
 import org.churchpresenter.sharedui.utils.calculateChordChartFontSize
-import org.churchpresenter.app.churchpresenter.composables.ChordChart
+import org.churchpresenter.presenter.ChordChart
 import org.churchpresenter.media.composables.SoftwareVideoPlayer
 import org.churchpresenter.media.viewmodel.MediaViewModel
 

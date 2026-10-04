@@ -57,11 +57,11 @@ import kotlin.test.assertEquals
  *
  * Known gaps — what these tests do not reach, and why:
  *
- *  * **A successful Test Connection.** The button constructs an `AtemClient` against the typed host
- *    and calls `queryState()`; the connected path needs a real ATEM answering the Blackmagic UDP
- *    handshake, so the "Connected" status, the detected-video-mode line and the write-back of the
- *    detected slot/keyer counts are unreachable from here. The failure and in-flight paths are both
- *    driven — see `AtemSettingsTabConnectionTest`.
+ *  * **A Test Connection that fails on the wire.** The button constructs its own `AtemClient`, whose
+ *    5s receive window is the only thing that ends an attempt against a switcher that refuses or goes
+ *    silent, so the I/O and protocol failures cannot be reached in a unit test's time. The connected
+ *    path (against `FakeAtemSwitcher`), the in-flight state and the one failure that needs no network —
+ *    a port outside the legal range — are all driven; see `AtemSettingsTabConnectionTest`.
  */
 @OptIn(ExperimentalTestApi::class)
 internal fun atemTab(

@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
+import org.churchpresenter.presenter.LocalInMergedTile
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -82,7 +84,7 @@ internal fun LowerThirdCue(surface: OutputSurface) {
     LowerThirdPresenter(
         composition = composition,
         progress = { presenterManager.lottieProgress.value },
-        frame = presenterManager.lottieFrame.value,
+        frame = presenterManager.lottieFrame.value?.imageBitmap,
         groupsText = presenterManager.lottieGroupsText.value,
     )
 }

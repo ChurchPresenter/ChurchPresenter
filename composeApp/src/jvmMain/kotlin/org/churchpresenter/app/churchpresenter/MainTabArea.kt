@@ -38,17 +38,17 @@ import org.churchpresenter.strings.generated.resources.background
 import org.churchpresenter.icons.generated.resources.ic_settings
 import org.churchpresenter.strings.generated.resources.tab_visibility
 import org.churchpresenter.strings.generated.resources.tooltip_settings
-import org.churchpresenter.app.churchpresenter.composables.ToolbarKey
-import org.churchpresenter.app.churchpresenter.composables.ToolbarKeyStyle
+import org.churchpresenter.sharedui.composables.ToolbarKey
+import org.churchpresenter.sharedui.composables.ToolbarKeyStyle
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.bibletab.BibleTab
-import org.churchpresenter.app.churchpresenter.tabs.CompanionSurfaceTab
+import org.churchpresenter.companionsurface.CompanionSurfaceTab
 import org.churchpresenter.crosswordtab.CrosswordTab
 import org.churchpresenter.app.churchpresenter.tabs.AppSTTTab
 import org.churchpresenter.songs.SongsTab
 import org.churchpresenter.app.churchpresenter.tabs.AppSongEditor
 import org.churchpresenter.app.churchpresenter.tabs.recordSongWentLive
-import org.churchpresenter.app.churchpresenter.viewmodel.titleSlideSection
+import org.churchpresenter.presenter.titleSlideSection
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.app.churchpresenter.tabs.getStringName
@@ -58,6 +58,8 @@ import org.churchpresenter.theme.components.RaisedCheckbox
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.tabs.AppQATab
+
+
 
 private const val CONTENT_CROSSFADE_MS = 120
 private val TOOLBAR_KEY_SIZE = 40.dp

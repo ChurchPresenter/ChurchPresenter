@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.canvas.previewShapeLabel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -16,12 +17,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
 import org.churchpresenter.app.churchpresenter.composables.CheckerboardFill
-import org.churchpresenter.app.churchpresenter.presenter.ABOVE_BAND_OVERLAP_FRACTION
-import org.churchpresenter.app.churchpresenter.presenter.AboveBand
+import org.churchpresenter.presenter.ABOVE_BAND_OVERLAP_FRACTION
+import org.churchpresenter.presenter.AboveBand
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.presenter.backgroundBlurRadius
-import org.churchpresenter.app.churchpresenter.presenter.lowerThirdBandFraction
-import org.churchpresenter.app.churchpresenter.presenter.resolveAboveBand
+import org.churchpresenter.presenter.backgroundBlurRadius
+import org.churchpresenter.presenter.lowerThirdBandFraction
+import org.churchpresenter.presenter.resolveAboveBand
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.OutputProfile

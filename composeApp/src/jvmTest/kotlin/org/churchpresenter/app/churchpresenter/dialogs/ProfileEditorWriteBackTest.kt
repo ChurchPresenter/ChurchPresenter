@@ -17,7 +17,7 @@ import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.CustomizePane
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.railTag
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.segment
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings

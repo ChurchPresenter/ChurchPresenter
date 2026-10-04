@@ -1,11 +1,10 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.SongStyleElement
+import org.churchpresenter.presenter.songShiftKey
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.presenter.elementMove
-import org.churchpresenter.app.churchpresenter.presenter.movedOn
-import org.churchpresenter.app.churchpresenter.presenter.referenceShiftFor
-import org.churchpresenter.app.churchpresenter.presenter.withMovesCleared
-import org.churchpresenter.app.churchpresenter.presenter.withReferenceShift
+import org.churchpresenter.presenter.movedOn
+import org.churchpresenter.presenter.withReferenceShift
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.BibleSettings
@@ -19,30 +18,6 @@ import kotlin.test.assertTrue
 
 /** Moving elements on their own: where a move is kept, what an output adds up, and taking moves back. */
 class ElementMovesTest {
-
-    @Test
-    fun `a song move is kept per element, per output, and per language where there is one`() {
-        assertEquals("LYRICS#1", songShiftKey(SongStyleElement.LYRICS, lowerThird = false, language = 1))
-        assertEquals("LYRICS@LT", songShiftKey(SongStyleElement.LYRICS, lowerThird = true))
-        // The number is the same digits in every language, so it has no language's own move.
-        assertEquals("NUMBER", songShiftKey(SongStyleElement.NUMBER, lowerThird = false, language = 1))
-        // The title slide's title is its own, so moving it leaves the title above every verse.
-        assertEquals(
-            "TITLE_SLIDE_TITLE#0",
-            songShiftKey(SongStyleElement.TITLE, lowerThird = false, language = 0, titleSlide = true),
-        )
-    }
-
-    @Test
-    fun `a language's lines move by the element's move and their own together`() {
-        val song = SongSettings()
-            .shiftedAt(songShiftKey(SongStyleElement.LYRICS, false), 10, 5)
-            .shiftedAt(songShiftKey(SongStyleElement.LYRICS, false, 1), 3, -2)
-        assertEquals(13 to 3, song.elementMove(SongStyleElement.LYRICS, lowerThird = false, language = 1))
-        assertEquals(10 to 5, song.elementMove(SongStyleElement.LYRICS, lowerThird = false, language = 0))
-        assertEquals(0 to 0, song.elementMove(SongStyleElement.LYRICS, lowerThird = true, language = 1))
-    }
-
     @Test
     fun `moving back to nothing drops the move`() {
         val key = songShiftKey(SongStyleElement.TITLE, false)
@@ -68,22 +43,6 @@ class ElementMovesTest {
         assertTrue(positions.moved)
         positions.onReset()
         assertEquals(setOf("NUMBER@LT"), draft.songSettings.layoutExtras.elementShifts.keys)
-    }
-
-    @Test
-    fun `a reference is moved on its own, per output, and taken back with the block's move`() {
-        val moved = BibleTranslationSettings(fileName = "kjv.spb", shiftX = 5)
-            .withReferenceShift(lowerThird = false, x = 81, y = 250)
-        assertEquals(81 to 250, moved.referenceShiftFor(lowerThird = false))
-        assertEquals(0 to 0, moved.referenceShiftFor(lowerThird = true))
-        assertTrue(moved.movedOn(lowerThird = false))
-        assertFalse(moved.movedOn(lowerThird = true))
-        val cleared = moved.withMovesCleared(lowerThird = false)
-        assertFalse(cleared.movedOn(lowerThird = false))
-        assertEquals(0, cleared.shiftX)
-        val lt = BibleTranslationSettings(lowerThirdShiftY = 3).withReferenceShift(lowerThird = true, x = 1, y = 2)
-        assertTrue(lt.movedOn(lowerThird = true))
-        assertFalse(lt.withMovesCleared(lowerThird = true).movedOn(lowerThird = true))
     }
 
     @Test

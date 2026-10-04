@@ -139,4 +139,47 @@ class ScreenTargetsTest {
         assertFalse(hasDeckLinkInputConflict(left, scenes))
         assertFalse(hasDeckLinkInputConflict(none.copy(targetType = Constants.TARGET_TYPE_DECKLINK), scenes))
     }
+
+    private val oneEdgeOff = listOf<(DisplayOption) -> DisplayOption>(
+        { it.copy(boundsX = it.boundsX + 1) },
+        { it.copy(boundsY = it.boundsY + 1) },
+        { it.copy(boundsW = it.boundsW + 1) },
+        { it.copy(boundsH = it.boundsH + 1) },
+    )
+
+    @Test
+    fun `a stored screen that differs from every option in one edge is found by its index instead`() {
+        oneEdgeOff.forEach { nudge ->
+            val stored = showing(nudge(right))
+            assertEquals(right, currentPrimaryOption(options, stored))
+            assertEquals(right, currentKeyOption(options, ScreenAssignment().keyingTo(nudge(right))))
+        }
+    }
+
+    @Test
+    fun `a screen whose bounds differ in one edge is another screen, and keeps its owner`() {
+        oneEdgeOff.forEach { nudge ->
+            val other = showing(nudge(left)).keyingTo(nudge(left))
+            val projection = ProjectionSettings().withAssignment(1, other)
+
+            val primary = withPrimaryTarget(projection, 0, ScreenAssignment(), left, numScreens = 2)
+            assertEquals(other, primary.getAssignment(1), "picture: $other")
+
+            val key = withKeyTarget(projection, 0, ScreenAssignment(), left, numScreens = 2)
+            assertEquals(other, key.getAssignment(1), "key: $other")
+        }
+    }
+
+    @Test
+    fun `a DeckLink port is only claimed from a slot on that same port`() {
+        val onOtherPort = showing(port1).keyingTo(port1)
+        val onScreen = showing(port0).copy(targetType = Constants.TARGET_TYPE_SCREEN)
+            .keyingTo(port0).copy(keyTargetType = Constants.TARGET_TYPE_SCREEN)
+        val projection = ProjectionSettings().withAssignment(1, onOtherPort).withAssignment(2, onScreen)
+
+        val after = withKeyTarget(projection, 0, ScreenAssignment(), port0, numScreens = 3)
+
+        assertEquals(onOtherPort, after.getAssignment(1))
+        assertEquals(onScreen, after.getAssignment(2))
+    }
 }

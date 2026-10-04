@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import org.churchpresenter.app.churchpresenter.server.SongCatalogResponse
-import org.churchpresenter.app.churchpresenter.server.SongDetailDto
+import org.churchpresenter.server.SongCatalogResponse
+import org.churchpresenter.server.SongDetailDto
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.utils.Constants
 

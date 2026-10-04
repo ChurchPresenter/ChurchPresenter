@@ -20,9 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.canvas_decklink_device
-import org.churchpresenter.app.churchpresenter.composables.CameraDevice
-import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
-import org.churchpresenter.app.churchpresenter.composables.selectableCameras
+import org.churchpresenter.canvas.CameraDevice
+import org.churchpresenter.canvas.CameraDeviceCatalog
+import org.churchpresenter.canvas.selectableCameras
 import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType

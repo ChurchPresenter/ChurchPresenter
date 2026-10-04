@@ -1,5 +1,9 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.SongStyleElement
+import org.churchpresenter.presenter.SongStyleTarget
+import org.churchpresenter.presenter.chunkFor
+import org.churchpresenter.presenter.withChunk
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test

@@ -9,7 +9,7 @@ import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
 import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.tabs.AppAnnouncementsTab
-import org.churchpresenter.app.churchpresenter.tabs.CanvasTab
+import org.churchpresenter.canvas.CanvasTab
 import org.churchpresenter.dictionary.DictionaryTab
 import org.churchpresenter.app.churchpresenter.tabs.AppLowerThirdTab
 import org.churchpresenter.media.tabs.MediaTab
@@ -224,7 +224,11 @@ internal fun MainDesktopScope.CanvasTabPane() {
         modifier = Modifier.fillMaxSize(),
         appSettings = appSettings,
         onSettingsChange = onSettingsChange,
-        presenterManager = presenterManager,
+        onPresentScene = { scene ->
+            presenterManager.setActiveScene(scene)
+            presenterManager.setPresentingMode(Presenting.CANVAS)
+            presenterManager.setShowPresenterWindow(true)
+        },
         sceneViewModel = sceneViewModel,
         onAddToSchedule = { sceneId, sceneName ->
             currentScheduleActions.addScene(sceneId, sceneName)

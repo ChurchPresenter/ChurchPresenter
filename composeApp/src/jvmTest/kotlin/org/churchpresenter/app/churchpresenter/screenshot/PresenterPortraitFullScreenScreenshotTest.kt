@@ -41,18 +41,18 @@ import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.scene.SourceTransform
-import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
-import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
+import org.churchpresenter.announcements.presenter.AnnouncementsPresenter
+import org.churchpresenter.dictionary.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
-import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
+import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
 import org.churchpresenter.slides.presenter.PicturePresenter
 import org.churchpresenter.slides.presenter.PresentationPresenter
-import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
-import org.churchpresenter.app.churchpresenter.presenter.QAQRCodePresenter
-import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
-import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
-import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
-import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.qa.presenter.QAPresenter
+import org.churchpresenter.qa.presenter.QAQRCodePresenter
+import org.churchpresenter.stt.presenter.STTPresenter
+import org.churchpresenter.canvas.ScenePresenter
+import org.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.skia.Bitmap
 import java.awt.Color
@@ -1114,7 +1114,7 @@ class PresenterPortraitFullScreenScreenshotTest {
 
     @Test
     fun `an animated lower third`() = shoot("lower_third") {
-        LowerThirdPresenter(composition = lottieComposition(), progress = { 0.5f }, frame = solidFrame())
+        LowerThirdPresenter(composition = lottieComposition(), progress = { 0.5f }, frame = solidFrame().imageBitmap)
     }
 
     // ── Fixtures ────────────────────────────────────────────────────────────────────────────────

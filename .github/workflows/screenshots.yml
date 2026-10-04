@@ -11,7 +11,7 @@ name: Screenshots
 #   * reg-actions needs write access to pull requests and to the repository, which `test`
 #     deliberately does not have (`contents: read`).
 #
-# **The images ARE committed**, under each module's `screenshots/` (`composeApp`, `shared-ui`, `slides`, `media`, `songs`, `bible-tab`), so a reviewer can open and approve
+# **The images ARE committed**, under each module's `screenshots/` (`composeApp`, `shared-ui`, `slides`, `media`, `songs`, `bible-tab`, `schedule`, `companion-surface`, `canvas`, `presenter`), so a reviewer can open and approve
 # what is on screen rather than take the diff on trust. This job is a second, independent view of
 # the same thing: it records the branch's images and reg-actions diffs them against the base
 # branch's, which it keeps on a `reg_actions` branch of its own. Note the record step below
@@ -108,6 +108,10 @@ jobs:
           :media:recordRoborazziJvm --tests '*ScreenshotTest*'
           :songs:recordRoborazziJvm --tests '*ScreenshotTest*'
           :bible-tab:recordRoborazziJvm --tests '*ScreenshotTest*'
+          :schedule:recordRoborazziJvm --tests '*ScreenshotTest*'
+          :canvas:recordRoborazziJvm --tests '*ScreenshotTest*'
+          :presenter:recordRoborazziJvm --tests '*ScreenshotTest*'
+          :companion-surface:recordRoborazziJvm --tests '*ScreenshotTest*'
 
       # So the rendered set can be fetched without running Gradle locally, and the source the
       # website's screenshots should be taken from — not because the images are uncommitted (they
@@ -165,6 +169,38 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
+      - name: Upload the rendered schedule screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-schedule
+          path: schedule/screenshots
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload the rendered canvas screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-canvas
+          path: canvas/screenshots
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload the rendered presenter screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-presenter
+          path: presenter/screenshots
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload the rendered companion-surface screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-companion-surface
+          path: companion-surface/screenshots
+          retention-days: 30
+          if-no-files-found: error
+
       # Retina renders for the website's homepage only — the wiki and blog take the 1x capture
       # above regardless of screen density (see import-screenshots.mjs in ChurchPresenter-Website).
       # Limited to the classes behind the seven homepage images so this doesn't re-run the other
@@ -181,7 +217,7 @@ jobs:
             --tests '*AppPreviewQAScreenshotTest' \
             --tests '*AppPreviewPresentationScreenshotTest' \
             --tests '*AppPreviewMediaScreenshotTest' \
-            --tests '*ScheduleTabScreenshotTest'
+            --tests '*AppPreviewScheduleScreenshotTest'
 
       # Uploads the whole tree, same as the 1x artifact above — simpler than teasing out just the
       # seven changed files, and the website's importer only ever reads specific paths from this by
@@ -205,20 +241,24 @@ jobs:
             --tests '*AppPreviewQAScreenshotTest' \
             --tests '*AppPreviewPresentationScreenshotTest' \
             --tests '*AppPreviewMediaScreenshotTest' \
-            --tests '*ScheduleTabScreenshotTest'
+            --tests '*AppPreviewScheduleScreenshotTest'
 
       # reg-actions compares one directory, so every module's renders go into one tree: the app's at
       # its root, exactly as before, and each other module's under its own name. Never committed.
       - name: Gather every module's screenshots
         run: |
           rm -rf screenshots-compare
-          mkdir -p screenshots-compare/shared-ui screenshots-compare/slides screenshots-compare/media screenshots-compare/songs screenshots-compare/bible-tab
+          mkdir -p screenshots-compare/shared-ui screenshots-compare/slides screenshots-compare/media screenshots-compare/songs screenshots-compare/bible-tab screenshots-compare/schedule screenshots-compare/companion-surface screenshots-compare/canvas screenshots-compare/presenter
           cp -R composeApp/screenshots/. screenshots-compare/
           cp -R shared-ui/screenshots/. screenshots-compare/shared-ui/
           cp -R slides/screenshots/. screenshots-compare/slides/
           cp -R media/screenshots/. screenshots-compare/media/
           cp -R songs/screenshots/. screenshots-compare/songs/
           cp -R bible-tab/screenshots/. screenshots-compare/bible-tab/
+          cp -R schedule/screenshots/. screenshots-compare/schedule/
+          cp -R canvas/screenshots/. screenshots-compare/canvas/
+          cp -R presenter/screenshots/. screenshots-compare/presenter/
+          cp -R companion-surface/screenshots/. screenshots-compare/companion-surface/
 
       - name: Compare with the base branch
         uses: reg-viz/reg-actions@v3

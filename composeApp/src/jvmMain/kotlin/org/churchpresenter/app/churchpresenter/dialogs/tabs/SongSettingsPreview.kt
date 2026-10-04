@@ -1,13 +1,15 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.SongStyleTarget
+import org.churchpresenter.presenter.isLowerThird
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
-import org.churchpresenter.app.churchpresenter.presenter.textOnly
-import org.churchpresenter.app.churchpresenter.presenter.wholeOutputRegion
+import org.churchpresenter.presenter.textOnly
+import org.churchpresenter.presenter.wholeOutputRegion
 import org.churchpresenter.theme.AppShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -22,15 +24,15 @@ import org.churchpresenter.strings.generated.resources.bible_preview_full_screen
 import org.churchpresenter.strings.generated.resources.bible_preview_lower_third
 import org.churchpresenter.strings.generated.resources.song_preview_sample_title
 import org.churchpresenter.strings.generated.resources.song_preview_title_slide
-import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
-import org.churchpresenter.app.churchpresenter.usesBibleLottieBand
-import org.churchpresenter.app.churchpresenter.viewmodel.titleSlideSection
+import org.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.presenter.usesBibleLottieBand
+import org.churchpresenter.presenter.titleSlideSection
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.core.models.songs.withSecondaryLines
-import org.churchpresenter.app.churchpresenter.presenter.LocalTransparentBlanking
+import org.churchpresenter.presenter.LocalTransparentBlanking
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongSettings
 import org.jetbrains.compose.resources.stringResource

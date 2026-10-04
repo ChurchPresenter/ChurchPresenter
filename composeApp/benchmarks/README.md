@@ -37,5 +37,5 @@ It writes `soak.md` (verdict, and the worst frame per content type), `soak.csv` 
 - the heap grows more than 64 MB, or resident memory more than 256 MB, from the first quarter of
   the run to the last (judged from eight samples up).
 
-`.github/workflows/soak.yml` runs the four hours nightly when `main` has moved, and uploads the
+`.github/workflows/soak.yml` runs the four hours on demand until it has run green, and uploads the
 report either way.

@@ -9,13 +9,13 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.dialogs.CalendarInviteFailedContent
-import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
+import org.churchpresenter.server.CalendarSyncService
 import java.time.Instant
 import java.time.Duration
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsNotEnabled
-import org.churchpresenter.app.churchpresenter.server.RelayEndpoints
-import org.churchpresenter.app.churchpresenter.server.CalendarSyncStatus
+import org.churchpresenter.server.RelayEndpoints
+import org.churchpresenter.server.CalendarSyncStatus
 import org.churchpresenter.calendar.sync.PairedDevice
 import org.churchpresenter.calendar.sync.RelayReply
 import org.churchpresenter.calendar.sync.RelayTransport

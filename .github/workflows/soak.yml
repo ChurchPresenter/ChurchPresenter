@@ -1,15 +1,15 @@
 name: Soak
 
-# Runs a scripted four-hour service on one off-screen output every night and fails on a leak or a
-# stall -- see ServiceSoak. The report (summary, per-minute CSV and a memory/frame-time chart) is
+# Runs a scripted four-hour service on one off-screen output and fails on a leak or a stall --
+# see ServiceSoak. The report (summary, per-minute CSV and a memory/frame-time chart) is
 # uploaded whether it passes or not, so a slow drift can be read before it fails.
 #
-# A night on which `main` has not moved since the last successful soak is skipped; a manual
-# dispatch always runs, and can ask for a shorter run.
+# On demand only, until it has run green: a manual dispatch always runs, and can ask for a
+# shorter run. To run it every night, add a `schedule:` trigger under `on:` (cron `0 5 * * *`,
+# after the nightly build); the first step then skips a night on which `main` has not moved
+# since the last successful soak.
 
 on:
-  schedule:
-    - cron: '0 5 * * *'   # 05:00 UTC daily, after the nightly build
   workflow_dispatch:
     inputs:
       minutes:

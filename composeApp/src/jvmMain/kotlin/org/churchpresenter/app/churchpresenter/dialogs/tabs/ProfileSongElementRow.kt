@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.SongStyleElement
+import org.churchpresenter.presenter.SongStyleTarget
 import androidx.compose.runtime.Composable
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile

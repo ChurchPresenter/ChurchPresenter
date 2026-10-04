@@ -1,10 +1,10 @@
 package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.settings.InstanceLinkSettings
-import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
+import org.churchpresenter.server.RemoteEventType
 import org.churchpresenter.settings.OBSSettings
 import org.churchpresenter.settings.ServerSettings
-import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.server.TunnelStatus
 
 /**
  * The key remote callers must present, which is none at all when the operator has not switched key

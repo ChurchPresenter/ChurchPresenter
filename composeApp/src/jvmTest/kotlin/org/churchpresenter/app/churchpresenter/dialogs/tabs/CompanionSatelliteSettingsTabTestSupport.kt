@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,7 +46,7 @@ import kotlin.test.assertEquals
 @OptIn(ExperimentalTestApi::class)
 internal fun satelliteTab(
     initial: AppSettings = AppSettings(),
-    viewModel: org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel? = null,
+    viewModel: CompanionSatelliteViewModel? = null,
     block: ComposeUiTest.(get: () -> AppSettings) -> Unit,
 ) = runComposeUiTest {
     var current = initial

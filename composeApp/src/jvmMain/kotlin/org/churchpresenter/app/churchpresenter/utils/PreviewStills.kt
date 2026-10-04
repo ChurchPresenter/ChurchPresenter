@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
-import org.churchpresenter.app.churchpresenter.composables.SharedCameraFrameCache
+import org.churchpresenter.canvas.SharedCameraFrameCache
 import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.core.models.camera.asCameraSource
 import java.io.File

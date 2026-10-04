@@ -50,7 +50,7 @@ import org.churchpresenter.strings.generated.resources.profile_margins
 import org.churchpresenter.strings.generated.resources.profile_ms
 import org.churchpresenter.strings.generated.resources.profile_text_size_unit
 import org.churchpresenter.app.churchpresenter.dialogs.DisplayTextStyle
-import org.churchpresenter.app.churchpresenter.presenter.LAYOUT_INTERLEAVED
+import org.churchpresenter.stt.presenter.LAYOUT_INTERLEAVED
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.CAPTION_BOX_BAND
 import org.churchpresenter.settings.CAPTION_BOX_CARD

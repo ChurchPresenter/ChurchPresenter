@@ -1,8 +1,15 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.styleElement
+import org.churchpresenter.presenter.isCredit
+import org.churchpresenter.presenter.SongStyleElement
+import org.churchpresenter.presenter.SongStyleTarget
+import org.churchpresenter.presenter.TITLE_SLIDE_ELEMENTS
+import org.churchpresenter.presenter.onTitleSlide
+import org.churchpresenter.presenter.songShiftKey
 import org.churchpresenter.sharedui.presenter.PresentedBlock
-import org.churchpresenter.app.churchpresenter.presenter.songBoxKey
-import org.churchpresenter.app.churchpresenter.presenter.titleSlideBoxKey
+import org.churchpresenter.presenter.songBoxKey
+import org.churchpresenter.presenter.titleSlideBoxKey
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.SongSettings

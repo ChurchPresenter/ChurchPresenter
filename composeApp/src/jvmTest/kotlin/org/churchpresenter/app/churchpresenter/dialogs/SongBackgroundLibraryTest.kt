@@ -20,7 +20,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.media.data.StockMediaClient
-import org.churchpresenter.app.churchpresenter.composables.CameraDevice
+import org.churchpresenter.canvas.CameraDevice
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import kotlin.test.Test

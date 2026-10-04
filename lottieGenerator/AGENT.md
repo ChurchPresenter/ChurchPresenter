@@ -27,7 +27,7 @@ The app passes `outputDir` and the canvas size and gets an `onFileSaved` callbac
 `embedded = true` it stays inside the app's window chrome. Keep those entry points public and their
 parameters defaulted — they are the whole API surface.
 
-The app renders the generated files itself (`presenter/LowerThirdPresenter.kt`,
+The app renders the generated files itself (`:lower-third`'s `LowerThirdPresenter`,
 `LowerThirdOffscreenRenderer`, `LottieFrameStream`); nothing in this module is involved at
 presentation time.
 

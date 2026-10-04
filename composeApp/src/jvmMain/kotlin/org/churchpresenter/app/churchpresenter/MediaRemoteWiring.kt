@@ -1,11 +1,11 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.server.broadcastMediaState
-import org.churchpresenter.app.churchpresenter.server.MediaPlaybackState
+import org.churchpresenter.server.broadcastMediaState
+import org.churchpresenter.server.MediaPlaybackState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.delay
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 

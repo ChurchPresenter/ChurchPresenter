@@ -1,5 +1,24 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.presenter.LocalBandOutgoing
+import org.churchpresenter.presenter.LocalBandSongLineIndex
+import org.churchpresenter.presenter.LocalLottieBandClock
+import org.churchpresenter.presenter.LocalTransparentBlanking
+import org.churchpresenter.presenter.LowerThirdLayout
+import org.churchpresenter.presenter.MergedTile
+import org.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.presenter.showsContentFor
+import org.churchpresenter.presenter.textOnly
+import org.churchpresenter.presenter.wholeOutputRegion
+import org.churchpresenter.canvas.ScenePresenter
+import org.churchpresenter.canvas.liveMerges
+import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
+import org.churchpresenter.dictionary.presenter.DictionaryPresenter
+import org.churchpresenter.announcements.presenter.AnnouncementsPresenter
+import org.churchpresenter.stt.presenter.STTPresenter
+import org.churchpresenter.qa.presenter.QAQRCodePresenter
+import org.churchpresenter.qa.presenter.QAPresenter
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager

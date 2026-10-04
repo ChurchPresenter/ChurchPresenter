@@ -48,7 +48,7 @@ import org.churchpresenter.strings.generated.resources.projection_decklink_io_co
 import org.churchpresenter.strings.generated.resources.projection_simulate_outputs
 import org.churchpresenter.strings.generated.resources.projection_target_display
 import org.churchpresenter.strings.generated.resources.screen
-import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.canvas.DeckLinkManager
 import org.churchpresenter.sharedui.composables.NumberSettingsTextField
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource

@@ -134,6 +134,27 @@ include(":songs")
 // :composeApp, which hands it the live output, the detection engine's status and statistics.
 include(":bible-tab")
 
+// The companion server and Instance Link: the Ktor REST/WebSocket API phones and other instances
+// use, the tunnel, SSL and calendar sync. Depended on by :composeApp, which applies what remote
+// clients ask for to the live output.
+include(":server")
+
+// The Schedule tab and ScheduleViewModel: the running order, its rows, and the .schedule files it
+// opens and saves. Depended on by :composeApp, which hands it the Planning Center import.
+include(":schedule")
+
+// The Canvas tab and SceneViewModel, the scene renderer, and the capture sources it draws: cameras,
+// screen and window capture, NDI and OMT input, DeckLink. Depended on by :composeApp.
+include(":canvas")
+
+// What the song and Bible outputs draw: the slides, their looks and layouts, the backgrounds and the
+// Lottie bands. Depended on by :composeApp, which keeps the windows and the off-screen outputs.
+include(":presenter")
+
+// The Companion Surface tab and CompanionSatelliteViewModel: the Compose face of
+// :companion-satellite, which stays free of any UI toolkit. Depended on by :composeApp.
+include(":companion-surface")
+
 // The OBS Studio integration: the obs-websocket client, the scene each content type switches to,
 // and the settings page. Depended on by :composeApp.
 include(":obs")

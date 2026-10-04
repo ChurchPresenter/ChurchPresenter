@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
-import org.churchpresenter.app.churchpresenter.composables.CameraDevice
+import org.churchpresenter.canvas.CameraDevice
 import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType

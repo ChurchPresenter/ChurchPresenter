@@ -39,7 +39,7 @@ import org.churchpresenter.strings.generated.resources.profile_merge_switch
 import org.churchpresenter.strings.generated.resources.profile_merge_tiled_note
 import org.churchpresenter.strings.generated.resources.profile_merge_too_few
 import org.churchpresenter.strings.generated.resources.profile_merge_unavailable
-import org.churchpresenter.app.churchpresenter.presenter.deckLinkModeSize
+import org.churchpresenter.canvas.deckLinkModeSize
 import org.churchpresenter.app.churchpresenter.utils.isMacOs
 import org.churchpresenter.settings.MergeKind
 import org.churchpresenter.settings.MergeMember

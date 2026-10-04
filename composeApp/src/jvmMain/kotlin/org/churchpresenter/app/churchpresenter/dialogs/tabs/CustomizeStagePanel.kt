@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.BibleStyleTarget
+import org.churchpresenter.presenter.SongStyleTarget
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -16,8 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.composables.BackgroundConfigFill
-import org.churchpresenter.app.churchpresenter.presenter.BibleLottieStillFrame
-import org.churchpresenter.app.churchpresenter.presenter.resolveAboveBand
+import org.churchpresenter.presenter.BibleLottieStillFrame
+import org.churchpresenter.presenter.resolveAboveBand
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.OutputProfile

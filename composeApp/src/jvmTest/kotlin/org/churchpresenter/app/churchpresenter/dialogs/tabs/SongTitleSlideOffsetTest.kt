@@ -1,5 +1,10 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.SongStyleElement
+import org.churchpresenter.presenter.SongStyleTarget
+import org.churchpresenter.presenter.titleSlideOffset
+import org.churchpresenter.presenter.titleSlideOffsetTag
+import org.churchpresenter.presenter.withTitleSlideOffset
 import org.churchpresenter.settings.ElementOffset
 import org.churchpresenter.settings.SongSettings
 import kotlin.test.Test

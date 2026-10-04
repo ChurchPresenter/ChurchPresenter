@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.dialogs.RemoteEvent
-import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
+import org.churchpresenter.server.RemoteEvent
+import org.churchpresenter.server.RemoteEventType
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
 import org.churchpresenter.app.churchpresenter.utils.UpdateInfo

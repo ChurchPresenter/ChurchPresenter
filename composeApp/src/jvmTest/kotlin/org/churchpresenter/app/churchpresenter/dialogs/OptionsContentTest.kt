@@ -34,7 +34,7 @@ import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.obs.OBSWebSocketManager
@@ -199,6 +199,13 @@ class OptionsContentTest {
     fun `an out-of-range initialTab is coerced onto the last real tab`() = dialog(initialTab = 999) {
         tab("Companion Satellite").assertIsSelected()
     }
+
+    /** With the OBS tab present Companion Satellite is one place further along, and still the last. */
+    @Test
+    fun `with an obs manager the last tab is still Companion Satellite`() =
+        dialog(initialTab = 999, obsManager = OBSWebSocketManager()) {
+            tab("Companion Satellite").assertIsSelected()
+        }
 
     @Test
     fun `Cancel dismisses without saving`() = dialog { result ->
@@ -380,9 +387,12 @@ class OptionsContentTest {
                 companionServer = CompanionServer(),
                 remoteClientManager = RemoteClientManager(),
                 onDismiss = {},
+                calendarSync = null,
                 onSave = {},
                 onIdentifyScreen = {},
                 onIdentifyBrowserSource = {},
+                onIdentifyNdi = {},
+                onIdentifyOmt = {},
                 scenes = emptyList(),
                 obsManager = null,
                 companionSatelliteViewModel = null,
@@ -402,9 +412,12 @@ class OptionsContentTest {
                 companionServer = CompanionServer(),
                 remoteClientManager = RemoteClientManager(),
                 onDismiss = {},
+                calendarSync = null,
                 onSave = {},
                 onIdentifyScreen = {},
                 onIdentifyBrowserSource = {},
+                onIdentifyNdi = {},
+                onIdentifyOmt = {},
                 scenes = emptyList(),
                 obsManager = null,
                 companionSatelliteViewModel = null,

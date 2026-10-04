@@ -11,11 +11,11 @@ import org.churchpresenter.bibletab.BibleViewModel
 import org.churchpresenter.dictionary.DictionaryViewModel
 import org.churchpresenter.slides.viewmodel.PicturesViewModel
 import org.churchpresenter.slides.viewmodel.PresentationViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
+import org.churchpresenter.canvas.SceneViewModel
+import org.churchpresenter.schedule.ScheduleViewModel
 import org.churchpresenter.songs.SongsViewModel
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogSide
-import org.churchpresenter.app.churchpresenter.utils.InstanceLinkLogger
+import org.churchpresenter.server.InstanceLinkLogSide
+import org.churchpresenter.server.InstanceLinkLogger
 import org.churchpresenter.bibletab.onEngineScripture
 import org.churchpresenter.bibletab.onEngineVersion
 import org.churchpresenter.settings.AppSettings

@@ -5,14 +5,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import io.github.alexzhirkevich.compottie.LottieComposition
-import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
-import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
-import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
-import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
-import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
-import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
-import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
-import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.announcements.presenter.AnnouncementsPresenter
+import org.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.canvas.ScenePresenter
+import org.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionStatus
@@ -22,6 +18,9 @@ import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.dictionary.presenter.DictionaryPresenter
+import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
+import org.churchpresenter.qa.presenter.QAPresenter
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
@@ -30,6 +29,7 @@ import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.slides.presenter.PicturePresenter
 import org.churchpresenter.stt.STTSegment
+import org.churchpresenter.stt.presenter.STTPresenter
 import java.awt.Color
 import java.awt.GradientPaint
 import java.awt.image.BufferedImage

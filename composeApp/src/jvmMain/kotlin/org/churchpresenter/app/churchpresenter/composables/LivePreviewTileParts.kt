@@ -1,14 +1,14 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.presenter.LocalBandOutgoing
+import org.churchpresenter.presenter.LocalBandSongLineIndex
+import org.churchpresenter.presenter.LocalLottieBandClock
+import org.churchpresenter.presenter.LowerThirdLayout
+import org.churchpresenter.presenter.showsContentFor
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.CompositionLocalProvider
-import org.churchpresenter.app.churchpresenter.presenter.LocalBandOutgoing
-import org.churchpresenter.app.churchpresenter.presenter.LocalBandSongLineIndex
-import org.churchpresenter.app.churchpresenter.presenter.LocalLottieBandClock
-import org.churchpresenter.app.churchpresenter.presenter.LowerThirdLayout
 import org.churchpresenter.app.churchpresenter.presenter.OverlayModes
-import org.churchpresenter.app.churchpresenter.presenter.showsContentFor
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

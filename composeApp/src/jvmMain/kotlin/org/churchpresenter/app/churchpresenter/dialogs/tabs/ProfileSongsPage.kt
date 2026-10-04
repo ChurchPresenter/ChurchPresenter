@@ -1,5 +1,13 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.styleElement
+import org.churchpresenter.presenter.withElementStyle
+import org.churchpresenter.presenter.elementStyle
+import org.churchpresenter.presenter.SongStyleElement
+import org.churchpresenter.presenter.SongStyleTarget
+import org.churchpresenter.presenter.TITLE_SLIDE_ELEMENTS
+import org.churchpresenter.presenter.hasAutoFit
+import org.churchpresenter.presenter.songShiftKey
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue

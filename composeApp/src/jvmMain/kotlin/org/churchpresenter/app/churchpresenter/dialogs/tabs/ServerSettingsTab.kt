@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import org.churchpresenter.app.churchpresenter.server.updateApiKey
-import org.churchpresenter.app.churchpresenter.server.updateFileUploadEnabled
-import org.churchpresenter.app.churchpresenter.server.updateMaxMediaUploadMb
+import org.churchpresenter.server.updateApiKey
+import org.churchpresenter.server.updateFileUploadEnabled
+import org.churchpresenter.server.updateMaxMediaUploadMb
 import androidx.compose.material3.minimumInteractiveComponentSize
 import org.churchpresenter.theme.components.toggleRow
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -72,8 +72,8 @@ import org.churchpresenter.sharedui.composables.SettingsScrollbarGutter
 import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
-import org.churchpresenter.app.churchpresenter.server.CalendarSyncService
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.server.CalendarSyncService
+import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 import java.util.UUID

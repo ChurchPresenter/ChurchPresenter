@@ -1,16 +1,16 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.server.broadcastFreezeChange
-import org.churchpresenter.app.churchpresenter.server.broadcastSlideChange
-import org.churchpresenter.app.churchpresenter.server.clearPresentationState
-import org.churchpresenter.app.churchpresenter.server.getImageFile
-import org.churchpresenter.app.churchpresenter.server.updateBible
-import org.churchpresenter.app.churchpresenter.server.updateBibleFilePaths
-import org.churchpresenter.app.churchpresenter.server.updatePictures
-import org.churchpresenter.app.churchpresenter.server.updatePresentation
-import org.churchpresenter.app.churchpresenter.server.updateSchedule
-import org.churchpresenter.app.churchpresenter.server.updateSecondaryBibleFilePath
-import org.churchpresenter.app.churchpresenter.server.updateSongs
+import org.churchpresenter.server.broadcastFreezeChange
+import org.churchpresenter.server.broadcastSlideChange
+import org.churchpresenter.server.clearPresentationState
+import org.churchpresenter.server.getImageFile
+import org.churchpresenter.server.updateBible
+import org.churchpresenter.server.updateBibleFilePaths
+import org.churchpresenter.server.updatePictures
+import org.churchpresenter.server.updatePresentation
+import org.churchpresenter.server.updateSchedule
+import org.churchpresenter.server.updateSecondaryBibleFilePath
+import org.churchpresenter.server.updateSongs
 import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
@@ -24,7 +24,7 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
 import java.io.File
 import java.util.Locale
-import org.churchpresenter.app.churchpresenter.server.shouldUseRemoteContent
+import org.churchpresenter.app.churchpresenter.remote.shouldUseRemoteContent
 import org.churchpresenter.sharedui.utils.UrlOpener
 import org.churchpresenter.calendar.model.UpcomingLoad
 import org.churchpresenter.settings.InstanceLinkSettings

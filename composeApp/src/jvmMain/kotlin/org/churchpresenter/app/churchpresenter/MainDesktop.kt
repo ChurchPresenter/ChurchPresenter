@@ -14,7 +14,7 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.bibletab.VerseSequenceLog
 import org.churchpresenter.sharedui.utils.LocalShortcuts
-import org.churchpresenter.app.churchpresenter.viewmodel.CompanionSatelliteViewModel
+import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.qa.QAManager

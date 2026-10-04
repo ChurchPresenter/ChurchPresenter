@@ -1,5 +1,12 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.styleElement
+import org.churchpresenter.presenter.withElementStyle
+import org.churchpresenter.presenter.elementStyle
+import org.churchpresenter.presenter.BibleElementStyle
+import org.churchpresenter.presenter.BibleStyleElement
+import org.churchpresenter.presenter.BibleStyleTarget
+import org.churchpresenter.presenter.defaultElementStyle
 import org.churchpresenter.bibletab.LONG_VERSE_WORDS_MAX
 import org.churchpresenter.bibletab.LONG_VERSE_WORDS_MIN
 import org.churchpresenter.bibletab.LONG_VERSE_WORDS_STEP
@@ -30,11 +37,11 @@ import org.churchpresenter.strings.generated.resources.profile_split_words
 import org.churchpresenter.strings.generated.resources.profile_translation_divider
 import org.churchpresenter.strings.generated.resources.words_suffix
 import org.churchpresenter.sharedui.presenter.PresentedBlock
-import org.churchpresenter.app.churchpresenter.presenter.bibleBoxKey
-import org.churchpresenter.app.churchpresenter.presenter.movedOn
-import org.churchpresenter.app.churchpresenter.presenter.referenceShiftFor
-import org.churchpresenter.app.churchpresenter.presenter.withMovesCleared
-import org.churchpresenter.app.churchpresenter.presenter.withReferenceShift
+import org.churchpresenter.presenter.bibleBoxKey
+import org.churchpresenter.presenter.movedOn
+import org.churchpresenter.presenter.referenceShiftFor
+import org.churchpresenter.presenter.withMovesCleared
+import org.churchpresenter.presenter.withReferenceShift
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.bible.defaultTranslationAbbreviation
 import org.churchpresenter.settings.AppSettings

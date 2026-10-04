@@ -24,7 +24,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundSettings
-import org.churchpresenter.app.churchpresenter.presenter.LocalTransparentBlanking
+import org.churchpresenter.presenter.LocalTransparentBlanking
 import org.churchpresenter.settings.utils.Constants
 import java.awt.image.BufferedImage
 import java.io.File

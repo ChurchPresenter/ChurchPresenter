@@ -14,10 +14,10 @@ import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.composables.CameraDevice
-import org.churchpresenter.app.churchpresenter.composables.CameraHost
-import org.churchpresenter.app.churchpresenter.composables.OS_WITHOUT_ENUMERATOR
-import org.churchpresenter.app.churchpresenter.composables.withOsName
+import org.churchpresenter.canvas.CameraDevice
+import org.churchpresenter.canvas.CameraHost
+import org.churchpresenter.app.churchpresenter.OS_WITHOUT_ENUMERATOR
+import org.churchpresenter.app.churchpresenter.withOsName
 import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.settings.BackgroundConfig
 import kotlin.test.Test
@@ -72,5 +72,20 @@ class BackgroundCameraPickerRowTest {
     fun `with no cameras there is no dropdown`() = row(machine = host.copy(devices = emptyList())) { _ ->
         assertTrue(onAllNodesWithText("Studio Cam").fetchSemanticsNodes().isEmpty())
         onNodeWithText("Camera Device", ignoreCase = true).assertExists()
+    }
+
+    @Test
+    fun `a DeckLink card whose driver lists no inputs or modes offers neither`() {
+        val card = CameraDevice(
+            "UltraStudio", "decklink://0", "DeckLink: UltraStudio", isDeckLink = true, deckLinkIndex = 0,
+        )
+        val saved = CameraDeviceRef(
+            devicePath = card.path, deviceName = card.name, isDeckLink = true, deckLinkIndex = 0,
+        )
+        row(BackgroundConfig(camera = saved), machine = CameraHost(listOf(card), ffmpegAvailable = true)) { _ ->
+            onAllNodesWithText("DeckLink: UltraStudio").onLast().assertExists()
+            assertTrue(onAllNodesWithText("Input").fetchSemanticsNodes().isEmpty())
+            assertTrue(onAllNodesWithText("Format").fetchSemanticsNodes().isEmpty())
+        }
     }
 }

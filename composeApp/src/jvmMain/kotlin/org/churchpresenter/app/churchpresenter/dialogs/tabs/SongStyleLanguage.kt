@@ -1,5 +1,13 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.presenter.styleElement
+import org.churchpresenter.presenter.withElementStyle
+import org.churchpresenter.presenter.elementStyle
+import org.churchpresenter.presenter.SongElementStyle
+import org.churchpresenter.presenter.SongStyleElement
+import org.churchpresenter.presenter.SongStyleTarget
+import org.churchpresenter.presenter.defaultSongElementStyle
+import org.churchpresenter.presenter.translationElement
 import androidx.compose.runtime.Composable
 import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.settings.SongSettings

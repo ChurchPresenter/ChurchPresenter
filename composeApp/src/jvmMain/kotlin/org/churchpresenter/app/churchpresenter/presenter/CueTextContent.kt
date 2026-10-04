@@ -1,5 +1,17 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.presenter.textOnly
+import org.churchpresenter.presenter.BibleSlideBackground
+import org.churchpresenter.presenter.SongSlideBackground
+import org.churchpresenter.presenter.contentRegion
+import org.churchpresenter.presenter.wholeOutputRegion
+import org.churchpresenter.announcements.presenter.AnnouncementsPresenter
+import org.churchpresenter.qa.presenter.QAQRCodePresenter
+import org.churchpresenter.qa.presenter.QAPresenter
+import org.churchpresenter.stt.presenter.STTPresenter
+import org.churchpresenter.dictionary.presenter.DictionaryPresenter
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.churchpresenter.liveshow.BackgroundSource

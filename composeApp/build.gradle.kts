@@ -327,11 +327,16 @@ kotlin {
             implementation(projects.announcements)
             implementation(projects.songs)
             implementation(projects.bibleTab)
+            implementation(projects.server)
+            implementation(projects.schedule)
+            implementation(projects.canvas)
+            implementation(projects.presenter)
             implementation(projects.lowerThird)
             implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source
             // directory, wrapped by CompanionSatelliteViewModel.
             implementation(projects.companionSatellite)
+            implementation(projects.companionSurface)
             // The OBS Studio integration: client, scene mapping and settings page.
             implementation(projects.obs)
             // The layer model: layers, cues, program and preview.
@@ -396,8 +401,8 @@ kotlin {
             implementation(libs.vlcj)
             implementation(libs.jna)
             implementation(libs.jna.platform)
-            implementation("com.google.zxing:core:3.5.3")
-            implementation("com.google.zxing:javase:3.5.3")
+            implementation(libs.zxing.core)
+            implementation(libs.zxing.javase)
             // Socket.IO client for STT integration
             implementation(libs.socket.io.client)
             // JCEF — embedded Chromium browser for web presenter
@@ -465,7 +470,9 @@ dependencies {
     add("jvmTestImplementation", testFixtures(projects.announcements))
     add("jvmTestImplementation", testFixtures(projects.songs))
     add("jvmTestImplementation", testFixtures(projects.bibleTab))
+    add("jvmTestImplementation", testFixtures(projects.schedule))
     add("jvmTestImplementation", testFixtures(projects.lowerThird))
+    add("jvmTestImplementation", testFixtures(projects.presenter))
     // CrashReportSweep: the Bible tab and view-model failure tests exercise paths that really
     // write a crash report. It lives with :diagnostics because it exists for CrashReporter's own
     // design -- the report directory is resolved once per JVM and cannot be redirected after.
@@ -1009,9 +1016,8 @@ val renderBenchmarkClasses = "*.benchmark.RenderBenchmark"
 val soakTestClasses = "*.benchmark.ServiceSoak"
 
 val serialTestClasses = listOf(
-    "*AtemUploadTracedTest",
-    "*CompanionServerAtemKeyTest",
-    "*CompanionServerAtemUploadTest",
+    // The ATEM upload suites that used to lead this list moved to `:server`, whose `test` task forks
+    // once, so they are alone in their JVM there.
     // The suite that opens the ATEM upload dialog. Doing so renders a Lottie frame and encodes it for
     // the switcher behind 5s deadlines -- the upload button enabling, the dialog's rows composing, and
     // `waitForAtemPrepared` (`:lower-third`'s LowerThirdTabTestSupport.kt). That is real work against a
@@ -1115,7 +1121,7 @@ tasks.register<org.gradle.api.tasks.testing.Test>("renderBenchmark") {
 // A service run for hours on one off-screen output, failing on a leak or a stall -- see ServiceSoak.
 //   ./gradlew :composeApp:soakTest                    # four hours, report to build/reports/soak/
 //   ./gradlew :composeApp:soakTest -PsoakMinutes=10   # a short local run
-// Run nightly by .github/workflows/soak.yml; never part of `jvmTest` or `check`.
+// Run on demand by .github/workflows/soak.yml; never part of `jvmTest` or `check`.
 tasks.register<org.gradle.api.tasks.testing.Test>("soakTest") {
     group = "verification"
     description = "Runs a scripted service for hours on one off-screen output and fails on a leak or a stall."

@@ -55,10 +55,10 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 |------------------|---------------------------------------------------------------------|
 | `tabs/`          | UI only — one file per tab, no logic                                |
 | `viewmodel/`     | State + business logic; owns its own ViewModel, never passed around |
-| `presenter/`     | Output window rendering (what the audience sees), plus the off-screen outputs (`BrowserSourceVideoRenderer`, `NdiVideoRenderer`, `OmtVideoRenderer`) on the shared `ComposeScenePump` |
-| `server/`        | Ktor REST/WebSocket server, ATEM *bridge*, tunnel, SSL — the ATEM client is `:atem`, the PCO OAuth callback listener is `:planning-center` |
+| `presenter/`     | The off-screen outputs (`BrowserSourceVideoRenderer`, `NdiVideoRenderer`, `OmtVideoRenderer`, DeckLink) on the shared `ComposeScenePump` — what the song and Bible outputs draw is the `:presenter` module |
+| `remote/`        | What a remote client or an Instance Link primary asks for, applied to the live output, the schedule and statistics — the server itself is `:server` |
 | `data/`          | File I/O, database, song parsing, Bible data                        |
-| `models/`        | Only what needs the app: `PresetItems`, the two Companion UI states — `ShortcutAction` is `:shared-ui` |
+| `models/`        | Only what needs the app: `PresetItems` — `ShortcutAction` is `:shared-ui`, the Companion UI states `:companion-surface` |
 | `composables/`   | UI components with app or feature ties (SceneCanvas, LivePreviewPanel, etc.) — the shared ones are `:shared-ui`, the video player `:media` |
 | `dialogs/`       | All dialogs and settings dialog tabs                                |
 | `utils/`         | Stateless helpers (UpdateChecker, etc.) — the shared ones (AutoFit, screen bounds) are `:shared-ui`, crash reporting is `:diagnostics` |
@@ -66,7 +66,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 
 ```
 main.kt → MainDesktop.kt → tabs/* + PresenterManager → presenter/*
-                        ↘ CompanionServer (server/)
+                        ↘ CompanionServer (:server)
                         ↘ StageMonitorScreen.kt
 ```
 - `MainDesktop.kt` is the root composable; `Presenting` (in `:shared-ui`) is the live-content enum.
@@ -97,7 +97,7 @@ module-specific notes there, not here.**
 | `atem/`                | `:atem`                | The Blackmagic ATEM protocol client — UDP, state, keyers, media-pool upload       | [AGENT.md](atem/AGENT.md)                |
 | `ndi/`                 | `:ndi`                 | NDI in and out — runtime discovery, the send calls and the receive calls, behind one interface | [AGENT.md](ndi/AGENT.md)                 |
 | `omt/`                 | `:omt`                 | OMT (Open Media Transport) in and out, over the libomt the app bundles, behind one interface | [AGENT.md](omt/AGENT.md)                 |
-| `planning-center/`     | `:planning-center`     | The Planning Center Online client — OAuth, the Services REST calls, the callback  | [AGENT.md](planning-center/AGENT.md)     |
+| `planning-center/`     | `:planning-center`     | The Planning Center Online client — OAuth, the Services REST calls, the callback, the import window | [AGENT.md](planning-center/AGENT.md)     |
 | `bible-formats/`       | `:bible-formats`       | The `.spb` converters and the Bible download catalogues (eBible, Zefania, Beblia)  | [AGENT.md](bible-formats/AGENT.md)       |
 | `song-chords/`         | `:song-chords`         | The chord grammar songs are written in — parsing, transposition, chord-sheet import | [AGENT.md](song-chords/AGENT.md)         |
 | `bible/`               | `:bible`               | The Bible itself: a loaded `.spb` translation, its books, verses and search        | [AGENT.md](bible/AGENT.md)               |
@@ -116,6 +116,11 @@ module-specific notes there, not here.**
 | `lower-third/`         | `:lower-third`         | The Lower Third tab, its ATEM render cache and sequencer, and the bundled lottie fonts | [AGENT.md](lower-third/AGENT.md)         |
 | `songs/`               | `:songs`               | The Songs tab, `SongsViewModel` and the song library on disk                        | [AGENT.md](songs/AGENT.md)               |
 | `bible-tab/`           | `:bible-tab`           | The Bible tab, `BibleViewModel`, the cross references and the verse-sequence log     | [AGENT.md](bible-tab/AGENT.md)           |
+| `schedule/`            | `:schedule`            | The Schedule tab, `ScheduleViewModel` and the `.schedule` files                      | [AGENT.md](schedule/AGENT.md)            |
+| `canvas/`              | `:canvas`              | The Canvas tab, `SceneViewModel`, the scene renderer and its capture sources (cameras, screen, NDI/OMT in, DeckLink) | [AGENT.md](canvas/AGENT.md)              |
+| `presenter/`           | `:presenter`           | What the song and Bible outputs draw: slides, looks, layouts, backgrounds, the Lottie bands and the style models | [AGENT.md](presenter/AGENT.md)           |
+| `server/`              | `:server`              | The companion server and Instance Link: the Ktor API, tunnel, SSL, ATEM bridge, calendar sync | [AGENT.md](server/AGENT.md)              |
+| `companion-surface/`   | `:companion-surface`   | The Companion Surface tab and panels, and `CompanionSatelliteViewModel`             | [AGENT.md](companion-surface/AGENT.md)   |
 | `obs/`                 | `:obs`                 | The OBS Studio integration — the obs-websocket client, scene mapping and its settings page | [AGENT.md](obs/AGENT.md)                 |
 | `live-show/`           | `:live-show`           | The layer model — `Layer`, `Cue`, and `LiveShow`'s program and preview (see `docs/LAYER_MODEL.md`) | [AGENT.md](live-show/AGENT.md)           |
 
@@ -136,7 +141,7 @@ The JaCoCo wiring, `useJUnitPlatform()` and the six-counter floor (85% on all si
 module's build file carries only what differs, set **above everything else** in the file:
 - `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults; name only the
   counters that need a different number. `:converter`, `:companion-satellite`, `:bible-engine`,
-  `:presentation-engine` and `:slides` name two each; every other module names none.
+  `:presentation-engine`, `:slides` and `:canvas` name two each; every other module names none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**
@@ -169,7 +174,7 @@ only — measure with the excludes removed before quoting it.
 ./gradlew :composeApp:jacocoTestReport # coverage → build/reports/jacoco/jacocoTestReport/html/
 bash cleanup_check.sh                  # repo code-quality report
 ./gradlew :composeApp:renderBenchmark  # off-screen render times per content type, 1080p and 4K — see composeApp/benchmarks/
-./gradlew :composeApp:soakTest -PsoakMinutes=10  # a scripted service on one output; fails on a leak or stall (nightly: 240)
+./gradlew :composeApp:soakTest -PsoakMinutes=10  # a scripted service on one output; fails on a leak or stall (CI: 240, on demand until it has run green)
 
 bash test-changed.sh                   # ONLY the suites your change touches — seconds, not minutes
 bash test-changed.sh --dry-run         # print the selection and the gradle command, run nothing

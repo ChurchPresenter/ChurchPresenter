@@ -2,9 +2,9 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.settings.ResolvedMerge
 import io.github.alexzhirkevich.compottie.LottieComposition
-import org.churchpresenter.app.churchpresenter.presenter.MergedTile
-import org.churchpresenter.app.churchpresenter.presenter.liveMerges
-import org.churchpresenter.app.churchpresenter.presenter.mergeHostIndex
+import org.churchpresenter.presenter.MergedTile
+import org.churchpresenter.canvas.liveMerges
+import org.churchpresenter.presenter.mergeHostIndex
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
@@ -43,7 +43,7 @@ import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import java.awt.GraphicsDevice
 import java.awt.GraphicsEnvironment
 import kotlinx.coroutines.CancellationException
-import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.canvas.DeckLinkManager
 import org.churchpresenter.sharedui.composables.HideOutputWindowCursor
 import org.churchpresenter.sharedui.composables.LocalOutputCursorHidden
 import org.churchpresenter.sharedui.composables.hiddenOutputCursor
