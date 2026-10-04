@@ -11,15 +11,19 @@ The **layer model** of `docs/LAYER_MODEL.md`:
   `clear` and `clearAll`.
 
 A real Gradle module of this build: `include(":live-show")`, `implementation(projects.liveShow)`.
-`:composeApp` is its only consumer. It takes `:core-models` and `:settings` (the cues carry their
-models) and Compose's runtime for snapshot state, and nothing of `:composeApp`'s.
+`:composeApp` is its only consumer. It takes `:core-models` (the cues carry its models) and
+Compose's runtime for snapshot state, and nothing of `:composeApp`'s. A background cue names whose
+setting it is (`BackgroundSource`) rather than carrying settings, so each output resolves it against
+its own.
 
 ## Where the migration stands
 
-Steps 1 and 2 of the note's migration. `PresenterManager.program` is **derived** from the single
-live mode by `legacyProgram` in the app, so exactly one layer is set for any mode but none. Every
-output (windows, NDI/OMT/Browser Source, preview tiles) draws it through the app's `OutputLayers` and
-`CueContent`. `LiveShow` itself is not wired in until the content setters write cues.
+Steps 1 to 3 of the note's migration. `PresenterManager.program` is **derived** from the single
+live mode by `legacyProgram` in the app: one content layer for any mode but none, plus the background
+layer under Bible and songs. Every output (windows, NDI/OMT/Browser Source, preview tiles) draws it
+through the app's `OutputLayers` and `CueContent`; the full-screen background is drawn by the
+presenters' background-only twins (`SlideBackgrounds.kt`), and a lower third's band stays with its
+slide. `LiveShow` itself is not wired in until the content setters write cues.
 
 ## Package
 
