@@ -2,12 +2,14 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.models.Presenting
 import java.io.File
 
 /** The content that goes through Preview while preview mode is on; everything else still goes straight to air. */
-internal val CUEABLE_MODES = setOf(Presenting.PICTURES, Presenting.LOWER_THIRD, Presenting.ANNOUNCEMENTS)
+internal val CUEABLE_MODES =
+    setOf(Presenting.PICTURES, Presenting.LYRICS, Presenting.LOWER_THIRD, Presenting.ANNOUNCEMENTS)
 
 /**
  * The Preview bus: what is cued, not yet on air, and Take, which puts it on air.
@@ -17,7 +19,8 @@ internal val CUEABLE_MODES = setOf(Presenting.PICTURES, Presenting.LOWER_THIRD, 
  * the default -- nothing reaches it and every go-live goes straight to [program], as it always did.
  *
  * With it on, a **new item** goes to Preview and waits for [take]; **stepping** within the item
- * already on Program (the next picture in the same folder) still goes straight to air. Only
+ * already on Program (the next picture in the same folder, the next section of the song) still goes
+ * straight to air. Only
  * [CUEABLE_MODES] are cued; the rest still go live directly.
  */
 class PreviewBus internal constructor(private val program: PresenterManager) {
@@ -62,6 +65,8 @@ class PreviewBus internal constructor(private val program: PresenterManager) {
             mode == Presenting.ANNOUNCEMENTS && program.announcementTickerLive.value -> program.setPresentingMode(mode)
             manager.isLive(mode) -> Unit
             mode == Presenting.PICTURES && program.isLive(mode) -> Unit
+            // The song on air going live again -- a section of it double-clicked -- is a step.
+            mode == Presenting.LYRICS && songTarget === program -> program.setPresentingMode(mode)
             else -> manager.setPresentingMode(mode)
         }
     }
@@ -73,6 +78,28 @@ class PreviewBus internal constructor(private val program: PresenterManager) {
         program.isLive(Presenting.PICTURES) && sameFolder(path, program.selectedImagePath.value) -> program
         else -> manager
     }
+
+    /** Where the last push of a song went -- see [forSong]. */
+    private var songTarget: PresenterManager? = null
+
+    /**
+     * Where a push of [section]'s song goes. The Songs tab pushes whatever is selected, live or
+     * not: the song on air is stepped there, and any other song goes to Preview, where nothing
+     * shows it until it is cued.
+     */
+    internal fun forSong(section: LyricSection?): PresenterManager {
+        val target = when {
+            forNewItem(Presenting.LYRICS) === program -> program
+            program.isLive(Presenting.LYRICS) && songOf(section) == songOf(program.lyricSection.value) -> program
+            else -> manager
+        }
+        songTarget = target
+        return target
+    }
+
+    /** Where a song's section and line indexes go: wherever its sections went. */
+    internal val songStepTarget: PresenterManager
+        get() = songTarget?.takeIf { _enabled.value } ?: program
 
     /** Puts a lower third up, or cues it while preview mode is on. */
     fun showLowerThird(json: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long, name: String) {
@@ -114,11 +141,21 @@ class PreviewBus internal constructor(private val program: PresenterManager) {
                 manager.currentLowerThirdName.value,
             )
             Presenting.ANNOUNCEMENTS -> program.setAnnouncementText(manager.announcementText.value)
+            Presenting.LYRICS -> {
+                program.setAllLyricSections(manager.allLyricSections.value)
+                program.setSongDisplaySectionIndex(manager.songDisplaySectionIndex.value)
+                program.setSongDisplayLineIndex(manager.songDisplayLineIndex.value)
+                program.setLyricSection(manager.lyricSection.value)
+                songTarget = program
+            }
             else -> return
         }
         program.setPresentingMode(mode)
     }
 }
+
+/** Which song [section] is from, as far as telling one song from another goes. */
+private fun songOf(section: LyricSection?): Pair<Int, String>? = section?.let { it.songNumber to it.title }
 
 private fun sameFolder(a: String?, b: String?): Boolean =
     a != null && b != null && File(a).parentFile == File(b).parentFile

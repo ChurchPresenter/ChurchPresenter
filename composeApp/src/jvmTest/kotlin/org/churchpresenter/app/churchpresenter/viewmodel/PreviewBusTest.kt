@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.churchpresenter.core.models.presentation.AnimationType
+import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.models.Presenting
 import java.io.File
@@ -162,6 +163,100 @@ class PreviewBusTest {
         assertEquals(AnimationType.SLIDE_LEFT, preview.animationType.value)
         assertEquals(700, preview.transitionDuration.value)
         assertEquals(700, program.transitionDuration.value)
+    }
+
+    // ── Songs ───────────────────────────────────────────────────────────────────────────────────
+
+    private fun section(title: String, number: Int, index: Int) =
+        LyricSection(title = title, songNumber = number, labelName = "V${index + 1}", lines = listOf("$title $index"))
+
+    /** What the Songs tab pushes for [title]'s section [index], as its controller pushes it. */
+    private fun push(title: String, number: Int, index: Int = 0) {
+        val sections = List(3) { section(title, number, it) }
+        bus.forSong(sections.first()).setAllLyricSections(sections)
+        bus.songStepTarget.setSongDisplaySectionIndex(index)
+        bus.songStepTarget.setSongDisplayLineIndex(0)
+        bus.forSong(sections[index]).setLyricSection(sections[index])
+    }
+
+    private fun songOnAir(title: String = "Amazing Grace", number: Int = 1) {
+        push(title, number)
+        bus.present(Presenting.LYRICS)
+    }
+
+    @Test
+    fun `off, a song goes straight to air`() {
+        songOnAir()
+        assertEquals(Presenting.LYRICS, program.presentingMode.value)
+        assertEquals("Amazing Grace 0", program.lyricSection.value.lines.single())
+        assertFalse(preview.anythingLive)
+    }
+
+    @Test
+    fun `a song going live with nothing on air is cued`() {
+        on()
+        songOnAir()
+        assertTrue(bus.isCued(Presenting.LYRICS))
+        assertEquals("Amazing Grace 0", preview.lyricSection.value.lines.single())
+        assertEquals(Presenting.NONE, program.presentingMode.value)
+    }
+
+    @Test
+    fun `the next section of the song on air goes straight out, double-clicked or not`() {
+        songOnAir()
+        on()
+        push("Amazing Grace", 1, index = 2)
+        bus.present(Presenting.LYRICS)
+
+        assertEquals("Amazing Grace 2", program.lyricSection.value.lines.single())
+        assertEquals(2, program.songDisplaySectionIndex.value)
+        assertFalse(bus.anythingCued)
+    }
+
+    @Test
+    fun `another song is cued while the one on air stays up`() {
+        songOnAir()
+        on()
+        songOnAir("How Great Thou Art", 2)
+
+        assertTrue(bus.isCued(Presenting.LYRICS))
+        assertEquals("How Great Thou Art 0", preview.lyricSection.value.lines.single())
+        assertEquals("Amazing Grace 0", program.lyricSection.value.lines.single())
+    }
+
+    @Test
+    fun `browsing another song without going live leaves the air and Preview alone`() {
+        songOnAir()
+        on()
+        push("How Great Thou Art", 2, index = 1)
+        assertFalse(bus.anythingCued, "only going live cues it")
+        assertEquals("Amazing Grace 0", program.lyricSection.value.lines.single())
+    }
+
+    @Test
+    fun `Take puts the cued song on air, and its sections step there after`() {
+        songOnAir()
+        on()
+        songOnAir("How Great Thou Art", 2)
+        bus.take()
+
+        assertEquals("How Great Thou Art 0", program.lyricSection.value.lines.single())
+        assertEquals(3, program.allLyricSections.value.size)
+        assertEquals(0, program.songDisplaySectionIndex.value)
+        assertFalse(bus.anythingCued)
+
+        push("How Great Thou Art", 2, index = 1)
+        assertEquals("How Great Thou Art 1", program.lyricSection.value.lines.single())
+        assertEquals(1, program.songDisplaySectionIndex.value)
+        assertFalse(bus.anythingCued)
+    }
+
+    @Test
+    fun `off, a song's indexes go to Program whatever was pushed before`() {
+        on()
+        push("How Great Thou Art", 2)
+        bus.setEnabled(false)
+        assertSame(program, bus.songStepTarget)
     }
 
     // ── Take ────────────────────────────────────────────────────────────────────────────────────

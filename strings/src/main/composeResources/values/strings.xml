@@ -1784,7 +1784,7 @@
     <string name="overlay_end_clears_display">Clear the screen when a lower third or announcement ends</string>
     <string name="overlay_end_clears_display_hint">When a lower third or announcement finishes on its own, clear everything. Turn off to take down only the lower third or announcement; outputs that show it over the content keep the song, verse or slide under it</string>
     <string name="preview_mode">Preview mode</string>
-    <string name="preview_mode_hint">Going live with a new picture, lower third or announcement cues it on Preview first; Take puts it on air. Stepping through what is already on air still goes straight out</string>
+    <string name="preview_mode_hint">Going live with a new song, picture, lower third or announcement cues it on Preview first; Take puts it on air. Stepping through what is already on air still goes straight out</string>
     <string name="preview_bus_label">Preview</string>
     <string name="preview_take">Take</string>
     <string name="shortcut_description_take">Take: put what is on Preview on air</string>

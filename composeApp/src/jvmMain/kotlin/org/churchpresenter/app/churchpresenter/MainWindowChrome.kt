@@ -175,10 +175,11 @@ private fun MainWindowScope.liveOutputCallbacks(): LiveOutputCallbacks = with(ro
         // here. That put the words on screen behind the transition driver's
         // back, so the Lottie band animated a swap for text that had
         // already changed. Every mode now goes through the driver.
-        onSongItemSelected = { section -> presenterManager.setLyricSection(section) },
-        onAllSectionsChanged = { presenterManager.setAllLyricSections(it) },
-        onSectionIndexChanged = { presenterManager.setSongDisplaySectionIndex(it) },
-        onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
+        // Through the Preview bus: the song on air is stepped, another one cued -- see forSong.
+        onSongItemSelected = { section -> presenterManager.previewBus.forSong(section).setLyricSection(section) },
+        onAllSectionsChanged = { presenterManager.previewBus.forSong(it.firstOrNull()).setAllLyricSections(it) },
+        onSectionIndexChanged = { presenterManager.previewBus.songStepTarget.setSongDisplaySectionIndex(it) },
+        onLineIndexChanged = { presenterManager.previewBus.songStepTarget.setSongDisplayLineIndex(it) },
         presenting = { mode ->
             presenterManager.previewBus.present(mode)
             if (shouldShowPresenterWindowFor(mode)) {

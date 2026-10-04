@@ -105,7 +105,7 @@ data class ProjectionSettings(
     // announcement's last loop -- clear the whole display (on, as it always did) or take down only
     // that overlay and leave the slide under it.
     val overlayEndClearsDisplay: Boolean = true,
-    // Preview mode: a new picture, lower third or announcement is cued on Preview and goes on air
+    // Preview mode: a new song, picture, lower third or announcement is cued on Preview and goes on air
     // with Take, rather than going live straight away. Off, as it always was.
     val previewModeEnabled: Boolean = false,
     /**
