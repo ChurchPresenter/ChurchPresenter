@@ -52,6 +52,13 @@ which `:composeApp`'s dialog and settings suites use too (`testFixtures(projects
   `SongBackgroundPanelScreenshotTest` and `LottieBandScreenshotTest`; their images are under
   `profiles/screenshots/`.
 
+## Coverage floor
+
+Branches **79%** and complexity **78%**; the other four counters keep the shared 85%. What is left is
+mostly not untested behavior: the stock photo, local library and Lottie generator dialogs open real
+windows a headless test cannot, and Compose's per-value change checks on the rows' handlers. Raise
+the floors as any of that becomes reachable; never lower them without asking.
+
 ## Commands
 
 ```bash
