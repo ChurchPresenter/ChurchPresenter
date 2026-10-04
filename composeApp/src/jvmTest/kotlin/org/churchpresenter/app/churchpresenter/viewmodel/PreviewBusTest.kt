@@ -153,8 +153,8 @@ class PreviewBusTest {
         on()
         bus.present(Presenting.MEDIA)
         assertEquals(Presenting.MEDIA, program.presentingMode.value)
-        program.slidesOutput.setPresentingMode(Presenting.PRESENTATION)
-        assertEquals(Presenting.PRESENTATION, program.presentingMode.value)
+        bus.present(Presenting.WEBSITE)
+        assertEquals(Presenting.WEBSITE, program.presentingMode.value)
         assertFalse(bus.anythingCued)
     }
 
