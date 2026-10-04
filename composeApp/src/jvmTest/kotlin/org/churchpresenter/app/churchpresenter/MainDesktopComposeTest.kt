@@ -60,6 +60,7 @@ import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.showLowerThird
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO

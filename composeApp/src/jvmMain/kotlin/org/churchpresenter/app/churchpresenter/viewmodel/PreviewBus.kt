@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.core.models.bible.SelectedVerse
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.presentationengine.model.Deck
 import org.churchpresenter.settings.AppSettings
@@ -28,7 +29,7 @@ internal val CUEABLE_MODES =
  * in the folder, the next slide of the deck) still goes straight to air. Only
  * [CUEABLE_MODES] are cued; the rest still go live directly.
  */
-class PreviewBus internal constructor(private val program: PresenterManager) {
+class PreviewBus internal constructor(internal val program: PresenterManager) {
 
     /** What Preview shows. Nothing on air reads it. */
     val manager: PresenterManager by lazy { PresenterManager(showPresenterWindowInitially = false) }
@@ -91,6 +92,23 @@ class PreviewBus internal constructor(private val program: PresenterManager) {
      */
     internal var cuedPlayback: CuedPlayback? = null
 
+    /** What waits for an item cued on Preview to reach the air -- see [onAir]. */
+    private val waiting = mutableListOf<Waiting>()
+
+    /**
+     * Runs [action] -- a statistic, a duration row, an Instance Link project -- when the [mode] item
+     * it belongs to reaches the air: now, unless that item has just gone to Preview, and then on the
+     * Take that puts it on air. Taken or not, a cued item's waiting actions go when Preview empties.
+     */
+    fun onAir(mode: Presenting, action: () -> Unit) {
+        val cued = _enabled.value && when (mode) {
+            Presenting.LYRICS -> songTarget === manager
+            Presenting.BIBLE -> verseTarget === manager
+            else -> manager.isLive(mode)
+        }
+        if (cued) waiting += Waiting(mode, cueIdentity(mode, manager), action) else action()
+    }
+
     /** Where the last push of verses went -- see [forVerses]. */
     private var verseTarget: PresenterManager? = null
 
@@ -132,14 +150,6 @@ class PreviewBus internal constructor(private val program: PresenterManager) {
     internal val songStepTarget: PresenterManager
         get() = songTarget?.takeIf { _enabled.value } ?: program
 
-    /** Puts a lower third up, or cues it while preview mode is on. */
-    fun showLowerThird(json: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long, name: String) {
-        val target = forNewItem(Presenting.LOWER_THIRD)
-        target.setLottieContent(json, pauseAtFrame, pauseFrame, pauseDurationMs, name)
-        target.setPresentingMode(Presenting.LOWER_THIRD)
-        program.setShowPresenterWindow(true)
-    }
-
     /**
      * Puts what is cued on air -- the slide first, as going live with one takes Program's overlays
      * down, then each overlay in the order it was cued -- and empties Preview.
@@ -150,6 +160,10 @@ class PreviewBus internal constructor(private val program: PresenterManager) {
         if (slide != Presenting.NONE) putOnAir(slide, from = manager, to = program)
         manager.overlays.value.forEach { putOnAir(it, from = manager, to = program) }
         // What was taken is on air now, so its next verse or section is a step there.
+        // What waited for these items reaches the air with them; what waited for an item cued and
+        // then replaced on Preview does not.
+        val taken = (listOf(slide) + manager.overlays.value).associateWith { cueIdentity(it, manager) }
+        waiting.filter { it.mode in taken && taken[it.mode] == it.identity }.forEach { it.action() }
         if (slide == Presenting.BIBLE) verseTarget = program
         if (slide == Presenting.LYRICS) songTarget = program
         if (slide == Presenting.PRESENTATION) {
@@ -162,8 +176,44 @@ class PreviewBus internal constructor(private val program: PresenterManager) {
 
     /** Empties Preview. */
     fun clear() {
+        waiting.clear()
         if (manager.anythingLive) manager.setPresentingMode(Presenting.NONE)
     }
+}
+
+/** Puts a lower third up, or cues it while preview mode is on. */
+fun PreviewBus.showLowerThird(
+    json: String,
+    pauseAtFrame: Boolean,
+    pauseFrame: Float,
+    pauseDurationMs: Long,
+    name: String,
+) {
+    val target = forNewItem(Presenting.LOWER_THIRD)
+    target.setLottieContent(json, pauseAtFrame, pauseFrame, pauseDurationMs, name)
+    target.setPresentingMode(Presenting.LOWER_THIRD)
+    program.setShowPresenterWindow(true)
+}
+
+/** The content a schedule [item] puts on air, for [PreviewBus.onAir]; none for what is never cued. */
+internal fun cuedModeOf(item: ScheduleItem): Presenting = when (item) {
+    is ScheduleItem.SongItem -> Presenting.LYRICS
+    is ScheduleItem.BibleVerseItem -> Presenting.BIBLE
+    is ScheduleItem.PictureItem -> Presenting.PICTURES
+    is ScheduleItem.PresentationItem -> Presenting.PRESENTATION
+    else -> Presenting.NONE
+}
+
+/** An [action] waiting for the [mode] item with this [identity] to be taken to air. */
+private class Waiting(val mode: Presenting, val identity: Any?, val action: () -> Unit)
+
+/** Which item of [mode] [manager] holds: the song, the chapter, the folder or the deck. */
+private fun cueIdentity(mode: Presenting, manager: PresenterManager): Any? = when (mode) {
+    Presenting.LYRICS -> songOf(manager.lyricSection.value)
+    Presenting.BIBLE -> chapterOf(manager.selectedVerses.value.firstOrNull())
+    Presenting.PICTURES -> manager.selectedImagePath.value?.let { File(it).parentFile }
+    Presenting.PRESENTATION -> manager.liveSlide.value?.fileName
+    else -> mode
 }
 
 /** A slide whose animation [PreviewBus.take] starts on air. */

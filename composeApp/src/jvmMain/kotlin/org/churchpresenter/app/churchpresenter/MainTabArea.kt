@@ -238,7 +238,7 @@ private fun MainDesktopScope.BibleTabPane() {
         isPresenting = presentingMode == Presenting.BIBLE,
         bibleOutput = presenterManager,
         verseStatistics = statisticsManager,
-        onVerseWentLive = { recordBibleWentLive(appSettings) },
+        onVerseWentLive = { presenterManager.previewBus.onAir(Presenting.BIBLE) { recordBibleWentLive(appSettings) } },
         verseSequenceLog = verseSequenceLog,
         crossReferences = sharedCrossReferences,
         dialogDismissSignal = dialogDismissSignal,
@@ -255,9 +255,12 @@ private fun MainDesktopScope.SongsTabPane() {
         viewModel = songsViewModel,
         appSettings = appSettings,
         typicalSongSeconds = service.typicalSongSeconds,
+        // Counted when the song reaches the air: on Take, while preview mode cues it.
         onSongWentLive = { song ->
-            recordSongWentLive(song, appSettings, statisticsManager)
-            live.onRowWentLive(song.asDurationRow())
+            presenterManager.previewBus.onAir(Presenting.LYRICS) {
+                recordSongWentLive(song, appSettings, statisticsManager)
+                live.onRowWentLive(song.asDurationRow())
+            }
         },
         titleSlideFor = ::titleSlideSection,
         songEditor = { request -> AppSongEditor(request, theme, appSettings) },

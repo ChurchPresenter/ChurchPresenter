@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.viewmodel.cuedModeOf
 import org.churchpresenter.server.broadcastFreezeChange
 import org.churchpresenter.server.broadcastSlideChange
 import org.churchpresenter.server.clearPresentationState
@@ -359,7 +360,10 @@ private fun MainWindowScope.instanceLinkBridge(
         } else null,
         role = appSettings.instanceLink.role,
         sendProject = if (instanceLinkIsControllerConnected) {
-            { item -> instanceLinkViewModel.sendProject(item) }
+            // A row cued on Preview is projected on the primary when it is taken, not before.
+            { item ->
+                presenterManager.previewBus.onAir(cuedModeOf(item)) { instanceLinkViewModel.sendProject(item) }
+            }
         } else null,
         sendVerse = if (instanceLinkIsControllerConnected) {
             { bookName, chapter, verseNumber, verseText, verseRange ->

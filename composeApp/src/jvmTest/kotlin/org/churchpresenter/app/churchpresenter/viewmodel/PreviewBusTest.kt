@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.presentation.AnimationType
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.models.Presenting
@@ -312,6 +313,88 @@ class PreviewBusTest {
 
         versesOnAir(verse(book = "Romans", chapter = 8, number = 29))
         assertEquals(29, program.selectedVerses.value.single().verseNumber, "the taken chapter steps on air")
+    }
+
+    // ── What waits for the air ──────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `off, what waits for the air happens at once`() {
+        val ran = mutableListOf<String>()
+        push("Amazing Grace", 1)
+        bus.onAir(Presenting.LYRICS) { ran += "song" }
+        assertEquals(listOf("song"), ran)
+    }
+
+    @Test
+    fun `a cued song's statistics wait for Take`() {
+        on()
+        val ran = mutableListOf<String>()
+        push("Amazing Grace", 1)
+        bus.onAir(Presenting.LYRICS) { ran += "counted" }
+        bus.present(Presenting.LYRICS)
+        assertTrue(ran.isEmpty(), "not on air yet")
+        bus.take()
+        assertEquals(listOf("counted"), ran)
+    }
+
+    @Test
+    fun `a song cued and then replaced on Preview is never counted`() {
+        on()
+        val ran = mutableListOf<String>()
+        push("Amazing Grace", 1)
+        bus.onAir(Presenting.LYRICS) { ran += "Amazing Grace" }
+        push("How Great Thou Art", 2)
+        bus.onAir(Presenting.LYRICS) { ran += "How Great Thou Art" }
+        bus.present(Presenting.LYRICS)
+        bus.take()
+        assertEquals(listOf("How Great Thou Art"), ran)
+    }
+
+    @Test
+    fun `what waits goes when Preview is emptied without a Take`() {
+        on()
+        val ran = mutableListOf<String>()
+        bus.forVerses(listOf(verse())).setSelectedVerses(listOf(verse()))
+        bus.onAir(Presenting.BIBLE) { ran += "verse" }
+        bus.setEnabled(false)
+        bus.setEnabled(true)
+        versesOnAir(verse())
+        bus.take()
+        assertTrue(ran.isEmpty())
+    }
+
+    @Test
+    fun `a step of what is on air happens at once`() {
+        versesOnAir()
+        on()
+        val ran = mutableListOf<String>()
+        bus.forVerses(listOf(verse(number = 17))).setSelectedVerses(listOf(verse(number = 17)))
+        bus.onAir(Presenting.BIBLE) { ran += "verse" }
+        assertEquals(listOf("verse"), ran)
+    }
+
+    @Test
+    fun `cued pictures wait, and are matched by their folder`() {
+        on()
+        val ran = mutableListOf<String>()
+        program.slidesOutput.setSelectedImagePath(picture(folderA, "1.png"))
+        bus.onAir(Presenting.PICTURES) { ran += "pictures" }
+        bus.take()
+        assertEquals(listOf("pictures"), ran)
+    }
+
+    @Test
+    fun `a schedule row names the content it puts on air`() {
+        val song = ScheduleItem.SongItem(id = "s", songNumber = 1, title = "A", songbook = "B")
+        val verse = ScheduleItem.BibleVerseItem(id = "v", bookName = "John", chapter = 3, verseNumber = 16, verseText = "")
+        val pictures = ScheduleItem.PictureItem(id = "p", folderPath = "", folderName = "", imageCount = 0)
+        val deck = ScheduleItem.PresentationItem(id = "d", filePath = "", fileName = "", slideCount = 0, fileType = "pdf")
+        val label = ScheduleItem.LabelItem(id = "l", text = "Welcome", textColor = "", backgroundColor = "")
+        assertEquals(Presenting.LYRICS, cuedModeOf(song))
+        assertEquals(Presenting.BIBLE, cuedModeOf(verse))
+        assertEquals(Presenting.PICTURES, cuedModeOf(pictures))
+        assertEquals(Presenting.PRESENTATION, cuedModeOf(deck))
+        assertEquals(Presenting.NONE, cuedModeOf(label), "never cued")
     }
 
     // ── Take ────────────────────────────────────────────────────────────────────────────────────
