@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.canvas.DeckLinkManager
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.settings.utils.Constants

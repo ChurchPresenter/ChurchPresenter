@@ -30,7 +30,7 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.qa.presenter.QAPresenter
 import org.churchpresenter.qa.presenter.QAQRCodePresenter
 import org.churchpresenter.stt.presenter.STTPresenter
-import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
+import org.churchpresenter.canvas.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.web.presenter.WebsitePresenter
 import org.churchpresenter.sharedui.utils.contentScale

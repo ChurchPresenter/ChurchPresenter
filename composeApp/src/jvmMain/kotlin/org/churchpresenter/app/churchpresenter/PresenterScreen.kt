@@ -24,7 +24,7 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.core.models.camera.CameraDeviceRef
-import org.churchpresenter.app.churchpresenter.composables.CameraBackground
+import org.churchpresenter.canvas.CameraBackground
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.sharedui.composables.keySignal
 import org.churchpresenter.settings.AppSettings

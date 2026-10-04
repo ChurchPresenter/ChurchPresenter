@@ -58,7 +58,7 @@ import kotlin.coroutines.CoroutineContext
 import org.churchpresenter.media.data.StockMediaClient
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
-import org.churchpresenter.app.churchpresenter.composables.CameraDevice
+import org.churchpresenter.canvas.CameraDevice
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.jetbrains.compose.resources.stringResource

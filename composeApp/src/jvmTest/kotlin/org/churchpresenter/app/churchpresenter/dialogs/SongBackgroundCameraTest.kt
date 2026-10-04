@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
-import org.churchpresenter.app.churchpresenter.composables.CameraDevice
-import org.churchpresenter.app.churchpresenter.composables.SharedCameraFrameCache
-import org.churchpresenter.app.churchpresenter.composables.cameraSourceOn
+import org.churchpresenter.canvas.CameraDevice
+import org.churchpresenter.canvas.SharedCameraFrameCache
+import org.churchpresenter.canvas.cameraSourceOn
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.cameraRefOn
 import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.core.models.camera.asCameraSource

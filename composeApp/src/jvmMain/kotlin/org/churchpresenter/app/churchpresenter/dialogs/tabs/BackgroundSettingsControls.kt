@@ -62,8 +62,8 @@ import org.churchpresenter.sharedui.composables.ColorPickerField
 import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.sharedui.composables.SettingsScrollbarGutter
 import org.churchpresenter.sharedui.composables.SlimSlider
-import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
-import org.churchpresenter.app.churchpresenter.composables.isFfmpegAvailable
+import org.churchpresenter.canvas.DeckLinkManager
+import org.churchpresenter.canvas.isFfmpegAvailable
 import org.churchpresenter.media.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.dialogs.PanelCaption
 import org.churchpresenter.app.churchpresenter.dialogs.PresetButton

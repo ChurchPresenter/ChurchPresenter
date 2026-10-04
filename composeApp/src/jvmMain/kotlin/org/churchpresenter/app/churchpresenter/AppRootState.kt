@@ -10,7 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.canvas.DeckLinkManager
 import org.churchpresenter.settings.QuickBackground
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.CompanionSatelliteSettings

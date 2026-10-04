@@ -44,7 +44,7 @@ import org.churchpresenter.settings.StageMonitorSettings
 import org.churchpresenter.settings.StageMonitorZoneStyle
 import org.churchpresenter.dictionary.presenter.DictionaryPresenter
 import org.churchpresenter.qa.presenter.QAPresenter
-import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
+import org.churchpresenter.canvas.ScenePresenter
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.songchords.ChordTransposer

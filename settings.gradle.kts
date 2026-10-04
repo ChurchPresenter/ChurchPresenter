@@ -143,6 +143,10 @@ include(":server")
 // opens and saves. Depended on by :composeApp, which hands it the Planning Center import.
 include(":schedule")
 
+// The Canvas tab and SceneViewModel, the scene renderer, and the capture sources it draws: cameras,
+// screen and window capture, NDI and OMT input, DeckLink. Depended on by :composeApp.
+include(":canvas")
+
 // The Companion Surface tab and CompanionSatelliteViewModel: the Compose face of
 // :companion-satellite, which stays free of any UI toolkit. Depended on by :composeApp.
 include(":companion-surface")

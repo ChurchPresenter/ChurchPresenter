@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import org.churchpresenter.app.churchpresenter.composables.CameraDevice
+import org.churchpresenter.canvas.CameraDevice
 import org.churchpresenter.core.models.camera.CameraDeviceRef
 import kotlin.test.Test
 import kotlin.test.assertEquals

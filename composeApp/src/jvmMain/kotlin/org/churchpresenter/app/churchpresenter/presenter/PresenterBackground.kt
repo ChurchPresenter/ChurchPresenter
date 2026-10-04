@@ -39,9 +39,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.composables.CameraBackground
-import org.churchpresenter.app.churchpresenter.composables.CameraDevice
-import org.churchpresenter.app.churchpresenter.composables.CameraDeviceCatalog
+import org.churchpresenter.canvas.CameraBackground
+import org.churchpresenter.canvas.CameraDevice
+import org.churchpresenter.canvas.CameraDeviceCatalog
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.slides.utils.PictureDecoder
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
