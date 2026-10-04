@@ -172,4 +172,28 @@ class DeviceEnumerationParsingTest {
 
         assertEquals("My Long Window Title", windows.single().title)
     }
+
+    @Test
+    fun `a dshow line naming a size it cannot read, or no rate, adds no format`() {
+        val output = """
+            [dshow @ 0x1]   pixel_format=yuyv422  min s=widexhigh fps=30 max s=1280x720 fps=30
+            [dshow @ 0x1]   pixel_format=yuyv422  min s=640x480
+        """.trimIndent()
+        assertEquals(listOf(CameraFormat(1280, 720, 30)), parseDshowFormats(output))
+    }
+
+    @Test
+    fun `a v4l2 size listed without a rate runs at the default rate`() {
+        assertEquals(listOf(CameraFormat(1280, 720, DEFAULT_CAMERA_FPS)), parseV4l2Formats("Raw : yuyv422 : 1280x720"))
+    }
+
+    @Test
+    fun `a v4l2-ctl rate before any size is ignored`() {
+        val output = """
+            Interval: Discrete 0.033s (30.000 fps)
+            Size: Discrete 640x480
+            Interval: Discrete 0.033s (30.000 fps)
+        """.trimIndent()
+        assertEquals(listOf(CameraFormat(640, 480, 30)), parseV4l2CtlFormats(output))
+    }
 }

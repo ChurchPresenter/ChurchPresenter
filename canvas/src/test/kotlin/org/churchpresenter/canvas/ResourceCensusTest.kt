@@ -6,6 +6,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.diagnostics.CrashReportSweep
 
 /**
  * The high-water marks of the native resources the app holds on someone else's behalf.
@@ -112,5 +113,20 @@ class ResourceCensusTest {
             """.trimIndent(),
             rendered,
         )
+    }
+
+    @Test
+    fun `reporting an ordinary booth and then a leaking one does not throw`() {
+        val sweep = CrashReportSweep()
+        sweep.mark()
+        try {
+            ResourceCensus.reportIfLeaky()
+            ResourceCensus.record(SharedResource.VIDEO_DECODE, 12)
+            ResourceCensus.reportIfLeaky()
+            ResourceCensus.reportIfLeaky()
+            assertEquals(12, ResourceCensus.peak(SharedResource.VIDEO_DECODE))
+        } finally {
+            sweep.sweep()
+        }
     }
 }

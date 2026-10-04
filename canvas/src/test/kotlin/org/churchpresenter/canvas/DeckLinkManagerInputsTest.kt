@@ -20,4 +20,9 @@ class DeckLinkManagerInputsTest {
         assertNull(DeckLinkManagerInputs.inputFrame(0))
         runBlocking { DeckLinkManagerInputs.pause(0) }
     }
+
+    @Test
+    fun `without the native library a DeckLink output has no mode size`() {
+        assertNull(deckLinkModeSize(0))
+    }
 }

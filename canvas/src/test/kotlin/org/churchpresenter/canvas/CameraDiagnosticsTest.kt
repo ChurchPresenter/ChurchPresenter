@@ -351,4 +351,20 @@ class CameraDiagnosticsTest {
             "only the two whose remedy is a place in the platform's settings diverge",
         )
     }
+
+    @Test
+    fun `a format list starting on its header line, with ffmpeg's log prefix on each entry, is read`() {
+        val tail = listOf(
+            "[avfoundation @ 0x1] Supported pixel formats: uyvy422",
+            "[avfoundation @ 0x1]   yuyv422",
+            "[avfoundation @ 0x1] Overriding selected pixel format",
+        )
+        assertEquals(listOf("uyvy422", "yuyv422"), parseSupportedPixelFormats(tail))
+    }
+
+    @Test
+    fun `a blank line ends a frame rate list`() {
+        val tail = listOf("Supported framerates:", "  30.000000", "", "  60.000000")
+        assertEquals(listOf(30.0), parseSupportedFramerates(tail))
+    }
 }

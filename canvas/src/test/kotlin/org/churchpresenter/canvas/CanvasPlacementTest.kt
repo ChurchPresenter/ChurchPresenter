@@ -3,6 +3,7 @@ package org.churchpresenter.canvas
 import org.churchpresenter.core.models.scene.SourceTransform
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.churchpresenter.core.models.scene.Scene
 
 /**
  * Where a layer sits against its canvas, and pulling one back inside (#608).
@@ -81,5 +82,11 @@ class CanvasPlacementTest {
         val fitted = turned.broughtIntoView()
         assertEquals(30f, fitted.rotation)
         assertEquals(0.5f, fitted.opacity)
+    }
+
+    @Test
+    fun `a layer the scene does not hold is misplaced nowhere`() {
+        val layouts = Scene(id = "s", name = "S").editorLayouts()
+        assertEquals(emptyList(), layouts.misplacements("missing"))
     }
 }
