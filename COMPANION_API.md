@@ -689,6 +689,31 @@ curl -k -X POST https://192.168.1.10:8765/api/clear
 { "ok": true }
 ```
 
+**Optional query param** — take down one overlay and leave the rest up: `layer=lowerthird`,
+`captions` or `announcements`.
+
+```bash
+curl -k -X POST "https://192.168.1.10:8765/api/clear?layer=lowerthird"
+```
+
+Over the WebSocket, `clear` takes the same `{"layer": "..."}` in its payload.
+
+---
+
+### `POST /api/take`
+
+Puts what is cued on Preview on air, as the **Take** button does. Only does anything while
+preview mode is on (Settings → System) and something is cued. No body or approval required.
+Over the WebSocket, the command is `take`.
+
+```bash
+curl -k -X POST https://192.168.1.10:8765/api/take
+```
+
+```json
+{ "ok": true }
+```
+
 ---
 
 ### Lower Thirds (Bitfocus Companion)

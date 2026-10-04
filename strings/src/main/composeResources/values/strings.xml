@@ -1787,6 +1787,7 @@
     <string name="preview_mode_hint">Going live with a new picture, lower third or announcement cues it on Preview first; Take puts it on air. Stepping through what is already on air still goes straight out</string>
     <string name="preview_bus_label">Preview</string>
     <string name="preview_take">Take</string>
+    <string name="shortcut_description_take">Take: put what is on Preview on air</string>
     <string name="profile_lower_third_over_content">Lower third goes over the content</string>
     <string name="profile_announcements_over_content">Announcements go over the content</string>
     <string name="profile_captions_over_content">Captions go over the content</string>

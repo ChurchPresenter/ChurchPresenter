@@ -6,6 +6,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.PictureSettings
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.slides.FakeSlidesOutput
+import org.churchpresenter.slides.SlidesOutput
 import org.churchpresenter.slides.solidImage
 import org.churchpresenter.slides.tempDir
 import java.awt.Color
@@ -93,6 +94,18 @@ class PicturesViewModelEdgeTest {
         val output = FakeSlidesOutput()
         vm().syncWithPresenter(output)
         assertNull(output.selectedImagePath.value)
+    }
+
+    @Test
+    fun `pictures cued on a preview are synced there as if they were on air`() {
+        val fake = FakeSlidesOutput()
+        val cued = object : SlidesOutput by fake {
+            override val picturesCued: Boolean get() = true
+        }
+        val vm = vm()
+        vm.selectImage(1)
+        vm.syncWithPresenter(cued)
+        assertEquals(vm.images[1].absolutePath, fake.selectedImagePath.value)
     }
 
     @Test

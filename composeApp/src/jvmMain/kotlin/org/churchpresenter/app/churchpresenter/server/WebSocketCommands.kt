@@ -128,6 +128,10 @@ private suspend fun DefaultWebSocketServerSession.presentCommand(
                         }
                         sendCommandAck(msg.commandId, ok = true, json = json)
                     }
+                    Constants.WS_CMD_TAKE -> {
+                        scope.launch { server.onTake.emit(Unit) }
+                        sendCommandAck(msg.commandId, ok = true, json = json)
+                    }
                     Constants.WS_CMD_BIBLE_HOLD -> {
                         val hold = try {
                             json.parseToJsonElement(msg.payload)

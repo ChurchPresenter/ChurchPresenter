@@ -152,4 +152,16 @@ internal fun Route.scheduleRoutes(
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
 
+                /**
+                 * POST /api/take
+                 * Puts what is cued on Preview on air, as the Take button does. Nothing is cued
+                 * while preview mode is off, so it then does nothing. No body or approval needed.
+                 * Response: {"ok":true}
+                 */
+                post(Constants.ENDPOINT_TAKE) {
+                    if (!server.checkApiKey(call)) return@post
+                    scope.launch { server.onTake.emit(Unit) }
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
+
 }

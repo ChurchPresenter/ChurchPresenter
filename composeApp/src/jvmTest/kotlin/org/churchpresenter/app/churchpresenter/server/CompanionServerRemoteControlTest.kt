@@ -422,6 +422,17 @@ class CompanionServerRemoteControlTest {
     }
 
     @Test
+    fun `Take is asked for without approval`() {
+        val taken = CompletableDeferred<Unit>()
+        collecting(server.onTake) { taken.complete(Unit) }
+
+        val response = post(Constants.ENDPOINT_TAKE)
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertNotNull(runBlocking { withTimeoutOrNull(2_000) { taken.await() } })
+    }
+
+    @Test
     fun `clearing one layer names that layer and leaves the rest up`() {
         val layer = CompletableDeferred<String>()
         val clearedAll = CompletableDeferred<Unit>()
@@ -694,6 +705,17 @@ class CompanionServerRemoteControlTest {
         val ack = sendOverWebSocket(command(Constants.WS_CMD_CLEAR, commandId = "cmd-1")).ackFor("cmd-1")
 
         assertEquals(true, assertNotNull(ack).ok)
+    }
+
+    @Test
+    fun `Take over the socket is acknowledged and reaches the app`() {
+        val taken = CompletableDeferred<Unit>()
+        collecting(server.onTake) { taken.complete(Unit) }
+
+        val ack = sendOverWebSocket(command(Constants.WS_CMD_TAKE, commandId = "cmd-take")).ackFor("cmd-take")
+
+        assertEquals(true, assertNotNull(ack).ok)
+        assertNotNull(runBlocking { withTimeoutOrNull(2_000) { taken.await() } })
     }
 
     @Test

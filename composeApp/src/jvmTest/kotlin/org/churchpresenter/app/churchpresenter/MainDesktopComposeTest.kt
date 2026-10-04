@@ -7,6 +7,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithTag
+import kotlin.test.assertFalse
+import org.churchpresenter.core.models.shortcuts.KeyChord
+import org.churchpresenter.settings.KeyboardShortcutSettings
+import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.settings.QuickBackground
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.isRoot
@@ -1036,6 +1045,55 @@ class MainDesktopComposeTest {
             press(Key.Z, ctrl = true, shift = true)
             assertEquals(1, wiring.scheduleChanged.last(), "redone")
         }
+    }
+
+    // ── Preview mode ────────────────────────────────────────────────────────────
+
+    private fun withPreviewMode(on: Boolean, take: KeyChord? = null) = withOneSong().let {
+        it.copy(
+            projectionSettings = it.projectionSettings.copy(previewModeEnabled = on),
+            keyboardShortcutSettings = KeyboardShortcutSettings(
+                overrides = if (take == null) emptyMap() else mapOf(ShortcutAction.TAKE.name to listOf(take)),
+            ),
+        )
+    }
+
+    private fun cuedManager() = PresenterManager().apply {
+        previewBus.setEnabled(true)
+        previewBus.showLowerThird("{}", false, -1f, 0L, "Pastor")
+    }
+
+    @Test
+    fun `Take's shortcut puts what is cued on air`() {
+        val manager = cuedManager()
+        root(withPreviewMode(true, KeyChord.of(Key.F12, ctrl = true, shift = true)), presenterManager = manager) { _ ->
+            press(Key.F12, ctrl = true, shift = true)
+            assertTrue(manager.isLive(Presenting.LOWER_THIRD))
+            assertFalse(manager.previewBus.anythingCued)
+        }
+    }
+
+    @Test
+    fun `the sidebar's Take button puts what is cued on air, and waits while nothing is`() {
+        val manager = cuedManager()
+        root(withPreviewMode(true), presenterManager = manager) { _ ->
+            onNodeWithTag(PREVIEW_TAKE_TAG).assertIsEnabled().performClick()
+            waitForIdle()
+            assertTrue(manager.isLive(Presenting.LOWER_THIRD))
+            onNodeWithTag(PREVIEW_TAKE_TAG).assertIsNotEnabled()
+        }
+    }
+
+    @Test
+    fun `the sidebar's switch turns preview mode on, and Take is not there while it is off`() {
+        val wiring = Wiring()
+        val base = withPreviewMode(false)
+        root(base, wiring = wiring) { _ ->
+            onAllNodesWithTag(PREVIEW_TAKE_TAG).assertCountEquals(0)
+            onNodeWithTag(PREVIEW_MODE_TOGGLE_TAG).performClick()
+            waitForIdle()
+        }
+        assertTrue(wiring.settingsChanges.last()(base).projectionSettings.previewModeEnabled)
     }
 
     @Test

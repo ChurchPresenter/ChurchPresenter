@@ -138,6 +138,9 @@ internal fun MainWindowScope.ServerCommandWiring() {
                 overlayForLayerName(name)?.let(presenterManager::clearOverlay)
             }
         }
+        LaunchedEffect(Unit) {
+            companionServer.onTake.collect { presenterManager.previewBus.take() }
+        }
 
         LaunchedEffect(Unit) {
             LowerThirdSequencer.onShow.collect { req ->
