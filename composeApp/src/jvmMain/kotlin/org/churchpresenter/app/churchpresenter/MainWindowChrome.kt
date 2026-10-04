@@ -170,7 +170,7 @@ internal fun MainWindowScope.MainDesktopHost() {
 private fun MainWindowScope.liveOutputCallbacks(): LiveOutputCallbacks = with(root) {
     LiveOutputCallbacks(
         onRowWentLive = { item -> liveDurationLog.wentLive(item) },
-        onVerseSelected = { verses -> presenterManager.setSelectedVerses(verses) },
+        onVerseSelected = { verses -> presenterManager.previewBus.forVerses(verses).setSelectedVerses(verses) },
         // Line mode used to push the section straight to the outputs from
         // here. That put the words on screen behind the transition driver's
         // back, so the Lottie band animated a swap for text that had

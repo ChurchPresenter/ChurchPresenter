@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.models.Presenting
@@ -9,7 +10,7 @@ import java.io.File
 
 /** The content that goes through Preview while preview mode is on; everything else still goes straight to air. */
 internal val CUEABLE_MODES =
-    setOf(Presenting.PICTURES, Presenting.LYRICS, Presenting.LOWER_THIRD, Presenting.ANNOUNCEMENTS)
+    setOf(Presenting.BIBLE, Presenting.PICTURES, Presenting.LYRICS, Presenting.LOWER_THIRD, Presenting.ANNOUNCEMENTS)
 
 /**
  * The Preview bus: what is cued, not yet on air, and Take, which puts it on air.
@@ -19,8 +20,8 @@ internal val CUEABLE_MODES =
  * the default -- nothing reaches it and every go-live goes straight to [program], as it always did.
  *
  * With it on, a **new item** goes to Preview and waits for [take]; **stepping** within the item
- * already on Program (the next picture in the same folder, the next section of the song) still goes
- * straight to air. Only
+ * already on Program (the next verse of the chapter, the next section of the song, the next picture
+ * in the folder) still goes straight to air. Only
  * [CUEABLE_MODES] are cued; the rest still go live directly.
  */
 class PreviewBus internal constructor(private val program: PresenterManager) {
@@ -67,6 +68,7 @@ class PreviewBus internal constructor(private val program: PresenterManager) {
             mode == Presenting.PICTURES && program.isLive(mode) -> Unit
             // The song on air going live again -- a section of it double-clicked -- is a step.
             mode == Presenting.LYRICS && songTarget === program -> program.setPresentingMode(mode)
+            mode == Presenting.BIBLE && verseTarget === program -> program.setPresentingMode(mode)
             else -> manager.setPresentingMode(mode)
         }
     }
@@ -77,6 +79,25 @@ class PreviewBus internal constructor(private val program: PresenterManager) {
         manager.isLive(Presenting.PICTURES) -> manager
         program.isLive(Presenting.PICTURES) && sameFolder(path, program.selectedImagePath.value) -> program
         else -> manager
+    }
+
+    /** Where the last push of verses went -- see [forVerses]. */
+    private var verseTarget: PresenterManager? = null
+
+    /**
+     * Where a push of [verses] goes. The Bible tab pushes whatever is selected, live or not: a
+     * verse of the chapter on air is a step and goes there, and any other passage goes to Preview,
+     * where nothing shows it until it is cued -- the line the tab's own auto-hold draws.
+     */
+    internal fun forVerses(verses: List<SelectedVerse>): PresenterManager {
+        val target = when {
+            forNewItem(Presenting.BIBLE) === program -> program
+            program.isLive(Presenting.BIBLE) &&
+                chapterOf(verses.firstOrNull()) == chapterOf(program.selectedVerses.value.firstOrNull()) -> program
+            else -> manager
+        }
+        verseTarget = target
+        return target
     }
 
     /** Where the last push of a song went -- see [forSong]. */
@@ -141,6 +162,13 @@ class PreviewBus internal constructor(private val program: PresenterManager) {
                 manager.currentLowerThirdName.value,
             )
             Presenting.ANNOUNCEMENTS -> program.setAnnouncementText(manager.announcementText.value)
+            Presenting.BIBLE -> {
+                // A hold the tab put on air while another chapter was browsed must not keep the
+                // taken passage off it.
+                program.setBibleHold(false)
+                program.setSelectedVerses(manager.selectedVerses.value)
+                verseTarget = program
+            }
             Presenting.LYRICS -> {
                 program.setAllLyricSections(manager.allLyricSections.value)
                 program.setSongDisplaySectionIndex(manager.songDisplaySectionIndex.value)
@@ -153,6 +181,9 @@ class PreviewBus internal constructor(private val program: PresenterManager) {
         program.setPresentingMode(mode)
     }
 }
+
+/** Which chapter [verse] is from, as far as telling one passage from another goes. */
+private fun chapterOf(verse: SelectedVerse?): Pair<String, Int>? = verse?.let { it.bookName to it.chapter }
 
 /** Which song [section] is from, as far as telling one song from another goes. */
 private fun songOf(section: LyricSection?): Pair<Int, String>? = section?.let { it.songNumber to it.title }

@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.AppSettings
@@ -150,7 +151,8 @@ class PreviewBusTest {
     @Test
     fun `what is not cued yet goes straight to air`() {
         on()
-        bus.present(Presenting.BIBLE)
+        bus.present(Presenting.MEDIA)
+        assertEquals(Presenting.MEDIA, program.presentingMode.value)
         program.slidesOutput.setPresentingMode(Presenting.PRESENTATION)
         assertEquals(Presenting.PRESENTATION, program.presentingMode.value)
         assertFalse(bus.anythingCued)
@@ -259,6 +261,59 @@ class PreviewBusTest {
         assertSame(program, bus.songStepTarget)
     }
 
+    // ── Bible ───────────────────────────────────────────────────────────────────────────────────
+
+    private fun verse(book: String = "John", chapter: Int = 3, number: Int = 16) =
+        SelectedVerse(bookName = book, chapter = chapter, verseNumber = number, verseText = "$book $chapter:$number")
+
+    private fun versesOnAir(verse: SelectedVerse = verse()) {
+        bus.forVerses(listOf(verse)).setSelectedVerses(listOf(verse))
+        bus.present(Presenting.BIBLE)
+    }
+
+    @Test
+    fun `off, a verse goes straight to air`() {
+        versesOnAir()
+        assertEquals(Presenting.BIBLE, program.presentingMode.value)
+        assertEquals(listOf(verse()), program.selectedVerses.value)
+        assertFalse(preview.anythingLive)
+    }
+
+    @Test
+    fun `a verse of the chapter on air is a step, and goes straight out`() {
+        versesOnAir()
+        on()
+        versesOnAir(verse(number = 17))
+        assertEquals(listOf(verse(number = 17)), program.selectedVerses.value)
+        assertFalse(bus.anythingCued)
+    }
+
+    @Test
+    fun `another chapter is cued while the passage on air stays up`() {
+        versesOnAir()
+        on()
+        versesOnAir(verse(chapter = 4, number = 1))
+        assertTrue(bus.isCued(Presenting.BIBLE))
+        assertEquals(listOf(verse(chapter = 4, number = 1)), preview.selectedVerses.value)
+        assertEquals(listOf(verse()), program.selectedVerses.value)
+    }
+
+    @Test
+    fun `Take puts the cued passage on air past a hold the tab left there`() {
+        versesOnAir()
+        on()
+        program.setBibleHold(true)
+        versesOnAir(verse(book = "Romans", chapter = 8, number = 28))
+        bus.take()
+
+        assertEquals(listOf(verse(book = "Romans", chapter = 8, number = 28)), program.selectedVerses.value)
+        assertFalse(program.bibleHold.value)
+        assertFalse(bus.anythingCued)
+
+        versesOnAir(verse(book = "Romans", chapter = 8, number = 29))
+        assertEquals(29, program.selectedVerses.value.single().verseNumber, "the taken chapter steps on air")
+    }
+
     // ── Take ────────────────────────────────────────────────────────────────────────────────────
 
     @Test
@@ -323,7 +378,7 @@ class PreviewBusTest {
     @Test
     fun `what Preview holds but cannot cue is not taken`() {
         on()
-        preview.setPresentingMode(Presenting.BIBLE)
+        preview.setPresentingMode(Presenting.MEDIA)
         bus.take()
         assertEquals(Presenting.NONE, program.presentingMode.value)
         assertFalse(preview.anythingLive)
