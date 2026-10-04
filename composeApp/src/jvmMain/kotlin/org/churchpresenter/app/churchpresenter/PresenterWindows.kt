@@ -98,10 +98,7 @@ internal fun PresenterWindows(
     val clearAnnouncementOnFinish = {
         presenterManager.setAnnouncementText("")
         presenterManager.setDisplayedAnnouncementText("")
-        presenterManager.overlayFinished(
-            Presenting.ANNOUNCEMENTS,
-            appSettings.projectionSettings.overlayEndClearsDisplay,
-        )
+        presenterManager.requestClearDisplay()
     }
     val lottieJsonContent by presenterManager.lottieJsonContent
     val lottiePauseAtFrame by presenterManager.lottiePauseAtFrame

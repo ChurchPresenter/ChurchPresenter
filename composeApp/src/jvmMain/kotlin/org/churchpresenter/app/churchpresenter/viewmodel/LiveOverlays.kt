@@ -6,7 +6,7 @@ import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.sharedui.models.Presenting
 
 /**
- * The overlays up over the slide -- lower thirds, announcements and captions ([OVERLAY_MODES]) --
+ * The overlays up over the slide -- lower thirds and captions ([OVERLAY_MODES]) --
  * and what was put live most recently. Part of [PresenterManager].
  */
 interface LiveOverlays {
@@ -35,7 +35,7 @@ interface LiveOverlays {
     fun clearOverlay(mode: Presenting)
 
     /**
-     * An overlay that ended on its own -- a lower third's run, an announcement's last loop. With
+     * An overlay that ended on its own -- a lower third's run or its animation finishing. With
      * [clearsDisplay] (the default setting, as it always was) the whole display clears; otherwise
      * only the overlay comes down and the slide under it stays.
      */

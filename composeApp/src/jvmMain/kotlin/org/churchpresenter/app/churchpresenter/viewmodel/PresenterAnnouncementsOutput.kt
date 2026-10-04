@@ -12,7 +12,7 @@ import org.churchpresenter.sharedui.models.Presenting
  * [PresenterSlidesOutput]: the manager's own declaration stays untouched.
  */
 class PresenterAnnouncementsOutput(private val manager: PresenterManager) : AnnouncementsOutput {
-    override val presentingMode: State<Presenting> by lazy { manager.modeAsSeenBy(Presenting.ANNOUNCEMENTS) }
+    override val presentingMode: State<Presenting> get() = manager.presentingMode
     override val screenLocks: State<Map<Int, Presenting>> get() = manager.screenLocks
     override val timerRemainingSeconds: State<Int> get() = manager.timerRemainingSeconds
     override val timerRunning: State<Boolean> get() = manager.timerRunning

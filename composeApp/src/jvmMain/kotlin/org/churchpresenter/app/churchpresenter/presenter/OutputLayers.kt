@@ -98,8 +98,8 @@ internal fun CueContent(cue: Cue, surface: OutputSurface) {
     }
 }
 
-/** The overlays in the order they stack, bottom to top: captions, lower third, announcements. */
-private val OVERLAY_DRAW_ORDER = listOf(Presenting.STT, Presenting.LOWER_THIRD, Presenting.ANNOUNCEMENTS)
+/** The overlays in the order they stack, bottom to top: captions, then the lower third. */
+private val OVERLAY_DRAW_ORDER = listOf(Presenting.STT, Presenting.LOWER_THIRD)
 
 /**
  * The overlays up over the slide, each drawn by [content] exactly as it is drawn on its own, stacked

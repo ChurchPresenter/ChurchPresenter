@@ -289,7 +289,7 @@ internal class LiveAnnouncementsState(private val context: PresenterContext) : L
 
     /** Whether an announcement is what any output is showing -- globally, or on a locked screen. */
     private fun announcementIsLive(): Boolean {
-        val anyScreenOnAnnouncements = Presenting.ANNOUNCEMENTS in context.overlays.value ||
+        val anyScreenOnAnnouncements = context.presentingMode.value == Presenting.ANNOUNCEMENTS ||
             context.screenLocks.value.values.any { it == Presenting.ANNOUNCEMENTS }
         return anyScreenOnAnnouncements && _announcementTickerLive.value
     }
