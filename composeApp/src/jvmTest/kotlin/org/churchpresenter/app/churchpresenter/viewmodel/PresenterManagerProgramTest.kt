@@ -179,11 +179,15 @@ class PresenterManagerProgramTest {
     @Test
     fun `program follows the mode as it changes`() {
         val pm = PresenterManager(showPresenterWindowInitially = false)
+        pm.setWebsiteUrl("https://example.org")
+        pm.setPresentingMode(Presenting.WEBSITE)
+        assertEquals(mapOf(Layer.SLIDE to Cue.Web("https://example.org")), pm.program.value)
         pm.setPresentingMode(Presenting.STT)
-        assertEquals(mapOf(Layer.CAPTIONS to Cue.Captions), pm.program.value)
-        pm.setDisplayedAnnouncementText("Welcome")
-        pm.setPresentingMode(Presenting.ANNOUNCEMENTS)
-        assertEquals(mapOf(Layer.ANNOUNCEMENTS to Cue.Announcement("Welcome")), pm.program.value)
+        assertEquals(
+            mapOf(Layer.SLIDE to Cue.Web("https://example.org"), Layer.CAPTIONS to Cue.Captions),
+            pm.program.value,
+            "captions go up over the slide",
+        )
         pm.setPresentingMode(Presenting.NONE)
         assertTrue(pm.program.value.isEmpty())
     }

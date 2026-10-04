@@ -100,7 +100,7 @@ class SystemSettingsTabTest {
      */
     private fun analytics(enabled: Boolean) = AppSettings(
         analyticsReportingEnabled = enabled,
-        projectionSettings = ProjectionSettings(hideCursorOnOutputs = false),
+        projectionSettings = ProjectionSettings(hideCursorOnOutputs = false, overlayEndClearsDisplay = false),
     )
 
     @AfterTest
@@ -282,8 +282,9 @@ class SystemSettingsTabTest {
             }
         }
 
-        // Analytics is the fourth switch declared, after launch-at-login, start-hidden and hide-cursor.
-        onAllNodes(isToggleable())[3].performScrollTo().performClick()
+        // Analytics is the fifth switch declared, after launch-at-login, start-hidden, hide-cursor and
+        // overlay-end-clears.
+        onAllNodes(isToggleable())[4].performScrollTo().performClick()
         waitForIdle()
 
         assertEquals(true, applied?.analyticsReportingEnabled, "clicking the off analytics switch turns reporting on")
@@ -347,7 +348,7 @@ class SystemSettingsTabTest {
             }
         }
 
-        onAllNodes(isToggleable()).assertCountEquals(4)
+        onAllNodes(isToggleable()).assertCountEquals(5)
         // Launch-at-login is declared first. The switch follows the OS registration, not the click:
         // it can only turn on if setEnabled() reported success, which cannot happen here — so this
         // cannot race the coroutine the click starts.

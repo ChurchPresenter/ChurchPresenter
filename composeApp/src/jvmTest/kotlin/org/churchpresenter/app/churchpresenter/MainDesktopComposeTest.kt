@@ -1000,7 +1000,7 @@ class MainDesktopComposeTest {
             actions.addLowerThird("pastor", "Pastor", false, 0)
             waitForIdle()
             takeLive("Pastor")
-            assertEquals(Presenting.LOWER_THIRD, manager.presentingMode.value)
+            assertEquals(Presenting.LOWER_THIRD, manager.lastLive.value)
             assertTrue(manager.lottieJsonContent.value.isNotEmpty())
         }
     }

@@ -132,7 +132,7 @@ class ApplyRemoteLiveStateTest {
         val presenter = apply(LiveStateDto(contentType = "ANNOUNCEMENTS", announcementText = "Service starts in 5"))
 
         assertEquals("Service starts in 5", presenter.announcementText.value)
-        assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
+        assertEquals(Presenting.ANNOUNCEMENTS, presenter.lastLive.value)
     }
 
     @Test
@@ -143,7 +143,7 @@ class ApplyRemoteLiveStateTest {
         apply(LiveStateDto(contentType = "ANNOUNCEMENTS"), presenter)
 
         assertEquals("kept", presenter.announcementText.value, "a null payload must not blank the text")
-        assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
+        assertEquals(Presenting.ANNOUNCEMENTS, presenter.lastLive.value)
     }
 
     // ── Website ─────────────────────────────────────────────────────────────────
@@ -282,7 +282,7 @@ class ApplyRemoteLiveStateTest {
             val presenter = apply(LiveStateDto(contentType = type))
             assertEquals(
                 Presenting.valueOf(type),
-                presenter.presentingMode.value,
+                presenter.lastLive.value,
                 "$type must at least switch the mode",
             )
         }
@@ -318,7 +318,7 @@ class ApplyRemoteLiveStateTest {
             val presenter = apply(LiveStateDto(contentType = type))
             assertEquals(
                 Presenting.valueOf(type),
-                presenter.presentingMode.value,
+                presenter.lastLive.value,
                 "$type must switch the mode even with an empty payload",
             )
         }

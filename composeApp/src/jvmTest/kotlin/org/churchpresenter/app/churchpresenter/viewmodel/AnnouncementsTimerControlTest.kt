@@ -296,7 +296,7 @@ class AnnouncementsTimerControlTest {
         vm.goLive(pm.announcementsOutput) { }
 
         assertEquals("Welcome to the 10am service", pm.announcementText.value)
-        assertEquals(Presenting.ANNOUNCEMENTS, pm.presentingMode.value)
+        assertEquals(Presenting.ANNOUNCEMENTS, pm.lastLive.value)
     }
 
     @Test

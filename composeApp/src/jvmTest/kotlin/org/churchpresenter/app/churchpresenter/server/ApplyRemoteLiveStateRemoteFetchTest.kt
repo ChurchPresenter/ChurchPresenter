@@ -186,7 +186,7 @@ class ApplyRemoteLiveStateRemoteFetchTest {
         val presenter = apply(LiveStateDto(contentType = "LOWER_THIRD", lowerThirdName = "Welcome"))
 
         assertEquals("""{"v":"5.9.0","layers":[]}""", presenter.lottieJsonContent.value)
-        assertEquals(Presenting.LOWER_THIRD, presenter.presentingMode.value)
+        assertEquals(Presenting.LOWER_THIRD, presenter.lastLive.value)
     }
 
     @Test
@@ -197,6 +197,6 @@ class ApplyRemoteLiveStateRemoteFetchTest {
         val presenter = apply(LiveStateDto(contentType = "LOWER_THIRD", lowerThirdName = "no-such-preset"))
 
         assertEquals("", presenter.lottieJsonContent.value)
-        assertEquals(Presenting.LOWER_THIRD, presenter.presentingMode.value, "the mode still switches")
+        assertEquals(Presenting.LOWER_THIRD, presenter.lastLive.value, "the mode still switches")
     }
 }

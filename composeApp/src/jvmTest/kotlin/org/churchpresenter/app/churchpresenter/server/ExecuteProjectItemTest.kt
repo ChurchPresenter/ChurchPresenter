@@ -237,7 +237,7 @@ class ExecuteProjectItemTest {
 
         assertTrue(recorder.added.isEmpty(), "got ${recorder.added}")
         assertEquals("Service starts at 10", presenter.announcementText.value)
-        assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
+        assertEquals(Presenting.ANNOUNCEMENTS, presenter.lastLive.value)
         assertTrue(presenter.showPresenterWindow.value)
     }
 
@@ -260,7 +260,7 @@ class ExecuteProjectItemTest {
             assertEquals(3_723, presenter.timerRemainingSeconds.value, "1h 2m 3s is 3723 seconds")
             assertTrue(presenter.timerRunning.value)
             assertTrue(presenter.announcementTickerLive.value, "the ticker has to be live or the screen never updates")
-            assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
+            assertEquals(Presenting.ANNOUNCEMENTS, presenter.lastLive.value)
         } finally {
             presenter.pauseAnnouncementTimer()
         }
@@ -306,7 +306,7 @@ class ExecuteProjectItemTest {
 
                 assertFalse(presenter.timerRunning.value, "$mode is a display, not a countdown")
                 assertTrue(presenter.announcementTickerLive.value, "$mode still has to drive the screen")
-                assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
+                assertEquals(Presenting.ANNOUNCEMENTS, presenter.lastLive.value)
             } finally {
                 presenter.pauseAnnouncementTimer()
             }
