@@ -185,6 +185,18 @@ class PresenterModeBackgroundOverrideTest {
     }
 
     @Test
+    fun `outside a merged tile a website is drawn live, never from its snapshot`() {
+        val withSnapshot = PresenterManager().apply {
+            setWebSnapshot(ImageBitmap(4, 4))
+            setWebsiteUrl("https://example.org")
+        }
+        runComposeUiTest {
+            setContent { content(Presenting.WEBSITE, withSnapshot, override = null)() }
+            onAllNodes(hasTestTag(WEB_SNAPSHOT_TAG)).assertCountEquals(0)
+        }
+    }
+
+    @Test
     fun `a lower-third profile draws the verse and the lyrics in its band`() {
         val band = OutputProfile(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL)
         runComposeUiTest {

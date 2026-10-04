@@ -2,6 +2,11 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import kotlin.test.assertTrue
+import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.withKeyDown
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.input.key.Key
 import org.churchpresenter.profiles.SONG_BACKGROUND_BUTTON_TAG
 import org.churchpresenter.profiles.SONG_BACKGROUND_SAVE_TAG
 import org.churchpresenter.profiles.SONG_BACKGROUND_SCOPE_TAG
@@ -272,6 +277,38 @@ class EditSongContentTest {
         type(Field.LYRICS, "{Chorus}\nAmazing grace")
         save()
         assertEquals(listOf("{Chorus}", "Amazing grace"), saved.song?.lyrics)
+    }
+
+    @Test
+    fun `a section chip writes its header on a line of its own`() = editor { saved ->
+        type(Field.LYRICS, "first line")
+        onNodeWithText("Bridge").performClick()
+        waitForIdle()
+        save()
+
+        assertTrue(saved.song?.lyrics.orEmpty().any { it.trim() == "[Bridge]" }, "lyrics: ${saved.song?.lyrics}")
+    }
+
+    @Test
+    fun `adding a language opens a pane for it after the ones already there`() = editor { _ ->
+        secondaryPane()
+        tap("Add a language")
+
+        assertTrue(onAllNodesWithText("Language 3").fetchSemanticsNodes().isNotEmpty())
+    }
+
+    @Test
+    fun `pasting with nothing chord-shaped on the clipboard types as usual`() = editor { saved ->
+        type(Field.LYRICS, "first line")
+        field(Field.LYRICS).performKeyInput {
+            withKeyDown(Key.CtrlLeft) { pressKey(Key.V) }
+            withKeyDown(Key.MetaLeft) { pressKey(Key.V) }
+            pressKey(Key.V)
+        }
+        waitForIdle()
+        save()
+
+        assertTrue(saved.song?.lyrics.orEmpty().first().startsWith("first line"), "lyrics: ${saved.song?.lyrics}")
     }
 
     @Test

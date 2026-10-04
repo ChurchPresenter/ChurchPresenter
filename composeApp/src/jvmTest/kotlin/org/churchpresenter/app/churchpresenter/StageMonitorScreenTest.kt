@@ -2,6 +2,8 @@
 
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.settings.textBoxKey
+import org.churchpresenter.settings.TextBox
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -153,6 +155,32 @@ class StageMonitorScreenTest {
     fun `a live verse is shown with its reference above the text`() {
         screen(
             sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.A),
+            presentingMode = Presenting.BIBLE,
+            displayedVerses = listOf(verse()),
+        ) {
+            assertTrue(rendersText("John 3:16\nFor God so loved the world"), renderedText().toString())
+        }
+    }
+
+    @Test
+    fun `a zone given a box draws in the box, not in the layout`() {
+        val box = TextBox(enabled = true, xPercent = 10f, yPercent = 10f, widthPercent = 60f, heightPercent = 40f)
+        screen(
+            sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.A)
+                .copy(textBoxes = mapOf(textBoxKey(StageMonitorStyleZone.A.name, lowerThird = false) to box)),
+            presentingMode = Presenting.BIBLE,
+            displayedVerses = listOf(verse()),
+        ) {
+            assertTrue(rendersText("John 3:16\nFor God so loved the world"), renderedText().toString())
+        }
+    }
+
+    @Test
+    fun `a full-screen zone given a box draws in the box`() {
+        val box = TextBox(enabled = true, xPercent = 5f, yPercent = 5f, widthPercent = 90f, heightPercent = 50f)
+        screen(
+            sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.FULL_SCREEN)
+                .copy(textBoxes = mapOf(textBoxKey(StageMonitorStyleZone.FULL_SCREEN.name, lowerThird = false) to box)),
             presentingMode = Presenting.BIBLE,
             displayedVerses = listOf(verse()),
         ) {

@@ -739,4 +739,26 @@ class StatisticsManagerTest {
         const val THIS_YEAR = 2026
         const val LAST_YEAR = 2025
     }
+
+    @Test
+    fun `a clear open at one end takes every play on that side of it`() {
+        val stats = StatisticsManager()
+        stats.sing("Amazing Grace", times = 2)
+        stats.read("John", times = 2)
+        val stamped = stats.songsIn(everything).single().lastUsed
+
+        assertEquals(2, stats.clearSong(SongKey("Hymnal", 1, "Amazing Grace"), fromMs = stamped - 60_000))
+        assertEquals(2, stats.clearVerse(VerseKey("KJV", "John", 3, 16), toMs = stamped + 60_000))
+    }
+
+    @Test
+    fun `clearing a verse with no range takes every play of it`() {
+        val stats = StatisticsManager()
+        stats.read("John", times = 3)
+        stats.read("Romans", chapter = 8, verse = 28)
+
+        assertEquals(3, stats.clearVerse(VerseKey("KJV", "John", 3, 16)))
+        val left = stats.versesIn(everything).single()
+        assertEquals("Romans", left.bookName)
+    }
 }

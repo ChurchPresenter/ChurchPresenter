@@ -111,7 +111,9 @@ class PresentationPlayer(
         slideIndex = index
         stepIndex = -1
         stepStartNanos = 0L
-        pendingEnterAtLastStepFor = null
+        // Marked before the load starts: a load that finishes before this call returns must still
+        // find it, or the slide stays unbuilt.
+        pendingEnterAtLastStepFor = if (enterAtLastStep) index else null
         ensureLoaded(index)
         ensureLoaded(index + 1)
         evictBeyondWindow(index)
@@ -119,9 +121,8 @@ class PresentationPlayer(
         if (enterAtLastStep) {
             val cachedStepCount = slideCache[index]?.evaluator?.stepCount
             if (cachedStepCount != null) {
+                pendingEnterAtLastStepFor = null
                 stepIndex = (cachedStepCount - 1).coerceAtLeast(-1)
-            } else {
-                pendingEnterAtLastStepFor = index
             }
         }
     }
