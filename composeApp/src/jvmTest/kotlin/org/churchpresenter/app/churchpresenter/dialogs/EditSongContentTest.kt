@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.core.models.songs.SongBackground
 import kotlin.test.assertTrue
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.withKeyDown
@@ -143,6 +144,7 @@ class EditSongContentTest {
         tuning: SongTuning = SongTuning(),
         showTuningFields: Boolean = false,
         typicalSeconds: Int? = null,
+        onApplyBackgroundToSongbook: ((String, SongBackground, SongBackground) -> Unit)? = null,
         block: ComposeUiTest.(Saved) -> Unit,
     ) {
         val saved = Saved()
@@ -161,6 +163,7 @@ class EditSongContentTest {
                         onSave = { song, savedTuning -> saved.song = song; saved.tuning = savedTuning },
                         typicalSeconds = typicalSeconds,
                         onChordsVisibleChange = { saved.chordsVisible += it },
+                        onApplyBackgroundToSongbook = onApplyBackgroundToSongbook,
                     )
                 }
             }
@@ -310,6 +313,26 @@ class EditSongContentTest {
 
         assertTrue(saved.song?.lyrics.orEmpty().first().startsWith("first line"), "lyrics: ${saved.song?.lyrics}")
     }
+
+    @Test
+    fun `a song in a song book offers to apply its background to the whole book`() {
+        val applied = mutableListOf<String>()
+        editor(onApplyBackgroundToSongbook = { book, _, _ -> applied += book }) { _ ->
+            onNodeWithTag(SONG_BACKGROUND_BUTTON_TAG).performClick()
+            waitForIdle()
+            onNodeWithText("Apply to song book").performClick()
+            waitForIdle()
+        }
+        assertEquals(listOf("Hymnal"), applied)
+    }
+
+    @Test
+    fun `a song in no song book has no book to apply its background to`() =
+        editor(aSong(songbook = ""), onApplyBackgroundToSongbook = { _, _, _ -> }) { _ ->
+            onNodeWithTag(SONG_BACKGROUND_BUTTON_TAG).performClick()
+            waitForIdle()
+            assertTrue(onAllNodesWithText("Apply to song book").fetchSemanticsNodes().isEmpty())
+        }
 
     @Test
     fun `the slide break chip writes the marker on a line of its own`() = editor { saved ->

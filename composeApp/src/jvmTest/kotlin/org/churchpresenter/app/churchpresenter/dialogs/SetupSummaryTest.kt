@@ -149,4 +149,14 @@ class SetupSummaryTest {
     fun `a summary of two unset folders is all zeroes`() = runBlocking {
         assertEquals(SetupSummary(0, 0, 0), loadSetupSummary("", ""))
     }
+
+    @Test
+    fun `songs filed deeper than the scan reaches are not counted`() {
+        val root = dir("deep")
+        var folder = root
+        repeat(6) { level -> folder = File(folder, "level$level").apply { mkdirs() }; folder.song("song$level") }
+
+        assertEquals(3, countSongs(root.absolutePath))
+        assertEquals(1, countSongBooks(root.absolutePath))
+    }
 }
