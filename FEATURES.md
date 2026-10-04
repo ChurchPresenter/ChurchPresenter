@@ -226,8 +226,8 @@
 - **Stay organized** — color-coded labels, per-item notes, quick reordering, recents and full undo/redo; Add Item stays pinned below the run of show however long it grows.
 
 **Source locations:**
-- `tabs/ScheduleTab.kt` — main UI
-- `viewmodel/ScheduleViewModel.kt`
+- `schedule/src/main/kotlin/org/churchpresenter/schedule/ScheduleTab.kt` — main UI (the `:schedule` module)
+- `schedule/src/main/kotlin/org/churchpresenter/schedule/ScheduleViewModel.kt`, plus its `ScheduleViewModel*.kt` extensions
 - `core-models/src/main/kotlin/.../models/schedule/ScheduleItem.kt` (the `:core-models` module)
 - `viewmodel/FileManager.kt`
 - `dialogs/AddLabelDialog.kt`

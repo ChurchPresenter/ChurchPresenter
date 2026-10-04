@@ -217,4 +217,63 @@ class SongBandSlotsTest {
         assertEquals("", two.text(TEXT_3))
         assertEquals("", two.text(TEXT_4))
     }
+
+    @Test
+    fun `with the title hidden no language carries one`() {
+        val hidden = slots(
+            language = Constants.SONG_LANG_BOTH,
+            availableSlots = 2,
+            settings = lineMode.copy(titleLowerThirdDisplay = Constants.NONE),
+        )
+        assertEquals("", hidden.text(REFERENCE_1))
+        assertEquals("", hidden.text(REFERENCE_2))
+    }
+
+    @Test
+    fun `a translation with no title of its own borrows the song's`() {
+        val untitled = verse.copy(translations = listOf(verse.translations.single().copy(title = "")))
+        val both = slots(
+            section = untitled,
+            language = Constants.SONG_LANG_BOTH,
+            availableSlots = 2,
+            settings = lineMode.copy(
+                titleLowerThirdDisplay = Constants.EVERY_PAGE,
+                showNumberLowerThird = Constants.NONE,
+            ),
+        )
+        assertEquals("Amazing Grace", both.text(REFERENCE_2))
+    }
+
+    @Test
+    fun `an untranslated line adds nothing to the stacked slot or its own slot`() {
+        val untranslated = verse.copy(translations = listOf(verse.translations.single().copy(lines = emptyList())))
+        val stacked = slots(section = untranslated, language = Constants.SONG_LANG_BOTH, availableSlots = 1)
+        assertEquals("Amazing grace, how sweet the sound", stacked.text(TEXT_1))
+        val apart = slots(section = untranslated, language = Constants.SONG_LANG_BOTH, availableSlots = 2)
+        assertEquals("", apart.text(TEXT_2))
+    }
+
+    @Test
+    fun `a section with no lines leaves the lyric slot empty in either mode`() {
+        val empty = verse.copy(lines = emptyList(), translations = emptyList())
+        assertEquals("", slots(section = empty).text(TEXT_1))
+        assertEquals("", slots(section = empty, settings = verseMode).text(TEXT_1))
+    }
+
+    @Test
+    fun `a title slide with one credit keeps it on the first reference line`() {
+        val titleSlide = LyricSection(
+            type = Constants.SECTION_TYPE_TITLE_SLIDE,
+            title = "Amazing Grace",
+            author = "John Newton",
+        )
+        val two = slots(
+            section = titleSlide,
+            language = Constants.SONG_LANG_PRIMARY,
+            availableSlots = 2,
+            all = listOf(titleSlide, verse),
+        )
+        assertEquals("John Newton", two.text(REFERENCE_1))
+        assertEquals("", two.text(REFERENCE_2))
+    }
 }

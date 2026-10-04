@@ -1,0 +1,673 @@
+package org.churchpresenter.schedule
+
+import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.core.models.schedule.ScheduleItem
+import java.io.File
+import java.nio.file.Files
+import org.churchpresenter.sharedui.models.Presenting
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import org.churchpresenter.core.models.schedule.RowTiming
+
+/**
+ * The schedule is the spine of a service: every item the operator will present, in order, with
+ * undo behind it. These tests cover the pure in-memory model only.
+ *
+ * IMPORTANT: [ScheduleViewModel] resolves its autosave path from `user.home` **at construction**,
+ * and `newSchedule()` deletes that file. Every test therefore builds its ViewModel while
+ * `user.home` points at a throwaway directory, so a test run can never delete the developer's
+ * real `~/.churchpresenter/autosave_schedule.tmp`.
+ */
+class ScheduleViewModelTest {
+
+    private lateinit var tempHome: File
+    private var realHome: String? = null
+    private val created = mutableListOf<ScheduleViewModel>()
+
+    /** Records every schedule the ViewModel pushed to its change callback. */
+    private val notifications = mutableListOf<List<ScheduleItem>>()
+
+    @BeforeTest
+    fun isolateHome() {
+        realHome = System.getProperty("user.home")
+        tempHome = Files.createTempDirectory("cp-schedule-test").toFile()
+        System.setProperty("user.home", tempHome.absolutePath)
+        notifications.clear()
+    }
+
+    @AfterTest
+    fun restoreHome() {
+        created.forEach { runCatching { it.dispose() } }
+        created.clear()
+        realHome?.let { System.setProperty("user.home", it) }
+        tempHome.deleteRecursively()
+    }
+
+    private fun newViewModel(): ScheduleViewModel =
+        ScheduleViewModel(onScheduleChanged = { notifications.add(it) }).also { created.add(it) }
+
+    private fun ScheduleViewModel.addSongs(vararg titles: String) =
+        titles.forEachIndexed { i, t -> addSong(songNumber = i + 1, title = t, songbook = "Hymnal") }
+
+    private val ScheduleViewModel.titles: List<String>
+        get() = scheduleItems.map { (it as ScheduleItem.SongItem).title }
+
+    // ── Baseline ────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `starts empty with nothing to undo or redo`() {
+        val vm = newViewModel()
+        assertTrue(vm.scheduleItems.isEmpty())
+        assertFalse(vm.canUndo)
+        assertFalse(vm.canRedo)
+        assertNull(vm.selectedItemId)
+    }
+
+    // ── Adding ──────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `adds items in order and notifies once per add`() {
+        val vm = newViewModel()
+        vm.addSongs("First", "Second", "Third")
+        assertEquals(listOf("First", "Second", "Third"), vm.titles)
+        assertEquals(3, notifications.size)
+        assertEquals(3, notifications.last().size)
+    }
+
+    @Test
+    fun `every added item gets a distinct id even when the content is identical`() {
+        val vm = newViewModel()
+        repeat(5) { vm.addSong(songNumber = 1, title = "Same", songbook = "Hymnal") }
+        assertEquals(5, vm.scheduleItems.map { it.id }.toSet().size, "duplicate ids would break selection and removal")
+    }
+
+    @Test
+    fun `mixed item types coexist in one schedule`() {
+        val vm = newViewModel()
+        vm.addSong(1, "Song", "Hymnal")
+        vm.addBibleVerse("John", 3, 16, "For God so loved the world")
+        vm.addLabel("Offering", "#FFFFFF", "#000000")
+        vm.addWebsite("https://example.org", "Example")
+        assertEquals(4, vm.scheduleItems.size)
+        assertTrue(vm.scheduleItems[0] is ScheduleItem.SongItem)
+        assertTrue(vm.scheduleItems[1] is ScheduleItem.BibleVerseItem)
+        assertTrue(vm.scheduleItems[2] is ScheduleItem.LabelItem)
+        assertTrue(vm.scheduleItems[3] is ScheduleItem.WebsiteItem)
+    }
+
+    @Test
+    fun `a media item keeps the subtitle file it was added with`() {
+        val vm = newViewModel()
+
+        vm.addMedia("/media/clip.mp4", "Clip", "local", subtitleUrl = "/media/clip.srt")
+
+        assertEquals("/media/clip.srt", (vm.scheduleItems.single() as ScheduleItem.MediaItem).subtitleUrl)
+    }
+
+    @Test
+    fun `a media item added without a subtitle file has none`() {
+        val vm = newViewModel()
+
+        vm.addMedia("/media/clip.mp4", "Clip", "local")
+
+        assertEquals("", (vm.scheduleItems.single() as ScheduleItem.MediaItem).subtitleUrl)
+    }
+
+    // ── Removing ────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `removes only the targeted item`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B", "C")
+        vm.removeItem(vm.scheduleItems[1].id)
+        assertEquals(listOf("A", "C"), vm.titles)
+    }
+
+    @Test
+    fun `removing an unknown id leaves the schedule untouched`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B")
+        vm.removeItem("no-such-id")
+        assertEquals(listOf("A", "B"), vm.titles)
+    }
+
+    // ── Reordering ──────────────────────────────────────────────────────────────
+
+    @Test
+    fun `moves an item up and down one position, returning its new index`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B", "C")
+        assertEquals(0, vm.moveItemUp(vm.scheduleItems[1].id))
+        assertEquals(listOf("B", "A", "C"), vm.titles)
+        assertEquals(2, vm.moveItemDown(vm.scheduleItems[1].id))
+        assertEquals(listOf("B", "C", "A"), vm.titles)
+    }
+
+    @Test
+    fun `moving past either end is a no-op`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B", "C")
+        val before = vm.titles
+        assertEquals(0, vm.moveItemUp(vm.scheduleItems.first().id), "top item stays at index 0")
+        assertEquals(2, vm.moveItemDown(vm.scheduleItems.last().id), "bottom item stays at the last index")
+        assertEquals(before, vm.titles)
+    }
+
+    @Test
+    fun `moves an item to the top and to the bottom`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B", "C", "D")
+        vm.moveItemToTop(vm.scheduleItems[2].id)
+        assertEquals(listOf("C", "A", "B", "D"), vm.titles)
+        vm.moveItemToBottom(vm.scheduleItems[0].id)
+        assertEquals(listOf("A", "B", "D", "C"), vm.titles)
+    }
+
+    @Test
+    fun `moving the bottom item to the bottom changes nothing, and an unknown row is not found`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B")
+        val undoable = vm.canUndo
+        assertEquals(1, vm.moveItemToBottom(vm.scheduleItems.last().id))
+        assertEquals(-1, vm.moveItemToBottom("no-such-row"))
+        assertEquals(listOf("A", "B"), vm.titles)
+        assertEquals(undoable, vm.canUndo, "nothing moved, so nothing to undo")
+    }
+
+    @Test
+    fun `a website's page title replaces its address once, and never a title someone set`() {
+        val vm = newViewModel()
+        vm.addWebsite("https://example.org", "")
+        vm.addWebsite("https://named.example", "Our Church")
+        fun titleOf(url: String) =
+            vm.scheduleItems.filterIsInstance<ScheduleItem.WebsiteItem>().single { it.url == url }.title
+
+        vm.updateWebsiteTitle("https://example.org", " ")
+        assertEquals("https://example.org", titleOf("https://example.org"), "a blank title is no title")
+
+        vm.updateWebsiteTitle("https://example.org", "Example")
+        vm.updateWebsiteTitle("https://named.example", "Page Title")
+        vm.updateWebsiteTitle("https://unknown.example", "Nobody")
+        assertEquals("Example", titleOf("https://example.org"))
+        assertEquals("Our Church", titleOf("https://named.example"))
+    }
+
+    @Test
+    fun `redo does nothing while following another instance`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B")
+        vm.undo()
+        assertTrue(vm.canRedo)
+        vm.followRemoteSchedule(emptyList())
+
+        vm.redo()
+        assertTrue(vm.scheduleItems.isEmpty(), "the follower's schedule is the primary's")
+    }
+
+    @Test
+    fun `drag-reorder by index moves the item and shifts the rest`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B", "C", "D")
+        vm.moveItem(from = 0, to = 2)
+        assertEquals(listOf("B", "C", "A", "D"), vm.titles)
+    }
+
+    @Test
+    fun `out-of-range or no-op index moves are ignored`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B")
+        val before = vm.titles
+        val notificationsBefore = notifications.size
+        vm.moveItem(from = -1, to = 0)
+        vm.moveItem(from = 0, to = 99)
+        vm.moveItem(from = 5, to = 0)
+        vm.moveItem(from = 1, to = 1)
+        assertEquals(before, vm.titles)
+        assertEquals(notificationsBefore, notifications.size, "a rejected move must not notify listeners")
+    }
+
+    // ── Undo / redo ─────────────────────────────────────────────────────────────
+
+    @Test
+    fun `undo reverses an add and redo reapplies it`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B")
+        assertTrue(vm.canUndo)
+
+        vm.undo()
+        assertEquals(listOf("A"), vm.titles)
+        assertTrue(vm.canRedo)
+
+        vm.redo()
+        assertEquals(listOf("A", "B"), vm.titles)
+    }
+
+    @Test
+    fun `undo reverses removal and reordering too`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B", "C")
+        vm.removeItem(vm.scheduleItems[0].id)
+        assertEquals(listOf("B", "C"), vm.titles)
+        vm.undo()
+        assertEquals(listOf("A", "B", "C"), vm.titles)
+
+        vm.moveItemToBottom(vm.scheduleItems[0].id)
+        assertEquals(listOf("B", "C", "A"), vm.titles)
+        vm.undo()
+        assertEquals(listOf("A", "B", "C"), vm.titles)
+    }
+
+    @Test
+    fun `undo walks back through the whole history`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B", "C")
+        repeat(3) { vm.undo() }
+        assertTrue(vm.scheduleItems.isEmpty())
+        assertFalse(vm.canUndo, "nothing left to undo")
+    }
+
+    @Test
+    fun `undo on an empty history is a harmless no-op`() {
+        val vm = newViewModel()
+        vm.undo()
+        vm.redo()
+        assertTrue(vm.scheduleItems.isEmpty())
+        assertFalse(vm.canUndo)
+        assertFalse(vm.canRedo)
+    }
+
+    @Test
+    fun `a new edit after undo discards the redo branch`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B")
+        vm.undo()
+        assertTrue(vm.canRedo)
+
+        vm.addSong(9, "C", "Hymnal") // diverge from the undone branch
+        assertFalse(vm.canRedo, "redo must not resurrect an abandoned branch")
+        assertEquals(listOf("A", "C"), vm.titles)
+    }
+
+    @Test
+    fun `undo history is capped and the cap discards the oldest states`() {
+        val vm = newViewModel()
+        repeat(60) { vm.addSong(it, "Song $it", "Hymnal") } // cap is 50
+        var undos = 0
+        while (vm.canUndo) { vm.undo(); undos++ }
+        assertEquals(50, undos, "undo depth should stop at the 50-snapshot cap")
+        assertEquals(10, vm.scheduleItems.size, "the 10 oldest adds fall out of history and stay applied")
+    }
+
+    // ── Notes ───────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `notes are stored per item and blank clears them`() {
+        val vm = newViewModel()
+        vm.addSongs("A")
+        val id = vm.scheduleItems[0].id
+        assertEquals("", vm.getNote(id), "absent note reads as empty, never null")
+
+        vm.setNote(id, "Key of G")
+        assertEquals("Key of G", vm.getNote(id))
+
+        vm.setNote(id, "   ")
+        assertEquals("", vm.getNote(id), "a blank note clears rather than storing whitespace")
+    }
+
+    /**
+     * A note is an edit like any other: it has to mark the schedule dirty and be undoable.
+     *
+     * `setNote` used to do neither, with two consequences. The autosave loop skips a schedule it is
+     * never told changed, so typing a note and then crashing lost it. And because undo restores the
+     * notes map wholesale from its snapshot, undoing an *unrelated* earlier edit silently reverted
+     * the note too — the operator pressed undo once and lost two things.
+     *
+     * A note is committed by the ✓ button, not on every keystroke, so one edit is one undo step.
+     */
+    @Test
+    fun `a note edit marks the schedule changed`() {
+        val vm = newViewModel()
+        vm.addSongs("A")
+        val id = vm.scheduleItems[0].id
+        val before = notifications.size
+
+        vm.setNote(id, "Key of G")
+
+        assertTrue(notifications.size > before, "autosave only runs for a schedule it knows changed")
+    }
+
+    @Test
+    fun `a note edit is undone on its own, leaving the item it belongs to`() {
+        val vm = newViewModel()
+        vm.addSongs("A")
+        val id = vm.scheduleItems[0].id
+        vm.setNote(id, "Key of G")
+
+        vm.undo()
+
+        // The most recent edit was the note, so that is what comes back off the stack — the song
+        // it was attached to must survive.
+        assertEquals("", vm.getNote(id))
+        assertEquals(1, vm.scheduleItems.size, "undoing the note must not take the song with it")
+    }
+
+    @Test
+    fun `undoing an edit made before the note leaves the note alone`() {
+        val vm = newViewModel()
+        vm.addSongs("A")
+        val id = vm.scheduleItems[0].id
+        vm.setNote(id, "Key of G")
+        vm.addSongs("B")
+
+        vm.undo() // undoes adding B
+
+        // This is the case that used to lose work silently: the note was never snapshotted, so any
+        // undo restored a notes map that predated it.
+        assertEquals("Key of G", vm.getNote(id), "an unrelated undo must not discard the note")
+        assertEquals(1, vm.scheduleItems.size)
+    }
+
+    @Test
+    fun `committing the same note again is not a second undo step`() {
+        val vm = newViewModel()
+        vm.addSongs("A")
+        val id = vm.scheduleItems[0].id
+        vm.setNote(id, "Key of G")
+        val before = notifications.size
+
+        vm.setNote(id, "Key of G")
+
+        // The ✓ button is also how the editor is closed, so pressing it without having changed
+        // anything must not push an undo step that appears to do nothing.
+        assertEquals(before, notifications.size)
+        vm.undo()
+        assertEquals("", vm.getNote(id), "one edit, one undo")
+    }
+
+    // ── Selection ───────────────────────────────────────────────────────────────
+
+    @Test
+    fun `selecting the same item twice toggles it off`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B")
+        val id = vm.scheduleItems[0].id
+
+        vm.selectItem(id)
+        assertEquals(id, vm.selectedItemId)
+        vm.selectItem(id)
+        assertNull(vm.selectedItemId, "re-selecting the same item deselects it")
+
+        vm.selectItem(id)
+        vm.selectItem(vm.scheduleItems[1].id)
+        assertEquals(vm.scheduleItems[1].id, vm.selectedItemId, "selecting a different item switches")
+
+        vm.clearSelection()
+        assertNull(vm.selectedItemId)
+    }
+
+    // ── Clearing ────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `clearSchedule empties the list but stays undoable`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B")
+        vm.clearSchedule()
+        assertTrue(vm.scheduleItems.isEmpty())
+        assertTrue(vm.canUndo)
+        vm.undo()
+        assertEquals(listOf("A", "B"), vm.titles, "an accidental clear must be recoverable")
+    }
+
+    @Test
+    fun `newSchedule wipes history as well as items`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B")
+        vm.newSchedule()
+        assertTrue(vm.scheduleItems.isEmpty())
+        assertFalse(vm.canUndo, "starting a new service must not leave the old one undo-reachable")
+        assertFalse(vm.canRedo)
+    }
+
+    // ── Instance Link follower mode ─────────────────────────────────────────────
+
+    @Test
+    fun `while following a remote schedule local mutations are redirected, not applied`() {
+        val vm = newViewModel()
+        val pushed = mutableListOf<ScheduleItem>()
+        vm.onPushToRemoteSchedule = { pushed.add(it) }
+
+        vm.followRemoteSchedule(emptyList())
+        assertTrue(vm.isFollowingRemote)
+
+        vm.addSong(1, "Requested", "Hymnal")
+        assertTrue(vm.scheduleItems.isEmpty(), "a follower must not mutate its own schedule locally")
+        assertEquals(1, pushed.size, "the add should be forwarded to the primary instead")
+        assertEquals("Requested", (pushed[0] as ScheduleItem.SongItem).title)
+    }
+
+    @Test
+    fun `while following a remote schedule reordering and undo are inert`() {
+        val vm = newViewModel()
+        vm.addSongs("A", "B")
+        vm.followRemoteSchedule(emptyList())
+
+        vm.moveItem(0, 1)
+        vm.clearSchedule()
+        vm.undo()
+        vm.newSchedule()
+        assertTrue(vm.isFollowingRemote)
+    }
+
+    @Test
+    fun `stopFollowingRemote restores local control`() {
+        val vm = newViewModel()
+        vm.followRemoteSchedule(emptyList())
+        assertTrue(vm.isFollowingRemote)
+
+        vm.stopFollowingRemote()
+        assertFalse(vm.isFollowingRemote)
+
+        vm.addSong(1, "Local again", "Hymnal")
+        assertEquals(listOf("Local again"), vm.titles)
+    }
+
+    // ── Planned rows ────────────────────────────────────────────────────────────
+
+    private fun plannedSong(id: String = "planned-1") =
+        ScheduleItem.SongItem(id = id, songNumber = 1, title = "Planned", songbook = "Hymnal", songId = "Hymnal::1")
+
+    @Test
+    fun `a planned row is added whole with its timing`() {
+        val vm = newViewModel()
+        val timing = RowTiming(startAt = "09:45")
+
+        vm.addRow(plannedSong(), timing)
+
+        assertEquals("planned-1", vm.scheduleItems.single().id, "the id is kept so the timing still points at it")
+        assertEquals(timing, vm.timingFor("planned-1"))
+        assertTrue(vm.canUndo)
+    }
+
+    @Test
+    fun `default timing is not stored`() {
+        val vm = newViewModel()
+
+        vm.addRow(plannedSong("a"), RowTiming())
+        vm.addRow(plannedSong("b"), null)
+
+        assertEquals(RowTiming.DEFAULT, vm.timingFor("a"))
+        assertEquals(RowTiming.DEFAULT, vm.timingFor("b"))
+        assertTrue(vm.timing.isEmpty())
+    }
+
+    @Test
+    fun `a planned row is pushed to the primary while following one`() {
+        val vm = newViewModel()
+        val pushed = mutableListOf<ScheduleItem>()
+        vm.onPushToRemoteSchedule = { pushed.add(it) }
+        vm.followRemoteSchedule(emptyList())
+
+        vm.addRow(plannedSong(), RowTiming(startAt = "09:45"))
+
+        assertEquals(listOf("planned-1"), pushed.map { it.id })
+        assertTrue(vm.scheduleItems.isEmpty(), "the primary's schedule comes back as a broadcast")
+    }
+
+    @Test
+    fun `a cue row can be ticked off and back on in place`() {
+        val vm = newViewModel()
+        vm.addRow(plannedSong("song"), null)
+        vm.addRow(ScheduleItem.CueItem(id = "cue", action = "blank"), null)
+
+        vm.setCueEnabled("cue", enabled = false)
+
+        val cue = vm.scheduleItems[1] as ScheduleItem.CueItem
+        assertFalse(cue.enabled)
+        assertEquals(listOf("song", "cue"), vm.scheduleItems.map { it.id }, "in place, not moved")
+
+        vm.undo()
+        assertTrue((vm.scheduleItems[1] as ScheduleItem.CueItem).enabled)
+    }
+
+    @Test
+    fun `ticking something that is not a cue does nothing`() {
+        val vm = newViewModel()
+        vm.addRow(plannedSong("song"), null)
+        val before = vm.scheduleItems.toList()
+
+        vm.setCueEnabled("song", enabled = false)
+        vm.setCueEnabled("missing", enabled = false)
+
+        assertEquals(before, vm.scheduleItems)
+    }
+
+    // ── The live row, and the service start ─────────────────────────────────────
+
+    @Test
+    fun `presenting a row marks it live, with the time, and the automation's select does too`() {
+        val vm = newViewModel()
+        vm.addSongs("Alpha", "Beta")
+        val (alpha, beta) = vm.scheduleItems
+        assertNull(vm.liveRowId)
+
+        val at = java.time.LocalTime.of(10, 2)
+        vm.markLive(alpha.id, at)
+        assertEquals(alpha.id, vm.liveRowId)
+        assertEquals(at, vm.liveSince)
+
+        vm.presentItem(item = beta, onPresenting = {})
+        assertEquals(beta.id, vm.liveRowId, "every present path marks the row")
+
+        vm.selectOnly(alpha.id)
+        assertEquals(alpha.id, vm.liveRowId, "the engine's select is a go-live too")
+        assertEquals(alpha.id, vm.selectedItemId)
+
+        vm.presentItem(item = ScheduleItem.LabelItem("h", "Worship", "#FFF", "#000"), onPresenting = {})
+        assertEquals(alpha.id, vm.liveRowId, "a heading cannot be live")
+
+        vm.presentItem(item = ScheduleItem.MinistryItem("o", "A poem"), onPresenting = {})
+        assertEquals("o", vm.liveRowId, "an off-screen slot is what is happening, even with nothing on screen")
+    }
+
+    @Test
+    fun `the service start is kept with the rows and cleared with them`() {
+        val vm = newViewModel()
+        vm.addSongs("Alpha")
+        vm.markLive(vm.scheduleItems.single().id)
+        vm.setServiceStart("10:00")
+        assertEquals("10:00", vm.serviceStartTime)
+
+        vm.clearSchedule()
+        assertNull(vm.serviceStartTime)
+        assertNull(vm.liveRowId)
+        assertNull(vm.liveSince)
+
+        vm.setServiceStart(null)
+        assertNull(vm.serviceStartTime)
+    }
+
+    // ── Presenting each kind of row ─────────────────────────────────────────────
+
+    private val everyKind: List<ScheduleItem> = listOf(
+        ScheduleItem.SongItem("s", 1, "Song", "Hymnal", "Hymnal::1"),
+        ScheduleItem.BibleVerseItem("b", "John", 3, 16, "For God so loved"),
+        ScheduleItem.PictureItem("p", "/pics", "Pictures", 3),
+        ScheduleItem.PresentationItem("d", "/deck.pptx", "Deck", 10, "pptx"),
+        ScheduleItem.MediaItem("m", "/clip.mp4", "Clip", "local"),
+        ScheduleItem.LowerThirdItem("l", "preset", "Name", false, 0L),
+        ScheduleItem.AnnouncementItem(id = "a", text = "Welcome"),
+        ScheduleItem.WebsiteItem("w", "https://church.example"),
+        ScheduleItem.SceneItem("sc", "scene-1", "Scene"),
+        ScheduleItem.DictionaryItem("x", "G26", "agape", "agapē", "love"),
+        ScheduleItem.CueItem(id = "c", action = "blank"),
+    )
+
+    @Test
+    fun `with no handler of its own each kind of row switches the output to its content`() {
+        val vm = newViewModel()
+        val modes = mutableListOf<Presenting>()
+        everyKind.forEach { vm.presentItem(item = it, onPresenting = { mode -> modes += mode }) }
+
+        assertEquals(
+            listOf(
+                Presenting.LYRICS, Presenting.BIBLE, Presenting.PICTURES, Presenting.PRESENTATION,
+                Presenting.MEDIA, Presenting.ANNOUNCEMENTS, Presenting.WEBSITE, Presenting.CANVAS,
+                Presenting.ANNOUNCEMENTS,
+            ),
+            modes,
+            "a lower third and a cue have nothing to fall back to",
+        )
+    }
+
+    @Test
+    fun `with its handler each kind of row goes to it instead`() {
+        val vm = newViewModel()
+        val handled = mutableListOf<String>()
+        val modes = mutableListOf<Presenting>()
+        everyKind.forEach { item ->
+            vm.presentItem(
+                item = item,
+                onPresenting = { modes += it },
+                onPresentSong = { handled += it.id },
+                onPresentBible = { handled += it.id },
+                onPresentPresentation = { handled += it.id },
+                onPresentPictures = { handled += it.id },
+                onPresentMedia = { handled += it.id },
+                onPresentAnnouncement = { handled += it.id },
+                onPresentLowerThird = { handled += it.id },
+                onPresentWebsite = { handled += it.id },
+                onPresentScene = { handled += it.id },
+                onPresentDictionary = { handled += it.id },
+                onPresentCue = { handled += it.id },
+            )
+        }
+        assertEquals(everyKind.map { it.id }, handled)
+        assertTrue(modes.isEmpty())
+    }
+
+    // ── Moving rows at the ends ─────────────────────────────────────────────────
+
+    @Test
+    fun `a row already at an end, or not in the schedule, does not move`() {
+        val vm = newViewModel()
+        vm.addSong(1, "A", "Hymnal")
+        vm.addSong(2, "B", "Hymnal")
+        val first = vm.scheduleItems[0].id
+        val last = vm.scheduleItems[1].id
+        val announced = notifications.size
+
+        assertEquals(1, vm.moveItemDown(last))
+        assertEquals(1, vm.moveItemToBottom(last))
+        assertEquals(0, vm.moveItemToTop(first))
+        assertEquals(-1, vm.moveItemDown("missing"))
+        vm.moveItem(0, 5)
+        vm.moveItem(1, 1)
+        assertEquals(listOf(first, last), vm.scheduleItems.map { it.id })
+        assertEquals(announced, notifications.size, "nothing moved, so nothing was announced")
+    }
+}

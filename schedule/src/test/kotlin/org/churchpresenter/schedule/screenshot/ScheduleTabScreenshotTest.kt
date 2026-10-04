@@ -1,0 +1,340 @@
+@file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
+
+package org.churchpresenter.schedule.screenshot
+
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import org.churchpresenter.calendar.ScheduleServiceLink
+import org.churchpresenter.calendar.model.UpcomingLoad
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.test.onNodeWithTag
+import org.churchpresenter.schedule.ScheduleToolbarButton
+import org.churchpresenter.schedule.ScheduleToolbarIconSize
+import org.churchpresenter.schedule.ScheduleToolbarTags
+import org.churchpresenter.schedule.scheduleTab
+import org.churchpresenter.schedule.seedEveryItemType
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.schedule.ScheduleOpenFailure
+import org.churchpresenter.schedule.ScheduleViewModel
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.LocalTime
+import org.churchpresenter.calendar.CueFeed
+import org.churchpresenter.calendar.FiredCue
+import org.churchpresenter.core.models.schedule.CueAction
+import org.churchpresenter.core.models.schedule.RowEnd
+import org.churchpresenter.core.models.schedule.RowTiming
+import org.churchpresenter.core.models.schedule.ScheduleItem
+import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.schedule.undo
+import org.churchpresenter.schedule.setServiceStart
+import org.churchpresenter.schedule.selectItem
+import org.churchpresenter.schedule.addSong
+import org.churchpresenter.schedule.addScene
+import org.churchpresenter.schedule.addRow
+import org.churchpresenter.schedule.addPresentation
+import org.churchpresenter.schedule.addLabel
+import org.churchpresenter.schedule.addDictionary
+import org.churchpresenter.schedule.addBibleVerse
+import org.churchpresenter.schedule.addAnnouncement
+
+class ScheduleTabScreenshotTest {
+
+    private fun shoot(
+        name: String,
+        itemZoomPercent: Int = 100,
+        width: Dp? = null,
+        legacyRowActions: Boolean = false,
+        hiddenToolbarButtons: Set<String> = emptySet(),
+        toolbarIconSize: ScheduleToolbarIconSize = ScheduleToolbarIconSize.SMALL,
+        rootIndex: Int = 0,
+        seed: ScheduleViewModel.() -> Unit = { seedEveryItemType() },
+        clock: () -> LocalTime = { NOW },
+        upcomingServiceLoad: UpcomingLoad? = null,
+        scheduleService: ScheduleServiceLink? = null,
+        offerAddToCalendar: Boolean = false,
+        drive: ComposeUiTest.(ScheduleViewModel) -> Unit = {},
+    ) = stackedThemes(SECTION, name) { mode, file ->
+        // A feed left over from another shot would mark this one's cue rows.
+        CueFeed.clear()
+        scheduleTab(
+            itemZoomPercent = itemZoomPercent,
+            width = width,
+            legacyRowActions = legacyRowActions,
+            hiddenToolbarButtons = hiddenToolbarButtons,
+            toolbarIconSize = toolbarIconSize,
+            seed = seed,
+            themeMode = mode,
+            clock = clock,
+            upcomingServiceLoad = upcomingServiceLoad,
+            scheduleService = scheduleService,
+            offerAddToCalendar = offerAddToCalendar,
+        ) { vm, _ ->
+            drive(vm)
+            captureTo(file, rootIndex)
+        }
+    }
+
+    @Test
+    fun `every item type`() = shoot("every_item_type")
+
+    // ── The calendar's notices under Add Files ──────────────────────────────────────────────────
+
+    /**
+     * The next planned service, due in an hour and twenty minutes. The notice draws the time *left*,
+     * never a date, so the picture is the same on any day; its moment is set from the wall clock
+     * the shot starts at, with half a minute's slack, so the text holds however long the render
+     * takes. Epoch milliseconds rather than a `java.time` now(), which is the date-drawing family
+     * `ScreenshotInvariantsTest` keeps out of screenshots.
+     */
+    private fun sundayLoad() = UpcomingLoad(
+        serviceId = "sunday",
+        serviceName = "Sunday Morning",
+        loadAt = LocalDateTime.ofInstant(
+            Instant.ofEpochMilli(System.currentTimeMillis() + SUNDAY_LOAD_IN_MILLIS),
+            ZoneId.systemDefault(),
+        ),
+    )
+
+    @Test
+    fun `the next service announced, with Load now`() =
+        shoot("autoload_notice", seed = {}, upcomingServiceLoad = sundayLoad())
+
+    @Test
+    fun `load now asking what to do with the rows already there`() =
+        shoot("load_now_confirm", upcomingServiceLoad = sundayLoad(), rootIndex = 1) {
+            onNodeWithText("Load now").performClick()
+            waitForIdle()
+        }
+
+    @Test
+    fun `changes offered to be saved back to the calendar`() = shoot(
+        "save_to_calendar",
+        scheduleService = ScheduleServiceLink("sunday", "Sunday Morning", hasChanges = true),
+    )
+
+    @Test
+    fun `a hand-built schedule offered to the calendar`() = shoot("add_to_calendar", offerAddToCalendar = true)
+
+    /**
+     * A service loaded from the calendar, part-way through: every row carries the time the plan
+     * works out for it, and the live row says how far the service is from that plan.
+     */
+    @Test
+    fun `a loaded service running behind its plan`() = shoot("behind_plan", seed = { loadedService() }) { vm ->
+        // The second song was planned for 10:05 and went live at 10:07: two minutes behind, and
+        // at 10:14 -- past the five it was planned to take -- the overrun has grown it to four.
+        vm.markLive(vm.scheduleItems[2].id, LocalTime.of(10, 7))
+        waitForIdle()
+    }
+
+    /** A cue that was due while the operator was live with something else: marked, not fired. */
+    @Test
+    fun `a cue the engine skipped`() = shoot("cue_skipped", seed = { loadedService() }) { vm ->
+        val cue = vm.scheduleItems.first { it is ScheduleItem.CueItem }
+        CueFeed.post(FiredCue(cue, LocalTime.of(10, 10), skipped = true))
+        waitForIdle()
+    }
+
+    /** What the calendar puts in the Schedule: pinned starts, planned lengths, a cue, a service start. */
+    private fun ScheduleViewModel.loadedService() {
+        setServiceStart("10:00")
+        addLabel("Worship", "#FFFFFF", "#5B9DF5")
+        addRow(
+            ScheduleItem.SongItem("s1", 1, "Amazing Grace", "Hymnal", songId = "Hymnal::1"),
+            RowTiming(startAt = "10:00", runSeconds = 300, atEnd = RowEnd.NEXT),
+        )
+        addRow(
+            ScheduleItem.SongItem("s2", 42, "Here I Am to Worship", "Hymnal", songId = "Hymnal::42"),
+            RowTiming(runSeconds = 300),
+        )
+        addRow(
+            ScheduleItem.CueItem("cue", CueAction.BLANK, label = "Blank before the sermon", absoluteTime = "10:10"),
+            null,
+        )
+        addRow(
+            ScheduleItem.PresentationItem(
+                "deck", "/Users/Shared/ChurchPresenter/Decks/Sermon.pptx", "Sermon.pptx", 24, "pptx",
+            ),
+            RowTiming(runSeconds = 1920),
+        )
+    }
+
+    @Test
+    fun `every timer mode`() = shoot(
+        "timers",
+        seed = {
+            addAnnouncement(text = "", isTimer = true, timerMinutes = 5)
+            addAnnouncement(text = "", isTimer = true, timerHours = 1, timerMinutes = 30, timerSeconds = 15)
+            addAnnouncement(
+                text = "",
+                isTimer = true,
+                timerMode = Constants.TIMER_MODE_CLOCK,
+                targetHour = 10,
+                targetMinute = 30,
+            )
+            addAnnouncement(text = "", isTimer = true, timerMode = Constants.TIMER_MODE_COUNT_UP)
+            addAnnouncement(text = "", isTimer = true, timerMode = Constants.TIMER_MODE_CLOCK_DISPLAY)
+        },
+    )
+
+    @Test
+    fun `labels in their own colours`() = shoot(
+        "labels_coloured",
+        seed = {
+            addLabel("Welcome", "#FFFFFF", "#203040")
+            addLabel("Worship", "#1B5E20", "#C8E6C9")
+            addLabel("Sermon", "#FFFFFF", "#B71C1C")
+            addLabel("Communion", "#4A148C", "#E1BEE7")
+            addLabel("Sending", "#000000", "#FFD54F")
+        },
+    )
+
+    @Test
+    fun `a long announcement is truncated`() = shoot(
+        "announcement_truncated",
+        seed = {
+            addAnnouncement(
+                text = "The fellowship lunch will be held in the hall directly after the service, " +
+                    "and everyone is very welcome to stay",
+            )
+        },
+    )
+
+    @Test
+    fun `a plan imported from Planning Center`() = shoot(
+        "planning_center_import",
+        seed = {
+            addLabel("Pre-Service", "#FFFFFF", "#6750A4")
+            addSong(songNumber = 0, title = "Build My Life", songbook = "Planning Center")
+            addLabel("Worship", "#FFFFFF", "#6750A4")
+            addSong(songNumber = 0, title = "Goodness Of God", songbook = "Planning Center")
+            addLabel("Message", "#FFFFFF", "#6750A4")
+            addBibleVerse(
+                bookName = "Romans",
+                chapter = 8,
+                verseNumber = 28,
+                verseText = "And we know that all things work together for good.",
+            )
+            addPresentation(
+                filePath = "/planning-center/sermon-slides.pptx",
+                fileName = "sermon-slides.pptx",
+                slideCount = 18,
+                fileType = "pptx",
+            )
+        },
+    )
+
+    @Test
+    fun `scene and dictionary rows`() = shoot(
+        "scene_and_dictionary",
+        seed = {
+            addScene(sceneId = "scene-1", sceneName = "Countdown scene")
+            addDictionary(
+                number = "H2617",
+                word = "חֶסֶד",
+                transliteration = "chesed",
+                definition = "steadfast love",
+            )
+        },
+    )
+
+    @Test
+    fun `an empty schedule`() = shoot("empty", seed = {})
+
+    @Test
+    fun `an item selected`() = shoot("item_selected") { vm ->
+        vm.scheduleItems.getOrNull(1)?.let { vm.selectItem(it.id) }
+        waitForIdle()
+    }
+
+    @Test
+    fun `redo available after an undo`() = shoot("toolbar_redo_available") { vm ->
+        vm.undo()
+        waitForIdle()
+    }
+
+    @Test
+    fun `a narrow panel wraps the toolbar`() = shoot("narrow_panel", width = 240.dp)
+
+    /**
+     * The legacy card layout: every row's buttons on their own line, none of them over the title.
+     *
+     * Shot at 320dp rather than the harness's full window, because this layout spreads its buttons
+     * across the row — remove at one end, the rest at the other — and at 1024dp that reads as a
+     * mistake rather than as the layout an operator sees in a real panel.
+     */
+    @Test
+    fun `legacy row actions`() = shoot("legacy_row_actions", legacyRowActions = true, width = 320.dp)
+
+    /** The header with toolbar buttons and the title-row readouts turned off from the options menu. */
+    @Test
+    fun `toolbar buttons hidden`() = shoot(
+        "toolbar_buttons_hidden",
+        hiddenToolbarButtons = setOf(
+            ScheduleToolbarButton.PLANNING_CENTER.name,
+            ScheduleToolbarButton.UNDO.name,
+            ScheduleToolbarButton.REDO.name,
+            ScheduleToolbarButton.ITEM_COUNT.name,
+        ),
+    )
+
+    /**
+     * The toolbar at its two larger icon sizes, every button turned on so the Calendar Manager's is
+     * among them. Small is every other shot in this class.
+     */
+    @Test
+    fun `toolbar icons medium`() =
+        shoot("toolbar_icons_medium", toolbarIconSize = ScheduleToolbarIconSize.MEDIUM, width = 400.dp)
+
+    @Test
+    fun `toolbar icons large`() =
+        shoot("toolbar_icons_large", toolbarIconSize = ScheduleToolbarIconSize.LARGE, width = 400.dp)
+
+    /** CHURCH-PRESENTER-DESKTOP-9N: a file that is not a schedule is named, and nothing changes. */
+    @Test
+    fun `a file that is not a schedule is named in a dialog`() = shoot("open_not_a_schedule", rootIndex = 1) { vm ->
+        vm.openFailure = ScheduleOpenFailure("Sunday 10-05.cps", unreadable = false)
+        waitForIdle()
+    }
+
+    @Test
+    fun `a file that cannot be read is named in a dialog`() = shoot("open_unreadable", rootIndex = 1) { vm ->
+        vm.openFailure = ScheduleOpenFailure("Sunday 10-05.cps", unreadable = true)
+        waitForIdle()
+    }
+
+    /** The options menu itself — an open menu is its own compose root, hence [rootIndex] 1. */
+    @Test
+    fun `the options menu`() = shoot("options_menu", rootIndex = 1) {
+        onNodeWithTag(ScheduleToolbarTags.OPTIONS).performClick()
+        waitForIdle()
+    }
+
+    @Test
+    fun `density extra compact`() = shoot("density_extra_compact", itemZoomPercent = 55)
+
+    @Test
+    fun `density compact`() = shoot("density_compact", itemZoomPercent = 70)
+
+    @Test
+    fun `density detailed`() = shoot("density_detailed", itemZoomPercent = 150)
+
+    @Test
+    fun `density extra detailed`() = shoot("density_extra_detailed", itemZoomPercent = 200)
+
+    private companion object {
+        /** The wall clock every shot is judged against -- the live row's badge would otherwise tick. */
+        val NOW: LocalTime = LocalTime.of(10, 14)
+
+        const val SECTION = "scheduleTab"
+
+        /** An hour and twenty minutes, less the half minute of slack -- "in 1 h 20 min". */
+        const val SUNDAY_LOAD_IN_MILLIS = (80 * 60 - 30) * 1_000L
+    }
+}

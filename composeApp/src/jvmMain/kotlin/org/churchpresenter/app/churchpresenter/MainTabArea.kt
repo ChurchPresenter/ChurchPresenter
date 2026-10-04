@@ -38,8 +38,8 @@ import org.churchpresenter.strings.generated.resources.background
 import org.churchpresenter.icons.generated.resources.ic_settings
 import org.churchpresenter.strings.generated.resources.tab_visibility
 import org.churchpresenter.strings.generated.resources.tooltip_settings
-import org.churchpresenter.app.churchpresenter.composables.ToolbarKey
-import org.churchpresenter.app.churchpresenter.composables.ToolbarKeyStyle
+import org.churchpresenter.sharedui.composables.ToolbarKey
+import org.churchpresenter.sharedui.composables.ToolbarKeyStyle
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.bibletab.BibleTab
 import org.churchpresenter.companionsurface.CompanionSurfaceTab

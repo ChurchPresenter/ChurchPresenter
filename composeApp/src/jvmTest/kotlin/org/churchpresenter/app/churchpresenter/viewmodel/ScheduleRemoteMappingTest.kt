@@ -3,6 +3,8 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.server.ScheduleItemDto
+import org.churchpresenter.app.churchpresenter.remote.applyRemoteSchedule
+import org.churchpresenter.schedule.ScheduleViewModel
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -298,7 +300,7 @@ class ScheduleRemoteMappingTest {
     fun `an empty remote schedule empties the local one`() {
         apply(dto("song", id = "1") { copy(songNumber = 1) })
 
-        model.applyRemoteSchedule(emptyList())
+        model.followRemoteSchedule(emptyList())
 
         assertTrue(model.scheduleItems.isEmpty())
     }

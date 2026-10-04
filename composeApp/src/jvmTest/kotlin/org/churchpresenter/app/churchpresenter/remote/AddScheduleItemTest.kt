@@ -142,6 +142,43 @@ class AddScheduleItemTest {
         }
     }
 
+    @Test
+    fun `a whole plan brings its headings, lower thirds, scenes and cues with it`() {
+        val plan = listOf(
+            ScheduleItem.LabelItem(id = "l", text = "Part 2", textColor = "#fff", backgroundColor = "#000"),
+            ScheduleItem.LowerThirdItem(
+                id = "lt", presetId = "welcome", presetLabel = "Welcome",
+                pauseAtFrame = true, pauseDurationMs = 1500,
+            ),
+            ScheduleItem.SceneItem(id = "sc", sceneId = "scene-1", sceneName = "Opening"),
+            ScheduleItem.CueItem(id = "cue", action = "blank"),
+        )
+        val recorder = ScheduleActionsRecorder()
+
+        val added = plan.map { addScheduleItem(it, recorder.actions(), wholePlan = true) }
+
+        assertEquals(listOf(true, true, true, true), added)
+        assertEquals(
+            listOf(
+                "label:Part 2:#fff:#000",
+                "lowerThird:welcome:Welcome:true:1500",
+                "scene:scene-1:Opening",
+                "cue:cue",
+            ),
+            recorder.added,
+        )
+    }
+
+    @Test
+    fun `a ministry request is not schedule content even in a whole plan`() {
+        val (recorder, added) = ScheduleActionsRecorder().let { r ->
+            r to addScheduleItem(ScheduleItem.MinistryItem("m", "Violin", "Jake"), r.actions(), wholePlan = true)
+        }
+
+        assertFalse(added)
+        assertTrue(recorder.added.isEmpty())
+    }
+
     // ── The bug this extraction fixed ───────────────────────────────────────────
 
     @Test

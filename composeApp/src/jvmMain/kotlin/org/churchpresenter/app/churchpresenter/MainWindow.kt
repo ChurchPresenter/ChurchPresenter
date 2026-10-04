@@ -74,6 +74,7 @@ import androidx.compose.ui.window.WindowState
 import org.churchpresenter.server.TunnelStatus
 import org.churchpresenter.sharedui.composables.LocalWentLive
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
+import org.churchpresenter.schedule.LocalOpenCalendar
 
 /** The work done once the window is up: the server's first start, the update check and the story prompt. */
 @Composable
