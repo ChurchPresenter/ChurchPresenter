@@ -4,13 +4,17 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.presentationengine.model.Deck
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.models.Presenting
 import java.io.File
 
 /** The content that goes through Preview while preview mode is on; everything else still goes straight to air. */
 internal val CUEABLE_MODES =
-    setOf(Presenting.BIBLE, Presenting.PICTURES, Presenting.LYRICS, Presenting.LOWER_THIRD, Presenting.ANNOUNCEMENTS)
+    setOf(
+        Presenting.BIBLE, Presenting.LYRICS, Presenting.PICTURES, Presenting.PRESENTATION,
+        Presenting.LOWER_THIRD, Presenting.ANNOUNCEMENTS,
+    )
 
 /**
  * The Preview bus: what is cued, not yet on air, and Take, which puts it on air.
@@ -21,7 +25,7 @@ internal val CUEABLE_MODES =
  *
  * With it on, a **new item** goes to Preview and waits for [take]; **stepping** within the item
  * already on Program (the next verse of the chapter, the next section of the song, the next picture
- * in the folder) still goes straight to air. Only
+ * in the folder, the next slide of the deck) still goes straight to air. Only
  * [CUEABLE_MODES] are cued; the rest still go live directly.
  */
 class PreviewBus internal constructor(private val program: PresenterManager) {
@@ -65,7 +69,7 @@ class PreviewBus internal constructor(private val program: PresenterManager) {
             // A timer's text ticks on air; its go-live goes there with it.
             mode == Presenting.ANNOUNCEMENTS && program.announcementTickerLive.value -> program.setPresentingMode(mode)
             manager.isLive(mode) -> Unit
-            mode == Presenting.PICTURES && program.isLive(mode) -> Unit
+            (mode == Presenting.PICTURES || mode == Presenting.PRESENTATION) && program.isLive(mode) -> Unit
             // The song on air going live again -- a section of it double-clicked -- is a step.
             mode == Presenting.LYRICS && songTarget === program -> program.setPresentingMode(mode)
             mode == Presenting.BIBLE && verseTarget === program -> program.setPresentingMode(mode)
@@ -80,6 +84,12 @@ class PreviewBus internal constructor(private val program: PresenterManager) {
         program.isLive(Presenting.PICTURES) && sameFolder(path, program.selectedImagePath.value) -> program
         else -> manager
     }
+
+    /**
+     * The animated playback of a cued slide: Preview shows the slide still, and [take] starts its
+     * animation on air -- see [PresenterSlidesOutput].
+     */
+    internal var cuedPlayback: CuedPlayback? = null
 
     /** Where the last push of verses went -- see [forVerses]. */
     private var verseTarget: PresenterManager? = null
@@ -142,6 +152,10 @@ class PreviewBus internal constructor(private val program: PresenterManager) {
         // What was taken is on air now, so its next verse or section is a step there.
         if (slide == Presenting.BIBLE) verseTarget = program
         if (slide == Presenting.LYRICS) songTarget = program
+        if (slide == Presenting.PRESENTATION) {
+            cuedPlayback?.let { program.presentationShowSlide(it.deck, it.slideIndex, it.enterAtLastStep) }
+        }
+        cuedPlayback = null
         program.setShowPresenterWindow(true)
         clear()
     }
@@ -151,6 +165,9 @@ class PreviewBus internal constructor(private val program: PresenterManager) {
         if (manager.anythingLive) manager.setPresentingMode(Presenting.NONE)
     }
 }
+
+/** A slide whose animation [PreviewBus.take] starts on air. */
+internal class CuedPlayback(val deck: Deck, val slideIndex: Int, val enterAtLastStep: Boolean)
 
 /** What [from] holds of [mode], put on [to] and taken live there. */
 private fun putOnAir(mode: Presenting, from: PresenterManager, to: PresenterManager) {
@@ -172,6 +189,12 @@ private fun putOnAir(mode: Presenting, from: PresenterManager, to: PresenterMana
             // taken passage off it.
             to.setBibleHold(false)
             to.setSelectedVerses(from.selectedVerses.value)
+        }
+        Presenting.PRESENTATION -> {
+            to.setSelectedSlide(from.selectedSlide.value)
+            from.liveSlide.value?.let { to.setLiveSlide(it.fileName, it.index) }
+            to.setNextSlide(from.nextSlide.value)
+            to.setPresenterNotes(from.presenterNotes.value)
         }
         Presenting.LYRICS -> {
             to.setAllLyricSections(from.allLyricSections.value)

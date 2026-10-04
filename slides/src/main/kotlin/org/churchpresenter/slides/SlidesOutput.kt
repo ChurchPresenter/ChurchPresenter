@@ -42,6 +42,12 @@ interface PictureOutput {
 
 /** The deck slide on the output: its bitmaps, its notes, and its animated playback. */
 interface DeckOutput {
+    /**
+     * Whether a presentation is cued on a preview, waiting to go on air. The tab keeps stepping it
+     * there as it would on air; off unless the app has a preview.
+     */
+    val presentationCued: Boolean get() = false
+
     val presentationFrame: State<PresentationFrame?>
 
     fun setSelectedSlide(slide: ImageBitmap?)

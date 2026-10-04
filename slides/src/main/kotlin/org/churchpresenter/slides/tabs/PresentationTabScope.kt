@@ -195,6 +195,7 @@ internal fun PresentationTabScope.PresentationLiveEffects(viewModel: Presentatio
         val idx = viewModel.selectedSlideIndex
         val enterAtLastStep = viewModel.consumeEnteredViaPreviousSlide()
         val anyScreenOnPresentation = mode == Presenting.PRESENTATION ||
+            presenterManager?.presentationCued == true ||
             presenterManager?.screenLocks?.value?.values?.any { it == Presenting.PRESENTATION } == true
         if (anyScreenOnPresentation && viewModel.slideFiles.isNotEmpty()) {
             val bitmap = viewModel.slideFiles.getOrNull(idx)?.let { f ->
@@ -231,6 +232,7 @@ internal fun PresentationTabScope.PresentationLiveEffects(viewModel: Presentatio
     // is refreshed -- and only that. Re-pushing the live slide here restarted its animation.
     LaunchedEffect(viewModel.hiddenSlides) {
         val onPresentation = presenterManager?.presentingMode?.value == Presenting.PRESENTATION ||
+            presenterManager?.presentationCued == true ||
             presenterManager?.screenLocks?.value?.values?.any { it == Presenting.PRESENTATION } == true
         if (!onPresentation) return@LaunchedEffect
         val nextFile = viewModel.nextShownSlideIndex()?.let { viewModel.slideFiles.getOrNull(it) }
