@@ -53,6 +53,7 @@ import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.bibletab.BibleViewModel
+import org.churchpresenter.bible.Bible
 import org.churchpresenter.bible.bibleFilesInDirectory
 import androidx.compose.runtime.produceState
 import java.io.File
@@ -115,10 +116,6 @@ internal fun BibleProperties(
     }
 
     val bible = bibleVm?.primaryBible?.value
-    val books = bibleVm?.books?.value ?: emptyList()
-    val verses = bibleVm?.verses?.value ?: emptyList()
-    val selectedBookIndex = bibleVm?.selectedBookIndex?.value ?: 0
-    val selectedChapter = bibleVm?.selectedChapter?.value ?: 1
 
     Text(
         stringResource(Res.string.canvas_source_bible),
@@ -136,6 +133,74 @@ internal fun BibleProperties(
         )
     }
 
+    BibleVersePicker(
+        bibleVm = bibleVm,
+        source = source,
+        onUpdate = onUpdate,
+        noBibleConfigured = appSettings == null || storageDir.isEmpty(),
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    HorizontalDivider()
+    Spacer(modifier = Modifier.height(4.dp))
+
+    BibleTextFields(source, onUpdate)
+    Spacer(modifier = Modifier.height(8.dp))
+    HorizontalDivider()
+    Spacer(modifier = Modifier.height(4.dp))
+
+    BibleVerseStyle(source, onUpdate, bible, availableFonts)
+    Spacer(modifier = Modifier.height(4.dp))
+
+    BibleReferenceStyle(source, onUpdate)
+    Spacer(modifier = Modifier.height(4.dp))
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Column {
+            Text(
+                stringResource(Res.string.canvas_align_horizontal),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            HorizontalAlignmentButtons(
+                selectedAlignment = source.horizontalAlignment,
+                onAlignmentChange = { onUpdate(source.copy(horizontalAlignment = it)) },
+                leftValue = "left",
+                centerValue = "center",
+                rightValue = "right"
+            )
+        }
+        Column {
+            Text(
+                stringResource(Res.string.canvas_align_vertical),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            VerticalAlignmentButtons(
+                selectedAlignment = source.verticalAlignment,
+                onAlignmentChange = { onUpdate(source.copy(verticalAlignment = it)) },
+                topValue = "top",
+                middleValue = "center",
+                bottomValue = "bottom"
+            )
+        }
+    }
+}
+/** Book, chapter and verses from the panel's own translation, inserted into the source as its text. */
+@Composable
+private fun BibleVersePicker(
+    bibleVm: BibleViewModel?,
+    source: SceneSource.BibleSource,
+    onUpdate: (SceneSource) -> Unit,
+    noBibleConfigured: Boolean,
+) {
+    val bible = bibleVm?.primaryBible?.value
+    val books = bibleVm?.books?.value ?: emptyList()
+    val verses = bibleVm?.verses?.value ?: emptyList()
+    val selectedBookIndex = bibleVm?.selectedBookIndex?.value ?: 0
+    val selectedChapter = bibleVm?.selectedChapter?.value ?: 1
     if (books.isNotEmpty()) {
         val chapterCount = bible?.getChapterCount(bible.getBookId(selectedBookIndex)) ?: 0
         var startVerse by remember(selectedBookIndex, selectedChapter) { mutableStateOf(1) }
@@ -215,18 +280,18 @@ internal fun BibleProperties(
                 Text(stringResource(Res.string.canvas_bible_insert))
             }
         }
-    } else if (appSettings == null || storageDir.isEmpty()) {
+    } else if (noBibleConfigured) {
         Text(
             stringResource(Res.string.bible_no_primary_title),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
+}
 
-    Spacer(modifier = Modifier.height(8.dp))
-    HorizontalDivider()
-    Spacer(modifier = Modifier.height(4.dp))
-
+/** The verse and reference the source shows, editable by hand. */
+@Composable
+private fun BibleTextFields(source: SceneSource.BibleSource, onUpdate: (SceneSource) -> Unit) {
     var verseTextValue by remember(source.verseText) { mutableStateOf(source.verseText) }
     StyledTextField(
         value = verseTextValue,
@@ -251,11 +316,16 @@ internal fun BibleProperties(
         label = stringResource(Res.string.canvas_bible_reference),
         modifier = Modifier.fillMaxWidth()
     )
+}
 
-    Spacer(modifier = Modifier.height(8.dp))
-    HorizontalDivider()
-    Spacer(modifier = Modifier.height(4.dp))
-
+/** The verse text's face: font, size, spacing, curve, colours and style. */
+@Composable
+private fun BibleVerseStyle(
+    source: SceneSource.BibleSource,
+    onUpdate: (SceneSource) -> Unit,
+    bible: Bible?,
+    availableFonts: List<String>,
+) {
     Text(
         stringResource(Res.string.canvas_verse_style),
         style = MaterialTheme.typography.labelMedium,
@@ -327,9 +397,11 @@ internal fun BibleProperties(
         outline = source.outline,
         onOutlineChange = { onUpdate(source.copy(outline = it)) },
     )
+}
 
-    Spacer(modifier = Modifier.height(4.dp))
-
+/** The reference line's face: size, colour and style. */
+@Composable
+private fun BibleReferenceStyle(source: SceneSource.BibleSource, onUpdate: (SceneSource) -> Unit) {
     Text(
         stringResource(Res.string.canvas_reference_style),
         style = MaterialTheme.typography.labelMedium,
@@ -368,40 +440,4 @@ internal fun BibleProperties(
         outline = source.referenceOutline,
         onOutlineChange = { onUpdate(source.copy(referenceOutline = it)) },
     )
-
-    Spacer(modifier = Modifier.height(4.dp))
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Column {
-            Text(
-                stringResource(Res.string.canvas_align_horizontal),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            HorizontalAlignmentButtons(
-                selectedAlignment = source.horizontalAlignment,
-                onAlignmentChange = { onUpdate(source.copy(horizontalAlignment = it)) },
-                leftValue = "left",
-                centerValue = "center",
-                rightValue = "right"
-            )
-        }
-        Column {
-            Text(
-                stringResource(Res.string.canvas_align_vertical),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            VerticalAlignmentButtons(
-                selectedAlignment = source.verticalAlignment,
-                onAlignmentChange = { onUpdate(source.copy(verticalAlignment = it)) },
-                topValue = "top",
-                middleValue = "center",
-                bottomValue = "bottom"
-            )
-        }
-    }
 }

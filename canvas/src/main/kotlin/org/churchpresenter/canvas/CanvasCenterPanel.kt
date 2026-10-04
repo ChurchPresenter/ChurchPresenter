@@ -55,7 +55,6 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.forArea
 import org.churchpresenter.core.models.scene.isLandscape
-import org.churchpresenter.sharedui.models.Presenting
 import org.jetbrains.compose.resources.stringResource
 import java.util.UUID
 import org.churchpresenter.strings.generated.resources.canvas_tool_select

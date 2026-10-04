@@ -21,7 +21,7 @@ class SceneSnapTest {
     private val size = 0.2f          // the dragged source is 0.2 x 0.2
 
     private fun snap(x: Float, y: Float, sources: List<SceneSource> = emptyList(), excludeId: String = "self") =
-        computeSnap(x, y, size, size, sources, excludeId, canvasWidth = w, canvasHeight = h)
+        computeSnap(SnapBox(x, y, size, size), SnapTargets(sources, excludeId, canvasWidth = w, canvasHeight = h))
 
     private fun approx(a: Float, b: Float) = abs(a - b) <= 0.0005f
 

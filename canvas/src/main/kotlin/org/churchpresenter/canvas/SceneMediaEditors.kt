@@ -203,6 +203,85 @@ internal fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSour
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 
+    TextContentEditor(source, onUpdate)
+    PropertySliderWithInput(
+        stringResource(Res.string.canvas_letter_spacing),
+        source.letterSpacing, MIN_LETTER_SPACING, MAX_LETTER_SPACING, "%"
+    ) { v -> onUpdate(source.copy(letterSpacing = v)) }
+    PropertySliderWithInput(
+        stringResource(Res.string.canvas_text_curve),
+        source.curve,
+        -MAX_TEXT_CURVE,
+        MAX_TEXT_CURVE,
+        "%"
+    ) { v ->
+        onUpdate(source.copy(curve = v))
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        FontSettingsDropdown(
+            label = stringResource(Res.string.canvas_font),
+            value = source.fontFamily,
+            fonts = availableFonts,
+            fillWidth = true,
+            onValueChange = { onUpdate(source.copy(fontFamily = it)) },
+            modifier = Modifier.weight(FONT_NAME_WEIGHT)
+        )
+        PropertyIntField(
+            stringResource(Res.string.canvas_clock_font_size),
+            source.fontSize,
+            MIN_FONT_SIZE..MAX_FONT_SIZE,
+            Modifier.weight(1f)
+        ) { onUpdate(source.copy(fontSize = it)) }
+    }
+    TextStyleButtons(
+        bold = source.bold,
+        italic = source.italic,
+        underline = source.underline,
+        shadow = false,
+        onBoldChange = { onUpdate(source.copy(bold = it)) },
+        onItalicChange = { onUpdate(source.copy(italic = it)) },
+        onUnderlineChange = { onUpdate(source.copy(underline = it)) },
+        onShadowChange = {},
+        strikethrough = source.strikethrough,
+        onStrikethroughChange = { onUpdate(source.copy(strikethrough = it)) },
+        showShadow = false,
+        outline = source.outline,
+        onOutlineChange = { onUpdate(source.copy(outline = it)) },
+    )
+    TextAlignmentRow(source, onUpdate)
+    ColorPickerField(
+        color = source.fontColor,
+        onColorChange = { onUpdate(source.copy(fontColor = it)) },
+        label = stringResource(Res.string.canvas_font_color)
+    )
+    LabeledCheckbox(
+        checked = isTransparentBg,
+        onCheckedChange = { checked ->
+                onUpdate(source.copy(
+                    backgroundColor = if (checked) "#00000000" else "#000000"
+                ))
+            },
+        label = stringResource(Res.string.canvas_transparent_bg),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        spacing = 4.dp,
+    )
+    if (!isTransparentBg) {
+        ColorPickerField(
+            color = source.backgroundColor,
+            onColorChange = { onUpdate(source.copy(backgroundColor = it)) },
+            label = stringResource(Res.string.canvas_bg_color)
+        )
+    }
+}
+
+/** The text a text source shows: a short field, and a larger window for writing more. */
+@Composable
+private fun TextContentEditor(source: SceneSource.TextSource, onUpdate: (SceneSource) -> Unit) {
     var textValue by remember(source.text) { mutableStateOf(source.text) }
     var showTextDialog by remember { mutableStateOf(false) }
     StyledTextField(
@@ -259,54 +338,11 @@ internal fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSour
             }
         }
     }
-    PropertySliderWithInput(
-        stringResource(Res.string.canvas_letter_spacing),
-        source.letterSpacing, MIN_LETTER_SPACING, MAX_LETTER_SPACING, "%"
-    ) { v -> onUpdate(source.copy(letterSpacing = v)) }
-    PropertySliderWithInput(
-        stringResource(Res.string.canvas_text_curve),
-        source.curve,
-        -MAX_TEXT_CURVE,
-        MAX_TEXT_CURVE,
-        "%"
-    ) { v ->
-        onUpdate(source.copy(curve = v))
-    }
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        FontSettingsDropdown(
-            label = stringResource(Res.string.canvas_font),
-            value = source.fontFamily,
-            fonts = availableFonts,
-            fillWidth = true,
-            onValueChange = { onUpdate(source.copy(fontFamily = it)) },
-            modifier = Modifier.weight(FONT_NAME_WEIGHT)
-        )
-        PropertyIntField(
-            stringResource(Res.string.canvas_clock_font_size),
-            source.fontSize,
-            MIN_FONT_SIZE..MAX_FONT_SIZE,
-            Modifier.weight(1f)
-        ) { onUpdate(source.copy(fontSize = it)) }
-    }
-    TextStyleButtons(
-        bold = source.bold,
-        italic = source.italic,
-        underline = source.underline,
-        shadow = false,
-        onBoldChange = { onUpdate(source.copy(bold = it)) },
-        onItalicChange = { onUpdate(source.copy(italic = it)) },
-        onUnderlineChange = { onUpdate(source.copy(underline = it)) },
-        onShadowChange = {},
-        strikethrough = source.strikethrough,
-        onStrikethroughChange = { onUpdate(source.copy(strikethrough = it)) },
-        showShadow = false,
-        outline = source.outline,
-        onOutlineChange = { onUpdate(source.copy(outline = it)) },
-    )
+}
+
+/** Where a text source sits in its box, across and down. */
+@Composable
+private fun TextAlignmentRow(source: SceneSource.TextSource, onUpdate: (SceneSource) -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -339,30 +375,6 @@ internal fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSour
                 bottomValue = "bottom"
             )
         }
-    }
-    ColorPickerField(
-        color = source.fontColor,
-        onColorChange = { onUpdate(source.copy(fontColor = it)) },
-        label = stringResource(Res.string.canvas_font_color)
-    )
-    LabeledCheckbox(
-        checked = isTransparentBg,
-        onCheckedChange = { checked ->
-                onUpdate(source.copy(
-                    backgroundColor = if (checked) "#00000000" else "#000000"
-                ))
-            },
-        label = stringResource(Res.string.canvas_transparent_bg),
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        spacing = 4.dp,
-    )
-    if (!isTransparentBg) {
-        ColorPickerField(
-            color = source.backgroundColor,
-            onColorChange = { onUpdate(source.copy(backgroundColor = it)) },
-            label = stringResource(Res.string.canvas_bg_color)
-        )
     }
 }
 

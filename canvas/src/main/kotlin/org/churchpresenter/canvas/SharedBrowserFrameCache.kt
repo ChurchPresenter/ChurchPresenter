@@ -1,7 +1,6 @@
 package org.churchpresenter.canvas
 
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.toComposeImageBitmap
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,41 +18,29 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
-import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import org.churchpresenter.diagnostics.CrashReporter
-import java.io.ByteArrayInputStream
 import java.io.IOException
-import java.net.ServerSocket
 import java.net.URI
 import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.net.http.WebSocket
-import java.util.Base64
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeoutException
-import javax.imageio.ImageIO
 import org.churchpresenter.sharedui.utils.addGuardedShutdownHook
 import org.churchpresenter.diagnostics.Log
 
-private const val HTTP_OK = 200
 private const val MILLIS_PER_SECOND = 1000L
 private const val MIN_FPS = 1
 private const val MAX_FPS = 60
 private const val MIN_CAPTURE_INTERVAL_MS = 16L
 private const val MIN_STARTUP_CAPTURE_INTERVAL_MS = 33L
 private const val NAVIGATE_SETTLE_MS = 2000L
-private const val PAGE_LOAD_SETTLE_MS = 3000L
-private const val DEVTOOLS_POLL_INTERVAL_MS = 500L
-private const val WMIC_TIMEOUT_S = 5L
-private const val PROCESS_KILL_TIMEOUT_S = 3L
 private const val WEBSOCKET_CONNECT_TIMEOUT_S = 10L
 private const val WEBSOCKET_SEND_TIMEOUT_S = 5L
 private const val CDP_RESPONSE_TIMEOUT_S = 30L
@@ -69,9 +56,6 @@ object SharedBrowserFrameCache {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val entries = mutableMapOf<String, CacheEntry>()
-    private val httpClient = HttpClient.newHttpClient()
-    private val isWindows = System.getProperty("os.name", "").lowercase().contains("win")
-    @Volatile private var zombiesCleaned = false
 
     init {
         // Kill all browser processes on JVM shutdown to prevent orphaned Chrome/Edge windows
@@ -83,7 +67,7 @@ object SharedBrowserFrameCache {
         }
     }
 
-    private class CacheEntry(
+    internal class CacheEntry(
         val frame: MutableStateFlow<ImageBitmap?> = MutableStateFlow(null),
         val error: MutableStateFlow<String?> = MutableStateFlow(null),
         val currentUrl: MutableStateFlow<String> = MutableStateFlow(""),
@@ -105,12 +89,7 @@ object SharedBrowserFrameCache {
     @Synchronized
     fun acquire(
         sourceId: String,
-        url: String,
-        renderWidth: Int,
-        renderHeight: Int,
-        customCss: String,
-        fps: Int,
-        forceTransparent: Boolean
+        page: BrowserPage,
     ): BrowserFlows {
         val entry = entries.getOrPut(sourceId) { CacheEntry() }
         ResourceCensus.record(SharedResource.BROWSER_SOURCE, entries.size)
@@ -124,7 +103,7 @@ object SharedBrowserFrameCache {
                 // Launching the process, its temp profile and the DevTools socket fail with I/O
                 // errors; a malformed reply or a closed socket with the two runtime ones.
                 try {
-                    startBrowser(entry, BrowserPage(url, renderWidth, renderHeight, customCss, fps, forceTransparent))
+                    startBrowser(entry, page)
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: IOException) {
@@ -230,146 +209,16 @@ object SharedBrowserFrameCache {
 
     // ── Browser Discovery ──────────────────────────────────────────
 
-    /** The executable `which`/`where` reports for [name], when it exists on disk. */
-    private fun browserOnPath(whichCmd: String, name: String): String? = try {
-        val proc = ProcessBuilder(whichCmd, name).redirectErrorStream(true).start()
-        val output = proc.inputStream.bufferedReader().readText().trim()
-        val path = output.lines().firstOrNull()?.trim()
-        if (proc.waitFor() == 0 && !path.isNullOrBlank() && java.io.File(path).exists()) path else null
-    } catch (_: Exception) {
-        null
-    }
 
-    internal fun findBrowserExecutable(): String? {
-        val osName = System.getProperty("os.name", "").lowercase()
-        val isWindows = osName.contains("win")
 
-        // Check well-known install paths first
-        val candidates = when {
-            isWindows -> listOf(
-                "${System.getenv("ProgramFiles(x86)")}\\Microsoft\\Edge\\Application\\msedge.exe",
-                "${System.getenv("ProgramFiles")}\\Microsoft\\Edge\\Application\\msedge.exe",
-                "${System.getenv("LOCALAPPDATA")}\\Microsoft\\Edge\\Application\\msedge.exe",
-                "${System.getenv("ProgramFiles")}\\Google\\Chrome\\Application\\chrome.exe",
-                "${System.getenv("ProgramFiles(x86)")}\\Google\\Chrome\\Application\\chrome.exe",
-                "${System.getenv("LOCALAPPDATA")}\\Google\\Chrome\\Application\\chrome.exe"
-            )
-            osName.contains("mac") -> listOf(
-                "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-                "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
-                "/Applications/Chromium.app/Contents/MacOS/Chromium",
-                // Homebrew paths
-                "/opt/homebrew/bin/chromium",
-                "/usr/local/bin/chromium"
-            )
-            else -> listOf(
-                "/usr/bin/google-chrome-stable",
-                "/usr/bin/google-chrome",
-                "/usr/bin/chromium-browser",
-                "/usr/bin/chromium",
-                "/snap/bin/chromium",
-                "/usr/bin/microsoft-edge-stable",
-                "/usr/bin/microsoft-edge"
-            )
-        }
-        val found = candidates.firstOrNull { path ->
-            try { java.io.File(path).exists() } catch (_: Exception) { false }
-        }
-        if (found != null) return found
 
-        // Fallback: check PATH
-        val names = if (isWindows) listOf("msedge.exe", "chrome.exe")
-                    else listOf(
-                        "google-chrome-stable",
-                        "google-chrome",
-                        "chromium-browser",
-                        "chromium",
-                        "microsoft-edge-stable"
-                    )
-        val whichCmd = if (isWindows) "where" else "which"
-        return names.firstNotNullOfOrNull { name -> browserOnPath(whichCmd, name) }
-    }
-
-    internal fun findFreePort(): Int {
-        return ServerSocket(0).use { it.localPort }
-    }
-
-    /**
-     * Kill orphaned headless Chrome/Edge processes from previous runs.
-     * Only runs once per app session, on the first acquire() call.
-     */
-    private fun killZombieBrowsers() {
-        if (zombiesCleaned) return
-        zombiesCleaned = true
-        try {
-            if (isWindows) {
-                // Find headless Chrome/Edge processes via wmic
-                val proc = ProcessBuilder(
-                    "wmic", "process", "where",
-                    "CommandLine like '%--headless%' and (Name='msedge.exe' or Name='chrome.exe')",
-                    "get", "ProcessId"
-                ).redirectErrorStream(true).start()
-                val output = proc.inputStream.bufferedReader().readText()
-                proc.waitFor(WMIC_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
-                val pids = Regex("\\d+").findAll(output).map { it.value }.toList()
-                for (pid in pids) {
-                    Log.warn("BrowserSource", "Killing zombie browser process: PID $pid")
-                    ProcessBuilder("taskkill", "/F", "/T", "/PID", pid)
-                        .redirectErrorStream(true).start()
-                        .waitFor(PROCESS_KILL_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
-                }
-            } else {
-                // On Linux/macOS, kill headless chrome/edge processes
-                ProcessBuilder("pkill", "-f", "--headless.*--remote-debugging-port")
-                    .redirectErrorStream(true).start()
-                    .waitFor(PROCESS_KILL_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
-            }
-        } catch (_: Exception) {}
-    }
 
     // ── CDP Browser Lifecycle ──────────────────────────────────────
 
-    /** The CDP connection to the freshly launched browser, or null once the failure is reported. */
-    private suspend fun connectCdp(entry: CacheEntry, port: Int): CdpConnection? {
-        if (!waitForCdpReady(port, timeoutMs = 15000)) {
-            Log.warn("BrowserSource", "CDP did not become ready in time")
-            CrashReporter.reportWarning(
-                "BrowserSource: CDP did not become ready in time",
-                tags = mapOf("subsystem" to "browser-source")
-            )
-            entry.error.value = "Browser failed to start"
-            return null
-        }
-        Log.info("BrowserSource", "CDP ready on port $port")
-        return openCdpWebSocket(port)
-    }
 
-    private suspend fun openCdpWebSocket(port: Int): CdpConnection? {
-        val wsUrl = withContext(Dispatchers.IO) { getPageWebSocketUrl(port) }
-        if (wsUrl == null) {
-            Log.warn("BrowserSource", "Could not get page WebSocket URL")
-            CrashReporter.reportWarning(
-                "BrowserSource: Could not get page WebSocket URL",
-                tags = mapOf("subsystem" to "browser-source")
-            )
-            return null
-        }
-        Log.info("BrowserSource", "Connecting WebSocket: $wsUrl")
-        val cdp = CdpConnection()
-        val connected = withContext(Dispatchers.IO) { cdp.connect(wsUrl) }
-        if (!connected) {
-            Log.warn("BrowserSource", "WebSocket connection failed")
-            CrashReporter.reportWarning(
-                "BrowserSource: WebSocket connection to CDP failed",
-                tags = mapOf("subsystem" to "browser-source")
-            )
-            return null
-        }
-        return cdp
-    }
 
     /** The page one browser source shows, and how it is rendered and captured. */
-    private data class BrowserPage(
+    data class BrowserPage(
         val url: String,
         val renderWidth: Int,
         val renderHeight: Int,
@@ -380,9 +229,9 @@ object SharedBrowserFrameCache {
 
     private suspend fun startBrowser(entry: CacheEntry, page: BrowserPage) {
         // Kill any zombie browsers from previous runs (once per session)
-        withContext(Dispatchers.IO) { killZombieBrowsers() }
+        withContext(Dispatchers.IO) { BrowserProcesses.killZombieBrowsers() }
 
-        val browserPath = findBrowserExecutable()
+        val browserPath = BrowserProcesses.findBrowserExecutable()
         if (browserPath == null) {
             Log.warn("BrowserSource", "No Chrome or Edge browser found on system")
             CrashReporter.reportWarning(
@@ -393,7 +242,7 @@ object SharedBrowserFrameCache {
             return
         }
 
-        val port = findFreePort()
+        val port = BrowserProcesses.findFreePort()
         entry.debugPort = port
 
         // Create a unique temp user-data-dir to avoid profile lock conflicts
@@ -428,9 +277,9 @@ object SharedBrowserFrameCache {
             } catch (_: Throwable) {}
         }
 
-        val cdp = connectCdp(entry, port)
+        val cdp = CdpPages.connectCdp(entry, port)
         if (cdp == null) {
-            killProcess(process)
+            BrowserProcesses.killProcess(process)
             entry.browserProcess = null
             return
         }
@@ -438,70 +287,10 @@ object SharedBrowserFrameCache {
         cdp.onUrlChanged = { url -> entry.currentUrl.value = url }
         Log.info("BrowserSource", "WebSocket connected")
 
-        configurePage(cdp, page)
+        CdpPages.configurePage(cdp, page)
         runCaptureLoop(entry, cdp, page.fps)
     }
 
-    /** Viewport, transparency and navigation for a freshly connected page. */
-    private suspend fun configurePage(cdp: CdpConnection, page: BrowserPage) {
-    val url = page.url
-    val renderWidth = page.renderWidth
-    val renderHeight = page.renderHeight
-    val customCss = page.customCss
-    val forceTransparent = page.forceTransparent
-    // Configure viewport and transparency
-    var resp = cdp.sendAsync("Emulation.setDeviceMetricsOverride", buildJsonObject {
-        put("width", renderWidth)
-        put("height", renderHeight)
-        put("deviceScaleFactor", 1)
-        put("mobile", false)
-    })
-    Log.info("BrowserSource", "setDeviceMetricsOverride: $resp")
-
-    if (forceTransparent) {
-        resp = cdp.sendAsync("Emulation.setDefaultBackgroundColorOverride", buildJsonObject {
-            put("color", buildJsonObject {
-                put("r", 0)
-                put("g", 0)
-                put("b", 0)
-                put("a", 0)
-            })
-        })
-        Log.info("BrowserSource", "setDefaultBackgroundColorOverride: $resp")
-    }
-
-    cdp.sendAsync("Page.enable", null)
-
-    // Navigate to the URL
-    if (url.isNotBlank()) {
-        resp = cdp.sendAsync("Page.navigate", buildJsonObject { put("url", url) })
-        Log.info("BrowserSource", "Page.navigate($url): $resp")
-
-        // Wait for page to load
-        delay(PAGE_LOAD_SETTLE_MS)
-
-        // Inject transparency CSS
-        if (forceTransparent) {
-            cdp.sendAsync("Runtime.evaluate", buildJsonObject {
-                put(
-                    "expression",
-                    "document.documentElement.style.background='transparent';" +
-                        "document.body.style.background='transparent';"
-                )
-            })
-        }
-        if (customCss.isNotBlank()) {
-            cdp.sendAsync("Runtime.evaluate", buildJsonObject {
-                put(
-                    "expression",
-                    "var s=document.createElement('style');" +
-                        "s.textContent='${escapeForJsStringLiteral(customCss)}';document.head.appendChild(s);"
-                )
-            })
-        }
-    }
-
-    }
 
     /** Screenshots the page at [fps] into the entry until the coroutine is cancelled. */
     private suspend fun runCaptureLoop(entry: CacheEntry, cdp: CdpConnection, fps: Int) {
@@ -514,7 +303,7 @@ object SharedBrowserFrameCache {
         while (currentCoroutineContext().isActive) {
             // A frame that will not decode (bad base64, unreadable PNG, a failed bitmap) is skipped.
             try {
-                if (captureFrame(entry, cdp, first = frameCount == 0)) frameCount++
+                if (CdpPages.captureFrame(entry, cdp, first = frameCount == 0)) frameCount++
             } catch (e: CancellationException) {
                 throw e
             } catch (e: IOException) {
@@ -528,82 +317,10 @@ object SharedBrowserFrameCache {
         }
     }
 
-    /** Screenshots the page once into [entry]; false when nothing decodable came back. */
-    private suspend fun captureFrame(entry: CacheEntry, cdp: CdpConnection, first: Boolean): Boolean {
-        val response = cdp.sendAsync("Page.captureScreenshot", buildJsonObject { put("format", "png") })
-        val data = response?.get("data")?.jsonPrimitive?.contentOrNull
-        if (data == null) {
-            if (first) reportMissingScreenshot(response)
-            return false
-        }
-        val pngBytes = withContext(Dispatchers.IO) { Base64.getDecoder().decode(data) }
-        val img = withContext(Dispatchers.IO) { ImageIO.read(ByteArrayInputStream(pngBytes)) }
-        if (img == null) {
-            if (first) {
-                Log.warn("BrowserSource", "ImageIO.read returned null (${pngBytes.size} bytes)")
-            }
-            return false
-        }
-        entry.frame.value = img.toComposeImageBitmap()
-        if (first) {
-            Log.info("BrowserSource", "First frame captured: ${img.width}x${img.height}")
-        }
-        return true
-    }
 
-    private fun reportMissingScreenshot(response: JsonObject?) {
-        if (response == null) {
-            Log.warn("BrowserSource", "captureScreenshot returned null")
-        } else {
-            Log.warn("BrowserSource", "captureScreenshot response has no 'data': ${response.keys}")
-        }
-    }
 
-    private suspend fun waitForCdpReady(port: Int, timeoutMs: Long): Boolean {
-        val deadline = System.currentTimeMillis() + timeoutMs
-        while (System.currentTimeMillis() < deadline) {
-            try {
-                val request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:$port/json/version"))
-                    .GET().build()
-                val response = withContext(Dispatchers.IO) {
-                    httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-                }
-                if (response.statusCode() == HTTP_OK) return true
-            } catch (_: Exception) {
-                // Not ready yet
-            }
-            delay(DEVTOOLS_POLL_INTERVAL_MS)
-        }
-        return false
-    }
 
-    internal fun getPageWebSocketUrl(port: Int): String? {
-        return try {
-            val request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:$port/json"))
-                .GET().build()
-            val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-            val pages = Json.parseToJsonElement(response.body()).jsonArray
-            // Find the actual page tab, not extension background pages
-            val page = pages.firstOrNull { entry ->
-                entry.jsonObject["type"]?.jsonPrimitive?.contentOrNull == "page"
-            } ?: pages.firstOrNull()
-            page?.jsonObject?.get("webSocketDebuggerUrl")?.jsonPrimitive?.contentOrNull
-        } catch (e: IOException) {
-            pageUrlFailed(e)
-        } catch (e: InterruptedException) {
-            pageUrlFailed(e)
-        } catch (e: IllegalArgumentException) {
-            // A reply that is not the JSON array DevTools sends.
-            pageUrlFailed(e)
-        }
-    }
 
-    private fun pageUrlFailed(e: Exception): String? {
-        Log.warn("BrowserSource", "getPageWebSocketUrl error: ${e.message}")
-        return null
-    }
 
     private fun stopBrowser(entry: CacheEntry) {
         entry.captureJob?.cancel()
@@ -614,7 +331,7 @@ object SharedBrowserFrameCache {
 
         val process = entry.browserProcess
         if (process != null) {
-            killProcess(process)
+            BrowserProcesses.killProcess(process)
             entry.browserProcess = null
         }
 
@@ -628,23 +345,6 @@ object SharedBrowserFrameCache {
         entry.frame.value = null
     }
 
-    internal fun killProcess(process: Process) {
-        try {
-            if (isWindows) {
-                try {
-                    val pid = process.pid()
-                    ProcessBuilder("taskkill", "/F", "/T", "/PID", pid.toString())
-                        .redirectErrorStream(true).start()
-                        .waitFor(PROCESS_KILL_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
-                } catch (_: Throwable) {}
-            } else {
-                process.destroyForcibly()
-            }
-            process.waitFor(PROCESS_KILL_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
-        } catch (_: Throwable) {
-            process.destroyForcibly()
-        }
-    }
 
     // ── CDP WebSocket Connection ───────────────────────────────────
 

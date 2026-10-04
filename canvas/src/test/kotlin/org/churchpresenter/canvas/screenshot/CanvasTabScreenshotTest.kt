@@ -26,6 +26,9 @@ import javax.imageio.ImageIO
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.canvas.updateTransform
+import org.churchpresenter.canvas.selectSource
+import org.churchpresenter.canvas.addSource
 
 /**
  * Every state of the Canvas tab, in both themes.

@@ -272,93 +272,9 @@ internal fun CameraProperties(
         }
 
         if (source.isDeckLink && source.deckLinkIndex >= 0) {
-
-            if (DeckLinkManager.isOutputActive(source.deckLinkIndex)) {
-                Text(
-                    text = stringResource(Res.string.canvas_decklink_io_warning),
-                    color = MaterialTheme.colorScheme.error,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(vertical = 4.dp)
-                )
-            }
-
-            var connections by remember { mutableStateOf<List<DeckLinkManager.VideoConnection>>(emptyList()) }
-            var modes by remember { mutableStateOf<List<DeckLinkManager.InputMode>>(emptyList()) }
-
-            LaunchedEffect(source.deckLinkIndex) {
-                withContext(Dispatchers.IO) {
-                    connections = DeckLinkManager.listVideoConnections(source.deckLinkIndex)
-                    modes = DeckLinkManager.listInputModes(source.deckLinkIndex)
-                }
-            }
-
-            LaunchedEffect(connections, source.videoConnection) {
-                if (source.videoConnection == 0 && connections.isNotEmpty()) {
-                    onUpdate(source.copy(videoConnection = connections.first().value))
-                }
-            }
-
-            if (connections.isNotEmpty()) {
-                val connItems = connections.map { it.name }
-                DropdownSelector(
-                    label = stringResource(Res.string.canvas_camera_connection),
-                    items = connItems,
-                    selected = selectedConnectionName(connections, source.videoConnection),
-                    onSelectedChange = { selected ->
-                        val conn = connections.find { it.name == selected }
-                        if (conn != null) {
-                            onUpdate(source.copy(videoConnection = conn.value))
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            val autoLabel = stringResource(Res.string.canvas_camera_mode_auto)
-            val modeItems = listOf(autoLabel) + modes.map { it.name }
-            DropdownSelector(
-                label = stringResource(Res.string.canvas_clock_mode),
-                items = modeItems,
-                selected = selectedModeName(modes, source.videoFormat, autoLabel),
-                onSelectedChange = { selected ->
-                    if (selected == autoLabel) {
-                        onUpdate(source.copy(videoFormat = ""))
-                    } else {
-                        val mode = modes.find { it.name == selected }
-                        if (mode != null) {
-                            onUpdate(source.copy(videoFormat = mode.encodedValue))
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
+            DeckLinkInputSettings(source, onUpdate)
         } else if (source.devicePath.isNotEmpty() && !source.isDeckLink) {
-
-            var formats by remember { mutableStateOf<List<CameraFormat>>(emptyList()) }
-            LaunchedEffect(source.devicePath) {
-                formats = withContext(Dispatchers.IO) {
-                    listCameraFormats(source.devicePath, source.deviceName)
-                }
-            }
-
-            val autoLabel = stringResource(Res.string.canvas_camera_format_auto)
-            val formatItems = listOf(autoLabel) + formats.map { it.displayName }
-            DropdownSelector(
-                label = stringResource(Res.string.canvas_camera_format),
-                items = formatItems,
-                selected = selectedFormatName(formats, source.videoFormat, autoLabel),
-                onSelectedChange = { selected ->
-                    if (selected == autoLabel) {
-                        onUpdate(source.copy(videoFormat = ""))
-                    } else {
-                        val fmt = formats.find { it.displayName == selected }
-                        if (fmt != null) {
-                            onUpdate(source.copy(videoFormat = fmt.encodedValue))
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
+            CameraFormatSettings(source, onUpdate)
         }
     }
 
@@ -381,6 +297,100 @@ internal fun CameraProperties(
     )
 
     CameraPrivacyHint(osName)
+}
+
+/** A DeckLink input's connector and video mode, read off the card. */
+@Composable
+private fun DeckLinkInputSettings(source: SceneSource.CameraSource, onUpdate: (SceneSource) -> Unit) {
+    if (DeckLinkManager.isOutputActive(source.deckLinkIndex)) {
+        Text(
+            text = stringResource(Res.string.canvas_decklink_io_warning),
+            color = MaterialTheme.colorScheme.error,
+            fontSize = 12.sp,
+            modifier = Modifier.padding(vertical = 4.dp)
+        )
+    }
+
+    var connections by remember { mutableStateOf<List<DeckLinkManager.VideoConnection>>(emptyList()) }
+    var modes by remember { mutableStateOf<List<DeckLinkManager.InputMode>>(emptyList()) }
+
+    LaunchedEffect(source.deckLinkIndex) {
+        withContext(Dispatchers.IO) {
+            connections = DeckLinkManager.listVideoConnections(source.deckLinkIndex)
+            modes = DeckLinkManager.listInputModes(source.deckLinkIndex)
+        }
+    }
+
+    LaunchedEffect(connections, source.videoConnection) {
+        if (source.videoConnection == 0 && connections.isNotEmpty()) {
+            onUpdate(source.copy(videoConnection = connections.first().value))
+        }
+    }
+
+    if (connections.isNotEmpty()) {
+        val connItems = connections.map { it.name }
+        DropdownSelector(
+            label = stringResource(Res.string.canvas_camera_connection),
+            items = connItems,
+            selected = selectedConnectionName(connections, source.videoConnection),
+            onSelectedChange = { selected ->
+                val conn = connections.find { it.name == selected }
+                if (conn != null) {
+                    onUpdate(source.copy(videoConnection = conn.value))
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+
+    val autoLabel = stringResource(Res.string.canvas_camera_mode_auto)
+    val modeItems = listOf(autoLabel) + modes.map { it.name }
+    DropdownSelector(
+        label = stringResource(Res.string.canvas_clock_mode),
+        items = modeItems,
+        selected = selectedModeName(modes, source.videoFormat, autoLabel),
+        onSelectedChange = { selected ->
+            if (selected == autoLabel) {
+                onUpdate(source.copy(videoFormat = ""))
+            } else {
+                val mode = modes.find { it.name == selected }
+                if (mode != null) {
+                    onUpdate(source.copy(videoFormat = mode.encodedValue))
+                }
+            }
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+/** A webcam's capture format, from what the device reports it offers. */
+@Composable
+private fun CameraFormatSettings(source: SceneSource.CameraSource, onUpdate: (SceneSource) -> Unit) {
+    var formats by remember { mutableStateOf<List<CameraFormat>>(emptyList()) }
+    LaunchedEffect(source.devicePath) {
+        formats = withContext(Dispatchers.IO) {
+            listCameraFormats(source.devicePath, source.deviceName)
+        }
+    }
+
+    val autoLabel = stringResource(Res.string.canvas_camera_format_auto)
+    val formatItems = listOf(autoLabel) + formats.map { it.displayName }
+    DropdownSelector(
+        label = stringResource(Res.string.canvas_camera_format),
+        items = formatItems,
+        selected = selectedFormatName(formats, source.videoFormat, autoLabel),
+        onSelectedChange = { selected ->
+            if (selected == autoLabel) {
+                onUpdate(source.copy(videoFormat = ""))
+            } else {
+                val fmt = formats.find { it.displayName == selected }
+                if (fmt != null) {
+                    onUpdate(source.copy(videoFormat = fmt.encodedValue))
+                }
+            }
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
 }
 
 /** Whatever [cameraHintStringRes] decides is worth saying about this machine's camera tooling. */

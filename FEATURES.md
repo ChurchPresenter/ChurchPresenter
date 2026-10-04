@@ -170,17 +170,17 @@
 
 **Source locations:**
 - `web/…/tabs/WebTab.kt` (the `:web` module) — web browser UI; its pieces in `WebTabScope.kt`, `WebToolbar.kt`, `WebPreview.kt`; the app fills in the live output and the preview picker in `tabs/AppWebTab.kt`
-- `tabs/CanvasTab.kt` — scene compositor UI; its pieces in `tabs/CanvasTabScope.kt`, `CanvasLeftPanel.kt`, `CanvasAddSourceMenu.kt`, `CanvasCenterPanel.kt`
-- `viewmodel/SceneViewModel.kt`
+- `canvas/…/CanvasTab.kt` (the `:canvas` module) — scene compositor UI; its pieces in `CanvasTabScope.kt`, `CanvasLeftPanel.kt`, `CanvasAddSourceMenu.kt`, `CanvasCenterPanel.kt`
+- `canvas/…/SceneViewModel.kt`, its source edits in `SceneViewModelSources.kt`
 - `core-models/src/main/kotlin/.../models/scene/SceneModels.kt` (the `:core-models` module) — including a scene's second layout and which one an output draws
-- `composables/SceneCanvas.kt`, `composables/SceneSourceRenderer.kt`, `composables/SourcePropertiesPanel.kt`
-- `tabs/CanvasSizeMenu.kt`, `tabs/CanvasPlacement.kt` — a scene's size and layouts, and layers left off the canvas
-- `composables/SharedBrowserFrameCache.kt`, `composables/SharedCameraFrameCache.kt`
-- `composables/NdiFrameCache.kt`, `composables/NdiSourceDirectory.kt` — receiving NDI sources onto the canvas, and finding them
-- `composables/OmtFrameCache.kt`, `composables/SceneOmtEditor.kt`, `composables/ReceivedFrameCache.kt` — receiving OMT sources onto the canvas, choosing one, and the capture loop both protocols share
+- `canvas/…/SceneCanvas.kt`, `SceneSourceRenderer.kt` (with `SceneTextSources.kt`, `SceneClockSource.kt`, `SceneDeviceSources.kt`), `SourcePropertiesPanel.kt`
+- `canvas/…/CanvasSizeMenu.kt`, `CanvasPlacement.kt` — a scene's size and layouts, and layers left off the canvas
+- `canvas/…/SharedBrowserFrameCache.kt` (with `BrowserProcesses.kt`, `CdpPages.kt`), `SharedCameraFrameCache.kt`
+- `canvas/…/NdiFrameCache.kt`, `NdiSourceDirectory.kt` — receiving NDI sources onto the canvas, and finding them
+- `canvas/…/OmtFrameCache.kt`, `SceneOmtEditor.kt`, `ReceivedFrameCache.kt` — receiving OMT sources onto the canvas, choosing one, and the capture loop both protocols share; `NetworkInputs.kt` is how the canvas reaches the app's NDI and OMT libraries
 - `shared-ui/…/utils/FfmpegBinary.kt`, `dialogs/tabs/ProjectionFfmpegCard.kt` — which ffmpeg cameras are opened with: the bundled one, an override, or whatever is installed
 - `gradle/ffmpeg-builds.properties`, `THIRD_PARTY_FFMPEG.md` — where the bundled ffmpeg comes from, and its licence
-- `presenter/ScenePresenter.kt`, `web/…/presenter/WebsitePresenter.kt` (the `:web` module: JCEF, `CefManager`, the embedded browser)
+- `canvas/…/ScenePresenter.kt`, `web/…/presenter/WebsitePresenter.kt` (the `:web` module: JCEF, `CefManager`, the embedded browser)
 - `data/settings/WebBookmark.kt`
 
 ## Live Captions & Translation

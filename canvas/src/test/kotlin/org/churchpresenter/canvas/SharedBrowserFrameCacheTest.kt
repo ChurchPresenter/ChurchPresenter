@@ -292,7 +292,7 @@ class SharedBrowserFrameCacheTest {
 
     @Test
     fun `findBrowserExecutable returns null or a real, existing executable path`() {
-        val path = SharedBrowserFrameCache.findBrowserExecutable()
+        val path = BrowserProcesses.findBrowserExecutable()
         if (path != null) assertTrue(File(path).exists(), "a non-null result must be a real file: $path")
     }
 
@@ -301,7 +301,7 @@ class SharedBrowserFrameCacheTest {
         val saved = System.getProperty("os.name", "")
         try {
             System.setProperty("os.name", "Windows 11")
-            val path = SharedBrowserFrameCache.findBrowserExecutable()
+            val path = BrowserProcesses.findBrowserExecutable()
             if (path != null) assertTrue(File(path).exists(), "a non-null result must be a real file: $path")
         } finally {
             System.setProperty("os.name", saved)
@@ -313,7 +313,7 @@ class SharedBrowserFrameCacheTest {
         val saved = System.getProperty("os.name", "")
         try {
             System.setProperty("os.name", "Generic Linux")
-            val path = SharedBrowserFrameCache.findBrowserExecutable()
+            val path = BrowserProcesses.findBrowserExecutable()
             if (path != null) assertTrue(File(path).exists(), "a non-null result must be a real file: $path")
         } finally {
             System.setProperty("os.name", saved)
@@ -324,7 +324,7 @@ class SharedBrowserFrameCacheTest {
 
     @Test
     fun `findFreePort returns a usable port number`() {
-        val port = SharedBrowserFrameCache.findFreePort()
+        val port = BrowserProcesses.findFreePort()
         assertTrue(port in 1..65535, "expected a valid port, got $port")
     }
 
@@ -360,7 +360,7 @@ class SharedBrowserFrameCacheTest {
     fun `killProcess terminates an already-exited process without throwing`() {
         val process = ProcessBuilder(shellCommand("exit 0")).start()
         process.waitFor()
-        SharedBrowserFrameCache.killProcess(process)
+        BrowserProcesses.killProcess(process)
     }
 }
 

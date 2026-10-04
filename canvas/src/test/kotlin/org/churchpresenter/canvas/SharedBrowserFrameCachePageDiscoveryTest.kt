@@ -16,7 +16,7 @@ import kotlin.test.assertNull
 /**
  * How a browser source finds the tab it is going to render.
  *
- * Before any CDP traffic happens, [SharedBrowserFrameCache.getPageWebSocketUrl] asks the freshly
+ * Before any CDP traffic happens, [BrowserProcesses.getPageWebSocketUrl] asks the freshly
  * launched browser's `/json` endpoint what targets it has and picks one to attach to. Everything
  * downstream — the whole WebSocket protocol client [SharedBrowserFrameCacheTest] covers — is aimed
  * at whatever this returns, so choosing the wrong target means the output renders the wrong thing
@@ -82,7 +82,7 @@ class SharedBrowserFrameCachePageDiscoveryTest {
 
         assertEquals(
             "ws://localhost/devtools/page/REAL",
-            SharedBrowserFrameCache.getPageWebSocketUrl(port),
+            BrowserProcesses.getPageWebSocketUrl(port),
             "ordering must not decide this — the type does",
         )
     }
@@ -98,7 +98,7 @@ class SharedBrowserFrameCachePageDiscoveryTest {
             """.trimIndent()
         )
 
-        assertEquals("ws://localhost/devtools/page/REAL", SharedBrowserFrameCache.getPageWebSocketUrl(port))
+        assertEquals("ws://localhost/devtools/page/REAL", BrowserProcesses.getPageWebSocketUrl(port))
     }
 
     @Test
@@ -109,26 +109,26 @@ class SharedBrowserFrameCachePageDiscoveryTest {
 
         // Deliberate: a browser build that labels its tab something unexpected should still render
         // rather than refuse outright. The fallback is only reached once the filter finds nothing.
-        assertEquals("ws://localhost/devtools/page/ONLY", SharedBrowserFrameCache.getPageWebSocketUrl(port))
+        assertEquals("ws://localhost/devtools/page/ONLY", BrowserProcesses.getPageWebSocketUrl(port))
     }
 
     @Test
     fun `an empty target list yields no url`() {
-        assertNull(SharedBrowserFrameCache.getPageWebSocketUrl(serving("[]")))
+        assertNull(BrowserProcesses.getPageWebSocketUrl(serving("[]")))
     }
 
     @Test
     fun `a target with no debugger url yields no url`() {
         val port = serving("""[{"type":"page","title":"no socket here"}]""")
 
-        assertNull(SharedBrowserFrameCache.getPageWebSocketUrl(port))
+        assertNull(BrowserProcesses.getPageWebSocketUrl(port))
     }
 
     @Test
     fun `a body that is not the expected json yields no url rather than throwing`() {
         // The browser is a separate process on a port anything could be listening on; a parse failure
         // has to come back as "no target" so the caller retries, not as an exception through it.
-        assertNull(SharedBrowserFrameCache.getPageWebSocketUrl(serving("""{"not":"an array"}""")))
+        assertNull(BrowserProcesses.getPageWebSocketUrl(serving("""{"not":"an array"}""")))
     }
 
     @Test
@@ -138,6 +138,6 @@ class SharedBrowserFrameCachePageDiscoveryTest {
         // the request would hang instead of failing — this call sets no read timeout.
         val deadPort = ServerSocket(0).use { it.localPort }
 
-        assertNull(SharedBrowserFrameCache.getPageWebSocketUrl(deadPort))
+        assertNull(BrowserProcesses.getPageWebSocketUrl(deadPort))
     }
 }

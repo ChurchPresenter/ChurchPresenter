@@ -2,29 +2,13 @@ package org.churchpresenter.canvas
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import org.churchpresenter.strings.generated.resources.canvas_bible_select_verse
 import org.churchpresenter.strings.generated.resources.canvas_browser_no_url
 import org.churchpresenter.slides.utils.PictureDecoder
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.em
-import kotlin.math.PI
-import kotlin.math.abs
-import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -35,9 +19,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -45,25 +26,14 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.canvas_image_not_found
 import org.churchpresenter.strings.generated.resources.show_qr_code
-import org.churchpresenter.strings.generated.resources.canvas_placeholder_camera
-import org.churchpresenter.strings.generated.resources.background_camera_option
 import org.churchpresenter.strings.generated.resources.canvas_video_vlc_load_failed
 import org.churchpresenter.strings.generated.resources.canvas_video_vlc_not_found
 import org.churchpresenter.strings.generated.resources.canvas_video_no_selection
 import org.churchpresenter.strings.generated.resources.canvas_video_file_not_found
 import org.churchpresenter.strings.generated.resources.canvas_video_loading
-import org.churchpresenter.strings.generated.resources.canvas_placeholder_ndi
-import org.churchpresenter.strings.generated.resources.canvas_placeholder_ndi_default
-import org.churchpresenter.strings.generated.resources.canvas_placeholder_ndi_waiting
-import org.churchpresenter.strings.generated.resources.canvas_placeholder_omt
-import org.churchpresenter.strings.generated.resources.canvas_placeholder_omt_default
-import org.churchpresenter.strings.generated.resources.canvas_placeholder_screen_capture
-import org.churchpresenter.core.models.scene.ClockModes
 import org.churchpresenter.core.models.scene.SceneSource
-import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
 
-import org.churchpresenter.sharedui.utils.Utils.systemFontFamilyOrDefault
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -76,15 +46,11 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import java.awt.Rectangle
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.cos
 import kotlin.math.sin
@@ -97,30 +63,14 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.drawscope.Stroke
-import org.churchpresenter.sharedui.composables.OutlinedText
-import org.churchpresenter.sharedui.composables.backdropRoom
-import org.churchpresenter.sharedui.composables.mode
-import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
-import org.churchpresenter.sharedui.utils.CommandRunner
-import org.churchpresenter.sharedui.utils.readCommandOutput
 import org.churchpresenter.media.composables.isVlcAvailable
 import org.churchpresenter.media.composables.isVlcLoadFailed
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import org.churchpresenter.core.models.scene.PathPoint
 
 private const val URL_DEBOUNCE_MS = 800L
-private const val ERROR_TEXT_COLOR = 0xFFFF8888
-private const val POLL_INTERVAL_MS = 1000L
-private const val SECONDS_PER_MINUTE = 60
-private const val SECONDS_PER_HOUR = 3600
-private const val SECONDS_PER_DAY = 86400
-private const val PERCENT_SCALE = 100f
-/** A curve of 100% spends half a circle on the line; more than a full circle would overlap itself. */
-private const val MAX_CURVE_TURNS = 2f
-/** How much room a bent reference line gets: its own height, plus the room the bend needs. */
-private const val REFERENCE_ROWS = 3f
-private const val WINDOW_BOUNDS_FIELDS = 4
-private const val BOUNDS_WIDTH_INDEX = 2
-private const val BOUNDS_HEIGHT_INDEX = 3
 
+internal const val SOURCE_ERROR_TEXT_COLOR = 0xFFFF8888
 
 /**
  * Draws one scene source.
@@ -196,151 +146,6 @@ private fun ImageSourceContent(source: SceneSource.ImageSource, modifier: Modifi
             contentAlignment = Alignment.Center
         ) {
             Text(stringResource(Res.string.canvas_image_not_found), color = Color.White, fontSize = 12.sp)
-        }
-    }
-}
-
-/**
- * Tracking as Compose wants it: [TextUnit.Unspecified] for none at all, rather than a spacing of
- * zero. The two are not the same to the text shaper — asking for zero re-shapes the line and moves
- * it by a pixel, which would change every scene that has never touched the setting.
- */
-private fun trackingOf(percent: Float): TextUnit =
-    if (percent == 0f) TextUnit.Unspecified else (percent / PERCENT_SCALE).em
-
-/** Underline, strike-through, both, or neither — as Compose wants it. */
-private fun textDecorationOf(underline: Boolean, strikethrough: Boolean): TextDecoration? = when {
-    underline && strikethrough ->
-        TextDecoration.combine(listOf(TextDecoration.Underline, TextDecoration.LineThrough))
-    underline -> TextDecoration.Underline
-    strikethrough -> TextDecoration.LineThrough
-    else -> null
-}
-
-@Composable
-private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier, fontScale: Float = 1f) {
-    val bgColor = if (source.backgroundColor.equals("#00000000", ignoreCase = true))
-        Color.Transparent
-    else
-        parseHexColor(source.backgroundColor)
-    val textColor = parseHexColor(source.fontColor)
-    val fontFamily = remember(source.fontFamily) { systemFontFamilyOrDefault(source.fontFamily) }
-    val align = when (source.horizontalAlignment) {
-        "left" -> TextAlign.Left
-        "right" -> TextAlign.Right
-        else -> TextAlign.Center
-    }
-    val lineHeightMultiplier = source.lineSpacing / 100f
-    val verticalAlign = when (source.verticalAlignment) {
-        "top" -> Alignment.TopCenter
-        "bottom" -> Alignment.BottomCenter
-        else -> Alignment.Center
-    }
-
-    Box(
-        modifier = modifier.fillMaxSize().background(bgColor).clipToBounds(),
-        contentAlignment = verticalAlign
-    ) {
-        if (source.curve != 0f) {
-            CurvedText(
-                text = source.text,
-                curve = source.curve,
-                style = TextStyle(
-                    color = textColor,
-                    fontSize = drawnFontSize(source.fontSize, fontScale),
-                    fontFamily = fontFamily,
-                    fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
-                    fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
-                    textDecoration = textDecorationOf(source.underline, source.strikethrough),
-                    letterSpacing = trackingOf(source.letterSpacing),
-                ),
-                modifier = Modifier.fillMaxSize().padding(4.dp)
-            )
-        } else {
-            val painter = rememberTextBackdropPainter(source.backdrop, fontScale)
-            OutlinedText(
-                text = source.text,
-                outline = source.outline,
-                scaleFactor = fontScale,
-                color = textColor,
-                fontSize = drawnFontSize(source.fontSize, fontScale),
-                fontFamily = fontFamily,
-                style = TextStyle(
-                    fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
-                    fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
-                    textDecoration = textDecorationOf(source.underline, source.strikethrough),
-                    letterSpacing = trackingOf(source.letterSpacing),
-                ),
-                textAlign = align,
-                lineHeight = drawnFontSize(source.fontSize, fontScale * lineHeightMultiplier),
-                overflow = TextOverflow.Ellipsis,
-                fillWidth = false,
-                modifier = Modifier.padding(4.dp)
-                    .backdropRoom(source.backdrop, fontScale)
-                    .then(painter.modifier),
-                onTextLayout = painter::onTextLayout,
-            )
-        }
-    }
-}
-
-/**
- * One line of text bent around a circle: [curve] is a percentage, positive arching the line over
- * the circle and negative cupping it under, and 100 spends a half circle on it.
- *
- * Compose has no text-on-a-path, so each glyph is measured and drawn on its own, rotated to the
- * angle its own centre sits at. That is also why the line cannot wrap — newlines become spaces.
- */
-@Composable
-fun CurvedText(
-    text: String,
-    curve: Float,
-    style: TextStyle,
-    modifier: Modifier = Modifier,
-    /** Stroked underneath, glyph for glyph, exactly as `OutlinedText` does for laid-out text. */
-    outline: TextOutline = TextOutline(),
-    outlineScale: Float = 1f,
-) {
-    if (outline.isVisible) {
-        // The stroke first and the fill over it, both drawn into the same box: a bent line has no
-        // layout of its own to disturb, so the two passes land glyph for glyph.
-        CurvedText(
-            text = text,
-            curve = curve,
-            style = style.copy(
-                color = parseHexColor(outline.color),
-                drawStyle = Stroke(width = outline.width * outlineScale),
-            ),
-            modifier = modifier,
-        )
-    }
-    val measurer = rememberTextMeasurer()
-    val glyphs = remember(text, style) {
-        text.replace('\n', ' ').map { measurer.measure(AnnotatedString(it.toString()), style) }
-    }
-    val widths = remember(glyphs) { glyphs.map { it.size.width.toFloat() } }
-    val lineWidth = widths.sum()
-    val lineHeight = remember(glyphs) { glyphs.maxOfOrNull { it.size.height.toFloat() } ?: 0f }
-
-    Canvas(modifier) {
-        if (lineWidth <= 0f) return@Canvas
-        val sweep = (abs(curve) / PERCENT_SCALE).coerceAtMost(MAX_CURVE_TURNS) * PI.toFloat()
-        val radius = lineWidth / sweep
-        // How far the ends fall away from the middle of the arc, which is what it costs in height.
-        val sagitta = radius * (1f - cos(sweep / 2f))
-        val arch = curve > 0f
-        val extentTop = (size.height - (sagitta + lineHeight)) / 2f
-        val apexTop = if (arch) extentTop else extentTop + sagitta
-        val pivot = Offset(size.width / 2f, if (arch) apexTop + radius else apexTop - radius)
-
-        var travelled = 0f
-        glyphs.forEachIndexed { index, glyph ->
-            val centre = travelled + widths[index] / 2f
-            val angle = Math.toDegrees(((centre - lineWidth / 2f) / radius).toDouble()).toFloat()
-            rotate(degrees = if (arch) angle else -angle, pivot = pivot) {
-                drawText(glyph, topLeft = Offset(size.width / 2f - widths[index] / 2f, apexTop))
-            }
-            travelled += widths[index]
         }
     }
 }
@@ -453,8 +258,11 @@ private fun BrowserSourceContent(
     var browserFlows by remember { mutableStateOf<SharedBrowserFrameCache.BrowserFlows?>(null) }
     DisposableEffect(source.id, source.renderWidth, source.renderHeight) {
         browserFlows = SharedBrowserFrameCache.acquire(
-            source.id, source.url, source.renderWidth, source.renderHeight,
-            source.customCss, source.fps, source.forceTransparent
+            source.id,
+            SharedBrowserFrameCache.BrowserPage(
+                source.url, source.renderWidth, source.renderHeight,
+                source.customCss, source.fps, source.forceTransparent,
+            ),
         )
         onDispose {
             browserFlows = null
@@ -499,7 +307,7 @@ private fun BrowserSourceContent(
         ) {
             Text(
                 text = error ?: "Loading: ${source.url}",
-                color = if (error != null) Color(ERROR_TEXT_COLOR) else Color.White,
+                color = if (error != null) Color(SOURCE_ERROR_TEXT_COLOR) else Color.White,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
             )
@@ -568,10 +376,7 @@ private fun ShapeSourceContent(source: SceneSource.ShapeSource, modifier: Modifi
                 }
             }
             "line" -> {
-                val p0 = source.points.getOrNull(0)
-                val p1 = source.points.getOrNull(1)
-                val startPt = if (p0 != null) Offset(p0.x * w, p0.y * h) else Offset(0f, 0f)
-                val endPt = if (p1 != null) Offset(p1.x * w, p1.y * h) else Offset(w, h)
+                val (startPt, endPt) = lineEnds(source.points, w, h)
                 drawLine(
                     color = strokeColor,
                     start = startPt,
@@ -581,37 +386,8 @@ private fun ShapeSourceContent(source: SceneSource.ShapeSource, modifier: Modifi
                 )
             }
             "arrow" -> {
-                val p0 = source.points.getOrNull(0)
-                val p1 = source.points.getOrNull(1)
-                val startPt = if (p0 != null) Offset(p0.x * w, p0.y * h) else Offset(0f, 0f)
-                val endPt = if (p1 != null) Offset(p1.x * w, p1.y * h) else Offset(w, h)
-                drawLine(
-                    color = strokeColor,
-                    start = startPt,
-                    end = endPt,
-                    strokeWidth = strokeWidth,
-                    cap = StrokeCap.Round
-                )
-                // Arrowhead
-                val arrowSize = (strokeWidth * 4f).coerceAtLeast(arrowMinPx)
-                val dx = endPt.x - startPt.x
-                val dy = endPt.y - startPt.y
-                val angle = kotlin.math.atan2(dy, dx)
-                val ax1 = endPt.x - arrowSize * kotlin.math.cos(angle - 0.4f)
-                val ay1 = endPt.y - arrowSize * kotlin.math.sin(angle - 0.4f)
-                val ax2 = endPt.x - arrowSize * kotlin.math.cos(angle + 0.4f)
-                val ay2 = endPt.y - arrowSize * kotlin.math.sin(angle + 0.4f)
-                val arrowPath = Path().apply {
-                    moveTo(endPt.x, endPt.y)
-                    lineTo(ax1, ay1)
-                    moveTo(endPt.x, endPt.y)
-                    lineTo(ax2, ay2)
-                }
-                drawPath(
-                    arrowPath,
-                    color = strokeColor,
-                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-                )
+                val (startPt, endPt) = lineEnds(source.points, w, h)
+                drawArrow(startPt, endPt, strokeColor, strokeWidth, arrowMinPx)
             }
             "freehand" -> {
                 if (source.points.size >= 2) {
@@ -628,196 +404,44 @@ private fun ShapeSourceContent(source: SceneSource.ShapeSource, modifier: Modifi
     }
 }
 
-@Composable
-private fun ClockSourceContent(source: SceneSource.ClockSource, modifier: Modifier, fontScale: Float = 1f) {
-    val bgColor = parseHexColor(source.backgroundColor)
-    val fontColor = parseHexColor(source.fontColor)
-    val fontFamily = systemFontFamilyOrDefault(source.fontFamily)
+/** A line's two ends on a [w] by [h] box: its stored points, or corner to corner when it has none. */
+private fun lineEnds(points: List<PathPoint>, w: Float, h: Float): Pair<Offset, Offset> {
+    val p0 = points.getOrNull(0)
+    val p1 = points.getOrNull(1)
+    val startPt = if (p0 != null) Offset(p0.x * w, p0.y * h) else Offset(0f, 0f)
+    val endPt = if (p1 != null) Offset(p1.x * w, p1.y * h) else Offset(w, h)
+    return startPt to endPt
+}
 
-    val displayText = when (source.mode) {
-        ClockModes.COUNTDOWN -> countdownText(source)
-        ClockModes.COUNT_UP -> countUpText(source)
-        ClockModes.TARGET_TIME -> targetTimeText(source)
-        else -> wallClockText(source)
-    }
-
-    val style = TextStyle(
-        color = fontColor,
-        fontSize = drawnFontSize(source.fontSize, fontScale),
-        fontFamily = fontFamily,
-        fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
-        fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = textDecorationOf(source.underline, source.strikethrough),
-        letterSpacing = trackingOf(source.letterSpacing)
+/** A line from [startPt] to [endPt] with an open arrowhead at [endPt], never smaller than [arrowMinPx]. */
+private fun DrawScope.drawArrow(startPt: Offset, endPt: Offset, color: Color, strokeWidth: Float, arrowMinPx: Float) {
+    drawLine(
+        color = color,
+        start = startPt,
+        end = endPt,
+        strokeWidth = strokeWidth,
+        cap = StrokeCap.Round
     )
-
-    Box(
-        modifier = modifier.fillMaxSize().background(bgColor),
-        contentAlignment = Alignment.Center
-    ) {
-        if (source.curve != 0f) {
-            // A bent line is drawn glyph by glyph rather than laid out as text, so there is no line
-            // box to band and no block to box: the backdrop is skipped rather than misplaced.
-            CurvedText(
-                displayText, source.curve, style, Modifier.fillMaxSize(),
-                outline = source.outline, outlineScale = fontScale,
-            )
-        } else {
-            val painter = rememberTextBackdropPainter(source.backdrop, fontScale)
-            OutlinedText(
-                text = displayText,
-                outline = source.outline,
-                scaleFactor = fontScale,
-                color = Color.Unspecified,
-                fontSize = TextUnit.Unspecified,
-                style = style,
-                fillWidth = false,
-                modifier = painter.modifier,
-                onTextLayout = painter::onTextLayout,
-            )
-        }
+    val arrowSize = (strokeWidth * ARROWHEAD_STROKES).coerceAtLeast(arrowMinPx)
+    val angle = kotlin.math.atan2(endPt.y - startPt.y, endPt.x - startPt.x)
+    val ax1 = endPt.x - arrowSize * kotlin.math.cos(angle - ARROWHEAD_SPREAD_RAD)
+    val ay1 = endPt.y - arrowSize * kotlin.math.sin(angle - ARROWHEAD_SPREAD_RAD)
+    val ax2 = endPt.x - arrowSize * kotlin.math.cos(angle + ARROWHEAD_SPREAD_RAD)
+    val ay2 = endPt.y - arrowSize * kotlin.math.sin(angle + ARROWHEAD_SPREAD_RAD)
+    val arrowPath = Path().apply {
+        moveTo(endPt.x, endPt.y)
+        lineTo(ax1, ay1)
+        moveTo(endPt.x, endPt.y)
+        lineTo(ax2, ay2)
     }
+    drawPath(arrowPath, color = color, style = Stroke(width = strokeWidth, cap = StrokeCap.Round))
 }
 
-/** hh:mm:ss, dropping either end as the source asks. */
-private fun formatElapsed(seconds: Int, showHours: Boolean, showSeconds: Boolean): String = buildString {
-    if (showHours) append("%02d:".format(seconds / SECONDS_PER_HOUR))
-    append("%02d".format((seconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE))
-    if (showSeconds) append(":%02d".format(seconds % SECONDS_PER_MINUTE))
-}
+/** An arrowhead's arms are this many stroke widths long... */
+private const val ARROWHEAD_STROKES = 4f
 
-/**
- * Seconds from now until the next occurrence of a time of day — tomorrow's, once today's has been
- * and gone, which is what keeps a "service starts at 10:00" countdown from going negative.
- */
-private fun secondsUntilTimeOfDay(hour: Int, minute: Int, second: Int): Int {
-    val target = hour * SECONDS_PER_HOUR + minute * SECONDS_PER_MINUTE + second
-    val diff = target - LocalTime.now().toSecondOfDay()
-    return if (diff > 0) diff else diff + SECONDS_PER_DAY
-}
-
-/** The countdown's remaining time, or its expiry message once it has run out. */
-@Composable
-private fun countdownText(source: SceneSource.ClockSource): String {
-    val totalSeconds = source.targetHour * SECONDS_PER_HOUR +
-        source.targetMinute * SECONDS_PER_MINUTE + source.targetSecond
-
-    // Sync TimerStateManager when duration fields change
-    LaunchedEffect(totalSeconds) {
-        TimerStateManager.onDurationChanged(source.id, totalSeconds)
-    }
-
-    val remaining = TimerStateManager.getState(source.id, totalSeconds).remainingSeconds
-    val expired = remaining == 0 && totalSeconds > 0
-    return if (expired && source.expiredText.isNotBlank()) source.expiredText
-    else formatElapsed(remaining, source.showHours, source.showSeconds)
-}
-
-/** A stopwatch: seeded at zero and counted up by the same shared state the countdown uses. */
-@Composable
-private fun countUpText(source: SceneSource.ClockSource): String {
-    return formatElapsed(
-        TimerStateManager.getState(source.id, 0).remainingSeconds,
-        source.showHours,
-        source.showSeconds
-    )
-}
-
-/** Counts down to a time of day off the wall clock, so it needs no transport of its own. */
-@Composable
-private fun targetTimeText(source: SceneSource.ClockSource): String {
-    var text by remember { mutableStateOf("") }
-    LaunchedEffect(
-        source.targetTimeHour, source.targetTimeMinute, source.targetTimeSecond,
-        source.showHours, source.showSeconds
-    ) {
-        while (isActive) {
-            val remaining =
-                secondsUntilTimeOfDay(source.targetTimeHour, source.targetTimeMinute, source.targetTimeSecond)
-            text = formatElapsed(remaining, source.showHours, source.showSeconds)
-            delay(POLL_INTERVAL_MS)
-        }
-    }
-    return text
-}
-
-/** The wall clock itself, in the source's own 12h/24h format. */
-@Composable
-private fun wallClockText(source: SceneSource.ClockSource): String {
-    var text by remember { mutableStateOf("") }
-    LaunchedEffect(source.timeFormat, source.showHours, source.showSeconds) {
-        while (isActive) {
-            val pattern = buildString {
-                if (source.showHours) {
-                    append(if (source.timeFormat == "12h") "hh:" else "HH:")
-                }
-                append("mm")
-                if (source.showSeconds) append(":ss")
-                if (source.timeFormat == "12h") append(" a")
-            }
-            text = LocalTime.now().format(DateTimeFormatter.ofPattern(pattern))
-            delay(POLL_INTERVAL_MS)
-        }
-    }
-    return text
-}
-
-/**
- * The verse over its reference, both bent by [SceneSource.BibleSource.curve].
- *
- * A bent line cannot wrap, so the verse is one line however long it is — which is the trade the
- * curve asks for, and why it is off by default.
- */
-@Composable
-private fun CurvedBibleText(
-    source: SceneSource.BibleSource,
-    textColor: Color,
-    refColor: Color,
-    fontFamily: FontFamily,
-    fontScale: Float
-) {
-    Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
-        CurvedText(
-            text = source.verseText.ifEmpty { stringResource(Res.string.canvas_bible_select_verse) },
-            curve = source.curve,
-            style = TextStyle(
-                color = if (source.verseText.isEmpty()) Color.Gray else textColor,
-                fontSize = drawnFontSize(source.fontSize, fontScale),
-                fontFamily = fontFamily,
-                fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
-                fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
-                textDecoration = textDecorationOf(source.underline, source.strikethrough),
-                letterSpacing = trackingOf(source.letterSpacing),
-            ),
-            modifier = Modifier.fillMaxWidth().weight(1f),
-            outline = source.outline,
-            outlineScale = fontScale,
-        )
-        if (source.referenceText.isNotEmpty()) {
-            CurvedText(
-                text = source.referenceText,
-                curve = source.curve,
-                style = TextStyle(
-                    color = refColor,
-                    fontSize = drawnFontSize(source.referenceFontSize, fontScale),
-                    fontFamily = fontFamily,
-                    fontWeight = if (source.referenceBold) FontWeight.Bold else FontWeight.Normal,
-                    fontStyle = if (source.referenceItalic) FontStyle.Italic else FontStyle.Normal,
-                    textDecoration = textDecorationOf(
-                        source.referenceUnderline,
-                        source.referenceStrikethrough
-                    ),
-                    letterSpacing = trackingOf(source.letterSpacing),
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height((source.referenceFontSize * fontScale * REFERENCE_ROWS).dp),
-                outline = source.referenceOutline,
-                outlineScale = fontScale,
-            )
-        }
-    }
-}
+/** ...and this far either side of the line, in radians. */
+private const val ARROWHEAD_SPREAD_RAD = 0.4f
 
 @Composable
 private fun QRCodeSourceContent(source: SceneSource.QRCodeSource, modifier: Modifier) {
@@ -911,414 +535,3 @@ private fun QRCodeSourceContent(source: SceneSource.QRCodeSource, modifier: Modi
         }
     }
 }
-
-
-@Composable
-private fun CameraSourceContent(
-    source: SceneSource.CameraSource,
-    modifier: Modifier,
-    showDiagnostics: Boolean,
-) {
-    if (source.devicePath.isBlank()) {
-        Box(
-            modifier = modifier.fillMaxSize().background(Color.DarkGray),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = if (source.deviceName.isNotEmpty()) {
-                    stringResource(Res.string.canvas_placeholder_camera, source.deviceName)
-                } else {
-                    stringResource(Res.string.background_camera_option)
-                },
-                color = Color.White,
-                fontSize = 14.sp
-            )
-        }
-        return
-    }
-
-    // Use shared cache so canvas preview and presenter output share one capture process.
-    //
-    // Acquired in the effect rather than in `remember`: a composition that is abandoned before its
-    // effects run still discards what `remember` produced, and it does so without calling any
-    // `onDispose`. Acquiring there leaked the refcount — and with it the ffmpeg process holding the
-    // device open, which the *next* acquire then found busy. That is the reported
-    // "Error opening input: Input/output error" on a camera nothing else is using.
-    var cameraFlows by remember { mutableStateOf<SharedCameraFrameCache.CameraFlows?>(null) }
-    DisposableEffect(source.devicePath, source.videoFormat, source.videoConnection, source.deckLinkIndex) {
-        cameraFlows = SharedCameraFrameCache.acquire(source)
-        onDispose {
-            cameraFlows = null
-            SharedCameraFrameCache.release(source)
-        }
-    }
-
-    // Stand-ins for the one composition pass before the effect has acquired: collecting needs a
-    // flow, and a conditional `collectAsState` would move with the acquire.
-    val noFrame = remember { MutableStateFlow<ImageBitmap?>(null) }
-    val noFailure = remember { MutableStateFlow<CameraFailure?>(null) }
-    val frame by (cameraFlows?.frame ?: noFrame).collectAsState()
-    val error by (cameraFlows?.error ?: noFailure).collectAsState()
-
-    if (frame != null) {
-        Image(
-            bitmap = frame!!,
-            contentDescription = source.deviceName,
-            contentScale = ContentScale.Crop,
-            modifier = modifier.fillMaxSize()
-        )
-    } else {
-        Box(
-            modifier = modifier.fillMaxSize().background(Color.DarkGray),
-            contentAlignment = Alignment.Center
-        ) {
-            val shownError = error?.takeIf { showDiagnostics }
-            Text(
-                text = shownError?.let { stringResource(cameraFailureStringRes(it)) }
-                    ?: if (source.deviceName.isNotEmpty()) {
-                        stringResource(Res.string.canvas_placeholder_camera, source.deviceName)
-                    } else {
-                        stringResource(Res.string.background_camera_option)
-                    },
-                color = if (shownError != null) Color(ERROR_TEXT_COLOR) else Color.White,
-                fontSize = 14.sp,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-/**
- * A live NDI source from the network.
- *
- * Drawn with [ContentScale.Fit] rather than the camera's `Crop`: an NDI source is as often a
- * graphics or slide feed from another machine as it is a camera, and cropping one of those loses
- * content the operator put there on purpose. The layer's own box is how they choose the framing.
- */
-@Composable
-private fun NdiSourceContent(source: SceneSource.NdiSource, modifier: Modifier) {
-    if (source.sourceName.isBlank() && source.sourceAddress.isBlank()) {
-        NetworkSourcePlaceholder(stringResource(Res.string.canvas_placeholder_ndi_default), modifier)
-        return
-    }
-
-    // Acquired in the effect, for the reason spelled out in [CameraSourceContent].
-    var flows by remember { mutableStateOf<ReceivedFrameCache.Flows?>(null) }
-    DisposableEffect(source.sourceName, source.sourceAddress, source.lowBandwidth) {
-        flows = SharedNdiFrameCache.acquire(source)
-        onDispose {
-            flows = null
-            SharedNdiFrameCache.release(source)
-        }
-    }
-
-    val noFrame = remember { MutableStateFlow<ImageBitmap?>(null) }
-    val notConnected = remember { MutableStateFlow(false) }
-    val frame by (flows?.frame ?: noFrame).collectAsState()
-    val connected by (flows?.connected ?: notConnected).collectAsState()
-    val label = source.sourceName.ifBlank { source.sourceAddress }
-
-    val shown = frame
-    if (shown != null) {
-        Image(
-            bitmap = shown,
-            contentDescription = label,
-            contentScale = ContentScale.Fit,
-            modifier = modifier.fillMaxSize()
-        )
-    } else {
-        // Connected but with nothing on the wire yet is "waiting"; not connected is a runtime that
-        // is not installed or a source that has gone away, and the two read differently on purpose.
-        NetworkSourcePlaceholder(
-            text = if (connected) stringResource(Res.string.canvas_placeholder_ndi_waiting, label)
-                   else stringResource(Res.string.canvas_placeholder_ndi, label),
-            modifier = modifier,
-        )
-    }
-}
-
-/**
- * A live OMT source from the network — [NdiSourceContent]'s twin, fitted rather than cropped for the
- * reason that one gives, and drawing the same placeholders.
- */
-@Composable
-private fun OmtSourceContent(source: SceneSource.OmtSource, modifier: Modifier) {
-    if (source.sourceAddress.isBlank()) {
-        NetworkSourcePlaceholder(stringResource(Res.string.canvas_placeholder_omt_default), modifier)
-        return
-    }
-
-    // Acquired in the effect, for the reason spelled out in [CameraSourceContent].
-    var flows by remember { mutableStateOf<ReceivedFrameCache.Flows?>(null) }
-    DisposableEffect(source.sourceAddress, source.preview) {
-        flows = SharedOmtFrameCache.acquire(source)
-        onDispose {
-            flows = null
-            SharedOmtFrameCache.release(source)
-        }
-    }
-
-    val noFrame = remember { MutableStateFlow<ImageBitmap?>(null) }
-    val notConnected = remember { MutableStateFlow(false) }
-    val frame by (flows?.frame ?: noFrame).collectAsState()
-    val connected by (flows?.connected ?: notConnected).collectAsState()
-
-    val shown = frame
-    if (shown != null) {
-        Image(
-            bitmap = shown,
-            contentDescription = source.sourceAddress,
-            contentScale = ContentScale.Fit,
-            modifier = modifier.fillMaxSize()
-        )
-    } else {
-        NetworkSourcePlaceholder(
-            text = if (connected) stringResource(Res.string.canvas_placeholder_ndi_waiting, source.sourceAddress)
-                   else stringResource(Res.string.canvas_placeholder_omt, source.sourceAddress),
-            modifier = modifier,
-        )
-    }
-}
-
-@Composable
-private fun NetworkSourcePlaceholder(text: String, modifier: Modifier) {
-    Box(
-        modifier = modifier.fillMaxSize().background(Color.DarkGray),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = text, color = Color.White, fontSize = 14.sp, textAlign = TextAlign.Center)
-    }
-}
-
-@Composable
-private fun ScreenCaptureSourceContent(source: SceneSource.ScreenCaptureSource, modifier: Modifier) {
-    // Through the shared cache: this composable is mounted once in the canvas editor, once in each
-    // sidebar live preview and once on each presenter output, and each instance used to run its own
-    // `Robot.createScreenCapture` loop over the same pixels at up to 30fps.
-    var frames by remember { mutableStateOf<StateFlow<ImageBitmap?>?>(null) }
-    DisposableEffect(ScreenCaptureSpec.of(source)) {
-        frames = SharedScreenCaptureCache.acquire(source)
-        onDispose {
-            frames = null
-            SharedScreenCaptureCache.release(source)
-        }
-    }
-    val noFrame = remember { MutableStateFlow<ImageBitmap?>(null) }
-    val frame by (frames ?: noFrame).collectAsState()
-
-    Box(
-        modifier = modifier.fillMaxSize().background(Color.Black),
-        contentAlignment = Alignment.Center
-    ) {
-        val currentFrame = frame
-        if (currentFrame != null) {
-            Image(
-                painter = BitmapPainter(currentFrame),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit
-            )
-        } else {
-            Text(stringResource(Res.string.canvas_placeholder_screen_capture), color = Color.White, fontSize = 14.sp)
-        }
-    }
-}
-
-internal fun findWindowBounds(windowTitle: String): Rectangle? =
-    windowBoundsFor(System.getProperty("os.name", "").lowercase(), windowTitle, ::readCommandOutput)
-
-/**
- * Where the window called [windowTitle] currently sits, or `null` when no window by that name is
- * open — which is the ordinary case after the operator picks a window and then closes it.
- *
- * [osName] is a parameter rather than read from `os.name` here so a test can ask for each platform's
- * lookup without swapping the system property, which skiko latches JVM-wide.
- */
-fun windowBoundsFor(osName: String, windowTitle: String, run: CommandRunner): Rectangle? {
-    return try {
-        when {
-            osName.contains("linux") -> linuxWindowBoundsFrom(windowTitle, run)
-            osName.contains("win") -> findWindowsWindowBounds(windowTitle)
-            osName.contains("mac") -> macWindowBoundsFrom(windowTitle, run)
-            else -> null
-        }
-    } catch (_: Exception) { null }
-}
-
-/**
- * Where [title]'s window sits on X11, found by walking the root stacking list with `xprop` and asking
- * `xwininfo` about the one whose `_NET_WM_NAME` matches exactly.
- *
- * The match is exact rather than a prefix or contains: the operator picked this title out of a list
- * built the same way, and two windows of an application routinely differ only by a suffix. A window
- * whose geometry comes back with a zero width or height is skipped rather than returned, so the walk
- * continues to the next candidate — a mapped-but-unrealised window reports exactly that.
- */
-fun linuxWindowBoundsFrom(title: String, run: CommandRunner): Rectangle? {
-    val listOutput = run(listOf("xprop", "-root", "_NET_CLIENT_LIST_STACKING"), 0L).output
-    val windowIds = Regex("0x[0-9a-fA-F]+").findAll(listOutput).map { it.value }.toList()
-
-    for (wid in windowIds) {
-        val nameOutput = run(listOf("xprop", "-id", wid, "_NET_WM_NAME"), 0L).output
-        val name = Regex("\"(.+)\"").find(nameOutput)?.groupValues?.get(1)
-        if (name != title) continue
-
-        val bounds = parseXwininfoBounds(run(listOf("xwininfo", "-id", wid), 0L).output)
-        if (bounds != null) return bounds
-    }
-    return null
-}
-
-/**
- * The geometry in one `xwininfo -id` report, whose interesting lines are four labelled integers among
- * a page of other properties. "Absolute" is the position on the screen rather than within the parent,
- * which is what a capture needs.
- *
- * `null` when the report carries no usable size, so the caller keeps looking rather than capturing an
- * empty rectangle.
- */
-fun parseXwininfoBounds(output: String): Rectangle? {
-    var x = 0; var y = 0; var w = 0; var h = 0
-    for (line in output.lines()) {
-        val trimmed = line.trim()
-        when {
-            trimmed.startsWith("Absolute upper-left X:") -> x = trimmed.substringAfter(":").trim().toIntOrNull() ?: 0
-            trimmed.startsWith("Absolute upper-left Y:") -> y = trimmed.substringAfter(":").trim().toIntOrNull() ?: 0
-            trimmed.startsWith("Width:") -> w = trimmed.substringAfter(":").trim().toIntOrNull() ?: 0
-            trimmed.startsWith("Height:") -> h = trimmed.substringAfter(":").trim().toIntOrNull() ?: 0
-        }
-    }
-    return if (w > 0 && h > 0) Rectangle(x, y, w, h) else null
-}
-
-private fun findWindowsWindowBounds(title: String): Rectangle? {
-    return try {
-        // Find the window by title using JNA EnumWindows
-        val windows = WindowsWindowCapture.listWindows()
-        val win = windows.find { it.title == title }
-        if (win != null) {
-            WindowsWindowCapture.getWindowBounds(win.hwnd)
-        } else null
-    } catch (_: Exception) { null }
-}
-
-/** The AppleScript that returns `x,y,w,h` for the first visible window named [title]. */
-internal fun macWindowBoundsScript(title: String): String = """
-    tell application "System Events"
-        repeat with proc in (every process whose visible is true)
-            repeat with win in (every window of proc)
-                if name of win is "$title" then
-                    set {x, y} to position of win
-                    set {w, h} to size of win
-                    return "" & x & "," & y & "," & w & "," & h
-                end if
-            end repeat
-        end repeat
-    end tell
-""".trimIndent()
-
-/**
- * Where [title]'s window sits on macOS, which only System Events can answer.
- *
- * The script returns the four numbers on one comma-separated line, and anything else means no window
- * matched — an empty answer, or an error message osascript wrote to the stream instead.
- */
-fun macWindowBoundsFrom(title: String, run: CommandRunner): Rectangle? {
-    val output = run(listOf("osascript", "-e", macWindowBoundsScript(title)), 0L).output.trim()
-    val parts = output.split(",").mapNotNull { it.trim().toIntOrNull() }
-    return if (parts.size == WINDOW_BOUNDS_FIELDS &&
-        parts[BOUNDS_WIDTH_INDEX] > 0 && parts[BOUNDS_HEIGHT_INDEX] > 0
-    ) {
-        Rectangle(parts[0], parts[1], parts[BOUNDS_WIDTH_INDEX], parts[BOUNDS_HEIGHT_INDEX])
-    } else null
-}
-
-@Composable
-private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifier, fontScale: Float = 1f) {
-    val bgColor = if (source.backgroundColor.equals("#00000000", ignoreCase = true))
-        Color.Transparent
-    else
-        parseHexColor(source.backgroundColor)
-    val textColor = parseHexColor(source.fontColor)
-    val refColor = parseHexColor(source.referenceFontColor)
-    val fontFamily = remember(source.fontFamily) { systemFontFamilyOrDefault(source.fontFamily) }
-    val align = when (source.horizontalAlignment) {
-        "left" -> TextAlign.Left
-        "right" -> TextAlign.Right
-        else -> TextAlign.Center
-    }
-    val lineHeightMultiplier = source.lineSpacing / 100f
-    val verticalAlign = when (source.verticalAlignment) {
-        "top" -> Alignment.TopStart
-        "bottom" -> Alignment.BottomStart
-        else -> Alignment.Center
-    }
-
-    Box(
-        modifier = modifier.fillMaxSize().background(bgColor).clipToBounds(),
-        contentAlignment = verticalAlign
-    ) {
-        if (source.curve != 0f) {
-            CurvedBibleText(source, textColor, refColor, fontFamily, fontScale)
-            return@Box
-        }
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(8.dp),
-            horizontalAlignment = when (source.horizontalAlignment) {
-                "left" -> Alignment.Start
-                "right" -> Alignment.End
-                else -> Alignment.CenterHorizontally
-            }
-        ) {
-            val versePainter = rememberTextBackdropPainter(source.backdrop, fontScale)
-            val refPainter = rememberTextBackdropPainter(source.referenceBackdrop, fontScale)
-            OutlinedText(
-                text = source.verseText.ifEmpty { stringResource(Res.string.canvas_bible_select_verse) },
-                outline = source.outline,
-                scaleFactor = fontScale,
-                color = if (source.verseText.isEmpty()) Color.Gray else textColor,
-                fontSize = drawnFontSize(source.fontSize, fontScale),
-                fontFamily = fontFamily,
-                style = TextStyle(
-                    fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
-                    fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
-                    textDecoration = textDecorationOf(source.underline, source.strikethrough),
-                    letterSpacing = trackingOf(source.letterSpacing),
-                ),
-                textAlign = align,
-                lineHeight = drawnFontSize(source.fontSize, fontScale * lineHeightMultiplier),
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth()
-                    .backdropRoom(source.backdrop, fontScale)
-                    .then(versePainter.modifier),
-                onTextLayout = versePainter::onTextLayout,
-            )
-            if (source.referenceText.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(4.dp))
-                OutlinedText(
-                    text = source.referenceText,
-                    outline = source.referenceOutline,
-                    scaleFactor = fontScale,
-                    color = refColor,
-                    fontSize = drawnFontSize(source.referenceFontSize, fontScale),
-                    fontFamily = fontFamily,
-                    style = TextStyle(
-                        fontWeight = if (source.referenceBold) FontWeight.Bold else FontWeight.Normal,
-                        fontStyle = if (source.referenceItalic) FontStyle.Italic else FontStyle.Normal,
-                        textDecoration = textDecorationOf(
-                            source.referenceUnderline,
-                            source.referenceStrikethrough,
-                        ),
-                        letterSpacing = trackingOf(source.letterSpacing),
-                    ),
-                    textAlign = align,
-                    modifier = Modifier.fillMaxWidth()
-                        .backdropRoom(source.referenceBackdrop, fontScale)
-                        .then(refPainter.modifier),
-                    onTextLayout = refPainter::onTextLayout,
-                )
-            }
-        }
-    }
-}
-

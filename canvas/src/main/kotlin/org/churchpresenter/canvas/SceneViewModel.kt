@@ -9,7 +9,6 @@ import org.churchpresenter.core.models.io.writeTextAtomically
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.scene.SceneAlternateLayout
 import org.churchpresenter.core.models.scene.SceneSource
-import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.sharedui.utils.presenterScreenBounds
 import java.io.File
 import java.util.UUID
@@ -30,16 +29,16 @@ class SceneViewModel {
         prettyPrint = true
     }
 
-    private val _scenes = mutableStateListOf<Scene>()
+    internal val _scenes = mutableStateListOf<Scene>()
     val scenes: List<Scene> get() = _scenes
 
-    private val _currentSceneId = mutableStateOf<String?>(null)
+    internal val _currentSceneId = mutableStateOf<String?>(null)
     val currentSceneId: State<String?> = _currentSceneId
 
     val currentScene: Scene?
         get() = _scenes.find { it.id == _currentSceneId.value }
 
-    private val _selectedSourceId = mutableStateOf<String?>(null)
+    internal val _selectedSourceId = mutableStateOf<String?>(null)
     val selectedSourceId: State<String?> = _selectedSourceId
 
     val selectedSource: SceneSource?
@@ -134,118 +133,6 @@ class SceneViewModel {
 
     // --- Source operations ---
 
-    fun addSource(source: SceneSource) {
-        val scene = currentScene ?: return
-        updateScene(scene.id) { it.copy(sources = it.sources + source) }
-        _selectedSourceId.value = source.id
-    }
-
-    fun removeSource(sourceId: String) {
-        val scene = currentScene ?: return
-        updateScene(scene.id) {
-            it.copy(
-                sources = it.sources.filter { s -> s.id != sourceId },
-                alternate = it.alternate?.let { layout -> layout.copy(transforms = layout.transforms - sourceId) }
-            )
-        }
-        if (_selectedSourceId.value == sourceId) {
-            _selectedSourceId.value = null
-        }
-    }
-
-    fun selectSource(sourceId: String?) {
-        _selectedSourceId.value = sourceId
-    }
-
-    fun updateSource(sourceId: String, updater: (SceneSource) -> SceneSource) {
-        val scene = currentScene ?: return
-        updateScene(scene.id) {
-            it.copy(sources = it.sources.map { s ->
-                if (s.id == sourceId) updater(s) else s
-            })
-        }
-    }
-
-    fun moveSourceUp(sourceId: String) {
-        val scene = currentScene ?: return
-        val sources = scene.sources.toMutableList()
-        val index = sources.indexOfFirst { it.id == sourceId }
-        if (index > 0) {
-            val temp = sources[index]
-            sources[index] = sources[index - 1]
-            sources[index - 1] = temp
-            updateScene(scene.id) { it.copy(sources = sources) }
-        }
-    }
-
-    fun moveSourceDown(sourceId: String) {
-        val scene = currentScene ?: return
-        val sources = scene.sources.toMutableList()
-        val index = sources.indexOfFirst { it.id == sourceId }
-        if (index >= 0 && index < sources.size - 1) {
-            val temp = sources[index]
-            sources[index] = sources[index + 1]
-            sources[index + 1] = temp
-            updateScene(scene.id) { it.copy(sources = sources) }
-        }
-    }
-
-    fun toggleSourceVisibility(sourceId: String) {
-        updateSource(sourceId) { source ->
-            when (source) {
-                is SceneSource.ImageSource -> source.copy(visible = !source.visible)
-                is SceneSource.TextSource -> source.copy(visible = !source.visible)
-                is SceneSource.ColorSource -> source.copy(visible = !source.visible)
-                is SceneSource.VideoSource -> source.copy(visible = !source.visible)
-                is SceneSource.BrowserSource -> source.copy(visible = !source.visible)
-                is SceneSource.ShapeSource -> source.copy(visible = !source.visible)
-                is SceneSource.ClockSource -> source.copy(visible = !source.visible)
-                is SceneSource.QRCodeSource -> source.copy(visible = !source.visible)
-                is SceneSource.CameraSource -> source.copy(visible = !source.visible)
-                is SceneSource.ScreenCaptureSource -> source.copy(visible = !source.visible)
-                is SceneSource.NdiSource -> source.copy(visible = !source.visible)
-                is SceneSource.OmtSource -> source.copy(visible = !source.visible)
-                is SceneSource.BibleSource -> source.copy(visible = !source.visible)
-            }
-        }
-    }
-
-    fun toggleSourceLock(sourceId: String) {
-        updateSource(sourceId) { source ->
-            when (source) {
-                is SceneSource.ImageSource -> source.copy(locked = !source.locked)
-                is SceneSource.TextSource -> source.copy(locked = !source.locked)
-                is SceneSource.ColorSource -> source.copy(locked = !source.locked)
-                is SceneSource.VideoSource -> source.copy(locked = !source.locked)
-                is SceneSource.BrowserSource -> source.copy(locked = !source.locked)
-                is SceneSource.ShapeSource -> source.copy(locked = !source.locked)
-                is SceneSource.ClockSource -> source.copy(locked = !source.locked)
-                is SceneSource.QRCodeSource -> source.copy(locked = !source.locked)
-                is SceneSource.CameraSource -> source.copy(locked = !source.locked)
-                is SceneSource.ScreenCaptureSource -> source.copy(locked = !source.locked)
-                is SceneSource.NdiSource -> source.copy(locked = !source.locked)
-                is SceneSource.OmtSource -> source.copy(locked = !source.locked)
-                is SceneSource.BibleSource -> source.copy(locked = !source.locked)
-            }
-        }
-    }
-
-    /**
-     * Moves or resizes [sourceId]. With [alternate] set the change goes to the scene's second layout
-     * and the main one is left as it was; with no second layout it is ignored.
-     */
-    fun updateTransform(sourceId: String, transform: SourceTransform, alternate: Boolean = false) {
-        if (!alternate) {
-            updateSource(sourceId) { it.withTransform(transform) }
-            return
-        }
-        val scene = currentScene ?: return
-        val layout = scene.alternate ?: return
-        updateScene(scene.id) {
-            it.copy(alternate = layout.copy(transforms = layout.transforms + (sourceId to transform)))
-        }
-    }
-
     /**
      * Gives [sceneId] a second layout for screens of the other orientation, or takes it away. A new
      * one starts empty, so every layer begins at the same fractions of the turned canvas.
@@ -284,7 +171,7 @@ class SceneViewModel {
         }
     }
 
-    private fun updateScene(sceneId: String, updater: (Scene) -> Scene) {
+    internal fun updateScene(sceneId: String, updater: (Scene) -> Scene) {
         val index = _scenes.indexOfFirst { it.id == sceneId }
         if (index >= 0) {
             _scenes[index] = updater(_scenes[index])
