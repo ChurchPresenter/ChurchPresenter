@@ -1,5 +1,15 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.settings.LinkLayers
+import org.churchpresenter.sharedui.composables.LabeledCheckbox
+import org.jetbrains.compose.resources.StringResource
+import androidx.compose.ui.platform.testTag
+import org.churchpresenter.strings.generated.resources.instance_link_follow_layers
+import org.churchpresenter.strings.generated.resources.instance_link_layer_slides
+import org.churchpresenter.strings.generated.resources.instance_link_layer_media
+import org.churchpresenter.strings.generated.resources.instance_link_layer_lower_thirds
+import org.churchpresenter.strings.generated.resources.instance_link_layer_captions
+import org.churchpresenter.strings.generated.resources.instance_link_layer_announcements
 import androidx.compose.runtime.Stable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -279,6 +289,13 @@ private class InstanceLinkForm(private val settings: InstanceLinkSettings) {
     var bibleSyncMode by mutableStateOf(settings.bibleSyncMode)
     var mirrorBackgrounds by mutableStateOf(settings.mirrorBackgrounds)
     var role by mutableStateOf(settings.role)
+    var followedLayers by mutableStateOf(settings.followedLayers)
+
+    /** Follows [layer] or stops, keeping the layers in their own order. */
+    fun follow(layer: String, on: Boolean) {
+        val chosen = if (on) followedLayers + layer else followedLayers - layer
+        followedLayers = LinkLayers.ALL.filter { it in chosen }
+    }
 
     fun edited(): InstanceLinkSettings = settings.copy(
         primaryHost = host.trim(),
@@ -289,7 +306,8 @@ private class InstanceLinkForm(private val settings: InstanceLinkSettings) {
         allowPushToSchedule = allowPushToSchedule,
         bibleSyncMode = bibleSyncMode,
         mirrorBackgrounds = mirrorBackgrounds,
-        role = role
+        role = role,
+        followedLayers = followedLayers,
     )
 }
 
@@ -461,8 +479,42 @@ if (form.role == InstanceLinkRole.CONTROLLED) {
         style = MaterialTheme.typography.bodyMedium,
         spacing = 12.dp,
     )
+
+    FollowedLayers(form)
 }
 }
+
+/** Which layers of the primary's output this follower mirrors; the rest stay its own. */
+@Composable
+private fun FollowedLayers(form: InstanceLinkForm) {
+    Text(
+        stringResource(Res.string.instance_link_follow_layers),
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    LinkLayers.ALL.forEach { layer ->
+        LabeledCheckbox(
+            checked = layer in form.followedLayers,
+            onCheckedChange = { form.follow(layer, it) },
+            label = stringResource(linkLayerLabel(layer)),
+            modifier = Modifier.fillMaxWidth().testTag(followLayerTag(layer)),
+            style = MaterialTheme.typography.bodyMedium,
+            spacing = 12.dp,
+        )
+    }
+}
+
+/** What a follower's layer choice is called in the dialog. */
+private fun linkLayerLabel(layer: String): StringResource = when (layer) {
+    LinkLayers.MEDIA -> Res.string.instance_link_layer_media
+    LinkLayers.LOWER_THIRD -> Res.string.instance_link_layer_lower_thirds
+    LinkLayers.CAPTIONS -> Res.string.instance_link_layer_captions
+    LinkLayers.ANNOUNCEMENTS -> Res.string.instance_link_layer_announcements
+    else -> Res.string.instance_link_layer_slides
+}
+
+/** Test handle for the checkbox that follows [layer]. */
+internal fun followLayerTag(layer: String) = "instance_link_follow_$layer"
 
 /** Disconnect while linked, cancel, save without reconnecting, and connect. */
 @Composable

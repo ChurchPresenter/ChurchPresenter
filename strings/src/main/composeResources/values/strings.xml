@@ -147,6 +147,12 @@
     <string name="instance_link_reconnect_delay_hint">Shortest wait before retrying a dropped link. Repeated failures back off further on their own.</string>
     <string name="instance_link_allow_push_to_schedule">Allow adding items to the primary's schedule</string>
     <string name="instance_link_mirror_backgrounds">Also mirror the primary's backgrounds</string>
+    <string name="instance_link_follow_layers">Follow these layers</string>
+    <string name="instance_link_layer_slides">Slides and backgrounds</string>
+    <string name="instance_link_layer_media">Media</string>
+    <string name="instance_link_layer_lower_thirds">Lower thirds</string>
+    <string name="instance_link_layer_captions">Captions</string>
+    <string name="instance_link_layer_announcements">Announcements</string>
     <string name="instance_link_role">Connection role</string>
     <string name="instance_link_role_controlled">Controlled — mirror the primary's content</string>
     <string name="instance_link_role_controller">Controller — drive the primary's output from here</string>

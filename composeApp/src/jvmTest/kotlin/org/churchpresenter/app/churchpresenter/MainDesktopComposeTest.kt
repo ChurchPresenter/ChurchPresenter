@@ -1093,16 +1093,10 @@ class MainDesktopComposeTest {
     }
 
     @Test
-    fun `the sidebar's switch turns preview mode on, and Take is not there while it is off`() {
-        val wiring = Wiring()
-        val base = withPreviewMode(false)
-        root(base, wiring = wiring) { _ ->
+    fun `Take is not in the sidebar while preview mode is off`() =
+        root(withPreviewMode(false)) { _ ->
             onAllNodesWithTag(PREVIEW_TAKE_TAG).assertCountEquals(0)
-            onNodeWithTag(PREVIEW_MODE_TOGGLE_TAG).performClick()
-            waitForIdle()
         }
-        assertTrue(wiring.settingsChanges.last()(base).projectionSettings.previewModeEnabled)
-    }
 
     @Test
     fun `a tab's function key opens it`() {

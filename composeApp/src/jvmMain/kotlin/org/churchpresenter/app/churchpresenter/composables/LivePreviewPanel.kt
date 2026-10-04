@@ -80,7 +80,6 @@ import org.churchpresenter.strings.generated.resources.ndi_output_numbered
 import org.churchpresenter.strings.generated.resources.omt_output_numbered
 import org.churchpresenter.strings.generated.resources.collapse_preview
 import org.churchpresenter.strings.generated.resources.expand_preview
-import org.churchpresenter.strings.generated.resources.live_preview_title
 import org.churchpresenter.strings.generated.resources.screen_number
 import org.churchpresenter.strings.generated.resources.pause
 import org.churchpresenter.strings.generated.resources.play
@@ -113,8 +112,6 @@ import org.churchpresenter.media.viewmodel.formatMediaTime
 
 private const val AUDIO_LEVEL_COLOR = 0xFF4CAF50
 
-/** Half a pulse of the LIVE badge, in milliseconds; it reverses, so a full cycle is twice this. */
-private const val LIVE_PULSE_MS = 550
 
 /**
  * A scaled-down preview of whatever is currently live on the presenter windows.
@@ -220,6 +217,9 @@ fun LivePreviewPanel(
         }
     }
 }
+
+/** Test handle on a tile whose output is showing something -- the one framed red. */
+internal const val LIVE_TILE_TAG = "live_preview_tile"
 
 /** Test handle for the Done button that ends editing the layout. */
 internal const val PREVIEW_LAYOUT_DONE_TAG = "preview_layout_done"
@@ -557,6 +557,8 @@ private fun SingleDisplayPreview(
                 .aspectRatio(outputSize.aspectRatio)
                 .clip(AppShape(6.dp))
                 .border(if (busRole != null) BUS_BORDER_WIDTH else 1.dp, borderColor, AppShape(6.dp))
+                // Live is the red frame alone; this says so to a test.
+                .then(if (isLive) Modifier.testTag(LIVE_TILE_TAG) else Modifier)
         ) {
         val primaryRole = rawAssignment.primaryOutputRole
 
@@ -600,11 +602,6 @@ private fun SingleDisplayPreview(
             }
         }
 
-        // "LIVE" badge — only when this screen is showing content, and not while preview mode is on,
-        // where the frame's colour says which bus the tile is
-        if (isLive && busRole == null) {
-            LiveBadge(Modifier.align(Alignment.TopStart))
-        }
 
         PreviewBadges(
             screenIndex = screenIndex,
@@ -740,46 +737,6 @@ private fun OutputProfileSwapMenu(
 
 /** How far the caret turns when the preview is folded away; the same quarter turn the tray uses. */
 private const val CARET_CLOSED_DEGREES = -90f
-
-/**
- * The pulsing LIVE badge.
- *
- * Its own composable, and its own animation, on purpose. The pulse used to be read at the top of
- * [SingleDisplayPreview]'s scope, which invalidated that whole scope — the nested `PresenterScreen`
- * and every source under it — on every animation frame, for every output, whether or not the output
- * was live. With one preview per display, per Browser Source and per NDI output, that was the app
- * re-rendering all of its outputs twice over at 60fps while sitting idle.
- *
- * The alpha is read inside `drawBehind`, so a pulse now costs a redraw of this one badge and no
- * recomposition at all.
- */
-@Composable
-private fun LiveBadge(modifier: Modifier = Modifier) {
-    val transition = rememberInfiniteTransition(label = "live")
-    val pulse = transition.animateFloat(
-        initialValue = 0.70f,
-        targetValue = 1.0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(LIVE_PULSE_MS, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "live_pulse"
-    )
-    Text(
-        text = stringResource(Res.string.live_preview_title),
-        color = Color.White,
-        fontSize = 10.sp,
-        modifier = modifier
-            .padding(4.dp)
-            .drawBehind {
-                drawRoundRect(
-                    color = Color.Red.copy(alpha = pulse.value),
-                    cornerRadius = CornerRadius(3.dp.toPx()),
-                )
-            }
-            .padding(horizontal = 6.dp, vertical = 2.dp)
-    )
-}
 
 @Composable
 internal fun AnimatedEqualizer() {

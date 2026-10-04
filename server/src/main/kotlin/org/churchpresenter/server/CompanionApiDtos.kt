@@ -227,7 +227,13 @@ data class LiveStateDto(
     // ignore it (ignoreUnknownKeys).
     val dictionaryEntry: StrongsEntry? = null,
     // lower third — resolves to a file via the same lowerThirdFiles() lookup /api/lowerthirds/{name}/json uses
-    val lowerThirdName: String? = null
+    val lowerThirdName: String? = null,
+    // What is on air on the primary at this moment, whatever [contentType] the change was: the
+    // slide's mode, and the overlays (lower third, captions, announcements) up over it. A follower
+    // takes only what is live, and takes down an overlay the primary took down. Old primaries omit
+    // them (null -> the follower goes live with [contentType] as before); old followers ignore them.
+    val liveSlide: String? = null,
+    val overlays: List<String>? = null,
 )
 
 // ── Bible DTOs ────────────────────────────────────────────────────────────────

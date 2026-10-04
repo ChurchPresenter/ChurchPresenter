@@ -5,6 +5,7 @@ import java.io.File
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.dictionary.data.StrongsEntry
 import org.churchpresenter.settings.BibleSyncMode
+import org.churchpresenter.settings.LinkLayers
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionStatus
@@ -57,7 +58,9 @@ internal suspend fun applyRemoteLiveState(
     /** This instance's own saved scenes — CANVAS mirroring is id-match only (no content endpoint). */
     localScenes: List<Scene> = emptyList(),
     /** Loads + starts media playback locally (MediaViewModel stays owned by its composable). */
-    onPlayRemoteMedia: ((url: String, type: String) -> Unit)? = null
+    onPlayRemoteMedia: ((url: String, type: String) -> Unit)? = null,
+    /** The layers this follower mirrors, from `LinkLayers`; changes to the others are left alone. */
+    followedLayers: List<String> = LinkLayers.ALL,
 ) {
     val mode = runCatching { Presenting.valueOf(state.contentType) }.getOrNull()
     if (mode == null) {
@@ -67,6 +70,28 @@ internal suspend fun applyRemoteLiveState(
         )
         return
     }
+    val follows = { m: Presenting -> linkLayerOf(m) in followedLayers }
+    if (follows(mode) &&
+        !applyRemoteContent(state, mode, presenterManager, instanceLinkViewModel, bibleSyncMode, localPrimaryBible, localScenes, onPlayRemoteMedia)
+    ) {
+        return
+    }
+    followAir(state, mode, presenterManager, follows)
+    presenterManager.setShowPresenterWindow(true)
+}
+
+/** The content half of [applyRemoteLiveState]: [mode]'s content, put in place; false when it cannot go live. */
+@Suppress("LongParameterList")
+private suspend fun applyRemoteContent(
+    state: LiveStateDto,
+    mode: Presenting,
+    presenterManager: PresenterManager,
+    instanceLinkViewModel: InstanceLinkViewModel,
+    bibleSyncMode: BibleSyncMode,
+    localPrimaryBible: Bible?,
+    localScenes: List<Scene>,
+    onPlayRemoteMedia: ((url: String, type: String) -> Unit)?,
+): Boolean {
     when (mode) {
         Presenting.BIBLE ->
             applyRemoteBible(state, presenterManager, bibleSyncMode, localPrimaryBible)
@@ -118,7 +143,7 @@ internal suspend fun applyRemoteLiveState(
             )
         }
         Presenting.PICTURES ->
-            if (!applyRemotePictures(state, presenterManager, instanceLinkViewModel)) return
+            if (!applyRemotePictures(state, presenterManager, instanceLinkViewModel)) return false
         Presenting.LOWER_THIRD -> applyRemoteLowerThird(state, presenterManager, instanceLinkViewModel)
         Presenting.MEDIA -> applyRemoteMedia(state, presenterManager, instanceLinkViewModel, onPlayRemoteMedia)
         Presenting.CANVAS -> applyRemoteCanvas(state, presenterManager, localScenes)
@@ -133,8 +158,43 @@ internal suspend fun applyRemoteLiveState(
             )
         }
     }
-    presenterManager.setPresentingMode(mode)
-    presenterManager.setShowPresenterWindow(true)
+    return true
+}
+
+/**
+ * What goes live on this follower for a change of [mode] on the primary. A primary that says what
+ * is on air ([LiveStateDto.liveSlide], [LiveStateDto.overlays]) is followed exactly: its slide goes
+ * live when this change is that slide's, an overlay goes up when this change is that overlay's, and
+ * an overlay it took down comes down here. An older primary says only [mode], which goes live as
+ * it always did. Layers this follower does not follow are left as they are -- though its own
+ * overlays still come down when a followed slide goes live, as going live with a slide does.
+ */
+internal fun followAir(
+    state: LiveStateDto,
+    mode: Presenting,
+    presenterManager: PresenterManager,
+    follows: (Presenting) -> Boolean,
+) {
+    val overlays = state.overlays?.mapNotNull { runCatching { Presenting.valueOf(it) }.getOrNull() }
+    if (overlays == null) {
+        if (follows(mode)) presenterManager.setPresentingMode(mode)
+        return
+    }
+    val slide = state.liveSlide?.let { runCatching { Presenting.valueOf(it) }.getOrNull() }
+    if (mode == slide && follows(slide) && presenterManager.presentingMode.value != slide) {
+        presenterManager.setPresentingMode(slide)
+    }
+    if (mode in overlays && follows(mode)) presenterManager.setPresentingMode(mode)
+    (presenterManager.overlays.value - overlays.toSet()).filter(follows).forEach(presenterManager::clearOverlay)
+}
+
+/** Which of `LinkLayers` [mode] is on, for a follower choosing what to mirror. */
+internal fun linkLayerOf(mode: Presenting): String = when (mode) {
+    Presenting.MEDIA -> LinkLayers.MEDIA
+    Presenting.LOWER_THIRD -> LinkLayers.LOWER_THIRD
+    Presenting.STT -> LinkLayers.CAPTIONS
+    Presenting.ANNOUNCEMENTS -> LinkLayers.ANNOUNCEMENTS
+    else -> LinkLayers.SLIDE
 }
 
 /** The BIBLE half of [applyRemoteLiveState]: either this instance's own wording, or the primary's. */

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Monitor
-import androidx.compose.material.icons.filled.Preview
 import androidx.compose.material.icons.outlined.DisplaySettings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -33,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_close
-import org.churchpresenter.strings.generated.resources.preview_mode
 import org.churchpresenter.strings.generated.resources.preview_take
 import org.churchpresenter.strings.generated.resources.tooltip_clear_display
 import org.churchpresenter.strings.generated.resources.tooltip_preview_settings
@@ -50,7 +48,6 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.previewOutputSize
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.withPreviewMode
 import org.churchpresenter.stt.STTManager
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.settings.AppSettings
@@ -120,9 +117,7 @@ internal fun PreviewSidebar(
                 PreviewSettingsButton(appSettings.projectionSettings, { editingPreviewLayout = true }) { updated ->
                     onSettingsChange { s -> s.copy(projectionSettings = updated) }
                 }
-                PreviewModeControls(presenterManager, appSettings.projectionSettings.previewModeEnabled) { on ->
-                    onSettingsChange { s -> s.withPreviewMode(on) }
-                }
+                if (appSettings.projectionSettings.previewModeEnabled) PreviewTakeButton(presenterManager)
             }
             // A layout filling the panel takes the column's spare height; otherwise it keeps its own.
             val previewFills = appSettings.projectionSettings.run { previewLayoutFillsPanel && activeLayout() != null }
@@ -222,45 +217,26 @@ private fun PreviewSettingsButton(
 }
 
 /**
- * Preview mode's switch and, while it is on, Take: what is cued on Preview goes on air. Take can be
- * pressed only while something is cued.
+ * Preview mode's Take, while preview mode is on: what is cued on Preview goes on air. It can be
+ * pressed only while something is cued. Preview mode itself is switched in System settings.
  */
 @Composable
-internal fun RowScope.PreviewModeControls(
-    presenterManager: PresenterManager,
-    on: Boolean,
-    onToggle: (Boolean) -> Unit,
-) {
-    TooltipIconButton(
-        painter = rememberVectorPainter(Icons.Default.Preview),
-        text = stringResource(Res.string.preview_mode),
-        onClick = { onToggle(!on) },
-        buttonSize = 36.dp,
-        iconTint = if (on) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-        },
-        modifier = Modifier.testTag(PREVIEW_MODE_TOGGLE_TAG),
-    )
-    if (on) {
-        val bus = presenterManager.previewBus
-        Spacer(Modifier.weight(1f))
-        Button(
-            onClick = bus::take,
-            enabled = bus.anythingCued,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.error,
-                contentColor = MaterialTheme.colorScheme.onError,
-            ),
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            modifier = Modifier.height(36.dp).testTag(PREVIEW_TAKE_TAG),
-        ) {
-            Text(stringResource(Res.string.preview_take))
-        }
+internal fun RowScope.PreviewTakeButton(presenterManager: PresenterManager) {
+    val bus = presenterManager.previewBus
+    Spacer(Modifier.weight(1f))
+    Button(
+        onClick = bus::take,
+        enabled = bus.anythingCued,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.error,
+            contentColor = MaterialTheme.colorScheme.onError,
+        ),
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        modifier = Modifier.height(36.dp).testTag(PREVIEW_TAKE_TAG),
+    ) {
+        Text(stringResource(Res.string.preview_take))
     }
 }
 
-/** Test handles for preview mode's switch and its Take button. */
-internal const val PREVIEW_MODE_TOGGLE_TAG = "preview_mode_toggle"
+/** Test handle for preview mode's Take button. */
 internal const val PREVIEW_TAKE_TAG = "preview_take"

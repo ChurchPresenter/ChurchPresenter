@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.ImageBitmap
@@ -219,7 +220,7 @@ class LivePreviewPanelTest {
         assertEquals(emptyMap(), manager.browserSourceTranspose.value)
     }
 
-    // ── Mode dispatch → Live badge ────────────────────────────────────────────────────────────
+    // ── Mode dispatch → live tile ──────────────────────────────────────────────────────────────
 
     @Test
     fun `each presenting mode shows Live when its show flag is on, the default`() = runComposeUiTest {
@@ -232,12 +233,12 @@ class LivePreviewPanelTest {
                     )
                 }
             }
-            onNodeWithText("Live").assertExists("mode=$mode must show Live when its show flag defaults to true")
+            onNodeWithTag(LIVE_TILE_TAG).assertExists("mode=$mode must show live when its show flag defaults to true")
         }
     }
 
     @Test
-    fun `each presenting mode's Live badge is gated by its own show flag`() = runComposeUiTest {
+    fun `each presenting mode's live tile is gated by its own show flag`() = runComposeUiTest {
         val offCases = listOf(
             Presenting.BIBLE to OutputProfile(bibleMode = Constants.SONG_LANG_OFF),
             Presenting.LYRICS to OutputProfile(songMode = Constants.SONG_LANG_OFF),
@@ -266,18 +267,18 @@ class LivePreviewPanelTest {
                     )
                 }
             }
-            onNodeWithText("Live").assertDoesNotExist()
+            onNodeWithTag(LIVE_TILE_TAG).assertDoesNotExist()
         }
     }
 
     @Test
-    fun `Presenting NONE never shows the Live badge`() = runComposeUiTest {
+    fun `Presenting NONE never shows a live tile`() = runComposeUiTest {
         setContent {
             MaterialTheme {
                 LivePreviewPanel(presenterManager = PresenterManager(), appSettings = AppSettings())
             }
         }
-        onNodeWithText("Live").assertDoesNotExist()
+        onNodeWithTag(LIVE_TILE_TAG).assertDoesNotExist()
     }
 
     // ── FILL badge ─────────────────────────────────────────────────────────────────────────────
@@ -852,9 +853,9 @@ class LivePreviewPanelTest {
         }
         // STTManager starts with no segments/in-progress text, so there's no caption text to
         // assert on directly — this confirms the sttManager != null branch composes cleanly,
-        // alongside the panel's own always-present content and Live badge.
+        // alongside the panel's own always-present content and live frame.
         onNodeWithText("Screen 1").assertExists()
-        onNodeWithText("Live").assertExists()
+        onNodeWithTag(LIVE_TILE_TAG).assertExists()
     }
 
     // ── The profile swap menu ──────────────────────────────────────────────────────────────────

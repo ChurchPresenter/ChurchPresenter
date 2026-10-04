@@ -95,7 +95,8 @@ internal fun AppRootState.InstanceLinkFollowerWiring() {
                 onPlayRemoteMedia = { url, type ->
                     mediaViewModel.loadMedia(url, type)
                     mediaViewModel.play()
-                }
+                },
+                followedLayers = appSettings.instanceLink.followedLayers,
             )
         }
     }

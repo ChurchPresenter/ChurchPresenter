@@ -84,7 +84,9 @@ internal fun LiveStateBroadcastWiring(
                     lowerThirdName = nullIfEmpty(pm.currentLowerThirdName.value),
                     verseCode = verseCode,
                     songSectionIndex = livePositionOrNull(source, Presenting.LYRICS, pm.songDisplaySectionIndex.value),
-                    songLineIndex = livePositionOrNull(source, Presenting.LYRICS, pm.songDisplayLineIndex.value)
+                    songLineIndex = livePositionOrNull(source, Presenting.LYRICS, pm.songDisplayLineIndex.value),
+                    liveSlide = pm.presentingMode.value.name,
+                    overlays = pm.overlays.value.map { it.name },
                 ),
             )
         }
