@@ -42,8 +42,9 @@ class DisplayedSongPositionTest {
         repeat(FRAMES) { frame ->
             val position = manager.displayedSongPosition.value
             val shown = manager.displayedLyricSection.value
+            val atIndex = position.allSections.getOrNull(position.sectionIndex)
             assertTrue(
-                position.allSections.getOrNull(position.sectionIndex)?.let { it.header == shown.header && it.lines == shown.lines } == true,
+                atIndex != null && atIndex.header == shown.header && atIndex.lines == shown.lines,
                 "frame $frame: the outputs drew ${shown.header} at section ${position.sectionIndex}",
             )
             mainClock.advanceTimeByFrame()

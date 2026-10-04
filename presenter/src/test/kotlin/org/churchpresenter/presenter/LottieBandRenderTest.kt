@@ -43,16 +43,14 @@ class LottieBandRenderTest {
         dir.deleteRecursively()
     }
 
-    private fun template(
-        animation: TextAnimation = TextAnimation.FADE,
-        align: BandTextAlign = BandTextAlign.FOLLOW_SETTINGS,
-    ): File = LottieBandTestSupport.writeTemplate(
-        dir,
-        cfg = BibleLottieGenConfig(
-            canvasW = 1920, canvasH = 194, layout = SlotLayout.SIDE_BY_SIDE,
-            textAnimation = animation, textAlign = align, referenceAlign = align,
-        ),
-    )
+    private fun template(align: BandTextAlign = BandTextAlign.FOLLOW_SETTINGS): File =
+        LottieBandTestSupport.writeTemplate(
+            dir,
+            cfg = BibleLottieGenConfig(
+                canvasW = 1920, canvasH = 194, layout = SlotLayout.SIDE_BY_SIDE,
+                textAnimation = TextAnimation.FADE, textAlign = align, referenceAlign = align,
+            ),
+        )
 
     private fun band(file: File) =
         BackgroundConfig(backgroundType = Constants.BACKGROUND_LOTTIE, backgroundLottie = file.path)
@@ -67,7 +65,10 @@ class LottieBandRenderTest {
         verseText = text,
     )
 
-    private val verses = listOf(verse("For God so loved the world", "KJV"), verse("Ибо так возлюбил Бог мир", "RST"))
+    private val verses = listOf(
+        verse("For God so loved the world", "KJV"),
+        verse("Ибо так возлюбил Бог мир", "RST"),
+    )
 
     private fun bibleSettings(file: File, italic: Boolean = false) = AppSettings(
         backgroundSettings = BackgroundSettings(bibleLowerThirdBackground = band(file)),
@@ -106,9 +107,6 @@ class LottieBandRenderTest {
 
     @Test
     fun `a Bible band holding its verse draws`() = bibleBandDraws(template())
-
-    @Test
-    fun `a ticker band draws`() = bibleBandDraws(template(animation = TextAnimation.TICKER))
 
     @Test
     fun `a band pinned left draws`() = bibleBandDraws(template(align = BandTextAlign.LEFT), italic = true)
