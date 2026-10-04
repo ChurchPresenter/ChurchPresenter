@@ -34,3 +34,14 @@ internal fun PresenterManager.unlockedModeFor(profile: OutputProfile): Presentin
  */
 internal fun PresenterManager.shownModeFor(profile: OutputProfile, effectiveMode: Presenting): Presenting =
     if (effectiveMode == presentingMode.value) unlockedModeFor(profile) else effectiveMode
+
+/**
+ * The overlay a remote client names when it clears one layer -- `POST /api/clear?layer=...` or the
+ * WebSocket `clear` command's `layer` -- or null for a name that is not one, which clears nothing.
+ */
+internal fun overlayForLayerName(name: String): Presenting? = when (name.trim().lowercase()) {
+    "lowerthird", "lower_third", "lower-third", "graphics" -> Presenting.LOWER_THIRD
+    "captions", "stt" -> Presenting.STT
+    "announcements", "announcement" -> Presenting.ANNOUNCEMENTS
+    else -> null
+}

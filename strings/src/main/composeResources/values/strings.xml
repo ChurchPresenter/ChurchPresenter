@@ -1786,6 +1786,10 @@
     <string name="profile_lower_third_over_content">Lower third goes over the content</string>
     <string name="profile_announcements_over_content">Announcements go over the content</string>
     <string name="profile_captions_over_content">Captions go over the content</string>
+    <string name="shortcut_description_clear_lower_third">Take the lower third down</string>
+    <string name="shortcut_description_clear_captions">Take the captions down</string>
+    <string name="shortcut_description_clear_announcement">Take the announcement down</string>
+    <string name="overlay_take_down">Take %1$s down</string>
     <string name="analytics_reporting">Share anonymous crash &amp; analytics reports</string>
     <string name="send_test_event">Send test event</string>
     <string name="test_event_title">Sentry test event</string>

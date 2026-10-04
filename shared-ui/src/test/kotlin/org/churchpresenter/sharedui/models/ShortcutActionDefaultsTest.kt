@@ -32,15 +32,22 @@ class ShortcutActionDefaultsTest {
     }
 
     @Test
-    fun `every action except Save As and the tenth quick background ships with a binding`() {
-        // Two deliberately unbound actions. Save As has no accelerator in the app today and exists
-        // here so it can be given one. The tenth quick-background slot has no key left to take:
-        // one to nine are spent on the first nine slots and Ctrl+0 on the reset, so it ships
-        // unbound rather than claiming a two-handed chord nobody asked for.
+    fun `only the deliberately unbound actions ship without a binding`() {
+        // Save As has no accelerator in the app today and exists here so it can be given one. The
+        // three overlay clears are new and left for each operator to bind. The tenth
+        // quick-background slot has no key left to take: one to nine are spent on the first nine
+        // slots and Ctrl+0 on the reset, so it ships unbound rather than claiming a two-handed
+        // chord nobody asked for.
         val unbound = ShortcutAction.entries.filter { it.defaults.isEmpty() }
 
         assertEquals(
-            listOf(ShortcutAction.SAVE_SCHEDULE_AS, ShortcutAction.QUICK_BACKGROUND_10),
+            listOf(
+                ShortcutAction.SAVE_SCHEDULE_AS,
+                ShortcutAction.CLEAR_LOWER_THIRD,
+                ShortcutAction.CLEAR_CAPTIONS,
+                ShortcutAction.CLEAR_ANNOUNCEMENT,
+                ShortcutAction.QUICK_BACKGROUND_10,
+            ),
             unbound,
         )
     }

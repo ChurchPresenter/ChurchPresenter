@@ -8,7 +8,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.churchpresenter.settings.utils.Constants
 
 private const val SUMMARY_PREVIEW_CHARS = 60
@@ -112,11 +114,17 @@ private suspend fun DefaultWebSocketServerSession.presentCommand(
                         sendCommandAck(msg.commandId, ok = true, json = json)
                     }
                     Constants.WS_CMD_CLEAR -> {
-                        scope.launch { server.onClear.emit(Unit) }
-                        scope.launch {
-                            server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
-                                "clear", RemoteLabel.EMPTY, clientId = wsClientId
-                            ))
+                        // With a "layer" in the payload, only that layer comes down.
+                        val layer = clearLayerOf(msg.payload, json)
+                        if (layer != null) {
+                            scope.launch { server.onClearLayer.emit(layer) }
+                        } else {
+                            scope.launch { server.onClear.emit(Unit) }
+                            scope.launch {
+                                server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
+                                    "clear", RemoteLabel.EMPTY, clientId = wsClientId
+                                ))
+                            }
                         }
                         sendCommandAck(msg.commandId, ok = true, json = json)
                     }
@@ -231,4 +239,11 @@ private suspend fun DefaultWebSocketServerSession.replyWithDecision(decision: Co
     val allowed = try { decision.await() } catch (_: Exception) { false }
     val response = if (allowed) """{"ok":true}""" else """{"ok":false,"reason":"denied"}"""
     try { send(Frame.Text(response)) } catch (_: Exception) { }
+}
+
+/** The `layer` a WebSocket `clear` names in its payload, or null for a clear of everything. */
+internal fun clearLayerOf(payload: String, json: Json): String? = try {
+    json.parseToJsonElement(payload).jsonObject["layer"]?.jsonPrimitive?.contentOrNull
+} catch (_: IllegalArgumentException) {
+    null
 }

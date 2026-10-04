@@ -128,12 +128,19 @@ internal fun Route.scheduleRoutes(
                 /**
                  * POST /api/clear
                  * Instantly switches the presenter to display-none (Presenting.NONE).
+                 * With `?layer=lowerthird|captions|announcements`, takes down only that layer.
                  * No request body or approval needed.
                  * Response: {"ok":true}
                  */
                 post(Constants.ENDPOINT_CLEAR) {
                     if (!server.checkApiKey(call)) return@post
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                    val layer = call.request.queryParameters["layer"]
+                    if (layer != null) {
+                        scope.launch { server.onClearLayer.emit(layer) }
+                        call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                        return@post
+                    }
                     scope.launch { server.onClear.emit(Unit) }
                     scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
                         actionType = "clear",

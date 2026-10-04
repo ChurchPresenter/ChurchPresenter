@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.viewmodel.overlayForLayerName
 import org.churchpresenter.app.churchpresenter.server.broadcastDisplayCleared
 import org.churchpresenter.app.churchpresenter.server.broadcastSongSectionSelected
 import org.churchpresenter.app.churchpresenter.server.updateBrowserSourceTranspose
@@ -130,6 +131,11 @@ internal fun MainWindowScope.ServerCommandWiring() {
             companionServer.onClear.collect {
                 mediaViewModel.pause()
                 presenterManager.requestClearDisplay()
+            }
+        }
+        LaunchedEffect(Unit) {
+            companionServer.onClearLayer.collect { name ->
+                overlayForLayerName(name)?.let(presenterManager::clearOverlay)
             }
         }
 
