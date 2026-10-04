@@ -4,7 +4,6 @@ package org.churchpresenter.profiles
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,7 +66,7 @@ class PreviewOutputPickerTest {
     private fun <T> composed(block: @Composable () -> T): T {
         var result: T? = null
         runComposeUiTest {
-            setContent { DevelopmentBuild { MaterialTheme { result = block() } } }
+            setContent { MaterialTheme { result = block() } }
             waitForIdle()
         }
         @Suppress("UNCHECKED_CAST")
@@ -98,17 +97,15 @@ class PreviewOutputPickerTest {
     ) = runComposeUiTest {
         var current = initial
         setContent {
-            DevelopmentBuild {
-                MaterialTheme {
-                    var state by remember { mutableStateOf(current) }
-                    PreviewOutputPicker(
-                        settings = state,
-                        tabId = tab,
-                        mode = Presenting.BIBLE,
-                        onSettingsChange = { transform -> state = transform(state); current = state },
-                        realWindowCount = realWindowCount,
-                    )
-                }
+            MaterialTheme {
+                var state by remember { mutableStateOf(current) }
+                PreviewOutputPicker(
+                    settings = state,
+                    tabId = tab,
+                    mode = Presenting.BIBLE,
+                    onSettingsChange = { transform -> state = transform(state); current = state },
+                    realWindowCount = realWindowCount,
+                )
             }
         }
         block { current }
@@ -318,8 +315,3 @@ class PreviewOutputPickerTest {
         }
     }
 }
-
-/** A development build, as the app's own test runs are: the picker lists the dev windows main.kt opens. */
-@Composable
-private fun DevelopmentBuild(content: @Composable () -> Unit) =
-    CompositionLocalProvider(LocalDevelopmentBuild provides true, content = content)

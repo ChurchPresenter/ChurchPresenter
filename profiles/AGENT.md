@@ -29,7 +29,8 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 
 - **`LocalDevelopmentBuild`**: whether this is a development build, which decides whether the
   preview-output picker lists the dev windows `main.kt` opens. The app provides it from its
-  `BuildConfig` at the root of its composition; unprovided, it answers as a release build.
+  `BuildConfig` at the root of its composition; unprovided, it answers as an unpackaged run does,
+  which is what every test is.
 
 ## Package
 

@@ -42,8 +42,11 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.components.DropdownSelector
 import org.churchpresenter.sharedui.composables.mode
 
-/** A development build: the app provides it from its `BuildConfig`, which this module cannot read. */
-val LocalDevelopmentBuild = staticCompositionLocalOf { false }
+/**
+ * A development build: the app provides it from its `BuildConfig`, which this module cannot read.
+ * Unprovided it answers as an unpackaged run does, which is what every test is.
+ */
+val LocalDevelopmentBuild = staticCompositionLocalOf { true }
 
 /** How wide the picker itself is, regardless of how much room its container offers. */
 private val PREVIEW_OUTPUT_PICKER_WIDTH = 200.dp
