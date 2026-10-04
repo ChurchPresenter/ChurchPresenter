@@ -180,7 +180,7 @@ private fun MainWindowScope.liveOutputCallbacks(): LiveOutputCallbacks = with(ro
         onSectionIndexChanged = { presenterManager.setSongDisplaySectionIndex(it) },
         onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
         presenting = { mode ->
-            presenterManager.setPresentingMode(mode)
+            presenterManager.previewBus.present(mode)
             if (shouldShowPresenterWindowFor(mode)) {
                 presenterManager.setShowPresenterWindow(true)
             }

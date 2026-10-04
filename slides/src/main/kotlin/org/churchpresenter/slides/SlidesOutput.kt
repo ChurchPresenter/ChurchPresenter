@@ -30,6 +30,12 @@ interface LiveOutput {
 
 /** The picture on the output, and the one queued behind it for the crossfade. */
 interface PictureOutput {
+    /**
+     * Whether pictures are cued on a preview, waiting to go on air. The tab keeps stepping them
+     * there as it would on air; off unless the app has a preview.
+     */
+    val picturesCued: Boolean get() = false
+
     fun setSelectedImagePath(imagePath: String?)
     fun setNextImagePath(path: String?)
 }

@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.getBrowserSourceOutput
@@ -80,12 +81,30 @@ internal fun previewCrossfadeMs(outputSettings: AppSettings): Int {
     ).coerceAtLeast(MIN_PREVIEW_CROSSFADE_MS)
 }
 
-/** The tile's border: red while it is live, the ordinary outline otherwise, faded between. */
+/**
+ * Which bus a tile shows while preview mode is on, in a vision mixer's colours: Preview's tile is
+ * framed green, Program's red, whatever is on them.
+ */
+internal enum class BusRole { PREVIEW, PROGRAM }
+
+private val PREVIEW_BUS_GREEN = Color(0xFF00C853)
+
+/** How thick a tile's frame is while preview mode is on. */
+internal val BUS_BORDER_WIDTH = 3.dp
+
+/**
+ * The tile's border: red while it is live, the ordinary outline otherwise, faded between. While
+ * preview mode is on the [role] decides instead: green for Preview, red for Program.
+ */
 @Composable
-internal fun previewBorderColor(isLive: Boolean): Color {
+internal fun previewBorderColor(isLive: Boolean, role: BusRole? = null): Color {
     val borderColor by animateColorAsState(
-        targetValue = if (isLive) Color.Red.copy(alpha = 0.85f)
-                      else MaterialTheme.colorScheme.outlineVariant,
+        targetValue = when {
+            role == BusRole.PREVIEW -> PREVIEW_BUS_GREEN
+            role == BusRole.PROGRAM -> Color.Red
+            isLive -> Color.Red.copy(alpha = 0.85f)
+            else -> MaterialTheme.colorScheme.outlineVariant
+        },
         animationSpec = tween(300),
         label = "border_color"
     )

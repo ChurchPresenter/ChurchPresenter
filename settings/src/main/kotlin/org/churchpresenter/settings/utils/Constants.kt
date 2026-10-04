@@ -237,6 +237,8 @@ object Constants {
     const val PREVIEW_OUTPUT_BROWSER_SOURCE = "browserSource"
     const val PREVIEW_OUTPUT_NDI = "ndi"
     const val PREVIEW_OUTPUT_OMT = "omt"
+    /** The Preview bus's tile, while preview mode is on: one of its kind, so no index. */
+    const val PREVIEW_OUTPUT_PREVIEW_BUS = "preview"
 
     /** The stored identity of one output: which list it came from, and its index in that list. */
     fun previewOutputKey(kind: String, index: Int): String = "$kind:$index"

@@ -61,6 +61,9 @@ class PresenterManager private constructor(
         context.requestClearDisplay = ::requestClearDisplay
     }
 
+    /** What is cued, not yet on air, while preview mode is on -- see [PreviewBus]. */
+    val previewBus: PreviewBus by lazy { PreviewBus(this) }
+
     /** This manager as the Pictures and Presentation tabs see it -- see [PresenterSlidesOutput]. */
     val slidesOutput: SlidesOutput by lazy { PresenterSlidesOutput(this) }
     val mediaOutput: MediaOutput by lazy { PresenterMediaOutput(this) }

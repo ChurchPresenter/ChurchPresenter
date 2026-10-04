@@ -183,6 +183,8 @@ internal fun BoxScope.PreviewBadges(
     onTranspose: ((Int?) -> Unit)?,
     label: String?,
     mediaAudible: Boolean,
+    /** Whether the tile is an output's, which can be locked; Preview's is none. */
+    lockable: Boolean = true,
 ) {
     // FILL badge when key output is configured
     if (rawAssignment.hasKeyOutput) {
@@ -201,7 +203,7 @@ internal fun BoxScope.PreviewBadges(
     // LOCKED badge + lock toggle — not applicable to Stage Monitor screens, which route
     // their own content dynamically and are never locked to a single tab.
     val lockedMode = locks[screenIndex]
-    if (profile.displayMode != Constants.DISPLAY_MODE_STAGE_MONITOR) {
+    if (lockable && profile.displayMode != Constants.DISPLAY_MODE_STAGE_MONITOR) {
         if (lockedMode != null) {
             Text(
                 text = stringResource(Res.string.screen_locked_badge),

@@ -1783,6 +1783,10 @@
     <string name="hide_cursor_on_outputs_hint">The mouse pointer is never shown over a full-screen output, even when it passes across one</string>
     <string name="overlay_end_clears_display">Clear the screen when a lower third or announcement ends</string>
     <string name="overlay_end_clears_display_hint">When a lower third or announcement finishes on its own, clear everything. Turn off to take down only the lower third or announcement; outputs that show it over the content keep the song, verse or slide under it</string>
+    <string name="preview_mode">Preview mode</string>
+    <string name="preview_mode_hint">Going live with a new picture, lower third or announcement cues it on Preview first; Take puts it on air. Stepping through what is already on air still goes straight out</string>
+    <string name="preview_bus_label">Preview</string>
+    <string name="preview_take">Take</string>
     <string name="profile_lower_third_over_content">Lower third goes over the content</string>
     <string name="profile_announcements_over_content">Announcements go over the content</string>
     <string name="profile_captions_over_content">Captions go over the content</string>

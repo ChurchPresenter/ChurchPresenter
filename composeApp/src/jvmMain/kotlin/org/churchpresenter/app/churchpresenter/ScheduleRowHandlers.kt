@@ -6,6 +6,7 @@ import org.churchpresenter.sharedui.utils.LiveHistoryLogger
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.app.churchpresenter.viewmodel.cueOrSetAnnouncementText
 import java.io.File
 
 /*
@@ -67,7 +68,7 @@ internal fun MainDesktopScope.presentAnnouncementFromSchedule(
             timerExpiredText = item.timerExpiredText.ifBlank { timerExpiredDefaultLabel },
         )
     } else {
-        presenterManager.setAnnouncementText(item.text)
+        cueOrSetAnnouncementText(presenterManager, item.text)
     }
     live.presenting(Presenting.ANNOUNCEMENTS)
 }
@@ -77,11 +78,9 @@ internal fun MainDesktopScope.presentLowerThirdFromSchedule(item: ScheduleItem.L
     val lottieFile = findLottiePresetFile(lottieFolder.listFiles()?.toList(), item.presetLabel, item.presetId)
     if (lottieFile != null && lottieFile.exists()) {
         val json = lottieFile.readText()
-        presenterManager.setLottieContent(
+        presenterManager.previewBus.showLowerThird(
             json, item.pauseAtFrame, -1f, item.pauseDurationMs, lottieFile.nameWithoutExtension,
         )
-        presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
-        presenterManager.setShowPresenterWindow(true)
     }
 }
 
@@ -93,7 +92,7 @@ internal fun MainDesktopScope.presentWebsiteFromSchedule(item: ScheduleItem.Webs
 }
 
 internal fun MainDesktopScope.presentDictionaryFromSchedule(item: ScheduleItem.DictionaryItem) {
-    presenterManager.setAnnouncementText("${item.word} (${item.transliteration})\n\n${item.definition}")
+    cueOrSetAnnouncementText(presenterManager, "${item.word} (${item.transliteration})\n\n${item.definition}")
     presenterManager.setShowPresenterWindow(true)
     live.presenting(Presenting.ANNOUNCEMENTS)
 }

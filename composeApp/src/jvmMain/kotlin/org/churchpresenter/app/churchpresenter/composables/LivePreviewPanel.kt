@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.composables
 import org.churchpresenter.app.churchpresenter.presenter.liveMerges
 import org.churchpresenter.app.churchpresenter.presenter.sizedAs
 import org.churchpresenter.strings.generated.resources.preview_merged_label
+import org.churchpresenter.strings.generated.resources.preview_bus_label
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -274,6 +275,7 @@ private fun previewEntries(
     fun String.forPreview(kind: String, index: Int): String =
         if (merges.containsKey(Constants.previewOutputKey(kind, index))) "$this $mergedLabel" else this
     return buildList {
+        if (presenterManager.previewBus.enabled.value) add(context.previewBusEntry(proj.getAssignment(0)))
         for (i in 0 until displayCount) {
             val screenAssignment = proj.getAssignment(i)
 
@@ -335,6 +337,38 @@ private class PreviewContext(
     val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
     /**
+     * The Preview bus's tile: what is cued, drawn as the first screen's [output] would draw it, and
+     * framed green. No locks or transposes -- those belong to an output, and this is none.
+     */
+    @Composable
+    fun previewBusEntry(output: ScreenAssignment): PreviewEntry {
+        val label = stringResource(Res.string.preview_bus_label)
+        return PreviewEntry(
+            Constants.PREVIEW_OUTPUT_PREVIEW_BUS,
+            label,
+            outputSizeOf(output, OutputKind.SCREEN).aspectRatio,
+        ) { m, grouped ->
+            SingleDisplayPreview(
+                screenIndex = 0,
+                screenAssignment = output,
+                outputKind = OutputKind.SCREEN,
+                presenterManager = presenterManager.previewBus.manager,
+                appSettings = appSettings,
+                modifier = m,
+                serverUrl = serverUrl,
+                qaDisplayUrl = qaDisplayUrl,
+                sttManager = sttManager,
+                label = label,
+                showLabel = true,
+                showMode = appSettings.projectionSettings.showOutputModes,
+                collapsible = !grouped,
+                onSettingsChange = onSettingsChange,
+                busRole = BusRole.PREVIEW,
+            )
+        }
+    }
+
+    /**
      * The preview of [output], the [index]th of its [kind].
      *
      * Each kind is its own 0-based index space with its own lock map — screen 0, Browser Source 0, NDI
@@ -392,6 +426,7 @@ private class PreviewContext(
                 showMode = appSettings.projectionSettings.showOutputModes,
                 collapsible = !grouped,
                 onSettingsChange = onSettingsChange,
+                busRole = if (presenterManager.previewBus.enabled.value) BusRole.PROGRAM else null,
             )
         }
     }
@@ -453,6 +488,8 @@ private fun SingleDisplayPreview(
     showMode: Boolean = true,
     collapsible: Boolean = true,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
+    /** The bus this tile shows while preview mode is on, which frames it; null while it is off. */
+    busRole: BusRole? = null,
 ) {
     // The raw assignment, kept for physical fields (key output, size) and for the profile swap
     // menu below (it reads/writes `activeProfileId` itself). Everything content-shaped resolves
@@ -490,7 +527,7 @@ private fun SingleDisplayPreview(
     val outputSize = outputSizeOf(rawAssignment, outputKind)
 
     val isLive = previewShowsSomething(presenterManager, effectiveMode, profile)
-    val borderColor = previewBorderColor(isLive)
+    val borderColor = previewBorderColor(isLive, busRole)
 
     val displayModeChipLabel = displayModeLabel(profile.displayMode)
 
@@ -518,7 +555,7 @@ private fun SingleDisplayPreview(
                 .fillMaxWidth()
                 .aspectRatio(outputSize.aspectRatio)
                 .clip(AppShape(6.dp))
-                .border(1.dp, borderColor, AppShape(6.dp))
+                .border(if (busRole != null) BUS_BORDER_WIDTH else 1.dp, borderColor, AppShape(6.dp))
         ) {
         val primaryRole = rawAssignment.primaryOutputRole
 
@@ -554,8 +591,9 @@ private fun SingleDisplayPreview(
             PreviewWebsiteMirror(presenterManager)
         }
 
-        // "LIVE" badge — only when this screen is showing content
-        if (isLive) {
+        // "LIVE" badge — only when this screen is showing content, and not while preview mode is on,
+        // where the frame's colour says which bus the tile is
+        if (isLive && busRole == null) {
             LiveBadge(Modifier.align(Alignment.TopStart))
         }
 
@@ -570,6 +608,7 @@ private fun SingleDisplayPreview(
             onTranspose = onTranspose,
             label = if (showLabel) label else null,
             mediaAudible = mediaViewModel != null && mediaViewModel.isLoaded && mediaViewModel.isPlaying,
+            lockable = busRole != BusRole.PREVIEW,
         )
         }
         }

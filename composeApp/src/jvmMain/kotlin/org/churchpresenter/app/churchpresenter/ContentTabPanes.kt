@@ -147,9 +147,7 @@ internal fun MainDesktopScope.LowerThirdTabPane() {
             state.scheduleActions.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs)
         },
         onGoLive = { json, pauseAtFrame, pauseFrame, pauseDurationMs, presetName ->
-            presenterManager.setLottieContent(json, pauseAtFrame, pauseFrame, pauseDurationMs, presetName)
-            presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
-            presenterManager.setShowPresenterWindow(true)
+            presenterManager.previewBus.showLowerThird(json, pauseAtFrame, pauseFrame, pauseDurationMs, presetName)
         },
         onOpenLottieGen = { outputDir, onSaved -> onOpenLottieGen(outputDir, onSaved) }
     )

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -104,11 +105,6 @@ internal fun PresenterWindows(
             appSettings.projectionSettings.overlayEndClearsDisplay,
         )
     }
-    val lottieJsonContent by presenterManager.lottieJsonContent
-    val lottiePauseAtFrame by presenterManager.lottiePauseAtFrame
-    val lottiePauseFrame by presenterManager.lottiePauseFrame
-    val lottiePauseDurationMs by presenterManager.lottiePauseDurationMs
-    val lottieTrigger by presenterManager.lottieTrigger
 
     val proj = appSettings.projectionSettings
 
@@ -116,21 +112,12 @@ internal fun PresenterWindows(
     // fallback does not: it is a window on the operator's own screen, not a projector.
     val hideCursor = appSettings.projectionSettings.hideCursorOnOutputs
 
-    PresenterTransitionEffects(presenterManager, appSettings)
-
-    val lottieComposition by rememberLottieComposition(lottieJsonContent) {
-        LottieCompositionSpec.JsonString(lottieJsonContent)
-    }
-    LottiePlaybackEffect(
-        presenterManager = presenterManager,
-        durationFrames = lottieComposition?.durationFrames,
-        frameRate = lottieComposition?.frameRate,
-        pauseAtFrame = lottiePauseAtFrame,
-        pauseFrame = lottiePauseFrame,
-        pauseDurationMs = lottiePauseDurationMs,
-        trigger = lottieTrigger,
-        overlayEndClearsDisplay = appSettings.projectionSettings.overlayEndClearsDisplay,
-    )
+    val lottieComposition = rememberPresenterDrivers(presenterManager, appSettings)
+    // Preview's own drivers, while preview mode is on: what is cued fades and plays there as it
+    // would on air.
+    val previewBus = presenterManager.previewBus
+    SideEffect { previewBus.setEnabled(proj.previewModeEnabled) }
+    if (previewBus.enabled.value) rememberPresenterDrivers(previewBus.manager, appSettings)
 
     val env = OutputEnvironment(
         presenterManager, mediaViewModel, sttManager, serverUrl, qaDisplayUrl, lottieComposition,
@@ -195,6 +182,34 @@ internal fun PresenterWindows(
             )
         }
     }
+}
+
+/**
+ * What moves [presenterManager]'s content once it is set: the transitions from selected to
+ * displayed, and the lower third's playback. Returns the lower third's parsed composition, which
+ * the outputs draw.
+ */
+@Composable
+internal fun rememberPresenterDrivers(
+    presenterManager: PresenterManager,
+    appSettings: AppSettings,
+): LottieComposition? {
+    val lottieJsonContent by presenterManager.lottieJsonContent
+    PresenterTransitionEffects(presenterManager, appSettings)
+    val lottieComposition by rememberLottieComposition(lottieJsonContent) {
+        LottieCompositionSpec.JsonString(lottieJsonContent)
+    }
+    LottiePlaybackEffect(
+        presenterManager = presenterManager,
+        durationFrames = lottieComposition?.durationFrames,
+        frameRate = lottieComposition?.frameRate,
+        pauseAtFrame = presenterManager.lottiePauseAtFrame.value,
+        pauseFrame = presenterManager.lottiePauseFrame.value,
+        pauseDurationMs = presenterManager.lottiePauseDurationMs.value,
+        trigger = presenterManager.lottieTrigger.value,
+        overlayEndClearsDisplay = appSettings.projectionSettings.overlayEndClearsDisplay,
+    )
+    return lottieComposition
 }
 
 @Composable
