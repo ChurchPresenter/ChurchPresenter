@@ -1,0 +1,81 @@
+name: Soak
+
+# Runs a scripted four-hour service on one off-screen output and fails on a leak or a stall --
+# see ServiceSoak. The report (summary, per-minute CSV and a memory/frame-time chart) is
+# uploaded whether it passes or not, so a slow drift can be read before it fails.
+#
+# On demand only, until it has run green: a manual dispatch always runs, and can ask for a
+# shorter run. To run it every night, add a `schedule:` trigger under `on:` (cron `0 5 * * *`,
+# after the nightly build); the first step then skips a night on which `main` has not moved
+# since the last successful soak.
+
+on:
+  workflow_dispatch:
+    inputs:
+      minutes:
+        description: 'How long to run the service, in minutes'
+        required: false
+        default: '240'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  soak:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - name: Skip when main has not moved since the last successful soak
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "RUN=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          LAST_SHA=$(gh run list --workflow soak.yml --branch "${{ github.ref_name }}" \
+            --status success --limit 1 --json headSha -q '.[0].headSha // empty' 2>/dev/null || echo "")
+          if [ "$LAST_SHA" = "$HEAD_SHA" ]; then
+            echo "No new commits since the last soak ($HEAD_SHA)"
+            echo "RUN=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "RUN=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: ${{ steps.check.outputs.RUN == 'true' }}
+
+      - uses: actions/setup-java@v4
+        if: ${{ steps.check.outputs.RUN == 'true' }}
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - uses: gradle/actions/setup-gradle@v4
+        if: ${{ steps.check.outputs.RUN == 'true' }}
+
+      - name: Run the service
+        if: ${{ steps.check.outputs.RUN == 'true' }}
+        run: ./gradlew :composeApp:soakTest "-PsoakMinutes=${{ github.event.inputs.minutes || '240' }}"
+
+      - name: Summary
+        if: ${{ always() && steps.check.outputs.RUN == 'true' }}
+        run: |
+          if [ -f composeApp/build/reports/soak/soak.md ]; then
+            cat composeApp/build/reports/soak/soak.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload the report
+        if: ${{ always() && steps.check.outputs.RUN == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-report
+          path: |
+            composeApp/build/reports/soak/
+            composeApp/build/test-results/soakTest/
+          retention-days: 30
+          if-no-files-found: warn

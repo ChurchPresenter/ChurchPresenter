@@ -19,8 +19,8 @@ invisible there.
 `AppDataDir`, `ClockFormat` and `UpdateCheckInterval` — the constants and helpers those defaults
 are spelled with, which are not themselves settings.
 
-**Never rewrite by package prefix.** `:composeApp` owns 34 files in `…utils`, 34 in `…data` and
-`ObsSceneSelection` in `…data.settings`; a prefix rewrite drags all of them along. Key on the
+**Never rewrite by package prefix.** `:composeApp` owns 34 files in `…utils` and 34 in `…data`;
+a prefix rewrite drags all of them along. Key on the
 symbols this module declares. In particular `:shared-ui` has **its own `utils/Constants.kt`**
 holding top-level functions like `presenterScreenBounds()` — the `SceneViewModel` suites stub its
 file class by name, `mockkStatic("org.churchpresenter.sharedui.utils.ConstantsKt")`, and that
@@ -55,9 +55,8 @@ old document is still migrated on load and on Settings → Import.
 | `utils/UpdateCheckInterval.kt` | The startup-check interval enum, stored in `AppSettings` |
 | `utils/ClockFormat.kt` | `isSystemUsing24HourFormat()` — asked by `AnnouncementsSettings.liveClockFormat`'s default |
 
-**`ObsSceneSelection.kt` deliberately stayed in `:composeApp`.** It is a helper function over
-`OBSSettings`, not persisted state, and it is the only thing in the package that needed
-`presenter.Presenting` — moving it would have dragged the live-content enum down here.
+**`ObsSceneSelection.kt` is not here.** It is a helper over `OBSSettings`, not persisted state, and
+it needs `Presenting`, so it lives in `:obs` with the rest of the OBS integration.
 
 **Only `object Constants` came out of `Constants.kt`.** The screen-device, aspect-ratio and song
 header helpers that shared that file stayed behind — now in `:shared-ui`'s `utils/Constants.kt`,

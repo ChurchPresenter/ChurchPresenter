@@ -12,7 +12,9 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
   a plain `ImageBitmap`; the app's `LottieFrameStream` owns the native bitmap behind it.
   `LowerThirdLayout` stays in the app, since it draws the app's camera and video backgrounds;
 - `LottieFonts` and the bundled fonts it reads, under `src/main/resources/fonts`. LottieGen's
-  `FontRegistry` reads the same resources off the classpath.
+  `FontRegistry` reads the same resources off the classpath;
+- the ATEM page of the Options dialog (`AtemSettingsTab`, with `AtemSettingsFields`), which edits
+  `AtemSettings` and tests the connection.
 
 A real Gradle module of this build: `include(":lower-third")`, `implementation(projects.lowerThird)`.
 `:composeApp` is its only consumer. The app's outputs, its ATEM bridge and routes, and the
@@ -48,6 +50,9 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
   - `LowerThirdWindow`: the window.
 
   Scope properties forward with plain getters and setters, never `by x::y`.
+- **The ATEM settings page** (`AtemSettingsTab.kt`, `AtemSettingsFields.kt`): the connection card
+  with its Test Connection probe, the lower-third and background upload cards, the key fields.
+  `OptionsDialog` in the app draws it.
 
 ## Package
 
@@ -59,8 +64,8 @@ picker through `previewFor` and `pickerFor`.
 ## Rules
 
 - `internal` stops at the module edge. What `:composeApp` calls is public; nothing else is.
-- **Tests live here**, beside the code. The tab's screenshots stay in the app
-  (`LowerThirdTabScreenshotTest`), where they were recorded.
+- **Tests live here**, beside the code. The tab's and the ATEM page's screenshots stay in the app
+  (`LowerThirdTabScreenshotTest`, `AtemSettingsTabScreenshotTest`), where they were recorded.
 - The suite runs on JUnit 5, so a class-level hook is `@BeforeAll`/`@AfterAll`. JUnit 4's
   `@BeforeClass` is silently never run here.
 - A test that swaps `user.home` loads a skia class first, so skiko unpacks into the suite's own home

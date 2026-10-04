@@ -144,7 +144,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :companion-surface:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :companion-surface:detekt :obs:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -488,6 +488,14 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.qa == 'true' }}
         run: ./gradlew :qa:jacocoTestCoverageVerification -x test
 
+      - name: OBS tests
+        if: ${{ !cancelled() && steps.modules.outputs.obs == 'true' }}
+        run: ./gradlew :obs:test
+
+      - name: OBS coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.obs == 'true' }}
+        run: ./gradlew :obs:jacocoTestCoverageVerification -x test
+
       - name: Dictionary tests
         if: ${{ !cancelled() && steps.modules.outputs.dictionary == 'true' }}
         run: ./gradlew :dictionary:test
@@ -608,6 +616,7 @@ jobs:
               ("web", "Web"),
               ("crossword-tab", "Crossword tab"),
               ("qa", "QA"),
+              ("obs", "OBS"),
               ("dictionary", "Dictionary"),
               ("stt", "STT"),
               ("announcements", "Announcements"),
@@ -800,6 +809,8 @@ jobs:
             crossword-tab/build/test-results/
             qa/build/reports/tests/
             qa/build/test-results/
+            obs/build/reports/tests/
+            obs/build/test-results/
             dictionary/build/reports/tests/
             dictionary/build/test-results/
             stt/build/reports/tests/
