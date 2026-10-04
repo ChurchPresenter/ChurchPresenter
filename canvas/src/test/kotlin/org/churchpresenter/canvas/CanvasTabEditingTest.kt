@@ -87,7 +87,8 @@ class CanvasTabEditingTest {
             onNodeWithTag(CANVAS_BRING_INTO_VIEW_TAG).performClick()
             waitForIdle()
 
-            assertEquals(0, onAllNodesWithText("layers are outside the canvas", substring = true).fetchSemanticsNodes().size)
+            val stillOutside = onAllNodesWithText("layers are outside the canvas", substring = true)
+            assertEquals(0, stillOutside.fetchSemanticsNodes().size)
             vm.currentScene!!.sources.forEach { source ->
                 val t = source.transform
                 assert(t.x >= 0f && t.x + t.width <= 1f && t.y >= 0f && t.y + t.height <= 1f) { "${source.name} at $t" }

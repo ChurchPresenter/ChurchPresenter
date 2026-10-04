@@ -36,7 +36,9 @@ class ScreenGrabTest {
         height: Int = 360,
         title: String = "",
         id: String = "",
-    ) = ScreenCaptureSpec(mode, x = 5, y = 6, width = width, height = height, intervalMs = 100, windowTitle = title, windowId = id)
+    ) = ScreenCaptureSpec(
+        mode, x = 5, y = 6, width = width, height = height, intervalMs = 100, windowTitle = title, windowId = id,
+    )
 
     @Test
     fun `a machine that cannot grab the screen grabs nothing`() {

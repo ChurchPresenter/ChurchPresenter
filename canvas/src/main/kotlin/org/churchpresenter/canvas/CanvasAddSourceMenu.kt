@@ -27,23 +27,11 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_add
-import org.churchpresenter.strings.generated.resources.canvas_source_browser
-import org.churchpresenter.strings.generated.resources.canvas_source_color
-import org.churchpresenter.strings.generated.resources.canvas_source_image
-import org.churchpresenter.strings.generated.resources.canvas_source_text
-import org.churchpresenter.strings.generated.resources.canvas_source_video
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.util.UUID
-import org.churchpresenter.strings.generated.resources.canvas_source_timer
-import org.churchpresenter.strings.generated.resources.canvas_source_qrcode
-import org.churchpresenter.strings.generated.resources.background_camera_option
-import org.churchpresenter.strings.generated.resources.canvas_source_screen_capture
-import org.churchpresenter.strings.generated.resources.canvas_source_ndi
-import org.churchpresenter.strings.generated.resources.canvas_source_omt
-import org.churchpresenter.strings.generated.resources.canvas_source_bible
 import org.churchpresenter.strings.generated.resources.canvas_add_source
 
 /* The Canvas tab's Add source button and its menu of source types. */
@@ -110,7 +98,9 @@ internal fun CanvasTabScope.AddSourceButton(sceneViewModel: SceneViewModel) {
  */
 internal fun CanvasSourceNames.newSourceItems(): List<Pair<String, (id: String) -> SceneSource>> = listOf(
     strImage to { id ->
-        SceneSource.ImageSource(id = id, name = strImage, filePath = "", transform = SourceTransform(width = HALF, height = HALF))
+        SceneSource.ImageSource(
+            id = id, name = strImage, filePath = "", transform = SourceTransform(width = HALF, height = HALF),
+        )
     },
     strText to { id ->
         SceneSource.TextSource(
@@ -119,12 +109,18 @@ internal fun CanvasSourceNames.newSourceItems(): List<Pair<String, (id: String) 
         )
     },
     strColor to { id -> SceneSource.ColorSource(id = id, name = strColor, transform = SourceTransform()) },
-    strVideo to { id -> SceneSource.VideoSource(id = id, name = strVideo, filePath = "", transform = SourceTransform()) },
+    strVideo to { id ->
+        SceneSource.VideoSource(id = id, name = strVideo, filePath = "", transform = SourceTransform())
+    },
     strTimer to { id ->
-        SceneSource.ClockSource(id = id, name = strTimer, transform = SourceTransform(width = TIMER_WIDTH, height = TIMER_HEIGHT))
+        SceneSource.ClockSource(
+            id = id, name = strTimer, transform = SourceTransform(width = TIMER_WIDTH, height = TIMER_HEIGHT),
+        )
     },
     strQrCode to { id ->
-        SceneSource.QRCodeSource(id = id, name = strQrCode, transform = SourceTransform(width = QR_SIDE, height = QR_SIDE))
+        SceneSource.QRCodeSource(
+            id = id, name = strQrCode, transform = SourceTransform(width = QR_SIDE, height = QR_SIDE),
+        )
     },
     strCamera to { id -> SceneSource.CameraSource(id = id, name = strCamera, transform = SourceTransform()) },
     strScreenCapture to { id ->

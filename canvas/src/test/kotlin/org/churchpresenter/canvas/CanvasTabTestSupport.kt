@@ -111,7 +111,11 @@ internal fun canvasTab(
                             onPresentScene = { reports.presented += it },
                             sceneViewModel = vm,
                             onAddToSchedule = { id, name -> reports.scheduled += id to name },
-                            onSavePreset = if (offerSavePreset) ({ id, name -> reports.presets += id to name }) else null,
+                            onSavePreset = if (offerSavePreset) {
+                                { id, name -> reports.presets += id to name }
+                            } else {
+                                null
+                            },
                             cameraHost = cameraHost,
                         )
                         }

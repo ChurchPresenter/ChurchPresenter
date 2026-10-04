@@ -78,19 +78,24 @@ class CdpPagesTest {
                     sessions.add(this)
                     try {
                         for (frame in incoming) {
-                            if (frame !is Frame.Text) continue
-                            val request = Json.parseToJsonElement(frame.readText()).jsonObject
-                            val id = request["id"]?.jsonPrimitive?.intOrNull ?: continue
-                            val method = request["method"]?.jsonPrimitive?.content.orEmpty()
-                            methods += method
-                            val result = if (method == "Page.captureScreenshot") screenshot() else "{}"
-                            send(Frame.Text("""{"id":$id,"result":$result}"""))
+                            val reply = (frame as? Frame.Text)?.let { answer(it.readText()) } ?: continue
+                            send(Frame.Text(reply))
                         }
                     } finally {
                         sessions.remove(this)
                     }
                 }
             }
+        }
+
+        /** The reply to one CDP request, or null for a frame that is not a request. */
+        private fun answer(text: String): String? {
+            val request = Json.parseToJsonElement(text).jsonObject
+            val id = request["id"]?.jsonPrimitive?.intOrNull ?: return null
+            val method = request["method"]?.jsonPrimitive?.content.orEmpty()
+            methods += method
+            val result = if (method == "Page.captureScreenshot") screenshot() else "{}"
+            return """{"id":$id,"result":$result}"""
         }
 
         private fun screenshot(): String = when (shot) {
@@ -122,7 +127,10 @@ class CdpPagesTest {
     private fun browser(shot: Shot = Shot.PNG, listsPage: Boolean = true) =
         FakeDevTools(shot, listsPage).start().also { browsers += it }
 
-    private fun connect(browser: FakeDevTools, entry: SharedBrowserFrameCache.CacheEntry = SharedBrowserFrameCache.CacheEntry()) =
+    private fun connect(
+        browser: FakeDevTools,
+        entry: SharedBrowserFrameCache.CacheEntry = SharedBrowserFrameCache.CacheEntry(),
+    ) =
         runBlocking { CdpPages.connectCdp(entry, browser.port, readyTimeoutMs = 2_000) }?.also { connections += it }
 
     private val page = SharedBrowserFrameCache.BrowserPage(

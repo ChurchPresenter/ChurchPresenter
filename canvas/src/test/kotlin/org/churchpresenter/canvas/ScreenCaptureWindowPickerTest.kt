@@ -23,7 +23,7 @@ class ScreenCaptureWindowPickerTest {
 
     private fun panel(
         windows: () -> List<WindowInfo>,
-        start: SceneSource.ScreenCaptureSource = SceneSource.ScreenCaptureSource(id = "c", name = "Stage", captureMode = "window"),
+        start: SceneSource.ScreenCaptureSource = windowSource(),
         block: ComposeUiTest.(get: () -> SceneSource.ScreenCaptureSource) -> Unit,
     ) = runComposeUiTest {
         var current = start
@@ -41,6 +41,9 @@ class ScreenCaptureWindowPickerTest {
         waitForIdle()
         block { current }
     }
+
+    private fun windowSource(title: String = "") =
+        SceneSource.ScreenCaptureSource(id = "c", name = "Stage", captureMode = "window", windowTitle = title)
 
     private val open = listOf(WindowInfo("Lyrics", 0x1f), WindowInfo("Slides", 0))
 
@@ -62,7 +65,7 @@ class ScreenCaptureWindowPickerTest {
 
     @Test
     fun `the window already chosen is the one shown`() =
-        panel({ open }, SceneSource.ScreenCaptureSource(id = "c", name = "Stage", captureMode = "window", windowTitle = "Slides")) { _ ->
+        panel({ open }, windowSource(title = "Slides")) { _ ->
             onNodeWithText("Slides").assertExists()
         }
 

@@ -36,8 +36,11 @@ class NdiPropertiesDiscoveryTest {
     private object ReadyNdi : NetworkInputs {
         override val ndiStatus: StateFlow<NdiRuntimeStatus> = MutableStateFlow(NdiRuntimeStatus.Ready("6.0", "/fake"))
         override fun createNdiFinder(): NdiFinder? = null
-        override fun createNdiReceiver(source: NdiSourceInfo, bandwidth: NdiBandwidth, receiverName: String): NdiReceiver? =
-            null
+        override fun createNdiReceiver(
+            source: NdiSourceInfo,
+            bandwidth: NdiBandwidth,
+            receiverName: String,
+        ): NdiReceiver? = null
         override val omtStatus: StateFlow<OmtRuntimeStatus> = MutableStateFlow(OmtRuntimeStatus.NotInstalled)
         override fun discoverOmtSources(): List<String> = emptyList()
         override fun createOmtReceiver(address: String, preview: Boolean): OmtReceiver? = null
@@ -71,7 +74,10 @@ class NdiPropertiesDiscoveryTest {
 
     @Test
     fun `what discovery finds is offered, and choosing one points the layer at it`() =
-        panel(listOf(camera, graphics), SceneSource.NdiSource(id = "n", name = "NDI", sourceName = camera.name)) { get ->
+        panel(
+            listOf(camera, graphics),
+            SceneSource.NdiSource(id = "n", name = "NDI", sourceName = camera.name),
+        ) { get ->
             waitUntil(timeoutMillis = 5_000) { renderedText().contains("SOURCE") }
             chooseFromDropdown(camera.name, graphics.name)
 
