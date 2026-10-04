@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import org.churchpresenter.app.churchpresenter.dialogs.STTSettingsDialog
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -25,7 +26,7 @@ fun AppSTTTab(
     STTTab(
         modifier = modifier,
         sttManager = sttManager,
-        presentingMode = presenterManager.presentingMode,
+        presentingMode = remember(presenterManager) { presenterManager.modeAsSeenBy(Presenting.STT) },
         presenting = presenting,
         appSettings = appSettings,
         onSettingsChange = onSettingsChange,

@@ -97,3 +97,22 @@ internal fun CueContent(cue: Cue, surface: OutputSurface) {
         is Cue.Message -> Unit
     }
 }
+
+/** The overlays in the order they stack, bottom to top: captions, lower third, announcements. */
+private val OVERLAY_DRAW_ORDER = listOf(Presenting.STT, Presenting.LOWER_THIRD, Presenting.ANNOUNCEMENTS)
+
+/**
+ * The overlays up over the slide, each drawn by [content] exactly as it is drawn on its own, stacked
+ * above whatever the caller drew before this. Nothing on an output locked to a mode other than the
+ * slide's: a locked screen shows its own mode and nothing over it.
+ */
+@Composable
+internal fun OverlayModes(
+    presenterManager: PresenterManager,
+    effectiveMode: Presenting,
+    content: @Composable (Presenting) -> Unit,
+) {
+    if (effectiveMode != presenterManager.presentingMode.value) return
+    val overlays = presenterManager.overlays.value
+    OVERLAY_DRAW_ORDER.forEach { mode -> if (mode in overlays) key(mode) { content(mode) } }
+}

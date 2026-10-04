@@ -53,7 +53,7 @@ internal fun MainWindowScope.CalendarAutomationWiring() {
                 ),
                 operatorLive = {
                     isOperatorLive(
-                        presenterManager.presentingMode.value,
+                        presenterManager.lastLive.value,
                         engineLiveItem?.let { liveDurationLog.showing(it) },
                     )
                 },
@@ -142,11 +142,12 @@ internal fun MainWindowScope.ServerCommandWiring() {
                 presenterManager.setShowPresenterWindow(true)
             }
         }
+        val overlayEndClearsDisplay by rememberUpdatedState(appSettings.projectionSettings.overlayEndClearsDisplay)
         LaunchedEffect(Unit) {
+            // Only while the lower third is still up: the sequence runs on its own clock, and by the
+            // time it ends the operator may have moved on.
             LowerThirdSequencer.onClear.collect {
-                if (shouldClearAfterLowerThird(presenterManager.presentingMode.value)) {
-                    presenterManager.requestClearDisplay()
-                }
+                presenterManager.overlayFinished(Presenting.LOWER_THIRD, overlayEndClearsDisplay)
             }
         }
         LaunchedEffect(Unit) {
@@ -193,7 +194,7 @@ internal fun MainWindowScope.ServerBroadcastWiring() {
         }
 
         LaunchedEffect(Unit) {
-            snapshotFlow { presenterManager.presentingMode.value }
+            snapshotFlow { presenterManager.lastLive.value }
                 .collect { mode ->
                     if (shouldBroadcastDisplayCleared(mode)) {
                         companionServer.broadcastDisplayCleared()

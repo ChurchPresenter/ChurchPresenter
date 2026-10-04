@@ -145,7 +145,12 @@ LaunchedEffect(selectedSlide) {
 }
 
 LaunchedEffect(announcementText) {
-    showAnnouncementText(presenterManager, announcementText, appSettings.announcementsSettings)
+    showAnnouncementText(
+        presenterManager,
+        announcementText,
+        appSettings.announcementsSettings,
+        appSettings.projectionSettings.overlayEndClearsDisplay,
+    )
 }
 }
 
@@ -271,6 +276,7 @@ private suspend fun showAnnouncementText(
     presenterManager: PresenterManager,
     announcementText: String,
     annSettings: AnnouncementsSettings,
+    overlayEndClearsDisplay: Boolean,
 ) {
         val isFade = isFadeAnnouncement(annSettings.animationType)
         val wasEmpty = presenterManager.displayedAnnouncementText.value.isEmpty()
@@ -314,7 +320,7 @@ private suspend fun showAnnouncementText(
                 }
                 presenterManager.setAnnouncementText("")
                 presenterManager.setDisplayedAnnouncementText("")
-                presenterManager.requestClearDisplay()
+                presenterManager.overlayFinished(Presenting.ANNOUNCEMENTS, overlayEndClearsDisplay)
             }
         }
 }

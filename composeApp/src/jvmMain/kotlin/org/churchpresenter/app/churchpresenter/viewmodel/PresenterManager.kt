@@ -39,6 +39,7 @@ class PresenterManager private constructor(
     internal val announcements: LiveAnnouncementsState = LiveAnnouncementsState(context),
     internal val web: LiveWebState = LiveWebState(context),
     internal val screens: LiveScreensState = LiveScreensState(context),
+    internal val overlayLayers: LiveOverlaysState = LiveOverlaysState(context),
 ) : OutputLocks by locks,
     LiveBible by bible,
     LiveSongs by songs,
@@ -48,7 +49,8 @@ class PresenterManager private constructor(
     LiveLowerThird by lowerThird,
     LiveAnnouncements by announcements,
     LiveWeb by web,
-    LiveScreens by screens {
+    LiveScreens by screens,
+    LiveOverlays by overlayLayers {
 
     constructor(showPresenterWindowInitially: Boolean = true) :
         this(showPresenterWindowInitially, PresenterContext())
@@ -56,6 +58,7 @@ class PresenterManager private constructor(
     init {
         context.notify = ::notifyLiveStateChanged
         context.setPresentingMode = ::setPresentingMode
+        context.requestClearDisplay = ::requestClearDisplay
     }
 
     /** This manager as the Pictures and Presentation tabs see it -- see [PresenterSlidesOutput]. */
@@ -71,14 +74,24 @@ class PresenterManager private constructor(
     /** This manager as the Announcements tab sees it -- see [PresenterAnnouncementsOutput]. */
     val announcementsOutput: AnnouncementsOutput by lazy { PresenterAnnouncementsOutput(this) }
 
+    /**
+     * What the slide layers show: Bible, songs, pictures, a presentation, media, a web page, a canvas
+     * scene, Q&A or the dictionary, or [Presenting.NONE]. An overlay going live leaves it alone --
+     * see [overlays] -- so this is what everything asking "is my content on screen" reads.
+     */
     val presentingMode: State<Presenting> = context.presentingMode
 
+
     /**
-     * What is on air, as the layer model sees it -- for now derived from [presentingMode] and the
-     * content it names ([legacyProgram]), so at most one layer is ever set. An output with a screen
-     * lock draws its own mode's program instead (`OutputLayers`).
+     * What is on air, as the layer model sees it -- for now derived from [presentingMode] and each of
+     * [overlays], and the content they name ([legacyProgram]). An output with a screen lock draws its
+     * own mode's program instead (`OutputLayers`).
      */
-    val program: State<Map<Layer, Cue>> = derivedStateOf { legacyProgram(presentingMode.value, this) }
+    val program: State<Map<Layer, Cue>> = derivedStateOf {
+        overlays.value.fold(legacyProgram(presentingMode.value, this)) { layers, overlay ->
+            layers + legacyProgram(overlay, this)
+        }
+    }
 
     /** Notified whenever live-content state changes (mode, verse, lyric section, picture, media,
      *  announcement, website, scene, Q&A, dictionary) — wired in main.kt to broadcast an
@@ -122,6 +135,13 @@ class PresenterManager private constructor(
     val previewSettingsOverride: State<AppSettings?> = _previewSettingsOverride
 
     fun setPresentingMode(mode: Presenting) {
+        if (mode.isOverlay) {
+            overlayLayers.showOverlay(mode)
+            return
+        }
+        // Slide content replaces the overlays over it; clearing takes everything down.
+        context.overlays.value = emptySet()
+        context.lastLive.value = mode
         if (context.presentingMode.value != mode) {
             CrashReporter.setTag("presenting", mode.name)
             CrashReporter.breadcrumb("Presenting: ${mode.name}", category = "presenter")
@@ -146,7 +166,7 @@ class PresenterManager private constructor(
      *  watches this flag, animates bibleTransitionAlpha/songTransitionAlpha to 0,
      *  then sets presentingMode to NONE. */
     fun requestClearDisplay() {
-        if (context.presentingMode.value != Presenting.NONE) {
+        if (anythingLive) {
             context.clearDisplayRequested.value = true
         }
     }

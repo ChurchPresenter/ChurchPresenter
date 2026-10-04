@@ -18,7 +18,14 @@ import org.churchpresenter.sharedui.models.Presenting
 internal class PresenterContext {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
+    /** What the slide layers show -- see [PresenterManager.presentingMode]. */
     val presentingMode = mutableStateOf(Presenting.NONE)
+
+    /** The overlay content up over the slide -- see [PresenterManager.overlays]. */
+    val overlays = mutableStateOf<Set<Presenting>>(emptySet())
+
+    /** Whatever was put live most recently, slide or overlay -- see [PresenterManager.lastLive]. */
+    val lastLive = mutableStateOf(Presenting.NONE)
     val clearDisplayRequested = mutableStateOf(false)
 
     /** Per-screen lock: screen slot index -> locked mode; a missing entry follows [presentingMode]. */
@@ -29,4 +36,7 @@ internal class PresenterContext {
 
     /** Switches the live mode the way the manager does, for a countdown that runs out on screen. */
     var setPresentingMode: (Presenting) -> Unit = {}
+
+    /** Clears the display the way the manager does, for an overlay that ends on its own. */
+    var requestClearDisplay: () -> Unit = {}
 }

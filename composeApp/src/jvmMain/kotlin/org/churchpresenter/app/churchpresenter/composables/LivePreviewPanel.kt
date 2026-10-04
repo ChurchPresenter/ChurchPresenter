@@ -13,7 +13,6 @@ import androidx.compose.ui.platform.testTag
 import org.churchpresenter.strings.generated.resources.preview_layout_done
 import org.churchpresenter.strings.generated.resources.preview_layout_edit
 import org.churchpresenter.sharedui.utils.rememberScreenDevices
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -91,10 +90,6 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.resolvedFor
-import org.churchpresenter.app.churchpresenter.presenter.LowerThirdLayout
-import org.churchpresenter.app.churchpresenter.presenter.LocalBandOutgoing
-import org.churchpresenter.app.churchpresenter.presenter.LocalBandSongLineIndex
-import org.churchpresenter.app.churchpresenter.presenter.LocalLottieBandClock
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.utils.Constants
@@ -475,9 +470,6 @@ private fun SingleDisplayPreview(
     }
     val presentingMode by presenterManager.presentingMode
     val effectiveMode = locks[screenIndex] ?: presentingMode
-    // The clock stays wrapped: unwrapping it here would recompose this panel on every band frame.
-    val bandSongLineIndex by presenterManager.bandSongLineIndex
-    val bandOutgoing by presenterManager.bandOutgoing
     val mediaViewModel = LocalMediaViewModel.current
 
     val isLowerThird = profile.isLowerThird
@@ -496,7 +488,7 @@ private fun SingleDisplayPreview(
     // configured to something else -- saw N previews that were all the wrong one of them.
     val outputSize = outputSizeOf(rawAssignment, outputKind)
 
-    val isLive = effectiveMode != Presenting.NONE && showsContent
+    val isLive = previewShowsSomething(presenterManager, effectiveMode, profile)
     val borderColor = previewBorderColor(isLive)
 
     val displayModeChipLabel = displayModeLabel(profile.displayMode)
@@ -545,25 +537,10 @@ private fun SingleDisplayPreview(
                     showBackground = showsBackground,
                 ) {
                     val qaUrl = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa"
-                    if (effectiveMode != Presenting.NONE && showsContent) {
-                        Crossfade(
-                            targetState = effectiveMode,
-                            animationSpec = tween(previewCrossfadeMs(outputSettings))
-                        ) { mode ->
-                        CompositionLocalProvider(
-                            LocalLottieBandClock provides presenterManager.lottieBandClock,
-                            LocalBandSongLineIndex provides bandSongLineIndex,
-                            LocalBandOutgoing provides bandOutgoing,
-                        ) {
-                        LowerThirdLayout(mode, profile, outputSettings, showsBackground) {
-                        PreviewMode(
-                            mode, presenterManager, profile, outputSettings, showsBackground, primaryRole, qaUrl,
-                            sttManager,
-                        )
-                        }
-                        }
-                        }
-                    }
+                    PreviewModeLayers(
+                        presenterManager, effectiveMode, showsContent, profile, outputSettings,
+                        showsBackground, primaryRole, qaUrl, sttManager,
+                    )
                 }
             }
         }
@@ -885,3 +862,4 @@ internal fun ScaledPresenterContent(
         }
     }
 }
+

@@ -40,7 +40,7 @@ internal fun LiveStateBroadcastWiring(
         presenterManager.onLiveStateChanged = { pm, source ->
             // The one-off "this install has actually shown something to a congregation" mark.
             // Costs a file read per live change only until it fires, then never writes again.
-            if (pm.presentingMode.value != Presenting.NONE &&
+            if (pm.anythingLive &&
                 hasAudienceOutput(
                     appSettings().projectionSettings.screenAssignments,
                     screenCountForUsage,

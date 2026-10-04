@@ -11,15 +11,6 @@ import org.churchpresenter.sharedui.models.Presenting
 
 private const val DEFAULT_FADE_OUT_MS = 500
 
-/**
- * Whether a lower-third sequence finishing should clear the output.
- *
- * Only when the lower third is still what is on screen: the sequence runs on its own clock, so by
- * the time it ends the operator may have moved on, and clearing then would blank their new content.
- */
-internal fun shouldClearAfterLowerThird(presentingMode: Presenting): Boolean =
-    presentingMode == Presenting.LOWER_THIRD
-
 /** The floor every transition is held to, below which a fade reads as a flicker. */
 internal const val MIN_TRANSITION_MS = 100
 

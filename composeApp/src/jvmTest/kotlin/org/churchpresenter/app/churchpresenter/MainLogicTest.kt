@@ -497,15 +497,6 @@ class MainLogicTest {
     }
 
     @Test
-    fun `a finished lower third clears only while it is still on screen`() {
-        // The sequence runs on its own clock; by the time it ends the operator may have moved on,
-        // and clearing then would blank whatever they moved to.
-        assertTrue(shouldClearAfterLowerThird(Presenting.LOWER_THIRD))
-        assertFalse(shouldClearAfterLowerThird(Presenting.LYRICS))
-        assertFalse(shouldClearAfterLowerThird(Presenting.NONE))
-    }
-
-    @Test
     fun `a section change is announced only while songs are live`() {
         assertTrue(shouldBroadcastSongSection(Presenting.LYRICS))
         assertFalse(shouldBroadcastSongSection(Presenting.BIBLE))

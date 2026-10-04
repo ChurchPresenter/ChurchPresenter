@@ -1,5 +1,14 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.CompositionLocalProvider
+import org.churchpresenter.app.churchpresenter.presenter.LocalBandOutgoing
+import org.churchpresenter.app.churchpresenter.presenter.LocalBandSongLineIndex
+import org.churchpresenter.app.churchpresenter.presenter.LocalLottieBandClock
+import org.churchpresenter.app.churchpresenter.presenter.LowerThirdLayout
+import org.churchpresenter.app.churchpresenter.presenter.OverlayModes
+import org.churchpresenter.app.churchpresenter.presenter.showsContentFor
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -76,7 +85,8 @@ internal fun PreviewStageMonitor(
             presentingMode = presentingMode,
             showChords = profile.showChords,
             transposeSteps = transposeSteps,
-            announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS,
+            announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS ||
+                presenterManager.isLive(Presenting.ANNOUNCEMENTS),
             currentLyricSection = displayedLyricSection,
             allLyricSections = songPosition.allSections,
             songDisplaySectionIndex = songPosition.sectionIndex,
@@ -269,6 +279,59 @@ internal fun BoxScope.PreviewBadges(
         ) {
             AnimatedEqualizer()
         }
+    }
+}
+
+/** Whether this output shows anything: its own mode's content, or an overlay up over the slide. */
+internal fun previewShowsSomething(
+    presenterManager: PresenterManager,
+    effectiveMode: Presenting,
+    profile: OutputProfile,
+): Boolean =
+    (effectiveMode != Presenting.NONE && showsContentFor(effectiveMode, profile)) ||
+        (effectiveMode == presenterManager.presentingMode.value &&
+            presenterManager.overlays.value.any { showsContentFor(it, profile) })
+
+/**
+ * The tile's slide crossfading between modes, and the overlays up over it, each inside the output's
+ * lower-third layout.
+ */
+@Composable
+internal fun PreviewModeLayers(
+    presenterManager: PresenterManager,
+    effectiveMode: Presenting,
+    showsContent: Boolean,
+    profile: OutputProfile,
+    outputSettings: AppSettings,
+    showsBackground: Boolean,
+    primaryRole: String,
+    qaUrl: String,
+    sttManager: STTManager?,
+) {
+    // The clock stays wrapped: unwrapping it here would recompose the tile on every band frame.
+    val bandSongLineIndex by presenterManager.bandSongLineIndex
+    val bandOutgoing by presenterManager.bandOutgoing
+    val modeContent: @Composable (Presenting) -> Unit = { mode ->
+        CompositionLocalProvider(
+            LocalLottieBandClock provides presenterManager.lottieBandClock,
+            LocalBandSongLineIndex provides bandSongLineIndex,
+            LocalBandOutgoing provides bandOutgoing,
+        ) {
+            LowerThirdLayout(mode, profile, outputSettings, showsBackground) {
+                PreviewMode(
+                    mode, presenterManager, profile, outputSettings, showsBackground, primaryRole, qaUrl, sttManager,
+                )
+            }
+        }
+    }
+    if (effectiveMode != Presenting.NONE && showsContent) {
+        Crossfade(
+            targetState = effectiveMode,
+            animationSpec = tween(previewCrossfadeMs(outputSettings)),
+        ) { mode -> modeContent(mode) }
+    }
+    OverlayModes(presenterManager, effectiveMode) { mode ->
+        if (showsContentFor(mode, profile)) modeContent(mode)
     }
 }
 

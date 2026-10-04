@@ -101,6 +101,10 @@ data class ProjectionSettings(
     // Never show the mouse pointer over a full-screen output, so the congregation does not see it
     // crossing the projector while the operator works on the main screen. On unless turned off.
     val hideCursorOnOutputs: Boolean = true,
+    // When a lower third or an announcement ends on its own -- a lower third's timed run, an
+    // announcement's last loop -- clear the whole display (on, as it always did) or take down only
+    // that overlay and leave the slide under it.
+    val overlayEndClearsDisplay: Boolean = true,
     /**
      * Named, reusable [OutputProfile]s, any of which an output can follow via
      * [ScreenAssignment.activeProfileId] -- see `AppSettings.resolvedFor(profile)`

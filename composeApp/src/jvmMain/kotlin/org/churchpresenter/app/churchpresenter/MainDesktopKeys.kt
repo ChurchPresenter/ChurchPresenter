@@ -100,7 +100,7 @@ private suspend fun MainDesktopScope.clickPresentation(forward: Boolean) {
 
 /** Feeds a key no shortcut claimed to the hidden sequences; never claims it. */
 private fun MainDesktopScope.advanceKeySequences(key: Key): Boolean {
-    if (presentingMode != Presenting.NONE) {
+    if (presenterManager.anythingLive) {
         // Suppress both easter egg sequences while live
         state.konamiProgress = 0
         state.crosswordProgress = 0

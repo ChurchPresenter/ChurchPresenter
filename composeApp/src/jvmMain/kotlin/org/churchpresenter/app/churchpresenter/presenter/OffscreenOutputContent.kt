@@ -130,23 +130,13 @@ internal fun OffscreenOutputContent(
                     isLowerThird = isLowerThird,
                     showBackground = showBg
                 ) {
-                    // Mode-to-mode crossfade — same behavior and duration formula as the
-                    // real output windows (main.kt): fades only when bible/song crossfade
-                    // is enabled and neither the outgoing nor incoming mode is NONE.
+                    // Mode-to-mode crossfade, as the real output windows do it.
                     val modeCrossfadeDuration = BrowserSourceVideoRenderer.crossfadeDurationMs(
                         appSettings.bibleSettings.crossfade, appSettings.bibleSettings.transitionDuration.toInt(),
                         appSettings.songSettings.crossfade, appSettings.songSettings.transitionDuration.toInt()
                     )
-                    var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
-                    val screenCrossfadeActive = BrowserSourceVideoRenderer.isScreenCrossfadeActive(
-                        appSettings.bibleSettings.crossfade, appSettings.songSettings.crossfade,
-                        effectiveMode, prevEffectiveMode
-                    )
-                    if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
-                    Crossfade(
-                        targetState = effectiveMode,
-                        animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()
-                    ) { mode ->
+                    val screenCrossfadeActive = rememberScreenCrossfadeActive(appSettings, effectiveMode)
+                    val modeContent: @Composable (Presenting) -> Unit = { mode ->
                         val showsContent = showsContentFor(mode, profile)
                         if (mode != Presenting.NONE && showsContent) {
                             CompositionLocalProvider(
@@ -176,10 +166,30 @@ internal fun OffscreenOutputContent(
                             }
                         }
                     }
+                    Crossfade(
+                        targetState = effectiveMode,
+                        animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()
+                    ) { mode -> modeContent(mode) }
+                    OverlayModes(presenterManager, effectiveMode, modeContent)
                 }
             }
             }
         }
+}
+
+/**
+ * Whether the change into [effectiveMode] crossfades: only when Bible or song crossfade is on and
+ * neither the mode left nor the mode entered is NONE -- as the real output windows decide it.
+ */
+@Composable
+private fun rememberScreenCrossfadeActive(appSettings: AppSettings, effectiveMode: Presenting): Boolean {
+    var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
+    val active = BrowserSourceVideoRenderer.isScreenCrossfadeActive(
+        appSettings.bibleSettings.crossfade, appSettings.songSettings.crossfade,
+        effectiveMode, prevEffectiveMode
+    )
+    if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
+    return active
 }
 
 /** The card an output shows while it is being identified: its name, large, over a dim backdrop. */
@@ -225,6 +235,8 @@ private fun OffscreenStageMonitor(
     StageMonitorScreen(
         sm = appSettings.stageMonitorSettings,
         presentingMode = effectiveMode,
+        announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS ||
+            presenterManager.isLive(Presenting.ANNOUNCEMENTS),
         showChords = profile.showChords,
         transposeSteps = transposeSteps,
         currentLyricSection = presenterManager.displayedLyricSection.value,

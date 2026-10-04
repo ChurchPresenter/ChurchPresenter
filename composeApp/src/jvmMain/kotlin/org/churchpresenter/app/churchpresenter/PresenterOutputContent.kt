@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import org.churchpresenter.app.churchpresenter.presenter.OverlayModes
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -108,7 +109,8 @@ internal fun PresenterOutputContent(
                     sm = outputSettings.stageMonitorSettings,
                     presentingMode = presentingMode,
                     showChords = profile.showChords,
-                    announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS,
+                    announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS ||
+                        presenterManager.isLive(Presenting.ANNOUNCEMENTS),
                     currentLyricSection = displayedLyricSection,
                     allLyricSections = songPosition.allSections,
                     songDisplaySectionIndex = songPosition.sectionIndex,
@@ -149,10 +151,7 @@ internal fun PresenterOutputContent(
                         outputSettings.bibleSettings, outputSettings.songSettings, effectiveMode, prevEffectiveMode,
                     )
                         if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
-                        Crossfade(
-                            targetState = effectiveMode,
-                            animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()
-                        ) { mode ->
+                        val modeContent: @Composable (Presenting) -> Unit = { mode ->
                             PresenterModeContent(
                                 mode = mode,
                                 profile = profile,
@@ -168,19 +167,27 @@ internal fun PresenterOutputContent(
                                 showBg = showBg,
                             )
                         }
+                        Crossfade(
+                            targetState = effectiveMode,
+                            animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()
+                        ) { mode -> modeContent(mode) }
+                        OverlayModes(presenterManager, effectiveMode, modeContent)
 
-                        // Clear live browser ref when leaving WEBSITE mode
-                        LaunchedEffect(presentingMode) {
-                            if (presentingMode != Presenting.WEBSITE) {
-                                presenterManager.setLiveBrowser(null)
-                            }
-                        }
+                        ReleaseLiveBrowserOffWebsite(presenterManager, presentingMode)
 
                         if (screenNumber != null && identifyingScreen) IdentifyScreenOverlay(screenNumber)
                     }
                 }
             }
         }
+}
+
+/** Drops the live browser reference once the slide is no longer a web page. */
+@Composable
+private fun ReleaseLiveBrowserOffWebsite(presenterManager: PresenterManager, presentingMode: Presenting) {
+    LaunchedEffect(presentingMode) {
+        if (presentingMode != Presenting.WEBSITE) presenterManager.setLiveBrowser(null)
+    }
 }
 
 /** The Identify button's "Screen N", over the whole of one output. */
