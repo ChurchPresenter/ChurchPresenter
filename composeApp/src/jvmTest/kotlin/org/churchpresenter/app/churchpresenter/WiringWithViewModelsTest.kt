@@ -225,7 +225,11 @@ class WiringWithViewModelsTest {
         waitForIdle()
         // Enabled means the wiring dials out: nothing is listening, so it lands on CONNECTING or
         // ERROR — either way it tried, which is what distinguishes this from the disabled case.
-        assertTrue(obs.status.value != OBSWebSocketManager.ConnectionStatus.DISCONNECTED)
+        val dialled = obs.status.value != OBSWebSocketManager.ConnectionStatus.DISCONNECTED
+        // Hang up before the test ends: a connection failure landing after it would be reported
+        // against whichever coroutine test runs next in this JVM.
+        obs.disconnect()
+        assertTrue(dialled)
     }
 
     // ── MediaRemoteWiring, with a file loaded ──────────────────────────────────
