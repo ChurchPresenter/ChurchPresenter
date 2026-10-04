@@ -61,15 +61,6 @@ internal fun MainDesktopScope.handleMainDesktopKey(keyEvent: KeyEvent): Boolean 
         shortcuts.matches(ShortcutAction.CLEAR_OUTPUT, keyEvent) -> {
             clearOutput(); true
         }
-        shortcuts.matches(ShortcutAction.CLEAR_LOWER_THIRD, keyEvent) -> {
-            presenterManager.clearOverlay(Presenting.LOWER_THIRD); true
-        }
-        shortcuts.matches(ShortcutAction.CLEAR_CAPTIONS, keyEvent) -> {
-            presenterManager.clearOverlay(Presenting.STT); true
-        }
-        shortcuts.matches(ShortcutAction.CLEAR_ANNOUNCEMENT, keyEvent) -> {
-            presenterManager.clearOverlay(Presenting.ANNOUNCEMENTS); true
-        }
         // Presentation clickers (Logitech/Kensington etc.) are HID keyboards
         // sending Page Down/Up. Handled here in the preview pass so a live
         // presentation responds no matter which tab or control has focus —

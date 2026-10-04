@@ -27,9 +27,6 @@ import org.churchpresenter.strings.generated.resources.shortcut_description_open
 import org.churchpresenter.strings.generated.resources.shortcut_description_open_converter
 import org.churchpresenter.strings.generated.resources.shortcut_description_open_song_library
 import org.churchpresenter.strings.generated.resources.shortcut_description_delete_source
-import org.churchpresenter.strings.generated.resources.shortcut_description_clear_announcement
-import org.churchpresenter.strings.generated.resources.shortcut_description_clear_captions
-import org.churchpresenter.strings.generated.resources.shortcut_description_clear_lower_third
 import org.churchpresenter.strings.generated.resources.shortcut_description_escape
 import org.churchpresenter.strings.generated.resources.shortcut_description_exit
 import org.churchpresenter.strings.generated.resources.shortcut_description_f1_keyboard_shortcuts
@@ -165,10 +162,6 @@ enum class ShortcutAction(
     // ── Global ───────────────────────────────────────────────────────────────
     CLEAR_OUTPUT(ShortcutScope.GLOBAL, Res.string.shortcut_description_escape,
         listOf(KeyChord.of(Key.Escape))),
-    // Take one overlay down, leaving the slide under it. Unbound until someone picks keys for them.
-    CLEAR_LOWER_THIRD(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_lower_third, emptyList()),
-    CLEAR_CAPTIONS(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_captions, emptyList()),
-    CLEAR_ANNOUNCEMENT(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_announcement, emptyList()),
     UNDO(ShortcutScope.GLOBAL, Res.string.shortcut_description_undo,
         listOf(KeyChord.of(Key.Z, ctrl = true))),
     REDO(ShortcutScope.GLOBAL, Res.string.shortcut_description_redo,
