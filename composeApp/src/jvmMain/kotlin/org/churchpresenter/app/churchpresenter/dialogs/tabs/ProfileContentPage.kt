@@ -63,6 +63,11 @@ import org.jetbrains.compose.resources.stringResource
 private class ContentSwitch(
     val label: String,
     val checked: Boolean,
+    /**
+     * Whether this switch shows or hides a kind of content. An option on how content is shown --
+     * over the slide or in place of it -- is not, so the summary and Show all/Hide all leave it be.
+     */
+    val isContent: Boolean = true,
     val edit: (OutputProfile, Boolean) -> OutputProfile,
 )
 
@@ -139,7 +144,9 @@ private fun contentSwitches(profile: OutputProfile): ContentGroups {
         // Over the content or in place of it -- offered only while the lower third is shown here.
         if (profile.showStreaming) {
             val label = stringResource(Res.string.profile_lower_third_over_content)
-            add(ContentSwitch(label, profile.lowerThirdOverContent) { p, v -> p.copy(lowerThirdOverContent = v) })
+            add(ContentSwitch(label, profile.lowerThirdOverContent, isContent = false) { p, v ->
+                p.copy(lowerThirdOverContent = v)
+            })
         }
     }
     val overlays = buildList {
@@ -148,7 +155,9 @@ private fun contentSwitches(profile: OutputProfile): ContentGroups {
         })
         if (profile.showAnnouncements) {
             val label = stringResource(Res.string.profile_announcements_over_content)
-            add(ContentSwitch(label, profile.announcementsOverContent) { p, v -> p.copy(announcementsOverContent = v) })
+            add(ContentSwitch(label, profile.announcementsOverContent, isContent = false) { p, v ->
+                p.copy(announcementsOverContent = v)
+            })
         }
         add(ContentSwitch(stringResource(Res.string.tab_qa), profile.showQA) { p, v -> p.copy(showQA = v) })
         add(ContentSwitch(stringResource(Res.string.profile_nav_live_captions), profile.showSTT) { p, v ->
@@ -156,7 +165,9 @@ private fun contentSwitches(profile: OutputProfile): ContentGroups {
         })
         if (profile.showSTT) {
             val label = stringResource(Res.string.profile_captions_over_content)
-            add(ContentSwitch(label, profile.captionsOverContent) { p, v -> p.copy(captionsOverContent = v) })
+            add(ContentSwitch(label, profile.captionsOverContent, isContent = false) { p, v ->
+                p.copy(captionsOverContent = v)
+            })
         }
     }
     val backgrounds = listOf(
@@ -198,7 +209,7 @@ internal fun ProfileContentPage(
     onProfileChange: (OutputProfile) -> Unit,
 ) {
     val groups = contentSwitches(profile)
-    ContentSummary(profile, groups.all, onProfileChange)
+    ContentSummary(profile, groups.all.filter { it.isContent }, onProfileChange)
     ContentGroup("scripture", groups.scripture, profile, onProfileChange)
     SettingsGroup(
         stringResource(Res.string.output_profile_sources),
