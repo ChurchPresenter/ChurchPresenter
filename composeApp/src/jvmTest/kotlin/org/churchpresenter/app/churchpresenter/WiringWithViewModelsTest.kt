@@ -1,5 +1,9 @@
 package org.churchpresenter.app.churchpresenter
 
+import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
@@ -14,6 +18,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.sharedui.models.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
@@ -102,6 +107,97 @@ class WiringWithViewModelsTest {
         setContent { ObsSceneWiring(settings, CompanionServer(), obs, PresenterManager()) }
         waitForIdle()
         assertEquals(OBSWebSocketManager.ConnectionStatus.DISCONNECTED, obs.status.value)
+    }
+
+    /**
+     * The connection is a function of the settings alone: switching the integration on dials out,
+     * switching it off hangs up, with no restart of the app between the two.
+     */
+    @Test
+    fun `the obs connection follows the integration being switched on and off`() = runComposeUiTest {
+        val obs = OBSWebSocketManager()
+        val server = CompanionServer()
+        val manager = PresenterManager()
+        var settings by mutableStateOf(
+            AppSettings().let { it.copy(obsSettings = it.obsSettings.copy(enabled = false)) },
+        )
+        setContent { ObsSceneWiring(settings, server, obs, manager) }
+        waitForIdle()
+        assertEquals(OBSWebSocketManager.ConnectionStatus.DISCONNECTED, obs.status.value, "off to begin with")
+
+        settings = settings.copy(obsSettings = settings.obsSettings.copy(enabled = true))
+        waitForIdle()
+        // Nothing is listening, so it lands on CONNECTING or ERROR -- either way it dialled out.
+        assertTrue(
+            obs.status.value != OBSWebSocketManager.ConnectionStatus.DISCONNECTED,
+            "switching the integration on must dial out",
+        )
+
+        settings = settings.copy(obsSettings = settings.obsSettings.copy(enabled = false))
+        waitForIdle()
+        assertEquals(
+            OBSWebSocketManager.ConnectionStatus.DISCONNECTED,
+            obs.status.value,
+            "and switching it off must hang up again",
+        )
+    }
+
+    /**
+     * The Q&A cooldown and voting switch reach the server as they are; the admin password is the API
+     * key only while key checking is on, and nothing at all when it is off.
+     */
+    @Test
+    fun `the QA settings reach the server and follow a change to them`() = runComposeUiTest {
+        val obs = OBSWebSocketManager()
+        val server = CompanionServer()
+        val manager = PresenterManager()
+        var settings by mutableStateOf(
+            AppSettings().let {
+                it.copy(
+                    qaSettings = it.qaSettings.copy(rateLimitCooldownSeconds = 45, votingEnabled = true),
+                    serverSettings = it.serverSettings.copy(apiKeyEnabled = true, apiKey = "secret"),
+                )
+            },
+        )
+        setContent { ObsSceneWiring(settings, server, obs, manager) }
+        waitForIdle()
+        assertEquals(45, server.qaCooldownSeconds, "the cooldown from the settings")
+        assertTrue(server.qaVotingEnabled, "the voting switch from the settings")
+        assertEquals("secret", server.qaAdminPassword, "key checking is on, so the key guards the admin panel")
+
+        settings = settings.copy(
+            qaSettings = settings.qaSettings.copy(rateLimitCooldownSeconds = 10, votingEnabled = false),
+            serverSettings = settings.serverSettings.copy(apiKeyEnabled = false),
+        )
+        waitForIdle()
+        assertEquals(10, server.qaCooldownSeconds, "a changed cooldown must reach the server")
+        assertFalse(server.qaVotingEnabled, "and so must a switched-off vote")
+        assertEquals("", server.qaAdminPassword, "with key checking off the admin panel asks for no password")
+    }
+
+    /**
+     * The effects are keyed on the settings, not on the recomposition: a pass that changes nothing has
+     * nothing to push. The server is changed behind the wiring's back to prove it is left alone.
+     */
+    @Test
+    fun `recomposing with nothing changed does not push the settings to the server again`() = runComposeUiTest {
+        val obs = OBSWebSocketManager()
+        val server = CompanionServer()
+        val manager = PresenterManager()
+        val settings = AppSettings()
+        var pass by mutableStateOf(0)
+        setContent {
+            Text("$pass") // read here, so a new pass recomposes this caller with the very same arguments
+            ObsSceneWiring(settings, server, obs, manager)
+        }
+        waitForIdle()
+        assertEquals(30, server.qaCooldownSeconds, "the default cooldown is pushed on the first pass")
+
+        server.qaCooldownSeconds = 99
+        pass++
+        waitForIdle()
+
+        assertEquals(99, server.qaCooldownSeconds, "an unchanged recomposition must leave the server alone")
     }
 
     @Test
