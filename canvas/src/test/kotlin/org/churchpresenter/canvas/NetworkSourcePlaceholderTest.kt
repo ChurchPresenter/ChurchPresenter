@@ -42,4 +42,28 @@ class NetworkSourcePlaceholderTest {
         setContent { MaterialTheme { SceneSourceRenderer(SceneSource.NdiSource(id = "n", name = "NDI")) } }
         onNodeWithText("No NDI source selected").assertExists()
     }
+
+    @Test
+    fun `an NDI layer that cannot connect names its source`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                SceneSourceRenderer(SceneSource.NdiSource(id = "n", name = "NDI", sourceName = "HOST (Slides)"))
+            }
+        }
+        waitUntil(timeoutMillis = 2_000) {
+            onAllNodes(hasText("NDI: HOST (Slides)")).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    @Test
+    fun `an NDI layer with only an address names the address`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                SceneSourceRenderer(SceneSource.NdiSource(id = "n", name = "NDI", sourceAddress = "10.0.0.5:5961"))
+            }
+        }
+        waitUntil(timeoutMillis = 2_000) {
+            onAllNodes(hasText("NDI: 10.0.0.5:5961")).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
 }
