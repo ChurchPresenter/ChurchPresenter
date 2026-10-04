@@ -1,6 +1,8 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
@@ -10,6 +12,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.ImageBitmap
+import org.churchpresenter.settings.utils.Constants
+import java.io.File
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
@@ -65,5 +70,50 @@ internal fun FullScreenBackdropBox(
             )
         }
         content(blurRadius)
+    }
+}
+
+/** A background as it is drawn: resolved, and its picture decoded when it has one. */
+private data class ShownBackground(val background: ResolvedBackground, val bitmap: ImageBitmap?)
+
+/**
+ * [background] on a layer of its own, which stays put while it does not change.
+ *
+ * A new background crossfades in over [changeMs] -- but only once it can be drawn: a picture is
+ * decoded off the UI thread, and crossfading into it before that would fade through black. Until
+ * then the old one stays up. A picture that no longer exists is drawn as [backgroundModifier] draws
+ * one, black, rather than waited for.
+ */
+@Composable
+internal fun PersistentBackground(
+    background: ResolvedBackground,
+    modifier: Modifier,
+    alpha: () -> Float,
+    changeMs: Int,
+) {
+    val bitmap = rememberBackgroundBitmap(background, isLowerThird = false)
+    val pictureMissing = remember(background.type, background.imagePath) {
+        background.type == Constants.BACKGROUND_IMAGE && !File(background.imagePath).exists()
+    }
+    val ready = background.type != Constants.BACKGROUND_IMAGE || bitmap != null || pictureMissing
+    // The last background that was ready, held in a plain box rather than state: it only ever
+    // changes on a composition that is already happening, and reading it must not schedule another.
+    val lastReady = remember { arrayOfNulls<ShownBackground>(1) }
+    val target = if (ready) {
+        ShownBackground(background, bitmap).also { lastReady[0] = it }
+    } else {
+        lastReady[0] ?: ShownBackground(background, null)
+    }
+    Crossfade(
+        targetState = target,
+        animationSpec = if (changeMs > 0) tween(changeMs) else snap(),
+    ) { shown ->
+        FullScreenBackdropBox(
+            modifier = modifier,
+            alpha = alpha,
+            backdrop = PresenterBackdrop(shown.background, shown.bitmap),
+            isLowerThird = false,
+            drawsBackground = true,
+        )
     }
 }

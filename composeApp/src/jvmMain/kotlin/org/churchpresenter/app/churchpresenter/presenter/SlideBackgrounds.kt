@@ -7,6 +7,10 @@ import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.AppSettings
 
 // The full-screen backgrounds Bible and song slides draw, alone, for an output's background layer.
+//
+// Unlike the slide, the background does not fade out and back in with each new verse or section: it
+// stays up while it is the same background, crossfades when it changes, and follows the slide's fade
+// only while the display is being cleared.
 
 /**
  * The full-screen background [BiblePresenter] draws for the same arguments, alone -- what an output
@@ -22,6 +26,7 @@ internal fun BibleSlideBackground(
     isLowerThird: Boolean,
     outputRole: String,
     transitionAlpha: Float,
+    clearing: Boolean,
     showBackground: Boolean,
     bibleTranslations: List<Int>,
 ) {
@@ -46,12 +51,11 @@ internal fun BibleSlideBackground(
         transparentWhenBlank = LocalTransparentBlanking.current,
     )
     val enterAlpha = rememberBibleEnterAlpha(appSettings)
-    FullScreenBackdropBox(
+    PersistentBackground(
+        background = resolvedBg,
         modifier = modifier,
-        alpha = { transitionAlpha * enterAlpha.value },
-        backdrop = PresenterBackdrop(resolvedBg, rememberBackgroundBitmap(resolvedBg, false)),
-        isLowerThird = false,
-        drawsBackground = true,
+        alpha = { (if (clearing) transitionAlpha else 1f) * enterAlpha.value },
+        changeMs = appSettings.bibleSettings.transitionDuration.toInt(),
     )
 }
 
@@ -74,6 +78,7 @@ internal fun SongSlideBackground(
     appSettings: AppSettings,
     isLowerThird: Boolean,
     transitionAlpha: Float,
+    clearing: Boolean,
     showBackground: Boolean,
 ) {
     if (isLowerThird) return
@@ -86,12 +91,11 @@ internal fun SongSlideBackground(
         ownBackground = lyricSection.background,
     )
     val enterAlpha = rememberSongEnterAlpha(appSettings)
-    FullScreenBackdropBox(
+    PersistentBackground(
+        background = resolvedBg,
         modifier = modifier,
-        alpha = { transitionAlpha * enterAlpha.value },
-        backdrop = PresenterBackdrop(resolvedBg, rememberBackgroundBitmap(resolvedBg, false)),
-        isLowerThird = false,
-        drawsBackground = true,
+        alpha = { (if (clearing) transitionAlpha else 1f) * enterAlpha.value },
+        changeMs = appSettings.songSettings.transitionDuration.toInt(),
     )
 }
 

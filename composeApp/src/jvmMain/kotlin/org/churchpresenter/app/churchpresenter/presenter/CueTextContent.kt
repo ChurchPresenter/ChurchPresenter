@@ -78,6 +78,7 @@ internal fun BackgroundCue(cue: Cue.Background, surface: OutputSurface) {
                 isLowerThird = profile.isLowerThird,
                 outputRole = surface.outputRole,
                 transitionAlpha = presenterManager.bibleTransitionAlpha.value,
+                clearing = presenterManager.clearDisplayRequested.value,
                 showBackground = surface.showsBackground(profile.showBibleBackground),
                 bibleTranslations = profile.bibleTranslations,
             )
@@ -89,6 +90,7 @@ internal fun BackgroundCue(cue: Cue.Background, surface: OutputSurface) {
                 appSettings = appSettings,
                 isLowerThird = profile.isLowerThird,
                 transitionAlpha = presenterManager.songTransitionAlpha.value,
+                clearing = presenterManager.clearDisplayRequested.value,
                 showBackground = surface.showsBackground(profile.showSongsBackground),
             )
         }
