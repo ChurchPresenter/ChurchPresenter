@@ -282,9 +282,9 @@ class SystemSettingsTabTest {
             }
         }
 
-        // Analytics is the fifth switch declared, after launch-at-login, start-hidden, hide-cursor and
-        // overlay-end-clears.
-        onAllNodes(isToggleable())[4].performScrollTo().performClick()
+        // Analytics is the sixth switch declared, after launch-at-login, start-hidden, hide-cursor,
+        // overlay-end-clears and preview mode.
+        onAllNodes(isToggleable())[5].performScrollTo().performClick()
         waitForIdle()
 
         assertEquals(true, applied?.analyticsReportingEnabled, "clicking the off analytics switch turns reporting on")
@@ -348,7 +348,7 @@ class SystemSettingsTabTest {
             }
         }
 
-        onAllNodes(isToggleable()).assertCountEquals(5)
+        onAllNodes(isToggleable()).assertCountEquals(6)
         // Launch-at-login is declared first. The switch follows the OS registration, not the click:
         // it can only turn on if setEnabled() reported success, which cannot happen here — so this
         // cannot race the coroutine the click starts.
