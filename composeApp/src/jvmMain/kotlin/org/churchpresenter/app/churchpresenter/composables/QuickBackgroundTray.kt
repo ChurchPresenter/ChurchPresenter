@@ -2,6 +2,9 @@
 
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.profiles.QUICK_BACKGROUND_SLOTS
+import org.churchpresenter.profiles.quickBackgroundActionFor
+import org.churchpresenter.profiles.quickBackgroundLabel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -41,7 +44,7 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.quick_background_hint
 import org.churchpresenter.strings.generated.resources.quick_background_reset
 import org.churchpresenter.strings.generated.resources.background_scope_title
-import org.churchpresenter.app.churchpresenter.dialogs.SongBackgroundFill
+import org.churchpresenter.profiles.SongBackgroundFill
 import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.sharedui.utils.label
 import org.churchpresenter.settings.QuickBackground

@@ -2,8 +2,8 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
-import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
+import org.churchpresenter.profiles.PreviewOutputPicker
+import org.churchpresenter.profiles.rememberPreviewOutput
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.lowerthird.LowerThirdTab
 import org.churchpresenter.settings.AppSettings

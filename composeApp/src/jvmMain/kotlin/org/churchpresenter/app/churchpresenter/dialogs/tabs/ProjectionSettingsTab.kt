@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.profiles.previewOutputSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -71,13 +72,13 @@ import androidx.compose.runtime.collectAsState
 import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.sharedui.composables.SettingsScrollbarGutter
 import org.churchpresenter.sharedui.composables.SettingsSection
-import org.churchpresenter.app.churchpresenter.composables.TvScreenBox
-import org.churchpresenter.app.churchpresenter.composables.tvScreenBoxWidthFor
+import org.churchpresenter.profiles.TvScreenBox
+import org.churchpresenter.profiles.tvScreenBoxWidthFor
 import org.churchpresenter.media.composables.detectVlcInstallPath
 import org.churchpresenter.media.composables.isVlcAvailable
 import org.churchpresenter.media.composables.isVlcLoadFailed
 import org.churchpresenter.media.composables.listVlcAudioDevices
-import org.churchpresenter.app.churchpresenter.composables.ScanningRow
+import org.churchpresenter.profiles.ScanningRow
 import org.churchpresenter.media.composables.VlcAudioDevice
 import org.churchpresenter.media.composables.recheckVlcAvailability
 import org.churchpresenter.media.composables.vlcCustomPath

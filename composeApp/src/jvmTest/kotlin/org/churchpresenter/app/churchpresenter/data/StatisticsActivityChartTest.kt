@@ -139,4 +139,19 @@ class StatisticsActivityChartTest {
 
         assertTrue(points.size <= 52, "a chart with hundreds of columns is unreadable: ${points.size}")
     }
+
+    @Test
+    fun `months and years either side of the plays chart as empty`() {
+        recordOneOfEach()
+        val now = System.currentTimeMillis()
+
+        val monthly = manager.getActivityByPeriod(now - 100 * dayMs, now + 100 * dayMs)
+        val yearly = manager.getActivityByPeriod(now - 1500 * dayMs, now + 1500 * dayMs)
+
+        listOf(monthly, yearly).forEach { points ->
+            assertEquals(1, points.sumOf { it.songCount })
+            assertEquals(1, points.count { it.songCount > 0 }, "only one bucket holds the play")
+            assertTrue(points.first().verseCount == 0 && points.last().verseCount == 0)
+        }
+    }
 }

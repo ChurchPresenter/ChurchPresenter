@@ -14,7 +14,7 @@ import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.app.churchpresenter.hasNoPrimaryTarget
-import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
+import org.churchpresenter.profiles.FileManager
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.UpdateCheckInterval
 import java.awt.GraphicsEnvironment

@@ -481,4 +481,17 @@ class OffscreenOutputContentRenderTest {
 
         assertTrue(deep < shallow, "the song band has to win on a song output, got $deep against $shallow")
     }
+
+    @Test
+    fun `every other kind of content composes on an off-screen output with nothing live`() {
+        listOf(
+            Presenting.PICTURES, Presenting.PRESENTATION, Presenting.MEDIA, Presenting.CANVAS,
+            Presenting.STT, Presenting.DICTIONARY,
+        ).forEach { mode ->
+            render(mode = mode) {
+                waitForIdle()
+                assertTrue(onAllNodes(hasTestTag(WEB_SNAPSHOT_TAG)).fetchSemanticsNodes().isEmpty(), "$mode")
+            }
+        }
+    }
 }

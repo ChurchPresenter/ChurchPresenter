@@ -331,6 +331,7 @@ kotlin {
             implementation(projects.schedule)
             implementation(projects.canvas)
             implementation(projects.presenter)
+            implementation(projects.profiles)
             implementation(projects.lowerThird)
             implementation(projects.songChords)
             // The Companion Satellite protocol client: a real module rather than a mounted source
@@ -471,6 +472,7 @@ dependencies {
     add("jvmTestImplementation", testFixtures(projects.schedule))
     add("jvmTestImplementation", testFixtures(projects.lowerThird))
     add("jvmTestImplementation", testFixtures(projects.presenter))
+    add("jvmTestImplementation", testFixtures(projects.profiles))
     // CrashReportSweep: the Bible tab and view-model failure tests exercise paths that really
     // write a crash report. It lives with :diagnostics because it exists for CrashReporter's own
     // design -- the report directory is resolved once per JVM and cannot be redirected after.

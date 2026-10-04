@@ -3,8 +3,8 @@
 package org.churchpresenter.app.churchpresenter.screenshot
 
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.composables.rememberPreviewOutput
-import org.churchpresenter.app.churchpresenter.composables.PreviewOutputPicker
+import org.churchpresenter.profiles.rememberPreviewOutput
+import org.churchpresenter.profiles.PreviewOutputPicker
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText

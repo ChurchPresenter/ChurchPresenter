@@ -1,0 +1,288 @@
+/*
+ * Choosing the camera a background draws.
+ *
+ * Its own file rather than a block inside the background controls: a camera needs a device, and
+ * then a format or a DeckLink input to go with it, which is three pickers where every other type
+ * needs one field or none.
+ */
+package org.churchpresenter.profiles
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.background_camera_auto
+import org.churchpresenter.strings.generated.resources.background_camera_connection
+import org.churchpresenter.strings.generated.resources.background_camera_device
+import org.churchpresenter.strings.generated.resources.background_camera_format
+import org.churchpresenter.strings.generated.resources.canvas_camera_is_screen_capture
+import org.churchpresenter.strings.generated.resources.canvas_decklink_device
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.withContext
+import org.churchpresenter.canvas.cameraFailureStringRes
+import org.churchpresenter.canvas.cameraHintStringRes
+import org.churchpresenter.canvas.CameraDevice
+import org.churchpresenter.canvas.CameraDeviceCatalog
+import org.churchpresenter.canvas.CameraFailure
+import org.churchpresenter.canvas.CameraFormat
+import org.churchpresenter.canvas.CameraHost
+import org.churchpresenter.canvas.CameraPrivacyHint
+import org.churchpresenter.canvas.DeckLinkManager
+import org.churchpresenter.theme.components.DropdownSelector
+import org.churchpresenter.canvas.isFfmpegAvailable
+import org.churchpresenter.canvas.isScreenCaptureDevice
+import org.churchpresenter.canvas.listCameraFormats
+import org.churchpresenter.canvas.SharedCameraFrameCache
+import org.churchpresenter.canvas.selectableCameras
+import org.churchpresenter.canvas.selectedConnectionName
+import org.churchpresenter.canvas.selectedFormatName
+import org.churchpresenter.canvas.selectedModeName
+import org.churchpresenter.core.models.camera.CameraDeviceRef
+import org.churchpresenter.core.models.camera.asCameraSource
+import org.churchpresenter.core.models.scene.SceneSource
+import org.churchpresenter.settings.BackgroundConfig
+import org.jetbrains.compose.resources.stringResource
+
+/**
+ * The device this background draws, and the format it is asked for.
+ *
+ * **The format picker is not optional.** The capture behind a camera is shared and ref-counted on
+ * the device's identity, format included, so a background left on "auto" beside a Canvas layer
+ * pinned to `1920x1080@30` is two different keys for one piece of hardware — two captures, and the
+ * second one fails, because a camera opens once.
+ *
+ * Every enumeration here goes through [CameraDeviceCatalog] or an IO dispatcher. `listCameraFormats`
+ * and `listCameraDevicesWithDeckLink` both shell out to ffmpeg; the Canvas property panel calls them
+ * straight from composition and this deliberately does not copy that.
+ */
+@Composable
+internal fun CameraPickerRow(
+    config: BackgroundConfig,
+    /** The machine this row describes, or null to ask the real one -- as for `CameraProperties`. */
+    host: CameraHost? = null,
+    onConfigChange: (BackgroundConfig) -> Unit,
+) {
+    val deckLinkLabel = stringResource(Res.string.canvas_decklink_device)
+    val autoLabel = stringResource(Res.string.background_camera_auto)
+    val catalog by CameraDeviceCatalog.devices.collectAsState()
+    val devices = host?.devices ?: catalog
+    LaunchedEffect(Unit) { if (host == null) CameraDeviceCatalog.refresh(deckLinkLabel) }
+
+    // Probed off the composition thread. This file's own note above says it deliberately does not
+    // copy the Canvas panel's habit of shelling out from composition — but this call did exactly
+    // that, and `isFfmpegAvailable()` runs `ffmpeg -version` against each candidate install path in
+    // turn with a five-second timeout each. Starts `true` so no hint flashes on a machine that has
+    // ffmpeg.
+    var probedFfmpeg by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) { if (host == null) probedFfmpeg = withContext(Dispatchers.IO) { isFfmpegAvailable() } }
+    val ffmpegAvailable = host?.ffmpegAvailable ?: probedFfmpeg
+
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        PanelCaption(stringResource(Res.string.background_camera_device))
+        // Displays are dropped from what is offered, not from the catalog — see `selectableCameras`.
+        // The hints below still read the unfiltered list: they are about what enumeration found.
+        val found = devices.orEmpty().selectableCameras(keeping = config.camera.deviceName)
+
+        // Above the dropdown rather than instead of it: on Windows without ffmpeg the PnP fallback
+        // fills the list with names that cannot be opened, so a hint shown only when the list is
+        // empty is a hint the operator who needs it never sees.
+        cameraHintStringRes(
+            System.getProperty("os.name", ""),
+            devices,
+            ffmpegAvailable,
+            if (host == null) CameraDeviceCatalog.lastEnumeration?.enumerator else null,
+        ).forEach { hint ->
+            Text(
+                text = stringResource(hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        // Wrapped rather than an early `return@Column`, so the failure line and the way out of a
+        // privacy refusal below still render when the list is empty. On macOS empty is *the*
+        // symptom: a TCC denial makes AVFoundation enumerate nothing, so returning here hid the
+        // remedy in precisely the case it exists for.
+        if (found.isNotEmpty()) {
+            DropdownSelector(
+                label = stringResource(Res.string.background_camera_device),
+                items = found.map { it.displayName },
+                selected = selectedBackgroundCameraName(found, config.camera),
+                onSelectedChange = { name ->
+                    found.firstOrNull { it.displayName == name }?.let {
+                        onConfigChange(config.copy(camera = cameraRefOn(config.camera, it)))
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            // A background opens as the presenter window does, so a display saved here is what
+            // re-raises the Screen Recording prompt on every launch. It keeps working; it is named.
+            if (!config.camera.isDeckLink && isScreenCaptureDevice(config.camera.deviceName)) {
+                Text(
+                    text = stringResource(Res.string.canvas_camera_is_screen_capture),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+            if (config.camera.isDeckLink && config.camera.deckLinkIndex >= 0) {
+                DeckLinkFormatRows(config, onConfigChange, autoLabel)
+            } else if (config.camera.isSet) {
+                CameraFormatRow(config, onConfigChange, autoLabel)
+            }
+        }
+        CameraFailureRow(config.camera)
+        CameraPrivacyHint()
+    }
+}
+
+/**
+ * Why [source] is not drawing, if something is drawing it — and null when nothing is.
+ *
+ * Deliberately **not** an acquire: a settings panel that wants to explain a black rectangle must
+ * not be the thing that starts a capture. Acquiring from a dialog would open the device because
+ * someone opened Settings, and the matching release could stop a capture the output is still using.
+ *
+ * Null therefore means "nothing is capturing this camera", which is not the same as "it is fine".
+ * The caller renders that as no diagnosis, never as an all-clear.
+ *
+ * Here rather than beside the cache because that file is already at its `TooManyFunctions`
+ * threshold, and this is its only caller.
+ */
+private fun cameraFailureFlow(source: SceneSource.CameraSource): StateFlow<CameraFailure?>? =
+    SharedCameraFrameCache.liveFailures[SharedCameraFrameCache.keyFor(source)]
+
+/**
+ * Why the chosen camera is not drawing, when something is trying to draw it.
+ *
+ * A camera background renders as black and says nothing — `CameraBackground` documents that as
+ * deliberate, and it is right, because that composable *is* the presenter output and must never
+ * carry troubleshooting text in front of a congregation. But that left the failure explained
+ * nowhere at all: the Canvas layer has its red sentence and this picker had none, so an operator
+ * whose background was refused by macOS saw a black rectangle and no route to the cause. That is
+ * the discoverability half of issue #488.
+ *
+ * Observes through [SharedCameraFrameCache.failureOf] rather than acquiring, so opening Settings
+ * cannot itself start a capture. Nothing capturing means no diagnosis rather than an all-clear —
+ * the camera may simply not be live yet.
+ */
+@Composable
+private fun CameraFailureRow(camera: CameraDeviceRef) {
+    if (!camera.isSet) return
+    val source = remember(camera) { camera.asCameraSource() }
+    val failures = remember(source) { cameraFailureFlow(source) }
+    val failure by (failures ?: remember { MutableStateFlow(null) }).collectAsState()
+
+    failure?.let {
+        Text(
+            text = stringResource(cameraFailureStringRes(it)),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error,
+        )
+    }
+}
+
+/** The format list for an ordinary capture device, loaded off the composition thread. */
+@Composable
+private fun CameraFormatRow(
+    config: BackgroundConfig,
+    onConfigChange: (BackgroundConfig) -> Unit,
+    autoLabel: String,
+) {
+    var formats by remember { mutableStateOf<List<CameraFormat>>(emptyList()) }
+    LaunchedEffect(config.camera.devicePath) {
+        formats = withContext(Dispatchers.IO) {
+            listCameraFormats(config.camera.devicePath, config.camera.deviceName)
+        }
+    }
+    if (formats.isEmpty()) return
+    DropdownSelector(
+        label = stringResource(Res.string.background_camera_format),
+        items = listOf(autoLabel) + formats.map { it.displayName },
+        selected = selectedFormatName(formats, config.camera.videoFormat, autoLabel),
+        onSelectedChange = { name ->
+            val chosen = formats.firstOrNull { it.displayName == name }?.encodedValue.orEmpty()
+            onConfigChange(config.copy(camera = config.camera.copy(videoFormat = chosen)))
+        },
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+/** A DeckLink names its input and its mode instead of a format; both come from the card. */
+@Composable
+private fun DeckLinkFormatRows(
+    config: BackgroundConfig,
+    onConfigChange: (BackgroundConfig) -> Unit,
+    autoLabel: String,
+) {
+    var connections by remember { mutableStateOf<List<DeckLinkManager.VideoConnection>>(emptyList()) }
+    var modes by remember { mutableStateOf<List<DeckLinkManager.InputMode>>(emptyList()) }
+    LaunchedEffect(config.camera.deckLinkIndex) {
+        withContext(Dispatchers.IO) {
+            connections = DeckLinkManager.listVideoConnections(config.camera.deckLinkIndex)
+            modes = DeckLinkManager.listInputModes(config.camera.deckLinkIndex)
+        }
+    }
+    if (connections.isNotEmpty()) {
+        DropdownSelector(
+            label = stringResource(Res.string.background_camera_connection),
+            items = connections.map { it.name },
+            selected = selectedConnectionName(connections, config.camera.videoConnection),
+            onSelectedChange = { name ->
+                connections.firstOrNull { it.name == name }?.let {
+                    onConfigChange(config.copy(camera = config.camera.copy(videoConnection = it.value)))
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+    if (modes.isNotEmpty()) {
+        DropdownSelector(
+            label = stringResource(Res.string.background_camera_format),
+            items = listOf(autoLabel) + modes.map { it.name },
+            selected = selectedModeName(modes, config.camera.videoFormat, autoLabel),
+            onSelectedChange = { name ->
+                val chosen = modes.firstOrNull { it.name == name }?.encodedValue.orEmpty()
+                onConfigChange(config.copy(camera = config.camera.copy(videoFormat = chosen)))
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+/** What the device dropdown shows for [camera], falling back to the first device. */
+internal fun selectedBackgroundCameraName(devices: List<CameraDevice>, camera: CameraDeviceRef): String =
+    if (camera.isDeckLink && camera.deckLinkIndex >= 0) {
+        devices.find { it.isDeckLink && it.deckLinkIndex == camera.deckLinkIndex }?.displayName
+            ?: devices.first().displayName
+    } else {
+        devices.find { !it.isDeckLink && it.path == camera.devicePath }?.displayName
+            ?: camera.devicePath.ifEmpty { devices.first().displayName }
+    }
+
+/**
+ * [camera] pointed at [device].
+ *
+ * Format and connection are **reset**, exactly as `cameraSourceOn` resets them for a Canvas layer:
+ * a mode enumerated from one device means nothing on another, and carrying it over would ask the
+ * new device for a format it may not have.
+ */
+internal fun cameraRefOn(camera: CameraDeviceRef, device: CameraDevice): CameraDeviceRef = camera.copy(
+    devicePath = device.path,
+    deviceName = device.name,
+    videoFormat = "",
+    videoConnection = 0,
+    isDeckLink = device.isDeckLink,
+    deckLinkIndex = device.deckLinkIndex,
+)

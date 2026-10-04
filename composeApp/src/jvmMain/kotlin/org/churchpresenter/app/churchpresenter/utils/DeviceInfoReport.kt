@@ -7,7 +7,7 @@ import org.churchpresenter.media.composables.isVlcAvailable
 import org.churchpresenter.media.composables.vlcUnavailableReason
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.web.presenter.CefManager
-import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
+import org.churchpresenter.profiles.FileManager
 import java.awt.GraphicsEnvironment
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

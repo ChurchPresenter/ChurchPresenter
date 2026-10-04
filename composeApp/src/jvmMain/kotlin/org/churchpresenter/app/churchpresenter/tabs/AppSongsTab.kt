@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.dialogs.EditSongDialog
 import org.churchpresenter.app.churchpresenter.lottieBandPath
-import org.churchpresenter.app.churchpresenter.stageMonitorScreenIndices
+import org.churchpresenter.profiles.stageMonitorScreenIndices
 import org.churchpresenter.app.churchpresenter.utils.isChordChartPresentation
 import org.churchpresenter.app.churchpresenter.utils.isLiveOutput
 import org.churchpresenter.app.churchpresenter.utils.isSplitScreenSong

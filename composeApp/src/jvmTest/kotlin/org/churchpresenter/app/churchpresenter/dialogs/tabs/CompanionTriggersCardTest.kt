@@ -85,7 +85,10 @@ class CompanionTriggersCardTest {
         lottie("Pastor")
         File(folder, "notes.json").writeText("""{"not":"a lottie"}""")
         card { copied ->
-            onNodeWithText("Pastor").assertExists()
+            // The folder is scanned off the composition thread; wait for the scan, not for idle.
+            waitUntil("the folder scan lists Pastor") {
+                onAllNodesWithText("Pastor").fetchSemanticsNodes().isNotEmpty()
+            }
             assertTrue(onAllNodesWithText("notes").fetchSemanticsNodes().isEmpty(), "only Lottie files are triggers")
             assertTrue(onAllNodesWithText("Still only").fetchSemanticsNodes().isEmpty(), "no ATEM, no media buttons")
 
@@ -107,6 +110,9 @@ class CompanionTriggersCardTest {
         lottie("Welcome")
         val atem = settings(atemHost = "192.168.1.240")
         card(settings = atem) { copied ->
+            waitUntil("the folder scan lists Welcome") {
+                onAllNodesWithText("Welcome").fetchSemanticsNodes().isNotEmpty()
+            }
             onNodeWithText("Clip + Key uploads the clip", substring = true).assertExists()
 
             listOf("Still + Key", "Still only", "Clip + Key", "Clip only", "Copy Key On", "Copy Key Off")

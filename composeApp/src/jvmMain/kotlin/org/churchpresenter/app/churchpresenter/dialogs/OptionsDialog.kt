@@ -75,10 +75,10 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.CompanionSatelliteSe
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.obs.OBSSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SystemSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleSettingsTab
+import org.churchpresenter.profiles.BackgroundSettingsTab
+import org.churchpresenter.profiles.BibleSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.DetectedScreen
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProfilesSettingsTab
+import org.churchpresenter.profiles.ProfilesSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.detectScreensFromAwt
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab

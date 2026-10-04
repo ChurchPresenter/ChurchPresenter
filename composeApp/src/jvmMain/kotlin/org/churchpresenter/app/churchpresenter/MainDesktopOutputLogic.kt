@@ -1,10 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.ProjectionSettings
-import org.churchpresenter.settings.profileFor
 import org.churchpresenter.sharedui.models.Tabs
-import org.churchpresenter.settings.utils.Constants
 import java.io.File
 
 /*
@@ -20,11 +17,6 @@ internal fun sttUrlToPersist(settings: AppSettings, sttConnected: Boolean): Stri
 
 internal fun withSttLastConnectedUrl(settings: AppSettings, url: String): AppSettings =
     settings.copy(sttSettings = settings.sttSettings.copy(lastConnectedUrl = url))
-
-internal fun stageMonitorScreenIndices(proj: ProjectionSettings): List<Int> =
-    proj.screenAssignments.indices.filter {
-        proj.profileFor(proj.screenAssignments[it])?.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
-    }
 
 internal fun findLottiePresetFile(files: List<File>?, presetLabel: String, presetId: String): File? =
     files?.find { it.nameWithoutExtension == presetLabel || it.nameWithoutExtension == presetId }

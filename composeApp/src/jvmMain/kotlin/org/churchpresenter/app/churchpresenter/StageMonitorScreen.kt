@@ -53,8 +53,8 @@ import org.churchpresenter.strings.generated.resources.unit_bpm
 import org.churchpresenter.strings.generated.resources.Res
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.composables.songInfoOf
-import org.churchpresenter.app.churchpresenter.composables.MetronomeDot
-import org.churchpresenter.app.churchpresenter.composables.toAlignment
+import org.churchpresenter.profiles.MetronomeDot
+import org.churchpresenter.profiles.toAlignment
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import java.time.LocalTime

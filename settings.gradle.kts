@@ -151,6 +151,10 @@ include(":canvas")
 // Lottie bands. Depended on by :composeApp, which keeps the windows and the off-screen outputs.
 include(":presenter")
 
+// The Profiles settings pages -- each output profile's looks, layout, backgrounds and previews -- and the
+// settings row kit every settings page is built from. Depended on by :composeApp.
+include(":profiles")
+
 // The Companion Surface tab and CompanionSatelliteViewModel: the Compose face of
 // :companion-satellite, which stays free of any UI toolkit. Depended on by :composeApp.
 include(":companion-surface")

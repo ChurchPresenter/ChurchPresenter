@@ -50,10 +50,10 @@ import org.churchpresenter.strings.generated.resources.song_folder_with_count
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.composables.ScanningRow
+import org.churchpresenter.profiles.ScanningRow
 import org.churchpresenter.app.churchpresenter.data.SpsConverter
 import org.churchpresenter.app.churchpresenter.dialogs.BibleCatalogBrowserDialog
-import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
+import org.churchpresenter.profiles.FileManager
 import org.churchpresenter.bibleformats.catalog.BibleInstallSupport
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.withInstalledBible

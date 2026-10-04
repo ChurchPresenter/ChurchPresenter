@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
+import org.churchpresenter.profiles.lottieJson
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable

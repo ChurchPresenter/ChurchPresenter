@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.utils
 
+import org.churchpresenter.profiles.isMacOs
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue

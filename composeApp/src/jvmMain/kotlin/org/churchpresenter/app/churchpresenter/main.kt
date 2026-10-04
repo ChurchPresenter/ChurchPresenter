@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
 import androidx.compose.runtime.CompositionLocalProvider
+import org.churchpresenter.profiles.LocalDevelopmentBuild
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,7 +38,6 @@ import org.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
-
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.diagnostics.BuildIdentity
 import org.churchpresenter.diagnostics.CrashReporter
@@ -261,7 +261,10 @@ fun main() {
         // Held above every window so each one -- the main window, Settings, every dialog -- is drawn
         // with the same accent, font and text size, and a change reaches all of them at once.
         var themeCustomization by remember { mutableStateOf(themeCustomizationFrom(startupSettings)) }
-        CompositionLocalProvider(LocalThemeCustomization provides themeCustomization) {
+        CompositionLocalProvider(
+            LocalThemeCustomization provides themeCustomization,
+            LocalDevelopmentBuild provides !BuildConfig.IS_RELEASE,
+        ) {
             ChurchPresenterApp(coroutineExceptionHandler, onThemeCustomizationChange = { themeCustomization = it })
         }
     }
