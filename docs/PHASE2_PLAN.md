@@ -54,23 +54,18 @@ new tests or screenshots, per AGENT.md.
 
 ## Stage 2 leftovers
 
-### Step 1 — The content setters write cues (no visible change)
+### Step 1 — `LiveShow` wired in, and every layer clears on its own (no visible change)
 
-`PresenterManager` becomes the façade over `LiveShow` that `LAYER_MODEL.md` describes.
-
-- Construct one `LiveShow` in `PresenterManager`.
-- `setPresentingMode`, `showOverlay`/`clearOverlay` (`viewmodel/LiveOverlays.kt`) and the clear path
-  call `LiveShow.set`/`clear`.
-- `program` becomes `LiveShow.program`, retiring the `legacyProgram` fold in
-  `viewmodel/LegacyProgram.kt`. `legacyCue` stays as the builder of the cue from each part's state.
-- `PresenterContext.slideMode` is kept only as long as a reader needs it.
-- `OutputLayers` still builds a per-output program for locked or shown modes. It reads
-  `legacyProgram` until the locks themselves become looks (later).
-- Tests:
-  - Existing `LiveShowTest` and `CueTest`.
-  - The `PresenterManagerOverlayTest`/`PreviewBus*` suites stay green.
-  - New mapping tests assert that `pm.program` equals `liveShow.program` after every setter.
-- Benchmark: no regression.
+- `PresenterManager` keeps one `LiveShow` for the layers whose cue is whole on its own (messages,
+  props). The content layers stay derived (`legacyProgram`): their cues come from the displayed
+  state the transitions write, so moving every setter onto `LiveShow` buys nothing this phase needs.
+- `program` = the derived layers with `LiveShow.program` over them. Clearing the display clears
+  `LiveShow` too.
+- `PresenterManager.clearLayer(layer)` clears the slide or media content (leaving the overlays up),
+  one overlay, or one of `LiveShow`'s layers.
+- Remote: `layerForName` replaces `overlayForLayerName`, so `?layer=` also takes `slide`, `media`
+  and `messages`.
+- Tests: `PresenterManagerClearLayerTest`, `LayerNameTest`.
 
 ### Step 2 — Messages (UI → approval)
 

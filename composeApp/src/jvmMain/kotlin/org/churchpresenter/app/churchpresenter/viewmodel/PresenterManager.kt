@@ -9,6 +9,7 @@ import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.liveshow.Cue
 import org.churchpresenter.liveshow.Layer
+import org.churchpresenter.liveshow.LiveShow
 import org.churchpresenter.media.MediaOutput
 import org.churchpresenter.qa.QAOutput
 import org.churchpresenter.settings.AppSettings
@@ -78,15 +79,22 @@ class PresenterManager private constructor(
     val announcementsOutput: AnnouncementsOutput by lazy { PresenterAnnouncementsOutput(this) }
 
     /**
+     * The layers whose cue is held whole rather than derived from one of the parts -- messages and
+     * props (`docs/SHOW_CONTROL.md`). The content layers stay derived until their parts write cues.
+     */
+    internal val liveShow = LiveShow()
+
+    /**
      * What is on air, as the layer model sees it: the slide's content, each of [overlays], and the
-     * content they name ([legacyProgram]). Everything asking what is on screen reads it, through
-     * [liveContent], [slideContent] and [isLive]. An output with a screen lock draws its own mode's
-     * program instead (`OutputLayers`).
+     * content they name ([legacyProgram]), with [liveShow]'s own layers over them. Everything asking
+     * what is on screen reads it, through [liveContent], [slideContent] and [isLive]. An output with
+     * a screen lock draws its own mode's program instead (`OutputLayers`).
      */
     val program: State<Map<Layer, Cue>> = derivedStateOf {
-        overlays.value.fold(legacyProgram(context.slideMode.value, this)) { layers, overlay ->
+        val derived = overlays.value.fold(legacyProgram(context.slideMode.value, this)) { layers, overlay ->
             layers + legacyProgram(overlay, this)
         }
+        derived + liveShow.program.value
     }
 
     /** The content types [program] has on air: the slide's first, then each overlay in the order it went up. */
@@ -155,7 +163,32 @@ class PresenterManager private constructor(
         }
         // Slide content replaces the overlays over it; clearing takes everything down.
         context.overlays.value = emptySet()
-        context.lastLive.value = mode
+        if (mode == Presenting.NONE) liveShow.clearAll()
+        putSlide(mode, lastLive = mode)
+    }
+
+    /**
+     * Takes [layer] off air and leaves every other layer up: the slide or media content, one
+     * overlay, or one of [liveShow]'s layers. A layer with nothing on it is left as it is; the
+     * background follows the slide's content, so it is not cleared on its own.
+     */
+    fun clearLayer(layer: Layer) {
+        when (layer) {
+            Layer.CAPTIONS -> clearOverlay(Presenting.STT)
+            Layer.GRAPHICS -> clearOverlay(Presenting.LOWER_THIRD)
+            Layer.ANNOUNCEMENTS -> clearOverlay(Presenting.ANNOUNCEMENTS)
+            Layer.SLIDE, Layer.MEDIA ->
+                if (program.value[layer]?.content == slideContent.value && slideContent.value != Presenting.NONE) {
+                    putSlide(Presenting.NONE, lastLive = overlays.value.lastOrNull() ?: Presenting.NONE)
+                }
+            Layer.BACKGROUND -> Unit
+            else -> liveShow.clear(layer)
+        }
+    }
+
+    /** Puts [mode] on the slide layers, leaving the overlays as they are, and records [lastLive]. */
+    private fun putSlide(mode: Presenting, lastLive: Presenting) {
+        context.lastLive.value = lastLive
         if (context.slideMode.value != mode) {
             CrashReporter.setTag("presenting", mode.name)
             CrashReporter.breadcrumb("Presenting: ${mode.name}", category = "presenter")

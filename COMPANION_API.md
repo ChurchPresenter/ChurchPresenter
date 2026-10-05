@@ -689,8 +689,10 @@ curl -k -X POST https://192.168.1.10:8765/api/clear
 { "ok": true }
 ```
 
-**Optional query param** — take down one overlay and leave the rest up: `layer=lowerthird`,
-`captions` or `announcements`.
+**Optional query param** — take down one layer and leave the rest up: `layer=slide` (Bible, songs,
+a presentation, a web page, a scene, Q&A or the dictionary), `media` (a video or pictures),
+`lowerthird`, `captions`, `announcements` or `messages`. A layer with nothing on it is left as it is,
+and an unknown name clears nothing.
 
 ```bash
 curl -k -X POST "https://192.168.1.10:8765/api/clear?layer=lowerthird"

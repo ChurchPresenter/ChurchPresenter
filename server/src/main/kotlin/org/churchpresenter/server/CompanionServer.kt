@@ -347,7 +347,7 @@ class CompanionServer(
 
     /**
      * Emitted when a remote client clears one layer: POST /api/clear?layer=... or WS "clear" with a
-     * `layer`. The payload is the layer's name as sent -- see `overlayForLayerName`.
+     * `layer`. The payload is the layer's name as sent -- see `layerForName`.
      */
     val onClearLayer = MutableSharedFlow<String>(
         extraBufferCapacity = 4,

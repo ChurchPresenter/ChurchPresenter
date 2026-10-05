@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.liveshow.Layer
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.sharedui.models.Presenting
 
@@ -36,12 +37,16 @@ internal fun PresenterManager.shownModeFor(profile: OutputProfile, effectiveMode
     if (effectiveMode == slideContent.value) unlockedModeFor(profile) else effectiveMode
 
 /**
- * The overlay a remote client names when it clears one layer -- `POST /api/clear?layer=...` or the
+ * The layer a remote client names when it clears one -- `POST /api/clear?layer=...` or the
  * WebSocket `clear` command's `layer` -- or null for a name that is not one, which clears nothing.
+ * The background follows the slide's content and is not cleared on its own.
  */
-internal fun overlayForLayerName(name: String): Presenting? = when (name.trim().lowercase()) {
-    "lowerthird", "lower_third", "lower-third", "graphics" -> Presenting.LOWER_THIRD
-    "captions", "stt" -> Presenting.STT
-    "announcements", "announcement" -> Presenting.ANNOUNCEMENTS
+internal fun layerForName(name: String): Layer? = when (name.trim().lowercase()) {
+    "lowerthird", "lower_third", "lower-third", "graphics" -> Layer.GRAPHICS
+    "captions", "stt" -> Layer.CAPTIONS
+    "announcements", "announcement" -> Layer.ANNOUNCEMENTS
+    "slide" -> Layer.SLIDE
+    "media" -> Layer.MEDIA
+    "messages", "message" -> Layer.MESSAGES
     else -> null
 }

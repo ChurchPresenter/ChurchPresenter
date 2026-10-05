@@ -1,6 +1,6 @@
 # Design note: show control
 
-Status: **draft, for review**. Phase 2 of `docs/PHASE2_PLAN.md`: the rest of roadmap stage 2
+Status: **approved**. Phase 2 of `docs/PHASE2_PLAN.md`: the rest of roadmap stage 2
 (messages, props, clear groups, `LiveShow` wired in) and stage 3 (cue actions, macros, MIDI/OSC).
 It builds on `docs/LAYER_MODEL.md`, whose layers, cues and Preview/Take it assumes.
 
@@ -26,11 +26,18 @@ nothing happens on screen unless someone clicks:
 
 ### LiveShow as the source of program
 
-`PresenterManager` keeps one `LiveShow`. Every content setter that puts something on air, and
-every clear, goes through `LiveShow.set`/`clear`/`clearAll`; `program` is `LiveShow.program`. The
-`Live*` parts stay as they are, as the state behind each cue (`docs/LAYER_MODEL.md`, "Live
-state"). Nothing on screen changes; it is the prerequisite for every action below, which all speak
-in layers.
+`PresenterManager` keeps one `LiveShow`, and it holds the layers whose cue is whole on its own --
+messages and props. The content layers stay derived from the `Live*` parts (`legacyProgram`): their
+cues are built from the *displayed* state the transitions write, frame by frame, and moving every one
+of those setters onto `LiveShow` buys nothing the actions below need. `program` is the derived layers
+with `LiveShow.program` over them.
+
+Every layer clears on its own through one call, `PresenterManager.clearLayer(layer)`: the slide or
+media content (leaving the overlays up), one overlay, or one of `LiveShow`'s layers. Clearing the
+display clears `LiveShow` too. The background follows the slide's content and is not cleared alone.
+Remote clients reach it through `POST /api/clear?layer=` with `slide`, `media`, `lowerthird`,
+`captions`, `announcements` or `messages`. Nothing on screen changes; it is what every action below
+speaks to.
 
 The Preview bus stays a second `PresenterManager` in this phase. Moving it onto `LiveShow.preview`
 is deferred until something needs it.
@@ -180,7 +187,7 @@ This phase does three things, in order:
 
 Each step shippable on its own, each keeping every existing test green:
 
-1. **`LiveShow` wired in** (no visible change).
+1. **`LiveShow` wired in** for the layers held whole, and `clearLayer` for every layer (no visible change).
 2. **Messages**: cue, renderer, templates, look switch, API, Instance Link layer, panel.
 3. **Props**: the `PROPS` layer, definitions, renderer, panel, API.
 4. **Clear groups**.
