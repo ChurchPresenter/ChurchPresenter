@@ -3,7 +3,7 @@
 ## Context
 
 Phase 1 (layer model, Preview/Take, looks, `presentingMode` retired) is merged to
-`ChurchPresenter/ChurchPresenter` main. The roadmap's execution order (ROADMAP.md on
+`ChurchPresenter/ChurchPresenter` main. The roadmap's execution order (`ROADMAP.md`, formerly on
 `claude/top-tier-roadmap`, stages 2–3) says what comes next. You chose that order over the
 roadmap's "Phase 2 = slides & themes".
 
@@ -35,9 +35,8 @@ EasyWorship import and 2.7 release work. They are listed at the end and are opti
    - `git push origin FETCH_HEAD:refs/heads/main`
    - Verify that main contains the phase-1 commits (`497c3f13` or its merge).
 2. Branch `claude/phase2` cut from that main (done).
-3. Bring `ROADMAP.md` over from `claude/top-tier-roadmap` (it is not on main), so the phase's steps
-   are referenced in-tree.
-4. Write **`docs/SHOW_CONTROL.md`**, a design note in the style of `docs/LAYER_MODEL.md`, reviewed
+3. `ROADMAP.md` brought over from `claude/top-tier-roadmap` (done).
+4. **`docs/SHOW_CONTROL.md`** (drafted, awaiting review), a design note in the style of `docs/LAYER_MODEL.md`, reviewed
    before any code. It covers:
    - Messages: the cue fields (text, template, tokens, duration), and the rule that a message going
      live clears every other layer and goes up alone (decision 7).
@@ -99,9 +98,8 @@ new tests or screenshots, per AGENT.md.
 
 ### Step 3 — Props (UI → approval)
 
-- Graphics holds one cue today. Props are a new `Cue.Props(set)`, or a set beside the lower third.
-  The design note decides; recommended is a **Props sub-stack on Graphics** so a logo bug survives
-  a lower third.
+- Props get a layer of their own, `PROPS` above Graphics, holding one `Cue.Props(on: Set<String>)`.
+  A logo bug then survives a lower third. See `docs/SHOW_CONTROL.md`, decision 2.
 - Kinds: logo/image bug, clock (reuse the announcement clock formatting in
   `viewmodel/LiveAnnouncements.kt`), live badge, countdown badge (reuse the announcement timer
   modes).
