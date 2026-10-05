@@ -57,7 +57,7 @@ class PresenterManager private constructor(
         this(showPresenterWindowInitially, PresenterContext())
 
     init {
-        context.notify = ::notifyLiveStateChanged
+        context.notify = { source -> onLiveStateChanged?.invoke(this, source) }
         context.setPresentingMode = ::setPresentingMode
         context.requestClearDisplay = ::requestClearDisplay
     }
@@ -127,9 +127,6 @@ class PresenterManager private constructor(
      *  a broadcast pair the wrong mode with fresh content, or the right mode with stale content,
      *  whichever setter happened to run first. */
     var onLiveStateChanged: ((PresenterManager, Presenting) -> Unit)? = null
-    private fun notifyLiveStateChanged(source: Presenting) {
-        onLiveStateChanged?.invoke(this, source)
-    }
 
     /** Raised to fade the outputs out before the display is cleared -- see [requestClearDisplay]. */
     val clearDisplayRequested: State<Boolean> = context.clearDisplayRequested
@@ -167,27 +164,8 @@ class PresenterManager private constructor(
         putSlide(mode, lastLive = mode)
     }
 
-    /**
-     * Takes [layer] off air and leaves every other layer up: the slide or media content, one
-     * overlay, or one of [liveShow]'s layers. A layer with nothing on it is left as it is; the
-     * background follows the slide's content, so it is not cleared on its own.
-     */
-    fun clearLayer(layer: Layer) {
-        when (layer) {
-            Layer.CAPTIONS -> clearOverlay(Presenting.STT)
-            Layer.GRAPHICS -> clearOverlay(Presenting.LOWER_THIRD)
-            Layer.ANNOUNCEMENTS -> clearOverlay(Presenting.ANNOUNCEMENTS)
-            Layer.SLIDE, Layer.MEDIA ->
-                if (program.value[layer]?.content == slideContent.value && slideContent.value != Presenting.NONE) {
-                    putSlide(Presenting.NONE, lastLive = overlays.value.lastOrNull() ?: Presenting.NONE)
-                }
-            Layer.BACKGROUND -> Unit
-            else -> liveShow.clear(layer)
-        }
-    }
-
     /** Puts [mode] on the slide layers, leaving the overlays as they are, and records [lastLive]. */
-    private fun putSlide(mode: Presenting, lastLive: Presenting) {
+    internal fun putSlide(mode: Presenting, lastLive: Presenting) {
         context.lastLive.value = lastLive
         if (context.slideMode.value != mode) {
             CrashReporter.setTag("presenting", mode.name)
@@ -206,7 +184,7 @@ class PresenterManager private constructor(
             clearPresentationPlayback()
             slides.clearLiveSlide()
         }
-        notifyLiveStateChanged(mode)
+        context.notify(mode)
     }
 
     /** Request a fade-out before clearing the display. The LaunchedEffect in main.kt

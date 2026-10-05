@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.viewmodel.clearLayer
 import org.churchpresenter.app.churchpresenter.viewmodel.layerForName
 import org.churchpresenter.server.broadcastDisplayCleared
 import org.churchpresenter.server.broadcastSongSectionSelected
