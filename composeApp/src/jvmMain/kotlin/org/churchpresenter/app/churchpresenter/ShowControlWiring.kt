@@ -4,7 +4,22 @@ import org.churchpresenter.app.churchpresenter.remote.AppShowHost
 import org.churchpresenter.app.churchpresenter.remote.ShowOutlets
 import org.churchpresenter.app.churchpresenter.remote.executeProjectItem
 import org.churchpresenter.app.churchpresenter.viewmodel.cuedModeOf
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.churchpresenter.schedule.ActionChoices
+import org.churchpresenter.schedule.CompanionChoice
+import org.churchpresenter.schedule.MessageChoice
+import org.churchpresenter.settings.messageTokens
+import java.io.File
+import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.flow.filter
 import org.churchpresenter.atem.AtemConnectionManager
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.core.models.companion.CompanionSurfaceSlot
 import org.churchpresenter.diagnostics.Log
@@ -23,7 +38,8 @@ internal fun AppRootState.appShowHost(): ShowHost = AppShowHost(
     outlets = ShowOutlets(
         rows = { currentScheduleItems },
         currentRowId = { engineLiveItem?.id ?: selectedScheduleItemId },
-        goLive = this::projectFromCalendar,
+        // A row an action puts live does not run its own actions: two rows naming each other loop.
+        goLive = { item, plays -> projectFromCalendar(item, plays, runActions = false) },
         toPreview = { item ->
             executeProjectItem(
                 item,
@@ -49,6 +65,52 @@ internal fun AppRootState.appShowHost(): ShowHost = AppShowHost(
         log = { Log.warn(SHOW_CONTROL_TAG, it) },
     ),
 )
+
+/**
+ * Runs the [actions] of the schedule row [item] as it reaches the air: now, or -- when it has just
+ * gone to Preview -- on the Take that puts it there. Firing the row again starts them over.
+ */
+internal fun AppRootState.runRowActions(item: ScheduleItem, actions: List<Action>) {
+    if (actions.isEmpty()) return
+    presenterManager.previewBus.onAir(cuedModeOf(item)) { showRunner.run(actions, key = item.id) }
+}
+
+/** Stops the action lists still running -- their waits included -- whenever the outputs are cleared. */
+@Composable
+internal fun MainWindowScope.ShowControlEffects() {
+    LaunchedEffect(root) {
+        snapshotFlow { root.presenterManager.clearDisplayRequested.value }
+            .filter { it }
+            .collect { root.showRunner.cancelAll() }
+    }
+}
+
+/** What the row-action editor offers: the saved things in settings, the lower thirds on disk, OBS and Companion. */
+@Composable
+internal fun MainWindowScope.rememberActionChoices(): ActionChoices {
+    val settings = root.appSettings
+    val folder = settings.streamingSettings.lowerThirdFolder
+    val lowerThirds by produceState(emptyList<String>(), folder) {
+        value = withContext(Dispatchers.IO) { lowerThirdPresetNames(File(folder)) }
+    }
+    val obsScenes = root.obsManager.scenes.value
+    return remember(settings, lowerThirds, obsScenes) {
+        ActionChoices(
+            clearGroups = settings.clearGroups.map { it.name },
+            messages = settings.messageTemplates.map { MessageChoice(it.name, messageTokens(it.text)) },
+            props = settings.props.map { it.name },
+            lowerThirds = lowerThirds,
+            obsScenes = obsScenes,
+            companion = settings.companionSatelliteConnections.map { CompanionChoice(it.id, it.name) },
+            onOpen = root.obsManager::requestScenes,
+        )
+    }
+}
+
+/** The lower-third presets in [folder], by the name a lower-third action runs them by. */
+internal fun lowerThirdPresetNames(folder: File): List<String> =
+    folder.listFiles()?.filter { it.isFile && it.extension.equals("json", ignoreCase = true) }
+        ?.map { it.nameWithoutExtension }?.sorted().orEmpty()
 
 /** Presses the button [press] names on the first surface of its connection that is showing. */
 private fun AppRootState.pressCompanionButton(press: Action.CompanionPress): Boolean {

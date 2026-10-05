@@ -1,5 +1,6 @@
 package org.churchpresenter.schedule
 
+import org.churchpresenter.showcontrol.Action
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -137,7 +138,8 @@ class ScheduleViewModel(
         _liveSince.value = at
     }
 
-    internal val json = Json { prettyPrint = true; encodeDefaults = true }
+    // Fields a newer build adds are skipped, not a reason to read the file as something else.
+    internal val json = Json { prettyPrint = true; encodeDefaults = true; ignoreUnknownKeys = true }
     internal var currentFilePath: String? = null
 
     // ── Undo / Redo ───────────────────────────────────────────────────────────
@@ -146,7 +148,24 @@ class ScheduleViewModel(
         val items: List<ScheduleItem>,
         val notes: Map<String, String>,
         val timing: Map<String, RowTiming>,
+        val actions: Map<String, List<Action>> = emptyMap(),
     )
+
+    /** The rows and everything kept beside them, as they are now -- what undo goes back to. */
+    internal fun snapshot() =
+        ScheduleSnapshot(_scheduleItems.toList(), _notes.toMap(), _timing.toMap(), _actions.toMap())
+
+    /** Puts the rows and everything kept beside them back as [snapshot] has them. */
+    internal fun restore(snapshot: ScheduleSnapshot) {
+        _scheduleItems.clear()
+        _scheduleItems.addAll(snapshot.items)
+        _notes.clear()
+        _notes.putAll(snapshot.notes)
+        _timing.clear()
+        _timing.putAll(snapshot.timing)
+        _actions.clear()
+        _actions.putAll(snapshot.actions)
+    }
 
     internal val undoStack = ArrayDeque<ScheduleSnapshot>()
     internal val redoStack = ArrayDeque<ScheduleSnapshot>()
@@ -161,12 +180,7 @@ class ScheduleViewModel(
      * schedule -- with nothing to undo back to, and remembers [filePath] for the next Save.
      */
     internal fun replaceSchedule(decoded: DecodedSchedule, filePath: String?) {
-        _scheduleItems.clear()
-        _scheduleItems.addAll(decoded.items)
-        _notes.clear()
-        _notes.putAll(decoded.notes)
-        _timing.clear()
-        _timing.putAll(decoded.timing)
+        restore(ScheduleSnapshot(decoded.items, decoded.notes, decoded.timing, decoded.actions))
         currentFilePath = filePath
         undoStack.clear()
         redoStack.clear()
@@ -177,7 +191,7 @@ class ScheduleViewModel(
     }
 
     internal fun pushUndoSnapshot() {
-        undoStack.addLast(ScheduleSnapshot(_scheduleItems.toList(), _notes.toMap(), _timing.toMap()))
+        undoStack.addLast(snapshot())
         if (undoStack.size > MAX_UNDO_DEPTH) undoStack.removeFirst()
         redoStack.clear()
         _canUndo.value = true
@@ -197,6 +211,15 @@ class ScheduleViewModel(
      */
     internal val _timing = mutableStateMapOf<String, RowTiming>()
     val timing: Map<String, RowTiming> get() = _timing
+
+    // ── Actions ───────────────────────────────────────────────────────────────
+
+    /**
+     * What each row does when it goes live, keyed by row id (`docs/SHOW_CONTROL.md`, Cue actions):
+     * show-control actions run in order, beside the content the row puts up.
+     */
+    internal val _actions = mutableStateMapOf<String, List<Action>>()
+    val actions: Map<String, List<Action>> get() = _actions
 
     /**
      * The `HH:mm` start of the planned service this schedule was loaded from, or null.
@@ -223,4 +246,10 @@ class ScheduleViewModel(
      * should know what is doing the measuring.
      */
     var onItemPresented: ((ScheduleItem) -> Unit)? = null
+
+    /**
+     * Called once a row has been put on screen, with the actions it runs when it goes live -- after
+     * its content, so anything that waits for that content to reach the air sees it there.
+     */
+    var onRowActions: ((ScheduleItem, List<Action>) -> Unit)? = null
 }

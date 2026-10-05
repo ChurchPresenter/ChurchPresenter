@@ -106,6 +106,8 @@ internal fun ScheduleRowTitle(
     onPresent: () -> Unit,
     onEditLabel: () -> Unit,
     modifier: Modifier = Modifier,
+    hasActions: Boolean = false,
+    onEditActions: () -> Unit = {},
 ) {
     val isSection = item is ScheduleItem.LabelItem
         Box(modifier = modifier) {
@@ -157,6 +159,8 @@ internal fun ScheduleRowTitle(
                     onRemove = onRemove,
                     onPresent = onPresent,
                     onEditLabel = onEditLabel,
+                    hasActions = hasActions,
+                    onEditActions = onEditActions,
                 )
             }
         }

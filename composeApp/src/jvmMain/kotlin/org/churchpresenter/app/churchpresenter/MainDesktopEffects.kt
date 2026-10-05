@@ -71,6 +71,7 @@ internal fun MainDesktopScope.LeadingEffects() {
 internal fun MainDesktopScope.TrailingEffects() {
     LaunchedEffect(scheduleViewModel) {
         scheduleViewModel.onItemPresented = live.onRowWentLive
+        scheduleViewModel.onRowActions = live.onRowActions
     }
 
     // A clip a cue started belongs on the live output: being handed the row cleared it, and

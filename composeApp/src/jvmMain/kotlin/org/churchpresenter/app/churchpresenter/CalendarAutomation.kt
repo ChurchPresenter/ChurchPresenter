@@ -24,7 +24,7 @@ import org.churchpresenter.app.churchpresenter.remote.withAnnouncement
  * kind of item already has its own notion of a repeat, so it is mapped onto that rather than timed
  * from here.
  */
-internal fun AppRootState.projectFromCalendar(item: ScheduleItem, plays: Int) {
+internal fun AppRootState.projectFromCalendar(item: ScheduleItem, plays: Int, runActions: Boolean = true) {
     // Select it as a click would, so the Schedule shows what is live.
     currentScheduleActions.selectItem(item.id)
     liveDurationLog.wentLive(item)
@@ -58,6 +58,7 @@ internal fun AppRootState.projectFromCalendar(item: ScheduleItem, plays: Int) {
             }
         }
     }
+    if (runActions) runRowActions(item, currentScheduleActions.currentActions()[item.id].orEmpty())
 }
 
 /** Loads a planned service's rows into the Schedule, with their timing and the service's start. */

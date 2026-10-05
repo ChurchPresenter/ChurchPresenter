@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.showcontrol.Action
 import kotlinx.coroutines.flow.Flow
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.InstanceLinkStatus
@@ -36,6 +37,8 @@ data class LiveOutputCallbacks(
     val onLineIndexChanged: (Int) -> Unit = {},
     /** A row the operator put on screen from the Schedule -- timed, so its length can be learnt. */
     val onRowWentLive: (ScheduleItem) -> Unit = {},
+    /** A row put on screen from the Schedule, with the actions it runs as it reaches the air. */
+    val onRowActions: (ScheduleItem, List<Action>) -> Unit = { _, _ -> },
 )
 
 /** The planned service the Schedule works against, from the calendar. */

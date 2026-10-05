@@ -1,6 +1,14 @@
 package org.churchpresenter.schedule
 
 import org.churchpresenter.strings.generated.resources.edit_label
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.text.style.TextOverflow
+import org.churchpresenter.showcontrol.Action
+import org.churchpresenter.strings.generated.resources.tooltip_row_actions
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.calendar.model.RowClock
 import androidx.compose.animation.AnimatedVisibility
@@ -143,7 +151,9 @@ private fun RowScope.ScheduleRowActionButtons(
     onToggleNote: () -> Unit,
     onRemove: () -> Unit,
     onPresent: () -> Unit,
-    onEditLabel: () -> Unit
+    onEditLabel: () -> Unit,
+    hasActions: Boolean = false,
+    onEditActions: () -> Unit = {},
 ) {
     val actionSize = if (isSection) SECTION_ACTION_BUTTON_SIZE else ACTION_BUTTON_SIZE
     val actionIcon = if (isSection) SECTION_ACTION_ICON_SIZE else ACTION_ICON_SIZE
@@ -189,6 +199,18 @@ private fun RowScope.ScheduleRowActionButtons(
         iconTint = if (note.isNotEmpty() || noteExpanded) MaterialTheme.colorScheme.primary
                    else MaterialTheme.colorScheme.onSurfaceVariant
     )
+    if (!isSection) {
+        ScheduleRowActionButton(
+            painter = rememberVectorPainter(Icons.Outlined.Bolt),
+            text = stringResource(Res.string.tooltip_row_actions),
+            onClick = onEditActions,
+            modifier = Modifier.testTag(SCHEDULE_ROW_ACTIONS_BUTTON_TAG),
+            buttonSize = actionSize,
+            iconSize = actionIcon,
+            iconTint = if (hasActions) MaterialTheme.colorScheme.primary
+                       else MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
     if (!removeFirst) removeButton()
 
     if (isSection) {
@@ -231,8 +253,14 @@ internal fun ScheduleItemRow(
     onRemove: () -> Unit,
     onPresent: () -> Unit,
     onEditLabel: () -> Unit = {},
-    onNoteChanged: (String) -> Unit = {}
+    onNoteChanged: (String) -> Unit = {},
+    /** What this row does when it goes live -- see `docs/SHOW_CONTROL.md`, Cue actions. */
+    actions: List<Action> = emptyList(),
+    /** Every row of the schedule, for the actions that name one. */
+    rows: List<ScheduleItem> = emptyList(),
+    onActionsChanged: (List<Action>) -> Unit = {},
 ) {
+    var editingActions by remember(item.id) { mutableStateOf(false) }
     val interactionSource = remember(item.id) { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
     val actionsAlpha by animateFloatAsState(if (hovered) 1f else 0f, label = "scheduleRowActionsAlpha")
@@ -312,6 +340,8 @@ internal fun ScheduleItemRow(
                     onPresent = onPresent,
                     onEditLabel = onEditLabel,
                     modifier = Modifier.weight(1f),
+                    hasActions = actions.isNotEmpty(),
+                    onEditActions = { editingActions = true },
                 )
             }
 
@@ -327,7 +357,13 @@ internal fun ScheduleItemRow(
                     onRemove = onRemove,
                     onPresent = onPresent,
                     onEditLabel = onEditLabel,
+                    hasActions = actions.isNotEmpty(),
+                    onEditActions = { editingActions = true },
                 )
+            }
+
+            if (actions.isNotEmpty()) {
+                ScheduleRowActionsChip(actions, rows, onEdit = { editingActions = true })
             }
 
             if (note.isNotEmpty() && !noteExpanded) {
@@ -346,7 +382,49 @@ internal fun ScheduleItemRow(
 
         ScheduleRowAccent(leftAccent)
     }
+    if (editingActions) {
+        RowActionsDialog(item, actions, rows, onSave = onActionsChanged, onDismiss = { editingActions = false })
+    }
 }
+
+/** What the row does when it goes live, in one line under its title; the pencil opens the editor. */
+@Composable
+private fun ScheduleRowActionsChip(actions: List<Action>, rows: List<ScheduleItem>, onEdit: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag(SCHEDULE_ROW_ACTIONS_CHIP_TAG)
+            .padding(start = 38.dp, end = 8.dp, bottom = 7.dp)
+            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f), AppShape(6.dp))
+            .padding(start = 6.dp, end = 2.dp, top = 2.dp, bottom = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            rememberVectorPainter(Icons.Outlined.Bolt),
+            contentDescription = null,
+            modifier = Modifier.size(12.dp),
+            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
+        Text(
+            text = actions.map { actionSummary(it, rows) }.joinToString("  ·  "),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f).padding(start = 6.dp)
+        )
+        ScheduleRowActionButton(
+            painter = painterResource(IconRes.drawable.ic_edit),
+            text = stringResource(Res.string.tooltip_row_actions),
+            onClick = onEdit,
+            iconSize = 11.dp,
+            iconTint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+        )
+    }
+}
+
+internal const val SCHEDULE_ROW_ACTIONS_BUTTON_TAG = "schedule_row_actions_button"
+internal const val SCHEDULE_ROW_ACTIONS_CHIP_TAG = "schedule_row_actions_chip"
 
 /**
  * The buttons that fade in over the right-hand end of a row while the pointer is on it.
@@ -368,6 +446,8 @@ internal fun BoxScope.ScheduleRowHoverActions(
     onRemove: () -> Unit,
     onPresent: () -> Unit,
     onEditLabel: () -> Unit,
+    hasActions: Boolean = false,
+    onEditActions: () -> Unit = {},
 ) {
 Row(
     modifier = Modifier
@@ -400,7 +480,9 @@ Row(
         onToggleNote = onToggleNote,
         onRemove = onRemove,
         onPresent = onPresent,
-        onEditLabel = onEditLabel
+        onEditLabel = onEditLabel,
+        hasActions = hasActions,
+        onEditActions = onEditActions,
     )
 }
 }
@@ -417,6 +499,8 @@ private fun ScheduleRowLegacyActions(
     onRemove: () -> Unit,
     onPresent: () -> Unit,
     onEditLabel: () -> Unit,
+    hasActions: Boolean = false,
+    onEditActions: () -> Unit = {},
 ) {
     Row(
         modifier = Modifier
@@ -440,7 +524,9 @@ private fun ScheduleRowLegacyActions(
             onToggleNote = onToggleNote,
             onRemove = onRemove,
             onPresent = onPresent,
-            onEditLabel = onEditLabel
+            onEditLabel = onEditLabel,
+            hasActions = hasActions,
+            onEditActions = onEditActions,
         )
     }
 }
