@@ -98,7 +98,8 @@ internal class AppShowHost(
         }
         val text = template?.let { fillMessage(it.text, action.tokens) } ?: action.text
         require(text.isNotBlank()) { "A message needs words" }
-        presenterManager.showMessage(Cue.Message(text, template?.name, action.durationSeconds ?: template?.durationSeconds))
+        val duration = action.durationSeconds ?: template?.durationSeconds
+        presenterManager.showMessage(Cue.Message(text, template?.name, duration))
         presenterManager.setShowPresenterWindow(true)
     }
 
@@ -147,7 +148,8 @@ internal class AppShowHost(
     override suspend fun obsScene(scene: String) = outlets.obsScene(scene)
 
     override suspend fun atemKey(action: Action.AtemKey) = outlets.atem {
-        it.setKeyOnAir(AtemKey(useDsk = action.downstream, mixEffect = action.mixEffect, keyer = action.keyer), action.on)
+        val key = AtemKey(useDsk = action.downstream, mixEffect = action.mixEffect, keyer = action.keyer)
+        it.setKeyOnAir(key, action.on)
     }
 
     override suspend fun atemMacro(index: Int) = outlets.atem { it.runMacro(index) }
