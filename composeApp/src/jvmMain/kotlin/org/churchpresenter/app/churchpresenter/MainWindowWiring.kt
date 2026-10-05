@@ -64,7 +64,7 @@ internal fun MainWindowScope.CalendarAutomationWiring() {
 
         // Nothing is on screen any more, so whatever was is no longer being
         // timed -- see LiveDurationLog.
-        val liveMode = presenterManager.presentingMode.value
+        val liveMode = presenterManager.slideContent.value
         LaunchedEffect(liveMode) {
             if (liveMode == Presenting.NONE) {
                 liveDurationLog.wentBlank()
@@ -120,7 +120,7 @@ internal fun MainWindowScope.ServerCommandWiring() {
                 presenterManager.setSongDisplaySectionIndex(req.section)
                 presenterManager.setSongDisplayLineIndex(remoteSongLineIndex(req.lineIndex))
                 presenterManager.setLyricSection(section)
-                if (shouldSwitchToLyrics(presenterManager.presentingMode.value)) {
+                if (shouldSwitchToLyrics(presenterManager.slideContent.value)) {
                     presenterManager.setPresentingMode(Presenting.LYRICS)
                     presenterManager.setShowPresenterWindow(true)
                 }
@@ -214,7 +214,7 @@ internal fun MainWindowScope.ServerBroadcastWiring() {
         LaunchedEffect(Unit) {
             snapshotFlow { presenterManager.songDisplaySectionIndex.value }
                 .collect { index ->
-                    if (shouldBroadcastSongSection(presenterManager.presentingMode.value)) {
+                    if (shouldBroadcastSongSection(presenterManager.slideContent.value)) {
                         companionServer.broadcastSongSectionSelected(index)
                     }
                 }

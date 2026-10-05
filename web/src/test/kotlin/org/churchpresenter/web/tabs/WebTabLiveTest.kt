@@ -68,7 +68,7 @@ class WebTabLiveTest {
 
         webButton(WebLabel.FOCUS_FIRST_INPUT).performClick()
 
-        assertEquals(Presenting.WEBSITE, presenter.presentingMode.value)
+        assertEquals(Presenting.WEBSITE, presenter.onAir.value)
     }
 
     @Test

@@ -71,8 +71,8 @@ internal fun shouldMainResolveScheduleVerse(
 internal fun shouldMainHandleAutoFollow(
     activeTabIndex: Int,
     bibleTabIndex: Int,
-    presentingMode: Presenting,
-): Boolean = activeTabIndex != bibleTabIndex && presentingMode == Presenting.BIBLE
+    slideContent: Presenting,
+): Boolean = activeTabIndex != bibleTabIndex && slideContent == Presenting.BIBLE
 
 /**
  * The verses to put on screen for a remote "select bible verse" request.

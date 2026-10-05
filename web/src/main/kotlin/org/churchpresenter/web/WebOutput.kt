@@ -14,7 +14,8 @@ import org.churchpresenter.sharedui.models.Presenting
  * into the app, and so a test can hand the tab a fake that records what it was told.
  */
 interface WebOutput {
-    val presentingMode: State<Presenting>
+    /** Whether [mode] is on air, on the slide layers or as an overlay. */
+    fun isLive(mode: Presenting): Boolean
     val websiteUrl: State<String>
     val webPageTitle: State<String>
 

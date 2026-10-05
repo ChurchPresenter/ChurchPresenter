@@ -157,7 +157,7 @@ class RemoteCommandEffectsTest {
     fun `with no remote wired at all nothing is driven`() = runComposeUiTest {
         effects(flows = null)
 
-        assertEquals(Presenting.NONE, presenter.presentingMode.value)
+        assertEquals(Presenting.NONE, presenter.slideContent.value)
         assertTrue(selectedTabs.isEmpty())
         assertNull(presenter.selectedImagePath.value)
     }
@@ -247,7 +247,7 @@ class RemoteCommandEffectsTest {
         emit(flows.selectSlide, "deck" to 4)
 
         assertNull(presenter.selectedSlide.value)
-        assertEquals(Presenting.NONE, presenter.presentingMode.value)
+        assertEquals(Presenting.NONE, presenter.slideContent.value)
     }
 
     @Test
@@ -259,12 +259,12 @@ class RemoteCommandEffectsTest {
         emit(flows.selectSlide, "deck" to 1)
         // The slides are decoded off the main thread, then staged, then the deck goes live -- that
         // last step is the signal the whole selection has landed.
-        waitUntil("the deck went live") { presenter.presentingMode.value == Presenting.PRESENTATION }
+        waitUntil("the deck went live") { presenter.slideContent.value == Presenting.PRESENTATION }
 
         assertEquals(1, presentations.selectedSlideIndex)
         assertNotNull(presenter.nextSlide.value, "and the one after it is staged for the stage monitor")
         assertEquals("", presenter.presenterNotes.value, "a deck with no notes has none to show")
-        assertEquals(Presenting.PRESENTATION, presenter.presentingMode.value)
+        assertEquals(Presenting.PRESENTATION, presenter.slideContent.value)
         assertTrue(presenter.showPresenterWindow.value)
     }
 
@@ -292,7 +292,7 @@ class RemoteCommandEffectsTest {
         waitUntil("the slide decoded") { presenter.selectedSlide.value != null }
 
         assertEquals(0, presentations.selectedSlideIndex)
-        assertEquals(Presenting.PRESENTATION, presenter.presentingMode.value)
+        assertEquals(Presenting.PRESENTATION, presenter.slideContent.value)
         assertFalse(presenter.showPresenterWindow.value, "an already-live deck is not re-opened on screen")
     }
 
@@ -317,7 +317,7 @@ class RemoteCommandEffectsTest {
         emit(flows.selectPicture, "folder-1" to 1)
 
         assertEquals(files[1].absolutePath, presenter.selectedImagePath.value)
-        assertEquals(Presenting.PICTURES, presenter.presentingMode.value)
+        assertEquals(Presenting.PICTURES, presenter.slideContent.value)
         assertTrue(presenter.showPresenterWindow.value)
     }
 
@@ -343,7 +343,7 @@ class RemoteCommandEffectsTest {
         emit(flows.selectPicture, "folder-1" to 1)
 
         assertEquals(files[1].absolutePath, presenter.selectedImagePath.value)
-        assertEquals(Presenting.PICTURES, presenter.presentingMode.value)
+        assertEquals(Presenting.PICTURES, presenter.slideContent.value)
     }
 
     @Test
@@ -354,7 +354,7 @@ class RemoteCommandEffectsTest {
         emit(flows.selectPicture, "folder-1" to 0)
 
         assertNull(presenter.selectedImagePath.value)
-        assertEquals(Presenting.NONE, presenter.presentingMode.value)
+        assertEquals(Presenting.NONE, presenter.slideContent.value)
     }
 
     @Test
@@ -396,7 +396,7 @@ class RemoteCommandEffectsTest {
             ),
         )
 
-        assertEquals(Presenting.BIBLE, presenter.presentingMode.value)
+        assertEquals(Presenting.BIBLE, presenter.slideContent.value)
         assertTrue(presenter.showPresenterWindow.value)
         assertEquals("For God so loved the world", presenter.selectedVerses.value.single().verseText)
     }

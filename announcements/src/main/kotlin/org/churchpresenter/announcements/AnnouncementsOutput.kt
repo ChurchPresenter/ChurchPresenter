@@ -11,7 +11,8 @@ import org.churchpresenter.sharedui.models.Presenting
  * operator is on another tab; the tab only starts, pauses and reads it.
  */
 interface AnnouncementsOutput {
-    val presentingMode: State<Presenting>
+    /** Whether announcements are on air. */
+    val announcementsLive: Boolean
     val screenLocks: State<Map<Int, Presenting>>
 
     /** Seconds left on a countdown, or elapsed on a count-up. */

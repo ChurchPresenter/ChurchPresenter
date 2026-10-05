@@ -42,7 +42,7 @@ class PreviewBusTest {
         lowerThird()
         cueOrSetAnnouncementText(program, "Welcome")
 
-        assertEquals(Presenting.PICTURES, program.presentingMode.value)
+        assertEquals(Presenting.PICTURES, program.slideContent.value)
         assertTrue(program.isLive(Presenting.LOWER_THIRD))
         assertEquals("Welcome", program.announcementText.value)
         assertFalse(preview.anythingLive, "nothing reaches Preview while preview mode is off")
@@ -104,7 +104,7 @@ class PreviewBusTest {
 
         assertTrue(bus.isCued(Presenting.PICTURES))
         assertTrue(slides.picturesCued)
-        assertEquals(Presenting.NONE, program.presentingMode.value)
+        assertEquals(Presenting.NONE, program.slideContent.value)
         assertEquals(picture(folderA, "2.png"), preview.nextImagePath.value)
 
         slides.setSelectedImagePath(picture(folderA, "2.png"))
@@ -137,7 +137,7 @@ class PreviewBusTest {
         bus.present(Presenting.PICTURES)
         program.slidesOutput.setSelectedImagePath(picture(folderB, "1.png"))
         assertEquals(picture(folderB, "1.png"), preview.selectedImagePath.value)
-        assertEquals(Presenting.NONE, program.presentingMode.value)
+        assertEquals(Presenting.NONE, program.slideContent.value)
     }
 
     @Test
@@ -146,16 +146,16 @@ class PreviewBusTest {
         on()
         bus.present(Presenting.PICTURES)
         assertFalse(bus.anythingCued)
-        assertEquals(Presenting.PICTURES, program.presentingMode.value)
+        assertEquals(Presenting.PICTURES, program.slideContent.value)
     }
 
     @Test
     fun `what is not cued yet goes straight to air`() {
         on()
         bus.present(Presenting.MEDIA)
-        assertEquals(Presenting.MEDIA, program.presentingMode.value)
+        assertEquals(Presenting.MEDIA, program.slideContent.value)
         bus.present(Presenting.WEBSITE)
-        assertEquals(Presenting.WEBSITE, program.presentingMode.value)
+        assertEquals(Presenting.WEBSITE, program.slideContent.value)
         assertFalse(bus.anythingCued)
     }
 
@@ -190,7 +190,7 @@ class PreviewBusTest {
     @Test
     fun `off, a song goes straight to air`() {
         songOnAir()
-        assertEquals(Presenting.LYRICS, program.presentingMode.value)
+        assertEquals(Presenting.LYRICS, program.slideContent.value)
         assertEquals("Amazing Grace 0", program.lyricSection.value.lines.single())
         assertFalse(preview.anythingLive)
     }
@@ -201,7 +201,7 @@ class PreviewBusTest {
         songOnAir()
         assertTrue(bus.isCued(Presenting.LYRICS))
         assertEquals("Amazing Grace 0", preview.lyricSection.value.lines.single())
-        assertEquals(Presenting.NONE, program.presentingMode.value)
+        assertEquals(Presenting.NONE, program.slideContent.value)
     }
 
     @Test
@@ -275,7 +275,7 @@ class PreviewBusTest {
     @Test
     fun `off, a verse goes straight to air`() {
         versesOnAir()
-        assertEquals(Presenting.BIBLE, program.presentingMode.value)
+        assertEquals(Presenting.BIBLE, program.slideContent.value)
         assertEquals(listOf(verse()), program.selectedVerses.value)
         assertFalse(preview.anythingLive)
     }
@@ -411,7 +411,7 @@ class PreviewBusTest {
         bus.take()
 
         assertTrue(program.isLive(Presenting.LOWER_THIRD))
-        assertEquals(Presenting.LYRICS, program.presentingMode.value, "an overlay leaves the slide")
+        assertEquals(Presenting.LYRICS, program.slideContent.value, "an overlay leaves the slide")
         assertEquals("Welcome", program.currentLowerThirdName.value)
         assertEquals("{\"nm\":\"Welcome\"}", program.lottieJsonContent.value)
         assertTrue(program.lottiePauseAtFrame.value)
@@ -427,7 +427,7 @@ class PreviewBusTest {
         program.slidesOutput.setSelectedImagePath(picture(folderA, "1.png"))
         program.slidesOutput.setNextImagePath(picture(folderA, "2.png"))
         bus.take()
-        assertEquals(Presenting.PICTURES, program.presentingMode.value)
+        assertEquals(Presenting.PICTURES, program.slideContent.value)
         assertEquals(picture(folderA, "1.png"), program.selectedImagePath.value)
         assertEquals(picture(folderA, "2.png"), program.nextImagePath.value)
         assertFalse(bus.anythingCued)
@@ -442,7 +442,7 @@ class PreviewBusTest {
         preview.setPresentingMode(Presenting.ANNOUNCEMENTS)
         bus.take()
 
-        assertEquals(Presenting.PICTURES, program.presentingMode.value)
+        assertEquals(Presenting.PICTURES, program.slideContent.value)
         assertEquals(
             setOf(Presenting.ANNOUNCEMENTS),
             program.overlays.value,
@@ -458,7 +458,7 @@ class PreviewBusTest {
         bus.take()
         on()
         bus.take()
-        assertEquals(Presenting.BIBLE, program.presentingMode.value)
+        assertEquals(Presenting.BIBLE, program.slideContent.value)
         assertFalse(program.showPresenterWindow.value)
     }
 
@@ -467,7 +467,7 @@ class PreviewBusTest {
         on()
         preview.setPresentingMode(Presenting.MEDIA)
         bus.take()
-        assertEquals(Presenting.NONE, program.presentingMode.value)
+        assertEquals(Presenting.NONE, program.slideContent.value)
         assertFalse(preview.anythingLive)
     }
 

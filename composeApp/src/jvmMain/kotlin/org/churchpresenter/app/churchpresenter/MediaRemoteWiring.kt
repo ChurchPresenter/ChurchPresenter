@@ -32,7 +32,7 @@ internal fun MediaRemoteWiring(
             if (loaded) {
                 companionServer.broadcastMediaState(
                     MediaPlaybackState(
-                        isLive = isMediaLive(presenterManager.presentingMode.value),
+                        isLive = isMediaLive(presenterManager.slideContent.value),
                         isLoaded = true,
                         isPlaying = mediaViewModel.isPlaying,
                         title = mediaViewModel.mediaTitle,

@@ -49,7 +49,7 @@ import androidx.compose.ui.test.performTextReplacement
  * makes them to stand in for that.
  */
 class FakeQAOutput : QAOutput {
-    override val presentingMode = mutableStateOf(Presenting.NONE)
+    override val slideContent = mutableStateOf(Presenting.NONE)
     override val screenLocks = mutableStateOf<Map<Int, Presenting>>(emptyMap())
     val displayedQuestion = mutableStateOf<Question?>(null)
     val showQRCodeOnDisplay = mutableStateOf(false)
@@ -63,7 +63,7 @@ class FakeQAOutput : QAOutput {
     }
 
     fun setPresentingMode(mode: Presenting) {
-        presentingMode.value = mode
+        slideContent.value = mode
     }
 
     fun setScreenLock(screenIndex: Int, mode: Presenting?) {

@@ -12,7 +12,7 @@ import kotlin.test.assertTrue
 /**
  * [PresenterManager] is the single source of truth for what the audience is seeing. Its most
  * subtle contract is the one on `onLiveStateChanged`: each content setter reports the content type
- * it *belongs to*, never the currently-live `presentingMode`. Deriving it from the live mode would
+ * it *belongs to*, never the currently-live `slideContent`. Deriving it from the live mode would
  * let a broadcast pair the wrong mode with fresh content (or the right mode with stale content)
  * depending on which setter happened to run first — and this callback is what drives Instance Link
  * mirroring, so getting it wrong shows the wrong thing on a follower's output.
@@ -31,7 +31,7 @@ class PresenterManagerTest {
     @Test
     fun `a new manager is showing nothing`() {
         val pm = PresenterManager()
-        assertEquals(Presenting.NONE, pm.presentingMode.value)
+        assertEquals(Presenting.NONE, pm.slideContent.value)
         assertFalse(pm.clearDisplayRequested.value)
         assertTrue(pm.screenLocks.value.isEmpty())
         assertTrue(pm.browserSourceLocks.value.isEmpty())
@@ -45,7 +45,7 @@ class PresenterManagerTest {
 
         pm.setPresentingMode(Presenting.BIBLE)
 
-        assertEquals(Presenting.BIBLE, pm.presentingMode.value)
+        assertEquals(Presenting.BIBLE, pm.slideContent.value)
         assertEquals(listOf(Presenting.BIBLE), reported)
         // Going live must leave content visible; the presenter's own fade-in does the animation.
         assertEquals(1f, pm.bibleTransitionAlpha.value)

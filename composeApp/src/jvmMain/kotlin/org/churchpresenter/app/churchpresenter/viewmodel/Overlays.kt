@@ -26,14 +26,14 @@ internal fun OutputProfile.drawsOverContent(overlay: Presenting): Boolean = when
  * newest overlay up that replaces content on this output, or else the slide.
  */
 internal fun PresenterManager.unlockedModeFor(profile: OutputProfile): Presenting =
-    overlays.value.lastOrNull { !profile.drawsOverContent(it) } ?: presentingMode.value
+    overlays.value.lastOrNull { !profile.drawsOverContent(it) } ?: slideContent.value
 
 /**
  * What an output with [profile] shows on its slide layers, given [effectiveMode] -- its screen lock,
  * or the slide's mode when it has none. A lock wins; otherwise [unlockedModeFor] decides.
  */
 internal fun PresenterManager.shownModeFor(profile: OutputProfile, effectiveMode: Presenting): Presenting =
-    if (effectiveMode == presentingMode.value) unlockedModeFor(profile) else effectiveMode
+    if (effectiveMode == slideContent.value) unlockedModeFor(profile) else effectiveMode
 
 /**
  * The overlay a remote client names when it clears one layer -- `POST /api/clear?layer=...` or the

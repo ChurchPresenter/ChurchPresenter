@@ -94,7 +94,7 @@ internal fun MediaTabScope.MediaTabEffects(
             // the mode is already MEDIA. Presenting a media row from the schedule sets the mode in
             // the same handler that sets the item, so this effect always found itself "already
             // live", always blanked, and nothing ever turned it back on. (#602)
-            val wasLive = presenterManager?.presentingMode?.value == Presenting.MEDIA
+            val wasLive = presenterManager?.isLive(Presenting.MEDIA) == true
             if (wasLive) presenterManager.requestClearDisplay()
             when (it.mediaType) {
                 Constants.MEDIA_TYPE_URL -> { selectedSourceType = Constants.MEDIA_TYPE_URL; urlInput = it.mediaUrl }

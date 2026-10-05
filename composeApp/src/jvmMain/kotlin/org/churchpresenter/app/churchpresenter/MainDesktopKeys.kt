@@ -42,7 +42,7 @@ internal fun MainDesktopScope.handleMainDesktopKey(keyEvent: KeyEvent): Boolean 
     if (keyEvent.type != KeyEventType.KeyDown) return false
     val shortcutTab = shortcuts.actionFor(keyEvent, ShortcutScope.GLOBAL)?.targetTab
     val quickBackgroundSlot = quickBackgroundSlotFor(shortcuts, keyEvent)
-    val live = presentingMode == Presenting.PRESENTATION
+    val live = slideContent == Presenting.PRESENTATION
     return when {
         shortcuts.matches(ShortcutAction.REDO, keyEvent) -> {
             scheduleViewModel.redo(); true

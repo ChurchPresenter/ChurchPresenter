@@ -60,7 +60,7 @@ class QATabTest {
             assertEquals(QuestionStatus.APPROVED, qa.questions.single().status)
             // Approving is the moderator saying "this may be asked", not "show it now" — the
             // congregation must not see a question the moment it is cleared.
-            assertFalse(presenter.presentingMode.value == Presenting.QA, "nothing was displayed")
+            assertFalse(presenter.slideContent.value == Presenting.QA, "nothing was displayed")
             assertEquals(null, qa.displayedQuestion)
         }
 

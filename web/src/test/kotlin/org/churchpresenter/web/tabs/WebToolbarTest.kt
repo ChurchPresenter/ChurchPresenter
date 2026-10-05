@@ -84,7 +84,7 @@ class WebToolbarTest {
         webButton(WebLabel.GO_LIVE).assertIsEnabled().performClick()
         waitForIdle()
 
-        assertEquals(Presenting.WEBSITE, presenter.presentingMode.value)
+        assertEquals(Presenting.WEBSITE, presenter.onAir.value)
         assertEquals("https://example.com", presenter.websiteUrl.value)
     }
 

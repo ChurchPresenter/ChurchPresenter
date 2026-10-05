@@ -79,7 +79,7 @@ class ApplyRemoteLiveStateTest {
 
         // This is the one case that returns *before* switching mode: an unknown type cannot be
         // rendered, so a follower on an older build holds what it has rather than blanking.
-        assertEquals(Presenting.LYRICS, presenter.presentingMode.value)
+        assertEquals(Presenting.LYRICS, presenter.slideContent.value)
     }
 
     // ── Lyrics ──────────────────────────────────────────────────────────────────
@@ -105,14 +105,14 @@ class ApplyRemoteLiveStateTest {
         // The indices are what keep the overflow room on the same line as the auditorium.
         assertEquals(2, presenter.songDisplaySectionIndex.value)
         assertEquals(1, presenter.songDisplayLineIndex.value)
-        assertEquals(Presenting.LYRICS, presenter.presentingMode.value)
+        assertEquals(Presenting.LYRICS, presenter.slideContent.value)
     }
 
     @Test
     fun `a song with no title switches mode but shows nothing`() {
         val presenter = apply(LiveStateDto(contentType = "LYRICS"))
 
-        assertEquals(Presenting.LYRICS, presenter.presentingMode.value, "the mode still switches")
+        assertEquals(Presenting.LYRICS, presenter.slideContent.value, "the mode still switches")
         assertEquals("", presenter.lyricSection.value.title, "but there is nothing to put up")
     }
 
@@ -157,7 +157,7 @@ class ApplyRemoteLiveStateTest {
 
         assertEquals("https://example.org/notices", presenter.websiteUrl.value)
         assertEquals("Notices", presenter.webPageTitle.value)
-        assertEquals(Presenting.WEBSITE, presenter.presentingMode.value)
+        assertEquals(Presenting.WEBSITE, presenter.slideContent.value)
     }
 
     @Test
@@ -190,7 +190,7 @@ class ApplyRemoteLiveStateTest {
         )
 
         assertEquals("scene-1", presenter.activeScene.value?.id)
-        assertEquals(Presenting.CANVAS, presenter.presentingMode.value)
+        assertEquals(Presenting.CANVAS, presenter.slideContent.value)
     }
 
     @Test
@@ -203,7 +203,7 @@ class ApplyRemoteLiveStateTest {
         // Canvas mirrors by id — scene content is not fetchable over the link — so a follower whose
         // scenes.json differs simply has nothing to show. It must not activate the wrong scene.
         assertNull(presenter.activeScene.value)
-        assertEquals(Presenting.CANVAS, presenter.presentingMode.value)
+        assertEquals(Presenting.CANVAS, presenter.slideContent.value)
     }
 
     @Test
@@ -229,7 +229,7 @@ class ApplyRemoteLiveStateTest {
 
         assertEquals("q1", presenter.displayedQuestion.value?.id)
         assertEquals("How do I join a group?", presenter.displayedQuestion.value?.text)
-        assertEquals(Presenting.QA, presenter.presentingMode.value)
+        assertEquals(Presenting.QA, presenter.slideContent.value)
     }
 
     @Test
@@ -252,7 +252,7 @@ class ApplyRemoteLiveStateTest {
 
         assertEquals("G5485", presenter.displayedDictionaryEntry.value?.number)
         assertEquals("χάρις", presenter.displayedDictionaryEntry.value?.word)
-        assertEquals(Presenting.DICTIONARY, presenter.presentingMode.value)
+        assertEquals(Presenting.DICTIONARY, presenter.slideContent.value)
     }
 
     @Test
@@ -269,7 +269,7 @@ class ApplyRemoteLiveStateTest {
         val presenter = apply(LiveStateDto(contentType = "DICTIONARY"))
 
         assertNull(presenter.displayedDictionaryEntry.value)
-        assertEquals(Presenting.DICTIONARY, presenter.presentingMode.value)
+        assertEquals(Presenting.DICTIONARY, presenter.slideContent.value)
     }
 
     // ── Modes with no feed to mirror ────────────────────────────────────────────
@@ -306,7 +306,7 @@ class ApplyRemoteLiveStateTest {
         // callback rather than driven from here.
         assertTrue(played.isNotEmpty(), "a url must reach the local player")
         assertEquals("https://example.org/clip.mp4", played.first().first)
-        assertEquals(Presenting.MEDIA, presenter.presentingMode.value)
+        assertEquals(Presenting.MEDIA, presenter.slideContent.value)
     }
 
     @Test
@@ -344,7 +344,7 @@ class ApplyRemoteLiveStateTest {
         assertEquals(16, verse.verseNumber)
         assertEquals("For God so loved the world.", verse.verseText)
         assertEquals("16-17", verse.verseRange)
-        assertEquals(Presenting.BIBLE, presenter.presentingMode.value)
+        assertEquals(Presenting.BIBLE, presenter.slideContent.value)
     }
 
     @Test
@@ -364,7 +364,7 @@ class ApplyRemoteLiveStateTest {
         val presenter = apply(LiveStateDto(contentType = "BIBLE"))
 
         assertTrue(presenter.selectedVerses.value.isEmpty())
-        assertEquals(Presenting.BIBLE, presenter.presentingMode.value)
+        assertEquals(Presenting.BIBLE, presenter.slideContent.value)
     }
 
     @Test
@@ -378,7 +378,7 @@ class ApplyRemoteLiveStateTest {
             onPlayRemoteMedia = null,
         )
 
-        assertEquals(Presenting.MEDIA, presenter.presentingMode.value)
+        assertEquals(Presenting.MEDIA, presenter.slideContent.value)
         assertEquals("", presenter.currentMediaUrl.value)
     }
 
@@ -407,6 +407,6 @@ class ApplyRemoteLiveStateTest {
         )
 
         assertTrue(played.isEmpty())
-        assertEquals(Presenting.MEDIA, presenter.presentingMode.value)
+        assertEquals(Presenting.MEDIA, presenter.slideContent.value)
     }
 }

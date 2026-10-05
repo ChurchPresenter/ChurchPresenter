@@ -178,7 +178,7 @@ class PresentationTabControlsTest {
             }
             waitForIdle()
 
-            assertEquals(Presenting.PRESENTATION, presenter.presentingMode.value)
+            assertEquals(Presenting.PRESENTATION, presenter.onAir.value)
             assertTrue(presenter.showPresenterWindow.value)
         }
     }

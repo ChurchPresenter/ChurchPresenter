@@ -35,26 +35,26 @@ class RemoteLayersTest {
     @Test
     fun `an older primary's change goes live as it always did`() {
         followAir(state(Presenting.BIBLE), Presenting.BIBLE, follower, everything)
-        assertEquals(Presenting.BIBLE, follower.presentingMode.value)
+        assertEquals(Presenting.BIBLE, follower.slideContent.value)
     }
 
     @Test
     fun `an older primary's change on a layer not followed is left alone`() {
         followAir(state(Presenting.BIBLE), Presenting.BIBLE, follower) { it != Presenting.BIBLE }
-        assertEquals(Presenting.NONE, follower.presentingMode.value)
+        assertEquals(Presenting.NONE, follower.slideContent.value)
     }
 
     @Test
     fun `the primary's slide goes live when this change is the slide's`() {
         followAir(state(Presenting.LYRICS, Presenting.LYRICS, emptyList()), Presenting.LYRICS, follower, everything)
-        assertEquals(Presenting.LYRICS, follower.presentingMode.value)
+        assertEquals(Presenting.LYRICS, follower.slideContent.value)
     }
 
     @Test
     fun `content the primary is not showing does not go live`() {
         follower.setPresentingMode(Presenting.BIBLE)
         followAir(state(Presenting.LYRICS, Presenting.BIBLE, emptyList()), Presenting.LYRICS, follower, everything)
-        assertEquals(Presenting.BIBLE, follower.presentingMode.value)
+        assertEquals(Presenting.BIBLE, follower.slideContent.value)
     }
 
     @Test
@@ -62,7 +62,7 @@ class RemoteLayersTest {
         follower.setPresentingMode(Presenting.BIBLE)
         val up = state(Presenting.LOWER_THIRD, Presenting.BIBLE, listOf(Presenting.LOWER_THIRD))
         followAir(up, Presenting.LOWER_THIRD, follower, everything)
-        assertEquals(Presenting.BIBLE, follower.presentingMode.value)
+        assertEquals(Presenting.BIBLE, follower.slideContent.value)
         assertEquals(setOf(Presenting.LOWER_THIRD), follower.overlays.value)
     }
 
@@ -74,7 +74,7 @@ class RemoteLayersTest {
         val after = state(Presenting.BIBLE, Presenting.BIBLE, listOf(Presenting.STT))
         followAir(after, Presenting.BIBLE, follower, everything)
         assertEquals(setOf(Presenting.STT), follower.overlays.value)
-        assertEquals(Presenting.BIBLE, follower.presentingMode.value)
+        assertEquals(Presenting.BIBLE, follower.slideContent.value)
     }
 
     @Test

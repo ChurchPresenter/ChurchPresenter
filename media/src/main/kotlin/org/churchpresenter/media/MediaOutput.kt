@@ -4,7 +4,8 @@ import androidx.compose.runtime.State
 import org.churchpresenter.sharedui.models.Presenting
 
 interface MediaOutput {
-    val presentingMode: State<Presenting>
+    /** Whether [mode] is on air, on the slide layers or as an overlay. */
+    fun isLive(mode: Presenting): Boolean
     val showPresenterWindow: State<Boolean>
     fun setPresentingMode(mode: Presenting)
     fun setShowPresenterWindow(show: Boolean)

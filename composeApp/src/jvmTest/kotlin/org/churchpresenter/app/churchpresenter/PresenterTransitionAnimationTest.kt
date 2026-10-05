@@ -277,7 +277,7 @@ class PresenterTransitionAnimationTest {
 
         manager.requestClearDisplay()
 
-        waitUntil("the clear ran") { manager.presentingMode.value == Presenting.NONE }
+        waitUntil("the clear ran") { manager.slideContent.value == Presenting.NONE }
         assertEquals(1f, manager.bibleTransitionAlpha.value)
     }
 
@@ -291,7 +291,7 @@ class PresenterTransitionAnimationTest {
 
         manager.requestClearDisplay()
 
-        waitUntil("the clear ran") { manager.presentingMode.value == Presenting.NONE }
+        waitUntil("the clear ran") { manager.slideContent.value == Presenting.NONE }
         assertEquals(1f, manager.bibleTransitionAlpha.value)
     }
 
@@ -315,7 +315,7 @@ class PresenterTransitionAnimationTest {
 
         manager.requestClearDisplay()
 
-        waitUntil("the clear ran") { manager.presentingMode.value == Presenting.NONE }
+        waitUntil("the clear ran") { manager.slideContent.value == Presenting.NONE }
         assertEquals(1f, manager.pictureTransitionAlpha.value)
     }
 

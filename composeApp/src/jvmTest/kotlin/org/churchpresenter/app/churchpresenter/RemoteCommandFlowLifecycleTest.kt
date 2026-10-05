@@ -196,7 +196,7 @@ class RemoteCommandFlowLifecycleTest {
         compose({ Wired(selectPicture = flowOf("elsewhere" to 1)) }, resolve = { _, i -> other[i] })
 
         assertEquals(other[1].absolutePath, presenter.selectedImagePath.value)
-        assertEquals(Presenting.PICTURES, presenter.presentingMode.value)
+        assertEquals(Presenting.PICTURES, presenter.slideContent.value)
         assertEquals(File(dir, "uploads").absolutePath, pictures.selectedFolder?.absolutePath)
     }
 
@@ -218,7 +218,7 @@ class RemoteCommandFlowLifecycleTest {
         pictures.selectFolder(File(dir, "loaded"))
         compose({ Wired(selectPicture = flowOf("any" to 4)) }, resolve = { _, _ -> null })
 
-        assertEquals(Presenting.NONE, presenter.presentingMode.value)
+        assertEquals(Presenting.NONE, presenter.slideContent.value)
     }
 
     @Test
@@ -237,7 +237,7 @@ class RemoteCommandFlowLifecycleTest {
             statistics = statistics,
         )
 
-        assertEquals(Presenting.BIBLE, presenter.presentingMode.value)
+        assertEquals(Presenting.BIBLE, presenter.slideContent.value)
         assertTrue(statistics.getAllVersesInRange(0L, Long.MAX_VALUE).isNotEmpty())
     }
 
@@ -245,6 +245,6 @@ class RemoteCommandFlowLifecycleTest {
     fun `a remote verse with no statistics manager still goes live`() = runComposeUiTest {
         compose({ Wired(verse = flowOf(SelectBibleVerseRequest(bookName = "John", chapter = 3, verseNumber = 16))) })
 
-        assertEquals(Presenting.BIBLE, presenter.presentingMode.value)
+        assertEquals(Presenting.BIBLE, presenter.slideContent.value)
     }
 }

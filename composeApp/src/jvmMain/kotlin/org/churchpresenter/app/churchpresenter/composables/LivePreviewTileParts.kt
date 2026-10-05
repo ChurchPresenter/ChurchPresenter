@@ -69,7 +69,7 @@ internal fun PreviewStageMonitor(
     effectiveMode: Presenting,
     transposeSteps: Int,
 ) {
-    val presentingMode by presenterManager.presentingMode
+    val slideContent by presenterManager.slideContent
     val displayedVerses by presenterManager.displayedVerses
     val nextVerses by presenterManager.nextVerses
     val displayedLyricSection by presenterManager.displayedLyricSection
@@ -84,7 +84,7 @@ internal fun PreviewStageMonitor(
     ScaledPresenterContent(output = outputSize) {
         StageMonitorScreen(
             sm = outputSettings.stageMonitorSettings,
-            presentingMode = presentingMode,
+            slideContent = slideContent,
             showChords = profile.showChords,
             transposeSteps = transposeSteps,
             announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS ||

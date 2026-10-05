@@ -13,7 +13,7 @@ import kotlin.test.assertTrue
 /**
  * Which tab a remotely-projected item asks to load its content.
  *
- * `executeProjectItem` adds the item to the schedule and flips `presentingMode`, but deliberately
+ * `executeProjectItem` adds the item to the schedule and flips `slideContent`, but deliberately
  * does not push picture or slide content itself — the owning tab does, driven by these flows. A type
  * missing from the dispatch therefore goes live as an **empty screen**: the mode changes and nothing
  * loads. That is the failure these tests exist to catch, and it is silent.

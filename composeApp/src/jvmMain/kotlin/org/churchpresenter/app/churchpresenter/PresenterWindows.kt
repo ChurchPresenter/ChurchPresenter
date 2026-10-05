@@ -86,7 +86,7 @@ internal fun PresenterWindows(
     },
 ) {
     val showPresenterWindow by presenterManager.showPresenterWindow
-    val presentingMode by presenterManager.presentingMode
+    val slideContent by presenterManager.slideContent
     val screenLocks by presenterManager.screenLocks
     val selectedVerses by presenterManager.selectedVerses
     val displayedVerses by presenterManager.displayedVerses
@@ -167,7 +167,7 @@ internal fun PresenterWindows(
             outputKey = outputKey,
             merge = merges[outputKey],
             // Every tile of one picture shows what its first output shows, lock and all.
-            effectiveMode = presenterManager.screenSlotMode(profile, screenLocks, merges, slotIndex, presentingMode),
+            effectiveMode = presenterManager.screenSlotMode(profile, screenLocks, merges, slotIndex, slideContent),
         )
 
         when {
@@ -344,11 +344,11 @@ private fun PresenterManager.screenSlotMode(
     screenLocks: Map<Int, Presenting>,
     merges: Map<String, ResolvedMerge>,
     slotIndex: Int,
-    presentingMode: Presenting,
+    slideContent: Presenting,
 ): Presenting = shownModeFor(
     profile,
     effectiveOutputMode(
-        screenLocks, mergeHostIndex(merges, Constants.PREVIEW_OUTPUT_SCREEN, slotIndex), presentingMode,
+        screenLocks, mergeHostIndex(merges, Constants.PREVIEW_OUTPUT_SCREEN, slotIndex), slideContent,
     ),
 )
 

@@ -261,7 +261,7 @@ class MediaTabPlaybackTest {
             mediaButton(MediaLabel.GO_LIVE).performClick()
             waitForIdle()
 
-            assertEquals(Presenting.MEDIA, presenter.presentingMode.value)
+            assertEquals(Presenting.MEDIA, presenter.onAir.value)
             val item = sent.single() as ScheduleItem.MediaItem
             assertEquals(vm.mediaUrl, item.mediaUrl)
             assertEquals(vm.mediaType, item.mediaType)

@@ -77,7 +77,7 @@ class PicturesViewModelEdgeTest {
     fun `go live with nothing open puts nothing on the output`() {
         val output = FakeSlidesOutput()
         vm(open = null).goLive(output)
-        assertEquals(Presenting.NONE, output.presentingMode.value)
+        assertEquals(Presenting.NONE, output.onAir.value)
         assertNull(output.selectedImagePath.value)
     }
 

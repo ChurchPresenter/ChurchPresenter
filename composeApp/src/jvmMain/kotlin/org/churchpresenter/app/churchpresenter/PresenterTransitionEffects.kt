@@ -50,7 +50,7 @@ internal fun PresenterTransitionEffects(
 // A null template means the classic band and the code it had.
 val bibleTemplate by rememberBibleLottieTemplate(lottieBandPath(appSettings, Presenting.BIBLE).orEmpty())
 val songTemplate by rememberBibleLottieTemplate(lottieBandPath(appSettings, Presenting.LYRICS).orEmpty())
-val presentingMode by presenterManager.presentingMode
+val slideContent by presenterManager.slideContent
 // Whether the selected line is part of what the song band shows. Outside line mode the band draws
 // the whole section, so picking a different line changes nothing on the output — and a swap driven
 // by it crossfades the section to an identical copy of itself.
@@ -64,11 +64,11 @@ fun templateFor(mode: Presenting): BibleLottieTemplate? = when (mode) {
 
 val clearRequested by presenterManager.clearDisplayRequested
 LaunchedEffect(clearRequested) {
-    if (clearRequested) clearDisplay(presenterManager, appSettings, templateFor(presenterManager.presentingMode.value))
+    if (clearRequested) clearDisplay(presenterManager, appSettings, templateFor(presenterManager.slideContent.value))
 }
 
-LaunchedEffect(presentingMode, bibleTemplate, songTemplate) {
-    val template = templateFor(presentingMode)
+LaunchedEffect(slideContent, bibleTemplate, songTemplate) {
+    val template = templateFor(slideContent)
     if (template == null) {
         // A screen locked to the content keeps its band up while the rest of the outputs move on.
         val locks = presenterManager.screenLocks.value
@@ -77,7 +77,7 @@ LaunchedEffect(presentingMode, bibleTemplate, songTemplate) {
         if (!anyBandLocked) presenterManager.setLottieBandClock(BibleBandClock(BibleBandPhase.IDLE, 0f))
         return@LaunchedEffect
     }
-    when (presentingMode) {
+    when (slideContent) {
         Presenting.BIBLE -> {
             presenterManager.setDisplayedVerses(presenterManager.selectedVerses.value)
             presenterManager.setBibleTransitionAlpha(1f)
@@ -336,7 +336,7 @@ private suspend fun clearDisplay(
     appSettings: AppSettings,
     template: BibleLottieTemplate?,
 ) {
-    val mode = presenterManager.presentingMode.value
+    val mode = presenterManager.slideContent.value
     val modeIsLocked = isAnyScreenLockedTo(presenterManager.screenLocks.value, mode)
     // The fade is one clock for every output, so it follows the profile the main window does.
     val operatorBible = appSettings.operatorBibleSettings()

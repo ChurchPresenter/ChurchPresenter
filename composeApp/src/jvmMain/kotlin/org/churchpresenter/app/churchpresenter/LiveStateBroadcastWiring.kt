@@ -85,7 +85,7 @@ internal fun LiveStateBroadcastWiring(
                     verseCode = verseCode,
                     songSectionIndex = livePositionOrNull(source, Presenting.LYRICS, pm.songDisplaySectionIndex.value),
                     songLineIndex = livePositionOrNull(source, Presenting.LYRICS, pm.songDisplayLineIndex.value),
-                    liveSlide = pm.presentingMode.value.name,
+                    liveSlide = pm.slideContent.value.name,
                     overlays = pm.overlays.value.map { it.name },
                 ),
             )
@@ -109,7 +109,7 @@ internal fun liveHistoryEntryOf(
     verseCode: Triple<Int, Int, Int>?,
     source: Presenting = pm.lastLive.value,
 ): LiveHistoryEntry {
-    val mode = if (source.isOverlay && pm.isLive(source)) source else pm.presentingMode.value
+    val mode = if (source.isOverlay && pm.isLive(source)) source else pm.slideContent.value
     val none = LiveHistoryEntry(Presenting.NONE.name)
     return when (mode) {
         Presenting.LYRICS -> {

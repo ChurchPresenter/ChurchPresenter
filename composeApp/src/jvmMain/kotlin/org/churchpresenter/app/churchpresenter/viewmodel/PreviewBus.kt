@@ -156,7 +156,7 @@ class PreviewBus internal constructor(internal val program: PresenterManager) {
      */
     fun take() {
         if (!anythingCued) return
-        val slide = manager.presentingMode.value
+        val slide = manager.slideContent.value
         if (slide != Presenting.NONE) putOnAir(slide, from = manager, to = program)
         manager.overlays.value.forEach { putOnAir(it, from = manager, to = program) }
         // What was taken is on air now, so its next verse or section is a step there.

@@ -19,8 +19,8 @@ import java.io.File
  * nobody asked for. And the index has to be a slide that exists, which it is not at either end of
  * the deck once `nextSlide`/`previousSlide` has clamped, or before a deck is loaded at all.
  */
-internal fun shouldPushSlide(presentingMode: Presenting, selectedIndex: Int, slideCount: Int): Boolean =
-    presentingMode == Presenting.PRESENTATION && selectedIndex in 0 until slideCount
+internal fun shouldPushSlide(slideContent: Presenting, selectedIndex: Int, slideCount: Int): Boolean =
+    slideContent == Presenting.PRESENTATION && selectedIndex in 0 until slideCount
 
 /**
  * The current slide and the one after it, decoded for the presenter and the stage monitor.
@@ -71,8 +71,8 @@ internal fun shouldPublishPresentation(
  * Whether a slide chosen remotely has to take the output as well as move the selection. Only when
  * something else is live — a presentation already on screen just changes slide.
  */
-internal fun shouldTakePresentationLive(presentingMode: Presenting): Boolean =
-    presentingMode != Presenting.PRESENTATION
+internal fun shouldTakePresentationLive(slideContent: Presenting): Boolean =
+    slideContent != Presenting.PRESENTATION
 
 /** The speaker notes for a slide, or none — a deck may carry fewer notes than slides. */
 internal fun presenterNotesAt(notes: List<String>, index: Int): String = notes.getOrElse(index) { "" }

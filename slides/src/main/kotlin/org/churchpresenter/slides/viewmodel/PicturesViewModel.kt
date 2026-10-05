@@ -178,10 +178,10 @@ class PicturesViewModel private constructor(
      * an identity for [selectedFolder], never a path to read from.
      * [presenterManager] — when non-null, explicitly re-synced after every downloaded image (not
      * just once): images arrive one at a time here (unlike the synchronous local-folder path), and
-     * PicturesTab's own reactive sync effect only restarts on selectedImageIndex/presentingMode
-     * changes, so without this the presenter could be left showing nothing if presentingMode was
-     * already PICTURES (e.g. a second remote item clicked while one was already live) and the
-     * currently-selected index's bytes hadn't arrived yet when that effect last ran.
+     * PicturesTab's own reactive sync effect only restarts on selectedImageIndex changes, so
+     * without this the presenter could be left showing nothing if pictures were already on air
+     * (e.g. a second remote item clicked while one was already live) and the currently-selected
+     * index's bytes hadn't arrived yet when that effect last ran.
      */
     fun loadPictureFromRemote(
         folderId: String,

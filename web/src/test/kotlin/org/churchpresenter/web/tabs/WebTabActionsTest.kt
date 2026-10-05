@@ -198,7 +198,7 @@ class WebTabActionsTest {
         val s = scope().apply { urlInput = "a.org" }
         s.goLive()
 
-        assertEquals(Presenting.WEBSITE, output.presentingMode.value)
+        assertEquals(Presenting.WEBSITE, output.onAir.value)
         assertEquals("https://a.org", output.websiteUrl.value)
         assertEquals("https://a.org", s.urlInput)
     }

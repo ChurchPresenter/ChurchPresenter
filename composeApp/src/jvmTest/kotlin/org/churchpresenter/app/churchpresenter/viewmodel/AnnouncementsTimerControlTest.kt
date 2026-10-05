@@ -337,7 +337,7 @@ class AnnouncementsTimerControlTest {
         vm.saveToSettings { transform -> saved = transform(saved) }
 
         assertEquals("Draft", saved.announcementsSettings.text)
-        assertEquals(Presenting.NONE, pm.presentingMode.value)
+        assertEquals(Presenting.NONE, pm.slideContent.value)
     }
 
     // ── Timer formatting ────────────────────────────────────────────────────────

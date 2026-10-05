@@ -76,7 +76,7 @@ internal class MainDesktopScope(
     // Clamp synchronously so no composition pass ever sees an out-of-bounds index.
     val effectiveTabIndex get() = clampedTabIndex(state.selectedTabIndex, visibleTabs)
     val currentTab get() = visibleTabs[effectiveTabIndex]
-    val presentingMode: Presenting get() = presenterManager.presentingMode.value
+    val slideContent: Presenting get() = presenterManager.slideContent.value
     val mainFocusRequester = state.mainFocusRequester
 
     val picturesViewModel = owned.vms.picturesViewModel
@@ -103,7 +103,7 @@ internal class MainDesktopScope(
     suspend fun pushCurrentSlideIfLive() {
         val index = presentationViewModel.selectedSlideIndex
         val slideCount = presentationViewModel.slideFiles.size
-        if (!shouldPushSlide(presenterManager.presentingMode.value, index, slideCount)) return
+        if (!shouldPushSlide(presenterManager.slideContent.value, index, slideCount)) return
         val (bitmap, nextBitmap) = decodeSlideBitmaps(
             presentationViewModel.slideFiles,
             index,

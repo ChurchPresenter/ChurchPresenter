@@ -45,10 +45,10 @@ internal fun canDisconnectInstanceLink(status: InstanceLinkStatus): Boolean =
  * index the tab already sits on would write the selection back over itself on every emission.
  */
 internal fun shouldFollowRemoteSection(
-    presentingMode: Presenting,
+    slideContent: Presenting,
     selectedSectionIndex: Int,
     incomingSectionIndex: Int,
-): Boolean = presentingMode == Presenting.LYRICS && selectedSectionIndex != incomingSectionIndex
+): Boolean = slideContent == Presenting.LYRICS && selectedSectionIndex != incomingSectionIndex
 
 internal fun stableFileId(file: File): String = file.absolutePath.hashCode().toUInt().toString(HEX_RADIX)
 

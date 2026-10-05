@@ -204,7 +204,7 @@ private fun PicturesEffects(
     }
 
     // Sync presenter image when selection or presenting mode changes
-    LaunchedEffect(viewModel.selectedImageIndex, presenterManager?.presentingMode) {
+    LaunchedEffect(viewModel.selectedImageIndex, presenterManager) {
         presenterManager?.let { viewModel.syncWithPresenter(it) }
     }
 

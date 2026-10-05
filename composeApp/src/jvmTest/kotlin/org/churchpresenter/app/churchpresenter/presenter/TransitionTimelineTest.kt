@@ -327,7 +327,7 @@ class TransitionTimelineTest {
             manager.setPresentingMode(Presenting.BIBLE)
             advanceUntil("the band holds") { manager.lottieBandClock.value.phase == BibleBandPhase.HOLD }
             manager.requestClearDisplay()
-            advanceUntil("the display cleared") { manager.presentingMode.value == Presenting.NONE }
+            advanceUntil("the display cleared") { manager.slideContent.value == Presenting.NONE }
         }
 
         timeline.assertSwapRuns(0)

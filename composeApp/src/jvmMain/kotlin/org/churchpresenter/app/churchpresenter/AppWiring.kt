@@ -257,8 +257,8 @@ internal fun AppRootState.CompanionServerWiring(tunnelStatus: TunnelStatus) {
         }
     }
     MediaRemoteWiring(companionServer, mediaViewModel, presenterManager)
-    val presentingModeValue = presenterManager.presentingMode.value
-    LiveStatusWiring(appSettings, companionServer, presentingModeValue)
+    val slideContentValue = presenterManager.slideContent.value
+    LiveStatusWiring(appSettings, companionServer, slideContentValue)
     LaunchedEffect(Unit) {
         companionServer.onPresentationGoLive.collect {
             presenterManager.setPresentingMode(Presenting.PRESENTATION)

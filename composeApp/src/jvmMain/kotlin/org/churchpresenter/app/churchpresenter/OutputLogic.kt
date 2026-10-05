@@ -21,8 +21,8 @@ internal fun showsOutputBackground(profile: OutputProfile): Boolean =
 internal fun effectiveOutputMode(
     locks: Map<Int, Presenting>,
     index: Int,
-    presentingMode: Presenting,
-): Presenting = locks[index] ?: presentingMode
+    slideContent: Presenting,
+): Presenting = locks[index] ?: slideContent
 
 /** Whether this output's picture goes out over SDI rather than to a display. */
 internal fun isDeckLinkPrimaryOutput(assignment: ScreenAssignment): Boolean =

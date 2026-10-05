@@ -88,7 +88,7 @@ class SlideTransitionFrameTest {
 
     @Composable
     private fun SongOutput(manager: PresenterManager, settings: AppSettings, lookAhead: Boolean = false) {
-        val presenting by manager.presentingMode
+        val presenting by manager.slideContent
         val section by manager.displayedLyricSection
         val alpha by manager.songTransitionAlpha
         val position by manager.displayedSongPosition
@@ -168,7 +168,7 @@ class SlideTransitionFrameTest {
             bibleSettings = BibleSettings(crossfade = true, transitionDuration = FADE_MS.toFloat()),
         )
         output(manager, settings) {
-            val presenting by manager.presentingMode
+            val presenting by manager.slideContent
             val verses by manager.displayedVerses
             val alpha by manager.bibleTransitionAlpha
             if (presenting == Presenting.BIBLE) {

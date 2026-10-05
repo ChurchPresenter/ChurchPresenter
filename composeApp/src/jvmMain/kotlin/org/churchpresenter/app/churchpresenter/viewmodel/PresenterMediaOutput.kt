@@ -6,7 +6,7 @@ import org.churchpresenter.sharedui.models.Presenting
 
 /** [PresenterManager] as the `:media` tab sees it: every call goes straight through. */
 class PresenterMediaOutput(private val manager: PresenterManager) : MediaOutput {
-    override val presentingMode: State<Presenting> get() = manager.presentingMode
+    override fun isLive(mode: Presenting): Boolean = manager.isLive(mode)
     override val showPresenterWindow: State<Boolean> get() = manager.showPresenterWindow
 
     override fun setPresentingMode(mode: Presenting) = manager.setPresentingMode(mode)

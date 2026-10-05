@@ -25,7 +25,7 @@ internal fun followAir(
         return
     }
     val slide = state.liveSlide?.let { runCatching { Presenting.valueOf(it) }.getOrNull() }
-    if (mode == slide && follows(slide) && presenterManager.presentingMode.value != slide) {
+    if (mode == slide && follows(slide) && presenterManager.slideContent.value != slide) {
         presenterManager.setPresentingMode(slide)
     }
     if (mode in overlays && follows(mode)) presenterManager.setPresentingMode(mode)

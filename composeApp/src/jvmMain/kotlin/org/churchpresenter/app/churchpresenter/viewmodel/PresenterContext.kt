@@ -19,8 +19,11 @@ import org.churchpresenter.sharedui.models.Presenting
 internal class PresenterContext {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    /** What the slide layers show -- see [PresenterManager.presentingMode]. */
-    val presentingMode = mutableStateOf(Presenting.NONE)
+    /**
+     * The content on the slide layers, which [PresenterManager.program] is derived from -- see
+     * [PresenterManager.slideContent].
+     */
+    val slideMode = mutableStateOf(Presenting.NONE)
 
     /**
      * The overlay content up over the slide -- see [PresenterManager.overlays]. Compared by identity:
@@ -32,7 +35,7 @@ internal class PresenterContext {
     val lastLive = mutableStateOf(Presenting.NONE)
     val clearDisplayRequested = mutableStateOf(false)
 
-    /** Per-screen lock: screen slot index -> locked mode; a missing entry follows [presentingMode]. */
+    /** Per-screen lock: screen slot index -> locked mode; a missing entry follows [slideMode]. */
     val screenLocks = mutableStateOf<Map<Int, Presenting>>(emptyMap())
 
     /** Reports a live-content change of [Presenting] type; set by the manager to its own broadcast. */

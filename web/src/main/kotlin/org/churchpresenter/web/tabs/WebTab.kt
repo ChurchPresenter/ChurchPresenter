@@ -116,9 +116,8 @@ fun WebTab(
     val savedTitle = output?.webPageTitle?.value ?: ""
     val state = remember { WebTabState(savedUrl, savedTitle) }
 
-    // Derive isLive from the presenter mode — clears automatically on "Clear Display"
-    val presentingMode = output?.presentingMode?.value ?: Presenting.NONE
-    val isLive = presentingMode == Presenting.WEBSITE
+    // Derived from what is on air — clears automatically on "Clear Display"
+    val isLive = output?.isLive(Presenting.WEBSITE) == true
 
     val navController = rememberWebNavController()
     // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the

@@ -235,7 +235,7 @@ private fun MainDesktopScope.BibleTabPane() {
         onInstanceLinkSendVerse = link.sendVerse,
         onInstanceLinkSendBibleHold = link.sendBibleHold,
         onPresenting = live.presenting,
-        isPresenting = presentingMode == Presenting.BIBLE,
+        isPresenting = slideContent == Presenting.BIBLE,
         bibleOutput = presenterManager,
         verseStatistics = statisticsManager,
         onVerseWentLive = { presenterManager.previewBus.onAir(Presenting.BIBLE) { recordBibleWentLive(appSettings) } },
@@ -277,7 +277,7 @@ private fun MainDesktopScope.SongsTabPane() {
         onSectionIndexChanged = live.onSectionIndexChanged,
         onLineIndexChanged = live.onLineIndexChanged,
         onPresenting = live.presenting,
-        isPresenting = presentingMode == Presenting.LYRICS,
+        isPresenting = slideContent == Presenting.LYRICS,
         playCounts = statisticsManager,
         dialogDismissSignal = dialogDismissSignal
     )

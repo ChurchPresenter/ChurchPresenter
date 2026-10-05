@@ -174,7 +174,7 @@ private fun MediaTabScope.MediaLocalSource(viewModel: MediaViewModel, modifier: 
                     } else {
                         Constants.MEDIA_TYPE_LOCAL
                     }
-                    if (presenterManager?.presentingMode?.value == Presenting.MEDIA) {
+                    if (presenterManager?.isLive(Presenting.MEDIA) == true) {
                         presenterManager.requestClearDisplay()
                     }
                     viewModel.loadMedia(f.absolutePathString(), type)
@@ -246,7 +246,7 @@ private fun MediaTabScope.MediaUrlSource(viewModel: MediaViewModel, modifier: Mo
     RaisedButton(
         onClick = {
             if (urlInput.isNotBlank()) {
-                if (presenterManager?.presentingMode?.value == Presenting.MEDIA) presenterManager.requestClearDisplay()
+                if (presenterManager?.isLive(Presenting.MEDIA) == true) presenterManager.requestClearDisplay()
                 val url = urlInput.trim()
                 viewModel.loadMedia(url, Constants.MEDIA_TYPE_URL)
                 RecentMediaFiles.add(url)
@@ -401,7 +401,7 @@ private fun MediaTabScope.MediaRecentBar(viewModel: MediaViewModel) {
                                 ext in Constants.AUDIO_EXTENSIONS -> Constants.MEDIA_TYPE_AUDIO
                                 else -> Constants.MEDIA_TYPE_LOCAL
                             }
-                            if (presenterManager?.presentingMode?.value == Presenting.MEDIA) {
+                            if (presenterManager?.isLive(Presenting.MEDIA) == true) {
                                 presenterManager.requestClearDisplay()
                             }
                             viewModel.loadMedia(path, type)

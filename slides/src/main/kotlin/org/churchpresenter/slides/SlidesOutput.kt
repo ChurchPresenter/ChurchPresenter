@@ -19,7 +19,8 @@ interface SlidesOutput : LiveOutput, PictureOutput, DeckOutput
 
 /** What is on the output, and how it changes. */
 interface LiveOutput {
-    val presentingMode: State<Presenting>
+    /** Whether [mode] is on air, on the slide layers or as an overlay. */
+    fun isLive(mode: Presenting): Boolean
     val screenLocks: State<Map<Int, Presenting>>
 
     fun setPresentingMode(mode: Presenting)

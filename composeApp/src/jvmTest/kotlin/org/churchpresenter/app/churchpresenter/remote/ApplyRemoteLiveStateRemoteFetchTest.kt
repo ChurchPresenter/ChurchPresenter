@@ -114,7 +114,7 @@ class ApplyRemoteLiveStateRemoteFetchTest {
         val cachedPath = presenter.selectedImagePath.value
         assertTrue(cachedPath != null && File(cachedPath).exists(), "expected a real cache file, got $cachedPath")
         assertEquals(imageBytes.toList(), File(cachedPath).readBytes().toList())
-        assertEquals(Presenting.PICTURES, presenter.presentingMode.value)
+        assertEquals(Presenting.PICTURES, presenter.slideContent.value)
     }
 
     @Test
@@ -166,7 +166,7 @@ class ApplyRemoteLiveStateRemoteFetchTest {
         // here rather than asserted as an existing contract: the mode does NOT switch on this one
         // failure path, unlike the "missing folder-id/index in the payload" case just below.
         assertNull(presenter.selectedImagePath.value)
-        assertEquals(Presenting.NONE, presenter.presentingMode.value)
+        assertEquals(Presenting.NONE, presenter.slideContent.value)
     }
 
     @Test
@@ -175,7 +175,7 @@ class ApplyRemoteLiveStateRemoteFetchTest {
         assertNull(presenter.selectedImagePath.value)
         assertEquals(
             Presenting.PICTURES,
-            presenter.presentingMode.value,
+            presenter.slideContent.value,
             "this guard falls through normally, unlike a failed fetch",
         )
     }

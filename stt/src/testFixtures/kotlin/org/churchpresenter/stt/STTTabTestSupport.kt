@@ -60,7 +60,7 @@ fun sttTab(
     seed: STTManager.() -> Unit = {},
     width: Dp? = null,
     themeMode: ThemeMode? = null,
-    block: ComposeUiTest.(stt: STTManager, presentingMode: MutableState<Presenting>, reports: STTReports) -> Unit,
+    block: ComposeUiTest.(stt: STTManager, captionsLive: MutableState<Boolean>, reports: STTReports) -> Unit,
 ) {
     // On the document for the server, and on every profile for the rest: the tab's transcript
     // reads the caption settings of a profile that shows captions, which are per profile now.
@@ -73,7 +73,7 @@ fun sttTab(
         )
     }
     val stt = STTManager()
-    val presentingMode = mutableStateOf(Presenting.NONE)
+    val captionsLive = mutableStateOf(false)
     val reports = STTReports()
     try {
         stt.seed()
@@ -87,7 +87,7 @@ fun sttTab(
                     Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
                     STTTab(
                         sttManager = stt,
-                        presentingMode = presentingMode,
+                        captionsLive = captionsLive,
                         presenting = { reports.presenting += it },
                         appSettings = appSettings,
                         onSettingsChange = { transform ->
@@ -99,7 +99,7 @@ fun sttTab(
                     }
                 }
             }
-            block(stt, presentingMode, reports)
+            block(stt, captionsLive, reports)
         }
     } finally {
         runCatching { stt.dispose() }

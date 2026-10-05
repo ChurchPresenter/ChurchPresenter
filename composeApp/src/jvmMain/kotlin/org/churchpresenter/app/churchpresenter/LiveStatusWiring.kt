@@ -39,10 +39,10 @@ internal fun transposeControlOutputs(projection: ProjectionSettings): Set<Int> =
 internal fun LiveStatusWiring(
     appSettings: AppSettings,
     companionServer: CompanionServer,
-    presentingModeValue: Presenting,
+    slideContentValue: Presenting,
 ) {
-    LaunchedEffect(presentingModeValue) {
-        companionServer.updatePresentationLiveStatus(isPresentationLive(presentingModeValue))
+    LaunchedEffect(slideContentValue) {
+        companionServer.updatePresentationLiveStatus(isPresentationLive(slideContentValue))
     }
     // ── Browser Source outputs (OBS/vMix overlay) ─────────────────────────────
     // Each output gets its own off-screen renderer (BrowserSourceVideoRenderer) that

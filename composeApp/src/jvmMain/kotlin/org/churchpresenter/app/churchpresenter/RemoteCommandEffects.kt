@@ -176,7 +176,7 @@ private fun RemotePresentationEffects(
                 presenterManager.setLiveSlide(presentationViewModel.selectedPresentation?.name, index)
                 presenterManager.setNextSlide(nextBitmap)
                 presenterManager.setPresenterNotes(presenterNotesAt(presentationViewModel.slideNotes, index))
-                if (shouldTakePresentationLive(presenterManager.presentingMode.value)) {
+                if (shouldTakePresentationLive(presenterManager.slideContent.value)) {
                     presenterManager.setPresentingMode(Presenting.PRESENTATION)
                     presenterManager.setShowPresenterWindow(true)
                 }

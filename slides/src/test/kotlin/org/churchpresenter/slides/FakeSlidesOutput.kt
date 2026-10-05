@@ -13,7 +13,9 @@ class FakeSlidesOutput : SlidesOutput {
     private val mode = mutableStateOf(Presenting.NONE)
     private val locks = mutableStateOf<Map<Int, Presenting>>(emptyMap())
 
-    override val presentingMode: State<Presenting> = mode
+    val onAir: State<Presenting> = mode
+
+    override fun isLive(mode: Presenting): Boolean = mode != Presenting.NONE && onAir.value == mode
     override val screenLocks: State<Map<Int, Presenting>> = locks
     override val presentationFrame: MutableState<PresentationFrame?> = mutableStateOf(null)
 

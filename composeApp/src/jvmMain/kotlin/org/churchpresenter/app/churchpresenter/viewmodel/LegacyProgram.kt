@@ -47,3 +47,24 @@ private fun legacyCue(mode: Presenting, live: PresenterManager): Cue? = when (mo
 
 private fun mediaCue(url: String, type: String): Cue =
     if (type == Constants.MEDIA_TYPE_AUDIO) Cue.Audio(url) else Cue.Video(url)
+
+/** The content type this cue puts on air, or [Presenting.NONE] for a background, which is none. */
+internal val Cue.content: Presenting get() = when (this) {
+    is Cue.Background -> Presenting.NONE
+    is Cue.Video, is Cue.Audio -> Presenting.MEDIA
+    is Cue.Picture -> Presenting.PICTURES
+    is Cue.Verses -> Presenting.BIBLE
+    is Cue.Song -> Presenting.LYRICS
+    is Cue.PresentationSlide -> Presenting.PRESENTATION
+    is Cue.SceneCue -> Presenting.CANVAS
+    is Cue.Web -> Presenting.WEBSITE
+    is Cue.QuestionCue -> Presenting.QA
+    is Cue.Dictionary -> Presenting.DICTIONARY
+    is Cue.Captions -> Presenting.STT
+    is Cue.LowerThird -> Presenting.LOWER_THIRD
+    is Cue.Announcement, is Cue.Message -> Presenting.ANNOUNCEMENTS
+}
+
+/** The content types [program] puts on air, in the order they went up: the slide first, then each overlay. */
+internal fun contentOnAir(program: Map<Layer, Cue>): Set<Presenting> =
+    program.values.mapNotNullTo(LinkedHashSet()) { cue -> cue.content.takeIf { it != Presenting.NONE } }

@@ -179,7 +179,7 @@ internal class AnnouncementsTabScope(inputs: AnnouncementsTabInputs, environment
     val isSentToStageMonitor get() = if (hasSeparateMainScreen) {
         canSendToStageMonitor && stageMonitorScreenIndices.all { currentScreenLocks[it] == Presenting.ANNOUNCEMENTS }
     } else {
-        output?.presentingMode?.value == Presenting.ANNOUNCEMENTS
+        output?.announcementsLive == true
     }
     // [stopTicker] must be true when [text] is plain announcement text (the ticker would otherwise
     // silently overwrite it within a second) and false when [text] IS the timer/clock's own current

@@ -71,7 +71,7 @@ class AnnouncementsTabTest {
         annButton(AnnouncementLabel.GO_LIVE).performClick()
         waitForIdle()
 
-        assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
+        assertEquals(Presenting.ANNOUNCEMENTS, presenter.onAir.value)
         assertEquals("Service starts in ten minutes", presenter.announcementText.value)
     }
 

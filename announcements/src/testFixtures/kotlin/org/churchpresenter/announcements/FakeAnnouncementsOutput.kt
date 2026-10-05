@@ -13,7 +13,9 @@ import org.churchpresenter.sharedui.models.Presenting
  * `AnnouncementsTimerControlTest` drives the real ticker.
  */
 class FakeAnnouncementsOutput : AnnouncementsOutput {
-    override val presentingMode: MutableState<Presenting> = mutableStateOf(Presenting.NONE)
+    val onAir: MutableState<Presenting> = mutableStateOf(Presenting.NONE)
+
+    override val announcementsLive: Boolean get() = onAir.value == Presenting.ANNOUNCEMENTS
     override val screenLocks: MutableState<Map<Int, Presenting>> = mutableStateOf(emptyMap())
     override val timerRemainingSeconds: MutableState<Int> = mutableStateOf(0)
     override val timerRunning: MutableState<Boolean> = mutableStateOf(false)
@@ -28,12 +30,12 @@ class FakeAnnouncementsOutput : AnnouncementsOutput {
     val started = mutableListOf<String>()
 
     override fun setPresentingMode(mode: Presenting) {
-        presentingMode.value = mode
+        onAir.value = mode
         if (mode != Presenting.NONE) clearDisplayRequested.value = false
     }
 
     override fun requestClearDisplay() {
-        if (presentingMode.value != Presenting.NONE) clearDisplayRequested.value = true
+        if (onAir.value != Presenting.NONE) clearDisplayRequested.value = true
     }
 
     override fun setScreenLock(screenIndex: Int, mode: Presenting?) {

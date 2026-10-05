@@ -97,7 +97,7 @@ class LottieBandDriverTest {
         effects(manager, settings())
         goLive(manager)
         manager.requestClearDisplay()
-        waitUntil("the display cleared") { manager.presentingMode.value == Presenting.NONE }
+        waitUntil("the display cleared") { manager.slideContent.value == Presenting.NONE }
         assertEquals(BibleBandPhase.IDLE, manager.lottieBandClock.value.phase)
         assertTrue(BibleBandPhase.EXIT in phases, "the exit played: $phases")
         assertEquals(1f, manager.bibleTransitionAlpha.value, "the classic fade did not run")

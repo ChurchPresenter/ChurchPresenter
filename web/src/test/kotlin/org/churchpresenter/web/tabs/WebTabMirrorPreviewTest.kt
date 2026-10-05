@@ -130,7 +130,7 @@ class WebTabMirrorPreviewTest {
         waitForIdle()
 
         assertEquals(null, presenter.liveBrowser.value, "no browser was ever attached")
-        assertEquals(Presenting.WEBSITE, presenter.presentingMode.value, "and nothing was torn down")
+        assertEquals(Presenting.WEBSITE, presenter.onAir.value, "and nothing was torn down")
         onNode(spinner).assertDoesNotExist()
     }
 

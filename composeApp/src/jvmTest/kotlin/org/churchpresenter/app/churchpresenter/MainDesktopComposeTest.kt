@@ -1012,7 +1012,7 @@ class MainDesktopComposeTest {
             actions.addLowerThird("gone", "Gone", false, 0)
             waitForIdle()
             takeLive("Gone")
-            assertEquals(Presenting.NONE, manager.presentingMode.value, "no file, nothing to play")
+            assertEquals(Presenting.NONE, manager.slideContent.value, "no file, nothing to play")
 
             actions.addLowerThird("pastor", "Pastor", false, 0)
             waitForIdle()

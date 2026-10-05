@@ -16,7 +16,7 @@ class PresenterMediaOutputTest {
         output.setShowPresenterWindow(true)
         output.setCurrentMedia("file:///clip.mp4", "local")
 
-        assertEquals(Presenting.MEDIA, output.presentingMode.value)
+        assertTrue(output.isLive(Presenting.MEDIA))
         assertTrue(output.showPresenterWindow.value)
         assertEquals("file:///clip.mp4", manager.currentMediaUrl.value)
         assertEquals("local", manager.currentMediaType.value)

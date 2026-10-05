@@ -62,7 +62,7 @@ class PreviewBusSlidesTest {
     @Test
     fun `off, a slide goes straight to air`() {
         show("a.pdf", 0)
-        assertEquals(Presenting.PRESENTATION, program.presentingMode.value)
+        assertEquals(Presenting.PRESENTATION, program.slideContent.value)
         assertSame(first, program.selectedSlide.value)
         assertEquals(LiveSlide("a.pdf", 0), program.liveSlide.value)
         assertFalse(preview.anythingLive)
@@ -79,7 +79,7 @@ class PreviewBusSlidesTest {
         assertSame(first, preview.selectedSlide.value)
         assertSame(second, preview.nextSlide.value)
         assertEquals("a.pdf notes 0", preview.presenterNotes.value)
-        assertEquals(Presenting.NONE, program.presentingMode.value)
+        assertEquals(Presenting.NONE, program.slideContent.value)
         assertNull(program.selectedSlide.value)
         assertSame(deck, assertNotNull(bus.cuedPlayback).deck, "its playback waits for Take")
         assertFalse(slides.advancePresentationStep(deck, 0), "no build steps on Preview")

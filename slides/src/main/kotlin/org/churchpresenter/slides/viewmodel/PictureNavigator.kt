@@ -181,7 +181,7 @@ internal class PicturesLive(private val state: PicturesState) : PicturesPresenti
     }
 
     override fun syncWithPresenter(presenterManager: SlidesOutput) {
-        val anyScreenOnPictures = presenterManager.presentingMode.value == Presenting.PICTURES ||
+        val anyScreenOnPictures = presenterManager.isLive(Presenting.PICTURES) ||
             presenterManager.picturesCued ||
             presenterManager.screenLocks.value.values.any { it == Presenting.PICTURES }
         if (anyScreenOnPictures && state.images.isNotEmpty()) {

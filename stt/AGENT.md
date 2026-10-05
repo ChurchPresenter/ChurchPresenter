@@ -20,9 +20,8 @@ it). Nothing of `:composeApp`'s.
 
 ## Seams to the app
 
-- **`presentingMode`**: the tab needs only to know whether the output is showing captions, so it
-  takes the output's mode as a `State<Presenting>`. `AppSTTTab` passes
-  `presenterManager.presentingMode`.
+- **`captionsLive`**: the tab needs only to know whether captions are on air, so it takes that as
+  a `State<Boolean>`. `AppSTTTab` passes one derived from `presenterManager.isLive(Presenting.STT)`.
 - **`settingsDialog`**: the caption settings dialog edits the output profiles the app owns, so the
   app draws it into this slot.
 

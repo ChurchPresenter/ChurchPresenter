@@ -62,7 +62,7 @@ internal fun PresenterManager.bandLineIndex(lineMode: Boolean): Int =
 internal suspend fun PresenterManager.applyBibleTarget(target: BibleBandTarget, template: BibleLottieTemplate?) {
     if (target.hold) return
     val animating = template?.takeIf {
-        presentingMode.value == Presenting.BIBLE && bandIsUp() && displayedVerses.value != target.verses
+        slideContent.value == Presenting.BIBLE && bandIsUp() && displayedVerses.value != target.verses
     }
     if (animating == null) {
         setDisplayedVerses(target.verses)
@@ -79,7 +79,7 @@ internal suspend fun PresenterManager.applySongTarget(target: SongBandTarget, te
         // band's text out and back in over identical words.
         val settled = displayedLyricSection.value.isRestatedAs(target.section) &&
             target.lineIndex == bandSongLineIndex.value
-        presentingMode.value == Presenting.LYRICS && bandIsUp() && !settled
+        slideContent.value == Presenting.LYRICS && bandIsUp() && !settled
     }
     if (animating == null) {
         setDisplayedLyricSection(target.section, target.position)

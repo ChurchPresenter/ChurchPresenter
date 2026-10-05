@@ -73,7 +73,7 @@ internal fun PresenterOutputContent(
     lottieComposition: LottieComposition?,
     clearAnnouncementOnFinish: () -> Unit,
 ) {
-    val presentingMode by presenterManager.presentingMode
+    val slideContent by presenterManager.slideContent
     // The profile this output is assigned to -- everything about how it looks and what it shows.
     // A default, empty profile stands in for a dangling/missing reference rather than crashing;
     // see [OutputProfile]'s own note that this should not happen once migration has run.
@@ -107,7 +107,7 @@ internal fun PresenterOutputContent(
                 // Stage monitor: dedicated presenter-confidence layout
                 StageMonitorScreen(
                     sm = outputSettings.stageMonitorSettings,
-                    presentingMode = presentingMode,
+                    slideContent = slideContent,
                     showChords = profile.showChords,
                     announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS ||
                         presenterManager.isLive(Presenting.ANNOUNCEMENTS),
@@ -173,7 +173,7 @@ internal fun PresenterOutputContent(
                         ) { mode -> modeContent(mode) }
                         OverlayModes(presenterManager, profile, effectiveMode, modeContent)
 
-                        ReleaseLiveBrowserOffWebsite(presenterManager, presentingMode)
+                        ReleaseLiveBrowserOffWebsite(presenterManager, slideContent)
 
                         if (screenNumber != null && identifyingScreen) IdentifyScreenOverlay(screenNumber)
                     }
@@ -184,9 +184,9 @@ internal fun PresenterOutputContent(
 
 /** Drops the live browser reference once the slide is no longer a web page. */
 @Composable
-private fun ReleaseLiveBrowserOffWebsite(presenterManager: PresenterManager, presentingMode: Presenting) {
-    LaunchedEffect(presentingMode) {
-        if (presentingMode != Presenting.WEBSITE) presenterManager.setLiveBrowser(null)
+private fun ReleaseLiveBrowserOffWebsite(presenterManager: PresenterManager, slideContent: Presenting) {
+    LaunchedEffect(slideContent) {
+        if (slideContent != Presenting.WEBSITE) presenterManager.setLiveBrowser(null)
     }
 }
 

@@ -56,7 +56,7 @@ class OverlayRenderTest {
                         presenterManager = manager,
                         appSettingsState = mutableStateOf(settings),
                         screenAssignmentState = mutableStateOf(ScreenAssignment(activeProfileId = "p")),
-                        effectiveModeState = mutableStateOf(lockedTo ?: manager.presentingMode.value),
+                        effectiveModeState = mutableStateOf(lockedTo ?: manager.slideContent.value),
                         outputIndex = 0,
                         kind = OffscreenOutputKind.NDI,
                     ),

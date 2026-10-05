@@ -198,7 +198,9 @@ In order, each step shippable on its own and each keeping every existing test gr
 6. **Preview / Take** behind the preference.
 7. **Looks** replace the `show*` flags, migrating saved profiles.
 8. **`presentingMode` retired.** Its readers move to `program` file by file; `Presenting` stays as
-   the name of a content type only.
+   the name of a content type only. What is on air is read off `program` -- `liveContent`,
+   `slideContent` and `isLive` -- and the tabs' seams ask `isLive(type)`. The slide's stored
+   content type stays inside `PresenterManager` until the content setters write cues themselves.
 
 The benchmark and soak test must show no regression at steps 2, 3 and 4.
 

@@ -119,7 +119,7 @@ class PresentationTabRealDeckTest {
             presentationButton(PresentationLabel.GO_LIVE).performClick()
             waitForIdle()
 
-            assertEquals(Presenting.PRESENTATION, presenter.presentingMode.value)
+            assertEquals(Presenting.PRESENTATION, presenter.onAir.value)
             assertTrue(presenter.showPresenterWindow.value)
         }
     }

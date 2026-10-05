@@ -21,7 +21,7 @@ import org.churchpresenter.slides.presenter.PresentationFrame
 class PresenterSlidesOutput(private val manager: PresenterManager) : SlidesOutput {
     private val bus get() = manager.previewBus
 
-    override val presentingMode: State<Presenting> get() = manager.presentingMode
+    override fun isLive(mode: Presenting): Boolean = manager.isLive(mode)
     override val picturesCued: Boolean get() = bus.isCued(Presenting.PICTURES)
     override val presentationCued: Boolean get() = bus.isCued(Presenting.PRESENTATION)
 

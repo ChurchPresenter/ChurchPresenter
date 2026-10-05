@@ -243,7 +243,7 @@ private fun OffscreenStageMonitor(
 ) {
     StageMonitorScreen(
         sm = appSettings.stageMonitorSettings,
-        presentingMode = effectiveMode,
+        slideContent = effectiveMode,
         announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS ||
             presenterManager.isLive(Presenting.ANNOUNCEMENTS),
         showChords = profile.showChords,

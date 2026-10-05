@@ -28,7 +28,7 @@ class PresenterManagerOverlayTest {
         val pm = manager()
         pm.setPresentingMode(Presenting.LYRICS)
         pm.setPresentingMode(Presenting.LOWER_THIRD)
-        assertEquals(Presenting.LYRICS, pm.presentingMode.value)
+        assertEquals(Presenting.LYRICS, pm.slideContent.value)
         assertEquals(setOf(Presenting.LOWER_THIRD), pm.overlays.value)
         assertEquals(Presenting.LOWER_THIRD, pm.lastLive.value)
         assertTrue(pm.isLive(Presenting.LYRICS))
@@ -61,7 +61,7 @@ class PresenterManagerOverlayTest {
     fun `an overlay alone is something live, and can be cleared`() {
         val pm = manager()
         pm.setPresentingMode(Presenting.LOWER_THIRD)
-        assertEquals(Presenting.NONE, pm.presentingMode.value)
+        assertEquals(Presenting.NONE, pm.slideContent.value)
         assertTrue(pm.anythingLive)
         pm.requestClearDisplay()
         assertTrue(pm.clearDisplayRequested.value, "a lone overlay must still be clearable")
@@ -85,7 +85,7 @@ class PresenterManagerOverlayTest {
         pm.setPresentingMode(Presenting.STT)
         pm.setPresentingMode(Presenting.LOWER_THIRD)
         pm.clearOverlay(Presenting.LOWER_THIRD)
-        assertEquals(Presenting.LYRICS, pm.presentingMode.value)
+        assertEquals(Presenting.LYRICS, pm.slideContent.value)
         assertEquals(setOf(Presenting.STT), pm.overlays.value)
         assertEquals(Presenting.STT, pm.lastLive.value, "the newest of what is still up")
         pm.clearOverlay(Presenting.STT)
@@ -118,7 +118,7 @@ class PresenterManagerOverlayTest {
         pm.overlayFinished(Presenting.ANNOUNCEMENTS, clearsDisplay = false)
         assertFalse(pm.clearDisplayRequested.value)
         assertTrue(pm.overlays.value.isEmpty())
-        assertEquals(Presenting.LYRICS, pm.presentingMode.value)
+        assertEquals(Presenting.LYRICS, pm.slideContent.value)
     }
 
     @Test
@@ -129,21 +129,32 @@ class PresenterManagerOverlayTest {
         pm.setPresentingMode(Presenting.BIBLE)
         pm.overlayFinished(Presenting.LOWER_THIRD, clearsDisplay = true)
         assertFalse(pm.clearDisplayRequested.value)
-        assertEquals(Presenting.BIBLE, pm.presentingMode.value)
+        assertEquals(Presenting.BIBLE, pm.slideContent.value)
     }
 
-    // ── What a tab sees ─────────────────────────────────────────────────────────────────────────
+    // ── What is on air ──────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `a tab sees its own overlay as live while it is up`() {
+    fun `what is on air is read off program, the slide first, then each overlay`() {
         val pm = manager()
-        val seenByCaptions = pm.modeAsSeenBy(Presenting.STT)
         pm.setPresentingMode(Presenting.LYRICS)
-        assertEquals(Presenting.LYRICS, seenByCaptions.value)
         pm.setPresentingMode(Presenting.STT)
-        assertEquals(Presenting.STT, seenByCaptions.value)
+        pm.setPresentingMode(Presenting.LOWER_THIRD)
+        assertEquals(listOf(Presenting.LYRICS, Presenting.STT, Presenting.LOWER_THIRD), pm.liveContent.value.toList())
+        assertEquals(Presenting.LYRICS, pm.slideContent.value)
+        assertTrue(pm.isLive(Presenting.STT))
         pm.clearOverlay(Presenting.STT)
-        assertEquals(Presenting.LYRICS, seenByCaptions.value)
+        assertFalse(pm.isLive(Presenting.STT))
+        assertEquals(Presenting.LYRICS, pm.slideContent.value)
+    }
+
+    @Test
+    fun `an overlay alone has no slide content under it`() {
+        val pm = manager()
+        pm.setPresentingMode(Presenting.ANNOUNCEMENTS)
+        assertEquals(Presenting.NONE, pm.slideContent.value)
+        assertTrue(pm.anythingLive)
+        assertFalse(pm.isLive(Presenting.NONE))
     }
 
     // ── What each output shows ──────────────────────────────────────────────────────────────────

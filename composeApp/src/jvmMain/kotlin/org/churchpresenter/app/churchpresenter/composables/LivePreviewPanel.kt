@@ -197,11 +197,11 @@ fun LivePreviewPanel(
 
         // Media controls — for the clip this panel can still do something with; see
         // [mediaTransportUseful], which is where the rule and its reasoning live.
-        val presentingMode by presenterManager.presentingMode
+        val slideContent by presenterManager.slideContent
         val transportUseful = mediaViewModel != null && mediaTransportUseful(
             isLoaded = mediaViewModel.isLoaded,
             isPlaying = mediaViewModel.isPlaying,
-            presentingMode = presentingMode,
+            slideContent = slideContent,
         )
         if (transportUseful && mediaViewModel != null) {
             MediaPreviewControls(
@@ -239,8 +239,8 @@ private val PREVIEW_HEADER_ALLOWANCE = 26.dp
  * bar back the moment the next song went live, showing 0:00 of a video that was over and seekable to
  * nowhere.
  */
-internal fun mediaTransportUseful(isLoaded: Boolean, isPlaying: Boolean, presentingMode: Presenting): Boolean =
-    isLoaded && (presentingMode == Presenting.MEDIA || isPlaying)
+internal fun mediaTransportUseful(isLoaded: Boolean, isPlaying: Boolean, slideContent: Presenting): Boolean =
+    isLoaded && (slideContent == Presenting.MEDIA || isPlaying)
 
 /**
  * Every output the panel can show, in screen, Browser Source, NDI, OMT order, each drawn by its own
@@ -505,8 +505,8 @@ private fun SingleDisplayPreview(
     val outputSettings = remember(appSettings, profile) {
         appSettings.resolvedFor(profile)
     }
-    val presentingMode by presenterManager.presentingMode
-    val effectiveMode = presenterManager.shownModeFor(profile, locks[screenIndex] ?: presentingMode)
+    val slideContent by presenterManager.slideContent
+    val effectiveMode = presenterManager.shownModeFor(profile, locks[screenIndex] ?: slideContent)
     val mediaViewModel = LocalMediaViewModel.current
 
     val isLowerThird = profile.isLowerThird
