@@ -143,7 +143,9 @@ jobs:
             echo "timestampUrl=http://timestamp.digicert.com"
             echo "subjectName=Church Presenter"
           } > "$SIGNING_DIR/signing.properties"
-          echo "desktop.signing.repo.path=$RUNNER_TEMP/signing" >> local.properties
+          # Forward slashes: java.util.Properties reads a backslash as an escape, so D:\a\_temp
+          # would load as D:a_temp and signWindowsMsi would skip for want of a certificate.
+          echo "desktop.signing.repo.path=$(cygpath -m "$RUNNER_TEMP")/signing" >> local.properties
           echo "Windows signing configuration written"
 
       # ── Build ───────────────────────────────────────────────────────────────

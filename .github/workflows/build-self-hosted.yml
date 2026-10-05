@@ -119,7 +119,8 @@ jobs:
             "timestampUrl=http://timestamp.digicert.com"
             "subjectName=Church Presenter"
           ) | Set-Content "$signingDir\signing.properties"
-          Add-Content "local.properties" "desktop.signing.repo.path=$($env:RUNNER_TEMP)/signing"
+          # Forward slashes: java.util.Properties reads a backslash as an escape.
+          Add-Content "local.properties" "desktop.signing.repo.path=$($env:RUNNER_TEMP.Replace('\', '/'))/signing"
           Write-Host "Windows signing configuration written"
 
       # ── Build ───────────────────────────────────────────────────────────────

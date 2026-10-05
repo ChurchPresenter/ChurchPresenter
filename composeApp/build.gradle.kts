@@ -1523,7 +1523,7 @@ fun registerWindowsSignTask(taskName: String, packagingTask: String, extension: 
             val isWindows = System.getProperty("os.name").contains("Windows", ignoreCase = true)
             val hasCert = winCertPath != null && File(winCertPath).exists() && winCertPassword.isConfigured()
             if (!isWindows) logger.info("$taskName skipped: not running on Windows")
-            if (!hasCert) logger.info("$taskName skipped: certificate not configured")
+            if (isWindows && !hasCert) logger.warn("$taskName skipped: no certificate at ${winCertPath ?: "(not configured)"}")
             isWindows && hasCert
         }
         doLast {
