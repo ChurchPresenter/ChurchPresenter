@@ -2,6 +2,8 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.profiles.awaitFolderScan
+import org.churchpresenter.profiles.awaitLowerThirdRows
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

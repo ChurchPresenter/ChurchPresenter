@@ -16,7 +16,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.SETTINGS_PREVIEW_SCALED_TAG
+import org.churchpresenter.profiles.SETTINGS_PREVIEW_SCALED_TAG
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.Dp

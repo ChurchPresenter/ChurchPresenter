@@ -13,7 +13,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.onNodeWithTag
-import org.churchpresenter.app.churchpresenter.dialogs.SONG_BACKGROUND_BUTTON_TAG
+import org.churchpresenter.profiles.SONG_BACKGROUND_BUTTON_TAG
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.core.models.songs.SongItem

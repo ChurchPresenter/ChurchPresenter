@@ -44,7 +44,7 @@ import org.churchpresenter.app.churchpresenter.composables.QuickBackgroundTray
 import org.churchpresenter.sharedui.composables.ToolbarKey
 import org.churchpresenter.sharedui.composables.ToolbarKeyStyle
 import org.churchpresenter.sharedui.composables.TooltipIconButton
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.previewOutputSize
+import org.churchpresenter.profiles.previewOutputSize
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager

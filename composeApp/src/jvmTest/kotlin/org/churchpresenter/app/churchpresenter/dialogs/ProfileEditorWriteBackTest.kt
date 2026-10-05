@@ -2,6 +2,9 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasTextExactly
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.hasText
@@ -14,9 +17,7 @@ import androidx.compose.ui.test.v2.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.CustomizePane
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.railTag
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.segment
+import org.churchpresenter.profiles.railTag
 import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
@@ -131,7 +132,7 @@ class ProfileEditorWriteBackTest {
      */
     private fun SkikoComposeUiTest.alignVerseBlockTop() =
         run {
-        onNodeWithTag(railTag(CustomizePane.BIBLE.name)).performClick()
+        onNodeWithTag(railTag("BIBLE")).performClick()
         waitForIdle()
         segment("Top").performScrollTo().performClick()
     }
@@ -171,3 +172,6 @@ class ProfileEditorWriteBackTest {
         const val DIALOG_HEIGHT = 900f
     }
 }
+
+private fun SkikoComposeUiTest.segment(label: String): SemanticsNodeInteraction =
+    onAllNodes(hasTextExactly(label) and hasClickAction())[0]

@@ -85,7 +85,7 @@ import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.sharedui.composables.SettingsScrollbarGutter
 import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
-import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
+import org.churchpresenter.profiles.FileManager
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.AppSettings
 import org.jetbrains.compose.resources.stringResource

@@ -407,6 +407,21 @@ class CCLIReportContentShellTest {
         }
 
     @Test
+    fun `the confirmation names all time as its period when all time is chosen`() =
+        report({ playSong(number = 1, title = "Amazing Grace", songbook = "Hymnal") }) { _ ->
+            awaitLoaded(songs = 1, verses = 0)
+            onNodeWithText(Preset.ALL_TIME).performClick()
+            waitUntil("all time must apply first", timeoutMillis = 5_000) { countOf(Tab.songs(1)) == 1 }
+
+            onNodeWithTag(REPORT_CLEAR_ROW_TAG + "Amazing Grace").performClick()
+            waitForIdle()
+
+            onNodeWithText(
+                "Remove Amazing Grace from the statistics for All Time? This cannot be undone."
+            ).assertIsDisplayed()
+        }
+
+    @Test
     fun `a verse row can be removed on its own`() =
         report({
             playVerse(bible = "KJV", book = "John", chapter = 3, verse = 16, times = 2)

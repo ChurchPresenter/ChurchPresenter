@@ -215,4 +215,14 @@ class RemoteActivityToastHostTest {
         waitForIdle()
         assertEquals(notification, dismissed, "the toast must dismiss itself once the auto-dismiss timer elapses")
     }
+
+    @Test
+    fun `every kind of remote action is named on its toast`() {
+        RemoteEventType.entries.forEach { type ->
+            runComposeUiTest {
+                setContent(host(listOf(RemoteActivityNotification(type, title = "Item for $type"))))
+                onNodeWithText("Item for $type", substring = true).assertExists("$type shows its title")
+            }
+        }
+    }
 }

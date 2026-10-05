@@ -1,0 +1,146 @@
+package org.churchpresenter.profiles
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import org.churchpresenter.theme.AppShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.media_subtitles
+import org.churchpresenter.strings.generated.resources.output_profile_sample_caption
+import org.churchpresenter.strings.generated.resources.output_profile_sample_caption_earlier
+import org.churchpresenter.strings.generated.resources.output_profile_sample_caption_translation
+import org.churchpresenter.strings.generated.resources.output_profile_sample_dictionary_definition
+import org.churchpresenter.strings.generated.resources.output_profile_sample_dictionary_usage
+import org.churchpresenter.strings.generated.resources.output_profile_sample_question
+import org.churchpresenter.strings.generated.resources.output_profile_sample_subtitle
+import org.churchpresenter.strings.generated.resources.tab_dictionary
+import org.churchpresenter.strings.generated.resources.tab_qa
+import org.churchpresenter.strings.generated.resources.tab_stt
+import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.dictionary.presenter.DictionaryPresenter
+import org.churchpresenter.qa.presenter.QAPresenter
+import org.churchpresenter.stt.presenter.STTPresenter
+import org.churchpresenter.media.presenter.SubtitleOverlay
+import org.churchpresenter.media.subtitles.SubtitleCue
+import org.churchpresenter.stt.STTSegment
+import org.churchpresenter.core.models.qa.Question
+import org.churchpresenter.settings.AppSettings
+import org.jetbrains.compose.resources.stringResource
+
+/**
+ * The pictures beside the whole-form style tabs: captions, subtitles, a Q&A question and a
+ * dictionary card, each drawn by the renderer the output itself uses, over sample content, at the
+ * profile's preview shape -- so a change in the form is seen as the screen would show it.
+ *
+ * [checker] draws them over the checkerboard in place of the plate -- [PreviewBackgroundMode.CHECKER].
+ */
+@Composable
+internal fun ProfileFormStage(
+    pane: CustomizePane,
+    settings: AppSettings,
+    output: PreviewOutputSize,
+    checker: Boolean = false,
+) {
+    FormStageFrame(output, badge = pane.stageBadge(), checker = checker) {
+        when (pane) {
+            CustomizePane.CAPTIONS -> CaptionSample(settings)
+            CustomizePane.SUBTITLES -> SubtitleOverlay(
+                cue = SubtitleCue(
+                    startMs = 0,
+                    endMs = 0,
+                    text = stringResource(Res.string.output_profile_sample_subtitle),
+                ),
+                mediaSettings = settings.mediaSettings,
+            )
+            CustomizePane.QA -> QAPresenter(question = sampleQuestion(), qaSettings = settings.qaSettings)
+            CustomizePane.DICTIONARY -> DictionaryPresenter(
+                entry = sampleEntry(),
+                dictionarySettings = settings.dictionarySettings,
+            )
+            // Not whole-form stages; [CustomizeStagePanel] draws these.
+            CustomizePane.STAGE_MONITOR, CustomizePane.BIBLE, CustomizePane.SONGS, CustomizePane.BACKGROUND -> Unit
+        }
+    }
+}
+
+@Composable
+private fun CustomizePane.stageBadge(): String = stringResource(
+    when (this) {
+        CustomizePane.SUBTITLES -> Res.string.media_subtitles
+        CustomizePane.QA -> Res.string.tab_qa
+        CustomizePane.DICTIONARY -> Res.string.tab_dictionary
+        else -> Res.string.tab_stt
+    },
+)
+
+/** Two finished lines and their translation, with no drip-feed left to play out. */
+@Composable
+private fun CaptionSample(settings: AppSettings) {
+    val earlier = stringResource(Res.string.output_profile_sample_caption_earlier)
+    val latest = stringResource(Res.string.output_profile_sample_caption)
+    val translated = stringResource(Res.string.output_profile_sample_caption_translation)
+    STTPresenter(
+        segments = listOf(sampleSegment(0, earlier), sampleSegment(1, latest)),
+        inProgressText = "",
+        translationSegments = listOf(sampleSegment(1, translated)),
+        inProgressTranslation = "",
+        highlightedWords = emptyList(),
+        // The drip-feed types the newest line out letter by letter; a still picture shows it whole.
+        sttSettings = settings.sttSettings.copy(dripFeedEnabled = false),
+    )
+}
+
+private fun sampleSegment(id: Int, text: String) =
+    STTSegment(id = id, timestamp = "", text = text, start = 0.0, end = 0.0, completed = true)
+
+@Composable
+private fun sampleQuestion() = Question(
+    id = "sample",
+    text = stringResource(Res.string.output_profile_sample_question),
+    timestamp = 0L,
+)
+
+@Composable
+private fun sampleEntry() = StrongsEntry(
+    number = "G3056",
+    word = "λόγος",
+    transliteration = "logos",
+    pronunciation = "log'-os",
+    definition = stringResource(Res.string.output_profile_sample_dictionary_definition),
+    kjvUsage = stringResource(Res.string.output_profile_sample_dictionary_usage),
+)
+
+/** The plate the form stages draw on: the Bible and Song stages' frame, and their badge. */
+@Composable
+private fun FormStageFrame(
+    output: PreviewOutputSize,
+    badge: String,
+    checker: Boolean,
+    content: @Composable () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(output.aspectRatio)
+            .clipToBounds()
+            .background(Color(PREVIEW_BACKGROUND), AppShape(6.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, AppShape(6.dp)),
+    ) {
+        if (checker) {
+            PreviewCheckerboard(Modifier.matchParentSize().clip(AppShape(6.dp)))
+        }
+        ScaledPresenterBox(output) { content() }
+        PreviewBadge(label = badge, modifier = Modifier.align(Alignment.TopStart).padding(6.dp))
+    }
+}

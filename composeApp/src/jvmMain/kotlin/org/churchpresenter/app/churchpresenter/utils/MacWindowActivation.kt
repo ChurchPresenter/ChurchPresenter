@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.window.FrameWindowScope
 import kotlinx.coroutines.delay
 import java.awt.Desktop
+import org.churchpresenter.profiles.isMacOs
 
 private const val APPKIT_SETTLE_MS = 300L
 
@@ -14,8 +15,6 @@ private const val APPKIT_SETTLE_MS = 300L
  * to re-activate the app, leaving all menus disabled until refocus. Explicitly
  * bring the window to front and ask AppKit to activate the app once.
  */
-internal fun isMacOs(osName: String): Boolean = osName.lowercase().contains("mac")
-
 @Composable
 fun FrameWindowScope.MacMenuBarActivationFix() {
     if (!isMacOs(System.getProperty("os.name", ""))) return

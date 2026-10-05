@@ -2,6 +2,15 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.core.models.songs.SongBackground
+import kotlin.test.assertTrue
+import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.withKeyDown
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.input.key.Key
+import org.churchpresenter.profiles.SONG_BACKGROUND_BUTTON_TAG
+import org.churchpresenter.profiles.SONG_BACKGROUND_SAVE_TAG
+import org.churchpresenter.profiles.SONG_BACKGROUND_SCOPE_TAG
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -135,6 +144,7 @@ class EditSongContentTest {
         tuning: SongTuning = SongTuning(),
         showTuningFields: Boolean = false,
         typicalSeconds: Int? = null,
+        onApplyBackgroundToSongbook: ((String, SongBackground, SongBackground) -> Unit)? = null,
         block: ComposeUiTest.(Saved) -> Unit,
     ) {
         val saved = Saved()
@@ -153,6 +163,7 @@ class EditSongContentTest {
                         onSave = { song, savedTuning -> saved.song = song; saved.tuning = savedTuning },
                         typicalSeconds = typicalSeconds,
                         onChordsVisibleChange = { saved.chordsVisible += it },
+                        onApplyBackgroundToSongbook = onApplyBackgroundToSongbook,
                     )
                 }
             }
@@ -270,6 +281,58 @@ class EditSongContentTest {
         save()
         assertEquals(listOf("{Chorus}", "Amazing grace"), saved.song?.lyrics)
     }
+
+    @Test
+    fun `a section chip writes its header on a line of its own`() = editor { saved ->
+        type(Field.LYRICS, "first line")
+        onNodeWithText("Bridge").performClick()
+        waitForIdle()
+        save()
+
+        assertTrue(saved.song?.lyrics.orEmpty().any { it.trim() == "[Bridge]" }, "lyrics: ${saved.song?.lyrics}")
+    }
+
+    @Test
+    fun `adding a language opens a pane for it after the ones already there`() = editor { _ ->
+        secondaryPane()
+        tap("Add a language")
+
+        assertTrue(onAllNodesWithText("Language 3").fetchSemanticsNodes().isNotEmpty())
+    }
+
+    @Test
+    fun `pasting with nothing chord-shaped on the clipboard types as usual`() = editor { saved ->
+        type(Field.LYRICS, "first line")
+        field(Field.LYRICS).performKeyInput {
+            withKeyDown(Key.CtrlLeft) { pressKey(Key.V) }
+            withKeyDown(Key.MetaLeft) { pressKey(Key.V) }
+            pressKey(Key.V)
+        }
+        waitForIdle()
+        save()
+
+        assertTrue(saved.song?.lyrics.orEmpty().first().startsWith("first line"), "lyrics: ${saved.song?.lyrics}")
+    }
+
+    @Test
+    fun `a song in a song book offers to apply its background to the whole book`() {
+        val applied = mutableListOf<String>()
+        editor(onApplyBackgroundToSongbook = { book, _, _ -> applied += book }) { _ ->
+            onNodeWithTag(SONG_BACKGROUND_BUTTON_TAG).performClick()
+            waitForIdle()
+            onNodeWithText("Apply to song book").performClick()
+            waitForIdle()
+        }
+        assertEquals(listOf("Hymnal"), applied)
+    }
+
+    @Test
+    fun `a song in no song book has no book to apply its background to`() =
+        editor(aSong(songbook = ""), onApplyBackgroundToSongbook = { _, _, _ -> }) { _ ->
+            onNodeWithTag(SONG_BACKGROUND_BUTTON_TAG).performClick()
+            waitForIdle()
+            assertTrue(onAllNodesWithText("Apply to song book").fetchSemanticsNodes().isEmpty())
+        }
 
     @Test
     fun `the slide break chip writes the marker on a line of its own`() = editor { saved ->

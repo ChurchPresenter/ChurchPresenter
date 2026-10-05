@@ -6,7 +6,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.composables.quickBackgroundSlotFor
+import org.churchpresenter.profiles.quickBackgroundSlotFor
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.models.ShortcutScope
 import org.churchpresenter.sharedui.models.Presenting

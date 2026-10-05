@@ -119,6 +119,7 @@ module-specific notes there, not here.**
 | `schedule/`            | `:schedule`            | The Schedule tab, `ScheduleViewModel` and the `.schedule` files                      | [AGENT.md](schedule/AGENT.md)            |
 | `canvas/`              | `:canvas`              | The Canvas tab, `SceneViewModel`, the scene renderer and its capture sources (cameras, screen, NDI/OMT in, DeckLink) | [AGENT.md](canvas/AGENT.md)              |
 | `presenter/`           | `:presenter`           | What the song and Bible outputs draw: slides, looks, layouts, backgrounds, the Lottie bands and the style models | [AGENT.md](presenter/AGENT.md)           |
+| `profiles/`            | `:profiles`            | The Profiles settings pages (looks, layout, backgrounds, previews), the song background panel and the settings row kit every settings page uses | [AGENT.md](profiles/AGENT.md)            |
 | `server/`              | `:server`              | The companion server and Instance Link: the Ktor API, tunnel, SSL, ATEM bridge, calendar sync | [AGENT.md](server/AGENT.md)              |
 | `companion-surface/`   | `:companion-surface`   | The Companion Surface tab and panels, and `CompanionSatelliteViewModel`             | [AGENT.md](companion-surface/AGENT.md)   |
 | `obs/`                 | `:obs`                 | The OBS Studio integration — the obs-websocket client, scene mapping and its settings page | [AGENT.md](obs/AGENT.md)                 |
@@ -141,7 +142,7 @@ The JaCoCo wiring, `useJUnitPlatform()` and the six-counter floor (85% on all si
 module's build file carries only what differs, set **above everything else** in the file:
 - `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults; name only the
   counters that need a different number. `:converter`, `:companion-satellite`, `:bible-engine`,
-  `:presentation-engine`, `:slides` and `:canvas` name two each; every other module names none.
+  `:presentation-engine`, `:slides`, `:canvas` and `:profiles` name two each; every other module names none.
   Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**
