@@ -43,6 +43,8 @@ private fun legacyCue(mode: Presenting, live: PresenterManager): Cue? = when (mo
     Presenting.QA -> Cue.QuestionCue(live.displayedQuestion.value)
     Presenting.STT -> Cue.Captions
     Presenting.DICTIONARY -> Cue.Dictionary(live.displayedDictionaryEntry.value?.number)
+    // A message is held whole, on its own layer.
+    Presenting.MESSAGE -> live.liveShow.program.value[Layer.MESSAGES]
 }
 
 private fun mediaCue(url: String, type: String): Cue =
@@ -62,7 +64,8 @@ internal val Cue.content: Presenting get() = when (this) {
     is Cue.Dictionary -> Presenting.DICTIONARY
     is Cue.Captions -> Presenting.STT
     is Cue.LowerThird -> Presenting.LOWER_THIRD
-    is Cue.Announcement, is Cue.Message -> Presenting.ANNOUNCEMENTS
+    is Cue.Announcement -> Presenting.ANNOUNCEMENTS
+    is Cue.Message -> Presenting.MESSAGE
 }
 
 /** The content types [program] puts on air, in the order they went up: the slide first, then each overlay. */

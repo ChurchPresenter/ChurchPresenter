@@ -2954,4 +2954,15 @@
     <string name="profile_merge_snap">Snap side by side</string>
     <string name="preview_merged_label">(merged)</string>
     <string name="projection_merged_by_profile">Overridden by %1$s profile</string>
+    <string name="tooltip_message">Message</string>
+    <string name="message_title">Message</string>
+    <string name="message_saved">Saved messages</string>
+    <string name="message_text">Message</string>
+    <string name="message_text_hint">Type a message. Put a blank to fill in each time in braces, like {number}</string>
+    <string name="message_duration">Stays up for (seconds)</string>
+    <string name="message_duration_hint">Until cleared</string>
+    <string name="message_shows_as">Shows as</string>
+    <string name="message_save">Save message</string>
+    <string name="message_clear">Clear message</string>
+    <string name="message_on_air">On air</string>
 </resources>

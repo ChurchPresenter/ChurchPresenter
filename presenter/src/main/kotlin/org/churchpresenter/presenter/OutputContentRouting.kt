@@ -24,5 +24,6 @@ fun showsContentFor(mode: Presenting, profile: OutputProfile): Boolean = when (m
     Presenting.QA -> profile.look.slide.qa
     Presenting.STT -> profile.look.captions
     Presenting.DICTIONARY -> profile.look.slide.dictionary
+    Presenting.MESSAGE -> profile.look.messages
     Presenting.NONE -> false
 }

@@ -13,6 +13,7 @@ import org.churchpresenter.qa.presenter.QAPresenter
 import org.churchpresenter.stt.presenter.STTPresenter
 import org.churchpresenter.dictionary.presenter.DictionaryPresenter
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import org.churchpresenter.liveshow.BackgroundSource
 import org.churchpresenter.liveshow.Cue
@@ -134,6 +135,29 @@ internal fun AnnouncementCue(surface: OutputSurface) {
         transitionAlpha = presenterManager.announcementTransitionAlpha.value,
         onFinished = surface.onAnnouncementFinished,
         // The preview tile has always drawn the announcement's own background.
+        showBackground = if (surface.kind == OutputSurfaceKind.PREVIEW) {
+            true
+        } else {
+            surface.showBackgroundOverride ?: surface.showBg
+        },
+    )
+}
+
+/**
+ * A message, drawn with the output's announcement look until messages have a style of their own --
+ * standing still, though: a nursery call that scrolled past would be missed.
+ */
+@Composable
+internal fun MessageCue(cue: Cue.Message, surface: OutputSurface) {
+    val settings = surface.appSettings
+    AnnouncementsPresenter(
+        text = cue.text,
+        appSettings = remember(settings) {
+            settings.copy(
+                announcementsSettings = settings.announcementsSettings.copy(animationType = Constants.ANIMATION_NONE),
+            )
+        },
+        outputRole = surface.outputRole,
         showBackground = if (surface.kind == OutputSurfaceKind.PREVIEW) {
             true
         } else {

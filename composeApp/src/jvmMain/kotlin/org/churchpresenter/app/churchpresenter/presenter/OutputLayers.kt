@@ -100,8 +100,7 @@ internal fun CueContent(cue: Cue, surface: OutputSurface) {
         is Cue.Captions -> CaptionsCue(surface)
         is Cue.Dictionary -> DictionaryCue(surface)
         is Cue.Background -> BackgroundCue(cue, surface)
-        // Not put on air until its own migration step.
-        is Cue.Message -> Unit
+        is Cue.Message -> MessageCue(cue, surface)
     }
 }
 
@@ -127,4 +126,6 @@ internal fun OverlayModes(
     OVERLAY_DRAW_ORDER.forEach { mode ->
         if (mode in overlays && mode != shownMode && profile.drawsOverContent(mode)) key(mode) { content(mode) }
     }
+    // A message is up alone, over everything an output following the live content shows.
+    if (presenterManager.isLive(Presenting.MESSAGE)) key(Presenting.MESSAGE) { content(Presenting.MESSAGE) }
 }

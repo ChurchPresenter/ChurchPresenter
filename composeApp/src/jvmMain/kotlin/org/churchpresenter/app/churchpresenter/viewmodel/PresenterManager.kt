@@ -160,7 +160,8 @@ class PresenterManager private constructor(
         }
         // Slide content replaces the overlays over it; clearing takes everything down.
         context.overlays.value = emptySet()
-        if (mode == Presenting.NONE) liveShow.clearAll()
+        // Clearing takes the whole layers down too; slide content takes a message down.
+        if (mode == Presenting.NONE) liveShow.clearAll() else liveShow.clear(Layer.MESSAGES)
         putSlide(mode, lastLive = mode)
     }
 

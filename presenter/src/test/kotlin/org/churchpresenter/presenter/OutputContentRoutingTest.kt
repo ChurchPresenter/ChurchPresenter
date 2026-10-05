@@ -22,6 +22,7 @@ class OutputContentRoutingTest {
             announcements = false,
             graphics = false,
             captions = false,
+            messages = false,
         ),
     )
 
@@ -38,6 +39,7 @@ class OutputContentRoutingTest {
         Presenting.QA to { p -> p.withLook { copy(slide = slide.copy(qa = true)) } },
         Presenting.STT to { p -> p.withLook { copy(captions = true) } },
         Presenting.DICTIONARY to { p -> p.withLook { copy(slide = slide.copy(dictionary = true)) } },
+        Presenting.MESSAGE to { p -> p.withLook { copy(messages = true) } },
     )
 
     @Test

@@ -195,7 +195,8 @@ class PresenterManagerProgramTest {
 
     @Test
     fun `only Bible and songs put a background up`() {
-        Presenting.entries.forEach { mode ->
+        // A message is no slide content; it goes up whole, through showMessage.
+        Presenting.entries.filter { it != Presenting.MESSAGE }.forEach { mode ->
             val expected = when (mode) {
                 Presenting.NONE -> 0
                 Presenting.BIBLE, Presenting.LYRICS -> 2

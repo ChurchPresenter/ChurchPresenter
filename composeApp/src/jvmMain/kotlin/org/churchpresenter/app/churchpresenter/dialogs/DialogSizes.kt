@@ -64,3 +64,6 @@ internal val SHARE_STORY_DIALOG_HEIGHT: Dp = 470.dp
  */
 internal val CUSTOMIZE_THEME_DIALOG_WIDTH: Dp = 940.dp
 internal val CUSTOMIZE_THEME_DIALOG_HEIGHT: Dp = 720.dp
+
+internal val MESSAGE_DIALOG_WIDTH: Dp = 520.dp
+internal val MESSAGE_DIALOG_HEIGHT: Dp = 560.dp

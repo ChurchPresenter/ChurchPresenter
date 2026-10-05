@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material.icons.outlined.DisplaySettings
 import androidx.compose.material3.Button
@@ -34,6 +35,7 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.strings.generated.resources.preview_take
 import org.churchpresenter.strings.generated.resources.tooltip_clear_display
+import org.churchpresenter.strings.generated.resources.tooltip_message
 import org.churchpresenter.strings.generated.resources.tooltip_preview_settings
 import org.churchpresenter.strings.generated.resources.tooltip_toggle_displays
 import org.churchpresenter.companionsurface.CompanionConnectionChipRow
@@ -48,6 +50,10 @@ import org.churchpresenter.profiles.previewOutputSize
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.clearMessage
+import org.churchpresenter.app.churchpresenter.viewmodel.messageOnAir
+import org.churchpresenter.app.churchpresenter.viewmodel.showMessage
+import org.churchpresenter.app.churchpresenter.dialogs.MessageDialog
 import org.churchpresenter.stt.STTManager
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.settings.AppSettings
@@ -117,6 +123,7 @@ internal fun PreviewSidebar(
                 PreviewSettingsButton(appSettings.projectionSettings, { editingPreviewLayout = true }) { updated ->
                     onSettingsChange { s -> s.copy(projectionSettings = updated) }
                 }
+                MessageButton(presenterManager, appSettings, onSettingsChange)
                 if (appSettings.projectionSettings.previewModeEnabled) PreviewTakeButton(presenterManager)
             }
             // A layout filling the panel takes the column's spare height; otherwise it keeps its own.
@@ -188,6 +195,39 @@ internal fun PreviewSidebar(
         }
     }
 }
+
+/** Opens the Message dialog; lit while a message is on air. */
+@Composable
+private fun MessageButton(
+    presenterManager: PresenterManager,
+    appSettings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+) {
+    var open by remember { mutableStateOf(false) }
+    val onAir = presenterManager.messageOnAir
+    TooltipIconButton(
+        painter = rememberVectorPainter(Icons.AutoMirrored.Filled.Message),
+        text = stringResource(Res.string.tooltip_message),
+        onClick = { open = true },
+        buttonSize = 36.dp,
+        iconTint = if (onAir != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.testTag(MESSAGE_BUTTON_TAG),
+    )
+    MessageDialog(
+        isVisible = open,
+        templates = appSettings.messageTemplates,
+        onTemplatesChange = { templates -> onSettingsChange { it.copy(messageTemplates = templates) } },
+        onAir = onAir,
+        onGoLive = { message ->
+            presenterManager.showMessage(message)
+            presenterManager.setShowPresenterWindow(true)
+        },
+        onClear = { presenterManager.clearMessage() },
+        onDismiss = { open = false },
+    )
+}
+
+internal const val MESSAGE_BUTTON_TAG = "preview_message"
 
 /** The gear beside the clear button: opens the editor for how the preview panel is arranged. */
 @Composable

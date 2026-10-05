@@ -56,6 +56,7 @@ import org.churchpresenter.sharedui.utils.findScreenIndexByBounds
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.presenter.OverlayModes
+import org.churchpresenter.app.churchpresenter.viewmodel.MessageExpiry
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.shownModeFor
 import org.churchpresenter.stt.STTManager
@@ -196,6 +197,7 @@ internal fun rememberPresenterDrivers(
 ): LottieComposition? {
     val lottieJsonContent by presenterManager.lottieJsonContent
     PresenterTransitionEffects(presenterManager, appSettings)
+    MessageExpiry(presenterManager)
     val lottieComposition by rememberLottieComposition(lottieJsonContent) {
         LottieCompositionSpec.JsonString(lottieJsonContent)
     }

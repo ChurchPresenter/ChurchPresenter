@@ -228,7 +228,8 @@ class LivePreviewPanelTest {
 
     @Test
     fun `each presenting mode shows Live when its show flag is on, the default`() = runComposeUiTest {
-        for (mode in Presenting.entries.filter { it != Presenting.NONE }) {
+        // A message is no slide content; it goes up whole, through showMessage.
+        for (mode in Presenting.entries.filter { it != Presenting.NONE && it != Presenting.MESSAGE }) {
             setContent {
                 MaterialTheme {
                     LivePreviewPanel(

@@ -2,6 +2,10 @@
 
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.schedule.SCHEDULE_ROW_CARD_TAG
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasText
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -31,6 +35,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.doubleClick
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.onAllNodesWithText
@@ -911,9 +916,17 @@ class MainDesktopComposeTest {
         }
     }
 
-    /** Double-clicks the schedule row reading [label], which takes it live. */
+    /**
+     * Takes the schedule row reading [label] live -- the row itself, not a tab's list that may show
+     * the same name -- by selecting it and then double-clicking it. Selecting first lets the tab the
+     * row opens settle: a double-click whose first click switched the tab could otherwise reach the
+     * row as two single clicks.
+     */
     private fun ComposeUiTest.takeLive(label: String) {
-        onAllNodesWithText(label, substring = true)[0].performMouseInput { doubleClick() }
+        val row = onAllNodes(hasText(label, substring = true) and hasAnyAncestor(hasTestTag(SCHEDULE_ROW_CARD_TAG)))[0]
+        row.performMouseInput { click() }
+        waitForIdle()
+        row.performMouseInput { doubleClick() }
         waitForIdle()
     }
 
@@ -1003,9 +1016,7 @@ class MainDesktopComposeTest {
     @Test
     fun `a lower third taken live from the schedule plays its preset, and a missing one does nothing`() {
         val folder = File(dir, "lower-thirds").apply { mkdirs() }
-        // An hour long: one that ran out while the test waited would clear the display on its own.
-        File(folder, "Pastor.json")
-            .writeText("""{"v":"5.7.4","fr":30,"ip":0,"op":108000,"w":1920,"h":1080,"layers":[]}""")
+        File(folder, "Pastor.json").writeText("""{"v":"5.7.4","fr":30,"ip":0,"op":30,"w":1920,"h":1080,"layers":[]}""")
         val manager = PresenterManager()
         val settings = withOneSong().let {
             it.copy(streamingSettings = it.streamingSettings.copy(lowerThirdFolder = folder.absolutePath))

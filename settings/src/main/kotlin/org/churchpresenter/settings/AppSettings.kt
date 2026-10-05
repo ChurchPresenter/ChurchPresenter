@@ -139,7 +139,9 @@ data class AppSettings(
     /** The backgrounds the preview panel's quick tray offers, in the order it shows them. */
     val quickBackgrounds: List<QuickBackground> = emptyList(),
     /** Whether that tray is open or shut — a panel-local choice, switched from the panel itself. */
-    val quickBackgroundsExpanded: Boolean = true
+    val quickBackgroundsExpanded: Boolean = true,
+    /** The messages saved to go live again -- see [MessageTemplate]. */
+    val messageTemplates: List<MessageTemplate> = emptyList(),
 ) {
     /** What the song identified by [songId] is played at — tempo and capo together. */
     fun tuningFor(songId: String): SongTuning =

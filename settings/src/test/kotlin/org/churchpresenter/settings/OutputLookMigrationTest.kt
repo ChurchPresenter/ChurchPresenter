@@ -43,7 +43,8 @@ class OutputLookMigrationTest {
     fun `every switch moves to its place in the look`() {
         val old = LEGACY_LOOK_PATHS.keys.joinToString(",") { "\"$it\":false" }
         val profile = profiles("""{"id":"p",$old}""").single()
-        assertEquals(OutputLook.NOTHING, profile.look)
+        // Messages came after the switches, so no old file turns them off.
+        assertEquals(OutputLook.NOTHING.copy(messages = true), profile.look)
     }
 
     @Test

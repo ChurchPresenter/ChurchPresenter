@@ -294,7 +294,8 @@ internal fun previewShowsSomething(
 ): Boolean =
     (effectiveMode != Presenting.NONE && showsContentFor(effectiveMode, profile)) ||
         (effectiveMode == presenterManager.unlockedModeFor(profile) &&
-            presenterManager.overlays.value.any { profile.drawsOverContent(it) && showsContentFor(it, profile) })
+            (presenterManager.overlays.value.any { profile.drawsOverContent(it) && showsContentFor(it, profile) } ||
+                (presenterManager.isLive(Presenting.MESSAGE) && showsContentFor(Presenting.MESSAGE, profile))))
 
 /**
  * The tile's slide crossfading between modes, and the overlays up over it, each inside the output's
