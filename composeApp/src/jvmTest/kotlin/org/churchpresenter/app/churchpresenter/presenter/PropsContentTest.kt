@@ -48,7 +48,8 @@ class PropsContentTest {
     fun `an output whose look leaves props out draws none`() = runComposeUiTest {
         mainClock.autoAdvance = false
         val pm = PresenterManager().apply { setPropOn("live", true) }
-        setContent { MaterialTheme { LivePreviewPanel(presenterManager = pm, appSettings = settings(OutputLook(props = false))) } }
+        val noProps = settings(OutputLook(props = false))
+        setContent { MaterialTheme { LivePreviewPanel(presenterManager = pm, appSettings = noProps) } }
         mainClock.advanceTimeBy(100)
         onNodeWithText("ON AIR").assertDoesNotExist()
     }

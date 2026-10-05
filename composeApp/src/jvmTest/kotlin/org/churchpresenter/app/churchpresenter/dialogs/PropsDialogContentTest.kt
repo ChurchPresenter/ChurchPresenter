@@ -83,7 +83,8 @@ class PropsDialogContentTest {
     }
 
     @Test
-    fun `a countdown keeps its time, and a prop with no name is named for its kind`() = dialog(props = emptyList()) { seen ->
+    fun `a countdown keeps its time, and a prop with no name is named for its kind`() =
+        dialog(props = emptyList()) { seen ->
         onNodeWithTag(PROP_ADD_TAG).performClick()
         onNodeWithTag(propKindTag(PropKind.COUNTDOWN)).performClick()
         field(PROP_COUNTDOWN_TAG).performTextInput("10:30:00")

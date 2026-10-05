@@ -29,7 +29,9 @@ class PropsDialogScreenshotTest {
     private val props = listOf(
         PropDefinition("prop1", "Live", PropKind.BADGE, PropCorner.TOP_LEFT, 7, text = "LIVE"),
         PropDefinition("prop2", "Clock", PropKind.CLOCK, PropCorner.TOP_RIGHT, 7),
-        PropDefinition("prop3", "Service starts", PropKind.COUNTDOWN, PropCorner.BOTTOM_RIGHT, 8, countdownTo = "10:30"),
+        PropDefinition(
+            "prop3", "Service starts", PropKind.COUNTDOWN, PropCorner.BOTTOM_RIGHT, 8, countdownTo = "10:30",
+        ),
     )
 
     private fun shoot(name: String, props: List<PropDefinition>, drive: ComposeUiTest.() -> Unit = {}) =

@@ -183,7 +183,8 @@ class RemoteLayersTest {
         followProps(LiveStateDto(contentType = "PROPS", overlays = emptyList(), props = listOf("logo", "clock")),
             follower, everything)
         assertEquals(setOf("logo", "clock"), follower.propsOnAir)
-        followProps(LiveStateDto(contentType = "PROPS", overlays = emptyList(), props = emptyList()), follower, everything)
+        val none = LiveStateDto(contentType = "PROPS", overlays = emptyList(), props = emptyList())
+        followProps(none, follower, everything)
         assertEquals(emptySet(), follower.propsOnAir)
     }
 

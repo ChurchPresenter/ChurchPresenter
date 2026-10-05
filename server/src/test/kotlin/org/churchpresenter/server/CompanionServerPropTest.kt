@@ -99,7 +99,8 @@ class CompanionServerPropTest {
         return next
     }
 
-    private fun CompletableDeferred<PropSwitch>.awaited(): PropSwitch? = runBlocking { withTimeoutOrNull(2_000) { await() } }
+    private fun CompletableDeferred<PropSwitch>.awaited(): PropSwitch? =
+        runBlocking { withTimeoutOrNull(2_000) { await() } }
 
     @Test
     fun `the props are listed with whether each is up`() {
@@ -158,17 +159,20 @@ class CompanionServerPropTest {
         WebSocketMessage(type = Constants.WS_CMD_PROP, payload = payload, commandId = commandId),
     )
 
+    /** The acknowledgement [frame] carries, if it is one. */
+    private fun ackIn(frame: Frame): CommandAckPayload? =
+        (frame as? Frame.Text)?.readText()
+            ?.let { runCatching { json.decodeFromString(WebSocketMessage.serializer(), it) }.getOrNull() }
+            ?.takeIf { it.type == Constants.WS_EVENT_COMMAND_ACK }
+            ?.let { json.decodeFromString(CommandAckPayload.serializer(), it.payload) }
+
     private fun acksFor(ids: Set<String>, vararg frames: String): List<CommandAckPayload> = runBlocking {
         val acks = mutableListOf<CommandAckPayload>()
         withTimeoutOrNull(10_000) {
             client.webSocket(urlString = "ws://127.0.0.1:$port${Constants.ENDPOINT_WS}") {
                 frames.forEach { send(Frame.Text(it)) }
                 while (acks.map { it.commandId }.toSet() != ids) {
-                    val frame = incoming.receive() as? Frame.Text ?: continue
-                    val message = runCatching { json.decodeFromString(WebSocketMessage.serializer(), frame.readText()) }
-                        .getOrNull()?.takeIf { it.type == Constants.WS_EVENT_COMMAND_ACK } ?: continue
-                    json.decodeFromString(CommandAckPayload.serializer(), message.payload)
-                        .takeIf { it.commandId in ids }?.let(acks::add)
+                    ackIn(incoming.receive())?.takeIf { it.commandId in ids }?.let(acks::add)
                 }
             }
         }
