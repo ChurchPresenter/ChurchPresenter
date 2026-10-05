@@ -1003,7 +1003,9 @@ class MainDesktopComposeTest {
     @Test
     fun `a lower third taken live from the schedule plays its preset, and a missing one does nothing`() {
         val folder = File(dir, "lower-thirds").apply { mkdirs() }
-        File(folder, "Pastor.json").writeText("""{"v":"5.7.4","fr":30,"ip":0,"op":30,"w":1920,"h":1080,"layers":[]}""")
+        // An hour long: one that ran out while the test waited would clear the display on its own.
+        File(folder, "Pastor.json")
+            .writeText("""{"v":"5.7.4","fr":30,"ip":0,"op":108000,"w":1920,"h":1080,"layers":[]}""")
         val manager = PresenterManager()
         val settings = withOneSong().let {
             it.copy(streamingSettings = it.streamingSettings.copy(lowerThirdFolder = folder.absolutePath))
