@@ -2,6 +2,9 @@
 
 package org.churchpresenter.profiles
 
+import org.churchpresenter.settings.MediaLook
+import org.churchpresenter.settings.OutputLook
+import org.churchpresenter.settings.SlideLook
 import org.churchpresenter.canvas.PreviewShapePreset
 import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.hasSetTextAction
@@ -68,8 +71,11 @@ class ProfilesRedesignTest {
             waitForIdle()
 
             val p = get().profile()
-            assertFalse(p.showBible || p.showSongs || p.showMedia || p.showSubtitles || p.showQA || p.showSTT)
-            assertFalse(p.showPictures || p.showCanvas || p.showFullscreenBackground)
+            assertFalse(
+                p.showBible || p.showSongs || p.look.media.video || p.look.media.subtitles || p.look.slide.qa ||
+                    p.look.captions,
+            )
+            assertFalse(p.look.media.pictures || p.look.slide.canvas || p.look.background.fullscreen)
         }
     }
 
@@ -87,14 +93,17 @@ class ProfilesRedesignTest {
 
     @Test
     fun `Show all switches them back on`() {
-        val off = OutputProfile(bibleMode = Constants.SONG_LANG_OFF, showMedia = false, showQA = false)
+        val off = OutputProfile(
+            bibleMode = Constants.SONG_LANG_OFF,
+            look = OutputLook(media = MediaLook(video = false), slide = SlideLook(qa = false)),
+        )
         profilesTab(profileDocument(profile = off)) { get ->
             openProfilePage(ProfilePage.Content)
             onNodeWithText("Show all").performClick()
             waitForIdle()
 
             val p = get().profile()
-            assertTrue(p.showBible && p.showMedia && p.showQA)
+            assertTrue(p.showBible && p.look.media.video && p.look.slide.qa)
         }
     }
 
@@ -112,7 +121,8 @@ class ProfilesRedesignTest {
 
     @Test
     fun `the summary names what is hidden`() {
-        profilesTab(profileDocument(profile = OutputProfile(showCanvas = false))) { _ ->
+        val noCanvas = OutputProfile(look = OutputLook(slide = SlideLook(canvas = false)))
+        profilesTab(profileDocument(profile = noCanvas)) { _ ->
             openProfilePage(ProfilePage.Content)
             // Song look-ahead ships off, so it is named too; what matters is that Canvas is.
             onNode(hasText("hidden:", substring = true) and hasText("Canvas", substring = true)).assertExists()

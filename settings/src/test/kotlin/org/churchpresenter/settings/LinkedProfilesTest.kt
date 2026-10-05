@@ -36,11 +36,11 @@ class LinkedProfilesTest {
         id = "youth",
         name = "Youth night",
         parentId = "main",
-        showQA = showQa,
         overrides = overrides,
         bibleSettings = BibleSettings(
             translations = listOf(kjv.copy(textFontSize = fontSize), rst.copy(textFontSize = 70)),
         ),
+        look = OutputLook(slide = SlideLook(qa = showQa)),
     )
 
     private fun proj(vararg profiles: OutputProfile) = ProjectionSettings(outputProfiles = profiles.toList())
@@ -101,26 +101,26 @@ class LinkedProfilesTest {
 
     @Test
     fun `a follower takes its master's values except the ones it changed`() {
-        val resolved = proj(master(fontSize = 90, fadeIn = false), follower(setOf("showQA"), showQa = false))
+        val resolved = proj(master(fontSize = 90, fadeIn = false), follower(setOf("look.slide.qa"), showQa = false))
             .withLinksResolved()
         val youth = resolved.p("youth")
         assertEquals(90, youth.bibleSettings.translations[0].textFontSize)
         assertFalse(youth.bibleSettings.fadeIn)
-        assertFalse(youth.showQA)
+        assertFalse(youth.look.slide.qa)
         assertEquals("Youth night", youth.name)
     }
 
     @Test
     fun `a link to a missing or linked master is cleared and the values are kept`() {
-        val orphan = follower(setOf("showQA"), showQa = false).copy(parentId = "gone")
-        val chained = OutputProfile(id = "c", parentId = "youth", showPictures = false,
-                overrides = setOf("showPictures"))
+        val orphan = follower(setOf("look.slide.qa"), showQa = false).copy(parentId = "gone")
+        val chained = OutputProfile(id = "c", parentId = "youth",
+                overrides = setOf("look.media.pictures"), look = OutputLook(media = MediaLook(pictures = false)))
         val resolved = proj(master(), follower(), orphan.copy(id = "o"), chained).withLinksResolved()
         assertNull(resolved.p("o").parentId)
         assertTrue(resolved.p("o").overrides.isEmpty())
-        assertFalse(resolved.p("o").showQA)
+        assertFalse(resolved.p("o").look.slide.qa)
         assertNull(resolved.p("c").parentId)
-        assertFalse(resolved.p("c").showPictures)
+        assertFalse(resolved.p("c").look.media.pictures)
     }
 
     @Test
@@ -145,11 +145,12 @@ class LinkedProfilesTest {
     @Test
     fun `an edit on a follower becomes its own and its display mode stays the master's`() {
         val edited = proj(master(), follower()).withLinksResolved().editProfile("youth") {
-            it.copy(showPictures = false, displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR)
+            it.copy(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR)
+                .withLook { copy(media = media.copy(pictures = false)) }
         }
         val youth = edited.p("youth")
-        assertEquals(setOf("showPictures"), youth.overrides)
-        assertFalse(youth.showPictures)
+        assertEquals(setOf("look.media.pictures"), youth.overrides)
+        assertFalse(youth.look.media.pictures)
         assertEquals(master().displayMode, youth.displayMode)
     }
 
@@ -157,42 +158,43 @@ class LinkedProfilesTest {
     fun `an edit on a master reaches every follower that has not changed that value`() {
         val start = proj(master(), follower(setOf("bibleSettings.fadeIn"))).withLinksResolved()
         val edited = start.editProfile("main") { m ->
-            m.copy(showMedia = false, bibleSettings = m.bibleSettings.copy(fadeIn = false))
+            m.copy(bibleSettings = m.bibleSettings.copy(fadeIn = false))
+                .withLook { copy(media = media.copy(video = false)) }
         }
-        assertFalse(edited.p("youth").showMedia)
+        assertFalse(edited.p("youth").look.media.video)
         assertTrue(edited.p("youth").bibleSettings.fadeIn, "the follower's own value stays")
     }
 
     @Test
     fun `editing a profile that is not there changes nothing`() {
         val start = proj(master())
-        assertSame(start, start.editProfile("nope") { it.copy(showMedia = false) })
+        assertSame(start, start.editProfile("nope") { it.withLook { copy(media = media.copy(video = false)) } })
     }
 
     @Test
     fun `revert gives the values under a prefix back to the master`() {
-        val start = proj(master(fontSize = 90), follower(setOf("showQA",
+        val start = proj(master(fontSize = 90), follower(setOf("look.slide.qa",
                 "bibleSettings.translations[kjv.spb].textFontSize"), 50, false))
             .withLinksResolved()
         assertEquals(50, start.p("youth").bibleSettings.translations[0].textFontSize)
         val reverted = start.revertToMaster("youth", listOf("bibleSettings"))
         assertEquals(90, reverted.p("youth").bibleSettings.translations[0].textFontSize)
-        assertEquals(setOf("showQA"), reverted.p("youth").overrides)
-        assertFalse(reverted.p("youth").showQA)
+        assertEquals(setOf("look.slide.qa"), reverted.p("youth").overrides)
+        assertFalse(reverted.p("youth").look.slide.qa)
     }
 
     @Test
     fun `unlink keeps every value and places the profile after its old master's block`() {
         val other = OutputProfile(id = "other")
         val second = follower().copy(id = "easter", name = "Easter")
-        val start = proj(master(fontSize = 90), follower(setOf("showQA"), showQa = false), second,
+        val start = proj(master(fontSize = 90), follower(setOf("look.slide.qa"), showQa = false), second,
                 other).withLinksResolved()
         val unlinked = start.unlinkProfile("youth")
         val youth = unlinked.p("youth")
         assertNull(youth.parentId)
         assertTrue(youth.overrides.isEmpty())
         assertEquals(90, youth.bibleSettings.translations[0].textFontSize)
-        assertFalse(youth.showQA)
+        assertFalse(youth.look.slide.qa)
         assertEquals(listOf("main", "easter", "youth", "other"), unlinked.order())
         // A profile that follows nothing, or is not there, is left alone.
         assertSame(unlinked, unlinked.unlinkProfile("youth"))
@@ -201,16 +203,20 @@ class LinkedProfilesTest {
 
     @Test
     fun `link and keep holds the differences as overrides, link and match drops them`() {
-        val standalone = OutputProfile(id = "s", showQA = false, displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR)
+        val standalone = OutputProfile(
+            id = "s",
+            displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR,
+            look = OutputLook(slide = SlideLook(qa = false)),
+        )
         val start = proj(master(), standalone)
         val kept = start.linkProfile("s", "main", keepOwnValues = true)
-        assertTrue("showQA" in kept.p("s").overrides)
+        assertTrue("look.slide.qa" in kept.p("s").overrides)
         assertFalse("displayMode" in kept.p("s").overrides)
-        assertFalse(kept.p("s").showQA)
+        assertFalse(kept.p("s").look.slide.qa)
         assertEquals(master().displayMode, kept.p("s").displayMode)
         val matched = start.linkProfile("s", "main", keepOwnValues = false)
         assertTrue(matched.p("s").overrides.isEmpty())
-        assertTrue(matched.p("s").showQA)
+        assertTrue(matched.p("s").look.slide.qa)
     }
 
     @Test
@@ -237,7 +243,7 @@ class LinkedProfilesTest {
 
     @Test
     fun `counting changes, and reading who follows whom`() {
-        val start = proj(master(), follower(setOf("showQA", "bibleSettings.fadeIn")))
+        val start = proj(master(), follower(setOf("look.slide.qa", "bibleSettings.fadeIn")))
         assertEquals(2, overrideCount(start.p("youth")))
         assertEquals(1, overrideCount(start.p("youth"), listOf("bibleSettings")))
         assertEquals(listOf("youth"), start.linkedTo("main").map { it.id })
@@ -247,12 +253,12 @@ class LinkedProfilesTest {
 
     @Test
     fun `a master with followers cannot be deleted and a duplicate follows nothing`() {
-        val start = proj(master(), follower(setOf("showQA"), showQa = false)).withLinksResolved()
+        val start = proj(master(), follower(setOf("look.slide.qa"), showQa = false)).withLinksResolved()
         assertSame(start, start.deleteOutputProfile("main"))
         val duplicated = start.duplicateOutputProfile("youth", "Youth copy")
         val copy = duplicated.outputProfiles.last()
         assertNull(copy.parentId)
         assertTrue(copy.overrides.isEmpty())
-        assertFalse(copy.showQA)
+        assertFalse(copy.look.slide.qa)
     }
 }

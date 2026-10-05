@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.settings.MediaLook
+import org.churchpresenter.settings.OutputLook
+import org.churchpresenter.settings.SlideLook
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
@@ -110,19 +113,19 @@ class PresenterOutputContentTest {
     @Test
     fun `pictures mode runs the picture output`() = runComposeUiTest {
         val manager = PresenterManager().apply { setDisplayedImagePath("/tmp/none.jpg") }
-        setContent(ComposeContent(Presenting.PICTURES, OutputProfile(showPictures = true), manager))
+        setContent(ComposeContent(Presenting.PICTURES, picturesProfile(true), manager))
     }
 
     @Test
     fun `an output with pictures switched off skips both picture and slide output`() = runComposeUiTest {
         val manager = PresenterManager().apply { setDisplayedImagePath("/tmp/none.jpg") }
-        setContent(ComposeContent(Presenting.PICTURES, OutputProfile(showPictures = false), manager))
-        setContent(ComposeContent(Presenting.PRESENTATION, OutputProfile(showPictures = false), manager))
+        setContent(ComposeContent(Presenting.PICTURES, picturesProfile(false), manager))
+        setContent(ComposeContent(Presenting.PRESENTATION, picturesProfile(false), manager))
     }
 
     @Test
     fun `presentation mode runs the slide output`() = runComposeUiTest {
-        setContent(ComposeContent(Presenting.PRESENTATION, OutputProfile(showPictures = true), PresenterManager()))
+        setContent(ComposeContent(Presenting.PRESENTATION, picturesProfile(true), PresenterManager()))
     }
 
     @Test
@@ -215,15 +218,21 @@ class PresenterOutputContentTest {
 
     @Test
     fun `canvas mode runs the scene output with no scene selected`() = runComposeUiTest {
-        setContent(ComposeContent(Presenting.CANVAS, OutputProfile(showCanvas = true), PresenterManager()))
+        val canvas = OutputProfile(look = OutputLook(slide = SlideLook(canvas = true)))
+        setContent(ComposeContent(Presenting.CANVAS, canvas, PresenterManager()))
     }
 
     @Test
     fun `an output with canvas and website switched off draws neither`() = runComposeUiTest {
         val manager = PresenterManager().apply { setWebsiteUrl("https://example.org") }
-        val off = OutputProfile(showCanvas = false, showWebsite = false, showMedia = false)
+        val off = OutputProfile(
+            look = OutputLook(media = MediaLook(video = false), slide = SlideLook(canvas = false, web = false)),
+        )
         setContent(ComposeContent(Presenting.CANVAS, off, manager))
         setContent(ComposeContent(Presenting.WEBSITE, off, manager))
         setContent(ComposeContent(Presenting.MEDIA, off, manager))
     }
 }
+
+/** A profile with pictures switched [on] or off and everything else as it ships. */
+private fun picturesProfile(on: Boolean) = OutputProfile(look = OutputLook(media = MediaLook(pictures = on)))

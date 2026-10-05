@@ -61,7 +61,7 @@ class SectionMastersTest {
     @Test
     fun `every path belongs to the section whose page edits it, and the display mode to none`() {
         assertEquals(ProfileSection.BIBLE, ProfileSection.of("bibleSettings.translations[kjv.spb].textFontSize"))
-        assertEquals(ProfileSection.CONTENT, ProfileSection.of("showQA"))
+        assertEquals(ProfileSection.CONTENT, ProfileSection.of("look.slide.qa"))
         assertEquals(ProfileSection.BACKGROUND, ProfileSection.of("backgroundOverrides"))
         assertEquals(ProfileSection.STAGE, ProfileSection.of("stageMonitorSettings.zones"))
         assertNull(ProfileSection.of(DISPLAY_MODE_PATH))

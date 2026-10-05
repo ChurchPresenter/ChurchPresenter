@@ -2,6 +2,7 @@
 
 package org.churchpresenter.profiles
 
+import org.churchpresenter.settings.withLook
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,6 +10,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.LowerThirdPlacement
+import org.churchpresenter.settings.OutputLook
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.PlaceableContent
 import org.churchpresenter.settings.utils.Constants
@@ -25,14 +27,16 @@ class ProfilePlacementRowTest {
         assertEquals(PlaceableContent.entries, lowerThird.placeableShown())
         assertEquals(
             listOf(PlaceableContent.WEBSITE, PlaceableContent.CANVAS),
-            lowerThird.copy(showMedia = false, showPictures = false).placeableShown(),
+            lowerThird.withLook { copy(media = media.copy(video = false, pictures = false)) }.placeableShown(),
             "pictures and presentations share one switch, so both go with it",
         )
     }
 
     @Test
     fun `picking In band puts that content in the band and nothing else`() = runComposeUiTest {
-        var profile by mutableStateOf(lowerThird.copy(showPictures = false, showWebsite = false, showCanvas = false))
+        var profile by mutableStateOf(
+            lowerThird.withLook { onlyMedia() },
+        )
         setContent { PlacementRows(profile) { profile = it } }
         onAllNodesWithText("In band")[0].performClick()
         waitForIdle()
@@ -43,10 +47,8 @@ class ProfilePlacementRowTest {
     @Test
     fun `picking Full screen again puts it back`() = runComposeUiTest {
         var profile by mutableStateOf(
-            lowerThird.copy(
-                showPictures = false, showWebsite = false, showCanvas = false,
-                lowerThirdPlacements = mapOf(PlaceableContent.MEDIA to LowerThirdPlacement.IN_BAND),
-            ),
+            lowerThird.copy(lowerThirdPlacements = mapOf(PlaceableContent.MEDIA to LowerThirdPlacement.IN_BAND))
+                .withLook { onlyMedia() },
         )
         setContent { PlacementRows(profile) { profile = it } }
         onAllNodesWithText("Full screen")[0].performClick()
@@ -55,3 +57,7 @@ class ProfilePlacementRowTest {
         assertEquals(LowerThirdPlacement.FULL_SCREEN, profile.placementFor(PlaceableContent.MEDIA))
     }
 }
+
+/** A look with video the only placeable content left on. */
+private fun OutputLook.onlyMedia(): OutputLook =
+    copy(media = media.copy(pictures = false), slide = slide.copy(web = false, canvas = false))

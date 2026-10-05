@@ -1,5 +1,8 @@
 package org.churchpresenter.profiles
 
+import org.churchpresenter.settings.OutputLook
+import org.churchpresenter.settings.SlideLook
+import org.churchpresenter.settings.withLook
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
@@ -37,14 +40,13 @@ class StyleTabsForProfileTest {
 
     @Test
     fun `content switched off takes its tab away`() {
-        val narrowed = allOn.copy(
-            bibleMode = Constants.SONG_LANG_OFF,
-            songMode = Constants.SONG_LANG_OFF,
-            showSTT = false,
-            showSubtitles = false,
-            showQA = false,
-            showDictionary = false,
-        )
+        val narrowed = allOn.copy(bibleMode = Constants.SONG_LANG_OFF, songMode = Constants.SONG_LANG_OFF).withLook {
+            copy(
+                media = media.copy(subtitles = false),
+                slide = slide.copy(qa = false, dictionary = false),
+                captions = false,
+            )
+        }
         assertEquals(listOf(CustomizePane.BACKGROUND), stylePanesFor(narrowed))
     }
 
@@ -52,8 +54,7 @@ class StyleTabsForProfileTest {
     fun `the stage monitor keeps its own tab whatever it shows`() {
         val bare = OutputProfile(
             displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR,
-            showQA = false,
-            showDictionary = false,
+            look = OutputLook(slide = SlideLook(qa = false, dictionary = false)),
         )
         assertEquals(listOf(CustomizePane.STAGE_MONITOR), stylePanesFor(bare))
     }
@@ -66,7 +67,7 @@ class StyleTabsForProfileTest {
 
     @Test
     fun `a background chip needs both its surface and its content`() {
-        val noBibleBackground = allOn.copy(showBibleBackground = false)
+        val noBibleBackground = allOn.withLook { copy(background = background.copy(bible = false)) }
         val noBible = allOn.copy(bibleMode = Constants.SONG_LANG_OFF)
         assertFalse(CustomizeElement.BACKGROUND_BIBLE in styleElementsFor(CustomizePane.BACKGROUND, noBibleBackground))
         assertFalse(CustomizeElement.BACKGROUND_BIBLE in styleElementsFor(CustomizePane.BACKGROUND, noBible))
@@ -75,22 +76,18 @@ class StyleTabsForProfileTest {
 
     @Test
     fun `the default surface is the band's on a lower third and the screen's otherwise`() {
-        val band = allOn.copy(
-            displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
-            showFullscreenBackground = false,
-        )
-        val screen = allOn.copy(showLowerThirdBackground = false)
+        val band = allOn.copy(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL)
+            .withLook { copy(background = background.copy(fullscreen = false)) }
+        val screen = allOn.withLook { copy(background = background.copy(lowerThird = false)) }
         assertTrue(CustomizeElement.BACKGROUND_DEFAULT in styleElementsFor(CustomizePane.BACKGROUND, band))
         assertTrue(CustomizeElement.BACKGROUND_DEFAULT in styleElementsFor(CustomizePane.BACKGROUND, screen))
     }
 
     @Test
     fun `with no background surface left the Background tab goes too`() {
-        val none = allOn.copy(
-            showFullscreenBackground = false,
-            showBibleBackground = false,
-            showSongsBackground = false,
-        )
+        val none = allOn.withLook {
+            copy(background = background.copy(fullscreen = false, bible = false, songs = false))
+        }
         assertFalse(CustomizePane.BACKGROUND in stylePanesFor(none))
     }
 

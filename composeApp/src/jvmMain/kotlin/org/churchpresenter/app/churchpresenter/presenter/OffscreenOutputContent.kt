@@ -118,9 +118,9 @@ internal fun OffscreenOutputContent(
             val isStageMonitor = profile.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
             val outputRole = Constants.OUTPUT_ROLE_NORMAL
             // General per-output background toggle — same field/logic as native output
-            // (main.kt). showBibleBackground/showSongsBackground below are an additional
+            // (main.kt). look.background.bible/songs below are an additional
             // layer on top of this, not a replacement for it.
-            val showBg = if (isLowerThird) profile.showLowerThirdBackground else profile.showFullscreenBackground
+            val showBg = if (isLowerThird) profile.look.background.lowerThird else profile.look.background.fullscreen
             // One tile of a merged picture shows only its own part of it -- see MergeTile.kt. The
             // identify card below is left out of that, so it names this output, not the picture.
             val mergeOutput = Constants.previewOutputKey(context.kind.previewKind, outputIndex)

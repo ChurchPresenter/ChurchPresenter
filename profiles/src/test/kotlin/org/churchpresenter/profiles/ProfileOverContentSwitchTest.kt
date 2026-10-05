@@ -2,6 +2,8 @@
 
 package org.churchpresenter.profiles
 
+import org.churchpresenter.settings.OutputLook
+import org.churchpresenter.settings.SlideLook
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -78,7 +80,7 @@ class ProfileOverContentSwitchTest {
 
     @Test
     fun `a switch is offered only while its content is shown here`() = page(
-        OutputProfile(id = "p", showStreaming = false, showAnnouncements = false, showSTT = false),
+        OutputProfile(id = "p", look = OutputLook(graphics = false, announcements = false, captions = false)),
     ) { _ ->
         assertFalse(offered(lowerThird) || offered(announcements) || offered(captions))
     }
@@ -90,10 +92,12 @@ class ProfileOverContentSwitchTest {
     }
 
     @Test
-    fun `Show all leaves them alone`() = page(OutputProfile(id = "p", showQA = false)) { current ->
+    fun `Show all leaves them alone`() = page(
+        OutputProfile(id = "p", look = OutputLook(slide = SlideLook(qa = false))),
+    ) { current ->
         onAllNodesWithText("Show all")[0].performClick()
         waitForIdle()
-        assertTrue(current().showQA, "Show all shows the hidden content")
+        assertTrue(current().look.slide.qa, "Show all shows the hidden content")
         assertEquals(false, current().lowerThirdOverContent, "and does not move the lower third over the content")
     }
 }

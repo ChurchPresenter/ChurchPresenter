@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.settings.MediaLook
+import org.churchpresenter.settings.OutputLook
+import org.churchpresenter.settings.SlideLook
 import org.churchpresenter.presenter.showsContentFor
 import org.churchpresenter.server.BrowserSourceFrame
 import androidx.compose.runtime.mutableStateOf
@@ -360,15 +363,13 @@ class BrowserSourceVideoRendererTest {
         val allOff = OutputProfile(
             bibleMode = Constants.SONG_LANG_OFF,
             songMode = Constants.SONG_LANG_OFF,
-            showPictures = false,
-            showAnnouncements = false,
-            showStreaming = false,
-            showMedia = false,
-            showWebsite = false,
-            showCanvas = false,
-            showQA = false,
-            showSTT = false,
-            showDictionary = false,
+            look = OutputLook(
+                media = MediaLook(pictures = false, video = false),
+                slide = SlideLook(web = false, canvas = false, qa = false, dictionary = false),
+                announcements = false,
+                graphics = false,
+                captions = false,
+            ),
         )
         assertFalse(showsContentFor(Presenting.BIBLE, allOff))
         assertFalse(showsContentFor(Presenting.LYRICS, allOff))

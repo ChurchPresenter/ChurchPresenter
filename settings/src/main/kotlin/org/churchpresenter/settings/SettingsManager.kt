@@ -148,6 +148,7 @@ class SettingsManager {
         19 to ::migrateBibleOffsetsToBoxes,
         21 to ::migrateTopLevelStylingOut,
         22 to ::migrateBibleAndSongsOut,
+        23 to ::migrateShowSwitchesIntoLooks,
     )
 
     /** The flat song-number field each [SongCreditStyle] property of the title slide's is seeded from. */
@@ -438,6 +439,20 @@ class SettingsManager {
         val newProjection = JsonObject(projection + ("outputProfiles" to JsonArray(seeded)))
         val seededRoot = JsonObject(root + ("projectionSettings" to newProjection))
         return JsonObject(seededRoot.toMutableMap().apply { stripBibleAndSongStyling() }).toString()
+    }
+
+    /**
+     * Schema version 23. A profile's flat `show*` switches become its look, grouped by layer
+     * ([OutputLook]), and a linked profile's overrides of them are renamed to their new paths, so
+     * every output draws what it did and every follower keeps its own switches.
+     */
+    private fun migrateShowSwitchesIntoLooks(raw: String): String {
+        val root = parseSettingsRoot(raw) ?: return raw
+        val projection = root["projectionSettings"]?.jsonObject ?: return raw
+        val profiles = projection["outputProfiles"]?.jsonArray ?: return raw
+        val moved = profiles.map { element -> (element as? JsonObject)?.let(::moveShowSwitchesIntoLook) ?: element }
+        val newProjection = JsonObject(projection + ("outputProfiles" to JsonArray(moved)))
+        return JsonObject(root + ("projectionSettings" to newProjection)).toString()
     }
 
     /** The factory profile without the two sections [seedBibleAndSongs] is to fill from the document. */

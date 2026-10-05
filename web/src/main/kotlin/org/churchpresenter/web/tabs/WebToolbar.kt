@@ -413,5 +413,5 @@ private fun WebTabScope.WebTypeToPage() {
 internal fun hasWebCapableOutput(proj: ProjectionSettings): Boolean =
     proj.screenAssignments.any {
         it.targetType != Constants.TARGET_TYPE_DECKLINK && it.targetDisplay >= 0 &&
-            proj.profileFor(it)?.showWebsite == true
+            proj.profileFor(it)?.look?.slide?.web == true
     }

@@ -8,12 +8,14 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import io.github.alexzhirkevich.compottie.LottieComposition
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.content
 import org.churchpresenter.app.churchpresenter.viewmodel.drawsOverContent
 import org.churchpresenter.app.churchpresenter.viewmodel.legacyProgram
 import org.churchpresenter.app.churchpresenter.viewmodel.unlockedModeFor
 import org.churchpresenter.liveshow.Cue
 import org.churchpresenter.liveshow.Layer
 import org.churchpresenter.media.viewmodel.MediaViewModel
+import org.churchpresenter.presenter.showsContentFor
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.sharedui.models.Presenting
@@ -79,22 +81,24 @@ internal fun OutputLayers(mode: Presenting, surface: OutputSurface) {
 /** What one cue draws on [surface], when the output's profile shows that kind of content. */
 @Composable
 internal fun CueContent(cue: Cue, surface: OutputSurface) {
-    val profile = surface.profile
+    // The output's look decides whether it draws this kind of content at all; a background goes by
+    // the background switches, which the background layer reads itself.
+    if (cue !is Cue.Background && !showsContentFor(cue.content, surface.profile)) return
     when (cue) {
-        is Cue.Verses -> if (profile.showBible) BibleCue(surface)
-        is Cue.Song -> if (profile.showSongs) SongCue(surface)
-        is Cue.Picture -> if (profile.showPictures) PictureCue(surface)
-        is Cue.PresentationSlide -> if (profile.showPictures) PresentationCue(surface)
+        is Cue.Verses -> BibleCue(surface)
+        is Cue.Song -> SongCue(surface)
+        is Cue.Picture -> PictureCue(surface)
+        is Cue.PresentationSlide -> PresentationCue(surface)
         // Audio draws nothing; which of the two the media is follows the media view model, as it
         // always has, so a video and an audio cue go through the same check.
-        is Cue.Video, is Cue.Audio -> if (profile.showMedia) MediaCue(surface)
-        is Cue.LowerThird -> if (profile.showStreaming) LowerThirdCue(surface)
-        is Cue.Announcement -> if (profile.showAnnouncements) AnnouncementCue(surface)
-        is Cue.Web -> if (profile.showWebsite) WebCue(surface)
-        is Cue.SceneCue -> if (profile.showCanvas) ScenePresenter(scene = surface.presenterManager.activeScene.value)
-        is Cue.QuestionCue -> if (profile.showQA) QuestionCue(surface)
-        is Cue.Captions -> if (profile.showSTT) CaptionsCue(surface)
-        is Cue.Dictionary -> if (profile.showDictionary) DictionaryCue(surface)
+        is Cue.Video, is Cue.Audio -> MediaCue(surface)
+        is Cue.LowerThird -> LowerThirdCue(surface)
+        is Cue.Announcement -> AnnouncementCue(surface)
+        is Cue.Web -> WebCue(surface)
+        is Cue.SceneCue -> ScenePresenter(scene = surface.presenterManager.activeScene.value)
+        is Cue.QuestionCue -> QuestionCue(surface)
+        is Cue.Captions -> CaptionsCue(surface)
+        is Cue.Dictionary -> DictionaryCue(surface)
         is Cue.Background -> BackgroundCue(cue, surface)
         // Not put on air until its own migration step.
         is Cue.Message -> Unit

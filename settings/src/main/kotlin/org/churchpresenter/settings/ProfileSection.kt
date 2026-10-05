@@ -43,10 +43,7 @@ const val OWN_SECTION = ""
 /** Everything the Content & sources page decides: what is shown, from where, and how it fits. */
 val CONTENT_PATHS = listOf(
     "bibleMode", "bibleTranslations", "songMode", "songTranslations", "songLookAhead", "showChords",
-    "showTransposeControls",
-    "showPictures", "showMedia", "showSubtitles", "showStreaming", "showAnnouncements", "showWebsite",
-    "showQA", "showSTT", "showDictionary", "showCanvas", "showFullscreenBackground",
-    "showLowerThirdBackground", "showBibleBackground", "showSongsBackground", "pictureScaleMode",
+    "showTransposeControls", "look", "pictureScaleMode",
     "mediaScaleMode", "lowerThirdPlacements",
     "lowerThirdOverContent", "announcementsOverContent", "captionsOverContent",
 )

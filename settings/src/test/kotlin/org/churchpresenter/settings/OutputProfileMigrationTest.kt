@@ -339,11 +339,11 @@ class OutputProfileMigrationTest {
         assertSame(BLANK_OUTPUT_PROFILE, profile)
         assertFalse(profile.showBible)
         assertFalse(profile.showSongs)
-        assertFalse(profile.showSubtitles)
-        assertFalse(profile.showFullscreenBackground)
-        assertFalse(profile.showLowerThirdBackground)
-        assertFalse(profile.showBibleBackground)
-        assertFalse(profile.showSongsBackground)
+        assertFalse(profile.look.media.subtitles)
+        assertFalse(profile.look.background.fullscreen)
+        assertFalse(profile.look.background.lowerThird)
+        assertFalse(profile.look.background.bible)
+        assertFalse(profile.look.background.songs)
     }
 
     @Test

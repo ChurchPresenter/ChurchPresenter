@@ -37,7 +37,7 @@ internal fun BibleCue(surface: OutputSurface) {
         isLowerThirdVertical = profile.isLowerThirdVertical,
         outputRole = surface.outputRole,
         transitionAlpha = presenterManager.bibleTransitionAlpha.value,
-        showBackground = surface.showsBackground(profile.showBibleBackground),
+        showBackground = surface.showsBackground(profile.look.background.bible),
         crossfadeEnabled = appSettings.bibleSettings.crossfade,
         bibleTranslations = profile.bibleTranslations,
         drawsBackground = false,
@@ -64,7 +64,7 @@ internal fun SongCue(surface: OutputSurface) {
         lookAheadEnabled = profile.songLookAhead,
         allLyricSections = songPosition.allSections,
         displaySectionIndex = songPosition.sectionIndex,
-        showBackground = surface.showsBackground(profile.showSongsBackground),
+        showBackground = surface.showsBackground(profile.look.background.songs),
         crossfadeEnabled = appSettings.songSettings.crossfade,
         languageOverride = profile.songMode,
         languageSelection = profile.songTranslations,
@@ -91,7 +91,7 @@ internal fun BackgroundCue(cue: Cue.Background, surface: OutputSurface) {
                 outputRole = surface.outputRole,
                 transitionAlpha = presenterManager.bibleTransitionAlpha.value,
                 clearing = presenterManager.clearDisplayRequested.value,
-                showBackground = surface.showsBackground(profile.showBibleBackground),
+                showBackground = surface.showsBackground(profile.look.background.bible),
                 bibleTranslations = profile.bibleTranslations,
             )
         }
@@ -103,7 +103,7 @@ internal fun BackgroundCue(cue: Cue.Background, surface: OutputSurface) {
                 isLowerThird = profile.isLowerThird,
                 transitionAlpha = presenterManager.songTransitionAlpha.value,
                 clearing = presenterManager.clearDisplayRequested.value,
-                showBackground = surface.showsBackground(profile.showSongsBackground),
+                showBackground = surface.showsBackground(profile.look.background.songs),
             )
         }
     }

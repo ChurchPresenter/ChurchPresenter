@@ -97,8 +97,9 @@ internal fun BoxScope.PreviewBackgroundLayer(
         PreviewBackgroundSurface.BIBLE -> if (lowerThird) BackgroundScope.BIBLE_LOWER_THIRD else BackgroundScope.BIBLE
         PreviewBackgroundSurface.SONGS -> if (lowerThird) BackgroundScope.SONG_LOWER_THIRD else BackgroundScope.SONG
     }
-    val shown = (if (lowerThird) profile.showLowerThirdBackground else profile.showFullscreenBackground) &&
-        (if (surface == PreviewBackgroundSurface.BIBLE) profile.showBibleBackground else profile.showSongsBackground)
+    val shown = (if (lowerThird) profile.look.background.lowerThird else profile.look.background.fullscreen) &&
+        (if (surface == PreviewBackgroundSurface.BIBLE) profile.look.background.bible
+        else profile.look.background.songs)
     BoxWithConstraints(modifier = Modifier.matchParentSize()) {
         val previewWidth = maxWidth
         val checker = mode == PreviewBackgroundMode.CHECKER

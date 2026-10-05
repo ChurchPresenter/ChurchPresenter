@@ -2,6 +2,7 @@
 
 package org.churchpresenter.profiles
 
+import org.churchpresenter.settings.withLook
 import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasTextExactly
@@ -92,9 +93,9 @@ class ProfileHeaderTest {
             contentSwitch("Canvas").performClick()
             waitForIdle()
 
-            assertFalse(get().profile().showCanvas, "Canvas ships on and must have gone off")
-            assertTrue(get().profile().showQA, "the switch beside it must not move")
-            assertTrue(get().profile().showPictures)
+            assertFalse(get().profile().look.slide.canvas, "Canvas ships on and must have gone off")
+            assertTrue(get().profile().look.slide.qa, "the switch beside it must not move")
+            assertTrue(get().profile().look.media.pictures)
         }
     }
 
@@ -139,7 +140,7 @@ class ProfileHeaderTest {
             waitForIdle()
 
             assertFalse(
-                get().profile().showDictionary,
+                get().profile().look.slide.dictionary,
                 "a confidence screen must be able to stop showing the dictionary card",
             )
         }
@@ -160,11 +161,11 @@ class ProfileHeaderTest {
     @Test
     fun `the subtitles switch is there, having never had one anywhere else`() {
         profilesTab(doc()) { get ->
-            val before = get().profile().showSubtitles
+            val before = get().profile().look.media.subtitles
             contentSwitch("Subtitles").performClick()
             waitForIdle()
 
-            assertEquals(!before, get().profile().showSubtitles)
+            assertEquals(!before, get().profile().look.media.subtitles)
         }
     }
 
@@ -182,20 +183,20 @@ class ProfileHeaderTest {
     @Test
     fun `every content switch flips its own flag`() {
         val switches: List<Pair<String, (OutputProfile) -> Boolean>> = listOf(
-            "Pictures/Presentation" to { p -> p.showPictures },
-            "Media" to { p -> p.showMedia },
-            "Subtitles" to { p -> p.showSubtitles },
-            "Lower Third" to { p -> p.showStreaming },
-            "Announcements" to { p -> p.showAnnouncements },
-            "Web" to { p -> p.showWebsite },
-            "Canvas" to { p -> p.showCanvas },
-            "Q&A" to { p -> p.showQA },
-            "Live captions" to { p -> p.showSTT },
-            "Dictionary" to { p -> p.showDictionary },
-            "Background" to { p -> p.showFullscreenBackground },
-            "Lower Third Background" to { p -> p.showLowerThirdBackground },
-            "Bible Background" to { p -> p.showBibleBackground },
-            "Songs Background" to { p -> p.showSongsBackground },
+            "Pictures/Presentation" to { p -> p.look.media.pictures },
+            "Media" to { p -> p.look.media.video },
+            "Subtitles" to { p -> p.look.media.subtitles },
+            "Lower Third" to { p -> p.look.graphics },
+            "Announcements" to { p -> p.look.announcements },
+            "Web" to { p -> p.look.slide.web },
+            "Canvas" to { p -> p.look.slide.canvas },
+            "Q&A" to { p -> p.look.slide.qa },
+            "Live captions" to { p -> p.look.captions },
+            "Dictionary" to { p -> p.look.slide.dictionary },
+            "Background" to { p -> p.look.background.fullscreen },
+            "Lower Third Background" to { p -> p.look.background.lowerThird },
+            "Bible Background" to { p -> p.look.background.bible },
+            "Songs Background" to { p -> p.look.background.songs },
             "Song look-ahead" to { p -> p.songLookAhead },
         )
         for ((label, read) in switches) {
@@ -217,8 +218,9 @@ class ProfileHeaderTest {
             waitForIdle()
 
             val after = get().profile()
-            assertEquals(!before.showMedia, after.showMedia)
-            assertEquals(before.copy(showMedia = after.showMedia), after, "nothing else moved")
+            assertEquals(!before.look.media.video, after.look.media.video)
+            val moved = before.withLook { copy(media = media.copy(video = after.look.media.video)) }
+            assertEquals(moved, after, "nothing else moved")
         }
     }
 }

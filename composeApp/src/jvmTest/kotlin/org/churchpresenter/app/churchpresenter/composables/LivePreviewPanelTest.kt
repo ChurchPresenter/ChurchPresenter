@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.settings.MediaLook
+import org.churchpresenter.settings.OutputLook
+import org.churchpresenter.settings.SlideLook
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
@@ -243,16 +246,16 @@ class LivePreviewPanelTest {
         val offCases = listOf(
             Presenting.BIBLE to OutputProfile(bibleMode = Constants.SONG_LANG_OFF),
             Presenting.LYRICS to OutputProfile(songMode = Constants.SONG_LANG_OFF),
-            Presenting.PICTURES to OutputProfile(showPictures = false),
-            Presenting.PRESENTATION to OutputProfile(showPictures = false),
-            Presenting.MEDIA to OutputProfile(showMedia = false),
-            Presenting.LOWER_THIRD to OutputProfile(showStreaming = false),
-            Presenting.ANNOUNCEMENTS to OutputProfile(showAnnouncements = false),
-            Presenting.WEBSITE to OutputProfile(showWebsite = false),
-            Presenting.CANVAS to OutputProfile(showCanvas = false),
-            Presenting.QA to OutputProfile(showQA = false),
-            Presenting.STT to OutputProfile(showSTT = false),
-            Presenting.DICTIONARY to OutputProfile(showDictionary = false),
+            Presenting.PICTURES to OutputProfile(look = OutputLook(media = MediaLook(pictures = false))),
+            Presenting.PRESENTATION to OutputProfile(look = OutputLook(media = MediaLook(pictures = false))),
+            Presenting.MEDIA to OutputProfile(look = OutputLook(media = MediaLook(video = false))),
+            Presenting.LOWER_THIRD to OutputProfile(look = OutputLook(graphics = false)),
+            Presenting.ANNOUNCEMENTS to OutputProfile(look = OutputLook(announcements = false)),
+            Presenting.WEBSITE to OutputProfile(look = OutputLook(slide = SlideLook(web = false))),
+            Presenting.CANVAS to OutputProfile(look = OutputLook(slide = SlideLook(canvas = false))),
+            Presenting.QA to OutputProfile(look = OutputLook(slide = SlideLook(qa = false))),
+            Presenting.STT to OutputProfile(look = OutputLook(captions = false)),
+            Presenting.DICTIONARY to OutputProfile(look = OutputLook(slide = SlideLook(dictionary = false))),
         )
         for ((mode, offProfile) in offCases) {
             setContent {

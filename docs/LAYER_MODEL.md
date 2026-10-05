@@ -196,7 +196,12 @@ In order, each step shippable on its own and each keeping every existing test gr
    This is the first visible change, and the first screenshot re-record.
 5. **Per-layer Clear and Clear All**, in the UI, shortcuts and API.
 6. **Preview / Take** behind the preference.
-7. **Looks** replace the `show*` flags, migrating saved profiles.
+7. **Looks** replace the `show*` flags, migrating saved profiles. A profile's `look` groups them by
+   layer (`look.background`, `look.media`, `look.slide`, `look.captions`, `look.graphics`,
+   `look.announcements`); settings version 23 moves each saved switch and renames a linked
+   profile's overrides to match, so followers still follow switch by switch. Scripture and songs
+   stay the profile's language modes, the stage monitor's chord options stay its own, and a screen
+   lock still pins an output to one content type's layers.
 8. **`presentingMode` retired.** Its readers move to `program` file by file; `Presenting` stays as
    the name of a content type only. What is on air is read off `program` -- `liveContent`,
    `slideContent` and `isLive` -- and the tabs' seams ask `isLive(type)`. The slide's stored

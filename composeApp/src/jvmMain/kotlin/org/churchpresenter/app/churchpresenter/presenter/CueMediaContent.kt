@@ -64,7 +64,7 @@ internal fun MediaCue(surface: OutputSurface) {
         } else {
             surface.outputRole
         },
-        showSubtitles = surface.profile.showSubtitles,
+        showSubtitles = surface.profile.look.media.subtitles,
         profileId = surface.profile.id,
         mediaSettings = appSettings.mediaSettings,
         contentScale = appSettings.mediaScaleMode.contentScale,

@@ -2,6 +2,8 @@
 
 package org.churchpresenter.web.tabs
 
+import org.churchpresenter.settings.OutputLook
+import org.churchpresenter.settings.SlideLook
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.assertIsEnabled
@@ -39,7 +41,9 @@ class WebToolbarTest {
 
     private fun projection(vararg assignments: ScreenAssignment, showWebsite: Boolean = true) = ProjectionSettings(
         screenAssignments = assignments.toList(),
-        outputProfiles = listOf(OutputProfile(id = PROFILE, name = "Main", showWebsite = showWebsite)),
+        outputProfiles = listOf(
+            OutputProfile(id = PROFILE, name = "Main", look = OutputLook(slide = SlideLook(web = showWebsite))),
+        ),
     )
 
     private fun onDisplay(display: Int, type: String = "screen", profile: String? = PROFILE) =

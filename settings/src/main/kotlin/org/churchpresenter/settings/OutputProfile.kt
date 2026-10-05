@@ -27,21 +27,8 @@ val BLANK_OUTPUT_PROFILE = OutputProfile(
     id = BLANK_OUTPUT_PROFILE_ID,
     bibleMode = Constants.SONG_LANG_OFF,
     songMode = Constants.SONG_LANG_OFF,
-    showPictures = false,
-    showMedia = false,
-    showSubtitles = false,
-    showStreaming = false,
-    showAnnouncements = false,
-    showWebsite = false,
     showChords = false,
-    showQA = false,
-    showSTT = false,
-    showDictionary = false,
-    showCanvas = false,
-    showFullscreenBackground = false,
-    showLowerThirdBackground = false,
-    showBibleBackground = false,
-    showSongsBackground = false,
+    look = OutputLook.NOTHING,
 )
 
 /**
@@ -78,17 +65,11 @@ data class OutputProfile(
     val bibleTranslations: List<Int> = emptyList(),
     val songMode: String = Constants.SONG_LANG_BOTH,
     val songTranslations: List<Int> = emptyList(),
-    val showPictures: Boolean = true,
-    val showMedia: Boolean = true,
-    val showSubtitles: Boolean = true,
-    val showStreaming: Boolean = true,
     // Whether a lower third, an announcement or captions go up over what is on screen here, or
     // replace it as they always did (the default).
     val lowerThirdOverContent: Boolean = false,
     val announcementsOverContent: Boolean = false,
     val captionsOverContent: Boolean = false,
-    val showAnnouncements: Boolean = true,
-    val showWebsite: Boolean = true,
     val songLookAhead: Boolean = false,
     val showChords: Boolean = true,
     /**
@@ -98,14 +79,8 @@ data class OutputProfile(
      * for a Stage Monitor with [showChords]; screens and NDI outputs have no page to put it on.
      */
     val showTransposeControls: Boolean = false,
-    val showQA: Boolean = true,
-    val showSTT: Boolean = true,
-    val showDictionary: Boolean = true,
-    val showCanvas: Boolean = true,
-    val showFullscreenBackground: Boolean = true,
-    val showLowerThirdBackground: Boolean = true,
-    val showBibleBackground: Boolean = true,
-    val showSongsBackground: Boolean = true,
+    /** What this profile's outputs draw of the live stack, layer by layer. */
+    val look: OutputLook = OutputLook(),
     /**
      * The shape the Profiles tab previews this profile at -- a profile is not tied to one output's
      * real size, so this is a stand-in the operator picks (their real screen's resolution, say),
