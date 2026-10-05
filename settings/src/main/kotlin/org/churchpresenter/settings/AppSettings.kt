@@ -142,6 +142,8 @@ data class AppSettings(
     val quickBackgroundsExpanded: Boolean = true,
     /** The messages saved to go live again -- see [MessageTemplate]. */
     val messageTemplates: List<MessageTemplate> = emptyList(),
+    /** The props an operator can put up -- see [PropDefinition]. */
+    val props: List<PropDefinition> = emptyList(),
 ) {
     /** What the song identified by [songId] is played at — tempo and capo together. */
     fun tuningFor(songId: String): SongTuning =

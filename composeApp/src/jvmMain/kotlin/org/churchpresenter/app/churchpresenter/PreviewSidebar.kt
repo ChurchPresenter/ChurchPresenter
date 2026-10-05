@@ -1,5 +1,13 @@
 package org.churchpresenter.app.churchpresenter
 
+import javax.swing.filechooser.FileNameExtensionFilter
+import org.churchpresenter.sharedui.filechooser.FileChooser
+import org.churchpresenter.app.churchpresenter.dialogs.PropsDialog
+import org.churchpresenter.app.churchpresenter.viewmodel.setPropOn
+import org.churchpresenter.app.churchpresenter.viewmodel.propsOnAir
+import org.churchpresenter.strings.generated.resources.props_picture
+import org.churchpresenter.strings.generated.resources.tooltip_props
+import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
@@ -124,6 +132,7 @@ internal fun PreviewSidebar(
                     onSettingsChange { s -> s.copy(projectionSettings = updated) }
                 }
                 MessageButton(presenterManager, appSettings, onSettingsChange)
+                PropsButton(presenterManager, appSettings, onSettingsChange)
                 if (appSettings.projectionSettings.previewModeEnabled) PreviewTakeButton(presenterManager)
             }
             // A layout filling the panel takes the column's spare height; otherwise it keeps its own.
@@ -228,6 +237,47 @@ private fun MessageButton(
 }
 
 internal const val MESSAGE_BUTTON_TAG = "preview_message"
+
+/** Opens the Props dialog; lit while a prop is up. */
+@Composable
+private fun PropsButton(
+    presenterManager: PresenterManager,
+    appSettings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+) {
+    var open by remember { mutableStateOf(false) }
+    val onAir = presenterManager.propsOnAir
+    val chooseTitle = stringResource(Res.string.props_picture)
+    TooltipIconButton(
+        painter = rememberVectorPainter(Icons.Outlined.Layers),
+        text = stringResource(Res.string.tooltip_props),
+        onClick = { open = true },
+        buttonSize = 36.dp,
+        iconTint = if (onAir.isNotEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.testTag(PROPS_BUTTON_TAG),
+    )
+    PropsDialog(
+        isVisible = open,
+        props = appSettings.props,
+        onPropsChange = { props -> onSettingsChange { it.copy(props = props) } },
+        onAir = onAir,
+        onSwitch = { id, on ->
+            presenterManager.setPropOn(id, on)
+            if (on) presenterManager.setShowPresenterWindow(true)
+        },
+        onChoosePicture = {
+            FileChooser.platformInstance.chooseSingle(
+                path = null,
+                filters = listOf(FileNameExtensionFilter(chooseTitle, "png", "jpg", "jpeg", "webp", "gif", "bmp")),
+                title = chooseTitle,
+                selectDirectory = false,
+            )?.toString()
+        },
+        onDismiss = { open = false },
+    )
+}
+
+internal const val PROPS_BUTTON_TAG = "preview_props"
 
 /** The gear beside the clear button: opens the editor for how the preview panel is arranged. */
 @Composable

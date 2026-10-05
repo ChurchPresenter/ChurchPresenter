@@ -101,11 +101,13 @@ internal fun CueContent(cue: Cue, surface: OutputSurface) {
         is Cue.Dictionary -> DictionaryCue(surface)
         is Cue.Background -> BackgroundCue(cue, surface)
         is Cue.Message -> MessageCue(cue, surface)
+        is Cue.Props -> PropsCue(cue, surface)
     }
 }
 
-/** The overlays in the order they stack, bottom to top: captions, lower third, announcements. */
-private val OVERLAY_DRAW_ORDER = listOf(Presenting.STT, Presenting.LOWER_THIRD, Presenting.ANNOUNCEMENTS)
+/** The overlays in the order they stack, bottom to top: captions, lower third, props, announcements. */
+private val OVERLAY_DRAW_ORDER =
+    listOf(Presenting.STT, Presenting.LOWER_THIRD, Presenting.PROPS, Presenting.ANNOUNCEMENTS)
 
 /**
  * The overlays this output draws over its content, each drawn by [content] exactly as it is drawn on
@@ -124,7 +126,12 @@ internal fun OverlayModes(
     if (shownMode != presenterManager.unlockedModeFor(profile)) return
     val overlays = presenterManager.overlays.value
     OVERLAY_DRAW_ORDER.forEach { mode ->
-        if (mode in overlays && mode != shownMode && profile.drawsOverContent(mode)) key(mode) { content(mode) }
+        // Props sit over the lower third and under announcements, and are up whatever is shown.
+        if (mode == Presenting.PROPS) {
+            if (presenterManager.isLive(Presenting.PROPS)) key(mode) { content(mode) }
+        } else if (mode in overlays && mode != shownMode && profile.drawsOverContent(mode)) {
+            key(mode) { content(mode) }
+        }
     }
     // A message is up alone, over everything an output following the live content shows.
     if (presenterManager.isLive(Presenting.MESSAGE)) key(Presenting.MESSAGE) { content(Presenting.MESSAGE) }

@@ -14,6 +14,9 @@ internal val OVERLAY_MODES: Set<Presenting> = setOf(Presenting.STT, Presenting.L
 /** Whether this content type is held as an overlay rather than as the slide -- see [OVERLAY_MODES]. */
 internal val Presenting.isOverlay: Boolean get() = this in OVERLAY_MODES
 
+/** Whether this content type is held whole on a layer of its own, in `PresenterManager.liveShow`. */
+internal val Presenting.isWhole: Boolean get() = this == Presenting.MESSAGE || this == Presenting.PROPS
+
 /** Whether this output draws the overlay [overlay] over its content rather than in place of it. */
 internal fun OutputProfile.drawsOverContent(overlay: Presenting): Boolean = when (overlay) {
     Presenting.LOWER_THIRD -> lowerThirdOverContent

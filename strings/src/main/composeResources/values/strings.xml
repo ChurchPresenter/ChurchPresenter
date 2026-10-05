@@ -2966,4 +2966,24 @@
     <string name="message_save">Save message</string>
     <string name="message_clear">Clear message</string>
     <string name="message_on_air">On air</string>
+    <string name="tooltip_props">Props</string>
+    <string name="props_title">Props</string>
+    <string name="props_empty">No props yet. Add a logo, a clock, a countdown or a badge that stays up over everything.</string>
+    <string name="props_add">Add prop</string>
+    <string name="props_save">Save prop</string>
+    <string name="props_name">Name</string>
+    <string name="props_kind_image">Picture</string>
+    <string name="props_kind_clock">Clock</string>
+    <string name="props_kind_countdown">Countdown</string>
+    <string name="props_kind_badge">Badge</string>
+    <string name="props_corner_top_left">Top left</string>
+    <string name="props_corner_top_right">Top right</string>
+    <string name="props_corner_bottom_left">Bottom left</string>
+    <string name="props_corner_bottom_right">Bottom right</string>
+    <string name="props_size">Height (% of the screen)</string>
+    <string name="props_picture">Picture</string>
+    <string name="props_choose_picture">Choose…</string>
+    <string name="props_badge_text">Badge text</string>
+    <string name="props_countdown_to">Counts down to (HH:mm)</string>
+    <string name="props_on_air">On air</string>
 </resources>
