@@ -1,24 +1,19 @@
 package org.churchpresenter.presenter
 
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -112,6 +107,11 @@ fun SongPresenter(
     showChords: Boolean = false,
     /** Full screen: the region the text alone is placed in, the background filling the screen -- see [textOnly]. */
     textRegion: ContentRegion? = null,
+    /**
+     * Whether the full-screen background is drawn here. Off where an output draws it on its own
+     * background layer instead ([SongSlideBackground]); a lower third's band is drawn either way.
+     */
+    drawsBackground: Boolean = true,
 ) {
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val ss = appSettings.songSettings
@@ -157,35 +157,22 @@ fun SongPresenter(
             transparentWhenBlank = LocalTransparentBlanking.current,
             ownBackground = if (isLowerThird) lyricSection.lowerThirdBackground else lyricSection.background,
         )
-        val backdrop = PresenterBackdrop(resolvedBg, rememberBackgroundBitmap(resolvedBg, isLowerThird))
+        // The picture is decoded only where it is drawn: on the band, or full screen when this draws
+        // the background itself rather than leaving it to the background layer.
+        val backdrop = PresenterBackdrop(
+            resolvedBg,
+            if (isLowerThird || drawsBackground) rememberBackgroundBitmap(resolvedBg, isLowerThird) else null,
+        )
 
         // Fade-in on first appearance (covers background + text)
-        val fadeInDuration = appSettings.songSettings.transitionDuration.toInt().coerceAtLeast(100)
-        var enterAlpha by remember { mutableStateOf(if (appSettings.songSettings.fadeIn) 0f else 1f) }
-        LaunchedEffect(Unit) {
-            if (appSettings.songSettings.fadeIn && enterAlpha < 1f) {
-                val anim = Animatable(0f)
-                anim.animateTo(1f, tween(durationMillis = fadeInDuration)) {
-                    enterAlpha = this.value
-                }
-                enterAlpha = 1f
-            }
-        }
-
-        BoxWithConstraints(
-            modifier
-                .fillMaxSize()
-                .graphicsLayer { alpha = transitionAlpha * enterAlpha }
-                .then(if (!isLowerThird && !backdrop.blurred) backdrop.bgModifier else Modifier)
-        ) {
-            // The stored radius is in the 1920x1080 reference space the rest of the presenter measures in.
-            val blurRadius = backgroundBlurRadius(backdrop.bgBlurReferencePx, maxWidth)
-            PresenterBackgroundLayers(
-                background = resolvedBg,
-                backgroundModifier = backdrop.bgModifier,
-                isLowerThird = isLowerThird,
-                blurRadius = blurRadius,
-            )
+        val enterAlpha = rememberSongEnterAlpha(appSettings)
+        FullScreenBackdropBox(
+            modifier = modifier,
+            alpha = { transitionAlpha * enterAlpha.value },
+            backdrop = backdrop,
+            isLowerThird = isLowerThird,
+            drawsBackground = drawsBackground,
+        ) { blurRadius ->
             // Everything but the background, in the region when the background stays full screen.
             TextRegionBox(textRegion) {
                 SongFrameContent(look, backdrop, blurRadius)
@@ -193,6 +180,7 @@ fun SongPresenter(
         }
     }
 }
+
 
 /** A Lottie band draws the whole band itself — text included — so it replaces everything else. */
 @Composable

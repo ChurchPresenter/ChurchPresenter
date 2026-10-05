@@ -88,9 +88,9 @@ internal fun styleElementsFor(pane: CustomizePane, profile: OutputProfile): List
         when (element) {
             CustomizeElement.SONG_LOOK_AHEAD -> profile.songLookAhead
             CustomizeElement.BACKGROUND_DEFAULT ->
-                if (profile.isLowerThird) profile.showLowerThirdBackground else profile.showFullscreenBackground
-            CustomizeElement.BACKGROUND_BIBLE -> profile.showBible && profile.showBibleBackground
-            CustomizeElement.BACKGROUND_SONG -> profile.showSongs && profile.showSongsBackground
+                if (profile.isLowerThird) profile.look.background.lowerThird else profile.look.background.fullscreen
+            CustomizeElement.BACKGROUND_BIBLE -> profile.showBible && profile.look.background.bible
+            CustomizeElement.BACKGROUND_SONG -> profile.showSongs && profile.look.background.songs
             else -> true
         }
     }
@@ -107,10 +107,10 @@ internal fun stylePanesFor(profile: OutputProfile): List<CustomizePane> =
             CustomizePane.BIBLE -> profile.showBible
             CustomizePane.SONGS -> profile.showSongs
             CustomizePane.BACKGROUND -> styleElementsFor(pane, profile).isNotEmpty()
-            CustomizePane.CAPTIONS -> profile.showSTT
-            CustomizePane.SUBTITLES -> profile.showSubtitles
-            CustomizePane.QA -> profile.showQA
-            CustomizePane.DICTIONARY -> profile.showDictionary
+            CustomizePane.CAPTIONS -> profile.look.captions
+            CustomizePane.SUBTITLES -> profile.look.media.subtitles
+            CustomizePane.QA -> profile.look.slide.qa
+            CustomizePane.DICTIONARY -> profile.look.slide.dictionary
             CustomizePane.STAGE_MONITOR -> true
         }
     }

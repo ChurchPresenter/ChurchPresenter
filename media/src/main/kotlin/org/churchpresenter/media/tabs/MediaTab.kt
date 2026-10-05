@@ -283,7 +283,7 @@ private fun MediaTabScope.MediaPreviewCard(
 
         // ── Content area ──────────────────────────────────────────────
         val isPresenting =
-            presenterManager?.presentingMode?.value == Presenting.MEDIA && presenterManager.showPresenterWindow.value
+            presenterManager?.isLive(Presenting.MEDIA) == true && presenterManager.showPresenterWindow.value
 
         val vlcPlayers = LocalMediaVlcPlayers.current
         if (viewModel.isLoaded && viewModel.isAudioFile) {

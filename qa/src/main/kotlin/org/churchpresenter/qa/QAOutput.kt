@@ -13,7 +13,8 @@ import org.churchpresenter.sharedui.models.Presenting
  * so a test can hand the tab a fake that records what it was told.
  */
 interface QAOutput {
-    val presentingMode: State<Presenting>
+    /** The content on air under the overlays, or [Presenting.NONE] once the display is cleared. */
+    val slideContent: State<Presenting>
     val screenLocks: State<Map<Int, Presenting>>
 
     fun setDisplayedQuestion(question: Question?)

@@ -14,15 +14,15 @@ internal fun shouldShowPresenterWindowFor(mode: Presenting): Boolean = mode != P
 
 /** Whether this output draws the configured background, which is a separate switch per layout. */
 internal fun showsOutputBackground(profile: OutputProfile): Boolean =
-    if (profile.isLowerThird) profile.showLowerThirdBackground
-    else profile.showFullscreenBackground
+    if (profile.isLowerThird) profile.look.background.lowerThird
+    else profile.look.background.fullscreen
 
 /** What an output is showing: its own lock when it has one, otherwise whatever is live. */
 internal fun effectiveOutputMode(
     locks: Map<Int, Presenting>,
     index: Int,
-    presentingMode: Presenting,
-): Presenting = locks[index] ?: presentingMode
+    slideContent: Presenting,
+): Presenting = locks[index] ?: slideContent
 
 /** Whether this output's picture goes out over SDI rather than to a display. */
 internal fun isDeckLinkPrimaryOutput(assignment: ScreenAssignment): Boolean =

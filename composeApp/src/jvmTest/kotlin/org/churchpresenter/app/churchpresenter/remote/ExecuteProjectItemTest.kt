@@ -57,7 +57,7 @@ class ExecuteProjectItemTest {
         )
 
         assertEquals(listOf("song:42:Amazing Grace:Hymnal:Hymnal::42"), recorder.added)
-        assertEquals(Presenting.LYRICS, presenter.presentingMode.value)
+        assertEquals(Presenting.LYRICS, presenter.slideContent.value)
         assertTrue(presenter.showPresenterWindow.value, "projecting must open the output")
     }
 
@@ -82,7 +82,7 @@ class ExecuteProjectItemTest {
         )
 
         assertEquals(listOf("bible:John:3:16:For God so loved the world.:16-18:43"), recorder.added)
-        assertEquals(Presenting.BIBLE, presenter.presentingMode.value)
+        assertEquals(Presenting.BIBLE, presenter.slideContent.value)
         assertTrue(presenter.showPresenterWindow.value)
     }
 
@@ -110,7 +110,7 @@ class ExecuteProjectItemTest {
         )
 
         assertEquals(listOf("website:https://example.org:Notices"), recorder.added)
-        assertEquals(Presenting.WEBSITE, presenter.presentingMode.value)
+        assertEquals(Presenting.WEBSITE, presenter.slideContent.value)
     }
 
     @Test
@@ -161,7 +161,7 @@ class ExecuteProjectItemTest {
             recorder.actions(),
             presenter,
         )
-        val modeBefore = presenter.presentingMode.value
+        val modeBefore = presenter.slideContent.value
         val addedBefore = recorder.added.size
 
         executeProjectItem(
@@ -173,7 +173,7 @@ class ExecuteProjectItemTest {
         // A label is a divider in the service order, not content. Falling through the `when` has to
         // leave whatever is live alone rather than blanking the screen mid-service.
         assertEquals(addedBefore, recorder.added.size, "a label has nothing to add, got ${recorder.added}")
-        assertEquals(modeBefore, presenter.presentingMode.value, "and nothing to switch the output to")
+        assertEquals(modeBefore, presenter.slideContent.value, "and nothing to switch the output to")
         assertEquals("Before", presenter.lyricSection.value.title, "the live song must still be live")
     }
 
@@ -197,7 +197,7 @@ class ExecuteProjectItemTest {
             val (_, presenter) = project(item)
             assertEquals(
                 expected,
-                presenter.presentingMode.value,
+                presenter.slideContent.value,
                 "${item::class.simpleName} must reach its own renderer",
             )
         }
@@ -220,7 +220,7 @@ class ExecuteProjectItemTest {
             recorder.added.isEmpty(),
             "a projected word must not be filed in the schedule, got ${recorder.added}",
         )
-        assertEquals(Presenting.DICTIONARY, presenter.presentingMode.value)
+        assertEquals(Presenting.DICTIONARY, presenter.slideContent.value)
         assertTrue(presenter.showPresenterWindow.value)
 
         val shown = presenter.displayedDictionaryEntry.value
@@ -237,7 +237,7 @@ class ExecuteProjectItemTest {
 
         assertTrue(recorder.added.isEmpty(), "got ${recorder.added}")
         assertEquals("Service starts at 10", presenter.announcementText.value)
-        assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
+        assertEquals(Presenting.ANNOUNCEMENTS, presenter.lastLive.value)
         assertTrue(presenter.showPresenterWindow.value)
     }
 
@@ -260,7 +260,7 @@ class ExecuteProjectItemTest {
             assertEquals(3_723, presenter.timerRemainingSeconds.value, "1h 2m 3s is 3723 seconds")
             assertTrue(presenter.timerRunning.value)
             assertTrue(presenter.announcementTickerLive.value, "the ticker has to be live or the screen never updates")
-            assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
+            assertEquals(Presenting.ANNOUNCEMENTS, presenter.lastLive.value)
         } finally {
             presenter.pauseAnnouncementTimer()
         }
@@ -306,7 +306,7 @@ class ExecuteProjectItemTest {
 
                 assertFalse(presenter.timerRunning.value, "$mode is a display, not a countdown")
                 assertTrue(presenter.announcementTickerLive.value, "$mode still has to drive the screen")
-                assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
+                assertEquals(Presenting.ANNOUNCEMENTS, presenter.lastLive.value)
             } finally {
                 presenter.pauseAnnouncementTimer()
             }

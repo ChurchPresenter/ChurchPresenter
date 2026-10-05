@@ -33,4 +33,7 @@ data class LiveContent(
     /** Current line/section position within [lyricSection] -- see LiveStateDto.songSectionIndex. */
     val songSectionIndex: Int? = null,
     val songLineIndex: Int? = null,
+    /** What is on air: the slide's mode and the overlays over it -- see LiveStateDto.liveSlide. */
+    val liveSlide: String? = null,
+    val overlays: List<String>? = null,
 )

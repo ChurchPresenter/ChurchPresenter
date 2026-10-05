@@ -28,8 +28,8 @@ import org.churchpresenter.sharedui.composables.searchBarCard
 fun STTTab(
     modifier: Modifier = Modifier,
     sttManager: STTManager,
-    /** What the output is presenting; the tab shows itself live when it is captions. */
-    presentingMode: State<Presenting>,
+    /** Whether captions are on air; the tab shows itself live while they are. */
+    captionsLive: State<Boolean>,
     presenting: (Presenting) -> Unit,
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
@@ -51,7 +51,7 @@ fun STTTab(
             ConnectionBar(
                 sttManager = sttManager,
                 savedUrl = sttSettings.serverUrl,
-                isLive = presentingMode.value == Presenting.STT,
+                isLive = captionsLive.value,
                 onConnect = { url ->
                     onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(serverUrl = url)) }
                     sttManager.connect(url)

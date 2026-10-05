@@ -1,5 +1,8 @@
 package org.churchpresenter.profiles
 
+import org.churchpresenter.settings.OutputLook
+import org.churchpresenter.settings.SlideLook
+import org.churchpresenter.settings.withLook
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -49,14 +52,15 @@ class ProfileLinkUiTest {
 
     private fun doc(extraYouthOverrides: Map<String, (OutputProfile) -> OutputProfile> = emptyMap()): AppSettings {
         var youth = OutputProfile(
-            id = "youth", name = "Youth night", parentId = "main", showQA = false,
+            id = "youth", name = "Youth night", parentId = "main",
             bibleSettings = bible.copy(
                 translations = bible.translations.map {
                     if (it.fileName == "kjv.spb") it.copy(textFontSize = 50) else it
                 },
                 fadeIn = false,
             ),
-            overrides = setOf(kjvSize, "showQA", "bibleSettings.fadeIn"),
+            overrides = setOf(kjvSize, "look.slide.qa", "bibleSettings.fadeIn"),
+            look = OutputLook(slide = SlideLook(qa = false)),
         )
         extraYouthOverrides.forEach { (path, change) -> youth = change(youth).copy(overrides = youth.overrides + path) }
         return AppSettings(
@@ -66,7 +70,12 @@ class ProfileLinkUiTest {
                     OutputProfile(id = "main", name = "Sanctuary", bibleSettings = bible),
                     youth,
                     OutputProfile(id = "easter", name = "Easter", parentId = "main"),
-                    OutputProfile(id = "stream", name = "Livestream", showQA = false, bibleSettings = bible),
+                    OutputProfile(
+                        id = "stream",
+                        name = "Livestream",
+                        bibleSettings = bible,
+                        look = OutputLook(slide = SlideLook(qa = false)),
+                    ),
                 ),
                 screenAssignments = listOf(ScreenAssignment(activeProfileId = "main")),
             ).withLinksResolved(),
@@ -141,21 +150,21 @@ class ProfileLinkUiTest {
             select("youth")
             contentSwitch("Media").performClick()
             waitForIdle()
-            assertTrue("showMedia" in get().profile("youth").overrides)
+            assertTrue("look.media.video" in get().profile("youth").overrides)
             select("main")
             contentSwitch("Pictures/Presentation").performClick()
             waitForIdle()
-            assertFalse(get().profile("easter").showPictures)
-            assertFalse(get().profile("youth").showPictures)
+            assertFalse(get().profile("easter").look.media.pictures)
+            assertFalse(get().profile("youth").look.media.pictures)
         }
 
     @Test
     fun `the differences card edits and reverts each value in place`() = profilesTab(doc()) { get ->
         select("youth")
-        val qaRow = hasAnyAncestor(hasTestTag(changeRowTag("showQA")))
+        val qaRow = hasAnyAncestor(hasTestTag(changeRowTag("look.slide.qa")))
         onAllNodes(isToggleable() and qaRow, useUnmergedTree = true)[0].performClick()
         waitForIdle()
-        assertTrue(get().profile("youth").showQA)
+        assertTrue(get().profile("youth").look.slide.qa)
         val sizeRow = hasAnyAncestor(hasTestTag(changeRowTag(kjvSize)))
         onAllNodes(hasContentDescription("Increment") and sizeRow, useUnmergedTree = true)[0].performClick()
         waitForIdle()
@@ -168,14 +177,16 @@ class ProfileLinkUiTest {
     @Test
     fun `a long list of differences shows six, then the rest on asking`() = profilesTab(
         doc(
-            listOf("showPictures", "showMedia", "showWebsite", "showCanvas", "showStreaming").associateWith { path ->
+            listOf(
+                "look.media.pictures", "look.media.video", "look.slide.web", "look.slide.canvas", "look.graphics",
+            ).associateWith { path ->
                 { p: OutputProfile ->
                     when (path) {
-                        "showPictures" -> p.copy(showPictures = false)
-                        "showMedia" -> p.copy(showMedia = false)
-                        "showWebsite" -> p.copy(showWebsite = false)
-                        "showCanvas" -> p.copy(showCanvas = false)
-                        else -> p.copy(showStreaming = false)
+                        "look.media.pictures" -> p.withLook { copy(media = media.copy(pictures = false)) }
+                        "look.media.video" -> p.withLook { copy(media = media.copy(video = false)) }
+                        "look.slide.web" -> p.withLook { copy(slide = slide.copy(web = false)) }
+                        "look.slide.canvas" -> p.withLook { copy(slide = slide.copy(canvas = false)) }
+                        else -> p.withLook { copy(graphics = false) }
                     }
                 }
             },
@@ -197,11 +208,11 @@ class ProfileLinkUiTest {
         openCustomizePane(CustomizePane.BIBLE)
         actionKey("Unlink")
         assertNull(get().profile("youth").parentId)
-        assertFalse(get().profile("youth").showQA)
+        assertFalse(get().profile("youth").look.slide.qa)
         onNodeWithText("Unlinked from Sanctuary.", substring = true).assertExists()
         tap(linkTag("Undo"))
         assertEquals("main", get().profile("youth").parentId)
-        assertTrue("showQA" in get().profile("youth").overrides)
+        assertTrue("look.slide.qa" in get().profile("youth").overrides)
     }
 
     @Test
@@ -219,13 +230,13 @@ class ProfileLinkUiTest {
         onNodeWithTag(MASTER_PICKER_TAG).assertExists()
         actionKey("Link and keep my values")
         assertEquals("main", get().profile("stream").parentId)
-        assertTrue("showQA" in get().profile("stream").overrides)
-        assertFalse(get().profile("stream").showQA)
+        assertTrue("look.slide.qa" in get().profile("stream").overrides)
+        assertFalse(get().profile("stream").look.slide.qa)
         actionKey("Unlink")
         assertNull(get().profile("stream").parentId)
         actionKey("Link and match Sanctuary")
         assertTrue(get().profile("stream").overrides.isEmpty())
-        assertTrue(get().profile("stream").showQA)
+        assertTrue(get().profile("stream").look.slide.qa)
     }
 
     @Test

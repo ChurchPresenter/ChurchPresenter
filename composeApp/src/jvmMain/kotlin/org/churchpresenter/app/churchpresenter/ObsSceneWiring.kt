@@ -42,7 +42,7 @@ internal fun ObsSceneWiring(
     }
     // Switch OBS scene when presenting mode changes
     LaunchedEffect(Unit) {
-        snapshotFlow { presenterManager.presentingMode.value }
+        snapshotFlow { presenterManager.lastLive.value }
             .collect { mode ->
                 val sceneName = obsSceneFor(mode, appSettings.obsSettings) ?: return@collect
                 obsManager.setScene(sceneName)

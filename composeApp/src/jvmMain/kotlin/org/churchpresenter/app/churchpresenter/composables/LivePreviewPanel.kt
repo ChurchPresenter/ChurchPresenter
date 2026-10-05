@@ -4,6 +4,7 @@ import org.churchpresenter.canvas.DeckLinkManager
 import org.churchpresenter.canvas.liveMerges
 import org.churchpresenter.presenter.sizedAs
 import org.churchpresenter.strings.generated.resources.preview_merged_label
+import org.churchpresenter.strings.generated.resources.preview_bus_label
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -14,7 +15,6 @@ import androidx.compose.ui.platform.testTag
 import org.churchpresenter.strings.generated.resources.preview_layout_done
 import org.churchpresenter.strings.generated.resources.preview_layout_edit
 import org.churchpresenter.sharedui.utils.rememberScreenDevices
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -57,9 +57,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.layout
@@ -80,7 +78,6 @@ import org.churchpresenter.strings.generated.resources.ndi_output_numbered
 import org.churchpresenter.strings.generated.resources.omt_output_numbered
 import org.churchpresenter.strings.generated.resources.collapse_preview
 import org.churchpresenter.strings.generated.resources.expand_preview
-import org.churchpresenter.strings.generated.resources.live_preview_title
 import org.churchpresenter.strings.generated.resources.screen_number
 import org.churchpresenter.strings.generated.resources.pause
 import org.churchpresenter.strings.generated.resources.play
@@ -92,10 +89,6 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.resolvedFor
-import org.churchpresenter.presenter.LowerThirdLayout
-import org.churchpresenter.presenter.LocalBandOutgoing
-import org.churchpresenter.presenter.LocalBandSongLineIndex
-import org.churchpresenter.presenter.LocalLottieBandClock
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.utils.Constants
@@ -107,6 +100,7 @@ import org.churchpresenter.sharedui.utils.OutputSize
 import org.churchpresenter.sharedui.utils.outputSizeOf
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.shownModeFor
 import org.churchpresenter.stt.STTManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -116,8 +110,6 @@ import org.churchpresenter.media.viewmodel.formatMediaTime
 
 private const val AUDIO_LEVEL_COLOR = 0xFF4CAF50
 
-/** Half a pulse of the LIVE badge, in milliseconds; it reverses, so a full cycle is twice this. */
-private const val LIVE_PULSE_MS = 550
 
 /**
  * A scaled-down preview of whatever is currently live on the presenter windows.
@@ -205,11 +197,11 @@ fun LivePreviewPanel(
 
         // Media controls — for the clip this panel can still do something with; see
         // [mediaTransportUseful], which is where the rule and its reasoning live.
-        val presentingMode by presenterManager.presentingMode
+        val slideContent by presenterManager.slideContent
         val transportUseful = mediaViewModel != null && mediaTransportUseful(
             isLoaded = mediaViewModel.isLoaded,
             isPlaying = mediaViewModel.isPlaying,
-            presentingMode = presentingMode,
+            slideContent = slideContent,
         )
         if (transportUseful && mediaViewModel != null) {
             MediaPreviewControls(
@@ -223,6 +215,9 @@ fun LivePreviewPanel(
         }
     }
 }
+
+/** Test handle on a tile whose output is showing something -- the one framed red. */
+internal const val LIVE_TILE_TAG = "live_preview_tile"
 
 /** Test handle for the Done button that ends editing the layout. */
 internal const val PREVIEW_LAYOUT_DONE_TAG = "preview_layout_done"
@@ -244,8 +239,8 @@ private val PREVIEW_HEADER_ALLOWANCE = 26.dp
  * bar back the moment the next song went live, showing 0:00 of a video that was over and seekable to
  * nowhere.
  */
-internal fun mediaTransportUseful(isLoaded: Boolean, isPlaying: Boolean, presentingMode: Presenting): Boolean =
-    isLoaded && (presentingMode == Presenting.MEDIA || isPlaying)
+internal fun mediaTransportUseful(isLoaded: Boolean, isPlaying: Boolean, slideContent: Presenting): Boolean =
+    isLoaded && (slideContent == Presenting.MEDIA || isPlaying)
 
 /**
  * Every output the panel can show, in screen, Browser Source, NDI, OMT order, each drawn by its own
@@ -279,6 +274,7 @@ private fun previewEntries(
     fun String.forPreview(kind: String, index: Int): String =
         if (merges.containsKey(Constants.previewOutputKey(kind, index))) "$this $mergedLabel" else this
     return buildList {
+        if (presenterManager.previewBus.enabled.value) add(context.previewBusEntry(proj.getAssignment(0)))
         for (i in 0 until displayCount) {
             val screenAssignment = proj.getAssignment(i)
 
@@ -340,6 +336,38 @@ private class PreviewContext(
     val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
     /**
+     * The Preview bus's tile: what is cued, drawn as the first screen's [output] would draw it, and
+     * framed green. No locks or transposes -- those belong to an output, and this is none.
+     */
+    @Composable
+    fun previewBusEntry(output: ScreenAssignment): PreviewEntry {
+        val label = stringResource(Res.string.preview_bus_label)
+        return PreviewEntry(
+            Constants.PREVIEW_OUTPUT_PREVIEW_BUS,
+            label,
+            outputSizeOf(output, OutputKind.SCREEN).aspectRatio,
+        ) { m, grouped ->
+            SingleDisplayPreview(
+                screenIndex = 0,
+                screenAssignment = output,
+                outputKind = OutputKind.SCREEN,
+                presenterManager = presenterManager.previewBus.manager,
+                appSettings = appSettings,
+                modifier = m,
+                serverUrl = serverUrl,
+                qaDisplayUrl = qaDisplayUrl,
+                sttManager = sttManager,
+                label = label,
+                showLabel = true,
+                showMode = appSettings.projectionSettings.showOutputModes,
+                collapsible = !grouped,
+                onSettingsChange = onSettingsChange,
+                busRole = BusRole.PREVIEW,
+            )
+        }
+    }
+
+    /**
      * The preview of [output], the [index]th of its [kind].
      *
      * Each kind is its own 0-based index space with its own lock map — screen 0, Browser Source 0, NDI
@@ -397,6 +425,7 @@ private class PreviewContext(
                 showMode = appSettings.projectionSettings.showOutputModes,
                 collapsible = !grouped,
                 onSettingsChange = onSettingsChange,
+                busRole = if (presenterManager.previewBus.enabled.value) BusRole.PROGRAM else null,
             )
         }
     }
@@ -458,6 +487,8 @@ private fun SingleDisplayPreview(
     showMode: Boolean = true,
     collapsible: Boolean = true,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
+    /** The bus this tile shows while preview mode is on, which frames it; null while it is off. */
+    busRole: BusRole? = null,
 ) {
     // The raw assignment, kept for physical fields (key output, size) and for the profile swap
     // menu below (it reads/writes `activeProfileId` itself). Everything content-shaped resolves
@@ -474,11 +505,8 @@ private fun SingleDisplayPreview(
     val outputSettings = remember(appSettings, profile) {
         appSettings.resolvedFor(profile)
     }
-    val presentingMode by presenterManager.presentingMode
-    val effectiveMode = locks[screenIndex] ?: presentingMode
-    // The clock stays wrapped: unwrapping it here would recompose this panel on every band frame.
-    val bandSongLineIndex by presenterManager.bandSongLineIndex
-    val bandOutgoing by presenterManager.bandOutgoing
+    val slideContent by presenterManager.slideContent
+    val effectiveMode = presenterManager.shownModeFor(profile, locks[screenIndex] ?: slideContent)
     val mediaViewModel = LocalMediaViewModel.current
 
     val isLowerThird = profile.isLowerThird
@@ -497,8 +525,8 @@ private fun SingleDisplayPreview(
     // configured to something else -- saw N previews that were all the wrong one of them.
     val outputSize = outputSizeOf(rawAssignment, outputKind)
 
-    val isLive = effectiveMode != Presenting.NONE && showsContent
-    val borderColor = previewBorderColor(isLive)
+    val isLive = previewShowsSomething(presenterManager, effectiveMode, profile)
+    val borderColor = previewBorderColor(isLive, busRole)
 
     val displayModeChipLabel = displayModeLabel(profile.displayMode)
 
@@ -526,7 +554,9 @@ private fun SingleDisplayPreview(
                 .fillMaxWidth()
                 .aspectRatio(outputSize.aspectRatio)
                 .clip(AppShape(6.dp))
-                .border(1.dp, borderColor, AppShape(6.dp))
+                .border(if (busRole != null) BUS_BORDER_WIDTH else 1.dp, borderColor, AppShape(6.dp))
+                // Live is the red frame alone; this says so to a test.
+                .then(if (isLive) Modifier.testTag(LIVE_TILE_TAG) else Modifier)
         ) {
         val primaryRole = rawAssignment.primaryOutputRole
 
@@ -546,25 +576,10 @@ private fun SingleDisplayPreview(
                     showBackground = showsBackground,
                 ) {
                     val qaUrl = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa"
-                    if (effectiveMode != Presenting.NONE && showsContent) {
-                        Crossfade(
-                            targetState = effectiveMode,
-                            animationSpec = tween(previewCrossfadeMs(outputSettings))
-                        ) { mode ->
-                        CompositionLocalProvider(
-                            LocalLottieBandClock provides presenterManager.lottieBandClock,
-                            LocalBandSongLineIndex provides bandSongLineIndex,
-                            LocalBandOutgoing provides bandOutgoing,
-                        ) {
-                        LowerThirdLayout(mode, profile, outputSettings, showsBackground) {
-                        PreviewMode(
-                            mode, presenterManager, profile, outputSettings, showsBackground, primaryRole, qaUrl,
-                            sttManager,
-                        )
-                        }
-                        }
-                        }
-                    }
+                    PreviewModeLayers(
+                        presenterManager, effectiveMode, showsContent, profile, outputSettings,
+                        showsBackground, primaryRole, qaUrl, sttManager,
+                    )
                 }
             }
         }
@@ -575,12 +590,16 @@ private fun SingleDisplayPreview(
         // so this panel shows a pixel-accurate mirror including scroll position.
         if (profile.displayMode != Constants.DISPLAY_MODE_STAGE_MONITOR && effectiveMode == Presenting.WEBSITE) {
             PreviewWebsiteMirror(presenterManager)
+            // What goes up over the page, which its snapshot does not carry: drawn alone, with no
+            // screen of its own to hide the page under it.
+            ScaledPresenterContent(output = outputSize) {
+                PreviewModeLayers(
+                    presenterManager, effectiveMode, showsContent, profile, outputSettings,
+                    showsBackground, primaryRole, "", sttManager, drawsSlide = false,
+                )
+            }
         }
 
-        // "LIVE" badge — only when this screen is showing content
-        if (isLive) {
-            LiveBadge(Modifier.align(Alignment.TopStart))
-        }
 
         PreviewBadges(
             screenIndex = screenIndex,
@@ -593,6 +612,7 @@ private fun SingleDisplayPreview(
             onTranspose = onTranspose,
             label = if (showLabel) label else null,
             mediaAudible = mediaViewModel != null && mediaViewModel.isLoaded && mediaViewModel.isPlaying,
+            lockable = busRole != BusRole.PREVIEW,
         )
         }
         }
@@ -715,46 +735,6 @@ private fun OutputProfileSwapMenu(
 
 /** How far the caret turns when the preview is folded away; the same quarter turn the tray uses. */
 private const val CARET_CLOSED_DEGREES = -90f
-
-/**
- * The pulsing LIVE badge.
- *
- * Its own composable, and its own animation, on purpose. The pulse used to be read at the top of
- * [SingleDisplayPreview]'s scope, which invalidated that whole scope — the nested `PresenterScreen`
- * and every source under it — on every animation frame, for every output, whether or not the output
- * was live. With one preview per display, per Browser Source and per NDI output, that was the app
- * re-rendering all of its outputs twice over at 60fps while sitting idle.
- *
- * The alpha is read inside `drawBehind`, so a pulse now costs a redraw of this one badge and no
- * recomposition at all.
- */
-@Composable
-private fun LiveBadge(modifier: Modifier = Modifier) {
-    val transition = rememberInfiniteTransition(label = "live")
-    val pulse = transition.animateFloat(
-        initialValue = 0.70f,
-        targetValue = 1.0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(LIVE_PULSE_MS, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "live_pulse"
-    )
-    Text(
-        text = stringResource(Res.string.live_preview_title),
-        color = Color.White,
-        fontSize = 10.sp,
-        modifier = modifier
-            .padding(4.dp)
-            .drawBehind {
-                drawRoundRect(
-                    color = Color.Red.copy(alpha = pulse.value),
-                    cornerRadius = CornerRadius(3.dp.toPx()),
-                )
-            }
-            .padding(horizontal = 6.dp, vertical = 2.dp)
-    )
-}
 
 @Composable
 internal fun AnimatedEqualizer() {
@@ -886,3 +866,4 @@ internal fun ScaledPresenterContent(
         }
     }
 }
+

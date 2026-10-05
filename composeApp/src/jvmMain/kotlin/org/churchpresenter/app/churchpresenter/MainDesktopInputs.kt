@@ -91,7 +91,7 @@ data class RemoteControlFlows(
     val selectBibleVerseFlow: Flow<SelectBibleVerseRequest>? = null,
     val remoteSelectSongFlow: Flow<ScheduleItem.SongItem>? = null,
     /** Same backfill mechanism as [remoteSelectSongFlow] — a remote PROJECT go-live for a picture
-     *  folder/presentation only adds it to the schedule and flips presentingMode; these drive the
+     *  folder/presentation only adds it to the schedule and flips slideContent; these drive the
      *  main screen to actually load the real content into the corresponding ViewModel. */
     val remoteSelectPictureFlow: Flow<ScheduleItem.PictureItem>? = null,
     val remoteSelectPresentationFlow: Flow<ScheduleItem.PresentationItem>? = null,

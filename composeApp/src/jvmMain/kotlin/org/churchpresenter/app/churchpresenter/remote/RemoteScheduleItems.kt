@@ -112,7 +112,7 @@ internal fun AppSettings.withAnnouncement(item: ScheduleItem.AnnouncementItem): 
  * Hands a remotely-projected item to whichever tab has to load its real content, and reports whether
  * any tab was asked.
  *
- * [executeProjectItem] adds the item to the schedule and flips `presentingMode`, but deliberately
+ * [executeProjectItem] adds the item to the schedule and flips `slideContent`, but deliberately
  * does **not** push picture or slide content itself — the tab that owns that content does, driven by
  * these flows. So a type missing from this `when` goes live as an empty screen: the mode changes and
  * nothing loads.

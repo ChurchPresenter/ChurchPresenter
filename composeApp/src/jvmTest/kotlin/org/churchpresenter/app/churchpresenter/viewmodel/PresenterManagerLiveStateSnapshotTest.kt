@@ -56,7 +56,7 @@ class PresenterManagerLiveStateSnapshotTest {
 
         pm.restoreLiveState(snapshot)
 
-        assertEquals(Presenting.LYRICS, pm.presentingMode.value)
+        assertEquals(Presenting.LYRICS, pm.slideContent.value)
         assertEquals("the operator's verse", pm.selectedVerses.value.single().verseText)
         assertEquals("the operator's verse", pm.selectedVerse.value.verseText)
         assertEquals("the operator's verse", pm.displayedVerses.value.single().verseText)
@@ -97,7 +97,7 @@ class PresenterManagerLiveStateSnapshotTest {
         pm.setPresentingMode(Presenting.BIBLE)
         pm.restoreLiveState(snapshot)
 
-        assertEquals(Presenting.NONE, pm.presentingMode.value, "nothing was live, so nothing comes back live")
+        assertEquals(Presenting.NONE, pm.slideContent.value, "nothing was live, so nothing comes back live")
         assertEquals(emptyList(), pm.selectedVerses.value)
     }
 

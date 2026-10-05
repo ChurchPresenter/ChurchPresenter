@@ -53,5 +53,21 @@ data class InstanceLinkSettings(
      * often venue-specific. Only meaningful in [InstanceLinkRole.CONTROLLED]. */
     val mirrorBackgrounds: Boolean = false,
     /** See [InstanceLinkRole]. */
-    val role: InstanceLinkRole = InstanceLinkRole.CONTROLLED
+    val role: InstanceLinkRole = InstanceLinkRole.CONTROLLED,
+    /**
+     * The layers of the primary's output this instance mirrors, from [LinkLayers]; the others stay
+     * this instance's own. All of them by default. Only meaningful in [InstanceLinkRole.CONTROLLED].
+     */
+    val followedLayers: List<String> = LinkLayers.ALL,
 )
+
+/** The layers an Instance Link follower can choose to mirror -- see [InstanceLinkSettings.followedLayers]. */
+object LinkLayers {
+    /** Bible, songs, pictures, presentations, web pages, scenes, Q&A and the dictionary, with their backgrounds. */
+    const val SLIDE = "slide"
+    const val MEDIA = "media"
+    const val LOWER_THIRD = "lowerthird"
+    const val CAPTIONS = "captions"
+    const val ANNOUNCEMENTS = "announcements"
+    val ALL = listOf(SLIDE, MEDIA, LOWER_THIRD, CAPTIONS, ANNOUNCEMENTS)
+}

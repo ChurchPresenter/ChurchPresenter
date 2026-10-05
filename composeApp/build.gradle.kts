@@ -340,6 +340,8 @@ kotlin {
             implementation(projects.companionSurface)
             // The OBS Studio integration: client, scene mapping and settings page.
             implementation(projects.obs)
+            // The layer model: layers, cues, program and preview.
+            implementation(projects.liveShow)
             // The ATEM protocol client: the UDP conversation with the switcher — connect, state
             // dump, key control and media-pool upload. AtemBridge is the app-side wiring.
             implementation(projects.atem)
@@ -895,7 +897,9 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
     // into it, which is exactly the trap to avoid here -- a 20-minute cap was tried first and would
     // have failed both of those healthy runs. Re-measure before tightening this, and raise it when
     // the suite grows rather than leaving it to bite a green run.
-    timeout.set(Duration.ofMinutes(30))
+    //
+    // Not the soak test: it runs for hours by design, and sets its own limit from the run asked for.
+    if (name != "soakTest") timeout.set(Duration.ofMinutes(30))
 
     // Lets a session chasing a hang tighten HungTestReporter's threshold:
     //   ./gradlew :composeApp:jvmTest -PhangThresholdMs=30000
@@ -1137,6 +1141,9 @@ tasks.register<org.gradle.api.tasks.testing.Test>("soakTest") {
     // it is only called hung half an hour past the length of the run it was asked for.
     val soakMinutes = providers.gradleProperty("soakMinutes").orNull?.toDoubleOrNull() ?: 240.0
     systemProperty("churchpresenter.test.hangThresholdMs", ((soakMinutes + 30) * 60_000).toLong().toString())
+    // The task itself gets the same half hour past the run: the 30-minute cap every other test task
+    // carries would end a four-hour run a quarter of the way in.
+    timeout.set(Duration.ofMillis(((soakMinutes + 30) * 60_000).toLong()))
     val reportDir = layout.buildDirectory.dir("reports/soak").get().asFile
     systemProperty("soak.reportDir", reportDir.absolutePath)
     listOf("soakMinutes" to "soak.minutes", "soakFps" to "soak.fps", "soakCueSeconds" to "soak.cueSeconds",

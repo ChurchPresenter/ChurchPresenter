@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.viewmodel.overlayForLayerName
 import org.churchpresenter.server.broadcastDisplayCleared
 import org.churchpresenter.server.broadcastSongSectionSelected
 import org.churchpresenter.server.updateBrowserSourceTranspose
@@ -53,7 +54,7 @@ internal fun MainWindowScope.CalendarAutomationWiring() {
                 ),
                 operatorLive = {
                     isOperatorLive(
-                        presenterManager.presentingMode.value,
+                        presenterManager.lastLive.value,
                         engineLiveItem?.let { liveDurationLog.showing(it) },
                     )
                 },
@@ -63,7 +64,7 @@ internal fun MainWindowScope.CalendarAutomationWiring() {
 
         // Nothing is on screen any more, so whatever was is no longer being
         // timed -- see LiveDurationLog.
-        val liveMode = presenterManager.presentingMode.value
+        val liveMode = presenterManager.slideContent.value
         LaunchedEffect(liveMode) {
             if (liveMode == Presenting.NONE) {
                 liveDurationLog.wentBlank()
@@ -119,7 +120,7 @@ internal fun MainWindowScope.ServerCommandWiring() {
                 presenterManager.setSongDisplaySectionIndex(req.section)
                 presenterManager.setSongDisplayLineIndex(remoteSongLineIndex(req.lineIndex))
                 presenterManager.setLyricSection(section)
-                if (shouldSwitchToLyrics(presenterManager.presentingMode.value)) {
+                if (shouldSwitchToLyrics(presenterManager.slideContent.value)) {
                     presenterManager.setPresentingMode(Presenting.LYRICS)
                     presenterManager.setShowPresenterWindow(true)
                 }
@@ -132,6 +133,14 @@ internal fun MainWindowScope.ServerCommandWiring() {
                 presenterManager.requestClearDisplay()
             }
         }
+        LaunchedEffect(Unit) {
+            companionServer.onClearLayer.collect { name ->
+                overlayForLayerName(name)?.let(presenterManager::clearOverlay)
+            }
+        }
+        LaunchedEffect(Unit) {
+            companionServer.onTake.collect { presenterManager.previewBus.take() }
+        }
 
         LaunchedEffect(Unit) {
             LowerThirdSequencer.onShow.collect { req ->
@@ -142,11 +151,12 @@ internal fun MainWindowScope.ServerCommandWiring() {
                 presenterManager.setShowPresenterWindow(true)
             }
         }
+        val overlayEndClearsDisplay by rememberUpdatedState(appSettings.projectionSettings.overlayEndClearsDisplay)
         LaunchedEffect(Unit) {
+            // Only while the lower third is still up: the sequence runs on its own clock, and by the
+            // time it ends the operator may have moved on.
             LowerThirdSequencer.onClear.collect {
-                if (shouldClearAfterLowerThird(presenterManager.presentingMode.value)) {
-                    presenterManager.requestClearDisplay()
-                }
+                presenterManager.overlayFinished(Presenting.LOWER_THIRD, overlayEndClearsDisplay)
             }
         }
         LaunchedEffect(Unit) {
@@ -193,7 +203,7 @@ internal fun MainWindowScope.ServerBroadcastWiring() {
         }
 
         LaunchedEffect(Unit) {
-            snapshotFlow { presenterManager.presentingMode.value }
+            snapshotFlow { presenterManager.lastLive.value }
                 .collect { mode ->
                     if (shouldBroadcastDisplayCleared(mode)) {
                         companionServer.broadcastDisplayCleared()
@@ -204,7 +214,7 @@ internal fun MainWindowScope.ServerBroadcastWiring() {
         LaunchedEffect(Unit) {
             snapshotFlow { presenterManager.songDisplaySectionIndex.value }
                 .collect { index ->
-                    if (shouldBroadcastSongSection(presenterManager.presentingMode.value)) {
+                    if (shouldBroadcastSongSection(presenterManager.slideContent.value)) {
                         companionServer.broadcastSongSectionSelected(index)
                     }
                 }

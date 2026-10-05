@@ -67,10 +67,10 @@ private fun SelectedVerse.asZoneText(): String =
 
 /** The words the live zone shows: the song section on screen, or the verse being presented. */
 internal fun stageCurrentText(
-    presentingMode: Presenting,
+    slideContent: Presenting,
     currentLyricSection: LyricSection,
     displayedVerses: List<SelectedVerse>,
-): String = when (presentingMode) {
+): String = when (slideContent) {
     Presenting.LYRICS -> currentLyricSection.lines.joinToString("\n")
     Presenting.BIBLE -> displayedVerses.firstOrNull()?.asZoneText().orEmpty()
     else -> ""
@@ -81,11 +81,11 @@ internal fun stageCurrentText(
  * lookahead, not the secondary language of the current verse.
  */
 internal fun stageNextText(
-    presentingMode: Presenting,
+    slideContent: Presenting,
     allLyricSections: List<LyricSection>,
     songDisplaySectionIndex: Int,
     nextVerses: List<SelectedVerse>,
-): String = when (presentingMode) {
+): String = when (slideContent) {
     Presenting.LYRICS ->
         allLyricSections.getOrNull(songDisplaySectionIndex + 1)?.lines?.joinToString("\n").orEmpty()
     Presenting.BIBLE -> nextVerses.firstOrNull()?.asZoneText().orEmpty()
@@ -100,10 +100,10 @@ internal fun stageNextText(
  * alongside whatever else is really live on the main output.
  */
 internal fun activeStageTypes(
-    presentingMode: Presenting,
+    slideContent: Presenting,
     announcementActive: Boolean,
 ): Set<StageMonitorContentType> = buildSet {
-    when (presentingMode) {
+    when (slideContent) {
         Presenting.BIBLE -> { add(StageMonitorContentType.BIBLE); add(StageMonitorContentType.NEXT) }
         Presenting.LYRICS -> { add(StageMonitorContentType.SONGS); add(StageMonitorContentType.NEXT) }
         Presenting.PRESENTATION ->
@@ -134,17 +134,17 @@ internal fun activeStageTypes(
 @Composable
 fun StageMonitorScreen(
     sm: StageMonitorSettings,
-    presentingMode: Presenting,
+    slideContent: Presenting,
     showChords: Boolean = true,
     // Semitones this output moves the chords it draws: a musician's transpose, on this output
     // alone. The song and every other output keep the key it is written in.
     transposeSteps: Int = 0,
     // True when an announcement has been routed to this stage monitor — either because it's what's
-    // actually live everywhere (presentingMode == ANNOUNCEMENTS), or because Announcements was sent
+    // actually live everywhere (slideContent == ANNOUNCEMENTS), or because Announcements was sent
     // here specifically via its own "Send to Stage Monitor" toggle. Kept independent of
-    // [presentingMode] so the Bible/Song/etc. zones below keep tracking whatever is really live on
+    // [slideContent] so the Bible/Song/etc. zones below keep tracking whatever is really live on
     // the main output instead of being blanked out by an announcement overlay.
-    announcementActive: Boolean = presentingMode == Presenting.ANNOUNCEMENTS,
+    announcementActive: Boolean = slideContent == Presenting.ANNOUNCEMENTS,
     currentLyricSection: LyricSection,
     allLyricSections: List<LyricSection> = emptyList(),
     songDisplaySectionIndex: Int = 0,
@@ -172,8 +172,8 @@ fun StageMonitorScreen(
     use24Hour: Boolean = isSystemUsing24HourFormat(),
     modifier: Modifier = Modifier
 ) {
-    val currentText = stageCurrentText(presentingMode, currentLyricSection, displayedVerses)
-    val nextText = stageNextText(presentingMode, allLyricSections, songDisplaySectionIndex, nextVerses)
+    val currentText = stageCurrentText(slideContent, currentLyricSection, displayedVerses)
+    val nextText = stageNextText(slideContent, allLyricSections, songDisplaySectionIndex, nextVerses)
 
     // Load image bitmap for PICTURES mode
     var currentImageBitmap by remember(displayedImagePath) { mutableStateOf<ImageBitmap?>(null) }
@@ -204,7 +204,7 @@ fun StageMonitorScreen(
     val renderData = ZoneRenderData(
         currentText = currentText,
         chordLines = if (showChords) currentChordLines else emptyList(),
-        songInfo = if (presentingMode == Presenting.LYRICS) {
+        songInfo = if (slideContent == Presenting.LYRICS) {
             songInfoOf(
                 // The key it reports is the key the chords are drawn in, so it moves with them.
                 section = currentLyricSection.copy(chordLines = currentChordLines),
@@ -216,7 +216,7 @@ fun StageMonitorScreen(
         } else {
             null
         },
-        nextChordLines = if (showChords && presentingMode == Presenting.LYRICS) {
+        nextChordLines = if (showChords && slideContent == Presenting.LYRICS) {
             transposeChordLines(
                 allLyricSections.getOrNull(songDisplaySectionIndex + 1)?.chordLines.orEmpty(),
                 transposeSteps,
@@ -237,7 +237,7 @@ fun StageMonitorScreen(
         dictionarySettings = dictionarySettings
     )
 
-    val activeTypes = activeStageTypes(presentingMode, announcementActive)
+    val activeTypes = activeStageTypes(slideContent, announcementActive)
 
     fun contentFor(zone: StageMonitorZone): StageMonitorContentType? {
         val assigned = StageMonitorContentType.entries.filter { sm.zoneFor(it) == zone }
@@ -285,7 +285,7 @@ fun StageMonitorScreen(
 
         // Metronome — a silent flash dot, only while a song is actually projected.
         val metronomeAlignment = sm.metronomePosition.toAlignment()
-        if (metronomeAlignment != null && presentingMode == Presenting.LYRICS && currentLyricSection.bpm > 0) {
+        if (metronomeAlignment != null && slideContent == Presenting.LYRICS && currentLyricSection.bpm > 0) {
             MetronomeDot(
                 bpm = currentLyricSection.bpm,
                 active = true,

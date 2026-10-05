@@ -22,7 +22,7 @@ internal fun AppSettings.captionSettingsOnScreen(): STTSettings {
         )
         .mapNotNull { it.activeProfileId }
         .toSet()
-    val captioning = projection.outputProfiles.filter { it.showSTT }
+    val captioning = projection.outputProfiles.filter { it.look.captions }
     val profile = captioning.firstOrNull { it.id in inUse }
         ?: captioning.firstOrNull()
         ?: projection.outputProfiles.firstOrNull()

@@ -81,7 +81,7 @@ internal class LiveSlidesState(private val context: PresenterContext) : LiveSlid
 
     override fun setLiveSlide(fileName: String?, index: Int) {
         _liveSlide.value = LiveSlide(fileName, index)
-        if (context.presentingMode.value == Presenting.PRESENTATION) context.notify(Presenting.PRESENTATION)
+        if (context.slideMode.value == Presenting.PRESENTATION) context.notify(Presenting.PRESENTATION)
     }
 
     override fun setDisplayedSlide(slide: ImageBitmap?) {

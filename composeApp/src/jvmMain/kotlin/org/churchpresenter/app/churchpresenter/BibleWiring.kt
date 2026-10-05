@@ -82,7 +82,7 @@ private fun MainDesktopScope.AutoFollowWiring() {
         if (!shouldMainHandleAutoFollow(
                 activeTabIndex = effectiveTabIndex,
                 bibleTabIndex = visibleTabs.indexOf(Tabs.BIBLE),
-                presentingMode = presentingMode,
+                slideContent = slideContent,
             )
         ) return@LaunchedEffect
         val verses = bibleViewModel.getSelectedVerses()

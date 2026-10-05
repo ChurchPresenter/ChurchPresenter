@@ -1,5 +1,9 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.settings.MediaLook
+import org.churchpresenter.settings.OutputLook
+import org.churchpresenter.settings.SlideLook
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.ImageBitmap
@@ -15,6 +19,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runComposeUiTest
+import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
@@ -219,7 +224,7 @@ class LivePreviewPanelTest {
         assertEquals(emptyMap(), manager.browserSourceTranspose.value)
     }
 
-    // ── Mode dispatch → Live badge ────────────────────────────────────────────────────────────
+    // ── Mode dispatch → live tile ──────────────────────────────────────────────────────────────
 
     @Test
     fun `each presenting mode shows Live when its show flag is on, the default`() = runComposeUiTest {
@@ -232,25 +237,25 @@ class LivePreviewPanelTest {
                     )
                 }
             }
-            onNodeWithText("Live").assertExists("mode=$mode must show Live when its show flag defaults to true")
+            onNodeWithTag(LIVE_TILE_TAG).assertExists("mode=$mode must show live when its show flag defaults to true")
         }
     }
 
     @Test
-    fun `each presenting mode's Live badge is gated by its own show flag`() = runComposeUiTest {
+    fun `each presenting mode's live tile is gated by its own show flag`() = runComposeUiTest {
         val offCases = listOf(
             Presenting.BIBLE to OutputProfile(bibleMode = Constants.SONG_LANG_OFF),
             Presenting.LYRICS to OutputProfile(songMode = Constants.SONG_LANG_OFF),
-            Presenting.PICTURES to OutputProfile(showPictures = false),
-            Presenting.PRESENTATION to OutputProfile(showPictures = false),
-            Presenting.MEDIA to OutputProfile(showMedia = false),
-            Presenting.LOWER_THIRD to OutputProfile(showStreaming = false),
-            Presenting.ANNOUNCEMENTS to OutputProfile(showAnnouncements = false),
-            Presenting.WEBSITE to OutputProfile(showWebsite = false),
-            Presenting.CANVAS to OutputProfile(showCanvas = false),
-            Presenting.QA to OutputProfile(showQA = false),
-            Presenting.STT to OutputProfile(showSTT = false),
-            Presenting.DICTIONARY to OutputProfile(showDictionary = false),
+            Presenting.PICTURES to OutputProfile(look = OutputLook(media = MediaLook(pictures = false))),
+            Presenting.PRESENTATION to OutputProfile(look = OutputLook(media = MediaLook(pictures = false))),
+            Presenting.MEDIA to OutputProfile(look = OutputLook(media = MediaLook(video = false))),
+            Presenting.LOWER_THIRD to OutputProfile(look = OutputLook(graphics = false)),
+            Presenting.ANNOUNCEMENTS to OutputProfile(look = OutputLook(announcements = false)),
+            Presenting.WEBSITE to OutputProfile(look = OutputLook(slide = SlideLook(web = false))),
+            Presenting.CANVAS to OutputProfile(look = OutputLook(slide = SlideLook(canvas = false))),
+            Presenting.QA to OutputProfile(look = OutputLook(slide = SlideLook(qa = false))),
+            Presenting.STT to OutputProfile(look = OutputLook(captions = false)),
+            Presenting.DICTIONARY to OutputProfile(look = OutputLook(slide = SlideLook(dictionary = false))),
         )
         for ((mode, offProfile) in offCases) {
             setContent {
@@ -266,18 +271,18 @@ class LivePreviewPanelTest {
                     )
                 }
             }
-            onNodeWithText("Live").assertDoesNotExist()
+            onNodeWithTag(LIVE_TILE_TAG).assertDoesNotExist()
         }
     }
 
     @Test
-    fun `Presenting NONE never shows the Live badge`() = runComposeUiTest {
+    fun `Presenting NONE never shows a live tile`() = runComposeUiTest {
         setContent {
             MaterialTheme {
                 LivePreviewPanel(presenterManager = PresenterManager(), appSettings = AppSettings())
             }
         }
-        onNodeWithText("Live").assertDoesNotExist()
+        onNodeWithTag(LIVE_TILE_TAG).assertDoesNotExist()
     }
 
     // ── FILL badge ─────────────────────────────────────────────────────────────────────────────
@@ -713,6 +718,29 @@ class LivePreviewPanelTest {
         onNodeWithText("Nothing is live", substring = true).assertDoesNotExist()
     }
 
+    @Test
+    fun `an overlay up over a web page shows over its snapshot`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setWebSnapshot(ImageBitmap(4, 4))
+        pm.setPresentingMode(Presenting.WEBSITE)
+        pm.setDisplayedAnnouncementText("Coffee after the service")
+        pm.setPresentingMode(Presenting.ANNOUNCEMENTS)
+        val overPage = AppSettings(
+            announcementsSettings = AnnouncementsSettings(animationType = Constants.ANIMATION_NONE),
+            projectionSettings = ProjectionSettings(
+                outputProfiles = listOf(OutputProfile(id = "over", announcementsOverContent = true)),
+                screenAssignments = listOf(ScreenAssignment(activeProfileId = "over")),
+            ),
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = pm, appSettings = overPage)
+            }
+        }
+        onNodeWithText("Coffee after the service").assertExists("the announcement, over the page")
+        onNodeWithText("Nothing is live", substring = true).assertDoesNotExist()
+    }
+
     // ── Media controls (no MediaViewModel loaded) ────────────────────────────────────────────
 
     @Test
@@ -852,9 +880,9 @@ class LivePreviewPanelTest {
         }
         // STTManager starts with no segments/in-progress text, so there's no caption text to
         // assert on directly — this confirms the sttManager != null branch composes cleanly,
-        // alongside the panel's own always-present content and Live badge.
+        // alongside the panel's own always-present content and live frame.
         onNodeWithText("Screen 1").assertExists()
-        onNodeWithText("Live").assertExists()
+        onNodeWithTag(LIVE_TILE_TAG).assertExists()
     }
 
     // ── The profile swap menu ──────────────────────────────────────────────────────────────────

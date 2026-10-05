@@ -66,7 +66,7 @@ internal fun MainDesktopScope.ContentPublishWiring() {
         snapshotFlow { presenterManager.songDisplaySectionIndex.value }
             .collect { index ->
                 if (shouldFollowRemoteSection(
-                        presenterManager.presentingMode.value,
+                        presenterManager.slideContent.value,
                         songsViewModel.selectedSectionIndex.value,
                         index,
                     )

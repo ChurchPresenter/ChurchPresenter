@@ -35,7 +35,7 @@ Every output composes the same fixed stack, bottom to top:
 | 4 | **Captions** | Live transcription | `STT` |
 | 5 | **Graphics** | Lower third (Lottie), props (logo bug, clock, live badge) | `LOWER_THIRD` |
 | 6 | **Announcements** | Scrolling or static announcement, countdown | `ANNOUNCEMENTS` |
-| 7 | **Messages** | Short operator text that must never displace anything, e.g. a nursery call | — (new) |
+| 7 | **Messages** | Operator text, e.g. a nursery call. Going live with one clears every other layer, as an announcement does today (decision 7) | — (new) |
 | — | **Audio** | Audio-only media, not drawn | Audio files under `MEDIA` |
 
 Rules:
@@ -196,9 +196,16 @@ In order, each step shippable on its own and each keeping every existing test gr
    This is the first visible change, and the first screenshot re-record.
 5. **Per-layer Clear and Clear All**, in the UI, shortcuts and API.
 6. **Preview / Take** behind the preference.
-7. **Looks** replace the `show*` flags, migrating saved profiles.
+7. **Looks** replace the `show*` flags, migrating saved profiles. A profile's `look` groups them by
+   layer (`look.background`, `look.media`, `look.slide`, `look.captions`, `look.graphics`,
+   `look.announcements`); settings version 23 moves each saved switch and renames a linked
+   profile's overrides to match, so followers still follow switch by switch. Scripture and songs
+   stay the profile's language modes, the stage monitor's chord options stay its own, and a screen
+   lock still pins an output to one content type's layers.
 8. **`presentingMode` retired.** Its readers move to `program` file by file; `Presenting` stays as
-   the name of a content type only.
+   the name of a content type only. What is on air is read off `program` -- `liveContent`,
+   `slideContent` and `isLive` -- and the tabs' seams ask `isLive(type)`. The slide's stored
+   content type stays inside `PresenterManager` until the content setters write cues themselves.
 
 The benchmark and soak test must show no regression at steps 2, 3 and 4.
 
@@ -218,3 +225,11 @@ The benchmark and soak test must show no regression at steps 2, 3 and 4.
    Transparent as above, no "keep current".
 4. **Preview mode** is opt-in; direct Go Live stays the default.
 5. **Instance Link**: followers mirror the layer stack, with the followed layers chosen per link.
+6. **Step 4 in practice**: lower thirds and captions go up over the slide; announcements, being
+   full-screen messages, still replace it (short notices over a song: see decision 7).
+   Going live with slide content takes the overlays down. A lower third ending on its own clears the
+   whole display by default, as before; a System setting takes down only the lower third instead.
+   OBS scene switching, Instance Link and Companion follow the most recent go-live.
+7. **Messages** work as today's full-screen notices do: a message going live clears every other
+   layer, then goes up alone. It is not an overlay; notices over a song stay the per-display
+   "over content" choice for lower thirds and announcements.

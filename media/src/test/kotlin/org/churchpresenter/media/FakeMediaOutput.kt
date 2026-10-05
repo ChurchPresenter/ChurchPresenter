@@ -4,14 +4,16 @@ import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.sharedui.models.Presenting
 
 class FakeMediaOutput : MediaOutput {
-    override val presentingMode = mutableStateOf(Presenting.NONE)
+    val onAir = mutableStateOf(Presenting.NONE)
+
+    override fun isLive(mode: Presenting): Boolean = mode != Presenting.NONE && onAir.value == mode
     override val showPresenterWindow = mutableStateOf(false)
     val clearDisplayRequested = mutableStateOf(false)
     var currentMedia: Pair<String, String>? = null
         private set
 
     override fun setPresentingMode(mode: Presenting) {
-        presentingMode.value = mode
+        onAir.value = mode
         if (mode != Presenting.NONE) clearDisplayRequested.value = false
     }
 
@@ -24,6 +26,6 @@ class FakeMediaOutput : MediaOutput {
     }
 
     override fun requestClearDisplay() {
-        if (presentingMode.value != Presenting.NONE) clearDisplayRequested.value = true
+        if (onAir.value != Presenting.NONE) clearDisplayRequested.value = true
     }
 }

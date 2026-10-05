@@ -3,10 +3,22 @@
 package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import org.churchpresenter.sharedui.utils.LocalShortcuts
+import org.churchpresenter.sharedui.utils.ShortcutMap
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithTag
+import kotlin.test.assertFalse
+import org.churchpresenter.core.models.shortcuts.KeyChord
+import org.churchpresenter.settings.KeyboardShortcutSettings
+import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.settings.QuickBackground
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.isRoot
@@ -48,6 +60,7 @@ import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.showLowerThird
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
@@ -135,6 +148,9 @@ class MainDesktopComposeTest {
     ) = runComposeUiTest {
         var actions = ScheduleActions()
         setContent {
+            // The bindings, as MainWindow provides them from the settings.
+            val shortcuts = ShortcutMap.from(appSettings.keyboardShortcutSettings)
+            CompositionLocalProvider(LocalShortcuts provides shortcuts) {
             MaterialTheme {
                 MainDesktop(
                     appSettings = appSettings,
@@ -174,6 +190,7 @@ class MainDesktopComposeTest {
                         uploadPresentationFlow = flows.uploadPresentation,
                     ),
                 )
+            }
             }
         }
         waitForIdle()
@@ -986,7 +1003,9 @@ class MainDesktopComposeTest {
     @Test
     fun `a lower third taken live from the schedule plays its preset, and a missing one does nothing`() {
         val folder = File(dir, "lower-thirds").apply { mkdirs() }
-        File(folder, "Pastor.json").writeText("""{"v":"5.7.4","fr":30,"ip":0,"op":30,"w":1920,"h":1080,"layers":[]}""")
+        // An hour long: one that ran out while the test waited would clear the display on its own.
+        File(folder, "Pastor.json")
+            .writeText("""{"v":"5.7.4","fr":30,"ip":0,"op":108000,"w":1920,"h":1080,"layers":[]}""")
         val manager = PresenterManager()
         val settings = withOneSong().let {
             it.copy(streamingSettings = it.streamingSettings.copy(lowerThirdFolder = folder.absolutePath))
@@ -995,12 +1014,12 @@ class MainDesktopComposeTest {
             actions.addLowerThird("gone", "Gone", false, 0)
             waitForIdle()
             takeLive("Gone")
-            assertEquals(Presenting.NONE, manager.presentingMode.value, "no file, nothing to play")
+            assertEquals(Presenting.NONE, manager.slideContent.value, "no file, nothing to play")
 
             actions.addLowerThird("pastor", "Pastor", false, 0)
             waitForIdle()
             takeLive("Pastor")
-            assertEquals(Presenting.LOWER_THIRD, manager.presentingMode.value)
+            assertEquals(Presenting.LOWER_THIRD, manager.lastLive.value)
             assertTrue(manager.lottieJsonContent.value.isNotEmpty())
         }
     }
@@ -1037,6 +1056,49 @@ class MainDesktopComposeTest {
             assertEquals(1, wiring.scheduleChanged.last(), "redone")
         }
     }
+
+    // ── Preview mode ────────────────────────────────────────────────────────────
+
+    private fun withPreviewMode(on: Boolean, take: KeyChord? = null) = withOneSong().let {
+        it.copy(
+            projectionSettings = it.projectionSettings.copy(previewModeEnabled = on),
+            keyboardShortcutSettings = KeyboardShortcutSettings(
+                overrides = if (take == null) emptyMap() else mapOf(ShortcutAction.TAKE.name to listOf(take)),
+            ),
+        )
+    }
+
+    private fun cuedManager() = PresenterManager().apply {
+        previewBus.setEnabled(true)
+        previewBus.showLowerThird("{}", false, -1f, 0L, "Pastor")
+    }
+
+    @Test
+    fun `Take's shortcut puts what is cued on air`() {
+        val manager = cuedManager()
+        root(withPreviewMode(true, KeyChord.of(Key.F12, ctrl = true, shift = true)), presenterManager = manager) { _ ->
+            press(Key.F12, ctrl = true, shift = true)
+            assertTrue(manager.isLive(Presenting.LOWER_THIRD))
+            assertFalse(manager.previewBus.anythingCued)
+        }
+    }
+
+    @Test
+    fun `the sidebar's Take button puts what is cued on air, and waits while nothing is`() {
+        val manager = cuedManager()
+        root(withPreviewMode(true), presenterManager = manager) { _ ->
+            onNodeWithTag(PREVIEW_TAKE_TAG).assertIsEnabled().performClick()
+            waitForIdle()
+            assertTrue(manager.isLive(Presenting.LOWER_THIRD))
+            onNodeWithTag(PREVIEW_TAKE_TAG).assertIsNotEnabled()
+        }
+    }
+
+    @Test
+    fun `Take is not in the sidebar while preview mode is off`() =
+        root(withPreviewMode(false)) { _ ->
+            onAllNodesWithTag(PREVIEW_TAKE_TAG).assertCountEquals(0)
+        }
 
     @Test
     fun `a tab's function key opens it`() {

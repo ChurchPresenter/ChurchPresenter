@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.viewmodel.cuedModeOf
 import org.churchpresenter.server.broadcastFreezeChange
 import org.churchpresenter.server.broadcastSlideChange
 import org.churchpresenter.server.clearPresentationState
@@ -170,17 +171,18 @@ internal fun MainWindowScope.MainDesktopHost() {
 private fun MainWindowScope.liveOutputCallbacks(): LiveOutputCallbacks = with(root) {
     LiveOutputCallbacks(
         onRowWentLive = { item -> liveDurationLog.wentLive(item) },
-        onVerseSelected = { verses -> presenterManager.setSelectedVerses(verses) },
+        onVerseSelected = { verses -> presenterManager.previewBus.forVerses(verses).setSelectedVerses(verses) },
         // Line mode used to push the section straight to the outputs from
         // here. That put the words on screen behind the transition driver's
         // back, so the Lottie band animated a swap for text that had
         // already changed. Every mode now goes through the driver.
-        onSongItemSelected = { section -> presenterManager.setLyricSection(section) },
-        onAllSectionsChanged = { presenterManager.setAllLyricSections(it) },
-        onSectionIndexChanged = { presenterManager.setSongDisplaySectionIndex(it) },
-        onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
+        // Through the Preview bus: the song on air is stepped, another one cued -- see forSong.
+        onSongItemSelected = { section -> presenterManager.previewBus.forSong(section).setLyricSection(section) },
+        onAllSectionsChanged = { presenterManager.previewBus.forSong(it.firstOrNull()).setAllLyricSections(it) },
+        onSectionIndexChanged = { presenterManager.previewBus.songStepTarget.setSongDisplaySectionIndex(it) },
+        onLineIndexChanged = { presenterManager.previewBus.songStepTarget.setSongDisplayLineIndex(it) },
         presenting = { mode ->
-            presenterManager.setPresentingMode(mode)
+            presenterManager.previewBus.present(mode)
             if (shouldShowPresenterWindowFor(mode)) {
                 presenterManager.setShowPresenterWindow(true)
             }
@@ -358,7 +360,10 @@ private fun MainWindowScope.instanceLinkBridge(
         } else null,
         role = appSettings.instanceLink.role,
         sendProject = if (instanceLinkIsControllerConnected) {
-            { item -> instanceLinkViewModel.sendProject(item) }
+            // A row cued on Preview is projected on the primary when it is taken, not before.
+            { item ->
+                presenterManager.previewBus.onAir(cuedModeOf(item)) { instanceLinkViewModel.sendProject(item) }
+            }
         } else null,
         sendVerse = if (instanceLinkIsControllerConnected) {
             { bookName, chapter, verseNumber, verseText, verseRange ->

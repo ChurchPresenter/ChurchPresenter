@@ -13,7 +13,7 @@ import org.churchpresenter.web.WebOutput
  * [PresenterSlidesOutput]: the manager's own declaration stays untouched.
  */
 class PresenterWebOutput(private val manager: PresenterManager) : WebOutput {
-    override val presentingMode: State<Presenting> get() = manager.presentingMode
+    override fun isLive(mode: Presenting): Boolean = manager.isLive(mode)
     override val websiteUrl: State<String> get() = manager.websiteUrl
     override val webPageTitle: State<String> get() = manager.webPageTitle
     override val liveBrowser: State<CefBrowser?> get() = manager.liveBrowser

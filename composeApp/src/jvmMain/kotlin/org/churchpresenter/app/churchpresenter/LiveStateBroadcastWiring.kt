@@ -16,6 +16,7 @@ import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.utils.hasAudienceOutput
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.isOverlay
 
 /**
  * Broadcasts this instance's live content to any connected InstanceLink follower.
@@ -40,7 +41,7 @@ internal fun LiveStateBroadcastWiring(
         presenterManager.onLiveStateChanged = { pm, source ->
             // The one-off "this install has actually shown something to a congregation" mark.
             // Costs a file read per live change only until it fires, then never writes again.
-            if (pm.presentingMode.value != Presenting.NONE &&
+            if (pm.anythingLive &&
                 hasAudienceOutput(
                     appSettings().projectionSettings.screenAssignments,
                     screenCountForUsage,
@@ -62,7 +63,7 @@ internal fun LiveStateBroadcastWiring(
             )
             val verseCode = liveCode.takeIf { source == Presenting.BIBLE }
             // Beside the broadcast and ahead of it, so it is written whether or not the server runs.
-            LiveHistoryLogger.logLiveState(liveHistoryEntryOf(pm, liveCode))
+            LiveHistoryLogger.logLiveState(liveHistoryEntryOf(pm, liveCode, source))
             companionServer.updateLiveState(
                 LiveContent(
                     mode = source.name,
@@ -83,7 +84,9 @@ internal fun LiveStateBroadcastWiring(
                     lowerThirdName = nullIfEmpty(pm.currentLowerThirdName.value),
                     verseCode = verseCode,
                     songSectionIndex = livePositionOrNull(source, Presenting.LYRICS, pm.songDisplaySectionIndex.value),
-                    songLineIndex = livePositionOrNull(source, Presenting.LYRICS, pm.songDisplayLineIndex.value)
+                    songLineIndex = livePositionOrNull(source, Presenting.LYRICS, pm.songDisplayLineIndex.value),
+                    liveSlide = pm.slideContent.value.name,
+                    overlays = pm.overlays.value.map { it.name },
                 ),
             )
         }
@@ -97,9 +100,16 @@ internal fun LiveStateBroadcastWiring(
  *
  * [verseCode] is the canonical code of [PresenterManager.selectedVerse] through the primary Bible,
  * null when it cannot be resolved; it is only written while BIBLE is the mode.
+ *
+ * An overlay is logged when [source] -- the change being logged -- is that overlay going up; any
+ * other change logs the slide, so a song moving on under a lower third is still in the history.
  */
-internal fun liveHistoryEntryOf(pm: PresenterManager, verseCode: Triple<Int, Int, Int>?): LiveHistoryEntry {
-    val mode = pm.presentingMode.value
+internal fun liveHistoryEntryOf(
+    pm: PresenterManager,
+    verseCode: Triple<Int, Int, Int>?,
+    source: Presenting = pm.lastLive.value,
+): LiveHistoryEntry {
+    val mode = if (source.isOverlay && pm.isLive(source)) source else pm.slideContent.value
     val none = LiveHistoryEntry(Presenting.NONE.name)
     return when (mode) {
         Presenting.LYRICS -> {

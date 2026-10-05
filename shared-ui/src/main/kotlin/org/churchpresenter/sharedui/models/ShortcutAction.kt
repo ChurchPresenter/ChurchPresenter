@@ -73,6 +73,7 @@ import org.churchpresenter.strings.generated.resources.shortcut_description_quic
 import org.churchpresenter.strings.generated.resources.shortcut_description_quick_background_10
 import org.churchpresenter.strings.generated.resources.shortcut_description_quick_background_reset
 import org.churchpresenter.strings.generated.resources.shortcut_description_undo
+import org.churchpresenter.strings.generated.resources.shortcut_description_take
 import org.churchpresenter.core.models.shortcuts.KeyChord
 import org.jetbrains.compose.resources.StringResource
 
@@ -162,6 +163,8 @@ enum class ShortcutAction(
     // ── Global ───────────────────────────────────────────────────────────────
     CLEAR_OUTPUT(ShortcutScope.GLOBAL, Res.string.shortcut_description_escape,
         listOf(KeyChord.of(Key.Escape))),
+    // Preview mode's Take. Unbound until someone picks a key for it.
+    TAKE(ShortcutScope.GLOBAL, Res.string.shortcut_description_take, emptyList()),
     UNDO(ShortcutScope.GLOBAL, Res.string.shortcut_description_undo,
         listOf(KeyChord.of(Key.Z, ctrl = true))),
     REDO(ShortcutScope.GLOBAL, Res.string.shortcut_description_redo,

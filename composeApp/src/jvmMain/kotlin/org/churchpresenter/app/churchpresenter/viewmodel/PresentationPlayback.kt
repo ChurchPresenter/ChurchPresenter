@@ -94,7 +94,7 @@ internal class PresentationPlaybackState(private val context: PresenterContext) 
         if (player.deck !== deck || player.currentSlideIndex != slideIndex) return null
         // A cleared display blanks the mode-driven output — steps would be invisible there.
         // (Screen-lock visibility is the caller's gate, as with all lock-aware behavior.)
-        val visibleViaMode = context.presentingMode.value == Presenting.PRESENTATION &&
+        val visibleViaMode = context.slideMode.value == Presenting.PRESENTATION &&
             !context.clearDisplayRequested.value
         val visibleViaLock = context.screenLocks.value.values.any { it == Presenting.PRESENTATION }
         return if (visibleViaMode || visibleViaLock) player else null

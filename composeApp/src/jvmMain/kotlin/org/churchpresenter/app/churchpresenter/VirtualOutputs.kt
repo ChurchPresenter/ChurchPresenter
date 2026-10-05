@@ -106,7 +106,7 @@ private fun AppRootState.BrowserSourceOutput(
                 presenterManager.browserSourceLocks.value,
                 // A merged output shows what its picture's first output shows.
                 mergeHostIndex(outputMergesState.value, Constants.PREVIEW_OUTPUT_BROWSER_SOURCE, i),
-                presenterManager.presentingMode.value,
+                presenterManager.slideContent.value,
             )
         }
     }
@@ -159,7 +159,7 @@ private fun AppRootState.NdiOutput(
                 presenterManager.ndiLocks.value,
                 // A merged output shows what its picture's first output shows.
                 mergeHostIndex(outputMergesState.value, Constants.PREVIEW_OUTPUT_NDI, i),
-                presenterManager.presentingMode.value,
+                presenterManager.slideContent.value,
             )
         }
     }
@@ -227,7 +227,7 @@ private fun AppRootState.OmtOutput(
                 presenterManager.omtLocks.value,
                 // A merged output shows what its picture's first output shows.
                 mergeHostIndex(outputMergesState.value, Constants.PREVIEW_OUTPUT_OMT, i),
-                presenterManager.presentingMode.value,
+                presenterManager.slideContent.value,
             )
         }
     }

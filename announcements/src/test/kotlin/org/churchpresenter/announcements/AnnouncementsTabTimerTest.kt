@@ -120,7 +120,7 @@ class AnnouncementsTabTimerTest {
             waitForIdle()
 
             assertFalse(presenter.announcementTickerLive.value, "still preview-only")
-            assertFalse(presenter.presentingMode.value == Presenting.ANNOUNCEMENTS)
+            assertFalse(presenter.onAir.value == Presenting.ANNOUNCEMENTS)
         }
 
     @Test
@@ -141,7 +141,7 @@ class AnnouncementsTabTimerTest {
             waitForIdle()
 
             assertTrue(presenter.announcementTickerLive.value, "the ticker is live now")
-            assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
+            assertEquals(Presenting.ANNOUNCEMENTS, presenter.onAir.value)
             assertEquals(
                 "05:00",
                 presenter.announcementText.value,

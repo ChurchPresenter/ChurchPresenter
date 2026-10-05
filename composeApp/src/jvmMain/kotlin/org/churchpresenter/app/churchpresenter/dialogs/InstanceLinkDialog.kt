@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.settings.LinkLayers
 import androidx.compose.runtime.Stable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -279,6 +280,13 @@ private class InstanceLinkForm(private val settings: InstanceLinkSettings) {
     var bibleSyncMode by mutableStateOf(settings.bibleSyncMode)
     var mirrorBackgrounds by mutableStateOf(settings.mirrorBackgrounds)
     var role by mutableStateOf(settings.role)
+    var followedLayers by mutableStateOf(settings.followedLayers)
+
+    /** Follows [layer] or stops, keeping the layers in their own order. */
+    fun follow(layer: String, on: Boolean) {
+        val chosen = if (on) followedLayers + layer else followedLayers - layer
+        followedLayers = LinkLayers.ALL.filter { it in chosen }
+    }
 
     fun edited(): InstanceLinkSettings = settings.copy(
         primaryHost = host.trim(),
@@ -289,7 +297,8 @@ private class InstanceLinkForm(private val settings: InstanceLinkSettings) {
         allowPushToSchedule = allowPushToSchedule,
         bibleSyncMode = bibleSyncMode,
         mirrorBackgrounds = mirrorBackgrounds,
-        role = role
+        role = role,
+        followedLayers = followedLayers,
     )
 }
 
@@ -461,6 +470,8 @@ if (form.role == InstanceLinkRole.CONTROLLED) {
         style = MaterialTheme.typography.bodyMedium,
         spacing = 12.dp,
     )
+
+    FollowedLayers(form.followedLayers, form::follow)
 }
 }
 

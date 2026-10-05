@@ -31,8 +31,8 @@ internal fun shouldShowStoryPrompt(isDue: Boolean, updatePending: Boolean): Bool
  * Whether the operator has something of their own on screen, so a cue must not take over: anything is
  * live, and it is not the row the calendar engine itself put there ([engineItemShowing]).
  */
-internal fun isOperatorLive(presentingMode: Presenting, engineItemShowing: Boolean?): Boolean =
-    presentingMode != Presenting.NONE && engineItemShowing != true
+internal fun isOperatorLive(slideContent: Presenting, engineItemShowing: Boolean?): Boolean =
+    slideContent != Presenting.NONE && engineItemShowing != true
 
 /** A remote action's toast title: Clear Display has a fixed one of its own, everything else is named by the phone. */
 internal fun remoteActivityTitle(type: RemoteEventType, clearDisplayTitle: String, sentTitle: String): String =

@@ -31,14 +31,16 @@ import org.churchpresenter.web.WebOutput
  * stand in for the window having opened its browser.
  */
 internal class FakeWebOutput : WebOutput {
-    override val presentingMode = mutableStateOf(Presenting.NONE)
+    val onAir = mutableStateOf(Presenting.NONE)
+
+    override fun isLive(mode: Presenting): Boolean = mode != Presenting.NONE && onAir.value == mode
     override val websiteUrl = mutableStateOf("")
     override val webPageTitle = mutableStateOf("")
     override val liveBrowser = mutableStateOf<CefBrowser?>(null)
     override val webSnapshot = mutableStateOf<ImageBitmap?>(null)
 
     override fun setPresentingMode(mode: Presenting) {
-        presentingMode.value = mode
+        onAir.value = mode
     }
 
     override fun setWebsiteUrl(url: String) {

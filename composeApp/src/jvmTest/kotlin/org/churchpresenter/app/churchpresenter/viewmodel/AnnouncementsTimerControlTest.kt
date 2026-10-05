@@ -296,7 +296,7 @@ class AnnouncementsTimerControlTest {
         vm.goLive(pm.announcementsOutput) { }
 
         assertEquals("Welcome to the 10am service", pm.announcementText.value)
-        assertEquals(Presenting.ANNOUNCEMENTS, pm.presentingMode.value)
+        assertEquals(Presenting.ANNOUNCEMENTS, pm.lastLive.value)
     }
 
     @Test
@@ -337,7 +337,7 @@ class AnnouncementsTimerControlTest {
         vm.saveToSettings { transform -> saved = transform(saved) }
 
         assertEquals("Draft", saved.announcementsSettings.text)
-        assertEquals(Presenting.NONE, pm.presentingMode.value)
+        assertEquals(Presenting.NONE, pm.slideContent.value)
     }
 
     // ── Timer formatting ────────────────────────────────────────────────────────

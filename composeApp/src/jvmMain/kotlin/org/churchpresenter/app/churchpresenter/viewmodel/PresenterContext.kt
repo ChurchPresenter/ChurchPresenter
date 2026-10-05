@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.referentialEqualityPolicy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -18,10 +19,23 @@ import org.churchpresenter.sharedui.models.Presenting
 internal class PresenterContext {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    val presentingMode = mutableStateOf(Presenting.NONE)
+    /**
+     * The content on the slide layers, which [PresenterManager.program] is derived from -- see
+     * [PresenterManager.slideContent].
+     */
+    val slideMode = mutableStateOf(Presenting.NONE)
+
+    /**
+     * The overlay content up over the slide -- see [PresenterManager.overlays]. Compared by identity:
+     * the set's order is the order they went up in, and two sets in a different order are equal.
+     */
+    val overlays = mutableStateOf<Set<Presenting>>(emptySet(), referentialEqualityPolicy())
+
+    /** Whatever was put live most recently, slide or overlay -- see [PresenterManager.lastLive]. */
+    val lastLive = mutableStateOf(Presenting.NONE)
     val clearDisplayRequested = mutableStateOf(false)
 
-    /** Per-screen lock: screen slot index -> locked mode; a missing entry follows [presentingMode]. */
+    /** Per-screen lock: screen slot index -> locked mode; a missing entry follows [slideMode]. */
     val screenLocks = mutableStateOf<Map<Int, Presenting>>(emptyMap())
 
     /** Reports a live-content change of [Presenting] type; set by the manager to its own broadcast. */
@@ -29,4 +43,7 @@ internal class PresenterContext {
 
     /** Switches the live mode the way the manager does, for a countdown that runs out on screen. */
     var setPresentingMode: (Presenting) -> Unit = {}
+
+    /** Clears the display the way the manager does, for an overlay that ends on its own. */
+    var requestClearDisplay: () -> Unit = {}
 }

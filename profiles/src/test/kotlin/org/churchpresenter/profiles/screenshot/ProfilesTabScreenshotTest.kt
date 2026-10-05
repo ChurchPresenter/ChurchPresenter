@@ -2,6 +2,10 @@
 
 package org.churchpresenter.profiles.screenshot
 
+import org.churchpresenter.settings.BackgroundLook
+import org.churchpresenter.settings.MediaLook
+import org.churchpresenter.settings.OutputLook
+import org.churchpresenter.settings.SlideLook
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -120,13 +124,12 @@ class ProfilesTabScreenshotTest {
             OutputProfile(
                 bibleMode = Constants.SONG_LANG_OFF,
                 songMode = Constants.SONG_LANG_OFF,
-                showFullscreenBackground = false,
-                showBibleBackground = false,
-                showSongsBackground = false,
-                showSTT = false,
-                showSubtitles = false,
-                showQA = false,
-                showDictionary = false,
+                look = OutputLook(
+                    background = BackgroundLook(fullscreen = false, bible = false, songs = false),
+                    media = MediaLook(subtitles = false),
+                    slide = SlideLook(qa = false, dictionary = false),
+                    captions = false,
+                ),
             ),
         ),
     )
@@ -415,13 +418,14 @@ class ProfilesTabScreenshotTest {
         val base = library()
         val bible = base.bibleSettings
         val youth = OutputProfile(
-            id = "youth", name = "Youth night", parentId = "main", showQA = false,
+            id = "youth", name = "Youth night", parentId = "main",
             bibleSettings = bible.copy(
                 translations = bible.translations.map {
                     if (it.fileName == "kjv.spb") it.copy(textFontSize = 50) else it
                 },
             ),
-            overrides = setOf("bibleSettings.translations[kjv.spb].textFontSize", "showQA"),
+            overrides = setOf("bibleSettings.translations[kjv.spb].textFontSize", "look.slide.qa"),
+            look = OutputLook(slide = SlideLook(qa = false)),
         )
         val easter = OutputProfile(id = "easter", name = "Easter", parentId = "main")
         val proj = base.projectionSettings

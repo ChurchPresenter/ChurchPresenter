@@ -143,7 +143,7 @@ class PicturesTabOptionsTest {
     fun `go live puts the picture and the one after it on the output`() = tab { h ->
         pictureButton(PictureLabel.GO_LIVE).performClick()
         waitForIdle()
-        assertEquals(Presenting.PICTURES, h.output.presentingMode.value)
+        assertEquals(Presenting.PICTURES, h.output.onAir.value)
         assertEquals(h.vm.images[0].absolutePath, h.output.selectedImagePath.value)
         assertEquals(h.vm.images[1].absolutePath, h.output.nextImagePath.value)
         assertEquals(1, h.calls.projected.size)
@@ -157,7 +157,7 @@ class PicturesTabOptionsTest {
         }
         waitForIdle()
         assertEquals(1, h.vm.selectedImageIndex)
-        assertEquals(Presenting.PICTURES, h.output.presentingMode.value)
+        assertEquals(Presenting.PICTURES, h.output.onAir.value)
     }
 
     @Test

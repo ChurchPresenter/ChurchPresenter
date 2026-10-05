@@ -86,7 +86,7 @@ class AnnouncementsTabStageMonitorTest {
             annButton(AnnouncementLabel.SEND_TO_STAGE_MONITOR).performClick()
             waitForIdle()
 
-            assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
+            assertEquals(Presenting.ANNOUNCEMENTS, presenter.onAir.value)
             assertEquals("Notices", presenter.announcementText.value)
             assertTrue(
                 presenter.screenLocks.value.isEmpty(),
@@ -183,7 +183,7 @@ class AnnouncementsTabStageMonitorTest {
             timerButton(AnnouncementLabel.SEND_TO_STAGE_MONITOR).performClick()
             waitForIdle()
 
-            assertEquals(Presenting.ANNOUNCEMENTS, presenter.presentingMode.value)
+            assertEquals(Presenting.ANNOUNCEMENTS, presenter.onAir.value)
             assertEquals("05:00", presenter.announcementText.value)
         }
 }

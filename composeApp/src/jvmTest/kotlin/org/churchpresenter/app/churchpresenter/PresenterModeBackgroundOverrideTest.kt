@@ -1,5 +1,9 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.settings.BackgroundLook
+import org.churchpresenter.settings.MediaLook
+import org.churchpresenter.settings.OutputLook
+import org.churchpresenter.settings.SlideLook
 import androidx.compose.runtime.Composable
 import org.churchpresenter.app.churchpresenter.presenter.WEB_SNAPSHOT_TAG
 import org.churchpresenter.presenter.LocalInMergedTile
@@ -131,15 +135,13 @@ class PresenterModeBackgroundOverrideTest {
     private val showsNothing = OutputProfile(
         bibleMode = Constants.SONG_LANG_OFF,
         songMode = Constants.SONG_LANG_OFF,
-        showPictures = false,
-        showMedia = false,
-        showStreaming = false,
-        showAnnouncements = false,
-        showWebsite = false,
-        showQA = false,
-        showSTT = false,
-        showDictionary = false,
-        showCanvas = false,
+        look = OutputLook(
+            media = MediaLook(pictures = false, video = false),
+            slide = SlideLook(web = false, canvas = false, qa = false, dictionary = false),
+            announcements = false,
+            graphics = false,
+            captions = false,
+        ),
     )
 
     @Test
@@ -211,7 +213,7 @@ class PresenterModeBackgroundOverrideTest {
 
     @Test
     fun `a profile with its backgrounds off still draws the words`() {
-        val bare = OutputProfile(showBibleBackground = false, showSongsBackground = false)
+        val bare = OutputProfile(look = OutputLook(background = BackgroundLook(bible = false, songs = false)))
         runComposeUiTest {
             setContent(content(Presenting.BIBLE, bibleManager(), override = null, profile = bare))
             onNodeWithText(verse.verseText, substring = true).assertExists()

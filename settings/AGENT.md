@@ -140,6 +140,9 @@ named in `BIBLE_GLOBAL_KEYS`, `SONG_GLOBAL_KEYS`, `STT_GLOBAL_KEYS` and `QA_GLOB
   `BIBLE_TRANSLATION_GLOBAL_KEYS`. First it gives every profile what it lacked: a whole section,
   or a translation its Bible settings never styled. A document with no profiles gets its factory
   profile built from its own look.
+- **Version 23** turns a profile's fifteen flat `show*` switches into its `look`, grouped by layer
+  (`OutputLook.kt`, `migrateShowSwitchesIntoLooks`), and renames a follower's overrides of them by
+  `LEGACY_LOOK_PATHS`. Edit a look through `withLook`/`withBackground`/`withMedia`/`withSlide`.
 - **The main window follows a profile** for everything that is not one per install
   (`operatorProfile`: the first profile an output uses, else the first profile). Read
   `operatorSongSettings()`/`operatorBibleSettings()` for verse splitting, the title slide, chorus

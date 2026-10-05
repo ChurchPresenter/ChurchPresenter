@@ -107,7 +107,7 @@ internal class PresentationTabScope(
             // (PowerPoint's own 'B'), NOT Clear Display, which shows the configured
             // background instead.
             shortcuts.matches(ShortcutAction.PRESENTATION_BLANK, keyEvent) -> {
-                if (presenterManager?.presentingMode?.value == Presenting.PRESENTATION) {
+                if (presenterManager?.isLive(Presenting.PRESENTATION) == true) {
                     onFreezeToggle()
                     true
                 } else false
@@ -191,10 +191,10 @@ internal fun PresentationTabScope.PresentationLiveEffects(viewModel: Presentatio
     }
 
     LaunchedEffect(viewModel.selectedSlideIndex, viewModel.slideFiles.size) {
-        val mode = presenterManager?.presentingMode?.value
         val idx = viewModel.selectedSlideIndex
         val enterAtLastStep = viewModel.consumeEnteredViaPreviousSlide()
-        val anyScreenOnPresentation = mode == Presenting.PRESENTATION ||
+        val anyScreenOnPresentation = presenterManager?.isLive(Presenting.PRESENTATION) == true ||
+            presenterManager?.presentationCued == true ||
             presenterManager?.screenLocks?.value?.values?.any { it == Presenting.PRESENTATION } == true
         if (anyScreenOnPresentation && viewModel.slideFiles.isNotEmpty()) {
             val bitmap = viewModel.slideFiles.getOrNull(idx)?.let { f ->
@@ -230,7 +230,8 @@ internal fun PresentationTabScope.PresentationLiveEffects(viewModel: Presentatio
     // Hiding or showing a slide can change which one comes next, so the stage monitor's "next"
     // is refreshed -- and only that. Re-pushing the live slide here restarted its animation.
     LaunchedEffect(viewModel.hiddenSlides) {
-        val onPresentation = presenterManager?.presentingMode?.value == Presenting.PRESENTATION ||
+        val onPresentation = presenterManager?.isLive(Presenting.PRESENTATION) == true ||
+            presenterManager?.presentationCued == true ||
             presenterManager?.screenLocks?.value?.values?.any { it == Presenting.PRESENTATION } == true
         if (!onPresentation) return@LaunchedEffect
         val nextFile = viewModel.nextShownSlideIndex()?.let { viewModel.slideFiles.getOrNull(it) }

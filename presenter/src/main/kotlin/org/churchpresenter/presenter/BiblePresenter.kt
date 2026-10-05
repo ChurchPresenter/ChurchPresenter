@@ -1,21 +1,14 @@
 package org.churchpresenter.presenter
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.text.TextBackdrop
@@ -147,6 +140,11 @@ fun BiblePresenter(
     bibleTranslations: List<Int> = emptyList(),
     /** Full screen: the region the text alone is placed in, the background filling the screen -- see [textOnly]. */
     textRegion: ContentRegion? = null,
+    /**
+     * Whether the full-screen background is drawn here. Off where an output draws it on its own
+     * background layer instead ([BibleSlideBackground]); a lower third's band is drawn either way.
+     */
+    drawsBackground: Boolean = true,
 ) {
     val look = BibleLook(
         selectedVerses = selectedVerses,
@@ -188,34 +186,23 @@ fun BiblePresenter(
             showBackground = showBackground,
             transparentWhenBlank = LocalTransparentBlanking.current,
         )
-        val backdrop = PresenterBackdrop(resolvedBg, rememberBackgroundBitmap(resolvedBg, isLowerThird))
+        // The picture is decoded only where it is drawn: on the band, or full screen when this draws
+        // the background itself rather than leaving it to the background layer.
+        val backdrop = PresenterBackdrop(
+            resolvedBg,
+            if (isLowerThird || drawsBackground) rememberBackgroundBitmap(resolvedBg, isLowerThird) else null,
+        )
 
         // Fade-in on first appearance (covers background + text)
-        val fadeInDuration = appSettings.bibleSettings.transitionDuration.toInt().coerceAtLeast(100)
-        var enterAlpha by remember { mutableStateOf(if (appSettings.bibleSettings.fadeIn) 0f else 1f) }
-        LaunchedEffect(Unit) {
-            if (appSettings.bibleSettings.fadeIn && enterAlpha < 1f) {
-                val anim = Animatable(0f)
-                anim.animateTo(1f, tween(durationMillis = fadeInDuration)) {
-                    enterAlpha = this.value
-                }
-                enterAlpha = 1f
-            }
-        }
-
-        BoxWithConstraints(
-            modifier.fillMaxSize()
-                .graphicsLayer { alpha = transitionAlpha * enterAlpha }
-                .then(if (!isLowerThird && !resolvedBg.isBlurred) backdrop.bgModifier else Modifier)
-        ) {
+        val enterAlpha = rememberBibleEnterAlpha(appSettings)
+        FullScreenBackdropBox(
+            modifier = modifier,
+            alpha = { transitionAlpha * enterAlpha.value },
+            backdrop = backdrop,
+            isLowerThird = isLowerThird,
+            drawsBackground = drawsBackground,
+        ) { blurRadius ->
             val density = LocalDensity.current
-            val blurRadius = backgroundBlurRadius(resolvedBg.blurReferencePx, maxWidth)
-            PresenterBackgroundLayers(
-                background = resolvedBg,
-                backgroundModifier = backdrop.bgModifier,
-                isLowerThird = isLowerThird,
-                blurRadius = blurRadius,
-            )
             // Everything but the background, in the region when the background stays full screen.
             TextRegionBox(textRegion) {
                 BibleFrameContent(style, backdrop, blurRadius, density)
@@ -223,6 +210,7 @@ fun BiblePresenter(
         }
     }
 }
+
 
 /** A Lottie band draws the whole band itself — text included — so it replaces everything else. */
 @Composable

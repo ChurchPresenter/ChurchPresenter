@@ -5,7 +5,7 @@ import org.churchpresenter.sharedui.models.Presenting
 
 /**
  * Whether an output shows a given kind of content -- the per-content-type visibility gate every
- * real output obeys, via the [OutputProfile] it is assigned to.
+ * real output obeys: its [OutputProfile]'s look, and for scripture and songs its language modes.
  *
  * The single definition of that mapping. It was written out three times (here, the live preview
  * panel, and the Browser Source renderer), which is three places to forget when a content type is
@@ -15,14 +15,14 @@ import org.churchpresenter.sharedui.models.Presenting
 fun showsContentFor(mode: Presenting, profile: OutputProfile): Boolean = when (mode) {
     Presenting.BIBLE -> profile.showBible
     Presenting.LYRICS -> profile.showSongs
-    Presenting.PICTURES, Presenting.PRESENTATION -> profile.showPictures
-    Presenting.ANNOUNCEMENTS -> profile.showAnnouncements
-    Presenting.LOWER_THIRD -> profile.showStreaming
-    Presenting.MEDIA -> profile.showMedia
-    Presenting.WEBSITE -> profile.showWebsite
-    Presenting.CANVAS -> profile.showCanvas
-    Presenting.QA -> profile.showQA
-    Presenting.STT -> profile.showSTT
-    Presenting.DICTIONARY -> profile.showDictionary
+    Presenting.PICTURES, Presenting.PRESENTATION -> profile.look.media.pictures
+    Presenting.ANNOUNCEMENTS -> profile.look.announcements
+    Presenting.LOWER_THIRD -> profile.look.graphics
+    Presenting.MEDIA -> profile.look.media.video
+    Presenting.WEBSITE -> profile.look.slide.web
+    Presenting.CANVAS -> profile.look.slide.canvas
+    Presenting.QA -> profile.look.slide.qa
+    Presenting.STT -> profile.look.captions
+    Presenting.DICTIONARY -> profile.look.slide.dictionary
     Presenting.NONE -> false
 }

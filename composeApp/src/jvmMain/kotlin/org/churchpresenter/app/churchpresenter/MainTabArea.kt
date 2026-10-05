@@ -235,10 +235,10 @@ private fun MainDesktopScope.BibleTabPane() {
         onInstanceLinkSendVerse = link.sendVerse,
         onInstanceLinkSendBibleHold = link.sendBibleHold,
         onPresenting = live.presenting,
-        isPresenting = presentingMode == Presenting.BIBLE,
+        isPresenting = slideContent == Presenting.BIBLE,
         bibleOutput = presenterManager,
         verseStatistics = statisticsManager,
-        onVerseWentLive = { recordBibleWentLive(appSettings) },
+        onVerseWentLive = { presenterManager.previewBus.onAir(Presenting.BIBLE) { recordBibleWentLive(appSettings) } },
         verseSequenceLog = verseSequenceLog,
         crossReferences = sharedCrossReferences,
         dialogDismissSignal = dialogDismissSignal,
@@ -255,9 +255,12 @@ private fun MainDesktopScope.SongsTabPane() {
         viewModel = songsViewModel,
         appSettings = appSettings,
         typicalSongSeconds = service.typicalSongSeconds,
+        // Counted when the song reaches the air: on Take, while preview mode cues it.
         onSongWentLive = { song ->
-            recordSongWentLive(song, appSettings, statisticsManager)
-            live.onRowWentLive(song.asDurationRow())
+            presenterManager.previewBus.onAir(Presenting.LYRICS) {
+                recordSongWentLive(song, appSettings, statisticsManager)
+                live.onRowWentLive(song.asDurationRow())
+            }
         },
         titleSlideFor = ::titleSlideSection,
         songEditor = { request -> AppSongEditor(request, theme, appSettings) },
@@ -274,7 +277,7 @@ private fun MainDesktopScope.SongsTabPane() {
         onSectionIndexChanged = live.onSectionIndexChanged,
         onLineIndexChanged = live.onLineIndexChanged,
         onPresenting = live.presenting,
-        isPresenting = presentingMode == Presenting.LYRICS,
+        isPresenting = slideContent == Presenting.LYRICS,
         playCounts = statisticsManager,
         dialogDismissSignal = dialogDismissSignal
     )

@@ -46,7 +46,7 @@ class MediaTabScheduleLiveTest {
                 presenter.clearDisplayRequested.value,
                 "the output was blanked to load the file and must be showing again afterwards",
             )
-            assertEquals(Presenting.MEDIA, presenter.presentingMode.value)
+            assertEquals(Presenting.MEDIA, presenter.onAir.value)
         }
     }
 
@@ -72,7 +72,7 @@ class MediaTabScheduleLiveTest {
         mediaTab(selectedMediaItem = clip(), presenterManager = presenter) { vm, _ ->
             waitUntil { vm.isLoaded }
 
-            assertEquals(Presenting.NONE, presenter.presentingMode.value, "loading is not going live")
+            assertEquals(Presenting.NONE, presenter.onAir.value, "loading is not going live")
             assertFalse(presenter.clearDisplayRequested.value)
         }
     }

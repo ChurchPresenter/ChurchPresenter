@@ -14,7 +14,7 @@ import org.churchpresenter.settings.utils.Constants
  *
  * Carried whole by each [OutputProfile] rather than once for the install, so two screens can style
  * their subtitles differently; [OutputProfileResolution] takes the profile's copy outright, with no
- * keep-list, because nothing here is install-wide. [OutputProfile.showSubtitles] decides whether an
+ * keep-list, because nothing here is install-wide. [OutputProfile.look]'s `media.subtitles` decides whether an
  * output draws them at all, and which *tracks* it draws is chosen on the Media tab, where the files
  * are loaded -- they belong to the video, not to the install.
  */

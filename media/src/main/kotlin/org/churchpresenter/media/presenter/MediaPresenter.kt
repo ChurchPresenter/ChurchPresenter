@@ -20,7 +20,7 @@ fun MediaPresenter(
     isVisible: Boolean = true,
     transitionAlpha: Float = 1f,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
-    /** Whether this output draws the subtitle overlay at all -- `OutputProfile.showSubtitles`. */
+    /** Whether this output draws the subtitle overlay at all -- `OutputProfile.look.media.subtitles`. */
     showSubtitles: Boolean = true,
     /**
      * The profile this output runs, which decides *which* subtitle tracks it draws.

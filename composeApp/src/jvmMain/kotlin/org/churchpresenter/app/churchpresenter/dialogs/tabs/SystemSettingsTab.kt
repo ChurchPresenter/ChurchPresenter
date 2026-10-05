@@ -66,6 +66,10 @@ import org.churchpresenter.strings.generated.resources.start_outputs_hidden
 import org.churchpresenter.strings.generated.resources.start_outputs_hidden_hint
 import org.churchpresenter.strings.generated.resources.hide_cursor_on_outputs
 import org.churchpresenter.strings.generated.resources.hide_cursor_on_outputs_hint
+import org.churchpresenter.strings.generated.resources.overlay_end_clears_display
+import org.churchpresenter.strings.generated.resources.overlay_end_clears_display_hint
+import org.churchpresenter.strings.generated.resources.preview_mode
+import org.churchpresenter.strings.generated.resources.preview_mode_hint
 import org.churchpresenter.strings.generated.resources.system_manage_settings
 import org.churchpresenter.strings.generated.resources.test_event_dev_only
 import org.churchpresenter.strings.generated.resources.test_event_failed
@@ -76,6 +80,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.BuildConfig
+import org.churchpresenter.app.churchpresenter.viewmodel.withPreviewMode
 import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.sharedui.composables.SettingsScrollbarGutter
 import org.churchpresenter.server.CompanionServer
@@ -245,6 +250,26 @@ private fun GeneralCard(
                     onSettingsChange { s ->
                         s.copy(projectionSettings = s.projectionSettings.copy(hideCursorOnOutputs = hide))
                     }
+                }
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            GeneralToggleRow(
+                label = stringResource(Res.string.overlay_end_clears_display),
+                hint = stringResource(Res.string.overlay_end_clears_display_hint),
+                checked = settings.projectionSettings.overlayEndClearsDisplay,
+                onCheckedChange = { clears ->
+                    onSettingsChange { s ->
+                        s.copy(projectionSettings = s.projectionSettings.copy(overlayEndClearsDisplay = clears))
+                    }
+                }
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            GeneralToggleRow(
+                label = stringResource(Res.string.preview_mode),
+                hint = stringResource(Res.string.preview_mode_hint),
+                checked = settings.projectionSettings.previewModeEnabled,
+                onCheckedChange = { on ->
+                    onSettingsChange { s -> s.withPreviewMode(on) }
                 }
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))

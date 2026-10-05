@@ -1,5 +1,6 @@
 package org.churchpresenter.stt
 
+import org.churchpresenter.settings.OutputLook
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
@@ -17,7 +18,8 @@ class CaptionSettingsOnScreenTest {
 
     private val idle = OutputProfile(id = "idle", sttSettings = STTSettings(maxSegments = 1))
     private val live = OutputProfile(id = "live", sttSettings = STTSettings(maxSegments = 2))
-    private val silent = OutputProfile(id = "silent", showSTT = false, sttSettings = STTSettings(maxSegments = 3))
+    private val silent =
+        OutputProfile(id = "silent", sttSettings = STTSettings(maxSegments = 3), look = OutputLook(captions = false))
 
     private fun doc(profiles: List<OutputProfile>, assigned: String? = null) = AppSettings(
         sttSettings = STTSettings(maxSegments = 9, serverUrl = "http://stt.local"),

@@ -76,4 +76,18 @@ class LiveStateBroadcastWiringTest {
         manager.setPresentingMode(Presenting.LYRICS)
         manager.onLiveStateChanged?.invoke(manager, Presenting.BIBLE)
     }
+
+    @Test
+    fun `the broadcast says what is on air, the slide and the overlays over it`() = runComposeUiTest {
+        val manager = PresenterManager()
+        val server = CompanionServer()
+        compose(this, manager, server)
+        waitForIdle()
+        manager.setPresentingMode(Presenting.LYRICS)
+        manager.setPresentingMode(Presenting.LOWER_THIRD)
+        manager.onLiveStateChanged?.invoke(manager, Presenting.LOWER_THIRD)
+        val sent = assertNotNull(server.liveState.value)
+        assertEquals(Presenting.LYRICS.name, sent.liveSlide)
+        assertEquals(listOf(Presenting.LOWER_THIRD.name), sent.overlays)
+    }
 }

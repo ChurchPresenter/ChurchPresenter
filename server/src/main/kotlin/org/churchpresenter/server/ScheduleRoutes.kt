@@ -125,15 +125,28 @@ internal fun Route.scheduleRoutes(
                     }
                 }
 
+                liveControlRoutes(server, scope)
+
+}
+
+/** POST /api/clear and POST /api/take: what is on air, taken down or put up without asking. */
+private fun Route.liveControlRoutes(server: CompanionServer, scope: CoroutineScope) {
                 /**
                  * POST /api/clear
                  * Instantly switches the presenter to display-none (Presenting.NONE).
+                 * With `?layer=lowerthird|captions|announcements`, takes down only that layer.
                  * No request body or approval needed.
                  * Response: {"ok":true}
                  */
                 post(Constants.ENDPOINT_CLEAR) {
                     if (!server.checkApiKey(call)) return@post
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                    val layer = call.request.queryParameters["layer"]
+                    if (layer != null) {
+                        scope.launch { server.onClearLayer.emit(layer) }
+                        call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                        return@post
+                    }
                     scope.launch { server.onClear.emit(Unit) }
                     scope.launch { server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
                         actionType = "clear",
@@ -145,4 +158,15 @@ internal fun Route.scheduleRoutes(
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
 
+                /**
+                 * POST /api/take
+                 * Puts what is cued on Preview on air, as the Take button does. Nothing is cued
+                 * while preview mode is off, so it then does nothing. No body or approval needed.
+                 * Response: {"ok":true}
+                 */
+                post(Constants.ENDPOINT_TAKE) {
+                    if (!server.checkApiKey(call)) return@post
+                    scope.launch { server.onTake.emit(Unit) }
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
 }

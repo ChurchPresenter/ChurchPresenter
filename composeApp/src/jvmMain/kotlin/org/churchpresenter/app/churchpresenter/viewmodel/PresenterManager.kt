@@ -1,11 +1,14 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.announcements.AnnouncementsOutput
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.liveshow.Cue
+import org.churchpresenter.liveshow.Layer
 import org.churchpresenter.media.MediaOutput
 import org.churchpresenter.qa.QAOutput
 import org.churchpresenter.settings.AppSettings
@@ -36,6 +39,7 @@ class PresenterManager private constructor(
     internal val announcements: LiveAnnouncementsState = LiveAnnouncementsState(context),
     internal val web: LiveWebState = LiveWebState(context),
     internal val screens: LiveScreensState = LiveScreensState(context),
+    internal val overlayLayers: LiveOverlaysState = LiveOverlaysState(context),
 ) : OutputLocks by locks,
     LiveBible by bible,
     LiveSongs by songs,
@@ -45,7 +49,8 @@ class PresenterManager private constructor(
     LiveLowerThird by lowerThird,
     LiveAnnouncements by announcements,
     LiveWeb by web,
-    LiveScreens by screens {
+    LiveScreens by screens,
+    LiveOverlays by overlayLayers {
 
     constructor(showPresenterWindowInitially: Boolean = true) :
         this(showPresenterWindowInitially, PresenterContext())
@@ -53,7 +58,11 @@ class PresenterManager private constructor(
     init {
         context.notify = ::notifyLiveStateChanged
         context.setPresentingMode = ::setPresentingMode
+        context.requestClearDisplay = ::requestClearDisplay
     }
+
+    /** What is cued, not yet on air, while preview mode is on -- see [PreviewBus]. */
+    val previewBus: PreviewBus by lazy { PreviewBus(this) }
 
     /** This manager as the Pictures and Presentation tabs see it -- see [PresenterSlidesOutput]. */
     val slidesOutput: SlidesOutput by lazy { PresenterSlidesOutput(this) }
@@ -68,7 +77,35 @@ class PresenterManager private constructor(
     /** This manager as the Announcements tab sees it -- see [PresenterAnnouncementsOutput]. */
     val announcementsOutput: AnnouncementsOutput by lazy { PresenterAnnouncementsOutput(this) }
 
-    val presentingMode: State<Presenting> = context.presentingMode
+    /**
+     * What is on air, as the layer model sees it: the slide's content, each of [overlays], and the
+     * content they name ([legacyProgram]). Everything asking what is on screen reads it, through
+     * [liveContent], [slideContent] and [isLive]. An output with a screen lock draws its own mode's
+     * program instead (`OutputLayers`).
+     */
+    val program: State<Map<Layer, Cue>> = derivedStateOf {
+        overlays.value.fold(legacyProgram(context.slideMode.value, this)) { layers, overlay ->
+            layers + legacyProgram(overlay, this)
+        }
+    }
+
+    /** The content types [program] has on air: the slide's first, then each overlay in the order it went up. */
+    val liveContent: State<Set<Presenting>> = derivedStateOf { contentOnAir(program.value) }
+
+    /**
+     * The content on air under the overlays: Bible, songs, pictures, a presentation, media, a web
+     * page, a canvas scene, Q&A or the dictionary, or [Presenting.NONE]. An overlay going live leaves
+     * it alone -- see [overlays].
+     */
+    val slideContent: State<Presenting> = derivedStateOf {
+        liveContent.value.firstOrNull { !it.isOverlay } ?: Presenting.NONE
+    }
+
+    /** Whether anything at all is on screen. */
+    val anythingLive: Boolean get() = liveContent.value.isNotEmpty()
+
+    /** Whether [mode] is on screen, on the slide layers or as an overlay. */
+    fun isLive(mode: Presenting): Boolean = mode in liveContent.value
 
     /** Notified whenever live-content state changes (mode, verse, lyric section, picture, media,
      *  announcement, website, scene, Q&A, dictionary) — wired in main.kt to broadcast an
@@ -76,9 +113,9 @@ class PresenterManager private constructor(
      *  visual transition/animation state (alphas, offsets) so it doesn't fire on every frame.
      *
      *  The second parameter is the content type THIS specific change belongs to — e.g. setSelectedVerse
-     *  always reports [Presenting.BIBLE], regardless of what [presentingMode] currently holds. Content
+     *  always reports [Presenting.BIBLE], regardless of what [slideContent] currently holds. Content
      *  setters and [setPresentingMode] are independent calls from application code, so deriving the
-     *  reported type from the live (possibly not-yet-updated) [presentingMode] value instead would let
+     *  reported type from the live (possibly not-yet-updated) [slideContent] value instead would let
      *  a broadcast pair the wrong mode with fresh content, or the right mode with stale content,
      *  whichever setter happened to run first. */
     var onLiveStateChanged: ((PresenterManager, Presenting) -> Unit)? = null
@@ -112,11 +149,18 @@ class PresenterManager private constructor(
     val previewSettingsOverride: State<AppSettings?> = _previewSettingsOverride
 
     fun setPresentingMode(mode: Presenting) {
-        if (context.presentingMode.value != mode) {
+        if (mode.isOverlay) {
+            overlayLayers.showOverlay(mode)
+            return
+        }
+        // Slide content replaces the overlays over it; clearing takes everything down.
+        context.overlays.value = emptySet()
+        context.lastLive.value = mode
+        if (context.slideMode.value != mode) {
             CrashReporter.setTag("presenting", mode.name)
             CrashReporter.breadcrumb("Presenting: ${mode.name}", category = "presenter")
         }
-        context.presentingMode.value = mode
+        context.slideMode.value = mode
         if (mode != Presenting.NONE) {
             context.clearDisplayRequested.value = false
             // Reset transition alphas so presenters are visible when going live
@@ -134,9 +178,9 @@ class PresenterManager private constructor(
 
     /** Request a fade-out before clearing the display. The LaunchedEffect in main.kt
      *  watches this flag, animates bibleTransitionAlpha/songTransitionAlpha to 0,
-     *  then sets presentingMode to NONE. */
+     *  then clears the display. */
     fun requestClearDisplay() {
-        if (context.presentingMode.value != Presenting.NONE) {
+        if (anythingLive) {
             context.clearDisplayRequested.value = true
         }
     }
@@ -187,7 +231,7 @@ class PresenterManager private constructor(
      * somebody adds, and would have to be a friend of internals it has no other business with.
      */
     fun snapshotLiveState(): LiveStateSnapshot = LiveStateSnapshot(
-        mode = presentingMode.value,
+        mode = slideContent.value,
         selectedVerse = selectedVerse.value,
         selectedVerses = selectedVerses.value,
         displayedVerses = displayedVerses.value,

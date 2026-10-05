@@ -106,15 +106,15 @@ class BibleAllLayerTest {
             {"settingsVersion":${AppSettings.CURRENT_SETTINGS_VERSION},
              "bibleSettings":{"translations":[{"fileName":"kjv.spb","textFontSize":70},{"fileName":"rst.spb","textFontSize":40}]},
              "projectionSettings":{"outputProfiles":[
-                {"id":"youth","parentId":"main","overrides":["showQA"],"showQA":false},
-                {"id":"main","showMedia":false}
+                {"id":"youth","parentId":"main","overrides":["look.slide.qa"],"look":{"slide":{"qa":false}}},
+                {"id":"main","look":{"media":{"video":false}}}
              ]}}
         """.trimIndent()
         val loaded = SettingsManager().migrateAndDecode(raw)
         assertEquals(setOf("textFontSize"), loaded.bibleSettings.translationList()[1].ownStyleKeys)
         val profiles = loaded.projectionSettings.outputProfiles
         assertEquals(listOf("main", "youth"), profiles.map { it.id })
-        assertEquals(false, profiles[1].showMedia, "the follower takes its master's value")
-        assertEquals(false, profiles[1].showQA)
+        assertEquals(false, profiles[1].look.media.video, "the follower takes its master's value")
+        assertEquals(false, profiles[1].look.slide.qa)
     }
 }

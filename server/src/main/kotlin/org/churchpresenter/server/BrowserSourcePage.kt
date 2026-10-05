@@ -42,7 +42,7 @@ internal fun browserSourceOverlayPage(
     // ?bg= is a per-request debug override (e.g. for viewing outside OBS, where a page
     // background left transparent just renders as opaque white in a plain browser tab) —
     // it's purely a page-preview convenience, unrelated to whether the rendered frame itself
-    // has a background (that's screenAssignment.showFullscreenBackground/showLowerThirdBackground,
+    // has a background (that's the profile's look.background.fullscreen/lowerThird,
     // read by BrowserSourceVideoRenderer, same fields native output uses).
     val bodyBg = when (bgOverride?.lowercase()) {
         "black" -> "#000"

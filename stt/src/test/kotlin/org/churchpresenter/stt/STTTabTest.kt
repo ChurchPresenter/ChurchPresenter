@@ -219,15 +219,15 @@ class STTTabTest {
 
     @Test
     fun `Go Live asks for STT and then stops offering`() {
-        sttTab(seed = { live("a caption") }) { _, presentingMode, reports ->
+        sttTab(seed = { live("a caption") }) { _, captionsLive, reports ->
             sttButton(STTLabel.GO_LIVE).assertIsEnabled()
 
             sttButton(STTLabel.GO_LIVE).performClick()
 
             assertEquals(listOf(Presenting.STT), reports.presenting)
 
-            // The tab dims Go Live off the output's mode, not off its own click.
-            presentingMode.value = Presenting.STT
+            // The tab dims Go Live off what is on air, not off its own click.
+            captionsLive.value = true
             waitForIdle()
             sttButton(STTLabel.GO_LIVE).assertIsNotEnabled()
         }

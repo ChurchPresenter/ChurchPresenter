@@ -13,7 +13,7 @@ class MainDesktopAutoFollowGateTest {
             shouldMainHandleAutoFollow(
                 activeTabIndex = 4,
                 bibleTabIndex = 1,
-                presentingMode = Presenting.BIBLE,
+                slideContent = Presenting.BIBLE,
             ),
         )
     }
@@ -24,7 +24,7 @@ class MainDesktopAutoFollowGateTest {
             shouldMainHandleAutoFollow(
                 activeTabIndex = 1,
                 bibleTabIndex = 1,
-                presentingMode = Presenting.BIBLE,
+                slideContent = Presenting.BIBLE,
             ),
             "handling it here too would put the verse live twice and log it twice",
         )
@@ -40,7 +40,7 @@ class MainDesktopAutoFollowGateTest {
             Presenting.ANNOUNCEMENTS,
         ).forEach { mode ->
             assertFalse(
-                shouldMainHandleAutoFollow(activeTabIndex = 4, bibleTabIndex = 1, presentingMode = mode),
+                shouldMainHandleAutoFollow(activeTabIndex = 4, bibleTabIndex = 1, slideContent = mode),
                 "$mode is live, so a detected verse must not replace it",
             )
         }
@@ -52,7 +52,7 @@ class MainDesktopAutoFollowGateTest {
             shouldMainHandleAutoFollow(
                 activeTabIndex = 0,
                 bibleTabIndex = -1,
-                presentingMode = Presenting.BIBLE,
+                slideContent = Presenting.BIBLE,
             ),
             "a hidden bible tab is not in the composition, so there is no handler to defer to",
         )
@@ -64,7 +64,7 @@ class MainDesktopAutoFollowGateTest {
             shouldMainHandleAutoFollow(
                 activeTabIndex = 0,
                 bibleTabIndex = -1,
-                presentingMode = Presenting.LYRICS,
+                slideContent = Presenting.LYRICS,
             ),
         )
     }
@@ -72,10 +72,10 @@ class MainDesktopAutoFollowGateTest {
     @Test
     fun `the bible tab being first does not make every tab look like it`() {
         assertTrue(
-            shouldMainHandleAutoFollow(activeTabIndex = 0, bibleTabIndex = 1, presentingMode = Presenting.BIBLE),
+            shouldMainHandleAutoFollow(activeTabIndex = 0, bibleTabIndex = 1, slideContent = Presenting.BIBLE),
         )
         assertFalse(
-            shouldMainHandleAutoFollow(activeTabIndex = 0, bibleTabIndex = 0, presentingMode = Presenting.BIBLE),
+            shouldMainHandleAutoFollow(activeTabIndex = 0, bibleTabIndex = 0, slideContent = Presenting.BIBLE),
         )
     }
 }

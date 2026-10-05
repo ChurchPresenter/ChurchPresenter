@@ -17,13 +17,13 @@ import org.jetbrains.compose.resources.stringResource
 
 /** The content kinds this profile shows, each with its label — the ones a placement means anything for. */
 internal fun OutputProfile.placeableShown(): List<PlaceableContent> = buildList {
-    if (showMedia) add(PlaceableContent.MEDIA)
-    if (showPictures) {
+    if (look.media.video) add(PlaceableContent.MEDIA)
+    if (look.media.pictures) {
         add(PlaceableContent.PRESENTATION)
         add(PlaceableContent.PICTURES)
     }
-    if (showWebsite) add(PlaceableContent.WEBSITE)
-    if (showCanvas) add(PlaceableContent.CANVAS)
+    if (look.slide.web) add(PlaceableContent.WEBSITE)
+    if (look.slide.canvas) add(PlaceableContent.CANVAS)
 }
 
 internal fun PlaceableContent.label(): StringResource = when (this) {

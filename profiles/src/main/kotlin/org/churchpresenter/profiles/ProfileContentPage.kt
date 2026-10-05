@@ -42,6 +42,9 @@ import org.churchpresenter.strings.generated.resources.profile_source_songs
 import org.churchpresenter.strings.generated.resources.background
 import org.churchpresenter.strings.generated.resources.projection_content_lt_background
 import org.churchpresenter.strings.generated.resources.profile_song_look_ahead
+import org.churchpresenter.strings.generated.resources.profile_announcements_over_content
+import org.churchpresenter.strings.generated.resources.profile_captions_over_content
+import org.churchpresenter.strings.generated.resources.profile_lower_third_over_content
 import org.churchpresenter.strings.generated.resources.projection_content_web
 import org.churchpresenter.strings.generated.resources.stage_monitor_show_chords
 import org.churchpresenter.strings.generated.resources.profile_show_transpose_controls
@@ -53,6 +56,10 @@ import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.changedPaths
+import org.churchpresenter.settings.withBackground
+import org.churchpresenter.settings.withLook
+import org.churchpresenter.settings.withMedia
+import org.churchpresenter.settings.withSlide
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
@@ -60,6 +67,11 @@ import org.jetbrains.compose.resources.stringResource
 private class ContentSwitch(
     val label: String,
     val checked: Boolean,
+    /**
+     * Whether this switch shows or hides a kind of content. An option on how content is shown --
+     * over the slide or in place of it -- is not, so the summary and Show all/Hide all leave it be.
+     */
+    val isContent: Boolean = true,
     val edit: (OutputProfile, Boolean) -> OutputProfile,
 )
 
@@ -82,7 +94,7 @@ private fun languageMode(on: Boolean): String = if (on) Constants.SONG_LANG_BOTH
  * The chords switch is the stage monitor's alone -- no other display mode draws one -- and the
  * look-ahead is offered only while songs are on, since there is nothing to look ahead in otherwise.
  * Everything else is offered whatever the display mode, because `showsContentFor` is
- * display-mode-agnostic: a stage monitor obeys `showPictures`, `showQA` and the rest exactly as a
+ * display-mode-agnostic: a stage monitor obeys its look exactly as a
  * full screen does.
  */
 @Composable
@@ -113,51 +125,75 @@ private fun contentSwitches(profile: OutputProfile): ContentGroups {
                 add(ContentSwitch(label, profile.showTransposeControls) { p, v -> p.copy(showTransposeControls = v) })
             }
         }
-        add(ContentSwitch(stringResource(Res.string.tab_dictionary), profile.showDictionary) { p, v ->
-            p.copy(showDictionary = v)
+        add(ContentSwitch(stringResource(Res.string.tab_dictionary), profile.look.slide.dictionary) { p, v ->
+            p.withLook { withSlide { copy(dictionary = v) } }
         })
     }
-    val media = listOf(
-        ContentSwitch(stringResource(Res.string.content_pictures), profile.showPictures) { p, v ->
-            p.copy(showPictures = v)
-        },
-        ContentSwitch(stringResource(Res.string.media), profile.showMedia) { p, v -> p.copy(showMedia = v) },
+    val media = buildList {
+        add(ContentSwitch(stringResource(Res.string.content_pictures), profile.look.media.pictures) { p, v ->
+            p.withLook { withMedia { copy(pictures = v) } }
+        })
+        add(ContentSwitch(stringResource(Res.string.media), profile.look.media.video) { p, v ->
+            p.withLook { withMedia { copy(video = v) } }
+        })
         // Whether video carries its subtitle overlay on this output; read by MediaPresenter.
-        ContentSwitch(stringResource(Res.string.media_subtitles), profile.showSubtitles) { p, v ->
-            p.copy(showSubtitles = v)
-        },
-        ContentSwitch(stringResource(Res.string.projection_content_web), profile.showWebsite) { p, v ->
-            p.copy(showWebsite = v)
-        },
-        ContentSwitch(stringResource(Res.string.tab_canvas), profile.showCanvas) { p, v -> p.copy(showCanvas = v) },
-        ContentSwitch(stringResource(Res.string.display_lower_third), profile.showStreaming) { p, v ->
-            p.copy(showStreaming = v)
-        },
-    )
-    val overlays = listOf(
-        ContentSwitch(stringResource(Res.string.content_announcements), profile.showAnnouncements) { p, v ->
-            p.copy(showAnnouncements = v)
-        },
-        ContentSwitch(stringResource(Res.string.tab_qa), profile.showQA) { p, v -> p.copy(showQA = v) },
-        ContentSwitch(
-            stringResource(Res.string.profile_nav_live_captions),
-            profile.showSTT,
-        ) { p, v -> p.copy(showSTT = v) },
-    )
+        add(ContentSwitch(stringResource(Res.string.media_subtitles), profile.look.media.subtitles) { p, v ->
+            p.withLook { withMedia { copy(subtitles = v) } }
+        })
+        add(ContentSwitch(stringResource(Res.string.projection_content_web), profile.look.slide.web) { p, v ->
+            p.withLook { withSlide { copy(web = v) } }
+        })
+        add(ContentSwitch(stringResource(Res.string.tab_canvas), profile.look.slide.canvas) { p, v ->
+            p.withLook { withSlide { copy(canvas = v) } }
+        })
+        add(ContentSwitch(stringResource(Res.string.display_lower_third), profile.look.graphics) { p, v ->
+            p.withLook { copy(graphics = v) }
+        })
+        // Over the content or in place of it -- offered only while the lower third is shown here.
+        if (profile.look.graphics) {
+            val label = stringResource(Res.string.profile_lower_third_over_content)
+            add(ContentSwitch(label, profile.lowerThirdOverContent, isContent = false) { p, v ->
+                p.copy(lowerThirdOverContent = v)
+            })
+        }
+    }
+    val overlays = buildList {
+        add(ContentSwitch(stringResource(Res.string.content_announcements), profile.look.announcements) { p, v ->
+            p.withLook { copy(announcements = v) }
+        })
+        if (profile.look.announcements) {
+            val label = stringResource(Res.string.profile_announcements_over_content)
+            add(ContentSwitch(label, profile.announcementsOverContent, isContent = false) { p, v ->
+                p.copy(announcementsOverContent = v)
+            })
+        }
+        add(ContentSwitch(stringResource(Res.string.tab_qa), profile.look.slide.qa) { p, v ->
+            p.withLook { withSlide { copy(qa = v) } }
+        })
+        add(ContentSwitch(stringResource(Res.string.profile_nav_live_captions), profile.look.captions) { p, v ->
+            p.withLook { copy(captions = v) }
+        })
+        if (profile.look.captions) {
+            val label = stringResource(Res.string.profile_captions_over_content)
+            add(ContentSwitch(label, profile.captionsOverContent, isContent = false) { p, v ->
+                p.copy(captionsOverContent = v)
+            })
+        }
+    }
     val backgrounds = listOf(
         ContentSwitch(
             stringResource(Res.string.background),
-            profile.showFullscreenBackground,
-        ) { p, v -> p.copy(showFullscreenBackground = v) },
+            profile.look.background.fullscreen,
+        ) { p, v -> p.withLook { withBackground { copy(fullscreen = v) } } },
         ContentSwitch(
             stringResource(Res.string.projection_content_lt_background),
-            profile.showLowerThirdBackground,
-        ) { p, v -> p.copy(showLowerThirdBackground = v) },
-        ContentSwitch(stringResource(Res.string.content_bible_background), profile.showBibleBackground) { p, v ->
-            p.copy(showBibleBackground = v)
+            profile.look.background.lowerThird,
+        ) { p, v -> p.withLook { withBackground { copy(lowerThird = v) } } },
+        ContentSwitch(stringResource(Res.string.content_bible_background), profile.look.background.bible) { p, v ->
+            p.withLook { withBackground { copy(bible = v) } }
         },
-        ContentSwitch(stringResource(Res.string.content_songs_background), profile.showSongsBackground) { p, v ->
-            p.copy(showSongsBackground = v)
+        ContentSwitch(stringResource(Res.string.content_songs_background), profile.look.background.songs) { p, v ->
+            p.withLook { withBackground { copy(songs = v) } }
         },
     )
     return ContentGroups(
@@ -183,7 +219,7 @@ internal fun ProfileContentPage(
     onProfileChange: (OutputProfile) -> Unit,
 ) {
     val groups = contentSwitches(profile)
-    ContentSummary(profile, groups.all, onProfileChange)
+    ContentSummary(profile, groups.all.filter { it.isContent }, onProfileChange)
     ContentGroup("scripture", groups.scripture, profile, onProfileChange)
     SettingsGroup(
         stringResource(Res.string.output_profile_sources),

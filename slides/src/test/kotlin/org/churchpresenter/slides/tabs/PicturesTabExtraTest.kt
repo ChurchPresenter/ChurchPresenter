@@ -54,7 +54,7 @@ class PicturesTabExtraTest {
             pictureButton(PictureLabel.GO_LIVE).performClick()
             waitForIdle()
 
-            assertEquals(Presenting.PICTURES, presenter.presentingMode.value)
+            assertEquals(Presenting.PICTURES, presenter.onAir.value)
             assertEquals(selected.absolutePath, presenter.selectedImagePath.value)
         }
     }

@@ -1,5 +1,7 @@
 package org.churchpresenter.profiles
 
+import org.churchpresenter.settings.OutputLook
+import org.churchpresenter.settings.SlideLook
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -36,8 +38,8 @@ class ProfileListTest {
         projectionSettings = ProjectionSettings(
             outputProfiles = listOf(
                 OutputProfile(id = "main", name = "Sanctuary"),
-                OutputProfile(id = "youth", name = "Youth night", parentId = "main", showQA = false,
-                        overrides = setOf("showQA")),
+                OutputProfile(id = "youth", name = "Youth night", parentId = "main",
+                        overrides = setOf("look.slide.qa"), look = OutputLook(slide = SlideLook(qa = false))),
                 OutputProfile(id = "stream", name = "Livestream"),
                 OutputProfile(id = "spare", name = "Spare"),
             ),

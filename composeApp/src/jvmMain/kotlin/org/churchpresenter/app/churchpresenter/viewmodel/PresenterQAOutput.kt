@@ -12,7 +12,7 @@ import org.churchpresenter.sharedui.models.Presenting
  * [PresenterSlidesOutput]: the manager's own declaration stays untouched.
  */
 class PresenterQAOutput(private val manager: PresenterManager) : QAOutput {
-    override val presentingMode: State<Presenting> get() = manager.presentingMode
+    override val slideContent: State<Presenting> get() = manager.slideContent
     override val screenLocks: State<Map<Int, Presenting>> get() = manager.screenLocks
 
     override fun setDisplayedQuestion(question: Question?) = manager.setDisplayedQuestion(question)

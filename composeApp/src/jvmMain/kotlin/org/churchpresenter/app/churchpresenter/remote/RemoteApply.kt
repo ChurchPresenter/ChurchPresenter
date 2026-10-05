@@ -5,6 +5,7 @@ import java.io.File
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.dictionary.data.StrongsEntry
 import org.churchpresenter.settings.BibleSyncMode
+import org.churchpresenter.settings.LinkLayers
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionStatus
@@ -57,7 +58,9 @@ internal suspend fun applyRemoteLiveState(
     /** This instance's own saved scenes — CANVAS mirroring is id-match only (no content endpoint). */
     localScenes: List<Scene> = emptyList(),
     /** Loads + starts media playback locally (MediaViewModel stays owned by its composable). */
-    onPlayRemoteMedia: ((url: String, type: String) -> Unit)? = null
+    onPlayRemoteMedia: ((url: String, type: String) -> Unit)? = null,
+    /** The layers this follower mirrors, from `LinkLayers`; changes to the others are left alone. */
+    followedLayers: List<String> = LinkLayers.ALL,
 ) {
     val mode = runCatching { Presenting.valueOf(state.contentType) }.getOrNull()
     if (mode == null) {
@@ -67,6 +70,30 @@ internal suspend fun applyRemoteLiveState(
         )
         return
     }
+    val follows = { m: Presenting -> linkLayerOf(m) in followedLayers }
+    val applied = !follows(mode) || applyRemoteContent(
+        state, mode, presenterManager, instanceLinkViewModel, bibleSyncMode, localPrimaryBible, localScenes,
+        onPlayRemoteMedia,
+    )
+    if (!applied) {
+        return
+    }
+    followAir(state, mode, presenterManager, follows)
+    presenterManager.setShowPresenterWindow(true)
+}
+
+/** The content half of [applyRemoteLiveState]: [mode]'s content, put in place; false when it cannot go live. */
+@Suppress("LongParameterList")
+private suspend fun applyRemoteContent(
+    state: LiveStateDto,
+    mode: Presenting,
+    presenterManager: PresenterManager,
+    instanceLinkViewModel: InstanceLinkViewModel,
+    bibleSyncMode: BibleSyncMode,
+    localPrimaryBible: Bible?,
+    localScenes: List<Scene>,
+    onPlayRemoteMedia: ((url: String, type: String) -> Unit)?,
+): Boolean {
     when (mode) {
         Presenting.BIBLE ->
             applyRemoteBible(state, presenterManager, bibleSyncMode, localPrimaryBible)
@@ -118,7 +145,7 @@ internal suspend fun applyRemoteLiveState(
             )
         }
         Presenting.PICTURES ->
-            if (!applyRemotePictures(state, presenterManager, instanceLinkViewModel)) return
+            if (!applyRemotePictures(state, presenterManager, instanceLinkViewModel)) return false
         Presenting.LOWER_THIRD -> applyRemoteLowerThird(state, presenterManager, instanceLinkViewModel)
         Presenting.MEDIA -> applyRemoteMedia(state, presenterManager, instanceLinkViewModel, onPlayRemoteMedia)
         Presenting.CANVAS -> applyRemoteCanvas(state, presenterManager, localScenes)
@@ -133,8 +160,7 @@ internal suspend fun applyRemoteLiveState(
             )
         }
     }
-    presenterManager.setPresentingMode(mode)
-    presenterManager.setShowPresenterWindow(true)
+    return true
 }
 
 /** The BIBLE half of [applyRemoteLiveState]: either this instance's own wording, or the primary's. */

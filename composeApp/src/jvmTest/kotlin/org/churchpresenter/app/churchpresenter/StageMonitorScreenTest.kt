@@ -98,8 +98,8 @@ class StageMonitorScreenTest {
 
     private fun screen(
         sm: StageMonitorSettings,
-        presentingMode: Presenting = Presenting.NONE,
-        announcementActive: Boolean = presentingMode == Presenting.ANNOUNCEMENTS,
+        slideContent: Presenting = Presenting.NONE,
+        announcementActive: Boolean = slideContent == Presenting.ANNOUNCEMENTS,
         currentLyricSection: LyricSection = section(),
         allLyricSections: List<LyricSection> = emptyList(),
         songDisplaySectionIndex: Int = 0,
@@ -124,7 +124,7 @@ class StageMonitorScreenTest {
                     Box(modifier = Modifier.size(800.dp, 600.dp)) {
                         StageMonitorScreen(
                             sm = sm,
-                            presentingMode = presentingMode,
+                            slideContent = slideContent,
                             transposeSteps = transposeSteps,
                             announcementActive = announcementActive,
                             currentLyricSection = currentLyricSection,
@@ -155,7 +155,7 @@ class StageMonitorScreenTest {
     fun `a live verse is shown with its reference above the text`() {
         screen(
             sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.A),
-            presentingMode = Presenting.BIBLE,
+            slideContent = Presenting.BIBLE,
             displayedVerses = listOf(verse()),
         ) {
             assertTrue(rendersText("John 3:16\nFor God so loved the world"), renderedText().toString())
@@ -168,7 +168,7 @@ class StageMonitorScreenTest {
         screen(
             sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.A)
                 .copy(textBoxes = mapOf(textBoxKey(StageMonitorStyleZone.A.name, lowerThird = false) to box)),
-            presentingMode = Presenting.BIBLE,
+            slideContent = Presenting.BIBLE,
             displayedVerses = listOf(verse()),
         ) {
             assertTrue(rendersText("John 3:16\nFor God so loved the world"), renderedText().toString())
@@ -181,7 +181,7 @@ class StageMonitorScreenTest {
         screen(
             sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.FULL_SCREEN)
                 .copy(textBoxes = mapOf(textBoxKey(StageMonitorStyleZone.FULL_SCREEN.name, lowerThird = false) to box)),
-            presentingMode = Presenting.BIBLE,
+            slideContent = Presenting.BIBLE,
             displayedVerses = listOf(verse()),
         ) {
             assertTrue(rendersText("John 3:16\nFor God so loved the world"), renderedText().toString())
@@ -192,7 +192,7 @@ class StageMonitorScreenTest {
     fun `a verse range is shown as the range, not as the first verse number`() {
         screen(
             sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.A),
-            presentingMode = Presenting.BIBLE,
+            slideContent = Presenting.BIBLE,
             displayedVerses = listOf(verse(number = 16, range = "16-18")),
         ) {
             assertTrue(rendersContaining("John 3:16-18"), renderedText().toString())
@@ -206,7 +206,7 @@ class StageMonitorScreenTest {
                 StageMonitorContentType.BIBLE to StageMonitorZone.A,
                 StageMonitorContentType.NEXT to StageMonitorZone.B,
             ),
-            presentingMode = Presenting.BIBLE,
+            slideContent = Presenting.BIBLE,
             displayedVerses = listOf(verse(number = 16, text = "current verse")),
             nextVerses = listOf(verse(number = 17, text = "the verse after")),
         ) {
@@ -219,7 +219,7 @@ class StageMonitorScreenTest {
     fun `with no verse selected the bible zone draws nothing`() {
         screen(
             sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.A),
-            presentingMode = Presenting.BIBLE,
+            slideContent = Presenting.BIBLE,
             displayedVerses = emptyList(),
         ) {
             assertEquals(emptySet(), renderedText())
@@ -230,7 +230,7 @@ class StageMonitorScreenTest {
     fun `with no next verse the lookahead zone stays empty`() {
         screen(
             sm = routing(StageMonitorContentType.NEXT to StageMonitorZone.B),
-            presentingMode = Presenting.BIBLE,
+            slideContent = Presenting.BIBLE,
             displayedVerses = listOf(verse()),
             nextVerses = emptyList(),
         ) {
@@ -250,7 +250,7 @@ class StageMonitorScreenTest {
     fun `a transposed output draws the chords moved, and says the key it moved them to`() {
         screen(
             sm = routing(StageMonitorContentType.SONGS to StageMonitorZone.A),
-            presentingMode = Presenting.LYRICS,
+            slideContent = Presenting.LYRICS,
             currentLyricSection = chordSection("[Gsus4]Amazing [Cmaj7]grace"),
             transposeSteps = 2,
         ) {
@@ -265,7 +265,7 @@ class StageMonitorScreenTest {
     fun `an output left at nothing draws the chords as written`() {
         screen(
             sm = routing(StageMonitorContentType.SONGS to StageMonitorZone.A),
-            presentingMode = Presenting.LYRICS,
+            slideContent = Presenting.LYRICS,
             currentLyricSection = chordSection("[Gsus4]Amazing grace"),
         ) {
             assertTrue(rendersContaining("Gsus4"), renderedText().toString())
@@ -287,7 +287,7 @@ class StageMonitorScreenTest {
     fun `the live section's lines are shown together`() {
         screen(
             sm = routing(StageMonitorContentType.SONGS to StageMonitorZone.A),
-            presentingMode = Presenting.LYRICS,
+            slideContent = Presenting.LYRICS,
             currentLyricSection = section("first line", "second line"),
         ) {
             assertTrue(rendersText("first line\nsecond line"), renderedText().toString())
@@ -301,7 +301,7 @@ class StageMonitorScreenTest {
                 StageMonitorContentType.SONGS to StageMonitorZone.A,
                 StageMonitorContentType.NEXT to StageMonitorZone.B,
             ),
-            presentingMode = Presenting.LYRICS,
+            slideContent = Presenting.LYRICS,
             currentLyricSection = section("now singing"),
             allLyricSections = listOf(section("now singing"), section("up next")),
             songDisplaySectionIndex = 0,
@@ -315,7 +315,7 @@ class StageMonitorScreenTest {
     fun `on the last section the next zone is empty rather than wrapping around`() {
         screen(
             sm = routing(StageMonitorContentType.NEXT to StageMonitorZone.B),
-            presentingMode = Presenting.LYRICS,
+            slideContent = Presenting.LYRICS,
             currentLyricSection = section("the last one"),
             allLyricSections = listOf(section("the first one"), section("the last one")),
             songDisplaySectionIndex = 1,
@@ -330,7 +330,7 @@ class StageMonitorScreenTest {
     fun `a zone shows nothing when the type routed to it is not live`() {
         screen(
             sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.A),
-            presentingMode = Presenting.LYRICS,
+            slideContent = Presenting.LYRICS,
             currentLyricSection = section("a lyric nobody routed"),
             displayedVerses = listOf(verse()),
         ) {
@@ -342,7 +342,7 @@ class StageMonitorScreenTest {
     fun `a type routed to NONE is not drawn anywhere`() {
         screen(
             sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.NONE),
-            presentingMode = Presenting.BIBLE,
+            slideContent = Presenting.BIBLE,
             displayedVerses = listOf(verse(text = "unrouted verse")),
         ) {
             assertFalse(rendersContaining("unrouted verse"), renderedText().toString())
@@ -357,7 +357,7 @@ class StageMonitorScreenTest {
                 // Assigned a quadrant, and live — but full screen wins outright.
                 StageMonitorContentType.NEXT to StageMonitorZone.B,
             ),
-            presentingMode = Presenting.BIBLE,
+            slideContent = Presenting.BIBLE,
             displayedVerses = listOf(verse(text = "the whole screen")),
             nextVerses = listOf(verse(text = "a quadrant that loses")),
         ) {
@@ -373,7 +373,7 @@ class StageMonitorScreenTest {
                 StageMonitorContentType.BIBLE to StageMonitorZone.A,
                 StageMonitorContentType.SONGS to StageMonitorZone.A,
             ),
-            presentingMode = Presenting.LYRICS,
+            slideContent = Presenting.LYRICS,
             currentLyricSection = section("the live one"),
             displayedVerses = listOf(verse(text = "the idle one")),
         ) {
@@ -400,7 +400,7 @@ class StageMonitorScreenTest {
         var atCatalogSize = 0f
         screen(
             sm = base,
-            presentingMode = Presenting.BIBLE,
+            slideContent = Presenting.BIBLE,
             announcementActive = true,
             displayedVerses = listOf(verse(text = "up there")),
             announcementText = below,
@@ -409,7 +409,7 @@ class StageMonitorScreenTest {
         var whenTaller = 0f
         screen(
             sm = base.withZoneHeight(StageMonitorStyleZone.A, 85f),
-            presentingMode = Presenting.BIBLE,
+            slideContent = Presenting.BIBLE,
             announcementActive = true,
             displayedVerses = listOf(verse(text = "up there")),
             announcementText = below,
@@ -432,7 +432,7 @@ class StageMonitorScreenTest {
         var atCatalogSize = 0f
         screen(
             sm = base,
-            presentingMode = Presenting.BIBLE,
+            slideContent = Presenting.BIBLE,
             displayedVerses = listOf(verse(text = "here")),
             nextVerses = listOf(verse(number = 17, text = beside)),
         ) { atCatalogSize = leftOf(beside) }
@@ -440,7 +440,7 @@ class StageMonitorScreenTest {
         var whenWider = 0f
         screen(
             sm = base.withZoneWidth(StageMonitorStyleZone.A, 75f),
-            presentingMode = Presenting.BIBLE,
+            slideContent = Presenting.BIBLE,
             displayedVerses = listOf(verse(text = "here")),
             nextVerses = listOf(verse(number = 17, text = beside)),
         ) { whenWider = leftOf(beside) }
@@ -470,7 +470,7 @@ class StageMonitorScreenTest {
                 StageMonitorContentType.BIBLE to StageMonitorZone.C,
                 StageMonitorContentType.CLOCK to StageMonitorZone.C,
             ),
-            presentingMode = Presenting.NONE,
+            slideContent = Presenting.NONE,
         ) {
             assertTrue(renderedText().any { CLOCK_SHAPE.containsMatchIn(it) }, renderedText().toString())
         }
@@ -483,7 +483,7 @@ class StageMonitorScreenTest {
                 StageMonitorContentType.BIBLE to StageMonitorZone.C,
                 StageMonitorContentType.CLOCK to StageMonitorZone.C,
             ),
-            presentingMode = Presenting.BIBLE,
+            slideContent = Presenting.BIBLE,
             displayedVerses = listOf(verse(text = "scripture beats the clock")),
         ) {
             assertTrue(rendersContaining("scripture beats the clock"), renderedText().toString())
@@ -500,12 +500,12 @@ class StageMonitorScreenTest {
                 StageMonitorContentType.BIBLE to StageMonitorZone.A,
                 StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.D,
             ),
-            presentingMode = Presenting.BIBLE,
+            slideContent = Presenting.BIBLE,
             announcementActive = true,
             displayedVerses = listOf(verse(text = "still following along")),
             announcementText = "05:00",
         ) {
-            // The whole point of announcementActive being independent of presentingMode.
+            // The whole point of announcementActive being independent of slideContent.
             assertTrue(rendersContaining("still following along"), renderedText().toString())
             assertTrue(rendersText("05:00"))
         }
@@ -515,7 +515,7 @@ class StageMonitorScreenTest {
     fun `a timer zone with nothing to show holds a placeholder`() {
         screen(
             sm = routing(StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.D),
-            presentingMode = Presenting.ANNOUNCEMENTS,
+            slideContent = Presenting.ANNOUNCEMENTS,
             announcementText = "",
         ) {
             assertTrue(rendersText("--:--"), renderedText().toString())
@@ -526,7 +526,7 @@ class StageMonitorScreenTest {
     fun `announcements mode alone does not light up the bible zone`() {
         screen(
             sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.A),
-            presentingMode = Presenting.ANNOUNCEMENTS,
+            slideContent = Presenting.ANNOUNCEMENTS,
             displayedVerses = listOf(verse(text = "not live any more")),
             announcementText = "10:00",
         ) {
@@ -540,7 +540,7 @@ class StageMonitorScreenTest {
     fun `presenter notes are shown while a deck is live`() {
         screen(
             sm = routing(StageMonitorContentType.PRESENTATION_NOTES to StageMonitorZone.E),
-            presentingMode = Presenting.PRESENTATION,
+            slideContent = Presenting.PRESENTATION,
             presenterNotes = "remember to mention the offering",
         ) {
             assertTrue(rendersText("remember to mention the offering"), renderedText().toString())
@@ -551,7 +551,7 @@ class StageMonitorScreenTest {
     fun `presenter notes are not shown when a deck is not live`() {
         screen(
             sm = routing(StageMonitorContentType.PRESENTATION_NOTES to StageMonitorZone.E),
-            presentingMode = Presenting.LYRICS,
+            slideContent = Presenting.LYRICS,
             currentLyricSection = section("a lyric"),
             presenterNotes = "notes for a deck nobody is showing",
         ) {
@@ -565,7 +565,7 @@ class StageMonitorScreenTest {
     fun `a live slide is drawn`() {
         screen(
             sm = routing(StageMonitorContentType.PRESENTATION to StageMonitorZone.A),
-            presentingMode = Presenting.PRESENTATION,
+            slideContent = Presenting.PRESENTATION,
             displayedSlide = ImageBitmap(16, 16),
         ) {
             assertEquals(1, imageCount(), "the slide bitmap should be drawn")
@@ -576,7 +576,7 @@ class StageMonitorScreenTest {
     fun `a presentation zone with no slide yet draws no image`() {
         screen(
             sm = routing(StageMonitorContentType.PRESENTATION to StageMonitorZone.A),
-            presentingMode = Presenting.PRESENTATION,
+            slideContent = Presenting.PRESENTATION,
             displayedSlide = null,
         ) {
             assertEquals(0, imageCount())
@@ -592,7 +592,7 @@ class StageMonitorScreenTest {
             ImageIO.write(BufferedImage(4, 4, BufferedImage.TYPE_INT_ARGB), "png", file)
             screen(
                 sm = routing(StageMonitorContentType.PICTURES to StageMonitorZone.A),
-                presentingMode = Presenting.PICTURES,
+                slideContent = Presenting.PICTURES,
                 displayedImagePath = file.absolutePath,
             ) {
                 waitUntil("the picture is decoded and drawn") { imageCount() == 1 }
@@ -606,7 +606,7 @@ class StageMonitorScreenTest {
     fun `a pictures zone with nothing loaded yet draws no image`() {
         screen(
             sm = routing(StageMonitorContentType.PICTURES to StageMonitorZone.A),
-            presentingMode = Presenting.PICTURES,
+            slideContent = Presenting.PICTURES,
             displayedImagePath = null,
         ) {
             assertEquals(0, imageCount())
@@ -624,7 +624,7 @@ class StageMonitorScreenTest {
         )
         screen(
             sm = routing(StageMonitorContentType.CANVAS to StageMonitorZone.A),
-            presentingMode = Presenting.CANVAS,
+            slideContent = Presenting.CANVAS,
             activeScene = scene,
         ) {
             assertTrue(rendersContaining("Welcome Home"), renderedText().toString())
@@ -635,7 +635,7 @@ class StageMonitorScreenTest {
     fun `a canvas zone with no active scene draws nothing`() {
         screen(
             sm = routing(StageMonitorContentType.CANVAS to StageMonitorZone.A),
-            presentingMode = Presenting.CANVAS,
+            slideContent = Presenting.CANVAS,
             activeScene = null,
         ) {
             assertEquals(emptySet(), renderedText())
@@ -648,7 +648,7 @@ class StageMonitorScreenTest {
     fun `a live question is shown`() {
         screen(
             sm = routing(StageMonitorContentType.QA to StageMonitorZone.A),
-            presentingMode = Presenting.QA,
+            slideContent = Presenting.QA,
             displayedQuestion = Question(id = "q1", text = "What time is the potluck?", timestamp = 0L),
             qaSettings = QASettings(),
         ) {
@@ -660,7 +660,7 @@ class StageMonitorScreenTest {
     fun `a qa zone with no live question draws nothing`() {
         screen(
             sm = routing(StageMonitorContentType.QA to StageMonitorZone.A),
-            presentingMode = Presenting.QA,
+            slideContent = Presenting.QA,
             displayedQuestion = null,
         ) {
             assertEquals(emptySet(), renderedText())
@@ -673,7 +673,7 @@ class StageMonitorScreenTest {
     fun `a live dictionary entry is shown`() {
         screen(
             sm = routing(StageMonitorContentType.DICTIONARY to StageMonitorZone.A),
-            presentingMode = Presenting.DICTIONARY,
+            slideContent = Presenting.DICTIONARY,
             displayedDictionaryEntry = StrongsEntry(
                 number = "H430",
                 word = "אֱלֹהִים",
@@ -691,7 +691,7 @@ class StageMonitorScreenTest {
     fun `a dictionary zone with no live entry draws nothing`() {
         screen(
             sm = routing(StageMonitorContentType.DICTIONARY to StageMonitorZone.A),
-            presentingMode = Presenting.DICTIONARY,
+            slideContent = Presenting.DICTIONARY,
             displayedDictionaryEntry = null,
         ) {
             assertEquals(emptySet(), renderedText())
@@ -702,16 +702,16 @@ class StageMonitorScreenTest {
 
     @Test
     fun `lower third, website and STT zones exist but draw nothing yet`() {
-        for ((presentingMode, contentType) in listOf(
+        for ((slideContent, contentType) in listOf(
             Presenting.LOWER_THIRD to StageMonitorContentType.LOWER_THIRD,
             Presenting.WEBSITE to StageMonitorContentType.WEB,
             Presenting.STT to StageMonitorContentType.STT,
         )) {
             screen(
                 sm = routing(contentType to StageMonitorZone.A),
-                presentingMode = presentingMode,
+                slideContent = slideContent,
             ) {
-                assertEquals(emptySet(), renderedText(), "presentingMode=$presentingMode")
+                assertEquals(emptySet(), renderedText(), "slideContent=$slideContent")
             }
         }
     }
@@ -722,7 +722,7 @@ class StageMonitorScreenTest {
     fun `a media zone with no view model draws nothing`() {
         screen(
             sm = routing(StageMonitorContentType.MEDIA to StageMonitorZone.A),
-            presentingMode = Presenting.MEDIA,
+            slideContent = Presenting.MEDIA,
             mediaViewModel = null,
         ) {
             assertEquals(emptySet(), renderedText())
@@ -734,7 +734,7 @@ class StageMonitorScreenTest {
         val viewModel = MediaViewModel().apply { loadMedia("file:///tmp/song.mp3", Constants.MEDIA_TYPE_LOCAL) }
         screen(
             sm = routing(StageMonitorContentType.MEDIA to StageMonitorZone.A),
-            presentingMode = Presenting.MEDIA,
+            slideContent = Presenting.MEDIA,
             mediaViewModel = viewModel,
         ) {
             assertEquals(emptySet(), renderedText())
@@ -753,7 +753,7 @@ class StageMonitorScreenTest {
                 StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.D,
                 StageMonitorContentType.PRESENTATION_NOTES to StageMonitorZone.E,
             ),
-            presentingMode = Presenting.BIBLE,
+            slideContent = Presenting.BIBLE,
             announcementActive = true,
             displayedVerses = listOf(verse(text = "top left")),
             nextVerses = listOf(verse(text = "top right")),
@@ -781,7 +781,7 @@ class StageMonitorScreenTest {
             sm = routing(StageMonitorContentType.SONGS to StageMonitorZone.A).copy(
                 zoneStyles = mapOf(StageMonitorStyleZone.A to style),
             ),
-            presentingMode = Presenting.LYRICS,
+            slideContent = Presenting.LYRICS,
             currentLyricSection = section("styled lyric"),
         ) {
             assertTrue(rendersText("styled lyric"), renderedText().toString())
@@ -811,15 +811,15 @@ class StageMonitorScreenTest {
         val sm = routing(StageMonitorContentType.SONGS to StageMonitorZone.A)
             .copy(metronomePosition = MetronomePosition.TOP_CENTER)
 
-        screen(sm = sm, presentingMode = Presenting.LYRICS, currentLyricSection = section("a", bpm = 90)) {
+        screen(sm = sm, slideContent = Presenting.LYRICS, currentLyricSection = section("a", bpm = 90)) {
             assertEquals(1, metronomeCount(), "a song with a tempo gets a dot")
         }
-        screen(sm = sm, presentingMode = Presenting.LYRICS, currentLyricSection = section("a", bpm = 0)) {
+        screen(sm = sm, slideContent = Presenting.LYRICS, currentLyricSection = section("a", bpm = 0)) {
             assertEquals(0, metronomeCount(), "no tempo, no dot")
         }
         screen(
             sm = sm,
-            presentingMode = Presenting.BIBLE,
+            slideContent = Presenting.BIBLE,
             currentLyricSection = section("a", bpm = 90),
             displayedVerses = listOf(verse()),
         ) {
@@ -832,7 +832,7 @@ class StageMonitorScreenTest {
         screen(
             sm = routing(StageMonitorContentType.SONGS to StageMonitorZone.A)
                 .copy(metronomePosition = MetronomePosition.NONE),
-            presentingMode = Presenting.LYRICS,
+            slideContent = Presenting.LYRICS,
             currentLyricSection = section("a", bpm = 120),
         ) {
             assertEquals(0, metronomeCount())

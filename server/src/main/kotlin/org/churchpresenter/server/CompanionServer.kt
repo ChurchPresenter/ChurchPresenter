@@ -345,6 +345,21 @@ class CompanionServer(
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
+    /**
+     * Emitted when a remote client clears one layer: POST /api/clear?layer=... or WS "clear" with a
+     * `layer`. The payload is the layer's name as sent -- see `overlayForLayerName`.
+     */
+    val onClearLayer = MutableSharedFlow<String>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** Emitted when a remote client takes what is cued on Preview to air: POST /api/take or WS "take". */
+    val onTake = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
     /** Emitted when a remote client sends WS "bible_hold". Payload: {"hold": true/false}. */
     val onBibleHold = MutableSharedFlow<Boolean>(
         extraBufferCapacity = 4,

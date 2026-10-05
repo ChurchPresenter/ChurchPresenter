@@ -440,7 +440,7 @@ class PicturesViewModelTest {
         vm.goLive(pm)
 
         assertEquals(vm.images[1].absolutePath, pm.selectedImagePath.value)
-        assertEquals(Presenting.PICTURES, pm.presentingMode.value)
+        assertEquals(Presenting.PICTURES, pm.onAir.value)
         assertTrue(pm.showPresenterWindow.value)
     }
 
@@ -473,7 +473,7 @@ class PicturesViewModelTest {
         vm.goLive(pm)
 
         assertNull(pm.selectedImagePath.value)
-        assertEquals(Presenting.NONE, pm.presentingMode.value, "an empty folder must not blank what is already live")
+        assertEquals(Presenting.NONE, pm.onAir.value, "an empty folder must not blank what is already live")
     }
 
     @Test

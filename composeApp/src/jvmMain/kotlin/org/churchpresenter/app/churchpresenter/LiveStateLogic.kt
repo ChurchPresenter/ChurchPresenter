@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter
 import org.churchpresenter.sharedui.models.Presenting
 
 /** Whether media is what is on the output, which is what connected phones are told. */
-internal fun isMediaLive(presentingMode: Presenting): Boolean = presentingMode == Presenting.MEDIA
+internal fun isMediaLive(slideContent: Presenting): Boolean = slideContent == Presenting.MEDIA
 
 /**
  * The song position to announce, or none when songs are not what is live.
@@ -37,8 +37,8 @@ internal fun <T> liveVerseCode(
 }
 
 /** Whether media is what the presentation-live flag should report. */
-internal fun isPresentationLive(presentingMode: Presenting): Boolean =
-    presentingMode == Presenting.PRESENTATION
+internal fun isPresentationLive(slideContent: Presenting): Boolean =
+    slideContent == Presenting.PRESENTATION
 
 /**
  * The line to select for a section chosen remotely, or none.
@@ -50,16 +50,16 @@ internal fun remoteSongLineIndex(requestedLineIndex: Int): Int =
     if (requestedLineIndex >= 0) requestedLineIndex else -1
 
 /** Whether taking a song section live also has to switch the output over to lyrics. */
-internal fun shouldSwitchToLyrics(presentingMode: Presenting): Boolean =
-    presentingMode != Presenting.LYRICS
+internal fun shouldSwitchToLyrics(slideContent: Presenting): Boolean =
+    slideContent != Presenting.LYRICS
 
 /** Whether a section change is worth telling connected phones about — only while songs are live. */
-internal fun shouldBroadcastSongSection(presentingMode: Presenting): Boolean =
-    presentingMode == Presenting.LYRICS
+internal fun shouldBroadcastSongSection(slideContent: Presenting): Boolean =
+    slideContent == Presenting.LYRICS
 
 /** Whether the output going empty is worth announcing. */
-internal fun shouldBroadcastDisplayCleared(presentingMode: Presenting): Boolean =
-    presentingMode == Presenting.NONE
+internal fun shouldBroadcastDisplayCleared(slideContent: Presenting): Boolean =
+    slideContent == Presenting.NONE
 
 /**
  * Whether a clear signal is a fresh one rather than the value replayed on subscribe.

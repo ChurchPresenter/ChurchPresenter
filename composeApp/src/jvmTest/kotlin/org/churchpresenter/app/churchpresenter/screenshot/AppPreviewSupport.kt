@@ -244,7 +244,7 @@ internal fun appPreview(
  * straight through.
  */
 private fun ComposeUiTest.pinLottieFrame(presenterManager: PresenterManager) {
-    if (presenterManager.presentingMode.value != Presenting.LOWER_THIRD) return
+    if (presenterManager.slideContent.value != Presenting.LOWER_THIRD) return
     waitUntil("the lower-third pre-render is ready", 15_000L) {
         (presenterManager.lottieFrameCount.value ?: 0) > 0
     }

@@ -20,41 +20,41 @@ class MediaTransportUsefulTest {
 
     @Test
     fun `a video on screen offers its transport`() {
-        assertTrue(mediaTransportUseful(isLoaded = true, isPlaying = true, presentingMode = Presenting.MEDIA))
+        assertTrue(mediaTransportUseful(isLoaded = true, isPlaying = true, slideContent = Presenting.MEDIA))
     }
 
     @Test
     fun `a video on screen but paused still offers it`() {
         // Paused is exactly when an operator reaches for the transport.
-        assertTrue(mediaTransportUseful(isLoaded = true, isPlaying = false, presentingMode = Presenting.MEDIA))
+        assertTrue(mediaTransportUseful(isLoaded = true, isPlaying = false, slideContent = Presenting.MEDIA))
     }
 
     @Test
     fun `audio playing behind a song keeps its transport`() {
-        assertTrue(mediaTransportUseful(isLoaded = true, isPlaying = true, presentingMode = Presenting.LYRICS))
+        assertTrue(mediaTransportUseful(isLoaded = true, isPlaying = true, slideContent = Presenting.LYRICS))
     }
 
     @Test
     fun `a finished clip under a live song offers nothing`() {
         // The reported bug, in one line: loaded, not playing, something else on screen.
-        assertFalse(mediaTransportUseful(isLoaded = true, isPlaying = false, presentingMode = Presenting.LYRICS))
+        assertFalse(mediaTransportUseful(isLoaded = true, isPlaying = false, slideContent = Presenting.LYRICS))
     }
 
     @Test
     fun `a finished clip with nothing live offers nothing`() {
-        assertFalse(mediaTransportUseful(isLoaded = true, isPlaying = false, presentingMode = Presenting.NONE))
+        assertFalse(mediaTransportUseful(isLoaded = true, isPlaying = false, slideContent = Presenting.NONE))
     }
 
     @Test
     fun `nothing loaded offers nothing, whatever is on screen`() {
-        assertFalse(mediaTransportUseful(isLoaded = false, isPlaying = false, presentingMode = Presenting.MEDIA))
-        assertFalse(mediaTransportUseful(isLoaded = false, isPlaying = true, presentingMode = Presenting.MEDIA))
+        assertFalse(mediaTransportUseful(isLoaded = false, isPlaying = false, slideContent = Presenting.MEDIA))
+        assertFalse(mediaTransportUseful(isLoaded = false, isPlaying = true, slideContent = Presenting.MEDIA))
     }
 
     @Test
     fun `a clip loaded and paused before going live offers nothing yet`() {
         // Loading leaves the clip paused on purpose; until it is live or playing there is nothing for
         // the panel's transport to act on, and the Media tab's own controls are where it is started.
-        assertFalse(mediaTransportUseful(isLoaded = true, isPlaying = false, presentingMode = Presenting.BIBLE))
+        assertFalse(mediaTransportUseful(isLoaded = true, isPlaying = false, slideContent = Presenting.BIBLE))
     }
 }

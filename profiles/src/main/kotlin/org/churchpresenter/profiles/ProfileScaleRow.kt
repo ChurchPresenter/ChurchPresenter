@@ -18,12 +18,12 @@ import org.jetbrains.compose.resources.stringResource
  */
 @Composable
 internal fun ScaleRows(profile: OutputProfile, onProfileChange: (OutputProfile) -> Unit) {
-    if (profile.showPictures) {
+    if (profile.look.media.pictures) {
         SettingsRow(stringResource(Res.string.pictures), paths = listOf("pictureScaleMode")) {
             ScaleSegments(profile.pictureScaleMode) { onProfileChange(profile.copy(pictureScaleMode = it)) }
         }
     }
-    if (profile.showMedia) {
+    if (profile.look.media.video) {
         SettingsRow(stringResource(Res.string.media), paths = listOf("mediaScaleMode")) {
             ScaleSegments(profile.mediaScaleMode) { onProfileChange(profile.copy(mediaScaleMode = it)) }
         }

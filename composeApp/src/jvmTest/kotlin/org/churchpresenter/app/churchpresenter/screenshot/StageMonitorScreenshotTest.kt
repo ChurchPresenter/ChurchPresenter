@@ -100,7 +100,7 @@ class StageMonitorScreenshotTest {
                         sm = settings,
                         showChords = showChords,
                         transposeSteps = transposeSteps,
-                        presentingMode = presenting,
+                        slideContent = presenting,
                         announcementActive = announcementActive,
                         currentLyricSection = section,
                         allLyricSections = sections,

@@ -121,7 +121,7 @@ class ApplyRemoteLiveStateBibleCodeTest {
         val verse = presenter.selectedVerses.value.single()
         assertEquals("Господь — Пастырь мой", verse.verseText, "the follower renders its own translation")
         assertEquals("Псалтирь", verse.bookName, "and its own book name")
-        assertEquals(Presenting.BIBLE, presenter.presentingMode.value)
+        assertEquals(Presenting.BIBLE, presenter.slideContent.value)
     }
 
     @Test
@@ -178,7 +178,7 @@ class ApplyRemoteLiveStateBibleCodeTest {
             "showing nothing is right; showing the primary's wording would defeat reference-only mode"
         )
         assertEquals(
-            Presenting.BIBLE, presenter.presentingMode.value,
+            Presenting.BIBLE, presenter.slideContent.value,
             "the follower still moves off the song it was showing rather than leaving it up"
         )
     }
@@ -188,7 +188,7 @@ class ApplyRemoteLiveStateBibleCodeTest {
         val presenter = apply(codeState(19, 23, 1), localPrimaryBible = null)
 
         assertTrue(presenter.selectedVerses.value.isEmpty())
-        assertEquals(Presenting.BIBLE, presenter.presentingMode.value)
+        assertEquals(Presenting.BIBLE, presenter.slideContent.value)
     }
 
     @Test

@@ -420,6 +420,32 @@ class CompanionServerRemoteControlTest {
         )
     }
 
+    @Test
+    fun `Take is asked for without approval`() {
+        val taken = CompletableDeferred<Unit>()
+        collecting(server.onTake) { taken.complete(Unit) }
+
+        val response = post(Constants.ENDPOINT_TAKE)
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertNotNull(runBlocking { withTimeoutOrNull(2_000) { taken.await() } })
+    }
+
+    @Test
+    fun `clearing one layer names that layer and leaves the rest up`() {
+        val layer = CompletableDeferred<String>()
+        val clearedAll = CompletableDeferred<Unit>()
+        collecting(server.onClearLayer) { layer.complete(it) }
+        collecting(server.onClear) { clearedAll.complete(Unit) }
+
+        val response = post("${Constants.ENDPOINT_CLEAR}?layer=lowerthird")
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals("lowerthird", runBlocking { withTimeoutOrNull(2_000) { layer.await() } })
+        // The layer branch launches only its own emission, so with it in hand nothing else is pending.
+        assertFalse(clearedAll.isCompleted, "a layer clear must not take the slide down with it")
+    }
+
     // ── The schedule ────────────────────────────────────────────────────────────
 
     @Test
@@ -678,6 +704,33 @@ class CompanionServerRemoteControlTest {
         val ack = sendOverWebSocket(command(Constants.WS_CMD_CLEAR, commandId = "cmd-1")).ackFor("cmd-1")
 
         assertEquals(true, assertNotNull(ack).ok)
+    }
+
+    @Test
+    fun `Take over the socket is acknowledged and reaches the app`() {
+        val taken = CompletableDeferred<Unit>()
+        collecting(server.onTake) { taken.complete(Unit) }
+
+        val ack = sendOverWebSocket(command(Constants.WS_CMD_TAKE, commandId = "cmd-take")).ackFor("cmd-take")
+
+        assertEquals(true, assertNotNull(ack).ok)
+        assertNotNull(runBlocking { withTimeoutOrNull(2_000) { taken.await() } })
+    }
+
+    @Test
+    fun `a clear over the socket naming a layer clears only that layer`() {
+        val layer = CompletableDeferred<String>()
+        val clearedAll = CompletableDeferred<Unit>()
+        collecting(server.onClearLayer) { layer.complete(it) }
+        collecting(server.onClear) { clearedAll.complete(Unit) }
+
+        val ack = sendOverWebSocket(
+            command(Constants.WS_CMD_CLEAR, """{"layer":"captions"}""", commandId = "cmd-layer"),
+        ).ackFor("cmd-layer")
+
+        assertEquals(true, assertNotNull(ack).ok)
+        assertEquals("captions", runBlocking { withTimeoutOrNull(2_000) { layer.await() } })
+        assertFalse(clearedAll.isCompleted, "a layer clear must not take the slide down with it")
     }
 
     @Test

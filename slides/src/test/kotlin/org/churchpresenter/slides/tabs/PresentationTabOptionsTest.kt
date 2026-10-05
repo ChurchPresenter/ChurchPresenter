@@ -300,7 +300,7 @@ class PresentationTabOptionsTest {
         val file = loadDeck(h)
         presentationButton(PresentationLabel.GO_LIVE).performClick()
         waitUntil("the slide on the output", 5_000) { h.output.selectedSlide.value != null }
-        assertEquals(Presenting.PRESENTATION, h.output.presentingMode.value)
+        assertEquals(Presenting.PRESENTATION, h.output.onAir.value)
         assertTrue(h.output.showPresenterWindow.value)
         assertEquals(file.name to 0, h.output.liveSlide.value)
         assertEquals(listOf(0), h.output.shownSlides)

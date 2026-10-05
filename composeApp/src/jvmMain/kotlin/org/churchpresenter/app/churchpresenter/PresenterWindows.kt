@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -54,7 +55,9 @@ import org.churchpresenter.sharedui.utils.DevFlags
 import org.churchpresenter.sharedui.utils.findScreenIndexByBounds
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
+import org.churchpresenter.app.churchpresenter.presenter.OverlayModes
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.shownModeFor
 import org.churchpresenter.stt.STTManager
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.AppSettings
@@ -83,7 +86,7 @@ internal fun PresenterWindows(
     },
 ) {
     val showPresenterWindow by presenterManager.showPresenterWindow
-    val presentingMode by presenterManager.presentingMode
+    val slideContent by presenterManager.slideContent
     val screenLocks by presenterManager.screenLocks
     val selectedVerses by presenterManager.selectedVerses
     val displayedVerses by presenterManager.displayedVerses
@@ -97,13 +100,11 @@ internal fun PresenterWindows(
     val clearAnnouncementOnFinish = {
         presenterManager.setAnnouncementText("")
         presenterManager.setDisplayedAnnouncementText("")
-        presenterManager.requestClearDisplay()
+        presenterManager.overlayFinished(
+            Presenting.ANNOUNCEMENTS,
+            appSettings.projectionSettings.overlayEndClearsDisplay,
+        )
     }
-    val lottieJsonContent by presenterManager.lottieJsonContent
-    val lottiePauseAtFrame by presenterManager.lottiePauseAtFrame
-    val lottiePauseFrame by presenterManager.lottiePauseFrame
-    val lottiePauseDurationMs by presenterManager.lottiePauseDurationMs
-    val lottieTrigger by presenterManager.lottieTrigger
 
     val proj = appSettings.projectionSettings
 
@@ -111,20 +112,12 @@ internal fun PresenterWindows(
     // fallback does not: it is a window on the operator's own screen, not a projector.
     val hideCursor = appSettings.projectionSettings.hideCursorOnOutputs
 
-    PresenterTransitionEffects(presenterManager, appSettings)
-
-    val lottieComposition by rememberLottieComposition(lottieJsonContent) {
-        LottieCompositionSpec.JsonString(lottieJsonContent)
-    }
-    LottiePlaybackEffect(
-        presenterManager = presenterManager,
-        durationFrames = lottieComposition?.durationFrames,
-        frameRate = lottieComposition?.frameRate,
-        pauseAtFrame = lottiePauseAtFrame,
-        pauseFrame = lottiePauseFrame,
-        pauseDurationMs = lottiePauseDurationMs,
-        trigger = lottieTrigger,
-    )
+    val lottieComposition = rememberPresenterDrivers(presenterManager, appSettings)
+    // Preview's own drivers, while preview mode is on: what is cued fades and plays there as it
+    // would on air.
+    val previewBus = presenterManager.previewBus
+    SideEffect { previewBus.setEnabled(proj.previewModeEnabled) }
+    if (previewBus.enabled.value) rememberPresenterDrivers(previewBus.manager, appSettings)
 
     val env = OutputEnvironment(
         presenterManager, mediaViewModel, sttManager, serverUrl, qaDisplayUrl, lottieComposition,
@@ -174,11 +167,7 @@ internal fun PresenterWindows(
             outputKey = outputKey,
             merge = merges[outputKey],
             // Every tile of one picture shows what its first output shows, lock and all.
-            effectiveMode = effectiveOutputMode(
-                screenLocks,
-                mergeHostIndex(merges, Constants.PREVIEW_OUTPUT_SCREEN, slotIndex),
-                presentingMode,
-            ),
+            effectiveMode = presenterManager.screenSlotMode(profile, screenLocks, merges, slotIndex, slideContent),
         )
 
         when {
@@ -195,6 +184,34 @@ internal fun PresenterWindows(
     }
 }
 
+/**
+ * What moves [presenterManager]'s content once it is set: the transitions from selected to
+ * displayed, and the lower third's playback. Returns the lower third's parsed composition, which
+ * the outputs draw.
+ */
+@Composable
+internal fun rememberPresenterDrivers(
+    presenterManager: PresenterManager,
+    appSettings: AppSettings,
+): LottieComposition? {
+    val lottieJsonContent by presenterManager.lottieJsonContent
+    PresenterTransitionEffects(presenterManager, appSettings)
+    val lottieComposition by rememberLottieComposition(lottieJsonContent) {
+        LottieCompositionSpec.JsonString(lottieJsonContent)
+    }
+    LottiePlaybackEffect(
+        presenterManager = presenterManager,
+        durationFrames = lottieComposition?.durationFrames,
+        frameRate = lottieComposition?.frameRate,
+        pauseAtFrame = presenterManager.lottiePauseAtFrame.value,
+        pauseFrame = presenterManager.lottiePauseFrame.value,
+        pauseDurationMs = presenterManager.lottiePauseDurationMs.value,
+        trigger = presenterManager.lottieTrigger.value,
+        overlayEndClearsDisplay = appSettings.projectionSettings.overlayEndClearsDisplay,
+    )
+    return lottieComposition
+}
+
 @Composable
 internal fun LottiePlaybackEffect(
     presenterManager: PresenterManager,
@@ -204,6 +221,8 @@ internal fun LottiePlaybackEffect(
     pauseFrame: Float,
     pauseDurationMs: Long,
     trigger: Int,
+    /** What the lower third finishing does -- see [PresenterManager.overlayFinished]. */
+    overlayEndClearsDisplay: Boolean = true,
 ) {
     LaunchedEffect(durationFrames, frameRate, pauseAtFrame, pauseFrame, pauseDurationMs, trigger) {
         try {
@@ -243,7 +262,7 @@ internal fun LottiePlaybackEffect(
             } else {
                 presenterManager.setLottieProgress(1f)
             }
-            presenterManager.requestClearDisplay()
+            presenterManager.overlayFinished(Presenting.LOWER_THIRD, overlayEndClearsDisplay)
         } catch (e: CancellationException) {
             throw e
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -268,10 +287,13 @@ internal data class OutputEnvironment(
 
 /**
  * Crossfades [content] between modes as the real outputs do: only when the Bible or song settings
- * crossfade and neither side is NONE, over [crossfadeMs]; otherwise it cuts.
+ * crossfade and neither side is NONE, over [crossfadeMs]; otherwise it cuts. The overlays are drawn
+ * by [content] too, over it.
  */
 @Composable
 private fun CrossfadedOutput(
+    presenterManager: PresenterManager,
+    profile: OutputProfile,
     effectiveMode: Presenting,
     crossfadeMs: Int,
     outputSettings: AppSettings,
@@ -286,6 +308,7 @@ private fun CrossfadedOutput(
         targetState = effectiveMode,
         animationSpec = if (screenCrossfadeActive) tween(crossfadeMs) else snap()
     ) { mode -> content(mode) }
+    OverlayModes(presenterManager, profile, effectiveMode, content)
 }
 
 /** One output's [mode], drawn with its background forced on as the key and DeckLink paths always have. */
@@ -314,6 +337,20 @@ private fun OutputModeContent(
         showBackgroundOverride = true,
     )
 }
+
+/** What screen slot [slotIndex] shows: its picture's first output's lock, else [profile]'s live mode. */
+private fun PresenterManager.screenSlotMode(
+    profile: OutputProfile,
+    screenLocks: Map<Int, Presenting>,
+    merges: Map<String, ResolvedMerge>,
+    slotIndex: Int,
+    slideContent: Presenting,
+): Presenting = shownModeFor(
+    profile,
+    effectiveOutputMode(
+        screenLocks, mergeHostIndex(merges, Constants.PREVIEW_OUTPUT_SCREEN, slotIndex), slideContent,
+    ),
+)
 
 /** One screen slot's output: its assignment, what it draws with, and the mode it shows. */
 private data class OutputSlot(
@@ -392,7 +429,9 @@ private fun DeckLinkOutputs(
             merge = slot.merge,
             mergeOutput = slot.outputKey,
         ) {
-            CrossfadedOutput(slot.effectiveMode, slot.crossfadeMs, slot.outputSettings) { mode ->
+            CrossfadedOutput(
+                env.presenterManager, slot.profile, slot.effectiveMode, slot.crossfadeMs, slot.outputSettings,
+            ) { mode ->
                 OutputModeContent(
                     mode, slot.profile, slot.outputSettings, deckLinkRole,
                     showsOutputBackground(slot.profile), env,
@@ -409,7 +448,9 @@ private fun DeckLinkOutputs(
             mediaViewModel = env.mediaViewModel,
             isLowerThird = slot.profile.isLowerThird,
         ) {
-            CrossfadedOutput(slot.effectiveMode, slot.crossfadeMs, slot.outputSettings) { mode ->
+            CrossfadedOutput(
+                env.presenterManager, slot.profile, slot.effectiveMode, slot.crossfadeMs, slot.outputSettings,
+            ) { mode ->
                 OutputModeContent(
                     mode, slot.profile, slot.outputSettings, Constants.OUTPUT_ROLE_KEY,
                     showsOutputBackground(slot.profile), env,
@@ -510,7 +551,9 @@ private fun ScreenOutputs(
                 mediaViewModel = env.mediaViewModel,
                 isLowerThird = slot.profile.isLowerThird,
             ) {
-                CrossfadedOutput(slot.effectiveMode, slot.crossfadeMs, slot.outputSettings) { mode ->
+                CrossfadedOutput(
+                    env.presenterManager, slot.profile, slot.effectiveMode, slot.crossfadeMs, slot.outputSettings,
+                ) { mode ->
                     OutputModeContent(mode, slot.profile, slot.outputSettings, primaryRole, showBg, env)
                 }
             }
@@ -582,7 +625,9 @@ private fun KeyOutputWindow(
                             } else false
                         }
                 ) {
-                    CrossfadedOutput(slot.effectiveMode, slot.crossfadeMs, slot.outputSettings) { mode ->
+                    CrossfadedOutput(
+                    env.presenterManager, slot.profile, slot.effectiveMode, slot.crossfadeMs, slot.outputSettings,
+                ) { mode ->
                         OutputModeContent(
                             mode, slot.profile, slot.outputSettings, Constants.OUTPUT_ROLE_KEY,
                             showsOutputBackground(slot.profile), env,

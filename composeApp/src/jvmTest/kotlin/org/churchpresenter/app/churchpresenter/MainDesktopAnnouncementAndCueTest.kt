@@ -165,7 +165,7 @@ class MainDesktopAnnouncementAndCueTest {
         seen.actions.playSlideshow(ScheduleItem.SongItem(id = "s", songNumber = 1, title = "A", songbook = "B"), 1)
         waitForIdle()
 
-        assertEquals(Presenting.NONE, presenter.presentingMode.value, "a cue starts a player; it does not go live")
+        assertEquals(Presenting.NONE, presenter.slideContent.value, "a cue starts a player; it does not go live")
         }
     }
 
@@ -176,7 +176,7 @@ class MainDesktopAnnouncementAndCueTest {
             seen.actions.presentScene("no-such-scene")
             waitForIdle()
 
-            assertEquals(Presenting.CANVAS, presenter.presentingMode.value)
+            assertEquals(Presenting.CANVAS, presenter.slideContent.value)
         }
     }
 }

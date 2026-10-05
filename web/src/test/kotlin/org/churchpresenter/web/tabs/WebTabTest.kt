@@ -152,7 +152,7 @@ class WebTabTest {
             waitForIdle()
 
             onNodeWithText("https://scheduled.example").assertExists()
-            assertEquals(Presenting.WEBSITE, presenter.presentingMode.value)
+            assertEquals(Presenting.WEBSITE, presenter.onAir.value)
             assertEquals("https://scheduled.example", presenter.websiteUrl.value)
         }
     }

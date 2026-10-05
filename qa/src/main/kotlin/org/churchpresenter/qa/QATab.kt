@@ -70,13 +70,13 @@ fun QATab(
             onSettingsChange = onSettingsChange,
         )
     }
-    val presentingMode by output.presentingMode
+    val slideContent by output.slideContent
     val isQALocked = tab.isQALocked
 
     // Reset QA display state when display is cleared (e.g. via Escape or Clear Display)
     val hasQAContentUp = tab.showQROnDisplay || tab.displayedQuestion != null
-    LaunchedEffect(presentingMode) {
-        if (presentingMode == Presenting.NONE && !isQALocked && hasQAContentUp) {
+    LaunchedEffect(slideContent) {
+        if (slideContent == Presenting.NONE && !isQALocked && hasQAContentUp) {
             qaManager.clearDisplay()
         }
     }

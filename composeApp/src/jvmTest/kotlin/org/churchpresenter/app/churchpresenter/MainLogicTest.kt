@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.settings.BackgroundLook
+import org.churchpresenter.settings.OutputLook
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.AppSettings
@@ -497,15 +499,6 @@ class MainLogicTest {
     }
 
     @Test
-    fun `a finished lower third clears only while it is still on screen`() {
-        // The sequence runs on its own clock; by the time it ends the operator may have moved on,
-        // and clearing then would blank whatever they moved to.
-        assertTrue(shouldClearAfterLowerThird(Presenting.LOWER_THIRD))
-        assertFalse(shouldClearAfterLowerThird(Presenting.LYRICS))
-        assertFalse(shouldClearAfterLowerThird(Presenting.NONE))
-    }
-
-    @Test
     fun `a section change is announced only while songs are live`() {
         assertTrue(shouldBroadcastSongSection(Presenting.LYRICS))
         assertFalse(shouldBroadcastSongSection(Presenting.BIBLE))
@@ -946,15 +939,13 @@ class MainLogicTest {
     fun `each layout has its own background switch`() {
         val lowerThird = OutputProfile(
             displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
-            showLowerThirdBackground = false,
-            showFullscreenBackground = true,
+            look = OutputLook(background = BackgroundLook(lowerThird = false, fullscreen = true)),
         )
         assertFalse(showsOutputBackground(lowerThird), "the fullscreen switch must not stand in for it")
 
         val fullscreen = OutputProfile(
             displayMode = Constants.DISPLAY_MODE_FULLSCREEN,
-            showLowerThirdBackground = false,
-            showFullscreenBackground = true,
+            look = OutputLook(background = BackgroundLook(lowerThird = false, fullscreen = true)),
         )
         assertTrue(showsOutputBackground(fullscreen))
     }

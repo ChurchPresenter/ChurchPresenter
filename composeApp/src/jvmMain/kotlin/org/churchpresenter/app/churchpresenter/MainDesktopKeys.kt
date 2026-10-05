@@ -42,7 +42,7 @@ internal fun MainDesktopScope.handleMainDesktopKey(keyEvent: KeyEvent): Boolean 
     if (keyEvent.type != KeyEventType.KeyDown) return false
     val shortcutTab = shortcuts.actionFor(keyEvent, ShortcutScope.GLOBAL)?.targetTab
     val quickBackgroundSlot = quickBackgroundSlotFor(shortcuts, keyEvent)
-    val live = presentingMode == Presenting.PRESENTATION
+    val live = slideContent == Presenting.PRESENTATION
     return when {
         shortcuts.matches(ShortcutAction.REDO, keyEvent) -> {
             scheduleViewModel.redo(); true
@@ -62,6 +62,9 @@ internal fun MainDesktopScope.handleMainDesktopKey(keyEvent: KeyEvent): Boolean 
         }
         shortcuts.matches(ShortcutAction.CLEAR_OUTPUT, keyEvent) -> {
             clearOutput(); true
+        }
+        shortcuts.matches(ShortcutAction.TAKE, keyEvent) -> {
+            presenterManager.previewBus.take(); true
         }
         // Presentation clickers (Logitech/Kensington etc.) are HID keyboards
         // sending Page Down/Up. Handled here in the preview pass so a live
@@ -102,7 +105,7 @@ private suspend fun MainDesktopScope.clickPresentation(forward: Boolean) {
 
 /** Feeds a key no shortcut claimed to the hidden sequences; never claims it. */
 private fun MainDesktopScope.advanceKeySequences(key: Key): Boolean {
-    if (presentingMode != Presenting.NONE) {
+    if (presenterManager.anythingLive) {
         // Suppress both easter egg sequences while live
         state.konamiProgress = 0
         state.crosswordProgress = 0
