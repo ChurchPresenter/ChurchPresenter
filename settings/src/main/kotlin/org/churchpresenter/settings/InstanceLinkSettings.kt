@@ -70,5 +70,7 @@ object LinkLayers {
     const val CAPTIONS = "captions"
     const val ANNOUNCEMENTS = "announcements"
     const val MESSAGES = "messages"
-    val ALL = listOf(SLIDE, MEDIA, LOWER_THIRD, CAPTIONS, ANNOUNCEMENTS, MESSAGES)
+    /** Matched by id, so a follower shows only the props it has defined under the same ids. */
+    const val PROPS = "props"
+    val ALL = listOf(SLIDE, MEDIA, LOWER_THIRD, CAPTIONS, ANNOUNCEMENTS, MESSAGES, PROPS)
 }

@@ -154,6 +154,7 @@
     <string name="instance_link_layer_captions">Captions</string>
     <string name="instance_link_layer_announcements">Announcements</string>
     <string name="instance_link_layer_messages">Messages</string>
+    <string name="instance_link_layer_props">Props</string>
     <string name="instance_link_role">Connection role</string>
     <string name="instance_link_role_controlled">Controlled — mirror the primary's content</string>
     <string name="instance_link_role_controller">Controller — drive the primary's output from here</string>

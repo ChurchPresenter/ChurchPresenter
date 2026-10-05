@@ -21,5 +21,12 @@ fun PresenterManager.setPropOn(id: String, on: Boolean) {
     onLiveStateChanged?.invoke(this, Presenting.PROPS)
 }
 
+/** Puts exactly the props [ids] up, taking every other prop down -- a follower matching its primary. */
+fun PresenterManager.setPropsOn(ids: Set<String>) {
+    if (ids == propsOnAir) return
+    if (ids.isEmpty()) liveShow.clear(Layer.PROPS) else liveShow.set(Cue.Props(ids))
+    onLiveStateChanged?.invoke(this, Presenting.PROPS)
+}
+
 /** Switches the prop [id] the other way. */
 fun PresenterManager.toggleProp(id: String) = setPropOn(id, id !in propsOnAir)

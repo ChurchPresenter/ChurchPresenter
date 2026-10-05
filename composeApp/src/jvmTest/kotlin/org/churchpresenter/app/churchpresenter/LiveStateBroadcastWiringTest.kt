@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.viewmodel.setPropOn
 import org.churchpresenter.liveshow.Cue
 import org.churchpresenter.app.churchpresenter.viewmodel.showMessage
 import org.churchpresenter.app.churchpresenter.viewmodel.clearMessage
@@ -105,5 +106,15 @@ class LiveStateBroadcastWiringTest {
         assertEquals(60, server.liveState.value?.messageDurationSeconds)
         manager.clearMessage()
         assertEquals(null, server.liveState.value?.message)
+    }
+
+    @Test
+    fun `the broadcast carries the props up`() = runComposeUiTest {
+        val manager = PresenterManager()
+        val server = CompanionServer()
+        compose(this, manager, server)
+        waitForIdle()
+        manager.setPropOn("logo", true)
+        assertEquals(listOf("logo"), server.liveState.value?.props)
     }
 }

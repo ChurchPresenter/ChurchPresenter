@@ -80,6 +80,7 @@ internal suspend fun applyRemoteLiveState(
     }
     followAir(state, mode, presenterManager, follows)
     followMessage(state, presenterManager, follows)
+    followProps(state, presenterManager, follows)
     presenterManager.setShowPresenterWindow(true)
 }
 
@@ -152,8 +153,8 @@ private suspend fun applyRemoteContent(
         Presenting.CANVAS -> applyRemoteCanvas(state, presenterManager, localScenes)
         Presenting.QA -> applyRemoteQa(state, presenterManager)
         Presenting.DICTIONARY -> applyRemoteDictionary(state, presenterManager)
-        // Carried whole in the state itself -- see followMessage.
-        Presenting.MESSAGE -> Unit
+        // Carried whole in the state itself -- see followMessage and followProps.
+        Presenting.MESSAGE, Presenting.PROPS -> Unit
         else -> {
             // presentation: mirrored via its own dedicated broadcast (remotePresentationSlide
             // collector); stt: no caption feed exists to mirror. Mode still switches below.

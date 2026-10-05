@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.viewmodel.toggleProp
+import org.churchpresenter.app.churchpresenter.viewmodel.setPropOn
+import org.churchpresenter.app.churchpresenter.viewmodel.propsOnAir
 import org.churchpresenter.app.churchpresenter.viewmodel.showMessage
 import org.churchpresenter.liveshow.Cue
 import androidx.compose.runtime.SideEffect
@@ -146,7 +149,16 @@ internal fun MainWindowScope.ServerCommandWiring() {
             companionServer.onTake.collect { presenterManager.previewBus.take() }
         }
         // The saved messages a remote client may name, and the messages it puts up.
-        SideEffect { companionServer.messageTemplates = appSettings.messageTemplates }
+        SideEffect {
+            companionServer.messageTemplates = appSettings.messageTemplates
+            companionServer.props = appSettings.props
+        }
+        LaunchedEffect(Unit) {
+            companionServer.onProp.collect { switch ->
+                switch.on?.let { presenterManager.setPropOn(switch.id, it) } ?: presenterManager.toggleProp(switch.id)
+                if (switch.id in presenterManager.propsOnAir) presenterManager.setShowPresenterWindow(true)
+            }
+        }
         LaunchedEffect(Unit) {
             companionServer.onMessage.collect { message ->
                 presenterManager.showMessage(Cue.Message(message.text, message.template, message.durationSeconds))

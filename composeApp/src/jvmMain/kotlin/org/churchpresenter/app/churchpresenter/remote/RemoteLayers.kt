@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.remote
 
+import org.churchpresenter.app.churchpresenter.viewmodel.setPropsOn
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.clearMessage
 import org.churchpresenter.app.churchpresenter.viewmodel.messageOnAir
@@ -43,6 +44,7 @@ internal fun linkLayerOf(mode: Presenting): String = when (mode) {
     Presenting.STT -> LinkLayers.CAPTIONS
     Presenting.ANNOUNCEMENTS -> LinkLayers.ANNOUNCEMENTS
     Presenting.MESSAGE -> LinkLayers.MESSAGES
+    Presenting.PROPS -> LinkLayers.PROPS
     else -> LinkLayers.SLIDE
 }
 
@@ -59,4 +61,14 @@ internal fun followMessage(state: LiveStateDto, presenterManager: PresenterManag
         text == null -> presenterManager.clearMessage()
         presenterManager.messageOnAir?.text != text -> presenterManager.showMessage(Cue.Message(text))
     }
+}
+
+/**
+ * The primary's props, mirrored on this follower when it follows props: exactly the ids the primary
+ * has up, which draw here only where this follower defines props under the same ids. An older
+ * primary, which sends no [LiveStateDto.props], changes nothing.
+ */
+internal fun followProps(state: LiveStateDto, presenterManager: PresenterManager, follows: (Presenting) -> Boolean) {
+    val props = state.props ?: return
+    if (follows(Presenting.PROPS)) presenterManager.setPropsOn(props.toSet())
 }

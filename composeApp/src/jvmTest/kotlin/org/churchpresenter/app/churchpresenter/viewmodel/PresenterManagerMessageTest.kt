@@ -70,10 +70,10 @@ class PresenterManagerMessageTest {
         val pm = manager()
         mainClock.autoAdvance = false
         setContent { MessageExpiry(pm) }
-        pm.showMessage(nursery.copy(durationSeconds = 30))
-        mainClock.advanceTimeBy(29_000)
+        pm.showMessage(nursery.copy(durationSeconds = 2))
+        mainClock.advanceTimeBy(1_500)
         assertTrue(pm.isLive(Presenting.MESSAGE), "not yet")
-        mainClock.advanceTimeBy(2_000)
+        mainClock.advanceTimeBy(1_000)
         assertNull(pm.messageOnAir)
     }
 
@@ -83,13 +83,13 @@ class PresenterManagerMessageTest {
         mainClock.autoAdvance = false
         setContent { MessageExpiry(pm) }
         pm.showMessage(nursery)
-        mainClock.advanceTimeBy(600_000)
+        mainClock.advanceTimeBy(3_000)
         assertEquals(nursery, pm.messageOnAir)
-        pm.showMessage(Cue.Message("First", durationSeconds = 10))
-        mainClock.advanceTimeBy(5_000)
+        pm.showMessage(Cue.Message("First", durationSeconds = 2))
+        mainClock.advanceTimeBy(1_000)
         val second = Cue.Message("Second")
         pm.showMessage(second)
-        mainClock.advanceTimeBy(10_000)
+        mainClock.advanceTimeBy(2_000)
         assertEquals(second, pm.messageOnAir, "the first one's clock does not take the second down")
     }
 }

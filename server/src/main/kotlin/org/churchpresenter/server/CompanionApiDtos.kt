@@ -239,6 +239,9 @@ data class LiveStateDto(
     // the message came down.
     val message: String? = null,
     val messageDurationSeconds: Int? = null,
+    // The props up on the primary, by id; sent alongside [overlays], so an empty list there means
+    // none are.
+    val props: List<String>? = null,
 )
 
 // ── Bible DTOs ────────────────────────────────────────────────────────────────

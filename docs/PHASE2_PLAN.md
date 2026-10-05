@@ -106,7 +106,21 @@ The original plan for the step:
 - UI: a Messages panel (template picker, token fields, Go Live/Clear) beside the preview sidebar.
   Strings go in `strings/.../values/strings.xml` only.
 
-### Step 3 — Props (UI → approval)
+### Step 3 — Props (done)
+
+Built as `docs/SHOW_CONTROL.md` describes; the UI was approved. What shipped:
+
+- A `PROPS` layer between the lower third and announcements, held whole in `LiveShow`
+  (`Cue.Props(on)`, `viewmodel/Props.kt`): props stay up while the content changes, and Clear All or
+  a message takes them down. `PropsCue` draws each in its corner (`presenter/PropsContent.kt`).
+- Kinds: picture, clock (the announcements' format), countdown to a time, badge. Definitions in
+  settings (`PropDefinition`), `look.props`, and the sidebar's Props button and dialog
+  (`dialogs/PropsDialog.kt`).
+- `GET /api/props`, `POST /api/props/{id}/on|off|toggle` and the WebSocket `prop` command
+  (`server/PropRoutes.kt`).
+- Instance Link: `LiveStateDto.props`, followed by id through `LinkLayers.PROPS`.
+
+The original plan for the step:
 
 - Props get a layer of their own, `PROPS` above Graphics, holding one `Cue.Props(on: Set<String>)`.
   A logo bug then survives a lower third. See `docs/SHOW_CONTROL.md`, decision 2.

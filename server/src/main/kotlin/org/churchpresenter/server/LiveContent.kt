@@ -39,4 +39,6 @@ data class LiveContent(
     /** The message up, alone over everything -- see LiveStateDto.message. */
     val message: String? = null,
     val messageDurationSeconds: Int? = null,
+    /** The props up, by id -- see LiveStateDto.props. */
+    val props: List<String>? = null,
 )

@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.remote
 
+import org.churchpresenter.app.churchpresenter.viewmodel.setPropsOn
+import org.churchpresenter.app.churchpresenter.viewmodel.propsOnAir
 import org.churchpresenter.liveshow.Cue
 import org.churchpresenter.app.churchpresenter.viewmodel.showMessage
 import org.churchpresenter.app.churchpresenter.viewmodel.messageOnAir
@@ -171,5 +173,26 @@ class RemoteLayersTest {
     fun `a message is on the messages link layer`() {
         assertEquals(LinkLayers.MESSAGES, linkLayerOf(Presenting.MESSAGE))
         assertTrue(LinkLayers.MESSAGES in LinkLayers.ALL)
+    }
+
+    // ── Props ───────────────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the follower matches the primary's props when it follows them`() {
+        follower.setPropsOn(setOf("old"))
+        followProps(LiveStateDto(contentType = "PROPS", overlays = emptyList(), props = listOf("logo", "clock")),
+            follower, everything)
+        assertEquals(setOf("logo", "clock"), follower.propsOnAir)
+        followProps(LiveStateDto(contentType = "PROPS", overlays = emptyList(), props = emptyList()), follower, everything)
+        assertEquals(emptySet(), follower.propsOnAir)
+    }
+
+    @Test
+    fun `props not followed, or an older primary, change nothing`() {
+        follower.setPropsOn(setOf("ours"))
+        followProps(LiveStateDto(contentType = "PROPS", props = listOf("logo")), follower) { it != Presenting.PROPS }
+        followProps(LiveStateDto(contentType = "PROPS"), follower, everything)
+        assertEquals(setOf("ours"), follower.propsOnAir)
+        assertEquals(LinkLayers.PROPS, linkLayerOf(Presenting.PROPS))
     }
 }

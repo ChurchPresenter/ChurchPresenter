@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.strings.generated.resources.instance_link_layer_props
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,6 +48,7 @@ private fun linkLayerLabel(layer: String): StringResource = when (layer) {
     LinkLayers.CAPTIONS -> Res.string.instance_link_layer_captions
     LinkLayers.ANNOUNCEMENTS -> Res.string.instance_link_layer_announcements
     LinkLayers.MESSAGES -> Res.string.instance_link_layer_messages
+    LinkLayers.PROPS -> Res.string.instance_link_layer_props
     else -> Res.string.instance_link_layer_slides
 }
 

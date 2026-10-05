@@ -43,6 +43,7 @@ import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.MessageTemplate
+import org.churchpresenter.settings.PropDefinition
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.utils.Constants
 
@@ -363,6 +364,15 @@ class CompanionServer(
 
     /** The saved messages a remote client may name -- kept current by the app from its settings. */
     @Volatile var messageTemplates: List<MessageTemplate> = emptyList()
+
+    /** Emitted when a remote client switches a prop: POST /api/props/{id}/on|off|toggle or WS "prop". */
+    val onProp = MutableSharedFlow<PropSwitch>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** The props a remote client may switch -- kept current by the app from its settings. */
+    @Volatile var props: List<PropDefinition> = emptyList()
 
     /** Emitted when a remote client takes what is cued on Preview to air: POST /api/take or WS "take". */
     val onTake = MutableSharedFlow<Unit>(

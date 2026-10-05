@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.viewmodel.propsOnAir
 import org.churchpresenter.app.churchpresenter.viewmodel.messageOnAir
 import org.churchpresenter.server.updateLiveState
 import org.churchpresenter.server.LiveContent
@@ -90,6 +91,7 @@ internal fun LiveStateBroadcastWiring(
                     overlays = pm.overlays.value.map { it.name },
                     message = pm.messageOnAir?.text,
                     messageDurationSeconds = pm.messageOnAir?.durationSeconds,
+                    props = pm.propsOnAir.toList(),
                 ),
             )
         }

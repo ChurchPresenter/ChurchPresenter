@@ -750,6 +750,31 @@ answered `400` with `{"ok": false, "reason": "..."}`.
 
 ---
 
+### `GET /api/props` and `POST /api/props/{id}/on|off|toggle`
+
+Props are the persistent overlays set up in the app's Props panel -- a logo bug, the clock, a
+countdown, a badge such as LIVE -- which stay up while songs and verses change under them. Clear
+All and a message take them down. No approval required.
+
+`GET /api/props` lists them, with whether each is up:
+
+```json
+[ { "id": "prop1", "name": "Logo", "kind": "IMAGE", "on": true },
+  { "id": "prop2", "name": "Live", "kind": "BADGE", "on": false } ]
+```
+
+`POST /api/props/{id}/on`, `/off` or `/toggle` switches one, named by its id or its name (any
+case). An unknown prop is answered `404`, an unknown action `400`.
+
+```bash
+curl -k -X POST https://192.168.1.10:8765/api/props/Logo/toggle
+```
+
+Over the WebSocket, the command is `prop` with `{"id": "...", "on": true}` -- `false` takes it down,
+and leaving `on` out toggles it.
+
+---
+
 ### Lower Thirds (Bitfocus Companion)
 
 One HTTP call runs the entire lower-third sequence — the app cuts the ATEM

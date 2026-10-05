@@ -23,7 +23,9 @@ class MessagePreviewTileTest {
 
     @Test
     fun `an output draws the message up, and its tile is live`() = runComposeUiTest {
+        mainClock.autoAdvance = false
         setContent { MaterialTheme { LivePreviewPanel(presenterManager = manager(), appSettings = AppSettings()) } }
+        mainClock.advanceTimeBy(100)
         onNodeWithText("Parent of child #42", substring = true).assertExists()
         onNodeWithTag(LIVE_TILE_TAG).assertExists()
     }
@@ -36,7 +38,9 @@ class MessagePreviewTileTest {
                 screenAssignments = listOf(ScreenAssignment(activeProfileId = "quiet")),
             ),
         )
+        mainClock.autoAdvance = false
         setContent { MaterialTheme { LivePreviewPanel(presenterManager = manager(), appSettings = noMessages) } }
+        mainClock.advanceTimeBy(100)
         onNodeWithText("Parent of child #42", substring = true).assertDoesNotExist()
         onNodeWithTag(LIVE_TILE_TAG).assertDoesNotExist()
     }

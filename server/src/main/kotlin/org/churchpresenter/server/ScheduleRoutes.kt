@@ -127,6 +127,7 @@ internal fun Route.scheduleRoutes(
 
                 liveControlRoutes(server, scope)
                 messageRoutes(server, json, scope)
+                propRoutes(server, json, scope)
 
 }
 
