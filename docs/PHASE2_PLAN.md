@@ -132,7 +132,20 @@ The original plan for the step:
   needs it.
 - Remote: `/api/props/{id}/on|off`, WS, and a Companion feedback field.
 
-### Step 4 — Clear groups (small; UI → approval)
+### Step 4 — Clear groups (done)
+
+The UI was approved. What shipped:
+
+- `ClearGroup(id, name, layers)` in settings (`AppSettings.clearGroups`), layers by their `Layer`
+  names; `PresenterManager.clearGroup` clears each through `clearLayer` (`viewmodel/ClearGroups.kt`).
+- The sidebar's Clear layers button: a menu of the groups, then each layer on its own (dimmed with
+  nothing on it), then the group editor (`dialogs/ClearGroupsDialog.kt`).
+- `POST /api/clear?group=`, WS `clear` with `{"group"}`, and `GET /api/clear-groups`
+  (`server/ClearGroupRoutes.kt`); `?layer=props` now clears props too.
+- Not done here: the key binding moves to step 7, which adds key bindings for named actions;
+  `clearAll(keepBackground)` was not needed, since the background follows the slide's content.
+
+The original plan for the step:
 
 - User-defined named sets of layers, e.g. "Clear text" = Slide + Messages.
 - They clear through `LiveShow.clear` per layer.
@@ -187,6 +200,7 @@ The original plan for the step:
 
 ### Step 7 — Macros (UI → approval)
 
+- Also binds a key to a clear group (left over from step 4).
 - Storage: named action lists in settings (`MacroSettings`, additive).
 - Triggers:
   - A macro button panel (sidebar or Companion surface).

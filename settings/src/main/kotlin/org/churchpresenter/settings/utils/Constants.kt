@@ -296,6 +296,7 @@ object Constants {
     const val ENDPOINT_SCHEDULE_ADD_BATCH = "/api/schedule/add-batch"
     const val ENDPOINT_PROJECT            = "/api/project"
     const val ENDPOINT_CLEAR              = "/api/clear"
+    const val ENDPOINT_CLEAR_GROUPS       = "/api/clear-groups"
     const val ENDPOINT_TAKE               = "/api/take"
     const val ENDPOINT_MESSAGE            = "/api/message"
     const val ENDPOINT_PROPS              = "/api/props"

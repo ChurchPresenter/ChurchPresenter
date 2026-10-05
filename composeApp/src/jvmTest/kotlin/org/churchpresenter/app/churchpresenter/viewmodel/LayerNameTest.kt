@@ -16,6 +16,7 @@ class LayerNameTest {
         listOf("captions", "stt").forEach { assertEquals(Layer.CAPTIONS, layerForName(it), it) }
         listOf("announcements", "announcement").forEach { assertEquals(Layer.ANNOUNCEMENTS, layerForName(it), it) }
         listOf("messages", "message").forEach { assertEquals(Layer.MESSAGES, layerForName(it), it) }
+        listOf("props", "prop").forEach { assertEquals(Layer.PROPS, layerForName(it), it) }
         assertEquals(Layer.SLIDE, layerForName("slide"))
         assertEquals(Layer.MEDIA, layerForName("media"))
     }

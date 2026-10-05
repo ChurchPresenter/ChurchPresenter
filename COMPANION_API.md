@@ -691,14 +691,29 @@ curl -k -X POST https://192.168.1.10:8765/api/clear
 
 **Optional query param** — take down one layer and leave the rest up: `layer=slide` (Bible, songs,
 a presentation, a web page, a scene, Q&A or the dictionary), `media` (a video or pictures),
-`lowerthird`, `captions`, `announcements` or `messages`. A layer with nothing on it is left as it is,
-and an unknown name clears nothing.
+`lowerthird`, `captions`, `announcements`, `props` or `messages`. A layer with nothing on it is left
+as it is, and an unknown name clears nothing.
 
 ```bash
 curl -k -X POST "https://192.168.1.10:8765/api/clear?layer=lowerthird"
 ```
 
 Over the WebSocket, `clear` takes the same `{"layer": "..."}` in its payload.
+
+**Clear groups** — `group=` fires one of the operator's clear groups, named by its id or its name
+(any case), and takes down every layer in it: e.g. *Clear text* = slide + messages. An unknown group
+answers `404 {"ok":false,"reason":"no such clear group"}`. Over the WebSocket, `clear` takes
+`{"group": "..."}`, acked with `ok:false` and `no_such_group` for an unknown one.
+
+```bash
+curl -k -X POST "https://192.168.1.10:8765/api/clear?group=Clear%20text"
+```
+
+`GET /api/clear-groups` lists them, with the layers each clears:
+
+```json
+[ { "id": "clear1", "name": "Clear text", "layers": ["SLIDE", "MESSAGES"] } ]
+```
 
 ---
 

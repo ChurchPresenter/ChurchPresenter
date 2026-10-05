@@ -128,6 +128,7 @@ internal fun Route.scheduleRoutes(
                 liveControlRoutes(server, scope)
                 messageRoutes(server, json, scope)
                 propRoutes(server, json, scope)
+                clearGroupRoutes(server, json)
 
 }
 
@@ -136,13 +137,18 @@ private fun Route.liveControlRoutes(server: CompanionServer, scope: CoroutineSco
                 /**
                  * POST /api/clear
                  * Instantly switches the presenter to display-none (Presenting.NONE).
-                 * With `?layer=lowerthird|captions|announcements`, takes down only that layer.
+                 * With `?layer=lowerthird|captions|announcements`, takes down only that layer;
+                 * with `?group=`, the layers of that clear group (by id or name; 404 if none).
                  * No request body or approval needed.
                  * Response: {"ok":true}
                  */
                 post(Constants.ENDPOINT_CLEAR) {
                     if (!server.checkApiKey(call)) return@post
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                    call.request.queryParameters["group"]?.let { group ->
+                        call.respondClearGroup(server, scope, group)
+                        return@post
+                    }
                     val layer = call.request.queryParameters["layer"]
                     if (layer != null) {
                         scope.launch { server.onClearLayer.emit(layer) }

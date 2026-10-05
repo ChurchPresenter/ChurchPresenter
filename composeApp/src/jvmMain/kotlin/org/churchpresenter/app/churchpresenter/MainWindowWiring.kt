@@ -6,6 +6,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.propsOnAir
 import org.churchpresenter.app.churchpresenter.viewmodel.showMessage
 import org.churchpresenter.liveshow.Cue
 import androidx.compose.runtime.SideEffect
+import org.churchpresenter.app.churchpresenter.viewmodel.clearGroup
 import org.churchpresenter.app.churchpresenter.viewmodel.clearLayer
 import org.churchpresenter.app.churchpresenter.viewmodel.layerForName
 import org.churchpresenter.server.broadcastDisplayCleared
@@ -152,6 +153,12 @@ internal fun MainWindowScope.ServerCommandWiring() {
         SideEffect {
             companionServer.messageTemplates = appSettings.messageTemplates
             companionServer.props = appSettings.props
+            companionServer.clearGroups = appSettings.clearGroups
+        }
+        LaunchedEffect(Unit) {
+            companionServer.onClearGroup.collect { id ->
+                appSettings.clearGroups.firstOrNull { it.id == id }?.let(presenterManager::clearGroup)
+            }
         }
         LaunchedEffect(Unit) {
             companionServer.onProp.collect { switch ->

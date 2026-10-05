@@ -51,5 +51,6 @@ internal fun layerForName(name: String): Layer? = when (name.trim().lowercase())
     "slide" -> Layer.SLIDE
     "media" -> Layer.MEDIA
     "messages", "message" -> Layer.MESSAGES
+    "props", "prop" -> Layer.PROPS
     else -> null
 }

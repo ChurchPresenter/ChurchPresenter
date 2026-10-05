@@ -128,6 +128,7 @@ internal fun ClearGroupsDialogContent(
     onDismiss: () -> Unit,
 ) {
     var editing by remember { mutableStateOf<ClearGroup?>(null) }
+    val labels = CLEARABLE_LAYERS.associate { it.name to stringResource(it.clearLabel) }
     Surface(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface) {
         Column(modifier = Modifier.padding(24.dp)) {
             Text(stringResource(Res.string.clear_groups_title), style = MaterialTheme.typography.headlineSmall)
@@ -155,7 +156,7 @@ internal fun ClearGroupsDialogContent(
                 isSaved = editing?.let { draft -> groups.any { it.id == draft.id } } == true,
                 onAdd = { editing = ClearGroup(id = newClearGroupId(groups), name = "") },
                 onSave = { draft ->
-                    val saved = draft.copy(name = draft.name.ifBlank { draft.layers.joinToString(" + ") })
+                    val saved = draft.copy(name = draft.name.ifBlank { draft.layers.mapNotNull(labels::get).joinToString(" + ") })
                     val isNew = groups.none { it.id == saved.id }
                     onGroupsChange(if (isNew) groups + saved else groups.map { if (it.id == saved.id) saved else it })
                     editing = null

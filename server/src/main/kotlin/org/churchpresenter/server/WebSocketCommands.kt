@@ -116,6 +116,8 @@ private suspend fun DefaultWebSocketServerSession.presentCommand(
                         sendCommandAck(msg.commandId, ok = true, json = json)
                     }
                     Constants.WS_CMD_CLEAR -> {
+                        // With a "group" in the payload, that clear group's layers come down.
+                        if (clearGroupCommand(msg, server, json, scope)) return true
                         // With a "layer" in the payload, only that layer comes down.
                         val layer = clearLayerOf(msg.payload, json)
                         if (layer != null) {

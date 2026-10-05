@@ -43,6 +43,7 @@ import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.MessageTemplate
+import org.churchpresenter.settings.ClearGroup
 import org.churchpresenter.settings.PropDefinition
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.utils.Constants
@@ -373,6 +374,15 @@ class CompanionServer(
 
     /** The props a remote client may switch -- kept current by the app from its settings. */
     @Volatile var props: List<PropDefinition> = emptyList()
+
+    /** Emitted with a clear group's id when a remote client fires it: POST /api/clear?group= or WS "clear". */
+    val onClearGroup = MutableSharedFlow<String>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** The clear groups a remote client may fire -- kept current by the app from its settings. */
+    @Volatile var clearGroups: List<ClearGroup> = emptyList()
 
     /** Emitted when a remote client takes what is cued on Preview to air: POST /api/take or WS "take". */
     val onTake = MutableSharedFlow<Unit>(
