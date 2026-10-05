@@ -2987,4 +2987,20 @@
     <string name="props_badge_text">Badge text</string>
     <string name="props_countdown_to">Counts down to (HH:mm)</string>
     <string name="props_on_air">On air</string>
+    <string name="tooltip_clear_layers">Clear layers</string>
+    <string name="clear_groups_title">Clear groups</string>
+    <string name="clear_groups_empty">No clear groups yet. Add one to clear several layers with one click, like Slide and Messages.</string>
+    <string name="clear_groups_edit">Edit clear groups…</string>
+    <string name="clear_groups_add">Add group</string>
+    <string name="clear_groups_save">Save group</string>
+    <string name="clear_groups_name">Name</string>
+    <string name="clear_groups_layers">Clears</string>
+    <string name="clear_group_clear">Clear</string>
+    <string name="clear_layer_slide">Slide</string>
+    <string name="clear_layer_media">Media</string>
+    <string name="clear_layer_captions">Captions</string>
+    <string name="clear_layer_graphics">Lower third</string>
+    <string name="clear_layer_props">Props</string>
+    <string name="clear_layer_announcements">Announcements</string>
+    <string name="clear_layer_messages">Message</string>
 </resources>

@@ -3,6 +3,13 @@ package org.churchpresenter.app.churchpresenter
 import javax.swing.filechooser.FileNameExtensionFilter
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.dialogs.PropsDialog
+import org.churchpresenter.app.churchpresenter.dialogs.ClearGroupsDialog
+import org.churchpresenter.app.churchpresenter.dialogs.ClearLayersMenuItems
+import org.churchpresenter.app.churchpresenter.viewmodel.clearGroup
+import org.churchpresenter.app.churchpresenter.viewmodel.clearLayer
+import org.churchpresenter.strings.generated.resources.tooltip_clear_layers
+import androidx.compose.material.icons.outlined.LayersClear
+import androidx.compose.material3.DropdownMenu
 import org.churchpresenter.app.churchpresenter.viewmodel.setPropOn
 import org.churchpresenter.app.churchpresenter.viewmodel.propsOnAir
 import org.churchpresenter.strings.generated.resources.props_picture
@@ -133,6 +140,7 @@ internal fun PreviewSidebar(
                 }
                 MessageButton(presenterManager, appSettings, onSettingsChange)
                 PropsButton(presenterManager, appSettings, onSettingsChange)
+                ClearLayersButton(presenterManager, appSettings, onSettingsChange)
                 if (appSettings.projectionSettings.previewModeEnabled) PreviewTakeButton(presenterManager)
             }
             // A layout filling the panel takes the column's spare height; otherwise it keeps its own.
@@ -278,6 +286,44 @@ private fun PropsButton(
 }
 
 internal const val PROPS_BUTTON_TAG = "preview_props"
+
+/** Drops down the clear groups and the layers to clear one by one, and opens the group editor. */
+@Composable
+private fun ClearLayersButton(
+    presenterManager: PresenterManager,
+    appSettings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+) {
+    var menuOpen by remember { mutableStateOf(false) }
+    var editing by remember { mutableStateOf(false) }
+    Box {
+        TooltipIconButton(
+            painter = rememberVectorPainter(Icons.Outlined.LayersClear),
+            text = stringResource(Res.string.tooltip_clear_layers),
+            onClick = { menuOpen = true },
+            buttonSize = 36.dp,
+            modifier = Modifier.testTag(CLEAR_LAYERS_BUTTON_TAG),
+        )
+        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+            ClearLayersMenuItems(
+                groups = appSettings.clearGroups,
+                onAir = presenterManager.program.value.keys,
+                onClearGroup = { menuOpen = false; presenterManager.clearGroup(it) },
+                onClearLayer = { menuOpen = false; presenterManager.clearLayer(it) },
+                onEdit = { menuOpen = false; editing = true },
+            )
+        }
+    }
+    ClearGroupsDialog(
+        isVisible = editing,
+        groups = appSettings.clearGroups,
+        onGroupsChange = { groups -> onSettingsChange { it.copy(clearGroups = groups) } },
+        onClearGroup = { presenterManager.clearGroup(it) },
+        onDismiss = { editing = false },
+    )
+}
+
+internal const val CLEAR_LAYERS_BUTTON_TAG = "preview_clear_layers"
 
 /** The gear beside the clear button: opens the editor for how the preview panel is arranged. */
 @Composable

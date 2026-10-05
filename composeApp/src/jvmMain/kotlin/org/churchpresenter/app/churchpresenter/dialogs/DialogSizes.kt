@@ -70,3 +70,5 @@ internal val MESSAGE_DIALOG_HEIGHT: Dp = 560.dp
 
 internal val PROPS_DIALOG_WIDTH: Dp = 560.dp
 internal val PROPS_DIALOG_HEIGHT: Dp = 620.dp
+internal val CLEAR_DIALOG_WIDTH: Dp = 560.dp
+internal val CLEAR_DIALOG_HEIGHT: Dp = 480.dp
