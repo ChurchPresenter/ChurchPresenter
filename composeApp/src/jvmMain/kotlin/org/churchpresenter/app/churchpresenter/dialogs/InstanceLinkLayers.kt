@@ -15,6 +15,7 @@ import org.churchpresenter.strings.generated.resources.instance_link_layer_annou
 import org.churchpresenter.strings.generated.resources.instance_link_layer_captions
 import org.churchpresenter.strings.generated.resources.instance_link_layer_lower_thirds
 import org.churchpresenter.strings.generated.resources.instance_link_layer_media
+import org.churchpresenter.strings.generated.resources.instance_link_layer_messages
 import org.churchpresenter.strings.generated.resources.instance_link_layer_slides
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -45,6 +46,7 @@ private fun linkLayerLabel(layer: String): StringResource = when (layer) {
     LinkLayers.LOWER_THIRD -> Res.string.instance_link_layer_lower_thirds
     LinkLayers.CAPTIONS -> Res.string.instance_link_layer_captions
     LinkLayers.ANNOUNCEMENTS -> Res.string.instance_link_layer_announcements
+    LinkLayers.MESSAGES -> Res.string.instance_link_layer_messages
     else -> Res.string.instance_link_layer_slides
 }
 

@@ -2,6 +2,12 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.liveshow.Cue
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.presenter.OutputSurfaceKind
+import org.churchpresenter.app.churchpresenter.presenter.OutputSurface
+import org.churchpresenter.app.churchpresenter.presenter.MessageCue
 import org.churchpresenter.profiles.lottieJson
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -129,6 +135,22 @@ class AppPreviewOutputScreenshotTest {
         AnnouncementsPresenter(
             text = "Christ is risen — He is risen indeed!",
             appSettings = settings(),
+        )
+    }
+
+    /** A message: the announcement look, standing still, with nothing else on screen. */
+    @Test
+    fun `message on screen`() = output("message") {
+        MessageCue(
+            Cue.Message("Parent of child #42, please come to the nursery"),
+            OutputSurface(
+                kind = OutputSurfaceKind.WINDOW,
+                profile = OutputProfile(),
+                appSettings = settings(),
+                presenterManager = PresenterManager(showPresenterWindowInitially = false),
+                outputRole = Constants.OUTPUT_ROLE_NORMAL,
+                showBg = true,
+            ),
         )
     }
 

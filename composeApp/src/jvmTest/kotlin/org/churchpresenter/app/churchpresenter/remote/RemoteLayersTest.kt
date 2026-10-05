@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.remote
 
+import org.churchpresenter.liveshow.Cue
+import org.churchpresenter.app.churchpresenter.viewmodel.showMessage
+import org.churchpresenter.app.churchpresenter.viewmodel.messageOnAir
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -134,5 +137,39 @@ class RemoteLayersTest {
         runBlocking { applyRemoteLiveState(announcement, follower, InstanceLinkViewModel()) }
         assertEquals("From the primary", follower.announcementText.value)
         assertEquals(setOf(Presenting.ANNOUNCEMENTS), follower.overlays.value)
+    }
+
+    // ── Messages ────────────────────────────────────────────────────────────────────────────────
+
+    private fun withMessage(text: String?) = LiveStateDto(
+        contentType = Presenting.MESSAGE.name,
+        liveSlide = Presenting.NONE.name,
+        overlays = emptyList(),
+        message = text,
+    )
+
+    @Test
+    fun `the primary's message goes up here, and comes down when the primary's does`() {
+        follower.setPresentingMode(Presenting.LYRICS)
+        followMessage(withMessage("Nursery #4"), follower, everything)
+        assertEquals("Nursery #4", follower.messageOnAir?.text)
+        assertEquals(null, follower.messageOnAir?.durationSeconds, "the primary's clock takes it down")
+        followMessage(withMessage(null), follower, everything)
+        assertEquals(null, follower.messageOnAir)
+    }
+
+    @Test
+    fun `messages not followed, or an older primary, change nothing`() {
+        followMessage(withMessage("Nursery #4"), follower) { it != Presenting.MESSAGE }
+        assertEquals(null, follower.messageOnAir)
+        follower.showMessage(Cue.Message("Ours"))
+        followMessage(withMessage(null).copy(overlays = null), follower, everything)
+        assertEquals("Ours", follower.messageOnAir?.text)
+    }
+
+    @Test
+    fun `a message is on the messages link layer`() {
+        assertEquals(LinkLayers.MESSAGES, linkLayerOf(Presenting.MESSAGE))
+        assertTrue(LinkLayers.MESSAGES in LinkLayers.ALL)
     }
 }

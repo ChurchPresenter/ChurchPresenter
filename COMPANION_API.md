@@ -718,6 +718,38 @@ curl -k -X POST https://192.168.1.10:8765/api/take
 
 ---
 
+### `POST /api/message`
+
+Puts a message up -- a nursery call, say. Every other layer comes down and the message goes up
+alone, standing still in the announcement look; it comes down when its duration runs out, on
+`POST /api/clear?layer=messages`, or when a song or verse goes live. No approval required.
+Over the WebSocket, the command is `message` with the same body as its payload.
+
+**Body** -- your own text, or a message saved in the app's Message panel by name or id, with its
+`{tokens}` filled in:
+
+| Field | Type | |
+|---|---|---|
+| `text` | string | The message itself. Optional when `template` is given. |
+| `template` | string | A saved message's name (any case) or id. |
+| `tokens` | object | Values for the `{tokens}` in the text, e.g. `{"number": "42"}`. |
+| `durationSeconds` | int | How long it stays up; the saved message's when left out, else until cleared. |
+
+```bash
+curl -k -X POST https://192.168.1.10:8765/api/message \
+  -H "Content-Type: application/json" \
+  -d '{"template": "Nursery", "tokens": {"number": "42"}}'
+```
+
+```json
+{ "ok": true, "text": "Parent of child #42, please come to the nursery" }
+```
+
+A body that is not JSON, names a saved message that does not exist, or comes to no text at all is
+answered `400` with `{"ok": false, "reason": "..."}`.
+
+---
+
 ### Lower Thirds (Bitfocus Companion)
 
 One HTTP call runs the entire lower-third sequence — the app cuts the ATEM

@@ -26,7 +26,7 @@ Intended outcome:
 - A UI hang no longer freezes the outputs, or at least is caught and reported.
 
 Parallel lanes that need nothing from this core work: 2.6 ProPresenter import (`:converter`), 3.4
-EasyWorship import and 2.7 release work. They are listed at the end and are optional for this phase.
+EasyWorship import and 2.7 release work. They are listed at the end and are left out of this phase.
 
 ## Step 0 — Branch and design note
 
@@ -67,7 +67,22 @@ new tests or screenshots, per AGENT.md.
   and `messages`.
 - Tests: `PresenterManagerClearLayerTest`, `LayerNameTest`.
 
-### Step 2 — Messages (UI → approval)
+### Step 2 — Messages (done)
+
+Built as `docs/SHOW_CONTROL.md` describes; the UI was approved. What shipped:
+
+- `Presenting.MESSAGE` on the Messages layer, held whole in `LiveShow` (`viewmodel/Messages.kt`):
+  `showMessage` clears everything else, slide content takes it down, `MessageExpiry` runs its
+  clock. It draws with the announcement look, standing still (`MessageCue`).
+- Saved messages with `{tokens}` (`settings/MessageTemplate.kt`), `look.messages`, and the
+  sidebar's Message button and dialog (`dialogs/MessageDialog.kt`).
+- `POST /api/message` and the WebSocket `message` command (`server/MessageRoutes.kt`).
+- Instance Link: `LiveStateDto.message`, followed through `LinkLayers.MESSAGES`
+  (`remote/RemoteLayers.kt` `followMessage`). A follower whose saved layer list predates messages
+  does not follow them until it is ticked.
+
+The original plan for the step:
+
 
 - Cue and layer:
   - `Cue.Message(text, template?, durationSeconds?)` gets a `MessageCue` renderer in
@@ -205,7 +220,10 @@ new tests or screenshots, per AGENT.md.
      output running.
    - This is the riskiest step. Ship the watchdog and I/O fixes even if isolation slips.
 
-## Parallel lanes (optional this phase)
+## Parallel lanes (out of this phase)
+
+ProPresenter and EasyWorship import stay out of Phase 2: the converter already imports songs from
+both, and the gaps below are for a later phase.
 
 - **2.6 ProPresenter import**, in `converter/.../song/ProPresenterConverter.kt`, in the order of
   `docs/IMPORT_SURVEY.md`'s list:

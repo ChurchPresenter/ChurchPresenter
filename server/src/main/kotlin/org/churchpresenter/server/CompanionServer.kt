@@ -42,6 +42,7 @@ import org.churchpresenter.qa.QAManager
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.settings.MessageTemplate
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.utils.Constants
 
@@ -353,6 +354,15 @@ class CompanionServer(
         extraBufferCapacity = 4,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
+
+    /** Emitted when a remote client puts a message up: POST /api/message or WS "message". */
+    val onMessage = MutableSharedFlow<RemoteMessage>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** The saved messages a remote client may name -- kept current by the app from its settings. */
+    @Volatile var messageTemplates: List<MessageTemplate> = emptyList()
 
     /** Emitted when a remote client takes what is cued on Preview to air: POST /api/take or WS "take". */
     val onTake = MutableSharedFlow<Unit>(

@@ -106,7 +106,8 @@ class PresenterManager private constructor(
      * it alone -- see [overlays].
      */
     val slideContent: State<Presenting> = derivedStateOf {
-        liveContent.value.firstOrNull { !it.isOverlay } ?: Presenting.NONE
+        // A message is on a layer of its own, up alone: there is no slide under it.
+        liveContent.value.firstOrNull { !it.isOverlay && it != Presenting.MESSAGE } ?: Presenting.NONE
     }
 
     /** Whether anything at all is on screen. */

@@ -145,6 +145,8 @@ fun CompanionServer.updateLiveState(content: LiveContent) = with(content) {
         lowerThirdName = lowerThirdName?.ifEmpty { null },
         liveSlide = liveSlide,
         overlays = overlays,
+        message = message,
+        messageDurationSeconds = messageDurationSeconds,
     )
     // Skip byte-identical re-broadcasts (content setters fire on every call, even when
     // nothing changed) — same early-return pattern the other update* functions use. Protects

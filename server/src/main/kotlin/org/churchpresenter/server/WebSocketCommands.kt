@@ -31,6 +31,7 @@ internal suspend fun DefaultWebSocketServerSession.handleWsCommand(
         }
         presentCommand(msg, server, wsClientId, json, scope) -> Unit
         mediaValueCommand(msg, server, json, scope) -> Unit
+        messageCommand(msg, server, json, scope) -> Unit
         scheduleCommand(msg, server, wsClientId, json, scope) -> Unit
         else -> sendCommandAck(msg.commandId, ok = false, reason = "unknown_command", json = json)
     }

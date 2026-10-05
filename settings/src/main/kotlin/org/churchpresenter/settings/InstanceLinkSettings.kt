@@ -69,5 +69,6 @@ object LinkLayers {
     const val LOWER_THIRD = "lowerthird"
     const val CAPTIONS = "captions"
     const val ANNOUNCEMENTS = "announcements"
-    val ALL = listOf(SLIDE, MEDIA, LOWER_THIRD, CAPTIONS, ANNOUNCEMENTS)
+    const val MESSAGES = "messages"
+    val ALL = listOf(SLIDE, MEDIA, LOWER_THIRD, CAPTIONS, ANNOUNCEMENTS, MESSAGES)
 }

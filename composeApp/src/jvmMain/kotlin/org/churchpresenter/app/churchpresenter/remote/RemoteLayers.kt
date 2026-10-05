@@ -1,6 +1,10 @@
 package org.churchpresenter.app.churchpresenter.remote
 
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.clearMessage
+import org.churchpresenter.app.churchpresenter.viewmodel.messageOnAir
+import org.churchpresenter.app.churchpresenter.viewmodel.showMessage
+import org.churchpresenter.liveshow.Cue
 import org.churchpresenter.server.LiveStateDto
 import org.churchpresenter.settings.LinkLayers
 import org.churchpresenter.sharedui.models.Presenting
@@ -38,5 +42,21 @@ internal fun linkLayerOf(mode: Presenting): String = when (mode) {
     Presenting.LOWER_THIRD -> LinkLayers.LOWER_THIRD
     Presenting.STT -> LinkLayers.CAPTIONS
     Presenting.ANNOUNCEMENTS -> LinkLayers.ANNOUNCEMENTS
+    Presenting.MESSAGE -> LinkLayers.MESSAGES
     else -> LinkLayers.SLIDE
+}
+
+/**
+ * The primary's message, mirrored on this follower when it follows messages: put up when the
+ * primary's is new, taken down when the primary's has gone. The primary's own clock takes it down,
+ * so it goes up here without a duration of its own. An older primary, which sends no [LiveStateDto
+ * .overlays], says nothing about messages and changes nothing.
+ */
+internal fun followMessage(state: LiveStateDto, presenterManager: PresenterManager, follows: (Presenting) -> Boolean) {
+    if (state.overlays == null || !follows(Presenting.MESSAGE)) return
+    val text = state.message
+    when {
+        text == null -> presenterManager.clearMessage()
+        presenterManager.messageOnAir?.text != text -> presenterManager.showMessage(Cue.Message(text))
+    }
 }

@@ -36,4 +36,7 @@ data class LiveContent(
     /** What is on air: the slide's mode and the overlays over it -- see LiveStateDto.liveSlide. */
     val liveSlide: String? = null,
     val overlays: List<String>? = null,
+    /** The message up, alone over everything -- see LiveStateDto.message. */
+    val message: String? = null,
+    val messageDurationSeconds: Int? = null,
 )
