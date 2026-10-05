@@ -32,7 +32,8 @@ internal fun Route.clearGroupRoutes(server: CompanionServer, json: Json) {
     get(Constants.ENDPOINT_CLEAR_GROUPS) {
         if (!server.checkApiKey(call)) return@get
         val listing = server.clearGroups.map { ClearGroupDto(it.id, it.name, it.layers) }
-        call.respondText(json.encodeToString(ListSerializer(ClearGroupDto.serializer()), listing), ContentType.Application.Json)
+        val body = json.encodeToString(ListSerializer(ClearGroupDto.serializer()), listing)
+        call.respondText(body, ContentType.Application.Json)
     }
 }
 

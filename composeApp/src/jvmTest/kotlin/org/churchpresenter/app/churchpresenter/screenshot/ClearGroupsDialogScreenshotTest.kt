@@ -51,7 +51,8 @@ class ClearGroupsDialogScreenshotTest {
     }
 
     @Test
-    fun `two groups, one open for editing`() = shoot("editing", { onNodeWithTag(clearGroupEditTag("clear1")).performClick() }) {
+    fun `two groups, one open for editing`() =
+        shoot("editing", { onNodeWithTag(clearGroupEditTag("clear1")).performClick() }) {
         Box(Modifier.size(560.dp, 480.dp)) { ClearGroupsDialogContent(groups, {}, {}, {}) }
     }
 

@@ -141,7 +141,7 @@ The UI was approved. What shipped:
 - The sidebar's Clear layers button: a menu of the groups, then each layer on its own (dimmed with
   nothing on it), then the group editor (`dialogs/ClearGroupsDialog.kt`).
 - `POST /api/clear?group=`, WS `clear` with `{"group"}`, and `GET /api/clear-groups`
-  (`server/ClearGroupRoutes.kt`); `?layer=props` now clears props too.
+  (`server/ClearGroupDto.kt`); `?layer=props` now clears props too.
 - Not done here: the key binding moves to step 7, which adds key bindings for named actions;
   `clearAll(keepBackground)` was not needed, since the background follows the slide's content.
 

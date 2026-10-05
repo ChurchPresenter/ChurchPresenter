@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
@@ -38,7 +36,6 @@ import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.clear_group_clear
 import org.churchpresenter.strings.generated.resources.clear_groups_add
-import org.churchpresenter.strings.generated.resources.clear_groups_edit
 import org.churchpresenter.strings.generated.resources.clear_groups_empty
 import org.churchpresenter.strings.generated.resources.clear_groups_layers
 import org.churchpresenter.strings.generated.resources.clear_groups_name
@@ -61,42 +58,6 @@ import org.churchpresenter.theme.components.SettingsTextField
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-/**
- * What the sidebar's Clear layers button drops down: the saved clear groups, then each layer on
- * its own (dimmed when nothing is on it), then the way into [ClearGroupsDialog].
- */
-@Composable
-internal fun ClearLayersMenuItems(
-    groups: List<ClearGroup>,
-    onAir: Set<Layer>,
-    onClearGroup: (ClearGroup) -> Unit,
-    onClearLayer: (Layer) -> Unit,
-    onEdit: () -> Unit,
-) {
-    groups.forEach { group ->
-        DropdownMenuItem(
-            text = { Text(group.name, fontWeight = FontWeight.Bold) },
-            onClick = { onClearGroup(group) },
-            modifier = Modifier.testTag(clearGroupItemTag(group.id)),
-        )
-    }
-    if (groups.isNotEmpty()) HorizontalDivider()
-    CLEARABLE_LAYERS.forEach { layer ->
-        DropdownMenuItem(
-            text = { Text(stringResource(layer.clearLabel)) },
-            onClick = { onClearLayer(layer) },
-            enabled = layer in onAir,
-            modifier = Modifier.testTag(clearLayerItemTag(layer)),
-        )
-    }
-    HorizontalDivider()
-    DropdownMenuItem(
-        text = { Text(stringResource(Res.string.clear_groups_edit)) },
-        onClick = onEdit,
-        modifier = Modifier.testTag(CLEAR_GROUPS_EDIT_TAG),
-    )
-}
-
 /** Keeps the clear groups (`docs/SHOW_CONTROL.md`, Clear groups): named sets of layers cleared together. */
 @Composable
 fun ClearGroupsDialog(
@@ -112,7 +73,8 @@ fun ClearGroupsDialog(
         width = CLEAR_DIALOG_WIDTH,
         height = CLEAR_DIALOG_HEIGHT,
     )
-    DialogWindow(onCloseRequest = onDismiss, state = dialogState, title = stringResource(Res.string.clear_groups_title)) {
+    val title = stringResource(Res.string.clear_groups_title)
+    DialogWindow(onCloseRequest = onDismiss, state = dialogState, title = title) {
         ProvideUiFontScale {
             ClearGroupsDialogContent(groups, onGroupsChange, onClearGroup, onDismiss)
         }
@@ -156,7 +118,8 @@ internal fun ClearGroupsDialogContent(
                 isSaved = editing?.let { draft -> groups.any { it.id == draft.id } } == true,
                 onAdd = { editing = ClearGroup(id = newClearGroupId(groups), name = "") },
                 onSave = { draft ->
-                    val saved = draft.copy(name = draft.name.ifBlank { draft.layers.mapNotNull(labels::get).joinToString(" + ") })
+                    val named = draft.layers.mapNotNull(labels::get).joinToString(" + ")
+                    val saved = draft.copy(name = draft.name.ifBlank { named })
                     val isNew = groups.none { it.id == saved.id }
                     onGroupsChange(if (isNew) groups + saved else groups.map { if (it.id == saved.id) saved else it })
                     editing = null
@@ -274,14 +237,9 @@ internal fun newClearGroupId(groups: List<ClearGroup>): String =
 internal const val CLEAR_GROUP_NAME_TAG = "clear_group_name"
 internal const val CLEAR_GROUP_ADD_TAG = "clear_group_add"
 internal const val CLEAR_GROUP_SAVE_TAG = "clear_group_save"
-internal const val CLEAR_GROUPS_EDIT_TAG = "clear_groups_edit"
-
-internal fun clearGroupItemTag(id: String) = "clear_group_item_$id"
 
 internal fun clearGroupButtonTag(id: String) = "clear_group_button_$id"
 
 internal fun clearGroupEditTag(id: String) = "clear_group_edit_$id"
 
 internal fun clearGroupLayerTag(layer: Layer) = "clear_group_layer_${layer.name}"
-
-internal fun clearLayerItemTag(layer: Layer) = "clear_layer_item_${layer.name}"
