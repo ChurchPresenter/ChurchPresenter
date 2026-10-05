@@ -38,7 +38,7 @@ class RowActionsDialogContentTest {
     private val choices = ActionChoices(
         clearGroups = listOf("Clear text", "Clear graphics"),
         messages = listOf(MessageChoice("Nursery", listOf("number")), MessageChoice("Parking")),
-        props = listOf("Logo"),
+        props = listOf("Logo", "Badge"),
         lowerThirds = listOf("Pastor", "Guest"),
         obsScenes = listOf("Wide", "Band"),
         companion = listOf(CompanionChoice("c1", "Deck"), CompanionChoice("c2", "Mini")),
@@ -154,7 +154,8 @@ class RowActionsDialogContentTest {
     }
 
     @Test
-    fun `a wait takes seconds, and anything that is not a number is ignored`() = editor(listOf(Action.Wait(1.0))) { seen ->
+    fun `a wait takes seconds, and anything that is not a number is ignored`() =
+        editor(listOf(Action.Wait(1.0))) { seen ->
         type("Seconds", "x")
         type("Seconds", "1.5")
         assertEquals(listOf(Action.Wait(1.5)), save(seen))
@@ -207,7 +208,8 @@ class RowActionsDialogContentTest {
     }
 
     @Test
-    fun `a timer counts down seconds, to a time, or up`() = editor(listOf(Action.Timer(TimerModes.DURATION, 300))) { seen ->
+    fun `a timer counts down seconds, to a time, or up`() =
+        editor(listOf(Action.Timer(TimerModes.DURATION, 300))) { seen ->
         type("Seconds", "90")
         assertEquals(listOf(Action.Timer(TimerModes.DURATION, 90)), save(seen))
         pick("Mode", "Until a time")
@@ -225,6 +227,15 @@ class RowActionsDialogContentTest {
         pick("Row", "2 - Be Thou My Vision")
         onNodeWithText("From a newer version", substring = true).assertExists()
         assertEquals(listOf(Action.GoLive("s2"), Action.Unknown(JsonObject(emptyMap()))), save(seen))
+    }
+
+    @Test
+    fun `a row is cued on Preview by picking it, and a prop by its name`() = editor(
+        listOf(Action.ToPreview("s1"), Action.Prop("Logo")),
+    ) { seen ->
+        pick("Row", "2 - Be Thou My Vision")
+        pick("Prop", "Badge")
+        assertEquals(listOf(Action.ToPreview("s2"), Action.Prop("Badge")), save(seen))
     }
 
     @Test

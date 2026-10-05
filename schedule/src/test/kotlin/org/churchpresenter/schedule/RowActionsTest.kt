@@ -59,19 +59,26 @@ class RowActionsTest {
     }
 
     @Test
+    fun `outside the app the editor is offered nothing`() = runComposeUiTest {
+        setContent { Text(if (LocalActionChoices.current == ActionChoices()) "nothing" else "something") }
+        onNodeWithText("nothing").assertExists()
+    }
+
+    @Test
     fun `the summary says the kind and what it names`() = runComposeUiTest {
         val actions = listOf(
             Action.ObsScene("Wide"), Action.Wait(2.0), Action.GoLive("s1"), Action.Clear("PROPS"),
             Action.Message(text = "Hi"), Action.AtemMacro(2), Action.ClearAll, Action.ToPreview("gone"),
             Action.LowerThird("Pastor"), Action.Prop("Logo"), Action.ClearGroup("Text"), Action.RunMacro("M"),
-            Action.Media(MediaCommand.STOP), Action.Unknown(JsonObject(emptyMap())),
+            Action.Media(MediaCommand.STOP), Action.Unknown(JsonObject(emptyMap())), Action.ToPreview("s1"),
+            Action.GoLive("gone"),
         )
         setContent { Text(actions.map { actionSummary(it, listOf(song)) }.joinToString(" | ")) }
         onNodeWithText(
             "Switch OBS scene: Wide | Wait: 2 s | Go live with a row: 1 - Amazing Grace | Clear a layer: Props | " +
                 "Show a message: Hi | Run an ATEM macro: 3 | Clear everything | Cue a row on Preview | " +
                 "Run a lower third: Pastor | Switch a prop: Logo | Clear a group: Text | Run a macro: M | " +
-                "Control media | From a newer version",
+                "Control media | From a newer version | Cue a row on Preview: 1 - Amazing Grace | Go live with a row",
         ).assertExists()
     }
 }
