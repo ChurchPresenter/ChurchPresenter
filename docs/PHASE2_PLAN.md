@@ -154,7 +154,27 @@ The original plan for the step:
 
 ## Stage 3 — Automate the show
 
-### Step 5 — One action vocabulary (`:show-control` module, no UI)
+### Step 5 — One action vocabulary (`:show-control` module, no UI) (done)
+
+What shipped:
+
+- `:show-control`: `Action` (19 types, each stored by its `@SerialName`; one from a newer build is
+  kept and skipped), `ShowHost`, and `ActionRunner` (in order, `wait`, macros at most 8 deep, keyed
+  runs that replace each other, failures reported and passed over).
+- The app's host, `remote/AppShowHost.kt`, wired in `ShowControlWiring.kt`; `AppRootState.showRunner`
+  runs lists. Each action goes through `projectFromCalendar`, the preview bus,
+  `clearLayer`/`clearGroup`, `showMessage`, the props, the lower-third folder, the announcement
+  timers, `MediaViewModel`, `OBSWebSocketManager`, `AtemConnectionManager` and
+  `CompanionSatelliteViewModel`.
+- The cue sheet: `obsScene` and `atemKey` cues now run (`cueAsAction`, through
+  `CalendarHost.runAction`); the scene or key is in the cue's label (`DSK 1 on`, `ME 1 key 2 off`).
+  The other cue actions keep their own paths.
+- New pieces: `AtemClient.runMacro` (MAct), `OBSWebSocketManager.requestScenes`/`scenes`, and
+  `previousContentRow` beside `nextContentRow`.
+- Not yet: `take` of one layer alone (refused; the preview bus takes everything). Nothing fires
+  actions on its own until steps 6 to 8.
+
+The original plan for the step:
 
 - A serializable `sealed interface Action`. Every subtype gets an explicit `@SerialName`, per
   `settings/AGENT.md`'s rule on polymorphic types.

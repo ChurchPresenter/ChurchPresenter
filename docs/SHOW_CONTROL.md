@@ -100,7 +100,7 @@ HTTP/WebSocket API, Companion and MIDI/OSC:
 |---|---|---|
 | `set` | a schedule row or item | Puts it on air (`executeProjectItem`) |
 | `preview` | a schedule row or item | Cues it on Preview |
-| `take` | optional layer | Take |
+| `take` | optional layer | Take (one layer alone is not supported yet) |
 | `clear` | layer | Clears one layer |
 | `clearGroup` | group | Clears a clear group |
 | `message` | template, tokens, duration | Puts a message up |
@@ -111,7 +111,7 @@ HTTP/WebSocket API, Companion and MIDI/OSC:
 | `obsScene` | scene | Switches OBS's program scene |
 | `atemKey` | key, on/off | Puts an ATEM keyer on or off air |
 | `atemMacro` | macro index | Runs an ATEM macro (a new `:atem` command) |
-| `companion` | surface, button | Presses a button on a Companion Satellite surface |
+| `companion` | connection, button, placement | Presses a button on a Companion Satellite surface |
 | `next` / `previous` | -- | Goes live with the next or previous schedule row |
 | `wait` | seconds | Waits before the next action in the list |
 | `macro` | name | Runs a macro |

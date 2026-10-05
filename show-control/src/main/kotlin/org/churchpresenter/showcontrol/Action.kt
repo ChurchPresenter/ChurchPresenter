@@ -100,10 +100,14 @@ sealed interface Action {
     @SerialName("atemMacro")
     data class AtemMacro(val index: Int) : Action
 
-    /** Presses [button] on the Companion Satellite surface in slot [surface]. */
+    /**
+     * Presses [button] on a Companion Satellite surface: the one [connection] (its id in the
+     * settings) shows at [placement] (`TAB`, `LEFT_SIDEBAR`, `RIGHT_SIDEBAR`), or at any placement
+     * when that is blank.
+     */
     @Serializable
     @SerialName("companion")
-    data class CompanionPress(val surface: String, val button: Int) : Action
+    data class CompanionPress(val connection: String, val button: Int, val placement: String = "") : Action
 
     /** Goes live with the next schedule row. */
     @Serializable

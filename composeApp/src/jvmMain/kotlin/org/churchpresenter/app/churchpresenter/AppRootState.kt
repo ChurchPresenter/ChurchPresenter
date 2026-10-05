@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.showcontrol.ActionRunner
 import org.churchpresenter.server.InstanceLinkCommandFailure
 import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.ui.window.ApplicationScope
@@ -99,6 +100,9 @@ internal class AppRootState(
     val sttManager = STTManager()
     val obsManager = OBSWebSocketManager()
     val companionSatelliteViewModel = CompanionSatelliteViewModel()
+
+    /** Runs show-control action lists -- calendar cues today, cue actions and macros later. */
+    val showRunner: ActionRunner by lazy { ActionRunner(appShowHost(), coroutineScope) }
     val autoConnectedIds = mutableSetOf<String>()
     val lastReconciled = mutableMapOf<String, CompanionSatelliteSettings>()
 

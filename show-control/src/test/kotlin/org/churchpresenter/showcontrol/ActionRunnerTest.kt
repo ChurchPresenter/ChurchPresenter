@@ -55,7 +55,7 @@ class ActionRunnerTest {
             note("atemKey:${action.downstream}/${action.mixEffect}/${action.keyer}=${action.on}", action)
         override suspend fun atemMacro(index: Int) = note("atemMacro:$index")
         override suspend fun companion(action: Action.CompanionPress) =
-            note("companion:${action.surface}/${action.button}")
+            note("companion:${action.connection}/${action.placement}/${action.button}")
         override suspend fun next() = note("next")
         override suspend fun previous() = note("previous")
         override fun macro(name: String): List<Action>? = macros[name]
@@ -87,7 +87,7 @@ class ActionRunnerTest {
             listOf(
                 "goLive:row1x2", "preview:row2", "take:SLIDE", "clear:PROPS", "clearAll", "clearGroup:Text",
                 "message:Hi[]null", "prop:Logo=true", "prop:Badge=null", "lowerThird:Pastor", "timer:duration/0/",
-                "media:STOP", "obs:Wide", "atemKey:false/0/2=true", "atemMacro:1", "companion:S/5", "next", "previous",
+                "media:STOP", "obs:Wide", "atemKey:false/0/2=true", "atemMacro:1", "companion:S//5", "next", "previous",
             ).map { "$it@0" },
             host.calls,
         )

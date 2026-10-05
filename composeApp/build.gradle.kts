@@ -342,6 +342,7 @@ kotlin {
             implementation(projects.obs)
             // The layer model: layers, cues, program and preview.
             implementation(projects.liveShow)
+            implementation(projects.showControl)
             // The ATEM protocol client: the UDP conversation with the switcher — connect, state
             // dump, key control and media-pool upload. AtemBridge is the app-side wiring.
             implementation(projects.atem)

@@ -101,5 +101,6 @@ internal fun AppRootState.calendarCueHost(): CalendarHost = CalendarHost(
         liveDurationLog.wentBlank()
         engineLiveItem = null
     },
+    runAction = { showRunner.run(listOf(it)) },
 )
 

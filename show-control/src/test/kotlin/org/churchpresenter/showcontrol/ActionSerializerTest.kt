@@ -38,7 +38,7 @@ class ActionSerializerTest {
         Action.ObsScene("Wide"),
         Action.AtemKey(downstream = true, keyer = 1, on = false),
         Action.AtemMacro(3),
-        Action.CompanionPress("SIDEBAR", 4),
+        Action.CompanionPress("conn1", 4, "LEFT_SIDEBAR"),
         Action.NextItem,
         Action.PreviousItem,
         Action.Wait(1.5),
