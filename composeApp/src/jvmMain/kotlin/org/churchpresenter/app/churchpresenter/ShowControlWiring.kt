@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter
 import org.churchpresenter.app.churchpresenter.remote.AppShowHost
 import org.churchpresenter.app.churchpresenter.remote.ShowOutlets
 import org.churchpresenter.app.churchpresenter.remote.executeProjectItem
+import org.churchpresenter.app.churchpresenter.viewmodel.PreviewBus
 import org.churchpresenter.app.churchpresenter.viewmodel.cuedModeOf
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -70,9 +71,13 @@ internal fun AppRootState.appShowHost(): ShowHost = AppShowHost(
  * Runs the [actions] of the schedule row [item] as it reaches the air: now, or -- when it has just
  * gone to Preview -- on the Take that puts it there. Firing the row again starts them over.
  */
-internal fun AppRootState.runRowActions(item: ScheduleItem, actions: List<Action>) {
+internal fun AppRootState.runRowActions(item: ScheduleItem, actions: List<Action>) =
+    presenterManager.previewBus.runOnAir(item, actions) { list, key -> showRunner.run(list, key) }
+
+/** Hands [actions] to [run], keyed by [item]'s id, once [item] reaches the air -- see [PreviewBus.onAir]. */
+internal fun PreviewBus.runOnAir(item: ScheduleItem, actions: List<Action>, run: (List<Action>, String) -> Unit) {
     if (actions.isEmpty()) return
-    presenterManager.previewBus.onAir(cuedModeOf(item)) { showRunner.run(actions, key = item.id) }
+    onAir(cuedModeOf(item)) { run(actions, item.id) }
 }
 
 /** Stops the action lists still running -- their waits included -- whenever the outputs are cleared. */

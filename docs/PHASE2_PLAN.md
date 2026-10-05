@@ -204,7 +204,21 @@ The original plan for the step:
   - ATEM macro run: a new protocol command in `:atem`.
   - OBS scene listing, for pickers.
 
-### Step 6 — Cue actions on schedule rows (UI → approval)
+### Step 6 — Cue actions on schedule rows (done)
+
+The UI was approved. What shipped:
+
+- `ScheduleFileV2.actions` (left out of the file when no row has any, so such a file still opens in
+  older builds) and the undo snapshots; the schedule's JSON now skips fields it does not know.
+- The row's Actions button and `RowActionsDialog` (`schedule/RowActions*.kt`), with pickers fed
+  through `LocalActionChoices` (`ShowControlWiring.rememberActionChoices`), and a chip under the
+  title listing them.
+- Firing: `presentItem` hands them to `onRowActions` after the row's content; the app runs them
+  through `PreviewBus.onAir` (`runOnAir`), so on Take with preview mode on. The calendar's
+  automation runs them too; a row an action puts live does not run its own, and Clear stops what
+  is still running.
+
+The original plan for the step:
 
 - Storage: `actions: Map<rowId, List<Action>>` in `ScheduleFileV2`
   (`schedule/.../ScheduleViewModelFiles.kt`), next to `notes` and `timing`. Old files read
