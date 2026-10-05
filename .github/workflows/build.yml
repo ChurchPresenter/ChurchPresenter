@@ -301,7 +301,7 @@ jobs:
             --output-format json 2>&1 )
           HISTORY_EXIT=$?
           set -e
-          if [ $HISTORY_EXIT -ne 0 ] || echo "$HISTORY_OUT" | grep -qiE "401|unauthenticated|invalid credentials"; then
+          if [ $HISTORY_EXIT -ne 0 ] || echo "$HISTORY_OUT" | grep -qiE "status code:? *401|unable to authenticate|unauthenticated|invalid credentials"; then
             echo "❌ Credential check failed (exit $HISTORY_EXIT):"
             echo "$HISTORY_OUT"
             exit 1
@@ -498,7 +498,7 @@ jobs:
           HISTORY_EXIT=$?
           set -e
           # Some Xcode versions return exit 0 even on 401 — also grep output
-          if [ $HISTORY_EXIT -ne 0 ] || echo "$HISTORY_OUT" | grep -qiE "401|unauthenticated|invalid credentials"; then
+          if [ $HISTORY_EXIT -ne 0 ] || echo "$HISTORY_OUT" | grep -qiE "status code:? *401|unable to authenticate|unauthenticated|invalid credentials"; then
             echo "❌ Credential check failed (exit $HISTORY_EXIT) — output:"
             echo "$HISTORY_OUT"
             echo "Verify MACOS_NOTARIZATION_API_KEY_ID='$API_KEY_ID' and MACOS_NOTARIZATION_API_ISSUER_ID are set correctly in GitHub Secrets"
