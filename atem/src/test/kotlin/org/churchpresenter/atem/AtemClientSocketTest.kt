@@ -449,6 +449,22 @@ class AtemClientSocketTest {
     }
 
     @Test
+    fun `running a macro sends its slot, big-endian, and the run action`() {
+        FakeAtemSwitcher().use { fake ->
+            val client = connected(fake)
+            try {
+                runBlocking { client.runMacro(258) }
+            } finally {
+                client.disconnect()
+            }
+            val cmd = fake.commandsNamed("MAct").single()
+            assertEquals(1, cmd[0].toInt(), "the slot's high byte first")
+            assertEquals(2, cmd[1].toInt(), "then its low byte")
+            assertEquals(0, cmd[2].toInt(), "and action 0, run")
+        }
+    }
+
+    @Test
     fun `putting a downstream keyer on air sends a one on-air byte`() {
         FakeAtemSwitcher().use { fake ->
             val client = connected(fake)

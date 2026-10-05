@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -114,6 +115,7 @@ class OBSWebSocketManagerTest {
             port = runBlocking { server.engine.resolvedConnectors().first().port }
         }
         fun dropConnections() = runBlocking { sessions.toList().forEach { it.close() } }
+        fun say(text: String) = runBlocking { sessions.toList().forEach { it.send(Frame.Text(text)) } }
         fun stop() = server.stop(0, 0)
     }
 
@@ -289,6 +291,61 @@ class OBSWebSocketManagerTest {
         assertEquals("SetCurrentProgramScene", data["requestType"]?.jsonPrimitive?.content)
         assertEquals("Worship", data["requestData"]?.jsonObject?.get("sceneName")?.jsonPrimitive?.content)
         assertTrue(data["requestId"]?.jsonPrimitive?.content?.isNotEmpty() == true, "OBS requires a request id")
+    }
+
+    @Test
+    fun `the scenes are asked for, listed top first, and asked for again when they change`() {
+        val server = startObs()
+        val obs = manager()
+        obs.connectTo(server)
+        server.nextFrame()
+
+        obs.requestScenes()
+        val request = server.nextFrame()["d"]!!.jsonObject
+        assertEquals("GetSceneList", request["requestType"]?.jsonPrimitive?.content)
+        assertEquals(null, request["requestData"], "GetSceneList takes no data")
+
+        server.say(sceneList("Wide", "Pulpit"))
+        awaitUntil("the scene list to arrive") { obs.scenes.value.isNotEmpty() }
+        assertEquals(listOf("Pulpit", "Wide"), obs.scenes.value)
+
+        server.say("""{"op":5,"d":{"eventType":"SceneCreated","eventData":{"sceneName":"Band"}}}""")
+        assertEquals("GetSceneList", server.nextFrame()["d"]!!.jsonObject["requestType"]?.jsonPrimitive?.content)
+
+        obs.disconnect()
+        assertEquals(emptyList(), obs.scenes.value)
+    }
+
+    @Test
+    fun `a scene change is not chased when the scenes were never asked for`() {
+        val server = startObs()
+        val obs = manager()
+        obs.connectTo(server)
+        server.nextFrame()
+        server.say("""{"op":5,"d":{"eventType":"SceneListChanged"}}""")
+        obs.setScene("Worship")
+        val next = server.nextFrame()["d"]!!.jsonObject
+        assertEquals("SetCurrentProgramScene", next["requestType"]?.jsonPrimitive?.content)
+    }
+
+    @Test
+    fun `only an answer to GetSceneList is a scene list, and only a scene event a change`() {
+        assertEquals(listOf("B", "A"), sceneListIn(sceneList("A", "B")))
+        assertEquals(null, sceneListIn("""{"op":7,"d":{"requestType":"GetVersion","responseData":{}}}"""))
+        assertEquals(null, sceneListIn("""{"op":7,"d":{"requestType":"GetSceneList"}}"""))
+        assertEquals(null, sceneListIn("""{"op":5,"d":{"requestType":"GetSceneList"}}"""))
+        assertEquals(null, sceneListIn("not json"))
+        assertEquals(null, sceneListIn("[1]"))
+        assertTrue(changesSceneList("""{"op":5,"d":{"eventType":"SceneRemoved"}}"""))
+        assertFalse(changesSceneList("""{"op":5,"d":{"eventType":"CurrentProgramSceneChanged"}}"""))
+        assertFalse(changesSceneList("""{"op":7,"d":{"eventType":"SceneRemoved"}}"""))
+    }
+
+    /** OBS's answer to GetSceneList for [names], bottom of its list first as OBS sends it. */
+    private fun sceneList(vararg names: String): String {
+        val scenes = names.mapIndexed { i, name -> """{"sceneIndex":$i,"sceneName":"$name"}""" }.joinToString(",")
+        return """{"op":7,"d":{"requestType":"GetSceneList","requestId":"x",""" +
+            """"requestStatus":{"result":true,"code":100},"responseData":{"scenes":[$scenes]}}}"""
     }
 
     @Test

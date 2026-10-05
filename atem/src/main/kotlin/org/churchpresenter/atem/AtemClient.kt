@@ -134,6 +134,8 @@ class AtemClient(
 
     companion object {
         private const val HEADER_SIZE = 12
+        private const val BITS_PER_BYTE = 8
+        private const val MACRO_RUN: Byte = 0
         private const val FLAG_ACK_REQUEST = 0x01
         private const val FLAG_HELLO = 0x02
         private const val FLAG_RETRANSMIT_REQUEST = 0x08
@@ -486,6 +488,20 @@ class AtemClient(
             sendCommandAndWait(
                 "CDsL",
                 byteArrayOf(keyer.toByte(), if (onAir) 1 else 0, 0, 0),
+                expectedResponse = null
+            )
+        }
+    }
+
+    /**
+     * Run the macro in slot [index] (MAct, action 0 -- run), 0-based as the switcher counts them.
+     * A slot with no macro in it does nothing.
+     */
+    suspend fun runMacro(index: Int) = withContext(Dispatchers.IO) {
+        opMutex.withLock {
+            sendCommandAndWait(
+                "MAct",
+                byteArrayOf((index shr BITS_PER_BYTE).toByte(), index.toByte(), MACRO_RUN, 0),
                 expectedResponse = null
             )
         }
