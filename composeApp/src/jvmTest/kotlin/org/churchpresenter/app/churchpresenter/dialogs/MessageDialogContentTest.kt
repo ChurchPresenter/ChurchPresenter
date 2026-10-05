@@ -67,7 +67,8 @@ class MessageDialogContentTest {
     }
 
     @Test
-    fun `a typed message goes live until cleared, and Go Live waits for text`() = dialog(templates = emptyList()) { seen ->
+    fun `a typed message goes live until cleared, and Go Live waits for text`() =
+        dialog(templates = emptyList()) { seen ->
         onNodeWithTag(MESSAGE_GO_LIVE_TAG).performClick()
         assertNull(seen.live, "nothing to put up yet")
         field(MESSAGE_TEXT_TAG).performTextInput("Car lights on")
@@ -89,7 +90,8 @@ class MessageDialogContentTest {
         onNodeWithTag(messageTemplateTag("message1")).performClick()
         field(MESSAGE_TEXT_TAG).performTextReplacement("Child {number} to the nursery")
         onNodeWithText("Save message").performClick()
-        assertEquals(listOf(nursery.copy(name = "Child {number} to the…", text = "Child {number} to the nursery")), seen.templates)
+        val updated = nursery.copy(name = "Child {number} to the…", text = "Child {number} to the nursery")
+        assertEquals(listOf(updated), seen.templates)
         onNodeWithText("Delete").performClick()
         assertEquals(emptyList(), seen.templates)
     }

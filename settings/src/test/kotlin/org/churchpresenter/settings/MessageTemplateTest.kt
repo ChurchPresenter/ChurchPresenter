@@ -33,7 +33,8 @@ class MessageTemplateTest {
     fun `saved messages survive the settings file`() {
         val json = Json { ignoreUnknownKeys = true }
         val settings = AppSettings(messageTemplates = listOf(MessageTemplate("message1", "Nursery", "#{number}", 90)))
-        val back = json.decodeFromString(AppSettings.serializer(), json.encodeToString(AppSettings.serializer(), settings))
+        val written = json.encodeToString(AppSettings.serializer(), settings)
+        val back = json.decodeFromString(AppSettings.serializer(), written)
         assertEquals(settings.messageTemplates, back.messageTemplates)
         assertEquals(emptyList(), json.decodeFromString(AppSettings.serializer(), "{}").messageTemplates)
     }
