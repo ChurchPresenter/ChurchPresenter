@@ -90,6 +90,22 @@ class LivePreviewPanelTest {
     }
 
     @Test
+    fun `with preview mode on, the cued item gets a Preview tile of its own`() = runComposeUiTest {
+        val manager = PresenterManager()
+        manager.previewBus.setEnabled(true)
+        manager.previewBus.manager.setDisplayedAnnouncementText("Doors open at six")
+        manager.previewBus.manager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = manager, appSettings = AppSettings())
+            }
+        }
+        onNodeWithText("Preview").assertExists()
+        onNodeWithText("Screen 1").assertExists()
+        onAllNodesWithText("Doors open at six", substring = true)[0].assertExists()
+    }
+
+    @Test
     fun `devWindowCount controls how many dev-fallback preview slots render`() = runComposeUiTest {
         val settings = AppSettings(projectionSettings = ProjectionSettings(devWindowCount = 3))
         setContent {

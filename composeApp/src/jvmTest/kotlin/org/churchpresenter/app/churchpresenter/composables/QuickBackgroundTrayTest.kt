@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
@@ -148,5 +149,29 @@ class QuickBackgroundTrayTest {
                 "an eleventh slot has no key to reach it and is not shown",
             )
         }
+    }
+
+    // ── Hover labels ───────────────────────────────────────────────────────────
+
+    @Test
+    fun `hovering a tile names the background it puts up`() = tray(listOf(entry("a", "#112233"))) {
+        assertEquals(1, onAllNodesWithText("Custom color").fetchSemanticsNodes().size)
+
+        onNodeWithText("Custom color").performMouseInput { moveTo(center) }
+        mainClock.advanceTimeBy(600)
+        waitForIdle()
+
+        assertEquals(2, onAllNodesWithText("Custom color", substring = true).fetchSemanticsNodes().size)
+    }
+
+    @Test
+    fun `hovering the reset says what it does`() = tray(listOf(entry("a", "#112233")), activeId = "a") {
+        onNodeWithText("Back to normal").assertDoesNotExist()
+
+        onNodeWithTag(QUICK_BACKGROUND_RESET_TAG).performMouseInput { moveTo(center) }
+        mainClock.advanceTimeBy(600)
+        waitForIdle()
+
+        onNodeWithText("Back to normal").assertExists()
     }
 }

@@ -819,6 +819,7 @@ jobs:
           path: |
             composeApp/build/reports/tests/
             composeApp/build/test-results/
+            composeApp/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
             converter/build/reports/tests/
             converter/build/test-results/
             lottieGenerator/build/reports/tests/

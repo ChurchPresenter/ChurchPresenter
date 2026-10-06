@@ -795,6 +795,8 @@ class SystemSettingsTabTest {
             }
         }
 
+        // The folder is scanned off the UI thread; the button appears once that scan is done.
+        waitUntil(timeoutMillis = 5_000) { onAllNodesWithText("Add Song Samples").fetchSemanticsNodes().isNotEmpty() }
         onAllNodesWithText("Add Song Samples").onFirst().performScrollTo().performClick()
         waitUntil(timeoutMillis = 5_000) { told.isNotEmpty() }
 
@@ -824,6 +826,8 @@ class SystemSettingsTabTest {
             }
         }
 
+        // The folder is scanned off the UI thread; the button appears once that scan is done.
+        waitUntil(timeoutMillis = 5_000) { onAllNodesWithText("Download Bibles…").fetchSemanticsNodes().isNotEmpty() }
         onAllNodesWithText("Download Bibles…").onFirst().performScrollTo().assertExists(
             "the Bible folder section is where someone with no Bibles goes, so the downloader lives there"
         )
@@ -860,6 +864,8 @@ class SystemSettingsTabTest {
             }
         }
 
+        // The folder is scanned off the UI thread; the button appears once that scan is done.
+        waitUntil(timeoutMillis = 5_000) { onAllNodesWithText("Add Song Samples").fetchSemanticsNodes().isNotEmpty() }
         onAllNodesWithText("Add Song Samples").onFirst().performScrollTo().performClick()
         waitUntil { asked.isNotEmpty() }
 

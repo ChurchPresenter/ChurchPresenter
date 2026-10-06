@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter
 import org.churchpresenter.settings.AppSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -123,5 +124,39 @@ class MainDesktopPanelResizeTest {
 
         assertTrue(after.windowedLayout.schedulePanelCollapsed, "resizing must not un-collapse the panel")
         assertTrue(after.windowedLayout.previewPanelCollapsed)
+    }
+
+    // ── withSchedulePanelCollapsed / withPreviewPanelCollapsed ──────────────────
+
+    @Test
+    fun `collapsing the schedule while windowed leaves the maximized layout open`() {
+        val after = withSchedulePanelCollapsed(AppSettings(), isMaximized = false, collapsed = true)
+
+        assertTrue(after.windowedLayout.schedulePanelCollapsed)
+        assertFalse(after.maximizedLayout.schedulePanelCollapsed)
+    }
+
+    @Test
+    fun `collapsing the schedule while maximized leaves the windowed layout open`() {
+        val after = withSchedulePanelCollapsed(AppSettings(), isMaximized = true, collapsed = true)
+
+        assertTrue(after.maximizedLayout.schedulePanelCollapsed)
+        assertFalse(after.windowedLayout.schedulePanelCollapsed)
+    }
+
+    @Test
+    fun `collapsing the preview while windowed leaves the maximized layout open`() {
+        val after = withPreviewPanelCollapsed(AppSettings(), isMaximized = false, collapsed = true)
+
+        assertTrue(after.windowedLayout.previewPanelCollapsed)
+        assertFalse(after.maximizedLayout.previewPanelCollapsed)
+    }
+
+    @Test
+    fun `collapsing the preview while maximized leaves the windowed layout open`() {
+        val after = withPreviewPanelCollapsed(AppSettings(), isMaximized = true, collapsed = true)
+
+        assertTrue(after.maximizedLayout.previewPanelCollapsed)
+        assertFalse(after.windowedLayout.previewPanelCollapsed)
     }
 }

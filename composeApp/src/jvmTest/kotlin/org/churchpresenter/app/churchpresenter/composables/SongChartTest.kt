@@ -110,4 +110,11 @@ class SongChartTest {
         assertEquals(2, stats.sections, "one verse and one chorus, whatever the chorus is split into")
         assertEquals(3, stats.lines)
     }
+
+    @Test
+    fun `each preview section carries the kind its header names`() {
+        val sections = buildPreviewSections("[Verse 1]\none\n[Chorus]\ntwo")
+
+        assertEquals(listOf(SongSectionKind.VERSE, SongSectionKind.CHORUS), sections.map { it.kind })
+    }
 }

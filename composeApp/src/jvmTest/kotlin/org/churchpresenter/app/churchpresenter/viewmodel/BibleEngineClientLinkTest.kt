@@ -69,7 +69,9 @@ class BibleEngineClientLinkTest {
         var port: Int = 0
             private set
 
-        private val server = embeddedServer(Netty, port = 0) {
+        // Bound to loopback itself, not the wildcard: on a wildcard bind another process can take
+        // 127.0.0.1 on the same port, and the more specific socket gets every loopback connection.
+        private val server = embeddedServer(Netty, port = 0, host = "127.0.0.1") {
             install(WebSockets)
             routing {
                 webSocket("/bible-engine") {

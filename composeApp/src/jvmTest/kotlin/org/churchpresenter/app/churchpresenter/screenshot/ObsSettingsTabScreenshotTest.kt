@@ -233,7 +233,8 @@ class ObsSettingsTabScreenshotTest {
         var port: Int = 0
             private set
 
-        private val server = embeddedServer(Netty, port = 0) {
+        // Bound to loopback itself, not the wildcard, so no other process can take this address and port.
+        private val server = embeddedServer(Netty, port = 0, host = LOOPBACK) {
             install(WebSockets)
             routing {
                 webSocket("/") {
