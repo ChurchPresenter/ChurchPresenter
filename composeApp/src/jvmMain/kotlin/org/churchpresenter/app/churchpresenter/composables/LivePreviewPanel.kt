@@ -81,8 +81,8 @@ import org.churchpresenter.strings.generated.resources.expand_preview
 import org.churchpresenter.strings.generated.resources.screen_number
 import org.churchpresenter.strings.generated.resources.pause
 import org.churchpresenter.strings.generated.resources.play
-import org.churchpresenter.app.churchpresenter.PresenterScreen
-import org.churchpresenter.app.churchpresenter.showsOutputBackground
+import org.churchpresenter.liveoutput.PresenterScreen
+import org.churchpresenter.liveoutput.showsOutputBackground
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
@@ -99,8 +99,8 @@ import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.sharedui.utils.OutputSize
 import org.churchpresenter.sharedui.utils.outputSizeOf
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.shownModeFor
+import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.liveoutput.shownModeFor
 import org.churchpresenter.stt.STTManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource

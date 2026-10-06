@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.liveoutput.lottieBandPath
 import org.churchpresenter.presenter.usesBibleLottieBand
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.AppSettings

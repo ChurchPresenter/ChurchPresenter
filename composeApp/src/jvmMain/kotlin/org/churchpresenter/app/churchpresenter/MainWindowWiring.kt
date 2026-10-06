@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.viewmodel.overlayForLayerName
+import org.churchpresenter.liveoutput.overlayForLayerName
 import org.churchpresenter.server.broadcastDisplayCleared
 import org.churchpresenter.server.broadcastSongSectionSelected
 import org.churchpresenter.server.updateBrowserSourceTranspose

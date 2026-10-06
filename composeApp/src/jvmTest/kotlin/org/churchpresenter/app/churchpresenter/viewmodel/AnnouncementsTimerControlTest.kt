@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.announcements.AnnouncementsViewModel
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.models.Presenting

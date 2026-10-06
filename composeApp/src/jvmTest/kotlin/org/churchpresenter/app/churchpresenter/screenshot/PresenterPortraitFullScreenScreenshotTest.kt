@@ -43,7 +43,7 @@ import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.announcements.presenter.AnnouncementsPresenter
 import org.churchpresenter.dictionary.presenter.DictionaryPresenter
-import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
+import org.churchpresenter.liveoutput.LottieFrame
 import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
 import org.churchpresenter.slides.presenter.PicturePresenter
 import org.churchpresenter.slides.presenter.PresentationPresenter

@@ -48,8 +48,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.sharedui.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.presenter.NdiManager
-import org.churchpresenter.app.churchpresenter.presenter.NdiVideoRenderer
+import org.churchpresenter.liveoutput.NdiManager
+import org.churchpresenter.liveoutput.NdiVideoRenderer
 import org.churchpresenter.ndi.NdiOutputMode
 import org.churchpresenter.ndi.NdiRuntimeStatus
 import org.churchpresenter.ndi.NdiSender

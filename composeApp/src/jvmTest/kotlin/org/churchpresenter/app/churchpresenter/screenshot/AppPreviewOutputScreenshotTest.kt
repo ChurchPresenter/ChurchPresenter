@@ -19,7 +19,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.rendering.PDFRenderer
-import org.churchpresenter.app.churchpresenter.PresenterScreen
+import org.churchpresenter.liveoutput.PresenterScreen
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.dictionary.data.StrongsEntry
 import org.churchpresenter.settings.AppSettings
@@ -30,7 +30,7 @@ import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.announcements.presenter.AnnouncementsPresenter
 import org.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.dictionary.presenter.DictionaryPresenter
-import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
+import org.churchpresenter.liveoutput.LottieFrame
 import org.churchpresenter.lowerthird.render.LowerThirdOffscreenRenderer
 import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
 import org.churchpresenter.slides.presenter.PicturePresenter

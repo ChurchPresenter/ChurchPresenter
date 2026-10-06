@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
-import org.churchpresenter.app.churchpresenter.lottieBandPath
+import org.churchpresenter.liveoutput.lottieBandPath
 import org.churchpresenter.app.churchpresenter.utils.isLiveOutput
 import org.churchpresenter.app.churchpresenter.utils.isMultiTranslationPresentation
 import org.churchpresenter.app.churchpresenter.utils.isSplitScreenBible

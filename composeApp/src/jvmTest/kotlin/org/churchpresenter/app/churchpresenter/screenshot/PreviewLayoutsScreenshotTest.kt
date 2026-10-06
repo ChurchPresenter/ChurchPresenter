@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
 import org.churchpresenter.app.churchpresenter.composables.PreviewGroupsPopover
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.PreviewArea
 import org.churchpresenter.settings.PreviewLayout

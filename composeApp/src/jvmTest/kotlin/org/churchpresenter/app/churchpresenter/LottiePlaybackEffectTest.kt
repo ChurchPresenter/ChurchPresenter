@@ -5,7 +5,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

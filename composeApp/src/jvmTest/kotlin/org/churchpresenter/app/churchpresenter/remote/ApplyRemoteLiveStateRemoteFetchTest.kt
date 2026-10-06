@@ -11,7 +11,7 @@ import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.settings.AtemSettings
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.InstanceLinkViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest

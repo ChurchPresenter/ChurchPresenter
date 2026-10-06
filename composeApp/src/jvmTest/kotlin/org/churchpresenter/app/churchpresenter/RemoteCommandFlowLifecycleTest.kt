@@ -14,7 +14,7 @@ import kotlinx.coroutines.yield
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.server.SelectBibleVerseRequest
 import org.churchpresenter.bibletab.BibleViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.models.Presenting

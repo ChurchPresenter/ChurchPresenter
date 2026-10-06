@@ -47,7 +47,7 @@ import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.profiles.previewOutputSize
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.stt.STTManager
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.settings.AppSettings

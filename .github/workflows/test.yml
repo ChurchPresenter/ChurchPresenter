@@ -144,7 +144,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :canvas:detekt :presenter:detekt :profiles:detekt :companion-surface:detekt :obs:detekt :live-show:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :canvas:detekt :presenter:detekt :profiles:detekt :companion-surface:detekt :obs:detekt :live-show:detekt :live-output:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -504,6 +504,14 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.liveshow == 'true' }}
         run: ./gradlew :live-show:jacocoTestCoverageVerification -x test
 
+      - name: Live output tests
+        if: ${{ !cancelled() && steps.modules.outputs.liveoutput == 'true' }}
+        run: ./gradlew :live-output:test
+
+      - name: Live output coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.liveoutput == 'true' }}
+        run: ./gradlew :live-output:jacocoTestCoverageVerification -x test
+
       - name: Dictionary tests
         if: ${{ !cancelled() && steps.modules.outputs.dictionary == 'true' }}
         run: ./gradlew :dictionary:test
@@ -650,6 +658,7 @@ jobs:
               ("qa", "QA"),
               ("obs", "OBS"),
               ("live-show", "Live show"),
+              ("live-output", "Live output"),
               ("dictionary", "Dictionary"),
               ("stt", "STT"),
               ("announcements", "Announcements"),
@@ -849,6 +858,8 @@ jobs:
             obs/build/test-results/
             live-show/build/reports/tests/
             live-show/build/test-results/
+            live-output/build/reports/tests/
+            live-output/build/test-results/
             dictionary/build/reports/tests/
             dictionary/build/test-results/
             stt/build/reports/tests/

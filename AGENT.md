@@ -55,7 +55,6 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 |------------------|---------------------------------------------------------------------|
 | `tabs/`          | UI only — one file per tab, no logic                                |
 | `viewmodel/`     | State + business logic; owns its own ViewModel, never passed around |
-| `presenter/`     | The off-screen outputs (`BrowserSourceVideoRenderer`, `NdiVideoRenderer`, `OmtVideoRenderer`, DeckLink) on the shared `ComposeScenePump` — what the song and Bible outputs draw is the `:presenter` module |
 | `remote/`        | What a remote client or an Instance Link primary asks for, applied to the live output, the schedule and statistics — the server itself is `:server` |
 | `data/`          | File I/O, database, song parsing, Bible data                        |
 | `models/`        | Only what needs the app: `PresetItems` — `ShortcutAction` is `:shared-ui`, the Companion UI states `:companion-surface` |
@@ -65,9 +64,8 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `ui/theme/`      | `LanguageProvider` and the theme-customization settings — the theme itself is the `:theme` module |
 
 ```
-main.kt → MainDesktop.kt → tabs/* + PresenterManager → presenter/*
+main.kt → MainDesktop.kt → tabs/* + PresenterManager (:live-output)
                         ↘ CompanionServer (:server)
-                        ↘ StageMonitorScreen.kt
 ```
 - `MainDesktop.kt` is the root composable; `Presenting` (in `:shared-ui`) is the live-content enum.
 - New user-facing strings go in `strings/src/main/composeResources/values/strings.xml` — the
@@ -124,6 +122,7 @@ module-specific notes there, not here.**
 | `companion-surface/`   | `:companion-surface`   | The Companion Surface tab and panels, and `CompanionSatelliteViewModel`             | [AGENT.md](companion-surface/AGENT.md)   |
 | `obs/`                 | `:obs`                 | The OBS Studio integration — the obs-websocket client, scene mapping and its settings page | [AGENT.md](obs/AGENT.md)                 |
 | `live-show/`           | `:live-show`           | The layer model — `Layer`, `Cue`, and `LiveShow`'s program and preview (see `docs/LAYER_MODEL.md`) | [AGENT.md](live-show/AGENT.md)           |
+| `live-output/`         | `:live-output`         | `PresenterManager` and what is on air, the output windows and stage monitor, and the off-screen outputs (NDI, OMT, Browser Source, DeckLink) on `ComposeScenePump` | [AGENT.md](live-output/AGENT.md)         |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions

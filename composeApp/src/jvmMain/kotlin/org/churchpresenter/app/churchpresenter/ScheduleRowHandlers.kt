@@ -1,13 +1,13 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.viewmodel.showLowerThird
+import org.churchpresenter.liveoutput.showLowerThird
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.sharedui.utils.LiveHistoryLogger
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.viewmodel.cueOrSetAnnouncementText
+import org.churchpresenter.liveoutput.cueOrSetAnnouncementText
 import java.io.File
 
 /*

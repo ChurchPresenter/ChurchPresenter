@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.liveoutput.PresenterTransitionEffects
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.test.ComposeUiTest
@@ -8,7 +9,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.presenter.BibleBandPhase
 import org.churchpresenter.presenter.LottieBandTestSupport
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.lottiegen.band.BibleLottieGenConfig
