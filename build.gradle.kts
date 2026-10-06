@@ -28,6 +28,12 @@ subprojects {
     version = "1.0.0"
 }
 
+subprojects {
+    plugins.withId("io.gitlab.arturbosch.detekt") {
+        dependencies.add("detektPlugins", project(":detekt-rules"))
+    }
+}
+
 val isFilteredTestRun = gradle.startParameter.taskRequests.any { request ->
     request.args.any { it == "--tests" }
 }

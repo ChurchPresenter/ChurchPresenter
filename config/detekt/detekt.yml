@@ -103,3 +103,9 @@ exceptions:
 performance:
   SpreadOperator:
     active: true
+
+churchpresenter:
+  HardcodedColor:
+    active: true
+    # The palette lives in :theme; a color picker's swatches are the one other place a literal belongs.
+    excludes: ['**/theme/src/**', '**/*ColorPicker*.kt', '**/test/**', '**/jvmTest/**']
