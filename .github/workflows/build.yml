@@ -148,6 +148,17 @@ jobs:
           echo "desktop.signing.repo.path=$(cygpath -m "$RUNNER_TEMP")/signing" >> local.properties
           echo "Windows signing configuration written"
 
+      - name: Add signtool to PATH
+        if: ${{ env.WINDOWS_SIGNING_ENABLED == 'true' }}
+        shell: powershell
+        run: |
+          # signtool ships with the Windows SDK but is not on the runner's PATH.
+          $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" |
+            Sort-Object FullName -Descending | Select-Object -First 1
+          if (-not $signtool) { throw "signtool.exe not found under Windows Kits\10\bin" }
+          Write-Host "Using $($signtool.FullName)"
+          Add-Content -Path $env:GITHUB_PATH -Value $signtool.DirectoryName -Encoding ascii
+
       # ── Build ───────────────────────────────────────────────────────────────
 
       - name: Build and sign installer
