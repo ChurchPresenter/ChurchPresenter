@@ -34,15 +34,20 @@ feature modules whose presenters it draws, and nothing of `:composeApp`'s.
 ## Rules
 
 - `internal` stops at the module edge. What `:composeApp` calls is public; nothing else is.
-- **Tests live here.** `LiveOutputTestSupport.kt` holds this suite's copies of the app's
+- **Tests and screenshots live here.** The screenshot suite is `screenshot/StageMonitorScreenshotTest`;
+  its images are under `live-output/screenshots/stageMonitor/`. `LiveOutputTestSupport.kt` holds this suite's copies of the app's
   `withSongsEverywhere`/`withBibleEverywhere` and `TestSingletons.latchSkikoHostOs` — copies, so the
   move did not touch `:shared-ui`.
 - What needs the app stays there, with its tests: `PresenterWindows` and the window geometry
-  (`MergeTileTest`, `PresenterOverflowTest`), the render benchmark and the soak test.
+  (`MergeTileTest`, `PresenterOverflowTest`), the render benchmark and the soak test, and the
+  full-screen screenshot suites (`PresenterFullScreenScreenshotTest` and its portrait twin), which
+  draw the other tabs' presenters too.
 
 ## Commands
 
 ```bash
 ./gradlew :live-output:test :live-output:detekt
 ./gradlew :live-output:jacocoTestCoverageVerification
+./gradlew :live-output:recordRoborazziJvm --tests '*ScreenshotTest*'
+./gradlew :live-output:verifyRoborazziJvm --tests '*ScreenshotTest*'
 ```
