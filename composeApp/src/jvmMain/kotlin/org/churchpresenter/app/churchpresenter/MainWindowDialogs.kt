@@ -53,6 +53,7 @@ internal fun MainWindowScope.SettingsDialogs() {
     with(root) {
         OptionsDialog(
             isVisible = showOptionsDialog,
+            devMode = devMode,
             initialTab = optionsDialogInitialTab,
             initialSettings = appSettings,
             theme = theme,

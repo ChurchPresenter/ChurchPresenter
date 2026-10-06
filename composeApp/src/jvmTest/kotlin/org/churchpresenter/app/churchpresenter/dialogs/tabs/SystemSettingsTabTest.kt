@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,7 +31,6 @@ import kotlinx.serialization.json.Json
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
-import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.TabLabelMargin
@@ -719,9 +721,9 @@ class SystemSettingsTabTest {
         stubSwingDialogs()
         setContent {
             MaterialTheme {
-                SystemSettingsTab(
-                    settings = analytics(true),
-                )
+                CompositionLocalProvider(LocalSettingsDevMode provides true) {
+                    SystemSettingsTab(settings = analytics(true))
+                }
             }
         }
 
@@ -737,36 +739,44 @@ class SystemSettingsTabTest {
     }
 
     @Test
-    fun `the test-event button and its dev-only note show while reporting is on`() = runComposeUiTest {
-        assertFalse(BuildConfig.IS_RELEASE, "a Gradle run is not a release build, so the affordance is offered")
+    fun `in dev mode a card of its own holds preview mode and the test event, with its note`() = runComposeUiTest {
         setContent {
             MaterialTheme {
-                SystemSettingsTab(
-                    settings = analytics(true),
-                )
+                CompositionLocalProvider(LocalSettingsDevMode provides true) {
+                    SystemSettingsTab(settings = analytics(true))
+                }
             }
         }
 
+        onNodeWithTag(DEV_MODE_CARD_TAG).assertExists()
+        onAllNodesWithText("Dev mode only").onFirst().assertExists()
+        onAllNodesWithText("Preview mode").onFirst().assertExists()
         onNode(hasText("Send test event") and hasClickAction())
             .assertExists("the test-event button must be offered, not just its label")
+            .assertIsEnabled()
         onAllNodesWithText("Visible to developers only — hidden in released installer builds.").onFirst()
             .assertExists("the note explaining why the button is there must render with it")
     }
 
     @Test
-    fun `the test-event button is hidden once reporting is off`() = runComposeUiTest {
-        setContent {
-            MaterialTheme {
-                SystemSettingsTab(
-                    settings = analytics(false),
-                )
+    fun `with reporting off the test event cannot be sent, and outside dev mode there is no card`() =
+        runComposeUiTest {
+            var devMode by mutableStateOf(true)
+            setContent {
+                MaterialTheme {
+                    CompositionLocalProvider(LocalSettingsDevMode provides devMode) {
+                        SystemSettingsTab(settings = analytics(false))
+                    }
+                }
             }
-        }
+            onNode(hasText("Send test event") and hasClickAction()).assertIsNotEnabled()
 
-        onAllNodesWithText("Send test event").assertCountEquals(0)
-        onAllNodesWithText("Visible to developers only — hidden in released installer builds.")
-            .assertCountEquals(0)
-    }
+            devMode = false
+            waitForIdle()
+            onAllNodesWithTag(DEV_MODE_CARD_TAG).assertCountEquals(0)
+            onAllNodesWithText("Send test event").assertCountEquals(0)
+            onAllNodesWithText("Preview mode").assertCountEquals(0)
+        }
 
     @Test
     fun `the settings-file and maintenance buttons all render`() = runComposeUiTest {
