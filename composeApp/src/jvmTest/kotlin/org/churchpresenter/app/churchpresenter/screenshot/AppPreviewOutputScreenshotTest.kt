@@ -5,13 +5,13 @@ package org.churchpresenter.app.churchpresenter.screenshot
 import org.churchpresenter.settings.PropCorner
 import org.churchpresenter.settings.PropKind
 import org.churchpresenter.settings.PropDefinition
-import org.churchpresenter.app.churchpresenter.presenter.PropsCue
+import org.churchpresenter.liveoutput.PropsCue
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.liveshow.Cue
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.presenter.OutputSurfaceKind
-import org.churchpresenter.app.churchpresenter.presenter.OutputSurface
-import org.churchpresenter.app.churchpresenter.presenter.MessageCue
+import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.liveoutput.OutputSurfaceKind
+import org.churchpresenter.liveoutput.OutputSurface
+import org.churchpresenter.liveoutput.MessageCue
 import org.churchpresenter.profiles.lottieJson
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,7 +29,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.rendering.PDFRenderer
-import org.churchpresenter.app.churchpresenter.PresenterScreen
+import org.churchpresenter.liveoutput.PresenterScreen
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.dictionary.data.StrongsEntry
 import org.churchpresenter.settings.AppSettings
@@ -40,7 +40,7 @@ import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.announcements.presenter.AnnouncementsPresenter
 import org.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.dictionary.presenter.DictionaryPresenter
-import org.churchpresenter.app.churchpresenter.presenter.LottieFrame
+import org.churchpresenter.liveoutput.LottieFrame
 import org.churchpresenter.lowerthird.render.LowerThirdOffscreenRenderer
 import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
 import org.churchpresenter.slides.presenter.PicturePresenter

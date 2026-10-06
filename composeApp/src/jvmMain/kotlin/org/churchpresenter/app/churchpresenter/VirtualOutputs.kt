@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.liveoutput.effectiveOutputMode
 import org.churchpresenter.server.registerBrowserSourceFrames
 import org.churchpresenter.canvas.liveMerges
 import org.churchpresenter.presenter.mergeHostIndex
@@ -23,11 +24,11 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.getBrowserSourceOutput
 import org.churchpresenter.settings.getNdiOutput
 import org.churchpresenter.settings.getOmtOutput
-import org.churchpresenter.app.churchpresenter.presenter.BrowserSourceVideoRenderer
-import org.churchpresenter.app.churchpresenter.presenter.NdiManager
-import org.churchpresenter.app.churchpresenter.presenter.OmtManager
-import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputContext
-import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputKind
+import org.churchpresenter.liveoutput.BrowserSourceVideoRenderer
+import org.churchpresenter.liveoutput.NdiManager
+import org.churchpresenter.liveoutput.OmtManager
+import org.churchpresenter.liveoutput.OffscreenOutputContext
+import org.churchpresenter.liveoutput.OffscreenOutputKind
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.runtime.State
@@ -256,6 +257,7 @@ private fun AppRootState.OmtOutput(
                 effectiveModeState = effectiveModeState,
                 outputIndex = i,
                 kind = OffscreenOutputKind.OMT,
+                appVersion = BuildConfig.APP_VERSION,
                 sttManager = sttManager,
                 mediaViewModel = mediaViewModel,
                 qaDisplayUrlState = qaDisplayUrlState,

@@ -132,7 +132,7 @@ internal fun KonamiEasterEggDialogContent(onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun ConfettiOverlay() {
+internal fun ConfettiOverlay() {
     val rng = remember { Random(42) }
     var particles by remember {
         mutableStateOf(

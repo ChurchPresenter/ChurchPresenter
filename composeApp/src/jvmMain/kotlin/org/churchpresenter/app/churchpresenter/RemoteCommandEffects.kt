@@ -21,8 +21,7 @@ import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.bibletab.BibleViewModel
 import org.churchpresenter.slides.viewmodel.PicturesViewModel
 import org.churchpresenter.slides.viewmodel.PresentationViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-
+import org.churchpresenter.liveoutput.PresenterManager
 import java.io.File
 import org.churchpresenter.bibletab.logLiveReference
 

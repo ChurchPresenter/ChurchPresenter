@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
 import kotlin.test.assertTrue
-import org.churchpresenter.app.churchpresenter.viewmodel.clearFromOperator
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.clearFromOperator
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.showcontrol.Action

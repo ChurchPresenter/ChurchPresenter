@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.viewmodel.propsOnAir
-import org.churchpresenter.app.churchpresenter.viewmodel.messageOnAir
+import org.churchpresenter.liveoutput.propsOnAir
+import org.churchpresenter.liveoutput.messageOnAir
 import org.churchpresenter.server.updateLiveState
 import org.churchpresenter.server.LiveContent
 import androidx.compose.runtime.Composable
@@ -17,9 +17,8 @@ import org.churchpresenter.sharedui.utils.LiveHistoryLogger
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.utils.hasAudienceOutput
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.isOverlay
-
+import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.liveoutput.isOverlay
 /**
  * Broadcasts this instance's live content to any connected InstanceLink follower.
  *

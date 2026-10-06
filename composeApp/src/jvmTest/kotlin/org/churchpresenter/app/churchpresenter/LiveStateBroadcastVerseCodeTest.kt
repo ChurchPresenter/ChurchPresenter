@@ -4,7 +4,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.bible.SpbFixture
 import org.churchpresenter.core.models.bible.SelectedVerse

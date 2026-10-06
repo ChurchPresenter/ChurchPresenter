@@ -1,13 +1,13 @@
 package org.churchpresenter.app.churchpresenter.remote
 
-import org.churchpresenter.app.churchpresenter.viewmodel.setPropsOn
-import org.churchpresenter.app.churchpresenter.viewmodel.propsOnAir
+import org.churchpresenter.liveoutput.setPropsOn
+import org.churchpresenter.liveoutput.propsOnAir
 import org.churchpresenter.liveshow.Cue
-import org.churchpresenter.app.churchpresenter.viewmodel.showMessage
-import org.churchpresenter.app.churchpresenter.viewmodel.messageOnAir
+import org.churchpresenter.liveoutput.showMessage
+import org.churchpresenter.liveoutput.messageOnAir
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.server.InstanceLinkViewModel
 import org.churchpresenter.server.LiveStateDto
 import org.churchpresenter.settings.LinkLayers

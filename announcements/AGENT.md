@@ -9,8 +9,8 @@ specific time or clock). The tab, `AnnouncementsViewModel` and `AnnouncementsPre
 the announcement on an output) live here.
 
 A real Gradle module of this build: `include(":announcements")`,
-`implementation(projects.announcements)`. `:composeApp` is its only consumer. `PresenterManager`
-uses `AnnouncementsViewModel.formatTimer`.
+`implementation(projects.announcements)`. Its consumers are `:composeApp` and `:live-output`.
+`:live-output`'s `PresenterManager` uses `AnnouncementsViewModel.formatTimer`.
 
 It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings` and `:theme`, and nothing of
 `:composeApp`'s.
@@ -21,7 +21,7 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings` and `:t
   and the timer.
   - The timer ticks on the output, not in the tab, so a countdown keeps running while the operator
     is on another tab.
-  - The app implements the interface as `PresenterAnnouncementsOutput`
+  - `:live-output` implements the interface as `PresenterAnnouncementsOutput`
     (`presenterManager.announcementsOutput`).
   - Tests use `FakeAnnouncementsOutput`. It makes the same state changes but never ticks.
     `AnnouncementsTimerControlTest` in the app drives the real ticker.

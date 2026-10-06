@@ -4,8 +4,8 @@ import org.churchpresenter.showcontrol.ActionRunner
 import org.churchpresenter.app.churchpresenter.remote.AppShowHost
 import org.churchpresenter.app.churchpresenter.remote.ShowOutlets
 import org.churchpresenter.app.churchpresenter.remote.executeProjectItem
-import org.churchpresenter.app.churchpresenter.viewmodel.PreviewBus
-import org.churchpresenter.app.churchpresenter.viewmodel.cuedModeOf
+import org.churchpresenter.liveoutput.PreviewBus
+import org.churchpresenter.liveoutput.cuedModeOf
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue

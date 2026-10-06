@@ -2,7 +2,8 @@ package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.runtime.CompositionLocalProvider
 import org.churchpresenter.schedule.LocalActionChoices
-import org.churchpresenter.app.churchpresenter.viewmodel.cuedModeOf
+import org.churchpresenter.liveoutput.cuedModeOf
+import org.churchpresenter.liveoutput.shouldShowPresenterWindowFor
 import org.churchpresenter.server.broadcastFreezeChange
 import org.churchpresenter.server.broadcastSlideChange
 import org.churchpresenter.server.clearPresentationState

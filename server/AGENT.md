@@ -16,7 +16,7 @@ tablets, Bitfocus Companion and other ChurchPresenter instances talk to. Also he
 - the remote-event types the approval dialog shows.
 
 A real Gradle module of this build: `include(":server")`, `implementation(projects.server)`. A plain
-Kotlin module with no Compose. `:composeApp` is its only consumer.
+Kotlin module with no Compose. Its consumers are `:composeApp` and `:live-output`.
 
 It takes `:core-models`, `:settings`, `:shared-ui` (its usage events and text helpers),
 `:diagnostics`, `:calendar`, `:lower-third`, `:presentation-engine`, `:atem`, `:dictionary`,

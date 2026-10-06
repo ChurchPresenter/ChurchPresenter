@@ -47,7 +47,7 @@ import org.churchpresenter.sharedui.utils.UsageEvents
 import java.io.File
 import java.io.IOException
 import kotlinx.coroutines.CoroutineExceptionHandler
-import org.churchpresenter.app.churchpresenter.presenter.AppNetworkInputs
+import org.churchpresenter.liveoutput.AppNetworkInputs
 import org.churchpresenter.canvas.CameraDeviceCatalog
 import org.churchpresenter.canvas.NetworkInputs
 import org.churchpresenter.canvas.ResourceCensus

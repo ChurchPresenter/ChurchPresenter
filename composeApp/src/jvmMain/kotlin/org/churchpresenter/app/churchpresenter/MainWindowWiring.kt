@@ -1,15 +1,15 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.viewmodel.clearFromOperator
-import org.churchpresenter.app.churchpresenter.viewmodel.toggleProp
-import org.churchpresenter.app.churchpresenter.viewmodel.setPropOn
-import org.churchpresenter.app.churchpresenter.viewmodel.propsOnAir
-import org.churchpresenter.app.churchpresenter.viewmodel.showMessage
+import org.churchpresenter.liveoutput.clearFromOperator
+import org.churchpresenter.liveoutput.toggleProp
+import org.churchpresenter.liveoutput.setPropOn
+import org.churchpresenter.liveoutput.propsOnAir
+import org.churchpresenter.liveoutput.showMessage
 import org.churchpresenter.liveshow.Cue
 import androidx.compose.runtime.SideEffect
-import org.churchpresenter.app.churchpresenter.viewmodel.clearGroup
-import org.churchpresenter.app.churchpresenter.viewmodel.clearLayer
-import org.churchpresenter.app.churchpresenter.viewmodel.layerForName
+import org.churchpresenter.liveoutput.clearGroup
+import org.churchpresenter.liveoutput.clearLayer
+import org.churchpresenter.liveoutput.layerForName
 import org.churchpresenter.server.broadcastDisplayCleared
 import org.churchpresenter.server.broadcastSongSectionSelected
 import org.churchpresenter.server.updateBrowserSourceTranspose

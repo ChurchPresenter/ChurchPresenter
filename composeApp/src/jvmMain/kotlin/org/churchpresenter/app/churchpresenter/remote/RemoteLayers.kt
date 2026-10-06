@@ -1,10 +1,10 @@
 package org.churchpresenter.app.churchpresenter.remote
 
-import org.churchpresenter.app.churchpresenter.viewmodel.setPropsOn
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.clearMessage
-import org.churchpresenter.app.churchpresenter.viewmodel.messageOnAir
-import org.churchpresenter.app.churchpresenter.viewmodel.showMessage
+import org.churchpresenter.liveoutput.setPropsOn
+import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.liveoutput.clearMessage
+import org.churchpresenter.liveoutput.messageOnAir
+import org.churchpresenter.liveoutput.showMessage
 import org.churchpresenter.liveshow.Cue
 import org.churchpresenter.server.LiveStateDto
 import org.churchpresenter.settings.LinkLayers

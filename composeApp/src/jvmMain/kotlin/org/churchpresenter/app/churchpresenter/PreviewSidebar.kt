@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
-import org.churchpresenter.app.churchpresenter.viewmodel.clearFromOperator
+import org.churchpresenter.liveoutput.clearFromOperator
 import org.churchpresenter.app.churchpresenter.dialogs.ControlPanelData
 import org.churchpresenter.app.churchpresenter.dialogs.ControlPanelActions
 import org.churchpresenter.app.churchpresenter.dialogs.ControlDialog
@@ -17,13 +17,13 @@ import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.dialogs.PropsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ClearGroupsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ClearLayersMenuItems
-import org.churchpresenter.app.churchpresenter.viewmodel.clearGroup
-import org.churchpresenter.app.churchpresenter.viewmodel.clearLayer
+import org.churchpresenter.liveoutput.clearGroup
+import org.churchpresenter.liveoutput.clearLayer
 import org.churchpresenter.strings.generated.resources.tooltip_clear_layers
 import androidx.compose.material.icons.outlined.LayersClear
 import androidx.compose.material3.DropdownMenu
-import org.churchpresenter.app.churchpresenter.viewmodel.setPropOn
-import org.churchpresenter.app.churchpresenter.viewmodel.propsOnAir
+import org.churchpresenter.liveoutput.setPropOn
+import org.churchpresenter.liveoutput.propsOnAir
 import org.churchpresenter.strings.generated.resources.props_picture
 import org.churchpresenter.strings.generated.resources.tooltip_macros
 import org.churchpresenter.strings.generated.resources.tooltip_props
@@ -79,10 +79,10 @@ import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.profiles.previewOutputSize
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.clearMessage
-import org.churchpresenter.app.churchpresenter.viewmodel.messageOnAir
-import org.churchpresenter.app.churchpresenter.viewmodel.showMessage
+import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.liveoutput.clearMessage
+import org.churchpresenter.liveoutput.messageOnAir
+import org.churchpresenter.liveoutput.showMessage
 import org.churchpresenter.app.churchpresenter.dialogs.MacrosDialog
 import org.churchpresenter.app.churchpresenter.dialogs.MessageDialog
 import org.churchpresenter.stt.STTManager

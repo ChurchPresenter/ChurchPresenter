@@ -6,8 +6,7 @@ import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.unit.Density
-import org.churchpresenter.app.churchpresenter.presenter.FrameBuffer
-
+import org.churchpresenter.liveoutput.FrameBuffer
 /** One frame at 60 fps, the clock every frame advances by. */
 private const val FRAME_NANOS = 16_666_667L
 

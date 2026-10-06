@@ -64,8 +64,8 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.showLowerThird
+import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.liveoutput.showLowerThird
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO

@@ -171,3 +171,6 @@ include(":live-show")
 // action lists through the app's host. Depended on by :composeApp and :calendar.
 include(":show-control")
 include(":control-in")
+// The live output: PresenterManager and what is on air, the output windows and the stage monitor, and
+// the off-screen outputs (NDI, OMT, Browser Source, DeckLink). Depended on by :composeApp.
+include(":live-output")

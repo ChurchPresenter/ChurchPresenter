@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.liveoutput.content
 import io.mockk.coEvery
 import io.mockk.mockkObject
 import io.mockk.unmockkObject

@@ -1,0 +1,208 @@
+package org.churchpresenter.liveoutput
+
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.screen_number
+import io.github.alexzhirkevich.compottie.LottieComposition
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.profileFor
+import org.churchpresenter.settings.resolvedFor
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.media.viewmodel.LocalMediaViewModel
+import org.churchpresenter.media.viewmodel.MediaViewModel
+import org.churchpresenter.stt.STTManager
+import org.jetbrains.compose.resources.stringResource
+
+/**
+ * What a single audience output actually draws for the current [effectiveMode] — the dispatch from
+ * [Presenting] to the matching presenter, driven by [screenAssignment] so crossfade, lower-third
+ * layout, per-type visibility, language mode and backgrounds behave identically for every output.
+ *
+ * Hoisted out of PresenterWindows.kt, where it was a local lambda inside a composable that builds
+ * real AWT windows -- which made it unreachable from a headless test. As a top-level composable it
+ * renders with no Window involved, so the mode-to-presenter mapping can finally be asserted.
+ *
+ * Takes [presenterManager] directly: this is the rendering-bridge exception AGENT.md allows (the
+ * same one MediaPresenter/PresentationPlayer rely on), and the alternative is threading 34
+ * individually-hoisted values through the signature.
+ */
+@Composable
+fun PresenterOutputContent(
+    screenAssignment: ScreenAssignment,
+    effectiveMode: Presenting,
+    screenNumber: Int?,
+    presenterManager: PresenterManager,
+    appSettings: AppSettings,
+    mediaViewModel: MediaViewModel,
+    sttManager: STTManager,
+    serverUrl: String,
+    qaDisplayUrl: String,
+    identifyingScreen: Boolean,
+    lottieComposition: LottieComposition?,
+    clearAnnouncementOnFinish: () -> Unit,
+) {
+    val slideContent by presenterManager.slideContent
+    // The profile this output is assigned to -- everything about how it looks and what it shows.
+    // A default, empty profile stands in for a dangling/missing reference rather than crashing;
+    // see [OutputProfile]'s own note that this should not happen once migration has run.
+    val profile = appSettings.projectionSettings.profileFor(screenAssignment) ?: OutputProfile()
+    // What THIS output renders with: the global document's content, this profile's styling.
+    // Resolved here rather than at the caller so no output path can forget to do it.
+    // Remembered: a profile is merged into the document and decoded, which is real work to repeat
+    // on every recomposition. Keyed on both sides, so it is redone exactly when one changes.
+    val outputSettings = remember(appSettings, profile) {
+        appSettings.resolvedFor(profile)
+    }
+    val modeCrossfadeDuration = modeCrossfadeDuration(outputSettings.bibleSettings, outputSettings.songSettings)
+    val displayedVerses by presenterManager.displayedVerses
+    val nextVerses by presenterManager.nextVerses
+    val displayedLyricSection by presenterManager.displayedLyricSection
+    val songPosition by presenterManager.displayedSongPosition
+    val displayedImagePath by presenterManager.displayedImagePath
+    val displayedSlide by presenterManager.displayedSlide
+    val announcementText by presenterManager.announcementText
+    val displayedAnnouncementText by presenterManager.displayedAnnouncementText
+    val activeScene by presenterManager.activeScene
+    val displayedQuestion by presenterManager.displayedQuestion
+    val displayedDictionaryEntry by presenterManager.displayedDictionaryEntry
+    val presenterNotes by presenterManager.presenterNotes
+
+        val primaryRole = screenAssignment.primaryOutputRole
+        val showBg = showsOutputBackground(profile)
+        CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
+            if (profile.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR) {
+                LaunchedEffect(Unit) { UsageEvents.recordOncePerRun(UsageEvent.STAGE_MONITOR) }
+                // Stage monitor: dedicated presenter-confidence layout
+                StageMonitorScreen(
+                    sm = outputSettings.stageMonitorSettings,
+                    slideContent = slideContent,
+                    showChords = profile.showChords,
+                    announcementActive = effectiveMode == Presenting.ANNOUNCEMENTS ||
+                        presenterManager.isLive(Presenting.ANNOUNCEMENTS),
+                    currentLyricSection = displayedLyricSection,
+                    allLyricSections = songPosition.allSections,
+                    songDisplaySectionIndex = songPosition.sectionIndex,
+                    displayedVerses = displayedVerses,
+                    nextVerses = nextVerses,
+                    announcementText = displayedAnnouncementText,
+                    displayedImagePath = displayedImagePath,
+                    displayedSlide = displayedSlide,
+                    presenterNotes = presenterNotes,
+                    activeScene = activeScene,
+                    displayedQuestion = displayedQuestion,
+                    qaSettings = outputSettings.qaSettings,
+                    displayedDictionaryEntry = displayedDictionaryEntry,
+                    dictionarySettings = outputSettings.dictionarySettings,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                PresenterScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    appSettings = outputSettings,
+                    outputRole = primaryRole,
+                    isLowerThird = profile.isLowerThird,
+                    showBackground = showBg
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .onPreviewKeyEvent { keyEvent ->
+                                if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
+                                    mediaViewModel.pause()
+                                    presenterManager.requestClearDisplay()
+                                    true
+                                } else false
+                            }
+                    ) {
+                        var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
+                        val screenCrossfadeActive = isScreenCrossfadeActive(
+                        outputSettings.bibleSettings, outputSettings.songSettings, effectiveMode, prevEffectiveMode,
+                    )
+                        if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
+                        val modeContent: @Composable (Presenting) -> Unit = { mode ->
+                            PresenterModeContent(
+                                mode = mode,
+                                profile = profile,
+                                presenterManager = presenterManager,
+                                appSettings = outputSettings,
+                                mediaViewModel = mediaViewModel,
+                                sttManager = sttManager,
+                                serverUrl = serverUrl,
+                                qaDisplayUrl = qaDisplayUrl,
+                                lottieComposition = lottieComposition,
+                                clearAnnouncementOnFinish = clearAnnouncementOnFinish,
+                                outputRole = primaryRole,
+                                showBg = showBg,
+                            )
+                        }
+                        Crossfade(
+                            targetState = effectiveMode,
+                            animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()
+                        ) { mode -> modeContent(mode) }
+                        OverlayModes(presenterManager, profile, effectiveMode, modeContent)
+
+                        ReleaseLiveBrowserOffWebsite(presenterManager, slideContent)
+
+                        if (screenNumber != null && identifyingScreen) IdentifyScreenOverlay(screenNumber)
+                    }
+                }
+            }
+        }
+}
+
+/** Drops the live browser reference once the slide is no longer a web page. */
+@Composable
+private fun ReleaseLiveBrowserOffWebsite(presenterManager: PresenterManager, slideContent: Presenting) {
+    LaunchedEffect(slideContent) {
+        if (slideContent != Presenting.WEBSITE) presenterManager.setLiveBrowser(null)
+    }
+}
+
+/** The Identify button's "Screen N", over the whole of one output. */
+@Composable
+fun IdentifyScreenOverlay(screenNumber: Int) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.75f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = stringResource(Res.string.screen_number, screenNumber),
+            color = Color.White,
+            fontSize = 96.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+    }
+}

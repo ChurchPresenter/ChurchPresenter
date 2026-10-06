@@ -6,8 +6,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.showMessage
+import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.liveoutput.showMessage
 import org.churchpresenter.liveshow.Cue
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputLook

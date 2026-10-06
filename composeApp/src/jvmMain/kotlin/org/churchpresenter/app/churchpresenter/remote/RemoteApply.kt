@@ -16,8 +16,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.server.InstanceLinkLogSide
 import org.churchpresenter.server.InstanceLinkLogger
 import org.churchpresenter.server.InstanceLinkViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-
+import org.churchpresenter.liveoutput.PresenterManager
 /**
  * Applying what a *remote* instance sends to this one: the Instance Link follower path, and the
  * approved remote requests that arrive from a phone or a linked controller.

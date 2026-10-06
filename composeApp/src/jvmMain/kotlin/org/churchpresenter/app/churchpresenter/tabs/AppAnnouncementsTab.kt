@@ -6,7 +6,7 @@ import org.churchpresenter.announcements.AnnouncementsTab
 import org.churchpresenter.profiles.PreviewOutputPicker
 import org.churchpresenter.profiles.rememberPreviewOutput
 import org.churchpresenter.profiles.stageMonitorScreenIndices
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants

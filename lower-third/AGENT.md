@@ -9,16 +9,17 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
   live or onto an ATEM;
 - what an ATEM upload needs: the render cache, the off-screen renderer and the key sequencer;
 - `LowerThirdPresenter` (`presenter/`), the animation on an output. It takes the frame to draw as
-  a plain `ImageBitmap`; the app's `LottieFrameStream` owns the native bitmap behind it.
+  a plain `ImageBitmap`; `:live-output`'s `LottieFrameStream` owns the native bitmap behind it.
   `LowerThirdLayout` stays in the app, since it draws the app's camera and video backgrounds;
 - `LottieFonts` and the bundled fonts it reads, under `src/main/resources/fonts`. LottieGen's
   `FontRegistry` reads the same resources off the classpath;
 - the ATEM page of the Options dialog (`AtemSettingsTab`, with `AtemSettingsFields`), which edits
   `AtemSettings` and tests the connection.
 
-A real Gradle module of this build: `include(":lower-third")`, `implementation(projects.lowerThird)`.
-`:composeApp` is its only consumer. The app's outputs, its ATEM bridge and routes, and the
-Bible lottie band all use the render cache, the sequencer and `LottieFonts` from here.
+A real Gradle module of this build: `include(":lower-third")`,
+`implementation(projects.lowerThird)`. Its consumers are `:composeApp` and `:live-output`. The
+outputs (`:live-output`), the app's ATEM bridge and routes, and the Bible lottie band all use the
+render cache, the sequencer and `LottieFonts` from here.
 
 It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`, `:diagnostics`,
 `:atem`, `:lottieGenerator` and `:presentation-engine`, and nothing of `:composeApp`'s.

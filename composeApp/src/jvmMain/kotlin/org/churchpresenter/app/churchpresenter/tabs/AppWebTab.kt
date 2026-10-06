@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.churchpresenter.profiles.PreviewOutputPicker
 import org.churchpresenter.profiles.rememberPreviewOutput
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants

@@ -64,8 +64,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.canvas.DeckLinkManager
-import org.churchpresenter.app.churchpresenter.presenter.NdiManager
-import org.churchpresenter.app.churchpresenter.presenter.OmtManager
+import org.churchpresenter.liveoutput.NdiManager
+import org.churchpresenter.liveoutput.OmtManager
 import org.churchpresenter.ndi.NdiRuntimeStatus
 import org.churchpresenter.omt.OmtRuntimeStatus
 import androidx.compose.runtime.collectAsState

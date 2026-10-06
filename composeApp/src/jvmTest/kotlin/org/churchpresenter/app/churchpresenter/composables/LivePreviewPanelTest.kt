@@ -30,7 +30,7 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.stt.STTManager
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -87,6 +87,22 @@ class LivePreviewPanelTest {
         }
         onNodeWithText("Screen 1").assertExists()
         onNodeWithText("Screen 2").assertDoesNotExist()
+    }
+
+    @Test
+    fun `with preview mode on, the cued item gets a Preview tile of its own`() = runComposeUiTest {
+        val manager = PresenterManager()
+        manager.previewBus.setEnabled(true)
+        manager.previewBus.manager.setDisplayedAnnouncementText("Doors open at six")
+        manager.previewBus.manager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = manager, appSettings = AppSettings())
+            }
+        }
+        onNodeWithText("Preview").assertExists()
+        onNodeWithText("Screen 1").assertExists()
+        onAllNodesWithText("Doors open at six", substring = true)[0].assertExists()
     }
 
     @Test

@@ -27,8 +27,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
-import org.churchpresenter.app.churchpresenter.viewmodel.CLEARABLE_LAYERS
-import org.churchpresenter.app.churchpresenter.viewmodel.knownLayers
+import org.churchpresenter.liveoutput.CLEARABLE_LAYERS
+import org.churchpresenter.liveoutput.knownLayers
 import org.churchpresenter.liveshow.Layer
 import org.churchpresenter.settings.ClearGroup
 import org.churchpresenter.sharedui.utils.LocalMainWindowState

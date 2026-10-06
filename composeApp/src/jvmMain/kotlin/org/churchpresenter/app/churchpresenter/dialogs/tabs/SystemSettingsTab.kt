@@ -80,7 +80,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.BuildConfig
-import org.churchpresenter.app.churchpresenter.viewmodel.withPreviewMode
+import org.churchpresenter.liveoutput.withPreviewMode
 import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.sharedui.composables.SettingsScrollbarGutter
 import org.churchpresenter.server.CompanionServer

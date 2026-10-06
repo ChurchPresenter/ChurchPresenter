@@ -1,16 +1,16 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.viewmodel.setPropOn
+import org.churchpresenter.liveoutput.setPropOn
 import org.churchpresenter.liveshow.Cue
-import org.churchpresenter.app.churchpresenter.viewmodel.showMessage
-import org.churchpresenter.app.churchpresenter.viewmodel.clearMessage
+import org.churchpresenter.liveoutput.showMessage
+import org.churchpresenter.liveoutput.clearMessage
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

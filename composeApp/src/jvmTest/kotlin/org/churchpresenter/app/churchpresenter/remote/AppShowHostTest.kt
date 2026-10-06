@@ -1,11 +1,11 @@
 package org.churchpresenter.app.churchpresenter.remote
 
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.messageOnAir
-import org.churchpresenter.app.churchpresenter.viewmodel.propsOnAir
-import org.churchpresenter.app.churchpresenter.viewmodel.setPropOn
-import org.churchpresenter.app.churchpresenter.viewmodel.showMessage
+import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.liveoutput.messageOnAir
+import org.churchpresenter.liveoutput.propsOnAir
+import org.churchpresenter.liveoutput.setPropOn
+import org.churchpresenter.liveoutput.showMessage
 import org.churchpresenter.atem.AtemClient
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.schedule.TimerModes

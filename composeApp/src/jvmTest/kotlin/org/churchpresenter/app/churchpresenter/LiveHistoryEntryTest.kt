@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.utils.LiveHistoryEntry
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.songs.LyricSection
 import kotlin.test.Test

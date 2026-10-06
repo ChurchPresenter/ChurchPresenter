@@ -4,6 +4,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import org.churchpresenter.controlin.ControlHub
 import org.churchpresenter.showcontrol.ActionRunner
+import org.churchpresenter.liveoutput.deckLinkOutputCount
 import org.churchpresenter.server.InstanceLinkCommandFailure
 import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.ui.window.ApplicationScope
@@ -29,7 +30,7 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.theme.themeFromSettings
 import org.churchpresenter.media.viewmodel.MediaViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.qa.QAManager

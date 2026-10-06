@@ -83,13 +83,25 @@ class StyleThumbnails(
         val lottie = withContext(Dispatchers.Default) {
             json.encodeToString(JsonObject.serializer(), LottieGenerator.generate(config))
         }
-        render(lottie, config)
+        renderWithRetry(lottie, config)
     } catch (e: CancellationException) {
         throw e
     } catch (e: IllegalStateException) {
         null
     } catch (e: IllegalArgumentException) {
         null
+    }
+
+    // The first still of a session parses its Lottie cold, and on a slow or busy machine that can
+    // outlast the renderer's load deadline; the second attempt is warm. Without this the style
+    // being edited could stay blank until the config next changed.
+    @Suppress("SwallowedException")
+    private suspend fun renderWithRetry(lottie: String, config: LottieGenConfig): ImageBitmap? = try {
+        render(lottie, config)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: IllegalStateException) {
+        render(lottie, config)
     }
 }
 

@@ -6,7 +6,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.viewmodel.clearGroup
+import org.churchpresenter.liveoutput.clearGroup
 import org.churchpresenter.profiles.quickBackgroundSlotFor
 import org.churchpresenter.sharedui.models.CLEAR_GROUP_ACTIONS
 import org.churchpresenter.sharedui.models.MACRO_ACTIONS

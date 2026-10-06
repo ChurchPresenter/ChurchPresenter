@@ -1,0 +1,1255 @@
+@file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
+
+package org.churchpresenter.liveoutput.screenshot
+
+import java.time.LocalTime
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Canvas
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onRoot
+import io.github.takahirom.roborazzi.captureRoboImage
+import org.churchpresenter.liveoutput.StageMonitorScreen
+import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.settings.DictionarySettings
+import org.churchpresenter.settings.MetronomePosition
+import org.churchpresenter.settings.QASettings
+import org.churchpresenter.settings.StageMonitorContentType
+import org.churchpresenter.settings.StageMonitorLayout
+import org.churchpresenter.settings.StageMonitorSettings
+import org.churchpresenter.settings.StageMonitorStyleZone
+import org.churchpresenter.settings.StageMonitorZone
+import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.settings.StageMonitorZoneStyle
+import org.churchpresenter.settings.toZone
+import org.churchpresenter.core.models.songs.LyricSection
+import org.churchpresenter.core.models.qa.Question
+import org.churchpresenter.core.models.qa.QuestionStatus
+import org.churchpresenter.core.models.scene.Scene
+import org.churchpresenter.core.models.scene.SceneSource
+import org.churchpresenter.core.models.bible.SelectedVerse
+import org.churchpresenter.core.models.scene.SourceTransform
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.settings.utils.Constants
+import kotlin.test.Test
+import org.churchpresenter.settings.withZoneWidth
+import org.churchpresenter.settings.withZoneHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import org.churchpresenter.sharedui.screenshot.RENDER_TIMEOUT_MS
+import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
+
+/**
+ * The stage monitor — the screen the worship leader and the speaker read from.
+ *
+ * It is a grid of zones rather than one surface: every kind of content is assigned to a corner (or
+ * to the whole screen), and each zone carries its own font, colours and alignment. So the states
+ * worth reviewing are *which zone a thing lands in* and *what a zone looks like*, not just what is
+ * live — which is why the layout shots below matter as much as the content ones.
+ *
+ * One image per state, not a light/dark pair: this screen paints from `StageMonitorSettings`, not
+ * from the operator's theme.
+ *
+ * **The clock is switched off in every shot.** Its zone draws the wall clock, so leaving it on would
+ * rewrite every one of these images the moment the minute turned — the same rule the Announcements
+ * timer modes and the canvas clock source are held to.
+ */
+class StageMonitorScreenshotTest {
+
+    /** What the clock zone reads in every shot. Arbitrary, and the point is that it never moves. */
+    private val PINNED_CLOCK: LocalTime = LocalTime.of(10, 42, 8)
+
+    private fun shoot(
+        name: String,
+        settings: StageMonitorSettings = stageSettings(),
+        /**
+         * The monitor's own pixel size, which is the size of the image.
+         *
+         * It has to be the **window's** size, not a `Modifier.size` on the content: the capture is
+         * the test window's root, so a content box larger than the window is simply cropped by it
+         * and every image comes out 1024x768 whatever the box asked for.
+         */
+        output: OutputSize = OutputSize(1024, 768),
+        showChords: Boolean = true,
+        transposeSteps: Int = 0,
+        presenting: Presenting = Presenting.LYRICS,
+        announcementActive: Boolean = false,
+        section: LyricSection = songSection(),
+        sections: List<LyricSection> = emptyList(),
+        sectionIndex: Int = 0,
+        verses: List<SelectedVerse> = emptyList(),
+        nextVerses: List<SelectedVerse> = emptyList(),
+        announcementText: String = "",
+        imagePath: String? = null,
+        slide: ImageBitmap? = null,
+        notes: String = "",
+        scene: Scene? = null,
+        question: Question? = null,
+        entry: StrongsEntry? = null,
+        awaitPicture: Boolean = false,
+    ) = runDesktopComposeUiTest(width = output.width, height = output.height) {
+        setContent {
+            MaterialTheme {
+                Box(Modifier.fillMaxSize()) {
+                    StageMonitorScreen(
+                        sm = settings,
+                        showChords = showChords,
+                        transposeSteps = transposeSteps,
+                        slideContent = presenting,
+                        announcementActive = announcementActive,
+                        currentLyricSection = section,
+                        allLyricSections = sections,
+                        songDisplaySectionIndex = sectionIndex,
+                        displayedVerses = verses,
+                        nextVerses = nextVerses,
+                        announcementText = announcementText,
+                        displayedImagePath = imagePath,
+                        displayedSlide = slide,
+                        presenterNotes = notes,
+                        activeScene = scene,
+                        displayedQuestion = question,
+                        displayedDictionaryEntry = entry,
+                        qaSettings = QASettings(),
+                        dictionarySettings = DictionarySettings(),
+                        // Pinned, never read from the machine. The clock zone drew the real wall
+                        // clock, so 22 of these images changed on every run and the suite could not
+                        // be read as pass/fail. 24-hour is pinned too: the host's locale decides
+                        // that, so a US mac and a CI box disagreed even with the instant fixed.
+                        now = { PINNED_CLOCK },
+                        use24Hour = false,
+                    )
+                }
+            }
+        }
+        // The picture zone loads its file on Dispatchers.IO, which the test clock does not wait for.
+        // The slide carries a test tag for exactly this; without the wait the zone captures empty.
+        if (awaitPicture) {
+            waitUntil("the picture to be decoded", RENDER_TIMEOUT_MS) {
+                onAllNodesWithTag("stage_slide").fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+            }
+        }
+        waitForIdle()
+        capture(name)
+    }
+
+    private fun ComposeUiTest.capture(name: String) {
+        onRoot().captureRoboImage("$SCREENSHOT_ROOT/$SECTION/$name.png")
+    }
+
+    // ── Nothing live ────────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `nothing live yet`() = shoot("idle", presenting = Presenting.NONE, section = LyricSection())
+
+    // ── Songs ───────────────────────────────────────────────────────────────────────────────────
+
+    /** The section on screen, and the one after it in the corner the band watches. */
+    @Test
+    fun `a song, with the next section`() = shoot(
+        "song",
+        sections = SONG_SECTIONS,
+        sectionIndex = 0,
+    )
+
+    @Test
+    fun `the last section, with nothing after it`() = shoot(
+        "song_last_section",
+        section = SONG_SECTIONS.last(),
+        sections = SONG_SECTIONS,
+        sectionIndex = SONG_SECTIONS.lastIndex,
+    )
+
+    /**
+     * A song whose chart the band reads, chords above the words.
+     *
+     * The chart is drawn from `LyricSection.chordLines` — the lines as written — while `lines` are
+     * the same words with the markup taken off. The song parser is the one place that split happens,
+     * so nothing downstream ever sees a `[G]`; a fixture that puts markup in `lines` gets it printed
+     * inline, which is a broken fixture rather than a broken screen.
+     */
+    @Test
+    fun `a song with its chords`() = shoot(
+        "song_chords",
+        showChords = true,
+        section = chordSection(),
+        sections = listOf(chordSection()),
+    )
+
+    /**
+     * The same song on an output a musician has transposed up two: every chord, and the Key line,
+     * moved — the words and the layout exactly as in `song_chords`.
+     */
+    @Test
+    fun `a song transposed for the band`() = shoot(
+        "song_chords_transposed",
+        showChords = true,
+        transposeSteps = 2,
+        section = chordSection(),
+        sections = listOf(chordSection()),
+    )
+
+    /** The same song with chords off: the words alone, no chart. */
+    @Test
+    fun `the same song with chords turned off`() = shoot(
+        "song_chords_hidden",
+        showChords = false,
+        section = chordSection(),
+        sections = listOf(chordSection()),
+    )
+
+    /** A tempo set on the song lights the metronome dot in whichever corner it is anchored to. */
+    @Test
+    fun `a song with the metronome running`() = shoot(
+        "song_metronome",
+        settings = stageSettings(metronomePosition = MetronomePosition.TOP_RIGHT),
+        section = songSection().copy(bpm = 72),
+        sections = SONG_SECTIONS,
+    )
+
+    // ── Scripture ───────────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a verse, with the next one`() = shoot(
+        "bible",
+        presenting = Presenting.BIBLE,
+        section = LyricSection(),
+        verses = listOf(verse()),
+        nextVerses = listOf(verse(number = 17, text = "For God sent not his Son into the world to condemn the world.")),
+    )
+
+    @Test
+    fun `a verse with nothing after it`() = shoot(
+        "bible_no_next",
+        presenting = Presenting.BIBLE,
+        section = LyricSection(),
+        verses = listOf(verse()),
+    )
+
+    // ── The other content types ─────────────────────────────────────────────────────────────────
+
+    /**
+     * Speaker notes from the deck — the reason a preacher looks at this screen at all.
+     *
+     * The notes need a zone of their own: the slide and the notes both default to the full screen,
+     * so with the defaults one simply wins and the notes are never seen.
+     */
+    @Test
+    fun `presenter notes`() = shoot(
+        "presentation_notes",
+        settings = stageSettings(
+            zones = mapOf(
+                StageMonitorContentType.PRESENTATION to StageMonitorZone.A,
+                StageMonitorContentType.PRESENTATION_NOTES to StageMonitorZone.D,
+            )
+        ),
+        presenting = Presenting.PRESENTATION,
+        section = LyricSection(),
+        slide = slideBitmap(),
+        notes = NOTES,
+    )
+
+    @Test
+    fun `a slide with no notes on it`() = shoot(
+        "presentation_slide",
+        presenting = Presenting.PRESENTATION,
+        section = LyricSection(),
+        slide = slideBitmap(),
+    )
+
+    @Test
+    fun `an announcement routed here`() = shoot(
+        "announcement",
+        presenting = Presenting.LYRICS,
+        announcementActive = true,
+        announcementText = "Prayer meeting Wednesday at 7pm in the hall",
+        sections = SONG_SECTIONS,
+    )
+
+    /** A countdown sent here reads as an announcement — they share one pre-formatted string. */
+    @Test
+    fun `a countdown routed here`() = shoot(
+        "announcement_timer",
+        presenting = Presenting.LYRICS,
+        announcementActive = true,
+        announcementText = "05:00",
+        sections = SONG_SECTIONS,
+    )
+
+    @Test
+    fun `a question`() = shoot(
+        "qa",
+        presenting = Presenting.QA,
+        section = LyricSection(),
+        question = Question(
+            id = "q1",
+            text = "How do I join a small group?",
+            timestamp = 0L,
+            status = QuestionStatus.APPROVED,
+        ),
+    )
+
+    @Test
+    fun `a dictionary entry`() = shoot(
+        "dictionary",
+        presenting = Presenting.DICTIONARY,
+        section = LyricSection(),
+        entry = strongs(),
+    )
+
+    @Test
+    fun `a canvas scene`() = shoot(
+        "canvas",
+        presenting = Presenting.CANVAS,
+        section = LyricSection(),
+        scene = scene(),
+    )
+
+    // ── Layouts ─────────────────────────────────────────────────────────────────────────────────
+
+    /** Everything on one full-screen zone — the simplest setup, and the default for most types. */
+    @Test
+    fun `one full-screen zone`() = shoot(
+        "layout_full_screen",
+        settings = stageSettings(
+            zones = mapOf(
+                StageMonitorContentType.SONGS to StageMonitorZone.FULL_SCREEN,
+                StageMonitorContentType.NEXT to StageMonitorZone.NONE,
+            )
+        ),
+        sections = SONG_SECTIONS,
+    )
+
+    /** Four corners in use at once: words, what is next, the announcement and the notes. */
+    @Test
+    fun `four quadrants`() = shoot(
+        "layout_four_quadrants",
+        settings = stageSettings(
+            zones = mapOf(
+                StageMonitorContentType.SONGS to StageMonitorZone.A,
+                StageMonitorContentType.NEXT to StageMonitorZone.B,
+                StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.C,
+                StageMonitorContentType.PRESENTATION_NOTES to StageMonitorZone.E,
+            )
+        ),
+        announcementActive = true,
+        announcementText = "Offering after the second song",
+        notes = NOTES,
+        sections = SONG_SECTIONS,
+    )
+
+    @Test
+    fun `the words across the bottom instead`() = shoot(
+        "layout_bottom_band",
+        settings = stageSettings(
+            zones = mapOf(
+                StageMonitorContentType.SONGS to StageMonitorZone.D,
+                StageMonitorContentType.NEXT to StageMonitorZone.A,
+            )
+        ),
+        sections = SONG_SECTIONS,
+    )
+
+    /** A picture, which fills whatever zone it is given rather than being typeset into it. */
+    @Test
+    fun `a picture`() = shoot(
+        "pictures",
+        presenting = Presenting.PICTURES,
+        section = LyricSection(),
+        imagePath = photo().absolutePath,
+        awaitPicture = true,
+    )
+
+    /** The same picture in a corner, with the words still on the screen beside it. */
+    @Test
+    fun `a picture in a corner`() = shoot(
+        "pictures_corner",
+        settings = stageSettings(
+            zones = mapOf(
+                StageMonitorContentType.PICTURES to StageMonitorZone.E,
+                StageMonitorContentType.SONGS to StageMonitorZone.A,
+            )
+        ),
+        presenting = Presenting.PICTURES,
+        imagePath = photo().absolutePath,
+        sections = SONG_SECTIONS,
+        awaitPicture = true,
+    )
+
+    @Test
+    fun `a question in a corner`() = shoot(
+        "qa_corner",
+        settings = stageSettings(zones = mapOf(StageMonitorContentType.QA to StageMonitorZone.C)),
+        presenting = Presenting.QA,
+        section = LyricSection(),
+        question = Question(
+            id = "q1",
+            text = "How do I join a small group?",
+            timestamp = 0L,
+            status = QuestionStatus.APPROVED,
+        ),
+    )
+
+    @Test
+    fun `a dictionary entry in a corner`() = shoot(
+        "dictionary_corner",
+        settings = stageSettings(zones = mapOf(StageMonitorContentType.DICTIONARY to StageMonitorZone.B)),
+        presenting = Presenting.DICTIONARY,
+        section = LyricSection(),
+        entry = strongs(),
+    )
+
+    @Test
+    fun `a scene in a corner`() = shoot(
+        "canvas_corner",
+        settings = stageSettings(zones = mapOf(StageMonitorContentType.CANVAS to StageMonitorZone.D)),
+        presenting = Presenting.CANVAS,
+        section = LyricSection(),
+        scene = scene(),
+    )
+
+    /**
+     * A type sent nowhere: this leader wants only what is coming next, not the words on screen.
+     *
+     * Hiding *Next* instead would be the same picture as `song_chords_hidden`, which already shows a
+     * lone top-left zone.
+     */
+    @Test
+    fun `a content type switched off`() = shoot(
+        "content_hidden",
+        settings = stageSettings(
+            zones = mapOf(
+                StageMonitorContentType.SONGS to StageMonitorZone.NONE,
+                StageMonitorContentType.NEXT to StageMonitorZone.B,
+            )
+        ),
+        sections = SONG_SECTIONS,
+    )
+
+    // ── Zone sizes, on three shapes of monitor ──────────────────────────────────────────────────
+    // The grid is weighted by the stored percentages, so the same resized layout has to hold up on
+    // whatever the output happens to be — a 1080p confidence screen, an old 4:3, or one rotated.
+    // Every zone carries content here, so what moved is legible rather than a shift of empty boxes.
+
+    /** A top row taking four fifths of the screen, and a bottom row split 50 / 14 / 36. */
+    @Test
+    fun `zones resized on a 1080p monitor`() = resizedShot("zones_resized")
+
+    /** The same percentages on a 4:3, where every zone is squarer and the text has less width. */
+    @Test
+    fun `zones resized on a four-three monitor`() =
+        resizedShot("zones_resized_four_three", FOUR_THREE)
+
+    /** And rotated, where an 80% top row is most of a very tall screen. */
+    @Test
+    fun `zones resized on a portrait monitor`() =
+        resizedShot("zones_resized_portrait", PORTRAIT)
+
+    // A deck rather than scripture, because a slide is an image: text reflows into whatever zone it
+    // is given, an image is letterboxed into it, so resizing shows on a slide in a way it does not
+    // on a paragraph. The notes beside it are the zone that gets squeezed.
+
+    /** A slide in the big zone with its notes beside it, on a resized 1080p grid. */
+    @Test
+    fun `a presentation on resized zones`() = presentationShot("zones_resized_presentation")
+
+    /** The same deck where the slide's own 4:3 and the monitor's agree, and the zones do not. */
+    @Test
+    fun `a presentation on resized zones on a four-three monitor`() =
+        presentationShot("zones_resized_presentation_four_three", FOUR_THREE)
+
+    /** And rotated, where a 4:3 slide in an 80%-tall zone leaves the most letterboxing. */
+    @Test
+    fun `a presentation on resized zones on a portrait monitor`() =
+        presentationShot("zones_resized_presentation_portrait", PORTRAIT)
+
+    // ── Metronome positions ─────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the metronome bottom left`() = shoot(
+        "metronome_bottom_left",
+        settings = stageSettings(metronomePosition = MetronomePosition.BOTTOM_LEFT),
+        section = songSection().copy(bpm = 72),
+        sections = SONG_SECTIONS,
+    )
+
+    @Test
+    fun `the metronome dead centre`() = shoot(
+        "metronome_centre",
+        settings = stageSettings(metronomePosition = MetronomePosition.CENTER),
+        section = songSection().copy(bpm = 72),
+        sections = SONG_SECTIONS,
+    )
+
+    // ── More than a zone can hold ───────────────────────────────────────────────────────────────
+
+    /** Notes longer than their zone: they scroll rather than being cut off. */
+    @Test
+    fun `notes longer than the zone`() = shoot(
+        "long_notes",
+        settings = stageSettings(
+            zones = mapOf(
+                StageMonitorContentType.PRESENTATION to StageMonitorZone.A,
+                StageMonitorContentType.PRESENTATION_NOTES to StageMonitorZone.D,
+            )
+        ),
+        presenting = Presenting.PRESENTATION,
+        section = LyricSection(),
+        slide = slideBitmap(),
+        notes = LONG_NOTES,
+    )
+
+    /** A long verse in a corner zone — the words step down to whatever size fits. */
+    @Test
+    fun `a long verse in a corner`() = shoot(
+        "bible_long",
+        presenting = Presenting.BIBLE,
+        section = LyricSection(),
+        verses = listOf(verse(text = LONG_PASSAGE)),
+        nextVerses = listOf(verse(number = 2, text = "He maketh me to lie down in green pastures.")),
+    )
+
+    // ── Zone styling ────────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `zones styled apart from each other`() = shoot(
+        "styled_zones",
+        settings = stageSettings(
+            styles = mapOf(
+                StageMonitorStyleZone.A to StageMonitorZoneStyle(
+                    fontSize = 64, color = "#FFD54F", bgColor = "#1B2A5B", bold = true, shadow = true,
+                ),
+                StageMonitorStyleZone.B to StageMonitorZoneStyle(
+                    fontSize = 28, color = "#8FB3F5", bgColor = "#10131A", italic = true,
+                    verticalAlignment = Constants.MIDDLE, horizontalAlignment = Constants.CENTER,
+                ),
+            )
+        ),
+        sections = SONG_SECTIONS,
+    )
+
+    /**
+     * A bordered backdrop on a left-aligned zone, which is the state the clipping audit found had no
+     * picture anywhere in the set.
+     *
+     * A zone has no clip and no gap to its neighbour, so the plate was drawn **outside** the zone and
+     * bled onto the one below it — the only surface where the overdraw landed on other content rather
+     * than being shaved off. `Modifier.backdropRoom` insets the text so the box lands inside its own
+     * zone; that it does is what this picture is for. Both zones carry it so the boundary between
+     * them is where a reviewer looks.
+     */
+    @Test
+    fun `zones in bordered boxes`() = shoot(
+        "zone_backdrop_border",
+        settings = stageSettings(
+            styles = mapOf(
+                StageMonitorStyleZone.A to StageMonitorZoneStyle(
+                    fontSize = 44,
+                    horizontalAlignment = Constants.LEFT,
+                    backdrop = BORDER_BOX,
+                ),
+                StageMonitorStyleZone.B to StageMonitorZoneStyle(
+                    fontSize = 32,
+                    horizontalAlignment = Constants.LEFT,
+                    backdrop = BORDER_BOX,
+                ),
+            )
+        ),
+        sections = SONG_SECTIONS,
+    )
+
+    /** A different face per zone — the fonts are per-zone settings, not one screen-wide choice. */
+    @Test
+    fun `zones in different fonts`() = shoot(
+        "zone_fonts",
+        settings = stageSettings(
+            styles = mapOf(
+                StageMonitorStyleZone.A to StageMonitorZoneStyle(
+                    fontType = "Georgia", fontSize = 44, color = "#FFFFFF", bgColor = "#000000",
+                ),
+                StageMonitorStyleZone.B to StageMonitorZoneStyle(
+                    fontType = "Courier New", fontSize = 32, color = "#8FB3F5", bgColor = "#000000",
+                    verticalAlignment = Constants.MIDDLE, horizontalAlignment = Constants.CENTER,
+                ),
+            )
+        ),
+        sections = SONG_SECTIONS,
+    )
+
+    /** Bold, italic, underlined and shadowed — the four text switches a zone carries. */
+    @Test
+    fun `every text switch on`() = shoot(
+        "zone_text_switches",
+        settings = stageSettings(
+            styles = mapOf(
+                StageMonitorStyleZone.A to StageMonitorZoneStyle(
+                    fontSize = 44, color = "#FFFFFF", bgColor = "#1B2A5B",
+                    bold = true, italic = true, underline = true, shadow = true,
+                ),
+            )
+        ),
+        sections = SONG_SECTIONS,
+    )
+
+    /** Where the words sit inside their zone: pinned to a corner, or centred in it. */
+    @Test
+    fun `zones aligned differently`() = shoot(
+        "zone_alignment",
+        settings = stageSettings(
+            styles = mapOf(
+                StageMonitorStyleZone.A to StageMonitorZoneStyle(
+                    fontSize = 40, color = "#FFFFFF", bgColor = "#000000",
+                    verticalAlignment = Constants.BOTTOM, horizontalAlignment = Constants.RIGHT,
+                ),
+                StageMonitorStyleZone.B to StageMonitorZoneStyle(
+                    fontSize = 40, color = "#FFFFFF", bgColor = "#000000",
+                    verticalAlignment = Constants.TOP, horizontalAlignment = Constants.LEFT,
+                ),
+            )
+        ),
+        sections = SONG_SECTIONS,
+    )
+
+    /** Each zone on its own ground, so the leader can tell them apart at a glance. */
+    @Test
+    fun `zones on their own backgrounds`() = shoot(
+        "zone_backgrounds",
+        settings = stageSettings(
+            zones = mapOf(
+                StageMonitorContentType.SONGS to StageMonitorZone.A,
+                StageMonitorContentType.NEXT to StageMonitorZone.B,
+                StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.C,
+            ),
+            styles = mapOf(
+                StageMonitorStyleZone.A to StageMonitorZoneStyle(
+                    fontSize = 40,
+                    color = "#FFFFFF",
+                    bgColor = "#10131A",
+                ),
+                StageMonitorStyleZone.B to StageMonitorZoneStyle(
+                    fontSize = 36,
+                    color = "#10131A",
+                    bgColor = "#8FB3F5",
+                ),
+                StageMonitorStyleZone.C to StageMonitorZoneStyle(
+                    fontSize = 32,
+                    color = "#FFD54F",
+                    bgColor = "#3B1F5B",
+                ),
+            ),
+        ),
+        announcementActive = true,
+        announcementText = "Offering after the second song",
+        sections = SONG_SECTIONS,
+    )
+
+    /** The chart's chords take the zone's own chord colour. */
+    @Test
+    fun `chords in the zone's colour`() = shoot(
+        "chord_colour",
+        showChords = true,
+        settings = stageSettings(
+            styles = mapOf(
+                StageMonitorStyleZone.A to StageMonitorZoneStyle(
+                    fontSize = 40, color = "#FFFFFF", bgColor = "#000000", chordColor = "#FFD54F",
+                ),
+            ),
+        ),
+        section = chordSection(),
+        sections = listOf(chordSection()),
+    )
+
+    @Test
+    fun `large type for a leader who cannot see the screen`() = shoot(
+        "large_type",
+        settings = stageSettings(
+            styles = mapOf(
+                StageMonitorStyleZone.A to StageMonitorZoneStyle(
+                    fontSize = 96,
+                    color = "#FFFFFF",
+                    bgColor = "#000000",
+                ),
+            )
+        ),
+        sections = SONG_SECTIONS,
+    )
+
+    // ── Every layout in the catalog ─────────────────────────────────────────────────────────────
+    // One shot per arrangement, each routing a content type into every zone it draws, so the row and
+    // cell weights are visible rather than inferred.
+    //
+    // The five-zone shots come out with one cell empty, and that is the truth rather than a gap:
+    // only four content types can be live at once — what is being presented, its look-ahead, the
+    // clock and an announcement — so a fifth zone has nothing to put in it until the mode changes.
+
+    @Test
+    fun `the two-zone layout, top over bottom`() = layoutShot("layout_top_bottom", StageMonitorLayout.TOP_BOTTOM)
+
+    @Test
+    fun `the two-zone layout, side by side`() = layoutShot("layout_left_right", StageMonitorLayout.LEFT_RIGHT)
+
+    @Test
+    fun `three zones, one over two`() = layoutShot("layout_top_two_below", StageMonitorLayout.TOP_TWO_BELOW)
+
+    @Test
+    fun `three zones stacked as rows`() = layoutShot("layout_three_rows", StageMonitorLayout.THREE_ROWS)
+
+    @Test
+    fun `four zones as a quad grid`() = layoutShot("layout_quad", StageMonitorLayout.QUAD)
+
+    @Test
+    fun `four zones, one over three`() = layoutShot("layout_top_three_below", StageMonitorLayout.TOP_THREE_BELOW)
+
+    /** The arrangement the monitor has always drawn, with every one of its five zones carrying something. */
+    @Test
+    fun `five zones, the classic arrangement`() = layoutShot("layout_classic", StageMonitorLayout.CLASSIC)
+
+    @Test
+    fun `five zones, one over four`() = layoutShot("layout_top_four_below", StageMonitorLayout.TOP_FOUR_BELOW)
+
+    // ── Scripture in each zone in turn ──────────────────────────────────────────────────────────
+    // Which position a slot occupies depends on the layout, so what a verse looks like in Zone 4 of
+    // the classic grid is not what it looks like in Zone 1 — each is its own piece of typography.
+
+    @Test
+    fun `scripture in zone one`() = verseInZone("bible_zone_1", StageMonitorZone.A)
+
+    @Test
+    fun `scripture in zone two`() = verseInZone("bible_zone_2", StageMonitorZone.B)
+
+    @Test
+    fun `scripture in zone three`() = verseInZone("bible_zone_3", StageMonitorZone.C)
+
+    @Test
+    fun `scripture in zone four`() = verseInZone("bible_zone_4", StageMonitorZone.D)
+
+    @Test
+    fun `scripture in zone five`() = verseInZone("bible_zone_5", StageMonitorZone.E)
+
+    // ── A song in each zone in turn ─────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a song in zone one`() = songInZone("song_zone_1", StageMonitorZone.A)
+
+    @Test
+    fun `a song in zone two`() = songInZone("song_zone_2", StageMonitorZone.B)
+
+    @Test
+    fun `a song in zone three`() = songInZone("song_zone_3", StageMonitorZone.C)
+
+    @Test
+    fun `a song in zone four`() = songInZone("song_zone_4", StageMonitorZone.D)
+
+    @Test
+    fun `a song in zone five`() = songInZone("song_zone_5", StageMonitorZone.E)
+
+    // ── Drivers for the three sweeps above ──────────────────────────────────────────────────────
+
+    private fun layoutShot(name: String, layout: StageMonitorLayout) = shoot(
+        name,
+        settings = stageSettings(zones = filling(layout), layout = layout),
+        presenting = Presenting.BIBLE,
+        verses = listOf(verse()),
+        nextVerses = listOf(verse(number = 17, text = "For God sent not his Son to condemn the world.")),
+        announcementActive = true,
+        announcementText = "Offering after the second song",
+        notes = NOTES,
+    )
+
+    /**
+     * The verse alone in [zone], with the look-ahead out of the way so the zone is the subject.
+     *
+     * A passage rather than a single line, on purpose: the comparison worth having across the sweep
+     * is how far each zone's auto-fit has to shrink the same words, and a short verse fits
+     * everywhere and shows nothing.
+     */
+    private fun verseInZone(name: String, zone: StageMonitorZone) = shoot(
+        name,
+        settings = stageSettings(
+            zones = mapOf(
+                StageMonitorContentType.BIBLE to zone,
+                StageMonitorContentType.NEXT to StageMonitorZone.NONE,
+            ),
+        ),
+        presenting = Presenting.BIBLE,
+        verses = listOf(verse(text = SWEEP_VERSE)),
+    )
+
+    /** The same idea for a song: a full section, so a narrow zone has something to shrink. */
+    private fun songInZone(name: String, zone: StageMonitorZone) = shoot(
+        name,
+        settings = stageSettings(
+            zones = mapOf(
+                StageMonitorContentType.SONGS to zone,
+                StageMonitorContentType.NEXT to StageMonitorZone.NONE,
+            ),
+        ),
+        section = SWEEP_SECTION,
+        sections = listOf(SWEEP_SECTION),
+    )
+
+    // ── Every zone at every alignment ───────────────────────────────────────────────────────────
+    // One shot per alignment, with EVERY zone set to it: nine shots then show each zone at each of
+    // the nine positions, which nine-per-zone would have taken fifty-four to say.
+
+    @Test
+    fun `every zone aligned top left`() = alignedShot("align_top_left", Constants.TOP, Constants.LEFT)
+
+    @Test
+    fun `every zone aligned top centre`() = alignedShot("align_top_center", Constants.TOP, Constants.CENTER)
+
+    @Test
+    fun `every zone aligned top right`() = alignedShot("align_top_right", Constants.TOP, Constants.RIGHT)
+
+    @Test
+    fun `every zone aligned middle left`() = alignedShot("align_middle_left", Constants.MIDDLE, Constants.LEFT)
+
+    @Test
+    fun `every zone aligned middle centre`() = alignedShot("align_middle_center", Constants.MIDDLE, Constants.CENTER)
+
+    @Test
+    fun `every zone aligned middle right`() = alignedShot("align_middle_right", Constants.MIDDLE, Constants.RIGHT)
+
+    @Test
+    fun `every zone aligned bottom left`() = alignedShot("align_bottom_left", Constants.BOTTOM, Constants.LEFT)
+
+    @Test
+    fun `every zone aligned bottom centre`() = alignedShot("align_bottom_center", Constants.BOTTOM, Constants.CENTER)
+
+    @Test
+    fun `every zone aligned bottom right`() = alignedShot("align_bottom_right", Constants.BOTTOM, Constants.RIGHT)
+
+    // ── The full-screen zone at every alignment ─────────────────────────────────────────────────
+    // It takes the whole monitor and so is never in the grid above; its nine positions are its own.
+
+    @Test
+    fun `full screen aligned top left`() = fullScreenAlignedShot("full_align_top_left", Constants.TOP, Constants.LEFT)
+
+    @Test
+    fun `full screen aligned top centre`() =
+        fullScreenAlignedShot("full_align_top_center", Constants.TOP, Constants.CENTER)
+
+    @Test
+    fun `full screen aligned top right`() =
+        fullScreenAlignedShot("full_align_top_right", Constants.TOP, Constants.RIGHT)
+
+    @Test
+    fun `full screen aligned middle left`() =
+        fullScreenAlignedShot("full_align_middle_left", Constants.MIDDLE, Constants.LEFT)
+
+    @Test
+    fun `full screen aligned middle centre`() =
+        fullScreenAlignedShot("full_align_middle_center", Constants.MIDDLE, Constants.CENTER)
+
+    @Test
+    fun `full screen aligned middle right`() =
+        fullScreenAlignedShot("full_align_middle_right", Constants.MIDDLE, Constants.RIGHT)
+
+    @Test
+    fun `full screen aligned bottom left`() =
+        fullScreenAlignedShot("full_align_bottom_left", Constants.BOTTOM, Constants.LEFT)
+
+    @Test
+    fun `full screen aligned bottom centre`() =
+        fullScreenAlignedShot("full_align_bottom_center", Constants.BOTTOM, Constants.CENTER)
+
+    @Test
+    fun `full screen aligned bottom right`() =
+        fullScreenAlignedShot("full_align_bottom_right", Constants.BOTTOM, Constants.RIGHT)
+
+    // ── Each text switch on its own, in every zone ──────────────────────────────────────────────
+    // `zone_text_switches` shows all four at once, which cannot say which switch drew what.
+
+    @Test
+    fun `every zone bold`() = switchShot("switch_bold") { copy(bold = true) }
+
+    @Test
+    fun `every zone italic`() = switchShot("switch_italic") { copy(italic = true) }
+
+    @Test
+    fun `every zone underlined`() = switchShot("switch_underline") { copy(underline = true) }
+
+    @Test
+    fun `every zone shadowed`() = switchShot("switch_shadow") { copy(shadow = true) }
+
+    /** A shadow is three settings, not one: a colour, a size and an intensity. */
+    @Test
+    fun `every zone shadowed in its own colour and weight`() = switchShot("switch_shadow_styled") {
+        copy(shadow = true, shadowColor = "#4FD3E8", shadowSize = 200, shadowOpacity = 100)
+    }
+
+    // ── Type, colour and ground, one distinct value per zone ────────────────────────────────────
+
+    /** A different face in every zone at once, so no two are being told apart by position alone. */
+    @Test
+    fun `a different font in every zone`() = perZoneShot("zone_fonts_all") { index ->
+        copy(fontType = FACES[index], fontSize = 34)
+    }
+
+    @Test
+    fun `a different size in every zone`() = perZoneShot("zone_sizes_all") { index ->
+        copy(fontSize = 24 + index * 12)
+    }
+
+    @Test
+    fun `a different text colour in every zone`() = perZoneShot("zone_text_colours_all") { index ->
+        copy(color = INKS[index])
+    }
+
+    @Test
+    fun `a different background in every zone`() = perZoneShot("zone_backgrounds_all") { index ->
+        copy(bgColor = GROUNDS[index])
+    }
+
+    // ── A chart's chord colour, in every zone it can land in ────────────────────────────────────
+    // A song occupies one zone at a time, so unlike the sweeps above this one needs a shot per zone.
+
+    @Test
+    fun `chords in zone one`() = chordsInZone("chords_zone_1", StageMonitorZone.A)
+
+    @Test
+    fun `chords in zone two`() = chordsInZone("chords_zone_2", StageMonitorZone.B)
+
+    @Test
+    fun `chords in zone three`() = chordsInZone("chords_zone_3", StageMonitorZone.C)
+
+    @Test
+    fun `chords in zone four`() = chordsInZone("chords_zone_4", StageMonitorZone.D)
+
+    @Test
+    fun `chords in zone five`() = chordsInZone("chords_zone_5", StageMonitorZone.E)
+
+    // ── Drivers for the style sweeps ────────────────────────────────────────────────────────────
+
+    /** [change] applied to every one of the six zones, so one shot speaks for all of them. */
+    private fun everyZone(change: StageMonitorZoneStyle.() -> StageMonitorZoneStyle) =
+        StageMonitorStyleZone.entries.associateWith { StageMonitorSettings().styleFor(it).change() }
+
+    private fun alignedShot(name: String, vertical: String, horizontal: String) = shoot(
+        name,
+        settings = stageSettings(
+            zones = filling(StageMonitorLayout.CLASSIC),
+            styles = everyZone { copy(verticalAlignment = vertical, horizontalAlignment = horizontal) },
+        ),
+        presenting = Presenting.BIBLE,
+        verses = listOf(verse()),
+        nextVerses = listOf(verse(number = 17, text = "For God sent not his Son to condemn the world.")),
+        announcementActive = true,
+        announcementText = "Offering after the second song",
+    )
+
+    private fun fullScreenAlignedShot(name: String, vertical: String, horizontal: String) = shoot(
+        name,
+        settings = stageSettings(
+            zones = mapOf(StageMonitorContentType.BIBLE to StageMonitorZone.FULL_SCREEN),
+            styles = everyZone { copy(verticalAlignment = vertical, horizontalAlignment = horizontal) },
+        ),
+        presenting = Presenting.BIBLE,
+        verses = listOf(verse()),
+    )
+
+    private fun switchShot(name: String, change: StageMonitorZoneStyle.() -> StageMonitorZoneStyle) = shoot(
+        name,
+        settings = stageSettings(
+            zones = filling(StageMonitorLayout.CLASSIC),
+            styles = everyZone(change),
+        ),
+        presenting = Presenting.BIBLE,
+        verses = listOf(verse()),
+        nextVerses = listOf(verse(number = 17, text = "For God sent not his Son to condemn the world.")),
+        announcementActive = true,
+        announcementText = "Offering after the second song",
+    )
+
+    /** [change] receives each zone's index, so every zone can be given a value of its own. */
+    private fun perZoneShot(name: String, change: StageMonitorZoneStyle.(Int) -> StageMonitorZoneStyle) = shoot(
+        name,
+        settings = stageSettings(
+            zones = filling(StageMonitorLayout.CLASSIC),
+            styles = StageMonitorStyleZone.entries.mapIndexed { index, zone ->
+                zone to StageMonitorSettings().styleFor(zone).change(index)
+            }.toMap(),
+        ),
+        presenting = Presenting.BIBLE,
+        verses = listOf(verse()),
+        nextVerses = listOf(verse(number = 17, text = "For God sent not his Son to condemn the world.")),
+        announcementActive = true,
+        announcementText = "Offering after the second song",
+    )
+
+    private fun chordsInZone(name: String, zone: StageMonitorZone) = shoot(
+        name,
+        showChords = true,
+        settings = stageSettings(
+            zones = mapOf(
+                StageMonitorContentType.SONGS to zone,
+                StageMonitorContentType.NEXT to StageMonitorZone.NONE,
+            ),
+            styles = everyZone { copy(chordColor = "#FFD54F") },
+        ),
+        section = chordSection(),
+        sections = listOf(chordSection()),
+    )
+
+    /** A monitor's pixel size — the window the screen is drawn in, and so the size of the image. */
+    private data class OutputSize(val width: Int, val height: Int)
+
+    // ── Fixtures ────────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Settings with the clock switched off.
+     *
+     * [zones] and [styles] are merged over the defaults rather than replacing them, so a shot only
+     * has to name the zones it is actually about.
+     */
+    private fun stageSettings(
+        zones: Map<StageMonitorContentType, StageMonitorZone> = emptyMap(),
+        styles: Map<StageMonitorStyleZone, StageMonitorZoneStyle> = emptyMap(),
+        metronomePosition: MetronomePosition = MetronomePosition.NONE,
+        layout: StageMonitorLayout = StageMonitorLayout.CLASSIC,
+    ) = layoutApplied(
+        layout,
+        StageMonitorSettings(
+            contentZones = StageMonitorSettings.defaultContentZones() +
+                mapOf(StageMonitorContentType.CLOCK to StageMonitorZone.NONE) + zones,
+            zoneStyles = StageMonitorSettings.defaultZoneStyles() + styles,
+            metronomePosition = metronomePosition,
+        ),
+    )
+
+    /** The resized grid drawing a deck: the slide in Zone 1, its notes in the squeezed Zone 4. */
+    private fun presentationShot(name: String, output: OutputSize = LANDSCAPE) = shoot(
+        name,
+        settings = resized(
+            zones = mapOf(
+                StageMonitorContentType.PRESENTATION to StageMonitorZone.A,
+                StageMonitorContentType.PRESENTATION_NOTES to StageMonitorZone.D,
+                StageMonitorContentType.NEXT to StageMonitorZone.NONE,
+            ),
+        ),
+        presenting = Presenting.PRESENTATION,
+        section = LyricSection(),
+        slide = slideBitmap(),
+        notes = NOTES,
+        announcementActive = true,
+        announcementText = "05:00",
+        output = output,
+    )
+
+    /** The resized grid on an output of [output]'s size, with four of its five zones carrying text. */
+    private fun resizedShot(name: String, output: OutputSize = LANDSCAPE) = shoot(
+        name,
+        settings = resized(),
+        presenting = Presenting.BIBLE,
+        verses = listOf(verse(text = SWEEP_VERSE)),
+        nextVerses = listOf(verse(number = 17, text = "For God sent not his Son to condemn the world.")),
+        announcementActive = true,
+        announcementText = "05:00",
+        output = output,
+    )
+
+    /**
+     * A grid nobody would get from the catalog, with content in every zone.
+     *
+     * Lopsided in both directions at once: height belongs to the row and width to the cell, and the
+     * same numbers everywhere would not show the difference.
+     */
+    private fun resized(zones: Map<StageMonitorContentType, StageMonitorZone> = emptyMap()) = stageSettings(
+        zones = mapOf(
+            StageMonitorContentType.BIBLE to StageMonitorZone.A,
+            StageMonitorContentType.NEXT to StageMonitorZone.B,
+            StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.C,
+            StageMonitorContentType.CLOCK to StageMonitorZone.D,
+        ) + zones,
+    )
+        .withZoneHeight(StageMonitorStyleZone.A, 80f)
+        .withZoneWidth(StageMonitorStyleZone.A, 75f)
+        .withZoneWidth(StageMonitorStyleZone.C, 50f)
+
+    /**
+     * [settings] on [layout], with anything routed to a zone it does not draw sent to None — the
+     * same normalising the settings tab does, so a shot never shows a routing the app would clear.
+     */
+    private fun layoutApplied(layout: StageMonitorLayout, settings: StageMonitorSettings) =
+        settings.withLayout(layout)
+
+    /**
+     * One content type per zone the layout draws, in drawing order.
+     *
+     * Ordered by what is live while scripture is being presented: the verse, its look-ahead, an
+     * announcement and the clock. A fifth slot gets presenter notes, which only draw while a
+     * presentation is live — see the note above the layout shots.
+     */
+    private fun filling(layout: StageMonitorLayout): Map<StageMonitorContentType, StageMonitorZone> {
+        val inOrder = listOf(
+            StageMonitorContentType.BIBLE,
+            StageMonitorContentType.NEXT,
+            StageMonitorContentType.ANNOUNCEMENT_TEXT,
+            StageMonitorContentType.CLOCK,
+            StageMonitorContentType.PRESENTATION_NOTES,
+        )
+        return layout.slots.mapIndexed { index, slot -> inOrder[index] to slot.toZone() }.toMap()
+    }
+
+    private fun songSection() = SONG_SECTIONS.first()
+
+    private fun chordSection() = LyricSection(
+        header = "[Verse 1]",
+        title = "Amazing Grace",
+        songNumber = 42,
+        type = Constants.SECTION_TYPE_VERSE,
+        // As the parser produces them: words in `lines`, the chart as written in `chordLines`.
+        lines = listOf(
+            "Amazing grace how sweet the sound",
+            "That saved a wretch like me",
+        ),
+        chordLines = listOf(
+            "A[G]mazing grace how [G7]sweet the [C]sound",
+            "That [G]saved a wretch like [D]me",
+        ),
+    )
+
+    private fun verse(
+        number: Int = 16,
+        text: String = "For God so loved the world, that he gave his only begotten Son.",
+    ) = SelectedVerse(
+        translationFileName = "kjv.spb",
+        bibleAbbreviation = "KJV",
+        bibleName = "KJV",
+        bookName = "John",
+        chapter = 3,
+        verseNumber = number,
+        verseText = text,
+    )
+
+    private fun strongs() = StrongsEntry(
+        number = "G26",
+        word = "ἀγάπη",
+        transliteration = "agape",
+        pronunciation = "ag-ah'-pay",
+        definition = "brotherly love, affection, benevolence",
+        kjvUsage = "love, charity",
+    )
+
+    /** A real, decodable image for the picture zone. */
+    private fun photo(): java.io.File {
+        FIXTURES.mkdirs()
+        val file = java.io.File(FIXTURES, "backdrop.png")
+        val image = java.awt.image.BufferedImage(1280, 720, java.awt.image.BufferedImage.TYPE_INT_RGB)
+        val canvas = image.createGraphics()
+        canvas.paint = java.awt.GradientPaint(
+            0f, 0f, java.awt.Color(0x2B3A67), 1280f, 720f, java.awt.Color(0x8FB3F5),
+        )
+        canvas.fillRect(0, 0, 1280, 720)
+        canvas.dispose()
+        javax.imageio.ImageIO.write(image, "png", file)
+        return file
+    }
+
+    private fun scene() = Scene(
+        name = "Welcome",
+        sources = listOf(
+            SceneSource.ColorSource(id = "c1", name = "Backdrop", color = "#1B2A5B"),
+            SceneSource.TextSource(
+                id = "t1",
+                name = "Welcome",
+                text = "Welcome",
+                transform = SourceTransform(x = 0.2f, y = 0.4f, width = 0.6f, height = 0.2f),
+                fontSize = 96,
+            ),
+        ),
+    )
+
+    private fun slideBitmap(): ImageBitmap {
+        val bitmap = ImageBitmap(1920, 1080)
+        val canvas = Canvas(bitmap)
+        fun bar(left: Float, top: Float, width: Float, height: Float, colour: Color) {
+            canvas.drawRect(left, top, left + width, top + height, Paint().apply { color = colour })
+        }
+        bar(0f, 0f, 1920f, 1080f, Color(0xFFFAFAFA))
+        bar(0f, 0f, 1920f, 160f, Color(0xFF2B3A67))
+        bar(120f, 320f, 1100f, 80f, Color(0xFF20242B))
+        listOf(480f, 580f, 680f).forEach { y -> bar(120f, y, 1400f, 40f, Color(0xFFC9CDD4)) }
+        return bitmap
+    }
+
+    private companion object {
+        const val SECTION = "stageMonitor"
+
+        /** A box around a zone's text. No fill: with one it stops being a box of its own. */
+        val BORDER_BOX = TextBackdrop(
+            border = true,
+            borderColor = "#FFD54F",
+            borderWidth = 6,
+            borderPadding = 18,
+            borderRadius = 12,
+        )
+
+        /** 16:9, and the shape every image outside the zone-size set is recorded at. */
+        val LANDSCAPE = OutputSize(1024, 576)
+
+        /** An old confidence monitor, and a rotated one — both of which churches run. */
+        val FOUR_THREE = OutputSize(1024, 768)
+        val PORTRAIT = OutputSize(576, 1024)
+
+        val FIXTURES = java.io.File("build/screenshot-fixtures/stage-monitor")
+
+        const val LONG_PASSAGE =
+            "The LORD is my shepherd; I shall not want. He maketh me to lie down in green " +
+                "pastures: he leadeth me beside the still waters. He restoreth my soul: he " +
+                "leadeth me in the paths of righteousness for his name's sake."
+
+        val LONG_NOTES = List(6) {
+            "Point ${'$'}{it + 1}: read the passage slowly, pause before the last line, and let the " +
+                "band come back in on the chorus rather than the verse."
+        }.joinToString("\n\n")
+
+        /** Long enough that every zone in the sweep has to fit it rather than just place it. */
+        const val SWEEP_VERSE =
+            "For God so loved the world, that he gave his only begotten Son, that whosoever " +
+                "believeth in him should not perish, but have everlasting life."
+
+        val SWEEP_SECTION = LyricSection(
+            header = "[Verse 3]",
+            title = "Amazing Grace",
+            songNumber = 42,
+            type = Constants.SECTION_TYPE_VERSE,
+            lines = listOf(
+                "Through many dangers, toils and snares",
+                "I have already come",
+                "'Tis grace hath brought me safe thus far",
+                "And grace will lead me home",
+            ),
+        )
+
+        /** Six faces and six colours, one per zone, for the per-zone sweeps. */
+        val FACES = listOf("Georgia", "Courier New", "Arial", "Times New Roman", "Verdana", "Impact")
+        val INKS = listOf("#FFD54F", "#8FB3F5", "#5DDBA8", "#FF8A80", "#CE93D8", "#FFFFFF")
+        val GROUNDS = listOf("#1B2A5B", "#10131A", "#3B1F5B", "#0E2A22", "#2A1215", "#000000")
+
+        const val NOTES =
+            "Read the passage slowly. Pause before the last line — the band comes back in on the " +
+                "chorus, not the verse."
+
+        val SONG_SECTIONS = listOf(
+            LyricSection(
+                header = "[Verse 1]",
+                title = "Amazing Grace",
+                songNumber = 42,
+                type = Constants.SECTION_TYPE_VERSE,
+                lines = listOf("Amazing grace how sweet the sound", "That saved a wretch like me"),
+            ),
+            LyricSection(
+                header = "{Chorus}",
+                title = "Amazing Grace",
+                songNumber = 42,
+                type = Constants.SECTION_TYPE_CHORUS,
+                lines = listOf("Praise the Lord, praise the Lord", "Let the earth hear His voice"),
+            ),
+        )
+    }
+}

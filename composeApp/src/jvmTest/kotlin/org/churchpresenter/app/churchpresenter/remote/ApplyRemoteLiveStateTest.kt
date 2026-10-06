@@ -8,7 +8,7 @@ import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.InstanceLinkViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.BeforeTest
 import kotlin.test.Test

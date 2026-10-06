@@ -2,10 +2,10 @@ package org.churchpresenter.app.churchpresenter.benchmark
 
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
-import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputContent
-import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputContext
-import org.churchpresenter.app.churchpresenter.presenter.OffscreenOutputKind
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.OffscreenOutputContent
+import org.churchpresenter.liveoutput.OffscreenOutputContext
+import org.churchpresenter.liveoutput.OffscreenOutputKind
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment

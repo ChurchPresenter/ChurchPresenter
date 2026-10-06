@@ -10,8 +10,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.setPropOn
+import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.liveoutput.setPropOn
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputLook
 import org.churchpresenter.settings.OutputProfile
@@ -20,9 +20,7 @@ import org.churchpresenter.settings.PropCorner
 import org.churchpresenter.settings.PropDefinition
 import org.churchpresenter.settings.PropKind
 import org.churchpresenter.settings.ScreenAssignment
-import java.time.LocalTime
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 /** What a prop draws, on an output and as text. */
 class PropsContentTest {
@@ -78,21 +76,5 @@ class PropsContentTest {
 
         onNodeWithText("Beta").assertExists()
         onNodeWithText("Alpha").assertDoesNotExist()
-    }
-
-    @Test
-    fun `a countdown shows what is left, then nothing below zero`() {
-        val now = LocalTime.of(9, 30, 0)
-        assertEquals("15:00", countdownText(now, "09:45"))
-        assertEquals("1:05:30", countdownText(LocalTime.of(9, 0, 0), "10:05:30"))
-        assertEquals("0:00", countdownText(now, "09:00"))
-        assertEquals("0:00", countdownText(now, "soon"))
-    }
-
-    @Test
-    fun `the clock follows its pattern, and a broken pattern falls back to hours and minutes`() {
-        val now = LocalTime.of(14, 5, 9)
-        assertEquals("14:05:09", clockText(now, "HH:mm:ss"))
-        assertEquals("14:05", clockText(now, "HH:mm:ss'"))
     }
 }

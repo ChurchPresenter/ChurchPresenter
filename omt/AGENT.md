@@ -13,10 +13,10 @@ The package is `org.churchpresenter.omt`. It is `:ndi`'s sibling and deliberatel
 read `ndi/AGENT.md` for the reasoning behind the seam, the reused buffers and the single-driver
 rule, which apply here unchanged. This file records where OMT differs.
 
-The app-side wiring is in `:composeApp`, as NDI's is: `OmtVideoRenderer`, `OmtOutputRegistry` and
-`OmtManager` for outputs, `ProjectionOmtCard` for their settings, and `OmtFrameCache` and
-`SceneOmtEditor` for the Canvas source. `OmtFrameCache` and `NdiFrameCache` share their capture
-loop through `ReceivedFrameCache`.
+The app-side wiring is outside, as NDI's is: `OmtVideoRenderer`, `OmtOutputRegistry` and
+`OmtManager` for outputs in `:live-output`, `ProjectionOmtCard` for their settings in `:composeApp`,
+and `OmtFrameCache` for the Canvas source in `:canvas`. `OmtFrameCache` and `NdiFrameCache` share
+their capture loop through `ReceivedFrameCache`.
 
 ## **The app ships libomt, unlike libndi**
 
