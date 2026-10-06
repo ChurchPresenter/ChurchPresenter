@@ -141,15 +141,17 @@ class BibleFolderListingTest {
     }
 
     /**
-     * Documents a KNOWN GAP: macOS writes `._name` resource-fork stubs beside real files on FAT
-     * volumes (USB sticks are the common case here), and those carry the same extension, so they
-     * appear in the picker as duplicate-looking dead rows.
+     * macOS writes `._name` resource-fork stubs beside real files on FAT volumes (USB sticks are the
+     * common case here), and Office or WPS leaves a `~$name` lock file beside one it has open. Both
+     * carry the same extension; offered as modules, the lock file was picked and failed to load
+     * (CHURCH-PRESENTER-DESKTOP-9S/9T).
      */
     @Test
-    fun `mac resource-fork stubs are offered as modules -- known gap`() {
+    fun `mac resource-fork stubs and office lock files are not offered as modules`() {
         file("kjv.spb")
         File(dir, "._kjv.spb").writeText(" ")
-        assertEquals(listOf("._kjv.spb", "kjv.spb"), files())
+        File(dir, "~\$kjv.spb").writeText(" ")
+        assertEquals(listOf("kjv.spb"), files())
     }
 
     // ── Bad folders ─────────────────────────────────────────────────────────────

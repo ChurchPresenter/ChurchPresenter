@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.filechooser.FileChooser
+import org.churchpresenter.sharedui.utils.isSystemArtifact
 import org.churchpresenter.slides.SlidesOutput
 import org.churchpresenter.slides.data.HiddenItemsStore
 import org.churchpresenter.slides.data.firstVisibleIndex
@@ -150,7 +151,7 @@ class PicturesViewModel private constructor(
 
         // Load images from folder
         val imageFiles = folder.listFiles { file ->
-            file.isFile && file.extension.lowercase() in PICTURE_EXTENSIONS
+            file.isFile && file.extension.lowercase() in PICTURE_EXTENSIONS && !isSystemArtifact(file.name)
         }?.sortedBy { it.name } ?: emptyList()
 
         // Add only files not already present so a re-entrant/repeated load stays idempotent — a

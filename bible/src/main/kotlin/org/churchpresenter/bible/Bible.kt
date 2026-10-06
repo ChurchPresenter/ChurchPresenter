@@ -1,6 +1,8 @@
 package org.churchpresenter.bible
 
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.diagnostics.Log
+import java.nio.charset.CharacterCodingException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.charset.StandardCharsets
@@ -16,6 +18,13 @@ private const val VERSE_GROUP_TEXT = 8
 private const val TITLE_PREFIX_LENGTH = 8
 internal const val CHAPTER_KEY_BOOK_SHIFT = 20
 private const val CHAPTER_KEY_CHAPTER_MASK = 0xFFFFFL
+
+/**
+ * Whether [e] says the file itself is not a Bible module's text -- an Office `~$` lock file or a
+ * module saved in a legacy code page (CHURCH-PRESENTER-DESKTOP-9S/9T) -- rather than that loading
+ * went wrong.
+ */
+internal fun isFileFault(e: Exception): Boolean = e is CharacterCodingException
 
 data class ChapterResult(val previewIds: List<String>, val verses: List<String>)
 
@@ -163,6 +172,9 @@ class Bible {
      * The exception is deliberately not rethrown. A load failure has to reach the operator as a
      * message beside the book list, not as an exception unwinding through a coroutine that is
      * loading several translations at once — see [BibleLoadError].
+     *
+     * A file that is not UTF-8 text is the operator's to fix, not a fault in the app, so it is
+     * logged rather than reported -- see [isFileFault].
      */
     private fun recordLoadFailure(e: Exception, resourcePath: String, parsedAnything: Boolean) {
         loadError = BibleLoadError(
@@ -170,7 +182,11 @@ class Bible {
             reason = e.message?.takeIf { it.isNotBlank() } ?: e.toString(),
             partial = parsedAnything,
         )
-        CrashReporter.reportException(e, "Loading Bible module $resourcePath")
+        if (isFileFault(e)) {
+            Log.warn("Bible", "Not a UTF-8 Bible module: $resourcePath")
+        } else {
+            CrashReporter.reportException(e, "Loading Bible module $resourcePath")
+        }
     }
 
     // New: load from a BibleQuote .spb plain text module

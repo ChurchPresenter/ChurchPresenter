@@ -2,6 +2,7 @@ package org.churchpresenter.profiles
 
 import org.churchpresenter.bible.MAX_BIBLE_SCAN_DEPTH
 import org.churchpresenter.sharedui.filechooser.FileChooser
+import org.churchpresenter.sharedui.utils.isSystemArtifact
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.BibleSettings
 import java.io.File
@@ -94,7 +95,7 @@ class FileManager {
 
         // Bounded depth so a symlink cycle or a stray deep tree can't hang the settings dialog.
         return dir.walkTopDown().maxDepth(MAX_BIBLE_SCAN_DEPTH)
-            .filter { it.isFile && it.extension.lowercase() == Constants.EXTENSION_SPB }
+            .filter { it.isFile && it.extension.lowercase() == Constants.EXTENSION_SPB && !isSystemArtifact(it.name) }
             .map { it.toRelativeString(dir).replace('\\', '/') }
             .sorted()
             .toList()
