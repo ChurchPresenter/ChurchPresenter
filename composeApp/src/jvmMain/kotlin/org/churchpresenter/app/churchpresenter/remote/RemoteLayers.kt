@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.remote
 
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.server.LiveStateDto
 import org.churchpresenter.settings.LinkLayers
 import org.churchpresenter.sharedui.models.Presenting

@@ -15,9 +15,8 @@ import org.churchpresenter.sharedui.utils.LiveHistoryLogger
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.app.churchpresenter.utils.hasAudienceOutput
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.isOverlay
-
+import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.liveoutput.isOverlay
 /**
  * Broadcasts this instance's live content to any connected InstanceLink follower.
  *

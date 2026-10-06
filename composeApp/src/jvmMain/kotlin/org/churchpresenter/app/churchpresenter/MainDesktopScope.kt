@@ -9,7 +9,7 @@ import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.sharedui.utils.ShortcutMap
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.qa.QAManager
 import org.churchpresenter.stt.STTManager
 import org.churchpresenter.settings.AppSettings

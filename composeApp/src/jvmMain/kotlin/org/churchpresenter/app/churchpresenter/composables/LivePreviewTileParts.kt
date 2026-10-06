@@ -8,7 +8,7 @@ import org.churchpresenter.presenter.showsContentFor
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.CompositionLocalProvider
-import org.churchpresenter.app.churchpresenter.presenter.OverlayModes
+import org.churchpresenter.liveoutput.OverlayModes
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -40,7 +40,7 @@ import org.churchpresenter.strings.generated.resources.live_preview_nothing
 import org.churchpresenter.strings.generated.resources.lock_screen_to_tab
 import org.churchpresenter.strings.generated.resources.screen_locked_badge
 import org.churchpresenter.strings.generated.resources.unlock_screen
-import org.churchpresenter.app.churchpresenter.StageMonitorScreen
+import org.churchpresenter.liveoutput.StageMonitorScreen
 import org.churchpresenter.app.churchpresenter.offersTranspose
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
@@ -49,12 +49,12 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.OutputSize
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
-import org.churchpresenter.app.churchpresenter.presenter.OutputLayers
-import org.churchpresenter.app.churchpresenter.presenter.OutputSurface
-import org.churchpresenter.app.churchpresenter.presenter.OutputSurfaceKind
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.drawsOverContent
-import org.churchpresenter.app.churchpresenter.viewmodel.unlockedModeFor
+import org.churchpresenter.liveoutput.OutputLayers
+import org.churchpresenter.liveoutput.OutputSurface
+import org.churchpresenter.liveoutput.OutputSurfaceKind
+import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.liveoutput.drawsOverContent
+import org.churchpresenter.liveoutput.unlockedModeFor
 import org.churchpresenter.stt.STTManager
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.mode

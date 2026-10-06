@@ -166,3 +166,7 @@ include(":obs")
 // The layer model: the layers, the cues that go on them, and what is on air and cued. Depended on
 // by :composeApp.
 include(":live-show")
+
+// The live output: PresenterManager and what is on air, the output windows and the stage monitor, and
+// the off-screen outputs (NDI, OMT, Browser Source, DeckLink). Depended on by :composeApp.
+include(":live-output")

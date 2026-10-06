@@ -7,8 +7,7 @@ import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.delay
 import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.media.viewmodel.MediaViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-
+import org.churchpresenter.liveoutput.PresenterManager
 private const val SEEK_SETTLE_MS = 500L
 
 /**

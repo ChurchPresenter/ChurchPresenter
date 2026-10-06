@@ -12,10 +12,11 @@ The **Canvas** tab and everything a scene is drawn from:
   DeckLink input;
 - `ScenePresenter`, which the app's outputs draw a scene with.
 
-A real Gradle module of this build: `include(":canvas")`, `implementation(projects.canvas)`.
-`:composeApp` is its only consumer. Besides the tab it uses `SceneViewModel`, `ScenePresenter`,
-the camera background (`CameraBackground`, `CameraDeviceCatalog`, the camera picker parts), the
-video cache behind looping backgrounds, `DeckLinkManager` and `liveMerges`, and `PreviewShape`.
+A real Gradle module of this build: `include(":canvas")`, `implementation(projects.canvas)`. Its
+consumers are `:composeApp` and `:live-output`. Besides the tab the app uses `SceneViewModel`,
+`ScenePresenter`, the camera background (`CameraBackground`, `CameraDeviceCatalog`, the camera
+picker parts), the video cache behind looping backgrounds, `DeckLinkManager` and `liveMerges`, and
+`PreviewShape`.
 
 It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`,
 `:diagnostics`, `:ndi`, `:omt`, `:media`, `:slides`, `:bible` and `:bible-tab`, and nothing of
@@ -25,9 +26,10 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 
 - **`onPresentScene`**: the tab's Go Live. The app sets the active scene, switches the output to
   the canvas and shows the output window.
-- **`NetworkInputs`**: the app's NDI runtime and OMT library, as the canvas receives from them.
-  The app owns and loads both (it sends its own outputs over them) and installs `AppNetworkInputs`
-  once at startup, first thing in `main`. Until then every call answers as an unloaded library.
+- **`NetworkInputs`**: the app's NDI runtime and OMT library, as the canvas receives from them. The
+  app owns and loads both (it sends its own outputs over them) and installs `AppNetworkInputs`
+  (`:live-output`) once at startup, first thing in `main`. Until then every call answers as an
+  unloaded library.
 - The Bible source lists translations with its own `bibleFilesInDirectory`, a copy of the app's
   `FileManager.getBibleFilesInDirectory` kept here so the move did not touch `:bible` — every UI
   module depends on it through `:shared-ui`, so a change there reruns nearly every suite in CI.

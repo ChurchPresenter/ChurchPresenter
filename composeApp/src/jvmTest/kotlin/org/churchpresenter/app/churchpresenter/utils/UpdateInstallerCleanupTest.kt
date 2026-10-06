@@ -4,6 +4,7 @@ import java.io.File
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class UpdateInstallerCleanupTest {
@@ -25,6 +26,15 @@ class UpdateInstallerCleanupTest {
 
         assertEquals(3, deleteLeftoverUpdateInstallers(dir))
         assertTrue(left.none { it.exists() }, "every leftover installer must be gone")
+    }
+
+    @Test
+    fun `by default the leftovers are looked for in the system temp directory`() {
+        val left = File.createTempFile(UPDATE_INSTALLER_PREFIX, ".msi")
+
+        deleteLeftoverUpdateInstallers()
+
+        assertFalse(left.exists(), "an installer left in the temp directory must be gone")
     }
 
     @Test

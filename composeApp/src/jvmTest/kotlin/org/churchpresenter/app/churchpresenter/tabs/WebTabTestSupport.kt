@@ -19,8 +19,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-
+import org.churchpresenter.liveoutput.PresenterManager
 internal class WebReports {
     val scheduled = mutableListOf<Pair<String, String>>()
     val titleUpdates = mutableListOf<Pair<String, String>>()

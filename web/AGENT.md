@@ -8,7 +8,7 @@ The **Web** tab and the embedded Chromium it browses with: the tab itself (`WebT
 `WebTabScope`, `WebToolbar`, `WebPreview`), and `WebsitePresenter.kt` — JCEF's install and start-up
 (`JcefInstall`, `CefManager`), the embedded browser (`EmbeddedWebView`, `WebNavController`) and the
 website output an output window draws. A real Gradle module of this build — `include(":web")`,
-`implementation(projects.web)`. `:composeApp` is its only consumer.
+`implementation(projects.web)`. Its consumers are `:composeApp` and `:live-output`.
 
 It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme` and `:diagnostics`
 — and nothing of `:composeApp`'s. JCEF itself is an `api` dependency, because a `CefBrowser` crosses
@@ -24,10 +24,10 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 ## The one interface
 
 **`WebOutput`** is everything the tab needs from the live output: presenting mode, the URL and title
-on screen, the live browser and its snapshot. The app's `PresenterWebOutput` implements it by passing
-every call to `PresenterManager` (reached as `presenterManager.webOutput`). Tests use `FakeWebOutput`,
-which only remembers what it was told. A new need from the output is a new member here, not a
-reference to the app.
+on screen, the live browser and its snapshot. `:live-output`'s `PresenterWebOutput` implements it by
+passing every call to `PresenterManager` (reached as `presenterManager.webOutput`). Tests use
+`FakeWebOutput`, which only remembers what it was told. A new need from the output is a new member
+here, not a reference to the app.
 
 ## Package
 

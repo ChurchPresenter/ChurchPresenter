@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.viewmodel.showLowerThird
+import org.churchpresenter.liveoutput.showLowerThird
 import org.churchpresenter.bibletab.selectVerseByBookId
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable

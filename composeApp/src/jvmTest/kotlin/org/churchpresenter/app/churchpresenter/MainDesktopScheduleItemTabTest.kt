@@ -110,6 +110,12 @@ class MainDesktopScheduleItemTabTest {
     }
 
     @Test
+    fun `a cue and an off-screen ministry row have no tab to open`() {
+        assertNull(tabForScheduleItem(ScheduleItem.CueItem(id = "1", action = "start")))
+        assertNull(tabForScheduleItem(ScheduleItem.MinistryItem(id = "2", title = "Offering")))
+    }
+
+    @Test
     fun `every content-bearing item type maps to a distinct tab`() {
         // Guards against a copy-paste mistake sending two different content types to the same
         // tab, which would look like clicking one silently loaded the other.

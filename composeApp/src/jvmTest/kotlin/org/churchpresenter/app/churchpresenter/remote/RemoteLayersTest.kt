@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.remote
 
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.server.InstanceLinkViewModel
 import org.churchpresenter.server.LiveStateDto
 import org.churchpresenter.settings.LinkLayers

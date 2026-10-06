@@ -332,6 +332,12 @@ class LiveMapReporterTest {
     }
 
     @Test
+    fun `with no display to ask, the real probe counts none rather than throwing`() {
+        // The suite runs headless, where AWT refuses to list screen devices at all.
+        assertEquals(0, LiveMapReporter.detectScreenCount())
+    }
+
+    @Test
     fun `a machine that answers is reported as it answered`() {
         assertEquals(3, LiveMapReporter.detectScreenCount { 3 })
     }

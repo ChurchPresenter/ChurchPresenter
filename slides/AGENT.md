@@ -7,15 +7,15 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 The **Pictures** and **Presentation** tabs: the tabs themselves, their viewmodels, the presenters
 that draw a picture or a deck on an output, picture decoding (HEIC included), the hidden-slide store
 and the recent folders and files. A real Gradle module of this build — `include(":slides")`,
-`implementation(projects.slides)`. `:composeApp` is its only consumer.
+`implementation(projects.slides)`. Its consumers are `:composeApp` and `:live-output`.
 
 It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`, `:diagnostics`
 and `:presentation-engine` (as `api`: a caller passes `Deck`s) — and nothing of `:composeApp`'s.
 
-## What stays in the app
+## What stays outside
 
-- **`PresentationPlayer`** — the animated-deck runtime. `PresenterManager` owns it, and it drives
-  VLC (`EmbeddedVideoDecoder`) and the Lottie stream, which belong to the app. It produces the
+- **`PresentationPlayer`** (`:live-output`) — the animated-deck runtime. `PresenterManager` owns
+  it, and it drives VLC (`EmbeddedVideoDecoder`) and the Lottie stream. It produces the
   [`PresentationFrame`] this module's presenter draws.
 - **The remote-control side** — `PresentationRoutes`, `PresentationRemoteRoutes`,
   `PresentationStore`, `PictureLibrary` and `PresentationRemoteDialog`, which reach the server and the
@@ -26,11 +26,11 @@ and `:presentation-engine` (as `api`: a caller passes `Deck`s) — and nothing o
 
 **`SlidesOutput`** is everything the tabs need from the live output: presenting mode, screen locks,
 the live deck frame, and the calls that put a picture or a slide on screen — split into
-`LiveOutput`, `PictureOutput` and `DeckOutput` so none outgrows detekt's function limit. The app's
-`PresenterSlidesOutput` implements it by passing every call to `PresenterManager` (reached as
-`presenterManager.slidesOutput`); the tabs and viewmodels take it, never the manager. Tests use
-`FakeSlidesOutput`, which records what it was told. A new need from the output is a new member here,
-not a reference to the app.
+`LiveOutput`, `PictureOutput` and `DeckOutput` so none outgrows detekt's function limit.
+`:live-output`'s `PresenterSlidesOutput` implements it by passing every call to `PresenterManager`
+(reached as `presenterManager.slidesOutput`); the tabs and viewmodels take it, never the manager.
+Tests use `FakeSlidesOutput`, which records what it was told. A new need from the output is a new
+member here, not a reference to the app.
 
 ## Package
 

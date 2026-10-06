@@ -13,8 +13,8 @@ The **Strong's dictionary**:
   interlinear files.
 
 A real Gradle module of this build: `include(":dictionary")`, `implementation(projects.dictionary)`.
-`:composeApp` is its only consumer. Its companion server serves the same data through its own
-`StrongsDictionaryRepository`, and its stage monitor shows a `StrongsEntry`.
+Its consumers are `:composeApp` and `:live-output`. Its companion server serves the same data
+through its own `StrongsDictionaryRepository`, and its stage monitor shows a `StrongsEntry`.
 
 It takes `:shared-ui`, `:core-models`, `:strings`, `:icons`, `:settings`, `:theme` and `:bible`, and nothing of
 `:composeApp`'s.

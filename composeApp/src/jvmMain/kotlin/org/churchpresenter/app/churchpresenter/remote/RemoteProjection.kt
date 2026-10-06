@@ -10,8 +10,7 @@ import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.LiveHistoryLogger
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-
+import org.churchpresenter.liveoutput.PresenterManager
 /**
  * Executes a project request — adds to schedule and sets presenter state.
  * Fixes the original bug where SongItem projection never selected the song in the Songs tab.

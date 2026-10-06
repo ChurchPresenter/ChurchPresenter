@@ -17,9 +17,10 @@ What the song and Bible outputs draw:
 - `ChordChart`, the chord rows a song slide draws.
 
 A real Gradle module of this build: `include(":presenter")`, `implementation(projects.presenter)`.
-`:composeApp` is its only consumer. It keeps the output windows (`PresenterScreen`,
-`PresenterOutputContent`), `PresenterManager` and the transitions that drive the bands, the
-settings pages, and the off-screen outputs (NDI, OMT, Browser Source, DeckLink, the scene pump).
+Its consumers are `:composeApp` and `:live-output`. `:live-output` keeps the output windows
+(`PresenterScreen`, `PresenterOutputContent`), `PresenterManager` and the transitions that drive the
+bands, and the off-screen outputs (NDI, OMT, Browser Source, DeckLink, the scene pump); the app keeps
+the settings pages.
 
 It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`,
 `:diagnostics`, `:canvas`, `:slides`, `:media`, `:lower-third`, `:lottieGenerator` and
@@ -38,13 +39,14 @@ the settings at. `:composeApp`'s band and transition suites use it too
 
 ## Rules
 
-- `internal` stops at the module edge. What `:composeApp` calls is public; nothing else is.
+- `internal` stops at the module edge. What `:composeApp` and `:live-output` call is public; nothing
+  else is.
 - **Tests and screenshots live here.** The screenshot suites are `screenshot/PresenterScreenshotTest`,
   `PresenterLowerThirdScreenshotTest`, `PresenterPortraitLowerThirdScreenshotTest` and
   `PresenterTitleSlideScreenshotTest`; their images are under `presenter/screenshots/`.
-- What needs the app stays there, with its tests: anything that reaches `PresenterManager`,
-  `PresenterTransitionEffects` or `PresenterScreen`, the full-screen screenshot suites (they draw
-  the other tabs' presenters too), and the settings UI around the style models.
+- What needs `PresenterManager`, `PresenterTransitionEffects` or `PresenterScreen` lives in
+  `:live-output`, with its tests. What needs the app stays there: the full-screen screenshot
+  suites (they draw the other tabs' presenters too), and the settings UI around the style models.
 
 ## Commands
 

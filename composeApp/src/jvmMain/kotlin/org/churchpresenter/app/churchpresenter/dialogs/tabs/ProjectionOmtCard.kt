@@ -87,8 +87,8 @@ import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.app.churchpresenter.composables.ResolutionPicker
 import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.sharedui.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.presenter.OmtManager
-import org.churchpresenter.app.churchpresenter.presenter.OmtVideoRenderer
+import org.churchpresenter.liveoutput.OmtManager
+import org.churchpresenter.liveoutput.OmtVideoRenderer
 import org.churchpresenter.omt.OmtOutputMode
 import org.churchpresenter.omt.OmtQuality
 import org.churchpresenter.omt.OmtRuntimeStatus

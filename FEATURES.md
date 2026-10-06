@@ -99,7 +99,7 @@
 **Source locations:**
 - `slides/…/tabs/PresentationTab.kt` (the `:slides` module) — main UI; its pieces in `PresentationTabScope.kt`, `PresentationTopBar.kt`, `PresentationControlsBar.kt`, `PresentationBody.kt`
 - `slides/…/viewmodel/PresentationViewModel.kt`
-- `presenter/PresentationPlayer.kt` (the app), `slides/…/presenter/PresentationPresenter.kt` and `PresentationFrame.kt` — animated playback
+- `live-output/…/PresentationPlayer.kt` (the app), `slides/…/presenter/PresentationPresenter.kt` and `PresentationFrame.kt` — animated playback
 - `presentation-engine/` (the `:presentation-engine` Gradle module, at the repo root) — PPTX/Keynote parsing, timing and animation engine
 - `data/settings/PresentationSettings.kt`
 - `:server`'s `CompanionServer.kt` — slide API for mobile (background rendering)
@@ -141,7 +141,7 @@
 - `tabs/AppLowerThirdTab.kt` — the app's wrapper, which supplies the preview output and its picker
 - `lower-third/…/presenter/LowerThirdPresenter.kt` — the lower third on the output
 - `lottieGenerator/.../lottie/TextShaping.kt` — the Text shaping setting every Lottie player reads from the file
-- `presenter/…/BibleLottieBand.kt`, `presenter/…/BibleLottieTemplate.kt`, `presenter/…/BibleLottieTextFit.kt`, `presenter/…/BibleBandClock.kt` — the Bible band at run time; driven from `PresenterTransitionEffects.kt`
+- `presenter/…/BibleLottieBand.kt`, `presenter/…/BibleLottieTemplate.kt`, `presenter/…/BibleLottieTextFit.kt`, `presenter/…/BibleBandClock.kt` — the Bible band at run time; driven from `live-output/…/PresenterTransitionEffects.kt`
 - `profiles/…/BibleLottieBandPicker.kt` — the template picker, the Bible tab's Lower Third Animation section and the generator window
 - `lottieGenerator/src/main/kotlin/.../band/` (the `:lottieGenerator` module) — the Bible band generator
 
@@ -153,7 +153,7 @@
 - `announcements/` (the `:announcements` Gradle module) — `AnnouncementsTab.kt` and its pieces
   (`Announcements*.kt`), `AnnouncementsViewModel.kt` with its timer parts in `AnnouncementsTimerParts.kt`
 - `tabs/AppAnnouncementsTab.kt` — the app's wrapper: the live output, the stage monitors and the
-  preview-output picker; `viewmodel/PresenterAnnouncementsOutput.kt` — the tab's `AnnouncementsOutput`
+  preview-output picker; `live-output/…/PresenterAnnouncementsOutput.kt` — the tab's `AnnouncementsOutput`
 - `data/settings/AnnouncementsSettings.kt`
 - `announcements/…/presenter/AnnouncementsPresenter.kt` — the announcement on the output
 - `utils/TimerStateManager.kt`
@@ -212,7 +212,7 @@
 - `qa/…/QATab.kt` (with `QATabBars.kt`, `QATabList.kt`, `QuestionRow.kt`, `QuestionRowActions.kt`)
   and `qa/…/QAManager.kt` (with `QAStore.kt`, `QAActions.kt`) — the `:qa` module
 - `tabs/AppQATab.kt` — the app's wrapper, which supplies the remote-access dialog;
-  `viewmodel/PresenterQAOutput.kt` — the tab's `QAOutput`, over `PresenterManager`
+  `live-output/…/PresenterQAOutput.kt` — the tab's `QAOutput`, over `PresenterManager`
 - `data/settings/QASettings.kt`
 - `qa/…/presenter/QAPresenter.kt` — the question and the QR code on the output; the QR image itself is `generateQRCodeBitmap` in `:shared-ui`
 - `profiles/…/ProfileOverlayPages.kt` — the question and QR look, edited on Profiles → Q&A
@@ -268,19 +268,19 @@
 - **Design the preview panel** — arrange the live previews the way the booth wants them: start a layout from a template, split areas across or down, drag the dividers, choose what each area shows and where it sits, keep several named layouts and switch between them, and let a layout fill the panel.
 
 **Source locations:**
-- `PresenterScreen.kt` — output window
+- `live-output/…/PresenterScreen.kt` — output window
 - `shared-ui/…/models/Presenting.kt` — active-content state enum
-- `presenter/DeckLinkComposeOutput.kt`
-- `presenter/BrowserSourceVideoRenderer.kt`, `presenter/…/LocalTransparentBlanking.kt` — Browser Source output
-- `presenter/ComposeScenePump.kt`, `presenter/OffscreenOutputContent.kt` — the off-screen render both virtual outputs share
+- `live-output/…/DeckLinkComposeOutput.kt`
+- `live-output/…/BrowserSourceVideoRenderer.kt`, `presenter/…/LocalTransparentBlanking.kt` — Browser Source output
+- `live-output/…/ComposeScenePump.kt`, `live-output/…/OffscreenOutputContent.kt` — the off-screen render both virtual outputs share
 - `ndi/` (the `:ndi` Gradle module) — NDI itself: `NdiRuntime`, `NdiLibrary`/`JnaNdiLibrary`, `NdiSender` and `NdiOutputMode`
-- `presenter/NdiVideoRenderer.kt`, `presenter/NdiManager.kt`, `dialogs/tabs/ProjectionNdiCard.kt` — the app-side wiring and its settings card
+- `live-output/…/NdiVideoRenderer.kt`, `live-output/…/NdiManager.kt`, `dialogs/tabs/ProjectionNdiCard.kt` — the app-side wiring and its settings card
 - `omt/` (the `:omt` Gradle module) — OMT itself: `OmtRuntime`, `OmtLibrary`/`JnaOmtLibrary`, `OmtSender`, `OmtReceiver`, `OmtDiscovery`
-- `presenter/OmtVideoRenderer.kt`, `presenter/OmtOutputRegistry.kt`, `presenter/OmtManager.kt`, `dialogs/tabs/ProjectionOmtCard.kt` — the app-side OMT wiring and its settings card
+- `live-output/…/OmtVideoRenderer.kt`, `live-output/…/OmtOutputRegistry.kt`, `live-output/…/OmtManager.kt`, `dialogs/tabs/ProjectionOmtCard.kt` — the app-side OMT wiring and its settings card
 - `gradle/omt-builds.properties`, `.github/workflows/omt-linux.yml`, `THIRD_PARTY_OMT.md` — where the bundled OMT libraries come from, and their licence
 - `media/…/data/StockMediaClient.kt`, `media/…/dialogs/StockMediaBrowserDialog.kt`, `media/…/viewmodel/StockMediaViewModel.kt`, `data/settings/StockPhotoSettings.kt`
 - `composables/DeckLinkManager.kt`, `composables/DeckLinkInputGate.kt`, `composables/LivePreviewPanel.kt`, `presenter/…/LoopingVideoBackground.kt`
-- `viewmodel/PresenterManager.kt`, `profiles/…/BackgroundSettingsViewModel.kt`
+- `live-output/…/PresenterManager.kt`, `profiles/…/BackgroundSettingsViewModel.kt`
 - `data/settings/BackgroundConfig.kt`, `data/settings/BackgroundSettings.kt`, `data/settings/ProjectionSettings.kt`, `data/settings/ScreenAssignment.kt`
 - `profiles/…/BackgroundSettingsTab.kt`, `dialogs/tabs/ProjectionSettingsTab.kt`
 - `shared-ui/…/utils/AutoFitUtils.kt`
@@ -309,7 +309,7 @@
 - **Transpose on the band's tablets** — open a Browser Source stage view on a tablet and move its chords up or down a semitone with −1 / 0 / +1 buttons: for a capo, or a singer who needs another key. Only that output changes — the song, the main screen and the OBS feed stay as written. Turned on per profile, and each tablet is approved on the desktop once.
 
 **Source locations:**
-- `StageMonitorScreen.kt`
+- `live-output/…/StageMonitorScreen.kt`
 - `data/settings/StageMonitorSettings.kt`
 - `:server`'s `BrowserSourcePage.kt`, `:server`'s `BrowserSourceRoutes.kt` — the tablets' transpose buttons, and the routes that approve and apply them; `LiveStatusWiring.kt` (`offersTranspose`) says which outputs offer them
 - `profiles/…/ProfileStagePage.kt`, `profiles/…/ProfileStageText.kt`, `profiles/…/StageMonitorZoneGrid.kt` — the Stage layout page of a stage-monitor profile

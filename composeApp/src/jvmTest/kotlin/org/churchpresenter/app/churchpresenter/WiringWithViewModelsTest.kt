@@ -14,7 +14,7 @@ import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.server.InstanceLinkViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.obs.OBSWebSocketManager
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.sharedui.models.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals

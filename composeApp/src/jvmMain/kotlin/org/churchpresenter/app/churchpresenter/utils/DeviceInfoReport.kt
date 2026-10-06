@@ -12,9 +12,8 @@ import java.awt.GraphicsEnvironment
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import org.churchpresenter.diagnostics.CrashReporter
-import org.churchpresenter.app.churchpresenter.presenter.NdiManager
-import org.churchpresenter.app.churchpresenter.presenter.OmtManager
-
+import org.churchpresenter.liveoutput.NdiManager
+import org.churchpresenter.liveoutput.OmtManager
 /**
  * Builds a plain-text snapshot of the machine/app configuration for bug reports — OS, display
  * layout, VLC/DeckLink/JCEF availability, and a redacted summary of output/integration settings

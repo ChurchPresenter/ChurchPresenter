@@ -3,7 +3,7 @@ package org.churchpresenter.app.churchpresenter
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.sharedui.models.Presenting
 import kotlin.test.Test

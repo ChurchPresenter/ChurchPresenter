@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.liveoutput.isScreenIndexValid
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.ScreenAssignment
 

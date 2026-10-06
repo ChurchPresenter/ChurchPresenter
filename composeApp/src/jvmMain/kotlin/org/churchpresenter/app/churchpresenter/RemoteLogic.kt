@@ -58,15 +58,6 @@ internal fun remoteEventTargetsClient(eventClientId: String, decidedClientId: St
     eventClientId == decidedClientId || decidedClientId.isBlank()
 
 /**
- * The URL the on-screen Q&A QR code points at.
- *
- * The tunnel URL when there is one, so a phone on mobile data can reach it; the LAN address
- * otherwise.
- */
-internal fun qaQrCodeUrl(tunnelUrl: String, serverUrl: String): String =
-    "${tunnelUrl.ifEmpty { serverUrl }}/qa"
-
-/**
  * Whether media going away is worth one last broadcast.
  *
  * Only on the edge: connected phones need one "nothing loaded" to drop their now-playing view, but

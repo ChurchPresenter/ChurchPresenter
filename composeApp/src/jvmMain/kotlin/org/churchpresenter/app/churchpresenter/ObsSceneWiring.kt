@@ -8,8 +8,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.obs.obsSceneFor
 import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.obs.OBSWebSocketManager
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-
+import org.churchpresenter.liveoutput.PresenterManager
 /**
  * Keeps OBS in step with what is live: connects when the settings say so, and switches scenes as
  * the presented content changes.

@@ -13,7 +13,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.announcements.annButton
 import org.churchpresenter.schedule.SCHEDULE_ROW_CARD_TAG
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongSettings

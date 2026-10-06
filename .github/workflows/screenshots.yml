@@ -11,7 +11,7 @@ name: Screenshots
 #   * reg-actions needs write access to pull requests and to the repository, which `test`
 #     deliberately does not have (`contents: read`).
 #
-# **The images ARE committed**, under each module's `screenshots/` (`composeApp`, `shared-ui`, `slides`, `media`, `songs`, `bible-tab`, `schedule`, `companion-surface`, `canvas`, `presenter`, `profiles`), so a reviewer can open and approve
+# **The images ARE committed**, under each module's `screenshots/` (`composeApp`, `shared-ui`, `slides`, `media`, `songs`, `bible-tab`, `schedule`, `companion-surface`, `canvas`, `presenter`, `profiles`, `live-output`), so a reviewer can open and approve
 # what is on screen rather than take the diff on trust. This job is a second, independent view of
 # the same thing: it records the branch's images and reg-actions diffs them against the base
 # branch's, which it keeps on a `reg_actions` branch of its own. Note the record step below
@@ -112,6 +112,7 @@ jobs:
           :canvas:recordRoborazziJvm --tests '*ScreenshotTest*'
           :presenter:recordRoborazziJvm --tests '*ScreenshotTest*'
           :profiles:recordRoborazziJvm --tests '*ScreenshotTest*'
+          :live-output:recordRoborazziJvm --tests '*ScreenshotTest*'
           :companion-surface:recordRoborazziJvm --tests '*ScreenshotTest*'
 
       # So the rendered set can be fetched without running Gradle locally, and the source the
@@ -202,6 +203,14 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
+      - name: Upload the rendered live-output screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-live-output
+          path: live-output/screenshots
+          retention-days: 30
+          if-no-files-found: error
+
       - name: Upload the rendered companion-surface screenshots
         uses: actions/upload-artifact@v4
         with:
@@ -257,7 +266,7 @@ jobs:
       - name: Gather every module's screenshots
         run: |
           rm -rf screenshots-compare
-          mkdir -p screenshots-compare/shared-ui screenshots-compare/slides screenshots-compare/media screenshots-compare/songs screenshots-compare/bible-tab screenshots-compare/schedule screenshots-compare/companion-surface screenshots-compare/canvas screenshots-compare/presenter screenshots-compare/profiles
+          mkdir -p screenshots-compare/shared-ui screenshots-compare/slides screenshots-compare/media screenshots-compare/songs screenshots-compare/bible-tab screenshots-compare/schedule screenshots-compare/companion-surface screenshots-compare/canvas screenshots-compare/presenter screenshots-compare/profiles screenshots-compare/live-output
           cp -R composeApp/screenshots/. screenshots-compare/
           cp -R shared-ui/screenshots/. screenshots-compare/shared-ui/
           cp -R slides/screenshots/. screenshots-compare/slides/
@@ -268,6 +277,7 @@ jobs:
           cp -R canvas/screenshots/. screenshots-compare/canvas/
           cp -R presenter/screenshots/. screenshots-compare/presenter/
           cp -R profiles/screenshots/. screenshots-compare/profiles/
+          cp -R live-output/screenshots/. screenshots-compare/live-output/
           cp -R companion-surface/screenshots/. screenshots-compare/companion-surface/
 
       - name: Compare with the base branch
