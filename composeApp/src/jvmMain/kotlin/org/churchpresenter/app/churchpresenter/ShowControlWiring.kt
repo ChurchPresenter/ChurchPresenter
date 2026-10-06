@@ -15,6 +15,8 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.schedule.ActionChoices
 import org.churchpresenter.schedule.CompanionChoice
 import org.churchpresenter.schedule.MessageChoice
+import org.churchpresenter.settings.Macro
+import org.churchpresenter.settings.macroNamed
 import org.churchpresenter.settings.messageTokens
 import java.io.File
 import androidx.compose.runtime.snapshotFlow
@@ -63,6 +65,7 @@ internal fun AppRootState.appShowHost(): ShowHost = AppShowHost(
             require(atem.host.isNotBlank()) { "No ATEM switcher is set up" }
             AtemConnectionManager.use(atem.host, atem.port, needsState = false) { block(it) }
         },
+        macro = { name -> appSettings.macros.macroNamed(name)?.actions },
         log = { Log.warn(SHOW_CONTROL_TAG, it) },
     ),
 )
@@ -73,6 +76,12 @@ internal fun AppRootState.appShowHost(): ShowHost = AppShowHost(
  */
 internal fun AppRootState.runRowActions(item: ScheduleItem, actions: List<Action>) =
     presenterManager.previewBus.runOnAir(item, actions) { list, key -> showRunner.run(list, key) }
+
+/** Runs [macro]'s actions; pressing it again while it is still going starts it over. */
+internal fun AppRootState.runMacro(macro: Macro) {
+    showRunner.run(macro.actions, "macro:${macro.id}")
+    presenterManager.setShowPresenterWindow(true)
+}
 
 /** Hands [actions] to [run], keyed by [item]'s id, once [item] reaches the air -- see [PreviewBus.onAir]. */
 internal fun PreviewBus.runOnAir(item: ScheduleItem, actions: List<Action>, run: (List<Action>, String) -> Unit) {
@@ -107,6 +116,7 @@ internal fun MainWindowScope.rememberActionChoices(): ActionChoices {
             lowerThirds = lowerThirds,
             obsScenes = obsScenes,
             companion = settings.companionSatelliteConnections.map { CompanionChoice(it.id, it.name) },
+            macros = settings.macros.map { it.name },
             onOpen = root.obsManager::requestScenes,
         )
     }

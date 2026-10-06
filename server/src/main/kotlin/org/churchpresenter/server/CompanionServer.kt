@@ -44,6 +44,7 @@ import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.MessageTemplate
 import org.churchpresenter.settings.ClearGroup
+import org.churchpresenter.settings.Macro
 import org.churchpresenter.settings.PropDefinition
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.utils.Constants
@@ -374,6 +375,15 @@ class CompanionServer(
 
     /** The props a remote client may switch -- kept current by the app from its settings. */
     @Volatile var props: List<PropDefinition> = emptyList()
+
+    /** Emitted with a macro's id when a remote client runs it: POST /api/macro/{name} or WS "macro". */
+    val onMacro = MutableSharedFlow<String>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** The macros a remote client may run -- kept current by the app from its settings. */
+    @Volatile var macros: List<Macro> = emptyList()
 
     /** Emitted with a clear group's id when a remote client fires it: POST /api/clear?group= or WS "clear". */
     val onClearGroup = MutableSharedFlow<String>(

@@ -2510,6 +2510,24 @@
     <string name="shortcut_description_quick_background_8">Quick background 8</string>
     <string name="shortcut_description_quick_background_9">Quick background 9</string>
     <string name="shortcut_description_quick_background_10">Quick background 10</string>
+    <string name="shortcut_description_macro_1">Run macro 1</string>
+    <string name="shortcut_description_macro_2">Run macro 2</string>
+    <string name="shortcut_description_macro_3">Run macro 3</string>
+    <string name="shortcut_description_macro_4">Run macro 4</string>
+    <string name="shortcut_description_macro_5">Run macro 5</string>
+    <string name="shortcut_description_macro_6">Run macro 6</string>
+    <string name="shortcut_description_macro_7">Run macro 7</string>
+    <string name="shortcut_description_macro_8">Run macro 8</string>
+    <string name="shortcut_description_macro_9">Run macro 9</string>
+    <string name="shortcut_description_clear_group_1">Clear group 1</string>
+    <string name="shortcut_description_clear_group_2">Clear group 2</string>
+    <string name="shortcut_description_clear_group_3">Clear group 3</string>
+    <string name="shortcut_description_clear_group_4">Clear group 4</string>
+    <string name="shortcut_description_clear_group_5">Clear group 5</string>
+    <string name="shortcut_description_clear_group_6">Clear group 6</string>
+    <string name="shortcut_description_clear_group_7">Clear group 7</string>
+    <string name="shortcut_description_clear_group_8">Clear group 8</string>
+    <string name="shortcut_description_clear_group_9">Clear group 9</string>
     <!-- ============================================================================
          Setup wizard v2 — the two-column Getting Started window.
          English only: non-English locales are managed separately (see AGENT.md).
@@ -2996,6 +3014,14 @@
     <string name="clear_groups_name">Name</string>
     <string name="clear_groups_layers">Clears</string>
     <string name="clear_group_clear">Clear</string>
+    <string name="tooltip_macros">Macros</string>
+    <string name="macros_title">Macros</string>
+    <string name="macros_hint">A macro is a named list of actions. Run it from here, from a key (Run macro 1–9 in Keyboard Shortcuts, in this order), from the remote API, or from another macro.</string>
+    <string name="macros_empty">No macros yet. Add one to run several actions with one click, like a message, a lower third and an OBS scene.</string>
+    <string name="macros_add">Add macro</string>
+    <string name="macros_save">Save macro</string>
+    <string name="macros_name">Name</string>
+    <string name="macros_run">Run</string>
     <string name="clear_layer_slide">Slide</string>
     <string name="clear_layer_media">Media</string>
     <string name="clear_layer_captions">Captions</string>

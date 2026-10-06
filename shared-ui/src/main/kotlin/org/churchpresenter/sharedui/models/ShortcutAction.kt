@@ -10,33 +10,40 @@ import org.churchpresenter.strings.generated.resources.shortcut_category_menus
 import org.churchpresenter.strings.generated.resources.shortcut_category_pictures
 import org.churchpresenter.strings.generated.resources.shortcut_category_presentation
 import org.churchpresenter.strings.generated.resources.shortcut_category_songs
-import org.churchpresenter.strings.generated.resources.shortcut_scope_bible_hint
-import org.churchpresenter.strings.generated.resources.shortcut_scope_canvas_hint
-import org.churchpresenter.strings.generated.resources.shortcut_scope_global_hint
-import org.churchpresenter.strings.generated.resources.shortcut_scope_media_hint
-import org.churchpresenter.strings.generated.resources.shortcut_scope_menus_hint
-import org.churchpresenter.strings.generated.resources.shortcut_scope_pictures_hint
-import org.churchpresenter.strings.generated.resources.shortcut_scope_presentation_hint
-import org.churchpresenter.strings.generated.resources.shortcut_scope_songs_hint
 import org.churchpresenter.strings.generated.resources.shortcut_description_add_to_schedule
 import org.churchpresenter.strings.generated.resources.shortcut_description_blank_output
+import org.churchpresenter.strings.generated.resources.shortcut_description_clear_group_1
+import org.churchpresenter.strings.generated.resources.shortcut_description_clear_group_2
+import org.churchpresenter.strings.generated.resources.shortcut_description_clear_group_3
+import org.churchpresenter.strings.generated.resources.shortcut_description_clear_group_4
+import org.churchpresenter.strings.generated.resources.shortcut_description_clear_group_5
+import org.churchpresenter.strings.generated.resources.shortcut_description_clear_group_6
+import org.churchpresenter.strings.generated.resources.shortcut_description_clear_group_7
+import org.churchpresenter.strings.generated.resources.shortcut_description_clear_group_8
+import org.churchpresenter.strings.generated.resources.shortcut_description_clear_group_9
 import org.churchpresenter.strings.generated.resources.shortcut_description_clicker_next
 import org.churchpresenter.strings.generated.resources.shortcut_description_clicker_prev
 import org.churchpresenter.strings.generated.resources.shortcut_description_close_schedule
-import org.churchpresenter.strings.generated.resources.shortcut_description_open_calendar_manager
-import org.churchpresenter.strings.generated.resources.shortcut_description_open_converter
-import org.churchpresenter.strings.generated.resources.shortcut_description_open_song_library
 import org.churchpresenter.strings.generated.resources.shortcut_description_delete_source
 import org.churchpresenter.strings.generated.resources.shortcut_description_escape
 import org.churchpresenter.strings.generated.resources.shortcut_description_exit
-import org.churchpresenter.strings.generated.resources.shortcut_description_f1_keyboard_shortcuts
 import org.churchpresenter.strings.generated.resources.shortcut_description_f10_media
 import org.churchpresenter.strings.generated.resources.shortcut_description_f11_lower_third
 import org.churchpresenter.strings.generated.resources.shortcut_description_f12_announcements
+import org.churchpresenter.strings.generated.resources.shortcut_description_f1_keyboard_shortcuts
 import org.churchpresenter.strings.generated.resources.shortcut_description_f6_bible
 import org.churchpresenter.strings.generated.resources.shortcut_description_f7_songs
 import org.churchpresenter.strings.generated.resources.shortcut_description_f8_pictures
 import org.churchpresenter.strings.generated.resources.shortcut_description_f9_presentation
+import org.churchpresenter.strings.generated.resources.shortcut_description_macro_1
+import org.churchpresenter.strings.generated.resources.shortcut_description_macro_2
+import org.churchpresenter.strings.generated.resources.shortcut_description_macro_3
+import org.churchpresenter.strings.generated.resources.shortcut_description_macro_4
+import org.churchpresenter.strings.generated.resources.shortcut_description_macro_5
+import org.churchpresenter.strings.generated.resources.shortcut_description_macro_6
+import org.churchpresenter.strings.generated.resources.shortcut_description_macro_7
+import org.churchpresenter.strings.generated.resources.shortcut_description_macro_8
+import org.churchpresenter.strings.generated.resources.shortcut_description_macro_9
 import org.churchpresenter.strings.generated.resources.shortcut_description_media_play_pause
 import org.churchpresenter.strings.generated.resources.shortcut_description_mute
 import org.churchpresenter.strings.generated.resources.shortcut_description_nav_down
@@ -48,7 +55,10 @@ import org.churchpresenter.strings.generated.resources.shortcut_description_next
 import org.churchpresenter.strings.generated.resources.shortcut_description_next_slide
 import org.churchpresenter.strings.generated.resources.shortcut_description_next_song
 import org.churchpresenter.strings.generated.resources.shortcut_description_next_verse
+import org.churchpresenter.strings.generated.resources.shortcut_description_open_calendar_manager
+import org.churchpresenter.strings.generated.resources.shortcut_description_open_converter
 import org.churchpresenter.strings.generated.resources.shortcut_description_open_schedule
+import org.churchpresenter.strings.generated.resources.shortcut_description_open_song_library
 import org.churchpresenter.strings.generated.resources.shortcut_description_play_pause
 import org.churchpresenter.strings.generated.resources.shortcut_description_prev_chapter
 import org.churchpresenter.strings.generated.resources.shortcut_description_prev_image
@@ -56,12 +66,8 @@ import org.churchpresenter.strings.generated.resources.shortcut_description_prev
 import org.churchpresenter.strings.generated.resources.shortcut_description_prev_slide
 import org.churchpresenter.strings.generated.resources.shortcut_description_prev_song
 import org.churchpresenter.strings.generated.resources.shortcut_description_prev_verse
-import org.churchpresenter.strings.generated.resources.shortcut_description_redo
-import org.churchpresenter.strings.generated.resources.shortcut_description_remove_from_schedule
-import org.churchpresenter.strings.generated.resources.shortcut_description_save_schedule
-import org.churchpresenter.strings.generated.resources.shortcut_description_save_schedule_as
-import org.churchpresenter.strings.generated.resources.shortcut_description_settings
 import org.churchpresenter.strings.generated.resources.shortcut_description_quick_background_1
+import org.churchpresenter.strings.generated.resources.shortcut_description_quick_background_10
 import org.churchpresenter.strings.generated.resources.shortcut_description_quick_background_2
 import org.churchpresenter.strings.generated.resources.shortcut_description_quick_background_3
 import org.churchpresenter.strings.generated.resources.shortcut_description_quick_background_4
@@ -70,10 +76,22 @@ import org.churchpresenter.strings.generated.resources.shortcut_description_quic
 import org.churchpresenter.strings.generated.resources.shortcut_description_quick_background_7
 import org.churchpresenter.strings.generated.resources.shortcut_description_quick_background_8
 import org.churchpresenter.strings.generated.resources.shortcut_description_quick_background_9
-import org.churchpresenter.strings.generated.resources.shortcut_description_quick_background_10
 import org.churchpresenter.strings.generated.resources.shortcut_description_quick_background_reset
-import org.churchpresenter.strings.generated.resources.shortcut_description_undo
+import org.churchpresenter.strings.generated.resources.shortcut_description_redo
+import org.churchpresenter.strings.generated.resources.shortcut_description_remove_from_schedule
+import org.churchpresenter.strings.generated.resources.shortcut_description_save_schedule
+import org.churchpresenter.strings.generated.resources.shortcut_description_save_schedule_as
+import org.churchpresenter.strings.generated.resources.shortcut_description_settings
 import org.churchpresenter.strings.generated.resources.shortcut_description_take
+import org.churchpresenter.strings.generated.resources.shortcut_description_undo
+import org.churchpresenter.strings.generated.resources.shortcut_scope_bible_hint
+import org.churchpresenter.strings.generated.resources.shortcut_scope_canvas_hint
+import org.churchpresenter.strings.generated.resources.shortcut_scope_global_hint
+import org.churchpresenter.strings.generated.resources.shortcut_scope_media_hint
+import org.churchpresenter.strings.generated.resources.shortcut_scope_menus_hint
+import org.churchpresenter.strings.generated.resources.shortcut_scope_pictures_hint
+import org.churchpresenter.strings.generated.resources.shortcut_scope_presentation_hint
+import org.churchpresenter.strings.generated.resources.shortcut_scope_songs_hint
 import org.churchpresenter.core.models.shortcuts.KeyChord
 import org.jetbrains.compose.resources.StringResource
 
@@ -275,4 +293,39 @@ enum class ShortcutAction(
      */
     QUICK_BACKGROUND_10(ShortcutScope.GLOBAL, Res.string.shortcut_description_quick_background_10,
         emptyList()),
+
+    // Run the macro / fire the clear group in that place in its list in Settings. Unbound until
+    // someone picks a key.
+    MACRO_1(ShortcutScope.GLOBAL, Res.string.shortcut_description_macro_1, emptyList()),
+    MACRO_2(ShortcutScope.GLOBAL, Res.string.shortcut_description_macro_2, emptyList()),
+    MACRO_3(ShortcutScope.GLOBAL, Res.string.shortcut_description_macro_3, emptyList()),
+    MACRO_4(ShortcutScope.GLOBAL, Res.string.shortcut_description_macro_4, emptyList()),
+    MACRO_5(ShortcutScope.GLOBAL, Res.string.shortcut_description_macro_5, emptyList()),
+    MACRO_6(ShortcutScope.GLOBAL, Res.string.shortcut_description_macro_6, emptyList()),
+    MACRO_7(ShortcutScope.GLOBAL, Res.string.shortcut_description_macro_7, emptyList()),
+    MACRO_8(ShortcutScope.GLOBAL, Res.string.shortcut_description_macro_8, emptyList()),
+    MACRO_9(ShortcutScope.GLOBAL, Res.string.shortcut_description_macro_9, emptyList()),
+    CLEAR_GROUP_1(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_group_1, emptyList()),
+    CLEAR_GROUP_2(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_group_2, emptyList()),
+    CLEAR_GROUP_3(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_group_3, emptyList()),
+    CLEAR_GROUP_4(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_group_4, emptyList()),
+    CLEAR_GROUP_5(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_group_5, emptyList()),
+    CLEAR_GROUP_6(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_group_6, emptyList()),
+    CLEAR_GROUP_7(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_group_7, emptyList()),
+    CLEAR_GROUP_8(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_group_8, emptyList()),
+    CLEAR_GROUP_9(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_group_9, emptyList()),
 }
+
+/** The keys that run the first nine macros, in the order the macros are listed. */
+val MACRO_ACTIONS: List<ShortcutAction> = listOf(
+    ShortcutAction.MACRO_1, ShortcutAction.MACRO_2, ShortcutAction.MACRO_3,
+    ShortcutAction.MACRO_4, ShortcutAction.MACRO_5, ShortcutAction.MACRO_6,
+    ShortcutAction.MACRO_7, ShortcutAction.MACRO_8, ShortcutAction.MACRO_9,
+)
+
+/** The keys that fire the first nine clear groups, in the order the groups are listed. */
+val CLEAR_GROUP_ACTIONS: List<ShortcutAction> = listOf(
+    ShortcutAction.CLEAR_GROUP_1, ShortcutAction.CLEAR_GROUP_2, ShortcutAction.CLEAR_GROUP_3,
+    ShortcutAction.CLEAR_GROUP_4, ShortcutAction.CLEAR_GROUP_5, ShortcutAction.CLEAR_GROUP_6,
+    ShortcutAction.CLEAR_GROUP_7, ShortcutAction.CLEAR_GROUP_8, ShortcutAction.CLEAR_GROUP_9,
+)

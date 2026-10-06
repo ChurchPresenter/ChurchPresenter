@@ -18,6 +18,7 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.BibleSyncMode
+import org.churchpresenter.settings.Macro
 import org.churchpresenter.settings.InstanceLinkRole
 import java.io.File
 import org.churchpresenter.slides.PresentationSlidesLoaded
@@ -39,6 +40,8 @@ data class LiveOutputCallbacks(
     val onRowWentLive: (ScheduleItem) -> Unit = {},
     /** A row put on screen from the Schedule, with the actions it runs as it reaches the air. */
     val onRowActions: (ScheduleItem, List<Action>) -> Unit = { _, _ -> },
+    /** Runs a macro from the Macros panel or a key. */
+    val onRunMacro: (Macro) -> Unit = {},
 )
 
 /** The planned service the Schedule works against, from the calendar. */

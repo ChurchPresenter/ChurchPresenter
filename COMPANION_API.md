@@ -790,6 +790,29 @@ and leaving `on` out toggles it.
 
 ---
 
+### `GET /api/macros` and `POST /api/macro/{name}`
+
+Macros are the named action lists set up in the app's Macros panel -- a message, a lower third, an
+OBS scene, a wait, another macro. No approval required.
+
+`GET /api/macros` lists them, with how many actions each holds:
+
+```json
+[ { "id": "macro1", "name": "Walk in", "actions": 4 } ]
+```
+
+`POST /api/macro/{name}` runs one, named by its id or its name (any case). Running it again while it
+is still going starts it over. An unknown macro is answered `404`.
+
+```bash
+curl -k -X POST https://192.168.1.10:8765/api/macro/Walk%20in
+```
+
+Over the WebSocket, the command is `macro` with `{"name": "Walk in"}`; an unknown macro is acked
+with `no_such_macro`.
+
+---
+
 ### Lower Thirds (Bitfocus Companion)
 
 One HTTP call runs the entire lower-third sequence — the app cuts the ATEM

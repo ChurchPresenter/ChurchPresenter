@@ -232,7 +232,22 @@ The original plan for the step:
 - UI: an action list editor on the row (add, reorder, delete; pickers fed by OBS scenes, ATEM keys
   and macros, Companion buttons, lower thirds, props, messages).
 
-### Step 7 — Macros (UI → approval)
+### Step 7 — Macros (built; UI awaiting approval)
+
+What was built:
+
+- `Macro(id, name, actions)` in settings (`AppSettings.macros`, additive); `ShowOutlets.macro` and
+  `ActionChoices.macros` read them, so `RunMacro` and the action pickers see them.
+- The sidebar's Macros button and `MacrosDialog`: a Run button per macro, and an editor with a name
+  and the cue-action list editor (`ActionListEditor`, public in `:schedule`).
+- Keys: `MACRO_1`–`9` run the first nine macros in list order, and `CLEAR_GROUP_1`–`9` fire the first
+  nine clear groups (the key left over from step 4); both ship unbound.
+- `GET /api/macros`, `POST /api/macro/{name}` and the WebSocket `macro` command
+  (`server/MacroRoutes.kt`), documented in `COMPANION_API.md`.
+- Not yet: Companion actions and variables for macros.
+
+The original plan for the step:
+
 
 - Also binds a key to a clear group (left over from step 4).
 - Storage: named action lists in settings (`MacroSettings`, additive).

@@ -129,6 +129,7 @@ internal fun Route.scheduleRoutes(
                 messageRoutes(server, json, scope)
                 propRoutes(server, json, scope)
                 clearGroupRoutes(server, json)
+                macroRoutes(server, json, scope)
 
 }
 

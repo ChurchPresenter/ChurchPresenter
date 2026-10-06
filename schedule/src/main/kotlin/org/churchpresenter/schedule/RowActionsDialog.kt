@@ -115,21 +115,7 @@ internal fun RowActionsDialogContent(
                 modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                if (draft.isEmpty()) {
-                    Text(stringResource(Res.string.row_actions_empty), style = MaterialTheme.typography.bodyMedium)
-                }
-                draft.forEachIndexed { index, action ->
-                    RowActionCard(
-                        index = index,
-                        action = action,
-                        last = index == draft.lastIndex,
-                        choices = choices,
-                        rows = rows,
-                        onChange = { changed -> draft = draft.toMutableList().also { it[index] = changed } },
-                        onMove = { by -> draft = draft.moved(index, index + by) },
-                        onRemove = { draft = draft.filterIndexed { i, _ -> i != index } },
-                    )
-                }
+                ActionCards(draft, choices, rows) { draft = it }
             }
             HorizontalDivider()
             Spacer(Modifier.padding(top = 12.dp))
@@ -147,6 +133,54 @@ internal fun RowActionsDialogContent(
                 ) { Text(stringResource(Res.string.row_actions_save)) }
             }
         }
+    }
+}
+
+/**
+ * The cards of an action list, one per action, each editable, movable and removable -- what the
+ * cue-action dialog and the macro editor both show. [onChange] gets the whole list each time.
+ */
+@Composable
+internal fun ActionCards(
+    actions: List<Action>,
+    choices: ActionChoices,
+    rows: List<ScheduleItem>,
+    onChange: (List<Action>) -> Unit,
+) {
+    if (actions.isEmpty()) {
+        Text(stringResource(Res.string.row_actions_empty), style = MaterialTheme.typography.bodyMedium)
+    }
+    actions.forEachIndexed { index, action ->
+        RowActionCard(
+            index = index,
+            action = action,
+            last = index == actions.lastIndex,
+            choices = choices,
+            rows = rows,
+            onChange = { changed -> onChange(actions.toMutableList().also { it[index] = changed }) },
+            onMove = { by -> onChange(actions.moved(index, index + by)) },
+            onRemove = { onChange(actions.filterIndexed { i, _ -> i != index }) },
+        )
+    }
+}
+
+/**
+ * An action list, edited in place: its cards, then an Add action menu under them. [rows] are the
+ * schedule rows a go-live or next/previous action can name; the pickers' choices come from
+ * [LocalActionChoices].
+ */
+@Composable
+fun ActionListEditor(
+    actions: List<Action>,
+    rows: List<ScheduleItem>,
+    onChange: (List<Action>) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val choices = LocalActionChoices.current
+    LaunchedEffect(Unit) { choices.onOpen() }
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        ActionCards(actions, choices, rows, onChange)
+        AddActionButton { kind -> onChange(actions + newAction(kind, choices, rows)) }
     }
 }
 

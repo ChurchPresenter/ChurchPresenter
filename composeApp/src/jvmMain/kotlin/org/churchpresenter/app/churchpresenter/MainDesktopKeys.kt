@@ -6,7 +6,10 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import kotlinx.coroutines.launch
+import org.churchpresenter.app.churchpresenter.viewmodel.clearGroup
 import org.churchpresenter.profiles.quickBackgroundSlotFor
+import org.churchpresenter.sharedui.models.CLEAR_GROUP_ACTIONS
+import org.churchpresenter.sharedui.models.MACRO_ACTIONS
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.models.ShortcutScope
 import org.churchpresenter.sharedui.models.Presenting
@@ -42,6 +45,8 @@ internal fun MainDesktopScope.handleMainDesktopKey(keyEvent: KeyEvent): Boolean 
     if (keyEvent.type != KeyEventType.KeyDown) return false
     val shortcutTab = shortcuts.actionFor(keyEvent, ShortcutScope.GLOBAL)?.targetTab
     val quickBackgroundSlot = quickBackgroundSlotFor(shortcuts, keyEvent)
+    val macroSlot = macroSlotFor(keyEvent)
+    val clearGroupSlot = clearGroupSlotFor(keyEvent)
     val live = slideContent == Presenting.PRESENTATION
     return when {
         shortcuts.matches(ShortcutAction.REDO, keyEvent) -> {
@@ -63,6 +68,15 @@ internal fun MainDesktopScope.handleMainDesktopKey(keyEvent: KeyEvent): Boolean 
         shortcuts.matches(ShortcutAction.CLEAR_OUTPUT, keyEvent) -> {
             clearOutput(); true
         }
+        macroSlot != null -> {
+            // Swallowed whether or not that slot is filled, as the quick backgrounds are.
+            appSettings.macros.getOrNull(macroSlot)?.let(this.live.onRunMacro)
+            true
+        }
+        clearGroupSlot != null -> {
+            appSettings.clearGroups.getOrNull(clearGroupSlot)?.let { presenterManager.clearGroup(it) }
+            true
+        }
         shortcuts.matches(ShortcutAction.TAKE, keyEvent) -> {
             presenterManager.previewBus.take(); true
         }
@@ -83,6 +97,14 @@ internal fun MainDesktopScope.handleMainDesktopKey(keyEvent: KeyEvent): Boolean 
         else -> advanceKeySequences(keyEvent.key)
     }
 }
+
+/** Which of the first nine macros [keyEvent] runs (0-based), or null when it runs none. */
+private fun MainDesktopScope.macroSlotFor(keyEvent: KeyEvent): Int? =
+    MACRO_ACTIONS.indexOfFirst { shortcuts.matches(it, keyEvent) }.takeIf { it >= 0 }
+
+/** Which of the first nine clear groups [keyEvent] fires (0-based), or null when it fires none. */
+private fun MainDesktopScope.clearGroupSlotFor(keyEvent: KeyEvent): Int? =
+    CLEAR_GROUP_ACTIONS.indexOfFirst { shortcuts.matches(it, keyEvent) }.takeIf { it >= 0 }
 
 /** One clicker press: the deck's next or previous animation step, else the next or previous slide. */
 private suspend fun MainDesktopScope.clickPresentation(forward: Boolean) {

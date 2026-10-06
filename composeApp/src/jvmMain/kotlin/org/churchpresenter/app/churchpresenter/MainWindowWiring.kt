@@ -34,6 +34,7 @@ import org.churchpresenter.calendar.CalendarFileWatcher
 import org.churchpresenter.calendar.seedCalendarFolder
 import org.churchpresenter.calendar.CueRunner
 import org.churchpresenter.settings.calendarFolder
+import org.churchpresenter.settings.macroNamed
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
@@ -154,6 +155,12 @@ internal fun MainWindowScope.ServerCommandWiring() {
             companionServer.messageTemplates = appSettings.messageTemplates
             companionServer.props = appSettings.props
             companionServer.clearGroups = appSettings.clearGroups
+            companionServer.macros = appSettings.macros
+        }
+        LaunchedEffect(Unit) {
+            companionServer.onMacro.collect { id ->
+                appSettings.macros.macroNamed(id)?.let { runMacro(it) }
+            }
         }
         LaunchedEffect(Unit) {
             companionServer.onClearGroup.collect { id ->

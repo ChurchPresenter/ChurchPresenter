@@ -210,6 +210,8 @@ internal fun MainDesktopScope.MainDesktopPanels() {
                     qaDisplayUrl = web.qaDisplayUrl,
                     sttManager = sttManager,
                     companionSatelliteViewModel = companionSatelliteViewModel,
+                    scheduleRows = scheduleViewModel.scheduleItems,
+                    onRunMacro = live.onRunMacro,
                 )
             }
         }

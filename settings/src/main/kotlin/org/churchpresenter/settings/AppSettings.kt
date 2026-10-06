@@ -146,6 +146,8 @@ data class AppSettings(
     val props: List<PropDefinition> = emptyList(),
     /** The layer sets an operator clears in one go -- see [ClearGroup]. */
     val clearGroups: List<ClearGroup> = emptyList(),
+    /** The action lists an operator runs by name -- see [Macro]. */
+    val macros: List<Macro> = emptyList(),
 ) {
     /** What the song identified by [songId] is played at — tempo and capo together. */
     fun tuningFor(songId: String): SongTuning =
