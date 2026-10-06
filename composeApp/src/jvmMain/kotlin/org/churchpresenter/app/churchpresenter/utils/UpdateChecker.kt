@@ -67,7 +67,9 @@ object UpdateChecker {
      * eligible too; otherwise they're skipped exactly like drafts.
      */
     suspend fun checkForUpdate(includePrereleases: Boolean): UpdateCheckResult =
-        checkForUpdate(includePrereleases, RELEASES_API_URL)
+        // The Store updates its own installs; installing a release MSI over one would leave two copies.
+        if (StorePackage.isInstalled) UpdateCheckResult.UpToDate
+        else checkForUpdate(includePrereleases, RELEASES_API_URL)
 
     internal suspend fun checkForUpdate(includePrereleases: Boolean, apiUrl: String): UpdateCheckResult =
         withContext(Dispatchers.IO) {
