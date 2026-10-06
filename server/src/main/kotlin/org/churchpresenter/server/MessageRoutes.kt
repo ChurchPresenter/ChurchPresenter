@@ -50,6 +50,7 @@ internal fun resolveMessage(request: MessageRequest, templates: List<MessageTemp
 internal fun Route.messageRoutes(server: CompanionServer, json: Json, scope: CoroutineScope) {
     post(Constants.ENDPOINT_MESSAGE) {
         if (!server.checkApiKey(call)) return@post
+        if (!call.requireDevMode(server)) return@post
         val request = try {
             json.decodeFromString(MessageRequest.serializer(), call.receiveText())
         } catch (_: Exception) {
@@ -74,6 +75,7 @@ internal suspend fun DefaultWebSocketServerSession.messageCommand(
     scope: CoroutineScope,
 ): Boolean {
     if (msg.type != Constants.WS_CMD_MESSAGE) return false
+    if (refusedOutsideDevMode(msg, server, json)) return true
     val request = runCatching { json.decodeFromString(MessageRequest.serializer(), msg.payload) }.getOrNull()
     val message = request?.let { resolveMessage(it, server.messageTemplates) }
     if (message == null) {

@@ -45,8 +45,9 @@ internal fun MainDesktopScope.handleMainDesktopKey(keyEvent: KeyEvent): Boolean 
     if (keyEvent.type != KeyEventType.KeyDown) return false
     val shortcutTab = shortcuts.actionFor(keyEvent, ShortcutScope.GLOBAL)?.targetTab
     val quickBackgroundSlot = quickBackgroundSlotFor(shortcuts, keyEvent)
-    val macroSlot = macroSlotFor(keyEvent)
-    val clearGroupSlot = clearGroupSlotFor(keyEvent)
+    // Dev mode only: outside it these keys do nothing, and fall through.
+    val macroSlot = macroSlotFor(keyEvent)?.takeIf { this.live.devMode }
+    val clearGroupSlot = clearGroupSlotFor(keyEvent)?.takeIf { this.live.devMode }
     val live = slideContent == Presenting.PRESENTATION
     return when {
         shortcuts.matches(ShortcutAction.REDO, keyEvent) -> {
@@ -77,7 +78,7 @@ internal fun MainDesktopScope.handleMainDesktopKey(keyEvent: KeyEvent): Boolean 
             appSettings.clearGroups.getOrNull(clearGroupSlot)?.let { presenterManager.clearGroup(it) }
             true
         }
-        shortcuts.matches(ShortcutAction.TAKE, keyEvent) -> {
+        shortcuts.matches(ShortcutAction.TAKE, keyEvent) && this.live.devMode -> {
             presenterManager.previewBus.take(); true
         }
         // Presentation clickers (Logitech/Kensington etc.) are HID keyboards

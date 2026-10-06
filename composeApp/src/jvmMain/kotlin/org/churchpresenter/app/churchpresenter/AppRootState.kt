@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.sharedui.utils.DevFlags
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import org.churchpresenter.controlin.ControlHub
@@ -184,6 +185,14 @@ internal class AppRootState(
     var showStyleEditorWindow by mutableStateOf(false)
     var showMemoryMonitorWindow by mutableStateOf(false)
     var developerMenuUnlocked by mutableStateOf(false)
+
+    /**
+     * Dev mode: a dev build, the developer menu unlocked, or the forced dev window. The features not
+     * ready for production -- the sidebar's Dev mode only box and what is behind it -- exist only
+     * while it is on.
+     */
+    val devMode: Boolean
+        get() = shouldShowDeveloperMenu(BuildConfig.IS_RELEASE, DevFlags.forceDevWindow, developerMenuUnlocked)
     var lottieGenOutputDir by mutableStateOf<File?>(null)
     var lottieGenOnFileSaved by mutableStateOf<(() -> Unit)?>(null)
     var pendingUpdateResult by mutableStateOf<UpdateCheckResult?>(null)

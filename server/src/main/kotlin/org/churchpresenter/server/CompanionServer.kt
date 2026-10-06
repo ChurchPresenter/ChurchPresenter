@@ -382,6 +382,12 @@ class CompanionServer(
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
+    /**
+     * Whether the app is in dev mode -- kept current by the app. Off, the features not yet ready for
+     * production refuse remote clients; see [requireDevMode].
+     */
+    @Volatile var devMode: Boolean = false
+
     /** The macros a remote client may run -- kept current by the app from its settings. */
     @Volatile var macros: List<Macro> = emptyList()
 

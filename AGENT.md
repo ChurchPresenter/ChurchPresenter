@@ -31,6 +31,18 @@ demand.
   `MainDesktopScope`/`MainDesktopViewModels` (`MainDesktopPanels.kt`, `ScheduleSidebar.kt`,
   `MainTabArea.kt`, `ContentTabPanes.kt`, `PreviewSidebar.kt`). Not new precedent.
 
+### Dev mode only — unfinished features stay behind it
+- A user-facing feature that is built but not approved for production goes in the preview
+  sidebar's **Dev mode only** box (`DevModeBox` in `PreviewSidebar.kt`), or gates on dev mode
+  where it has no button there: `AppRootState.devMode` in the app, `LiveOutputCallbacks.devMode`
+  on the main screen, `LocalShowControlEnabled` in `:schedule`, `CompanionServer.devMode` (with
+  `requireDevMode`) on the remote API, `ShortcutAction.devOnly` for its keys.
+- Gate the behaviour, not only the button: a saved setting must not keep working unseen when dev
+  mode is off.
+- Dev mode is the Developer menu's rule (`shouldShowDeveloperMenu`): a dev build, D pressed seven
+  times, or `forceDevWindow`. A feature leaves the box only when the person running the work says it
+  is ready for production.
+
 ### UI icons
 - **NEVER** use text/emoji as icons (`Text("⏸")`). Use `painterResource()` with real icon assets.
 

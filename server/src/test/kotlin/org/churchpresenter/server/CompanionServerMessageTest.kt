@@ -76,6 +76,8 @@ class CompanionServerMessageTest {
 
     @BeforeTest
     fun reset() {
+        // These are dev mode only features (AGENT.md); off, they refuse -- see the dev mode test.
+        server.devMode = true
         client = HttpClient(CIO) { install(WebSockets) }
         server.updateApiKey(enabled = false, key = "")
         server.messageTemplates = listOf(nursery)

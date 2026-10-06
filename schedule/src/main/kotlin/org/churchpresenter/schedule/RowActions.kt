@@ -56,6 +56,12 @@ data class ActionChoices(
 /** The choices the app offers the row-action editor -- none outside the app. */
 val LocalActionChoices = staticCompositionLocalOf { ActionChoices() }
 
+/**
+ * Whether a row's cue actions are offered -- its Actions button and chip. They are dev mode only
+ * (AGENT.md), so off unless the app says otherwise; what a row holds stays in its file either way.
+ */
+val LocalShowControlEnabled = staticCompositionLocalOf { false }
+
 /** Each kind of action the editor can add, in the order its menu offers them. */
 internal enum class ActionKind(val label: StringResource) {
     OBS_SCENE(Res.string.action_obs_scene),

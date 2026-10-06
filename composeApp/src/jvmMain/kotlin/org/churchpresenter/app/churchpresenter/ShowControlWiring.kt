@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.liveoutput.withPreviewMode
 import org.churchpresenter.showcontrol.ActionRunner
 import org.churchpresenter.app.churchpresenter.remote.AppShowHost
 import org.churchpresenter.app.churchpresenter.remote.ShowOutlets
@@ -38,7 +39,8 @@ import org.churchpresenter.showcontrol.ShowHost
  */
 internal fun AppRootState.appShowHost(): ShowHost = AppShowHost(
     presenterManager = presenterManager,
-    settings = { appSettings },
+    // Preview mode is dev mode only; outside it the host sees it off, as the outputs do.
+    settings = { if (devMode) appSettings else appSettings.withPreviewMode(false) },
     outlets = ShowOutlets(
         rows = { currentScheduleItems },
         currentRowId = { lastLiveRowId ?: selectedScheduleItemId },
@@ -77,8 +79,9 @@ internal fun AppRootState.appShowHost(): ShowHost = AppShowHost(
  * Runs the [actions] of the schedule row [item] as it reaches the air: now, or -- when it has just
  * gone to Preview -- on the Take that puts it there. Firing the row again starts them over.
  */
-internal fun AppRootState.runRowActions(item: ScheduleItem, actions: List<Action>) =
-    presenterManager.previewBus.runOnAir(item, actions) { list, key -> showRunner.run(list, key) }
+internal fun AppRootState.runRowActions(item: ScheduleItem, actions: List<Action>) {
+    if (devMode) presenterManager.previewBus.runOnAir(item, actions) { list, key -> showRunner.run(list, key) }
+}
 
 /**
  * Runs the actions of the schedule row [item] now -- it has gone straight to air. [chainDepth] is
@@ -86,6 +89,7 @@ internal fun AppRootState.runRowActions(item: ScheduleItem, actions: List<Action
  * rows that step to each other cannot loop.
  */
 internal fun AppRootState.runRowActionsNow(item: ScheduleItem, chainDepth: Int = -1) {
+    if (!devMode) return
     val actions = currentScheduleActions.currentActions()[item.id].orEmpty()
     if (actions.isEmpty()) return
     if (chainDepth + 1 >= ActionRunner.MAX_CHAIN_DEPTH) {
@@ -97,6 +101,7 @@ internal fun AppRootState.runRowActionsNow(item: ScheduleItem, chainDepth: Int =
 
 /** Runs [macro]'s actions; pressing it again while it is still going starts it over. */
 internal fun AppRootState.runMacro(macro: Macro) {
+    if (!devMode) return
     showRunner.run(macro.actions, "macro:${macro.id}")
 }
 

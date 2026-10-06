@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.liveoutput.withPreviewMode
 import org.churchpresenter.server.broadcastFreezeChange
 import org.churchpresenter.server.clearPresentationState
 import org.churchpresenter.server.updateAutoScrollInterval
@@ -191,20 +192,23 @@ internal fun AppRootState.rememberEffectiveAppSettings(): AppSettings {
     // the preview would show the sample in the styling the operator is in the middle of replacing.
     // Null whenever no preview is running, which is every other moment of the app's life.
     val previewSettingsOverride by presenterManager.previewSettingsOverride
+    val devMode = devMode
     val effectiveAppSettings = remember(
         appSettings,
         mirroredBackgroundSettings,
         previewSettingsOverride,
         activeQuickBackground,
+        devMode,
     ) {
         // Three layers, innermost first: the settings dialog's draft stands in for the saved
         // settings while a preview is running, Instance Link swaps the backgrounds inside whichever
         // of the two that is, and the quick tray's pick goes in front of the lot — it is what an
         // operator reaches for mid-service to override what is on screen right now.
+        // Preview mode is dev mode only: outside it a saved switch is read as off.
         withQuickBackground(
             withMirroredBackgrounds(previewSettingsOverride ?: appSettings, mirroredBackgroundSettings),
             activeQuickBackground,
-        )
+        ).let { if (devMode) it else it.withPreviewMode(false) }
     }
     // A tile removed from the tray, or a whole settings import, must not leave a stale override live.
     LaunchedEffect(appSettings.quickBackgrounds) {

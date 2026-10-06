@@ -116,26 +116,12 @@ private suspend fun DefaultWebSocketServerSession.presentCommand(
                         }
                         sendCommandAck(msg.commandId, ok = true, json = json)
                     }
-                    Constants.WS_CMD_CLEAR -> {
-                        // With a "group" in the payload, that clear group's layers come down.
-                        if (clearGroupCommand(msg, server, json, scope)) return true
-                        // With a "layer" in the payload, only that layer comes down.
-                        val layer = clearLayerOf(msg.payload, json)
-                        if (layer != null) {
-                            scope.launch { server.onClearLayer.emit(layer) }
-                        } else {
-                            scope.launch { server.onClear.emit(Unit) }
-                            scope.launch {
-                                server.onInstantAction.emit(CompanionServer.RemoteInstantAction(
-                                    "clear", RemoteLabel.EMPTY, clientId = wsClientId
-                                ))
-                            }
-                        }
-                        sendCommandAck(msg.commandId, ok = true, json = json)
-                    }
+                    Constants.WS_CMD_CLEAR -> clearCommand(msg, server, wsClientId, json, scope)
                     Constants.WS_CMD_TAKE -> {
-                        scope.launch { server.onTake.emit(Unit) }
-                        sendCommandAck(msg.commandId, ok = true, json = json)
+                        if (!refusedOutsideDevMode(msg, server, json)) {
+                            scope.launch { server.onTake.emit(Unit) }
+                            sendCommandAck(msg.commandId, ok = true, json = json)
+                        }
                     }
                     Constants.WS_CMD_BIBLE_HOLD -> {
                         val hold = try {
@@ -255,4 +241,33 @@ internal fun clearLayerOf(payload: String, json: Json): String? = try {
     json.parseToJsonElement(payload).jsonObject["layer"]?.jsonPrimitive?.contentOrNull
 } catch (_: IllegalArgumentException) {
     null
+}
+
+/**
+ * The WebSocket `clear` command: a clear group, one layer, or everything. A group or a layer is dev
+ * mode only; clearing everything is not.
+ */
+private suspend fun DefaultWebSocketServerSession.clearCommand(
+    msg: WebSocketMessage,
+    server: CompanionServer,
+    wsClientId: String,
+    json: Json,
+    scope: CoroutineScope,
+) {
+    // With a "group" in the payload, that clear group's layers come down.
+    if (clearGroupCommand(msg, server, json, scope)) return
+    // With a "layer" in the payload, only that layer comes down.
+    val layer = clearLayerOf(msg.payload, json)
+    if (layer != null) {
+        if (refusedOutsideDevMode(msg, server, json)) return
+        scope.launch { server.onClearLayer.emit(layer) }
+    } else {
+        scope.launch { server.onClear.emit(Unit) }
+        scope.launch {
+            server.onInstantAction.emit(
+                CompanionServer.RemoteInstantAction("clear", RemoteLabel.EMPTY, clientId = wsClientId),
+            )
+        }
+    }
+    sendCommandAck(msg.commandId, ok = true, json = json)
 }

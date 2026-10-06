@@ -147,11 +147,12 @@ private fun Route.liveControlRoutes(server: CompanionServer, scope: CoroutineSco
                     if (!server.checkApiKey(call)) return@post
                     val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                     call.request.queryParameters["group"]?.let { group ->
-                        call.respondClearGroup(server, scope, group)
+                        if (call.requireDevMode(server)) call.respondClearGroup(server, scope, group)
                         return@post
                     }
                     val layer = call.request.queryParameters["layer"]
                     if (layer != null) {
+                        if (!call.requireDevMode(server)) return@post
                         scope.launch { server.onClearLayer.emit(layer) }
                         call.respondText("""{"ok":true}""", ContentType.Application.Json)
                         return@post
@@ -175,6 +176,7 @@ private fun Route.liveControlRoutes(server: CompanionServer, scope: CoroutineSco
                  */
                 post(Constants.ENDPOINT_TAKE) {
                     if (!server.checkApiKey(call)) return@post
+                    if (!call.requireDevMode(server)) return@post
                     scope.launch { server.onTake.emit(Unit) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }

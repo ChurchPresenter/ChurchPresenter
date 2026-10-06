@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.controlin.ControlSettings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -19,7 +20,8 @@ import org.churchpresenter.sharedui.models.Presenting
 @Composable
 internal fun MainWindowScope.ControlInEffects() {
     val hub = root.controlHub
-    val control = root.appSettings.control
+    // MIDI and OSC are dev mode only: outside it every port stays closed.
+    val control = if (root.devMode) root.appSettings.control else ControlSettings()
     DisposableEffect(hub) { onDispose { hub.close() } }
     // Opening a port can block on a device, so it is done off the UI thread.
     LaunchedEffect(control) { withContext(Dispatchers.IO) { hub.apply(control) } }

@@ -72,6 +72,8 @@ class CompanionServerMacroTest {
 
     @BeforeTest
     fun reset() {
+        // These are dev mode only features (AGENT.md); off, they refuse -- see the dev mode test.
+        server.devMode = true
         client = HttpClient(CIO) { install(WebSockets) }
         server.updateApiKey(enabled = false, key = "")
         server.macros = listOf(walkIn, closing)
@@ -146,6 +148,33 @@ class CompanionServerMacroTest {
         assertTrue(acks.first { it.commandId == "ok" }.ok)
         assertFalse(acks.first { it.commandId == "unknown" }.ok)
         assertFalse(acks.first { it.commandId == "missing" }.ok)
+    }
+
+    @Test
+    fun `outside dev mode the unfinished features refuse, and clearing everything still works`() {
+        server.devMode = false
+        val gated = listOf(
+            "POST ${Constants.ENDPOINT_MACRO}/macro1",
+            "POST ${Constants.ENDPOINT_TAKE}",
+            "POST ${Constants.ENDPOINT_CLEAR}?layer=slide",
+            "POST ${Constants.ENDPOINT_CLEAR}?group=anything",
+            "POST ${Constants.ENDPOINT_MESSAGE}",
+            "POST ${Constants.ENDPOINT_PROPS}/logo/on",
+            "GET ${Constants.ENDPOINT_MACROS}",
+            "GET ${Constants.ENDPOINT_PROPS}",
+            "GET ${Constants.ENDPOINT_CLEAR_GROUPS}",
+        )
+        gated.forEach { request ->
+            val (verb, path) = request.split(" ")
+            val response = runBlocking { if (verb == "GET") client.get(url(path)) else client.post(url(path)) }
+            assertEquals(HttpStatusCode.Forbidden, response.status, request)
+            assertTrue("dev mode only" in runBlocking { response.bodyAsText() }, request)
+        }
+        assertEquals(HttpStatusCode.OK, post(Constants.ENDPOINT_CLEAR).status, "clearing everything is not gated")
+
+        val ack = acksFor(setOf("m"), command("""{"name":"Walk in"}""", "m")).single()
+        assertFalse(ack.ok)
+        assertEquals("dev_mode_only", ack.reason)
     }
 
     private fun command(payload: String, commandId: String): String = json.encodeToString(

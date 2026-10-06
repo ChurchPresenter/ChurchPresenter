@@ -46,12 +46,14 @@ internal fun propAction(action: String?): Result<Boolean?> = when (action) {
 internal fun Route.propRoutes(server: CompanionServer, json: Json, scope: CoroutineScope) {
     get(Constants.ENDPOINT_PROPS) {
         if (!server.checkApiKey(call)) return@get
+        if (!call.requireDevMode(server)) return@get
         val onAir = server.liveState.value?.props.orEmpty().toSet()
         val body = json.encodeToString(ListSerializer(PropDto.serializer()), propsListing(server.props, onAir))
         call.respondText(body, ContentType.Application.Json)
     }
     post("${Constants.ENDPOINT_PROPS}/{id}/{action}") {
         if (!server.checkApiKey(call)) return@post
+        if (!call.requireDevMode(server)) return@post
         val prop = findProp(server.props, call.parameters["id"].orEmpty())
         val action = propAction(call.parameters["action"])
         when {
@@ -76,6 +78,7 @@ internal suspend fun DefaultWebSocketServerSession.propCommand(
     scope: CoroutineScope,
 ): Boolean {
     if (msg.type != Constants.WS_CMD_PROP) return false
+    if (refusedOutsideDevMode(msg, server, json)) return true
     val payload = runCatching { json.parseToJsonElement(msg.payload).jsonObject }.getOrNull()
     val prop = payload?.get("id")?.jsonPrimitive?.content?.let { findProp(server.props, it) }
     if (prop == null) {

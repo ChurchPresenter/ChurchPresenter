@@ -350,6 +350,13 @@ both, and the gaps below are for a later phase.
   - Crash-free sessions confirmed in Sentry.
   - Delta updates last.
 
+## Dev mode only
+
+Not ready for production, so behind dev mode (AGENT.md, "Dev mode only") until approved: messages,
+props, macros, MIDI and OSC, clear layers and clear groups, schedule row actions, preview mode and
+Take (moved out of System → General into the sidebar box), their shortcut slots, and their remote
+API, which answers `403 {"reason":"dev mode only"}` outside it. Plain `/api/clear` stays open.
+
 ## Rules that apply throughout
 
 - Commits are authored by zitlem

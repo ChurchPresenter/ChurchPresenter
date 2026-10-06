@@ -183,7 +183,7 @@ private fun RowScope.ScheduleRowActionButtons(
         iconTint = if (note.isNotEmpty() || noteExpanded) MaterialTheme.colorScheme.primary
                    else MaterialTheme.colorScheme.onSurfaceVariant
     )
-    if (!isSection) {
+    if (!isSection && LocalShowControlEnabled.current) {
         ScheduleRowActionButton(
             painter = rememberVectorPainter(Icons.Outlined.Bolt),
             text = stringResource(Res.string.tooltip_row_actions),
@@ -341,7 +341,8 @@ internal fun ScheduleItemRow(
 
             ScheduleRowFooter(
                 RowNote(note, noteExpanded, noteText), { noteText = it }, onNoteChanged, { noteExpanded = it },
-                actions, rows, onEditActions = { editingActions = true },
+                if (LocalShowControlEnabled.current) actions else emptyList(), rows,
+                onEditActions = { editingActions = true },
             )
         }
 

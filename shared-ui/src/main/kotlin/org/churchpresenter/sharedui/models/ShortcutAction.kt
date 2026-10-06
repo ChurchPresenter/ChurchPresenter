@@ -313,7 +313,13 @@ enum class ShortcutAction(
     CLEAR_GROUP_6(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_group_6, emptyList()),
     CLEAR_GROUP_7(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_group_7, emptyList()),
     CLEAR_GROUP_8(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_group_8, emptyList()),
-    CLEAR_GROUP_9(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_group_9, emptyList()),
+    CLEAR_GROUP_9(ShortcutScope.GLOBAL, Res.string.shortcut_description_clear_group_9, emptyList());
+
+    /**
+     * Whether this belongs to a feature that is not ready for production yet: it is offered, and
+     * answers its key, only in dev mode (AGENT.md, "Dev mode only").
+     */
+    val devOnly: Boolean get() = this == TAKE || this in MACRO_ACTIONS || this in CLEAR_GROUP_ACTIONS
 }
 
 /** The keys that run the first nine macros, in the order the macros are listed. */

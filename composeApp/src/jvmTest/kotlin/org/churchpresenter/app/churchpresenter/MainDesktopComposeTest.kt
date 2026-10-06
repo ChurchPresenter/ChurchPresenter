@@ -164,10 +164,12 @@ class MainDesktopComposeTest {
                     onRequestDeveloperMenuUnlock = { wiring.developerUnlocks++ },
                     presenterManager = presenterManager,
                     companionSatelliteViewModel = CompanionSatelliteViewModel(),
+                    // A test run is a dev build, so the dev mode only features are on, as in the app.
                     live = LiveOutputCallbacks(
                         presenting = {},
                         onVerseSelected = {},
                         onSongItemSelected = {},
+                        devMode = true,
                     ),
                     publish = MainDesktopPublishers(
                         onScheduleActionsReady = { actions = it },

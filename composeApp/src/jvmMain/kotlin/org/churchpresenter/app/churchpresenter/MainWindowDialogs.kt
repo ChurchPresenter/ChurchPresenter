@@ -102,6 +102,7 @@ internal fun MainWindowScope.SettingsDialogs() {
         KeyboardShortcutsDialog(
             isVisible = showKeyboardShortcutsDialog,
             settings = appSettings,
+            devMode = devMode,
             onSave = { updated ->
                 appSettings = updated
                 settingsManager.saveSettings(updated)

@@ -31,6 +31,7 @@ internal fun findClearGroup(groups: List<ClearGroup>, wanted: String): ClearGrou
 internal fun Route.clearGroupRoutes(server: CompanionServer, json: Json) {
     get(Constants.ENDPOINT_CLEAR_GROUPS) {
         if (!server.checkApiKey(call)) return@get
+        if (!call.requireDevMode(server)) return@get
         val listing = server.clearGroups.map { ClearGroupDto(it.id, it.name, it.layers) }
         val body = json.encodeToString(ListSerializer(ClearGroupDto.serializer()), listing)
         call.respondText(body, ContentType.Application.Json)
@@ -60,6 +61,7 @@ internal suspend fun DefaultWebSocketServerSession.clearGroupCommand(
 ): Boolean {
     val wanted = runCatching { json.parseToJsonElement(msg.payload).jsonObject["group"]?.jsonPrimitive?.contentOrNull }
         .getOrNull() ?: return false
+    if (refusedOutsideDevMode(msg, server, json)) return true
     val group = findClearGroup(server.clearGroups, wanted)
     if (group == null) {
         sendCommandAck(msg.commandId, ok = false, reason = "no_such_group", json = json)

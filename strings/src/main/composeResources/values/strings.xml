@@ -3015,6 +3015,7 @@
     <string name="clear_groups_layers">Clears</string>
     <string name="clear_group_clear">Clear</string>
     <string name="tooltip_macros">Macros</string>
+    <string name="dev_mode_only">Dev mode only</string>
     <string name="macros_title">Macros</string>
     <string name="macros_hint">A macro is a named list of actions. Run it from here, from a key (Run macro 1–9 in Keyboard Shortcuts, in this order), from the remote API, or from another macro.</string>
     <string name="macros_empty">No macros yet. Add one to run several actions with one click, like a message, a lower third and an OBS scene.</string>

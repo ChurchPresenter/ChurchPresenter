@@ -22,11 +22,13 @@ import org.churchpresenter.settings.utils.Constants
 internal fun Route.macroRoutes(server: CompanionServer, json: Json, scope: CoroutineScope) {
     get(Constants.ENDPOINT_MACROS) {
         if (!server.checkApiKey(call)) return@get
+        if (!call.requireDevMode(server)) return@get
         val body = json.encodeToString(ListSerializer(MacroDto.serializer()), macrosListing(server.macros))
         call.respondText(body, ContentType.Application.Json)
     }
     post("${Constants.ENDPOINT_MACRO}/{name}") {
         if (!server.checkApiKey(call)) return@post
+        if (!call.requireDevMode(server)) return@post
         val macro = server.macros.macroNamed(call.parameters["name"].orEmpty())
         if (macro == null) {
             call.respond(HttpStatusCode.NotFound, """{"ok":false,"reason":"no such macro"}""")
@@ -45,6 +47,7 @@ internal suspend fun DefaultWebSocketServerSession.macroCommand(
     scope: CoroutineScope,
 ): Boolean {
     if (msg.type != Constants.WS_CMD_MACRO) return false
+    if (refusedOutsideDevMode(msg, server, json)) return true
     val wanted = runCatching { json.parseToJsonElement(msg.payload).jsonObject["name"]?.jsonPrimitive?.contentOrNull }
         .getOrNull()
     val macro = wanted?.let(server.macros::macroNamed)

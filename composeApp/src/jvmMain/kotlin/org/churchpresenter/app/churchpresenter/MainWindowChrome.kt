@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.schedule.LocalShowControlEnabled
 import androidx.compose.runtime.CompositionLocalProvider
 import org.churchpresenter.schedule.LocalActionChoices
 import org.churchpresenter.liveoutput.cuedModeOf
@@ -21,7 +22,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import org.churchpresenter.sharedui.utils.DevFlags
 import kotlinx.coroutines.launch
 import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -101,9 +101,7 @@ internal fun MainWindowScope.AppMenuBar() {
                 currentScheduleActions.clearSchedule()
                 selectedScheduleItemId = null
             },
-            showDeveloperMenu = shouldShowDeveloperMenu(
-                BuildConfig.IS_RELEASE, DevFlags.forceDevWindow, developerMenuUnlocked,
-            ),
+            showDeveloperMenu = devMode,
             isPresenterWindowVisible = presenterManager.showPresenterWindow.value,
             onSetPresenterWindowVisible = { presenterManager.setShowPresenterWindow(it) },
             isDevWindowAlwaysOnTop = presenterManager.devWindowAlwaysOnTop.value,
@@ -126,7 +124,10 @@ internal fun MainWindowScope.MainDesktopHost() {
             isControllerConnected(instanceLinkStatus, appSettings.instanceLink.role)
         val instanceLinkUsesRemoteContent =
             shouldUseRemoteContent(instanceLinkStatus, appSettings.instanceLink.role)
-        CompositionLocalProvider(LocalActionChoices provides rememberActionChoices()) {
+        CompositionLocalProvider(
+            LocalActionChoices provides rememberActionChoices(),
+            LocalShowControlEnabled provides devMode,
+        ) {
             MainDesktop(
                 hostWindow = window,
                 appSettings = appSettings,
@@ -182,6 +183,7 @@ private fun MainWindowScope.liveOutputCallbacks(): LiveOutputCallbacks = with(ro
         onRowActions = { item, actions -> runRowActions(item, actions) },
         onRunMacro = ::runMacro,
         controlHub = controlHub,
+        devMode = devMode,
         onVerseSelected = { verses -> presenterManager.previewBus.forVerses(verses).setSelectedVerses(verses) },
         // Line mode used to push the section straight to the outputs from
         // here. That put the words on screen behind the transition driver's

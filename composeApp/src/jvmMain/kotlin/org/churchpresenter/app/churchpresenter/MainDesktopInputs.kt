@@ -45,6 +45,8 @@ data class LiveOutputCallbacks(
     val onRunMacro: (Macro) -> Unit = {},
     /** The MIDI and OSC ports, for the dialog that sets them up and learns triggers. */
     val controlHub: ControlHub? = null,
+    /** Dev mode: the features not ready for production are offered -- see `AppRootState.devMode`. */
+    val devMode: Boolean = false,
 )
 
 /** The planned service the Schedule works against, from the calendar. */

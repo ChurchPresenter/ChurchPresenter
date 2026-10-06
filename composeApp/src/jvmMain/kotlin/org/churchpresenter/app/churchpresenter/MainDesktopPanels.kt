@@ -210,7 +210,7 @@ internal fun MainDesktopScope.MainDesktopPanels() {
                     qaDisplayUrl = web.qaDisplayUrl,
                     sttManager = sttManager,
                     companionSatelliteViewModel = companionSatelliteViewModel,
-                    showControl = SidebarShowControl(scheduleViewModel.scheduleItems, live.onRunMacro, live.controlHub),
+                    showControl = live.showControlFor(scheduleViewModel.scheduleItems),
                 )
             }
         }

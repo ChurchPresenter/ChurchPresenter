@@ -689,7 +689,7 @@ curl -k -X POST https://192.168.1.10:8765/api/clear
 { "ok": true }
 ```
 
-**Optional query param** — take down one layer and leave the rest up: `layer=slide` (Bible, songs,
+**Optional query param** (dev mode only, like `group=` below) — take down one layer and leave the rest up: `layer=slide` (Bible, songs,
 a presentation, a web page, a scene, Q&A or the dictionary), `media` (a video or pictures),
 `lowerthird`, `captions`, `announcements`, `props` or `messages`. A layer with nothing on it is left
 as it is, and an unknown name clears nothing.
@@ -700,7 +700,7 @@ curl -k -X POST "https://192.168.1.10:8765/api/clear?layer=lowerthird"
 
 Over the WebSocket, `clear` takes the same `{"layer": "..."}` in its payload.
 
-**Clear groups** — `group=` fires one of the operator's clear groups, named by its id or its name
+**Clear groups** (dev mode only, as is `GET /api/clear-groups`) — `group=` fires one of the operator's clear groups, named by its id or its name
 (any case), and takes down every layer in it: e.g. *Clear text* = slide + messages. An unknown group
 answers `404 {"ok":false,"reason":"no such clear group"}`. Over the WebSocket, `clear` takes
 `{"group": "..."}`, acked with `ok:false` and `no_such_group` for an unknown one.
@@ -719,6 +719,8 @@ curl -k -X POST "https://192.168.1.10:8765/api/clear?group=Clear%20text"
 
 ### `POST /api/take`
 
+**Dev mode only** for now: outside dev mode this answers `403 {"ok":false,"reason":"dev mode only"}` (WebSocket: acked `ok:false`, `dev_mode_only`).
+
 Puts what is cued on Preview on air, as the **Take** button does. Only does anything while
 preview mode is on (Settings → System) and something is cued. No body or approval required.
 Over the WebSocket, the command is `take`.
@@ -734,6 +736,8 @@ curl -k -X POST https://192.168.1.10:8765/api/take
 ---
 
 ### `POST /api/message`
+
+**Dev mode only** for now: outside dev mode this answers `403 {"ok":false,"reason":"dev mode only"}` (WebSocket: acked `ok:false`, `dev_mode_only`).
 
 Puts a message up -- a nursery call, say. Every other layer comes down and the message goes up
 alone, standing still in the announcement look; it comes down when its duration runs out, on
@@ -767,6 +771,8 @@ answered `400` with `{"ok": false, "reason": "..."}`.
 
 ### `GET /api/props` and `POST /api/props/{id}/on|off|toggle`
 
+**Dev mode only** for now: outside dev mode this answers `403 {"ok":false,"reason":"dev mode only"}`.
+
 Props are the persistent overlays set up in the app's Props panel -- a logo bug, the clock, a
 countdown, a badge such as LIVE -- which stay up while songs and verses change under them. Clear
 All and a message take them down. No approval required.
@@ -791,6 +797,8 @@ and leaving `on` out toggles it.
 ---
 
 ### `GET /api/macros` and `POST /api/macro/{name}`
+
+**Dev mode only** for now: outside dev mode this answers `403 {"ok":false,"reason":"dev mode only"}`.
 
 Macros are the named action lists set up in the app's Macros panel -- a message, a lower third, an
 OBS scene, a wait, another macro. No approval required.
