@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">教会同工</string>
     <string name="calendar_export_staff_sub">完整的聚会流程，包含各行时间、时长、标记以及聚会前后的项目</string>
     <string name="calendar_export_choose">选择要导出的版本</string>
+    <string name="calendar_timing_run_hours">%1$d小时</string>
+    <string name="calendar_timing_run_minutes">%1$d分</string>
 </resources>

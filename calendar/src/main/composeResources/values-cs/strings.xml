@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Tým sboru</string>
     <string name="calendar_export_staff_sub">Úplný průběh bohoslužby s časy řádků, délkami, značkami a body před bohoslužbou i po ní</string>
     <string name="calendar_export_choose">Vyberte, kterou kopii exportovat</string>
+    <string name="calendar_timing_run_hours">%1$d h</string>
+    <string name="calendar_timing_run_minutes">%1$d min</string>
 </resources>

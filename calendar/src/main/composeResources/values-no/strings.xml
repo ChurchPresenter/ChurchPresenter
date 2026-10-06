@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Medarbeidere</string>
     <string name="calendar_export_staff_sub">Hele kjøreplanen med radtider, lengder, merker og punkter før og etter gudstjenesten</string>
     <string name="calendar_export_choose">Velg hvilken kopi som skal eksporteres</string>
+    <string name="calendar_timing_run_hours">%1$d t</string>
+    <string name="calendar_timing_run_minutes">%1$d min</string>
 </resources>

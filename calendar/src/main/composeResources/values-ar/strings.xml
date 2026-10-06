@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">فريق الكنيسة</string>
     <string name="calendar_export_staff_sub">ترتيب الاجتماع كاملًا مع أوقات الصفوف والمدد والعلامات والبنود التي تسبق الاجتماع وتليه</string>
     <string name="calendar_export_choose">اختر النسخة التي تريد تصديرها</string>
+    <string name="calendar_timing_run_hours">%1$d س</string>
+    <string name="calendar_timing_run_minutes">%1$d د</string>
 </resources>

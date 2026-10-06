@@ -70,6 +70,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.seconds_suffix
 import org.churchpresenter.strings.generated.resources.announcement_animation
 import org.churchpresenter.strings.generated.resources.announcement_animation_speed
 import org.churchpresenter.strings.generated.resources.announcement_loop_count
@@ -560,7 +561,8 @@ private fun AnnouncementsTabScope.AnnouncementsAnimationCard(viewModel: Announce
                 },
                 valueRange = sliderMin..sliderMax,
                 trailingLabel =
-                    "${"%.1f".format((sliderSum - viewModel.durationMs) / ANNOUNCEMENT_MILLIS_PER_SECOND_F)}s",
+                    "%.1f".format((sliderSum - viewModel.durationMs) / ANNOUNCEMENT_MILLIS_PER_SECOND_F) +
+                        stringResource(Res.string.seconds_suffix),
                 modifier = Modifier.fillMaxWidth()
             )
         }

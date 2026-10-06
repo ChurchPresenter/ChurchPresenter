@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Seurakunnan tiimi</string>
     <string name="calendar_export_staff_sub">Koko kulkusuunnitelma rivien aikoineen, kestoineen ja merkkeineen sekä tilaisuutta edeltävine ja sen jälkeisine kohtineen</string>
     <string name="calendar_export_choose">Valitse vietävä kopio</string>
+    <string name="calendar_timing_run_hours">%1$d h</string>
+    <string name="calendar_timing_run_minutes">%1$d min</string>
 </resources>

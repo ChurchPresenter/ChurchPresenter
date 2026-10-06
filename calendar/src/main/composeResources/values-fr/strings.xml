@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Équipe de l'église</string>
     <string name="calendar_export_staff_sub">Le déroulé complet avec les heures de ligne, les durées, les repères et les éléments d'avant et d'après le culte</string>
     <string name="calendar_export_choose">Choisissez la copie à exporter</string>
+    <string name="calendar_timing_run_hours">%1$d h</string>
+    <string name="calendar_timing_run_minutes">%1$d min</string>
 </resources>

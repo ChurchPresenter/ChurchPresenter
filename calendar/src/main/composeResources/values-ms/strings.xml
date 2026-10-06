@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Pasukan gereja</string>
     <string name="calendar_export_staff_sub">Aturcara penuh dengan masa baris, tempoh, penanda serta item sebelum dan selepas ibadah</string>
     <string name="calendar_export_choose">Pilih salinan yang hendak dieksport</string>
+    <string name="calendar_timing_run_hours">%1$dj</string>
+    <string name="calendar_timing_run_minutes">%1$dm</string>
 </resources>

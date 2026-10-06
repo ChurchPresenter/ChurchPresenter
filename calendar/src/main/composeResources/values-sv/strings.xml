@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Medarbetare</string>
     <string name="calendar_export_staff_sub">Hela körschemat med radtider, längder, markeringar och punkter före och efter gudstjänsten</string>
     <string name="calendar_export_choose">Välj vilken kopia som ska exporteras</string>
+    <string name="calendar_timing_run_hours">%1$d h</string>
+    <string name="calendar_timing_run_minutes">%1$d min</string>
 </resources>

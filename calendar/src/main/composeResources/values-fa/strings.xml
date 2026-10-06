@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">تیم کلیسا</string>
     <string name="calendar_export_staff_sub">ترتیب برنامه کامل با زمان ردیف‌ها، مدت‌ها، نشانه‌ها و موارد پیش و پس از مراسم</string>
     <string name="calendar_export_choose">انتخاب کنید کدام نسخه خروجی گرفته شود</string>
+    <string name="calendar_timing_run_hours">%1$d ساعت</string>
+    <string name="calendar_timing_run_minutes">%1$d دقیقه</string>
 </resources>

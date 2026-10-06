@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Wahudumu wa kanisa</string>
     <string name="calendar_export_staff_sub">Mtiririko kamili wa ibada wenye muda wa safu, urefu wa muda, alama na vipengele vya kabla na baada ya ibada</string>
     <string name="calendar_export_choose">Chagua nakala ya kuhamisha</string>
+    <string name="calendar_timing_run_hours">Saa %1$d</string>
+    <string name="calendar_timing_run_minutes">Dak %1$d</string>
 </resources>

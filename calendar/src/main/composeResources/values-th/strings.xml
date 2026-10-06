@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">ทีมงานคริสตจักร</string>
     <string name="calendar_export_staff_sub">ลำดับรายการฉบับเต็ม พร้อมเวลาของแต่ละแถว ความยาว เครื่องหมาย และรายการก่อนและหลังนมัสการ</string>
     <string name="calendar_export_choose">เลือกฉบับที่จะส่งออก</string>
+    <string name="calendar_timing_run_hours">%1$d ชม.</string>
+    <string name="calendar_timing_run_minutes">%1$d น.</string>
 </resources>

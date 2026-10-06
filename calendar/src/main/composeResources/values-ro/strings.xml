@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Echipa bisericii</string>
     <string name="calendar_export_staff_sub">Desfășurarea completă, cu orele rândurilor, duratele, marcajele și punctele de dinainte și de după serviciu</string>
     <string name="calendar_export_choose">Alegeți ce copie să exportați</string>
+    <string name="calendar_timing_run_hours">%1$d h</string>
+    <string name="calendar_timing_run_minutes">%1$d min</string>
 </resources>

@@ -61,7 +61,7 @@ internal fun exportAllLevels(): String {
     ENCODED_DIR.mkdirs()
     val exported = all.count { exportOne(it) }
     val skipped = all.size - exported
-    return Strings.exportedCount(exported) + if (skipped > 0) Strings.skippedCount(skipped) else ""
+    return Strings.exportedCount.format(exported) + if (skipped > 0) Strings.skippedCount.format(skipped) else ""
 }
 
 private fun exportOne(level: Int): Boolean {
@@ -95,5 +95,5 @@ internal fun decodeAllLevels(): String {
         }.isSuccess
     }
     val failed = files.size - decoded
-    return Strings.decodedCount(decoded) + if (failed > 0) Strings.failedCount(failed) else ""
+    return Strings.decodedCount.format(decoded) + if (failed > 0) Strings.failedCount.format(failed) else ""
 }

@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Служыцелі царквы</string>
     <string name="calendar_export_staff_sub">Поўны парадак служэння з часам радкоў, працягласцямі, меткамі і пунктамі да і пасля служэння</string>
     <string name="calendar_export_choose">Выберыце, якую копію экспартаваць</string>
+    <string name="calendar_timing_run_hours">%1$d гадз</string>
+    <string name="calendar_timing_run_minutes">%1$d хв</string>
 </resources>

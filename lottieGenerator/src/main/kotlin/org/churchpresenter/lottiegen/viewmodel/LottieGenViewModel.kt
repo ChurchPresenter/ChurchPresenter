@@ -215,7 +215,7 @@ class LottieGenViewModel(
             )
         }
         PresetStorage.save(presets)
-        statusText = Strings.styleAppliedStatus(presets.size)
+        statusText = Strings.styleAppliedStatus.format(presets.size)
     }
 
     override fun batchDownloadAll(dir: File?) {
@@ -246,7 +246,7 @@ class LottieGenViewModel(
                     count++
                 } catch (_: Exception) {}
             }
-            statusText = Strings.savedFilesStatus(count)
+            statusText = Strings.savedFilesStatus.format(count)
             onFileSaved?.invoke()
         }
     }

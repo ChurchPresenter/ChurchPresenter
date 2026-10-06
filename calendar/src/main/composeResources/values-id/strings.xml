@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Tim gereja</string>
     <string name="calendar_export_staff_sub">Susunan acara lengkap dengan waktu per baris, durasi, penanda, serta item sebelum dan sesudah ibadah</string>
     <string name="calendar_export_choose">Pilih salinan yang akan diekspor</string>
+    <string name="calendar_timing_run_hours">%1$d j</string>
+    <string name="calendar_timing_run_minutes">%1$d m</string>
 </resources>

@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">ທີມງານຄຣິດຕະຈັກ</string>
     <string name="calendar_export_staff_sub">ລຳດັບລາຍການສະບັບເຕັມ ພ້ອມເວລາຂອງແຕ່ລະແຖວ ຄວາມຍາວ ເຄື່ອງໝາຍ ແລະ ລາຍການກ່ອນ ແລະ ຫຼັງການນະມັດສະການ</string>
     <string name="calendar_export_choose">ເລືອກສະບັບທີ່ຈະສົ່ງອອກ</string>
+    <string name="calendar_timing_run_hours">%1$d ຊມ.</string>
+    <string name="calendar_timing_run_minutes">%1$d ນທ.</string>
 </resources>

@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Kilise ekibi</string>
     <string name="calendar_export_staff_sub">Satır saatleri, süreler, işaretler ve ibadet öncesi ve sonrası öğeleriyle tam akış planı</string>
     <string name="calendar_export_choose">Hangi kopyanın dışa aktarılacağını seçin</string>
+    <string name="calendar_timing_run_hours">%1$d sa</string>
+    <string name="calendar_timing_run_minutes">%1$d dk</string>
 </resources>

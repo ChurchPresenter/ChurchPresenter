@@ -116,7 +116,7 @@ internal class AdminState(private val scope: CoroutineScope) {
             currentLevel = target
             rawText = templateFor(target)
             unexportedLevels = unexportedLevels - target
-            say(Strings.levelNotFound(target))
+            say(Strings.levelNotFound.format(target))
         }
     }
 
@@ -127,7 +127,7 @@ internal class AdminState(private val scope: CoroutineScope) {
         PUZZLES_DIR.mkdirs()
         File(PUZZLES_DIR, "level$level.txt").writeText(rawText, Charsets.UTF_8)
         refreshLevels()
-        say(Strings.newLevelCreated(level))
+        say(Strings.newLevelCreated.format(level))
     }
 
     /** What the editor calls on every keystroke: mark the level unexported and re-arm the autosave. */
@@ -145,19 +145,19 @@ internal class AdminState(private val scope: CoroutineScope) {
         ENCODED_DIR.mkdirs()
         File(ENCODED_DIR, "level$currentLevel.xwp").writeText(encode(text), Charsets.UTF_8)
         unexportedLevels = unexportedLevels - currentLevel
-        say(Strings.exported(currentLevel))
+        say(Strings.exported.format(currentLevel))
     }
 
     fun loadEncoded() {
         val file = File(ENCODED_DIR, "level$currentLevel.xwp")
-        if (!file.exists()) return say(Strings.xwpNotFound(currentLevel), error = true)
+        if (!file.exists()) return say(Strings.xwpNotFound.format(currentLevel), error = true)
         runCatching { decode(file.readText(Charsets.UTF_8)) }
             .onSuccess {
                 rawText = it
                 unexportedLevels = unexportedLevels - currentLevel
-                say(Strings.loadedEncoded(currentLevel))
+                say(Strings.loadedEncoded.format(currentLevel))
             }
-            .onFailure { say(Strings.decodeFailed(currentLevel), error = true) }
+            .onFailure { say(Strings.decodeFailed.format(currentLevel), error = true) }
     }
 
     /**
@@ -180,8 +180,8 @@ internal class AdminState(private val scope: CoroutineScope) {
         scheduleAutoSave()
         val unplaced = unique.count { it.number !in puzzle.placedNumbers }
         say(
-            if (unplaced > 0) Strings.reorderedUnplaced(unplaced)
-            else Strings.reorderedAll(renumbered.size)
+            if (unplaced > 0) Strings.reorderedUnplaced.format(unplaced)
+            else Strings.reorderedAll.format(renumbered.size)
         )
     }
 

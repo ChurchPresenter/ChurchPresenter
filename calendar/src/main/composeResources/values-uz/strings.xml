@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Cherkov xodimlari</string>
     <string name="calendar_export_staff_sub">Qator vaqtlari, davomiyliklar, belgilar hamda xizmatdan oldingi va keyingi bandlar bilan to‘liq xizmat tartibi</string>
     <string name="calendar_export_choose">Qaysi nusxani eksport qilishni tanlang</string>
+    <string name="calendar_timing_run_hours">%1$d soat</string>
+    <string name="calendar_timing_run_minutes">%1$d daq</string>
 </resources>

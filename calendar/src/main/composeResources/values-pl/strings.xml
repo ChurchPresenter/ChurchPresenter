@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Zespół kościoła</string>
     <string name="calendar_export_staff_sub">Pełny przebieg nabożeństwa z godzinami wierszy, czasami trwania, znacznikami oraz punktami przed nabożeństwem i po nim</string>
     <string name="calendar_export_choose">Wybierz, którą kopię wyeksportować</string>
+    <string name="calendar_timing_run_hours">%1$d godz.</string>
+    <string name="calendar_timing_run_minutes">%1$d min</string>
 </resources>

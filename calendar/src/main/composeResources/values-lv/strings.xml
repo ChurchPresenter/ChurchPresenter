@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Draudzes komanda</string>
     <string name="calendar_export_staff_sub">Pilna norises kārtība ar rindu laikiem, ilgumiem, atzīmēm un punktiem pirms un pēc dievkalpojuma</string>
     <string name="calendar_export_choose">Izvēlieties, kuru kopiju eksportēt</string>
+    <string name="calendar_timing_run_hours">%1$d st</string>
+    <string name="calendar_timing_run_minutes">%1$d min</string>
 </resources>

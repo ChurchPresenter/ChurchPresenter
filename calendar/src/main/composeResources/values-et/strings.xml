@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Koguduse meeskond</string>
     <string name="calendar_export_staff_sub">Täielik kava ridade aegade, kestuste, märkide ning enne ja pärast teenistust toimuvate punktidega</string>
     <string name="calendar_export_choose">Vali, millist koopiat eksportida</string>
+    <string name="calendar_timing_run_hours">%1$d h</string>
+    <string name="calendar_timing_run_minutes">%1$d min</string>
 </resources>

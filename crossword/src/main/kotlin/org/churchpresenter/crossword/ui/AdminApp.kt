@@ -128,7 +128,7 @@ private fun LevelHeader(state: AdminState) {
 
         Text(
             text = if (state.levels.isEmpty()) Strings.noLevels
-            else Strings.levelPosition(state.currentLevel, index + 1, state.levels.size),
+            else Strings.levelPosition.format(state.currentLevel, index + 1, state.levels.size),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(horizontal = 8.dp)
         )
@@ -170,7 +170,7 @@ private fun UnexportedWarnings(state: AdminState) {
     if (templates.isNotEmpty()) {
         Spacer(Modifier.width(16.dp))
         Text(
-            text = Strings.templatesWarning(templates.joinToString(", ")),
+            text = Strings.templatesWarning.format(templates.joinToString(", ")),
             color = MaterialTheme.colorScheme.tertiary,
             style = MaterialTheme.typography.labelMedium
         )
@@ -178,7 +178,7 @@ private fun UnexportedWarnings(state: AdminState) {
     if (unexported.isNotEmpty()) {
         Spacer(Modifier.width(16.dp))
         Text(
-            text = Strings.unexportedWarning(unexported.joinToString(", ")),
+            text = Strings.unexportedWarning.format(unexported.joinToString(", ")),
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.labelMedium
         )
@@ -241,7 +241,7 @@ private fun ActionBar(state: AdminState) {
             KeyButton(onClick = {
                 openFileDialog(Strings.loadPlaintextTitle, listOf("txt"))?.let { file ->
                     state.edit(file.readText(Charsets.UTF_8))
-                    state.say(Strings.imported(file.name))
+                    state.say(Strings.imported.format(file.name))
                 }
             }) { Text(Strings.importTxt) }
         }

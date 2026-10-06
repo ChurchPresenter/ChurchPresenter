@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">教会スタッフ</string>
     <string name="calendar_export_staff_sub">各行の時刻、長さ、キュー、礼拝前後の項目を含む完全な進行表</string>
     <string name="calendar_export_choose">書き出す版を選んでください</string>
+    <string name="calendar_timing_run_hours">%1$d時間</string>
+    <string name="calendar_timing_run_minutes">%1$d分</string>
 </resources>

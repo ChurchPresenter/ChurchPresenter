@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Kerkmedewerkers</string>
     <string name="calendar_export_staff_sub">Het volledige draaiboek met rijtijden, duur, markeringen en onderdelen voor en na de dienst</string>
     <string name="calendar_export_choose">Kies welke versie je wilt exporteren</string>
+    <string name="calendar_timing_run_hours">%1$d u</string>
+    <string name="calendar_timing_run_minutes">%1$d min</string>
 </resources>

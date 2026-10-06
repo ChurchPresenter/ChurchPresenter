@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Equipa da igreja</string>
     <string name="calendar_export_staff_sub">A ordem do culto completa com horas das linhas, durações, marcas e itens de antes e depois do culto</string>
     <string name="calendar_export_choose">Escolha que cópia exportar</string>
+    <string name="calendar_timing_run_hours">%1$d h</string>
+    <string name="calendar_timing_run_minutes">%1$d min</string>
 </resources>

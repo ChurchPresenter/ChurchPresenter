@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Шіркеу қызметкерлері</string>
     <string name="calendar_export_staff_sub">Жол уақыттары, ұзақтықтар, белгілер және қызметке дейінгі әрі кейінгі тармақтар бар толық қызмет реті</string>
     <string name="calendar_export_choose">Қай көшірмені экспорттау керектігін таңдаңыз</string>
+    <string name="calendar_timing_run_hours">%1$d сағ</string>
+    <string name="calendar_timing_run_minutes">%1$d мин</string>
 </resources>

@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Служителі церкви</string>
     <string name="calendar_export_staff_sub">Повний порядок служіння з часом рядків, тривалостями, мітками та пунктами до і після служіння</string>
     <string name="calendar_export_choose">Виберіть, яку копію експортувати</string>
+    <string name="calendar_timing_run_hours">%1$d год</string>
+    <string name="calendar_timing_run_minutes">%1$d хв</string>
 </resources>

@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">Staff ng iglesya</string>
     <string name="calendar_export_staff_sub">Ang buong takbo ng programa na may oras ng bawat hilera, tagal, marka at mga item bago at pagkatapos ng pagsamba</string>
     <string name="calendar_export_choose">Piliin kung aling kopya ang i-export</string>
+    <string name="calendar_timing_run_hours">%1$dh</string>
+    <string name="calendar_timing_run_minutes">%1$dm</string>
 </resources>

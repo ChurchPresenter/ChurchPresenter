@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">मण्डलीको टोली</string>
     <string name="calendar_export_staff_sub">पङ्क्तिका समय, अवधि, चिन्ह र सभाअघि तथा सभापछिका वस्तुहरूसहित पूरा सभाको क्रम</string>
     <string name="calendar_export_choose">कुन प्रति निर्यात गर्ने छान्नुहोस्</string>
+    <string name="calendar_timing_run_hours">%1$d घण्टा</string>
+    <string name="calendar_timing_run_minutes">%1$d मि</string>
 </resources>

@@ -313,4 +313,6 @@
     <string name="calendar_export_staff">சபைக் குழு</string>
     <string name="calendar_export_staff_sub">வரிசை நேரங்கள், கால அளவுகள், குறிகள் மற்றும் ஆராதனைக்கு முன்னும் பின்னும் உள்ள உருப்படிகளுடன் முழு ஆராதனை வரிசை</string>
     <string name="calendar_export_choose">எந்த நகலை ஏற்றுமதி செய்வது எனத் தேர்ந்தெடுக்கவும்</string>
+    <string name="calendar_timing_run_hours">%1$d ம</string>
+    <string name="calendar_timing_run_minutes">%1$d நி</string>
 </resources>
