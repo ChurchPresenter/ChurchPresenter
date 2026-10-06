@@ -2,6 +2,8 @@
 
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.showcontrol.Action
+import org.churchpresenter.settings.Macro
 import org.churchpresenter.schedule.SCHEDULE_ROW_CARD_TAG
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasAnyAncestor
@@ -141,6 +143,7 @@ class MainDesktopComposeTest {
         val quickPicked = mutableListOf<QuickBackground?>()
         val settingsChanges = mutableListOf<(AppSettings) -> AppSettings>()
         var developerUnlocks = 0
+        val macrosRun = mutableListOf<Macro>()
     }
 
     /** Composes the root with [appSettings], then lets everything it launched settle. */
@@ -149,6 +152,7 @@ class MainDesktopComposeTest {
         flows: Flows = Flows(),
         wiring: Wiring = Wiring(),
         presenterManager: PresenterManager = PresenterManager(),
+        devMode: Boolean = true,
         block: ComposeUiTest.(ScheduleActions) -> Unit = {},
     ) = runComposeUiTest {
         var actions = ScheduleActions()
@@ -164,12 +168,13 @@ class MainDesktopComposeTest {
                     onRequestDeveloperMenuUnlock = { wiring.developerUnlocks++ },
                     presenterManager = presenterManager,
                     companionSatelliteViewModel = CompanionSatelliteViewModel(),
-                    // A test run is a dev build, so the dev mode only features are on, as in the app.
+                    // A test run is a dev build, so the dev mode only features are on unless a test turns them off.
                     live = LiveOutputCallbacks(
                         presenting = {},
                         onVerseSelected = {},
                         onSongItemSelected = {},
-                        devMode = true,
+                        onRunMacro = { wiring.macrosRun += it },
+                        devMode = devMode,
                     ),
                     publish = MainDesktopPublishers(
                         onScheduleActionsReady = { actions = it },
@@ -1084,6 +1089,63 @@ class MainDesktopComposeTest {
     private fun cuedManager() = PresenterManager().apply {
         previewBus.setEnabled(true)
         previewBus.showLowerThird("{}", false, -1f, 0L, "Pastor")
+    }
+
+    @Test
+    fun `in dev mode the sidebar's box holds the unfinished features, and its toggle switches preview mode`() {
+        val wiring = Wiring()
+        root(withPreviewMode(false), wiring = wiring) { _ ->
+            onNodeWithTag(DEV_MODE_BOX_TAG).assertExists()
+            onNodeWithTag(MESSAGE_BUTTON_TAG).assertExists()
+            onNodeWithTag(PROPS_BUTTON_TAG).assertExists()
+            onNodeWithTag(MACROS_BUTTON_TAG).assertExists()
+            onNodeWithTag(CLEAR_LAYERS_BUTTON_TAG).assertExists()
+            onAllNodesWithTag(PREVIEW_TAKE_TAG).assertCountEquals(0)
+            onNodeWithTag(PREVIEW_MODE_TOGGLE_TAG).performClick()
+            waitForIdle()
+            assertTrue(wiring.settingsChanges.last()(withPreviewMode(false)).projectionSettings.previewModeEnabled)
+        }
+    }
+
+    @Test
+    fun `outside dev mode the box, Take and the macro and clear-group keys are gone`() {
+        val wiring = Wiring()
+        val keyed = withPreviewMode(true, KeyChord.of(Key.F12, ctrl = true, shift = true)).let {
+            it.copy(
+                macros = listOf(Macro("macro1", "Walk in", listOf(Action.ClearAll))),
+                keyboardShortcutSettings = KeyboardShortcutSettings(
+                    overrides = it.keyboardShortcutSettings.overrides +
+                        (ShortcutAction.MACRO_1.name to listOf(KeyChord.of(Key.F11, ctrl = true, shift = true))),
+                ),
+            )
+        }
+        val manager = cuedManager()
+        root(keyed, wiring = wiring, presenterManager = manager, devMode = false) { _ ->
+            onAllNodesWithTag(DEV_MODE_BOX_TAG).assertCountEquals(0)
+            onAllNodesWithTag(PREVIEW_TAKE_TAG).assertCountEquals(0)
+            press(Key.F11, ctrl = true, shift = true)
+            press(Key.F12, ctrl = true, shift = true)
+            assertTrue(wiring.macrosRun.isEmpty(), "the macro key does nothing")
+            assertFalse(manager.isLive(Presenting.LOWER_THIRD), "Take's key does nothing")
+        }
+    }
+
+    @Test
+    fun `in dev mode a macro's key runs it`() {
+        val wiring = Wiring()
+        val walkIn = Macro("macro1", "Walk in", listOf(Action.ClearAll))
+        val keyed = withOneSong().copy(
+            macros = listOf(walkIn),
+            keyboardShortcutSettings = KeyboardShortcutSettings(
+                overrides = mapOf(
+                    ShortcutAction.MACRO_1.name to listOf(KeyChord.of(Key.F11, ctrl = true, shift = true)),
+                ),
+            ),
+        )
+        root(keyed, wiring = wiring) { _ ->
+            press(Key.F11, ctrl = true, shift = true)
+            assertEquals(listOf(walkIn), wiring.macrosRun)
+        }
     }
 
     @Test

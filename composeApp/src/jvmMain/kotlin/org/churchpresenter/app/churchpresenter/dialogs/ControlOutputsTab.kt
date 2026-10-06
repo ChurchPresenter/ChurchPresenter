@@ -118,13 +118,15 @@ private fun OutputFields(message: OutMessage, onChange: (OutMessage) -> Unit) {
             value = message.address,
             onValueChange = { onChange(message.copy(address = it)) },
             label = stringResource(Res.string.control_field_address),
-            modifier = Modifier.width(ADDRESS_FIELD_WIDTH),
+            modifier = Modifier.width(ADDRESS_FIELD_WIDTH)
+                .testTag(controlFieldTag(stringResource(Res.string.control_field_address))),
         )
         SettingsTextField(
             value = message.argument,
             onValueChange = { onChange(message.copy(argument = it)) },
             label = stringResource(Res.string.control_field_argument),
-            modifier = Modifier.width(ADDRESS_FIELD_WIDTH),
+            modifier = Modifier.width(ADDRESS_FIELD_WIDTH)
+                .testTag(controlFieldTag(stringResource(Res.string.control_field_argument))),
         )
     } else {
         val numberLabel = if (message.kind == TriggerKinds.MIDI_CC) {

@@ -39,6 +39,9 @@ demand.
   `requireDevMode`) on the remote API, `ShortcutAction.devOnly` for its keys.
 - Gate the behaviour, not only the button: a saved setting must not keep working unseen when dev
   mode is off.
+- **Screenshots show production only.** No screenshot suite shoots a dev-mode-only feature, and a
+  shot of a screen that has one is taken with dev mode off. Its behaviour is covered by unit and
+  UI tests instead; it gets screenshots when it leaves the box.
 - Dev mode is the Developer menu's rule (`shouldShowDeveloperMenu`): a dev build, D pressed seven
   times, or `forceDevWindow`. A feature leaves the box only when the person running the work says it
   is ready for production.

@@ -178,20 +178,23 @@ private fun TriggerFields(trigger: Trigger, onChange: (Trigger) -> Unit) {
                     value = trigger.address,
                     onValueChange = { onChange(trigger.copy(address = it.uppercase())) },
                     label = stringResource(Res.string.control_field_command),
-                    modifier = Modifier.width(FIELD_WIDTH),
+                    modifier = Modifier.width(FIELD_WIDTH)
+                        .testTag(controlFieldTag(stringResource(Res.string.control_field_command))),
                 )
                 SettingsTextField(
                     value = trigger.cue,
                     onValueChange = { onChange(trigger.copy(cue = it)) },
                     label = stringResource(Res.string.control_field_cue),
-                    modifier = Modifier.width(FIELD_WIDTH),
+                    modifier = Modifier.width(FIELD_WIDTH)
+                        .testTag(controlFieldTag(stringResource(Res.string.control_field_cue))),
                 )
             }
             else -> SettingsTextField(
                 value = trigger.address,
                 onValueChange = { onChange(trigger.copy(address = it)) },
                 label = stringResource(Res.string.control_field_address),
-                modifier = Modifier.width(ADDRESS_WIDTH),
+                modifier = Modifier.width(ADDRESS_WIDTH)
+                    .testTag(controlFieldTag(stringResource(Res.string.control_field_address))),
             )
         }
     }
