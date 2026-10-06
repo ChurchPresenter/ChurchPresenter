@@ -2,11 +2,15 @@ package org.churchpresenter.app.churchpresenter.utils
 
 
 import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.SongTranslation
+import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -280,5 +284,34 @@ class UsageDetectionTest {
             )
         )
         assertFalse(hasAudienceOutput(emptyList(), screenCount = 3, deckLinkDeviceCount = 2))
+    }
+
+    // ── How many languages a song reaches the screen in ────────────────────────
+
+    private fun songIn(languages: Int) = SongItem(
+        number = "1",
+        title = "Amazing Grace",
+        lyrics = listOf("Amazing grace"),
+        translations = List(languages - 1) { SongTranslation(title = "T$it", lyrics = listOf("line $it")) },
+    )
+
+    @Test
+    fun `a song shown in four languages is reported as four`() {
+        assertEquals(UsageEvent.SONG_FOUR_LANGUAGES, songLanguageEvent(songIn(4), listOf(out())))
+    }
+
+    @Test
+    fun `a song shown in three languages is reported as three`() {
+        assertEquals(UsageEvent.SONG_THREE_LANGUAGES, songLanguageEvent(songIn(3), listOf(out())))
+    }
+
+    @Test
+    fun `a song shown in two languages is reported as dual language`() {
+        assertEquals(UsageEvent.SONG_DUAL_LANGUAGE, songLanguageEvent(song(), listOf(out())))
+    }
+
+    @Test
+    fun `a song shown in one language reports nothing`() {
+        assertNull(songLanguageEvent(songIn(1), listOf(out())))
     }
 }

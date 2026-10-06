@@ -832,6 +832,7 @@ class MainLogicTest {
     fun `a dev fallback window with no size falls back to the 16 by 9 box`() {
         assertEquals(960f to 540f, devFallbackWindowSizeDp(0, 0))
         assertEquals(960f to 540f, devFallbackWindowSizeDp(-1920, 1080))
+        assertEquals(960f to 540f, devFallbackWindowSizeDp(1920, 0))
     }
 
     // ── The lower-third playback clock ──────────────────────────────────────────
