@@ -1,5 +1,6 @@
 package org.churchpresenter.settings
 
+import org.churchpresenter.controlin.ControlSettings
 import kotlinx.serialization.Serializable
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.UpdateCheckInterval
@@ -148,6 +149,8 @@ data class AppSettings(
     val clearGroups: List<ClearGroup> = emptyList(),
     /** The action lists an operator runs by name -- see [Macro]. */
     val macros: List<Macro> = emptyList(),
+    /** The MIDI and OSC ports, and what arriving and leaving messages do -- see [ControlSettings]. */
+    val control: ControlSettings = ControlSettings(),
 ) {
     /** What the song identified by [songId] is played at — tempo and capo together. */
     fun tuningFor(songId: String): SongTuning =

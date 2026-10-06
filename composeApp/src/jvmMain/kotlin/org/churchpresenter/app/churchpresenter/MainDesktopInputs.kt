@@ -17,6 +17,7 @@ import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.controlin.ControlHub
 import org.churchpresenter.settings.BibleSyncMode
 import org.churchpresenter.settings.Macro
 import org.churchpresenter.settings.InstanceLinkRole
@@ -42,6 +43,8 @@ data class LiveOutputCallbacks(
     val onRowActions: (ScheduleItem, List<Action>) -> Unit = { _, _ -> },
     /** Runs a macro from the Macros panel or a key. */
     val onRunMacro: (Macro) -> Unit = {},
+    /** The MIDI and OSC ports, for the dialog that sets them up and learns triggers. */
+    val controlHub: ControlHub? = null,
 )
 
 /** The planned service the Schedule works against, from the calendar. */

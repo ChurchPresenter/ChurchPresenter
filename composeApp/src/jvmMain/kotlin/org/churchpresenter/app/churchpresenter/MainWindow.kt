@@ -320,6 +320,7 @@ private fun AppRootState.MainWindowContent(
         RemoteProjectRequests()
         CalendarAutomationWiring()
         ShowControlEffects()
+        ControlInEffects()
         ServerCommandWiring()
         QaAndPresentationConnectRequests()
         AdminAndMusicianConnectRequests()

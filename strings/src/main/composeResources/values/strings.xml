@@ -3022,6 +3022,54 @@
     <string name="macros_save">Save macro</string>
     <string name="macros_name">Name</string>
     <string name="macros_run">Run</string>
+    <string name="control_open">MIDI &amp; OSC…</string>
+    <string name="control_title">MIDI &amp; OSC</string>
+    <string name="control_hint">Map what a pad, a lighting desk or a controller sends to actions, and send something back out when the show goes live, takes or clears.</string>
+    <string name="control_tab_ports">Ports</string>
+    <string name="control_tab_triggers">Triggers</string>
+    <string name="control_tab_outputs">Outputs</string>
+    <string name="control_save">Save</string>
+    <string name="control_midi_input">MIDI input</string>
+    <string name="control_midi_output">MIDI output</string>
+    <string name="control_device_none">Off</string>
+    <string name="control_osc_in_port">OSC listen port (0 = off)</string>
+    <string name="control_osc_out_host">OSC send to host</string>
+    <string name="control_osc_out_port">OSC send to port</string>
+    <string name="control_state_off">Off</string>
+    <string name="control_state_open">Open</string>
+    <string name="control_state_failed">Could not open</string>
+    <string name="control_triggers_empty">No triggers yet. Add one, press Learn, and play the pad or send the message to map it to actions.</string>
+    <string name="control_trigger_add">Add trigger</string>
+    <string name="control_trigger_save">Save trigger</string>
+    <string name="control_name">Name (optional)</string>
+    <string name="control_kind">Kind</string>
+    <string name="control_kind_note">MIDI note</string>
+    <string name="control_kind_cc">MIDI control change</string>
+    <string name="control_kind_msc">MIDI Show Control</string>
+    <string name="control_kind_osc">OSC message</string>
+    <string name="control_field_channel">Channel (0 = any)</string>
+    <string name="control_field_note">Note</string>
+    <string name="control_field_controller">Controller</string>
+    <string name="control_field_value">Value (blank = any)</string>
+    <string name="control_field_command">Command</string>
+    <string name="control_field_cue">Cue (blank = any)</string>
+    <string name="control_field_address">OSC address</string>
+    <string name="control_field_argument">OSC argument (optional)</string>
+    <string name="control_field_level">Velocity / value</string>
+    <string name="control_learn">Learn</string>
+    <string name="control_learning">Waiting… play a pad or send a message</string>
+    <string name="control_any">any</string>
+    <string name="control_label_note">Note %1$d, channel %2$s</string>
+    <string name="control_label_cc">Control %1$d, channel %2$s</string>
+    <string name="control_label_msc">MSC %1$s %2$s</string>
+    <string name="control_outputs_empty">No outputs yet. Add one to send a note or an OSC message when the show goes live, takes or clears.</string>
+    <string name="control_output_add">Add output</string>
+    <string name="control_output_save">Save output</string>
+    <string name="control_output_when">When</string>
+    <string name="control_event_go_live">Something goes live</string>
+    <string name="control_event_take">Take</string>
+    <string name="control_event_clear">Everything is cleared</string>
+    <string name="control_output_arrow">sends</string>
     <string name="clear_layer_slide">Slide</string>
     <string name="clear_layer_media">Media</string>
     <string name="clear_layer_captions">Captions</string>

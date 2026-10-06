@@ -1,5 +1,14 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.dialogs.ControlPanelData
+import org.churchpresenter.app.churchpresenter.dialogs.ControlPanelActions
+import org.churchpresenter.app.churchpresenter.dialogs.ControlDialog
+import org.churchpresenter.controlin.MidiPorts
+import org.churchpresenter.controlin.ControlHub
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.collectAsState
 import javax.swing.filechooser.FileNameExtensionFilter
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.dialogs.PropsDialog
@@ -109,8 +118,7 @@ internal fun PreviewSidebar(
     qaDisplayUrl: String,
     sttManager: STTManager?,
     companionSatelliteViewModel: CompanionSatelliteViewModel,
-    scheduleRows: List<ScheduleItem> = emptyList(),
-    onRunMacro: (Macro) -> Unit = {},
+    showControl: SidebarShowControl = SidebarShowControl(),
 ) {
     // Whether the panel's layout is being edited, from the gear's Edit layout to the panel's Done.
     var editingPreviewLayout by remember { mutableStateOf(false) }
@@ -126,9 +134,8 @@ internal fun PreviewSidebar(
                 mediaViewModel = mediaViewModel,
                 instanceLinkSendClear = instanceLinkSendClear,
                 appSettings = appSettings,
-                scheduleRows = scheduleRows,
+                showControl = showControl,
                 onSettingsChange = onSettingsChange,
-                onRunMacro = onRunMacro,
                 onEditPreviewLayout = { editingPreviewLayout = true },
             )
             // A layout filling the panel takes the column's spare height; otherwise it keeps its own.
@@ -210,9 +217,8 @@ private fun SidebarButtons(
     mediaViewModel: MediaViewModel?,
     instanceLinkSendClear: (() -> Unit)?,
     appSettings: AppSettings,
-    scheduleRows: List<ScheduleItem>,
+    showControl: SidebarShowControl,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    onRunMacro: (Macro) -> Unit,
     onEditPreviewLayout: () -> Unit,
 ) {
     // Wraps rather than clips: the panel is resizable and these buttons need ~320dp together.
@@ -246,7 +252,7 @@ private fun SidebarButtons(
         }
         MessageButton(presenterManager, appSettings, onSettingsChange)
         PropsButton(presenterManager, appSettings, onSettingsChange)
-        MacrosButton(appSettings, scheduleRows, onSettingsChange, onRunMacro)
+        MacrosButton(appSettings, showControl, onSettingsChange)
         ClearLayersButton(presenterManager, appSettings, onSettingsChange)
         if (appSettings.projectionSettings.previewModeEnabled) PreviewTakeButton(presenterManager)
     }
@@ -326,15 +332,22 @@ private fun PropsButton(
 
 internal const val PROPS_BUTTON_TAG = "preview_props"
 
+/** What the sidebar's show-control buttons need: the schedule's rows, running a macro, and the MIDI/OSC hub. */
+internal class SidebarShowControl(
+    val rows: List<ScheduleItem> = emptyList(),
+    val onRunMacro: (Macro) -> Unit = {},
+    val controlHub: ControlHub? = null,
+)
+
 /** Opens the Macros dialog: the named action lists, to run or edit. */
 @Composable
 private fun MacrosButton(
     appSettings: AppSettings,
-    scheduleRows: List<ScheduleItem>,
+    showControl: SidebarShowControl,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    onRunMacro: (Macro) -> Unit,
 ) {
     var open by remember { mutableStateOf(false) }
+    var controlOpen by remember { mutableStateOf(false) }
     TooltipIconButton(
         painter = rememberVectorPainter(Icons.Outlined.PlayCircle),
         text = stringResource(Res.string.tooltip_macros),
@@ -346,10 +359,44 @@ private fun MacrosButton(
     MacrosDialog(
         isVisible = open,
         macros = appSettings.macros,
-        rows = scheduleRows,
+        rows = showControl.rows,
         onMacrosChange = { macros -> onSettingsChange { it.copy(macros = macros) } },
-        onRun = onRunMacro,
+        onRun = showControl.onRunMacro,
         onDismiss = { open = false },
+        onOpenControl = showControl.controlHub?.let { { controlOpen = true } },
+    )
+    showControl.controlHub?.let { hub ->
+        ControlSetup(controlOpen, hub, appSettings, showControl.rows, onSettingsChange) { controlOpen = false }
+    }
+}
+
+/** The MIDI & OSC dialog over [hub]: the devices there are, how the ports stand, Learn, and saving. */
+@Composable
+private fun ControlSetup(
+    visible: Boolean,
+    hub: ControlHub,
+    appSettings: AppSettings,
+    scheduleRows: List<ScheduleItem>,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val status by hub.status.collectAsState()
+    val learning by hub.isLearning.collectAsState()
+    // Asking the system for its devices can block, so it is done off the UI thread, once per opening.
+    val devices by produceState(emptyList<String>() to emptyList(), visible) {
+        if (visible) value = withContext(Dispatchers.IO) { MidiPorts.inputNames() to MidiPorts.outputNames() }
+    }
+    ControlDialog(
+        isVisible = visible,
+        settings = appSettings.control,
+        data = ControlPanelData(status, devices.first, devices.second, scheduleRows),
+        actions = ControlPanelActions(
+            isLearning = learning,
+            onLearn = hub::learn,
+            onCancelLearn = hub::cancelLearn,
+            onSave = { saved -> onSettingsChange { it.copy(control = saved) } },
+        ),
+        onDismiss = onDismiss,
     )
 }
 

@@ -177,6 +177,7 @@ private fun MainWindowScope.liveOutputCallbacks(): LiveOutputCallbacks = with(ro
         onRowWentLive = { item -> liveDurationLog.wentLive(item) },
         onRowActions = { item, actions -> runRowActions(item, actions) },
         onRunMacro = ::runMacro,
+        controlHub = controlHub,
         onVerseSelected = { verses -> presenterManager.previewBus.forVerses(verses).setSelectedVerses(verses) },
         // Line mode used to push the section straight to the outputs from
         // here. That put the words on screen behind the transition driver's

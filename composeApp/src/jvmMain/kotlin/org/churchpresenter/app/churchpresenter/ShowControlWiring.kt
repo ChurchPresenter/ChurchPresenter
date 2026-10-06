@@ -80,7 +80,6 @@ internal fun AppRootState.runRowActions(item: ScheduleItem, actions: List<Action
 /** Runs [macro]'s actions; pressing it again while it is still going starts it over. */
 internal fun AppRootState.runMacro(macro: Macro) {
     showRunner.run(macro.actions, "macro:${macro.id}")
-    presenterManager.setShowPresenterWindow(true)
 }
 
 /** Hands [actions] to [run], keyed by [item]'s id, once [item] reaches the air -- see [PreviewBus.onAir]. */

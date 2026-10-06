@@ -32,6 +32,7 @@ import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.close
+import org.churchpresenter.strings.generated.resources.control_open
 import org.churchpresenter.strings.generated.resources.delete_saved_string
 import org.churchpresenter.strings.generated.resources.macros_add
 import org.churchpresenter.strings.generated.resources.macros_empty
@@ -56,6 +57,7 @@ fun MacrosDialog(
     onMacrosChange: (List<Macro>) -> Unit,
     onRun: (Macro) -> Unit,
     onDismiss: () -> Unit,
+    onOpenControl: (() -> Unit)? = null,
 ) {
     if (!isVisible) return
     val dialogState = rememberDialogState(
@@ -69,7 +71,7 @@ fun MacrosDialog(
         title = stringResource(Res.string.macros_title),
     ) {
         ProvideUiFontScale {
-            MacrosDialogContent(macros, rows, onMacrosChange, onRun, onDismiss)
+            MacrosDialogContent(macros, rows, onMacrosChange, onRun, onDismiss, onOpenControl)
         }
     }
 }
@@ -82,6 +84,7 @@ internal fun MacrosDialogContent(
     onMacrosChange: (List<Macro>) -> Unit,
     onRun: (Macro) -> Unit,
     onDismiss: () -> Unit,
+    onOpenControl: (() -> Unit)? = null,
 ) {
     var editing by remember { mutableStateOf<Macro?>(null) }
     Surface(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface) {
@@ -126,6 +129,7 @@ internal fun MacrosDialogContent(
                     onMacrosChange(macros.filterNot { it.id == draft.id })
                     editing = null
                 },
+                onOpenControl = onOpenControl,
                 onDismiss = onDismiss,
             )
         }
@@ -175,11 +179,19 @@ private fun MacroButtons(
     onAdd: () -> Unit,
     onSave: (Macro) -> Unit,
     onDelete: (Macro) -> Unit,
+    onOpenControl: (() -> Unit)?,
     onDismiss: () -> Unit,
 ) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         GhostButton(shape = AppShape(6.dp), onClick = onAdd, modifier = Modifier.testTag(MACRO_ADD_TAG)) {
             Text(stringResource(Res.string.macros_add))
+        }
+        if (onOpenControl != null) {
+            GhostButton(
+                shape = AppShape(6.dp),
+                onClick = onOpenControl,
+                modifier = Modifier.testTag(MACRO_CONTROL_TAG),
+            ) { Text(stringResource(Res.string.control_open)) }
         }
         if (editing != null && isSaved) {
             GhostButton(shape = AppShape(6.dp), onClick = { onDelete(editing) }) {
@@ -207,6 +219,7 @@ internal fun newMacroId(macros: List<Macro>): String =
 internal const val MACRO_NAME_TAG = "macro_name"
 internal const val MACRO_ADD_TAG = "macro_add"
 internal const val MACRO_SAVE_TAG = "macro_save"
+internal const val MACRO_CONTROL_TAG = "macro_control"
 
 internal fun macroRunTag(id: String) = "macro_run_$id"
 

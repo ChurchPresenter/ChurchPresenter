@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.controlin.ControlHub
 import org.churchpresenter.showcontrol.ActionRunner
 import org.churchpresenter.server.InstanceLinkCommandFailure
 import org.churchpresenter.core.models.songs.SongItem
@@ -103,6 +104,8 @@ internal class AppRootState(
 
     /** Runs show-control action lists -- calendar cues today, cue actions and macros later. */
     val showRunner: ActionRunner by lazy { ActionRunner(appShowHost(), coroutineScope) }
+    /** The MIDI and OSC ports: what arrives runs actions, and what the show does is sent back out. */
+    val controlHub: ControlHub by lazy { ControlHub(onMapping = ::runControlMapping) }
     val autoConnectedIds = mutableSetOf<String>()
     val lastReconciled = mutableMapOf<String, CompanionSatelliteSettings>()
 
