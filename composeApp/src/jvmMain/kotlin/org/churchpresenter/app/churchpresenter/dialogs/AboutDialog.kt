@@ -45,6 +45,7 @@ import org.churchpresenter.strings.generated.resources.app_name
 import org.churchpresenter.strings.generated.resources.action_ok
 import org.churchpresenter.strings.generated.resources.diagnostic_info_save_failed
 import org.churchpresenter.strings.generated.resources.diagnostic_info_saved
+import org.churchpresenter.strings.generated.resources.diagnostic_info_text_filter
 import org.churchpresenter.strings.generated.resources.open_crash_logs
 import org.churchpresenter.strings.generated.resources.report_bug
 import org.churchpresenter.strings.generated.resources.save_diagnostic_info
@@ -260,6 +261,7 @@ private fun SaveDiagnosticInfoButton(appSettings: AppSettings) {
     val saveTitle = stringResource(Res.string.save_diagnostic_info)
     val savedMsg = stringResource(Res.string.diagnostic_info_saved)
     val saveFailedMsg = stringResource(Res.string.diagnostic_info_save_failed)
+    val textFilterLabel = stringResource(Res.string.diagnostic_info_text_filter)
     val saveCoroutineScope = rememberCoroutineScope()
     KeyButton(
         shape = AppShape(6.dp),
@@ -269,7 +271,7 @@ private fun SaveDiagnosticInfoButton(appSettings: AppSettings) {
                 var path = FileChooser.platformInstance.save(
                     location = null,
                     suggestedName = "churchpresenter-diagnostic-info.txt",
-                    filters = listOf(FileNameExtensionFilter("Text (*.txt)", "txt")),
+                    filters = listOf(FileNameExtensionFilter(textFilterLabel, "txt")),
                     title = saveTitle
                 )
                 if (path != null) {

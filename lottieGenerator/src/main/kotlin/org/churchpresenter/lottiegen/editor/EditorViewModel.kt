@@ -21,6 +21,7 @@ import org.churchpresenter.lottiegen.spec.StyleSpec
 import java.io.File
 import java.io.IOException
 import kotlin.math.roundToInt
+import org.churchpresenter.lottiegen.ui.Strings
 
 /**
  * One bundled template spec offered by the New dialog: [styleId] links a port to its
@@ -182,10 +183,10 @@ class EditorViewModel(
         return try {
             BuildRegistrar.register(spec.copy(id = spec.id.trim()), stylesDir)
         } catch (e: IOException) {
-            statusText = "Error: ${e.message}"
+            statusText = Strings.bandStatusError(e.message.toString())
             null
         } catch (e: IllegalArgumentException) {
-            statusText = "Error: ${e.message}"
+            statusText = Strings.bandStatusError(e.message.toString())
             null
         }
     }
@@ -224,9 +225,9 @@ class EditorViewModel(
                 // superseded regeneration went on to overwrite the status of the one that replaced it.
                 throw e
             } catch (e: IllegalStateException) {
-                statusText = "Error: ${e.message}"
+                statusText = Strings.bandStatusError(e.message.toString())
             } catch (e: IllegalArgumentException) {
-                statusText = "Error: ${e.message}"
+                statusText = Strings.bandStatusError(e.message.toString())
             }
         }
     }
@@ -250,9 +251,9 @@ class EditorViewModel(
                 // superseded regeneration went on to overwrite the status of the one that replaced it.
                 throw e
             } catch (e: IllegalStateException) {
-                statusText = "Error: ${e.message}"
+                statusText = Strings.bandStatusError(e.message.toString())
             } catch (e: IllegalArgumentException) {
-                statusText = "Error: ${e.message}"
+                statusText = Strings.bandStatusError(e.message.toString())
             }
         }
     }

@@ -2,6 +2,7 @@ package org.churchpresenter.lowerthird
 
 import org.churchpresenter.atem.AtemMediaSlot
 import org.churchpresenter.atem.AtemState
+import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -13,7 +14,7 @@ class AtemStateDescriptionTest {
     @Test
     fun `a switcher without clip memory gives its mode and rate alone`() {
         val state = AtemState(fps = 25.0, videoMode = "1080p25", stillSlots = slots(20), clipSlots = emptyList())
-        assertEquals("1080p25 (25 fps)", describeAtemState(state))
+        assertEquals("1080p25 (25 fps)", runBlocking { describeAtemState(state) })
     }
 
     @Test
@@ -28,11 +29,11 @@ class AtemStateDescriptionTest {
         )
         assertEquals(
             "1080p25 (25 fps) — 2 clips × up to 100 frames (≈4.0s), 40 frames unassigned",
-            describeAtemState(state),
+            runBlocking { describeAtemState(state) },
         )
         assertEquals(
             "1080p25 (25 fps) — 2 clips × up to 100 frames (≈4.0s)/50 frames (≈2.0s)",
-            describeAtemState(state.copy(clipMaxFrames = listOf(100, 50), unassignedFrames = 0)),
+            runBlocking { describeAtemState(state.copy(clipMaxFrames = listOf(100, 50), unassignedFrames = 0)) },
         )
     }
 }

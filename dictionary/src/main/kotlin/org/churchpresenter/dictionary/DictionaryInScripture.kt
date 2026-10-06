@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.book
 import org.churchpresenter.strings.generated.resources.dictionary_filter_all
 import org.churchpresenter.strings.generated.resources.dictionary_go_to_verse
 import org.churchpresenter.strings.generated.resources.dictionary_in_scripture_count
@@ -183,7 +184,8 @@ private fun InterlinearVerseRow(
         interlinearVerse.chapter,
         interlinearVerse.verseNumber
     )
-    val bookName = getBookName?.invoke(interlinearVerse.bookId) ?: "Book ${interlinearVerse.bookId}"
+    val bookLabel = stringResource(Res.string.book)
+    val bookName = getBookName?.invoke(interlinearVerse.bookId) ?: "$bookLabel ${interlinearVerse.bookId}"
     val refLabel = "$bookName ${interlinearVerse.chapter}:${interlinearVerse.verseNumber}"
     val goToVerseStr = stringResource(Res.string.dictionary_go_to_verse)
 

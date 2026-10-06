@@ -5,6 +5,12 @@ import org.churchpresenter.atem.formatAtemFps
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import org.churchpresenter.theme.components.SettingsTextField
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.atem_capacity_unassigned
+import org.churchpresenter.strings.generated.resources.atem_state_clips
+import org.churchpresenter.strings.generated.resources.atem_state_frames
+import org.churchpresenter.strings.generated.resources.atem_state_mode
+import org.jetbrains.compose.resources.getString
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,20 +19,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.KeyboardType
 
 /** The switcher's video mode and frame rate, and how much clip memory it holds, in one line. */
-internal fun describeAtemState(state: AtemState): String = buildString {
+internal suspend fun describeAtemState(state: AtemState): String {
     val fpsLabel = formatAtemFps(state.fps)
-    append("${state.videoMode} ($fpsLabel fps)")
-    if (state.clipMaxFrames.isNotEmpty()) {
-        val capacity = state.clipMaxFrames.distinct()
-            .joinToString("/") { frames ->
-                val secs = String.format(java.util.Locale.US, "%.1f", frames / state.fps)
-                "$frames frames (≈${secs}s)"
-            }
-        append(" — ${state.clipSlots.size} clips × up to $capacity")
-        if (state.unassignedFrames > 0) {
-            append(", ${state.unassignedFrames} frames unassigned")
+    val mode = getString(Res.string.atem_state_mode, state.videoMode, fpsLabel)
+    if (state.clipMaxFrames.isEmpty()) return mode
+    val capacity = state.clipMaxFrames.distinct()
+        .map { frames ->
+            val secs = String.format(java.util.Locale.US, "%.1f", frames / state.fps)
+            getString(Res.string.atem_state_frames, frames, secs)
         }
-    }
+        .joinToString("/")
+    val clips = getString(Res.string.atem_state_clips, state.clipSlots.size, capacity)
+    val unassigned = if (state.unassignedFrames > 0) {
+        getString(Res.string.atem_capacity_unassigned, state.unassignedFrames)
+    } else ""
+    return "$mode — $clips$unassigned"
 }
 
 /**

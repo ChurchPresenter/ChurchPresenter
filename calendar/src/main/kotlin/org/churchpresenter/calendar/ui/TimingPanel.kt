@@ -48,6 +48,8 @@ import org.churchpresenter.calendar.generated.resources.calendar_timing_once
 import org.churchpresenter.calendar.generated.resources.calendar_timing_or
 import org.churchpresenter.calendar.generated.resources.calendar_timing_own
 import org.churchpresenter.calendar.generated.resources.calendar_timing_repeats
+import org.churchpresenter.calendar.generated.resources.calendar_timing_run_hours
+import org.churchpresenter.calendar.generated.resources.calendar_timing_run_minutes
 import org.churchpresenter.calendar.generated.resources.calendar_timing_runs
 import org.churchpresenter.calendar.generated.resources.calendar_timing_starts
 import org.churchpresenter.calendar.generated.resources.calendar_timing_times_hint
@@ -321,8 +323,13 @@ private fun Modifier.swallowClicks(): Modifier = pointerInput(Unit) {
 }
 
 /** `5m` … `1h`, as the design labels the run chips. */
+@Composable
 private fun runChipLabel(seconds: Int): String =
-    if (seconds >= SECONDS_PER_HOUR) "${seconds / SECONDS_PER_HOUR}h" else "${seconds / SECONDS_PER_MINUTE}m"
+    if (seconds >= SECONDS_PER_HOUR) {
+        stringResource(Res.string.calendar_timing_run_hours, seconds / SECONDS_PER_HOUR)
+    } else {
+        stringResource(Res.string.calendar_timing_run_minutes, seconds / SECONDS_PER_MINUTE)
+    }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

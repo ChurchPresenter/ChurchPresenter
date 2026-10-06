@@ -126,7 +126,7 @@ internal fun PlayButton(
     ) {
         Icon(
             imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-            contentDescription = if (isPlaying) "Pause" else "Play",
+            contentDescription = if (isPlaying) Strings.editorPause else Strings.editorPlay,
             tint = fill.ink,
             modifier = Modifier.size(iconSize)
         )

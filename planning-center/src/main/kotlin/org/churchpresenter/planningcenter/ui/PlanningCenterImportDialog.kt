@@ -41,10 +41,14 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.planning_center_connect
 import org.churchpresenter.strings.generated.resources.planning_center_description
+import org.churchpresenter.strings.generated.resources.error_connection_failed
+import org.churchpresenter.strings.generated.resources.planning_center_error_invalid_credentials
+import org.churchpresenter.strings.generated.resources.planning_center_error_sign_in_timeout
 import org.churchpresenter.strings.generated.resources.planning_center_import_no_plans
 import org.churchpresenter.strings.generated.resources.planning_center_import_title
 import org.churchpresenter.strings.generated.resources.planning_center_status_connecting
 import org.churchpresenter.strings.generated.resources.atem_status_error
+import org.churchpresenter.strings.generated.resources.stock_photo_error_network
 import kotlinx.coroutines.launch
 import org.churchpresenter.sharedui.composables.cpColorToHex
 import org.churchpresenter.sharedui.utils.UsageEvent
@@ -53,6 +57,7 @@ import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.planningcenter.PlanningCenterAuthServer
 import org.churchpresenter.planningcenter.PlanningCenterClient
 import org.churchpresenter.settings.PlanningCenterSettings
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.utils.UrlOpener
 
@@ -251,15 +256,16 @@ internal suspend fun connectToPlanningCenter(
                     onConnected(tokens.accessToken, tokens.refreshToken, tokens.expiresAtEpochMs, name)
                 }
                 PlanningCenterClient.TokenOutcome.InvalidCredentials ->
-                    onError("Invalid client ID or secret")
+                    onError(getString(Res.string.planning_center_error_invalid_credentials))
                 PlanningCenterClient.TokenOutcome.NetworkError ->
-                    onError("Network error — check your connection")
+                    onError(getString(Res.string.stock_photo_error_network))
                 PlanningCenterClient.TokenOutcome.Failure ->
-                    onError("Connection failed")
+                    onError(getString(Res.string.error_connection_failed))
             }
         }
         is PlanningCenterAuthServer.CallbackResult.Error -> onError(callback.message)
-        PlanningCenterAuthServer.CallbackResult.Timeout -> onError("Timed out waiting for browser sign-in")
+        PlanningCenterAuthServer.CallbackResult.Timeout ->
+            onError(getString(Res.string.planning_center_error_sign_in_timeout))
     }
 }
 

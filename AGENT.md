@@ -124,6 +124,7 @@ module-specific notes there, not here.**
 | `companion-surface/`   | `:companion-surface`   | The Companion Surface tab and panels, and `CompanionSatelliteViewModel`             | [AGENT.md](companion-surface/AGENT.md)   |
 | `obs/`                 | `:obs`                 | The OBS Studio integration — the obs-websocket client, scene mapping and its settings page | [AGENT.md](obs/AGENT.md)                 |
 | `live-show/`           | `:live-show`           | The layer model — `Layer`, `Cue`, and `LiveShow`'s program and preview (see `docs/LAYER_MODEL.md`) | [AGENT.md](live-show/AGENT.md)           |
+| `detekt-rules/`        | `:detekt-rules`        | The project's own detekt rules (`HardcodedString`), run in every module's detekt | [AGENT.md](detekt-rules/AGENT.md)        |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions
@@ -171,6 +172,7 @@ only — measure with the excludes removed before quoting it.
 ./gradlew :composeApp:detekt           # static analysis — CI's first gate, run it LAST before you stop
 ./gradlew :theme:test :theme:detekt    # a module's own suite and gate
 # NEVER run :composeApp:detektBaseline — it rewrites baseline.xml and absorbs your own new findings
+./gradlew :<module>:detekt -PhardcodedStrings  # report hard-coded strings; never fails — see detekt-rules/AGENT.md
 ./gradlew :composeApp:check            # compile + all unit tests
 ./gradlew :composeApp:jacocoTestReport # coverage → build/reports/jacoco/jacocoTestReport/html/
 bash cleanup_check.sh                  # repo code-quality report

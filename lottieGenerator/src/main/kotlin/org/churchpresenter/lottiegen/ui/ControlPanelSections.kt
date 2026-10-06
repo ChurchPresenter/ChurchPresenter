@@ -284,7 +284,7 @@ internal fun LogoSection(viewModel: LottieGenState) {
                     SwingUtilities.invokeLater {
                         val chooser = JFileChooser()
                         chooser.fileFilter = FileNameExtensionFilter(
-                            "Images",
+                            Strings.imagesFilter,
                             "png",
                             "jpg",
                             "jpeg",

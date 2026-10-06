@@ -57,6 +57,7 @@ import org.churchpresenter.icons.generated.resources.ic_copy
 import org.churchpresenter.icons.generated.resources.ic_delete
 import org.churchpresenter.icons.generated.resources.ic_edit
 import org.churchpresenter.strings.generated.resources.canvas_new_scene
+import org.churchpresenter.strings.generated.resources.canvas_scene_default_name
 import org.churchpresenter.strings.generated.resources.canvas_scenes
 import org.churchpresenter.strings.generated.resources.canvas_sources
 import org.churchpresenter.settings.utils.Constants
@@ -89,6 +90,7 @@ import org.churchpresenter.sharedui.composables.rowPad
 
 @Composable
 internal fun CanvasTabScope.CanvasLeftPanel(sceneViewModel: SceneViewModel) {
+    val defaultSceneName = stringResource(Res.string.canvas_scene_default_name)
     Column(
         modifier = Modifier
             .width(with(density) { leftPanelPx.toDp() })
@@ -108,7 +110,7 @@ internal fun CanvasTabScope.CanvasLeftPanel(sceneViewModel: SceneViewModel) {
 
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             RaisedButton(
-                onClick = { sceneViewModel.addScene() },
+                onClick = { sceneViewModel.addScene(defaultSceneName) },
                 modifier = Modifier.weight(1f),
                 shape = AppShape(8.dp),
                 contentPadding = ButtonDefaults.ContentPadding

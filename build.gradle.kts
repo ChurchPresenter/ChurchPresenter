@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.kotlinJvm) apply false
+    alias(libs.plugins.detekt) apply false
 }
 
 val gitHooksPath = ".githooks"
@@ -89,6 +90,25 @@ subprojects {
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+// The project's own detekt rules (`:detekt-rules`) run in every module's detekt task.
+// `-PhardcodedStrings` switches HardcodedString on everywhere and reports without failing, to measure
+// what is left before a module opts in -- see detekt-rules/AGENT.md.
+val reportHardcodedStrings = providers.gradleProperty("hardcodedStrings").isPresent
+
+subprojects {
+    if (path != ":detekt-rules") {
+        plugins.withId("io.gitlab.arturbosch.detekt") {
+            dependencies { add("detektPlugins", project(":detekt-rules")) }
+            if (reportHardcodedStrings) {
+                tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+                    config.from(rootProject.file("config/detekt/hardcoded-strings.yml"))
+                    ignoreFailures = true
                 }
             }
         }

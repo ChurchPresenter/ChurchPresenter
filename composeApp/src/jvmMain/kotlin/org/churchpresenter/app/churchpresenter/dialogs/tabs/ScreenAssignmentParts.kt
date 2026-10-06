@@ -61,7 +61,8 @@ internal fun rememberKeyOutputOptions(
     proj: ProjectionSettings,
 ): List<DisplayOption> {
     val noneLabel = stringResource(Res.string.key_output_none)
-return remember(screenDevicesAll, noneLabel, proj.screenNames) {
+    val displayWord = stringResource(Res.string.projection_target_display)
+return remember(screenDevicesAll, noneLabel, proj.screenNames, displayWord) {
     val opts = mutableListOf(DisplayOption(label = noneLabel,
         targetDisplay = Constants.KEY_TARGET_NONE, targetType = Constants.TARGET_TYPE_SCREEN))
     var keyDisplayNum = 1
@@ -69,7 +70,7 @@ return remember(screenDevicesAll, noneLabel, proj.screenNames) {
         if (screen.isPrimary) continue
         val named = proj.screenName(screen.key)
         opts.add(DisplayOption(
-            label = displayLabel(named, keyDisplayNum, screen),
+            label = displayLabel(named, keyDisplayNum, screen, displayWord),
             shortLabel = displayShortLabel(named, keyDisplayNum, screen),
             targetDisplay = screen.index, targetType = Constants.TARGET_TYPE_SCREEN,
             boundsX = screen.boundsX,

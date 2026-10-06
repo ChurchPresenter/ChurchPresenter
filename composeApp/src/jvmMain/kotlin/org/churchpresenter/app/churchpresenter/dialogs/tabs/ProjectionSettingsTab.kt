@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.projection_target_display
 import org.jetbrains.compose.resources.getString
 import org.churchpresenter.strings.generated.resources.vlc_directory_chooser_title
 import org.churchpresenter.strings.generated.resources.audio_output
@@ -148,8 +149,8 @@ fun detectScreensFromAwt(): List<DetectedScreen> {
  * How a display is named in a menu: the operator's own name for it, else its number, and always its
  * geometry — which is what tells two displays apart when they are named alike or not at all.
  */
-internal fun displayLabel(name: String, number: Int, screen: DetectedScreen): String {
-    val head = name.ifEmpty { "Display $number" }
+internal fun displayLabel(name: String, number: Int, screen: DetectedScreen, displayWord: String): String {
+    val head = name.ifEmpty { "$displayWord $number" }
     return "$head (${screen.boundsW}x${screen.boundsH} @ ${screen.boundsX},${screen.boundsY})"
 }
 
@@ -669,7 +670,8 @@ private fun rememberDisplayOptions(
     proj: ProjectionSettings,
 ): List<DisplayOption> {
     val screenNames = proj.screenNames
-    return remember(screenDevicesAll, noneLabel, screenNames) {
+    val displayWord = stringResource(Res.string.projection_target_display)
+    return remember(screenDevicesAll, noneLabel, screenNames, displayWord) {
         val options = mutableListOf<DisplayOption>()
         options.add(
             DisplayOption(
@@ -687,7 +689,7 @@ private fun rememberDisplayOptions(
             val named = proj.screenName(screen.key)
             options.add(
                 DisplayOption(
-                    label = displayLabel(named, displayNum, screen),
+                    label = displayLabel(named, displayNum, screen, displayWord),
                     shortLabel = displayShortLabel(named, displayNum, screen),
                     targetDisplay = screen.index,
                     targetType = Constants.TARGET_TYPE_SCREEN,

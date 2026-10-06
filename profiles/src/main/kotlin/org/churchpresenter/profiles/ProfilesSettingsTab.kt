@@ -20,6 +20,7 @@ import org.churchpresenter.strings.generated.resources.ndi_output_numbered
 import org.churchpresenter.strings.generated.resources.omt_output_numbered
 import org.churchpresenter.strings.generated.resources.output_profile_empty_state
 import org.churchpresenter.strings.generated.resources.output_profile_new_name_default
+import org.churchpresenter.strings.generated.resources.profile_duplicate_name
 import org.churchpresenter.strings.generated.resources.profile_linked_name
 import org.churchpresenter.strings.generated.resources.screen_number
 import org.churchpresenter.settings.AppSettings
@@ -81,6 +82,7 @@ fun ProfilesSettingsTab(
     val unlink = remember { UnlinkState() }
 
     val defaultProfileName = stringResource(Res.string.output_profile_new_name_default)
+    val copyNameFormat = stringResource(Res.string.profile_duplicate_name)
     val usage = proj.outputProfiles.associate { it.id to profileUserLabels(proj, it.id) }
     // What a profile linked to each one is called: "Sanctuary (linked)".
     val linkedNames = proj.outputProfiles.associate { p ->
@@ -121,7 +123,7 @@ fun ProfilesSettingsTab(
                 onDuplicate = { id ->
                     val source = proj.outputProfiles.find { it.id == id }
                     if (source != null) {
-                        val copyName = duplicateName(source.name.ifBlank { defaultProfileName })
+                        val copyName = duplicateName(source.name.ifBlank { defaultProfileName }, copyNameFormat)
                         updateProjection { it.duplicateOutputProfile(id, copyName) }
                     }
                 },
@@ -140,7 +142,7 @@ fun ProfilesSettingsTab(
                 onProfileChange = { updated -> updateProjection { it.editProfile(profile.id) { updated } } },
                 onRename = { name -> updateProjection { it.renameOutputProfile(profile.id, name) } },
                 onDuplicate = {
-                    val copyName = duplicateName(profile.name.ifBlank { defaultProfileName })
+                    val copyName = duplicateName(profile.name.ifBlank { defaultProfileName }, copyNameFormat)
                     updateProjection { it.duplicateOutputProfile(profile.id, copyName) }
                 },
                 onRequestDelete = { pendingDeleteId = profile.id },
@@ -257,7 +259,7 @@ private fun ProjectionSettings.relinked(u: UnlinkedProfile): ProjectionSettings 
 private fun OutputProfile.displayNameOr(fallback: String): String = name.ifBlank { fallback }
 
 /** "Foyer TV" → "Foyer TV copy", "Foyer TV copy" → "Foyer TV copy copy": no de-duplication attempted. */
-internal fun duplicateName(name: String): String = "$name copy"
+internal fun duplicateName(name: String, format: String): String = format.format(name)
 
 /** Every output currently following [id], labeled the way its own card labels it. */
 @Composable

@@ -146,6 +146,12 @@ object Strings {
 
     fun batchImportedStatus(added: Int, updated: Int): String =
         bundle.getString("batch_imported_status").format(added, updated)
+    fun styleAppliedStatus(count: Int): String = bundle.getString("style_applied_status").format(count)
+    fun savedFilesStatus(count: Int): String = bundle.getString("saved_files_status").format(count)
+    val untitled: String get() = bundle.getString("untitled")
+    val colorThemeCustom: String get() = bundle.getString("color_theme_custom")
+    val edit: String get() = bundle.getString("edit")
+    val imagesFilter: String get() = bundle.getString("images_filter")
 
     // Color picker dialog
     val chooseColor: String get() = bundle.getString("choose_color")

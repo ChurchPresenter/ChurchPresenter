@@ -49,6 +49,7 @@ import org.churchpresenter.strings.generated.resources.atem_slot
 import org.churchpresenter.strings.generated.resources.atem_slots_error
 import org.churchpresenter.strings.generated.resources.atem_upload
 import org.churchpresenter.strings.generated.resources.atem_upload_error
+import org.churchpresenter.strings.generated.resources.atem_fps_value
 import org.churchpresenter.strings.generated.resources.atem_upload_mode
 import org.churchpresenter.strings.generated.resources.atem_uploading
 import org.churchpresenter.atem.AtemMediaSlot
@@ -86,7 +87,9 @@ internal fun LowerThirdTabScope.LowerThirdAtemDialog() {
                     val fpsUsed = detectedFps ?: appSettings.atemSettings.clipFps
                     if (detectedFps != null || atemSlotCapacity != null) {
                         val parts = buildList {
-                            if (detectedFps != null) add("${formatAtemFps(detectedFps)} fps")
+                            if (detectedFps != null) {
+                                add(stringResource(Res.string.atem_fps_value, formatAtemFps(detectedFps)))
+                            }
                             if (atemSlotCapacity != null) {
                                 val secs = String.format(java.util.Locale.US, "%.1f", atemSlotCapacity / fpsUsed)
                                 add(

@@ -254,6 +254,8 @@
     <string name="calendar_timing_plus">+%1$d</string>
     <string name="calendar_timing_or">or</string>
     <string name="calendar_timing_runs">Runs</string>
+    <string name="calendar_timing_run_hours">%1$dh</string>
+    <string name="calendar_timing_run_minutes">%1$dm</string>
     <string name="calendar_timing_own">Its own</string>
     <string name="calendar_timing_repeats">Repeats</string>
     <string name="calendar_timing_once">Once</string>

@@ -119,7 +119,7 @@ private fun LevelHeader(state: AdminState) {
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Tip("Go to previous level") {
+        Tip(Strings.prevLevelTip) {
             KeyIconButton(
                 onClick = { state.loadLevel(state.levels[index - 1]) },
                 enabled = index > 0
@@ -127,13 +127,13 @@ private fun LevelHeader(state: AdminState) {
         }
 
         Text(
-            text = if (state.levels.isEmpty()) "No levels"
-            else "Level ${state.currentLevel}  (${index + 1} / ${state.levels.size})",
+            text = if (state.levels.isEmpty()) Strings.noLevels
+            else Strings.levelPosition(state.currentLevel, index + 1, state.levels.size),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(horizontal = 8.dp)
         )
 
-        Tip("Go to next level") {
+        Tip(Strings.nextLevelTip) {
             KeyIconButton(
                 onClick = { state.loadLevel(state.levels[index + 1]) },
                 enabled = index < state.levels.size - 1
@@ -142,7 +142,7 @@ private fun LevelHeader(state: AdminState) {
 
         Spacer(Modifier.width(16.dp))
 
-        Tip("Create a new empty level and open it for editing") {
+        Tip(Strings.newLevelTip) {
             KeyButton(onClick = { state.newLevel() }) { Text(Strings.newLevel) }
         }
 
@@ -170,7 +170,7 @@ private fun UnexportedWarnings(state: AdminState) {
     if (templates.isNotEmpty()) {
         Spacer(Modifier.width(16.dp))
         Text(
-            text = "⚠ Level ${templates.joinToString(", ")}: clues not yet entered",
+            text = Strings.templatesWarning(templates.joinToString(", ")),
             color = MaterialTheme.colorScheme.tertiary,
             style = MaterialTheme.typography.labelMedium
         )
@@ -178,7 +178,7 @@ private fun UnexportedWarnings(state: AdminState) {
     if (unexported.isNotEmpty()) {
         Spacer(Modifier.width(16.dp))
         Text(
-            text = "⚠ Level ${unexported.joinToString(", ")} not exported",
+            text = Strings.unexportedWarning(unexported.joinToString(", ")),
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.labelMedium
         )
@@ -237,40 +237,36 @@ private fun ActionBar(state: AdminState) {
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Tip("Import a .txt plaintext puzzle file from disk into this level") {
+        Tip(Strings.importTxtTip) {
             KeyButton(onClick = {
-                openFileDialog("Load Plaintext", listOf("txt"))?.let { file ->
+                openFileDialog(Strings.loadPlaintextTitle, listOf("txt"))?.let { file ->
                     state.edit(file.readText(Charsets.UTF_8))
-                    state.say("Imported ${file.name}")
+                    state.say(Strings.imported(file.name))
                 }
             }) { Text(Strings.importTxt) }
         }
 
         Spacer(Modifier.width(8.dp))
 
-        Tip("Decode and load the saved .xwp file for this level back into the editor") {
+        Tip(Strings.loadXwpTip) {
             KeyButton(onClick = { state.loadEncoded() }) { Text(Strings.loadXwp) }
         }
 
         Spacer(Modifier.width(8.dp))
 
-        Tip("Encode and save this level as a .xwp file for use in the presenter") {
+        Tip(Strings.exportXwpTip) {
             RaisedButton(onClick = { state.exportCurrent() }) { Text(Strings.exportXwp) }
         }
 
         Spacer(Modifier.width(8.dp))
 
-        Tip(
-            "Build the crossword grid and renumber clues in reading order " +
-                "(top→bottom, left→right). Also converts simplified formats to " +
-                "standard layout."
-        ) {
+        Tip(Strings.fixReorderTip) {
             KeyButton(onClick = { state.fixReorder() }) { Text(Strings.fixReorder) }
         }
 
         Spacer(Modifier.width(16.dp))
 
-        Tip("Export all levels to .xwp files in one go, skipping any that are invalid or still unedited") {
+        Tip(Strings.exportAllTip) {
             KeyButton(onClick = {
                 state.say(exportAllLevels())
                 state.refreshLevels()
@@ -279,7 +275,7 @@ private fun ActionBar(state: AdminState) {
 
         Spacer(Modifier.width(8.dp))
 
-        Tip("Decode all .xwp files in the encoded/ folder back to plaintext .txt files") {
+        Tip(Strings.decodeAllTip) {
             KeyButton(onClick = {
                 state.say(decodeAllLevels())
                 state.refreshLevels()

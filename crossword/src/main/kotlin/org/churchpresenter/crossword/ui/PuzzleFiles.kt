@@ -57,11 +57,11 @@ internal fun scanTemplateLevels(levels: List<Int>): Set<Int> =
 /** Encodes every plaintext level found, and reports how many went out and how many were skipped. */
 internal fun exportAllLevels(): String {
     val all = detectLevels()
-    if (all.isEmpty()) return "No plaintext levels found in puzzles/"
+    if (all.isEmpty()) return Strings.noPlaintextLevels
     ENCODED_DIR.mkdirs()
     val exported = all.count { exportOne(it) }
     val skipped = all.size - exported
-    return "Exported $exported level(s)" + if (skipped > 0) ", $skipped skipped (invalid/unplaceable)" else ""
+    return Strings.exportedCount(exported) + if (skipped > 0) Strings.skippedCount(skipped) else ""
 }
 
 private fun exportOne(level: Int): Boolean {
@@ -85,7 +85,7 @@ private fun injectedLayout(file: File, text: String, title: String, clues: List<
 /** Decodes every `.xwp` back to plaintext, and reports how many came back. */
 internal fun decodeAllLevels(): String {
     val files = ENCODED_DIR.listFiles { f -> f.name.matches(ENCODED_NAME) }.orEmpty()
-    if (files.isEmpty()) return "No .xwp files found in encoded/"
+    if (files.isEmpty()) return Strings.noXwpFiles
     PUZZLES_DIR.mkdirs()
     val decoded = files.count { file ->
         runCatching {
@@ -95,5 +95,5 @@ internal fun decodeAllLevels(): String {
         }.isSuccess
     }
     val failed = files.size - decoded
-    return "Decoded $decoded level(s)" + if (failed > 0) ", $failed failed" else ""
+    return Strings.decodedCount(decoded) + if (failed > 0) Strings.failedCount(failed) else ""
 }

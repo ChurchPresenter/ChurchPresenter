@@ -22,6 +22,10 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.canvas_browser_error
+import org.churchpresenter.strings.generated.resources.canvas_browser_not_found
+import org.jetbrains.compose.resources.getString
 import java.io.IOException
 import java.net.URI
 import java.net.http.HttpClient
@@ -96,9 +100,9 @@ object SharedBrowserFrameCache {
         entry.refCount++
         if (entry.refCount == 1) {
             entry.captureJob = scope.launch {
-                fun failed(e: Exception) {
+                suspend fun failed(e: Exception) {
                     Log.warn("BrowserSource", "Failed to start CDP browser: ${e.message}")
-                    entry.error.value = "Browser error: ${e.message}"
+                    entry.error.value = getString(Res.string.canvas_browser_error, e.message.orEmpty())
                 }
                 // Launching the process, its temp profile and the DevTools socket fail with I/O
                 // errors; a malformed reply or a closed socket with the two runtime ones.
@@ -238,7 +242,7 @@ object SharedBrowserFrameCache {
                 "BrowserSource: No Chrome or Edge browser found on system",
                 tags = mapOf("subsystem" to "browser-source")
             )
-            entry.error.value = "Chrome or Edge not found. Install a Chromium browser to use Browser sources."
+            entry.error.value = getString(Res.string.canvas_browser_not_found)
             return
         }
 

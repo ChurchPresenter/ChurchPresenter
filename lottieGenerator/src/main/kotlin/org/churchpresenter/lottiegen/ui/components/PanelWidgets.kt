@@ -37,6 +37,7 @@ import org.churchpresenter.theme.components.SegmentTrackItem
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.lottiegen.ui.Strings
 
 /** Hover tooltip wrapper for control-panel widgets. */
 @OptIn(ExperimentalFoundationApi::class)
@@ -207,13 +208,13 @@ fun SubtleButton(
 
 /** The small ✕ used to remove a saved preset or color theme -- a destructive key. */
 @Composable
-fun DeleteIconButton(onClick: () -> Unit, contentDescription: String = "Delete") {
+fun DeleteIconButton(onClick: () -> Unit, contentDescription: String = Strings.editorDelete) {
     SmallIconButton(Icons.Default.Close, onClick, contentDescription, elevationPalette().danger)
 }
 
 /** The small pencil that opens a row's fuller controls. */
 @Composable
-fun EditIconButton(onClick: () -> Unit, contentDescription: String = "Edit") {
+fun EditIconButton(onClick: () -> Unit, contentDescription: String = Strings.edit) {
     SmallIconButton(Icons.Default.Edit, onClick, contentDescription, elevationPalette().key)
 }
 

@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.instance_link_command_failed
+import org.churchpresenter.strings.generated.resources.instance_link_command_reason_unknown
 import org.churchpresenter.strings.generated.resources.instance_link_command_no_ack
 import org.churchpresenter.strings.generated.resources.remote_activity_dismiss
 import kotlinx.coroutines.delay
@@ -80,7 +81,7 @@ fun InstanceLinkToastHost(
                                 stringResource(
                                     Res.string.instance_link_command_failed,
                                     current.commandType,
-                                    current.reason ?: "unknown"
+                                    current.reason ?: stringResource(Res.string.instance_link_command_reason_unknown)
                                 )
                             },
                             style = MaterialTheme.typography.bodySmall,

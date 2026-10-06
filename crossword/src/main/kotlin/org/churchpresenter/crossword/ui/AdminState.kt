@@ -116,7 +116,7 @@ internal class AdminState(private val scope: CoroutineScope) {
             currentLevel = target
             rawText = templateFor(target)
             unexportedLevels = unexportedLevels - target
-            say("Level $target not found — edit to create it")
+            say(Strings.levelNotFound(target))
         }
     }
 
@@ -127,7 +127,7 @@ internal class AdminState(private val scope: CoroutineScope) {
         PUZZLES_DIR.mkdirs()
         File(PUZZLES_DIR, "level$level.txt").writeText(rawText, Charsets.UTF_8)
         refreshLevels()
-        say("New level $level — edit to begin")
+        say(Strings.newLevelCreated(level))
     }
 
     /** What the editor calls on every keystroke: mark the level unexported and re-arm the autosave. */
@@ -138,26 +138,26 @@ internal class AdminState(private val scope: CoroutineScope) {
     }
 
     fun exportCurrent() {
-        val (_, title, clues) = parsed ?: return say("Invalid puzzle format.", error = true)
-        if (isUnedited(rawText)) return say("Replace the placeholder clues before exporting.", error = true)
+        val (_, title, clues) = parsed ?: return say(Strings.invalidFormat, error = true)
+        if (isUnedited(rawText)) return say(Strings.replacePlaceholders, error = true)
         val text = layoutFor(title, clues)
-            ?: return say("Cannot export: clues don't form a valid crossword — run Fix/Reorder first.", true)
+            ?: return say(Strings.cannotExportInvalid, true)
         ENCODED_DIR.mkdirs()
         File(ENCODED_DIR, "level$currentLevel.xwp").writeText(encode(text), Charsets.UTF_8)
         unexportedLevels = unexportedLevels - currentLevel
-        say("Exported level$currentLevel.xwp")
+        say(Strings.exported(currentLevel))
     }
 
     fun loadEncoded() {
         val file = File(ENCODED_DIR, "level$currentLevel.xwp")
-        if (!file.exists()) return say("level$currentLevel.xwp not found in encoded/", error = true)
+        if (!file.exists()) return say(Strings.xwpNotFound(currentLevel), error = true)
         runCatching { decode(file.readText(Charsets.UTF_8)) }
             .onSuccess {
                 rawText = it
                 unexportedLevels = unexportedLevels - currentLevel
-                say("Loaded encoded level $currentLevel")
+                say(Strings.loadedEncoded(currentLevel))
             }
-            .onFailure { say("Failed to decode level$currentLevel.xwp", error = true) }
+            .onFailure { say(Strings.decodeFailed(currentLevel), error = true) }
     }
 
     /**
@@ -165,10 +165,10 @@ internal class AdminState(private val scope: CoroutineScope) {
      * right, so the numbers on screen are the numbers the puzzle will be played with.
      */
     fun fixReorder() {
-        val (title, clues) = clueSource() ?: return say("Cannot reorder: invalid puzzle format.", true)
+        val (title, clues) = clueSource() ?: return say(Strings.cannotReorderInvalid, true)
         val unique = withUniqueNumbers(clues)
         val puzzle = CrosswordEngine.build(unique)
-            ?: return say("Cannot reorder: no words could be placed.", error = true)
+            ?: return say(Strings.cannotReorderNoWords, error = true)
 
         val renumbered = renumber(unique, puzzle)
         val positions = unique.indices.mapNotNull { i ->
@@ -180,8 +180,8 @@ internal class AdminState(private val scope: CoroutineScope) {
         scheduleAutoSave()
         val unplaced = unique.count { it.number !in puzzle.placedNumbers }
         say(
-            if (unplaced > 0) "Reordered — $unplaced clue(s) not in puzzle"
-            else "Reordered — all ${renumbered.size} clues placed"
+            if (unplaced > 0) Strings.reorderedUnplaced(unplaced)
+            else Strings.reorderedAll(renumbered.size)
         )
     }
 

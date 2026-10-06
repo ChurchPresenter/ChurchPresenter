@@ -152,7 +152,7 @@ internal fun ImageOptionsEditor(element: ImageElement, onChange: (ImageElement) 
         )
         GhostButton(onClick = {
             val chooser = JFileChooser()
-            chooser.fileFilter = FileNameExtensionFilter("Images", "png", "jpg", "jpeg")
+            chooser.fileFilter = FileNameExtensionFilter(Strings.imagesFilter, "png", "jpg", "jpeg")
             if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 ImageImport.import(chooser.selectedFile)?.let { imported ->
                     onChange(

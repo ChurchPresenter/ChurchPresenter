@@ -84,6 +84,10 @@ import org.churchpresenter.atem.AtemClient
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.AtemSettings
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.getString
+import org.churchpresenter.strings.generated.resources.atem_unknown_error
+import org.churchpresenter.strings.generated.resources.atem_detected_keyers_me
+import org.churchpresenter.strings.generated.resources.atem_slot_key
 import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.theme.semantic
 import java.io.IOException
@@ -266,14 +270,14 @@ private fun AtemTestConnectionRow(host: String, port: Int, onDetected: (AtemStat
                     } catch (e: IOException) {
                         // The ATEM link: AtemProtocolException is one.
                         connectionStatus = "error"
-                        connectionError = e.message ?: "Unknown error"
+                        connectionError = e.message ?: getString(Res.string.atem_unknown_error)
                     } catch (e: IllegalStateException) {
                         connectionStatus = "error"
-                        connectionError = e.message ?: "Unknown error"
+                        connectionError = e.message ?: getString(Res.string.atem_unknown_error)
                     } catch (e: IllegalArgumentException) {
                         // A host or port the socket cannot be pointed at.
                         connectionStatus = "error"
-                        connectionError = e.message ?: "Unknown error"
+                        connectionError = e.message ?: getString(Res.string.atem_unknown_error)
                     } finally {
                         isTesting = false
                     }
@@ -418,7 +422,9 @@ private fun AtemKeyFields(atem: AtemSettings, update: (AtemSettings.() -> AtemSe
             AtemSlotField("DSK", atem.dskIndex, atem.detectedDownstreamKeyers) { update { copy(dskIndex = it) } }
         } else {
             AtemSlotField("M/E", atem.keyMixEffect, atem.detectedMixEffects) { update { copy(keyMixEffect = it) } }
-            AtemSlotField("Key", atem.keyIndex, keyersOnMe) { update { copy(keyIndex = it) } }
+            AtemSlotField(stringResource(Res.string.atem_slot_key), atem.keyIndex, keyersOnMe) {
+                update { copy(keyIndex = it) }
+            }
         }
         AtemNumberField(atem.keyPreRollMs, stringResource(Res.string.atem_key_preroll)) {
             update { copy(keyPreRollMs = it.coerceAtLeast(0)) }
@@ -433,7 +439,8 @@ private fun AtemKeyFields(atem: AtemSettings, update: (AtemSettings.() -> AtemSe
 @Composable
 private fun AtemDetectedKeyers(atem: AtemSettings) {
     if (atem.detectedKeyersPerMe.isNotEmpty()) {
-        val perMe = atem.detectedKeyersPerMe.mapIndexed { i, k -> "M/E ${i + 1}: ${k} keys" }
+        val perMe = atem.detectedKeyersPerMe
+            .mapIndexed { i, k -> stringResource(Res.string.atem_detected_keyers_me, i + 1, k) }
             .joinToString("   ") +
             (if (atem.detectedDownstreamKeyers > 0) "   DSK: ${atem.detectedDownstreamKeyers}" else "")
         Text(

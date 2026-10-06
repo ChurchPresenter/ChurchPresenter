@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.atem_upload_background_1_tooltip
 import org.churchpresenter.strings.generated.resources.atem_upload_background_2_tooltip
+import org.churchpresenter.strings.generated.resources.atem_upload_background_unreadable
 import org.churchpresenter.strings.generated.resources.stock_library_tooltip
 import org.churchpresenter.strings.generated.resources.stock_photo_browse_tooltip
 import kotlinx.coroutines.Dispatchers
@@ -54,6 +55,7 @@ import org.churchpresenter.atem.AtemClient
 import org.churchpresenter.atem.AtemFrameEncoder
 import org.churchpresenter.atem.AtemUploadStatus
 import org.churchpresenter.settings.AtemSettings
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import java.awt.RenderingHints
 import java.awt.image.BufferedImage
@@ -130,7 +132,7 @@ private suspend fun uploadBackgroundToAtem(atemSettings: AtemSettings, imagePath
     val file = File(imagePath)
     val name = file.nameWithoutExtension
     val argb = withContext(Dispatchers.IO) {
-        val img = ImageIO.read(file) ?: throw IOException("Could not read image file")
+        val img = ImageIO.read(file) ?: throw IOException(getString(Res.string.atem_upload_background_unreadable))
         val w = atemSettings.renderWidth
         val h = atemSettings.renderHeight
         val src = IntArray(img.width * img.height)

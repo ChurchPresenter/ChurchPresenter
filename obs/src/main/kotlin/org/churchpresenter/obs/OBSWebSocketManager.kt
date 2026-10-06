@@ -26,6 +26,10 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.error_connection_failed
+import org.churchpresenter.strings.generated.resources.obs_error_auth_failed
+import org.jetbrains.compose.resources.getString
 import java.security.MessageDigest
 import java.util.Base64
 import java.util.UUID
@@ -71,8 +75,8 @@ class OBSWebSocketManager {
                     val identifiedText = (incoming.receive() as? Frame.Text)?.readText()
                         ?: error("Expected Identified frame")
                     val identified = Json.parseToJsonElement(identifiedText).jsonObject
-                    check(identified["op"]?.jsonPrimitive?.int == 2) {
-                        "Authentication failed — check your OBS password"
+                    if (identified["op"]?.jsonPrimitive?.int != 2) {
+                        error(getString(Res.string.obs_error_auth_failed))
                     }
 
                     withContext(Dispatchers.Main) { _status.value = ConnectionStatus.CONNECTED }
@@ -112,7 +116,7 @@ class OBSWebSocketManager {
             // observable beside an empty or stale one. Anything watching the status — the
             // settings chip, a test — reads both, and the two writes are separate, so
             // setting the status first leaves a window showing "failed" with no reason.
-            _errorMessage.value = e.message ?: "Connection failed"
+            _errorMessage.value = e.message ?: getString(Res.string.error_connection_failed)
             _status.value = ConnectionStatus.ERROR
         }
     }

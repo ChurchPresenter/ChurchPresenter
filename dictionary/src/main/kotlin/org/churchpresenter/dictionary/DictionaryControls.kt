@@ -44,10 +44,11 @@ internal fun InScriptureBookDropdown(
     onSelect: (Int?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val bookLabel = stringResource(Res.string.book)
     val options = listOf("" to allBooksLabel) +
-        availableBooks.map { it.toString() to (getBookName?.invoke(it) ?: "Book $it") }
+        availableBooks.map { it.toString() to (getBookName?.invoke(it) ?: "$bookLabel $it") }
     DropdownSelector(
-        label = stringResource(Res.string.book),
+        label = bookLabel,
         value = selectedBookId?.toString() ?: "",
         options = options,
         onValueChange = { onSelect(it.toIntOrNull()) },

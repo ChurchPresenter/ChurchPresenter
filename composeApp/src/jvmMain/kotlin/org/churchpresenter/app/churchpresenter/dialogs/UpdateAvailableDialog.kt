@@ -41,6 +41,8 @@ import org.churchpresenter.theme.AppShape
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.participate_in_prereleases
 import org.churchpresenter.strings.generated.resources.update_dialog_check_interval
+import org.churchpresenter.strings.generated.resources.update_dialog_download_failed
+import org.churchpresenter.strings.generated.resources.update_dialog_install_failed
 import org.churchpresenter.strings.generated.resources.update_dialog_message
 import org.churchpresenter.strings.generated.resources.update_dialog_title
 import org.churchpresenter.strings.generated.resources.update_dialog_up_to_date_title
@@ -60,6 +62,7 @@ import org.churchpresenter.settings.utils.UpdateCheckInterval
 import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
 import org.churchpresenter.theme.ProvideUiFontScale
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Desktop
 import java.io.File
@@ -234,6 +237,8 @@ fun UpdateAvailableDialog(
 
     val updateInfo = (result as? UpdateCheckResult.Available)?.info
 
+    val installFailedMessage = stringResource(Res.string.update_dialog_install_failed)
+
     val startDownload: () -> Unit = {
         // Count this as an app-updater download (fire-and-forget, own scope —
         // never delays or fails the actual download below).
@@ -271,11 +276,13 @@ fun UpdateAvailableDialog(
             } catch (e: IOException) {
                 // The connection, the download or the temp file -- a malformed URL is one too.
                 withContext(Dispatchers.Main) {
-                    downloadState = DownloadState.Error(e.message ?: "Download failed")
+                    downloadState =
+                        DownloadState.Error(e.message ?: getString(Res.string.update_dialog_download_failed))
                 }
             } catch (e: IllegalArgumentException) {
                 withContext(Dispatchers.Main) {
-                    downloadState = DownloadState.Error(e.message ?: "Download failed")
+                    downloadState =
+                        DownloadState.Error(e.message ?: getString(Res.string.update_dialog_download_failed))
                 }
             }
         }
@@ -318,9 +325,9 @@ fun UpdateAvailableDialog(
                         launchInstaller(file)
                         exitProcess(0)
                     } catch (e: IOException) {
-                        downloadState = DownloadState.Error(e.message ?: "Failed to launch installer")
+                        downloadState = DownloadState.Error(e.message ?: installFailedMessage)
                     } catch (e: SecurityException) {
-                        downloadState = DownloadState.Error(e.message ?: "Failed to launch installer")
+                        downloadState = DownloadState.Error(e.message ?: installFailedMessage)
                     }
                 },
                 onOpenReleasePage = { UrlOpener.open(it) },

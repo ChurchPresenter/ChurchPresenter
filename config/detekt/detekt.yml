@@ -103,3 +103,13 @@ exceptions:
 performance:
   SpreadOperator:
     active: true
+
+# The project's own rules, from :detekt-rules. HardcodedString lands switched off: a module opts in
+# once `./gradlew :<module>:detekt -PhardcodedStrings` reports nothing for it, by adding its source
+# root under `includes` and setting `active: true` -- see detekt-rules/AGENT.md.
+churchpresenter:
+  HardcodedString:
+    active: false
+    includes: []
+    excludes: ['**/test/**', '**/jvmTest/**', '**/testFixtures/**']
+    allowedCalls: ['Log.info', 'Log.warn', 'Log.error']

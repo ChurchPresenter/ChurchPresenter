@@ -70,6 +70,11 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.slides.SlidesOutput
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.getString
+import org.churchpresenter.strings.generated.resources.presentation_filter_all
+import org.churchpresenter.strings.generated.resources.presentation_filter_powerpoint
+import org.churchpresenter.strings.generated.resources.presentation_filter_keynote
+import org.churchpresenter.strings.generated.resources.presentation_filter_pdf
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -169,11 +174,13 @@ private fun PresentationTabScope.OpenPresentationButton(viewModel: PresentationV
     RaisedButton(
         onClick = {
             scope.launch {
-                val allFilter =
-                    FileNameExtensionFilter("All Presentation Files", "ppt", "pptx", "key", "pdf")
-                val pptFilter = FileNameExtensionFilter("PowerPoint Files (*.ppt, *.pptx)", "ppt", "pptx")
-                val keynoteFilter = FileNameExtensionFilter("Keynote Files (*.key)", "key")
-                val pdfFilter = FileNameExtensionFilter("PDF Files (*.pdf)", "pdf")
+                val allFilter = FileNameExtensionFilter(
+                    getString(Res.string.presentation_filter_all), "ppt", "pptx", "key", "pdf"
+                )
+                val pptFilter =
+                    FileNameExtensionFilter(getString(Res.string.presentation_filter_powerpoint), "ppt", "pptx")
+                val keynoteFilter = FileNameExtensionFilter(getString(Res.string.presentation_filter_keynote), "key")
+                val pdfFilter = FileNameExtensionFilter(getString(Res.string.presentation_filter_pdf), "pdf")
                 val files = FileChooser.platformInstance.chooseMultiple(
                     path = Path(appSettings.presentationStorageDirectory),
                     filters = listOf(allFilter, pptFilter, keynoteFilter, pdfFilter),

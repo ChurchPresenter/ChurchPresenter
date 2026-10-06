@@ -25,6 +25,8 @@ import org.churchpresenter.lottiegen.persistence.PresetStorage
 import java.io.File
 import java.io.IOException
 import java.time.Instant
+import org.churchpresenter.lottiegen.ui.EditorStrings
+import org.churchpresenter.lottiegen.ui.Strings
 
 /**
  * How long to wait before regenerating. A dragged slider or a held key settles quickly, so those
@@ -101,9 +103,9 @@ class LottieGenViewModel(
                 // superseded regeneration went on to overwrite the status of the one that replaced it.
                 throw e
             } catch (e: IllegalStateException) {
-                statusText = "Error: ${e.message}"
+                statusText = Strings.bandStatusError(e.message.toString())
             } catch (e: IllegalArgumentException) {
-                statusText = "Error: ${e.message}"
+                statusText = Strings.bandStatusError(e.message.toString())
             }
         }
     }
@@ -125,9 +127,9 @@ class LottieGenViewModel(
                 // superseded regeneration went on to overwrite the status of the one that replaced it.
                 throw e
             } catch (e: IllegalStateException) {
-                statusText = "Error: ${e.message}"
+                statusText = Strings.bandStatusError(e.message.toString())
             } catch (e: IllegalArgumentException) {
-                statusText = "Error: ${e.message}"
+                statusText = Strings.bandStatusError(e.message.toString())
             }
         }
     }
@@ -135,7 +137,7 @@ class LottieGenViewModel(
     // --- Presets ---
 
     override fun savePreset() {
-        val nameText = config.nameText.trim().ifEmpty { "Untitled" }
+        val nameText = config.nameText.trim().ifEmpty { Strings.untitled }
         val infoText = config.infoText.trim()
         val presetConfig = config.copy(logoData = null, logoW = 0, logoH = 0)
         val existingIndex = presets.indexOfFirst {
@@ -213,7 +215,7 @@ class LottieGenViewModel(
             )
         }
         PresetStorage.save(presets)
-        statusText = "Style applied to ${presets.size} items"
+        statusText = Strings.styleAppliedStatus(presets.size)
     }
 
     override fun batchDownloadAll(dir: File?) {
@@ -244,7 +246,7 @@ class LottieGenViewModel(
                     count++
                 } catch (_: Exception) {}
             }
-            statusText = "Saved $count files"
+            statusText = Strings.savedFilesStatus(count)
             onFileSaved?.invoke()
         }
     }
@@ -252,7 +254,7 @@ class LottieGenViewModel(
     // --- Color Themes ---
 
     override fun saveColorTheme() {
-        val baseName = "Custom"
+        val baseName = Strings.colorThemeCustom
         val name = uniqueName(baseName, colorThemes.map { it.name }.toSet())
         val theme = ColorTheme(
             name, ColorThemeColors(
@@ -354,10 +356,10 @@ class LottieGenViewModel(
         try {
             file.writeText(jsonStr)
         } catch (e: IOException) {
-            statusText = "Error: ${e.message}"
+            statusText = Strings.bandStatusError(e.message.toString())
             return null
         }
-        statusText = "Saved: ${file.name}"
+        statusText = EditorStrings.savedStatus(file.name)
         onFileSaved?.invoke()
         return file
     }

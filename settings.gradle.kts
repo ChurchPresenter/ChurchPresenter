@@ -166,3 +166,7 @@ include(":obs")
 // The layer model: the layers, the cues that go on them, and what is on air and cued. Depended on
 // by :composeApp.
 include(":live-show")
+
+// The project's own detekt rules -- HardcodedString. Not a dependency of any module; the root build
+// adds it to every module's detekt run.
+include(":detekt-rules")

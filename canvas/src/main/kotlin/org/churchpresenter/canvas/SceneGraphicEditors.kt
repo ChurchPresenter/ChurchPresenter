@@ -56,6 +56,7 @@ import org.churchpresenter.strings.generated.resources.canvas_qr_background
 import org.churchpresenter.strings.generated.resources.canvas_qr_wifi_ssid
 import org.churchpresenter.strings.generated.resources.canvas_qr_wifi_password
 import org.churchpresenter.strings.generated.resources.canvas_qr_wifi_encryption
+import org.churchpresenter.strings.generated.resources.none
 import org.churchpresenter.strings.generated.resources.canvas_qr_wifi_hidden
 import org.churchpresenter.strings.generated.resources.canvas_qr_error_correction
 import org.churchpresenter.strings.generated.resources.position
@@ -491,6 +492,7 @@ internal fun QRCodeProperties(source: SceneSource.QRCodeSource, onUpdate: (Scene
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
     val urlLabel    = stringResource(Res.string.canvas_qr_type_url)
+    val noneLabel   = stringResource(Res.string.none)
     val textLabel   = stringResource(Res.string.canvas_qr_type_text)
     val emailLabel  = stringResource(Res.string.canvas_qr_type_email)
     val phoneLabel  = stringResource(Res.string.canvas_qr_type_phone)
@@ -510,7 +512,7 @@ internal fun QRCodeProperties(source: SceneSource.QRCodeSource, onUpdate: (Scene
     DropdownSelector(
         label = stringResource(Res.string.canvas_qr_type),
         items = typeOptions,
-        selected = typeMap[source.contentType] ?: "URL",
+        selected = typeMap[source.contentType] ?: urlLabel,
         onSelectedChange = { newType ->
             val type = reverseTypeMap[newType] ?: "url"
             val prefill = when (type) {
@@ -536,9 +538,9 @@ internal fun QRCodeProperties(source: SceneSource.QRCodeSource, onUpdate: (Scene
         }
         DropdownSelector(
             label = stringResource(Res.string.canvas_qr_wifi_encryption),
-            items = listOf("WPA", "WPA2", "WPA3", "WEP", "None"),
-            selected = source.wifiEncryption,
-            onSelectedChange = { onUpdate(source.copy(wifiEncryption = it)) },
+            items = listOf("WPA", "WPA2", "WPA3", "WEP", noneLabel),
+            selected = if (source.wifiEncryption == "None") noneLabel else source.wifiEncryption,
+            onSelectedChange = { onUpdate(source.copy(wifiEncryption = if (it == noneLabel) "None" else it)) },
             modifier = Modifier.fillMaxWidth()
         )
         LabeledCheckbox(

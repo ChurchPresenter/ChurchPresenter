@@ -26,6 +26,9 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.atem.AtemMediaSlot
 import org.churchpresenter.atem.AtemState
 import org.churchpresenter.strings.generated.resources.cancel
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.atem_upload_failed
+import org.jetbrains.compose.resources.getString
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -380,7 +383,7 @@ internal class LowerThirdTabScope(inputs: LowerThirdTabInputs, state: LowerThird
                 AtemUploadStatus.clear(id)
                 if (closeDialogOnSuccess) showAtemDialog = false
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                atemError = e.message ?: "Upload failed"
+                atemError = e.message ?: getString(Res.string.atem_upload_failed)
                 uploadId?.let { AtemUploadStatus.fail(it, e.message) }
             } finally {
                 atemProgress = null

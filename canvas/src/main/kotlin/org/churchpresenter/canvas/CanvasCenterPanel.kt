@@ -44,6 +44,7 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.add_to_schedule
 import org.churchpresenter.strings.generated.resources.save_preset
 import org.churchpresenter.strings.generated.resources.canvas_create_scene
+import org.churchpresenter.strings.generated.resources.canvas_scene_default_name
 import org.churchpresenter.strings.generated.resources.canvas_no_scene_selected
 import org.churchpresenter.strings.generated.resources.canvas_select_source
 import org.churchpresenter.strings.generated.resources.go_live
@@ -95,6 +96,7 @@ internal fun CanvasTabScope.CanvasCenterPanel(sceneViewModel: SceneViewModel, mo
             CanvasOutsideLayers(sceneViewModel, outsideLayers, canvasLayouts)
             CanvasEditorArea(sceneViewModel, canvasLayouts, Modifier.weight(1f).fillMaxWidth().padding(8.dp))
         } else {
+            val defaultSceneName = stringResource(Res.string.canvas_scene_default_name)
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -106,7 +108,7 @@ internal fun CanvasTabScope.CanvasCenterPanel(sceneViewModel: SceneViewModel, mo
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(8.dp))
-                    RaisedButton(onClick = { sceneViewModel.addScene() }, shape = AppShape(8.dp)) {
+                    RaisedButton(onClick = { sceneViewModel.addScene(defaultSceneName) }, shape = AppShape(8.dp)) {
                         Text(stringResource(Res.string.canvas_create_scene))
                     }
                 }
