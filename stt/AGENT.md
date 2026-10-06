@@ -11,9 +11,9 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 - `STTPresenter` (`presenter/`), the captions on an output, with the caption text, look and
   reveal pace it is built from (`Caption*.kt`, `SttDripFeed.kt`, `SttRevealPace.kt`).
 
-A real Gradle module of this build: `include(":stt")`, `implementation(projects.stt)`. `:composeApp`
-is its only consumer. The presenters, the stage monitor and the Bible tab's auto-follow read the
-same `STTManager`.
+A real Gradle module of this build: `include(":stt")`, `implementation(projects.stt)`. Its consumers
+are `:composeApp` and `:live-output`. The presenters, the stage monitor and the Bible tab's
+auto-follow read the same `STTManager`.
 
 It takes `:shared-ui`, `:core-models`, `:strings`, `:settings` and `:theme`, plus socket.io (`org.json` comes with
 it). Nothing of `:composeApp`'s.

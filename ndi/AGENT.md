@@ -58,7 +58,8 @@ into a fat jar. If someone asks for "one-click NDI", the answer is a link to the
 | `NdiPixels.kt` | ARGB ⇄ NDI byte order, into a buffer the caller reuses |
 
 App-side wiring is **not** here, the way `AtemBridge` is not in `:atem`: `NdiVideoRenderer`,
-`NdiManager` and `ProjectionNdiCard` live in `:composeApp`.
+`NdiOutputRegistry` and `NdiManager` live in `:live-output`, and `ProjectionNdiCard` in
+`:composeApp`.
 
 ## Rules
 

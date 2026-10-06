@@ -9,7 +9,8 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 The parser and renderer for **PPTX (animated), PPT (static), PDF and Keynote (animated, via a
 reverse-engineered IWA parser)**. `:composeApp` calls `PresentationLoader`, `DeckRasterizer`,
 `TimelineEvaluator`, `SlideDiskCache`, `SlideFontRegistry` and the `model` types from
-`viewmodel/PresentationViewModel.kt`, `presenter/PresentationPlayer.kt` and `server/CompanionServer.kt`.
+`viewmodel/PresentationViewModel.kt` and `server/CompanionServer.kt`; `:live-output` calls them from
+`PresentationPlayer`.
 
 `:converter` is the module's other consumer, and it wants the opposite of pixels: `KeynoteText`
 hands back a `.key`'s **words**, one string per slide, so the converter can write them out as

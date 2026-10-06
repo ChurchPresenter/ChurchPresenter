@@ -11,9 +11,9 @@ the cross references (`CrossReferenceRepository`), the verse-sequence log, the b
 abbreviations, and the long-verse split.
 
 A real Gradle module of this build: `include(":bible-tab")`, `implementation(projects.bibleTab)`.
-`:composeApp` is its only consumer. Besides the tab it uses `BibleViewModel` (presenter wiring,
-remote commands, Instance Link), `VerseSequenceLog`, `BibleBookAbbreviations` (Planning Center
-scripture detection, the calendar) and the long-verse constants (Profiles → Bible).
+Its consumers are `:composeApp` and `:live-output`. Besides the tab the app uses `BibleViewModel`
+(presenter wiring, remote commands, Instance Link), `VerseSequenceLog`, `BibleBookAbbreviations`
+(Planning Center scripture detection, the calendar) and the long-verse constants (Profiles → Bible).
 
 It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`, `:bible`,
 `:bible-formats`, `:diagnostics` and `:stt`, and nothing of `:composeApp`'s.

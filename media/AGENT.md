@@ -9,15 +9,16 @@ The **Media** tab and the playback under it: the tab itself, `MediaViewModel`, t
 `EmbeddedVideoDecoder` a presentation's video layers play through, `MediaPresenter` and the subtitle
 overlay, the subtitle parser, the media settings tab, the recent media files and the Pexels/Pixabay
 stock search. A real Gradle module of this build — `include(":media")`,
-`implementation(projects.media)`. `:composeApp` is its only consumer.
+`implementation(projects.media)`. Its consumers are `:composeApp` and `:live-output`.
 
 It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme` and
 `:diagnostics`, plus vlcj and the Ktor client — and nothing of `:composeApp`'s.
 
-## What stays in the app
+## What stays outside
 
-- **Who plays what where** — the output windows, the live preview, the stage monitor, scenes and
-  `PresentationPlayer` use `VideoPlayer`/`EmbeddedVideoDecoder`/`MediaPresenter` from here.
+- **Who plays what where** — the output windows, the stage monitor and `PresentationPlayer`
+  (`:live-output`), the live preview and scenes use
+  `VideoPlayer`/`EmbeddedVideoDecoder`/`MediaPresenter` from here.
 - **The remote-control side** — `MediaRemoteWiring` and the media routes, which reach the server.
 - **The preview-output picker** — it reads the app's outputs; the tab draws it through its
   `previewOutputPicker` slot, which the app supplies.
@@ -26,7 +27,7 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 ## The one interface
 
 **`MediaOutput`** is everything the tab needs from the live output: presenting mode, whether the
-presenter window is up, and the calls that put media on screen or clear it. The app's
+presenter window is up, and the calls that put media on screen or clear it. `:live-output`'s
 `PresenterMediaOutput` implements it by passing every call to `PresenterManager` (reached as
 `presenterManager.mediaOutput`); the tab takes it, never the manager. Tests use `FakeMediaOutput`.
 A new need from the output is a new member here, not a reference to the app.
