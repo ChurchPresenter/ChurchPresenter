@@ -130,8 +130,8 @@ import org.churchpresenter.strings.generated.resources.unit_bpm
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.sharedui.composables.ConditionalTooltipArea
-import org.churchpresenter.app.churchpresenter.composables.PaneTab
-import org.churchpresenter.app.churchpresenter.composables.PaneTabRow
+import org.churchpresenter.settingspages.PaneTab
+import org.churchpresenter.settingspages.PaneTabRow
 import org.churchpresenter.sharedui.composables.SectionInk
 import org.churchpresenter.app.churchpresenter.composables.SongChordPreview
 import org.churchpresenter.sharedui.composables.SongSectionKind

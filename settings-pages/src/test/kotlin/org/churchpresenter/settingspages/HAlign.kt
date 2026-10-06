@@ -1,0 +1,11 @@
+package org.churchpresenter.settingspages
+
+/** Position of a button inside one horizontal-alignment group — the row is laid out right-first. */
+internal object HAlign {
+    const val RIGHT = 0
+    const val CENTER = 1
+    const val LEFT = 2
+
+    /** Right, centre and left: how many buttons one group contributes. */
+    const val GROUP_SIZE = 3
+}

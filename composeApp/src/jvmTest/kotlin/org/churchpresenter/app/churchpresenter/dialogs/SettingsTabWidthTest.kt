@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.FixedViewport
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.app.churchpresenter.ViewportProbe
-import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
+import org.churchpresenter.settingspages.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.app.churchpresenter.horizontalOverflow
 import org.churchpresenter.server.CompanionServer

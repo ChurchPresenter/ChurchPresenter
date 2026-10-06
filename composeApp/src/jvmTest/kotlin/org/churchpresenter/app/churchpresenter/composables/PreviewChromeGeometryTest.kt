@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import org.churchpresenter.settingspages.formatResolution
 import org.churchpresenter.profiles.TvScreenBoxHorizontalChrome
 import org.churchpresenter.profiles.TvScreenBoxVerticalChrome
 import org.churchpresenter.profiles.tvScreenBoxWidthFor

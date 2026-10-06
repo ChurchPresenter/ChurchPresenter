@@ -122,6 +122,7 @@ module-specific notes there, not here.**
 | `companion-surface/`   | `:companion-surface`   | The Companion Surface tab and panels, and `CompanionSatelliteViewModel`             | [AGENT.md](companion-surface/AGENT.md)   |
 | `obs/`                 | `:obs`                 | The OBS Studio integration — the obs-websocket client, scene mapping and its settings page | [AGENT.md](obs/AGENT.md)                 |
 | `live-show/`           | `:live-show`           | The layer model — `Layer`, `Cue`, and `LiveShow`'s program and preview (see `docs/LAYER_MODEL.md`) | [AGENT.md](live-show/AGENT.md)           |
+| `settings-pages/`      | `:settings-pages`      | The Options dialog's own pages — System, Projection, Server, Companion Satellite — with the Bible catalog System opens and the sample songs it installs | [AGENT.md](settings-pages/AGENT.md)      |
 | `live-output/`         | `:live-output`         | `PresenterManager` and what is on air, the output windows and stage monitor, and the off-screen outputs (NDI, OMT, Browser Source, DeckLink) on `ComposeScenePump` | [AGENT.md](live-output/AGENT.md)         |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no

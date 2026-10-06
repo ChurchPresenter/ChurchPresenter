@@ -38,7 +38,7 @@ import org.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
+import org.churchpresenter.settingspages.AutoStartManager
 import org.churchpresenter.diagnostics.BuildIdentity
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter

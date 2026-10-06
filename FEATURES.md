@@ -28,7 +28,7 @@
   and `Songs.kt` (the library on disk, `.sps` included)
 - `tabs/AppSongsTab.kt` — the app's parts of the tab: the editor (`EditSongDialog`) and what a song
   going live records; `presenter/…/TitleSlideSection.kt` — the title slide the tab sends
-- `viewmodel/SongSettingsViewModel.kt`, `data/SpsConverter.kt`; `SongItem` and `SongFileParser` are in
+- `viewmodel/SongSettingsViewModel.kt`, `settings-pages/…/SpsConverter.kt`; `SongItem` and `SongFileParser` are in
   `:core-models` (`models/songs/`)
 - `dialogs/SongBackground*.kt` — the per-song background panel
 - `data/settings/SongSettings.kt`
@@ -73,7 +73,7 @@
   `BibleVerse.kt`, `BibleTranslationNames.kt` and the `.spb` format helpers in `SpbFormat.kt`
 - `bible-formats/` (the `:bible-formats` Gradle module) — the download catalogues and the `.spb` converters behind them
 - `bible-formats/src/main/kotlin/.../catalog/` — `EBibleSource` (eBible.org, USFX), `ZefaniaSource` + `ZefaniaRepositoryIndex`, `BebliaSource` + `BebliaCatalogIndex`
-- `viewmodel/BibleCatalogViewModel.kt`, `dialogs/BibleCatalogBrowserDialog.kt` — download browser UI
+- `settings-pages/…/BibleCatalogViewModel.kt`, `settings-pages/…/BibleCatalogBrowserDialog.kt` — download browser UI
 - `bible-formats/src/main/kotlin/.../UsfxToSpbConverter.kt`, `XmlToSpbConverter.kt` — the conversions
 - `data/settings/BibleSettings.kt`, `data/settings/BibleEngineSettings.kt`
 - `presenter/…/BiblePresenter.kt`, with `BibleLook.kt`, `BibleFrame.kt`, `BibleSlide.kt`, `BibleLayouts.kt` and `PresenterBackdrop.kt` beside it
@@ -177,7 +177,7 @@
 - `canvas/…/SharedBrowserFrameCache.kt` (with `BrowserProcesses.kt`, `CdpPages.kt`), `SharedCameraFrameCache.kt`
 - `canvas/…/NdiFrameCache.kt`, `NdiSourceDirectory.kt` — receiving NDI sources onto the canvas, and finding them
 - `canvas/…/OmtFrameCache.kt`, `SceneOmtEditor.kt`, `ReceivedFrameCache.kt` — receiving OMT sources onto the canvas, choosing one, and the capture loop both protocols share; `NetworkInputs.kt` is how the canvas reaches the app's NDI and OMT libraries
-- `shared-ui/…/utils/FfmpegBinary.kt`, `dialogs/tabs/ProjectionFfmpegCard.kt` — which ffmpeg cameras are opened with: the bundled one, an override, or whatever is installed
+- `shared-ui/…/utils/FfmpegBinary.kt`, `settings-pages/…/ProjectionFfmpegCard.kt` — which ffmpeg cameras are opened with: the bundled one, an override, or whatever is installed
 - `gradle/ffmpeg-builds.properties`, `THIRD_PARTY_FFMPEG.md` — where the bundled ffmpeg comes from, and its licence
 - `canvas/…/ScenePresenter.kt`, `web/…/presenter/WebsitePresenter.kt` (the `:web` module: JCEF, `CefManager`, the embedded browser)
 - `data/settings/WebBookmark.kt`
@@ -240,7 +240,7 @@
 
 **Source locations:**
 - `calendar/` (the `:calendar` Gradle module) — the Calendar Manager window, its model and the PDF export
-- `dialogs/CalendarEnrollQrDialog.kt`, `dialogs/tabs/CalendarSyncCard.kt`, `:server`'s `CalendarRelayAccess.kt` — pairing a phone and syncing through the relay
+- `dialogs/CalendarEnrollQrDialog.kt`, `settings-pages/…/CalendarSyncCard.kt`, `:server`'s `CalendarRelayAccess.kt` — pairing a phone and syncing through the relay
 - `planning-center/` (the `:planning-center` Gradle module) — the Planning Center client, and under
   `ui/` the import window (`PlanningCenterImportDialog.kt`, `PlanningCenterImportViewModel.kt`)
 - `dialogs/PlanningCenterImportDialog.kt` — the app's wrapper: the OAuth client, the windows, the song
@@ -274,15 +274,15 @@
 - `live-output/…/BrowserSourceVideoRenderer.kt`, `presenter/…/LocalTransparentBlanking.kt` — Browser Source output
 - `live-output/…/ComposeScenePump.kt`, `live-output/…/OffscreenOutputContent.kt` — the off-screen render both virtual outputs share
 - `ndi/` (the `:ndi` Gradle module) — NDI itself: `NdiRuntime`, `NdiLibrary`/`JnaNdiLibrary`, `NdiSender` and `NdiOutputMode`
-- `live-output/…/NdiVideoRenderer.kt`, `live-output/…/NdiManager.kt`, `dialogs/tabs/ProjectionNdiCard.kt` — the app-side wiring and its settings card
+- `live-output/…/NdiVideoRenderer.kt`, `live-output/…/NdiManager.kt`, `settings-pages/…/ProjectionNdiCard.kt` — the app-side wiring and its settings card
 - `omt/` (the `:omt` Gradle module) — OMT itself: `OmtRuntime`, `OmtLibrary`/`JnaOmtLibrary`, `OmtSender`, `OmtReceiver`, `OmtDiscovery`
-- `live-output/…/OmtVideoRenderer.kt`, `live-output/…/OmtOutputRegistry.kt`, `live-output/…/OmtManager.kt`, `dialogs/tabs/ProjectionOmtCard.kt` — the app-side OMT wiring and its settings card
+- `live-output/…/OmtVideoRenderer.kt`, `live-output/…/OmtOutputRegistry.kt`, `live-output/…/OmtManager.kt`, `settings-pages/…/ProjectionOmtCard.kt` — the app-side OMT wiring and its settings card
 - `gradle/omt-builds.properties`, `.github/workflows/omt-linux.yml`, `THIRD_PARTY_OMT.md` — where the bundled OMT libraries come from, and their licence
 - `media/…/data/StockMediaClient.kt`, `media/…/dialogs/StockMediaBrowserDialog.kt`, `media/…/viewmodel/StockMediaViewModel.kt`, `data/settings/StockPhotoSettings.kt`
 - `composables/DeckLinkManager.kt`, `composables/DeckLinkInputGate.kt`, `composables/LivePreviewPanel.kt`, `presenter/…/LoopingVideoBackground.kt`
 - `live-output/…/PresenterManager.kt`, `profiles/…/BackgroundSettingsViewModel.kt`
 - `data/settings/BackgroundConfig.kt`, `data/settings/BackgroundSettings.kt`, `data/settings/ProjectionSettings.kt`, `data/settings/ScreenAssignment.kt`
-- `profiles/…/BackgroundSettingsTab.kt`, `dialogs/tabs/ProjectionSettingsTab.kt`
+- `profiles/…/BackgroundSettingsTab.kt`, `settings-pages/…/ProjectionSettingsTab.kt`
 - `shared-ui/…/utils/AutoFitUtils.kt`
 - `profiles/…/ProfilesSettingsTab.kt`, `profiles/…/ProfileEditor.kt`, `profiles/…/ProfileHeader.kt` — the Profiles tab: the list, the editor, the header
 - `profiles/…/ProfileContentPage.kt`, `profiles/…/ProfileSourcePickers.kt`, `profiles/…/ProfileSources.kt` — what a profile shows, and its Bible and song sources
@@ -322,9 +322,9 @@
 **Source locations:**
 - `:server`'s `CompanionServer.kt` — Ktor REST + WebSocket server
 - `:server`'s `SslCertificateManager.kt`, `:server`'s `TunnelManager.kt`
-- `data/RemoteClientManager.kt`
+- `settings-pages/…/RemoteClientManager.kt`
 - `data/settings/ServerSettings.kt`
-- `dialogs/tabs/ServerSettingsTab.kt`
+- `settings-pages/…/ServerSettingsTab.kt`
 - `dialogs/RemoteActivityToast.kt`, `dialogs/RemoteEventDialog.kt`
 
 ## Multi-Room & Instance Linking
@@ -351,7 +351,7 @@
 - `companion-satellite/` (the `:companion-satellite` Gradle module) — native Companion Satellite protocol client
 - `data/settings/AtemSettings.kt`, `data/settings/OBSSettings.kt`, `data/settings/CompanionSatelliteSettings.kt`
 - `lower-third/` (the `:lower-third` Gradle module) — `AtemSettingsTab`, the ATEM settings page
-- `dialogs/tabs/CompanionSatelliteSettingsTab.kt`
+- `settings-pages/…/CompanionSatelliteSettingsTab.kt`
 
 ## Reporting & Licensing
 - **One statistics window** — every song and verse you present is tracked automatically, then reported in one place: songs, Bible and activity-over-time tabs over whichever period you pick.
@@ -381,11 +381,11 @@
 - `data/settings/CustomThemeColors.kt` (the `:settings` module) — the optional per-role colours
 - `dialogs/SetupWizardDialog.kt`
 - `dialogs/KeyboardShortcutsDialog.kt`, `dialogs/ShortcutBindingRow.kt`, `dialogs/ShortcutCapture.kt`, `dialogs/ShortcutCategoryRail.kt` — the shortcut list and rebinding
-- `composables/LabeledTab.kt`, `dialogs/tabs/TabLabelsRow.kt` — tab label styles
+- `composables/LabeledTab.kt`, `settings-pages/…/TabLabelsRow.kt` — tab label styles
 - `crossword-tab/…/CrosswordTab.kt`, `crossword-tab/…/data/CrosswordData.kt` (the `:crossword-tab` module) — a hidden tab (←→←→); `crossword/` (the `:crossword` Gradle module) is its authoring tool and the encoded puzzles
 - `dialogs/OptionsDialog.kt`
 - `data/SettingsManager.kt`, `data/settings/AppSettings.kt`, `data/settings/WindowLayoutSettings.kt`
-- `utils/AutoStartManager.kt`, `utils/UpdateChecker.kt`
+- `settings-pages/…/AutoStartManager.kt`, `utils/UpdateChecker.kt`
 - `diagnostics/` (the `:diagnostics` Gradle module) — `CrashReporter`: crash logs and the Sentry bridge
 
 ## Free & Open

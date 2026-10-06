@@ -55,7 +55,7 @@ import org.churchpresenter.strings.generated.resources.shortcut_unsaved_many
 import org.churchpresenter.strings.generated.resources.shortcut_unsaved_one
 import org.churchpresenter.strings.generated.resources.symbol_cancel
 import org.churchpresenter.strings.generated.resources.symbol_ok
-import org.churchpresenter.app.churchpresenter.composables.SearchField
+import org.churchpresenter.settingspages.SearchField
 import org.churchpresenter.core.models.shortcuts.KeyChord
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.models.ShortcutScope

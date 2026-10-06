@@ -31,10 +31,10 @@ import org.churchpresenter.strings.generated.resources.close
 import kotlinx.coroutines.delay
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.sharedui.utils.centeredOnMainWindow
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.connectionQrBitmap
+import org.churchpresenter.settingspages.connectionQrBitmap
 import org.churchpresenter.server.CalendarEnrollment
 import org.churchpresenter.server.CalendarInvite
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.calendarSyncStatusText
+import org.churchpresenter.settingspages.calendarSyncStatusText
 import org.churchpresenter.server.CalendarSyncStatus
 import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode

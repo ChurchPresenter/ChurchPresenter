@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.app.churchpresenter.builtInRelayEndpoints
+import org.churchpresenter.app.churchpresenter.BuildConfig
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -65,23 +67,23 @@ import org.churchpresenter.strings.generated.resources.companion_satellite_setti
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
-import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
+import org.churchpresenter.settingspages.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.lowerthird.AtemSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.LocalApplySettings
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.CompanionSatelliteSettingsTab
+import org.churchpresenter.settingspages.LocalApplySettings
+import org.churchpresenter.settingspages.CompanionSatelliteSettingsTab
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.obs.OBSSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.SystemSettingsTab
+import org.churchpresenter.settingspages.SystemSettingsTab
 import org.churchpresenter.profiles.BackgroundSettingsTab
 import org.churchpresenter.profiles.BibleSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.DetectedScreen
+import org.churchpresenter.settingspages.DetectedScreen
 import org.churchpresenter.profiles.ProfilesSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.detectScreensFromAwt
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
+import org.churchpresenter.settingspages.ProjectionSettingsTab
+import org.churchpresenter.settingspages.detectScreensFromAwt
+import org.churchpresenter.settingspages.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.composables.LabeledTab
 import org.churchpresenter.app.churchpresenter.composables.LabeledTabIndicator
 import org.churchpresenter.app.churchpresenter.composables.labeledTabMinWidth
@@ -336,7 +338,8 @@ private fun SettingsTabContent(
         0 -> SystemSettingsTab(
             settings = settings,
             onSettingsChange = onSettingsChange,
-            companionServer = companionServer
+            companionServer = companionServer,
+            isReleaseBuild = BuildConfig.IS_RELEASE,
         )
         1 -> BibleSettingsTab(
             settings = settings,
@@ -354,6 +357,7 @@ private fun SettingsTabContent(
         )
         TAB_PROJECTION -> ProjectionSettingsTab(
             settings = settings,
+            isReleaseBuild = BuildConfig.IS_RELEASE,
             onSettingsChange = onSettingsChange,
             companionServer = companionServer,
             onIdentifyScreen = { onIdentifyScreen() },
@@ -369,6 +373,11 @@ private fun SettingsTabContent(
             companionServer = companionServer,
             remoteClientManager = remoteClientManager,
             calendarSync = calendarSync,
+            windowRoot = { theme, content -> AppWindowRoot(theme = theme, content = content) },
+            calendarInviteDialog = { invite, onDismiss ->
+                CalendarEnrollQrDialog(invite = invite, onDismiss = onDismiss)
+            },
+            defaultRelayUrl = builtInRelayEndpoints.relayUrl,
         )
         TAB_ATEM -> AtemSettingsTab(settings = settings, onSettingsChange = onSettingsChange)
         TAB_INTEGRATIONS -> if (obsManager != null) {

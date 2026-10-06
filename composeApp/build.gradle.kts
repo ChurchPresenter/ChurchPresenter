@@ -344,6 +344,8 @@ kotlin {
             implementation(projects.liveShow)
             // The live output: PresenterManager, the output windows and the off-screen outputs.
             implementation(projects.liveOutput)
+            // The pages the Options dialog hosts: System, Projection, Server, Companion Satellite.
+            implementation(projects.settingsPages)
             // The ATEM protocol client: the UDP conversation with the switcher — connect, state
             // dump, key control and media-pool upload. AtemBridge is the app-side wiring.
             implementation(projects.atem)
@@ -1031,11 +1033,6 @@ val serialTestClasses = listOf(
     // measured, not the code. The Lower Third tab's own suites moved to `:lower-third`, whose `test`
     // task forks once, so they are already alone in their JVM there.
     "*LowerThirdTabScreenshotTest",
-    // Here for a different reason: it binds a fixed port AND draws that port into the image (the
-    // Server URL row, the connection QR). Shifting the port per fork would rewrite every one of its
-    // committed screenshots on every run, so it keeps the literal and runs where nothing competes
-    // for the port.
-    "*ServerSettingsTabScreenshotTest",
     // And these for a third: all thirteen seed one fixed directory on disk -- AppPreviewSupport's
     // `library()` writes songs, bibles, a Gallery of PNGs and a deck into LIBRARY
     // (/Users/Shared/ChurchPresenter, else /tmp/ChurchPresenter) with copyTo(overwrite = true).

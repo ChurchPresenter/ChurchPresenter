@@ -170,3 +170,7 @@ include(":live-show")
 // The live output: PresenterManager and what is on air, the output windows and the stage monitor, and
 // the off-screen outputs (NDI, OMT, Browser Source, DeckLink). Depended on by :composeApp.
 include(":live-output")
+
+// The Options dialog's own pages -- System, Projection, Server, Companion Satellite -- with the Bible
+// catalog they open and the sample songs System installs. Depended on by :composeApp.
+include(":settings-pages")

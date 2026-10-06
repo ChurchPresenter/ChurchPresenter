@@ -18,8 +18,9 @@ The Profiles settings pages and what they are built from:
 - `FileManager`, which the Bible page lists translations with.
 
 A real Gradle module of this build: `include(":profiles")`, `implementation(projects.profiles)`. Its
-consumers are `:composeApp` and `:live-output`. The app keeps the settings pages that need app
-services — Projection, Server, System, Companion — and the Options dialog that hosts every page.
+consumers are `:composeApp` and `:live-output`. The settings pages that need app services —
+Projection, Server, System, Companion — are `:settings-pages`; the app keeps the Options dialog
+that hosts every page.
 
 It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`, `:diagnostics`,
 `:presenter`, `:canvas`, `:media`, `:slides`, `:bible`, `:bible-tab`, `:lottieGenerator`, `:atem`,

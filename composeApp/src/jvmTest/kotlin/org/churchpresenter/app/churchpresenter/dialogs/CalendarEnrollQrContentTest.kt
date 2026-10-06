@@ -4,6 +4,7 @@ package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -69,5 +70,21 @@ class CalendarEnrollQrContentTest {
     @Test
     fun `the code is read out in groups of three`() {
         assertEquals("Code 482 913 1", enrollCodeText("4829131", "Code %s"))
+    }
+
+    @Test
+    fun `the invite dialog says why there is no QR`() {
+        runComposeUiTest {
+            setContent {
+                MaterialTheme {
+                    CalendarInviteFailedContent(
+                        status = CalendarSyncStatus.Failed("connection refused"),
+                        onDismiss = {},
+                    )
+                }
+            }
+            onAllNodesWithText("connection refused", substring = true)[0]
+                .assertExists("the reason is the sync card's own words for it")
+        }
     }
 }
