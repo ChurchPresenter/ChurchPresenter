@@ -143,7 +143,9 @@ jobs:
             echo "timestampUrl=http://timestamp.digicert.com"
             echo "subjectName=Church Presenter"
           } > "$SIGNING_DIR/signing.properties"
-          echo "desktop.signing.repo.path=$RUNNER_TEMP/signing" >> local.properties
+          # local.properties is read with java.util.Properties, where a backslash is an escape:
+          # D:\a\_temp would load as D:a_temp. Write the path with forward slashes.
+          echo "desktop.signing.repo.path=$(cygpath -m "$RUNNER_TEMP")/signing" >> local.properties
           echo "Windows signing configuration written"
 
       # ── Build ───────────────────────────────────────────────────────────────
