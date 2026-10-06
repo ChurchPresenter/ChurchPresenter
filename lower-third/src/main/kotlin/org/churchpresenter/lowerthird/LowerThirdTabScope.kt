@@ -547,6 +547,8 @@ internal fun LowerThirdTabScope.LowerThirdSelectionEffects() {
         if (!showAtemDialog || jsonContent.isBlank()) return@LaunchedEffect
         val variant = atemVariant(atemIsClip)
         LottieRenderCache.prepare(jsonContent, variant)
-        LottieRenderCache.progressFlow(jsonContent, variant).collect { atemPrepareProgress = it }
+        // Its first value asks the disk whether the file is cached already.
+        withContext(Dispatchers.IO) { LottieRenderCache.progressFlow(jsonContent, variant) }
+            .collect { atemPrepareProgress = it }
     }
 }

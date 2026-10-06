@@ -183,6 +183,34 @@ This phase does three things, in order:
    a separate process that draws the outputs. The decision -- build it, or stop at the watchdog -- is
    recorded here after the spike, with the cost measured.
 
+### Decision: the watchdog and the disk fixes ship; the output process does not, yet
+
+The spike was a reading of the code, not a prototype, and **nothing here was measured**. It found:
+
+- **Every output window and every off-screen output share the event thread by design.** The on-screen
+  windows compose on it, and `ComposeScenePump` and `LowerThirdOffscreenRenderer` are confined to it
+  because their scenes share Compose's global snapshot observers with the operator UI (the 2026-08-29
+  lock inversion). A second render thread in the same process cannot be made safe, so isolation
+  means a second process.
+- **The program is mostly data, and not all of it.** `Cue` is plain values for verses, songs,
+  messages, props, announcements, lower thirds, backgrounds and web pages. But it also names things
+  that only exist inside this process: a presentation deck with its animation timeline and cached
+  slide images, a scene fed by cameras, screen capture and NDI/OMT receivers, a VLC player for
+  video, the Lottie render cache and the settings the looks resolve against. An output process
+  needs its own copy of every one, kept in step.
+- **The cost is a new piece of the app, not a change to one.** It needs a wire format for the
+  program and every state behind it, a second JVM to launch, supervise and restart, its own
+  decoders and capture inputs, and a way to keep it in step with settings. It would also change what
+  "the output window" is on every platform.
+- **What a UI hang costs today is bounded by what the watchdog now reports.** A frozen event thread
+  freezes every output with the last frame still on screen; the watchdog names where it was stuck,
+  and the five disk calls that could cause it on the output paths are gone.
+
+So: ship the watchdog and the I/O fixes, and leave the output process until a stall is seen in the
+field that they do not explain. If it is built, start with the narrowest process that helps -- one
+that only holds the last frame of a window and keeps the projector black-free if the UI dies --
+before moving any composition into it.
+
 ## Migration
 
 Each step shippable on its own, each keeping every existing test green:

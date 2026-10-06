@@ -260,7 +260,23 @@ The original plan for the step:
   - Companion: actions and variables in `COMPANION_API.md`.
 - A macro can run another macro. Depth is bounded so loops can't hang.
 
-### Step 8 — MIDI and OSC in and out (UI → approval)
+### Step 8 — MIDI and OSC in and out (built; UI awaiting approval)
+
+What was built:
+
+- `:control-in`: `Trigger`/`ControlEvent` (flat, with a string `kind`), `Osc` and `Midi` (parse and
+  encode, as plain functions), `OscServer`/`OscSender`/`MidiDevices` (the thin device layer), and
+  `ControlHub` (opens the ports, matches, learns, sends).
+- `ControlSettings` in `AppSettings.control`: the ports, the trigger table and the output table.
+- `AppRootState.controlHub`, opened off the UI thread by `ControlInEffects`: a trigger runs its
+  actions as a macro does; an output goes out when what is on air gains something (go live),
+  empties (clear) or a Take puts the preview on air (`PreviewBus.takes`).
+- A MIDI & OSC dialog (`ControlDialog`), opened from the Macros dialog: Ports, Triggers (with Learn)
+  and Outputs tabs. Placed there rather than in Settings, whose tabs are numbered by position.
+- Not yet: MSC out, OSC pattern wildcards, and Companion/stream-deck style feedback.
+
+The original plan for the step:
+
 
 - New module `:control-in`.
   - MIDI through `javax.sound.midi` (in the JDK): notes, CC and MSC.
@@ -271,7 +287,23 @@ The original plan for the step:
 - Ports go through `testPort` in tests. The device layer is split from the mapping logic so the
   logic is unit-testable headless (AGENT.md's "split, don't exclude").
 
-## Step 9 — Watchdog and output isolation (2.8)
+## Step 9 — Watchdog and output isolation (2.8) (built; the output process decided against for now)
+
+What was built:
+
+- `:diagnostics`: `ThreadDump` (the dump and lock-owner section the hung-test reporter had, now
+  shared), `StallDetector` and `UiWatchdog`: a debug build pings the event thread and, when it does
+  not answer within 250ms, logs its stack once while it is still stuck, and how long it was out when
+  it answers (`Log.warn`, so it reaches the crash report's breadcrumbs). Started from `main()` when
+  `!BuildConfig.IS_RELEASE`.
+- The five synchronous disk calls on output paths now ask the disk off the UI thread: the background
+  picture and video (`rememberFileExists`, with a cache so a picture seen before does not flicker),
+  the song background check (`songBackgroundResolves` takes the answer), the picture decode,
+  `LottieRenderCache.progressFlow`'s call site, and `followerMediaUrl` (now `suspend`).
+- The isolation decision is in `docs/SHOW_CONTROL.md`, Output isolation.
+
+The original plan for the step:
+
 
 1. **Watchdog first.**
    - A debug-build event-thread stall detector logs any frame over budget with the event thread's
