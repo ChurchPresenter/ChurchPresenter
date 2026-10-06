@@ -4,7 +4,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.io.IOException
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlin.coroutines.AbstractCoroutineContextElement
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Runs action lists against a [ShowHost], each in order on its own coroutine in [scope]: a `wait`
@@ -16,10 +19,13 @@ class ActionRunner(private val host: ShowHost, private val scope: CoroutineScope
 
     private val runs = mutableMapOf<String, Job>()
 
-    /** Runs [actions] under [key], cancelling what was still running under it first. */
-    fun run(actions: List<Action>, key: String = ANONYMOUS): Job = synchronized(runs) {
+    /**
+     * Runs [actions] under [key], cancelling what was still running under it first. [chainDepth] is
+     * how many row-action lists led to this one -- see [ChainDepth].
+     */
+    fun run(actions: List<Action>, key: String = ANONYMOUS, chainDepth: Int = 0): Job = synchronized(runs) {
         if (key != ANONYMOUS) runs.remove(key)?.cancel()
-        val job = scope.launch { perform(actions) }
+        val job = scope.launch(ChainDepth(chainDepth)) { perform(actions) }
         if (key != ANONYMOUS) {
             runs[key] = job
             job.invokeOnCompletion { synchronized(runs) { if (runs[key] === job) runs.remove(key) } }
@@ -62,14 +68,16 @@ class ActionRunner(private val host: ShowHost, private val scope: CoroutineScope
         }
     }
 
+    // Any failure of one action is reported and passed over, whatever its type: a host call reaches
+    // media, devices and the network, and one that escaped would end the run and, with it, the
+    // scope it runs in. Cancellation is not a failure and goes on up.
+    @Suppress("TooGenericExceptionCaught")
     private suspend fun attempt(action: Action, block: suspend () -> Unit) {
         try {
             block()
-        } catch (e: IllegalStateException) {
-            host.reportError(action, e)
-        } catch (e: IllegalArgumentException) {
-            host.reportError(action, e)
-        } catch (e: IOException) {
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
             host.reportError(action, e)
         }
     }
@@ -77,6 +85,9 @@ class ActionRunner(private val host: ShowHost, private val scope: CoroutineScope
     companion object {
         /** How many macros deep a run may go before the next one is refused. */
         const val MAX_MACRO_DEPTH = 8
+
+        /** How many row-action lists deep a chain of next and previous may go before it stops. */
+        const val MAX_CHAIN_DEPTH = 8
         private const val ANONYMOUS = ""
         private const val MILLIS_PER_SECOND = 1000
     }
@@ -106,3 +117,15 @@ internal suspend fun ShowHost.dispatch(action: Action) {
         is Action.Wait, is Action.RunMacro, is Action.Unknown -> Unit
     }
 }
+
+/**
+ * How many row-action lists led to the run in this coroutine. A row reached by `next` or `previous`
+ * runs its own list one deeper, so two rows that step to each other stop at
+ * [ActionRunner.MAX_CHAIN_DEPTH] instead of looping.
+ */
+class ChainDepth(val depth: Int) : AbstractCoroutineContextElement(Key) {
+    companion object Key : CoroutineContext.Key<ChainDepth>
+}
+
+/** The [ChainDepth] of the run calling this, 0 outside one. */
+suspend fun currentChainDepth(): Int = currentCoroutineContext()[ChainDepth]?.depth ?: 0

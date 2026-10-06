@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import org.churchpresenter.app.churchpresenter.viewmodel.clearFromOperator
 import org.churchpresenter.app.churchpresenter.dialogs.ControlPanelData
 import org.churchpresenter.app.churchpresenter.dialogs.ControlPanelActions
 import org.churchpresenter.app.churchpresenter.dialogs.ControlDialog
@@ -241,7 +244,7 @@ private fun SidebarButtons(
             text = stringResource(Res.string.tooltip_clear_display),
             onClick = {
                 mediaViewModel?.pause()
-                presenterManager.requestClearDisplay()
+                presenterManager.clearFromOperator()
                 instanceLinkSendClear?.invoke()
             },
             buttonSize = 36.dp,
@@ -382,6 +385,8 @@ private fun ControlSetup(
 ) {
     val status by hub.status.collectAsState()
     val learning by hub.isLearning.collectAsState()
+    // A learned trigger arrives on the device's thread; it is handed to the dialog on the UI's.
+    val uiScope = rememberCoroutineScope()
     // Asking the system for its devices can block, so it is done off the UI thread, once per opening.
     val devices by produceState(emptyList<String>() to emptyList(), visible) {
         if (visible) value = withContext(Dispatchers.IO) { MidiPorts.inputNames() to MidiPorts.outputNames() }
@@ -392,7 +397,7 @@ private fun ControlSetup(
         data = ControlPanelData(status, devices.first, devices.second, scheduleRows),
         actions = ControlPanelActions(
             isLearning = learning,
-            onLearn = hub::learn,
+            onLearn = { onTrigger -> hub.learn { trigger -> uiScope.launch { onTrigger(trigger) } } },
             onCancelLearn = hub::cancelLearn,
             onSave = { saved -> onSettingsChange { it.copy(control = saved) } },
         ),

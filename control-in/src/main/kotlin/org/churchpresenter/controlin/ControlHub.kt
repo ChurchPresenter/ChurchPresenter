@@ -52,26 +52,47 @@ class ControlHub(
     /** Whether [learn] is waiting for the next thing to arrive. */
     val isLearning: StateFlow<Boolean> = _isLearning.asStateFlow()
 
-    /** Closes the ports of the settings before and opens those of [next]. */
-    fun apply(next: ControlSettings) = synchronized(lock) {
-        closePorts()
-        settings = next
-        midiIn = openOrNull(next.midiInput.isNotBlank()) {
-            ports.openMidiIn(next.midiInput) { bytes -> Midi.parse(bytes)?.let(::dispatch) }
+    /**
+     * Moves to [next]: the tables take effect at once, and only a port whose own setting changed is
+     * closed and opened again -- saving a mapping does not drop the MIDI device or the OSC socket.
+     * A port is closed outside the lock, so a device thread waiting in [dispatch] is never what its
+     * close waits on.
+     */
+    fun apply(next: ControlSettings) {
+        val stale = mutableListOf<AutoCloseable>()
+        synchronized(lock) {
+            val before = settings
+            settings = next
+            if (next.midiInput != before.midiInput) {
+                midiIn?.let(stale::add)
+                midiIn = openOrNull(next.midiInput.isNotBlank()) {
+                    ports.openMidiIn(next.midiInput) { bytes -> Midi.parse(bytes)?.let(::dispatch) }
+                }
+            }
+            if (next.oscInPort != before.oscInPort) {
+                oscIn?.let(stale::add)
+                oscIn = openOrNull(next.oscInPort > 0) {
+                    ports.openOscIn(next.oscInPort) { packet -> Osc.parse(packet).forEach { dispatch(it.toEvent()) } }
+                }
+            }
+            if (next.midiOutput != before.midiOutput) {
+                midiOut?.let(stale::add)
+                midiOut = openOrNull(next.midiOutput.isNotBlank()) { ports.openMidiOut(next.midiOutput) }
+            }
+            if (next.oscOutHost != before.oscOutHost || next.oscOutPort != before.oscOutPort) {
+                oscOut?.let(stale::add)
+                oscOut = openOrNull(next.oscOutHost.isNotBlank() && next.oscOutPort > 0) {
+                    ports.openOscOut(next.oscOutHost, next.oscOutPort)
+                }
+            }
+            _status.value = ControlStatus(
+                midiInput = stateOf(next.midiInput.isNotBlank(), midiIn),
+                oscInput = stateOf(next.oscInPort > 0, oscIn),
+                midiOutput = stateOf(next.midiOutput.isNotBlank(), midiOut),
+                oscOutput = stateOf(next.oscOutHost.isNotBlank() && next.oscOutPort > 0, oscOut),
+            )
         }
-        oscIn = openOrNull(next.oscInPort > 0) {
-            ports.openOscIn(next.oscInPort) { packet -> Osc.parse(packet).forEach { dispatch(it.toEvent()) } }
-        }
-        midiOut = openOrNull(next.midiOutput.isNotBlank()) { ports.openMidiOut(next.midiOutput) }
-        oscOut = openOrNull(next.oscOutHost.isNotBlank() && next.oscOutPort > 0) {
-            ports.openOscOut(next.oscOutHost, next.oscOutPort)
-        }
-        _status.value = ControlStatus(
-            midiInput = stateOf(next.midiInput.isNotBlank(), midiIn),
-            oscInput = stateOf(next.oscInPort > 0, oscIn),
-            midiOutput = stateOf(next.midiOutput.isNotBlank(), midiOut),
-            oscOutput = stateOf(next.oscOutHost.isNotBlank() && next.oscOutPort > 0, oscOut),
-        )
+        stale.forEach { it.close() }
     }
 
     /** Takes the next thing that arrives as a trigger for [onTrigger] instead of running any mapping. */
@@ -108,9 +129,18 @@ class ControlHub(
         messages.forEach { send(it) }
     }
 
-    override fun close() = synchronized(lock) {
-        closePorts()
-        _status.value = ControlStatus()
+    override fun close() {
+        val open = synchronized(lock) {
+            val all = listOfNotNull(midiIn, oscIn, midiOut, oscOut)
+            midiIn = null
+            oscIn = null
+            midiOut = null
+            oscOut = null
+            settings = ControlSettings()
+            _status.value = ControlStatus()
+            all
+        }
+        open.forEach { it.close() }
     }
 
     private fun send(message: OutMessage) {
@@ -122,17 +152,6 @@ class ControlHub(
             val midi = synchronized(lock) { midiOut }
             Midi.encode(message).forEach { midi?.send(it) }
         }
-    }
-
-    private fun closePorts() {
-        midiIn?.close()
-        oscIn?.close()
-        midiOut?.close()
-        oscOut?.close()
-        midiIn = null
-        oscIn = null
-        midiOut = null
-        oscOut = null
     }
 
     private fun <T> openOrNull(wanted: Boolean, open: () -> T?): T? = if (wanted) open() else null

@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.viewmodel.clearFromOperator
 import org.churchpresenter.app.churchpresenter.viewmodel.toggleProp
 import org.churchpresenter.app.churchpresenter.viewmodel.setPropOn
 import org.churchpresenter.app.churchpresenter.viewmodel.propsOnAir
@@ -139,7 +140,7 @@ internal fun MainWindowScope.ServerCommandWiring() {
         LaunchedEffect(Unit) {
             companionServer.onClear.collect {
                 mediaViewModel.pause()
-                presenterManager.requestClearDisplay()
+                presenterManager.clearFromOperator()
             }
         }
         LaunchedEffect(Unit) {

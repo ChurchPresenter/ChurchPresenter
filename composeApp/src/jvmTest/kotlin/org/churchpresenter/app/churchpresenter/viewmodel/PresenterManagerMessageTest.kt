@@ -92,4 +92,19 @@ class PresenterManagerMessageTest {
         mainClock.advanceTimeBy(2_000)
         assertEquals(second, pm.messageOnAir, "the first one's clock does not take the second down")
     }
+
+    @Test
+    fun `the same message sent again while it is up starts its time over`() = runComposeUiTest {
+        val pm = manager()
+        mainClock.autoAdvance = false
+        setContent { MessageExpiry(pm) }
+        val timed = nursery.copy(durationSeconds = 2)
+        pm.showMessage(timed)
+        mainClock.advanceTimeBy(1_500)
+        pm.showMessage(timed)
+        mainClock.advanceTimeBy(1_000)
+        assertEquals(timed, pm.messageOnAir, "resent at 1.5s, so it has 2s from there")
+        mainClock.advanceTimeBy(1_500)
+        assertNull(pm.messageOnAir)
+    }
 }

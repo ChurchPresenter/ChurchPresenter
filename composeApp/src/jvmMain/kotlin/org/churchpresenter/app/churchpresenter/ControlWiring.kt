@@ -6,7 +6,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.controlin.ControlMapping
 import org.churchpresenter.controlin.OutputEvents
@@ -44,5 +43,5 @@ internal fun liveOutputEvents(before: Set<Presenting>, after: Set<Presenting>): 
 
 /** Runs what [mapping]'s trigger is set to do, as a macro would run, from the operator's own scope. */
 internal fun AppRootState.runControlMapping(mapping: ControlMapping) {
-    coroutineScope.launch { showRunner.run(mapping.actions, "control:${mapping.id}") }
+    showRunner.run(mapping.actions, "control:${mapping.id}")
 }

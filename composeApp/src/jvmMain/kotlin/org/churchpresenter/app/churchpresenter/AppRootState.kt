@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import org.churchpresenter.controlin.ControlHub
 import org.churchpresenter.showcontrol.ActionRunner
 import org.churchpresenter.server.InstanceLinkCommandFailure
@@ -103,7 +105,11 @@ internal class AppRootState(
     val companionSatelliteViewModel = CompanionSatelliteViewModel()
 
     /** Runs show-control action lists -- calendar cues today, cue actions and macros later. */
-    val showRunner: ActionRunner by lazy { ActionRunner(appShowHost(), coroutineScope) }
+    // Under a supervisor of its own, so a run that fails cannot take the root scope down with it.
+    val showRunner: ActionRunner by lazy {
+        val supervised = coroutineScope.coroutineContext + SupervisorJob(coroutineScope.coroutineContext[Job])
+        ActionRunner(appShowHost(), CoroutineScope(supervised))
+    }
     /** The MIDI and OSC ports: what arrives runs actions, and what the show does is sent back out. */
     val controlHub: ControlHub by lazy { ControlHub(onMapping = ::runControlMapping) }
     val autoConnectedIds = mutableSetOf<String>()
@@ -138,6 +144,9 @@ internal class AppRootState(
     // clicked, a song sent from the Songs tab -- a due cue is skipped rather than fired over the
     // operator. See CueRunner.operatorLive and LiveDurationLog.showing.
     var engineLiveItem by mutableStateOf<ScheduleItem?>(null)
+
+    /** The schedule row last put on air, by any path -- where next and previous count from. */
+    var lastLiveRowId by mutableStateOf<String?>(null)
 
     var dialogDismissSignal by mutableStateOf(0)
     var showOptionsDialog by mutableStateOf(false)

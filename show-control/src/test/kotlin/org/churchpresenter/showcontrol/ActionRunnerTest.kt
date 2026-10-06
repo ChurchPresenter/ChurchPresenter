@@ -29,8 +29,12 @@ class ActionRunnerTest {
 
         private fun note(call: String, action: Action? = null) {
             if (action in failing) {
-                if (action is Action.ObsScene) throw IOException("OBS is gone")
-                error("$call failed")
+                throw when (action) {
+                    is Action.ObsScene -> IOException("OBS is gone")
+                    is Action.Prop -> UnsupportedOperationException("no props here")
+                    is Action.LowerThird -> NullPointerException("no preset")
+                    else -> IllegalStateException("$call failed")
+                }
             }
             calls += "$call@${clock()}"
         }
@@ -45,8 +49,8 @@ class ActionRunnerTest {
         override suspend fun clearGroup(group: String) = note("clearGroup:$group")
         override suspend fun message(action: Action.Message) =
             note("message:${action.text}${action.template}${action.tokens.values}${action.durationSeconds}")
-        override suspend fun prop(action: Action.Prop) = note("prop:${action.prop}=${action.on}")
-        override suspend fun lowerThird(preset: String) = note("lowerThird:$preset")
+        override suspend fun prop(action: Action.Prop) = note("prop:${action.prop}=${action.on}", action)
+        override suspend fun lowerThird(preset: String) = note("lowerThird:$preset", Action.LowerThird(preset))
         override suspend fun timer(action: Action.Timer) =
             note("timer:${action.mode}/${action.seconds}/${action.until}")
         override suspend fun media(command: MediaCommand) = note("media:$command")
@@ -56,7 +60,11 @@ class ActionRunnerTest {
         override suspend fun atemMacro(index: Int) = note("atemMacro:$index")
         override suspend fun companion(action: Action.CompanionPress) =
             note("companion:${action.connection}/${action.placement}/${action.button}")
-        override suspend fun next() = note("next")
+        var chainDepthAtNext = -1
+        override suspend fun next() {
+            chainDepthAtNext = currentChainDepth()
+            note("next")
+        }
         override suspend fun previous() = note("previous")
         override fun macro(name: String): List<Action>? = macros[name]
         override fun reportError(action: Action, error: Throwable) {
@@ -176,5 +184,33 @@ class ActionRunnerTest {
         advanceUntilIdle()
         assertEquals(listOf("obs:D@1000"), host.calls)
         assertFalse(runner.isRunning("b"))
+    }
+
+    @Test
+    fun `a failure of any type is reported and passed over, and the scope it runs in lives on`() = runTest {
+        val prop = Action.Prop("logo")
+        val host = recorder(failing = setOf(prop, Action.LowerThird("gone")))
+        val runner = ActionRunner(host, this)
+
+        runner.run(listOf(prop, Action.LowerThird("gone"), Action.NextItem), key = "row")
+        advanceUntilIdle()
+        runner.run(listOf(Action.PreviousItem))
+        advanceUntilIdle()
+
+        assertEquals(listOf("next@0", "previous@0"), host.calls)
+        assertEquals(listOf<Action>(prop, Action.LowerThird("gone")), host.errors.map { it.first })
+    }
+
+    @Test
+    fun `a run carries its chain depth to the host, and a run outside one is at depth 0`() = runTest {
+        val host = recorder()
+        val runner = ActionRunner(host, this)
+
+        runner.run(listOf(Action.NextItem), key = "row", chainDepth = 3)
+        advanceUntilIdle()
+        assertEquals(3, host.chainDepthAtNext)
+
+        runner.perform(listOf(Action.NextItem))
+        assertEquals(0, host.chainDepthAtNext)
     }
 }

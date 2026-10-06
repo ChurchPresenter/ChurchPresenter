@@ -52,6 +52,7 @@ class AppShowHostTest {
             rows = { listOf(song, heading, verse) },
             currentRowId = { current },
             goLive = { item, plays -> done += "live:${item.id}x$plays" },
+            rowActions = { item, depth -> done += "actions:${item.id}@$depth" },
             toPreview = { done += "preview:${it.id}" },
             media = { done += "media:$it" },
             obsScene = { done += "obs:$it" },
@@ -189,7 +190,7 @@ class AppShowHostTest {
     }
 
     @Test
-    fun `next and previous step through the content rows from the current one`() {
+    fun `next and previous step through the content rows from the current one, with their own actions`() {
         run(Action.PreviousItem)
         run(Action.NextItem)
         current = "s1"
@@ -198,7 +199,17 @@ class AppShowHostTest {
         current = "s2"
         run(Action.NextItem)
         run(Action.PreviousItem)
-        assertEquals(listOf("live:s1x1", "live:s2x1", "live:s1x1"), done)
+        assertEquals(
+            listOf("live:s1x1", "actions:s1@0", "live:s2x1", "actions:s2@0", "live:s1x1", "actions:s1@0"),
+            done,
+        )
+    }
+
+    @Test
+    fun `a step from a row's own actions carries how deep the chain already is`() {
+        current = "s1"
+        runBlocking { ActionRunner(host, this).run(listOf(Action.NextItem), key = "s1", chainDepth = 3).join() }
+        assertEquals(listOf("live:s2x1", "actions:s2@3"), done)
     }
 
     @Test

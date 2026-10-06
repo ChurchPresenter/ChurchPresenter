@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.showcontrol.ActionRunner
 import org.churchpresenter.app.churchpresenter.remote.AppShowHost
 import org.churchpresenter.app.churchpresenter.remote.ShowOutlets
 import org.churchpresenter.app.churchpresenter.remote.executeProjectItem
@@ -20,7 +21,7 @@ import org.churchpresenter.settings.macroNamed
 import org.churchpresenter.settings.messageTokens
 import java.io.File
 import androidx.compose.runtime.snapshotFlow
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.drop
 import org.churchpresenter.atem.AtemConnectionManager
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
@@ -40,9 +41,11 @@ internal fun AppRootState.appShowHost(): ShowHost = AppShowHost(
     settings = { appSettings },
     outlets = ShowOutlets(
         rows = { currentScheduleItems },
-        currentRowId = { engineLiveItem?.id ?: selectedScheduleItemId },
+        currentRowId = { lastLiveRowId ?: selectedScheduleItemId },
         // A row an action puts live does not run its own actions: two rows naming each other loop.
         goLive = { item, plays -> projectFromCalendar(item, plays, runActions = false) },
+        // A row next or previous reaches does, as one stepped to by hand does, a chain level deeper.
+        rowActions = { item, depth -> runRowActionsNow(item, depth) },
         toPreview = { item ->
             executeProjectItem(
                 item,
@@ -77,6 +80,21 @@ internal fun AppRootState.appShowHost(): ShowHost = AppShowHost(
 internal fun AppRootState.runRowActions(item: ScheduleItem, actions: List<Action>) =
     presenterManager.previewBus.runOnAir(item, actions) { list, key -> showRunner.run(list, key) }
 
+/**
+ * Runs the actions of the schedule row [item] now -- it has gone straight to air. [chainDepth] is
+ * how many row-action lists led here; past [ActionRunner.MAX_CHAIN_DEPTH] the chain stops, so two
+ * rows that step to each other cannot loop.
+ */
+internal fun AppRootState.runRowActionsNow(item: ScheduleItem, chainDepth: Int = -1) {
+    val actions = currentScheduleActions.currentActions()[item.id].orEmpty()
+    if (actions.isEmpty()) return
+    if (chainDepth + 1 >= ActionRunner.MAX_CHAIN_DEPTH) {
+        Log.warn(SHOW_CONTROL_TAG, "Row ${item.id} not run: its actions step through rows more than 8 deep")
+        return
+    }
+    showRunner.run(actions, item.id, chainDepth + 1)
+}
+
 /** Runs [macro]'s actions; pressing it again while it is still going starts it over. */
 internal fun AppRootState.runMacro(macro: Macro) {
     showRunner.run(macro.actions, "macro:${macro.id}")
@@ -88,12 +106,15 @@ internal fun PreviewBus.runOnAir(item: ScheduleItem, actions: List<Action>, run:
     onAir(cuedModeOf(item)) { run(actions, item.id) }
 }
 
-/** Stops the action lists still running -- their waits included -- whenever the outputs are cleared. */
+/**
+ * Stops the action lists still running -- their waits included -- whenever an operator clears the
+ * outputs. A clear that a list asks for itself, or that a media file ending asks for, leaves them be.
+ */
 @Composable
 internal fun MainWindowScope.ShowControlEffects() {
     LaunchedEffect(root) {
-        snapshotFlow { root.presenterManager.clearDisplayRequested.value }
-            .filter { it }
+        snapshotFlow { root.presenterManager.operatorClears.intValue }
+            .drop(1)
             .collect { root.showRunner.cancelAll() }
     }
 }

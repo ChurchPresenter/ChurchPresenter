@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -122,6 +123,9 @@ private fun TriggerEditor(
     learning: TriggerLearning,
     onChange: (ControlMapping) -> Unit,
 ) {
+    // What is being edited when the learned trigger arrives, not when Learn was pressed: a name or
+    // actions typed while waiting are kept.
+    val latest by rememberUpdatedState(draft)
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         SettingsTextField(
             value = draft.name,
@@ -139,7 +143,7 @@ private fun TriggerEditor(
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             TriggerFields(draft.trigger) { onChange(draft.copy(trigger = it)) }
             Spacer(Modifier.weight(1f))
-            LearnButton(learning) { learned -> onChange(draft.copy(trigger = learned)) }
+            LearnButton(learning) { learned -> onChange(latest.copy(trigger = learned)) }
         }
         ActionListEditor(draft.actions, rows, onChange = { onChange(draft.copy(actions = it)) })
     }

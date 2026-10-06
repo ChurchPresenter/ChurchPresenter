@@ -29,6 +29,7 @@ internal fun AppRootState.projectFromCalendar(item: ScheduleItem, plays: Int, ru
     currentScheduleActions.selectItem(item.id)
     liveDurationLog.wentLive(item)
     engineLiveItem = item
+    lastLiveRowId = item.id
     when (item) {
         // Scenes are driven by MainDesktop's own ViewModel; the bridge is
         // the one way there. Everything else is what a phone can project.
@@ -58,7 +59,8 @@ internal fun AppRootState.projectFromCalendar(item: ScheduleItem, plays: Int, ru
             }
         }
     }
-    if (runActions) runRowActions(item, currentScheduleActions.currentActions()[item.id].orEmpty())
+    // Straight to air, never to Preview, so its actions run now rather than waiting on a Take.
+    if (runActions) runRowActionsNow(item)
 }
 
 /** Loads a planned service's rows into the Schedule, with their timing and the service's start. */

@@ -167,9 +167,11 @@ internal fun resolveBackground(
 ): ResolvedBackground {
     val override = if (isLowerThird) settings.quickLowerThirdBackground else settings.quickBackground
     // Both remembered unconditionally: a `&&` short-circuit here would be a conditional remember.
-    // The disk is asked in the background, so a picture or clip counts as missing until it answers.
-    val overrideMediaExists = rememberFileExists(override?.mediaPath) == true
-    val ownMediaExists = rememberFileExists(ownBackground.mediaPath) == true
+    // The disk is asked in the background. Until it answers the picture or clip counts as there --
+    // the usual case -- so it is chosen at once and the picture holds the last background while it
+    // decodes, instead of the fallback flashing up first. One that turns out missing is dropped then.
+    val overrideMediaExists = rememberFileExists(override?.mediaPath) != false
+    val ownMediaExists = rememberFileExists(ownBackground.mediaPath) != false
     val overrideDraws = remember(override, knownCameras, overrideMediaExists) {
         override != null && songBackgroundResolves(override, knownCameras, overrideMediaExists)
     }

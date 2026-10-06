@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.viewmodel.clearFromOperator
 import org.churchpresenter.profiles.stageMonitorScreenIndices
 import kotlinx.coroutines.CoroutineScope
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
@@ -122,7 +123,7 @@ internal class MainDesktopScope(
     /** Clears every output, including a "Send to Stage Monitor" lock, from the Clear shortcut. */
     fun clearOutput() {
         mediaViewModel?.pause()
-        presenterManager.requestClearDisplay()
+        presenterManager.clearFromOperator()
         link.sendClear?.invoke()
         // Also release any "Send to Stage Monitor" lock (e.g. from Announcements)
         // so the stage monitor goes back to following the main presenting mode.

@@ -136,6 +136,23 @@ class ControlHubTest {
     }
 
     @Test
+    fun `a change to the tables alone keeps the ports open, and a changed port alone is reopened`() {
+        val fake = FakePorts()
+        val got = mutableListOf<ControlMapping>()
+        val hub = hub(fake, got)
+        hub.apply(ControlSettings(midiInput = "Pad", oscInPort = 9000))
+
+        hub.apply(ControlSettings(midiInput = "Pad", oscInPort = 9000, mappings = listOf(walkIn)))
+        assertTrue(fake.closed.isEmpty(), "saving a mapping does not drop the ports")
+        fake.onMidi!!(byteArrayOf(0x90.toByte(), 60, 100))
+        assertEquals(listOf(walkIn), got, "and the new table is in use")
+
+        hub.apply(ControlSettings(midiInput = "Pad", oscInPort = 9001, mappings = listOf(walkIn)))
+        assertEquals(listOf("oscIn:9000"), fake.closed.toList())
+        assertEquals(9001, fake.oscInPort)
+    }
+
+    @Test
     fun `applying again closes the old ports, and closing the hub closes them all`() {
         val fake = FakePorts()
         val hub = hub(fake, mutableListOf())

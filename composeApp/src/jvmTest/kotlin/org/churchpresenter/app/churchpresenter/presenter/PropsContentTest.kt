@@ -2,6 +2,10 @@
 
 package org.churchpresenter.app.churchpresenter.presenter
 
+import org.churchpresenter.settings.AnnouncementsSettings
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -52,6 +56,28 @@ class PropsContentTest {
         setContent { MaterialTheme { LivePreviewPanel(presenterManager = pm, appSettings = noProps) } }
         mainClock.advanceTimeBy(100)
         onNodeWithText("ON AIR").assertDoesNotExist()
+    }
+
+    @Test
+    fun `a clock on air picks up an edited format`() = runComposeUiTest {
+        mainClock.autoAdvance = false
+        val clock = PropDefinition("clock", "Clock", PropKind.CLOCK)
+        var current by mutableStateOf(
+            settings().copy(
+                props = listOf(clock),
+                announcementsSettings = AnnouncementsSettings(liveClockFormat = "'Alpha'"),
+            ),
+        )
+        val pm = PresenterManager().apply { setPropOn("clock", true) }
+        setContent { MaterialTheme { LivePreviewPanel(presenterManager = pm, appSettings = current) } }
+        mainClock.advanceTimeBy(100)
+        onNodeWithText("Alpha").assertExists()
+
+        current = current.copy(announcementsSettings = AnnouncementsSettings(liveClockFormat = "'Beta'"))
+        mainClock.advanceTimeBy(1_100)
+
+        onNodeWithText("Beta").assertExists()
+        onNodeWithText("Alpha").assertDoesNotExist()
     }
 
     @Test

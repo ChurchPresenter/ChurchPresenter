@@ -174,7 +174,10 @@ internal fun MainWindowScope.MainDesktopHost() {
 
 private fun MainWindowScope.liveOutputCallbacks(): LiveOutputCallbacks = with(root) {
     LiveOutputCallbacks(
-        onRowWentLive = { item -> liveDurationLog.wentLive(item) },
+        onRowWentLive = { item ->
+            liveDurationLog.wentLive(item)
+            lastLiveRowId = item.id
+        },
         onRowActions = { item, actions -> runRowActions(item, actions) },
         onRunMacro = ::runMacro,
         controlHub = controlHub,

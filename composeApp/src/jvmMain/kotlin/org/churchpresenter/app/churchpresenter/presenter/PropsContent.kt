@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.key
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -61,7 +63,10 @@ internal fun PropsCue(cue: Cue.Props, surface: OutputSurface) {
                 horizontalAlignment = corner.horizontal,
             ) {
                 inCorner.forEach { prop ->
-                    Prop(prop, outputHeight * prop.sizePercent.coerceIn(1, MAX_PROP_PERCENT) / PERCENT, clockFormat)
+                    // Keyed, so a prop keeps its own state when one above it in the corner comes down.
+                    key(prop.id) {
+                        Prop(prop, outputHeight * prop.sizePercent.coerceIn(1, MAX_PROP_PERCENT) / PERCENT, clockFormat)
+                    }
                 }
             }
         }
@@ -116,12 +121,13 @@ private fun PropImage(path: String, height: Dp) {
     }
 }
 
-/** [format] of the time, redone every second. */
+/** [format] of the time, redone every second -- with the latest [format], so an edited prop shows at once. */
 @Composable
 private fun ticking(format: (LocalTime) -> String): String {
+    val latest by rememberUpdatedState(format)
     val text by produceState(format(LocalTime.now())) {
         while (true) {
-            value = format(LocalTime.now())
+            value = latest(LocalTime.now())
             delay(TICK_MILLIS)
         }
     }

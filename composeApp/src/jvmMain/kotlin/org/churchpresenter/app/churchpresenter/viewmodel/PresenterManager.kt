@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -131,6 +132,16 @@ class PresenterManager private constructor(
 
     /** Raised to fade the outputs out before the display is cleared -- see [requestClearDisplay]. */
     val clearDisplayRequested: State<Boolean> = context.clearDisplayRequested
+
+    /**
+     * How many times an operator has cleared the outputs -- the Clear button, its key, a remote
+     * client's clear -- as against a clear that a media file ending or an action asked for. What is
+     * still running of an action list stops on this, and only this; see [clearFromOperator].
+     */
+    internal val operatorClears = mutableIntStateOf(0)
+
+    /** How many times a message has been put up, so the same message sent again restarts its timer. */
+    internal val messagesShown = mutableIntStateOf(0)
 
     private val _showPresenterWindow = mutableStateOf(showPresenterWindowInitially)
     val showPresenterWindow: State<Boolean> = _showPresenterWindow

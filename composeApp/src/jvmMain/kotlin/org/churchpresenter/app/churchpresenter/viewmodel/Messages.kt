@@ -16,6 +16,7 @@ fun PresenterManager.showMessage(message: Cue.Message) {
     overlays.value.toList().forEach(::clearOverlay)
     putSlide(Presenting.NONE, lastLive = Presenting.MESSAGE)
     liveShow.set(message)
+    messagesShown.intValue++
     onLiveStateChanged?.invoke(this, Presenting.MESSAGE)
 }
 
@@ -34,10 +35,14 @@ fun PresenterManager.clearMessage() {
 @Composable
 internal fun MessageExpiry(presenterManager: PresenterManager) {
     val message = presenterManager.messageOnAir
-    LaunchedEffect(message) {
+    // Keyed on each showing too: the same message sent again is a fresh one, with its own time.
+    val shown = presenterManager.messagesShown.intValue
+    LaunchedEffect(message, shown) {
         val seconds = message?.durationSeconds?.takeIf { it > 0 } ?: return@LaunchedEffect
         delay(seconds * MILLIS_PER_SECOND)
-        if (presenterManager.messageOnAir == message) presenterManager.clearMessage()
+        if (presenterManager.messageOnAir == message && presenterManager.messagesShown.intValue == shown) {
+            presenterManager.clearMessage()
+        }
     }
 }
 

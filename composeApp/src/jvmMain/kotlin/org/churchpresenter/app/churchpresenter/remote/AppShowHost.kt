@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.remote
 
+import org.churchpresenter.showcontrol.currentChainDepth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.findLottiePresetFile
@@ -41,6 +42,8 @@ internal data class ShowOutlets(
     val currentRowId: () -> String? = { null },
     /** Puts [item] on air from the schedule, played [plays] times -- as a fired cue does. */
     val goLive: (item: ScheduleItem, plays: Int) -> Unit = { _, _ -> },
+    /** Runs the row actions of [item], which next or previous just put on air, a chain level deeper. */
+    val rowActions: (item: ScheduleItem, chainDepth: Int) -> Unit = { _, _ -> },
     /** Cues [item] on Preview. */
     val toPreview: (item: ScheduleItem) -> Unit = {},
     val media: (MediaCommand) -> Unit = {},
@@ -161,11 +164,17 @@ internal class AppShowHost(
         val rows = outlets.rows()
         val current = outlets.currentRowId()
         val target = if (current == null) rows.firstOrNull { it.isContentRow() } else rows.nextContentRow(current)
-        target?.let { outlets.goLive(it, 1) }
+        target?.let { step(it) }
     }
 
     override suspend fun previous() {
-        outlets.currentRowId()?.let { outlets.rows().previousContentRow(it) }?.let { outlets.goLive(it, 1) }
+        outlets.currentRowId()?.let { outlets.rows().previousContentRow(it) }?.let { step(it) }
+    }
+
+    /** Puts [row] on air as a step through the schedule: with its own actions, unlike `set`. */
+    private suspend fun step(row: ScheduleItem) {
+        outlets.goLive(row, 1)
+        outlets.rowActions(row, currentChainDepth())
     }
 
     override fun macro(name: String): List<Action>? = outlets.macro(name)

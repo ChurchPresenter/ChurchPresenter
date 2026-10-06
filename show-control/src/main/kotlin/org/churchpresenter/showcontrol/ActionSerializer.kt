@@ -12,7 +12,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import kotlin.reflect.KClass
 
 /**
@@ -71,8 +70,11 @@ object ActionSerializer : KSerializer<Action> {
     override fun deserialize(decoder: Decoder): Action {
         val input = decoder as? JsonDecoder ?: throw SerializationException("Actions are read from JSON")
         val obj = input.decodeJsonElement() as? JsonObject ?: throw SerializationException("An action is an object")
-        val serializer = obj[TYPE]?.jsonPrimitive?.contentOrNull?.let(byName::get) ?: return Action.Unknown(obj)
         return try {
+            // A `type` that is not a string -- an object, an array -- is as unknown as a name this
+            // build has never heard of; reading it throws, so it is read inside the catch.
+            val serializer = (obj[TYPE] as? JsonPrimitive)?.contentOrNull?.let(byName::get)
+                ?: return Action.Unknown(obj)
             lenient.decodeFromJsonElement(serializer, JsonObject(obj - TYPE))
         } catch (_: SerializationException) {
             Action.Unknown(obj)

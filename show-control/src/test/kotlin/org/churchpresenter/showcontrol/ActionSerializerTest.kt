@@ -79,6 +79,15 @@ class ActionSerializerTest {
     }
 
     @Test
+    fun `a type that is not a name is unknown, kept as written, and the list around it still reads`() {
+        val written = """[{"type":{"name":"set"}},{"type":["x"]},{"scene":"Wide"},{"type":"clearAll"}]"""
+        val read = json.decodeFromString(list, written)
+        assertEquals(3, read.count { it is Action.Unknown })
+        assertEquals(Action.ClearAll, read.last())
+        assertEquals(written, json.encodeToString(list, read))
+    }
+
+    @Test
     fun `a field it does not have is ignored, and one it cannot read keeps it unknown`() {
         val extra = """{"type":"obsScene","scene":"Wide","fade":3}"""
         assertEquals(Action.ObsScene("Wide"), json.decodeFromString(Action.serializer(), extra))

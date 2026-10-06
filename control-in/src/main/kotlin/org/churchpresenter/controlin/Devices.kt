@@ -11,6 +11,7 @@ import javax.sound.midi.MidiSystem
 import javax.sound.midi.MidiUnavailableException
 import javax.sound.midi.Receiver
 import javax.sound.midi.Sequencer
+import javax.sound.midi.ShortMessage
 import javax.sound.midi.Synthesizer
 
 /** Listens for OSC packets on a UDP port and hands each one's bytes to [onPacket]. */
@@ -162,7 +163,7 @@ class MidiOut internal constructor(private val device: MidiDevice, private val r
 
     override fun send(bytes: ByteArray) {
         runCatching {
-            val message = javax.sound.midi.ShortMessage(
+            val message = ShortMessage(
                 bytes[0].toInt() and BYTE, bytes[1].toInt() and BYTE, bytes.getOrElse(2) { 0 }.toInt() and BYTE,
             )
             receiver.send(message, -1)

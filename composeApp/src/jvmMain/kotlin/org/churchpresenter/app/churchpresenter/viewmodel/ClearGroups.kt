@@ -13,6 +13,15 @@ val CLEARABLE_LAYERS: List<Layer> = Layer.entries - Layer.BACKGROUND - Layer.AUD
 fun ClearGroup.knownLayers(): List<Layer> =
     CLEARABLE_LAYERS.filter { it.name in layers }
 
+/**
+ * Clears the outputs because an operator asked to -- the Clear button, its key or a remote client --
+ * which also stops what is still running of any action list; a clear an action asks for does not.
+ */
+fun PresenterManager.clearFromOperator() {
+    operatorClears.intValue++
+    requestClearDisplay()
+}
+
 /** Takes every layer of [group] off air and leaves the rest up -- see [clearLayer]. */
 fun PresenterManager.clearGroup(group: ClearGroup) {
     group.knownLayers().forEach(::clearLayer)

@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
+import kotlin.test.assertTrue
+import org.churchpresenter.app.churchpresenter.viewmodel.clearFromOperator
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
@@ -34,6 +36,20 @@ class ShowControlWiringTest {
         assertEquals(emptyList(), ran, "cued, not on air yet")
         bus.take()
         assertEquals(listOf("p1"), ran)
+    }
+
+    @Test
+    fun `only an operator's clear is counted, so only it stops what a list still has to do`() {
+        val pm = PresenterManager(showPresenterWindowInitially = false)
+        pm.setPresentingMode(Presenting.ANNOUNCEMENTS)
+
+        pm.requestClearDisplay()
+        assertEquals(0, pm.operatorClears.intValue, "a media end or an action's own clear")
+        assertTrue(pm.clearDisplayRequested.value)
+
+        pm.clearFromOperator()
+        pm.clearFromOperator()
+        assertEquals(2, pm.operatorClears.intValue, "counted even with nothing left to fade")
     }
 
     @Test

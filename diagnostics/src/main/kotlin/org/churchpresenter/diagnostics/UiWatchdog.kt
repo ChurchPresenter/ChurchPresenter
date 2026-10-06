@@ -12,6 +12,7 @@ import java.awt.EventQueue
  * It holds no thread and no clock of its own, so a test drives it with numbers.
  *
  * [stack] is the event thread's current stack, [report] where a line goes (the app: `Log.warn`).
+ * The event thread answers and the watchdog thread polls, so every call takes the detector's lock.
  */
 class StallDetector(
     private val budgetMs: Long,
@@ -22,15 +23,17 @@ class StallDetector(
     private var reported = false
 
     /** Whether a ping is out and not yet answered. */
-    val isWaiting: Boolean get() = postedAt != NONE
+    val isWaiting: Boolean get() = synchronized(this) { postedAt != NONE }
 
     /** A ping was handed to the event thread at [now]. */
+    @Synchronized
     fun posted(now: Long) {
         postedAt = now
         reported = false
     }
 
     /** The event thread ran the ping at [now]. */
+    @Synchronized
     fun answered(now: Long) {
         if (postedAt == NONE) return
         val late = now - postedAt
@@ -40,6 +43,7 @@ class StallDetector(
     }
 
     /** Called often: reports the stack the first time the unanswered ping is past the budget. */
+    @Synchronized
     fun poll(now: Long) {
         if (postedAt == NONE || reported || now - postedAt <= budgetMs) return
         reported = true
