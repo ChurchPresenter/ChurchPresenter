@@ -244,4 +244,16 @@ class LiveDurationLogTest {
         assertEquals(LiveDurationLog.durationKey(library), LiveDurationLog.durationKey(row))
         assertEquals(0, SongItem(number = "n/a", title = "Untitled", songbook = "Hymns").asDurationRow().songNumber)
     }
+
+    @Test
+    fun `an item put on air now is showing until the screen goes blank`() {
+        val log = log()
+        val hymn = song()
+
+        log.wentLive(hymn)
+        assertTrue(log.showing(hymn))
+
+        log.wentBlank()
+        assertFalse(log.showing(hymn))
+    }
 }

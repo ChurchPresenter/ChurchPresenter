@@ -328,12 +328,12 @@ private fun previewEntries(
 
 /** What every preview in the panel is drawn with, whichever output list it came from. */
 private class PreviewContext(
-    val presenterManager: PresenterManager,
-    val appSettings: AppSettings,
-    val serverUrl: String,
-    val qaDisplayUrl: String,
-    val sttManager: STTManager?,
-    val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    private val presenterManager: PresenterManager,
+    private val appSettings: AppSettings,
+    private val serverUrl: String,
+    private val qaDisplayUrl: String,
+    private val sttManager: STTManager?,
+    private val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
     /**
      * The Preview bus's tile: what is cued, drawn as the first screen's [output] would draw it, and
