@@ -144,7 +144,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :canvas:detekt :presenter:detekt :profiles:detekt :companion-surface:detekt :obs:detekt :live-show:detekt :show-control:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :canvas:detekt :presenter:detekt :profiles:detekt :companion-surface:detekt :obs:detekt :live-show:detekt :show-control:detekt :control-in:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -512,6 +512,14 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.showcontrol == 'true' }}
         run: ./gradlew :show-control:jacocoTestCoverageVerification -x test
 
+      - name: Control in tests
+        if: ${{ !cancelled() && steps.modules.outputs.controlin == 'true' }}
+        run: ./gradlew :control-in:test
+
+      - name: Control in coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.controlin == 'true' }}
+        run: ./gradlew :control-in:jacocoTestCoverageVerification -x test
+
       - name: Dictionary tests
         if: ${{ !cancelled() && steps.modules.outputs.dictionary == 'true' }}
         run: ./gradlew :dictionary:test
@@ -659,6 +667,7 @@ jobs:
               ("obs", "OBS"),
               ("live-show", "Live show"),
               ("show-control", "Show control"),
+              ("control-in", "Control in"),
               ("dictionary", "Dictionary"),
               ("stt", "STT"),
               ("announcements", "Announcements"),
@@ -860,6 +869,8 @@ jobs:
             live-show/build/test-results/
             show-control/build/reports/tests/
             show-control/build/test-results/
+            control-in/build/reports/tests/
+            control-in/build/test-results/
             dictionary/build/reports/tests/
             dictionary/build/test-results/
             stt/build/reports/tests/

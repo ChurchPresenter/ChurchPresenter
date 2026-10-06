@@ -170,3 +170,4 @@ include(":live-show")
 // The action vocabulary -- one list of things that change the show -- and the runner that plays
 // action lists through the app's host. Depended on by :composeApp and :calendar.
 include(":show-control")
+include(":control-in")
