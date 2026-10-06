@@ -153,7 +153,9 @@ private fun DuplicateFinderState.DuplicateGroupHeader(groupIdx: Int, group: Dupl
                 val avgSim = if (group.similarities.size > 1)
                     group.similarities.drop(1).average() else 1.0
                 Text(
-                    Strings.groupDetail(group.songs.size, group.reason, (avgSim * 100).toInt()),
+                    Strings.groupDetail(
+                        group.songs.size, Strings.duplicateReason(group.reason), (avgSim * 100).toInt()
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

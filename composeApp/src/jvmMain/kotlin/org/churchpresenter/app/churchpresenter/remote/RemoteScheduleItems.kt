@@ -6,6 +6,11 @@ import org.churchpresenter.app.churchpresenter.ScheduleActions
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.server.RemoteEventType
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.canvas_scene_default_name
+import org.churchpresenter.strings.generated.resources.remote_label_image_count
+import org.churchpresenter.strings.generated.resources.schedule_item_count
+import org.jetbrains.compose.resources.getString
 
 private const val SUMMARY_PREVIEW_CHARS = 60
 
@@ -21,7 +26,7 @@ internal fun qaActionType(action: String): RemoteEventType = when (action) {
 }
 
 /** Returns a (title, detail) pair describing a ScheduleItem for the remote event banner. */
-internal fun remoteEventLabel(item: ScheduleItem): Pair<String, String> = when (item) {
+internal suspend fun remoteEventLabel(item: ScheduleItem): Pair<String, String> = when (item) {
     is ScheduleItem.SongItem -> "${item.songNumber} - ${item.title}" to item.songbook
     is ScheduleItem.BibleVerseItem -> {
         val ref = if (item.verseRange.isNotEmpty()) "${item.bookName} ${item.chapter}:${item.verseRange}"
@@ -29,14 +34,14 @@ internal fun remoteEventLabel(item: ScheduleItem): Pair<String, String> = when (
         ref to item.verseText.take(SUMMARY_PREVIEW_CHARS)
     }
 
-    is ScheduleItem.PictureItem -> item.folderName to "${item.imageCount} images"
+    is ScheduleItem.PictureItem -> item.folderName to getString(Res.string.remote_label_image_count, item.imageCount)
     is ScheduleItem.PresentationItem -> item.fileName to item.fileType.uppercase()
     is ScheduleItem.MediaItem -> item.mediaTitle to item.mediaType
     is ScheduleItem.LabelItem -> item.text.take(SUMMARY_PREVIEW_CHARS) to ""
     is ScheduleItem.AnnouncementItem -> item.text.take(SUMMARY_PREVIEW_CHARS) to ""
     is ScheduleItem.LowerThirdItem -> item.presetLabel to ""
     is ScheduleItem.WebsiteItem -> item.title to item.url
-    is ScheduleItem.SceneItem -> item.sceneName to "Scene"
+    is ScheduleItem.SceneItem -> item.sceneName to getString(Res.string.canvas_scene_default_name)
     is ScheduleItem.DictionaryItem -> item.word to item.number
     is ScheduleItem.CueItem -> item.displayText to item.absoluteTime
     is ScheduleItem.MinistryItem -> item.title to item.detail
@@ -56,9 +61,10 @@ internal fun remoteEventLabel(item: ScheduleItem): Pair<String, String> = when (
  * song with an en dash and a verse without its [ScheduleItem.BibleVerseItem.verseRange], because the
  * detail is a compact one-line list rather than a banner heading.
  */
-internal fun batchEventSummary(items: List<ScheduleItem>): Pair<String, String> {
+internal suspend fun batchEventSummary(items: List<ScheduleItem>): Pair<String, String> {
     val count = items.size
-    val title = if (count == 1) remoteEventLabel(items.first()).first else "$count items"
+    val title = if (count == 1) remoteEventLabel(items.first()).first
+    else getString(Res.string.schedule_item_count, count)
     val detail = items.take(3).joinToString(" · ") { item ->
         when (item) {
             is ScheduleItem.BibleVerseItem -> "${item.bookName} ${item.chapter}:${item.verseNumber}"

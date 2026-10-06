@@ -2276,4 +2276,8 @@
     <string name="presentation_filter_keynote">Файли Keynote (*.key)</string>
     <string name="presentation_filter_pdf">Файли PDF (*.pdf)</string>
     <string name="atem_slot_key">Ключ</string>
+    <string name="remote_label_image_count">Зображень: %1$d</string>
+    <string name="conversion_error_no_songs">У файлі не знайдено пісень</string>
+    <string name="conversion_error_read_failed">Помилка читання файлу SPS: %1$s</string>
+    <string name="conversion_error_song_failed">Помилка конвертації пісні %1$s - %2$s: %3$s</string>
 </resources>

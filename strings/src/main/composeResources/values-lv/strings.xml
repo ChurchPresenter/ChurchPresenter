@@ -2321,4 +2321,8 @@
     <string name="presentation_filter_keynote">Keynote faili (*.key)</string>
     <string name="presentation_filter_pdf">PDF faili (*.pdf)</string>
     <string name="atem_slot_key">Key</string>
+    <string name="remote_label_image_count">%1$d attēli</string>
+    <string name="conversion_error_no_songs">Failā nav atrasta neviena dziesma</string>
+    <string name="conversion_error_read_failed">Kļūda, lasot SPS failu: %1$s</string>
+    <string name="conversion_error_song_failed">Kļūda, konvertējot dziesmu %1$s - %2$s: %3$s</string>
 </resources>

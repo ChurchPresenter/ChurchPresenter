@@ -1608,6 +1608,7 @@
     <string name="remote_label_section">Section %1$d</string>
     <string name="remote_label_image">Image %1$d</string>
     <string name="remote_label_kilobytes">%1$d KB</string>
+    <string name="remote_label_image_count">%1$d images</string>
     <string name="remote_activity_added_to_schedule">Added to Schedule</string>
     <string name="remote_activity_removed_from_schedule">Removed from Schedule</string>
     <string name="remote_activity_projected">Projected (Go Live)</string>
@@ -1778,6 +1779,9 @@
     <string name="conversion_complete">Conversion Complete</string>
     <string name="conversion_complete_message">Converted %1$d songs to folder: %2$s</string>
     <string name="conversion_complete_with_errors">Converted %1$d songs.\nErrors:\n%2$s</string>
+    <string name="conversion_error_no_songs">No songs found in file</string>
+    <string name="conversion_error_read_failed">Error reading SPS file: %1$s</string>
+    <string name="conversion_error_song_failed">Error converting song %1$s - %2$s: %3$s</string>
     <string name="convert">Convert</string>
     <string name="tooltip_directory_writable">Directory is writable</string>
     <string name="tooltip_directory_not_found">Directory not found. Create it or choose a different location.</string>

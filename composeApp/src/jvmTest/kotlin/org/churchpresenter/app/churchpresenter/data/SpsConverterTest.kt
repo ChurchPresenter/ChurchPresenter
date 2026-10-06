@@ -194,7 +194,7 @@ class SpsConverterTest {
         val result = converter.convertSpsToSongFiles(sps.absolutePath, output.absolutePath)
 
         assertEquals(0, result.songsConverted)
-        assertEquals(listOf("No songs found in file"), result.errors)
+        assertEquals(listOf<ConversionError>(ConversionError.NoSongs), result.errors)
         assertEquals("", result.songbookFolder)
         assertTrue(output.list()?.isEmpty() ?: true, "an empty songbook folder would look like a broken import")
     }
@@ -205,7 +205,7 @@ class SpsConverterTest {
 
         assertEquals(0, result.songsConverted)
         assertEquals(1, result.errors.size)
-        assertTrue(result.errors.single().startsWith("Error reading SPS file"), result.errors.single())
+        assertTrue(result.errors.single() is ConversionError.ReadFailed, result.errors.single().toString())
     }
 
     @Test
@@ -237,7 +237,8 @@ class SpsConverterTest {
         assertEquals(1, result.songsConverted)
         assertEquals(1, result.errors.size)
         assertTrue(
-            result.errors.single().startsWith("Error converting song 1 - Amazing Grace"),
+            (result.errors.single() as? ConversionError.SongFailed)
+                ?.let { it.number == "1" && it.title == "Amazing Grace" } == true,
             "the operator has to be told WHICH song did not make it: ${result.errors}",
         )
         assertTrue(convertedNames().contains("0002 - How Great Thou Art.song"), "the rest of the import still ran")

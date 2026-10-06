@@ -2306,4 +2306,8 @@
     <string name="presentation_filter_keynote">Fișiere Keynote (*.key)</string>
     <string name="presentation_filter_pdf">Fișiere PDF (*.pdf)</string>
     <string name="atem_slot_key">Key</string>
+    <string name="remote_label_image_count">%1$d imagini</string>
+    <string name="conversion_error_no_songs">Nu s-au găsit cântări în fișier</string>
+    <string name="conversion_error_read_failed">Eroare la citirea fișierului SPS: %1$s</string>
+    <string name="conversion_error_song_failed">Eroare la conversia cântării %1$s - %2$s: %3$s</string>
 </resources>

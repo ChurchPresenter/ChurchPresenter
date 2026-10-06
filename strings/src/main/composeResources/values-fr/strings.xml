@@ -2304,4 +2304,8 @@
     <string name="presentation_filter_keynote">Fichiers Keynote (*.key)</string>
     <string name="presentation_filter_pdf">Fichiers PDF (*.pdf)</string>
     <string name="atem_slot_key">Key</string>
+    <string name="remote_label_image_count">%1$d images</string>
+    <string name="conversion_error_no_songs">Aucun cantique trouvé dans le fichier</string>
+    <string name="conversion_error_read_failed">Erreur de lecture du fichier SPS : %1$s</string>
+    <string name="conversion_error_song_failed">Erreur de conversion du cantique %1$s - %2$s : %3$s</string>
 </resources>

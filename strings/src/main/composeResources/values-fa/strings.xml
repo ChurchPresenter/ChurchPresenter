@@ -2321,4 +2321,8 @@
     <string name="presentation_filter_keynote">پرونده‌های Keynote (*.key)</string>
     <string name="presentation_filter_pdf">پرونده‌های PDF (*.pdf)</string>
     <string name="atem_slot_key">Key</string>
+    <string name="remote_label_image_count">%1$d تصویر</string>
+    <string name="conversion_error_no_songs">هیچ سرودی در فایل یافت نشد</string>
+    <string name="conversion_error_read_failed">خطا در خواندن فایل SPS: %1$s</string>
+    <string name="conversion_error_song_failed">خطا در تبدیل سرود %1$s - %2$s: %3$s</string>
 </resources>

@@ -2321,4 +2321,8 @@
     <string name="presentation_filter_keynote">ملفات Keynote (*.key)</string>
     <string name="presentation_filter_pdf">ملفات PDF (*.pdf)</string>
     <string name="atem_slot_key">Key</string>
+    <string name="remote_label_image_count">%1$d صور</string>
+    <string name="conversion_error_no_songs">لم يتم العثور على ترانيم في الملف</string>
+    <string name="conversion_error_read_failed">خطأ في قراءة ملف SPS: %1$s</string>
+    <string name="conversion_error_song_failed">خطأ في تحويل الترنيمة %1$s - %2$s: %3$s</string>
 </resources>

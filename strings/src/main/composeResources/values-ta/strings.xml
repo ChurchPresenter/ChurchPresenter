@@ -2327,4 +2327,8 @@
     <string name="presentation_filter_keynote">Keynote கோப்புகள் (*.key)</string>
     <string name="presentation_filter_pdf">PDF கோப்புகள் (*.pdf)</string>
     <string name="atem_slot_key">விசை</string>
+    <string name="remote_label_image_count">%1$d படங்கள்</string>
+    <string name="conversion_error_no_songs">கோப்பில் பாடல்கள் எதுவும் இல்லை</string>
+    <string name="conversion_error_read_failed">SPS கோப்பைப் படிப்பதில் பிழை: %1$s</string>
+    <string name="conversion_error_song_failed">பாடல் %1$s - %2$s ஐ மாற்றுவதில் பிழை: %3$s</string>
 </resources>

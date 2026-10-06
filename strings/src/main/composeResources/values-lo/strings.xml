@@ -2321,4 +2321,8 @@
     <string name="presentation_filter_keynote">ໄຟລ໌ Keynote (*.key)</string>
     <string name="presentation_filter_pdf">ໄຟລ໌ PDF (*.pdf)</string>
     <string name="atem_slot_key">Key</string>
+    <string name="remote_label_image_count">%1$d ຮູບ</string>
+    <string name="conversion_error_no_songs">ບໍ່ພົບບົດເພງໃນໄຟລ໌</string>
+    <string name="conversion_error_read_failed">ອ່ານໄຟລ໌ SPS ຜິດພາດ: %1$s</string>
+    <string name="conversion_error_song_failed">ແປງບົດເພງ %1$s - %2$s ຜິດພາດ: %3$s</string>
 </resources>

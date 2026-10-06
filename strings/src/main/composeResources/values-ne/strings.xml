@@ -2321,4 +2321,8 @@
     <string name="presentation_filter_keynote">Keynote फाइलहरू (*.key)</string>
     <string name="presentation_filter_pdf">PDF फाइलहरू (*.pdf)</string>
     <string name="atem_slot_key">Key</string>
+    <string name="remote_label_image_count">%1$d तस्बिर</string>
+    <string name="conversion_error_no_songs">फाइलमा कुनै गीत भेटिएन</string>
+    <string name="conversion_error_read_failed">SPS फाइल पढ्दा त्रुटि: %1$s</string>
+    <string name="conversion_error_song_failed">गीत %1$s - %2$s रूपान्तरण गर्दा त्रुटि: %3$s</string>
 </resources>

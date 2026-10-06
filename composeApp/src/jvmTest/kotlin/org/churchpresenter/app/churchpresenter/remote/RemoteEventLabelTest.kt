@@ -4,6 +4,8 @@ import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.server.RemoteEventType
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import kotlinx.coroutines.runBlocking
+import org.churchpresenter.sharedui.testing.ComposeResourceEnvironmentTestSupport
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -21,6 +23,11 @@ import kotlin.test.assertTrue
  * excluded from the coverage gate as app-entry wiring *and* sitting at 0%.
  */
 class RemoteEventLabelTest {
+
+    private fun label(item: ScheduleItem) = resolved { remoteEventLabel(item) }
+
+    private fun <T> resolved(block: suspend () -> T): T =
+        ComposeResourceEnvironmentTestSupport.withFixedEnvironment { runBlocking { block() } }
 
     // ── qaActionType ────────────────────────────────────────────────────────────
 
@@ -55,7 +62,7 @@ class RemoteEventLabelTest {
 
     @Test
     fun `a song is labelled by number and title, detailed by its songbook`() {
-        val (title, detail) = remoteEventLabel(
+        val (title, detail) = label(
             ScheduleItem.SongItem(id = "1", songNumber = 42, title = "Amazing Grace", songbook = "Hymnal")
         )
 
@@ -65,7 +72,7 @@ class RemoteEventLabelTest {
 
     @Test
     fun `a single verse is labelled by its reference`() {
-        val (title, detail) = remoteEventLabel(
+        val (title, detail) = label(
             ScheduleItem.BibleVerseItem(
                 id = "1", bookName = "John", chapter = 3, verseNumber = 16,
                 verseText = "For God so loved the world.",
@@ -78,7 +85,7 @@ class RemoteEventLabelTest {
 
     @Test
     fun `a verse range is labelled by the range rather than the first verse`() {
-        val (title, _) = remoteEventLabel(
+        val (title, _) = label(
             ScheduleItem.BibleVerseItem(
                 id = "1", bookName = "John", chapter = 3, verseNumber = 16,
                 verseText = "…", verseRange = "16-18",
@@ -91,7 +98,7 @@ class RemoteEventLabelTest {
 
     @Test
     fun `a long verse preview is truncated`() {
-        val (_, detail) = remoteEventLabel(
+        val (_, detail) = label(
             ScheduleItem.BibleVerseItem(
                 id = "1", bookName = "Psalm", chapter = 119, verseNumber = 1,
                 verseText = "x".repeat(500),
@@ -139,14 +146,14 @@ class RemoteEventLabelTest {
         // The `when` is exhaustive over a sealed class, so a new item type is a compile error rather
         // than a blank banner — but a type mapped to an empty title would still read as blank.
         items.forEach { item ->
-            val (title, _) = remoteEventLabel(item)
+            val (title, _) = label(item)
             assertTrue(title.isNotBlank(), "${item::class.simpleName} must be nameable on the banner")
         }
     }
 
     @Test
     fun `a picture folder is detailed by how many images it holds`() {
-        val (title, detail) = remoteEventLabel(
+        val (title, detail) = label(
             ScheduleItem.PictureItem(id = "3", folderPath = "/p", folderName = "Advent", imageCount = 12)
         )
 
@@ -156,7 +163,7 @@ class RemoteEventLabelTest {
 
     @Test
     fun `a website is detailed by its url so the operator can see where it leads`() {
-        val (title, detail) = remoteEventLabel(
+        val (title, detail) = label(
             ScheduleItem.WebsiteItem(id = "9", url = "https://example.org/notices", title = "Notices")
         )
 

@@ -2286,4 +2286,8 @@
     <string name="presentation_filter_keynote">Soubory Keynote (*.key)</string>
     <string name="presentation_filter_pdf">Soubory PDF (*.pdf)</string>
     <string name="atem_slot_key">Klíč</string>
+    <string name="remote_label_image_count">Obrázků: %1$d</string>
+    <string name="conversion_error_no_songs">V souboru nebyly nalezeny žádné písně</string>
+    <string name="conversion_error_read_failed">Chyba při čtení souboru SPS: %1$s</string>
+    <string name="conversion_error_song_failed">Chyba při převodu písně %1$s - %2$s: %3$s</string>
 </resources>

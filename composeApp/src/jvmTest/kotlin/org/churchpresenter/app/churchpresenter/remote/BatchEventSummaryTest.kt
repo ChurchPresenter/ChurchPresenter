@@ -2,6 +2,8 @@ package org.churchpresenter.app.churchpresenter.remote
 
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import kotlinx.coroutines.runBlocking
+import org.churchpresenter.sharedui.testing.ComposeResourceEnvironmentTestSupport
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -19,6 +21,13 @@ import kotlin.test.assertTrue
  * three carries no ellipsis.
  */
 class BatchEventSummaryTest {
+
+    private fun label(item: ScheduleItem) = resolved { remoteEventLabel(item) }
+
+    private fun summary(items: List<ScheduleItem>) = resolved { batchEventSummary(items) }
+
+    private fun <T> resolved(block: suspend () -> T): T =
+        ComposeResourceEnvironmentTestSupport.withFixedEnvironment { runBlocking { block() } }
 
     private fun song(number: Int = 42, title: String = "Amazing Grace") = ScheduleItem.SongItem(
         id = "s$number", songNumber = number, title = title, songbook = "Hymnal", songId = "sid",
@@ -44,30 +53,30 @@ class BatchEventSummaryTest {
 
     @Test
     fun `a single item is named, not counted`() {
-        val (title, _) = batchEventSummary(listOf(song()))
+        val (title, _) = summary(listOf(song()))
 
-        assertEquals(remoteEventLabel(song()).first, title)
+        assertEquals(label(song()).first, title)
         assertFalse(title.contains("items"), "the operator is approving something specific, not a count: $title")
     }
 
     @Test
     fun `a single verse is named by its reference`() {
-        val (title, _) = batchEventSummary(listOf(bibleVerse()))
+        val (title, _) = summary(listOf(bibleVerse()))
 
-        assertEquals(remoteEventLabel(bibleVerse()).first, title)
+        assertEquals(label(bibleVerse()).first, title)
     }
 
     @Test
     fun `more than one item is counted`() {
-        assertEquals("2 items", batchEventSummary(listOf(song(), bibleVerse())).first)
-        assertEquals("5 items", batchEventSummary(List(5) { song(it) }).first)
+        assertEquals("2 items", summary(listOf(song(), bibleVerse())).first)
+        assertEquals("5 items", summary(List(5) { song(it) }).first)
     }
 
     // ── The " …" suffix, and its off-by-one ─────────────────────────────────────
 
     @Test
     fun `exactly three items carry no ellipsis`() {
-        val (_, detail) = batchEventSummary(listOf(song(1), song(2), song(3)))
+        val (_, detail) = summary(listOf(song(1), song(2), song(3)))
 
         assertFalse(detail.endsWith("…"), "the ellipsis means a fourth item is hidden; there is none: $detail")
         assertEquals(3, detail.split(" · ").size)
@@ -75,7 +84,7 @@ class BatchEventSummaryTest {
 
     @Test
     fun `a fourth item is what adds the ellipsis`() {
-        val (_, detail) = batchEventSummary(listOf(song(1), song(2), song(3), song(4)))
+        val (_, detail) = summary(listOf(song(1), song(2), song(3), song(4)))
 
         assertTrue(detail.endsWith(" …"), detail)
         assertFalse(detail.contains("4 –"), "only the first three are listed: $detail")
@@ -83,7 +92,7 @@ class BatchEventSummaryTest {
 
     @Test
     fun `only the first three are listed however long the batch`() {
-        val (title, detail) = batchEventSummary(List(20) { song(it + 1) })
+        val (title, detail) = summary(List(20) { song(it + 1) })
 
         assertEquals("20 items", title)
         assertEquals(3, detail.removeSuffix(" …").split(" · ").size)
@@ -93,21 +102,21 @@ class BatchEventSummaryTest {
 
     @Test
     fun `a verse is listed as book chapter and verse`() {
-        val (_, detail) = batchEventSummary(listOf(bibleVerse(book = "Psalms", chapter = 23, verse = 1), song()))
+        val (_, detail) = summary(listOf(bibleVerse(book = "Psalms", chapter = 23, verse = 1), song()))
 
         assertTrue(detail.startsWith("Psalms 23:1"), detail)
     }
 
     @Test
     fun `a song is listed as number and title`() {
-        val (_, detail) = batchEventSummary(listOf(song(number = 7, title = "Be Thou My Vision"), song(8)))
+        val (_, detail) = summary(listOf(song(number = 7, title = "Be Thou My Vision"), song(8)))
 
         assertTrue(detail.startsWith("7 – Be Thou My Vision"), detail)
     }
 
     @Test
     fun `anything else is listed by its own display text`() {
-        val (_, detail) = batchEventSummary(listOf(dictionary(), website(), announcement()))
+        val (_, detail) = summary(listOf(dictionary(), website(), announcement()))
 
         assertEquals(
             listOf(dictionary().displayText, website().displayText, announcement().displayText),
@@ -118,7 +127,7 @@ class BatchEventSummaryTest {
     @Test
     fun `a long display text is truncated so one item cannot fill the line`() {
         val long = "A very long website title that would otherwise run off the end of the toast"
-        val (_, detail) = batchEventSummary(listOf(website(title = long), song()))
+        val (_, detail) = summary(listOf(website(title = long), song()))
 
         assertEquals(long.take(30), detail.split(" · ").first())
     }
@@ -127,14 +136,14 @@ class BatchEventSummaryTest {
 
     @Test
     fun `items are listed in the order they were sent`() {
-        val (_, detail) = batchEventSummary(listOf(song(1, "First"), bibleVerse(verse = 2), website("Third")))
+        val (_, detail) = summary(listOf(song(1, "First"), bibleVerse(verse = 2), website("Third")))
 
         assertEquals(listOf("1 – First", "John 3:2", "Third"), detail.split(" · "))
     }
 
     @Test
     fun `an empty batch does not throw`() {
-        val (title, detail) = batchEventSummary(emptyList())
+        val (title, detail) = summary(emptyList())
 
         assertEquals("0 items", title)
         assertEquals("", detail)

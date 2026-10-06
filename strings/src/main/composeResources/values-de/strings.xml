@@ -2277,4 +2277,8 @@
     <string name="presentation_filter_keynote">Keynote-Dateien (*.key)</string>
     <string name="presentation_filter_pdf">PDF-Dateien (*.pdf)</string>
     <string name="atem_slot_key">Key</string>
+    <string name="remote_label_image_count">%1$d Bilder</string>
+    <string name="conversion_error_no_songs">Keine Lieder in der Datei gefunden</string>
+    <string name="conversion_error_read_failed">Fehler beim Lesen der SPS-Datei: %1$s</string>
+    <string name="conversion_error_song_failed">Fehler beim Konvertieren des Liedes %1$s - %2$s: %3$s</string>
 </resources>

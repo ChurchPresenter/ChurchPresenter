@@ -2321,4 +2321,8 @@
     <string name="presentation_filter_keynote">Keynote ファイル (*.key)</string>
     <string name="presentation_filter_pdf">PDF ファイル (*.pdf)</string>
     <string name="atem_slot_key">Key</string>
+    <string name="remote_label_image_count">%1$d 枚の画像</string>
+    <string name="conversion_error_no_songs">ファイルに賛美歌が見つかりません</string>
+    <string name="conversion_error_read_failed">SPS ファイルの読み込みエラー: %1$s</string>
+    <string name="conversion_error_song_failed">賛美歌 %1$s - %2$s の変換エラー: %3$s</string>
 </resources>

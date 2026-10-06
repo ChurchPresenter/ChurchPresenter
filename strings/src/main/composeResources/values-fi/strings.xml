@@ -2321,4 +2321,8 @@
     <string name="presentation_filter_keynote">Keynote-tiedostot (*.key)</string>
     <string name="presentation_filter_pdf">PDF-tiedostot (*.pdf)</string>
     <string name="atem_slot_key">Key</string>
+    <string name="remote_label_image_count">%1$d kuvaa</string>
+    <string name="conversion_error_no_songs">Tiedostosta ei löytynyt lauluja</string>
+    <string name="conversion_error_read_failed">Virhe luettaessa SPS-tiedostoa: %1$s</string>
+    <string name="conversion_error_song_failed">Virhe muunnettaessa laulua %1$s - %2$s: %3$s</string>
 </resources>

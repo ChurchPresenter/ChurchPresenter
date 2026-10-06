@@ -2321,4 +2321,8 @@
     <string name="presentation_filter_keynote">Fail Keynote (*.key)</string>
     <string name="presentation_filter_pdf">Fail PDF (*.pdf)</string>
     <string name="atem_slot_key">Key</string>
+    <string name="remote_label_image_count">%1$d imej</string>
+    <string name="conversion_error_no_songs">Tiada lagu ditemui dalam fail</string>
+    <string name="conversion_error_read_failed">Ralat membaca fail SPS: %1$s</string>
+    <string name="conversion_error_song_failed">Ralat menukar lagu %1$s - %2$s: %3$s</string>
 </resources>

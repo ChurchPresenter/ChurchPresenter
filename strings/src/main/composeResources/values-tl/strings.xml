@@ -2321,4 +2321,8 @@
     <string name="presentation_filter_keynote">Mga Keynote File (*.key)</string>
     <string name="presentation_filter_pdf">Mga PDF File (*.pdf)</string>
     <string name="atem_slot_key">Key</string>
+    <string name="remote_label_image_count">%1$d larawan</string>
+    <string name="conversion_error_no_songs">Walang nakitang awit sa file</string>
+    <string name="conversion_error_read_failed">Error sa pagbasa ng SPS file: %1$s</string>
+    <string name="conversion_error_song_failed">Error sa pag-convert ng awit %1$s - %2$s: %3$s</string>
 </resources>

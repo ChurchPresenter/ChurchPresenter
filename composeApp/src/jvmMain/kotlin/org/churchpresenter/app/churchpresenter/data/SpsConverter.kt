@@ -9,13 +9,19 @@ import java.sql.SQLException
 data class ConversionResult(
     val songsConverted: Int,
     val songbookFolder: String,
-    val errors: List<String>
+    val errors: List<ConversionError>
 )
+
+sealed interface ConversionError {
+    data object NoSongs : ConversionError
+    data class ReadFailed(val reason: String?) : ConversionError
+    data class SongFailed(val number: String, val title: String, val reason: String?) : ConversionError
+}
 
 class SpsConverter {
 
     fun convertSpsToSongFiles(spsFilePath: String, outputDirectory: String): ConversionResult {
-        val errors = mutableListOf<String>()
+        val errors = mutableListOf<ConversionError>()
         var songsConverted = 0
 
         return try {
@@ -25,7 +31,7 @@ class SpsConverter {
             val songList = songs.getSongs()
 
             if (songList.isEmpty()) {
-                return ConversionResult(0, "", listOf("No songs found in file"))
+                return ConversionResult(0, "", listOf(ConversionError.NoSongs))
             }
 
             // Use the songbook name from the first song, or the filename
@@ -51,7 +57,7 @@ class SpsConverter {
                     parser.writeSongFile(song, filePath)
                     songsConverted++
                 } catch (e: IOException) {
-                    errors.add("Error converting song ${song.number} - ${song.title}: ${e.message}")
+                    errors.add(ConversionError.SongFailed(song.number, song.title, e.message))
                 }
             }
 
@@ -68,7 +74,7 @@ class SpsConverter {
     }
 
     private fun readFailed(songsConverted: Int, e: Exception) =
-        ConversionResult(songsConverted, "", listOf("Error reading SPS file: ${e.message}"))
+        ConversionResult(songsConverted, "", listOf(ConversionError.ReadFailed(e.message)))
 
     fun getTargetFolderName(spsFilePath: String): String? {
         try {

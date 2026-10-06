@@ -6,11 +6,15 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.conversion_complete
 import org.churchpresenter.strings.generated.resources.conversion_complete_message
 import org.churchpresenter.strings.generated.resources.conversion_complete_with_errors
+import org.churchpresenter.strings.generated.resources.conversion_error_no_songs
+import org.churchpresenter.strings.generated.resources.conversion_error_read_failed
+import org.churchpresenter.strings.generated.resources.conversion_error_song_failed
 import org.churchpresenter.strings.generated.resources.folder_already_exists
 import org.churchpresenter.strings.generated.resources.folder_overwrite_confirm
 import org.churchpresenter.strings.generated.resources.song_samples
 import org.churchpresenter.strings.generated.resources.song_samples_copied
 import org.churchpresenter.strings.generated.resources.song_samples_overwrite_confirm
+import org.churchpresenter.app.churchpresenter.data.ConversionError
 import org.churchpresenter.app.churchpresenter.data.ConversionResult
 import org.churchpresenter.app.churchpresenter.data.SpsConverter
 import org.jetbrains.compose.resources.stringResource
@@ -54,6 +58,7 @@ internal class ConversionPrompts(
     private val completeTitle: String,
     private val completeFormat: String,
     private val errorsFormat: String,
+    private val errorTexts: ConversionErrorTexts,
 ) {
     fun confirmOverwrite(directory: String, fileName: String): Boolean {
         val converter = SpsConverter()
@@ -80,7 +85,11 @@ internal class ConversionPrompts(
         } else {
             JOptionPane.showMessageDialog(
                 null,
-                String.format(errorsFormat, result.songsConverted, result.errors.joinToString("\n")),
+                String.format(
+                    errorsFormat,
+                    result.songsConverted,
+                    result.errors.joinToString("\n", transform = errorTexts::describe),
+                ),
                 completeTitle,
                 JOptionPane.WARNING_MESSAGE,
             )
@@ -95,7 +104,24 @@ internal fun conversionPrompts() = ConversionPrompts(
     completeTitle = stringResource(Res.string.conversion_complete),
     completeFormat = stringResource(Res.string.conversion_complete_message),
     errorsFormat = stringResource(Res.string.conversion_complete_with_errors),
+    errorTexts = ConversionErrorTexts(
+        noSongs = stringResource(Res.string.conversion_error_no_songs),
+        readFailedFormat = stringResource(Res.string.conversion_error_read_failed),
+        songFailedFormat = stringResource(Res.string.conversion_error_song_failed),
+    ),
 )
+
+internal class ConversionErrorTexts(
+    private val noSongs: String,
+    private val readFailedFormat: String,
+    private val songFailedFormat: String,
+) {
+    fun describe(error: ConversionError): String = when (error) {
+        ConversionError.NoSongs -> noSongs
+        is ConversionError.ReadFailed -> String.format(readFailedFormat, error.reason)
+        is ConversionError.SongFailed -> String.format(songFailedFormat, error.number, error.title, error.reason)
+    }
+}
 
 /**
  * Runs [block] on a later turn of the event queue.

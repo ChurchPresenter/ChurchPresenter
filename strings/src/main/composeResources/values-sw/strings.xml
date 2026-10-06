@@ -2321,4 +2321,8 @@
     <string name="presentation_filter_keynote">Faili za Keynote (*.key)</string>
     <string name="presentation_filter_pdf">Faili za PDF (*.pdf)</string>
     <string name="atem_slot_key">Key</string>
+    <string name="remote_label_image_count">Picha %1$d</string>
+    <string name="conversion_error_no_songs">Hakuna nyimbo zilizopatikana kwenye faili</string>
+    <string name="conversion_error_read_failed">Hitilafu ya kusoma faili ya SPS: %1$s</string>
+    <string name="conversion_error_song_failed">Hitilafu ya kugeuza wimbo %1$s - %2$s: %3$s</string>
 </resources>

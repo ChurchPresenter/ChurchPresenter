@@ -215,6 +215,15 @@ object Strings {
     fun songCount(n: Int): String = bundle.getString("song_count").format(n)
     fun verseOrderPrefix(order: String): String = bundle.getString("verse_order_prefix").format(order)
     fun parseError(msg: String): String = bundle.getString("parse_error").format(msg)
+    fun biblePreviewBooks(count: Int): String = bundle.getString("bible_preview_books").format(count)
+    fun biblePreviewVerses(count: Int): String = bundle.getString("bible_preview_verses").format(count)
+    fun biblePreviewLanguage(code: String): String = bundle.getString("bible_preview_language").format(code)
+    fun duplicateReason(reason: String): String = when (reason) {
+        "Same song number" -> catSameNumber
+        "Same title" -> catSameTitle
+        "Similar lyrics" -> catSimilarLyrics
+        else -> reason
+    }
 
     // Document conversion section
     val docPreviewMarkdown: String get() = bundle.getString("doc_preview_markdown")

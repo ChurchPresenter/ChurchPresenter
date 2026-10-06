@@ -2277,4 +2277,8 @@
     <string name="presentation_filter_keynote">Keynote файлдары (*.key)</string>
     <string name="presentation_filter_pdf">PDF файлдары (*.pdf)</string>
     <string name="atem_slot_key">Кілт</string>
+    <string name="remote_label_image_count">%1$d сурет</string>
+    <string name="conversion_error_no_songs">Файлда әнұрандар табылмады</string>
+    <string name="conversion_error_read_failed">SPS файлын оқу қатесі: %1$s</string>
+    <string name="conversion_error_song_failed">%1$s - %2$s әнұранын түрлендіру қатесі: %3$s</string>
 </resources>

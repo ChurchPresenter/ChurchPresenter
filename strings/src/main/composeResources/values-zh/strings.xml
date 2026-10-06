@@ -2321,4 +2321,8 @@
     <string name="presentation_filter_keynote">Keynote 文件 (*.key)</string>
     <string name="presentation_filter_pdf">PDF 文件 (*.pdf)</string>
     <string name="atem_slot_key">Key</string>
+    <string name="remote_label_image_count">%1$d 张图片</string>
+    <string name="conversion_error_no_songs">文件中未找到歌曲</string>
+    <string name="conversion_error_read_failed">读取 SPS 文件出错：%1$s</string>
+    <string name="conversion_error_song_failed">转换歌曲 %1$s - %2$s 出错：%3$s</string>
 </resources>

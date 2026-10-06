@@ -2309,4 +2309,8 @@
     <string name="presentation_filter_keynote">Keynote-failid (*.key)</string>
     <string name="presentation_filter_pdf">PDF-failid (*.pdf)</string>
     <string name="atem_slot_key">Key</string>
+    <string name="remote_label_image_count">%1$d pilti</string>
+    <string name="conversion_error_no_songs">Failist ei leitud ühtegi laulu</string>
+    <string name="conversion_error_read_failed">Viga SPS-faili lugemisel: %1$s</string>
+    <string name="conversion_error_song_failed">Viga laulu %1$s - %2$s teisendamisel: %3$s</string>
 </resources>
