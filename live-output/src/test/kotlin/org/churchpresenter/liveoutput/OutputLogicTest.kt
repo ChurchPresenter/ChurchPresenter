@@ -297,4 +297,22 @@ class OutputLogicTest {
     fun `the saved index is the fallback when the bounds match nothing`() {
         assertEquals(0, keyOutputScreenIndex(matchedByBounds = null, savedIndex = 0))
     }
+
+    // ── Output windows ──────────────────────────────────────────────────────────
+
+    @Test
+    fun `going live raises the output windows, clearing does not`() {
+        Presenting.entries.filter { it != Presenting.NONE }
+            .forEach { assertTrue(shouldShowPresenterWindowFor(it), it.name) }
+        assertFalse(shouldShowPresenterWindowFor(Presenting.NONE))
+    }
+
+    @Test
+    fun `an index names an attached display, or it does not`() {
+        assertTrue(isScreenIndexValid(0, screenCount = 2))
+        assertTrue(isScreenIndexValid(1, screenCount = 2))
+        assertFalse(isScreenIndexValid(2, screenCount = 2))
+        assertFalse(isScreenIndexValid(-1, screenCount = 2))
+        assertFalse(isScreenIndexValid(0, screenCount = 0))
+    }
 }

@@ -1,7 +1,5 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.liveoutput
 
-import org.churchpresenter.liveoutput.PresenterManager
-import org.churchpresenter.liveoutput.PresenterMediaOutput
 import org.churchpresenter.sharedui.models.Presenting
 import kotlin.test.Test
 import kotlin.test.assertEquals

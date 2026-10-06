@@ -274,6 +274,61 @@ class StageMonitorScreenTest {
     }
 
     @Test
+    fun `an output with chords off draws the words without them`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                Box(modifier = Modifier.size(800.dp, 600.dp)) {
+                    StageMonitorScreen(
+                        sm = routing(StageMonitorContentType.SONGS to StageMonitorZone.A),
+                        slideContent = Presenting.LYRICS,
+                        showChords = false,
+                        currentLyricSection = chordSection("[Gsus4]Amazing grace"),
+                        allLyricSections = listOf(chordSection("[Gsus4]Amazing grace"), chordSection("[D]How sweet")),
+                        displayedVerses = emptyList(),
+                    )
+                }
+            }
+        }
+        assertTrue(rendersContaining("Amazing grace"), renderedText().toString())
+        assertFalse(rendersContaining("Gsus4"), renderedText().toString())
+    }
+
+    @Test
+    fun `given only what is live, the monitor fills in the rest itself`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                Box(modifier = Modifier.size(800.dp, 600.dp)) {
+                    StageMonitorScreen(
+                        sm = routing(StageMonitorContentType.BIBLE to StageMonitorZone.A),
+                        slideContent = Presenting.BIBLE,
+                        currentLyricSection = section(),
+                        displayedVerses = listOf(verse()),
+                    )
+                }
+            }
+        }
+        assertTrue(rendersText("John 3:16\nFor God so loved the world"), renderedText().toString())
+    }
+
+    @Test
+    fun `an announcement on air reaches its zone without being named active`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                Box(modifier = Modifier.size(800.dp, 600.dp)) {
+                    StageMonitorScreen(
+                        sm = routing(StageMonitorContentType.ANNOUNCEMENT_TEXT to StageMonitorZone.A),
+                        slideContent = Presenting.ANNOUNCEMENTS,
+                        currentLyricSection = section(),
+                        displayedVerses = emptyList(),
+                        announcementText = "Doors open at six",
+                    )
+                }
+            }
+        }
+        assertTrue(rendersContaining("Doors open at six"), renderedText().toString())
+    }
+
+    @Test
     fun `chord lines move spelled the way the key they land in is written`() {
         assertEquals(listOf("[Bb]one [Eb]two"), transposeChordLines(listOf("[A]one [D]two"), 1))
         assertEquals(listOf("[B]one [E]two"), transposeChordLines(listOf("[Bb]one [Eb]two"), 1))

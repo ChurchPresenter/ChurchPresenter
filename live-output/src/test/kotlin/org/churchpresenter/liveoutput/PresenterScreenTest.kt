@@ -171,6 +171,57 @@ class PresenterScreenTest {
         assertTrue(pixel.red > 0.9f, "with blanking suppressed the layer beneath must show through, got $pixel")
     }
 
+    // ── Dim and blur on the default card ────────────────────────────────────────
+
+    @Test
+    fun `a dimmed background is darker than the color it was set to`() {
+        val settings = AppSettings(
+            backgroundSettings = BackgroundSettings(
+                defaultBackgroundType = Constants.BACKGROUND_COLOR,
+                defaultBackgroundColor = "#FFFFFF",
+                defaultBackgroundOpacity = 1f,
+                defaultBackgroundDim = 50,
+            ),
+        )
+        val pixel = sample(settings)
+        assertEquals(0.5f, pixel.red, 0.05f)
+        assertEquals(0.5f, pixel.green, 0.05f)
+        assertEquals(0.5f, pixel.blue, 0.05f)
+    }
+
+    @Test
+    fun `a blurred plain color still reads as that color`() {
+        val settings = AppSettings(
+            backgroundSettings = BackgroundSettings(
+                defaultBackgroundType = Constants.BACKGROUND_COLOR,
+                defaultBackgroundColor = "#112233",
+                defaultBackgroundOpacity = 1f,
+                defaultBackgroundBlur = 20,
+            ),
+        )
+        val pixel = sample(settings)
+        assertEquals(0x11 / 255f, pixel.red, 0.03f)
+        assertEquals(0x22 / 255f, pixel.green, 0.03f)
+        assertEquals(0x33 / 255f, pixel.blue, 0.03f)
+    }
+
+    @Test
+    fun `dim and blur are not applied while the background is off`() {
+        val settings = AppSettings(
+            backgroundSettings = BackgroundSettings(
+                defaultBackgroundType = Constants.BACKGROUND_COLOR,
+                defaultBackgroundColor = "#FFFFFF",
+                defaultBackgroundDim = 50,
+                defaultBackgroundBlur = 20,
+            ),
+        )
+        val pixel = sample(settings, showBackground = false, transparentBlanking = true, underneath = Color.Red)
+        assertTrue(
+            pixel.red > 0.9f && pixel.green < 0.1f,
+            "nothing may be drawn over a disabled background, got $pixel",
+        )
+    }
+
     // ── Solid color background ───────────────────────────────────────────────────
 
     @Test

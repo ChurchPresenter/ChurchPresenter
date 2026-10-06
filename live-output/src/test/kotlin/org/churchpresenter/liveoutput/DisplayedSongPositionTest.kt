@@ -1,9 +1,7 @@
-package org.churchpresenter.app.churchpresenter
+package org.churchpresenter.liveoutput
 
-import org.churchpresenter.liveoutput.PresenterTransitionEffects
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants

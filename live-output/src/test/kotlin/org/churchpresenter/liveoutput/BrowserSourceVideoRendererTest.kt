@@ -24,6 +24,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import org.churchpresenter.sharedui.models.Presenting
 
@@ -35,13 +36,20 @@ private const val WAIT_MS = 4_000L
 
 class BrowserSourceVideoRendererTest {
 
-    private fun renderer(fps: Int = 30, onConsumerSeen: () -> Unit = {}) = BrowserSourceVideoRenderer(
+    private fun renderer(
+        fps: Int = 30,
+        width: Int = 1920,
+        height: Int = 1080,
+        onConsumerSeen: () -> Unit = {},
+    ) = BrowserSourceVideoRenderer(
         OffscreenOutputContext(
             presenterManager = PresenterManager(),
             appSettingsState = mutableStateOf(AppSettings()),
             screenAssignmentState = mutableStateOf(ScreenAssignment()),
             effectiveModeState = mutableStateOf(Presenting.NONE),
         ),
+        width = width,
+        height = height,
         fps = fps,
         onConsumerSeen = onConsumerSeen,
     )
@@ -106,6 +114,17 @@ class BrowserSourceVideoRendererTest {
         val b = BrowserSourceFrame(0, 0, 4, 4, 4, 4, byteArrayOf(1, 2, 3))
         assertNotEquals(a, b)
         assertEquals(a, a)
+    }
+
+    @Test
+    fun `computeDirtyRect never returns an inverted rect for identical frames`() {
+        val frame = solid(4, 3, 7)
+
+        val rect = BrowserSourceVideoRenderer.computeDirtyRect(frame, frame.copyOf(), 4, 3)
+
+        assertEquals(0, rect.x)
+        assertEquals(4, rect.w)
+        assertTrue(rect.h >= 0, "an empty band, never a negative one")
     }
 
     @Test
@@ -448,6 +467,40 @@ class BrowserSourceVideoRendererTest {
         } finally {
             scope.cancel()
         }
+    }
+
+    // ── Deltas ──────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a frame after the first sends only the pixels that changed`() = runBlocking {
+        val r = renderer(width = W, height = H)
+        val first = solid(W, H, OPAQUE_RED)
+        r.onFrame(first, W, H, elapsedMs = 0)
+        val full = r.frames.replayCache.last()
+        assertEquals(W, full.rectWidth)
+        assertEquals(H, full.rectHeight)
+
+        val next = first.copyOf().also { it[1 * W + 5] = 0xFF00FF00.toInt() }
+        r.onFrame(next, W, H, elapsedMs = 10)
+
+        val delta = r.frames.replayCache.last()
+        assertEquals(5, delta.x)
+        assertEquals(1, delta.y)
+        assertEquals(1, delta.rectWidth)
+        assertEquals(1, delta.rectHeight)
+        assertEquals(W, delta.fullWidth)
+    }
+
+    @Test
+    fun `an unchanged frame sends nothing`() = runBlocking {
+        val r = renderer(width = W, height = H)
+        val frame = solid(W, H, OPAQUE_RED)
+        r.onFrame(frame, W, H, elapsedMs = 0)
+        val sent = r.frames.replayCache.last()
+
+        r.onFrame(frame.copyOf(), W, H, elapsedMs = 10)
+
+        assertSame(sent, r.frames.replayCache.last())
     }
 
     private fun waitFor(what: String, condition: () -> Boolean) = runBlocking {

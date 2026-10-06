@@ -87,6 +87,18 @@ class PreviewBusSlidesTest {
     }
 
     @Test
+    fun `a cued deck has no build steps to walk on Preview`() {
+        bus.setEnabled(true)
+        val deck = staticDeck("a.pdf")
+        show("a.pdf", 0, deck = deck)
+
+        assertFalse(slides.advancePresentationStep(deck, 0))
+        assertFalse(slides.rewindPresentationStep(deck, 0))
+        slides.clearPresentationPlayback()
+        assertNull(bus.cuedPlayback)
+    }
+
+    @Test
     fun `a slide of the deck on air is a step, and goes straight out`() {
         show("a.pdf", 0)
         bus.setEnabled(true)

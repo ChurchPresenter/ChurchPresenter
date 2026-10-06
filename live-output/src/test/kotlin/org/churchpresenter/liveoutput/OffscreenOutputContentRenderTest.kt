@@ -110,6 +110,7 @@ class OffscreenOutputContentRenderTest {
         kind: OffscreenOutputKind = OffscreenOutputKind.BROWSER_SOURCE,
         seed: PresenterManager.() -> Unit = {},
         qaDisplayUrl: String? = null,
+        serverUrl: String? = null,
         body: ComposeUiTest.() -> Unit,
     ) = runComposeUiTest {
         val manager = PresenterManager().apply(seed)
@@ -124,6 +125,7 @@ class OffscreenOutputContentRenderTest {
                         outputIndex = outputIndex,
                         kind = kind,
                         qaDisplayUrlState = qaDisplayUrl?.let { mutableStateOf(it) },
+                        serverUrlState = serverUrl?.let { mutableStateOf(it) },
                     )
                 )
             }
@@ -315,6 +317,40 @@ class OffscreenOutputContentRenderTest {
         },
     ) {
         onNodeWithText("How do we know the canon is settled?", substring = true).assertExists()
+    }
+
+    @Test
+    fun `with no tunnel the QR code points at the server`() = render(
+        mode = Presenting.QA,
+        serverUrl = "http://10.0.0.5:8080",
+        seed = {
+            setDisplayedQuestion(Question(id = "q1", text = "Is this question shown?", timestamp = 0L))
+            setShowQRCodeOnDisplay(true)
+        },
+    ) {
+        onNodeWithContentDescription("QR Code").assertExists()
+    }
+
+    @Test
+    fun `a browser source draws the chords in the key its musician moved them to`() {
+        val (stage, settings) = assignmentInMode(Constants.DISPLAY_MODE_STAGE_MONITOR)
+        render(
+            mode = Presenting.LYRICS,
+            assignment = stage,
+            settings = settings,
+            seed = {
+                setBrowserSourceTranspose(0, 2)
+                setDisplayedLyricSection(
+                    LyricSection(
+                        type = "verse",
+                        lines = listOf("Amazing grace"),
+                        chordLines = listOf("[G]Amazing grace"),
+                    ),
+                )
+            },
+        ) {
+            onNodeWithText("Key A", substring = true).assertExists()
+        }
     }
 
     @Test

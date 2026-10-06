@@ -1,7 +1,5 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.liveoutput.isScreenIndexValid
-import org.churchpresenter.liveoutput.shouldShowPresenterWindowFor
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.AppSettings
@@ -762,13 +760,6 @@ class MainLogicTest {
     // ── Going live ──────────────────────────────────────────────────────────────
 
     @Test
-    fun `going live raises the output windows, clearing does not`() {
-        Presenting.entries.filter { it != Presenting.NONE }
-            .forEach { assertTrue(shouldShowPresenterWindowFor(it), it.name) }
-        assertFalse(shouldShowPresenterWindowFor(Presenting.NONE))
-    }
-
-    @Test
     fun `a link that is connecting is not treated as down`() {
         assertTrue(isInstanceLinkActive(InstanceLinkStatus.CONNECTED))
         assertTrue(isInstanceLinkActive(InstanceLinkStatus.CONNECTING))
@@ -1052,15 +1043,6 @@ class MainLogicTest {
     }
 
     // ── Placing an output on a display ──────────────────────────────────────────
-
-    @Test
-    fun `an index names an attached display, or it does not`() {
-        assertTrue(isScreenIndexValid(0, screenCount = 2))
-        assertTrue(isScreenIndexValid(1, screenCount = 2))
-        assertFalse(isScreenIndexValid(2, screenCount = 2))
-        assertFalse(isScreenIndexValid(-1, screenCount = 2))
-        assertFalse(isScreenIndexValid(0, screenCount = 0))
-    }
 
     @Test
     fun `an output explicitly set to none is skipped`() {

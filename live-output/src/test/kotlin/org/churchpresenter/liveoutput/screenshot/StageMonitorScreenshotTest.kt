@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.liveoutput.screenshot
 
 import java.time.LocalTime
 import androidx.compose.foundation.layout.Box

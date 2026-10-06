@@ -18,6 +18,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.stt.STTManager
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class PresenterOutputContentTest {
@@ -160,6 +161,42 @@ class PresenterOutputContentTest {
         val manager = PresenterManager().apply { setDisplayedVerses(listOf(verse)) }
         val stage = OutputProfile(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR)
         setContent(ComposeContent(Presenting.BIBLE, stage, manager))
+    }
+
+    @Test
+    fun `a stage monitor follows an announcement put up over the slide`() = runComposeUiTest {
+        val manager = PresenterManager().apply {
+            setDisplayedVerses(listOf(verse))
+            setPresentingMode(Presenting.BIBLE)
+            setDisplayedAnnouncementText("Doors open at six")
+            setPresentingMode(Presenting.ANNOUNCEMENTS)
+        }
+        assertTrue(manager.isLive(Presenting.ANNOUNCEMENTS))
+        val stage = OutputProfile(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR)
+        setContent(ComposeContent(Presenting.BIBLE, stage, manager))
+        onNodeWithText("Doors open at six", substring = true).assertExists()
+    }
+
+    @Test
+    fun `an assignment naming no profile draws with the default one`() = runComposeUiTest {
+        val manager = PresenterManager().apply { setDisplayedVerses(listOf(verse)) }
+        setContent {
+            PresenterOutputContent(
+                screenAssignment = ScreenAssignment(activeProfileId = "no-such-profile"),
+                effectiveMode = Presenting.BIBLE,
+                screenNumber = 1,
+                presenterManager = manager,
+                appSettings = AppSettings(),
+                mediaViewModel = MediaViewModel(),
+                sttManager = STTManager(),
+                serverUrl = "",
+                qaDisplayUrl = "",
+                identifyingScreen = false,
+                lottieComposition = null,
+                clearAnnouncementOnFinish = {},
+            )
+        }
+        onNodeWithText("For God so loved the world", substring = true).assertExists()
     }
 
     @Test
