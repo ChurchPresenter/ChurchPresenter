@@ -129,6 +129,23 @@ class StyleThumbnailsTest {
     }
 
     @Test
+    fun `a still that times out once is drawn on the second try`() {
+        val attempts = ConcurrentLinkedQueue<String>()
+        val thumbs = thumbnails { _, config ->
+            attempts += config.style
+            check(config.style != "1" || attempts.count { it == "1" } > 1) {
+                "Lottie composition failed to load for off-screen rendering"
+            }
+            ImageBitmap(1, 1)
+        }
+        thumbs.request(LottieGenConfig(nameText = "Anna"))
+        waitFor("every style") { thumbs.thumbnails.size == 3 }
+
+        assertEquals(setOf("1", "2", "3"), thumbs.thumbnails.keys)
+        assertEquals(2, attempts.count { it == "1" }, "the cold first still is tried exactly once more")
+    }
+
+    @Test
     fun `the default catalogue is every style`() {
         val thumbs = StyleThumbnails(scope)
         assertTrue(thumbs.thumbnails.isEmpty(), "nothing is drawn until asked")
