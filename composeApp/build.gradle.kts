@@ -1521,14 +1521,20 @@ fun registerWindowsSignTask(taskName: String, packagingTask: String, extension: 
         description = "Sign Windows $extension installer with code signing certificate"
         group = "signing"
         dependsOn(packagingTask)
+        // Skips only when signing was never asked for. Once desktop.signing.repo.path is set, a
+        // missing certificate or password fails the build instead of shipping an unsigned installer.
         onlyIf {
             val isWindows = System.getProperty("os.name").contains("Windows", ignoreCase = true)
-            val hasCert = winCertPath != null && File(winCertPath).exists() && winCertPassword.isConfigured()
             if (!isWindows) logger.info("$taskName skipped: not running on Windows")
-            if (!hasCert) logger.info("$taskName skipped: certificate not configured")
-            isWindows && hasCert
+            if (desktopSigningRepoPath == null) logger.info("$taskName skipped: desktop.signing.repo.path not set")
+            isWindows && desktopSigningRepoPath != null
         }
         doLast {
+            check(winCertPath != null && File(winCertPath).exists()) {
+                "$taskName: certificate not found (desktop.signing.repo.path=$desktopSigningRepoPath, " +
+                    "certFile=$winCertFileRel)"
+            }
+            check(winCertPassword.isConfigured()) { "$taskName: certPassword not configured" }
             val outDir = layout.buildDirectory.dir("compose/binaries/main/$extension").get().asFile
             outDir.listFiles { f -> f.extension.equals(extension, ignoreCase = true) }?.forEach { installer ->
                 val result = ProcessBuilder(
