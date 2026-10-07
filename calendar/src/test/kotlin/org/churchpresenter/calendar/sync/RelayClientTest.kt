@@ -75,7 +75,7 @@ class RelayClientTest {
 
     @Test
     fun `the transport refuses a plain http relay before sending`() {
-        assertFailsWith<IllegalArgumentException> {
+        assertFailsWith<RelayFailure.Misconfigured> {
             HttpRelayTransport().send("GET", "http://relay.example/x", emptyMap(), null)
         }
     }

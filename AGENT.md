@@ -174,6 +174,9 @@ only — measure with the excludes removed before quoting it.
 ./gradlew :composeApp:jacocoTestReport # coverage → build/reports/jacoco/jacocoTestReport/html/
 bash cleanup_check.sh                  # repo code-quality report
 ./gradlew :composeApp:renderBenchmark  # off-screen render times per content type, 1080p and 4K — see composeApp/benchmarks/
+./gradlew :composeApp:renderBenchmark -PrecordRenderBaseline    # re-record the reference-Mac baseline, composeApp/benchmarks/
+./gradlew :composeApp:renderBenchmark -PrecordCiRenderBaseline  # write composeApp/benchmarks/ci/ (CI's own: record via render-benchmark.yml, not locally)
+./gradlew :composeApp:renderBenchmark -PcheckRenderRegression   # fail on a row slower than the CI baseline (render-benchmark.yml's gate)
 ./gradlew :composeApp:soakTest -PsoakMinutes=10  # a scripted service on one output; fails on a leak or stall (CI: 240, on demand until it has run green)
 
 bash test-changed.sh                   # ONLY the suites your change touches — seconds, not minutes

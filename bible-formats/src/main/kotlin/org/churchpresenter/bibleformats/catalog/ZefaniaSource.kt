@@ -103,7 +103,7 @@ object ZefaniaSource : BibleSource {
 
         try {
             val zipFile = File(scratch, "module.zip")
-            val spbPart = File(scratch, module.fileName)
+            val spbPart = BibleInstallSupport.partFileIn(scratch, module.fileName)
 
             val result = try {
                 BibleInstallSupport.downloadTo(

@@ -202,7 +202,9 @@ class BebliaSourceTest {
         val body = xmlBible().toByteArray(Charsets.UTF_8)
         install(httpServingBytes(body), module(sizeBytes = body.size.toLong()))
 
-        assertFalse(BibleInstallSupport.scratchIn(targetDir).exists())
+        val left = targetDir.list().orEmpty().filter { it.startsWith(BibleInstallSupport.SCRATCH_PREFIX) }
+        assertTrue(left.isEmpty(), "left behind: $left")
+        assertTrue(File(targetDir, module().fileName).isFile, "the module itself is in place")
     }
 
     @Test

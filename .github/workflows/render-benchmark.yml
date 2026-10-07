@@ -1,0 +1,160 @@
+name: Render benchmark
+
+# Holds main's off-screen render times, once a week, against a baseline recorded on this same kind
+# of runner -- see RenderBenchmark and compareWithBaseline. A scheduled run that finds a regression
+# opens an issue (or comments on the open one), so a slowdown is reported without a run on every
+# pull request; dispatch it by hand to check a branch. The hosted runners are ~10x slower than
+# the reference Mac behind composeApp/benchmarks/results.json, so the absolute frame budget cannot
+# be checked here; what can is "this got meaningfully slower than it was", against
+# composeApp/benchmarks/ci/results.json. A row fails past baseline x 1.5 + 1 ms on its typical
+# frame (render p50 + readback p50).
+#
+# Its own workflow rather than a job in test.yml: that file's one job is `test`, the required
+# context on main, with a draft-cancelling first step, a merge-queue trigger and write permissions
+# for its reporters, all of which exist for that context. This gate needs none of them, and folding
+# it in would put its runner time and its concurrency group in the way of the required check.
+#
+# The CI baseline is recorded by dispatching this workflow with `record_baseline`, or by any run
+# while no baseline is committed; either uploads `ci-render-baseline`, which a maintainer downloads
+# and commits as the two files in composeApp/benchmarks/ci/.
+on:
+  schedule:
+    # Mondays 06:00 UTC, on main (a schedule always runs the default branch).
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      record_baseline:
+        description: 'Record the CI baseline (uploads ci-render-baseline to commit) instead of checking against it'
+        type: boolean
+        required: false
+        default: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: read
+  # Only for the regression issue a scheduled run files.
+  issues: write
+
+concurrency:
+  group: render-benchmark-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      BASELINE: composeApp/benchmarks/ci/results.json
+      RECORD: ${{ github.event_name == 'workflow_dispatch' && inputs.record_baseline }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # With no baseline committed, a run records one instead of checking: a workflow new on a
+      # branch cannot be dispatched until it is on the default branch, so the first pull request
+      # run is what produces the baseline to commit.
+      - name: Is there a CI baseline
+        id: baseline
+        run: |
+          if [ "$RECORD" = "true" ]; then
+            echo "record=true" >> "$GITHUB_OUTPUT"
+          elif [ -f "$BASELINE" ]; then
+            echo "record=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "record=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::No CI render baseline committed yet ($BASELINE) -- this run records one; commit its ci-render-baseline artifact to composeApp/benchmarks/ci/."
+            echo "No CI render baseline committed yet — this run recorded one (artifact ci-render-baseline)." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # Compiled first and the Kotlin compile daemon stopped, so the measurement shares the runner
+      # with nothing but the one benchmark JVM -- see the same step in test.yml.
+      - name: Compile
+        run: |
+          ./gradlew :composeApp:jvmTestClasses
+          pkill -f KotlinCompileDaemon || true
+
+      - name: Check render times against the CI baseline
+        id: check
+        if: steps.baseline.outputs.record != 'true'
+        run: ./gradlew :composeApp:renderBenchmark -PcheckRenderRegression
+
+      - name: Record the CI baseline
+        if: steps.baseline.outputs.record == 'true'
+        run: ./gradlew :composeApp:renderBenchmark -PrecordCiRenderBaseline
+
+      - name: Summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f composeApp/build/reports/render-benchmark/results.md ]; then
+            cat composeApp/build/reports/render-benchmark/results.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "The benchmark wrote no report; see the step log." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-benchmark
+          path: |
+            composeApp/build/reports/render-benchmark/
+            composeApp/build/test-results/renderBenchmark/
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Upload the recorded baseline
+        if: ${{ !cancelled() && steps.baseline.outputs.record == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-render-baseline
+          path: composeApp/benchmarks/ci/
+          retention-days: 30
+          if-no-files-found: error
+
+      # A scheduled run that regressed files it, so a slowdown on main is noticed without anyone
+      # reading the run. One open issue per regression stretch: a later failing week comments on it
+      # rather than opening another. Only the check failing does this -- a broken build does not.
+      - name: Report a regression as an issue
+        if: ${{ failure() && github.event_name == 'schedule' && steps.check.outcome == 'failure' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          LABEL="render-regression"
+          gh label create "$LABEL" --color D93F0B \
+            --description "The weekly render benchmark found main slower than its CI baseline" 2>/dev/null || true
+          REPORT=composeApp/build/reports/render-benchmark/results.md
+          {
+            echo "The weekly render benchmark found a row slower than its CI baseline on \`${GITHUB_SHA:0:9}\`."
+            echo
+            echo "Run: $RUN_URL (report in the \`render-benchmark\` artifact)."
+            echo
+            if [ -f "$REPORT" ]; then
+              sed -n '/^## Compared with/,$p' "$REPORT"
+            else
+              echo "The benchmark wrote no report; see the run log."
+            fi
+            echo
+            echo "If the slowdown is intended, re-record the baseline: dispatch this workflow with \`record_baseline\` and commit its \`ci-render-baseline\` artifact to \`composeApp/benchmarks/ci/\`."
+          } > issue.md
+          OPEN=$(gh issue list --label "$LABEL" --state open --limit 1 --json number -q '.[0].number // empty')
+          if [ -n "$OPEN" ]; then
+            gh issue comment "$OPEN" --body-file issue.md
+          else
+            gh issue create --title "Render benchmark regression on main" --label "$LABEL" --body-file issue.md
+          fi

@@ -170,8 +170,8 @@ class InstanceLinkClient(
         val apiKey = primary.apiKey
         val deviceId = primary.deviceId
         // A peer that's simply offline (not started yet, or closed) is an expected, benign state —
-        // don't let the retry cadence flood Sentry with one warning per attempt. Report the
-        // first failure of a streak, then only every 10th thereafter; reset once connected again.
+        // don't let the retry cadence flood Sentry with one warning per attempt. When a streak is
+        // reported is ConnectFailures.shouldReportConnectFailure's decision; reset once connected again.
         var consecutiveFailures = 0
         fun connectFailed(e: Exception) {
             consecutiveFailures++
@@ -800,12 +800,6 @@ internal object ConnectFailures {
     }
 
     /**
-     * Buckets a connect failure so Sentry can be filtered/grouped by cause: "refused"/"dns" are
-     * the expected, benign case (primary not started yet or misconfigured host/port), while
-     * "timeout"/"tls"/"other" are more likely to indicate an actual regression (e.g. a primary
-     * that crashed mid-session, or a protocol/certificate bug).
-     */
-    /**
      * A connect failure's message with the peer's address taken out of it.
      *
      * The message used to be interpolated into the report's *title*, which did two things. It put
@@ -824,6 +818,12 @@ internal object ConnectFailures {
     internal fun redactedConnectFailure(message: String?): String =
         message?.replace(PEER_URL, "$1<peer>$2") ?: "none"
 
+    /**
+     * Buckets a connect failure so Sentry can be filtered/grouped by cause. "refused", "dns",
+     * "timeout" and "ping_timeout" are the primary not being there — not started, switched off, or
+     * gone from the network — and are [BENIGN_CONNECT_FAILURES]; "tls" and "other" are more likely
+     * a real regression (a protocol or certificate bug) and stay on the reporting cadence.
+     */
     internal fun classifyConnectFailure(e: Exception): String = when {
         // ktor's own pinger raises this when the primary misses the keepalive window, which is what
         // the heartbeat is for: the link drops, the backoff reconnects, and the operator sees the

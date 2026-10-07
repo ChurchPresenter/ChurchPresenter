@@ -10,6 +10,7 @@ import org.churchpresenter.calendar.CalendarStore
 import org.churchpresenter.calendar.model.CalendarDocument
 import org.churchpresenter.calendar.model.PlannedService
 import org.churchpresenter.calendar.sync.Envelope
+import org.churchpresenter.calendar.sync.HttpRelayTransport
 import org.churchpresenter.calendar.sync.RelayReply
 import org.churchpresenter.calendar.sync.RelayTransport
 import org.churchpresenter.core.models.songs.SongFileParser
@@ -150,6 +151,28 @@ class CalendarSyncServiceTest {
         service.revokeDevice("phone-1")
         assertEquals(CalendarSyncStatus.Off, service.status.value)
         assertTrue(relay.calls.isEmpty())
+    }
+
+    @Test
+    fun `a relay address that is not https ends the round with a status, not an exception`() = runBlocking<Unit> {
+        settings = settings.copy(
+            relayUrl = "http://relay.example", clientKey = "key-1", instanceId = "inst", desktopToken = "tok",
+            instanceKey = Envelope.encodeKey(Envelope.newKey()), installId = "install-A",
+        )
+        val service = CalendarSyncService(
+            folder = folder,
+            songFolder = null,
+            settings = { settings },
+            saveSettings = { settings = it },
+            transport = HttpRelayTransport(),
+            endpoints = RelayEndpoints("http://relay.example", "http://site.example/key"),
+        )
+
+        assertFalse(service.syncNow())
+        val failed = assertIs<CalendarSyncStatus.Failed>(service.status.value)
+        assertEquals("the relay address is not an https:// address", failed.message)
+        assertEquals(0, service.pushCatalog())
+        assertIs<CalendarSyncStatus.Failed>(service.status.value)
     }
 
     @Test

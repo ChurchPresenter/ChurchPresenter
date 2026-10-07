@@ -27,6 +27,7 @@ import java.nio.channels.UnresolvedAddressException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
+import java.util.UUID
 import java.util.zip.ZipFile
 import javax.net.ssl.SSLException
 import kotlin.random.Random
@@ -176,6 +177,15 @@ object BibleInstallSupport {
         this is IllegalStateException && message?.contains("Content-Length mismatch") == true
 
     const val COPY_BUFFER_BYTES = 64 * 1024
+
+    /** The name every install's scratch folder starts with; see [scratchIn]. */
+    const val SCRATCH_PREFIX = ".cp-install"
+
+    /** What [partFileIn] appends to a module still being written. */
+    const val PART_SUFFIX = ".part"
+
+    /** How long a scratch folder sits untouched before [sweepStaleScratch] takes it as abandoned. */
+    private const val STALE_SCRATCH_MS = 24L * 60 * 60 * 1000
     private const val MAX_ARCHIVE_ENTRIES = 64
     private const val MAX_EXTRACTED_BYTES = 256L * 1024 * 1024
 
@@ -278,14 +288,50 @@ object BibleInstallSupport {
      * the finishing move must be an atomic rename, which only works within one filesystem, and
      * Bible folders are routinely on network shares or external drives.
      */
-    fun scratchIn(targetDir: File): File = File(targetDir, ".cp-install")
+    fun scratchIn(targetDir: File): File = File(targetDir, "$SCRATCH_PREFIX-${UUID.randomUUID()}")
+
+    /**
+     * What a module is written as inside its scratch folder until it is moved into place: its file
+     * name with [PART_SUFFIX], so nothing that lists the Bible folder's `.spb` files — several walk
+     * its subfolders — can take a half-written conversion, or one a crash left behind, for a Bible.
+     */
+    fun partFileIn(scratch: File, fileName: String): File = File(scratch, fileName + PART_SUFFIX)
 
     /**
      * A fresh, empty scratch folder under [targetDir], or null when the install cannot go ahead
      * because [targetDir] cannot be written to or the folder beneath it cannot be made.
+     *
+     * Every install gets a folder of its own. They used to share one `.cp-install`, which each
+     * install emptied as it began and deleted as it ended — and each catalogue tab runs its own
+     * install, into the same folder, so one tab starting or finishing deleted the scratch another
+     * was still writing into (Sentry CHURCH-PRESENTER-DESKTOP-6K: `.cp-install/module.xml (No such
+     * file or directory)`). Scratch folders a crash left behind are swept here, by [sweepStaleScratch].
      */
-    fun prepareInstall(targetDir: File): File? =
-        scratchIn(targetDir).takeIf { usableDirectory(targetDir) }?.let(::prepareScratch)
+    fun prepareInstall(targetDir: File): File? {
+        if (!usableDirectory(targetDir)) return null
+        sweepStaleScratch(targetDir)
+        return prepareScratch(scratchIn(targetDir))
+    }
+
+    /**
+     * Deletes the scratch folders under [targetDir] that no running install can still own: the old
+     * shared `.cp-install`, which nothing creates any more, and any per-install folder untouched for
+     * [staleAfterMs] — far longer than an install takes, so a folder another install is writing
+     * into right now is never one of them.
+     */
+    internal fun sweepStaleScratch(
+        targetDir: File,
+        now: Long = System.currentTimeMillis(),
+        staleAfterMs: Long = STALE_SCRATCH_MS,
+    ) {
+        targetDir.listFiles()
+            ?.filter { it.isDirectory && isStaleScratch(it, now, staleAfterMs) }
+            ?.forEach { it.deleteRecursively() }
+    }
+
+    private fun isStaleScratch(dir: File, now: Long, staleAfterMs: Long): Boolean =
+        dir.name == SCRATCH_PREFIX ||
+            (dir.name.startsWith("$SCRATCH_PREFIX-") && now - dir.lastModified() > staleAfterMs)
 
     /**
      * [scratch], emptied and existing as a directory, or null when it cannot be made.

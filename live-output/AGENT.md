@@ -14,7 +14,10 @@ What is on air, and everything that puts it on a screen or a wire:
 - the stage monitor (`StageMonitorScreen`, `StageZoneContent`, `StageZoneStyle`);
 - the off-screen outputs on the shared `ComposeScenePump`: `BrowserSourceVideoRenderer`,
   `NdiVideoRenderer`/`NdiManager`, `OmtVideoRenderer`/`OmtManager`, `DeckLinkComposeOutput`, over
-  `OffscreenOutputContent`; and `PresentationPlayer`, `LottieFrameStream`, `AppNetworkInputs`.
+  `OffscreenOutputContent`; and `PresentationPlayer`, `LottieFrameStream`, `AppNetworkInputs`;
+- `LottieOutputFrames`: the lower third's frames for outputs larger than its desktop frames. Each
+  output holds its pixel size from `LowerThirdCue`; a larger size gets frames pre-rendered at the
+  size it draws them, at most two sizes at once, closed when no output of that size is left.
 
 A real Gradle module of this build: `include(":live-output")`, `implementation(projects.liveOutput)`.
 `:composeApp` is its only consumer: the root screen, the window wiring (`PresenterWindows`,
