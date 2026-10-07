@@ -2,21 +2,8 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>CyclomaticComplexMethod:MotionPathFlattener.kt$MotionPathFlattener$private fun parse(path: String): List&lt;Pair&lt;Double, Double&gt;&gt;?</ID>
-    <ID>CyclomaticComplexMethod:TimelineCompiler.kt$TimelineCompiler$private fun synthesizeSpec( role: EffectSpec.Role, behaviors: List&lt;TimingBehavior&gt;, layerBoundsPt: RectPt, effectNode: TimeNode ): EffectSpec</ID>
-    <ID>NestedBlockDepth:MotionPathFlattener.kt$MotionPathFlattener$private fun parse(path: String): List&lt;Pair&lt;Double, Double&gt;&gt;?</ID>
-    <ID>NestedBlockDepth:PowerPointDeckSupport.kt$PowerPointDeckSupport$private fun registerEmbeddedFonts(show: SlideShow&lt;*, *&gt;)</ID>
-    <ID>NestedBlockDepth:PowerPointDeckSupport.kt$PowerPointDeckSupport$private fun slideMeta( slide: Slide&lt;*, *&gt;, slideIndex: Int, pageWidthPt: Double, pageHeightPt: Double, warnings: MutableList&lt;String&gt; ): PowerPointSlideMeta</ID>
-    <ID>NestedBlockDepth:PptxSlideRasterizer.kt$PptxSlideRasterizer$private fun renderBand(slide: XSLFSlide, spec: LayerSpec.Background, scale: Double): BufferedImage</ID>
-    <ID>ReturnCount:MotionPathFlattener.kt$MotionPathFlattener$private fun parse(path: String): List&lt;Pair&lt;Double, Double&gt;&gt;?</ID>
-    <ID>ReturnCount:PowerPointDeckSupport.kt$PowerPointDeckSupport$fun(shapeId: Long, paragraphIndex: Int?): List&lt;TimelineCompiler.LayerIdWithBounds&gt;</ID>
     <ID>ReturnCount:SlideDiskCache.kt$SlideDiskCache$fun lookup(file: File, renderWidthPx: Int?): CachedSlides?</ID>
     <ID>ReturnCount:SlideFontRegistry.kt$SlideFontRegistry$fun resolveFamily(requested: String): String</ID>
-    <ID>ReturnCount:TimelineCompiler.kt$TimelineCompiler$private fun translateCurves(behavior: TimingBehavior.AnimateValue, boundsPt: RectPt): PropertyCurve?</ID>
-    <ID>ReturnCount:TimelineEvaluator.kt$TimelineEvaluator$private fun interpolate(curve: PropertyCurve, p: Double): Double?</ID>
     <ID>ThrowsCount:SlideDiskCache.kt$SlideDiskCache.Writer$fun putSlide( index: Int, image: BufferedImage, note: String, fidelity: Fidelity, hasTimeline: Boolean ): File</ID>
-    <ID>TooManyFunctions:TimelineCompiler.kt$TimelineCompiler</ID>
-    <ID>TooManyFunctions:TimelineEvaluator.kt$TimelineEvaluator</ID>
-    <ID>TooManyFunctions:TimingParser.kt$TimingParser</ID>
   </CurrentIssues>
 </SmellBaseline>
