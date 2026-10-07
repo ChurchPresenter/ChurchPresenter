@@ -92,28 +92,23 @@ object DetectionLogger {
         return File(parent, "$prefix$suffix.jsonl")
     }
 
-    /** Keeps `[A-Za-z0-9._-]`, replacing anything else with `_`, so any session id is filename-safe. */
-    private fun sanitize(raw: String): String =
-        raw.map {
-            if (it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' ||
-                it == '.' || it == '_' || it == '-'
-            ) it else '_'
-        }
-            .joinToString("")
-
     /** Deletes dated detection + candidate + sticky logs older than [MAX_AGE_DAYS] in [dir]. Once per process. */
     private fun cleanupOldLogsOnce(dir: File?) {
         if (dir == null || !cleanedUp.compareAndSet(false, true)) return
         runCatching {
             val cutoff = System.currentTimeMillis() - MAX_AGE_DAYS * 24 * 60 * 60 * 1000
             dir.listFiles()?.forEach { file ->
-                val n = file.name
-                if (file.isFile && n.endsWith(".jsonl") &&
-                    (n.startsWith(BASE_PREFIX) || n.startsWith(CANDIDATE_PREFIX) || n.startsWith(STICKY_PREFIX)) &&
-                    file.lastModified() < cutoff
-                ) file.delete()
+                if (isExpiredLog(file, cutoff)) file.delete()
             }
         }
+    }
+
+    /** Whether [file] is one of this logger's dated logs, last written before [cutoff]. */
+    private fun isExpiredLog(file: File, cutoff: Long): Boolean {
+        val n = file.name
+        val ours = n.startsWith(BASE_PREFIX) || n.startsWith(CANDIDATE_PREFIX) || n.startsWith(STICKY_PREFIX)
+        val datedLog = file.isFile && n.endsWith(".jsonl") && ours
+        return datedLog && file.lastModified() < cutoff
     }
 
     /** An emitted detection → `detection-log-*.jsonl`. */
@@ -187,10 +182,7 @@ object DetectionLogger {
      * Independent file (`sticky-log-*.jsonl`) from detection-log/candidate-log so it can't affect
      * existing training tooling that reads those. Gated by [Config.logStickyChanges].
      */
-    fun logStickyChange(
-        transcript: String, translation: String,
-        prevBook: Int?, prevChapter: Int?, newBook: Int?, newChapter: Int?,
-    ) {
+    fun logStickyChange(transcript: String, translation: String, change: StickyChange) {
         if (!Config.logStickyChanges) return
         val configured = path ?: return
         val target = datedFile(configured, STICKY_PREFIX)
@@ -199,10 +191,10 @@ object DetectionLogger {
             val line = buildString {
                 append('{')
                 append("\"ts\":\"").append(Instant.now()).append("\",")
-                append("\"prevBook\":").append(prevBook ?: "null").append(',')
-                append("\"prevChapter\":").append(prevChapter ?: "null").append(',')
-                append("\"newBook\":").append(newBook ?: "null").append(',')
-                append("\"newChapter\":").append(newChapter ?: "null").append(',')
+                append("\"prevBook\":").append(change.prevBook ?: "null").append(',')
+                append("\"prevChapter\":").append(change.prevChapter ?: "null").append(',')
+                append("\"newBook\":").append(change.newBook ?: "null").append(',')
+                append("\"newChapter\":").append(change.newChapter ?: "null").append(',')
                 if (sessionId != null) append("\"sessionId\":\"").append(esc(sessionId!!)).append("\",")
                 else append("\"sessionId\":null,")
                 append("\"transcript\":\"").append(esc(transcript)).append("\",")
@@ -281,6 +273,18 @@ object DetectionLogger {
         }
     }
 
-    private fun esc(s: String): String =
-        s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ").replace("\r", " ")
 }
+
+/** A sticky book/chapter moving from the previous values to the new ones, for the sticky log. */
+data class StickyChange(val prevBook: Int?, val prevChapter: Int?, val newBook: Int?, val newChapter: Int?)
+
+private fun esc(s: String): String =
+    s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ").replace("\r", " ")
+
+/** Keeps `[A-Za-z0-9._-]`, replacing anything else with `_`, so any session id is filename-safe. */
+private fun sanitize(raw: String): String =
+    raw.map { if (isFileNameSafe(it)) it else '_' }
+        .joinToString("")
+
+private fun isFileNameSafe(c: Char): Boolean =
+    c in 'A'..'Z' || c in 'a'..'z' || c in '0'..'9' || c == '.' || c == '_' || c == '-'
