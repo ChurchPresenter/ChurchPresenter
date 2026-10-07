@@ -21,3 +21,14 @@ internal fun convertSongsRule(r: Request): Resolution? {
         else -> null
     }
 }
+
+/**
+ * "How do I edit multiple songs", "batch edit songs", "song library": the Song Library Manager, where
+ * many songs are selected and changed together. Asked or told, it opens; a convert is the rule above's.
+ */
+internal fun songLibraryRule(r: Request): Resolution? {
+    if (Vocabulary.BIBLE_NAMES.any { r.text.containsWordPrefix(it) }) return null
+    val named = r.hasPhrase(Vocabulary.SONG_LIBRARY)
+    val editingMany = r.has(Vocabulary.EDIT) && r.has(Vocabulary.MANY) && r.has(Vocabulary.SONG)
+    return if (named || editingMany) act(HelperAction.OpenSongLibrary) else null
+}

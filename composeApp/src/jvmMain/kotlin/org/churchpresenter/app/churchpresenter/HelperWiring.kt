@@ -186,6 +186,10 @@ internal class AppHelperExecutor(private val root: AppRootState) : HelperActionE
             root.showConverterWindow = true
             ActionOutcome.Done(message = action.describe())
         }
+        HelperAction.OpenSongLibrary -> {
+            root.showSongLibraryWindow = true
+            ActionOutcome.Done(message = action.describe())
+        }
         HelperAction.OpenKeyboardShortcuts -> {
             root.showKeyboardShortcutsDialog = true
             ActionOutcome.Done()

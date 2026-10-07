@@ -3024,6 +3024,10 @@
     <!-- %1$s is the program's name, as it writes it: OpenLP, SongBeamer, FreeShow… -->
     <string name="helper_open_converter_from">Opening the Converter with %1$s chosen. Choose its file or folder, then convert.</string>
     <string name="helper_open_converter_documents">Opening the Converter on documents. Choose the PDF, Word, PowerPoint or Keynote files with the lyrics, then convert.</string>
+    <!-- Names the Song Library Manager's Batch Edit… command, whose label is that window's own string
+         (batch_edit_menu in songlibrary/src/main/composeResources/values/strings.xml): translate it
+         the way that file does. -->
+    <string name="helper_open_song_library">Opening the Song Library Manager. Select the songs you want to change (Shift-click a range, or Ctrl/Cmd-click each one), choose Batch Edit…, tick the fields to change, then apply.</string>
     <string name="helper_open_shortcuts">Opening Keyboard Shortcuts.</string>
     <string name="helper_open_display_setup">Let's set up your screens.</string>
     <string name="helper_open_projection">Open Projection settings</string>

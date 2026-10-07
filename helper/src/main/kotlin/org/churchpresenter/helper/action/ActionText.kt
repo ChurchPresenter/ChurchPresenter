@@ -1,6 +1,7 @@
 package org.churchpresenter.helper.action
 
 import org.churchpresenter.helper.HelperText
+import org.churchpresenter.strings.generated.resources.helper_open_song_library
 import org.churchpresenter.strings.generated.resources.helper_open_converter
 import org.churchpresenter.strings.generated.resources.helper_open_converter_documents
 import org.churchpresenter.strings.generated.resources.helper_open_converter_from
@@ -78,6 +79,7 @@ fun HelperAction.describe(undoLabel: HelperText? = null): HelperText = when (thi
         sourceName != null -> helperText(Res.string.helper_open_converter_from, sourceName)
         else -> helperText(Res.string.helper_open_converter)
     }
+    HelperAction.OpenSongLibrary -> helperText(Res.string.helper_open_song_library)
     HelperAction.Greet -> helperText(Res.string.helper_greeting)
     HelperAction.Thanks -> helperText(Res.string.helper_youre_welcome)
     HelperAction.UndoLast -> undoLabel

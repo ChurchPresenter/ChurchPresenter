@@ -120,6 +120,11 @@ sealed interface HelperAction {
         override val needsConfirmation get() = false
     }
 
+    /** Open the Song Library Manager, where many songs are edited at once. */
+    data object OpenSongLibrary : HelperAction {
+        override val needsConfirmation get() = false
+    }
+
     /** "Hello", "help", "what can you do": say hello, with examples of what to ask. */
     data object Greet : HelperAction {
         override val needsConfirmation get() = false

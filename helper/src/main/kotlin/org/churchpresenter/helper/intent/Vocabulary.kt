@@ -130,6 +130,29 @@ internal object Vocabulary {
         SongSourceWords(listOf("videopsalm", "video psalm"), "videopsalm", "VideoPsalm"),
     )
 
+    /** Names for the Song Library Manager, or for changing many songs at once in it. */
+    val SONG_LIBRARY = listOf(
+        "song library", "songs library", "my library", "library manager", "manage songs", "manage my songs",
+        "batch edit", "bulk edit", "mass edit", "batch change", "bulk change", "mass change", "batch rename",
+        "bulk rename", "edit songs at once", "organize songs", "organise songs", "organize my songs",
+        "organise my songs", "clean up songs", "clean up my songs", "tidy up songs", "tidy my songs",
+        "song metadata", "song details", "change songbook", "change the songbook", "set the songbook",
+        "change author", "change the author", "categorize songs", "categorise songs", "song catalog",
+        "song catalogue",
+    )
+
+    /** Words that make editing songs about many of them. */
+    val MANY = setOf(
+        "multiple", "many", "several", "all", "batch", "bulk", "mass", "lots", "together", "every", "selected",
+        "these", "entire", "whole",
+    )
+
+    /** Changing songs, as opposed to showing them. */
+    val EDIT = setOf(
+        "edit", "editing", "change", "changing", "update", "rename", "fix", "tag", "retag", "modify", "organize",
+        "organise", "clean", "tidy", "categorize", "categorise", "assign",
+    )
+
     /** Documents the converter reads lyrics out of — only taken with a song word beside them. */
     val SONG_DOCUMENTS = setOf(
         "pdf", "pdfs", "word", "docx", "doc", "powerpoint", "pptx", "ppt", "keynote", "document", "documents",
