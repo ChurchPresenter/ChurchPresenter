@@ -95,6 +95,12 @@ data class ProjectionSettings(
      * is what makes clearing the field the way to undo a rename.
      */
     val screenNames: Map<String, String> = emptyMap(),
+    /**
+     * The monitors the operator has said the app must never open a window on, by [screenKey] -- the
+     * same geometry [screenNames] and every assignment's saved bounds identify a monitor by. See
+     * `UnusedScreens.kt` for what reads and writes it.
+     */
+    val unusedScreens: List<String> = emptyList(),
     // Launch with the output windows hidden; the operator reveals them with the toolbar's display
     // toggle when ready to present.
     val startOutputsHidden: Boolean = false,

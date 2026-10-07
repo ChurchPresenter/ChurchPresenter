@@ -7,6 +7,8 @@ import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.screenKey
+import org.churchpresenter.settings.withScreenUsed
 
 /** The option [assignment]'s picture goes to: DeckLink by index, a screen by bounds. */
 internal fun currentPrimaryOption(options: List<DisplayOption>, assignment: ScreenAssignment): DisplayOption =
@@ -52,6 +54,9 @@ internal fun hasDeckLinkInputConflict(option: DisplayOption, scenes: List<Scene>
 /**
  * Points slot [i]'s picture at [option], taking it off any other slot's picture, and off any key
  * (this slot's included), that already used that display or port -- one output, one owner.
+ *
+ * An [option] marked [DisplayOption.unused] has its "Don't use" mark cleared: picking a monitor
+ * marked unused is how it is put back into use.
  */
 internal fun withPrimaryTarget(
     projection: ProjectionSettings,
@@ -60,7 +65,12 @@ internal fun withPrimaryTarget(
     option: DisplayOption,
     numScreens: Int,
 ): ProjectionSettings {
-    var newProj = projection.withAssignment(
+    val inUse = if (option.unused) {
+        projection.withScreenUsed(screenKey(option.boundsX, option.boundsY, option.boundsW, option.boundsH))
+    } else {
+        projection
+    }
+    var newProj = inUse.withAssignment(
         i,
         assignment.copy(
             targetDisplay = option.targetDisplay,

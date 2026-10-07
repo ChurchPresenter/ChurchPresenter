@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
@@ -49,7 +50,7 @@ class ProfileOutputsPageTest {
         onAllNodesWithText("Screen 1").let { it[it.fetchSemanticsNodes().size - 1] }
 
     @Test
-    fun `a click gives an output to this profile, and a second hands it back`() = profilesTab(
+    fun `a click gives an output to this profile, and a second sets it to Blank`() = profilesTab(
         AppSettings(
             projectionSettings = ProjectionSettings(
                 outputProfiles = listOf(main, stage),
@@ -67,6 +68,6 @@ class ProfileOutputsPageTest {
 
         screenTile().performScrollTo().performClick()
         waitForIdle()
-        assertEquals("stage", get().projectionSettings.screenAssignments.single().activeProfileId)
+        assertEquals(BLANK_OUTPUT_PROFILE_ID, get().projectionSettings.screenAssignments.single().activeProfileId)
     }
 }

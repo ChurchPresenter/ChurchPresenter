@@ -906,6 +906,9 @@
     <string name="output_profile_delete_blocked">Can't delete "%1$s" — it's still used by: %2$s</string>
     <string name="output_profile_picker_tooltip">Output profile</string>
     <string name="output_profile_blank">Blank</string>
+    <string name="output_profile_dont_use">Don't use</string>
+    <string name="display_not_used">not used</string>
+    <string name="profile_outputs_not_used">Not used</string>
     <!-- No longer shown (Blank replaced None); kept while the locales still carry it. -->
     <string name="output_profile_swap_menu_tooltip">Swap output profile</string>
     <string name="output_profile_new_name_default">New Profile</string>
@@ -2617,7 +2620,7 @@
     <string name="profile_duplicate_sub">Makes a standalone copy with the current values.</string>
     <string name="profile_delete_sub">Outputs using it have to be given another profile first.</string>
     <string name="profile_outputs_group">Outputs</string>
-    <string name="profile_outputs_hint">Click an output to show this profile on it. Click it again to hand it back to another profile.</string>
+    <string name="profile_outputs_hint">Click an output to show this profile on it. Click it again to set it to Blank.</string>
     <string name="profile_outputs_empty">No outputs are set up yet. Add them on the Projection tab.</string>
     <string name="profile_outputs_uses_this">Uses this profile</string>
     <string name="profile_outputs_uses_other">Uses %1$s</string>

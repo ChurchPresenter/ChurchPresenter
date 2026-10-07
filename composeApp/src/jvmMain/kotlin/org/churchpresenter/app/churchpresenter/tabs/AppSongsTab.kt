@@ -60,7 +60,9 @@ fun recordSongWentLive(song: SongItem, appSettings: AppSettings, statisticsManag
         author = song.author
     )
     val proj = appSettings.projectionSettings
-    val outputs = proj.screenAssignments.filter { it.isLiveOutput() }.mapNotNull { proj.profileFor(it) }
+    val outputs = proj.screenAssignments
+        .filter { it.isLiveOutput(proj.unusedScreens) }
+        .mapNotNull { proj.profileFor(it) }
     songLanguageEvent(song, outputs)?.let { UsageEvents.record(it) }
     if (isSplitScreenSong(outputs)) UsageEvents.record(UsageEvent.SONG_SPLIT_SCREEN)
     if (lottieBandPath(appSettings, Presenting.LYRICS) != null) {
