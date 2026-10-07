@@ -1,6 +1,8 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import org.churchpresenter.presenter.ChordLine
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.composables.SongSectionKind
 import org.churchpresenter.sharedui.composables.sectionKindOf
 import org.churchpresenter.sharedui.composables.SectionLabelRow
@@ -229,7 +231,10 @@ fun SongChordPreview(
         if (showChords && palette.isNotEmpty()) {
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Column(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .guideTarget(GuideTargets.SONG_CHORD_PALETTE)
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(7.dp),
             ) {
                 Row(

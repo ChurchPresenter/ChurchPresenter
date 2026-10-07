@@ -55,6 +55,7 @@ class RuleIntentResolver : IntentResolver {
             ::fontSizeRule,
             ::shortcutRule,
             ::songTranslationRule,
+            ::songChordsRule,
             ::navigationRule,
             ::openSettingsRule,
             ::verseRule,

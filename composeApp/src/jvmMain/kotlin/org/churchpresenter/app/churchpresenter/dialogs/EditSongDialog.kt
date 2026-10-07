@@ -1145,7 +1145,10 @@ private fun RowScope.TempoCard(bpm: String, onBpmChange: (String) -> Unit, weigh
 private fun ChordsToggle(on: Boolean, onToggle: () -> Unit) {
     HoverLabel(stringResource(Res.string.song_chords_toggle)) {
         Row(
-            modifier = Modifier.clickable(onClick = onToggle).padding(start = 6.dp),
+            modifier = Modifier
+                .guideTarget(GuideTargets.SONG_CHORDS_SWITCH)
+                .clickable(onClick = onToggle)
+                .padding(start = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {

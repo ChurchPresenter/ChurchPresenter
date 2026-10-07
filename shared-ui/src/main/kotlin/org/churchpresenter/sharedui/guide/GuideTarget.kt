@@ -24,6 +24,8 @@ object GuideTargets {
     val NEW_SONG = GuideTarget("songs.new")
     val EDIT_SONG = GuideTarget("songs.edit")
     val ADD_SONG_LANGUAGE = GuideTarget("songEditor.addLanguage")
+    val SONG_CHORDS_SWITCH = GuideTarget("songEditor.chordsSwitch")
+    val SONG_CHORD_PALETTE = GuideTarget("songEditor.chordPalette")
 
     /** The main window's tab for [tab]. */
     fun mainTab(tab: Tabs): GuideTarget = GuideTarget("tab.${tab.name}")

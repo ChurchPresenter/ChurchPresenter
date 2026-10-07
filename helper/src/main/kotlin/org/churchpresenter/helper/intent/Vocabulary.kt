@@ -46,6 +46,12 @@ internal object Vocabulary {
     /** The song editor's own words for adding one — enough on their own, with no song named. */
     const val ADD_LANGUAGE = "add a language"
 
+    /** Word starts that mean chords. */
+    const val CHORD = "chord"
+
+    /** "Cords" — the common misspelling, taken only beside a song word, since a cord is also a cable. */
+    val CHORD_MISSPELLINGS = setOf("cord", "cords")
+
     /** Word starts that make "translation" mean the Bible's, not a song's. */
     val BIBLE_NAMES = listOf("bible", "scripture")
 

@@ -26,6 +26,14 @@ internal fun songTranslationRule(r: Request): Resolution? =
         null
     }
 
+/** A song's chords, asked or told — "add chords to amazing grace" is the operator's to type, too. */
+internal fun songChordsRule(r: Request): Resolution? =
+    if (NavigationTopics.isSongChords(r.text, r.context.currentTab)) {
+        act(HelperAction.Highlight(NavigationTopics.songChords()))
+    } else {
+        null
+    }
+
 internal fun openSettingsRule(r: Request): Resolution? {
     if (!r.has(Vocabulary.SETTINGS)) return null
     val page = when {

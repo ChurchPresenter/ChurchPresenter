@@ -20,8 +20,11 @@ import org.churchpresenter.strings.generated.resources.helper_hint_schedule
 import org.churchpresenter.strings.generated.resources.edit_song
 import org.churchpresenter.strings.generated.resources.helper_hint_add_song_language
 import org.churchpresenter.strings.generated.resources.helper_hint_settings
-import org.churchpresenter.strings.generated.resources.helper_hint_song_translation
+import org.churchpresenter.strings.generated.resources.helper_hint_chord_palette
+import org.churchpresenter.strings.generated.resources.helper_hint_chords_switch
+import org.churchpresenter.strings.generated.resources.helper_hint_pick_and_edit
 import org.churchpresenter.strings.generated.resources.song_add_translation
+import org.churchpresenter.strings.generated.resources.song_chords
 import org.churchpresenter.strings.generated.resources.helper_hint_tab
 import org.churchpresenter.strings.generated.resources.helper_hint_take
 import org.churchpresenter.strings.generated.resources.helper_hint_toggle_outputs
@@ -66,6 +69,7 @@ internal object NavigationTopics {
     fun find(normalized: String): GuideTour? {
         // Before the topics: "add a song translation" also says "add a song".
         if (isSongTranslation(normalized)) return songTranslation()
+        if (isSongChords(normalized)) return songChords()
         TOPICS.firstOrNull { (phrases, _) -> phrases.any { normalized.containsPhrase(it) } }?.let { return it.second() }
         val tab = tabNamed(normalized) ?: return null
         return GuideTour(listOf(tabStep(tab)))
@@ -108,7 +112,7 @@ internal object NavigationTopics {
             tabStep(Tabs.SONGS),
             GuideStep(
                 GuideTargets.EDIT_SONG,
-                helperText(Res.string.helper_hint_song_translation, helperText(Res.string.edit_song)),
+                helperText(Res.string.helper_hint_pick_and_edit, helperText(Res.string.edit_song)),
                 before = HelperAction.SelectTab(Tabs.SONGS),
             ),
             // In the song editor's own window; pressing Edit moves the tour on to it.
@@ -116,6 +120,35 @@ internal object NavigationTopics {
                 GuideTargets.ADD_SONG_LANGUAGE,
                 helperText(Res.string.helper_hint_add_song_language, helperText(Res.string.song_add_translation)),
             ),
+        ),
+    )
+
+    /**
+     * Whether [normalized] asks about a song's chords — "add chords to a song", "where are the
+     * chords". Not chords on a stage monitor or an output, which are a profile's to show.
+     */
+    fun isSongChords(normalized: String, currentTab: Tabs? = null): Boolean {
+        val words = normalized.split(' ')
+        if (words.any { it in Vocabulary.SCREEN } || normalized.containsWordPrefix("stage")) return false
+        val aboutSong = words.any { it in Vocabulary.SONG } || currentTab == Tabs.SONGS
+        return normalized.containsWordPrefix(Vocabulary.CHORD) ||
+            aboutSong && words.any { it in Vocabulary.CHORD_MISSPELLINGS }
+    }
+
+    /** The Songs tab, Edit, then the editor's Chords switch and the chords to insert from. */
+    fun songChords() = GuideTour(
+        listOf(
+            tabStep(Tabs.SONGS),
+            GuideStep(
+                GuideTargets.EDIT_SONG,
+                helperText(Res.string.helper_hint_pick_and_edit, helperText(Res.string.edit_song)),
+                before = HelperAction.SelectTab(Tabs.SONGS),
+            ),
+            GuideStep(
+                GuideTargets.SONG_CHORDS_SWITCH,
+                helperText(Res.string.helper_hint_chords_switch, helperText(Res.string.song_chords)),
+            ),
+            GuideStep(GuideTargets.SONG_CHORD_PALETTE, helperText(Res.string.helper_hint_chord_palette)),
         ),
     )
 

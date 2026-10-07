@@ -3022,8 +3022,11 @@
     <string name="helper_hint_new_song">Click here to write a new song.</string>
     <!-- %1$s is the Edit Song button's name (edit_song), passed in so the hint names it as the
          translated UI does. -->
-    <string name="helper_hint_song_translation">Pick the song, then click %1$s.</string>
+    <string name="helper_hint_pick_and_edit">Pick the song, then click %1$s.</string>
     <!-- %1$s is the song editor's Add a language tab (song_add_translation). -->
+    <!-- %1$s is the song editor's Chords switch (song_chords). -->
+    <string name="helper_hint_chords_switch">Switch %1$s on, if it is off. The chord tools open under the preview.</string>
+    <string name="helper_hint_chord_palette">Put the cursor just before the syllable and click a chord here. You can also type chords in square brackets, like [G]Amazing [C]grace, or paste a sheet with chords above the lyrics and it is converted for you.</string>
     <string name="helper_hint_add_song_language">Click “%1$s”, name the language, then type or paste its lyrics.</string>
     <string name="helper_hint_schedule">This is your schedule. Add songs, verses and slides here to plan the service.</string>
     <string name="helper_hint_clear">This clears everything off the audience screen.</string>
