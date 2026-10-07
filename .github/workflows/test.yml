@@ -51,6 +51,9 @@ permissions:
   pull-requests: write
   # For a draft's run to cancel itself -- see the first step of `test`.
   actions: write
+  # Only for the `test-hang` issue the last step of `test` files when HungTestReporter halted a
+  # fork. A fork's pull request gets a read-only token whatever this says; that step copes.
+  issues: write
 
 concurrency:
   # A newer push to the same branch makes an in-flight run redundant. With `push` back to main only,
@@ -883,3 +886,66 @@ jobs:
             profiles/build/test-results/
             companion-surface/build/reports/tests/
             companion-surface/build/test-results/
+
+      # A hang halts its fork with a thread dump (HungTestReporter, exit 93) into
+      # <module>/build/test-results/<task>/hung-test-dump.txt, which `test-reports` above carries.
+      # The hang shows up every few weeks on an unrelated run and is easy to re-run past, so it is
+      # filed as a `test-hang` issue -- one open issue, later hangs comment on it -- rather than left
+      # in an artifact that expires in a week.
+      #
+      # Purely a reporter: it can never change this job's result. `continue-on-error`, every gh call
+      # guarded, and a token that cannot write issues (a fork's pull request) just logs and exits 0.
+      - name: Report a hung test as an issue
+        if: failure()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+          PR: ${{ github.event.pull_request.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          DUMPS=$(find . -path '*/build/test-results/*' -name hung-test-dump.txt -type f 2>/dev/null | sort)
+          if [ -z "$DUMPS" ]; then
+            echo "No hung-test dump; nothing to file."
+            exit 0
+          fi
+          LABEL="test-hang"
+          {
+            echo "HungTestReporter halted a test fork in CI."
+            echo
+            echo "- Event: \`$EVENT\`"
+            if [ -n "$PR" ]; then
+              echo "- Branch: \`$BRANCH\` (#$PR)"
+            else
+              echo "- Branch: \`$BRANCH\`"
+            fi
+            echo "- Commit: \`$GITHUB_SHA\`"
+            echo "- Run: $RUN_URL -- the full dump is in its \`test-reports\` artifact."
+            for dump in $DUMPS; do
+              HUNG=$(grep -m1 'HUNG TEST:' "$dump" | sed -e 's/^=== HUNG TEST: //' -e 's/ ===$//')
+              echo
+              echo "### ${dump#./}"
+              echo
+              echo "Hung: ${HUNG:-(no HUNG TEST line in the dump)}"
+              echo
+              echo '```'
+              head -n 120 "$dump"
+              echo '```'
+            done
+          } > hang-issue.md
+          cat hang-issue.md >> "$GITHUB_STEP_SUMMARY" || true
+          gh label create "$LABEL" --color FBCA04 \
+            --description "A CI test fork was halted by HungTestReporter" >/dev/null 2>&1 || true
+          if ! OPEN=$(gh issue list --label "$LABEL" --state open --limit 1 --json number -q '.[0].number // empty' 2>&1); then
+            echo "Cannot read issues with this token (a fork's pull request?): $OPEN -- not filing."
+            exit 0
+          fi
+          if [ -n "$OPEN" ]; then
+            gh issue comment "$OPEN" --body-file hang-issue.md \
+              || echo "Could not comment on #$OPEN (read-only token?) -- not filing."
+          else
+            gh issue create --title "Test suite hang in CI" --label "$LABEL" --body-file hang-issue.md \
+              || echo "Could not open an issue (read-only token?) -- not filing."
+          fi

@@ -34,6 +34,8 @@ env:
 
 permissions:
   contents: read
+  # To find the last successful run, so a week in which main has not moved is skipped.
+  actions: read
   # Only for the regression issue a scheduled run files.
   issues: write
 
@@ -42,7 +44,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # A scheduled week in which main has not moved since the last successful run would measure the
+  # same code again, so it is skipped. A run by hand always goes ahead.
+  moved:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - name: Has main moved since the last successful run
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          LAST_SHA=$(gh run list --workflow render-benchmark.yml --branch "${{ github.ref_name }}" \
+            --status success --limit 1 --json headSha -q '.[0].headSha // empty' 2>/dev/null || echo "")
+          if [ "$LAST_SHA" = "${{ github.sha }}" ]; then
+            echo "No new commits since the last successful render benchmark (${{ github.sha }})" >> "$GITHUB_STEP_SUMMARY"
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
   render:
+    needs: moved
+    if: needs.moved.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:

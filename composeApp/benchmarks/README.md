@@ -72,5 +72,10 @@ It writes `soak.md` (verdict, and the worst frame per content type), `soak.csv` 
 - the heap grows more than 64 MB, or resident memory more than 256 MB, from the first quarter of
   the run to the last (judged from eight samples up).
 
-`.github/workflows/soak.yml` runs the four hours on demand until it has run green, and uploads the
-report either way.
+`.github/workflows/soak.yml` runs the four hours on `main` every Sunday at 22:00 UTC, so it is done
+before Monday's render benchmark, or by hand (*Run workflow*, on any branch, with an optional
+`minutes`). A scheduled week in which `main` has not moved since the last successful soak is
+skipped. The report is uploaded as the `soak-report` artifact either way, and a scheduled run that
+fails opens a `soak-failure` issue -- the commit, the run, `soak.md` and the head of `soak-stall.txt`
+(a stall) or `hung-test-dump.txt` (a hang) -- or comments on the one already open. A cancelled run
+files nothing.

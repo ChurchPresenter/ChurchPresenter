@@ -1164,7 +1164,7 @@ tasks.register<org.gradle.api.tasks.testing.Test>("renderBenchmark") {
 // A service run for hours on one off-screen output, failing on a leak or a stall -- see ServiceSoak.
 //   ./gradlew :composeApp:soakTest                    # four hours, report to build/reports/soak/
 //   ./gradlew :composeApp:soakTest -PsoakMinutes=10   # a short local run
-// Run on demand by .github/workflows/soak.yml; never part of `jvmTest` or `check`.
+// Run weekly on main (and by hand) by .github/workflows/soak.yml; never part of `jvmTest` or `check`.
 tasks.register<org.gradle.api.tasks.testing.Test>("soakTest") {
     group = "verification"
     description = "Runs a scripted service for hours on one off-screen output and fails on a leak or a stall."

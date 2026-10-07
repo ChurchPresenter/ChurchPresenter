@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.lottiegen.ui.ControlPanel
 import org.churchpresenter.lottiegen.ui.PreviewPanel
 import org.churchpresenter.lottiegen.viewmodel.LottieGenViewModel
+import org.churchpresenter.lottiegen.viewmodel.StyleThumbnails
+import org.churchpresenter.lottiegen.viewmodel.ThumbnailDiagnostics
 import java.awt.Cursor
 import java.io.File
 
@@ -54,10 +56,16 @@ fun App(
     embedded: Boolean = outputDir != null,
     /** The host's own font picker, lent to the generator the same way `BibleLottieGenApp` takes one. */
     fontPicker: BandFontPicker? = null,
+    /**
+     * Where the Style menu's thumbnail builds record what they did, for a caller that wants to read
+     * it when a picture is missing -- see [ThumbnailDiagnostics]. Read-only; it changes nothing drawn.
+     */
+    thumbnailDiagnostics: ThumbnailDiagnostics? = null,
 ) {
     val scope = rememberCoroutineScope()
     val viewModel = remember(scope) {
-        LottieGenViewModel(scope, outputDir, onFileSaved, canvasWidth, canvasHeight)
+        val thumbnails = StyleThumbnails(scope, thumbnailDiagnostics ?: ThumbnailDiagnostics())
+        LottieGenViewModel(scope, outputDir, onFileSaved, canvasWidth, canvasHeight, thumbnails)
     }
 
     // When embedded in ChurchPresenter, the parent already provides a MaterialTheme
