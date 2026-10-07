@@ -12,10 +12,9 @@ name: Render benchmark
 # for its reporters, all of which exist for that context. This gate needs none of them, and folding
 # it in would put its runner time and its concurrency group in the way of the required check.
 #
-# The CI baseline is recorded by dispatching this workflow with `record_baseline`, which uploads
-# `ci-render-baseline`; a maintainer downloads it and commits the two files to
-# composeApp/benchmarks/ci/. Until that file exists in the checkout, the gate step skips with a
-# notice instead of failing every pull request.
+# The CI baseline is recorded by dispatching this workflow with `record_baseline`, or by any run
+# while no baseline is committed; either uploads `ci-render-baseline`, which a maintainer downloads
+# and commits as the two files in composeApp/benchmarks/ci/.
 on:
   push:
     branches: [main]
@@ -65,35 +64,39 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # With no baseline committed, a run records one instead of checking: a workflow new on a
+      # branch cannot be dispatched until it is on the default branch, so the first pull request
+      # run is what produces the baseline to commit.
       - name: Is there a CI baseline
         id: baseline
         run: |
-          if [ "$RECORD" = "true" ] || [ -f "$BASELINE" ]; then
-            echo "run=true" >> "$GITHUB_OUTPUT"
+          if [ "$RECORD" = "true" ]; then
+            echo "record=true" >> "$GITHUB_OUTPUT"
+          elif [ -f "$BASELINE" ]; then
+            echo "record=false" >> "$GITHUB_OUTPUT"
           else
-            echo "run=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::No CI render baseline committed yet ($BASELINE) -- dispatch this workflow with record_baseline and commit its ci-render-baseline artifact."
-            echo "no CI render baseline committed yet — dispatch with record_baseline" >> "$GITHUB_STEP_SUMMARY"
+            echo "record=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::No CI render baseline committed yet ($BASELINE) -- this run records one; commit its ci-render-baseline artifact to composeApp/benchmarks/ci/."
+            echo "No CI render baseline committed yet — this run recorded one (artifact ci-render-baseline)." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       # Compiled first and the Kotlin compile daemon stopped, so the measurement shares the runner
       # with nothing but the one benchmark JVM -- see the same step in test.yml.
       - name: Compile
-        if: steps.baseline.outputs.run == 'true'
         run: |
           ./gradlew :composeApp:jvmTestClasses
           pkill -f KotlinCompileDaemon || true
 
       - name: Check render times against the CI baseline
-        if: steps.baseline.outputs.run == 'true' && env.RECORD != 'true'
+        if: steps.baseline.outputs.record != 'true'
         run: ./gradlew :composeApp:renderBenchmark -PcheckRenderRegression
 
       - name: Record the CI baseline
-        if: steps.baseline.outputs.run == 'true' && env.RECORD == 'true'
+        if: steps.baseline.outputs.record == 'true'
         run: ./gradlew :composeApp:renderBenchmark -PrecordCiRenderBaseline
 
       - name: Summary
-        if: ${{ !cancelled() && steps.baseline.outputs.run == 'true' }}
+        if: ${{ !cancelled() }}
         run: |
           if [ -f composeApp/build/reports/render-benchmark/results.md ]; then
             cat composeApp/build/reports/render-benchmark/results.md >> "$GITHUB_STEP_SUMMARY"
@@ -102,7 +105,7 @@ jobs:
           fi
 
       - name: Upload the report
-        if: ${{ !cancelled() && steps.baseline.outputs.run == 'true' }}
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: render-benchmark
@@ -113,7 +116,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload the recorded baseline
-        if: ${{ !cancelled() && env.RECORD == 'true' }}
+        if: ${{ !cancelled() && steps.baseline.outputs.record == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: ci-render-baseline

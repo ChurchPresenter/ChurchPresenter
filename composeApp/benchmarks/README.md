@@ -43,10 +43,12 @@ in the report and never fails; re-record to bring it in. The comparison is appen
 `results.md`, which the job writes to its summary and uploads as the `render-benchmark` artifact.
 
 A missing or unreadable baseline fails `-PcheckRenderRegression` rather than passing it. In CI the
-job checks first: with no `ci/results.json` committed it skips the gate with a notice.
+job checks first: with no `ci/results.json` committed it records one instead of checking, with a
+notice, so the first run of the workflow produces the baseline.
 
-**Recording it:** dispatch the *Render benchmark* workflow with `record_baseline` ticked, download
-its `ci-render-baseline` artifact and commit the two files to `composeApp/benchmarks/ci/`.
+**Recording it:** dispatch the *Render benchmark* workflow with `record_baseline` ticked (or let a
+run with no baseline committed record one), download its `ci-render-baseline` artifact and commit
+the two files to `composeApp/benchmarks/ci/`.
 Re-record the same way after a change that is meant to make rendering slower, or when GitHub moves
 `ubuntu-latest` to different hardware. Never commit a `ci/` recorded on a developer machine.
 
