@@ -34,7 +34,7 @@ import org.jetbrains.compose.resources.stringResource
  * Source/NDI rows on the Projection tab and the Live Preview sidebar's swap menu, since all three
  * do exactly the same job: write `activeProfileId`.
  *
- * [onDontUse], given only for a screen row that drives a monitor, adds **Don't use** under Blank:
+ * [onDontUse], given only for a screen row that drives a monitor, adds **Don't use** first, above Blank:
  * the monitor is marked unused and the row set to None -- see `ProjectionSettings.withScreenUnused`.
  * The network outputs have no monitor, so they never pass it.
  */
@@ -81,12 +81,6 @@ internal fun OutputProfilePicker(
             )
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(
-                text = {
-                    Text(stringResource(Res.string.output_profile_blank), style = MaterialTheme.typography.bodySmall)
-                },
-                onClick = { expanded = false; onPick(BLANK_OUTPUT_PROFILE_ID) },
-            )
             if (onDontUse != null) {
                 DropdownMenuItem(
                     text = {
@@ -98,6 +92,12 @@ internal fun OutputProfilePicker(
                     onClick = { expanded = false; onDontUse() },
                 )
             }
+            DropdownMenuItem(
+                text = {
+                    Text(stringResource(Res.string.output_profile_blank), style = MaterialTheme.typography.bodySmall)
+                },
+                onClick = { expanded = false; onPick(BLANK_OUTPUT_PROFILE_ID) },
+            )
             profiles.forEach { profile ->
                 DropdownMenuItem(
                     text = { Text(profile.name.ifBlank { profile.id }, style = MaterialTheme.typography.bodySmall) },
