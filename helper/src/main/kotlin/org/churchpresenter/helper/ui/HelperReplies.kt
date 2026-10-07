@@ -144,6 +144,10 @@ internal fun ReplyBody(
             Said(HelperText.Res(Res.string.helper_unknown))
             ExampleChips(ask)
         }
+        HelperReply.Greeting -> {
+            Said(HelperText.Res(Res.string.helper_greeting))
+            ExampleChips(ask)
+        }
         is HelperReply.Touring -> TourBody(state, reply, executor)
         HelperReply.DisplaySetup -> DisplaySetupPanel(state, inputs.screens, executor)
     }

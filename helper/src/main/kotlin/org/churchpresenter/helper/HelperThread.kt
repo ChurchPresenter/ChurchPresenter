@@ -3,6 +3,7 @@ package org.churchpresenter.helper
 import androidx.compose.runtime.mutableStateListOf
 import org.churchpresenter.helper.action.describe
 import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.helper_greeting
 import org.churchpresenter.strings.generated.resources.helper_shortcut_is
 import org.churchpresenter.strings.generated.resources.helper_unknown
 import org.jetbrains.compose.resources.StringResource
@@ -47,6 +48,7 @@ internal fun HelperReply.summary(undoLabel: HelperText?): HelperText? = when (th
     is HelperReply.Shortcut ->
         helperText(Res.string.helper_shortcut_is, helperText(action.descriptionRes), HelperText.KeyFor(action))
     HelperReply.Unknown -> helperText(Res.string.helper_unknown)
+    HelperReply.Greeting -> helperText(Res.string.helper_greeting)
     is HelperReply.Touring -> tour.steps[index].hint
     HelperReply.Idle, HelperReply.DisplaySetup -> null
 }

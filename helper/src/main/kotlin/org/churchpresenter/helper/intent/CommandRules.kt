@@ -23,9 +23,12 @@ internal fun setupWizardRule(r: Request): Resolution? =
 
 internal fun displaySetupRule(r: Request): Resolution? {
     if (r.has(Vocabulary.SETTINGS) || r.isQuestion && !r.says("set up")) return null
-    if (r.says("identify") && r.has(Vocabulary.SCREEN)) return act(HelperAction.IdentifyScreens)
+    if (r.says("identify") && r.has(Vocabulary.SCREEN) || r.hasPhrase(Vocabulary.WHICH_SCREEN)) {
+        return act(HelperAction.IdentifyScreens)
+    }
     val aboutScreens = r.has(Vocabulary.SCREEN) || r.says("second screen")
-    val settingUp = r.has(Vocabulary.SETUP) || r.says("set up") || r.first == "help"
+    val settingUp = r.has(Vocabulary.SETUP) || r.says("set up") || r.first == "help" ||
+        r.hasPhrase(Vocabulary.SCREEN_TROUBLE)
     val showOrClear = r.has(Vocabulary.CLEAR) || r.first in setOf("show", "hide")
     return if (aboutScreens && settingUp && !showOrClear) act(HelperAction.StartDisplaySetup) else null
 }
@@ -39,8 +42,8 @@ internal fun backgroundColorRule(r: Request): Resolution? {
 
 internal fun fontSizeRule(r: Request): Resolution? {
     val direction = when {
-        r.has(Vocabulary.BIGGER) -> 1
-        r.has(Vocabulary.SMALLER) -> -1
+        r.has(Vocabulary.BIGGER) || r.hasPhrase(Vocabulary.TOO_SMALL) -> 1
+        r.has(Vocabulary.SMALLER) || r.hasPhrase(Vocabulary.TOO_BIG) -> -1
         else -> return null
     }
     val aboutText = r.has(Vocabulary.FONT) || r.has(Vocabulary.SONG) || r.has(Vocabulary.BIBLE)

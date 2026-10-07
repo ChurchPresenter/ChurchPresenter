@@ -20,16 +20,24 @@ internal fun navigationRule(r: Request): Resolution? {
  * "how do I" as the question, since the lyrics are the operator's to type.
  */
 internal fun songTranslationRule(r: Request): Resolution? =
-    if (NavigationTopics.isSongTranslation(r.text, r.context.currentTab)) {
-        act(HelperAction.Highlight(NavigationTopics.songTranslation()))
+    if (HowToTopics.isSongTranslation(r.text, r.context.currentTab)) {
+        act(HelperAction.Highlight(HowToTopics.songTranslation()))
     } else {
         null
     }
 
 /** A song's chords, asked or told — "add chords to amazing grace" is the operator's to type, too. */
 internal fun songChordsRule(r: Request): Resolution? =
-    if (NavigationTopics.isSongChords(r.text, r.context.currentTab)) {
-        act(HelperAction.Highlight(NavigationTopics.songChords()))
+    if (HowToTopics.isSongChords(r.text, r.context.currentTab)) {
+        act(HelperAction.Highlight(HowToTopics.songChords()))
+    } else {
+        null
+    }
+
+/** Adding a Bible translation, asked or told — it is downloaded in Settings, then shown. */
+internal fun bibleTranslationRule(r: Request): Resolution? =
+    if (HowToTopics.isBibleTranslation(r.text)) {
+        act(HelperAction.Highlight(HowToTopics.bibleTranslation()))
     } else {
         null
     }

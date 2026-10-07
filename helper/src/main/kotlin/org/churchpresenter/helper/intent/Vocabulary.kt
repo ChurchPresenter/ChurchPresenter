@@ -58,11 +58,36 @@ internal object Vocabulary {
     /** "langauge", "languge", "langage" → "language", so the phrases above match however it is typed. */
     fun normalizeLanguage(text: String): String = text.replace(Regex("""\blang\p{L}*"""), "language")
 
+    /** "Text is too small" asks for bigger; "too big" for smaller. */
+    val TOO_SMALL = listOf("too small", "too tiny", "hard to read", "can't read", "cannot read")
+    val TOO_BIG = listOf("too big", "too large", "too much text", "doesn't fit", "does not fit")
+
+    /** A screen that is not doing what it should — display setup is the answer. */
+    val SCREEN_TROUBLE = listOf(
+        "not working", "doesn't work", "does not work", "isn't working", "not showing", "won't show",
+        "nothing shows", "nothing on", "no picture", "no signal", "is black", "stays black",
+    )
+
+    /** Asking which screen is which — numbering them answers it. */
+    val WHICH_SCREEN = listOf("which screen", "which display", "which monitor", "which projector", "number the")
+
+    /** A greeting, or asking what the helper can do. */
+    val GREETING = setOf("hello", "hi", "hey", "help", "hiya", "howdy")
+    val ABOUT_HELPER = listOf("what can you do", "what do you do", "who are you", "what are you", "how do you work")
+    /** Words a greeting comes padded with: "hi there wick", "help me please". */
+    val FILLER = setOf("there", "wick", "me", "please", "pls", "again", "i", "need")
+    val THANKS = listOf("thanks", "thank you", "thx", "cheers", "much appreciated", "great job", "awesome")
+
     /** Word starts that mean chords. */
     const val CHORD = "chord"
 
     /** "Cords" — the common misspelling, taken only beside a song word, since a cord is also a cable. */
     val CHORD_MISSPELLINGS = setOf("cord", "cords")
+
+    /** Words that, beside a Bible, ask to add one: "download a Bible", "get another Bible", "new version". */
+    val GET = setOf(
+        "add", "download", "get", "install", "import", "new", "another", "more", "other", "version", "versions",
+    )
 
     /** Word starts that make "translation" mean the Bible's, not a song's. */
     val BIBLE_NAMES = listOf("bible", "scripture")

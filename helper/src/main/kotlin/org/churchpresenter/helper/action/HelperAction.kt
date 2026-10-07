@@ -111,4 +111,14 @@ sealed interface HelperAction {
 
     /** Take back the last change the helper made. */
     data object UndoLast : HelperAction
+
+    /** "Hello", "help", "what can you do": say hello, with examples of what to ask. */
+    data object Greet : HelperAction {
+        override val needsConfirmation get() = false
+    }
+
+    /** "Thanks": say you're welcome. */
+    data object Thanks : HelperAction {
+        override val needsConfirmation get() = false
+    }
 }

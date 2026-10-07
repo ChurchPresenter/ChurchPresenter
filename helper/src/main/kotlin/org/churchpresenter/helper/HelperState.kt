@@ -18,6 +18,7 @@ import org.churchpresenter.strings.generated.resources.helper_done
 import org.churchpresenter.strings.generated.resources.helper_nothing_to_undo
 import org.churchpresenter.strings.generated.resources.helper_undo_done
 import org.churchpresenter.strings.generated.resources.helper_undo_stale
+import org.churchpresenter.strings.generated.resources.helper_youre_welcome
 
 /** What the helper's bubble is showing below its header. */
 sealed interface HelperReply {
@@ -42,6 +43,9 @@ sealed interface HelperReply {
 
     /** The request was not understood. */
     data object Unknown : HelperReply
+
+    /** Hello, and examples of what to ask. */
+    data object Greeting : HelperReply
 
     /** Pointing at [tour]'s step [index]. */
     data class Touring(val tour: GuideTour, val index: Int) : HelperReply
@@ -145,6 +149,8 @@ class HelperState(val session: GuideSession = GuideSession()) {
             is HelperAction.Highlight -> showStep(action.tour, 0, executor)
             is HelperAction.ShowShortcut -> show(HelperReply.Shortcut(action.action))
             HelperAction.UndoLast -> undo()
+            HelperAction.Greet -> show(HelperReply.Greeting)
+            HelperAction.Thanks -> show(HelperReply.Message(helperText(Res.string.helper_youre_welcome)))
             else -> onOutcome(executor.execute(action), executor)
         }
     }

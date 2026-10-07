@@ -56,6 +56,7 @@ class RuleIntentResolver : IntentResolver {
             ::shortcutRule,
             ::songTranslationRule,
             ::songChordsRule,
+            ::bibleTranslationRule,
             ::navigationRule,
             ::openSettingsRule,
             ::verseRule,
@@ -64,6 +65,8 @@ class RuleIntentResolver : IntentResolver {
             ::clearRule,
             ::takeRule,
             ::outputsRule,
+            // Last: "help me set up the screens" and "thanks, now clear it" are requests first.
+            ::chatRule,
         )
     }
 }

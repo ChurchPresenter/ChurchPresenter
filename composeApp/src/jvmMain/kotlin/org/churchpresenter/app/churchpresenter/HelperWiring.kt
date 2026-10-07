@@ -195,7 +195,8 @@ internal class AppHelperExecutor(private val root: AppRootState) : HelperActionE
         }
         is HelperAction.ShowTab -> showTab(action.tab)
         // Handled by the helper itself; never sent here.
-        is HelperAction.Highlight, is HelperAction.ShowShortcut, HelperAction.UndoLast -> ActionOutcome.Done()
+        is HelperAction.Highlight, is HelperAction.ShowShortcut, HelperAction.UndoLast,
+        HelperAction.Greet, HelperAction.Thanks -> ActionOutcome.Done()
     }
 
     /** Slides and pictures step from here; songs and the Bible by their own tab's keys. */

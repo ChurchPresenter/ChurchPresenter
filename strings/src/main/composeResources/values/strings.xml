@@ -2969,6 +2969,7 @@
     <string name="helper_more">More</string>
     <string name="helper_clear">Clear conversation</string>
     <string name="helper_greeting">Hi, I'm Wick. Tell me what you'd like to do, or ask where something is.</string>
+    <string name="helper_youre_welcome">You're welcome! Ask me any time.</string>
     <string name="helper_unknown">I didn't quite catch that. Try one of these:</string>
     <string name="helper_example_bg">Make the song background blue</string>
     <string name="helper_example_verse">Show John 3:16</string>
@@ -3027,12 +3028,20 @@
     <!-- %1$s is the song editor's Chords switch (song_chords). -->
     <string name="helper_hint_chords_switch">Switch %1$s on, if it is off. The chord tools open under the preview.</string>
     <string name="helper_hint_chord_palette">Put the cursor just before the syllable and click a chord here. You can also type chords in square brackets, like [G]Amazing [C]grace, or paste a sheet with chords above the lyrics and it is converted for you.</string>
+    <!-- %1$s is the Download Bibles button (bible_catalog_button). -->
+    <string name="helper_hint_bible_download">Click %1$s to pick a Bible from the online catalogues and download it. Already have a Bible file? Put it in this folder.</string>
+    <!-- %1$s is the catalog's Download button (bible_catalog_download). -->
+    <string name="helper_hint_bible_catalog">Pick the Bible you want and click %1$s. Type a name or language above to narrow the list.</string>
+    <string name="helper_hint_bible_page">When it has downloaded, open the Bible page.</string>
+    <!-- %1$s is the Bible page's Add translation picker (add_bible_translation). -->
+    <string name="helper_hint_bible_add_translation">Choose it from %1$s to show it, beside any Bible already there.</string>
     <string name="helper_hint_add_song_language">Click “%1$s”, name the language, then type or paste its lyrics.</string>
     <string name="helper_hint_schedule">This is your schedule. Add songs, verses and slides here to plan the service.</string>
     <string name="helper_hint_clear">This clears everything off the audience screen.</string>
     <string name="helper_hint_take">This sends what is in the preview to the screen.</string>
     <string name="helper_hint_background">Backgrounds are set here.</string>
     <string name="helper_hint_settings">Settings open from here.</string>
+    <string name="helper_hint_server_page">Phones, tablets and Companion connect from this page. Turn the server on, then scan the code or open the address on the device.</string>
     <string name="helper_hint_projection_page">Screens and outputs are set up on this page.</string>
     <string name="helper_hint_live_preview">This shows what the audience sees right now.</string>
     <string name="helper_hint_toggle_outputs">This shows or hides the output windows.</string>

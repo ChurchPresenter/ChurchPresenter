@@ -6,6 +6,8 @@ import org.churchpresenter.helper.helperText
 import org.churchpresenter.helper.intent.helperTabName
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.helper_confirm_assign
+import org.churchpresenter.strings.generated.resources.helper_greeting
+import org.churchpresenter.strings.generated.resources.helper_youre_welcome
 import org.churchpresenter.strings.generated.resources.helper_confirm_bg_saved
 import org.churchpresenter.strings.generated.resources.helper_confirm_bg_service
 import org.churchpresenter.strings.generated.resources.helper_confirm_clear
@@ -68,6 +70,8 @@ fun HelperAction.describe(undoLabel: HelperText? = null): HelperText = when (thi
     is HelperAction.ShowTab -> helperText(Res.string.helper_confirm_show_tab, helperTabName(tab))
     is HelperAction.Highlight -> helperText(Res.string.helper_show_me)
     is HelperAction.ShowShortcut -> helperText(action.descriptionRes)
+    HelperAction.Greet -> helperText(Res.string.helper_greeting)
+    HelperAction.Thanks -> helperText(Res.string.helper_youre_welcome)
     HelperAction.UndoLast -> undoLabel
         ?.let { helperText(Res.string.helper_confirm_undo, it) }
         ?: helperText(Res.string.helper_nothing_to_undo)
