@@ -65,7 +65,12 @@ import org.churchpresenter.app.churchpresenter.utils.converterEvent
 import org.churchpresenter.app.churchpresenter.utils.songLibraryUsageEvent
 
 @Composable
-fun ConverterWindow(theme: ThemeMode, initialTab: Int = ConverterTab.BIBLES, onClose: () -> Unit) {
+fun ConverterWindow(
+    theme: ThemeMode,
+    initialTab: Int = ConverterTab.BIBLES,
+    initialSongSource: String? = null,
+    onClose: () -> Unit,
+) {
     LaunchedEffect(Unit) { UsageEvents.recordOncePerRun(UsageEvent.CONVERTER_OPENED) }
     val language = LocalLanguage.current
     // The converter is a separate module with its own `ResourceBundle`, which it initialises from
@@ -82,6 +87,7 @@ fun ConverterWindow(theme: ThemeMode, initialTab: Int = ConverterTab.BIBLES, onC
         AppWindowRoot(theme = theme) {
             ConverterApp(
                 initialTab = initialTab,
+                initialSongSource = initialSongSource,
                 onConverted = { sourceId -> converterEvent(sourceId)?.let { UsageEvents.record(it) } },
             )
         }

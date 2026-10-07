@@ -1,6 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.runtime.Composable
+import org.churchpresenter.converter.ui.ConverterTab
+import org.churchpresenter.helper.action.describe
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import org.churchpresenter.app.churchpresenter.dialogs.optionsTabIndexOf
@@ -177,6 +179,12 @@ internal class AppHelperExecutor(private val root: AppRootState) : HelperActionE
         HelperAction.OpenSetupWizard -> {
             root.showSetupWizard = true
             ActionOutcome.Done()
+        }
+        is HelperAction.OpenConverter -> {
+            root.converterInitialTab = ConverterTab.SONGS
+            root.converterInitialSource = action.sourceId
+            root.showConverterWindow = true
+            ActionOutcome.Done(message = action.describe())
         }
         HelperAction.OpenKeyboardShortcuts -> {
             root.showKeyboardShortcutsDialog = true

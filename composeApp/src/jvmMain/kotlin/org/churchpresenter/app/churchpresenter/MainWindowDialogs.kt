@@ -203,6 +203,7 @@ internal fun MainWindowScope.ToolWindows() {
             ConverterWindow(
                 theme = theme,
                 initialTab = converterInitialTab,
+                initialSongSource = converterInitialSource,
                 onClose = { showConverterWindow = false }
             )
         }

@@ -1,6 +1,9 @@
 package org.churchpresenter.helper.action
 
 import org.churchpresenter.helper.HelperText
+import org.churchpresenter.strings.generated.resources.helper_open_converter
+import org.churchpresenter.strings.generated.resources.helper_open_converter_documents
+import org.churchpresenter.strings.generated.resources.helper_open_converter_from
 import org.churchpresenter.helper.display.screenLabel
 import org.churchpresenter.helper.helperText
 import org.churchpresenter.helper.intent.helperTabName
@@ -70,6 +73,11 @@ fun HelperAction.describe(undoLabel: HelperText? = null): HelperText = when (thi
     is HelperAction.ShowTab -> helperText(Res.string.helper_confirm_show_tab, helperTabName(tab))
     is HelperAction.Highlight -> helperText(Res.string.helper_show_me)
     is HelperAction.ShowShortcut -> helperText(action.descriptionRes)
+    is HelperAction.OpenConverter -> when {
+        sourceId == DOCUMENTS_SOURCE -> helperText(Res.string.helper_open_converter_documents)
+        sourceName != null -> helperText(Res.string.helper_open_converter_from, sourceName)
+        else -> helperText(Res.string.helper_open_converter)
+    }
     HelperAction.Greet -> helperText(Res.string.helper_greeting)
     HelperAction.Thanks -> helperText(Res.string.helper_youre_welcome)
     HelperAction.UndoLast -> undoLabel
@@ -83,3 +91,6 @@ fun HelperAction.optionLabel(): HelperText = when (this) {
     is HelperAction.ChangeFontSize -> scopeName(scope)
     else -> describe()
 }
+
+/** The converter's id for lyrics read out of PDF, Word, PowerPoint and Keynote files. */
+internal const val DOCUMENTS_SOURCE = "documents"

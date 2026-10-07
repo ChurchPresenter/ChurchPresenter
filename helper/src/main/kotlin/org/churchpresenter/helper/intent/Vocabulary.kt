@@ -104,6 +104,37 @@ internal object Vocabulary {
     /** Asking to bring files in, rather than to put them on screen. */
     val ADD = setOf("add", "import", "load", "upload", "open", "choose", "pick", "select", "get")
 
+    /**
+     * Bringing songs over from another program. Not "move" or "switch": "move the song up" and
+     * "switch to songs" are about the app's own songs.
+     */
+    val CONVERT = setOf(
+        "convert", "converting", "conversion", "converter", "import", "importing", "migrate", "migrating",
+        "transfer", "transferring",
+    )
+
+    /**
+     * The programs the converter reads songs from, by how people write their names, with its id
+     * for each and the name as the program writes it. Only those its source list shows: a source
+     * it withholds is left out here too.
+     */
+    val SONG_SOURCES = listOf(
+        SongSourceWords(listOf("songbeamer", "song beamer"), "songbeamer", "SongBeamer"),
+        SongSourceWords(listOf("openlp", "open lp"), "openlp", "OpenLP"),
+        SongSourceWords(listOf("opensong"), "opensong", "OpenSong"),
+        SongSourceWords(listOf("freeshow", "free show"), "freeshow", "FreeShow"),
+        SongSourceWords(listOf("freeworship", "free worship"), "freeworship", "Free Worship"),
+        SongSourceWords(listOf("easyslides", "easy slides"), "easyslides", "EasySlides"),
+        SongSourceWords(listOf("quelea"), "quelea", "Quelea"),
+        SongSourceWords(listOf("softprojector", "soft projector"), "softprojector", "SoftProjector"),
+        SongSourceWords(listOf("videopsalm", "video psalm"), "videopsalm", "VideoPsalm"),
+    )
+
+    /** Documents the converter reads lyrics out of — only taken with a song word beside them. */
+    val SONG_DOCUMENTS = setOf(
+        "pdf", "pdfs", "word", "docx", "doc", "powerpoint", "pptx", "ppt", "keynote", "document", "documents",
+    )
+
     /** Word starts that mean chords. */
     const val CHORD = "chord"
 
@@ -199,3 +230,6 @@ internal object ColorNames {
         return "#" + moved.joinToString("") { "%02X".format(it) }
     }
 }
+
+/** A program the converter reads songs from: the [phrases] that name it, its [id] and its [name]. */
+internal class SongSourceWords(val phrases: List<String>, val id: String, val name: String)

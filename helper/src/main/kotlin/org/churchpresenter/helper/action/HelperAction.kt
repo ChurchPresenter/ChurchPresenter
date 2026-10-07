@@ -112,6 +112,14 @@ sealed interface HelperAction {
     /** Take back the last change the helper made. */
     data object UndoLast : HelperAction
 
+    /**
+     * Open the Converter on its Songs tab, with [sourceId] — a converter song-source id — chosen
+     * when the operator named the program; [sourceName] is how that program writes its name.
+     */
+    data class OpenConverter(val sourceId: String? = null, val sourceName: String? = null) : HelperAction {
+        override val needsConfirmation get() = false
+    }
+
     /** "Hello", "help", "what can you do": say hello, with examples of what to ask. */
     data object Greet : HelperAction {
         override val needsConfirmation get() = false

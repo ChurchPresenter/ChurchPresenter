@@ -174,6 +174,8 @@ internal class AppRootState(
     // Which tab it opens on. The Help menu wants the converter as a whole; the setup wizard's
     // song step wants Songs, because that is the format problem it just described.
     var converterInitialTab by mutableStateOf(ConverterTab.BIBLES)
+    // The song source its Songs tab opens on, when the helper named one; null opens the default.
+    var converterInitialSource by mutableStateOf<String?>(null)
     var showSongLibraryWindow by mutableStateOf(false)
     var showCalendarWindow by mutableStateOf(false)
     // Raised to have the Calendar Manager open a new service on the Schedule tab's rows.

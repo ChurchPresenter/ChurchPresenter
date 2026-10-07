@@ -51,6 +51,7 @@ internal fun MainWindowScope.AppMenuBar() {
             ),
             onConverter = {
                 converterInitialTab = ConverterTab.BIBLES
+                converterInitialSource = null
                 showConverterWindow = true
             },
             onSongLibrary = { showSongLibraryWindow = true },

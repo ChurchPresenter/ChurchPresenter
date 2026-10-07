@@ -385,6 +385,7 @@ private fun AppRootState.FirstRunDialogs() {
             onOpenConverter = {
                 UsageEvents.record(UsageEvent.SETUP_WIZARD_OPENED_CONVERTER)
                 converterInitialTab = ConverterTab.SONGS
+                converterInitialSource = null
                 showConverterWindow = true
             },
             onDismiss = {
