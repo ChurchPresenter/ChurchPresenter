@@ -1,5 +1,6 @@
 package org.churchpresenter.bibleengine
 
+import org.churchpresenter.bibleengine.bible.EngineTranslation
 import org.churchpresenter.bibleengine.bible.SpbLoader
 import org.churchpresenter.bibleengine.detection.BookResolver
 import org.churchpresenter.bibleengine.engine.DetectionEngine
@@ -39,6 +40,13 @@ class EngineHandle internal constructor(val boundPort: Int, private val stopFn: 
  * engine in-process when STT connects and talks to it over the WebSocket.
  */
 object EngineServer {
+    /** How many ports from the requested one are tried before giving up. */
+    private const val PORT_ATTEMPTS = 10
+
+    /** The WebSocket server's stop: the grace period, then the hard timeout. */
+    private const val STOP_GRACE_MS = 500L
+    private const val STOP_TIMEOUT_MS = 1000L
+
     fun start(sttUrl: String, bibleRoot: String, port: Int, bibleFiles: List<String> = emptyList()): EngineHandle? {
         if (bibleRoot.isBlank()) {
             System.err.println("bible-engine: bible root not configured")
@@ -75,6 +83,21 @@ object EngineServer {
                     .onFailure { System.err.println("bible-engine: version corpus failed to build — ${it.message}") }
             }, "ble-version-corpus").apply { isDaemon = true }.start()
         }
+        return startServing(sttUrl, bibleRoot, port, translations, versionCorpus)
+    }
+
+    /**
+     * Builds the detection engine over [translations], binds its WebSocket server on the first free
+     * port from [port], and connects the STT client when [sttUrl] is set. Null when no port in the
+     * range is free or the STT url does not parse.
+     */
+    private fun startServing(
+        sttUrl: String,
+        bibleRoot: String,
+        port: Int,
+        translations: List<EngineTranslation>,
+        versionCorpus: AtomicReference<VersionCorpus>,
+    ): EngineHandle? {
         val broadcaster = Broadcaster()
         val detectionEngine = DetectionEngine(
             translations,
@@ -109,7 +132,7 @@ object EngineServer {
         // unreachable STT client). The requested port may be taken — most commonly because it
         // collides with ChurchPresenter's Companion server — so try a small range and use the first
         // free port. Local clients learn the actual port via EngineHandle.boundPort.
-        val bound = (port until port + 10).firstNotNullOfOrNull { p ->
+        val bound = (port until port + PORT_ATTEMPTS).firstNotNullOfOrNull { p ->
             runCatching {
                 embeddedServer(Netty, port = p) {
                     install(WebSockets) {
@@ -123,7 +146,7 @@ object EngineServer {
             }.getOrNull()?.let { it to p }
         }
         if (bound == null) {
-            System.err.println("bible-engine: failed to bind WS server on ports $port..${port + 9}")
+            System.err.println("bible-engine: failed to bind WS server on ports $port..${port + PORT_ATTEMPTS - 1}")
             return null
         }
         val (server, boundPort) = bound
@@ -145,7 +168,7 @@ object EngineServer {
             } catch (e: URISyntaxException) {
                 // IO.socket's one failure: the url does not parse. Connecting itself is asynchronous.
                 System.err.println("bible-engine: failed to connect STT client — ${e.message}")
-                runCatching { server.stop(500, 1000) }
+                runCatching { server.stop(STOP_GRACE_MS, STOP_TIMEOUT_MS) }
                 runCatching { broadcaster.close() }
                 runCatching { detectionScope.cancel() }
                 runCatching { detectionExecutor.shutdown() }
@@ -154,7 +177,7 @@ object EngineServer {
 
         return EngineHandle(boundPort) {
             runCatching { sttClient?.disconnect() }
-            runCatching { server.stop(500, 1000) }
+            runCatching { server.stop(STOP_GRACE_MS, STOP_TIMEOUT_MS) }
             runCatching { broadcaster.close() }
             runCatching { detectionScope.cancel() }
             runCatching { detectionExecutor.shutdown() }

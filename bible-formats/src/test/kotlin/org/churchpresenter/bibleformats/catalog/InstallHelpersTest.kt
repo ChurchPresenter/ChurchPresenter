@@ -154,10 +154,67 @@ class InstallHelpersTest {
     }
 
     @Test
-    fun `an install into a usable directory gets an empty scratch folder`() {
-        val scratch = BibleInstallSupport.prepareInstall(dir)
-        assertEquals(BibleInstallSupport.scratchIn(dir), scratch)
-        assertTrue(scratch!!.isDirectory)
+    fun `an install into a usable directory gets an empty scratch folder inside it`() {
+        val scratch = BibleInstallSupport.prepareInstall(dir)!!
+        // Inside the target, so the finishing move stays a rename on one filesystem.
+        assertEquals(dir, scratch.parentFile)
+        assertTrue(scratch.name.startsWith(BibleInstallSupport.SCRATCH_PREFIX + "-"), scratch.name)
+        assertTrue(scratch.isDirectory)
+        assertEquals(0, scratch.listFiles()?.size)
+    }
+
+    @Test
+    fun `two installs into the same folder do not clobber each other's scratch`() {
+        // Each catalogue tab runs its own install into the one Bible folder. The second starting
+        // used to empty the first's scratch, and either ending deleted the other's.
+        val first = BibleInstallSupport.prepareInstall(dir)!!
+        val firstDownload = File(first, "module.xml").apply { writeText("half of the first download") }
+
+        val second = BibleInstallSupport.prepareInstall(dir)!!
+        assertTrue(first != second, "each install has a folder of its own")
+        assertTrue(firstDownload.isFile, "starting the second install left the first's download alone")
+
+        second.deleteRecursively() // what the second install's finally does
+        assertEquals("half of the first download", firstDownload.readText())
+    }
+
+    @Test
+    fun `a module being written is never an spb file in the scratch folder`() {
+        val scratch = BibleInstallSupport.prepareInstall(dir)!!
+        val part = BibleInstallSupport.partFileIn(scratch, "kjv.spb")
+        assertEquals(scratch, part.parentFile)
+        assertFalse(part.extension.equals("spb", ignoreCase = true), part.name)
+    }
+
+    @Test
+    fun `scratch left by a crash is swept, and a live install's is not`() {
+        val now = System.currentTimeMillis()
+        val dayAndMore = 25L * 60 * 60 * 1000
+        val legacy = File(dir, ".cp-install").apply { mkdirs() }
+        File(legacy, "kjv.spb").writeText("##Title:\tleft over")
+        val abandoned = File(dir, ".cp-install-old").apply { mkdirs() }
+        File(abandoned, "module.zip").writeText("x")
+        abandoned.setLastModified(now - dayAndMore)
+        val live = File(dir, ".cp-install-live").apply { mkdirs() }
+        val probeLike = File(dir, ".cp-install-write-test-1").apply { writeText("") }
+        probeLike.setLastModified(now - dayAndMore)
+        val unrelated = File(dir, "Old Bibles").apply { mkdirs() }
+        unrelated.setLastModified(now - dayAndMore)
+
+        BibleInstallSupport.sweepStaleScratch(dir, now = now)
+
+        assertFalse(legacy.exists(), "the old shared folder is never in use any more")
+        assertFalse(abandoned.exists(), "untouched for a day")
+        assertTrue(live.isDirectory, "another install may be writing into it")
+        assertTrue(probeLike.isFile, "only folders are swept")
+        assertTrue(unrelated.isDirectory, "only scratch folders are swept")
+    }
+
+    @Test
+    fun `preparing an install sweeps what a crash left behind`() {
+        val legacy = File(dir, ".cp-install").apply { mkdirs() }
+        BibleInstallSupport.prepareInstall(dir)
+        assertFalse(legacy.exists())
     }
 
     @Test

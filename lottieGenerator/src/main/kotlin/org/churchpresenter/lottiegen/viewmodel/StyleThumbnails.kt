@@ -41,10 +41,15 @@ private const val THUMBNAIL_PADDING_PX = 6
  * [render] turns one style's Lottie into a picture; it is the one step that needs a real Compose
  * scene, so it is a parameter and a test passes a stand-in. Pictures arrive one style at a time,
  * so the menu fills in while it is being built rather than all at once.
+ *
+ * [diagnostics] records what each build did -- see [ThumbnailDiagnostics]; it is read, never acted on.
  */
 class StyleThumbnails(
     private val scope: CoroutineScope,
-    private val render: suspend (lottieJson: String, config: LottieGenConfig) -> ImageBitmap? = ::renderThumbnail,
+    private val diagnostics: ThumbnailDiagnostics = ThumbnailDiagnostics(),
+    private val render: suspend (lottieJson: String, config: LottieGenConfig) -> ImageBitmap? = { lottie, config ->
+        renderThumbnail(lottie, config, diagnostics)
+    },
     private val styleIds: () -> List<String> = { StyleCatalog.entries.map { it.id } },
     private val debounceMs: Long = THUMBNAIL_DEBOUNCE_MS,
 ) {
@@ -56,40 +61,66 @@ class StyleThumbnails(
     private var job: Job? = null
     private val json = Json
 
+    /** What the builds have done so far, as text -- for a picture that should be there and is not. */
+    fun diagnostics(): String = diagnostics.describe()
+
     /** Draws every style for [config], unless that is what is already drawn or being drawn. */
     fun request(config: LottieGenConfig) {
         val next = thumbnailKey(config)
-        if (next == key) return
+        if (next == key) {
+            diagnostics.requested(config.style, job = null)
+            return
+        }
         key = next
         job?.cancel()
-        job = scope.launch {
+        val build = scope.launch {
             delay(debounceMs)
+            diagnostics.buildStarted()
             val built = LinkedHashMap<String, ImageBitmap>()
             for (id in styleIds()) {
                 val picture = drawOne(next.copy(style = id)) ?: continue
-                if (key != next) return@launch
+                if (key != next) {
+                    diagnostics.buildSuperseded()
+                    return@launch
+                }
                 built[id] = picture
-                thumbnails = thumbnails + (id to picture)
+                publish(thumbnails + (id to picture))
             }
             // A style that failed to draw this time must not keep the last config's picture.
-            if (key == next) thumbnails = built
+            if (key == next) {
+                publish(built)
+                diagnostics.buildFinished()
+            }
         }
+        job = build
+        diagnostics.requested(config.style, build)
+    }
+
+    private fun publish(pictures: Map<String, ImageBitmap>) {
+        thumbnails = pictures
+        diagnostics.published(pictures.keys)
     }
 
     // A style that cannot be drawn -- a composition that never loads -- simply has no picture: the
     // menu still lists it by name, and picking it shows the real error in the preview.
     @Suppress("SwallowedException")
-    private suspend fun drawOne(config: LottieGenConfig): ImageBitmap? = try {
-        val lottie = withContext(Dispatchers.Default) {
-            json.encodeToString(JsonObject.serializer(), LottieGenerator.generate(config))
+    private suspend fun drawOne(config: LottieGenConfig): ImageBitmap? {
+        val picture = try {
+            val lottie = withContext(Dispatchers.Default) {
+                json.encodeToString(JsonObject.serializer(), LottieGenerator.generate(config))
+            }
+            renderWithRetry(lottie, config)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IllegalStateException) {
+            diagnostics.recordIfAbsent(config.style, ThumbnailDiagnostics.Outcome.ILLEGAL_STATE, e.message)
+            null
+        } catch (e: IllegalArgumentException) {
+            diagnostics.record(config.style, ThumbnailDiagnostics.Outcome.ILLEGAL_ARGUMENT, e.message)
+            null
         }
-        renderWithRetry(lottie, config)
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: IllegalStateException) {
-        null
-    } catch (e: IllegalArgumentException) {
-        null
+        if (picture == null) diagnostics.recordIfAbsent(config.style, ThumbnailDiagnostics.Outcome.RENDER_NULL)
+        return picture
     }
 
     // The first still of a session parses its Lottie cold, and on a slow or busy machine that can
@@ -97,11 +128,20 @@ class StyleThumbnails(
     // being edited could stay blank until the config next changed.
     @Suppress("SwallowedException")
     private suspend fun renderWithRetry(lottie: String, config: LottieGenConfig): ImageBitmap? = try {
-        render(lottie, config)
+        render(lottie, config)?.also { diagnostics.record(config.style, ThumbnailDiagnostics.Outcome.DRAWN) }
     } catch (e: CancellationException) {
         throw e
     } catch (e: IllegalStateException) {
-        render(lottie, config)
+        retry(lottie, config)
+    }
+
+    private suspend fun retry(lottie: String, config: LottieGenConfig): ImageBitmap? = try {
+        render(lottie, config)?.also { diagnostics.record(config.style, ThumbnailDiagnostics.Outcome.DRAWN_ON_RETRY) }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: IllegalStateException) {
+        diagnostics.record(config.style, ThumbnailDiagnostics.Outcome.ILLEGAL_STATE_TWICE, e.message)
+        throw e
     }
 }
 
@@ -137,12 +177,19 @@ internal fun croppedThumbnail(pixels: IntArray, width: Int, height: Int): Pair<I
     return StillFrame.cropRegion(pixels, width, height, region, fill = 0) to region
 }
 
-/** One style's still at quarter scale, cropped to what it draws. */
-private suspend fun renderThumbnail(lottieJson: String, config: LottieGenConfig): ImageBitmap? {
+/** One style's still at quarter scale, cropped to what it draws; a blank still is noted in [diagnostics]. */
+private suspend fun renderThumbnail(
+    lottieJson: String,
+    config: LottieGenConfig,
+    diagnostics: ThumbnailDiagnostics,
+): ImageBitmap? {
     val width = (config.canvasW / THUMBNAIL_SCALE).coerceAtLeast(1)
     val height = (config.canvasH / THUMBNAIL_SCALE).coerceAtLeast(1)
     val pixels = StillFrame.render(lottieJson, width, height, thumbnailProgress(config))
-    val (cropped, region) = croppedThumbnail(pixels, width, height) ?: return null
+    val (cropped, region) = croppedThumbnail(pixels, width, height) ?: run {
+        diagnostics.record(config.style, ThumbnailDiagnostics.Outcome.BLANK)
+        return null
+    }
     val image = BufferedImage(region.width, region.height, BufferedImage.TYPE_INT_ARGB)
     image.setRGB(0, 0, region.width, region.height, cropped, 0, region.width)
     return image.toComposeImageBitmap()

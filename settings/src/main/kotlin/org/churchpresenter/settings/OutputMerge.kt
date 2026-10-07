@@ -100,6 +100,8 @@ fun ProjectionSettings.mergeMember(key: String, deckLinkSize: (Int) -> Pair<Int,
                 val (w, h) = deckLinkSize(a.targetDisplay) ?: (DEFAULT_WIDTH to DEFAULT_HEIGHT)
                 MergeMember(key, MergeKind.DECKLINK, w, h)
             }
+            // A monitor marked unused is never part of a picture: the merge reads as not following.
+            isScreenUnused(a.targetScreenKey) -> return null
             a.targetDisplay >= 0 && a.targetBoundsW > 0 && a.targetBoundsH > 0 ->
                 MergeMember(key, MergeKind.REAL_DISPLAY, a.targetBoundsW, a.targetBoundsH)
             else -> MergeMember(key, MergeKind.DEV_WINDOW, a.devWindowWidth, a.devWindowHeight)

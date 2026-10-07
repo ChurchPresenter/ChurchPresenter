@@ -13,6 +13,9 @@ internal object MotionPathFlattener {
     private const val CURVE_SUBDIVISIONS = 16
     private const val RESAMPLE_POINTS = 48
 
+    /** A cubic segment's control points and end point. */
+    private const val CUBIC_POINTS = 3
+
     fun flatten(path: String): List<Pair<Double, Double>>? {
         val points = parse(path) ?: return null
         if (points.size < 2) return points
@@ -22,72 +25,94 @@ internal object MotionPathFlattener {
     private fun parse(path: String): List<Pair<Double, Double>>? {
         val tokens = path.trim().split(Regex("[\\s,]+")).filter { it.isNotEmpty() }
         if (tokens.isEmpty()) return null
-        val points = mutableListOf<Pair<Double, Double>>()
-        var cx = 0.0
-        var cy = 0.0
-        var startX = 0.0
-        var startY = 0.0
-        var i = 0
+        return try {
+            PathReader(tokens).read()
+        } catch (_: Exception) {
+            null
+        }
+    }
 
-        fun number(): Double? = tokens.getOrNull(i)?.toDoubleOrNull()?.also { i++ }
+    /** Walks the path's tokens command by command, keeping the pen and the subpath's start. */
+    private class PathReader(private val tokens: List<String>) {
+        private val points = mutableListOf<Pair<Double, Double>>()
+        private var i = 0
+        private var cx = 0.0
+        private var cy = 0.0
+        private var startX = 0.0
+        private var startY = 0.0
 
-        try {
+        /** The polyline, or null at the first command that is unknown or short of numbers. */
+        fun read(): List<Pair<Double, Double>>? {
             while (i < tokens.size) {
                 val command = tokens[i]
                 i++
                 val relative = command.length == 1 && command[0].isLowerCase()
-                when (command.uppercase()) {
-                    "M" -> {
-                        val x = number() ?: return null
-                        val y = number() ?: return null
-                        cx = if (relative) cx + x else x
-                        cy = if (relative) cy + y else y
-                        startX = cx
-                        startY = cy
-                        points.add(cx to cy)
-                    }
-                    "L" -> {
-                        // Polyline form: L may be followed by several coordinate pairs.
-                        while (tokens.getOrNull(i)?.toDoubleOrNull() != null) {
-                            val x = number() ?: return null
-                            val y = number() ?: return null
-                            cx = if (relative) cx + x else x
-                            cy = if (relative) cy + y else y
-                            points.add(cx to cy)
-                        }
-                    }
-                    "C" -> {
-                        while (tokens.getOrNull(i)?.toDoubleOrNull() != null) {
-                            val x1 = number() ?: return null
-                            val y1 = number() ?: return null
-                            val x2 = number() ?: return null
-                            val y2 = number() ?: return null
-                            val x3 = number() ?: return null
-                            val y3 = number() ?: return null
-                            val p1 = if (relative) (cx + x1) to (cy + y1) else x1 to y1
-                            val p2 = if (relative) (cx + x2) to (cy + y2) else x2 to y2
-                            val p3 = if (relative) (cx + x3) to (cy + y3) else x3 to y3
-                            for (step in 1..CURVE_SUBDIVISIONS) {
-                                val t = step.toDouble() / CURVE_SUBDIVISIONS
-                                points.add(cubic(cx to cy, p1, p2, p3, t))
-                            }
-                            cx = p3.first
-                            cy = p3.second
-                        }
-                    }
-                    "Z" -> {
-                        cx = startX
-                        cy = startY
-                        points.add(cx to cy)
-                    }
+                val ok = when (command.uppercase()) {
+                    "M" -> moveTo(relative)
+                    "L" -> lineTo(relative)
+                    "C" -> curveTo(relative)
+                    "Z" -> closePath()
                     "E" -> return points // end marker
-                    else -> return null
+                    else -> false
                 }
+                if (!ok) return null
             }
-        } catch (_: Exception) {
-            return null
+            return points
         }
-        return points
+
+        private fun number(): Double? = tokens.getOrNull(i)?.toDoubleOrNull()?.also { i++ }
+
+        private fun nextIsNumber(): Boolean = tokens.getOrNull(i)?.toDoubleOrNull() != null
+
+        /** The next coordinate pair, made absolute when [relative]; null when it is incomplete. */
+        private fun point(relative: Boolean): Pair<Double, Double>? {
+            val x = number() ?: return null
+            val y = number() ?: return null
+            return if (relative) (cx + x) to (cy + y) else x to y
+        }
+
+        private fun moveTo(relative: Boolean): Boolean {
+            val (x, y) = point(relative) ?: return false
+            cx = x
+            cy = y
+            startX = cx
+            startY = cy
+            points.add(cx to cy)
+            return true
+        }
+
+        /** Polyline form: L may be followed by several coordinate pairs. */
+        private fun lineTo(relative: Boolean): Boolean {
+            while (nextIsNumber()) {
+                val (x, y) = point(relative) ?: return false
+                cx = x
+                cy = y
+                points.add(cx to cy)
+            }
+            return true
+        }
+
+        private fun curveTo(relative: Boolean): Boolean {
+            while (nextIsNumber()) {
+                // All three points are relative to the pen where the segment starts.
+                val (p1, p2, p3) = List(CUBIC_POINTS) { point(relative) }
+                if (p1 == null || p2 == null || p3 == null) return false
+                for (step in 1..CURVE_SUBDIVISIONS) {
+                    val t = step.toDouble() / CURVE_SUBDIVISIONS
+                    points.add(cubic(cx to cy, p1, p2, p3, t))
+                }
+                cx = p3.first
+                cy = p3.second
+            }
+            return true
+        }
+
+        private fun closePath(): Boolean {
+            cx = startX
+            cy = startY
+            points.add(cx to cy)
+            return true
+        }
     }
 
     private fun cubic(

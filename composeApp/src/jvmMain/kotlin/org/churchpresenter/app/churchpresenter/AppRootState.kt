@@ -225,7 +225,7 @@ internal class AppRootState(
 
         val proj = appSettings.projectionSettings
         val assignments = reconcileScreenAssignments(
-            proj.screenAssignments, nonPrimaryDisplays, deckLinkCount, proj.fallbackProfileId,
+            proj.screenAssignments, nonPrimaryDisplays, deckLinkCount, proj.fallbackProfileId, proj.unusedScreens,
         )
         if (assignments != null) {
             appSettings = appSettings.copy(

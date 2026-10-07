@@ -106,7 +106,7 @@ object BebliaSource : BibleSource {
 
         try {
             val xmlFile = File(scratch, "module.xml")
-            val spbPart = File(scratch, module.fileName)
+            val spbPart = BibleInstallSupport.partFileIn(scratch, module.fileName)
 
             val commit = module.downloadKey.substringBefore('/')
             val file = module.downloadKey.substringAfter('/')

@@ -1,6 +1,7 @@
 package org.churchpresenter.presentationengine.pptx
 
 import org.apache.poi.EncryptedDocumentException
+import org.apache.poi.openxml4j.opc.PackagePart
 import org.apache.poi.sl.usermodel.Placeholder
 import org.apache.poi.sl.usermodel.Slide
 import org.apache.poi.sl.usermodel.SlideShow
@@ -67,14 +68,17 @@ internal object PowerPointDeckSupport {
     private fun registerEmbeddedFonts(show: SlideShow<*, *>) {
         val pkg = (show as? XMLSlideShow)?.`package` ?: return
         try {
-            for (part in pkg.parts) {
-                if (part.contentType.contains("font", ignoreCase = true)) {
-                    try {
-                        SlideFontRegistry.registerFontStream(part.inputStream)
-                    } catch (_: Exception) {
-                    }
-                }
-            }
+            pkg.parts.asSequence()
+                .filter { it.contentType.contains("font", ignoreCase = true) }
+                .forEach { registerFontPart(it) }
+        } catch (_: Exception) {
+        }
+    }
+
+    /** One embedded font; a payload that cannot be read is skipped rather than failing the deck. */
+    private fun registerFontPart(part: PackagePart) {
+        try {
+            SlideFontRegistry.registerFontStream(part.inputStream)
         } catch (_: Exception) {
         }
     }
@@ -119,38 +123,13 @@ internal object PowerPointDeckSupport {
             // Legacy .ppt: static forever (the binary format exposes no usable animation data).
             return PowerPointSlideMeta(notes, layers = null, timeline = null, transition = null)
         }
-        var layers: List<LayerSpec>? = null
-        var timeline: Timeline? = null
-        try {
-            layers = PptxLayerPlanner.plan(slide, AnimationTargetScanner.scan(slide))
-            if (layers != null) {
-                val compiled = TimelineCompiler(
-                    slideWidthPt = pageWidthPt,
-                    slideHeightPt = pageHeightPt,
-                    resolveLayers = layerResolver(slide, layers)
-                ).compile(TimingParser.parse(slide))
-                if (compiled == null) {
-                    // Nothing usable compiled. A video layer still needs its own identity even
-                    // with no animation driving it — the app finds it there to drive playback —
-                    // so only fall back to the flattened static composite when there isn't one.
-                    // (KeynoteDeckSupport's native path makes the same exception, for the same
-                    // reason; without this a slide holding only an unanimated video loses the
-                    // layer the planner deliberately created for it.)
-                    if (layers.none { it is LayerSpec.Media }) layers = null
-                } else {
-                    timeline = compiled.timeline
-                    compiled.warnings.forEach { warnings.add("Slide ${slideIndex + 1}: $it") }
-                    layers = layers.map { spec ->
-                        if (spec.id in compiled.initiallyHiddenLayerIds) spec.withInitiallyVisible(false) else spec
-                    }
-                }
-            }
+        val (layers, timeline) = try {
+            slideAnimation(slide, slideIndex, pageWidthPt, pageHeightPt, warnings)
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             // One slide's animation is parsed by POI out of arbitrary XML, which throws whatever its
             // internals do; the slide drops to static rather than failing the deck.
             warnings.add("Slide ${slideIndex + 1}: animation parse failed (${e.message}) — static")
-            layers = null
-            timeline = null
+            null to null
         }
         return PowerPointSlideMeta(
             notes = notes,
@@ -158,6 +137,39 @@ internal object PowerPointDeckSupport {
             timeline = timeline,
             transition = TransitionParser.parse(slide)
         )
+    }
+
+    /**
+     * The slide's layer decomposition and the timeline driving it; null layers mean a single
+     * static composite. Throws whatever POI throws on malformed timing XML.
+     */
+    private fun slideAnimation(
+        slide: XSLFSlide,
+        slideIndex: Int,
+        pageWidthPt: Double,
+        pageHeightPt: Double,
+        warnings: MutableList<String>,
+    ): Pair<List<LayerSpec>?, Timeline?> {
+        val layers = PptxLayerPlanner.plan(slide, AnimationTargetScanner.scan(slide)) ?: return null to null
+        val compiled = TimelineCompiler(
+            slideWidthPt = pageWidthPt,
+            slideHeightPt = pageHeightPt,
+            resolveLayers = layerResolver(slide, layers)
+        ).compile(TimingParser.parse(slide))
+        if (compiled == null) {
+            // Nothing usable compiled. A video layer still needs its own identity even
+            // with no animation driving it — the app finds it there to drive playback —
+            // so only fall back to the flattened static composite when there isn't one.
+            // (KeynoteDeckSupport's native path makes the same exception, for the same
+            // reason; without this a slide holding only an unanimated video loses the
+            // layer the planner deliberately created for it.)
+            return layers.takeIf { it.any { spec -> spec is LayerSpec.Media } } to null
+        }
+        compiled.warnings.forEach { warnings.add("Slide ${slideIndex + 1}: $it") }
+        val visible = layers.map { spec ->
+            if (spec.id in compiled.initiallyHiddenLayerIds) spec.withInitiallyVisible(false) else spec
+        }
+        return visible to compiled.timeline
     }
 
     /**
@@ -179,21 +191,14 @@ internal object PowerPointDeckSupport {
 
         return fun(shapeId: Long, paragraphIndex: Int?): List<TimelineCompiler.LayerIdWithBounds> {
             val topIndex = topIndexByShapeId[shapeId] ?: return emptyList()
-            paragraphLayers[topIndex]?.let { paras ->
-                return if (paragraphIndex != null) {
-                    paras.filter { it.paragraphIndex == paragraphIndex }
-                        .map { TimelineCompiler.LayerIdWithBounds(it.id, it.boundsPt) }
-                } else {
-                    paras.map { TimelineCompiler.LayerIdWithBounds(it.id, it.boundsPt) }
-                }
+            val paras = paragraphLayers[topIndex]
+            if (paras != null) {
+                return paras.filter { paragraphIndex == null || it.paragraphIndex == paragraphIndex }
+                    .map { TimelineCompiler.LayerIdWithBounds(it.id, it.boundsPt) }
             }
-            shapeLayers[topIndex]?.let {
-                return listOf(TimelineCompiler.LayerIdWithBounds(it.id, it.boundsPt))
-            }
-            mediaLayers[topIndex]?.let {
-                return listOf(TimelineCompiler.LayerIdWithBounds(it.id, it.boundsPt))
-            }
-            return emptyList()
+            val whole = shapeLayers[topIndex]?.let { TimelineCompiler.LayerIdWithBounds(it.id, it.boundsPt) }
+                ?: mediaLayers[topIndex]?.let { TimelineCompiler.LayerIdWithBounds(it.id, it.boundsPt) }
+            return listOfNotNull(whole)
         }
     }
 

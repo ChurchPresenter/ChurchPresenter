@@ -36,16 +36,20 @@ import org.churchpresenter.strings.generated.resources.browser_source_output_lab
 import org.churchpresenter.strings.generated.resources.identify_screen
 import org.churchpresenter.strings.generated.resources.ndi_output_numbered
 import org.churchpresenter.strings.generated.resources.omt_output_numbered
+import org.churchpresenter.strings.generated.resources.output_profile_blank
 import org.churchpresenter.strings.generated.resources.profile_outputs_empty
 import org.churchpresenter.strings.generated.resources.profile_outputs_group
 import org.churchpresenter.strings.generated.resources.profile_outputs_hint
+import org.churchpresenter.strings.generated.resources.profile_outputs_not_used
 import org.churchpresenter.strings.generated.resources.profile_outputs_uses_other
 import org.churchpresenter.strings.generated.resources.profile_outputs_uses_this
 import org.churchpresenter.strings.generated.resources.profile_not_in_use
 import org.churchpresenter.strings.generated.resources.screen_number
+import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.isScreenUnused
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.KeyButton
 import org.jetbrains.compose.resources.stringResource
@@ -60,6 +64,8 @@ internal data class OutputTile(
     val label: String,
     val size: String?,
     val profileId: String?,
+    /** A screen whose monitor is marked "Don't use": shown, but no profile can be put on it. */
+    val notUsed: Boolean = false,
 )
 
 /**
@@ -76,6 +82,7 @@ internal fun outputTiles(proj: ProjectionSettings): List<OutputTile> = buildList
                 proj.screenLabelOr(a, stringResource(Res.string.screen_number, index + 1)),
                 sizeLabel(a.targetBoundsW, a.targetBoundsH),
                 a.activeProfileId,
+                notUsed = proj.isScreenUnused(a.targetScreenKey),
             ),
         )
     }
@@ -136,9 +143,11 @@ internal fun ProjectionSettings.withTileProfile(tile: OutputTile, profileId: Str
 /**
  * Outputs: every output as a tile, and which profile each follows.
  *
- * Clicking a tile gives it this profile. Clicking one that already follows it hands it back to the
- * first other profile in the list -- an output always follows exactly one profile, so "none" is
- * not a state it can be left in, and taking the profile off it has to put another one on.
+ * Clicking a tile gives it this profile. Clicking one that already follows it sets it to Blank
+ * ([BLANK_OUTPUT_PROFILE_ID]) -- an output always follows exactly one profile, so taking this one
+ * off has to put something on, and Blank shows nothing rather than jumping the output to whichever
+ * other profile happens to be listed first. A screen on a monitor marked "Don't use" reads
+ * "Not used" and takes no click.
  */
 @Composable
 internal fun ProfileOutputsPage(
@@ -185,12 +194,8 @@ internal fun ProfileOutputsPage(
                             other = profiles.find { it.id == tile.profileId && it.id != profile.id },
                             modifier = Modifier.weight(1f),
                             onClick = {
-                                val target = if (tile.profileId == profile.id) {
-                                    profiles.firstOrNull { it.id != profile.id }?.id
-                                } else {
-                                    profile.id
-                                }
-                                if (target != null) onProjectionChange { it.withTileProfile(tile, target) }
+                                val target = if (tile.profileId == profile.id) BLANK_OUTPUT_PROFILE_ID else profile.id
+                                onProjectionChange { it.withTileProfile(tile, target) }
                             },
                         )
                     }
@@ -222,14 +227,14 @@ private fun OutputTileCard(
 ) {
     val scheme = MaterialTheme.colorScheme
     val palette = profilesPalette()
-    val mine = tile.profileId == profile.id
+    val mine = tile.profileId == profile.id && !tile.notUsed
     val shape = AppShape(10.dp)
     Row(
         modifier = modifier
             .clip(shape)
             .background(if (mine) scheme.surfaceContainerHigh else palette.card)
             .border(if (mine) 2.dp else 1.dp, if (mine) scheme.primary else palette.cardBorder, shape)
-            .clickable(onClick = onClick)
+            .clickable(enabled = !tile.notUsed, onClick = onClick)
             .testTag(outputTileTag(tile.kind, tile.index))
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -252,6 +257,11 @@ private fun OutputTileCard(
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                 when {
+                    tile.notUsed -> Text(
+                        stringResource(Res.string.profile_outputs_not_used),
+                        fontSize = 11.sp,
+                        color = palette.faintText,
+                    )
                     mine -> Text(
                         stringResource(Res.string.profile_outputs_uses_this),
                         fontSize = 11.sp,
@@ -266,6 +276,11 @@ private fun OutputTileCard(
                             maxLines = 1,
                         )
                     }
+                    tile.profileId == BLANK_OUTPUT_PROFILE_ID -> Text(
+                        stringResource(Res.string.output_profile_blank),
+                        fontSize = 11.sp,
+                        color = palette.faintText,
+                    )
                     else -> Text(
                         stringResource(Res.string.profile_not_in_use),
                         fontSize = 11.sp,

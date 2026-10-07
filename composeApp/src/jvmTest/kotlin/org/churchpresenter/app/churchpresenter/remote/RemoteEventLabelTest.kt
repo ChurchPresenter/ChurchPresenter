@@ -64,6 +64,26 @@ class RemoteEventLabelTest {
     }
 
     @Test
+    fun `a cue is labelled by what it does, detailed by when`() {
+        val (title, detail) = remoteEventLabel(
+            ScheduleItem.CueItem(id = "1", action = "clear", label = "Clear for prayer", absoluteTime = "09:45")
+        )
+
+        assertEquals("Clear for prayer", title)
+        assertEquals("09:45", detail)
+    }
+
+    @Test
+    fun `a ministry slot is labelled by its title, detailed by who`() {
+        val (title, detail) = remoteEventLabel(
+            ScheduleItem.MinistryItem(id = "1", title = "Offertory", detail = "Anna, violin")
+        )
+
+        assertEquals("Offertory", title)
+        assertEquals("Anna, violin", detail)
+    }
+
+    @Test
     fun `a single verse is labelled by its reference`() {
         val (title, detail) = remoteEventLabel(
             ScheduleItem.BibleVerseItem(

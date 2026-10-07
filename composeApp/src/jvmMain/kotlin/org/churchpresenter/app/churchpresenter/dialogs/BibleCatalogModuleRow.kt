@@ -103,26 +103,7 @@ internal fun ModuleRow(
                 )
                 if (isInstalled) {
                     Spacer(Modifier.width(8.dp))
-                    Surface(
-                        shape = MaterialTheme.shapes.extraSmall,
-                        color = MaterialTheme.colorScheme.inverseSurface,
-                        contentColor = MaterialTheme.colorScheme.inverseOnSurface
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                        ) {
-                            Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(11.dp))
-                            Spacer(Modifier.width(3.dp))
-                            Text(
-                                text = stringResource(Res.string.bible_catalog_installed),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontSize = 9.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            )
-                        }
-                    }
+                    InstalledBadge()
                 }
             }
             Text(
@@ -144,50 +125,88 @@ internal fun ModuleRow(
         }
         Spacer(Modifier.width(12.dp))
         Box(modifier = Modifier.width(ACTION_COLUMN_WIDTH), contentAlignment = Alignment.CenterEnd) {
-            when {
-                isInstalling -> Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = stringResource(phaseStringRes(phase)),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                        maxLines = 1
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    LinearProgressIndicator(
-                        progress = { progress },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                isInstalled -> KeyButton(
-                    onClick = onInstall,
-                    enabled = !anyInstallRunning,
-                    shape = AppShape(6.dp),
-                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
-                ) {
-                    Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(14.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        text = stringResource(Res.string.bible_catalog_redownload),
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                }
-                else -> RaisedButton(
-                    onClick = onInstall,
-                    enabled = !anyInstallRunning,
-                    shape = AppShape(6.dp),
-                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
-                ) {
-                    Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(14.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        text = stringResource(Res.string.bible_catalog_download),
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                }
-            }
+            ModuleRowAction(isInstalling, isInstalled, phase, progress, anyInstallRunning, onInstall)
         }
     }
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+}
+
+/** The small inverted "installed" chip beside a Bible's name. */
+@Composable
+private fun InstalledBadge() {
+    Surface(
+        shape = MaterialTheme.shapes.extraSmall,
+        color = MaterialTheme.colorScheme.inverseSurface,
+        contentColor = MaterialTheme.colorScheme.inverseOnSurface
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+        ) {
+            Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(11.dp))
+            Spacer(Modifier.width(3.dp))
+            Text(
+                text = stringResource(Res.string.bible_catalog_installed),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+        }
+    }
+}
+
+/** The row's right-hand column: install progress while it runs, otherwise Download or Re-download. */
+@Composable
+private fun ModuleRowAction(
+    isInstalling: Boolean,
+    isInstalled: Boolean,
+    phase: InstallPhase?,
+    progress: Float,
+    anyInstallRunning: Boolean,
+    onInstall: () -> Unit,
+) {
+    when {
+        isInstalling -> Column(horizontalAlignment = Alignment.End) {
+            Text(
+                text = stringResource(phaseStringRes(phase)),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                maxLines = 1
+            )
+            Spacer(Modifier.height(4.dp))
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        isInstalled -> KeyButton(
+            onClick = onInstall,
+            enabled = !anyInstallRunning,
+            shape = AppShape(6.dp),
+            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+        ) {
+            Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(14.dp))
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = stringResource(Res.string.bible_catalog_redownload),
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
+        else -> RaisedButton(
+            onClick = onInstall,
+            enabled = !anyInstallRunning,
+            shape = AppShape(6.dp),
+            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+        ) {
+            Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(14.dp))
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = stringResource(Res.string.bible_catalog_download),
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
+    }
 }
 
 @Composable

@@ -431,6 +431,17 @@ class BibleCatalogViewModelTest {
     }
 
     @Test
+    fun `a folder named like a Bible is not an installed Bible, nor is a storage folder that is gone`() {
+        File(dir, "KJV.spb").mkdirs()
+        assertTrue(vm(FakeSource()).apply { refreshInstalled() }.installedFiles.isEmpty())
+
+        val gone = vm(FakeSource(), storageDirectory = File(dir, "unplugged-drive").absolutePath)
+        gone.refreshInstalled()
+
+        assertTrue(gone.installedFiles.isEmpty(), "a missing folder lists nothing rather than throwing")
+    }
+
+    @Test
     fun `with no storage folder nothing is reported as installed`() {
         val model = vm(FakeSource(), storageDirectory = "")
 

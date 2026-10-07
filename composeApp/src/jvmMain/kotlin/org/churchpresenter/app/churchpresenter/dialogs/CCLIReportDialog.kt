@@ -79,7 +79,7 @@ import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.StatisticsPeriod
 import org.churchpresenter.app.churchpresenter.data.VerseSummary
 import org.churchpresenter.app.churchpresenter.data.availableYears
-import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
+import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.stringResource
 import java.time.LocalDate

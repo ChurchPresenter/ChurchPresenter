@@ -6,6 +6,9 @@ import org.churchpresenter.bibleengine.bible.EngineTranslation
 
 object ReverseLookup {
 
+    /** Fewer distinct terms than this in the window is too little to look a verse up by. */
+    private const val MIN_QUERY_TERMS = 3
+
     data class ReverseResult(
         val translationId: String,
         val bookNum: Int,
@@ -27,25 +30,9 @@ object ReverseLookup {
     ): ReverseResult? {
         val window = query.split(Regex("\\s+")).takeLast(Config.reverseWindowWords).joinToString(" ")
         val queryTerms = index.tokenize(window).toSet()
-        if (queryTerms.size < 3) return null
+        if (queryTerms.size < MIN_QUERY_TERMS) return null
 
-        // First try: only verses that contain ALL query tokens (precise match)
-        val fullResults = index.searchAllTerms(window, topK)
-
-        val rawCandidates: List<BibleIndex.SearchResult>
-        val threshold: Double
-
-        if (fullResults.size >= 1) {
-            rawCandidates = fullResults
-            // All candidates have every query term — trust BM25 ranking, no ratio gate
-            threshold = 0.0
-        } else {
-            // Fallback: partial match with strict ratio to avoid false positives
-            val allResults = index.search(window, topK)
-            if (allResults.size < 2) return null
-            rawCandidates = allResults
-            threshold = Config.reverseMinScoreRatio
-        }
+        val (rawCandidates, threshold) = candidatePool(index, window, topK) ?: return null
 
         // Collapse the same verse appearing in multiple translations to a single entry (keeping the
         // best score). Otherwise the top-1/top-2 ratio gate sees two copies of the SAME verse scoring
@@ -54,9 +41,33 @@ object ReverseLookup {
             .groupBy { Triple(it.verse.bookNum, it.verse.chapter, it.verse.verse) }
             .map { (_, group) -> group.maxByOrNull { it.score }!! }
             .sortedByDescending { it.score }
-        if (candidates.isEmpty()) return null
+        return candidates.firstOrNull()?.let { top -> resultFor(top, candidates, threshold, translations) }
+    }
 
-        val top = candidates[0]
+    /**
+     * The results to rank and the ratio the winner must clear: first only verses that contain ALL
+     * query tokens (precise match) -- every one has every query term, so the BM25 ranking is
+     * trusted with no ratio gate -- and failing that a partial match held to a strict ratio to
+     * avoid false positives. Null when even the partial match has nothing to compare.
+     */
+    private fun candidatePool(
+        index: BibleIndex,
+        window: String,
+        topK: Int,
+    ): Pair<List<BibleIndex.SearchResult>, Double>? {
+        val fullResults = index.searchAllTerms(window, topK)
+        if (fullResults.isNotEmpty()) return fullResults to 0.0
+        val allResults = index.search(window, topK)
+        return if (allResults.size < 2) null else allResults to Config.reverseMinScoreRatio
+    }
+
+    /** [top] as the answer, when it clears [threshold] over its competitor in [candidates]. */
+    private fun resultFor(
+        top: BibleIndex.SearchResult,
+        candidates: List<BibleIndex.SearchResult>,
+        threshold: Double,
+        translations: List<EngineTranslation>,
+    ): ReverseResult? {
         // The ambiguity gate's competitor must be a DIFFERENT passage: when the sliding window
         // straddles two adjacent verses, the neighbor scoring close is evidence FOR the passage,
         // not against it (real case: a window covering Matthew 11:28-29 scored 11:29 at ratio
@@ -71,7 +82,7 @@ object ReverseLookup {
             Double.MAX_VALUE
         }
 
-        if (ratio < threshold) return null
+        if (ratio < threshold || translations.none { it.id == top.translationId }) return null
 
         val confidence = when {
             ratio >= 10.0 -> 0.90
@@ -79,8 +90,6 @@ object ReverseLookup {
             ratio >= 3.0 -> 0.70
             else -> 0.60
         }
-
-        if (translations.none { it.id == top.translationId }) return null
         return ReverseResult(
             translationId = top.translationId,
             bookNum = top.verse.bookNum,

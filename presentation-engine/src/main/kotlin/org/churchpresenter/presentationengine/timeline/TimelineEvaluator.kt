@@ -6,10 +6,8 @@ import org.churchpresenter.presentationengine.model.EffectSpec
 import org.churchpresenter.presentationengine.model.FillMode
 import org.churchpresenter.presentationengine.model.LayerProperty
 import org.churchpresenter.presentationengine.model.LayerState
-import org.churchpresenter.presentationengine.model.PropertyCurve
 import org.churchpresenter.presentationengine.model.RectPt
 import org.churchpresenter.presentationengine.model.RepeatSpec
-import org.churchpresenter.presentationengine.model.RevealClip
 import org.churchpresenter.presentationengine.model.Timeline
 import kotlin.math.PI
 import kotlin.math.sin
@@ -175,15 +173,15 @@ class TimelineEvaluator(
                 } else {
                     // Entrance: start fully offscreen on the side opposite the movement
                     // direction (moving UP means arriving from below the slide).
-                    val (dx, dy) = flyOffset(opposite(effect.direction), layerId)
+                    val (dx, dy) = flyOffset(RevealGeometry.opposite(effect.direction), layerId)
                     val remaining = 1.0 - p
                     LayerState(translateXPt = dx * remaining, translateYPt = dy * remaining)
                 }
             }
 
-            is EffectSpec.Wipe -> LayerState(clip = wipeClip(effect.direction, effect.role, p))
+            is EffectSpec.Wipe -> LayerState(clip = RevealGeometry.wipeClip(effect.direction, effect.role, p))
 
-            is EffectSpec.Split -> LayerState(clip = splitClip(effect.horizontal, effect.role, p))
+            is EffectSpec.Split -> LayerState(clip = RevealGeometry.splitClip(effect.horizontal, effect.role, p))
 
             is EffectSpec.Zoom -> {
                 val scale = if (effect.role == EffectSpec.Role.EXIT) {
@@ -228,7 +226,7 @@ class TimelineEvaluator(
     private fun sampleCurves(effect: EffectSpec.Custom, p: Double): LayerState {
         var state = LayerState.VISIBLE
         for (curve in effect.curves) {
-            val value = interpolate(curve, p) ?: continue
+            val value = RevealGeometry.interpolate(curve, p) ?: continue
             state = when (curve.property) {
                 LayerProperty.ALPHA -> state.copy(alpha = value.coerceIn(0.0, 1.0))
                 LayerProperty.TRANSLATE_X -> state.copy(translateXPt = value)
@@ -241,31 +239,6 @@ class TimelineEvaluator(
         return state
     }
 
-    private fun interpolate(curve: PropertyCurve, p: Double): Double? {
-        val frames = curve.keyframes
-        if (frames.isEmpty()) return null
-        if (p <= frames.first().first) return frames.first().second
-        if (p >= frames.last().first) return frames.last().second
-        for (index in 0 until frames.size - 1) {
-            val (t0, v0) = frames[index]
-            val (t1, v1) = frames[index + 1]
-            if (p in t0..t1) {
-                val f = if (t1 > t0) (p - t0) / (t1 - t0) else 1.0
-                return v0 + (v1 - v0) * f
-            }
-        }
-        return frames.last().second
-    }
-
-    private fun opposite(direction: Direction): Direction = when (direction) {
-        Direction.UP -> Direction.DOWN
-        Direction.DOWN -> Direction.UP
-        Direction.LEFT -> Direction.RIGHT
-        Direction.RIGHT -> Direction.LEFT
-        Direction.IN -> Direction.OUT
-        Direction.OUT -> Direction.IN
-    }
-
     /** Offset (in points) that moves the layer fully offscreen in [direction]. */
     private fun flyOffset(direction: Direction, layerId: String): Pair<Double, Double> {
         val bounds = layerBounds[layerId] ?: RectPt(0.0, 0.0, slideWidthPt, slideHeightPt)
@@ -275,32 +248,6 @@ class TimelineEvaluator(
             Direction.LEFT -> -(bounds.x + bounds.w) to 0.0
             Direction.RIGHT -> (slideWidthPt - bounds.x) to 0.0
             Direction.IN, Direction.OUT -> 0.0 to 0.0
-        }
-    }
-
-    private fun wipeClip(direction: Direction, role: EffectSpec.Role, p: Double): RevealClip {
-        val shown = if (role == EffectSpec.Role.EXIT) 1.0 - p else p
-        return when (direction) {
-            Direction.DOWN -> RevealClip(0.0, 0.0, 1.0, shown)
-            Direction.UP -> RevealClip(0.0, 1.0 - shown, 1.0, 1.0)
-            Direction.RIGHT -> RevealClip(0.0, 0.0, shown, 1.0)
-            Direction.LEFT -> RevealClip(1.0 - shown, 0.0, 1.0, 1.0)
-            Direction.IN, Direction.OUT -> RevealClip(0.0, 0.0, 1.0, shown)
-        }
-    }
-
-    /** A split opens from the middle of the layer, in its own normalized space. */
-    private companion object {
-        const val CENTER = 0.5
-    }
-
-    private fun splitClip(horizontal: Boolean, role: EffectSpec.Role, p: Double): RevealClip {
-        val shown = if (role == EffectSpec.Role.EXIT) 1.0 - p else p
-        val half = shown / 2.0
-        return if (horizontal) {
-            RevealClip(0.0, CENTER - half, 1.0, CENTER + half)
-        } else {
-            RevealClip(CENTER - half, 0.0, CENTER + half, 1.0)
         }
     }
 }

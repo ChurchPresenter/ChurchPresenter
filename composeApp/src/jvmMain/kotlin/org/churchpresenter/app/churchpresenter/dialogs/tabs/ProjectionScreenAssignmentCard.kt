@@ -4,6 +4,7 @@ import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.settings.mergingProfileOf
+import org.churchpresenter.settings.withScreenUnused
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -144,6 +145,10 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                     .then(if (i == 0) Modifier.guideTarget(GuideTargets.SCREEN_PROFILE_PICKER) else Modifier),
                 onPick = { pickedId ->
                     updateProjection { it.withAssignment(i, assignment.copy(activeProfileId = pickedId)) }
+                },
+                // Only a row driving a monitor has one to mark unused.
+                onDontUse = assignment.targetScreenKey.takeIf { it.isNotEmpty() }?.let { key ->
+                    { updateProjection { it.withScreenUnused(key) } }
                 },
             )
 

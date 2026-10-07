@@ -11,6 +11,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -148,6 +149,50 @@ class LottieRenderCacheTest {
             LottieRenderCache.desktopVariant("""{"w":1920,"h":1080}""", atem1080),
             "no timeline, nothing to stream",
         )
+    }
+
+    // ── Output-sized variants ───────────────────────────────────────────────────
+
+    private val desktop1080 =
+        LottieRenderCache.Variant(clip = true, width = 1920, height = 1080, fps = 30.0, frameCount = 90)
+
+    @Test
+    fun `a 4K output gets the desktop clip at 4K, same rate and length`() {
+        assertEquals(
+            desktop1080.copy(width = 3840, height = 2160),
+            LottieRenderCache.outputVariant(desktop1080, 3840, 2160),
+        )
+    }
+
+    @Test
+    fun `an output no larger than the desktop clip draws the desktop clip`() {
+        assertNull(LottieRenderCache.outputVariant(desktop1080, 1920, 1080), "the same size")
+        assertNull(LottieRenderCache.outputVariant(desktop1080, 1280, 720), "a smaller output scales down")
+        assertNull(LottieRenderCache.outputVariant(desktop1080, 3840, 1080), "fit by its height, no larger")
+        assertNull(LottieRenderCache.outputVariant(desktop1080, 0, 0), "not laid out yet")
+    }
+
+    @Test
+    fun `a different aspect gets the size Fit draws the canvas at`() {
+        val square = desktop1080.copy(width = 1080, height = 1080)
+        assertEquals(square.copy(width = 2160, height = 2160), LottieRenderCache.outputVariant(square, 3840, 2160))
+    }
+
+    @Test
+    fun `an output past 4K is capped at 3840 on the longest side`() {
+        assertEquals(
+            desktop1080.copy(width = 3840, height = 2160),
+            LottieRenderCache.outputVariant(desktop1080, 7680, 4320),
+        )
+    }
+
+    @Test
+    fun `an output-sized variant fits its output at a scale of exactly one`() {
+        listOf(2560 to 1440, 3000 to 2000, 2000 to 3000, 3000 to 1700, 2731 to 1600).forEach { (w, h) ->
+            val v = assertNotNull(LottieRenderCache.outputVariant(desktop1080, w, h), "${w}x$h")
+            val fit = minOf(w.toDouble() / v.width, h.toDouble() / v.height)
+            assertEquals(1.0, fit, "${w}x$h gets ${v.width}x${v.height}")
+        }
     }
 
     // ── ARGB RLE codec ────────────────────────────────────────────────────────

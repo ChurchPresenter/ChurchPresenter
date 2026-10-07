@@ -51,10 +51,16 @@ object VersionScorer {
         // With a single rendering there is nothing to be distinctive *against*; no weight is
         // definable, so the comparative path below cannot run. What IS reportable is the weaker
         // claim handled by [soleCandidate] — see Config's sole-candidate section.
-        val n = viable.size
-        if (n == 0) return emptyList()
-        if (n == 1) return soleCandidate(viable[0], spoken)
+        return when (viable.size) {
+            0 -> emptyList()
+            1 -> soleCandidate(viable[0], spoken)
+            else -> comparativeDeltas(viable, spoken)
+        }
+    }
 
+    /** Every one of two or more [viable] renderings weighed against the others by what was [spoken]. */
+    private fun comparativeDeltas(viable: List<VersionCandidate>, spoken: String): List<Delta> {
+        val n = viable.size
         // The window must actually contain the verse. Partial windows are the dominant noise source
         // and are where the miss penalty below would misfire hardest — a version looks wrong merely
         // because the speaker hasn't reached the end of the verse yet.

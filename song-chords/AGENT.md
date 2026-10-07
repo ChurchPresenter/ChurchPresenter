@@ -37,8 +37,9 @@ pasted chord sheet becomes markup in the first place. A real Gradle module of th
 
 ## Consumers
 
-`:composeApp` (`SongChordPreview`, `AutoFitUtils`, `UsageDetection`, `EditSongDialog`), `:songs`
-(`SongsViewModel`, `Songs`), `:shared-ui` (`SectionLabel`) and `:converter` (`QueleaConverter`).
+`:composeApp` (`AutoFitUtils`, `UsageDetection`), `:songs` (`SongsViewModel`, `Songs`, and the
+song editor: `EditSongDialog`, `SongChordPreview`, `ChordPicker`), `:shared-ui` (`SectionLabel`) and
+`:converter` (`QueleaConverter`).
 
 ## Commands
 

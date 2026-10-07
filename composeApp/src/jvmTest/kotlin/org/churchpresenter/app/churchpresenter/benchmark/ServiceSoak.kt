@@ -1,8 +1,11 @@
 package org.churchpresenter.app.churchpresenter.benchmark
 
 import androidx.compose.runtime.mutableIntStateOf
+import org.churchpresenter.app.churchpresenter.HungTestReporter
+import org.churchpresenter.app.churchpresenter.threadDump
 import java.io.File
 import java.lang.management.ManagementFactory
+import java.util.Locale
 import java.util.concurrent.locks.LockSupport
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -20,10 +23,12 @@ private const val KB_PER_MB = 1024.0
  * Not part of `jvmTest`: it runs as `./gradlew :composeApp:soakTest` (`-PsoakMinutes`, default 240),
  * alone in its JVM, paced at the output's frame rate in real time. Every minute it collects garbage
  * and samples the heap, the process's resident memory and that minute's frame times, then writes
- * `soak.csv`, `soak.md` and `soak.svg` to `build/reports/soak/`.
+ * `soak.csv`, `soak.md` and `soak.svg` to `build/reports/soak/` -- the CSV after every sample, so a
+ * run cut short still leaves its curve.
  *
  * It fails when a frame stalls past [SoakLimits.stallMs], or when the heap or resident memory kept
- * growing from the first quarter of the run to the last -- see [judge].
+ * growing from the first quarter of the run to the last -- see [judge]. A frame that never finishes
+ * at all is caught by [SoakStallWatchdog], which writes every thread's stack to `soak-stall.txt`.
  */
 class ServiceSoak {
 
@@ -31,6 +36,14 @@ class ServiceSoak {
     private val fps = System.getProperty("soak.fps")?.toIntOrNull() ?: DEFAULT_FPS
     private val cueSeconds = System.getProperty("soak.cueSeconds")?.toLongOrNull() ?: DEFAULT_CUE_SECONDS
     private val sampleSeconds = System.getProperty("soak.sampleSeconds")?.toLongOrNull() ?: DEFAULT_SAMPLE_SECONDS
+    private val stallSeconds = System.getProperty("soak.stallSeconds")?.toLongOrNull() ?: DEFAULT_STALL_SECONDS
+    // Emptied first: a run cut short must not leave the last run's files looking like its own.
+    private val reportDir = System.getProperty("soak.reportDir")?.let { dir ->
+        File(dir).apply {
+            deleteRecursively()
+            mkdirs()
+        }
+    }
 
     @Test
     fun `a long service neither leaks nor stalls`() {
@@ -38,7 +51,15 @@ class ServiceSoak {
         val scenarios = BenchmarkScenarios.all(photo)
         val cue = mutableIntStateOf(0)
         var cuesShown = 0
-        val run = OffscreenOutput(WIDTH, HEIGHT) { frame -> scenarios[cue.intValue].second(frame) }.use { output ->
+        // Watched like a frame: building the output composes it for the first time, and a soak once
+        // hung right there, before the frame loop and its own watchdog had started.
+        val built = SoakStallWatchdog(
+            limitNanos = stallSeconds * NANOS_PER_SECOND,
+            onStall = { stalled -> reportStall(0.0, stalled, "the output being built") },
+        ).start().use { watchdog ->
+            watchdog.step { OffscreenOutput(WIDTH, HEIGHT) { frame -> scenarios[cue.intValue].second(frame) } }
+        }
+        val run = built.use { output ->
             run(
                 output,
                 content = { scenarios[cue.intValue].first },
@@ -55,8 +76,7 @@ class ServiceSoak {
         val description = "${scenarios.size} content types in turn, ${cueSeconds}s a cue, on one " +
             "${WIDTH}x$HEIGHT off-screen output at $fps fps for $minutes minutes; sampled every " +
             "${sampleSeconds}s. The first pass through every content type is warm-up."
-        System.getProperty("soak.reportDir")?.let { dir ->
-            val out = File(dir).apply { mkdirs() }
+        reportDir?.let { out ->
             File(out, "soak.csv").writeText(soakCsv(run.samples))
             File(out, "soak.md").writeText(soakMarkdown(description, verdict, limits, run.worstByContent))
             File(out, "soak.svg").writeText(soakChart(run.samples, frameBudgetMs(WIDTH, HEIGHT)))
@@ -89,6 +109,10 @@ class ServiceSoak {
         var windowWarming = false
         val samples = mutableListOf<SoakSample>()
         val worst = mutableMapOf<String, Double>()
+        val watchdog = SoakStallWatchdog(
+            limitNanos = stallSeconds * NANOS_PER_SECOND,
+            onStall = { stalled -> reportStall(minutesSince(start), stalled, content()) },
+        ).start()
         while (System.nanoTime() < end) {
             val now = System.nanoTime()
             if (now < deadline) {
@@ -100,7 +124,7 @@ class ServiceSoak {
             deadline = maxOf(deadline + frameInterval, System.nanoTime())
             val warming = warmingUp()
             val showing = content()
-            val cost = output.step().totalNanos
+            val cost = watchdog.step { output.step() }.totalNanos
             window += cost
             windowWarming = windowWarming || warming
             if (!warming) worst.merge(showing, cost / NANOS_PER_MILLI, ::maxOf)
@@ -110,14 +134,44 @@ class ServiceSoak {
             }
             if (System.nanoTime() >= nextSample) {
                 samples += sample(minutesSince(start), window, late, windowWarming)
+                // On disk as it grows, so a run killed part-way still leaves its curve behind.
+                reportDir?.let { File(it, "soak.csv").writeText(soakCsv(samples)) }
                 window.clear()
                 late = 0
                 windowWarming = false
                 nextSample += sampleSeconds * NANOS_PER_SECOND
             }
         }
+        watchdog.close()
         if (window.isNotEmpty()) samples += sample(minutesSince(start), window, late, windowWarming)
         return Run(samples, worst)
+    }
+
+    /**
+     * One frame has not finished in [stallSeconds]: a stall, which is what this test exists to find.
+     * Writes every thread's stack and a summary the workflow shows, then halts -- the stuck frame
+     * holds the test thread, so there is no failing it the ordinary way, and waiting only lets the
+     * task timeout kill it with nothing written.
+     */
+    private fun reportStall(minute: Double, stalledNanos: Long, showing: String) {
+        val headline = "SOAK STALL: one frame has not finished in ${stalledNanos / NANOS_PER_SECOND}s, " +
+            "at minute ${"%.1f".format(Locale.ROOT, minute)}, showing $showing ==="
+        val dump = threadDump(
+            headline,
+            "The test thread is inside OffscreenOutput.step(); read it and the event queue.",
+        )
+        System.err.println(dump)
+        System.err.flush()
+        reportDir?.let { out ->
+            runCatching {
+                File(out, "soak-stall.txt").writeText(dump)
+                File(out, "soak.md").writeText(
+                    "## Soak: stalled\n\n$headline\n\nEvery thread's stack is in `soak-stall.txt`, and the " +
+                        "samples up to the stall in `soak.csv`, both in the `soak-report` artifact.\n",
+                )
+            }
+        }
+        Runtime.getRuntime().halt(HungTestReporter.HUNG_EXIT_CODE)
     }
 
     private fun minutesSince(start: Long) =
@@ -146,5 +200,8 @@ class ServiceSoak {
         const val DEFAULT_FPS = 30
         const val DEFAULT_CUE_SECONDS = 20L
         const val DEFAULT_SAMPLE_SECONDS = 60L
+
+        /** A frame costs tens of milliseconds; one still running after a minute is stuck, not slow. */
+        const val DEFAULT_STALL_SECONDS = 60L
     }
 }

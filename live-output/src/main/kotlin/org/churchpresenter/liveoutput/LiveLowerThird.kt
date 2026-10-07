@@ -10,8 +10,6 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.presenter.BandOutgoing
 import org.churchpresenter.presenter.BibleBandClock
 import org.churchpresenter.presenter.BibleBandPhase
-import org.churchpresenter.diagnostics.CrashReporter
-import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.lottiegen.lottie.LottieTextShaping
 import org.churchpresenter.lowerthird.render.LottieRenderCache
 import org.churchpresenter.settings.AtemSettings
@@ -145,6 +143,10 @@ internal class LiveLowerThirdState(private val context: PresenterContext) : Live
 
     private var atemRenderSettings: AtemSettings? = null
 
+    /** The frames outputs larger than the desktop variant draw; see [LottieOutputFrames]. */
+    internal val outputFrames =
+        LottieOutputFrames(context.scope, currentFrameIndex = { _lottieCurrentFrameIndex.value })
+
     override fun setLottieBandClock(clock: BibleBandClock) {
         _lottieBandClock.value = clock
     }
@@ -164,6 +166,7 @@ internal class LiveLowerThirdState(private val context: PresenterContext) : Live
     override fun setLottieCurrentFrameIndex(index: Int) {
         _lottieCurrentFrameIndex.value = index
         lottieFrameStream?.requestFrame(index)
+        outputFrames.requestFrame(index)
     }
 
     override fun setLottieProgress(progress: Float) {
@@ -194,6 +197,7 @@ internal class LiveLowerThirdState(private val context: PresenterContext) : Live
         _lottieCurrentFrameIndex.value = 0
         lottieFrameStream?.close()
         lottieFrameStream = null
+        outputFrames.setContent(null, null)
 
         if (json.isNotBlank()) preRenderJob = context.scope.launch { preRender(json) }
     }
@@ -205,39 +209,18 @@ internal class LiveLowerThirdState(private val context: PresenterContext) : Live
         try {
             val variant = LottieRenderCache.desktopVariant(json, atemRenderSettings)
                 ?: return // JSON has no timing — stay on the live renderer
-            // Instant on a cache hit; renders in the background otherwise
-            val cached = LottieRenderCache.prepare(json, variant).await()
+            // Instant on a cache hit; renders in the background otherwise. Asked for before the
+            // larger outputs' variants, so the desktop one renders first.
+            val pending = LottieRenderCache.prepare(json, variant)
+            withContext(Dispatchers.Main) { outputFrames.setContent(json, variant) }
+            val cached = pending.await()
             stream = LottieFrameStream(file = cached, scope = context.scope) { frame ->
                 // Identity guard: a decode already in flight when newer content replaced
                 // this stream must not publish into the new content's cleared state (the
                 // stale bitmap would be closed by this stream's teardown while displayed).
                 if (lottieFrameStream === stream) _lottieFrame.value = frame
             }
-            if (!stream.open()) {
-                // A silently-blank off-screen render: discard the cache file (so a later
-                // play re-renders instead of re-reading the blank entry) and keep using
-                // the live renderer — better than switching to bitmaps of nothing.
-                stream.close()
-                cached.delete()
-                // The message stays constant so this groups as one issue; everything that
-                // varies goes in tags and extras. Carrying only the subsystem, as it did,
-                // made the report unanswerable — a blank render is a property of the
-                // variant and the file it produced, and neither was in it.
-                CrashReporter.reportWarning(
-                    "Lottie pre-render produced blank frames, discarded",
-                    tags = mapOf(
-                        "subsystem" to "lower_third",
-                        "lottie.clip" to variant.clip.toString(),
-                        "lottie.empty_cache_file" to (cached.length() == 0L).toString()
-                    ),
-                    extras = mapOf(
-                        "variant" to "${variant.width}x${variant.height} " +
-                            "@${variant.fps}fps, ${variant.frameCount} frames",
-                        "cacheFileBytes" to cached.length().toString()
-                    )
-                )
-                return
-            }
+            if (!openUnlessBlank(stream, cached, variant)) return
             withContext(Dispatchers.Main) {
                 // Do NOT reset _lottieCurrentFrameIndex here — main.kt's playback loop
                 // may already be partway through this play (it switches to raw frames
@@ -267,11 +250,6 @@ internal class LiveLowerThirdState(private val context: PresenterContext) : Live
             // it was adopted — release it, it will never be drawn.
             if (!published) stream?.close()
         }
-    }
-
-    private fun lottiePreRenderFailed(e: Exception) {
-        Log.error("PresenterManager", "Lottie pre-render failed: ${e.message}")
-        CrashReporter.reportException(e, "Lottie pre-render")
     }
 }
 

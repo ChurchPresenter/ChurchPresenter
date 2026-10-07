@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.output_profile_blank
+import org.churchpresenter.strings.generated.resources.output_profile_dont_use
 import org.churchpresenter.strings.generated.resources.projection_merged_by_profile
 import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
@@ -32,6 +33,10 @@ import org.jetbrains.compose.resources.stringResource
  * output itself -- see `ScreenAssignment.activeProfileId`. Shared by the Screen/Browser
  * Source/NDI rows on the Projection tab and the Live Preview sidebar's swap menu, since all three
  * do exactly the same job: write `activeProfileId`.
+ *
+ * [onDontUse], given only for a screen row that drives a monitor, adds **Don't use** first, above Blank:
+ * the monitor is marked unused and the row set to None -- see `ProjectionSettings.withScreenUnused`.
+ * The network outputs have no monitor, so they never pass it.
  */
 @Composable
 internal fun OutputProfilePicker(
@@ -41,6 +46,7 @@ internal fun OutputProfilePicker(
     modifier: Modifier = Modifier,
     /** The profile merging this output into its picture, which then decides it -- see OutputMerge.kt. */
     mergedBy: OutputProfile? = null,
+    onDontUse: (() -> Unit)? = null,
 ) {
     if (mergedBy != null) {
         val note = stringResource(Res.string.projection_merged_by_profile, mergedBy.name.ifBlank { mergedBy.id })
@@ -75,6 +81,17 @@ internal fun OutputProfilePicker(
             )
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            if (onDontUse != null) {
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            stringResource(Res.string.output_profile_dont_use),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    },
+                    onClick = { expanded = false; onDontUse() },
+                )
+            }
             DropdownMenuItem(
                 text = {
                     Text(stringResource(Res.string.output_profile_blank), style = MaterialTheme.typography.bodySmall)

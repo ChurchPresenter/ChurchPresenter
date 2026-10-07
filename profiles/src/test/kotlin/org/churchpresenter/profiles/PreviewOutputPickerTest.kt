@@ -132,6 +132,19 @@ class PreviewOutputPickerTest {
     }
 
     @Test
+    fun `a screen on a monitor marked unused is skipped like a None row`() {
+        val onMonitor = { x: Int ->
+            screen(target = 1).copy(targetBoundsX = x, targetBoundsY = 0, targetBoundsW = 1920, targetBoundsH = 1080)
+        }
+        val base = settings(listOf(onMonitor(1920), onMonitor(3840)))
+        val s = base.copy(
+            projectionSettings = base.projectionSettings.copy(unusedScreens = listOf("1920x1080@1920,0")),
+        )
+
+        assertEquals(listOf("screen:1"), outputs(s, realWindowCount = 2).map { it.key })
+    }
+
+    @Test
     fun `a screen set to None IS listed when it is a dev-fallback slot`() {
         val listed = outputs(settings(listOf(screen(target = Constants.KEY_TARGET_NONE))))
         assertEquals(listOf("screen:0"), listed.map { it.key })

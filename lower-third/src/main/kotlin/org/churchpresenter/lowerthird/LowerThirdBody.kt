@@ -71,7 +71,6 @@ import java.io.File
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.draw.clip
 import org.churchpresenter.sharedui.utils.PreviewOutput
-import org.churchpresenter.lottiegen.render.lottieDrawProgress
 import org.churchpresenter.sharedui.composables.BibleListRowShape
 import org.churchpresenter.sharedui.composables.DragHandle
 import org.churchpresenter.sharedui.composables.bibleListCard
@@ -311,7 +310,7 @@ private fun LowerThirdTabScope.LowerThirdPreviewCard(previewOutput: PreviewOutpu
                 if (canPlay) {
                     Image(painter = rememberLottiePainter(
                         composition = composition,
-                        progress = { lottieDrawProgress(animatedProgress.value) },
+                        progress = { animatedProgress.value },
                         fontManager = LottieFonts,
                         enableTextGrouping = groupsText,
                     ), contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize())

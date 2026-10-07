@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
@@ -26,7 +27,9 @@ import org.churchpresenter.lottiegen.model.Preset
 import org.churchpresenter.lottiegen.persistence.PresetStorage
 import org.churchpresenter.lottiegen.ui.LOWER_THIRD_STYLE_THUMBNAIL_TAG
 import org.churchpresenter.lottiegen.ui.Strings
+import org.churchpresenter.lottiegen.viewmodel.ThumbnailDiagnostics
 import org.churchpresenter.app.churchpresenter.TestSingletons
+import org.churchpresenter.app.churchpresenter.threadDump
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.lottiegen.App as LottieGenApp
 import java.util.Locale
@@ -104,11 +107,13 @@ class LottieGenScreenshotTest {
         Strings.setLocale(Locale.ENGLISH)
         seedLibrary()
         stackedThemes(section, name) { mode, file ->
+            // Read only if the thumbnail never arrives: what the build did, style by style.
+            val thumbnailDiagnostics = ThumbnailDiagnostics()
             runSkikoComposeUiTest(size = window, density = Density(1f)) {
                 setContent {
                     ChurchPresenterTheme(themeMode = mode) {
                         Box(Modifier.size(window.width.dp, window.height.dp)) {
-                            LottieGenApp(embedded = true)
+                            LottieGenApp(embedded = true, thumbnailDiagnostics = thumbnailDiagnostics)
                         }
                     }
                 }
@@ -118,9 +123,19 @@ class LottieGenScreenshotTest {
                 // preview is waited for by its pixels: the default accent bar is the only red right
                 // of the controls.
                 waitUntil("the preview rendered", RENDER_TIMEOUT_MS) { previewAccentPixels() >= PREVIEW_ACCENT_PIXELS }
-                waitUntil("the style thumbnail", RENDER_TIMEOUT_MS) {
-                    onAllNodesWithTag(LOWER_THIRD_STYLE_THUMBNAIL_TAG, useUnmergedTree = true)
-                        .fetchSemanticsNodes().isNotEmpty()
+                try {
+                    waitUntil("the style thumbnail", RENDER_TIMEOUT_MS) {
+                        onAllNodesWithTag(LOWER_THIRD_STYLE_THUMBNAIL_TAG, useUnmergedTree = true)
+                            .fetchSemanticsNodes().isNotEmpty()
+                    }
+                } catch (e: ComposeTimeoutException) {
+                    // Twice on CI (#785, #789's branch), never locally, and the first test of its fork
+                    // both times. The thumbnails draw on the event queue, so its stack is evidence;
+                    // what the build itself recorded says whether it finished, and why the style asked
+                    // for has no picture.
+                    System.err.println(threadDump("NO STYLE THUMBNAIL after ${RENDER_TIMEOUT_MS}ms ==="))
+                    System.err.println(thumbnailDiagnostics.describe())
+                    throw e
                 }
                 drive()
                 captureTo(file)

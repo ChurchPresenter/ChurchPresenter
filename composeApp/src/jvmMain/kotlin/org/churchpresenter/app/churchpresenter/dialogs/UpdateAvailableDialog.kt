@@ -66,12 +66,9 @@ import java.io.File
 import java.io.OutputStream
 import java.io.InputStream
 import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URI
 import kotlin.system.exitProcess
 import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.sharedui.utils.SystemClipboard
-import org.churchpresenter.app.churchpresenter.utils.UPDATE_INSTALLER_PREFIX
 import org.churchpresenter.sharedui.utils.UrlOpener
 
 /**
@@ -239,44 +236,8 @@ fun UpdateAvailableDialog(
         // never delays or fails the actual download below).
         updateInfo?.let { UpdateChecker.reportDownloadStarted(it.latestVersion) }
         scope.launch(Dispatchers.IO) {
-            try {
-                val url = URI(updateInfo!!.downloadUrl!!).toURL()
-                val connection = url.openConnection() as HttpURLConnection
-                connection.instanceFollowRedirects = true
-                connection.requestMethod = "GET"
-                connection.connectTimeout = 10_000
-                connection.readTimeout = 30_000
-                connection.connect()
-
-                val contentLength = connection.contentLengthLong
-                val suffix = installerSuffixFor(updateInfo.downloadUrl)
-                // NB: do not deleteOnExit() — the installer is launched as the
-                // app exits via exitProcess(0), and the shutdown hook would
-                // delete the file out from under the installer.
-                val tempFile = File.createTempFile(UPDATE_INSTALLER_PREFIX, suffix)
-
-                connection.inputStream.use { input ->
-                    tempFile.outputStream().use { output ->
-                        copyReportingProgress(input, output, contentLength) { progress ->
-                            withContext(Dispatchers.Main) {
-                                downloadState = DownloadState.Downloading(progress)
-                            }
-                        }
-                    }
-                }
-                connection.disconnect()
-                withContext(Dispatchers.Main) {
-                    downloadState = DownloadState.Done(tempFile)
-                }
-            } catch (e: IOException) {
-                // The connection, the download or the temp file -- a malformed URL is one too.
-                withContext(Dispatchers.Main) {
-                    downloadState = DownloadState.Error(e.message ?: "Download failed")
-                }
-            } catch (e: IllegalArgumentException) {
-                withContext(Dispatchers.Main) {
-                    downloadState = DownloadState.Error(e.message ?: "Download failed")
-                }
+            downloadInstaller(updateInfo!!.downloadUrl!!) { state ->
+                withContext(Dispatchers.Main) { downloadState = state }
             }
         }
     }

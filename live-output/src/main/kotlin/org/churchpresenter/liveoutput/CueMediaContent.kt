@@ -3,11 +3,18 @@ package org.churchpresenter.liveoutput
 import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
 import org.churchpresenter.presenter.LocalInMergedTile
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.platform.testTag
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
@@ -74,6 +81,13 @@ internal fun MediaCue(surface: OutputSurface) {
 @Composable
 internal fun LowerThirdCue(surface: OutputSurface) {
     val presenterManager = surface.presenterManager
+    // An output holds its pixel size, so one larger than the desktop frames gets frames of its own
+    // and draws them one to one. The preview tiles are small: they draw the desktop frames.
+    val outputFrames = presenterManager.lowerThird.outputFrames
+    val hold = if (surface.kind == OutputSurfaceKind.PREVIEW) null else remember(outputFrames) { outputFrames.hold() }
+    if (hold != null) DisposableEffect(hold) { onDispose { hold.close() } }
+    var size by remember { mutableStateOf(IntSize.Zero) }
+    val frame = hold?.let { outputFrames.frameFor(size.width, size.height) } ?: presenterManager.lottieFrame.value
     val composition = if (surface.kind == OutputSurfaceKind.WINDOW) {
         surface.lottieComposition
     } else {
@@ -81,12 +95,19 @@ internal fun LowerThirdCue(surface: OutputSurface) {
         val parsed by rememberLottieComposition(json) { LottieCompositionSpec.JsonString(json.ifBlank { "{}" }) }
         parsed
     }
-    LowerThirdPresenter(
-        composition = composition,
-        progress = { presenterManager.lottieProgress.value },
-        frame = presenterManager.lottieFrame.value?.imageBitmap,
-        groupsText = presenterManager.lottieGroupsText.value,
-    )
+    Box(
+        Modifier.fillMaxSize().onSizeChanged {
+            size = it
+            hold?.resize(it.width, it.height)
+        },
+    ) {
+        LowerThirdPresenter(
+            composition = composition,
+            progress = { presenterManager.lottieProgress.value },
+            frame = frame?.imageBitmap,
+            groupsText = presenterManager.lottieGroupsText.value,
+        )
+    }
 }
 
 @Composable

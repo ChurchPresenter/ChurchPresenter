@@ -33,34 +33,11 @@ object ContinuationEngine {
         now: Long = System.currentTimeMillis(),
     ): ContinuationResult? {
         val stickyValid = state.watchExpiresAt == 0L || now <= state.watchExpiresAt
-        val candidates = buildSet {
-            if (stickyValid) {
-                val book = state.watchBook
-                val chapter = state.watchChapter
-                if (book != null && chapter != null) add(book to chapter)
-            }
-            // Only the most recently visited chapters — the sermon's ACTIVE context. Scanning
-            // every chapter touched all service produced two orders of magnitude more junk than
-            // hits on real data (94 emissions / 0 TPs in an earlier replay). Off by default —
-            // see Config.chapterHistoryEnabled for the evidence.
-            if (Config.chapterHistoryEnabled) {
-                addAll(state.chapterHistory.toList().takeLast(Config.chapterHistoryMaxCandidates))
-            }
-        }
-        if (candidates.isEmpty()) return null
-
+        val candidates = chapterCandidates(state, stickyValid)
         val query = "${state.transcript} ${state.translation}".trim()
-        if (query.split(Regex("\\s+")).size < 3) return null
+        if (candidates.isEmpty() || wordCount(query) < MIN_QUERY_WORDS) return null
 
-        val allVerses = candidates.flatMap { translation.byChapter[it]?.filter { v -> !v.isHeader } ?: emptyList() }
-        val scored = allVerses
-            .map { it to AgreementScorer.score(it.text, state.transcript, state.translation) }
-            .filter { it.second >= Config.chapterScopeMinAgreement }
-            .sortedByDescending { it.second }
-        val top = scored.getOrNull(0) ?: return null
-        val runnerUp = scored.getOrNull(1)
-        val ratio = if (runnerUp != null && runnerUp.second > 0) top.second / runnerUp.second else Double.MAX_VALUE
-        if (runnerUp != null && ratio < Config.chapterScopeMinRatio) return null // ambiguous — stay silent
+        val top = unambiguousTop(candidates, translation, state) ?: return null
 
         // Verse-side coverage floor (same metric as the sequential check): the winning verse
         // must be substantially present in the window. Stricter when it comes from a chapter
@@ -69,9 +46,47 @@ object ContinuationEngine {
             top.first.bookNum == state.watchBook && top.first.chapter == state.watchChapter
         val coverage = AgreementScorer.coverage(top.first.text, query)
         val floor = if (isCurrentSticky) Config.chapterScopeMinCoverage else Config.chapterHistoryMinCoverage
-        if (coverage < floor) return null
+        return if (coverage < floor) {
+            null
+        } else {
+            ContinuationResult(top.first, translation, top.second.coerceIn(SCOPE_MIN_CONFIDENCE, SCOPE_MAX_CONFIDENCE))
+        }
+    }
 
-        return ContinuationResult(top.first, translation, top.second.coerceIn(0.55, 0.85))
+    /** The chapters [checkChapterScope] scores: the live sticky's, then the recently visited ones. */
+    private fun chapterCandidates(state: UtteranceState, stickyValid: Boolean): Set<Pair<Int, Int>> = buildSet {
+        if (stickyValid) {
+            val book = state.watchBook
+            val chapter = state.watchChapter
+            if (book != null && chapter != null) add(book to chapter)
+        }
+        // Only the most recently visited chapters — the sermon's ACTIVE context. Scanning
+        // every chapter touched all service produced two orders of magnitude more junk than
+        // hits on real data (94 emissions / 0 TPs in an earlier replay). Off by default —
+        // see Config.chapterHistoryEnabled for the evidence.
+        if (Config.chapterHistoryEnabled) {
+            addAll(state.chapterHistory.toList().takeLast(Config.chapterHistoryMaxCandidates))
+        }
+    }
+
+    /**
+     * The best-agreeing verse in [candidates] with its score, or null when nothing agrees enough
+     * or the runner-up scores too close to it to tell them apart — ambiguous, so stay silent.
+     */
+    private fun unambiguousTop(
+        candidates: Set<Pair<Int, Int>>,
+        translation: EngineTranslation,
+        state: UtteranceState,
+    ): Pair<EngineVerse, Double>? {
+        val allVerses = candidates.flatMap { translation.byChapter[it]?.filter { v -> !v.isHeader } ?: emptyList() }
+        val scored = allVerses
+            .map { it to AgreementScorer.score(it.text, state.transcript, state.translation) }
+            .filter { it.second >= Config.chapterScopeMinAgreement }
+            .sortedByDescending { it.second }
+        val top = scored.getOrNull(0) ?: return null
+        val runnerUp = scored.getOrNull(1)
+        val ratio = if (runnerUp != null && runnerUp.second > 0) top.second / runnerUp.second else Double.MAX_VALUE
+        return top.takeUnless { runnerUp != null && ratio < Config.chapterScopeMinRatio }
     }
 
     fun check(
@@ -83,31 +98,58 @@ object ContinuationEngine {
         if (now - state.lastDetectedAt > Config.continuationTimeoutMs) return null
 
         val query = "${state.transcript} ${state.translation}".trim()
-        if (query.split(Regex("\\s+")).size < 3) return null
-
-        val t = translations.find { it.id == state.lastTranslationId } ?: return null
-        val lastVerse = t.lookupVerse(lastRef.bookNum, lastRef.chapter, lastRef.verseStart)
-            ?: return null
-
-        // Look up the next 3 candidate verses. Scored by VERSE-side coverage (how much of the
-        // candidate verse is present in the window) — see Config.continuationMinCoverage for why
-        // query-side overlap systematically under-scored verbatim verse-by-verse reading.
-        var candidate: EngineVerse? = t.nextVerse(lastVerse)
-        repeat(3) {
-            val c = candidate ?: return@repeat
-            val coverage = AgreementScorer.coverage(c.text, query)
-            val distinctVerseWords = distinctScoringWords(c.text)
-            val floor = if (distinctVerseWords >= 4) Config.continuationMinCoverage else 1.0
-            if (coverage >= floor) {
-                return ContinuationResult(c, t, coverage.coerceIn(0.5, 0.88))
-            }
-            candidate = t.nextVerse(c)
+        val t = translations.find { it.id == state.lastTranslationId }
+        val lastVerse = t?.lookupVerse(lastRef.bookNum, lastRef.chapter, lastRef.verseStart)
+        return if (t == null || lastVerse == null || wordCount(query) < MIN_QUERY_WORDS) {
+            null
+        } else {
+            nextCoveredVerse(t, lastVerse, query)
         }
-        return null
     }
+
+    /**
+     * The first of the [NEXT_VERSES_LOOKED_AT] verses after [lastVerse] substantially present in
+     * [query]. Scored by VERSE-side coverage (how much of the candidate verse is present in the
+     * window) — see Config.continuationMinCoverage for why query-side overlap systematically
+     * under-scored verbatim verse-by-verse reading.
+     */
+    private fun nextCoveredVerse(t: EngineTranslation, lastVerse: EngineVerse, query: String): ContinuationResult? =
+        generateSequence(t.nextVerse(lastVerse)) { t.nextVerse(it) }
+            .take(NEXT_VERSES_LOOKED_AT)
+            .map { c -> c to AgreementScorer.coverage(c.text, query) }
+            .firstOrNull { (c, coverage) ->
+                val floor = if (distinctScoringWords(c.text) >= SHORT_VERSE_DISTINCT_WORDS) {
+                    Config.continuationMinCoverage
+                } else {
+                    1.0
+                }
+                coverage >= floor
+            }
+            ?.let { (c, coverage) ->
+                ContinuationResult(c, t, coverage.coerceIn(NEXT_MIN_CONFIDENCE, NEXT_MAX_CONFIDENCE))
+            }
+
+    private fun wordCount(query: String): Int = query.split(Regex("\\s+")).size
 
     /** Distinct words the coverage metric would score for [text] — the short-verse guard input. */
     private fun distinctScoringWords(text: String): Int =
-        text.lowercase().replace('ё', 'е').split(Regex("[^\\p{L}]+")).filter { it.length >= 3 }.toSet().size
+        text.lowercase().replace('ё', 'е').split(Regex("[^\\p{L}]+")).filter { it.length >= MIN_SCORED_WORD_LENGTH }
+            .toSet().size
 
+    /** Fewer words than this in the window is too little to score a verse against. */
+    private const val MIN_QUERY_WORDS = 3
+
+    /** How many verses past the last detected one the sequential check looks at. */
+    private const val NEXT_VERSES_LOOKED_AT = 3
+
+    /** A verse with fewer distinct scored words must be present in full, not just mostly. */
+    private const val SHORT_VERSE_DISTINCT_WORDS = 4
+
+    /** Words shorter than this are not scored. */
+    private const val MIN_SCORED_WORD_LENGTH = 3
+
+    private const val SCOPE_MIN_CONFIDENCE = 0.55
+    private const val SCOPE_MAX_CONFIDENCE = 0.85
+    private const val NEXT_MIN_CONFIDENCE = 0.5
+    private const val NEXT_MAX_CONFIDENCE = 0.88
 }

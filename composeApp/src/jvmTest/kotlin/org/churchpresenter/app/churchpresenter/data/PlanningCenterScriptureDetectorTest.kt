@@ -170,6 +170,27 @@ class PlanningCenterScriptureDetectorTest {
     }
 
     @Test
+    fun `a book name that is only a period is no book name`() {
+        assertTrue(detect(". 3:16").isEmpty())
+    }
+
+    @Test
+    fun `a chapter or verse too large to be a number is skipped`() {
+        assertTrue(detect("John 99999999999:16").isEmpty())
+        assertTrue(detect("John 3:99999999999").isEmpty())
+    }
+
+    @Test
+    fun `a book the bible lists without a name cannot be matched`() {
+        // A module whose book table names a book it carries no name for.
+        val unnamed = bible(books = mapOf(43 to "John")).also { b ->
+            every { b.getBookCount() } returns 2
+            every { b.getBookId(1) } returns 66
+        }
+        assertEquals(listOf("John"), detect("John 3:16", unnamed).map { it.bookName })
+    }
+
+    @Test
     fun `unparseable references are skipped without dropping the good ones`() {
         val refs = detect("John 3:16, not a reference at all, Genesis 1:1")
         assertEquals(listOf("John", "Genesis"), refs.map { it.bookName })

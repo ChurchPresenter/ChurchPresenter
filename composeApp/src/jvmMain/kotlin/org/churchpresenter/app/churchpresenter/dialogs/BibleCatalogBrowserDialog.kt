@@ -172,110 +172,16 @@ internal fun BibleCatalogBrowserDialogContent(
 
             Messages(viewModel, onRetryInstall = { viewModel.retryLastInstall(markInstalledEverywhere) })
 
-            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                when {
-                    viewModel.isLoading && viewModel.modules.isEmpty() -> {
-                        Column(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            CircularProgressIndicator()
-                            Spacer(Modifier.height(12.dp))
-                            Text(
-                                text = stringResource(Res.string.bible_catalog_loading),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                            )
-                        }
-                    }
-                    viewModel.catalogError != null && viewModel.modules.isEmpty() -> {
-                        GhostButton(
-                            onClick = { viewModel.load() },
-                            modifier = Modifier.align(Alignment.Center)
-                        ) {
-                            Text(stringResource(Res.string.bible_catalog_retry))
-                        }
-                    }
-                    viewModel.visibleModules.isEmpty() -> {
-                        Column(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(
-                                Icons.Default.Search,
-                                contentDescription = null,
-                                modifier = Modifier.size(32.dp),
-                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
-                            )
-                            Spacer(Modifier.height(8.dp))
-                            Text(
-                                text = stringResource(Res.string.bible_catalog_empty),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                            )
-                            Spacer(Modifier.height(2.dp))
-                            Text(
-                                text = stringResource(Res.string.bible_catalog_empty_hint),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            )
-                        }
-                    }
-                    else -> {
-                        val listState = rememberLazyListState()
-                        LazyColumn(
-                            state = listState,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .guideTarget(GuideTargets.BIBLE_CATALOG_LIST)
-                                .padding(end = 12.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            items(viewModel.visibleModules, key = { it.key }) { module ->
-                                ModuleRow(
-                                    module = module,
-                                    showDate = module.displayName.trim().lowercase() in viewModel.duplicateDisplayNames,
-                                    isInstalled = viewModel.isInstalled(module),
-                                    isInstalling = viewModel.installingKey == module.key,
-                                    phase = viewModel.installPhase,
-                                    progress = viewModel.installProgress,
-                                    anyInstallRunning = viewModel.installingKey != null,
-                                    onInstall = { pendingInstall = module }
-                                )
-                            }
-                        }
-                        VerticalScrollbar(
-                            adapter = rememberScrollbarAdapter(listState),
-                            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight()
-                        )
-                    }
-                }
-            }
+            CatalogModuleArea(
+                viewModel = viewModel,
+                onInstall = { pendingInstall = it },
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+            )
 
             Spacer(Modifier.height(12.dp))
             HorizontalDivider()
             Spacer(Modifier.height(12.dp))
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Filled.Warning,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = stringResource(Res.string.bible_catalog_attribution),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    modifier = Modifier.weight(1f)
-                )
-                Spacer(Modifier.width(12.dp))
-
-                RaisedButton(onClick = onDismiss, shape = AppShape(6.dp)) {
-                    Text(stringResource(Res.string.bible_catalog_done))
-                }
-            }
+            CatalogFooter(onDismiss)
         }
     }
 
@@ -291,28 +197,147 @@ internal fun BibleCatalogBrowserDialogContent(
         )
     }
 
-    viewModel.lastInstalled?.let { installed ->
-        AlertDialog(
-            onDismissRequest = { viewModel.dismissInstalledNotice() },
-            title = { Text(stringResource(Res.string.bible_catalog_installed)) },
-            text = {
-                Column {
-                    Text(stringResource(Res.string.bible_catalog_installed_summary, installed.title, installed.books))
-                    if (installed.rights.isNotBlank()) {
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            text = stringResource(Res.string.bible_catalog_rights, installed.rights),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+    InstalledNotice(viewModel)
+}
+
+/** The catalogue itself, or what stands in for it: loading, a retry, or an empty search. */
+@Composable
+private fun CatalogModuleArea(
+    viewModel: BibleCatalogViewModel,
+    onInstall: (BibleModule) -> Unit,
+    modifier: Modifier,
+) {
+    Box(modifier = modifier) {
+        when {
+            viewModel.isLoading && viewModel.modules.isEmpty() -> {
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(Res.string.bible_catalog_loading),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                }
+            }
+            viewModel.catalogError != null && viewModel.modules.isEmpty() -> {
+                GhostButton(
+                    onClick = { viewModel.load() },
+                    modifier = Modifier.align(Alignment.Center)
+                ) {
+                    Text(stringResource(Res.string.bible_catalog_retry))
+                }
+            }
+            viewModel.visibleModules.isEmpty() -> {
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = null,
+                        modifier = Modifier.size(32.dp),
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(Res.string.bible_catalog_empty),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        text = stringResource(Res.string.bible_catalog_empty_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+            }
+            else -> {
+                val listState = rememberLazyListState()
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .guideTarget(GuideTargets.BIBLE_CATALOG_LIST)
+                        .padding(end = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    items(viewModel.visibleModules, key = { it.key }) { module ->
+                        ModuleRow(
+                            module = module,
+                            showDate = module.displayName.trim().lowercase() in viewModel.duplicateDisplayNames,
+                            isInstalled = viewModel.isInstalled(module),
+                            isInstalling = viewModel.installingKey == module.key,
+                            phase = viewModel.installPhase,
+                            progress = viewModel.installProgress,
+                            anyInstallRunning = viewModel.installingKey != null,
+                            onInstall = { onInstall(module) }
                         )
                     }
                 }
-            },
-            confirmButton = {
-                GhostButton(onClick = { viewModel.dismissInstalledNotice() }) {
-                    Text(stringResource(Res.string.ok))
+                VerticalScrollbar(
+                    adapter = rememberScrollbarAdapter(listState),
+                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight()
+                )
+            }
+        }
+    }
+}
+
+/** The sources' attribution and the button that closes the browser. */
+@Composable
+private fun CatalogFooter(onDismiss: () -> Unit) {
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            Icons.Filled.Warning,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = stringResource(Res.string.bible_catalog_attribution),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(Modifier.width(12.dp))
+
+        RaisedButton(onClick = onDismiss, shape = AppShape(6.dp)) {
+            Text(stringResource(Res.string.bible_catalog_done))
+        }
+    }
+}
+
+/** What was just installed, and its rights statement, once an install has finished. */
+@Composable
+private fun InstalledNotice(viewModel: BibleCatalogViewModel) {
+    val installed = viewModel.lastInstalled ?: return
+    AlertDialog(
+        onDismissRequest = { viewModel.dismissInstalledNotice() },
+        title = { Text(stringResource(Res.string.bible_catalog_installed)) },
+        text = {
+            Column {
+                Text(stringResource(Res.string.bible_catalog_installed_summary, installed.title, installed.books))
+                if (installed.rights.isNotBlank()) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(Res.string.bible_catalog_rights, installed.rights),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
                 }
             }
-        )
-    }
+        },
+        confirmButton = {
+            GhostButton(onClick = { viewModel.dismissInstalledNotice() }) {
+                Text(stringResource(Res.string.ok))
+            }
+        }
+    )
 }
