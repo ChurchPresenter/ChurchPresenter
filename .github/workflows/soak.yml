@@ -10,6 +10,9 @@ name: Soak
 # since the last successful soak.
 
 on:
+  schedule:
+    # Sundays 22:00 UTC, on main (a schedule always runs the default branch).
+    - cron: '0 22 * * 0'
   workflow_dispatch:
     inputs:
       minutes:
@@ -19,58 +22,66 @@ on:
 
 permissions:
   contents: read
+  # To find the last successful soak, so a week in which main has not moved is skipped.
   actions: read
+  # Only for the failure issue a scheduled run files.
+  issues: write
 
 jobs:
-  soak:
+  # A scheduled week in which main has not moved since the last successful soak would run the same
+  # code again, so it is skipped. A run by hand always goes ahead.
+  moved:
     runs-on: ubuntu-latest
-    timeout-minutes: 330
+    outputs:
+      run: ${{ steps.check.outputs.run }}
     steps:
-      - name: Skip when main has not moved since the last successful soak
+      - name: Has main moved since the last successful soak
         id: check
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          HEAD_SHA: ${{ github.sha }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "RUN=true" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           LAST_SHA=$(gh run list --workflow soak.yml --branch "${{ github.ref_name }}" \
             --status success --limit 1 --json headSha -q '.[0].headSha // empty' 2>/dev/null || echo "")
-          if [ "$LAST_SHA" = "$HEAD_SHA" ]; then
-            echo "No new commits since the last soak ($HEAD_SHA)"
-            echo "RUN=false" >> "$GITHUB_OUTPUT"
+          if [ "$LAST_SHA" = "${{ github.sha }}" ]; then
+            echo "No new commits since the last successful soak (${{ github.sha }})" >> "$GITHUB_STEP_SUMMARY"
+            echo "run=false" >> "$GITHUB_OUTPUT"
           else
-            echo "RUN=true" >> "$GITHUB_OUTPUT"
+            echo "run=true" >> "$GITHUB_OUTPUT"
           fi
 
+  soak:
+    needs: moved
+    if: needs.moved.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
       - uses: actions/checkout@v4
-        if: ${{ steps.check.outputs.RUN == 'true' }}
 
       - uses: actions/setup-java@v4
-        if: ${{ steps.check.outputs.RUN == 'true' }}
         with:
           java-version: '21'
           distribution: 'temurin'
 
       - uses: gradle/actions/setup-gradle@v4
-        if: ${{ steps.check.outputs.RUN == 'true' }}
 
       - name: Run the service
-        if: ${{ steps.check.outputs.RUN == 'true' }}
+        id: soak
         run: ./gradlew :composeApp:soakTest "-PsoakMinutes=${{ github.event.inputs.minutes || '240' }}"
 
       - name: Summary
-        if: ${{ always() && steps.check.outputs.RUN == 'true' }}
+        if: ${{ !cancelled() }}
         run: |
           if [ -f composeApp/build/reports/soak/soak.md ]; then
             cat composeApp/build/reports/soak/soak.md >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Upload the report
-        if: ${{ always() && steps.check.outputs.RUN == 'true' }}
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: soak-report
@@ -79,3 +90,54 @@ jobs:
             composeApp/build/test-results/soakTest/
           retention-days: 30
           if-no-files-found: warn
+
+      # A scheduled run that failed files it, so a leak or a stall on main is noticed without anyone
+      # reading the run. One open issue per failing stretch: a later failing week comments on it
+      # rather than opening another. Only the soak itself failing does this -- a broken setup step
+      # does not, and a cancelled run (or one past the job's deadline) never reaches here.
+      - name: Report a failure as an issue
+        if: ${{ failure() && github.event_name == 'schedule' && steps.soak.outcome == 'failure' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          LABEL="soak-failure"
+          gh label create "$LABEL" --color B60205 \
+            --description "The weekly soak found a leak, a stall or a hang on main" 2>/dev/null || true
+          REPORT=composeApp/build/reports/soak/soak.md
+          STALL=composeApp/build/reports/soak/soak-stall.txt
+          HANG=composeApp/build/test-results/soakTest/hung-test-dump.txt
+          {
+            echo "The weekly soak failed on \`${GITHUB_SHA:0:9}\` (${GITHUB_SHA})."
+            echo
+            echo "Run: $RUN_URL -- the full report, CSV, chart and any thread dump are in its \`soak-report\` artifact."
+            echo
+            if [ -f "$REPORT" ]; then
+              cat "$REPORT"
+            else
+              echo "The soak wrote no report; see the run log."
+            fi
+            if [ -f "$STALL" ]; then
+              echo
+              echo "### Stall: first 80 lines of \`soak-stall.txt\`"
+              echo
+              echo '```'
+              head -n 80 "$STALL"
+              echo '```'
+            fi
+            if [ -f "$HANG" ]; then
+              echo
+              echo "### Hang: first 80 lines of \`hung-test-dump.txt\`"
+              echo
+              echo '```'
+              head -n 80 "$HANG"
+              echo '```'
+            fi
+          } > issue.md
+          OPEN=$(gh issue list --label "$LABEL" --state open --limit 1 --json number -q '.[0].number // empty')
+          if [ -n "$OPEN" ]; then
+            gh issue comment "$OPEN" --body-file issue.md
+          else
+            gh issue create --title "Soak failure on main" --label "$LABEL" --body-file issue.md
+          fi
