@@ -409,4 +409,19 @@ class ApplyRemoteLiveStateTest {
         assertTrue(played.isEmpty())
         assertEquals(Presenting.MEDIA, presenter.slideContent.value)
     }
+
+    @Test
+    fun `a lower third with no name switches mode and plays nothing`() {
+        val presenter = apply(LiveStateDto(contentType = "LOWER_THIRD"))
+        assertEquals("", presenter.lottieJsonContent.value)
+        assertEquals(Presenting.LOWER_THIRD, presenter.lastLive.value)
+    }
+
+    @Test
+    fun `a message or prop state applies nothing here, since each is carried whole in the state`() {
+        listOf("MESSAGE", "PROPS").forEach { type ->
+            val presenter = apply(LiveStateDto(contentType = type))
+            assertEquals(Presenting.NONE, presenter.slideContent.value, "$type is not a slide")
+        }
+    }
 }

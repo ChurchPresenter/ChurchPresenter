@@ -2,6 +2,9 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
@@ -146,5 +149,26 @@ class KeyboardShortcutsContentTest {
         onNodeWithText("Double-click").assertExists()
         onNodeWithText("Right-click").assertExists()
         onNodeWithText("Shift+Drag").assertExists()
+    }
+
+    @Test
+    fun `every category follows dev mode and the saved bindings changing underneath it`() = runComposeUiTest {
+        var dev by mutableStateOf(true)
+        var settings by mutableStateOf(AppSettings())
+        setContent {
+            MaterialTheme { KeyboardShortcutsDialogContent(settings, onSave = {}, onDismiss = {}, devMode = dev) }
+        }
+        waitForIdle()
+        ShortcutScope.entries.forEach { scope ->
+            onNodeWithTag(shortcutCategoryTag(scope)).performClick()
+            waitForIdle()
+            dev = !dev
+            settings = settingsWith(ShortcutAction.MACRO_1, listOf(KeyChord.of(Key.F11, ctrl = true, shift = true)))
+            waitForIdle()
+            settings = AppSettings()
+            waitForIdle()
+        }
+        onNodeWithTag(shortcutCategoryTag(null)).performClick()
+        waitForIdle()
     }
 }

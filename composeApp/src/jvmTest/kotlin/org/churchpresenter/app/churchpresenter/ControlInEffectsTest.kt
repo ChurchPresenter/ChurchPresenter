@@ -82,4 +82,16 @@ class ControlInEffectsTest {
         assertTrue(hub.status.value.midiOutput != PortState.OPEN)
         assertEquals(setOf(1, 2, 3), sent.toSet())
     }
+
+    @Test
+    fun `new settings reopen the ports, and settings with none close them`() = runComposeUiTest {
+        val hub = hub()
+        val manager = PresenterManager(showPresenterWindowInitially = false)
+        var settings by mutableStateOf(ControlSettings(midiOutput = "Desk"))
+        setContent { MaterialTheme { ControlInEffects(hub, settings, manager) } }
+        waitUntil(timeoutMillis = 5_000) { hub.status.value.midiOutput == PortState.OPEN }
+        settings = ControlSettings()
+        waitUntil(timeoutMillis = 5_000) { hub.status.value.midiOutput == PortState.OFF }
+        assertTrue(closed.isNotEmpty())
+    }
 }

@@ -5,6 +5,9 @@ package org.churchpresenter.app.churchpresenter.dialogs
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.hasAnyAncestor
@@ -28,6 +31,7 @@ import org.churchpresenter.controlin.OutputEvents
 import org.churchpresenter.controlin.PortState
 import org.churchpresenter.controlin.Trigger
 import org.churchpresenter.controlin.TriggerKinds
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -238,5 +242,111 @@ class ControlDialogContentTest {
     fun `an id is never one already taken`() {
         assertEquals("trigger3", nextControlId("trigger", listOf("trigger1", "trigger2")))
         assertEquals("trigger3", nextControlId("trigger", listOf("trigger2")))
+    }
+
+    @Test
+    fun `the open editors follow the dialog's inputs as they change`() = runComposeUiTest {
+        var settings by mutableStateOf(ControlSettings(mappings = listOf(walkIn), outputs = listOf(clear)))
+        var data by mutableStateOf(ControlPanelData(ControlStatus(), listOf("Pad"), listOf("Desk")))
+        var learning by mutableStateOf(false)
+        setContent {
+            MaterialTheme {
+                Box(Modifier.size(900.dp, 1200.dp)) {
+                    ControlDialogContent(settings, data, ControlPanelActions(isLearning = learning), onDismiss = {})
+                }
+            }
+        }
+        waitForIdle()
+        data = ControlPanelData(ControlStatus(PortState.OPEN, PortState.OPEN, PortState.OPEN, PortState.OPEN))
+        waitForIdle()
+
+        tab("TRIGGERS")
+        onNodeWithTag(controlTriggerTag("trigger1")).performClick()
+        waitForIdle()
+        learning = true
+        waitForIdle()
+        onNodeWithText("Waiting", substring = true).assertExists()
+        learning = false
+        data = ControlPanelData(rows = listOf(ScheduleItem.AnnouncementItem("a1", "Welcome")))
+        waitForIdle()
+        pick("Kind", "MIDI control change")
+        pick("Kind", "MIDI Show Control")
+        pick("Kind", "OSC message")
+        settings = ControlSettings(mappings = listOf(walkIn.copy(name = "Renamed")), outputs = listOf(clear))
+        waitForIdle()
+        onNodeWithText("Renamed", substring = true).assertExists()
+
+        tab("OUTPUTS")
+        onNodeWithTag(controlOutputTag("output1")).performClick()
+        waitForIdle()
+        pick("Kind", "MIDI note")
+        pick("Kind", "MIDI control change")
+        settings = ControlSettings(outputs = listOf(clear, clear.copy(id = "output2")))
+        waitForIdle()
+        onNodeWithTag(controlOutputTag("output2")).assertExists()
+    }
+
+    @Test
+    fun `the ports tab follows the ports' state and the devices as they change`() = runComposeUiTest {
+        var data by mutableStateOf(ControlPanelData())
+        var settings by mutableStateOf(ControlSettings())
+        setContent {
+            MaterialTheme {
+                Box(Modifier.size(900.dp, 1200.dp)) {
+                    ControlDialogContent(settings, data, ControlPanelActions(), onDismiss = {})
+                }
+            }
+        }
+        waitForIdle()
+        PortState.entries.forEach { state ->
+            data = ControlPanelData(ControlStatus(state, state, state, state), listOf("Pad"), listOf("Desk"))
+            waitForIdle()
+        }
+        settings = ControlSettings(
+            midiInput = "Pad",
+            midiOutput = "Gone",
+            oscInPort = 9000,
+            oscOutHost = "10.0.0.2",
+            oscOutPort = 9001,
+        )
+        waitForIdle()
+        onNodeWithText("Gone").assertExists()
+        data = ControlPanelData()
+        settings = ControlSettings()
+        waitForIdle()
+    }
+
+    @Test
+    fun `a new trigger being added survives the saved ones changing underneath it`() = runComposeUiTest {
+        var settings by mutableStateOf(ControlSettings())
+        var learning by mutableStateOf(false)
+        setContent {
+            MaterialTheme {
+                Box(Modifier.size(900.dp, 1200.dp)) {
+                    ControlDialogContent(
+                        settings,
+                        ControlPanelData(),
+                        ControlPanelActions(isLearning = learning),
+                        onDismiss = {},
+                    )
+                }
+            }
+        }
+        waitForIdle()
+        tab("TRIGGERS")
+        onNodeWithTag(CONTROL_TRIGGER_ADD_TAG).performClick()
+        waitForIdle()
+        learning = true
+        waitForIdle()
+        learning = false
+        settings = ControlSettings(mappings = listOf(walkIn))
+        waitForIdle()
+        onNodeWithTag(controlTriggerTag("trigger1")).assertExists()
+        tab("OUTPUTS")
+        onNodeWithTag(CONTROL_OUTPUT_ADD_TAG).performClick()
+        waitForIdle()
+        settings = ControlSettings(outputs = listOf(clear))
+        waitForIdle()
+        onNodeWithTag(controlOutputTag("output1")).assertExists()
     }
 }

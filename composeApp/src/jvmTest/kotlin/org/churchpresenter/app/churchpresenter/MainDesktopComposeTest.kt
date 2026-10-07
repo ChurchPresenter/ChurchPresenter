@@ -2,83 +2,53 @@
 
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.showcontrol.Action
-import org.churchpresenter.settings.ClearGroup
-import org.churchpresenter.settings.Macro
-import org.churchpresenter.liveshow.Layer
-import org.churchpresenter.app.churchpresenter.dialogs.clearGroupItemTag
-import org.churchpresenter.app.churchpresenter.dialogs.clearLayerItemTag
-import org.churchpresenter.schedule.SCHEDULE_ROW_CARD_TAG
-import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasAnyAncestor
-import androidx.compose.ui.test.hasText
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import org.churchpresenter.sharedui.utils.LocalShortcuts
-import org.churchpresenter.sharedui.utils.ShortcutMap
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onNodeWithTag
-import kotlin.test.assertFalse
-import org.churchpresenter.core.models.shortcuts.KeyChord
-import org.churchpresenter.settings.KeyboardShortcutSettings
-import org.churchpresenter.sharedui.models.ShortcutAction
-import org.churchpresenter.settings.QuickBackground
 import androidx.compose.ui.test.ComposeUiTest
-import androidx.compose.ui.test.isRoot
-import org.churchpresenter.calendar.PresetStore
-import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.doubleClick
 import androidx.compose.ui.test.hasSetTextAction
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import androidx.compose.ui.test.isRoot
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
-import androidx.compose.ui.test.click
-import androidx.compose.ui.test.doubleClick
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
-import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
-import kotlinx.coroutines.flow.MutableSharedFlow
+import java.io.File
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.core.models.songs.SongFileParser
-import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.CompanionSatelliteSettings
-import org.churchpresenter.settings.SongSettings
-import org.churchpresenter.settings.WindowLayoutSettings
-import org.churchpresenter.settings.InstanceLinkRole
-import org.churchpresenter.settings.OutputProfile
-import org.churchpresenter.settings.ScreenAssignment
-import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.calendar.PresetStore
+import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.qa.QAManager
+import org.churchpresenter.schedule.ScheduleToolbarButton
+import org.churchpresenter.schedule.ScheduleToolbarIconSize
 import org.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.server.ScheduleItemDto
 import org.churchpresenter.server.SelectBibleVerseRequest
-import org.churchpresenter.qa.QAManager
-import org.churchpresenter.stt.STTManager
+import org.churchpresenter.settings.CompanionSatelliteSettings
+import org.churchpresenter.settings.InstanceLinkRole
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.QuickBackground
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.WindowLayoutSettings
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.models.Tabs
+import org.churchpresenter.stt.STTManager
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
-import org.churchpresenter.liveoutput.PresenterManager
-import org.churchpresenter.liveoutput.showLowerThird
-import java.awt.image.BufferedImage
-import java.io.File
-import javax.imageio.ImageIO
-import java.nio.file.Files
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
 
 /**
  * The root composable, actually composed.
@@ -91,149 +61,7 @@ import kotlin.test.Test
  * driven here: composing them starts real subsystems, which a headless test should not do. They are
  * covered by their own tab tests.
  */
-class MainDesktopComposeTest {
-
-    private lateinit var dir: File
-
-    @BeforeTest
-    fun setUp() {
-        // Both latches have to happen against the real user.home, before anything swaps it.
-        TestSingletons.latchSkikoHostOs()
-        TestSingletons.latchToTestHome()
-        dir = Files.createTempDirectory("cp-main-desktop-compose").toFile()
-    }
-
-    @AfterTest
-    fun tearDown() {
-        dir.deleteRecursively()
-    }
-
-    private fun settings(): AppSettings =
-        AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath))
-
-    /** A folder of real images, so the picture paths do their work instead of exiting early. */
-    private fun pictureFolder(): File {
-        val folder = File(dir, "Pictures").apply { mkdirs() }
-        repeat(3) { i ->
-            val image = BufferedImage(4, 4, BufferedImage.TYPE_INT_RGB)
-            ImageIO.write(image, "png", File(folder, "image-$i.png"))
-        }
-        return folder
-    }
-
-    /** Puts one song in the library, so the paths that only run with something loaded are taken. */
-    private fun withOneSong(): AppSettings {
-        val book = File(dir, "Hymnal").apply { mkdirs() }
-        SongFileParser().writeSongFile(
-            SongItem(
-                number = "1",
-                title = "A Test Song",
-                songbook = "Hymnal",
-                lyrics = listOf("[Verse 1]", "first line", "second line"),
-            ),
-            File(book, "1 - A Test Song.song").absolutePath,
-        )
-        return settings()
-    }
-
-    /** Every optional callback the root can be given, so the paths that only run when one is wired are taken. */
-    private class Wiring {
-        val songsLoaded = mutableListOf<Int>()
-        val scenesChanged = mutableListOf<Int>()
-        val scheduleChanged = mutableListOf<Int>()
-        val picturesLoaded = mutableListOf<String>()
-        val slidesLoaded = mutableListOf<String>()
-        val tabChanges = mutableListOf<Int>()
-        val quickPicked = mutableListOf<QuickBackground?>()
-        val settingsChanges = mutableListOf<(AppSettings) -> AppSettings>()
-        var developerUnlocks = 0
-        val macrosRun = mutableListOf<Macro>()
-    }
-
-    /** Composes the root with [appSettings], then lets everything it launched settle. */
-    private fun root(
-        appSettings: AppSettings = settings(),
-        flows: Flows = Flows(),
-        wiring: Wiring = Wiring(),
-        presenterManager: PresenterManager = PresenterManager(),
-        devMode: Boolean = true,
-        block: ComposeUiTest.(ScheduleActions) -> Unit = {},
-    ) = runComposeUiTest {
-        var actions = ScheduleActions()
-        setContent {
-            // The bindings, as MainWindow provides them from the settings.
-            val shortcuts = ShortcutMap.from(appSettings.keyboardShortcutSettings)
-            CompositionLocalProvider(LocalShortcuts provides shortcuts) {
-            MaterialTheme {
-                MainDesktop(
-                    appSettings = appSettings,
-                    onQuickBackgroundPicked = { wiring.quickPicked += it },
-                    onSettingsChange = { wiring.settingsChanges += it },
-                    onRequestDeveloperMenuUnlock = { wiring.developerUnlocks++ },
-                    presenterManager = presenterManager,
-                    companionSatelliteViewModel = CompanionSatelliteViewModel(),
-                    // A test run is a dev build, so the dev mode only features are on unless a test turns them off.
-                    live = LiveOutputCallbacks(
-                        presenting = {},
-                        onVerseSelected = {},
-                        onSongItemSelected = {},
-                        onRunMacro = { wiring.macrosRun += it },
-                        devMode = devMode,
-                    ),
-                    publish = MainDesktopPublishers(
-                        onScheduleActionsReady = { actions = it },
-                        onSongsLoaded = { wiring.songsLoaded += it.size },
-                        onScenesChanged = { wiring.scenesChanged += it.size },
-                        onScheduleChanged = { wiring.scheduleChanged += it.size },
-                        onPicturesLoaded = { id, _, _, _ -> wiring.picturesLoaded += id },
-                        onPresentationSlidesLoaded = { id, _, _, _, _, _ -> wiring.slidesLoaded += id },
-                        onTabChange = { wiring.tabChanges += it },
-                    ),
-                    flows = RemoteControlFlows(
-                        selectPictureImageFlow = flows.selectPicture,
-                        selectSlideFlow = flows.selectSlide,
-                        nextPictureFlow = flows.nextPicture,
-                        previousPictureFlow = flows.previousPicture,
-                        nextSlideFlow = flows.nextSlide,
-                        previousSlideFlow = flows.previousSlide,
-                        remotePresentationPlayPauseFlow = flows.playPause,
-                        remotePresentationLoopToggleFlow = flows.loopToggle,
-                        remotePresentationGotoFlow = flows.goto,
-                        selectBibleVerseFlow = flows.selectBibleVerse,
-                        remoteSelectSongFlow = flows.remoteSelectSong,
-                        remoteSelectPictureFlow = flows.remoteSelectPicture,
-                        remoteSelectPresentationFlow = flows.remoteSelectPresentation,
-                        uploadPresentationFlow = flows.uploadPresentation,
-                    ),
-                )
-            }
-            }
-        }
-        waitForIdle()
-        block(actions)
-    }
-
-    /** The remote-command flows, so the collectors that wait on them are entered. */
-    private class Flows {
-        val selectPicture = MutableSharedFlow<Pair<String, Int>>(extraBufferCapacity = 4)
-        val selectSlide = MutableSharedFlow<Pair<String, Int>>(extraBufferCapacity = 4)
-        val nextPicture = MutableSharedFlow<Unit>(extraBufferCapacity = 4)
-        val previousPicture = MutableSharedFlow<Unit>(extraBufferCapacity = 4)
-        val nextSlide = MutableSharedFlow<Unit>(extraBufferCapacity = 4)
-        val previousSlide = MutableSharedFlow<Unit>(extraBufferCapacity = 4)
-        val playPause = MutableSharedFlow<Unit>(extraBufferCapacity = 4)
-        val loopToggle = MutableSharedFlow<Unit>(extraBufferCapacity = 4)
-        val goto = MutableSharedFlow<Int>(extraBufferCapacity = 4)
-        val selectBibleVerse = MutableSharedFlow<SelectBibleVerseRequest>(extraBufferCapacity = 4)
-        val remoteSelectSong = MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = 4)
-        val remoteSelectPicture = MutableSharedFlow<ScheduleItem.PictureItem>(extraBufferCapacity = 4)
-        val remoteSelectPresentation = MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = 4)
-        val uploadPresentation = MutableSharedFlow<File>(extraBufferCapacity = 4)
-    }
-
-    /** Settings that leave [tab] as the only visible one, so the root builds that branch. */
-    private fun showingOnly(tab: Tabs): AppSettings =
-        settings().copy(hiddenTabs = Tabs.entries.filter { it != tab }.map { it.name }.toSet())
+class MainDesktopComposeTest : MainDesktopComposeHarness() {
 
     // ── Composing at all ────────────────────────────────────────────────────────
 
@@ -914,32 +742,25 @@ class MainDesktopComposeTest {
     }
 
     @Test
-    fun `an announcement taken live rewrites the announcement settings`() = root(withOneSong()) { actions ->
-        actions.addAnnouncement(
-            ScheduleItem.AnnouncementItem(id = "ann", text = "A notice for the room"),
-        )
-        waitForIdle()
-
-        val node = onAllNodesWithText("A notice for the room", substring = true)
-        if (node.fetchSemanticsNodes().isNotEmpty()) {
-            node[0].performMouseInput { doubleClick() }
+    fun `an announcement taken live rewrites the announcement settings`() {
+        val wiring = Wiring()
+        val manager = PresenterManager()
+        root(withOneSong(), wiring = wiring, presenterManager = manager) { actions ->
+            actions.addAnnouncement(ScheduleItem.AnnouncementItem(id = "ann", text = "Notice"))
+            actions.addAnnouncement(
+                ScheduleItem.AnnouncementItem(id = "tmr", text = "Starting soon", isTimer = true, timerMinutes = 5),
+            )
             waitForIdle()
+
+            takeLive("Notice")
+            assertTrue(wiring.settingsChanges.isNotEmpty(), "the row's look is written to the settings")
+
+            val before = wiring.settingsChanges.size
+            takeLive("05:00")
+            assertTrue(wiring.settingsChanges.size > before, "a timer row is taken live too")
         }
     }
 
-    /**
-     * Takes the schedule row reading [label] live -- the row itself, not a tab's list that may show
-     * the same name -- by selecting it and then double-clicking it. Selecting first lets the tab the
-     * row opens settle: a double-click whose first click switched the tab could otherwise reach the
-     * row as two single clicks.
-     */
-    private fun ComposeUiTest.takeLive(label: String) {
-        val row = onAllNodes(hasText(label, substring = true) and hasAnyAncestor(hasTestTag(SCHEDULE_ROW_CARD_TAG)))[0]
-        row.performMouseInput { click() }
-        waitForIdle()
-        row.performMouseInput { doubleClick() }
-        waitForIdle()
-    }
 
     /** The root with a controller's link, counting the slide steps it forwards, while [presenting] is live. */
     private fun clickerRoot(presenting: Presenting, block: ComposeUiTest.() -> Unit): Pair<Int, Int> {
@@ -1053,16 +874,6 @@ class MainDesktopComposeTest {
 
     // ── Global shortcuts and their effect ──────────────────────────────────────
 
-    private fun ComposeUiTest.press(key: Key, ctrl: Boolean = false, shift: Boolean = false) {
-        onAllNodes(isRoot())[0].performKeyInput {
-            if (ctrl) keyDown(Key.CtrlLeft)
-            if (shift) keyDown(Key.ShiftLeft)
-            pressKey(key)
-            if (shift) keyUp(Key.ShiftLeft)
-            if (ctrl) keyUp(Key.CtrlLeft)
-        }
-        waitForIdle()
-    }
 
     @Test
     fun `undo and redo take back the last schedule change and put it back`() {
@@ -1078,152 +889,6 @@ class MainDesktopComposeTest {
             assertEquals(1, wiring.scheduleChanged.last(), "redone")
         }
     }
-
-    // ── Preview mode ────────────────────────────────────────────────────────────
-
-    private fun withPreviewMode(on: Boolean, take: KeyChord? = null) = withOneSong().let {
-        it.copy(
-            projectionSettings = it.projectionSettings.copy(previewModeEnabled = on),
-            keyboardShortcutSettings = KeyboardShortcutSettings(
-                overrides = if (take == null) emptyMap() else mapOf(ShortcutAction.TAKE.name to listOf(take)),
-            ),
-        )
-    }
-
-    private fun cuedManager() = PresenterManager().apply {
-        previewBus.setEnabled(true)
-        previewBus.showLowerThird("{}", false, -1f, 0L, "Pastor")
-    }
-
-    @Test
-    fun `in dev mode the sidebar's box holds the unfinished features, and its toggle switches preview mode`() {
-        val wiring = Wiring()
-        root(withPreviewMode(false), wiring = wiring) { _ ->
-            onNodeWithTag(DEV_MODE_BOX_TAG).assertExists()
-            onNodeWithTag(MESSAGE_BUTTON_TAG).assertExists()
-            onNodeWithTag(PROPS_BUTTON_TAG).assertExists()
-            onNodeWithTag(MACROS_BUTTON_TAG).assertExists()
-            onNodeWithTag(CLEAR_LAYERS_BUTTON_TAG).assertExists()
-            onAllNodesWithTag(PREVIEW_TAKE_TAG).assertCountEquals(0)
-            onNodeWithTag(PREVIEW_MODE_TOGGLE_TAG).performClick()
-            waitForIdle()
-            assertTrue(wiring.settingsChanges.last()(withPreviewMode(false)).projectionSettings.previewModeEnabled)
-        }
-    }
-
-    @Test
-    fun `outside dev mode the box, Take and the macro and clear-group keys are gone`() {
-        val wiring = Wiring()
-        val keyed = withPreviewMode(true, KeyChord.of(Key.F12, ctrl = true, shift = true)).let {
-            it.copy(
-                macros = listOf(Macro("macro1", "Walk in", listOf(Action.ClearAll))),
-                keyboardShortcutSettings = KeyboardShortcutSettings(
-                    overrides = it.keyboardShortcutSettings.overrides +
-                        (ShortcutAction.MACRO_1.name to listOf(KeyChord.of(Key.F11, ctrl = true, shift = true))),
-                ),
-            )
-        }
-        val manager = cuedManager()
-        root(keyed, wiring = wiring, presenterManager = manager, devMode = false) { _ ->
-            onAllNodesWithTag(DEV_MODE_BOX_TAG).assertCountEquals(0)
-            onAllNodesWithTag(PREVIEW_TAKE_TAG).assertCountEquals(0)
-            press(Key.F11, ctrl = true, shift = true)
-            press(Key.F12, ctrl = true, shift = true)
-            assertTrue(wiring.macrosRun.isEmpty(), "the macro key does nothing")
-            assertFalse(manager.isLive(Presenting.LOWER_THIRD), "Take's key does nothing")
-        }
-    }
-
-    @Test
-    fun `in dev mode a macro's key runs it`() {
-        val wiring = Wiring()
-        val walkIn = Macro("macro1", "Walk in", listOf(Action.ClearAll))
-        val keyed = withOneSong().copy(
-            macros = listOf(walkIn),
-            keyboardShortcutSettings = KeyboardShortcutSettings(
-                overrides = mapOf(
-                    ShortcutAction.MACRO_1.name to listOf(KeyChord.of(Key.F11, ctrl = true, shift = true)),
-                ),
-            ),
-        )
-        root(keyed, wiring = wiring) { _ ->
-            press(Key.F11, ctrl = true, shift = true)
-            assertEquals(listOf(walkIn), wiring.macrosRun)
-        }
-    }
-
-    @Test
-    fun `in dev mode a clear group's key clears its layers, and an empty slot's key does nothing`() {
-        val keyed = withOneSong().let {
-            it.copy(
-                clearGroups = listOf(ClearGroup("g1", "Graphics", listOf(Layer.GRAPHICS.name))),
-                keyboardShortcutSettings = KeyboardShortcutSettings(
-                    overrides = mapOf(
-                        ShortcutAction.CLEAR_GROUP_1.name to listOf(KeyChord.of(Key.F11, ctrl = true, shift = true)),
-                        ShortcutAction.CLEAR_GROUP_2.name to listOf(KeyChord.of(Key.F10, ctrl = true, shift = true)),
-                    ),
-                ),
-            )
-        }
-        val manager = cuedManager().apply { previewBus.take() }
-        root(keyed, presenterManager = manager) { _ ->
-            press(Key.F10, ctrl = true, shift = true)
-            assertTrue(manager.isLive(Presenting.LOWER_THIRD), "slot 2 has no group")
-            press(Key.F11, ctrl = true, shift = true)
-            assertFalse(manager.isLive(Presenting.LOWER_THIRD))
-        }
-    }
-
-    @Test
-    fun `Take's shortcut puts what is cued on air`() {
-        val manager = cuedManager()
-        root(withPreviewMode(true, KeyChord.of(Key.F12, ctrl = true, shift = true)), presenterManager = manager) { _ ->
-            press(Key.F12, ctrl = true, shift = true)
-            assertTrue(manager.isLive(Presenting.LOWER_THIRD))
-            assertFalse(manager.previewBus.anythingCued)
-        }
-    }
-
-    @Test
-    fun `the sidebar's Take button puts what is cued on air, and waits while nothing is`() {
-        val manager = cuedManager()
-        root(withPreviewMode(true), presenterManager = manager) { _ ->
-            onNodeWithTag(PREVIEW_TAKE_TAG).assertIsEnabled().performClick()
-            waitForIdle()
-            assertTrue(manager.isLive(Presenting.LOWER_THIRD))
-            onNodeWithTag(PREVIEW_TAKE_TAG).assertIsNotEnabled()
-        }
-    }
-
-    @Test
-    fun `the clear layers menu clears a group, or one layer that is on air`() {
-        val gfx = ClearGroup("g1", "Graphics", listOf(Layer.GRAPHICS.name))
-        val settings = withPreviewMode(false).copy(clearGroups = listOf(gfx))
-        val manager = cuedManager().apply { previewBus.take() }
-        root(settings, presenterManager = manager) { _ ->
-            assertTrue(manager.isLive(Presenting.LOWER_THIRD))
-            onNodeWithTag(CLEAR_LAYERS_BUTTON_TAG).performClick()
-            waitForIdle()
-            onNodeWithTag(clearGroupItemTag("g1")).performClick()
-            waitForIdle()
-            assertFalse(manager.isLive(Presenting.LOWER_THIRD), "the group cleared its layer")
-        }
-
-        val again = cuedManager().apply { previewBus.take() }
-        root(settings, presenterManager = again) { _ ->
-            onNodeWithTag(CLEAR_LAYERS_BUTTON_TAG).performClick()
-            waitForIdle()
-            onNodeWithTag(clearLayerItemTag(Layer.GRAPHICS)).performClick()
-            waitForIdle()
-            assertFalse(again.isLive(Presenting.LOWER_THIRD), "the layer cleared on its own")
-        }
-    }
-
-    @Test
-    fun `Take is not in the sidebar while preview mode is off`() =
-        root(withPreviewMode(false)) { _ ->
-            onAllNodesWithTag(PREVIEW_TAKE_TAG).assertCountEquals(0)
-        }
 
     @Test
     fun `a tab's function key opens it`() {
@@ -1264,4 +929,25 @@ class MainDesktopComposeTest {
             assertEquals(listOf("Coffee"), PresetStore(presets).load().presets.map { it.name })
         }
     }
+    @Test
+    fun `the schedule options write the icon size, the row buttons and the toolbar buttons to the settings`() {
+        val wiring = Wiring()
+        val base = withOneSong()
+        root(base, wiring = wiring) { _ ->
+            fun choose(tag: String) {
+                onNodeWithTag("schedule_options").performClick()
+                waitForIdle()
+                onNodeWithTag(tag).performClick()
+                waitForIdle()
+            }
+            choose(ScheduleToolbarIconSize.SMALL.menuTag)
+            val sized = wiring.settingsChanges.last()(base)
+            assertEquals(ScheduleToolbarIconSize.SMALL.name, sized.scheduleToolbarIconSize)
+            choose("schedule_options_legacy_actions")
+            assertEquals(!base.scheduleLegacyRowActions, wiring.settingsChanges.last()(base).scheduleLegacyRowActions)
+            choose(ScheduleToolbarButton.ZOOM.menuTag)
+            assertTrue(ScheduleToolbarButton.ZOOM.name in wiring.settingsChanges.last()(base).hiddenScheduleButtons)
+        }
+    }
+
 }

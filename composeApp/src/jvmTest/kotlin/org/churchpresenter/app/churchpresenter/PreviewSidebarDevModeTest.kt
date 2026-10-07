@@ -62,6 +62,9 @@ class PreviewSidebarDevModeTest {
         withHub = true
         waitForIdle()
         onNodeWithTag(MACROS_BUTTON_TAG).assertExists()
+        withHub = false
+        waitForIdle()
+        onNodeWithTag(MACROS_BUTTON_TAG).assertExists()
         hub.close()
     }
 
