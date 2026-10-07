@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import org.churchpresenter.settings.activeLayout
+import org.churchpresenter.settings.drivesNothing
 import org.churchpresenter.settings.updateLayout
 import org.churchpresenter.theme.AppShape
 import androidx.compose.foundation.verticalScroll
@@ -282,7 +283,8 @@ private fun previewEntries(
             // realWindowCount): those are auto-resolved to None only because no hardware exists,
             // yet main.kt still opens a window for them, so they must appear in the preview too.
             val isDevFallbackSlot = devWindowedFallback && i >= realWindowCount
-            if (!isDevFallbackSlot && screenAssignment.targetDisplay == Constants.KEY_TARGET_NONE) continue
+            // A row on a monitor marked "Don't use" opens no window either, so it is skipped the same way.
+            if (!isDevFallbackSlot && proj.drivesNothing(screenAssignment)) continue
 
             // The operator's name for the monitor, falling back to the numbered default. This
             // panel is the one place they watch all service long, so a booth driving "Foyer TV"

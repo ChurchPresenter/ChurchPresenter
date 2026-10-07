@@ -141,6 +141,32 @@ class ReconcileAssignmentsTest {
         assertEquals(Constants.KEY_TARGET_NONE, reconciled[1].targetDisplay)
     }
 
+    // ── a monitor marked "Don't use" ────────────────────────────────────────────────────────────
+
+    @Test
+    fun `a new slot skips an unused monitor and takes the next usable one, or None`() {
+        val reconciled = reconcileAssignments(
+            emptyList(), 2, listOf(projector, balcony), listOf(primary, projector, balcony), FALLBACK_PROFILE,
+            unusedScreens = listOf(projector.key),
+        ).orEmpty()
+
+        assertEquals(2, reconciled.size, "the unused monitor still counts towards the slots")
+        assertEquals(balcony.index, reconciled[0].targetDisplay)
+        assertEquals(3840, reconciled[0].targetBoundsW)
+        assertEquals(Constants.KEY_TARGET_NONE, reconciled[1].targetDisplay)
+    }
+
+    @Test
+    fun `an auto slot never resolves to an unused monitor`() {
+        val reconciled = reconcileAssignments(
+            listOf(ScreenAssignment(targetDisplay = -1), ScreenAssignment(targetDisplay = -1)), 2,
+            listOf(projector, balcony), listOf(primary, projector, balcony), FALLBACK_PROFILE,
+            unusedScreens = listOf(projector.key),
+        ).orEmpty()
+
+        assertEquals(listOf(balcony.index, Constants.KEY_TARGET_NONE), reconciled.map { it.targetDisplay })
+    }
+
     private companion object {
         const val FALLBACK_PROFILE = "profile1"
     }

@@ -24,6 +24,10 @@ import org.churchpresenter.settings.utils.Constants
  * profile that exists. Left null it would follow nothing: its profile picker shows no selection, it
  * draws with factory defaults rather than any profile the operator made, and the null is saved.
  *
+ * A monitor in [unusedScreens] (`ProjectionSettings.unusedScreens`) still counts towards the slots,
+ * but is never handed to one: the positional picks below skip it, so a slot whose turn would have
+ * been that monitor gets the next usable one, or None.
+ *
  * Returns **null when nothing needed changing**, so a normal launch does not rewrite the settings
  * file. Callers persist only a non-null result.
  */
@@ -32,13 +36,15 @@ fun reconcileScreenAssignments(
     nonPrimaryDisplays: List<ResolvedDisplay>,
     deckLinkCount: Int,
     fallbackProfileId: String,
+    unusedScreens: Collection<String> = emptyList(),
 ): List<ScreenAssignment>? {
     val slotCount = (nonPrimaryDisplays.size + deckLinkCount).coerceAtLeast(0)
+    val usable = nonPrimaryDisplays.filterNot { screenKey(it.x, it.y, it.width, it.height) in unusedScreens }
     var changed = false
     val assignments = saved.toMutableList()
 
     while (assignments.size < slotCount) {
-        val display = nonPrimaryDisplays.getOrNull(assignments.size)
+        val display = usable.getOrNull(assignments.size)
         assignments.add(
             ScreenAssignment(
                 targetDisplay = display?.deviceIndex ?: Constants.KEY_TARGET_NONE,
@@ -54,7 +60,7 @@ fun reconcileScreenAssignments(
 
     for (idx in assignments.indices) {
         if (assignments[idx].targetDisplay != AUTO_TARGET_DISPLAY) continue
-        val display = nonPrimaryDisplays.getOrNull(idx)
+        val display = usable.getOrNull(idx)
         assignments[idx] = if (display != null) {
             assignments[idx].copy(
                 targetDisplay = display.deviceIndex,

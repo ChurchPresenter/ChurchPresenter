@@ -100,6 +100,17 @@ class OutputMergeTest {
     }
 
     @Test
+    fun `an output on a monitor marked unused is no member, so the merge reads as not following`() {
+        val wall = merged(MergeTile("screen:0"), MergeTile("screen:1"))
+        val p = proj(wall, screens = listOf(display(1920), display(3840)))
+            .copy(unusedScreens = listOf(screenKey(3840, 0, 1920, 1080)))
+
+        assertNull(p.mergeMember("screen:1"))
+        assertEquals(MergeMember("screen:0", MergeKind.REAL_DISPLAY, 1920, 1080), p.mergeMember("screen:0"))
+        assertEquals(null to MergeProblem.NOT_FOLLOWING, p.resolveMerge(wall))
+    }
+
+    @Test
     fun `one output is nothing to merge, and no merge is no problem`() {
         val single = merged(MergeTile("screen:0"), MergeTile("screen:0"))
         assertEquals(MergeProblem.TOO_FEW, proj(single, screens = listOf(dev())).resolveMerge(single).second)
