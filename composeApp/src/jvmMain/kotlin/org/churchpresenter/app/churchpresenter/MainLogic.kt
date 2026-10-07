@@ -3,6 +3,8 @@ package org.churchpresenter.app.churchpresenter
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
 import org.churchpresenter.app.churchpresenter.data.Language
+import org.churchpresenter.diagnostics.Log
+import org.churchpresenter.diagnostics.Logger
 
 /**
  * The decisions `main.kt` makes at startup, held apart from the entry point that makes them.
@@ -35,21 +37,37 @@ import org.churchpresenter.app.churchpresenter.data.Language
  *   creation* only, so a fault during `swapBuffers` never triggers it — the default has to be right
  *   rather than recoverable.
  *
- * [override] is the operator's escape hatch, taken verbatim when set, so a machine that does worse
- * on the platform default has a way out without waiting for a build.
+ * [override] is the operator's escape hatch, so a machine that does worse on the platform default
+ * has a way out without waiting for a build. It is taken when this platform can run it and ignored,
+ * with a warning to [log], when it cannot: skiko rejects an API outside the platform's
+ * `fallbackRenderApiQueue` with an `IllegalArgumentException` before the first window opens, so an
+ * override this platform cannot run (OPENGL on a Mac) would stop the app starting at all.
  *
  * Matched on the name rather than a platform enum because that is what the property carries.
  */
-internal fun preferredRenderApi(osName: String, override: String?): String? {
-    val requested = override?.trim()?.uppercase()
-    if (!requested.isNullOrEmpty()) return requested
+internal fun preferredRenderApi(osName: String, override: String?, log: Logger = Log): String? {
     val name = osName.lowercase()
-    return when {
-        name.contains("mac") -> "METAL"
-        name.contains("win") -> null
-        else -> "OPENGL"
+    val (platformDefault, supported) = when {
+        name.contains("mac") -> "METAL" to MAC_RENDER_APIS
+        name.contains("win") -> null to WINDOWS_RENDER_APIS
+        else -> "OPENGL" to OTHER_RENDER_APIS
     }
+    val requested = override?.trim()?.uppercase()
+    if (requested.isNullOrEmpty()) return platformDefault
+    if (requested in supported) return requested
+    log.warn("Startup", "Render API override $requested is not supported on $osName; using the platform default")
+    return platformDefault
 }
+
+/*
+ * The `skiko.renderApi` values skiko accepts on each platform: what its `SkikoProperties` parses
+ * there and keeps in that platform's `fallbackRenderApiQueue`. SOFTWARE is SOFTWARE_COMPAT on macOS
+ * and SOFTWARE_FAST elsewhere; DIRECT_SOFTWARE is SOFTWARE_FAST.
+ */
+private val MAC_RENDER_APIS = setOf("METAL", "SOFTWARE", "SOFTWARE_COMPAT")
+private val WINDOWS_RENDER_APIS =
+    setOf("DIRECT3D", "ANGLE", "OPENGL", "SOFTWARE", "SOFTWARE_FAST", "SOFTWARE_COMPAT", "DIRECT_SOFTWARE")
+private val OTHER_RENDER_APIS = setOf("OPENGL", "SOFTWARE", "SOFTWARE_FAST", "SOFTWARE_COMPAT", "DIRECT_SOFTWARE")
 
 /** The port the single-instance lock binds, honouring the override a second dev instance sets. */
 internal fun singleInstanceLockPort(override: String?, default: Int): Int =
