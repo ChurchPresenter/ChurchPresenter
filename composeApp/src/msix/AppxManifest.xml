@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Filled in by the packageMsix task in composeApp/build.gradle.kts: every @TOKEN@ is replaced
+     before makeappx runs. Identity Name, Publisher and PublisherDisplayName must match the app's
+     reservation in Partner Center (Product identity page) or the Store rejects the upload. -->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  xmlns:desktop2="http://schemas.microsoft.com/appx/manifest/desktop/windows10/2"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap desktop desktop2 rescap">
+
+  <Identity
+    Name="@IDENTITY_NAME@"
+    Publisher="@PUBLISHER@"
+    Version="@VERSION@"
+    ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>Church Presenter</DisplayName>
+    <PublisherDisplayName>@PUBLISHER_DISPLAY_NAME@</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+
+  <Applications>
+    <Application Id="ChurchPresenter" Executable="ChurchPresenter.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="Church Presenter"
+        Description="Presentation software for worship services"
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png" />
+      <Extensions>
+        <!-- Launch at login for a Store install: the app's HKCU Run key write is virtualized and
+             never read (AutoStartManager stands down). Off until the user turns it on under
+             Settings > Apps > Startup. -->
+        <desktop:Extension Category="windows.startupTask" Executable="ChurchPresenter.exe" EntryPoint="Windows.FullTrustApplication">
+          <desktop:StartupTask TaskId="ChurchPresenterStartup" Enabled="false" DisplayName="Church Presenter" />
+        </desktop:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Extensions>
+    <!-- The companion server listens on 8765 and walks up to 40 ports when that one is taken
+         (CompanionServer). Opening them at install time replaces the firewall prompt. -->
+    <desktop2:Extension Category="windows.firewallRules">
+      <desktop2:FirewallRules Executable="ChurchPresenter.exe">
+        <desktop2:Rule Direction="in" IPProtocol="TCP" LocalPortMin="8765" LocalPortMax="8805" Profile="domainAndPrivate" />
+      </desktop2:FirewallRules>
+    </desktop2:Extension>
+  </Extensions>
+
+  <Capabilities>
+    <Capability Name="internetClientServer" />
+    <Capability Name="privateNetworkClientServer" />
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>
