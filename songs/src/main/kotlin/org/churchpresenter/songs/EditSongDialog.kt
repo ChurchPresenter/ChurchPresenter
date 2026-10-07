@@ -80,7 +80,12 @@ fun EditSongDialog(
     /** Stores renamed [languageNames] on Save. Null leaves the names out of the editor. */
     onLanguageNamesChange: ((List<String>) -> Unit)? = null,
     onDismiss: () -> Unit,
-    onSave: (SongItem, SongTuning) -> Unit
+    onSave: (SongItem, SongTuning) -> Unit,
+    /**
+     * Wraps the window's content — the app passes its helper's spotlight, so a tour can ring the
+     * editor's controls. Draws the content as it is by default.
+     */
+    windowContent: @Composable (content: @Composable () -> Unit) -> Unit = { it() },
 ) {
     if (!isVisible || song == null) return
 
@@ -95,25 +100,27 @@ fun EditSongDialog(
         title = if (isNewSong) stringResource(Res.string.new_song) else stringResource(Res.string.edit_song),
         resizable = true
     ) {
-        EditSongContent(
-            song = song,
-            backgroundButton = backgroundButton,
-            songbooks = songbooks,
-            existingSongs = existingSongs,
-            isNewSong = isNewSong,
-            theme = theme,
-            tuning = tuning,
-            showTuningFields = showTuningFields,
-            chordsVisible = chordsVisible,
-            typicalSeconds = typicalSeconds,
-            onChordsVisibleChange = onChordsVisibleChange,
-            isVisible = isVisible,
-            onApplyBackgroundToSongbook = onApplyBackgroundToSongbook,
-            languageNames = languageNames,
-            onLanguageNamesChange = onLanguageNamesChange,
-            onDismiss = onDismiss,
-            onSave = onSave
-        )
+        windowContent {
+            EditSongContent(
+                song = song,
+                backgroundButton = backgroundButton,
+                songbooks = songbooks,
+                existingSongs = existingSongs,
+                isNewSong = isNewSong,
+                theme = theme,
+                tuning = tuning,
+                showTuningFields = showTuningFields,
+                chordsVisible = chordsVisible,
+                typicalSeconds = typicalSeconds,
+                onChordsVisibleChange = onChordsVisibleChange,
+                isVisible = isVisible,
+                onApplyBackgroundToSongbook = onApplyBackgroundToSongbook,
+                languageNames = languageNames,
+                onLanguageNamesChange = onLanguageNamesChange,
+                onDismiss = onDismiss,
+                onSave = onSave
+            )
+        }
     }
 }
 
