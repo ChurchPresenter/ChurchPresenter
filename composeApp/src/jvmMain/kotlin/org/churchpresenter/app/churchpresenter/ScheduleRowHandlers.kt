@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.liveoutput.showLowerThird
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.sharedui.utils.LiveHistoryLogger
@@ -8,7 +7,6 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.liveoutput.cueOrSetAnnouncementText
-import java.io.File
 
 /*
  * What the main screen does with a Schedule row: open it in its tab, or put it on screen.
@@ -59,31 +57,10 @@ internal fun MainDesktopScope.presentMediaFromSchedule(item: ScheduleItem.MediaI
 internal fun MainDesktopScope.presentAnnouncementFromSchedule(
     item: ScheduleItem.AnnouncementItem,
     timerExpiredDefaultLabel: String,
-) {
-    onSettingsChange { settings ->
-        withAnnouncementFrom(settings, item)
-    }
-    if (item.isTimer) {
-        presenterManager.goLiveAnnouncementTimer(
-            item,
-            timerExpiredText = item.timerExpiredText.ifBlank { timerExpiredDefaultLabel },
-        )
-    } else {
-        cueOrSetAnnouncementText(presenterManager, item.text)
-    }
-    live.presenting(Presenting.ANNOUNCEMENTS)
-}
+) = presentAnnouncementItem(item, timerExpiredDefaultLabel, presenterManager, onSettingsChange, live.presenting)
 
-internal fun MainDesktopScope.presentLowerThirdFromSchedule(item: ScheduleItem.LowerThirdItem) {
-    val lottieFolder = File(appSettings.streamingSettings.lowerThirdFolder)
-    val lottieFile = findLottiePresetFile(lottieFolder.listFiles()?.toList(), item.presetLabel, item.presetId)
-    if (lottieFile != null && lottieFile.exists()) {
-        val json = lottieFile.readText()
-        presenterManager.previewBus.showLowerThird(
-            json, item.pauseAtFrame, -1f, item.pauseDurationMs, lottieFile.nameWithoutExtension,
-        )
-    }
-}
+internal fun MainDesktopScope.presentLowerThirdFromSchedule(item: ScheduleItem.LowerThirdItem) =
+    presentLowerThirdItem(item, appSettings.streamingSettings.lowerThirdFolder, presenterManager)
 
 internal fun MainDesktopScope.presentWebsiteFromSchedule(item: ScheduleItem.WebsiteItem) {
     state.select(item)
