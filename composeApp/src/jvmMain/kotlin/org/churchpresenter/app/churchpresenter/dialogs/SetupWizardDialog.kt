@@ -59,7 +59,7 @@ import org.churchpresenter.media.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
 import org.churchpresenter.app.churchpresenter.ui.theme.themeDisplayName
-import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
+import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource

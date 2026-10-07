@@ -17,7 +17,7 @@ import org.churchpresenter.settings.OutputStyleScope
  * control in `CustomizePanes` asks this before drawing itself.
  *
  * Ambient rather than a parameter on purpose: the pairs are spread across a dozen private
- * composables, and threading a scope down to each of them would change signatures that
- * `config/detekt/baseline.xml` keys its entries by.
+ * composables, and threading a scope down to each of them would change every one of their
+ * signatures for a value only a few of them read.
  */
 internal val LocalOutputStyleScope = staticCompositionLocalOf { OutputStyleScope.BOTH }

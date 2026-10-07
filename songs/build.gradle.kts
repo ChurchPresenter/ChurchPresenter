@@ -27,6 +27,11 @@ dependencies {
     implementation(projects.settings)
     implementation(projects.theme)
     implementation(projects.songChords)
+    // The song editor: its chord preview draws `ChordLine`, and its footer formats the typical
+    // live time the way the calendar does. The Background button is the app's, passed in as a slot,
+    // so `:profiles` is only on the test classpath below.
+    implementation(projects.presenter)
+    implementation(projects.calendar)
 
     // Mac SongPresenter `.sps` libraries are SQLite files.
     implementation(libs.sqlite.jdbc)
@@ -51,6 +56,8 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation(testFixtures(projects.sharedUi))
+    // The editor's suites draw the real Background button in its slot, as the app does.
+    testImplementation(projects.profiles)
     testImplementation(libs.compose.uiTestJunit4)
     testImplementation(libs.compose.uiTest)
     testImplementation(libs.kotlinx.coroutines.test)

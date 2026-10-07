@@ -2,7 +2,8 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.runtime.Composable
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
-import org.churchpresenter.app.churchpresenter.dialogs.EditSongDialog
+import org.churchpresenter.app.churchpresenter.dialogs.songEditorBackgroundButton
+import org.churchpresenter.songs.EditSongDialog
 import org.churchpresenter.liveoutput.lottieBandPath
 import org.churchpresenter.profiles.stageMonitorScreenIndices
 import org.churchpresenter.app.churchpresenter.utils.isChordChartPresentation
@@ -25,6 +26,7 @@ import org.churchpresenter.theme.ThemeMode
 @Composable
 fun AppSongEditor(request: SongEditorRequest, theme: ThemeMode, appSettings: AppSettings) {
     EditSongDialog(
+        backgroundButton = songEditorBackgroundButton,
         isVisible = request.isVisible,
         song = request.song,
         songbooks = request.songbooks,

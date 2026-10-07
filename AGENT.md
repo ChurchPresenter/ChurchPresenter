@@ -169,7 +169,7 @@ only — measure with the excludes removed before quoting it.
 ./gradlew compileKotlinJvm             # fast compile check
 ./gradlew :composeApp:detekt           # static analysis — CI's first gate, run it LAST before you stop
 ./gradlew :theme:test :theme:detekt    # a module's own suite and gate
-# NEVER run :composeApp:detektBaseline — it rewrites baseline.xml and absorbs your own new findings
+# NEVER run :composeApp:detektBaseline — it writes a baseline that absorbs your own new findings
 ./gradlew :composeApp:check            # compile + all unit tests
 ./gradlew :composeApp:jacocoTestReport # coverage → build/reports/jacoco/jacocoTestReport/html/
 bash cleanup_check.sh                  # repo code-quality report
@@ -194,27 +194,15 @@ step of any change that touched Kotlin.** It is the first job in `.github/workfl
 fails on what the compiler only warns about (an unused import). Every finding it prints is yours to
 fix.
 
-### **NEVER add to a detekt baseline file**
-`config/detekt/baseline.xml`, `bible-engine/config/detekt/baseline.xml` and
-`presentation-engine/config/detekt/baseline.xml` hold findings from before the size/length rules
-(`LongMethod`, `LongParameterList`, `TooManyFunctions`, `LargeClass`, `MaxLineLength`,
-`TooGenericExceptionCaught`) were switched on. They are debt to be paid down, and they only ever
-shrink:
-- **The only permitted edit to a baseline file is deleting entries.** Never add a line to one — not a
-  new entry, not a re-keyed copy of an old one, not a "temporary" one. No exceptions, and no asking
-  whether this one is fine: fix the finding instead.
-- **NEVER run `detektBaseline`** (or any task that writes a baseline) — it regenerates the file from
-  the current tree and silently absorbs every finding you just introduced.
-- **Touching a baselined function can surface its finding.** Entries are keyed by rule plus
-  signature (a parameter's KDoc included), so changing a signature or a long line makes detekt
-  report it again. That finding is now yours: wrap the line, split the function, narrow the catch —
-  and delete the old entry, which no longer matches anything.
-- **When you fix a baselined finding, delete its entry** in the same change.
-- **Every entry is `jvmMain` code; `jvmTest` has none and must keep none.** In tests, suppress at the
-  declaration (`@Suppress`) for what genuinely cannot be wrapped.
-- detekt cannot fix these rules itself (none of them is auto-correctable, and the build has no
-  `detekt-formatting` plugin), so deleting a baseline file does not clean anything up — it turns every
-  entry back into a CI failure. Pay the debt down file by file instead.
+### **There are no detekt baselines — NEVER add one**
+No module has a baseline file: every finding the size/length rules (`LongMethod`,
+`LongParameterList`, `TooManyFunctions`, `LargeClass`, `MaxLineLength`, `TooGenericExceptionCaught`)
+ever raised was fixed in code, and the build configures no `baseline =` anywhere.
+- **Never create one, and never add `baseline =` to a `detekt {}` block.** A finding is fixed in
+  code — wrap the line, split the function, narrow the catch — not recorded.
+- **NEVER run `detektBaseline`** (or any task that writes a baseline) — it writes one from the
+  current tree and silently absorbs every finding you just introduced.
+- In tests, suppress at the declaration (`@Suppress`) only for what genuinely cannot be wrapped.
 
 Thresholds are deliberately not detekt's defaults: `LongMethod` 100, `LargeClass` 1000, and
 `LongParameterList` with `ignoreDefaultParameters: true` so the `*TestSupport.kt` DSL helpers are

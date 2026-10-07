@@ -206,8 +206,8 @@ object ReferenceWatcher {
         }
         val tokens = tokenize(text)
         if (tokens.isEmpty()) return emptyList()
-        val atoms = classify(tokens)
-        return interpret(atoms, sticky, now)
+        val atoms = BookMatcher.classify(tokens)
+        return Interpreter(sticky, now).interpret(atoms)
     }
 
     /**
@@ -244,7 +244,7 @@ object ReferenceWatcher {
     private fun lastBookMentioned(text: String): Int? {
         val tokens = tokenize(text)
         if (tokens.isEmpty()) return null
-        return classify(tokens).filterIsInstance<Atom.Book>().lastOrNull()?.num
+        return BookMatcher.classify(tokens).filterIsInstance<Atom.Book>().lastOrNull()?.num
     }
 
     // ── tokenization ──────────────────────────────────────────────────────────
@@ -274,170 +274,38 @@ object ReferenceWatcher {
 
     // ── classification (greedy multi-token book lookup) ─────────────────────────
 
-    private fun classify(tokens: List<String>): List<Atom> {
-        val atoms = ArrayList<Atom>(tokens.size)
-        var i = 0
-        while (i < tokens.size) {
-            // Numbered-book disambiguation runs first: "1 Послание Иоанна" → 1 John (62), not the
-            // Gospel (43); "Первая книга царств" → 1 Samuel (9), not left unresolved. The look-back
-            // tokens (ordinal / «послание»/«книга» / «к») were already classified as Num/Filler, so
-            // drop those atoms and emit the resolved book in their place.
-            val numberedBook = resolveNumberedBookAt(tokens, i)
-            if (numberedBook != null) {
-                val (bookNum, back) = numberedBook
-                repeat(back) { if (atoms.isNotEmpty()) atoms.removeAt(atoms.lastIndex) }
-                atoms.add(Atom.Book(bookNum))
-                i++
-                continue
-            }
-            // The same citation with the ordinal AFTER the book: "Иоанн говорит в первом послании,
-            // в первой главе шестом стихе" (S13 row 928). Only the look-back form was
-            // handled, so this resolved to the Gospel and shipped as an explicit tier-1 — auto-go-live
-            // with the wrong book, while the reverse lookup found the real 1 John 1:6 seconds later.
-            val numberedBookAhead = resolveNumberedBookAhead(tokens, i)
-            if (numberedBookAhead != null) {
-                atoms.add(Atom.Book(numberedBookAhead))
-                i++
-                continue
-            }
+    /** Which atom tokens at the cursor became, how many they used, and how many atoms behind it they replace. */
+    private class Match(val atom: Atom, val consumed: Int, val dropBack: Int = 0)
 
-            // Greedy book match: try 3-, then 2-, then 1-token joins against the alias table.
-            var matched = false
-            // Set when the exact-alias branch below refuses this token for want of corroboration, so
-            // the inflection-tolerant fallback can't quietly re-admit the very same word.
-            var shortAliasRefused = false
-            val maxJoin = minOf(3, tokens.size - i)
-            for (len in maxJoin downTo 1) {
-                val phrase = tokens.subList(i, i + len).joinToString(" ")
-                val bookNum = BookResolver.ALIASES[phrase]
-                // Skip ultra-short single-token aliases (≤2 chars: "so"→Zeph, "re"/"ap"→Rev, "ge",
-                // "ex"…). They are typed-input abbreviations and fire constantly on spoken/translated
-                // prose (the translation track flows through here too), hijacking the sticky book.
-                // Multi-word aliases always carry a space (length ≥ 3) and are kept.
-                if (bookNum != null && (len > 1 || phrase.length >= 3)) {
-                    // Ambiguous common-word aliases (bare "иоанну"/"бытие"…) AND short real-word
-                    // aliases ("job", "song", "при", "откр" — ≤ SHORT_ALIAS_MAX_LEN chars) need
-                    // corroborating context — a chapter/verse digit nearby or an explicit citation
-                    // marker — or they're just ordinary vocabulary/narration, not a book being
-                    // named. A genuine spoken citation via a short alias essentially always has
-                    // the number within reach ("Job chapter 3"), so recall survives the gate.
-                    // A version name is not a citation: "New King James version" names the module the
-                    // speaker is reading FROM. Real trace: it flipped the sticky book to James in the
-                    // middle of Psalm 14 (S09).
-                    if (len == 1 && isVersionNamePart(tokens, i)) break
-                    if (len == 1 &&
-                        (AMBIGUOUS_BOOK_FORMS[phrase] != null || isShortAlias(phrase, bookNum)) &&
-                        !hasAmbiguousBookCorroboration(tokens, i)
-                    ) {
-                        shortAliasRefused = true
-                        break
-                    }
-                    atoms.add(Atom.Book(bookNum))
-                    i += len
-                    matched = true
-                    break
-                }
-                // Same join, but matching each word by stem — catches a multi-word name whose
-                // halves are inflected differently than the alias table spells them ("Плача
-                // Иеремия" for "плач иеремии"). Tried inside the same longest-first loop so a
-                // 2-word stem hit still beats the 1-word exact alias for its second word, which
-                // is the whole point: otherwise "иеремия" wins on its own and names Jeremiah.
-                if (len > 1) {
-                    val phraseBook = BookResolver.resolveStemPhrase(tokens.subList(i, i + len))
-                    if (phraseBook != null) {
-                        atoms.add(Atom.Book(phraseBook))
-                        i += len
-                        matched = true
-                        break
-                    }
-                }
-            }
-            if (matched) continue
+    /** What the greedy alias join made of the tokens at the cursor. */
+    private sealed interface AliasJoin {
+        class Matched(val match: Match) : AliasJoin
 
-            val tok = tokens[i]
-            // Inflection-tolerant single-token book match (Матфея, Даниила, Римлянам…), but not for
-            // tokens that are numbers/keywords/separators.
-            if (tok != ":" && tok != "-" && !isChapKw(tok) && !isVerseKw(tok) &&
-                tok !in RANGE_WORDS && tok !in LIST_WORDS && !isNumberRatherThanBook(tok)
-            ) {
-                BookResolver.resolveStem(tok)?.let { match ->
-                    // Over-extension gate: a token much longer than the alias stem it matched is
-                    // usually ordinary vocabulary sharing a prefix ("открылся"→"откр",
-                    // "повторить"→a Deuteronomy stem), not an inflected book name — real
-                    // grammatical endings extend a stem by 1-2 chars (Матфея, Даниила). Beyond
-                    // that, require the same corroboration ambiguous aliases need. The threshold
-                    // matches StickyAudit's empirically-validated risky band (extension >= 3).
-                    //
-                    // Two ways a SHORT name used to slip past the corroboration gate, because a name
-                    // of ≤ SHORT_ALIAS_MAX_LEN chars survives stemOf untouched and so matches itself
-                    // here at extension 0:
-                    //  - [shortAliasRefused]: the exact branch above just refused this very token for
-                    //    want of corroboration, and this branch would re-admit it ("плач" → Lamentations
-                    //    off ordinary grief vocabulary, sticky-log-S10.
-                    //  - [BookResolver.isRegisteredOnlyStem]: the exact branch never sees names an SPB
-                    //    module registered at startup (it reads the static table), so those reach only
-                    //    this branch — ungated, however short or ordinary the word. The Russian Synodal
-                    //    module names book 65 "Иуда" and book 28 "Осия", both everyday words: a sermon
-                    //    illustration about Judas flipped the sticky book to Jude
-                    //    (sticky-log-S12,, and "осия" held Hosea as the wrong
-                    //    sticky book for ~40 minutes through a Psalm 14 passage (S09).
-                    // Inflected forms are untouched — "Луки"/"Марка" resolve through the vetted static
-                    // stems and stay unconditional.
-                    val overExtended = tok.length - match.stem.length >= STEM_MAX_EXTENSION_UNCORROBORATED
-                    val unvettedShortName = match.stem.length <= SHORT_ALIAS_MAX_LEN &&
-                        BookResolver.isRegisteredOnlyStem(match.stem)
-                    val needsCorroboration = overExtended || shortAliasRefused || unvettedShortName ||
-                        AMBIGUOUS_BOOK_FORMS[tok] != null || AMBIGUOUS_BOOK_STEMS[match.stem] != null
-                    val gated = needsCorroboration && !hasAmbiguousBookCorroboration(tokens, i)
-                    if (!gated) { atoms.add(Atom.Book(match.bookNum)); i++; matched = true }
-                }
-            }
-            if (matched) continue
-
-            atoms.add(
-                when {
-                    tok == ":" -> Atom.Colon
-                    tok == "-" -> Atom.Range
-                    isChapKw(tok) -> Atom.ChapKw
-                    isVerseKw(tok) -> Atom.VerseKw
-                    tok in RANGE_WORDS -> Atom.Range
-                    tok in LIST_WORDS -> Atom.ListSep
-                    tok in FROM_WORDS -> Atom.From
-                    tok in BARE_ONE -> Atom.Filler
-                    else -> NumberWords.parseToken(tok)?.let { Atom.Num(it) } ?: Atom.Filler
-                }
-            )
-            i++
-        }
-        return atoms
+        /** An exact alias that needed corroboration and had none: the stem fallback may not re-admit it. */
+        object Refused : AliasJoin
+        object NoMatch : AliasJoin
     }
+
+    /** The longest alias join tried, in tokens. */
+    private const val MAX_JOIN = 3
 
     /**
-     * True when [t] should be read as a number rather than offered to the book-stem resolver.
-     *
-     * `NumberWords.parseToken` matches a number stem plus any plausible grammatical ending, so a
-     * book name that merely *begins* with one is swallowed whole: "Второзакония" — the standard
-     * Russian title of Deuteronomy — is stem "втор" (2) followed by "озакония", whose leading
-     * vowel is a valid ending, so it parsed as the number 2 and never reached [BookResolver].
-     * Exact aliases escaped this because the greedy alias branch runs first; only the inflected
-     * forms fell through, which is why "Второзаконие" worked and "Второзакония" did not.
-     *
-     * Resolve it the way any lexicon collision should be: longest match wins. "второзакония"
-     * matches book stem "второзакон" (10) against number stem "втор" (4), so it is a book;
-     * "второй" matches "втор" both ways (4 vs 4) and stays the number it is. Same shape as the
-     * `NOT_NUMBERS` "семья"/"семь" fix, but as a rule instead of a list, so the next such book
-     * name needs no new entry.
+     * Skip ultra-short single-token aliases (≤2 chars: "so"→Zeph, "re"/"ap"→Rev, "ge", "ex"…). They
+     * are typed-input abbreviations and fire constantly on spoken/translated prose (the translation
+     * track flows through here too), hijacking the sticky book. Multi-word aliases always carry a
+     * space (length ≥ 3) and are kept.
      */
-    private fun isNumberRatherThanBook(t: String): Boolean {
-        if (NumberWords.parseToken(t) == null) return false
-        val bookStem = BookResolver.resolveStem(t)?.stem ?: return true
-        return bookStem.length <= NumberWords.matchedStemLength(t)
-    }
+    private const val MIN_SINGLE_ALIAS_LEN = 3
+
+    private const val CHAP_RU_STEM = "глав"
+    private const val VERSE_RU_STEM = "стих"
 
     private fun isChapKw(t: String): Boolean =
-        (t.startsWith("глав") && t.substring(4) in CHAP_RU_ENDINGS) || CHAP_KW.any { t.startsWith(it) }
+        (t.startsWith(CHAP_RU_STEM) && t.substring(CHAP_RU_STEM.length) in CHAP_RU_ENDINGS) ||
+            CHAP_KW.any { t.startsWith(it) }
     private fun isVerseKw(t: String): Boolean =
-        (t.startsWith("стих") && t.substring(4) in VERSE_RU_ENDINGS) || VERSE_KW.any { t.startsWith(it) }
+        (t.startsWith(VERSE_RU_STEM) && t.substring(VERSE_RU_STEM.length) in VERSE_RU_ENDINGS) ||
+            VERSE_KW.any { t.startsWith(it) }
 
     private fun isEpistleMarker(t: String): Boolean = EPISTLE_MARKER_STEMS.any { t.startsWith(it) }
 
@@ -482,115 +350,276 @@ object ReferenceWatcher {
         return (spec.base + (ord ?: 1) - 1) to back
     }
 
-    /**
-     * True when the token at [at] is a number that could plausibly be a chapter or verse, as opposed
-     * to an ordinary count.
-     *
-     * A citation says the number in digits ("Psalm 14", "1 Коринфянам") or spells it right next to a
-     * chapter/verse keyword ("Десятая глава", "chapter three"). A count phrase spells it and attaches
-     * it to a noun — "Two songs", "Job's first trial", "Два пения" — which used to satisfy this gate
-     * exactly like a real citation and was the longest-standing false-positive shape in the gap table.
-     */
-    private fun isCitationNumber(tokens: List<String>, at: Int): Boolean {
-        val tok = tokens.getOrNull(at) ?: return false
-        if (NumberWords.parseToken(tok) == null) return false
-        if (tok.any { it.isDigit() }) return true
-        // Spelled out: only a chapter/verse keyword on either side makes it a citation number.
-        for (d in 1..2) {
-            val after = tokens.getOrNull(at + d)
-            val before = tokens.getOrNull(at - d)
-            if (after != null && (isChapKw(after) || isVerseKw(after))) return true
-            if (before != null && (isChapKw(before) || isVerseKw(before))) return true
+    /** Turning tokens into atoms, trying each way a book can be named before the plain readings. */
+    private object BookMatcher {
+
+        fun classify(tokens: List<String>): List<Atom> {
+            val atoms = ArrayList<Atom>(tokens.size)
+            var i = 0
+            while (i < tokens.size) {
+                val match = matchAt(tokens, i)
+                repeat(match.dropBack) { if (atoms.isNotEmpty()) atoms.removeAt(atoms.lastIndex) }
+                atoms.add(match.atom)
+                i += match.consumed
+            }
+            return atoms
         }
-        return false
+
+        private fun matchAt(tokens: List<String>, i: Int): Match {
+            // Numbered-book disambiguation runs first: "1 Послание Иоанна" → 1 John (62), not the
+            // Gospel (43); "Первая книга царств" → 1 Samuel (9), not left unresolved. The look-back
+            // tokens (ordinal / «послание»/«книга» / «к») were already classified as Num/Filler, so
+            // drop those atoms and emit the resolved book in their place.
+            //
+            // The same citation with the ordinal AFTER the book: "Иоанн говорит в первом послании,
+            // в первой главе шестом стихе" (S13 row 928). Only the look-back form was
+            // handled, so this resolved to the Gospel and shipped as an explicit tier-1 — auto-go-live
+            // with the wrong book, while the reverse lookup found the real 1 John 1:6 seconds later.
+            val numbered = resolveNumberedBookAt(tokens, i)
+                ?.let { (bookNum, back) -> Match(Atom.Book(bookNum), 1, back) }
+                ?: resolveNumberedBookAhead(tokens, i)?.let { Match(Atom.Book(it), 1) }
+            return numbered ?: aliasOrStem(tokens, i) ?: Match(simpleAtom(tokens[i]), 1)
+        }
+
+        private fun aliasOrStem(tokens: List<String>, i: Int): Match? {
+            val join = matchAliasJoin(tokens, i)
+            return (join as? AliasJoin.Matched)?.match
+                ?: matchStem(tokens, i, shortAliasRefused = join == AliasJoin.Refused)
+        }
+
+        /** Greedy book match: try 3-, then 2-, then 1-token joins against the alias table. */
+        private fun matchAliasJoin(tokens: List<String>, i: Int): AliasJoin =
+            (minOf(MAX_JOIN, tokens.size - i) downTo 1).firstNotNullOfOrNull { len -> joinOf(tokens, i, len) }
+                ?: AliasJoin.NoMatch
+
+        /** The join of [len] tokens from [i], or null to try a shorter one. */
+        private fun joinOf(tokens: List<String>, i: Int, len: Int): AliasJoin? {
+            val phrase = tokens.subList(i, i + len).joinToString(" ")
+            val bookNum = BookResolver.ALIASES[phrase]
+            if (bookNum != null && (len > 1 || phrase.length >= MIN_SINGLE_ALIAS_LEN)) {
+                return exactJoin(tokens, i, len, phrase, bookNum)
+            }
+            // Same join, but matching each word by stem — catches a multi-word name whose
+            // halves are inflected differently than the alias table spells them ("Плача
+            // Иеремия" for "плач иеремии"). Tried inside the same longest-first loop so a
+            // 2-word stem hit still beats the 1-word exact alias for its second word, which
+            // is the whole point: otherwise "иеремия" wins on its own and names Jeremiah.
+            if (len == 1) return null
+            return BookResolver.resolveStemPhrase(tokens.subList(i, i + len))
+                ?.let { AliasJoin.Matched(Match(Atom.Book(it), len)) }
+        }
+
+        private fun exactJoin(tokens: List<String>, i: Int, len: Int, phrase: String, bookNum: Int): AliasJoin {
+            // Ambiguous common-word aliases (bare "иоанну"/"бытие"…) AND short real-word
+            // aliases ("job", "song", "при", "откр" — ≤ SHORT_ALIAS_MAX_LEN chars) need
+            // corroborating context — a chapter/verse digit nearby or an explicit citation
+            // marker — or they're just ordinary vocabulary/narration, not a book being
+            // named. A genuine spoken citation via a short alias essentially always has
+            // the number within reach ("Job chapter 3"), so recall survives the gate.
+            val ordinaryWord = AMBIGUOUS_BOOK_FORMS[phrase] != null || Gates.isShortAlias(phrase, bookNum)
+            return when {
+                // A version name is not a citation: "New King James version" names the module the
+                // speaker is reading FROM. Real trace: it flipped the sticky book to James in the
+                // middle of Psalm 14 (S09).
+                len == 1 && Gates.isVersionNamePart(tokens, i) -> AliasJoin.NoMatch
+                len == 1 && ordinaryWord && !Gates.hasAmbiguousBookCorroboration(tokens, i) -> AliasJoin.Refused
+                else -> AliasJoin.Matched(Match(Atom.Book(bookNum), len))
+            }
+        }
+
+        /**
+         * Inflection-tolerant single-token book match (Матфея, Даниила, Римлянам…), but not for
+         * tokens that are numbers/keywords/separators.
+         */
+        private fun matchStem(tokens: List<String>, i: Int, shortAliasRefused: Boolean): Match? {
+            val tok = tokens[i]
+            val separator = tok == ":" || tok == "-"
+            val keyword = isChapKw(tok) || isVerseKw(tok)
+            val connective = tok in RANGE_WORDS || tok in LIST_WORDS
+            val structural = separator || keyword || connective
+            if (structural || isNumberRatherThanBook(tok)) return null
+            val match = BookResolver.resolveStem(tok) ?: return null
+            // Over-extension gate: a token much longer than the alias stem it matched is
+            // usually ordinary vocabulary sharing a prefix ("открылся"→"откр",
+            // "повторить"→a Deuteronomy stem), not an inflected book name — real
+            // grammatical endings extend a stem by 1-2 chars (Матфея, Даниила). Beyond
+            // that, require the same corroboration ambiguous aliases need. The threshold
+            // matches StickyAudit's empirically-validated risky band (extension >= 3).
+            //
+            // Two ways a SHORT name used to slip past the corroboration gate, because a name
+            // of ≤ SHORT_ALIAS_MAX_LEN chars survives stemOf untouched and so matches itself
+            // here at extension 0:
+            //  - [shortAliasRefused]: the exact branch above just refused this very token for
+            //    want of corroboration, and this branch would re-admit it ("плач" → Lamentations
+            //    off ordinary grief vocabulary, sticky-log-S10.
+            //  - [BookResolver.isRegisteredOnlyStem]: the exact branch never sees names an SPB
+            //    module registered at startup (it reads the static table), so those reach only
+            //    this branch — ungated, however short or ordinary the word. The Russian Synodal
+            //    module names book 65 "Иуда" and book 28 "Осия", both everyday words: a sermon
+            //    illustration about Judas flipped the sticky book to Jude
+            //    (sticky-log-S12,, and "осия" held Hosea as the wrong
+            //    sticky book for ~40 minutes through a Psalm 14 passage (S09).
+            // Inflected forms are untouched — "Луки"/"Марка" resolve through the vetted static
+            // stems and stay unconditional.
+            val overExtended = tok.length - match.stem.length >= STEM_MAX_EXTENSION_UNCORROBORATED
+            val unvettedShortName = match.stem.length <= SHORT_ALIAS_MAX_LEN &&
+                BookResolver.isRegisteredOnlyStem(match.stem)
+            val needsCorroboration = overExtended || shortAliasRefused || unvettedShortName ||
+                AMBIGUOUS_BOOK_FORMS[tok] != null || AMBIGUOUS_BOOK_STEMS[match.stem] != null
+            val gated = needsCorroboration && !Gates.hasAmbiguousBookCorroboration(tokens, i)
+            return if (gated) null else Match(Atom.Book(match.bookNum), 1)
+        }
+
+        private fun simpleAtom(tok: String): Atom = when {
+            tok == ":" -> Atom.Colon
+            tok == "-" -> Atom.Range
+            isChapKw(tok) -> Atom.ChapKw
+            isVerseKw(tok) -> Atom.VerseKw
+            tok in RANGE_WORDS -> Atom.Range
+            tok in LIST_WORDS -> Atom.ListSep
+            tok in FROM_WORDS -> Atom.From
+            tok in BARE_ONE -> Atom.Filler
+            else -> NumberWords.parseToken(tok)?.let { Atom.Num(it) } ?: Atom.Filler
+        }
+
+        /**
+         * True when [t] should be read as a number rather than offered to the book-stem resolver.
+         *
+         * `NumberWords.parseToken` matches a number stem plus any plausible grammatical ending, so a
+         * book name that merely *begins* with one is swallowed whole: "Второзакония" — the standard
+         * Russian title of Deuteronomy — is stem "втор" (2) followed by "озакония", whose leading
+         * vowel is a valid ending, so it parsed as the number 2 and never reached [BookResolver].
+         * Exact aliases escaped this because the greedy alias branch runs first; only the inflected
+         * forms fell through, which is why "Второзаконие" worked and "Второзакония" did not.
+         *
+         * Resolve it the way any lexicon collision should be: longest match wins. "второзакония"
+         * matches book stem "второзакон" (10) against number stem "втор" (4), so it is a book;
+         * "второй" matches "втор" both ways (4 vs 4) and stays the number it is. Same shape as the
+         * `NOT_NUMBERS` "семья"/"семь" fix, but as a rule instead of a list, so the next such book
+         * name needs no new entry.
+         */
+        private fun isNumberRatherThanBook(t: String): Boolean {
+            if (NumberWords.parseToken(t) == null) return false
+            val bookStem = BookResolver.resolveStem(t)?.stem ?: return true
+            return bookStem.length <= NumberWords.matchedStemLength(t)
+        }
+
+        /**
+         * The mirror of [resolveNumberedBookAt] for speech that names the book and *then* qualifies it —
+         * "Иоанн говорит в первом послании", "Пётр пишет во втором послании". Scans a short window after
+         * `tokens[i]` for an epistle marker, taking any ordinal found on the way; ordinary prepositions
+         * and the «к»/«ко» connector may sit between, anything else closes the window so a marker
+         * belonging to a later, unrelated clause can't be claimed.
+         *
+         * Requires an explicit ordinal for families with no unnumbered meaning, exactly as the look-back
+         * form does — a bare "Иоанн говорит в послании" still means 1 John only because John/Peter
+         * conventionally default to the first.
+         */
+        private fun resolveNumberedBookAhead(tokens: List<String>, i: Int): Int? {
+            val spec = NUMBERED_BOOK_FORMS[tokens[i]] ?: return null
+            val window = tokens.subList(i + 1, minOf(i + AHEAD_WINDOW, tokens.lastIndex) + 1)
+            // The window is read up to the first token that is either the marker or one that closes it.
+            val stop = window.indexOfFirst { tok -> isEpistleMarker(tok) || !Gates.passesAhead(tok, spec) }
+            if (stop < 0 || !isEpistleMarker(window[stop])) return null
+            val ord = window.subList(0, stop).lastOrNull { tok -> Gates.ordinalFor(tok, spec) != null }
+                ?.let { Gates.ordinalFor(it, spec) }
+            return if (ord == null && !spec.markerAloneDefaultsToFirst) null else spec.base + (ord ?: 1) - 1
+        }
     }
 
-    /**
-     * True when this alias is short enough to double as ordinary vocabulary. English escapes a plain
-     * length test through inflection the Russian stem index never sees: "song" and "job" are gated at
-     * ≤ [SHORT_ALIAS_MAX_LEN], while "songs" and "job's" — the forms that actually occur in speech
-     * ("Two songs", "Job's first trial") — are a character longer and sailed straight past. A plural
-     * or possessive inherits the gate only when stripping it yields a short alias for the SAME book,
-     * so "james" (→"jame", not an alias) and "acts" (→"act", not an alias) are untouched.
-     */
-    private fun isShortAlias(phrase: String, bookNum: Int): Boolean {
-        if (phrase.length <= SHORT_ALIAS_MAX_LEN) return true
-        val singular = phrase.removeSuffix("'s").removeSuffix("s")
-        return singular != phrase && singular.length <= SHORT_ALIAS_MAX_LEN &&
-            BookResolver.ALIASES[singular] == bookNum
-    }
+    /** The checks that decide whether a word may be read as naming a book. */
+    private object Gates {
 
-    /**
-     * True when `tokens[i]` is part of a Bible *version* name rather than a citation — the one that
-     * occurs in practice is "(New) King James (Version)", which contains a book name.
-     */
-    private fun isVersionNamePart(tokens: List<String>, i: Int): Boolean =
-        i > 0 && tokens[i] == "james" && tokens[i - 1] == "king"
+        /** [tok] as an ordinal that selects one of [spec]'s numbered books, or null. */
+        fun ordinalFor(tok: String, spec: NumberedBookSpec): Int? =
+            NumberWords.parseToken(tok)?.takeIf { it in 1..spec.count }
 
-    /**
-     * The mirror of [resolveNumberedBookAt] for speech that names the book and *then* qualifies it —
-     * "Иоанн говорит в первом послании", "Пётр пишет во втором послании". Scans a short window after
-     * `tokens[i]` for an epistle marker, taking any ordinal found on the way; ordinary prepositions
-     * and the «к»/«ко» connector may sit between, anything else closes the window so a marker
-     * belonging to a later, unrelated clause can't be claimed.
-     *
-     * Requires an explicit ordinal for families with no unnumbered meaning, exactly as the look-back
-     * form does — a bare "Иоанн говорит в послании" still means 1 John only because John/Peter
-     * conventionally default to the first.
-     */
-    private fun resolveNumberedBookAhead(tokens: List<String>, i: Int): Int? {
-        val spec = NUMBERED_BOOK_FORMS[tokens[i]] ?: return null
-        var ord: Int? = null
-        var marker = false
-        for (j in i + 1..minOf(i + AHEAD_WINDOW, tokens.lastIndex)) {
-            val tok = tokens[j]
-            if (isEpistleMarker(tok)) { marker = true; break }
-            val n = NumberWords.parseToken(tok)
-            if (n != null && n in 1..spec.count) { ord = n; continue }
-            if (tok in EPISTLE_CONNECTORS || tok in AHEAD_FILLERS) continue
-            return null
-        }
-        if (!marker) return null
-        if (ord == null && !spec.markerAloneDefaultsToFirst) return null
-        return spec.base + (ord ?: 1) - 1
-    }
+        /** Whether [tok] may sit between a book name and its trailing epistle marker. */
+        fun passesAhead(tok: String, spec: NumberedBookSpec): Boolean =
+            ordinalFor(tok, spec) != null || tok in EPISTLE_CONNECTORS || tok in AHEAD_FILLERS
 
-    /**
-     * True when `tokens[i]` (one of [AMBIGUOUS_BOOK_FORMS]) has corroborating context: a
-     * chapter/verse digit within 2 tokens either side, or an explicit book/epistle/gospel marker
-     * noun within the preceding 2 tokens.
-     */
-    private fun hasAmbiguousBookCorroboration(tokens: List<String>, i: Int): Boolean {
-        for (d in 1..2) {
-            if (isCitationNumber(tokens, i + d)) return true
-            // A number introduced by "с"/"from" opens a VERSE span inside the book already being
-            // read ("Если мы прочитаем с 22 стиха…") — the same binding interpret()'s fromMark
-            // enforces. It therefore cannot double as the chapter of a book named after it, so it
-            // must not corroborate one: in that sermon that clause let the following
-            // "Иеремия описывает" claim the sticky off Lamentations, and the drift produced the
-            // wrong-book Jeremiah 18:18 two utterances later. A number reached by an ordinary
-            // preposition ("в 3 главе Бытие") is untouched.
-            if (isCitationNumber(tokens, i - d) && tokens.getOrNull(i - d - 1) !in FROM_WORDS) return true
+        /**
+         * True when the token at [at] is a number that could plausibly be a chapter or verse, as opposed
+         * to an ordinary count.
+         *
+         * A citation says the number in digits ("Psalm 14", "1 Коринфянам") or spells it right next to a
+         * chapter/verse keyword ("Десятая глава", "chapter three"). A count phrase spells it and attaches
+         * it to a noun — "Two songs", "Job's first trial", "Два пения" — which used to satisfy this gate
+         * exactly like a real citation and was the longest-standing false-positive shape in the gap table.
+         */
+        private fun isCitationNumber(tokens: List<String>, at: Int): Boolean {
+            val tok = tokens.getOrNull(at)
+            if (tok == null || NumberWords.parseToken(tok) == null) return false
+            if (tok.any { it.isDigit() }) return true
+            // Spelled out: only a chapter/verse keyword on either side makes it a citation number.
+            return (1..2).any { d ->
+                val after = tokens.getOrNull(at + d)
+                val before = tokens.getOrNull(at - d)
+                (after != null && (isChapKw(after) || isVerseKw(after))) ||
+                    (before != null && (isChapKw(before) || isVerseKw(before)))
+            }
         }
-        for (d in 1..2) {
-            val back = tokens.getOrNull(i - d) ?: continue
-            if (isEpistleMarker(back) || back.startsWith("евангели")) return true
+
+        /**
+         * True when this alias is short enough to double as ordinary vocabulary. English escapes a plain
+         * length test through inflection the Russian stem index never sees: "song" and "job" are gated at
+         * ≤ [SHORT_ALIAS_MAX_LEN], while "songs" and "job's" — the forms that actually occur in speech
+         * ("Two songs", "Job's first trial") — are a character longer and sailed straight past. A plural
+         * or possessive inherits the gate only when stripping it yields a short alias for the SAME book,
+         * so "james" (→"jame", not an alias) and "acts" (→"act", not an alias) are untouched.
+         */
+        fun isShortAlias(phrase: String, bookNum: Int): Boolean {
+            if (phrase.length <= SHORT_ALIAS_MAX_LEN) return true
+            val singular = phrase.removeSuffix("'s").removeSuffix("s")
+            return singular != phrase && singular.length <= SHORT_ALIAS_MAX_LEN &&
+                BookResolver.ALIASES[singular] == bookNum
         }
-        return false
+
+        /**
+         * True when `tokens[i]` is part of a Bible *version* name rather than a citation — the one that
+         * occurs in practice is "(New) King James (Version)", which contains a book name.
+         */
+        fun isVersionNamePart(tokens: List<String>, i: Int): Boolean =
+            i > 0 && tokens[i] == "james" && tokens[i - 1] == "king"
+
+        /**
+         * True when `tokens[i]` (one of [AMBIGUOUS_BOOK_FORMS]) has corroborating context: a
+         * chapter/verse digit within 2 tokens either side, or an explicit book/epistle/gospel marker
+         * noun within the preceding 2 tokens.
+         */
+        fun hasAmbiguousBookCorroboration(tokens: List<String>, i: Int): Boolean {
+            val numberNearby = (1..2).any { d ->
+                // A number introduced by "с"/"from" opens a VERSE span inside the book already being
+                // read ("Если мы прочитаем с 22 стиха…") — the same binding interpret()'s fromMark
+                // enforces. It therefore cannot double as the chapter of a book named after it, so it
+                // must not corroborate one: in that sermon that clause let the following
+                // "Иеремия описывает" claim the sticky off Lamentations, and the drift produced the
+                // wrong-book Jeremiah 18:18 two utterances later. A number reached by an ordinary
+                // preposition ("в 3 главе Бытие") is untouched.
+                isCitationNumber(tokens, i + d) ||
+                    (isCitationNumber(tokens, i - d) && tokens.getOrNull(i - d - 1) !in FROM_WORDS)
+            }
+            return numberNearby || (1..2).any { d ->
+                val back = tokens.getOrNull(i - d)
+                back != null && (isEpistleMarker(back) || back.startsWith("евангели"))
+            }
+        }
     }
 
     // ── interpretation ──────────────────────────────────────────────────────────
 
-    private fun interpret(atoms: List<Atom>, sticky: Sticky, now: Long): List<Ref> {
-        val out = ArrayList<Ref>()
+    /** One pass over an utterance's atoms, building references and moving the [sticky] context. */
+    private class Interpreter(private val sticky: Sticky, private val now: Long) {
+        private val out = ArrayList<Ref>()
 
-        var curBook: Int? = null
-        var chapter: Int? = null
-        var verseStart: Int? = null
-        var verseEnd: Int? = null
-        var keywordSeen = false
-        var colonSeen = false
-        var rangeArmed = false
+        private var curBook: Int? = null
+        private var chapter: Int? = null
+        private var verseStart: Int? = null
+        private var verseEnd: Int? = null
+        private var keywordSeen = false
+        private var colonSeen = false
+        private var rangeArmed = false
+
         // How many numbers were already buffered when "с"/"from" arrived, or null if it hasn't.
         // Everything after it opens a VERSE span, so the bare "book N = chapter" convention may only
         // claim a number that PREDATES it: "Псалом 23. С первого стиха." still means 23:1, while the
@@ -598,28 +627,114 @@ object ReferenceWatcher {
         // earlier sentence of the same accumulated text) must not turn the verse ordinal into a
         // chapter — that primed the sticky to Psalm 1 mid-Psalm-23 and emitted 19:1:1 as a tier-2
         // continuation, which auto-goes-live.
-        var fromMark: Int? = null
+        private var fromMark: Int? = null
+
         // Keyword-first binding: a chapter/verse keyword arriving BEFORE its number
         // ("глава 26 стих 3", "Job chapter 3 verse 2") marks the NEXT number as bound. Without
         // this, keywords only consumed numbers that preceded them and keyword-first citations
         // parsed inverted (chapter/verse swapped) in every language.
-        var pendingChapKw = false
-        var pendingVerseKw = false
-        // numbers buffered since the last keyword/colon, each tagged whether a range preceded it
-        val recent = ArrayList<Pair<Int, Boolean>>()
+        private var pendingChapKw = false
+        private var pendingVerseKw = false
 
-        fun assignChapterFromRecent() {
+        // numbers buffered since the last keyword/colon, each tagged whether a range preceded it
+        private val recent = ArrayList<Pair<Int, Boolean>>()
+
+        fun interpret(atoms: List<Atom>): List<Ref> {
+            for (a in atoms) {
+                when (a) {
+                    is Atom.Book -> onBook(a.num)
+                    is Atom.ChapKw -> {
+                        if (recent.isNotEmpty()) assignChapterFromRecent() else pendingChapKw = true
+                        keywordSeen = true
+                    }
+                    is Atom.VerseKw -> onVerseKw()
+                    is Atom.Colon -> { assignChapterFromRecent(); colonSeen = true }
+                    is Atom.Range -> rangeArmed = true
+                    is Atom.From -> if (fromMark == null) fromMark = recent.size
+                    is Atom.ListSep -> Unit // keep recent; lists don't form ranges
+                    is Atom.Num -> onNum(a.value)
+                    is Atom.Filler -> onFiller()
+                }
+            }
+            flush()
+            return out
+        }
+
+        private fun onBook(num: Int) {
+            // Normally a book starts a fresh reference (flush whatever preceded it). When
+            // inferBookAtEnd is on and no book has been named yet in this segment but
+            // chapter/verse numbers already have, the book was spoken *after* its numbers
+            // ("14 стих 3 главы … Матфея") — attach it to them instead of flushing.
+            val attachToPending = Config.inferBookAtEnd && curBook == null &&
+                (chapter != null || verseStart != null || recent.isNotEmpty())
+            if (!attachToPending) flush()
+            curBook = num
+        }
+
+        private fun onVerseKw() {
+            // "Book N, verse M" with no chapter keyword for N ("Psalm 10, verse 13") —
+            // same bare "book number = chapter" convention flush()'s own leftover
+            // fallback already applies. Without this, N gets swept into verseStart below
+            // and flush()'s leftover fallback wrongly promotes the real verse number M
+            // into chapter (parsed as ch=?, v=10 instead of ch=10, v=13).
+            // Only the FIRST buffered number is the chapter. Russian says the verse number
+            // before its keyword ("Псалом 23, 1 стих"), so anything after the chapter is
+            // the verse this keyword names — discarding it, as an unconditional
+            // assignChapterFromRecent() does, silently drops a verse the speaker said and
+            // leaves the reference chapter-only.
+            val bareChapterFirst = chapter == null && curBook != null && recent.isNotEmpty() &&
+                fromMark.let { it == null || it > 0 }
+            when {
+                bareChapterFirst -> {
+                    chapter = recent.first().first
+                    val rest = recent.drop(1)
+                    recent.clear()
+                    recent.addAll(rest)
+                    if (recent.isNotEmpty()) assignVersesFromRecent() else pendingVerseKw = true
+                }
+                recent.isNotEmpty() -> assignVersesFromRecent()
+                else -> pendingVerseKw = true
+            }
+            keywordSeen = true
+        }
+
+        private fun onNum(value: Int) {
+            when {
+                pendingChapKw -> { chapter = value; pendingChapKw = false; rangeArmed = false }
+                pendingVerseKw && verseStart == null -> {
+                    verseStart = value; pendingVerseKw = false; rangeArmed = false
+                }
+                else -> { recent.add(value to rangeArmed); rangeArmed = false }
+            }
+        }
+
+        private fun onFiller() {
+            // A colon already bound these numbers to the reference ("Исайя 26:3 написано
+            // «…»", "Isaiah 26:3 says …") — trailing prose must not wipe the buffered
+            // verse. Without a colon, numbers followed by prose are likely counts
+            // ("Марк 5 человек") — drop as before. Deliberately colon-only, NOT
+            // keywordSeen: "Матфея 3 глава … 5 причин" must not turn 5 into a verse.
+            if (colonSeen && recent.isNotEmpty()) assignVersesFromRecent() else recent.clear()
+            // A pending keyword must not bind across prose either ("глава, друзья, 26").
+            pendingChapKw = false
+            pendingVerseKw = false
+            rangeArmed = false
+        }
+
+        private fun assignChapterFromRecent() {
             if (chapter == null && recent.isNotEmpty()) chapter = recent.first().first
             recent.clear()
         }
-        fun assignVersesFromRecent() {
+
+        private fun assignVersesFromRecent() {
             for ((v, ranged) in recent) {
                 if (verseStart == null) verseStart = v
                 else if (ranged && verseEnd == null) verseEnd = v
             }
             recent.clear()
         }
-        fun flush() {
+
+        private fun flush() {
             // leftover buffered numbers with no trailing keyword
             if (recent.isNotEmpty()) {
                 // The bare "book N" convention only applies while nothing has claimed a verse yet.
@@ -631,103 +746,22 @@ object ReferenceWatcher {
                 // dropping the operator's verses 4-6 on the floor.
                 if (chapter == null && verseStart == null) {
                     chapter = recent.first().first
-                    if (recent.size >= 2) {
-                        verseStart = recent[1].first
-                        if (recent.size >= 3 && recent[2].second) verseEnd = recent[2].first
-                    }
+                    recent.getOrNull(1)?.let { verseStart = it.first }
+                    recent.getOrNull(2)?.takeIf { it.second }?.let { verseEnd = it.first }
                 } else {
                     assignVersesFromRecent()
                 }
                 recent.clear()
             }
-            emit(curBook, chapter, verseStart, verseEnd, keywordSeen, sticky, now, out)
+            val book = curBook
+            if (book != null) emitNamedBook(book) else emitFromSticky()
             chapter = null; verseStart = null; verseEnd = null
             keywordSeen = false; colonSeen = false; rangeArmed = false
             fromMark = null
             pendingChapKw = false; pendingVerseKw = false
         }
 
-        for (a in atoms) {
-            when (a) {
-                is Atom.Book -> {
-                    // Normally a book starts a fresh reference (flush whatever preceded it). When
-                    // inferBookAtEnd is on and no book has been named yet in this segment but
-                    // chapter/verse numbers already have, the book was spoken *after* its numbers
-                    // ("14 стих 3 главы … Матфея") — attach it to them instead of flushing.
-                    val attachToPending = Config.inferBookAtEnd && curBook == null &&
-                        (chapter != null || verseStart != null || recent.isNotEmpty())
-                    if (attachToPending) curBook = a.num
-                    else { flush(); curBook = a.num }
-                }
-                is Atom.ChapKw -> {
-                    if (recent.isNotEmpty()) assignChapterFromRecent() else pendingChapKw = true
-                    keywordSeen = true
-                }
-                is Atom.VerseKw -> {
-                    when {
-                        // "Book N, verse M" with no chapter keyword for N ("Psalm 10, verse 13") —
-                        // same bare "book number = chapter" convention flush()'s own leftover
-                        // fallback already applies. Without this, N gets swept into verseStart below
-                        // and flush()'s leftover fallback wrongly promotes the real verse number M
-                        // into chapter (parsed as ch=?, v=10 instead of ch=10, v=13).
-                        // Only the FIRST buffered number is the chapter. Russian says the verse number
-                        // before its keyword ("Псалом 23, 1 стих"), so anything after the chapter is
-                        // the verse this keyword names — discarding it, as an unconditional
-                        // assignChapterFromRecent() does, silently drops a verse the speaker said and
-                        // leaves the reference chapter-only.
-                        chapter == null && curBook != null && recent.isNotEmpty() &&
-                            (fromMark == null || fromMark!! > 0) -> {
-                            chapter = recent.first().first
-                            val rest = recent.drop(1)
-                            recent.clear()
-                            recent.addAll(rest)
-                            if (recent.isNotEmpty()) assignVersesFromRecent() else pendingVerseKw = true
-                        }
-                        recent.isNotEmpty() -> assignVersesFromRecent()
-                        else -> pendingVerseKw = true
-                    }
-                    keywordSeen = true
-                }
-                is Atom.Colon -> { assignChapterFromRecent(); colonSeen = true }
-                is Atom.Range -> { rangeArmed = true }
-                is Atom.From -> { if (fromMark == null) fromMark = recent.size }
-                is Atom.ListSep -> { /* keep recent; lists don't form ranges */ }
-                is Atom.Num -> when {
-                    pendingChapKw -> { chapter = a.value; pendingChapKw = false; rangeArmed = false }
-                    pendingVerseKw && verseStart == null -> {
-                        verseStart = a.value; pendingVerseKw = false; rangeArmed = false
-                    }
-                    else -> { recent.add(a.value to rangeArmed); rangeArmed = false }
-                }
-                is Atom.Filler -> {
-                    // A colon already bound these numbers to the reference ("Исайя 26:3 написано
-                    // «…»", "Isaiah 26:3 says …") — trailing prose must not wipe the buffered
-                    // verse. Without a colon, numbers followed by prose are likely counts
-                    // ("Марк 5 человек") — drop as before. Deliberately colon-only, NOT
-                    // keywordSeen: "Матфея 3 глава … 5 причин" must not turn 5 into a verse.
-                    if (colonSeen && recent.isNotEmpty()) assignVersesFromRecent() else recent.clear()
-                    // A pending keyword must not bind across prose either ("глава, друзья, 26").
-                    pendingChapKw = false
-                    pendingVerseKw = false
-                    rangeArmed = false
-                }
-            }
-        }
-        flush()
-        return out
-    }
-
-    private fun emit(
-        curBook: Int?,
-        chapter: Int?,
-        verseStart: Int?,
-        verseEnd: Int?,
-        keywordSeen: Boolean,
-        sticky: Sticky,
-        now: Long,
-        out: MutableList<Ref>,
-    ) {
-        if (curBook != null) {
+        private fun emitNamedBook(book: Int) {
             // A book was named — make it sticky even if no chapter followed yet, so a chapter/verse
             // in a *later* utterance ("…к римлянам." → "Десятая глава…") still attaches to it. A
             // genuinely NEW book (different from what was already sticky) always resets the carried
@@ -738,33 +772,35 @@ object ReferenceWatcher {
             // chapter on THIS mention just means "nothing new was said," not "the chapter is unknown
             // again." Snapshot both values before mutating — sticky.watchChapter is read and written
             // in this same branch.
-            val sameBook = curBook == sticky.watchBook
+            val sameBook = book == sticky.watchBook
             val resolvedChapter = chapter ?: sticky.watchChapter.takeIf { sameBook }
-            sticky.watchBook = curBook
+            sticky.watchBook = book
             sticky.watchChapter = resolvedChapter
             sticky.watchExpiresAt = now + Config.stickyTtlMs
             val ch = resolvedChapter ?: return
             // No verse named yet (book + chapter only) — the sticky context above is primed for a
             // later bare "N стих", but there is no evidence of which verse to show, so emit nothing
             // rather than guessing verse 1.
-            if (verseStart == null) return
-            out.add(Ref(curBook, ch, verseStart, normEnd(verseStart, verseEnd), 1))
-            return
+            val start = verseStart ?: return
+            out.add(Ref(book, ch, start, normEnd(start, verseEnd), 1))
         }
-        // No book in this utterance → sticky resolution, but only when a keyword anchored it
-        // (a bare number with no глава/стих is too risky to bind to stale context).
-        if (!keywordSeen) return
-        val book = sticky.watchBook ?: return
-        val ch = chapter ?: sticky.watchChapter ?: return
-        if (chapter == null && verseStart == null) return // nothing new
-        sticky.watchChapter = ch
-        sticky.watchExpiresAt = now + Config.stickyTtlMs
-        // A new bare chapter arrived via the sticky book, but no verse yet — same situation as the
-        // book+chapter branch above: prime silently and wait for a real verse rather than guessing 1.
-        if (verseStart == null) return
-        out.add(Ref(book, ch, verseStart, normEnd(verseStart, verseEnd), 2))
-    }
 
-    private fun normEnd(start: Int?, end: Int?): Int? =
-        if (start != null && end != null && end > start) end else null
+        private fun emitFromSticky() {
+            // No book in this utterance → sticky resolution, but only when a keyword anchored it
+            // (a bare number with no глава/стих is too risky to bind to stale context).
+            if (!keywordSeen) return
+            val book = sticky.watchBook ?: return
+            val ch = chapter ?: sticky.watchChapter ?: return
+            if (chapter == null && verseStart == null) return // nothing new
+            sticky.watchChapter = ch
+            sticky.watchExpiresAt = now + Config.stickyTtlMs
+            // A new bare chapter arrived via the sticky book, but no verse yet — same situation as the
+            // book+chapter branch above: prime silently and wait for a real verse rather than guessing 1.
+            val start = verseStart ?: return
+            out.add(Ref(book, ch, start, normEnd(start, verseEnd), 2))
+        }
+    }
 }
+
+private fun normEnd(start: Int?, end: Int?): Int? =
+    if (start != null && end != null && end > start) end else null

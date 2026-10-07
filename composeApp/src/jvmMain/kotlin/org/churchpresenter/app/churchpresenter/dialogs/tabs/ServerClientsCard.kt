@@ -40,7 +40,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.material3.Surface
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
+import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState

@@ -128,18 +128,21 @@ class VersionDetector(
     private fun evaluate(): Verdict? {
         if (verses < Config.versionMinVerses) return null
         val ranked = scores.entries.sortedByDescending { it.value }
-        val leader = ranked.firstOrNull() ?: return null
-        if (leader.value < Config.versionMinEvidence) return null
+        val leader = ranked.firstOrNull()?.takeIf { it.value >= Config.versionMinEvidence } ?: return null
         val margin = leader.value - (ranked.getOrNull(1)?.value ?: 0.0)
-        if (margin < Config.versionMinMargin) return null
+        return if (margin < Config.versionMinMargin) null else verdictFor(leader.key, margin, ranked.size)
+    }
+
+    /** The verdict for [leader], [margin] clear of the runner-up among [candidates] candidates. */
+    private fun verdictFor(leader: String, margin: Double, candidates: Int): Verdict {
         // Saturating: ~0.49 at the 2.0 margin floor, ~0.8 at 5, ~0.96 at 10 distinctive words clear.
         var confidence = 1.0 - exp(-margin / 3.0)
         // Only ever one candidate: the margin is the tally itself, against nothing. The curve above
         // would read that as strong agreement when it is really "nothing contradicted it" — there
         // was nothing that could have. Capped so a single-translation library cannot present as more
         // certain than a corpus that actually ruled competitors out.
-        if (ranked.size == 1) confidence = min(confidence, Config.versionSoleCandidateMaxConfidence)
-        return Verdict(leader.key, labels[leader.key] ?: leader.key, (confidence * 1000).toInt() / 1000.0)
+        if (candidates == 1) confidence = min(confidence, Config.versionSoleCandidateMaxConfidence)
+        return Verdict(leader, labels[leader] ?: leader, (confidence * CONFIDENCE_STEPS).toInt() / CONFIDENCE_STEPS)
     }
 
     /** How far [id] leads the best score that is not its own. */
@@ -175,6 +178,9 @@ class VersionDetector(
     private companion object {
         /** Small enough that a backlog is dropped rather than allowed to report stale answers late. */
         const val QUEUE_CAPACITY = 32
+
+        /** Confidence is published to three decimal places. */
+        const val CONFIDENCE_STEPS = 1000.0
 
         fun defaultExecutor(): Executor = ThreadPoolExecutor(
             1, 1, 0L, TimeUnit.MILLISECONDS, ArrayBlockingQueue(QUEUE_CAPACITY),

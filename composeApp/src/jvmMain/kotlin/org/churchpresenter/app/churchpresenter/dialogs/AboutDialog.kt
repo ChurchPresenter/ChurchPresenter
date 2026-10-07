@@ -52,7 +52,7 @@ import org.churchpresenter.strings.generated.resources.submit_feature_request
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
+import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.DeviceInfoReport
 import org.jetbrains.compose.resources.painterResource

@@ -1226,6 +1226,23 @@ class SystemSettingsTabTest {
     }
 
     @Test
+    fun `downloading into a read-only bible folder says why instead of opening the browser`() = runComposeUiTest {
+        val dir = tempDir()
+        if (!dir.setWritable(false) || canWriteInto(dir)) return@runComposeUiTest
+        showBibleFolder(dir.path)
+        val notWritable = "This folder can't be written to, so Bibles can't be downloaded into it. " +
+            "Choose a different Bible storage folder."
+        waitUntil(timeoutMillis = 5_000) { onAllNodesWithText("Download Bibles…").fetchSemanticsNodes().isNotEmpty() }
+        onAllNodesWithText(notWritable).assertCountEquals(0)
+
+        onAllNodesWithText("Download Bibles…").onFirst().performScrollTo().performClick()
+        waitForIdle()
+
+        // Probed on the click: a download written here would fail the moment it finished.
+        onAllNodesWithText(notWritable).onFirst().assertExists()
+    }
+
+    @Test
     fun `the dot on a folder that cannot even be listed explains the same`() = runComposeUiTest {
         val dir = tempDir()
         if (!dir.setReadable(false) || !dir.setWritable(false) || canList(dir)) return@runComposeUiTest

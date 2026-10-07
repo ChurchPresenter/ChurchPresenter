@@ -61,23 +61,8 @@ internal fun LicenceConfirmation(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    val isRedistributable = module.sourceId == BibleSourceId.EBIBLE
     val showsEnglishBookNames = module.sourceId == BibleSourceId.BEBLIA &&
         !BebliaSource.hasLocalisedBookNames(module.language)
-    val badgeContainer = if (isRedistributable) {
-        MaterialTheme.colorScheme.inverseSurface
-    } else {
-        MaterialTheme.colorScheme.errorContainer
-    }
-    val badgeContent = if (isRedistributable) {
-        MaterialTheme.colorScheme.inverseOnSurface
-    } else {
-        MaterialTheme.colorScheme.onErrorContainer
-    }
-    val badgeLabel = stringResource(
-        if (isRedistributable) Res.string.bible_catalog_license_badge_redistributable
-        else Res.string.bible_catalog_license_badge_unverified
-    )
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -99,83 +84,9 @@ internal fun LicenceConfirmation(
         text = {
 
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.small)
-                        .padding(12.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = module.displayName,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.weight(1f, fill = false),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Surface(
-                            shape = MaterialTheme.shapes.extraSmall,
-                            color = badgeContainer,
-                            contentColor = badgeContent
-                        ) {
-                            Text(
-                                text = badgeLabel.uppercase(),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontSize = 9.sp,
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    MetadataRow(
-                        label = stringResource(Res.string.bible_catalog_license_field_source),
-                        value = stringResource(sourceLabelStringRes(module.sourceId))
-                    )
-                    MetadataRow(
-                        label = stringResource(Res.string.bible_catalog_license_field_identifier),
-                        value = module.identifier
-                    )
-                    MetadataRow(
-                        label = stringResource(Res.string.bible_catalog_license_field_copyright),
-                        value = if (module.copyright.isNotBlank()) {
-                            module.copyright
-                        } else {
-                            stringResource(Res.string.bible_catalog_license_unknown)
-                        }
-                    )
-                }
+                LicenceModuleCard(module)
                 Spacer(Modifier.height(12.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(IntrinsicSize.Min)
-                        .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.small)
-                        .padding(12.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .width(3.dp)
-                            .fillMaxHeight()
-                            .background(MaterialTheme.colorScheme.primary, AppShape(2.dp))
-                    )
-                    Spacer(Modifier.width(10.dp))
-                    Column {
-
-                        Text(
-                            text = stringResource(sourceLicenceStringRes(module.sourceId)),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            text = stringResource(Res.string.bible_catalog_license_body),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
+                LicenceTerms(module)
                 if (showsEnglishBookNames) {
                     Spacer(Modifier.height(12.dp))
                     Text(
@@ -207,6 +118,106 @@ internal fun LicenceConfirmation(
             }
         }
     )
+}
+
+/** The Bible being installed: its name, whether it may be redistributed, and where it is from. */
+@Composable
+private fun LicenceModuleCard(module: BibleModule) {
+    val isRedistributable = module.sourceId == BibleSourceId.EBIBLE
+    val badgeContainer = if (isRedistributable) {
+        MaterialTheme.colorScheme.inverseSurface
+    } else {
+        MaterialTheme.colorScheme.errorContainer
+    }
+    val badgeContent = if (isRedistributable) {
+        MaterialTheme.colorScheme.inverseOnSurface
+    } else {
+        MaterialTheme.colorScheme.onErrorContainer
+    }
+    val badgeLabel = stringResource(
+        if (isRedistributable) Res.string.bible_catalog_license_badge_redistributable
+        else Res.string.bible_catalog_license_badge_unverified
+    )
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.small)
+            .padding(12.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = module.displayName,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f, fill = false),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.width(8.dp))
+            Surface(
+                shape = MaterialTheme.shapes.extraSmall,
+                color = badgeContainer,
+                contentColor = badgeContent
+            ) {
+                Text(
+                    text = badgeLabel.uppercase(),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                )
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        MetadataRow(
+            label = stringResource(Res.string.bible_catalog_license_field_source),
+            value = stringResource(sourceLabelStringRes(module.sourceId))
+        )
+        MetadataRow(
+            label = stringResource(Res.string.bible_catalog_license_field_identifier),
+            value = module.identifier
+        )
+        MetadataRow(
+            label = stringResource(Res.string.bible_catalog_license_field_copyright),
+            value = if (module.copyright.isNotBlank()) {
+                module.copyright
+            } else {
+                stringResource(Res.string.bible_catalog_license_unknown)
+            }
+        )
+    }
+}
+
+/** The source's licence and the terms installing it accepts, behind a primary-coloured rule. */
+@Composable
+private fun LicenceTerms(module: BibleModule) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+            .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.small)
+            .padding(12.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .width(3.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.primary, AppShape(2.dp))
+        )
+        Spacer(Modifier.width(10.dp))
+        Column {
+            Text(
+                text = stringResource(sourceLicenceStringRes(module.sourceId)),
+                style = MaterialTheme.typography.bodySmall
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(Res.string.bible_catalog_license_body),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+    }
 }
 
 @Composable

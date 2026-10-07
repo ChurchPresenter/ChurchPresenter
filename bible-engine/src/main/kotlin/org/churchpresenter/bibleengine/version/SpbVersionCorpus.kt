@@ -53,7 +53,28 @@ object VersionCorpusLoader {
         onSkip: (fileName: String, reason: String) -> Unit = { _, _ -> },
     ): VersionCorpus {
         val root = File(Config.bibleRoot)
-        if (!root.exists()) return VersionCorpus.EMPTY
+        val files = if (root.exists()) corpusFiles(root, priorityFiles, onSkip) else emptyList()
+        val indexes = buildIndexes(files, onSkip)
+        if (indexes.isEmpty()) return VersionCorpus.EMPTY
+
+        val kept = collapseDuplicates(indexes)
+        if (kept.size < indexes.size) {
+            val survivors = kept.mapTo(HashSet()) { it.fileName }
+            indexes.filterNot { it.fileName in survivors }
+                .forEach { onSkip(it.fileName, "merged — another module already covers ${it.label}") }
+        }
+        return SpbVersionCorpus(kept).also { Config.versionCorpusLabels = it.labels }
+    }
+
+    /**
+     * The `.spb` files under [root] the corpus is built from: [priorityFiles] first, then the rest by
+     * name, up to the module cap. Every file the cap leaves out is reported to [onSkip].
+     */
+    private fun corpusFiles(
+        root: File,
+        priorityFiles: List<String>,
+        onSkip: (fileName: String, reason: String) -> Unit,
+    ): List<File> {
         val all = runCatching {
             root.walk().filter { it.isFile && it.name.endsWith(".spb") }.toList().sortedBy { it.name }
         }.getOrNull().orEmpty()
@@ -64,15 +85,22 @@ object VersionCorpusLoader {
             f.toRelativeString(root).replace('\\', '/') in priority || f.name in priority
         val files = (all.filter(::isPriority) + all.filterNot(::isPriority))
             .take(Config.versionMaxCorpusBibles)
-        if (files.isEmpty()) return VersionCorpus.EMPTY
+        if (files.isEmpty()) return files
 
         val capped = files.toHashSet()
         all.filterNot { it in capped }.forEach {
             onSkip(it.name, "over the ${Config.versionMaxCorpusBibles}-module cap")
         }
+        return files
+    }
 
+    /** One index per readable, usable module in [files]; every other one is reported to [onSkip]. */
+    private fun buildIndexes(
+        files: List<File>,
+        onSkip: (fileName: String, reason: String) -> Unit,
+    ): List<SpbVersionIndex> {
         val seenIds = mutableMapOf<String, Int>()
-        val indexes = files.mapNotNull { f ->
+        return files.mapNotNull { f ->
             val built = runCatching { SpbVersionIndex.build(f, seenIds) }
             val index = built.getOrNull()
             // A throw and a null mean different things to whoever is reading this: the first is the
@@ -84,15 +112,6 @@ object VersionCorpusLoader {
             }
             index
         }
-        if (indexes.isEmpty()) return VersionCorpus.EMPTY
-
-        val kept = collapseDuplicates(indexes)
-        if (kept.size < indexes.size) {
-            val survivors = kept.mapTo(HashSet()) { it.fileName }
-            indexes.filterNot { it.fileName in survivors }
-                .forEach { onSkip(it.fileName, "merged — another module already covers ${it.label}") }
-        }
-        return SpbVersionCorpus(kept).also { Config.versionCorpusLabels = it.labels }
     }
 
     /**
