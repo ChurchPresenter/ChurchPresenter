@@ -1,6 +1,7 @@
 package org.churchpresenter.helper.intent
 
 import org.churchpresenter.helper.HelperText
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.helper.action.GuideStep
 import org.churchpresenter.helper.action.GuideTour
 import org.churchpresenter.helper.action.HelperAction
@@ -71,6 +72,7 @@ internal object AnnouncementTopics {
     )
 
     private fun timerCountdown() = modeStep(
+        Constants.TIMER_MODE_DURATION,
         helperText(
             Res.string.helper_hint_timer_countdown,
             helperText(Res.string.timer_title),
@@ -78,10 +80,13 @@ internal object AnnouncementTopics {
         ),
     )
 
-    private fun timerCountUp() =
-        modeStep(helperText(Res.string.helper_hint_timer_count_up, helperText(Res.string.timer_mode_duration)))
+    private fun timerCountUp() = modeStep(
+        Constants.TIMER_MODE_COUNT_UP,
+        helperText(Res.string.helper_hint_timer_count_up, helperText(Res.string.timer_mode_duration)),
+    )
 
     private fun timerClock() = modeStep(
+        Constants.TIMER_MODE_CLOCK_DISPLAY,
         helperText(
             Res.string.helper_hint_timer_clock,
             helperText(Res.string.canvas_source_clock),
@@ -89,6 +94,7 @@ internal object AnnouncementTopics {
         ),
     )
 
-    private fun modeStep(hint: HelperText) =
-        GuideStep(GuideTargets.TIMER_MODES, hint, before = HelperAction.SelectTab(Tabs.ANNOUNCEMENTS))
+    /** Rings the timer's [mode] segment itself, so the step shows exactly where to click. */
+    private fun modeStep(mode: String, hint: HelperText) =
+        GuideStep(GuideTargets.timerMode(mode), hint, before = HelperAction.SelectTab(Tabs.ANNOUNCEMENTS))
 }

@@ -30,7 +30,7 @@ import org.churchpresenter.strings.generated.resources.song_chords
  */
 internal object HowToTopics {
     /** The tour for [normalized], or null when it is none of these. */
-    fun find(normalized: String, currentTab: Tabs? = null): GuideTour? = when {
+    fun find(normalized: String, currentTab: Tabs? = null): GuideTour? = OutputTopics.find(normalized) ?: when {
         isSongTranslation(normalized, currentTab) -> songTranslation()
         isSongChords(normalized, currentTab) -> songChords()
         isBibleTranslation(normalized) -> bibleTranslation()

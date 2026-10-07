@@ -43,8 +43,19 @@ object GuideTargets {
     val LOWER_THIRD_SAVE = GuideTarget("lottieGen.save")
     val ANNOUNCEMENT_TEXT = GuideTarget("announcements.text")
     val ANNOUNCEMENT_GO_LIVE = GuideTarget("announcements.goLive")
-    val TIMER_MODES = GuideTarget("announcements.timerModes")
     val TIMER_GO_LIVE = GuideTarget("announcements.timerGoLive")
+    val PROFILE_NEW = GuideTarget("settings.profiles.new")
+    val PROFILE_NAME = GuideTarget("settings.profiles.name")
+    val SCREEN_PROFILE_PICKER = GuideTarget("settings.projection.screenProfile")
+
+    /** One choice, [value], of a segmented control or picker named [group] — where to click, exactly. */
+    fun option(group: String, value: String): GuideTarget = GuideTarget("option.$group.$value")
+
+    /** A profile's display mode segment, by its `Constants.DISPLAY_MODE_*` value. */
+    fun displayMode(mode: String): GuideTarget = option("displayMode", mode)
+
+    /** The Announcements timer's mode segment, by its `Constants.TIMER_MODE_*` value. */
+    fun timerMode(mode: String): GuideTarget = option("timerMode", mode)
 
     /** The main window's tab for [tab]. */
     fun mainTab(tab: Tabs): GuideTarget = GuideTarget("tab.${tab.name}")

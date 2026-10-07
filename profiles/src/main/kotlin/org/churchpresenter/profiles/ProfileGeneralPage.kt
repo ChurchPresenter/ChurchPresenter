@@ -1,6 +1,8 @@
 package org.churchpresenter.profiles
 
 import androidx.compose.foundation.layout.PaddingValues
+import org.churchpresenter.sharedui.guide.guideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -63,11 +65,18 @@ internal fun ProfileGeneralPage(
                 value = profile.name,
                 onValueChange = onRename,
                 placeholder = { Text(profile.id) },
-                modifier = Modifier.width(NAME_FIELD_WIDTH).testTag(PROFILE_NAME_FIELD_TAG),
+                modifier = Modifier
+                    .width(NAME_FIELD_WIDTH)
+                    .testTag(PROFILE_NAME_FIELD_TAG)
+                    .guideTarget(GuideTargets.PROFILE_NAME),
                 fillWidth = true,
             )
         }
-        SettingsRow(stringResource(Res.string.profile_display_mode), sub = modeSub, paths = listOf(DISPLAY_MODE_PATH)) {
+        SettingsRow(
+            stringResource(Res.string.profile_display_mode),
+            sub = modeSub,
+            paths = listOf(DISPLAY_MODE_PATH),
+        ) {
             DisplayModeSegments(profile, onProfileChange, enabled = !modeLocked)
         }
     }
@@ -106,12 +115,21 @@ internal fun DisplayModeSegments(
 ) {
     RowSegmented(
         options = listOf(
-            RowOption(Constants.DISPLAY_MODE_FULLSCREEN, stringResource(Res.string.profile_mode_full)),
+            RowOption(
+                Constants.DISPLAY_MODE_FULLSCREEN,
+                stringResource(Res.string.profile_mode_full),
+                guideTarget = GuideTargets.displayMode(Constants.DISPLAY_MODE_FULLSCREEN),
+            ),
             RowOption(
                 Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
                 stringResource(Res.string.profile_mode_lower_third),
+                guideTarget = GuideTargets.displayMode(Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL),
             ),
-            RowOption(Constants.DISPLAY_MODE_STAGE_MONITOR, stringResource(Res.string.profile_mode_stage)),
+            RowOption(
+                Constants.DISPLAY_MODE_STAGE_MONITOR,
+                stringResource(Res.string.profile_mode_stage),
+                guideTarget = GuideTargets.displayMode(Constants.DISPLAY_MODE_STAGE_MONITOR),
+            ),
         ),
         selected = shownDisplayMode(profile.displayMode),
         onSelect = { picked ->

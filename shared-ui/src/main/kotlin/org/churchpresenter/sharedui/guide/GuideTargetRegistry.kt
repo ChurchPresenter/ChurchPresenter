@@ -1,6 +1,7 @@
 package org.churchpresenter.sharedui.guide
 
 import androidx.compose.runtime.Stable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -57,3 +58,6 @@ val LocalGuideTargetRegistry = staticCompositionLocalOf<GuideTargetRegistry?> { 
 
 /** The app's guide session; null when no helper is running. */
 val LocalGuideSession = staticCompositionLocalOf<GuideSession?> { null }
+
+/** The color a tagged control is highlighted in while a tour points at it; set by the spotlight host. */
+val LocalGuideRingColor = staticCompositionLocalOf { Color.Unspecified }

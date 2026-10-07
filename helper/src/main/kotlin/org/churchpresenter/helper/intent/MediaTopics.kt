@@ -42,7 +42,6 @@ internal object MediaTopics {
         if (normalized.containsPhrase("tab")) return null
         val words = normalized.split(' ')
         return when {
-            Vocabulary.LOWER_THIRD.any { normalized.containsPhrase(it) } -> lowerThird()
             Vocabulary.SLIDESHOW.any { normalized.containsPhrase(it) } -> slideshow()
             words.any { it in Vocabulary.PHOTOS } ->
                 if (words.any { it in Vocabulary.ADD }) addPhotos() else showPictures()
@@ -94,7 +93,7 @@ internal object MediaTopics {
     )
 
     /** Made in the generator the tab opens, then put live from the tab. */
-    private fun lowerThird() = GuideTour(
+    fun lowerThird() = GuideTour(
         listOf(
             tabStep(Tabs.LOWER_THIRD),
             step(

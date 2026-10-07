@@ -50,6 +50,9 @@ class RuleIntentResolver : IntentResolver {
         val RULES: List<(Request) -> Resolution?> = listOf(
             ::undoRule,
             ::setupWizardRule,
+            // Before display setup: "set up a stage monitor" is a profile, not the audience screen.
+            ::outputTopicsRule,
+            ::lowerThirdRule,
             ::displaySetupRule,
             ::backgroundColorRule,
             ::fontSizeRule,

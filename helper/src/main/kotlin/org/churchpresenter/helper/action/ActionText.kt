@@ -103,6 +103,7 @@ fun HelperAction.describe(undoLabel: HelperText? = null): HelperText = when (thi
 
 /** The short label a choice between actions shows: the scope, when the choices differ only in that. */
 fun HelperAction.optionLabel(): HelperText = when (this) {
+    is HelperAction.Highlight -> label ?: describe()
     is HelperAction.SetBackgroundColor -> scopeName(scope)
     is HelperAction.ChangeFontSize -> scopeName(scope)
     else -> describe()

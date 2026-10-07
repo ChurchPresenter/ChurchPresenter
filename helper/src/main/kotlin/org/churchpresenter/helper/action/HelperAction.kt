@@ -104,7 +104,8 @@ sealed interface HelperAction {
     /** Put a hidden tab back in the tab row. */
     data class ShowTab(val tab: Tabs) : HelperAction
 
-    data class Highlight(val tour: GuideTour) : HelperAction {
+    /** Ring [tour]'s controls in turn; [label] names it when it is one of several choices. */
+    data class Highlight(val tour: GuideTour, val label: HelperText? = null) : HelperAction {
         override val needsConfirmation get() = false
     }
 

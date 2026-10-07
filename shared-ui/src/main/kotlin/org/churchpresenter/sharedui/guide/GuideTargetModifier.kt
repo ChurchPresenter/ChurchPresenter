@@ -1,6 +1,12 @@
 package org.churchpresenter.sharedui.guide
 
 import androidx.compose.ui.relocation.bringIntoView
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.isUnspecified
+import androidx.compose.ui.node.DrawModifierNode
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -49,6 +55,7 @@ private class GuideTargetNode(var target: GuideTarget) :
     GlobalPositionAwareModifierNode,
     PointerInputModifierNode,
     ObserverModifierNode,
+    DrawModifierNode,
     CompositionLocalConsumerModifierNode {
 
     // Kept from the last report: composition locals cannot be read once the node is detaching.
@@ -68,6 +75,20 @@ private class GuideTargetNode(var target: GuideTarget) :
 
     override fun onCancelPointerInput() = Unit
 
+    /**
+     * While the session points at this control, a tint and an outline inside its own edges — what
+     * still shows where the window's ring around it is clipped by a scrolling list or covered by an
+     * open menu. Read in draw, so it comes and goes with the step without a recomposition.
+     */
+    override fun ContentDrawScope.draw() {
+        drawContent()
+        val color = currentValueOf(LocalGuideRingColor)
+        if (color.isUnspecified || currentValueOf(LocalGuideSession)?.activeTarget != target) return
+        val corner = CornerRadius(HIGHLIGHT_CORNER.toPx())
+        drawRoundRect(color.copy(alpha = HIGHLIGHT_FILL_ALPHA), cornerRadius = corner)
+        drawRoundRect(color, cornerRadius = corner, style = Stroke(HIGHLIGHT_STROKE.toPx()))
+    }
+
     override fun onAttach() = scrollIntoViewIfActive()
 
     override fun onObservedReadsChanged() = scrollIntoViewIfActive()
@@ -86,3 +107,7 @@ private class GuideTargetNode(var target: GuideTarget) :
         registry = null
     }
 }
+
+private val HIGHLIGHT_CORNER = 6.dp
+private val HIGHLIGHT_STROKE = 2.dp
+private const val HIGHLIGHT_FILL_ALPHA = 0.16f

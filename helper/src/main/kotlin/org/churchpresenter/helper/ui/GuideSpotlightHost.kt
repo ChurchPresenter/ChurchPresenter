@@ -1,6 +1,7 @@
 package org.churchpresenter.helper.ui
 
 import androidx.compose.animation.core.FastOutSlowInEasing
+import org.churchpresenter.sharedui.guide.LocalGuideRingColor
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -43,7 +44,10 @@ fun GuideSpotlightHost(modifier: Modifier = Modifier, content: @Composable BoxSc
     // Targets report in window-root coordinates; the ring draws in this box's, which need not start at 0,0.
     var origin by remember { mutableStateOf(Offset.Zero) }
     Box(modifier.onGloballyPositioned { origin = it.positionInRoot() }) {
-        CompositionLocalProvider(LocalGuideTargetRegistry provides registry) {
+        CompositionLocalProvider(
+            LocalGuideTargetRegistry provides registry,
+            LocalGuideRingColor provides MaterialTheme.colorScheme.primary,
+        ) {
             content()
         }
         SpotlightRing(registry, origin)

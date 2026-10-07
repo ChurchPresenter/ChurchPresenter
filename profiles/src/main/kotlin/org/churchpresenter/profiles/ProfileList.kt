@@ -1,6 +1,8 @@
 package org.churchpresenter.profiles
 
 import androidx.compose.foundation.ContextMenuArea
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.ContextMenuItem
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -252,7 +254,10 @@ private fun ProfileListHeader(onNew: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         GroupCaption(stringResource(Res.string.output_profiles_tab), Modifier.weight(1f))
-        KeyIconButton(onClick = onNew, modifier = Modifier.size(30.dp).testTag(NEW_PROFILE_TAG)) {
+        KeyIconButton(
+            onClick = onNew,
+            modifier = Modifier.size(30.dp).testTag(NEW_PROFILE_TAG).guideTarget(GuideTargets.PROFILE_NEW),
+        ) {
             Icon(
                 Icons.Filled.Add,
                 contentDescription = stringResource(Res.string.profile_list_new),

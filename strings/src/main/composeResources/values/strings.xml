@@ -2997,6 +2997,9 @@
     <string name="helper_example_convert">Convert songs from another program</string>
     <string name="helper_example_song_library">Edit many songs at once</string>
     <string name="helper_example_calendar">Plan services on the calendar</string>
+    <string name="helper_example_stage_monitor">Set up a stage monitor</string>
+    <string name="helper_example_lower_third_output">Set up a lower third display</string>
+    <string name="helper_example_full_screen_output">Set up a full screen display</string>
     <string name="helper_do_it">Do it</string>
     <string name="helper_cancel">Cancel</string>
     <string name="helper_ok">OK</string>
@@ -3008,6 +3011,7 @@
     <string name="helper_not_now">Not now</string>
     <string name="helper_dont_show_again">Don't show tips like this again</string>
     <string name="helper_live_warning">This changes what is on screen right now.</string>
+    <string name="helper_clarify_lower_third">Do you want to make a lower third, or set up a screen or stream to show them on?</string>
     <string name="helper_clarify_scope">For songs, the Bible, or both?</string>
     <string name="helper_scope_song">song</string>
     <string name="helper_scope_bible">Bible</string>
@@ -3109,6 +3113,17 @@
     <string name="helper_hint_timer_clock">Pick %1$s to show the current time. Choose 12- or 24-hour under %2$s.</string>
     <!-- %1$s is the Go Live button (go_live). -->
     <string name="helper_hint_timer_go_live">Set the time, then click %1$s. It runs on the screen until you clear it.</string>
+    <string name="helper_hint_output_profiles">Each screen shows a profile, and the profile decides whether it is full screen, a lower third or a stage monitor. Profiles are set up here.</string>
+    <string name="helper_hint_output_new_profile">Click + to make a new profile, or pick one you already have in the list.</string>
+    <!-- %1$s is the profile's Name field (profile_name). -->
+    <string name="helper_hint_output_profile_name">Give it a name in %1$s, like Stage, Livestream or Main screen, so you can tell it apart later.</string>
+    <!-- %1$s is the Display mode row (profile_display_mode); %2$s the mode to pick (profile_mode_full, profile_mode_lower_third or profile_mode_stage). -->
+    <string name="helper_hint_output_display_mode">Under %1$s, choose %2$s.</string>
+    <string name="helper_hint_output_projection_page">Then open the Projection page.</string>
+    <!-- %1$s is the Screen Assignment section (screen_assignment). -->
+    <string name="helper_hint_output_assign">Under %1$s, pick that profile for the screen it should appear on. No row for it? Connect the screen first; each one gets its own row.</string>
+    <!-- %1$s is the Screen Assignment section (screen_assignment). -->
+    <string name="helper_hint_output_assign_lower_third">Under %1$s, pick that profile for the screen it should appear on. Sending it to a stream instead? Add an NDI output further down and pick the profile there; Alpha keeps it see-through.</string>
     <string name="helper_hint_add_song_language">Click “%1$s”, name the language, then type or paste its lyrics.</string>
     <string name="helper_hint_schedule">This is your schedule. Add songs, verses and slides here to plan the service.</string>
     <string name="helper_hint_clear">This clears everything off the audience screen.</string>

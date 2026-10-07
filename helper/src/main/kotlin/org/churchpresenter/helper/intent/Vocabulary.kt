@@ -128,6 +128,29 @@ internal object Vocabulary {
     /** First words that take something down rather than put it up. */
     val TAKE_DOWN = setOf("hide", "stop", "remove", "end", "close", "pause", "delete")
 
+    /** A screen for the people up front — what a stage monitor gets called. */
+    val STAGE_MONITOR = listOf(
+        "stage monitor", "stage monitors", "stage display", "stage screen", "confidence monitor",
+        "confidence screen", "foldback", "band monitor", "band screen", "musician monitor", "musicians screen",
+        "speaker monitor", "pastor screen", "preacher screen", "notes monitor", "worship team screen",
+        "worship team monitor", "platform monitor", "comfort monitor",
+    )
+
+    /** What makes a lower third, or a full screen, about an output rather than the graphic itself. */
+    val OUTPUT_WORDS = setOf(
+        "display", "displays", "output", "outputs", "screen", "screens", "monitor", "monitors", "projector",
+        "tv", "stream", "streaming", "livestream", "obs", "vmix", "ndi", "profile", "profiles", "setup",
+    )
+
+    /** Making something new, rather than showing or setting up what is there. */
+    val MAKE = setOf(
+        "make", "create", "generate", "design", "new", "build", "edit", "name", "names", "title", "titles",
+        "animated", "animate", "template",
+    )
+
+    /** Full screen, however it is written. */
+    val FULL_SCREEN = listOf("full screen", "fullscreen", "full-screen", "main screen", "main display", "main output")
+
     /** Asking to bring files in, rather than to put them on screen. */
     val ADD = setOf("add", "import", "load", "upload", "open", "choose", "pick", "select", "get")
 

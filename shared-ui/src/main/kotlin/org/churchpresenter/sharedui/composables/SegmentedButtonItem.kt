@@ -1,6 +1,7 @@
 package org.churchpresenter.sharedui.composables
 
 import androidx.compose.ui.graphics.vector.ImageVector
+import org.churchpresenter.sharedui.guide.GuideTarget
 import androidx.compose.ui.unit.Dp
 
 data class SegmentedButtonItem<T>(
@@ -16,4 +17,6 @@ data class SegmentedButtonItem<T>(
      */
     val testTag: String? = null,
     val width: Dp? = null,
+    /** What the helper's tours call this one segment, so a step can ring the choice itself. */
+    val guideTarget: GuideTarget? = null,
 )

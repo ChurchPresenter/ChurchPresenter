@@ -110,7 +110,6 @@ internal fun AnnouncementsTabScope.AnnouncementsTimerSection(viewModel: Announce
                 viewModel.timerMode = mode
                 viewModel.saveToSettings(onSettingsChange)
             },
-            modifier = Modifier.guideTarget(GuideTargets.TIMER_MODES),
         )
 
         // Countdown / count-up / live clock display

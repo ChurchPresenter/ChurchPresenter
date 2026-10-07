@@ -1,6 +1,9 @@
 package org.churchpresenter.helper.suggest
 
 import org.churchpresenter.helper.intent.normalize
+import org.churchpresenter.strings.generated.resources.helper_example_stage_monitor
+import org.churchpresenter.strings.generated.resources.helper_example_lower_third_output
+import org.churchpresenter.strings.generated.resources.helper_example_full_screen_output
 import org.churchpresenter.strings.generated.resources.helper_example_announcement
 import org.churchpresenter.strings.generated.resources.helper_example_countdown
 import org.churchpresenter.strings.generated.resources.helper_example_clock
@@ -115,6 +118,21 @@ enum class SuggestedRequest(val label: StringResource, val request: String, keyw
         Res.string.helper_example_calendar, "how do i plan a service",
         "calendar plan planner planning service services sunday " +
             "upcoming future recurring repeat weekly monthly template",
+    ),
+    STAGE_MONITOR(
+        Res.string.helper_example_stage_monitor, "how do i set up a stage monitor",
+        "stage monitor confidence foldback band " +
+            "musician musicians pastor preacher notes platform",
+    ),
+    LOWER_THIRD_OUTPUT(
+        Res.string.helper_example_lower_third_output, "how do i set up a lower third display",
+        "lower third display output stream " +
+            "streaming livestream ndi obs vmix overlay",
+    ),
+    FULL_SCREEN_OUTPUT(
+        Res.string.helper_example_full_screen_output, "how do i set up a full screen display",
+        "full fullscreen main display " +
+            "output projector audience profile",
     ),
     ;
 
