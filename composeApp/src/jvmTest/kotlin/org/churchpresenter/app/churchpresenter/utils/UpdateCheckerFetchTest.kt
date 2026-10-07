@@ -57,6 +57,15 @@ class UpdateCheckerFetchTest {
     }
 
     @Test
+    fun `a store install never offers an update`() {
+        val url = start(200, oneNewInstallableRelease)
+        val result = runBlocking {
+            UpdateChecker.checkForUpdate(includePrereleases = false, apiUrl = url, storeInstall = true)
+        }
+        assertIs<UpdateCheckResult.UpToDate>(result)
+    }
+
+    @Test
     fun `an empty release list fetched over http reads as up to date`() {
         val url = start(200, "[]")
         val result = runBlocking { UpdateChecker.checkForUpdate(includePrereleases = false, apiUrl = url) }

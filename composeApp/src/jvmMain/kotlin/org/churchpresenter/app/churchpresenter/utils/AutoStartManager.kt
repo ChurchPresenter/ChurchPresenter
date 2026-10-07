@@ -30,7 +30,10 @@ object AutoStartManager {
      * Store install, whose virtualized Run key would never be read at login (its manifest declares
      * a startup task instead).
      */
-    private val exePath: String? = System.getProperty("jpackage.app-path")?.takeUnless { StorePackage.isInstalled }
+    private val exePath: String? = launcherPath(System.getProperty("jpackage.app-path"), StorePackage.isInstalled)
+
+    internal fun launcherPath(appPath: String?, storeInstall: Boolean): String? =
+        appPath?.takeUnless { storeInstall }
 
     /** Maps an `os.name` string to the platform whose registration mechanism applies. */
     internal fun platformFor(osName: String): Platform {
