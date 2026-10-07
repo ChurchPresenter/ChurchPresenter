@@ -56,7 +56,7 @@ import org.jetbrains.compose.resources.stringResource
 internal fun DisplaySetupPanel(state: HelperState, screens: List<HelperScreen>, executor: HelperActionExecutor) {
     LaunchedEffect(screens) { state.displayFlow = state.displayFlow.detected(screens) }
     val flow = state.displayFlow
-    BubbleHeading(Res.string.helper_display_title)
+    BubbleHeading(stringResource(Res.string.helper_display_title), Icons.Filled.Tv)
     when (flow.step) {
         DisplayStep.DETECT -> {
             Said(helperText(Res.string.helper_display_one_screen))

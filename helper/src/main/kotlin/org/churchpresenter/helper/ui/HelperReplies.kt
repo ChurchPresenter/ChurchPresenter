@@ -2,29 +2,34 @@ package org.churchpresenter.helper.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.helper.HelperActionExecutor
 import org.churchpresenter.helper.HelperReply
 import org.churchpresenter.helper.HelperState
 import org.churchpresenter.helper.HelperText
+import org.churchpresenter.helper.ThreadEntry
+import org.churchpresenter.helper.nextStep
 import org.churchpresenter.helper.action.describe
 import org.churchpresenter.helper.action.optionLabel
+import org.churchpresenter.helper.resolve
 import org.churchpresenter.helper.suggest.Suggestion
+import org.churchpresenter.helper.suggest.SuggestionIds
 import org.churchpresenter.helper.suggest.Tip
 import org.churchpresenter.settings.dismissing
 import org.churchpresenter.settings.snoozing
@@ -35,8 +40,7 @@ import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.sharedui.utils.label
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.helper_cancel
-import org.churchpresenter.strings.generated.resources.helper_confirm_hide
-import org.churchpresenter.strings.generated.resources.helper_hide_confirm_button
+import org.churchpresenter.strings.generated.resources.helper_do_it
 import org.churchpresenter.strings.generated.resources.helper_dont_show_again
 import org.churchpresenter.strings.generated.resources.helper_example_bg
 import org.churchpresenter.strings.generated.resources.helper_example_display
@@ -59,60 +63,110 @@ import org.churchpresenter.strings.generated.resources.helper_tour_stop
 import org.churchpresenter.strings.generated.resources.helper_undo
 import org.churchpresenter.strings.generated.resources.helper_unknown
 import org.churchpresenter.strings.generated.resources.helper_yes
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 private const val SNOOZE_MS = 24L * 60L * 60L * 1000L
 
+/** The id a kept tip is filed under in the conversation, beside the suggestion ids. */
+private const val TIP_ABOUT = "tip"
+
 private val EXAMPLES = listOf(
-    Res.string.helper_example_bg,
-    Res.string.helper_example_verse,
-    Res.string.helper_example_where,
-    Res.string.helper_example_display,
+    Res.string.helper_example_bg to Icons.Filled.Palette,
+    Res.string.helper_example_verse to Icons.AutoMirrored.Filled.MenuBook,
+    Res.string.helper_example_where to Icons.Filled.MusicNote,
+    Res.string.helper_example_display to Icons.Filled.Tv,
 )
 
-/** The bubble's middle: whatever the conversation is at. */
+/** The icon on the tag over a suggestion or tip, by what it is about. */
+internal fun topicIcon(about: String?): ImageVector = when (about) {
+    SuggestionIds.SCHEDULE_EMPTY -> Icons.Filled.Event
+    SuggestionIds.SONGS_EMPTY -> Icons.Filled.MusicNote
+    SuggestionIds.BIBLE_NONE -> Icons.AutoMirrored.Filled.MenuBook
+    SuggestionIds.NO_AUDIENCE -> Icons.Filled.Tv
+    SuggestionIds.OUTPUTS_HIDDEN -> Icons.Filled.Visibility
+    else -> Icons.Filled.Lightbulb
+}
+
+/** The conversation so far, each line as it was said. */
 @Composable
-internal fun ReplyBody(state: HelperState, inputs: HelperInputs, executor: HelperActionExecutor, tip: Tip?) {
-    when (val reply = state.reply) {
-        HelperReply.Idle -> IdleBody(state, inputs, executor, tip)
-        is HelperReply.Confirm -> ConfirmCard(
-            text = reply.action.describe(state.undoLabel),
-            action = reply.action,
-            onConfirm = { state.confirm(executor) },
-            onCancel = state::reset,
-        )
-        is HelperReply.Clarify -> {
-            Said(reply.question)
-            ChipRow(reply.options.map { it.optionLabel() to { state.request(it, executor) } })
-        }
-        is HelperReply.Message -> MessageBody(state, reply, executor)
-        is HelperReply.Shortcut -> ShortcutBody(reply.action, onOk = state::reset)
-        HelperReply.Unknown -> UnknownBody(state)
-        is HelperReply.Touring -> TourBody(state, reply, executor)
-        HelperReply.DisplaySetup -> DisplaySetupPanel(state, inputs.screens, executor)
-        HelperReply.ConfirmHide -> {
-            Said(HelperText.Res(Res.string.helper_confirm_hide), Modifier.testTag("helper.confirmHide"))
-            Actions(
-                Res.string.helper_cancel to state::reset,
-                primary = Res.string.helper_hide_confirm_button to {
-                    state.close()
-                    inputs.onSettingsChange(inputs.settings.copy(enabled = false))
-                },
-            )
+internal fun ThreadLines(thread: List<ThreadEntry>) {
+    thread.forEach { entry ->
+        when (entry) {
+            is ThreadEntry.Operator -> Asked(entry.text)
+            is ThreadEntry.Wick -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                entry.topic?.let { BubbleHeading(stringResource(it), topicIcon(entry.about)) }
+                Said(entry.text)
+            }
         }
     }
 }
 
+/** The reply still waiting on the operator, at the bottom of the conversation. */
 @Composable
-private fun IdleBody(state: HelperState, inputs: HelperInputs, executor: HelperActionExecutor, tip: Tip?) {
+internal fun ReplyBody(
+    state: HelperState,
+    inputs: HelperInputs,
+    executor: HelperActionExecutor,
+    tip: Tip?,
+    ask: (String) -> Unit,
+) {
+    when (val reply = state.reply) {
+        HelperReply.Idle -> IdleBody(state, inputs, executor, tip, ask)
+        is HelperReply.Confirm -> {
+            val doIt = stringResource(Res.string.helper_do_it)
+            ConfirmCard(
+                text = reply.action.describe(state.undoLabel),
+                action = reply.action,
+                onConfirm = {
+                    state.answer(doIt)
+                    state.run(reply.action, executor)
+                },
+                onCancel = state::reset,
+            )
+        }
+        is HelperReply.Clarify -> {
+            Said(reply.question)
+            val options = reply.options.map { it to it.optionLabel() }
+            val labels = options.map { (_, label) -> label.resolve() }
+            ChipRow(
+                options.mapIndexed { i, (action, label) ->
+                    ChipOption(label) {
+                        state.answer(labels[i])
+                        state.request(action, executor)
+                    }
+                },
+            )
+        }
+        is HelperReply.Message -> MessageBody(state, reply, executor)
+        is HelperReply.Shortcut -> ShortcutBody(reply.action, onOk = state::reset)
+        HelperReply.Unknown -> {
+            Said(HelperText.Res(Res.string.helper_unknown))
+            ExampleChips(ask)
+        }
+        is HelperReply.Touring -> TourBody(state, reply, executor)
+        HelperReply.DisplaySetup -> DisplaySetupPanel(state, inputs.screens, executor)
+    }
+}
+
+@Composable
+private fun IdleBody(
+    state: HelperState,
+    inputs: HelperInputs,
+    executor: HelperActionExecutor,
+    tip: Tip?,
+    ask: (String) -> Unit,
+) {
     val suggestion = inputs.suggestions.firstOrNull()
     if (suggestion != null) {
-        SuggestionCard(suggestion, inputs, onAct = { state.request(suggestion.action, executor) })
+        SuggestionCard(state, suggestion, inputs, executor)
         return
     }
+    // Once there is a conversation, the greeting and the tip have had their turn.
+    if (state.thread.entries.isNotEmpty()) return
     if (tip == null || !inputs.settings.tipsEnabled) {
         Said(HelperText.Res(Res.string.helper_greeting))
-        ExampleChips(state)
+        ExampleChips(ask)
         return
     }
     // Opening the bubble is what counts as the day's tip having been offered.
@@ -120,44 +174,65 @@ private fun IdleBody(state: HelperState, inputs: HelperInputs, executor: HelperA
         val now = inputs.nowMillis()
         if (inputs.settings.tipDue(now)) inputs.onSettingsChange(inputs.settings.tipShown(now))
     }
-    BubbleHeading(Res.string.helper_tip_title)
+    BubbleHeading(stringResource(Res.string.helper_tip_title), topicIcon(TIP_ABOUT))
     Said(tip.text)
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        TextButton(onClick = { inputs.onSettingsChange(inputs.settings.copy(tipsEnabled = false)) }) {
-            Text(stringResource(Res.string.helper_tips_off))
-        }
-        Spacer(Modifier.weight(1f))
-        TextButton(onClick = { state.tipOffset-- }) { Text(stringResource(Res.string.helper_previous_tip)) }
-        TextButton(onClick = { state.tipOffset++ }) { Text(stringResource(Res.string.helper_next_tip)) }
-        tip.action?.let { action ->
-            FilledTonalButton(onClick = { state.request(action, executor) }) {
-                Text(stringResource(Res.string.helper_show_me))
+    val showMe = stringResource(Res.string.helper_show_me)
+    Actions(
+        Res.string.helper_previous_tip to { state.tipOffset-- },
+        Res.string.helper_next_tip to { state.tipOffset++ },
+        primary = tip.action?.let { action ->
+            Res.string.helper_show_me to {
+                state.thread.keep(tip.text, Res.string.helper_tip_title, TIP_ABOUT)
+                state.thread.said(showMe)
+                state.request(action, executor)
             }
-        }
-    }
+        },
+        primaryLeads = true,
+    )
+    QuietLink(Res.string.helper_tips_off, onClick = {
+        inputs.onSettingsChange(inputs.settings.copy(tipsEnabled = false))
+    })
 }
 
 @Composable
-private fun SuggestionCard(suggestion: Suggestion, inputs: HelperInputs, onAct: () -> Unit) {
+private fun SuggestionCard(
+    state: HelperState,
+    suggestion: Suggestion,
+    inputs: HelperInputs,
+    executor: HelperActionExecutor,
+) {
+    suggestion.topic?.let { BubbleHeading(stringResource(it), topicIcon(suggestion.id)) }
     Said(suggestion.text, Modifier.testTag("helper.suggestion"))
     val settings = inputs.settings
+    val showMe = stringResource(Res.string.helper_show_me)
     Actions(
-        Res.string.helper_dont_show_again to { inputs.onSettingsChange(settings.dismissing(suggestion.id)) },
         Res.string.helper_not_now to {
             inputs.onSettingsChange(settings.snoozing(suggestion.id, inputs.nowMillis() + SNOOZE_MS))
         },
-        primary = Res.string.helper_show_me to onAct,
+        primary = Res.string.helper_show_me to {
+            state.thread.keep(suggestion.text, suggestion.topic, suggestion.id)
+            state.thread.said(showMe)
+            state.request(suggestion.action, executor)
+        },
+        primaryLeads = true,
     )
+    QuietLink(Res.string.helper_dont_show_again, onClick = {
+        inputs.onSettingsChange(settings.dismissing(suggestion.id))
+    })
 }
 
 @Composable
 private fun MessageBody(state: HelperState, reply: HelperReply.Message, executor: HelperActionExecutor) {
     Said(reply.text, Modifier.testTag("helper.message"))
     val offer = reply.offer
+    val yes = stringResource(Res.string.helper_yes)
     when {
         offer != null -> Actions(
             Res.string.helper_cancel to state::reset,
-            primary = Res.string.helper_yes to { state.request(offer, executor) },
+            primary = Res.string.helper_yes to {
+                state.answer(yes)
+                state.request(offer, executor)
+            },
         )
         reply.canUndo -> Actions(Res.string.helper_undo to state::undo, primary = Res.string.helper_ok to state::reset)
         else -> Actions(primary = Res.string.helper_ok to state::reset)
@@ -168,33 +243,23 @@ private fun MessageBody(state: HelperState, reply: HelperReply.Message, executor
 private fun ShortcutBody(action: ShortcutAction, onOk: () -> Unit) {
     val chord = LocalShortcuts.current.chordsFor(action).firstOrNull()
     val what = stringResource(action.descriptionRes)
-    Text(
-        if (chord != null) {
-            stringResource(Res.string.helper_shortcut_is, what, chord.label())
-        } else {
-            stringResource(Res.string.helper_shortcut_unbound, what)
-        },
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.testTag("helper.shortcut"),
-    )
+    val text = if (chord != null) {
+        stringResource(Res.string.helper_shortcut_is, what, chord.label())
+    } else {
+        stringResource(Res.string.helper_shortcut_unbound, what)
+    }
+    Said(HelperText.Plain(text), Modifier.testTag("helper.shortcut"))
     Actions(primary = Res.string.helper_ok to onOk)
 }
 
+/** Example requests as chips; picking one asks it, as if it had been typed. */
 @Composable
-private fun UnknownBody(state: HelperState) {
-    Said(HelperText.Res(Res.string.helper_unknown))
-    ExampleChips(state)
-}
-
-/** Example requests; picking one puts it in the field, ready to send or change. */
-@Composable
-private fun ExampleChips(state: HelperState) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        EXAMPLES.forEach { res ->
-            val text = stringResource(res)
-            AssistChip(onClick = { state.input = text }, label = { Text(text) })
-        }
+private fun ExampleChips(ask: (String) -> Unit) {
+    val examples = EXAMPLES.map { (res, icon) -> Triple(res, icon, stringResource(res)) }
+    val options = remember(examples) {
+        examples.map { (res, icon, text) -> ChipOption(HelperText.Res(res), icon) { ask(text) } }
     }
+    ChipRow(options)
 }
 
 @Composable
@@ -215,6 +280,6 @@ private fun TourBody(state: HelperState, reply: HelperReply.Touring, executor: H
     }
     Said(step.hint, Modifier.testTag("helper.tourHint"))
     val last = reply.index == reply.tour.steps.lastIndex
-    val onward = if (last) Res.string.helper_tour_done else Res.string.helper_tour_next
+    val onward: StringResource = if (last) Res.string.helper_tour_done else Res.string.helper_tour_next
     Actions(Res.string.helper_tour_stop to state::reset, primary = onward to { state.nextStep(executor) })
 }
