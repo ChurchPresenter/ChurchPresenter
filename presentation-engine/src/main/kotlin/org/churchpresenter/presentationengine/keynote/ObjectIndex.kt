@@ -34,46 +34,43 @@ internal class ObjectIndex private constructor(
         fun load(file: File): ObjectIndex? {
             val objects = mutableMapOf<Long, IwaObject>()
             try {
-                if (file.isDirectory) {
-                    File(file, "Index").listFiles()
-                        ?.filter { it.isFile && it.extension == "iwa" }
-                        ?.sortedBy { it.name }
-                        ?.forEach { iwa ->
-                            IwaChunkReader.readObjects(iwa.readBytes())
-                                .forEach { objects[it.identifier] = it }
-                        }
-                    File(file, "Metadata").listFiles()
-                        ?.filter { it.isFile && it.extension == "iwa" }
-                        ?.forEach { iwa ->
-                            IwaChunkReader.readObjects(iwa.readBytes())
-                                .forEach { objects[it.identifier] = it }
-                        }
-                } else {
-                    ZipFile(file).use { zip ->
-                        for (entry in zip.entries()) {
-                            if (entry.isDirectory || !entry.name.endsWith(".iwa")) continue
-                            val bytes = zip.getInputStream(entry).readBytes()
-                            IwaChunkReader.readObjects(bytes).forEach { objects[it.identifier] = it }
-                        }
-                    }
-                }
+                val archives = if (file.isDirectory) directoryArchives(file) else zipArchives(file)
+                archives.forEach { bytes -> IwaChunkReader.readObjects(bytes).forEach { objects[it.identifier] = it } }
             } catch (_: Exception) {
                 return null
             }
             if (objects.isEmpty()) return null
+            return ObjectIndex(objects, dataFileNames(objects.values))
+        }
 
-            val dataFileNames = mutableMapOf<Long, String>()
-            objects.values.filter { it.type == KnFields.TYPE_TSP_PACKAGE_METADATA }.forEach { metadata ->
-                val message = IwaMessage.parse(metadata.payload) ?: return@forEach
-                for (dataInfo in message.messages(KnFields.PACKAGE_METADATA_DATAS)) {
-                    val id = dataInfo.varint(KnFields.DATA_INFO_IDENTIFIER) ?: continue
+        /** A package directory's archives: Index/ in name order, then Metadata/. */
+        private fun directoryArchives(dir: File): List<ByteArray> {
+            fun iwaFiles(sub: String) = File(dir, sub).listFiles()
+                ?.filter { it.isFile && it.extension == "iwa" }
+                .orEmpty()
+            return (iwaFiles("Index").sortedBy { it.name } + iwaFiles("Metadata")).map { it.readBytes() }
+        }
+
+        /** Every `.iwa` entry of a zipped deck, in the zip's own order. */
+        private fun zipArchives(file: File): List<ByteArray> = ZipFile(file).use { zip ->
+            zip.entries().asSequence()
+                .filter { !it.isDirectory && it.name.endsWith(".iwa") }
+                .map { zip.getInputStream(it).readBytes() }
+                .toList()
+        }
+
+        /** Data-id → file-name pairs from every TSP.PackageMetadata, skipping entries without both. */
+        private fun dataFileNames(objects: Collection<IwaObject>): Map<Long, String> =
+            objects.asSequence()
+                .filter { it.type == KnFields.TYPE_TSP_PACKAGE_METADATA }
+                .mapNotNull { IwaMessage.parse(it.payload) }
+                .flatMap { it.messages(KnFields.PACKAGE_METADATA_DATAS) }
+                .mapNotNull { dataInfo ->
+                    val id = dataInfo.varint(KnFields.DATA_INFO_IDENTIFIER)
                     val name = dataInfo.string(KnFields.DATA_INFO_FILE_NAME)
                         ?: dataInfo.string(KnFields.DATA_INFO_PREFERRED_FILE_NAME)
-                        ?: continue
-                    dataFileNames[id] = name
+                    if (id != null && name != null) id to name else null
                 }
-            }
-            return ObjectIndex(objects, dataFileNames)
-        }
+                .toMap()
     }
 }

@@ -38,29 +38,36 @@ internal object IwaChunkReader {
         val objects = mutableListOf<IwaObject>()
         var pos = 0
         while (pos < decompressed.size) {
-            val (infoLength, afterLen) = IwaMessage.readVarint(decompressed, pos) ?: break
-            pos = afterLen
-            val infoEnd = pos + infoLength.toInt()
-            if (infoLength <= 0 || infoEnd > decompressed.size) break
-            val info = IwaMessage.parse(decompressed, pos, infoLength.toInt()) ?: break
-            pos = infoEnd
-            val identifier = info.varint(ARCHIVE_INFO_IDENTIFIER) ?: 0L
-            var firstType = 0
-            var firstPayload = ByteArray(0)
-            var isFirst = true
-            for (messageInfo in info.messages(ARCHIVE_INFO_MESSAGE_INFOS)) {
-                val length = (messageInfo.varint(MESSAGE_INFO_LENGTH) ?: 0L).toInt()
-                if (length < 0 || pos + length > decompressed.size) return objects
-                if (isFirst) {
-                    firstType = (messageInfo.varint(MESSAGE_INFO_TYPE) ?: 0L).toInt()
-                    firstPayload = decompressed.copyOfRange(pos, pos + length)
-                    isFirst = false
-                }
-                pos += length
-            }
-            if (!isFirst) objects.add(IwaObject(identifier, firstType, firstPayload))
+            val (archive, next) = readArchive(decompressed, pos) ?: break
+            archive?.let { objects.add(it) }
+            pos = next
         }
         return objects
+    }
+
+    /**
+     * The archive at [start] -- its first message, or null when it has none -- and where the next
+     * archive begins. Null when the stream is truncated or corrupt from here on, which ends the read.
+     */
+    private fun readArchive(data: ByteArray, start: Int): Pair<IwaObject?, Int>? {
+        val (infoLength, afterLen) = IwaMessage.readVarint(data, start) ?: return null
+        val infoEnd = afterLen + infoLength.toInt()
+        val info = if (infoLength <= 0 || infoEnd > data.size) null
+            else IwaMessage.parse(data, afterLen, infoLength.toInt())
+        if (info == null) return null
+        val identifier = info.varint(ARCHIVE_INFO_IDENTIFIER) ?: 0L
+        var pos = infoEnd
+        var first: IwaObject? = null
+        for (messageInfo in info.messages(ARCHIVE_INFO_MESSAGE_INFOS)) {
+            val length = (messageInfo.varint(MESSAGE_INFO_LENGTH) ?: 0L).toInt()
+            if (length < 0 || pos + length > data.size) return null
+            if (first == null) {
+                val type = (messageInfo.varint(MESSAGE_INFO_TYPE) ?: 0L).toInt()
+                first = IwaObject(identifier, type, data.copyOfRange(pos, pos + length))
+            }
+            pos += length
+        }
+        return first to pos
     }
 
     private fun decompressChunks(iwaBytes: ByteArray): ByteArray? {
