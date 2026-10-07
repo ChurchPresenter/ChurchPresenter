@@ -23,7 +23,7 @@ fun rememberShapedLottiePainter(
     dynamicProperties: LottieDynamicProperties? = null,
 ): LottiePainter = rememberLottiePainter(
     composition = composition,
-    progress = { lottieDrawProgress(progress()) },
+    progress = progress,
     fontManager = if (grouped) GeneratorLottieFonts else null,
     dynamicProperties = dynamicProperties,
     enableTextGrouping = grouped,

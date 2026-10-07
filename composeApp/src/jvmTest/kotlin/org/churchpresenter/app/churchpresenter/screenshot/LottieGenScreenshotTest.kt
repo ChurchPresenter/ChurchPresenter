@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
@@ -27,6 +28,7 @@ import org.churchpresenter.lottiegen.persistence.PresetStorage
 import org.churchpresenter.lottiegen.ui.LOWER_THIRD_STYLE_THUMBNAIL_TAG
 import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.app.churchpresenter.TestSingletons
+import org.churchpresenter.app.churchpresenter.threadDump
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.lottiegen.App as LottieGenApp
 import java.util.Locale
@@ -118,9 +120,16 @@ class LottieGenScreenshotTest {
                 // preview is waited for by its pixels: the default accent bar is the only red right
                 // of the controls.
                 waitUntil("the preview rendered", RENDER_TIMEOUT_MS) { previewAccentPixels() >= PREVIEW_ACCENT_PIXELS }
-                waitUntil("the style thumbnail", RENDER_TIMEOUT_MS) {
-                    onAllNodesWithTag(LOWER_THIRD_STYLE_THUMBNAIL_TAG, useUnmergedTree = true)
-                        .fetchSemanticsNodes().isNotEmpty()
+                try {
+                    waitUntil("the style thumbnail", RENDER_TIMEOUT_MS) {
+                        onAllNodesWithTag(LOWER_THIRD_STYLE_THUMBNAIL_TAG, useUnmergedTree = true)
+                            .fetchSemanticsNodes().isNotEmpty()
+                    }
+                } catch (e: ComposeTimeoutException) {
+                    // Twice on CI (#785, #789's branch), never locally, and the first test of its fork
+                    // both times. The thumbnails draw on the event queue, so its stack is the evidence.
+                    System.err.println(threadDump("NO STYLE THUMBNAIL after ${RENDER_TIMEOUT_MS}ms ==="))
+                    throw e
                 }
                 drive()
                 captureTo(file)

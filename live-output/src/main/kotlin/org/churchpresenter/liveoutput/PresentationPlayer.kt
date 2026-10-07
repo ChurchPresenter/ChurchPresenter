@@ -41,7 +41,10 @@ class PresentationPlayer(
     private class SlideLayers(
         val layers: List<RawLayer>,
         val evaluator: TimelineEvaluator?
-    )
+    ) {
+        /** The step a slide stepped back onto lands on: its build complete. */
+        val lastStep: Int get() = ((evaluator?.stepCount ?: 0) - 1).coerceAtLeast(-1)
+    }
 
     private class RawLayer(
         val spec: LayerSpec,
@@ -53,6 +56,8 @@ class PresentationPlayer(
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val rasterizer = DeckRasterizer(deck, renderWidthPx, onDegraded = ::reportDegradedSlide)
     private val rasterLock = Any()
+    /** Guards the slide, its step and the pending last-step entry against the loader's completion. */
+    private val navLock = Any()
 
     private val slideCache = ConcurrentHashMap<Int, SlideLayers>()
     // internal: lets tests wait for an async rasterization attempt to actually finish (success or
@@ -108,23 +113,18 @@ class PresentationPlayer(
         val spec = deck.slides[index].transition
         val specUsable = spec != null && spec.type != TransitionType.NONE && spec.durationMs > 0
         slideTransition.arm(if (index != slideIndex && outgoing.isNotEmpty() && specUsable) spec else null, outgoing)
-        slideIndex = index
-        stepIndex = -1
-        stepStartNanos = 0L
-        // Marked before the load starts: a load that finishes before this call returns must still
-        // find it, or the slide stays unbuilt.
-        pendingEnterAtLastStepFor = if (enterAtLastStep) index else null
+        synchronized(navLock) {
+            slideIndex = index
+            // Taken from the cache when it is there, else left to the load to apply as it publishes.
+            val cached = slideCache[index]
+            stepIndex = if (enterAtLastStep && cached != null) cached.lastStep else -1
+            stepStartNanos = 0L
+            pendingEnterAtLastStepFor = if (enterAtLastStep && cached == null) index else null
+        }
         ensureLoaded(index)
         ensureLoaded(index + 1)
         evictBeyondWindow(index)
         syncMovieTarget(index)
-        if (enterAtLastStep) {
-            val cachedStepCount = slideCache[index]?.evaluator?.stepCount
-            if (cachedStepCount != null) {
-                pendingEnterAtLastStepFor = null
-                stepIndex = (cachedStepCount - 1).coerceAtLeast(-1)
-            }
-        }
     }
 
     /**
@@ -288,10 +288,15 @@ class PresentationPlayer(
                             initiallyHiddenLayerIds = slide.layers.filter { !it.initiallyVisible }.map { it.id }.toSet()
                         )
                     }
-                    slideCache[index] = SlideLayers(raws, evaluator)
-                    if (pendingEnterAtLastStepFor == index && slideIndex == index) {
-                        pendingEnterAtLastStepFor = null
-                        stepIndex = ((evaluator?.stepCount ?: 0) - 1).coerceAtLeast(-1)
+                    val loaded = SlideLayers(raws, evaluator)
+                    // The step lands before the slide is published: frame() reads the cache
+                    // lock-free, and must never find the slide without its step.
+                    synchronized(navLock) {
+                        if (pendingEnterAtLastStepFor == index && slideIndex == index) {
+                            pendingEnterAtLastStepFor = null
+                            stepIndex = loaded.lastStep
+                        }
+                        slideCache[index] = loaded
                     }
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     // A slide is drawn by POI, PDFBox and AWT, which throw whatever their internals do (NPEs and
