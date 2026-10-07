@@ -101,6 +101,33 @@ internal object Vocabulary {
         "name strap", "name straps", "name tag", "nametag", "name bar", "chyron", "speaker name", "name and title",
     )
 
+    /** Words and phrases for a text announcement — including the ones churches page parents with. */
+    val ANNOUNCEMENT = listOf(
+        "announcement", "announcements", "announce", "notice", "notices", "nursery", "baby room", "babies room",
+        "kids room", "children's room", "childcare", "child care", "page a parent", "page parents", "call a parent",
+        "call parents", "parents of", "lost and found", "parking", "headlights", "car lights", "license plate",
+        "licence plate", "scrolling text", "ticker", "crawl", "marquee", "banner", "welcome message",
+        "message on screen", "message on the screen", "text on screen", "text on the screen", "news",
+    )
+
+    /** Counting down — to a length of time, or to a time of day. */
+    val COUNTDOWN = listOf(
+        "countdown", "count down", "countdowns", "timer", "timers", "time left", "minutes left", "starts in",
+        "pre-service", "preservice", "until the service", "before the service",
+    )
+
+    /** Counting up from zero. */
+    val COUNT_UP = listOf("count up", "stopwatch", "stop watch", "elapsed", "how long it's been")
+
+    /** The time of day, on the screen. */
+    val CLOCK = listOf(
+        "clock", "current time", "time of day", "show the time", "display the time", "what time it is",
+        "the time on",
+    )
+
+    /** First words that take something down rather than put it up. */
+    val TAKE_DOWN = setOf("hide", "stop", "remove", "end", "close", "pause", "delete")
+
     /** Asking to bring files in, rather than to put them on screen. */
     val ADD = setOf("add", "import", "load", "upload", "open", "choose", "pick", "select", "get")
 

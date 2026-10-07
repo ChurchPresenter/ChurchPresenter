@@ -216,9 +216,10 @@ internal fun TimerModeTrack(
     modes: List<Pair<String, String>>,
     selected: String,
     onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .sunken(AppShape(10.dp), elevationPalette())
             .padding(3.dp),

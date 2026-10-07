@@ -2986,6 +2986,17 @@
     <string name="helper_example_identify">Which screen is which?</string>
     <string name="helper_example_undo">Undo the last change</string>
     <string name="helper_example_shortcuts">Show keyboard shortcuts</string>
+    <string name="helper_example_announcement">Show an announcement</string>
+    <string name="helper_example_countdown">Show a countdown timer</string>
+    <string name="helper_example_clock">Show the clock</string>
+    <string name="helper_example_pictures">Show pictures</string>
+    <string name="helper_example_slideshow">Show a slideshow</string>
+    <string name="helper_example_presentation">Show a PDF or PowerPoint</string>
+    <string name="helper_example_video">Play a video</string>
+    <string name="helper_example_lower_third">Make a lower third</string>
+    <string name="helper_example_convert">Convert songs from another program</string>
+    <string name="helper_example_song_library">Edit many songs at once</string>
+    <string name="helper_example_calendar">Plan services on the calendar</string>
     <string name="helper_do_it">Do it</string>
     <string name="helper_cancel">Cancel</string>
     <string name="helper_ok">OK</string>
@@ -3087,6 +3098,17 @@
     <string name="helper_hint_lower_third_save">Pick a style and colors if you like, then click Save Lower Third. It lands in the list on the Lower Third tab.</string>
     <!-- %1$s is the Go Live button (go_live). -->
     <string name="helper_hint_lower_third_go_live">Pick it in the list and click %1$s to put it on the screen.</string>
+    <string name="helper_hint_announcement_text">Type the announcement here, like “Parents of child 12, please come to the nursery.”</string>
+    <!-- %1$s is the Go Live button (go_live). -->
+    <string name="helper_hint_announcement_go_live">Click %1$s to put it on the screen. The settings beside it choose how it moves and how many times.</string>
+    <!-- %1$s and %2$s are the timer's Timer and Specific Time modes (timer_title, timer_mode_clock). -->
+    <string name="helper_hint_timer_countdown">Pick %1$s to count down from a length of time, or %2$s to count down to a set time, like when the service starts.</string>
+    <!-- %1$s is the timer's count-up mode (timer_mode_duration). -->
+    <string name="helper_hint_timer_count_up">Pick %1$s to count up from zero, like a stopwatch.</string>
+    <!-- %1$s is the timer's Clock mode (canvas_source_clock); %2$s its Format field (timer_clock_format). -->
+    <string name="helper_hint_timer_clock">Pick %1$s to show the current time. Choose 12- or 24-hour under %2$s.</string>
+    <!-- %1$s is the Go Live button (go_live). -->
+    <string name="helper_hint_timer_go_live">Set the time, then click %1$s. It runs on the screen until you clear it.</string>
     <string name="helper_hint_add_song_language">Click “%1$s”, name the language, then type or paste its lyrics.</string>
     <string name="helper_hint_schedule">This is your schedule. Add songs, verses and slides here to plan the service.</string>
     <string name="helper_hint_clear">This clears everything off the audience screen.</string>

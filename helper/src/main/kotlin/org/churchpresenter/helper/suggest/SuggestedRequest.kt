@@ -1,6 +1,17 @@
 package org.churchpresenter.helper.suggest
 
 import org.churchpresenter.helper.intent.normalize
+import org.churchpresenter.strings.generated.resources.helper_example_announcement
+import org.churchpresenter.strings.generated.resources.helper_example_countdown
+import org.churchpresenter.strings.generated.resources.helper_example_clock
+import org.churchpresenter.strings.generated.resources.helper_example_pictures
+import org.churchpresenter.strings.generated.resources.helper_example_slideshow
+import org.churchpresenter.strings.generated.resources.helper_example_presentation
+import org.churchpresenter.strings.generated.resources.helper_example_video
+import org.churchpresenter.strings.generated.resources.helper_example_lower_third
+import org.churchpresenter.strings.generated.resources.helper_example_convert
+import org.churchpresenter.strings.generated.resources.helper_example_song_library
+import org.churchpresenter.strings.generated.resources.helper_example_calendar
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.helper_example_bg
 import org.churchpresenter.strings.generated.resources.helper_example_bible_translation
@@ -58,9 +69,57 @@ enum class SuggestedRequest(val label: StringResource, val request: String, keyw
         Res.string.helper_example_shortcuts, "show keyboard shortcuts",
         "shortcut shortcuts key keys hotkey keyboard",
     ),
+    ANNOUNCEMENT(
+        Res.string.helper_example_announcement, "how do i show an announcement",
+        "announcement announcements announce message messages notice notices nursery baby babies kids " +
+            "children parent parents page parking lost found ticker banner scrolling welcome news",
+    ),
+    COUNTDOWN(
+        Res.string.helper_example_countdown, "how do i show a countdown",
+        "countdown countdowns count timer timers minutes left starts stopwatch",
+    ),
+    CLOCK(
+        Res.string.helper_example_clock, "how do i show the clock",
+        "clock time current",
+    ),
+    PICTURES(
+        Res.string.helper_example_pictures, "how do i show pictures",
+        "photo photos picture pictures image images pic pics album albums jpg",
+    ),
+    SLIDESHOW(
+        Res.string.helper_example_slideshow, "how do i show a slideshow",
+        "slideshow slideshows advance",
+    ),
+    PRESENTATION(
+        Res.string.helper_example_presentation, "how do i show a pdf",
+        "pdf pdfs powerpoint pptx ppt keynote presentation presentations deck",
+    ),
+    VIDEO(
+        Res.string.helper_example_video, "how do i play a video",
+        "video videos movie movies clip clips film mp4 play",
+    ),
+    LOWER_THIRD(
+        Res.string.helper_example_lower_third, "how do i make a lower third",
+        "lower third thirds lottie name strap tag nametag chyron speaker",
+    ),
+    CONVERT(
+        Res.string.helper_example_convert, "how do i convert songs",
+        "convert converter conversion import migrate transfer " +
+            "openlp songbeamer opensong freeshow quelea videopsalm easyslides",
+    ),
+    SONG_LIBRARY(
+        Res.string.helper_example_song_library, "batch edit songs",
+        "batch bulk mass multiple many organize organise library songbook author metadata",
+    ),
+    CALENDAR(
+        Res.string.helper_example_calendar, "how do i plan a service",
+        "calendar plan planner planning service services sunday " +
+            "upcoming future recurring repeat weekly monthly template",
+    ),
     ;
 
-    internal val words: List<String> = keywords.split(' ')
+    /** The keywords, and the words of the request itself. */
+    internal val words: List<String> = (keywords.split(' ') + request.split(' ')).distinct()
 
     companion object {
         /** What the helper offers when it has nothing closer: a little of everything it does. */
@@ -69,8 +128,8 @@ enum class SuggestedRequest(val label: StringResource, val request: String, keyw
 }
 
 /**
- * The requests closest to [input], best first, filled out with [SuggestedRequest.DEFAULTS] to
- * [limit]. A typed word scores against each request's keywords: the same word, one starting the
+ * The requests closest to [input], best first, up to [limit] — or [SuggestedRequest.DEFAULTS] when
+ * none is like it at all. A typed word scores against each request's keywords: the same word, one starting the
  * other, or one or two letters off ("clera" for "clear", "chrods" for "chords").
  */
 fun closestRequests(input: String, limit: Int = CHIP_COUNT): List<SuggestedRequest> {
@@ -80,7 +139,8 @@ fun closestRequests(input: String, limit: Int = CHIP_COUNT): List<SuggestedReque
         .filter { (_, score) -> score > 0.0 }
         .sortedByDescending { (_, score) -> score }
         .map { (request, _) -> request }
-    return (closest + SuggestedRequest.DEFAULTS).distinct().take(limit)
+    // Only what is actually like it; the defaults are for when nothing is.
+    return closest.take(limit).ifEmpty { SuggestedRequest.DEFAULTS }
 }
 
 /** How alike two words are, from 1 (the same) down to 0 (nothing alike). */

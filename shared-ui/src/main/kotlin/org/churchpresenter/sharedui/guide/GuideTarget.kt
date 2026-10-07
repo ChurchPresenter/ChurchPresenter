@@ -41,6 +41,10 @@ object GuideTargets {
     val LOWER_THIRD_NAME = GuideTarget("lottieGen.name")
     val LOWER_THIRD_INFO = GuideTarget("lottieGen.info")
     val LOWER_THIRD_SAVE = GuideTarget("lottieGen.save")
+    val ANNOUNCEMENT_TEXT = GuideTarget("announcements.text")
+    val ANNOUNCEMENT_GO_LIVE = GuideTarget("announcements.goLive")
+    val TIMER_MODES = GuideTarget("announcements.timerModes")
+    val TIMER_GO_LIVE = GuideTarget("announcements.timerGoLive")
 
     /** The main window's tab for [tab]. */
     fun mainTab(tab: Tabs): GuideTarget = GuideTarget("tab.${tab.name}")

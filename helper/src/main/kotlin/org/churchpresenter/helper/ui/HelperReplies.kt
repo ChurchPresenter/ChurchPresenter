@@ -1,6 +1,17 @@
 package org.churchpresenter.helper.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Slideshow
+import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.Subtitles
+import androidx.compose.material.icons.filled.ImportExport
+import androidx.compose.material.icons.filled.LibraryMusic
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Keyboard
@@ -92,6 +103,17 @@ private fun requestIcon(request: SuggestedRequest): ImageVector = when (request)
     SuggestedRequest.REMOTE -> Icons.Filled.PhoneAndroid
     SuggestedRequest.UNDO -> Icons.AutoMirrored.Filled.Undo
     SuggestedRequest.SHORTCUTS -> Icons.Filled.Keyboard
+    SuggestedRequest.ANNOUNCEMENT -> Icons.Filled.Campaign
+    SuggestedRequest.COUNTDOWN -> Icons.Filled.Timer
+    SuggestedRequest.CLOCK -> Icons.Filled.AccessTime
+    SuggestedRequest.PICTURES -> Icons.Filled.Image
+    SuggestedRequest.SLIDESHOW -> Icons.Filled.Slideshow
+    SuggestedRequest.PRESENTATION -> Icons.Filled.PictureAsPdf
+    SuggestedRequest.VIDEO -> Icons.Filled.Movie
+    SuggestedRequest.LOWER_THIRD -> Icons.Filled.Subtitles
+    SuggestedRequest.CONVERT -> Icons.Filled.ImportExport
+    SuggestedRequest.SONG_LIBRARY -> Icons.Filled.LibraryMusic
+    SuggestedRequest.CALENDAR -> Icons.Filled.CalendarMonth
 }
 
 /** The icon on the tag over a suggestion or tip, by what it is about. */

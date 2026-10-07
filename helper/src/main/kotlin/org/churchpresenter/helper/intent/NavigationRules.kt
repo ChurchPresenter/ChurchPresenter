@@ -42,9 +42,17 @@ internal fun bibleTranslationRule(r: Request): Resolution? =
         null
     }
 
-/** Photos, a slideshow, a PDF or a video — added or shown, asked or told. */
-internal fun mediaTopicsRule(r: Request): Resolution? =
-    MediaTopics.find(r.text)?.let { act(HelperAction.Highlight(it)) }
+/**
+ * Photos, a slideshow, a PDF, a video or a lower third; an announcement, a timer or the clock —
+ * added or shown, asked or told.
+ */
+internal fun mediaTopicsRule(r: Request): Resolution? {
+    // "Clear the announcement", "hide the clock", "stop the video": taking it down is the clear and
+    // output rules' to answer, not a tour of how to put it up.
+    if (r.has(Vocabulary.CLEAR) || r.first in Vocabulary.TAKE_DOWN) return null
+    val tour = MediaTopics.find(r.text) ?: AnnouncementTopics.find(r.text)
+    return tour?.let { act(HelperAction.Highlight(it)) }
+}
 
 internal fun openSettingsRule(r: Request): Resolution? {
     if (!r.has(Vocabulary.SETTINGS)) return null

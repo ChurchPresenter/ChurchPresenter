@@ -34,7 +34,7 @@ internal object HowToTopics {
         isSongTranslation(normalized, currentTab) -> songTranslation()
         isSongChords(normalized, currentTab) -> songChords()
         isBibleTranslation(normalized) -> bibleTranslation()
-        else -> MediaTopics.find(normalized)
+        else -> MediaTopics.find(normalized) ?: AnnouncementTopics.find(normalized)
     }
 
     /**
