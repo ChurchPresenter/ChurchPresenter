@@ -1,6 +1,8 @@
 package org.churchpresenter.profiles
 
 import androidx.compose.material.icons.Icons
+import org.churchpresenter.sharedui.guide.GuideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.ClosedCaption
@@ -142,6 +144,13 @@ internal fun ProfilePage.navTag(): String = when (this) {
     ProfilePage.Outputs -> "profile_nav_outputs"
     ProfilePage.Content -> "profile_nav_content"
     is ProfilePage.Appearance -> railTag(pane.name)
+}
+
+/** What the helper's tours call this entry of the section list, for the ones a tour points at. */
+internal fun ProfilePage.guideTarget(): GuideTarget? = when {
+    this == ProfilePage.Content -> GuideTargets.PROFILE_CONTENT_PAGE
+    this is ProfilePage.Appearance && pane == CustomizePane.STAGE_MONITOR -> GuideTargets.STAGE_LAYOUT_PAGE
+    else -> null
 }
 
 /** Test handle for the Text group's element switch. */

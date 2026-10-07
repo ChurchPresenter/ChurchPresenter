@@ -140,6 +140,7 @@ private fun AnnouncementsTabScope.AnnouncementsTextActions(viewModel: Announceme
         if (output != null) {
             if (canSendToStageMonitor) {
                 ActionIconButton(
+                modifier = Modifier.guideTarget(GuideTargets.ANNOUNCEMENT_TO_STAGE),
                     onClick = { toggleStageMonitor(viewModel, viewModel.text, stopTicker = true) },
                     enabled = viewModel.text.isNotBlank() || isSentToStageMonitor,
                     tooltipText = if (isSentToStageMonitor) stringResource(

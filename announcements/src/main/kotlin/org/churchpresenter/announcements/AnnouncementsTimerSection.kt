@@ -385,6 +385,7 @@ private fun AnnouncementsTabScope.TimerStageMonitorButton(viewModel: Announcemen
         canSendToStageMonitor &&
         viewModel.timerMode != Constants.TIMER_MODE_CLOCK_DISPLAY) {
         ActionIconButton(
+                modifier = Modifier.guideTarget(GuideTargets.TIMER_TO_STAGE),
             onClick = {
                 // Sending is the only thing (besides Go Live) allowed to mark the
                 // ticker live — the play/pause button above stays preview-only.

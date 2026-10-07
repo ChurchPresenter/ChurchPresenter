@@ -3003,6 +3003,7 @@
     <string name="helper_example_stage_monitor">Set up a stage monitor</string>
     <string name="helper_example_lower_third_output">Set up a lower third display</string>
     <string name="helper_example_full_screen_output">Set up a full screen display</string>
+    <string name="helper_example_stage_layout">Choose what shows on the stage monitor</string>
     <string name="helper_do_it">Do it</string>
     <string name="helper_cancel">Cancel</string>
     <string name="helper_ok">OK</string>
@@ -3127,6 +3128,30 @@
     <string name="helper_hint_output_assign">Under %1$s, pick that profile for the screen it should appear on. No row for it? Connect the screen first; each one gets its own row.</string>
     <!-- %1$s is the Screen Assignment section (screen_assignment). -->
     <string name="helper_hint_output_assign_lower_third">Under %1$s, pick that profile for the screen it should appear on. Sending it to a stream instead? Add an NDI output further down and pick the profile there; Alpha keeps it see-through.</string>
+    <string name="helper_hint_stage_profile">Pick your stage monitor in the list of profiles. No stage monitor yet? Ask me to set one up first.</string>
+    <!-- %1$s is the Display mode row (profile_display_mode); %2$s its Stage monitor choice (profile_mode_stage); %3$s the Stage layout page (profile_nav_stage_layout). -->
+    <string name="helper_hint_stage_mode">Make sure %1$s is %2$s, and click it if not. The %3$s page only appears for a stage monitor.</string>
+    <!-- %1$s is a page of the profile (profile_nav_stage_layout, profile_nav_content). -->
+    <string name="helper_hint_stage_open_page">Open %1$s.</string>
+    <!-- %1$s is the Zones row (profile_stage_zones). -->
+    <string name="helper_hint_stage_zones">Under %1$s, pick how many parts the screen is split into.</string>
+    <!-- %1$s is the Arrangement row (profile_stage_arrangement). -->
+    <string name="helper_hint_stage_arrangement">Under %1$s, pick how they sit. Drag a divider in the picture to give a zone more room.</string>
+    <!-- %1$s is the What goes where group (profile_group_what_goes_where); %2$s its None choice (stage_monitor_zone_none). -->
+    <string name="helper_hint_stage_what_goes_where">Under %1$s, pick the zone each kind of content shows in, or %2$s to leave it off.</string>
+    <!-- %1$s is a kind of content (Songs, Next, Clock…); %2$s the None choice (stage_monitor_zone_none). -->
+    <string name="helper_hint_stage_content">Next to %1$s, pick the zone it shows in, or %2$s to leave it off.</string>
+    <!-- %1$s is Bible (bible); %2$s the Content &amp; sources page (profile_nav_content). -->
+    <string name="helper_hint_stage_bible">Next to %1$s, pick the zone it shows in. It also needs %1$s switched on under %2$s.</string>
+    <!-- %1$s is the Show Chords switch (stage_monitor_show_chords); %2$s Songs (songs). -->
+    <string name="helper_hint_stage_chords">Turn on %1$s. The chords show in the %2$s zone, above the words.</string>
+    <!-- %1$s is the Applies to strip (profile_applies_to). -->
+    <string name="helper_hint_stage_text">Under %1$s, pick the zone, then set its font, size and color below.</string>
+    <string name="helper_hint_stage_message_text">Type the message for the people on stage.</string>
+    <!-- %1$s is the Send to Stage Monitor button (tooltip_send_to_stage_monitor); %2$s Announcements (content_announcements). -->
+    <string name="helper_hint_stage_message_send">Click %1$s. It shows in the stage monitor's %2$s zone.</string>
+    <!-- %1$s is the Send to Stage Monitor button (tooltip_send_to_stage_monitor). -->
+    <string name="helper_hint_stage_timer_send">Set the time, then click %1$s to show it on the stage monitor.</string>
     <string name="helper_hint_add_song_language">Click “%1$s”, name the language, then type or paste its lyrics.</string>
     <string name="helper_hint_schedule">This is your schedule. Add songs, verses and slides here to plan the service.</string>
     <string name="helper_hint_clear">This clears everything off the audience screen.</string>

@@ -1,6 +1,7 @@
 package org.churchpresenter.helper.suggest
 
 import org.churchpresenter.helper.intent.normalize
+import org.churchpresenter.strings.generated.resources.helper_example_stage_layout
 import org.churchpresenter.strings.generated.resources.helper_example_stage_monitor
 import org.churchpresenter.strings.generated.resources.helper_example_lower_third_output
 import org.churchpresenter.strings.generated.resources.helper_example_full_screen_output
@@ -133,6 +134,11 @@ enum class SuggestedRequest(val label: StringResource, val request: String, keyw
         Res.string.helper_example_full_screen_output, "how do i set up a full screen display",
         "full fullscreen main display " +
             "output projector audience profile",
+    ),
+    STAGE_LAYOUT(
+        Res.string.helper_example_stage_layout, "what goes where on the stage monitor",
+        "zone zones layout arrangement chords notes clock next stage " +
+            "monitor confidence what goes where",
     ),
     ;
 

@@ -47,12 +47,23 @@ object GuideTargets {
     val PROFILE_NEW = GuideTarget("settings.profiles.new")
     val PROFILE_NAME = GuideTarget("settings.profiles.name")
     val SCREEN_PROFILE_PICKER = GuideTarget("settings.projection.screenProfile")
+    val PROFILE_CONTENT_PAGE = GuideTarget("settings.profiles.contentPage")
+    val STAGE_LAYOUT_PAGE = GuideTarget("settings.profiles.stageLayoutPage")
+    val STAGE_ZONES = GuideTarget("settings.profiles.stageZones")
+    val STAGE_ARRANGEMENT = GuideTarget("settings.profiles.stageArrangement")
+    val STAGE_SHOW_CHORDS = GuideTarget("settings.profiles.stageShowChords")
+    val STAGE_TEXT_ZONE = GuideTarget("settings.profiles.stageTextZone")
+    val ANNOUNCEMENT_TO_STAGE = GuideTarget("announcements.toStage")
+    val TIMER_TO_STAGE = GuideTarget("announcements.timerToStage")
 
     /** One choice, [value], of a segmented control or picker named [group] — where to click, exactly. */
     fun option(group: String, value: String): GuideTarget = GuideTarget("option.$group.$value")
 
     /** A profile's display mode segment, by its `Constants.DISPLAY_MODE_*` value. */
     fun displayMode(mode: String): GuideTarget = option("displayMode", mode)
+
+    /** A stage monitor profile's zone picker for one kind of content, by its `StageMonitorContentType` name. */
+    fun stageContent(type: String): GuideTarget = option("stageContent", type)
 
     /** The Announcements timer's mode segment, by its `Constants.TIMER_MODE_*` value. */
     fun timerMode(mode: String): GuideTarget = option("timerMode", mode)

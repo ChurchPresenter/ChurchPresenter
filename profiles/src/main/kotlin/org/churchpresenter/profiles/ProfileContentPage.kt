@@ -1,6 +1,9 @@
 package org.churchpresenter.profiles
 
 import org.churchpresenter.sharedui.utils.songLanguageName
+import org.churchpresenter.sharedui.guide.GuideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -72,6 +75,8 @@ private class ContentSwitch(
      * over the slide or in place of it -- is not, so the summary and Show all/Hide all leave it be.
      */
     val isContent: Boolean = true,
+    /** What the helper's tours call this switch, for one a tour points at. */
+    val guideTarget: GuideTarget? = null,
     val edit: (OutputProfile, Boolean) -> OutputProfile,
 )
 
@@ -114,17 +119,7 @@ private fun contentSwitches(profile: OutputProfile): ContentGroups {
                 p.copy(songLookAhead = v && p.showSongs)
             })
         }
-        if (stageMonitor) {
-            add(ContentSwitch(stringResource(Res.string.stage_monitor_show_chords), profile.showChords) { p, v ->
-                p.copy(showChords = v)
-            })
-            // The musicians' transpose buttons, on a Browser Source page — offered only while
-            // there are chords to move.
-            if (profile.showChords) {
-                val label = stringResource(Res.string.profile_show_transpose_controls)
-                add(ContentSwitch(label, profile.showTransposeControls) { p, v -> p.copy(showTransposeControls = v) })
-            }
-        }
+        if (stageMonitor) addAll(stageChordSwitches(profile))
         add(ContentSwitch(stringResource(Res.string.tab_dictionary), profile.look.slide.dictionary) { p, v ->
             p.withLook { withSlide { copy(dictionary = v) } }
         })
@@ -298,7 +293,9 @@ private fun ContentGroup(
                 label = switch.label,
                 checked = switch.checked,
                 onCheckedChange = { onProfileChange(switch.edit(profile, it)) },
-                modifier = Modifier.testTag(contentSwitchTag(switch.label)),
+                modifier = Modifier
+                    .testTag(contentSwitchTag(switch.label))
+                    .then(switch.guideTarget?.let { Modifier.guideTarget(it) } ?: Modifier),
                 paths = paths[switch.label].orEmpty(),
             )
         }
@@ -378,3 +375,21 @@ internal fun contentSwitchTag(label: String): String = "profile_content_$label"
 
 /** Test handle for the summary line. */
 internal const val PROFILE_CONTENT_SUMMARY_TAG = "profile_content_summary"
+
+/** A stage monitor's chord switches: Show Chords, and while it is on, the musicians' transpose buttons. */
+@Composable
+private fun stageChordSwitches(profile: OutputProfile): List<ContentSwitch> = buildList {
+    add(
+        ContentSwitch(
+            stringResource(Res.string.stage_monitor_show_chords),
+            profile.showChords,
+            guideTarget = GuideTargets.STAGE_SHOW_CHORDS,
+        ) { p, v -> p.copy(showChords = v) },
+    )
+    // The musicians' transpose buttons, on a Browser Source page — offered only while there are
+    // chords to move.
+    if (profile.showChords) {
+        val label = stringResource(Res.string.profile_show_transpose_controls)
+        add(ContentSwitch(label, profile.showTransposeControls) { p, v -> p.copy(showTransposeControls = v) })
+    }
+}

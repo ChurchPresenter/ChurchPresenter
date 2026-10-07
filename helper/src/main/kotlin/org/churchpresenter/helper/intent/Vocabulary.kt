@@ -136,6 +136,24 @@ internal object Vocabulary {
         "worship team monitor", "platform monitor", "comfort monitor",
     )
 
+    /** On the stage monitor, what the operator asks to change, by topic. */
+    val STAGE_LAYOUT = listOf(
+        "zone", "zones", "layout", "layouts", "arrangement", "arrange", "split", "quad", "grid", "divide",
+        "sections", "parts", "columns", "rows", "how many", "resize", "areas", "boxes",
+    )
+    /** Not "add", "show" or "display": "add a stage monitor" and "stage display" are its setup. */
+    val STAGE_CONTENT = listOf(
+        "what goes where", "what shows", "what is shown", "what's shown", "assign", "put", "move", "where does",
+        "which zone", "goes where",
+    )
+    val STAGE_TEXT = listOf(
+        "font", "fonts", "text size", "size", "bigger", "smaller", "larger", "color", "colour", "colors",
+        "colours", "readable", "hard to read", "background",
+    )
+    val STAGE_MESSAGE = listOf(
+        "message", "messages", "send", "tell", "alert", "note to", "notify", "text the", "message the",
+    )
+
     /** What makes a lower third, or a full screen, about an output rather than the graphic itself. */
     val OUTPUT_WORDS = setOf(
         "display", "displays", "output", "outputs", "screen", "screens", "monitor", "monitors", "projector",
