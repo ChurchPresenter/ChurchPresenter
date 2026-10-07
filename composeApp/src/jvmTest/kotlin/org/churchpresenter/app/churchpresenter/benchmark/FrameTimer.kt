@@ -58,16 +58,19 @@ class FrameTimer(
         height: Int,
         content: @Composable (frame: Int) -> Unit,
     ): ScenarioResult = OffscreenOutput(width, height, clock, content).use { output ->
+        // Whether the content drew at all, from any frame, warm-up included: a scrolling notice can
+        // be between laps for every one of a short measured run, and warm-up runs on a wall clock,
+        // so where the scroll stands when measuring starts differs from machine to machine.
+        var drawn = 0
         val warmupEnd = clock() + warmupMillis * NANOS_PER_MILLI.toLong()
         var warmed = 0
         while (warmed < warmupFrames || clock() < warmupEnd) {
             output.step()
+            if (drawn == 0) drawn = output.drawnPixels()
             warmed++
         }
         val render = LongArray(measuredFrames)
         val readback = LongArray(measuredFrames)
-        // Any measured frame will do: scrolling content can be off screen on the last one.
-        var drawn = 0
         repeat(measuredFrames) { i ->
             val cost = output.step()
             render[i] = cost.renderNanos
