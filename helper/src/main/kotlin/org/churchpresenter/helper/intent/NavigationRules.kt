@@ -42,6 +42,10 @@ internal fun bibleTranslationRule(r: Request): Resolution? =
         null
     }
 
+/** Photos, a slideshow, a PDF or a video — added or shown, asked or told. */
+internal fun mediaTopicsRule(r: Request): Resolution? =
+    MediaTopics.find(r.text)?.let { act(HelperAction.Highlight(it)) }
+
 internal fun openSettingsRule(r: Request): Resolution? {
     if (!r.has(Vocabulary.SETTINGS)) return null
     val page = when {

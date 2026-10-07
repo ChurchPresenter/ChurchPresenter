@@ -3,6 +3,13 @@ package org.churchpresenter.helper.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Keyboard
+import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.PhoneAndroid
+import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.automirrored.filled.NavigateNext
+import androidx.compose.material.icons.filled.DesktopAccessDisabled
+import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Lightbulb
@@ -28,6 +35,7 @@ import org.churchpresenter.helper.nextStep
 import org.churchpresenter.helper.action.describe
 import org.churchpresenter.helper.action.optionLabel
 import org.churchpresenter.helper.resolve
+import org.churchpresenter.helper.suggest.SuggestedRequest
 import org.churchpresenter.helper.suggest.Suggestion
 import org.churchpresenter.helper.suggest.SuggestionIds
 import org.churchpresenter.helper.suggest.Tip
@@ -42,10 +50,6 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.helper_cancel
 import org.churchpresenter.strings.generated.resources.helper_do_it
 import org.churchpresenter.strings.generated.resources.helper_dont_show_again
-import org.churchpresenter.strings.generated.resources.helper_example_bg
-import org.churchpresenter.strings.generated.resources.helper_example_display
-import org.churchpresenter.strings.generated.resources.helper_example_verse
-import org.churchpresenter.strings.generated.resources.helper_example_where
 import org.churchpresenter.strings.generated.resources.helper_greeting
 import org.churchpresenter.strings.generated.resources.helper_next_tip
 import org.churchpresenter.strings.generated.resources.helper_not_now
@@ -71,12 +75,24 @@ private const val SNOOZE_MS = 24L * 60L * 60L * 1000L
 /** The id a kept tip is filed under in the conversation, beside the suggestion ids. */
 private const val TIP_ABOUT = "tip"
 
-private val EXAMPLES = listOf(
-    Res.string.helper_example_bg to Icons.Filled.Palette,
-    Res.string.helper_example_verse to Icons.AutoMirrored.Filled.MenuBook,
-    Res.string.helper_example_where to Icons.Filled.MusicNote,
-    Res.string.helper_example_display to Icons.Filled.Tv,
-)
+/** Asks [request] as if typed, showing [shown] in the conversation as what the operator said. */
+internal typealias Ask = (shown: String, request: String) -> Unit
+
+/** The icon on a suggested request's chip. */
+private fun requestIcon(request: SuggestedRequest): ImageVector = when (request) {
+    SuggestedRequest.BACKGROUND -> Icons.Filled.Palette
+    SuggestedRequest.VERSE, SuggestedRequest.BIBLE_TRANSLATION -> Icons.AutoMirrored.Filled.MenuBook
+    SuggestedRequest.NEW_SONG, SuggestedRequest.CHORDS -> Icons.Filled.MusicNote
+    SuggestedRequest.PROJECTOR, SuggestedRequest.IDENTIFY -> Icons.Filled.Tv
+    SuggestedRequest.TEXT_SIZE -> Icons.Filled.FormatSize
+    SuggestedRequest.CLEAR -> Icons.Filled.DesktopAccessDisabled
+    SuggestedRequest.NEXT_SLIDE -> Icons.AutoMirrored.Filled.NavigateNext
+    SuggestedRequest.SONG_LANGUAGE -> Icons.Filled.Translate
+    SuggestedRequest.SCHEDULE -> Icons.Filled.Event
+    SuggestedRequest.REMOTE -> Icons.Filled.PhoneAndroid
+    SuggestedRequest.UNDO -> Icons.AutoMirrored.Filled.Undo
+    SuggestedRequest.SHORTCUTS -> Icons.Filled.Keyboard
+}
 
 /** The icon on the tag over a suggestion or tip, by what it is about. */
 internal fun topicIcon(about: String?): ImageVector = when (about) {
@@ -109,7 +125,7 @@ internal fun ReplyBody(
     inputs: HelperInputs,
     executor: HelperActionExecutor,
     tip: Tip?,
-    ask: (String) -> Unit,
+    ask: Ask,
 ) {
     when (val reply = state.reply) {
         HelperReply.Idle -> IdleBody(state, inputs, executor, tip, ask)
@@ -140,13 +156,13 @@ internal fun ReplyBody(
         }
         is HelperReply.Message -> MessageBody(state, reply, executor)
         is HelperReply.Shortcut -> ShortcutBody(reply.action, onOk = state::reset)
-        HelperReply.Unknown -> {
+        is HelperReply.Unknown -> {
             Said(HelperText.Res(Res.string.helper_unknown))
-            ExampleChips(ask)
+            RequestChips(reply.closest, ask)
         }
         HelperReply.Greeting -> {
             Said(HelperText.Res(Res.string.helper_greeting))
-            ExampleChips(ask)
+            RequestChips(SuggestedRequest.DEFAULTS, ask)
         }
         is HelperReply.Touring -> TourBody(state, reply, executor)
         HelperReply.DisplaySetup -> DisplaySetupPanel(state, inputs.screens, executor)
@@ -159,7 +175,7 @@ private fun IdleBody(
     inputs: HelperInputs,
     executor: HelperActionExecutor,
     tip: Tip?,
-    ask: (String) -> Unit,
+    ask: Ask,
 ) {
     val suggestion = inputs.suggestions.firstOrNull()
     if (suggestion != null) {
@@ -170,7 +186,7 @@ private fun IdleBody(
     if (state.thread.entries.isNotEmpty()) return
     if (tip == null || !inputs.settings.tipsEnabled) {
         Said(HelperText.Res(Res.string.helper_greeting))
-        ExampleChips(ask)
+        RequestChips(SuggestedRequest.DEFAULTS, ask)
         return
     }
     // Opening the bubble is what counts as the day's tip having been offered.
@@ -256,12 +272,14 @@ private fun ShortcutBody(action: ShortcutAction, onOk: () -> Unit) {
     Actions(primary = Res.string.helper_ok to onOk)
 }
 
-/** Example requests as chips; picking one asks it, as if it had been typed. */
+/** Requests as chips; picking one asks it, as if it had been typed. */
 @Composable
-private fun ExampleChips(ask: (String) -> Unit) {
-    val examples = EXAMPLES.map { (res, icon) -> Triple(res, icon, stringResource(res)) }
-    val options = remember(examples) {
-        examples.map { (res, icon, text) -> ChipOption(HelperText.Res(res), icon) { ask(text) } }
+private fun RequestChips(requests: List<SuggestedRequest>, ask: Ask) {
+    val labels = requests.map { stringResource(it.label) }
+    val options = remember(requests, labels) {
+        requests.mapIndexed { i, request ->
+            ChipOption(HelperText.Res(request.label), requestIcon(request)) { ask(labels[i], request.request) }
+        }
     }
     ChipRow(options)
 }

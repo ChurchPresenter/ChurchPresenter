@@ -1,6 +1,8 @@
 package org.churchpresenter.slides.tabs
 
 import org.churchpresenter.slides.viewmodel.PresentationViewModel
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.Image
@@ -186,7 +188,7 @@ private fun PresentationTabScope.OpenPresentationButton(viewModel: PresentationV
                 }
             }
         },
-        modifier = Modifier.height(32.dp),
+        modifier = Modifier.height(32.dp).guideTarget(GuideTargets.PRESENTATION_SELECT_FILE),
         shape = AppShape(7.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
@@ -212,6 +214,7 @@ private fun PresentationTabScope.PresentationGoLiveButton(
     presenterManager: SlidesOutput,
 ) {
     GoLiveButton(
+        modifier = Modifier.guideTarget(GuideTargets.PRESENTATION_GO_LIVE),
         onClick = {
             val idx = viewModel.selectedSlideIndex
             scope.launch {

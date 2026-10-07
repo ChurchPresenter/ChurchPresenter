@@ -2970,11 +2970,22 @@
     <string name="helper_clear">Clear conversation</string>
     <string name="helper_greeting">Hi, I'm Wick. Tell me what you'd like to do, or ask where something is.</string>
     <string name="helper_youre_welcome">You're welcome! Ask me any time.</string>
-    <string name="helper_unknown">I didn't quite catch that. Try one of these:</string>
+    <string name="helper_unknown">I didn't quite catch that. Did you mean one of these?</string>
     <string name="helper_example_bg">Make the song background blue</string>
     <string name="helper_example_verse">Show John 3:16</string>
     <string name="helper_example_where">Where do I add a song?</string>
     <string name="helper_example_display">Set up the projector</string>
+    <string name="helper_example_text_size">Make the song text bigger</string>
+    <string name="helper_example_clear">Clear the screen</string>
+    <string name="helper_example_next">Next slide</string>
+    <string name="helper_example_chords">How do I add chords?</string>
+    <string name="helper_example_song_language">How do I add a song translation?</string>
+    <string name="helper_example_bible_translation">How do I add a Bible translation?</string>
+    <string name="helper_example_schedule">Where is the schedule?</string>
+    <string name="helper_example_remote">How do I use the remote?</string>
+    <string name="helper_example_identify">Which screen is which?</string>
+    <string name="helper_example_undo">Undo the last change</string>
+    <string name="helper_example_shortcuts">Show keyboard shortcuts</string>
     <string name="helper_do_it">Do it</string>
     <string name="helper_cancel">Cancel</string>
     <string name="helper_ok">OK</string>
@@ -3035,6 +3046,20 @@
     <string name="helper_hint_bible_page">When it has downloaded, open the Bible page.</string>
     <!-- %1$s is the Bible page's Add translation picker (add_bible_translation). -->
     <string name="helper_hint_bible_add_translation">Choose it from %1$s to show it, beside any Bible already there.</string>
+    <!-- %1$s is the Pictures tab's Select Folder button (select_folder). -->
+    <string name="helper_hint_pictures_folder">Click %1$s and choose the folder your photos are in. Every picture in it shows up here, so a folder works as an album. Folders you have opened come back in the Recent row.</string>
+    <!-- %1$s is the Go Live button (go_live). -->
+    <string name="helper_hint_pictures_go_live">Pick a picture and click %1$s, or double-click it, to put it on the screen.</string>
+    <!-- %1$s is the Play button (play). -->
+    <string name="helper_hint_pictures_play">Press %1$s and the pictures move on by themselves. The interval beside it sets how long each one stays up.</string>
+    <!-- %1$s is the Presentation tab's Select File button (select_presentation_file_button). -->
+    <string name="helper_hint_presentation_file">Click %1$s and choose the PDF, PowerPoint or Keynote file.</string>
+    <!-- %1$s is the Go Live button (go_live). -->
+    <string name="helper_hint_presentation_go_live">Click %1$s to show it. Double-click any slide to jump straight to it.</string>
+    <!-- %1$s is the Media tab's Select File button (media_select_file). -->
+    <string name="helper_hint_media_file">Click %1$s and choose the video.</string>
+    <!-- %1$s is the Go Live button (go_live). -->
+    <string name="helper_hint_media_go_live">Click %1$s to show it, and it starts playing. Pause and skip with the controls below.</string>
     <string name="helper_hint_add_song_language">Click “%1$s”, name the language, then type or paste its lyrics.</string>
     <string name="helper_hint_schedule">This is your schedule. Add songs, verses and slides here to plan the service.</string>
     <string name="helper_hint_clear">This clears everything off the audience screen.</string>

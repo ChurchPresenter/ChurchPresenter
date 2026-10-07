@@ -11,6 +11,8 @@ import org.churchpresenter.helper.action.HelperAction
 import org.churchpresenter.helper.action.UndoStack
 import org.churchpresenter.helper.display.DisplaySetupFlow
 import org.churchpresenter.helper.intent.Resolution
+import org.churchpresenter.helper.suggest.SuggestedRequest
+import org.churchpresenter.helper.suggest.closestRequests
 import org.churchpresenter.sharedui.guide.GuideSession
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.strings.generated.resources.Res
@@ -41,8 +43,8 @@ sealed interface HelperReply {
     /** The key bound to [action]. */
     data class Shortcut(val action: ShortcutAction) : HelperReply
 
-    /** The request was not understood. */
-    data object Unknown : HelperReply
+    /** The request was not understood; [closest] are the requests most like it, to pick from. */
+    data class Unknown(val closest: List<SuggestedRequest>) : HelperReply
 
     /** Hello, and examples of what to ask. */
     data object Greeting : HelperReply
@@ -119,11 +121,11 @@ class HelperState(val session: GuideSession = GuideSession()) {
 
 
     /** Acts on what a typed request came to. */
-    fun onResolved(resolution: Resolution, executor: HelperActionExecutor) {
+    fun onResolved(resolution: Resolution, executor: HelperActionExecutor, input: String = "") {
         when (resolution) {
             is Resolution.Act -> request(resolution.action, executor)
             is Resolution.Clarify -> show(HelperReply.Clarify(resolution.question, resolution.options))
-            Resolution.Unknown -> show(HelperReply.Unknown)
+            Resolution.Unknown -> show(HelperReply.Unknown(closestRequests(input)))
         }
     }
 

@@ -47,7 +47,7 @@ internal fun HelperReply.summary(undoLabel: HelperText?): HelperText? = when (th
     is HelperReply.Message -> text
     is HelperReply.Shortcut ->
         helperText(Res.string.helper_shortcut_is, helperText(action.descriptionRes), HelperText.KeyFor(action))
-    HelperReply.Unknown -> helperText(Res.string.helper_unknown)
+    is HelperReply.Unknown -> helperText(Res.string.helper_unknown)
     HelperReply.Greeting -> helperText(Res.string.helper_greeting)
     is HelperReply.Touring -> tour.steps[index].hint
     HelperReply.Idle, HelperReply.DisplaySetup -> null

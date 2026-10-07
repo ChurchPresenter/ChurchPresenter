@@ -173,7 +173,7 @@ private fun todaysTip(state: HelperState, inputs: HelperInputs): Tip? {
 }
 
 private fun moodFor(reply: HelperReply): LampMood = when (reply) {
-    HelperReply.Unknown -> LampMood.CONFUSED
+    is HelperReply.Unknown -> LampMood.CONFUSED
     is HelperReply.Confirm, is HelperReply.Clarify -> LampMood.THINKING
     is HelperReply.Message -> if (reply.canUndo) LampMood.HAPPY else LampMood.IDLE
     else -> LampMood.IDLE
@@ -189,12 +189,14 @@ private fun HelperPanel(
     animate: Boolean,
 ) {
     val scope = rememberCoroutineScope()
-    val ask: (String) -> Unit = { text ->
-        if (text.isNotBlank()) {
+    // [shown] is what goes in the conversation; [request] what the rules read — the same when typed,
+    // a chip's translated label and its English request when picked.
+    val ask: Ask = { shown, request ->
+        if (request.isNotBlank()) {
             scope.launch {
-                val resolution = resolver.resolve(text, inputs.context)
-                state.answer(text)
-                state.onResolved(resolution, executor)
+                val resolution = resolver.resolve(request, inputs.context)
+                state.answer(shown)
+                state.onResolved(resolution, executor, input = request)
             }
         }
     }
@@ -326,7 +328,7 @@ private fun HeaderMenu(canClear: Boolean, onClear: () -> Unit) {
 
 /** The message box: a rounded field, and a send button that lights up once there is something to send. */
 @Composable
-private fun Composer(state: HelperState, ask: (String) -> Unit) {
+private fun Composer(state: HelperState, ask: Ask) {
     val colors = MaterialTheme.colorScheme
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
@@ -334,7 +336,7 @@ private fun Composer(state: HelperState, ask: (String) -> Unit) {
     val send = {
         val text = state.input
         if (text.isNotBlank()) {
-            ask(text)
+            ask(text, text)
             state.input = ""
         }
     }

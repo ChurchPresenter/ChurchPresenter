@@ -57,6 +57,7 @@ class RuleIntentResolver : IntentResolver {
             ::songTranslationRule,
             ::songChordsRule,
             ::bibleTranslationRule,
+            ::mediaTopicsRule,
             ::navigationRule,
             ::openSettingsRule,
             ::verseRule,

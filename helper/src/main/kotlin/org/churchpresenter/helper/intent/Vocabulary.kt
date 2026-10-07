@@ -78,6 +78,26 @@ internal object Vocabulary {
     val FILLER = setOf("there", "wick", "me", "please", "pls", "again", "i", "need")
     val THANKS = listOf("thanks", "thank you", "thx", "cheers", "much appreciated", "great job", "awesome")
 
+    /** Pictures, and a folder of them — the Pictures tab's album. */
+    val PHOTOS = setOf(
+        "photo", "photos", "picture", "pictures", "image", "images", "pic", "pics", "pix", "album", "albums",
+        "jpg", "jpeg", "png",
+    )
+
+    /** Pictures moving on by themselves. */
+    val SLIDESHOW = listOf("slideshow", "slide show", "slideshows", "slide shows")
+
+    /** What the Presentation tab opens. */
+    val PRESENTATION = setOf(
+        "pdf", "pdfs", "powerpoint", "pptx", "ppt", "keynote", "presentation", "presentations", "deck",
+    )
+
+    /** What the Media tab opens. */
+    val VIDEO = setOf("video", "videos", "movie", "movies", "clip", "clips", "film", "mp4", "footage")
+
+    /** Asking to bring files in, rather than to put them on screen. */
+    val ADD = setOf("add", "import", "load", "upload", "open", "choose", "pick", "select", "get")
+
     /** Word starts that mean chords. */
     const val CHORD = "chord"
 

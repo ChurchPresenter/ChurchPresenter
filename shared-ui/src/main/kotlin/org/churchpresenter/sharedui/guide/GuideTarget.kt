@@ -29,6 +29,13 @@ object GuideTargets {
     val BIBLE_DOWNLOAD = GuideTarget("settings.system.downloadBibles")
     val BIBLE_ADD_TRANSLATION = GuideTarget("settings.bible.addTranslation")
     val BIBLE_CATALOG_LIST = GuideTarget("bibleCatalog.list")
+    val PICTURES_SELECT_FOLDER = GuideTarget("pictures.selectFolder")
+    val PICTURES_GO_LIVE = GuideTarget("pictures.goLive")
+    val PICTURES_PLAY = GuideTarget("pictures.play")
+    val PRESENTATION_SELECT_FILE = GuideTarget("presentation.selectFile")
+    val PRESENTATION_GO_LIVE = GuideTarget("presentation.goLive")
+    val MEDIA_SELECT_FILE = GuideTarget("media.selectFile")
+    val MEDIA_GO_LIVE = GuideTarget("media.goLive")
 
     /** The main window's tab for [tab]. */
     fun mainTab(tab: Tabs): GuideTarget = GuideTarget("tab.${tab.name}")
