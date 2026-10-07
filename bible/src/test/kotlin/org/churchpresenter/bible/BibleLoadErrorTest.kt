@@ -2,6 +2,8 @@ package org.churchpresenter.bible
 
 import org.churchpresenter.diagnostics.CrashReportSweep
 import java.io.File
+import java.io.IOException
+import java.nio.charset.MalformedInputException
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -51,6 +53,19 @@ class BibleLoadErrorTest {
 
     /** `0xC3 0x28` is a lead byte followed by something that cannot continue it. */
     private val invalidUtf8 = byteArrayOf(0xC3.toByte(), 0x28)
+
+    @Test
+    fun `a module that is not UTF-8 text is the file's fault, not the app's`() {
+        // CHURCH-PRESENTER-DESKTOP-9S/9T: an Office lock file named like a module.
+        val lockFile = File(dir, "~\$N_TRADITIONAL.spb").apply { writeBytes(invalidUtf8) }
+        val b = Bible()
+
+        b.loadFromSpb(lockFile.absolutePath)
+
+        assertNotNull(b.loadError, "the operator is still told the module did not load")
+        assertTrue(isFileFault(MalformedInputException(1)))
+        assertFalse(isFileFault(IOException("disk went away")), "a failed read is still reported")
+    }
 
     @Test
     fun `a module that is not there says so instead of loading empty`() {

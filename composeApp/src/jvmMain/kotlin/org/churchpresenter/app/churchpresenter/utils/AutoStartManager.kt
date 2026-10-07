@@ -25,8 +25,15 @@ object AutoStartManager {
 
     internal enum class Platform { WINDOWS, MAC, LINUX }
 
-    /** Set by jpackage to the installed launcher path; null when running from Gradle/IDE. */
-    private val exePath: String? = System.getProperty("jpackage.app-path")
+    /**
+     * Set by jpackage to the installed launcher path; null when running from Gradle/IDE, and for a
+     * Store install, whose virtualized Run key would never be read at login (its manifest declares
+     * a startup task instead).
+     */
+    private val exePath: String? = launcherPath(System.getProperty("jpackage.app-path"), StorePackage.isInstalled)
+
+    internal fun launcherPath(appPath: String?, storeInstall: Boolean): String? =
+        appPath?.takeUnless { storeInstall }
 
     /** Maps an `os.name` string to the platform whose registration mechanism applies. */
     internal fun platformFor(osName: String): Platform {

@@ -135,6 +135,22 @@ class MergeTest {
     }
 
     @Test
+    fun `a service restored by a newer edit leaves no deletion behind`() {
+        val deleted = document(service("a"), service("b", version = 1L)).withoutService("b", at(5))
+        val restored = document(service("a"), service("b", name = "Restored", updated = at(8), version = 3L))
+
+        val merged = deleted.mergedWith(restored, at(10))
+
+        assertEquals("Restored", merged.serviceById("b")?.name)
+        assertTrue("b" !in merged.deletedServices, "or every push would carry a deletion for a live service")
+        assertTrue("b" !in merged.deletedVersions)
+        // The same deletion handed back later -- a phone, a relay replay -- still loses.
+        val replayed = merged.mergedWith(deleted, at(11))
+        assertEquals("Restored", replayed.serviceById("b")?.name)
+        assertTrue("b" !in replayed.deletedServices)
+    }
+
+    @Test
     fun `more edits win over a later clock`() {
         val edited = document(service("a", name = "Edited twice", updated = at(2), version = 2L))
         val stale = document(service("a", name = "Old copy, restamped", updated = at(9), version = 1L))

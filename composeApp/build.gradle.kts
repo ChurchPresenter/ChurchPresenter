@@ -1556,6 +1556,55 @@ fun registerWindowsSignTask(taskName: String, packagingTask: String, extension: 
 registerWindowsSignTask("signWindowsMsi", "packageMsi", "msi")
 registerWindowsSignTask("signWindowsExe", "packageExe", "exe")
 
+// ── Microsoft Store (MSIX) ────────────────────────────────────────────────────
+// Wraps the jpackage app image in an MSIX for Store submission. The Store signs the package
+// itself, so the output is left unsigned. The identity must match the app's reservation in
+// Partner Center: pass -Pmsix.identityName, -Pmsix.publisher and -Pmsix.publisherDisplayName.
+// The defaults produce a package that builds, not one the Store accepts.
+val msixIdentityName = providers.gradleProperty("msix.identityName").filter { it.isNotBlank() }.getOrElse("ChurchPresenter.ChurchPresenter")
+val msixPublisher = providers.gradleProperty("msix.publisher").filter { it.isNotBlank() }.getOrElse("CN=Church Presenter")
+val msixPublisherDisplayName = providers.gradleProperty("msix.publisherDisplayName").filter { it.isNotBlank() }.getOrElse("Church Presenter")
+
+fun String.xmlEscaped() = replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;")
+
+tasks.register("packageMsix") {
+    description = "Package the Windows app image as an MSIX for the Microsoft Store (needs makeappx on PATH)"
+    group = "compose desktop"
+    dependsOn("createDistributable")
+    onlyIf {
+        val isWindows = System.getProperty("os.name").contains("Windows", ignoreCase = true)
+        if (!isWindows) logger.info("packageMsix skipped: not running on Windows")
+        isWindows
+    }
+    val commits = gitCommitCount()
+    // MSIX takes four segments and the Store requires the last to be 0; the first three are the
+    // MSI's, so both installers of one build carry the same version.
+    val msixVersion = "$versionYear.${commits / 256}.${commits % 256}.0"
+    val appImage = layout.buildDirectory.dir("compose/binaries/main/app/ChurchPresenter")
+    val stagingDir = layout.buildDirectory.dir("msix/layout")
+    val outDir = layout.buildDirectory.dir("compose/binaries/main/msix")
+    val templateDir = layout.projectDirectory.dir("src/msix")
+    doLast {
+        val staging = stagingDir.get().asFile
+        staging.deleteRecursively()
+        appImage.get().asFile.copyRecursively(staging)
+        templateDir.dir("Assets").asFile.copyRecursively(File(staging, "Assets"))
+        val manifest = templateDir.file("AppxManifest.xml").asFile.readText()
+            .replace("@IDENTITY_NAME@", msixIdentityName.xmlEscaped())
+            .replace("@PUBLISHER@", msixPublisher.xmlEscaped())
+            .replace("@PUBLISHER_DISPLAY_NAME@", msixPublisherDisplayName.xmlEscaped())
+            .replace("@VERSION@", msixVersion)
+        File(staging, "AppxManifest.xml").writeText(manifest)
+
+        val out = outDir.get().asFile.apply { deleteRecursively(); mkdirs() }
+        val msix = File(out, "ChurchPresenter-$msixVersion-WINDOWS-x64.msix")
+        val result = ProcessBuilder("makeappx", "pack", "/d", staging.absolutePath, "/p", msix.absolutePath, "/o")
+            .inheritIO().start().waitFor()
+        if (result != 0) error("makeappx failed with exit code $result")
+        logger.lifecycle("MSIX packaged: ${msix.name}")
+    }
+}
+
 // ── Linux GPG Signing ─────────────────────────────────────────────────────────
 // GPG-signs the .deb package using dpkg-sig (must be installed on the build host).
 // Only executes on Linux with a configured GPG key.

@@ -212,13 +212,28 @@ private val defaultDir: File = File(System.getProperty("user.home"), "Downloads"
 /** File-chooser filter label: the product name and its extension, both untranslated by nature. */
 private fun pickerLabel(source: SongSource): String = "${source.name} (${source.ext})"
 
+/**
+ * Whether the person approved the chooser [show] opened.
+ *
+ * The Windows look and feel's file pane can throw a NullPointerException from inside the dialog's
+ * own event loop -- it repaints the list selection on a focus change and finds no cell there
+ * (CHURCH-PRESENTER-DESKTOP-9R). That takes the dialog down with it; the pick is treated as
+ * cancelled, so the button can simply be pressed again instead of the converter crashing.
+ */
+@Suppress("TooGenericExceptionCaught")
+internal fun approved(show: () -> Int): Boolean = try {
+    show() == JFileChooser.APPROVE_OPTION
+} catch (_: NullPointerException) {
+    false
+}
+
 internal fun pickFiles(description: String, vararg extensions: String, multiSelection: Boolean): List<File> {
     val chooser = JFileChooser(defaultDir).apply {
         fileFilter = FileNameExtensionFilter(description, *extensions)
         isMultiSelectionEnabled = multiSelection
         dialogTitle = Strings.selectDialog(description)
     }
-    return if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+    return if (approved { chooser.showOpenDialog(null) }) {
         if (multiSelection) chooser.selectedFiles.toList() else listOfNotNull(chooser.selectedFile)
     } else emptyList()
 }
@@ -228,7 +243,7 @@ internal fun pickDirectory(): File? {
         fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
         dialogTitle = Strings.selectFolder
     }
-    return if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) chooser.selectedFile else null
+    return if (approved { chooser.showOpenDialog(null) }) chooser.selectedFile else null
 }
 
 internal fun findXmlFilesRecursive(dir: File): List<File> = findFilesRecursive(dir, "xml")
@@ -264,7 +279,7 @@ internal fun pickSourceFiles(source: SongSource, format: SongFormatConverter): L
         isMultiSelectionEnabled = format.allowsMultipleFiles
         dialogTitle = Strings.selectDialog(label)
     }
-    return if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+    return if (approved { chooser.showOpenDialog(null) }) {
         if (format.allowsMultipleFiles) chooser.selectedFiles.toList() else listOfNotNull(chooser.selectedFile)
     } else emptyList()
 }

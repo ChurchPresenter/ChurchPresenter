@@ -148,11 +148,10 @@ jobs:
           echo "desktop.signing.repo.path=$(cygpath -m "$RUNNER_TEMP")/signing" >> local.properties
           echo "Windows signing configuration written"
 
-      - name: Add signtool to PATH
-        if: ${{ env.WINDOWS_SIGNING_ENABLED == 'true' }}
+      - name: Add Windows SDK tools to PATH
         shell: powershell
         run: |
-          # signtool ships with the Windows SDK but is not on the runner's PATH.
+          # signtool and makeappx ship with the Windows SDK but are not on the runner's PATH.
           $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" |
             Sort-Object FullName -Descending | Select-Object -First 1
           if (-not $signtool) { throw "signtool.exe not found under Windows Kits\10\bin" }
@@ -162,13 +161,23 @@ jobs:
       # ── Build ───────────────────────────────────────────────────────────────
 
       - name: Build and sign installer
+        shell: bash
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           PLANNING_CENTER_CLIENT_ID: ${{ secrets.PLANNING_CENTER_CLIENT_ID }}
           PLANNING_CENTER_CLIENT_SECRET: ${{ secrets.PLANNING_CENTER_CLIENT_SECRET }}
           CALENDAR_RELAY_URL: ${{ secrets.CALENDAR_RELAY_URL }}
           CALENDAR_RELAY_CONFIG_URL: ${{ secrets.CALENDAR_RELAY_CONFIG_URL }}
-        run: ./gradlew :composeApp:signWindowsMsi
+          # Partner Center's Product identity values. Unset, the MSIX still builds, but the Store
+          # rejects it.
+          MSIX_IDENTITY_NAME: ${{ vars.MSIX_IDENTITY_NAME }}
+          MSIX_PUBLISHER: ${{ vars.MSIX_PUBLISHER }}
+          MSIX_PUBLISHER_DISPLAY_NAME: ${{ vars.MSIX_PUBLISHER_DISPLAY_NAME }}
+        run: >-
+          ./gradlew :composeApp:signWindowsMsi :composeApp:packageMsix
+          "-Pmsix.identityName=$MSIX_IDENTITY_NAME"
+          "-Pmsix.publisher=$MSIX_PUBLISHER"
+          "-Pmsix.publisherDisplayName=$MSIX_PUBLISHER_DISPLAY_NAME"
 
       - name: Rename MSI (add WINDOWS-x64 label)
         shell: bash
@@ -183,6 +192,15 @@ jobs:
           name: windows-msi
           path: composeApp/build/compose/binaries/main/msi
           retention-days: 2
+
+      # For upload to Partner Center by hand; not attached to the GitHub release, since an MSIX
+      # outside the Store installs only with a trusted signature.
+      - name: Upload MSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-msix
+          path: composeApp/build/compose/binaries/main/msix
+          retention-days: 7
 
   build-macos:
     if: ${{ inputs.macos_arm64 }}
