@@ -160,6 +160,42 @@ class ScreenAssignmentReconcileTest {
         assertEquals("choir", result.activeProfileId)
     }
 
+    // ── Monitors marked "Don't use" ─────────────────────────────────────────────
+
+    @Test
+    fun `an unused monitor still counts as a slot but is never handed to one`() {
+        val unused = display(1, x = 1920)
+        val result = assertNotNull(reconcileScreenAssignments(
+            emptyList(), listOf(unused, display(2, x = 3840)), 0, FALLBACK_PROFILE,
+            unusedScreens = listOf(screenKey(1920, 0, 1920, 1080)),
+        ))
+
+        assertEquals(2, result.size, "the unused monitor keeps its slot")
+        assertEquals(listOf(2, Constants.KEY_TARGET_NONE), result.map { it.targetDisplay })
+        assertEquals(3840, result[0].targetBoundsX, "the first slot takes the next usable monitor")
+    }
+
+    @Test
+    fun `auto skips an unused monitor and takes the next usable one, or None`() {
+        val result = assertNotNull(reconcileScreenAssignments(
+            listOf(auto(), auto()), listOf(display(1, x = 1920), display(2, x = 3840)), 0, FALLBACK_PROFILE,
+            unusedScreens = listOf(screenKey(1920, 0, 1920, 1080)),
+        ))
+
+        assertEquals(listOf(2, Constants.KEY_TARGET_NONE), result.map { it.targetDisplay })
+        assertEquals(3840, result[0].targetBoundsX)
+    }
+
+    @Test
+    fun `an unused monitor no assignment names changes nothing about the others`() {
+        val result = assertNotNull(reconcileScreenAssignments(
+            listOf(auto()), listOf(display(1, x = 1920)), 0, FALLBACK_PROFILE,
+            unusedScreens = listOf(screenKey(9999, 0, 1920, 1080)),
+        ))
+
+        assertEquals(1, result.single().targetDisplay)
+    }
+
     // ── Slots already sufficient ────────────────────────────────────────────────
 
     @Test
