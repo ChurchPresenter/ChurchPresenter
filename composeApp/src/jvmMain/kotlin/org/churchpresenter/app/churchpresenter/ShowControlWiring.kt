@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.liveoutput.withPreviewMode
 import org.churchpresenter.showcontrol.ActionRunner
 import org.churchpresenter.app.churchpresenter.remote.AppShowHost
@@ -94,11 +95,15 @@ internal fun PreviewBus.runOnAir(item: ScheduleItem, actions: List<Action>, run:
  * outputs. A clear that a list asks for itself, or that a media file ending asks for, leaves them be.
  */
 @Composable
-internal fun MainWindowScope.ShowControlEffects() {
-    LaunchedEffect(root) {
-        snapshotFlow { root.presenterManager.operatorClears.intValue }
+internal fun MainWindowScope.ShowControlEffects() = ShowControlEffects(root.presenterManager, root.showRunner)
+
+/** Cancels what [runner] is running whenever an operator clears [presenterManager]'s outputs. */
+@Composable
+internal fun ShowControlEffects(presenterManager: PresenterManager, runner: ActionRunner) {
+    LaunchedEffect(presenterManager, runner) {
+        snapshotFlow { presenterManager.operatorClears.intValue }
             .drop(1)
-            .collect { root.showRunner.cancelAll() }
+            .collect { runner.cancelAll() }
     }
 }
 

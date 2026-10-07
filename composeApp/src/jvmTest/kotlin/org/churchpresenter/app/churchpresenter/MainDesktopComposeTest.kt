@@ -3,7 +3,11 @@
 package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.showcontrol.Action
+import org.churchpresenter.settings.ClearGroup
 import org.churchpresenter.settings.Macro
+import org.churchpresenter.liveshow.Layer
+import org.churchpresenter.app.churchpresenter.dialogs.clearGroupItemTag
+import org.churchpresenter.app.churchpresenter.dialogs.clearLayerItemTag
 import org.churchpresenter.schedule.SCHEDULE_ROW_CARD_TAG
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasAnyAncestor
@@ -1149,6 +1153,28 @@ class MainDesktopComposeTest {
     }
 
     @Test
+    fun `in dev mode a clear group's key clears its layers, and an empty slot's key does nothing`() {
+        val keyed = withOneSong().let {
+            it.copy(
+                clearGroups = listOf(ClearGroup("g1", "Graphics", listOf(Layer.GRAPHICS.name))),
+                keyboardShortcutSettings = KeyboardShortcutSettings(
+                    overrides = mapOf(
+                        ShortcutAction.CLEAR_GROUP_1.name to listOf(KeyChord.of(Key.F11, ctrl = true, shift = true)),
+                        ShortcutAction.CLEAR_GROUP_2.name to listOf(KeyChord.of(Key.F10, ctrl = true, shift = true)),
+                    ),
+                ),
+            )
+        }
+        val manager = cuedManager().apply { previewBus.take() }
+        root(keyed, presenterManager = manager) { _ ->
+            press(Key.F10, ctrl = true, shift = true)
+            assertTrue(manager.isLive(Presenting.LOWER_THIRD), "slot 2 has no group")
+            press(Key.F11, ctrl = true, shift = true)
+            assertFalse(manager.isLive(Presenting.LOWER_THIRD))
+        }
+    }
+
+    @Test
     fun `Take's shortcut puts what is cued on air`() {
         val manager = cuedManager()
         root(withPreviewMode(true, KeyChord.of(Key.F12, ctrl = true, shift = true)), presenterManager = manager) { _ ->
@@ -1166,6 +1192,30 @@ class MainDesktopComposeTest {
             waitForIdle()
             assertTrue(manager.isLive(Presenting.LOWER_THIRD))
             onNodeWithTag(PREVIEW_TAKE_TAG).assertIsNotEnabled()
+        }
+    }
+
+    @Test
+    fun `the clear layers menu clears a group, or one layer that is on air`() {
+        val gfx = ClearGroup("g1", "Graphics", listOf(Layer.GRAPHICS.name))
+        val settings = withPreviewMode(false).copy(clearGroups = listOf(gfx))
+        val manager = cuedManager().apply { previewBus.take() }
+        root(settings, presenterManager = manager) { _ ->
+            assertTrue(manager.isLive(Presenting.LOWER_THIRD))
+            onNodeWithTag(CLEAR_LAYERS_BUTTON_TAG).performClick()
+            waitForIdle()
+            onNodeWithTag(clearGroupItemTag("g1")).performClick()
+            waitForIdle()
+            assertFalse(manager.isLive(Presenting.LOWER_THIRD), "the group cleared its layer")
+        }
+
+        val again = cuedManager().apply { previewBus.take() }
+        root(settings, presenterManager = again) { _ ->
+            onNodeWithTag(CLEAR_LAYERS_BUTTON_TAG).performClick()
+            waitForIdle()
+            onNodeWithTag(clearLayerItemTag(Layer.GRAPHICS)).performClick()
+            waitForIdle()
+            assertFalse(again.isLive(Presenting.LOWER_THIRD), "the layer cleared on its own")
         }
     }
 
