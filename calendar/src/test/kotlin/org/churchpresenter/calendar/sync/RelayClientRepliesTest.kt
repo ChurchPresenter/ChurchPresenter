@@ -85,9 +85,19 @@ class RelayClientRepliesTest {
 
     @Test
     fun `the real transport refuses a relay that is not https before sending anything`() {
-        assertFailsWith<IllegalArgumentException> {
-            HttpRelayTransport().send("GET", "http://relay.example/x", emptyMap(), null)
+        for (url in listOf("http://relay.example/x", "", "/i/inst/changes", "https:///x", "https://bad host/x")) {
+            assertFailsWith<RelayFailure.Misconfigured>(url) {
+                HttpRelayTransport().send("GET", url, emptyMap(), null)
+            }
         }
+    }
+
+    @Test
+    fun `a relay address that is not https fails a call as a relay failure, not a crash`() {
+        val client = RelayClient("http://relay.example", "inst", "i", HttpRelayTransport())
+        val failure = assertFailsWith<RelayFailure.Misconfigured> { client.changes("t", 0) }
+        assertEquals("the relay address is not an https:// address", failure.message)
+        assertFailsWith<RelayFailure.Misconfigured> { RelayClient("", "inst", "i", HttpRelayTransport()).register() }
     }
 
     @Test
