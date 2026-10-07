@@ -85,23 +85,8 @@ internal fun MainDesktopScope.handleMainDesktopKey(keyEvent: KeyEvent): Boolean 
 }
 
 /** One clicker press: the deck's next or previous animation step, else the next or previous slide. */
-private suspend fun MainDesktopScope.clickPresentation(forward: Boolean) {
-    val deck = presentationViewModel.deck
-    val index = presentationViewModel.selectedSlideIndex
-    val stepped = deck != null && if (forward) {
-        presenterManager.advancePresentationStep(deck, index)
-    } else {
-        presenterManager.rewindPresentationStep(deck, index)
-    }
-    if (!stepped) {
-        if (forward) {
-            presentationViewModel.nextSlide(link.sendNextSlide)
-        } else {
-            presentationViewModel.previousSlide(link.sendPreviousSlide)
-        }
-        pushCurrentSlideIfLive()
-    }
-}
+private suspend fun MainDesktopScope.clickPresentation(forward: Boolean) =
+    clickPresentationSlide(forward, presentationViewModel, presenterManager, link)
 
 /** Feeds a key no shortcut claimed to the hidden sequences; never claims it. */
 private fun MainDesktopScope.advanceKeySequences(key: Key): Boolean {

@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.profiles.stageMonitorScreenIndices
 import kotlinx.coroutines.CoroutineScope
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.bibletab.VerseSequenceLog
@@ -100,33 +99,9 @@ internal class MainDesktopScope(
      * next/previous slide Instance Link commands. Only pushes when Presentation is actually the live
      * content, same gate PresentationTab's own slide-push effect uses.
      */
-    suspend fun pushCurrentSlideIfLive() {
-        val index = presentationViewModel.selectedSlideIndex
-        val slideCount = presentationViewModel.slideFiles.size
-        if (!shouldPushSlide(presenterManager.slideContent.value, index, slideCount)) return
-        val (bitmap, nextBitmap) = decodeSlideBitmaps(
-            presentationViewModel.slideFiles,
-            index,
-            presentationViewModel.nextShownSlideIndex(index),
-        )
-        presenterManager.setSelectedSlide(bitmap)
-        presenterManager.setLiveSlide(presentationViewModel.selectedPresentation?.name, index)
-        presenterManager.setNextSlide(nextBitmap)
-        presenterManager.setPresenterNotes(presenterNotesAt(presentationViewModel.slideNotes, index))
-        // Keep animated playback in sync (or cleared) so a stale animated frame from a
-        // previous slide can never override the freshly pushed static slide.
-        presentationViewModel.deck?.let { presenterManager.presentationShowSlide(it, index) }
-            ?: presenterManager.clearPresentationPlayback()
-    }
+    suspend fun pushCurrentSlideIfLive() = pushPresentationSlideIfLive(presentationViewModel, presenterManager)
 
     /** Clears every output, including a "Send to Stage Monitor" lock, from the Clear shortcut. */
-    fun clearOutput() {
-        mediaViewModel?.pause()
-        presenterManager.requestClearDisplay()
-        link.sendClear?.invoke()
-        // Also release any "Send to Stage Monitor" lock (e.g. from Announcements)
-        // so the stage monitor goes back to following the main presenting mode.
-        stageMonitorScreenIndices(appSettings.projectionSettings)
-            .forEach { presenterManager.setScreenLock(it, null) }
-    }
+    fun clearOutput() =
+        clearAllOutputs(presenterManager, appSettings.projectionSettings, link, mediaViewModel?.let { it::pause })
 }
