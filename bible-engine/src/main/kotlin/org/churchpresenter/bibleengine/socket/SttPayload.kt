@@ -77,54 +77,57 @@ private fun buildUpdate(payload: JSONObject, textField: String): SttUpdate? {
     val text = windowedText(completed, inProgress) ?: return null
     return SttUpdate(
         text = text,
-        speechType = speechTypeOf(payload),
-        segmentId = extractSegmentId(payload),
-        startTime = extractStartTime(payload),
-        sessionId = sessionIdOf(payload),
+        speechType = PayloadFields.speechTypeOf(payload),
+        segmentId = PayloadFields.extractSegmentId(payload),
+        startTime = PayloadFields.extractStartTime(payload),
+        sessionId = PayloadFields.sessionIdOf(payload),
     )
 }
 
-// Best-effort speech_type from the payload (e.g. "Speaking"/"Quiet"/"Music"); null if absent so
-// detection behaves unchanged until the STT stream provides it. Drives the music precision gate.
-private fun speechTypeOf(payload: JSONObject): String? = payload.stringOrNull("speech_type")
+/** The fields an update carries besides its text, each read best-effort. */
+private object PayloadFields {
+    // Best-effort speech_type from the payload (e.g. "Speaking"/"Quiet"/"Music"); null if absent so
+    // detection behaves unchanged until the STT stream provides it. Drives the music precision gate.
+    fun speechTypeOf(payload: JSONObject): String? = payload.stringOrNull("speech_type")
 
-// Stable per-service session id (e.g. the STT db base name "S01"), emitted as a
-// top-level `session_id` in every payload. Ties all three artifacts (STT db, engine detection-log,
-// CP live-references) with an exact join. Null until the STT app ships the field.
-private fun sessionIdOf(payload: JSONObject): String? = payload.stringOrNull("session_id")
+    // Stable per-service session id (e.g. the STT db base name "S01"), emitted as a
+    // top-level `session_id` in every payload. Ties all three artifacts (STT db, engine detection-log,
+    // CP live-references) with an exact join. Null until the STT app ships the field.
+    fun sessionIdOf(payload: JSONObject): String? = payload.stringOrNull("session_id")
 
-// The STT segment id that produced this update — the clock-free correlation key matching the STT
-// db's `segment_id` column (TEXT = str(id)). Prefers an explicit string `segment_id`, then falls
-// back to the integer `id` (the db primary key) stringified. Probe order: in-progress (newest) →
-// latest completed segment → top-level. Null only if nothing is present.
-private fun extractSegmentId(payload: JSONObject): String? {
-    (payload.opt("in_progress") as? JSONObject)?.let { segmentIdOf(it)?.let { id -> return id } }
-    val segments = payload.optJSONArray("segments")
-    if (segments != null && segments.length() > 0) {
-        segments.optJSONObject(segments.length() - 1)?.let { segmentIdOf(it)?.let { id -> return id } }
+    // The STT segment id that produced this update — the clock-free correlation key matching the STT
+    // db's `segment_id` column (TEXT = str(id)). Prefers an explicit string `segment_id`, then falls
+    // back to the integer `id` (the db primary key) stringified. Probe order: in-progress (newest) →
+    // latest completed segment → top-level. Null only if nothing is present.
+    fun extractSegmentId(payload: JSONObject): String? {
+        (payload.opt("in_progress") as? JSONObject)?.let { segmentIdOf(it)?.let { id -> return id } }
+        val segments = payload.optJSONArray("segments")
+        if (segments != null && segments.length() > 0) {
+            segments.optJSONObject(segments.length() - 1)?.let { segmentIdOf(it)?.let { id -> return id } }
+        }
+        return segmentIdOf(payload)
     }
-    return segmentIdOf(payload)
-}
 
-private fun segmentIdOf(obj: JSONObject): String? {
-    obj.stringOrNull("segment_id")?.let { return it }
-    if (obj.has("id") && !obj.isNull("id")) return obj.optInt("id").toString()
-    return null
-}
-
-// Session-relative start time of the newest segment (seconds from session start). Reads the
-// canonical `start_time`, falling back to `start` (the field today's payload uses). Best-effort.
-private fun extractStartTime(payload: JSONObject): Double? {
-    (payload.opt("in_progress") as? JSONObject)?.let { startTimeOf(it)?.let { t -> return t } }
-    val segments = payload.optJSONArray("segments")
-    if (segments != null && segments.length() > 0) {
-        segments.optJSONObject(segments.length() - 1)?.let { startTimeOf(it)?.let { t -> return t } }
+    private fun segmentIdOf(obj: JSONObject): String? {
+        obj.stringOrNull("segment_id")?.let { return it }
+        if (obj.has("id") && !obj.isNull("id")) return obj.optInt("id").toString()
+        return null
     }
-    return startTimeOf(payload)
-}
 
-private fun startTimeOf(obj: JSONObject): Double? = when {
-    obj.has("start_time") -> obj.optDouble("start_time")
-    obj.has("start") -> obj.optDouble("start")
-    else -> null
+    // Session-relative start time of the newest segment (seconds from session start). Reads the
+    // canonical `start_time`, falling back to `start` (the field today's payload uses). Best-effort.
+    fun extractStartTime(payload: JSONObject): Double? {
+        (payload.opt("in_progress") as? JSONObject)?.let { startTimeOf(it)?.let { t -> return t } }
+        val segments = payload.optJSONArray("segments")
+        if (segments != null && segments.length() > 0) {
+            segments.optJSONObject(segments.length() - 1)?.let { startTimeOf(it)?.let { t -> return t } }
+        }
+        return startTimeOf(payload)
+    }
+
+    private fun startTimeOf(obj: JSONObject): Double? = when {
+        obj.has("start_time") -> obj.optDouble("start_time")
+        obj.has("start") -> obj.optDouble("start")
+        else -> null
+    }
 }
