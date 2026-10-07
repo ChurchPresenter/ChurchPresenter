@@ -7,50 +7,13 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.printToString
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
-import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.theme.ThemeMode
 import kotlin.test.Test
 import kotlin.test.assertFalse
 
+/** The song editor's closed states are `:songs`' `EditSongDialogClosedTest`. */
 class DialogClosedStateTest {
-
-    @OptIn(ExperimentalTestApi::class)
-    @Test
-    fun `a hidden song editor draws nothing`() = runComposeUiTest {
-        setContent {
-            MaterialTheme {
-                EditSongDialog(
-                    isVisible = false,
-                    song = SongItem(number = "1", title = "Amazing Grace"),
-                    theme = ThemeMode.LIGHT,
-                    onDismiss = {},
-                    onSave = { _: SongItem, _: SongTuning -> },
-                )
-            }
-        }
-
-        assertFalse(onRoot().printToString().contains("Amazing Grace"))
-    }
-
-    @OptIn(ExperimentalTestApi::class)
-    @Test
-    fun `a song editor opened with no song draws nothing`() = runComposeUiTest {
-        setContent {
-            MaterialTheme {
-                EditSongDialog(
-                    isVisible = true,
-                    song = null,
-                    theme = ThemeMode.LIGHT,
-                    onDismiss = {},
-                    onSave = { _: SongItem, _: SongTuning -> },
-                )
-            }
-        }
-
-        assertFalse(onRoot().printToString().contains("Save"))
-    }
 
     @OptIn(ExperimentalTestApi::class)
     @Test

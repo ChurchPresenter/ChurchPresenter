@@ -2,11 +2,12 @@ package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import org.churchpresenter.songs.EditSongDialog
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.app.churchpresenter.data.PlanningCenterPrimaryBible
-import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
+import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.planningcenter.ui.PlanningCenterImportServices
 import org.churchpresenter.presentationengine.LoadResult
 import org.churchpresenter.presentationengine.PresentationLoader
@@ -64,6 +65,7 @@ fun PlanningCenterImportDialog(
         },
         editSong = { song, songbook, onEditDismiss, onSave ->
             EditSongDialog(
+                backgroundButton = songEditorBackgroundButton,
                 isVisible = song != null,
                 song = song,
                 songbooks = listOf(songbook),

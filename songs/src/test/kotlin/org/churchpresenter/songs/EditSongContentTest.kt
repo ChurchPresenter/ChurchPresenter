@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.dialogs
+package org.churchpresenter.songs
 
 import org.churchpresenter.core.models.songs.SongBackground
 import kotlin.test.assertTrue
@@ -152,6 +152,7 @@ class EditSongContentTest {
             setContent {
                 MaterialTheme {
                     EditSongContent(
+                        backgroundButton = testBackgroundButton,
                         song = song,
                         songbooks = songbooks,
                         existingSongs = existingSongs,

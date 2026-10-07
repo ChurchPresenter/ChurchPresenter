@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.sharedui.utils
 
 import androidx.compose.runtime.Composable
 import org.churchpresenter.theme.AppThemeWrapper

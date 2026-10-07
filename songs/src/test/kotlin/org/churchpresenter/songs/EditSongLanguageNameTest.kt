@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.dialogs
+package org.churchpresenter.songs
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
@@ -31,6 +31,7 @@ class EditSongLanguageNameTest {
                     // As SongsTab passes them: rebuilt on every recomposition from the install's names.
                     var names by remember { mutableStateOf(emptyList<String>()) }
                     EditSongContent(
+                        backgroundButton = testBackgroundButton,
                         song = SongItem(number = "1", title = "Song", songbook = "Hymnal", lyrics = listOf("a")),
                         songbooks = emptyList(),
                         existingSongs = emptyList(),
@@ -61,6 +62,7 @@ class EditSongLanguageNameTest {
         setContent {
             MaterialTheme {
                 EditSongContent(
+                    backgroundButton = testBackgroundButton,
                     song = SongItem(number = "1", title = "Song", songbook = "Hymnal", lyrics = listOf("a")),
                     songbooks = emptyList(), existingSongs = emptyList(), isNewSong = false,
                     theme = ThemeMode.LIGHT, languageNames = emptyList(), onLanguageNamesChange = {},

@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs
+package org.churchpresenter.songs
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

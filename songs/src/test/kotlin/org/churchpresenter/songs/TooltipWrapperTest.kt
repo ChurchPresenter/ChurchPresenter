@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.songs
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size

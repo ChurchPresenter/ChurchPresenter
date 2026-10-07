@@ -2,7 +2,5 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>LongMethod:EditSongDialog.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable internal fun EditSongContent( song: SongItem, songbooks: List&lt;String&gt;, existingSongs: List&lt;SongItem&gt;, isNewSong: Boolean, theme: ThemeMode, tuning: SongTuning = SongTuning(), showTuningFields: Boolean = false, chordsVisible: Boolean = true, /** How long this song usually runs here -- measured, see [EditSongDialog]. */ typicalSeconds: Int? = null, onChordsVisibleChange: (Boolean) -&gt; Unit = {}, isVisible: Boolean = true, onApplyBackgroundToSongbook: ((songbook: String, background: SongBackground, lowerThirdBackground: SongBackground) -&gt; Unit)? = null, /** What each language is called install-wide -- see [EditSongDialog]. */ languageNames: List&lt;String&gt; = emptyList(), onLanguageNamesChange: ((List&lt;String&gt;) -&gt; Unit)? = null, onDismiss: () -&gt; Unit, onSave: (SongItem, SongTuning) -&gt; Unit )</ID>
-    <ID>TooManyFunctions:EditSongDialog.kt$org.churchpresenter.app.churchpresenter.dialogs.EditSongDialog.kt</ID>
   </CurrentIssues>
 </SmellBaseline>

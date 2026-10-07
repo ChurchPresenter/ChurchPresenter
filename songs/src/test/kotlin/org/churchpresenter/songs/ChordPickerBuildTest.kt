@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.songs
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue

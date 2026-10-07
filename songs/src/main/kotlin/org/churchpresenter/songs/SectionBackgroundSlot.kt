@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.songs
 
 import org.churchpresenter.sharedui.utils.isHeaderLine
 import org.churchpresenter.sharedui.utils.songBackgroundDirectiveOf

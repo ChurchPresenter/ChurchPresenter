@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.songs
 
 import org.churchpresenter.core.models.camera.CameraDeviceRef
 import org.churchpresenter.core.models.songs.SONG_BACKGROUND_PREFIX

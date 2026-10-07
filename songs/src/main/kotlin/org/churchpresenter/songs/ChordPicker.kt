@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.songs
 
 import org.churchpresenter.sharedui.composables.ZoneLabel
 import androidx.compose.foundation.background

@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.dialogs
+package org.churchpresenter.songs
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
@@ -32,6 +32,7 @@ class EditSongContentResetTest {
         setContent {
             MaterialTheme {
                 EditSongContent(
+                    backgroundButton = testBackgroundButton,
                     song = current,
                     songbooks = listOf("Hymnal"),
                     existingSongs = emptyList(),
@@ -71,8 +72,14 @@ class EditSongContentResetTest {
         setContent {
             MaterialTheme {
                 val hidden = song("1", "Hidden")
-                EditSongDialog(isVisible = false, song = hidden, theme = ThemeMode.LIGHT, onDismiss = {}) { _, _ -> }
-                EditSongDialog(isVisible = true, song = null, theme = ThemeMode.LIGHT, onDismiss = {}) { _, _ -> }
+                EditSongDialog(
+                    isVisible = false, song = hidden, backgroundButton = testBackgroundButton,
+                    theme = ThemeMode.LIGHT, onDismiss = {},
+                ) { _, _ -> }
+                EditSongDialog(
+                    isVisible = true, song = null, backgroundButton = testBackgroundButton,
+                    theme = ThemeMode.LIGHT, onDismiss = {},
+                ) { _, _ -> }
             }
         }
         waitForIdle()

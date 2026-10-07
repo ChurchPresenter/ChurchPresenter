@@ -46,7 +46,7 @@ import org.churchpresenter.strings.generated.resources.memory_monitor_non_heap
 import org.churchpresenter.strings.generated.resources.memory_monitor_used
 import org.churchpresenter.strings.generated.resources.memory_monitor_window_title
 import kotlinx.coroutines.delay
-import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
+import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource

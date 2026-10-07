@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.songs.screenshot
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -17,7 +17,8 @@ import org.churchpresenter.profiles.SONG_BACKGROUND_BUTTON_TAG
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.app.churchpresenter.dialogs.EditSongContent
+import org.churchpresenter.songs.EditSongContent
+import org.churchpresenter.songs.testBackgroundButton
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
@@ -56,6 +57,7 @@ class EditSongDialogScreenshotTest {
                 ChurchPresenterTheme(themeMode = mode) {
                     Box(Modifier.size(1120.dp, 760.dp)) {
                         EditSongContent(
+                            backgroundButton = testBackgroundButton,
                             song = song,
                             songbooks = songbooks,
                             existingSongs = existingSongs,
