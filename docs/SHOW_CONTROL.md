@@ -1,6 +1,6 @@
 # Design note: show control
 
-Status: **approved**. Phase 2 of `docs/PHASE2_PLAN.md`: the rest of roadmap stage 2
+Status: **approved**. Phase 2: the rest of roadmap stage 2
 (messages, props, clear groups, `LiveShow` wired in) and stage 3 (cue actions, macros, MIDI/OSC).
 It builds on `docs/LAYER_MODEL.md`, whose layers, cues and Preview/Take it assumes.
 
