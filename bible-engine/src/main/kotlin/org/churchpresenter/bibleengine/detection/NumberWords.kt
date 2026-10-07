@@ -17,18 +17,20 @@ object NumberWords {
     /** A single token parsed to its value, or null. Digits, digit-ordinals, or one number word. */
     fun parseToken(token: String): Int? {
         val t = token.trim().lowercase()
-        if (t.isEmpty()) return null
-        if (t in NOT_NUMBERS) return null
+        if (t.isEmpty() || t in NOT_NUMBERS) return null
         // digits, optionally with an ordinal suffix like "3-я", "21-й", "19-го", "2nd"
-        DIGIT_ORD.find(t)?.let { return it.groupValues[1].toIntOrNull() }
-        // a single number word: match a stem, but only when the remaining grammatical ending is
-        // plausible — this rejects look-alikes such as "столько"/"сторона"/"дважды" -> not numbers.
-        for ((stem, value) in STEMS) {
-            if (!t.startsWith(stem)) continue
-            val ending = t.substring(stem.length)
-            if (ending.isEmpty() || ending[0] in VALID_ENDING_START) return value
-        }
-        return null
+        val digits = DIGIT_ORD.find(t)
+        return if (digits != null) digits.groupValues[1].toIntOrNull() else matchStem(t)?.second
+    }
+
+    /**
+     * A single number word: the longest stem [t] starts with, but only when the remaining
+     * grammatical ending is plausible — this rejects look-alikes such as "столько"/"сторона"/
+     * "дважды" -> not numbers.
+     */
+    private fun matchStem(t: String): Pair<String, Int>? = STEMS.firstOrNull { (stem, _) ->
+        t.startsWith(stem) &&
+            t.substring(stem.length).let { ending -> ending.isEmpty() || ending[0] in VALID_ENDING_START }
     }
 
     /**
@@ -41,14 +43,8 @@ object NumberWords {
      */
     fun matchedStemLength(token: String): Int {
         val t = token.trim().lowercase()
-        if (t.isEmpty() || t in NOT_NUMBERS) return 0
-        if (DIGIT_ORD.find(t) != null) return 0
-        for ((stem, _) in STEMS) {
-            if (!t.startsWith(stem)) continue
-            val ending = t.substring(stem.length)
-            if (ending.isEmpty() || ending[0] in VALID_ENDING_START) return stem.length
-        }
-        return 0
+        if (t.isEmpty() || t in NOT_NUMBERS || DIGIT_ORD.find(t) != null) return 0
+        return matchStem(t)?.first?.length ?: 0
     }
 
     // Russian ordinal/cardinal endings start with a vowel, soft sign, or й; Latin endings with a
@@ -81,11 +77,11 @@ object NumberWords {
         var prev = first
         var i = start + 1
         while (i < tokens.size) {
-            if (tokens[i].any { it.isDigit() }) break
-            val v = parseToken(tokens[i]) ?: break
+            // A digit token ends the run, as does anything that is not a number word.
+            val v = tokens[i].takeUnless { tok -> tok.any { it.isDigit() } }?.let(::parseToken)
             // Only combine when each part is strictly smaller than the previous (100 > 20 > 1);
             // this rejects "третий четвёртый" (two separate verses) while accepting "сто пятый".
-            if (v >= prev) break
+            if (v == null || v >= prev) break
             sum += v
             prev = v
             consumed++

@@ -37,6 +37,7 @@ object DetectionLogger {
     @Volatile var sessionId: String? = null
 
     private const val MAX_AGE_DAYS = 30L
+    private const val DRAIN_POLL_MS = 5L
     private const val BASE_PREFIX = "detection-log-"
     private const val CANDIDATE_PREFIX = "candidate-log-"
     private const val STICKY_PREFIX = "sticky-log-"
@@ -69,7 +70,7 @@ object DetectionLogger {
     /** Blocks until every queued line has been written — for tests and orderly shutdown. */
     fun drainForTests() {
         val deadline = System.currentTimeMillis() + 5_000
-        while (pending.get() > 0 && System.currentTimeMillis() < deadline) Thread.sleep(5)
+        while (pending.get() > 0 && System.currentTimeMillis() < deadline) Thread.sleep(DRAIN_POLL_MS)
     }
     // Files (by absolute path) that have already had their one session header written. A set rather
     // than a single flag, so each session-keyed file gets exactly one header — appending to an
