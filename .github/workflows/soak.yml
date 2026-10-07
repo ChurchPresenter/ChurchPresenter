@@ -4,10 +4,12 @@ name: Soak
 # see ServiceSoak. The report (summary, per-minute CSV and a memory/frame-time chart) is
 # uploaded whether it passes or not, so a slow drift can be read before it fails.
 #
-# On demand only, until it has run green: a manual dispatch always runs, and can ask for a
-# shorter run. To run it every night, add a `schedule:` trigger under `on:` (cron `0 5 * * *`,
-# after the nightly build); the first step then skips a night on which `main` has not moved
-# since the last successful soak.
+# Weekly, on main, Sunday 22:00 UTC -- about four and a half hours, so it is done before Monday's
+# render benchmark. A scheduled week in which main has not moved since the last successful soak
+# is skipped by the first job. A scheduled run whose soak fails opens a `soak-failure` issue with
+# the verdict and the head of any thread dump (or comments on the open one); a cancelled run files
+# nothing. Dispatch it by hand to check a branch or to ask for a shorter run: a run by hand always
+# goes ahead and never files an issue.
 
 on:
   schedule:
