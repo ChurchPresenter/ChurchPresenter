@@ -34,7 +34,7 @@ class RenderBenchmark {
     @Test
     fun `every content type renders inside its frame budget`() {
         val photo = BenchmarkScenarios.photo()
-        val scenarios = BenchmarkScenarios.all(photo)
+        val scenarios = BenchmarkScenarios.all(photo, sizes)
         val results = sizes.flatMap { (w, h) ->
             scenarios.map { (name, content) -> timer.measure(name, w, h, content) }
         }

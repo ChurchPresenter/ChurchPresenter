@@ -30,6 +30,7 @@ import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.dictionary.data.StrongsEntry
 import org.churchpresenter.dictionary.presenter.DictionaryPresenter
 import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
+import org.churchpresenter.lowerthird.render.LottieRenderCache
 import org.churchpresenter.qa.presenter.QAPresenter
 import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
@@ -40,6 +41,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.slides.presenter.PicturePresenter
 import org.churchpresenter.stt.STTSegment
 import org.churchpresenter.stt.presenter.STTPresenter
+import kotlinx.coroutines.runBlocking
 import java.awt.Color
 import java.awt.GradientPaint
 import java.awt.image.BufferedImage
@@ -61,9 +63,9 @@ object BenchmarkScenarios {
      * Every content type, each changing what it shows from frame to frame where it can.
      *
      * The lower third's Lottie file is parsed here, once, as the app parses one before it goes live
-     * rather than inside the output.
+     * rather than inside the output. [sizes] are the output sizes the scenarios will be drawn at.
      */
-    fun all(photo: File): List<Scenario> {
+    fun all(photo: File, sizes: List<Pair<Int, Int>> = emptyList()): List<Scenario> {
         val lowerThird = LottieComposition.parse(lowerThirdJson())
         return listOf(
             "song verse" to { frame ->
@@ -116,7 +118,7 @@ object BenchmarkScenarios {
             "lottie lower third" to { frame ->
                 Fill { LowerThirdPresenter(composition = lowerThird, progress = { (frame % LOOP) / LOOP.toFloat() }) }
             },
-            "song + lower third + announcement" to layered(),
+            "song + lower third + announcement" to layered(sizes),
         )
     }
 
@@ -125,10 +127,18 @@ object BenchmarkScenarios {
      * slide, its background on the layer under it, and a lower third and a scrolling announcement
      * up over it on an output that puts both over its content. The song and the lower third move on
      * each frame; the content is pushed after the frame that draws it, as the app pushes it.
+     *
+     * The lower third's frames are rendered into the cache first, at the desktop size and at every
+     * benchmark size larger than it, as a first showing on each output leaves the cache: the output
+     * then holds its own size and streams its own frames, as a live one does once they are ready.
      */
-    private fun layered(): @Composable (frame: Int) -> Unit {
+    private fun layered(sizes: List<Pair<Int, Int>>): @Composable (frame: Int) -> Unit {
+        val json = lowerThirdJson()
+        val desktop = checkNotNull(LottieRenderCache.desktopVariant(json, atem = null))
+        val variants = listOf(desktop) + sizes.mapNotNull { (w, h) -> LottieRenderCache.outputVariant(desktop, w, h) }
+        runBlocking { variants.forEach { LottieRenderCache.prepare(json, it).await() } }
         val manager = PresenterManager(showPresenterWindowInitially = false).apply {
-            setLottieContent(lowerThirdJson(), false, -1f, 0L, "Pastor")
+            setLottieContent(json, false, -1f, 0L, "Pastor")
             setDisplayedLyricSection(verse(0))
             setPresentingMode(Presenting.LYRICS)
             setPresentingMode(Presenting.LOWER_THIRD)
