@@ -15,21 +15,14 @@ import androidx.compose.runtime.remember
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.schedule.ActionChoices
-import org.churchpresenter.schedule.CompanionChoice
-import org.churchpresenter.schedule.MessageChoice
 import org.churchpresenter.settings.Macro
 import org.churchpresenter.settings.macroNamed
-import org.churchpresenter.settings.messageTokens
 import java.io.File
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.drop
-import org.churchpresenter.atem.AtemConnectionManager
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
-import org.churchpresenter.core.models.companion.CompanionSurfaceSlot
 import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.showcontrol.Action
-import org.churchpresenter.showcontrol.MediaCommand
 import org.churchpresenter.showcontrol.ShowHost
 
 /**
@@ -56,20 +49,10 @@ internal fun AppRootState.appShowHost(): ShowHost = AppShowHost(
                 statisticsManager,
             )
         },
-        media = { command ->
-            when (command) {
-                MediaCommand.PLAY -> mediaViewModel.play()
-                MediaCommand.PAUSE -> mediaViewModel.pause()
-                MediaCommand.STOP -> mediaViewModel.stop()
-            }
-        },
+        media = mediaOutlet(mediaViewModel::play, mediaViewModel::pause, mediaViewModel::stop),
         obsScene = obsManager::setScene,
         companion = ::pressCompanionButton,
-        atem = { block ->
-            val atem = appSettings.atemSettings
-            require(atem.host.isNotBlank()) { "No ATEM switcher is set up" }
-            AtemConnectionManager.use(atem.host, atem.port, needsState = false) { block(it) }
-        },
+        atem = { block -> runOnAtem(appSettings.atemSettings, block) },
         macro = { name -> appSettings.macros.macroNamed(name)?.actions },
         log = { Log.warn(SHOW_CONTROL_TAG, it) },
     ),
@@ -91,12 +74,7 @@ internal fun AppRootState.runRowActions(item: ScheduleItem, actions: List<Action
 internal fun AppRootState.runRowActionsNow(item: ScheduleItem, chainDepth: Int = -1) {
     if (!devMode) return
     val actions = currentScheduleActions.currentActions()[item.id].orEmpty()
-    if (actions.isEmpty()) return
-    if (chainDepth + 1 >= ActionRunner.MAX_CHAIN_DEPTH) {
-        Log.warn(SHOW_CONTROL_TAG, "Row ${item.id} not run: its actions step through rows more than 8 deep")
-        return
-    }
-    showRunner.run(actions, item.id, chainDepth + 1)
+    runRowActionsChained(item.id, actions, chainDepth) { list, key, depth -> showRunner.run(list, key, depth) }
 }
 
 /** Runs [macro]'s actions; pressing it again while it is still going starts it over. */
@@ -134,16 +112,7 @@ internal fun MainWindowScope.rememberActionChoices(): ActionChoices {
     }
     val obsScenes = root.obsManager.scenes.value
     return remember(settings, lowerThirds, obsScenes) {
-        ActionChoices(
-            clearGroups = settings.clearGroups.map { it.name },
-            messages = settings.messageTemplates.map { MessageChoice(it.name, messageTokens(it.text)) },
-            props = settings.props.map { it.name },
-            lowerThirds = lowerThirds,
-            obsScenes = obsScenes,
-            companion = settings.companionSatelliteConnections.map { CompanionChoice(it.id, it.name) },
-            macros = settings.macros.map { it.name },
-            onOpen = root.obsManager::requestScenes,
-        )
+        actionChoices(settings, lowerThirds, obsScenes, root.obsManager::requestScenes)
     }
 }
 
@@ -153,12 +122,7 @@ internal fun lowerThirdPresetNames(folder: File): List<String> =
         ?.map { it.nameWithoutExtension }?.sorted().orEmpty()
 
 /** Presses the button [press] names on the first surface of its connection that is showing. */
-private fun AppRootState.pressCompanionButton(press: Action.CompanionPress): Boolean {
-    val placements = CompanionSurfacePlacement.entries
-        .filter { press.placement.isBlank() || it.name.equals(press.placement, ignoreCase = true) }
-    return placements.any { placement ->
-        companionSatelliteViewModel.pressButton(CompanionSurfaceSlot(press.connection, placement), press.button) != null
-    }
-}
+private fun AppRootState.pressCompanionButton(press: Action.CompanionPress): Boolean =
+    pressOnSurface(press, companionSatelliteViewModel::pressButton)
 
-private const val SHOW_CONTROL_TAG = "ShowControl"
+internal const val SHOW_CONTROL_TAG = "ShowControl"

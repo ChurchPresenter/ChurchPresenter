@@ -120,4 +120,15 @@ class ShortcutActionDefaultsTest {
         assertTrue(!ShortcutScope.MEDIA.overlaps(ShortcutScope.PICTURES))
         assertTrue(!ShortcutScope.MENU.overlaps(ShortcutScope.CANVAS))
     }
+
+    @Test
+    fun `only Take, the macro slots and the clear-group slots are dev only`() {
+        val devOnly = ShortcutAction.entries.filter { it.devOnly }.toSet()
+
+        assertEquals(
+            setOf(ShortcutAction.TAKE) + MACRO_ACTIONS + CLEAR_GROUP_ACTIONS,
+            devOnly,
+        )
+        assertTrue(!ShortcutAction.SAVE_SCHEDULE.devOnly)
+    }
 }

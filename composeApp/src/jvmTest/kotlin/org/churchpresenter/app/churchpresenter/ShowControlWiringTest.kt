@@ -1,6 +1,16 @@
 package org.churchpresenter.app.churchpresenter
 
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
+import org.churchpresenter.core.models.companion.CompanionSurfaceSlot
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.AtemSettings
+import org.churchpresenter.settings.ClearGroup
+import org.churchpresenter.settings.Macro
+import org.churchpresenter.settings.MessageTemplate
+import org.churchpresenter.settings.PropDefinition
+import org.churchpresenter.showcontrol.ActionRunner
+import org.churchpresenter.showcontrol.MediaCommand
 import org.churchpresenter.liveoutput.clearFromOperator
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -65,5 +75,71 @@ class ShowControlWiringTest {
         } finally {
             folder.deleteRecursively()
         }
+    }
+
+    @Test
+    fun `a media action plays, pauses or stops the player`() {
+        val calls = mutableListOf<String>()
+        val outlet = mediaOutlet({ calls += "play" }, { calls += "pause" }, { calls += "stop" })
+        MediaCommand.entries.forEach(outlet)
+        assertEquals(listOf("play", "pause", "stop"), calls)
+    }
+
+    @Test
+    fun `no ATEM action runs until a switcher is set up`() = kotlinx.coroutines.runBlocking {
+        var ran = false
+        val error = kotlin.test.assertFailsWith<IllegalArgumentException> {
+            runOnAtem(AtemSettings(host = " ")) { ran = true }
+        }
+        assertEquals("No ATEM switcher is set up", error.message)
+        assertTrue(!ran)
+    }
+
+    @Test
+    fun `a row's actions chain one level down, and stop at the depth limit`() {
+        val seen = mutableListOf<Triple<List<Action>, String, Int>>()
+        val run = { list: List<Action>, key: String, depth: Int -> seen += Triple(list, key, depth); Unit }
+        runRowActionsChained("r1", emptyList(), -1, run)
+        runRowActionsChained("r1", obs, -1, run)
+        runRowActionsChained("r2", obs, 3, run)
+        runRowActionsChained("r3", obs, ActionRunner.MAX_CHAIN_DEPTH - 1, run)
+        assertEquals<List<Triple<List<Action>, String, Int>>>(listOf(Triple(obs, "r1", 0), Triple(obs, "r2", 4)), seen)
+    }
+
+    @Test
+    fun `the editor is offered what settings hold, plus the lower thirds and scenes found`() {
+        var opened = 0
+        val settings = AppSettings(
+            clearGroups = listOf(ClearGroup("g1", "Everything")),
+            messageTemplates = listOf(MessageTemplate("m1", "Greeting", "Hello {name}")),
+            props = listOf(PropDefinition("p1", "Logo")),
+            macros = listOf(Macro("x1", "Walk in", obs)),
+        )
+        val choices = actionChoices(settings, listOf("Pastor"), listOf("Wide"), { opened++ })
+        assertEquals(listOf("Everything"), choices.clearGroups)
+        assertEquals(listOf("Greeting"), choices.messages.map { it.name })
+        assertEquals(listOf("Logo"), choices.props)
+        assertEquals(listOf("Walk in"), choices.macros)
+        assertEquals(listOf("Pastor"), choices.lowerThirds)
+        assertEquals(listOf("Wide"), choices.obsScenes)
+        choices.onOpen()
+        assertEquals(1, opened)
+    }
+
+    @Test
+    fun `a companion press tries the named placement, or each one when none is named`() {
+        val asked = mutableListOf<CompanionSurfaceSlot>()
+        val last = CompanionSurfacePlacement.entries.last()
+        val answers = { slot: CompanionSurfaceSlot, _: Int ->
+            asked += slot
+            if (slot.placement == last) true else null
+        }
+        assertTrue(pressOnSurface(Action.CompanionPress("c1", 3), answers))
+        assertEquals(CompanionSurfacePlacement.entries.size, asked.size)
+
+        asked.clear()
+        val first = CompanionSurfacePlacement.entries.first()
+        assertTrue(!pressOnSurface(Action.CompanionPress("c1", 3, first.name.lowercase()), answers))
+        assertEquals(listOf(CompanionSurfaceSlot("c1", first)), asked)
     }
 }
