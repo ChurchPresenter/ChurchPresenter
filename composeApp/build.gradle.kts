@@ -1099,7 +1099,7 @@ tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest") {
 //   ./gradlew :composeApp:renderBenchmark -PcheckRenderRegression   # fail on a row slower than the CI baseline
 // The two baselines are different machines and are never compared with each other: the one in
 // benchmarks/ is the reference Mac, against the absolute budget; benchmarks/ci/ is recorded BY the
-// hosted CI runner (~10x slower), and is what render-benchmark.yml holds every pull request against.
+// hosted CI runner (~10x slower), and is what render-benchmark.yml holds main against every week.
 // `-PcheckRenderRegression=<file>` names another baseline (relative to the repository root). A row
 // regresses when its typical frame (render p50 + readback p50) passes baseline x (1 + margin) +
 // slack: `-PrenderRegressionMargin` (default 0.5) and `-PrenderRegressionSlackMs` (default 1.0).

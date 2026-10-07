@@ -30,8 +30,10 @@ from two different machines, and they are **never compared with each other**:
 
 ## The CI regression gate
 
-`.github/workflows/render-benchmark.yml` runs on every pull request and on `main`, and holds the
-run against `ci/results.json`. Each scenario and size that both have is compared on its **typical
+`.github/workflows/render-benchmark.yml` runs on `main` every Monday at 06:00 UTC, or by hand
+(*Run workflow*, on any branch), and holds the run against `ci/results.json`. A scheduled run that
+finds a regression opens a `render-regression` issue with the comparison, or comments on the one
+already open. Each scenario and size that both have is compared on its **typical
 frame** -- render p50 plus readback p50, the median rather than the tail, because a shared runner's
 tail is mostly its neighbours. A row regresses when
 

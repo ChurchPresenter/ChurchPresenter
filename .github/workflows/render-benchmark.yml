@@ -1,7 +1,9 @@
 name: Render benchmark
 
-# Holds every pull request's off-screen render times against a baseline recorded on this same kind
-# of runner -- see RenderBenchmark and compareWithBaseline. The hosted runners are ~10x slower than
+# Holds main's off-screen render times, once a week, against a baseline recorded on this same kind
+# of runner -- see RenderBenchmark and compareWithBaseline. A scheduled run that finds a regression
+# opens an issue (or comments on the open one), so a slowdown is reported without a run on every
+# pull request; dispatch it by hand to check a branch. The hosted runners are ~10x slower than
 # the reference Mac behind composeApp/benchmarks/results.json, so the absolute frame budget cannot
 # be checked here; what can is "this got meaningfully slower than it was", against
 # composeApp/benchmarks/ci/results.json. A row fails past baseline x 1.5 + 1 ms on its typical
@@ -16,10 +18,9 @@ name: Render benchmark
 # while no baseline is committed; either uploads `ci-render-baseline`, which a maintainer downloads
 # and commits as the two files in composeApp/benchmarks/ci/.
 on:
-  push:
-    branches: [main]
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+  schedule:
+    # Mondays 06:00 UTC, on main (a schedule always runs the default branch).
+    - cron: '0 6 * * 1'
   workflow_dispatch:
     inputs:
       record_baseline:
@@ -33,16 +34,15 @@ env:
 
 permissions:
   contents: read
+  # Only for the regression issue a scheduled run files.
+  issues: write
 
 concurrency:
-  group: render-benchmark-${{ github.head_ref || github.ref_name }}
+  group: render-benchmark-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
   render:
-    # A draft runs nothing; `ready_for_review` runs it once the pull request is marked ready. Not a
-    # required check, so a skipped run blocks nothing.
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -88,6 +88,7 @@ jobs:
           pkill -f KotlinCompileDaemon || true
 
       - name: Check render times against the CI baseline
+        id: check
         if: steps.baseline.outputs.record != 'true'
         run: ./gradlew :composeApp:renderBenchmark -PcheckRenderRegression
 
@@ -123,3 +124,37 @@ jobs:
           path: composeApp/benchmarks/ci/
           retention-days: 30
           if-no-files-found: error
+
+      # A scheduled run that regressed files it, so a slowdown on main is noticed without anyone
+      # reading the run. One open issue per regression stretch: a later failing week comments on it
+      # rather than opening another. Only the check failing does this -- a broken build does not.
+      - name: Report a regression as an issue
+        if: ${{ failure() && github.event_name == 'schedule' && steps.check.outcome == 'failure' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          LABEL="render-regression"
+          gh label create "$LABEL" --color D93F0B \
+            --description "The weekly render benchmark found main slower than its CI baseline" 2>/dev/null || true
+          REPORT=composeApp/build/reports/render-benchmark/results.md
+          {
+            echo "The weekly render benchmark found a row slower than its CI baseline on \`${GITHUB_SHA:0:9}\`."
+            echo
+            echo "Run: $RUN_URL (report in the \`render-benchmark\` artifact)."
+            echo
+            if [ -f "$REPORT" ]; then
+              sed -n '/^## Compared with/,$p' "$REPORT"
+            else
+              echo "The benchmark wrote no report; see the run log."
+            fi
+            echo
+            echo "If the slowdown is intended, re-record the baseline: dispatch this workflow with \`record_baseline\` and commit its \`ci-render-baseline\` artifact to \`composeApp/benchmarks/ci/\`."
+          } > issue.md
+          OPEN=$(gh issue list --label "$LABEL" --state open --limit 1 --json number -q '.[0].number // empty')
+          if [ -n "$OPEN" ]; then
+            gh issue comment "$OPEN" --body-file issue.md
+          else
+            gh issue create --title "Render benchmark regression on main" --label "$LABEL" --body-file issue.md
+          fi
