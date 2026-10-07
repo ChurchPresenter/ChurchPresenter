@@ -24,8 +24,11 @@ internal object Vocabulary {
     val SETUP = setOf("setup", "configure", "connect", "assign", "use")
     val UNDO = setOf("undo", "revert")
 
-    /** Word starts that mean another language: "translate", "translation", "bilingual", "languages". */
-    val TRANSLATION = listOf("translat", "bilingual", "multilingual", "languag")
+    /**
+     * Word starts that mean another language: "translate", "translation", "bilingual", "languages" —
+     * cut short enough to take the usual misspellings too ("langauge", "languge", "tranlsate").
+     */
+    val TRANSLATION = listOf("transl", "tranl", "bilingual", "multilingual", "lang")
 
     /** Phrases that ask for a song in another language. */
     val OTHER_LANGUAGE = listOf("another language", "second language", "other language", "two languages", "version in")
@@ -43,8 +46,17 @@ internal object Vocabulary {
         "finnish", "swedish", "norwegian", "danish", "armenian", "georgian", "moldovan", "latin",
     )
 
-    /** The song editor's own words for adding one — enough on their own, with no song named. */
-    const val ADD_LANGUAGE = "add a language"
+    /**
+     * Asking to add a language — enough on its own, with no song named: a Bible translation is
+     * downloaded, not added. Matched after [normalizeLanguage] fixes the spelling.
+     */
+    val ADD_LANGUAGE = listOf(
+        "add a language", "add language", "add another language", "add a new language", "add a second language",
+        "add second language", "new language",
+    )
+
+    /** "langauge", "languge", "langage" → "language", so the phrases above match however it is typed. */
+    fun normalizeLanguage(text: String): String = text.replace(Regex("""\blang\p{L}*"""), "language")
 
     /** Word starts that mean chords. */
     const val CHORD = "chord"

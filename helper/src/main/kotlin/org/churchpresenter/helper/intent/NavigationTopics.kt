@@ -96,7 +96,7 @@ internal object NavigationTopics {
      */
     fun isSongTranslation(normalized: String, currentTab: Tabs? = null): Boolean {
         if (Vocabulary.BIBLE_NAMES.any { normalized.containsWordPrefix(it) }) return false
-        if (normalized.containsPhrase(Vocabulary.ADD_LANGUAGE)) return true
+        if (Vocabulary.ADD_LANGUAGE.any { Vocabulary.normalizeLanguage(normalized).containsPhrase(it) }) return true
         val words = normalized.split(' ')
         // On the Songs tab, "translate this" or "add Spanish" is about a song without saying so.
         val aboutSong = words.any { it in Vocabulary.SONG } || currentTab == Tabs.SONGS
