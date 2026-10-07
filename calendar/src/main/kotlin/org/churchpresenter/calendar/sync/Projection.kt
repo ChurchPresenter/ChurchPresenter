@@ -67,25 +67,31 @@ object Projection {
 
     /**
      * Each remembered deletion as a sealed record of its own, newest first: the relay's plaintext
-     * tombstones are not signed by anybody, so a deletion is only believed when it opens.
+     * tombstones are not signed by anybody, so a deletion is only believed when it opens. None for
+     * a service the document still holds: it was restored since, and pushing both would send its id
+     * twice, once as the service and once as its deletion.
      */
-    fun deletions(document: CalendarDocument): List<RemoteService> = document.deletedServices.entries
-        .sortedByDescending { it.value }
-        .take(WireLimits.DELETIONS_PER_PUSH)
-        .map { (id, at) ->
-            RemoteService(
-                id = id,
-                // Only for the relay's retention: kept as long as the deletion is remembered.
-                date = runCatching { Instant.parse(at).atZone(ZoneOffset.UTC).toLocalDate().toString() }
-                    .getOrDefault(""),
-                startTime = "",
-                name = "",
-                version = document.deletedVersions[id] ?: 0L,
-                editedAt = at,
-                deleted = true,
-                updatedBy = DESKTOP,
-            )
-        }
+    fun deletions(document: CalendarDocument): List<RemoteService> {
+        val live = document.services.mapTo(HashSet()) { it.id }
+        return document.deletedServices.entries
+            .filter { it.key !in live }
+            .sortedByDescending { it.value }
+            .take(WireLimits.DELETIONS_PER_PUSH)
+            .map { (id, at) ->
+                RemoteService(
+                    id = id,
+                    // Only for the relay's retention: kept as long as the deletion is remembered.
+                    date = runCatching { Instant.parse(at).atZone(ZoneOffset.UTC).toLocalDate().toString() }
+                        .getOrDefault(""),
+                    startTime = "",
+                    name = "",
+                    version = document.deletedVersions[id] ?: 0L,
+                    editedAt = at,
+                    deleted = true,
+                    updatedBy = DESKTOP,
+                )
+            }
+    }
 
     /** A preset by name and kind only; the item it holds never leaves this machine. */
     fun presets(presets: List<ItemPreset>): List<RemotePreset> =

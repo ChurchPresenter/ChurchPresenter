@@ -22,6 +22,9 @@ class FakeRelay(
     var lastDesktopInstall = ""
     val calls = mutableListOf<String>()
 
+    /** Every state push as it arrived, before [records] collapsed it by id. */
+    val pushedStates = mutableListOf<StateRequest>()
+
     /** What the next call answers instead of the real behaviour, once. */
     var nextReply: RelayReply? = null
 
@@ -89,6 +92,7 @@ class FakeRelay(
                 RelayReply(412, """{"error":"precondition_failed"}""")
             path == "state" && method == "PUT" -> {
                 val state = json.decodeFromString(StateRequest.serializer(), body!!)
+                pushedStates += state
                 // The songbooks stand; a state push replaces the calendar only.
                 records.keys.filterNot { it.startsWith(CATALOG_PREFIX) }.forEach(records::remove)
                 tombstones.keys.filterNot { it.startsWith(CATALOG_PREFIX) }.forEach(tombstones::remove)

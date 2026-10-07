@@ -300,6 +300,11 @@ class PicturesViewModelWatchTest {
     }
 
     @Test
+    fun `an AppleDouble companion appearing in the folder is skipped`() {
+        assertNull(model.watching.watchedImageName(PathEvent("._b.jpg", StandardWatchEventKinds.ENTRY_CREATE)))
+    }
+
+    @Test
     fun `the picture extension is matched whatever case it was written in`() {
         assertEquals("B.JPG", model.watching.watchedImageName(PathEvent("B.JPG", StandardWatchEventKinds.ENTRY_CREATE)))
     }

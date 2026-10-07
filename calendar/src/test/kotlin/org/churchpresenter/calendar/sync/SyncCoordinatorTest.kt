@@ -174,6 +174,38 @@ class SyncCoordinatorTest {
     }
 
     @Test
+    fun `a service restored by a newer edit is pushed once, as the service`() {
+        val token = registered()
+        store.save(CalendarDocument(services = listOf(localService("s1", "Doomed"))).withoutService("s1"))
+        relay.phoneWrote(sealing.seal(phoneService("s1", "Restored", version = 3L)))
+
+        coordinator().sync(token, cursor = 0)
+
+        val pushed = relay.pushedStates.last().records.filter { it.id == "s1" }
+        assertEquals(1, pushed.size, "the id goes out exactly once")
+        assertEquals(false, sealing.open(pushed.single())?.deleted)
+        assertTrue("s1" !in store.load().document.deletedServices)
+    }
+
+    @Test
+    fun `a file already holding a deletion for a live service pushes only the service`() {
+        val token = registered()
+        store.save(
+            CalendarDocument(
+                services = listOf(localService("s1", "Restored", version = 3L)),
+                deletedServices = mapOf("s1" to "2026-09-18T00:00:00Z"),
+                deletedVersions = mapOf("s1" to 2L),
+            )
+        )
+
+        coordinator().pushLocal(token, cursor = 0)
+
+        val pushed = relay.pushedStates.single().records.filter { it.id == "s1" }
+        assertEquals(1, pushed.size)
+        assertEquals(false, sealing.open(pushed.single())?.deleted)
+    }
+
+    @Test
     fun `the relay's own plaintext tombstone deletes nothing`() {
         val token = registered()
         store.save(CalendarDocument(services = listOf(localService("s1", "Kept"))))
