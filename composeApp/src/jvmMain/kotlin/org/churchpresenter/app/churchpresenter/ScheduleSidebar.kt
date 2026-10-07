@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,7 +64,7 @@ private const val CLOCK_TICK_MS = 1000L
 internal fun MainDesktopScope.ScheduleSidebar(modifier: Modifier) {
     Column(modifier = modifier) {
         InstanceLinkStatusRows()
-        Box(modifier = Modifier.weight(1f)) {
+        Box(modifier = Modifier.weight(1f).guideTarget(GuideTargets.SCHEDULE_PANEL)) {
             ScheduleTabPane()
         }
         ScheduleSidebarCompanionPanel(

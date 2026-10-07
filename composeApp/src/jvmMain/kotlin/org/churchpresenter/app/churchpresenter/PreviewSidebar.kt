@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
@@ -98,6 +100,7 @@ internal fun PreviewSidebar(
                     text = stringResource(Res.string.tooltip_toggle_displays),
                     onClick = { presenterManager.togglePresenterWindow() },
                     buttonSize = 36.dp,
+                    modifier = Modifier.guideTarget(GuideTargets.TOGGLE_OUTPUTS),
                     iconTint = if (presenterManager.showPresenterWindow.value)
                         MaterialTheme.colorScheme.primary
                     else
@@ -112,6 +115,7 @@ internal fun PreviewSidebar(
                         instanceLinkSendClear?.invoke()
                     },
                     buttonSize = 36.dp,
+                    modifier = Modifier.guideTarget(GuideTargets.CLEAR_OUTPUT),
                     iconTint = MaterialTheme.colorScheme.error
                 )
                 PreviewSettingsButton(appSettings.projectionSettings, { editingPreviewLayout = true }) { updated ->
@@ -124,7 +128,8 @@ internal fun PreviewSidebar(
             LivePreviewPanel(
                 presenterManager = presenterManager,
                 appSettings = livePreviewAppSettings,
-                modifier = if (previewFills) Modifier.fillMaxWidth().weight(1f) else Modifier.fillMaxWidth(),
+                modifier = (if (previewFills) Modifier.fillMaxWidth().weight(1f) else Modifier.fillMaxWidth())
+                    .guideTarget(GuideTargets.LIVE_PREVIEW),
                 serverUrl = serverUrl,
                 qaDisplayUrl = qaDisplayUrl,
                 sttManager = sttManager,
@@ -232,7 +237,7 @@ internal fun RowScope.PreviewTakeButton(presenterManager: PresenterManager) {
             contentColor = MaterialTheme.colorScheme.onError,
         ),
         contentPadding = PaddingValues(horizontal = 16.dp),
-        modifier = Modifier.height(36.dp).testTag(PREVIEW_TAKE_TAG),
+        modifier = Modifier.height(36.dp).testTag(PREVIEW_TAKE_TAG).guideTarget(GuideTargets.TAKE),
     ) {
         Text(stringResource(Res.string.preview_take))
     }

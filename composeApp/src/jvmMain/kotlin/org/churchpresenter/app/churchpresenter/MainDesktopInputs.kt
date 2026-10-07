@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
 import kotlinx.coroutines.flow.Flow
+import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.server.ScheduleItemDto
@@ -70,6 +71,8 @@ data class MainDesktopPublishers(
     val onScheduleActionsReady: (ScheduleActions) -> Unit = {},
     val onScheduleItemSelected: (String?) -> Unit = {},
     val onTabChange: (Int) -> Unit = {},
+    /** The tab now showing, by what it is — the helper reads "make it bigger" by it. */
+    val onCurrentTabChange: (Tabs) -> Unit = {},
 )
 
 /** A picture folder's images, ready to serve to remote clients. */
@@ -109,6 +112,8 @@ data class RemoteControlFlows(
     val remotePresentationPlayPauseFlow: Flow<Unit>? = null,
     val remotePresentationLoopToggleFlow: Flow<Unit>? = null,
     val remotePresentationGotoFlow: Flow<Int>? = null,
+    /** Tabs the helper asks the main screen to switch to, when it points at something on one. */
+    val selectTabFlow: Flow<Tabs>? = null,
 )
 
 /** This instance's side of an Instance Link, as a follower, a controller or a primary. */

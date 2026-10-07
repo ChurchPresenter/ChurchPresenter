@@ -43,6 +43,11 @@ import java.util.Locale
 import androidx.compose.runtime.Stable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.churchpresenter.helper.HelperState
+import org.churchpresenter.sharedui.utils.DevFlags
+import org.churchpresenter.sharedui.models.Tabs
 
 /**
  * The desktop app's own state and services: the settings it edits, the managers and ViewModels
@@ -127,6 +132,14 @@ internal class AppRootState(
         MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = REMOTE_FLOW_BUFFER)
     val remoteSelectMediaFlow = MutableSharedFlow<ScheduleItem.MediaItem>(extraBufferCapacity = REMOTE_FLOW_BUFFER)
 
+    // The helper lamp: its conversation, the tab the main screen is on (so "make it bigger" knows
+    // what "it" is), and the one thing it asks of the main screen that no remote flow already does.
+    val helperState = HelperState()
+    var helperCurrentTab by mutableStateOf<Tabs?>(null)
+    // How many songs the library loaded, or null before it has — "empty" only once it has looked.
+    var helperSongCount by mutableStateOf<Int?>(null)
+    val helperSelectTabFlow = MutableSharedFlow<Tabs>(extraBufferCapacity = REMOTE_FLOW_BUFFER)
+
     // What the automation engine last put on screen, or null once it blanked. The engine yields
     // to a hand on the controls: if the outputs show something other than this -- a Schedule row
     // clicked, a song sent from the Songs tab -- a due cue is skipped rather than fired over the
@@ -139,6 +152,15 @@ internal class AppRootState(
     val openOptionsDialog: (Int) -> Unit = { tab ->
         optionsDialogInitialTab = tab
         showOptionsDialog = true
+    }
+
+    /** Puts each output's number on its screen for a few seconds — from Settings and from the helper. */
+    fun identifyScreens() {
+        identifyingScreen = true
+        coroutineScope.launch {
+            delay(UPDATE_CHECK_DELAY_MS)
+            identifyingScreen = false
+        }
     }
     var showStatisticsDialog by mutableStateOf(false)
     var showInstanceLinkDialog by mutableStateOf(false)
@@ -168,6 +190,10 @@ internal class AppRootState(
     var showStyleEditorWindow by mutableStateOf(false)
     var showMemoryMonitorWindow by mutableStateOf(false)
     var developerMenuUnlocked by mutableStateOf(false)
+
+    /** Development builds, the forced dev window, or the developer menu unlocked — what Wick waits for. */
+    val isDevMode: Boolean
+        get() = shouldShowDeveloperMenu(BuildConfig.IS_RELEASE, DevFlags.forceDevWindow, developerMenuUnlocked)
     var lottieGenOutputDir by mutableStateOf<File?>(null)
     var lottieGenOnFileSaved by mutableStateOf<(() -> Unit)?>(null)
     var pendingUpdateResult by mutableStateOf<UpdateCheckResult?>(null)

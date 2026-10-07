@@ -144,7 +144,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :canvas:detekt :presenter:detekt :profiles:detekt :companion-surface:detekt :obs:detekt :live-show:detekt :live-output:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :helper:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :canvas:detekt :presenter:detekt :profiles:detekt :companion-surface:detekt :obs:detekt :live-show:detekt :live-output:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -536,6 +536,14 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.announcements == 'true' }}
         run: ./gradlew :announcements:jacocoTestCoverageVerification -x test
 
+      - name: Helper tests
+        if: ${{ !cancelled() && steps.modules.outputs.helper == 'true' }}
+        run: ./gradlew :helper:test
+
+      - name: Helper coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.helper == 'true' }}
+        run: ./gradlew :helper:jacocoTestCoverageVerification -x test
+
       - name: Lower Third tests
         if: ${{ !cancelled() && steps.modules.outputs.lowerthird == 'true' }}
         run: ./gradlew :lower-third:test
@@ -662,6 +670,7 @@ jobs:
               ("dictionary", "Dictionary"),
               ("stt", "STT"),
               ("announcements", "Announcements"),
+              ("helper", "Helper"),
               ("lower-third", "Lower Third"),
               ("songs", "Songs"),
               ("bible-tab", "Bible tab"),
@@ -867,6 +876,8 @@ jobs:
             stt/build/test-results/
             announcements/build/reports/tests/
             announcements/build/test-results/
+            helper/build/reports/tests/
+            helper/build/test-results/
             lower-third/build/reports/tests/
             lower-third/build/test-results/
             songs/build/reports/tests/

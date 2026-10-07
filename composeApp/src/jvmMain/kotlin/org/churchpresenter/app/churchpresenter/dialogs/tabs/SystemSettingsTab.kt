@@ -1,5 +1,12 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.material3.TextButton
+import org.churchpresenter.strings.generated.resources.settings_helper_title
+import org.churchpresenter.strings.generated.resources.settings_helper_tips
+import org.churchpresenter.strings.generated.resources.settings_helper_show
+import org.churchpresenter.strings.generated.resources.settings_helper_reset
+import org.churchpresenter.settings.resettingSuggestions
+import org.churchpresenter.settings.HelperSettings
 import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.material3.minimumInteractiveComponentSize
 import org.churchpresenter.strings.generated.resources.cancel
@@ -98,7 +105,8 @@ private const val DANGER_EDGE_ALPHA = 0.3f
 fun SystemSettingsTab(
     settings: AppSettings = AppSettings(),
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
-    companionServer: CompanionServer? = null
+    companionServer: CompanionServer? = null,
+    showHelperSettings: Boolean = false,
 ) {
     val fileManager = FileManager()
 
@@ -148,6 +156,7 @@ fun SystemSettingsTab(
                         verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
                         GeneralCard(settings, onSettingsChange)
+                        if (showHelperSettings) HelperCard(settings, onSettingsChange)
                         ManageSettingsCard(companionServer)
                     }
                 }
@@ -155,11 +164,45 @@ fun SystemSettingsTab(
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     storage()
                     GeneralCard(settings, onSettingsChange)
+                    if (showHelperSettings) HelperCard(settings, onSettingsChange)
                     ManageSettingsCard(companionServer)
                 }
             }
         }
         SettingsScrollbar(scrollState)
+    }
+}
+
+/** The helper lamp: whether it is shown, whether it offers tips, and bringing back what was put away. */
+@Composable
+private fun HelperCard(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
+) {
+    val helper = settings.helper
+    val update: (HelperSettings) -> Unit = { next -> onSettingsChange { s -> s.copy(helper = next) } }
+    SettingsCard(title = stringResource(Res.string.settings_helper_title)) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            GeneralToggleRow(
+                label = stringResource(Res.string.settings_helper_show),
+                checked = helper.enabled,
+                onCheckedChange = { update(helper.copy(enabled = it)) }
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            GeneralToggleRow(
+                label = stringResource(Res.string.settings_helper_tips),
+                checked = helper.tipsEnabled,
+                onCheckedChange = { update(helper.copy(tipsEnabled = it)) }
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            TextButton(
+                onClick = { update(helper.resettingSuggestions()) },
+                enabled = helper.dismissedSuggestions.isNotEmpty() || helper.snoozedUntil.isNotEmpty(),
+                modifier = Modifier.padding(vertical = 4.dp)
+            ) {
+                Text(stringResource(Res.string.settings_helper_reset))
+            }
+        }
     }
 }
 

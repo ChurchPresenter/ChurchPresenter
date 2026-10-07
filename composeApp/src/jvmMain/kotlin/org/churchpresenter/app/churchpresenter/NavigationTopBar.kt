@@ -43,6 +43,7 @@ import org.churchpresenter.strings.generated.resources.language_ukrainian
 import org.churchpresenter.strings.generated.resources.language_uzbek
 import org.churchpresenter.strings.generated.resources.menu_about
 import org.churchpresenter.strings.generated.resources.menu_getting_started
+import org.churchpresenter.strings.generated.resources.menu_show_helper
 import org.churchpresenter.strings.generated.resources.add_to_schedule
 import org.churchpresenter.strings.generated.resources.menu_keyboard_shortcuts
 import org.churchpresenter.strings.generated.resources.menu_clear_schedule
@@ -112,6 +113,8 @@ fun FrameWindowScope.NavigationTopBar(
     onHelp: () -> Unit = {},
     onHowToBlog: () -> Unit = {},
     onGettingStarted: () -> Unit = {},
+    /** Help → Show Helper; null leaves the item out — Wick is shown in dev mode only. */
+    onShowHelper: (() -> Unit)? = null,
     onConverter: () -> Unit = {},
     onSongLibrary: () -> Unit = {},
     onCalendar: () -> Unit = {},
@@ -156,7 +159,8 @@ fun FrameWindowScope.NavigationTopBar(
         ConnectMenu(onConnectToInstance, onDisconnectInstance, isInstanceLinkConnected)
         ViewMenu(theme, currentTheme, hasCustomTheme, onCustomizeTheme)
         LanguageMenu(onLanguageChange)
-        HelpMenu(helpLabel, helpMnemonic, ::accelerator, onGettingStarted, onKeyboardShortcuts, onHowToBlog,
+        HelpMenu(helpLabel, helpMnemonic, ::accelerator, onGettingStarted, onShowHelper, onKeyboardShortcuts,
+            onHowToBlog,
             onConverter, onSongLibrary, onCalendar, onAbout, onHelp, onContactUs, onCheckForUpdates)
         if (showDeveloperMenu) {
             DeveloperMenu(isPresenterWindowVisible, onSetPresenterWindowVisible, isDevWindowAlwaysOnTop,
@@ -377,6 +381,7 @@ private fun MenuBarScope.HelpMenu(
     mnemonic: Char,
     accel: (ShortcutAction) -> KeyShortcut?,
     onGettingStarted: () -> Unit,
+    onShowHelper: (() -> Unit)?,
     onKeyboardShortcuts: () -> Unit,
     onHowToBlog: () -> Unit,
     onConverter: () -> Unit,
@@ -389,6 +394,7 @@ private fun MenuBarScope.HelpMenu(
 ) {
     Menu(label, mnemonic = mnemonic) {
         Item(stringResource(Res.string.menu_getting_started), onClick = onGettingStarted)
+        onShowHelper?.let { Item(stringResource(Res.string.menu_show_helper), onClick = it) }
         Item(
             stringResource(Res.string.menu_keyboard_shortcuts),
             onClick = onKeyboardShortcuts,

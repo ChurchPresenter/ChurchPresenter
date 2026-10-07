@@ -136,6 +136,8 @@ data class AppSettings(
     val updateCheckInterval: UpdateCheckInterval = UpdateCheckInterval.EVERY_LAUNCH,
     val lastUpdateCheckTimestamp: Long = 0L,
     val storyPrompt: StoryPromptState = StoryPromptState(),
+    /** The helper lamp in the main window's corner — shown or not, and what it was told to keep quiet. */
+    val helper: HelperSettings = HelperSettings(),
     /** The backgrounds the preview panel's quick tray offers, in the order it shows them. */
     val quickBackgrounds: List<QuickBackground> = emptyList(),
     /** Whether that tray is open or shut — a panel-local choice, switched from the panel itself. */

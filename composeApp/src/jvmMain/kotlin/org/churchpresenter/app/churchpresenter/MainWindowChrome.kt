@@ -19,7 +19,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import org.churchpresenter.sharedui.utils.DevFlags
 import kotlinx.coroutines.launch
 import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -43,6 +42,7 @@ internal fun MainWindowScope.AppMenuBar() {
             onAbout = { showAboutDialog = true },
             onContactUs = { showContactDialog = true },
             onGettingStarted = { showSetupWizard = true },
+            onShowHelper = if (isDevMode) ::showHelper else null,
             onStatistics = { showStatisticsDialog = true },
             onConnectToInstance = { showInstanceLinkDialog = true },
             onDisconnectInstance = { instanceLinkViewModel.disconnect() },
@@ -99,9 +99,7 @@ internal fun MainWindowScope.AppMenuBar() {
                 currentScheduleActions.clearSchedule()
                 selectedScheduleItemId = null
             },
-            showDeveloperMenu = shouldShowDeveloperMenu(
-                BuildConfig.IS_RELEASE, DevFlags.forceDevWindow, developerMenuUnlocked,
-            ),
+            showDeveloperMenu = isDevMode,
             isPresenterWindowVisible = presenterManager.showPresenterWindow.value,
             onSetPresenterWindowVisible = { presenterManager.setShowPresenterWindow(it) },
             isDevWindowAlwaysOnTop = presenterManager.devWindowAlwaysOnTop.value,
@@ -231,7 +229,11 @@ private fun MainWindowScope.mainDesktopPublishers(): MainDesktopPublishers = wit
     MainDesktopPublishers(
         onScheduleActionsReady = { scheduleActions = it },
         onScheduleItemSelected = { itemId -> selectedScheduleItemId = itemId },
-        onSongsLoaded = { songs -> companionServer.updateSongs(songs) },
+        onSongsLoaded = { songs ->
+            helperSongCount = songs.size
+            companionServer.updateSongs(songs)
+        },
+        onCurrentTabChange = { tab -> helperCurrentTab = tab },
         onScenesChanged = { scenes -> scenesForInstanceLink = scenes },
         onBibleLoaded = { bible, translation ->
             primaryBibleForInstanceLink = bible
@@ -306,6 +308,7 @@ private fun MainWindowScope.remoteControlFlows(): RemoteControlFlows = with(root
         remotePresentationPlayPauseFlow = companionServer.onPresentationPlayPause,
         remotePresentationLoopToggleFlow = companionServer.onPresentationLoopToggle,
         remotePresentationGotoFlow = companionServer.onPresentationGoto,
+        selectTabFlow = helperSelectTabFlow,
     )
 }
 

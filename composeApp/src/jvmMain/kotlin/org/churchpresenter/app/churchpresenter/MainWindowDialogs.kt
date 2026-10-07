@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.input.key.key
 import androidx.compose.runtime.Composable
 import org.churchpresenter.strings.generated.resources.Res
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.data.asDurationRow
 import org.churchpresenter.app.churchpresenter.dialogs.AboutDialog
@@ -55,6 +54,7 @@ internal fun MainWindowScope.SettingsDialogs() {
             isVisible = showOptionsDialog,
             initialTab = optionsDialogInitialTab,
             initialSettings = appSettings,
+            showHelperSettings = isDevMode,
             theme = theme,
             settingsManager = settingsManager,
             companionServer = companionServer,
@@ -80,13 +80,7 @@ internal fun MainWindowScope.SettingsDialogs() {
                     updated.streamingSettings.lowerThirdFolder
                 )
             },
-            onIdentifyScreen = {
-                identifyingScreen = true
-                coroutineScope.launch {
-                    delay(UPDATE_CHECK_DELAY_MS)
-                    identifyingScreen = false
-                }
-            },
+            onIdentifyScreen = ::identifyScreens,
             onIdentifyBrowserSource = { index ->
                 presenterManager.identifyBrowserSourceOutput(index)
             },
