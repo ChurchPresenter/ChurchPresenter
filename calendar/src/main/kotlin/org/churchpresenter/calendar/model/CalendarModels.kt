@@ -101,7 +101,8 @@ data class CalendarDocument(
      * - on one side only, and not deleted on the other → kept
      * - on both → the one with the higher [PlannedService.version]; on a tie, the later
      *   [PlannedService.updatedAt]
-     * - deleted on one side → gone, unless the other side's copy outranks the deletion the same way
+     * - deleted on one side → gone, unless the other side's copy outranks the deletion the same way;
+     *   then the deletion is forgotten, so the file never carries one for a service it still holds
      *
      * The version decides, not the clock: a copy can only outrank another by being an edit of it,
      * so an old copy handed back -- by a relay replaying what it stored, or a machine restored from
@@ -130,7 +131,12 @@ data class CalendarDocument(
                     (newest.version == deletedVersion && newest.updatedAt > deletedAt)
                 if (outranks) newest else null
             }
-        val keptTombstones = tombstones.filterValues { it > storedInstant(now.minus(TOMBSTONE_LIFETIME)) }
+        // A deletion the surviving copy outranked is dropped: the copy's version only grows, so the
+        // same deletion handed back later loses the same comparison and has nothing left to guard.
+        val survivors = merged.mapTo(HashSet()) { it.id }
+        val keptTombstones = tombstones.filter { (id, stamp) ->
+            id !in survivors && stamp > storedInstant(now.minus(TOMBSTONE_LIFETIME))
+        }
         return copy(
             version = maxOf(version, other.version),
             // Ordered by id last, so the two machines produce *byte-identical* merges: a stable

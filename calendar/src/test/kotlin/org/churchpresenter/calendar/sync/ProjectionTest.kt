@@ -116,6 +116,17 @@ class ProjectionTest {
     }
 
     @Test
+    fun `no deletion is projected for a service the document still holds`() {
+        val document = CalendarDocument(
+            services = listOf(service.copy(id = "x")),
+            deletedServices = mapOf("x" to "2026-09-01T00:00:00Z", "y" to "2026-09-02T00:00:00Z"),
+            deletedVersions = mapOf("x" to 2L, "y" to 1L),
+        )
+
+        assertEquals(listOf("y"), Projection.deletions(document).map { it.id })
+    }
+
+    @Test
     fun `presets are projected by id and kind only`() {
         val presets = listOf(ItemPreset("p1", "Countdown", ScheduleItem.AnnouncementItem("a", "5:00", isTimer = true)))
 

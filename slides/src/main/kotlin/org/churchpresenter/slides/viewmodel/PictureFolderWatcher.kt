@@ -6,6 +6,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.churchpresenter.sharedui.utils.isSystemArtifact
 import java.io.File
 import java.nio.file.FileSystems
 import java.nio.file.StandardWatchEventKinds
@@ -117,6 +118,7 @@ internal class PictureFolderWatcher(
     fun watchedImageName(event: WatchEvent<*>): String? {
         if (event.kind() == StandardWatchEventKinds.OVERFLOW) return null
         val fileName = event.context()?.toString() ?: return null
+        if (isSystemArtifact(fileName)) return null
         return if (fileName.substringAfterLast('.', "").lowercase() in PICTURE_EXTENSIONS) fileName else null
     }
 

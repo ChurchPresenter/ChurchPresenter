@@ -126,6 +126,14 @@ class PicturesViewModelEdgeTest {
     }
 
     @Test
+    fun `macOS AppleDouble companions are not listed as pictures`() {
+        // CHURCH-PRESENTER-DESKTOP-9V/9W: a Mac had written ._ files beside each picture.
+        val pics = folder("FromAMac", 2).apply { File(this, "._img0.png").writeBytes(byteArrayOf(0, 5, 22, 7)) }
+        val vm = vm(open = pics)
+        assertEquals(listOf("img0.png", "img1.png"), vm.images.map { it.name })
+    }
+
+    @Test
     fun `loading a folder twice lists each picture once`() {
         val pics = folder("Twice", 2)
         val vm = vm(open = pics)
