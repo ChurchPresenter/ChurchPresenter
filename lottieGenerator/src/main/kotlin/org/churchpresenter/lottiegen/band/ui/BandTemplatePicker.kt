@@ -37,7 +37,6 @@ import org.churchpresenter.lottiegen.band.BandStyle
 import org.churchpresenter.lottiegen.band.BibleLottieGenViewModel
 import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.ui.Tokens
-import org.churchpresenter.lottiegen.render.lottieDrawProgress
 
 private val THUMB_WIDTH = 104.dp
 private val THUMB_MIN_HEIGHT = 20.dp
@@ -148,7 +147,7 @@ private fun StyleThumbnail(viewModel: BibleLottieGenViewModel, style: BandStyle,
             val timeline = viewModel.thumbnailTimeline
             val hold = timeline.holdStart.toFloat() / timeline.totalFrames
             Image(
-                painter = rememberLottiePainter(composition = composition, progress = { lottieDrawProgress(hold) }),
+                painter = rememberLottiePainter(composition = composition, progress = { hold }),
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds,
                 // Tagged once it draws, so a test can wait for the chip rather than guess.

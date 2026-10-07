@@ -178,6 +178,22 @@ class PresentationPlayerTimelineTest {
     }
 
     @Test
+    fun `a slide stepped back onto is never drawn unbuilt while it loads`() {
+        val build = Timeline(listOf(appear("title"), appear("title")))
+        val deck = deck(slide(0, timeline = build), slide(1, timeline = build))
+        repeat(STEP_BACK_ROUNDS) { round ->
+            val p = player(deck)
+            p.showSlide(1, enterAtLastStep = true)
+            // Sampled from the moment the call returns: the first frame the slide gets is the
+            // one the output shows, so it must already be built.
+            val first = p.awaitFrame(1)
+            assertEquals(2, first.completedSteps, "round $round")
+            p.close()
+            players.remove(p)
+        }
+    }
+
+    @Test
     fun `a slide with a movie layer and no extracted file still draws its poster`() {
         val movie = LayerSpec.Media(
             id = "movie", zIndex = 0, boundsPt = bounds, shapeIndex = 0, contentRectPt = bounds, mediaFile = null,
@@ -197,3 +213,5 @@ class PresentationPlayerTimelineTest {
         assertEquals(1, p.awaitFrame(1).layers.size)
     }
 }
+
+private const val STEP_BACK_ROUNDS = 200

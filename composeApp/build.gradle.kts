@@ -1140,16 +1140,17 @@ tasks.register<org.gradle.api.tasks.testing.Test>("soakTest") {
     extensions.getByType<JacocoTaskExtension>().isEnabled = false
     outputs.upToDateWhen { false }
     // The hung-test reporter's five minutes are for unit tests. This one runs for hours by design, so
-    // it is only called hung half an hour past the length of the run it was asked for.
+    // it is only called hung a quarter of an hour past the length of the run it was asked for --
+    // before the task timeout below, so a hung run ends with its thread dump rather than without one.
     val soakMinutes = providers.gradleProperty("soakMinutes").orNull?.toDoubleOrNull() ?: 240.0
-    systemProperty("churchpresenter.test.hangThresholdMs", ((soakMinutes + 30) * 60_000).toLong().toString())
-    // The task itself gets the same half hour past the run: the 30-minute cap every other test task
+    systemProperty("churchpresenter.test.hangThresholdMs", ((soakMinutes + 15) * 60_000).toLong().toString())
+    // The task itself gets half an hour past the run: the 30-minute cap every other test task
     // carries would end a four-hour run a quarter of the way in.
     timeout.set(Duration.ofMillis(((soakMinutes + 30) * 60_000).toLong()))
     val reportDir = layout.buildDirectory.dir("reports/soak").get().asFile
     systemProperty("soak.reportDir", reportDir.absolutePath)
     listOf("soakMinutes" to "soak.minutes", "soakFps" to "soak.fps", "soakCueSeconds" to "soak.cueSeconds",
-        "soakSampleSeconds" to "soak.sampleSeconds").forEach { (gradle, system) ->
+        "soakSampleSeconds" to "soak.sampleSeconds", "soakStallSeconds" to "soak.stallSeconds").forEach { (gradle, system) ->
         providers.gradleProperty(gradle).orNull?.let { systemProperty(system, it) }
     }
     doLast {

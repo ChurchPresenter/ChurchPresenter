@@ -13,7 +13,6 @@ import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.churchpresenter.sharedui.composables.keyColorFilter
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.lowerthird.render.LottieFonts
-import org.churchpresenter.lottiegen.render.lottieDrawProgress
 
 /**
  * Displays a Lottie animation in the presenter window.
@@ -61,7 +60,7 @@ fun LowerThirdPresenter(
             // painter at that exact moment caused a visible hitch.
             val painter = rememberLottiePainter(
                 composition = composition,
-                progress = { lottieDrawProgress(progress()) },
+                progress = progress,
                 fontManager = LottieFonts,
                 enableTextGrouping = groupsText,
             )
