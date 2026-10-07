@@ -1095,6 +1095,15 @@ tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest") {
 //   ./gradlew :composeApp:renderBenchmark                         # report to build/reports/render-benchmark/
 //   ./gradlew :composeApp:renderBenchmark -PrecordRenderBaseline  # also overwrite composeApp/benchmarks/
 //   ./gradlew :composeApp:renderBenchmark -PenforceRenderBudget   # fail past one frame at p99
+//   ./gradlew :composeApp:renderBenchmark -PrecordCiRenderBaseline  # write composeApp/benchmarks/ci/ instead
+//   ./gradlew :composeApp:renderBenchmark -PcheckRenderRegression   # fail on a row slower than the CI baseline
+// The two baselines are different machines and are never compared with each other: the one in
+// benchmarks/ is the reference Mac, against the absolute budget; benchmarks/ci/ is recorded BY the
+// hosted CI runner (~10x slower), and is what render-benchmark.yml holds every pull request against.
+// `-PcheckRenderRegression=<file>` names another baseline (relative to the repository root). A row
+// regresses when its typical frame (render p50 + readback p50) passes baseline x (1 + margin) +
+// slack: `-PrenderRegressionMargin` (default 0.5) and `-PrenderRegressionSlackMs` (default 1.0).
+// A missing baseline fails the check -- it never passes for want of something to compare with.
 // Alone in one JVM and never part of `jvmTest` or `check`: timings taken beside other forks measure
 // the machine, not the code. `renderBenchmarkClasses` is declared with `serialTestClasses` above.
 
@@ -1112,10 +1121,39 @@ tasks.register<org.gradle.api.tasks.testing.Test>("renderBenchmark") {
     outputs.upToDateWhen { false }
     val reportDir = layout.buildDirectory.dir("reports/render-benchmark").get().asFile
     systemProperty("renderBenchmark.reportDir", reportDir.absolutePath)
-    systemProperty("renderBenchmark.baselineDir", layout.projectDirectory.dir("benchmarks").asFile.absolutePath)
-    systemProperty("renderBenchmark.record", project.hasProperty("recordRenderBaseline").toString())
+    val recordReference = project.hasProperty("recordRenderBaseline")
+    val recordCi = project.hasProperty("recordCiRenderBaseline")
+    val baselineDir = layout.projectDirectory.dir(if (recordCi) "benchmarks/ci" else "benchmarks").asFile
+    systemProperty("renderBenchmark.baselineDir", baselineDir.absolutePath)
+    systemProperty("renderBenchmark.record", (recordReference || recordCi).toString())
     systemProperty("renderBenchmark.enforce", project.hasProperty("enforceRenderBudget").toString())
     providers.gradleProperty("renderBenchmarkFrames").orNull?.let { systemProperty("renderBenchmark.frames", it) }
+    // `-PcheckRenderRegression` alone has the value "" (or "true" from a properties file): the default.
+    val regressionBaselineName = providers.gradleProperty("checkRenderRegression").orNull
+        ?.let { if (it.isBlank() || it == "true") "composeApp/benchmarks/ci/results.json" else it }
+    val regressionBaseline = regressionBaselineName?.let { rootProject.layout.projectDirectory.file(it).asFile }
+    regressionBaseline?.let { systemProperty("renderBenchmark.regressionBaseline", it.absolutePath) }
+    // As given, so the report and the failure name the repository's file, not the runner's checkout path.
+    regressionBaselineName?.let { systemProperty("renderBenchmark.regressionBaselineName", it) }
+    providers.gradleProperty("renderRegressionMargin").orNull
+        ?.let { systemProperty("renderBenchmark.regressionMargin", it) }
+    providers.gradleProperty("renderRegressionSlackMs").orNull
+        ?.let { systemProperty("renderBenchmark.regressionSlackMs", it) }
+    doFirst {
+        if (recordReference && recordCi) {
+            throw GradleException(
+                "-PrecordRenderBaseline and -PrecordCiRenderBaseline name different machines' baselines; pass one.",
+            )
+        }
+        // Before minutes of measuring, not after them. RenderBenchmark checks again for a direct run.
+        if (regressionBaseline != null && !regressionBaseline.isFile) {
+            throw GradleException(
+                "No render baseline at $regressionBaseline to check against. Record one on the machine " +
+                    "this run is compared on with -PrecordCiRenderBaseline (on CI: dispatch render-benchmark.yml " +
+                    "with record_baseline and commit its ci-render-baseline artifact to composeApp/benchmarks/ci/).",
+            )
+        }
+    }
     doLast {
         val report = reportDir.resolve("results.md")
         if (report.exists()) logger.lifecycle(report.readText())

@@ -1,0 +1,122 @@
+name: Render benchmark
+
+# Holds every pull request's off-screen render times against a baseline recorded on this same kind
+# of runner -- see RenderBenchmark and compareWithBaseline. The hosted runners are ~10x slower than
+# the reference Mac behind composeApp/benchmarks/results.json, so the absolute frame budget cannot
+# be checked here; what can is "this got meaningfully slower than it was", against
+# composeApp/benchmarks/ci/results.json. A row fails past baseline x 1.5 + 1 ms on its typical
+# frame (render p50 + readback p50).
+#
+# Its own workflow rather than a job in test.yml: that file's one job is `test`, the required
+# context on main, with a draft-cancelling first step, a merge-queue trigger and write permissions
+# for its reporters, all of which exist for that context. This gate needs none of them, and folding
+# it in would put its runner time and its concurrency group in the way of the required check.
+#
+# The CI baseline is recorded by dispatching this workflow with `record_baseline`, which uploads
+# `ci-render-baseline`; a maintainer downloads it and commits the two files to
+# composeApp/benchmarks/ci/. Until that file exists in the checkout, the gate step skips with a
+# notice instead of failing every pull request.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      record_baseline:
+        description: 'Record the CI baseline (uploads ci-render-baseline to commit) instead of checking against it'
+        type: boolean
+        required: false
+        default: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: render-benchmark-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    # A draft runs nothing; `ready_for_review` runs it once the pull request is marked ready. Not a
+    # required check, so a skipped run blocks nothing.
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      BASELINE: composeApp/benchmarks/ci/results.json
+      RECORD: ${{ github.event_name == 'workflow_dispatch' && inputs.record_baseline }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Is there a CI baseline
+        id: baseline
+        run: |
+          if [ "$RECORD" = "true" ] || [ -f "$BASELINE" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No CI render baseline committed yet ($BASELINE) -- dispatch this workflow with record_baseline and commit its ci-render-baseline artifact."
+            echo "no CI render baseline committed yet — dispatch with record_baseline" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # Compiled first and the Kotlin compile daemon stopped, so the measurement shares the runner
+      # with nothing but the one benchmark JVM -- see the same step in test.yml.
+      - name: Compile
+        if: steps.baseline.outputs.run == 'true'
+        run: |
+          ./gradlew :composeApp:jvmTestClasses
+          pkill -f KotlinCompileDaemon || true
+
+      - name: Check render times against the CI baseline
+        if: steps.baseline.outputs.run == 'true' && env.RECORD != 'true'
+        run: ./gradlew :composeApp:renderBenchmark -PcheckRenderRegression
+
+      - name: Record the CI baseline
+        if: steps.baseline.outputs.run == 'true' && env.RECORD == 'true'
+        run: ./gradlew :composeApp:renderBenchmark -PrecordCiRenderBaseline
+
+      - name: Summary
+        if: ${{ !cancelled() && steps.baseline.outputs.run == 'true' }}
+        run: |
+          if [ -f composeApp/build/reports/render-benchmark/results.md ]; then
+            cat composeApp/build/reports/render-benchmark/results.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "The benchmark wrote no report; see the step log." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload the report
+        if: ${{ !cancelled() && steps.baseline.outputs.run == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-benchmark
+          path: |
+            composeApp/build/reports/render-benchmark/
+            composeApp/build/test-results/renderBenchmark/
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Upload the recorded baseline
+        if: ${{ !cancelled() && env.RECORD == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-render-baseline
+          path: composeApp/benchmarks/ci/
+          retention-days: 30
+          if-no-files-found: error
