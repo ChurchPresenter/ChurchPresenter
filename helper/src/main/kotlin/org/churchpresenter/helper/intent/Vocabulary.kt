@@ -95,6 +95,12 @@ internal object Vocabulary {
     /** What the Media tab opens. */
     val VIDEO = setOf("video", "videos", "movie", "movies", "clip", "clips", "film", "mp4", "footage")
 
+    /** A lower third, by the names people give it. */
+    val LOWER_THIRD = listOf(
+        "lower third", "lower thirds", "lower-third", "lower-thirds", "lowerthird", "lowerthirds", "lottie", "l3",
+        "name strap", "name straps", "name tag", "nametag", "name bar", "chyron", "speaker name", "name and title",
+    )
+
     /** Asking to bring files in, rather than to put them on screen. */
     val ADD = setOf("add", "import", "load", "upload", "open", "choose", "pick", "select", "get")
 

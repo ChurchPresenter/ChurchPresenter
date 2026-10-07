@@ -3060,6 +3060,17 @@
     <string name="helper_hint_media_file">Click %1$s and choose the video.</string>
     <!-- %1$s is the Go Live button (go_live). -->
     <string name="helper_hint_media_go_live">Click %1$s to show it, and it starts playing. Pause and skip with the controls below.</string>
+    <!-- %1$s is the Lower Third tab's Generate button (generate_lower_third). -->
+    <string name="helper_hint_lower_third_generate">Click %1$s to open the Lower Third Generator.</string>
+    <!-- The next three name the generator's Name and Info fields and its Save Lower Third button,
+         whose labels are the generator's own strings (name, info and save_lower_third in
+         lottieGenerator/src/main/resources/lottiegen_strings*.properties): translate them the way
+         that file does. -->
+    <string name="helper_hint_lower_third_name">Type the person's name in Name.</string>
+    <string name="helper_hint_lower_third_info">Type their title or role in Info, like Pastor or Worship Leader.</string>
+    <string name="helper_hint_lower_third_save">Pick a style and colors if you like, then click Save Lower Third. It lands in the list on the Lower Third tab.</string>
+    <!-- %1$s is the Go Live button (go_live). -->
+    <string name="helper_hint_lower_third_go_live">Pick it in the list and click %1$s to put it on the screen.</string>
     <string name="helper_hint_add_song_language">Click “%1$s”, name the language, then type or paste its lyrics.</string>
     <string name="helper_hint_schedule">This is your schedule. Add songs, verses and slides here to plan the service.</string>
     <string name="helper_hint_clear">This clears everything off the audience screen.</string>

@@ -1,6 +1,8 @@
 package org.churchpresenter.lowerthird
 
 import androidx.compose.foundation.Image
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import org.churchpresenter.sharedui.composables.initialPassClickable
@@ -172,7 +174,10 @@ private fun LowerThirdTabScope.LowerThirdFileList() {
                     scope.launch { refreshKey++ }
                 }
             },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .guideTarget(GuideTargets.LOWER_THIRD_GENERATE),
             shape = AppShape(8.dp)
         ) {
             Text(stringResource(Res.string.generate_lower_third), style = MaterialTheme.typography.labelMedium)

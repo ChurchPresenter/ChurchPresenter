@@ -36,6 +36,11 @@ object GuideTargets {
     val PRESENTATION_GO_LIVE = GuideTarget("presentation.goLive")
     val MEDIA_SELECT_FILE = GuideTarget("media.selectFile")
     val MEDIA_GO_LIVE = GuideTarget("media.goLive")
+    val LOWER_THIRD_GENERATE = GuideTarget("lowerThird.generate")
+    val LOWER_THIRD_GO_LIVE = GuideTarget("lowerThird.goLive")
+    val LOWER_THIRD_NAME = GuideTarget("lottieGen.name")
+    val LOWER_THIRD_INFO = GuideTarget("lottieGen.info")
+    val LOWER_THIRD_SAVE = GuideTarget("lottieGen.save")
 
     /** The main window's tab for [tab]. */
     fun mainTab(tab: Tabs): GuideTarget = GuideTarget("tab.${tab.name}")

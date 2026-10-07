@@ -1,6 +1,8 @@
 package org.churchpresenter.lottiegen.ui
 
 import androidx.compose.foundation.layout.RowScope
+import org.churchpresenter.lottiegen.ControlTag
+import org.churchpresenter.lottiegen.NoControlTag
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -112,7 +114,12 @@ private fun PanelHeader() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp, fontPicker: BandFontPicker? = null) {
+fun ControlPanel(
+    viewModel: LottieGenState,
+    panelWidth: Dp = 436.dp,
+    fontPicker: BandFontPicker? = null,
+    controlTag: ControlTag = NoControlTag,
+) {
     val scrollState = rememberScrollState()
     var showBatchImport by remember { mutableStateOf(false) }
     var batchImportText by remember { mutableStateOf("") }
@@ -137,14 +144,14 @@ fun ControlPanel(viewModel: LottieGenState, panelWidth: Dp = 436.dp, fontPicker:
 
             CanvasSection(viewModel)
             StyleLayoutSection(viewModel)
-            TextSection(viewModel)
+            TextSection(viewModel, controlTag)
             TextStyleSection(viewModel, fontPicker)
             ColorsSection(viewModel)
             ShapeSection(viewModel)
             LogoSection(viewModel)
             TimingSection(viewModel)
             PositionSection(viewModel)
-            ActionsSection(viewModel)
+            ActionsSection(viewModel, controlTag)
             LibrarySection(viewModel, onBatchImport = { showBatchImport = true })
         }
     }
