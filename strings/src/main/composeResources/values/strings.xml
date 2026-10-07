@@ -3020,6 +3020,11 @@
     <string name="helper_tour_stop">Stop</string>
     <string name="helper_hint_tab">This is the %1$s tab.</string>
     <string name="helper_hint_new_song">Click here to write a new song.</string>
+    <!-- %1$s is the Edit Song button's name (edit_song), passed in so the hint names it as the
+         translated UI does. -->
+    <string name="helper_hint_song_translation">Pick the song, then click %1$s.</string>
+    <!-- %1$s is the song editor's Add a language tab (song_add_translation). -->
+    <string name="helper_hint_add_song_language">Click “%1$s”, name the language, then type or paste its lyrics.</string>
     <string name="helper_hint_schedule">This is your schedule. Add songs, verses and slides here to plan the service.</string>
     <string name="helper_hint_clear">This clears everything off the audience screen.</string>
     <string name="helper_hint_take">This sends what is in the preview to the screen.</string>

@@ -22,6 +22,8 @@ object GuideTargets {
     val BACKGROUND_BUTTON = GuideTarget("toolbar.background")
     val SETTINGS_BUTTON = GuideTarget("toolbar.settings")
     val NEW_SONG = GuideTarget("songs.new")
+    val EDIT_SONG = GuideTarget("songs.edit")
+    val ADD_SONG_LANGUAGE = GuideTarget("songEditor.addLanguage")
 
     /** The main window's tab for [tab]. */
     fun mainTab(tab: Tabs): GuideTarget = GuideTarget("tab.${tab.name}")

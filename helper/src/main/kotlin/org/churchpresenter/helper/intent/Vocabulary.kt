@@ -24,6 +24,31 @@ internal object Vocabulary {
     val SETUP = setOf("setup", "configure", "connect", "assign", "use")
     val UNDO = setOf("undo", "revert")
 
+    /** Word starts that mean another language: "translate", "translation", "bilingual", "languages". */
+    val TRANSLATION = listOf("translat", "bilingual", "multilingual", "languag")
+
+    /** Phrases that ask for a song in another language. */
+    val OTHER_LANGUAGE = listOf("another language", "second language", "other language", "two languages", "version in")
+
+    /**
+     * Languages a church sings in, by their English names — "Russian lyrics", "add Spanish". The
+     * app's own locales, and a few more that congregations commonly sing in.
+     */
+    val LANGUAGE_NAMES = setOf(
+        "english", "spanish", "russian", "ukrainian", "belarusian", "polish", "german", "french", "portuguese",
+        "italian", "dutch", "romanian", "czech", "slovak", "croatian", "serbian", "bulgarian", "hungarian",
+        "greek", "turkish", "arabic", "farsi", "persian", "hebrew", "hindi", "nepali", "tamil", "thai", "lao",
+        "chinese", "mandarin", "cantonese", "japanese", "korean", "vietnamese", "indonesian", "malay",
+        "tagalog", "filipino", "swahili", "amharic", "kazakh", "uzbek", "estonian", "latvian", "lithuanian",
+        "finnish", "swedish", "norwegian", "danish", "armenian", "georgian", "moldovan", "latin",
+    )
+
+    /** The song editor's own words for adding one — enough on their own, with no song named. */
+    const val ADD_LANGUAGE = "add a language"
+
+    /** Word starts that make "translation" mean the Bible's, not a song's. */
+    val BIBLE_NAMES = listOf("bible", "scripture")
+
     /** Phrases that make a request a question about where something is. */
     val WHERE = listOf(
         "where", "how do i", "how can i", "how to", "how would i", "find", "show me", "can't find", "cannot find",

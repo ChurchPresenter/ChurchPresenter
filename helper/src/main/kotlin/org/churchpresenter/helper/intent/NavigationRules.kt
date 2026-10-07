@@ -15,6 +15,17 @@ internal fun navigationRule(r: Request): Resolution? {
     return act(hiddenTab?.let { HelperAction.ShowTab(it) } ?: HelperAction.Highlight(tour))
 }
 
+/**
+ * A song in another language, asked or told — "add a translation to this song" is as much a
+ * "how do I" as the question, since the lyrics are the operator's to type.
+ */
+internal fun songTranslationRule(r: Request): Resolution? =
+    if (NavigationTopics.isSongTranslation(r.text, r.context.currentTab)) {
+        act(HelperAction.Highlight(NavigationTopics.songTranslation()))
+    } else {
+        null
+    }
+
 internal fun openSettingsRule(r: Request): Resolution? {
     if (!r.has(Vocabulary.SETTINGS)) return null
     val page = when {

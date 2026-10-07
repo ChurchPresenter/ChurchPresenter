@@ -48,13 +48,13 @@ fun PaneTabRow(
  * readable at a glance, not inferred from a small difference in surface tint.
  */
 @Composable
-fun PaneTab(label: String, selected: Boolean, onClick: () -> Unit) {
+fun PaneTab(label: String, selected: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Text(
         text = label,
         fontSize = 12.sp,
         fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
         color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier
+        modifier = modifier
             .background(
                 if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
                 AppShape(7.dp),

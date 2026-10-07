@@ -17,7 +17,11 @@ import org.churchpresenter.strings.generated.resources.helper_hint_live_preview
 import org.churchpresenter.strings.generated.resources.helper_hint_new_song
 import org.churchpresenter.strings.generated.resources.helper_hint_projection_page
 import org.churchpresenter.strings.generated.resources.helper_hint_schedule
+import org.churchpresenter.strings.generated.resources.edit_song
+import org.churchpresenter.strings.generated.resources.helper_hint_add_song_language
 import org.churchpresenter.strings.generated.resources.helper_hint_settings
+import org.churchpresenter.strings.generated.resources.helper_hint_song_translation
+import org.churchpresenter.strings.generated.resources.song_add_translation
 import org.churchpresenter.strings.generated.resources.helper_hint_tab
 import org.churchpresenter.strings.generated.resources.helper_hint_take
 import org.churchpresenter.strings.generated.resources.helper_hint_toggle_outputs
@@ -60,6 +64,8 @@ internal object NavigationTopics {
 
     /** The tour for [normalized], or null when it names nothing the helper knows. */
     fun find(normalized: String): GuideTour? {
+        // Before the topics: "add a song translation" also says "add a song".
+        if (isSongTranslation(normalized)) return songTranslation()
         TOPICS.firstOrNull { (phrases, _) -> phrases.any { normalized.containsPhrase(it) } }?.let { return it.second() }
         val tab = tabNamed(normalized) ?: return null
         return GuideTour(listOf(tabStep(tab)))
@@ -76,6 +82,39 @@ internal object NavigationTopics {
                 GuideTargets.NEW_SONG,
                 helperText(Res.string.helper_hint_new_song),
                 before = HelperAction.SelectTab(Tabs.SONGS),
+            ),
+        ),
+    )
+
+    /**
+     * Whether [normalized] asks about a song in another language — "add a translation to this song",
+     * "bilingual hymn", "add a language" — and not about a Bible translation.
+     */
+    fun isSongTranslation(normalized: String, currentTab: Tabs? = null): Boolean {
+        if (Vocabulary.BIBLE_NAMES.any { normalized.containsWordPrefix(it) }) return false
+        if (normalized.containsPhrase(Vocabulary.ADD_LANGUAGE)) return true
+        val words = normalized.split(' ')
+        // On the Songs tab, "translate this" or "add Spanish" is about a song without saying so.
+        val aboutSong = words.any { it in Vocabulary.SONG } || currentTab == Tabs.SONGS
+        val aboutLanguage = Vocabulary.TRANSLATION.any { normalized.containsWordPrefix(it) } ||
+            words.any { it in Vocabulary.LANGUAGE_NAMES } ||
+            Vocabulary.OTHER_LANGUAGE.any { normalized.containsPhrase(it) }
+        return aboutSong && aboutLanguage
+    }
+
+    /** The Songs tab, then the song's Edit button, where another language is added. */
+    fun songTranslation() = GuideTour(
+        listOf(
+            tabStep(Tabs.SONGS),
+            GuideStep(
+                GuideTargets.EDIT_SONG,
+                helperText(Res.string.helper_hint_song_translation, helperText(Res.string.edit_song)),
+                before = HelperAction.SelectTab(Tabs.SONGS),
+            ),
+            // In the song editor's own window; pressing Edit moves the tour on to it.
+            GuideStep(
+                GuideTargets.ADD_SONG_LANGUAGE,
+                helperText(Res.string.helper_hint_add_song_language, helperText(Res.string.song_add_translation)),
             ),
         ),
     )

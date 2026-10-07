@@ -287,7 +287,8 @@ private fun LyricsActionBar(
                 tooltipText = editSongStr,
                 painter = painterResource(IconRes.drawable.ic_edit),
                 containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onTertiary
+                contentColor = MaterialTheme.colorScheme.onTertiary,
+                modifier = Modifier.guideTarget(GuideTargets.EDIT_SONG),
             )
         }
 

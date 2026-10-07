@@ -1,6 +1,9 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
 import org.churchpresenter.profiles.SongBackgroundButton
+import org.churchpresenter.helper.ui.GuideSpotlightHost
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -214,24 +217,27 @@ fun EditSongDialog(
         title = if (isNewSong) stringResource(Res.string.new_song) else stringResource(Res.string.edit_song),
         resizable = true
     ) {
-        EditSongContent(
-            song = song,
-            songbooks = songbooks,
-            existingSongs = existingSongs,
-            isNewSong = isNewSong,
-            theme = theme,
-            tuning = tuning,
-            showTuningFields = showTuningFields,
-            chordsVisible = chordsVisible,
-            typicalSeconds = typicalSeconds,
-            onChordsVisibleChange = onChordsVisibleChange,
-            isVisible = isVisible,
-            onApplyBackgroundToSongbook = onApplyBackgroundToSongbook,
-            languageNames = languageNames,
-            onLanguageNamesChange = onLanguageNamesChange,
-            onDismiss = onDismiss,
-            onSave = onSave
-        )
+        // This window's own spotlight: Wick's "add a song translation" tour rings its language tab.
+        GuideSpotlightHost(Modifier.fillMaxSize()) {
+            EditSongContent(
+                song = song,
+                songbooks = songbooks,
+                existingSongs = existingSongs,
+                isNewSong = isNewSong,
+                theme = theme,
+                tuning = tuning,
+                showTuningFields = showTuningFields,
+                chordsVisible = chordsVisible,
+                typicalSeconds = typicalSeconds,
+                onChordsVisibleChange = onChordsVisibleChange,
+                isVisible = isVisible,
+                onApplyBackgroundToSongbook = onApplyBackgroundToSongbook,
+                languageNames = languageNames,
+                onLanguageNamesChange = onLanguageNamesChange,
+                onDismiss = onDismiss,
+                onSave = onSave
+            )
+        }
     }
 }
 
@@ -634,7 +640,11 @@ internal fun EditSongContent(
                                     }
                                 }
                                 if (visibleTranslations < MAX_SONG_EXTRA_TRANSLATIONS) {
-                                    PaneTab(stringResource(Res.string.song_add_translation), selected = false) {
+                                    PaneTab(
+                                        stringResource(Res.string.song_add_translation),
+                                        selected = false,
+                                        modifier = Modifier.guideTarget(GuideTargets.ADD_SONG_LANGUAGE),
+                                    ) {
                                         visibleTranslations += 1
                                         pane = visibleTranslations
                                     }
