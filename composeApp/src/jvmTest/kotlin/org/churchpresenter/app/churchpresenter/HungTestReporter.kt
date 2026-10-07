@@ -60,8 +60,7 @@ import java.util.concurrent.atomic.AtomicReference
  *
  * ## Occurrence five (2026-08-29) proved it, and it is fixed
  *
- * `ThreadDump`'s lock section (once this class's own) did what it was added for. Run 33269248282
- * halted `jvmTestSerial` after 159s in
+ * [appendLockInfo] did what it was added for. Run 33269248282 halted `jvmTestSerial` after 159s in
  * `AppPreviewLowerThirdScreenshotTest` and printed `=== DEADLOCK CYCLE: 2 threads ===` **with lock
  * owners**, which is the ownership evidence `getAllStackTraces` could not give:
  *
@@ -177,6 +176,7 @@ class HungTestReporter internal constructor(
 
         const val DEFAULT_THRESHOLD_MS = 5 * 60 * 1000L
         const val POLL_MS = 10_000L
+        const val STACK_DEPTH = 25
 
         /** Distinctive, so the exit code alone says what happened. */
         const val HUNG_EXIT_CODE = 93
