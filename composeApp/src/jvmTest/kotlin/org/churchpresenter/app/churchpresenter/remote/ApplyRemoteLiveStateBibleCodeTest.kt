@@ -210,4 +210,18 @@ class ApplyRemoteLiveStateBibleCodeTest {
         assertEquals("The LORD is my shepherd; I shall not want.", verse.verseText)
         assertEquals("Psalms", verse.bookName, "with no code to resolve, the primary's own reference stands")
     }
+
+    @Test
+    fun `a code missing its verse or its chapter is not a code, so the primary's wording stands`() {
+        val partials = listOf(
+            codeState(19, 23, 1).copy(verseCodeVerse = null),
+            codeState(19, 23, 1).copy(verseCodeChapter = null),
+        )
+        for (state in partials) {
+            val verse = apply(state, followerBible()).selectedVerses.value.single()
+
+            assertEquals("The LORD is my shepherd; I shall not want.", verse.verseText, "for $state")
+            assertEquals("Psalms", verse.bookName)
+        }
+    }
 }
