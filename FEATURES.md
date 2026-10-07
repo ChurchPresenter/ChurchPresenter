@@ -26,15 +26,19 @@
   `SongListScope.kt`, `SongTableHeader.kt`, `SongListRows.kt`; `SongLyricsPanel.kt`),
   `SongsViewModel.kt`, `SongFolderWatcher.kt`, `SongSearchMatch.kt` (where each search hit matched),
   and `Songs.kt` (the library on disk, `.sps` included)
-- `tabs/AppSongsTab.kt` — the app's parts of the tab: the editor (`EditSongDialog`) and what a song
-  going live records; `presenter/…/TitleSlideSection.kt` — the title slide the tab sends
-- `viewmodel/SongSettingsViewModel.kt`, `data/SpsConverter.kt`; `SongItem` and `SongFileParser` are in
-  `:core-models` (`models/songs/`)
+- The song editor, also in `songs/`: `EditSongDialog.kt` (the dialog and `EditSongContent`) with
+  `EditSongState.kt`, `EditSongHeader.kt`, `EditSongEditor.kt`, `EditSongLyricsField.kt`,
+  `EditSongText.kt`, `SectionBackgroundSlot.kt` and `SongBackgroundButtonState.kt` (the slot the
+  app's Background button fills); `SongChordPreview.kt` and `ChordPicker.kt` — the chord preview:
+  Transpose, the key's palette and the chord picker
+- `tabs/AppSongsTab.kt` — the app's parts of the tab: the editor it opens and what a song going live
+  records; `dialogs/SongEditorBackgroundButton.kt` — the editor's Background button;
+  `presenter/…/TitleSlideSection.kt` — the title slide the tab sends
+- `data/SpsConverter.kt`; `SongItem` and `SongFileParser` are in `:core-models` (`models/songs/`)
 - `dialogs/SongBackground*.kt` — the per-song background panel
 - `data/settings/SongSettings.kt`
 - `presenter/…/SongPresenter.kt`, with `SongLook.kt`, `SongFrame.kt`, `SongFitFrame.kt` and `SongSlide*.kt` beside it
-- `dialogs/EditSongDialog.kt`, `profiles/…/SongSettingsTab.kt`
-- `composables/SongChordPreview.kt` — the editor's chord preview: Transpose, the key's palette and the chord picker
+- `profiles/…/SongSettingsTab.kt`
 - `core-models/src/main/kotlin/.../models/songs/LyricSection.kt` (the `:core-models` module)
 - `converter/` (the `:converter` Gradle module, at the repo root) — format converter tool
 - `songlibrary/` (the `:songlibrary` Gradle module) — the Song Library Manager grid; `TranslationComparison.kt` and `ui/CompareTranslations*.kt` — Compare translations

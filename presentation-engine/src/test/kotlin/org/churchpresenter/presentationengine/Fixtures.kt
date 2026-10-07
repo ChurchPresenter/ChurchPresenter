@@ -5,6 +5,8 @@ import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDType1Font
+import org.apache.poi.openxml4j.opc.OPCPackage
+import org.apache.poi.openxml4j.opc.PackagingURIHelper
 import org.apache.poi.xslf.usermodel.XMLSlideShow
 import org.apache.poi.xslf.usermodel.XSLFSlide
 import org.apache.poi.xslf.usermodel.XSLFTextShape
@@ -140,6 +142,17 @@ object Fixtures {
             file.outputStream().use { ppt.write(it) }
         }
         return file
+    }
+
+    /**
+     * Adds a part to [pptx] under `ppt/fonts/` holding [bytes], with a font content type -- what a
+     * deck saved with "embed fonts" carries, valid or not.
+     */
+    fun addEmbeddedFontPart(pptx: File, name: String, bytes: ByteArray) {
+        OPCPackage.open(pptx).use { pkg ->
+            val part = pkg.createPart(PackagingURIHelper.createPartName("/ppt/fonts/$name"), "application/x-fontdata")
+            part.outputStream.use { it.write(bytes) }
+        }
     }
 
     /** A PDF with [pages] pages, each labeled "Page N". */

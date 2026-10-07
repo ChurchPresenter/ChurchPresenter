@@ -214,35 +214,7 @@ object PresentationLoader {
     private fun loadKeynoteStatic(file: File, analysis: KeynoteStaticSupport.Analysis): LoadResult {
         val warnings = mutableListOf<String>()
 
-        if (analysis.hasPreviewPdf) {
-            val tempPdf = File.createTempFile("keynote_preview_", ".pdf")
-            try {
-                if (KeynoteStaticSupport.extractPreviewPdf(file, tempPdf)) {
-                    val meta = PdfDeckSupport.readMetadata(tempPdf)
-                    if (meta is PdfMetadataResult.Success) {
-                        return LoadResult.Success(
-                            Deck(
-                                sourceFile = file,
-                                format = DeckFormat.KEYNOTE,
-                                slideWidthPt = meta.metadata.pageWidthPt,
-                                slideHeightPt = meta.metadata.pageHeightPt,
-                                slides = staticSlides(
-                                    meta.metadata.pageCount,
-                                    meta.metadata.pageWidthPt, meta.metadata.pageHeightPt,
-                                    notes = analysis.notes,
-                                    fidelity = Fidelity.STATIC_FALLBACK
-                                ),
-                                warnings = warnings,
-                                source = DeckSource.KeynoteStatic(file, KeynoteStaticStrategy.PREVIEW_PDF)
-                            )
-                        )
-                    }
-                    warnings.add("Embedded preview PDF unreadable, using thumbnails")
-                }
-            } finally {
-                tempPdf.delete()
-            }
-        }
+        if (analysis.hasPreviewPdf) previewPdfDeck(file, analysis, warnings)?.let { return it }
 
         if (analysis.orderedThumbnailEntries.isEmpty()) {
             return LoadResult.Failure(DeckLoadError.EMPTY_DOCUMENT, "No preview PDF or slide thumbnails in .key")
@@ -265,6 +237,45 @@ object PresentationLoader {
                 )
             )
         )
+    }
+
+    /**
+     * The deck drawn from the embedded preview PDF, or null when that PDF cannot be extracted or
+     * read -- noting in [warnings] that the thumbnails are used instead when it extracts but does
+     * not read.
+     */
+    private fun previewPdfDeck(
+        file: File,
+        analysis: KeynoteStaticSupport.Analysis,
+        warnings: MutableList<String>,
+    ): LoadResult? {
+        val tempPdf = File.createTempFile("keynote_preview_", ".pdf")
+        try {
+            if (!KeynoteStaticSupport.extractPreviewPdf(file, tempPdf)) return null
+            val meta = PdfDeckSupport.readMetadata(tempPdf) as? PdfMetadataResult.Success
+            if (meta == null) {
+                warnings.add("Embedded preview PDF unreadable, using thumbnails")
+                return null
+            }
+            return LoadResult.Success(
+                Deck(
+                    sourceFile = file,
+                    format = DeckFormat.KEYNOTE,
+                    slideWidthPt = meta.metadata.pageWidthPt,
+                    slideHeightPt = meta.metadata.pageHeightPt,
+                    slides = staticSlides(
+                        meta.metadata.pageCount,
+                        meta.metadata.pageWidthPt, meta.metadata.pageHeightPt,
+                        notes = analysis.notes,
+                        fidelity = Fidelity.STATIC_FALLBACK
+                    ),
+                    warnings = warnings,
+                    source = DeckSource.KeynoteStatic(file, KeynoteStaticStrategy.PREVIEW_PDF)
+                )
+            )
+        } finally {
+            tempPdf.delete()
+        }
     }
 
     private fun staticSlides(

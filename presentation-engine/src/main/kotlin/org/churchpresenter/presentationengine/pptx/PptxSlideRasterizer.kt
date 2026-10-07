@@ -124,13 +124,7 @@ internal object PptxSlideRasterizer {
         try {
             applyHints(graphics, slide)
             graphics.scale(scale, scale)
-            if (spec.zIndex == 0) {
-                val factory = DrawFactory.getInstance(graphics)
-                runCatching { slide.background?.let { factory.getDrawable(it).draw(graphics) } }
-                if (slide.followMasterGraphics) {
-                    runCatching { slide.masterSheet?.let { factory.getDrawable(it).draw(graphics) } }
-                }
-            }
+            if (spec.zIndex == 0) drawBackdrop(graphics, slide)
             for (shapeIndex in spec.shapeIndexes) {
                 drawShape(graphics, slide.shapes[shapeIndex])
             }
@@ -138,6 +132,15 @@ internal object PptxSlideRasterizer {
             graphics.dispose()
         }
         return image
+    }
+
+    /** The slide's background, and its master's graphics when it follows them; either may fail alone. */
+    private fun drawBackdrop(graphics: Graphics2D, slide: XSLFSlide) {
+        val factory = DrawFactory.getInstance(graphics)
+        runCatching { slide.background?.let { factory.getDrawable(it).draw(graphics) } }
+        if (slide.followMasterGraphics) {
+            runCatching { slide.masterSheet?.let { factory.getDrawable(it).draw(graphics) } }
+        }
     }
 
     private fun renderCropped(

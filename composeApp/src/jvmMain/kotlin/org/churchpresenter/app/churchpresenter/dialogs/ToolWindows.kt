@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.foundation.layout.height
+import org.churchpresenter.songs.EditSongDialog
 import androidx.compose.ui.awt.SwingDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,7 +34,7 @@ import org.churchpresenter.strings.generated.resources.open_calendar_manager
 import org.churchpresenter.strings.generated.resources.open_song_library
 import org.churchpresenter.strings.generated.resources.lottie_gen_window_title
 import org.churchpresenter.strings.generated.resources.style_editor_window_title
-import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
+import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.app.churchpresenter.ui.theme.LocalLanguage
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
@@ -116,6 +117,7 @@ fun SongLibraryWindow(
                 // whether it was reached from the Songs tab or from here.
                 songEditor = { editing ->
                     EditSongDialog(
+                        backgroundButton = songEditorBackgroundButton,
                         isVisible = true,
                         song = editing.song,
                         songbooks = editing.songbooks,
@@ -239,6 +241,7 @@ fun CalendarWindow(
                 // SongsViewModel already watches.
                 songEditor = { editing ->
                     EditSongDialog(
+                        backgroundButton = songEditorBackgroundButton,
                         isVisible = true,
                         song = editing.song,
                         songbooks = editing.songbooks,

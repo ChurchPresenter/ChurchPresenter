@@ -10,9 +10,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
  * pane tabs do -- readable at a glance rather than inferred from a small difference in surface tint.
  *
  * Ambient rather than a parameter because the Bible and Song settings tabs reach a segmented button
- * from nineteen call sites spread over seven files, several of them behind `LongMethod` entries in
- * `config/detekt/baseline.xml` that are keyed by signature. One provider at the top of each tab
- * carries the choice to all of them, including the shared preview rows they compose.
+ * from nineteen call sites spread over seven files. One provider at the top of each tab carries the
+ * choice to all of them, including the shared preview rows they compose.
  */
 enum class SegmentedButtonTone { NEUTRAL, ACCENT }
 

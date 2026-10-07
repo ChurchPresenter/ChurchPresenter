@@ -3,6 +3,7 @@ package org.churchpresenter.bibleengine
 import org.churchpresenter.bibleengine.engine.DetectionLogger
 import org.churchpresenter.bibleengine.engine.ScriptureEvent
 import org.churchpresenter.bibleengine.engine.ScriptureReference
+import org.churchpresenter.bibleengine.engine.StickyChange
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -21,7 +22,7 @@ class DetectionLoggerTest {
 
             DetectionLogger.logStickyChange(
                 transcript = "и мы читаем", translation = "and we read",
-                prevBook = 46, prevChapter = 11, newBook = 9, newChapter = 15,
+                change = StickyChange(prevBook = 46, prevChapter = 11, newBook = 9, newChapter = 15),
             )
             DetectionLogger.drainForTests()
 
@@ -48,7 +49,7 @@ class DetectionLoggerTest {
             DetectionLogger.path = "${dir.absolutePath}/detection-log.jsonl"
             Config.logStickyChanges = false
 
-            DetectionLogger.logStickyChange("a", "b", null, null, 9, 15)
+            DetectionLogger.logStickyChange("a", "b", StickyChange(null, null, 9, 15))
             DetectionLogger.drainForTests()
 
             assertTrue(dir.listFiles().isNullOrEmpty(), "expected no file written when disabled")

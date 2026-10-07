@@ -6,22 +6,29 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 
 The **Songs** tab: the song list with its search, songbook filter, columns and favorites, the lyrics
 panel, and the keyboard navigation that pushes sections and lines to the output. `SongsViewModel`
-and the library on disk (`Songs`, the `.song` folders and Mac SongPresenter `.sps` files) live here.
+and the library on disk (`Songs`, the `.song` folders and Mac SongPresenter `.sps` files) live here,
+and so does the **song editor**, `EditSongDialog`, with its chord preview and chord picker.
 
 A real Gradle module of this build: `include(":songs")`, `implementation(projects.songs)`.
 `:composeApp` is its only consumer. Besides the tab it uses `SongsViewModel` (Planning Center
 import, the tool windows, Instance Link mirroring) and `Songs` (`CompanionLibraryFeed`,
 `SpsConverter`).
 
-It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme` and
-`:song-chords`, and nothing of `:composeApp`'s.
+It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`,
+`:song-chords`, `:presenter` (the editor's chord preview draws `ChordLine`) and `:calendar` (its
+footer's `formatDuration`), and nothing of `:composeApp`'s. Its tests also take `:profiles`, to draw
+the real Background button in the editor's slot.
 
 ## Seams to the app
 
 The tab and view model take what the app owns as parameters:
 
 - **`songEditor`**: the slot the song editor is drawn in, handed a `SongEditorRequest`. The app's is
-  `AppSongEditor` (`EditSongDialog`), which also decides whether the tempo field shows.
+  `AppSongEditor`, which opens this module's `EditSongDialog` and decides whether the tempo field
+  shows.
+- **`EditSongDialog`'s `backgroundButton`**: the editor's Background button, handed a
+  `SongBackgroundButtonState`. The app draws `:profiles`' `SongBackgroundButton` in it
+  (`songEditorBackgroundButton`); the tests draw the same through `testBackgroundButton`.
 - **`titleSlideFor`**: builds the title slide. The app passes `titleSlideSection`, which lays the
   lines out the way the presenter draws them. Tests use `fakeTitleSlide`.
 - **`onSongWentLive`**: called once per different song that goes live. The app records statistics
@@ -60,7 +67,12 @@ drive the tab with the app's own seams filled in.
 - `internal` stops at the module edge. What `:composeApp` calls is public; nothing else is.
 - **Tests and screenshots live here**, beside the code. The screenshot suite is
   `screenshot/SongsTabScreenshotTest`, and its images are under `songs/screenshots/songsTab/`. The
-  editor's own screenshots stay in the app, with `EditSongDialog`.
+  editor's are `screenshot/EditSongDialogScreenshotTest`, under `songs/screenshots/editSongDialog/`.
+- **The editor is split by concern**, every file under detekt's function limit: `EditSongDialog`
+  (the dialog, `EditSongContent`, the footer), `EditSongState` (the `@Stable` edit buffers and
+  every edit, plus the tuning and language-name drafts), `EditSongHeader` (the metadata cards),
+  `EditSongEditor` (the pane toolbar, chips, legend), `EditSongLyricsField` and `EditSongText`
+  (the pure text helpers).
 - The went-live telemetry is the app's (`SongsTabGoLiveTelemetryTest`), because it needs the app's
   `StatisticsManager`.
 

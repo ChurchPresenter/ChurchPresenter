@@ -119,7 +119,17 @@ class SlideDiskCache(
         val slideCount: Int,
         val renderWidthPx: Int,
         val slides: List<SlideEntry>
-    )
+    ) {
+        /**
+         * Whether this entry was written by this cache and renderer for [file] as it is now, at
+         * [renderWidthPx] -- any width when that is null.
+         */
+        internal fun isUsableFor(file: File, renderWidthPx: Int?): Boolean =
+            schemaVersion == SCHEMA_VERSION &&
+                rendererVersion == RENDERER_VERSION &&
+                sourceMtime == file.lastModified() &&
+                (renderWidthPx == null || this.renderWidthPx == renderWidthPx)
+    }
 
     @Serializable
     data class SlideEntry(val fidelity: Fidelity, val hasTimeline: Boolean)
@@ -141,17 +151,9 @@ class SlideDiskCache(
      */
     fun lookup(file: File, renderWidthPx: Int?): CachedSlides? {
         val dir = dirFor(file)
-        val manifestFile = File(dir, "manifest.json")
-        if (!manifestFile.isFile) return null
-        val manifest = try {
-            json.decodeFromString(Manifest.serializer(), manifestFile.readText())
-        } catch (_: Exception) {
-            return null
-        }
-        if (manifest.schemaVersion != SCHEMA_VERSION) return null
-        if (manifest.rendererVersion != RENDERER_VERSION) return null
-        if (manifest.sourceMtime != file.lastModified()) return null
-        if (renderWidthPx != null && manifest.renderWidthPx != renderWidthPx) return null
+        val manifest = readManifest(File(dir, "manifest.json"))
+            ?.takeIf { it.isUsableFor(file, renderWidthPx) }
+            ?: return null
         val slideFiles = (0 until manifest.slideCount).map { File(dir, slideName(it)) }
         if (slideFiles.any { !it.isFile }) return null
         // exists() then readText() is a check-then-act, and the prune can delete this directory
@@ -163,6 +165,16 @@ class SlideDiskCache(
             runCatching { File(dir, noteName(i)).readText() }.getOrDefault("")
         }
         return CachedSlides(manifest, slideFiles, notes)
+    }
+
+    /** The manifest at [manifestFile], or null when there is none or it does not parse. */
+    private fun readManifest(manifestFile: File): Manifest? {
+        if (!manifestFile.isFile) return null
+        return try {
+            json.decodeFromString(Manifest.serializer(), manifestFile.readText())
+        } catch (_: Exception) {
+            null
+        }
     }
 
     /**
@@ -251,6 +263,14 @@ class SlideDiskCache(
             if (!isCurrent()) throw SlideCacheSupersededException(dir)
             ensureDir()
             val slideFile = File(dir, slideName(index))
+            writeJpeg(index, image, slideFile)
+            if (note.isNotBlank()) File(dir, noteName(index)).writeText(note)
+            entries.add(SlideEntry(fidelity, hasTimeline))
+            return slideFile
+        }
+
+        /** Writes slide [index] as a JPEG; an [IOException] names the file and why it failed. */
+        private fun writeJpeg(index: Int, image: BufferedImage, slideFile: File) {
             val written = try {
                 ImageIO.write(DeckRasterizer.flattenToRgb(image), "jpg", slideFile)
             } catch (e: IOException) {
@@ -259,9 +279,6 @@ class SlideDiskCache(
                 throw IOException("Failed to write slide $index to $slideFile (${diagnose(dir)})", e)
             }
             if (!written) throw IOException("No JPEG writer accepted slide $index for $slideFile")
-            if (note.isNotBlank()) File(dir, noteName(index)).writeText(note)
-            entries.add(SlideEntry(fidelity, hasTimeline))
-            return slideFile
         }
 
         fun commit() {

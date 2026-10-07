@@ -5,11 +5,13 @@ package org.churchpresenter.app.churchpresenter.dialogs
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.material3.Text
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.bibleformats.catalog.BibleModule
 import org.churchpresenter.bibleformats.catalog.BibleSourceId
 import org.churchpresenter.bibleformats.catalog.InstallPhase
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class BibleCatalogModuleRowTest {
@@ -53,5 +55,37 @@ class BibleCatalogModuleRowTest {
                 assertTrue(dated == (i == 0), "row $i shows the date: $dated")
             }
         }
+    }
+
+    /** Renders [moduleSubtitle] for [module] and returns what it said. */
+    private fun subtitleOf(module: BibleModule, showDate: Boolean): String {
+        var subtitle = ""
+        runComposeUiTest {
+            setContent { MaterialTheme { Text(moduleSubtitle(module, showDate).also { subtitle = it }) } }
+            waitForIdle()
+        }
+        return subtitle
+    }
+
+    @Test
+    fun `the subtitle lists identifier, language, size and date in that order`() {
+        // The size is formatted in the default locale, so the expectation is too.
+        val megabytes = "%.1f".format(4_500_000 / (1024.0 * 1024.0))
+        assertEquals("engkjv · eng · $megabytes MB · 2024-05-01", subtitleOf(module(39, 27), showDate = true))
+    }
+
+    @Test
+    fun `whatever the source did not publish is left out of the subtitle`() {
+        val bare = module(39, 27, date = "").copy(identifier = "", language = "", sizeBytes = 0)
+
+        assertEquals("", subtitleOf(bare, showDate = true))
+    }
+
+    @Test
+    fun `a blank identifier and size leave the language and date standing alone`() {
+        val partial = module(39, 27).copy(identifier = "", sizeBytes = 0)
+
+        assertEquals("eng · 2024-05-01", subtitleOf(partial, showDate = true))
+        assertEquals("eng", subtitleOf(partial, showDate = false))
     }
 }

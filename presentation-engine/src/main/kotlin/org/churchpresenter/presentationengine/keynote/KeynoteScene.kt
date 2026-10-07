@@ -24,14 +24,15 @@ internal class KnSlide(
     /** Flattened draw list, master content first, in z-order. */
     val drawables: List<KnPlacedDrawable>,
     val notes: String,
-    val timeline: Timeline?,
+    /** The slide's builds; absent on a slide with none. */
+    val timeline: Timeline? = null,
     /** Ids of drawables that are build targets (they become their own layers). */
-    val builtDrawableIds: Set<Long>,
+    val builtDrawableIds: Set<Long> = emptySet(),
     /** Ids of drawables whose build fanned out into per-paragraph layers (By Paragraph/Bullet). */
-    val paragraphBuiltDrawableIds: Set<Long>,
-    val transition: SlideTransitionSpec?,
+    val paragraphBuiltDrawableIds: Set<Long> = emptySet(),
+    val transition: SlideTransitionSpec? = null,
     /** Non-null → this slide is beyond the whitelist and must render from the static fallback. */
-    val gateReason: String?
+    val gateReason: String? = null
 )
 
 internal data class KnPlacedDrawable(

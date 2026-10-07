@@ -50,7 +50,7 @@ import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.composables.isJavaFxAvailable
 import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
 import org.churchpresenter.server.CalendarSyncService
-import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
+import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.calendar.CalendarStore
 import org.churchpresenter.calendar.ServiceAutoLoader
 import org.churchpresenter.settings.calendarFolder

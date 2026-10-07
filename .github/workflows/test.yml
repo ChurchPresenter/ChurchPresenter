@@ -129,9 +129,7 @@ jobs:
           python3 .github/ci/affected_modules.py --graph module-graph.txt --base "$BASE_SHA" >> "$GITHUB_OUTPUT"
 
       # Static analysis, ~5s, ahead of the 14-minute suite so a style regression fails fast.
-      # Pre-existing findings are baselined per module -- config/detekt/baseline.xml for
-      # :composeApp, and bible-engine/ and presentation-engine/ carry their own. Everything else
-      # listed here has no baseline at all and has to be clean.
+      # No module has a detekt baseline: every module listed here has to be clean.
       #
       # NOT gated on which modules changed, deliberately. A module's detekt task costs seconds, and the gate is
       # worth nothing if a change that breaks it can skip it: the shared config/detekt/detekt.yml

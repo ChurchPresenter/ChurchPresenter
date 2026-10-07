@@ -85,50 +85,70 @@ private fun parseRow(line: String): StickyRow? = runCatching {
  * down which rows are worth reading, it doesn't replace reading them.
  */
 internal fun classify(row: StickyRow): Verdict {
-    if (row.prevBook != null && row.prevBook == row.newBook &&
-        row.prevChapter != null && row.newChapter == null
-    ) {
-        return Verdict(row, Category.CHAPTER_CLEARED, "book ${row.newBook} kept, chapter ${row.prevChapter} -> null")
-    }
     val newBook = row.newBook
-    if (newBook == null || newBook == row.prevBook) {
-        return Verdict(row, Category.OTHER, "")
+    return when {
+        JumpClassifier.isChapterCleared(row) ->
+            Verdict(row, Category.CHAPTER_CLEARED, "book ${row.newBook} kept, chapter ${row.prevChapter} -> null")
+        newBook == null || newBook == row.prevBook -> Verdict(row, Category.OTHER, "")
+        else -> JumpClassifier.classifyJump(row, newBook)
+    }
+}
+
+/** The steps of [classify] that read the text behind a sticky change. */
+private object JumpClassifier {
+
+    /** The book stayed while the chapter was dropped. */
+    fun isChapterCleared(row: StickyRow): Boolean {
+        val sameBook = row.prevBook != null && row.prevBook == row.newBook
+        return sameBook && row.prevChapter != null && row.newChapter == null
     }
 
-    val tokens = tokenize("${row.transcript} ${row.translation}")
+    /** Why the sticky jumped to [newBook], read from the text that moved it. */
+    fun classifyJump(row: StickyRow, newBook: Int): Verdict {
+        val tokens = tokenize("${row.transcript} ${row.translation}")
 
-    if (hasMultiTokenAliasHit(tokens, newBook)) return Verdict(row, Category.CONFIDENT, "")
+        // Numbered books ("во втором послании Коринфянам" → 2 Corinthians) never appear in the alias
+        // table under their spoken form — the ordinal is read off the surrounding tokens by
+        // ReferenceWatcher.resolveNumberedBookAt. Ask that same function, or every such jump is filed
+        // as UNEXPLAINED, which is the one category that must stay trustworthy: 4 of the 5 UNEXPLAINED
+        // rows across earlier sessions were correct resolutions of exactly this shape, and they
+        // buried the one that was real.
+        val confident = hasMultiTokenAliasHit(tokens, newBook) ||
+            tokens.indices.any { ReferenceWatcher.resolveNumberedBookAt(tokens, it)?.first == newBook }
+        if (confident) return Verdict(row, Category.CONFIDENT, "")
 
-    // Numbered books ("во втором послании Коринфянам" → 2 Corinthians) never appear in the alias
-    // table under their spoken form — the ordinal is read off the surrounding tokens by
-    // ReferenceWatcher.resolveNumberedBookAt. Ask that same function, or every such jump is filed
-    // as UNEXPLAINED, which is the one category that must stay trustworthy: 4 of the 5 UNEXPLAINED
-    // rows across earlier sessions were correct resolutions of exactly this shape, and they
-    // buried the one that was real.
-    if (tokens.indices.any { ReferenceWatcher.resolveNumberedBookAt(tokens, it)?.first == newBook }) {
-        return Verdict(row, Category.CONFIDENT, "")
+        return exactAliasVerdict(row, tokens, newBook)
+            ?: stemVerdict(row, tokens, newBook)
+            ?: Verdict(row, Category.UNEXPLAINED, "no alias/stem match for book $newBook anywhere in the text")
     }
 
-    // Exact single-token alias match. Length floor of 3 mirrors ReferenceWatcher.classify's own
-    // floor for single-token aliases (it skips <=2-char aliases like "мк"/"ре" entirely as too risky
-    // to ever fire from prose) — below that, a coincidental match here wouldn't explain a real jump
-    // anyway, since the live engine would never have used it.
-    val exactHit = tokens.firstOrNull { BookResolver.ALIASES[it] == newBook && it.length >= 3 }
-    if (exactHit != null) {
-        return if (exactHit.length >= 6) Verdict(row, Category.CONFIDENT, "")
-        else Verdict(
-            row,
-            Category.SHORT_ALIAS,
-            "matched a short exact alias \"$exactHit\" — confirm this wasn't ordinary vocabulary",
-        )
+    /**
+     * Exact single-token alias match. Length floor of 3 mirrors ReferenceWatcher.classify's own floor
+     * for single-token aliases (it skips <=2-char aliases like "мк"/"ре" entirely as too risky to ever
+     * fire from prose) — below that, a coincidental match here wouldn't explain a real jump anyway,
+     * since the live engine would never have used it.
+     */
+    private fun exactAliasVerdict(row: StickyRow, tokens: List<String>, newBook: Int): Verdict? {
+        val exactHit = tokens.firstOrNull { BookResolver.ALIASES[it] == newBook && it.length >= MIN_EXACT_ALIAS_LEN }
+        return when {
+            exactHit == null -> null
+            exactHit.length >= CONFIDENT_ALIAS_LEN -> Verdict(row, Category.CONFIDENT, "")
+            else -> Verdict(
+                row,
+                Category.SHORT_ALIAS,
+                "matched a short exact alias \"$exactHit\" — confirm this wasn't ordinary vocabulary",
+            )
+        }
     }
 
-    // Reachable only via the inflection-tolerant stem fallback — measure how far the matched word
-    // extends past the shortest stem that explains it.
-    val stemToken = tokens.firstOrNull { BookResolver.resolveStem(it)?.bookNum == newBook }
-    if (stemToken != null) {
+    /**
+     * Reachable only via the inflection-tolerant stem fallback — measure how far the matched word
+     * extends past the shortest stem that explains it.
+     */
+    private fun stemVerdict(row: StickyRow, tokens: List<String>, newBook: Int): Verdict? {
+        val stemToken = tokens.firstOrNull { BookResolver.resolveStem(it)?.bookNum == newBook } ?: return null
         val extension = extensionOverBestStem(stemToken, newBook)
-        return if (extension >= 3) {
+        return if (extension >= STEM_OVEREXTENSION_CHARS) {
             Verdict(row, Category.STEM_OVEREXTENSION,
                 "\"$stemToken\" extends ${extension} chars past its matched book alias's stem — " +
                     "confirm this wasn't an unrelated word")
@@ -136,9 +156,15 @@ internal fun classify(row: StickyRow): Verdict {
             Verdict(row, Category.CONFIDENT, "")
         }
     }
-
-    return Verdict(row, Category.UNEXPLAINED, "no alias/stem match for book $newBook anywhere in the text")
 }
+
+private const val MIN_EXACT_ALIAS_LEN = 3
+
+/** An exact alias this long is too specific to be ordinary vocabulary. */
+private const val CONFIDENT_ALIAS_LEN = 6
+
+/** A word reaching this far past its stem is more likely an unrelated word than an inflection. */
+private const val STEM_OVEREXTENSION_CHARS = 3
 
 private fun hasMultiTokenAliasHit(tokens: List<String>, book: Int): Boolean {
     for (i in tokens.indices) {
