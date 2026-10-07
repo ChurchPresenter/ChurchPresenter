@@ -4,7 +4,6 @@ import org.junit.platform.engine.TestExecutionResult
 import org.junit.platform.launcher.TestExecutionListener
 import org.junit.platform.launcher.TestIdentifier
 import org.junit.platform.launcher.TestPlan
-import org.churchpresenter.diagnostics.ThreadDump
 import java.util.concurrent.atomic.AtomicReference
 
 /**
