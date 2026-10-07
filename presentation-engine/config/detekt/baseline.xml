@@ -2,8 +2,5 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>ReturnCount:SlideDiskCache.kt$SlideDiskCache$fun lookup(file: File, renderWidthPx: Int?): CachedSlides?</ID>
-    <ID>ReturnCount:SlideFontRegistry.kt$SlideFontRegistry$fun resolveFamily(requested: String): String</ID>
-    <ID>ThrowsCount:SlideDiskCache.kt$SlideDiskCache.Writer$fun putSlide( index: Int, image: BufferedImage, note: String, fidelity: Fidelity, hasTimeline: Boolean ): File</ID>
   </CurrentIssues>
 </SmellBaseline>
