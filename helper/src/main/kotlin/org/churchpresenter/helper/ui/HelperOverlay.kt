@@ -78,6 +78,7 @@ import org.churchpresenter.helper.suggest.tipAt
 import org.churchpresenter.settings.HelperSettings
 import org.churchpresenter.settings.helperDayOf
 import org.churchpresenter.settings.tipDue
+import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.strings.generated.resources.Res
@@ -225,24 +226,28 @@ private fun HelperPanel(
                 onHide = { state.confirmingHide = true },
                 onClose = state::close,
             )
-            Column(
-                Modifier
-                    .weight(1f, fill = false)
-                    .verticalScroll(scroll)
-                    .padding(start = 14.dp, end = 14.dp, top = 4.dp, bottom = 14.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                ThreadLines(state.thread.entries)
-                ReplyBody(state, inputs, executor, tip, ask)
-                if (state.confirmingHide) {
-                    HideCard(
-                        onCancel = { state.confirmingHide = false },
-                        onHide = {
-                            state.close()
-                            inputs.onSettingsChange(inputs.settings.copy(enabled = false))
-                        },
-                    )
+            // The conversation scrolls once it outgrows the panel; the bar says so, in the panel's
+            // right margin.
+            Box(Modifier.weight(1f, fill = false)) {
+                Column(
+                    Modifier
+                        .verticalScroll(scroll)
+                        .padding(start = 14.dp, end = 14.dp, top = 4.dp, bottom = 14.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    ThreadLines(state.thread.entries)
+                    ReplyBody(state, inputs, executor, tip, ask)
+                    if (state.confirmingHide) {
+                        HideCard(
+                            onCancel = { state.confirmingHide = false },
+                            onHide = {
+                                state.close()
+                                inputs.onSettingsChange(inputs.settings.copy(enabled = false))
+                            },
+                        )
+                    }
                 }
+                SettingsScrollbar(scroll)
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = LINE_ALPHA))
             Composer(state, ask)
