@@ -56,6 +56,7 @@ class RuleIntentResolver : IntentResolver {
             ::shortcutRule,
             ::convertSongsRule,
             ::songLibraryRule,
+            ::calendarRule,
             ::songTranslationRule,
             ::songChordsRule,
             ::bibleTranslationRule,

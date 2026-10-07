@@ -34,8 +34,7 @@ internal object NavigationTopics {
         listOf("projection", "second screen", "projector", "screens", "displays", "outputs", "monitor") to ::projection,
         listOf("remote", "phone", "tablet", "companion", "mobile", "ipad") to ::remoteServer,
         listOf(
-            "schedule", "order of service", "run of show", "playlist", "plan a service", "plan the service",
-            "plan service", "service plan",
+            "schedule", "order of service", "run of show", "playlist", "plan the service", "today's service",
         ) to
             { tour(GuideTargets.SCHEDULE_PANEL, Res.string.helper_hint_schedule) },
         listOf("clear", "blank the screen", "black out") to

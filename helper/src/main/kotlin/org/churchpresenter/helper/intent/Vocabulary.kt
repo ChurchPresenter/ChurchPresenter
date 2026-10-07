@@ -153,6 +153,40 @@ internal object Vocabulary {
         "organise", "clean", "tidy", "categorize", "categorise", "assign",
     )
 
+    /** What a planned service is called. */
+    val SERVICE = setOf(
+        "service", "services", "sunday", "sundays", "saturday", "wednesday", "event", "events", "meeting",
+        "meetings", "mass", "gathering", "gatherings", "calendar", "planner",
+    )
+
+    /** Asking for the Calendar Manager, or to plan services ahead of time. */
+    val CALENDAR = listOf(
+        "calendar", "calendar manager", "service calendar", "church calendar", "service planner", "planner",
+        "plan a service", "plan service", "plan services", "plan ahead", "plan sunday", "plan next sunday",
+        "plan for sunday", "add a service", "add service", "new service", "create a service", "schedule a service",
+        "upcoming service", "upcoming services", "future service", "future services", "next sunday",
+        "next week's service", "service plan", "services planned",
+    )
+
+    /** A service that comes round again. */
+    val RECURRING = listOf(
+        "recurring", "recur", "recurs", "repeat", "repeats", "repeating", "repeated", "every week", "every sunday",
+        "each sunday", "each week", "weekly", "biweekly", "bi-weekly", "fortnightly", "every other week",
+        "every two weeks", "every 2 weeks", "monthly", "every month", "series",
+    )
+
+    /** A run of show kept to start new services from. */
+    val TEMPLATE = listOf("template", "templates", "service template", "save as template")
+
+    /** Putting a planned service into the Schedule tab. */
+    val LOAD_SERVICE = listOf(
+        "load into schedule", "load into the schedule", "load the service", "load a service", "load sunday",
+        "auto load", "auto-load", "autoload", "load automatically", "automatically load", "into the schedule tab",
+    )
+
+    /** Running a service's items on their own. Not "timer": a countdown is the Announcements tab's. */
+    val AUTOMATE = listOf("automate", "automation", "automatic", "automatically", "cue", "cues")
+
     /** Documents the converter reads lyrics out of — only taken with a song word beside them. */
     val SONG_DOCUMENTS = setOf(
         "pdf", "pdfs", "word", "docx", "doc", "powerpoint", "pptx", "ppt", "keynote", "document", "documents",

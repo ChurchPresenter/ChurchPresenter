@@ -10,6 +10,9 @@ import org.churchpresenter.sharedui.models.Tabs
 /** Which content an appearance change is for. */
 enum class ContentScope { SONG, BIBLE, ALL }
 
+/** What about planned services the operator asked — each opens the Calendar Manager with its own how-to. */
+enum class CalendarTopic { PLAN, REPEAT, TEMPLATE, LOAD, AUTOMATE }
+
 /** Whether a background change is kept, or only shown for the rest of this service. */
 enum class Persistence { SAVED, THIS_SERVICE }
 
@@ -117,6 +120,11 @@ sealed interface HelperAction {
      * when the operator named the program; [sourceName] is how that program writes its name.
      */
     data class OpenConverter(val sourceId: String? = null, val sourceName: String? = null) : HelperAction {
+        override val needsConfirmation get() = false
+    }
+
+    /** Open the Calendar Manager, saying how to do the [topic] asked about. */
+    data class OpenCalendar(val topic: CalendarTopic = CalendarTopic.PLAN) : HelperAction {
         override val needsConfirmation get() = false
     }
 

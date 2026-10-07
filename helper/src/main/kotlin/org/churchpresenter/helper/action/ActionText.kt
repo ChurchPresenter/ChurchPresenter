@@ -1,6 +1,11 @@
 package org.churchpresenter.helper.action
 
 import org.churchpresenter.helper.HelperText
+import org.churchpresenter.strings.generated.resources.helper_open_calendar
+import org.churchpresenter.strings.generated.resources.helper_open_calendar_repeat
+import org.churchpresenter.strings.generated.resources.helper_open_calendar_template
+import org.churchpresenter.strings.generated.resources.helper_open_calendar_load
+import org.churchpresenter.strings.generated.resources.helper_open_calendar_automate
 import org.churchpresenter.strings.generated.resources.helper_open_song_library
 import org.churchpresenter.strings.generated.resources.helper_open_converter
 import org.churchpresenter.strings.generated.resources.helper_open_converter_documents
@@ -80,6 +85,15 @@ fun HelperAction.describe(undoLabel: HelperText? = null): HelperText = when (thi
         else -> helperText(Res.string.helper_open_converter)
     }
     HelperAction.OpenSongLibrary -> helperText(Res.string.helper_open_song_library)
+    is HelperAction.OpenCalendar -> helperText(
+        when (topic) {
+            CalendarTopic.PLAN -> Res.string.helper_open_calendar
+            CalendarTopic.REPEAT -> Res.string.helper_open_calendar_repeat
+            CalendarTopic.TEMPLATE -> Res.string.helper_open_calendar_template
+            CalendarTopic.LOAD -> Res.string.helper_open_calendar_load
+            CalendarTopic.AUTOMATE -> Res.string.helper_open_calendar_automate
+        },
+    )
     HelperAction.Greet -> helperText(Res.string.helper_greeting)
     HelperAction.Thanks -> helperText(Res.string.helper_youre_welcome)
     HelperAction.UndoLast -> undoLabel
