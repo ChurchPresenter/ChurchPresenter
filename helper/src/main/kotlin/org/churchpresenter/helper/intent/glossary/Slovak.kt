@@ -877,5 +877,7 @@ internal val SLOVAK = Glossary(
         "styl*" to "style",
         "formát*" to "format",
         "farb*" to "color",
+
+        // The help table's own examples.
     ),
 )

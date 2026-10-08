@@ -2511,7 +2511,7 @@
     <string name="helper_command_look_2_does">Změní ho jen pro tuto bohoslužbu</string>
     <string name="helper_command_look_3">zvětši text</string>
     <string name="helper_command_look_3_does">Zvětší nebo zmenší text</string>
-    <string name="helper_command_look_4">zpět</string>
+    <string name="helper_command_look_4">vrátit zpět</string>
     <string name="helper_command_look_4_does">Vrátí poslední změnu od Wicka</string>
     <string name="helper_commands_bible">Bible</string>
     <string name="helper_command_bible_1">zobraz Jan 3:16</string>
@@ -2548,7 +2548,7 @@
     <string name="helper_command_service_1_does">Posouvá obrázky a snímky</string>
     <string name="helper_command_service_2">vymaž obrazovku</string>
     <string name="helper_command_service_2_does">Vymaže, co je na obrazovce</string>
-    <string name="helper_command_service_3">zobrazit</string>
+    <string name="helper_command_service_3">pustit naživo</string>
     <string name="helper_command_service_3_does">Pošle, co čeká v náhledu</string>
     <string name="helper_command_service_4">další položka</string>
     <string name="helper_command_service_4_does">Přejde na další položku programu</string>

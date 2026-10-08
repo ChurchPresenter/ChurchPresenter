@@ -666,5 +666,8 @@ internal val FINNISH = Glossary(
         "väriä" to "color",
         "värit" to "color",
         "värejä" to "color",
+
+        // The help table's own examples.
+        "vanhemp*" to "parents",
     ),
 )

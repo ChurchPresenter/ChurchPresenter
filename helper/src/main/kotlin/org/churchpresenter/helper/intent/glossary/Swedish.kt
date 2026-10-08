@@ -655,5 +655,8 @@ internal val SWEDISH = Glossary(
         "färger" to "color",
         "farg" to "color",
         "fargen" to "color",
+
+        // The help table's own examples.
+        "föräldr*" to "parents",
     ),
 )

@@ -565,5 +565,12 @@ internal val TAGALOG = Glossary(
         "i-style" to "style",
         "disenyo" to "design",
         "kulay" to "color",
+
+        // The help table's own examples.
+        "magdadagdag" to "add",
+        "saan ako" to "where do i",
+        "magdadagdag ng" to "add a",
+        "magulang" to "parents",
+        "sabay-sabay na i-edit" to "batch edit",
     ),
 )

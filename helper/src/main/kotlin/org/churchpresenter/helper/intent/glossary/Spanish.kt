@@ -749,5 +749,17 @@ internal val SPANISH = Glossary(
         "final del canto" to "end of song",
         "final de la canción" to "end of song",
         "final de la cancion" to "end of song",
+
+        // The help table's own examples.
+        "rótulo inferior" to "lower third",
+        "rotulo inferior" to "lower third",
+        "cómo hago un" to "how do i make a",
+        "como hago un" to "how do i make a",
+        "cómo hago una" to "how do i make a",
+        "como hago una" to "how do i make a",
+        "configuro" to "set up",
+        "por lotes" to "batch",
+        "por lote" to "batch",
+        "padres" to "parents",
     ),
 )

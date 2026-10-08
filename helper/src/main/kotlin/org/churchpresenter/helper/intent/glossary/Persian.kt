@@ -1066,5 +1066,12 @@ internal val PERSIAN = Glossary(
         "استایل" to "style",
         "استايل" to "style",
         "رنگ" to "color",
+
+        // The help table's own examples.
+        "را نشان بده" to "show",
+        "را نشان بدهید" to "show",
+        "اضافه کنم" to "add",
+        "بسازم" to "make",
+        "والدین" to "parents",
     ),
 )

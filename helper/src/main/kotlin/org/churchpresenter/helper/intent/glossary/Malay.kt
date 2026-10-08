@@ -533,5 +533,12 @@ internal val MALAY = Glossary(
         "penanda akhir lagu" to "end of song marker",
         "penanda akhir" to "end marker",
         "akhir lagu" to "end of song",
+
+        // The help table's own examples.
+        "ibu bapa" to "parents",
+        "bilik bayi" to "nursery",
+        "jam" to "clock",
+        "secara pukal" to "batch",
+        "tukar lagu daripada" to "convert songs from",
     ),
 )

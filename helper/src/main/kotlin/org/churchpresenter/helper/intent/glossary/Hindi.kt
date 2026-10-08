@@ -780,5 +780,11 @@ internal val HINDI = Glossary(
         "रंग" to "color",
         "फ़ॉर्मेट" to "format",
         "फॉर्मेट" to "format",
+
+        // The help table's own examples.
+        "स्क्रीनें" to "screens",
+        "माता-पिता" to "parents",
+        "कैसे बनाऊँ" to "how do i make",
+        "बनाऊँ" to "make",
     ),
 )

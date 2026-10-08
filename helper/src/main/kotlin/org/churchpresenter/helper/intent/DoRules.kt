@@ -1,6 +1,5 @@
 package org.churchpresenter.helper.intent
 
-import org.churchpresenter.calendar.model.parseReference
 import org.churchpresenter.helper.action.HelperAction
 
 // The rules that do a job outright rather than show where it is done: a countdown, an announcement,
@@ -42,6 +41,7 @@ internal fun announcementRule(r: Request): Resolution? {
         ?: QUOTED.find(raw)?.groupValues?.get(1)
             ?.takeIf { r.hasPhrase(Vocabulary.ANNOUNCEMENT) || r.first == "show" }
         ?: typedAnnouncement(r)
+        ?: pagedParent(r)
     val shown = text?.trim()?.trim('"', '“', '”', '«', '»')?.trim()
     return shown?.takeIf { it.isNotEmpty() }?.let { act(HelperAction.ShowAnnouncement(it)) }
 }
@@ -57,6 +57,20 @@ private fun typedAnnouncement(r: Request): String? {
     return if (':' in raw) raw.substringAfter(':') else raw.substringAfter(' ', "")
 }
 
+private val CHILDREN_ROOMS = listOf(
+    "nursery", "kids room", "baby room", "babies room", "children's room", "childcare", "child care",
+)
+
+/**
+ * "Сәкеннің ата-анасын балалар бөлмесіне шақыр": the parents and a children's room, in words no English
+ * pattern reads. The page is shown as typed — it is already in the language the church reads.
+ */
+private fun pagedParent(r: Request): String? {
+    if (!r.says("parents", "parent") || !r.hasPhrase(CHILDREN_ROOMS)) return null
+    val typed = r.raw.trim().replaceFirstChar { it.uppercase() }
+    return if (typed.last() in ".!?。！") typed else "$typed."
+}
+
 private val TO_SCHEDULE = listOf(
     "to the schedule", "to schedule", "into the schedule", "on the schedule", "in the schedule",
 )
@@ -66,7 +80,7 @@ private val SONG_PREFIX = Regex("""^(?:the\s+|a\s+)?(?:song|hymn)\s+(?:number\s+
 /** "Add John 3:16 to the schedule", "put amazing grace on the schedule", "add song 245 to schedule". */
 internal fun addToScheduleRule(r: Request): Resolution? {
     val what = scheduledText(r) ?: return null
-    val ref = parseReference(asReference(what))?.takeIf { it.bookName.split(' ').last() !in Vocabulary.NOT_A_BOOK }
+    val ref = readReference(asReference(what))?.takeIf { it.bookName.split(' ').last() !in Vocabulary.NOT_A_BOOK }
     val action = if (ref != null) {
         val book = ref.bookName.split(' ').joinToString(" ") { w -> w.replaceFirstChar { it.uppercase() } }
         val first = maxOf(1, ref.firstVerse)
@@ -92,17 +106,15 @@ private fun scheduledText(r: Request): String? {
     return what.takeIf { it.isNotEmpty() && it !in setOf("it", "this", "that", "this song", "this verse") }
 }
 
-/** A typed reference in the form [parseReference] reads: "john chapter 3 verse 16" → "john 3:16". */
-internal fun asReference(text: String): String = text
-    .replace(Regex("""\bchapter (\d+) verses? (\d+)"""), "$1:$2")
-    .replace(Regex("""^(.*\p{L}) (\d{1,3}) (\d{1,3})$"""), "$1 $2:$3")
-    .replace(Regex("""\s*:\s*"""), ":")
-    .replace(Regex("""(\d) ?- ?(\d)"""), "$1-$2")
-
-private val SCHEDULE_WORDS = listOf("in the schedule", "from the schedule", "on the schedule", "schedule item")
+private val SCHEDULE_WORDS = listOf(
+    "in the schedule", "from the schedule", "on the schedule", "to the schedule", "schedule item",
+)
 private const val GO_VERB = "(?:go to|jump to|skip to|move to|show|open)"
-private const val IN_SCHEDULE = "(?:in|from|on) the schedule"
+private const val IN_SCHEDULE = "(?:in|from|on|to) the schedule"
 private val GO_TO = Regex("""^$GO_VERB\s+(?:the\s+)?(.+?)\s+$IN_SCHEDULE$""")
+
+/** The schedule named first: "go to in the schedule the sermon", as "siirry ohjelmassa saarnaan" reads. */
+private val GO_TO_SCHEDULE_FIRST = Regex("""^$GO_VERB\s+$IN_SCHEDULE\s+(?:the\s+)?(.+)$""")
 
 /** The same with the verb last: "the sermon in the schedule go to", "in the schedule the sermon go to". */
 private val GO_TO_VERB_LAST = Regex("""^(?:$IN_SCHEDULE\s+)?(?:the\s+)?(.+?)(?:\s+$IN_SCHEDULE)?\s+$GO_VERB$""")
@@ -111,7 +123,9 @@ private val GO_TO_VERB_LAST = Regex("""^(?:$IN_SCHEDULE\s+)?(?:the\s+)?(.+?)(?:\
 internal fun scheduleStepRule(r: Request): Resolution? {
     val aboutItem = r.says("item", "items") || r.hasPhrase(SCHEDULE_WORDS) || r.says("schedule")
     if (!aboutItem) return null
-    (GO_TO.find(r.text) ?: GO_TO_VERB_LAST.find(r.text)?.takeIf { r.hasPhrase(SCHEDULE_WORDS) })?.let { m ->
+    val match = GO_TO.find(r.text) ?: GO_TO_SCHEDULE_FIRST.find(r.text)
+        ?: GO_TO_VERB_LAST.find(r.text)?.takeIf { r.hasPhrase(SCHEDULE_WORDS) }
+    match?.let { m ->
         val name = m.groupValues[1]
         if (name !in setOf("next", "next item", "previous", "previous item", "last item")) {
             return act(HelperAction.ScheduleGoTo(name))

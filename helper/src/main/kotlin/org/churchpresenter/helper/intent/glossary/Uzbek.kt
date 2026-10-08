@@ -677,5 +677,10 @@ internal val UZBEK = Glossary(
         "qoshiq sarlavha*" to "song title",
         "sarlavha*" to "title",
         "havola*" to "reference",
+
+        // The help table's own examples.
+        "ni koʻrsat" to "show",
+        "ota-ona*" to "parents",
+        "qanday qilaman" to "how do i make",
     ),
 )

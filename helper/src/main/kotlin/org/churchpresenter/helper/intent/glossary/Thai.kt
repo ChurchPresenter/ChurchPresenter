@@ -524,6 +524,10 @@ internal val THAI = Glossary(
         "หน้าตา" to "look",
         "รูปลักษณ์" to "appearance",
         "สีตัวอักษร" to "text color",
+
+        // The help table's own examples.
+        "เพลง" to "song",
+        "ผู้ปกครอง" to "parents",
     ),
     spaced = false,
 )

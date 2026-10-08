@@ -582,6 +582,16 @@ internal val JAPANESE = Glossary(
         "書式" to "format",
         "デザイン" to "design",
         "文字色" to "text color",
+
+        // The help table's own examples.
+        "を表示" to "show",
+        "を進行表に追加" to "to the schedule add",
+        "進行表に追加" to "to the schedule add",
+        "進行表の" to "in the schedule ",
+        "へ移動" to "go to",
+        "保護者" to "parents",
+        "両親" to "parents",
+        "保育室" to "nursery",
     ),
     spaced = false,
 )

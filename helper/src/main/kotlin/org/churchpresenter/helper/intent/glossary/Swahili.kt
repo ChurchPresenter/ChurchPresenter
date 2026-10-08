@@ -531,7 +531,7 @@ internal val SWAHILI = Glossary(
         "ninahamishaje" to "how do i move",
         "ninasogezaje" to "how do i move",
         "ninakuzaje" to "how do i enlarge",
-        "ninawekaje" to "how do i put",
+        "ninawekaje" to "how do i set up",
         "ninaharirije" to "how do i edit",
         "sogeza" to "move",
         "badilisha maneno" to "change the words",
@@ -567,5 +567,17 @@ internal val SWAHILI = Glossary(
         "mwonekano" to "look",
         "mtindo" to "style",
         "rangi" to "color",
+
+        // The help table's own examples.
+        "ninaongeza" to "add",
+        "kodi" to "chords",
+        "safisha" to "clear",
+        "weka projekta" to "set up the projector",
+        "kioo cha jukwaani" to "stage monitor",
+        "onyesho" to "display",
+        "mfululizo wa picha" to "slideshow",
+        "ninatengenezaje" to "how do i make",
+        "kwa wingi" to "batch",
+        "wazazi" to "parents",
     ),
 )

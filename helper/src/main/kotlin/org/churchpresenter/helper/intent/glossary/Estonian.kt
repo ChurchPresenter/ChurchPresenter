@@ -619,5 +619,11 @@ internal val ESTONIAN = Glossary(
         "vormin*" to "format",
         "värv*" to "color",
         "varv*" to "color",
+
+        // The help table's own examples.
+        "mine" to "go to",
+        "juurde" to "",
+        "vanema*" to "parents",
+        "lastet*" to "kids room",
     ),
 )

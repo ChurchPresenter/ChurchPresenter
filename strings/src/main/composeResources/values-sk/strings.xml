@@ -2531,7 +2531,7 @@
     <string name="helper_command_look_2_does">Zmení ho len pre túto bohoslužbu</string>
     <string name="helper_command_look_3">zväčši text</string>
     <string name="helper_command_look_3_does">Zväčší alebo zmenší text</string>
-    <string name="helper_command_look_4">späť</string>
+    <string name="helper_command_look_4">vrátiť späť</string>
     <string name="helper_command_look_4_does">Vráti poslednú zmenu od Wicka</string>
     <string name="helper_commands_bible">Biblia</string>
     <string name="helper_command_bible_1">zobraz Ján 3:16</string>

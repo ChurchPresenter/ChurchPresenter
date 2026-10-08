@@ -9,7 +9,7 @@ internal val KAZAKH = Glossary(
         "қай жерден" to "where",
         "мен қалай" to "how do i",
         "қалай істеймін" to "how do i",
-        "қалай жасаймын" to "how do i",
+        "қалай жасаймын" to "how do i make",
         "қалай болады" to "how can i",
         "қалай аламын" to "how can i",
         "қалайша" to "how do i",
@@ -575,5 +575,8 @@ internal val KAZAKH = Glossary(
         "атау*" to "title",
         "тақырып*" to "title",
         "сілтеме*" to "reference",
+
+        // The help table's own examples.
+        "ата-ана*" to "parents",
     ),
 )

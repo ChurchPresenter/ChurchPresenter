@@ -788,5 +788,9 @@ internal val LATVIAN = Glossary(
         "krasa" to "color",
         "krasu" to "color",
         "krasas" to "color",
+
+        // The help table's own examples.
+        "vecāk*" to "parents",
+        "bērnistab*" to "kids room",
     ),
 )

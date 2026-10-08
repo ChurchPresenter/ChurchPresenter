@@ -2,6 +2,8 @@ package org.churchpresenter.helper.suggest
 
 import org.churchpresenter.helper.action.HelperAction
 import org.churchpresenter.helper.intent.ResolveContext
+import org.churchpresenter.helper.intent.glossary.Glossaries
+import org.churchpresenter.helper.intent.normalize
 import org.churchpresenter.helper.intent.Resolution
 import org.churchpresenter.helper.intent.RuleIntentResolver
 import java.io.File
@@ -25,11 +27,12 @@ class TranslatedHelpExamplesTest {
 
     private fun outcome(text: String, language: String): String {
         val resolution = resolver.resolveNow(text, ResolveContext(language = language))
-        val action = (resolution as? Resolution.Act)?.action ?: return resolution.toString()
+        val action = (resolution as? Resolution.Act)?.action ?: return resolution::class.simpleName.orEmpty()
+        // The words a translation carries (a book, a song, a message) differ by language; what is done does not.
         return if (action is HelperAction.Highlight) {
             "tour " + action.tour.steps.joinToString(" > ") { it.target.id }
         } else {
-            action.toString()
+            action::class.simpleName.orEmpty()
         }
     }
 
@@ -45,7 +48,13 @@ class TranslatedHelpExamplesTest {
                 val example = translated[command.example.key] ?: return@mapNotNull null
                 val expected = outcome(command.request, "en")
                 val actual = outcome(example, language)
-                if (actual == expected) null else "$language ${command.example.key}: \"$example\" -> $actual"
+                if (actual == expected) {
+                    null
+                } else {
+                    val read = Glossaries.readings(normalize(example), language).first()
+                    "$language ${command.example.key}: \"$example\" read as \"$read\" -> $actual, " +
+                        "not \"${command.request}\" -> $expected"
+                }
             }
         }
         assertEquals(emptyList(), wrong)

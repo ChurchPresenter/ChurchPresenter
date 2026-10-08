@@ -582,5 +582,8 @@ internal val DUTCH = Glossary(
         "opmaak" to "format",
         "opmaken" to "format",
         "kleur*" to "color",
+
+        // The help table's own examples.
+        "ouders" to "parents",
     ),
 )

@@ -1135,5 +1135,10 @@ internal val ARABIC = Glossary(
         "النمط" to "style",
         "لون" to "color",
         "اللون" to "color",
+
+        // The help table's own examples.
+        "والدي" to "parents",
+        "والدا" to "parents",
+        "والدين" to "parents",
     ),
 )

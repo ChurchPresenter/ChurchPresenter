@@ -618,5 +618,10 @@ internal val TAMIL = Glossary(
         "வடிவமை*" to "design",
         "நிறம்" to "color",
         "நிறத்*" to "color",
+
+        // The help table's own examples.
+        "pdf-ஐ" to "a pdf",
+        "பெற்றோர*" to "parents",
+        "குழந்தைகள் அறை*" to "nursery",
     ),
 )

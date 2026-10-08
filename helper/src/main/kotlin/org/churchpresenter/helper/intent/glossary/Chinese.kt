@@ -657,6 +657,10 @@ internal val CHINESE = Glossary(
         "格式" to "format",
         "文字颜色" to "text color",
         "颜色" to "color",
+
+        // The help table's own examples.
+        "程序单里的" to "in the schedule ",
+        "家长" to "parents",
     ),
     spaced = false,
 )

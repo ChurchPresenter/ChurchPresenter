@@ -2587,7 +2587,7 @@
     <string name="helper_command_service_3_does">Mengirim isi Pratinjau ke layar</string>
     <string name="helper_command_service_4">item berikutnya</string>
     <string name="helper_command_service_4_does">Pindah ke item jadwal berikutnya</string>
-    <string name="helper_command_service_5">ke khotbah di jadwal</string>
+    <string name="helper_command_service_5">pergi ke khotbah di jadwal</string>
     <string name="helper_command_service_5_does">Pindah ke item jadwal menurut nama</string>
     <string name="helper_command_service_6">apa yang sedang tayang</string>
     <string name="helper_command_service_6_does">Menyebutkan isi layar sekarang</string>

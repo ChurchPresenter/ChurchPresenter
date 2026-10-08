@@ -585,5 +585,10 @@ internal val NEPALI = Glossary(
         "शैली" to "style",
         "रङ" to "color",
         "देखावट" to "appearance",
+
+        // The help table's own examples.
+        "जाऊ" to "go to",
+        "आमाबुबा*" to "parents",
+        "शिशु कोठा*" to "nursery",
     ),
 )

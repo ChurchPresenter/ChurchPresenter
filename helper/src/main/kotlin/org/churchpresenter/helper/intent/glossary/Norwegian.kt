@@ -601,5 +601,8 @@ internal val NORWEGIAN = Glossary(
         "stiler" to "style",
         "formater*" to "format",
         "farge*" to "color",
+
+        // The help table's own examples.
+        "foreldr*" to "parents",
     ),
 )

@@ -794,5 +794,15 @@ internal val PORTUGUESE = Glossary(
         "fim da musica" to "end of song",
         "final da música" to "end of song",
         "final da musica" to "end of song",
+
+        // The help table's own examples.
+        "pais" to "parents",
+        "sequência de fotos" to "slideshow",
+        "sequencia de fotos" to "slideshow",
+        "como faço um" to "how do i make a",
+        "como faco um" to "how do i make a",
+        "como faço uma" to "how do i make a",
+        "configuro" to "set up",
+        "em lote" to "batch",
     ),
 )

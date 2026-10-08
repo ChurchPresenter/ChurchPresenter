@@ -13,6 +13,7 @@ internal fun normalize(input: String): String =
         .replace('：', ':')
         .replace(Regex("[\u064B-\u0652\u0640]"), "")
         .replace(Regex("""[^\p{L}\p{M}\p{N}:#'\-\s]"""), " ")
+        .replace(Regex("""(\d)-(\p{L})"""), "$1 $2")
         .replace(Regex("""\s+"""), " ")
         .trim()
 
@@ -105,8 +106,8 @@ class RuleIntentResolver : IntentResolver {
             ::songChordsRule,
             ::bibleTranslationRule,
             ::mediaTopicsRule,
-            ::navigationRule,
             ::newSongRule,
+            ::navigationRule,
             ::openSettingsRule,
             // Before the tab rule: "show song 245" is that song, not the Songs tab.
             ::namedSongRule,

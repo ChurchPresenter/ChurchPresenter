@@ -1,6 +1,5 @@
 package org.churchpresenter.helper.intent
 
-import org.churchpresenter.calendar.model.parseReference
 import org.churchpresenter.helper.action.HelperAction
 import org.churchpresenter.sharedui.guide.SettingsPage
 import org.churchpresenter.sharedui.models.ShortcutAction
@@ -72,12 +71,14 @@ internal fun openSettingsRule(r: Request): Resolution? {
 /** "show John 3:16", "go to psalm 23", "john chapter 3 verse 16", "jn 3 16". */
 internal fun verseRule(r: Request): Resolution? {
     val verb = Vocabulary.VERSE_VERBS.firstOrNull { r.text.startsWith("$it ") }
-    val rest = (verb?.let { r.text.removePrefix("$it ") } ?: r.text)
+    // "یوحنا 3:16 را نشان بده", "ヨハネ 3:16 を表示": the verb comes last in many languages.
+    val verbLast = Vocabulary.VERSE_VERBS.firstOrNull { r.text.endsWith(" $it") }
+    val rest = (verb?.let { r.text.removePrefix("$it ") } ?: verbLast?.let { r.text.removeSuffix(" $it") } ?: r.text)
         .replace(Regex("""\bchapter (\d+) verses? (\d+)"""), "$1:$2")
         .replace(Regex("""^(.*\p{L}) (\d{1,3}) (\d{1,3})$"""), "$1 $2:$3")
         .replace(Regex("""\s*:\s*"""), ":")
         .replace(Regex("""(\d) ?- ?(\d)"""), "$1-$2")
-    val ref = parseReference(rest) ?: return null
+    val ref = readReference(rest) ?: return null
     val lastWord = ref.bookName.split(' ').last()
     if (lastWord in Vocabulary.NOT_A_BOOK || lastWord in Vocabulary.SETTINGS) return null
     val book = ref.bookName.split(' ').joinToString(" ") { word -> word.replaceFirstChar { it.uppercase() } }
@@ -85,12 +86,6 @@ internal fun verseRule(r: Request): Resolution? {
     val display = ref.copy(bookName = book).display
     return act(HelperAction.ShowBibleVerse(book, ref.chapter, first, maxOf(first, ref.lastVerse), display))
 }
-
-private val NEW_SONG = listOf("new song", "add a song", "add song", "add a new song", "create a song", "write a song")
-
-/** "New song", said outright rather than asked: the New Song button, as the question gets. */
-internal fun newSongRule(r: Request): Resolution? =
-    if (r.hasPhrase(NEW_SONG) && !r.says("schedule")) act(HelperAction.Highlight(NavigationTopics.newSong())) else null
 
 internal fun switchTabRule(r: Request): Resolution? {
     if (!r.says("go to", "switch to", "open", "show", "tab")) return null

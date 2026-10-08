@@ -11,7 +11,7 @@ internal val TURKISH = Glossary(
         "nereden" to "where",
         "nasıl yapabilirim" to "how can i",
         "nasil yapabilirim" to "how can i",
-        "nasıl yaparım" to "how do i",
+        "nasıl yaparım" to "how do i make",
         "nasil yaparim" to "how do i",
         "nasıl" to "how do i",
         "nasil" to "how do i",
@@ -349,7 +349,7 @@ internal val TURKISH = Glossary(
         "pazari" to "sunday",
         "takvim*" to "calendar",
         "programı" to "schedule",
-        "programda" to "schedule",
+        "programda" to "in the schedule",
         "akış*" to "schedule",
         "çalma listesi" to "playlist",
         "calma listesi" to "playlist",
@@ -696,5 +696,13 @@ internal val TURKISH = Glossary(
         "sarki sonu" to "end of song",
         "bitiş işaret*" to "end marker",
         "bitis isaret*" to "end marker",
+
+        // The help table's own examples.
+        "git" to "go to",
+        "aile*" to "parents",
+        "kreş*" to "nursery",
+        "kurarım" to "set up",
+        "görüntü*" to "display",
+        "toplu düzenle" to "batch edit",
     ),
 )

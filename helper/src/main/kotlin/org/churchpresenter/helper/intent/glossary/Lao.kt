@@ -468,6 +468,10 @@ internal val LAO = Glossary(
         "ໜ້າຕາ" to "look",
         "ຮູບລັກ" to "appearance",
         "ສີຕົວອັກສອນ" to "text color",
+
+        // The help table's own examples.
+        "ເພງ" to "song",
+        "ພໍ່ແມ່" to "parents",
     ),
     spaced = false,
 )

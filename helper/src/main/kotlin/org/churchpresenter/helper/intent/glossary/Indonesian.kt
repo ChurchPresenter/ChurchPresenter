@@ -560,5 +560,11 @@ internal val INDONESIAN = Glossary(
         "penanda akhir lagu" to "end of song marker",
         "penanda akhir" to "end marker",
         "akhir lagu" to "end of song",
+
+        // The help table's own examples.
+        "orang tua" to "parents",
+        "ruang bayi" to "nursery",
+        "jam" to "clock",
+        "secara massal" to "batch",
     ),
 )

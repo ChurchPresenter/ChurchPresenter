@@ -716,5 +716,14 @@ internal val FRENCH = Glossary(
         "fin de cantique" to "end of song",
         "fin du chant" to "end of song",
         "fin de chant" to "end of song",
+
+        // The help table's own examples.
+        "fond" to "background",
+        "l'horloge" to "the clock",
+        "horloge" to "clock",
+        "comment faire un" to "how do i make a",
+        "comment faire une" to "how do i make a",
+        "par lot" to "batch",
+        "par lots" to "batch",
     ),
 )

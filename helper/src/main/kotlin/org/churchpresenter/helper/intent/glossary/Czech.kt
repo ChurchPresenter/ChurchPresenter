@@ -884,5 +884,9 @@ internal val CZECH = Glossary(
         "styl*" to "style",
         "formát*" to "format",
         "barv*" to "color",
+
+        // The help table's own examples.
+        "pustit naživo" to "go live",
+        "spustit naživo" to "go live",
     ),
 )
