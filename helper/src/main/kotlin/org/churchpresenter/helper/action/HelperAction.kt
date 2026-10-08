@@ -137,6 +137,11 @@ sealed interface HelperAction {
         override val needsConfirmation get() = false
     }
 
+    /** Open CCLI Reports: how often each song was used, the passages shown, and when. */
+    data object OpenStatistics : HelperAction {
+        override val needsConfirmation get() = false
+    }
+
     /** "Hello", "help", "what can you do": say hello, with examples of what to ask. */
     data object Greet : HelperAction {
         override val needsConfirmation get() = false

@@ -171,7 +171,9 @@ internal fun EditSongToolbar(
             }
         }
         Spacer(Modifier.weight(1f))
-        backgroundButton(EditorBackgroundButtonState(state, sectionSlots, scopeNames, onApplyBackgroundToSongbook))
+        Box(Modifier.guideTarget(GuideTargets.SONG_BACKGROUND)) {
+            backgroundButton(EditorBackgroundButtonState(state, sectionSlots, scopeNames, onApplyBackgroundToSongbook))
+        }
         ChordsToggle(on = showChords, onToggle = onToggleChords)
     }
 }

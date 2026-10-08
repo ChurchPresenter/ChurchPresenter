@@ -66,6 +66,8 @@ class RuleIntentResolver : IntentResolver {
             ::backgroundColorRule,
             ::fontSizeRule,
             ::shortcutRule,
+            // Before the converter: "import from Planning Center" is not a song conversion.
+            ::featureTopicsRule,
             ::convertSongsRule,
             ::songLibraryRule,
             ::calendarRule,

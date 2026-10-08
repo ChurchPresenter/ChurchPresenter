@@ -60,6 +60,18 @@ object GuideTargets {
     val STAGE_TEXT_ZONE = GuideTarget("settings.profiles.stageTextZone")
     val ANNOUNCEMENT_TO_STAGE = GuideTarget("announcements.toStage")
     val TIMER_TO_STAGE = GuideTarget("announcements.timerToStage")
+    val SONG_SEARCH = GuideTarget("songs.search")
+    val SONG_SEARCH_FILTER = GuideTarget("songs.searchFilter")
+    val SONG_FAVORITES = GuideTarget("songs.favorites")
+    val SONG_BACKGROUND = GuideTarget("songEditor.background")
+    val BIBLE_SEARCH = GuideTarget("bible.search")
+    val BIBLE_SEARCH_MODE = GuideTarget("bible.searchMode")
+    val BIBLE_VERSES = GuideTarget("bible.verses")
+    val PLANNING_CENTER_IMPORT = GuideTarget("schedule.planningCenter")
+    val SERVER_ENABLE = GuideTarget("settings.server.enable")
+    val SERVER_QR = GuideTarget("settings.server.qr")
+    val WEB_URL = GuideTarget("web.url")
+    val WEB_GO_LIVE = GuideTarget("web.goLive")
 
     /** One choice, [value], of a segmented control or picker named [group] — where to click, exactly. */
     fun option(group: String, value: String): GuideTarget = GuideTarget("option.$group.$value")

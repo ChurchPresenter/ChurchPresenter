@@ -1,5 +1,7 @@
 package org.churchpresenter.bibletab
 
+import org.churchpresenter.sharedui.guide.guideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -90,6 +92,7 @@ internal fun BibleVerseHeader(
         // The same height as the Book and Chapter headings, so the label and the buttons sit on their
         // center line and all three lists start level.
         modifier = Modifier.fillMaxWidth().heightIn(min = BIBLE_HEADER_HEIGHT)
+            .guideTarget(GuideTargets.BIBLE_VERSES)
             .padding(start = 16.dp, end = 10.dp),
         itemVerticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),

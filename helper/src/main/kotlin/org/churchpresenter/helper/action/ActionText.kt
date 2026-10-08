@@ -8,6 +8,7 @@ import org.churchpresenter.strings.generated.resources.helper_open_calendar_temp
 import org.churchpresenter.strings.generated.resources.helper_open_calendar_load
 import org.churchpresenter.strings.generated.resources.helper_open_calendar_automate
 import org.churchpresenter.strings.generated.resources.helper_open_song_library
+import org.churchpresenter.strings.generated.resources.helper_open_statistics
 import org.churchpresenter.strings.generated.resources.helper_open_converter
 import org.churchpresenter.strings.generated.resources.helper_open_converter_documents
 import org.churchpresenter.strings.generated.resources.helper_open_converter_from
@@ -96,6 +97,7 @@ fun HelperAction.describe(undoLabel: HelperText? = null): HelperText = when (thi
             CalendarTopic.AUTOMATE -> Res.string.helper_open_calendar_automate
         },
     )
+    HelperAction.OpenStatistics -> helperText(Res.string.helper_open_statistics)
     HelperAction.Greet -> helperText(Res.string.helper_greeting)
     HelperAction.Thanks -> helperText(Res.string.helper_youre_welcome)
     HelperAction.UndoLast -> undoLabel

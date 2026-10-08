@@ -287,6 +287,51 @@ internal object Vocabulary {
         "show me", "show", "open", "go to", "read", "display", "put up", "bring up", "find", "project",
     )
 
+    /** Asking for CCLI Reports: how often songs were used. */
+    val CCLI = listOf(
+        "ccli", "statistics", "stats", "usage report", "song report", "song usage", "how many times", "how often",
+        "play count", "play counts", "most sung", "copyright report", "ccli report",
+    )
+
+    /** Planning Center Online, however it is written. */
+    val PLANNING_CENTER = listOf("planning center", "planning centre", "planningcenter", "pco")
+
+    /** Running the app from a phone or tablet — the remote and the code to scan for it. */
+    val PHONE_REMOTE = listOf(
+        "from my phone", "from the phone", "from a phone", "on my phone", "phone remote", "use my phone",
+        "connect my phone", "connect a phone", "from my tablet", "from a tablet", "from my ipad", "remote control",
+        "qr code", "scan the code", "control it from",
+    )
+
+    /** Word starts that mean favorites, however they are spelled. */
+    val FAVORITE = listOf("favorit", "favourit", "fave", "starred")
+    val STAR_A_SONG = listOf("star a song", "star this song", "star the song", "star songs", "star my songs")
+
+    /** Phrases that make a background about one song rather than all of them. */
+    val ONE_SONG = listOf(
+        "this song", "one song", "each song", "per song", "single song", "a song", "specific song", "individual song",
+        "certain song", "particular song", "its own", "own background", "song's own", "different background",
+    )
+
+    /** Showing more than one verse at a time. */
+    val MULTI_VERSE = listOf(
+        "several verses", "multiple verses", "more than one verse", "many verses", "two verses", "three verses",
+        "few verses", "a few verses", "verse range", "range of verses", "verses together", "group of verses",
+        "select verses", "select several", "select multiple", "whole passage", "a passage",
+    )
+
+    /** Looking something up, in other words than "search". */
+    val LOOK_UP = listOf("look up", "look for", "lookup")
+    val FIND_VERSE = listOf("find a verse", "find verses", "find the verse", "find a passage", "which verse says")
+    val FIND_SONG = listOf(
+        "find a song", "find songs", "find the song", "find my song", "song number", "by number", "by title",
+        "filter songs", "filter the songs",
+    )
+
+    /** A web page, to put on screen. */
+    val WEBSITE = setOf("website", "websites", "webpage", "webpages", "url", "browser", "site", "web")
+    val WEB_PAGE = listOf("web page", "web site", "internet page")
+
     /** Words that cannot be a Bible book, so "show song 3" is not read as a reference. */
     val NOT_A_BOOK = SONG + SCREEN +
         setOf("slide", "slides", "picture", "pictures", "tab", "page", "number", "step", "item")

@@ -1,6 +1,14 @@
 package org.churchpresenter.helper.suggest
 
 import org.churchpresenter.helper.intent.normalize
+import org.churchpresenter.strings.generated.resources.helper_example_website
+import org.churchpresenter.strings.generated.resources.helper_example_ccli
+import org.churchpresenter.strings.generated.resources.helper_example_planning_center
+import org.churchpresenter.strings.generated.resources.helper_example_song_background
+import org.churchpresenter.strings.generated.resources.helper_example_favorites
+import org.churchpresenter.strings.generated.resources.helper_example_multi_verse
+import org.churchpresenter.strings.generated.resources.helper_example_bible_search
+import org.churchpresenter.strings.generated.resources.helper_example_song_search
 import org.churchpresenter.strings.generated.resources.helper_example_stage_layout
 import org.churchpresenter.strings.generated.resources.helper_example_stage_monitor
 import org.churchpresenter.strings.generated.resources.helper_example_lower_third_output
@@ -140,6 +148,29 @@ enum class SuggestedRequest(val label: StringResource, val request: String, keyw
         "zone zones layout arrangement chords notes clock next stage " +
             "monitor confidence what goes where",
     ),
+    SONG_SEARCH(
+        Res.string.helper_example_song_search, "how do i search for a song",
+        "search find look filter number title songbook song songs",
+    ),
+    BIBLE_SEARCH(
+        Res.string.helper_example_bible_search, "how do i search the bible",
+        "search find look word words bible scripture verse",
+    ),
+    MULTI_VERSE(
+        Res.string.helper_example_multi_verse, "how do i show several verses",
+        "several multiple many range passage verses together select",
+    ),
+    FAVORITES(Res.string.helper_example_favorites, "how do i favorite a song", "favorite favorites favourite star starred"),
+    SONG_BACKGROUND(
+        Res.string.helper_example_song_background, "give this song its own background",
+        "own background song picture video camera each per",
+    ),
+    PLANNING_CENTER(
+        Res.string.helper_example_planning_center, "import from planning center",
+        "planning center pco plan import services",
+    ),
+    CCLI(Res.string.helper_example_ccli, "ccli report", "ccli report reports statistics stats usage copyright times"),
+    WEBSITE(Res.string.helper_example_website, "show a website", "website web page url browser site internet"),
     ;
 
     /** The keywords, and the words of the request itself. */

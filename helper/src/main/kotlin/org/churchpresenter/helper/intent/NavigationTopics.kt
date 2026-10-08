@@ -11,6 +11,10 @@ import org.churchpresenter.sharedui.guide.SettingsPage
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.sharedui.models.labelRes
 import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.show_qr_code
+import org.churchpresenter.strings.generated.resources.helper_hint_server_qr
+import org.churchpresenter.strings.generated.resources.helper_hint_server_enable
+import org.churchpresenter.strings.generated.resources.enable_server
 import org.churchpresenter.strings.generated.resources.helper_hint_background
 import org.churchpresenter.strings.generated.resources.helper_hint_clear
 import org.churchpresenter.strings.generated.resources.helper_hint_live_preview
@@ -84,13 +88,21 @@ internal object NavigationTopics {
         ),
     )
 
-    private fun remoteServer() = GuideTour(
+    fun remoteServer() = GuideTour(
         listOf(
             GuideStep(GuideTargets.SETTINGS_BUTTON, helperText(Res.string.helper_hint_settings)),
             GuideStep(
                 GuideTargets.settingsPage(SettingsPage.SERVER),
                 helperText(Res.string.helper_hint_server_page),
                 before = HelperAction.OpenSettings(SettingsPage.SERVER),
+            ),
+            GuideStep(
+                GuideTargets.SERVER_ENABLE,
+                helperText(Res.string.helper_hint_server_enable, helperText(Res.string.enable_server)),
+            ),
+            GuideStep(
+                GuideTargets.SERVER_QR,
+                helperText(Res.string.helper_hint_server_qr, helperText(Res.string.show_qr_code)),
             ),
         ),
     )
