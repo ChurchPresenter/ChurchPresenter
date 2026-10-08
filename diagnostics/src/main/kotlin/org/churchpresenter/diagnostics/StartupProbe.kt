@@ -4,6 +4,10 @@ import java.io.File
 import java.lang.management.ManagementFactory
 import java.util.Locale
 
+private const val BYTES_PER_MB = 1024.0 * 1024.0
+private const val KB_PER_MB = 1024.0
+private const val MILLIS_PER_SECOND = 1000L
+
 /**
  * What one launch measured: how long from the JVM starting to `main` running, and to the main
  * window's first frame, and the memory the app sits at once it has settled.
@@ -11,7 +15,7 @@ import java.util.Locale
 data class StartupTimes(
     val toMainMs: Long,
     val toFirstFrameMs: Long,
-    /** Java heap in use after a full collection, [StartupProbe.idleSeconds] after the first frame. */
+    /** Java heap in use after a full collection, once the app has sat idle. */
     val idleHeapMb: Double,
     /** The process's resident set at the same moment, or null where the OS does not say. */
     val idleRssMb: Double?,
@@ -25,57 +29,39 @@ data class StartupTimes(
 }
 
 /**
- * How long the app takes to start, for the startup budget in `composeApp/benchmarks/budgets.md`.
- *
- * Off unless `-Dchurchpresenter.startupProbe=<file>` is set; then [mainStarted] and [firstFrame]
- * record when each happened, measured from the JVM's own start, and after [idleSeconds] of the
- * app sitting idle the heap and resident memory are sampled, [StartupTimes] goes to the file and
- * [exit] is called. `./gradlew :composeApp:startupBenchmark` launches the app that way several
- * times. Every step but the clock and the exit is a plain function a test drives.
+ * One measured launch, written to [file]: [mainStarted] and [firstFrame] record when each happened;
+ * [idleSeconds] after the first frame the memory is sampled, [StartupTimes] is written and the
+ * launch exits. One that has not drawn its window [deadlineSeconds] after `main` writes
+ * [NO_FIRST_FRAME] and exits instead, so a benchmark never leaves an app open. Each exit is the
+ * caller's own, so a test passes one that only records.
  */
-object StartupProbe {
-
-    const val PROPERTY = "churchpresenter.startupProbe"
-    const val IDLE_PROPERTY = "churchpresenter.startupProbe.idleSeconds"
-    private const val DEFAULT_IDLE_SECONDS = 30L
-    private const val BYTES_PER_MB = 1024.0 * 1024.0
-    private const val KB_PER_MB = 1024.0
-    private const val MILLIS_PER_SECOND = 1000L
-
-    /** Where the result goes, or null when the probe is off. */
-    val target: File? get() = System.getProperty(PROPERTY)?.takeIf { it.isNotBlank() }?.let(::File)
-
-    val idleSeconds: Long get() = System.getProperty(IDLE_PROPERTY)?.toLongOrNull() ?: DEFAULT_IDLE_SECONDS
-
-    @Volatile private var toMainMs: Long? = null
+class StartupRun(
+    private val file: File,
+    private val idleSeconds: Long,
+    private val deadlineSeconds: Long,
+) {
+    @Volatile private var toMainMs = -1L
     @Volatile private var finishing = false
 
-    /** Milliseconds since this JVM started. */
-    fun sinceJvmStart(): Long = System.currentTimeMillis() - ManagementFactory.getRuntimeMXBean().startTime
-
-    /** `main` is running. */
-    fun mainStarted(now: Long = sinceJvmStart()) {
-        if (target != null) toMainMs = now
+    /** `main` is running at [now]; starts the deadline. */
+    fun mainStarted(now: Long, exit: () -> Unit) {
+        toMainMs = now
+        after(deadlineSeconds, "startup-probe-deadline") {
+            if (!finishing) {
+                write(NO_FIRST_FRAME)
+                exit()
+            }
+        }
     }
 
-    /**
-     * The main window drew its first frame. With the probe on, starts the idle wait, the sample and
-     * the write on a thread of its own, then calls [exit] -- the app's own way out; a second call
-     * does nothing.
-     */
-    fun firstFrame(exit: () -> Unit, now: Long = sinceJvmStart()) {
-        val file = target ?: return
+    /** The main window drew its first frame at [now]: waits out the idle time, writes, exits. Once. */
+    fun firstFrame(now: Long, exit: () -> Unit) {
         if (finishing) return
         finishing = true
-        Thread({
-            try {
-                Thread.sleep(idleSeconds * MILLIS_PER_SECOND)
-            } catch (_: InterruptedException) {
-                return@Thread
-            }
-            write(file, times(now))
+        after(idleSeconds, "startup-probe") {
+            write(times(now).toJson())
             exit()
-        }, "startup-probe").apply { isDaemon = true }.start()
+        }
     }
 
     /** The launch so far, with the memory sampled now. */
@@ -83,34 +69,87 @@ object StartupProbe {
         @Suppress("ExplicitGarbageCollectionCall") // idle memory is what survives a collection
         System.gc()
         val heap = ManagementFactory.getMemoryMXBean().heapMemoryUsage.used / BYTES_PER_MB
-        return StartupTimes(toMainMs ?: -1, firstFrameMs, heap, residentMb())
+        return StartupTimes(toMainMs, firstFrameMs, heap, residentMb())
     }
 
-    /** [times] to [file], creating its directory. */
-    fun write(file: File, times: StartupTimes) {
+    private fun write(line: String) {
         file.absoluteFile.parentFile.mkdirs()
-        file.writeText(times.toJson() + "\n")
+        file.writeText(line + "\n")
     }
 
-    /**
-     * Resident memory: `/proc/self/status` on Linux, `ps` elsewhere (macOS has no `/proc`). Null on
-     * Windows, where neither exists.
-     */
-    internal fun residentMb(
-        proc: File = File("/proc/self/status"),
-        ps: () -> String? = ::psResidentKb,
-    ): Double? = runCatching {
-        if (proc.isFile) {
-            proc.readLines().firstOrNull { it.startsWith("VmRSS:") }
-                ?.split(Regex("\\s+"))?.getOrNull(1)?.toDouble()?.div(KB_PER_MB)
-        } else {
-            ps()?.trim()?.toDoubleOrNull()?.div(KB_PER_MB)
-        }
-    }.getOrNull()
+    private fun after(seconds: Long, name: String, then: () -> Unit) {
+        Thread({
+            try {
+                Thread.sleep(seconds * MILLIS_PER_SECOND)
+            } catch (_: InterruptedException) {
+                return@Thread
+            }
+            then()
+        }, name).apply { isDaemon = true }.start()
+    }
 
-    internal fun psResidentKb(): String? = runCatching {
-        val process = ProcessBuilder("ps", "-o", "rss=", "-p", ProcessHandle.current().pid().toString())
-            .redirectErrorStream(true).start()
-        process.inputStream.bufferedReader().readText().also { process.waitFor() }
-    }.getOrNull()
+    companion object {
+        /** What a launch that never drew its main window writes instead of [StartupTimes]. */
+        const val NO_FIRST_FRAME = "{\"error\": \"no first frame before the deadline\"}"
+    }
 }
+
+/**
+ * How long the app takes to start, for the startup budget in `composeApp/benchmarks/budgets.md`.
+ *
+ * Off unless `-Dchurchpresenter.startupProbe=<file>` is set; then the app's launch is a [StartupRun]
+ * writing there. `./gradlew :composeApp:startupBenchmark` launches the app that way several times.
+ */
+object StartupProbe {
+
+    const val PROPERTY = "churchpresenter.startupProbe"
+    const val IDLE_PROPERTY = "churchpresenter.startupProbe.idleSeconds"
+    const val DEADLINE_PROPERTY = "churchpresenter.startupProbe.deadlineSeconds"
+    private const val DEFAULT_IDLE_SECONDS = 30L
+    private const val DEFAULT_DEADLINE_SECONDS = 180L
+
+    /** The launch the system properties ask for, or null when the probe is off. */
+    fun fromProperties(): StartupRun? {
+        val file = System.getProperty(PROPERTY)?.takeIf { it.isNotBlank() }?.let(::File) ?: return null
+        val idle = System.getProperty(IDLE_PROPERTY)?.toLongOrNull() ?: DEFAULT_IDLE_SECONDS
+        val deadline = System.getProperty(DEADLINE_PROPERTY)?.toLongOrNull() ?: DEFAULT_DEADLINE_SECONDS
+        return StartupRun(file, idle, deadline)
+    }
+
+    private val run: StartupRun? by lazy { fromProperties() }
+
+    /** Milliseconds since this JVM started. */
+    fun sinceJvmStart(): Long = System.currentTimeMillis() - ManagementFactory.getRuntimeMXBean().startTime
+
+    /** `main` is running; [exit] is how the app leaves if it never draws its window. */
+    fun mainStarted(exit: () -> Unit) {
+        run?.mainStarted(sinceJvmStart(), exit)
+    }
+
+    /** The main window drew its first frame; [exit] is how the app leaves once it is measured. */
+    fun firstFrame(exit: () -> Unit) {
+        run?.firstFrame(sinceJvmStart(), exit)
+    }
+}
+
+/**
+ * Resident memory: `/proc/self/status` on Linux, `ps` elsewhere (macOS has no `/proc`). Null on
+ * Windows, where neither exists.
+ */
+internal fun residentMb(
+    proc: File = File("/proc/self/status"),
+    ps: () -> String? = ::psResidentKb,
+): Double? = runCatching {
+    if (proc.isFile) {
+        proc.readLines().firstOrNull { it.startsWith("VmRSS:") }
+            ?.split(Regex("\\s+"))?.getOrNull(1)?.toDouble()?.div(KB_PER_MB)
+    } else {
+        ps()?.trim()?.toDoubleOrNull()?.div(KB_PER_MB)
+    }
+}.getOrNull()
+
+internal fun psResidentKb(): String? = runCatching {
+    val process = ProcessBuilder("ps", "-o", "rss=", "-p", ProcessHandle.current().pid().toString())
+        .redirectErrorStream(true).start()
+    process.inputStream.bufferedReader().readText().also { process.waitFor() }
+}.getOrNull()

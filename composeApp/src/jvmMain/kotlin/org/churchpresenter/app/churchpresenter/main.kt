@@ -45,6 +45,7 @@ import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.diagnostics.BuildIdentity
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.diagnostics.StartupProbe
+import kotlin.system.exitProcess
 import org.churchpresenter.diagnostics.UiWatchdog
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
 import org.churchpresenter.sharedui.utils.UsageEvents
@@ -63,6 +64,9 @@ internal const val UPDATE_CHECK_DELAY_MS = 5_000L
 internal const val STORY_PROMPT_DELAY_MS = 8_000L
 
 internal const val CURRENT_EULA_VERSION = 1
+
+/** How a startup-benchmark launch that never drew its window ends; see StartupProbe. */
+private const val STARTUP_PROBE_NO_FRAME_EXIT = 3
 
 private var singleInstanceSocket: java.net.ServerSocket? = null
 
@@ -125,7 +129,7 @@ private fun bundleDefaultBible(settings: AppSettings) {
 
 fun main() {
     // Off unless the startup benchmark asked for it; see StartupProbe.
-    StartupProbe.mainStarted()
+    StartupProbe.mainStarted(exit = { exitProcess(STARTUP_PROBE_NO_FRAME_EXIT) })
     // Before anything else: skiko latches this on its first SkiaLayer, so a later set is ignored.
     preferredRenderApi(System.getProperty("os.name", ""), DevFlags.renderApiOverride)?.let {
         System.setProperty("skiko.renderApi", it)

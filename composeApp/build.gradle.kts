@@ -1214,7 +1214,9 @@ interface StartupExec {
 tasks.register("startupBenchmark") {
     group = "verification"
     description = "Launches the app several times and reports time to the first frame and idle memory."
-    dependsOn("jvmTestClasses", tasks.named("run").map { it.dependsOn })
+    // What the launches run on -- the app's jar and its runtime classpath -- never the `run` task
+    // itself, which would launch the app as the operator's own.
+    dependsOn("jvmTestClasses", "jvmJar", configurations.named("jvmRuntimeClasspath"))
     outputs.upToDateWhen { false }
     val exec = objects.newInstance(StartupExec::class.java).exec
     val launches = providers.gradleProperty("startupLaunches").orNull?.toIntOrNull() ?: 5
@@ -1256,8 +1258,10 @@ tasks.register("startupBenchmark") {
                 "idleRssMb" to field("idleRssMb"),
             )
         }
+        // A launch that hit StartupProbe's deadline wrote no times: it never drew its window.
+        val failed = results.count { it["toFirstFrameMs"] == null }
         // The first launch warms the OS file cache and is reported, not counted.
-        val counted = if (results.size > 1) results.drop(1) else results
+        val counted = (if (results.size > 1) results.drop(1) else results).filter { it["toFirstFrameMs"] != null }
         fun median(key: String) = counted.mapNotNull { it[key] }.sorted().let { if (it.isEmpty()) null else it[it.size / 2] }
         fun worst(key: String) = counted.mapNotNull { it[key] }.maxOrNull()
         val keys = listOf("toMainMs" to "To main()", "toFirstFrameMs" to "To the main window's first frame",
@@ -1271,6 +1275,7 @@ tasks.register("startupBenchmark") {
             appendLine("| | Median | Worst |")
             appendLine("|---|---:|---:|")
             keys.forEach { (key, label) -> appendLine("| $label | ${median(key) ?: "n/a"} | ${worst(key) ?: "n/a"} |") }
+            if (failed > 0) appendLine("\n$failed launch(es) never drew the main window before the deadline.")
         }
         reportDir.resolve("startup.md").writeText(report)
         logger.lifecycle(report)
@@ -1284,6 +1289,7 @@ tasks.register("startupBenchmark") {
                 val value = median(key) ?: return@mapNotNull null
                 if (value > limit) "$label: $value, past its budget of $limit" else null
             }
+            if (failed > 0) throw GradleException("$failed startup launch(es) never drew the main window.")
             if (over.isNotEmpty()) throw GradleException("Startup over budget: " + over.joinToString("; "))
         }
     }

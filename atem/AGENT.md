@@ -26,7 +26,9 @@ inside `ConstantsKt` is exactly how a sibling rename silently rewrote a `mockkSt
 
 | Path | Owns |
 |---|---|
-| `AtemClient.kt` | `class AtemClient` — the socket, the packet layer, every command builder and parser; `AtemState`, `AtemMediaSlot`, `AtemProtocolException`, and the `Companion` one-shots (`cutKey`, `cutUpstreamKeyer`, `isReachable`) |
+| `AtemClient.kt` | `class AtemClient` — the socket, reliable delivery, the commands and the upload flow; the `Companion` one-shots (`cutKey`, `cutUpstreamKeyer`, `isReachable`) |
+| `AtemModels.kt` | `AtemState`, `AtemMediaSlot`, `AtemKey`, `AtemProtocolException` |
+| `AtemWire.kt`, `AtemStateParser.kt`, `AtemTransferProtocol.kt` | The pure byte work, as `internal` extensions on `AtemClient` so its tests call them as before: framing and payloads, the state dump, the transfer's chunking and rejections |
 | `AtemConnectionManager.kt` | `object AtemConnectionManager` — one shared client, serialised by a `Mutex`, reconnected lazily when the ATEM expires an idle session |
 | `AtemFrameEncoder.kt` | The media-pool frame encoding (10-bit YUV + RLE) |
 | `AtemUploadStatus.kt` | `object AtemUploadStatus` — the upload progress `StateFlow` the UI observes |
@@ -46,8 +48,8 @@ it; they, and `:lower-third`'s `LowerThirdSequencerKeyTest`, `LowerThirdAtemUplo
 ## Rules
 
 - **Anything `:composeApp` calls has to be public here.** `internal` no longer reaches the app. The
-  `internal` members of `AtemClient` are the byte builders and parsers, called only by this
-  module's own tests — keep them that way.
+  `internal` extensions on `AtemClient` are the byte builders and parsers, called only by the client
+  and this module's own tests — keep them that way.
 - **`FakeAtemSwitcher` is derived from a capture, never from `AtemClient`.** Its doc comment says
   why at length: a fake written by reading the client encodes the client's own misreadings, so the
   test passes and the bug is pinned in place. When the client turns out to be wrong about the
