@@ -18,7 +18,7 @@ Its consumers are `:composeApp` and `:live-output`. Besides the tab the app uses
 (Planning Center scripture detection, the calendar) and the long-verse constants (Profiles → Bible).
 
 It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`, `:bible`,
-`:bible-formats`, `:diagnostics` and `:stt`, and nothing of `:composeApp`'s.
+`:bible-formats`, `:bible-engine`, `:diagnostics` and `:stt`, and nothing of `:composeApp`'s.
 
 ## Seams to the app
 

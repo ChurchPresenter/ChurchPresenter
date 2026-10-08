@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.profiles
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,7 +35,7 @@ private val SettingsCardShape = AppShape(12.dp)
  * with a fixed title has nowhere to put.
  */
 @Composable
-internal fun SettingsCard(
+fun SettingsCard(
     title: String,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
@@ -85,7 +85,7 @@ internal fun SettingsCard(
 
 /** A pill counting something the card's header reports on — how many folders are linked, say. */
 @Composable
-internal fun SettingsCardBadge(text: String, container: Color, content: Color) {
+fun SettingsCardBadge(text: String, container: Color, content: Color) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelSmall,

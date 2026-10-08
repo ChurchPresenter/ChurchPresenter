@@ -12,6 +12,8 @@ The Profiles settings pages and what they are built from:
   `BackgroundSettingsViewModel`, which only that tab owns;
 - the song background panel and the local stock library (`SongBackgroundPanel`, `LocalLibraryDialog`)
   and the bundled stock backgrounds they offer, in `src/main/composeResources/files/backgrounds`;
+- the settings card kit the app's own pages use (`SettingsCard`, `SettingsCardBadge`,
+  `LocalApplySettings`, `LocalSettingsDevMode`);
 - the settings row kit every settings page uses (`SettingsGroup`, `SettingsRowControls`, `RowOption`,
   `SettingsDetail`), and the small pickers beside it (`PreviewOutputPicker`, `TvScreenBox`,
   `SliderNumberField`, `ScanningRow`);

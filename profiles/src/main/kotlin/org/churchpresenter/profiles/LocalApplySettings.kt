@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.profiles
 
 import androidx.compose.runtime.staticCompositionLocalOf
 
@@ -11,4 +11,4 @@ import androidx.compose.runtime.staticCompositionLocalOf
  * Apply pressed -- two steps away from the preview that was meant to make the change visible. Null
  * where there is no draft to apply, and the nested dialog then shows no such button.
  */
-internal val LocalApplySettings = staticCompositionLocalOf<(() -> Unit)?> { null }
+val LocalApplySettings = staticCompositionLocalOf<(() -> Unit)?> { null }

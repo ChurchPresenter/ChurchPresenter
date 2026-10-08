@@ -51,6 +51,7 @@ import kotlin.test.assertNotNull
 import kotlin.math.abs
 import kotlin.test.assertTrue
 import java.nio.file.Path as NioPath
+import org.churchpresenter.profiles.LocalSettingsDevMode
 
 /** Reads settings the way the app does, ignoring keys this build does not know. */
 private val lenientJson = Json { ignoreUnknownKeys = true }

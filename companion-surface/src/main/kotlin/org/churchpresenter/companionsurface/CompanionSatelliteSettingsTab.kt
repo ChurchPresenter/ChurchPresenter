@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.companionsurface
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.runtime.MutableState

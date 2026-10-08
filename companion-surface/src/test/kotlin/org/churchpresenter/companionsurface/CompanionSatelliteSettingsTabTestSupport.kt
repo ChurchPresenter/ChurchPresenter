@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.companionsurface
 
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import androidx.compose.material3.MaterialTheme

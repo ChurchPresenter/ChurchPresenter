@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.LocalSettingsDevMode
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -71,8 +70,7 @@ import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.lowerthird.AtemSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.LocalApplySettings
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.CompanionSatelliteSettingsTab
+import org.churchpresenter.companionsurface.CompanionSatelliteSettingsTab
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.obs.OBSSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SystemSettingsTab
@@ -93,6 +91,8 @@ import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.obs.OBSWebSocketManager
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import org.churchpresenter.profiles.LocalSettingsDevMode
+import org.churchpresenter.profiles.LocalApplySettings
 
 // Values must equal each tab's own position in SettingsTabStrip's row: PrimaryScrollableTabRow's
 // selectedTabIndex/tabIndicatorOffset key off *position*, so a value that outruns its row slot

@@ -20,6 +20,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.KeyboardShortcutSettings
 import org.churchpresenter.settings.ProjectionSettings
 import kotlin.test.Test
+import org.churchpresenter.profiles.LocalSettingsDevMode
 
 /** The System tab's Dev mode only card: preview mode and the test event, and only in dev mode. */
 @OptIn(ExperimentalTestApi::class)

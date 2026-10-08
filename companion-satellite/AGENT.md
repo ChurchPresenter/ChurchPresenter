@@ -20,7 +20,7 @@ point.
 `org.churchpresenter.companionsatellite.CompanionSatelliteClient` and its
 `CompanionConnectionStatus`. The client is wrapped by `:companion-surface` (its
 `CompanionSatelliteViewModel`, `CompanionSurfacePanel` and `CompanionConnectionUiState`), which
-takes this module as an `api` dependency; the app's own `dialogs/tabs/CompanionSatelliteSettingsTab.kt`
+takes this module as an `api` dependency; `:companion-surface`'s `CompanionSatelliteSettingsTab.kt`
 reads the status too.
 
 ## Layout

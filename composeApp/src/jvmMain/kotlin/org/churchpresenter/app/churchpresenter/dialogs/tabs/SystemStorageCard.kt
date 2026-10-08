@@ -84,6 +84,8 @@ import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.profiles.SettingsCardBadge
+import org.churchpresenter.profiles.SettingsCard
 
 /** What a chosen folder turned out to be, once the check on it has run. */
 internal enum class DirStatus { NOT_SET, CHECKING, WRITABLE, READ_ONLY, NOT_FOUND, INVALID }

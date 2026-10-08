@@ -95,6 +95,8 @@ import org.churchpresenter.settings.AppSettings
 import org.jetbrains.compose.resources.stringResource
 import javax.swing.JOptionPane
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.profiles.LocalSettingsDevMode
+import org.churchpresenter.profiles.SettingsCard
 
 private const val DANGER_EDGE_ALPHA = 0.3f
 
