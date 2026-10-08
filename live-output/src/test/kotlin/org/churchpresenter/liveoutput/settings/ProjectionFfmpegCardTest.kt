@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.liveoutput.settings
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +17,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
+import androidx.compose.runtime.CompositionLocalProvider
+import java.nio.file.Files
+import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -50,6 +53,7 @@ class ProjectionFfmpegCardTest {
         openUrl: (String) -> Unit = {},
         copyText: (String) -> Unit = {},
         applied: MutableList<String> = mutableListOf(),
+        chooser: PathChooser = PathChooser { _, _, _ -> null },
         body: ComposeUiTest.(read: () -> AppSettings) -> Unit,
     ) = runComposeUiTest {
         var current = initial
@@ -57,6 +61,7 @@ class ProjectionFfmpegCardTest {
             Surface {
                 Box(Modifier.fillMaxSize()) {
                     var state by remember { mutableStateOf(initial) }
+                    CompositionLocalProvider(LocalPathChooser provides chooser) {
                     FfmpegCard(
                         settings = state,
                         onSettingsChange = { transform ->
@@ -68,6 +73,7 @@ class ProjectionFfmpegCardTest {
                         openUrl = openUrl,
                         copyText = copyText,
                     )
+                    }
                 }
             }
         }
@@ -114,6 +120,34 @@ class ProjectionFfmpegCardTest {
         card(status = BUNDLED) { _ ->
             onNodeWithText("Get ffmpeg").assertDoesNotExist()
             onNodeWithContentDescription("Copy link").assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `choosing an ffmpeg writes its path and re-resolves, and dismissing the chooser changes nothing`() {
+        val chosen = Files.createTempFile("ffmpeg", "").toFile()
+        val asked = mutableListOf<Pair<String, Boolean>>()
+        val applied = mutableListOf<String>()
+        var answer: Path? = null
+        try {
+            card(applied = applied, chooser = PathChooser { _, title, directory ->
+                asked += title to directory
+                answer
+            }) { read ->
+                onNodeWithText("Choose ffmpeg").performClick()
+                waitUntil { asked.size == 1 }
+                waitForIdle()
+                assertEquals("", read().projectionSettings.ffmpegPath, "nothing chosen, nothing written")
+                assertEquals("Choose an ffmpeg program" to false, asked.single(), "a file, not a folder")
+
+                answer = chosen.toPath()
+                onNodeWithText("Choose ffmpeg").performClick()
+                waitUntil { applied.isNotEmpty() }
+                assertEquals(chosen.absolutePath, read().projectionSettings.ffmpegPath)
+                assertEquals(listOf(chosen.absolutePath), applied)
+            }
+        } finally {
+            chosen.delete()
         }
     }
 

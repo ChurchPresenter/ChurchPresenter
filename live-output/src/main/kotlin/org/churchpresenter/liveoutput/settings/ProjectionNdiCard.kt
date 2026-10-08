@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.liveoutput.settings
 
 import org.churchpresenter.settings.mergingProfileOf
 import org.churchpresenter.settings.utils.Constants
@@ -47,7 +47,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.liveoutput.NdiManager
 import org.churchpresenter.liveoutput.NdiVideoRenderer
 import org.churchpresenter.ndi.NdiOutputMode
@@ -89,7 +88,6 @@ import org.churchpresenter.strings.generated.resources.ndi_runtime_ready
 import org.churchpresenter.strings.generated.resources.ndi_runtime_unsupported_cpu
 import org.churchpresenter.strings.generated.resources.ndi_trademark
 import org.churchpresenter.strings.generated.resources.remove
-import org.churchpresenter.app.churchpresenter.composables.ResolutionPicker
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
@@ -235,6 +233,7 @@ private fun NdiRuntimeRow(
         NdiRuntimeMessage(status)
 
         val scope = rememberCoroutineScope()
+        val pathChooser = LocalPathChooser.current
         val ndiFolderTitle = stringResource(Res.string.ndi_runtime_path)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             // Read-only plus a Browse button, exactly as the VLC path field on this same tab is: a
@@ -259,11 +258,10 @@ private fun NdiRuntimeRow(
                 shape = AppShape(6.dp),
                 onClick = {
                     scope.launch {
-                        val chosen = FileChooser.platformInstance.chooseSingle(
-                            path = path.takeIf { it.isNotBlank() }?.let(::Path),
+                        val chosen = pathChooser.choose(
+                            start = path.takeIf { it.isNotBlank() }?.let(::Path),
                             title = ndiFolderTitle,
-                            selectDirectory = true,
-                            filters = emptyList(),
+                            directory = true,
                         ) ?: return@launch
                         val selected = chosen.absolutePathString()
                         onSettingsChange { s ->

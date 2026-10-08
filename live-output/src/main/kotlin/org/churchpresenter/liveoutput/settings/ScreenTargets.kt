@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.liveoutput.settings
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue

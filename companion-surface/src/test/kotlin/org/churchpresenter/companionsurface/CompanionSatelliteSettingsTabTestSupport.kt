@@ -2,7 +2,6 @@
 
 package org.churchpresenter.companionsurface
 
-import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

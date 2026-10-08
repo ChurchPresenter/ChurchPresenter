@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.liveoutput.settings
 
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.mergingProfileOf
@@ -28,7 +28,6 @@ import org.churchpresenter.strings.generated.resources.screen_assignment
 import org.churchpresenter.strings.generated.resources.screen_col_label
 import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.theme.components.SettingsTextField
-import org.churchpresenter.app.churchpresenter.composables.ResolutionPicker
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.core.models.scene.Scene

@@ -1,9 +1,9 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.liveoutput.screenshot
 
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.FfmpegCard
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.FfmpegStatus
+import org.churchpresenter.liveoutput.settings.FfmpegCard
+import org.churchpresenter.liveoutput.settings.FfmpegStatus
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import kotlin.test.Test

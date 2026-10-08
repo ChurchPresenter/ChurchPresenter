@@ -8,7 +8,6 @@ import androidx.compose.ui.platform.testTag
 import org.churchpresenter.strings.generated.resources.preview_layout_done
 import org.churchpresenter.strings.generated.resources.preview_layout_edit
 import org.churchpresenter.sharedui.utils.rememberScreenDevices
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -59,7 +58,6 @@ import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.liveoutput.shownModeFor
 import org.churchpresenter.stt.STTManager
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.sharedui.composables.mode
 import org.churchpresenter.media.viewmodel.formatMediaTime
 
 /**

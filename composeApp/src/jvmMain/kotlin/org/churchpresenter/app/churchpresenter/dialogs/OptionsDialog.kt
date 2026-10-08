@@ -76,10 +76,11 @@ import org.churchpresenter.obs.OBSSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SystemSettingsTab
 import org.churchpresenter.profiles.BackgroundSettingsTab
 import org.churchpresenter.profiles.BibleSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.DetectedScreen
+import org.churchpresenter.app.churchpresenter.BuildConfig
+import org.churchpresenter.liveoutput.settings.DetectedScreen
 import org.churchpresenter.profiles.ProfilesSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.detectScreensFromAwt
+import org.churchpresenter.liveoutput.settings.ProjectionSettingsTab
+import org.churchpresenter.liveoutput.settings.detectScreensFromAwt
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.composables.LabeledTab
 import org.churchpresenter.app.churchpresenter.composables.LabeledTabIndicator
@@ -368,7 +369,8 @@ private fun SettingsTabContent(
             onIdentifyNdi = { index -> onIdentifyNdi(index) },
             onIdentifyOmt = { index -> onIdentifyOmt(index) },
             scenes = scenes,
-            detectScreens = detectScreens
+            detectScreens = detectScreens,
+            isRelease = BuildConfig.IS_RELEASE,
         )
         TAB_SERVER -> ServerSettingsTab(
             settings = settings,

@@ -1,8 +1,9 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.liveoutput.settings
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,6 +77,8 @@ internal fun projectionTab(
      */
     vlcInstalled: Boolean = true,
     audioDevices: List<VlcAudioDevice> = emptyList(),
+    /** What the tab's file and folder pickers answer; the platform chooser would block the run. */
+    chooser: PathChooser = PathChooser { _, _, _ -> null },
     block: ComposeUiTest.(get: () -> AppSettings) -> Unit,
 ) = runComposeUiTest {
     var current = initial
@@ -83,6 +86,7 @@ internal fun projectionTab(
     setContent {
         MaterialTheme {
             var state by remember { mutableStateOf(current) }
+            CompositionLocalProvider(LocalPathChooser provides chooser) {
             ProjectionSettingsTab(
                 settings = state,
                 onSettingsChange = { transform -> state = transform(state); current = state },
@@ -97,6 +101,7 @@ internal fun projectionTab(
                 vlcProbe = { vlcInstalled },
                 audioDeviceProbe = { audioDevices },
             )
+            }
         }
     }
     awaitAudioDevices()

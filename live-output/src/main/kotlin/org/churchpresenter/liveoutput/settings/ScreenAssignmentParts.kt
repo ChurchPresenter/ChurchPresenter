@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.liveoutput.settings
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border

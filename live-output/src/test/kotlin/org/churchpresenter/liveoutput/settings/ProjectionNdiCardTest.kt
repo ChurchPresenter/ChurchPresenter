@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.liveoutput.settings
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -399,5 +399,22 @@ class ProjectionNdiCardTest {
     @Test
     fun `an output with receivers counts them`() {
         card(oneOutput(), receivers = 3) { _ -> onNodeWithText("3 receiving").assertExists() }
+    }
+
+    @Test
+    fun `dismissing the menus and the Remove question changes nothing`() {
+        card(oneOutput()) { read ->
+            val before = read()
+            onNodeWithText("Alpha (transparent)").performClick()
+            waitForIdle()
+            clickOutsidePopup()
+            onNodeWithText("30").performClick()
+            waitForIdle()
+            clickOutsidePopup()
+            onNodeWithText("Remove").performClick()
+            waitForIdle()
+            clickOutsidePopup()
+            assertEquals(before, read(), "nothing was chosen")
+        }
     }
 }

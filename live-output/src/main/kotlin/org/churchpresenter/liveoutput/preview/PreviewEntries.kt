@@ -6,14 +6,11 @@ import org.churchpresenter.presenter.sizedAs
 import org.churchpresenter.strings.generated.resources.preview_merged_label
 import org.churchpresenter.strings.generated.resources.preview_bus_label
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import org.churchpresenter.settings.drivesNothing
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.layout
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.browser_source_output_label
 import org.churchpresenter.strings.generated.resources.ndi_output_numbered

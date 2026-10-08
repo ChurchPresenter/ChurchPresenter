@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.liveoutput.settings
 
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
@@ -67,7 +67,6 @@ import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.composables.ResolutionPicker
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.addBrowserSourceOutput
 import org.churchpresenter.settings.removeBrowserSourceOutput

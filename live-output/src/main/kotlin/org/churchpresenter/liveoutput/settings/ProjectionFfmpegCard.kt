@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.liveoutput.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,7 +27,6 @@ import org.churchpresenter.sharedui.composables.CopyLinkIconButton
 import org.churchpresenter.sharedui.utils.FfmpegBinary
 import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.theme.components.SettingsTextField
-import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.sharedui.utils.UrlOpener
 import org.churchpresenter.settings.AppSettings
@@ -180,6 +179,7 @@ private fun FfmpegPathRow(
     copyText: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val pathChooser = LocalPathChooser.current
     val chooserTitle = stringResource(Res.string.ffmpeg_path_hint)
 
     /** Saves [selected] as the override, applies it, and re-probes — the only way this row changes. */
@@ -211,11 +211,10 @@ private fun FfmpegPathRow(
             shape = AppShape(6.dp),
             onClick = {
                 scope.launch {
-                    val chosen = FileChooser.platformInstance.chooseSingle(
-                        path = path.takeIf { it.isNotBlank() }?.let(::Path),
+                    val chosen = pathChooser.choose(
+                        start = path.takeIf { it.isNotBlank() }?.let(::Path),
                         title = chooserTitle,
-                        selectDirectory = false,
-                        filters = emptyList(),
+                        directory = false,
                     ) ?: return@launch
                     applyPath(chosen.absolutePathString())
                 }

@@ -181,7 +181,7 @@
 - `canvas/…/SharedBrowserFrameCache.kt` (with `BrowserProcesses.kt`, `CdpPages.kt`), `SharedCameraFrameCache.kt`
 - `canvas/…/NdiFrameCache.kt`, `NdiSourceDirectory.kt` — receiving NDI sources onto the canvas, and finding them
 - `canvas/…/OmtFrameCache.kt`, `SceneOmtEditor.kt`, `ReceivedFrameCache.kt` — receiving OMT sources onto the canvas, choosing one, and the capture loop both protocols share; `NetworkInputs.kt` is how the canvas reaches the app's NDI and OMT libraries
-- `shared-ui/…/utils/FfmpegBinary.kt`, `dialogs/tabs/ProjectionFfmpegCard.kt` — which ffmpeg cameras are opened with: the bundled one, an override, or whatever is installed
+- `shared-ui/…/utils/FfmpegBinary.kt`, `live-output/…/settings/ProjectionFfmpegCard.kt` — which ffmpeg cameras are opened with: the bundled one, an override, or whatever is installed
 - `gradle/ffmpeg-builds.properties`, `THIRD_PARTY_FFMPEG.md` — where the bundled ffmpeg comes from, and its licence
 - `canvas/…/ScenePresenter.kt`, `web/…/presenter/WebsitePresenter.kt` (the `:web` module: JCEF, `CefManager`, the embedded browser)
 - `data/settings/WebBookmark.kt`
@@ -278,15 +278,15 @@
 - `live-output/…/BrowserSourceVideoRenderer.kt`, `presenter/…/LocalTransparentBlanking.kt` — Browser Source output
 - `live-output/…/ComposeScenePump.kt`, `live-output/…/OffscreenOutputContent.kt` — the off-screen render both virtual outputs share
 - `ndi/` (the `:ndi` Gradle module) — NDI itself: `NdiRuntime`, `NdiLibrary`/`JnaNdiLibrary`, `NdiSender` and `NdiOutputMode`
-- `live-output/…/NdiVideoRenderer.kt`, `live-output/…/NdiManager.kt`, `dialogs/tabs/ProjectionNdiCard.kt` — the app-side wiring and its settings card
+- `live-output/…/NdiVideoRenderer.kt`, `live-output/…/NdiManager.kt`, `live-output/…/settings/ProjectionNdiCard.kt` — the app-side wiring and its settings card
 - `omt/` (the `:omt` Gradle module) — OMT itself: `OmtRuntime`, `OmtLibrary`/`JnaOmtLibrary`, `OmtSender`, `OmtReceiver`, `OmtDiscovery`
-- `live-output/…/OmtVideoRenderer.kt`, `live-output/…/OmtOutputRegistry.kt`, `live-output/…/OmtManager.kt`, `dialogs/tabs/ProjectionOmtCard.kt` — the app-side OMT wiring and its settings card
+- `live-output/…/OmtVideoRenderer.kt`, `live-output/…/OmtOutputRegistry.kt`, `live-output/…/OmtManager.kt`, `live-output/…/settings/ProjectionOmtCard.kt` — the app-side OMT wiring and its settings card
 - `gradle/omt-builds.properties`, `.github/workflows/omt-linux.yml`, `THIRD_PARTY_OMT.md` — where the bundled OMT libraries come from, and their licence
 - `media/…/data/StockMediaClient.kt`, `media/…/dialogs/StockMediaBrowserDialog.kt`, `media/…/viewmodel/StockMediaViewModel.kt`, `data/settings/StockPhotoSettings.kt`
 - `composables/DeckLinkManager.kt`, `composables/DeckLinkInputGate.kt`, `live-output/…/preview/LivePreviewPanel.kt`, `presenter/…/LoopingVideoBackground.kt`
 - `live-output/…/PresenterManager.kt`, `profiles/…/BackgroundSettingsViewModel.kt`
 - `data/settings/BackgroundConfig.kt`, `data/settings/BackgroundSettings.kt`, `data/settings/ProjectionSettings.kt`, `data/settings/ScreenAssignment.kt`
-- `profiles/…/BackgroundSettingsTab.kt`, `dialogs/tabs/ProjectionSettingsTab.kt`
+- `profiles/…/BackgroundSettingsTab.kt`, `live-output/…/settings/ProjectionSettingsTab.kt`
 - `shared-ui/…/utils/AutoFitUtils.kt`
 - `profiles/…/ProfilesSettingsTab.kt`, `profiles/…/ProfileEditor.kt`, `profiles/…/ProfileHeader.kt` — the Profiles tab: the list, the editor, the header
 - `profiles/…/ProfileContentPage.kt`, `profiles/…/ProfileSourcePickers.kt`, `profiles/…/ProfileSources.kt` — what a profile shows, and its Bible and song sources

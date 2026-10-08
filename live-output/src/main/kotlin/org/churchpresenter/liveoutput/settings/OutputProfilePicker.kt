@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.liveoutput.settings
 
 import org.churchpresenter.profiles.HintTooltip
 import androidx.compose.foundation.layout.Box

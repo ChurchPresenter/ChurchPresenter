@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.liveoutput.settings
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.ComposeUiTest
@@ -11,6 +11,10 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
+import androidx.compose.ui.test.isRoot
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.click
+import androidx.compose.ui.geometry.Offset
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -65,6 +69,18 @@ class OutputProfilePickerTest {
             waitForIdle()
 
             assertEquals(listOf(BLANK_OUTPUT_PROFILE_ID), picked)
+        }
+    }
+
+    @Test
+    fun `a click outside closes the menu without picking anything`() {
+        val picked = mutableListOf<String>()
+        picker(onDontUse = null, picked = picked) {
+            item("Blank").assertExists()
+            onAllNodes(isRoot())[0].performTouchInput { click(bottomRight - Offset(2f, 2f)) }
+            waitForIdle()
+            item("Blank").assertDoesNotExist()
+            assertEquals(emptyList(), picked)
         }
     }
 }

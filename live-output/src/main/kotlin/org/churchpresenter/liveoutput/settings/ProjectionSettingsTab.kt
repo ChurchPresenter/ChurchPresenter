@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.liveoutput.settings
 
 import org.churchpresenter.profiles.previewOutputSize
 import androidx.compose.foundation.background
@@ -83,13 +83,11 @@ import org.churchpresenter.profiles.ScanningRow
 import org.churchpresenter.media.composables.VlcAudioDevice
 import org.churchpresenter.media.composables.recheckVlcAvailability
 import org.churchpresenter.media.composables.vlcCustomPath
-import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.isScreenUnused
 import org.churchpresenter.settings.screenKey
-import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.DevFlags
@@ -218,6 +216,8 @@ fun ProjectionSettingsTab(
      */
     vlcProbe: () -> Boolean = { isVlcAvailable },
     audioDeviceProbe: () -> List<VlcAudioDevice> = ::listVlcAudioDevices,
+    /** Whether this is a release build: a developer build with no real screen lists the dev fallback window. */
+    isRelease: Boolean = false,
 ) {
     val scope = rememberCoroutineScope()
     val proj = settings.projectionSettings
@@ -234,7 +234,7 @@ fun ProjectionSettingsTab(
     // Dev convenience: mirrors main.kt's devWindowedFallback — on a single-monitor dev machine
     // with no DeckLink device, main.kt opens an extra windowed "dev" output at assignment slot 0.
     // Without this, that window would have no row here to configure it.
-    val devWindowedFallback = (!BuildConfig.IS_RELEASE || DevFlags.forceDevWindow) && realWindowCount == 0
+    val devWindowedFallback = (!isRelease || DevFlags.forceDevWindow) && realWindowCount == 0
     val devWindowCount = proj.devWindowCount.coerceAtLeast(1)
     val presenterWindowCount = realWindowCount + if (devWindowedFallback) devWindowCount else 0
 
@@ -603,6 +603,7 @@ private fun VlcPathRow(
     onChosen: (path: String, detected: Boolean) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val pathChooser = LocalPathChooser.current
     // Custom VLC path picker
     Spacer(modifier = Modifier.height(4.dp))
     Text(
@@ -634,11 +635,10 @@ private fun VlcPathRow(
             shape = AppShape(6.dp),
             onClick = {
             scope.launch {
-                val file = FileChooser.platformInstance.chooseSingle(
-                    path = Path(vlcPathText),
+                val file = pathChooser.choose(
+                    start = Path(vlcPathText),
                     title = getString(Res.string.vlc_directory_chooser_title),
-                    selectDirectory = true,
-                    filters = emptyList()
+                    directory = true,
                 )
                 if (file != null) {
                     val selectedPath = file.absolutePathString()

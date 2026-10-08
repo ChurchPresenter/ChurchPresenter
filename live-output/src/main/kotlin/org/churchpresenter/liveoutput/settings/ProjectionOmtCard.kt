@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.liveoutput.settings
 
 import org.churchpresenter.settings.mergingProfileOf
 import org.churchpresenter.settings.utils.Constants
@@ -84,9 +84,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.churchpresenter.sharedui.composables.LabeledSwitch
-import org.churchpresenter.app.churchpresenter.composables.ResolutionPicker
 import org.churchpresenter.sharedui.composables.SettingsSection
-import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.liveoutput.OmtManager
 import org.churchpresenter.liveoutput.OmtVideoRenderer
 import org.churchpresenter.omt.OmtOutputMode
@@ -202,6 +200,7 @@ private fun OmtLibraryRow(
         OmtLibraryMessage(status)
 
         val scope = rememberCoroutineScope()
+        val pathChooser = LocalPathChooser.current
         val folderTitle = stringResource(Res.string.omt_library_path)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             // Read-only plus a Browse button, as the NDI and VLC folders on this tab are.
@@ -225,11 +224,10 @@ private fun OmtLibraryRow(
                 shape = AppShape(6.dp),
                 onClick = {
                     scope.launch {
-                        val chosen = FileChooser.platformInstance.chooseSingle(
-                            path = path.takeIf { it.isNotBlank() }?.let(::Path),
+                        val chosen = pathChooser.choose(
+                            start = path.takeIf { it.isNotBlank() }?.let(::Path),
                             title = folderTitle,
-                            selectDirectory = true,
-                            filters = emptyList(),
+                            directory = true,
                         ) ?: return@launch
                         val selected = chosen.absolutePathString()
                         // Only written back: main.kt's effect is keyed on this path and loads it.

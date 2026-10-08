@@ -76,10 +76,8 @@ import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.CompanionSatelliteSettings
-import org.churchpresenter.companionsurface.CompanionConnectionUiState
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.core.models.companion.CompanionSurfaceSlot
-import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.theme.semantic

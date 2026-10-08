@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.liveoutput.settings
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -326,6 +326,23 @@ class ProjectionOmtCardTest {
         card(withOutputs()) { _ ->
             onNodeWithText("No receivers").assertExists()
             onNodeWithText("Receivers list this output as", substring = true).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `dismissing the menus and the Remove question changes nothing`() {
+        card(withOutputs()) { read ->
+            val before = read()
+            onNodeWithText("Automatic").performClick()
+            waitForIdle()
+            clickOutsidePopup()
+            onNodeWithText("Alpha (transparent)").performClick()
+            waitForIdle()
+            clickOutsidePopup()
+            onNodeWithText("Remove").performClick()
+            waitForIdle()
+            clickOutsidePopup()
+            assertEquals(before, read(), "nothing was chosen")
         }
     }
 }

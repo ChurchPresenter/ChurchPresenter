@@ -39,7 +39,6 @@ import org.churchpresenter.strings.generated.resources.expand_preview
 import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
 import org.churchpresenter.settings.OutputProfile
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.sharedui.composables.mode
 
 // The line above each preview: the output's name and mode, the fold caret and the profile picker.
 

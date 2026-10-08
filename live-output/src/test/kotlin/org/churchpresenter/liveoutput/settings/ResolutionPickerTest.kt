@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.liveoutput.settings
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.ComposeUiTest
@@ -103,5 +103,27 @@ class ResolutionPickerTest {
         waitForIdle()
 
         assertNull(read(), "a cancelled dialog must report no change at all")
+    }
+
+    @Test
+    fun `dismissing the menu reports nothing`() = picker { read ->
+        val before = read()
+        onNodeWithText("1920×1080").performClick()
+        waitForIdle()
+        clickOutsidePopup()
+        assertEquals(before, read())
+    }
+
+    @Test
+    fun `a custom height is reported with the width`() = picker { read ->
+        onNodeWithText("1920×1080").performClick()
+        waitForIdle()
+        onNodeWithText("Custom", substring = true).performClick()
+        waitForIdle()
+        onNodeWithText("1080").performTextReplacement("1200")
+        waitForIdle()
+        onNodeWithText("OK").performClick()
+        waitForIdle()
+        assertEquals(1920 to 1200, read())
     }
 }

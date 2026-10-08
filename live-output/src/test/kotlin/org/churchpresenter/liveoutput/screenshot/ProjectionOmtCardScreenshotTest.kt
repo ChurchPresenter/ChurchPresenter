@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.liveoutput.screenshot
 
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
@@ -9,7 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Box
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.OmtOutputsCard
+import org.churchpresenter.liveoutput.settings.OmtOutputsCard
 import org.churchpresenter.omt.OmtRuntimeStatus
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile

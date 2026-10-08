@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.dialogs.tabs
+package org.churchpresenter.liveoutput.settings
 
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -273,6 +273,16 @@ class ProjectionSettingsTabBrowserSourceTest {
 
             assertEquals(BLANK_OUTPUT_PROFILE_ID, output(get).activeProfileId)
             onAllNodesWithText("Blank").onLast().assertExists()
+        }
+    }
+
+    @Test
+    fun `dismissing the frame rate dropdown keeps the frame rate`() {
+        projectionTab(initial = withOutputs(1)) { get ->
+            rowDropdown("30").performScrollTo().performClick()
+            waitForIdle()
+            clickOutsidePopup()
+            assertEquals(30, output(get).browserSourceFps)
         }
     }
 }
