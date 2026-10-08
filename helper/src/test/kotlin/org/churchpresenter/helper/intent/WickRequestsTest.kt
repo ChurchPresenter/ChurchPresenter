@@ -120,6 +120,15 @@ class WickRequestsTest {
     }
 
     @Test
+    fun `adding or editing a song starts at its button, not at the tab`() {
+        assertEquals(GuideTargets.NEW_SONG, tourTargets("how do I add song").first())
+        assertEquals(GuideTargets.NEW_SONG, tourTargets("where do I add a song").first())
+        assertEquals(GuideTargets.EDIT_SONG, tourTargets("how do I edit song").first())
+        assertEquals(GuideTargets.EDIT_SONG, tourTargets("how do I change a song").first())
+        assertIs<HelperAction.OpenSongLibrary>(action("batch edit songs"))
+    }
+
+    @Test
     fun `making the lyrics bigger, said outright, changes the size rather than showing where`() {
         assertEquals(HelperAction.ChangeFontSize(ContentScope.SONG, 1), action("make the song text bigger"))
     }

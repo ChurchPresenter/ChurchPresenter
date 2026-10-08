@@ -56,7 +56,9 @@ internal enum class LookAspect { FONT, SIZE, STYLE, SHADOW, POSITION, MARGINS, A
 private val EDIT_LYRICS = listOf(
     "change song lyrics", "change the lyrics", "change lyrics", "edit lyrics", "edit the lyrics", "edit song lyrics",
     "fix the lyrics", "fix lyrics", "change the words", "edit the words", "update the lyrics", "correct the lyrics",
-    "typo", "mistake in the lyrics", "edit a song", "edit the song", "change a song",
+    "typo", "mistake in the lyrics", "edit a song", "edit the song", "change a song", "edit song", "edit songs",
+    "edit this song", "edit my song", "change song", "change the song", "change this song", "modify song",
+    "modify a song", "update song", "update a song", "edit a hymn", "edit hymn",
 )
 private val END_MARKER = listOf(
     "end of song marker", "end-of-song marker", "end marker", "end of song", "end-of-song", "end of the song",
@@ -92,7 +94,9 @@ private val REFERENCE_WORDS = listOf("reference", "references", "ref", "book nam
  */
 internal fun lookRule(r: Request): Resolution? {
     val tour = when {
-        r.hasPhrase(EDIT_LYRICS) -> LookTours.editLyrics()
+        // "Batch edit songs" is many songs at once: the Song Library's, not the editor's.
+        r.hasPhrase(EDIT_LYRICS) && !r.has(Vocabulary.MANY) && !r.hasPhrase(Vocabulary.SONG_LIBRARY) ->
+            LookTours.editLyrics()
         r.hasPhrase(END_MARKER) -> LookTours.endMarker()
         else -> lookTour(r)
     }
@@ -144,7 +148,6 @@ internal object LookTours {
     /** The Songs tab, Edit, then the lyrics in the editor. */
     fun editLyrics() = GuideTour(
         listOf(
-            tabStep(Tabs.SONGS),
             GuideStep(
                 GuideTargets.EDIT_SONG,
                 helperText(Res.string.helper_hint_pick_and_edit, helperText(Res.string.edit_song)),
