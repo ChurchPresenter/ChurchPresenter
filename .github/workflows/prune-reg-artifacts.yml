@@ -1,22 +1,24 @@
-name: Prune screenshot reports
+name: Prune screenshot artifacts
 
-# reg-actions uploads a `reg` artifact with every screenshot comparison, and it does not pass a
-# retention on: its `retention-days` input (screenshots.yml) only prunes the `reg_actions` branch,
-# so the artifact falls back to the repository default of 90 days. At 90-180 MB a push that came to
-# over 100 GB. This keeps a week of them -- long enough to download the report a recent PR's
-# comment links -- and deletes the rest every day.
+# The screenshot workflow uploads a `reg` report (reg-actions) and the `screenshots*` renders on
+# every push. reg-actions passes no retention, so its `reg` artifact keeps the repository default
+# of 90 days -- its `retention-days` input in screenshots.yml only prunes the `reg_actions` branch --
+# and at 90-180 MB a push that came to over 100 GB. Only a branch's latest run is worth looking at,
+# so this keeps the newest two of each artifact per branch -- the latest and the one before, to
+# compare against -- and deletes the rest every day.
 #
-# Only artifacts named `reg`. Workflow runs, logs and every other artifact are left alone.
+# Only the screenshot workflow's artifacts (`reg`, `screenshots*`). Workflow runs, logs and every
+# other artifact are left alone.
 
 on:
   schedule:
     - cron: '17 4 * * *'   # daily, 04:17 UTC
   workflow_dispatch:
     inputs:
-      max_age_days:
-        description: 'Delete reg artifacts older than this many days'
+      keep:
+        description: 'How many of each artifact to keep per branch, newest first'
         required: false
-        default: '7'
+        default: '2'
         type: number
       dry_run:
         description: 'List what would be deleted without deleting'
@@ -30,33 +32,45 @@ jobs:
     permissions:
       actions: write
     steps:
-      - name: Delete old reg artifacts
+      - name: Delete all but the newest screenshot artifacts per branch
         uses: actions/github-script@v7
         with:
           script: |
-            const maxAgeDays = Number('${{ inputs.max_age_days || 7 }}');
+            const keep = Number('${{ inputs.keep || 2 }}');
             const dryRun = '${{ inputs.dry_run || false }}' === 'true';
-            const cutoff = new Date(Date.now() - maxAgeDays * 24 * 60 * 60 * 1000);
-            console.log(`reg artifacts created before ${cutoff.toISOString()}${dryRun ? ' (dry run)' : ''}`);
+            const isScreenshotArtifact = (name) => name === 'reg' || name.startsWith('screenshots');
 
-            // Collect first, then delete: deleting while paging shifts the pages under the loop.
-            const old = await github.paginate(github.rest.actions.listArtifactsForRepo, {
+            // Collect everything first, then delete: deleting while paging shifts the pages.
+            const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              name: 'reg',
               per_page: 100,
-            }, (response) => response.data.filter(a => !a.expired && new Date(a.created_at) < cutoff));
+            }, (response) => response.data.filter(a => !a.expired && isScreenshotArtifact(a.name)));
 
+            const groups = new Map();
+            for (const a of artifacts) {
+              const key = `${a.name} @ ${a.workflow_run?.head_branch ?? '?'}`;
+              if (!groups.has(key)) groups.set(key, []);
+              groups.get(key).push(a);
+            }
+
+            let count = 0;
             let bytes = 0;
-            for (const artifact of old) {
-              bytes += artifact.size_in_bytes;
-              if (!dryRun) {
-                await github.rest.actions.deleteArtifact({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  artifact_id: artifact.id,
-                });
+            for (const [key, list] of groups) {
+              list.sort((x, y) => new Date(y.created_at) - new Date(x.created_at));
+              const stale = list.slice(keep);
+              if (stale.length > 0) console.log(`${key}: keeping ${Math.min(keep, list.length)}, removing ${stale.length}`);
+              for (const a of stale) {
+                count++;
+                bytes += a.size_in_bytes;
+                if (!dryRun) {
+                  await github.rest.actions.deleteArtifact({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    artifact_id: a.id,
+                  });
+                }
               }
             }
             const gb = (bytes / 1024 ** 3).toFixed(1);
-            console.log(`${dryRun ? 'Would delete' : 'Deleted'} ${old.length} reg artifact(s), ${gb} GB`);
+            console.log(`${dryRun ? 'Would delete' : 'Deleted'} ${count} artifact(s), ${gb} GB`);
