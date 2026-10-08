@@ -15,6 +15,7 @@ import org.churchpresenter.core.models.schedule.CueAction
 import org.churchpresenter.core.models.schedule.RowEnd
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.showcontrol.Action
 import java.time.LocalDateTime
 import java.time.LocalTime
 
@@ -213,9 +214,37 @@ fun fireCue(
             host.projectItem(it, cue.plays)
         }
         CueAction.BLANK -> host.blankOutputs()
-        else -> Unit
+        else -> cueAsAction(cue)?.let(host.runAction)
     }
     CueFeed.post(FiredCue(cue, at))
+}
+
+/**
+ * The action an `obsScene` or `atemKey` cue comes to, or null for any other cue -- and for one whose
+ * label does not say what to do. An `obsScene` cue's label is the scene's name; an `atemKey` cue's
+ * is the key, counted from one as the switcher's panel does, and on or off: `DSK 1 on`,
+ * `ME 1 key 2 off`.
+ */
+fun cueAsAction(cue: ScheduleItem.CueItem): Action? = when (cue.action) {
+    CueAction.OBS_SCENE -> cue.label.trim().takeIf { it.isNotEmpty() }?.let(Action::ObsScene)
+    CueAction.ATEM_KEY -> atemKeyIn(cue.label)
+    else -> null
+}
+
+private val DOWNSTREAM_KEY = Regex("""dsk\s*(\d+)\s+(on|off)""", RegexOption.IGNORE_CASE)
+private val UPSTREAM_KEY = Regex("""me\s*(\d+)\s*key\s*(\d+)\s+(on|off)""", RegexOption.IGNORE_CASE)
+
+private fun atemKeyIn(label: String): Action.AtemKey? {
+    val text = label.trim()
+    DOWNSTREAM_KEY.matchEntire(text)?.destructured?.let { (keyer, state) ->
+        return Action.AtemKey(downstream = true, keyer = keyer.toInt() - 1, on = state.equals("on", true))
+            .takeIf { it.keyer >= 0 }
+    }
+    UPSTREAM_KEY.matchEntire(text)?.destructured?.let { (me, keyer, state) ->
+        return Action.AtemKey(mixEffect = me.toInt() - 1, keyer = keyer.toInt() - 1, on = state.equals("on", true))
+            .takeIf { it.mixEffect >= 0 && it.keyer >= 0 }
+    }
+    return null
 }
 
 /**

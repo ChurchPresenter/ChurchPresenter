@@ -1,5 +1,10 @@
 package org.churchpresenter.app.churchpresenter.remote
 
+import org.churchpresenter.liveoutput.setPropsOn
+import org.churchpresenter.liveoutput.propsOnAir
+import org.churchpresenter.liveshow.Cue
+import org.churchpresenter.liveoutput.showMessage
+import org.churchpresenter.liveoutput.messageOnAir
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.liveoutput.PresenterManager
@@ -159,5 +164,61 @@ class RemoteLayersTest {
         runBlocking { applyRemoteLiveState(announcement, follower, InstanceLinkViewModel()) }
         assertEquals("From the primary", follower.announcementText.value)
         assertEquals(setOf(Presenting.ANNOUNCEMENTS), follower.overlays.value)
+    }
+
+    // ── Messages ────────────────────────────────────────────────────────────────────────────────
+
+    private fun withMessage(text: String?) = LiveStateDto(
+        contentType = Presenting.MESSAGE.name,
+        liveSlide = Presenting.NONE.name,
+        overlays = emptyList(),
+        message = text,
+    )
+
+    @Test
+    fun `the primary's message goes up here, and comes down when the primary's does`() {
+        follower.setPresentingMode(Presenting.LYRICS)
+        followMessage(withMessage("Nursery #4"), follower, everything)
+        assertEquals("Nursery #4", follower.messageOnAir?.text)
+        assertEquals(null, follower.messageOnAir?.durationSeconds, "the primary's clock takes it down")
+        followMessage(withMessage(null), follower, everything)
+        assertEquals(null, follower.messageOnAir)
+    }
+
+    @Test
+    fun `messages not followed, or an older primary, change nothing`() {
+        followMessage(withMessage("Nursery #4"), follower) { it != Presenting.MESSAGE }
+        assertEquals(null, follower.messageOnAir)
+        follower.showMessage(Cue.Message("Ours"))
+        followMessage(withMessage(null).copy(overlays = null), follower, everything)
+        assertEquals("Ours", follower.messageOnAir?.text)
+    }
+
+    @Test
+    fun `a message is on the messages link layer`() {
+        assertEquals(LinkLayers.MESSAGES, linkLayerOf(Presenting.MESSAGE))
+        assertTrue(LinkLayers.MESSAGES in LinkLayers.ALL)
+    }
+
+    // ── Props ───────────────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the follower matches the primary's props when it follows them`() {
+        follower.setPropsOn(setOf("old"))
+        followProps(LiveStateDto(contentType = "PROPS", overlays = emptyList(), props = listOf("logo", "clock")),
+            follower, everything)
+        assertEquals(setOf("logo", "clock"), follower.propsOnAir)
+        val none = LiveStateDto(contentType = "PROPS", overlays = emptyList(), props = emptyList())
+        followProps(none, follower, everything)
+        assertEquals(emptySet(), follower.propsOnAir)
+    }
+
+    @Test
+    fun `props not followed, or an older primary, change nothing`() {
+        follower.setPropsOn(setOf("ours"))
+        followProps(LiveStateDto(contentType = "PROPS", props = listOf("logo")), follower) { it != Presenting.PROPS }
+        followProps(LiveStateDto(contentType = "PROPS"), follower, everything)
+        assertEquals(setOf("ours"), follower.propsOnAir)
+        assertEquals(LinkLayers.PROPS, linkLayerOf(Presenting.PROPS))
     }
 }

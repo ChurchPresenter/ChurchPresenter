@@ -1,19 +1,13 @@
 package org.churchpresenter.schedule
 
-import org.churchpresenter.schedule.ScheduleViewModel.ScheduleSnapshot
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.showcontrol.Action
 
 fun ScheduleViewModel.undo() {
     if (_isFollowingRemote.value || undoStack.isEmpty()) return
-    redoStack.addLast(ScheduleSnapshot(_scheduleItems.toList(), _notes.toMap(), _timing.toMap()))
-    val snapshot = undoStack.removeLast()
-    _scheduleItems.clear()
-    _scheduleItems.addAll(snapshot.items)
-    _notes.clear()
-    _notes.putAll(snapshot.notes)
-    _timing.clear()
-    _timing.putAll(snapshot.timing)
+    redoStack.addLast(snapshot())
+    restore(undoStack.removeLast())
     _canUndo.value = undoStack.isNotEmpty()
     _canRedo.value = true
     notifyChanged()
@@ -21,14 +15,8 @@ fun ScheduleViewModel.undo() {
 
 fun ScheduleViewModel.redo() {
     if (_isFollowingRemote.value || redoStack.isEmpty()) return
-    undoStack.addLast(ScheduleSnapshot(_scheduleItems.toList(), _notes.toMap(), _timing.toMap()))
-    val snapshot = redoStack.removeLast()
-    _scheduleItems.clear()
-    _scheduleItems.addAll(snapshot.items)
-    _notes.clear()
-    _notes.putAll(snapshot.notes)
-    _timing.clear()
-    _timing.putAll(snapshot.timing)
+    undoStack.addLast(snapshot())
+    restore(redoStack.removeLast())
     _canUndo.value = true
     _canRedo.value = redoStack.isNotEmpty()
     notifyChanged()
@@ -51,6 +39,17 @@ fun ScheduleViewModel.setNote(itemId: String, note: String) {
 }
 
 fun ScheduleViewModel.timingFor(itemId: String): RowTiming = _timing[itemId] ?: RowTiming.DEFAULT
+
+/** What the row [itemId] does when it goes live -- none for most rows. */
+fun ScheduleViewModel.actionsFor(itemId: String): List<Action> = _actions[itemId].orEmpty()
+
+/** Sets what the row [itemId] does when it goes live; an empty list takes its actions away. */
+fun ScheduleViewModel.setActions(itemId: String, actions: List<Action>) {
+    if (actionsFor(itemId) == actions) return
+    pushUndoSnapshot()
+    if (actions.isEmpty()) _actions.remove(itemId) else _actions[itemId] = actions
+    notifyChanged()
+}
 
 fun ScheduleViewModel.setServiceStart(startTime: String?) {
     _serviceStartTime.value = startTime

@@ -8,6 +8,9 @@ What is on air, and everything that puts it on a screen or a wire:
 - `PresenterManager` and the live state it is split into (`LiveSongs`, `LiveBible`, `LiveSlides`,
   `LivePictures`, `LiveAnnouncements`, `LiveLowerThird`, `LiveOverlays`, `LiveScreens`, `LiveWeb`),
   `PreviewBus`, `OutputLocks`, `legacyProgram` and the tabs' output adapters (`Presenter*Output`);
+- the whole-cue layers `LiveShow` holds and their clearing (`docs/SHOW_CONTROL.md`): `Messages`
+  (`showMessage`, `MessageExpiry`), `Props`, `ClearGroups` (with `clearFromOperator`) and
+  `LayerClearing`, drawn by `MessageCue` and `PropsCue`;
 - the output windows' content (`PresenterScreen`, `PresenterOutputContent`, `PresenterModeContent`,
   `OutputLayers`, `CueTextContent`/`CueMediaContent`) and the transitions that drive them
   (`PresenterTransitionEffects`, `TransitionLogic`, `AnnouncementLogic`, `LottieBandEffects`);

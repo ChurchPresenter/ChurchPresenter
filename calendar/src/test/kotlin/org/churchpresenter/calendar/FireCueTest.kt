@@ -4,6 +4,7 @@ import org.churchpresenter.core.models.schedule.CueAction
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.schedule.TimerModes
+import org.churchpresenter.showcontrol.Action
 import java.time.LocalTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -31,13 +32,14 @@ class FireCueTest {
             },
             projectItem = { item, plays -> done += "project:${item.id}x$plays" },
             blankOutputs = { done += "blank" },
+            runAction = { done += "action:$it" },
         )
     }
 
     private fun song(id: String) = ScheduleItem.SongItem(id, 1, "Song", "Hymns", "Hymns::1")
 
-    private fun cue(action: String, payload: ScheduleItem? = null, plays: Int = 1) =
-        ScheduleItem.CueItem(id = "c", action = action, payload = payload, plays = plays)
+    private fun cue(action: String, payload: ScheduleItem? = null, plays: Int = 1, label: String = "") =
+        ScheduleItem.CueItem(id = "c", action = action, label = label, payload = payload, plays = plays)
 
     private fun fire(
         cue: ScheduleItem.CueItem,
@@ -85,8 +87,34 @@ class FireCueTest {
 
     @Test
     fun `an action this version does not know is simply not fired`() {
-        assertTrue(fire(cue(CueAction.OBS_SCENE)).done.isEmpty())
         assertTrue(fire(cue("somethingLater")).done.isEmpty())
+    }
+
+    @Test
+    fun `an OBS scene cue switches to the scene its label names`() {
+        val fired = fire(cue(CueAction.OBS_SCENE, label = " Wide ")).done
+        assertEquals(listOf("action:${Action.ObsScene("Wide")}"), fired)
+        assertTrue(fire(cue(CueAction.OBS_SCENE, label = " ")).done.isEmpty(), "no scene, nothing to switch to")
+    }
+
+    @Test
+    fun `an ATEM key cue reads its key and state from its label, counted from one`() {
+        assertEquals(
+            Action.AtemKey(downstream = true, keyer = 0, on = true),
+            cueAsAction(cue(CueAction.ATEM_KEY, label = "DSK 1 on")),
+        )
+        assertEquals(
+            Action.AtemKey(mixEffect = 1, keyer = 2, on = false),
+            cueAsAction(cue(CueAction.ATEM_KEY, label = " me2 KEY 3 OFF ")),
+        )
+        listOf("DSK 0 on", "ME 0 key 1 on", "ME 1 key 0 on", "DSK 1", "key 1 on", "").forEach {
+            assertEquals(null, cueAsAction(cue(CueAction.ATEM_KEY, label = it)), it)
+        }
+        assertEquals(null, cueAsAction(cue(CueAction.BLANK, label = "DSK 1 on")))
+        assertEquals(
+            listOf("action:${Action.AtemKey(downstream = true, keyer = 1, on = false)}"),
+            fire(cue(CueAction.ATEM_KEY, label = "dsk2 off")).done,
+        )
     }
 
     // ── Countdown ───────────────────────────────────────────────────────────────

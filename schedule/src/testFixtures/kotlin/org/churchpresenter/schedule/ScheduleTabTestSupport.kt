@@ -2,6 +2,7 @@
 
 package org.churchpresenter.schedule
 
+import androidx.compose.runtime.CompositionLocalProvider
 import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
@@ -97,6 +98,11 @@ internal fun scheduleTab(
     scheduleService: ScheduleServiceLink? = null,
     /** Whether the tab is offered a calendar to add a hand-built Schedule to, as the app does. */
     offerAddToCalendar: Boolean = false,
+    /**
+     * Whether the rows offer their cue actions, as the app does in dev mode. On for the behaviour
+     * tests, off for a shot (one with a [themeMode]): screenshots show production only (AGENT.md).
+     */
+    showControl: Boolean = themeMode == null,
     block: ComposeUiTest.(vm: ScheduleViewModel, reports: ScheduleReports) -> Unit,
 ) {
     val realHome = System.getProperty("user.home")
@@ -109,6 +115,7 @@ internal fun scheduleTab(
         val body: ComposeUiTest.() -> Unit = {
             setContent {
                 ThemedForTest(themeMode) {
+                    CompositionLocalProvider(LocalShowControlEnabled provides showControl) {
                     Box(modifier = if (width != null) Modifier.width(width) else Modifier) {
                     ScheduleTab(
                         scheduleViewModel = vm,
@@ -140,6 +147,7 @@ internal fun scheduleTab(
                         onAddScheduleToCalendar =
                             if (offerAddToCalendar) ({ reports.addToCalendarRequests += 1 }) else null,
                     )
+                    }
                     }
                 }
             }

@@ -22,6 +22,8 @@ dependencies {
     // A run of show is a List<ScheduleItem> and nothing else, so the planner and the Schedule tab
     // speak one model; SongLibrary is how the add-item picker reads the song folder.
     implementation(projects.coreModels)
+    // What an obsScene or atemKey cue does is an action, run by the app.
+    api(projects.showControl)
     implementation(projects.theme)
 
     implementation(libs.kotlinx.coroutines.core)

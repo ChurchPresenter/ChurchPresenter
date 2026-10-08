@@ -42,6 +42,10 @@ import org.churchpresenter.qa.QAManager
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.settings.MessageTemplate
+import org.churchpresenter.settings.ClearGroup
+import org.churchpresenter.settings.Macro
+import org.churchpresenter.settings.PropDefinition
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.utils.Constants
 
@@ -347,12 +351,54 @@ class CompanionServer(
 
     /**
      * Emitted when a remote client clears one layer: POST /api/clear?layer=... or WS "clear" with a
-     * `layer`. The payload is the layer's name as sent -- see `overlayForLayerName`.
+     * `layer`. The payload is the layer's name as sent -- see `layerForName`.
      */
     val onClearLayer = MutableSharedFlow<String>(
         extraBufferCapacity = 4,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
+
+    /** Emitted when a remote client puts a message up: POST /api/message or WS "message". */
+    val onMessage = MutableSharedFlow<RemoteMessage>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** The saved messages a remote client may name -- kept current by the app from its settings. */
+    @Volatile var messageTemplates: List<MessageTemplate> = emptyList()
+
+    /** Emitted when a remote client switches a prop: POST /api/props/{id}/on|off|toggle or WS "prop". */
+    val onProp = MutableSharedFlow<PropSwitch>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** The props a remote client may switch -- kept current by the app from its settings. */
+    @Volatile var props: List<PropDefinition> = emptyList()
+
+    /** Emitted with a macro's id when a remote client runs it: POST /api/macro/{name} or WS "macro". */
+    val onMacro = MutableSharedFlow<String>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /**
+     * Whether the app is in dev mode -- kept current by the app. Off, the features not yet ready for
+     * production refuse remote clients; see [requireDevMode].
+     */
+    @Volatile var devMode: Boolean = false
+
+    /** The macros a remote client may run -- kept current by the app from its settings. */
+    @Volatile var macros: List<Macro> = emptyList()
+
+    /** Emitted with a clear group's id when a remote client fires it: POST /api/clear?group= or WS "clear". */
+    val onClearGroup = MutableSharedFlow<String>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** The clear groups a remote client may fire -- kept current by the app from its settings. */
+    @Volatile var clearGroups: List<ClearGroup> = emptyList()
 
     /** Emitted when a remote client takes what is cued on Preview to air: POST /api/take or WS "take". */
     val onTake = MutableSharedFlow<Unit>(

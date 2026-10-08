@@ -263,7 +263,12 @@ object CueAction {
     const val SCENE = "scene"
     /** Clears every output. */
     const val BLANK = "blank"
+    /** Switches OBS's program scene to the one the cue's label names. Not offered in the cue sheet yet. */
     const val OBS_SCENE = "obsScene"
+    /**
+     * Puts an ATEM key on or off air, as the cue's label says -- `DSK 1 on`, `ME 1 key 2 off`. Not
+     * offered in the cue sheet yet.
+     */
     const val ATEM_KEY = "atemKey"
 
     /** The actions offered in the cue sheet, in the design's order. */

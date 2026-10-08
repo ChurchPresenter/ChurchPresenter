@@ -8,7 +8,8 @@ The **Calendar Manager**: every planned service, on a month grid, each with a ru
 from the Help menu beside the Song Library Manager. A real Gradle module of this build —
 `include(":calendar")`, `implementation(projects.calendar)`.
 
-It takes `:core-models` and `:theme` and nothing else of the app's.
+It takes `:core-models`, `:theme` and `:show-control` (what an `obsScene` or `atemKey` cue comes to,
+`cueAsAction`, run by the app through `CalendarHost.runAction`), and nothing else of the app's.
 
 ## The one decision the rest of this module rests on
 

@@ -1,5 +1,9 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.liveoutput.setPropOn
+import org.churchpresenter.liveshow.Cue
+import org.churchpresenter.liveoutput.showMessage
+import org.churchpresenter.liveoutput.clearMessage
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -89,5 +93,28 @@ class LiveStateBroadcastWiringTest {
         val sent = assertNotNull(server.liveState.value)
         assertEquals(Presenting.LYRICS.name, sent.liveSlide)
         assertEquals(listOf(Presenting.LOWER_THIRD.name), sent.overlays)
+    }
+
+    @Test
+    fun `the broadcast carries the message up, and none once it is down`() = runComposeUiTest {
+        val manager = PresenterManager()
+        val server = CompanionServer()
+        compose(this, manager, server)
+        waitForIdle()
+        manager.showMessage(Cue.Message("Nursery #4", durationSeconds = 60))
+        assertEquals("Nursery #4", server.liveState.value?.message)
+        assertEquals(60, server.liveState.value?.messageDurationSeconds)
+        manager.clearMessage()
+        assertEquals(null, server.liveState.value?.message)
+    }
+
+    @Test
+    fun `the broadcast carries the props up`() = runComposeUiTest {
+        val manager = PresenterManager()
+        val server = CompanionServer()
+        compose(this, manager, server)
+        waitForIdle()
+        manager.setPropOn("logo", true)
+        assertEquals(listOf("logo"), server.liveState.value?.props)
     }
 }
