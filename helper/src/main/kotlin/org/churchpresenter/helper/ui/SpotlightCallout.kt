@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
@@ -60,6 +61,7 @@ private val AVATAR = 32.dp
 private val AVATAR_OUT = 19.dp
 private val AVATAR_EDGE = 2.dp
 private val BUBBLE_GAP = 18.dp
+private val UNDER_GAP = 8.dp
 private val BUBBLE_MAX = 250.dp
 
 /**
@@ -87,6 +89,9 @@ internal fun BoxScope.SpotlightCallout(target: GuideTarget, bounds: Rect, hint: 
         label = "nudge",
     )
     val edge = MaterialTheme.colorScheme.background
+    // At the window's top edge — the tab row — there is no room over the control, so Wick sits under it.
+    val under = bounds.top < with(LocalDensity.current) { AVATAR_OUT.toPx() }
+    val toward = if (under) -1f else 1f
     Layout(
         content = {
             Box(
@@ -98,8 +103,8 @@ internal fun BoxScope.SpotlightCallout(target: GuideTarget, bounds: Rect, hint: 
                         scaleX = grown
                         scaleY = grown
                         translationX = -NUDGE_DP.dp.toPx() * nudge
-                        translationY = (POP_RISE_DP * (1f - p) + NUDGE_DP * nudge).dp.toPx()
-                        rotationZ = NUDGE_TILT * nudge
+                        translationY = (POP_RISE_DP * (1f - p) * toward + NUDGE_DP * nudge * toward).dp.toPx()
+                        rotationZ = NUDGE_TILT * nudge * toward
                     }
                     .shadow(6.dp, CircleShape)
                     .border(AVATAR_EDGE, edge, CircleShape)
@@ -123,10 +128,12 @@ internal fun BoxScope.SpotlightCallout(target: GuideTarget, bounds: Rect, hint: 
         val note = measurables.getOrNull(1)?.measure(loose)
         layout(constraints.maxWidth, constraints.maxHeight) {
             val out = AVATAR_OUT.roundToPx()
-            avatar.place(bounds.right.toInt() + out - avatar.width, bounds.top.toInt() - out)
+            val avatarY = if (under) bounds.bottom.toInt() + out - avatar.height else bounds.top.toInt() - out
+            avatar.place(bounds.right.toInt() + out - avatar.width, avatarY)
             if (note != null) {
                 val gap = BUBBLE_GAP.toPx()
-                val below = bounds.bottom + gap
+                // Clear of Wick when it sits under the control too.
+                val below = bounds.bottom + if (under) AVATAR_OUT.toPx() + UNDER_GAP.toPx() else gap
                 val above = bounds.top - gap - note.height
                 val (x, y) = when {
                     below + note.height <= constraints.maxHeight -> bounds.left - SPOTLIGHT_OUTSET.toPx() to below

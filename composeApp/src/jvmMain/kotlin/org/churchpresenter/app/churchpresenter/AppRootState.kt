@@ -66,6 +66,8 @@ import org.churchpresenter.sharedui.models.Tabs
 internal class AppRootState(
     private val application: ApplicationScope,
     val coroutineScope: CoroutineScope,
+    // The displays besides the main one; a test passes its own, having none.
+    private val secondaryDisplays: () -> List<ResolvedDisplay> = ::nonPrimaryDisplays,
 ) {
     var appReady by mutableStateOf(false)
     val settingsManager = SettingsManager()
@@ -238,15 +240,7 @@ internal class AppRootState(
 
     /** Fits the saved screen assignments to the displays and DeckLink devices this machine has now. */
     private fun reconcileScreenAssignmentsAtStartup() {
-        val screenDevicesAll = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
-        val primaryDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
-        val nonPrimaryDisplays = screenDevicesAll.filter { it != primaryDevice }.map { device ->
-            val bounds = device.defaultConfiguration.bounds
-            ResolvedDisplay(
-                deviceIndex = screenDevicesAll.indexOf(device),
-                x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height,
-            )
-        }
+        val nonPrimaryDisplays = secondaryDisplays()
         val deckLinkCount = deckLinkOutputCount(DeckLinkManager.isAvailable()) { DeckLinkManager.listDevices().size }
 
         val proj = appSettings.projectionSettings
@@ -263,3 +257,16 @@ internal class AppRootState(
 }
 
 private const val REMOTE_FLOW_BUFFER = 8
+
+/** Every display but the main one, as the screen assignments name them. */
+private fun nonPrimaryDisplays(): List<ResolvedDisplay> {
+    val screenDevicesAll = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
+    val primaryDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
+    return screenDevicesAll.filter { it != primaryDevice }.map { device ->
+        val bounds = device.defaultConfiguration.bounds
+        ResolvedDisplay(
+            deviceIndex = screenDevicesAll.indexOf(device),
+            x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height,
+        )
+    }
+}
