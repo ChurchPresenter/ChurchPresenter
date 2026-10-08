@@ -4,6 +4,9 @@ import org.churchpresenter.bible.SpbFixture
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleSyncMode
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.job
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -67,8 +70,15 @@ class BibleViewModelFollowerTest {
         )
     }
 
+    /** Every view model a test built, so teardown can wait out what each is still writing. */
+    private val models = mutableListOf<BibleViewModel>()
+
     @AfterTest
     fun tearDown() {
+        // Joined, not only cancelled: a replica download still writing its cache file finishes the
+        // write before it notices, and a write into a home already deleted below fails in some
+        // later test's runTest as an exception from before it started.
+        runBlocking { models.forEach { it.viewModelScope.coroutineContext.job.cancelAndJoin() } }
         realHome?.let { System.setProperty("user.home", it) }
         dir.deleteRecursively()
         testHome.deleteRecursively()
@@ -80,6 +90,7 @@ class BibleViewModelFollowerTest {
                 bibleSettings = BibleSettings(storageDirectory = dir.absolutePath, primaryBible = "local.spb"),
             ),
         )
+        models += model
         awaitUntil("local bible") { model.books.value.isNotEmpty() && model.isFullyLoaded }
         return model
     }
@@ -289,6 +300,7 @@ class BibleViewModelFollowerTest {
                     ),
                 ),
             )
+            models += vm
             awaitUntil("bilingual load") { vm.books.value.isNotEmpty() && vm.isFullyLoaded }
 
             val token = vm.verseSelectionToken.value
@@ -325,6 +337,7 @@ class BibleViewModelFollowerTest {
                     primaryBible = "r.spb",
                 )),
             )
+            models += vm
             awaitUntil("load") { vm.books.value.isNotEmpty() && vm.isFullyLoaded }
 
             fun numbersFor(range: String): List<Int> {
