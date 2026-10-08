@@ -29,6 +29,9 @@ class WickRequestsTest {
     fun `a countdown of so many minutes starts one`() {
         assertEquals(HelperAction.StartCountdown(5), action("5 minute countdown"))
         assertEquals(HelperAction.StartCountdown(10), action("start a 10 min timer"))
+        // Taking it down is not starting one.
+        val takeDown = resolve("take down the 5 minute countdown")
+        assertTrue(takeDown !is Resolution.Act || takeDown.action !is HelperAction.StartCountdown, "$takeDown")
     }
 
     @Test

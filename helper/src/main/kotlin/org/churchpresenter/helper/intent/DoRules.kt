@@ -11,10 +11,10 @@ private const val MAX_COUNTDOWN_MINUTES = 600
 
 /** "5 minute countdown", "start a 10 min timer", "countdown for 3 minutes". */
 internal fun countdownRule(r: Request): Resolution? {
-    if (!r.hasPhrase(Vocabulary.COUNTDOWN) || r.first in Vocabulary.TAKE_DOWN || r.has(Vocabulary.CLEAR)) return null
-    val minutes = MINUTES.find(r.text)?.groupValues?.get(1)?.toIntOrNull() ?: return null
-    if (minutes !in 1..MAX_COUNTDOWN_MINUTES) return null
-    return act(HelperAction.StartCountdown(minutes))
+    val takingDown = r.first in Vocabulary.TAKE_DOWN || r.has(Vocabulary.CLEAR) || r.says("take down", "turn off")
+    val minutes = MINUTES.find(r.text)?.groupValues?.get(1)?.toIntOrNull()
+        ?.takeIf { it in 1..MAX_COUNTDOWN_MINUTES && r.hasPhrase(Vocabulary.COUNTDOWN) && !takingDown }
+    return minutes?.let { act(HelperAction.StartCountdown(it)) }
 }
 
 private val TELL_PARENTS = Regex(

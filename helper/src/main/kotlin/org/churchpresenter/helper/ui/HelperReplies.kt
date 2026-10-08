@@ -106,7 +106,7 @@ private const val TIP_ABOUT = "tip"
 internal typealias Ask = (shown: String, request: String) -> Unit
 
 /** The icon on a suggested request's chip. */
-private fun requestIcon(request: SuggestedRequest): ImageVector = when (request) {
+internal fun requestIcon(request: SuggestedRequest): ImageVector = when (request) {
     SuggestedRequest.BACKGROUND -> Icons.Filled.Palette
     SuggestedRequest.VERSE, SuggestedRequest.BIBLE_TRANSLATION -> Icons.AutoMirrored.Filled.MenuBook
     SuggestedRequest.NEW_SONG, SuggestedRequest.CHORDS -> Icons.Filled.MusicNote
