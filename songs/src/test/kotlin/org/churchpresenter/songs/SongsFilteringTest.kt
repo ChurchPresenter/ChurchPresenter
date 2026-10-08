@@ -33,7 +33,12 @@ class SongsFilteringTest {
         val catalog = books.flatMap { (bookName, songs) ->
             songs.map { (number, title) -> SongItem(number = number, title = title, songbook = bookName) }
         }
-        return SongsViewModel(AppSettings(), dispatcher = Dispatchers.Default, enableFolderWatcher = false).also {
+        return SongsViewModel(
+            AppSettings(),
+            dispatcher = Dispatchers.Unconfined,
+            ioDispatcher = Dispatchers.Unconfined,
+            enableFolderWatcher = false,
+        ).also {
             created.add(it)
             it.setInstanceLinkSource(active = true, catalog = catalog, fetchLyrics = null)
         }
