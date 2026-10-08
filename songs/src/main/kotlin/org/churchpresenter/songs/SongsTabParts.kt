@@ -1,5 +1,6 @@
 package org.churchpresenter.songs
 
+import org.churchpresenter.sharedui.models.Presenting
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import org.churchpresenter.settings.SongColumnId
@@ -45,7 +46,6 @@ import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.starts_with
 import org.churchpresenter.strings.generated.resources.title
 import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.settings.utils.Constants
@@ -65,10 +65,11 @@ import androidx.compose.foundation.layout.RowScope
 @Composable
 internal fun SongsTabController.SongsTabEffects(
     playCounts: SongPlayCounts?,
-    selectedSongItem: ScheduleItem.SongItem?,
-    selectedSongItemVersion: Int,
+    schedule: ScheduleSelection,
     dialogDismissSignal: Int,
 ) {
+    val selectedSongItem = schedule.item
+    val selectedSongItemVersion = schedule.version
     LaunchedEffect(playCounts) { viewModel.setPlayCounts(playCounts) }
 
     // Reload songs whenever the storage directory changes (e.g. after settings are saved)
@@ -94,26 +95,35 @@ internal fun SongsTabController.SongsTabEffects(
     val songDialogOpen = dialogs.editing != null || dialogs.creatingNew || dialogs.deleting != null
     // Read before the schedule effect below records this visit's version.
     val openedFromSchedule = remember {
-        selectedSongItem != null && selectedSongItemVersion != viewModel.scheduleVersionSeen
+        selectedSongItem != null && (selectedSongItem to selectedSongItemVersion) != viewModel.scheduleSeen
     }
 
-    // React to schedule item selection
-    // Uses selectedSongItemVersion as a key so clicking the same song twice always re-fires
+    // A song handed over by the schedule or a remote. Acted on once per handover: the tab is rebuilt
+    // on every visit and the app keeps the last schedule song, so without the version check a
+    // visit would select that song again and push it over whatever is live.
     LaunchedEffect(selectedSongItem, selectedSongItemVersion) {
-        viewModel.scheduleVersionSeen = selectedSongItemVersion
-        selectedSongItem?.let { item ->
-            // Wait until data is ready if currently loading
-            if (viewModel.isLoading.value) {
-                snapshotFlow { viewModel.isLoading.value }
-                    .first { !it }
-            }
-            val found = viewModel.selectSongByDetails(item.songNumber, item.title, item.songbook, item.songId)
-            if (found) {
-                live.titleSlideSelected = false
-                sendToPresenter()
-                tabFocusRequester.requestFocus()
-            }
+        val handover = selectedSongItem to selectedSongItemVersion
+        val fresh = handover != viewModel.scheduleSeen
+        viewModel.scheduleSeen = handover
+        val item = selectedSongItem?.takeIf { fresh } ?: return@LaunchedEffect
+        // Wait until data is ready if currently loading
+        if (viewModel.isLoading.value) {
+            snapshotFlow { viewModel.isLoading.value }.first { !it }
         }
+        // A song the library does not have leaves the output as it is.
+        if (!viewModel.selectSongByDetails(item.songNumber, item.title, item.songbook, item.songId)) {
+            return@LaunchedEffect
+        }
+        live.titleSlideSelected = false
+        when (schedule.action) {
+            ScheduleSongAction.GO_LIVE -> {
+                sendToPresenter(goLive = true, source = "schedule")
+                onPresenting(Presenting.LYRICS)
+            }
+            ScheduleSongAction.OPEN -> if (!isPresenting) sendToPresenter()
+            ScheduleSongAction.PUSH -> sendToPresenter()
+        }
+        tabFocusRequester.requestFocus()
     }
 
     // Remote (Instance Link) songs fetch their lyrics lazily after selection — sendToPresenter()

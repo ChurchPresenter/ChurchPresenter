@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.songs.ScheduleSongAction
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -92,7 +93,10 @@ internal fun MainDesktopScope.TrailingEffects() {
         onSongItemVersionBump = { state.selectedSongItemVersion++ },
         resolveImageFile = flows.resolveImageFile,
         onSettingsChange = onSettingsChange,
-        onSongItemSelected = { state.selectedSongItem = it },
+        onSongItemSelected = {
+            state.selectedSongItem = it
+            state.selectedSongItemAction = ScheduleSongAction.PUSH
+        },
         onPictureItemSelected = { state.select(it) },
         onPresentationItemSelected = { state.select(it) },
         onMediaItemSelected = { state.select(it) },

@@ -98,7 +98,7 @@ internal class SongsTabController(
     // them -- so while it is the selection, it is what goes out, ahead of the song's own sections.
     // Every push comes through here, Go Live and the arrow keys included; a path that read the
     // view model's selection directly sent verse 1 out from under a staged title slide.
-    fun sendToPresenter(goLive: Boolean = false) {
+    fun sendToPresenter(goLive: Boolean = false, source: String = "manual") {
         val idx = viewModel.selectedSongIndex.value
         val items = viewModel.filteredSongItems.value
         val song = items.getOrNull(idx)
@@ -109,7 +109,7 @@ internal class SongsTabController(
         // Before the push, so the section's history line already carries the row it came from.
         if ((goLive || isPresenting) && song != null) {
             LiveHistoryLogger.noteLiveSong(
-                song.songId, song.songbook, song.number.toIntOrNull() ?: 0, song.title, "manual",
+                song.songId, song.songbook, song.number.toIntOrNull() ?: 0, song.title, source,
             )
         }
         pushSections(titleSlide, tuning)

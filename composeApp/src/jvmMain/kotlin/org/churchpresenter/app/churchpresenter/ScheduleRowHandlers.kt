@@ -1,11 +1,9 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.songs.ScheduleSongAction
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.models.Tabs
-import org.churchpresenter.sharedui.utils.LiveHistoryLogger
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.core.models.songs.LyricSection
-import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.liveoutput.cueOrSetAnnouncementText
 
 /*
@@ -18,21 +16,14 @@ internal fun MainDesktopScope.presentBibleFromSchedule(item: ScheduleItem.BibleV
     live.presenting(Presenting.BIBLE)
 }
 
+/**
+ * Puts a schedule song on screen by handing it to the Songs tab to go live with, as its own Go
+ * Live does. Nothing is pushed from here: a placeholder put up ahead of the song showed as a blank
+ * slide -- for a whole transition, or for good when the tab could not find the song.
+ */
 internal fun MainDesktopScope.presentSongFromSchedule(item: ScheduleItem.SongItem) {
     selectTab(Tabs.SONGS)
-    state.select(item)
-    LiveHistoryLogger.noteLiveSong(item.songId, item.songbook, item.songNumber, item.title, "schedule")
-    live.onSongItemSelected(
-        LyricSection(
-            title = item.title,
-            songNumber = item.songNumber,
-            lines = emptyList(),
-            type = Constants.SECTION_TYPE_SONG
-        )
-    )
-    // No statistics here: selecting the row makes the Songs tab push it, and with lyrics now the
-    // live mode that push is the go-live it counts. Counting here as well logged every song twice.
-    live.presenting(Presenting.LYRICS)
+    state.select(item, ScheduleSongAction.GO_LIVE)
 }
 
 internal fun MainDesktopScope.presentPresentationFromSchedule(item: ScheduleItem.PresentationItem) {

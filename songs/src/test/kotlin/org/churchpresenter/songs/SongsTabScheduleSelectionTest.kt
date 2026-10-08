@@ -5,6 +5,11 @@ package org.churchpresenter.songs
 import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.performClick
+import org.churchpresenter.sharedui.models.Presenting
+import kotlin.test.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -101,6 +106,98 @@ class SongsTabScheduleSelectionTest {
             // A song deleted from the library after the service was planned must leave the output
             // alone rather than push whatever happened to be selected.
             assertNull(reports.selectedSection, "no match means nothing is sent")
+        }
+    }
+
+    // ── A song already live when a schedule song arrives ─────────────────────────────────────────
+
+    /** Puts [title] live the way the tab's Go Live does, so a different song is on screen. */
+    private fun ComposeUiTest.putLive(vm: SongsViewModel, title: String) {
+        vm.selectSong(vm.filteredSongItems.value.indexOfFirst { it.title == title })
+        waitForIdle()
+        onNodeWithContentDescription("Go Live").performClick()
+        waitForIdle()
+    }
+
+    @Test
+    fun `going live from the schedule over a live song puts up the new song's first section`() {
+        val selection = mutableStateOf<ScheduleItem.SongItem?>(null)
+        val version = mutableStateOf(0)
+        val action = mutableStateOf(ScheduleSongAction.OPEN)
+        songsTab(isPresenting = true, scheduleSelection = selection, scheduleSelectionVersion = version,
+            scheduleAction = action) { vm, reports ->
+            waitForIdle()
+            putLive(vm, "Amazing Grace")
+            reports.presenting.clear()
+
+            action.value = ScheduleSongAction.GO_LIVE
+            selection.value = row(2, "Be Thou My Vision")
+            version.value++
+            waitForIdle()
+
+            val shown = reports.selectedSection
+            assertEquals("Be Thou My Vision", shown?.title, "the new song is what goes up")
+            assertTrue(shown?.lines.orEmpty().isNotEmpty(), "with its words, never an empty slide")
+            assertEquals(listOf(Presenting.LYRICS), reports.presenting)
+        }
+    }
+
+    @Test
+    fun `a single click on a schedule song while one is live leaves the screen alone`() {
+        val selection = mutableStateOf<ScheduleItem.SongItem?>(null)
+        val version = mutableStateOf(0)
+        val action = mutableStateOf(ScheduleSongAction.OPEN)
+        songsTab(isPresenting = true, scheduleSelection = selection, scheduleSelectionVersion = version,
+            scheduleAction = action) { vm, reports ->
+            waitForIdle()
+            putLive(vm, "Amazing Grace")
+            val pushes = reports.allSections.size
+
+            selection.value = row(2, "Be Thou My Vision")
+            version.value++
+            waitForIdle()
+
+            assertEquals("Be Thou My Vision", vm.filteredSongItems.value[vm.selectedSongIndex.value].title)
+            assertEquals(pushes, reports.allSections.size, "a click opens the song; it does not push it")
+            assertEquals("Amazing Grace", reports.selectedSection?.title)
+        }
+    }
+
+    @Test
+    fun `coming back to the tab does not push the last schedule song again`() {
+        val selection = mutableStateOf<ScheduleItem.SongItem?>(row(2, "Be Thou My Vision"))
+        val visit = mutableStateOf(0)
+        songsTab(scheduleSelection = selection, tabVisit = visit) { _, reports ->
+            waitForIdle()
+            val pushes = reports.allSections.size
+            assertTrue(pushes > 0, "the hand-over itself pushes")
+
+            visit.value++
+            waitForIdle()
+
+            assertEquals(pushes, reports.allSections.size, "a revisit is not a new hand-over")
+        }
+    }
+
+    @Test
+    fun `a schedule song the library does not have changes nothing on screen`() {
+        val selection = mutableStateOf<ScheduleItem.SongItem?>(null)
+        val version = mutableStateOf(0)
+        val action = mutableStateOf(ScheduleSongAction.GO_LIVE)
+        songsTab(isPresenting = true, scheduleSelection = selection, scheduleSelectionVersion = version,
+            scheduleAction = action) { vm, reports ->
+            waitForIdle()
+            putLive(vm, "Amazing Grace")
+            val pushes = reports.allSections.size
+            reports.presenting.clear()
+
+            selection.value = row(99, "Not In The Library")
+            version.value++
+            waitForIdle()
+
+            assertEquals(pushes, reports.allSections.size)
+            assertEquals("Amazing Grace", reports.selectedSection?.title, "the live song stays up")
+            assertTrue(reports.presenting.isEmpty())
         }
     }
 }

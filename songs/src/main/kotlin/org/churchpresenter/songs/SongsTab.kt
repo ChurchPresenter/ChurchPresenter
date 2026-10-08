@@ -63,6 +63,8 @@ fun SongsTab(
     onInstanceLinkSendSongSection: ((number: String, section: Int, lineIndex: Int) -> Unit)? = null,
     selectedSongItem: ScheduleItem.SongItem? = null,
     selectedSongItemVersion: Int = 0,
+    /** What to do with [selectedSongItem]: open it, push it, or put it on screen. */
+    selectedSongItemAction: ScheduleSongAction = ScheduleSongAction.PUSH,
     onSongItemSelected: (LyricSection) -> Unit,
     onAllSectionsChanged: (List<LyricSection>) -> Unit = {},
     onSectionIndexChanged: (Int) -> Unit = {},
@@ -123,7 +125,8 @@ fun SongsTab(
     controller.focusRescue = rememberFocusLostRescue(hostWindow, controller.tabFocusRequester)
 
     controller.SongsTabEffects(
-        playCounts, selectedSongItem, selectedSongItemVersion, dialogDismissSignal,
+        playCounts, ScheduleSelection(selectedSongItem, selectedSongItemVersion, selectedSongItemAction),
+        dialogDismissSignal,
     )
     controller.SongsTabPanes(modifier)
     controller.SongEditorDialogs()

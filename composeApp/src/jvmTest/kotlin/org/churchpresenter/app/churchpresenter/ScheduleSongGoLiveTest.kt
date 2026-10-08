@@ -21,6 +21,7 @@ import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongSettings
 import java.io.File
@@ -29,12 +30,15 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Taking a song live from its schedule row, through the composed root and the real Songs tab.
  *
- * Two things ride on this path that nothing else checks. The play log must count the song once —
- * the schedule handler and the Songs tab push both used to count it — and the on-screen history must
+ * Three things ride on this path that nothing else checks. The song itself must go up: the handler
+ * once put an empty placeholder slide on air ahead of it, a blank for a whole transition. The play
+ * log must count the song once -- the schedule handler and the Songs tab push both used to count
+ * it. And the on-screen history must
  * name the row, since the schedule knows the songbook the presenter never sees.
  *
  * The output callbacks drive a real [PresenterManager], as the app's own wiring does, and its live
@@ -86,6 +90,7 @@ class ScheduleSongGoLiveTest {
         presenter.onLiveStateChanged = { pm, _ -> LiveHistoryLogger.logLiveState(liveHistoryEntryOf(pm, null)) }
         val statistics = StatisticsManager()
         var actions = ScheduleActions()
+        val pushed = mutableListOf<LyricSection>()
         setContent {
             MaterialTheme {
                 MainDesktop(
@@ -96,7 +101,7 @@ class ScheduleSongGoLiveTest {
                     live = LiveOutputCallbacks(
                         presenting = { presenter.setPresentingMode(it) },
                         onVerseSelected = { presenter.setSelectedVerses(it) },
-                        onSongItemSelected = { presenter.setLyricSection(it) },
+                        onSongItemSelected = { pushed += it; presenter.setLyricSection(it) },
                         onSectionIndexChanged = { presenter.setSongDisplaySectionIndex(it) },
                         onLineIndexChanged = { presenter.setSongDisplayLineIndex(it) },
                     ),
@@ -125,5 +130,7 @@ class ScheduleSongGoLiveTest {
             "every lyric line of the song names its row",
         )
         assertEquals("schedule", lyricLines.first()["source"]?.jsonPrimitive?.content)
+        assertTrue(pushed.isNotEmpty(), "the song reached the output")
+        assertTrue(pushed.none { it.lines.isEmpty() }, "and no empty placeholder slide went up ahead of it")
     }
 }

@@ -2,6 +2,7 @@
 
 package org.churchpresenter.songs
 
+import androidx.compose.runtime.key
 import org.churchpresenter.settings.KeyboardShortcutSettings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -181,6 +182,10 @@ fun songsTab(
      * here, so a suite about the tab's own keys starts with the keyboard on the tab.
      */
     focusSearchOnOpen: Boolean = false,
+    /** What the tab does with [scheduleSelection]: the app's click, go-live or remote push. */
+    scheduleAction: MutableState<ScheduleSongAction> = mutableStateOf(ScheduleSongAction.PUSH),
+    /** Bumped to rebuild the tab, as switching away from it and back does in the app. */
+    tabVisit: MutableState<Int> = mutableStateOf(0),
     block: ComposeUiTest.(vm: SongsViewModel, reports: TabReports) -> Unit,
 ) {
     val dir = Files.createTempDirectory("cp-songs-tab").toFile()
@@ -229,6 +234,7 @@ fun songsTab(
             setContent {
                 ThemedForTest(themeMode) {
                   CompositionLocalProvider(LocalShortcuts provides shortcuts) {
+                   key(tabVisit.value) {
                     SongsTab(
                         viewModel = vm,
                         appSettings = settingsOverride.value ?: settings,
@@ -253,7 +259,9 @@ fun songsTab(
                         typicalSongSeconds = typicalSongSeconds,
                         selectedSongItem = scheduleSelection.value,
                         selectedSongItemVersion = scheduleSelectionVersion.value,
+                        selectedSongItemAction = scheduleAction.value,
                     )
+                   }
                   }
                 }
             }

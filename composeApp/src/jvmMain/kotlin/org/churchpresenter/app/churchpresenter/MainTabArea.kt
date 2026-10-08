@@ -272,6 +272,7 @@ private fun MainDesktopScope.SongsTabPane() {
         onInstanceLinkSendSongSection = link.sendSongSection,
         selectedSongItem = state.selectedSongItem,
         selectedSongItemVersion = state.selectedSongItemVersion,
+        selectedSongItemAction = state.selectedSongItemAction,
         onSongItemSelected = live.onSongItemSelected,
         onAllSectionsChanged = live.onAllSectionsChanged,
         onSectionIndexChanged = live.onSectionIndexChanged,

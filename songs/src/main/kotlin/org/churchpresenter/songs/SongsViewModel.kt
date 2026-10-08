@@ -1,5 +1,6 @@
 package org.churchpresenter.songs
 
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineDispatcher
@@ -49,9 +50,10 @@ class SongsViewModel(
 
     internal var loadSongsJob: kotlinx.coroutines.Job? = null
 
-    // The schedule selection the Songs tab last acted on. The tab is rebuilt on every visit and the
-    // app keeps the last schedule song, so this is how a visit tells a fresh schedule click apart.
-    internal var scheduleVersionSeen = -1
+    // The schedule hand-over (song and version) the Songs tab last acted on. The tab is rebuilt on
+    // every visit and the app keeps the last schedule song, so this is how a visit tells a fresh
+    // schedule click apart from one it has already handled.
+    internal var scheduleSeen: Pair<ScheduleItem.SongItem?, Int>? = null
 
     internal val songFolderWatcher = SongFolderWatcher(viewModelScope) { loadSongs() }
 

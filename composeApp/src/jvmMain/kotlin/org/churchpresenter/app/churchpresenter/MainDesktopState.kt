@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.songs.ScheduleSongAction
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
@@ -31,6 +32,8 @@ internal class MainDesktopState(
     var selectedBibleVerseItemVersion by mutableStateOf(0)
     var selectedSongItem by mutableStateOf<ScheduleItem.SongItem?>(null)
     var selectedSongItemVersion by mutableStateOf(0)
+    /** What the Songs tab does with [selectedSongItem]: open it, push it, or put it on screen. */
+    var selectedSongItemAction by mutableStateOf(ScheduleSongAction.OPEN)
     var selectedPictureItem by mutableStateOf<ScheduleItem.PictureItem?>(null)
     var selectedPictureItemVersion by mutableStateOf(0)
     var selectedPresentationItem by mutableStateOf<ScheduleItem.PresentationItem?>(null)
@@ -60,10 +63,17 @@ internal class MainDesktopState(
 
     val mainFocusRequester = FocusRequester()
 
-    /** Hands [item] to the tab that opens it, bumping its version; false for a type no tab opens this way. */
-    fun select(item: ScheduleItem): Boolean {
+    /**
+     * Hands [item] to the tab that opens it, bumping its version; false for a type no tab opens this
+     * way. [songAction] is what the Songs tab does with a song: a click opens it, a go-live puts it up.
+     */
+    fun select(item: ScheduleItem, songAction: ScheduleSongAction = ScheduleSongAction.OPEN): Boolean {
         when (item) {
-            is ScheduleItem.SongItem -> { selectedSongItem = item; selectedSongItemVersion++ }
+            is ScheduleItem.SongItem -> {
+                selectedSongItem = item
+                selectedSongItemAction = songAction
+                selectedSongItemVersion++
+            }
             is ScheduleItem.BibleVerseItem -> { selectedBibleVerseItem = item; selectedBibleVerseItemVersion++ }
             is ScheduleItem.PictureItem -> { selectedPictureItem = item; selectedPictureItemVersion++ }
             is ScheduleItem.PresentationItem -> {
