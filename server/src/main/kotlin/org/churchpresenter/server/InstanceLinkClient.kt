@@ -2,16 +2,11 @@ package org.churchpresenter.server
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
-import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
-import io.ktor.client.request.get
 import io.ktor.client.request.header
-import io.ktor.client.request.parameter
-import io.ktor.client.statement.bodyAsText
-import io.ktor.client.statement.readRawBytes
 import io.ktor.http.HttpMethod
 import io.ktor.http.isSuccess
 import io.ktor.websocket.Frame
@@ -38,37 +33,11 @@ import kotlinx.serialization.json.jsonPrimitive
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.diagnostics.Log
-import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.utils.Constants
-import java.net.ConnectException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.io.IOException
-import javax.net.ssl.SSLException
 import kotlin.random.Random
-
-private const val FAILURE_LOG_INTERVAL = 10
-private const val DECADE = 10
-private const val REPORT_INTERVAL_WIDEN_AT_100 = 100
-private const val REPORT_INTERVAL_WIDEN_AT_1000 = 1000
-
-/**
- * The [classifyConnectFailure] buckets that mean "the primary is not up yet", not "something broke".
- *
- * `timeout` joined them after one stored address produced **767 reports from three churches in
- * seventeen days**, every one of them a first failure. Whether an absent primary refuses the
- * connection or never answers it is a property of the network between the two machines — a host
- * that is switched off times out where one that is merely not running the app refuses — and not
- * something the operator did differently. Filing the first of those as a defect and throttling the
- * other was a distinction with nothing behind it.
- *
- * It is also why the first-failure report was worth so little here: `consecutiveFailures` lives in
- * `connectLoop`, so every restart of the link begins a fresh count, and a follower pointed at an
- * address that never answers reports its "first" failure again on each one.
- */
-private val BENIGN_CONNECT_FAILURES = setOf("refused", "dns", "ping_timeout", "timeout")
 
 enum class InstanceLinkStatus { DISCONNECTED, CONNECTING, CONNECTED, ERROR }
 
@@ -129,6 +98,9 @@ class InstanceLinkClient(
     }
     private val json = Json { ignoreUnknownKeys = true }
 
+    /** The REST fetches, which this client answers [InstanceLinkFetches] with. */
+    private val fetches = InstanceLinkHttpFetches(httpClient, json)
+
     private var connectJob: Job? = null
     @Volatile private var session: DefaultClientWebSocketSession? = null
 
@@ -143,18 +115,10 @@ class InstanceLinkClient(
     // points, so cancellation alone isn't enough) — same guard CompanionSatelliteClient uses.
     @Volatile private var generation = 0L
 
-    // Captured on connect() so fetchSongDetail() (called on-demand, outside the connect loop) can
-    // build REST URLs against the same primary without needing its own host/port/key parameters.
-    @Volatile private var currentHost: String = ""
-    @Volatile private var currentPort: Int = 0
-    @Volatile private var currentApiKey: String = ""
-
     /** Starts (or restarts) the link to the primary instance's CompanionServer. */
     fun connect(host: String, port: Int, apiKey: String, deviceId: String, reconnectDelayMs: Long) {
         disconnect()
-        currentHost = host
-        currentPort = port
-        currentApiKey = apiKey
+        fetches.target(host, port, apiKey)
         val myGeneration = ++generation
         connectJob = scope.launch {
             connectLoop(PrimaryAddress(host, port, apiKey, deviceId), reconnectDelayMs, myGeneration)
@@ -499,235 +463,19 @@ class InstanceLinkClient(
     override fun sendNextSlide() = sendCommand(Constants.WS_CMD_NEXT_SLIDE, "")
     override fun sendPreviousSlide() = sendCommand(Constants.WS_CMD_PREVIOUS_SLIDE, "")
 
-    /**
-     * Builds the streaming URL for one of the primary's local media files (PartialContent, so
-     * the player can seek) — used to mirror MEDIA live state. Null while not connected.
-     */
-    override fun mediaStreamUrl(mediaId: String): String? {
-        if (currentHost.isEmpty()) return null
-        val keyParam = if (currentApiKey.isNotEmpty()) "?${Constants.QUERY_PARAM_API_KEY}=$currentApiKey" else ""
-        return "http://$currentHost:$currentPort${Constants.ENDPOINT_MEDIA_STREAM}/$mediaId$keyParam"
-    }
-
-    /** Logs the outcome of one `fetch*` call below — [kind] identifies which one (e.g. "bible_file",
-     *  "picture_bytes"), symmetric with the primary's `rest_request` log line for the same hit. */
-    private fun logFetch(kind: String, success: Boolean, status: Int? = null, reason: String? = null) {
-        InstanceLinkLogger.log(
-            InstanceLinkLogSide.FOLLOWER, "fetch_result",
-            mapOf("kind" to kind, "success" to success, "status" to status, "reason" to reason)
-        )
-    }
-
-    /**
-     * Fetches full song detail (sections/lyrics) from the primary on demand — the catalog broadcast
-     * only carries metadata (title/number/tune/author), so this is called lazily when a song is
-     * actually selected rather than for the whole library upfront (which could mean thousands of
-     * requests for a large library).
-     */
-    override suspend fun fetchSongDetail(number: String, songbook: String): SongDetailDto? {
-        if (currentHost.isEmpty()) {
-            logFetch("song_detail", success = false, reason = "not_connected")
-            return null
-        }
-        return runCatching {
-            val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_SONGS}/$number") {
-                if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
-                if (songbook.isNotEmpty()) parameter(Constants.QUERY_PARAM_SONGBOOK, songbook)
-            }
-            if (!response.status.isSuccess()) {
-                logFetch("song_detail", success = false, status = response.status.value, reason = "http_status")
-                return null
-            }
-            logFetch("song_detail", success = true, status = response.status.value)
-            json.decodeFromString(SongDetailDto.serializer(), response.bodyAsText())
-        }.onFailure { e -> logFetch("song_detail", success = false, reason = e.message) }.getOrNull()
-    }
-
-    /** Fetches one picture's raw bytes from the primary — used to mirror a live picture (resolved
-     *  via [LiveStateDto.pictureFolderId]/[LiveStateDto.pictureIndex]) without a local copy of it. */
-    override suspend fun fetchPictureImageBytes(folderId: String, index: Int): ByteArray? {
-        if (currentHost.isEmpty()) {
-            logFetch("picture_bytes", success = false, reason = "not_connected")
-            return null
-        }
-        return runCatching {
-            val response = httpClient.get(
-                "http://$currentHost:$currentPort${Constants.ENDPOINT_PICTURES}/$folderId/images/$index"
-            ) {
-                if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
-            }
-            if (!response.status.isSuccess()) {
-                logFetch("picture_bytes", success = false, status = response.status.value, reason = "http_status")
-                return null
-            }
-            logFetch("picture_bytes", success = true, status = response.status.value)
-            response.readRawBytes()
-        }.onFailure { e -> logFetch("picture_bytes", success = false, reason = e.message) }.getOrNull()
-    }
-
-    /** Fetches one presentation slide's raw bytes from the primary — mirrors [RemotePresentationSlide]
-     *  (from the existing presentation_slide_changed broadcast) without a local copy of the file. */
-    override suspend fun fetchPresentationSlideBytes(id: String, index: Int): ByteArray? {
-        if (currentHost.isEmpty()) {
-            logFetch("presentation_slide", success = false, reason = "not_connected")
-            return null
-        }
-        return runCatching {
-            val response = httpClient.get(
-                "http://$currentHost:$currentPort${Constants.ENDPOINT_PRESENTATIONS}/$id/slides/$index"
-            ) {
-                if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
-            }
-            if (!response.status.isSuccess()) {
-                logFetch("presentation_slide", success = false, status = response.status.value, reason = "http_status")
-                return null
-            }
-            logFetch("presentation_slide", success = true, status = response.status.value)
-            response.readRawBytes()
-        }.onFailure { e -> logFetch("presentation_slide", success = false, reason = e.message) }.getOrNull()
-    }
-
-    /**
-     * Downloads the primary's raw .spb bible file bytes — the caller loads it through the same
-     * Bible.loadFromSpb() used for local files instead of reimplementing that engine against the API.
-     */
-    override suspend fun fetchBibleFile(): ByteArray? {
-        if (currentHost.isEmpty()) {
-            logFetch("bible_file", success = false, reason = "not_connected")
-            return null
-        }
-        return runCatching {
-            val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_BIBLE_FILE}") {
-                if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
-            }
-            if (!response.status.isSuccess()) {
-                logFetch("bible_file", success = false, status = response.status.value, reason = "http_status")
-                return null
-            }
-            logFetch("bible_file", success = true, status = response.status.value)
-            response.readRawBytes()
-        }.onFailure { e -> logFetch("bible_file", success = false, reason = e.message) }.getOrNull()
-    }
-
-    /** Downloads the primary's raw secondary .spb bible file — only used when the follower opted in
-     *  to mirroring the primary's secondary bible instead of keeping its own local one. */
-    override suspend fun fetchSecondaryBibleFile(): ByteArray? {
-        if (currentHost.isEmpty()) {
-            logFetch("secondary_bible_file", success = false, reason = "not_connected")
-            return null
-        }
-        return runCatching {
-            val response = httpClient.get(
-                "http://$currentHost:$currentPort${Constants.ENDPOINT_BIBLE_FILE}/secondary"
-            ) {
-                if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
-            }
-            if (!response.status.isSuccess()) {
-                logFetch(
-                    "secondary_bible_file",
-                    success = false,
-                    status = response.status.value,
-                    reason = "http_status"
-                )
-                return null
-            }
-            logFetch("secondary_bible_file", success = true, status = response.status.value)
-            response.readRawBytes()
-        }.onFailure { e -> logFetch("secondary_bible_file", success = false, reason = e.message) }.getOrNull()
-    }
-
-    /** Downloads every Bible module advertised by the primary, preserving manifest order. */
-    override suspend fun fetchBibleTranslations(): List<Pair<String, ByteArray>> {
-        if (currentHost.isEmpty()) return emptyList()
-        return runCatching {
-            val manifestResponse = httpClient.get(
-                "http://$currentHost:$currentPort${Constants.ENDPOINT_BIBLE_FILE}/translations"
-            ) {
-                if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
-            }
-            if (!manifestResponse.status.isSuccess()) return emptyList()
-            val names = Json.decodeFromString<List<String>>(manifestResponse.bodyAsText())
-            names.mapIndexedNotNull { index, name ->
-                val response = httpClient.get(
-                    "http://$currentHost:$currentPort${Constants.ENDPOINT_BIBLE_FILE}/translation/$index"
-                ) {
-                    if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
-                }
-                if (response.status.isSuccess()) name to response.readRawBytes() else null
-            }
-        }.onFailure { error ->
-            logFetch("bible_translations", success = false, reason = error.message)
-        }.getOrDefault(emptyList())
-    }
-
-    /** Fetches one lower-third preset's raw Lottie JSON by name — see [Constants.ENDPOINT_LOWER_THIRDS]. */
-    override suspend fun fetchLowerThirdJson(name: String): ByteArray? {
-        if (currentHost.isEmpty()) {
-            logFetch("lower_third_json", success = false, reason = "not_connected")
-            return null
-        }
-        // Path segment, not a query param: URLEncoder turns spaces into "+", which Ktor's route
-        // parameter decoding does NOT turn back into a space (that only happens for query/form
-        // encoding) — swap it for "%20" so a name with spaces still resolves on the server.
-        val encodedName = java.net.URLEncoder.encode(name, "UTF-8").replace("+", "%20")
-        return runCatching {
-            val response = httpClient.get(
-                "http://$currentHost:$currentPort${Constants.ENDPOINT_LOWER_THIRDS}/$encodedName/json"
-            ) {
-                if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
-            }
-            if (!response.status.isSuccess()) {
-                logFetch("lower_third_json", success = false, status = response.status.value, reason = "http_status")
-                return null
-            }
-            logFetch("lower_third_json", success = true, status = response.status.value)
-            response.readRawBytes()
-        }.onFailure { e -> logFetch("lower_third_json", success = false, reason = e.message) }.getOrNull()
-    }
-
-    /** Fetches the primary's current background settings — only used when the follower opted in to
-     *  mirroring backgrounds (InstanceLinkSettings.mirrorBackgrounds). Image/video fields are still
-     *  the primary's own local file paths; use [fetchBackgroundAsset] (keyed by slot) for bytes. */
-    override suspend fun fetchBackgroundSettings(): BackgroundSettings? {
-        if (currentHost.isEmpty()) {
-            logFetch("background_settings", success = false, reason = "not_connected")
-            return null
-        }
-        return runCatching {
-            val response = httpClient.get("http://$currentHost:$currentPort${Constants.ENDPOINT_BACKGROUNDS}") {
-                if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
-            }
-            if (!response.status.isSuccess()) {
-                logFetch("background_settings", success = false, status = response.status.value, reason = "http_status")
-                return null
-            }
-            logFetch("background_settings", success = true, status = response.status.value)
-            json.decodeFromString(BackgroundSettings.serializer(), response.bodyAsText())
-        }.onFailure { e -> logFetch("background_settings", success = false, reason = e.message) }.getOrNull()
-    }
-
-    /** Fetches one background slot's raw image/video bytes by slot name — see
-     *  [Constants.BACKGROUND_SLOT_DEFAULT] and siblings for the shared slot vocabulary. */
-    override suspend fun fetchBackgroundAsset(slot: String, isVideo: Boolean): ByteArray? {
-        if (currentHost.isEmpty()) {
-            logFetch("background_asset", success = false, reason = "not_connected")
-            return null
-        }
-        return runCatching {
-            val response = httpClient.get(
-                "http://$currentHost:$currentPort${Constants.ENDPOINT_BACKGROUNDS}/asset/$slot"
-            ) {
-                if (currentApiKey.isNotEmpty()) header(Constants.HEADER_API_KEY, currentApiKey)
-                parameter("type", if (isVideo) "video" else "image")
-            }
-            if (!response.status.isSuccess()) {
-                logFetch("background_asset", success = false, status = response.status.value, reason = "http_status")
-                return null
-            }
-            logFetch("background_asset", success = true, status = response.status.value)
-            response.readRawBytes()
-        }.onFailure { e -> logFetch("background_asset", success = false, reason = e.message) }.getOrNull()
-    }
+    override fun mediaStreamUrl(mediaId: String): String? = fetches.mediaStreamUrl(mediaId)
+    override suspend fun fetchSongDetail(number: String, songbook: String) = fetches.fetchSongDetail(number, songbook)
+    override suspend fun fetchPictureImageBytes(folderId: String, index: Int) =
+        fetches.fetchPictureImageBytes(folderId, index)
+    override suspend fun fetchPresentationSlideBytes(id: String, index: Int) =
+        fetches.fetchPresentationSlideBytes(id, index)
+    override suspend fun fetchBibleFile() = fetches.fetchBibleFile()
+    override suspend fun fetchSecondaryBibleFile() = fetches.fetchSecondaryBibleFile()
+    override suspend fun fetchBibleTranslations() = fetches.fetchBibleTranslations()
+    override suspend fun fetchLowerThirdJson(name: String) = fetches.fetchLowerThirdJson(name)
+    override suspend fun fetchBackgroundSettings() = fetches.fetchBackgroundSettings()
+    override suspend fun fetchBackgroundAsset(slot: String, isVideo: Boolean) =
+        fetches.fetchBackgroundAsset(slot, isVideo)
 
     /** Stops the link without disposing the underlying HTTP client (safe to [connect] again). */
     fun disconnect() {
@@ -743,105 +491,5 @@ class InstanceLinkClient(
         disconnect()
         runCatching { httpClient.close() }
         scope.cancel()
-    }
-}
-
-/**
- * How a failed connect to the primary is classified, redacted and rate-limited before it is
- * reported. None of it depends on a connection's state.
- */
-internal object ConnectFailures {
-    /**
-     * The peer's address inside a connect failure's message, with the port kept.
-     *
-     * Group 1 is the scheme, group 2 the port and the rest of the URL, so the host between them
-     * is what [redactedConnectFailure] replaces. Deliberately narrow: it matches an address in a
-     * `ws://`/`wss://` URL and leaves every other word of ktor's message alone, because the rest
-     * of it is the diagnosis.
-     */
-    private val PEER_URL = Regex("""(wss?://)[^/\s\]:]+(:\d+)?""")
-
-    /**
-     * Whether a connect failure this far into a run of them is worth a warning.
-     *
-     * A follower is configured once and then starts with the room, routinely before the primary
-     * does, so "refused" and "dns" on the first attempt are the ordinary startup order rather than
-     * a fault — and reporting them there made the follower's own boot sequence the single noisiest
-     * signal in the project. Those two therefore wait for the run to persist through
-     * [FAILURE_LOG_INTERVAL] attempts, by which point the backoff has carried it well past any
-     * plausible "primary is still coming up" window and the link genuinely is not working.
-     *
-     * Once it has persisted, a benign run is reported **once**: the first warning says the link is
-     * not coming up, and every later one from the same run says only that it still is not —
-     * CHURCH-PRESENTER-DESKTOP-68 kept one follower pointed at an address that never answered
-     * filing a warning at 10, 20 … 100, 200 … 1000 consecutive timeouts, about nineteen per
-     * thousand, each telling Sentry nothing the first had not.
-     *
-     * The kinds that suggest a regression rather than an ordering — a certificate, or something
-     * unrecognised — report on the first failure and then on the widening cadence of
-     * [reportIntervalFor], because those are worth seeing even if they never recur and worth
-     * seeing again while they do.
-     */
-    internal fun shouldReportConnectFailure(kind: String, consecutiveFailures: Int): Boolean {
-        if (kind in BENIGN_CONNECT_FAILURES) return consecutiveFailures == FAILURE_LOG_INTERVAL
-        return consecutiveFailures == 1 || consecutiveFailures % reportIntervalFor(consecutiveFailures) == 0
-    }
-
-    /**
-     * The reporting cadence for [shouldReportConnectFailure]: every 10th failure through the first
-     * 99, every 100th through the first 999, every 1000th beyond that — applied to how often a
-     * still-failing streak is worth telling Sentry about, separate from [MAX_RECONNECT_DELAY_MS]'s
-     * own backoff on how often a reconnect is actually retried.
-     */
-    internal fun reportIntervalFor(consecutiveFailures: Int): Int = when {
-        consecutiveFailures < REPORT_INTERVAL_WIDEN_AT_100 -> FAILURE_LOG_INTERVAL
-        consecutiveFailures < REPORT_INTERVAL_WIDEN_AT_1000 -> FAILURE_LOG_INTERVAL * DECADE
-        else -> FAILURE_LOG_INTERVAL * DECADE * DECADE
-    }
-
-    /**
-     * A connect failure's message with the peer's address taken out of it.
-     *
-     * The message used to be interpolated into the report's *title*, which did two things. It put
-     * the address of a church's own machine — `ws://192.168.1.100:8765/ws` — into an issue title,
-     * where nothing scrubs it: `CrashReporter` redacts home directories and the OS username, not
-     * private addresses. And because Sentry groups on the title, one failure arrived as **fourteen
-     * separate issues**, one per address and port, none of which looked related to the others.
-     *
-     * `PicturesViewModel.reportThumbnailFailures` fixed the same shape for file names and says why:
-     * a constant title so the class of failure is one issue, and what distinguishes an occurrence in
-     * the detail.
-     *
-     * The port is kept. It is not anyone's address, and a follower pointed at the wrong port is a
-     * real misconfiguration worth being able to see.
-     */
-    internal fun redactedConnectFailure(message: String?): String =
-        message?.replace(PEER_URL, "$1<peer>$2") ?: "none"
-
-    /**
-     * Buckets a connect failure so Sentry can be filtered/grouped by cause. "refused", "dns",
-     * "timeout" and "ping_timeout" are the primary not being there — not started, switched off, or
-     * gone from the network — and are [BENIGN_CONNECT_FAILURES]; "tls" and "other" are more likely
-     * a real regression (a protocol or certificate bug) and stay on the reporting cadence.
-     */
-    internal fun classifyConnectFailure(e: Exception): String = when {
-        // ktor's own pinger raises this when the primary misses the keepalive window, which is what
-        // the heartbeat is for: the link drops, the backoff reconnects, and the operator sees the
-        // status change. On a hall's wifi that is ordinary churn — five churches filed it — so it
-        // belongs with "refused" and "dns" rather than being reported the first time it happens.
-        e is IOException && e.message?.contains("Ping timeout", ignoreCase = true) == true -> "ping_timeout"
-        else -> classifyConnectFailureByType(e)
-    }
-
-    private fun classifyConnectFailureByType(e: Exception): String = when (e) {
-        // Ktor's ConnectTimeoutException extends java.net.ConnectException, so it must be matched
-        // first or every connect timeout is filed as "refused" — the one bucket that says the
-        // operator simply has not started the primary yet.
-        is ConnectTimeoutException -> "timeout"
-        is ConnectException -> "refused"
-        is UnknownHostException -> "dns"
-        is SocketTimeoutException -> "timeout"
-        is SSLException -> "tls"
-        else -> "other"
     }
 }
