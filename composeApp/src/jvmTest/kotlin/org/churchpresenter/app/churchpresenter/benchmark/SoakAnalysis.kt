@@ -23,6 +23,10 @@ data class SoakSample(
      * appearance loads fonts, images and code, so these windows are reported but not judged.
      */
     val warmup: Boolean = false,
+    /** Times the UI thread left `UiWatchdog`'s ping unanswered past [SoakLimits.uiStallMs]. */
+    val uiStalls: Int = 0,
+    /** The longest the UI thread took to answer a ping in this window, in ms. */
+    val maxUiStallMs: Double = 0.0,
 )
 
 /** How much memory may grow, and how long one frame may take, before a soak run fails. */
@@ -30,6 +34,8 @@ data class SoakLimits(
     val heapGrowthMb: Double = 64.0,
     val rssGrowthMb: Double = 256.0,
     val stallMs: Double = 250.0,
+    /** How long the UI thread may leave `UiWatchdog`'s ping unanswered: its own budget. */
+    val uiStallMs: Double = 250.0,
     /** Fewer samples than this cannot tell growth from warm-up, so growth is reported but not judged. */
     val minSamplesToJudge: Int = 8,
 )
@@ -44,6 +50,9 @@ data class SoakVerdict(
     val lateFrames: Int,
     val totalFrames: Int,
     val judgedGrowth: Boolean,
+    /** UI-thread stalls after warm-up, and the longest. */
+    val uiStalls: Int = 0,
+    val worstUiStallMs: Double = 0.0,
     val failures: List<String>,
 ) {
     val passed: Boolean get() = failures.isEmpty()
@@ -67,8 +76,8 @@ internal fun growth(values: List<Double>): Double {
 }
 
 /**
- * Judges a run after its warm-up: any frame past the stall limit fails it, and so does memory that
- * kept growing.
+ * Judges a run after its warm-up: any frame past the stall limit fails it, so does any time the UI
+ * thread stopped answering past its budget, and so does memory that kept growing.
  */
 fun judge(all: List<SoakSample>, limits: SoakLimits = SoakLimits()): SoakVerdict {
     val samples = all.filterNot { it.warmup }
@@ -77,8 +86,13 @@ fun judge(all: List<SoakSample>, limits: SoakLimits = SoakLimits()): SoakVerdict
     val rssGrowth = if (rss.size == samples.size && rss.isNotEmpty()) growth(rss) else null
     val worst = samples.maxOfOrNull { it.maxMs } ?: 0.0
     val judged = samples.size >= limits.minSamplesToJudge
+    val uiStalls = samples.sumOf { it.uiStalls }
+    val worstUi = samples.maxOfOrNull { it.maxUiStallMs } ?: 0.0
     val failures = buildList {
         if (worst > limits.stallMs) add("a frame took ${fmt(worst)} ms, past the ${fmt(limits.stallMs)} ms stall limit")
+        if (uiStalls > 0) {
+            add("the UI thread stalled $uiStalls time(s), the longest ${fmt(worstUi)} ms, past ${fmt(limits.uiStallMs)} ms")
+        }
         if (judged && heapGrowth > limits.heapGrowthMb) {
             add("the heap grew ${fmt(heapGrowth)} MB, past ${fmt(limits.heapGrowthMb)} MB")
         }
@@ -94,6 +108,8 @@ fun judge(all: List<SoakSample>, limits: SoakLimits = SoakLimits()): SoakVerdict
         lateFrames = samples.sumOf { it.lateFrames },
         totalFrames = samples.sumOf { it.frames },
         judgedGrowth = judged,
+        uiStalls = uiStalls,
+        worstUiStallMs = worstUi,
         failures = failures,
     )
 }
@@ -103,11 +119,11 @@ private fun fmt2(value: Double) = String.format(Locale.ROOT, "%.2f", value)
 
 /** Every sample as CSV, one row per window. */
 fun soakCsv(samples: List<SoakSample>): String = buildString {
-    appendLine("minute,heap_mb,rss_mb,frames,late_frames,p50_ms,p99_ms,max_ms,warmup")
+    appendLine("minute,heap_mb,rss_mb,frames,late_frames,p50_ms,p99_ms,max_ms,warmup,ui_stalls,max_ui_stall_ms")
     samples.forEach { s ->
         appendLine(
             listOf(fmt2(s.minute), fmt(s.heapMb), s.rssMb?.let(::fmt).orEmpty(), s.frames, s.lateFrames,
-                fmt2(s.p50Ms), fmt2(s.p99Ms), fmt2(s.maxMs), s.warmup).joinToString(","),
+                fmt2(s.p50Ms), fmt2(s.p99Ms), fmt2(s.maxMs), s.warmup, s.uiStalls, fmt(s.maxUiStallMs)).joinToString(","),
         )
     }
 }
@@ -134,6 +150,9 @@ fun soakMarkdown(
     appendLine("| Frames after warm-up | ${verdict.totalFrames} (${verdict.lateFrames} late) |")
     appendLine("| Worst frame | ${fmt2(verdict.worstFrameMs)} ms (limit ${fmt(limits.stallMs)}) |")
     appendLine("| Worst frame in warm-up | ${fmt2(verdict.warmupWorstFrameMs)} ms — first appearance, not judged |")
+    appendLine(
+        "| UI-thread stalls | ${verdict.uiStalls}, longest ${fmt(verdict.worstUiStallMs)} ms (budget ${fmt(limits.uiStallMs)}) |",
+    )
     val judged = if (verdict.judgedGrowth) "" else " — too short to judge"
     appendLine("| Heap growth | ${fmt(verdict.heapGrowthMb)} MB (limit ${fmt(limits.heapGrowthMb)})$judged |")
     val rss = verdict.rssGrowthMb?.let { "${fmt(it)} MB (limit ${fmt(limits.rssGrowthMb)})$judged" }

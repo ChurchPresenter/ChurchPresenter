@@ -11,13 +11,15 @@ import java.awt.EventQueue
  * still stuck -- afterwards the stack is gone -- and, when the thread answers, how long it was out.
  * It holds no thread and no clock of its own, so a test drives it with numbers.
  *
- * [stack] is the event thread's current stack, [report] where a line goes (the app: `Log.warn`).
+ * [stack] is the event thread's current stack, [report] where a line goes (the app: `Log.warn`),
+ * and [onAnswered] is told how long every ping took, stalled or not -- the soak test counts them.
  * The event thread answers and the watchdog thread polls, so every call takes the detector's lock.
  */
 class StallDetector(
     private val budgetMs: Long,
     private val stack: () -> List<StackTraceElement>,
     private val report: (String) -> Unit,
+    private val onAnswered: (lateMs: Long) -> Unit = {},
 ) {
     private var postedAt = NONE
     private var reported = false
@@ -38,6 +40,7 @@ class StallDetector(
         if (postedAt == NONE) return
         val late = now - postedAt
         if (reported) report("UI thread answered after ${late}ms (budget ${budgetMs}ms)")
+        onAnswered(late)
         postedAt = NONE
         reported = false
     }
@@ -69,14 +72,18 @@ object UiWatchdog {
 
     @Volatile private var thread: Thread? = null
 
-    /** Starts watching, if it is not already; [budgetMs] is how long a stall may last unreported. */
+    /**
+     * Starts watching, if it is not already; [budgetMs] is how long a stall may last unreported, and
+     * [onAnswered] hears how long each ping took to be answered.
+     */
     @Synchronized
-    fun start(budgetMs: Long = DEFAULT_BUDGET_MS) {
+    fun start(budgetMs: Long = DEFAULT_BUDGET_MS, onAnswered: (lateMs: Long) -> Unit = {}) {
         if (thread?.isAlive == true) return
         val detector = StallDetector(
             budgetMs = budgetMs,
             stack = { ThreadDump.stackOf(EVENT_THREAD).orEmpty() },
             report = { Log.warn(TAG, it) },
+            onAnswered = onAnswered,
         )
         thread = Thread({ watch(detector, budgetMs) }, "ui-watchdog").apply {
             isDaemon = true

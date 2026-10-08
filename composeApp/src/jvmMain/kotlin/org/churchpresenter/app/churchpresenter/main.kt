@@ -44,6 +44,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.diagnostics.BuildIdentity
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.diagnostics.StartupProbe
 import org.churchpresenter.diagnostics.UiWatchdog
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
 import org.churchpresenter.sharedui.utils.UsageEvents
@@ -123,6 +124,8 @@ private fun bundleDefaultBible(settings: AppSettings) {
 }
 
 fun main() {
+    // Off unless the startup benchmark asked for it; see StartupProbe.
+    StartupProbe.mainStarted()
     // Before anything else: skiko latches this on its first SkiaLayer, so a later set is ignored.
     preferredRenderApi(System.getProperty("os.name", ""), DevFlags.renderApiOverride)?.let {
         System.setProperty("skiko.renderApi", it)
