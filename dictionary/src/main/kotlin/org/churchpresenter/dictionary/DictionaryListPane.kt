@@ -35,6 +35,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -63,6 +64,7 @@ import org.churchpresenter.sharedui.composables.BibleListRowShape
 import org.churchpresenter.sharedui.composables.bibleRowColors
 import org.churchpresenter.sharedui.composables.rememberRowHover
 import org.churchpresenter.sharedui.composables.rowPad
+import org.churchpresenter.sharedui.composables.SearchFieldFocus
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -70,6 +72,7 @@ internal fun DictionaryListPane(
     modifier: Modifier,
     viewModel: DictionaryViewModel,
     getBookName: ((bookId: Int) -> String?)?,
+    searchFocus: SearchFieldFocus = remember { SearchFieldFocus() },
 ) {
     val results = viewModel.searchResults
     val listState = rememberLazyListState()
@@ -97,6 +100,7 @@ internal fun DictionaryListPane(
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 8.dp),
+            focus = searchFocus,
         )
 
         // Book / chapter filter for the entry list (visible once interlinear data is loaded)

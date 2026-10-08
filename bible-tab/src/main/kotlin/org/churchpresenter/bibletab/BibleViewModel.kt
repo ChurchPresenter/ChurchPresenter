@@ -322,6 +322,10 @@ class BibleViewModel(
 
     internal var loadChapterJob: kotlinx.coroutines.Job? = null
 
+    // The schedule selection the Bible tab last acted on. The tab is rebuilt on every visit and the
+    // app keeps the last schedule verse, so this is how a visit tells a fresh schedule click apart.
+    internal var scheduleVersionSeen = -1
+
     internal var searchJob: kotlinx.coroutines.Job? = null
 
     internal var lastChapterSelectTime = 0L

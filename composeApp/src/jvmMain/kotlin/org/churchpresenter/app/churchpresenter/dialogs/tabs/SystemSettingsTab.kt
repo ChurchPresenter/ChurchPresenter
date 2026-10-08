@@ -65,6 +65,8 @@ import org.churchpresenter.strings.generated.resources.settings_import_failed
 import org.churchpresenter.strings.generated.resources.start_outputs_hidden
 import org.churchpresenter.strings.generated.resources.start_outputs_hidden_hint
 import org.churchpresenter.strings.generated.resources.hide_cursor_on_outputs
+import org.churchpresenter.strings.generated.resources.focus_search_on_tab_open
+import org.churchpresenter.strings.generated.resources.focus_search_on_tab_open_hint
 import org.churchpresenter.strings.generated.resources.hide_cursor_on_outputs_hint
 import org.churchpresenter.strings.generated.resources.overlay_end_clears_display
 import org.churchpresenter.strings.generated.resources.overlay_end_clears_display_hint
@@ -270,6 +272,17 @@ private fun GeneralCard(
                 checked = settings.projectionSettings.previewModeEnabled,
                 onCheckedChange = { on ->
                     onSettingsChange { s -> s.withPreviewMode(on) }
+                }
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            GeneralToggleRow(
+                label = stringResource(Res.string.focus_search_on_tab_open),
+                hint = stringResource(Res.string.focus_search_on_tab_open_hint),
+                checked = settings.keyboardShortcutSettings.focusSearchOnTabOpen,
+                onCheckedChange = { on ->
+                    onSettingsChange { s ->
+                        s.copy(keyboardShortcutSettings = s.keyboardShortcutSettings.copy(focusSearchOnTabOpen = on))
+                    }
                 }
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))

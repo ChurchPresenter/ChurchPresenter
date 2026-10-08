@@ -56,7 +56,12 @@ internal fun BibleTabScope.BibleTabEffects(
      * wrong for an item the operator explicitly clicked — and it only fires while this tab is
      * composed, which it may not be by the time a cold-start Bible load finishes.
      */
+    // Read before the schedule effect below records this visit's version.
+    val openedFromSchedule = remember {
+        selectedVerseItem != null && selectedVerseItemVersion != viewModel.scheduleVersionSeen
+    }
     LaunchedEffect(selectedVerseItem, selectedVerseItemVersion) {
+        viewModel.scheduleVersionSeen = selectedVerseItemVersion
         selectedVerseItem?.let { item ->
             val verses = viewModel.resolveVerseSelection(
                 bookName = item.bookName,
@@ -77,7 +82,17 @@ internal fun BibleTabScope.BibleTabEffects(
         }
     }
 
-    LaunchedEffect(dialogDismissSignal) { focusRequester.requestFocus() }
+    // Opening the tab puts the caret in the search box (#798), unless the keyboard belongs to what is
+    // live here -- or to the schedule verse just opened -- so the step keys keep working. After that,
+    // closing a dialog hands the keyboard back to the tab as before.
+    var opened by remember { mutableStateOf(false) }
+    LaunchedEffect(dialogDismissSignal) {
+        val opening = !opened
+        opened = true
+        val searchFirst = appSettings.keyboardShortcutSettings.focusSearchOnTabOpen &&
+            !currentIsPresenting && !openedFromSchedule
+        if (opening && searchFirst) searchFocus.focusAndSelectAll() else focusRequester.requestFocus()
+    }
 }
 
 /** Keeps the split-browse live panel on the chapter that is live, and sends its key-press steps. */

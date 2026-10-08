@@ -5,6 +5,8 @@
 
 package org.churchpresenter.media.tabs
 
+import org.churchpresenter.sharedui.composables.handleGoLiveKey
+import androidx.compose.ui.focus.onFocusChanged
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -212,12 +214,20 @@ fun MediaTab(
         focusRequester,
     )
 
+    // The Go Live key acts only while the tab root itself has the keyboard.
+    var rootFocused by remember { mutableStateOf(false) }
+    val canGoLive = presenterManager != null && viewModel.isLoaded
     Column(
         modifier = modifier
             .fillMaxSize()
             .focusRequester(focusRequester)
+            .onFocusChanged { rootFocused = it.isFocused }
             .focusable()
-            .onPreviewKeyEvent { keyEvent -> tab.handleKey(viewModel, keyEvent) }
+            .onPreviewKeyEvent { keyEvent ->
+                tab.shortcuts.handleGoLiveKey(keyEvent, rootFocused, canGoLive) {
+                    presenterManager?.let { tab.goLive(viewModel, it) }
+                } || tab.handleKey(viewModel, keyEvent)
+            }
     ) {
         tab.MediaTopCard(viewModel)
         // Seek bar and preview share one card.

@@ -172,7 +172,10 @@ fun BibleTab(
         modifier = modifier
             .fillMaxSize()
             .focusRequester(focusRequester)
-            .onFocusChanged { focusRescue.onFocusChanged(it.hasFocus) }
+            .onFocusChanged {
+                focusRescue.onFocusChanged(it.hasFocus)
+                tab.ui.tabRootFocused = it.isFocused
+            }
             .focusRescuePressHook(focusRescue)
             .focusable()
             .onPreviewKeyEvent { tab.handleKeyEvent(viewModel, it) }

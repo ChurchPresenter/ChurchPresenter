@@ -1,5 +1,6 @@
 package org.churchpresenter.slides.tabs
 
+import org.churchpresenter.sharedui.composables.handleGoLiveKey
 import org.churchpresenter.slides.PresentationSlidesLoaded
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.Surface
@@ -215,15 +216,25 @@ fun PresentationTab(
     with(tab) {
         PresentationLoadEffects(viewModel)
         PresentationLiveEffects(viewModel)
+        // The Go Live key acts only while the tab root itself has the keyboard.
+        var rootFocused by remember { mutableStateOf(false) }
+        val canGoLive = presenterManager != null && viewModel.slideFiles.isNotEmpty()
         Column(
             modifier = modifier
                 .fillMaxSize()
                 .testTag("presentation_root")
                 .focusRequester(focusRequester)
-                .onFocusChanged { focusRescue.onFocusChanged(it.hasFocus) }
+                .onFocusChanged {
+                    focusRescue.onFocusChanged(it.hasFocus)
+                    rootFocused = it.isFocused
+                }
                 .focusRescuePressHook(focusRescue)
                 .focusable()
-                .onKeyEvent { keyEvent -> handleKey(viewModel, keyEvent) }
+                .onKeyEvent { keyEvent ->
+                    shortcuts.handleGoLiveKey(keyEvent, rootFocused, canGoLive) {
+                        presenterManager?.let { goLive(viewModel, it) }
+                    } || handleKey(viewModel, keyEvent)
+                }
         ) {
             PresentationTopBar(viewModel)
             PresentationBody(viewModel)

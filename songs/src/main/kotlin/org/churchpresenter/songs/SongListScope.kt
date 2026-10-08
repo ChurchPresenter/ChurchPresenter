@@ -12,6 +12,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import org.churchpresenter.sharedui.composables.SearchFieldFocus
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
@@ -53,6 +54,7 @@ internal class SongListScope(
     val favoritesExpanded: Boolean,
     val favPanelHeightPx: Float,
     val tabFocusRequester: FocusRequester,
+    val searchFocus: SearchFieldFocus,
     val favoriteSongs: () -> List<SongItem>,
     val playCountFor: (String) -> Int?,
     /** Where the current search found a song, for the line under its row; null draws no line. */

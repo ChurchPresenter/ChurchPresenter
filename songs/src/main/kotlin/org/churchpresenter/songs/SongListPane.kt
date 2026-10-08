@@ -58,7 +58,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import org.churchpresenter.sharedui.composables.SearchFieldFocus
+import org.churchpresenter.sharedui.composables.rememberSearchFieldValue
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -186,6 +189,7 @@ internal fun RowScope.SongListPane(
     onAddToSchedule: ((Int, String, String, String) -> Unit)?,
     onPresenting: (Presenting) -> Unit,
     sendToPresenter: (goLive: Boolean) -> Unit,
+    searchFocus: SearchFieldFocus = remember { SearchFieldFocus() },
 ) {
     val density = LocalDensity.current
     // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
@@ -194,7 +198,8 @@ internal fun RowScope.SongListPane(
         columns, dialogs, live, filteredSongs, selectedSongIndex, searchQuery, isLoading, isPresenting, songbooks,
         songbookOptions, selectedSongbook, allSongBooksText, containsText, filterType, filterTypes, filterTypeMap,
         filterTypeDisplayMap, currentSortColumn, currentSortAscending, actionCols, availableCols, visibleCols,
-        favorites, favoritesExpanded, favPanelHeightPx, tabFocusRequester, favoriteSongs, playCountFor, searchMatchFor,
+        favorites, favoritesExpanded, favPanelHeightPx, tabFocusRequester, searchFocus, favoriteSongs, playCountFor,
+        searchMatchFor,
         onSearchQueryChange, onSearchFocusChanged, onFilterTypeChange, onSongbookChange, onSortChange, onSelectSong,
         onSelectSongByDetails, onSelectSection, onToggleFavorite, onClearFavorites, onReloadSongs, onSaveColumnWidths,
         onSaveColumnOrder, onSaveHiddenColumns, onSaveFavPanelHeight, onFavoritesExpandedChange, onFavPanelHeightChange,
@@ -227,6 +232,7 @@ internal fun RowScope.SongListPane(
             favoritesExpanded = favoritesExpanded,
             favPanelHeightPx = favPanelHeightPx,
             tabFocusRequester = tabFocusRequester,
+            searchFocus = searchFocus,
             favoriteSongs = favoriteSongs,
             playCountFor = playCountFor,
             searchMatchFor = searchMatchFor,
@@ -391,15 +397,18 @@ private fun SongListScope.SongSearchField(modifier: Modifier) {
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
         )
         Box(modifier = Modifier.weight(1f).padding(horizontal = 8.dp)) {
+            var fieldValue by rememberSearchFieldValue(searchQuery, searchFocus)
             BasicTextField(
-                value = searchQuery,
-                onValueChange = { onSearchQueryChange(it) },
+                value = fieldValue,
+                onValueChange = {
+                    fieldValue = it
+                    if (it.text != searchQuery) onSearchQueryChange(it.text)
+                },
                 modifier = Modifier.fillMaxWidth()
+                    .focusRequester(searchFocus.requester)
                     .onFocusChanged { onSearchFocusChanged(it.isFocused) }
-                    // Enter is the operator saying "that is the song": take the caret back
-                    // now rather than waiting out the idle window, and — unlike that
-                    // automatic path — do it even while lyrics are live, because this is
-                    // deliberate. Consuming it keeps Enter from reaching anything else.
+                    // Go Live and the arrow keys are the tab's (SongsTabKeys). Enter still hands the
+                    // keyboard to the list when Go Live is bound to something else.
                     .onPreviewKeyEvent { event ->
                         if (event.type == KeyEventType.KeyDown && event.key == Key.Enter) {
                             tabFocusRequester.requestFocus()

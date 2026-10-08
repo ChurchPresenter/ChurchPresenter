@@ -32,7 +32,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_playlist_add
+import org.churchpresenter.sharedui.models.ShortcutAction
+import org.churchpresenter.sharedui.utils.LocalShortcuts
+import org.churchpresenter.sharedui.utils.label
+import org.churchpresenter.strings.generated.resources.tooltip_with_shortcut
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.strings.generated.resources.Res as StringsRes
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
 
@@ -58,7 +64,9 @@ fun ActionIconButton(
     buttonSize: Dp = 34.dp,
     iconSize: Dp = 16.dp,
     modifier: Modifier = Modifier,
-    tooltipContent: (@Composable () -> Unit)? = null
+    tooltipContent: (@Composable () -> Unit)? = null,
+    /** What the button is called to assistive technology; the tooltip's words unless they say more. */
+    contentDescription: String = tooltipText,
 ) {
     ConditionalTooltipArea(
         tooltip = {
@@ -106,26 +114,40 @@ fun ActionIconButton(
             contentAlignment = Alignment.Center
         ) {
             if (icon != null) {
-                Icon(icon, contentDescription = tooltipText, tint = ink, modifier = Modifier.size(iconSize))
+                Icon(icon, contentDescription = contentDescription, tint = ink, modifier = Modifier.size(iconSize))
             } else if (painter != null) {
-                Icon(painter, contentDescription = tooltipText, tint = ink, modifier = Modifier.size(iconSize))
+                Icon(painter, contentDescription = contentDescription, tint = ink, modifier = Modifier.size(iconSize))
             }
         }
     }
 }
 
-/** Uniform "Go Live" button — matches LowerThird's action row. */
+/**
+ * Uniform "Go Live" button — matches LowerThird's action row.
+ *
+ * [showsShortcut] adds the Go Live key to the tooltip ("Go Live (Enter)") on the tabs that answer
+ * it; it follows a rebinding and drops out when the action is unbound.
+ */
 @Composable
 fun GoLiveButton(
     onClick: () -> Unit,
     tooltipText: String,
     enabled: Boolean = true,
     dimmed: Boolean = false,
+    showsShortcut: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    val key = if (showsShortcut) LocalShortcuts.current.label(ShortcutAction.GO_LIVE) else ""
+    val tooltip = if (key.isEmpty()) {
+        tooltipText
+    } else {
+        stringResource(StringsRes.string.tooltip_with_shortcut, tooltipText, key)
+    }
     ActionIconButton(
         onClick = onClick,
-        tooltipText = tooltipText,
+        tooltipText = tooltip,
+        // Named without the key, which belongs to the tooltip: the button is still "Go Live".
+        contentDescription = tooltipText,
         icon = Icons.Default.Tv,
         enabled = enabled,
         containerColor = MaterialTheme.colorScheme.primary,

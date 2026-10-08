@@ -310,6 +310,16 @@
     <string name="shortcut_scope_presentation_hint">Active while the Presentation tab is focused</string>
     <string name="shortcut_scope_media_hint">Active during audio and video playback</string>
     <string name="shortcut_scope_canvas_hint">Active while editing a canvas scene</string>
+    <string name="shortcut_category_tabs">Search &amp; Go Live</string>
+    <string name="shortcut_scope_tabs_hint">Active on every tab with a Go Live button, while the tab has the keyboard</string>
+    <string name="shortcut_description_go_live_key">Go Live with the highlighted item</string>
+    <string name="shortcut_description_switch_search_live">Switch the keyboard between search and what is live</string>
+    <string name="tooltip_with_shortcut">%1$s (%2$s)</string>
+    <string name="keyboard_home_search">Searching — %1$s: go live</string>
+    <string name="keyboard_home_search_live">Searching — %1$s: go live · %2$s: back to live</string>
+    <string name="songs_browse_paused_hint">Arrow keys paused — this is not the live song. %1$s: go live · %2$s: back to live</string>
+    <string name="focus_search_on_tab_open">Focus search when opening a tab</string>
+    <string name="focus_search_on_tab_open_hint">Opening Bible, Songs or Dictionary puts the cursor in the search box, unless that tab is already live</string>
     <string name="shortcut_scope_mouse_hint">Gestures, which cannot be rebound</string>
     <string name="shortcut_conflicts_none">No conflicts</string>
     <string name="shortcut_conflicts_one">1 conflict</string>

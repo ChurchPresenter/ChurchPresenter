@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.dictionary.data.StrongsEntry
 import org.churchpresenter.sharedui.composables.DragHandle
+import org.churchpresenter.sharedui.composables.SearchFieldFocus
+import org.churchpresenter.sharedui.composables.goLiveKeyTarget
 import org.churchpresenter.sharedui.composables.bibleListCard
 
 /** The divider between the entry list and the detail pane, dragged to resize the list. */
@@ -52,13 +54,25 @@ fun DictionaryTab(
     // where there is a document to edit: the tab is also composed with no settings at all in
     // previews and tests.
 
-    Row(modifier = modifier) {
+    // Opening the tab puts the caret in the search box (#798); otherwise the tab root takes the
+    // keyboard, where the Go Live key sends the entry shown.
+    val searchFocus = remember { SearchFieldFocus() }
+    val searchFirst = appSettings?.keyboardShortcutSettings?.focusSearchOnTabOpen == true
+    LaunchedEffect(searchFocus) { if (searchFirst) searchFocus.focusAndSelectAll() }
+    val entry = viewModel.selectedEntry
+    Row(
+        modifier = modifier.goLiveKeyTarget(
+            enabled = entry != null && onGoLive != null,
+            focusOnOpen = !searchFirst,
+        ) { entry?.let { onGoLive?.invoke(it) } }
+    ) {
         DictionaryListPane(
             modifier = Modifier.width(with(density) { listWidthPx.toDp() }).fillMaxHeight()
                 .padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
                 .bibleListCard(),
             viewModel = viewModel,
             getBookName = getBookName,
+            searchFocus = searchFocus,
         )
         DragHandle(
             modifier = Modifier.testTag(DICTIONARY_LIST_DIVIDER_TAG),

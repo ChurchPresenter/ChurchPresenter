@@ -5,6 +5,8 @@ import androidx.compose.ui.draw.alpha
 import org.churchpresenter.sharedui.composables.FocusLostBanner
 import org.churchpresenter.sharedui.composables.LocalWentLive
 import org.churchpresenter.sharedui.composables.focusRescuePressHook
+import org.churchpresenter.sharedui.composables.handleGoLiveKey
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.composables.rememberFocusLostRescue
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -138,14 +141,26 @@ fun PicturesTab(
             wentLive = wentLive,
         )
     }
+    // The Go Live key acts only while the tab root itself has the keyboard, and not while the
+    // pictures are already up -- the arrow keys step them there.
+    var rootFocused by remember { mutableStateOf(false) }
+    val canGoLive = presenterManager != null && viewModel.images.isNotEmpty() &&
+        !presenterManager.isLive(Presenting.PICTURES)
     Column(
         modifier = modifier
             .fillMaxSize()
             .focusRequester(focusRequester)
-            .onFocusChanged { focusRescue.onFocusChanged(it.hasFocus) }
+            .onFocusChanged {
+                focusRescue.onFocusChanged(it.hasFocus)
+                rootFocused = it.isFocused
+            }
             .focusRescuePressHook(focusRescue)
             .focusable()
-            .onPreviewKeyEvent { keyEvent -> tabScope.handleKey(viewModel, keyEvent) }
+            .onPreviewKeyEvent { keyEvent ->
+                shortcuts.handleGoLiveKey(keyEvent, rootFocused, canGoLive) {
+                    presenterManager?.let { viewModel.goLive(it, onInstanceLinkSendProject, wentLive) }
+                } || tabScope.handleKey(viewModel, keyEvent)
+            }
     ) {
         tabScope.PicturesHeader(viewModel)
         FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost))

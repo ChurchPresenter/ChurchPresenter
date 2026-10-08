@@ -1,5 +1,6 @@
 package org.churchpresenter.lowerthird
 
+import org.churchpresenter.sharedui.composables.goLiveKeyTarget
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -80,7 +81,7 @@ import org.churchpresenter.sharedui.composables.rowSpan
 /** The file list, its drag handle, and the preview column. */
 @Composable
 internal fun LowerThirdTabScope.LowerThirdBody(modifier: Modifier) {
-    Row(modifier = modifier.fillMaxSize()) {
+    Row(modifier = modifier.fillMaxSize().goLiveKeyTarget(enabled = canPlay, onGoLive = ::goLive)) {
         // Left column — file list (resizable) + generate button
         LowerThirdFileList()
 

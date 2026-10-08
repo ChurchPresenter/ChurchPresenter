@@ -49,6 +49,10 @@ class SongsViewModel(
 
     internal var loadSongsJob: kotlinx.coroutines.Job? = null
 
+    // The schedule selection the Songs tab last acted on. The tab is rebuilt on every visit and the
+    // app keeps the last schedule song, so this is how a visit tells a fresh schedule click apart.
+    internal var scheduleVersionSeen = -1
+
     internal val songFolderWatcher = SongFolderWatcher(viewModelScope) { loadSongs() }
 
     internal val allSongItemsState = mutableStateOf<List<SongItem>>(emptyList())

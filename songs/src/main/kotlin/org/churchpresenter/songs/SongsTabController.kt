@@ -19,6 +19,7 @@ import org.churchpresenter.settings.operatorSongSettings
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.unit.Density
 import org.churchpresenter.sharedui.composables.FocusLostRescueState
+import org.churchpresenter.sharedui.composables.SearchFieldFocus
 
 /**
  * The Songs tab's state and behaviour between compositions: what is live, which dialog is open,
@@ -68,8 +69,15 @@ internal class SongsTabController(
     var onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {}
 
     val tabFocusRequester = FocusRequester()
-    // True while the caret is in the song search field — the tab's key handler stands down for it.
+    val searchFocus = SearchFieldFocus()
+    // True while the caret is in the song search field. The arrow keys browse the list from there
+    // and nothing reaches the output until Go Live.
     var searchFieldFocused by mutableStateOf(false)
+    // True while the tab root itself holds the keyboard, not the search box or another field: the
+    // only place Go Live on a key may act, because a one-line field lets Enter through to here.
+    var tabRootFocused by mutableStateOf(false)
+    // Set when a step key was held back because the selected song is not the live one.
+    var browsePausedHint by mutableStateOf(false)
     var favoritesExpanded by mutableStateOf(true)
     var rowTotalWidth by mutableStateOf(0f)
 
@@ -127,6 +135,13 @@ internal class SongsTabController(
         live.sectionIndex = if (titleSlide != null) -1 else viewModel.selectedSectionIndex.value
         live.lineIndex = if (titleSlide != null) 0 else viewModel.selectedLineIndex.value
     }
+
+    val selectedSong: SongItem?
+        get() = viewModel.filteredSongItems.value.getOrNull(viewModel.selectedSongIndex.value)
+
+    /** A song is live and the one selected is a different one -- its sections must not step out. */
+    val browsingAwayFromLive: Boolean
+        get() = isPresenting && live.songId != null && selectedSong?.songId != live.songId
 
     /** The sections, the selection and the section itself, led by [titleSlide] while it is the selection. */
     private fun pushSections(titleSlide: LyricSection?, tuning: SongTuning) {

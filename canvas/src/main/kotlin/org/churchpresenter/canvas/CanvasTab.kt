@@ -1,5 +1,9 @@
 package org.churchpresenter.canvas
 
+import org.churchpresenter.sharedui.utils.ShortcutMap
+import androidx.compose.ui.input.key.KeyEvent
+import org.churchpresenter.sharedui.composables.handleGoLiveKey
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.runtime.remember
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.rememberUpdatedState
@@ -18,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
@@ -129,22 +134,19 @@ fun CanvasTab(
 
         val shortcuts = LocalShortcuts.current
 
+        // The Go Live key acts only while the tab root itself has the keyboard.
+        var rootFocused by remember { mutableStateOf(false) }
+        val currentScene = sceneViewModel.currentScene
         Row(
             modifier = modifier
                 .fillMaxSize()
                 .focusRequester(focusRequester)
+                .onFocusChanged { rootFocused = it.isFocused }
                 .focusable()
                 .onKeyEvent { event ->
-                    if (event.type == KeyEventType.KeyDown &&
-                        shortcuts.matches(ShortcutAction.CANVAS_DELETE_SOURCE, event) &&
-                        renamingSceneId == null
-                    ) {
-                        val sourceId = sceneViewModel.selectedSourceId.value
-                        if (sourceId != null) {
-                            sceneViewModel.removeSource(sourceId)
-                            true
-                        } else false
-                    } else false
+                    val canGoLive = currentScene != null && renamingSceneId == null
+                    shortcuts.handleGoLiveKey(event, rootFocused, canGoLive) { currentScene?.let { goLive(it) } } ||
+                        deleteSelectedSource(event, shortcuts, sceneViewModel, renaming = renamingSceneId != null)
                 }
         ) {
             // Left panel: Scene selector + Source list
@@ -252,4 +254,18 @@ internal fun SingleLayoutConfirmDialog(onConfirm: () -> Unit, onDismiss: () -> U
             }
         },
     )
+}
+
+/** The delete-source key: removes the selected source, unless a scene name is being edited. */
+private fun deleteSelectedSource(
+    event: KeyEvent,
+    shortcuts: ShortcutMap,
+    sceneViewModel: SceneViewModel,
+    renaming: Boolean,
+): Boolean {
+    if (event.type != KeyEventType.KeyDown || renaming) return false
+    if (!shortcuts.matches(ShortcutAction.CANVAS_DELETE_SOURCE, event)) return false
+    val sourceId = sceneViewModel.selectedSourceId.value ?: return false
+    sceneViewModel.removeSource(sourceId)
+    return true
 }

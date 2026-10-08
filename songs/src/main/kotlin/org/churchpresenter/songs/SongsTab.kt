@@ -31,9 +31,6 @@ import org.churchpresenter.settings.SongSettings
 /** The toolbar button that adds the *selected* song, as opposed to any other "Add to Schedule". */
 internal const val SONGS_ADD_SELECTED_TAG = "songs_addSelectedToSchedule"
 
-/** How long typing must stop before the caret leaves the search box. See the idle effect below. */
-internal const val SEARCH_IDLE_FOCUS_MS = 3_000L
-
 
 @Composable
 fun SongsTab(
@@ -74,14 +71,6 @@ fun SongsTab(
     isPresenting: Boolean = false,
     playCounts: SongPlayCounts? = null,
     dialogDismissSignal: Int = 0,
-    /**
-     * How long typing must stop before the caret leaves the search box.
-     *
-     * A parameter only so a test can use a window short enough to wait out for real; the app never
-     * passes it. Compose's test clock does not reliably drive this `delay`, so a test that advanced
-     * the clock instead passed or failed depending on how much wall time the run happened to take.
-     */
-    searchIdleFocusMs: Long = SEARCH_IDLE_FOCUS_MS,
 ) {
 
     // Edit Song Dialog state (pure UI state — fine to keep here)
@@ -134,7 +123,7 @@ fun SongsTab(
     controller.focusRescue = rememberFocusLostRescue(hostWindow, controller.tabFocusRequester)
 
     controller.SongsTabEffects(
-        playCounts, selectedSongItem, selectedSongItemVersion, dialogDismissSignal, searchIdleFocusMs,
+        playCounts, selectedSongItem, selectedSongItemVersion, dialogDismissSignal,
     )
     controller.SongsTabPanes(modifier)
     controller.SongEditorDialogs()
