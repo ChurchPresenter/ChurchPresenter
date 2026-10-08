@@ -55,7 +55,6 @@ internal fun MainWindowScope.SettingsDialogs() {
             devMode = devMode,
             initialTab = optionsDialogInitialTab,
             initialSettings = appSettings,
-            showHelperSettings = isDevMode,
             theme = theme,
             settingsManager = settingsManager,
             companionServer = companionServer,

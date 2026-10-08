@@ -75,7 +75,7 @@ import org.churchpresenter.strings.generated.resources.helper_undo_label_tab
 @Composable
 internal fun MainWindowScope.HelperHost(modifier: Modifier) {
     // Wick is still being shaped: only development builds and an unlocked developer menu show it.
-    if (!root.isDevMode) return
+    if (!root.devMode) return
     with(root) {
         val devices = rememberScreenDevices()
         val projection = appSettings.projectionSettings
@@ -153,7 +153,7 @@ internal val AppRootState.wickIntroShowing: Boolean
     get() {
         if (helperState.replayIntro) return true
         val helper = appSettings.helper
-        return isDevMode && !helper.introSeen && helper.enabled && appReady && eulaAccepted &&
+        return devMode && !helper.introSeen && helper.enabled && appReady && eulaAccepted &&
             !showSetupWizard && startupChecksDone && pendingUpdateResult == null && !showStoryPrompt &&
             presenterManager.liveContent.value.isEmpty()
     }

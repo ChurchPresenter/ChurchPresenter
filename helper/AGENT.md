@@ -42,7 +42,7 @@ consumer is `:composeApp`. It takes `:shared-ui`, `:strings`, `:icons`, `:core-m
 ## Rules
 
 - **Dev mode only, for now.** The app draws the lamp, the Help → Show Helper item and the System
-  tab's Helper card only when `AppRootState.isDevMode` — the Developer menu's own gate. Lift it there
+  tab's Helper card only when `AppRootState.devMode` — the Developer menu's own gate. Lift it there
   when Wick ships.
 - **Everything that changes something is confirmed.** `HelperAction.needsConfirmation` is false only
   for pointing at things, opening a window and showing a key.
