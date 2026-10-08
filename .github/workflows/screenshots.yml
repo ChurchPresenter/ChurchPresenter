@@ -21,7 +21,9 @@ name: Screenshots
 # Skia renders text differently on macOS, Windows and Linux (the same reason AGENT.md tells tests to
 # assert invariants rather than pixels), so the committed images are right for whoever recorded them
 # and differ everywhere else. Record on ONE platform per branch, and re-record only what actually
-# changed — a re-record on a second OS rewrites nearly every file for nothing.
+# changed — a re-record on a second OS rewrites nearly every file for nothing. macOS is the
+# canonical platform: the committed set is recorded and verified there, and this Linux comparison
+# stays advisory.
 #
 # To update the website's screenshots, download the `screenshots` artifact from a run on `main`
 # rather than recording locally — those are the Linux renders, and they are consistent with each

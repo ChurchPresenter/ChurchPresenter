@@ -245,8 +245,9 @@ not flagged.
 - **Verify locally, not in CI.** The committed set is a macOS recording; CI renders on Linux, where
   almost every file differs, so CI records and posts an advisory `reg-actions` comparison only.
   **Record on ONE platform per branch** and never re-record the whole suite out of habit — across
-  platforms it rewrites nearly every file for no visual change. Which platform is canonical is
-  undecided; ask before re-recording broadly.
+  platforms it rewrites nearly every file for no visual change. **macOS is the canonical
+  platform**: record and verify there; CI's Linux comparison is advisory and never re-recorded into
+  the tree.
 - `verifyRoborazziJvm` fails past `ScreenshotSupport.CHANGE_THRESHOLD` (0.1% of pixels) and writes a
   reference|diff|new image to `<module>/build/outputs/roborazzi/<name>_compare.png`. **Open it
   before calling anything churn** — a whole suite failing is usually a re-record nobody did.
