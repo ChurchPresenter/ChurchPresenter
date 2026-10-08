@@ -1,0 +1,62 @@
+name: Prune screenshot reports
+
+# reg-actions uploads a `reg` artifact with every screenshot comparison, and it does not pass a
+# retention on: its `retention-days` input (screenshots.yml) only prunes the `reg_actions` branch,
+# so the artifact falls back to the repository default of 90 days. At 90-180 MB a push that came to
+# over 100 GB. This keeps a week of them -- long enough to download the report a recent PR's
+# comment links -- and deletes the rest every day.
+#
+# Only artifacts named `reg`. Workflow runs, logs and every other artifact are left alone.
+
+on:
+  schedule:
+    - cron: '17 4 * * *'   # daily, 04:17 UTC
+  workflow_dispatch:
+    inputs:
+      max_age_days:
+        description: 'Delete reg artifacts older than this many days'
+        required: false
+        default: '7'
+        type: number
+      dry_run:
+        description: 'List what would be deleted without deleting'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Delete old reg artifacts
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const maxAgeDays = Number('${{ inputs.max_age_days || 7 }}');
+            const dryRun = '${{ inputs.dry_run || false }}' === 'true';
+            const cutoff = new Date(Date.now() - maxAgeDays * 24 * 60 * 60 * 1000);
+            console.log(`reg artifacts created before ${cutoff.toISOString()}${dryRun ? ' (dry run)' : ''}`);
+
+            // Collect first, then delete: deleting while paging shifts the pages under the loop.
+            const old = await github.paginate(github.rest.actions.listArtifactsForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'reg',
+              per_page: 100,
+            }, (response) => response.data.filter(a => !a.expired && new Date(a.created_at) < cutoff));
+
+            let bytes = 0;
+            for (const artifact of old) {
+              bytes += artifact.size_in_bytes;
+              if (!dryRun) {
+                await github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id,
+                });
+              }
+            }
+            const gb = (bytes / 1024 ** 3).toFixed(1);
+            console.log(`${dryRun ? 'Would delete' : 'Deleted'} ${old.length} reg artifact(s), ${gb} GB`);
