@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import org.churchpresenter.liveoutput.deckLinkOutputCount
 import org.churchpresenter.server.InstanceLinkCommandFailure

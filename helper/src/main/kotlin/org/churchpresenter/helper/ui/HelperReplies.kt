@@ -211,6 +211,7 @@ internal fun ReplyBody(
             Said(HelperText.Res(Res.string.helper_unknown))
             RequestChips(reply.closest, ask)
         }
+        HelperReply.Commands -> CommandsTable(ask)
         HelperReply.Greeting -> {
             Said(HelperText.Res(Res.string.helper_greeting))
             RequestChips(SuggestedRequest.DEFAULTS, ask)

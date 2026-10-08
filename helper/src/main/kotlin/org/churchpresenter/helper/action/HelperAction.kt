@@ -174,6 +174,11 @@ sealed interface HelperAction {
         override val affectsLive get() = true
     }
 
+    /** "Help", "commands": every request Wick understands, in a table. */
+    data object ShowCommands : HelperAction {
+        override val needsConfirmation get() = false
+    }
+
     /** Say what is on screen now. */
     data object WhatsLive : HelperAction {
         override val needsConfirmation get() = false

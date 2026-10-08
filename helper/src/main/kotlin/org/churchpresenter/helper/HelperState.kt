@@ -48,6 +48,9 @@ sealed interface HelperReply {
     /** Hello, and examples of what to ask. */
     data object Greeting : HelperReply
 
+    /** Every request Wick understands, as a table. */
+    data object Commands : HelperReply
+
     /** Pointing at [tour]'s step [index]. */
     data class Touring(val tour: GuideTour, val index: Int) : HelperReply
 
@@ -153,6 +156,7 @@ class HelperState(val session: GuideSession = GuideSession()) {
             is HelperAction.ShowShortcut -> show(HelperReply.Shortcut(action.action))
             HelperAction.UndoLast -> undo()
             HelperAction.Greet -> show(HelperReply.Greeting)
+            HelperAction.ShowCommands -> show(HelperReply.Commands)
             HelperAction.Thanks -> show(HelperReply.Message(helperText(Res.string.helper_youre_welcome)))
             else -> onOutcome(executor.execute(action), executor)
         }

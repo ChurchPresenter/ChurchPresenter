@@ -11,6 +11,7 @@ import org.churchpresenter.strings.generated.resources.helper_open_song_library
 import org.churchpresenter.strings.generated.resources.helper_open_statistics
 import org.churchpresenter.strings.generated.resources.helper_check_updates
 import org.churchpresenter.strings.generated.resources.helper_whats_live
+import org.churchpresenter.strings.generated.resources.helper_commands_intro
 import org.churchpresenter.strings.generated.resources.helper_confirm_schedule_goto
 import org.churchpresenter.strings.generated.resources.helper_confirm_schedule_previous
 import org.churchpresenter.strings.generated.resources.helper_confirm_schedule_next
@@ -117,6 +118,7 @@ fun HelperAction.describe(undoLabel: HelperText? = null): HelperText = when (thi
         helperText(if (forward) Res.string.helper_confirm_schedule_next else Res.string.helper_confirm_schedule_previous)
     is HelperAction.ScheduleGoTo -> helperText(Res.string.helper_confirm_schedule_goto, name)
     HelperAction.WhatsLive -> helperText(Res.string.helper_whats_live)
+    HelperAction.ShowCommands -> helperText(Res.string.helper_commands_intro)
     HelperAction.CheckForUpdates -> helperText(Res.string.helper_check_updates)
     HelperAction.Greet -> helperText(Res.string.helper_greeting)
     HelperAction.Thanks -> helperText(Res.string.helper_youre_welcome)

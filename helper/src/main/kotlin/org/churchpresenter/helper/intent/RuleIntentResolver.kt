@@ -65,6 +65,8 @@ class RuleIntentResolver : IntentResolver {
         /** In order: the more specific reading of a phrase comes before the looser one. */
         val RULES: List<(Request) -> Resolution?> = listOf(
             ::undoRule,
+            // First: "help" alone asks for the list, before display setup reads "help" as a setup.
+            ::commandsRule,
             ::setupWizardRule,
             // What shows on the stage monitor, before its setup below.
             ::stageTopicsRule,

@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
 import kotlinx.coroutines.launch
+import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import org.churchpresenter.app.churchpresenter.remote.emitRemoteTabSelection
-import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.schedule.TimerModes
 import org.churchpresenter.core.models.songs.SongItem
@@ -36,6 +36,7 @@ import org.churchpresenter.strings.generated.resources.helper_song_not_found
 import org.churchpresenter.strings.generated.resources.helper_songs_not_loaded
 import org.churchpresenter.strings.generated.resources.helper_version
 import org.churchpresenter.strings.generated.resources.timer_expired
+import org.churchpresenter.updater.UpdateChecker
 import org.jetbrains.compose.resources.getString
 import java.util.UUID
 
@@ -98,12 +99,15 @@ private fun SongItem.asScheduleItem() = ScheduleItem.SongItem(
     songId = songId,
 )
 
+/** The song opened on the Songs tab and left there, for the operator to put live. */
+private fun readyNotLive(song: ScheduleItem.SongItem) = RemoteSongSelection(song, goLive = false, source = "helper")
+
 private fun SongItem.label(): String = if (number.isNotBlank()) "$number. $title" else title
 
 /** Finds the song and opens it on the Songs tab, ready for Go Live — nothing goes on screen. */
 internal fun AppRootState.helperFindSong(query: String): ActionOutcome {
     val song = lookUpSong(query) ?: return songMissing(query)
-    remoteSelectSongFlow.tryEmit(song.asScheduleItem())
+    remoteSelectSongFlow.tryEmit(readyNotLive(song.asScheduleItem()))
     return ActionOutcome.Done(helperText(Res.string.helper_song_found, song.label()))
 }
 
@@ -182,8 +186,12 @@ private fun AppRootState.readyScheduleRow(item: ScheduleItem): ActionOutcome {
             currentScheduleActions.presentScene(item.sceneId)
             ActionOutcome.Done(helperText(Res.string.helper_schedule_live, name))
         }
-        is ScheduleItem.SongItem, is ScheduleItem.PictureItem, is ScheduleItem.PresentationItem,
-        is ScheduleItem.MediaItem -> {
+        // Not through the tab selection: that puts a song live, and here it waits for Go Live.
+        is ScheduleItem.SongItem -> {
+            remoteSelectSongFlow.tryEmit(readyNotLive(item))
+            ActionOutcome.Done(helperText(Res.string.helper_schedule_ready, name))
+        }
+        is ScheduleItem.PictureItem, is ScheduleItem.PresentationItem, is ScheduleItem.MediaItem -> {
             coroutineScope.launch {
                 emitRemoteTabSelection(
                     item, remoteSelectSongFlow, remoteSelectPictureFlow, remoteSelectPresentationFlow,
