@@ -1,5 +1,24 @@
 package org.churchpresenter.helper.ui
 
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.StartOffset
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,9 +31,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -65,15 +81,37 @@ private const val AVATAR_GLOW_REACH = 0.75f
 /** Where the teal is lightest, as a share of the height from the top: lit from above, like the flame. */
 private const val LIGHT_FROM_TOP = 0.3f
 
-/** The round teal button: the lamp while closed, a chevron while open, and how many things wait. */
+/**
+ * The round teal button: Wick, always. While the panel is open it bobs and two gold rings ripple
+ * out from it; while closed, a badge counts what waits and the glow brightens.
+ */
 @Composable
 internal fun Launcher(open: Boolean, waiting: Int, animate: Boolean, mood: LampMood, onClick: () -> Unit) {
     val label = stringResource(if (open) Res.string.helper_close else Res.string.helper_open)
     val glow = if (waiting > 0 && !open) GLOW_WAITING else GLOW_RESTING
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    val pressed by interaction.collectIsPressedAsState()
+    val grow by animateFloatAsState(
+        when {
+            pressed -> PRESSED_SCALE
+            hovered -> HOVER_SCALE
+            else -> 1f
+        },
+        tween(HOVER_MS),
+        label = "launcherScale",
+    )
+    val moving = open && animate
+    // Only composed while it shows, so a closed lamp's ripples are not ticking unseen.
+    val motion = if (moving) launcherMotion() else remember { LauncherMotion(Still, Still, Still, Still) }
     Box(contentAlignment = Alignment.Center) {
         Box(
             Modifier
                 .size(60.dp)
+                .graphicsLayer {
+                    scaleX = grow
+                    scaleY = grow
+                }
                 .drawBehind {
                     drawCircle(
                         Brush.radialGradient(
@@ -83,25 +121,31 @@ internal fun Launcher(open: Boolean, waiting: Int, animate: Boolean, mood: LampM
                         ),
                         radius = size.minDimension * GLOW_REACH,
                     )
+                    if (moving) {
+                        drawRing(motion.ringA.value)
+                        drawRing(motion.ringB.value)
+                    }
                 }
                 .shadow(8.dp, CircleShape)
                 .clip(CircleShape)
                 .drawBehind { drawCircle(tealGradient(size.width, size.height)) }
-                .clickable(onClickLabel = label, onClick = onClick)
+                .clickable(interactionSource = interaction, indication = null, onClickLabel = label, onClick = onClick)
+                .hoverable(interaction)
                 .semantics { contentDescription = label }
                 .testTag("helper.lamp"),
             contentAlignment = Alignment.Center,
         ) {
-            if (open) {
-                Icon(
-                    Icons.Filled.KeyboardArrowDown,
-                    contentDescription = null,
-                    tint = OnTeal,
-                    modifier = Modifier.size(24.dp),
-                )
-            } else {
-                LampMascot(size = 48.dp, mood = mood, animate = animate)
-            }
+            LampMascot(
+                size = 60.dp,
+                mood = mood,
+                animate = animate,
+                modifier = Modifier.graphicsLayer {
+                    if (moving) {
+                        translationY = motion.bobY.value.dp.toPx()
+                        rotationZ = motion.bobTurn.value
+                    }
+                },
+            )
         }
         if (waiting > 0 && !open) {
             Box(
@@ -125,6 +169,79 @@ internal fun Launcher(open: Boolean, waiting: Int, animate: Boolean, mood: LampM
         }
     }
 }
+
+/** A gold ring [progress] of the way through its ripple: from just outside the button, growing and fading. */
+private fun DrawScope.drawRing(progress: Float) {
+    val radius = (size.minDimension / 2f + RING_OUTSET.toPx()) * (1f + (RING_GROWTH - 1f) * progress)
+    drawCircle(
+        FlameGlow.copy(alpha = RING_GOLD * RING_START_ALPHA * (1f - progress)),
+        radius = radius,
+        style = Stroke(RING_WIDTH.toPx()),
+    )
+}
+
+private class LauncherMotion(
+    val ringA: State<Float>,
+    val ringB: State<Float>,
+    val bobY: State<Float>,
+    val bobTurn: State<Float>,
+)
+
+/** The design's `wickRing` (two, half a beat apart) and `wickBob`. */
+@Composable
+private fun launcherMotion(): LauncherMotion {
+    val transition = rememberInfiniteTransition(label = "launcher")
+    val ring = infiniteRepeatable<Float>(tween(RING_MS, easing = EaseOut))
+    val ringA = transition.animateFloat(0f, 1f, ring, label = "ringA")
+    val ringB = transition.animateFloat(
+        0f, 1f,
+        infiniteRepeatable(tween(RING_MS, easing = EaseOut), initialStartOffset = StartOffset(RING_MS / 2)),
+        label = "ringB",
+    )
+    val bobY = transition.animateFloat(
+        0f, 0f,
+        infiniteRepeatable(
+            keyframes {
+                durationMillis = BOB_MS
+                0f at 0 using EaseInOut
+                -BOB_LIFT at BOB_MS / 4 using EaseInOut
+                0f at BOB_MS / 2 using EaseInOut
+                -BOB_LIFT at BOB_MS * 3 / 4 using EaseInOut
+            },
+        ),
+        label = "bobY",
+    )
+    val bobTurn = transition.animateFloat(
+        0f, 0f,
+        infiniteRepeatable(
+            keyframes {
+                durationMillis = BOB_MS
+                0f at 0 using EaseInOut
+                -BOB_TURN at BOB_MS / 4 using EaseInOut
+                0f at BOB_MS / 2 using EaseInOut
+                BOB_TURN at BOB_MS * 3 / 4 using EaseInOut
+            },
+        ),
+        label = "bobTurn",
+    )
+    return remember(transition) { LauncherMotion(ringA, ringB, bobY, bobTurn) }
+}
+
+private val Still: State<Float> = mutableFloatStateOf(0f)
+private val EaseOut = CubicBezierEasing(0f, 0f, 0.58f, 1f)
+private val EaseInOut = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)
+private const val RING_MS = 1800
+private const val BOB_MS = 2400
+private const val BOB_LIFT = 3f
+private const val BOB_TURN = 4f
+private const val RING_GROWTH = 1.32f
+private const val RING_START_ALPHA = 0.9f
+private const val RING_GOLD = 0.55f
+private val RING_OUTSET = 4.dp
+private val RING_WIDTH = 2.dp
+private const val HOVER_SCALE = 1.06f
+private const val PRESSED_SCALE = 0.97f
+private const val HOVER_MS = 150
 
 internal fun tealGradient(width: Float, height: Float) = Brush.radialGradient(
     listOf(TealLight, TealDark),
@@ -179,7 +296,7 @@ internal fun Avatar(animate: Boolean) {
             .drawBehind { drawCircle(tealGradient(size.width, size.height)) },
         contentAlignment = Alignment.Center,
     ) {
-        LampMascot(size = 34.dp, animate = animate)
+        LampMascot(size = 42.dp, animate = animate)
     }
 }
 
