@@ -33,8 +33,8 @@ The tab and view model take what the app owns as parameters:
   lines out the way the presenter draws them. Tests use `fakeTitleSlide`.
 - **`onSongWentLive`**: called once per different song that goes live. The app records statistics
   and usage telemetry there (`recordSongWentLive`) and starts the song's duration measurement.
-- **`playCounts`**: a `SongPlayCounts`, used by the Plays column and its sort. `StatisticsManager`
-  implements it.
+- **`playCounts`**: a `SongPlayCounts`, used by the Plays column and its sort. The app adapts
+  `:statistics`' `StatisticsManager` to it in `MainTabArea.kt`.
 - **`SongsViewModel.setInstanceLinkSource`** takes the primary's catalog as `SongItem`s and a fetch
   that returns a song's raw lyrics. The app converts its wire DTOs (`RemoteSongCatalog.kt`).
   `remoteSyncLog` is where the follower's sync events go: `InstanceLinkLogger` in the app.
@@ -74,7 +74,7 @@ drive the tab with the app's own seams filled in.
   `EditSongEditor` (the pane toolbar, chips, legend), `EditSongLyricsField` and `EditSongText`
   (the pure text helpers).
 - The went-live telemetry is the app's (`SongsTabGoLiveTelemetryTest`), because it needs the app's
-  `StatisticsManager`.
+  go-live wiring over `StatisticsManager` (`:statistics`).
 
 ## Commands
 

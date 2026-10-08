@@ -30,8 +30,8 @@ It takes `:core-models`, `:settings`, `:shared-ui` (its usage events and text he
   - `RemoteScheduleItems` adds one to the schedule;
   - `RemoteMirroring` decides what a follower mirrors.
 
-  They need the live output, statistics and the schedule, so they stay app-side. Nothing in this
-  module calls them; the app wires the server's callbacks to them.
+  They tie the live output, the statistics (`:statistics`) and the schedule together, so they stay
+  app-side. Nothing in this module calls them; the app wires the server's callbacks to them.
 - **Build values are passed in**:
   - `CompanionServer(appVersion = …)` is the app's `BuildConfig.APP_VERSION`.
   - The calendar relay is `RelayEndpoints`, given to `CalendarSyncService`. The app's
