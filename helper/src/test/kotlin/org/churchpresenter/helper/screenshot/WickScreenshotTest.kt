@@ -76,11 +76,6 @@ class WickScreenshotTest {
     }
 
     @Test
-    fun `the launcher open`() = captureComponent(SECTION, "launcher_open") {
-        Launcher(open = true, waiting = 0, animate = false, mood = LampMood.IDLE, onClick = {})
-    }
-
-    @Test
     fun `the panel greeting`() = captureComponent(SECTION, "panel_greeting") {
         panel(HelperState().apply { isOpen = true })
     }

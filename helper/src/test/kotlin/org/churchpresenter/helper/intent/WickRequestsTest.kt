@@ -33,7 +33,10 @@ class WickRequestsTest {
 
     @Test
     fun `an announcement shows the words as typed`() {
-        assertEquals(HelperAction.ShowAnnouncement("Coffee after the service"), action("announce: Coffee after the service"))
+        assertEquals(
+            HelperAction.ShowAnnouncement("Coffee after the service"),
+            action("announce: Coffee after the service"),
+        )
         assertEquals(
             HelperAction.ShowAnnouncement("Parents of Sam, please come to the nursery."),
             action("tell the parents of Sam to come to the nursery"),

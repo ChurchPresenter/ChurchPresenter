@@ -58,6 +58,7 @@ private fun navigationTopBar(
     onOpenStyleEditor: () -> Unit = {},
     onOpenMemoryMonitor: () -> Unit = {},
     onOpenStoryPrompt: () -> Unit = {},
+    onOpenWickIntro: () -> Unit = {},
     block: JMenuBar.() -> Unit,
 ) = runComposeUiTest {
     val window = mockk<ComposeWindow>(relaxed = true)
@@ -106,6 +107,7 @@ private fun navigationTopBar(
                 onOpenStyleEditor = onOpenStyleEditor,
                 onOpenMemoryMonitor = onOpenMemoryMonitor,
                 onOpenStoryPrompt = onOpenStoryPrompt,
+                onOpenWickIntro = onOpenWickIntro,
             )
         }
     }
@@ -192,6 +194,7 @@ class NavigationTopBarTest {
         developer.getItem(1).doClick()
         developer.getItem(2).doClick()
         developer.getItem(3).doClick()
+        developer.getItem(4).doClick()
     }
 
     @Test
@@ -492,7 +495,7 @@ class NavigationTopBarTest {
             assertEquals(8, menuCount)
             val developer = getMenu(7)
             assertEquals("Developer", developer.text)
-            assertEquals(4, developer.itemCount)
+            assertEquals(5, developer.itemCount)
 
             val display = developer.getItem(0) as JMenu
             assertEquals("Display", display.text)
@@ -543,6 +546,20 @@ class NavigationTopBarTest {
             developer.getItem(3).doClick()
         }
         assertEquals(1, storyPrompt)
+    }
+
+    @Test
+    fun `developer menu wick intro item invokes its callback`() {
+        var wickIntro = 0
+        navigationTopBar(
+            showDeveloperMenu = true,
+            onOpenWickIntro = { wickIntro++ },
+        ) {
+            val developer = getMenu(7)
+            assertEquals("Wick Intro Dialog", developer.getItem(4).text)
+            developer.getItem(4).doClick()
+        }
+        assertEquals(1, wickIntro)
     }
 
     @Test
