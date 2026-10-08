@@ -89,6 +89,8 @@ internal fun takeRule(r: Request): Resolution? =
     if (r.first == "take" || r.says("go live")) act(HelperAction.Take) else null
 
 internal fun outputsRule(r: Request): Resolution? {
-    val toggling = r.first in setOf("show", "hide", "toggle") || r.says("turn on", "turn off")
+    // The verb first in English, last in Hindi, Nepali, Tamil and others.
+    val verbs = setOf("show", "hide", "toggle")
+    val toggling = r.first in verbs || r.words.last() in verbs || r.says("turn on", "turn off")
     return if (toggling && r.has(Vocabulary.SCREEN)) act(HelperAction.ToggleOutputWindows) else null
 }

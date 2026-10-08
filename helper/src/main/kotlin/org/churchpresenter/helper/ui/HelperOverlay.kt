@@ -61,6 +61,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -367,10 +368,13 @@ private fun Composer(state: HelperState, ask: Ask) {
         ) {
             Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                 if (state.input.isEmpty()) {
+                    // One line in every language: a long translation ends in "…" rather than wrapping.
                     Text(
                         stringResource(Res.string.helper_input_placeholder),
                         style = MaterialTheme.typography.bodyMedium,
                         color = colors.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
                 BasicTextField(

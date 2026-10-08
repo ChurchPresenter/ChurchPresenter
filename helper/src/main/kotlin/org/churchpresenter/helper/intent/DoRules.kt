@@ -39,9 +39,22 @@ internal fun announcementRule(r: Request): Resolution? {
         "${m.groupValues[1].replaceFirstChar { it.uppercase() }}, please ${m.groupValues[2]}."
     } ?: ANNOUNCE.find(raw)?.groupValues?.get(1)
         ?: LABELLED.find(raw)?.groupValues?.get(1)
-        ?: QUOTED.find(raw)?.groupValues?.get(1)?.takeIf { r.hasPhrase(Vocabulary.ANNOUNCEMENT) || r.first == "show" }
+        ?: QUOTED.find(raw)?.groupValues?.get(1)
+            ?.takeIf { r.hasPhrase(Vocabulary.ANNOUNCEMENT) || r.first == "show" }
+        ?: typedAnnouncement(r)
     val shown = text?.trim()?.trim('"', '“', '”', '«', '»')?.trim()
     return shown?.takeIf { it.isNotEmpty() }?.let { act(HelperAction.ShowAnnouncement(it)) }
+}
+
+/**
+ * "Объяви: кофе после служения" — read through a glossary, the request starts with "announce", but
+ * the words to show are still the ones typed: after the colon, else after the first word.
+ */
+private fun typedAnnouncement(r: Request): String? {
+    if (r.first != "announce") return null
+    // A full-width colon too: "お知らせ：…", "通告：…".
+    val raw = r.raw.trim().replace('：', ':')
+    return if (':' in raw) raw.substringAfter(':') else raw.substringAfter(' ', "")
 }
 
 private val TO_SCHEDULE = listOf(
@@ -52,9 +65,12 @@ private val SONG_PREFIX = Regex("""^(?:the\s+|a\s+)?(?:song|hymn)\s+(?:number\s+
 
 /** "Add John 3:16 to the schedule", "put amazing grace on the schedule", "add song 245 to schedule". */
 internal fun addToScheduleRule(r: Request): Resolution? {
-    if (r.first !in ADD_VERBS) return null
+    // The verb comes first in English; last in Kazakh, Turkish, Japanese and others.
+    val verbFirst = r.first in ADD_VERBS
+    if (!verbFirst && r.words.last() !in ADD_VERBS) return null
     val phrase = TO_SCHEDULE.firstOrNull { r.text.containsPhrase(it) } ?: return null
-    val what = r.text.removePrefix("${r.first} ").substringBefore(" $phrase").trim()
+    val body = if (verbFirst) r.text.removePrefix("${r.first} ") else r.text.removeSuffix(" ${r.words.last()}")
+    val what = " $body ".replace(" $phrase ", " ").trim()
     if (what.isEmpty() || what in setOf("it", "this", "that", "this song", "this verse")) return null
     val ref = parseReference(asReference(what))
     if (ref != null && ref.bookName.split(' ').last() !in Vocabulary.NOT_A_BOOK) {
@@ -77,15 +93,18 @@ internal fun asReference(text: String): String = text
     .replace(Regex("""(\d) ?- ?(\d)"""), "$1-$2")
 
 private val SCHEDULE_WORDS = listOf("in the schedule", "from the schedule", "on the schedule", "schedule item")
-private val GO_TO = Regex(
-    """^(?:go to|jump to|skip to|move to|show|open)\s+(?:the\s+)?(.+?)\s+(?:in|from|on) the schedule$""",
-)
+private const val GO_VERB = "(?:go to|jump to|skip to|move to|show|open)"
+private const val IN_SCHEDULE = "(?:in|from|on) the schedule"
+private val GO_TO = Regex("""^$GO_VERB\s+(?:the\s+)?(.+?)\s+$IN_SCHEDULE$""")
+
+/** The same with the verb last: "the sermon in the schedule go to", "in the schedule the sermon go to". */
+private val GO_TO_VERB_LAST = Regex("""^(?:$IN_SCHEDULE\s+)?(?:the\s+)?(.+?)(?:\s+$IN_SCHEDULE)?\s+$GO_VERB$""")
 
 /** "Next item", "previous in the schedule", "go to the sermon in the schedule". */
 internal fun scheduleStepRule(r: Request): Resolution? {
     val aboutItem = r.says("item", "items") || r.hasPhrase(SCHEDULE_WORDS) || r.says("schedule")
     if (!aboutItem) return null
-    GO_TO.find(r.text)?.let { m ->
+    (GO_TO.find(r.text) ?: GO_TO_VERB_LAST.find(r.text)?.takeIf { r.hasPhrase(SCHEDULE_WORDS) })?.let { m ->
         val name = m.groupValues[1]
         if (name !in setOf("next", "next item", "previous", "previous item", "last item")) {
             return act(HelperAction.ScheduleGoTo(name))

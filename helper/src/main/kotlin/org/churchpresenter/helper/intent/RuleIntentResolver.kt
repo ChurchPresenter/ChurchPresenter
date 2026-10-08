@@ -8,13 +8,21 @@ import org.churchpresenter.helper.intent.glossary.Glossaries
  * turned to spaces, runs of spaces collapsed.
  */
 internal fun normalize(input: String): String =
-    input.lowercase()
+    asciiDigits(input).lowercase()
         .replace(Regex("[’‘`ʻʼ]"), "'")
         .replace('：', ':')
         .replace(Regex("[\u064B-\u0652\u0640]"), "")
         .replace(Regex("""[^\p{L}\p{M}\p{N}:#'\-\s]"""), " ")
         .replace(Regex("""\s+"""), " ")
         .trim()
+
+/** Every script's digits as 0–9 — "۵", "५", "๕" are a 5 to the rules, as in a verse or a countdown. */
+private fun asciiDigits(text: String): String =
+    if (text.none { it.isDigit() && it !in '0'..'9' }) {
+        text
+    } else {
+        buildString { text.forEach { append(if (it.isDigit()) ('0' + Character.digit(it, 10)) else it) } }
+    }
 
 /** Whether [phrase] appears here as whole words. */
 internal fun String.containsPhrase(phrase: String): Boolean = " $this ".contains(" $phrase ")
