@@ -93,11 +93,19 @@ internal fun BibleViewModel.applyTranslationOrder() {
  * `writeBytes` truncates the existing file first, so anything reading it at that moment — this
  * instance's own server handing the module to a downstream follower, or a load already under way —
  * sees a file that is briefly empty and then partly written. A move swaps whole files instead.
+ *
+ * Each write builds in a part file of its own: a reconnect can deliver the same translations again
+ * while the last delivery is still being written, and two writers sharing one part file left the
+ * second moving a file the first had already moved away.
  */
-private fun writeCacheFile(cacheFile: File, bytes: ByteArray) {
-    val part = File(cacheFile.parentFile, "${cacheFile.name}.part")
-    part.writeBytes(bytes)
-    BibleInstallSupport.moveIntoPlace(part, cacheFile)
+internal fun writeCacheFile(cacheFile: File, bytes: ByteArray) {
+    val part = File.createTempFile("${cacheFile.name}.", ".part", cacheFile.parentFile)
+    try {
+        part.writeBytes(bytes)
+        BibleInstallSupport.moveIntoPlace(part, cacheFile)
+    } finally {
+        part.delete()
+    }
 }
 
 fun BibleViewModel.invalidateInstanceLinkBibleCache() {
