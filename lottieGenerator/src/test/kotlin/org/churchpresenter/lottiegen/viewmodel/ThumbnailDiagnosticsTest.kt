@@ -51,6 +51,7 @@ class ThumbnailDiagnosticsTest {
 
         assertContains(text, "key present: false, requests: 0")
         assertContains(text, "style asked for: none")
+        assertContains(text, "key: none, distinct keys asked for: 0")
         assertContains(text, "job: never launched")
         assertContains(text, "last build finished: never")
         assertContains(text, "pictures published: 0 []")
@@ -82,6 +83,24 @@ class ThumbnailDiagnosticsTest {
         assertContains(text, "drawn this build: 1 of 3")
         assertContains(text, "style 1: drawn on the second try (IllegalStateException first)")
         assertContains(text, "style 2: render returned null")
+        assertContains(text, "without a picture: [2, 3]")
+        val key = thumbnailKey(LottieGenConfig(nameText = "Anna")).hashCode()
+        assertContains(text, "key: #%08x, distinct keys asked for: 1".format(key))
+    }
+
+    @Test
+    fun `a build that dies of something unexpected says what killed it`() {
+        val thumbs = thumbnails(ids = listOf("1", "2")) { _, config ->
+            if (config.style == "2") throw UnsupportedOperationException("no surface")
+            ImageBitmap(1, 1)
+        }
+        thumbs.request(LottieGenConfig(nameText = "Anna", style = "2"))
+        waitFor("the build to fail") { "last build failed" in diagnostics.describe() }
+
+        val text = diagnostics.describe()
+        assertContains(text, "job: cancelled")
+        assertContains(text, "last build failed: java.lang.UnsupportedOperationException: no surface")
+        assertContains(text, "last build finished: never")
     }
 
     @Test
