@@ -324,7 +324,7 @@
     <string name="tooltip_presentation_remote">Адкрыць дыстанцыйнае кіраванне</string>
     <string name="tooltip_qa_remote">Агульны доступ і аддалены доступ</string>
     <string name="tooltip_send_to_stage_monitor">Даслаць на манітор сцэны</string>
-    <string name="tooltip_hide_from_stage_monitor">Схаваць аб\'яву</string>
+    <string name="tooltip_hide_from_stage_monitor">Схаваць аб'яву</string>
     <string name="tooltip_remove">Выдаліць</string>
     <string name="tooltip_edit">Рэдагаваць</string>
 
@@ -781,10 +781,10 @@
     <!-- System Settings - Song Samples and File Conversion -->
     <string name="song_samples">Узоры песень</string>
     <string name="folder_already_exists">Папка ўжо існуе</string>
-    <string name="song_samples_overwrite_confirm">Папка \"Узоры песень\" ўжо існуе. Гэта перазапіша існуючыя файлы.\nПрацягнуць?</string>
-    <string name="song_samples_copied">Скапіравана %1$d узораў песень у папку \"Узоры песень\".</string>
+    <string name="song_samples_overwrite_confirm">Папка "Узоры песень" ўжо існуе. Гэта перазапіша існуючыя файлы.\nПрацягнуць?</string>
+    <string name="song_samples_copied">Скапіравана %1$d узораў песень у папку "Узоры песень".</string>
     <string name="add_song_samples">Дадаць узоры песень</string>
-    <string name="folder_overwrite_confirm">Папка \"%1$s\" ўжо існуе. Гэта перазапіша існуючыя файлы песень.\nПрацягнуць?</string>
+    <string name="folder_overwrite_confirm">Папка "%1$s" ўжо існуе. Гэта перазапіша існуючыя файлы песень.\nПрацягнуць?</string>
 
     <!-- Bible Settings - Download Bibles (catalog browser) -->
     <string name="bible_catalog_button">Спампаваць Бібліі…</string>
@@ -799,7 +799,7 @@
     <string name="bible_catalog_download">Спампаваць</string>
     <string name="bible_catalog_redownload">Спампаваць зноў</string>
     <string name="bible_catalog_size_mb">%1$s МБ</string>
-    <string name="bible_catalog_overwrite_confirm">\"%1$s\" ужо ёсць у вашай папцы з Бібліямі.\nСпампаваць зноў і замяніць існуючы файл?</string>
+    <string name="bible_catalog_overwrite_confirm">"%1$s" ужо ёсць у вашай папцы з Бібліямі.\nСпампаваць зноў і замяніць існуючы файл?</string>
     <string name="bible_catalog_stale_notice">Паказаны спіс Біблій з мінулага наведвання — здаецца, вы не ў сетцы.</string>
     <string name="bible_catalog_attribution">Кожны пераклад мае ўласныя аўтарскія правы — праверце іх перад публічным паказам.</string>
     <string name="bible_catalog_no_directory">Спачатку выберыце папку захоўвання Біблій у наладах выгляду.</string>
@@ -816,7 +816,7 @@
     <string name="bible_catalog_download_error_convert">Гэтую Біблію не ўдалося пераўтварыць, і яна не была ўстаноўлена.</string>
     <string name="bible_catalog_download_error_write">Не ўдалося запісаць у папку з Бібліямі — праверце, што яна існуе і на дыску ёсць месца.</string>
     <string name="bible_catalog_download_error_generic">Не ўдалося спампаваць. Паспрабуйце яшчэ раз.</string>
-    <string name="bible_catalog_installed_summary">Устаноўлена \"%1$s\" — %2$d кніг.</string>
+    <string name="bible_catalog_installed_summary">Устаноўлена "%1$s" — %2$d кніг.</string>
     <string name="bible_catalog_rights">Аўтарскія правы: %1$s</string>
     <string name="bible_catalog_source_ebible">eBible.org</string>
     <string name="bible_catalog_source_zefania">Архіў Zefania</string>
@@ -2350,7 +2350,7 @@
     <string name="helper_hint_bible_catalog">Выберыце патрэбную Біблію і націсніце «%1$s». Каб звузіць спіс, увядзіце вышэй назву або мову.</string>
     <string name="helper_hint_bible_page">Калі яна спампуецца, адкрыйце старонку «Біблія».</string>
     <string name="helper_hint_bible_add_translation">Выберыце яе ў «%1$s», каб паказваць побач з ужо адкрытай Бібліяй.</string>
-    <string name="helper_hint_pictures_folder">Націсніце «%1$s» і выберыце папку з фотаздымкамі. Тут з\'явяцца ўсе выявы з яе, так што папка працуе як альбом. Адкрытыя папкі з\'явяцца ў радку «Апошнія».</string>
+    <string name="helper_hint_pictures_folder">Націсніце «%1$s» і выберыце папку з фотаздымкамі. Тут з'явяцца ўсе выявы з яе, так што папка працуе як альбом. Адкрытыя папкі з'явяцца ў радку «Апошнія».</string>
     <string name="helper_hint_pictures_go_live">Выберыце выяву і націсніце «%1$s» або двойчы пстрыкніце па ёй, каб вывесці яе на экран.</string>
     <string name="helper_hint_pictures_play">Націсніце «%1$s», і выявы будуць змяняцца самі. Інтэрвал побач задае, колькі паказваецца кожная.</string>
     <string name="helper_hint_presentation_file">Націсніце «%1$s» і выберыце файл PDF, PowerPoint або Keynote.</string>
@@ -2360,7 +2360,7 @@
     <string name="helper_hint_lower_third_generate">Націсніце «%1$s», каб адкрыць генератар ніжніх цітраў.</string>
     <string name="helper_hint_lower_third_name">Увядзіце імя чалавека ў поле «Імя».</string>
     <string name="helper_hint_lower_third_info">Увядзіце яго пасаду ці служэнне ў поле «Інфа», напрыклад «Пастар» або «Лідар праслаўлення».</string>
-    <string name="helper_hint_lower_third_save">Пры жаданні выберыце стыль і колеры, потым націсніце «Захаваць ніжні тытр». Ён з\'явіцца ў спісе на ўкладцы «Ніжняя траціна».</string>
+    <string name="helper_hint_lower_third_save">Пры жаданні выберыце стыль і колеры, потым націсніце «Захаваць ніжні тытр». Ён з'явіцца ў спісе на ўкладцы «Ніжняя траціна».</string>
     <string name="helper_hint_lower_third_go_live">Выберыце яго ў спісе і націсніце «%1$s», каб вывесці на экран.</string>
     <string name="helper_hint_announcement_text">Увядзіце абвестку тут, напрыклад: «Бацькі дзіцяці № 12, падыдзіце, калі ласка, у дзіцячы пакой».</string>
     <string name="helper_hint_announcement_go_live">Націсніце «%1$s», каб вывесці яе на экран. Налады побач задаюць, як яна рухаецца і колькі разоў.</string>
@@ -2386,7 +2386,7 @@
     <string name="helper_hint_stage_chords">Уключыце «%1$s». Акорды паказваюцца ў зоне «%2$s» над словамі.</string>
     <string name="helper_hint_stage_text">У «%1$s» выберыце зону, потым ніжэй задайце шрыфт, памер і колер.</string>
     <string name="helper_hint_stage_message_text">Увядзіце паведамленне для тых, хто на сцэне.</string>
-    <string name="helper_hint_stage_message_send">Націсніце «%1$s». Яно з\'явіцца ў зоне «%2$s» манітора сцэны.</string>
+    <string name="helper_hint_stage_message_send">Націсніце «%1$s». Яно з'явіцца ў зоне «%2$s» манітора сцэны.</string>
     <string name="helper_hint_stage_timer_send">Задайце час і націсніце «%1$s», каб паказаць яго на маніторы сцэны.</string>
     <string name="helper_hint_add_song_language">Націсніце «%1$s», назавіце мову, потым увядзіце або ўстаўце тэкст песні.</string>
     <string name="helper_hint_schedule">Гэта ваша праграма. Дадавайце сюды песні, вершы і слайды, каб спланаваць служэнне.</string>
@@ -2429,11 +2429,11 @@
     <string name="helper_display_test_yes">Так, бачу</string>
     <string name="helper_display_test_no">Не</string>
     <string name="helper_display_show_numbers">Паказаць нумары яшчэ раз</string>
-    <string name="helper_display_done">Гатова. Усё, што вы выведзеце ў эфір, цяпер з\'явіцца на гэтым экране.</string>
+    <string name="helper_display_done">Гатова. Усё, што вы выведзеце ў эфір, цяпер з'явіцца на гэтым экране.</string>
     <string name="helper_screen_label">Дысплей %1$d (%2$d × %3$d)</string>
     <string name="helper_screen_label_named">%1$s (%2$d × %3$d)</string>
     <string name="helper_refused_settings_open">Спачатку закрыйце акно налад, інакш пры націсканні OK яно верне ўсё як было.</string>
-    <string name="helper_refused_follower">Гэты камп\'ютар бярэ фоны з іншага праз Instance Link, таму мяняйце іх там.</string>
+    <string name="helper_refused_follower">Гэты камп'ютар бярэ фоны з іншага праз Instance Link, таму мяняйце іх там.</string>
     <string name="helper_refused_live">Зараз нешта на экране. Паспрабуйце зноў, калі нічога не будзе ў эфіры.</string>
     <string name="helper_refused_no_preview">Take працуе ў рэжыме папярэдняга прагляду, а ў папярэднім праглядзе нічога не чакае. Рэжым папярэдняга прагляду ўключаецца ў сістэмных наладах.</string>
     <string name="helper_refused_nothing_to_step">Наперад і назад пераключаюць слайды і выявы. Спачатку адкрыйце прэзентацыю або выявы.</string>

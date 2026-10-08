@@ -166,7 +166,9 @@ fun HelperOverlay(
 @Composable
 private fun todaysTip(state: HelperState, inputs: HelperInputs): Tip? {
     val shortcuts = LocalShortcuts.current
-    val tips = remember(shortcuts) { allTips(shortcuts) }
+    // Shuffled once per run, so each day's tip is a random one while Previous and Next still step
+    // back and forth through the same order.
+    val tips = remember(shortcuts) { allTips(shortcuts).shuffled() }
     // Today's tip stays today's once offered: the rotation moved on when it was, so step back one.
     val offeredToday = inputs.settings.lastTipDay == helperDayOf(inputs.nowMillis())
     val todaysIndex = inputs.settings.nextTipIndex - if (offeredToday) 1 else 0

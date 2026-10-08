@@ -3282,7 +3282,7 @@
     <string name="helper_command_look_3">make the text bigger</string>
     <string name="helper_command_look_3_does">Steps the text size up or down</string>
     <string name="helper_command_look_4">undo</string>
-    <string name="helper_command_look_4_does">Takes back Wick\'s last change</string>
+    <string name="helper_command_look_4_does">Takes back Wick's last change</string>
     <string name="helper_commands_bible">Bible</string>
     <string name="helper_command_bible_1">show John 3:16</string>
     <string name="helper_command_bible_1_does">Puts the verse on screen</string>
@@ -3308,7 +3308,7 @@
     <string name="helper_command_songs_5">how do I favorite a song</string>
     <string name="helper_command_songs_5_does">Points at the star column</string>
     <string name="helper_command_songs_6">give this song its own background</string>
-    <string name="helper_command_songs_6_does">Shows the song\'s Background button</string>
+    <string name="helper_command_songs_6_does">Shows the song's Background button</string>
     <string name="helper_command_songs_7">how do I add a translation to this song</string>
     <string name="helper_command_songs_7_does">Shows how to add a language</string>
     <string name="helper_command_songs_8">how do I add chords to a song</string>
@@ -3317,15 +3317,15 @@
     <string name="helper_command_service_1">next slide</string>
     <string name="helper_command_service_1_does">Steps pictures and slides</string>
     <string name="helper_command_service_2">clear the screen</string>
-    <string name="helper_command_service_2_does">Clears what\'s on screen</string>
+    <string name="helper_command_service_2_does">Clears what's on screen</string>
     <string name="helper_command_service_3">go live</string>
-    <string name="helper_command_service_3_does">Sends what\'s cued in Preview</string>
+    <string name="helper_command_service_3_does">Sends what's cued in Preview</string>
     <string name="helper_command_service_4">next item</string>
     <string name="helper_command_service_4_does">Moves to the next schedule item</string>
     <string name="helper_command_service_5">go to the sermon in the schedule</string>
     <string name="helper_command_service_5_does">Moves to a schedule item by name</string>
-    <string name="helper_command_service_6">what\'s live</string>
-    <string name="helper_command_service_6_does">Says what\'s on screen now</string>
+    <string name="helper_command_service_6">what's live</string>
+    <string name="helper_command_service_6_does">Says what's on screen now</string>
     <string name="helper_command_service_7">hide the screens</string>
     <string name="helper_command_service_7_does">Shows or hides the output windows</string>
     <string name="helper_commands_announcements">Announcements and timers</string>

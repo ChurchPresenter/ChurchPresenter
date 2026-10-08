@@ -2023,8 +2023,8 @@
     <!-- Per-output Customize dialog -->
     <string name="output_profile_duplicate">Pendua</string>
     <string name="output_profile_delete">Padam</string>
-    <string name="output_profile_delete_confirm">Padam \"%1$s\"? Tindakan ini tidak boleh dibuat asal.</string>
-    <string name="output_profile_delete_blocked">Tidak dapat memadam \"%1$s\" — masih digunakan oleh: %2$s</string>
+    <string name="output_profile_delete_confirm">Padam "%1$s"? Tindakan ini tidak boleh dibuat asal.</string>
+    <string name="output_profile_delete_blocked">Tidak dapat memadam "%1$s" — masih digunakan oleh: %2$s</string>
     <string name="output_profile_picker_tooltip">Profil output</string>
     <string name="output_profile_swap_menu_tooltip">Tukar profil output</string>
     <string name="output_profile_new_name_default">Profil Baharu</string>

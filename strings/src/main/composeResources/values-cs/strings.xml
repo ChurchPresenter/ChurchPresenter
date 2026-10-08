@@ -830,10 +830,10 @@
     <!-- System Settings - Song Samples and File Conversion -->
     <string name="song_samples">Ukázkové písně</string>
     <string name="folder_already_exists">Složka již existuje</string>
-    <string name="song_samples_overwrite_confirm">Složka \"Ukázkové písně\" již existuje. Tím se přepíší existující soubory.\nPokračovat?</string>
-    <string name="song_samples_copied">Zkopírováno %1$d ukázkových písní do složky \"Ukázkové písně\".</string>
+    <string name="song_samples_overwrite_confirm">Složka "Ukázkové písně" již existuje. Tím se přepíší existující soubory.\nPokračovat?</string>
+    <string name="song_samples_copied">Zkopírováno %1$d ukázkových písní do složky "Ukázkové písně".</string>
     <string name="add_song_samples">Přidat ukázkové písně</string>
-    <string name="folder_overwrite_confirm">Složka \"%1$s\" již existuje. Tím se přepíší existující soubory písní.\nPokračovat?</string>
+    <string name="folder_overwrite_confirm">Složka "%1$s" již existuje. Tím se přepíší existující soubory písní.\nPokračovat?</string>
 
     <!-- Bible Settings - Download Bibles (catalog browser) -->
     <string name="bible_catalog_button">Stáhnout Bible…</string>
@@ -848,7 +848,7 @@
     <string name="bible_catalog_download">Stáhnout</string>
     <string name="bible_catalog_redownload">Stáhnout znovu</string>
     <string name="bible_catalog_size_mb">%1$s MB</string>
-    <string name="bible_catalog_overwrite_confirm">\"%1$s\" už je ve vaší složce s Biblemi.\nStáhnout znovu a přepsat existující soubor?</string>
+    <string name="bible_catalog_overwrite_confirm">"%1$s" už je ve vaší složce s Biblemi.\nStáhnout znovu a přepsat existující soubor?</string>
     <string name="bible_catalog_stale_notice">Zobrazen seznam Biblí z vaší poslední návštěvy — zdá se, že jste offline.</string>
     <string name="bible_catalog_attribution">Každý překlad má vlastní autorská práva — než jej veřejně ukážete, zkontrolujte je.</string>
     <string name="bible_catalog_no_directory">Nejprve zvolte složku pro ukládání Biblí v nastavení vzhledu.</string>
@@ -865,7 +865,7 @@
     <string name="bible_catalog_download_error_convert">Tuto Bibli se nepodařilo převést, a proto nebyla nainstalována.</string>
     <string name="bible_catalog_download_error_write">Nepodařilo se zapsat do složky s Biblemi — zkontrolujte, že stále existuje a má dostatek místa.</string>
     <string name="bible_catalog_download_error_generic">Stahování se nezdařilo. Zkuste to prosím znovu.</string>
-    <string name="bible_catalog_installed_summary">Nainstalováno \"%1$s\" — %2$d knih.</string>
+    <string name="bible_catalog_installed_summary">Nainstalováno "%1$s" — %2$d knih.</string>
     <string name="bible_catalog_rights">Autorská práva: %1$s</string>
     <string name="bible_catalog_source_ebible">eBible.org</string>
     <string name="bible_catalog_source_zefania">Archiv Zefania</string>

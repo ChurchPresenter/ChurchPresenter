@@ -2023,8 +2023,8 @@
     <!-- Per-output Customize dialog -->
     <string name="output_profile_duplicate">Duplikat</string>
     <string name="output_profile_delete">Hapus</string>
-    <string name="output_profile_delete_confirm">Hapus \"%1$s\"? Tindakan ini tidak dapat dibatalkan.</string>
-    <string name="output_profile_delete_blocked">Tidak dapat menghapus \"%1$s\" — masih digunakan oleh: %2$s</string>
+    <string name="output_profile_delete_confirm">Hapus "%1$s"? Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="output_profile_delete_blocked">Tidak dapat menghapus "%1$s" — masih digunakan oleh: %2$s</string>
     <string name="output_profile_picker_tooltip">Profil keluaran</string>
     <string name="output_profile_swap_menu_tooltip">Ganti profil keluaran</string>
     <string name="output_profile_new_name_default">Profil Baru</string>

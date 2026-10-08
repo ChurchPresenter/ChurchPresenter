@@ -455,7 +455,7 @@
     <string name="loading_slides">Dia's laden...</string>
     <string name="select_presentation_file">Selecteer een presentatiebestand om dia's te bekijken</string>
     <string name="supported_formats">Ondersteund: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
-    <string name="presentation_static_note">Dia\'s worden weergegeven als statische afbeeldingen — animaties, overgangen, video\'s en audio worden niet ondersteund.</string>
+    <string name="presentation_static_note">Dia's worden weergegeven als statische afbeeldingen — animaties, overgangen, video's en audio worden niet ondersteund.</string>
     <string name="presentation_error_password_protected">Deze PDF is met een wachtwoord beveiligd en kan niet worden geopend. Verwijder het wachtwoord en probeer het opnieuw.</string>
     <string name="presentation_error_empty_document">Dit bestand heeft geen pagina's om weer te geven.</string>
     <string name="presentation_error_library_missing">PDF-ondersteuning is niet beschikbaar in deze build.</string>
@@ -2006,8 +2006,8 @@
     <!-- Per-output Customize dialog -->
     <string name="output_profile_duplicate">Dupliceren</string>
     <string name="output_profile_delete">Verwijderen</string>
-    <string name="output_profile_delete_confirm">\"%1$s\" verwijderen? Dit kan niet ongedaan worden gemaakt.</string>
-    <string name="output_profile_delete_blocked">Kan \"%1$s\" niet verwijderen — het wordt nog gebruikt door: %2$s</string>
+    <string name="output_profile_delete_confirm">"%1$s" verwijderen? Dit kan niet ongedaan worden gemaakt.</string>
+    <string name="output_profile_delete_blocked">Kan "%1$s" niet verwijderen — het wordt nog gebruikt door: %2$s</string>
     <string name="output_profile_picker_tooltip">Uitvoerprofiel</string>
     <string name="output_profile_swap_menu_tooltip">Uitvoerprofiel wisselen</string>
     <string name="output_profile_new_name_default">Nieuw profiel</string>
@@ -2354,7 +2354,7 @@
     <string name="helper_open_converter_from">De converter wordt geopend met %1$s gekozen. Kies het bestand of de map, en converteer.</string>
     <string name="helper_open_converter_documents">De converter wordt geopend voor documenten. Kies de PDF-, Word-, PowerPoint- of Keynote-bestanden met de liedteksten, en converteer.</string>
     <string name="helper_open_song_library">Liedbibliotheekbeheer wordt geopend. Selecteer de liederen die u wilt wijzigen (Shift-klik voor een reeks, of Ctrl/Cmd-klik op elk lied), kies Bulkbewerking…, vink de velden aan die u wilt wijzigen en pas ze toe.</string>
-    <string name="helper_open_calendar">Kalenderbeheer wordt geopend. Kies een dag en klik op Dienst toevoegen, en kies dan onder Beginnen met een lege dienst, een sjabloon of een eerdere dienst. Voeg liederen, verzen en dia\'s toe aan het draaiboek.</string>
+    <string name="helper_open_calendar">Kalenderbeheer wordt geopend. Kies een dag en klik op Dienst toevoegen, en kies dan onder Beginnen met een lege dienst, een sjabloon of een eerdere dienst. Voeg liederen, verzen en dia's toe aan het draaiboek.</string>
     <string name="helper_open_calendar_repeat">Kalenderbeheer wordt geopend. Voeg de dienst één keer toe, klik dan op het kopieerpictogram in de kop van het draaiboek en zet Herhaling op Wekelijks, Om de 2 wk of Maandelijks.</string>
     <string name="helper_open_calendar_template">Kalenderbeheer wordt geopend. Plan een dienst en klik dan op het sjabloonpictogram in de kop van het draaiboek om hem op te slaan. Nieuwe diensten kunnen er onder Beginnen met van uitgaan.</string>
     <string name="helper_open_calendar_load">Kalenderbeheer wordt geopend. Kies de dienst en klik op In programma laden, of zet automatisch laden aan, zodat hij vóór de start vanzelf in het tabblad Programma komt.</string>
@@ -2378,7 +2378,7 @@
     <string name="helper_hint_bible_catalog">Kies de Bijbel die u wilt en klik op %1$s. Typ hierboven een naam of taal om de lijst te verkleinen.</string>
     <string name="helper_hint_bible_page">Open de pagina Bijbel als het downloaden klaar is.</string>
     <string name="helper_hint_bible_add_translation">Kies hem bij %1$s om hem te tonen, naast een Bijbel die er al staat.</string>
-    <string name="helper_hint_pictures_folder">Klik op %1$s en kies de map met uw foto\'s. Elke afbeelding erin verschijnt hier, dus een map werkt als een album. Mappen die u eerder opende, komen terug in de rij Recent.</string>
+    <string name="helper_hint_pictures_folder">Klik op %1$s en kies de map met uw foto's. Elke afbeelding erin verschijnt hier, dus een map werkt als een album. Mappen die u eerder opende, komen terug in de rij Recent.</string>
     <string name="helper_hint_pictures_go_live">Kies een afbeelding en klik op %1$s, of dubbelklik erop, om hem op het scherm te zetten.</string>
     <string name="helper_hint_pictures_play">Druk op %1$s en de afbeeldingen gaan vanzelf verder. Het interval ernaast bepaalt hoe lang elke afbeelding blijft staan.</string>
     <string name="helper_hint_presentation_file">Klik op %1$s en kies het PDF-, PowerPoint- of Keynote-bestand.</string>
@@ -2417,7 +2417,7 @@
     <string name="helper_hint_stage_message_send">Klik op %1$s. Het verschijnt in de zone %2$s van de stage monitor.</string>
     <string name="helper_hint_stage_timer_send">Stel de tijd in en klik dan op %1$s om hem op de stage monitor te tonen.</string>
     <string name="helper_hint_add_song_language">Klik op “%1$s”, geef de taal een naam en typ of plak dan de tekst.</string>
-    <string name="helper_hint_schedule">Dit is uw programma. Voeg hier liederen, verzen en dia\'s toe om de dienst te plannen.</string>
+    <string name="helper_hint_schedule">Dit is uw programma. Voeg hier liederen, verzen en dia's toe om de dienst te plannen.</string>
     <string name="helper_hint_clear">Dit haalt alles van het publieksscherm.</string>
     <string name="helper_hint_take">Dit stuurt wat in het voorbeeld staat naar het scherm.</string>
     <string name="helper_hint_background">Achtergronden stelt u hier in.</string>
@@ -2448,7 +2448,7 @@
     <string name="helper_tip_auto_fit">Liedtekst past zich standaard aan het scherm aan. Stel de grootste en kleinste grootte in het profiel in.</string>
     <string name="helper_tip_schedule_drag">Sleep liederen, verzen en afbeeldingen naar het programma om de hele dienst vooraf te plannen.</string>
     <string name="helper_tip_verse_typing">In het tabblad Bijbel kunt u een verwijzing als “joh 3 16” direct in het zoekvak typen.</string>
-    <string name="helper_tip_remote">Een telefoon of tablet kan ChurchPresenter bedienen: zet liederen, verzen en dia\'s op het scherm vanaf elke plek in de zaal. Zet de server aan en scan dan de code met de ChurchPresenter-app.</string>
+    <string name="helper_tip_remote">Een telefoon of tablet kan ChurchPresenter bedienen: zet liederen, verzen en dia's op het scherm vanaf elke plek in de zaal. Zet de server aan en scan dan de code met de ChurchPresenter-app.</string>
     <string name="helper_display_title">Schermen instellen</string>
     <string name="helper_display_one_screen">Ik vind maar één scherm. Sluit de beamer of tv aan, dan vind ik hem hier. Voor een stream stelt u in plaats daarvan NDI of een Browser Source in bij de projectie-instellingen.</string>
     <string name="helper_display_pick">Welk scherm ziet de gemeente?</string>
@@ -2464,7 +2464,7 @@
     <string name="helper_refused_follower">Deze computer volgt de achtergronden van een andere via Instance Link, dus wijzig ze daar.</string>
     <string name="helper_refused_live">Er staat nu iets op het scherm. Probeer het opnieuw als er niets live is.</string>
     <string name="helper_refused_no_preview">Take is voor de voorbeeldmodus, en er wacht niets in het voorbeeld. De voorbeeldmodus zet u aan in de systeeminstellingen.</string>
-    <string name="helper_refused_nothing_to_step">Volgende en vorige bladeren door dia\'s en afbeeldingen. Open eerst een presentatie of afbeeldingen.</string>
+    <string name="helper_refused_nothing_to_step">Volgende en vorige bladeren door dia's en afbeeldingen. Open eerst een presentatie of afbeeldingen.</string>
     <string name="helper_done_bg">De achtergrond voor %1$s is nu %2$s.</string>
     <string name="helper_done_bg_service">Er staat een achtergrond in %1$s voor deze dienst.</string>
     <string name="helper_done_font">De tekstgrootte voor %1$s is gewijzigd.</string>
@@ -2563,7 +2563,7 @@
     <string name="helper_command_songs_8_does">Toont de akkoordeditor</string>
     <string name="helper_commands_service">De dienst leiden</string>
     <string name="helper_command_service_1">volgende dia</string>
-    <string name="helper_command_service_1_does">Bladert door afbeeldingen en dia\'s</string>
+    <string name="helper_command_service_1_does">Bladert door afbeeldingen en dia's</string>
     <string name="helper_command_service_2">maak het scherm leeg</string>
     <string name="helper_command_service_2_does">Haalt alles van het scherm</string>
     <string name="helper_command_service_3">live gaan</string>
@@ -2586,7 +2586,7 @@
     <string name="helper_command_announcements_4">hoe toon ik de klok</string>
     <string name="helper_command_announcements_4_does">Laat zien hoe u de tijd toont</string>
     <string name="helper_commands_media">Media</string>
-    <string name="helper_command_media_1">hoe toon ik foto\'s</string>
+    <string name="helper_command_media_1">hoe toon ik foto's</string>
     <string name="helper_command_media_1_does">Leidt u door het tabblad Afbeeldingen</string>
     <string name="helper_command_media_2">hoe toon ik een diavoorstelling</string>
     <string name="helper_command_media_2_does">Leidt u door een diavoorstelling</string>
@@ -2620,7 +2620,7 @@
     <string name="helper_command_planning_5_does">Opent Statistieken</string>
     <string name="helper_commands_settings">Instellingen en hulp</string>
     <string name="helper_command_settings_1">open instellingen</string>
-    <string name="helper_command_settings_1_does">Opent Instellingen of een van de pagina\'s</string>
+    <string name="helper_command_settings_1_does">Opent Instellingen of een van de pagina's</string>
     <string name="helper_command_settings_2">sneltoetsen</string>
     <string name="helper_command_settings_2_does">Toont een sneltoets of de hele lijst</string>
     <string name="helper_command_settings_3">bedien het vanaf mijn telefoon</string>

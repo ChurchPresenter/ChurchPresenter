@@ -780,10 +780,10 @@
     <!-- System Settings - Song Samples and File Conversion -->
     <string name="song_samples">Przykładowe piosenki</string>
     <string name="folder_already_exists">Folder już istnieje</string>
-    <string name="song_samples_overwrite_confirm">Folder \"Przykładowe piosenki\" już istnieje. Spowoduje to nadpisanie istniejących plików.\nKontynuować?</string>
-    <string name="song_samples_copied">Skopiowano %1$d przykładowych piosenek do folderu \"Przykładowe piosenki\".</string>
+    <string name="song_samples_overwrite_confirm">Folder "Przykładowe piosenki" już istnieje. Spowoduje to nadpisanie istniejących plików.\nKontynuować?</string>
+    <string name="song_samples_copied">Skopiowano %1$d przykładowych piosenek do folderu "Przykładowe piosenki".</string>
     <string name="add_song_samples">Dodaj przykładowe piosenki</string>
-    <string name="folder_overwrite_confirm">Folder \"%1$s\" już istnieje. Spowoduje to nadpisanie istniejących plików piosenek.\nKontynuować?</string>
+    <string name="folder_overwrite_confirm">Folder "%1$s" już istnieje. Spowoduje to nadpisanie istniejących plików piosenek.\nKontynuować?</string>
 
     <!-- Bible Settings - Download Bibles (catalog browser) -->
     <string name="bible_catalog_button">Pobierz Biblie…</string>
@@ -798,7 +798,7 @@
     <string name="bible_catalog_download">Pobierz</string>
     <string name="bible_catalog_redownload">Pobierz ponownie</string>
     <string name="bible_catalog_size_mb">%1$s MB</string>
-    <string name="bible_catalog_overwrite_confirm">\"%1$s\" już znajduje się w Twoim folderze Biblii.\nPobrać ponownie i zastąpić istniejący plik?</string>
+    <string name="bible_catalog_overwrite_confirm">"%1$s" już znajduje się w Twoim folderze Biblii.\nPobrać ponownie i zastąpić istniejący plik?</string>
     <string name="bible_catalog_stale_notice">Wyświetlana jest lista Biblii z ostatniej wizyty — wygląda na to, że jesteś offline.</string>
     <string name="bible_catalog_attribution">Każde tłumaczenie ma własne prawa autorskie — sprawdź je przed publicznym pokazaniem.</string>
     <string name="bible_catalog_no_directory">Najpierw wybierz folder przechowywania Biblii w ustawieniach wyglądu.</string>
@@ -815,7 +815,7 @@
     <string name="bible_catalog_download_error_convert">Nie udało się przekonwertować tej Biblii, więc nie została zainstalowana.</string>
     <string name="bible_catalog_download_error_write">Nie udało się zapisać do folderu Biblii — sprawdź, czy nadal istnieje i ma wolne miejsce.</string>
     <string name="bible_catalog_download_error_generic">Pobieranie nie powiodło się. Spróbuj ponownie.</string>
-    <string name="bible_catalog_installed_summary">Zainstalowano \"%1$s\" — %2$d ksiąg.</string>
+    <string name="bible_catalog_installed_summary">Zainstalowano "%1$s" — %2$d ksiąg.</string>
     <string name="bible_catalog_rights">Prawa autorskie: %1$s</string>
     <string name="bible_catalog_source_ebible">eBible.org</string>
     <string name="bible_catalog_source_zefania">Archiwum Zefania</string>

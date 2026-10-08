@@ -781,10 +781,10 @@
     <!-- System Settings - Song Samples and File Conversion -->
     <string name="song_samples">Liedbeispiele</string>
     <string name="folder_already_exists">Ordner existiert bereits</string>
-    <string name="song_samples_overwrite_confirm">Ordner \"Liedbeispiele\" existiert bereits. Vorhandene Dateien werden überschrieben.\nFortfahren?</string>
-    <string name="song_samples_copied">%1$d Beispiellieder in den Ordner \"Liedbeispiele\" kopiert.</string>
+    <string name="song_samples_overwrite_confirm">Ordner "Liedbeispiele" existiert bereits. Vorhandene Dateien werden überschrieben.\nFortfahren?</string>
+    <string name="song_samples_copied">%1$d Beispiellieder in den Ordner "Liedbeispiele" kopiert.</string>
     <string name="add_song_samples">Liedbeispiele hinzufügen</string>
-    <string name="folder_overwrite_confirm">Ordner \"%1$s\" existiert bereits. Vorhandene Liederdateien werden überschrieben.\nFortfahren?</string>
+    <string name="folder_overwrite_confirm">Ordner "%1$s" existiert bereits. Vorhandene Liederdateien werden überschrieben.\nFortfahren?</string>
 
     <!-- Bible Settings - Download Bibles (catalog browser) -->
     <string name="bible_catalog_button">Bibeln herunterladen…</string>
@@ -799,7 +799,7 @@
     <string name="bible_catalog_download">Herunterladen</string>
     <string name="bible_catalog_redownload">Erneut herunterladen</string>
     <string name="bible_catalog_size_mb">%1$s MB</string>
-    <string name="bible_catalog_overwrite_confirm">\"%1$s\" befindet sich bereits in Ihrem Bibelordner.\nErneut herunterladen und die vorhandene Datei überschreiben?</string>
+    <string name="bible_catalog_overwrite_confirm">"%1$s" befindet sich bereits in Ihrem Bibelordner.\nErneut herunterladen und die vorhandene Datei überschreiben?</string>
     <string name="bible_catalog_stale_notice">Es wird die Bibelliste vom letzten Besuch angezeigt — Sie scheinen offline zu sein.</string>
     <string name="bible_catalog_attribution">Jede Übersetzung hat ihr eigenes Urheberrecht — prüfen Sie es, bevor Sie sie öffentlich zeigen.</string>
     <string name="bible_catalog_no_directory">Wählen Sie zuerst einen Bibel-Speicherordner in den Erscheinungsbild-Einstellungen.</string>
@@ -816,7 +816,7 @@
     <string name="bible_catalog_download_error_convert">Diese Bibel konnte nicht konvertiert werden und wurde nicht installiert.</string>
     <string name="bible_catalog_download_error_write">In den Bibelordner konnte nicht geschrieben werden — prüfen Sie, ob er noch existiert und genug Speicherplatz vorhanden ist.</string>
     <string name="bible_catalog_download_error_generic">Download fehlgeschlagen. Bitte versuchen Sie es erneut.</string>
-    <string name="bible_catalog_installed_summary">\"%1$s\" installiert — %2$d Bücher.</string>
+    <string name="bible_catalog_installed_summary">"%1$s" installiert — %2$d Bücher.</string>
     <string name="bible_catalog_rights">Urheberrecht: %1$s</string>
     <string name="bible_catalog_source_ebible">eBible.org</string>
     <string name="bible_catalog_source_zefania">Zefania-Archiv</string>

@@ -781,10 +781,10 @@
     <!-- System Settings - Song Samples and File Conversion -->
     <string name="song_samples">Ән үлгілері</string>
     <string name="folder_already_exists">Қалта бар</string>
-    <string name="song_samples_overwrite_confirm">\"Ән үлгілері\" қалтасы бар. Бұл бар файлдарды қайта жазады.\nЖалғастыру ма?</string>
-    <string name="song_samples_copied">%1$d ән үлгісі \"Ән үлгілері\" қалтасына көшірілді.</string>
+    <string name="song_samples_overwrite_confirm">"Ән үлгілері" қалтасы бар. Бұл бар файлдарды қайта жазады.\nЖалғастыру ма?</string>
+    <string name="song_samples_copied">%1$d ән үлгісі "Ән үлгілері" қалтасына көшірілді.</string>
     <string name="add_song_samples">Ән үлгілерін қосу</string>
-    <string name="folder_overwrite_confirm">\"%1$s\" қалтасы бар. Бұл бар ән файлдарын қайта жазады.\nЖалғастыру ма?</string>
+    <string name="folder_overwrite_confirm">"%1$s" қалтасы бар. Бұл бар ән файлдарын қайта жазады.\nЖалғастыру ма?</string>
 
     <!-- Bible Settings - Download Bibles (catalog browser) -->
     <string name="bible_catalog_button">Киелі Кітаптарды жүктеп алу…</string>
@@ -799,7 +799,7 @@
     <string name="bible_catalog_download">Жүктеп алу</string>
     <string name="bible_catalog_redownload">Қайта жүктеп алу</string>
     <string name="bible_catalog_size_mb">%1$s МБ</string>
-    <string name="bible_catalog_overwrite_confirm">\"%1$s\" Киелі Кітап қалтаңызда бұрыннан бар.\nҚайта жүктеп алып, бар файлды алмастырасыз ба?</string>
+    <string name="bible_catalog_overwrite_confirm">"%1$s" Киелі Кітап қалтаңызда бұрыннан бар.\nҚайта жүктеп алып, бар файлды алмастырасыз ба?</string>
     <string name="bible_catalog_stale_notice">Соңғы келуіңіздегі Киелі Кітаптар тізімі көрсетіліп тұр — сіз желіден тыс сияқтысыз.</string>
     <string name="bible_catalog_attribution">Әр аударманың өз авторлық құқығы бар — оны жария көрсетпес бұрын тексеріңіз.</string>
     <string name="bible_catalog_no_directory">Алдымен сыртқы түрі баптауларынан Киелі Кітап сақтау қалтасын таңдаңыз.</string>
@@ -816,7 +816,7 @@
     <string name="bible_catalog_download_error_convert">Бұл Киелі Кітапты түрлендіру мүмкін болмады, сондықтан ол орнатылмады.</string>
     <string name="bible_catalog_download_error_write">Киелі Кітап қалтасына жазу мүмкін болмады — оның бар екенін және дискіде орын бар екенін тексеріңіз.</string>
     <string name="bible_catalog_download_error_generic">Жүктеу сәтсіз аяқталды. Қайталап көріңіз.</string>
-    <string name="bible_catalog_installed_summary">\"%1$s\" орнатылды — %2$d кітап.</string>
+    <string name="bible_catalog_installed_summary">"%1$s" орнатылды — %2$d кітап.</string>
     <string name="bible_catalog_rights">Авторлық құқық: %1$s</string>
     <string name="bible_catalog_source_ebible">eBible.org</string>
     <string name="bible_catalog_source_zefania">Zefania мұрағаты</string>

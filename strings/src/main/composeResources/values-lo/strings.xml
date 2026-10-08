@@ -2023,8 +2023,8 @@
     <!-- Per-output Customize dialog -->
     <string name="output_profile_duplicate">ສຳເນົາ</string>
     <string name="output_profile_delete">ລຶບ</string>
-    <string name="output_profile_delete_confirm">ລຶບ \"%1$s\" ບໍ? ການກະທຳນີ້ບໍ່ສາມາດຍົກເລີກໄດ້.</string>
-    <string name="output_profile_delete_blocked">ບໍ່ສາມາດລຶບ \"%1$s\" ໄດ້ — ຍັງຖືກໃຊ້ໂດຍ: %2$s</string>
+    <string name="output_profile_delete_confirm">ລຶບ "%1$s" ບໍ? ການກະທຳນີ້ບໍ່ສາມາດຍົກເລີກໄດ້.</string>
+    <string name="output_profile_delete_blocked">ບໍ່ສາມາດລຶບ "%1$s" ໄດ້ — ຍັງຖືກໃຊ້ໂດຍ: %2$s</string>
     <string name="output_profile_picker_tooltip">ໂປຣໄຟລ໌ຊ່ອງອອກ</string>
     <string name="output_profile_swap_menu_tooltip">ສະຫຼັບໂປຣໄຟລ໌ຊ່ອງອອກ</string>
     <string name="output_profile_new_name_default">ໂປຣໄຟລ໌ໃໝ່</string>

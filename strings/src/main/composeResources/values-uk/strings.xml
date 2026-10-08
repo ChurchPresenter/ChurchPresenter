@@ -781,10 +781,10 @@
     <!-- System Settings - Song Samples and File Conversion -->
     <string name="song_samples">Зразки пісень</string>
     <string name="folder_already_exists">Папка вже існує</string>
-    <string name="song_samples_overwrite_confirm">Папка \"Зразки пісень\" вже існує. Це перезапише існуючі файли.\nПродовжити?</string>
-    <string name="song_samples_copied">Скопійовано %1$d зразків пісень у папку \"Зразки пісень\".</string>
+    <string name="song_samples_overwrite_confirm">Папка "Зразки пісень" вже існує. Це перезапише існуючі файли.\nПродовжити?</string>
+    <string name="song_samples_copied">Скопійовано %1$d зразків пісень у папку "Зразки пісень".</string>
     <string name="add_song_samples">Додати зразки пісень</string>
-    <string name="folder_overwrite_confirm">Папка \"%1$s\" вже існує. Це перезапише існуючі файли пісень.\nПродовжити?</string>
+    <string name="folder_overwrite_confirm">Папка "%1$s" вже існує. Це перезапише існуючі файли пісень.\nПродовжити?</string>
 
     <!-- Bible Settings - Download Bibles (catalog browser) -->
     <string name="bible_catalog_button">Завантажити Біблії…</string>
@@ -799,7 +799,7 @@
     <string name="bible_catalog_download">Завантажити</string>
     <string name="bible_catalog_redownload">Завантажити повторно</string>
     <string name="bible_catalog_size_mb">%1$s МБ</string>
-    <string name="bible_catalog_overwrite_confirm">\"%1$s\" вже є у вашій папці з Бібліями.\nЗавантажити знову та замінити наявний файл?</string>
+    <string name="bible_catalog_overwrite_confirm">"%1$s" вже є у вашій папці з Бібліями.\nЗавантажити знову та замінити наявний файл?</string>
     <string name="bible_catalog_stale_notice">Показано список Біблій з останнього відвідування — здається, ви не в мережі.</string>
     <string name="bible_catalog_attribution">Кожен переклад має власні авторські права — перевірте їх перед публічним показом.</string>
     <string name="bible_catalog_no_directory">Спочатку виберіть папку зберігання Біблій у налаштуваннях вигляду.</string>
@@ -816,7 +816,7 @@
     <string name="bible_catalog_download_error_convert">Цю Біблію не вдалося перетворити, і її не встановлено.</string>
     <string name="bible_catalog_download_error_write">Не вдалося записати у папку з Бібліями — перевірте, що вона існує і на диску є місце.</string>
     <string name="bible_catalog_download_error_generic">Не вдалося завантажити. Спробуйте ще раз.</string>
-    <string name="bible_catalog_installed_summary">Встановлено \"%1$s\" — %2$d книг.</string>
+    <string name="bible_catalog_installed_summary">Встановлено "%1$s" — %2$d книг.</string>
     <string name="bible_catalog_rights">Авторські права: %1$s</string>
     <string name="bible_catalog_source_ebible">eBible.org</string>
     <string name="bible_catalog_source_zefania">Архів Zefania</string>
@@ -2350,7 +2350,7 @@
     <string name="helper_hint_bible_catalog">Виберіть потрібну Біблію й натисніть «%1$s». Щоб звузити список, введіть вище назву або мову.</string>
     <string name="helper_hint_bible_page">Коли вона завантажиться, відкрийте сторінку «Біблія».</string>
     <string name="helper_hint_bible_add_translation">Виберіть її в «%1$s», щоб показувати поруч із уже відкритою Біблією.</string>
-    <string name="helper_hint_pictures_folder">Натисніть «%1$s» і виберіть папку з фотографіями. Тут з\'являться всі зображення з неї, тож папка працює як альбом. Відкриті папки з\'являться в рядку «Недавні».</string>
+    <string name="helper_hint_pictures_folder">Натисніть «%1$s» і виберіть папку з фотографіями. Тут з'являться всі зображення з неї, тож папка працює як альбом. Відкриті папки з'являться в рядку «Недавні».</string>
     <string name="helper_hint_pictures_go_live">Виберіть зображення й натисніть «%1$s» або двічі клацніть по ньому, щоб вивести його на екран.</string>
     <string name="helper_hint_pictures_play">Натисніть «%1$s», і зображення змінюватимуться самі. Інтервал поруч задає, скільки показується кожне.</string>
     <string name="helper_hint_presentation_file">Натисніть «%1$s» і виберіть файл PDF, PowerPoint або Keynote.</string>
@@ -2358,9 +2358,9 @@
     <string name="helper_hint_media_file">Натисніть «%1$s» і виберіть відео.</string>
     <string name="helper_hint_media_go_live">Натисніть «%1$s», щоб показати його, і воно почне відтворюватися. Пауза й перемотування — кнопками нижче.</string>
     <string name="helper_hint_lower_third_generate">Натисніть «%1$s», щоб відкрити генератор нижніх титрів.</string>
-    <string name="helper_hint_lower_third_name">Введіть ім\'я людини в полі «Ім\'я».</string>
+    <string name="helper_hint_lower_third_name">Введіть ім'я людини в полі «Ім'я».</string>
     <string name="helper_hint_lower_third_info">Введіть її посаду чи служіння в полі «Інфо», наприклад «Пастор» або «Лідер прославлення».</string>
-    <string name="helper_hint_lower_third_save">За бажанням виберіть стиль і кольори, потім натисніть «Зберегти нижній титр». Він з\'явиться у списку на вкладці «Нижня третина».</string>
+    <string name="helper_hint_lower_third_save">За бажанням виберіть стиль і кольори, потім натисніть «Зберегти нижній титр». Він з'явиться у списку на вкладці «Нижня третина».</string>
     <string name="helper_hint_lower_third_go_live">Виберіть його у списку й натисніть «%1$s», щоб вивести на екран.</string>
     <string name="helper_hint_announcement_text">Введіть оголошення тут, наприклад: «Батьки дитини № 12, підійдіть, будь ласка, до дитячої кімнати».</string>
     <string name="helper_hint_announcement_go_live">Натисніть «%1$s», щоб вивести його на екран. Налаштування поруч задають, як воно рухається і скільки разів.</string>
@@ -2386,7 +2386,7 @@
     <string name="helper_hint_stage_chords">Увімкніть «%1$s». Акорди показуються в зоні «%2$s» над словами.</string>
     <string name="helper_hint_stage_text">У «%1$s» виберіть зону, потім нижче задайте шрифт, розмір і колір.</string>
     <string name="helper_hint_stage_message_text">Введіть повідомлення для тих, хто на сцені.</string>
-    <string name="helper_hint_stage_message_send">Натисніть «%1$s». Воно з\'явиться в зоні «%2$s» монітора сцени.</string>
+    <string name="helper_hint_stage_message_send">Натисніть «%1$s». Воно з'явиться в зоні «%2$s» монітора сцени.</string>
     <string name="helper_hint_stage_timer_send">Задайте час і натисніть «%1$s», щоб показати його на моніторі сцени.</string>
     <string name="helper_hint_add_song_language">Натисніть «%1$s», назвіть мову, потім введіть або вставте текст пісні.</string>
     <string name="helper_hint_schedule">Це ваша програма. Додавайте сюди пісні, вірші й слайди, щоб спланувати служіння.</string>
@@ -2429,11 +2429,11 @@
     <string name="helper_display_test_yes">Так, бачу</string>
     <string name="helper_display_test_no">Ні</string>
     <string name="helper_display_show_numbers">Показати номери ще раз</string>
-    <string name="helper_display_done">Готово. Усе, що ви виведете в ефір, тепер з\'явиться на цьому екрані.</string>
+    <string name="helper_display_done">Готово. Усе, що ви виведете в ефір, тепер з'явиться на цьому екрані.</string>
     <string name="helper_screen_label">Дисплей %1$d (%2$d × %3$d)</string>
     <string name="helper_screen_label_named">%1$s (%2$d × %3$d)</string>
     <string name="helper_refused_settings_open">Спершу закрийте вікно налаштувань, інакше після натискання OK воно поверне все як було.</string>
-    <string name="helper_refused_follower">Цей комп\'ютер бере фони з іншого через Instance Link, тож змінюйте їх там.</string>
+    <string name="helper_refused_follower">Цей комп'ютер бере фони з іншого через Instance Link, тож змінюйте їх там.</string>
     <string name="helper_refused_live">Зараз щось на екрані. Спробуйте ще раз, коли нічого не буде в ефірі.</string>
     <string name="helper_refused_no_preview">Take працює в режимі попереднього перегляду, а в попередньому перегляді нічого не чекає. Режим попереднього перегляду вмикається в системних налаштуваннях.</string>
     <string name="helper_refused_nothing_to_step">Вперед і назад перемикають слайди й зображення. Спершу відкрийте презентацію або зображення.</string>

@@ -2007,8 +2007,8 @@
     <!-- Per-output Customize dialog -->
     <string name="output_profile_duplicate">Duplicar</string>
     <string name="output_profile_delete">Eliminar</string>
-    <string name="output_profile_delete_confirm">Eliminar \"%1$s\"? Esta ação não pode ser desfeita.</string>
-    <string name="output_profile_delete_blocked">Não é possível eliminar \"%1$s\" — ainda é usado por: %2$s</string>
+    <string name="output_profile_delete_confirm">Eliminar "%1$s"? Esta ação não pode ser desfeita.</string>
+    <string name="output_profile_delete_blocked">Não é possível eliminar "%1$s" — ainda é usado por: %2$s</string>
     <string name="output_profile_picker_tooltip">Perfil da saída</string>
     <string name="output_profile_swap_menu_tooltip">Trocar perfil da saída</string>
     <string name="output_profile_new_name_default">Novo Perfil</string>

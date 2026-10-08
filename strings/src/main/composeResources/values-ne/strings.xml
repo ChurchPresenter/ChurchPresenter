@@ -2023,8 +2023,8 @@
     <!-- Per-output Customize dialog -->
     <string name="output_profile_duplicate">प्रतिलिपि बनाउनुहोस्</string>
     <string name="output_profile_delete">मेटाउनुहोस्</string>
-    <string name="output_profile_delete_confirm">\"%1$s\" मेटाउने? यो कार्य पूर्ववत गर्न सकिँदैन।</string>
-    <string name="output_profile_delete_blocked">\"%1$s\" मेटाउन सकिँदैन — यो अझै यीमा प्रयोग भइरहेको छ: %2$s</string>
+    <string name="output_profile_delete_confirm">"%1$s" मेटाउने? यो कार्य पूर्ववत गर्न सकिँदैन।</string>
+    <string name="output_profile_delete_blocked">"%1$s" मेटाउन सकिँदैन — यो अझै यीमा प्रयोग भइरहेको छ: %2$s</string>
     <string name="output_profile_picker_tooltip">आउटपुट प्रोफाइल</string>
     <string name="output_profile_swap_menu_tooltip">आउटपुट प्रोफाइल बदल्नुहोस्</string>
     <string name="output_profile_new_name_default">नयाँ प्रोफाइल</string>

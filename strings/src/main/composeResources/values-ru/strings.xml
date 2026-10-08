@@ -819,10 +819,10 @@
     <!-- System Settings - Song Samples and File Conversion -->
     <string name="song_samples">Образцы песен</string>
     <string name="folder_already_exists">Папка уже существует</string>
-    <string name="song_samples_overwrite_confirm">Папка \"Образцы песен\" уже существует. Это перезапишет существующие файлы.\nПродолжить?</string>
-    <string name="song_samples_copied">Скопировано %1$d образцов песен в папку \"Образцы песен\".</string>
+    <string name="song_samples_overwrite_confirm">Папка "Образцы песен" уже существует. Это перезапишет существующие файлы.\nПродолжить?</string>
+    <string name="song_samples_copied">Скопировано %1$d образцов песен в папку "Образцы песен".</string>
     <string name="add_song_samples">Добавить образцы песен</string>
-    <string name="folder_overwrite_confirm">Папка \"%1$s\" уже существует. Это перезапишет существующие файлы песен.\nПродолжить?</string>
+    <string name="folder_overwrite_confirm">Папка "%1$s" уже существует. Это перезапишет существующие файлы песен.\nПродолжить?</string>
 
     <!-- Bible Settings - Download Bibles (catalog browser) -->
     <string name="bible_catalog_button">Скачать Библии…</string>
@@ -837,7 +837,7 @@
     <string name="bible_catalog_download">Скачать</string>
     <string name="bible_catalog_redownload">Скачать заново</string>
     <string name="bible_catalog_size_mb">%1$s МБ</string>
-    <string name="bible_catalog_overwrite_confirm">\"%1$s\" уже есть в вашей папке с Библиями.\nСкачать снова и заменить существующий файл?</string>
+    <string name="bible_catalog_overwrite_confirm">"%1$s" уже есть в вашей папке с Библиями.\nСкачать снова и заменить существующий файл?</string>
     <string name="bible_catalog_stale_notice">Показан список Библий с прошлого посещения — похоже, вы не в сети.</string>
     <string name="bible_catalog_attribution">У каждого перевода свои авторские права — проверьте их перед публичным показом.</string>
     <string name="bible_catalog_no_directory">Сначала выберите папку хранения Библий в настройках оформления.</string>
@@ -854,7 +854,7 @@
     <string name="bible_catalog_download_error_convert">Эту Библию не удалось преобразовать, и она не была установлена.</string>
     <string name="bible_catalog_download_error_write">Не удалось записать в папку с Библиями — проверьте, что она существует и на диске есть место.</string>
     <string name="bible_catalog_download_error_generic">Не удалось скачать. Попробуйте ещё раз.</string>
-    <string name="bible_catalog_installed_summary">Установлено \"%1$s\" — %2$d книг.</string>
+    <string name="bible_catalog_installed_summary">Установлено "%1$s" — %2$d книг.</string>
     <string name="bible_catalog_rights">Авторские права: %1$s</string>
     <string name="bible_catalog_source_ebible">eBible.org</string>
     <string name="bible_catalog_source_zefania">Архив Zefania</string>
