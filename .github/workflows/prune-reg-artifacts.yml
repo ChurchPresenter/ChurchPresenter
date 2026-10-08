@@ -4,8 +4,9 @@ name: Prune screenshot artifacts
 # every push. reg-actions passes no retention, so its `reg` artifact keeps the repository default
 # of 90 days -- its `retention-days` input in screenshots.yml only prunes the `reg_actions` branch --
 # and at 90-180 MB a push that came to over 100 GB. Only a branch's latest run is worth looking at,
-# so this keeps the newest two of each artifact per branch -- the latest and the one before, to
-# compare against -- and deletes the rest every day.
+# so this keeps the newest two of each artifact per branch that still exists -- the latest and the
+# one before, to compare against -- and deletes the rest every day, including everything from a
+# branch that has been merged and deleted.
 #
 # Only the screenshot workflow's artifacts (`reg`, `screenshots*`). Workflow runs, logs and every
 # other artifact are left alone.
@@ -47,6 +48,13 @@ jobs:
               per_page: 100,
             }, (response) => response.data.filter(a => !a.expired && isScreenshotArtifact(a.name)));
 
+            // A branch that is gone has been merged or abandoned: none of its artifacts are kept.
+            const branches = new Set(await github.paginate(github.rest.repos.listBranches, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100,
+            }, (response) => response.data.map(b => b.name)));
+
             const groups = new Map();
             for (const a of artifacts) {
               const key = `${a.name} @ ${a.workflow_run?.head_branch ?? '?'}`;
@@ -58,8 +66,10 @@ jobs:
             let bytes = 0;
             for (const [key, list] of groups) {
               list.sort((x, y) => new Date(y.created_at) - new Date(x.created_at));
-              const stale = list.slice(keep);
-              if (stale.length > 0) console.log(`${key}: keeping ${Math.min(keep, list.length)}, removing ${stale.length}`);
+              const branchExists = branches.has(list[0].workflow_run?.head_branch);
+              const stale = branchExists ? list.slice(keep) : list;
+              const kept = list.length - stale.length;
+              if (stale.length > 0) console.log(`${key}: keeping ${kept}, removing ${stale.length}`);
               for (const a of stale) {
                 count++;
                 bytes += a.size_in_bytes;
