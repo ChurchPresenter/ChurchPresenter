@@ -88,6 +88,8 @@ fun dictionaryTab(
     strongsForBookChapter: Map<Int, Set<String>> = emptyMap(),
     withOnAddToSchedule: Boolean = true,
     withOnGoLive: Boolean = true,
+    /** The number of the entry the host reports on air; none by default. */
+    liveEntryNumber: String? = null,
     /** Extra Greek entries, for a test needing a shape the standing corpus does not have. */
     extraEntries: List<StrongsEntry> = emptyList(),
     width: Dp? = null,
@@ -136,6 +138,7 @@ fun dictionaryTab(
                             reports.scheduled += listOf(number, word, transliteration, definition)
                         } } else null,
                         onGoLive = if (withOnGoLive) { { reports.live += it } } else null,
+                        liveEntryNumber = liveEntryNumber,
                         getVerseText = getVerseText,
                         getBookName = getBookName,
                         onWordClick = { reports.wordClicks += it },

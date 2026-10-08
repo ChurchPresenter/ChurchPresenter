@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -12,8 +13,8 @@ import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
-import org.churchpresenter.app.churchpresenter.dialogs.withStatsHome
+import org.churchpresenter.statistics.StatisticsManager
+import org.churchpresenter.statistics.withStatsHome
 import org.churchpresenter.bible.SpbFixture
 import org.churchpresenter.bibletab.bibleFixture
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -48,12 +49,11 @@ class RemoteCommandEffectsTest {
     private lateinit var presenter: PresenterManager
 
     private val selectedTabs = mutableListOf<Tabs>()
-    private val songsSelected = mutableListOf<ScheduleItem.SongItem>()
+    private val songsSelected = mutableListOf<RemoteSongSelection>()
     private val picturesSelected = mutableListOf<ScheduleItem.PictureItem>()
     private val presentationsSelected = mutableListOf<ScheduleItem.PresentationItem>()
     private val mediaSelected = mutableListOf<ScheduleItem.MediaItem>()
     private var settings = AppSettings()
-    private var songVersionBumps = 0
     private var slidePushes = 0
 
     /**
@@ -72,7 +72,7 @@ class RemoteCommandEffectsTest {
         val previousSlide = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
         val selectSlide = MutableSharedFlow<Pair<String, Int>>(extraBufferCapacity = 1)
         val selectVerse = MutableSharedFlow<SelectBibleVerseRequest>(extraBufferCapacity = 1)
-        val selectSong = MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = 1)
+        val selectSong = MutableSharedFlow<RemoteSongSelection>(extraBufferCapacity = 1)
         val selectPictureItem = MutableSharedFlow<ScheduleItem.PictureItem>(extraBufferCapacity = 1)
         val selectPresentation = MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = 1)
         val selectMedia = MutableSharedFlow<ScheduleItem.MediaItem>(extraBufferCapacity = 1)
@@ -127,7 +127,6 @@ class RemoteCommandEffectsTest {
                 presentationViewModel = presentations,
                 bibleViewModel = bible,
                 presenterManager = presenter,
-                onSongItemVersionBump = { songVersionBumps++ },
                 resolveImageFile = resolveImageFile,
                 onSettingsChange = { transform -> settings = transform(settings) },
                 onSongItemSelected = { songsSelected.add(it) },
@@ -431,12 +430,12 @@ class RemoteCommandEffectsTest {
         val flows = Flows()
         effects(flows)
         val song = ScheduleItem.SongItem(id = "1", songNumber = 42, title = "Amazing Grace", songbook = "Hymns")
+        val selection = RemoteSongSelection(song, goLive = true, source = "remote")
 
-        emit(flows.selectSong, song)
+        emit(flows.selectSong, selection)
 
-        assertEquals(listOf(song), songsSelected)
+        assertEquals(listOf(selection), songsSelected, "the whole hand-over reaches the app, go-live included")
         assertEquals(listOf(Tabs.SONGS), selectedTabs)
-        assertEquals(1, songVersionBumps, "the row has to redraw or the selection is invisible")
     }
 
     @Test

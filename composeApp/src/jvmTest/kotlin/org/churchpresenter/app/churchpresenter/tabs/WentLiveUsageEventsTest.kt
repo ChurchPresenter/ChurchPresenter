@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BackgroundConfig

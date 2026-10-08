@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -48,7 +49,7 @@ import org.churchpresenter.settings.InstanceLinkRole
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.server.ScheduleItemDto
@@ -209,7 +210,7 @@ class MainDesktopComposeTest {
         val loopToggle = MutableSharedFlow<Unit>(extraBufferCapacity = 4)
         val goto = MutableSharedFlow<Int>(extraBufferCapacity = 4)
         val selectBibleVerse = MutableSharedFlow<SelectBibleVerseRequest>(extraBufferCapacity = 4)
-        val remoteSelectSong = MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = 4)
+        val remoteSelectSong = MutableSharedFlow<RemoteSongSelection>(extraBufferCapacity = 4)
         val remoteSelectPicture = MutableSharedFlow<ScheduleItem.PictureItem>(extraBufferCapacity = 4)
         val remoteSelectPresentation = MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = 4)
         val uploadPresentation = MutableSharedFlow<File>(extraBufferCapacity = 4)
@@ -768,12 +769,16 @@ class MainDesktopComposeTest {
                     SelectBibleVerseRequest(bookName = "No Such Book", chapter = 1, verseNumber = 1),
                 )
                 flows.remoteSelectSong.emit(
-                    ScheduleItem.SongItem(
-                        id = "a",
-                        songNumber = 1,
-                        title = "A Test Song",
-                        songbook = "Hymnal",
-                        songId = "Hymnal::1",
+                    RemoteSongSelection(
+                        ScheduleItem.SongItem(
+                            id = "a",
+                            songNumber = 1,
+                            title = "A Test Song",
+                            songbook = "Hymnal",
+                            songId = "Hymnal::1",
+                        ),
+                        goLive = false,
+                        source = "remote",
                     ),
                 )
                 flows.remoteSelectPicture.emit(

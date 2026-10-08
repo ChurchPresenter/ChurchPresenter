@@ -364,9 +364,9 @@
 - **Tidy the numbers** — remove a single song or verse from the selected period, or clear everything; both ask first.
 
 **Source locations:**
-- `data/StatisticsManager.kt`
-- `dialogs/CCLIReportDialog.kt` — the statistics window itself
-- `data/StatisticsPeriod.kt` — the period presets shared by its pills and its date pickers
+- `statistics/` (the `:statistics` Gradle module) — `StatisticsManager.kt`, `StatisticsQueries.kt` (the CCLI lookup and the CSV/XLS exports)
+- `statistics/…/CCLIReportDialog.kt` — the statistics window itself, with `CCLIReportRange.kt`, `CCLIReportTables.kt` and `CCLIReportActivity.kt`
+- `statistics/…/StatisticsPeriod.kt` — the period presets shared by its pills and its date pickers
 
 ## Personalization & Workflow
 - **34 languages** — full interface translation: English, Spanish, French, German, Portuguese, Dutch, Swedish, Norwegian, Finnish, Estonian, Latvian, Polish, Czech, Slovak, Croatian, Romanian, Ukrainian, Russian, Belarusian, Kazakh, Uzbek, Turkish, Arabic, Persian, Hindi, Nepali, Thai, Lao, Japanese, Chinese, Indonesian, Malay, Tagalog and Swahili — with the interface laid out right-to-left for Arabic and Persian.
@@ -392,7 +392,8 @@
 - `crossword-tab/…/CrosswordTab.kt`, `crossword-tab/…/data/CrosswordData.kt` (the `:crossword-tab` module) — a hidden tab (←→←→); `crossword/` (the `:crossword` Gradle module) is its authoring tool and the encoded puzzles
 - `dialogs/OptionsDialog.kt`
 - `data/SettingsManager.kt`, `data/settings/AppSettings.kt`, `data/settings/WindowLayoutSettings.kt`
-- `utils/AutoStartManager.kt`, `utils/UpdateChecker.kt`
+- `utils/AutoStartManager.kt`
+- `updater/` (the `:updater` Gradle module) — `UpdateChecker.kt`, the update window (`UpdateAvailableDialog.kt`) and the installer download
 - `diagnostics/` (the `:diagnostics` Gradle module) — `CrashReporter`: crash logs and the Sentry bridge
 
 ## Free & Open

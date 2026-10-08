@@ -104,7 +104,7 @@ class SongListPaneFiltersTest {
 
     @Test
     fun `Enter in the search box hands the keyboard back and keeps the query`() =
-        songsTab(searchIdleFocusMs = 600_000L) { vm, _ ->
+        songsTab() { vm, _ ->
             searchBox().performClick()
             waitForIdle()
             searchBox().assertIsFocused()

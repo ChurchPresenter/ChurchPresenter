@@ -30,6 +30,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.KeyboardShortcutSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
@@ -101,6 +102,7 @@ class SystemSettingsTabTest {
     private fun analytics(enabled: Boolean) = AppSettings(
         analyticsReportingEnabled = enabled,
         projectionSettings = ProjectionSettings(hideCursorOnOutputs = false, overlayEndClearsDisplay = false),
+        keyboardShortcutSettings = KeyboardShortcutSettings(focusSearchOnTabOpen = false),
     )
 
     @AfterTest
@@ -282,9 +284,9 @@ class SystemSettingsTabTest {
             }
         }
 
-        // Analytics is the sixth switch declared, after launch-at-login, start-hidden, hide-cursor,
-        // overlay-end-clears and preview mode.
-        onAllNodes(isToggleable())[5].performScrollTo().performClick()
+        // Analytics is the seventh switch declared, after launch-at-login, start-hidden, hide-cursor,
+        // overlay-end-clears, preview mode and focus-search-on-open.
+        onAllNodes(isToggleable())[6].performScrollTo().performClick()
         waitForIdle()
 
         assertEquals(true, applied?.analyticsReportingEnabled, "clicking the off analytics switch turns reporting on")
@@ -348,7 +350,7 @@ class SystemSettingsTabTest {
             }
         }
 
-        onAllNodes(isToggleable()).assertCountEquals(6)
+        onAllNodes(isToggleable()).assertCountEquals(7)
         // Launch-at-login is declared first. The switch follows the OS registration, not the click:
         // it can only turn on if setEnabled() reported success, which cannot happen here — so this
         // cannot race the coroutine the click starts.

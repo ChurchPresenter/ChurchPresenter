@@ -160,6 +160,7 @@ private fun PicturesTabScope.PicturesFolderBar(viewModel: PicturesViewModel) {
                 enabled = viewModel.images.isNotEmpty(),
                 tooltipText = stringResource(Res.string.go_live),
                 modifier = Modifier.guideTarget(GuideTargets.PICTURES_GO_LIVE),
+                showsShortcut = true,
             )
         }
     }

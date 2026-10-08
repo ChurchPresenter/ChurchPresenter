@@ -27,7 +27,7 @@ import kotlin.test.assertTrue
  */
 class EmitRemoteTabSelectionTest {
 
-    private val songs = MutableSharedFlow<ScheduleItem.SongItem>(replay = 1)
+    private val songs = MutableSharedFlow<RemoteSongSelection>(replay = 1)
     private val pictures = MutableSharedFlow<ScheduleItem.PictureItem>(replay = 1)
     private val presentations = MutableSharedFlow<ScheduleItem.PresentationItem>(replay = 1)
     private val media = MutableSharedFlow<ScheduleItem.MediaItem>(replay = 1)
@@ -79,7 +79,8 @@ class EmitRemoteTabSelectionTest {
         val item = song()
         assertTrue(emit(item))
 
-        assertSame(item, songs.replayCache.single())
+        assertEquals(RemoteSongSelection(item, goLive = true, source = "remote"), songs.replayCache.single(),
+            "a projected song goes live from the Songs tab")
         assertEquals(setOf("songs"), emitted().keys, "a song must not wake another tab")
     }
 
@@ -150,5 +151,11 @@ class EmitRemoteTabSelectionTest {
             reporting.map { it.javaClass },
             "a type whose tab owns the content -- and only those -- is handed over",
         )
+    }
+
+    @Test
+    fun `the calendar names itself as the song's source`() {
+        runBlocking { emitRemoteTabSelection(song(), songs, pictures, presentations, media, source = "calendar") }
+        assertEquals("calendar", songs.replayCache.single().source)
     }
 }

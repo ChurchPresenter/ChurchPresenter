@@ -37,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import org.churchpresenter.media.MediaOutput
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -302,32 +303,10 @@ private fun MediaTabScope.MediaSourceActions(viewModel: MediaViewModel) {
         if (presenterManager != null) {
             GoLiveButton(
                 modifier = Modifier.guideTarget(GuideTargets.MEDIA_GO_LIVE),
-                onClick = {
-                    presenterManager.setPresentingMode(Presenting.MEDIA)
-                    presenterManager.setShowPresenterWindow(true)
-                    presenterManager.setCurrentMedia(viewModel.mediaUrl, viewModel.mediaType)
-                    viewModel.play()
-                    wentLive(
-                        ScheduleItem.MediaItem(
-                            id = java.util.UUID.randomUUID().toString(),
-                            mediaUrl = viewModel.mediaUrl,
-                            mediaTitle = viewModel.mediaTitle,
-                            mediaType = viewModel.mediaType,
-                            subtitleUrl = viewModel.subtitleUrl,
-                        )
-                    )
-                    onInstanceLinkSendProject?.invoke(
-                        ScheduleItem.MediaItem(
-                            id = java.util.UUID.randomUUID().toString(),
-                            mediaUrl = viewModel.mediaUrl,
-                            mediaTitle = viewModel.mediaTitle,
-                            mediaType = viewModel.mediaType,
-                            subtitleUrl = viewModel.subtitleUrl
-                        )
-                    )
-                },
+                onClick = { goLive(viewModel, presenterManager) },
                 enabled = viewModel.isLoaded,
-                tooltipText = stringResource(Res.string.go_live)
+                tooltipText = stringResource(Res.string.go_live),
+                showsShortcut = true,
             )
         }
     }
@@ -416,4 +395,30 @@ private fun MediaTabScope.MediaRecentBar(viewModel: MediaViewModel) {
             }
         }
     }
+}
+
+/** Puts the loaded media on screen and starts it. */
+internal fun MediaTabScope.goLive(viewModel: MediaViewModel, output: MediaOutput) {
+    output.setPresentingMode(Presenting.MEDIA)
+    output.setShowPresenterWindow(true)
+    output.setCurrentMedia(viewModel.mediaUrl, viewModel.mediaType)
+    viewModel.play()
+    wentLive(
+        ScheduleItem.MediaItem(
+            id = java.util.UUID.randomUUID().toString(),
+            mediaUrl = viewModel.mediaUrl,
+            mediaTitle = viewModel.mediaTitle,
+            mediaType = viewModel.mediaType,
+            subtitleUrl = viewModel.subtitleUrl,
+        )
+    )
+    onInstanceLinkSendProject?.invoke(
+        ScheduleItem.MediaItem(
+            id = java.util.UUID.randomUUID().toString(),
+            mediaUrl = viewModel.mediaUrl,
+            mediaTitle = viewModel.mediaTitle,
+            mediaType = viewModel.mediaType,
+            subtitleUrl = viewModel.subtitleUrl
+        )
+    )
 }

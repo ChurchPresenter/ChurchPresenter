@@ -215,55 +215,59 @@ private fun PresentationTabScope.PresentationGoLiveButton(
 ) {
     GoLiveButton(
         modifier = Modifier.guideTarget(GuideTargets.PRESENTATION_GO_LIVE),
-        onClick = {
-            val idx = viewModel.selectedSlideIndex
-            scope.launch {
-                val bitmap = viewModel.slideFiles.getOrNull(idx)?.let { f ->
-                    withContext(Dispatchers.IO) {
-                        try {
-                            org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
-                        } catch (_: Exception) {
-                            null
-                        }
-                    }
-                }
-                val nextFile = viewModel.nextShownSlideIndex(idx)
-                    ?.let { viewModel.slideFiles.getOrNull(it) }
-                val nextBitmap = nextFile?.let { f ->
-                    withContext(Dispatchers.IO) {
-                        try {
-                            org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
-                        } catch (_: Exception) {
-                            null
-                        }
-                    }
-                }
-                presenterManager.setSelectedSlide(bitmap)
-                presenterManager.setLiveSlide(viewModel.selectedPresentation?.name, idx)
-                presenterManager.setNextSlide(nextBitmap)
-                presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(idx) { "" })
-            }
-            presenterManager.setPresentingMode(Presenting.PRESENTATION)
-            viewModel.deck?.let { presenterManager.presentationShowSlide(it, idx) }
-            presenterManager.setShowPresenterWindow(true)
-            viewModel.selectedPresentation?.let { f ->
-                wentLive(presentationRow(f, viewModel.slideFiles.size))
-            }
-            viewModel.selectedPresentation?.let { f ->
-                onInstanceLinkSendProject?.invoke(
-                    ScheduleItem.PresentationItem(
-                        id = java.util.UUID.randomUUID().toString(),
-                        filePath = f.absolutePath,
-                        fileName = f.nameWithoutExtension,
-                        slideCount = viewModel.slideFiles.size,
-                        fileType = f.extension.lowercase()
-                    )
-                )
-            }
-        },
+        onClick = { goLive(viewModel, presenterManager) },
         enabled = viewModel.slideFiles.isNotEmpty(),
-        tooltipText = stringResource(Res.string.go_live)
+        tooltipText = stringResource(Res.string.go_live),
+        showsShortcut = true,
     )
+}
+
+/** Puts the selected slide of the selected presentation on screen. */
+internal fun PresentationTabScope.goLive(viewModel: PresentationViewModel, presenterManager: SlidesOutput) {
+    val idx = viewModel.selectedSlideIndex
+    scope.launch {
+        val bitmap = viewModel.slideFiles.getOrNull(idx)?.let { f ->
+            withContext(Dispatchers.IO) {
+                try {
+                    org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                } catch (_: Exception) {
+                    null
+                }
+            }
+        }
+        val nextFile = viewModel.nextShownSlideIndex(idx)
+            ?.let { viewModel.slideFiles.getOrNull(it) }
+        val nextBitmap = nextFile?.let { f ->
+            withContext(Dispatchers.IO) {
+                try {
+                    org.jetbrains.skia.Image.makeFromEncoded(f.readBytes()).toComposeImageBitmap()
+                } catch (_: Exception) {
+                    null
+                }
+            }
+        }
+        presenterManager.setSelectedSlide(bitmap)
+        presenterManager.setLiveSlide(viewModel.selectedPresentation?.name, idx)
+        presenterManager.setNextSlide(nextBitmap)
+        presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(idx) { "" })
+    }
+    presenterManager.setPresentingMode(Presenting.PRESENTATION)
+    viewModel.deck?.let { presenterManager.presentationShowSlide(it, idx) }
+    presenterManager.setShowPresenterWindow(true)
+    viewModel.selectedPresentation?.let { f ->
+        wentLive(presentationRow(f, viewModel.slideFiles.size))
+    }
+    viewModel.selectedPresentation?.let { f ->
+        onInstanceLinkSendProject?.invoke(
+            ScheduleItem.PresentationItem(
+                id = java.util.UUID.randomUUID().toString(),
+                filePath = f.absolutePath,
+                fileName = f.nameWithoutExtension,
+                slideCount = viewModel.slideFiles.size,
+                fileType = f.extension.lowercase()
+            )
+        )
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)

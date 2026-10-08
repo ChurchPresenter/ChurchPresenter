@@ -2,6 +2,10 @@
 
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.core.models.schedule.ScheduleItem
+import kotlinx.coroutines.flow.MutableSharedFlow
+import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasContentDescription
@@ -12,7 +16,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.schedule.SCHEDULE_ROW_CARD_TAG
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.sharedui.utils.LiveHistoryLogger
@@ -21,6 +25,7 @@ import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.core.models.songs.SongFileParser
 import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongSettings
 import java.io.File
@@ -29,12 +34,15 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Taking a song live from its schedule row, through the composed root and the real Songs tab.
  *
- * Two things ride on this path that nothing else checks. The play log must count the song once —
- * the schedule handler and the Songs tab push both used to count it — and the on-screen history must
+ * Three things ride on this path that nothing else checks. The song itself must go up: the handler
+ * once put an empty placeholder slide on air ahead of it, a blank for a whole transition. The play
+ * log must count the song once -- the schedule handler and the Songs tab push both used to count
+ * it. And the on-screen history must
  * name the row, since the schedule knows the songbook the presenter never sees.
  *
  * The output callbacks drive a real [PresenterManager], as the app's own wiring does, and its live
@@ -86,6 +94,7 @@ class ScheduleSongGoLiveTest {
         presenter.onLiveStateChanged = { pm, _ -> LiveHistoryLogger.logLiveState(liveHistoryEntryOf(pm, null)) }
         val statistics = StatisticsManager()
         var actions = ScheduleActions()
+        val pushed = mutableListOf<LyricSection>()
         setContent {
             MaterialTheme {
                 MainDesktop(
@@ -96,7 +105,7 @@ class ScheduleSongGoLiveTest {
                     live = LiveOutputCallbacks(
                         presenting = { presenter.setPresentingMode(it) },
                         onVerseSelected = { presenter.setSelectedVerses(it) },
-                        onSongItemSelected = { presenter.setLyricSection(it) },
+                        onSongItemSelected = { pushed += it; presenter.setLyricSection(it) },
                         onSectionIndexChanged = { presenter.setSongDisplaySectionIndex(it) },
                         onLineIndexChanged = { presenter.setSongDisplayLineIndex(it) },
                     ),
@@ -125,5 +134,41 @@ class ScheduleSongGoLiveTest {
             "every lyric line of the song names its row",
         )
         assertEquals("schedule", lyricLines.first()["source"]?.jsonPrimitive?.content)
+        assertTrue(pushed.isNotEmpty(), "the song reached the output")
+        assertTrue(pushed.none { it.lines.isEmpty() }, "and no empty placeholder slide went up ahead of it")
+    }
+
+    @Test
+    fun `a song projected by a remote goes up whole and is logged under the remote`() = runComposeUiTest {
+        val presenter = PresenterManager()
+        presenter.onLiveStateChanged = { pm, _ -> LiveHistoryLogger.logLiveState(liveHistoryEntryOf(pm, null)) }
+        val remoteSongs = MutableSharedFlow<RemoteSongSelection>(extraBufferCapacity = 1)
+        val pushed = mutableListOf<LyricSection>()
+        setContent {
+            MaterialTheme {
+                MainDesktop(
+                    appSettings = library(),
+                    presenterManager = presenter,
+                    companionSatelliteViewModel = CompanionSatelliteViewModel(),
+                    live = LiveOutputCallbacks(
+                        presenting = { presenter.setPresentingMode(it) },
+                        onVerseSelected = { presenter.setSelectedVerses(it) },
+                        onSongItemSelected = { pushed += it; presenter.setLyricSection(it) },
+                    ),
+                    flows = RemoteControlFlows(remoteSelectSongFlow = remoteSongs),
+                )
+            }
+        }
+        waitForIdle()
+        val row = ScheduleItem.SongItem(
+            id = "r", songNumber = 1, title = "A Test Song", songbook = "Hymnal", songId = "Hymnal::1",
+        )
+        remoteSongs.tryEmit(RemoteSongSelection(row, goLive = true, source = "remote"))
+        waitUntil(timeoutMillis = 5_000) { presenter.slideContent.value == Presenting.LYRICS }
+
+        assertTrue(pushed.isNotEmpty() && pushed.none { it.lines.isEmpty() }, "the song itself, never a blank")
+        val lyricLine = historyLines().last { it["contentType"]?.jsonPrimitive?.content == "LYRICS" }
+        assertEquals("Hymnal::1", lyricLine["songId"]?.jsonPrimitive?.content)
+        assertEquals("remote", lyricLine["source"]?.jsonPrimitive?.content)
     }
 }

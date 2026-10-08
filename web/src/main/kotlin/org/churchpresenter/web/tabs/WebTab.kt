@@ -1,5 +1,6 @@
 package org.churchpresenter.web.tabs
 
+import org.churchpresenter.sharedui.composables.goLiveKeyTarget
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -142,7 +143,11 @@ fun WebTab(
     }
     tab.WebTabEffects(selectedWebsiteItem, selectedWebsiteItemVersion)
 
-    Column(modifier = modifier.fillMaxSize()) {
+    // Go Live on a key, under the button's condition, and not for the page already on screen.
+    val webCapable = remember(appSettings.projectionSettings) { hasWebCapableOutput(appSettings.projectionSettings) }
+    val canGoLive = tab.urlInput.isNotBlank() && hasSecondaryDisplay && webCapable &&
+        !(isLive && tab.liveUrl == tab.currentUrlNormalised)
+    Column(modifier = modifier.fillMaxSize().goLiveKeyTarget(enabled = canGoLive) { tab.goLive() }) {
         tab.WebToolbarCard()
         // The output picker and the preview share one card.
         tab.WebPreviewCard(Modifier.weight(1f))

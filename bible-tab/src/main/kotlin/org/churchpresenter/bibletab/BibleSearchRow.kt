@@ -2,6 +2,7 @@ package org.churchpresenter.bibletab
 
 import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.composables.SearchFieldFocus
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.clickable
@@ -93,6 +94,7 @@ internal fun BibleSearchRow(
     onCycleSearchMode: () -> Unit,
     onScopeSelected: (Int) -> Unit,
     onModeSelected: (Int) -> Unit,
+    searchFocus: SearchFieldFocus = remember { SearchFieldFocus() },
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth().searchBarCard()) {
         val searchIsNarrow = maxWidth < 440.dp
@@ -110,10 +112,11 @@ internal fun BibleSearchRow(
                         SearchModeChip(
                             searchMode,
                             onCycleSearchMode,
-                            modifier = Modifier.guideTarget(GuideTargets.BIBLE_SEARCH_MODE),
+                            modifier = Modifier.guideTarget(GuideTargets.BIBLE_SEARCH_MODE).guideTarget(GuideTargets.BIBLE_SEARCH),
                         )
                     },
-                    modifier = Modifier.fillMaxWidth().guideTarget(GuideTargets.BIBLE_SEARCH)
+                    modifier = Modifier.fillMaxWidth().guideTarget(GuideTargets.BIBLE_SEARCH),
+                    focus = searchFocus,
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -155,10 +158,11 @@ internal fun BibleSearchRow(
                         SearchModeChip(
                             searchMode,
                             onCycleSearchMode,
-                            modifier = Modifier.guideTarget(GuideTargets.BIBLE_SEARCH_MODE),
+                            modifier = Modifier.guideTarget(GuideTargets.BIBLE_SEARCH_MODE).guideTarget(GuideTargets.BIBLE_SEARCH),
                         )
                     },
-                    modifier = Modifier.weight(1f).guideTarget(GuideTargets.BIBLE_SEARCH)
+                    modifier = Modifier.weight(1f).guideTarget(GuideTargets.BIBLE_SEARCH),
+                    focus = searchFocus,
                 )
                 DropdownSelector(
                     label = stringResource(Res.string.scope),

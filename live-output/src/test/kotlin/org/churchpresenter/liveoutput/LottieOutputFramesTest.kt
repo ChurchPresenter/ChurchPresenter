@@ -13,6 +13,7 @@ import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -94,6 +95,33 @@ class LottieOutputFramesTest {
 
         assertEquals(setOf(IntSize(3840, 2160)), sizes())
         assertEquals(listOf(desktop.copy(width = 3840, height = 2160)), asked, "same rate and length, larger")
+    }
+
+    @Test
+    fun `on a machine short of memory a large output draws the desktop frames scaled`() {
+        val small = LottieOutputFrames(scope, currentFrameIndex = { 1 }, enabled = false) { _, variant ->
+            synchronized(asked) { asked += variant }
+            CompletableDeferred()
+        }
+        small.setContent(json, desktop)
+        small.hold().resize(3840, 2160)
+
+        assertTrue(small.variants.isEmpty(), "no 4K stream")
+        assertTrue(asked.isEmpty(), "nothing is pre-rendered for it")
+        assertNull(small.frameFor(3840, 2160), "so the output falls back to the desktop frames")
+        small.setContent(null, null)
+    }
+
+    @Test
+    fun `an 8 GB machine counts as enough memory, a 4 GB one does not, and an unknown one does`() {
+        val gib = 1024L * 1024 * 1024
+        assertTrue(hasMemoryForOutputFrames(8 * gib))
+        // What Windows reports for 8 GB of RAM once the firmware and the GPU have kept theirs.
+        assertTrue(hasMemoryForOutputFrames(7 * gib + 900L * 1024 * 1024))
+        assertFalse(hasMemoryForOutputFrames(4 * gib))
+        assertFalse(hasMemoryForOutputFrames(MIN_MEMORY_FOR_OUTPUT_FRAMES - 1))
+        assertTrue(hasMemoryForOutputFrames(null), "a JVM that cannot say keeps the larger frames")
+        assertTrue(physicalMemoryBytes()?.let { it > 0 } ?: true, "read from the platform, positive when known")
     }
 
     @Test

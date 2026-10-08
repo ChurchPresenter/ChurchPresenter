@@ -4,6 +4,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import org.churchpresenter.bibletab.ctrlClickVerse
 import org.churchpresenter.bibletab.BibleLabel
+import org.churchpresenter.bibletab.BibleVerseStatistics
 import org.churchpresenter.bibletab.SECOND_MODULE
 import org.churchpresenter.bibletab.actionButton
 import org.churchpresenter.bibletab.bibleFixture
@@ -12,7 +13,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.OutputProfile
@@ -64,7 +65,7 @@ class BibleTabGoLiveTelemetryTest {
         isolateHome()
         val statistics = StatisticsManager()
 
-        bibleTab(statistics = statistics) { vm, _ ->
+        bibleTab(statistics = BibleVerseStatistics(statistics::recordVerseDisplay)) { vm, _ ->
             vm.ctrlClickVerse(1)
             vm.ctrlClickVerse(2)
             waitForIdle()
@@ -102,7 +103,7 @@ class BibleTabGoLiveTelemetryTest {
         isolateHome()
         val statistics = StatisticsManager()
 
-        bibleTab(statistics = statistics) { _, _ ->
+        bibleTab(statistics = BibleVerseStatistics(statistics::recordVerseDisplay)) { _, _ ->
             goLive()
 
             val logged = statistics.getAllVersesInRange(0L, Long.MAX_VALUE)

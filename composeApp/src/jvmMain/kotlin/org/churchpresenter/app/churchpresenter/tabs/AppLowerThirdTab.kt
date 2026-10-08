@@ -30,6 +30,8 @@ fun AppLowerThirdTab(
     ) -> Unit,
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit,
     modifier: Modifier = Modifier,
+    /** The preset on air, by name, or null when none is. */
+    liveLowerThirdName: String? = null,
 ) {
     LowerThirdTab(
         modifier = modifier,
@@ -40,6 +42,7 @@ fun AppLowerThirdTab(
         onAddToSchedule = onAddToSchedule,
         onGoLive = onGoLive,
         onOpenLottieGen = onOpenLottieGen,
+        liveLowerThirdName = liveLowerThirdName,
         previewOutput = rememberPreviewOutput(appSettings, Constants.PREVIEW_TAB_LOWER_THIRD, Presenting.LOWER_THIRD),
         outputPicker = { pickerModifier ->
             PreviewOutputPicker(

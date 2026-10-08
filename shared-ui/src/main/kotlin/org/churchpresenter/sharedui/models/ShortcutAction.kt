@@ -10,6 +10,7 @@ import org.churchpresenter.strings.generated.resources.shortcut_category_menus
 import org.churchpresenter.strings.generated.resources.shortcut_category_pictures
 import org.churchpresenter.strings.generated.resources.shortcut_category_presentation
 import org.churchpresenter.strings.generated.resources.shortcut_category_songs
+import org.churchpresenter.strings.generated.resources.shortcut_category_tabs
 import org.churchpresenter.strings.generated.resources.shortcut_scope_bible_hint
 import org.churchpresenter.strings.generated.resources.shortcut_scope_canvas_hint
 import org.churchpresenter.strings.generated.resources.shortcut_scope_global_hint
@@ -18,6 +19,7 @@ import org.churchpresenter.strings.generated.resources.shortcut_scope_menus_hint
 import org.churchpresenter.strings.generated.resources.shortcut_scope_pictures_hint
 import org.churchpresenter.strings.generated.resources.shortcut_scope_presentation_hint
 import org.churchpresenter.strings.generated.resources.shortcut_scope_songs_hint
+import org.churchpresenter.strings.generated.resources.shortcut_scope_tabs_hint
 import org.churchpresenter.strings.generated.resources.shortcut_description_add_to_schedule
 import org.churchpresenter.strings.generated.resources.shortcut_description_blank_output
 import org.churchpresenter.strings.generated.resources.shortcut_description_clicker_next
@@ -74,6 +76,8 @@ import org.churchpresenter.strings.generated.resources.shortcut_description_quic
 import org.churchpresenter.strings.generated.resources.shortcut_description_quick_background_reset
 import org.churchpresenter.strings.generated.resources.shortcut_description_undo
 import org.churchpresenter.strings.generated.resources.shortcut_description_take
+import org.churchpresenter.strings.generated.resources.shortcut_description_go_live_key
+import org.churchpresenter.strings.generated.resources.shortcut_description_switch_search_live
 import org.churchpresenter.core.models.shortcuts.KeyChord
 import org.jetbrains.compose.resources.StringResource
 
@@ -93,6 +97,9 @@ import org.jetbrains.compose.resources.StringResource
 enum class ShortcutScope(val titleRes: StringResource, val hintRes: StringResource) {
     MENU(Res.string.shortcut_category_menus, Res.string.shortcut_scope_menus_hint),
     GLOBAL(Res.string.shortcut_category_global, Res.string.shortcut_scope_global_hint),
+
+    /** Handled by whichever tab holds the keyboard — the same action on every tab that has it. */
+    TABS(Res.string.shortcut_category_tabs, Res.string.shortcut_scope_tabs_hint),
     BIBLE(Res.string.shortcut_category_bible, Res.string.shortcut_scope_bible_hint),
     SONGS(Res.string.shortcut_category_songs, Res.string.shortcut_scope_songs_hint),
     PICTURES(Res.string.shortcut_category_pictures, Res.string.shortcut_scope_pictures_hint),
@@ -106,9 +113,14 @@ enum class ShortcutScope(val titleRes: StringResource, val hintRes: StringResour
      * A tab scope only competes with itself and with [GLOBAL], because a tab handler and the root
      * handler both see the event while that tab has focus. Two different tab scopes never do —
      * `Space` means play/pause in both Media and Pictures and always has.
+     *
+     * [TABS] is checked by every tab handler, so it competes with every tab scope as well.
      */
     fun overlaps(other: ShortcutScope): Boolean =
-        this == other || this == GLOBAL || other == GLOBAL
+        this == other || this == GLOBAL || other == GLOBAL ||
+            (this == TABS && other.isTab) || (other == TABS && isTab)
+
+    private val isTab: Boolean get() = this != MENU && this != GLOBAL && this != TABS
 }
 
 /**
@@ -163,6 +175,12 @@ enum class ShortcutAction(
     // ── Global ───────────────────────────────────────────────────────────────
     CLEAR_OUTPUT(ShortcutScope.GLOBAL, Res.string.shortcut_description_escape,
         listOf(KeyChord.of(Key.Escape))),
+    // ── Every tab with a Go Live button ──────────────────────────────────────
+    GO_LIVE(ShortcutScope.TABS, Res.string.shortcut_description_go_live_key,
+        listOf(KeyChord.of(Key.Enter), KeyChord.of(Key.NumPadEnter))),
+    SWITCH_SEARCH_LIVE(ShortcutScope.TABS, Res.string.shortcut_description_switch_search_live,
+        listOf(KeyChord.of(Key.Tab, ctrl = true))),
+
     // Preview mode's Take. Unbound until someone picks a key for it.
     TAKE(ShortcutScope.GLOBAL, Res.string.shortcut_description_take, emptyList()),
     UNDO(ShortcutScope.GLOBAL, Res.string.shortcut_description_undo,

@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import org.churchpresenter.helper.ui.GuideSpotlightHost
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.app.churchpresenter.dialogs.songEditorBackgroundButton
 import org.churchpresenter.songs.EditSongDialog
 import org.churchpresenter.liveoutput.lottieBandPath

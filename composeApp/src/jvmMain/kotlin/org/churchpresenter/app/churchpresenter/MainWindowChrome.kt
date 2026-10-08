@@ -22,7 +22,7 @@ import androidx.compose.runtime.Composable
 import kotlinx.coroutines.launch
 import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
+import org.churchpresenter.updater.UpdateChecker
 import java.io.File
 import java.util.Locale
 import org.churchpresenter.app.churchpresenter.remote.shouldUseRemoteContent

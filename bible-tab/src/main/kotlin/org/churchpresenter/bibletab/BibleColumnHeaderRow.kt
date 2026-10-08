@@ -156,7 +156,8 @@ internal fun BibleVerseHeader(
 
         GoLiveButton(
             onClick = onGoLive,
-            tooltipText = goLiveStr
+            tooltipText = goLiveStr,
+            showsShortcut = true,
         )
     }
 }

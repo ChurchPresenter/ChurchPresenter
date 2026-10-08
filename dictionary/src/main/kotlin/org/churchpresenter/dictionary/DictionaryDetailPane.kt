@@ -274,7 +274,8 @@ private fun DictionaryDetailActionRow(
                 GoLiveButton(
                     onClick = { entry?.let { onGoLive(it) } },
                     enabled = entry != null,
-                    tooltipText = goLiveStr
+                    tooltipText = goLiveStr,
+                    showsShortcut = true,
                 )
             }
         }

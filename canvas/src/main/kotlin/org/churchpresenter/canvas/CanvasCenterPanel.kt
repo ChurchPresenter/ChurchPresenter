@@ -245,17 +245,9 @@ private fun CanvasTabScope.CanvasSceneActions(currentScene: Scene) {
 
         // Go Live
         GoLiveButton(
-            onClick = {
-                onPresentScene(currentScene)
-                wentLive(
-                    ScheduleItem.SceneItem(
-                        id = UUID.randomUUID().toString(),
-                        sceneId = currentScene.id,
-                        sceneName = currentScene.name,
-                    )
-                )
-            },
-            tooltipText = stringResource(Res.string.go_live)
+            onClick = { goLive(currentScene) },
+            tooltipText = stringResource(Res.string.go_live),
+            showsShortcut = true,
         )
     }
 }
@@ -478,4 +470,10 @@ internal fun CanvasTabScope.CanvasPropertiesPanel(sceneViewModel: SceneViewModel
             }
         }
     }
+}
+
+/** Puts [scene] on screen. */
+internal fun CanvasTabScope.goLive(scene: Scene) {
+    onPresentScene(scene)
+    wentLive(ScheduleItem.SceneItem(id = UUID.randomUUID().toString(), sceneId = scene.id, sceneName = scene.name))
 }

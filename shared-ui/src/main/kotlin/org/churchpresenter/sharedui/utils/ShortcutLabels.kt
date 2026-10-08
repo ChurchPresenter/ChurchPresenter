@@ -183,7 +183,8 @@ fun ShortcutMap.searchText(action: ShortcutAction): String {
  * Every chord bound to [action], joined — or an empty string when it is unbound.
  *
  * Empty rather than a placeholder so callers can decide: the settings tab shows "Not set", while an
- * inline hint hides itself entirely rather than describing a key that does nothing.
+ * inline hint hides itself entirely rather than describing a key that does nothing. Two chords that
+ * read the same are named once: Go Live's Enter and numpad Enter are both "Enter".
  */
 @Composable
 fun ShortcutMap.label(action: ShortcutAction): String {
@@ -191,7 +192,7 @@ fun ShortcutMap.label(action: ShortcutAction): String {
     // context, and KeyChord.label() reads string resources.
     val parts = mutableListOf<String>()
     chordsFor(action).forEach { parts.add(it.label()) }
-    return parts.joinToString(CHORD_SEPARATOR)
+    return parts.distinct().joinToString(CHORD_SEPARATOR)
 }
 
 /** [label] with "Not set" substituted, for places that must render something. */

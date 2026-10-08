@@ -91,6 +91,8 @@ internal fun canvasTab(
     cameraHost: CameraHost? = CameraHost(PINNED_CAMERAS, ffmpegAvailable = true),
     /** Whether the host offers Save preset, as the app does when the calendar is there to keep it. */
     offerSavePreset: Boolean = false,
+    /** The scene the host reports on air, read from the seeded view model; none by default. */
+    liveSceneId: (SceneViewModel) -> String? = { null },
     block: ComposeUiTest.(vm: SceneViewModel, reports: CanvasReports) -> Unit,
 ) {
     val realHome = System.getProperty("user.home")
@@ -116,6 +118,7 @@ internal fun canvasTab(
                             } else {
                                 null
                             },
+                            liveSceneId = liveSceneId(vm),
                             cameraHost = cameraHost,
                         )
                         }

@@ -55,6 +55,10 @@ import org.churchpresenter.sharedui.composables.SectionLabelRow
 import org.churchpresenter.sharedui.composables.ActionIconButton
 import org.churchpresenter.sharedui.composables.AddToScheduleButton
 import org.churchpresenter.sharedui.composables.FocusHintBanner
+import org.churchpresenter.sharedui.composables.SearchKeyboardBanner
+import org.churchpresenter.sharedui.models.ShortcutAction
+import org.churchpresenter.sharedui.utils.LocalShortcuts
+import org.churchpresenter.sharedui.utils.labelOrUnbound
 import org.churchpresenter.sharedui.composables.FocusLostBanner
 import org.churchpresenter.sharedui.composables.GoLiveButton
 import androidx.compose.ui.platform.LocalDensity
@@ -74,7 +78,7 @@ import org.churchpresenter.icons.generated.resources.ic_add
 import org.churchpresenter.icons.generated.resources.ic_note
 import org.churchpresenter.icons.generated.resources.ic_edit
 import org.churchpresenter.strings.generated.resources.no_lyrics_available
-import org.churchpresenter.strings.generated.resources.songs_search_focus_hint
+import org.churchpresenter.strings.generated.resources.songs_browse_paused_hint
 import org.churchpresenter.strings.generated.resources.tab_focus_lost
 import org.churchpresenter.strings.generated.resources.song_title_slide
 import org.churchpresenter.strings.generated.resources.title
@@ -123,7 +127,12 @@ internal fun RowScope.SongLyricsPanel(
     lyricSections: () -> List<LyricSection>,
     onSectionSelected: (Int) -> Unit,
     onLineSelected: (Int) -> Unit,
+    /** Selects the live song again, on what is up. */
     onBackToLiveSong: () -> Unit,
+    /** True after a step key was held back because the selected song is not the live one. */
+    browsePausedHint: Boolean,
+    /** The search banner's click: the same as the search ⇄ live key. */
+    onSearchBannerClick: () -> Unit,
     onAddToSchedule: ((Int, String, String, String) -> Unit)?,
     onPresenting: (Presenting) -> Unit,
     sendToPresenter: (goLive: Boolean) -> Unit,
@@ -169,11 +178,7 @@ internal fun RowScope.SongLyricsPanel(
             RaisedButton(
                 shape = AppShape(6.dp),
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-                onClick = {
-                    onBackToLiveSong()
-                    onSectionSelected(live.sectionIndex)
-                    onLineSelected(live.lineIndex)
-                },
+                onClick = onBackToLiveSong,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {
                 Text(
@@ -198,18 +203,24 @@ internal fun RowScope.SongLyricsPanel(
             )
         }
 
-        // The same banner for the other way the keys stop working: the caret is still in the search
-        // box, so the tab's key handler is standing down. Not a lost focus -- the tab still has it,
-        // which is why the rescue banner above cannot cover this -- so it says where to click, and
-        // clicking it does exactly that. It disappears on its own once typing stops.
+        // Where the keyboard is, when it is not on the list: in the search box, where the arrow keys
+        // browse and nothing reaches the screen until Go Live; or held back from stepping a song that
+        // is not the live one. Clicking either does what the search ⇄ live key does.
         //
         // Sits here, directly above the words, rather than up with the rescue banner: it comes and
         // goes on every search, and higher up it would shove the Back to Live button down the panel
         // mid-service, which is the one control that must not move while something is live.
         if (searchFieldFocused) {
+            SearchKeyboardBanner(somethingLive = isPresenting, onClick = onSearchBannerClick)
+        } else if (browsePausedHint && showBackToLive && !dialogOpen) {
+            val shortcuts = LocalShortcuts.current
             FocusHintBanner(
-                text = stringResource(Res.string.songs_search_focus_hint),
-                onClick = { tabFocusRequester.requestFocus() },
+                text = stringResource(
+                    Res.string.songs_browse_paused_hint,
+                    shortcuts.labelOrUnbound(ShortcutAction.GO_LIVE),
+                    shortcuts.labelOrUnbound(ShortcutAction.SWITCH_SEARCH_LIVE),
+                ),
+                onClick = onBackToLiveSong,
             )
         }
 
@@ -325,7 +336,8 @@ private fun LyricsActionBar(
         GoLiveButton(
             onClick = { sendToPresenter(true); onPresenting(Presenting.LYRICS); tabFocusRequester.requestFocus() },
             enabled = hasSongSelected,
-            tooltipText = goLiveStr
+            tooltipText = goLiveStr,
+            showsShortcut = true,
         )
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -40,6 +41,7 @@ import org.churchpresenter.strings.generated.resources.exact_match
 import org.churchpresenter.strings.generated.resources.no_results_found
 import org.churchpresenter.strings.generated.resources.tab_focus_lost
 import org.churchpresenter.sharedui.composables.FocusLostBanner
+import org.churchpresenter.sharedui.composables.SearchKeyboardBanner
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.moveBibleTranslation
 import org.churchpresenter.settings.swapBibleTranslations
@@ -88,13 +90,14 @@ internal fun ColumnScope.BibleTabContent(
             selectedScope = selectedScope,
             modeOptions = modeOptions,
             selectedMode = selectedMode,
-            onQueryChange = { viewModel.onSmartQueryChanged(it) },
+            onQueryChange = { searchQueryChanged(viewModel, it) },
             onClear = { viewModel.clearSearch(); focusRequester.requestFocus() },
             onSubmit = { viewModel.submitSmartQuery(); focusRequester.requestFocus() },
             onFocusChanged = { searchFieldFocused = it },
             onCycleSearchMode = { viewModel.cycleSearchMode(); focusRequester.requestFocus() },
             onScopeSelected = viewModel::updateSelectedScopeIndex,
             onModeSelected = viewModel::updateSelectedModeIndex,
+            searchFocus = searchFocus,
         )
 
 
@@ -105,9 +108,11 @@ internal fun ColumnScope.BibleTabContent(
         if (appSettings.bibleSettings.primaryBible.isBlank() && viewModel.primaryBible.value == null) {
             BibleNoPrimaryHint(appSettings)
         } else if (isSearchMode && searchResults.isNotEmpty()) {
+            LaunchedEffect(searchResults) { ui.highlightedResult = -1 }
             BibleSearchResults(
                 results = searchResults,
                 query = searchQuery,
+                highlightedIndex = ui.highlightedResult,
                 onResultChosen = { result ->
                     viewModel.selectSearchResult(result)
                     viewModel.clearSearch()
@@ -272,6 +277,10 @@ private fun ColumnScope.BibleBrowser(viewModel: BibleViewModel, tab: BibleTabSco
         // No top gap of its own: the search card above already ends in an 8dp margin, which
         // matches the banner's 8dp below.
         FocusLostBanner(focusRescue, stringResource(Res.string.tab_focus_lost), topPadding = 0.dp)
+        // The other way the step keys stand down: the caret is in the search box, browsing.
+        if (searchFieldFocused) {
+            SearchKeyboardBanner(somethingLive = currentIsPresenting, onClick = { switchSearchLive(viewModel) })
+        }
 
         // Provided rather than passed: the verse row that draws it is five levels down.
         CompositionLocalProvider(

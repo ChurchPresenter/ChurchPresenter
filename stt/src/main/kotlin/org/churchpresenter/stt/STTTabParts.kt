@@ -153,7 +153,8 @@ internal fun ConnectionBar(
         GoLiveButton(
             onClick = onGoLive,
             enabled = connected && !isLive,
-            tooltipText = stringResource(Res.string.stt_go_live)
+            tooltipText = stringResource(Res.string.stt_go_live),
+            showsShortcut = true,
         )
     }
 }

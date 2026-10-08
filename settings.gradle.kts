@@ -174,3 +174,11 @@ include(":live-show")
 // The live output: PresenterManager and what is on air, the output windows and the stage monitor, and
 // the off-screen outputs (NDI, OMT, Browser Source, DeckLink). Depended on by :composeApp.
 include(":live-output")
+
+// Statistics: what was presented and when, the play log, and the CCLI report window over them.
+// Depended on by :composeApp.
+include(":statistics")
+
+// The updater: the GitHub release check, the installer download and the update window. Depended on
+// by :composeApp.
+include(":updater")

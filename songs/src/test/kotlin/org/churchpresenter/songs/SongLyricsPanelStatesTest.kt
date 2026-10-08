@@ -24,7 +24,7 @@ class SongLyricsPanelStatesTest {
     private fun ComposeUiTest.has(matcher: androidx.compose.ui.test.SemanticsMatcher): Boolean =
         onAllNodes(matcher).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
 
-    private val searchHint = "Keyboard is in the search box"
+    private val searchHint = "Searching —"
 
     private val bilingual = listOf(
         SongFixture(

@@ -44,9 +44,11 @@ import org.churchpresenter.sharedui.composables.ToolbarKey
 import org.churchpresenter.sharedui.composables.ToolbarKeyStyle
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.bibletab.BibleTab
+import org.churchpresenter.bibletab.BibleVerseStatistics
 import org.churchpresenter.companionsurface.CompanionSurfaceTab
 import org.churchpresenter.crosswordtab.CrosswordTab
 import org.churchpresenter.app.churchpresenter.tabs.AppSTTTab
+import org.churchpresenter.songs.SongPlayCounts
 import org.churchpresenter.songs.SongsTab
 import org.churchpresenter.app.churchpresenter.tabs.AppSongEditor
 import org.churchpresenter.app.churchpresenter.tabs.recordSongWentLive
@@ -54,7 +56,7 @@ import org.churchpresenter.presenter.titleSlideSection
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.app.churchpresenter.tabs.getStringName
-import org.churchpresenter.app.churchpresenter.data.asDurationRow
+import org.churchpresenter.statistics.asDurationRow
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.theme.components.RaisedCheckbox
 import org.jetbrains.compose.resources.painterResource
@@ -235,13 +237,17 @@ private fun MainDesktopScope.BibleTabPane() {
         },
         selectedVerseItem = state.selectedBibleVerseItem,
         selectedVerseItemVersion = state.selectedBibleVerseItemVersion,
+        selectedVerseItemGoLive = state.selectedBibleVerseItemGoLive,
         onVerseSelected = live.onVerseSelected,
         onInstanceLinkSendVerse = link.sendVerse,
         onInstanceLinkSendBibleHold = link.sendBibleHold,
         onPresenting = live.presenting,
         isPresenting = slideContent == Presenting.BIBLE,
         bibleOutput = presenterManager,
-        verseStatistics = statisticsManager,
+        // :statistics knows nothing of :bible-tab, so the tab's seam is adapted here.
+        verseStatistics = remember(statisticsManager) {
+            statisticsManager?.let { BibleVerseStatistics(it::recordVerseDisplay) }
+        },
         onVerseWentLive = { presenterManager.previewBus.onAir(Presenting.BIBLE) { recordBibleWentLive(appSettings) } },
         verseSequenceLog = verseSequenceLog,
         crossReferences = sharedCrossReferences,
@@ -276,13 +282,16 @@ private fun MainDesktopScope.SongsTabPane() {
         onInstanceLinkSendSongSection = link.sendSongSection,
         selectedSongItem = state.selectedSongItem,
         selectedSongItemVersion = state.selectedSongItemVersion,
+        selectedSongItemAction = state.selectedSongItemAction,
+        selectedSongItemSource = state.selectedSongItemSource,
         onSongItemSelected = live.onSongItemSelected,
         onAllSectionsChanged = live.onAllSectionsChanged,
         onSectionIndexChanged = live.onSectionIndexChanged,
         onLineIndexChanged = live.onLineIndexChanged,
         onPresenting = live.presenting,
         isPresenting = slideContent == Presenting.LYRICS,
-        playCounts = statisticsManager,
+        // Likewise :songs' seam.
+        playCounts = remember(statisticsManager) { statisticsManager?.let { SongPlayCounts(it::getSongPlayCount) } },
         dialogDismissSignal = dialogDismissSignal
     )
 }

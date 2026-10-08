@@ -310,35 +310,39 @@ private fun LowerThirdTabScope.LowerThirdScheduleAndLive() {
     // Go Live
     GoLiveButton(
         modifier = Modifier.guideTarget(GuideTargets.LOWER_THIRD_GO_LIVE),
-        onClick = {
-            val atemSettings = appSettings.atemSettings
-            if (atemSettings.goLiveKey && atemConfigured) {
-                val durationMs = LottieRenderCache.lottieDurationMs(jsonContent) ?: totalDurationMs()
-                val name = selectedFile?.nameWithoutExtension ?: ""
-                val useDsk = atemSettings.useDownstreamKey
-                scope.launch {
-                    val keyError = LowerThirdSequencer.run(
-                        clip = LowerThirdClip(
-                            name = name,
-                            json = jsonContent,
-                            durationMs = durationMs,
-                            pauseAtFrame = false,
-                            pauseDurationMs = 0L,
-                        ),
-                        key = LowerThirdKey(
-                            mixEffect = if (useDsk) 0 else atemSettings.keyMixEffect,
-                            keyer = if (useDsk) atemSettings.dskIndex else atemSettings.keyIndex,
-                            useDownstreamKey = useDsk,
-                        ),
-                        atem = atemSettings,
-                    )
-                    if (keyError != null) atemError = keyError
-                }
-            } else {
-                onGoLive(jsonContent, false, -1f, 0L, selectedFile?.nameWithoutExtension ?: "")
-            }
-        },
+        onClick = ::goLive,
         enabled = canPlay,
-        tooltipText = stringResource(Res.string.go_live)
+        tooltipText = stringResource(Res.string.go_live),
+        showsShortcut = true,
     )
+}
+
+/** Puts the selected preset on air: keyed onto the ATEM when set up to, else onto the outputs. */
+internal fun LowerThirdTabScope.goLive() {
+    val atemSettings = appSettings.atemSettings
+    if (atemSettings.goLiveKey && atemConfigured) {
+        val durationMs = LottieRenderCache.lottieDurationMs(jsonContent) ?: totalDurationMs()
+        val name = selectedFile?.nameWithoutExtension ?: ""
+        val useDsk = atemSettings.useDownstreamKey
+        scope.launch {
+            val keyError = LowerThirdSequencer.run(
+                clip = LowerThirdClip(
+                    name = name,
+                    json = jsonContent,
+                    durationMs = durationMs,
+                    pauseAtFrame = false,
+                    pauseDurationMs = 0L,
+                ),
+                key = LowerThirdKey(
+                    mixEffect = if (useDsk) 0 else atemSettings.keyMixEffect,
+                    keyer = if (useDsk) atemSettings.dskIndex else atemSettings.keyIndex,
+                    useDownstreamKey = useDsk,
+                ),
+                atem = atemSettings,
+            )
+            if (keyError != null) atemError = keyError
+        }
+    } else {
+        onGoLive(jsonContent, false, -1f, 0L, selectedFile?.nameWithoutExtension ?: "")
+    }
 }
