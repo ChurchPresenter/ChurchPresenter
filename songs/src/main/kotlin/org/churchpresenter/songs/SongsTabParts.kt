@@ -260,10 +260,10 @@ private fun SongsTabController.SongListSide(row: RowScope) = with(row) {
         favoriteSongs = { viewModel.getFavoriteSongs() },
         playCountFor = { id -> playCounts?.getSongPlayCount(id) },
         searchMatchFor = viewModel::searchMatchFor,
-        onSearchQueryChange = { viewModel.updateSearchQuery(it) },
+        onSearchQueryChange = { searchFor(it) },
         onSearchFocusChanged = { searchFieldFocused = it },
         onFilterTypeChange = { viewModel.updateFilterType(it) },
-        onSongbookChange = { viewModel.updateSelectedSongbook(it) },
+        onSongbookChange = { pickSongbook(it) },
         onSortChange = { viewModel.updateSort(it) },
         onSelectSong = { viewModel.selectSong(it) },
         onSelectSongByDetails = { number, title, songbook, songId ->

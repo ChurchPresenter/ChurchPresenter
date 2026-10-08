@@ -20,17 +20,48 @@ internal fun SongsTabController.goLiveSelected(): Boolean {
     return true
 }
 
-/** Selects the live song again, on the section and line that are up. Changes nothing on screen. */
+/**
+ * Selects the live song again, on the section and line that are up. Changes nothing on screen.
+ * When the search had to be cleared to show that song, it is held for the way back into search.
+ */
 internal fun SongsTabController.backToLive() {
     val songId = live.songId ?: return
-    if (selectedSong?.songId != songId) viewModel.selectSongById(songId)
+    if (selectedSong?.songId != songId) {
+        val search = ParkedSearch(viewModel.searchQuery.value, viewModel.selectedSongbook.value)
+        viewModel.selectSongById(songId)
+        if (search != ParkedSearch(viewModel.searchQuery.value, viewModel.selectedSongbook.value)) {
+            parkedSearch = search
+        }
+    }
     viewModel.selectSection(live.sectionIndex)
     viewModel.setLineIndex(live.lineIndex)
     browsePausedHint = false
 }
 
-/** Moves the keyboard into the search box with its query selected. */
-internal fun SongsTabController.focusSearch() = searchFocus.focusAndSelectAll()
+/**
+ * Moves the keyboard into the search box with its query selected, putting back the search that
+ * going back to live cleared. Only the highlight moves; nothing reaches the output.
+ */
+internal fun SongsTabController.focusSearch() {
+    parkedSearch?.let {
+        parkedSearch = null
+        viewModel.updateSelectedSongbook(it.songbook)
+        viewModel.updateSearchQuery(it.query)
+    }
+    searchFocus.focusAndSelectAll()
+}
+
+/** The operator's own search: a search held for the way back is dropped. */
+internal fun SongsTabController.searchFor(query: String) {
+    parkedSearch = null
+    viewModel.updateSearchQuery(query)
+}
+
+/** The operator's own songbook: a search held for the way back is dropped. */
+internal fun SongsTabController.pickSongbook(songbook: String) {
+    parkedSearch = null
+    viewModel.updateSelectedSongbook(songbook)
+}
 
 /** The search ⇄ live key: out of search back to what is live (or the list), or into search. */
 internal fun SongsTabController.switchSearchLive() {
