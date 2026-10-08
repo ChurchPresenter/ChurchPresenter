@@ -2465,7 +2465,7 @@
     <string name="helper_tip_auto_fit">歌词默认会自动适应屏幕大小。可以在配置文件中设置最大和最小字号。</string>
     <string name="helper_tip_schedule_drag">把歌曲、经文和图片拖到程序单上，就能提前安排好整场聚会。</string>
     <string name="helper_tip_verse_typing">在圣经标签页中，你可以直接在搜索框里输入“jn 3 16”这样的经文出处。</string>
-    <string name="helper_tip_remote">手机和平板可以通过远程服务器控制幻灯片。</string>
+    <string name="helper_tip_remote">手机或平板可以控制 ChurchPresenter：在会场任何地方显示歌曲、经文和幻灯片。打开服务器，然后用 ChurchPresenter 应用扫描它的二维码。</string>
     <string name="helper_display_title">显示设置</string>
     <string name="helper_display_one_screen">我只找到一个显示器。连接投影仪或电视后，我会在这里找到它。如果是直播，请改在投影设置中设置 NDI 或 Browser Source。</string>
     <string name="helper_display_pick">会众看的是哪一个？</string>
@@ -2495,4 +2495,23 @@
     <string name="settings_helper_show">在主窗口角落显示助手 Wick</string>
     <string name="settings_helper_tips">提供每日提示</string>
     <string name="settings_helper_title">助手</string>
+    <string name="helper_hint_identify">点击“%1$s”，每个屏幕都会显示自己的编号，让您分清哪个屏幕是哪个。</string>
+    <string name="helper_open_song_library_compare">正在打开歌曲库管理器。选一首有多种语言的歌曲，然后选择“比较译文”。“仅显示问题”只列出需要注意的段落。</string>
+    <string name="helper_tip_calendar">你可以在日历管理器中提前安排以后的聚会，每场聚会都有自己的聚会流程。</string>
+    <string name="helper_tip_calendar_cues">日历管理器可以自动启动聚会前的标记。设置好每一项的开始时间，它就会在那个时间显示到屏幕上。</string>
+    <string name="helper_tip_calendar_sync">你安排好的聚会可以与手机和平板同步，这样整周都能在手机应用上安排，即使这台电脑关着也可以。</string>
+    <string name="helper_hint_calendar_sync">打开“%1$s”，然后用手机或平板上的 ChurchPresenter 应用扫描二维码。</string>
+    <string name="helper_tip_qa_tunnel">会众不用连接教会的 Wi-Fi，也能用手机向问答环节发送问题。启用公开访问后，他们用移动数据就能发送。</string>
+    <string name="helper_hint_qa_remote">点击“%1$s”，打开加入码和共享选项。</string>
+    <string name="helper_hint_qa_public_access">点击“%1$s”。之后大家就可以扫描加入码，用移动数据发送问题，不需要 Wi-Fi。</string>
+    <string name="helper_tip_lottie_background">圣经和歌曲的背景可以播放动画开场和结束。选择 Lottie 背景，文字出现时它会以动画进入，文字清除时以动画退出。</string>
+    <string name="helper_tip_two_translations">为了让屏幕更清晰，一台投影仪上同时显示的圣经译本或歌曲语言最好不超过两种。每个输出的配置文件决定它显示哪些。</string>
+    <string name="helper_tip_hide_slides">你可以隐藏图片或演示幻灯片而不删除它：点击缩略图右下角的眼睛图标，逐张切换或自动播放时就会跳过它。</string>
+    <string name="helper_tip_metronome">舞台监视器可以为乐队显示节拍器：在歌曲编辑器中设置歌曲每分钟的拍数，歌曲显示期间它会一直保持节拍。</string>
+    <string name="helper_hint_song_tempo">在“%1$s”下输入每分钟的拍数。只有设置了舞台监视器后才会显示。</string>
+    <string name="helper_tip_song_features">一首歌曲可以显示和弦、以标题幻灯片开头，并且最多包含四种语言。在歌曲编辑器中添加和弦和语言；标题幻灯片由每个输出的配置文件打开。</string>
+    <string name="helper_tip_stt">语音转文字服务可以连接到 ChurchPresenter，把实时字幕或讲话内容的实时翻译显示在屏幕上。在“语音字幕”（STT）标签页中连接它。</string>
+    <string name="helper_tip_song_library">歌曲库管理器可以一次编辑多首歌曲：选中它们，选择“批量编辑…”，然后一起设置歌本、作者或其他任何字段。</string>
+    <string name="helper_tip_compare_translations">歌曲库管理器可以对照检查一首歌曲的各个语言：“比较译文”会找出缺少标题、只翻译了一部分或彼此对不上的段落。</string>
+    <string name="helper_tip_presets">任何图片集、演示、视频、通告或场景，都可以用“添加到程序单”旁边的“保存预设”保存为预设。然后在日历管理器的“预设”中把它添加到已安排的聚会。</string>
 </resources>

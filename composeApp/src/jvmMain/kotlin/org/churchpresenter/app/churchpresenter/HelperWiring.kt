@@ -190,7 +190,7 @@ internal class AppHelperExecutor(private val root: AppRootState) : HelperActionE
             root.showCalendarWindow = true
             ActionOutcome.Done(message = action.describe())
         }
-        HelperAction.OpenSongLibrary -> {
+        is HelperAction.OpenSongLibrary -> {
             root.showSongLibraryWindow = true
             ActionOutcome.Done(message = action.describe())
         }

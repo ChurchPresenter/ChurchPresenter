@@ -2448,7 +2448,7 @@
     <string name="helper_tip_auto_fit">Par défaut, le texte des cantiques s\'ajuste tout seul à l\'écran. Réglez sa taille maximale et minimale dans le profil.</string>
     <string name="helper_tip_schedule_drag">Faites glisser cantiques, versets et images dans le programme pour préparer tout le culte à l\'avance.</string>
     <string name="helper_tip_verse_typing">Dans l\'onglet Bible, vous pouvez taper une référence comme « jn 3 16 » directement dans la zone de recherche.</string>
-    <string name="helper_tip_remote">Les téléphones et tablettes peuvent faire défiler les diapositives grâce au serveur distant.</string>
+    <string name="helper_tip_remote">Un téléphone ou une tablette peut piloter ChurchPresenter : affichez cantiques, versets et diapositives de n\'importe où dans la salle. Activez le serveur, puis scannez son code avec l\'application ChurchPresenter.</string>
     <string name="helper_display_title">Configuration des écrans</string>
     <string name="helper_display_one_screen">Je ne trouve qu\'un seul écran. Branchez le projecteur ou la télévision, et je le trouverai ici. Pour une diffusion, configurez plutôt NDI ou une Browser Source dans les paramètres de Projection.</string>
     <string name="helper_display_pick">Lequel l\'assemblée voit-elle ?</string>
@@ -2478,4 +2478,23 @@
     <string name="settings_helper_show">Afficher Wick, l\'assistant, dans le coin de la fenêtre principale</string>
     <string name="settings_helper_tips">Proposer une astuce du jour</string>
     <string name="settings_helper_title">Assistant</string>
+    <string name="helper_hint_identify">Cliquez sur %1$s et chaque écran affiche son numéro, pour savoir lequel est lequel.</string>
+    <string name="helper_open_song_library_compare">Ouverture du Gestionnaire de la bibliothèque de cantiques. Choisissez un cantique en plusieurs langues et sélectionnez Comparer les traductions. Problèmes uniquement n\'affiche que les sections à revoir.</string>
+    <string name="helper_tip_calendar">Vous pouvez préparer les cultes à venir à l\'avance dans le Gestionnaire de calendrier, chacun avec son propre déroulé.</string>
+    <string name="helper_tip_calendar_cues">Le Gestionnaire de calendrier peut lancer tout seul les éléments d\'avant le culte. Réglez l\'heure de début de chaque élément, et il s\'affiche à l\'écran à ce moment-là.</string>
+    <string name="helper_tip_calendar_sync">Vos cultes planifiés peuvent se synchroniser avec les téléphones et tablettes : vous préparez depuis l\'application mobile toute la semaine, même quand cet ordinateur est éteint.</string>
+    <string name="helper_hint_calendar_sync">Activez %1$s, puis scannez le code avec l\'application ChurchPresenter sur le téléphone ou la tablette.</string>
+    <string name="helper_tip_qa_tunnel">Les participants peuvent envoyer des questions à une session de Q&amp;R depuis leur téléphone sans se connecter au Wi-Fi de l\'église. Activez l\'accès public et ils utilisent leurs données mobiles.</string>
+    <string name="helper_hint_qa_remote">Cliquez sur %1$s pour ouvrir le code d\'accès et les options de partage.</string>
+    <string name="helper_hint_qa_public_access">Cliquez sur %1$s. Les participants peuvent alors scanner le code d\'accès et envoyer des questions via leurs données mobiles, sans Wi-Fi.</string>
+    <string name="helper_tip_lottie_background">Les arrière-plans de la Bible et des cantiques peuvent jouer une entrée et une sortie animées. Choisissez un arrière-plan Lottie : il s\'anime à l\'apparition du texte et à sa disparition.</string>
+    <string name="helper_tip_two_translations">Pour un écran plus lisible, n\'affichez pas plus de deux versions de la Bible ou langues de cantique à la fois sur un même projecteur. Le profil de chaque sortie choisit lesquelles il affiche.</string>
+    <string name="helper_tip_hide_slides">Vous pouvez masquer une image ou une diapositive de présentation sans la supprimer : cliquez sur l\'œil en bas à droite de sa miniature, et elle est ignorée quand vous avancez ou lancez la lecture.</string>
+    <string name="helper_tip_metronome">Le moniteur de scène peut afficher un métronome pour les musiciens : réglez les battements par minute d\'un cantique dans l\'éditeur de cantiques, et il bat la mesure tant que le cantique est affiché.</string>
+    <string name="helper_hint_song_tempo">Tapez les battements par minute sous %1$s. Ce champ n\'apparaît qu\'une fois un moniteur de scène configuré.</string>
+    <string name="helper_tip_song_features">Un cantique peut afficher les accords, s\'ouvrir sur une diapositive de titre et contenir jusqu\'à quatre langues. Ajoutez accords et langues dans l\'éditeur de cantiques ; le profil de chaque sortie active la diapositive de titre.</string>
+    <string name="helper_tip_stt">Un service de transcription vocale peut se connecter à ChurchPresenter et afficher à l\'écran des sous-titres en direct, ou une traduction en direct de ce qui est dit. Connectez-le dans l\'onglet STT.</string>
+    <string name="helper_tip_song_library">Le Gestionnaire de la bibliothèque de cantiques modifie de nombreux cantiques à la fois : sélectionnez-les, choisissez Modification par lot…, et réglez le recueil, l\'auteur ou tout autre champ pour tous en même temps.</string>
+    <string name="helper_tip_compare_translations">Le Gestionnaire de la bibliothèque de cantiques peut confronter les langues d\'un cantique : Comparer les traductions trouve les sections sans titre, partiellement traduites ou qui ne correspondent pas.</string>
+    <string name="helper_tip_presets">Enregistrez n\'importe quelle série d\'images, présentation, vidéo, annonce ou scène comme préréglage avec Enregistrer le préréglage, à côté de Ajouter au programme. Ajoutez-le ensuite à un culte planifié depuis Préréglages dans le Gestionnaire de calendrier.</string>
 </resources>

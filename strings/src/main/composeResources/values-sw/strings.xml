@@ -2465,7 +2465,7 @@
     <string name="helper_tip_auto_fit">Maandishi ya wimbo hujitosheleza kwenye skrini yenyewe. Weka ukubwa wake mkubwa zaidi na mdogo zaidi katika wasifu.</string>
     <string name="helper_tip_schedule_drag">Buruta nyimbo, mistari na picha kwenye ratiba ili kupanga ibada nzima mapema.</string>
     <string name="helper_tip_verse_typing">Katika kichupo cha Biblia unaweza kuandika rejea kama “yoh 3 16” moja kwa moja kwenye kisanduku cha kutafuta.</string>
-    <string name="helper_tip_remote">Simu na kompyuta kibao zinaweza kuendesha slaidi kupitia seva ya mbali.</string>
+    <string name="helper_tip_remote">Simu au kompyuta kibao inaweza kudhibiti ChurchPresenter: weka nyimbo, mistari na slaidi kwenye skrini kutoka popote ukumbini. Washa seva, kisha changanua msimbo wake kwa programu ya ChurchPresenter.</string>
     <string name="helper_display_title">Kuweka skrini</string>
     <string name="helper_display_one_screen">Naona skrini moja tu. Unganisha projekta au TV, nami nitaipata hapa. Kwa mtiririko, weka NDI au Browser Source katika mipangilio ya Uonyeshaji badala yake.</string>
     <string name="helper_display_pick">Waumini wanaona ipi?</string>
@@ -2495,4 +2495,23 @@
     <string name="settings_helper_show">Onyesha Wick, msaidizi, kwenye kona ya dirisha kuu</string>
     <string name="settings_helper_tips">Toa kidokezo cha siku</string>
     <string name="settings_helper_title">Msaidizi</string>
+    <string name="helper_hint_identify">Bofya %1$s na kila skrini itaonyesha namba yake, ili ujue skrini ipi ni ipi.</string>
+    <string name="helper_open_song_library_compare">Ninafungua Kidhibiti cha Maktaba ya Nyimbo. Chagua wimbo wenye lugha zaidi ya moja kisha uchague Linganisha tafsiri. Matatizo tu huonyesha sehemu zinazohitaji kuangaliwa pekee.</string>
+    <string name="helper_tip_calendar">Unaweza kupanga ibada zijazo mapema katika Msimamizi wa Kalenda, kila moja ikiwa na mtiririko wake wa ibada.</string>
+    <string name="helper_tip_calendar_cues">Msimamizi wa Kalenda unaweza kuanzisha alama za kabla ya ibada zenyewe. Weka muda kila kipengele kinapoanza, nacho kitaonekana kwenye skrini wakati huo.</string>
+    <string name="helper_tip_calendar_sync">Ibada ulizopanga zinaweza kusawazishwa na simu na kompyuta kibao, ili upange kutoka programu ya simu wiki nzima, hata kompyuta hii ikiwa imezimwa.</string>
+    <string name="helper_hint_calendar_sync">Washa %1$s, kisha changanua msimbo kwa programu ya ChurchPresenter kwenye simu au kompyuta kibao.</string>
+    <string name="helper_tip_qa_tunnel">Watu wanaweza kutuma maswali kwenye kipindi cha Maswali kutoka simu zao bila kujiunga na Wi-Fi ya kanisa. Washa ufikiaji wa umma nao watatumia data ya simu.</string>
+    <string name="helper_hint_qa_remote">Bofya %1$s ili kufungua msimbo wa kujiunga na chaguo za kushiriki.</string>
+    <string name="helper_hint_qa_public_access">Bofya %1$s. Kisha watu wanaweza kuchanganua msimbo wa kujiunga na kutuma maswali kupitia data ya simu, bila kuhitaji Wi-Fi.</string>
+    <string name="helper_tip_lottie_background">Usuli wa Biblia na wa nyimbo unaweza kucheza mwanzo na mwisho uliohuishwa. Chagua usuli wa Lottie, nao utaingia kwa uhuishaji maandishi yanapoonekana na kutoka yanapoondolewa.</string>
+    <string name="helper_tip_two_translations">Ili skrini iwe wazi zaidi, usionyeshe zaidi ya tafsiri mbili za Biblia au lugha mbili za nyimbo kwenye projekta moja kwa wakati mmoja. Wasifu wa kila tokeo huchagua zipi zionyeshwe.</string>
+    <string name="helper_tip_hide_slides">Unaweza kuficha picha au slaidi ya wasilisho bila kuifuta: bofya jicho kwenye kona ya chini kulia ya kijipicha chake, nayo itarukwa unapopitia au kucheza.</string>
+    <string name="helper_tip_metronome">Kioo cha jukwaani kinaweza kuonyesha metronomu kwa ajili ya bendi: weka midundo kwa dakika ya wimbo katika kihariri cha wimbo, nayo itadumisha mdundo wakati wimbo uko kwenye skrini.</string>
+    <string name="helper_hint_song_tempo">Andika midundo kwa dakika chini ya %1$s. Huonekana tu baada ya kioo cha jukwaani kuwekwa.</string>
+    <string name="helper_tip_song_features">Wimbo unaweza kuonyesha kodi, kuanza na slaidi ya kichwa, na kubeba hadi lugha nne. Ongeza kodi na lugha katika kihariri cha wimbo; wasifu wa kila tokeo huwasha slaidi ya kichwa.</string>
+    <string name="helper_tip_stt">Huduma ya kubadilisha usemi kuwa maandishi inaweza kuunganishwa na ChurchPresenter na kuweka manukuu ya moja kwa moja, au tafsiri ya moja kwa moja ya kinachosemwa, kwenye skrini. Iunganishe kwenye kichupo cha STT.</string>
+    <string name="helper_tip_song_library">Kidhibiti cha Maktaba ya Nyimbo huhariri nyimbo nyingi kwa mara moja: zichague, chagua Kuhariri kwa Wingi…, kisha weka kitabu cha nyimbo, mwandishi au chochote kingine kwa zote pamoja.</string>
+    <string name="helper_tip_compare_translations">Kidhibiti cha Maktaba ya Nyimbo kinaweza kulinganisha lugha za wimbo kati yao: Linganisha tafsiri hupata sehemu zisizo na kichwa, zilizotafsiriwa kwa sehemu tu, au zisizolingana.</string>
+    <string name="helper_tip_presets">Hifadhi seti yoyote ya picha, wasilisho, video, tangazo au onyesho kama kiolezo kwa Hifadhi kiolezo, kando ya Ongeza kwenye Ratiba. Kisha uiongeze kwenye ibada iliyopangwa kutoka Mipangilio tayari katika Msimamizi wa Kalenda.</string>
 </resources>

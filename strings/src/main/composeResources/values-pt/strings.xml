@@ -2449,7 +2449,7 @@
     <string name="helper_tip_auto_fit">Por padrão, o texto das músicas se ajusta sozinho à tela. Defina o tamanho máximo e mínimo no perfil.</string>
     <string name="helper_tip_schedule_drag">Arraste músicas, versículos e imagens para o roteiro para planejar o culto inteiro com antecedência.</string>
     <string name="helper_tip_verse_typing">Na aba Bíblia você pode digitar uma referência como “jo 3 16” direto na caixa de busca.</string>
-    <string name="helper_tip_remote">Celulares e tablets podem passar os slides pelo servidor remoto.</string>
+    <string name="helper_tip_remote">Um celular ou tablet pode controlar o ChurchPresenter: coloque músicas, versículos e slides na tela de qualquer lugar do templo. Ligue o servidor e depois escaneie o código com o aplicativo ChurchPresenter.</string>
     <string name="helper_display_title">Configuração de telas</string>
     <string name="helper_display_one_screen">Só encontro uma tela. Conecte o projetor ou a TV, e eu a encontro aqui. Para uma transmissão, configure NDI ou uma Browser Source nas configurações de Projeção.</string>
     <string name="helper_display_pick">Qual delas a congregação vê?</string>
@@ -2479,4 +2479,23 @@
     <string name="settings_helper_show">Mostrar o Wick, o assistente, no canto da janela principal</string>
     <string name="settings_helper_tips">Oferecer uma dica do dia</string>
     <string name="settings_helper_title">Assistente</string>
+    <string name="helper_hint_identify">Clique em %1$s e cada tela mostra seu número, para você saber qual é qual.</string>
+    <string name="helper_open_song_library_compare">Abrindo o Gerenciador da biblioteca de músicas. Escolha uma música com mais de um idioma e selecione Comparar traduções. Somente problemas mostra apenas as seções que precisam de atenção.</string>
+    <string name="helper_tip_calendar">Você pode planejar cultos futuros com antecedência no Gerenciador de calendário, cada um com sua própria ordem do culto.</string>
+    <string name="helper_tip_calendar_cues">O Gerenciador de calendário pode iniciar sozinho os itens de antes do culto. Defina quando cada item começa, e ele vai para a tela nesse horário.</string>
+    <string name="helper_tip_calendar_sync">Seus cultos planejados podem sincronizar com celulares e tablets, para você planejar pelo aplicativo móvel a semana toda, mesmo com este computador desligado.</string>
+    <string name="helper_hint_calendar_sync">Ative %1$s e depois escaneie o código com o aplicativo ChurchPresenter no celular ou tablet.</string>
+    <string name="helper_tip_qa_tunnel">As pessoas podem enviar perguntas para uma sessão de P&amp;R pelo celular sem entrar no Wi-Fi da igreja. Ative o acesso público e elas usam os dados móveis.</string>
+    <string name="helper_hint_qa_remote">Clique em %1$s para abrir o código de entrada e as opções de compartilhamento.</string>
+    <string name="helper_hint_qa_public_access">Clique em %1$s. Assim as pessoas podem escanear o código de entrada e enviar perguntas pelos dados móveis, sem precisar de Wi-Fi.</string>
+    <string name="helper_tip_lottie_background">Os fundos da Bíblia e das músicas podem tocar uma entrada e uma saída animadas. Escolha um fundo Lottie: ele entra animado quando o texto aparece e sai quando é limpo.</string>
+    <string name="helper_tip_two_translations">Para uma tela mais limpa, mostre no máximo duas traduções da Bíblia ou idiomas de música ao mesmo tempo em um projetor. O perfil de cada saída escolhe quais ele mostra.</string>
+    <string name="helper_tip_hide_slides">Você pode ocultar uma imagem ou um slide de apresentação sem excluí-lo: clique no olho no canto inferior direito da miniatura, e ele é pulado ao avançar ou reproduzir.</string>
+    <string name="helper_tip_metronome">O monitor de palco pode mostrar um metrônomo para a banda: defina as batidas por minuto da música no editor de músicas, e ele marca o tempo enquanto a música estiver na tela.</string>
+    <string name="helper_hint_song_tempo">Digite as batidas por minuto em %1$s. Só aparece depois que um monitor de palco estiver configurado.</string>
+    <string name="helper_tip_song_features">Uma música pode mostrar acordes, abrir com um slide de título e ter até quatro idiomas. Adicione acordes e idiomas no editor de músicas; o perfil de cada saída ativa o slide de título.</string>
+    <string name="helper_tip_stt">Um serviço de fala para texto pode se conectar ao ChurchPresenter e colocar legendas ao vivo, ou uma tradução ao vivo do que é dito, em uma tela. Conecte-o na aba STT.</string>
+    <string name="helper_tip_song_library">O Gerenciador da biblioteca de músicas edita várias músicas de uma vez: selecione-as, escolha Edição em lote… e defina o hinário, o autor ou qualquer outro dado para todas juntas.</string>
+    <string name="helper_tip_compare_translations">O Gerenciador da biblioteca de músicas pode conferir os idiomas de uma música entre si: Comparar traduções encontra seções sem título, traduzidas só em parte ou que não se alinham.</string>
+    <string name="helper_tip_presets">Salve qualquer conjunto de imagens, apresentação, vídeo, aviso ou cena como predefinição com Salvar predefinição, ao lado de Adicionar ao Roteiro. Depois adicione-o a um culto planejado em Predefinições no Gerenciador de calendário.</string>
 </resources>

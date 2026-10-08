@@ -2465,7 +2465,7 @@
     <string name="helper_tip_auto_fit">Qoʻshiq matni odatda ekranga oʻzi moslashadi. Uning eng katta va eng kichik oʻlchamini profilda belgilang.</string>
     <string name="helper_tip_schedule_drag">Butun xizmatni oldindan rejalash uchun qoʻshiqlar, oyatlar va rasmlarni jadvalga torting.</string>
     <string name="helper_tip_verse_typing">Muqaddas Kitob yorligʻida “yuh 3 16” kabi havolani toʻgʻridan-toʻgʻri qidiruv maydoniga yozishingiz mumkin.</string>
-    <string name="helper_tip_remote">Telefonlar va planshetlar masofaviy server orqali slaydlarni boshqara oladi.</string>
+    <string name="helper_tip_remote">Telefon yoki planshet ChurchPresenter ni boshqara oladi: zalning istalgan joyidan qoʻshiqlar, oyatlar va slaydlarni ekranga chiqaring. Serverni yoqing, soʻng uning kodini ChurchPresenter ilovasi bilan skanerlang.</string>
     <string name="helper_display_title">Displeyni sozlash</string>
     <string name="helper_display_one_screen">Faqat bitta displey topyapman. Proyektor yoki televizorni ulang, men uni shu yerda topaman. Translyatsiya uchun esa Proyeksiya sozlamalarida NDI yoki Browser Source ni sozlang.</string>
     <string name="helper_display_pick">Jamoat qaysi birini koʻradi?</string>
@@ -2495,4 +2495,23 @@
     <string name="settings_helper_show">Yordamchi Wickni asosiy oynaning burchagida koʻrsatish</string>
     <string name="settings_helper_tips">Kun maslahatini taklif qilish</string>
     <string name="settings_helper_title">Yordamchi</string>
+    <string name="helper_hint_identify">%1$s tugmasini bosing — har bir ekran oʻz raqamini koʻrsatadi, shunda qaysi ekran qaysi ekanini bilasiz.</string>
+    <string name="helper_open_song_library_compare">Qoʻshiq kutubxonasi menejeri ochilmoqda. Bir nechta tildagi qoʻshiqni tanlang va Tarjimalarni solishtirish ni tanlang. Faqat muammolar yoqilsa, faqat tekshirish kerak boʻlgan boʻlimlar koʻrsatiladi.</string>
+    <string name="helper_tip_calendar">Taqvim menejerida kelgusi xizmatlarni oldindan rejalashingiz mumkin, har birining oʻz xizmat tartibi bilan.</string>
+    <string name="helper_tip_calendar_cues">Taqvim menejeri xizmat oldidan belgilarni oʻzi boshlab bera oladi. Har bir band qachon boshlanishini belgilang, u oʻsha vaqtda ekranga chiqadi.</string>
+    <string name="helper_tip_calendar_sync">Rejalashtirilgan xizmatlaringiz telefon va planshetlar bilan sinxronlanishi mumkin, shunda bu kompyuter oʻchiq boʻlsa ham butun hafta mobil ilovadan rejalashingiz mumkin.</string>
+    <string name="helper_hint_calendar_sync">%1$s ni yoqing, soʻng telefon yoki planshetdagi ChurchPresenter ilovasi bilan kodni skanerlang.</string>
+    <string name="helper_tip_qa_tunnel">Odamlar cherkov Wi-Fi tarmogʻiga ulanmasdan telefonlaridan Savol-javob sessiyasiga savol yuborishi mumkin. Ommaviy kirishni yoqing, ular mobil internetdan foydalanadi.</string>
+    <string name="helper_hint_qa_remote">Qoʻshilish kodi va ulashish sozlamalarini ochish uchun %1$s tugmasini bosing.</string>
+    <string name="helper_hint_qa_public_access">%1$s tugmasini bosing. Shundan soʻng odamlar qoʻshilish kodini skanerlab, Wi-Fi kerak boʻlmasdan mobil internet orqali savol yuborishi mumkin.</string>
+    <string name="helper_tip_lottie_background">Muqaddas Kitob va qoʻshiq fonlari animatsiyali kirish va chiqishni ijro eta oladi. Lottie fonini tanlang: matn paydo boʻlganda u animatsiya bilan kiradi, matn tozalanganda animatsiya bilan chiqadi.</string>
+    <string name="helper_tip_two_translations">Ekran aniqroq boʻlishi uchun bitta proyektorda bir vaqtda ikkitadan ortiq Muqaddas Kitob tarjimasi yoki qoʻshiq tilini koʻrsatmang. Qaysilari koʻrsatilishini har bir chiqishning profili tanlaydi.</string>
+    <string name="helper_tip_hide_slides">Rasm yoki taqdimot slaydini oʻchirmasdan yashirishingiz mumkin: uning kichik rasmining pastki oʻng burchagidagi koʻz tugmasini bosing, shunda u varaqlashda yoki ijroda oʻtkazib yuboriladi.</string>
+    <string name="helper_tip_metronome">Sahna monitori guruh uchun metronom koʻrsata oladi: qoʻshiq muharririda qoʻshiqning daqiqadagi zarblar sonini belgilang, qoʻshiq ekranda turganda u ritmni ushlab turadi.</string>
+    <string name="helper_hint_song_tempo">%1$s ostiga daqiqadagi zarblar sonini yozing. U faqat sahna monitori sozlangandan keyin koʻrinadi.</string>
+    <string name="helper_tip_song_features">Qoʻshiq akkordlarni koʻrsatishi, sarlavha slaydi bilan boshlanishi va toʻrttagacha tilni oʻz ichiga olishi mumkin. Akkordlar va tillarni qoʻshiq muharririda qoʻshing; sarlavha slaydini har bir chiqishning profili yoqadi.</string>
+    <string name="helper_tip_stt">Nutqni matnga aylantirish xizmati ChurchPresenter ga ulanib, ekranga jonli subtitrlarni yoki aytilayotgan gaplarning jonli tarjimasini chiqara oladi. Uni STT yorligʻida ulang.</string>
+    <string name="helper_tip_song_library">Qoʻshiq kutubxonasi menejeri koʻp qoʻshiqni birdaniga tahrirlaydi: ularni belgilang, Ommaviy tahrirlash… ni tanlang va hammasi uchun qoʻshiqlar kitobi, muallif yoki boshqa narsani birga belgilang.</string>
+    <string name="helper_tip_compare_translations">Qoʻshiq kutubxonasi menejeri qoʻshiq tillarini bir-biri bilan tekshira oladi: Tarjimalarni solishtirish sarlavhasi yoʻq, faqat qisman tarjima qilingan yoki bir-biriga mos kelmaydigan boʻlimlarni topadi.</string>
+    <string name="helper_tip_presets">Istalgan rasmlar toʻplami, taqdimot, video, eʼlon yoki sahnani Jadvalga qoʻshish yonidagi Presetni saqlash bilan tayyorlanma sifatida saqlang. Soʻng uni Taqvim menejeridagi Tayyorlanmalar orqali rejalashtirilgan xizmatga qoʻshing.</string>
 </resources>

@@ -2465,7 +2465,7 @@
     <string name="helper_tip_auto_fit">Sångtext anpassar sig efter skärmen som standard. Ställ in största och minsta storlek i profilen.</string>
     <string name="helper_tip_schedule_drag">Dra sånger, verser och bilder till programmet för att planera hela gudstjänsten i förväg.</string>
     <string name="helper_tip_verse_typing">På fliken Bibel kan du skriva en hänvisning som ”joh 3 16” direkt i sökrutan.</string>
-    <string name="helper_tip_remote">Telefoner och surfplattor kan styra bilderna via fjärrservern.</string>
+    <string name="helper_tip_remote">En telefon eller surfplatta kan styra ChurchPresenter: visa sånger, verser och bilder var du än står i lokalen. Slå på servern och skanna sedan dess kod med ChurchPresenter-appen.</string>
     <string name="helper_display_title">Skärminställning</string>
     <string name="helper_display_one_screen">Jag hittar bara en skärm. Anslut projektorn eller tv:n så hittar jag den här. För en ström ställer du i stället in NDI eller en Browser Source i projektionsinställningarna.</string>
     <string name="helper_display_pick">Vilken ser församlingen?</string>
@@ -2495,4 +2495,23 @@
     <string name="settings_helper_show">Visa Wick, hjälpredan, i hörnet av huvudfönstret</string>
     <string name="settings_helper_tips">Erbjud dagens tips</string>
     <string name="settings_helper_title">Hjälpreda</string>
+    <string name="helper_hint_identify">Klicka på %1$s så visar varje skärm sitt nummer och du ser vilken som är vilken.</string>
+    <string name="helper_open_song_library_compare">Öppnar Sångbibliotekshanterare. Välj en sång med mer än ett språk och välj Jämför översättningar. Endast problem visar bara de avsnitt som behöver åtgärdas.</string>
+    <string name="helper_tip_calendar">I Kalenderhanterare kan du planera kommande gudstjänster i förväg, var och en med sitt eget körschema.</string>
+    <string name="helper_tip_calendar_cues">Kalenderhanterare kan starta det som ska visas före gudstjänsten av sig självt. Ställ in när varje punkt börjar, så visas den på skärmen vid den tiden.</string>
+    <string name="helper_tip_calendar_sync">Dina planerade gudstjänster kan synkas med telefoner och surfplattor, så att du kan planera i mobilappen hela veckan, även när den här datorn är avstängd.</string>
+    <string name="helper_hint_calendar_sync">Slå på %1$s och skanna sedan koden med ChurchPresenter-appen på telefonen eller surfplattan.</string>
+    <string name="helper_tip_qa_tunnel">Folk kan skicka frågor till en frågestund från sina telefoner utan att ansluta till kyrkans wifi. Slå på publik åtkomst så använder de sin mobildata.</string>
+    <string name="helper_hint_qa_remote">Klicka på %1$s för att öppna anslutningskoden och delningsalternativen.</string>
+    <string name="helper_hint_qa_public_access">Klicka på %1$s. Sedan kan folk skanna anslutningskoden och skicka frågor via mobildata, utan wifi.</string>
+    <string name="helper_tip_lottie_background">Bibel- och sångbakgrunder kan spela upp ett animerat intro och outro. Välj en Lottie-bakgrund, så animeras den in när texten visas och ut när den rensas.</string>
+    <string name="helper_tip_two_translations">För en tydligare skärm, visa högst två bibelöversättningar eller sångspråk på en projektor åt gången. Varje utgångs profil väljer vilka den visar.</string>
+    <string name="helper_tip_hide_slides">Du kan dölja en bild eller en presentationsbild utan att ta bort den: klicka på ögat i miniatyrens nedre högra hörn, så hoppas den över när du stegar igenom eller spelar upp.</string>
+    <string name="helper_tip_metronome">Scenmonitorn kan visa en metronom för bandet: ställ in sångens slag per minut i sångredigeraren, så håller den takten medan sången visas.</string>
+    <string name="helper_hint_song_tempo">Skriv in slag per minut under %1$s. Det visas bara när en scenmonitor har ställts in.</string>
+    <string name="helper_tip_song_features">En sång kan visa ackord, börja med en titelbild och innehålla upp till fyra språk. Lägg till ackord och språk i sångredigeraren; varje utgångs profil slår på titelbilden.</string>
+    <string name="helper_tip_stt">En tal-till-text-tjänst kan ansluta till ChurchPresenter och visa livetextning, eller en liveöversättning av det som sägs, på en skärm. Anslut den på fliken STT.</string>
+    <string name="helper_tip_song_library">Sångbibliotekshanterare redigerar många sånger på en gång: markera dem, välj Massredigering… och ställ in sångbok, författare eller något annat för alla samtidigt.</string>
+    <string name="helper_tip_compare_translations">Sångbibliotekshanterare kan jämföra en sångs språk med varandra: Jämför översättningar hittar avsnitt som saknar rubrik, bara är delvis översatta eller inte stämmer överens.</string>
+    <string name="helper_tip_presets">Spara valfri bildserie, presentation, video, meddelande eller scen som förinställning med Spara förinställning, bredvid Lägg till i programmet. Lägg sedan till den i en planerad gudstjänst från Förinställningar i Kalenderhanterare.</string>
 </resources>

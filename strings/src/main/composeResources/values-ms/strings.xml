@@ -2465,7 +2465,7 @@
     <string name="helper_tip_auto_fit">Teks lagu menyesuaikan diri dengan skrin secara lalai. Tetapkan saiz terbesar dan terkecilnya dalam profil.</string>
     <string name="helper_tip_schedule_drag">Seret lagu, ayat dan gambar ke jadual untuk merancang seluruh kebaktian lebih awal.</string>
     <string name="helper_tip_verse_typing">Dalam tab Alkitab, anda boleh menaip rujukan seperti “jn 3 16” terus ke dalam kotak carian.</string>
-    <string name="helper_tip_remote">Telefon dan tablet boleh menjalankan slaid melalui pelayan kawalan jauh.</string>
+    <string name="helper_tip_remote">Telefon atau tablet boleh mengawal ChurchPresenter: paparkan lagu, ayat dan slaid dari mana-mana sahaja dalam dewan. Hidupkan pelayan, kemudian imbas kodnya dengan aplikasi ChurchPresenter.</string>
     <string name="helper_display_title">Persediaan paparan</string>
     <string name="helper_display_one_screen">Saya hanya jumpa satu paparan. Sambungkan projektor atau TV, dan saya akan menemuinya di sini. Untuk strim, sediakan NDI atau Browser Source dalam tetapan Projeksi.</string>
     <string name="helper_display_pick">Yang mana satu dilihat oleh jemaah?</string>
@@ -2495,4 +2495,23 @@
     <string name="settings_helper_show">Tunjuk Wick, pembantu, di penjuru tetingkap utama</string>
     <string name="settings_helper_tips">Tawarkan petua hari ini</string>
     <string name="settings_helper_title">Pembantu</string>
+    <string name="helper_hint_identify">Klik %1$s dan setiap skrin memaparkan nombornya, jadi anda tahu skrin mana satu.</string>
+    <string name="helper_open_song_library_compare">Membuka Pengurus Pustaka Lagu. Pilih lagu yang mempunyai lebih daripada satu bahasa dan pilih Bandingkan terjemahan. Masalah sahaja hanya menunjukkan bahagian yang perlu diberi perhatian.</string>
+    <string name="helper_tip_calendar">Anda boleh merancang kebaktian akan datang lebih awal dalam Pengurus Kalendar, setiap satu dengan aturcaranya sendiri.</string>
+    <string name="helper_tip_calendar_cues">Pengurus Kalendar boleh memulakan item sebelum kebaktian anda dengan sendiri. Tetapkan bila setiap item bermula, dan ia dipaparkan pada skrin pada masa itu.</string>
+    <string name="helper_tip_calendar_sync">Kebaktian yang dirancang boleh disegerakkan dengan telefon dan tablet, jadi anda boleh merancang daripada aplikasi mudah alih sepanjang minggu, walaupun komputer ini dimatikan.</string>
+    <string name="helper_hint_calendar_sync">Hidupkan %1$s, kemudian imbas kod dengan aplikasi ChurchPresenter pada telefon atau tablet.</string>
+    <string name="helper_tip_qa_tunnel">Orang ramai boleh menghantar soalan ke sesi Q&amp;A daripada telefon mereka tanpa menyertai Wi-Fi gereja. Hidupkan akses awam dan mereka menggunakan data mudah alih.</string>
+    <string name="helper_hint_qa_remote">Klik %1$s untuk membuka kod sertai dan pilihan perkongsian.</string>
+    <string name="helper_hint_qa_public_access">Klik %1$s. Orang ramai kemudian boleh mengimbas kod sertai dan menghantar soalan melalui data mudah alih, tanpa memerlukan Wi-Fi.</string>
+    <string name="helper_tip_lottie_background">Latar Alkitab dan lagu boleh memainkan animasi masuk dan keluar. Pilih latar Lottie, dan ia beranimasi masuk apabila teks muncul dan keluar apabila teks dikosongkan.</string>
+    <string name="helper_tip_two_translations">Untuk skrin yang lebih jelas, paparkan tidak lebih daripada dua terjemahan Alkitab atau bahasa lagu serentak pada satu projektor. Profil setiap output memilih yang mana dipaparkan.</string>
+    <string name="helper_tip_hide_slides">Anda boleh menyembunyikan gambar atau slaid persembahan tanpa memadamnya: klik ikon mata di sudut kanan bawah lakaran kecilnya, dan ia dilangkau apabila anda maju atau memainkan.</string>
+    <string name="helper_tip_metronome">Monitor pentas boleh memaparkan metronom untuk kumpulan muzik: tetapkan rentak seminit lagu dalam editor lagu, dan ia mengekalkan rentak selagi lagu dipaparkan.</string>
+    <string name="helper_hint_song_tempo">Taip rentak seminit di bawah %1$s. Ia hanya muncul selepas monitor pentas disediakan.</string>
+    <string name="helper_tip_song_features">Lagu boleh memaparkan kord, dibuka dengan slaid tajuk dan memuatkan sehingga empat bahasa. Tambah kord dan bahasa dalam editor lagu; profil setiap output menghidupkan slaid tajuk.</string>
+    <string name="helper_tip_stt">Perkhidmatan pertuturan-ke-teks boleh bersambung ke ChurchPresenter dan memaparkan sari kata langsung, atau terjemahan langsung bagi apa yang diucapkan, pada skrin. Sambungkannya di tab STT.</string>
+    <string name="helper_tip_song_library">Pengurus Pustaka Lagu mengedit banyak lagu serentak: pilih lagu-lagu itu, pilih Edit Pukal…, dan tetapkan buku lagu, pengarang atau apa-apa sahaja untuk semuanya sekali gus.</string>
+    <string name="helper_tip_compare_translations">Pengurus Pustaka Lagu boleh menyemak bahasa-bahasa sesebuah lagu antara satu sama lain: Bandingkan terjemahan menemui bahagian yang tiada tajuk, hanya diterjemah sebahagian atau tidak sepadan.</string>
+    <string name="helper_tip_presets">Simpan mana-mana set gambar, persembahan, video, pengumuman atau adegan sebagai pratetap dengan Simpan pratetap, di sebelah Tambah ke Jadual. Kemudian tambahkannya ke kebaktian yang dirancang daripada Praset dalam Pengurus Kalendar.</string>
 </resources>

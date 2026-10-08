@@ -2420,7 +2420,7 @@
     <string name="helper_tip_auto_fit">Tekst pieśni domyślnie sam dopasowuje się do ekranu. Jego największy i najmniejszy rozmiar ustawisz w profilu.</string>
     <string name="helper_tip_schedule_drag">Przeciągaj pieśni, wersety i obrazy do programu, aby z wyprzedzeniem zaplanować całe nabożeństwo.</string>
     <string name="helper_tip_verse_typing">Na karcie Biblia możesz wpisać odnośnik, np. „j 3 16”, prosto w pole wyszukiwania.</string>
-    <string name="helper_tip_remote">Telefony i tablety mogą przełączać slajdy przez serwer zdalnego sterowania.</string>
+    <string name="helper_tip_remote">Telefon lub tablet może sterować ChurchPresenter: wyświetlaj pieśni, wersety i slajdy z dowolnego miejsca na sali. Włącz serwer, a potem zeskanuj jego kod aplikacją ChurchPresenter.</string>
     <string name="helper_display_title">Konfiguracja ekranu</string>
     <string name="helper_display_one_screen">Widzę tylko jeden ekran. Podłącz projektor lub telewizor, a znajdę go tutaj. Do transmisji skonfiguruj zamiast tego NDI lub Browser Source w ustawieniach Projekcji.</string>
     <string name="helper_display_pick">Który z nich widzi zgromadzenie?</string>
@@ -2450,4 +2450,23 @@
     <string name="settings_helper_show">Pokaż pomocnika Wicka w rogu okna głównego</string>
     <string name="settings_helper_tips">Proponuj wskazówkę dnia</string>
     <string name="settings_helper_title">Pomocnik</string>
+    <string name="helper_hint_identify">Kliknij %1$s, a każdy ekran pokaże swój numer, więc będziesz wiedzieć, który jest który.</string>
+    <string name="helper_open_song_library_compare">Otwieram Menedżer biblioteki pieśni. Zaznacz pieśń w więcej niż jednym języku i wybierz Porównaj tłumaczenia. Tylko problemy pokazuje wyłącznie sekcje, które wymagają uwagi.</string>
+    <string name="helper_tip_calendar">W Menedżerze kalendarza możesz z wyprzedzeniem planować przyszłe nabożeństwa, każde z własnym przebiegiem.</string>
+    <string name="helper_tip_calendar_cues">Menedżer kalendarza może sam uruchamiać to, co leci przed nabożeństwem. Ustaw, kiedy zaczyna się każda pozycja, a o tej porze pojawi się na ekranie.</string>
+    <string name="helper_tip_calendar_sync">Zaplanowane nabożeństwa mogą się synchronizować z telefonami i tabletami, więc możesz planować w aplikacji mobilnej przez cały tydzień, nawet gdy ten komputer jest wyłączony.</string>
+    <string name="helper_hint_calendar_sync">Włącz %1$s, a potem zeskanuj kod aplikacją ChurchPresenter na telefonie lub tablecie.</string>
+    <string name="helper_tip_qa_tunnel">Ludzie mogą wysyłać pytania do sesji pytań i odpowiedzi ze swoich telefonów bez łączenia się z kościelnym Wi-Fi. Włącz dostęp publiczny, a skorzystają z danych komórkowych.</string>
+    <string name="helper_hint_qa_remote">Kliknij %1$s, aby otworzyć kod dołączenia i opcje udostępniania.</string>
+    <string name="helper_hint_qa_public_access">Kliknij %1$s. Wtedy ludzie mogą zeskanować kod dołączenia i wysyłać pytania przez dane komórkowe, bez Wi-Fi.</string>
+    <string name="helper_tip_lottie_background">Tła Biblii i pieśni mogą odtwarzać animowane wejście i wyjście. Wybierz tło Lottie, a wejdzie z animacją, gdy pojawi się tekst, i zniknie, gdy zostanie wyczyszczony.</string>
+    <string name="helper_tip_two_translations">Dla czytelniejszego ekranu pokazuj na jednym projektorze naraz nie więcej niż dwa przekłady Biblii lub języki pieśni. Profil każdego wyjścia decyduje, które z nich pokazuje.</string>
+    <string name="helper_tip_hide_slides">Możesz ukryć obraz lub slajd prezentacji bez usuwania go: kliknij oko w prawym dolnym rogu miniatury, a zostanie pominięty przy przechodzeniu i odtwarzaniu.</string>
+    <string name="helper_tip_metronome">Monitor sceny może pokazywać metronom dla zespołu: ustaw liczbę uderzeń na minutę w edytorze pieśni, a będzie wybijał rytm, dopóki pieśń jest na ekranie.</string>
+    <string name="helper_hint_song_tempo">Wpisz liczbę uderzeń na minutę w polu %1$s. Pojawia się ono dopiero, gdy skonfigurowano monitor sceny.</string>
+    <string name="helper_tip_song_features">Pieśń może pokazywać akordy, zaczynać się slajdem tytułowym i zawierać do czterech języków. Akordy i języki dodasz w edytorze pieśni; slajd tytułowy włącza profil każdego wyjścia.</string>
+    <string name="helper_tip_stt">Usługa zamiany mowy na tekst może połączyć się z ChurchPresenter i wyświetlać na ekranie napisy na żywo albo tłumaczenie na żywo tego, co mówi się na sali. Połącz ją na karcie STT.</string>
+    <string name="helper_tip_song_library">Menedżer biblioteki pieśni edytuje wiele pieśni naraz: zaznacz je, wybierz Edycja zbiorcza… i ustaw śpiewnik, autora lub cokolwiek innego dla wszystkich jednocześnie.</string>
+    <string name="helper_tip_compare_translations">Menedżer biblioteki pieśni może sprawdzić języki pieśni względem siebie: Porównaj tłumaczenia znajduje sekcje bez tytułu, przetłumaczone tylko częściowo albo niepasujące do siebie.</string>
+    <string name="helper_tip_presets">Zapisz dowolny zestaw obrazów, prezentację, wideo, ogłoszenie lub scenę jako szablon przyciskiem Zapisz ustawienie, obok Dodaj do programu. Potem dodaj go do zaplanowanego nabożeństwa z Szablony pozycji w Menedżerze kalendarza.</string>
 </resources>

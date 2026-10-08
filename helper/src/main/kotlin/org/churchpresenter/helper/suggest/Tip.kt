@@ -1,6 +1,37 @@
 package org.churchpresenter.helper.suggest
 
 import org.churchpresenter.helper.HelperText
+import org.churchpresenter.strings.generated.resources.helper_tip_presets
+import org.churchpresenter.strings.generated.resources.helper_tip_compare_translations
+import org.churchpresenter.strings.generated.resources.helper_tip_song_library
+import org.churchpresenter.strings.generated.resources.helper_tip_stt
+import org.churchpresenter.strings.generated.resources.helper_tip_song_features
+import org.churchpresenter.strings.generated.resources.helper_tip_metronome
+import org.churchpresenter.strings.generated.resources.helper_hint_song_tempo
+import org.churchpresenter.strings.generated.resources.helper_hint_pick_and_edit
+import org.churchpresenter.strings.generated.resources.edit_song
+import org.churchpresenter.strings.generated.resources.song_tempo
+import org.churchpresenter.strings.generated.resources.helper_tip_hide_slides
+import org.churchpresenter.strings.generated.resources.helper_tip_two_translations
+import org.churchpresenter.strings.generated.resources.helper_tip_lottie_background
+import org.churchpresenter.helper.intent.tabStep
+import org.churchpresenter.sharedui.models.Tabs
+import org.churchpresenter.strings.generated.resources.helper_tip_qa_tunnel
+import org.churchpresenter.strings.generated.resources.helper_hint_qa_remote
+import org.churchpresenter.strings.generated.resources.helper_hint_qa_public_access
+import org.churchpresenter.strings.generated.resources.tooltip_qa_remote
+import org.churchpresenter.strings.generated.resources.qa_enable_public_access
+import org.churchpresenter.helper.action.CalendarTopic
+import org.churchpresenter.strings.generated.resources.helper_tip_calendar_cues
+import org.churchpresenter.strings.generated.resources.helper_tip_calendar
+import org.churchpresenter.strings.generated.resources.helper_tip_calendar_sync
+import org.churchpresenter.strings.generated.resources.helper_hint_calendar_sync
+import org.churchpresenter.strings.generated.resources.calendar_sync_enable
+import org.churchpresenter.helper.action.GuideStep
+import org.churchpresenter.helper.action.GuideTour
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.strings.generated.resources.helper_hint_identify
+import org.churchpresenter.strings.generated.resources.identify_screen
 import org.churchpresenter.helper.action.HelperAction
 import org.churchpresenter.helper.helperText
 import org.churchpresenter.sharedui.guide.SettingsPage
@@ -35,13 +66,95 @@ private val TIP_SHORTCUTS = listOf(
 
 private val FEATURE_TIPS = listOf(
     Tip(helperText(Res.string.helper_tip_tell_me)),
-    Tip(helperText(Res.string.helper_tip_identify), HelperAction.StartDisplaySetup),
+    // Shows where: the Identify button on the Projection page, which numbers the screens.
+    Tip(
+        helperText(Res.string.helper_tip_identify),
+        HelperAction.Highlight(
+            GuideTour(
+                listOf(
+                    GuideStep(
+                        GuideTargets.IDENTIFY_SCREENS,
+                        helperText(Res.string.helper_hint_identify, helperText(Res.string.identify_screen)),
+                        before = HelperAction.OpenSettings(SettingsPage.PROJECTION),
+                    ),
+                ),
+            ),
+        ),
+    ),
     Tip(helperText(Res.string.helper_tip_quick_background)),
     Tip(helperText(Res.string.helper_tip_profiles), HelperAction.OpenSettings(SettingsPage.PROFILES)),
     Tip(helperText(Res.string.helper_tip_auto_fit)),
     Tip(helperText(Res.string.helper_tip_schedule_drag)),
     Tip(helperText(Res.string.helper_tip_verse_typing)),
     Tip(helperText(Res.string.helper_tip_remote), HelperAction.OpenSettings(SettingsPage.SERVER)),
+    Tip(helperText(Res.string.helper_tip_calendar), HelperAction.OpenCalendar()),
+    Tip(helperText(Res.string.helper_tip_presets), HelperAction.OpenCalendar()),
+    Tip(helperText(Res.string.helper_tip_lottie_background), HelperAction.OpenSettings(SettingsPage.BACKGROUND)),
+    Tip(helperText(Res.string.helper_tip_two_translations), HelperAction.OpenSettings(SettingsPage.PROFILES)),
+    Tip(helperText(Res.string.helper_tip_hide_slides), HelperAction.SelectTab(Tabs.PICTURES)),
+    Tip(helperText(Res.string.helper_tip_song_features), HelperAction.SelectTab(Tabs.SONGS)),
+    Tip(helperText(Res.string.helper_tip_stt), HelperAction.SelectTab(Tabs.STT)),
+    Tip(helperText(Res.string.helper_tip_song_library), HelperAction.OpenSongLibrary()),
+    Tip(helperText(Res.string.helper_tip_compare_translations), HelperAction.OpenSongLibrary(compare = true)),
+    // Shows where: the song editor's Tempo, reached through the Songs tab and Edit Song.
+    Tip(
+        helperText(Res.string.helper_tip_metronome),
+        HelperAction.Highlight(
+            GuideTour(
+                listOf(
+                    tabStep(Tabs.SONGS),
+                    GuideStep(
+                        GuideTargets.EDIT_SONG,
+                        helperText(Res.string.helper_hint_pick_and_edit, helperText(Res.string.edit_song)),
+                        before = HelperAction.SelectTab(Tabs.SONGS),
+                    ),
+                    GuideStep(
+                        GuideTargets.SONG_TEMPO,
+                        helperText(Res.string.helper_hint_song_tempo, helperText(Res.string.song_tempo)),
+                    ),
+                ),
+            ),
+        ),
+    ),
+    // Shows where: the Q&A tab's sharing dialog, and its public access (the tunnel).
+    Tip(
+        helperText(Res.string.helper_tip_qa_tunnel),
+        HelperAction.Highlight(
+            GuideTour(
+                listOf(
+                    tabStep(Tabs.QA),
+                    GuideStep(
+                        GuideTargets.QA_REMOTE,
+                        helperText(Res.string.helper_hint_qa_remote, helperText(Res.string.tooltip_qa_remote)),
+                        before = HelperAction.SelectTab(Tabs.QA),
+                    ),
+                    GuideStep(
+                        GuideTargets.QA_PUBLIC_ACCESS,
+                        helperText(
+                            Res.string.helper_hint_qa_public_access,
+                            helperText(Res.string.qa_enable_public_access),
+                        ),
+                    ),
+                ),
+            ),
+        ),
+    ),
+    Tip(helperText(Res.string.helper_tip_calendar_cues), HelperAction.OpenCalendar(CalendarTopic.AUTOMATE)),
+    // Shows where: the sync switch on the Server page.
+    Tip(
+        helperText(Res.string.helper_tip_calendar_sync),
+        HelperAction.Highlight(
+            GuideTour(
+                listOf(
+                    GuideStep(
+                        GuideTargets.CALENDAR_SYNC,
+                        helperText(Res.string.helper_hint_calendar_sync, helperText(Res.string.calendar_sync_enable)),
+                        before = HelperAction.OpenSettings(SettingsPage.SERVER),
+                    ),
+                ),
+            ),
+        ),
+    ),
 )
 
 /**

@@ -2465,7 +2465,7 @@
     <string name="helper_tip_auto_fit">Teks lagu otomatis menyesuaikan diri dengan layar. Atur ukuran terbesar dan terkecilnya di profil.</string>
     <string name="helper_tip_schedule_drag">Seret lagu, ayat, dan gambar ke jadwal untuk merencanakan seluruh ibadah sebelumnya.</string>
     <string name="helper_tip_verse_typing">Di tab Alkitab, Anda bisa langsung mengetik referensi seperti “jn 3 16” di kotak pencarian.</string>
-    <string name="helper_tip_remote">Ponsel dan tablet bisa menjalankan slide lewat server remote.</string>
+    <string name="helper_tip_remote">Ponsel atau tablet bisa mengendalikan ChurchPresenter: tampilkan lagu, ayat, dan slide dari mana saja di ruangan. Nyalakan servernya, lalu pindai kodenya dengan aplikasi ChurchPresenter.</string>
     <string name="helper_display_title">Penyiapan layar</string>
     <string name="helper_display_one_screen">Saya hanya menemukan satu layar. Sambungkan proyektor atau TV, dan saya akan menemukannya di sini. Untuk siaran, atur NDI atau Browser Source di pengaturan Proyeksi.</string>
     <string name="helper_display_pick">Layar mana yang dilihat jemaat?</string>
@@ -2495,4 +2495,23 @@
     <string name="settings_helper_show">Tampilkan Wick, si pembantu, di sudut jendela utama</string>
     <string name="settings_helper_tips">Tawarkan tip hari ini</string>
     <string name="settings_helper_title">Pembantu</string>
+    <string name="helper_hint_identify">Klik %1$s dan setiap layar menampilkan nomornya, jadi Anda tahu layar mana yang mana.</string>
+    <string name="helper_open_song_library_compare">Membuka Pengelola Pustaka Lagu. Pilih lagu yang punya lebih dari satu bahasa, lalu pilih Bandingkan terjemahan. Hanya masalah menampilkan bagian yang perlu diperhatikan saja.</string>
+    <string name="helper_tip_calendar">Anda bisa merencanakan ibadah mendatang jauh hari di Pengelola Kalender, masing-masing dengan susunan acaranya sendiri.</string>
+    <string name="helper_tip_calendar_cues">Pengelola Kalender bisa memulai sendiri isi sebelum ibadah Anda. Atur kapan setiap item mulai, dan item itu tampil di layar pada waktunya.</string>
+    <string name="helper_tip_calendar_sync">Ibadah yang Anda rencanakan bisa disinkronkan dengan ponsel dan tablet, jadi Anda bisa merencanakan dari aplikasi seluler sepanjang minggu, bahkan saat komputer ini mati.</string>
+    <string name="helper_hint_calendar_sync">Nyalakan %1$s, lalu pindai kodenya dengan aplikasi ChurchPresenter di ponsel atau tablet.</string>
+    <string name="helper_tip_qa_tunnel">Jemaat bisa mengirim pertanyaan ke sesi Tanya Jawab dari ponsel tanpa bergabung ke Wi-Fi gereja. Aktifkan akses publik dan mereka memakai data seluler.</string>
+    <string name="helper_hint_qa_remote">Klik %1$s untuk membuka kode bergabung dan pilihan berbagi.</string>
+    <string name="helper_hint_qa_public_access">Klik %1$s. Jemaat lalu bisa memindai kode bergabung dan mengirim pertanyaan lewat data seluler, tanpa perlu Wi-Fi.</string>
+    <string name="helper_tip_lottie_background">Latar Alkitab dan lagu bisa memutar animasi masuk dan keluar. Pilih latar Lottie, dan latar itu beranimasi masuk saat teks muncul dan keluar saat teks dibersihkan.</string>
+    <string name="helper_tip_two_translations">Agar layar lebih jelas, tampilkan paling banyak dua terjemahan Alkitab atau bahasa lagu sekaligus di satu proyektor. Profil setiap output memilih mana yang ditampilkan.</string>
+    <string name="helper_tip_hide_slides">Anda bisa menyembunyikan gambar atau slide presentasi tanpa menghapusnya: klik ikon mata di pojok kanan bawah thumbnail-nya, dan slide itu dilewati saat Anda maju atau memutar.</string>
+    <string name="helper_tip_metronome">Monitor panggung bisa menampilkan metronom untuk tim musik: atur ketukan per menit lagu di editor lagu, dan metronom menjaga tempo selama lagu tampil.</string>
+    <string name="helper_hint_song_tempo">Ketik ketukan per menit di bawah %1$s. Kolom ini baru muncul setelah monitor panggung disiapkan.</string>
+    <string name="helper_tip_song_features">Lagu bisa menampilkan akor, dibuka dengan slide judul, dan memuat hingga empat bahasa. Tambahkan akor dan bahasa di editor lagu; profil setiap output yang menyalakan slide judul.</string>
+    <string name="helper_tip_stt">Layanan ucapan-ke-teks bisa tersambung ke ChurchPresenter dan menampilkan teks langsung, atau terjemahan langsung dari apa yang diucapkan, di layar. Sambungkan di tab STT.</string>
+    <string name="helper_tip_song_library">Pengelola Pustaka Lagu mengedit banyak lagu sekaligus: pilih lagunya, pilih Edit Massal…, lalu atur buku lagu, penulis, atau apa pun untuk semuanya bersamaan.</string>
+    <string name="helper_tip_compare_translations">Pengelola Pustaka Lagu bisa mencocokkan bahasa-bahasa sebuah lagu satu sama lain: Bandingkan terjemahan menemukan bagian yang tidak berjudul, baru sebagian diterjemahkan, atau tidak sejajar.</string>
+    <string name="helper_tip_presets">Simpan set gambar, presentasi, video, pengumuman, atau adegan apa pun sebagai preset dengan Simpan preset, di samping Tambahkan ke Jadwal. Lalu tambahkan ke ibadah yang direncanakan dari Prasetel di Pengelola Kalender.</string>
 </resources>

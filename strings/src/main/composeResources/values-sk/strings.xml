@@ -2450,7 +2450,7 @@
     <string name="helper_tip_auto_fit">Text piesne sa predvolene sám prispôsobí obrazovke. Jeho najväčšiu a najmenšiu veľkosť nastavíte v profile.</string>
     <string name="helper_tip_schedule_drag">Presúvajte piesne, verše a obrázky do programu a naplánujte si celú bohoslužbu vopred.</string>
     <string name="helper_tip_verse_typing">Na karte Biblia môžete odkaz ako „jn 3 16“ napísať rovno do vyhľadávacieho poľa.</string>
-    <string name="helper_tip_remote">Telefóny a tablety môžu ovládať snímky cez server diaľkového ovládania.</string>
+    <string name="helper_tip_remote">Telefón alebo tablet môže ovládať ChurchPresenter: premietajte piesne, verše a snímky odkiaľkoľvek zo sály. Zapnite server a potom naskenujte jeho kód aplikáciou ChurchPresenter.</string>
     <string name="helper_display_title">Nastavenie obrazovky</string>
     <string name="helper_display_one_screen">Našiel som len jednu obrazovku. Pripojte projektor alebo televízor a ja ho tu nájdem. Pre stream namiesto toho nastavte NDI alebo Browser Source v nastaveniach Projekcie.</string>
     <string name="helper_display_pick">Ktorú vidí zhromaždenie?</string>
@@ -2480,4 +2480,23 @@
     <string name="settings_helper_show">Zobraziť pomocníka Wicka v rohu hlavného okna</string>
     <string name="settings_helper_tips">Ponúkať tip dňa</string>
     <string name="settings_helper_title">Pomocník</string>
+    <string name="helper_hint_identify">Kliknite na %1$s a každá obrazovka ukáže svoje číslo, takže zistíte, ktorá je ktorá.</string>
+    <string name="helper_open_song_library_compare">Otváram Správcu knižnice piesní. Vyberte pieseň s viac ako jedným jazykom a zvoľte Porovnať preklady. Iba problémy zobrazí len časti, ktoré potrebujú pozornosť.</string>
+    <string name="helper_tip_calendar">V Správcovi kalendára môžete vopred plánovať budúce bohoslužby, každú s vlastným priebehom.</string>
+    <string name="helper_tip_calendar_cues">Správca kalendára vie sám spúšťať to, čo beží pred bohoslužbou. Nastavte, kedy sa každá položka začína, a v tom čase sa objaví na obrazovke.</string>
+    <string name="helper_tip_calendar_sync">Naplánované bohoslužby sa môžu synchronizovať s telefónmi a tabletmi, takže môžete celý týždeň plánovať v mobilnej aplikácii, aj keď je tento počítač vypnutý.</string>
+    <string name="helper_hint_calendar_sync">Zapnite %1$s a potom naskenujte kód aplikáciou ChurchPresenter v telefóne alebo tablete.</string>
+    <string name="helper_tip_qa_tunnel">Ľudia môžu posielať otázky do relácie Q&amp;A zo svojich telefónov bez pripojenia k Wi-Fi zboru. Zapnite verejný prístup a použijú svoje mobilné dáta.</string>
+    <string name="helper_hint_qa_remote">Kliknite na %1$s a otvorte kód na pripojenie a možnosti zdieľania.</string>
+    <string name="helper_hint_qa_public_access">Kliknite na %1$s. Ľudia potom môžu naskenovať kód na pripojenie a posielať otázky cez mobilné dáta, bez Wi-Fi.</string>
+    <string name="helper_tip_lottie_background">Pozadia Biblie a piesní môžu prehrať animovaný nástup a odchod. Zvoľte pozadie Lottie a to sa animovane objaví, keď sa zobrazí text, a odíde, keď sa text skryje.</string>
+    <string name="helper_tip_two_translations">Pre prehľadnejšiu obrazovku zobrazujte na jednom projektore naraz najviac dva preklady Biblie alebo jazyky piesne. Ktoré z nich sa zobrazia, volí profil každého výstupu.</string>
+    <string name="helper_tip_hide_slides">Obrázok alebo snímku prezentácie môžete skryť bez toho, aby ste ich zmazali: kliknite na oko v pravom dolnom rohu náhľadu a pri prechádzaní alebo prehrávaní sa preskočí.</string>
+    <string name="helper_tip_metronome">Monitor javiska vie kapele zobraziť metronóm: v editore piesne nastavte počet úderov za minútu a kým je pieseň na obrazovke, bude udávať rytmus.</string>
+    <string name="helper_hint_song_tempo">Do poľa %1$s napíšte počet úderov za minútu. Zobrazí sa, až keď je nastavený monitor javiska.</string>
+    <string name="helper_tip_song_features">Pieseň môže zobraziť akordy, začať titulnou snímkou a obsahovať až štyri jazyky. Akordy a jazyky pridáte v editore piesne; titulnú snímku zapína profil každého výstupu.</string>
+    <string name="helper_tip_stt">Služba prevodu reči na text sa môže pripojiť k ChurchPresenter a zobraziť na obrazovke živé titulky alebo živý preklad toho, čo zaznieva. Pripojte ju na karte STT.</string>
+    <string name="helper_tip_song_library">Správca knižnice piesní upraví veľa piesní naraz: označte ich, zvoľte Hromadná úprava… a nastavte spevník, autora alebo čokoľvek iné všetkým spoločne.</string>
+    <string name="helper_tip_compare_translations">Správca knižnice piesní vie porovnať jazyky piesne medzi sebou: Porovnať preklady nájde časti, ktorým chýba názov, ktoré sú preložené len sčasti alebo si nezodpovedajú.</string>
+    <string name="helper_tip_presets">Ľubovoľnú sadu obrázkov, prezentáciu, video, oznam alebo scénu uložte ako predvoľbu tlačidlom Uložiť predvoľbu vedľa Pridať do programu. Potom ju pridajte do naplánovanej bohoslužby z Predvoľby v Správcovi kalendára.</string>
 </resources>

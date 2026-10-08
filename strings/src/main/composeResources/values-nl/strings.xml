@@ -2448,7 +2448,7 @@
     <string name="helper_tip_auto_fit">Liedtekst past zich standaard aan het scherm aan. Stel de grootste en kleinste grootte in het profiel in.</string>
     <string name="helper_tip_schedule_drag">Sleep liederen, verzen en afbeeldingen naar het programma om de hele dienst vooraf te plannen.</string>
     <string name="helper_tip_verse_typing">In het tabblad Bijbel kunt u een verwijzing als “joh 3 16” direct in het zoekvak typen.</string>
-    <string name="helper_tip_remote">Telefoons en tablets kunnen de dia\'s bedienen via de server voor afstandsbediening.</string>
+    <string name="helper_tip_remote">Een telefoon of tablet kan ChurchPresenter bedienen: zet liederen, verzen en dia\'s op het scherm vanaf elke plek in de zaal. Zet de server aan en scan dan de code met de ChurchPresenter-app.</string>
     <string name="helper_display_title">Schermen instellen</string>
     <string name="helper_display_one_screen">Ik vind maar één scherm. Sluit de beamer of tv aan, dan vind ik hem hier. Voor een stream stelt u in plaats daarvan NDI of een Browser Source in bij de projectie-instellingen.</string>
     <string name="helper_display_pick">Welk scherm ziet de gemeente?</string>
@@ -2478,4 +2478,23 @@
     <string name="settings_helper_show">Wick, de helper, in de hoek van het hoofdvenster weergeven</string>
     <string name="settings_helper_tips">Tip van de dag aanbieden</string>
     <string name="settings_helper_title">Helper</string>
+    <string name="helper_hint_identify">Klik op %1$s en elk scherm toont zijn nummer, zodat u weet welk scherm welk is.</string>
+    <string name="helper_open_song_library_compare">Liedbibliotheekbeheer wordt geopend. Kies een lied met meer dan één taal en kies Vertalingen vergelijken. Alleen problemen toont alleen de secties die aandacht nodig hebben.</string>
+    <string name="helper_tip_calendar">In Kalenderbeheer kunt u toekomstige diensten vooruit plannen, elk met een eigen draaiboek.</string>
+    <string name="helper_tip_calendar_cues">Kalenderbeheer kan wat vóór de dienst loopt vanzelf starten. Stel in wanneer elk onderdeel begint, en het komt op dat moment op het scherm.</string>
+    <string name="helper_tip_calendar_sync">Uw geplande diensten kunnen synchroniseren met telefoons en tablets, zodat u de hele week vanuit de mobiele app kunt plannen, ook als deze computer uit staat.</string>
+    <string name="helper_hint_calendar_sync">Zet %1$s aan en scan dan de code met de ChurchPresenter-app op de telefoon of tablet.</string>
+    <string name="helper_tip_qa_tunnel">Mensen kunnen vanaf hun telefoon vragen naar een V&amp;A-sessie sturen zonder met de wifi van de kerk te verbinden. Zet openbare toegang aan, dan gebruiken ze hun mobiele data.</string>
+    <string name="helper_hint_qa_remote">Klik op %1$s om de deelnamecode en de deelopties te openen.</string>
+    <string name="helper_hint_qa_public_access">Klik op %1$s. Mensen kunnen dan de deelnamecode scannen en vragen sturen via mobiele data, zonder wifi.</string>
+    <string name="helper_tip_lottie_background">Bijbel- en liedachtergronden kunnen een geanimeerde intro en outro afspelen. Kies een Lottie-achtergrond, dan animeert die in als de tekst verschijnt en uit als die wordt gewist.</string>
+    <string name="helper_tip_two_translations">Voor een overzichtelijker scherm toont u op één projector niet meer dan twee bijbelvertalingen of liedtalen tegelijk. Het profiel van elke uitvoer bepaalt welke het toont.</string>
+    <string name="helper_tip_hide_slides">U kunt een afbeelding of presentatiedia verbergen zonder hem te verwijderen: klik op het oog rechtsonder in de miniatuur, dan wordt hij overgeslagen bij het doorlopen of afspelen.</string>
+    <string name="helper_tip_metronome">De stage monitor kan een metronoom tonen voor de band: stel in de liededitor de beats per minuut van een lied in, en hij houdt de maat zolang het lied op het scherm staat.</string>
+    <string name="helper_hint_song_tempo">Typ de beats per minuut onder %1$s. Dit verschijnt pas als er een stage monitor is ingesteld.</string>
+    <string name="helper_tip_song_features">Een lied kan akkoorden tonen, openen met een titeldia en tot vier talen bevatten. Voeg akkoorden en talen toe in de liededitor; het profiel van elke uitvoer zet de titeldia aan.</string>
+    <string name="helper_tip_stt">Een spraak-naar-tekstdienst kan verbinding maken met ChurchPresenter en live ondertitels, of een live vertaling van wat er gezegd wordt, op een scherm zetten. Verbind hem op het tabblad STT.</string>
+    <string name="helper_tip_song_library">Liedbibliotheekbeheer bewerkt veel liederen tegelijk: selecteer ze, kies Bulkbewerking… en stel de liedbundel, auteur of iets anders voor allemaal tegelijk in.</string>
+    <string name="helper_tip_compare_translations">Liedbibliotheekbeheer kan de talen van een lied met elkaar vergelijken: Vertalingen vergelijken vindt secties zonder titel, die maar deels vertaald zijn of niet op elkaar aansluiten.</string>
+    <string name="helper_tip_presets">Sla elke afbeeldingenreeks, presentatie, video, mededeling of scène op als voorinstelling met Voorinstelling opslaan, naast Toevoegen aan programma. Voeg hem daarna toe aan een geplande dienst via Voorinstellingen in Kalenderbeheer.</string>
 </resources>

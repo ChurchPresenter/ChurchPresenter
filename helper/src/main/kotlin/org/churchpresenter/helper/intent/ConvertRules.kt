@@ -28,7 +28,12 @@ internal fun convertSongsRule(r: Request): Resolution? {
  */
 internal fun songLibraryRule(r: Request): Resolution? {
     if (Vocabulary.BIBLE_NAMES.any { r.text.containsWordPrefix(it) }) return null
+    // "Compare song translations", "find missing verses": the library's translation check.
+    val aboutLanguages = Vocabulary.TRANSLATION.any { r.text.containsWordPrefix(it) }
+    val comparing = r.text.containsWordPrefix("compar") && aboutLanguages ||
+        r.says("missing verse", "missing verses", "missing title", "missing titles", "partial verse", "partial verses")
+    if (comparing) return act(HelperAction.OpenSongLibrary(compare = true))
     val named = r.hasPhrase(Vocabulary.SONG_LIBRARY)
     val editingMany = r.has(Vocabulary.EDIT) && r.has(Vocabulary.MANY) && r.has(Vocabulary.SONG)
-    return if (named || editingMany) act(HelperAction.OpenSongLibrary) else null
+    return if (named || editingMany) act(HelperAction.OpenSongLibrary()) else null
 }

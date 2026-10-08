@@ -2450,7 +2450,7 @@
     <string name="helper_tip_auto_fit">Implicit, textul cântărilor se potrivește singur pe ecran. Setați mărimea maximă și minimă în profil.</string>
     <string name="helper_tip_schedule_drag">Trageți cântări, versete și imagini în program pentru a planifica dinainte tot serviciul.</string>
     <string name="helper_tip_verse_typing">În fila Biblie puteți scrie o referință precum „in 3 16” direct în caseta de căutare.</string>
-    <string name="helper_tip_remote">Telefoanele și tabletele pot derula slide-urile prin serverul de control la distanță.</string>
+    <string name="helper_tip_remote">Un telefon sau o tabletă poate controla ChurchPresenter: afișați cântări, versete și slide-uri de oriunde din sală. Porniți serverul, apoi scanați codul lui cu aplicația ChurchPresenter.</string>
     <string name="helper_display_title">Configurarea ecranelor</string>
     <string name="helper_display_one_screen">Găsesc un singur ecran. Conectați proiectorul sau televizorul și îl voi găsi aici. Pentru un stream, configurați în schimb NDI sau o Browser Source în setările Proiecție.</string>
     <string name="helper_display_pick">Pe care îl vede congregația?</string>
@@ -2480,4 +2480,23 @@
     <string name="settings_helper_show">Afișează pe Wick, asistentul, în colțul ferestrei principale</string>
     <string name="settings_helper_tips">Oferă un sfat al zilei</string>
     <string name="settings_helper_title">Asistent</string>
+    <string name="helper_hint_identify">Faceți clic pe %1$s și fiecare ecran își afișează numărul, ca să știți care e care.</string>
+    <string name="helper_open_song_library_compare">Se deschide Managerul bibliotecii de cântări. Alegeți o cântare în mai multe limbi și alegeți Compară traducerile. Doar probleme arată numai secțiunile care au nevoie de atenție.</string>
+    <string name="helper_tip_calendar">Puteți planifica din timp serviciile viitoare în Managerul calendar, fiecare cu propria desfășurare.</string>
+    <string name="helper_tip_calendar_cues">Managerul calendar poate porni singur elementele dinaintea serviciului. Stabiliți când începe fiecare element, iar el apare pe ecran la ora respectivă.</string>
+    <string name="helper_tip_calendar_sync">Serviciile planificate se pot sincroniza cu telefoanele și tabletele, așa că puteți planifica din aplicația mobilă toată săptămâna, chiar și când acest calculator este oprit.</string>
+    <string name="helper_hint_calendar_sync">Activați %1$s, apoi scanați codul cu aplicația ChurchPresenter pe telefon sau tabletă.</string>
+    <string name="helper_tip_qa_tunnel">Oamenii pot trimite întrebări la o sesiune Î&amp;R de pe telefon fără să se conecteze la Wi-Fi-ul bisericii. Activați accesul public și vor folosi datele mobile.</string>
+    <string name="helper_hint_qa_remote">Faceți clic pe %1$s pentru a deschide codul de acces și opțiunile de partajare.</string>
+    <string name="helper_hint_qa_public_access">Faceți clic pe %1$s. Apoi oamenii pot scana codul de acces și trimite întrebări prin datele mobile, fără Wi-Fi.</string>
+    <string name="helper_tip_lottie_background">Fundalurile pentru Biblie și cântări pot reda o intrare și o ieșire animate. Alegeți un fundal Lottie: intră animat când apare textul și iese când acesta se șterge.</string>
+    <string name="helper_tip_two_translations">Pentru un ecran mai clar, nu afișați mai mult de două traduceri ale Bibliei sau limbi ale cântării deodată pe un proiector. Profilul fiecărei ieșiri alege care sunt afișate.</string>
+    <string name="helper_tip_hide_slides">Puteți ascunde o imagine sau un slide de prezentare fără să-l ștergeți: faceți clic pe ochiul din colțul din dreapta jos al miniaturii, iar el va fi sărit când avansați sau redați.</string>
+    <string name="helper_tip_metronome">Monitorul de scenă poate afișa un metronom pentru formație: setați bătăile pe minut ale cântării în editorul de cântări, iar el ține ritmul cât timp cântarea este pe ecran.</string>
+    <string name="helper_hint_song_tempo">Scrieți bătăile pe minut la %1$s. Apare doar după ce a fost configurat un monitor de scenă.</string>
+    <string name="helper_tip_song_features">O cântare poate afișa acorduri, poate începe cu un slide de titlu și poate avea până la patru limbi. Adăugați acorduri și limbi în editorul de cântări; profilul fiecărei ieșiri activează slide-ul de titlu.</string>
+    <string name="helper_tip_stt">Un serviciu de transcriere vocală se poate conecta la ChurchPresenter și poate pune pe ecran subtitrări live sau o traducere live a ceea ce se spune. Conectați-l din fila STT.</string>
+    <string name="helper_tip_song_library">Managerul bibliotecii de cântări editează multe cântări deodată: selectați-le, alegeți Editare în masă… și setați cartea de cântări, autorul sau orice altceva pentru toate odată.</string>
+    <string name="helper_tip_compare_translations">Managerul bibliotecii de cântări poate verifica limbile unei cântări una față de alta: Compară traducerile găsește secțiunile fără titlu, traduse doar parțial sau care nu se potrivesc.</string>
+    <string name="helper_tip_presets">Salvați orice set de imagini, prezentare, video, anunț sau scenă ca presetare cu Salvează presetarea, lângă Adaugă la Program. Apoi adăugați-o la un serviciu planificat din Presetări în Managerul calendar.</string>
 </resources>

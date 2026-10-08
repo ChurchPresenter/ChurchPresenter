@@ -2465,7 +2465,7 @@
     <string name="helper_tip_auto_fit">Kusang umaakma sa screen ang text ng awit bilang default. Itakda ang pinakamalaki at pinakamaliit na laki nito sa profile.</string>
     <string name="helper_tip_schedule_drag">I-drag ang mga awit, talata at larawan sa schedule para planuhin nang maaga ang buong serbisyo.</string>
     <string name="helper_tip_verse_typing">Sa tab na Biblia, puwede kang mag-type ng reference gaya ng “jn 3 16” diretso sa search box.</string>
-    <string name="helper_tip_remote">Kayang patakbuhin ng mga phone at tablet ang mga slide sa pamamagitan ng remote server.</string>
+    <string name="helper_tip_remote">Kayang kontrolin ng isang phone o tablet ang ChurchPresenter: maglabas ng mga awit, talata at slide mula saanman sa silid. I-on ang server, saka i-scan ang code nito gamit ang ChurchPresenter app.</string>
     <string name="helper_display_title">Pag-set up ng display</string>
     <string name="helper_display_one_screen">Isang display lang ang nakikita ko. Ikonekta ang projector o TV, at makikita ko ito dito. Para sa stream, mag-set up na lang ng NDI o Browser Source sa Projection settings.</string>
     <string name="helper_display_pick">Alin ang nakikita ng kongregasyon?</string>
@@ -2495,4 +2495,23 @@
     <string name="settings_helper_show">Ipakita si Wick, ang katulong, sa sulok ng pangunahing window</string>
     <string name="settings_helper_tips">Mag-alok ng tip ng araw</string>
     <string name="settings_helper_title">Katulong</string>
+    <string name="helper_hint_identify">I-click ang %1$s at ipapakita ng bawat screen ang numero nito, para malaman mo kung aling screen ang alin.</string>
+    <string name="helper_open_song_library_compare">Binubuksan ang Tagapamahala ng Aklatan ng Awit. Pumili ng awit na may higit sa isang wika at piliin ang Paghambingin ang mga salin. Ipinapakita ng Mga problema lang ang mga seksyong kailangang ayusin.</string>
+    <string name="helper_tip_calendar">Puwede mong planuhin nang maaga ang mga susunod na serbisyo sa Tagapamahala ng Kalendaryo, bawat isa ay may sariling takbo ng programa.</string>
+    <string name="helper_tip_calendar_cues">Kayang kusang simulan ng Tagapamahala ng Kalendaryo ang mga item bago ang serbisyo. Itakda kung kailan magsisimula ang bawat item, at lalabas ito sa screen sa oras na iyon.</string>
+    <string name="helper_tip_calendar_sync">Puwedeng mag-sync sa mga phone at tablet ang mga planadong serbisyo, kaya makakapagplano ka mula sa mobile app buong linggo, kahit naka-off ang computer na ito.</string>
+    <string name="helper_hint_calendar_sync">I-on ang %1$s, saka i-scan ang code gamit ang ChurchPresenter app sa phone o tablet.</string>
+    <string name="helper_tip_qa_tunnel">Puwedeng magpadala ng mga tanong ang mga tao sa isang Q&amp;A session mula sa kanilang phone nang hindi kumokonekta sa Wi-Fi ng simbahan. I-on ang pampublikong access at mobile data nila ang gagamitin.</string>
+    <string name="helper_hint_qa_remote">I-click ang %1$s para buksan ang join code at ang mga opsyon sa pagbabahagi.</string>
+    <string name="helper_hint_qa_public_access">I-click ang %1$s. Pagkatapos, puwede nang i-scan ng mga tao ang join code at magpadala ng mga tanong gamit ang mobile data, hindi na kailangan ng Wi-Fi.</string>
+    <string name="helper_tip_lottie_background">Puwedeng magpakita ng animated na intro at outro ang mga background ng Biblia at awit. Pumili ng Lottie background, at papasok ito nang may animation kapag lumabas ang text at aalis kapag na-clear ito.</string>
+    <string name="helper_tip_two_translations">Para mas malinis ang screen, huwag magpakita ng higit sa dalawang salin ng Biblia o wika ng awit nang sabay sa isang projector. Ang profile ng bawat output ang pumipili kung alin ang ipapakita.</string>
+    <string name="helper_tip_hide_slides">Puwede mong itago ang isang larawan o slide ng presentation nang hindi ito binubura: i-click ang mata sa kanang ibabang sulok ng thumbnail nito, at lalaktawan ito kapag nag-step through o nag-play ka.</string>
+    <string name="helper_tip_metronome">Kayang magpakita ng stage monitor ng metronome para sa banda: itakda ang beats per minute ng awit sa song editor, at pananatilihin nito ang beat habang nakalabas ang awit.</string>
+    <string name="helper_hint_song_tempo">I-type ang beats per minute sa ilalim ng %1$s. Lalabas lang ito kapag may naka-set up nang stage monitor.</string>
+    <string name="helper_tip_song_features">Puwedeng magpakita ng chords ang isang awit, magsimula sa title slide, at magkaroon ng hanggang apat na wika. Magdagdag ng chords at wika sa song editor; ang profile ng bawat output ang nag-o-on sa title slide.</string>
+    <string name="helper_tip_stt">Puwedeng kumonekta sa ChurchPresenter ang isang speech-to-text na serbisyo at maglagay sa screen ng live captions, o live na salin ng sinasabi. Ikonekta ito sa STT tab.</string>
+    <string name="helper_tip_song_library">Sabay-sabay na ine-edit ng Tagapamahala ng Aklatan ng Awit ang maraming awit: piliin ang mga ito, piliin ang Sabay-sabay na Pag-edit…, at itakda ang aklat ng awit, may-akda o anumang iba pa para sa lahat nang sabay.</string>
+    <string name="helper_tip_compare_translations">Kayang ihambing ng Tagapamahala ng Aklatan ng Awit ang mga wika ng isang awit sa isa\'t isa: hinahanap ng Paghambingin ang mga salin ang mga seksyong walang pamagat, bahagya lang ang salin, o hindi magkatugma.</string>
+    <string name="helper_tip_presets">I-save bilang preset ang anumang set ng larawan, presentation, video, anunsyo o scene gamit ang I-save ang preset, katabi ng Idagdag sa Schedule. Saka ito idagdag sa isang planadong serbisyo mula sa Mga preset sa Tagapamahala ng Kalendaryo.</string>
 </resources>

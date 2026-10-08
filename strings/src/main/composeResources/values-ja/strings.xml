@@ -2465,7 +2465,7 @@
     <string name="helper_tip_auto_fit">賛美歌の文字は、標準で画面に合わせて大きさが調整されます。最大と最小のサイズはプロファイルで設定できます。</string>
     <string name="helper_tip_schedule_drag">賛美歌、聖句、画像を進行表にドラッグすれば、礼拝全体を前もって計画できます。</string>
     <string name="helper_tip_verse_typing">聖書タブでは、検索ボックスに「jn 3 16」のような箇所を直接入力できます。</string>
-    <string name="helper_tip_remote">スマートフォンやタブレットから、リモートサーバー経由でスライドを操作できます。</string>
+    <string name="helper_tip_remote">スマートフォンやタブレットで ChurchPresenter を操作できます。会場のどこからでも賛美歌、聖句、スライドを表示できます。サーバーをオンにしてから、ChurchPresenter アプリでそのコードを読み取ってください。</string>
     <string name="helper_display_title">ディスプレイの設定</string>
     <string name="helper_display_one_screen">ディスプレイが 1 台しか見つかりません。プロジェクターやテレビをつなぐと、ここに表示されます。配信の場合は、代わりに投影の設定で NDI か Browser Source を設定してください。</string>
     <string name="helper_display_pick">会衆が見るのはどれですか？</string>
@@ -2495,4 +2495,23 @@
     <string name="settings_helper_show">ヘルパーのWickをメインウィンドウの隅に表示</string>
     <string name="settings_helper_tips">今日のヒントを表示</string>
     <string name="settings_helper_title">ヘルパー</string>
+    <string name="helper_hint_identify">「%1$s」をクリックすると各画面に番号が表示され、どの画面がどれかわかります。</string>
+    <string name="helper_open_song_library_compare">賛美歌ライブラリ管理を開きます。複数の言語がある賛美歌を選び、「翻訳を比較」を選んでください。「問題のみ」にすると、確認が必要なセクションだけが表示されます。</string>
+    <string name="helper_tip_calendar">カレンダーマネージャーでは、今後の礼拝を前もって計画できます。礼拝ごとに独自の進行表があります。</string>
+    <string name="helper_tip_calendar_cues">カレンダーマネージャーは、礼拝前のキューを自動で開始できます。各項目の開始時刻を設定すると、その時刻に画面に表示されます。</string>
+    <string name="helper_tip_calendar_sync">計画した礼拝はスマートフォンやタブレットと同期できるので、このコンピューターの電源が切れていても、1週間いつでもモバイルアプリから計画できます。</string>
+    <string name="helper_hint_calendar_sync">「%1$s」をオンにしてから、スマートフォンかタブレットの ChurchPresenter アプリでコードを読み取ってください。</string>
+    <string name="helper_tip_qa_tunnel">教会の Wi-Fi に接続しなくても、スマートフォンから Q&amp;A に質問を送れます。公開アクセスをオンにすると、モバイルデータ通信で送れるようになります。</string>
+    <string name="helper_hint_qa_remote">「%1$s」をクリックすると、参加コードと共有オプションが開きます。</string>
+    <string name="helper_hint_qa_public_access">「%1$s」をクリックします。参加者は参加コードを読み取り、Wi-Fi なしでモバイルデータ通信から質問を送れるようになります。</string>
+    <string name="helper_tip_lottie_background">聖書と賛美歌の背景では、アニメーションのイントロとアウトロを再生できます。Lottie 背景を選ぶと、文字が表示されるときにアニメーションで現れ、消えるときにアニメーションで消えます。</string>
+    <string name="helper_tip_two_translations">画面を見やすくするため、1台のプロジェクターに同時に表示する聖書の翻訳や賛美歌の言語は2つまでにしましょう。どれを表示するかは、出力ごとのプロファイルで選びます。</string>
+    <string name="helper_tip_hide_slides">画像やプレゼンテーションのスライドは、削除せずに非表示にできます。サムネイルの右下にある目のアイコンをクリックすると、送りや再生のときにスキップされます。</string>
+    <string name="helper_tip_metronome">ステージモニターにバンド用のメトロノームを表示できます。賛美歌エディターで賛美歌の1分あたりの拍数を設定すると、その賛美歌の表示中は拍を刻み続けます。</string>
+    <string name="helper_hint_song_tempo">「%1$s」に1分あたりの拍数を入力します。ステージモニターを設定した後にのみ表示されます。</string>
+    <string name="helper_tip_song_features">賛美歌では、コードの表示、タイトルスライドでの開始、最大4つの言語が使えます。コードと言語は賛美歌エディターで追加し、タイトルスライドは出力ごとのプロファイルでオンにします。</string>
+    <string name="helper_tip_stt">音声認識サービスを ChurchPresenter に接続すると、ライブ字幕や話している内容のライブ翻訳を画面に表示できます。STT タブで接続してください。</string>
+    <string name="helper_tip_song_library">賛美歌ライブラリ管理では、多くの賛美歌をまとめて編集できます。賛美歌を選び、「一括編集…」を選んで、賛美歌集や作者などをすべてに一度に設定します。</string>
+    <string name="helper_tip_compare_translations">賛美歌ライブラリ管理では、賛美歌の言語どうしを照合できます。「翻訳を比較」は、タイトルがない、一部しか翻訳されていない、または対応がずれているセクションを見つけます。</string>
+    <string name="helper_tip_presets">画像セット、プレゼンテーション、動画、お知らせ、シーンは、「進行表に追加」の横の「プリセットを保存」でプリセットとして保存できます。その後、カレンダーマネージャーの「プリセット」から計画中の礼拝に追加します。</string>
 </resources>

@@ -1,6 +1,7 @@
 package org.churchpresenter.helper.action
 
 import org.churchpresenter.helper.HelperText
+import org.churchpresenter.strings.generated.resources.helper_open_song_library_compare
 import org.churchpresenter.strings.generated.resources.helper_open_calendar
 import org.churchpresenter.strings.generated.resources.helper_open_calendar_repeat
 import org.churchpresenter.strings.generated.resources.helper_open_calendar_template
@@ -84,7 +85,8 @@ fun HelperAction.describe(undoLabel: HelperText? = null): HelperText = when (thi
         sourceName != null -> helperText(Res.string.helper_open_converter_from, sourceName)
         else -> helperText(Res.string.helper_open_converter)
     }
-    HelperAction.OpenSongLibrary -> helperText(Res.string.helper_open_song_library)
+    is HelperAction.OpenSongLibrary ->
+        helperText(if (compare) Res.string.helper_open_song_library_compare else Res.string.helper_open_song_library)
     is HelperAction.OpenCalendar -> helperText(
         when (topic) {
             CalendarTopic.PLAN -> Res.string.helper_open_calendar

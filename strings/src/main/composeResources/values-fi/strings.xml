@@ -2465,7 +2465,7 @@
     <string name="helper_tip_auto_fit">Laulun teksti sovittuu oletuksena näyttöön. Aseta sen suurin ja pienin koko profiilissa.</string>
     <string name="helper_tip_schedule_drag">Vedä lauluja, jakeita ja kuvia ohjelmaan, niin voit suunnitella koko tilaisuuden etukäteen.</string>
     <string name="helper_tip_verse_typing">Raamattu-välilehdellä voit kirjoittaa viitteen, kuten ”joh 3 16”, suoraan hakukenttään.</string>
-    <string name="helper_tip_remote">Puhelimilla ja tableteilla voi ohjata dioja etäpalvelimen kautta.</string>
+    <string name="helper_tip_remote">Puhelimella tai tabletilla voi ohjata ChurchPresenteriä: tuo lauluja, jakeita ja dioja näytölle mistä päin salia tahansa. Käynnistä palvelin ja skannaa sen koodi ChurchPresenter-sovelluksella.</string>
     <string name="helper_display_title">Näyttöjen määritys</string>
     <string name="helper_display_one_screen">Löydän vain yhden näytön. Kytke projektori tai televisio, niin löydän sen tästä. Striimiä varten määritä sen sijaan NDI tai Browser Source Projisointi-asetuksissa.</string>
     <string name="helper_display_pick">Minkä näytön seurakunta näkee?</string>
@@ -2495,4 +2495,23 @@
     <string name="settings_helper_show">Näytä avustaja Wick pääikkunan kulmassa</string>
     <string name="settings_helper_tips">Tarjoa päivän vinkki</string>
     <string name="settings_helper_title">Avustaja</string>
+    <string name="helper_hint_identify">Napsauta %1$s, niin jokainen näyttö näyttää numeronsa ja näet, mikä on mikä.</string>
+    <string name="helper_open_song_library_compare">Avataan Laulukirjaston hallinta. Valitse laulu, jolla on useampi kieli, ja valitse Vertaa käännöksiä. Vain ongelmat näyttää vain kohdat, jotka vaativat huomiota.</string>
+    <string name="helper_tip_calendar">Voit suunnitella tulevat tilaisuudet etukäteen Kalenterin hallinnassa, jokaiselle oma kulkusuunnitelmansa.</string>
+    <string name="helper_tip_calendar_cues">Kalenterin hallinta voi käynnistää ennen tilaisuutta näytettävät kohdat itsestään. Aseta, milloin kukin kohta alkaa, niin se tulee näytölle siihen aikaan.</string>
+    <string name="helper_tip_calendar_sync">Suunnitellut tilaisuudet voi synkronoida puhelimiin ja tabletteihin, joten voit suunnitella mobiilisovelluksella koko viikon, vaikka tämä tietokone olisi sammutettu.</string>
+    <string name="helper_hint_calendar_sync">Kytke päälle asetus %1$s ja skannaa sitten koodi ChurchPresenter-sovelluksella puhelimessa tai tabletissa.</string>
+    <string name="helper_tip_qa_tunnel">Ihmiset voivat lähettää kysymyksiä Kysymykset-istuntoon puhelimellaan liittymättä seurakunnan Wi-Fi-verkkoon. Ota julkinen käyttö käyttöön, niin he käyttävät mobiilidataa.</string>
+    <string name="helper_hint_qa_remote">Napsauta painiketta %1$s, niin liittymiskoodi ja jakamisasetukset avautuvat.</string>
+    <string name="helper_hint_qa_public_access">Napsauta painiketta %1$s. Sen jälkeen ihmiset voivat skannata liittymiskoodin ja lähettää kysymyksiä mobiilidatalla ilman Wi-Fiä.</string>
+    <string name="helper_tip_lottie_background">Raamatun ja laulujen taustat voivat toistaa animoidun alun ja lopun. Valitse Lottie-tausta, niin se animoituu esiin tekstin tullessa ja pois, kun teksti poistuu.</string>
+    <string name="helper_tip_two_translations">Selkeämmän näytön saat, kun näytät yhdellä projektorilla kerrallaan enintään kaksi Raamatun käännöstä tai laulun kieltä. Kunkin ulostulon profiili valitsee, mitkä se näyttää.</string>
+    <string name="helper_tip_hide_slides">Voit piilottaa kuvan tai esityksen dian poistamatta sitä: napsauta pikkukuvan oikeassa alakulmassa olevaa silmää, niin se ohitetaan selattaessa ja toistettaessa.</string>
+    <string name="helper_tip_metronome">Lavamonitori voi näyttää bändille metronomin: aseta laulun iskut minuutissa laulueditorissa, niin se pitää tahtia, kun laulu on näytöllä.</string>
+    <string name="helper_hint_song_tempo">Kirjoita iskut minuutissa kenttään %1$s. Kenttä näkyy vasta, kun lavamonitori on määritetty.</string>
+    <string name="helper_tip_song_features">Laulussa voi näkyä sointuja, se voi alkaa otsikkodialla ja siinä voi olla jopa neljä kieltä. Lisää soinnut ja kielet laulueditorissa; kunkin ulostulon profiili kytkee otsikkodian päälle.</string>
+    <string name="helper_tip_stt">Puheentunnistuspalvelu voi yhdistää ChurchPresenteriin ja tuoda näytölle livetekstityksen tai livekäännöksen puhutusta. Yhdistä se Tekstitys-välilehdellä.</string>
+    <string name="helper_tip_song_library">Laulukirjaston hallinta muokkaa monta laulua kerralla: valitse ne, valitse Joukkomuokkaus… ja aseta laulukirja, tekijä tai mikä tahansa muu kaikille yhdellä kertaa.</string>
+    <string name="helper_tip_compare_translations">Laulukirjaston hallinta voi verrata laulun kieliä toisiinsa: Vertaa käännöksiä löytää kohdat, joilta puuttuu otsikko, jotka on käännetty vain osittain tai jotka eivät vastaa toisiaan.</string>
+    <string name="helper_tip_presets">Tallenna mikä tahansa kuvasarja, esitys, video, ilmoitus tai näkymä esiasetukseksi painikkeella Tallenna esiasetus, joka on Lisää ohjelmaan -painikkeen vieressä. Lisää se sitten suunniteltuun tilaisuuteen Kalenterin hallinnan kohdasta Esiasetukset.</string>
 </resources>

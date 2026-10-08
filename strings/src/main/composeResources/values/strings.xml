@@ -3055,6 +3055,10 @@
     <string name="helper_open_calendar_template">Opening the Calendar Manager. Plan a service, then click the template icon in its run of show header to save it. New services can start from it under Start from.</string>
     <string name="helper_open_calendar_load">Opening the Calendar Manager. Pick the service and click Load into Schedule, or turn on auto-load so it goes into the Schedule tab by itself before it starts.</string>
     <string name="helper_open_calendar_automate">Opening the Calendar Manager. Click a row in a service's run of show to set when it starts on its own and how long it runs, then arm the service.</string>
+    <!-- Names the Song Library Manager's Compare translations and Only problems controls, that
+         window's own strings (compare_translations, compare_only_problems in
+         songlibrary/src/main/composeResources/values/strings.xml): translate them the way that file does. -->
+    <string name="helper_open_song_library_compare">Opening the Song Library Manager. Pick a song with more than one language and choose Compare translations. Only problems shows just the sections that need attention.</string>
     <string name="helper_open_shortcuts">Opening Keyboard Shortcuts.</string>
     <string name="helper_open_display_setup">Let's set up your screens.</string>
     <string name="helper_open_projection">Open Projection settings</string>
@@ -3159,6 +3163,8 @@
     <string name="helper_hint_background">Backgrounds are set here.</string>
     <string name="helper_hint_settings">Settings open from here.</string>
     <string name="helper_hint_server_page">Phones, tablets and Companion connect from this page. Turn the server on, then scan the code or open the address on the device.</string>
+    <!-- %1$s is the Projection page's Identify button (identify_screen). -->
+    <string name="helper_hint_identify">Click %1$s and each screen shows its number, so you can tell which is which.</string>
     <string name="helper_hint_projection_page">Screens and outputs are set up on this page.</string>
     <string name="helper_hint_live_preview">This shows what the audience sees right now.</string>
     <string name="helper_hint_toggle_outputs">This shows or hides the output windows.</string>
@@ -3184,7 +3190,28 @@
     <string name="helper_tip_auto_fit">Song text fits itself to the screen by default. Set its largest and smallest size in the profile.</string>
     <string name="helper_tip_schedule_drag">Drag songs, verses and pictures onto the schedule to plan the whole service ahead of time.</string>
     <string name="helper_tip_verse_typing">In the Bible tab you can type a reference like “jn 3 16” straight into the search box.</string>
-    <string name="helper_tip_remote">Phones and tablets can run the slides through the remote server.</string>
+    <string name="helper_tip_calendar">You can plan future services ahead of time in the Calendar Manager, each with its own run of show.</string>
+    <string name="helper_tip_calendar_cues">The Calendar Manager can start your pre-service cues on their own. Set when each item starts, and it goes on screen at that time.</string>
+    <string name="helper_tip_calendar_sync">Your planned services can sync with phones and tablets, so you can plan from the mobile app all week, even while this computer is off.</string>
+    <!-- %1$s is the Sync the calendar with phones switch (calendar_sync_enable). -->
+    <string name="helper_hint_calendar_sync">Turn on %1$s, then scan the code with the ChurchPresenter app on the phone or tablet.</string>
+    <string name="helper_tip_qa_tunnel">People can send questions to a Q&amp;A session from their phones without joining the church Wi-Fi. Turn on public access and they use their mobile data.</string>
+    <!-- %1$s is the Q&amp;A tab's Sharing &amp; Remote Access button (tooltip_qa_remote). -->
+    <string name="helper_hint_qa_remote">Click %1$s to open the join code and sharing options.</string>
+    <!-- %1$s is the Enable Public Access button (qa_enable_public_access). -->
+    <string name="helper_hint_qa_public_access">Click %1$s. People can then scan the join code and send questions over mobile data, with no Wi-Fi needed.</string>
+    <string name="helper_tip_lottie_background">Bible and song backgrounds can play an animated intro and outro. Pick a Lottie background, and it animates in when the text appears and out when it clears.</string>
+    <string name="helper_tip_two_translations">For a clearer screen, show no more than two Bible translations or song languages on one projector at a time. Each output's profile chooses which ones it shows.</string>
+    <string name="helper_tip_hide_slides">You can hide a picture or a presentation slide without deleting it: click the eye in the lower-right corner of its thumbnail, and it is skipped when you step through or play.</string>
+    <string name="helper_tip_metronome">The stage monitor can show a metronome for the band: set a song's beats per minute in the song editor, and it keeps the beat while the song is up.</string>
+    <!-- %1$s is the song editor's Tempo field (song_tempo). -->
+    <string name="helper_hint_song_tempo">Type the beats per minute under %1$s. It only shows once a stage monitor is set up.</string>
+    <string name="helper_tip_song_features">A song can show chords, open with a title slide, and carry up to four languages. Add chords and languages in the song editor; each output's profile turns the title slide on.</string>
+    <string name="helper_tip_stt">A speech-to-text service can connect to ChurchPresenter and put live captions, or a live translation of what is said, on a screen. Connect it on the STT tab.</string>
+    <string name="helper_tip_song_library">The Song Library Manager edits many songs at once: select them, choose Batch Edit…, and set the songbook, author or anything else for all of them together.</string>
+    <string name="helper_tip_compare_translations">The Song Library Manager can check a song's languages against each other: Compare translations finds sections that are missing a title, are only partly translated, or don't line up.</string>
+    <string name="helper_tip_presets">Save any picture set, presentation, video, announcement or scene as a preset with Save preset, beside Add to Schedule. Then add it to a planned service from Presets in the Calendar Manager.</string>
+    <string name="helper_tip_remote">A phone or tablet can control ChurchPresenter: put up songs, verses and slides from anywhere in the room. Turn on the server, then scan its code with the ChurchPresenter app.</string>
     <string name="helper_display_title">Display setup</string>
     <string name="helper_display_one_screen">I can only find one display. Connect the projector or TV, and I'll find it here. For a stream, set up NDI or a Browser Source in Projection settings instead.</string>
     <string name="helper_display_pick">Which one does the congregation see?</string>

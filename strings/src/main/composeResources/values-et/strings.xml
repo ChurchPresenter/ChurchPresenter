@@ -2453,7 +2453,7 @@
     <string name="helper_tip_auto_fit">Laulutekst sobitub vaikimisi ise ekraanile. Selle suurima ja väikseima suuruse saad määrata profiilis.</string>
     <string name="helper_tip_schedule_drag">Lohista laule, salme ja pilte kavasse, et kogu teenistus aegsasti valmis planeerida.</string>
     <string name="helper_tip_verse_typing">Piibli vahekaardil saad kirjutada viite, näiteks „jh 3 16“, otse otsinguväljale.</string>
-    <string name="helper_tip_remote">Telefonide ja tahvelarvutitega saab slaide juhtida kaugjuhtimisserveri kaudu.</string>
+    <string name="helper_tip_remote">Telefoni või tahvelarvutiga saab ChurchPresenterit juhtida: too laule, salme ja slaide ekraanile ükskõik kust saalis. Lülita server sisse, siis skanni selle kood ChurchPresenteri rakendusega.</string>
     <string name="helper_display_title">Ekraanide seadistamine</string>
     <string name="helper_display_one_screen">Leian ainult ühe ekraani. Ühenda projektor või teler ja ma leian selle siit. Otseülekande jaoks seadista hoopis NDI või Browser Source projektsiooni seadetes.</string>
     <string name="helper_display_pick">Millist ekraani kogudus näeb?</string>
@@ -2483,4 +2483,23 @@
     <string name="settings_helper_show">Kuva abiline Wick põhiakna nurgas</string>
     <string name="settings_helper_tips">Paku päeva nõuannet</string>
     <string name="settings_helper_title">Abiline</string>
+    <string name="helper_hint_identify">Klõpsa %1$s ja iga ekraan näitab oma numbrit, nii et näed, milline on milline.</string>
+    <string name="helper_open_song_library_compare">Avan laulukogu halduri. Vali laul, millel on rohkem kui üks keel, ja vali Võrdle tõlkeid. Ainult probleemid näitab vaid lõike, mis vajavad tähelepanu.</string>
+    <string name="helper_tip_calendar">Tulevasi teenistusi saad aegsasti planeerida kalendrihalduris, igaühel oma teenistuse kava.</string>
+    <string name="helper_tip_calendar_cues">Kalendrihaldur saab teenistuse-eelsed punktid ise käivitada. Määra iga punkti algusaeg ja see ilmub sel ajal ekraanile.</string>
+    <string name="helper_tip_calendar_sync">Planeeritud teenistused saab sünkroonida telefonide ja tahvelarvutitega, nii saad terve nädala mobiilirakendusest planeerida, isegi kui see arvuti on välja lülitatud.</string>
+    <string name="helper_hint_calendar_sync">Lülita sisse valik %1$s, siis skanni kood telefonis või tahvelarvutis ChurchPresenteri rakendusega.</string>
+    <string name="helper_tip_qa_tunnel">Inimesed saavad oma telefonist K&amp;V sessioonile küsimusi saata ilma kiriku WiFi-ga liitumata. Lülita sisse avalik juurdepääs ja nad kasutavad mobiilset andmesidet.</string>
+    <string name="helper_hint_qa_remote">Klõpsa nuppu %1$s, et avada liitumiskood ja jagamisvalikud.</string>
+    <string name="helper_hint_qa_public_access">Klõpsa nuppu %1$s. Siis saavad inimesed liitumiskoodi skannida ja küsimusi mobiilse andmeside kaudu saata, WiFi-t pole vaja.</string>
+    <string name="helper_tip_lottie_background">Piibli ja laulude taustad võivad mängida animeeritud sisse- ja väljaminekut. Vali Lottie taust: see animeerub sisse, kui tekst ilmub, ja välja, kui see kustub.</string>
+    <string name="helper_tip_two_translations">Selgema ekraani jaoks näita ühel projektoril korraga kuni kahte Piibli tõlget või laulu keelt. Iga väljundi profiil valib, milliseid see näitab.</string>
+    <string name="helper_tip_hide_slides">Pildi või esitluse slaidi saad peita seda kustutamata: klõpsa selle pisipildi alumises paremas nurgas olevat silma ja see jäetakse edasi liikudes või esitades vahele.</string>
+    <string name="helper_tip_metronome">Lavamonitor võib bändile metronoomi näidata: määra laulu löögid minutis laulude redaktoris ja see hoiab takti, kuni laul on ekraanil.</string>
+    <string name="helper_hint_song_tempo">Kirjuta löögid minutis välja %1$s. See ilmub alles siis, kui lavamonitor on seadistatud.</string>
+    <string name="helper_tip_song_features">Laul võib näidata akorde, alata pealkirjaslaidiga ja sisaldada kuni nelja keelt. Lisa akordid ja keeled laulude redaktoris; iga väljundi profiil lülitab pealkirjaslaidi sisse.</string>
+    <string name="helper_tip_stt">Kõnetuvastusteenus saab ChurchPresenteriga ühenduda ja panna ekraanile otsesubtiitrid või öeldu otsetõlke. Ühenda see STT vahekaardil.</string>
+    <string name="helper_tip_song_library">Laulukogu haldur muudab korraga paljusid laule: vali need, vali Hulgimuutmine… ja määra laulik, autor või midagi muud kõigile korraga.</string>
+    <string name="helper_tip_compare_translations">Laulukogu haldur saab laulu keeli omavahel võrrelda: Võrdle tõlkeid leiab lõigud, millel puudub pealkiri, mis on vaid osaliselt tõlgitud või mis ei kattu.</string>
+    <string name="helper_tip_presets">Salvesta mis tahes pildikomplekt, esitlus, video, teadaanne või stseen eelseadistusena nupuga Salvesta eelseadistus, mis on nupu Lisa kavasse kõrval. Seejärel lisa see planeeritud teenistusele kalendrihalduri jaotisest Eelseaded.</string>
 </resources>

@@ -2465,7 +2465,7 @@
     <string name="helper_tip_auto_fit">Tekst pjesme se zadano sam prilagođava zaslonu. Najveću i najmanju veličinu postavite u profilu.</string>
     <string name="helper_tip_schedule_drag">Povlačite pjesme, retke i slike u raspored da unaprijed isplanirate cijelo bogoslužje.</string>
     <string name="helper_tip_verse_typing">U kartici Biblija možete upisati referencu poput „iv 3 16“ izravno u okvir za pretraživanje.</string>
-    <string name="helper_tip_remote">Telefoni i tableti mogu upravljati slajdovima preko poslužitelja za daljinsko upravljanje.</string>
+    <string name="helper_tip_remote">Telefon ili tablet može upravljati ChurchPresenterom: prikazujte pjesme, retke i slajdove s bilo kojeg mjesta u dvorani. Uključite poslužitelj, a zatim skenirajte njegov kod aplikacijom ChurchPresenter.</string>
     <string name="helper_display_title">Postavljanje zaslona</string>
     <string name="helper_display_one_screen">Pronalazim samo jedan zaslon. Spojite projektor ili TV i pronaći ću ga ovdje. Za prijenos umjesto toga postavite NDI ili Browser Source u postavkama Projekcije.</string>
     <string name="helper_display_pick">Koji vide okupljeni?</string>
@@ -2495,4 +2495,23 @@
     <string name="settings_helper_show">Prikaži pomoćnika Wicka u kutu glavnog prozora</string>
     <string name="settings_helper_tips">Nudi savjet dana</string>
     <string name="settings_helper_title">Pomoćnik</string>
+    <string name="helper_hint_identify">Kliknite %1$s i svaki zaslon prikazat će svoj broj, pa ćete znati koji je koji.</string>
+    <string name="helper_open_song_library_compare">Otvaram Upravitelja knjižnice pjesama. Odaberite pjesmu s više od jednog jezika i odaberite Usporedi prijevode. Samo problemi prikazuje samo dijelove koji traže pažnju.</string>
+    <string name="helper_tip_calendar">U Upravitelju kalendara možete unaprijed planirati buduća bogoslužja, svako s vlastitim tijekom.</string>
+    <string name="helper_tip_calendar_cues">Upravitelj kalendara može sam pokrenuti ono što ide prije bogoslužja. Postavite kada svaka stavka počinje i u to će se vrijeme pojaviti na zaslonu.</string>
+    <string name="helper_tip_calendar_sync">Planirana bogoslužja mogu se sinkronizirati s telefonima i tabletima, pa možete planirati u mobilnoj aplikaciji cijeli tjedan, čak i dok je ovo računalo isključeno.</string>
+    <string name="helper_hint_calendar_sync">Uključite %1$s, a zatim skenirajte kod aplikacijom ChurchPresenter na telefonu ili tabletu.</string>
+    <string name="helper_tip_qa_tunnel">Ljudi mogu slati pitanja u sesiju pitanja i odgovora sa svojih telefona bez spajanja na crkveni Wi-Fi. Uključite javni pristup i koristit će mobilne podatke.</string>
+    <string name="helper_hint_qa_remote">Kliknite %1$s da otvorite kod za pridruživanje i mogućnosti dijeljenja.</string>
+    <string name="helper_hint_qa_public_access">Kliknite %1$s. Ljudi tada mogu skenirati kod za pridruživanje i slati pitanja preko mobilnih podataka, bez Wi-Fi mreže.</string>
+    <string name="helper_tip_lottie_background">Pozadine Biblije i pjesama mogu reproducirati animirani ulaz i izlaz. Odaberite Lottie pozadinu i ona će animirano ući kad se tekst pojavi te izaći kad se očisti.</string>
+    <string name="helper_tip_two_translations">Za pregledniji zaslon prikazujte na jednom projektoru najviše dva prijevoda Biblije ili jezika pjesme odjednom. Profil svakog izlaza bira koje prikazuje.</string>
+    <string name="helper_tip_hide_slides">Sliku ili slajd prezentacije možete sakriti bez brisanja: kliknite oko u donjem desnom kutu njezine minijature i bit će preskočena pri listanju ili reprodukciji.</string>
+    <string name="helper_tip_metronome">Scenski monitor može bendu prikazati metronom: u uređivaču pjesme postavite broj otkucaja u minuti i on će držati ritam dok je pjesma na zaslonu.</string>
+    <string name="helper_hint_song_tempo">Upišite broj otkucaja u minuti pod %1$s. To se polje prikazuje tek kad je postavljen scenski monitor.</string>
+    <string name="helper_tip_song_features">Pjesma može prikazati akorde, započeti naslovnim slajdom i imati do četiri jezika. Akorde i jezike dodajte u uređivaču pjesme; naslovni slajd uključuje profil svakog izlaza.</string>
+    <string name="helper_tip_stt">Usluga pretvaranja govora u tekst može se spojiti na ChurchPresenter i na zaslon staviti titlove uživo ili prijevod uživo onoga što se govori. Spojite je na kartici Titlovi (STT).</string>
+    <string name="helper_tip_song_library">Upravitelj knjižnice pjesama uređuje mnogo pjesama odjednom: odaberite ih, odaberite Skupno uređivanje… i postavite pjesmaricu, autora ili bilo što drugo za sve njih zajedno.</string>
+    <string name="helper_tip_compare_translations">Upravitelj knjižnice pjesama može usporediti jezike pjesme međusobno: Usporedi prijevode pronalazi dijelove kojima nedostaje naslov, koji su samo djelomično prevedeni ili se ne poklapaju.</string>
+    <string name="helper_tip_presets">Spremite bilo koji skup slika, prezentaciju, video, objavu ili scenu kao predložak gumbom Spremi predložak, pokraj Dodaj u raspored. Zatim ga dodajte u planirano bogoslužje iz Predlošci stavki u Upravitelju kalendara.</string>
 </resources>

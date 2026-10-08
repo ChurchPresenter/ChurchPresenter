@@ -2421,7 +2421,7 @@
     <string name="helper_tip_auto_fit">Liedtext passt sich standardmäßig an den Bildschirm an. Die größte und kleinste Schriftgröße legen Sie im Profil fest.</string>
     <string name="helper_tip_schedule_drag">Ziehen Sie Lieder, Verse und Bilder ins Programm, um den ganzen Gottesdienst im Voraus zu planen.</string>
     <string name="helper_tip_verse_typing">Im Tab Bibel können Sie eine Stelle wie „joh 3 16“ direkt ins Suchfeld tippen.</string>
-    <string name="helper_tip_remote">Handys und Tablets können die Folien über den Fernsteuerungsserver bedienen.</string>
+    <string name="helper_tip_remote">Ein Handy oder Tablet kann ChurchPresenter steuern: Zeigen Sie Lieder, Verse und Folien von überall im Raum. Schalten Sie den Server ein und scannen Sie dann seinen Code mit der ChurchPresenter-App.</string>
     <string name="helper_display_title">Bildschirme einrichten</string>
     <string name="helper_display_one_screen">Ich finde nur einen Bildschirm. Schließen Sie den Beamer oder Fernseher an, dann finde ich ihn hier. Für einen Stream richten Sie stattdessen NDI oder eine Browser Source in den Projektionseinstellungen ein.</string>
     <string name="helper_display_pick">Welchen sieht die Gemeinde?</string>
@@ -2451,4 +2451,23 @@
     <string name="settings_helper_show">Wick, den Helfer, in der Ecke des Hauptfensters anzeigen</string>
     <string name="settings_helper_tips">Tipp des Tages anbieten</string>
     <string name="settings_helper_title">Helfer</string>
+    <string name="helper_hint_identify">Klicken Sie auf %1$s, und jeder Bildschirm zeigt seine Nummer, damit Sie sehen, welcher welcher ist.</string>
+    <string name="helper_open_song_library_compare">Die Liederbibliothek-Verwaltung wird geöffnet. Wählen Sie ein Lied mit mehr als einer Sprache und dann Übersetzungen vergleichen. Nur Probleme zeigt nur die Abschnitte, die Aufmerksamkeit brauchen.</string>
+    <string name="helper_tip_calendar">Im Kalender-Manager können Sie künftige Gottesdienste im Voraus planen, jeden mit seinem eigenen Ablauf.</string>
+    <string name="helper_tip_calendar_cues">Der Kalender-Manager kann das, was vor dem Gottesdienst läuft, von selbst starten. Legen Sie fest, wann jeder Punkt beginnt, und er erscheint zu dieser Zeit auf dem Bildschirm.</string>
+    <string name="helper_tip_calendar_sync">Ihre geplanten Gottesdienste können sich mit Handys und Tablets synchronisieren, sodass Sie die ganze Woche in der mobilen App planen können, auch wenn dieser Computer aus ist.</string>
+    <string name="helper_hint_calendar_sync">Schalten Sie %1$s ein und scannen Sie dann den Code mit der ChurchPresenter-App auf dem Handy oder Tablet.</string>
+    <string name="helper_tip_qa_tunnel">Leute können Fragen an eine Fragen &amp; Antworten-Runde von ihren Handys senden, ohne sich mit dem WLAN der Gemeinde zu verbinden. Aktivieren Sie den öffentlichen Zugang, dann nutzen sie ihre mobilen Daten.</string>
+    <string name="helper_hint_qa_remote">Klicken Sie auf %1$s, um den Beitrittscode und die Freigabeoptionen zu öffnen.</string>
+    <string name="helper_hint_qa_public_access">Klicken Sie auf %1$s. Dann können Leute den Beitrittscode scannen und Fragen über mobile Daten senden, ganz ohne WLAN.</string>
+    <string name="helper_tip_lottie_background">Bibel- und Liedhintergründe können ein animiertes Intro und Outro abspielen. Wählen Sie einen Lottie-Hintergrund, dann wird er animiert eingeblendet, wenn der Text erscheint, und ausgeblendet, wenn er gelöscht wird.</string>
+    <string name="helper_tip_two_translations">Für einen übersichtlicheren Bildschirm zeigen Sie auf einem Projektor höchstens zwei Bibelübersetzungen oder Liedsprachen gleichzeitig. Welche es sind, legt das Profil jeder Ausgabe fest.</string>
+    <string name="helper_tip_hide_slides">Sie können ein Bild oder eine Präsentationsfolie ausblenden, ohne sie zu löschen: Klicken Sie auf das Auge unten rechts in der Miniatur, dann wird sie beim Weiterschalten und Abspielen übersprungen.</string>
+    <string name="helper_tip_metronome">Der Bühnenmonitor kann der Band ein Metronom zeigen: Legen Sie im Lied-Editor die Schläge pro Minute fest, und es hält den Takt, solange das Lied zu sehen ist.</string>
+    <string name="helper_hint_song_tempo">Geben Sie die Schläge pro Minute unter %1$s ein. Das Feld erscheint erst, wenn ein Bühnenmonitor eingerichtet ist.</string>
+    <string name="helper_tip_song_features">Ein Lied kann Akkorde zeigen, mit einer Titelfolie beginnen und bis zu vier Sprachen enthalten. Akkorde und Sprachen fügen Sie im Lied-Editor hinzu; die Titelfolie schaltet das Profil jeder Ausgabe ein.</string>
+    <string name="helper_tip_stt">Ein Spracherkennungsdienst kann sich mit ChurchPresenter verbinden und Live-Untertitel oder eine Live-Übersetzung des Gesagten auf einen Bildschirm bringen. Verbinden Sie ihn im Tab STT.</string>
+    <string name="helper_tip_song_library">Die Liederbibliothek-Verwaltung bearbeitet viele Lieder auf einmal: Markieren Sie sie, wählen Sie Sammelbearbeitung… und legen Sie Liederbuch, Autor oder anderes für alle zusammen fest.</string>
+    <string name="helper_tip_compare_translations">Die Liederbibliothek-Verwaltung kann die Sprachen eines Liedes miteinander abgleichen: Übersetzungen vergleichen findet Abschnitte, denen ein Titel fehlt, die nur teilweise übersetzt sind oder nicht zueinander passen.</string>
+    <string name="helper_tip_presets">Speichern Sie jede Bilderserie, Präsentation, jedes Video, jede Ankündigung oder Szene mit Vorlage speichern neben Zum Programm hinzufügen als Vorlage. Fügen Sie sie dann im Kalender-Manager unter Vorlagen einem geplanten Gottesdienst hinzu.</string>
 </resources>

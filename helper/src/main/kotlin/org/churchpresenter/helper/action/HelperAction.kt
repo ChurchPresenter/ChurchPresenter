@@ -129,8 +129,11 @@ sealed interface HelperAction {
         override val needsConfirmation get() = false
     }
 
-    /** Open the Song Library Manager, where many songs are edited at once. */
-    data object OpenSongLibrary : HelperAction {
+    /**
+     * Open the Song Library Manager, where many songs are edited at once — saying how to batch edit
+     * them, or, when [compare], how to check a song's languages against each other.
+     */
+    data class OpenSongLibrary(val compare: Boolean = false) : HelperAction {
         override val needsConfirmation get() = false
     }
 

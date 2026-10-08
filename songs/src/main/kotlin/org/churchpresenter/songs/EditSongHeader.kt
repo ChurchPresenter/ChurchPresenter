@@ -1,6 +1,8 @@
 package org.churchpresenter.songs
 
 import androidx.compose.foundation.background
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -341,6 +343,7 @@ private fun RowScope.TempoCard(bpm: String, onBpmChange: (String) -> Unit, weigh
     Column(
         modifier = Modifier
             .weight(weight)
+            .guideTarget(GuideTargets.SONG_TEMPO)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh, EditSongCardShape)
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, EditSongCardShape)
             .padding(horizontal = 11.dp, vertical = 6.dp),

@@ -2465,7 +2465,7 @@
     <string name="helper_tip_auto_fit">Şarkı metni varsayılan olarak ekrana kendiliğinden sığar. En büyük ve en küçük boyutunu profilde ayarlayın.</string>
     <string name="helper_tip_schedule_drag">Tüm toplantıyı önceden planlamak için şarkıları, ayetleri ve resimleri programa sürükleyin.</string>
     <string name="helper_tip_verse_typing">Kutsal Kitap sekmesinde “yu 3 16” gibi bir referansı doğrudan arama kutusuna yazabilirsiniz.</string>
-    <string name="helper_tip_remote">Telefonlar ve tabletler, uzaktan kumanda sunucusu üzerinden slaytları yönetebilir.</string>
+    <string name="helper_tip_remote">Bir telefon veya tablet ChurchPresenter uygulamasını yönetebilir: salonun her yerinden şarkıları, ayetleri ve slaytları ekrana getirin. Sunucuyu açın, ardından kodunu ChurchPresenter uygulamasıyla tarayın.</string>
     <string name="helper_display_title">Ekran kurulumu</string>
     <string name="helper_display_one_screen">Yalnızca bir ekran bulabiliyorum. Projektörü veya televizyonu bağlayın, burada bulurum. Yayın için bunun yerine Projeksiyon ayarlarında NDI veya Browser Source kurun.</string>
     <string name="helper_display_pick">Cemaat hangisini görüyor?</string>
@@ -2495,4 +2495,23 @@
     <string name="settings_helper_show">Yardımcı Wick\'i ana pencerenin köşesinde göster</string>
     <string name="settings_helper_tips">Günün ipucunu sun</string>
     <string name="settings_helper_title">Yardımcı</string>
+    <string name="helper_hint_identify">%1$s düğmesine tıklayın; her ekran kendi numarasını gösterir, böylece hangisinin hangisi olduğunu anlarsınız.</string>
+    <string name="helper_open_song_library_compare">Şarkı Kitaplığı Yöneticisi açılıyor. Birden fazla dili olan bir şarkı seçin ve Çevirileri karşılaştır komutunu seçin. Yalnızca sorunlar seçeneği yalnızca dikkat gerektiren bölümleri gösterir.</string>
+    <string name="helper_tip_calendar">Gelecekteki toplantıları Takvim Yöneticisi içinde önceden planlayabilirsiniz; her birinin kendi akış planı olur.</string>
+    <string name="helper_tip_calendar_cues">Takvim Yöneticisi toplantı öncesi öğelerinizi kendiliğinden başlatabilir. Her öğenin ne zaman başlayacağını ayarlayın, o saatte ekrana gelir.</string>
+    <string name="helper_tip_calendar_sync">Planlanan toplantılarınız telefon ve tabletlerle eşitlenebilir; böylece bu bilgisayar kapalıyken bile hafta boyunca mobil uygulamadan plan yapabilirsiniz.</string>
+    <string name="helper_hint_calendar_sync">%1$s anahtarını açın, sonra telefondaki veya tabletteki ChurchPresenter uygulamasıyla kodu tarayın.</string>
+    <string name="helper_tip_qa_tunnel">İnsanlar kilisenin Wi-Fi ağına bağlanmadan telefonlarından bir Soru-Cevap oturumuna soru gönderebilir. Herkese açık erişimi açın, mobil verilerini kullansınlar.</string>
+    <string name="helper_hint_qa_remote">Katılım kodunu ve paylaşım seçeneklerini açmak için %1$s düğmesine tıklayın.</string>
+    <string name="helper_hint_qa_public_access">%1$s düğmesine tıklayın. Ardından insanlar katılım kodunu tarayıp Wi-Fi gerekmeden mobil veriyle soru gönderebilir.</string>
+    <string name="helper_tip_lottie_background">Kutsal Kitap ve şarkı arka planları animasyonlu bir giriş ve çıkış oynatabilir. Bir Lottie arka planı seçin; metin göründüğünde animasyonla girer, temizlendiğinde çıkar.</string>
+    <string name="helper_tip_two_translations">Daha sade bir ekran için tek bir projektörde aynı anda en fazla iki Kutsal Kitap çevirisi veya şarkı dili gösterin. Hangilerinin gösterileceğini her çıkışın profili seçer.</string>
+    <string name="helper_tip_hide_slides">Bir resmi veya sunum slaydını silmeden gizleyebilirsiniz: küçük resminin sağ alt köşesindeki göze tıklayın; ilerlerken veya oynatırken atlanır.</string>
+    <string name="helper_tip_metronome">Sahne monitörü grup için bir metronom gösterebilir: şarkı düzenleyicide şarkının dakikadaki vuruş sayısını ayarlayın, şarkı ekrandayken ritmi tutar.</string>
+    <string name="helper_hint_song_tempo">Dakikadaki vuruş sayısını %1$s alanına yazın. Bu alan yalnızca bir sahne monitörü kurulduktan sonra görünür.</string>
+    <string name="helper_tip_song_features">Bir şarkı akorları gösterebilir, bir başlık slaydıyla açılabilir ve en fazla dört dil içerebilir. Akorları ve dilleri şarkı düzenleyicide ekleyin; başlık slaydını her çıkışın profili açar.</string>
+    <string name="helper_tip_stt">Bir konuşmadan metne hizmeti ChurchPresenter uygulamasına bağlanıp ekrana canlı altyazı ya da söylenenlerin canlı çevirisini getirebilir. Bağlantıyı STT sekmesinden kurun.</string>
+    <string name="helper_tip_song_library">Şarkı Kitaplığı Yöneticisi birçok şarkıyı aynı anda düzenler: şarkıları seçin, Toplu Düzenleme… komutunu seçin ve şarkı kitabını, yazarı veya başka herhangi bir alanı hepsi için birlikte ayarlayın.</string>
+    <string name="helper_tip_compare_translations">Şarkı Kitaplığı Yöneticisi bir şarkının dillerini birbiriyle karşılaştırabilir: Çevirileri karşılaştır komutu başlığı eksik, yalnızca kısmen çevrilmiş veya birbirini tutmayan bölümleri bulur.</string>
+    <string name="helper_tip_presets">Herhangi bir resim setini, sunumu, videoyu, duyuruyu veya sahneyi Programa Ekle düğmesinin yanındaki Ön ayarı kaydet düğmesiyle ön ayar olarak kaydedin. Sonra Takvim Yöneticisi içindeki Hazır ayarlar bölümünden planlanmış bir toplantıya ekleyin.</string>
 </resources>

@@ -2448,7 +2448,7 @@
     <string name="helper_tip_auto_fit">El texto de los cantos se ajusta solo a la pantalla de forma predeterminada. Fije su tamaño máximo y mínimo en el perfil.</string>
     <string name="helper_tip_schedule_drag">Arrastre cantos, versículos e imágenes al programa para planificar todo el servicio con antelación.</string>
     <string name="helper_tip_verse_typing">En la pestaña Biblia puede escribir una referencia como «jn 3 16» directamente en el cuadro de búsqueda.</string>
-    <string name="helper_tip_remote">Los teléfonos y las tabletas pueden pasar las diapositivas mediante el servidor remoto.</string>
+    <string name="helper_tip_remote">Un teléfono o una tableta puede controlar ChurchPresenter: muestre cantos, versículos y diapositivas desde cualquier lugar de la sala. Active el servidor y luego escanee su código con la aplicación ChurchPresenter.</string>
     <string name="helper_display_title">Configuración de pantallas</string>
     <string name="helper_display_one_screen">Solo encuentro una pantalla. Conecte el proyector o el televisor y lo encontraré aquí. Para una transmisión, configure en su lugar NDI o una Browser Source en la configuración de Proyección.</string>
     <string name="helper_display_pick">¿Cuál ve la congregación?</string>
@@ -2478,4 +2478,23 @@
     <string name="settings_helper_show">Mostrar a Wick, el asistente, en la esquina de la ventana principal</string>
     <string name="settings_helper_tips">Ofrecer un consejo del día</string>
     <string name="settings_helper_title">Asistente</string>
+    <string name="helper_hint_identify">Haga clic en %1$s y cada pantalla mostrará su número, para que sepa cuál es cuál.</string>
+    <string name="helper_open_song_library_compare">Abriendo el Gestor de la biblioteca de cantos. Elija un canto con más de un idioma y elija Comparar traducciones. Solo problemas muestra únicamente las secciones que requieren atención.</string>
+    <string name="helper_tip_calendar">Puede planificar servicios futuros con antelación en el Gestor de calendario, cada uno con su propio orden del servicio.</string>
+    <string name="helper_tip_calendar_cues">El Gestor de calendario puede iniciar solo los elementos previos al servicio. Fije cuándo empieza cada elemento y saldrá en pantalla a esa hora.</string>
+    <string name="helper_tip_calendar_sync">Sus servicios planificados pueden sincronizarse con teléfonos y tabletas, así puede planificar desde la aplicación móvil toda la semana, incluso con este ordenador apagado.</string>
+    <string name="helper_hint_calendar_sync">Active %1$s y luego escanee el código con la aplicación ChurchPresenter en el teléfono o la tableta.</string>
+    <string name="helper_tip_qa_tunnel">Las personas pueden enviar preguntas a una sesión de P&amp;R desde sus teléfonos sin conectarse al Wi-Fi de la iglesia. Active el acceso público y usarán sus datos móviles.</string>
+    <string name="helper_hint_qa_remote">Haga clic en %1$s para abrir el código de acceso y las opciones para compartir.</string>
+    <string name="helper_hint_qa_public_access">Haga clic en %1$s. Así las personas pueden escanear el código de acceso y enviar preguntas con datos móviles, sin necesidad de Wi-Fi.</string>
+    <string name="helper_tip_lottie_background">Los fondos de la Biblia y de los cantos pueden reproducir una entrada y una salida animadas. Elija un fondo Lottie: entra animado cuando aparece el texto y sale cuando se borra.</string>
+    <string name="helper_tip_two_translations">Para una pantalla más clara, no muestre más de dos traducciones bíblicas o idiomas de un canto a la vez en un mismo proyector. El perfil de cada salida elige cuáles muestra.</string>
+    <string name="helper_tip_hide_slides">Puede ocultar una imagen o una diapositiva de presentación sin borrarla: haga clic en el ojo de la esquina inferior derecha de su miniatura y se omitirá al avanzar o reproducir.</string>
+    <string name="helper_tip_metronome">El monitor de escenario puede mostrar un metrónomo para la banda: fije los pulsos por minuto de un canto en el editor de cantos y marcará el compás mientras el canto esté en pantalla.</string>
+    <string name="helper_hint_song_tempo">Escriba los pulsos por minuto en %1$s. Solo aparece una vez configurado un monitor de escenario.</string>
+    <string name="helper_tip_song_features">Un canto puede mostrar acordes, empezar con una diapositiva de título y tener hasta cuatro idiomas. Añada acordes e idiomas en el editor de cantos; el perfil de cada salida activa la diapositiva de título.</string>
+    <string name="helper_tip_stt">Un servicio de voz a texto puede conectarse a ChurchPresenter y mostrar en pantalla subtítulos en directo o una traducción en directo de lo que se dice. Conéctelo en la pestaña STT.</string>
+    <string name="helper_tip_song_library">El Gestor de la biblioteca de cantos edita muchos cantos a la vez: selecciónelos, elija Edición por lotes… y fije el cancionero, el autor o cualquier otro dato para todos juntos.</string>
+    <string name="helper_tip_compare_translations">El Gestor de la biblioteca de cantos puede contrastar entre sí los idiomas de un canto: Comparar traducciones encuentra las secciones sin título, traducidas solo en parte o que no coinciden.</string>
+    <string name="helper_tip_presets">Guarde cualquier conjunto de imágenes, presentación, video, anuncio o escena como preajuste con Guardar preajuste, junto a Añadir al programa. Luego añádalo a un servicio planificado desde Preajustes en el Gestor de calendario.</string>
 </resources>

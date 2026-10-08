@@ -2465,7 +2465,7 @@
     <string name="helper_tip_auto_fit">Dziesmas teksts pēc noklusējuma pats pielāgojas ekrānam. Tā lielāko un mazāko izmēru iestatiet profilā.</string>
     <string name="helper_tip_schedule_drag">Velciet dziesmas, pantus un attēlus programmā, lai visu dievkalpojumu ieplānotu laikus.</string>
     <string name="helper_tip_verse_typing">Bībeles cilnē varat ierakstīt atsauci, piemēram, „jņ 3 16”, tieši meklēšanas lodziņā.</string>
-    <string name="helper_tip_remote">Ar tālruņiem un planšetdatoriem var vadīt slaidus caur tālvadības serveri.</string>
+    <string name="helper_tip_remote">Ar tālruni vai planšetdatoru var vadīt ChurchPresenter: rādiet dziesmas, pantus un slaidus no jebkuras vietas zālē. Ieslēdziet serveri, tad noskenējiet tā kodu ar ChurchPresenter lietotni.</string>
     <string name="helper_display_title">Ekrānu iestatīšana</string>
     <string name="helper_display_one_screen">Varu atrast tikai vienu ekrānu. Pievienojiet projektoru vai televizoru, un es to atradīšu šeit. Tiešraidei tā vietā iestatiet NDI vai Browser Source projekcijas iestatījumos.</string>
     <string name="helper_display_pick">Kuru ekrānu redz draudze?</string>
@@ -2495,4 +2495,23 @@
     <string name="settings_helper_show">Rādīt palīgu Wick galvenā loga stūrī</string>
     <string name="settings_helper_tips">Piedāvāt dienas padomu</string>
     <string name="settings_helper_title">Palīgs</string>
+    <string name="helper_hint_identify">Noklikšķiniet uz %1$s, un katrs ekrāns parādīs savu numuru, lai jūs zinātu, kurš ir kurš.</string>
+    <string name="helper_open_song_library_compare">Atver dziesmu bibliotēkas pārvaldnieku. Izvēlieties dziesmu ar vairākām valodām un izvēlieties Salīdzināt tulkojumus. Tikai problēmas rāda tikai tās daļas, kurām jāpievērš uzmanība.</string>
+    <string name="helper_tip_calendar">Nākamos dievkalpojumus varat ieplānot laikus kalendāra pārvaldniekā, katram ar savu norises kārtību.</string>
+    <string name="helper_tip_calendar_cues">Kalendāra pārvaldnieks var pats palaist pirms dievkalpojuma rādāmos punktus. Iestatiet katra punkta sākuma laiku, un tas tajā brīdī parādīsies ekrānā.</string>
+    <string name="helper_tip_calendar_sync">Ieplānotos dievkalpojumus var sinhronizēt ar tālruņiem un planšetdatoriem, tāpēc visu nedēļu varat plānot mobilajā lietotnē, pat ja šis dators ir izslēgts.</string>
+    <string name="helper_hint_calendar_sync">Ieslēdziet slēdzi %1$s, tad noskenējiet kodu ar ChurchPresenter lietotni tālrunī vai planšetdatorā.</string>
+    <string name="helper_tip_qa_tunnel">Cilvēki var sūtīt jautājumus uz jautājumu sesiju no saviem tālruņiem, nepievienojoties baznīcas Wi-Fi. Ieslēdziet publisko piekļuvi, un viņi izmantos mobilos datus.</string>
+    <string name="helper_hint_qa_remote">Noklikšķiniet uz pogas %1$s, lai atvērtu pievienošanās kodu un kopīgošanas iespējas.</string>
+    <string name="helper_hint_qa_public_access">Noklikšķiniet uz pogas %1$s. Tad cilvēki varēs noskenēt pievienošanās kodu un sūtīt jautājumus, izmantojot mobilos datus, bez Wi-Fi.</string>
+    <string name="helper_tip_lottie_background">Bībeles un dziesmu foni var atskaņot animētu ievadu un nobeigumu. Izvēlieties Lottie fonu: tas ienāk ar animāciju, kad parādās teksts, un aiziet, kad teksts tiek notīrīts.</string>
+    <string name="helper_tip_two_translations">Lai ekrāns būtu pārskatāmāks, vienā projektorā vienlaikus rādiet ne vairāk kā divus Bībeles tulkojumus vai dziesmas valodas. Katras izvades profils izvēlas, kurus rādīt.</string>
+    <string name="helper_tip_hide_slides">Attēlu vai prezentācijas slaidu var paslēpt, to neizdzēšot: noklikšķiniet uz acs tā sīktēla apakšējā labajā stūrī, un tas tiks izlaists, pārejot uz priekšu vai atskaņojot.</string>
+    <string name="helper_tip_metronome">Skatuves monitors var rādīt metronomu grupai: iestatiet dziesmas sitienus minūtē dziesmu redaktorā, un tas turēs ritmu, kamēr dziesma ir ekrānā.</string>
+    <string name="helper_hint_song_tempo">Ierakstiet sitienus minūtē laukā %1$s. Tas parādās tikai tad, kad ir iestatīts skatuves monitors.</string>
+    <string name="helper_tip_song_features">Dziesma var rādīt akordus, sākties ar nosaukuma slaidu un saturēt līdz četrām valodām. Akordus un valodas pievienojiet dziesmu redaktorā; katras izvades profils ieslēdz nosaukuma slaidu.</string>
+    <string name="helper_tip_stt">Runas pārveides tekstā pakalpojums var pievienoties ChurchPresenter un rādīt ekrānā tiešraides subtitrus vai teiktā tiešraides tulkojumu. Pievienojiet to STT cilnē.</string>
+    <string name="helper_tip_song_library">Dziesmu bibliotēkas pārvaldnieks rediģē daudzas dziesmas uzreiz: atlasiet tās, izvēlieties Masveida rediģēšana… un iestatiet dziesmu grāmatu, autoru vai ko citu visām kopā.</string>
+    <string name="helper_tip_compare_translations">Dziesmu bibliotēkas pārvaldnieks var salīdzināt dziesmas valodas savā starpā: Salīdzināt tulkojumus atrod daļas, kurām trūkst nosaukuma, kas ir tulkotas tikai daļēji vai nesakrīt.</string>
+    <string name="helper_tip_presets">Saglabājiet jebkuru attēlu kopu, prezentāciju, video, paziņojumu vai ainu kā sagatavi ar pogu Saglabāt iestatījumu blakus pogai Pievienot programmai. Pēc tam pievienojiet to ieplānotam dievkalpojumam kalendāra pārvaldnieka sadaļā Sagataves.</string>
 </resources>
