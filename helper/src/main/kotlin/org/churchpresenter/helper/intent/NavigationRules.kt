@@ -49,7 +49,7 @@ internal fun bibleTranslationRule(r: Request): Resolution? =
 internal fun mediaTopicsRule(r: Request): Resolution? {
     // "Clear the announcement", "hide the clock", "stop the video": taking it down is the clear and
     // output rules' to answer, not a tour of how to put it up.
-    if (r.has(Vocabulary.CLEAR) || r.first in Vocabulary.TAKE_DOWN) return null
+    if (r.has(Vocabulary.CLEAR) || r.first in Vocabulary.TAKE_DOWN || r.says("take down")) return null
     val tour = MediaTopics.find(r.text) ?: AnnouncementTopics.find(r.text)
     return tour?.let { act(HelperAction.Highlight(it)) }
 }
@@ -85,6 +85,12 @@ internal fun verseRule(r: Request): Resolution? {
     val display = ref.copy(bookName = book).display
     return act(HelperAction.ShowBibleVerse(book, ref.chapter, first, maxOf(first, ref.lastVerse), display))
 }
+
+private val NEW_SONG = listOf("new song", "add a song", "add song", "add a new song", "create a song", "write a song")
+
+/** "New song", said outright rather than asked: the New Song button, as the question gets. */
+internal fun newSongRule(r: Request): Resolution? =
+    if (r.hasPhrase(NEW_SONG) && !r.says("schedule")) act(HelperAction.Highlight(NavigationTopics.newSong())) else null
 
 internal fun switchTabRule(r: Request): Resolution? {
     if (!r.says("go to", "switch to", "open", "show", "tab")) return null

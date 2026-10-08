@@ -60,7 +60,9 @@ internal object Vocabulary {
 
     /** "Text is too small" asks for bigger; "too big" for smaller. */
     val TOO_SMALL = listOf("too small", "too tiny", "hard to read", "can't read", "cannot read")
-    val TOO_BIG = listOf("too big", "too large", "too much text", "doesn't fit", "does not fit")
+    val TOO_BIG = listOf(
+        "too big", "too large", "too much text", "doesn't fit", "does not fit", "don't fit", "do not fit", "won't fit",
+    )
 
     /** A screen that is not doing what it should — display setup is the answer. */
     val SCREEN_TROUBLE = listOf(
@@ -231,6 +233,7 @@ internal object Vocabulary {
     val CALENDAR = listOf(
         "calendar", "calendar manager", "service calendar", "church calendar", "service planner", "planner",
         "plan a service", "plan service", "plan services", "plan ahead", "plan sunday", "plan next sunday",
+        "plan next sunday's", "next sunday's service", "sunday's service",
         "plan for sunday", "add a service", "add service", "new service", "create a service", "schedule a service",
         "upcoming service", "upcoming services", "future service", "future services", "next sunday",
         "next week's service", "service plan", "services planned",

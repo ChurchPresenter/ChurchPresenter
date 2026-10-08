@@ -106,6 +106,7 @@ class RuleIntentResolver : IntentResolver {
             ::bibleTranslationRule,
             ::mediaTopicsRule,
             ::navigationRule,
+            ::newSongRule,
             ::openSettingsRule,
             // Before the tab rule: "show song 245" is that song, not the Songs tab.
             ::namedSongRule,

@@ -78,7 +78,7 @@ internal object NavigationTopics {
         TAB_WORDS.firstOrNull { (words, _) -> words.any { normalized.containsWordPrefix(it) } }?.second
 
     /** Straight to the New Song button, the Songs tab opened for it: the tab alone answers nothing. */
-    private fun newSong() = GuideTour(
+    internal fun newSong() = GuideTour(
         listOf(
             GuideStep(
                 GuideTargets.NEW_SONG,

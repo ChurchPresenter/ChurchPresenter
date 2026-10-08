@@ -114,7 +114,8 @@ private fun lookTour(r: Request): GuideTour? {
 
 /** What about the text the request asks, or null when it is not about how text looks. */
 private fun lookAspect(r: Request): LookAspect? {
-    if (r.says("schedule")) return null
+    // "Look up a verse" is a search, not how text looks.
+    if (r.says("schedule") || r.hasPhrase(Vocabulary.LOOK_UP)) return null
     val aspect = when {
         r.has(STYLE_WORDS) -> LookAspect.STYLE
         r.has(SHADOW_WORDS) || r.says("drop shadow") -> LookAspect.SHADOW

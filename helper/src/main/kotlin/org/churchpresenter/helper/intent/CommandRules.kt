@@ -73,7 +73,8 @@ internal fun shortcutRule(r: Request): Resolution? {
         r.has(Vocabulary.CLEAR) -> ShortcutAction.CLEAR_OUTPUT
         r.says("take", "go live") -> ShortcutAction.TAKE
         r.has(Vocabulary.NEXT) && r.has(Vocabulary.BIBLE) -> ShortcutAction.BIBLE_NEXT_VERSE
-        r.has(Vocabulary.NEXT) && r.has(Vocabulary.SONG) -> ShortcutAction.SONGS_NEXT_SECTION
+        // A "section" is only ever a song's.
+        r.has(Vocabulary.NEXT) && (r.has(Vocabulary.SONG) || r.says("section")) -> ShortcutAction.SONGS_NEXT_SECTION
         r.has(Vocabulary.NEXT) -> ShortcutAction.CLICKER_NEXT
         r.has(Vocabulary.PREVIOUS) -> ShortcutAction.CLICKER_PREVIOUS
         r.has(Vocabulary.UNDO) -> ShortcutAction.UNDO
@@ -83,7 +84,7 @@ internal fun shortcutRule(r: Request): Resolution? {
 }
 
 internal fun clearRule(r: Request): Resolution? =
-    if (r.has(Vocabulary.CLEAR) || r.says("black out", "blackout")) act(HelperAction.ClearOutput) else null
+    if (r.has(Vocabulary.CLEAR) || r.says("black out", "blackout", "take down")) act(HelperAction.ClearOutput) else null
 
 internal fun takeRule(r: Request): Resolution? =
     if (r.first == "take" || r.says("go live")) act(HelperAction.Take) else null
