@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
 import kotlinx.coroutines.CoroutineScope
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.bibletab.VerseSequenceLog
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.models.Tabs

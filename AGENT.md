@@ -56,11 +56,11 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `tabs/`          | UI only — one file per tab, no logic                                |
 | `viewmodel/`     | State + business logic; owns its own ViewModel, never passed around |
 | `remote/`        | What a remote client or an Instance Link primary asks for, applied to the live output, the schedule and statistics — the server itself is `:server` |
-| `data/`          | File I/O, database, song parsing, Bible data                        |
+| `data/`          | File I/O, database, song parsing, Bible data — the play statistics are `:statistics` |
 | `models/`        | Only what needs the app: `PresetItems` — `ShortcutAction` is `:shared-ui`, the Companion UI states `:companion-surface` |
 | `composables/`   | UI components with app or feature ties (SceneCanvas, LivePreviewPanel, etc.) — the shared ones are `:shared-ui`, the video player `:media` |
 | `dialogs/`       | All dialogs and settings dialog tabs                                |
-| `utils/`         | Stateless helpers (UpdateChecker, etc.) — the shared ones (AutoFit, screen bounds) are `:shared-ui`, crash reporting is `:diagnostics` |
+| `utils/`         | Stateless helpers (AutoStartManager, etc.) — the shared ones (AutoFit, screen bounds) are `:shared-ui`, crash reporting is `:diagnostics`, the updater is `:updater` |
 | `ui/theme/`      | `LanguageProvider` and the theme-customization settings — the theme itself is the `:theme` module |
 
 ```
@@ -123,15 +123,18 @@ module-specific notes there, not here.**
 | `obs/`                 | `:obs`                 | The OBS Studio integration — the obs-websocket client, scene mapping and its settings page | [AGENT.md](obs/AGENT.md)                 |
 | `live-show/`           | `:live-show`           | The layer model — `Layer`, `Cue`, and `LiveShow`'s program and preview (see `docs/LAYER_MODEL.md`) | [AGENT.md](live-show/AGENT.md)           |
 | `live-output/`         | `:live-output`         | `PresenterManager` and what is on air, the output windows and stage monitor, and the off-screen outputs (NDI, OMT, Browser Source, DeckLink) on `ComposeScenePump` | [AGENT.md](live-output/AGENT.md)         |
+| `statistics/`          | `:statistics`          | What was presented and when — the counters, the play log, the CCLI lookup and exports — and the statistics window over them | [AGENT.md](statistics/AGENT.md)          |
+| `updater/`             | `:updater`             | The in-app updater: the GitHub release check, the installer download, the update window | [AGENT.md](updater/AGENT.md)             |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions
 from `gradle/libs.versions.toml`, `version` from the root `subprojects` block — don't re-declare it.
 
-### POI is shared by three modules
-`:presentation-engine`, `:converter` and `:composeApp` all pull Apache POI, and **exactly ONE POI
-schema jar may be on the classpath**: `poi-ooxml-full`, never `poi-ooxml-lite` — the engine's
-`<p:timing>` parser needs classes the lite jar omits. The version lives in
+### POI is shared by four modules
+`:presentation-engine`, `:converter`, `:statistics` and `:composeApp` all pull Apache POI, and
+**exactly ONE POI schema jar may be on the classpath**: `poi-ooxml-full`, never `poi-ooxml-lite` —
+the engine's `<p:timing>` parser needs classes the lite jar omits. `:statistics` takes only the core
+jar (its XLS export is HSSF), so it brings no schema jar. The version lives in
 `gradle/libs.versions.toml` (`apache-poi`) and nowhere else, and `:composeApp` excludes the lite
 module graph-wide in a `configurations.configureEach` block.
 

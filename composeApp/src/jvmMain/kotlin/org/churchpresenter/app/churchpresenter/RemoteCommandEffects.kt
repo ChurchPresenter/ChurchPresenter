@@ -12,7 +12,7 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.Flow
 
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.slides.data.RecentPresentationFiles
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting

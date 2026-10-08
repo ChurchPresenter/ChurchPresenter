@@ -25,8 +25,8 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 - **`BibleEngineStatus`**: whether the detection engine and its speech feed are up.
   `BibleEngineClient` implements it. The client itself stays in the app; it needs Ktor and the
   engine.
-- **`BibleVerseStatistics`**: where a verse that went live is counted. `StatisticsManager`
-  implements it.
+- **`BibleVerseStatistics`**: where a verse that went live is counted. The app adapts `:statistics`'
+  `StatisticsManager` to it in `MainTabArea.kt`.
 - **`onVerseWentLive`**: the app records its usage telemetry there (`recordBibleWentLive`).
 - **`crossReferences`** is required. The app passes `sharedCrossReferences`, which reads the dataset
   from the app's resources. Tests pass their own repository.
@@ -57,7 +57,7 @@ can drive the tab.
 - **Tests and screenshots live here.** The screenshot suite is `screenshot/BibleTabScreenshotTest`,
   and its images are under `bible-tab/screenshots/bibleTab/`.
 - The went-live statistics and telemetry test (`BibleTabGoLiveTelemetryTest`) stays in the app,
-  because it needs the real `StatisticsManager`.
+  because it needs the real `StatisticsManager` (`:statistics`).
 
 ## Commands
 

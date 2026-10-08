@@ -13,8 +13,8 @@ import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
-import org.churchpresenter.app.churchpresenter.dialogs.withStatsHome
+import org.churchpresenter.statistics.StatisticsManager
+import org.churchpresenter.statistics.withStatsHome
 import org.churchpresenter.bible.SpbFixture
 import org.churchpresenter.bibletab.bibleFixture
 import org.churchpresenter.core.models.schedule.ScheduleItem

@@ -58,7 +58,7 @@ import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.sharedui.utils.ShortcutMap
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.MacMenuBarActivationFix
-import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
+import org.churchpresenter.updater.UpdateChecker
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.settings.isDue

@@ -15,9 +15,33 @@ import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.lowerthird.render.LottieRenderCache
 import java.io.File
 import java.io.IOException
+import java.lang.management.ManagementFactory
+import com.sun.management.OperatingSystemMXBean as PlatformOsBean
+
+private const val MB = 1024L * 1024
 
 /** How many output sizes get frames of their own at once; any further size draws the desktop frames. */
 internal const val MAX_OUTPUT_VARIANTS = 2
+
+/**
+ * The physical memory a machine needs before outputs get frames of their own: a 4K stream holds
+ * ~100 MB of frames beside the desktop one. An "8 GB" machine reports a little under 8 GiB (the
+ * firmware and the GPU keep some), so the line is drawn just below it.
+ */
+internal const val MIN_MEMORY_FOR_OUTPUT_FRAMES: Long = 7L * 1024 * 1024 * 1024 + 512L * 1024 * 1024
+
+/** This machine's physical memory in bytes, or null where the JVM cannot say. */
+internal fun physicalMemoryBytes(): Long? =
+    (ManagementFactory.getOperatingSystemMXBean() as? PlatformOsBean)
+        ?.totalMemorySize?.takeIf { it > 0 }
+
+/**
+ * Whether a machine with [totalBytes] of memory pre-renders frames for its larger outputs. One that
+ * cannot say is given them, as every machine was before this check: the guard is for small machines
+ * that are known to be small.
+ */
+internal fun hasMemoryForOutputFrames(totalBytes: Long?): Boolean =
+    totalBytes == null || totalBytes >= MIN_MEMORY_FOR_OUTPUT_FRAMES
 
 /**
  * The lower third's frames for outputs larger than the desktop variant.
@@ -31,13 +55,26 @@ internal const val MAX_OUTPUT_VARIANTS = 2
  * and the output draws what it always has: the desktop frames, or the live painter.
  *
  * Driven from the UI thread, as `LiveLowerThirdState` is; [prepare] is the render cache by default
- * and a test's own files otherwise.
+ * and a test's own files otherwise. On a machine without [MIN_MEMORY_FOR_OUTPUT_FRAMES] of memory
+ * ([enabled] false) no size gets frames of its own, and every output draws the desktop frames scaled,
+ * as all outputs did before this class.
  */
 internal class LottieOutputFrames(
     private val scope: CoroutineScope,
     private val currentFrameIndex: () -> Int,
+    private val enabled: Boolean = hasMemoryForOutputFrames(physicalMemoryBytes()),
     private val prepare: (String, LottieRenderCache.Variant) -> Deferred<File> = LottieRenderCache::prepare,
 ) {
+    init {
+        if (!enabled) {
+            Log.info(
+                "LowerThird",
+                "Under ${MIN_MEMORY_FOR_OUTPUT_FRAMES / MB} MB of memory: large outputs draw the desktop " +
+                    "lower-third frames scaled rather than frames of their own",
+            )
+        }
+    }
+
     /** One output size's pre-render, stream and published frame. */
     private class Entry(val variant: LottieRenderCache.Variant) {
         val frame = mutableStateOf<LottieFrame?>(null)
@@ -111,7 +148,7 @@ internal class LottieOutputFrames(
     /** Starts a stream for every size now held and closes those no longer held, largest first. */
     private fun reconcile() {
         val content = json
-        val needed = if (content == null) emptyMap() else holds.keys
+        val needed = if (content == null || !enabled) emptyMap() else holds.keys
             .mapNotNull(::variantFor)
             .associateBy { IntSize(it.width, it.height) }
             .entries.sortedByDescending { it.key.width.toLong() * it.key.height }
