@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.yield
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.server.SelectBibleVerseRequest
 import org.churchpresenter.bibletab.BibleViewModel
 import org.churchpresenter.liveoutput.PresenterManager

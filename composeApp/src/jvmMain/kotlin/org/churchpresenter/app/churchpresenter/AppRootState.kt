@@ -17,9 +17,9 @@ import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.ResolvedDisplay
 import org.churchpresenter.settings.reconcileScreenAssignments
-import org.churchpresenter.app.churchpresenter.data.LiveDurationLog
+import org.churchpresenter.statistics.LiveDurationLog
 import org.churchpresenter.settings.SettingsManager
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.bibletab.VerseSequenceLog
 import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -36,7 +36,7 @@ import org.churchpresenter.server.InstanceLinkViewModel
 import org.churchpresenter.stt.STTManager
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
-import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
+import org.churchpresenter.updater.UpdateCheckResult
 import java.awt.GraphicsEnvironment
 import java.io.File
 import java.util.Locale

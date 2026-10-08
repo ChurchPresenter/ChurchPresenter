@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.runtime.Composable
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.app.churchpresenter.dialogs.songEditorBackgroundButton
 import org.churchpresenter.songs.EditSongDialog
 import org.churchpresenter.liveoutput.lottieBandPath

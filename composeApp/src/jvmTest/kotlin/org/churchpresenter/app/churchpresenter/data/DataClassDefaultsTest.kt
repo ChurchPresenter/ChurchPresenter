@@ -12,9 +12,9 @@ import org.churchpresenter.crosswordtab.data.CrosswordCell
 /**
  * Default values for the small `data class`es in this package that every call site so far has
  * constructed with every field spelled out explicitly. The defaults are not decorative: they are
- * what a field decodes to when an older persisted file (a `.spb` cache, a statistics log) is
- * missing a field a newer build added — [StatisticsFileFormatTest] pins that at the file-format
- * level for the statistics types, and this pins the same contract for the classes themselves.
+ * what a field decodes to when an older persisted file (a `.spb` cache, a song cache) is missing a
+ * field a newer build added. The statistics types' own are `:statistics`'
+ * `StatisticsDataClassDefaultsTest`.
  */
 class DataClassDefaultsTest {
 
@@ -31,34 +31,6 @@ class DataClassDefaultsTest {
         val result = BibleSearch(book = "Genesis")
 
         assertEquals(BibleSearch("Genesis", "", "", ""), result)
-    }
-
-    @Test
-    fun `a song display entry with only its number given still has a blank title and a zero count`() {
-        val entry = SongDisplayEntry(songNumber = 12)
-
-        assertEquals(SongDisplayEntry(12, "", "", 0), entry)
-    }
-
-    @Test
-    fun `a verse display entry with only its chapter given still has a blank book and a zero count`() {
-        val entry = VerseDisplayEntry(chapter = 3)
-
-        assertEquals(VerseDisplayEntry("", "", 3, 0, 0), entry)
-    }
-
-    @Test
-    fun `a song play event with only its title given still has a zero timestamp`() {
-        val event = SongPlayEvent(title = "Amazing Grace")
-
-        assertEquals(SongPlayEvent(0, "Amazing Grace", "", "", 0L), event)
-    }
-
-    @Test
-    fun `a verse play event with only its book given still has a zero timestamp`() {
-        val event = VersePlayEvent(bookName = "Genesis")
-
-        assertEquals(VersePlayEvent("", "Genesis", 0, 0, 0L), event)
     }
 
     @Test

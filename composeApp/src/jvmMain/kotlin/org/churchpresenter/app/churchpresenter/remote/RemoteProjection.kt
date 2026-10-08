@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter.remote
 
 import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.dictionary.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.ScheduleActions
 import org.churchpresenter.core.models.songs.LyricSection

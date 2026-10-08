@@ -19,7 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.asDurationRow
+import org.churchpresenter.statistics.asDurationRow
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.InstanceLinkLogSide
 import org.churchpresenter.server.InstanceLinkLogger
