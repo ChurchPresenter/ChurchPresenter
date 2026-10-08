@@ -232,6 +232,7 @@ private fun MainWindowScope.mainDesktopPublishers(): MainDesktopPublishers = wit
         onScheduleItemSelected = { itemId -> selectedScheduleItemId = itemId },
         onSongsLoaded = { songs ->
             helperSongCount = songs.size
+            helperSongs = songs
             companionServer.updateSongs(songs)
         },
         onCurrentTabChange = { tab -> helperCurrentTab = tab },

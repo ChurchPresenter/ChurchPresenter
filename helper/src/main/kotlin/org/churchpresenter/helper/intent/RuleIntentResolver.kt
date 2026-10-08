@@ -24,7 +24,13 @@ internal fun String.containsWordPrefix(stem: String): Boolean =
     if (' ' in stem) containsPhrase(stem) else split(' ').any { it.startsWith(stem) }
 
 /** One typed request, normalized, as the rules read it. */
-internal class Request(val text: String, val words: List<String>, val context: ResolveContext) {
+internal class Request(
+    val text: String,
+    val words: List<String>,
+    val context: ResolveContext,
+    /** What was typed, before normalizing — for text the operator wants shown as written. */
+    val raw: String = text,
+) {
     val first: String get() = words.first()
     fun has(set: Set<String>) = words.any { it in set }
     fun hasPhrase(phrases: List<String>) = phrases.any { text.containsPhrase(it) }
@@ -48,7 +54,10 @@ class RuleIntentResolver : IntentResolver {
         val text = normalize(input)
         if (text.isEmpty()) return Resolution.Unknown
         return Glossaries.readings(text, context.language)
-            .map { reading -> RULES.firstNotNullOfOrNull { it(Request(reading, reading.split(' '), context)) } }
+            .map { reading ->
+                val request = Request(reading, reading.split(' '), context, raw = input.trim())
+                RULES.firstNotNullOfOrNull { it(request) }
+            }
             .firstOrNull { it != null } ?: Resolution.Unknown
     }
 
@@ -66,6 +75,13 @@ class RuleIntentResolver : IntentResolver {
             ::backgroundColorRule,
             ::fontSizeRule,
             ::shortcutRule,
+            // Before the tours of the same things: "a 5 minute countdown" starts one.
+            ::countdownRule,
+            ::announcementRule,
+            ::addToScheduleRule,
+            ::scheduleStepRule,
+            ::whatsLiveRule,
+            ::versionRule,
             // Before the converter: "import from Planning Center" is not a song conversion.
             ::featureTopicsRule,
             ::convertSongsRule,
@@ -77,12 +93,16 @@ class RuleIntentResolver : IntentResolver {
             ::mediaTopicsRule,
             ::navigationRule,
             ::openSettingsRule,
+            // Before the tab rule: "show song 245" is that song, not the Songs tab.
+            ::namedSongRule,
             ::verseRule,
             ::switchTabRule,
             ::nextOrPreviousRule,
             ::clearRule,
             ::takeRule,
             ::outputsRule,
+            // Late: "show amazing grace" is a song only once nothing else claimed it.
+            ::songLookupRule,
             // Last: "help me set up the screens" and "thanks, now clear it" are requests first.
             ::chatRule,
         )

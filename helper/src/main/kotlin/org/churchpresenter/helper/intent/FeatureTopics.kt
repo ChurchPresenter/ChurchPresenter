@@ -8,6 +8,11 @@ import org.churchpresenter.sharedui.guide.GuideTarget
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.bible_history
+import org.churchpresenter.strings.generated.resources.bible_cross_references_title
+import org.churchpresenter.strings.generated.resources.bible_cross_references_enable
+import org.churchpresenter.strings.generated.resources.helper_hint_bible_history
+import org.churchpresenter.strings.generated.resources.helper_hint_bible_cross_refs
 import org.churchpresenter.strings.generated.resources.background
 import org.churchpresenter.strings.generated.resources.edit_song
 import org.churchpresenter.strings.generated.resources.filter
@@ -47,6 +52,8 @@ internal fun featureTopicsRule(r: Request): Resolution? {
             highlight(FeatureTours.favorites())
         aboutSongs && r.has(Vocabulary.BACKGROUND) && r.hasPhrase(Vocabulary.ONE_SONG) ->
             highlight(FeatureTours.songBackground())
+        r.hasPhrase(Vocabulary.CROSS_REFS) -> highlight(FeatureTours.crossReferences())
+        r.hasPhrase(Vocabulary.BIBLE_HISTORY) -> highlight(FeatureTours.bibleHistory())
         text.any { it.isDigit() } -> null
         r.hasPhrase(Vocabulary.MULTI_VERSE) -> highlight(FeatureTours.multiVerse())
         aboutBible && (searching || r.hasPhrase(Vocabulary.FIND_VERSE)) -> highlight(FeatureTours.bibleSearch())
@@ -115,6 +122,32 @@ internal object FeatureTours {
             GuideStep(
                 GuideTargets.BIBLE_VERSES,
                 helperText(Res.string.helper_hint_bible_multi_verse),
+                before = HelperAction.SelectTab(Tabs.BIBLE),
+            ),
+        ),
+    )
+
+    fun bibleHistory() = GuideTour(
+        listOf(
+            tabStep(Tabs.BIBLE),
+            GuideStep(
+                GuideTargets.BIBLE_HISTORY,
+                helperText(Res.string.helper_hint_bible_history, helperText(Res.string.bible_history)),
+                before = HelperAction.SelectTab(Tabs.BIBLE),
+            ),
+        ),
+    )
+
+    fun crossReferences() = GuideTour(
+        listOf(
+            tabStep(Tabs.BIBLE),
+            GuideStep(
+                GuideTargets.BIBLE_CROSS_REFS,
+                helperText(
+                    Res.string.helper_hint_bible_cross_refs,
+                    helperText(Res.string.bible_cross_references_title),
+                    helperText(Res.string.bible_cross_references_enable),
+                ),
                 before = HelperAction.SelectTab(Tabs.BIBLE),
             ),
         ),

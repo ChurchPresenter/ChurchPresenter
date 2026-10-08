@@ -1,6 +1,8 @@
 package org.churchpresenter.helper.suggest
 
 import org.churchpresenter.helper.intent.normalize
+import org.churchpresenter.strings.generated.resources.helper_example_cross_refs
+import org.churchpresenter.strings.generated.resources.helper_example_bible_history
 import org.churchpresenter.strings.generated.resources.helper_example_website
 import org.churchpresenter.strings.generated.resources.helper_example_ccli
 import org.churchpresenter.strings.generated.resources.helper_example_planning_center
@@ -171,6 +173,11 @@ enum class SuggestedRequest(val label: StringResource, val request: String, keyw
     ),
     CCLI(Res.string.helper_example_ccli, "ccli report", "ccli report reports statistics stats usage copyright times"),
     WEBSITE(Res.string.helper_example_website, "show a website", "website web page url browser site internet"),
+    BIBLE_HISTORY(
+        Res.string.helper_example_bible_history, "what did we just show",
+        "history recent recently shown earlier before back verse verses",
+    ),
+    CROSS_REFS(Res.string.helper_example_cross_refs, "related verses", "cross reference references refs related parallel"),
     ;
 
     /** The keywords, and the words of the request itself. */

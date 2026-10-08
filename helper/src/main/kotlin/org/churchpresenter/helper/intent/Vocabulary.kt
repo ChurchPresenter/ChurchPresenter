@@ -328,6 +328,18 @@ internal object Vocabulary {
         "filter songs", "filter the songs",
     )
 
+    /** Going back to verses already shown. */
+    val BIBLE_HISTORY = listOf(
+        "bible history", "verse history", "history", "what did we just show", "what did we show", "recently shown",
+        "recent verses", "verses we showed", "shown before", "shown earlier", "go back to a verse",
+    )
+
+    /** Passages that point at each other. */
+    val CROSS_REFS = listOf(
+        "cross reference", "cross references", "cross-reference", "cross-references", "cross ref", "cross refs",
+        "crossref", "crossrefs", "related verses", "related passages", "parallel passages", "similar verses", "refs",
+    )
+
     /** A web page, to put on screen. */
     val WEBSITE = setOf("website", "websites", "webpage", "webpages", "url", "browser", "site", "web")
     val WEB_PAGE = listOf("web page", "web site", "internet page")

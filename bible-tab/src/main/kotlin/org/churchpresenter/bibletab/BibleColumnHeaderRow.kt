@@ -1,5 +1,6 @@
 package org.churchpresenter.bibletab
 
+import androidx.compose.foundation.layout.Box
 import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.guide.GuideTargets
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -106,7 +107,11 @@ internal fun BibleVerseHeader(
         }
         else Spacer(Modifier.weight(1f))
 
-        if (crossRefsVisible) CrossRefsPill(crossRefsDocked, onCrossReferencesToggle)
+        if (crossRefsVisible) {
+            Box(Modifier.guideTarget(GuideTargets.BIBLE_CROSS_REFS)) {
+                CrossRefsPill(crossRefsDocked, onCrossReferencesToggle)
+            }
+        }
 
         HoldLivePill(holdAvailable, holdLive, holdLiveStr, verseSelectionHint, onHoldLiveToggle)
 

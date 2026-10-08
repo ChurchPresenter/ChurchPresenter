@@ -20,6 +20,9 @@ sealed interface HelperText {
 
     /** The key bound to [action], as this platform writes it, or blank when none is bound. */
     data class KeyFor(val action: ShortcutAction) : HelperText
+
+    /** [parts], each resolved, joined by [separator]: "John 3:16, Amazing Grace". */
+    data class Joined(val parts: List<HelperText>, val separator: String = ", ") : HelperText
 }
 
 /** [res] with [args], each a [HelperText] or anything else shown as it is. */
@@ -33,6 +36,7 @@ fun helperText(res: StringResource, vararg args: Any): HelperText =
 fun HelperText.resolve(): String = when (this) {
     is HelperText.Plain -> text
     is HelperText.KeyFor -> LocalShortcuts.current.chordsFor(action).firstOrNull()?.label().orEmpty()
+    is HelperText.Joined -> parts.map { it.resolve() }.joinToString(separator)
     is HelperText.Res -> {
         val resolved = args.map { it.resolve() }
         stringResource(res, *resolved.toTypedArray())

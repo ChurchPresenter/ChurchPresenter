@@ -190,6 +190,15 @@ internal class AppHelperExecutor(private val root: AppRootState) : HelperActionE
             root.showCalendarWindow = true
             ActionOutcome.Done(message = action.describe())
         }
+        is HelperAction.StartCountdown -> root.helperAnnounce(text = "", minutes = action.minutes)
+        is HelperAction.ShowAnnouncement -> root.helperAnnounce(action.text)
+        is HelperAction.FindSong -> root.helperFindSong(action.query)
+        is HelperAction.AddSongToSchedule -> root.helperAddSongToSchedule(action.query)
+        is HelperAction.AddVerseToSchedule -> root.helperAddVerseToSchedule(action)
+        is HelperAction.ScheduleStep -> root.helperScheduleStep(action.forward)
+        is HelperAction.ScheduleGoTo -> root.helperScheduleGoTo(action.name)
+        HelperAction.WhatsLive -> root.helperWhatsLive()
+        HelperAction.CheckForUpdates -> root.helperCheckForUpdates()
         HelperAction.OpenStatistics -> {
             root.showStatisticsDialog = true
             ActionOutcome.Done(message = action.describe())

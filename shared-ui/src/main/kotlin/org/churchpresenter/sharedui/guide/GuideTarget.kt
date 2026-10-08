@@ -67,6 +67,8 @@ object GuideTargets {
     val BIBLE_SEARCH = GuideTarget("bible.search")
     val BIBLE_SEARCH_MODE = GuideTarget("bible.searchMode")
     val BIBLE_VERSES = GuideTarget("bible.verses")
+    val BIBLE_HISTORY = GuideTarget("bible.history")
+    val BIBLE_CROSS_REFS = GuideTarget("bible.crossRefs")
     val PLANNING_CENTER_IMPORT = GuideTarget("schedule.planningCenter")
     val SERVER_ENABLE = GuideTarget("settings.server.enable")
     val SERVER_QR = GuideTarget("settings.server.qr")

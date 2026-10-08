@@ -138,6 +138,8 @@ internal class AppRootState(
     var helperCurrentTab by mutableStateOf<Tabs?>(null)
     // How many songs the library loaded, or null before it has — "empty" only once it has looked.
     var helperSongCount by mutableStateOf<Int?>(null)
+    // The library itself, for the helper to find a song by number or title.
+    var helperSongs by mutableStateOf<List<SongItem>>(emptyList())
     val helperSelectTabFlow = MutableSharedFlow<Tabs>(extraBufferCapacity = REMOTE_FLOW_BUFFER)
 
     // What the automation engine last put on screen, or null once it blanked. The engine yields

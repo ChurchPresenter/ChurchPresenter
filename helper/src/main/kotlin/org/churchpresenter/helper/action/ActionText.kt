@@ -9,6 +9,16 @@ import org.churchpresenter.strings.generated.resources.helper_open_calendar_load
 import org.churchpresenter.strings.generated.resources.helper_open_calendar_automate
 import org.churchpresenter.strings.generated.resources.helper_open_song_library
 import org.churchpresenter.strings.generated.resources.helper_open_statistics
+import org.churchpresenter.strings.generated.resources.helper_check_updates
+import org.churchpresenter.strings.generated.resources.helper_whats_live
+import org.churchpresenter.strings.generated.resources.helper_confirm_schedule_goto
+import org.churchpresenter.strings.generated.resources.helper_confirm_schedule_previous
+import org.churchpresenter.strings.generated.resources.helper_confirm_schedule_next
+import org.churchpresenter.strings.generated.resources.helper_confirm_add_verse
+import org.churchpresenter.strings.generated.resources.helper_confirm_add_song
+import org.churchpresenter.strings.generated.resources.helper_find_song
+import org.churchpresenter.strings.generated.resources.helper_confirm_announcement
+import org.churchpresenter.strings.generated.resources.helper_confirm_countdown
 import org.churchpresenter.strings.generated.resources.helper_open_converter
 import org.churchpresenter.strings.generated.resources.helper_open_converter_documents
 import org.churchpresenter.strings.generated.resources.helper_open_converter_from
@@ -98,6 +108,16 @@ fun HelperAction.describe(undoLabel: HelperText? = null): HelperText = when (thi
         },
     )
     HelperAction.OpenStatistics -> helperText(Res.string.helper_open_statistics)
+    is HelperAction.StartCountdown -> helperText(Res.string.helper_confirm_countdown, minutes)
+    is HelperAction.ShowAnnouncement -> helperText(Res.string.helper_confirm_announcement, text)
+    is HelperAction.FindSong -> helperText(Res.string.helper_find_song, query)
+    is HelperAction.AddSongToSchedule -> helperText(Res.string.helper_confirm_add_song, query)
+    is HelperAction.AddVerseToSchedule -> helperText(Res.string.helper_confirm_add_verse, display)
+    is HelperAction.ScheduleStep ->
+        helperText(if (forward) Res.string.helper_confirm_schedule_next else Res.string.helper_confirm_schedule_previous)
+    is HelperAction.ScheduleGoTo -> helperText(Res.string.helper_confirm_schedule_goto, name)
+    HelperAction.WhatsLive -> helperText(Res.string.helper_whats_live)
+    HelperAction.CheckForUpdates -> helperText(Res.string.helper_check_updates)
     HelperAction.Greet -> helperText(Res.string.helper_greeting)
     HelperAction.Thanks -> helperText(Res.string.helper_youre_welcome)
     HelperAction.UndoLast -> undoLabel

@@ -137,6 +137,53 @@ sealed interface HelperAction {
         override val needsConfirmation get() = false
     }
 
+    /** A countdown of [minutes] on screen, from the Announcements tab's timer. */
+    data class StartCountdown(val minutes: Int) : HelperAction {
+        override val affectsLive get() = true
+    }
+
+    /** [text] on screen as an announcement, typed as the operator wrote it. */
+    data class ShowAnnouncement(val text: String) : HelperAction {
+        override val affectsLive get() = true
+    }
+
+    /** The song [query] names — by number or title — opened on the Songs tab, ready to go live. */
+    data class FindSong(val query: String) : HelperAction {
+        override val needsConfirmation get() = false
+    }
+
+    /** The song [query] names, added to the end of the schedule. */
+    data class AddSongToSchedule(val query: String) : HelperAction
+
+    /** A verse or a run of verses, added to the end of the schedule; [display] is how it reads. */
+    data class AddVerseToSchedule(
+        val book: String,
+        val chapter: Int,
+        val verse: Int,
+        val lastVerse: Int,
+        val display: String,
+    ) : HelperAction
+
+    /** The schedule's next row ([forward]) or the one before, made ready to show. */
+    data class ScheduleStep(val forward: Boolean) : HelperAction {
+        override val affectsLive get() = true
+    }
+
+    /** The schedule row whose name contains [name], made ready to show. */
+    data class ScheduleGoTo(val name: String) : HelperAction {
+        override val affectsLive get() = true
+    }
+
+    /** Say what is on screen now. */
+    data object WhatsLive : HelperAction {
+        override val needsConfirmation get() = false
+    }
+
+    /** Say which version this is, and look for a newer one. */
+    data object CheckForUpdates : HelperAction {
+        override val needsConfirmation get() = false
+    }
+
     /** Open CCLI Reports: how often each song was used, the passages shown, and when. */
     data object OpenStatistics : HelperAction {
         override val needsConfirmation get() = false
