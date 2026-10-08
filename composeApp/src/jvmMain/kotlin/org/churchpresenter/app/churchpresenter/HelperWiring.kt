@@ -37,7 +37,7 @@ import org.churchpresenter.helper.display.HelperScreen
 import org.churchpresenter.helper.display.screenLabel
 import org.churchpresenter.helper.helperText
 import org.churchpresenter.helper.intent.ResolveContext
-import org.churchpresenter.helper.intent.RuleIntentResolver
+import org.churchpresenter.helper.intent.semantic.SemanticIntentResolver
 import org.churchpresenter.helper.intent.helperTabName
 import org.churchpresenter.helper.suggest.HelperSignals
 import org.churchpresenter.helper.suggest.suggestionsFor
@@ -94,7 +94,7 @@ internal fun MainWindowScope.HelperHost(modifier: Modifier) {
             firstRunDone = !showSetupWizard,
         )
         val executor = remember(this) { AppHelperExecutor(this) }
-        val resolver = remember { RuleIntentResolver() }
+        val resolver = remember { SemanticIntentResolver() }
         val now = System.currentTimeMillis()
         // A Companion surface in the right sidebar fills the corner the lamp sits in; the lamp
         // keeps above its divider instead of covering its buttons.

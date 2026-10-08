@@ -3070,6 +3070,7 @@
     <string name="helper_tour_done">Got it</string>
     <string name="helper_tour_stop">Stop</string>
     <string name="helper_hint_tab">This is the %1$s tab.</string>
+    <string name="helper_hint_control">This is %1$s.</string>
     <string name="helper_hint_new_song">Click here to write a new song.</string>
     <!-- %1$s is the Edit Song button's name (edit_song), passed in so the hint names it as the
          translated UI does. -->

@@ -2,6 +2,7 @@ package org.churchpresenter.helper.intent
 
 import org.churchpresenter.helper.HelperText
 import org.churchpresenter.helper.action.HelperAction
+import org.churchpresenter.helper.suggest.SuggestedRequest
 import org.churchpresenter.sharedui.models.Tabs
 import java.util.Locale
 
@@ -22,14 +23,17 @@ sealed interface Resolution {
 
     /** It was not understood. */
     data object Unknown : Resolution
+
+    /** It was not understood, but it reads closest to [requests], best first — offered as chips. */
+    data class Closest(val requests: List<SuggestedRequest>) : Resolution
 }
 
 /**
  * Turns a typed request into one of the helper's actions.
  *
- * The rules ([RuleIntentResolver]) are the only resolver today. A model-backed one would implement
- * this too, and may only answer with a [HelperAction] — so whatever reads the request, the helper
- * can do no more than its own list, and still asks before doing it.
+ * The rules ([RuleIntentResolver]) read it first; `SemanticIntentResolver` adds a small local model for
+ * what they miss. Either may only answer with a [HelperAction] — so whatever reads the request, the
+ * helper can do no more than its own list, and still asks before doing it.
  */
 fun interface IntentResolver {
     suspend fun resolve(input: String, context: ResolveContext): Resolution

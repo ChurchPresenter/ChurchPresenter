@@ -34,6 +34,7 @@ consumer is `:composeApp`. It takes `:shared-ui`, `:strings`, `:icons`, `:core-m
 | root | `HelperState` (the conversation, tours, undo), `HelperText`, `HelperActionExecutor` |
 | `action/` | `HelperAction` (everything it can do), confirmation text, settings edits, undo |
 | `intent/` | `IntentResolver`, `RuleIntentResolver`, the vocabulary, the "where is" topics |
+| `intent/semantic/` | The sentence model (`MiniLmEncoder`, `WordPieceTokenizer`), its catalog (`WickCatalog`), `SemanticMatcher` and `SemanticIntentResolver` |
 | `suggest/` | `HelperSignals`, `suggestionsFor`, the tips |
 | `display/` | `HelperScreen` and the display-setup flow |
 | `ui/` | The lamp, the overlay and bubble, the replies, display setup, the spotlight host |
@@ -47,8 +48,30 @@ consumer is `:composeApp`. It takes `:shared-ui`, `:strings`, `:icons`, `:core-m
   for pointing at things, opening a window and showing a key.
 - **Quiet during a service.** No suggestion, no badge, no animation while anything is live; the
   bubble never opens by itself.
-- **A resolver may only answer with a `HelperAction`.** A model-backed resolver added later
-  implements `IntentResolver` and is bound by the same list and the same confirmation.
+- **A resolver may only answer with a `HelperAction`.** `SemanticIntentResolver` is bound by the same
+  list and the same confirmation as the rules.
+
+## The sentence model
+
+What the rules miss is read by **all-MiniLM-L6-v2**, run in plain Kotlin (`MiniLmEncoder`, no native
+library): ~30 ms on one lowest-priority thread (`wick-model`), about 23 MB while loaded, loaded on the
+first miss and let go after ten idle minutes. It never runs while anything is live (the overlay
+already holds still) and never acts on a weak match: at `ACT` or above it answers with that action,
+otherwise it offers the closest chips — the model's score nudged by `keywordScores`, which catches
+typos. Without the model, the helper is its rules alone.
+
+- **One model file, replaced in place.** `helper/tools/export_minilm.py` writes `wick/minilm-l6.bin`
+  (int8, ~23 MB), `wick/vocab.txt` and the parity fixtures from a pinned revision; re-running
+  overwrites them. Never keep a second model beside it. `THIRD_PARTY_MINILM.md` is its licence notice.
+- **The catalog is generated from the codebase, and committed.** `wick/catalog.tsv` holds every chip,
+  every multi-word `*Topics.kt` phrase the rules understand, every `guideTarget(…)` control's own labels,
+  every Settings page's labels, every tab and every shortcut, each with its vector. Never edit it by hand:
+  `./gradlew :helper:updateWickCatalog` regenerates it, re-embedding only what changed, and
+  `WickCatalogTest` fails until it has been run after a change it covers. Which files make up each
+  Settings page is `WickCatalogSource.SETTINGS_FILES`.
+- **Measure before changing a threshold.** `./gradlew :helper:wickEval` runs `wick/understanding.tsv`
+  (rewordings, typos, off-topic requests) and fails on any wrong action by the model or when fewer than
+  90% of the requests it can see are reached. It prints which the rules got wrong — theirs to fix.
 - **The rules read English; every other language is a glossary.** `Vocabulary`, `ColorNames` and the
   rules stay English. `intent/glossary/` holds one `Glossary` per shipped locale that rewrites a typed
   request into those English words; `Glossaries.readings` tries the app's language, then the text as
@@ -63,4 +86,7 @@ consumer is `:composeApp`. It takes `:shared-ui`, `:strings`, `:icons`, `:core-m
 ```bash
 ./gradlew :helper:test :helper:detekt
 ./gradlew :helper:jacocoTestCoverageVerification
+./gradlew :helper:wickEval            # how well Wick understands rewordings
+./gradlew :helper:updateWickCatalog   # after tagging a control, rewording a label or adding a topic phrase
+python3 helper/tools/export_minilm.py # re-export the model (needs numpy and tokenizers)
 ```

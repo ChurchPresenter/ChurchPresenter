@@ -12,7 +12,6 @@ import org.churchpresenter.helper.action.UndoStack
 import org.churchpresenter.helper.display.DisplaySetupFlow
 import org.churchpresenter.helper.intent.Resolution
 import org.churchpresenter.helper.suggest.SuggestedRequest
-import org.churchpresenter.helper.suggest.closestRequests
 import org.churchpresenter.sharedui.guide.GuideSession
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.strings.generated.resources.Res
@@ -122,11 +121,12 @@ class HelperState(val session: GuideSession = GuideSession()) {
 
 
     /** Acts on what a typed request came to. */
-    fun onResolved(resolution: Resolution, executor: HelperActionExecutor, input: String = "") {
+    fun onResolved(resolution: Resolution, executor: HelperActionExecutor) {
         when (resolution) {
             is Resolution.Act -> request(resolution.action, executor)
             is Resolution.Clarify -> show(HelperReply.Clarify(resolution.question, resolution.options))
-            Resolution.Unknown -> show(HelperReply.Unknown(closestRequests(input)))
+            Resolution.Unknown -> show(HelperReply.Unknown(SuggestedRequest.DEFAULTS))
+            is Resolution.Closest -> show(HelperReply.Unknown(resolution.requests))
         }
     }
 

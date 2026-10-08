@@ -47,9 +47,10 @@ import org.jetbrains.compose.resources.StringResource
 /**
  * A request the helper can offer as a chip: the [label] it shows, in the operator's language, and the
  * [request] it sends, in English — the language the rules read, so a chip still works once its label
- * is translated. [keywords] are what a request the helper did not understand is matched against.
+ * is translated. [keywords] are more words for the same request: a request the rules did not understand
+ * is matched against both — by meaning (see `intent/semantic`), nudged by [keywordScores].
  */
-enum class SuggestedRequest(val label: StringResource, val request: String, keywords: String) {
+enum class SuggestedRequest(val label: StringResource, val request: String, internal val keywords: String) {
     BACKGROUND(
         Res.string.helper_example_bg, "make the song background blue",
         "background backgrounds bg backdrop color colour blue red green black look nicer prettier",
@@ -190,19 +191,18 @@ enum class SuggestedRequest(val label: StringResource, val request: String, keyw
 }
 
 /**
- * The requests closest to [input], best first, up to [limit] — or [SuggestedRequest.DEFAULTS] when
- * none is like it at all. A typed word scores against each request's keywords: the same word, one starting the
- * other, or one or two letters off ("clera" for "clear", "chrods" for "chords").
+ * How much each request's words are like [input]'s, scaled so the closest scores 1 — empty when no word
+ * is like any of them. A typed word scores against each request's keywords: the same word, one starting
+ * the other, or one or two letters off ("clera" for "clear", "chrods" for "chords"), which is what the
+ * sentence model, reading whole words, does not catch.
  */
-fun closestRequests(input: String, limit: Int = CHIP_COUNT): List<SuggestedRequest> {
+fun keywordScores(input: String): Map<SuggestedRequest, Double> {
     val typed = normalize(input).split(' ').filter { it.length > 1 && it !in STOP_WORDS }
-    val closest = SuggestedRequest.entries
-        .map { request -> request to typed.sumOf { word -> request.words.maxOf { wordMatch(word, it) } } }
-        .filter { (_, score) -> score > 0.0 }
-        .sortedByDescending { (_, score) -> score }
-        .map { (request, _) -> request }
-    // Only what is actually like it; the defaults are for when nothing is.
-    return closest.take(limit).ifEmpty { SuggestedRequest.DEFAULTS }
+    val raw = SuggestedRequest.entries.associateWith { request ->
+        typed.sumOf { word -> request.words.maxOf { wordMatch(word, it) } }
+    }
+    val top = raw.values.maxOrNull() ?: 0.0
+    return if (top <= 0.0) emptyMap() else raw.mapValues { (_, score) -> score / top }
 }
 
 /** How alike two words are, from 1 (the same) down to 0 (nothing alike). */
@@ -242,7 +242,6 @@ private val STOP_WORDS = setOf(
     "make", "set", "get", "want", "need", "this", "that", "and", "or", "for", "with", "where", "what", "show",
 )
 
-private const val CHIP_COUNT = 4
 private const val PREFIX_MIN = 3
 private const val ONE_OFF_MIN = 4
 private const val TWO_OFF_MIN = 6

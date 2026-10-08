@@ -197,7 +197,7 @@ private fun HelperPanel(
             scope.launch {
                 val resolution = resolver.resolve(request, inputs.context)
                 state.answer(shown)
-                state.onResolved(resolution, executor, input = request)
+                state.onResolved(resolution, executor)
             }
         }
     }
