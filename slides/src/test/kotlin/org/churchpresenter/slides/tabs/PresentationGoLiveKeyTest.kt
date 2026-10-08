@@ -21,7 +21,8 @@ import kotlin.test.assertTrue
 
 /**
  * The Go Live key on the Presentation tab: Enter on the tab root puts the selected slide on the
- * output, as the Go Live button does, and does nothing with no deck open.
+ * output, as the Go Live button does, and does nothing with no deck open or for the slide already
+ * on air.
  *
  * Slides are real JPEGs dropped into `slideFiles` (see [fakeSlideFiles]), as the other tab suites do.
  */
@@ -83,6 +84,40 @@ class PresentationGoLiveKeyTest {
             waitUntil("the slide on the output", WAIT_MS) { presenter.liveSlide.value != null }
             assertEquals(Presenting.PRESENTATION, presenter.onAir.value)
             assertEquals(1, presenter.liveSlide.value?.second, "the clicked slide")
+        }
+    }
+
+    @Test
+    fun `enter does nothing for the slide already on air`() {
+        val presenter = FakeSlidesOutput()
+        // Slide 1 of this deck is on air: the tab pushes it there itself once the slides arrive.
+        presenter.setPresentingMode(Presenting.PRESENTATION)
+        withSlides(presenter) { vm ->
+            waitUntil("the selected slide on air", WAIT_MS) {
+                presenter.liveSlide.value == (vm.selectedPresentation?.name to vm.selectedSlideIndex)
+            }
+            focusRoot()
+
+            pressEnter()
+
+            assertFalse(presenter.showPresenterWindow.value, "going live again would restart the slide")
+            assertEquals(null to 0, presenter.liveSlide.value)
+        }
+    }
+
+    @Test
+    fun `enter puts the selected slide live while another deck is on air`() {
+        val presenter = FakeSlidesOutput()
+        presenter.setPresentingMode(Presenting.PRESENTATION)
+        withSlides(presenter) { _ ->
+            waitUntil("the tab's own push of the slide", WAIT_MS) { presenter.liveSlide.value != null }
+            presenter.setLiveSlide("other.pptx", 0)
+            focusRoot()
+
+            pressEnter()
+
+            waitUntil("the slide on the output", WAIT_MS) { presenter.liveSlide.value == (null to 0) }
+            assertTrue(presenter.showPresenterWindow.value)
         }
     }
 

@@ -34,6 +34,8 @@ fun DictionaryTab(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((number: String, word: String, transliteration: String, definition: String) -> Unit)? = null,
     onGoLive: ((StrongsEntry) -> Unit)? = null,
+    /** The number of the entry on air, or null when the dictionary is not; Go Live skips it. */
+    liveEntryNumber: String? = null,
     getVerseText: ((bookId: Int, chapter: Int, verse: Int) -> String?)? = null,
     getBookName: ((bookId: Int) -> String?)? = null,
     onWordClick: ((strongsNumber: String) -> Unit)? = null,
@@ -62,7 +64,7 @@ fun DictionaryTab(
     val entry = viewModel.selectedEntry
     Row(
         modifier = modifier.goLiveKeyTarget(
-            enabled = entry != null && onGoLive != null,
+            enabled = entry != null && onGoLive != null && entry.number != liveEntryNumber,
             focusOnOpen = !searchFirst,
         ) { entry?.let { onGoLive?.invoke(it) } }
     ) {

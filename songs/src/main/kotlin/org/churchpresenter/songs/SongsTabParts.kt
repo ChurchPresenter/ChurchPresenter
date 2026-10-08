@@ -117,7 +117,7 @@ internal fun SongsTabController.SongsTabEffects(
         live.titleSlideSelected = false
         when (schedule.action) {
             ScheduleSongAction.GO_LIVE -> {
-                sendToPresenter(goLive = true, source = "schedule")
+                sendToPresenter(goLive = true, source = schedule.source)
                 onPresenting(Presenting.LYRICS)
             }
             ScheduleSongAction.OPEN -> if (!isPresenting) sendToPresenter()

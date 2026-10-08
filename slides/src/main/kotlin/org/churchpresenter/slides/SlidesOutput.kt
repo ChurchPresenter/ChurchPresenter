@@ -51,6 +51,9 @@ interface DeckOutput {
 
     val presentationFrame: State<PresentationFrame?>
 
+    /** The deck on air, as its file name and slide index, or null when none is. */
+    val slideOnAir: Pair<String?, Int>? get() = null
+
     fun setSelectedSlide(slide: ImageBitmap?)
     fun setNextSlide(slide: ImageBitmap?)
     fun setLiveSlide(fileName: String?, index: Int)

@@ -122,7 +122,8 @@ class BibleTabSearchKeysTest {
         bibleSearch("John 3:16")
         pressInSearch(Key.Enter)
 
-        assertEquals(Triple("John", 3, 16), reports.live?.firstOrNull()?.let { Triple(it.bookName, it.chapter, it.verseNumber) })
+        val live = reports.live?.firstOrNull()
+        assertEquals(Triple("John", 3, 16), live?.let { Triple(it.bookName, it.chapter, it.verseNumber) })
         assertTrue(Presenting.BIBLE in reports.presenting)
         bibleSearchBox().assertIsNotFocused()
     }

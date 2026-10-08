@@ -151,6 +151,8 @@ fun lowerThirdTab(
     pickerFor: (@Composable (AppSettings, ((AppSettings) -> AppSettings) -> Unit, Modifier) -> Unit)? = null,
     /** The answer to "delete this preset?"; asked questions are counted in the reports. */
     confirmRemove: Boolean = true,
+    /** The preset the host reports on air, by name; none by default. */
+    liveLowerThirdName: String? = null,
     block: ComposeUiTest.(reports: LowerThirdReports) -> Unit,
 ) {
     val reports = LowerThirdReports()
@@ -203,6 +205,7 @@ fun lowerThirdTab(
                             queryAtemState = queryAtemState,
                             probeAtemReachable = { _, _ -> atemReachable },
                             onOpenLottieGen = onOpenLottieGen,
+                            liveLowerThirdName = liveLowerThirdName,
                             confirmRemove = { _, _, onConfirmed ->
                                 reports.removeAsked++
                                 if (confirmRemove) onConfirmed()

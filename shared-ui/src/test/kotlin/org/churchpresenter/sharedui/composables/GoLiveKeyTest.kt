@@ -43,6 +43,8 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalTestApi::class)
 class GoLiveKeyTest {
 
+    private val keys = ShortcutMap.DEFAULT
+
     private fun rebound(vararg chords: KeyChord) = ShortcutMap.from(
         KeyboardShortcutSettings(overrides = mapOf(ShortcutAction.GO_LIVE.name to chords.toList())),
     )
@@ -52,22 +54,22 @@ class GoLiveKeyTest {
     @Test
     fun `enter on the tab root goes live`() {
         var live = 0
-        assertTrue(ShortcutMap.DEFAULT.handleGoLiveKey(keyDown(Key.Enter), rootFocused = true, enabled = true) { live++ })
+        assertTrue(keys.handleGoLiveKey(keyDown(Key.Enter), rootFocused = true, enabled = true) { live++ })
         assertEquals(1, live)
     }
 
     @Test
     fun `with nothing to send the key is claimed and does nothing`() {
         var live = 0
-        assertTrue(ShortcutMap.DEFAULT.handleGoLiveKey(keyDown(Key.Enter), rootFocused = true, enabled = false) { live++ })
+        assertTrue(keys.handleGoLiveKey(keyDown(Key.Enter), rootFocused = true, enabled = false) { live++ })
         assertEquals(0, live)
     }
 
     @Test
     fun `away from the tab root the key is left to whatever has focus`() {
         var live = 0
-        assertFalse(ShortcutMap.DEFAULT.handleGoLiveKey(keyDown(Key.Enter), rootFocused = false, enabled = true) { live++ })
-        assertFalse(ShortcutMap.DEFAULT.handleGoLiveKey(keyUp(Key.Enter), rootFocused = true, enabled = true) { live++ })
+        assertFalse(keys.handleGoLiveKey(keyDown(Key.Enter), rootFocused = false, enabled = true) { live++ })
+        assertFalse(keys.handleGoLiveKey(keyUp(Key.Enter), rootFocused = true, enabled = true) { live++ })
         assertEquals(0, live)
     }
 

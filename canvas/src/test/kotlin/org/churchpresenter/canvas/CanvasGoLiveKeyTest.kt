@@ -22,7 +22,7 @@ import kotlin.test.assertTrue
 /**
  * The Go Live key on the Canvas tab: Enter on the tab root puts the current scene on the output and
  * records it, as the Go Live button does; Enter in a text field, or while a scene is being renamed,
- * does not.
+ * does not, nor does Enter on the scene already on air.
  */
 class CanvasGoLiveKeyTest {
 
@@ -42,6 +42,32 @@ class CanvasGoLiveKeyTest {
             val live = reports.wentLive.single() as ScheduleItem.SceneItem
             assertEquals(vm.currentScene?.id, live.sceneId)
         }
+
+    @Test
+    fun `enter does nothing for the scene already on air`() =
+        canvasTab(seed = { addScene("Welcome") }, liveSceneId = { it.currentScene?.id }) { _, reports ->
+            waitForIdle()
+
+            pressEnter()
+
+            assertTrue(reports.presented.isEmpty(), "already on air: ${reports.presented}")
+            assertTrue(reports.wentLive.isEmpty())
+        }
+
+    @Test
+    fun `enter puts the current scene live while another is on air`() = canvasTab(
+        seed = {
+            addScene("Welcome")
+            addScene("Offering")
+        },
+        liveSceneId = { it.scenes.first().id },
+    ) { _, reports ->
+        waitForIdle()
+
+        pressEnter()
+
+        assertEquals(listOf("Offering"), reports.presented.map { it.name })
+    }
 
     @Test
     fun `with no scene enter puts nothing live`() = canvasTab { _, reports ->

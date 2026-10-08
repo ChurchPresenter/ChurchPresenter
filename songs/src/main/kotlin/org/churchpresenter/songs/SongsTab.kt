@@ -65,6 +65,8 @@ fun SongsTab(
     selectedSongItemVersion: Int = 0,
     /** What to do with [selectedSongItem]: open it, push it, or put it on screen. */
     selectedSongItemAction: ScheduleSongAction = ScheduleSongAction.PUSH,
+    /** Who handed [selectedSongItem] over, for the live history of a go-live. */
+    selectedSongItemSource: String = "schedule",
     onSongItemSelected: (LyricSection) -> Unit,
     onAllSectionsChanged: (List<LyricSection>) -> Unit = {},
     onSectionIndexChanged: (Int) -> Unit = {},
@@ -125,7 +127,8 @@ fun SongsTab(
     controller.focusRescue = rememberFocusLostRescue(hostWindow, controller.tabFocusRequester)
 
     controller.SongsTabEffects(
-        playCounts, ScheduleSelection(selectedSongItem, selectedSongItemVersion, selectedSongItemAction),
+        playCounts,
+        ScheduleSelection(selectedSongItem, selectedSongItemVersion, selectedSongItemAction, selectedSongItemSource),
         dialogDismissSignal,
     )
     controller.SongsTabPanes(modifier)

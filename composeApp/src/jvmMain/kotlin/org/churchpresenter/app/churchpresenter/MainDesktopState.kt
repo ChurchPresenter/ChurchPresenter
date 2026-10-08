@@ -30,10 +30,14 @@ internal class MainDesktopState(
 
     var selectedBibleVerseItem by mutableStateOf<ScheduleItem.BibleVerseItem?>(null)
     var selectedBibleVerseItemVersion by mutableStateOf(0)
+    /** True when [selectedBibleVerseItem] is to go live, not just open. */
+    var selectedBibleVerseItemGoLive by mutableStateOf(false)
     var selectedSongItem by mutableStateOf<ScheduleItem.SongItem?>(null)
     var selectedSongItemVersion by mutableStateOf(0)
     /** What the Songs tab does with [selectedSongItem]: open it, push it, or put it on screen. */
     var selectedSongItemAction by mutableStateOf(ScheduleSongAction.OPEN)
+    /** Who handed [selectedSongItem] over, for the live history: the schedule, a remote, the calendar. */
+    var selectedSongItemSource by mutableStateOf("schedule")
     var selectedPictureItem by mutableStateOf<ScheduleItem.PictureItem?>(null)
     var selectedPictureItemVersion by mutableStateOf(0)
     var selectedPresentationItem by mutableStateOf<ScheduleItem.PresentationItem?>(null)
@@ -67,14 +71,24 @@ internal class MainDesktopState(
      * Hands [item] to the tab that opens it, bumping its version; false for a type no tab opens this
      * way. [songAction] is what the Songs tab does with a song: a click opens it, a go-live puts it up.
      */
-    fun select(item: ScheduleItem, songAction: ScheduleSongAction = ScheduleSongAction.OPEN): Boolean {
+    fun select(
+        item: ScheduleItem,
+        songAction: ScheduleSongAction = ScheduleSongAction.OPEN,
+        songSource: String = "schedule",
+        verseGoLive: Boolean = false,
+    ): Boolean {
         when (item) {
             is ScheduleItem.SongItem -> {
                 selectedSongItem = item
                 selectedSongItemAction = songAction
+                selectedSongItemSource = songSource
                 selectedSongItemVersion++
             }
-            is ScheduleItem.BibleVerseItem -> { selectedBibleVerseItem = item; selectedBibleVerseItemVersion++ }
+            is ScheduleItem.BibleVerseItem -> {
+                selectedBibleVerseItem = item
+                selectedBibleVerseItemGoLive = verseGoLive
+                selectedBibleVerseItemVersion++
+            }
             is ScheduleItem.PictureItem -> { selectedPictureItem = item; selectedPictureItemVersion++ }
             is ScheduleItem.PresentationItem -> {
                 selectedPresentationItem = item

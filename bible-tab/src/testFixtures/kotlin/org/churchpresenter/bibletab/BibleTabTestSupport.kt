@@ -6,6 +6,8 @@ import org.churchpresenter.settings.KeyboardShortcutSettings
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.foundation.layout.width
@@ -194,6 +196,12 @@ fun bibleTab(
      */
     width: Dp? = null,
     selectedVerseItem: ScheduleItem.BibleVerseItem? = null,
+    /** The schedule hand-over's count; bump it to hand [selectedVerseItem] over again. */
+    selectedVerseItemVersion: MutableState<Int> = mutableStateOf(0),
+    /** Whether [selectedVerseItem] is handed over to go live (a double-click) rather than to open. */
+    selectedVerseItemGoLive: Boolean = false,
+    /** Bumped to rebuild the tab, as switching away from it and back does in the app. */
+    tabVisit: MutableState<Int> = mutableStateOf(0),
     engineStatus: BibleEngineStatus? = null,
     /** Whether the Bible is what the output is showing, as the host reports it. */
     isPresenting: Boolean = false,
@@ -240,6 +248,7 @@ fun bibleTab(
                 var appSettings by remember { mutableStateOf(initialSettings) }
                 ThemedForTest(themeMode) {
                     Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
+                    key(tabVisit.value) {
                     BibleTab(
                         viewModel = vm,
                         appSettings = appSettings,
@@ -275,9 +284,12 @@ fun bibleTab(
                         },
                         onInstanceLinkSendBibleHold = onInstanceLinkSendBibleHold,
                         selectedVerseItem = selectedVerseItem,
+                        selectedVerseItemVersion = selectedVerseItemVersion.value,
+                        selectedVerseItemGoLive = selectedVerseItemGoLive,
                         engineStatus = engineStatus,
                         isPresenting = isPresenting,
                     )
+                    }
                     }
                 }
             }

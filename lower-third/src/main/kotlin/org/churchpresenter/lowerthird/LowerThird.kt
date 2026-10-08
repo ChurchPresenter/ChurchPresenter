@@ -2,6 +2,7 @@
 
 package org.churchpresenter.lowerthird
 
+import org.churchpresenter.sharedui.composables.goLiveKeyTarget
 import java.awt.Window
 import javax.swing.JOptionPane
 import javax.swing.SwingUtilities
@@ -79,6 +80,8 @@ fun LowerThirdTab(
         presetName: String,
     ) -> Unit = { _, _, _, _, _ -> },
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
+    /** The preset on air, by name, or null when none is; the Go Live key does not play it again. */
+    liveLowerThirdName: String? = null,
     /**
      * Asks whether to delete a preset, calling `onConfirmed` if the answer is yes. A Swing dialog
      * by default; a test answers it itself, since a real one cannot open headless.
@@ -186,7 +189,8 @@ fun LowerThirdTab(
     tabScope.LowerThirdAtemEffects()
     tabScope.LowerThirdSelectionEffects()
     tabScope.LowerThirdAtemDialog()
-    tabScope.LowerThirdBody(modifier)
+    val canGoLive = tabScope.canPlay && tabScope.selectedFile?.nameWithoutExtension != liveLowerThirdName
+    tabScope.LowerThirdBody(modifier.goLiveKeyTarget(enabled = canGoLive, onGoLive = tabScope::goLive))
 }
 
 /** Watches the lower-third folder and bumps [LowerThirdUiState.refreshKey] when a `.json` in it changes. */

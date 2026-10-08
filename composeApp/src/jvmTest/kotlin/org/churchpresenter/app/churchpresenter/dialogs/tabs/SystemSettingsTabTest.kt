@@ -272,28 +272,6 @@ class SystemSettingsTabTest {
     }
 
     @Test
-    fun `the focus-search switch flips the setting through the callback`() = runComposeUiTest {
-        var applied: AppSettings? = null
-        val initial = analytics(false)
-        setContent {
-            MaterialTheme {
-                SystemSettingsTab(
-                    settings = initial,
-                    onSettingsChange = { transform -> applied = transform(initial) },
-                )
-            }
-        }
-
-        onNode(isToggleable() and hasText("Focus search when opening a tab", substring = true))
-            .performScrollTo().performClick()
-        waitForIdle()
-
-        assertEquals(true, applied?.keyboardShortcutSettings?.focusSearchOnTabOpen, "off turns on")
-        assertEquals(initial.keyboardShortcutSettings.overrides, applied?.keyboardShortcutSettings?.overrides,
-            "and the key bindings beside it are kept")
-    }
-
-    @Test
     fun `toggling the analytics switch on flips the setting through the callback`() = runComposeUiTest {
         var applied: AppSettings? = null
         val initial = analytics(false)

@@ -80,6 +80,8 @@ fun CanvasTab(
     /** Save preset, to the left of Add to Schedule: the same scene, kept for the Calendar Manager. */
     onSavePreset: ((sceneId: String, sceneName: String) -> Unit)? = null,
     dialogDismissSignal: Int = 0,
+    /** The scene on air, or null when the canvas is not; the Go Live key does not send it again. */
+    liveSceneId: String? = null,
     /** The machine the source panel's camera section describes, or null to ask this one — a test pins it. */
     cameraHost: CameraHost? = null,
 ) {
@@ -144,7 +146,7 @@ fun CanvasTab(
                 .onFocusChanged { rootFocused = it.isFocused }
                 .focusable()
                 .onKeyEvent { event ->
-                    val canGoLive = currentScene != null && renamingSceneId == null
+                    val canGoLive = currentScene != null && renamingSceneId == null && currentScene.id != liveSceneId
                     shortcuts.handleGoLiveKey(event, rootFocused, canGoLive) { currentScene?.let { goLive(it) } } ||
                         deleteSelectedSource(event, shortcuts, sceneViewModel, renaming = renamingSceneId != null)
                 }

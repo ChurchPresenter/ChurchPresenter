@@ -81,3 +81,17 @@ internal fun BibleTabScope.returnToLive(viewModel: BibleViewModel) {
     }
     viewModel.navigateToReference(SmartReference(bookIndex, shown.chapter, start, end))
 }
+
+/**
+ * Holds the output before a browse moves a live selection -- a search, or a schedule verse opened
+ * with a click -- so it stays off the screen until Go Live. Going back to live releases only this
+ * hold, never one the operator set. Split browse never sends a browse selection, so needs none.
+ */
+internal fun BibleTabScope.holdOutputForBrowsing() {
+    if (!currentIsPresenting || splitBrowseMode) return
+    val output = bibleOutput ?: return
+    if (!output.bibleHold.value) {
+        output.setBibleHold(true)
+        ui.heldForSearch = true
+    }
+}

@@ -10,10 +10,10 @@ import org.churchpresenter.liveoutput.cueOrSetAnnouncementText
  * What the main screen does with a Schedule row: open it in its tab, or put it on screen.
  */
 
+/** Puts a schedule verse on screen by handing it to the Bible tab to go live with. */
 internal fun MainDesktopScope.presentBibleFromSchedule(item: ScheduleItem.BibleVerseItem) {
     selectTab(Tabs.BIBLE)
-    state.select(item)
-    live.presenting(Presenting.BIBLE)
+    state.select(item, verseGoLive = true)
 }
 
 /**

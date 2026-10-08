@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import org.churchpresenter.bibletab.getVersesForDisplay
 import org.churchpresenter.bibletab.resolveBookIndex
 import org.churchpresenter.bibletab.LiveReference
@@ -13,7 +14,6 @@ import kotlinx.coroutines.flow.Flow
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.slides.data.RecentPresentationFiles
-import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.SelectBibleVerseRequest
@@ -42,10 +42,9 @@ internal fun RemoteCommandEffects(
     presentationViewModel: PresentationViewModel,
     bibleViewModel: BibleViewModel,
     presenterManager: PresenterManager,
-    onSongItemVersionBump: () -> Unit,
     resolveImageFile: ((folderId: String, index: Int) -> File?)?,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    onSongItemSelected: (ScheduleItem.SongItem) -> Unit,
+    onSongItemSelected: (RemoteSongSelection) -> Unit,
     onPictureItemSelected: (ScheduleItem.PictureItem) -> Unit,
     onPresentationItemSelected: (ScheduleItem.PresentationItem) -> Unit,
     onMediaItemSelected: (ScheduleItem.MediaItem) -> Unit,
@@ -61,7 +60,7 @@ internal fun RemoteCommandEffects(
     previousSlideFlow: Flow<Unit>? = null,
     selectSlideFlow: Flow<Pair<String, Int>>? = null,
     selectBibleVerseFlow: Flow<SelectBibleVerseRequest>? = null,
-    remoteSelectSongFlow: Flow<ScheduleItem.SongItem>? = null,
+    remoteSelectSongFlow: Flow<RemoteSongSelection>? = null,
     remoteSelectPictureFlow: Flow<ScheduleItem.PictureItem>? = null,
     remoteSelectPresentationFlow: Flow<ScheduleItem.PresentationItem>? = null,
     remoteSelectMediaFlow: Flow<ScheduleItem.MediaItem>? = null,
@@ -99,7 +98,6 @@ internal fun RemoteCommandEffects(
     )
     RemoteTabSelectionEffects(
         onSongItemSelected = onSongItemSelected,
-        onSongItemVersionBump = onSongItemVersionBump,
         onPictureItemSelected = onPictureItemSelected,
         onPresentationItemSelected = onPresentationItemSelected,
         onMediaItemSelected = onMediaItemSelected,
@@ -336,21 +334,19 @@ private fun RemoteBibleEffects(
  */
 @Composable
 private fun RemoteTabSelectionEffects(
-    onSongItemSelected: (ScheduleItem.SongItem) -> Unit,
-    onSongItemVersionBump: () -> Unit,
+    onSongItemSelected: (RemoteSongSelection) -> Unit,
     onPictureItemSelected: (ScheduleItem.PictureItem) -> Unit,
     onPresentationItemSelected: (ScheduleItem.PresentationItem) -> Unit,
     onMediaItemSelected: (ScheduleItem.MediaItem) -> Unit,
     onSelectTab: (Tabs) -> Unit,
-    remoteSelectSongFlow: Flow<ScheduleItem.SongItem>? = null,
+    remoteSelectSongFlow: Flow<RemoteSongSelection>? = null,
     remoteSelectPictureFlow: Flow<ScheduleItem.PictureItem>? = null,
     remoteSelectPresentationFlow: Flow<ScheduleItem.PresentationItem>? = null,
     remoteSelectMediaFlow: Flow<ScheduleItem.MediaItem>? = null,
 ) {
     LaunchedEffect(remoteSelectSongFlow) {
-        remoteSelectSongFlow?.collect { songItem ->
-            onSongItemSelected(songItem)
-            onSongItemVersionBump()
+        remoteSelectSongFlow?.collect { selection ->
+            onSongItemSelected(selection)
             onSelectTab(Tabs.SONGS)
         }
     }

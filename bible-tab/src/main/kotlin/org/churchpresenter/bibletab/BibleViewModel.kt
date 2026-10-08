@@ -1,5 +1,6 @@
 package org.churchpresenter.bibletab
 
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.utils.UsageEventStore
 import org.churchpresenter.sharedui.utils.UsageEvents
 import androidx.compose.runtime.State
@@ -322,9 +323,10 @@ class BibleViewModel(
 
     internal var loadChapterJob: kotlinx.coroutines.Job? = null
 
-    // The schedule selection the Bible tab last acted on. The tab is rebuilt on every visit and the
-    // app keeps the last schedule verse, so this is how a visit tells a fresh schedule click apart.
-    internal var scheduleVersionSeen = -1
+    // The schedule hand-over (verse and version) the Bible tab last acted on. The tab is rebuilt on
+    // every visit and the app keeps the last schedule verse, so this is how a visit tells a fresh
+    // schedule click apart from one it has already handled.
+    internal var scheduleSeen: Pair<ScheduleItem.BibleVerseItem?, Int>? = null
 
     internal var searchJob: kotlinx.coroutines.Job? = null
 

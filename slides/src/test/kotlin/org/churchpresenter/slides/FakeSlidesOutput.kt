@@ -25,6 +25,7 @@ class FakeSlidesOutput : SlidesOutput {
     val selectedSlide = mutableStateOf<ImageBitmap?>(null)
     val nextSlide = mutableStateOf<ImageBitmap?>(null)
     val liveSlide = mutableStateOf<Pair<String?, Int>?>(null)
+    override val slideOnAir: Pair<String?, Int>? get() = liveSlide.value
     val presenterNotes = mutableStateOf("")
     val animationType = mutableStateOf<AnimationType?>(null)
     val transitionDuration = mutableStateOf<Int?>(null)

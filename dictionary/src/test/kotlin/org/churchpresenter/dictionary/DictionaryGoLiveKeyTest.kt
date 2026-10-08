@@ -18,7 +18,8 @@ import org.churchpresenter.settings.KeyboardShortcutSettings
 
 /**
  * The Go Live key on the dictionary tab: Enter on the tab root sends the entry on show, as the Go
- * Live button does, and Enter typed into the search box stays the search box's.
+ * Live button does, and Enter typed into the search box stays the search box's. Enter on the entry
+ * already on air does nothing.
  */
 class DictionaryGoLiveKeyTest {
 
@@ -42,6 +43,26 @@ class DictionaryGoLiveKeyTest {
 
         assertEquals(listOf(DictionaryFixture.agape), reports.live)
     }
+
+    @Test
+    fun `enter does nothing for the entry already on air`() =
+        dictionaryTab(liveEntryNumber = DictionaryFixture.agape.number) { vm, reports ->
+            open(vm, DictionaryFixture.agape)
+
+            pressEnter()
+
+            assertTrue(reports.live.isEmpty(), "already on air: ${reports.live}")
+        }
+
+    @Test
+    fun `enter sends the entry on show while another is on air`() =
+        dictionaryTab(liveEntryNumber = DictionaryFixture.charis.number) { vm, reports ->
+            open(vm, DictionaryFixture.agape)
+
+            pressEnter()
+
+            assertEquals(listOf(DictionaryFixture.agape), reports.live)
+        }
 
     @Test
     fun `with nothing selected enter sends nothing`() = dictionaryTab { _, reports ->

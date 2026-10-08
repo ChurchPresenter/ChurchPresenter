@@ -10,7 +10,7 @@ enum class ScheduleSongAction {
      */
     OPEN,
 
-    /** A remote or calendar selection: select the song and push it, live or not. */
+    /** Select the song and push it, live or not -- what the tab did before it told these apart. */
     PUSH,
 
     /**
@@ -25,4 +25,5 @@ internal data class ScheduleSelection(
     val item: ScheduleItem.SongItem?,
     val version: Int,
     val action: ScheduleSongAction,
+    val source: String = "schedule",
 )

@@ -1,5 +1,6 @@
 package org.churchpresenter.slides.tabs
 
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.composables.handleGoLiveKey
 import org.churchpresenter.slides.PresentationSlidesLoaded
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -218,7 +219,10 @@ fun PresentationTab(
         PresentationLiveEffects(viewModel)
         // The Go Live key acts only while the tab root itself has the keyboard.
         var rootFocused by remember { mutableStateOf(false) }
-        val canGoLive = presenterManager != null && viewModel.slideFiles.isNotEmpty()
+        // Not for the slide already on air: going live again would restart its builds.
+        val onAir = presenterManager?.takeIf { it.isLive(Presenting.PRESENTATION) }?.slideOnAir
+        val canGoLive = presenterManager != null && viewModel.slideFiles.isNotEmpty() &&
+            onAir != (viewModel.selectedPresentation?.name to viewModel.selectedSlideIndex)
         Column(
             modifier = modifier
                 .fillMaxSize()

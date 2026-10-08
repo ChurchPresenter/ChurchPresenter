@@ -220,7 +220,9 @@ fun MediaTab(
     // would otherwise keep it, and Enter would press Load again.
     var rootFocused by remember { mutableStateOf(false) }
     LaunchedEffect(viewModel.mediaUrl, viewModel.isLoaded) { focusRequester.requestFocus() }
-    val canGoLive = presenterManager != null && viewModel.isLoaded
+    // Not for the media already on air: going live again would start it over.
+    val canGoLive = presenterManager != null && viewModel.isLoaded &&
+        !(presenterManager.isLive(Presenting.MEDIA) && presenterManager.mediaOnAir == viewModel.mediaUrl)
     Column(
         modifier = modifier
             .fillMaxSize()

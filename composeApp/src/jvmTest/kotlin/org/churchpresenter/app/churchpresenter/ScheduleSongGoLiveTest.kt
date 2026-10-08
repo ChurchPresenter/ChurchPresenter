@@ -2,6 +2,10 @@
 
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.core.models.schedule.ScheduleItem
+import kotlinx.coroutines.flow.MutableSharedFlow
+import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasContentDescription
@@ -132,5 +136,39 @@ class ScheduleSongGoLiveTest {
         assertEquals("schedule", lyricLines.first()["source"]?.jsonPrimitive?.content)
         assertTrue(pushed.isNotEmpty(), "the song reached the output")
         assertTrue(pushed.none { it.lines.isEmpty() }, "and no empty placeholder slide went up ahead of it")
+    }
+
+    @Test
+    fun `a song projected by a remote goes up whole and is logged under the remote`() = runComposeUiTest {
+        val presenter = PresenterManager()
+        presenter.onLiveStateChanged = { pm, _ -> LiveHistoryLogger.logLiveState(liveHistoryEntryOf(pm, null)) }
+        val remoteSongs = MutableSharedFlow<RemoteSongSelection>(extraBufferCapacity = 1)
+        val pushed = mutableListOf<LyricSection>()
+        setContent {
+            MaterialTheme {
+                MainDesktop(
+                    appSettings = library(),
+                    presenterManager = presenter,
+                    companionSatelliteViewModel = CompanionSatelliteViewModel(),
+                    live = LiveOutputCallbacks(
+                        presenting = { presenter.setPresentingMode(it) },
+                        onVerseSelected = { presenter.setSelectedVerses(it) },
+                        onSongItemSelected = { pushed += it; presenter.setLyricSection(it) },
+                    ),
+                    flows = RemoteControlFlows(remoteSelectSongFlow = remoteSongs),
+                )
+            }
+        }
+        waitForIdle()
+        val row = ScheduleItem.SongItem(
+            id = "r", songNumber = 1, title = "A Test Song", songbook = "Hymnal", songId = "Hymnal::1",
+        )
+        remoteSongs.tryEmit(RemoteSongSelection(row, goLive = true, source = "remote"))
+        waitUntil(timeoutMillis = 5_000) { presenter.slideContent.value == Presenting.LYRICS }
+
+        assertTrue(pushed.isNotEmpty() && pushed.none { it.lines.isEmpty() }, "the song itself, never a blank")
+        val lyricLine = historyLines().last { it["contentType"]?.jsonPrimitive?.content == "LYRICS" }
+        assertEquals("Hymnal::1", lyricLine["songId"]?.jsonPrimitive?.content)
+        assertEquals("remote", lyricLine["source"]?.jsonPrimitive?.content)
     }
 }

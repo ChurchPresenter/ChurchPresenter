@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import org.churchpresenter.app.churchpresenter.dialogs.text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -56,7 +57,7 @@ internal fun MainWindowScope.RemoteAddRequests() {
                 val add: () -> Unit = {
                     UsageEvents.record(UsageEvent.REMOTE_ADDED_TO_SCHEDULE)
                     addScheduleItem(item, currentScheduleActions) { song ->
-                        coroutineScope.launch { remoteSelectSongFlow.emit(song) }
+                        coroutineScope.launch { remoteSelectSongFlow.emit(openedByRemote(song)) }
                     }
                     pending.decision.complete(true)
                 }
@@ -183,7 +184,7 @@ internal fun MainWindowScope.RemoteRemoveRequests() {
                     UsageEvents.record(UsageEvent.REMOTE_ADDED_TO_SCHEDULE, pending.items.size)
                     for (item in pending.items) {
                         addScheduleItem(item, currentScheduleActions) { song ->
-                            coroutineScope.launch { remoteSelectSongFlow.emit(song) }
+                            coroutineScope.launch { remoteSelectSongFlow.emit(openedByRemote(song)) }
                         }
                     }
                     pending.decision.complete(true)
@@ -233,7 +234,6 @@ internal fun MainWindowScope.RemoteProjectRequests() {
                         item,
                         currentScheduleActions,
                         presenterManager,
-                        statisticsManager
                     )
                     coroutineScope.launch {
                         emitRemoteTabSelection(
@@ -395,3 +395,5 @@ internal fun MainWindowScope.AdminAndMusicianConnectRequests() {
     }
 }
 
+/** A song a remote added to the schedule: opened in the Songs tab, not put on screen. */
+private fun openedByRemote(song: ScheduleItem.SongItem) = RemoteSongSelection(song, goLive = false, source = "remote")

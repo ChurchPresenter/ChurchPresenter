@@ -24,7 +24,8 @@ import kotlin.test.assertTrue
 
 /**
  * The Go Live key on the Media tab: Enter on the tab root puts the loaded clip on the output and
- * starts it, as the Go Live button does; Enter in the address field is the field's.
+ * starts it, as the Go Live button does; Enter in the address field is the field's, and Enter on
+ * the clip already on air does nothing.
  *
  * The tab root takes the keyboard when the tab opens and whenever a clip finishes loading, by any
  * route -- a schedule row, the file picker or the Load button.
@@ -54,6 +55,41 @@ class MediaGoLiveKeyTest {
 
             assertEquals(Presenting.MEDIA, presenter.onAir.value)
             assertTrue(presenter.showPresenterWindow.value)
+            assertEquals(clip.mediaUrl to clip.mediaType, presenter.currentMedia)
+            assertTrue(vm.isPlaying, "going live starts the clip")
+        }
+    }
+
+    @Test
+    fun `enter does nothing for the clip already on air`() {
+        val presenter = FakeMediaOutput()
+        mediaTab(selectedMediaItem = clip, presenterManager = presenter) { vm, _ ->
+            waitUntil("the clip to load") { vm.isLoaded }
+            waitForIdle()
+            pressEnter()
+            assertTrue(vm.isPlaying)
+            presenter.setShowPresenterWindow(false)
+            vm.pause()
+            waitForIdle()
+
+            pressEnter()
+
+            assertFalse(vm.isPlaying, "going live again would start the paused clip over")
+            assertFalse(presenter.showPresenterWindow.value)
+        }
+    }
+
+    @Test
+    fun `enter puts the loaded clip live while another is on air`() {
+        val presenter = FakeMediaOutput()
+        presenter.setPresentingMode(Presenting.MEDIA)
+        presenter.setCurrentMedia("/media/other.mp4", Constants.MEDIA_TYPE_LOCAL)
+        mediaTab(selectedMediaItem = clip, presenterManager = presenter) { vm, _ ->
+            waitUntil("the clip to load") { vm.isLoaded }
+            waitForIdle()
+
+            pressEnter()
+
             assertEquals(clip.mediaUrl to clip.mediaType, presenter.currentMedia)
             assertTrue(vm.isPlaying, "going live starts the clip")
         }

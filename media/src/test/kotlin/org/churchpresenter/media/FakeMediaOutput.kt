@@ -21,6 +21,8 @@ class FakeMediaOutput : MediaOutput {
         showPresenterWindow.value = show
     }
 
+    override val mediaOnAir: String get() = currentMedia?.first.orEmpty()
+
     override fun setCurrentMedia(url: String, type: String) {
         currentMedia = url to type
     }

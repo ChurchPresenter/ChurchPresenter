@@ -67,13 +67,8 @@ private fun BibleTabScope.referenceIsLive(ref: SmartReference): Boolean {
 }
 
 private fun BibleTabScope.holdForSearch(viewModel: BibleViewModel, query: String) {
-    if (!currentIsPresenting || splitBrowseMode) return
     if (searchMode == BibleSearchMode.TEXT || viewModel.parseReference(query.trim()) == null) return
-    val output = bibleOutput ?: return
-    if (!output.bibleHold.value) {
-        output.setBibleHold(true)
-        ui.heldForSearch = true
-    }
+    holdOutputForBrowsing()
 }
 
 /**
