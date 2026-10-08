@@ -236,35 +236,36 @@ internal fun OptionsDialogContent(
                         onSelect = { selectedTabIndex = it },
                     )
 
-                // Tab Content
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.background)
-                ) {
-                    CompositionLocalProvider(
-                        LocalApplySettings provides applySettings,
-                        LocalSettingsDevMode provides devMode,
+                    // Tab Content
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.background)
                     ) {
-                        SettingsTabContent(
-                            tabIndex = safeTabIndex,
-                            settings = currentSettings,
-                            onSettingsChange = { updateFn -> currentSettings = updateFn(currentSettings) },
-                            settingsManager = settingsManager,
-                            companionServer = companionServer,
-                            remoteClientManager = remoteClientManager,
-                            calendarSync = calendarSync,
-                            onIdentifyScreen = onIdentifyScreen,
-                            onIdentifyBrowserSource = onIdentifyBrowserSource,
-                            onIdentifyNdi = onIdentifyNdi,
-                            onIdentifyOmt = onIdentifyOmt,
-                            scenes = scenes,
-                            obsManager = obsManager,
-                            companionSatelliteViewModel = companionSatelliteViewModel,
-                            companionSatelliteTabIndex = companionSatelliteTabIndex,
-                            detectScreens = detectScreens,
-                        )
+                        CompositionLocalProvider(
+                            LocalApplySettings provides applySettings,
+                            LocalSettingsDevMode provides devMode,
+                        ) {
+                            SettingsTabContent(
+                                tabIndex = safeTabIndex,
+                                settings = currentSettings,
+                                onSettingsChange = { updateFn -> currentSettings = updateFn(currentSettings) },
+                                settingsManager = settingsManager,
+                                companionServer = companionServer,
+                                remoteClientManager = remoteClientManager,
+                                calendarSync = calendarSync,
+                                onIdentifyScreen = onIdentifyScreen,
+                                onIdentifyBrowserSource = onIdentifyBrowserSource,
+                                onIdentifyNdi = onIdentifyNdi,
+                                onIdentifyOmt = onIdentifyOmt,
+                                scenes = scenes,
+                                obsManager = obsManager,
+                                companionSatelliteViewModel = companionSatelliteViewModel,
+                                companionSatelliteTabIndex = companionSatelliteTabIndex,
+                                detectScreens = detectScreens,
+                            )
+                        }
                     }
 
                     SettingsDialogButtons(

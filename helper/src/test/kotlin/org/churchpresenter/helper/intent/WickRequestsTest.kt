@@ -4,6 +4,7 @@ import org.churchpresenter.helper.action.ContentScope
 import org.churchpresenter.helper.action.HelperAction
 import org.churchpresenter.sharedui.guide.GuideTarget
 import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.models.Tabs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -120,11 +121,15 @@ class WickRequestsTest {
     }
 
     @Test
-    fun `adding or editing a song starts at its button, not at the tab`() {
-        assertEquals(GuideTargets.NEW_SONG, tourTargets("how do I add song").first())
-        assertEquals(GuideTargets.NEW_SONG, tourTargets("where do I add a song").first())
-        assertEquals(GuideTargets.EDIT_SONG, tourTargets("how do I edit song").first())
-        assertEquals(GuideTargets.EDIT_SONG, tourTargets("how do I change a song").first())
+    fun `adding or editing a song points at the Songs tab, then at its button`() {
+        val songsTab = GuideTargets.mainTab(Tabs.SONGS)
+        assertEquals(listOf(songsTab, GuideTargets.NEW_SONG), tourTargets("how do I add song"))
+        assertEquals(listOf(songsTab, GuideTargets.NEW_SONG), tourTargets("where do I add a song"))
+        assertEquals(listOf(songsTab, GuideTargets.EDIT_SONG), tourTargets("how do I edit song").take(2))
+        assertEquals(listOf(songsTab, GuideTargets.EDIT_SONG), tourTargets("how do I change a song").take(2))
+        // Pointed at, not opened: the tab changes only when Next moves on to the button.
+        val first = assertIs<HelperAction.Highlight>(action("how do I add song")).tour.steps.first()
+        assertEquals(null, first.before)
         assertIs<HelperAction.OpenSongLibrary>(action("batch edit songs"))
     }
 

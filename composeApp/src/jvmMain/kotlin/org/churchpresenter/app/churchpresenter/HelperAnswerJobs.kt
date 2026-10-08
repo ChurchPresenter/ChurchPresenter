@@ -7,6 +7,8 @@ import org.churchpresenter.helper.helperText
 import org.churchpresenter.helper.intent.helperTabName
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.models.Tabs
+import org.churchpresenter.strings.generated.resources.message_title
+import org.churchpresenter.strings.generated.resources.props_title
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.helper_live_announcement
 import org.churchpresenter.strings.generated.resources.helper_live_countdown
@@ -53,6 +55,8 @@ private fun AppRootState.describeLive(mode: Presenting): HelperText? = when (mod
     Presenting.QA -> helperTabName(Tabs.QA)
     Presenting.STT -> helperTabName(Tabs.STT)
     Presenting.DICTIONARY -> helperTabName(Tabs.DICTIONARY)
+    Presenting.MESSAGE -> helperText(Res.string.message_title)
+    Presenting.PROPS -> helperText(Res.string.props_title)
 }
 
 /** Says the version, then checks the way Help → Check for Updates does, whose window gives the answer. */

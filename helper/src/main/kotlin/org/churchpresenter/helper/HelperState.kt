@@ -97,12 +97,14 @@ class HelperState(val session: GuideSession = GuideSession()) {
     /** Back to the suggestion or tip, ending any tour. */
     fun reset() {
         session.activeTarget = null
+        session.activeHint = null
         show(HelperReply.Idle)
     }
 
     /** Forgets the conversation and starts again. */
     fun clear() {
         session.activeTarget = null
+        session.activeHint = null
         thread.clear()
         reply = HelperReply.Idle
     }
@@ -110,6 +112,7 @@ class HelperState(val session: GuideSession = GuideSession()) {
     /** The operator answered the reply on screen with [text]: both move into the conversation. */
     fun answer(text: String) {
         session.activeTarget = null
+        session.activeHint = null
         show(HelperReply.Idle)
         thread.said(text)
     }
@@ -142,6 +145,7 @@ class HelperState(val session: GuideSession = GuideSession()) {
     /** Asks first when [action] changes something; otherwise does it now. */
     fun request(action: HelperAction, executor: HelperActionExecutor) {
         session.activeTarget = null
+        session.activeHint = null
         if (action.needsConfirmation) {
             show(
                 if (action == HelperAction.UndoLast && undoStack.latest == null) {

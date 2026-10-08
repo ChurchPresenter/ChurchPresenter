@@ -149,6 +149,7 @@ internal object LookTours {
     /** The Songs tab, Edit, then the lyrics in the editor. */
     fun editLyrics() = GuideTour(
         listOf(
+            tabStep(Tabs.SONGS),
             GuideStep(
                 GuideTargets.EDIT_SONG,
                 helperText(Res.string.helper_hint_pick_and_edit, helperText(Res.string.edit_song)),

@@ -77,9 +77,10 @@ internal object NavigationTopics {
     fun tabNamed(normalized: String): Tabs? =
         TAB_WORDS.firstOrNull { (words, _) -> words.any { normalized.containsWordPrefix(it) } }?.second
 
-    /** Straight to the New Song button, the Songs tab opened for it: the tab alone answers nothing. */
+    /** The Songs tab, then its New Song button — the tab is pointed at, not opened, until Next. */
     internal fun newSong() = GuideTour(
         listOf(
+            tabStep(Tabs.SONGS),
             GuideStep(
                 GuideTargets.NEW_SONG,
                 helperText(Res.string.helper_hint_new_song),

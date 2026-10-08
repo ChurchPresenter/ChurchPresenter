@@ -18,5 +18,6 @@ internal fun HelperState.showStep(tour: GuideTour, index: Int, executor: HelperA
     val step = tour.steps.getOrNull(index) ?: return
     step.before?.let { executor.execute(it) }
     session.activeTarget = step.target
+    session.activeHint = { step.hint.resolve() }
     show(HelperReply.Touring(tour, index))
 }

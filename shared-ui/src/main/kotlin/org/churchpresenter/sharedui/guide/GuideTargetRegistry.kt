@@ -1,5 +1,6 @@
 package org.churchpresenter.sharedui.guide
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.getValue
@@ -42,6 +43,9 @@ class GuideTargetRegistry {
 class GuideSession {
     /** The control the spotlight rings, or null when nothing is being pointed at. */
     var activeTarget by mutableStateOf<GuideTarget?>(null)
+
+    /** The line said beside [activeTarget], in the operator's language, or null for none. */
+    var activeHint by mutableStateOf<(@Composable () -> String)?>(null)
 
     /** How many times the operator pressed the active target — a tour moves on when this changes. */
     var activePresses by mutableIntStateOf(0)
