@@ -18,6 +18,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class BibleColumnsScrollAheadTest {
 
@@ -151,4 +152,26 @@ class BibleColumnsScrollAheadTest {
 
             assertEquals(1, selected)
         }
+
+    // ── Jumping to a verse that is off screen (#799) ─────────────────────────────────────────────
+
+    @Test
+    fun `a verse below the window is jumped to with the one before it`() =
+        assertEquals(48, jumpTargetFor(Layout(rows(0, 1, 2, 3)), 49))
+
+    @Test
+    fun `a verse above the window is jumped to the same way`() =
+        assertEquals(4, jumpTargetFor(Layout(rows(20, 21, 22)), 5))
+
+    @Test
+    fun `the first verse has nothing before it to show`() =
+        assertEquals(0, jumpTargetFor(Layout(rows(20, 21, 22)), 0))
+
+    @Test
+    fun `a verse already on screen, even in part, is left to the scroll ahead`() =
+        assertNull(jumpTargetFor(Layout(rows(0, 1, 2, 3)), 3))
+
+    @Test
+    fun `before the first layout there is nothing to jump from`() =
+        assertNull(jumpTargetFor(Layout(emptyList()), 10))
 }

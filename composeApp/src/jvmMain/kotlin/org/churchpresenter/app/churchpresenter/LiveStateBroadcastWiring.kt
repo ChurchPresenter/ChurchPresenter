@@ -47,6 +47,7 @@ internal fun LiveStateBroadcastWiring(
                     appSettings().projectionSettings.screenAssignments,
                     screenCountForUsage,
                     deckLinkCountForUsage,
+                    appSettings().projectionSettings.unusedScreens,
                 )
             ) {
                 UsageEvents.recordOncePerInstall(UsageEvent.FIRST_LIVE_ON_SCREEN)

@@ -1,0 +1,120 @@
+package org.churchpresenter.songs
+
+import org.churchpresenter.sharedui.composables.SongSectionKind
+import org.churchpresenter.sharedui.composables.sectionKindOf
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
+class SongChartTest {
+
+    // ── Grouping a song into sections ───────────────────────────────────────────
+
+    @Test
+    fun `a header starts a section and holds everything after it`() {
+        val sections = buildPreviewSections("[Verse 1]\nline one\nline two\n{Chorus}\nchorus line")
+
+        assertEquals(listOf("Verse 1", "Chorus"), sections.map { it.label })
+        assertEquals(2, sections[0].lines.size)
+        assertEquals(1, sections[1].lines.size)
+    }
+
+    @Test
+    fun `blank lines separate nothing on their own`() {
+        // A song written without blank lines between verses still reads as verses, and one written
+        // with them does not gain extra sections from them.
+        val packed = buildPreviewSections("[Verse 1]\na\n[Verse 2]\nb")
+        val spaced = buildPreviewSections("[Verse 1]\n\na\n\n[Verse 2]\n\nb\n")
+
+        assertEquals(packed.map { it.label }, spaced.map { it.label })
+        assertEquals(2, spaced.size)
+    }
+
+    @Test
+    fun `words before any header still make a section`() {
+        val sections = buildPreviewSections("just a line")
+        assertEquals(1, sections.size)
+        assertEquals("", sections[0].label)
+    }
+
+    @Test
+    fun `a manual break splits the section without renaming it`() {
+        val sections = buildPreviewSections("{Chorus}\nfirst half\n[---]\nsecond half")
+
+        assertEquals(listOf("Chorus", "Chorus"), sections.map { it.label })
+        assertEquals(listOf(0, 1), sections.map { it.slideIndex })
+        assertTrue(sections.all { it.slideCount == 2 })
+        assertTrue(
+            sections.none { section -> section.lines.any { line -> line.any { "-" in it.text } } },
+            "the marker itself is consumed, never drawn as a lyric",
+        )
+    }
+
+    @Test
+    fun `an unsplit section is one slide of one`() {
+        val sections = buildPreviewSections("[Verse 1]\na\n[Verse 2]\nb")
+        assertTrue(sections.all { it.slideIndex == 0 && it.slideCount == 1 })
+    }
+
+    @Test
+    fun `each section counts its own slides`() {
+        val sections = buildPreviewSections("[Verse 1]\na\n[---]\nb\n[---]\nc\n[Verse 2]\nd")
+
+        assertEquals(listOf(3, 3, 3, 1), sections.map { it.slideCount })
+        assertEquals(listOf(0, 1, 2, 0), sections.map { it.slideIndex })
+    }
+
+    @Test
+    fun `a section is coloured by what its name says it is`() {
+        assertEquals(SongSectionKind.VERSE, sectionKindOf("Verse 2"))
+        assertEquals(SongSectionKind.CHORUS, sectionKindOf("Chorus"))
+        assertEquals(SongSectionKind.CHORUS, sectionKindOf("Refrain"))
+        assertEquals(SongSectionKind.BRIDGE, sectionKindOf("Bridge"))
+        assertEquals(SongSectionKind.TAG, sectionKindOf("Outro"))
+        assertEquals(SongSectionKind.VERSE, sectionKindOf("Something Else"))
+    }
+
+    @Test
+    fun `a section written in its own language is coloured the same as the English one`() {
+        assertEquals(SongSectionKind.CHORUS, sectionKindOf("Припев"))
+        assertEquals(SongSectionKind.CHORUS, sectionKindOf("Приспів 2"))
+        assertEquals(SongSectionKind.BRIDGE, sectionKindOf("Мост"))
+        assertEquals(SongSectionKind.TAG, sectionKindOf("Кода"))
+        // A verse is the fallback, so it lands right whether or not its word is listed.
+        assertEquals(SongSectionKind.VERSE, sectionKindOf("Куплет 1"))
+        // Pre-chorus is not a chorus in either language — both read as a verse.
+        assertEquals(SongSectionKind.VERSE, sectionKindOf("Pre-Chorus"))
+        assertEquals(SongSectionKind.VERSE, sectionKindOf("Предприпев"))
+    }
+
+    // ── Counting ────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the counts describe the words, not the markup`() {
+        val stats = songStatsOf(buildPreviewSections("[Verse 1]\n[G]one two\nthree\n{Chorus}\nfour"))
+
+        assertEquals(2, stats.sections)
+        assertEquals(3, stats.lines)
+        assertEquals(4, stats.words, "the [G] is not a word")
+    }
+
+    @Test
+    fun `an empty song counts nothing`() {
+        assertEquals(SongStats(0, 0, 0), songStatsOf(buildPreviewSections("")))
+    }
+
+    @Test
+    fun `a section split across slides is still counted as one section`() {
+        val stats = songStatsOf(buildPreviewSections("[Verse 1]\none\n{Chorus}\ntwo\n[---]\nthree"))
+
+        assertEquals(2, stats.sections, "one verse and one chorus, whatever the chorus is split into")
+        assertEquals(3, stats.lines)
+    }
+
+    @Test
+    fun `each preview section carries the kind its header names`() {
+        val sections = buildPreviewSections("[Verse 1]\none\n[Chorus]\ntwo")
+
+        assertEquals(listOf(SongSectionKind.VERSE, SongSectionKind.CHORUS), sections.map { it.kind })
+    }
+}

@@ -98,6 +98,31 @@ class RemoteLayersTest {
     }
 
     @Test
+    fun `a slide already live here is not taken live again, so the overlays over it stay up`() {
+        follower.setPresentingMode(Presenting.BIBLE)
+        follower.setPresentingMode(Presenting.LOWER_THIRD)
+        val same = state(Presenting.BIBLE, Presenting.BIBLE, listOf(Presenting.LOWER_THIRD))
+        followAir(same, Presenting.BIBLE, follower, everything)
+        assertEquals(setOf(Presenting.LOWER_THIRD), follower.overlays.value, "going live again would clear it")
+    }
+
+    @Test
+    fun `the primary's slide on a layer not followed does not go live`() {
+        val slide = state(Presenting.LYRICS, Presenting.LYRICS, emptyList())
+        followAir(slide, Presenting.LYRICS, follower) { it != Presenting.LYRICS }
+        assertEquals(Presenting.NONE, follower.slideContent.value)
+    }
+
+    @Test
+    fun `names a newer primary sends that this build does not know are ignored`() {
+        follower.setPresentingMode(Presenting.LOWER_THIRD)
+        val newer = LiveStateDto(contentType = "HOLOGRAM", liveSlide = "HOLOGRAM", overlays = listOf("HOLOGRAM", "STT"))
+        followAir(newer, Presenting.STT, follower, everything)
+        assertEquals(Presenting.NONE, follower.slideContent.value, "an unknown slide is no slide")
+        assertEquals(setOf(Presenting.STT), follower.overlays.value, "the overlay it does know goes up")
+    }
+
+    @Test
     fun `each content type is on its layer`() {
         assertEquals(LinkLayers.MEDIA, linkLayerOf(Presenting.MEDIA))
         assertEquals(LinkLayers.LOWER_THIRD, linkLayerOf(Presenting.LOWER_THIRD))

@@ -114,8 +114,7 @@ class LowerThirdOffscreenRenderer(
         // Confining the Compose half to one thread removes the second lock order, which is the only
         // fix available: there is no way to opt a scene out of the global observer list. The draw
         // stays cheap enough for the event queue because this renders a bounded pre-render, not a
-        // live feed -- `ComposeScenePump`, which does drive a live feed, has the same hazard and is
-        // deliberately left for a change that can measure the cost.
+        // live feed. `ComposeScenePump`, which does drive one, is confined to the event queue too.
         val groupsText = LottieTextShaping.groupsText(lottieJson)
         val scene = withContext(sceneDispatcher) {
             ImageComposeScene(width, height, Density(1f)) {

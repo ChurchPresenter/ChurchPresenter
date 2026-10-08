@@ -26,15 +26,19 @@
   `SongListScope.kt`, `SongTableHeader.kt`, `SongListRows.kt`; `SongLyricsPanel.kt`),
   `SongsViewModel.kt`, `SongFolderWatcher.kt`, `SongSearchMatch.kt` (where each search hit matched),
   and `Songs.kt` (the library on disk, `.sps` included)
-- `tabs/AppSongsTab.kt` — the app's parts of the tab: the editor (`EditSongDialog`) and what a song
-  going live records; `presenter/…/TitleSlideSection.kt` — the title slide the tab sends
-- `viewmodel/SongSettingsViewModel.kt`, `data/SpsConverter.kt`; `SongItem` and `SongFileParser` are in
-  `:core-models` (`models/songs/`)
+- The song editor, also in `songs/`: `EditSongDialog.kt` (the dialog and `EditSongContent`) with
+  `EditSongState.kt`, `EditSongHeader.kt`, `EditSongEditor.kt`, `EditSongLyricsField.kt`,
+  `EditSongText.kt`, `SectionBackgroundSlot.kt` and `SongBackgroundButtonState.kt` (the slot the
+  app's Background button fills); `SongChordPreview.kt` and `ChordPicker.kt` — the chord preview:
+  Transpose, the key's palette and the chord picker
+- `tabs/AppSongsTab.kt` — the app's parts of the tab: the editor it opens and what a song going live
+  records; `dialogs/SongEditorBackgroundButton.kt` — the editor's Background button;
+  `presenter/…/TitleSlideSection.kt` — the title slide the tab sends
+- `data/SpsConverter.kt`; `SongItem` and `SongFileParser` are in `:core-models` (`models/songs/`)
 - `dialogs/SongBackground*.kt` — the per-song background panel
 - `data/settings/SongSettings.kt`
 - `presenter/…/SongPresenter.kt`, with `SongLook.kt`, `SongFrame.kt`, `SongFitFrame.kt` and `SongSlide*.kt` beside it
-- `dialogs/EditSongDialog.kt`, `profiles/…/SongSettingsTab.kt`
-- `composables/SongChordPreview.kt` — the editor's chord preview: Transpose, the key's palette and the chord picker
+- `profiles/…/SongSettingsTab.kt`
 - `core-models/src/main/kotlin/.../models/songs/LyricSection.kt` (the `:core-models` module)
 - `converter/` (the `:converter` Gradle module, at the repo root) — format converter tool
 - `songlibrary/` (the `:songlibrary` Gradle module) — the Song Library Manager grid; `TranslationComparison.kt` and `ui/CompareTranslations*.kt` — Compare translations
@@ -360,9 +364,9 @@
 - **Tidy the numbers** — remove a single song or verse from the selected period, or clear everything; both ask first.
 
 **Source locations:**
-- `data/StatisticsManager.kt`
-- `dialogs/CCLIReportDialog.kt` — the statistics window itself
-- `data/StatisticsPeriod.kt` — the period presets shared by its pills and its date pickers
+- `statistics/` (the `:statistics` Gradle module) — `StatisticsManager.kt`, `StatisticsQueries.kt` (the CCLI lookup and the CSV/XLS exports)
+- `statistics/…/CCLIReportDialog.kt` — the statistics window itself, with `CCLIReportRange.kt`, `CCLIReportTables.kt` and `CCLIReportActivity.kt`
+- `statistics/…/StatisticsPeriod.kt` — the period presets shared by its pills and its date pickers
 
 ## Personalization & Workflow
 - **34 languages** — full interface translation: English, Spanish, French, German, Portuguese, Dutch, Swedish, Norwegian, Finnish, Estonian, Latvian, Polish, Czech, Slovak, Croatian, Romanian, Ukrainian, Russian, Belarusian, Kazakh, Uzbek, Turkish, Arabic, Persian, Hindi, Nepali, Thai, Lao, Japanese, Chinese, Indonesian, Malay, Tagalog and Swahili — with the interface laid out right-to-left for Arabic and Persian.
@@ -385,7 +389,8 @@
 - `crossword-tab/…/CrosswordTab.kt`, `crossword-tab/…/data/CrosswordData.kt` (the `:crossword-tab` module) — a hidden tab (←→←→); `crossword/` (the `:crossword` Gradle module) is its authoring tool and the encoded puzzles
 - `dialogs/OptionsDialog.kt`
 - `data/SettingsManager.kt`, `data/settings/AppSettings.kt`, `data/settings/WindowLayoutSettings.kt`
-- `utils/AutoStartManager.kt`, `utils/UpdateChecker.kt`
+- `utils/AutoStartManager.kt`
+- `updater/` (the `:updater` Gradle module) — `UpdateChecker.kt`, the update window (`UpdateAvailableDialog.kt`) and the installer download
 - `diagnostics/` (the `:diagnostics` Gradle module) — `CrashReporter`: crash logs and the Sentry bridge
 
 ## Free & Open

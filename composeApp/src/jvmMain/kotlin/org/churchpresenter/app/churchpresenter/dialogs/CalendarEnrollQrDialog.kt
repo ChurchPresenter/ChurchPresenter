@@ -36,7 +36,7 @@ import org.churchpresenter.server.CalendarEnrollment
 import org.churchpresenter.server.CalendarInvite
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.calendarSyncStatusText
 import org.churchpresenter.server.CalendarSyncStatus
-import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
+import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.stringResource
 

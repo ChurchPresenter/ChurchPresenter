@@ -17,7 +17,9 @@ import org.churchpresenter.sharedui.utils.UsageEvents
 fun recordBibleWentLive(appSettings: AppSettings) {
     val translationCount = appSettings.bibleSettings.translationList().size
     val proj = appSettings.projectionSettings
-    val outputs = proj.screenAssignments.filter { it.isLiveOutput() }.mapNotNull { proj.profileFor(it) }
+    val outputs = proj.screenAssignments
+        .filter { it.isLiveOutput(proj.unusedScreens) }
+        .mapNotNull { proj.profileFor(it) }
     if (isMultiTranslationPresentation(translationCount, outputs)) {
         UsageEvents.record(UsageEvent.BIBLE_MULTI_TRANSLATION)
     }

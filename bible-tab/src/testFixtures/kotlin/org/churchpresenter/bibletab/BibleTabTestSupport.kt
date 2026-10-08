@@ -2,9 +2,12 @@
 
 package org.churchpresenter.bibletab
 
+import org.churchpresenter.settings.KeyboardShortcutSettings
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.foundation.layout.width
@@ -193,11 +196,26 @@ fun bibleTab(
      */
     width: Dp? = null,
     selectedVerseItem: ScheduleItem.BibleVerseItem? = null,
+    /** When set, the schedule verse as state, so a test can hand a different verse over. */
+    scheduleVerse: MutableState<ScheduleItem.BibleVerseItem?>? = null,
+    /** The schedule hand-over's count; bump it to hand [selectedVerseItem] over again. */
+    selectedVerseItemVersion: MutableState<Int> = mutableStateOf(0),
+    /** Whether [selectedVerseItem] is handed over to go live (a double-click) rather than to open. */
+    selectedVerseItemGoLive: Boolean = false,
+    /** Bumped to rebuild the tab, as switching away from it and back does in the app. */
+    tabVisit: MutableState<Int> = mutableStateOf(0),
+    /** Bumped as the app does when one of its dialogs closes over the tab. */
+    dialogDismissSignal: MutableState<Int> = mutableStateOf(0),
     engineStatus: BibleEngineStatus? = null,
     /** Whether the Bible is what the output is showing, as the host reports it. */
     isPresenting: Boolean = false,
     /** Null keeps the plain MaterialTheme every other test composes under; set to shoot a theme. */
     themeMode: ThemeMode? = null,
+    /**
+     * Whether opening the tab puts the caret in the search box, as the app does by default. Off
+     * here, so a suite about the tab's own keys and clicks starts with the keyboard on the tab.
+     */
+    focusSearchOnOpen: Boolean = false,
     block: ComposeUiTest.(vm: BibleViewModel, reports: BibleReports) -> Unit,
 ) {
     val dir = Files.createTempDirectory("cp-bible-tab").toFile()
@@ -207,6 +225,7 @@ fun bibleTab(
         extraModules.forEach { SpbFixture.spbFile(dir, name = it, content = content) }
         val initialSettings = settings(
             AppSettings(
+                keyboardShortcutSettings = KeyboardShortcutSettings(focusSearchOnTabOpen = focusSearchOnOpen),
                 bibleSettings = BibleSettings(
                     storageDirectory = dir.absolutePath,
                     primaryBible = "test.spb",
@@ -233,6 +252,7 @@ fun bibleTab(
                 var appSettings by remember { mutableStateOf(initialSettings) }
                 ThemedForTest(themeMode) {
                     Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
+                    key(tabVisit.value) {
                     BibleTab(
                         viewModel = vm,
                         appSettings = appSettings,
@@ -267,10 +287,14 @@ fun bibleTab(
                             }
                         },
                         onInstanceLinkSendBibleHold = onInstanceLinkSendBibleHold,
-                        selectedVerseItem = selectedVerseItem,
+                        selectedVerseItem = scheduleVerse?.value ?: selectedVerseItem,
+                        selectedVerseItemVersion = selectedVerseItemVersion.value,
+                        selectedVerseItemGoLive = selectedVerseItemGoLive,
+                        dialogDismissSignal = dialogDismissSignal.value,
                         engineStatus = engineStatus,
                         isPresenting = isPresenting,
                     )
+                    }
                     }
                 }
             }

@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.input.key.Key
@@ -182,7 +183,7 @@ abstract class MainDesktopComposeHarness {
         val loopToggle = MutableSharedFlow<Unit>(extraBufferCapacity = 4)
         val goto = MutableSharedFlow<Int>(extraBufferCapacity = 4)
         val selectBibleVerse = MutableSharedFlow<SelectBibleVerseRequest>(extraBufferCapacity = 4)
-        val remoteSelectSong = MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = 4)
+        val remoteSelectSong = MutableSharedFlow<RemoteSongSelection>(extraBufferCapacity = 4)
         val remoteSelectPicture = MutableSharedFlow<ScheduleItem.PictureItem>(extraBufferCapacity = 4)
         val remoteSelectPresentation = MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = 4)
         val uploadPresentation = MutableSharedFlow<File>(extraBufferCapacity = 4)

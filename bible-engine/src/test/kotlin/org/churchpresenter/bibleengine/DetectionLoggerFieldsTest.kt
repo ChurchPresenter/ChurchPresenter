@@ -3,6 +3,7 @@ package org.churchpresenter.bibleengine
 import org.churchpresenter.bibleengine.engine.DetectionLogger
 import org.churchpresenter.bibleengine.engine.ScriptureEvent
 import org.churchpresenter.bibleengine.engine.ScriptureReference
+import org.churchpresenter.bibleengine.engine.StickyChange
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -127,7 +128,7 @@ class DetectionLoggerFieldsTest {
     fun `a sticky change with no previous context writes nulls`() {
         Config.logStickyChanges = true
 
-        DetectionLogger.logStickyChange("spoken", "", null, null, 43, 3)
+        DetectionLogger.logStickyChange("spoken", "", StickyChange(null, null, 43, 3))
 
         val row = logLines("sticky-log-").last()
         assertTrue(row.contains("\"prevBook\":null"), row)
@@ -140,7 +141,7 @@ class DetectionLoggerFieldsTest {
     fun `a sticky change clearing the context writes nulls for the new side`() {
         Config.logStickyChanges = true
 
-        DetectionLogger.logStickyChange("spoken", "", 43, 3, null, null)
+        DetectionLogger.logStickyChange("spoken", "", StickyChange(43, 3, null, null))
 
         val row = logLines("sticky-log-").last()
         assertTrue(row.contains("\"newBook\":null"), row)
@@ -152,7 +153,7 @@ class DetectionLoggerFieldsTest {
         Config.logStickyChanges = true
         DetectionLogger.sessionId = null
 
-        DetectionLogger.logStickyChange("spoken", "", null, null, 43, 3)
+        DetectionLogger.logStickyChange("spoken", "", StickyChange(null, null, 43, 3))
 
         assertTrue(logLines("sticky-log-").last().contains("\"sessionId\":null"), logLines("sticky-log-").last())
     }
@@ -192,7 +193,7 @@ class DetectionLoggerFieldsTest {
     fun `sticky logging is skipped when disabled`() {
         Config.logStickyChanges = false
 
-        DetectionLogger.logStickyChange("spoken", "", null, null, 43, 3)
+        DetectionLogger.logStickyChange("spoken", "", StickyChange(null, null, 43, 3))
         DetectionLogger.drainForTests()
 
         assertTrue(dir.listFiles()?.none { it.name.startsWith("sticky-log-") } != false)
@@ -204,7 +205,7 @@ class DetectionLoggerFieldsTest {
 
         DetectionLogger.log("spoken", "", event())
         DetectionLogger.logCandidate("spoken", "", event(), "low-agreement")
-        DetectionLogger.logStickyChange("spoken", "", null, null, 43, 3)
+        DetectionLogger.logStickyChange("spoken", "", StickyChange(null, null, 43, 3))
         DetectionLogger.drainForTests()
 
         assertTrue(dir.listFiles().isNullOrEmpty())

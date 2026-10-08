@@ -7,6 +7,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.CalendarSyncSettings
 import org.churchpresenter.settings.SettingsManager
 import java.awt.Window
+import java.nio.file.Path
 import javax.swing.JOptionPane
 import javax.swing.SwingUtilities
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -28,6 +29,102 @@ private const val SAFE_EXPORT_NAME = "churchpresenter-settings-no-passwords.json
 
 internal fun activeWindow(): Window? = Window.getWindows().firstOrNull { it.isActive }
 
+/** How a settings action tells the operator something: an information or an error message. */
+internal enum class SettingsMessageKind { INFO, ERROR }
+
+/** How a settings action asks a yes/no question: as a warning, or as a plain question. */
+internal enum class SettingsQuestionKind { WARNING, QUESTION }
+
+/**
+ * The steps of the settings actions that only a person at a real screen can take -- the file
+ * pickers, the dialogs, the Swing thread and the relaunch. Everything else those actions decide
+ * stays in them, against this, so a test can answer for the person. [SwingSettingsActionUi] is the
+ * app's; every action takes it as a defaulted last parameter.
+ */
+internal interface SettingsActionUi {
+    /** The path to save to, offering [suggestedName]; null when the operator cancelled. */
+    suspend fun chooseSavePath(suggestedName: String, title: String): Path?
+
+    /** The JSON file to open; null when the operator cancelled. */
+    suspend fun chooseOpenPath(title: String): Path?
+
+    fun showMessage(message: String, title: String, kind: SettingsMessageKind)
+
+    /** True when the operator answered yes. */
+    fun confirm(message: String, title: String, kind: SettingsQuestionKind): Boolean
+
+    /** The index of the option picked from [options] (the first is the default); anything else when closed. */
+    fun pickOption(question: String, title: String, options: Array<String>): Int
+
+    /** Runs [block] on the UI thread, later. */
+    fun onUiThread(block: () -> Unit)
+
+    /** Stops [companionServer], relaunches the app and exits this one. */
+    fun restart(companionServer: CompanionServer?)
+}
+
+/** The real pickers, JOptionPane, the Swing event thread and a relaunch of this JVM. */
+internal object SwingSettingsActionUi : SettingsActionUi {
+    override suspend fun chooseSavePath(suggestedName: String, title: String): Path? =
+        FileChooser.platformInstance.save(
+            location = null,
+            suggestedName = suggestedName,
+            title = title,
+            filters = listOf(FileNameExtensionFilter("JSON (*.json)", "json"))
+        )
+
+    override suspend fun chooseOpenPath(title: String): Path? =
+        FileChooser.platformInstance.chooseSingle(
+            path = null,
+            filters = listOf(FileNameExtensionFilter("JSON (*.json)", "json")),
+            title = title,
+            selectDirectory = false
+        )
+
+    override fun showMessage(message: String, title: String, kind: SettingsMessageKind) {
+        val type = when (kind) {
+            SettingsMessageKind.INFO -> JOptionPane.INFORMATION_MESSAGE
+            SettingsMessageKind.ERROR -> JOptionPane.ERROR_MESSAGE
+        }
+        JOptionPane.showMessageDialog(activeWindow(), message, title, type)
+    }
+
+    override fun confirm(message: String, title: String, kind: SettingsQuestionKind): Boolean {
+        val type = when (kind) {
+            SettingsQuestionKind.WARNING -> JOptionPane.WARNING_MESSAGE
+            SettingsQuestionKind.QUESTION -> JOptionPane.QUESTION_MESSAGE
+        }
+        return JOptionPane.showConfirmDialog(
+            activeWindow(), message, title, JOptionPane.YES_NO_OPTION, type
+        ) == JOptionPane.YES_OPTION
+    }
+
+    override fun pickOption(question: String, title: String, options: Array<String>): Int =
+        JOptionPane.showOptionDialog(
+            activeWindow(), question, title, JOptionPane.YES_NO_CANCEL_OPTION,
+            JOptionPane.QUESTION_MESSAGE, null, options, options[0],
+        )
+
+    override fun onUiThread(block: () -> Unit) = SwingUtilities.invokeLater(block)
+
+    /**
+     * Relaunches the app so the settings just written are the ones it comes back with.
+     *
+     * The server is stopped first so in-flight WebSocket sessions (a connected companion app, say)
+     * close cleanly instead of hitting a ping timeout when the JVM exits.
+     */
+    override fun restart(companionServer: CompanionServer?) {
+        try { companionServer?.stop() } catch (_: Exception) {}
+        val javaBin = System.getProperty("java.home") + "/bin/java"
+        val command = ProcessHandle.current().info().command().orElse(javaBin)
+        val args = ProcessHandle.current().info().arguments().orElse(emptyArray())
+        try {
+            ProcessBuilder(listOf(command) + args.toList()).start()
+        } catch (_: Exception) {}
+        Runtime.getRuntime().exit(0)
+    }
+}
+
 /**
  * Saves the settings to a file the user picks. [withoutSecrets] leaves out every password, sign-in
  * and API key ([withoutSecrets]), for a file that is safe to share -- with support, on an issue.
@@ -37,12 +134,11 @@ internal suspend fun exportSettings(
     exportedMsg: String,
     failedMsg: String,
     withoutSecrets: Boolean = false,
+    ui: SettingsActionUi = SwingSettingsActionUi,
 ) {
-    var file = FileChooser.platformInstance.save(
-        location = null,
+    var file = ui.chooseSavePath(
         suggestedName = if (withoutSecrets) SAFE_EXPORT_NAME else EXPORT_NAME,
         title = title,
-        filters = listOf(FileNameExtensionFilter("JSON (*.json)", "json"))
     ) ?: return
     try {
         // The calendar relay's key and tokens are this church's credentials, not preferences: an export
@@ -58,9 +154,9 @@ internal suspend fun exportSettings(
             file = file.resolveSibling("${file.nameWithoutExtension}.json")
         }
         file.writeText(json)
-        JOptionPane.showMessageDialog(activeWindow(), exportedMsg, title, JOptionPane.INFORMATION_MESSAGE)
+        ui.showMessage(exportedMsg, title, SettingsMessageKind.INFO)
     } catch (_: Exception) {
-        JOptionPane.showMessageDialog(activeWindow(), failedMsg, title, JOptionPane.ERROR_MESSAGE)
+        ui.showMessage(failedMsg, title, SettingsMessageKind.ERROR)
     }
 }
 
@@ -73,16 +169,10 @@ internal suspend fun importSettings(
     failedMsg: String,
     companionServer: CompanionServer?,
     secrets: SecretsChoice,
+    ui: SettingsActionUi = SwingSettingsActionUi,
 ) {
-    val file = FileChooser.platformInstance.chooseSingle(
-        path = null,
-        filters = listOf(FileNameExtensionFilter("JSON (*.json)", "json")),
-        title = title,
-        selectDirectory = false
-    ) ?: return
-    val confirmed = JOptionPane.showConfirmDialog(
-        activeWindow(), confirmMsg, title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE
-    ) == JOptionPane.YES_OPTION
+    val file = ui.chooseOpenPath(title) ?: return
+    val confirmed = ui.confirm(confirmMsg, title, SettingsQuestionKind.WARNING)
     if (!confirmed) return
     try {
         val settingsManager = SettingsManager()
@@ -92,11 +182,11 @@ internal suspend fun importSettings(
         // and tokens, and adopting them would make two desktops answer as one.
         val imported = settingsManager.migrateAndDecode(file.readText())
         // A file with passwords of its own asks whose to keep; one without keeps this computer's
-        val useFileSecrets = if (imported.hasSecrets) askUseFileSecrets(title, secrets) ?: return else false
+        val useFileSecrets = if (imported.hasSecrets) askUseFileSecrets(title, secrets, ui) ?: return else false
         settingsManager.saveSettings(importedSettings(imported, settingsManager.loadSettings(), useFileSecrets))
-        restartApp(companionServer)
+        ui.restart(companionServer)
     } catch (_: Exception) {
-        JOptionPane.showMessageDialog(activeWindow(), failedMsg, title, JOptionPane.ERROR_MESSAGE)
+        ui.showMessage(failedMsg, title, SettingsMessageKind.ERROR)
     }
 }
 
@@ -104,67 +194,47 @@ internal fun resetAllSettings(
     title: String,
     confirmMsg: String,
     clearCacheMsg: String,
-    companionServer: CompanionServer?
+    companionServer: CompanionServer?,
+    ui: SettingsActionUi = SwingSettingsActionUi,
 ) {
-    SwingUtilities.invokeLater {
-        val confirmed = JOptionPane.showConfirmDialog(
-            activeWindow(), confirmMsg, title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE
-        ) == JOptionPane.YES_OPTION
-        if (!confirmed) return@invokeLater
+    ui.onUiThread {
+        val confirmed = ui.confirm(confirmMsg, title, SettingsQuestionKind.WARNING)
+        if (!confirmed) return@onUiThread
         val settingsManager = SettingsManager()
-        val clearCache = JOptionPane.showConfirmDialog(
-            activeWindow(), clearCacheMsg, title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE
-        )
-        if (clearCache == JOptionPane.YES_OPTION) {
+        val clearCache = ui.confirm(clearCacheMsg, title, SettingsQuestionKind.QUESTION)
+        if (clearCache) {
             settingsManager.lottiePresetsDir.deleteRecursively()
         }
         settingsManager.saveSettings(AppSettings())
-        restartApp(companionServer)
+        ui.restart(companionServer)
     }
 }
 
 /** The folders a device can write into, all cleared together by [clearRemoteUploads]. */
 private val REMOTE_UPLOAD_DIRS = listOf("device_uploads", "device_presentations", "device_media")
 
-internal fun clearRemoteUploads(title: String, confirmMsg: String, clearedMsg: String) {
-    SwingUtilities.invokeLater {
-        val confirmed = JOptionPane.showConfirmDialog(
-            activeWindow(), confirmMsg, title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE
-        ) == JOptionPane.YES_OPTION
-        if (!confirmed) return@invokeLater
+internal fun clearRemoteUploads(
+    title: String,
+    confirmMsg: String,
+    clearedMsg: String,
+    ui: SettingsActionUi = SwingSettingsActionUi,
+) {
+    ui.onUiThread {
+        val confirmed = ui.confirm(confirmMsg, title, SettingsQuestionKind.WARNING)
+        if (!confirmed) return@onUiThread
         // All three trees, not just the pictures one: the button offers to delete "all remotely
         // uploaded files", and decks and media pushed from a phone are written beside them and
         // were never cleaned by anything.
         val home = java.io.File(System.getProperty("user.home"))
         REMOTE_UPLOAD_DIRS.forEach { java.io.File(home, ".churchpresenter/$it").deleteRecursively() }
-        JOptionPane.showMessageDialog(activeWindow(), clearedMsg, title, JOptionPane.INFORMATION_MESSAGE)
+        ui.showMessage(clearedMsg, title, SettingsMessageKind.INFO)
     }
 }
 
-/**
- * Relaunches the app so the settings just written are the ones it comes back with.
- *
- * The server is stopped first so in-flight WebSocket sessions (a connected companion app, say)
- * close cleanly instead of hitting a ping timeout when the JVM exits.
- */
-private fun restartApp(companionServer: CompanionServer?) {
-    try { companionServer?.stop() } catch (_: Exception) {}
-    val javaBin = System.getProperty("java.home") + "/bin/java"
-    val command = ProcessHandle.current().info().command().orElse(javaBin)
-    val args = ProcessHandle.current().info().arguments().orElse(emptyArray())
-    try {
-        ProcessBuilder(listOf(command) + args.toList()).start()
-    } catch (_: Exception) {}
-    Runtime.getRuntime().exit(0)
-}
-
 /** True to take the file's passwords, false to keep this computer's, null when the import is called off. */
-private fun askUseFileSecrets(title: String, choice: SecretsChoice): Boolean? {
+private fun askUseFileSecrets(title: String, choice: SecretsChoice, ui: SettingsActionUi): Boolean? {
     val options = arrayOf(choice.keep, choice.useFile, choice.cancel)
-    val picked = JOptionPane.showOptionDialog(
-        activeWindow(), choice.question, title, JOptionPane.YES_NO_CANCEL_OPTION,
-        JOptionPane.QUESTION_MESSAGE, null, options, options[0],
-    )
+    val picked = ui.pickOption(choice.question, title, options)
     return when (picked) {
         0 -> false
         1 -> true

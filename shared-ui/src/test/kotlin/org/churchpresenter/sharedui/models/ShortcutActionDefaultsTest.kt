@@ -131,4 +131,20 @@ class ShortcutActionDefaultsTest {
         )
         assertTrue(!ShortcutAction.SAVE_SCHEDULE.devOnly)
     }
+
+    @Test
+    fun `the tabs scope competes with every tab and the global keys, not the menus`() {
+        val tabScopes = ShortcutScope.entries - setOf(ShortcutScope.MENU, ShortcutScope.GLOBAL, ShortcutScope.TABS)
+        tabScopes.forEach { assertTrue(ShortcutScope.TABS.overlaps(it), "TABS must compete with $it") }
+        assertTrue(ShortcutScope.TABS.overlaps(ShortcutScope.GLOBAL))
+        assertTrue(!ShortcutScope.TABS.overlaps(ShortcutScope.MENU))
+    }
+
+    @Test
+    fun `go live ships on enter and the search-live switch on ctrl tab`() {
+        assertEquals(listOf(KeyChord.of(Key.Enter), KeyChord.of(Key.NumPadEnter)), ShortcutAction.GO_LIVE.defaults)
+        assertEquals(listOf(KeyChord.of(Key.Tab, ctrl = true)), ShortcutAction.SWITCH_SEARCH_LIVE.defaults)
+        assertEquals(ShortcutScope.TABS, ShortcutAction.GO_LIVE.scope)
+        assertEquals(ShortcutScope.TABS, ShortcutAction.SWITCH_SEARCH_LIVE.scope)
+    }
 }

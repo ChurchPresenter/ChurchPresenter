@@ -2,6 +2,9 @@ package org.churchpresenter.bibleengine.engine
 
 import org.churchpresenter.bibleengine.Config
 
+/** Expired dedup entries are swept only once the map holds this many. */
+private const val PRUNE_FROM_SIZE = 256
+
 class Stabilizer(private val clock: () -> Long = System::currentTimeMillis) {
 
     private val lastEmittedAt = HashMap<String, Long>()
@@ -49,7 +52,7 @@ class Stabilizer(private val clock: () -> Long = System::currentTimeMillis) {
     }
 
     private fun pruneExpired(now: Long) {
-        if (lastEmittedAt.size < 256) return
+        if (lastEmittedAt.size < PRUNE_FROM_SIZE) return
         val cutoff = now - Config.dedupTtlMs
         val it = lastEmittedAt.entries.iterator()
         while (it.hasNext()) {

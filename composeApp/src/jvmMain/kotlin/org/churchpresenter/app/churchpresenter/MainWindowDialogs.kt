@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import org.churchpresenter.strings.generated.resources.Res
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.data.asDurationRow
+import org.churchpresenter.statistics.asDurationRow
 import org.churchpresenter.app.churchpresenter.dialogs.AboutDialog
 import org.churchpresenter.app.churchpresenter.dialogs.InstanceLinkToastHost
 import org.churchpresenter.app.churchpresenter.dialogs.CONTACT_TYPE_TESTIMONIAL
@@ -39,11 +39,11 @@ import org.churchpresenter.app.churchpresenter.ui.theme.themeCustomizationFrom
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.dialogs.InstanceLinkDialog
 import org.churchpresenter.sharedui.utils.presenterScreenBounds
-import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
+import org.churchpresenter.updater.UpdateChecker
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
-import org.churchpresenter.app.churchpresenter.dialogs.CCLIReportDialog
-import org.churchpresenter.app.churchpresenter.dialogs.UpdateAvailableDialog
+import org.churchpresenter.statistics.CCLIReportDialog
+import org.churchpresenter.updater.UpdateAvailableDialog
 import org.churchpresenter.settings.answered
 import org.jetbrains.compose.resources.stringResource
 

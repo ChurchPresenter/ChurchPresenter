@@ -88,7 +88,7 @@ import org.churchpresenter.app.churchpresenter.composables.LabeledTabIndicator
 import org.churchpresenter.app.churchpresenter.composables.labeledTabMinWidth
 import org.churchpresenter.app.churchpresenter.composables.TabStripBackArrow
 import org.churchpresenter.app.churchpresenter.composables.TabStripForwardArrow
-import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
+import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.obs.OBSWebSocketManager
 import org.jetbrains.compose.resources.stringResource

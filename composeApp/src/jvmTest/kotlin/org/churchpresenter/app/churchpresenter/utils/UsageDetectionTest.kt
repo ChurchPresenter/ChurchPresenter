@@ -286,6 +286,40 @@ class UsageDetectionTest {
         assertFalse(hasAudienceOutput(emptyList(), screenCount = 3, deckLinkDeviceCount = 2))
     }
 
+    /** A screen output on the 1920x1080 monitor at 1920,0. */
+    private fun onMonitor() = screen(targetDisplay = 1)
+        .copy(targetBoundsX = 1920, targetBoundsY = 0, targetBoundsW = 1920, targetBoundsH = 1080)
+
+    private val monitorKey = "1920x1080@1920,0"
+
+    @Test
+    fun `an output on a monitor marked unused is not live, exactly as a None row`() {
+        assertFalse(onMonitor().isLiveOutput(listOf(monitorKey)))
+        assertTrue(onMonitor().isLiveOutput(listOf("3840x2160@3840,0")), "another monitor's mark is not this one's")
+        assertTrue(onMonitor().isLiveOutput(), "no monitor is unused by default")
+        assertFalse(screen(targetDisplay = Constants.KEY_TARGET_NONE).isLiveOutput(listOf(monitorKey)))
+    }
+
+    @Test
+    fun `an output with no monitor geometry is never taken for one on an unused monitor`() {
+        // auto, or a DeckLink port: no key, so a mark cannot switch it off.
+        assertTrue(screen().isLiveOutput(listOf(monitorKey, "")))
+        assertTrue(screen(targetType = Constants.TARGET_TYPE_DECKLINK).isLiveOutput(listOf(monitorKey)))
+    }
+
+    @Test
+    fun `an output on a monitor marked unused is not an audience output`() {
+        assertFalse(
+            hasAudienceOutput(
+                listOf(onMonitor()),
+                screenCount = 3,
+                deckLinkDeviceCount = 0,
+                unusedScreens = listOf(monitorKey),
+            ),
+        )
+        assertTrue(hasAudienceOutput(listOf(onMonitor()), screenCount = 3, deckLinkDeviceCount = 0))
+    }
+
     // ── How many languages a song reaches the screen in ────────────────────────
 
     private fun songIn(languages: Int) = SongItem(

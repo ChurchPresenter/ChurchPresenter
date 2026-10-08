@@ -51,7 +51,15 @@ class ServiceSoak {
         val scenarios = BenchmarkScenarios.all(photo)
         val cue = mutableIntStateOf(0)
         var cuesShown = 0
-        val run = OffscreenOutput(WIDTH, HEIGHT) { frame -> scenarios[cue.intValue].second(frame) }.use { output ->
+        // Watched like a frame: building the output composes it for the first time, and a soak once
+        // hung right there, before the frame loop and its own watchdog had started.
+        val built = SoakStallWatchdog(
+            limitNanos = stallSeconds * NANOS_PER_SECOND,
+            onStall = { stalled -> reportStall(0.0, stalled, "the output being built") },
+        ).start().use { watchdog ->
+            watchdog.step { OffscreenOutput(WIDTH, HEIGHT) { frame -> scenarios[cue.intValue].second(frame) } }
+        }
+        val run = built.use { output ->
             run(
                 output,
                 content = { scenarios[cue.intValue].first },

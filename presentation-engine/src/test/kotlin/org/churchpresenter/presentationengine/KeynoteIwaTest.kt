@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test
 import org.churchpresenter.presentationengine.Fixtures.ProtoWriter
 import org.churchpresenter.presentationengine.keynote.IwaChunkReader
 import org.churchpresenter.presentationengine.keynote.IwaMessage
+import org.churchpresenter.presentationengine.keynote.bool
+import org.churchpresenter.presentationengine.keynote.message
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue

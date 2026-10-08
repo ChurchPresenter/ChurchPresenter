@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -48,6 +49,8 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
+import org.churchpresenter.sharedui.composables.SearchFieldFocus
+import org.churchpresenter.sharedui.composables.rememberSearchFieldValue
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -243,7 +246,9 @@ internal fun BibleSearchField(
     onSubmit: () -> Unit,
     onFocusChanged: (Boolean) -> Unit,
     modeChip: @Composable () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** How the tab moves the keyboard in here with the query selected. */
+    focus: SearchFieldFocus = remember { SearchFieldFocus() },
 ) {
     Row(
         modifier = modifier
@@ -259,10 +264,15 @@ internal fun BibleSearchField(
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
         )
         Box(modifier = Modifier.weight(1f).padding(horizontal = 8.dp)) {
+            var fieldValue by rememberSearchFieldValue(value, focus)
             BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
+                value = fieldValue,
+                onValueChange = {
+                    fieldValue = it
+                    if (it.text != value) onValueChange(it.text)
+                },
                 modifier = Modifier.fillMaxWidth()
+                    .focusRequester(focus.requester)
                     .onFocusChanged { onFocusChanged(it.isFocused) }
                     .onPreviewKeyEvent { e ->
                         if (e.type == KeyEventType.KeyDown && e.key == Key.Enter) {
@@ -415,7 +425,14 @@ internal fun BibleVerseColumn(
         }
     }
     LaunchedEffect(selectedIndex) {
-        if (selectedIndex < 0 || selectedIndex + 1 >= verses.size) return@LaunchedEffect
+        if (selectedIndex !in verses.indices) return@LaunchedEffect
+        // A jump (a typed reference, a search result) can land anywhere in the chapter; stepping
+        // can't, so only a row that is off screen entirely needs more than the scroll-ahead below.
+        jumpTargetFor(listState.layoutInfo, selectedIndex)?.let {
+            listState.scrollToItem(it)
+            return@LaunchedEffect
+        }
+        if (selectedIndex + 1 >= verses.size) return@LaunchedEffect
         val scrollAmount = scrollAheadAmount(listState.layoutInfo, selectedIndex)
         if (scrollAmount > 0f) listState.scroll { scrollBy(scrollAmount) }
     }

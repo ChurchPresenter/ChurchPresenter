@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -10,6 +11,12 @@ import kotlinx.coroutines.runBlocking
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BibleSettings
+import org.churchpresenter.settings.BibleTranslationSettings
+import org.churchpresenter.statistics.StatisticsManager
+import org.churchpresenter.statistics.withStatsHome
+import org.churchpresenter.bible.SpbFixture
+import org.churchpresenter.bibletab.bibleFixture
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.SelectBibleVerseRequest
@@ -42,12 +49,11 @@ class RemoteCommandEffectsTest {
     private lateinit var presenter: PresenterManager
 
     private val selectedTabs = mutableListOf<Tabs>()
-    private val songsSelected = mutableListOf<ScheduleItem.SongItem>()
+    private val songsSelected = mutableListOf<RemoteSongSelection>()
     private val picturesSelected = mutableListOf<ScheduleItem.PictureItem>()
     private val presentationsSelected = mutableListOf<ScheduleItem.PresentationItem>()
     private val mediaSelected = mutableListOf<ScheduleItem.MediaItem>()
     private var settings = AppSettings()
-    private var songVersionBumps = 0
     private var slidePushes = 0
 
     /**
@@ -66,7 +72,7 @@ class RemoteCommandEffectsTest {
         val previousSlide = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
         val selectSlide = MutableSharedFlow<Pair<String, Int>>(extraBufferCapacity = 1)
         val selectVerse = MutableSharedFlow<SelectBibleVerseRequest>(extraBufferCapacity = 1)
-        val selectSong = MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = 1)
+        val selectSong = MutableSharedFlow<RemoteSongSelection>(extraBufferCapacity = 1)
         val selectPictureItem = MutableSharedFlow<ScheduleItem.PictureItem>(extraBufferCapacity = 1)
         val selectPresentation = MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = 1)
         val selectMedia = MutableSharedFlow<ScheduleItem.MediaItem>(extraBufferCapacity = 1)
@@ -104,12 +110,14 @@ class RemoteCommandEffectsTest {
     private fun ComposeUiTest.effects(
         flows: Flows? = null,
         resolveImageFile: ((String, Int) -> File?)? = null,
-    ) = effectsWired(mutableStateOf(flows), resolveImageFile)
+        statisticsManager: StatisticsManager? = null,
+    ) = effectsWired(mutableStateOf(flows), resolveImageFile, statisticsManager = statisticsManager)
 
     private fun ComposeUiTest.effectsWired(
         wired: State<Flows?>,
         resolveImageFile: ((String, Int) -> File?)? = null,
         appSettings: State<AppSettings>? = null,
+        statisticsManager: StatisticsManager? = null,
     ) {
         setContent {
             val flows = wired.value
@@ -119,7 +127,6 @@ class RemoteCommandEffectsTest {
                 presentationViewModel = presentations,
                 bibleViewModel = bible,
                 presenterManager = presenter,
-                onSongItemVersionBump = { songVersionBumps++ },
                 resolveImageFile = resolveImageFile,
                 onSettingsChange = { transform -> settings = transform(settings) },
                 onSongItemSelected = { songsSelected.add(it) },
@@ -142,6 +149,7 @@ class RemoteCommandEffectsTest {
                 remoteSelectPictureFlow = flows?.selectPictureItem,
                 remoteSelectPresentationFlow = flows?.selectPresentation,
                 remoteSelectMediaFlow = flows?.selectMedia,
+                statisticsManager = statisticsManager,
             )
         }
         waitForIdle()
@@ -422,12 +430,12 @@ class RemoteCommandEffectsTest {
         val flows = Flows()
         effects(flows)
         val song = ScheduleItem.SongItem(id = "1", songNumber = 42, title = "Amazing Grace", songbook = "Hymns")
+        val selection = RemoteSongSelection(song, goLive = true, source = "remote")
 
-        emit(flows.selectSong, song)
+        emit(flows.selectSong, selection)
 
-        assertEquals(listOf(song), songsSelected)
+        assertEquals(listOf(selection), songsSelected, "the whole hand-over reaches the app, go-live included")
         assertEquals(listOf(Tabs.SONGS), selectedTabs)
-        assertEquals(1, songVersionBumps, "the row has to redraw or the selection is invisible")
     }
 
     @Test
@@ -489,5 +497,152 @@ class RemoteCommandEffectsTest {
         emit(flows.playPause, Unit)
 
         assertFalse(selectedTabs.isNotEmpty(), "transport is not a reason to move the operator's view")
+    }
+
+    // ── A picture chosen from a folder this machine is or is not showing ────────
+
+    @Test
+    fun `a picture from another folder loads that folder before it goes live`() = runComposeUiTest {
+        val shown = File(dir, "shown").apply { mkdirs() }
+        File(shown, "x.png").writeBytes(pngBytes)
+        val uploads = File(dir, "uploads").apply { mkdirs() }
+        val uploaded = listOf("u1.png", "u2.png").map { File(uploads, it).apply { writeBytes(pngBytes) } }
+        pictures.selectFolder(shown)
+        val flows = Flows()
+        effects(flows, resolveImageFile = { _, index -> uploaded.getOrNull(index) })
+
+        emit(flows.selectPicture, "device_uploads" to 1)
+
+        assertEquals(uploads.absolutePath, pictures.selectedFolder?.absolutePath, "the phone's folder is loaded")
+        assertEquals(1, pictures.selectedImageIndex)
+        assertEquals(uploaded[1].absolutePath, presenter.selectedImagePath.value)
+        assertEquals(Presenting.PICTURES, presenter.slideContent.value)
+    }
+
+    @Test
+    fun `a picture from the folder already shown is selected without reloading it`() = runComposeUiTest {
+        val files = images("a.png", "b.png")
+        pictures.selectFolder(dir)
+        val flows = Flows()
+        effects(flows, resolveImageFile = { _, index -> files.getOrNull(index) })
+
+        emit(flows.selectPicture, stableFileId(dir) to 1)
+
+        assertEquals(dir.absolutePath, pictures.selectedFolder?.absolutePath)
+        assertEquals(1, pictures.selectedImageIndex)
+        assertEquals(files[1].absolutePath, presenter.selectedImagePath.value)
+        assertNull(presenter.nextImagePath.value, "nothing is staged after the last picture")
+    }
+
+    @Test
+    fun `a resolved picture past the end of the loaded folder goes live without moving the selection`() =
+        runComposeUiTest {
+            val files = images("a.png", "b.png")
+            pictures.selectFolder(dir)
+            val flows = Flows()
+            // The server's map knows more images than this folder holds -- a stale upload index.
+            effects(flows, resolveImageFile = { _, _ -> files[0] })
+
+            emit(flows.selectPicture, stableFileId(dir) to 5)
+
+            assertEquals(0, pictures.selectedImageIndex, "there is no sixth image to select here")
+            assertEquals(files[0].absolutePath, presenter.selectedImagePath.value)
+            assertEquals(Presenting.PICTURES, presenter.slideContent.value)
+        }
+
+    @Test
+    fun `a negative index never selects a picture or a slide`() = runComposeUiTest {
+        val files = images("a.png", "b.png")
+        pictures.selectFolder(dir)
+        presentations.slideFiles.addAll(files)
+        val flows = Flows()
+        effects(flows, resolveImageFile = { _, _ -> files[1] })
+
+        emit(flows.selectPicture, stableFileId(dir) to -1)
+        emit(flows.selectSlide, "deck" to -1)
+
+        assertEquals(0, pictures.selectedImageIndex, "the selection stays where it was")
+        assertEquals(files[1].absolutePath, presenter.selectedImagePath.value, "the resolved file still goes up")
+        assertEquals(0, presentations.selectedSlideIndex)
+        assertNull(presenter.selectedSlide.value, "no slide is staged for an index the deck cannot have")
+    }
+
+    @Test
+    fun `a negative index with nothing resolved leaves the screen alone`() = runComposeUiTest {
+        images("a.png")
+        pictures.loadImagesFromFolder(dir)
+        val flows = Flows()
+        effects(flows)
+
+        emit(flows.selectPicture, "folder-1" to -1)
+
+        assertNull(presenter.selectedImagePath.value)
+        assertEquals(Presenting.NONE, presenter.slideContent.value)
+    }
+
+    // ── A verse resolved against this machine's own Bible ──────────────────────
+
+    /** Swaps in a [BibleViewModel] over a real module, loaded before this returns. */
+    private fun loadBible(): AppSettings {
+        SpbFixture.spbFile(dir, content = bibleFixture)
+        val loaded = AppSettings(
+            bibleSettings = BibleSettings(
+                storageDirectory = dir.absolutePath,
+                primaryBible = "test.spb",
+                translations = listOf(BibleTranslationSettings(fileName = "test.spb")),
+            ),
+        )
+        runCatching { bible.dispose() }
+        bible = BibleViewModel(loaded, dispatcher = Dispatchers.Unconfined, ioDispatcher = Dispatchers.Unconfined)
+        settings = loaded
+        return loaded
+    }
+
+    @Test
+    fun `a remote verse is shown in this machine's own wording and counted for each verse of its range`() {
+        TestSingletons.latchToTestHome()
+        withStatsHome {
+            loadBible()
+            val statistics = StatisticsManager()
+            runComposeUiTest {
+                val flows = Flows()
+                effects(flows, statisticsManager = statistics)
+
+                emit(
+                    flows.selectVerse,
+                    SelectBibleVerseRequest(bookName = "John", chapter = 3, verseNumber = 16, verseRange = "16-17"),
+                )
+
+                val shown = presenter.selectedVerses.value.single()
+                assertEquals("For God so loved the world.", shown.verseText, "looked up locally")
+                assertEquals(Presenting.BIBLE, presenter.slideContent.value)
+                val counted = statistics.getAllVersesInRange(0L, Long.MAX_VALUE)
+                assertEquals(listOf(16, 17), counted.map { it.verseNumber }.sorted())
+                assertTrue(counted.all { it.bookName == "John" && it.chapter == 3 })
+            }
+        }
+    }
+
+    @Test
+    fun `a remote verse in a book this Bible lacks still goes up as the phone sent it`() {
+        TestSingletons.latchToTestHome()
+        withStatsHome {
+            loadBible()
+            val statistics = StatisticsManager()
+            runComposeUiTest {
+                val flows = Flows()
+                effects(flows, statisticsManager = statistics)
+
+                emit(
+                    flows.selectVerse,
+                    SelectBibleVerseRequest(bookName = "Jude", chapter = 1, verseNumber = 3, verseText = "Contend"),
+                )
+
+                val shown = presenter.selectedVerses.value.single()
+                assertEquals("Contend", shown.verseText)
+                assertEquals("Jude", shown.bookName)
+                assertEquals(listOf(3), statistics.getAllVersesInRange(0L, Long.MAX_VALUE).map { it.verseNumber })
+            }
+        }
     }
 }

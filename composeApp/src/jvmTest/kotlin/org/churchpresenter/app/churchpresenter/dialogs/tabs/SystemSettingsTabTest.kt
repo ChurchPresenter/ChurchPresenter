@@ -1,7 +1,5 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
@@ -32,6 +30,7 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.KeyboardShortcutSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
@@ -103,6 +102,7 @@ class SystemSettingsTabTest {
     private fun analytics(enabled: Boolean) = AppSettings(
         analyticsReportingEnabled = enabled,
         projectionSettings = ProjectionSettings(hideCursorOnOutputs = false, overlayEndClearsDisplay = false),
+        keyboardShortcutSettings = KeyboardShortcutSettings(focusSearchOnTabOpen = false),
     )
 
     @AfterTest
@@ -284,9 +284,9 @@ class SystemSettingsTabTest {
             }
         }
 
-        // Analytics is the fifth switch declared, after launch-at-login, start-hidden, hide-cursor
-        // and overlay-end-clears. Preview mode is no longer here: it is in the sidebar's dev box.
-        onAllNodes(isToggleable())[4].performScrollTo().performClick()
+        // Analytics is the sixth switch declared, after launch-at-login, start-hidden, hide-cursor,
+        // overlay-end-clears and focus-search-on-open. Preview mode is not here: it is in the sidebar's dev box.
+        onAllNodes(isToggleable())[5].performScrollTo().performClick()
         waitForIdle()
 
         assertEquals(true, applied?.analyticsReportingEnabled, "clicking the off analytics switch turns reporting on")
@@ -350,7 +350,7 @@ class SystemSettingsTabTest {
             }
         }
 
-        onAllNodes(isToggleable()).assertCountEquals(5)
+        onAllNodes(isToggleable()).assertCountEquals(6)
         // Launch-at-login is declared first. The switch follows the OS registration, not the click:
         // it can only turn on if setEnabled() reported success, which cannot happen here — so this
         // cannot race the coroutine the click starts.
@@ -737,46 +737,6 @@ class SystemSettingsTabTest {
             told.single()
         )
     }
-
-    @Test
-    fun `in dev mode a card of its own holds preview mode and the test event, with its note`() = runComposeUiTest {
-        setContent {
-            MaterialTheme {
-                CompositionLocalProvider(LocalSettingsDevMode provides true) {
-                    SystemSettingsTab(settings = analytics(true))
-                }
-            }
-        }
-
-        onNodeWithTag(DEV_MODE_CARD_TAG).assertExists()
-        onAllNodesWithText("Dev mode only").onFirst().assertExists()
-        onAllNodesWithText("Preview mode").onFirst().assertExists()
-        onNode(hasText("Send test event") and hasClickAction())
-            .assertExists("the test-event button must be offered, not just its label")
-            .assertIsEnabled()
-        onAllNodesWithText("Visible to developers only — hidden in released installer builds.").onFirst()
-            .assertExists("the note explaining why the button is there must render with it")
-    }
-
-    @Test
-    fun `with reporting off the test event cannot be sent, and outside dev mode there is no card`() =
-        runComposeUiTest {
-            var devMode by mutableStateOf(true)
-            setContent {
-                MaterialTheme {
-                    CompositionLocalProvider(LocalSettingsDevMode provides devMode) {
-                        SystemSettingsTab(settings = analytics(false))
-                    }
-                }
-            }
-            onNode(hasText("Send test event") and hasClickAction()).assertIsNotEnabled()
-
-            devMode = false
-            waitForIdle()
-            onAllNodesWithTag(DEV_MODE_CARD_TAG).assertCountEquals(0)
-            onAllNodesWithText("Send test event").assertCountEquals(0)
-            onAllNodesWithText("Preview mode").assertCountEquals(0)
-        }
 
     @Test
     fun `the settings-file and maintenance buttons all render`() = runComposeUiTest {
@@ -1233,6 +1193,23 @@ class SystemSettingsTabTest {
         onAllNodesWithText(
             "Cannot write to this directory. Choose a different location or change permissions."
         ).onFirst().assertExists("an amber dot names the permission problem")
+    }
+
+    @Test
+    fun `downloading into a read-only bible folder says why instead of opening the browser`() = runComposeUiTest {
+        val dir = tempDir()
+        if (!dir.setWritable(false) || canWriteInto(dir)) return@runComposeUiTest
+        showBibleFolder(dir.path)
+        val notWritable = "This folder can't be written to, so Bibles can't be downloaded into it. " +
+            "Choose a different Bible storage folder."
+        waitUntil(timeoutMillis = 5_000) { onAllNodesWithText("Download Bibles…").fetchSemanticsNodes().isNotEmpty() }
+        onAllNodesWithText(notWritable).assertCountEquals(0)
+
+        onAllNodesWithText("Download Bibles…").onFirst().performScrollTo().performClick()
+        waitForIdle()
+
+        // Probed on the click: a download written here would fail the moment it finished.
+        onAllNodesWithText(notWritable).onFirst().assertExists()
     }
 
     @Test

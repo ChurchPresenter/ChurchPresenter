@@ -46,6 +46,7 @@ import org.churchpresenter.strings.generated.resources.audio_output
 import org.churchpresenter.strings.generated.resources.audio_output_default
 import org.churchpresenter.strings.generated.resources.audio_output_device
 import org.churchpresenter.strings.generated.resources.bottom
+import org.churchpresenter.strings.generated.resources.display_not_used
 import org.churchpresenter.strings.generated.resources.key_output_none
 import org.churchpresenter.strings.generated.resources.left
 import org.churchpresenter.strings.generated.resources.loading
@@ -86,6 +87,7 @@ import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.isScreenUnused
 import org.churchpresenter.settings.screenKey
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.server.CompanionServer
@@ -171,7 +173,9 @@ internal data class DisplayOption(
     val boundsX: Int = Int.MIN_VALUE,
     val boundsY: Int = Int.MIN_VALUE,
     val boundsW: Int = 0,
-    val boundsH: Int = 0
+    val boundsH: Int = 0,
+    /** A monitor marked "Don't use": still listed, and picking it clears the mark. */
+    val unused: Boolean = false,
 )
 
 @Composable
@@ -241,7 +245,7 @@ fun ProjectionSettingsTab(
     LaunchedEffect(presenterWindowCount, nonPrimaryDevices) {
         reconcileAssignments(
             proj.screenAssignments, presenterWindowCount, nonPrimaryDevices, screenDevicesAll,
-            proj.fallbackProfileId,
+            proj.fallbackProfileId, proj.unusedScreens,
         )
             ?.let { reconciled ->
                 onSettingsChange { s ->
@@ -257,7 +261,8 @@ fun ProjectionSettingsTab(
     // ScreenAssignmentCard can take them as a parameter.
 
     val noneLabel = stringResource(Res.string.key_output_none)
-    val displayOptions = rememberDisplayOptions(screenDevicesAll, noneLabel, proj)
+    val notUsedLabel = stringResource(Res.string.display_not_used)
+    val displayOptions = rememberDisplayOptions(screenDevicesAll, noneLabel, notUsedLabel, proj)
 
     // Shared column widths — used by both the Screen Assignment table (Card 1) and the
     // Browser Source Outputs table (Card 1.5) so their columns line up the same way.
@@ -659,17 +664,21 @@ private fun VlcPathRow(
 /**
  * Every target a row's display dropdown can offer: None, each non-primary monitor, each DeckLink.
  *
- * Keyed on the things that change what it says -- the device list, the word for None, and the names
- * the operator has given monitors -- so renaming one rebuilds the menu and nothing else does.
+ * Keyed on the things that change what it says -- the device list, the word for None, the names
+ * the operator has given monitors and which of them are marked unused -- so renaming one rebuilds
+ * the menu and nothing else does. A monitor marked unused is still offered, its label followed by
+ * [notUsedLabel], so picking it is how the mark is cleared.
  */
 @Composable
 private fun rememberDisplayOptions(
     screenDevicesAll: List<DetectedScreen>,
     noneLabel: String,
+    notUsedLabel: String,
     proj: ProjectionSettings,
 ): List<DisplayOption> {
     val screenNames = proj.screenNames
-    return remember(screenDevicesAll, noneLabel, screenNames) {
+    val unusedScreens = proj.unusedScreens
+    return remember(screenDevicesAll, noneLabel, notUsedLabel, screenNames, unusedScreens) {
         val options = mutableListOf<DisplayOption>()
         options.add(
             DisplayOption(
@@ -685,16 +694,20 @@ private fun rememberDisplayOptions(
             // A renamed monitor is named in the menu too: the whole point of calling it "Foyer TV"
             // is not having to remember which of three geometries that is.
             val named = proj.screenName(screen.key)
+            val unused = proj.isScreenUnused(screen.key)
+            // "Display 2 (3840x2160 @ 3200,0) — not used"
+            val marked: (String) -> String = { if (unused) "$it — $notUsedLabel" else it }
             options.add(
                 DisplayOption(
-                    label = displayLabel(named, displayNum, screen),
-                    shortLabel = displayShortLabel(named, displayNum, screen),
+                    label = marked(displayLabel(named, displayNum, screen)),
+                    shortLabel = marked(displayShortLabel(named, displayNum, screen)),
                     targetDisplay = screen.index,
                     targetType = Constants.TARGET_TYPE_SCREEN,
                     boundsX = screen.boundsX,
                     boundsY = screen.boundsY,
                     boundsW = screen.boundsW,
-                    boundsH = screen.boundsH
+                    boundsH = screen.boundsH,
+                    unused = unused,
                 )
             )
             displayNum++
@@ -730,6 +743,8 @@ private fun rememberDisplayOptions(
  * monitor it used to drive, because `outputSizeOf` prefers real bounds whenever they are non-zero.
  *
  * A slot added here follows [fallbackProfileId]; left null it would follow no profile at all.
+ *
+ * A monitor in [unusedScreens] is never handed to a slot by position -- the picks skip it.
  */
 internal fun reconcileAssignments(
     stored: List<ScreenAssignment>,
@@ -737,12 +752,14 @@ internal fun reconcileAssignments(
     nonPrimaryDevices: List<DetectedScreen>,
     allDevices: List<DetectedScreen>,
     fallbackProfileId: String,
+    unusedScreens: Collection<String> = emptyList(),
 ): List<ScreenAssignment>? {
     var changed = false
     val assignments = stored.toMutableList()
+    val usableDevices = nonPrimaryDevices.filterNot { it.key in unusedScreens }
     while (assignments.size < presenterWindowCount) {
         val npIdx = assignments.size
-        val device = nonPrimaryDevices.getOrNull(npIdx)
+        val device = usableDevices.getOrNull(npIdx)
         assignments.add(ScreenAssignment(
             targetDisplay = device?.index ?: Constants.KEY_TARGET_NONE,
             targetBoundsX = device?.boundsX ?: Int.MIN_VALUE,
@@ -757,7 +774,7 @@ internal fun reconcileAssignments(
         val current = assignments[idx]
         // Only resolve auto (-1) to actual display; preserve none (-2)
         if (current.targetDisplay == -1) {
-            val device = nonPrimaryDevices.getOrNull(idx)
+            val device = usableDevices.getOrNull(idx)
             assignments[idx] = if (device != null) {
                 current.copy(
                     targetDisplay = device.index,

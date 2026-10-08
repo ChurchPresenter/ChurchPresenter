@@ -82,13 +82,12 @@ import java.util.concurrent.atomic.AtomicReference
  * three more times per frame on its own, so hopping only that one line would have closed the door
  * the dump happened to record and left three open.
  *
- * **`ComposeScenePump` still has the identical hazard** and is deliberately unfixed: it builds its
- * `ImageComposeScene` and advances the snapshot on `Dispatchers.Default` too, driving Browser
- * Source and NDI at 30-60fps, where confining the draw to the event queue costs real UI budget
- * whenever an output is live. That wants its own change, with a measurement attached. Until then a
- * narrower form of this deadlock remains reachable while a virtual output is running --
- * `BrowserSourceVideoRenderer`, which rides that pump, is already the culprit on an open production
- * `ArrayIndexOutOfBoundsException` raised inside a hash-map resize during scene construction.
+ * `ComposeScenePump`, which drives Browser Source, NDI and OMT, is confined the same way since
+ * (`ComposeScenePumpConfinementTest`), so every off-screen scene the app builds lives on the event
+ * queue. A scene composed anywhere else still races them on Compose's global, unsynchronised caches:
+ * the soak's own `OffscreenOutput` did, built on the test thread while a lower-third pre-render was
+ * being built on the event queue, and hung in its constructor spinning in `ObjectIntMap.findKeyIndex`.
+ * It is confined now too. Any new off-screen scene, in production or in a test, belongs there.
  */
 class HungTestReporter internal constructor(
     private val thresholdMs: Long,
@@ -176,7 +175,7 @@ class HungTestReporter internal constructor(
 
         const val DEFAULT_THRESHOLD_MS = 5 * 60 * 1000L
         const val POLL_MS = 10_000L
-        const val STACK_DEPTH = 25
+        const val STACK_DEPTH = 60
 
         /** Distinctive, so the exit code alone says what happened. */
         const val HUNG_EXIT_CODE = 93

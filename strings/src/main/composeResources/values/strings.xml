@@ -312,6 +312,16 @@
     <string name="shortcut_scope_presentation_hint">Active while the Presentation tab is focused</string>
     <string name="shortcut_scope_media_hint">Active during audio and video playback</string>
     <string name="shortcut_scope_canvas_hint">Active while editing a canvas scene</string>
+    <string name="shortcut_category_tabs">Search &amp; Go Live</string>
+    <string name="shortcut_scope_tabs_hint">Active on every tab with a Go Live button, while the tab has the keyboard</string>
+    <string name="shortcut_description_go_live_key">Go Live with the highlighted item</string>
+    <string name="shortcut_description_switch_search_live">Switch the keyboard between search and what is live</string>
+    <string name="tooltip_with_shortcut">%1$s (%2$s)</string>
+    <string name="keyboard_home_search">Searching — %1$s: go live</string>
+    <string name="keyboard_home_search_live">Searching — %1$s: go live · %2$s: back to live</string>
+    <string name="songs_browse_paused_hint">Arrow keys paused — this is not the live song. %1$s: go live · %2$s: back to live</string>
+    <string name="focus_search_on_tab_open">Focus search when opening a tab</string>
+    <string name="focus_search_on_tab_open_hint">Opening Bible, Songs or Dictionary puts the cursor in the search box, unless that tab is already live</string>
     <string name="shortcut_scope_mouse_hint">Gestures, which cannot be rebound</string>
     <string name="shortcut_conflicts_none">No conflicts</string>
     <string name="shortcut_conflicts_one">1 conflict</string>
@@ -908,6 +918,9 @@
     <string name="output_profile_delete_blocked">Can't delete "%1$s" — it's still used by: %2$s</string>
     <string name="output_profile_picker_tooltip">Output profile</string>
     <string name="output_profile_blank">Blank</string>
+    <string name="output_profile_dont_use">Don't use</string>
+    <string name="display_not_used">not used</string>
+    <string name="profile_outputs_not_used">Not used</string>
     <!-- No longer shown (Blank replaced None); kept while the locales still carry it. -->
     <string name="output_profile_swap_menu_tooltip">Swap output profile</string>
     <string name="output_profile_new_name_default">New Profile</string>
@@ -1805,6 +1818,9 @@
     <string name="test_event_sent">Test event sent to Sentry. Check your dashboard to confirm it arrived.</string>
     <string name="test_event_failed">Could not send test event. Crash reporting is disabled or no DSN is configured.</string>
     <string name="test_event_dev_only">Visible to developers only — hidden in released installer builds.</string>
+    <string name="already_running_title">ChurchPresenter is already running</string>
+    <string name="already_running_message">Switch to the ChurchPresenter window that is already open to keep working.</string>
+    <string name="already_running_ok">OK</string>
     <string name="crash_feedback_title">Report what happened</string>
     <string name="crash_feedback_message">ChurchPresenter closed unexpectedly last time. Telling us what you were doing helps us fix it. This is optional.</string>
     <string name="crash_feedback_comment_label">What were you doing?</string>
@@ -2637,7 +2653,7 @@
     <string name="profile_duplicate_sub">Makes a standalone copy with the current values.</string>
     <string name="profile_delete_sub">Outputs using it have to be given another profile first.</string>
     <string name="profile_outputs_group">Outputs</string>
-    <string name="profile_outputs_hint">Click an output to show this profile on it. Click it again to hand it back to another profile.</string>
+    <string name="profile_outputs_hint">Click an output to show this profile on it. Click it again to set it to Blank.</string>
     <string name="profile_outputs_empty">No outputs are set up yet. Add them on the Projection tab.</string>
     <string name="profile_outputs_uses_this">Uses this profile</string>
     <string name="profile_outputs_uses_other">Uses %1$s</string>

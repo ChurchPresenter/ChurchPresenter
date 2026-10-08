@@ -7,6 +7,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.unit.Density
 import org.churchpresenter.liveoutput.FrameBuffer
+import javax.swing.SwingUtilities
 /** One frame at 60 fps, the clock every frame advances by. */
 private const val FRAME_NANOS = 16_666_667L
 
@@ -27,6 +28,13 @@ data class FrameCost(val renderNanos: Long, val readbackNanos: Long) {
  * what it shows each frame and be timed through recomposition as well as drawing. The scene lives
  * until [close], so the composition and every `remember` in it survive across frames, as a live
  * output's do.
+ *
+ * **The scene is built, rendered and closed on the AWT event queue**, as `ComposeScenePump`'s is.
+ * Compose's node-kind cache is global and unsynchronised: a scene composed on the caller's thread
+ * while another is built on the event queue -- the lower-third pre-render a `PresenterManager`
+ * starts -- corrupted it and hung a soak in its constructor, spinning in `ObjectIntMap.findKeyIndex`.
+ * The cost is timed inside the hop, so the event queue's dispatch is not counted as rendering; the
+ * pixel readback stays on the caller's thread, as the pump's does.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 class OffscreenOutput(
@@ -36,25 +44,28 @@ class OffscreenOutput(
     content: @Composable (frame: Int) -> Unit,
 ) : AutoCloseable {
     private val frame = mutableIntStateOf(0)
-    private val scene = ImageComposeScene(width, height, Density(1f)) { content(frame.intValue) }
+    private val scene = onEventQueue { ImageComposeScene(width, height, Density(1f)) { content(frame.intValue) } }
     private val buffer = FrameBuffer(width, height)
     private val pixels = IntArray(width * height)
     private var time = 0L
 
     /** Renders the next frame, reads it back, and says what each half cost. */
     fun step(): FrameCost {
-        frame.intValue += 1
         time += FRAME_NANOS
-        val start = clock()
-        Snapshot.sendApplyNotifications()
-        val image = scene.render(time)
-        val rendered = clock()
+        val (image, renderNanos) = onEventQueue {
+            frame.intValue += 1
+            val start = clock()
+            Snapshot.sendApplyNotifications()
+            val rendered = scene.render(time)
+            rendered to clock() - start
+        }
+        val readStart = clock()
         try {
             check(buffer.readInto(image, pixels)) { "the frame could not be read back" }
         } finally {
             image.close()
         }
-        return FrameCost(rendered - start, clock() - rendered)
+        return FrameCost(renderNanos, clock() - readStart)
     }
 
     /** Pixels the last frame drew on, so content that showed nothing is caught. */
@@ -62,6 +73,14 @@ class OffscreenOutput(
 
     override fun close() {
         buffer.close()
-        scene.close()
+        onEventQueue { scene.close() }
     }
+}
+
+/** Runs [block] on the AWT event queue and hands back its result, rethrowing what it threw. */
+private fun <T> onEventQueue(block: () -> T): T {
+    if (SwingUtilities.isEventDispatchThread()) return block()
+    var result: Result<T>? = null
+    SwingUtilities.invokeAndWait { result = runCatching(block) }
+    return checkNotNull(result).getOrThrow()
 }

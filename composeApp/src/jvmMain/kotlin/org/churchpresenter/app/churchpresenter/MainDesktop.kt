@@ -11,7 +11,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.onPreviewKeyEvent
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.bibletab.VerseSequenceLog
 import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel

@@ -108,12 +108,12 @@ internal object TimingParser {
                 TimingBehavior.AnimateScale(
                     target = target(cBhvr.tgtEl),
                     durMs = dur, delayMs = delay,
-                    fromX = if (obj.isSetFrom) parsePercentFactor(obj.from.x) else null,
-                    fromY = if (obj.isSetFrom) parsePercentFactor(obj.from.y) else null,
-                    toX = if (obj.isSetTo) parsePercentFactor(obj.to.x) else null,
-                    toY = if (obj.isSetTo) parsePercentFactor(obj.to.y) else null,
-                    byX = if (obj.isSetBy) parsePercentFactor(obj.by.x) else null,
-                    byY = if (obj.isSetBy) parsePercentFactor(obj.by.y) else null
+                    fromX = if (obj.isSetFrom) TimingValues.parsePercentFactor(obj.from.x) else null,
+                    fromY = if (obj.isSetFrom) TimingValues.parsePercentFactor(obj.from.y) else null,
+                    toX = if (obj.isSetTo) TimingValues.parsePercentFactor(obj.to.x) else null,
+                    toY = if (obj.isSetTo) TimingValues.parsePercentFactor(obj.to.y) else null,
+                    byX = if (obj.isSetBy) TimingValues.parsePercentFactor(obj.by.x) else null,
+                    byY = if (obj.isSetBy) TimingValues.parsePercentFactor(obj.by.y) else null
                 )
             }
             "cmd" -> behaviorNode((obj as CTTLCommandBehavior).cBhvr) { cBhvr, dur, delay ->
@@ -136,8 +136,8 @@ internal object TimingParser {
             kind = kind,
             nodeType = if (cTn.isSetNodeType) cTn.nodeType.toString() else null,
             beginConditions = conditions(cTn),
-            durMs = if (cTn.isSetDur) parseTlTime(cTn.dur) else null,
-            repeatCount = if (cTn.isSetRepeatCount) parseRepeat(cTn.repeatCount) else null,
+            durMs = if (cTn.isSetDur) TimingValues.parseTlTime(cTn.dur) else null,
+            repeatCount = if (cTn.isSetRepeatCount) TimingValues.parseRepeat(cTn.repeatCount) else null,
             autoReverse = cTn.isSetAutoRev && cTn.autoRev,
             fill = if (cTn.isSetFill) cTn.fill.toString() else null,
             restart = if (cTn.isSetRestart) cTn.restart.toString() else null,
@@ -155,7 +155,7 @@ internal object TimingParser {
         build: (CTTLCommonBehaviorData, Long?, Long) -> TimingBehavior
     ): TimeNode {
         val cTn = cBhvr.cTn
-        val dur = if (cTn.isSetDur) parseTlTime(cTn.dur) else null
+        val dur = if (cTn.isSetDur) TimingValues.parseTlTime(cTn.dur) else null
         val delay = conditions(cTn).firstOrNull()?.delayMs?.takeIf { it >= 0 } ?: 0L
         return TimeNode(
             id = if (cTn.isSetId) cTn.id else 0L,
@@ -163,7 +163,7 @@ internal object TimingParser {
             nodeType = null,
             beginConditions = conditions(cTn),
             durMs = dur,
-            repeatCount = if (cTn.isSetRepeatCount) parseRepeat(cTn.repeatCount) else null,
+            repeatCount = if (cTn.isSetRepeatCount) TimingValues.parseRepeat(cTn.repeatCount) else null,
             autoReverse = cTn.isSetAutoRev && cTn.autoRev,
             fill = if (cTn.isSetFill) cTn.fill.toString() else null,
             restart = if (cTn.isSetRestart) cTn.restart.toString() else null,
@@ -181,7 +181,7 @@ internal object TimingParser {
 
     private fun condition(cond: CTTLTimeCondition): TimeCondition {
         return TimeCondition(
-            delayMs = if (cond.isSetDelay) parseTlTime(cond.delay) else null,
+            delayMs = if (cond.isSetDelay) TimingValues.parseTlTime(cond.delay) else null,
             event = if (cond.isSetEvt) cond.evt.toString() else null,
             triggerShapeId = cond.tgtEl?.spTgt?.spid,
             triggerNodeId = if (cond.isSetTn) cond.tn.`val` else null
@@ -237,6 +237,10 @@ internal object TimingParser {
             time to value
         }
     }
+}
+
+/** The scalar value types of the timing XML, each read into a plain number. */
+internal object TimingValues {
 
     /** "150%" over this is 1.5×. */
     private const val PERCENT_PER_UNIT = 100.0
@@ -251,7 +255,7 @@ internal object TimingParser {
      * ST_Percentage union: either an integer in thousandths-of-a-percent ("150000" = 1.5×) or a
      * percent string ("150%"). Returns a plain factor (1.0 = 100%).
      */
-    private fun parsePercentFactor(value: Any?): Double? {
+    fun parsePercentFactor(value: Any?): Double? {
         val text = value?.toString()?.trim() ?: return null
         return if (text.endsWith("%")) {
             text.dropLast(1).toDoubleOrNull()?.div(PERCENT_PER_UNIT)
@@ -261,14 +265,14 @@ internal object TimingParser {
     }
 
     /** ST_TLTime: a millisecond count or the token "indefinite". */
-    private fun parseTlTime(value: Any?): Long? {
+    fun parseTlTime(value: Any?): Long? {
         val text = value?.toString() ?: return null
         if (text.equals("indefinite", ignoreCase = true)) return TimeNode.INDEFINITE_MS
         return text.toLongOrNull()
     }
 
     /** repeatCount is in 1000ths of an iteration ("3000" = 3×); "indefinite" = -1.0. */
-    private fun parseRepeat(value: Any?): Double? {
+    fun parseRepeat(value: Any?): Double? {
         val text = value?.toString() ?: return null
         if (text.equals("indefinite", ignoreCase = true)) return -1.0
         return text.toDoubleOrNull()?.div(REPEAT_THOUSANDTHS_PER_ITERATION)

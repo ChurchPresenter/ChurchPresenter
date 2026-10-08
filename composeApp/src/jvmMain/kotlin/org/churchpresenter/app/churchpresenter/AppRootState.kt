@@ -5,9 +5,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import org.churchpresenter.controlin.ControlHub
 import org.churchpresenter.showcontrol.ActionRunner
+import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import org.churchpresenter.liveoutput.deckLinkOutputCount
 import org.churchpresenter.server.InstanceLinkCommandFailure
-import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
 import androidx.compose.runtime.getValue
@@ -22,9 +22,9 @@ import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.ResolvedDisplay
 import org.churchpresenter.settings.reconcileScreenAssignments
-import org.churchpresenter.app.churchpresenter.data.LiveDurationLog
+import org.churchpresenter.statistics.LiveDurationLog
 import org.churchpresenter.settings.SettingsManager
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.bibletab.VerseSequenceLog
 import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -41,7 +41,7 @@ import org.churchpresenter.server.InstanceLinkViewModel
 import org.churchpresenter.stt.STTManager
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
-import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
+import org.churchpresenter.updater.UpdateCheckResult
 import java.awt.GraphicsEnvironment
 import java.io.File
 import java.util.Locale
@@ -135,7 +135,7 @@ internal class AppRootState(
     var presentationDisplayUrl by mutableStateOf("")
     var presentationFrozen by mutableStateOf(false)
 
-    val remoteSelectSongFlow = MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = REMOTE_FLOW_BUFFER)
+    val remoteSelectSongFlow = MutableSharedFlow<RemoteSongSelection>(extraBufferCapacity = REMOTE_FLOW_BUFFER)
     val remoteSelectPictureFlow = MutableSharedFlow<ScheduleItem.PictureItem>(extraBufferCapacity = REMOTE_FLOW_BUFFER)
     val remoteSelectPresentationFlow =
         MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = REMOTE_FLOW_BUFFER)
@@ -222,7 +222,7 @@ internal class AppRootState(
 
         val proj = appSettings.projectionSettings
         val assignments = reconcileScreenAssignments(
-            proj.screenAssignments, nonPrimaryDisplays, deckLinkCount, proj.fallbackProfileId,
+            proj.screenAssignments, nonPrimaryDisplays, deckLinkCount, proj.fallbackProfileId, proj.unusedScreens,
         )
         if (assignments != null) {
             appSettings = appSettings.copy(

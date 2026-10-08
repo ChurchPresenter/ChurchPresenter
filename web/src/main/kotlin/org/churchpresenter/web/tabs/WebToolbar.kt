@@ -252,7 +252,8 @@ private fun WebTabScope.WebActionButtons(hasSecondaryDisplay: Boolean, hasWebCap
     GoLiveButton(
         onClick = { goLive() },
         enabled = goLiveEnabled,
-        tooltipText = stringResource(Res.string.web_go_live)
+        tooltipText = stringResource(Res.string.web_go_live),
+        showsShortcut = true,
     )
 }
 

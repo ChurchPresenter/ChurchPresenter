@@ -7,12 +7,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asComposeImageBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import io.github.alexzhirkevich.compottie.LottieComposition
 import org.churchpresenter.settings.utils.Constants
@@ -20,6 +23,7 @@ import org.jetbrains.skia.Bitmap
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 
 @OptIn(ExperimentalTestApi::class)
@@ -158,5 +162,41 @@ class LowerThirdPresenterRenderTest {
             assertEquals(1f, pixel.green, "corner $index must be covered by the animation")
             assertEquals(0f, pixel.red, "corner $index must be covered by the animation")
         }
+    }
+
+    // ── Output-sized frames ─────────────────────────────────────────────────────────────────────
+
+    /**
+     * A frame pre-rendered at its output's size is drawn one to one: every pixel lands where it was
+     * rendered, unfiltered. A one-pixel checkerboard is the pattern any resampling would blur, so an
+     * exact match means none happened -- which is what makes a 4K output's lower third cheap and sharp.
+     */
+    @Test
+    fun `a frame at the output's own size is drawn pixel for pixel`() {
+        val width = 48
+        val height = 27
+        val checker = IntArray(width * height) { i ->
+            if ((i % width + i / width) % 2 == 0) 0xFFFF0000.toInt() else 0xFF0000FF.toInt()
+        }
+        val bitmap = Bitmap()
+        bitmap.allocN32Pixels(width, height)
+        val bytes = ByteArray(checker.size * 4)
+        ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().put(checker)
+        bitmap.installPixels(bytes)
+        bitmap.setImmutable()
+        var drawn: IntArray? = null
+        runComposeUiTest {
+            setContent {
+                val size = with(LocalDensity.current) { DpSize(width.toDp(), height.toDp()) }
+                Box(Modifier.testTag("lt").size(size)) {
+                    LowerThirdPresenter(composition = null, progress = { 0f }, frame = bitmap.asComposeImageBitmap())
+                }
+            }
+            val map = onNodeWithTag("lt").captureToImage().toPixelMap()
+            assertEquals(width, map.width)
+            assertEquals(height, map.height)
+            drawn = IntArray(width * height) { i -> map[i % width, i / width].toArgb() }
+        }
+        assertContentEquals(checker, drawn)
     }
 }

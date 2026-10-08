@@ -2,10 +2,12 @@
 
 package org.churchpresenter.app.churchpresenter
 
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
+
+import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.doubleClick
@@ -26,11 +28,17 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.calendar.PresetStore
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
-import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.settings.CompanionSatelliteSettings
+import org.churchpresenter.settings.WindowLayoutSettings
+import org.churchpresenter.settings.InstanceLinkRole
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.statistics.StatisticsManager
+import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.qa.QAManager
 import org.churchpresenter.schedule.ScheduleToolbarButton
@@ -38,14 +46,8 @@ import org.churchpresenter.schedule.ScheduleToolbarIconSize
 import org.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.server.ScheduleItemDto
 import org.churchpresenter.server.SelectBibleVerseRequest
-import org.churchpresenter.settings.CompanionSatelliteSettings
-import org.churchpresenter.settings.InstanceLinkRole
-import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.QuickBackground
-import org.churchpresenter.settings.ScreenAssignment
-import org.churchpresenter.settings.WindowLayoutSettings
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.stt.STTManager
 import org.churchpresenter.theme.ThemeMode
@@ -612,12 +614,16 @@ class MainDesktopComposeTest : MainDesktopComposeHarness() {
                     SelectBibleVerseRequest(bookName = "No Such Book", chapter = 1, verseNumber = 1),
                 )
                 flows.remoteSelectSong.emit(
-                    ScheduleItem.SongItem(
-                        id = "a",
-                        songNumber = 1,
-                        title = "A Test Song",
-                        songbook = "Hymnal",
-                        songId = "Hymnal::1",
+                    RemoteSongSelection(
+                        ScheduleItem.SongItem(
+                            id = "a",
+                            songNumber = 1,
+                            title = "A Test Song",
+                            songbook = "Hymnal",
+                            songId = "Hymnal::1",
+                        ),
+                        goLive = false,
+                        source = "remote",
                     ),
                 )
                 flows.remoteSelectPicture.emit(

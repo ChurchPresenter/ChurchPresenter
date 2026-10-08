@@ -2,6 +2,8 @@
 
 package org.churchpresenter.songs
 
+import androidx.compose.runtime.key
+import org.churchpresenter.settings.KeyboardShortcutSettings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -167,15 +169,6 @@ fun songsTab(
     themeMode: ThemeMode? = null,
     /** The bindings the tab resolves its key handler and nav hint through; the shipped set unless overridden. */
     shortcuts: ShortcutMap = ShortcutMap.DEFAULT,
-    /**
-     * How long typing must stop before the tab takes the caret back — the app's own three seconds
-     * unless a test shortens it.
-     *
-     * Shortened rather than clock-advanced because Compose's test clock does not reliably drive
-     * that `delay`: tests that advanced the clock passed or failed depending on how much wall time
-     * the run happened to take. A short window plus `waitUntil` ends on a positive signal instead.
-     */
-    searchIdleFocusMs: Long = SEARCH_IDLE_FOCUS_MS,
     /** Instance Link Controller mode: a new song going live. Null when not controlling. */
     onInstanceLinkSendProject: ((ScheduleItem) -> Unit)? = null,
     /** Instance Link Controller mode: a section change on the song already live. */
@@ -184,6 +177,15 @@ fun songsTab(
     typicalSongSeconds: (SongItem) -> Int? = { null },
     /** Settings to compose with in place of the built ones, once a test sets it. */
     settingsOverride: MutableState<AppSettings?> = mutableStateOf(null),
+    /**
+     * Whether opening the tab puts the caret in the search box, as the app does by default. Off
+     * here, so a suite about the tab's own keys starts with the keyboard on the tab.
+     */
+    focusSearchOnOpen: Boolean = false,
+    /** What the tab does with [scheduleSelection]: the app's click, go-live or remote push. */
+    scheduleAction: MutableState<ScheduleSongAction> = mutableStateOf(ScheduleSongAction.PUSH),
+    /** Bumped to rebuild the tab, as switching away from it and back does in the app. */
+    tabVisit: MutableState<Int> = mutableStateOf(0),
     block: ComposeUiTest.(vm: SongsViewModel, reports: TabReports) -> Unit,
 ) {
     val dir = Files.createTempDirectory("cp-songs-tab").toFile()
@@ -204,7 +206,9 @@ fun songsTab(
                 File(book, "${s.number} - ${s.title}.song").absolutePath,
             )
         }
-        val settings = AppSettings().withSongsEverywhere(songSettings.copy(storageDirectory = dir.absolutePath))
+        val settings = AppSettings(
+            keyboardShortcutSettings = KeyboardShortcutSettings(focusSearchOnTabOpen = focusSearchOnOpen),
+        ).withSongsEverywhere(songSettings.copy(storageDirectory = dir.absolutePath))
             .let { if (hiddenCols != null) it.copy(songHiddenCols = hiddenCols) else it }
             .let { if (songBpm != null) it.copy(songBpm = songBpm) else it }
             .let {
@@ -230,6 +234,7 @@ fun songsTab(
             setContent {
                 ThemedForTest(themeMode) {
                   CompositionLocalProvider(LocalShortcuts provides shortcuts) {
+                   key(tabVisit.value) {
                     SongsTab(
                         viewModel = vm,
                         appSettings = settingsOverride.value ?: settings,
@@ -245,7 +250,6 @@ fun songsTab(
                         onLineIndexChanged = { reports.lineIndex = it },
                         onPresenting = { reports.presenting += it },
                         isPresenting = isPresenting,
-                        searchIdleFocusMs = searchIdleFocusMs,
                         playCounts = playCounts,
                         onSongWentLive = onSongWentLive,
                         titleSlideFor = titleSlideFor,
@@ -255,7 +259,9 @@ fun songsTab(
                         typicalSongSeconds = typicalSongSeconds,
                         selectedSongItem = scheduleSelection.value,
                         selectedSongItemVersion = scheduleSelectionVersion.value,
+                        selectedSongItemAction = scheduleAction.value,
                     )
+                   }
                   }
                 }
             }

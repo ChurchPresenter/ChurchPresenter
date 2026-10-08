@@ -1,5 +1,6 @@
 package org.churchpresenter.bibletab
 
+import org.churchpresenter.sharedui.composables.SearchFieldFocus
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.clickable
@@ -91,6 +92,7 @@ internal fun BibleSearchRow(
     onCycleSearchMode: () -> Unit,
     onScopeSelected: (Int) -> Unit,
     onModeSelected: (Int) -> Unit,
+    searchFocus: SearchFieldFocus = remember { SearchFieldFocus() },
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth().searchBarCard()) {
         val searchIsNarrow = maxWidth < 440.dp
@@ -105,7 +107,8 @@ internal fun BibleSearchRow(
                     onSubmit = onSubmit,
                     onFocusChanged = onFocusChanged,
                     modeChip = { SearchModeChip(searchMode, onCycleSearchMode) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    focus = searchFocus,
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -144,7 +147,8 @@ internal fun BibleSearchRow(
                     onSubmit = onSubmit,
                     onFocusChanged = onFocusChanged,
                     modeChip = { SearchModeChip(searchMode, onCycleSearchMode) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    focus = searchFocus,
                 )
                 DropdownSelector(
                     label = stringResource(Res.string.scope),

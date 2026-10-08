@@ -156,7 +156,8 @@ private fun PicturesTabScope.PicturesFolderBar(viewModel: PicturesViewModel) {
             GoLiveButton(
                 onClick = { viewModel.goLive(presenterManager, onInstanceLinkSendProject, wentLive) },
                 enabled = viewModel.images.isNotEmpty(),
-                tooltipText = stringResource(Res.string.go_live)
+                tooltipText = stringResource(Res.string.go_live),
+                showsShortcut = true,
             )
         }
     }

@@ -202,6 +202,20 @@ class LiveMapReporterTest {
     }
 
     @Test
+    fun `an output on a monitor marked unused is not counted as in use`() {
+        val (row, profile) = output(Constants.DISPLAY_MODE_STAGE_MONITOR, targetDisplay = 1)
+        val onMonitor = row.copy(targetBoundsX = 1920, targetBoundsY = 0, targetBoundsW = 1920, targetBoundsH = 1080)
+        val base = settings(outputs = listOf(onMonitor to profile))
+
+        val unused = base.copy(
+            projectionSettings = base.projectionSettings.copy(unusedScreens = listOf(onMonitor.targetScreenKey)),
+        )
+
+        assertFalse(LiveMapReporter.setupFacts(unused, screenCount = 2).stageMonitor, "no window opens on that monitor")
+        assertTrue(LiveMapReporter.setupFacts(base, screenCount = 2).stageMonitor, "and on a monitor in use it counts")
+    }
+
+    @Test
     fun `the ping url carries the setup facts that are set`() {
         val url = LiveMapReporter.buildPingUrl(
             "linux", "26.1.0", null, isDevBuild = false,

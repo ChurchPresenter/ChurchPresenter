@@ -20,8 +20,12 @@ import org.churchpresenter.sharedui.utils.UsageEvent
  * [LiveMapReporter.setupFacts] — the operator has switched them off. Callers filter to
  * [isLiveOutput] assignments and resolve each to its [OutputProfile] before calling any function
  * below -- content and layout live on the profile, not the assignment, once one is picked.
+ *
+ * A row pointing at a monitor in [unusedScreens] (`ProjectionSettings.unusedScreens`) is switched
+ * off just the same: no window ever opens on that monitor.
  */
-internal fun ScreenAssignment.isLiveOutput(): Boolean = targetDisplay != Constants.KEY_TARGET_NONE
+internal fun ScreenAssignment.isLiveOutput(unusedScreens: Collection<String> = emptyList()): Boolean =
+    targetDisplay != Constants.KEY_TARGET_NONE && (targetScreenKey.isEmpty() || targetScreenKey !in unusedScreens)
 
 /**
  * True when [song] carries a second language and some live output's profile is set to show it.
@@ -113,14 +117,16 @@ internal fun isSplitScreenSong(outputs: List<OutputProfile>): Boolean =
  *
  * A screen output needs a *second* display — with one, there is no audience screen, only the
  * operator's own. A DeckLink output needs a device fitted. Browser Source outputs are deliberately
- * not counted: nothing proves anything is receiving them.
+ * not counted: nothing proves anything is receiving them. Nor is an output on a monitor in
+ * [unusedScreens], which never opens a window.
  */
 internal fun hasAudienceOutput(
     outputs: List<ScreenAssignment>,
     screenCount: Int,
     deckLinkDeviceCount: Int,
+    unusedScreens: Collection<String> = emptyList(),
 ): Boolean = outputs.any {
-    if (!it.isLiveOutput()) false
+    if (!it.isLiveOutput(unusedScreens)) false
     else if (it.targetType == Constants.TARGET_TYPE_DECKLINK) deckLinkDeviceCount > 0
     else screenCount >= 2
 }

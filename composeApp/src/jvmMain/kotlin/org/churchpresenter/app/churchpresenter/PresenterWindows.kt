@@ -154,6 +154,9 @@ internal fun PresenterWindows(
     }
 
     val availableScreens = nonPrimaryIndices(screens.toList(), defaultScreenDevice())
+    // A monitor marked "Don't use" still counts as a slot, but is never handed to one by position.
+    val screenKeys = screens.map { it.defaultConfiguration.bounds.asDisplayRect().key }
+    val positionalScreens = usableScreenIndices(availableScreens, screenKeys, proj.unusedScreens)
     // Profiles that merge their outputs into one picture -- see OutputMerge.kt.
     val merges = remember(proj) { proj.liveMerges() }
 
@@ -185,6 +188,7 @@ internal fun PresenterWindows(
             merge = merges[outputKey],
             // Every tile of one picture shows what its first output shows, lock and all.
             effectiveMode = presenterManager.screenSlotMode(profile, screenLocks, merges, slotIndex, slideContent),
+            unusedScreens = proj.unusedScreens,
         )
 
         when {
@@ -194,7 +198,7 @@ internal fun PresenterWindows(
             isDeckLinkPrimaryOutput(screenAssignment) ->
                 DeckLinkOutputs(slot, screens, showPresenterWindow, hideCursor, env)
             else -> ScreenOutputs(
-                slot, screens, availableScreens.getOrNull(i), showPresenterWindow, hideCursor, env,
+                slot, screens, positionalScreens.getOrNull(i), showPresenterWindow, hideCursor, env,
                 presenterOutputContent,
             )
         }
@@ -380,6 +384,8 @@ private data class OutputSlot(
     val outputKey: String,
     val merge: ResolvedMerge?,
     val effectiveMode: Presenting,
+    /** The monitors marked "Don't use" -- no window of this slot's ever opens on one. */
+    val unusedScreens: List<String> = emptyList(),
 )
 
 /** The dev build's stand-in for an output: an ordinary window on the operator's own screen. */
@@ -513,8 +519,13 @@ private fun ScreenOutputs(
 
     // A merge of real displays opens one window, on its first display, across them all.
     val attached = screens.map { it.defaultConfiguration.bounds.asDisplayRect() }
+    // A monitor marked "Don't use" never gets a window -- nor, by the return, this output's key.
+    val screenKeys = attached.map { it.key }
     val b = screenWindowRect(slot.merge, slot.outputKey, attached) {
-        targetScreenIndex?.takeIf { isScreenIndexValid(it, screens.size) }?.let { attached[it] }
+        targetScreenIndex
+            ?.takeIf { isScreenIndexValid(it, screens.size) }
+            ?.takeUnless { isUnusedScreenIndex(it, screenKeys, slot.unusedScreens) }
+            ?.let { attached[it] }
     } ?: return
 
     val showBg = showsOutputBackground(slot.profile)
@@ -603,6 +614,8 @@ private fun KeyOutputWindow(
         slot.assignment.keyTargetDisplay,
     )
     if (!isScreenIndexValid(keyScreenIndex, screens.size)) return
+    val screenKeys = screens.map { it.defaultConfiguration.bounds.asDisplayRect().key }
+    if (isUnusedScreenIndex(keyScreenIndex, screenKeys, slot.unusedScreens)) return
     val keyWindowState = remember(slot.index, keyScreenIndex) {
         val b = screens[keyScreenIndex].defaultConfiguration.bounds
         WindowState(

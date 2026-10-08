@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.mergingProfileOf
+import org.churchpresenter.settings.withScreenUnused
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -140,6 +141,10 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                 modifier = Modifier.width(langDropdownWidth),
                 onPick = { pickedId ->
                     updateProjection { it.withAssignment(i, assignment.copy(activeProfileId = pickedId)) }
+                },
+                // Only a row driving a monitor has one to mark unused.
+                onDontUse = assignment.targetScreenKey.takeIf { it.isNotEmpty() }?.let { key ->
+                    { updateProjection { it.withScreenUnused(key) } }
                 },
             )
 

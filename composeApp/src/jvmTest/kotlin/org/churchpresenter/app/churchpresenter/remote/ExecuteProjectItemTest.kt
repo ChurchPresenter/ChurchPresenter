@@ -5,14 +5,6 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.liveoutput.PresenterManager
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.liveHistoryEntryOf
-import org.churchpresenter.sharedui.utils.LiveHistoryLogger
-import org.churchpresenter.sharedui.utils.TrainingDataLogger
-import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -45,7 +37,7 @@ class ExecuteProjectItemTest {
     // ── Each content type reaches its own renderer ──────────────────────────────
 
     @Test
-    fun `a song is added to the schedule and put on the lyrics renderer`() {
+    fun `a song is added to the schedule and the output opened, leaving the song to the Songs tab`() {
         val (recorder, presenter) = project(
             ScheduleItem.SongItem(
                 id = "1",
@@ -57,19 +49,11 @@ class ExecuteProjectItemTest {
         )
 
         assertEquals(listOf("song:42:Amazing Grace:Hymnal:Hymnal::42"), recorder.added)
-        assertEquals(Presenting.LYRICS, presenter.slideContent.value)
         assertTrue(presenter.showPresenterWindow.value, "projecting must open the output")
-    }
-
-    @Test
-    fun `a song carries its title and number onto the presenter`() {
-        val (_, presenter) = project(
-            ScheduleItem.SongItem(id = "1", songNumber = 42, title = "Amazing Grace", songbook = "Hymnal")
-        )
-
-        val section = presenter.lyricSection.value
-        assertEquals("Amazing Grace", section.title, "the output must name the song that was asked for")
-        assertEquals(42, section.songNumber)
+        // The Songs tab puts the song up, its first section in one push; a placeholder put up from
+        // here ahead of it showed as a blank slide.
+        assertEquals(Presenting.NONE, presenter.slideContent.value, "nothing goes on screen from here")
+        assertTrue(presenter.lyricSection.value.lines.isEmpty() && presenter.lyricSection.value.title.isEmpty())
     }
 
     @Test
@@ -157,7 +141,7 @@ class ExecuteProjectItemTest {
         // Put something real on the output first, so "unchanged" means it survived rather than
         // meaning nothing was ever set.
         executeProjectItem(
-            ScheduleItem.SongItem(id = "0", songNumber = 7, title = "Before", songbook = "B"),
+            ScheduleItem.BibleVerseItem(id = "0", bookName = "John", chapter = 3, verseNumber = 16, verseText = "v"),
             recorder.actions(),
             presenter,
         )
@@ -174,15 +158,15 @@ class ExecuteProjectItemTest {
         // leave whatever is live alone rather than blanking the screen mid-service.
         assertEquals(addedBefore, recorder.added.size, "a label has nothing to add, got ${recorder.added}")
         assertEquals(modeBefore, presenter.slideContent.value, "and nothing to switch the output to")
-        assertEquals("Before", presenter.lyricSection.value.title, "the live song must still be live")
+        assertEquals("John", presenter.selectedVerses.value.single().bookName, "the live verse must still be live")
     }
 
     @Test
     fun `each projection sets exactly one mode`() {
         // Guards against a case that falls through into the next and leaves the output on the
-        // previous renderer while the schedule says otherwise.
+        // previous renderer while the schedule says otherwise. A song is not here: the Songs tab
+        // switches the output when it puts the song up.
         val cases = listOf(
-            ScheduleItem.SongItem(id = "1", songNumber = 1, title = "T", songbook = "B") to Presenting.LYRICS,
             ScheduleItem.BibleVerseItem(
                 id = "2",
                 bookName = "John",
@@ -313,38 +297,4 @@ class ExecuteProjectItemTest {
         }
     }
 
-    // ── The on-screen history ───────────────────────────────────────────────────
-
-    @Test
-    fun `a projected song's lyric lines name the song row in the on-screen history`() {
-        // The remote request is one of the three places that know the songbook; the presenter only
-        // ever sees the title and number, so without this the line could not be tied to a row.
-        TestSingletons.latchToTestHome()
-        TrainingDataLogger.sessionId = "execute-project-history"
-        val file = File(
-            System.getProperty("user.home"),
-            ".churchpresenter/bible-stt-logs/live-content-execute-project-history.jsonl",
-        ).apply { delete() }
-        try {
-            val presenter = PresenterManager()
-            presenter.onLiveStateChanged = { pm, _ -> LiveHistoryLogger.logLiveState(liveHistoryEntryOf(pm, null)) }
-
-            executeProjectItem(
-                ScheduleItem.SongItem(
-                    id = "1", songNumber = 77, title = "Remote Hymn", songbook = "Hymnal", songId = "Hymnal::77",
-                ),
-                ScheduleActionsRecorder().actions(),
-                presenter,
-            )
-
-            val lyricLine = file.readLines().map { Json.parseToJsonElement(it).jsonObject }
-                .last { it["contentType"]?.jsonPrimitive?.content == "LYRICS" }
-            assertEquals("Hymnal::77", lyricLine["songId"]?.jsonPrimitive?.content)
-            assertEquals("Hymnal", lyricLine["songbook"]?.jsonPrimitive?.content)
-            assertEquals("remote", lyricLine["source"]?.jsonPrimitive?.content)
-        } finally {
-            TrainingDataLogger.sessionId = null
-            file.delete()
-        }
-    }
 }

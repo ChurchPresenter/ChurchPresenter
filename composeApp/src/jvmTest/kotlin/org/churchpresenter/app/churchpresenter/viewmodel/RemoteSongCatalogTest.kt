@@ -58,4 +58,11 @@ class RemoteSongCatalogTest {
 
     @Test
     fun `a song with no sections has no lyrics`() = assertEquals(emptyList(), detail().toRawLyrics())
+
+    @Test
+    fun `a section with no type, or one already capitalised, keeps the header as sent`() =
+        assertEquals(
+            listOf("[]", "line", "[Tag]"),
+            detail(SongSectionDto("", listOf("line")), SongSectionDto("Tag", emptyList())).toRawLyrics(),
+        )
 }

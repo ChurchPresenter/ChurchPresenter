@@ -50,7 +50,7 @@ import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.composables.isJavaFxAvailable
 import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
 import org.churchpresenter.server.CalendarSyncService
-import org.churchpresenter.app.churchpresenter.utils.AppWindowRoot
+import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.calendar.CalendarStore
 import org.churchpresenter.calendar.ServiceAutoLoader
 import org.churchpresenter.settings.calendarFolder
@@ -58,7 +58,7 @@ import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.sharedui.utils.ShortcutMap
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.MacMenuBarActivationFix
-import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
+import org.churchpresenter.updater.UpdateChecker
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.settings.isDue

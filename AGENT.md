@@ -71,11 +71,11 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `tabs/`          | UI only — one file per tab, no logic                                |
 | `viewmodel/`     | State + business logic; owns its own ViewModel, never passed around |
 | `remote/`        | What a remote client or an Instance Link primary asks for, applied to the live output, the schedule and statistics — the server itself is `:server` |
-| `data/`          | File I/O, database, song parsing, Bible data                        |
+| `data/`          | File I/O, database, song parsing, Bible data — the play statistics are `:statistics` |
 | `models/`        | Only what needs the app: `PresetItems` — `ShortcutAction` is `:shared-ui`, the Companion UI states `:companion-surface` |
 | `composables/`   | UI components with app or feature ties (SceneCanvas, LivePreviewPanel, etc.) — the shared ones are `:shared-ui`, the video player `:media` |
 | `dialogs/`       | All dialogs and settings dialog tabs                                |
-| `utils/`         | Stateless helpers (UpdateChecker, etc.) — the shared ones (AutoFit, screen bounds) are `:shared-ui`, crash reporting is `:diagnostics` |
+| `utils/`         | Stateless helpers (AutoStartManager, etc.) — the shared ones (AutoFit, screen bounds) are `:shared-ui`, crash reporting is `:diagnostics`, the updater is `:updater` |
 | `ui/theme/`      | `LanguageProvider` and the theme-customization settings — the theme itself is the `:theme` module |
 
 ```
@@ -140,15 +140,18 @@ module-specific notes there, not here.**
 | `show-control/`        | `:show-control`        | The action vocabulary and `ActionRunner`, played through the app's `ShowHost` (see `docs/SHOW_CONTROL.md`) | [AGENT.md](show-control/AGENT.md)        |
 | `control-in/`          | `:control-in`          | MIDI and OSC in and out: the codecs, the ports and the hub that maps what arrives to actions | [AGENT.md](control-in/AGENT.md)          |
 | `live-output/`         | `:live-output`         | `PresenterManager` and what is on air, the output windows and stage monitor, and the off-screen outputs (NDI, OMT, Browser Source, DeckLink) on `ComposeScenePump` | [AGENT.md](live-output/AGENT.md)         |
+| `statistics/`          | `:statistics`          | What was presented and when — the counters, the play log, the CCLI lookup and exports — and the statistics window over them | [AGENT.md](statistics/AGENT.md)          |
+| `updater/`             | `:updater`             | The in-app updater: the GitHub release check, the installer download, the update window | [AGENT.md](updater/AGENT.md)             |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions
 from `gradle/libs.versions.toml`, `version` from the root `subprojects` block — don't re-declare it.
 
-### POI is shared by three modules
-`:presentation-engine`, `:converter` and `:composeApp` all pull Apache POI, and **exactly ONE POI
-schema jar may be on the classpath**: `poi-ooxml-full`, never `poi-ooxml-lite` — the engine's
-`<p:timing>` parser needs classes the lite jar omits. The version lives in
+### POI is shared by four modules
+`:presentation-engine`, `:converter`, `:statistics` and `:composeApp` all pull Apache POI, and
+**exactly ONE POI schema jar may be on the classpath**: `poi-ooxml-full`, never `poi-ooxml-lite` —
+the engine's `<p:timing>` parser needs classes the lite jar omits. `:statistics` takes only the core
+jar (its XLS export is HSSF), so it brings no schema jar. The version lives in
 `gradle/libs.versions.toml` (`apache-poi`) and nowhere else, and `:composeApp` excludes the lite
 module graph-wide in a `configurations.configureEach` block.
 
@@ -186,12 +189,15 @@ only — measure with the excludes removed before quoting it.
 ./gradlew compileKotlinJvm             # fast compile check
 ./gradlew :composeApp:detekt           # static analysis — CI's first gate, run it LAST before you stop
 ./gradlew :theme:test :theme:detekt    # a module's own suite and gate
-# NEVER run :composeApp:detektBaseline — it rewrites baseline.xml and absorbs your own new findings
+# NEVER run :composeApp:detektBaseline — it writes a baseline that absorbs your own new findings
 ./gradlew :composeApp:check            # compile + all unit tests
 ./gradlew :composeApp:jacocoTestReport # coverage → build/reports/jacoco/jacocoTestReport/html/
 bash cleanup_check.sh                  # repo code-quality report
 ./gradlew :composeApp:renderBenchmark  # off-screen render times per content type, 1080p and 4K — see composeApp/benchmarks/
-./gradlew :composeApp:soakTest -PsoakMinutes=10  # a scripted service on one output; fails on a leak or stall (CI: 240, on demand until it has run green)
+./gradlew :composeApp:renderBenchmark -PrecordRenderBaseline    # re-record the reference-Mac baseline, composeApp/benchmarks/
+./gradlew :composeApp:renderBenchmark -PrecordCiRenderBaseline  # write composeApp/benchmarks/ci/ (CI's own: record via render-benchmark.yml, not locally)
+./gradlew :composeApp:renderBenchmark -PcheckRenderRegression   # fail on a row slower than the CI baseline (render-benchmark.yml's gate)
+./gradlew :composeApp:soakTest -PsoakMinutes=10  # a scripted service on one output; fails on a leak or stall (CI: 240, weekly on main; a failure files a soak-failure issue)
 
 bash test-changed.sh                   # ONLY the suites your change touches — seconds, not minutes
 bash test-changed.sh --dry-run         # print the selection and the gradle command, run nothing
@@ -211,27 +217,15 @@ step of any change that touched Kotlin.** It is the first job in `.github/workfl
 fails on what the compiler only warns about (an unused import). Every finding it prints is yours to
 fix.
 
-### **NEVER add to a detekt baseline file**
-`config/detekt/baseline.xml`, `bible-engine/config/detekt/baseline.xml` and
-`presentation-engine/config/detekt/baseline.xml` hold findings from before the size/length rules
-(`LongMethod`, `LongParameterList`, `TooManyFunctions`, `LargeClass`, `MaxLineLength`,
-`TooGenericExceptionCaught`) were switched on. They are debt to be paid down, and they only ever
-shrink:
-- **The only permitted edit to a baseline file is deleting entries.** Never add a line to one — not a
-  new entry, not a re-keyed copy of an old one, not a "temporary" one. No exceptions, and no asking
-  whether this one is fine: fix the finding instead.
-- **NEVER run `detektBaseline`** (or any task that writes a baseline) — it regenerates the file from
-  the current tree and silently absorbs every finding you just introduced.
-- **Touching a baselined function can surface its finding.** Entries are keyed by rule plus
-  signature (a parameter's KDoc included), so changing a signature or a long line makes detekt
-  report it again. That finding is now yours: wrap the line, split the function, narrow the catch —
-  and delete the old entry, which no longer matches anything.
-- **When you fix a baselined finding, delete its entry** in the same change.
-- **Every entry is `jvmMain` code; `jvmTest` has none and must keep none.** In tests, suppress at the
-  declaration (`@Suppress`) for what genuinely cannot be wrapped.
-- detekt cannot fix these rules itself (none of them is auto-correctable, and the build has no
-  `detekt-formatting` plugin), so deleting a baseline file does not clean anything up — it turns every
-  entry back into a CI failure. Pay the debt down file by file instead.
+### **There are no detekt baselines — NEVER add one**
+No module has a baseline file: every finding the size/length rules (`LongMethod`,
+`LongParameterList`, `TooManyFunctions`, `LargeClass`, `MaxLineLength`, `TooGenericExceptionCaught`)
+ever raised was fixed in code, and the build configures no `baseline =` anywhere.
+- **Never create one, and never add `baseline =` to a `detekt {}` block.** A finding is fixed in
+  code — wrap the line, split the function, narrow the catch — not recorded.
+- **NEVER run `detektBaseline`** (or any task that writes a baseline) — it writes one from the
+  current tree and silently absorbs every finding you just introduced.
+- In tests, suppress at the declaration (`@Suppress`) only for what genuinely cannot be wrapped.
 
 Thresholds are deliberately not detekt's defaults: `LongMethod` 100, `LargeClass` 1000, and
 `LongParameterList` with `ignoreDefaultParameters: true` so the `*TestSupport.kt` DSL helpers are

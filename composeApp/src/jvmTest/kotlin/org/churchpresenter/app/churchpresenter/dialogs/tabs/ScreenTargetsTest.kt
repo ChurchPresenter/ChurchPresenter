@@ -4,6 +4,7 @@ import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.screenKey
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -72,6 +73,32 @@ class ScreenTargetsTest {
         assertEquals(1, after.getAssignment(1).targetDisplay)
         assertEquals(Constants.KEY_TARGET_NONE, after.getAssignment(0).targetDisplay, "slot 1 no longer has it")
         assertEquals(Constants.KEY_TARGET_NONE, after.getAssignment(1).keyTargetDisplay, "nor does its own key")
+    }
+
+    @Test
+    fun `choosing a monitor marked unused clears its mark and points the slot at it`() {
+        val leftKey = screenKey(0, 0, 1920, 1080)
+        val rightKey = screenKey(1920, 0, 1920, 1080)
+        val before = proj(ScreenAssignment(targetDisplay = Constants.KEY_TARGET_NONE))
+            .copy(unusedScreens = listOf(leftKey, rightKey))
+
+        val after = withPrimaryTarget(before, 0, before.getAssignment(0), left.copy(unused = true), numScreens = 1)
+
+        assertEquals(listOf(rightKey), after.unusedScreens, "only the chosen monitor is put back into use")
+        assertEquals(1, after.getAssignment(0).targetDisplay)
+        assertEquals(leftKey, after.getAssignment(0).targetScreenKey)
+    }
+
+    @Test
+    fun `choosing a monitor in use leaves the unused marks alone`() {
+        val rightKey = screenKey(1920, 0, 1920, 1080)
+        val before = proj(ScreenAssignment(targetDisplay = Constants.KEY_TARGET_NONE))
+            .copy(unusedScreens = listOf(rightKey))
+
+        val after = withPrimaryTarget(before, 0, before.getAssignment(0), left, numScreens = 1)
+
+        assertEquals(listOf(rightKey), after.unusedScreens)
+        assertEquals(1, after.getAssignment(0).targetDisplay)
     }
 
     @Test

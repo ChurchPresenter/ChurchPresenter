@@ -6,11 +6,18 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.churchpresenter.settings.AtemSettings
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 private const val MILLIS_PER_SECOND = 1000.0
 private const val DEFAULT_CANVAS_WIDTH = 1920
 private const val DEFAULT_CANVAS_HEIGHT = 1080
 private const val MAX_CANVAS_DIMENSION = 1920
+
+/**
+ * The longest side an output-sized variant is rendered at. An output larger than this (8K) draws the
+ * 4K frames scaled up rather than holding frames four times their size.
+ */
+private const val MAX_OUTPUT_DIMENSION = 3840
 
 /** Same-aspect tolerance for sharing one cache entry between desktop and ATEM sizes. */
 private const val ASPECT_TOLERANCE = 0.01
@@ -49,6 +56,18 @@ interface LottieRenderPolicy {
 
     /** The cache variant desktop playback streams from, or null if the JSON has no timing. */
     fun desktopVariant(lottieJson: String, atem: AtemSettings?): LottieRenderCache.Variant?
+
+    /**
+     * The cache variant an output [outputWidth]×[outputHeight] pixels big streams from: [desktop] at
+     * the size `ContentScale.Fit` draws it on that output, so the output draws its frames one to one.
+     * Null when [desktop] is already at least that size, so the output scales [desktop] down as it
+     * always has. Capped at 3840 on the longest side.
+     */
+    fun outputVariant(
+        desktop: LottieRenderCache.Variant,
+        outputWidth: Int,
+        outputHeight: Int,
+    ): LottieRenderCache.Variant?
 }
 
 internal object LottieRenderSizes : LottieRenderPolicy {
@@ -79,14 +98,16 @@ internal object LottieRenderSizes : LottieRenderPolicy {
         lottieDurationMs(lottieJson)?.let { ((it / MILLIS_PER_SECOND) * fps).toInt().coerceAtLeast(1) }
 
     /**
-     * Scales (w, h) down proportionally so neither side exceeds 1920 — output windows draw
-     * pre-rendered frames with ContentScale.Fit, so a larger canvas wastes disk and decode
-     * time with no visual benefit.
+     * Scales (w, h) down proportionally so neither side exceeds 1920 — the desktop variant every
+     * output can draw stays small on disk and quick to decode; an output larger than it gets a
+     * variant of its own size ([outputVariant]).
      */
-    override fun clampCanvasSize(w: Int, h: Int): Pair<Int, Int> {
+    override fun clampCanvasSize(w: Int, h: Int): Pair<Int, Int> = clampTo(w, h, MAX_CANVAS_DIMENSION)
+
+    private fun clampTo(w: Int, h: Int, maxSide: Int): Pair<Int, Int> {
         val longestSide = maxOf(w, h)
-        if (longestSide <= MAX_CANVAS_DIMENSION) return w to h
-        val scale = MAX_CANVAS_DIMENSION.toDouble() / longestSide
+        if (longestSide <= maxSide) return w to h
+        val scale = maxSide.toDouble() / longestSide
         return (w * scale).toInt().coerceAtLeast(1) to (h * scale).toInt().coerceAtLeast(1)
     }
 
@@ -153,4 +174,24 @@ internal object LottieRenderSizes : LottieRenderPolicy {
         return LottieRenderCache.Variant(true, w, h, LottieRenderCache.PLAYBACK_FPS.toDouble(), frames)
     }
 
+    /**
+     * The limiting side comes out at exactly the output's size and the other at most the output's,
+     * so `ContentScale.Fit` draws the frame at a scale of exactly one.
+     */
+    override fun outputVariant(
+        desktop: LottieRenderCache.Variant,
+        outputWidth: Int,
+        outputHeight: Int,
+    ): LottieRenderCache.Variant? {
+        if (outputWidth <= 0 || outputHeight <= 0) return null
+        val scale = minOf(outputWidth.toDouble() / desktop.width, outputHeight.toDouble() / desktop.height)
+        if (scale <= 1.0) return null
+        val (w, h) = clampTo(
+            (desktop.width * scale).roundToInt().coerceAtMost(outputWidth),
+            (desktop.height * scale).roundToInt().coerceAtMost(outputHeight),
+            MAX_OUTPUT_DIMENSION,
+        )
+        if (w <= desktop.width && h <= desktop.height) return null
+        return desktop.copy(width = w, height = h)
+    }
 }

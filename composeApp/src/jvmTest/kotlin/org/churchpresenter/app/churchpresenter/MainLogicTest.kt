@@ -19,8 +19,9 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.server.TunnelStatus
-import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
-import org.churchpresenter.app.churchpresenter.utils.UpdateInfo
+import org.churchpresenter.updater.UpdateCheckResult
+import org.churchpresenter.updater.UpdateInfo
+import org.churchpresenter.diagnostics.Logger
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.Test
@@ -65,8 +66,25 @@ class MainLogicTest {
     @Test
     fun `an operator override beats the platform default, on every platform`() {
         assertEquals("DIRECT3D", preferredRenderApi("Windows 11", override = "DIRECT3D"))
-        assertEquals("OPENGL", preferredRenderApi("Mac OS X", override = "OpenGL"), "skiko wants it uppercase")
+        assertEquals("OPENGL", preferredRenderApi("Windows 11", override = "OpenGL"), "skiko wants it uppercase")
         assertEquals("SOFTWARE", preferredRenderApi("Linux", override = "  software  "), "a stray space is not a value")
+        assertEquals("SOFTWARE", preferredRenderApi("Mac OS X", override = "software"))
+        assertEquals("SOFTWARE_COMPAT", preferredRenderApi("Mac OS X", override = "SOFTWARE_COMPAT"))
+    }
+
+    @Test
+    fun `an override the platform cannot run is ignored with a warning, not handed to skiko`() {
+        // skiko throws "MacOS does not support OPENGL rendering API" before the first window opens.
+        val lines = mutableListOf<String>()
+        val log = Logger(sink = { lines += it }, trail = { _, _, _ -> })
+
+        assertEquals("METAL", preferredRenderApi("Mac OS X", override = "OpenGL", log = log))
+        assertEquals("METAL", preferredRenderApi("Mac OS X", override = "SOFTWARE_FAST", log = log))
+        assertNull(preferredRenderApi("Windows 11", override = "METAL", log = log))
+        assertEquals("OPENGL", preferredRenderApi("Linux", override = "DIRECT3D", log = log))
+
+        assertEquals(4, lines.size)
+        assertTrue(lines.first().contains("OPENGL") && lines.first().contains("Mac OS X"), lines.first())
     }
 
     @Test

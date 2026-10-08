@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.profileFor
-import org.churchpresenter.app.churchpresenter.hasNoPrimaryTarget
+import org.churchpresenter.settings.drivesNothing
 import org.churchpresenter.profiles.FileManager
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.UpdateCheckInterval
@@ -142,10 +142,11 @@ object LiveMapReporter {
         songCounts: Pair<Int, Int> = 0 to 0,
         sessionMinutes: Int = 0,
     ): SetupFacts {
-        // Outputs with no display chosen are configuration the operator has switched off. Reading
+        // Outputs with no display chosen, or on a monitor marked "Don't use", are configuration the
+        // operator has switched off. Reading
         // their display mode would report a lower third or a stage monitor nobody is projecting.
         val proj = settings.projectionSettings
-        val activeProfiles = proj.screenAssignments.filterNot(::hasNoPrimaryTarget).mapNotNull { proj.profileFor(it) }
+        val activeProfiles = proj.screenAssignments.filterNot(proj::drivesNothing).mapNotNull { proj.profileFor(it) }
         return SetupFacts(
             language = settings.language,
             screens = screenCount,

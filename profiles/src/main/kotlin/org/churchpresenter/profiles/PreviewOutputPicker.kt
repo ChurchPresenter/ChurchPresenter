@@ -35,6 +35,7 @@ import org.churchpresenter.sharedui.utils.rememberScreenDevices
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.drivesNothing
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.painterResource
@@ -102,7 +103,8 @@ fun outputsShowing(
     for (index in 0 until displayCount) {
         val assignment = proj.getAssignment(index)
         val isDevFallbackSlot = devWindowedFallback && index >= realWindowCount
-        if (!isDevFallbackSlot && assignment.targetDisplay == Constants.KEY_TARGET_NONE) continue
+        // None, or a monitor marked "Don't use": either way main.kt opens no window for it.
+        if (!isDevFallbackSlot && proj.drivesNothing(assignment)) continue
         val profile = proj.profileFor(assignment) ?: OutputProfile()
         outputs += PreviewOutput(
             key = Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_SCREEN, index),

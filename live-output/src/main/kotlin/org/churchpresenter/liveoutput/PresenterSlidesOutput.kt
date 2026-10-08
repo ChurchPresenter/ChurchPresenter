@@ -40,6 +40,8 @@ class PresenterSlidesOutput(private val manager: PresenterManager) : SlidesOutpu
     private var holdingSlide = false
     override val screenLocks: State<Map<Int, Presenting>> get() = manager.screenLocks
     override val presentationFrame: State<PresentationFrame?> get() = manager.presentationFrame
+    override val slideOnAir: Pair<String?, Int>?
+        get() = manager.liveSlide.value?.let { it.fileName to it.index }
 
     override fun setPresentingMode(mode: Presenting) = bus.present(mode)
     override fun setShowPresenterWindow(show: Boolean) = manager.setShowPresenterWindow(show)

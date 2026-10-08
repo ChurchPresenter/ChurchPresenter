@@ -219,4 +219,23 @@ class AppShowHostTest {
         assertTrue(refused(Action.RunMacro("nope")).startsWith("No macro called nope"))
         assertTrue(done.single().startsWith("log:Show control could not run RunMacro(name=nope)"))
     }
+
+    @Test
+    fun `outlets left out reach nothing -- no rows, no row on air, no surface, no macro`() = runBlocking {
+        val none = ShowOutlets()
+        val row = ScheduleItem.AnnouncementItem("a1", "Welcome")
+        assertTrue(none.rows().isEmpty())
+        assertEquals(null, none.currentRowId())
+        none.goLive(row, 1)
+        none.rowActions(row, 0)
+        none.toPreview(row)
+        MediaCommand.entries.forEach(none.media)
+        none.obsScene("Wide")
+        assertFalse(none.companion(Action.CompanionPress("c1", 1)))
+        var ran = false
+        none.atem { ran = true }
+        assertFalse(ran, "with no switcher there is nothing to run the block on")
+        assertEquals(null, none.macro("Walk in"))
+        none.log("nothing listens")
+    }
 }

@@ -10,6 +10,7 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.InstanceLinkViewModel
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.app.churchpresenter.testPort
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -34,8 +35,8 @@ import kotlin.test.assertTrue
  *    primary that may be a different version, so every field is nullable and every branch has to
  *    cope with the nulls.
  *
- * Not covered here: PICTURES and LOWER_THIRD fetch bytes over the link, and the MEDIA stream-url
- * path needs a reachable primary — those need a live socket, and are covered separately in
+ * Not covered here: PICTURES and LOWER_THIRD fetch bytes over the link — those need a live
+ * socket, and are covered separately in
  * `ApplyRemoteLiveStateRemoteFetchTest` against a real [CompanionServer] (the same approach
  * `InstanceLinkClientTest` uses), so this class doesn't pay for starting one per test. The BIBLE
  * reference-only branch needs a real `Bible`, which `BibleViewModel`'s own suites already build; it
@@ -55,12 +56,13 @@ class ApplyRemoteLiveStateTest {
         presenter: PresenterManager = PresenterManager(),
         scenes: List<Scene> = emptyList(),
         onPlayRemoteMedia: ((String, String) -> Unit)? = null,
+        link: InstanceLinkViewModel = InstanceLinkViewModel(),
     ): PresenterManager {
         runBlocking {
             applyRemoteLiveState(
                 state = state,
                 presenterManager = presenter,
-                instanceLinkViewModel = InstanceLinkViewModel(),
+                instanceLinkViewModel = link,
                 localScenes = scenes,
                 onPlayRemoteMedia = onPlayRemoteMedia,
             )
@@ -423,5 +425,76 @@ class ApplyRemoteLiveStateTest {
             val presenter = apply(LiveStateDto(contentType = type))
             assertEquals(Presenting.NONE, presenter.slideContent.value, "$type is not a slide")
         }
+    }
+
+    // ── Media streamed from the primary ─────────────────────────────────────────
+
+    /**
+     * A link that knows its primary's address, which is all a stream url is built from. Nothing
+     * listens there: the url is handed to the local player, never fetched by the follower itself.
+     */
+    private fun <T> withAddressedLink(block: (link: InstanceLinkViewModel, port: Int) -> T): T {
+        val port = testPort(39_870)
+        val link = InstanceLinkViewModel()
+        link.connect(host = "127.0.0.1", port = port, apiKey = "", deviceId = "test", reconnectDelayMs = 60_000)
+        return try {
+            block(link, port)
+        } finally {
+            link.dispose()
+        }
+    }
+
+    @Test
+    fun `media from the primary's schedule is streamed from it, as a local file by default`() =
+        withAddressedLink { link, port ->
+            val played = mutableListOf<Pair<String, String>>()
+
+            val presenter = apply(
+                LiveStateDto(contentType = "MEDIA", mediaId = "clip-7"),
+                onPlayRemoteMedia = { url, type -> played += url to type },
+                link = link,
+            )
+
+            val (url, type) = played.single()
+            assertTrue(url.startsWith("http://127.0.0.1:$port/") && url.endsWith("/clip-7"), url)
+            assertEquals(Constants.MEDIA_TYPE_LOCAL, type, "a state that names no type is a local file")
+            assertEquals(url, presenter.currentMediaUrl.value)
+            assertEquals(Presenting.MEDIA, presenter.slideContent.value)
+        }
+
+    @Test
+    fun `media typed as a url but carrying none is streamed by its id, keeping its type`() =
+        withAddressedLink { link, _ ->
+            val played = mutableListOf<Pair<String, String>>()
+
+            apply(
+                LiveStateDto(contentType = "MEDIA", mediaType = Constants.MEDIA_TYPE_URL, mediaId = "clip-8"),
+                onPlayRemoteMedia = { url, type -> played += url to type },
+                link = link,
+            )
+
+            val (url, type) = played.single()
+            assertTrue(url.endsWith("/clip-8"), url)
+            assertEquals(Constants.MEDIA_TYPE_URL, type)
+        }
+
+    @Test
+    fun `streamable media with no local player to hand it to is not played`() = withAddressedLink { link, _ ->
+        val presenter = apply(LiveStateDto(contentType = "MEDIA", mediaId = "clip-9"), link = link)
+
+        assertEquals("", presenter.currentMediaUrl.value)
+        assertEquals(Presenting.MEDIA, presenter.slideContent.value, "the mode still switches")
+    }
+
+    @Test
+    fun `a stream id is not playable over a link that has no primary`() {
+        val played = mutableListOf<Pair<String, String>>()
+
+        apply(
+            LiveStateDto(contentType = "MEDIA", mediaId = "clip-10"),
+            onPlayRemoteMedia = { url, type -> played += url to type },
+        )
+
+        assertTrue(played.isEmpty(), "there is nowhere to stream it from")
     }
 }

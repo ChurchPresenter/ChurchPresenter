@@ -74,7 +74,7 @@ class KeyboardShortcutsContentTest {
             }
             onNodeWithTag(shortcutCategoryTag(null)).assertTextContains("Mouse")
         }
-        assertEquals(8, categories.size, "a new scope needs a rail entry and a heading of its own")
+        assertEquals(9, categories.size, "a new scope needs a rail entry and a heading of its own")
     }
 
     @Test

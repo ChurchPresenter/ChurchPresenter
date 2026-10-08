@@ -17,6 +17,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.theme.ThemeMode
+import java.io.File
+import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -369,6 +371,46 @@ class SetupWizardContentTest {
             railStep(8)
             assertTrue(onAllNodesWithTextCount("0 installed") >= 1, "an empty setup must say zero")
         }
+
+    @Test
+    fun `by default the last step counts the folders it was given, and finishing dismisses`() {
+        val bibles = Files.createTempDirectory("cp-wizard-bibles").toFile()
+        val songs = Files.createTempDirectory("cp-wizard-songs").toFile()
+        try {
+            File(bibles, "kjv.spb").writeText("x")
+            File(bibles, "rst.spb").writeText("x")
+            File(songs, "Hymnal").mkdirs()
+            File(songs, "Hymnal/a.song").writeText("x")
+            var dismissed = 0
+            runComposeUiTest {
+                setContent {
+                    MaterialTheme {
+                        // Only what the app has to pass: the scan and the finish button are its own.
+                        SetupWizardContent(
+                            theme = ThemeMode.SYSTEM,
+                            selectedLanguage = Language.ENGLISH,
+                            bibleDirectory = bibles.absolutePath,
+                            songsDirectory = songs.absolutePath,
+                            onLanguageSelected = {},
+                            onThemeSelected = {},
+                            onOpenSettings = {},
+                            onDismiss = { dismissed++ },
+                        )
+                    }
+                }
+                railStep(Label.LAST_STEP)
+                waitUntil("the folders were scanned") { onAllNodesWithTextCount("2 installed") >= 1 }
+                assertTrue(onAllNodesWithTextCount("1 books · 1 songs") >= 1)
+
+                onNodeWithText(Label.DONE).performClick()
+                waitForIdle()
+                assertEquals(1, dismissed, "with no finish action of its own, finishing closes the wizard")
+            }
+        } finally {
+            bibles.deleteRecursively()
+            songs.deleteRecursively()
+        }
+    }
 
     /** The label the picker draws for a theme, kept in one place so a rename lands here too. */
     private fun themeLabelFor(mode: ThemeMode): String = when (mode) {

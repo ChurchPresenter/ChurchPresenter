@@ -53,20 +53,26 @@ import org.churchpresenter.sharedui.composables.NumberSettingsTextField
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.isScreenUnused
 
-/** Where a key can go: nowhere, any display but the primary, or a DeckLink port. */
+/**
+ * Where a key can go: nowhere, any display but the primary, or a DeckLink port. A monitor marked
+ * unused is left out -- a key is never sent to one -- though it keeps its number, so the displays
+ * after it are numbered as the Display menu numbers them.
+ */
 @Composable
 internal fun rememberKeyOutputOptions(
     screenDevicesAll: List<DetectedScreen>,
     proj: ProjectionSettings,
 ): List<DisplayOption> {
     val noneLabel = stringResource(Res.string.key_output_none)
-return remember(screenDevicesAll, noneLabel, proj.screenNames) {
+return remember(screenDevicesAll, noneLabel, proj.screenNames, proj.unusedScreens) {
     val opts = mutableListOf(DisplayOption(label = noneLabel,
         targetDisplay = Constants.KEY_TARGET_NONE, targetType = Constants.TARGET_TYPE_SCREEN))
-    var keyDisplayNum = 1
-    for (screen in screenDevicesAll) {
-        if (screen.isPrimary) continue
+    // Numbered among every non-primary display, so an unused one left out keeps its number.
+    screenDevicesAll.filterNot { it.isPrimary }.forEachIndexed { position, screen ->
+        if (proj.isScreenUnused(screen.key)) return@forEachIndexed
+        val keyDisplayNum = position + 1
         val named = proj.screenName(screen.key)
         opts.add(DisplayOption(
             label = displayLabel(named, keyDisplayNum, screen),
@@ -77,7 +83,6 @@ return remember(screenDevicesAll, noneLabel, proj.screenNames) {
             boundsW = screen.boundsW,
             boundsH = screen.boundsH
         ))
-        keyDisplayNum++
     }
     if (DeckLinkManager.isAvailable()) {
         DeckLinkManager.listDevices().forEachIndexed { di, device ->

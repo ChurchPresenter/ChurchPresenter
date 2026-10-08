@@ -31,8 +31,7 @@ class HttpRelayTransport(
         .build(),
 ) : RelayTransport {
     override fun send(method: String, url: String, headers: Map<String, String>, body: String?): RelayReply {
-        val uri = URI.create(url)
-        require(uri.scheme == "https") { "relay URL must be https" }
+        val uri = relayUri(url)
         val request = HttpRequest.newBuilder(uri).timeout(timeout)
         headers.forEach { (name, value) -> request.header(name, value) }
         val publisher = body?.let(HttpRequest.BodyPublishers::ofString) ?: HttpRequest.BodyPublishers.noBody()
@@ -44,6 +43,24 @@ class HttpRelayTransport(
     private companion object {
         const val DEFAULT_TIMEOUT_SECONDS = 10L
     }
+}
+
+/**
+ * [url] as the URI a relay call goes to, or [RelayFailure.Misconfigured] when it is not an
+ * `https://` address with a host -- blank, unparseable or plain http. A setting, not a bug: every
+ * caller already ends a round on a [RelayFailure] with a status, so it must not surface as anything
+ * else. There is no plain-http exception for a local relay; none is used.
+ */
+internal fun relayUri(url: String): URI {
+    val uri = try {
+        URI.create(url)
+    } catch (e: IllegalArgumentException) {
+        throw RelayFailure.Misconfigured(e)
+    }
+    if (!uri.scheme.equals("https", ignoreCase = true) || uri.host.isNullOrBlank()) {
+        throw RelayFailure.Misconfigured()
+    }
+    return uri
 }
 
 /** Why a call did not succeed, as the caller has to tell them apart. */
@@ -67,6 +84,10 @@ sealed class RelayFailure(message: String, cause: Throwable? = null) : Exception
         RelayFailure("relay rejected the request ($status): $detail", cause)
 
     class Unreachable(cause: Throwable) : RelayFailure("relay unreachable: ${cause.message}")
+
+    /** The relay address is not one this desktop will call: missing, unparseable, or not https. */
+    class Misconfigured(cause: Throwable? = null) :
+        RelayFailure("the relay address is not an https:// address", cause)
 }
 
 /** The desktop's half of the relay protocol. */

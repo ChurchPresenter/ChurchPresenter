@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.showcontrol.Action
+import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import kotlinx.coroutines.flow.Flow
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.InstanceLinkStatus
@@ -100,7 +101,7 @@ data class RemoteControlFlows(
     val selectSlideFlow: Flow<Pair<String, Int>>? = null,
     /** Emits a verse to display instantly without approval. */
     val selectBibleVerseFlow: Flow<SelectBibleVerseRequest>? = null,
-    val remoteSelectSongFlow: Flow<ScheduleItem.SongItem>? = null,
+    val remoteSelectSongFlow: Flow<RemoteSongSelection>? = null,
     /** Same backfill mechanism as [remoteSelectSongFlow] — a remote PROJECT go-live for a picture
      *  folder/presentation only adds it to the schedule and flips slideContent; these drive the
      *  main screen to actually load the real content into the corresponding ViewModel. */

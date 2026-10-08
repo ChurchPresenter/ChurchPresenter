@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,7 +12,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.yield
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.server.SelectBibleVerseRequest
 import org.churchpresenter.bibletab.BibleViewModel
 import org.churchpresenter.liveoutput.PresenterManager
@@ -94,7 +95,7 @@ class RemoteCommandFlowLifecycleTest {
         val previousSlide: Flow<Unit>? = null,
         val selectSlide: Flow<Pair<String, Int>>? = null,
         val verse: Flow<SelectBibleVerseRequest>? = null,
-        val song: Flow<ScheduleItem.SongItem>? = null,
+        val song: Flow<RemoteSongSelection>? = null,
         val picture: Flow<ScheduleItem.PictureItem>? = null,
         val presentation: Flow<ScheduleItem.PresentationItem>? = null,
         val media: Flow<ScheduleItem.MediaItem>? = null,
@@ -113,7 +114,6 @@ class RemoteCommandFlowLifecycleTest {
                 presentationViewModel = presentations,
                 bibleViewModel = bible,
                 presenterManager = presenter,
-                onSongItemVersionBump = {},
                 resolveImageFile = resolve,
                 onSettingsChange = { transform -> settings = transform(settings) },
                 onSongItemSelected = {},
@@ -153,7 +153,13 @@ class RemoteCommandFlowLifecycleTest {
             nextSlide = flowOf(Unit, Unit),
             previousSlide = flowOf(Unit),
             selectSlide = flowOf("deck" to 3),
-            song = flowOf(ScheduleItem.SongItem(id = "s", songNumber = 1, title = "A", songbook = "B")),
+            song = flowOf(
+                RemoteSongSelection(
+                    ScheduleItem.SongItem(id = "s", songNumber = 1, title = "A", songbook = "B"),
+                    goLive = false,
+                    source = "remote",
+                ),
+            ),
             picture = flowOf(ScheduleItem.PictureItem(id = "p", folderPath = "/x", folderName = "x", imageCount = 0)),
             presentation = flowOf(
                 ScheduleItem.PresentationItem(

@@ -17,4 +17,10 @@ import org.churchpresenter.core.models.shortcuts.KeyChord
 @Serializable
 data class KeyboardShortcutSettings(
     val overrides: Map<String, List<KeyChord>> = emptyMap(),
+    /**
+     * Opening Bible, Songs or Dictionary puts the caret in its search box, so typing starts a search
+     * at once. Not when that tab is already live or was opened from the schedule: the keyboard stays
+     * on what is live there, so the step keys keep working.
+     */
+    val focusSearchOnTabOpen: Boolean = true,
 )

@@ -1,5 +1,6 @@
 package org.churchpresenter.dictionary
 
+import androidx.compose.ui.focus.focusProperties
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 import androidx.compose.foundation.VerticalScrollbar
@@ -35,6 +36,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -63,6 +65,7 @@ import org.churchpresenter.sharedui.composables.BibleListRowShape
 import org.churchpresenter.sharedui.composables.bibleRowColors
 import org.churchpresenter.sharedui.composables.rememberRowHover
 import org.churchpresenter.sharedui.composables.rowPad
+import org.churchpresenter.sharedui.composables.SearchFieldFocus
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -70,6 +73,7 @@ internal fun DictionaryListPane(
     modifier: Modifier,
     viewModel: DictionaryViewModel,
     getBookName: ((bookId: Int) -> String?)?,
+    searchFocus: SearchFieldFocus = remember { SearchFieldFocus() },
 ) {
     val results = viewModel.searchResults
     val listState = rememberLazyListState()
@@ -97,6 +101,7 @@ internal fun DictionaryListPane(
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 8.dp),
+            focus = searchFocus,
         )
 
         // Book / chapter filter for the entry list (visible once interlinear data is loaded)
@@ -300,6 +305,9 @@ private fun DictionaryEntryRow(
             .clip(BibleListRowShape)
             .background(colors.background)
             .hoverable(hover)
+            // A click selects the entry and leaves the keyboard with the tab, where Enter goes live;
+            // a focused row would take that Enter as another click instead.
+            .focusProperties { canFocus = false }
             .clickable(interactionSource = hover, indication = null, onClick = onClick)
             .padding(horizontal = rowPad(10.dp), vertical = rowPad(8.dp)),
         verticalAlignment = Alignment.CenterVertically,

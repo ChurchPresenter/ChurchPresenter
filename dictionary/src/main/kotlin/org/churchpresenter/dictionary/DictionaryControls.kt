@@ -13,6 +13,10 @@ import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.focus.focusRequester
+import org.churchpresenter.sharedui.composables.SearchFieldFocus
+import org.churchpresenter.sharedui.composables.rememberSearchFieldValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -100,6 +104,8 @@ internal fun DictionarySearchField(
     onValueChange: (String) -> Unit,
     onClear: () -> Unit,
     modifier: Modifier,
+    /** How the tab moves the keyboard in here with the query selected. */
+    focus: SearchFieldFocus = remember { SearchFieldFocus() },
 ) {
     Row(
         modifier = modifier
@@ -115,15 +121,19 @@ internal fun DictionarySearchField(
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
         )
         Box(modifier = Modifier.weight(1f).padding(horizontal = 8.dp)) {
+            var fieldValue by rememberSearchFieldValue(value, focus)
             BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
+                value = fieldValue,
+                onValueChange = {
+                    fieldValue = it
+                    if (it.text != value) onValueChange(it.text)
+                },
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface
                 ),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().focusRequester(focus.requester),
                 decorationBox = { innerTextField ->
                     if (value.isEmpty()) {
                         Text(

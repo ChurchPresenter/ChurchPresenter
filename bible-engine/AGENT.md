@@ -79,7 +79,8 @@ so a replay can be driven from the command line. The replay suite is inert witho
   COMPLEXITY — a detection pipeline is branch-dense — and `extra["coverageExcludes"]` dropping
   `**/ui/**`, `**/MainKt*` and `**/tools/**` (CLI diagnostics). Both `extra` blocks must stay
   **above everything else** in the build file; never re-declare the JaCoCo tasks here.
-- There is no detekt task on this module.
+- **Detekt**: `./gradlew :bible-engine:detekt`, against the root config, gated in CI. The module has
+  **no baseline**: every finding was fixed in code, and a new one is fixed, never suppressed.
 
 ## Rules
 

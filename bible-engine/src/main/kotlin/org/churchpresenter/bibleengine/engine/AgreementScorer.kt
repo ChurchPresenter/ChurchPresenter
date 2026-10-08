@@ -1,5 +1,8 @@
 package org.churchpresenter.bibleengine.engine
 
+/** Words shorter than this carry too little to score agreement on. */
+private const val MIN_SCORED_WORD_LENGTH = 3
+
 object AgreementScorer {
 
     fun score(candidateText: String, transcript: String, translation: String): Double {
@@ -42,6 +45,6 @@ object AgreementScorer {
         // orthography variance symmetrically (verse text and STT share this path).
         text.lowercase().replace('ё', 'е')
             .split(Regex("[^\\p{L}]+"))
-            .filter { it.length >= 3 }
+            .filter { it.length >= MIN_SCORED_WORD_LENGTH }
             .toSet()
 }
