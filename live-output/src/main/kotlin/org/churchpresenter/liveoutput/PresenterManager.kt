@@ -1,5 +1,7 @@
 package org.churchpresenter.liveoutput
 
+import androidx.compose.runtime.IntState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -9,6 +11,7 @@ import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.liveshow.Cue
 import org.churchpresenter.liveshow.Layer
+import org.churchpresenter.liveshow.LiveShow
 import org.churchpresenter.media.MediaOutput
 import org.churchpresenter.qa.QAOutput
 import org.churchpresenter.settings.AppSettings
@@ -56,7 +59,7 @@ class PresenterManager private constructor(
         this(showPresenterWindowInitially, PresenterContext())
 
     init {
-        context.notify = ::notifyLiveStateChanged
+        context.notify = { source -> onLiveStateChanged?.invoke(this, source) }
         context.setPresentingMode = ::setPresentingMode
         context.requestClearDisplay = ::requestClearDisplay
     }
@@ -78,15 +81,22 @@ class PresenterManager private constructor(
     val announcementsOutput: AnnouncementsOutput by lazy { PresenterAnnouncementsOutput(this) }
 
     /**
+     * The layers whose cue is held whole rather than derived from one of the parts -- messages and
+     * props (`docs/SHOW_CONTROL.md`). The content layers stay derived until their parts write cues.
+     */
+    internal val liveShow = LiveShow()
+
+    /**
      * What is on air, as the layer model sees it: the slide's content, each of [overlays], and the
-     * content they name ([legacyProgram]). Everything asking what is on screen reads it, through
-     * [liveContent], [slideContent] and [isLive]. An output with a screen lock draws its own mode's
-     * program instead (`OutputLayers`).
+     * content they name ([legacyProgram]), with [liveShow]'s own layers over them. Everything asking
+     * what is on screen reads it, through [liveContent], [slideContent] and [isLive]. An output with
+     * a screen lock draws its own mode's program instead (`OutputLayers`).
      */
     val program: State<Map<Layer, Cue>> = derivedStateOf {
-        overlays.value.fold(legacyProgram(context.slideMode.value, this)) { layers, overlay ->
+        val derived = overlays.value.fold(legacyProgram(context.slideMode.value, this)) { layers, overlay ->
             layers + legacyProgram(overlay, this)
         }
+        derived + liveShow.program.value
     }
 
     /** The content types [program] has on air: the slide's first, then each overlay in the order it went up. */
@@ -98,7 +108,8 @@ class PresenterManager private constructor(
      * it alone -- see [overlays].
      */
     val slideContent: State<Presenting> = derivedStateOf {
-        liveContent.value.firstOrNull { !it.isOverlay } ?: Presenting.NONE
+        // Messages and props are on layers of their own, held whole: neither is a slide.
+        liveContent.value.firstOrNull { !it.isOverlay && !it.isWhole } ?: Presenting.NONE
     }
 
     /** Whether anything at all is on screen. */
@@ -119,12 +130,21 @@ class PresenterManager private constructor(
      *  a broadcast pair the wrong mode with fresh content, or the right mode with stale content,
      *  whichever setter happened to run first. */
     var onLiveStateChanged: ((PresenterManager, Presenting) -> Unit)? = null
-    private fun notifyLiveStateChanged(source: Presenting) {
-        onLiveStateChanged?.invoke(this, source)
-    }
 
     /** Raised to fade the outputs out before the display is cleared -- see [requestClearDisplay]. */
     val clearDisplayRequested: State<Boolean> = context.clearDisplayRequested
+
+    /**
+     * How many times an operator has cleared the outputs -- the Clear button, its key, a remote
+     * client's clear -- as against a clear that a media file ending or an action asked for. What is
+     * still running of an action list stops on this, and only this; see [clearFromOperator].
+     */
+    val operatorClears: IntState get() = operatorClearCount
+
+    internal val operatorClearCount = mutableIntStateOf(0)
+
+    /** How many times a message has been put up, so the same message sent again restarts its timer. */
+    internal val messagesShown = mutableIntStateOf(0)
 
     private val _showPresenterWindow = mutableStateOf(showPresenterWindowInitially)
     val showPresenterWindow: State<Boolean> = _showPresenterWindow
@@ -155,7 +175,14 @@ class PresenterManager private constructor(
         }
         // Slide content replaces the overlays over it; clearing takes everything down.
         context.overlays.value = emptySet()
-        context.lastLive.value = mode
+        // Clearing takes the whole layers down too; slide content takes a message down.
+        if (mode == Presenting.NONE) liveShow.clearAll() else liveShow.clear(Layer.MESSAGES)
+        putSlide(mode, lastLive = mode)
+    }
+
+    /** Puts [mode] on the slide layers, leaving the overlays as they are, and records [lastLive]. */
+    internal fun putSlide(mode: Presenting, lastLive: Presenting) {
+        context.lastLive.value = lastLive
         if (context.slideMode.value != mode) {
             CrashReporter.setTag("presenting", mode.name)
             CrashReporter.breadcrumb("Presenting: ${mode.name}", category = "presenter")
@@ -173,7 +200,7 @@ class PresenterManager private constructor(
             clearPresentationPlayback()
             slides.clearLiveSlide()
         }
-        notifyLiveStateChanged(mode)
+        context.notify(mode)
     }
 
     /** Request a fade-out before clearing the display. The LaunchedEffect in main.kt

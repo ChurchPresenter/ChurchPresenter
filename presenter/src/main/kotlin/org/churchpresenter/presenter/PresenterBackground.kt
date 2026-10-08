@@ -8,6 +8,8 @@
  */
 package org.churchpresenter.presenter
 
+import org.churchpresenter.sharedui.utils.rememberFileExists
+import org.churchpresenter.sharedui.utils.FileExists
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -165,11 +167,16 @@ internal fun resolveBackground(
 ): ResolvedBackground {
     val override = if (isLowerThird) settings.quickLowerThirdBackground else settings.quickBackground
     // Both remembered unconditionally: a `&&` short-circuit here would be a conditional remember.
-    val overrideDraws = remember(override, knownCameras) {
-        override != null && songBackgroundResolves(override, knownCameras)
+    // The disk is asked in the background. Until it answers the picture or clip counts as there --
+    // the usual case -- so it is chosen at once and the picture holds the last background while it
+    // decodes, instead of the fallback flashing up first. One that turns out missing is dropped then.
+    val overrideMediaExists = rememberFileExists(override?.mediaPath) != false
+    val ownMediaExists = rememberFileExists(ownBackground.mediaPath) != false
+    val overrideDraws = remember(override, knownCameras, overrideMediaExists) {
+        override != null && songBackgroundResolves(override, knownCameras, overrideMediaExists)
     }
-    val ownDraws = remember(ownBackground, knownCameras) {
-        ownBackground.isCustom && songBackgroundResolves(ownBackground, knownCameras)
+    val ownDraws = remember(ownBackground, knownCameras, ownMediaExists) {
+        ownBackground.isCustom && songBackgroundResolves(ownBackground, knownCameras, ownMediaExists)
     }
 
     val live = when {
@@ -398,12 +405,12 @@ internal fun rememberBackgroundBitmap(background: ResolvedBackground, isLowerThi
         bitmap = if (background.type == Constants.BACKGROUND_IMAGE && background.imagePath.isNotEmpty()) {
             // PictureDecoder, not Skia directly — see PresenterScreen for why.
             val file = File(background.imagePath)
-            if (file.exists()) {
-                withContext(Dispatchers.IO) {
+            withContext(Dispatchers.IO) {
+                if (FileExists.check(background.imagePath)) {
                     PictureDecoder.decodeScaledOrNull(file, maxWidth, maxHeight)?.toComposeImageBitmap()
+                } else {
+                    null
                 }
-            } else {
-                null
             }
         } else {
             null

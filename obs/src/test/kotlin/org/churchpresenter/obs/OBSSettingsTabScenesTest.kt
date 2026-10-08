@@ -59,14 +59,17 @@ class OBSSettingsTabScenesTest {
      * and the Stage Monitor tab does give it a content type — but it is what ships, so it is pinned
      * here rather than asserted away. Adding the row (and its `obs_mode_*` string) will fail this
      * test, which is the point: the new row then needs its own coverage like every other mode.
+     *
+     * Messages and props have no row either, by design: props sit over whatever is on air and never
+     * change the scene, and a message takes the default scene like any unmapped mode.
      */
     @Test
-    fun `every presenting mode except the dictionary can be mapped`() {
+    fun `every presenting mode except the dictionary, messages and props can be mapped`() {
         val mapped = obsSceneModes.map { it.first }.toSet()
         assertEquals(
-            setOf(Presenting.DICTIONARY),
+            setOf(Presenting.DICTIONARY, Presenting.MESSAGE, Presenting.PROPS),
             Presenting.entries.toSet() - mapped,
-            "only the dictionary may be missing a scene row; a newly unmapped mode is a regression",
+            "only these may be missing a scene row; a newly unmapped mode is a regression",
         )
     }
 

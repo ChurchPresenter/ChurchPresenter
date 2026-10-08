@@ -234,6 +234,14 @@ data class LiveStateDto(
     // them (null -> the follower goes live with [contentType] as before); old followers ignore them.
     val liveSlide: String? = null,
     val overlays: List<String>? = null,
+    // The message up on the primary, alone over everything, and how long it stays up -- null when
+    // none is. Only primaries that send [overlays] send it, so a null there from one of them means
+    // the message came down.
+    val message: String? = null,
+    val messageDurationSeconds: Int? = null,
+    // The props up on the primary, by id; sent alongside [overlays], so an empty list there means
+    // none are.
+    val props: List<String>? = null,
 )
 
 // ── Bible DTOs ────────────────────────────────────────────────────────────────

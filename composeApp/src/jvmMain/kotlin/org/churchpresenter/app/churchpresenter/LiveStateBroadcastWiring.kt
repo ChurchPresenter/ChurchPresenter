@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.liveoutput.propsOnAir
+import org.churchpresenter.liveoutput.messageOnAir
 import org.churchpresenter.server.updateLiveState
 import org.churchpresenter.server.LiveContent
 import androidx.compose.runtime.Composable
@@ -87,6 +89,9 @@ internal fun LiveStateBroadcastWiring(
                     songLineIndex = livePositionOrNull(source, Presenting.LYRICS, pm.songDisplayLineIndex.value),
                     liveSlide = pm.slideContent.value.name,
                     overlays = pm.overlays.value.map { it.name },
+                    message = pm.messageOnAir?.text,
+                    messageDurationSeconds = pm.messageOnAir?.durationSeconds,
+                    props = pm.propsOnAir.toList(),
                 ),
             )
         }

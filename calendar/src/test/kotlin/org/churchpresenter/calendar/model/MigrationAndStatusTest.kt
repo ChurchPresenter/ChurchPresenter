@@ -197,5 +197,8 @@ class MigrationAndStatusTest {
         assertEquals("b", rows.nextContentRow("a")?.id)
         assertNull(rows.nextContentRow("b"), "nothing follows the last row")
         assertNull(rows.nextContentRow("missing"))
+        assertEquals("a", rows.previousContentRow("b")?.id)
+        assertNull(rows.previousContentRow("a"), "nothing comes before the first row")
+        assertNull(rows.previousContentRow("missing"))
     }
 }

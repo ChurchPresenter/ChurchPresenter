@@ -1,5 +1,7 @@
 package org.churchpresenter.media.utils
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.churchpresenter.settings.utils.Constants
 import java.io.File
 
@@ -12,9 +14,12 @@ import java.io.File
  * network in the path, and seeking a local file beats seeking an HTTP stream. A URL-type item is
  * already reachable from anywhere and is never rewritten.
  */
-internal fun followerMediaUrl(mediaType: String, localUrl: String, remoteStreamUrl: String?): String =
-    if (mediaType == Constants.MEDIA_TYPE_LOCAL && remoteStreamUrl != null && !File(localUrl).exists()) {
+internal suspend fun followerMediaUrl(mediaType: String, localUrl: String, remoteStreamUrl: String?): String =
+    if (mediaType == Constants.MEDIA_TYPE_LOCAL && remoteStreamUrl != null && !fileExists(localUrl)) {
         remoteStreamUrl
     } else {
         localUrl
     }
+
+/** The disk is asked on [Dispatchers.IO]: a path on a share that is down can take seconds to answer. */
+private suspend fun fileExists(path: String): Boolean = withContext(Dispatchers.IO) { File(path).exists() }

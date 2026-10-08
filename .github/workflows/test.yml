@@ -145,7 +145,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :canvas:detekt :presenter:detekt :profiles:detekt :companion-surface:detekt :obs:detekt :live-show:detekt :live-output:detekt :statistics:detekt :updater:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :canvas:detekt :presenter:detekt :profiles:detekt :companion-surface:detekt :obs:detekt :live-show:detekt :show-control:detekt :control-in:detekt :live-output:detekt :statistics:detekt :updater:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -505,6 +505,22 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.liveshow == 'true' }}
         run: ./gradlew :live-show:jacocoTestCoverageVerification -x test
 
+      - name: Show control tests
+        if: ${{ !cancelled() && steps.modules.outputs.showcontrol == 'true' }}
+        run: ./gradlew :show-control:test
+
+      - name: Show control coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.showcontrol == 'true' }}
+        run: ./gradlew :show-control:jacocoTestCoverageVerification -x test
+
+      - name: Control in tests
+        if: ${{ !cancelled() && steps.modules.outputs.controlin == 'true' }}
+        run: ./gradlew :control-in:test
+
+      - name: Control in coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.controlin == 'true' }}
+        run: ./gradlew :control-in:jacocoTestCoverageVerification -x test
+
       - name: Live output tests
         if: ${{ !cancelled() && steps.modules.outputs.liveoutput == 'true' }}
         run: ./gradlew :live-output:test
@@ -675,6 +691,8 @@ jobs:
               ("qa", "QA"),
               ("obs", "OBS"),
               ("live-show", "Live show"),
+              ("show-control", "Show control"),
+              ("control-in", "Control in"),
               ("live-output", "Live output"),
               ("statistics", "Statistics"),
               ("updater", "Updater"),
@@ -878,6 +896,10 @@ jobs:
             obs/build/test-results/
             live-show/build/reports/tests/
             live-show/build/test-results/
+            show-control/build/reports/tests/
+            show-control/build/test-results/
+            control-in/build/reports/tests/
+            control-in/build/test-results/
             live-output/build/reports/tests/
             live-output/build/test-results/
             statistics/build/reports/tests/

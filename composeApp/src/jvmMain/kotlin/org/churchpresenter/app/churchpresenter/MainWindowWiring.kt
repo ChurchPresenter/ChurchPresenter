@@ -1,6 +1,15 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.liveoutput.overlayForLayerName
+import org.churchpresenter.liveoutput.clearFromOperator
+import org.churchpresenter.liveoutput.toggleProp
+import org.churchpresenter.liveoutput.setPropOn
+import org.churchpresenter.liveoutput.propsOnAir
+import org.churchpresenter.liveoutput.showMessage
+import org.churchpresenter.liveshow.Cue
+import androidx.compose.runtime.SideEffect
+import org.churchpresenter.liveoutput.clearGroup
+import org.churchpresenter.liveoutput.clearLayer
+import org.churchpresenter.liveoutput.layerForName
 import org.churchpresenter.server.broadcastDisplayCleared
 import org.churchpresenter.server.broadcastSongSectionSelected
 import org.churchpresenter.server.updateBrowserSourceTranspose
@@ -26,6 +35,7 @@ import org.churchpresenter.calendar.CalendarFileWatcher
 import org.churchpresenter.calendar.seedCalendarFolder
 import org.churchpresenter.calendar.CueRunner
 import org.churchpresenter.settings.calendarFolder
+import org.churchpresenter.settings.macroNamed
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
@@ -130,16 +140,45 @@ internal fun MainWindowScope.ServerCommandWiring() {
         LaunchedEffect(Unit) {
             companionServer.onClear.collect {
                 mediaViewModel.pause()
-                presenterManager.requestClearDisplay()
+                presenterManager.clearFromOperator()
             }
         }
         LaunchedEffect(Unit) {
             companionServer.onClearLayer.collect { name ->
-                overlayForLayerName(name)?.let(presenterManager::clearOverlay)
+                layerForName(name)?.let(presenterManager::clearLayer)
             }
         }
         LaunchedEffect(Unit) {
             companionServer.onTake.collect { presenterManager.previewBus.take() }
+        }
+        // The saved messages a remote client may name, and the messages it puts up.
+        SideEffect {
+            companionServer.messageTemplates = appSettings.messageTemplates
+            companionServer.props = appSettings.props
+            companionServer.clearGroups = appSettings.clearGroups
+            companionServer.macros = appSettings.macros
+        }
+        LaunchedEffect(Unit) {
+            companionServer.onMacro.collect { id ->
+                appSettings.macros.macroNamed(id)?.let { runMacro(it) }
+            }
+        }
+        LaunchedEffect(Unit) {
+            companionServer.onClearGroup.collect { id ->
+                appSettings.clearGroups.firstOrNull { it.id == id }?.let(presenterManager::clearGroup)
+            }
+        }
+        LaunchedEffect(Unit) {
+            companionServer.onProp.collect { switch ->
+                switch.on?.let { presenterManager.setPropOn(switch.id, it) } ?: presenterManager.toggleProp(switch.id)
+                if (switch.id in presenterManager.propsOnAir) presenterManager.setShowPresenterWindow(true)
+            }
+        }
+        LaunchedEffect(Unit) {
+            companionServer.onMessage.collect { message ->
+                presenterManager.showMessage(Cue.Message(message.text, message.template, message.durationSeconds))
+                presenterManager.setShowPresenterWindow(true)
+            }
         }
 
         LaunchedEffect(Unit) {

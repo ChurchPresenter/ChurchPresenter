@@ -1,5 +1,10 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.sharedui.utils.DevFlags
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import org.churchpresenter.controlin.ControlHub
+import org.churchpresenter.showcontrol.ActionRunner
 import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import org.churchpresenter.liveoutput.deckLinkOutputCount
 import org.churchpresenter.server.InstanceLinkCommandFailure
@@ -100,6 +105,15 @@ internal class AppRootState(
     val sttManager = STTManager()
     val obsManager = OBSWebSocketManager()
     val companionSatelliteViewModel = CompanionSatelliteViewModel()
+
+    /** Runs show-control action lists -- calendar cues today, cue actions and macros later. */
+    // Under a supervisor of its own, so a run that fails cannot take the root scope down with it.
+    val showRunner: ActionRunner by lazy {
+        val supervised = coroutineScope.coroutineContext + SupervisorJob(coroutineScope.coroutineContext[Job])
+        ActionRunner(appShowHost(), CoroutineScope(supervised))
+    }
+    /** The MIDI and OSC ports: what arrives runs actions, and what the show does is sent back out. */
+    val controlHub: ControlHub by lazy { ControlHub(onMapping = ::runControlMapping) }
     val autoConnectedIds = mutableSetOf<String>()
     val lastReconciled = mutableMapOf<String, CompanionSatelliteSettings>()
 
@@ -132,6 +146,9 @@ internal class AppRootState(
     // clicked, a song sent from the Songs tab -- a due cue is skipped rather than fired over the
     // operator. See CueRunner.operatorLive and LiveDurationLog.showing.
     var engineLiveItem by mutableStateOf<ScheduleItem?>(null)
+
+    /** The schedule row last put on air, by any path -- where next and previous count from. */
+    var lastLiveRowId by mutableStateOf<String?>(null)
 
     var dialogDismissSignal by mutableStateOf(0)
     var showOptionsDialog by mutableStateOf(false)
@@ -168,6 +185,14 @@ internal class AppRootState(
     var showStyleEditorWindow by mutableStateOf(false)
     var showMemoryMonitorWindow by mutableStateOf(false)
     var developerMenuUnlocked by mutableStateOf(false)
+
+    /**
+     * Dev mode: a dev build, the developer menu unlocked, or the forced dev window. The features not
+     * ready for production -- the sidebar's Dev mode only box and what is behind it -- exist only
+     * while it is on.
+     */
+    val devMode: Boolean
+        get() = shouldShowDeveloperMenu(BuildConfig.IS_RELEASE, DevFlags.forceDevWindow, developerMenuUnlocked)
     var lottieGenOutputDir by mutableStateOf<File?>(null)
     var lottieGenOnFileSaved by mutableStateOf<(() -> Unit)?>(null)
     var pendingUpdateResult by mutableStateOf<UpdateCheckResult?>(null)

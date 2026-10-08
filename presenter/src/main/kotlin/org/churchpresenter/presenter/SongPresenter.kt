@@ -19,7 +19,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import java.io.File
 import org.churchpresenter.canvas.CameraDevice
 import org.churchpresenter.canvas.CameraDeviceCatalog
 import org.churchpresenter.canvas.cameraResolves
@@ -66,10 +65,10 @@ internal fun songBackgroundTypeConstant(type: String): String = when (type) {
 internal fun songBackgroundResolves(
     background: SongBackground,
     knownCameras: List<CameraDevice>? = CameraDeviceCatalog.devices.value,
+    mediaExists: Boolean = false,
 ): Boolean = when (background.type) {
     SongBackgroundType.COLOR, SongBackgroundType.GRADIENT -> true
-    SongBackgroundType.IMAGE, SongBackgroundType.VIDEO ->
-        background.mediaPath.isNotBlank() && File(background.mediaPath).exists()
+    SongBackgroundType.IMAGE, SongBackgroundType.VIDEO -> background.mediaPath.isNotBlank() && mediaExists
     SongBackgroundType.CAMERA -> cameraResolves(background.camera, knownCameras)
     else -> false
 }

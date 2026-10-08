@@ -296,7 +296,12 @@ object Constants {
     const val ENDPOINT_SCHEDULE_ADD_BATCH = "/api/schedule/add-batch"
     const val ENDPOINT_PROJECT            = "/api/project"
     const val ENDPOINT_CLEAR              = "/api/clear"
+    const val ENDPOINT_CLEAR_GROUPS       = "/api/clear-groups"
     const val ENDPOINT_TAKE               = "/api/take"
+    const val ENDPOINT_MESSAGE            = "/api/message"
+    const val ENDPOINT_PROPS              = "/api/props"
+    const val ENDPOINT_MACROS             = "/api/macros"
+    const val ENDPOINT_MACRO              = "/api/macro"
     const val ENDPOINT_PRESENTATIONS          = "/api/presentations"
     const val ENDPOINT_PRESENTATIONS_UPLOAD  = "/api/presentations/upload"
     const val ENDPOINT_PICTURES               = "/api/pictures"
@@ -353,6 +358,9 @@ object Constants {
     const val WS_CMD_PROJECT                = "project"
     const val WS_CMD_CLEAR                  = "clear"
     const val WS_CMD_TAKE                   = "take"
+    const val WS_CMD_MESSAGE                = "message"
+    const val WS_CMD_PROP                   = "prop"
+    const val WS_CMD_MACRO                  = "macro"
     const val WS_CMD_BIBLE_HOLD             = "bible_hold"
     /** ID-less navigation commands — operate on whatever the primary currently has live, since a
      *  Controller has no way to learn the primary's internally-assigned folderId/presentationId
