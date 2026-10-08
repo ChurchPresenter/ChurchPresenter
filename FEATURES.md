@@ -72,12 +72,12 @@
   `:server`'s `StrongsDictionaryRepository.kt` serves the same data to the companion API
 - `dictionary/…/presenter/DictionaryPresenter.kt` — the dictionary card on the output
 - `profiles/…/ProfileDictionaryPage.kt`, `profiles/…/DictionaryPart.kt` — how the dictionary card looks on each output, edited on Profiles → Dictionary
-- `viewmodel/BibleEngineClient.kt` — auto-follow speech detection client
+- `bible-tab/…/BibleEngineClient.kt` — auto-follow speech detection client
 - `bible/` (the `:bible` Gradle module) — `Bible.kt`, `BibleBook.kt`, `BibleSearch.kt`,
   `BibleVerse.kt`, `BibleTranslationNames.kt` and the `.spb` format helpers in `SpbFormat.kt`
 - `bible-formats/` (the `:bible-formats` Gradle module) — the download catalogues and the `.spb` converters behind them
 - `bible-formats/src/main/kotlin/.../catalog/` — `EBibleSource` (eBible.org, USFX), `ZefaniaSource` + `ZefaniaRepositoryIndex`, `BebliaSource` + `BebliaCatalogIndex`
-- `viewmodel/BibleCatalogViewModel.kt`, `dialogs/BibleCatalogBrowserDialog.kt` — download browser UI
+- `bible-tab/…/catalog/BibleCatalogViewModel.kt`, `bible-tab/…/catalog/BibleCatalogBrowserDialog.kt` — download browser UI
 - `bible-formats/src/main/kotlin/.../UsfxToSpbConverter.kt`, `XmlToSpbConverter.kt` — the conversions
 - `data/settings/BibleSettings.kt`, `data/settings/BibleEngineSettings.kt`
 - `presenter/…/BiblePresenter.kt`, with `BibleLook.kt`, `BibleFrame.kt`, `BibleSlide.kt`, `BibleLayouts.kt` and `PresenterBackdrop.kt` beside it

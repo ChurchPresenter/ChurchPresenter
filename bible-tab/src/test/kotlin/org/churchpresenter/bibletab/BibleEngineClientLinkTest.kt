@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.bibletab
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO

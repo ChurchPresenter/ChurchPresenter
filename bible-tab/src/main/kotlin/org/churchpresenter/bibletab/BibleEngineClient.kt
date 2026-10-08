@@ -1,6 +1,5 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.bibletab
 
-import org.churchpresenter.bibletab.BibleEngineStatus
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.bibleengine.EngineHandle
@@ -33,41 +32,6 @@ import org.json.JSONObject
 
 private const val JITTER_MIN = 0.8
 private const val JITTER_MAX = 1.2
-
-/**
- * One `scripture.*` event from the Bible Lookup Engine, decoded.
- *
- * A data class rather than a positional parameter list because the payload carries several adjacent
- * nullable strings the compiler cannot tell apart — [canonicalCodeStart], [canonicalCodeEnd],
- * [segmentId], [sessionId], [detectedVersion]. A transposition among them would compile cleanly and
- * silently corrupt the training-log join keys.
- *
- * [canonicalCodeStart]/[canonicalCodeEnd] are the engine's numbering-independent internal codes
- * (`BXXXCXXXVXXX`), forwarded so the CP side can land the reference in the primary Bible's own
- * display numbering (book order + Psalm numbering). [segmentId] is the STT segment that triggered the
- * detection (clock-free correlation key), or null when the STT stream didn't provide one. [sessionId]
- * is the stable per-service session id from STT — the exact join key that ties the STT db, the engine
- * detection-log and the CP live-references log, and keys the live-references filename. [tracks] is
- * the subset of {"transcription","translation"} that corroborated the detection.
- *
- * [detectedVersion] is which translation the engine believes is being *read aloud* (a label such as
- * "NASB", scored across every bible in the folder) — informational only, frequently not one of the
- * two bibles CP has loaded, and never the source of [verseText].
- */
-data class EngineScripture(
-    val bookId: Int,
-    val chapter: Int,
-    val verseStart: Int,
-    val verseEnd: Int?,
-    val verseText: String,
-    val matchType: String,
-    val canonicalCodeStart: String? = null,
-    val canonicalCodeEnd: String? = null,
-    val segmentId: String? = null,
-    val sessionId: String? = null,
-    val tracks: List<String> = emptyList(),
-    val detectedVersion: String? = null,
-)
 
 /** The app's wait between reconnect attempts: long enough not to hammer a restarting engine. */
 internal const val DEFAULT_RETRY_FLOOR_MS = 2_000L

@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs
+package org.churchpresenter.bibletab.catalog
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,9 +49,6 @@ import org.churchpresenter.strings.generated.resources.bible_catalog_subtitle
 import org.churchpresenter.strings.generated.resources.bible_catalog_title
 import org.churchpresenter.sharedui.composables.PaneTab
 import org.churchpresenter.sharedui.composables.PaneTabRow
-import org.churchpresenter.app.churchpresenter.composables.SearchableDropdownField
-import org.churchpresenter.app.churchpresenter.viewmodel.BibleCatalogViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.BibleDownloadError
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

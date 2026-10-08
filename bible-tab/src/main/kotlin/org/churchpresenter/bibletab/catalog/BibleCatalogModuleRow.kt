@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs
+package org.churchpresenter.bibletab.catalog
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

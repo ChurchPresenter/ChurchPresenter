@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.bibletab
 
 import kotlin.test.AfterTest
 import kotlin.test.Test

@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.dialogs
+package org.churchpresenter.bibletab.catalog
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.ComposeUiTest
@@ -26,7 +26,6 @@ import org.churchpresenter.bibleformats.catalog.BibleSource
 import org.churchpresenter.bibleformats.catalog.BibleSourceId
 import org.churchpresenter.bibleformats.catalog.InstallPhase
 import org.churchpresenter.bibleformats.catalog.InstallProgress
-import org.churchpresenter.app.churchpresenter.viewmodel.BibleCatalogViewModel
 import java.io.File
 import java.nio.file.Files
 import javax.swing.SwingUtilities

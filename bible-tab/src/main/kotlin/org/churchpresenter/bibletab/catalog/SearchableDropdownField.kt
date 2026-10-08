@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.bibletab.catalog
 
 import androidx.compose.foundation.LocalScrollbarStyle
 import androidx.compose.foundation.VerticalScrollbar

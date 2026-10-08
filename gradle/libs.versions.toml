@@ -40,6 +40,8 @@ pitest = "1.30.0"
 pitestJunit5 = "1.2.3"
 
 [libraries]
+# The JSON reader BibleEngineClient parses the engine's messages with; pinned to the version socket.io-client brings.
+org-json = { module = "org.json:json", version = "20090211" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }

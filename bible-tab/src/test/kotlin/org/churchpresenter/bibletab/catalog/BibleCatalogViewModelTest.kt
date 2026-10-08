@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.bibletab.catalog
 
 import kotlinx.coroutines.CompletableDeferred
 import org.churchpresenter.bibleformats.catalog.BibleCatalogOutcome

@@ -52,7 +52,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.profiles.ScanningRow
 import org.churchpresenter.app.churchpresenter.data.SpsConverter
-import org.churchpresenter.app.churchpresenter.dialogs.BibleCatalogBrowserDialog
+import org.churchpresenter.bibletab.catalog.BibleCatalogBrowserDialog
 import org.churchpresenter.profiles.FileManager
 import org.churchpresenter.bibleformats.catalog.BibleInstallSupport
 import org.churchpresenter.settings.AppSettings

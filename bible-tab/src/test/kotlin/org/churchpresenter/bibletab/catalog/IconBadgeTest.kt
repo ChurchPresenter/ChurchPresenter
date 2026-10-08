@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.dialogs
+package org.churchpresenter.bibletab.catalog
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book

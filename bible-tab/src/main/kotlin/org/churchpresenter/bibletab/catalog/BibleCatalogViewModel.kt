@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.bibletab.catalog
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

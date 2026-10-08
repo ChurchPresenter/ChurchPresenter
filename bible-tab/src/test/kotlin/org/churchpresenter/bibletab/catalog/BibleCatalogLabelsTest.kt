@@ -1,9 +1,7 @@
-package org.churchpresenter.app.churchpresenter.dialogs
+package org.churchpresenter.bibletab.catalog
 
 import org.churchpresenter.bibleformats.catalog.BibleSourceId
 import org.churchpresenter.bibleformats.catalog.InstallPhase
-import org.churchpresenter.app.churchpresenter.viewmodel.BibleCatalogError
-import org.churchpresenter.app.churchpresenter.viewmodel.BibleDownloadError
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals

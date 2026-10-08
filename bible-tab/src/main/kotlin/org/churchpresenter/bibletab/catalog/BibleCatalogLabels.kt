@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs
+package org.churchpresenter.bibletab.catalog
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -26,8 +26,6 @@ import org.churchpresenter.strings.generated.resources.bible_catalog_license_sou
 import org.churchpresenter.strings.generated.resources.bible_catalog_source_beblia
 import org.churchpresenter.bibleformats.catalog.BibleSourceId
 import org.churchpresenter.bibleformats.catalog.InstallPhase
-import org.churchpresenter.app.churchpresenter.viewmodel.BibleCatalogError
-import org.churchpresenter.app.churchpresenter.viewmodel.BibleDownloadError
 import org.jetbrains.compose.resources.StringResource
 
 internal fun phaseStringRes(phase: InstallPhase?): StringResource = when (phase) {

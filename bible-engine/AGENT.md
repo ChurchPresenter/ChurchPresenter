@@ -17,7 +17,7 @@ Package `engine`, unchanged from when it was a separate build, so no import in t
 
 ## How the app uses it
 
-`:composeApp` runs the engine **in-process**, from `viewmodel/BibleEngineClient.kt`:
+The app runs the engine **in-process**, from `:bible-tab`'s `BibleEngineClient.kt`:
 
 | Symbol | Role |
 |---|---|

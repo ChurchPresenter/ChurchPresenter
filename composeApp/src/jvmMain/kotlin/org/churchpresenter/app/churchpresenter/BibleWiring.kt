@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.viewmodel.EngineStart
+import org.churchpresenter.bibletab.EngineStart
 import org.churchpresenter.bibletab.resolveVerseSelection
 import org.churchpresenter.bibletab.LiveReference
 import androidx.compose.runtime.Composable

@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.bibletab
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

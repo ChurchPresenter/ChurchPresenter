@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.bibletab.screenshot
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,10 +22,10 @@ import org.churchpresenter.bibleformats.catalog.BibleSource
 import org.churchpresenter.bibleformats.catalog.BibleSourceId
 import org.churchpresenter.bibleformats.catalog.InstallPhase
 import org.churchpresenter.bibleformats.catalog.InstallProgress
-import org.churchpresenter.app.churchpresenter.dialogs.BibleCatalogBrowserDialogContent
+import org.churchpresenter.bibletab.catalog.BibleCatalogBrowserDialogContent
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.viewmodel.BibleCatalogViewModel
+import org.churchpresenter.bibletab.catalog.BibleCatalogViewModel
 import java.io.File
 import javax.swing.SwingUtilities
 import kotlin.test.AfterTest

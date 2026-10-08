@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs
+package org.churchpresenter.bibletab.catalog
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -65,7 +65,6 @@ import org.churchpresenter.bibleformats.catalog.BibleModule
 import org.churchpresenter.bibleformats.catalog.BibleSource
 import org.churchpresenter.bibleformats.catalog.EBibleSource
 import org.churchpresenter.bibleformats.catalog.ZefaniaSource
-import org.churchpresenter.app.churchpresenter.viewmodel.BibleCatalogViewModel
 import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
