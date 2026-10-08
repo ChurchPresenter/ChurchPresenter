@@ -598,6 +598,12 @@
     <string name="transition_duration">Geçiş Süresi:</string>
     <string name="unit_s">sn</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">Azalt</string>
+    <string name="value_dialog_increase">Artır</string>
+    <string name="value_dialog_keys_hint">↵ Tamam · Esc İptal</string>
+    <string name="value_dialog_out_of_range">%1$d ile %2$d %3$s arasında bir sayı girin.</string>
+    <string name="auto_scroll_interval_hint">Her slaytın bir sonrakine geçmeden önce ne kadar kalacağı.</string>
+    <string name="transition_duration_hint">Slaytlar arasındaki geçişin ne kadar süreceği.</string>
     <string name="animation_type">Animasyon Türü:</string>
     <string name="animation_crossfade">Çapraz Geçiş</string>
     <string name="animation_fade">Solma</string>

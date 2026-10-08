@@ -353,6 +353,12 @@
     <string name="transition_duration">Өту ұзақтығы:</string>
     <string name="unit_s">с</string>
     <string name="unit_ms">мс</string>
+    <string name="value_dialog_decrease">Азайту</string>
+    <string name="value_dialog_increase">Көбейту</string>
+    <string name="value_dialog_keys_hint">↵ Жарайды · Esc Болдырмау</string>
+    <string name="value_dialog_out_of_range">%1$d мен %2$d %3$s аралығындағы санды енгізіңіз.</string>
+    <string name="auto_scroll_interval_hint">Әр слайд келесісіне өткенге дейін қанша уақыт тұрады.</string>
+    <string name="transition_duration_hint">Слайдтар арасындағы өту қанша уақытқа созылады.</string>
     <string name="animation_type">Анимация түрі:</string>
     <string name="animation_crossfade">Біртіндеп өту</string>
     <string name="animation_fade">Жоғалу</string>

@@ -353,6 +353,12 @@
     <string name="transition_duration">Übergangszeit:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">Verringern</string>
+    <string name="value_dialog_increase">Erhöhen</string>
+    <string name="value_dialog_keys_hint">↵ OK · Esc Abbrechen</string>
+    <string name="value_dialog_out_of_range">Gib eine Zahl von %1$d bis %2$d %3$s ein.</string>
+    <string name="auto_scroll_interval_hint">Wie lange jede Folie stehen bleibt, bevor es weitergeht.</string>
+    <string name="transition_duration_hint">Wie lange der Übergang zwischen den Folien dauert.</string>
     <string name="animation_type">Animationstyp:</string>
     <string name="animation_crossfade">Überblendung</string>
     <string name="animation_fade">Einblenden</string>

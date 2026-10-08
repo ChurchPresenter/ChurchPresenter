@@ -598,6 +598,12 @@
     <string name="transition_duration">Tempoh Peralihan:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">Kurangkan</string>
+    <string name="value_dialog_increase">Tambah</string>
+    <string name="value_dialog_keys_hint">↵ OK · Esc Batal</string>
+    <string name="value_dialog_out_of_range">Masukkan nombor dari %1$d hingga %2$d %3$s.</string>
+    <string name="auto_scroll_interval_hint">Berapa lama setiap slaid kekal sebelum beralih.</string>
+    <string name="transition_duration_hint">Berapa lama peralihan antara slaid berlangsung.</string>
     <string name="animation_type">Jenis Animasi:</string>
     <string name="animation_crossfade">Silang Pudar</string>
     <string name="animation_fade">Pudar</string>

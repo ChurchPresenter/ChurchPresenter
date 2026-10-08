@@ -598,6 +598,12 @@
     <string name="transition_duration">Pārejas ilgums:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">Samazināt</string>
+    <string name="value_dialog_increase">Palielināt</string>
+    <string name="value_dialog_keys_hint">↵ Labi · Esc Atcelt</string>
+    <string name="value_dialog_out_of_range">Ievadiet skaitli no %1$d līdz %2$d %3$s.</string>
+    <string name="auto_scroll_interval_hint">Cik ilgi katrs slaids paliek, pirms pāriet uz nākamo.</string>
+    <string name="transition_duration_hint">Cik ilgi ilgst pāreja starp slaidiem.</string>
     <string name="animation_type">Animācijas veids:</string>
     <string name="animation_crossfade">Pārplūšana</string>
     <string name="animation_fade">Izgaišana</string>

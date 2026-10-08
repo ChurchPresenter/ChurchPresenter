@@ -435,6 +435,12 @@
     <string name="transition_duration">Trvanie prechodu:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">Znížiť</string>
+    <string name="value_dialog_increase">Zvýšiť</string>
+    <string name="value_dialog_keys_hint">↵ OK · Esc Zrušiť</string>
+    <string name="value_dialog_out_of_range">Zadajte číslo od %1$d do %2$d %3$s.</string>
+    <string name="auto_scroll_interval_hint">Ako dlho zostane každá snímka, kým sa prejde na ďalšiu.</string>
+    <string name="transition_duration_hint">Ako dlho trvá prechod medzi snímkami.</string>
     <string name="animation_type">Typ animácie:</string>
     <string name="animation_crossfade">Crossfade</string>
     <string name="animation_fade">Stmievanie</string>

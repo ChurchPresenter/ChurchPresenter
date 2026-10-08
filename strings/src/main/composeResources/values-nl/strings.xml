@@ -435,6 +435,12 @@
     <string name="transition_duration">Overgangsduur:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">Verlagen</string>
+    <string name="value_dialog_increase">Verhogen</string>
+    <string name="value_dialog_keys_hint">↵ OK · Esc Annuleren</string>
+    <string name="value_dialog_out_of_range">Voer een getal in van %1$d tot %2$d %3$s.</string>
+    <string name="auto_scroll_interval_hint">Hoe lang elke dia blijft staan voordat de volgende komt.</string>
+    <string name="transition_duration_hint">Hoe lang de overgang tussen dia\'s duurt.</string>
     <string name="animation_type">Animatietype:</string>
     <string name="animation_crossfade">Crossfade</string>
     <string name="animation_fade">Fade</string>

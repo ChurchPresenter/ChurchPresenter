@@ -598,6 +598,12 @@
     <string name="transition_duration">مدة الانتقال:</string>
     <string name="unit_s">ث</string>
     <string name="unit_ms">مل.ث</string>
+    <string name="value_dialog_decrease">إنقاص</string>
+    <string name="value_dialog_increase">زيادة</string>
+    <string name="value_dialog_keys_hint">↵ موافق · Esc إلغاء</string>
+    <string name="value_dialog_out_of_range">أدخل رقمًا من %1$d إلى %2$d %3$s.</string>
+    <string name="auto_scroll_interval_hint">المدة التي تبقى فيها كل شريحة قبل الانتقال إلى التالية.</string>
+    <string name="transition_duration_hint">المدة التي يستغرقها الانتقال بين الشرائح.</string>
     <string name="animation_type">نوع الحركة:</string>
     <string name="animation_crossfade">تلاشٍ متقاطع</string>
     <string name="animation_fade">تلاشٍ</string>

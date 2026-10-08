@@ -382,6 +382,12 @@
     <string name="transition_duration">Длительность перехода:</string>
     <string name="unit_s">с</string>
     <string name="unit_ms">мс</string>
+    <string name="value_dialog_decrease">Уменьшить</string>
+    <string name="value_dialog_increase">Увеличить</string>
+    <string name="value_dialog_keys_hint">↵ OK · Esc Отмена</string>
+    <string name="value_dialog_out_of_range">Введите число от %1$d до %2$d %3$s.</string>
+    <string name="auto_scroll_interval_hint">Сколько времени каждый слайд остаётся на экране перед переходом.</string>
+    <string name="transition_duration_hint">Сколько длится переход между слайдами.</string>
     <string name="animation_type">Тип анимации:</string>
     <string name="animation_crossfade">Плавный переход</string>
     <string name="animation_fade">Затухание</string>

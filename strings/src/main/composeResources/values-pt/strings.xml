@@ -435,6 +435,12 @@
     <string name="transition_duration">Duração da Transição:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">Diminuir</string>
+    <string name="value_dialog_increase">Aumentar</string>
+    <string name="value_dialog_keys_hint">↵ OK · Esc Cancelar</string>
+    <string name="value_dialog_out_of_range">Digite um número de %1$d a %2$d %3$s.</string>
+    <string name="auto_scroll_interval_hint">Quanto tempo cada slide permanece antes de avançar.</string>
+    <string name="transition_duration_hint">Quanto tempo dura a transição entre os slides.</string>
     <string name="animation_type">Tipo de Animação:</string>
     <string name="animation_crossfade">Crossfade</string>
     <string name="animation_fade">Fade</string>

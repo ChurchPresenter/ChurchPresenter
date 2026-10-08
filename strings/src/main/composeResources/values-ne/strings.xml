@@ -598,6 +598,12 @@
     <string name="transition_duration">सङ्क्रमण अवधि:</string>
     <string name="unit_s">से</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">घटाउनुहोस्</string>
+    <string name="value_dialog_increase">बढाउनुहोस्</string>
+    <string name="value_dialog_keys_hint">↵ ठीक छ · Esc रद्द गर्नुहोस्</string>
+    <string name="value_dialog_out_of_range">%1$d देखि %2$d %3$s सम्मको सङ्ख्या लेख्नुहोस्।</string>
+    <string name="auto_scroll_interval_hint">अर्को स्लाइडमा जानुअघि हरेक स्लाइड कति बेर रहन्छ।</string>
+    <string name="transition_duration_hint">स्लाइडहरूबीचको सङ्क्रमण कति बेर लाग्छ।</string>
     <string name="animation_type">एनिमेसनको किसिम:</string>
     <string name="animation_crossfade">क्रसफेड</string>
     <string name="animation_fade">फेड</string>

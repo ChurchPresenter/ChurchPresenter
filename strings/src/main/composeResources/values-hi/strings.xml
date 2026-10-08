@@ -598,6 +598,12 @@
     <string name="transition_duration">ट्रांज़िशन अवधि:</string>
     <string name="unit_s">से</string>
     <string name="unit_ms">मि.से</string>
+    <string name="value_dialog_decrease">घटाएँ</string>
+    <string name="value_dialog_increase">बढ़ाएँ</string>
+    <string name="value_dialog_keys_hint">↵ ठीक है · Esc रद्द करें</string>
+    <string name="value_dialog_out_of_range">%1$d से %2$d %3$s तक की संख्या दर्ज करें।</string>
+    <string name="auto_scroll_interval_hint">अगली स्लाइड पर जाने से पहले हर स्लाइड कितनी देर रहती है।</string>
+    <string name="transition_duration_hint">स्लाइडों के बीच ट्रांज़िशन कितनी देर का होता है।</string>
     <string name="animation_type">एनिमेशन प्रकार:</string>
     <string name="animation_crossfade">क्रॉसफ़ेड</string>
     <string name="animation_fade">फ़ेड</string>

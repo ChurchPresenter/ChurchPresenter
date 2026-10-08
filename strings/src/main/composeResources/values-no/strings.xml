@@ -598,6 +598,12 @@
     <string name="transition_duration">Overgangstid:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">Reduser</string>
+    <string name="value_dialog_increase">Øk</string>
+    <string name="value_dialog_keys_hint">↵ OK · Esc Avbryt</string>
+    <string name="value_dialog_out_of_range">Skriv inn et tall fra %1$d til %2$d %3$s.</string>
+    <string name="auto_scroll_interval_hint">Hvor lenge hvert lysbilde vises før det går videre.</string>
+    <string name="transition_duration_hint">Hvor lang tid overgangen mellom lysbildene tar.</string>
     <string name="animation_type">Animasjonstype:</string>
     <string name="animation_crossfade">Krysstoning</string>
     <string name="animation_fade">Toning</string>

@@ -598,6 +598,12 @@
     <string name="transition_duration">Oʻtish davomiyligi:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">Kamaytirish</string>
+    <string name="value_dialog_increase">Oshirish</string>
+    <string name="value_dialog_keys_hint">↵ OK · Esc Bekor qilish</string>
+    <string name="value_dialog_out_of_range">%1$d dan %2$d %3$s gacha son kiriting.</string>
+    <string name="auto_scroll_interval_hint">Har bir slayd keyingisiga oʻtishdan oldin qancha turishi.</string>
+    <string name="transition_duration_hint">Slaydlar orasidagi oʻtish qancha davom etishi.</string>
     <string name="animation_type">Animatsiya turi:</string>
     <string name="animation_crossfade">Silliq almashish</string>
     <string name="animation_fade">Soʻnish</string>

@@ -353,6 +353,12 @@
     <string name="transition_duration">Тривалість переходу:</string>
     <string name="unit_s">с</string>
     <string name="unit_ms">мс</string>
+    <string name="value_dialog_decrease">Зменшити</string>
+    <string name="value_dialog_increase">Збільшити</string>
+    <string name="value_dialog_keys_hint">↵ OK · Esc Скасувати</string>
+    <string name="value_dialog_out_of_range">Введіть число від %1$d до %2$d %3$s.</string>
+    <string name="auto_scroll_interval_hint">Скільки часу кожен слайд лишається на екрані перед переходом.</string>
+    <string name="transition_duration_hint">Скільки триває перехід між слайдами.</string>
     <string name="animation_type">Тип анімації:</string>
     <string name="animation_crossfade">Плавний перехід</string>
     <string name="animation_fade">Затухання</string>

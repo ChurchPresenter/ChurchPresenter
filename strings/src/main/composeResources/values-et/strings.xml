@@ -495,6 +495,12 @@
     <string name="transition_duration">Ülemineku kestus:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">Vähenda</string>
+    <string name="value_dialog_increase">Suurenda</string>
+    <string name="value_dialog_keys_hint">↵ OK · Esc Tühista</string>
+    <string name="value_dialog_out_of_range">Sisesta arv vahemikus %1$d kuni %2$d %3$s.</string>
+    <string name="auto_scroll_interval_hint">Kui kaua iga slaid ekraanil püsib, enne kui edasi liigutakse.</string>
+    <string name="transition_duration_hint">Kui kaua kestab üleminek slaidide vahel.</string>
     <string name="animation_type">Animatsiooni tüüp:</string>
     <string name="animation_crossfade">Risthajumine</string>
     <string name="animation_fade">Hajumine</string>

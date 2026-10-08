@@ -351,6 +351,7 @@ private fun ColumnScope.BibleBrowser(viewModel: BibleViewModel, tab: BibleTabSco
                 onVerseDoubleClicked = { goLiveWithHistory(viewModel); focusRequester.requestFocus() },
                 onCopyVerse = { copySelectedVerse() },
                 onAddToSchedule = { scheduleCurrentVerse(viewModel) },
+                translationTitle = viewModel.primaryBible.value?.getBibleTitle().orEmpty(),
                 isSplitActive = isSplitActive,
                 liveChapterVerses = liveChapterVerses,
                 liveVerseNumbers = liveVerseNumbers,

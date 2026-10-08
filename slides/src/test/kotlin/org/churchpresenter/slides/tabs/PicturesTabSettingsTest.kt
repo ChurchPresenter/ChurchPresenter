@@ -2,6 +2,7 @@
 
 package org.churchpresenter.slides.tabs
 
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
@@ -64,26 +65,47 @@ class PicturesTabSettingsTest {
     }
 
     @Test
-    fun `an interval longer than the maximum is clamped rather than refused`() =
+    fun `an interval longer than the maximum is refused with a message`() =
         picturesTab { vm, _ ->
-            // Half a minute is the cap; a typo of 300 should not park the slideshow for five
-            // minutes, and rejecting it outright would leave the operator with no feedback.
             openIntervalEditor()
             editorField().performTextReplacement("300")
             onNodeWithText("OK").performClick()
             waitForIdle()
 
-            assertEquals(30f, vm.autoScrollInterval)
+            assertEquals(5f, vm.autoScrollInterval, "a typo never parks the slideshow")
+            assertTrue(showsContainingText("Enter a number from 1 to 30 s."), renderedText().toString())
         }
 
     @Test
-    fun `an interval below the minimum is clamped too`() = picturesTab { vm, _ ->
+    fun `an interval below the minimum is refused too`() = picturesTab { vm, _ ->
         openIntervalEditor()
         editorField().performTextReplacement("0")
         onNodeWithText("OK").performClick()
         waitForIdle()
 
-        assertEquals(1f, vm.autoScrollInterval, "one second is as fast as it goes")
+        assertEquals(5f, vm.autoScrollInterval)
+        assertTrue(showsContainingText("Enter a number from 1 to 30 s."))
+    }
+
+    @Test
+    fun `a transition preset sets it in one click`() = picturesTab { vm, reports ->
+        openTransitionEditor()
+        onNodeWithText("750 ms").performClick()
+        onNodeWithText("OK").performClick()
+        waitForIdle()
+
+        assertEquals(750f, vm.transitionDuration)
+        assertEquals(750f, reports.settingsAfterChange?.pictureSettings?.transitionDuration)
+    }
+
+    @Test
+    fun `minus steps the interval down by a second`() = picturesTab { vm, _ ->
+        openIntervalEditor()
+        onNodeWithContentDescription("Decrease").performClick()
+        onNodeWithText("OK").performClick()
+        waitForIdle()
+
+        assertEquals(4f, vm.autoScrollInterval)
     }
 
     @Test

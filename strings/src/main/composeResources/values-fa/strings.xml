@@ -598,6 +598,12 @@
     <string name="transition_duration">مدت گذار:</string>
     <string name="unit_s">ث</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">کاهش</string>
+    <string name="value_dialog_increase">افزایش</string>
+    <string name="value_dialog_keys_hint">↵ تأیید · Esc لغو</string>
+    <string name="value_dialog_out_of_range">عددی از %1$d تا %2$d %3$s وارد کنید.</string>
+    <string name="auto_scroll_interval_hint">مدت زمانی که هر اسلاید پیش از رفتن به بعدی می‌ماند.</string>
+    <string name="transition_duration_hint">مدت زمان گذار میان اسلایدها.</string>
     <string name="animation_type">نوع انیمیشن:</string>
     <string name="animation_crossfade">محو تدریجی متقابل</string>
     <string name="animation_fade">محو شدن</string>
