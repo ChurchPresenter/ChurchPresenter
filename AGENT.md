@@ -346,7 +346,9 @@ every `@BeforeClass`.
   teardown.** `POST /api/atem/still|clip` transfers after responding; route every test in such a suite
   through `AtemBridge.trackUpload`/`cancelUpload` (which joins).
 - **No flaky tests.** A new or changed test must pass three consecutive
-  `./gradlew :composeApp:jvmTest --tests '<pattern>' --rerun-tasks` runs. Never fix a flake with a
+  `./gradlew :composeApp:jvmTest --tests '<pattern>' --rerun-tasks` runs. CI enforces it on every
+  pull request: `test.yml` reruns each test class the change added or edited three times
+  (`.github/ci/changed_tests.py` says which). Never fix a flake with a
   wider timeout, a retry or a looser assertion; if it cannot be made deterministic, delete it and note
   the gap. (`NoSuchFileException: .../in-progress-results-*.bin` is Gradle losing its scratch file —
   re-run.)

@@ -842,6 +842,28 @@ jobs:
           fi
           cat coverage.md >> "$GITHUB_STEP_SUMMARY"
 
+      # AGENT.md's flake rule, enforced: every test class this change added or edited runs three more
+      # times. `--rerun` reruns only the test task, so nothing recompiles; JaCoCo is off (-PfastTest)
+      # because the coverage above is already measured. .github/ci/changed_tests.py says which
+      # classes count. A pull request or merge group only: a push to main was already held to it.
+      - name: Changed tests pass three runs in a row
+        if: github.event_name != 'push'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+        run: |
+          python3 -m unittest discover -s .github/ci
+          python3 .github/ci/changed_tests.py --base "$BASE_SHA" > changed-tests.txt
+          while read -r task classes; do
+            [ -n "$task" ] || continue
+            filters=()
+            for c in $classes; do filters+=(--tests "$c"); done
+            for run in 1 2 3; do
+              echo "::group::$task, run $run of 3"
+              ./gradlew "$task" --rerun -PfastTest "${filters[@]}" < /dev/null
+              echo "::endgroup::"
+            done
+          done < changed-tests.txt
+
       - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@v4
