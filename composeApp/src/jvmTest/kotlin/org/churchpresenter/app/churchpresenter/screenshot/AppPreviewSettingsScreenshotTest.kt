@@ -16,7 +16,7 @@ import org.churchpresenter.settings.TabLabelStyle
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.text.font.FontFamily
 import org.churchpresenter.sharedui.composables.LocalFontPreviewFace
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.LocalDefaultCalendarFolder
+import org.churchpresenter.appsettings.LocalDefaultCalendarFolder
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialogContent
 import org.churchpresenter.server.CompanionServer
 import java.io.File

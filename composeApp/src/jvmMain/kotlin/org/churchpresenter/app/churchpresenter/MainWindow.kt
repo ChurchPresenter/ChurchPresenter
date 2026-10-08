@@ -44,8 +44,8 @@ import org.churchpresenter.app.churchpresenter.utils.windowPlacementFromSettings
 import org.churchpresenter.app.churchpresenter.utils.windowPlacementToSettings
 import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
-import org.churchpresenter.app.churchpresenter.dialogs.SetupWizardDialog
-import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
+import org.churchpresenter.appsettings.SetupWizardDialog
+import org.churchpresenter.sharedui.language.LanguageProvider
 import org.churchpresenter.theme.ThemeCustomization
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.composables.isJavaFxAvailable

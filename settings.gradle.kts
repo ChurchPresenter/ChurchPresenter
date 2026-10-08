@@ -183,6 +183,9 @@ include(":statistics")
 // by :composeApp.
 include(":updater")
 
+// The System settings page and the first-run setup wizard. Depended on by :composeApp.
+include(":app-settings")
+
 // The Server settings page, calendar sync and Instance Link's windows: the Compose face of :server.
 // Depended on by :composeApp.
 include(":server-ui")

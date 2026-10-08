@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.updater.UpdateCheckResult
-import org.churchpresenter.app.churchpresenter.data.Language
+import org.churchpresenter.sharedui.language.Language
 import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.diagnostics.Logger
 

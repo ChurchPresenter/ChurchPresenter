@@ -12,8 +12,8 @@ import androidx.compose.ui.test.v2.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.data.Language
-import org.churchpresenter.app.churchpresenter.dialogs.SetupWizardContent
+import org.churchpresenter.sharedui.language.Language
+import org.churchpresenter.appsettings.SetupWizardContent
 import java.io.File
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT

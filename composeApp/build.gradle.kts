@@ -351,6 +351,8 @@ kotlin {
             implementation(projects.statistics)
             // The updater: the release check, the installer download and the update window.
             implementation(projects.updater)
+            // The System settings page and the setup wizard.
+            implementation(projects.appSettings)
             // The Server settings page, calendar sync and Instance Link's windows.
             implementation(projects.serverUi)
             // The ATEM protocol client: the UDP conversation with the switcher — connect, state

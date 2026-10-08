@@ -75,8 +75,8 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `models/`        | Only what needs the app: `PresetItems` — `ShortcutAction` is `:shared-ui`, the Companion UI states `:companion-surface` |
 | `composables/`   | UI components with app or feature ties (SceneCanvas, DeckLinkManager, etc.) — the shared ones are `:shared-ui`, the video player `:media` |
 | `dialogs/`       | All dialogs and settings dialog tabs                                |
-| `utils/`         | Stateless helpers (AutoStartManager, etc.) — the shared ones (AutoFit, screen bounds) are `:shared-ui`, crash reporting is `:diagnostics`, the updater is `:updater` |
-| `ui/theme/`      | `LanguageProvider` and the theme-customization settings — the theme itself is the `:theme` module |
+| `utils/`         | Stateless helpers (window icons, placement, etc.) — the shared ones (AutoFit, screen bounds) are `:shared-ui`, crash reporting is `:diagnostics`, the updater is `:updater` |
+| `ui/theme/`      | The theme-customization settings — `Language` is `:shared-ui`, the theme itself is the `:theme` module |
 
 ```
 main.kt → MainDesktop.kt → tabs/* + PresenterManager (:live-output)
@@ -143,6 +143,7 @@ module-specific notes there, not here.**
 | `statistics/`          | `:statistics`          | What was presented and when — the counters, the play log, the CCLI lookup and exports — and the statistics window over them | [AGENT.md](statistics/AGENT.md)          |
 | `updater/`             | `:updater`             | The in-app updater: the GitHub release check, the installer download, the update window | [AGENT.md](updater/AGENT.md)             |
 | `server-ui/`           | `:server-ui`           | The Server settings page, calendar sync's card and Instance Link's windows: the Compose face of `:server` | [AGENT.md](server-ui/AGENT.md)           |
+| `app-settings/`        | `:app-settings`        | The System settings page, the setup wizard, auto-start and the `.sps` converter    | [AGENT.md](app-settings/AGENT.md)        |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions

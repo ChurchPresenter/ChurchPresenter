@@ -35,7 +35,7 @@ import org.churchpresenter.strings.generated.resources.open_song_library
 import org.churchpresenter.strings.generated.resources.lottie_gen_window_title
 import org.churchpresenter.strings.generated.resources.style_editor_window_title
 import org.churchpresenter.sharedui.utils.AppWindowRoot
-import org.churchpresenter.app.churchpresenter.ui.theme.LocalLanguage
+import org.churchpresenter.sharedui.language.LocalLanguage
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource

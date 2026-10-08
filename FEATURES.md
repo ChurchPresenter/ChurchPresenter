@@ -34,7 +34,7 @@
 - `tabs/AppSongsTab.kt` — the app's parts of the tab: the editor it opens and what a song going live
   records; `dialogs/SongEditorBackgroundButton.kt` — the editor's Background button;
   `presenter/…/TitleSlideSection.kt` — the title slide the tab sends
-- `data/SpsConverter.kt`; `SongItem` and `SongFileParser` are in `:core-models` (`models/songs/`)
+- `app-settings/…/SpsConverter.kt`; `SongItem` and `SongFileParser` are in `:core-models` (`models/songs/`)
 - `dialogs/SongBackground*.kt` — the per-song background panel
 - `data/settings/SongSettings.kt`
 - `presenter/…/SongPresenter.kt`, with `SongLook.kt`, `SongFrame.kt`, `SongFitFrame.kt` and `SongSlide*.kt` beside it
@@ -379,17 +379,17 @@
 - **Stays running** — automatic update checks, crash recovery and launch-at-login keep things reliable.
 
 **Source locations:**
-- `ui/theme/LanguageProvider.kt`
+- `shared-ui/…/language/Language.kt`, `shared-ui/…/language/LanguageProvider.kt`
 - `theme/` (the `:theme` Gradle module, at the repo root) — `Theme.kt`, `ThemeManager.kt`, `ThemeCustomization.kt`, `SemanticColors.kt`, `AppThemeWrapper.kt`
 - `dialogs/CustomizeThemeDialog.kt`, `dialogs/CustomizeThemePreview.kt`, `dialogs/ThemeCustomizationChoice.kt`, `ui/theme/ThemeCustomizationSettings.kt` — the Customize Theme window, its preview, what it hands back, and the settings it is read from
 - `data/settings/CustomThemeColors.kt` (the `:settings` module) — the optional per-role colours
-- `dialogs/SetupWizardDialog.kt`
+- `app-settings/…/SetupWizardDialog.kt` and the `SetupWizard*.kt` steps beside it, `app-settings/…/SetupSummary.kt`
 - `dialogs/KeyboardShortcutsDialog.kt`, `dialogs/ShortcutBindingRow.kt`, `dialogs/ShortcutCapture.kt`, `dialogs/ShortcutCategoryRail.kt` — the shortcut list and rebinding
-- `composables/LabeledTab.kt`, `dialogs/tabs/TabLabelsRow.kt` — tab label styles
+- `composables/LabeledTab.kt`, `app-settings/…/TabLabelsRow.kt` — tab label styles
 - `crossword-tab/…/CrosswordTab.kt`, `crossword-tab/…/data/CrosswordData.kt` (the `:crossword-tab` module) — a hidden tab (←→←→); `crossword/` (the `:crossword` Gradle module) is its authoring tool and the encoded puzzles
 - `dialogs/OptionsDialog.kt`
 - `data/SettingsManager.kt`, `data/settings/AppSettings.kt`, `data/settings/WindowLayoutSettings.kt`
-- `utils/AutoStartManager.kt`
+- `app-settings/…/AutoStartManager.kt`
 - `updater/` (the `:updater` Gradle module) — `UpdateChecker.kt`, the update window (`UpdateAvailableDialog.kt`) and the installer download
 - `diagnostics/` (the `:diagnostics` Gradle module) — `CrashReporter`: crash logs and the Sentry bridge
 

@@ -78,10 +78,10 @@ import org.churchpresenter.strings.generated.resources.menu_save_schedule_as
 import org.churchpresenter.strings.generated.resources.schedule
 import org.churchpresenter.strings.generated.resources.menu_settings
 import org.churchpresenter.strings.generated.resources.menu_statistics
-import org.churchpresenter.app.churchpresenter.data.Language
+import org.churchpresenter.sharedui.language.Language
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.utils.LocalShortcuts
-import org.churchpresenter.app.churchpresenter.ui.theme.themeDisplayName
+import org.churchpresenter.sharedui.utils.themeDisplayName
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
