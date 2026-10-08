@@ -1,6 +1,12 @@
 package org.churchpresenter.helper.suggest
 
 import org.churchpresenter.helper.intent.normalize
+import org.churchpresenter.strings.generated.resources.helper_example_bible_style
+import org.churchpresenter.strings.generated.resources.helper_example_title_style
+import org.churchpresenter.strings.generated.resources.helper_example_end_marker
+import org.churchpresenter.strings.generated.resources.helper_example_lyrics_position
+import org.churchpresenter.strings.generated.resources.helper_example_lyrics_style
+import org.churchpresenter.strings.generated.resources.helper_example_edit_lyrics
 import org.churchpresenter.strings.generated.resources.helper_example_cross_refs
 import org.churchpresenter.strings.generated.resources.helper_example_bible_history
 import org.churchpresenter.strings.generated.resources.helper_example_website
@@ -179,6 +185,24 @@ enum class SuggestedRequest(val label: StringResource, val request: String, inte
         "history recent recently shown earlier before back verse verses",
     ),
     CROSS_REFS(Res.string.helper_example_cross_refs, "related verses", "cross reference references refs related parallel"),
+    EDIT_LYRICS(
+        Res.string.helper_example_edit_lyrics, "how do i change song lyrics",
+        "lyrics words edit change fix typo mistake correct",
+    ),
+    LYRICS_STYLE(
+        Res.string.helper_example_lyrics_style, "how do i make the lyrics bold",
+        "bold italic underline outline shadow style styling look font",
+    ),
+    LYRICS_POSITION(
+        Res.string.helper_example_lyrics_position, "how do i move the lyrics to the top",
+        "position top bottom middle left right center align alignment margins move",
+    ),
+    END_MARKER(Res.string.helper_example_end_marker, "how do i change the end of song marker", "end marker last slide"),
+    TITLE_STYLE(Res.string.helper_example_title_style, "how do i make the song title bigger", "title titles name heading"),
+    BIBLE_STYLE(
+        Res.string.helper_example_bible_style, "how do i change how bible verses look",
+        "bible verse verses reference scripture look style font",
+    ),
     ;
 
     /** The keywords, and the words of the request itself. */

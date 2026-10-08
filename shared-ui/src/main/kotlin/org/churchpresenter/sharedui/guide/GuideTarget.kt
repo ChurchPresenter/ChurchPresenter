@@ -70,6 +70,17 @@ object GuideTargets {
     val BIBLE_SEARCH_MODE = GuideTarget("bible.searchMode")
     val BIBLE_VERSES = GuideTarget("bible.verses")
     val BIBLE_HISTORY = GuideTarget("bible.history")
+    val SONG_LYRICS = GuideTarget("songEditor.lyrics")
+    val PROFILE_SONGS_PAGE = GuideTarget("settings.profiles.songsPage")
+    val PROFILE_BIBLE_PAGE = GuideTarget("settings.profiles.biblePage")
+    val PROFILE_TEXT_FONT = GuideTarget("settings.profiles.textFont")
+    val PROFILE_TEXT_SIZE = GuideTarget("settings.profiles.textSize")
+    val PROFILE_TEXT_STYLE = GuideTarget("settings.profiles.textStyle")
+    val PROFILE_TEXT_ALIGNMENT = GuideTarget("settings.profiles.textAlignment")
+    val PROFILE_TEXT_SHADOW = GuideTarget("settings.profiles.textShadow")
+    val PROFILE_VERTICAL_ALIGNMENT = GuideTarget("settings.profiles.verticalAlignment")
+    val PROFILE_MARGINS = GuideTarget("settings.profiles.margins")
+    val PROFILE_END_MARKER = GuideTarget("settings.profiles.endMarker")
     val BIBLE_CROSS_REFS = GuideTarget("bible.crossRefs")
     val PLANNING_CENTER_IMPORT = GuideTarget("schedule.planningCenter")
     val SERVER_ENABLE = GuideTarget("settings.server.enable")
@@ -88,6 +99,9 @@ object GuideTargets {
 
     /** The Announcements timer's mode segment, by its `Constants.TIMER_MODE_*` value. */
     fun timerMode(mode: String): GuideTarget = option("timerMode", mode)
+
+    /** A Songs or Bible page's element chip — which part the Text rows style — by the element's name. */
+    fun lookElement(name: String): GuideTarget = option("lookElement", name)
 
     /** The main window's tab for [tab]. */
     fun mainTab(tab: Tabs): GuideTarget = GuideTarget("tab.${tab.name}")

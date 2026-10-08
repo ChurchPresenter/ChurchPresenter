@@ -150,6 +150,8 @@ internal fun ProfilePage.navTag(): String = when (this) {
 internal fun ProfilePage.guideTarget(): GuideTarget? = when {
     this == ProfilePage.Content -> GuideTargets.PROFILE_CONTENT_PAGE
     this is ProfilePage.Appearance && pane == CustomizePane.STAGE_MONITOR -> GuideTargets.STAGE_LAYOUT_PAGE
+    this is ProfilePage.Appearance && pane == CustomizePane.SONGS -> GuideTargets.PROFILE_SONGS_PAGE
+    this is ProfilePage.Appearance && pane == CustomizePane.BIBLE -> GuideTargets.PROFILE_BIBLE_PAGE
     else -> null
 }
 

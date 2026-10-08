@@ -1,5 +1,6 @@
 package org.churchpresenter.profiles
 
+import org.churchpresenter.sharedui.guide.LocalGuideSession
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -106,7 +107,10 @@ internal fun SettingsGroup(
             onDispose { present -= key }
         }
     }
-    val folded = folds != null && key in folds.folded && LocalSettingsQuery.current.isBlank()
+    // While Wick is pointing at something, nothing stays folded: a folded group draws no rows, so a
+    // tour step on one of them would ring nothing. It folds back when the tour ends.
+    val touring = LocalGuideSession.current?.activeTarget != null
+    val folded = !touring && folds != null && key in folds.folded && LocalSettingsQuery.current.isBlank()
     val radius = CARD_RADIUS
     val topRounded = if (header == null) radius else 0.dp
     val bottomRounded = if (footer == null) radius else 0.dp

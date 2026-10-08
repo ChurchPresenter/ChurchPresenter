@@ -29,6 +29,24 @@ import org.churchpresenter.strings.generated.resources.helper_command_look_3
 import org.churchpresenter.strings.generated.resources.helper_command_look_3_does
 import org.churchpresenter.strings.generated.resources.helper_command_look_4
 import org.churchpresenter.strings.generated.resources.helper_command_look_4_does
+import org.churchpresenter.strings.generated.resources.helper_command_look_13_does
+import org.churchpresenter.strings.generated.resources.helper_command_look_13
+import org.churchpresenter.strings.generated.resources.helper_command_look_12_does
+import org.churchpresenter.strings.generated.resources.helper_command_look_12
+import org.churchpresenter.strings.generated.resources.helper_command_look_11_does
+import org.churchpresenter.strings.generated.resources.helper_command_look_11
+import org.churchpresenter.strings.generated.resources.helper_command_look_10_does
+import org.churchpresenter.strings.generated.resources.helper_command_look_10
+import org.churchpresenter.strings.generated.resources.helper_command_look_9_does
+import org.churchpresenter.strings.generated.resources.helper_command_look_9
+import org.churchpresenter.strings.generated.resources.helper_command_look_8_does
+import org.churchpresenter.strings.generated.resources.helper_command_look_8
+import org.churchpresenter.strings.generated.resources.helper_command_look_7_does
+import org.churchpresenter.strings.generated.resources.helper_command_look_7
+import org.churchpresenter.strings.generated.resources.helper_command_look_6_does
+import org.churchpresenter.strings.generated.resources.helper_command_look_6
+import org.churchpresenter.strings.generated.resources.helper_command_look_5_does
+import org.churchpresenter.strings.generated.resources.helper_command_look_5
 import org.churchpresenter.strings.generated.resources.helper_command_media_1
 import org.churchpresenter.strings.generated.resources.helper_command_media_1_does
 import org.churchpresenter.strings.generated.resources.helper_command_media_2
@@ -125,6 +143,51 @@ internal val HELPER_COMMANDS: List<HelperCommandSection> = listOf(
             HelperCommand(Res.string.helper_command_look_2, "make the background red for now", Res.string.helper_command_look_2_does),
             HelperCommand(Res.string.helper_command_look_3, "make the text bigger", Res.string.helper_command_look_3_does),
             HelperCommand(Res.string.helper_command_look_4, "undo", Res.string.helper_command_look_4_does),
+            HelperCommand(
+                Res.string.helper_command_look_5,
+                "how do i change song lyrics",
+                Res.string.helper_command_look_5_does,
+            ),
+            HelperCommand(
+                Res.string.helper_command_look_6,
+                "how do i make the lyrics bold",
+                Res.string.helper_command_look_6_does,
+            ),
+            HelperCommand(
+                Res.string.helper_command_look_7,
+                "how do i add a shadow to the lyrics",
+                Res.string.helper_command_look_7_does,
+            ),
+            HelperCommand(
+                Res.string.helper_command_look_8,
+                "how do i move the lyrics to the top",
+                Res.string.helper_command_look_8_does,
+            ),
+            HelperCommand(
+                Res.string.helper_command_look_9,
+                "how do i change the margins",
+                Res.string.helper_command_look_9_does,
+            ),
+            HelperCommand(
+                Res.string.helper_command_look_10,
+                "how do i change the end of song marker",
+                Res.string.helper_command_look_10_does,
+            ),
+            HelperCommand(
+                Res.string.helper_command_look_11,
+                "how do i make the song title bigger",
+                Res.string.helper_command_look_11_does,
+            ),
+            HelperCommand(
+                Res.string.helper_command_look_12,
+                "how do i change how bible verses look",
+                Res.string.helper_command_look_12_does,
+            ),
+            HelperCommand(
+                Res.string.helper_command_look_13,
+                "how do i style the bible reference",
+                Res.string.helper_command_look_13_does,
+            ),
         ),
     ),
     HelperCommandSection(

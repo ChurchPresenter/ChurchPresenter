@@ -1,5 +1,8 @@
 package org.churchpresenter.profiles
 
+import androidx.compose.ui.Modifier
+import org.churchpresenter.sharedui.guide.guideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
@@ -62,10 +65,18 @@ internal fun TextLookRows(
 ) {
     val autoFitOn = look.autoFit == true
     leading()
-    SettingsRow(stringResource(Res.string.profile_text_font), paths = paths[TextLookField.FONT]) {
+    SettingsRow(
+        stringResource(Res.string.profile_text_font),
+        paths = paths[TextLookField.FONT],
+        modifier = Modifier.guideTarget(GuideTargets.PROFILE_TEXT_FONT),
+    ) {
         RowFont(look.fontType, fonts) { onChange(look.copy(fontType = it)) }
     }
-    SettingsRow(stringResource(Res.string.profile_text_size), paths = paths[TextLookField.SIZE]) {
+    SettingsRow(
+        stringResource(Res.string.profile_text_size),
+        paths = paths[TextLookField.SIZE],
+        modifier = Modifier.guideTarget(GuideTargets.PROFILE_TEXT_SIZE),
+    ) {
         RowStepper(
             value = look.fontSize,
             onValueChange = { onChange(look.copy(fontSize = it)) },
@@ -95,6 +106,7 @@ internal fun TextLookRows(
         // The outline and highlight are buttons of this row, so the search finds it by their names.
         searchTerms = styleSearchTerms(),
         paths = paths[TextLookField.STYLE] + paths[TextLookField.OUTLINE] + paths[TextLookField.BACKDROP],
+        modifier = Modifier.guideTarget(GuideTargets.PROFILE_TEXT_STYLE),
     ) {
         TextStyleButtons(
             bold = look.bold,
@@ -115,7 +127,11 @@ internal fun TextLookRows(
             onBackdropChange = { onChange(look.copy(backdrop = it)) },
         )
     }
-    SettingsRow(stringResource(Res.string.profile_text_alignment), paths = paths[TextLookField.ALIGNMENT]) {
+    SettingsRow(
+        stringResource(Res.string.profile_text_alignment),
+        paths = paths[TextLookField.ALIGNMENT],
+        modifier = Modifier.guideTarget(GuideTargets.PROFILE_TEXT_ALIGNMENT),
+    ) {
         RowSegmented(
             options = listOf(
                 RowOption(Constants.LEFT, stringResource(Res.string.left)),
@@ -190,6 +206,7 @@ private fun CaseSpacingShadowRows(look: TextLook, onChange: (TextLook) -> Unit, 
         look.shadow,
         { onChange(look.copy(shadow = it)) },
         paths = paths[TextLookField.SHADOW] + paths[TextLookField.SHADOW_DETAIL],
+        modifier = Modifier.guideTarget(GuideTargets.PROFILE_TEXT_SHADOW),
     )
     if (look.shadow) {
         SettingsWideRow(advanced = true, searchTerms = stringResource(Res.string.profile_text_shadow)) {

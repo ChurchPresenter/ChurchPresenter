@@ -110,7 +110,8 @@ internal fun EditSongEditorColumn(
                     insertSnippet(state.paneValue, ChordSheetImporter.convert(sheet), ownLine = false)
                 )
             },
-            modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 14.dp),
+            modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 14.dp)
+                .guideTarget(GuideTargets.SONG_LYRICS),
             placeholder = {
                 Text(
                     when (state.pane) {

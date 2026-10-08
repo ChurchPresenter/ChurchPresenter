@@ -2,6 +2,10 @@ package org.churchpresenter.helper.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.LastPage
+import androidx.compose.material.icons.filled.FormatAlignCenter
+import androidx.compose.material.icons.filled.FormatBold
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Language
@@ -139,6 +143,11 @@ private fun requestIcon(request: SuggestedRequest): ImageVector = when (request)
     SuggestedRequest.WEBSITE -> Icons.Filled.Language
     SuggestedRequest.BIBLE_HISTORY -> Icons.Filled.History
     SuggestedRequest.CROSS_REFS -> Icons.Filled.Link
+    SuggestedRequest.EDIT_LYRICS -> Icons.Filled.Edit
+    SuggestedRequest.LYRICS_STYLE, SuggestedRequest.TITLE_STYLE -> Icons.Filled.FormatBold
+    SuggestedRequest.LYRICS_POSITION -> Icons.Filled.FormatAlignCenter
+    SuggestedRequest.END_MARKER -> Icons.Filled.LastPage
+    SuggestedRequest.BIBLE_STYLE -> Icons.AutoMirrored.Filled.MenuBook
 }
 
 /** The icon on the tag over a suggestion or tip, by what it is about. */

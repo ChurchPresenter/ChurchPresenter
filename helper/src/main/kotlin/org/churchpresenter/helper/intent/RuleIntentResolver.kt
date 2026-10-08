@@ -83,6 +83,8 @@ class RuleIntentResolver : IntentResolver {
             ::lowerThirdRule,
             ::displaySetupRule,
             ::backgroundColorRule,
+            // Before the font rule: "how do I make the song title bigger" is a tour, not a change.
+            ::lookRule,
             ::fontSizeRule,
             ::shortcutRule,
             // Before the tours of the same things: "a 5 minute countdown" starts one.
