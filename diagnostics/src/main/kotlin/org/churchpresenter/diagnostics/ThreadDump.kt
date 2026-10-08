@@ -11,15 +11,15 @@ object ThreadDump {
     /** How many frames of each thread's stack a dump shows. */
     const val STACK_DEPTH = 25
 
-    /** The lock section, then every thread's stack in name order, under [header]. */
-    fun text(header: String): String = buildString {
+    /** The lock section, then every thread's stack in name order, [depth] frames each, under [header]. */
+    fun text(header: String, depth: Int = STACK_DEPTH): String = buildString {
         appendLine()
         appendLine(header)
-        appendLockInfo(this)
+        appendLockInfo(this, depth)
         Thread.getAllStackTraces().toSortedMap(compareBy { it.name }).forEach { (thread, stack) ->
             appendLine()
             appendLine("--- \"${thread.name}\" ${thread.state}${if (thread.isDaemon) " (daemon)" else ""}")
-            stack.take(STACK_DEPTH).forEach { appendLine("        at $it") }
+            stack.take(depth).forEach { appendLine("        at $it") }
         }
     }
 
@@ -37,7 +37,7 @@ object ThreadDump {
      * owner. Best effort: a JVM may refuse either, and a hang that is not a deadlock reports no
      * cycle, so the plain stacks stay the primary record.
      */
-    internal fun appendLockInfo(out: StringBuilder) {
+    internal fun appendLockInfo(out: StringBuilder, depth: Int = STACK_DEPTH) {
         runCatching {
             val bean = ManagementFactory.getThreadMXBean()
             val deadlocked = bean.findDeadlockedThreads()
@@ -53,7 +53,7 @@ object ThreadDump {
                 out.appendLine("--- \"${info.threadName}\" ${info.threadState}")
                 info.lockInfo?.let { out.appendLine("        waiting to lock $it") }
                 info.lockOwnerName?.let { out.appendLine("        held by \"$it\" (id ${info.lockOwnerId})") }
-                info.stackTrace.take(STACK_DEPTH).forEach { out.appendLine("        at $it") }
+                info.stackTrace.take(depth).forEach { out.appendLine("        at $it") }
             }
         }.onFailure { out.appendLine("=== lock info unavailable: $it") }
     }

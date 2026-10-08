@@ -29,7 +29,8 @@ import org.churchpresenter.lottiegen.ui.LOWER_THIRD_STYLE_THUMBNAIL_TAG
 import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.viewmodel.ThumbnailDiagnostics
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.threadDump
+import org.churchpresenter.diagnostics.HungTestReporter
+import org.churchpresenter.diagnostics.ThreadDump
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.lottiegen.App as LottieGenApp
 import java.util.Locale
@@ -133,7 +134,9 @@ class LottieGenScreenshotTest {
                     // both times. The thumbnails draw on the event queue, so its stack is evidence;
                     // what the build itself recorded says whether it finished, and why the style asked
                     // for has no picture.
-                    System.err.println(threadDump("NO STYLE THUMBNAIL after ${RENDER_TIMEOUT_MS}ms ==="))
+                    System.err.println(
+                        ThreadDump.text("=== NO STYLE THUMBNAIL after ${RENDER_TIMEOUT_MS}ms ===", HungTestReporter.STACK_DEPTH),
+                    )
                     System.err.println(thumbnailDiagnostics.describe())
                     throw e
                 }

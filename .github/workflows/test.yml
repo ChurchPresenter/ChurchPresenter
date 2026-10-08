@@ -72,6 +72,11 @@ jobs:
     # The suite takes ~14 minutes. Without a timeout a test that hangs instead of failing holds
     # the runner until GitHub's 6-hour default kills it, so the deadline is the failure signal.
     timeout-minutes: 60
+    env:
+      # HungTestReporter's threshold for every module suite (the composeApp step also passes it):
+      # a fork stuck on one test halts with a thread dump in its test-results, which the
+      # `test-reports` upload carries.
+      ORG_GRADLE_PROJECT_hangThresholdMs: '150000'
     steps:
       # A draft runs nothing -- and must not leave behind a `test` that counts as passing. A skipped
       # job does count: #634 was opened as a draft and marked ready five seconds later, the `opened`

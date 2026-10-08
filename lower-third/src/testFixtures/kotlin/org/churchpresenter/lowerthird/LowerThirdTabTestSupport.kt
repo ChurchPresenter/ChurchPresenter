@@ -82,6 +82,11 @@ class LowerThirdReports {
     var settingsChanges = 0
     /** The settings as they stood after the most recent change the tab asked for. */
     var settings: AppSettings? = null
+    /**
+     * Each preset file the tab asked to pre-render, by name. Recorded, not rendered: the real cache's
+     * jobs outlive the test and would keep the event queue busy through the next ones.
+     */
+    val preRendered = mutableListOf<String>()
 }
 
 /**
@@ -210,6 +215,7 @@ fun lowerThirdTab(
                                 reports.removeAsked++
                                 if (confirmRemove) onConfirmed()
                             },
+                            preRender = { file, _ -> reports.preRendered += file.nameWithoutExtension },
                         )
                     }
                 }

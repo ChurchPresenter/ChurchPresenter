@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter
+package org.churchpresenter.diagnostics
 
 import org.junit.platform.engine.TestDescriptor
 import org.junit.platform.engine.UniqueId

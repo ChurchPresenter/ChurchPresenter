@@ -306,9 +306,10 @@ failures that only appear under load:
 - **Some classes cannot run beside anything**: `jvmTestSerial` (`maxParallelForks = 1`) holds those
   listed in `serialTestClasses` (`composeApp/build.gradle.kts`). `jvmTest` excludes them and is
   `finalizedBy` it. Passing `--tests` stands the exclusion down and runs the named class in `jvmTest`.
-- **A hung fork is killed with a diagnosis.** `HungTestReporter` dumps every thread and halts the
-  fork (exit 93) once a test runs past its threshold (5 min, 150s in CI); the dump also goes to
-  `build/test-results/<task>/hung-test-dump.txt`. Tighten it with `-PhangThresholdMs=30000`.
+- **A hung fork is killed with a diagnosis.** `HungTestReporter` (`:diagnostics` test fixtures,
+  on every module's test runtime from the root build) dumps every thread and halts the fork
+  (exit 93) once a test runs past its threshold (5 min, 150s in CI); the dump also goes to
+  `<module>/build/test-results/<task>/hung-test-dump.txt`. Tighten it with `-PhangThresholdMs=30000`.
   Off-screen Compose scenes (`LowerThirdOffscreenRenderer`, `ComposeScenePump`) confine themselves
   to the event queue to avoid a snapshot-observer lock inversion — keep any new one that way.
 

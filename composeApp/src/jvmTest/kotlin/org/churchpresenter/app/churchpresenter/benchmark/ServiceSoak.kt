@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter.benchmark
 
 import androidx.compose.runtime.mutableIntStateOf
-import org.churchpresenter.app.churchpresenter.HungTestReporter
-import org.churchpresenter.app.churchpresenter.threadDump
+import org.churchpresenter.diagnostics.HungTestReporter
+import org.churchpresenter.diagnostics.ThreadDump
 import java.io.File
 import java.lang.management.ManagementFactory
 import java.util.Locale
@@ -156,9 +156,9 @@ class ServiceSoak {
     private fun reportStall(minute: Double, stalledNanos: Long, showing: String) {
         val headline = "SOAK STALL: one frame has not finished in ${stalledNanos / NANOS_PER_SECOND}s, " +
             "at minute ${"%.1f".format(Locale.ROOT, minute)}, showing $showing ==="
-        val dump = threadDump(
-            headline,
-            "The test thread is inside OffscreenOutput.step(); read it and the event queue.",
+        val dump = ThreadDump.text(
+            "=== $headline\n=== The test thread is inside OffscreenOutput.step(); read it and the event queue.",
+            depth = HungTestReporter.STACK_DEPTH,
         )
         System.err.println(dump)
         System.err.flush()

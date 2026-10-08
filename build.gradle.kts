@@ -65,6 +65,22 @@ subprojects {
                 // step gives up -- the same reason :composeApp has one, applied to the modules that
                 // were left unbounded when it was added.
                 timeout.set(java.time.Duration.ofMinutes(10))
+                // HungTestReporter (`:diagnostics` test fixtures, added below) halts a fork stuck on
+                // one test with a thread dump, well inside that timeout. `-PhangThresholdMs=`
+                // tightens it; the dump lands in test-results so CI uploads it with the results.
+                providers.gradleProperty("hangThresholdMs").orNull?.let {
+                    systemProperty("churchpresenter.test.hangThresholdMs", it)
+                }
+                systemProperty(
+                    "churchpresenter.test.hangDumpDir",
+                    layout.buildDirectory.dir("test-results/" + name).get().asFile.absolutePath,
+                )
+            }
+
+            // Registers HungTestReporter through the fixtures' service file. `:diagnostics` has its
+            // own fixtures on its test classpath already.
+            if (path != ":diagnostics") {
+                dependencies.add("testRuntimeOnly", dependencies.testFixtures(project(":diagnostics")))
             }
 
             tasks.withType<JacocoReport>().configureEach {

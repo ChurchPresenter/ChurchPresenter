@@ -58,6 +58,12 @@ class LowerThirdTabTest {
     }
 
     @Test
+    fun `every preset listed is handed to the pre-render, and nothing else`() = lowerThirdTab { reports ->
+        waitUntil(timeoutMillis = WAIT_TIMEOUT_MS) { reports.preRendered.size == 2 }
+        assertEquals(listOf("Speaker Name", "Welcome"), reports.preRendered.sorted())
+    }
+
+    @Test
     fun `with no folder configured the tab says so, rather than that the folder is empty`() =
         lowerThirdTab(folder = null) { _ ->
             assertTrue(showsExactly(LowerThirdLabel.NO_FOLDER), "got ${renderedText()}")
@@ -263,7 +269,7 @@ class LowerThirdTabTest {
 
     @Test
     fun `the tab draws with only its settings, as a preview composes it`() = runComposeUiTest {
-        setContent { LowerThirdTab(appSettings = AppSettings()) }
+        setContent { LowerThirdTab(appSettings = AppSettings(), preRender = { _, _ -> }) }
         waitForIdle()
 
         assertTrue(showsContainingText(LowerThirdLabel.NO_FOLDER), "no folder is set: ${renderedText()}")
@@ -276,7 +282,7 @@ class LowerThirdTabTest {
             runComposeUiTest {
                 setContent {
                     val streaming = StreamingSettings(lowerThirdFolder = folder.absolutePath)
-                    LowerThirdTab(appSettings = AppSettings(streamingSettings = streaming))
+                    LowerThirdTab(appSettings = AppSettings(streamingSettings = streaming), preRender = { _, _ -> })
                 }
                 awaitPresetScan()
                 selectPreset("Welcome")
