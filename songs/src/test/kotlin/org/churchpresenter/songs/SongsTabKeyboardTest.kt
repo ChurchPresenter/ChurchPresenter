@@ -11,7 +11,6 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -42,35 +41,6 @@ import kotlin.test.assertTrue
  * there are no more sections and nothing is live.
  */
 class SongsTabKeyboardTest {
-
-    /**
-     * The idle window these tests run the tab with, short enough to wait out for real.
-     *
-     * Not the test clock: `mainClock.advanceTimeBy` does not reliably drive that `delay`, so tests
-     * written that way passed or failed on how much wall time the run happened to take. Each wait
-     * below ends on a positive signal via [waitForKeys] instead.
-     */
-    private val IDLE_MS = 60L
-
-    /** Bound on [waitForKeys] — generous, and only ever reached by a genuine failure. */
-    private val KEYS_BACK_TIMEOUT_MS = 3_000L
-
-    /**
-     * Waits for the tab to actually take the caret back, then presses [key].
-     *
-     * The signal is the banner going away: it is rendered exactly while the search field holds
-     * focus, so its absence is the tab reporting that the keys are its own again.
-     */
-    private fun ComposeUiTest.waitForKeys(key: Key) {
-        waitUntil(timeoutMillis = KEYS_BACK_TIMEOUT_MS) {
-            onAllNodes(hasText(searchFocusHint, substring = true))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty()
-        }
-        press(key)
-    }
-
-    /** The hint banner's words, which are also the "the caret is still in the box" signal. */
-    private val searchFocusHint = "Keyboard is in the search box"
 
     /** The clear button carries no test tag, so it is addressed by its content description. */
     private val clearSearchLabel = "Clear search"
@@ -350,87 +320,19 @@ class SongsTabKeyboardTest {
         }
     }
 
-    // ── Getting the keys back from the search box ───────────────────────────────
+    // ── The search box while a song is live ─────────────────────────────────────
 
     /**
-     * Typing previews the first hit with no click, but leaves the caret in the search field, where
-     * the tab's key handler stands down — so the verse and line keys did nothing until the operator
-     * clicked a row. After typing stops the tab takes focus back on its own.
-     *
-     * The wait is elapsed on the test clock, so none of these pay a real second.
+     * While lyrics are live, the caret stays in the search box until the operator moves it, so a
+     * stray keypress after a search cannot change what the congregation is reading. Enter hands the
+     * keyboard to the tab, because it is the operator asking for it.
      */
     @Test
-    fun `typing that stops hands the keys back`() {
-        songsTab(songs = multiLineSong, songSettings = lineMode(), searchIdleFocusMs = IDLE_MS) { vm, _ ->
-            selectFirstSong(vm)
-            search("grace")
-            searchBox().performKeyInput { pressKey(Key.DirectionRight) }
-            waitForIdle()
-            assertEquals(0, vm.selectedLineIndex.value, "still typing, so the key belongs to the text")
-
-            waitForKeys(Key.DirectionRight)
-
-            assertTrue(vm.selectedLineIndex.value > 0, "was ${vm.selectedLineIndex.value}")
-        }
-    }
-
-    /** Only the caret moves: the query and the filtered list are left exactly as they were. */
-    @Test
-    fun `the query survives the keys coming back`() {
-        songsTab(songs = multiLineSong, songSettings = lineMode(), searchIdleFocusMs = IDLE_MS) { vm, _ ->
-            selectFirstSong(vm)
-            search("grace")
-            waitForKeys(Key.DirectionRight)
-
-            assertEquals("grace", vm.searchQuery.value, "the query must not be cleared")
-            assertEquals(listOf("Amazing Grace"), listedTitles(multiLineSong), "nor the filter dropped")
-        }
-    }
-
-    /**
-     * The wait is on *quiet*, not on time since the first keystroke.
-     *
-     * Two gaps that each fall short of the window must not add up to one that clears it — otherwise
-     * a slow typist loses the caret mid-query.
-     */
-    @Test
-    fun `each keystroke restarts the wait`() {
-        // A window long enough that the two keystrokes below land well inside it, so the test is
-        // about the restart and not about how fast the machine is.
-        songsTab(songs = multiLineSong, songSettings = lineMode(), searchIdleFocusMs = 2_000L) { vm, _ ->
-            selectFirstSong(vm)
-            search("g")
-            search("gr")
-
-            searchBox().performKeyInput { pressKey(Key.DirectionRight) }
-            waitForIdle()
-            assertEquals(0, vm.selectedLineIndex.value, "the second keystroke restarted the wait")
-
-            // The banner is still up, which is the tab saying the caret is still in the box.
-            assertTrue(
-                onAllNodes(hasText(searchFocusHint, substring = true))
-                    .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty(),
-                "the banner must still say the caret is in the box",
-            )
-        }
-    }
-
-    /**
-     * While lyrics are live the tab never takes the caret back on its own.
-     *
-     * Every navigation branch pushes to the output while presenting, so a pause mid-service must not
-     * leave one stray keypress able to change what the congregation is reading. Enter is still
-     * allowed, because it is the operator asking for it.
-     */
-    @Test
-    fun `while a song is live the wait never fires but Enter still does`() {
+    fun `while a song is live the search box keeps the keys until Enter`() {
         songsTab(
             songs = multiLineSong,
             songSettings = lineMode(),
             isPresenting = true,
-            // No window at all: were the live guard missing, the caret would move on the very frame
-            // the query settled, so the check below needs no wait to be meaningful.
-            searchIdleFocusMs = 0L,
         ) { vm, reports ->
             selectFirstSong(vm)
             search("grace")
@@ -438,7 +340,7 @@ class SongsTabKeyboardTest {
 
             waitForIdle()
             press(Key.DirectionRight)
-            assertEquals(0, vm.selectedLineIndex.value, "the wait must not fire while live")
+            assertEquals(0, vm.selectedLineIndex.value, "the caret is still in the search box")
             assertEquals(pushedBefore, reports.allSections.size, "and nothing may reach the output")
 
             searchBox().performKeyInput { pressKey(Key.Enter) }

@@ -20,10 +20,11 @@ import org.churchpresenter.settings.operatorBibleSettings
 @Composable
 internal fun BibleTabScope.BibleTabEffects(
     viewModel: BibleViewModel,
-    selectedVerseItem: ScheduleItem.BibleVerseItem?,
-    selectedVerseItemVersion: Int,
+    schedule: ScheduleVerse,
     dialogDismissSignal: Int,
 ) {
+    val selectedVerseItem = schedule.item
+    val selectedVerseItemVersion = schedule.version
     val isFirstComposition = remember { mutableStateOf(true) }
     LaunchedEffect(
         appSettings.bibleSettings.storageDirectory,
@@ -48,36 +49,57 @@ internal fun BibleTabScope.BibleTabEffects(
     }
 
     /**
-     * Puts a schedule item's verse on screen.
+     * A verse handed over by the schedule: opened with a click, or put on screen.
      *
-     * The push is made here, from the resolution itself, rather than left to
-     * `LaunchedEffect(verseSelectionToken)` below: that effect is skipped while a multi-verse
-     * selection is live and while split-browse is on — both right for an interactive selection and
-     * wrong for an item the operator explicitly clicked — and it only fires while this tab is
-     * composed, which it may not be by the time a cold-start Bible load finishes.
+     * Acted on once per hand-over: the tab is rebuilt on every visit and the app keeps the last
+     * schedule verse, so without the check a visit would select it again over whatever is live.
+     *
+     * A go-live goes through the tab's own go-live (`goLiveSource`), which records it, releases a
+     * hold and puts the Bible up; the verses are also pushed from here, from the resolution itself,
+     * rather than left to `LaunchedEffect(verseSelectionToken)` below -- that effect is skipped while
+     * a multi-verse selection is live and while split-browse is on. A click while a verse is live
+     * holds the output first, so it opens the verse without replacing what is on screen.
      */
+    // Read before the schedule effect below records this visit's hand-over.
+    val openedFromSchedule = remember {
+        selectedVerseItem != null && (selectedVerseItem to selectedVerseItemVersion) != viewModel.scheduleSeen
+    }
     LaunchedEffect(selectedVerseItem, selectedVerseItemVersion) {
-        selectedVerseItem?.let { item ->
-            val verses = viewModel.resolveVerseSelection(
-                bookName = item.bookName,
-                chapter = item.chapter,
-                verseNumber = item.verseNumber,
-                verseRange = item.verseRange,
-                bookId = item.bookId,
+        val handover = selectedVerseItem to selectedVerseItemVersion
+        val fresh = handover != viewModel.scheduleSeen
+        viewModel.scheduleSeen = handover
+        val item = selectedVerseItem?.takeIf { fresh } ?: return@LaunchedEffect
+        if (!schedule.goLive) holdOutputForBrowsing()
+        val verses = viewModel.resolveVerseSelection(
+            bookName = item.bookName,
+            chapter = item.chapter,
+            verseNumber = item.verseNumber,
+            verseRange = item.verseRange,
+            goLiveSource = if (schedule.goLive) "schedule" else null,
+            bookId = item.bookId,
+        )
+        if (verses.isEmpty()) {
+            CrashReporter.breadcrumb(
+                "Bible schedule item did not resolve to a verse",
+                category = "schedule",
             )
-            if (verses.isEmpty()) {
-                CrashReporter.breadcrumb(
-                    "Bible schedule item did not resolve to a verse",
-                    category = "schedule",
-                )
-                return@LaunchedEffect
-            }
-            onVerseSelected(verses)
-            focusRequester.requestFocus()
+            return@LaunchedEffect
         }
+        if (schedule.goLive || !currentIsPresenting) onVerseSelected(verses)
+        focusRequester.requestFocus()
     }
 
-    LaunchedEffect(dialogDismissSignal) { focusRequester.requestFocus() }
+    // Opening the tab puts the caret in the search box (#798), unless the keyboard belongs to what is
+    // live here -- or to the schedule verse just opened -- so the step keys keep working. After that,
+    // closing a dialog hands the keyboard back to the tab as before.
+    var opened by remember { mutableStateOf(false) }
+    LaunchedEffect(dialogDismissSignal) {
+        val opening = !opened
+        opened = true
+        val searchFirst = appSettings.keyboardShortcutSettings.focusSearchOnTabOpen &&
+            !currentIsPresenting && !openedFromSchedule
+        if (opening && searchFirst) searchFocus.focusAndSelectAll() else focusRequester.requestFocus()
+    }
 }
 
 /** Keeps the split-browse live panel on the chapter that is live, and sends its key-press steps. */
@@ -213,3 +235,6 @@ internal fun BibleTabScope.BibleSelectionEffects(viewModel: BibleViewModel) {
         }
     }
 }
+
+/** The verse the schedule handed over, the hand-over's count, and whether it is to go live. */
+internal data class ScheduleVerse(val item: ScheduleItem.BibleVerseItem?, val version: Int, val goLive: Boolean)

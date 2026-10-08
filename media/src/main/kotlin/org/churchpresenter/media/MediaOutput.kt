@@ -10,5 +10,8 @@ interface MediaOutput {
     fun setPresentingMode(mode: Presenting)
     fun setShowPresenterWindow(show: Boolean)
     fun setCurrentMedia(url: String, type: String)
+
+    /** The media on air, by the address [setCurrentMedia] was given; empty when none is. */
+    val mediaOnAir: String get() = ""
     fun requestClearDisplay()
 }

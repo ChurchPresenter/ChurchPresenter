@@ -1,5 +1,6 @@
 package org.churchpresenter.songs
 
+import org.churchpresenter.sharedui.models.Presenting
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import org.churchpresenter.settings.SongColumnId
@@ -23,7 +24,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -46,7 +46,6 @@ import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.starts_with
 import org.churchpresenter.strings.generated.resources.title
 import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.settings.utils.Constants
@@ -62,15 +61,15 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.DragHandle
 import androidx.compose.foundation.layout.RowScope
 
-/** The tab's effects: play counts, a storage-folder change, schedule selection, the search idle and remote lyrics. */
+/** The tab's effects: play counts, a storage-folder change, schedule selection, opening focus and remote lyrics. */
 @Composable
 internal fun SongsTabController.SongsTabEffects(
     playCounts: SongPlayCounts?,
-    selectedSongItem: ScheduleItem.SongItem?,
-    selectedSongItemVersion: Int,
+    schedule: ScheduleSelection,
     dialogDismissSignal: Int,
-    searchIdleFocusMs: Long,
 ) {
+    val selectedSongItem = schedule.item
+    val selectedSongItemVersion = schedule.version
     LaunchedEffect(playCounts) { viewModel.setPlayCounts(playCounts) }
 
     // Reload songs whenever the storage directory changes (e.g. after settings are saved)
@@ -90,51 +89,41 @@ internal fun SongsTabController.SongsTabEffects(
     // Reset title-slide selection whenever the active song changes
     LaunchedEffect(selectedSongIndex) { live.titleSlideSelected = false }
 
-    // Typing narrows the list and previews the first hit with no click, but the caret stays in the
-    // search field — and the key handler below stands down while it is there, so the verse and line
-    // keys do nothing until something else takes focus. Once typing has stopped, hand focus back to
-    // the tab root. The query and the filtered list are left exactly as they are; only the caret
-    // moves. Enter and a click in either pane do the same on demand.
-    //
-    // Every key earns its place: `searchQuery` restarts the wait on each keystroke, so it waits for
-    // *quiet* rather than for time since the first character; `searchFieldFocused` both arms the
-    // effect and cancels it when focus leaves by any other route; an empty query must never arm it
-    // at all (first composition, the clear button, backspacing the query away).
-    //
-    // `isPresenting` suppresses it outright while lyrics are live: every navigation branch below
-    // calls sendToPresenter(goLive = isPresenting), so a pause mid-service would otherwise leave one
-    // stray keypress able to change what the congregation is reading — and after a search the
-    // previewed song is usually not the live one, so it could push a different song entirely.
-    // Enter stays available when live, because it is deliberate.
-    //
-    // `songDialogOpen` covers the delete dialog, which composes in this same scene: a focus grab
-    // from a background coroutine would pull focus off its buttons.
+    // Whatever was held back is moot once the selection or the live song changes.
+    LaunchedEffect(selectedSongIndex, live.songId) { browsePausedHint = false }
+
     val songDialogOpen = dialogs.editing != null || dialogs.creatingNew || dialogs.deleting != null
-    LaunchedEffect(searchQuery, searchFieldFocused, isPresenting, songDialogOpen) {
-        // Not allowed to: something else owns the keyboard, or owns the output.
-        if (isPresenting || songDialogOpen) return@LaunchedEffect
-        // Nothing to do: the caret is not here, or there is no query to have finished typing.
-        if (!searchFieldFocused || searchQuery.isEmpty()) return@LaunchedEffect
-        delay(searchIdleFocusMs)
-        tabFocusRequester.requestFocus()
+    // Read before the schedule effect below records this visit's version.
+    val openedFromSchedule = remember {
+        selectedSongItem != null && (selectedSongItem to selectedSongItemVersion) != viewModel.scheduleSeen
     }
 
-    // React to schedule item selection
-    // Uses selectedSongItemVersion as a key so clicking the same song twice always re-fires
+    // A song handed over by the schedule or a remote. Acted on once per handover: the tab is rebuilt
+    // on every visit and the app keeps the last schedule song, so without the version check a
+    // visit would select that song again and push it over whatever is live.
     LaunchedEffect(selectedSongItem, selectedSongItemVersion) {
-        selectedSongItem?.let { item ->
-            // Wait until data is ready if currently loading
-            if (viewModel.isLoading.value) {
-                snapshotFlow { viewModel.isLoading.value }
-                    .first { !it }
-            }
-            val found = viewModel.selectSongByDetails(item.songNumber, item.title, item.songbook, item.songId)
-            if (found) {
-                live.titleSlideSelected = false
-                sendToPresenter()
-                tabFocusRequester.requestFocus()
-            }
+        val handover = selectedSongItem to selectedSongItemVersion
+        val fresh = handover != viewModel.scheduleSeen
+        viewModel.scheduleSeen = handover
+        val item = selectedSongItem?.takeIf { fresh } ?: return@LaunchedEffect
+        // Wait until data is ready if currently loading
+        if (viewModel.isLoading.value) {
+            snapshotFlow { viewModel.isLoading.value }.first { !it }
         }
+        // A song the library does not have leaves the output as it is.
+        if (!viewModel.selectSongByDetails(item.songNumber, item.title, item.songbook, item.songId)) {
+            return@LaunchedEffect
+        }
+        live.titleSlideSelected = false
+        when (schedule.action) {
+            ScheduleSongAction.GO_LIVE -> {
+                sendToPresenter(goLive = true, source = schedule.source)
+                onPresenting(Presenting.LYRICS)
+            }
+            ScheduleSongAction.OPEN -> if (!isPresenting) sendToPresenter()
+            ScheduleSongAction.PUSH -> sendToPresenter()
+        }
+        tabFocusRequester.requestFocus()
     }
 
     // Remote (Instance Link) songs fetch their lyrics lazily after selection — sendToPresenter()
@@ -146,7 +135,17 @@ internal fun SongsTabController.SongsTabEffects(
         }
     }
 
-    LaunchedEffect(dialogDismissSignal) { tabFocusRequester.requestFocus() }
+    // Opening the tab puts the caret in the search box (#798), unless the keyboard belongs to what is
+    // live here -- or to the schedule song just opened -- so the step keys keep working. After that,
+    // closing a dialog hands the keyboard back to the tab as before.
+    var opened by remember { mutableStateOf(false) }
+    LaunchedEffect(dialogDismissSignal) {
+        val opening = !opened
+        opened = true
+        val searchFirst = appSettings.keyboardShortcutSettings.focusSearchOnTabOpen &&
+            !isPresenting && !openedFromSchedule && !songDialogOpen
+        if (opening && searchFirst) focusSearch() else tabFocusRequester.requestFocus()
+    }
 }
 
 /** The tab's row: the song list, the handle between, and the lyrics panel. */
@@ -164,7 +163,10 @@ internal fun SongsTabController.SongsTabPanes(modifier: Modifier) {
                 }
             }
             .focusRequester(tabFocusRequester)
-            .onFocusChanged { focusRescue.onFocusChanged(it.hasFocus) }
+            .onFocusChanged {
+                focusRescue.onFocusChanged(it.hasFocus)
+                tabRootFocused = it.isFocused
+            }
             .focusRescuePressHook(focusRescue)
             .focusable()
             // The handler sits on the tab root, so it sees every key before the search field
@@ -254,6 +256,7 @@ private fun SongsTabController.SongListSide(row: RowScope) = with(row) {
         favoritesExpanded = favoritesExpanded,
         favPanelHeightPx = favPanelHeightPx,
         tabFocusRequester = tabFocusRequester,
+        searchFocus = searchFocus,
         favoriteSongs = { viewModel.getFavoriteSongs() },
         playCountFor = { id -> playCounts?.getSongPlayCount(id) },
         searchMatchFor = viewModel::searchMatchFor,
@@ -333,7 +336,9 @@ private fun SongsTabController.SongLyricsSide(row: RowScope) = with(row) {
         lyricSections = { viewModel.getLyricSections() },
         onSectionSelected = { viewModel.selectSection(it) },
         onLineSelected = { viewModel.setLineIndex(it) },
-        onBackToLiveSong = { live.songId?.let { viewModel.selectSongById(it) } },
+        onBackToLiveSong = ::backToLive,
+        browsePausedHint = browsePausedHint,
+        onSearchBannerClick = ::switchSearchLive,
         onAddToSchedule = onAddToSchedule,
         onPresenting = onPresenting,
         sendToPresenter = ::sendToPresenter,

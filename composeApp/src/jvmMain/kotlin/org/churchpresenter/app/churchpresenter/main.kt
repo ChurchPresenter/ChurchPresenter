@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.dialogs.showAlreadyRunningDialog
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
 import androidx.compose.runtime.CompositionLocalProvider
@@ -127,12 +128,7 @@ fun main() {
     }
     if (!acquireSingleInstanceLock()) {
         Log.info("Startup", "ChurchPresenter is already running.")
-        javax.swing.JOptionPane.showMessageDialog(
-            null,
-            "ChurchPresenter is already running.",
-            "ChurchPresenter",
-            javax.swing.JOptionPane.WARNING_MESSAGE
-        )
+        showAlreadyRunningDialog(SettingsManager().loadSettings())
         System.exit(0)
         return
     }

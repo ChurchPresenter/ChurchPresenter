@@ -1,15 +1,11 @@
 package org.churchpresenter.app.churchpresenter.remote
 
-import org.churchpresenter.core.models.songs.SongItem
-import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.dictionary.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.ScheduleActions
-import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.sharedui.utils.LiveHistoryLogger
 import org.churchpresenter.liveoutput.PresenterManager
 /**
  * Executes a project request — adds to schedule and sets presenter state.
@@ -19,10 +15,9 @@ internal fun executeProjectItem(
     item: ScheduleItem,
     scheduleActions: ScheduleActions,
     presenterManager: PresenterManager,
-    statisticsManager: StatisticsManager? = null
 ) {
     when (item) {
-        is ScheduleItem.SongItem -> projectSong(item, scheduleActions, presenterManager, statisticsManager)
+        is ScheduleItem.SongItem -> projectSong(item, scheduleActions, presenterManager)
 
         is ScheduleItem.BibleVerseItem -> projectBibleVerse(item, scheduleActions, presenterManager)
 
@@ -80,31 +75,18 @@ internal fun executeProjectItem(
     }
 }
 
-/** Adds [item] to the schedule and puts its song up, so the Songs tab navigates to it. */
+/**
+ * Adds [item] to the schedule and opens the output window. The song itself goes up from the Songs
+ * tab, which the caller hands it to (`emitRemoteTabSelection`): it goes live there with its first
+ * section in one push, and counts it. Nothing is put on screen from here -- a placeholder ahead of
+ * the song showed as a blank slide.
+ */
 private fun projectSong(
     item: ScheduleItem.SongItem,
     scheduleActions: ScheduleActions,
     presenterManager: PresenterManager,
-    statisticsManager: StatisticsManager?,
 ) {
-    // Add to schedule AND select the song so the Songs tab navigates to it
     scheduleActions.addSong(item.songNumber, item.title, item.songbook, item.songId)
-    LiveHistoryLogger.noteLiveSong(item.songId, item.songbook, item.songNumber, item.title, "remote")
-    presenterManager.setLyricSection(
-        LyricSection(
-            title = item.title,
-            songNumber = item.songNumber,
-            lines = emptyList(),
-            type = Constants.SECTION_TYPE_SONG
-        )
-    )
-    statisticsManager?.recordSongDisplay(
-        songId = item.songId,
-        songNumber = item.songNumber,
-        title = item.title,
-        songbook = item.songbook
-    )
-    presenterManager.setPresentingMode(Presenting.LYRICS)
     presenterManager.setShowPresenterWindow(true)
 }
 

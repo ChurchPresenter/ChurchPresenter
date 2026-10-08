@@ -150,7 +150,9 @@ internal fun MainDesktopScope.LowerThirdTabPane() {
         onGoLive = { json, pauseAtFrame, pauseFrame, pauseDurationMs, presetName ->
             presenterManager.previewBus.showLowerThird(json, pauseAtFrame, pauseFrame, pauseDurationMs, presetName)
         },
-        onOpenLottieGen = { outputDir, onSaved -> onOpenLottieGen(outputDir, onSaved) }
+        onOpenLottieGen = { outputDir, onSaved -> onOpenLottieGen(outputDir, onSaved) },
+        liveLowerThirdName = presenterManager.currentLowerThirdName.value
+            .takeIf { it.isNotEmpty() && presenterManager.isLive(Presenting.LOWER_THIRD) },
     )
 }
 
@@ -231,6 +233,7 @@ internal fun MainDesktopScope.CanvasTabPane() {
             presenterManager.setShowPresenterWindow(true)
         },
         sceneViewModel = sceneViewModel,
+        liveSceneId = presenterManager.activeScene.value?.id?.takeIf { presenterManager.isLive(Presenting.CANVAS) },
         onAddToSchedule = { sceneId, sceneName ->
             currentScheduleActions.addScene(sceneId, sceneName)
         },
@@ -255,6 +258,8 @@ internal fun MainDesktopScope.DictionaryTabPane() {
         onAddToSchedule = { number, word, transliteration, definition ->
             state.scheduleActions.addDictionary(number, word, transliteration, definition)
         },
+        liveEntryNumber = presenterManager.displayedDictionaryEntry.value?.number
+            ?.takeIf { presenterManager.isLive(Presenting.DICTIONARY) },
         onGoLive = { entry ->
             presenterManager.setDisplayedDictionaryEntry(entry)
             presenterManager.setShowPresenterWindow(true)

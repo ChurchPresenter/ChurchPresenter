@@ -125,14 +125,23 @@ internal fun AppSettings.withAnnouncement(item: ScheduleItem.AnnouncementItem): 
  * Returns false for every other type, so a test can pin "this drives no tab" as a positive result
  * rather than as the absence of an emission.
  */
+/**
+ * A song a remote or the calendar hands to the Songs tab: whether it is to go live, and who asked,
+ * for the live history.
+ */
+data class RemoteSongSelection(val item: ScheduleItem.SongItem, val goLive: Boolean, val source: String)
+
 internal suspend fun emitRemoteTabSelection(
     item: ScheduleItem,
-    songFlow: MutableSharedFlow<ScheduleItem.SongItem>,
+    songFlow: MutableSharedFlow<RemoteSongSelection>,
     pictureFlow: MutableSharedFlow<ScheduleItem.PictureItem>,
     presentationFlow: MutableSharedFlow<ScheduleItem.PresentationItem>,
     mediaFlow: MutableSharedFlow<ScheduleItem.MediaItem>,
+    /** Who put [item] up, for a song's live history: a remote, or the calendar. */
+    source: String = "remote",
 ): Boolean = when (item) {
-    is ScheduleItem.SongItem -> { songFlow.emit(item); true }
+    // The Songs tab goes live with the song itself: its first section, in one push.
+    is ScheduleItem.SongItem -> { songFlow.emit(RemoteSongSelection(item, goLive = true, source = source)); true }
     is ScheduleItem.PictureItem -> { pictureFlow.emit(item); true }
     is ScheduleItem.PresentationItem -> { presentationFlow.emit(item); true }
     // Without this a projected video set the presenter to MEDIA mode and played nothing: the file

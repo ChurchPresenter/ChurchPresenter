@@ -30,6 +30,7 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.stt.STTManager
 import androidx.compose.runtime.MutableState
+import org.churchpresenter.sharedui.composables.SearchFieldFocus
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.ui.unit.Density
@@ -142,6 +143,7 @@ internal class BibleTabScope(
     var searchFieldFocused
         get() = ui.searchFieldFocused
         set(value) { ui.searchFieldFocused = value }
+    val searchFocus get() = ui.searchFocus
     var colWBook
         get() = widths.colWBook
         set(value) { widths.colWBook = value }
@@ -255,13 +257,32 @@ internal class BibleTabScope(
             it.setBibleHold(false)
             onInstanceLinkSendBibleHold?.invoke(false)
         } }
+        ui.heldForSearch = false
         onPresenting(Presenting.BIBLE)
     }
 
-    fun handleKeyEvent(viewModel: BibleViewModel, event: KeyEvent): Boolean {
-        if (event.type != KeyEventType.KeyDown) return false
+    /**
+     * The tab's keys. The search ⇄ live key works from anywhere in the tab; while the caret is in
+     * the search box the arrow keys browse and Go Live sends what they reached (BibleTabSearchKeys).
+     * On the tab itself Go Live sends the selection -- only from the tab root, since another
+     * one-line field lets Enter through -- and the step keys follow.
+     */
+    fun handleKeyEvent(viewModel: BibleViewModel, event: KeyEvent): Boolean = when {
+        event.type != KeyEventType.KeyDown -> false
+        shortcuts.matches(ShortcutAction.SWITCH_SEARCH_LIVE, event) -> {
+            switchSearchLive(viewModel)
+            true
+        }
+        searchFieldFocused -> handleSearchKey(viewModel, event)
+        shortcuts.matches(ShortcutAction.GO_LIVE, event) -> {
+            if (ui.tabRootFocused && !selectionIsLive(viewModel)) goLiveWithHistory(viewModel)
+            ui.tabRootFocused
+        }
+        else -> handleStepKey(viewModel, event)
+    }
 
-        if (searchFieldFocused) return false
+    /** The verse and chapter keys, on the tab itself. */
+    private fun handleStepKey(viewModel: BibleViewModel, event: KeyEvent): Boolean {
 
         val movingUp = shortcuts.matches(ShortcutAction.BIBLE_PREVIOUS_VERSE, event)
         val movingDown = shortcuts.matches(ShortcutAction.BIBLE_NEXT_VERSE, event)
@@ -324,7 +345,18 @@ internal class BibleTabUiState {
     var historyExpanded by mutableStateOf(true)
     var selectedHistoryIdx by mutableStateOf(-1)
     var selectedDetectionIdx by mutableStateOf(0)
+    // True while the caret is in the search box: the arrow keys browse from there, and nothing
+    // reaches the output until Go Live.
     var searchFieldFocused by mutableStateOf(false)
+    // True while the tab root itself holds the keyboard -- the only place Go Live on a key may act,
+    // because a one-line field lets Enter through to here.
+    var tabRootFocused by mutableStateOf(false)
+    // Set when a search put the output on hold, so going back to live releases only that hold and
+    // never one the operator set.
+    var heldForSearch by mutableStateOf(false)
+    // The text-search result the arrow keys have reached; -1 for none.
+    var highlightedResult by mutableStateOf(-1)
+    val searchFocus = SearchFieldFocus()
 }
 
 /** The book, chapter, split and cross-reference column widths, and saving them. */

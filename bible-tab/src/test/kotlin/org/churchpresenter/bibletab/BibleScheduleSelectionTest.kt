@@ -14,6 +14,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.bible.SelectedVerse
+import org.churchpresenter.sharedui.models.Presenting
 import java.io.File
 import java.nio.file.Files
 import kotlin.coroutines.CoroutineContext
@@ -21,6 +22,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -42,6 +44,9 @@ import kotlin.test.assertTrue
  * `Dispatchers.Unconfined`, which loads the Bible synchronously — before the tab is ever composed,
  * so the window this test is about does not exist there. The load is held shut here instead, with a
  * dispatcher that queues rather than runs, and opened once the tab is up and waiting.
+ *
+ * The hand-over itself -- go live or only open, held while something is live, acted on once -- is
+ * about a loaded Bible, so those tests use the shared harness.
  */
 class BibleScheduleSelectionTest {
 
@@ -206,6 +211,101 @@ class BibleScheduleSelectionTest {
             )
             assertEquals(0, vm.selectedBookIndex.value, "the browse selection was left where it was")
             assertEquals(1, vm.selectedChapter.value, "and not moved to the chapter that was asked for")
+        }
+    }
+
+    // ── The hand-over, on a loaded Bible ────────────────────────────────────────────────────────
+
+    /** Genesis 1:3: the chapter the tab opens on, so moving to it is no navigate-away of its own. */
+    private val genesisOneThree = ScheduleItem.BibleVerseItem(
+        id = "item-2",
+        bookName = "Genesis",
+        chapter = 1,
+        verseNumber = 3,
+        verseText = "And God said, Let there be light.",
+        bookId = 1,
+    )
+
+    @Test
+    fun `going live from the schedule while another verse is live puts the new verse live`() {
+        val output = FakeBibleOutput().apply { setBibleHold(true) }
+        bibleTab(
+            presenter = output,
+            isPresenting = true,
+            selectedVerseItem = johnThreeSixteen,
+            selectedVerseItemGoLive = true,
+        ) { _, reports ->
+            waitForIdle()
+
+            assertTrue(Presenting.BIBLE in reports.presenting, "the tab's own go-live: ${reports.presenting}")
+            val live = reports.live?.single()
+            assertEquals("John" to 16, live?.bookName to live?.verseNumber)
+            assertFalse(output.bibleHold.value, "going live releases the hold")
+        }
+    }
+
+    @Test
+    fun `a click on a schedule verse while one is live holds the output and opens it`() {
+        val output = FakeBibleOutput()
+        bibleTab(presenter = output, isPresenting = true, selectedVerseItem = genesisOneThree) { vm, reports ->
+            waitForIdle()
+
+            assertEquals(2, vm.selectedVerseIndex.value, "the verse is open in the tab")
+            assertTrue(output.bibleHold.value, "what is on screen stays there")
+            assertTrue(reports.presenting.isEmpty(), "a click does not go live: ${reports.presenting}")
+        }
+    }
+
+    @Test
+    fun `a click on a schedule verse with nothing live puts it on the output`() {
+        val output = FakeBibleOutput()
+        bibleTab(presenter = output, selectedVerseItem = johnThreeSixteen) { _, reports ->
+            waitForIdle()
+
+            val pushed = reports.live?.single()
+            assertEquals("John" to 16, pushed?.bookName to pushed?.verseNumber)
+            assertFalse(output.bibleHold.value)
+        }
+    }
+
+    @Test
+    fun `coming back to the tab does not hand the same schedule verse over again`() {
+        val visit = mutableStateOf(0)
+        bibleTab(
+            isPresenting = true,
+            selectedVerseItem = johnThreeSixteen,
+            selectedVerseItemGoLive = true,
+            tabVisit = visit,
+        ) { vm, reports ->
+            waitUntil("the schedule verse went live") { Presenting.BIBLE in reports.presenting }
+            vm.selectBook(0)
+            waitForIdle()
+
+            visit.value++
+            waitForIdle()
+
+            assertEquals(1, reports.presenting.count { it == Presenting.BIBLE }, "${reports.presenting}")
+            assertEquals(0, vm.selectedBookIndex.value, "the operator's browse was left alone")
+        }
+    }
+
+    @Test
+    fun `handing the same verse over again goes live again`() {
+        val version = mutableStateOf(0)
+        bibleTab(
+            isPresenting = true,
+            selectedVerseItem = johnThreeSixteen,
+            selectedVerseItemVersion = version,
+            selectedVerseItemGoLive = true,
+        ) { vm, reports ->
+            waitUntil("the schedule verse went live") { Presenting.BIBLE in reports.presenting }
+            vm.selectBook(0)
+            waitForIdle()
+
+            version.value++
+            waitUntil("the second hand-over went live") { reports.presenting.count { it == Presenting.BIBLE } == 2 }
+
+            assertEquals(2, vm.selectedBookIndex.value, "back on John")
         }
     }
 }

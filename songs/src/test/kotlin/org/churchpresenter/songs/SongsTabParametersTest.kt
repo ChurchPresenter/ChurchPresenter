@@ -112,7 +112,6 @@ class SongsTabParametersTest {
         isPresenting = true,
         playCounts = c.counts,
         dialogDismissSignal = 2,
-        searchIdleFocusMs = 50L,
     )
 
     @Test

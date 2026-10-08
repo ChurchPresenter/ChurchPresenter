@@ -22,6 +22,7 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.utils.Utils
 import androidx.compose.ui.text.AnnotatedString
 import org.churchpresenter.sharedui.composables.bibleListCard
+import org.churchpresenter.sharedui.composables.goLiveKeyTarget
 import org.churchpresenter.sharedui.composables.searchBarCard
 
 @Composable
@@ -42,7 +43,10 @@ fun STTTab(
     val sttSettings = remember(appSettings) { appSettings.captionSettingsOnScreen() }
     var showSettingsDialog by remember { mutableStateOf(false) }
 
-    Column(modifier = modifier.fillMaxSize()) {
+    val goLive = { presenting(Presenting.STT) }
+    // Go Live on a key, under the same condition as the button: connected, and captions not up yet.
+    val canGoLive = sttManager.connected.value && !captionsLive.value
+    Column(modifier = modifier.fillMaxSize().goLiveKeyTarget(enabled = canGoLive, onGoLive = goLive)) {
         // Connection controls on the top card.
         Column(
             modifier = Modifier.fillMaxWidth().searchBarCard(),
@@ -57,7 +61,7 @@ fun STTTab(
                     sttManager.connect(url)
                 },
                 onOpenSettings = { showSettingsDialog = true },
-                onGoLive = { presenting(Presenting.STT) },
+                onGoLive = goLive,
             )
             ConnectionStatus(sttManager)
         }

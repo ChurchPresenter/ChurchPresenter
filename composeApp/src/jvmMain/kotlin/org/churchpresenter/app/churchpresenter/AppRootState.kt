@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import org.churchpresenter.liveoutput.deckLinkOutputCount
 import org.churchpresenter.server.InstanceLinkCommandFailure
-import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
 import androidx.compose.runtime.getValue
@@ -121,7 +121,7 @@ internal class AppRootState(
     var presentationDisplayUrl by mutableStateOf("")
     var presentationFrozen by mutableStateOf(false)
 
-    val remoteSelectSongFlow = MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = REMOTE_FLOW_BUFFER)
+    val remoteSelectSongFlow = MutableSharedFlow<RemoteSongSelection>(extraBufferCapacity = REMOTE_FLOW_BUFFER)
     val remoteSelectPictureFlow = MutableSharedFlow<ScheduleItem.PictureItem>(extraBufferCapacity = REMOTE_FLOW_BUFFER)
     val remoteSelectPresentationFlow =
         MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = REMOTE_FLOW_BUFFER)

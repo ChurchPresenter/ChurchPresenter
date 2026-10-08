@@ -88,6 +88,8 @@ fun BibleTab(
      * does nothing at all — which is what made a failed first click unrecoverable.
      */
     selectedVerseItemVersion: Int = 0,
+    /** True when [selectedVerseItem] is to go live (a double-click or the row's Go Live), not just open. */
+    selectedVerseItemGoLive: Boolean = false,
     onVerseSelected: (List<SelectedVerse>) -> Unit = {},
 
     onInstanceLinkSendVerse: ((
@@ -163,7 +165,11 @@ fun BibleTab(
             shortcuts = shortcuts,
         )
     }
-    tab.BibleTabEffects(viewModel, selectedVerseItem, selectedVerseItemVersion, dialogDismissSignal)
+    tab.BibleTabEffects(
+        viewModel,
+        ScheduleVerse(selectedVerseItem, selectedVerseItemVersion, selectedVerseItemGoLive),
+        dialogDismissSignal,
+    )
     tab.BibleSplitLiveEffects(viewModel)
     tab.BibleSelectionEffects(viewModel)
 
@@ -172,7 +178,10 @@ fun BibleTab(
         modifier = modifier
             .fillMaxSize()
             .focusRequester(focusRequester)
-            .onFocusChanged { focusRescue.onFocusChanged(it.hasFocus) }
+            .onFocusChanged {
+                focusRescue.onFocusChanged(it.hasFocus)
+                tab.ui.tabRootFocused = it.isFocused
+            }
             .focusRescuePressHook(focusRescue)
             .focusable()
             .onPreviewKeyEvent { tab.handleKeyEvent(viewModel, it) }

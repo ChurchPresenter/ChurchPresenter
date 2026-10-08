@@ -246,9 +246,9 @@ class OptionsContentTest {
     @Test
     fun `toggling analytics reporting on the System tab feeds back into saved settings`() = dialog { result ->
         // Ordinal 0 is Launch at Login, which registers a real OS autostart entry — never touch it.
-        // Ordinal 1 is start-hidden, 2 is hide-cursor, 3 is overlay-end-clears, 4 is preview mode;
-        // analytics is ordinal 5.
-        onAllNodes(isToggleable())[5].performScrollTo().performClick()
+        // Ordinal 1 is start-hidden, 2 is hide-cursor, 3 is overlay-end-clears, 4 is preview mode,
+        // 5 is focus-search-on-open; analytics is ordinal 6.
+        onAllNodes(isToggleable())[6].performScrollTo().performClick()
         onNodeWithText("Apply").performClick()
 
         assertEquals(!AppSettings().analyticsReportingEnabled, result.saved?.analyticsReportingEnabled)

@@ -12,5 +12,6 @@ class PresenterMediaOutput(private val manager: PresenterManager) : MediaOutput 
     override fun setPresentingMode(mode: Presenting) = manager.setPresentingMode(mode)
     override fun setShowPresenterWindow(show: Boolean) = manager.setShowPresenterWindow(show)
     override fun setCurrentMedia(url: String, type: String) = manager.setCurrentMedia(url, type)
+    override val mediaOnAir: String get() = manager.currentMediaUrl.value
     override fun requestClearDisplay() = manager.requestClearDisplay()
 }

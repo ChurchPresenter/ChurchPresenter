@@ -22,6 +22,7 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -48,6 +49,8 @@ internal fun ColumnScope.BibleSearchResults(
     results: List<BibleSearch>,
     query: String,
     onResultChosen: (BibleSearch) -> Unit,
+    /** The result the arrow keys reached from the search box; -1 for none. */
+    highlightedIndex: Int = -1,
 ) {
         Column(
             modifier = Modifier.fillMaxWidth().weight(1f)
@@ -67,13 +70,18 @@ internal fun ColumnScope.BibleSearchResults(
             }
             Box(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
                 val listState = rememberLazyListState()
+                LaunchedEffect(highlightedIndex) {
+                    if (highlightedIndex >= 0 && !listState.layoutInfo.showsWhole(highlightedIndex)) {
+                        listState.animateScrollToItem(highlightedIndex)
+                    }
+                }
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(start = 8.dp, end = 12.dp, bottom = 10.dp),
                     verticalArrangement = Arrangement.spacedBy(rowPad(2.dp)),
                 ) {
-                    itemsIndexed(results) { _, result ->
+                    itemsIndexed(results) { index, result ->
 
                         val resultText = result.verseText
                         val highlightedText = highlightedText(resultText, query)
@@ -83,7 +91,9 @@ internal fun ColumnScope.BibleSearchResults(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(BibleVerseRowShape)
-                                .background(bibleRowColors(selected = false, hovered = hovered).background)
+                                .background(
+                                    bibleRowColors(selected = index == highlightedIndex, hovered = hovered).background
+                                )
                                 .hoverable(hover)
                                 .initialPassClickable { onResultChosen(result) }
                                 .padding(
