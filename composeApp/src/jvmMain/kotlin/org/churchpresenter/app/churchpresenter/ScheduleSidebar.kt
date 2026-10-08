@@ -35,25 +35,16 @@ import org.churchpresenter.companionsurface.CompanionSurfacePanel
 import org.churchpresenter.serverui.ConnectionStatusRow
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.InstanceLinkStatus
-import org.churchpresenter.app.churchpresenter.dialogs.PlanningCenterImportDialog
 import org.churchpresenter.schedule.ScheduleTab
 import org.churchpresenter.schedule.ScheduleToolbarIconSize
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.core.models.schedule.ScheduleItem
-import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.InstanceLinkRole
 import org.churchpresenter.theme.components.GhostButton
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.schedule.addSong
-import org.churchpresenter.schedule.addPresentation
-import org.churchpresenter.schedule.addPicture
-import org.churchpresenter.schedule.addMedia
-import org.churchpresenter.schedule.addLabel
-import org.churchpresenter.schedule.addBibleVerse
-import org.churchpresenter.schedule.addAnnouncement
 
 private const val CLOCK_TICK_MS = 1000L
 
@@ -193,51 +184,6 @@ private fun MainDesktopScope.ScheduleTabPane() {
     )
 }
 
-/** The Planning Center import, adding what it picks to the Schedule and saving its tokens. */
-@Composable
-private fun MainDesktopScope.PlanningCenterImport(isVisible: Boolean, onDismiss: () -> Unit) {
-    PlanningCenterImportDialog(
-        isVisible = isVisible,
-        theme = theme,
-        settings = appSettings.planningCenterSettings,
-        onDismiss = onDismiss,
-        onTokensRefreshed = { accessToken, refreshToken, expiresAtEpochMs ->
-            onSettingsChange { settings ->
-                withPlanningCenterTokens(settings, accessToken, refreshToken, expiresAtEpochMs, personName = null)
-            }
-        },
-        onAddSong = { songNumber, title, songbook, songId ->
-            scheduleViewModel.addSong(songNumber, title, songbook, songId)
-        },
-        onAddLabel = { text, textColor, backgroundColor ->
-            scheduleViewModel.addLabel(text, textColor, backgroundColor)
-        },
-        onAddPresentation = { filePath, fileName, slideCount, fileType ->
-            scheduleViewModel.addPresentation(filePath, fileName, slideCount, fileType)
-        },
-        onAddPicture = { folderPath, folderName, imageCount ->
-            scheduleViewModel.addPicture(folderPath, folderName, imageCount)
-        },
-        onAddMedia = { mediaUrl, mediaTitle, mediaType ->
-            scheduleViewModel.addMedia(mediaUrl, mediaTitle, mediaType)
-        },
-        onAddAnnouncement = { text ->
-            scheduleViewModel.addAnnouncement(text = text)
-        },
-        onAddBibleVerse = { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
-            scheduleViewModel.addBibleVerse(bookName, chapter, verseNumber, verseText, verseRange, bookId)
-        },
-        onConnected = { accessToken, refreshToken, expiresAtEpochMs, personName ->
-            onSettingsChange { settings ->
-                withPlanningCenterTokens(settings, accessToken, refreshToken, expiresAtEpochMs, personName)
-            }
-        },
-        onDisconnect = {
-            onSettingsChange { settings -> withPlanningCenterTokens(settings, "", "", 0L, personName = "") }
-        }
-    )
-}
-
 /** Puts a Canvas scene live and shows it in its tab — from a Schedule row or the menu. */
 internal fun MainDesktopScope.presentScene(sceneId: String) {
     sceneViewModel.selectScene(sceneId)
@@ -281,25 +227,6 @@ internal fun MainDesktopScope.openScheduleItem(item: ScheduleItem) {
         else -> Unit
     }
 }
-
-/**
- * [settings] with Planning Center's tokens replaced — by a refresh, a new connection or a
- * disconnect (all blank). [personName] is left as it was when null, as a refresh does.
- */
-private fun withPlanningCenterTokens(
-    settings: AppSettings,
-    accessToken: String,
-    refreshToken: String,
-    expiresAtEpochMs: Long,
-    personName: String?,
-): AppSettings = settings.copy(
-    planningCenterSettings = settings.planningCenterSettings.copy(
-        accessToken = accessToken,
-        refreshToken = refreshToken,
-        tokenExpiresAtEpochMs = expiresAtEpochMs,
-        connectedPersonName = personName ?: settings.planningCenterSettings.connectedPersonName,
-    )
-)
 
 /**
  * Any Companion surface routed to the left sidebar, under the schedule.

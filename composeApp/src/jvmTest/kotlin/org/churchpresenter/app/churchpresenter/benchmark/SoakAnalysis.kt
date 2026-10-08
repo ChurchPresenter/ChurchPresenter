@@ -91,7 +91,10 @@ fun judge(all: List<SoakSample>, limits: SoakLimits = SoakLimits()): SoakVerdict
     val failures = buildList {
         if (worst > limits.stallMs) add("a frame took ${fmt(worst)} ms, past the ${fmt(limits.stallMs)} ms stall limit")
         if (uiStalls > 0) {
-            add("the UI thread stalled $uiStalls time(s), the longest ${fmt(worstUi)} ms, past ${fmt(limits.uiStallMs)} ms")
+            add(
+                "the UI thread stalled $uiStalls time(s), the longest ${fmt(worstUi)} ms, " +
+                    "past ${fmt(limits.uiStallMs)} ms",
+            )
         }
         if (judged && heapGrowth > limits.heapGrowthMb) {
             add("the heap grew ${fmt(heapGrowth)} MB, past ${fmt(limits.heapGrowthMb)} MB")
@@ -122,8 +125,10 @@ fun soakCsv(samples: List<SoakSample>): String = buildString {
     appendLine("minute,heap_mb,rss_mb,frames,late_frames,p50_ms,p99_ms,max_ms,warmup,ui_stalls,max_ui_stall_ms")
     samples.forEach { s ->
         appendLine(
-            listOf(fmt2(s.minute), fmt(s.heapMb), s.rssMb?.let(::fmt).orEmpty(), s.frames, s.lateFrames,
-                fmt2(s.p50Ms), fmt2(s.p99Ms), fmt2(s.maxMs), s.warmup, s.uiStalls, fmt(s.maxUiStallMs)).joinToString(","),
+            listOf(
+                fmt2(s.minute), fmt(s.heapMb), s.rssMb?.let(::fmt).orEmpty(), s.frames, s.lateFrames,
+                fmt2(s.p50Ms), fmt2(s.p99Ms), fmt2(s.maxMs), s.warmup, s.uiStalls, fmt(s.maxUiStallMs),
+            ).joinToString(","),
         )
     }
 }
@@ -151,7 +156,8 @@ fun soakMarkdown(
     appendLine("| Worst frame | ${fmt2(verdict.worstFrameMs)} ms (limit ${fmt(limits.stallMs)}) |")
     appendLine("| Worst frame in warm-up | ${fmt2(verdict.warmupWorstFrameMs)} ms — first appearance, not judged |")
     appendLine(
-        "| UI-thread stalls | ${verdict.uiStalls}, longest ${fmt(verdict.worstUiStallMs)} ms (budget ${fmt(limits.uiStallMs)}) |",
+        "| UI-thread stalls | ${verdict.uiStalls}, longest ${fmt(verdict.worstUiStallMs)} ms " +
+            "(budget ${fmt(limits.uiStallMs)}) |",
     )
     val judged = if (verdict.judgedGrowth) "" else " — too short to judge"
     appendLine("| Heap growth | ${fmt(verdict.heapGrowthMb)} MB (limit ${fmt(limits.heapGrowthMb)})$judged |")

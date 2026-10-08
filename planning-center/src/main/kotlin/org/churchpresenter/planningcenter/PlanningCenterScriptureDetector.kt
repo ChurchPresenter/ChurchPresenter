@@ -1,8 +1,11 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.planningcenter
 
-import org.churchpresenter.bibletab.BibleBookAbbreviations
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.planningcenter.ui.PlanningCenterScripture
+
+/** A book name or abbreviation as typed, to the book id it names, or null when it names none. */
+typealias BookAbbreviationResolver = suspend (text: String) -> Int?
+
 /**
  * Detects plain-text scripture references (e.g. "Psalm 23:1-6", one per line) inside Planning
  * Center plan item text and resolves them against a loaded [Bible] — used so a PCO-imported item
@@ -11,8 +14,8 @@ import org.churchpresenter.planningcenter.ui.PlanningCenterScripture
  * integration notes) — this only recognizes references and looks them up in the user's own
  * already-loaded primary Bible, respecting whatever language/translation that Bible is in. The
  * book name may be spelled out in full (matched against the loaded Bible's own book names) or a
- * common abbreviation (see [BibleBookAbbreviations]) — either resolves to whichever full name
- * the loaded Bible actually uses for that book.
+ * common abbreviation (the app's abbreviation tables, handed in as a [BookAbbreviationResolver]) —
+ * either resolves to whichever full name the loaded Bible actually uses for that book.
  *
  * Reference matching is intentionally simple (one reference filling an entire line, or several
  * comma/semicolon-separated references on one line) rather than the fuzzy free-text matching used
@@ -32,7 +35,11 @@ object PlanningCenterScriptureDetector {
     /** Matches a whole line shaped like "<Book name> <chapter>:<verse>[-<verseEnd>]". */
     private val referenceLineRegex = Regex("""^(.*?)\s*(\d+)\s*[:.]\s*(\d+)(?:\s*-\s*(\d+))?\s*$""")
 
-    suspend fun detectReferences(text: String, bible: Bible): List<DetectedReference> {
+    suspend fun detectReferences(
+        text: String,
+        bible: Bible,
+        resolveAbbreviation: BookAbbreviationResolver,
+    ): List<DetectedReference> {
         if (text.isBlank()) return emptyList()
         val bookNamesById = (0 until bible.getBookCount()).mapNotNull { displayIndex ->
             val bookId = bible.getBookId(displayIndex)
@@ -51,7 +58,7 @@ object PlanningCenterScriptureDetector {
                 val verseEnd = match.groupValues[4].toIntOrNull() ?: verseStart
                 val (bookId, bookName) = bookNamesById
                     .firstOrNull { (_, name) -> name.equals(bookText, ignoreCase = true) }
-                    ?: BibleBookAbbreviations.resolveBookId(bookText)
+                    ?: resolveAbbreviation(bookText)
                         ?.let { id -> bookNamesById.firstOrNull { (bid, _) -> bid == id } }
                     ?: return@mapNotNull null
                 DetectedReference(bookId, bookName, chapter, verseStart, verseEnd)

@@ -72,7 +72,8 @@ class SoakAnalysisTest {
         assertEquals(2, verdict.uiStalls)
         assertEquals(640.0, verdict.worstUiStallMs)
         assertEquals("the UI thread stalled 2 time(s), the longest 640.0 ms, past 250.0 ms", verdict.failures.single())
-        assertTrue("| UI-thread stalls | 2, longest 640.0 ms (budget 250.0) |" in soakMarkdown("run", verdict, SoakLimits()))
+        val markdown = soakMarkdown("run", verdict, SoakLimits())
+        assertTrue("| UI-thread stalls | 2, longest 640.0 ms (budget 250.0) |" in markdown)
     }
 
     @Test
@@ -115,7 +116,10 @@ class SoakAnalysisTest {
     @Test
     fun `the CSV has a row per sample and leaves a missing reading empty`() {
         val csv = soakCsv(listOf(sample(1, 200.0), sample(2, 210.5, rss = null))).trim().lines()
-        assertEquals("minute,heap_mb,rss_mb,frames,late_frames,p50_ms,p99_ms,max_ms,warmup,ui_stalls,max_ui_stall_ms", csv[0])
+        assertEquals(
+            "minute,heap_mb,rss_mb,frames,late_frames,p50_ms,p99_ms,max_ms,warmup,ui_stalls,max_ui_stall_ms",
+            csv[0],
+        )
         assertEquals("1.00,200.0,500.0,1800,0,10.00,15.00,20.00,false,0,40.0", csv[1])
         assertEquals("2.00,210.5,,1800,0,10.00,15.00,20.00,false,0,40.0", csv[2])
     }

@@ -135,7 +135,10 @@ class LottieGenScreenshotTest {
                     // what the build itself recorded says whether it finished, and why the style asked
                     // for has no picture.
                     System.err.println(
-                        ThreadDump.text("=== NO STYLE THUMBNAIL after ${RENDER_TIMEOUT_MS}ms ===", HungTestReporter.STACK_DEPTH),
+                        ThreadDump.text(
+                            "=== NO STYLE THUMBNAIL after ${RENDER_TIMEOUT_MS}ms ===",
+                            HungTestReporter.STACK_DEPTH,
+                        ),
                     )
                     System.err.println(thumbnailDiagnostics.describe())
                     throw e

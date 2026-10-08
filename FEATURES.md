@@ -247,9 +247,9 @@
 - `server-ui/…/CalendarEnrollQrDialog.kt`, `server-ui/…/CalendarSyncCard.kt`, `:server`'s `CalendarRelayAccess.kt` — pairing a phone and syncing through the relay
 - `planning-center/` (the `:planning-center` Gradle module) — the Planning Center client, and under
   `ui/` the import window (`PlanningCenterImportDialog.kt`, `PlanningCenterImportViewModel.kt`)
-- `dialogs/PlanningCenterImportDialog.kt` — the app's wrapper: the OAuth client, the windows, the song
-  editor and the slide count; `data/PlanningCenterPrimaryBible.kt` and
-  `data/PlanningCenterScriptureDetector.kt` — the scripture a plan names, found in the primary Bible
+- `PlanningCenterImportWiring.kt` — the app's wiring: the OAuth client, the windows, the song editor
+  and the slide count; `planning-center/…/PlanningCenterPrimaryBible.kt` and
+  `planning-center/…/PlanningCenterScriptureDetector.kt` — the scripture a plan names, found in the primary Bible
 
 ## Projection & Output
 - **Unlimited outputs** — drive as many screens as you have — one window per connected display, plus every DeckLink/SDI device. No artificial limit.

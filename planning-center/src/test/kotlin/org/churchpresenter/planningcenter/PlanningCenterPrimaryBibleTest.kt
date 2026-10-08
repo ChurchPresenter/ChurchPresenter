@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.planningcenter
 
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.bible.SpbFixture
@@ -63,7 +63,7 @@ class PlanningCenterPrimaryBibleTest {
     fun `with no Bible set up nothing is detected`() {
         configureBible(storageDirectory = File(home, "bibles").absolutePath, primaryBible = "")
 
-        val found = runBlocking { PlanningCenterPrimaryBible().detect("Psalms 23:1-6") }
+        val found = runBlocking { PlanningCenterPrimaryBible(resolveAbbreviation = { null }).detect("Psalms 23:1-6") }
 
         assertTrue(found.isEmpty(), "no primary Bible is configured, so there is nothing to look in; got $found")
     }
@@ -72,7 +72,7 @@ class PlanningCenterPrimaryBibleTest {
     fun `with no Bible folder nothing is detected`() {
         configureBible(storageDirectory = "", primaryBible = "test.spb")
 
-        val found = runBlocking { PlanningCenterPrimaryBible().detect("Psalms 23:1-6") }
+        val found = runBlocking { PlanningCenterPrimaryBible(resolveAbbreviation = { null }).detect("Psalms 23:1-6") }
 
         assertTrue(found.isEmpty(), "a Bible name without a folder to find it in cannot be loaded; got $found")
     }
@@ -82,7 +82,7 @@ class PlanningCenterPrimaryBibleTest {
         val bibles = File(home, "bibles").also { it.mkdirs() }
         val file = writePsalmsBible(bibles)
         configureBible(storageDirectory = bibles.absolutePath, primaryBible = "test.spb")
-        val primary = PlanningCenterPrimaryBible()
+        val primary = PlanningCenterPrimaryBible(resolveAbbreviation = { null })
 
         val first = runBlocking { primary.detect("Psalms 23:1-6") }
         assertEquals(1, first.size, "the reference should resolve against the Bible on disk; got $first")

@@ -1,16 +1,10 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.planningcenter
 
-import org.churchpresenter.bibletab.BibleBookAbbreviations
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.bible.BibleVerse
-import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -29,23 +23,10 @@ import kotlin.test.assertTrue
 class PlanningCenterScriptureDetectorTest {
 
     /**
-     * The abbreviation fallback ([BibleBookAbbreviations.resolveBookId]) resolves its tables from
-     * Compose string resources, which need a graphics environment — it throws `HeadlessException`
-     * in a test JVM. Stubbing it keeps these tests on the detector's own logic, and lets the
-     * abbreviation branch be exercised deliberately rather than by accident.
+     * The app's abbreviation tables, as the detector is handed them: only "Ps" and "Jn" are known
+     * here, so the abbreviation branch is exercised deliberately rather than by accident.
      */
-    @BeforeTest
-    fun stubAbbreviations() {
-        mockkObject(BibleBookAbbreviations)
-        coEvery { BibleBookAbbreviations.resolveBookId(any()) } returns null
-        coEvery { BibleBookAbbreviations.resolveBookId("Ps") } returns 19
-        coEvery { BibleBookAbbreviations.resolveBookId("Jn") } returns 43
-    }
-
-    @AfterTest
-    fun unstubAbbreviations() {
-        unmockkObject(BibleBookAbbreviations)
-    }
+    private val abbreviations: BookAbbreviationResolver = { text -> mapOf("Ps" to 19, "Jn" to 43)[text] }
 
     /** A stand-in Bible exposing three books, keyed the way the real one is. */
     private fun bible(
@@ -67,7 +48,7 @@ class PlanningCenterScriptureDetectorTest {
     }
 
     private fun detect(text: String, bible: Bible = bible()) =
-        runBlocking { PlanningCenterScriptureDetector.detectReferences(text, bible) }
+        runBlocking { PlanningCenterScriptureDetector.detectReferences(text, bible, abbreviations) }
 
     // ── Reference parsing ───────────────────────────────────────────────────────
 

@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.planningcenter
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -10,9 +10,9 @@ import java.io.File
 /**
  * The primary Bible, loaded once per Planning Center import (not shared with BibleViewModel's own
  * instance -- a plain standalone load, as StatisticsManager does for its CCLI lookup), and the
- * scripture references found against it.
+ * scripture references found against it. [resolveAbbreviation] reads a book typed short ("Ps").
  */
-internal class PlanningCenterPrimaryBible {
+class PlanningCenterPrimaryBible(private val resolveAbbreviation: BookAbbreviationResolver) {
     private var cachedPrimaryBible: Bible? = null
     private var triedLoadingPrimaryBible = false
 
@@ -41,7 +41,7 @@ internal class PlanningCenterPrimaryBible {
      */
     suspend fun detect(text: String): List<PlanningCenterScripture> {
         val bible = primaryBible() ?: return emptyList()
-        val refs = PlanningCenterScriptureDetector.detectReferences(text, bible)
+        val refs = PlanningCenterScriptureDetector.detectReferences(text, bible, resolveAbbreviation)
         return refs.mapNotNull { PlanningCenterScriptureDetector.resolveVerses(it, bible) }
     }
 }

@@ -1,14 +1,11 @@
-package org.churchpresenter.app.churchpresenter.viewmodel
+package org.churchpresenter.planningcenter
 
-import org.churchpresenter.liveoutput.content
 import io.mockk.coEvery
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import org.churchpresenter.app.churchpresenter.data.PlanningCenterPrimaryBible
-import org.churchpresenter.app.churchpresenter.dialogs.appPlanningCenterServices
 import org.churchpresenter.bible.SpbFixture
 import org.churchpresenter.planningcenter.ui.PlanningCenterImportViewModel
-import org.churchpresenter.planningcenter.PlanningCenterClient
+import org.churchpresenter.planningcenter.ui.planningCenterServices
 import org.churchpresenter.settings.SettingsManager
 import java.io.File
 import java.nio.file.Files
@@ -21,7 +18,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
- * The scripture half of a Planning Center import, through the app's own wiring of it.
+ * The scripture half of a Planning Center import, through [planningCenterServices] as the app wires it.
  *
  * A generic plan item is often just a list of references typed into its title or description
  * ("Psalm 23:1-6"). Those are detected locally against the user's own primary Bible and offered as
@@ -86,7 +83,12 @@ class PlanningCenterScriptureImportTest {
         initialServiceTypeId = "st-1",
         importSongbookName = "Planning Center",
         onTokensRefreshed = { _, _, _ -> },
-        services = appPlanningCenterServices(PlanningCenterPrimaryBible()),
+        services = planningCenterServices(
+            clientId = "client",
+            clientSecret = "secret",
+            resolveAbbreviation = { text -> if (text == "Ps") 19 else null },
+            countSlides = { 0 },
+        ),
     )
 
     private fun awaitUntil(what: String, timeoutMs: Long = 5_000, condition: () -> Boolean) {
@@ -163,10 +165,21 @@ class PlanningCenterScriptureImportTest {
         assertTrue(vm.detectedScripturesByItemId.isEmpty())
     }
 
-    // NOTE: "a reference to a book the loaded Bible does not have" is covered by
-    // PlanningCenterScriptureDetectorTest, where BibleBookAbbreviations can be stubbed cleanly.
-    // Exercising it through this view model reaches the abbreviation fallback for real, which
-    // throws HeadlessException in a test JVM and kills the load coroutine.
+    @Test
+    fun `a book typed short is read through the abbreviation tables`() {
+        val vm = viewModel()
+        loadPlan(vm, listOf(item("i1", "Ps 23:1")))
+        awaitUntil("detection") { vm.detectedScripturesByItemId.containsKey("i1") }
+        assertEquals("Psalms 23:1", vm.detectedScripturesByItemId["i1"]!!.single().displayReference)
+    }
+
+    @Test
+    fun `a reference to a book the loaded Bible does not have is not offered`() {
+        val vm = viewModel()
+        loadPlan(vm, listOf(item("i1", "Genesis 1:1"), item("i2", "Psalms 23:1")))
+        awaitUntil("the resolvable item") { vm.detectedScripturesByItemId.containsKey("i2") }
+        assertFalse(vm.detectedScripturesByItemId.containsKey("i1"))
+    }
 
     @Test
     fun `detected scriptures start fully selected`() {
