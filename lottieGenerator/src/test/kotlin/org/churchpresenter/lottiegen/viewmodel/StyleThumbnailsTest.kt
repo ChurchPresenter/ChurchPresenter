@@ -146,6 +146,29 @@ class StyleThumbnailsTest {
     }
 
     @Test
+    fun `a still that comes out blank once is drawn on the second try`() {
+        val attempts = ConcurrentLinkedQueue<String>()
+        val diagnostics = ThumbnailDiagnostics()
+        val thumbs = StyleThumbnails(
+            scope,
+            diagnostics = diagnostics,
+            render = { _, config ->
+                attempts += config.style
+                ImageBitmap(1, 1).takeIf { config.style != "1" || attempts.count { it == "1" } > 1 }
+            },
+            styleIds = { listOf("1", "2", "3") },
+            debounceMs = 0,
+        )
+        thumbs.request(LottieGenConfig(nameText = "Anna"))
+        waitFor("every style") { thumbs.thumbnails.size == 3 }
+
+        assertEquals(setOf("1", "2", "3"), thumbs.thumbnails.keys)
+        assertEquals(2, attempts.count { it == "1" }, "the blank first still is tried exactly once more")
+        assertEquals(1, attempts.count { it == "2" }, "a style drawn first time is not drawn again")
+        assertTrue(ThumbnailDiagnostics.Outcome.DRAWN_AFTER_BLANK.text in diagnostics.describe())
+    }
+
+    @Test
     fun `the default catalogue is every style`() {
         val thumbs = StyleThumbnails(scope)
         assertTrue(thumbs.thumbnails.isEmpty(), "nothing is drawn until asked")
