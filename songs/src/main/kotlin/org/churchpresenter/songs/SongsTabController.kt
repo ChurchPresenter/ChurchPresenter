@@ -29,6 +29,9 @@ import org.churchpresenter.sharedui.composables.SearchFieldFocus
 /** Adds a song to the schedule: its number, title, songbook and id. */
 internal typealias AddSongToSchedule = (songNumber: Int, title: String, songbook: String, songId: String) -> Unit
 
+/** A search query and songbook the operator left to go back to what is live. */
+internal data class ParkedSearch(val query: String, val songbook: String)
+
 @Stable
 internal class SongsTabController(
     val viewModel: SongsViewModel,
@@ -78,6 +81,9 @@ internal class SongsTabController(
     var tabRootFocused by mutableStateOf(false)
     // Set when a step key was held back because the selected song is not the live one.
     var browsePausedHint by mutableStateOf(false)
+    // The search that going back to the live song had to clear to show it, put back when the
+    // keyboard returns to the search box. Dropped once the operator types or picks a songbook.
+    var parkedSearch: ParkedSearch? = null
     var favoritesExpanded by mutableStateOf(true)
     var rowTotalWidth by mutableStateOf(0f)
 
