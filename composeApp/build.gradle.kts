@@ -5,6 +5,7 @@ import java.io.File
 import java.util.Calendar
 import java.security.MessageDigest
 import java.util.Properties
+import java.util.concurrent.TimeUnit
 
 val versionYear = Calendar.getInstance().get(Calendar.YEAR) % 100
 
@@ -342,6 +343,7 @@ kotlin {
             implementation(projects.obs)
             // The layer model: layers, cues, program and preview.
             implementation(projects.liveShow)
+            implementation(projects.showControl)
             // The live output: PresenterManager, the output windows and the off-screen outputs.
             implementation(projects.liveOutput)
             // Statistics: the counters, the play log and the CCLI report window over them.
@@ -1608,6 +1610,10 @@ val msixIdentityName = providers.gradleProperty("msix.identityName").filter { it
 val msixPublisher = providers.gradleProperty("msix.publisher").filter { it.isNotBlank() }.getOrElse("CN=Church Presenter")
 val msixPublisherDisplayName = providers.gradleProperty("msix.publisherDisplayName").filter { it.isNotBlank() }.getOrElse("Church Presenter")
 
+// How long makeappx may run before packageMsix gives up on it; the app image packs in a few.
+val msixTimeoutMinutes = 15L
+val OUTPUT_DRAIN_MS = 5_000L
+
 fun String.xmlEscaped() = replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;")
 
 tasks.register("packageMsix") {
@@ -1641,8 +1647,22 @@ tasks.register("packageMsix") {
 
         val out = outDir.get().asFile.apply { deleteRecursively(); mkdirs() }
         val msix = File(out, "ChurchPresenter-$msixVersion-WINDOWS-x64.msix")
-        val result = ProcessBuilder("makeappx", "pack", "/d", staging.absolutePath, "/p", msix.absolutePath, "/o")
-            .inheritIO().start().waitFor()
+        // Verbose, with its output read into the build log: inherited output goes to the Gradle
+        // daemon's own console, which the CI log never shows. Stdin is closed at once, so a prompt
+        // reads end-of-input instead of waiting, and the wait is bounded, so a stall fails the task.
+        val process = ProcessBuilder("makeappx", "pack", "/v", "/d", staging.absolutePath, "/p", msix.absolutePath, "/o")
+            .redirectErrorStream(true)
+            .start()
+        process.outputStream.close()
+        val output = Thread { process.inputStream.bufferedReader().forEachLine { logger.lifecycle(it) } }
+            .apply { isDaemon = true; start() }
+        val finished = process.waitFor(msixTimeoutMinutes, TimeUnit.MINUTES)
+        if (!finished) {
+            process.destroyForcibly()
+            error("makeappx did not finish within $msixTimeoutMinutes minutes")
+        }
+        output.join(OUTPUT_DRAIN_MS)
+        val result = process.exitValue()
         if (result != 0) error("makeappx failed with exit code $result")
         logger.lifecycle("MSIX packaged: ${msix.name}")
     }

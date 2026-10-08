@@ -69,5 +69,15 @@ fun dueRows(
 fun List<ScheduleItem>.nextContentRow(rowId: String): ScheduleItem? {
     val index = indexOfFirst { it.id == rowId }
     if (index < 0) return null
-    return drop(index + 1).firstOrNull { it !is ScheduleItem.LabelItem && it !is ScheduleItem.CueItem }
+    return drop(index + 1).firstOrNull { it.isContentRow() }
 }
+
+/** The last content row before [rowId] -- what "previous item" goes back to. */
+fun List<ScheduleItem>.previousContentRow(rowId: String): ScheduleItem? {
+    val index = indexOfFirst { it.id == rowId }
+    if (index < 0) return null
+    return take(index).lastOrNull { it.isContentRow() }
+}
+
+/** Whether [this] is something to put on screen, rather than a heading or a cue. */
+fun ScheduleItem.isContentRow(): Boolean = this !is ScheduleItem.LabelItem && this !is ScheduleItem.CueItem

@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.showcontrol.Action
 import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import kotlinx.coroutines.flow.Flow
 import org.churchpresenter.sharedui.models.Tabs
@@ -18,7 +19,9 @@ import org.churchpresenter.core.models.scene.Scene
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.controlin.ControlHub
 import org.churchpresenter.settings.BibleSyncMode
+import org.churchpresenter.settings.Macro
 import org.churchpresenter.settings.InstanceLinkRole
 import java.io.File
 import org.churchpresenter.slides.PresentationSlidesLoaded
@@ -38,6 +41,14 @@ data class LiveOutputCallbacks(
     val onLineIndexChanged: (Int) -> Unit = {},
     /** A row the operator put on screen from the Schedule -- timed, so its length can be learnt. */
     val onRowWentLive: (ScheduleItem) -> Unit = {},
+    /** A row put on screen from the Schedule, with the actions it runs as it reaches the air. */
+    val onRowActions: (ScheduleItem, List<Action>) -> Unit = { _, _ -> },
+    /** Runs a macro from the Macros panel or a key. */
+    val onRunMacro: (Macro) -> Unit = {},
+    /** The MIDI and OSC ports, for the dialog that sets them up and learns triggers. */
+    val controlHub: ControlHub? = null,
+    /** Dev mode: the features not ready for production are offered -- see `AppRootState.devMode`. */
+    val devMode: Boolean = false,
 )
 
 /** The planned service the Schedule works against, from the calendar. */

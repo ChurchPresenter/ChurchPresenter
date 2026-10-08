@@ -166,4 +166,24 @@ class SongsTabSearchKeysTest {
             switchSearchLive()
             searchBox().assertIsFocused()
         }
+
+    @Test
+    fun `ctrl tab back into search puts back the search the live song was outside of`() =
+        songsTab(isPresenting = true) { vm, reports ->
+            goLiveFromSearch(vm, "Be Thou My Vision")
+            searchBox().requestFocus()
+            search("Amazing")
+            pressInSearch(Key.DirectionDown)
+
+            switchSearchLive()
+            assertEquals("Be Thou My Vision", selectedTitle(vm), "back on the live song")
+            assertEquals("", vm.searchQuery.value, "the search was cleared to show it")
+            val pushes = reports.allSections.size
+
+            switchSearchLive()
+            searchBox().assertIsFocused()
+            assertEquals("Amazing", vm.searchQuery.value)
+            assertEquals(listOf("Amazing Grace", "Amazing Love"), vm.filteredSongItems.value.map { it.title })
+            assertEquals(pushes, reports.allSections.size, "putting the search back never reaches the output")
+        }
 }

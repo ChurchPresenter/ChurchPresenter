@@ -27,6 +27,7 @@ class CueTest {
             Cue.Captions to Layer.CAPTIONS,
             Cue.LowerThird("Speaker") to Layer.GRAPHICS,
             Cue.Announcement("Welcome") to Layer.ANNOUNCEMENTS,
+            Cue.Props(setOf("logo")) to Layer.PROPS,
             Cue.Message("Parents of 42") to Layer.MESSAGES,
             Cue.Audio("song.mp3") to Layer.AUDIO,
         )

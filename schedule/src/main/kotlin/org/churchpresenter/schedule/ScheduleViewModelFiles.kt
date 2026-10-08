@@ -1,5 +1,7 @@
 package org.churchpresenter.schedule
 
+import kotlinx.serialization.EncodeDefault
+import org.churchpresenter.showcontrol.Action
 import java.io.File
 import java.io.IOException
 import java.time.LocalDate
@@ -99,13 +101,18 @@ suspend fun ScheduleViewModel.loadSchedule(
 
 /** The schedule as it is written to disk: the rows, their notes and their timing. */
 internal fun ScheduleViewModel.scheduleFileDocument(): ScheduleFileV2 =
-    ScheduleFileV2(items = _scheduleItems.toList(), notes = _notes.toMap(), timing = _timing.toMap())
+    ScheduleFileV2(
+        items = _scheduleItems.toList(),
+        notes = _notes.toMap(),
+        timing = _timing.toMap(),
+        actions = _actions.toMap(),
+    )
 
 /** Try new format (v2 with notes and timing), fall back to legacy plain array. */
 internal fun ScheduleViewModel.decodeSchedule(jsonText: String): DecodedSchedule =
     try {
         val schedFile = json.decodeFromString(ScheduleFileV2.serializer(), jsonText)
-        DecodedSchedule(schedFile.items, schedFile.notes, schedFile.timing)
+        DecodedSchedule(schedFile.items, schedFile.notes, schedFile.timing, schedFile.actions)
     } catch (_: Exception) {
         DecodedSchedule(json.decodeFromString(ListSerializer(ScheduleItem.serializer()), jsonText))
     }
@@ -124,6 +131,7 @@ internal data class DecodedSchedule(
     val items: List<ScheduleItem>,
     val notes: Map<String, String> = emptyMap(),
     val timing: Map<String, RowTiming> = emptyMap(),
+    val actions: Map<String, List<Action>> = emptyMap(),
 )
 
 @Serializable
@@ -133,6 +141,12 @@ internal data class ScheduleFileV2(
     val notes: Map<String, String> = emptyMap(),
     /** How each row runs on its own -- start, length, repeats, end -- keyed by row id. See [RowTiming]. */
     val timing: Map<String, RowTiming> = emptyMap(),
+    /**
+     * What each row does when it goes live, keyed by row id. Left out of the file when no row has
+     * any, so a schedule without actions still opens in a build from before them.
+     */
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    val actions: Map<String, List<Action>> = emptyMap(),
 )
 
 /** How much of a decoder's message goes into the log -- the start says what it choked on. */

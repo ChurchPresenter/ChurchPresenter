@@ -104,7 +104,10 @@ object LottieRenderCache : LottieRenderPolicy by LottieRenderSizes {
     fun isReady(lottieJson: String, variant: Variant): Boolean =
         LottieCacheFiles.cacheFile(LottieCacheFiles.keyFor(lottieJson, variant)).exists()
 
-    /** Render progress (0..1) of an entry's in-flight job; 1f when already cached. */
+    /**
+     * Render progress (0..1) of an entry's in-flight job; 1f when already cached. The first call for
+     * an entry asks the disk, so call it off the UI thread.
+     */
     fun progressFlow(lottieJson: String, variant: Variant): StateFlow<Float> {
         val key = LottieCacheFiles.keyFor(lottieJson, variant)
         return progressFlows.getOrPut(key) {

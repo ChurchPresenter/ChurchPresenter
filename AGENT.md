@@ -31,6 +31,21 @@ demand.
   `MainDesktopScope`/`MainDesktopViewModels` (`MainDesktopPanels.kt`, `ScheduleSidebar.kt`,
   `MainTabArea.kt`, `ContentTabPanes.kt`, `PreviewSidebar.kt`). Not new precedent.
 
+### Dev mode only — unfinished features stay behind it
+- A user-facing feature that is built but not approved for production goes in the preview
+  sidebar's **Dev mode only** box (`DevModeBox` in `PreviewSidebar.kt`), or gates on dev mode
+  where it has no button there: `AppRootState.devMode` in the app, `LiveOutputCallbacks.devMode`
+  on the main screen, `LocalShowControlEnabled` in `:schedule`, `CompanionServer.devMode` (with
+  `requireDevMode`) on the remote API, `ShortcutAction.devOnly` for its keys.
+- Gate the behaviour, not only the button: a saved setting must not keep working unseen when dev
+  mode is off.
+- **Screenshots show production only.** No screenshot suite shoots a dev-mode-only feature, and a
+  shot of a screen that has one is taken with dev mode off. Its behaviour is covered by unit and
+  UI tests instead; it gets screenshots when it leaves the box.
+- Dev mode is the Developer menu's rule (`shouldShowDeveloperMenu`): a dev build, D pressed seven
+  times, or `forceDevWindow`. A feature leaves the box only when the person running the work says it
+  is ready for production.
+
 ### UI icons
 - **NEVER** use text/emoji as icons (`Text("⏸")`). Use `painterResource()` with real icon assets.
 
@@ -122,6 +137,8 @@ module-specific notes there, not here.**
 | `companion-surface/`   | `:companion-surface`   | The Companion Surface tab and panels, and `CompanionSatelliteViewModel`             | [AGENT.md](companion-surface/AGENT.md)   |
 | `obs/`                 | `:obs`                 | The OBS Studio integration — the obs-websocket client, scene mapping and its settings page | [AGENT.md](obs/AGENT.md)                 |
 | `live-show/`           | `:live-show`           | The layer model — `Layer`, `Cue`, and `LiveShow`'s program and preview (see `docs/LAYER_MODEL.md`) | [AGENT.md](live-show/AGENT.md)           |
+| `show-control/`        | `:show-control`        | The action vocabulary and `ActionRunner`, played through the app's `ShowHost` (see `docs/SHOW_CONTROL.md`) | [AGENT.md](show-control/AGENT.md)        |
+| `control-in/`          | `:control-in`          | MIDI and OSC in and out: the codecs, the ports and the hub that maps what arrives to actions | [AGENT.md](control-in/AGENT.md)          |
 | `live-output/`         | `:live-output`         | `PresenterManager` and what is on air, the output windows and stage monitor, and the off-screen outputs (NDI, OMT, Browser Source, DeckLink) on `ComposeScenePump` | [AGENT.md](live-output/AGENT.md)         |
 | `helper/`              | `:helper`              | Wick, the helper lamp — tips, display setup, typed requests, the spotlight that rings controls | [AGENT.md](helper/AGENT.md)              |
 | `statistics/`          | `:statistics`          | What was presented and when — the counters, the play log, the CCLI lookup and exports — and the statistics window over them | [AGENT.md](statistics/AGENT.md)          |

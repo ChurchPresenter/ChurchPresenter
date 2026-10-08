@@ -115,7 +115,7 @@ internal fun activeStageTypes(
         Presenting.CANVAS -> add(StageMonitorContentType.CANVAS)
         Presenting.QA -> add(StageMonitorContentType.QA)
         Presenting.DICTIONARY -> add(StageMonitorContentType.DICTIONARY)
-        Presenting.ANNOUNCEMENTS, Presenting.NONE -> {}
+        Presenting.ANNOUNCEMENTS, Presenting.MESSAGE, Presenting.PROPS, Presenting.NONE -> {}
     }
     if (announcementActive) add(StageMonitorContentType.ANNOUNCEMENT_TEXT)
 }

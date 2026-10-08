@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.LocalSettingsDevMode
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -138,7 +139,7 @@ fun OptionsDialog(
     companionSatelliteViewModel: CompanionSatelliteViewModel? = null,
     initialTab: Int = 0,
     initialSettings: AppSettings? = null,
-    showHelperSettings: Boolean = false,
+    devMode: Boolean = false,
 ) {
     if (!isVisible) return
 
@@ -178,7 +179,7 @@ fun OptionsDialog(
             companionSatelliteViewModel = companionSatelliteViewModel,
             initialTab = initialTab,
             initialSettings = initialSettings,
-            showHelperSettings = showHelperSettings,
+            devMode = devMode,
         )
     }
 }
@@ -202,7 +203,7 @@ internal fun OptionsDialogContent(
     initialTab: Int = 0,
     initialSettings: AppSettings? = null,
     detectScreens: () -> List<DetectedScreen> = ::detectScreensFromAwt,
-    showHelperSettings: Boolean = false,
+    devMode: Boolean = false,
 ) {
     var currentSettings by remember { mutableStateOf(initialSettings ?: settingsManager.loadSettings()) }
     val companionSatelliteTabIndex = if (obsManager != null) 8 else 7
@@ -235,34 +236,35 @@ internal fun OptionsDialogContent(
                         onSelect = { selectedTabIndex = it },
                     )
 
-                    // Tab Content
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.background)
+                // Tab Content
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.background)
+                ) {
+                    CompositionLocalProvider(
+                        LocalApplySettings provides applySettings,
+                        LocalSettingsDevMode provides devMode,
                     ) {
-                        CompositionLocalProvider(LocalApplySettings provides applySettings) {
-                            SettingsTabContent(
-                                tabIndex = safeTabIndex,
-                                settings = currentSettings,
-                                onSettingsChange = { updateFn -> currentSettings = updateFn(currentSettings) },
-                                settingsManager = settingsManager,
-                                companionServer = companionServer,
-                                remoteClientManager = remoteClientManager,
-                                calendarSync = calendarSync,
-                                onIdentifyScreen = onIdentifyScreen,
-                                onIdentifyBrowserSource = onIdentifyBrowserSource,
-                                onIdentifyNdi = onIdentifyNdi,
-                                onIdentifyOmt = onIdentifyOmt,
-                                scenes = scenes,
-                                obsManager = obsManager,
-                                companionSatelliteViewModel = companionSatelliteViewModel,
-                                companionSatelliteTabIndex = companionSatelliteTabIndex,
-                                detectScreens = detectScreens,
-                                showHelperSettings = showHelperSettings,
-                            )
-                        }
+                        SettingsTabContent(
+                            tabIndex = safeTabIndex,
+                            settings = currentSettings,
+                            onSettingsChange = { updateFn -> currentSettings = updateFn(currentSettings) },
+                            settingsManager = settingsManager,
+                            companionServer = companionServer,
+                            remoteClientManager = remoteClientManager,
+                            calendarSync = calendarSync,
+                            onIdentifyScreen = onIdentifyScreen,
+                            onIdentifyBrowserSource = onIdentifyBrowserSource,
+                            onIdentifyNdi = onIdentifyNdi,
+                            onIdentifyOmt = onIdentifyOmt,
+                            scenes = scenes,
+                            obsManager = obsManager,
+                            companionSatelliteViewModel = companionSatelliteViewModel,
+                            companionSatelliteTabIndex = companionSatelliteTabIndex,
+                            detectScreens = detectScreens,
+                        )
                     }
 
                     SettingsDialogButtons(
@@ -379,14 +381,12 @@ private fun SettingsTabContent(
     companionSatelliteViewModel: CompanionSatelliteViewModel?,
     companionSatelliteTabIndex: Int,
     detectScreens: () -> List<DetectedScreen>,
-    showHelperSettings: Boolean,
 ) {
     when (tabIndex) {
         0 -> SystemSettingsTab(
             settings = settings,
             onSettingsChange = onSettingsChange,
             companionServer = companionServer,
-            showHelperSettings = showHelperSettings
         )
         1 -> BibleSettingsTab(
             settings = settings,

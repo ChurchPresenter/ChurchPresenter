@@ -1,5 +1,6 @@
 package org.churchpresenter.settings
 
+import org.churchpresenter.controlin.ControlSettings
 import kotlinx.serialization.Serializable
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.settings.utils.UpdateCheckInterval
@@ -141,7 +142,17 @@ data class AppSettings(
     /** The backgrounds the preview panel's quick tray offers, in the order it shows them. */
     val quickBackgrounds: List<QuickBackground> = emptyList(),
     /** Whether that tray is open or shut — a panel-local choice, switched from the panel itself. */
-    val quickBackgroundsExpanded: Boolean = true
+    val quickBackgroundsExpanded: Boolean = true,
+    /** The messages saved to go live again -- see [MessageTemplate]. */
+    val messageTemplates: List<MessageTemplate> = emptyList(),
+    /** The props an operator can put up -- see [PropDefinition]. */
+    val props: List<PropDefinition> = emptyList(),
+    /** The layer sets an operator clears in one go -- see [ClearGroup]. */
+    val clearGroups: List<ClearGroup> = emptyList(),
+    /** The action lists an operator runs by name -- see [Macro]. */
+    val macros: List<Macro> = emptyList(),
+    /** The MIDI and OSC ports, and what arriving and leaving messages do -- see [ControlSettings]. */
+    val control: ControlSettings = ControlSettings(),
 ) {
     /** What the song identified by [songId] is played at — tempo and capo together. */
     fun tuningFor(songId: String): SongTuning =

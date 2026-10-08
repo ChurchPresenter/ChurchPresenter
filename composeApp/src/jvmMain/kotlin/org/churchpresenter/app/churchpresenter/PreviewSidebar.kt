@@ -2,19 +2,40 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import org.churchpresenter.liveoutput.withPreviewMode
+import org.churchpresenter.liveoutput.clearFromOperator
+import javax.swing.filechooser.FileNameExtensionFilter
+import org.churchpresenter.sharedui.filechooser.FileChooser
+import org.churchpresenter.app.churchpresenter.dialogs.PropsDialog
+import org.churchpresenter.app.churchpresenter.dialogs.ClearGroupsDialog
+import org.churchpresenter.app.churchpresenter.dialogs.ClearLayersMenuItems
+import org.churchpresenter.liveoutput.clearGroup
+import org.churchpresenter.liveoutput.clearLayer
+import org.churchpresenter.strings.generated.resources.tooltip_clear_layers
+import androidx.compose.material.icons.outlined.LayersClear
+import androidx.compose.material3.DropdownMenu
+import org.churchpresenter.liveoutput.setPropOn
+import org.churchpresenter.liveoutput.propsOnAir
+import org.churchpresenter.strings.generated.resources.props_picture
+import org.churchpresenter.strings.generated.resources.tooltip_props
+import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material.icons.outlined.DisplaySettings
 import androidx.compose.material3.Button
@@ -24,10 +45,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.testTag
@@ -37,6 +56,7 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.strings.generated.resources.preview_take
 import org.churchpresenter.strings.generated.resources.tooltip_clear_display
+import org.churchpresenter.strings.generated.resources.tooltip_message
 import org.churchpresenter.strings.generated.resources.tooltip_preview_settings
 import org.churchpresenter.strings.generated.resources.tooltip_toggle_displays
 import org.churchpresenter.companionsurface.CompanionConnectionChipRow
@@ -51,6 +71,10 @@ import org.churchpresenter.profiles.previewOutputSize
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.liveoutput.clearMessage
+import org.churchpresenter.liveoutput.messageOnAir
+import org.churchpresenter.liveoutput.showMessage
+import org.churchpresenter.app.churchpresenter.dialogs.MessageDialog
 import org.churchpresenter.stt.STTManager
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.settings.AppSettings
@@ -85,6 +109,7 @@ internal fun PreviewSidebar(
     qaDisplayUrl: String,
     sttManager: STTManager?,
     companionSatelliteViewModel: CompanionSatelliteViewModel,
+    showControl: SidebarShowControl = SidebarShowControl(),
 ) {
     // Whether the panel's layout is being edited, from the gear's Edit layout to the panel's Done.
     var editingPreviewLayout by remember { mutableStateOf(false) }
@@ -95,35 +120,15 @@ internal fun PreviewSidebar(
                 .fillMaxHeight()
                 .padding(8.dp)
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                TooltipIconButton(
-                    painter = rememberVectorPainter(Icons.Default.Monitor),
-                    text = stringResource(Res.string.tooltip_toggle_displays),
-                    onClick = { presenterManager.togglePresenterWindow() },
-                    buttonSize = 36.dp,
-                    modifier = Modifier.guideTarget(GuideTargets.TOGGLE_OUTPUTS),
-                    iconTint = if (presenterManager.showPresenterWindow.value)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                )
-                TooltipIconButton(
-                    painter = painterResource(IconRes.drawable.ic_close),
-                    text = stringResource(Res.string.tooltip_clear_display),
-                    onClick = {
-                        mediaViewModel?.pause()
-                        presenterManager.requestClearDisplay()
-                        instanceLinkSendClear?.invoke()
-                    },
-                    buttonSize = 36.dp,
-                    modifier = Modifier.guideTarget(GuideTargets.CLEAR_OUTPUT),
-                    iconTint = MaterialTheme.colorScheme.error
-                )
-                PreviewSettingsButton(appSettings.projectionSettings, { editingPreviewLayout = true }) { updated ->
-                    onSettingsChange { s -> s.copy(projectionSettings = updated) }
-                }
-                if (appSettings.projectionSettings.previewModeEnabled) PreviewTakeButton(presenterManager)
-            }
+            SidebarButtons(
+                presenterManager = presenterManager,
+                mediaViewModel = mediaViewModel,
+                instanceLinkSendClear = instanceLinkSendClear,
+                appSettings = appSettings,
+                showControl = showControl,
+                onSettingsChange = onSettingsChange,
+                onEditPreviewLayout = { editingPreviewLayout = true },
+            )
             // A layout filling the panel takes the column's spare height; otherwise it keeps its own.
             val previewFills = appSettings.projectionSettings.run { previewLayoutFillsPanel && activeLayout() != null }
             LivePreviewPanel(
@@ -211,6 +216,179 @@ private fun ColumnScope.RightSidebarCompanion(
         }
     }
 }
+
+/** The row of buttons over the preview: displays, clear, settings, message, props, macros, clear layers, take. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+@Suppress("LongParameterList")
+private fun SidebarButtons(
+    presenterManager: PresenterManager,
+    mediaViewModel: MediaViewModel?,
+    instanceLinkSendClear: (() -> Unit)?,
+    appSettings: AppSettings,
+    showControl: SidebarShowControl,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    onEditPreviewLayout: () -> Unit,
+) {
+    // Wraps rather than clips: the panel is resizable.
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        TooltipIconButton(
+            painter = rememberVectorPainter(Icons.Default.Monitor),
+            text = stringResource(Res.string.tooltip_toggle_displays),
+            onClick = { presenterManager.togglePresenterWindow() },
+            buttonSize = 36.dp,
+            modifier = Modifier.guideTarget(GuideTargets.TOGGLE_OUTPUTS),
+            iconTint = if (presenterManager.showPresenterWindow.value)
+                MaterialTheme.colorScheme.primary
+            else
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+        )
+        TooltipIconButton(
+            painter = painterResource(IconRes.drawable.ic_close),
+            text = stringResource(Res.string.tooltip_clear_display),
+            onClick = {
+                mediaViewModel?.pause()
+                presenterManager.clearFromOperator()
+                instanceLinkSendClear?.invoke()
+            },
+            buttonSize = 36.dp,
+            modifier = Modifier.guideTarget(GuideTargets.CLEAR_OUTPUT),
+            iconTint = MaterialTheme.colorScheme.error
+        )
+        PreviewSettingsButton(appSettings.projectionSettings, onEditPreviewLayout) { updated ->
+            onSettingsChange { s -> s.copy(projectionSettings = updated) }
+        }
+    }
+    if (showControl.devMode) {
+        DevModeBox {
+            MessageButton(presenterManager, appSettings, onSettingsChange)
+            PropsButton(presenterManager, appSettings, onSettingsChange)
+            MacrosButton(appSettings, showControl, onSettingsChange)
+            ClearLayersButton(presenterManager, appSettings, onSettingsChange)
+            PreviewModeToggle(appSettings.projectionSettings.previewModeEnabled) { on ->
+                onSettingsChange { it.withPreviewMode(on) }
+            }
+            if (appSettings.projectionSettings.previewModeEnabled) PreviewTakeButton(presenterManager)
+        }
+    }
+    }
+}
+
+/** Opens the Message dialog; lit while a message is on air. */
+@Composable
+private fun MessageButton(
+    presenterManager: PresenterManager,
+    appSettings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+) {
+    var open by remember { mutableStateOf(false) }
+    val onAir = presenterManager.messageOnAir
+    TooltipIconButton(
+        painter = rememberVectorPainter(Icons.AutoMirrored.Filled.Message),
+        text = stringResource(Res.string.tooltip_message),
+        onClick = { open = true },
+        buttonSize = 36.dp,
+        iconTint = if (onAir != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.testTag(MESSAGE_BUTTON_TAG),
+    )
+    MessageDialog(
+        isVisible = open,
+        templates = appSettings.messageTemplates,
+        onTemplatesChange = { templates -> onSettingsChange { it.copy(messageTemplates = templates) } },
+        onAir = onAir,
+        onGoLive = { message ->
+            presenterManager.showMessage(message)
+            presenterManager.setShowPresenterWindow(true)
+        },
+        onClear = { presenterManager.clearMessage() },
+        onDismiss = { open = false },
+    )
+}
+
+internal const val MESSAGE_BUTTON_TAG = "preview_message"
+
+/** Opens the Props dialog; lit while a prop is up. */
+@Composable
+private fun PropsButton(
+    presenterManager: PresenterManager,
+    appSettings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+) {
+    var open by remember { mutableStateOf(false) }
+    val onAir = presenterManager.propsOnAir
+    val chooseTitle = stringResource(Res.string.props_picture)
+    TooltipIconButton(
+        painter = rememberVectorPainter(Icons.Outlined.Layers),
+        text = stringResource(Res.string.tooltip_props),
+        onClick = { open = true },
+        buttonSize = 36.dp,
+        iconTint = if (onAir.isNotEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.testTag(PROPS_BUTTON_TAG),
+    )
+    PropsDialog(
+        isVisible = open,
+        props = appSettings.props,
+        onPropsChange = { props -> onSettingsChange { it.copy(props = props) } },
+        onAir = onAir,
+        onSwitch = { id, on ->
+            presenterManager.setPropOn(id, on)
+            if (on) presenterManager.setShowPresenterWindow(true)
+        },
+        onChoosePicture = {
+            FileChooser.platformInstance.chooseSingle(
+                path = null,
+                filters = listOf(FileNameExtensionFilter(chooseTitle, "png", "jpg", "jpeg", "webp", "gif", "bmp")),
+                title = chooseTitle,
+                selectDirectory = false,
+            )?.toString()
+        },
+        onDismiss = { open = false },
+    )
+}
+
+internal const val PROPS_BUTTON_TAG = "preview_props"
+
+/** Drops down the clear groups and the layers to clear one by one, and opens the group editor. */
+@Composable
+private fun ClearLayersButton(
+    presenterManager: PresenterManager,
+    appSettings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+) {
+    var menuOpen by remember { mutableStateOf(false) }
+    var editing by remember { mutableStateOf(false) }
+    Box {
+        TooltipIconButton(
+            painter = rememberVectorPainter(Icons.Outlined.LayersClear),
+            text = stringResource(Res.string.tooltip_clear_layers),
+            onClick = { menuOpen = true },
+            buttonSize = 36.dp,
+            modifier = Modifier.testTag(CLEAR_LAYERS_BUTTON_TAG),
+        )
+        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+            ClearLayersMenuItems(
+                groups = appSettings.clearGroups,
+                onAir = presenterManager.program.value.keys,
+                onClearGroup = { menuOpen = false; presenterManager.clearGroup(it) },
+                onClearLayer = { menuOpen = false; presenterManager.clearLayer(it) },
+                onEdit = { menuOpen = false; editing = true },
+            )
+        }
+    }
+    ClearGroupsDialog(
+        isVisible = editing,
+        groups = appSettings.clearGroups,
+        onGroupsChange = { groups -> onSettingsChange { it.copy(clearGroups = groups) } },
+        onClearGroup = { presenterManager.clearGroup(it) },
+        onDismiss = { editing = false },
+    )
+}
+
+internal const val CLEAR_LAYERS_BUTTON_TAG = "preview_clear_layers"
 
 /** The gear beside the clear button: opens the editor for how the preview panel is arranged. */
 @Composable

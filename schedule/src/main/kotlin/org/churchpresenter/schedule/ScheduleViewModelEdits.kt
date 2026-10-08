@@ -66,6 +66,7 @@ fun ScheduleViewModel.removeItem(id: String) {
     _scheduleItems.removeAll { it.id == id }
     _notes.remove(id)
     _timing.remove(id)
+    _actions.remove(id)
     notifyChanged()
 }
 
@@ -75,6 +76,7 @@ fun ScheduleViewModel.clearSchedule() {
     _scheduleItems.clear()
     _notes.clear()
     _timing.clear()
+    _actions.clear()
     _serviceStartTime.value = null
     _liveRowId.value = null
     _liveSince.value = null

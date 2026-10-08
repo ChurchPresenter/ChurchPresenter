@@ -158,7 +158,10 @@ internal fun ScheduleRowList(
                             onEditLabel = {
                                 if (item is ScheduleItem.LabelItem) onEditLabel(item)
                             },
-                            onNoteChanged = { viewModel.setNote(item.id, it) }
+                            onNoteChanged = { viewModel.setNote(item.id, it) },
+                            actions = viewModel.actionsFor(item.id),
+                            rows = rows,
+                            onActionsChanged = { viewModel.setActions(item.id, it) },
                         )
                     }
                 }

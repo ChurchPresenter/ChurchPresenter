@@ -28,6 +28,8 @@ dependencies {
     implementation(projects.settings)
     implementation(projects.theme)
     implementation(projects.calendar)
+    // What a row does when it goes live is a list of show-control actions.
+    api(projects.showControl)
     implementation(projects.diagnostics)
 
     implementation(libs.kotlinx.coroutines.core)
