@@ -55,6 +55,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -258,12 +262,19 @@ private fun heroMotion(): HeroMotion {
 private fun IntroText(title: StringResource, body: StringResource) {
     IntroTitle(title)
     Text(
-        stringResource(body),
+        withBold(stringResource(body)),
         fontSize = 14.sp,
         lineHeight = 21.sp,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(top = 8.dp),
     )
+}
+
+/** [text] with every `**…**` span set in bold, the markers dropped — so a translation bolds its own word. */
+internal fun withBold(text: String): AnnotatedString = buildAnnotatedString {
+    text.split("**").forEachIndexed { i, part ->
+        if (i % 2 == 1) withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(part) } else append(part)
+    }
 }
 
 @Composable

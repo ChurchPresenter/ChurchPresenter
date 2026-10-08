@@ -3277,9 +3277,9 @@
     <string name="helper_intro_next">Next</string>
     <string name="helper_intro_finish">Let's go</string>
     <string name="helper_intro_title_1">Hi, I'm Wick</string>
-    <string name="helper_intro_body_1">I'm a little helper that lives in the corner of Church Presenter. I'll point out handy features and answer questions while you get ready for Sunday.</string>
+    <string name="helper_intro_body_1">I'm a small helper bot that lives in the corner of Church Presenter, **not** an AI (artificial intelligence) chatbot. I know a set list of tasks, work without the internet, and point you to the right buttons while you get ready for Sunday.</string>
     <string name="helper_intro_title_2">Just ask</string>
-    <string name="helper_intro_body_2">Type a question or a task in plain words. Try one:</string>
+    <string name="helper_intro_body_2">Type a short request in plain words. If it isn't one I know, I'll suggest ones I do. Try one:</string>
     <string name="helper_intro_ask_song">How do I add a song?</string>
     <string name="helper_intro_reply_song">I'll open the Songs tab and point at the buttons, one at a time.</string>
     <string name="helper_intro_ask_verse">Show John 3:16</string>
