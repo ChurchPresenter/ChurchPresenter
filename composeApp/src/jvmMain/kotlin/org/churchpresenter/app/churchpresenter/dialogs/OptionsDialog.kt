@@ -65,7 +65,7 @@ import org.churchpresenter.strings.generated.resources.companion_satellite_setti
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
-import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
+import org.churchpresenter.serverui.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.server.CompanionServer
@@ -77,11 +77,12 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.SystemSettingsTab
 import org.churchpresenter.profiles.BackgroundSettingsTab
 import org.churchpresenter.profiles.BibleSettingsTab
 import org.churchpresenter.app.churchpresenter.BuildConfig
+import org.churchpresenter.app.churchpresenter.builtInRelayEndpoints
 import org.churchpresenter.liveoutput.settings.DetectedScreen
 import org.churchpresenter.profiles.ProfilesSettingsTab
 import org.churchpresenter.liveoutput.settings.ProjectionSettingsTab
 import org.churchpresenter.liveoutput.settings.detectScreensFromAwt
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
+import org.churchpresenter.serverui.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.composables.LabeledTab
 import org.churchpresenter.app.churchpresenter.composables.LabeledTabIndicator
 import org.churchpresenter.app.churchpresenter.composables.labeledTabMinWidth
@@ -378,6 +379,7 @@ private fun SettingsTabContent(
             companionServer = companionServer,
             remoteClientManager = remoteClientManager,
             calendarSync = calendarSync,
+            builtInRelayUrl = builtInRelayEndpoints.relayUrl,
         )
         TAB_ATEM -> AtemSettingsTab(settings = settings, onSettingsChange = onSettingsChange)
         TAB_INTEGRATIONS -> if (obsManager != null) {

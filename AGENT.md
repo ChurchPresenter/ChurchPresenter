@@ -142,6 +142,7 @@ module-specific notes there, not here.**
 | `live-output/`         | `:live-output`         | `PresenterManager` and what is on air, the output windows and stage monitor, and the off-screen outputs (NDI, OMT, Browser Source, DeckLink) on `ComposeScenePump` | [AGENT.md](live-output/AGENT.md)         |
 | `statistics/`          | `:statistics`          | What was presented and when — the counters, the play log, the CCLI lookup and exports — and the statistics window over them | [AGENT.md](statistics/AGENT.md)          |
 | `updater/`             | `:updater`             | The in-app updater: the GitHub release check, the installer download, the update window | [AGENT.md](updater/AGENT.md)             |
+| `server-ui/`           | `:server-ui`           | The Server settings page, calendar sync's card and Instance Link's windows: the Compose face of `:server` | [AGENT.md](server-ui/AGENT.md)           |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions

@@ -182,3 +182,7 @@ include(":statistics")
 // The updater: the GitHub release check, the installer download and the update window. Depended on
 // by :composeApp.
 include(":updater")
+
+// The Server settings page, calendar sync and Instance Link's windows: the Compose face of :server.
+// Depended on by :composeApp.
+include(":server-ui")

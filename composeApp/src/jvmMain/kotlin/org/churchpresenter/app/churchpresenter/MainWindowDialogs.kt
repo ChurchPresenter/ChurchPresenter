@@ -17,7 +17,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.churchpresenter.statistics.asDurationRow
 import org.churchpresenter.app.churchpresenter.dialogs.AboutDialog
-import org.churchpresenter.app.churchpresenter.dialogs.InstanceLinkToastHost
+import org.churchpresenter.serverui.InstanceLinkToastHost
 import org.churchpresenter.app.churchpresenter.dialogs.CONTACT_TYPE_TESTIMONIAL
 import org.churchpresenter.app.churchpresenter.dialogs.ContactUsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ShareYourStoryDialog
@@ -37,7 +37,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.ui.theme.themeChoiceFrom
 import org.churchpresenter.app.churchpresenter.ui.theme.themeCustomizationFrom
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.dialogs.InstanceLinkDialog
+import org.churchpresenter.serverui.InstanceLinkDialog
 import org.churchpresenter.sharedui.utils.presenterScreenBounds
 import org.churchpresenter.updater.UpdateChecker
 import org.churchpresenter.sharedui.utils.UsageEvent

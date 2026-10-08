@@ -244,7 +244,7 @@
 
 **Source locations:**
 - `calendar/` (the `:calendar` Gradle module) — the Calendar Manager window, its model and the PDF export
-- `dialogs/CalendarEnrollQrDialog.kt`, `dialogs/tabs/CalendarSyncCard.kt`, `:server`'s `CalendarRelayAccess.kt` — pairing a phone and syncing through the relay
+- `server-ui/…/CalendarEnrollQrDialog.kt`, `server-ui/…/CalendarSyncCard.kt`, `:server`'s `CalendarRelayAccess.kt` — pairing a phone and syncing through the relay
 - `planning-center/` (the `:planning-center` Gradle module) — the Planning Center client, and under
   `ui/` the import window (`PlanningCenterImportDialog.kt`, `PlanningCenterImportViewModel.kt`)
 - `dialogs/PlanningCenterImportDialog.kt` — the app's wrapper: the OAuth client, the windows, the song
@@ -326,9 +326,9 @@
 **Source locations:**
 - `:server`'s `CompanionServer.kt` — Ktor REST + WebSocket server
 - `:server`'s `SslCertificateManager.kt`, `:server`'s `TunnelManager.kt`
-- `data/RemoteClientManager.kt`
+- `server-ui/…/RemoteClientManager.kt`
 - `data/settings/ServerSettings.kt`
-- `dialogs/tabs/ServerSettingsTab.kt`
+- `server-ui/…/ServerSettingsTab.kt`
 - `dialogs/RemoteActivityToast.kt`, `dialogs/RemoteEventDialog.kt`
 
 ## Multi-Room & Instance Linking
@@ -339,8 +339,8 @@
 - `:server`'s `InstanceLinkClient.kt`
 - `:server`'s `InstanceLinkViewModel.kt`
 - `data/settings/InstanceLinkSettings.kt`
-- `dialogs/InstanceLinkDialog.kt`, `dialogs/InstanceLinkToast.kt`
-- `composables/ConnectionStatusRow.kt`
+- `server-ui/…/InstanceLinkDialog.kt`, `server-ui/…/InstanceLinkToast.kt`
+- `server-ui/…/ConnectionStatusRow.kt`
 
 ## Broadcast Integrations
 - **Blackmagic ATEM** — upload animated lower thirds straight into the ATEM media pool and drive the upstream key automatically when you go live — one tap, perfectly timed.

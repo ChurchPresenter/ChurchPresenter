@@ -8,7 +8,7 @@ import androidx.compose.ui.test.v2.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.profiles.SCANNING_ROW_TAG
-import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
+import org.churchpresenter.serverui.RemoteClientManager
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.settings.TabLabelMargin

@@ -32,7 +32,7 @@ import org.churchpresenter.strings.generated.resources.timer_expired
 import kotlinx.coroutines.delay
 import org.churchpresenter.companionsurface.CompanionConnectionChipRow
 import org.churchpresenter.companionsurface.CompanionSurfacePanel
-import org.churchpresenter.app.churchpresenter.composables.ConnectionStatusRow
+import org.churchpresenter.serverui.ConnectionStatusRow
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.app.churchpresenter.dialogs.PlanningCenterImportDialog
