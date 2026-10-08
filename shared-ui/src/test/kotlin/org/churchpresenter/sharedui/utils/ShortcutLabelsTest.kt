@@ -229,6 +229,14 @@ class ShortcutLabelsTest {
     }
 
     @Test
+    fun `two bindings that read the same are named once`() {
+        // Go Live ships on Enter and numpad Enter, which a hint would otherwise show as "Enter / Enter".
+        val bound = map(action to listOf(chord(Key.Enter), chord(Key.NumPadEnter)))
+        val label = composed { bound.label(action) }
+        assertEquals(composed { chord(Key.Enter).label() }, label)
+    }
+
+    @Test
     fun `an unbound action reads empty, so a caller can drop the hint`() {
         assertEquals("", composed { map().label(action) })
     }
