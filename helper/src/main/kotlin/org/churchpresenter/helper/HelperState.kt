@@ -74,6 +74,12 @@ class HelperState(val session: GuideSession = GuideSession()) {
      */
     val thread = HelperThread()
 
+    /** Just after the intro: "I'm down here", over the lamp, until Wick is opened. */
+    var introPointer by mutableStateOf(false)
+
+    /** The intro asked for again from that pointer, after it has been seen once. */
+    var replayIntro by mutableStateOf(false)
+
     /** Asking before the lamp is hidden — a card under the conversation, not a new page of it. */
     var confirmingHide by mutableStateOf(false)
     var reply by mutableStateOf<HelperReply>(HelperReply.Idle)

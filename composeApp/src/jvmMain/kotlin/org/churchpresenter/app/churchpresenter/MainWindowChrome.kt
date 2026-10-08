@@ -108,6 +108,8 @@ internal fun MainWindowScope.AppMenuBar() {
             onOpenStyleEditor = { showStyleEditorWindow = true },
             onOpenMemoryMonitor = { showMemoryMonitorWindow = true },
             onOpenStoryPrompt = { showStoryPrompt = true },
+            // Shows it whether or not it has been seen, like Replay intro.
+            onOpenWickIntro = { helperState.replayIntro = true },
         )
     }
 }

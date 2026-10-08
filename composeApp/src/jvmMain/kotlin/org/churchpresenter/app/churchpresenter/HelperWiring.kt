@@ -43,6 +43,7 @@ import org.churchpresenter.helper.suggest.HelperSignals
 import org.churchpresenter.helper.suggest.suggestionsFor
 import org.churchpresenter.helper.ui.HelperInputs
 import org.churchpresenter.helper.ui.HelperOverlay
+import org.churchpresenter.helper.ui.WickIntro
 import org.churchpresenter.liveoutput.deckLinkOutputCount
 import org.churchpresenter.canvas.DeckLinkManager
 import org.churchpresenter.server.SelectBibleVerseRequest
@@ -122,6 +123,16 @@ internal fun MainWindowScope.HelperHost(modifier: Modifier) {
                 cornerBottom = it.boundsInRoot().bottom + liftPx
             },
         )
+        if (wickIntroShowing) {
+            WickIntro(
+                onDone = {
+                    if (!appSettings.helper.introSeen) saveHelperSettings(appSettings.helper.copy(introSeen = true))
+                    helperState.replayIntro = false
+                    helperState.introPointer = true
+                },
+                animate = !anythingLive,
+            )
+        }
     }
 }
 
@@ -132,6 +143,20 @@ internal fun MainWindowScope.HelperHost(modifier: Modifier) {
  */
 internal fun lampLift(companionTop: Float?, cornerBottom: Float?): Float =
     if (companionTop == null || cornerBottom == null) 0f else (cornerBottom - companionTop).coerceAtLeast(0f)
+
+/**
+ * Whether "Meet Wick" is on screen: asked for again, or due the first time — after the licence, the
+ * setup wizard and the startup update check, and never beside the update window, the story prompt
+ * or a live service, so only one of them is ever up at once.
+ */
+internal val AppRootState.wickIntroShowing: Boolean
+    get() {
+        if (helperState.replayIntro) return true
+        val helper = appSettings.helper
+        return isDevMode && !helper.introSeen && helper.enabled && appReady && eulaAccepted &&
+            !showSetupWizard && startupChecksDone && pendingUpdateResult == null && !showStoryPrompt &&
+            presenterManager.liveContent.value.isEmpty()
+    }
 
 /** Writes the helper's own settings. */
 internal fun AppRootState.saveHelperSettings(helper: HelperSettings) {

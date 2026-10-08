@@ -173,6 +173,9 @@ internal class AppRootState(
     var showContactDialog by mutableStateOf(false)
     var contactDialogInitialType by mutableStateOf<String?>(null)
     var showStoryPrompt by mutableStateOf(false)
+
+    // Set once the startup update check has run, so nothing waiting on it opens before its result.
+    var startupChecksDone by mutableStateOf(false)
     var showConverterWindow by mutableStateOf(false)
     // Which tab it opens on. The Help menu wants the converter as a whole; the setup wizard's
     // song step wants Songs, because that is the format problem it just described.

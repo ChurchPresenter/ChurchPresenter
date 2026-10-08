@@ -57,6 +57,7 @@ import org.churchpresenter.strings.generated.resources.menu_developer_show_windo
 import org.churchpresenter.strings.generated.resources.menu_developer_style_editor
 import org.churchpresenter.strings.generated.resources.menu_developer_memory_monitor
 import org.churchpresenter.strings.generated.resources.menu_developer_story_prompt
+import org.churchpresenter.strings.generated.resources.menu_developer_wick_intro
 import org.churchpresenter.strings.generated.resources.menu_disconnect
 import org.churchpresenter.strings.generated.resources.menu_edit
 import org.churchpresenter.strings.generated.resources.menu_exit
@@ -128,7 +129,8 @@ fun FrameWindowScope.NavigationTopBar(
     onSetDevWindowAlwaysOnTop: (Boolean) -> Unit = {},
     onOpenStyleEditor: () -> Unit = {},
     onOpenMemoryMonitor: () -> Unit = {},
-    onOpenStoryPrompt: () -> Unit = {}
+    onOpenStoryPrompt: () -> Unit = {},
+    onOpenWickIntro: () -> Unit = {},
 ) {
 
     val fileLabel = stringResource(Res.string.menu_file)
@@ -164,7 +166,7 @@ fun FrameWindowScope.NavigationTopBar(
             onConverter, onSongLibrary, onCalendar, onAbout, onHelp, onContactUs, onCheckForUpdates)
         if (showDeveloperMenu) {
             DeveloperMenu(isPresenterWindowVisible, onSetPresenterWindowVisible, isDevWindowAlwaysOnTop,
-                onSetDevWindowAlwaysOnTop, onOpenStyleEditor, onOpenMemoryMonitor, onOpenStoryPrompt)
+                onSetDevWindowAlwaysOnTop, onOpenStyleEditor, onOpenMemoryMonitor, onOpenStoryPrompt, onOpenWickIntro)
         }
     }
 }
@@ -432,6 +434,7 @@ private fun MenuBarScope.DeveloperMenu(
     onOpenStyleEditor: () -> Unit,
     onOpenMemoryMonitor: () -> Unit,
     onOpenStoryPrompt: () -> Unit,
+    onOpenWickIntro: () -> Unit,
 ) {
     Menu(stringResource(Res.string.menu_developer), mnemonic = 'D') {
         Menu(stringResource(Res.string.menu_developer_display), mnemonic = 'S') {
@@ -449,5 +452,6 @@ private fun MenuBarScope.DeveloperMenu(
         Item(stringResource(Res.string.menu_developer_style_editor), onClick = onOpenStyleEditor)
         Item(stringResource(Res.string.menu_developer_memory_monitor), onClick = onOpenMemoryMonitor)
         Item(stringResource(Res.string.menu_developer_story_prompt), onClick = onOpenStoryPrompt)
+        Item(stringResource(Res.string.menu_developer_wick_intro), onClick = onOpenWickIntro)
     }
 }

@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
+import kotlinx.coroutines.flow.first
+import androidx.compose.runtime.snapshotFlow
 import org.churchpresenter.server.clearPresentationState
 import org.churchpresenter.server.preloadData
 import org.churchpresenter.server.updateApiKey
@@ -123,6 +125,7 @@ internal fun AppRootState.StartupEffect() {
                 pendingUpdateCheckWasManual = manual
             }
         }
+        startupChecksDone = true
 
         val now = System.currentTimeMillis()
         val storyPrompt = appSettings.storyPrompt.stampingInstall(now).recordingUse(now)
@@ -130,6 +133,8 @@ internal fun AppRootState.StartupEffect() {
         settingsManager.saveSettings(appSettings)
         if (shouldShowStoryPrompt(storyPrompt.isDue(now), updatePending = pendingUpdateResult != null)) {
             delay(STORY_PROMPT_DELAY_MS)
+            // Never on top of Wick's intro: it waits until that is finished or skipped.
+            snapshotFlow { wickIntroShowing }.first { !it }
             appSettings = appSettings.copy(storyPrompt = storyPrompt.shown(System.currentTimeMillis()))
             settingsManager.saveSettings(appSettings)
             showStoryPrompt = true

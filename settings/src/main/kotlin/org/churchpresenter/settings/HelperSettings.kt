@@ -17,6 +17,7 @@ fun helperDayOf(millis: Long): Long = millis / MILLIS_PER_DAY
  * @property snoozedUntil suggestion id → the epoch millis before which it stays quiet
  * @property nextTipIndex the tip the next rotation shows
  * @property lastTipDay the [helperDayOf] the last tip was offered on, so there is at most one a day
+ * @property introSeen whether the first-run "Meet Wick" dialog has been finished or skipped
  */
 @Serializable
 data class HelperSettings(
@@ -26,6 +27,7 @@ data class HelperSettings(
     val snoozedUntil: Map<String, Long> = emptyMap(),
     val nextTipIndex: Int = 0,
     val lastTipDay: Long = 0L,
+    val introSeen: Boolean = false,
 )
 
 /** Whether suggestion [id] may be shown at [nowMillis]: not dismissed, and not inside a snooze. */

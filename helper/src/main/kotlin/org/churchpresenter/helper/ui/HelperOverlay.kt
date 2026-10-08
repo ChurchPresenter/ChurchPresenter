@@ -149,8 +149,19 @@ fun HelperOverlay(
             HelperPanel(state, inputs, executor, resolver, tip, animate)
         }
         val teaser = inputs.suggestions.firstOrNull()?.text ?: tip?.text?.takeIf { tipWaiting }
-        if (!state.isOpen && waiting > 0 && teaser != null) {
-            Teaser(teaser, onOpen = { state.isOpen = true })
+        when {
+            state.isOpen -> Unit
+            state.introPointer -> IntroPointer(
+                onOpen = {
+                    state.introPointer = false
+                    state.isOpen = true
+                },
+                onReplay = {
+                    state.introPointer = false
+                    state.replayIntro = true
+                },
+            )
+            waiting > 0 && teaser != null -> Teaser(teaser, onOpen = { state.isOpen = true })
         }
         Spacer(Modifier.size(12.dp))
         Launcher(
@@ -158,7 +169,10 @@ fun HelperOverlay(
             waiting = waiting,
             animate = animate && !inputs.anythingLive,
             mood = moodFor(state.reply),
-            onClick = { if (state.isOpen) state.close() else state.isOpen = true },
+            onClick = {
+                state.introPointer = false
+                if (state.isOpen) state.close() else state.isOpen = true
+            },
         )
     }
 }

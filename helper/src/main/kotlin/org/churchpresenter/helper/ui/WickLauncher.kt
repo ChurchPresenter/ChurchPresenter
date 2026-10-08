@@ -57,6 +57,8 @@ import org.churchpresenter.helper.resolve
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.helper_close
 import org.churchpresenter.strings.generated.resources.helper_name
+import org.churchpresenter.strings.generated.resources.helper_intro_replay
+import org.churchpresenter.strings.generated.resources.helper_intro_pointer
 import org.churchpresenter.strings.generated.resources.helper_open
 import org.churchpresenter.theme.elevationPalette
 import org.jetbrains.compose.resources.stringResource
@@ -276,6 +278,33 @@ internal fun Teaser(text: HelperText, onOpen: () -> Unit) {
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(top = 2.dp),
+            )
+        }
+    }
+}
+
+/** Just after the intro: where Wick went, and a way to see the intro again. */
+@Composable
+internal fun IntroPointer(onOpen: () -> Unit, onReplay: () -> Unit) {
+    Surface(
+        onClick = onOpen,
+        shape = TeaserShape,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = LINE_ALPHA)),
+        modifier = Modifier
+            .padding(top = 8.dp)
+            .widthIn(max = 250.dp)
+            .floating(TeaserShape)
+            .testTag("helper.introPointer"),
+    ) {
+        Column(Modifier.padding(horizontal = 13.dp, vertical = 10.dp)) {
+            Text(stringResource(Res.string.helper_intro_pointer), style = MaterialTheme.typography.bodySmall)
+            Text(
+                stringResource(Res.string.helper_intro_replay),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(top = 5.dp).clickable(onClick = onReplay),
             )
         }
     }
