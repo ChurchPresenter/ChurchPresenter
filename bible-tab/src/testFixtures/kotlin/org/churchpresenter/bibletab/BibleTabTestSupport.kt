@@ -196,12 +196,16 @@ fun bibleTab(
      */
     width: Dp? = null,
     selectedVerseItem: ScheduleItem.BibleVerseItem? = null,
+    /** When set, the schedule verse as state, so a test can hand a different verse over. */
+    scheduleVerse: MutableState<ScheduleItem.BibleVerseItem?>? = null,
     /** The schedule hand-over's count; bump it to hand [selectedVerseItem] over again. */
     selectedVerseItemVersion: MutableState<Int> = mutableStateOf(0),
     /** Whether [selectedVerseItem] is handed over to go live (a double-click) rather than to open. */
     selectedVerseItemGoLive: Boolean = false,
     /** Bumped to rebuild the tab, as switching away from it and back does in the app. */
     tabVisit: MutableState<Int> = mutableStateOf(0),
+    /** Bumped as the app does when one of its dialogs closes over the tab. */
+    dialogDismissSignal: MutableState<Int> = mutableStateOf(0),
     engineStatus: BibleEngineStatus? = null,
     /** Whether the Bible is what the output is showing, as the host reports it. */
     isPresenting: Boolean = false,
@@ -283,9 +287,10 @@ fun bibleTab(
                             }
                         },
                         onInstanceLinkSendBibleHold = onInstanceLinkSendBibleHold,
-                        selectedVerseItem = selectedVerseItem,
+                        selectedVerseItem = scheduleVerse?.value ?: selectedVerseItem,
                         selectedVerseItemVersion = selectedVerseItemVersion.value,
                         selectedVerseItemGoLive = selectedVerseItemGoLive,
+                        dialogDismissSignal = dialogDismissSignal.value,
                         engineStatus = engineStatus,
                         isPresenting = isPresenting,
                     )

@@ -50,7 +50,7 @@ internal fun BibleTabScope.steppedReference(
 /** The last verse of [ref]'s chapter when that chapter is the one loaded, else null (unknown). */
 private fun BibleTabScope.lastVerseOf(ref: SmartReference): Int? {
     if (ref.bookIndex != selectedBookIndex || (ref.chapter ?: 1) != selectedChapter) return null
-    return verses.lastOrNull()?.substringBefore(". ")?.toIntOrNull()
+    return verses.lastOrNull()?.let { it.substringBefore(". ").toIntOrNull() }
 }
 
 /** How a reference reads in the search box: "John", "John 3" or "John 3:16". */

@@ -57,13 +57,11 @@ private fun SelectedVerse.key() = Triple(bookName, chapter, verseNumber)
 private fun BibleTabScope.liveAndShowing(): Boolean =
     currentIsPresenting && bibleOutput?.bibleHold?.value != true && displayedVerses.isNotEmpty()
 
+/** [ref] is the single verse on screen -- a chapter typed alone stands for its first verse. */
 private fun BibleTabScope.referenceIsLive(ref: SmartReference): Boolean {
-    if (!liveAndShowing() || displayedVerses.size != 1) return false
-    val shown = displayedVerses.first()
-    return books.getOrNull(ref.bookIndex) == shown.bookName &&
-        (ref.chapter ?: 1) == shown.chapter &&
-        (ref.verseStart ?: 1) == shown.verseNumber &&
-        ref.verseEnd == null
+    if (!liveAndShowing() || ref.verseEnd != null) return false
+    val shown = displayedVerses.singleOrNull() ?: return false
+    return shown.key() == Triple(books.getOrNull(ref.bookIndex), ref.chapter ?: 1, ref.verseStart ?: 1)
 }
 
 private fun BibleTabScope.holdForSearch(viewModel: BibleViewModel, query: String) {
