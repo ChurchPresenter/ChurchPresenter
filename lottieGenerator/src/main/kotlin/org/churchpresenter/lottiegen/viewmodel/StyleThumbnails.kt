@@ -124,19 +124,25 @@ class StyleThumbnails(
     }
 
     // The first still of a session parses its Lottie cold, and on a slow or busy machine that can
-    // outlast the renderer's load deadline; the second attempt is warm. Without this the style
-    // being edited could stay blank until the config next changed.
+    // outlast the renderer's load deadline -- or load just in time and capture a frame with nothing
+    // drawn yet; the second attempt is warm. Without this the style being edited could stay blank
+    // until the config next changed. A style drawn at the middle of its hold is never meant to be
+    // empty, so a blank still is tried once more like a timed-out one.
     @Suppress("SwallowedException")
-    private suspend fun renderWithRetry(lottie: String, config: LottieGenConfig): ImageBitmap? = try {
-        render(lottie, config)?.also { diagnostics.record(config.style, ThumbnailDiagnostics.Outcome.DRAWN) }
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: IllegalStateException) {
-        retry(lottie, config)
+    private suspend fun renderWithRetry(lottie: String, config: LottieGenConfig): ImageBitmap? {
+        val first = try {
+            render(lottie, config)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IllegalStateException) {
+            return retry(lottie, config, ThumbnailDiagnostics.Outcome.DRAWN_ON_RETRY)
+        }
+        return first?.also { diagnostics.record(config.style, ThumbnailDiagnostics.Outcome.DRAWN) }
+            ?: retry(lottie, config, ThumbnailDiagnostics.Outcome.DRAWN_AFTER_BLANK)
     }
 
-    private suspend fun retry(lottie: String, config: LottieGenConfig): ImageBitmap? = try {
-        render(lottie, config)?.also { diagnostics.record(config.style, ThumbnailDiagnostics.Outcome.DRAWN_ON_RETRY) }
+    private suspend fun retry(lottie: String, config: LottieGenConfig, drawn: ThumbnailDiagnostics.Outcome) = try {
+        render(lottie, config)?.also { diagnostics.record(config.style, drawn) }
     } catch (e: CancellationException) {
         throw e
     } catch (e: IllegalStateException) {

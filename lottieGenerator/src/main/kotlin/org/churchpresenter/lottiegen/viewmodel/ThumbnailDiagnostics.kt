@@ -21,6 +21,7 @@ class ThumbnailDiagnostics(private val clock: () -> Long = System::currentTimeMi
     enum class Outcome(val text: String) {
         DRAWN("drawn"),
         DRAWN_ON_RETRY("drawn on the second try (IllegalStateException first)"),
+        DRAWN_AFTER_BLANK("drawn on the second try (blank still first)"),
         RENDER_NULL("render returned null"),
         BLANK("blank still (nothing to crop)"),
         ILLEGAL_STATE_TWICE("IllegalStateException twice"),
