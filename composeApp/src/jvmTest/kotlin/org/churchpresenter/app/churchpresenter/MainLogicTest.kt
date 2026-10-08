@@ -19,8 +19,8 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.server.TunnelStatus
-import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
-import org.churchpresenter.app.churchpresenter.utils.UpdateInfo
+import org.churchpresenter.updater.UpdateCheckResult
+import org.churchpresenter.updater.UpdateInfo
 import org.churchpresenter.diagnostics.Logger
 import java.io.File
 import java.nio.file.Files

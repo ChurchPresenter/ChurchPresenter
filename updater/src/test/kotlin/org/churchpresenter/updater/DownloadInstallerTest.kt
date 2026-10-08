@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs
+package org.churchpresenter.updater
 
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer

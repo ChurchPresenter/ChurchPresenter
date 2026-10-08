@@ -15,7 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import org.churchpresenter.app.churchpresenter.utils.AppWindowIcons
 import org.churchpresenter.sharedui.utils.addGuardedShutdownHook
-import org.churchpresenter.app.churchpresenter.utils.deleteLeftoverUpdateInstallers
+import org.churchpresenter.updater.UpdateChecker
+import org.churchpresenter.updater.UpdaterIdentity
+import org.churchpresenter.updater.deleteLeftoverUpdateInstallers
 import org.churchpresenter.sharedui.utils.DevFlags
 import org.churchpresenter.app.churchpresenter.utils.GpuInfo
 import org.churchpresenter.lowerthird.render.LottieFonts
@@ -163,6 +165,8 @@ fun main() {
         ),
     )
     CrashReporter.breadcrumb("Application started", category = "lifecycle")
+    // The same for the updater, which compares releases against this version.
+    UpdateChecker.initialize(UpdaterIdentity(appVersion = BuildConfig.APP_VERSION, isRelease = BuildConfig.IS_RELEASE))
     // The installer a previous update ran is still in the temp directory: it could not be deleted
     // while it was running. The single-instance guard above means no download is in flight.
     deleteLeftoverUpdateInstallers()

@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.updater
 
 import java.io.File
 
@@ -17,7 +17,7 @@ internal const val UPDATE_INSTALLER_PREFIX = "ChurchPresenter-update"
  * Only regular files named with [UPDATE_INSTALLER_PREFIX] are touched. One that cannot be deleted —
  * an `.msi` Windows still has locked — is left for the next launch, and nothing here throws.
  */
-internal fun deleteLeftoverUpdateInstallers(
+fun deleteLeftoverUpdateInstallers(
     dir: File = File(System.getProperty("java.io.tmpdir")),
 ): Int = runCatching {
     dir.listFiles { file -> file.isFile && file.name.startsWith(UPDATE_INSTALLER_PREFIX) }

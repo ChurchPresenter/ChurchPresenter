@@ -174,3 +174,7 @@ include(":live-output")
 // Statistics: what was presented and when, the play log, and the CCLI report window over them.
 // Depended on by :composeApp.
 include(":statistics")
+
+// The updater: the GitHub release check, the installer download and the update window. Depended on
+// by :composeApp.
+include(":updater")

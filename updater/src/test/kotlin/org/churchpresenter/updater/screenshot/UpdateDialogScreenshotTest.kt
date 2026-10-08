@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.updater.screenshot
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,11 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.v2.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
-import org.churchpresenter.app.churchpresenter.dialogs.DownloadState
-import org.churchpresenter.app.churchpresenter.dialogs.UpdateAvailableContent
-import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
-import org.churchpresenter.app.churchpresenter.utils.UpdateInfo
 import org.churchpresenter.settings.utils.UpdateCheckInterval
+import org.churchpresenter.updater.DownloadState
+import org.churchpresenter.updater.UpdateAvailableContent
+import org.churchpresenter.updater.UpdateCheckResult
+import org.churchpresenter.updater.UpdateInfo
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo

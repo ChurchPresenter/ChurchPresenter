@@ -1,6 +1,7 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.updater
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
@@ -13,9 +14,9 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.churchpresenter.app.churchpresenter.BuildConfig
 import java.net.HttpURLConnection
 import java.net.URI
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 private const val CONNECT_TIMEOUT_MS = 5_000
@@ -51,6 +52,15 @@ object UpdateChecker {
 
     private val beaconScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
+    /** What this build is; set once at startup by [initialize]. */
+    @Volatile
+    private var identity = UpdaterIdentity()
+
+    /** Tells the updater which build is running. `main.kt` calls it once, before any check. */
+    fun initialize(identity: UpdaterIdentity) {
+        this.identity = identity
+    }
+
     /**
      * Checks GitHub for a newer release that has an installer for the current OS.
      *
@@ -77,7 +87,7 @@ object UpdateChecker {
         // The Store updates its own installs; installing a release MSI over one would leave two copies.
         if (storeInstall) UpdateCheckResult.UpToDate else withContext(Dispatchers.IO) {
             val body = fetchReleasesFrom(apiUrl) ?: return@withContext UpdateCheckResult.UpToDate
-            selectUpdate(body, includePrereleases, BuildConfig.APP_VERSION)
+            selectUpdate(body, includePrereleases, identity.appVersion)
         }
 
     internal fun fetchReleasesFrom(apiUrl: String): String? {
@@ -86,7 +96,7 @@ object UpdateChecker {
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             connection.setRequestProperty("Accept", "application/vnd.github+json")
-            connection.setRequestProperty("User-Agent", "ChurchPresenter/${BuildConfig.APP_VERSION}")
+            connection.setRequestProperty("User-Agent", "ChurchPresenter/${identity.appVersion}")
             connection.connectTimeout = CONNECT_TIMEOUT_MS
             connection.readTimeout = READ_TIMEOUT_MS
 
@@ -150,35 +160,6 @@ object UpdateChecker {
         )
     }
 
-    private fun selectDownloadUrl(urls: List<String>): String? {
-        val os = System.getProperty("os.name", "").lowercase()
-        val arch = System.getProperty("os.arch", "").lowercase()
-        return when {
-            os.contains("win") ->
-                urls.firstOrNull { it.endsWith(".msi", ignoreCase = true) }
-            os.contains("mac") && arch == "aarch64" ->
-                urls.firstOrNull { it.contains("arm64", ignoreCase = true) && it.endsWith(".dmg", ignoreCase = true) }
-            os.contains("mac") ->
-                urls.firstOrNull { !it.contains("arm64", ignoreCase = true) && it.endsWith(".dmg", ignoreCase = true) }
-            else ->
-                urls.firstOrNull { it.endsWith(".deb", ignoreCase = true) }
-        }
-    }
-
-    // The website's platform naming for the four installer builds — same
-    // branching as selectDownloadUrl, so the beacon reports the platform whose
-    // installer is actually being downloaded.
-    private fun currentPlatformId(): String {
-        val os = System.getProperty("os.name", "").lowercase()
-        val arch = System.getProperty("os.arch", "").lowercase()
-        return when {
-            os.contains("win") -> "windows"
-            os.contains("mac") && arch == "aarch64" -> "macos_arm64"
-            os.contains("mac") -> "macos_x64"
-            else -> "linux"
-        }
-    }
-
     // Same quick-retry shape as LiveMapReporter: a transient blip at the moment
     // the user clicks Download shouldn't drop the beacon. No slow retry — the
     // app exits to launch the installer soon after, killing the coroutine.
@@ -196,19 +177,33 @@ object UpdateChecker {
      * LiveMapReporter uses for ?src=dev.
      */
     fun reportDownloadStarted(version: String) {
-        if (!BuildConfig.IS_RELEASE) return
-        beaconScope.launch {
+        reportDownloadStarted(version, identity)
+    }
+
+    /**
+     * [reportDownloadStarted] with what it reads handed in: the build, where the beacon goes and the
+     * pause between attempts. Returns the sending job, or null for a dev build, so a test can wait
+     * for the attempts to finish rather than for a clock.
+     */
+    internal fun reportDownloadStarted(
+        version: String,
+        identity: UpdaterIdentity,
+        beaconUrl: String = DOWNLOAD_BEACON_URL,
+        retryDelay: Duration = QUICK_RETRY_DELAY,
+    ): Job? {
+        if (!identity.isRelease) return null
+        return beaconScope.launch {
             // True once the server answered at all — any HTTP status counts,
             // since a 4xx/5xx means the request arrived and a retry won't help.
             fun tryBeacon(): Boolean = try {
-                val url = URI("$DOWNLOAD_BEACON_URL?platform=${currentPlatformId()}&source=app&version=$version")
+                val url = URI("$beaconUrl?platform=${currentPlatformId()}&source=app&version=$version")
                     .toURL()
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "POST"
                 // The website's CSRF middleware 403s cross-origin POSTs with a
                 // form-like (or absent) content type; JSON passes it.
                 connection.setRequestProperty("Content-Type", "application/json")
-                connection.setRequestProperty("User-Agent", "ChurchPresenter/${BuildConfig.APP_VERSION}")
+                connection.setRequestProperty("User-Agent", "ChurchPresenter/${identity.appVersion}")
                 connection.connectTimeout = CONNECT_TIMEOUT_MS
                 connection.readTimeout = READ_TIMEOUT_MS
                 connection.responseCode // send the request
@@ -221,7 +216,7 @@ object UpdateChecker {
 
             repeat(QUICK_ATTEMPTS) { attempt ->
                 if (tryBeacon()) return@launch
-                if (attempt < QUICK_ATTEMPTS - 1) delay(QUICK_RETRY_DELAY)
+                if (attempt < QUICK_ATTEMPTS - 1) delay(retryDelay)
             }
         }
     }
@@ -245,3 +240,32 @@ object UpdateChecker {
     }
 }
 
+/** The installer among [urls] for the OS and CPU this app is running on, or null. */
+internal fun selectDownloadUrl(urls: List<String>): String? {
+    val os = System.getProperty("os.name", "").lowercase()
+    val arch = System.getProperty("os.arch", "").lowercase()
+    return when {
+        os.contains("win") ->
+            urls.firstOrNull { it.endsWith(".msi", ignoreCase = true) }
+        os.contains("mac") && arch == "aarch64" ->
+            urls.firstOrNull { it.contains("arm64", ignoreCase = true) && it.endsWith(".dmg", ignoreCase = true) }
+        os.contains("mac") ->
+            urls.firstOrNull { !it.contains("arm64", ignoreCase = true) && it.endsWith(".dmg", ignoreCase = true) }
+        else ->
+            urls.firstOrNull { it.endsWith(".deb", ignoreCase = true) }
+    }
+}
+
+// The website's platform naming for the four installer builds — same
+// branching as selectDownloadUrl, so the beacon reports the platform whose
+// installer is actually being downloaded.
+internal fun currentPlatformId(): String {
+    val os = System.getProperty("os.name", "").lowercase()
+    val arch = System.getProperty("os.arch", "").lowercase()
+    return when {
+        os.contains("win") -> "windows"
+        os.contains("mac") && arch == "aarch64" -> "macos_arm64"
+        os.contains("mac") -> "macos_x64"
+        else -> "linux"
+    }
+}

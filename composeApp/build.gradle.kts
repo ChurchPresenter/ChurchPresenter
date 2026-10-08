@@ -345,6 +345,8 @@ kotlin {
             implementation(projects.liveOutput)
             // Statistics: the counters, the play log and the CCLI report window over them.
             implementation(projects.statistics)
+            // The updater: the release check, the installer download and the update window.
+            implementation(projects.updater)
             // The ATEM protocol client: the UDP conversation with the switcher — connect, state
             // dump, key control and media-pool upload. AtemBridge is the app-side wiring.
             implementation(projects.atem)

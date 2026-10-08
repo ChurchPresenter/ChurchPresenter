@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs
+package org.churchpresenter.updater
 
 import kotlinx.coroutines.runBlocking
 import java.io.ByteArrayInputStream

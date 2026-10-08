@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.dialogs
+package org.churchpresenter.updater
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
@@ -51,22 +52,14 @@ import org.churchpresenter.strings.generated.resources.update_interval_every_lau
 import org.churchpresenter.strings.generated.resources.update_interval_monthly
 import org.churchpresenter.strings.generated.resources.update_interval_never
 import org.churchpresenter.strings.generated.resources.update_interval_weekly
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.settings.utils.UpdateCheckInterval
-import org.churchpresenter.app.churchpresenter.utils.UpdateCheckResult
-import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
 import org.churchpresenter.theme.ProvideUiFontScale
 import org.jetbrains.compose.resources.stringResource
-import java.awt.Desktop
 import java.io.File
 import java.io.OutputStream
 import java.io.InputStream
-import java.io.IOException
-import kotlin.system.exitProcess
 import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.sharedui.utils.UrlOpener
@@ -116,29 +109,6 @@ internal suspend fun copyReportingProgress(
  */
 internal fun downloadProgressFraction(bytesRead: Long, contentLength: Long): Float =
     if (contentLength > 0) (bytesRead.toFloat() / contentLength.toFloat()).coerceIn(0f, 1f) else -1f
-
-/**
- * The native command that launches [path] on [osName] (as reported by the `os.name` system
- * property), for [launchInstaller].
- *
- * Deliberately avoids [Desktop.open], which on Windows rejects `.msi` files with
- * "Unsupported URI content". [ProcessBuilder] takes its arguments as a list, so
- * installer paths containing spaces need no shell quoting.
- */
-internal fun installerLaunchCommand(osName: String, path: String): List<String> = when {
-    // msiexec is the supported way to run an .msi; /i = install.
-    osName.lowercase().contains("win") -> listOf("msiexec", "/i", path)
-    // mounts the .dmg in Finder; same as what Desktop.open() does on mac.
-    osName.lowercase().contains("mac") -> listOf("open", path)
-    // .deb: hand to the desktop installer Desktop.open() delegates to on Linux.
-    else -> listOf("xdg-open", path)
-}
-
-/** Launches the downloaded installer using the platform's native mechanism. */
-private fun launchInstaller(file: File) {
-    val command = installerLaunchCommand(System.getProperty("os.name", ""), file.absolutePath)
-    ProcessBuilder(command).start()
-}
 
 @Composable
 private fun updateIntervalLabel(interval: UpdateCheckInterval): String = when (interval) {
@@ -227,32 +197,9 @@ fun UpdateAvailableDialog(
 
     val mainWindowState = LocalMainWindowState.current
     val scope = rememberCoroutineScope()
-    var downloadState by remember(result) { mutableStateOf<DownloadState>(DownloadState.Idle) }
-
-    val updateInfo = (result as? UpdateCheckResult.Available)?.info
-
-    val startDownload: () -> Unit = {
-        // Count this as an app-updater download (fire-and-forget, own scope —
-        // never delays or fails the actual download below).
-        updateInfo?.let { UpdateChecker.reportDownloadStarted(it.latestVersion) }
-        scope.launch(Dispatchers.IO) {
-            downloadInstaller(updateInfo!!.downloadUrl!!) { state ->
-                withContext(Dispatchers.Main) { downloadState = state }
-            }
-        }
-    }
-
-    val dialogTitle = if (updateInfo != null)
-        stringResource(Res.string.update_dialog_title)
-    else
-        stringResource(Res.string.update_dialog_up_to_date_title)
-
-    // Extra height for the update-available state, whose hero sits above a full release-notes
-    // panel; the up-to-date state's flexible spacer absorbs the hero at the original heights.
-    val dialogHeight = when {
-        updateInfo != null -> if (isManualCheck) 548.dp else 500.dp
-        else -> if (isManualCheck) 468.dp else 420.dp
-    }
+    val flow = remember(result) { UpdateDownloadFlow((result as? UpdateCheckResult.Available)?.info, scope) }
+    val hasUpdate = result is UpdateCheckResult.Available
+    val dialogHeight = updateDialogHeight(hasUpdate, isManualCheck)
 
     DialogWindow(
         onCloseRequest = onDismiss,
@@ -261,7 +208,9 @@ fun UpdateAvailableDialog(
             width = 440.dp,
             height = dialogHeight
         ),
-        title = dialogTitle,
+        title = stringResource(
+            if (hasUpdate) Res.string.update_dialog_title else Res.string.update_dialog_up_to_date_title
+        ),
         resizable = false
     ) {
         ProvideUiFontScale {
@@ -272,23 +221,24 @@ fun UpdateAvailableDialog(
                 onParticipateInPrereleasesChange = onParticipateInPrereleasesChange,
                 updateCheckInterval = updateCheckInterval,
                 onUpdateCheckIntervalChange = onUpdateCheckIntervalChange,
-                downloadState = downloadState,
-                onDownload = startDownload,
-                onInstall = { file ->
-                    try {
-                        launchInstaller(file)
-                        exitProcess(0)
-                    } catch (e: IOException) {
-                        downloadState = DownloadState.Error(e.message ?: "Failed to launch installer")
-                    } catch (e: SecurityException) {
-                        downloadState = DownloadState.Error(e.message ?: "Failed to launch installer")
-                    }
-                },
+                downloadState = flow.state,
+                onDownload = { flow.download() },
+                onInstall = flow::install,
                 onOpenReleasePage = { UrlOpener.open(it) },
                 onDismiss = onDismiss
             )
         }
     }
+}
+
+/**
+ * The window's height. The update-available state's hero sits above a full release-notes panel and
+ * needs the extra room; the up-to-date state's flexible spacer absorbs the hero at the original
+ * heights. A manual check adds the check-interval row.
+ */
+internal fun updateDialogHeight(hasUpdate: Boolean, isManualCheck: Boolean): Dp = when {
+    hasUpdate -> if (isManualCheck) 548.dp else 500.dp
+    else -> if (isManualCheck) 468.dp else 420.dp
 }
 
 /**

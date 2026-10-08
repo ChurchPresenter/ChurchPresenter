@@ -145,7 +145,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :canvas:detekt :presenter:detekt :profiles:detekt :companion-surface:detekt :obs:detekt :live-show:detekt :live-output:detekt :statistics:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :canvas:detekt :presenter:detekt :profiles:detekt :companion-surface:detekt :obs:detekt :live-show:detekt :live-output:detekt :statistics:detekt :updater:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -521,6 +521,14 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.statistics == 'true' }}
         run: ./gradlew :statistics:jacocoTestCoverageVerification -x test
 
+      - name: Updater tests
+        if: ${{ !cancelled() && steps.modules.outputs.updater == 'true' }}
+        run: ./gradlew :updater:test
+
+      - name: Updater coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.updater == 'true' }}
+        run: ./gradlew :updater:jacocoTestCoverageVerification -x test
+
       - name: Dictionary tests
         if: ${{ !cancelled() && steps.modules.outputs.dictionary == 'true' }}
         run: ./gradlew :dictionary:test
@@ -669,6 +677,7 @@ jobs:
               ("live-show", "Live show"),
               ("live-output", "Live output"),
               ("statistics", "Statistics"),
+              ("updater", "Updater"),
               ("dictionary", "Dictionary"),
               ("stt", "STT"),
               ("announcements", "Announcements"),
@@ -873,6 +882,8 @@ jobs:
             live-output/build/test-results/
             statistics/build/reports/tests/
             statistics/build/test-results/
+            updater/build/reports/tests/
+            updater/build/test-results/
             dictionary/build/reports/tests/
             dictionary/build/test-results/
             stt/build/reports/tests/

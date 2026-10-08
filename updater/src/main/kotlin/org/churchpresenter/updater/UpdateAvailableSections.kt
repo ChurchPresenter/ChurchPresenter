@@ -1,6 +1,5 @@
-package org.churchpresenter.app.churchpresenter.dialogs
+package org.churchpresenter.updater
 
-import org.churchpresenter.app.churchpresenter.utils.UpdateInfo
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -39,7 +38,6 @@ import org.churchpresenter.strings.generated.resources.update_dialog_open_page
 import org.churchpresenter.strings.generated.resources.update_dialog_release_notes
 import org.churchpresenter.strings.generated.resources.update_dialog_up_to_date_title
 import org.churchpresenter.strings.generated.resources.update_dialog_view_on_github
-import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import org.churchpresenter.sharedui.composables.CopyLinkIconButton

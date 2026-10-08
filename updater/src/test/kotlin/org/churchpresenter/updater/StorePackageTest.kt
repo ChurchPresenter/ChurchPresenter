@@ -1,9 +1,7 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.updater
 
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class StorePackageTest {
@@ -18,12 +16,5 @@ class StorePackageTest {
     fun `a launcher elsewhere or absent is not a store install`() {
         assertFalse(StorePackage.isUnderWindowsApps("C:\\Program Files\\ChurchPresenter\\ChurchPresenter.exe"))
         assertFalse(StorePackage.isUnderWindowsApps(null))
-    }
-
-    @Test
-    fun `auto start keeps the launcher path except for a store install`() {
-        assertEquals("C:\\x.exe", AutoStartManager.launcherPath("C:\\x.exe", storeInstall = false))
-        assertNull(AutoStartManager.launcherPath("C:\\x.exe", storeInstall = true))
-        assertNull(AutoStartManager.launcherPath(null, storeInstall = false))
     }
 }

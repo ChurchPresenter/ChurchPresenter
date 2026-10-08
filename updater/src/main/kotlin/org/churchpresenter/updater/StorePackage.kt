@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.updater
 
 // Microsoft Store (MSIX) installs live under Program Files\WindowsApps, where the install folder is
 // read-only, updates come from the Store and HKCU writes are virtualized per package.

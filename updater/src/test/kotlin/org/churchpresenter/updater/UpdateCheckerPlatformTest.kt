@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.updater
 
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -8,8 +8,8 @@ import kotlin.test.assertNull
 /**
  * Installer selection for the in-app updater. Picking the wrong asset hands the user an installer
  * that won't run on their machine — an Intel Mac offered the arm64 .dmg, or a Windows user offered
- * a .deb. Both helpers are private and read `os.name`/`os.arch` at call time, so each case is
- * driven by temporarily overriding those properties.
+ * a .deb. Both helpers read `os.name`/`os.arch` at call time, so each case is driven by
+ * temporarily overriding those properties.
  */
 class UpdateCheckerPlatformTest {
 
@@ -25,21 +25,6 @@ class UpdateCheckerPlatformTest {
     private fun asPlatform(osName: String, osArch: String) {
         System.setProperty("os.name", osName)
         System.setProperty("os.arch", osArch)
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun selectDownloadUrl(urls: List<String>): String? {
-        val method = UpdateChecker::class.java
-            .getDeclaredMethod("selectDownloadUrl", List::class.java)
-            .apply { isAccessible = true }
-        return method.invoke(UpdateChecker, urls) as String?
-    }
-
-    private fun currentPlatformId(): String {
-        val method = UpdateChecker::class.java
-            .getDeclaredMethod("currentPlatformId")
-            .apply { isAccessible = true }
-        return method.invoke(UpdateChecker) as String
     }
 
     /** The four assets a release publishes, in an arbitrary order. */
@@ -101,6 +86,17 @@ class UpdateCheckerPlatformTest {
         asPlatform("Mac OS X", "aarch64")
         val noArm = releaseAssets.filterNot { it.contains("arm64") }
         assertNull(selectDownloadUrl(noArm), "an arm64 Mac must not be given the x64 dmg")
+    }
+
+    @Test
+    fun `an arm64 asset that is not a disk image is not offered to an arm64 Mac`() {
+        asPlatform("Mac OS X", "aarch64")
+
+        assertEquals(
+            "https://example.org/ChurchPresenter-26.1.0-arm64.dmg",
+            selectDownloadUrl(listOf("https://example.org/ChurchPresenter-26.1.0-arm64.zip") + releaseAssets),
+            "a zip cannot be opened as an installer",
+        )
     }
 
     @Test
