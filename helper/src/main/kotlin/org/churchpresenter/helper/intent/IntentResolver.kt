@@ -3,11 +3,13 @@ package org.churchpresenter.helper.intent
 import org.churchpresenter.helper.HelperText
 import org.churchpresenter.helper.action.HelperAction
 import org.churchpresenter.sharedui.models.Tabs
+import java.util.Locale
 
 /** What the resolver may know about the app when it reads a request — plain values, nothing live. */
 data class ResolveContext(
     val currentTab: Tabs? = null,
     val visibleTabs: Set<Tabs> = Tabs.entries.toSet(),
+    val language: String = Locale.getDefault().language,
 )
 
 /** What a typed request came to. */

@@ -49,9 +49,11 @@ consumer is `:composeApp`. It takes `:shared-ui`, `:strings`, `:icons`, `:core-m
   bubble never opens by itself.
 - **A resolver may only answer with a `HelperAction`.** A model-backed resolver added later
   implements `IntentResolver` and is bound by the same list and the same confirmation.
-- **The vocabulary is English only.** `Vocabulary` and `ColorNames` read what the operator types;
-  they move into one table per language when another is added. Every line the helper *says* is a
-  string resource.
+- **The rules read English; every other language is a glossary.** `Vocabulary`, `ColorNames` and the
+  rules stay English. `intent/glossary/` holds one `Glossary` per shipped locale that rewrites a typed
+  request into those English words; `Glossaries.readings` tries the app's language, then the text as
+  typed, then every other language. A new word goes in the glossary, never in a rule; a glossary
+  never maps a Bible book name. Every line the helper *says* is a string resource.
 - **Text style lives on profiles.** `withFontStep` edits every profile in use, never the global
   song/Bible settings, which `SettingsManager` strips of styling on save.
 - `internal` stops at the module edge. What `:composeApp` calls is public; nothing else is.

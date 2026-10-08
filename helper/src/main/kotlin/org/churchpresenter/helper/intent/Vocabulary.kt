@@ -3,8 +3,8 @@ package org.churchpresenter.helper.intent
 import kotlin.math.abs
 
 /**
- * The words the rule parser understands, by meaning. English only for now: the parser reads what
- * the operator types, and these tables move into one per language when another is added.
+ * The words the rule parser understands, by meaning. English only: a request typed in another
+ * language reaches the rules through its `Glossary`, already in these words.
  */
 internal object Vocabulary {
     val BACKGROUND = setOf("background", "backgrounds", "bg", "backdrop")

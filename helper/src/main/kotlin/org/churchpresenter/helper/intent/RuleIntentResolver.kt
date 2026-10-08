@@ -1,12 +1,18 @@
 package org.churchpresenter.helper.intent
 
 import org.churchpresenter.helper.action.HelperAction
+import org.churchpresenter.helper.intent.glossary.Glossaries
 
-/** Lower case, punctuation other than `: - #` turned to spaces, runs of spaces collapsed. */
+/**
+ * Lower case, apostrophes made plain, Arabic vowel marks dropped, punctuation other than `: - #`
+ * turned to spaces, runs of spaces collapsed.
+ */
 internal fun normalize(input: String): String =
     input.lowercase()
-        .replace('’', '\'')
-        .replace(Regex("""[^\p{L}\p{N}:#'\-\s]"""), " ")
+        .replace(Regex("[’‘`ʻʼ]"), "'")
+        .replace('：', ':')
+        .replace(Regex("[\u064B-\u0652\u0640]"), "")
+        .replace(Regex("""[^\p{L}\p{M}\p{N}:#'\-\s]"""), " ")
         .replace(Regex("""\s+"""), " ")
         .trim()
 
@@ -41,8 +47,9 @@ class RuleIntentResolver : IntentResolver {
     fun resolveNow(input: String, context: ResolveContext): Resolution {
         val text = normalize(input)
         if (text.isEmpty()) return Resolution.Unknown
-        val request = Request(text, text.split(' '), context)
-        return RULES.firstNotNullOfOrNull { it(request) } ?: Resolution.Unknown
+        return Glossaries.readings(text, context.language)
+            .map { reading -> RULES.firstNotNullOfOrNull { it(Request(reading, reading.split(' '), context)) } }
+            .firstOrNull { it != null } ?: Resolution.Unknown
     }
 
     private companion object {
