@@ -168,13 +168,28 @@ jobs:
           PLANNING_CENTER_CLIENT_SECRET: ${{ secrets.PLANNING_CENTER_CLIENT_SECRET }}
           CALENDAR_RELAY_URL: ${{ secrets.CALENDAR_RELAY_URL }}
           CALENDAR_RELAY_CONFIG_URL: ${{ secrets.CALENDAR_RELAY_CONFIG_URL }}
+        run: ./gradlew :composeApp:signWindowsMsi
+
+      # Its own step, bounded and allowed to fail: the MSIX is for a hand upload to Partner Center,
+      # and a makeappx that stalls must not hold back the signed MSI, the release or the nightly.
+      - name: Package MSIX
+        id: msix
+        shell: bash
+        timeout-minutes: 20
+        continue-on-error: true
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          PLANNING_CENTER_CLIENT_ID: ${{ secrets.PLANNING_CENTER_CLIENT_ID }}
+          PLANNING_CENTER_CLIENT_SECRET: ${{ secrets.PLANNING_CENTER_CLIENT_SECRET }}
+          CALENDAR_RELAY_URL: ${{ secrets.CALENDAR_RELAY_URL }}
+          CALENDAR_RELAY_CONFIG_URL: ${{ secrets.CALENDAR_RELAY_CONFIG_URL }}
           # Partner Center's Product identity values. Unset, the MSIX still builds, but the Store
           # rejects it.
           MSIX_IDENTITY_NAME: ${{ vars.MSIX_IDENTITY_NAME }}
           MSIX_PUBLISHER: ${{ vars.MSIX_PUBLISHER }}
           MSIX_PUBLISHER_DISPLAY_NAME: ${{ vars.MSIX_PUBLISHER_DISPLAY_NAME }}
         run: >-
-          ./gradlew :composeApp:signWindowsMsi :composeApp:packageMsix
+          ./gradlew :composeApp:packageMsix
           "-Pmsix.identityName=$MSIX_IDENTITY_NAME"
           "-Pmsix.publisher=$MSIX_PUBLISHER"
           "-Pmsix.publisherDisplayName=$MSIX_PUBLISHER_DISPLAY_NAME"
@@ -196,6 +211,7 @@ jobs:
       # For upload to Partner Center by hand; not attached to the GitHub release, since an MSIX
       # outside the Store installs only with a trusted signature.
       - name: Upload MSIX artifact
+        if: steps.msix.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: windows-msix
