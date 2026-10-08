@@ -2,6 +2,7 @@
 
 package org.churchpresenter.bibletab
 
+import org.churchpresenter.settings.KeyboardShortcutSettings
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
@@ -198,6 +199,11 @@ fun bibleTab(
     isPresenting: Boolean = false,
     /** Null keeps the plain MaterialTheme every other test composes under; set to shoot a theme. */
     themeMode: ThemeMode? = null,
+    /**
+     * Whether opening the tab puts the caret in the search box, as the app does by default. Off
+     * here, so a suite about the tab's own keys and clicks starts with the keyboard on the tab.
+     */
+    focusSearchOnOpen: Boolean = false,
     block: ComposeUiTest.(vm: BibleViewModel, reports: BibleReports) -> Unit,
 ) {
     val dir = Files.createTempDirectory("cp-bible-tab").toFile()
@@ -207,6 +213,7 @@ fun bibleTab(
         extraModules.forEach { SpbFixture.spbFile(dir, name = it, content = content) }
         val initialSettings = settings(
             AppSettings(
+                keyboardShortcutSettings = KeyboardShortcutSettings(focusSearchOnTabOpen = focusSearchOnOpen),
                 bibleSettings = BibleSettings(
                     storageDirectory = dir.absolutePath,
                     primaryBible = "test.spb",

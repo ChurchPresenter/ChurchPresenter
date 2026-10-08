@@ -24,9 +24,13 @@ class SearchFieldFocus {
     val requester = FocusRequester()
     internal var selectAllSignal by mutableIntStateOf(0)
 
+    /**
+     * Asks the field to take the keyboard. The field does it from its own effect rather than here:
+     * a search box drawn inside `BoxWithConstraints` is composed during layout, after the effect
+     * that opens the tab, so its requester is not attached yet when that effect runs.
+     */
     fun focusAndSelectAll() {
         selectAllSignal++
-        requester.requestFocus()
     }
 }
 
@@ -34,8 +38,9 @@ class SearchFieldFocus {
  * The search field's value: [query], with the caret at its end whenever the query is changed from
  * outside the field, and all of it selected each time [focus] asks for that.
  *
- * Give the field this value, and in its `onValueChange` assign the new value here before reporting
- * the text, so the caret and selection the user makes are kept.
+ * Give the field this value and `Modifier.focusRequester(focus.requester)`, and in its
+ * `onValueChange` assign the new value here before reporting the text, so the caret and selection
+ * the user makes are kept. This is also where the field takes the keyboard when [focus] asks.
  */
 @Composable
 fun rememberSearchFieldValue(query: String, focus: SearchFieldFocus): MutableState<TextFieldValue> {
@@ -43,6 +48,7 @@ fun rememberSearchFieldValue(query: String, focus: SearchFieldFocus): MutableSta
     if (state.value.text != query) state.value = TextFieldValue(query, TextRange(query.length))
     LaunchedEffect(focus.selectAllSignal) {
         if (focus.selectAllSignal > 0) {
+            focus.requester.requestFocus()
             state.value = state.value.copy(selection = TextRange(0, state.value.text.length))
         }
     }

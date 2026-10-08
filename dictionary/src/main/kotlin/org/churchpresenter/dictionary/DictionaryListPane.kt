@@ -1,5 +1,6 @@
 package org.churchpresenter.dictionary
 
+import androidx.compose.ui.focus.focusProperties
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 import androidx.compose.foundation.VerticalScrollbar
@@ -304,6 +305,9 @@ private fun DictionaryEntryRow(
             .clip(BibleListRowShape)
             .background(colors.background)
             .hoverable(hover)
+            // A click selects the entry and leaves the keyboard with the tab, where Enter goes live;
+            // a focused row would take that Enter as another click instead.
+            .focusProperties { canFocus = false }
             .clickable(interactionSource = hover, indication = null, onClick = onClick)
             .padding(horizontal = rowPad(10.dp), vertical = rowPad(8.dp)),
         verticalAlignment = Alignment.CenterVertically,

@@ -5,6 +5,7 @@
 
 package org.churchpresenter.media.tabs
 
+import androidx.compose.runtime.LaunchedEffect
 import org.churchpresenter.sharedui.composables.handleGoLiveKey
 import androidx.compose.ui.focus.onFocusChanged
 import org.churchpresenter.media.viewmodel.MediaViewModel
@@ -214,8 +215,11 @@ fun MediaTab(
         focusRequester,
     )
 
-    // The Go Live key acts only while the tab root itself has the keyboard.
+    // The Go Live key acts only while the tab root itself has the keyboard, so the root takes it
+    // when the tab opens and whenever media finishes loading -- the Load button or the file picker
+    // would otherwise keep it, and Enter would press Load again.
     var rootFocused by remember { mutableStateOf(false) }
+    LaunchedEffect(viewModel.mediaUrl, viewModel.isLoaded) { focusRequester.requestFocus() }
     val canGoLive = presenterManager != null && viewModel.isLoaded
     Column(
         modifier = modifier
