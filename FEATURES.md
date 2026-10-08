@@ -283,7 +283,7 @@
 - `live-output/…/OmtVideoRenderer.kt`, `live-output/…/OmtOutputRegistry.kt`, `live-output/…/OmtManager.kt`, `dialogs/tabs/ProjectionOmtCard.kt` — the app-side OMT wiring and its settings card
 - `gradle/omt-builds.properties`, `.github/workflows/omt-linux.yml`, `THIRD_PARTY_OMT.md` — where the bundled OMT libraries come from, and their licence
 - `media/…/data/StockMediaClient.kt`, `media/…/dialogs/StockMediaBrowserDialog.kt`, `media/…/viewmodel/StockMediaViewModel.kt`, `data/settings/StockPhotoSettings.kt`
-- `composables/DeckLinkManager.kt`, `composables/DeckLinkInputGate.kt`, `composables/LivePreviewPanel.kt`, `presenter/…/LoopingVideoBackground.kt`
+- `composables/DeckLinkManager.kt`, `composables/DeckLinkInputGate.kt`, `live-output/…/preview/LivePreviewPanel.kt`, `presenter/…/LoopingVideoBackground.kt`
 - `live-output/…/PresenterManager.kt`, `profiles/…/BackgroundSettingsViewModel.kt`
 - `data/settings/BackgroundConfig.kt`, `data/settings/BackgroundSettings.kt`, `data/settings/ProjectionSettings.kt`, `data/settings/ScreenAssignment.kt`
 - `profiles/…/BackgroundSettingsTab.kt`, `dialogs/tabs/ProjectionSettingsTab.kt`
@@ -306,7 +306,7 @@
 - `profiles/…/TextBoxRows.kt`, `profiles/…/BoxItem.kt`, `profiles/…/ItemBoxGroup.kt`, `profiles/…/SongBoxRows.kt`, `profiles/…/BibleBoxTarget.kt`, `profiles/…/PreviewAdjustBoxes.kt` — a page's box rows, and moving and resizing boxes on the preview
 - `profiles/…/MarginRoom.kt`, `presenter/…/ContentRegionModifier.kt`, `profiles/…/ContentBackgroundOwn.kt` — how far margins go, a region that moves only the text, and a content background that remembers its own
 - `data/settings/PreviewLayouts.kt`, `data/settings/PreviewLayoutSettings.kt` — preview layouts: the area tree and the layouts kept on the projection settings
-- `composables/PreviewLayoutView.kt`, `composables/PreviewLayoutTemplate.kt`, `composables/PreviewGroupsPopover.kt` — the panel drawn and edited as its layout says, the templates, and the gear's layout list
+- `live-output/…/preview/PreviewLayoutView.kt`, `live-output/…/preview/PreviewLayoutTemplate.kt`, `live-output/…/preview/PreviewGroupsPopover.kt` — the panel drawn and edited as its layout says, the templates, and the gear's layout list
 
 ## Stage Monitor
 - **Confidence display for the platform** — give worship leaders and speakers their own screen showing the current slide, next slide, a clock, the countdown timer, section labels and presenter notes — in vertical, horizontal or four-quadrant layouts.

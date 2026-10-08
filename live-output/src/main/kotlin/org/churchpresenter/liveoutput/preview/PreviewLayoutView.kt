@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.liveoutput.preview
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

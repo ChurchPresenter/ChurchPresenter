@@ -9,7 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
+import org.churchpresenter.liveoutput.preview.LivePreviewPanel
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.liveoutput.setPropOn
 import org.churchpresenter.settings.AppSettings

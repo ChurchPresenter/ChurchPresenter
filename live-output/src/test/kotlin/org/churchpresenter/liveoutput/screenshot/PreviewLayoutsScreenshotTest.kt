@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.liveoutput.screenshot
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
@@ -9,8 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
-import org.churchpresenter.app.churchpresenter.composables.PreviewGroupsPopover
+import org.churchpresenter.liveoutput.preview.LivePreviewPanel
+import org.churchpresenter.liveoutput.preview.PreviewGroupsPopover
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.PreviewArea

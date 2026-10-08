@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.liveoutput.preview
 
 import org.churchpresenter.presenter.LocalBandOutgoing
 import org.churchpresenter.presenter.LocalBandSongLineIndex
@@ -41,7 +41,7 @@ import org.churchpresenter.strings.generated.resources.lock_screen_to_tab
 import org.churchpresenter.strings.generated.resources.screen_locked_badge
 import org.churchpresenter.strings.generated.resources.unlock_screen
 import org.churchpresenter.liveoutput.StageMonitorScreen
-import org.churchpresenter.app.churchpresenter.offersTranspose
+import org.churchpresenter.settings.offersTranspose
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment

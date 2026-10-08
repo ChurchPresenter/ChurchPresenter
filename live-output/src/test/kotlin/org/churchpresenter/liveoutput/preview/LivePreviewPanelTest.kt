@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.liveoutput.preview
 
 import org.churchpresenter.settings.MediaLook
 import org.churchpresenter.settings.OutputLook
@@ -87,6 +87,16 @@ class LivePreviewPanelTest {
         }
         onNodeWithText("Screen 1").assertExists()
         onNodeWithText("Screen 2").assertDoesNotExist()
+    }
+
+    @Test
+    fun `a release build with no real output previews no dev-fallback slot`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = AppSettings(), isRelease = true)
+            }
+        }
+        onNodeWithText("Screen 1").assertDoesNotExist()
     }
 
     @Test

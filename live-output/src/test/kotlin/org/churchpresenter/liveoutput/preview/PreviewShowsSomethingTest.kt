@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.liveoutput.preview
 
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.settings.OutputLook

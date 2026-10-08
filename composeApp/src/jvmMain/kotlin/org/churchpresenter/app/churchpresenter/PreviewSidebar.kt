@@ -58,8 +58,8 @@ import org.churchpresenter.strings.generated.resources.tooltip_preview_settings
 import org.churchpresenter.strings.generated.resources.tooltip_toggle_displays
 import org.churchpresenter.companionsurface.CompanionConnectionChipRow
 import org.churchpresenter.companionsurface.CompanionSurfacePanel
-import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
-import org.churchpresenter.app.churchpresenter.composables.PreviewGroupsPopover
+import org.churchpresenter.liveoutput.preview.LivePreviewPanel
+import org.churchpresenter.liveoutput.preview.PreviewGroupsPopover
 import org.churchpresenter.app.churchpresenter.composables.QuickBackgroundTray
 import org.churchpresenter.sharedui.composables.ToolbarKey
 import org.churchpresenter.sharedui.composables.ToolbarKeyStyle
@@ -138,6 +138,7 @@ internal fun PreviewSidebar(
                 onSettingsChange = onSettingsChange,
                 editingLayout = editingPreviewLayout,
                 onDoneEditing = { editingPreviewLayout = false },
+                isRelease = BuildConfig.IS_RELEASE,
             )
             QuickBackgroundTray(
                 backgrounds = appSettings.quickBackgrounds,

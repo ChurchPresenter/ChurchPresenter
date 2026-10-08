@@ -18,6 +18,10 @@ What is on air, and everything that puts it on a screen or a wire:
 - the off-screen outputs on the shared `ComposeScenePump`: `BrowserSourceVideoRenderer`,
   `NdiVideoRenderer`/`NdiManager`, `OmtVideoRenderer`/`OmtManager`, `DeckLinkComposeOutput`, over
   `OffscreenOutputContent`; and `PresentationPlayer`, `LottieFrameStream`, `AppNetworkInputs`;
+- the live preview panel (`preview/`): `LivePreviewPanel` and its tiles, entries, header and media
+  controls, the preview layouts (`PreviewLayoutView`, `PreviewLayoutTemplate`, `PreviewGroupsPopover`)
+  and the stage monitor tile's `TransposeOverlay`. The app's `PreviewSidebar` hosts it and passes
+  `isRelease`;
 - `LottieOutputFrames`: the lower third's frames for outputs larger than its desktop frames. Each
   output holds its pixel size from `LowerThirdCue`; a larger size gets frames pre-rendered at the
   size it draws them, at most two sizes at once, closed when no output of that size is left.
@@ -35,13 +39,14 @@ feature modules whose presenters it draws, and nothing of `:composeApp`'s.
 
 ## Package
 
-**`org.churchpresenter.liveoutput`**, one flat package.
+**`org.churchpresenter.liveoutput`**, with the preview panel in `.preview`.
 
 ## Rules
 
 - `internal` stops at the module edge. What `:composeApp` calls is public; nothing else is.
-- **Tests and screenshots live here.** The screenshot suite is `screenshot/StageMonitorScreenshotTest`;
-  its images are under `live-output/screenshots/stageMonitor/`. `LiveOutputTestSupport.kt` holds this suite's copies of the app's
+- **Tests and screenshots live here.** The screenshot suites are `screenshot/StageMonitorScreenshotTest` and
+  `screenshot/PreviewLayoutsScreenshotTest`; their images are under `live-output/screenshots/stageMonitor/`
+  and `live-output/screenshots/previewLayouts/`. `LiveOutputTestSupport.kt` holds this suite's copies of the app's
   `withSongsEverywhere`/`withBibleEverywhere` and `TestSingletons.latchSkikoHostOs` — copies, so the
   move did not touch `:shared-ui`.
 - What needs the app stays there, with its tests: `PresenterWindows` and the window geometry

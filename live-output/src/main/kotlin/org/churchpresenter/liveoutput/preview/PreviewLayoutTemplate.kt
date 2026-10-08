@@ -1,5 +1,6 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.liveoutput.preview
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.preview_layout_template_one
