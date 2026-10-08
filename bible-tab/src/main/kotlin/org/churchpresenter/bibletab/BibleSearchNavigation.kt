@@ -5,14 +5,28 @@ package org.churchpresenter.bibletab
 /**
  * Up/down with the caret in the search box: through the text-search results, or one step at the
  * level the reference was typed to -- the book, the chapter or the verse -- rewriting the query.
+ * With nothing typed the first press puts the selected book in, to browse the books from.
  */
-internal fun BibleTabScope.stepSearch(viewModel: BibleViewModel, forward: Boolean): Boolean {
-    if (isSearchMode && searchResults.isNotEmpty()) {
+internal fun BibleTabScope.stepSearch(viewModel: BibleViewModel, forward: Boolean): Boolean = when {
+    isSearchMode && searchResults.isNotEmpty() -> {
         val step = if (forward) 1 else -1
         ui.highlightedResult = (ui.highlightedResult + step).coerceIn(0, searchResults.lastIndex)
-        return true
+        true
     }
-    if (searchMode == BibleSearchMode.TEXT) return false
+    searchMode == BibleSearchMode.TEXT -> false
+    searchQuery.isBlank() -> startFromSelectedBook(viewModel)
+    else -> stepTypedReference(viewModel, forward)
+}
+
+/** Puts the selected book in an empty search box, to step the books from. */
+private fun BibleTabScope.startFromSelectedBook(viewModel: BibleViewModel): Boolean {
+    val book = books.getOrNull(selectedBookIndex) ?: return false
+    searchQueryChanged(viewModel, book)
+    return true
+}
+
+/** One step at the level the query names, rewriting it; false when the query is not a reference. */
+private fun BibleTabScope.stepTypedReference(viewModel: BibleViewModel, forward: Boolean): Boolean {
     val ref = viewModel.parseReference(searchQuery.trim()) ?: return false
     val next = steppedReference(viewModel, ref, forward) ?: return true
     searchQueryChanged(viewModel, referenceText(next))
@@ -45,6 +59,13 @@ internal fun BibleTabScope.steppedReference(
             if (next !in 0 until bookCount) null else ref.copy(bookIndex = next)
         }
     }
+}
+
+/** [ref] opened one level down -- a book at its first chapter, a chapter at its first verse -- or null at a verse. */
+internal fun drilledReference(ref: SmartReference): SmartReference? = when {
+    ref.verseStart != null -> null
+    ref.chapter != null -> ref.copy(verseStart = 1)
+    else -> ref.copy(chapter = 1)
 }
 
 /** The last verse of [ref]'s chapter when that chapter is the one loaded, else null (unknown). */
