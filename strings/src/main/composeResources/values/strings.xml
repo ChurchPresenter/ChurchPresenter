@@ -1816,6 +1816,9 @@
     <string name="test_event_sent">Test event sent to Sentry. Check your dashboard to confirm it arrived.</string>
     <string name="test_event_failed">Could not send test event. Crash reporting is disabled or no DSN is configured.</string>
     <string name="test_event_dev_only">Visible to developers only — hidden in released installer builds.</string>
+    <string name="already_running_title">ChurchPresenter is already running</string>
+    <string name="already_running_message">Switch to the ChurchPresenter window that is already open to keep working.</string>
+    <string name="already_running_ok">OK</string>
     <string name="crash_feedback_title">Report what happened</string>
     <string name="crash_feedback_message">ChurchPresenter closed unexpectedly last time. Telling us what you were doing helps us fix it. This is optional.</string>
     <string name="crash_feedback_comment_label">What were you doing?</string>
