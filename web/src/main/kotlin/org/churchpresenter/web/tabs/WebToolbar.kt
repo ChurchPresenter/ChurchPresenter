@@ -114,7 +114,9 @@ private fun WebTabScope.WebToolbar() {
     }
 
     // Shared composables for URL bar and action buttons
-    val urlBar: @Composable RowScope.() -> Unit = { WebUrlBar(Modifier.weight(1f).widthIn(min = minUrlWidth).guideTarget(GuideTargets.WEB_URL)) }
+    val urlBar: @Composable RowScope.() -> Unit = {
+        WebUrlBar(Modifier.weight(1f).widthIn(min = minUrlWidth).guideTarget(GuideTargets.WEB_URL))
+    }
     val actionButtons: @Composable RowScope.() -> Unit = { WebActionButtons(hasSecondaryDisplay, hasWebCapableOutput) }
 
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {

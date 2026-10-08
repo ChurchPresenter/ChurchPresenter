@@ -169,7 +169,10 @@ enum class SuggestedRequest(val label: StringResource, val request: String, inte
         Res.string.helper_example_multi_verse, "how do i show several verses",
         "several multiple many range passage verses together select",
     ),
-    FAVORITES(Res.string.helper_example_favorites, "how do i favorite a song", "favorite favorites favourite star starred"),
+    FAVORITES(
+        Res.string.helper_example_favorites, "how do i favorite a song",
+        "favorite favorites favourite star starred",
+    ),
     SONG_BACKGROUND(
         Res.string.helper_example_song_background, "give this song its own background",
         "own background song picture video camera each per",
@@ -184,7 +187,10 @@ enum class SuggestedRequest(val label: StringResource, val request: String, inte
         Res.string.helper_example_bible_history, "what did we just show",
         "history recent recently shown earlier before back verse verses",
     ),
-    CROSS_REFS(Res.string.helper_example_cross_refs, "related verses", "cross reference references refs related parallel"),
+    CROSS_REFS(
+        Res.string.helper_example_cross_refs, "related verses",
+        "cross reference references refs related parallel",
+    ),
     EDIT_LYRICS(
         Res.string.helper_example_edit_lyrics, "how do i change song lyrics",
         "lyrics words edit change fix typo mistake correct",
@@ -198,7 +204,10 @@ enum class SuggestedRequest(val label: StringResource, val request: String, inte
         "position top bottom middle left right center align alignment margins move",
     ),
     END_MARKER(Res.string.helper_example_end_marker, "how do i change the end of song marker", "end marker last slide"),
-    TITLE_STYLE(Res.string.helper_example_title_style, "how do i make the song title bigger", "title titles name heading"),
+    TITLE_STYLE(
+        Res.string.helper_example_title_style, "how do i make the song title bigger",
+        "title titles name heading",
+    ),
     BIBLE_STYLE(
         Res.string.helper_example_bible_style, "how do i change how bible verses look",
         "bible verse verses reference scripture look style font",

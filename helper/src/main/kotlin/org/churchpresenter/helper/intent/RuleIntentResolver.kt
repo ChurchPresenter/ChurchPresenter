@@ -16,12 +16,14 @@ internal fun normalize(input: String): String =
         .replace(Regex("""\s+"""), " ")
         .trim()
 
+private const val DECIMAL = 10
+
 /** Every script's digits as 0–9 — "۵", "५", "๕" are a 5 to the rules, as in a verse or a countdown. */
 private fun asciiDigits(text: String): String =
     if (text.none { it.isDigit() && it !in '0'..'9' }) {
         text
     } else {
-        buildString { text.forEach { append(if (it.isDigit()) ('0' + Character.digit(it, 10)) else it) } }
+        buildString { text.forEach { append(if (it.isDigit()) ('0' + Character.digit(it, DECIMAL)) else it) } }
     }
 
 /** Whether [phrase] appears here as whole words. */

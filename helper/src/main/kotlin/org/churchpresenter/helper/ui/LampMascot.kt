@@ -95,32 +95,32 @@ private class Pose(ms: Long, mood: LampMood) {
 }
 
 private fun DrawScope.drawLamp(p: Pose) {
-    drawCircle(LampPaint.background, radius = HALF, center = Offset(HALF, HALF))
-    drawCircle(Color.White.copy(alpha = 0.08f), radius = 126f, center = Offset(HALF, HALF), style = Stroke(3f))
-    scale(p.haloScale, pivot = Offset(HALF, 84f)) {
-        drawCircle(LampPaint.halo, radius = 70f, center = Offset(HALF, 84f), alpha = p.haloAlpha)
+    drawCircle(LampPaint.background, radius = HALF, center = Geo.middle)
+    drawCircle(Geo.edgeColor, radius = Geo.EDGE_RADIUS, center = Geo.middle, style = Geo.edgeStroke)
+    scale(p.haloScale, pivot = Geo.haloCenter) {
+        drawCircle(LampPaint.halo, radius = Geo.HALO_RADIUS, center = Geo.haloCenter, alpha = p.haloAlpha)
     }
     // The shadow under the cup: a round glow squashed flat.
-    scale(1f, SHADE_SQUASH, pivot = Offset(HALF, 198f)) {
-        drawCircle(LampPaint.shade, radius = 64f, center = Offset(HALF, 198f))
+    scale(1f, SHADE_SQUASH, pivot = Geo.shadeCenter) {
+        drawCircle(LampPaint.shade, radius = Geo.SHADE_RADIUS, center = Geo.shadeCenter)
     }
-    drawPath(Shapes.handle, Teal.deep, style = Stroke(11f, cap = StrokeCap.Round))
-    drawPath(Shapes.handleShine, Teal.light, alpha = 0.7f, style = Stroke(4f, cap = StrokeCap.Round))
+    drawPath(Shapes.handle, Teal.deep, style = Geo.handleStroke)
+    drawPath(Shapes.handleShine, Teal.light, alpha = Geo.HANDLE_SHINE_ALPHA, style = Geo.handleShineStroke)
     drawPath(Shapes.body, LampPaint.body)
     drawPath(Shapes.gloss, LampPaint.gloss)
-    drawOval(LampPaint.rim, topLeft = Offset(60f, 127f), size = Size(136f, 22f))
-    drawOval(Teal.deep, topLeft = Offset(72f, 130.5f), size = Size(112f, 13f), alpha = 0.55f)
-    drawLine(Wick, Offset(HALF, 132f), Offset(HALF, 118f), strokeWidth = 5f, cap = StrokeCap.Round)
+    drawOval(LampPaint.rim, topLeft = Geo.rimTopLeft, size = Geo.rimSize)
+    drawOval(Teal.deep, topLeft = Geo.wellTopLeft, size = Geo.wellSize, alpha = Geo.WELL_ALPHA)
+    drawLine(Wick, Geo.wickFoot, Geo.wickTip, strokeWidth = Geo.WICK_WIDTH, cap = StrokeCap.Round)
     drawFlame(p)
     drawFace(p)
 }
 
 private fun DrawScope.drawFlame(p: Pose) {
-    flameLayer(Offset(HALF, 120f), p.outerRotate, p.outerX, p.outerY) {
+    flameLayer(Geo.outerFoot, p.outerRotate, p.outerX, p.outerY) {
         drawPath(Shapes.flameOuter, LampPaint.flameOuter)
     }
-    flameLayer(Offset(HALF, 116f), p.midRotate, p.midX, p.midY) { drawPath(Shapes.flameMid, LampPaint.flameMid) }
-    flameLayer(Offset(HALF, 110f), 0f, p.coreX, p.coreY) {
+    flameLayer(Geo.midFoot, p.midRotate, p.midX, p.midY) { drawPath(Shapes.flameMid, LampPaint.flameMid) }
+    flameLayer(Geo.coreFoot, 0f, p.coreX, p.coreY) {
         drawPath(Shapes.flameCore, FlameCore, alpha = p.coreAlpha)
     }
 }
@@ -134,25 +134,70 @@ private fun DrawScope.flameLayer(foot: Offset, degrees: Float, sx: Float, sy: Fl
 }
 
 private fun DrawScope.drawFace(p: Pose) {
-    for (cx in listOf(108f, 148f)) {
-        scale(1f, p.eyeOpen, pivot = Offset(cx, 162f)) {
-            drawOval(Ink, topLeft = Offset(cx - 6.5f, 154f), size = Size(13f, 16f))
+    for (cx in Geo.eyeCenters) {
+        scale(1f, p.eyeOpen, pivot = Offset(cx, Geo.EYE_Y)) {
+            drawOval(Ink, topLeft = Offset(cx - Geo.EYE_HALF_WIDTH, Geo.EYE_TOP), size = Geo.eyeSize)
         }
         // The glint goes out with the eye.
-        if (p.eyeOpen > GLINT_SHOWN) drawCircle(Color.White, radius = 2.4f, center = Offset(cx + 2.5f, 158.5f))
+        if (p.eyeOpen > GLINT_SHOWN) {
+            drawCircle(Color.White, radius = Geo.GLINT_RADIUS, center = Offset(cx + Geo.GLINT_SHIFT, Geo.GLINT_Y))
+        }
     }
-    for (cx in listOf(94f, 162f)) {
-        drawOval(Cheek, topLeft = Offset(cx - 8f, 169f), size = Size(16f, 10f), alpha = p.cheek)
+    for (cx in Geo.cheekCenters) {
+        drawOval(
+            Cheek,
+            topLeft = Offset(cx - Geo.CHEEK_HALF_WIDTH, Geo.CHEEK_TOP),
+            size = Geo.cheekSize,
+            alpha = p.cheek,
+        )
     }
-    drawPath(
-        Shapes.smile, Ink, alpha = 1f - p.grin,
-        style = Stroke(4.5f, cap = StrokeCap.Round),
-    )
+    drawPath(Shapes.smile, Ink, alpha = 1f - p.grin, style = Geo.smileStroke)
     if (p.grin > 0f) {
         drawPath(Shapes.grin, Ink, alpha = p.grin, style = Fill)
-        drawPath(Shapes.grin, Ink, alpha = p.grin, style = Stroke(3f, join = StrokeJoin.Round))
-        drawPath(Shapes.tongue, Tongue, alpha = p.grin, style = Stroke(3f, cap = StrokeCap.Round))
+        drawPath(Shapes.grin, Ink, alpha = p.grin, style = Geo.grinStroke)
+        drawPath(Shapes.tongue, Tongue, alpha = p.grin, style = Geo.tongueStroke)
     }
+}
+
+/** Where everything sits in the design's 256-unit square, by name — its SVG's own numbers. */
+private object Geo {
+    val middle = Offset(HALF, HALF)
+    val edgeColor = Color.White.copy(alpha = 0.08f)
+    const val EDGE_RADIUS = 126f
+    val edgeStroke = Stroke(3f)
+    val haloCenter = Offset(HALF, 84f)
+    const val HALO_RADIUS = 70f
+    val shadeCenter = Offset(HALF, 198f)
+    const val SHADE_RADIUS = 64f
+    val handleStroke = Stroke(11f, cap = StrokeCap.Round)
+    val handleShineStroke = Stroke(4f, cap = StrokeCap.Round)
+    const val HANDLE_SHINE_ALPHA = 0.7f
+    val rimTopLeft = Offset(60f, 127f)
+    val rimSize = Size(136f, 22f)
+    val wellTopLeft = Offset(72f, 130.5f)
+    val wellSize = Size(112f, 13f)
+    const val WELL_ALPHA = 0.55f
+    val wickFoot = Offset(HALF, 132f)
+    val wickTip = Offset(HALF, 118f)
+    const val WICK_WIDTH = 5f
+    val outerFoot = Offset(HALF, 120f)
+    val midFoot = Offset(HALF, 116f)
+    val coreFoot = Offset(HALF, 110f)
+    val eyeCenters = listOf(108f, 148f)
+    const val EYE_Y = 162f
+    const val EYE_TOP = 154f
+    const val EYE_HALF_WIDTH = 6.5f
+    val eyeSize = Size(13f, 16f)
+    const val GLINT_RADIUS = 2.4f
+    const val GLINT_SHIFT = 2.5f
+    const val GLINT_Y = 158.5f
+    val cheekCenters = listOf(94f, 162f)
+    const val CHEEK_TOP = 169f
+    const val CHEEK_HALF_WIDTH = 8f
+    val cheekSize = Size(16f, 10f)
+    val smileStroke = Stroke(4.5f, cap = StrokeCap.Round)
+    val grinStroke = Stroke(3f, join = StrokeJoin.Round)
+    val tongueStroke = Stroke(3f, cap = StrokeCap.Round)
 }
 
 // Wick's own colors — the same in every theme, since a lamp's light does not change with the window.

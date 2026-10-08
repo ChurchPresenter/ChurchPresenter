@@ -85,6 +85,8 @@ typos. Without the model, the helper is its rules alone.
 
 ```bash
 ./gradlew :helper:test :helper:detekt
+./gradlew :helper:recordRoborazziJvm --tests '*ScreenshotTest*'   # images in helper/screenshots/
+./gradlew :helper:verifyRoborazziJvm --tests '*ScreenshotTest*'
 ./gradlew :helper:jacocoTestCoverageVerification
 ./gradlew :helper:wickEval            # how well Wick understands rewordings
 ./gradlew :helper:updateWickCatalog   # after tagging a control, rewording a label or adding a topic phrase

@@ -67,7 +67,6 @@ import org.jetbrains.compose.resources.stringResource
 private val TealLight = Color(0xFF1A9A80)
 private val TealDark = Color(0xFF0C5546)
 private val FlameGlow = Color(0xFFF5C45A)
-private val OnTeal = Color(0xFFE8FBF6)
 
 private const val GLOW_WAITING = 0.55f
 private const val GLOW_RESTING = 0.18f

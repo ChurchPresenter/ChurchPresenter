@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.roborazzi)
     jacoco
 }
 
@@ -42,6 +43,12 @@ dependencies {
     testImplementation(libs.compose.uiTest)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
+    testImplementation(libs.roborazzi.composeDesktop)
+}
+
+// Committed, beside the module, as :composeApp's and :shared-ui's are.
+roborazzi {
+    outputDir.set(layout.projectDirectory.dir("screenshots"))
 }
 
 // The suite gets a home of its own under build/ so a test can never touch the real ~/.churchpresenter.

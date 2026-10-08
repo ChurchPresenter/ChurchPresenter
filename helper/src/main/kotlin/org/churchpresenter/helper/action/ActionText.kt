@@ -115,7 +115,9 @@ fun HelperAction.describe(undoLabel: HelperText? = null): HelperText = when (thi
     is HelperAction.AddSongToSchedule -> helperText(Res.string.helper_confirm_add_song, query)
     is HelperAction.AddVerseToSchedule -> helperText(Res.string.helper_confirm_add_verse, display)
     is HelperAction.ScheduleStep ->
-        helperText(if (forward) Res.string.helper_confirm_schedule_next else Res.string.helper_confirm_schedule_previous)
+        helperText(
+            if (forward) Res.string.helper_confirm_schedule_next else Res.string.helper_confirm_schedule_previous,
+        )
     is HelperAction.ScheduleGoTo -> helperText(Res.string.helper_confirm_schedule_goto, name)
     HelperAction.WhatsLive -> helperText(Res.string.helper_whats_live)
     HelperAction.ShowCommands -> helperText(Res.string.helper_commands_intro)

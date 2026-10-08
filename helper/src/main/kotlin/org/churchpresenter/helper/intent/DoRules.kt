@@ -65,24 +65,31 @@ private val SONG_PREFIX = Regex("""^(?:the\s+|a\s+)?(?:song|hymn)\s+(?:number\s+
 
 /** "Add John 3:16 to the schedule", "put amazing grace on the schedule", "add song 245 to schedule". */
 internal fun addToScheduleRule(r: Request): Resolution? {
-    // The verb comes first in English; last in Kazakh, Turkish, Japanese and others.
+    val what = scheduledText(r) ?: return null
+    val ref = parseReference(asReference(what))?.takeIf { it.bookName.split(' ').last() !in Vocabulary.NOT_A_BOOK }
+    val action = if (ref != null) {
+        val book = ref.bookName.split(' ').joinToString(" ") { w -> w.replaceFirstChar { it.uppercase() } }
+        val first = maxOf(1, ref.firstVerse)
+        HelperAction.AddVerseToSchedule(
+            book, ref.chapter, first, maxOf(first, ref.lastVerse), ref.copy(bookName = book).display,
+        )
+    } else {
+        HelperAction.AddSongToSchedule(what.replace(SONG_PREFIX, "").trim())
+    }
+    return act(action)
+}
+
+/**
+ * What [r] asks to add, with the verb and "to the schedule" taken off — the verb first in English, last
+ * in Kazakh, Turkish, Japanese and others — or null when it is not an add, or names only "it".
+ */
+private fun scheduledText(r: Request): String? {
     val verbFirst = r.first in ADD_VERBS
     if (!verbFirst && r.words.last() !in ADD_VERBS) return null
     val phrase = TO_SCHEDULE.firstOrNull { r.text.containsPhrase(it) } ?: return null
     val body = if (verbFirst) r.text.removePrefix("${r.first} ") else r.text.removeSuffix(" ${r.words.last()}")
     val what = " $body ".replace(" $phrase ", " ").trim()
-    if (what.isEmpty() || what in setOf("it", "this", "that", "this song", "this verse")) return null
-    val ref = parseReference(asReference(what))
-    if (ref != null && ref.bookName.split(' ').last() !in Vocabulary.NOT_A_BOOK) {
-        val book = ref.bookName.split(' ').joinToString(" ") { w -> w.replaceFirstChar { it.uppercase() } }
-        val first = maxOf(1, ref.firstVerse)
-        return act(
-            HelperAction.AddVerseToSchedule(
-                book, ref.chapter, first, maxOf(first, ref.lastVerse), ref.copy(bookName = book).display,
-            ),
-        )
-    }
-    return act(HelperAction.AddSongToSchedule(what.replace(SONG_PREFIX, "").trim()))
+    return what.takeIf { it.isNotEmpty() && it !in setOf("it", "this", "that", "this song", "this verse") }
 }
 
 /** A typed reference in the form [parseReference] reads: "john chapter 3 verse 16" → "john 3:16". */
@@ -115,27 +122,6 @@ internal fun scheduleStepRule(r: Request): Resolution? {
         r.has(Vocabulary.PREVIOUS) || r.says("last item") -> act(HelperAction.ScheduleStep(forward = false))
         else -> null
     }
-}
-
-private val WHATS_LIVE = listOf(
-    "what's live", "whats live", "what is live", "what's on screen", "what is on screen", "what's on the screen",
-    "what is on the screen", "what's showing", "what is showing", "what are we showing", "what's projected",
-    "what is projected", "what's up on screen", "what's on air", "what is on air", "is anything live",
-)
-
-internal fun whatsLiveRule(r: Request): Resolution? =
-    if (r.hasPhrase(WHATS_LIVE)) act(HelperAction.WhatsLive) else null
-
-private val VERSION = listOf(
-    "what version", "which version", "app version", "version of the app", "version am i", "version is this",
-    "check for updates", "check for update", "check for an update", "any updates", "an update", "is there an update",
-    "update the app", "latest version", "up to date", "newer version", "new version of the app",
-)
-
-/** "What version is this", "check for updates". A Bible's version is the Bible rules'. */
-internal fun versionRule(r: Request): Resolution? {
-    if (Vocabulary.BIBLE_NAMES.any { r.text.containsWordPrefix(it) }) return null
-    return if (r.hasPhrase(VERSION)) act(HelperAction.CheckForUpdates) else null
 }
 
 private const val FIND = """(?:(?:show|open|find|sing|play|pull up|bring up)\s+)?(?:the\s+)?"""

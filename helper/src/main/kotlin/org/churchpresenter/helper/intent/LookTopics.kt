@@ -91,8 +91,25 @@ private val REFERENCE_WORDS = listOf("reference", "references", "ref", "book nam
  * the font rule's to do.
  */
 internal fun lookRule(r: Request): Resolution? {
-    if (r.hasPhrase(EDIT_LYRICS)) return act(HelperAction.Highlight(LookTours.editLyrics()))
-    if (r.hasPhrase(END_MARKER)) return act(HelperAction.Highlight(LookTours.endMarker()))
+    val tour = when {
+        r.hasPhrase(EDIT_LYRICS) -> LookTours.editLyrics()
+        r.hasPhrase(END_MARKER) -> LookTours.endMarker()
+        else -> lookTour(r)
+    }
+    return tour?.let { act(HelperAction.Highlight(it)) }
+}
+
+/** The look tour a request asks for, or null when it names no look or no text. */
+private fun lookTour(r: Request): GuideTour? {
+    val aspect = lookAspect(r) ?: return null
+    val part = lookPart(r)
+    // "Make the lyrics bigger", said outright, is done rather than shown.
+    val mainText = part == LookPart.LYRICS || part == LookPart.VERSE
+    return if (aspect == LookAspect.SIZE && mainText && !r.isQuestion) null else LookTours.look(part, aspect)
+}
+
+/** What about the text the request asks, or null when it is not about how text looks. */
+private fun lookAspect(r: Request): LookAspect? {
     if (r.says("schedule")) return null
     val aspect = when {
         r.has(STYLE_WORDS) -> LookAspect.STYLE
@@ -103,12 +120,16 @@ internal fun lookRule(r: Request): Resolution? {
         // "The font", with no bigger or bolder: the typeface.
         r.hasPhrase(FONT_WORDS.toList()) -> LookAspect.FONT
         r.has(LOOK_WORDS) -> LookAspect.ALL
-        else -> return null
+        else -> null
     }
     // Margins are only ever the text's; anything else has to say what it is about.
-    if (aspect != LookAspect.MARGINS && r.words.none { it in TEXT_WORDS }) return null
+    return aspect?.takeIf { it == LookAspect.MARGINS || r.words.any { w -> w in TEXT_WORDS } }
+}
+
+/** Which text: the Bible's verse or reference, or a song's lyrics, title or number. */
+private fun lookPart(r: Request): LookPart {
     val bible = Vocabulary.BIBLE_NAMES.any { r.text.containsWordPrefix(it) } || r.says("verse", "verses")
-    val part = when {
+    return when {
         bible && r.hasPhrase(REFERENCE_WORDS) -> LookPart.REFERENCE
         bible -> LookPart.VERSE
         r.hasPhrase(REFERENCE_WORDS) -> LookPart.REFERENCE
@@ -116,10 +137,6 @@ internal fun lookRule(r: Request): Resolution? {
         r.hasPhrase(NUMBER_WORDS) -> LookPart.NUMBER
         else -> LookPart.LYRICS
     }
-    // "Make the lyrics bigger", said outright, is done rather than shown.
-    val mainText = part == LookPart.LYRICS || part == LookPart.VERSE
-    if (aspect == LookAspect.SIZE && mainText && !r.isQuestion) return null
-    return act(HelperAction.Highlight(LookTours.look(part, aspect)))
 }
 
 /** The tours [lookRule] chooses between. */
@@ -155,13 +172,13 @@ internal object LookTours {
             helperText(Res.string.helper_hint_look_element, helperText(part.label)),
         )
         val rows = when (aspect) {
-            LookAspect.FONT -> listOf(font())
-            LookAspect.SIZE -> listOf(size())
-            LookAspect.STYLE -> listOf(style())
-            LookAspect.SHADOW -> listOf(shadow())
-            LookAspect.POSITION -> listOf(vertical(), alignment(), margins())
-            LookAspect.MARGINS -> listOf(margins())
-            LookAspect.ALL -> listOf(font(), size(), style(), alignment(), shadow())
+            LookAspect.FONT -> listOf(fontRow)
+            LookAspect.SIZE -> listOf(sizeRow)
+            LookAspect.STYLE -> listOf(styleRow)
+            LookAspect.SHADOW -> listOf(shadowRow)
+            LookAspect.POSITION -> listOf(verticalRow, alignmentRow, marginsRow)
+            LookAspect.MARGINS -> listOf(marginsRow)
+            LookAspect.ALL -> listOf(fontRow, sizeRow, styleRow, alignmentRow, shadowRow)
         }
         // Margins are the whole page's; everything else, alignment included, is per part.
         val withChip = if (aspect == LookAspect.MARGINS) rows else listOf(chip) + rows
@@ -181,25 +198,25 @@ internal object LookTours {
         },
     )
 
-    private fun font() =
+    private val fontRow =
         step(GuideTargets.PROFILE_TEXT_FONT, Res.string.helper_hint_look_font, Res.string.profile_text_font)
-    private fun size() =
+    private val sizeRow =
         step(GuideTargets.PROFILE_TEXT_SIZE, Res.string.helper_hint_look_size, Res.string.profile_text_size)
-    private fun style() =
+    private val styleRow =
         step(GuideTargets.PROFILE_TEXT_STYLE, Res.string.helper_hint_look_style, Res.string.profile_text_style)
-    private fun shadow() =
+    private val shadowRow =
         step(GuideTargets.PROFILE_TEXT_SHADOW, Res.string.helper_hint_look_shadow, Res.string.profile_text_shadow)
-    private fun alignment() = step(
+    private val alignmentRow = step(
         GuideTargets.PROFILE_TEXT_ALIGNMENT,
         Res.string.helper_hint_look_alignment,
         Res.string.profile_text_alignment,
     )
-    private fun vertical() = step(
+    private val verticalRow = step(
         GuideTargets.PROFILE_VERTICAL_ALIGNMENT,
         Res.string.helper_hint_look_vertical,
         Res.string.profile_vertical_alignment,
     )
-    private fun margins() =
+    private val marginsRow =
         step(GuideTargets.PROFILE_MARGINS, Res.string.helper_hint_look_margins, Res.string.profile_margins)
 
     /** A step whose [hint] names the [label] of what it rings, in the app's own words. */

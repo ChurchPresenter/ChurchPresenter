@@ -107,6 +107,13 @@ private const val CHIP_TINT = 0.14f
 private const val DOT_IDLE = 0.18f
 private const val RING_MS = 2200
 private const val BOB_MS = 2800
+private const val BOB_QUARTER = BOB_MS / 4
+private const val BOB_LAST_QUARTER = 3
+private const val BOB_LIFT = 3f
+private const val BOB_TURN = 4f
+private const val HERO_MID_STOP = 0.58f
+private const val HERO_LIGHT_FROM_TOP = 0.42f
+private const val HERO_REACH = 0.6f
 private const val RING_GROWTH = 1.32f
 private const val RING_ALPHA = 0.5f
 
@@ -176,9 +183,9 @@ private fun IntroHero(onSkip: () -> Unit, animate: Boolean) {
             .drawBehind {
                 drawRect(
                     Brush.radialGradient(
-                        0f to HeroTop, 0.58f to HeroMid, 1f to HeroEdge,
-                        center = Offset(size.width / 2f, size.height * 0.42f),
-                        radius = size.width * 0.6f,
+                        0f to HeroTop, HERO_MID_STOP to HeroMid, 1f to HeroEdge,
+                        center = Offset(size.width / 2f, size.height * HERO_LIGHT_FROM_TOP),
+                        radius = size.width * HERO_REACH,
                     ),
                 )
             },
@@ -248,13 +255,13 @@ private fun heroMotion(): HeroMotion {
         keyframes {
             durationMillis = BOB_MS
             0f at 0 using easeInOut
-            -peak at BOB_MS / 4 using easeInOut
-            0f at BOB_MS / 2 using easeInOut
-            (if (alternate) peak else -peak) at BOB_MS * 3 / 4 using easeInOut
+            -peak at BOB_QUARTER using easeInOut
+            0f at BOB_QUARTER * 2 using easeInOut
+            (if (alternate) peak else -peak) at BOB_QUARTER * BOB_LAST_QUARTER using easeInOut
         },
     )
-    val bobY = transition.animateFloat(0f, 0f, bob(3f, alternate = false), label = "y")
-    val bobTurn = transition.animateFloat(0f, 0f, bob(4f, alternate = true), label = "turn")
+    val bobY = transition.animateFloat(0f, 0f, bob(BOB_LIFT, alternate = false), label = "y")
+    val bobTurn = transition.animateFloat(0f, 0f, bob(BOB_TURN, alternate = true), label = "turn")
     return remember(transition) { HeroMotion(ringA, ringB, bobY, bobTurn) }
 }
 
@@ -405,7 +412,8 @@ private fun IntroFooter(step: Int, onStep: (Int) -> Unit, onNext: () -> Unit) {
             contentPadding = PaddingValues(horizontal = 20.dp),
             modifier = Modifier.height(34.dp).testTag("helper.intro.next"),
         ) {
-            Text(stringResource(if (step == STEPS - 1) Res.string.helper_intro_finish else Res.string.helper_intro_next))
+            val label = if (step == STEPS - 1) Res.string.helper_intro_finish else Res.string.helper_intro_next
+            Text(stringResource(label))
         }
     }
 }

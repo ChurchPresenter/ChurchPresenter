@@ -112,7 +112,7 @@ internal fun BibleSearchRow(
                         SearchModeChip(
                             searchMode,
                             onCycleSearchMode,
-                            modifier = Modifier.guideTarget(GuideTargets.BIBLE_SEARCH_MODE).guideTarget(GuideTargets.BIBLE_SEARCH),
+                            modifier = Modifier.guideTarget(GuideTargets.BIBLE_SEARCH_MODE),
                         )
                     },
                     modifier = Modifier.fillMaxWidth().guideTarget(GuideTargets.BIBLE_SEARCH),
@@ -158,7 +158,7 @@ internal fun BibleSearchRow(
                         SearchModeChip(
                             searchMode,
                             onCycleSearchMode,
-                            modifier = Modifier.guideTarget(GuideTargets.BIBLE_SEARCH_MODE).guideTarget(GuideTargets.BIBLE_SEARCH),
+                            modifier = Modifier.guideTarget(GuideTargets.BIBLE_SEARCH_MODE),
                         )
                     },
                     modifier = Modifier.weight(1f).guideTarget(GuideTargets.BIBLE_SEARCH),
