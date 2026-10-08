@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.liveoutput.clearFromOperator
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.liveoutput.cueOrSetAnnouncementText
@@ -85,7 +86,7 @@ internal fun clearAllOutputs(
     pauseMedia: (() -> Unit)?,
 ) {
     pauseMedia?.invoke()
-    presenterManager.requestClearDisplay()
+    presenterManager.clearFromOperator()
     link.sendClear?.invoke()
     // Also release any "Send to Stage Monitor" lock (e.g. from Announcements)
     // so the stage monitor goes back to following the main presenting mode.

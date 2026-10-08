@@ -1,6 +1,11 @@
 package org.churchpresenter.app.churchpresenter.remote
 
+import org.churchpresenter.liveoutput.setPropsOn
 import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.liveoutput.clearMessage
+import org.churchpresenter.liveoutput.messageOnAir
+import org.churchpresenter.liveoutput.showMessage
+import org.churchpresenter.liveshow.Cue
 import org.churchpresenter.server.LiveStateDto
 import org.churchpresenter.settings.LinkLayers
 import org.churchpresenter.sharedui.models.Presenting
@@ -38,5 +43,32 @@ internal fun linkLayerOf(mode: Presenting): String = when (mode) {
     Presenting.LOWER_THIRD -> LinkLayers.LOWER_THIRD
     Presenting.STT -> LinkLayers.CAPTIONS
     Presenting.ANNOUNCEMENTS -> LinkLayers.ANNOUNCEMENTS
+    Presenting.MESSAGE -> LinkLayers.MESSAGES
+    Presenting.PROPS -> LinkLayers.PROPS
     else -> LinkLayers.SLIDE
+}
+
+/**
+ * The primary's message, mirrored on this follower when it follows messages: put up when the
+ * primary's is new, taken down when the primary's has gone. The primary's own clock takes it down,
+ * so it goes up here without a duration of its own. An older primary, which sends no [LiveStateDto
+ * .overlays], says nothing about messages and changes nothing.
+ */
+internal fun followMessage(state: LiveStateDto, presenterManager: PresenterManager, follows: (Presenting) -> Boolean) {
+    if (state.overlays == null || !follows(Presenting.MESSAGE)) return
+    val text = state.message
+    when {
+        text == null -> presenterManager.clearMessage()
+        presenterManager.messageOnAir?.text != text -> presenterManager.showMessage(Cue.Message(text))
+    }
+}
+
+/**
+ * The primary's props, mirrored on this follower when it follows props: exactly the ids the primary
+ * has up, which draw here only where this follower defines props under the same ids. An older
+ * primary, which sends no [LiveStateDto.props], changes nothing.
+ */
+internal fun followProps(state: LiveStateDto, presenterManager: PresenterManager, follows: (Presenting) -> Boolean) {
+    val props = state.props ?: return
+    if (follows(Presenting.PROPS)) presenterManager.setPropsOn(props.toSet())
 }

@@ -85,8 +85,17 @@ sealed interface Cue {
         override val layer get() = Layer.ANNOUNCEMENTS
     }
 
-    /** Operator text, e.g. a nursery call; going live with one clears every other layer -- see [Layer]. */
-    data class Message(val text: String) : Cue {
+    /** The props that are up, by id -- see `docs/SHOW_CONTROL.md`, Props. */
+    data class Props(val on: Set<String>) : Cue {
+        override val layer get() = Layer.PROPS
+    }
+
+    /**
+     * Operator text, e.g. a nursery call; going live with one clears every other layer -- see
+     * [Layer]. [text] is as shown, its tokens already filled in; [template] names the saved message
+     * it came from, if any; [durationSeconds] is how long it stays up, or null until cleared.
+     */
+    data class Message(val text: String, val template: String? = null, val durationSeconds: Int? = null) : Cue {
         override val layer get() = Layer.MESSAGES
     }
 

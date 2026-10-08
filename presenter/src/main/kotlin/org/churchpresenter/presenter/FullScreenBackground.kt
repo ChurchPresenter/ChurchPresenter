@@ -1,5 +1,6 @@
 package org.churchpresenter.presenter
 
+import org.churchpresenter.sharedui.utils.rememberFileExists
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.snap
@@ -14,7 +15,6 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.ImageBitmap
 import org.churchpresenter.settings.utils.Constants
-import java.io.File
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
@@ -92,9 +92,10 @@ internal fun PersistentBackground(
     changeMs: Int,
 ) {
     val bitmap = rememberBackgroundBitmap(background, isLowerThird = false)
-    val pictureMissing = remember(background.type, background.imagePath) {
-        background.type == Constants.BACKGROUND_IMAGE && !File(background.imagePath).exists()
-    }
+    // The disk is asked in the background, so the picture is not ready until that has answered.
+    val isPicture = background.type == Constants.BACKGROUND_IMAGE
+    val pictureExists = rememberFileExists(background.imagePath.takeIf { isPicture })
+    val pictureMissing = isPicture && pictureExists == false
     val ready = background.type != Constants.BACKGROUND_IMAGE || bitmap != null || pictureMissing
     // The last background that was ready, held in a plain box rather than state: it only ever
     // changes on a composition that is already happening, and reading it must not schedule another.

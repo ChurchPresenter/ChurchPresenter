@@ -1,5 +1,6 @@
 package org.churchpresenter.schedule
 
+import org.churchpresenter.showcontrol.Action
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.text.TextBackdrop
@@ -50,6 +51,8 @@ data class ScheduleTabActions(
     /** Selects a row, so the Schedule shows what the automation has just put on screen. */
     val selectItem: (id: String) -> Unit = {},
     val currentTiming: () -> Map<String, RowTiming> = { emptyMap() },
+    /** What each row does when it goes live, keyed by row id. */
+    val currentActions: () -> Map<String, List<Action>> = { emptyMap() },
     /** The loaded service's `HH:mm` start, the clock column's anchor where no row is pinned. */
     val setServiceStart: (startTime: String?) -> Unit = {},
 )
@@ -117,4 +120,5 @@ internal fun ScheduleViewModel.tabActions(files: ScheduleFileCommands) = Schedul
     selectItem       = { id -> selectOnly(id) },
     setServiceStart  = { setServiceStart(it) },
     currentTiming    = { timing.toMap() },
+    currentActions   = { actions.toMap() },
 )

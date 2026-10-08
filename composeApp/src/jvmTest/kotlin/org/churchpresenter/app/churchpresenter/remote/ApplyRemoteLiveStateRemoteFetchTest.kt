@@ -9,6 +9,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.settings.AtemSettings
+import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.InstanceLinkViewModel
 import org.churchpresenter.liveoutput.PresenterManager
@@ -203,5 +204,25 @@ class ApplyRemoteLiveStateRemoteFetchTest {
 
         assertEquals("", presenter.lottieJsonContent.value)
         assertEquals(Presenting.LOWER_THIRD, presenter.lastLive.value, "the mode still switches")
+    }
+
+    // ── MEDIA ──────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `media the primary streams is played from the primary's stream url`() {
+        val played = mutableListOf<Pair<String, String>>()
+        val presenter = PresenterManager()
+        runBlocking {
+            applyRemoteLiveState(
+                state = LiveStateDto(contentType = "MEDIA", mediaId = "clip-1"),
+                presenterManager = presenter,
+                instanceLinkViewModel = link,
+                onPlayRemoteMedia = { url, type -> played += url to type },
+            )
+        }
+        val (url, type) = played.single()
+        assertTrue(url.startsWith("http://127.0.0.1:$port") && url.contains("clip-1"), url)
+        assertEquals(Constants.MEDIA_TYPE_LOCAL, type)
+        assertEquals(Presenting.MEDIA, presenter.slideContent.value)
     }
 }

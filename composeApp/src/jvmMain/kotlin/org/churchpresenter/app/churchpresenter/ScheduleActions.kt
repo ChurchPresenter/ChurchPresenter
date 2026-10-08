@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.showcontrol.Action
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.schedule.ScheduleTabActions
@@ -38,6 +39,8 @@ data class ScheduleActions(
     val addRow: (item: ScheduleItem, timing: RowTiming?) -> Unit = { _, _ -> },
     /** How each row of the schedule runs on its own -- what the automation engine reads each tick. */
     val currentTiming: () -> Map<String, RowTiming> = { emptyMap() },
+    /** What each row of the schedule does when it goes live, keyed by row id. */
+    val currentActions: () -> Map<String, List<Action>> = { emptyMap() },
     /**
      * The `HH:mm` start of the service the schedule was loaded from, or null to forget it. What
      * the Schedule's clock times are reckoned from when no row carries a pin.
@@ -113,6 +116,7 @@ internal fun scheduleActionsFrom(
     addRow = actions.addRow,
     selectItem = actions.selectItem,
     currentTiming = actions.currentTiming,
+    currentActions = actions.currentActions,
     setServiceStart = actions.setServiceStart,
     addLabel = actions.addLabel,
     addLowerThird = actions.addLowerThird,

@@ -1,14 +1,19 @@
 package org.churchpresenter.schedule
 
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import org.churchpresenter.strings.generated.resources.edit_label
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.showcontrol.Action
+import org.churchpresenter.strings.generated.resources.tooltip_row_actions
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.calendar.model.RowClock
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
-import org.churchpresenter.theme.AppShape
 import org.churchpresenter.sharedui.composables.finalPassCombinedClickable
 import org.churchpresenter.sharedui.utils.label
 import androidx.compose.foundation.layout.Arrangement
@@ -26,22 +31,16 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -52,22 +51,15 @@ import org.churchpresenter.icons.generated.resources.ic_arrow_up
 import org.churchpresenter.icons.generated.resources.ic_close
 import org.churchpresenter.icons.generated.resources.ic_edit
 import org.churchpresenter.icons.generated.resources.ic_play
-import org.churchpresenter.icons.generated.resources.ic_check
 import org.churchpresenter.icons.generated.resources.ic_note
-import org.churchpresenter.strings.generated.resources.schedule_note_placeholder
 import org.churchpresenter.strings.generated.resources.tooltip_note
-import org.churchpresenter.strings.generated.resources.tooltip_note_clear
-import org.churchpresenter.strings.generated.resources.tooltip_note_done
 import org.churchpresenter.strings.generated.resources.tooltip_go_live
 import org.churchpresenter.strings.generated.resources.tooltip_move_down
 import org.churchpresenter.strings.generated.resources.tooltip_move_up
 import org.churchpresenter.strings.generated.resources.tooltip_remove
-import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.theme.hoverTint
-import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.RaisedFill
@@ -143,7 +135,9 @@ private fun RowScope.ScheduleRowActionButtons(
     onToggleNote: () -> Unit,
     onRemove: () -> Unit,
     onPresent: () -> Unit,
-    onEditLabel: () -> Unit
+    onEditLabel: () -> Unit,
+    hasActions: Boolean = false,
+    onEditActions: () -> Unit = {},
 ) {
     val actionSize = if (isSection) SECTION_ACTION_BUTTON_SIZE else ACTION_BUTTON_SIZE
     val actionIcon = if (isSection) SECTION_ACTION_ICON_SIZE else ACTION_ICON_SIZE
@@ -189,6 +183,18 @@ private fun RowScope.ScheduleRowActionButtons(
         iconTint = if (note.isNotEmpty() || noteExpanded) MaterialTheme.colorScheme.primary
                    else MaterialTheme.colorScheme.onSurfaceVariant
     )
+    if (!isSection && LocalShowControlEnabled.current) {
+        ScheduleRowActionButton(
+            painter = rememberVectorPainter(Icons.Outlined.Bolt),
+            text = stringResource(Res.string.tooltip_row_actions),
+            onClick = onEditActions,
+            modifier = Modifier.testTag(SCHEDULE_ROW_ACTIONS_BUTTON_TAG),
+            buttonSize = actionSize,
+            iconSize = actionIcon,
+            iconTint = if (hasActions) MaterialTheme.colorScheme.primary
+                       else MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
     if (!removeFirst) removeButton()
 
     if (isSection) {
@@ -231,25 +237,25 @@ internal fun ScheduleItemRow(
     onRemove: () -> Unit,
     onPresent: () -> Unit,
     onEditLabel: () -> Unit = {},
-    onNoteChanged: (String) -> Unit = {}
+    onNoteChanged: (String) -> Unit = {},
+    /** What this row does when it goes live -- see `docs/SHOW_CONTROL.md`, Cue actions. */
+    actions: List<Action> = emptyList(),
+    /** Every row of the schedule, for the actions that name one. */
+    rows: List<ScheduleItem> = emptyList(),
+    onActionsChanged: (List<Action>) -> Unit = {},
 ) {
+    var editingActions by remember(item.id) { mutableStateOf(false) }
     val interactionSource = remember(item.id) { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
     val actionsAlpha by animateFloatAsState(if (hovered) 1f else 0f, label = "scheduleRowActionsAlpha")
 
     var noteExpanded by remember(item.id) { mutableStateOf(false) }
     var noteText by remember(item.id) { mutableStateOf(note) }
-
-    LaunchedEffect(note) {
-        if (noteText != note) noteText = note
-    }
+    LaunchedEffect(note) { if (noteText != note) noteText = note }
 
     val isSection = item is ScheduleItem.LabelItem
     val colors = scheduleRowColors(item, isSelected)
     val cardBg = colors.card
-    val sectionText = colors.sectionText
-    val cardBorder = colors.border
-    val leftAccent = colors.accent
 
     Box(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -273,7 +279,7 @@ internal fun ScheduleItemRow(
                     lift = if (isSelected) CARD_LIFT_SELECTED else CARD_LIFT,
                     moves = false,
                 )
-                .border(1.dp, cardBorder, CARD_SHAPE)
+                .border(1.dp, colors.border, CARD_SHAPE)
         ) {
             Row(
                 modifier = Modifier
@@ -288,7 +294,6 @@ internal fun ScheduleItemRow(
                         bottom = if (isSection) SECTION_ROW_PADDING else density.rowPadding()
                     )
                     .heightIn(min = if (isSection) 0.dp else density.rowMinHeight())
-
                     .height(IntrinsicSize.Min),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -298,7 +303,7 @@ internal fun ScheduleItemRow(
 
                 ScheduleRowTitle(
                     item = item,
-                    look = ScheduleRowTitleLook(density, isSelected, timing, clock, sectionText),
+                    look = ScheduleRowTitleLook(density, isSelected, timing, clock, colors.sectionText),
                     legacyRowActions = legacyRowActions,
                     note = note,
                     noteExpanded = noteExpanded,
@@ -312,6 +317,8 @@ internal fun ScheduleItemRow(
                     onPresent = onPresent,
                     onEditLabel = onEditLabel,
                     modifier = Modifier.weight(1f),
+                    hasActions = actions.isNotEmpty(),
+                    onEditActions = { editingActions = true },
                 )
             }
 
@@ -327,26 +334,25 @@ internal fun ScheduleItemRow(
                     onRemove = onRemove,
                     onPresent = onPresent,
                     onEditLabel = onEditLabel,
+                    hasActions = actions.isNotEmpty(),
+                    onEditActions = { editingActions = true },
                 )
             }
 
-            if (note.isNotEmpty() && !noteExpanded) {
-                ScheduleRowNoteChip(note = note, onEdit = { noteExpanded = true })
-            }
-
-            AnimatedVisibility(visible = noteExpanded) {
-                ScheduleRowNoteEditor(
-                    noteText = noteText,
-                    onNoteTextChange = { noteText = it },
-                    onCommit = onNoteChanged,
-                    onClose = { noteExpanded = false },
-                )
-            }
+            ScheduleRowFooter(
+                RowNote(note, noteExpanded, noteText), { noteText = it }, onNoteChanged, { noteExpanded = it },
+                if (LocalShowControlEnabled.current) actions else emptyList(), rows,
+                onEditActions = { editingActions = true },
+            )
         }
 
-        ScheduleRowAccent(leftAccent)
+        ScheduleRowAccent(colors.accent)
+    }
+    if (editingActions) {
+        RowActionsDialog(item, actions, rows, onSave = onActionsChanged, onDismiss = { editingActions = false })
     }
 }
+
 
 /**
  * The buttons that fade in over the right-hand end of a row while the pointer is on it.
@@ -368,6 +374,8 @@ internal fun BoxScope.ScheduleRowHoverActions(
     onRemove: () -> Unit,
     onPresent: () -> Unit,
     onEditLabel: () -> Unit,
+    hasActions: Boolean = false,
+    onEditActions: () -> Unit = {},
 ) {
 Row(
     modifier = Modifier
@@ -400,7 +408,9 @@ Row(
         onToggleNote = onToggleNote,
         onRemove = onRemove,
         onPresent = onPresent,
-        onEditLabel = onEditLabel
+        onEditLabel = onEditLabel,
+        hasActions = hasActions,
+        onEditActions = onEditActions,
     )
 }
 }
@@ -417,6 +427,8 @@ private fun ScheduleRowLegacyActions(
     onRemove: () -> Unit,
     onPresent: () -> Unit,
     onEditLabel: () -> Unit,
+    hasActions: Boolean = false,
+    onEditActions: () -> Unit = {},
 ) {
     Row(
         modifier = Modifier
@@ -440,112 +452,9 @@ private fun ScheduleRowLegacyActions(
             onToggleNote = onToggleNote,
             onRemove = onRemove,
             onPresent = onPresent,
-            onEditLabel = onEditLabel
-        )
-    }
-}
-
-/** A note that is written but not being edited: the text, and a pencil to open it. */
-@Composable
-private fun ScheduleRowNoteChip(note: String, onEdit: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 38.dp, end = 8.dp, bottom = 7.dp)
-            .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.35f), AppShape(6.dp))
-            .padding(start = 8.dp, end = 2.dp, top = 4.dp, bottom = 4.dp),
-        verticalAlignment = Alignment.Top
-    ) {
-        Text(
-            text = note,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onTertiaryContainer,
-            modifier = Modifier.weight(1f).padding(top = 2.dp, bottom = 2.dp)
-        )
-        ScheduleRowActionButton(
-            painter = painterResource(IconRes.drawable.ic_edit),
-            text = stringResource(Res.string.tooltip_note),
-            onClick = onEdit,
-            iconSize = 11.dp,
-            iconTint = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
-        )
-    }
-}
-
-/**
- * The note being edited.
- *
- * [onCommit] is the row's `onNoteChanged`, and is called as the text changes rather than on close:
- * a note half-typed when the app goes down is still a note somebody wrote.
- */
-@Composable
-private fun ScheduleRowNoteEditor(
-    noteText: String,
-    onNoteTextChange: (String) -> Unit,
-    onCommit: (String) -> Unit,
-    onClose: () -> Unit,
-) {
-    val noteInteractionSource = remember { MutableInteractionSource() }
-    val noteFieldFocused by noteInteractionSource.collectIsFocusedAsState()
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 38.dp, end = 8.dp, bottom = 7.dp)
-            .sunken(
-                AppShape(7.dp),
-                elevationPalette(),
-                rim = if (noteFieldFocused) MaterialTheme.colorScheme.primary else Color.Unspecified
-            )
-            .hoverTint(AppShape(7.dp)),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        BasicTextField(
-            value = noteText,
-            onValueChange = onNoteTextChange,
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 10.dp, vertical = 8.dp),
-            textStyle = MaterialTheme.typography.bodySmall.copy(
-                color = MaterialTheme.colorScheme.onSurface
-            ),
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-            maxLines = 3,
-            interactionSource = noteInteractionSource,
-            decorationBox = { innerTextField ->
-                Box {
-                    if (noteText.isEmpty()) {
-                        Text(
-                            stringResource(Res.string.schedule_note_placeholder),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        )
-                    }
-                    innerTextField()
-                }
-            }
-        )
-        TooltipIconButton(
-            painter = painterResource(IconRes.drawable.ic_check),
-            text = stringResource(Res.string.tooltip_note_done),
-            onClick = {
-                onCommit(noteText)
-                onClose()
-            },
-            buttonSize = 32.dp,
-            iconSize = 15.dp,
-            iconTint = MaterialTheme.colorScheme.primary
-        )
-        TooltipIconButton(
-            painter = painterResource(IconRes.drawable.ic_close),
-            text = stringResource(Res.string.tooltip_note_clear),
-            onClick = {
-                onNoteTextChange("")
-                onCommit("")
-            },
-            modifier = Modifier.padding(end = 4.dp),
-            buttonSize = 32.dp,
-            iconSize = 15.dp,
-            iconTint = MaterialTheme.colorScheme.error
+            onEditLabel = onEditLabel,
+            hasActions = hasActions,
+            onEditActions = onEditActions,
         )
     }
 }

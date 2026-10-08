@@ -44,6 +44,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.diagnostics.BuildIdentity
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.diagnostics.UiWatchdog
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
 import org.churchpresenter.sharedui.utils.UsageEvents
 import java.io.File
@@ -146,6 +147,9 @@ fun main() {
 
     // Before the first window: every window gets the app icon's pixel frames as it opens.
     AppWindowIcons.install()
+
+    // A debug build says where the UI thread was stuck whenever it stops answering -- see UiWatchdog.
+    if (!BuildConfig.IS_RELEASE) UiWatchdog.start()
 
     val startupSettings = SettingsManager().loadSettings()
     CrashReporter.initialize(

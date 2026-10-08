@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,7 +29,6 @@ import kotlinx.serialization.json.Json
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
-import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.KeyboardShortcutSettings
 import org.churchpresenter.settings.ProjectionSettings
@@ -284,9 +284,9 @@ class SystemSettingsTabTest {
             }
         }
 
-        // Analytics is the seventh switch declared, after launch-at-login, start-hidden, hide-cursor,
-        // overlay-end-clears, preview mode and focus-search-on-open.
-        onAllNodes(isToggleable())[6].performScrollTo().performClick()
+        // Analytics is the sixth switch declared, after launch-at-login, start-hidden, hide-cursor,
+        // overlay-end-clears and focus-search-on-open. Preview mode is not here: it is in the sidebar's dev box.
+        onAllNodes(isToggleable())[5].performScrollTo().performClick()
         waitForIdle()
 
         assertEquals(true, applied?.analyticsReportingEnabled, "clicking the off analytics switch turns reporting on")
@@ -350,7 +350,7 @@ class SystemSettingsTabTest {
             }
         }
 
-        onAllNodes(isToggleable()).assertCountEquals(7)
+        onAllNodes(isToggleable()).assertCountEquals(6)
         // Launch-at-login is declared first. The switch follows the OS registration, not the click:
         // it can only turn on if setEnabled() reported success, which cannot happen here — so this
         // cannot race the coroutine the click starts.
@@ -721,9 +721,9 @@ class SystemSettingsTabTest {
         stubSwingDialogs()
         setContent {
             MaterialTheme {
-                SystemSettingsTab(
-                    settings = analytics(true),
-                )
+                CompositionLocalProvider(LocalSettingsDevMode provides true) {
+                    SystemSettingsTab(settings = analytics(true))
+                }
             }
         }
 
@@ -736,38 +736,6 @@ class SystemSettingsTabTest {
             "Could not send test event. Crash reporting is disabled or no DSN is configured.",
             told.single()
         )
-    }
-
-    @Test
-    fun `the test-event button and its dev-only note show while reporting is on`() = runComposeUiTest {
-        assertFalse(BuildConfig.IS_RELEASE, "a Gradle run is not a release build, so the affordance is offered")
-        setContent {
-            MaterialTheme {
-                SystemSettingsTab(
-                    settings = analytics(true),
-                )
-            }
-        }
-
-        onNode(hasText("Send test event") and hasClickAction())
-            .assertExists("the test-event button must be offered, not just its label")
-        onAllNodesWithText("Visible to developers only — hidden in released installer builds.").onFirst()
-            .assertExists("the note explaining why the button is there must render with it")
-    }
-
-    @Test
-    fun `the test-event button is hidden once reporting is off`() = runComposeUiTest {
-        setContent {
-            MaterialTheme {
-                SystemSettingsTab(
-                    settings = analytics(false),
-                )
-            }
-        }
-
-        onAllNodesWithText("Send test event").assertCountEquals(0)
-        onAllNodesWithText("Visible to developers only — hidden in released installer builds.")
-            .assertCountEquals(0)
     }
 
     @Test

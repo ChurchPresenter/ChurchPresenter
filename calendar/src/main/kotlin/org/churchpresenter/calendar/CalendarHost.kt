@@ -3,6 +3,7 @@ package org.churchpresenter.calendar
 import org.churchpresenter.calendar.ui.PreviewSources
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.showcontrol.Action
 import java.io.File
 
 /**
@@ -47,6 +48,12 @@ data class CalendarHost(
 
     /** Clears every output — a [org.churchpresenter.core.models.schedule.CueAction.BLANK] cue. */
     val blankOutputs: () -> Unit = {},
+
+    /**
+     * Runs one action from the show-control vocabulary -- what an `obsScene` or `atemKey` cue
+     * comes to (see [cueAsAction]).
+     */
+    val runAction: (Action) -> Unit = {},
 
     /**
      * What is in the Schedule tab right now.

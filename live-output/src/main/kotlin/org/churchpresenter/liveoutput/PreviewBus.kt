@@ -1,6 +1,9 @@
 package org.churchpresenter.liveoutput
 
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -56,7 +59,7 @@ class PreviewBus internal constructor(internal val program: PresenterManager) {
      * Where a new item of [mode] goes: Preview while preview mode is on and [mode] is one of
      * [CUEABLE_MODES], else Program.
      */
-    internal fun forNewItem(mode: Presenting): PresenterManager =
+    fun forNewItem(mode: Presenting): PresenterManager =
         if (_enabled.value && mode in CUEABLE_MODES) manager else program
 
     /**
@@ -109,6 +112,10 @@ class PreviewBus internal constructor(internal val program: PresenterManager) {
         if (cued) waiting += Waiting(mode, cueIdentity(mode, manager), action) else action()
     }
 
+    /** How many Takes have put something on air -- what a MIDI or OSC output waits on. */
+    var takes by mutableIntStateOf(0)
+        private set
+
     /** Where the last push of verses went -- see [forVerses]. */
     private var verseTarget: PresenterManager? = null
 
@@ -156,6 +163,7 @@ class PreviewBus internal constructor(internal val program: PresenterManager) {
      */
     fun take() {
         if (!anythingCued) return
+        takes++
         val slide = manager.slideContent.value
         if (slide != Presenting.NONE) putOnAir(slide, from = manager, to = program)
         manager.overlays.value.forEach { putOnAir(it, from = manager, to = program) }

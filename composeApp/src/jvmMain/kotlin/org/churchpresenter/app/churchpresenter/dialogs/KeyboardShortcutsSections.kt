@@ -108,14 +108,18 @@ internal fun rememberVisibleShortcuts(
     filter: ShortcutFilter,
     shortcuts: ShortcutMap,
     conflicts: Map<ShortcutAction, List<ShortcutAction>>,
+    devMode: Boolean = true,
 ): VisibleShortcuts {
+    // What this run offers: outside dev mode, the actions of dev-mode-only features are left out.
+    val offered = ShortcutAction.entries.filter { devMode || !it.devOnly }
+
     val query = filter.query
     val pressed = filter.pressed
     val conflictsOnly = filter.conflictsOnly
     val selectedScope = filter.selectedScope
     // Resolved in composition because descriptions and key labels both come from string resources;
     // the match itself is plain Kotlin below.
-    val haystacks: Map<ShortcutAction, String> = ShortcutAction.entries.associateWith { action ->
+    val haystacks: Map<ShortcutAction, String> = offered.associateWith { action ->
         "${stringResource(action.descriptionRes)} ${shortcuts.searchText(action)}".lowercase()
     }
 
@@ -133,12 +137,12 @@ internal fun rememberVisibleShortcuts(
         val chord = pressed
         val needle = query.trim().lowercase()
         when {
-            conflictsOnly -> ShortcutAction.entries.filter { it in conflicts }
+            conflictsOnly -> offered.filter { it in conflicts }
             // Exact chord match, the same question `conflictFor` asks: what is *this* combination
             // already doing? A looser match would fold Ctrl+← in with ← and stop answering it.
-            chord != null -> ShortcutAction.entries.filter { chord in shortcuts.chordsFor(it) }
-            needle.isNotEmpty() -> ShortcutAction.entries.filter { needle in haystacks.getValue(it) }
-            else -> ShortcutAction.entries.filter { it.scope == selectedScope }
+            chord != null -> offered.filter { chord in shortcuts.chordsFor(it) }
+            needle.isNotEmpty() -> offered.filter { needle in haystacks.getValue(it) }
+            else -> offered.filter { it.scope == selectedScope }
         }
     }
     val visibleMouseRows = remember(query, mouseRows, pressed, conflictsOnly, selectedScope) {
@@ -155,7 +159,7 @@ internal fun rememberVisibleShortcuts(
         }
     }
 
-    val categories = ShortcutAction.entries.groupBy { it.scope }.map { (scope, actions) ->
+    val categories = offered.groupBy { it.scope }.map { (scope, actions) ->
         ShortcutCategory(
             scope = scope,
             title = stringResource(scope.titleRes),

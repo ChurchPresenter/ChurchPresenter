@@ -141,10 +141,12 @@ class KeyboardShortcutsDialogScreenshotTest {
                 ChurchPresenterTheme(themeMode = mode) {
                     Surface(color = MaterialTheme.colorScheme.background) {
                         Box(Modifier.fillMaxSize()) {
+                            // As a production user sees it: the dev mode only actions are left out.
                             KeyboardShortcutsDialogContent(
                                 initialSettings = settings,
                                 onSave = {},
                                 onDismiss = {},
+                                devMode = false,
                             )
                         }
                     }

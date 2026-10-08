@@ -12,8 +12,8 @@ A real Gradle module of this build: `include(":schedule")`, `implementation(proj
 `:composeApp` is its only consumer. Besides the tab it uses `ScheduleViewModel` (the menu, remote
 commands, the calendar, Instance Link) and `LocalOpenCalendar`.
 
-It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`, `:calendar` and
-`:diagnostics`, and nothing of `:composeApp`'s.
+It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`, `:calendar`,
+`:diagnostics` and `:show-control` (a row's cue actions), and nothing of `:composeApp`'s.
 
 ## Seams to the app
 
@@ -22,6 +22,11 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 - **`followRemoteSchedule(items)`**: the app maps the primary's Instance Link broadcast to
   `ScheduleItem`s and logs the sync (`applyRemoteSchedule` in `remote/RemoteScheduleMapping.kt`).
   The DTO mapping tests stay in the app.
+- **Cue actions** (`docs/SHOW_CONTROL.md`): each row's show-control actions live in `actions`, beside
+  `notes` and `timing`, in the file (`ScheduleFileV2.actions`, left out when empty) and in undo. The
+  row's Actions button opens `RowActionsDialog`; what its pickers offer comes from the app through
+  `LocalActionChoices`. `presentItem` hands a row's actions to `onRowActions` after its content;
+  the app runs them.
 - **`ScheduleViewModel(autoSaveIntervalMs = …)`** is defaulted, so the app never passes it. Tests
   shorten it to drive the autosave loop.
 

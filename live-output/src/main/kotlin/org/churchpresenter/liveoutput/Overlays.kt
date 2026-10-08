@@ -1,5 +1,6 @@
 package org.churchpresenter.liveoutput
 
+import org.churchpresenter.liveshow.Layer
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.sharedui.models.Presenting
 
@@ -12,6 +13,9 @@ internal val OVERLAY_MODES: Set<Presenting> = setOf(Presenting.STT, Presenting.L
 
 /** Whether this content type is held as an overlay rather than as the slide -- see [OVERLAY_MODES]. */
 val Presenting.isOverlay: Boolean get() = this in OVERLAY_MODES
+
+/** Whether this content type is held whole on a layer of its own, in `PresenterManager.liveShow`. */
+internal val Presenting.isWhole: Boolean get() = this == Presenting.MESSAGE || this == Presenting.PROPS
 
 /** Whether this output draws the overlay [overlay] over its content rather than in place of it. */
 fun OutputProfile.drawsOverContent(overlay: Presenting): Boolean = when (overlay) {
@@ -36,12 +40,17 @@ fun PresenterManager.shownModeFor(profile: OutputProfile, effectiveMode: Present
     if (effectiveMode == slideContent.value) unlockedModeFor(profile) else effectiveMode
 
 /**
- * The overlay a remote client names when it clears one layer -- `POST /api/clear?layer=...` or the
+ * The layer a remote client names when it clears one -- `POST /api/clear?layer=...` or the
  * WebSocket `clear` command's `layer` -- or null for a name that is not one, which clears nothing.
+ * The background follows the slide's content and is not cleared on its own.
  */
-fun overlayForLayerName(name: String): Presenting? = when (name.trim().lowercase()) {
-    "lowerthird", "lower_third", "lower-third", "graphics" -> Presenting.LOWER_THIRD
-    "captions", "stt" -> Presenting.STT
-    "announcements", "announcement" -> Presenting.ANNOUNCEMENTS
+fun layerForName(name: String): Layer? = when (name.trim().lowercase()) {
+    "lowerthird", "lower_third", "lower-third", "graphics" -> Layer.GRAPHICS
+    "captions", "stt" -> Layer.CAPTIONS
+    "announcements", "announcement" -> Layer.ANNOUNCEMENTS
+    "slide" -> Layer.SLIDE
+    "media" -> Layer.MEDIA
+    "messages", "message" -> Layer.MESSAGES
+    "props", "prop" -> Layer.PROPS
     else -> null
 }

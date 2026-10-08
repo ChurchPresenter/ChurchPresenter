@@ -342,6 +342,7 @@ kotlin {
             implementation(projects.obs)
             // The layer model: layers, cues, program and preview.
             implementation(projects.liveShow)
+            implementation(projects.showControl)
             // The live output: PresenterManager, the output windows and the off-screen outputs.
             implementation(projects.liveOutput)
             // Statistics: the counters, the play log and the CCLI report window over them.
