@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.pitest)
     jacoco
 }
 
@@ -15,6 +16,7 @@ kotlin {
 // a song can depend on it without taking a model or a file format along.
 dependencies {
     testImplementation(kotlin("test"))
+    testImplementation(libs.kotest.property)
 }
 
 detekt {

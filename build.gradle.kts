@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.kotlinJvm) apply false
+    alias(libs.plugins.pitest) apply false
 }
 
 val gitHooksPath = ".githooks"
@@ -107,6 +108,26 @@ subprojects {
                     }
                 }
             }
+        }
+    }
+}
+
+// Mutation testing, configured once for the modules that apply `info.solidsoft.pitest` (the core
+// logic: :song-chords, :live-show, :core-models, :schedule). `./gradlew :<module>:pitest` writes
+// build/reports/pitest/; mutation-test.yml runs it weekly. Not a gate: no mutationThreshold.
+subprojects {
+    plugins.withId("info.solidsoft.pitest") {
+        extensions.configure<info.solidsoft.gradle.pitest.PitestPluginExtension> {
+            pitestVersion.set(libs.versions.pitest.get())
+            junit5PluginVersion.set(libs.versions.pitestJunit5.get())
+            targetClasses.set(listOf("org.churchpresenter.*"))
+            excludedClasses.set(listOf("*ComposableSingletons*"))
+            // Kotlin's generated null checks: mutating them only proves the compiler inserted them.
+            avoidCallsTo.set(listOf("kotlin.jvm.internal.Intrinsics"))
+            threads.set(Runtime.getRuntime().availableProcessors())
+            outputFormats.set(listOf("HTML", "XML"))
+            timestampedReports.set(false)
+            jvmArgs.set(listOf("-Djava.awt.headless=true"))
         }
     }
 }

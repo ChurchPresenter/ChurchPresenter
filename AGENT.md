@@ -199,6 +199,8 @@ bash cleanup_check.sh                  # repo code-quality report
 ./gradlew :composeApp:renderBenchmark -PcheckRenderRegression   # fail on a row slower than the CI baseline (render-benchmark.yml's gate)
 ./gradlew :composeApp:soakTest -PsoakMinutes=10  # a scripted service on one output; fails on a leak or stall (CI: 240, weekly on main; a failure files a soak-failure issue)
 
+./gradlew :song-chords:pitest          # mutation score (also :live-show, :core-models, :schedule); weekly in mutation-test.yml
+
 bash test-changed.sh                   # ONLY the suites your change touches — seconds, not minutes
 bash test-changed.sh --dry-run         # print the selection and the gradle command, run nothing
 
@@ -364,5 +366,8 @@ every `@BeforeClass`.
 - Tests run headless (`java.awt.headless=true`); anything reaching `GraphicsEnvironment` throws.
   `BibleBookAbbreviations.resolveBookId` does so indirectly — stub it.
 - Assert invariants over exact pixel values — font metrics differ across the three target platforms.
+- **Keep every file a test touches inside a folder it owns and deletes.** In the modules that run
+  `pitest`, the mutants are real code: a weakened path guard really does write outside the folder
+  under test, so a sibling of a shared temp directory outlives the run and fails the next one.
 - **Build paths from real temp directories, not POSIX literals** — `/tmp/x` does not exist on
   Windows and a stored `absolutePathString()` gains a drive letter.

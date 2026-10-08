@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.pitest)
     jacoco
 }
 
@@ -18,6 +19,7 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("reflect"))
+    testImplementation(libs.kotest.property)
 }
 
 detekt {

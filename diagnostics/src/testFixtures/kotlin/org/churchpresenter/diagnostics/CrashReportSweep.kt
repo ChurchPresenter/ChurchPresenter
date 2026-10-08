@@ -2,6 +2,9 @@ package org.churchpresenter.diagnostics
 
 import java.io.File
 
+/** A report written in the same second as [CrashReportSweep.mark] must still be swept. */
+private const val SWEEP_SLACK_MS = 1_000L
+
 /**
  * Removes the crash reports a test caused, and nothing else.
  *
@@ -30,7 +33,7 @@ class CrashReportSweep {
     fun mark() {
         // A second of slack: file modification times have coarser resolution than the clock on
         // some filesystems, and a report written in the same second must still be swept.
-        markedAt = System.currentTimeMillis() - 1_000
+        markedAt = System.currentTimeMillis() - SWEEP_SLACK_MS
     }
 
     /** Deletes every crash report written since [mark]. */

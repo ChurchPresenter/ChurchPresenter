@@ -119,7 +119,9 @@ class ThumbnailDiagnostics(private val clock: () -> Long = System::currentTimeMi
         val drawn = outcomes.count { it.value.startsWith(Outcome.DRAWN.text) }
         appendLine("  drawn this build: $drawn of ${outcomes.size}")
         val missing = outcomes.keys.filter { it !in published }
-        if (missing.isNotEmpty()) appendLine("  without a picture: ${missing.joinToString(prefix = "[", postfix = "]")}")
+        if (missing.isNotEmpty()) {
+            appendLine("  without a picture: ${missing.joinToString(prefix = "[", postfix = "]")}")
+        }
         // Every style but the plainly drawn ones, a retry included: that is what a slow machine looks like.
         outcomes.filterValues { it != Outcome.DRAWN.text }.forEach { (id, why) -> appendLine("  style $id: $why") }
     }
