@@ -25,7 +25,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.withBundledBible
-import org.churchpresenter.app.churchpresenter.data.asDurationRow
+import org.churchpresenter.statistics.asDurationRow
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.web.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.ui.theme.themeCustomizationFrom

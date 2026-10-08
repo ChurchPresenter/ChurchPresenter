@@ -48,7 +48,7 @@ import org.churchpresenter.settings.InstanceLinkRole
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.server.ScheduleItemDto

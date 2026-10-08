@@ -10,7 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.bibletab.BibleBookAbbreviations
-import org.churchpresenter.app.churchpresenter.data.asDurationRow
+import org.churchpresenter.statistics.asDurationRow
 import org.churchpresenter.app.churchpresenter.dialogs.CalendarWindow
 import org.churchpresenter.strings.generated.resources.calendar_locate_folder_title
 import org.churchpresenter.strings.generated.resources.calendar_choose_logo_title
