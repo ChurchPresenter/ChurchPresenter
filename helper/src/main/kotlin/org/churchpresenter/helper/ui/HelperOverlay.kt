@@ -412,7 +412,7 @@ private fun Composer(state: HelperState, ask: Ask) {
                 // Nothing to send: a flat, quiet circle, the arrow in the muted ink rather than the
                 // button's white, which all but vanished on it.
                 Box(
-                    sendModifier.background(colors.surfaceContainerHighest, CircleShape),
+                    sendModifier.background(lifted(CARD_LIFT), CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
                     SendArrow(colors.onSurfaceVariant)

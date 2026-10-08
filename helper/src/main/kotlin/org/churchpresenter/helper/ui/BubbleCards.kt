@@ -63,7 +63,7 @@ internal fun HideCard(onCancel: () -> Unit, onHide: () -> Unit) {
     Column(
         Modifier
             .fillMaxWidth()
-            .background(colors.surfaceContainerHighest, shape)
+            .background(lifted(CARD_LIFT), shape)
             .border(1.dp, colors.outlineVariant, shape)
             .padding(start = 13.dp, end = 13.dp, top = 13.dp, bottom = 12.dp)
             .testTag("helper.confirmHide"),

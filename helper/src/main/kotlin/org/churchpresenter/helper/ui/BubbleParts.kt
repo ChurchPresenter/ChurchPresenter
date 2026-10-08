@@ -28,11 +28,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -62,6 +64,19 @@ private val BubblePadding = PaddingValues(horizontal = 13.dp, vertical = 10.dp)
 private val BubbleInset = 24.dp
 private val BUTTON_HEIGHT = 34.dp
 
+/**
+ * The panel's own color, lifted [fraction] of the way toward its ink — how a bubble, a chip or a card
+ * stands off the panel in every scheme, light or dark.
+ */
+@Composable
+@ReadOnlyComposable
+internal fun lifted(fraction: Float): Color =
+    lerp(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.onSurface, fraction)
+
+internal const val BUBBLE_LIFT = 0.07f
+internal const val CARD_LIFT = 0.04f
+private const val CHIP_HOVER_LIFT = 0.08f
+
 /** One line the helper says, in Wick's bubble. */
 @Composable
 internal fun Said(text: HelperText, modifier: Modifier = Modifier) {
@@ -74,7 +89,7 @@ internal fun WickBubble(modifier: Modifier = Modifier, content: @Composable RowS
     Row(
         modifier
             .padding(end = BubbleInset)
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest, WickShape)
+            .background(lifted(BUBBLE_LIFT), WickShape)
             .padding(BubblePadding),
         verticalAlignment = Alignment.CenterVertically,
         content = content,
@@ -141,7 +156,7 @@ private fun WickChip(option: ChipOption) {
     Surface(
         onClick = option.onClick,
         shape = RoundedCornerShape(16.dp),
-        color = if (hovered) colors.surfaceBright else colors.surfaceContainerHighest,
+        color = lifted(if (hovered) CHIP_HOVER_LIFT else CARD_LIFT),
         border = BorderStroke(
             1.dp,
             if (hovered) colors.primary.copy(alpha = HOVER_LINE_ALPHA) else colors.outlineVariant,

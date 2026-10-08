@@ -101,6 +101,7 @@ class HelperState(val session: GuideSession = GuideSession()) {
 
     /** The operator answered the reply on screen with [text]: both move into the conversation. */
     fun answer(text: String) {
+        session.activeTarget = null
         show(HelperReply.Idle)
         thread.said(text)
     }

@@ -161,6 +161,7 @@ internal fun ReplyBody(
         HelperReply.Idle -> IdleBody(state, inputs, executor, tip, ask)
         is HelperReply.Confirm -> {
             val doIt = stringResource(Res.string.helper_do_it)
+            val cancel = stringResource(Res.string.helper_cancel)
             ConfirmCard(
                 text = reply.action.describe(state.undoLabel),
                 action = reply.action,
@@ -168,7 +169,7 @@ internal fun ReplyBody(
                     state.answer(doIt)
                     state.run(reply.action, executor)
                 },
-                onCancel = state::reset,
+                onCancel = { state.answer(cancel) },
             )
         }
         is HelperReply.Clarify -> {
@@ -185,7 +186,10 @@ internal fun ReplyBody(
             )
         }
         is HelperReply.Message -> MessageBody(state, reply, executor)
-        is HelperReply.Shortcut -> ShortcutBody(reply.action, onOk = state::reset)
+        is HelperReply.Shortcut -> {
+            val ok = stringResource(Res.string.helper_ok)
+            ShortcutBody(reply.action, onOk = { state.answer(ok) })
+        }
         is HelperReply.Unknown -> {
             Said(HelperText.Res(Res.string.helper_unknown))
             RequestChips(reply.closest, ask)
@@ -255,8 +259,11 @@ private fun SuggestionCard(
     Said(suggestion.text, Modifier.testTag("helper.suggestion"))
     val settings = inputs.settings
     val showMe = stringResource(Res.string.helper_show_me)
+    val notNow = stringResource(Res.string.helper_not_now)
     Actions(
         Res.string.helper_not_now to {
+            state.thread.keep(suggestion.text, suggestion.topic, suggestion.id)
+            state.thread.said(notNow)
             inputs.onSettingsChange(settings.snoozing(suggestion.id, inputs.nowMillis() + SNOOZE_MS))
         },
         primary = Res.string.helper_show_me to {
@@ -276,16 +283,26 @@ private fun MessageBody(state: HelperState, reply: HelperReply.Message, executor
     Said(reply.text, Modifier.testTag("helper.message"))
     val offer = reply.offer
     val yes = stringResource(Res.string.helper_yes)
+    val cancel = stringResource(Res.string.helper_cancel)
+    val ok = stringResource(Res.string.helper_ok)
+    val undo = stringResource(Res.string.helper_undo)
+    val onOk = { state.answer(ok) }
     when {
         offer != null -> Actions(
-            Res.string.helper_cancel to state::reset,
+            Res.string.helper_cancel to { state.answer(cancel) },
             primary = Res.string.helper_yes to {
                 state.answer(yes)
                 state.request(offer, executor)
             },
         )
-        reply.canUndo -> Actions(Res.string.helper_undo to state::undo, primary = Res.string.helper_ok to state::reset)
-        else -> Actions(primary = Res.string.helper_ok to state::reset)
+        reply.canUndo -> Actions(
+            Res.string.helper_undo to {
+                state.answer(undo)
+                state.undo()
+            },
+            primary = Res.string.helper_ok to onOk,
+        )
+        else -> Actions(primary = Res.string.helper_ok to onOk)
     }
 }
 
@@ -333,5 +350,10 @@ private fun TourBody(state: HelperState, reply: HelperReply.Touring, executor: H
     Said(step.hint, Modifier.testTag("helper.tourHint"))
     val last = reply.index == reply.tour.steps.lastIndex
     val onward: StringResource = if (last) Res.string.helper_tour_done else Res.string.helper_tour_next
-    Actions(Res.string.helper_tour_stop to state::reset, primary = onward to { state.nextStep(executor) })
+    val onwardText = stringResource(onward)
+    val stop = stringResource(Res.string.helper_tour_stop)
+    Actions(
+        Res.string.helper_tour_stop to { state.answer(stop) },
+        primary = onward to { state.nextStep(executor, said = onwardText) },
+    )
 }

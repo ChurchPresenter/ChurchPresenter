@@ -3,8 +3,9 @@ package org.churchpresenter.helper
 import org.churchpresenter.helper.action.GuideTour
 
 /** Moves the tour on, or ends it after its last step. */
-fun HelperState.nextStep(executor: HelperActionExecutor) {
+fun HelperState.nextStep(executor: HelperActionExecutor, said: String? = null) {
     val touring = reply as? HelperReply.Touring ?: return
+    said?.let(::answer)
     if (touring.index + 1 < touring.tour.steps.size) {
         showStep(touring.tour, touring.index + 1, executor)
     } else {
