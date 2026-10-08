@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Box
@@ -150,44 +151,61 @@ internal fun PreviewSidebar(
                 onPick = onQuickBackgroundPicked,
                 modifier = Modifier.padding(top = 8.dp),
             )
-            val rightSidebarConnections = appSettings.companionSatelliteConnections
-                .filter { it.showInRightSidebar && it.host.isNotBlank() }
-            if (rightSidebarConnections.isNotEmpty()) {
-                // Pushes everything below (divider + panel) down to the bottom of this
-                // fillMaxHeight column instead of sitting right under the live preview
-                // with empty space left below it -- unless the preview is filling that space.
-                if (!previewFills) Spacer(modifier = Modifier.weight(1f))
-                Spacer(modifier = Modifier.height(8.dp))
-                HorizontalDivider()
-                var selectedRightSidebarId by remember(rightSidebarConnections.map { it.id }) {
-                    mutableStateOf(resolveSelectedConnectionId(null, rightSidebarConnections))
+            RightSidebarCompanion(appSettings, previewFills, companionSatelliteViewModel)
+        }
+    }
+}
+
+/**
+ * The Companion surfaces routed to the right sidebar, under a divider at the bottom of the column:
+ * a chip row to pick one when there are several, and that surface's buttons.
+ */
+@Composable
+private fun ColumnScope.RightSidebarCompanion(
+    appSettings: AppSettings,
+    previewFills: Boolean,
+    companionSatelliteViewModel: CompanionSatelliteViewModel,
+) {
+    val rightSidebarConnections = appSettings.companionSatelliteConnections
+        .filter { it.showInRightSidebar && it.host.isNotBlank() }
+    if (rightSidebarConnections.isNotEmpty()) {
+        // Pushes everything below (divider + panel) down to the bottom of this
+        // fillMaxHeight column instead of sitting right under the live preview
+        // with empty space left below it -- unless the preview is filling that space.
+        if (!previewFills) Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(8.dp))
+        // Tagged from the divider down, which is also where the helper lamp keeps above.
+        Column(modifier = Modifier.fillMaxWidth().guideTarget(GuideTargets.COMPANION_SIDEBAR)) {
+            HorizontalDivider()
+            var selectedRightSidebarId by remember(rightSidebarConnections.map { it.id }) {
+                mutableStateOf(resolveSelectedConnectionId(null, rightSidebarConnections))
+            }
+            LaunchedEffect(rightSidebarConnections.map { it.id }) {
+                selectedRightSidebarId =
+                    resolveSelectedConnectionId(selectedRightSidebarId, rightSidebarConnections)
+            }
+            val selectedRightSidebarConnection =
+                rightSidebarConnections.find { it.id == selectedRightSidebarId }
+            // No weight here — sizeToContent sizes this panel to exactly what its
+            // configured grid needs rather than stretching to fill all remaining
+            // space below the (fixed-size) live preview above it.
+            Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                if (rightSidebarConnections.size > 1) {
+                    CompanionConnectionChipRow(
+                        connections = rightSidebarConnections,
+                        selectedId = selectedRightSidebarId,
+                        onSelect = { selectedRightSidebarId = it }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
-                LaunchedEffect(rightSidebarConnections.map { it.id }) {
-                    selectedRightSidebarId =
-                        resolveSelectedConnectionId(selectedRightSidebarId, rightSidebarConnections)
-                }
-                val selectedRightSidebarConnection = rightSidebarConnections.find { it.id == selectedRightSidebarId }
-                // No weight here — sizeToContent sizes this panel to exactly what its
-                // configured grid needs rather than stretching to fill all remaining
-                // space below the (fixed-size) live preview above it.
-                Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-                    if (rightSidebarConnections.size > 1) {
-                        CompanionConnectionChipRow(
-                            connections = rightSidebarConnections,
-                            selectedId = selectedRightSidebarId,
-                            onSelect = { selectedRightSidebarId = it }
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-                    if (selectedRightSidebarConnection != null) {
-                        CompanionSurfacePanel(
-                            connection = selectedRightSidebarConnection,
-                            placement = CompanionSurfacePlacement.RIGHT_SIDEBAR,
-                            viewModel = companionSatelliteViewModel,
-                            modifier = Modifier.fillMaxWidth(),
-                            sizeToContent = true
-                        )
-                    }
+                if (selectedRightSidebarConnection != null) {
+                    CompanionSurfacePanel(
+                        connection = selectedRightSidebarConnection,
+                        placement = CompanionSurfacePlacement.RIGHT_SIDEBAR,
+                        viewModel = companionSatelliteViewModel,
+                        modifier = Modifier.fillMaxWidth(),
+                        sizeToContent = true
+                    )
                 }
             }
         }

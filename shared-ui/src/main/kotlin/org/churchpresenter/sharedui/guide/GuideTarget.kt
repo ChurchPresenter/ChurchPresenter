@@ -19,6 +19,8 @@ object GuideTargets {
     val TOGGLE_OUTPUTS = GuideTarget("preview.toggleOutputs")
     val CLEAR_OUTPUT = GuideTarget("preview.clear")
     val TAKE = GuideTarget("preview.take")
+    /** The Companion surface routed to the right sidebar, from the divider above it down. */
+    val COMPANION_SIDEBAR = GuideTarget("preview.companion")
     val BACKGROUND_BUTTON = GuideTarget("toolbar.background")
     val SETTINGS_BUTTON = GuideTarget("toolbar.settings")
     val NEW_SONG = GuideTarget("songs.new")

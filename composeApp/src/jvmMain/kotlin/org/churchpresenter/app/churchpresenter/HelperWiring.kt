@@ -3,8 +3,17 @@ package org.churchpresenter.app.churchpresenter
 import androidx.compose.runtime.Composable
 import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.helper.action.describe
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.LocalGuideTargetRegistry
 import org.churchpresenter.app.churchpresenter.dialogs.optionsTabIndexOf
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.DisplayOption
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.detectScreensFromAwt
@@ -87,6 +96,12 @@ internal fun MainWindowScope.HelperHost(modifier: Modifier) {
         val executor = remember(this) { AppHelperExecutor(this) }
         val resolver = remember { RuleIntentResolver() }
         val now = System.currentTimeMillis()
+        // A Companion surface in the right sidebar fills the corner the lamp sits in; the lamp
+        // keeps above its divider instead of covering its buttons.
+        val companionTop = LocalGuideTargetRegistry.current?.boundsOf(GuideTargets.COMPANION_SIDEBAR)?.top
+        var cornerBottom by remember { mutableStateOf<Float?>(null) }
+        val liftPx = lampLift(companionTop, cornerBottom)
+        val lift = with(LocalDensity.current) { liftPx.toDp() }
         HelperOverlay(
             state = helperState,
             inputs = HelperInputs(
@@ -102,10 +117,21 @@ internal fun MainWindowScope.HelperHost(modifier: Modifier) {
             ),
             executor = executor,
             resolver = resolver,
-            modifier = modifier,
+            // Measured inside the lift, so adding the lift back gives where the corner itself is.
+            modifier = modifier.padding(bottom = lift).onGloballyPositioned {
+                cornerBottom = it.boundsInRoot().bottom + liftPx
+            },
         )
     }
 }
+
+/**
+ * How far, in pixels, the lamp rises from its corner so it sits above a Companion surface whose top
+ * edge is at [companionTop]: none without one, or before the corner has been measured
+ * ([cornerBottom], the corner's bottom edge). Both are in window-root coordinates.
+ */
+internal fun lampLift(companionTop: Float?, cornerBottom: Float?): Float =
+    if (companionTop == null || cornerBottom == null) 0f else (cornerBottom - companionTop).coerceAtLeast(0f)
 
 /** Writes the helper's own settings. */
 internal fun AppRootState.saveHelperSettings(helper: HelperSettings) {
