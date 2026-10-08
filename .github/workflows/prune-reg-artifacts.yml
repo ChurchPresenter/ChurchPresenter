@@ -1,0 +1,76 @@
+name: Prune screenshot artifacts
+
+# The screenshot workflow uploads a `reg` report (reg-actions) and the `screenshots*` renders on
+# every push. reg-actions passes no retention, so its `reg` artifact keeps the repository default
+# of 90 days -- its `retention-days` input in screenshots.yml only prunes the `reg_actions` branch --
+# and at 90-180 MB a push that came to over 100 GB. Only a branch's latest run is worth looking at,
+# so this keeps the newest two of each artifact per branch -- the latest and the one before, to
+# compare against -- and deletes the rest every day.
+#
+# Only the screenshot workflow's artifacts (`reg`, `screenshots*`). Workflow runs, logs and every
+# other artifact are left alone.
+
+on:
+  schedule:
+    - cron: '17 4 * * *'   # daily, 04:17 UTC
+  workflow_dispatch:
+    inputs:
+      keep:
+        description: 'How many of each artifact to keep per branch, newest first'
+        required: false
+        default: '2'
+        type: number
+      dry_run:
+        description: 'List what would be deleted without deleting'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Delete all but the newest screenshot artifacts per branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const keep = Number('${{ inputs.keep || 2 }}');
+            const dryRun = '${{ inputs.dry_run || false }}' === 'true';
+            const isScreenshotArtifact = (name) => name === 'reg' || name.startsWith('screenshots');
+
+            // Collect everything first, then delete: deleting while paging shifts the pages.
+            const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100,
+            }, (response) => response.data.filter(a => !a.expired && isScreenshotArtifact(a.name)));
+
+            const groups = new Map();
+            for (const a of artifacts) {
+              const key = `${a.name} @ ${a.workflow_run?.head_branch ?? '?'}`;
+              if (!groups.has(key)) groups.set(key, []);
+              groups.get(key).push(a);
+            }
+
+            let count = 0;
+            let bytes = 0;
+            for (const [key, list] of groups) {
+              list.sort((x, y) => new Date(y.created_at) - new Date(x.created_at));
+              const stale = list.slice(keep);
+              if (stale.length > 0) console.log(`${key}: keeping ${Math.min(keep, list.length)}, removing ${stale.length}`);
+              for (const a of stale) {
+                count++;
+                bytes += a.size_in_bytes;
+                if (!dryRun) {
+                  await github.rest.actions.deleteArtifact({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    artifact_id: a.id,
+                  });
+                }
+              }
+            }
+            const gb = (bytes / 1024 ** 3).toFixed(1);
+            console.log(`${dryRun ? 'Would delete' : 'Deleted'} ${count} artifact(s), ${gb} GB`);
