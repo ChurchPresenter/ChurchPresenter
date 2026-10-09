@@ -151,7 +151,8 @@ internal fun BibleVerseHeader(
             onClick = {
                 onAddToSchedule()
             },
-            tooltipText = addScheduleStr
+            tooltipText = addScheduleStr,
+            modifier = Modifier.guideTarget(GuideTargets.BIBLE_ADD_TO_SCHEDULE),
         )
 
         GoLiveButton(

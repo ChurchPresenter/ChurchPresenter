@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
+import org.churchpresenter.settings.HelperSettings
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -84,6 +85,11 @@ class SystemSettingsTabScreenshotTest {
 
     @Test
     fun `as it opens, with folders already set`() = shoot("top_filled", settings = filledSettings())
+
+    /** Wick started from Help → Show Helper: its card joins the switches, as it does outside dev mode. */
+    @Test
+    fun `with Wick started from the Help menu`() =
+        shoot("helper_card", settings = AppSettings(helper = HelperSettings(startedByUser = true)))
 
     // ── The stacked fallback ────────────────────────────────────────────────────────────────────
     // Everything fits one screen in two columns, so there is nothing below the fold to scroll to

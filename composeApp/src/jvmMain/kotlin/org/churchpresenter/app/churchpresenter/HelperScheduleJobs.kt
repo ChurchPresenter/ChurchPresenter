@@ -65,6 +65,7 @@ private fun AppRootState.readyScheduleRow(item: ScheduleItem): ActionOutcome {
                     chapter = item.chapter,
                     verseNumber = item.verseNumber,
                     verseRange = item.verseRange,
+                    bookId = item.bookId,
                 ),
             )
             ActionOutcome.Done(helperText(Res.string.helper_schedule_live, name))

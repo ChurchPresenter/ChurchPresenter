@@ -126,6 +126,7 @@ private fun EditSongTitleRow(
             originalSongbook = state.originalSongbook,
             onSongbookChange = { state.songbook = it },
             weight = 1f,
+            modifier = Modifier.guideTarget(GuideTargets.SONG_SONGBOOK),
         )
     }
 }
@@ -138,30 +139,35 @@ private fun EditSongDetailsRow(state: EditSongState, tuning: EditSongTuning?) {
             value = state.number,
             onValueChange = { v -> if (v.all { it.isDigit() }) state.number = v },
             weight = 0.8f,
+            modifier = Modifier.guideTarget(GuideTargets.SONG_NUMBER),
         )
         FieldCard(
             label = stringResource(Res.string.author),
             value = state.author,
             onValueChange = { state.author = it },
             weight = 1.6f,
+            modifier = Modifier.guideTarget(GuideTargets.SONG_AUTHOR),
         )
         FieldCard(
             label = stringResource(Res.string.composer),
             value = state.composer,
             onValueChange = { state.composer = it },
             weight = 1.6f,
+            modifier = Modifier.guideTarget(GuideTargets.SONG_COMPOSER),
         )
         FieldCard(
             label = stringResource(Res.string.ccli_number),
             value = state.ccli,
             onValueChange = { state.ccli = it },
             weight = 1f,
+            modifier = Modifier.guideTarget(GuideTargets.SONG_CCLI),
         )
         FieldCard(
             label = stringResource(Res.string.tune),
             value = state.tune,
             onValueChange = { state.tune = it },
             weight = 0.8f,
+            modifier = Modifier.guideTarget(GuideTargets.SONG_TUNE),
         )
         if (tuning != null) {
             FieldCard(
@@ -169,6 +175,7 @@ private fun EditSongDetailsRow(state: EditSongState, tuning: EditSongTuning?) {
                 value = tuning.capo,
                 onValueChange = { tuning.editCapo(it) },
                 weight = 0.55f,
+                modifier = Modifier.guideTarget(GuideTargets.SONG_CAPO),
             )
             TempoCard(
                 bpm = tuning.bpm,
@@ -218,9 +225,10 @@ private fun RowScope.FieldCard(
     onValueChange: (String) -> Unit,
     weight: Float,
     emphasis: Boolean = false,
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .weight(weight)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh, EditSongCardShape)
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, EditSongCardShape)
@@ -252,6 +260,7 @@ private fun RowScope.SongbookCard(
     originalSongbook: String,
     onSongbookChange: (String) -> Unit,
     weight: Float,
+    modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
     var isAddingNew by remember(isVisible) { mutableStateOf(false) }
@@ -263,7 +272,7 @@ private fun RowScope.SongbookCard(
 
     if (isAddingNew) {
         Column(
-            modifier = Modifier.weight(weight).then(cardModifier),
+            modifier = modifier.weight(weight).then(cardModifier),
             verticalArrangement = Arrangement.spacedBy(1.dp),
         ) {
             CardLabel(stringResource(Res.string.song_book))
@@ -292,7 +301,7 @@ private fun RowScope.SongbookCard(
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = it },
-            modifier = Modifier.weight(weight),
+            modifier = modifier.weight(weight),
         ) {
             // The anchor is the whole card, not the line of text inside it: a card that looks like
             // one control has to answer a click anywhere on it, including its label and its margins.

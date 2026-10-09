@@ -16,7 +16,7 @@ import kotlin.test.assertTrue
 
 /**
  * What the resolver makes of a ranking: driven with hand-made rankings, so each rule — act only when
- * sure, otherwise offer the closest chips, never offer what cannot be reached — is shown without the
+ * sure, otherwise ask about the best match, never offer what cannot be reached — is shown without the
  * model's own judgement in the way.
  */
 class SemanticIntentResolverTest {
@@ -63,28 +63,22 @@ class SemanticIntentResolverTest {
     }
 
     @Test
-    fun `a match short of sure is offered as chips, best first, and never acted on`() {
+    fun `a match short of sure is asked about, and never acted on`() {
         val ranked = listOf(
             scored(CatalogTarget.Settings(SettingsPage.SYSTEM), 0.6f),
             scored(CatalogTarget.Suggested(SuggestedRequest.CLEAR), 0.55f),
-            scored(CatalogTarget.Suggested(SuggestedRequest.NEXT_SLIDE), 0.4f),
         )
 
-        val resolution = resolver.decide(ranked, context, "hide everything")
+        val guess = assertIs<Resolution.DidYouMean>(resolver.decide(ranked, context, "hide everything"))
 
-        assertEquals(Resolution.Closest(listOf(SuggestedRequest.CLEAR, SuggestedRequest.NEXT_SLIDE)), resolution)
+        assertEquals(HelperAction.OpenSettings(SettingsPage.SYSTEM), guess.action)
     }
 
     @Test
-    fun `alike words lift a chip the model ranks a little lower`() {
-        val ranked = listOf(
-            scored(CatalogTarget.Suggested(SuggestedRequest.REMOTE), 0.33f),
-            scored(CatalogTarget.Suggested(SuggestedRequest.CHORDS), 0.29f),
-        )
+    fun `a far match is not guessed at`() {
+        val ranked = listOf(scored(CatalogTarget.Suggested(SuggestedRequest.CHORDS), 0.3f))
 
-        val chips = assertIs<Resolution.Closest>(resolver.decide(ranked, context, "how do i add chrods")).requests
-
-        assertEquals(SuggestedRequest.CHORDS, chips.first(), "\"chrods\" is one letter swap from \"chords\"")
+        assertEquals(Resolution.Unknown, resolver.decide(ranked, context, "how do i add chrods"))
     }
 
     @Test

@@ -24,11 +24,13 @@ import org.churchpresenter.helper.action.ActionOutcome
 import org.churchpresenter.helper.action.HelperAction
 import org.churchpresenter.helper.action.UndoEntry
 import org.churchpresenter.helper.intent.ResolveContext
+import org.churchpresenter.helper.intent.Resolution
 import org.churchpresenter.helper.intent.RuleIntentResolver
 import org.churchpresenter.helper.suggest.HelperSignals
 import org.churchpresenter.helper.suggest.Suggestion
 import org.churchpresenter.helper.suggest.suggestionsFor
 import org.churchpresenter.settings.HelperSettings
+import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
@@ -146,13 +148,12 @@ class WickPanelTest {
     }
 
     @Test
-    fun `what is not understood offers chips that ask for it`() = runComposeUiTest {
+    fun `what is not understood is said so, with nothing guessed`() = runComposeUiTest {
         val state = HelperState().apply { isOpen = true }
         wick(state)
         type("qwerty zxcvb")
-        assertIs<HelperReply.Unknown>(state.reply)
-        press("Show John 3:16")
-        assertIs<HelperReply.Confirm>(state.reply)
+        assertEquals(HelperReply.Unknown, state.reply)
+        onNodeWithText("Show John 3:16").assertDoesNotExist()
     }
 
     @Test
@@ -363,5 +364,23 @@ class WickPanelTest {
         settings = HelperSettings(enabled = false)
         wick(HelperState())
         onAllNodesWithTag("helper.lamp").assertCountEquals(0)
+    }
+
+    @Test
+    fun `a guess is asked about, done on yes and not sure on no`() = runComposeUiTest {
+        val state = HelperState().apply { isOpen = true }
+        wick(state)
+        val guess = HelperAction.ShowShortcut(ShortcutAction.TAKE)
+        state.onResolved(Resolution.DidYouMean(HelperText.Plain("Take"), guess), executor)
+        waitForIdle()
+        onNodeWithTag("helper.didYouMean").assertExists()
+        onNodeWithTag("helper.primary").performClick()
+        waitForIdle()
+        assertEquals(HelperReply.Shortcut(ShortcutAction.TAKE), state.reply)
+
+        state.onResolved(Resolution.DidYouMean(HelperText.Plain("Take"), guess), executor)
+        waitForIdle()
+        press("No")
+        assertEquals(HelperReply.Unknown, state.reply)
     }
 }

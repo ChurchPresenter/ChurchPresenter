@@ -80,6 +80,7 @@ import org.churchpresenter.companionsurface.CompanionConnectionUiState
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.core.models.companion.CompanionSurfaceSlot
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.theme.semantic
@@ -425,11 +426,11 @@ private fun CompanionConnectionFields(
 
 
     CompanionTextRow(
-        stringResource(Res.string.companion_satellite_connection_name),
+        Res.string.companion_satellite_connection_name,
         connection.id, connection.name, null, 250.dp,
     ) { value -> onUpdate { copy(name = value) } }
 
-    SettingRow(label = stringResource(Res.string.companion_satellite_host)) {
+    SettingRow(label = Res.string.companion_satellite_host) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.widthIn(max = 350.dp)
@@ -464,26 +465,26 @@ private fun CompanionConnectionFields(
     val deviceIdHint = stringResource(Res.string.companion_satellite_device_id_hint)
 
     CompanionTextRow(
-        stringResource(Res.string.companion_satellite_device_id),
+        Res.string.companion_satellite_device_id,
         connection.id, connection.deviceId, deviceIdHint, 350.dp,
     ) { value -> onUpdate { copy(deviceId = value) } }
 
     CompanionTextRow(
-        stringResource(Res.string.companion_satellite_left_sidebar_device_id),
+        Res.string.companion_satellite_left_sidebar_device_id,
         connection.id, connection.leftSidebarDeviceId, deviceIdHint, 350.dp,
     ) { value -> onUpdate { copy(leftSidebarDeviceId = value) } }
 
     CompanionTextRow(
-        stringResource(Res.string.companion_satellite_right_sidebar_device_id),
+        Res.string.companion_satellite_right_sidebar_device_id,
         connection.id, connection.rightSidebarDeviceId, deviceIdHint, 350.dp,
     ) { value -> onUpdate { copy(rightSidebarDeviceId = value) } }
 
     CompanionTextRow(
-        stringResource(Res.string.companion_satellite_product_name),
+        Res.string.companion_satellite_product_name,
         connection.id, connection.productName, null, 250.dp,
     ) { value -> onUpdate { copy(productName = value) } }
 
-    SettingRow(label = stringResource(Res.string.companion_satellite_reconnect_delay)) {
+    SettingRow(label = Res.string.companion_satellite_reconnect_delay) {
         SettingsTextField(
             value = reconnectDelayText,
             onValueChange = { v ->
@@ -564,7 +565,7 @@ private fun CompanionPlacements(
 /** One labelled text setting of a connection, saved on every keystroke. */
 @Composable
 private fun CompanionTextRow(
-    label: String,
+    label: StringResource,
     connectionId: String,
     value: String,
     placeholder: String?,

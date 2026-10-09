@@ -33,7 +33,7 @@ internal fun SongMoveRow(
     val (x, y) = song.shiftAt(key)
     val px = stringResource(Res.string.pixels_short)
     SettingsRow(
-        stringResource(Res.string.profile_shift),
+        Res.string.profile_shift,
         sub = stringResource(
             if (language) Res.string.profile_shift_language_sub else Res.string.profile_shift_element_sub,
         ),

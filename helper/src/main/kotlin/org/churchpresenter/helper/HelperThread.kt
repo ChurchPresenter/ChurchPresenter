@@ -6,7 +6,8 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.helper_commands_intro
 import org.churchpresenter.strings.generated.resources.helper_greeting
 import org.churchpresenter.strings.generated.resources.helper_shortcut_is
-import org.churchpresenter.strings.generated.resources.helper_unknown
+import org.churchpresenter.strings.generated.resources.helper_did_you_mean
+import org.churchpresenter.strings.generated.resources.helper_not_sure
 import org.jetbrains.compose.resources.StringResource
 
 /** One line of the conversation so far, above the reply that is still waiting on the operator. */
@@ -48,7 +49,8 @@ internal fun HelperReply.summary(undoLabel: HelperText?): HelperText? = when (th
     is HelperReply.Message -> text
     is HelperReply.Shortcut ->
         helperText(Res.string.helper_shortcut_is, helperText(action.descriptionRes), HelperText.KeyFor(action))
-    is HelperReply.Unknown -> helperText(Res.string.helper_unknown)
+    HelperReply.Unknown -> helperText(Res.string.helper_not_sure)
+    is HelperReply.DidYouMean -> helperText(Res.string.helper_did_you_mean, label)
     HelperReply.Greeting -> helperText(Res.string.helper_greeting)
     HelperReply.Commands -> helperText(Res.string.helper_commands_intro)
     is HelperReply.Touring -> tour.steps[index].hint

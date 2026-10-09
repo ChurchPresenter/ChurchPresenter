@@ -34,6 +34,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
@@ -134,6 +136,8 @@ internal fun ScheduleRowList(
                         .padding(bottom = 4.dp)
                         .alpha(if (isDraggingThis) DRAGGED_ITEM_ALPHA else 1f)
                         .reorderGesture(index, requireShift = true, drag, geometry)
+                        // The first row is the one the helper's schedule tours point at.
+                        .then(if (index == 0) Modifier.guideTarget(GuideTargets.SCHEDULE_FIRST_ROW) else Modifier)
                 ) {
                     val drift = look.drift.takeIf { item.id == viewModel.liveRowId }
                     CompositionLocalProvider(LocalLiveDrift provides drift) {

@@ -80,6 +80,40 @@ class GuideTargetsTest {
         GuideTargets.SERVER_QR,
         GuideTargets.WEB_URL,
         GuideTargets.WEB_GO_LIVE,
+        GuideTargets.SONGS_ADD_TO_SCHEDULE,
+        GuideTargets.BIBLE_ADD_TO_SCHEDULE,
+        GuideTargets.PICTURES_ADD_TO_SCHEDULE,
+        GuideTargets.PRESENTATION_ADD_TO_SCHEDULE,
+        GuideTargets.MEDIA_ADD_TO_SCHEDULE,
+        GuideTargets.LOWER_THIRD_ADD_TO_SCHEDULE,
+        GuideTargets.ANNOUNCEMENT_ADD_TO_SCHEDULE,
+        GuideTargets.WEB_ADD_TO_SCHEDULE,
+        GuideTargets.CANVAS_ADD_TO_SCHEDULE,
+        GuideTargets.SCHEDULE_NEW,
+        GuideTargets.SCHEDULE_OPEN,
+        GuideTargets.SCHEDULE_SAVE,
+        GuideTargets.SCHEDULE_ADD_FILES,
+        GuideTargets.SCHEDULE_FIRST_ROW,
+        GuideTargets.NDI_ADD,
+        GuideTargets.OMT_ADD,
+        GuideTargets.BROWSER_SOURCE_ADD,
+        GuideTargets.NDI_FIRST_NAME,
+        GuideTargets.BROWSER_SOURCE_FIRST_NAME,
+        GuideTargets.OBS_CONNECT,
+        GuideTargets.OBS_DEFAULT_SCENE,
+        GuideTargets.ATEM_TEST_CONNECTION,
+        GuideTargets.ATEM_DSK_SWITCH,
+        GuideTargets.PCO_CONNECT,
+        GuideTargets.PCO_SERVICE_TYPE,
+        GuideTargets.PCO_PLAN,
+        GuideTargets.PCO_IMPORT,
+        GuideTargets.SONG_AUTHOR,
+        GuideTargets.SONG_COMPOSER,
+        GuideTargets.SONG_CCLI,
+        GuideTargets.SONG_SONGBOOK,
+        GuideTargets.SONG_NUMBER,
+        GuideTargets.SONG_TUNE,
+        GuideTargets.SONG_CAPO,
     )
 
     private val built = Tabs.entries.map { GuideTargets.mainTab(it) } +
@@ -90,6 +124,9 @@ class GuideTargetsTest {
             GuideTargets.stageContent("BIBLE"),
             GuideTargets.timerMode("duration"),
             GuideTargets.lookElement("SONG_LYRICS"),
+            GuideTargets.settingsRow("preview_mode"),
+            GuideTargets.outputProfilePicker("ndi", 0),
+            GuideTargets.shortcutRow("TAKE"),
         )
 
     @Test
@@ -112,5 +149,8 @@ class GuideTargetsTest {
         assertEquals("option.lookElement.SONG_TITLE", GuideTargets.lookElement("SONG_TITLE").id)
         assertTrue(GuideTargets.stageContent("CLOCK").id.endsWith("CLOCK"))
         assertTrue(GuideTargets.timerMode("clock").id.endsWith("clock"))
+        assertEquals("settingsRow.preview_mode", GuideTargets.settingsRow("preview_mode").id)
+        assertEquals("settings.projection.ndi.2.profile", GuideTargets.outputProfilePicker("ndi", 2).id)
+        assertEquals("shortcuts.TAKE", GuideTargets.shortcutRow("TAKE").id)
     }
 }

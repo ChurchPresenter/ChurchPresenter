@@ -51,6 +51,7 @@ import org.churchpresenter.strings.generated.resources.shortcut_scope_mouse_hint
 import org.churchpresenter.strings.generated.resources.shortcut_search_match_many
 import org.churchpresenter.strings.generated.resources.shortcut_search_match_one
 import org.churchpresenter.strings.generated.resources.shortcut_search_results
+import org.churchpresenter.helper.ui.GuideSpotlightHost
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.settings.AppSettings
@@ -127,12 +128,15 @@ fun KeyboardShortcutsDialog(
         resizable = true
     ) {
         ProvideUiFontScale {
-            KeyboardShortcutsDialogContent(
-                initialSettings = settings,
-                onSave = onSave,
-                onDismiss = onDismiss,
-                devMode = devMode,
-            )
+            // This window's own spotlight: Wick's shortcut answers ring the row they name.
+            GuideSpotlightHost(Modifier.fillMaxSize()) {
+                KeyboardShortcutsDialogContent(
+                    initialSettings = settings,
+                    onSave = onSave,
+                    onDismiss = onDismiss,
+                    devMode = devMode,
+                )
+            }
         }
     }
 }
@@ -177,6 +181,7 @@ internal fun KeyboardShortcutsDialogContent(
     // whether the user happened to be searching at the time.
     val filter = remember { ShortcutFilter() }
     val pressFocus = remember { FocusRequester() }
+    FollowShortcutFocus(filter)
 
     val shortcuts = remember(currentSettings.keyboardShortcutSettings) {
         ShortcutMap.from(currentSettings.keyboardShortcutSettings)

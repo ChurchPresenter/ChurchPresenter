@@ -373,7 +373,7 @@
 - **9 themes** — light, dark, system and six accent themes to match your booth.
 - **Make it yours** — View → Customize Theme… builds a whole palette from one accent color on a light or dark base, lets you set the background, text, secondary, selection, success, warning and error colors too — or leave any on Auto — and sets the font, text size and list Margin — Normal, Thin or Thinner, for more rows on screen — the app's own windows use. Text is kept readable whatever you pick, and output screens are never affected.
 - **Guided setup** — a friendly first-run wizard gets your Bibles, songs and media ready in minutes.
-- **Wick, the helper** — a little lamp in the corner that offers a tip of the day, walks you through choosing the audience screen, points at the button you are looking for, and does simple jobs you type ("make the song background blue", "show John 3:16") once you say yes. What its rules don't catch, a small sentence model running on your own computer reads by meaning ("nothing shows on the second monitor"), offering the nearest requests rather than guessing. It stays quiet while anything is on screen.
+- **Wick, the helper** — a little lamp in the corner that offers a tip of the day, walks you through choosing the audience screen, points at the button you are looking for, and does simple jobs you type ("make the song background blue", "show John 3:16") once you say yes. What its rules don't catch, a small sentence model running on your own computer reads by meaning ("nothing shows on the second monitor"), offering the nearest requests rather than guessing. It stays quiet while anything is on screen. It is off until started from Help → Show Helper. It learns new phrasings, tours and tips from a small pack downloaded once a day, and a chat that went wrong can be sent to the team, masked and only when the user presses Send.
 - **Keyboard-driven** — comprehensive shortcuts for fast, mouse-free operation during a live service, every one of them rebindable from Help → Keyboard Shortcuts.
 - **Tabs your way** — show the main tabs as icons, labels or both, with the margin between them set to taste.
 - **Portable settings** — export and import your entire configuration to set up another machine instantly.
@@ -386,6 +386,8 @@
 - `data/settings/CustomThemeColors.kt` (the `:settings` module) — the optional per-role colours
 - `dialogs/SetupWizardDialog.kt`
 - `helper/` (the `:helper` Gradle module) — the lamp, its requests, tips and display setup; `HelperWiring.kt` carries its actions out; `shared-ui/…/guide/` tags the controls it points at
+- `helper/…/pack/`, `wick-pack/` — the downloadable Wick pack: its source, the built `pack.json`, and how the app checks, fetches and caches it
+- `helper/…/report/`, `WickChatSender.kt` — Send this chat: the masking and the Contact Us request
 - `helper/…/intent/semantic/`, `helper/src/main/resources/wick/` — the sentence model (`MiniLmEncoder`), the catalog generated from the codebase that it matches against, and `SemanticIntentResolver`; `helper/tools/export_minilm.py`, `THIRD_PARTY_MINILM.md` — where the bundled model comes from, and its licence
 - `dialogs/KeyboardShortcutsDialog.kt`, `dialogs/ShortcutBindingRow.kt`, `dialogs/ShortcutCapture.kt`, `dialogs/ShortcutCategoryRail.kt` — the shortcut list and rebinding
 - `composables/LabeledTab.kt`, `dialogs/tabs/TabLabelsRow.kt` — tab label styles

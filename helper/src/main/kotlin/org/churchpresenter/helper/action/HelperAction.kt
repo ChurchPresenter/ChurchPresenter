@@ -3,6 +3,7 @@ package org.churchpresenter.helper.action
 import org.churchpresenter.helper.HelperText
 import org.churchpresenter.helper.display.HelperScreen
 import org.churchpresenter.sharedui.guide.GuideTarget
+import org.churchpresenter.sharedui.guide.ProfileFocus
 import org.churchpresenter.sharedui.guide.SettingsPage
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.models.Tabs
@@ -72,7 +73,8 @@ sealed interface HelperAction {
     /** [direction] is +1 for bigger, -1 for smaller. */
     data class ChangeFontSize(val scope: ContentScope, val direction: Int) : HelperAction
 
-    data class OpenSettings(val page: SettingsPage) : HelperAction {
+    /** Opens Settings on [page]; on Profiles, [focus] picks the profile, its page and the row to show. */
+    data class OpenSettings(val page: SettingsPage, val focus: ProfileFocus? = null) : HelperAction {
         override val needsConfirmation get() = false
     }
 
@@ -196,6 +198,16 @@ sealed interface HelperAction {
 
     /** "Hello", "help", "what can you do": say hello, with examples of what to ask. */
     data object Greet : HelperAction {
+        override val needsConfirmation get() = false
+    }
+
+    /** Opens Keyboard Shortcuts on [action]'s row. */
+    data class OpenShortcutRow(val action: ShortcutAction) : HelperAction {
+        override val needsConfirmation get() = false
+    }
+
+    /** An answer Wick knows without the app doing anything: [text], then [offer] if the operator wants it. */
+    data class Say(val text: HelperText, val offer: HelperAction? = null) : HelperAction {
         override val needsConfirmation get() = false
     }
 

@@ -53,6 +53,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.helper.action.HelperAction
+import org.churchpresenter.strings.generated.resources.helper_change_shortcut
+import org.churchpresenter.helper.intent.SetupTopics
 import org.churchpresenter.helper.HelperActionExecutor
 import org.churchpresenter.helper.HelperReply
 import org.churchpresenter.helper.HelperState
@@ -80,10 +83,14 @@ import org.churchpresenter.strings.generated.resources.helper_dont_show_again
 import org.churchpresenter.strings.generated.resources.helper_greeting
 import org.churchpresenter.strings.generated.resources.helper_next_tip
 import org.churchpresenter.strings.generated.resources.helper_not_now
+import org.churchpresenter.strings.generated.resources.helper_notice_suggestion
+import org.churchpresenter.strings.generated.resources.helper_suggestions_label
 import org.churchpresenter.strings.generated.resources.helper_ok
+import org.churchpresenter.strings.generated.resources.helper_not_sure
 import org.churchpresenter.strings.generated.resources.helper_previous_tip
 import org.churchpresenter.strings.generated.resources.helper_shortcut_is
 import org.churchpresenter.strings.generated.resources.helper_shortcut_unbound
+import org.churchpresenter.strings.generated.resources.helper_send_chat
 import org.churchpresenter.strings.generated.resources.helper_show_me
 import org.churchpresenter.strings.generated.resources.helper_tip_title
 import org.churchpresenter.strings.generated.resources.helper_tips_off
@@ -92,12 +99,12 @@ import org.churchpresenter.strings.generated.resources.helper_tour_next
 import org.churchpresenter.strings.generated.resources.helper_tour_step
 import org.churchpresenter.strings.generated.resources.helper_tour_stop
 import org.churchpresenter.strings.generated.resources.helper_undo
-import org.churchpresenter.strings.generated.resources.helper_unknown
 import org.churchpresenter.strings.generated.resources.helper_yes
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-private const val SNOOZE_MS = 24L * 60L * 60L * 1000L
+/** How long Not now, Show me or the teaser's × puts a suggestion away. */
+internal const val SNOOZE_MS = 24L * 60L * 60L * 1000L
 
 /** The id a kept tip is filed under in the conversation, beside the suggestion ids. */
 private const val TIP_ABOUT = "tip"
@@ -166,9 +173,21 @@ internal fun ThreadLines(thread: List<ThreadEntry>) {
     thread.forEach { entry ->
         when (entry) {
             is ThreadEntry.Operator -> Asked(entry.text)
-            is ThreadEntry.Wick -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                entry.topic?.let { BubbleHeading(stringResource(it), topicIcon(entry.about)) }
-                Said(entry.text)
+            // A suggestion or a tip, once answered, keeps its card: still plainly not a reply.
+            is ThreadEntry.Wick -> if (entry.about != null) {
+                val caption =
+                    if (entry.about == TIP_ABOUT) Res.string.helper_tip_title else Res.string.helper_notice_suggestion
+                NoticeCard(stringResource(caption)) {
+                    entry.topic?.takeIf { entry.about != TIP_ABOUT }?.let {
+                        BubbleHeading(stringResource(it), topicIcon(entry.about))
+                    }
+                    BubbleText(entry.text.resolve(), MaterialTheme.colorScheme.onSurface)
+                }
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    entry.topic?.let { BubbleHeading(stringResource(it), topicIcon(entry.about)) }
+                    Said(entry.text)
+                }
             }
         }
     }
@@ -214,12 +233,28 @@ internal fun ReplyBody(
         is HelperReply.Message -> MessageBody(state, reply, executor)
         is HelperReply.Shortcut -> {
             val ok = stringResource(Res.string.helper_ok)
-            ShortcutBody(reply.action, onOk = { state.answer(ok) })
+            val change = stringResource(Res.string.helper_change_shortcut)
+            ShortcutBody(
+                reply.action,
+                onOk = { state.answer(ok) },
+                onChange = {
+                    state.answer(change)
+                    state.request(HelperAction.Highlight(SetupTopics.shortcutRow(reply.action)), executor)
+                },
+            )
         }
-        is HelperReply.Unknown -> {
-            Said(HelperText.Res(Res.string.helper_unknown))
-            RequestChips(reply.closest, ask)
+        HelperReply.Unknown -> {
+            Said(HelperText.Res(Res.string.helper_not_sure))
+            // Also where a "Did you mean …?" answered No ends up.
+            if (inputs.onSendChat != null && !state.sharingChat) {
+                QuietLink(
+                    Res.string.helper_send_chat,
+                    onClick = { state.sharingChat = true },
+                    modifier = Modifier.testTag("helper.shareChatLink"),
+                )
+            }
         }
+        is HelperReply.DidYouMean -> DidYouMeanBody(state, reply, executor)
         HelperReply.Commands -> CommandsTable(ask)
         HelperReply.Greeting -> {
             Said(HelperText.Res(Res.string.helper_greeting))
@@ -255,24 +290,25 @@ private fun IdleBody(
         val now = inputs.nowMillis()
         if (inputs.settings.tipDue(now)) inputs.onSettingsChange(inputs.settings.tipShown(now))
     }
-    BubbleHeading(stringResource(Res.string.helper_tip_title), topicIcon(TIP_ABOUT))
-    Said(tip.text)
     val showMe = stringResource(Res.string.helper_show_me)
-    Actions(
-        Res.string.helper_previous_tip to { state.tipOffset-- },
-        Res.string.helper_next_tip to { state.tipOffset++ },
-        primary = tip.action?.let { action ->
-            Res.string.helper_show_me to {
-                state.thread.keep(tip.text, Res.string.helper_tip_title, TIP_ABOUT)
-                state.thread.said(showMe)
-                state.request(action, executor)
-            }
-        },
-        primaryLeads = true,
-    )
-    QuietLink(Res.string.helper_tips_off, onClick = {
-        inputs.onSettingsChange(inputs.settings.copy(tipsEnabled = false))
-    })
+    NoticeCard(stringResource(Res.string.helper_tip_title)) {
+        BubbleText(tip.text.resolve(), MaterialTheme.colorScheme.onSurface)
+        Actions(
+            Res.string.helper_previous_tip to { state.tipOffset-- },
+            Res.string.helper_next_tip to { state.tipOffset++ },
+            primary = tip.action?.let { action ->
+                Res.string.helper_show_me to {
+                    state.thread.keep(tip.text, Res.string.helper_tip_title, TIP_ABOUT)
+                    state.thread.said(showMe)
+                    state.request(action, executor)
+                }
+            },
+            primaryLeads = true,
+        )
+        QuietLink(Res.string.helper_tips_off, onClick = {
+            inputs.onSettingsChange(inputs.settings.copy(tipsEnabled = false))
+        })
+    }
 }
 
 @Composable
@@ -282,27 +318,36 @@ private fun SuggestionCard(
     inputs: HelperInputs,
     executor: HelperActionExecutor,
 ) {
-    suggestion.topic?.let { BubbleHeading(stringResource(it), topicIcon(suggestion.id)) }
-    Said(suggestion.text, Modifier.testTag("helper.suggestion"))
     val settings = inputs.settings
     val showMe = stringResource(Res.string.helper_show_me)
     val notNow = stringResource(Res.string.helper_not_now)
-    Actions(
-        Res.string.helper_not_now to {
-            state.thread.keep(suggestion.text, suggestion.topic, suggestion.id)
-            state.thread.said(notNow)
-            inputs.onSettingsChange(settings.snoozing(suggestion.id, inputs.nowMillis() + SNOOZE_MS))
-        },
-        primary = Res.string.helper_show_me to {
-            state.thread.keep(suggestion.text, suggestion.topic, suggestion.id)
-            state.thread.said(showMe)
-            state.request(suggestion.action, executor)
-        },
-        primaryLeads = true,
-    )
-    QuietLink(Res.string.helper_dont_show_again, onClick = {
-        inputs.onSettingsChange(settings.dismissing(suggestion.id))
-    })
+    NoticeCard(stringResource(Res.string.helper_notice_suggestion)) {
+        suggestion.topic?.let { BubbleHeading(stringResource(it), topicIcon(suggestion.id)) }
+        Text(
+            suggestion.text.resolve(),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.testTag("helper.suggestion"),
+        )
+        Actions(
+            Res.string.helper_not_now to {
+                state.thread.keep(suggestion.text, suggestion.topic, suggestion.id)
+                state.thread.said(notNow)
+                inputs.onSettingsChange(settings.snoozing(suggestion.id, inputs.nowMillis() + SNOOZE_MS))
+            },
+            primary = Res.string.helper_show_me to {
+                state.thread.keep(suggestion.text, suggestion.topic, suggestion.id)
+                state.thread.said(showMe)
+                // Answered: it rests for the day like Not now, or it would be back the moment the tour ends.
+                inputs.onSettingsChange(settings.snoozing(suggestion.id, inputs.nowMillis() + SNOOZE_MS))
+                state.request(suggestion.action, executor)
+            },
+            primaryLeads = true,
+        )
+        QuietLink(Res.string.helper_dont_show_again, onClick = {
+            inputs.onSettingsChange(settings.dismissing(suggestion.id))
+        })
+    }
 }
 
 @Composable
@@ -334,7 +379,7 @@ private fun MessageBody(state: HelperState, reply: HelperReply.Message, executor
 }
 
 @Composable
-private fun ShortcutBody(action: ShortcutAction, onOk: () -> Unit) {
+private fun ShortcutBody(action: ShortcutAction, onOk: () -> Unit, onChange: () -> Unit) {
     val chord = LocalShortcuts.current.chordsFor(action).firstOrNull()
     val what = stringResource(action.descriptionRes)
     val text = if (chord != null) {
@@ -343,12 +388,13 @@ private fun ShortcutBody(action: ShortcutAction, onOk: () -> Unit) {
         stringResource(Res.string.helper_shortcut_unbound, what)
     }
     Said(HelperText.Plain(text), Modifier.testTag("helper.shortcut"))
-    Actions(primary = Res.string.helper_ok to onOk)
+    Actions(Res.string.helper_change_shortcut to onChange, primary = Res.string.helper_ok to onOk)
 }
 
-/** Requests as chips; picking one asks it, as if it had been typed. */
+/** Requests as chips under a small "Suggestions" label; picking one asks it, as if it had been typed. */
 @Composable
 private fun RequestChips(requests: List<SuggestedRequest>, ask: Ask) {
+    NoticeCaption(stringResource(Res.string.helper_suggestions_label))
     val labels = requests.map { stringResource(it.label) }
     val options = remember(requests, labels) {
         requests.mapIndexed { i, request ->

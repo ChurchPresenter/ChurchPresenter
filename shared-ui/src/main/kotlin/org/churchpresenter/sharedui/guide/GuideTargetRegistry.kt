@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 
 /**
@@ -55,13 +56,53 @@ class GuideSession {
     fun pressed(target: GuideTarget) {
         if (target == activeTarget) activePresses++
     }
+
+    /**
+     * Where the Profiles settings page should open, set by a tour just before it opens Settings; the
+     * page takes it once it is shown and puts it back to null.
+     */
+    var profileFocus by mutableStateOf<ProfileFocus?>(null)
+
+    /**
+     * The shortcut, by its `ShortcutAction` name, the Keyboard Shortcuts window should show when a tour
+     * opens it: the window clears its search and selects that shortcut's section, then puts it back.
+     */
+    var shortcutFocus by mutableStateOf<String?>(null)
+
+    /**
+     * Whether the operator is typing to Wick. A tab's focus rescue leaves the keyboard alone while this is
+     * true: focus in Wick's text box is not lost, and taking it back would send the typing to the tab.
+     */
+    var wickTyping by mutableStateOf(false)
+
+    /**
+     * How many windows other than the main one are showing Wick's lamp. While any is, the main window's
+     * steps aside: Settings blocks the main window, so a bubble there could not be typed into.
+     */
+    var otherLamps by mutableIntStateOf(0)
 }
+
+/**
+ * A place in the Profiles settings page: which profile, which of its pages, which row.
+ *
+ * [page] is the page's stable name: `GENERAL`, `OUTPUTS`, `CONTENT`, or an appearance pane's name
+ * (`SONGS`, `BIBLE`, `STAGE_MONITOR`, …). A null [profileId] keeps the profile already selected; a
+ * null [page] lets [rowKey] decide, by the page that lists that row.
+ */
+data class ProfileFocus(val profileId: String? = null, val page: String? = null, val rowKey: String? = null)
 
 /** This window's registry; null outside a spotlight host, which makes [guideTarget] do nothing. */
 val LocalGuideTargetRegistry = staticCompositionLocalOf<GuideTargetRegistry?> { null }
 
 /** The app's guide session; null when no helper is running. */
 val LocalGuideSession = staticCompositionLocalOf<GuideSession?> { null }
+
+/**
+ * Wick's lamp, for a window other than the main one: its spotlight host draws it in the window's corner,
+ * given the modifier that places it, so Wick can be asked while that window is in front. Null when
+ * Wick is off.
+ */
+val LocalWickCorner = staticCompositionLocalOf<(@Composable (Modifier) -> Unit)?> { null }
 
 /** The color a tagged control is highlighted in while a tour points at it; set by the spotlight host. */
 val LocalGuideRingColor = staticCompositionLocalOf { Color.Unspecified }

@@ -303,7 +303,7 @@ private fun ServerPortRow(
     onPortText: (String) -> Unit,
     onRestart: () -> Unit,
 ) {
-    SettingRow(label = stringResource(Res.string.server_port)) {
+    SettingRow(label = Res.string.server_port) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -342,7 +342,7 @@ private fun ServerPortRow(
 
 @Composable
 private fun ServerHostRow(hostText: String, isRunning: Boolean, onHostText: (String) -> Unit) {
-    SettingRow(label = stringResource(Res.string.server_host_label)) {
+    SettingRow(label = Res.string.server_host_label) {
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             SettingsTextField(
                 value = hostText,
@@ -371,7 +371,7 @@ private fun ServerHostRow(hostText: String, isRunning: Boolean, onHostText: (Str
 @Composable
 private fun ServerUrlRow(serverUrl: String, apiKey: String?) {
     var showConnectionQrDialog by remember { mutableStateOf(false) }
-    SettingRow(label = stringResource(Res.string.server_url_label)) {
+    SettingRow(label = Res.string.server_url_label) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -415,7 +415,7 @@ private fun ApiKeySection(
 ) {
     // ── API Key protection toggle ─────────────────────────────────
     SettingSwitchRow(
-        label = stringResource(Res.string.api_key_protection),
+        label = Res.string.api_key_protection,
         checked = settings.serverSettings.apiKeyEnabled,
         onCheckedChange = { enabled ->
             onSettingsChange { s ->
@@ -437,7 +437,7 @@ private fun ApiKeySection(
                 s.copy(serverSettings = s.serverSettings.copy(apiKey = key))
             }
         }
-        SettingRow(label = stringResource(Res.string.api_key_label)) {
+        SettingRow(label = Res.string.api_key_label) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -473,7 +473,7 @@ private fun ApiKeySection(
 private fun FileUploadSection(settings: AppSettings, onSettingsChange: ((AppSettings) -> AppSettings) -> Unit) {
     // ── Allow File Upload toggle ──────────────────────────────────
     SettingSwitchRow(
-        label = stringResource(Res.string.allow_file_upload),
+        label = Res.string.allow_file_upload,
         checked = settings.serverSettings.fileUploadEnabled,
         onCheckedChange = { enabled ->
             onSettingsChange { s ->
@@ -492,7 +492,7 @@ private fun FileUploadSection(settings: AppSettings, onSettingsChange: ((AppSett
         var maxMbText by remember(settings.serverSettings.maxMediaUploadMb) {
             mutableStateOf(settings.serverSettings.maxMediaUploadMb.toString())
         }
-        SettingRow(label = stringResource(Res.string.max_media_upload_label)) {
+        SettingRow(label = Res.string.max_media_upload_label) {
             SettingsTextField(
                 value = maxMbText,
                 onValueChange = { v ->

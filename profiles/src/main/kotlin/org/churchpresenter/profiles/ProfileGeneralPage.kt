@@ -60,7 +60,7 @@ internal fun ProfileGeneralPage(
     deleteBlockedNote: String? = null,
 ) {
     SettingsGroup(stringResource(Res.string.profile_nav_profile), key = "profile") {
-        SettingsRow(stringResource(Res.string.profile_name)) {
+        SettingsRow(Res.string.profile_name) {
             SettingsTextField(
                 value = profile.name,
                 onValueChange = onRename,
@@ -73,7 +73,7 @@ internal fun ProfileGeneralPage(
             )
         }
         SettingsRow(
-            stringResource(Res.string.profile_display_mode),
+            Res.string.profile_display_mode,
             sub = modeSub,
             paths = listOf(DISPLAY_MODE_PATH),
         ) {
@@ -83,14 +83,14 @@ internal fun ProfileGeneralPage(
     extraGroups()
     SettingsGroup(stringResource(Res.string.profile_actions), key = "actions") {
         SettingsRow(
-            stringResource(Res.string.output_profile_duplicate),
+            Res.string.output_profile_duplicate,
             sub = stringResource(Res.string.profile_duplicate_sub),
         ) {
             ActionKey(Icons.Filled.ContentCopy, stringResource(Res.string.output_profile_duplicate), onDuplicate)
         }
         extraActions()
         SettingsRow(
-            stringResource(Res.string.output_profile_delete),
+            Res.string.output_profile_delete,
             sub = deleteBlockedNote ?: stringResource(Res.string.profile_delete_sub),
         ) {
             ActionKey(

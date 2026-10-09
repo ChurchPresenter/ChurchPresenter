@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.helper.ui.GuideSpotlightHost
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import org.churchpresenter.songs.EditSongDialog
@@ -60,7 +63,10 @@ fun PlanningCenterImportDialog(
                 title = spec.title,
                 resizable = spec.resizable,
             ) {
-                AppWindowRoot(theme = theme, content = content)
+                AppWindowRoot(theme = theme) {
+                    // This window's own spotlight: Wick's Planning Center tour rings its buttons.
+                    GuideSpotlightHost(Modifier.fillMaxSize()) { content() }
+                }
             }
         },
         editSong = { song, songbook, onEditDismiss, onSave ->

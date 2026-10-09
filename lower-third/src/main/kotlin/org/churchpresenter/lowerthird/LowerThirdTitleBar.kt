@@ -304,7 +304,8 @@ private fun LowerThirdTabScope.LowerThirdScheduleAndLive() {
             onAddToSchedule(file.nameWithoutExtension, file.nameWithoutExtension, false, 0L)
         },
         enabled = selectedFile != null,
-        tooltipText = stringResource(Res.string.add_to_schedule)
+        tooltipText = stringResource(Res.string.add_to_schedule),
+        modifier = Modifier.guideTarget(GuideTargets.LOWER_THIRD_ADD_TO_SCHEDULE),
     )
 
     // Go Live
