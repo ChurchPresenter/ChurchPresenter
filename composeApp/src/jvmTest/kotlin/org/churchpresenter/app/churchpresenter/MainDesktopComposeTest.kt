@@ -14,6 +14,7 @@ import androidx.compose.ui.test.doubleClick
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -941,8 +942,11 @@ class MainDesktopComposeTest : MainDesktopComposeHarness() {
         val base = withOneSong()
         root(base, wiring = wiring) { _ ->
             fun choose(tag: String) {
-                onNodeWithTag("schedule_options").performClick()
-                waitForIdle()
+                // The menu stays open between picks; open it only when it is not already showing.
+                if (onAllNodesWithTag(tag).fetchSemanticsNodes().isEmpty()) {
+                    onNodeWithTag("schedule_options").performClick()
+                    waitForIdle()
+                }
                 onNodeWithTag(tag).performClick()
                 waitForIdle()
             }
