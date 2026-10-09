@@ -92,7 +92,6 @@ import org.churchpresenter.helper.suggest.tipAt
 import org.churchpresenter.settings.HelperSettings
 import org.churchpresenter.settings.helperDayOf
 import org.churchpresenter.settings.tipDue
-import org.churchpresenter.settings.tipShown
 import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.sharedui.utils.LocalShortcuts
