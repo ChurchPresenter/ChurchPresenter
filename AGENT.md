@@ -307,8 +307,8 @@ keep passing, and a test your change invalidated is fixed or deleted as part of 
 runs these on every push, plus each module's suite when the change touched that module or one it
 depends on — worked out from `./gradlew moduleGraph` by `.github/ci/affected_modules.py`, so a new
 `projects.*` dependency needs no CI edit. The jobs run side by side: `app`, `detekt`, the three-run
-check, and `modules`, whose suites `.github/ci/plan_ci.py` packs into a few runners by their measured
-minutes. **A new module with tests is one row in `plan_ci.py`'s `MODULES`** — until then CI warns
+check, and `modules`, whose suites `.github/ci/plan_ci.py` packs into up to eight runners by their measured
+minutes; each runner runs its suites one at a time. **A new module with tests is one row in `plan_ci.py`'s `MODULES`** — until then CI warns
 that it never runs. `test` is the required check: it gathers the results and fails unless every job
 passed.
 

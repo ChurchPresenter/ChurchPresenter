@@ -10,8 +10,9 @@ and a weight: its suite's CI minutes, measured. A new module is one row; until i
 names it in a workflow warning rather than leaving it untested in silence.
 
 The affected modules are packed greedily, heaviest first, into at most `MAX_SHARDS` groups of
-roughly `SHARD_MINUTES` each. Every group is one runner, and one Gradle invocation on it -- so the
-modules in a group run side by side on its cores rather than one step at a time.
+roughly `SHARD_MINUTES` each. Every group is one runner. Its suites compile in parallel but run one
+at a time: several suites at once on one runner starve the tests that wait on a real clock (a UDP
+handshake, a double-click), and runners cost nothing here, so the parallelism is runners.
 """
 import argparse
 import glob
@@ -77,8 +78,8 @@ NO_SUITE = {"composeApp", "strings", "icons"}
 # Extra tasks a module's group runs beside its suite and its coverage floor.
 EXTRA_TASKS = {"helper": [":helper:wickEval"]}
 
-MAX_SHARDS = 4
-SHARD_MINUTES = 6.0
+MAX_SHARDS = 8
+SHARD_MINUTES = 4.0
 
 
 def key(directory):

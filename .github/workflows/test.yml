@@ -247,10 +247,10 @@ jobs:
             composeApp/build/reports/tests/
             composeApp/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
 
-  # The module suites, in the groups prepare packed them into: one runner per group, and one Gradle
-  # invocation on it, so the group's modules run side by side on the runner's cores. `--continue`
-  # so one failing module still lets the rest report. Each module's coverage floor runs in the same
-  # invocation, after its own suite.
+  # The module suites, in the groups prepare packed them into: one runner per group. A group compiles
+  # in parallel, then runs its suites one at a time (`--max-workers=1`) -- several at once on one
+  # runner starved the tests that wait on a real clock. `--continue` so one failing module still
+  # lets the rest report. Each module's coverage floor runs in the same invocation as its suite.
   modules:
     needs: prepare
     if: needs.prepare.outputs.has_modules == 'true'
@@ -275,15 +275,15 @@ jobs:
         env:
           MODULES: ${{ matrix.shard.modules }}
           TASKS: ${{ matrix.shard.tasks }}
-        # Compiled first and the compile daemon stopped, as the app job does, so four test JVMs
-        # have the runner's memory to themselves.
+        # Compiled first and the compile daemon stopped, as the app job does, so the test JVMs have
+        # the runner's memory to themselves.
         run: |
           echo "Modules: $MODULES"
           compile=()
           for m in $MODULES; do compile+=(":$m:testClasses"); done
           ./gradlew "${compile[@]}" --max-workers=4
           pkill -f KotlinCompileDaemon || true
-          ./gradlew $TASKS --continue --max-workers=4
+          ./gradlew $TASKS --continue --max-workers=1
 
       - name: Keep the results for the report
         if: ${{ !cancelled() }}
