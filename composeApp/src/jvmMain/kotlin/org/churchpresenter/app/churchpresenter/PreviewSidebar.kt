@@ -3,7 +3,6 @@ package org.churchpresenter.app.churchpresenter
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import org.churchpresenter.liveoutput.withPreviewMode
-import org.churchpresenter.liveoutput.clearFromOperator
 import javax.swing.filechooser.FileNameExtensionFilter
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.dialogs.PropsDialog
@@ -57,7 +56,6 @@ import org.churchpresenter.strings.generated.resources.tooltip_message
 import org.churchpresenter.strings.generated.resources.tooltip_preview_settings
 import org.churchpresenter.strings.generated.resources.tooltip_toggle_displays
 import org.churchpresenter.companionsurface.CompanionConnectionChipRow
-import org.churchpresenter.companionsurface.CompanionSurfacePanel
 import org.churchpresenter.liveoutput.preview.LivePreviewPanel
 import org.churchpresenter.liveoutput.preview.PreviewGroupsPopover
 import org.churchpresenter.app.churchpresenter.composables.QuickBackgroundTray
@@ -65,9 +63,8 @@ import org.churchpresenter.sharedui.composables.ToolbarKey
 import org.churchpresenter.sharedui.composables.ToolbarKeyStyle
 import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.profiles.previewOutputSize
-import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
-import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.liveoutput.clearMessage
 import org.churchpresenter.liveoutput.messageOnAir
 import org.churchpresenter.liveoutput.showMessage
@@ -82,32 +79,52 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
+ * A Companion surface drawn in one of the main screen's sidebars: the connection it shows and where.
+ * Built by the wiring, which holds the surface's view model; the sidebars only place it.
+ */
+internal typealias CompanionSurfaceSlot =
+    @Composable (connection: CompanionSatelliteSettings, placement: CompanionSurfacePlacement) -> Unit
+
+/** What the right-hand sidebar shows: the settings it reads, the live-preview copy of them and the URLs. */
+internal class PreviewSidebarState(
+    val appSettings: AppSettings,
+    /** [appSettings] with the background possibly mirrored from an Instance Link primary — the preview only. */
+    val livePreviewAppSettings: AppSettings,
+    val activeQuickBackground: QuickBackground?,
+    val serverUrl: String,
+    val qaDisplayUrl: String,
+    val showControl: SidebarShowControl = SidebarShowControl(),
+)
+
+/** What the right-hand sidebar's controls do. */
+internal class PreviewSidebarActions(
+    /** The clear button: every output off, the media paused, and any Instance Link follower told. */
+    val onClearDisplay: () -> Unit,
+    val onQuickBackgroundPicked: (QuickBackground?) -> Unit,
+    val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+)
+
+/**
  * The right-hand sidebar: the display controls, the live preview, and any Companion surface routed
- * here.
+ * here, drawn at the panel's [geometry].
  *
- * One of MainDesktop's own layout pieces: the view models it takes are the main screen's, under the
- * standing exception AGENT.md records for the root screen's wiring and layout files.
+ * [presenterManager] and [sttManager] are what the live preview renders from; neither is a view model.
  */
 @Composable
 internal fun PreviewSidebar(
-    collapsed: Boolean,
-    visibleFraction: Float,
-    previewPanelPx: Float,
-    maxPreviewPx: Float,
+    geometry: PreviewPanelGeometry,
+    state: PreviewSidebarState,
+    actions: PreviewSidebarActions,
     presenterManager: PresenterManager,
-    mediaViewModel: MediaViewModel?,
-    instanceLinkSendClear: (() -> Unit)?,
-    livePreviewAppSettings: AppSettings,
-    appSettings: AppSettings,
-    activeQuickBackground: QuickBackground?,
-    onQuickBackgroundPicked: (QuickBackground?) -> Unit,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    serverUrl: String,
-    qaDisplayUrl: String,
     sttManager: STTManager?,
-    companionSatelliteViewModel: CompanionSatelliteViewModel,
-    showControl: SidebarShowControl = SidebarShowControl(),
+    companionSurface: CompanionSurfaceSlot,
 ) {
+    val appSettings = state.appSettings
+    val onSettingsChange = actions.onSettingsChange
+    val collapsed = geometry.collapsed
+    val visibleFraction = geometry.visibleFraction
+    val previewPanelPx = geometry.previewPanelPx
+    val maxPreviewPx = geometry.maxPreviewPx
     // Whether the panel's layout is being edited, from the gear's Edit layout to the panel's Done.
     var editingPreviewLayout by remember { mutableStateOf(false) }
     if (isPanelRendered(collapsed, visibleFraction)) {
@@ -119,10 +136,9 @@ internal fun PreviewSidebar(
         ) {
             SidebarButtons(
                 presenterManager = presenterManager,
-                mediaViewModel = mediaViewModel,
-                instanceLinkSendClear = instanceLinkSendClear,
+                onClearDisplay = actions.onClearDisplay,
                 appSettings = appSettings,
-                showControl = showControl,
+                showControl = state.showControl,
                 onSettingsChange = onSettingsChange,
                 onEditPreviewLayout = { editingPreviewLayout = true },
             )
@@ -130,10 +146,10 @@ internal fun PreviewSidebar(
             val previewFills = appSettings.projectionSettings.run { previewLayoutFillsPanel && activeLayout() != null }
             LivePreviewPanel(
                 presenterManager = presenterManager,
-                appSettings = livePreviewAppSettings,
+                appSettings = state.livePreviewAppSettings,
                 modifier = if (previewFills) Modifier.fillMaxWidth().weight(1f) else Modifier.fillMaxWidth(),
-                serverUrl = serverUrl,
-                qaDisplayUrl = qaDisplayUrl,
+                serverUrl = state.serverUrl,
+                qaDisplayUrl = state.qaDisplayUrl,
                 sttManager = sttManager,
                 onSettingsChange = onSettingsChange,
                 editingLayout = editingPreviewLayout,
@@ -145,12 +161,12 @@ internal fun PreviewSidebar(
                 // A quick background is a full-screen background: its tile is a picture of the
                 // output, so it is that output's shape.
                 tileAspect = previewOutputSize(appSettings).aspectRatio,
-                activeId = activeQuickBackground?.id,
+                activeId = state.activeQuickBackground?.id,
                 expanded = appSettings.quickBackgroundsExpanded,
                 onExpandedChange = { open ->
                     onSettingsChange { s -> s.copy(quickBackgroundsExpanded = open) }
                 },
-                onPick = onQuickBackgroundPicked,
+                onPick = actions.onQuickBackgroundPicked,
                 modifier = Modifier.padding(top = 8.dp),
             )
             val rightSidebarConnections = appSettings.companionSatelliteConnections
@@ -183,13 +199,7 @@ internal fun PreviewSidebar(
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                     if (selectedRightSidebarConnection != null) {
-                        CompanionSurfacePanel(
-                            connection = selectedRightSidebarConnection,
-                            placement = CompanionSurfacePlacement.RIGHT_SIDEBAR,
-                            viewModel = companionSatelliteViewModel,
-                            modifier = Modifier.fillMaxWidth(),
-                            sizeToContent = true
-                        )
+                        companionSurface(selectedRightSidebarConnection, CompanionSurfacePlacement.RIGHT_SIDEBAR)
                     }
                 }
             }
@@ -200,11 +210,9 @@ internal fun PreviewSidebar(
 /** The row of buttons over the preview: displays, clear, settings, message, props, macros, clear layers, take. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-@Suppress("LongParameterList")
 private fun SidebarButtons(
     presenterManager: PresenterManager,
-    mediaViewModel: MediaViewModel?,
-    instanceLinkSendClear: (() -> Unit)?,
+    onClearDisplay: () -> Unit,
     appSettings: AppSettings,
     showControl: SidebarShowControl,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
@@ -229,11 +237,7 @@ private fun SidebarButtons(
         TooltipIconButton(
             painter = painterResource(IconRes.drawable.ic_close),
             text = stringResource(Res.string.tooltip_clear_display),
-            onClick = {
-                mediaViewModel?.pause()
-                presenterManager.clearFromOperator()
-                instanceLinkSendClear?.invoke()
-            },
+            onClick = onClearDisplay,
             buttonSize = 36.dp,
             iconTint = MaterialTheme.colorScheme.error
         )

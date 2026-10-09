@@ -1,5 +1,9 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.tabs.AppQATab
+import org.churchpresenter.app.churchpresenter.tabs.AppSTTTab
+import org.churchpresenter.crosswordtab.CrosswordTab
+import org.churchpresenter.companionsurface.CompanionSurfaceTab
 import org.churchpresenter.liveoutput.showLowerThird
 import org.churchpresenter.bibletab.selectVerseByBookId
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,9 +33,63 @@ import java.util.UUID
 import org.churchpresenter.app.churchpresenter.tabs.AppWebTab
 
 /*
- * The content tabs as the main screen composes them, one pane each, wired to its state and the
- * Schedule's actions.
+ * The content tabs as the main screen composes them, one pane each, wired to its state, its view
+ * models and the Schedule's actions. The tab area they sit in only places them.
  */
+
+/** The pane [tab] is drawn with, wired to this screen's state, view models and live output. */
+@Composable
+internal fun MainDesktopScope.TabContentPane(tab: Tabs) {
+    when (tab) {
+        Tabs.BIBLE -> BibleTabPane()
+        Tabs.SONGS -> SongsTabPane()
+        Tabs.PICTURES -> PicturesTabPane()
+        Tabs.PRESENTATION -> PresentationTabPane()
+        Tabs.MEDIA -> MediaTabPane()
+        Tabs.LOWER_THIRD -> LowerThirdTabPane()
+        Tabs.ANNOUNCEMENTS -> AnnouncementsTabPane()
+        Tabs.WEB -> WebTabPane()
+        Tabs.CANVAS -> CanvasTabPane()
+        Tabs.QA -> if (qaManager != null) {
+            AppQATab(
+                modifier = Modifier.fillMaxSize(),
+                qaManager = qaManager,
+                presenterManager = presenterManager,
+                serverUrl = web.serverUrl,
+                presenting = live.presenting,
+                appSettings = appSettings,
+                onSettingsChange = onSettingsChange,
+                tunnelStatus = web.tunnelStatus,
+                tunnelUrl = web.tunnelUrl,
+                onStartTunnel = web.onStartTunnel,
+                onStopTunnel = web.onStopTunnel,
+                qaDisplayUrl = web.qaDisplayUrl,
+                onQaDisplayUrlChanged = web.onQaDisplayUrlChanged,
+            )
+        }
+        Tabs.STT -> if (sttManager != null) {
+            AppSTTTab(
+                modifier = Modifier.fillMaxSize(),
+                sttManager = sttManager,
+                presenterManager = presenterManager,
+                presenting = live.presenting,
+                appSettings = appSettings,
+                onSettingsChange = onSettingsChange
+            )
+        }
+        Tabs.CROSSWORD -> CrosswordTab(
+            modifier = Modifier.fillMaxSize(),
+            appSettings = appSettings,
+            onSettingsChange = onSettingsChange
+        )
+        Tabs.COMPANION_SURFACE -> CompanionSurfaceTab(
+            modifier = Modifier.fillMaxSize(),
+            appSettings = appSettings,
+            viewModel = companionSatelliteViewModel
+        )
+        Tabs.DICTIONARY -> DictionaryTabPane()
+    }
+}
 
 @Composable
 internal fun MainDesktopScope.PicturesTabPane() {
