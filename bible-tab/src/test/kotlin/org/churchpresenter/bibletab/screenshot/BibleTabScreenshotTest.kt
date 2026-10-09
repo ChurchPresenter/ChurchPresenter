@@ -17,6 +17,8 @@ import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.rightClick
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -268,6 +270,17 @@ class BibleTabScreenshotTest {
         onNodeWithContentDescription("Cross references: 4").performClick()
         waitForIdle()
         waitUntilAtLeastOneExists(hasText("Rom 5:8", substring = true))
+    }
+
+    @Test
+    fun `the right-click menu on a verse`() = shoot(
+        "verse_context_menu",
+        crossReferences = crossReferenceFixture(),
+        rootIndex = 1,
+    ) { _ ->
+        waitUntilAtLeastOneExists(hasContentDescription("Cross references: 4"))
+        onNodeWithText("1. In the beginning God created the heaven and the earth.").performMouseInput { rightClick() }
+        waitForIdle()
     }
 
     @Test

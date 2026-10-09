@@ -353,6 +353,12 @@
     <string name="transition_duration">Czas przejścia:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">Zmniejsz</string>
+    <string name="value_dialog_increase">Zwiększ</string>
+    <string name="value_dialog_keys_hint">↵ OK · Esc Anuluj</string>
+    <string name="value_dialog_out_of_range">Wpisz liczbę od %1$d do %2$d %3$s.</string>
+    <string name="auto_scroll_interval_hint">Jak długo każdy slajd pozostaje przed przejściem dalej.</string>
+    <string name="transition_duration_hint">Jak długo trwa przejście między slajdami.</string>
     <string name="animation_type">Typ animacji:</string>
     <string name="animation_crossfade">Przenikanie</string>
     <string name="animation_fade">Zanikanie</string>

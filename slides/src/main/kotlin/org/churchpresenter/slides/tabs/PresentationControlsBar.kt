@@ -24,16 +24,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import org.churchpresenter.theme.AppShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.Icon
 import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.theme.components.SunkenOutlinedTextField
 import androidx.compose.material3.Text
-import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
@@ -61,7 +56,6 @@ import org.churchpresenter.strings.generated.resources.animation_slide_left
 import org.churchpresenter.strings.generated.resources.animation_slide_right
 import org.churchpresenter.strings.generated.resources.animation_type
 import org.churchpresenter.strings.generated.resources.auto_scroll_interval
-import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.icons.generated.resources.ic_refresh
 import org.churchpresenter.icons.generated.resources.ic_pause
 import org.churchpresenter.icons.generated.resources.ic_play
@@ -70,7 +64,6 @@ import org.churchpresenter.icons.generated.resources.ic_skip_previous
 import org.churchpresenter.strings.generated.resources.loop_off
 import org.churchpresenter.strings.generated.resources.loop_on
 import org.churchpresenter.strings.generated.resources.next_image
-import org.churchpresenter.strings.generated.resources.ok
 import org.churchpresenter.strings.generated.resources.pause
 import org.churchpresenter.strings.generated.resources.presentation_arrow_key_hint
 import org.churchpresenter.strings.generated.resources.play
@@ -369,9 +362,6 @@ private fun PresentationTabScope.PresentationLoopButton(viewModel: PresentationV
 @Composable
 private fun PresentationTabScope.AutoScrollIntervalBox(viewModel: PresentationViewModel) {
     var editingInterval by remember { mutableStateOf(false) }
-    var intervalInput by remember(appSettings.presentationSettings.autoScrollInterval) {
-        mutableStateOf(appSettings.presentationSettings.autoScrollInterval.toInt().toString())
-    }
 
     Column(
         modifier = Modifier
@@ -406,38 +396,17 @@ private fun PresentationTabScope.AutoScrollIntervalBox(viewModel: PresentationVi
         )
     }
     if (editingInterval) {
-        AlertDialog(
-            onDismissRequest = { editingInterval = false },
-            title = { Text(stringResource(Res.string.auto_scroll_interval)) },
-            text = {
-                SunkenOutlinedTextField(
-                    value = intervalInput,
-                    onValueChange = { intervalInput = it },
-                    suffix = { Text(stringResource(Res.string.unit_s)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-            },
-            confirmButton = {
-                GhostButton(shape = AppShape(6.dp), onClick = {
-                    intervalInput.toIntOrNull()?.coerceIn(1, PRESENTATION_MAX_AUTO_SCROLL_SECONDS)?.let { v ->
-                        viewModel.autoScrollInterval = v.toFloat()
-                        onSettingsChange { s ->
-                            s.copy(
-                                presentationSettings = s.presentationSettings.copy(
-                                    autoScrollInterval = v.toFloat()
-                                )
-                            )
-                        }
-                    }
-                    editingInterval = false
-                }) { Text(stringResource(Res.string.ok)) }
-            },
-            dismissButton = {
-                GhostButton(shape = AppShape(6.dp), onClick = { editingInterval = false }) {
-                    Text(stringResource(Res.string.cancel))
+        AutoScrollIntervalDialog(
+            initial = appSettings.presentationSettings.autoScrollInterval.toInt(),
+            maxSeconds = PRESENTATION_MAX_AUTO_SCROLL_SECONDS,
+            onConfirm = { v ->
+                viewModel.autoScrollInterval = v.toFloat()
+                onSettingsChange { s ->
+                    s.copy(presentationSettings = s.presentationSettings.copy(autoScrollInterval = v.toFloat()))
                 }
-            }
+                editingInterval = false
+            },
+            onDismiss = { editingInterval = false },
         )
     }
 }
@@ -445,9 +414,6 @@ private fun PresentationTabScope.AutoScrollIntervalBox(viewModel: PresentationVi
 @Composable
 private fun PresentationTabScope.TransitionDurationBox(viewModel: PresentationViewModel) {
     var editingTransition by remember { mutableStateOf(false) }
-    var transitionInput by remember(appSettings.presentationSettings.transitionDuration) {
-        mutableStateOf(appSettings.presentationSettings.transitionDuration.toInt().toString())
-    }
 
     Column(
         modifier = Modifier
@@ -482,40 +448,18 @@ private fun PresentationTabScope.TransitionDurationBox(viewModel: PresentationVi
         )
     }
     if (editingTransition) {
-        AlertDialog(
-            onDismissRequest = { editingTransition = false },
-            title = { Text(stringResource(Res.string.transition_duration)) },
-            text = {
-                SunkenOutlinedTextField(
-                    value = transitionInput,
-                    onValueChange = { transitionInput = it },
-                    suffix = { Text(stringResource(Res.string.unit_ms)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-            },
-            confirmButton = {
-                GhostButton(shape = AppShape(6.dp), onClick = {
-                    transitionInput.toIntOrNull()
-                        ?.coerceIn(PRESENTATION_MIN_TRANSITION_MS, PRESENTATION_MAX_TRANSITION_MS)
-                        ?.let { v ->
-                        viewModel.transitionDuration = v.toFloat()
-                        onSettingsChange { s ->
-                            s.copy(
-                                presentationSettings = s.presentationSettings.copy(
-                                    transitionDuration = v.toFloat()
-                                )
-                            )
-                        }
-                    }
-                    editingTransition = false
-                }) { Text(stringResource(Res.string.ok)) }
-            },
-            dismissButton = {
-                GhostButton(shape = AppShape(6.dp), onClick = { editingTransition = false }) {
-                    Text(stringResource(Res.string.cancel))
+        TransitionDurationDialog(
+            initial = appSettings.presentationSettings.transitionDuration.toInt(),
+            minMs = PRESENTATION_MIN_TRANSITION_MS,
+            maxMs = PRESENTATION_MAX_TRANSITION_MS,
+            onConfirm = { v ->
+                viewModel.transitionDuration = v.toFloat()
+                onSettingsChange { s ->
+                    s.copy(presentationSettings = s.presentationSettings.copy(transitionDuration = v.toFloat()))
                 }
-            }
+                editingTransition = false
+            },
+            onDismiss = { editingTransition = false },
         )
     }
 }

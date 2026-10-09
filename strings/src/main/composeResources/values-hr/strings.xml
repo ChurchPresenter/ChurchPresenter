@@ -598,6 +598,12 @@
     <string name="transition_duration">Trajanje prijelaza:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">Smanji</string>
+    <string name="value_dialog_increase">Povećaj</string>
+    <string name="value_dialog_keys_hint">↵ U redu · Esc Odustani</string>
+    <string name="value_dialog_out_of_range">Unesite broj od %1$d do %2$d %3$s.</string>
+    <string name="auto_scroll_interval_hint">Koliko dugo svaki slajd ostaje prije prelaska na sljedeći.</string>
+    <string name="transition_duration_hint">Koliko dugo traje prijelaz između slajdova.</string>
     <string name="animation_type">Vrsta animacije:</string>
     <string name="animation_crossfade">Prijelaz preklapanjem</string>
     <string name="animation_fade">Postupni prijelaz</string>

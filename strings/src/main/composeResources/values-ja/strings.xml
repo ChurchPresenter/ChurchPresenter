@@ -598,6 +598,12 @@
     <string name="transition_duration">切り替えの長さ：</string>
     <string name="unit_s">秒</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">減らす</string>
+    <string name="value_dialog_increase">増やす</string>
+    <string name="value_dialog_keys_hint">↵ OK · Esc キャンセル</string>
+    <string name="value_dialog_out_of_range">%1$d～%2$d %3$sの数値を入力してください。</string>
+    <string name="auto_scroll_interval_hint">次に進むまで各スライドを表示する時間です。</string>
+    <string name="transition_duration_hint">スライド間の切り替えにかかる時間です。</string>
     <string name="animation_type">アニメーションの種類：</string>
     <string name="animation_crossfade">クロスフェード</string>
     <string name="animation_fade">フェード</string>

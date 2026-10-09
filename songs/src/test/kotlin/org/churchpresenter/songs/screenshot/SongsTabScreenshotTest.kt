@@ -9,6 +9,8 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.rightClick
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.songs.SongFixture
 import org.churchpresenter.songs.SongsViewModel
@@ -288,6 +290,15 @@ class SongsTabScreenshotTest {
     @Test
     fun `an empty library`() = stackedThemes(SECTION, "empty_library") { mode, file ->
         songsTab(songs = emptyList<SongFixture>(), themeMode = mode) { _, _ -> captureTo(file) }
+    }
+
+    @Test
+    fun `the right-click menu`() = stackedThemes(SECTION, "song_context_menu") { mode, file ->
+        songsTab(themeMode = mode) { _, _ ->
+            onNodeWithText("Amazing Grace").performMouseInput { rightClick() }
+            waitForIdle()
+            captureTo(file, rootIndex = 1)
+        }
     }
 
     private companion object {

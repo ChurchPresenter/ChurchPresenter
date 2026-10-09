@@ -598,6 +598,12 @@
     <string name="transition_duration">Durasi Transisi:</string>
     <string name="unit_s">dtk</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">Kurangi</string>
+    <string name="value_dialog_increase">Tambah</string>
+    <string name="value_dialog_keys_hint">↵ OK · Esc Batal</string>
+    <string name="value_dialog_out_of_range">Masukkan angka dari %1$d sampai %2$d %3$s.</string>
+    <string name="auto_scroll_interval_hint">Berapa lama setiap slide ditampilkan sebelum berpindah.</string>
+    <string name="transition_duration_hint">Berapa lama transisi antar slide berlangsung.</string>
     <string name="animation_type">Jenis Animasi:</string>
     <string name="animation_crossfade">Crossfade</string>
     <string name="animation_fade">Pudar</string>

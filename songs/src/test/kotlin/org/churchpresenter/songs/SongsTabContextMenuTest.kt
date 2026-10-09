@@ -52,10 +52,41 @@ class SongsTabContextMenuTest {
         songsTab { _, _ ->
             openMenuOn("Amazing Grace")
 
-            assertTrue(shows(SongsMenu.ADD_TO_SCHEDULE), rendered().toString())
-            assertTrue(shows(SongsMenu.ADD_TO_FAVORITES))
-            assertTrue(shows(SongsMenu.EDIT))
-            assertTrue(shows(SongsMenu.DELETE))
+            assertTrue(showsItem(SongsMenu.GO_LIVE), rendered().toString())
+            assertTrue(showsItem(SongsMenu.ADD_TO_SCHEDULE))
+            assertTrue(showsItem(SongsMenu.ADD_TO_FAVORITES))
+            assertTrue(showsItem(SongsMenu.EDIT))
+            assertTrue(showsItem(SongsMenu.DELETE))
+        }
+    }
+
+    @Test
+    fun `the header names the song that was right-clicked`() {
+        songsTab { _, _ ->
+            openMenuOn("Be Thou My Vision")
+
+            assertTrue(shows("Hymnal · 2"), rendered().toString())
+        }
+    }
+
+    @Test
+    fun `Go Live leads the menu and Delete closes it`() {
+        songsTab { _, _ ->
+            openMenuOn("Amazing Grace")
+
+            val items = rendered().filter { line -> SongsMenu.ORDER.any { line.startsWith(it) } }
+            assertTrue(items.first().startsWith(SongsMenu.GO_LIVE), items.toString())
+            assertEquals(SongsMenu.DELETE, items.last())
+        }
+    }
+
+    @Test
+    fun `Go Live and Add to Schedule show their keys`() {
+        songsTab { _, _ ->
+            openMenuOn("Amazing Grace")
+
+            assertTrue(shows(SongsMenu.GO_LIVE + "Enter"), rendered().toString())
+            assertTrue(shows(SongsMenu.ADD_TO_SCHEDULE + "F2"))
         }
     }
 
@@ -65,7 +96,7 @@ class SongsTabContextMenuTest {
             onNodeWithText("Amazing Grace").performClick()
             waitForIdle()
 
-            assertFalse(shows(SongsMenu.EDIT), rendered().toString())
+            assertFalse(showsItem(SongsMenu.EDIT), rendered().toString())
         }
     }
 
@@ -88,7 +119,7 @@ class SongsTabContextMenuTest {
             openMenuOn("Amazing Grace")
             clickMenuItem(SongsMenu.ADD_TO_SCHEDULE)
 
-            assertFalse(shows(SongsMenu.EDIT), "the menu should be gone: ${rendered()}")
+            assertFalse(showsItem(SongsMenu.EDIT), "the menu should be gone: ${rendered()}")
         }
     }
 
@@ -152,6 +183,9 @@ class SongsTabContextMenuTest {
         }
     }
 
+    /** A menu row's text is its label, then its key when it has one ("Add to ScheduleF2"). */
+    private fun ComposeUiTest.showsItem(label: String) = rendered().any { it.startsWith(label) }
+
     private object SongsMenu {
         const val ADD_TO_SCHEDULE = "Add to Schedule"
         const val ADD_TO_FAVORITES = "Add to favorites"
@@ -159,5 +193,6 @@ class SongsTabContextMenuTest {
         const val EDIT = "Edit Song"
         const val DELETE = "Delete"
         const val GO_LIVE = "Go Live"
+        val ORDER = listOf(GO_LIVE, ADD_TO_SCHEDULE, ADD_TO_FAVORITES, REMOVE_FROM_FAVORITES, EDIT, DELETE)
     }
 }
