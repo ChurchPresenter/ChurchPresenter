@@ -67,18 +67,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
+  # The suite is split across runners that work at the same time, and the repository is public, so
+  # GitHub's standard runners cost nothing however many run at once. `prepare` decides what runs;
+  # `detekt`, `app`, `modules` (one runner per group of module suites) and `changed-tests` then
+  # run side by side; and `test` -- the check `main` requires -- reports and decides. One job doing
+  # all of it in turn took 45 to 70 minutes, almost all of it module suites waiting for each other.
+  prepare:
     runs-on: ubuntu-latest
-    # A change that touches only a module or two takes ~40 minutes; one under :shared-ui, :settings
-    # or :diagnostics runs every module's suite and coverage step and needs most of this. A hung
-    # test is no longer what the deadline catches -- HungTestReporter halts it after
-    # hangThresholdMs below, with a thread dump -- so the deadline only bounds a run gone wrong.
-    timeout-minutes: 90
-    env:
-      # HungTestReporter's threshold for every module suite (the composeApp step also passes it):
-      # a fork stuck on one test halts with a thread dump in its test-results, which the
-      # `test-reports` upload carries.
-      ORG_GRADLE_PROJECT_hangThresholdMs: '150000'
+    timeout-minutes: 15
+    outputs:
+      shards: ${{ steps.plan.outputs.shards }}
+      has_modules: ${{ steps.plan.outputs.has_modules }}
     steps:
       # A draft runs nothing -- and must not leave behind a `test` that counts as passing. A skipped
       # job does count: #634 was opened as a draft and marked ready five seconds later, the `opened`
@@ -114,38 +113,47 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
       # Which modules' suites this change can affect, read off the build's own dependency graph
       # (`./gradlew moduleGraph`): a module runs when a file in its directory changed or when a
-      # module it depends on -- transitively, test fixtures included -- did. There is no list here to
-      # keep in step with the build files; .github/ci/affected_modules.py says what it does and the few
-      # files that run everything. :composeApp consumes almost every module and runs regardless.
+      # module it depends on -- transitively, test fixtures included -- did. .github/ci/affected_modules.py
+      # says what it does and the few files that run everything; .github/ci/plan_ci.py packs the
+      # affected suites into the `modules` job's groups. :composeApp runs regardless.
       #
       # The base is the pull request's or merge group's base commit, or the commit before a push.
       # Only that one commit is fetched: `git diff` between two commits needs their trees, not the
       # history between them. With no base -- workflow_dispatch, a new branch's all-zero `before` --
       # or one that cannot be fetched, every suite runs.
       - name: Which modules changed
-        id: modules
+        id: plan
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
         run: |
+          python3 -m unittest discover -s .github/ci
+          chmod +x gradlew
           ./gradlew -q moduleGraph > module-graph.txt
           if [ -n "$BASE_SHA" ] && ! git fetch --no-tags --depth=1 origin "$BASE_SHA"; then
             BASE_SHA=""
           fi
-          python3 .github/ci/affected_modules.py --graph module-graph.txt --base "$BASE_SHA" >> "$GITHUB_OUTPUT"
+          python3 .github/ci/affected_modules.py --graph module-graph.txt --base "$BASE_SHA" > affected.txt
+          python3 .github/ci/plan_ci.py shards --affected affected.txt >> "$GITHUB_OUTPUT"
 
-      # Static analysis, ~5s, ahead of the 14-minute suite so a style regression fails fast.
-      # No module has a detekt baseline: every module listed here has to be clean.
-      #
-      # NOT gated on which modules changed, deliberately. A module's detekt task costs seconds, and the gate is
-      # worth nothing if a change that breaks it can skip it: the shared config/detekt/detekt.yml
-      # governs every module at once, so "this PR didn't touch that folder" does not mean that
-      # folder still passes.
-      #
+  # Static analysis. No module has a detekt baseline: every module listed here has to be clean.
+  #
+  # NOT gated on which modules changed, deliberately. A module's detekt task costs seconds, and the
+  # gate is worth nothing if a change that breaks it can skip it: the shared config/detekt/detekt.yml
+  # governs every module at once, so "this PR didn't touch that folder" does not mean that folder
+  # still passes.
+  detekt:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - uses: gradle/actions/setup-gradle@v4
       - name: Detekt
         run: >-
           ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :converter:detekt
@@ -154,49 +162,45 @@ jobs:
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
           :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :helper:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :canvas:detekt :presenter:detekt :profiles:detekt :companion-surface:detekt :obs:detekt :live-show:detekt :show-control:detekt :control-in:detekt :live-output:detekt :statistics:detekt :updater:detekt :telemetry:detekt :app-settings:detekt :server-ui:detekt
 
+  app:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      ORG_GRADLE_PROJECT_hangThresholdMs: '150000'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - uses: gradle/actions/setup-gradle@v4
+
       - name: App unit tests
         id: unit_tests
         # Tighter than the job's own deadline so a hang here is attributed to this step and the
-        # module suites below (`!cancelled()`) and the report upload still get to run.
-        #
-        # Runs land around 19 minutes (18m45s and 19m24s, measured 2026-08-21) -- they used to be
-        # 11-14, and this comment said so long after it stopped being true, which is how a 20-minute
-        # Gradle-side cap came to be proposed that would have failed both of those healthy runs.
-        # Re-measure before quoting a band. Two other things now fire before this budget does:
-        # jvmTest's own 30-minute task timeout, and HungTestReporter, which halts a fork whose
-        # single test has outlived the threshold below and writes a thread dump into the results.
-        #
-        # That threshold is 150s HERE rather than the five-minute default, and it is the whole
-        # point of this line: the suite has hung outright three times, each occurrence costing a
-        # ~22-minute run that ends with NO failing assertion and NO diagnosis. At 150s the reporter
-        # halts the fork with a full thread dump instead, and the dump travels in `test-reports`.
-        #
-        # 150s is measured, not guessed. In a full local run the slowest CLASS is 37.1s for all of
-        # its tests together (InstanceLinkClientTest), so no single test -- which is what the
-        # reporter times -- comes close; 150s leaves four times that class's entire runtime as
-        # headroom for a slower runner. If a legitimate test ever trips this, the answer is to fix
-        # the test, not to raise the number: AGENT.md budgets ~1s a test.
+        # coverage steps and the results upload below (`!cancelled()`) still get to run. Two other
+        # things fire before this budget does: jvmTest's own 30-minute task timeout, and
+        # HungTestReporter, which halts a fork whose single test has outlived 150s (AGENT.md budgets
+        # ~1s a test) and writes a thread dump into the results.
         timeout-minutes: 40
-        #
         # Compiled first, then the Kotlin compile daemon is stopped before a single test forks. It is
-        # idle for the rest of the step but holds ~3-4 GB per instance, and beside the Gradle daemon
-        # and the test forks (each well past its 1 GB heap in native Skia memory) it took the 16 GB
-        # runner to zero with swap full; GitHub then loses the runner and reports the step as
-        # "cancelled", with no test failing and no report uploaded.
+        # idle for the rest of the step but holds ~3-4 GB, and beside the Gradle daemon and the test
+        # forks (each well past its 1 GB heap in native Skia memory) it took the 16 GB runner to zero
+        # with swap full; GitHub then loses the runner and reports the step as "cancelled".
         run: |
           ./gradlew :composeApp:jvmTestClasses
           pkill -f KotlinCompileDaemon || true
           ./gradlew :composeApp:jvmTest -PhangThresholdMs=150000
 
-      # So an outlier explains itself instead of needing a guess: the one killed run above was
-      # attributed to the wrong fixture precisely because nothing recorded where the time went.
+      # So an outlier explains itself instead of needing a guess.
       - name: Slowest test classes
         if: ${{ !cancelled() }}
         run: |
           python3 - <<'PY'
           import glob, re
           rows = []
-          for path in glob.glob('composeApp/build/test-results/jvmTest/TEST-*.xml'):
+          for path in glob.glob('composeApp/build/test-results/jvmTest*/TEST-*.xml'):
               head = open(path, errors='replace').read(4000)
               m = re.search(r'<testsuite name="([^"]+)"[^>]*tests="(\d+)"[^>]*time="([\d.]+)"', head)
               if m:
@@ -208,564 +212,157 @@ jobs:
               print(f'{t:>8.1f}s  {n:>5}  {name}')
           PY
 
-      # Prints the six JaCoCo counters into the log and onto the run's summary page, in the same
-      # format `./gradlew :composeApp:check` shows locally (minus the file:// link to the HTML tree,
-      # which does not survive the runner). Nothing else in CI reported a coverage number -- the
-      # floor below only speaks up when it is breached, so a run could move coverage several points
-      # in either direction and say nothing.
+      # The six JaCoCo counters, into the log and onto the run's summary page.
       #
-      # `-x jvmTest -x jvmTestSerial` for the same reason it is on the floor step: jacocoTestReport
-      # `dependsOn` BOTH of them, and after a FAILED suite that dependency is not up to date, so
-      # without this the step would relaunch the suite inside its own budget. The report is built
-      # from the exec data the step above already wrote.
+      # `-x jvmTest -x jvmTestSerial`: jacocoTestReport `dependsOn` both, and after a FAILED suite
+      # that dependency is not up to date, so without it this step would relaunch the suite inside
+      # its own budget (and with only `jvmTest` excluded it once ran the serial classes alone and
+      # reported a 159-test "green suite" at 33% coverage). The step-summary path travels as a
+      # property because `System.getenv` in build logic reads the daemon's frozen environment.
       #
-      # Excluding only `jvmTest` was not enough, and hid a whole missing suite. When Detekt fails,
-      # `App unit tests` is skipped -- but this step still ran, and with the serial task NOT excluded
-      # it quietly executed the thirteen serial classes on its own. That wrote a jvmTestSerial exec
-      # file and jvmTestSerial XML, so both pull-request comments then described a run in which the
-      # suite had never started: "App 159 ran, 159 passed" from the junit reporter, and composeApp at
-      # 33% instruction in the coverage table. One looked like a small green suite and the other like
-      # a coverage collapse; neither had happened.
-      #
-      # Advisory after a failure, like the floor: the exec data is then from a run that stopped
-      # early, so the numbers are understated. Still worth printing -- it is the only place the
-      # counters appear -- but they are not comparable with a green run's.
-      #
-      # The step-summary path is handed over as `-PstepSummary` rather than left to the build
-      # script to read out of the environment. `System.getenv` in build logic reads the Gradle
-      # DAEMON's environment, frozen when the daemon started -- here, during Detekt -- while
-      # GITHUB_STEP_SUMMARY names a fresh file per step that the runner consumes at that step's
-      # end. So the block landed in Detekt's already-read file and never appeared anywhere. A
-      # property travels with this invocation, so it is the live path.
-      #
-      # This and the suite, coverage and report steps after it run on `!cancelled()`, not
-      # `always()`. Both run after a failed suite, which is the point; `always()` also runs after
-      # the RUN was cancelled -- by `cancel-in-progress` when the branch moves -- and then the suite
-      # stopped partway, JaCoCo has no execution data, and the coverage table posts every
-      # composeApp counter at 0% under a "below floor" warning (#598 got exactly that). A step that
-      # hits its own `timeout-minutes` is failed, not cancelled, so a hang in the suite still
-      # reaches the steps below.
+      # `!cancelled()`, not `always()`: after a cancelled run the suite stopped partway and the
+      # numbers would be meaningless. A step that hits its own timeout is failed, not cancelled.
       - name: Coverage summary
         if: ${{ !cancelled() }}
         timeout-minutes: 10
         run: ./gradlew :composeApp:jacocoTestReport -x jvmTest -x jvmTestSerial "-PstepSummary=$GITHUB_STEP_SUMMARY"
 
-      # The six-counter floors (85% on most, 79% branch, 75% complexity), off the execution data the
-      # tests above just produced. Their denominator excludes the app-entry wiring that only runs
-      # under a real display -- see jacocoTestCoverageVerification in composeApp/build.gradle.kts.
-      # `!cancelled()` so a coverage regression is reported alongside test failures rather than
-      # hidden behind them.
-      #
-      # `-x jvmTest -x jvmTestSerial` is load-bearing. The Gradle task `dependsOn` both, which is
-      # right for a developer running it directly, but here the suite has already run in the step
-      # above -- see the Coverage summary step for what excluding only half of it did. When it
-      # PASSED that task is up to date and the dependency costs nothing -- which is why this looked
-      # fine for as long as the suite was green. When it FAILED it is not up to date, so this step
-      # started the whole 21-minute suite again inside a 10-minute budget: a guaranteed timeout.
-      # Observed on run 31232339922 (main, 2026-08-08) -- jvmTest failed at 01:40:44, this step
-      # relaunched it at 01:41:20, killed at 01:50:57. Every red run paid an extra ten minutes and
-      # reported a second failure that said "Coverage floor timed out" and meant nothing.
-      #
-      # Advisory whenever the suite did not pass: the exec data is then from a run that did not
-      # finish -- or, when Detekt failed and the suite step was SKIPPED, is not there at all -- so
-      # the number is understated and a floor breach would be an artefact. The build is already red
-      # for a better reason, and `outcome != 'success'` covers the skipped case as well as the failed
-      # one. When the suite passed this gates exactly as before, in seconds.
+      # The floors, off the execution data the suite just wrote. Advisory whenever the suite did not
+      # pass: the exec data is then from a run that did not finish, so a breach would be an artefact.
       - name: Coverage floor
         if: ${{ !cancelled() }}
         continue-on-error: ${{ steps.unit_tests.outcome != 'success' }}
         timeout-minutes: 10
         run: ./gradlew :composeApp:jacocoTestCoverageVerification -x jvmTest -x jvmTestSerial
 
-      - name: Converter tests
-        if: ${{ !cancelled() && steps.modules.outputs.converter == 'true' }}
-        run: ./gradlew :converter:test
-
-      # The module's own six-counter floor, off the execution data the step above just wrote.
-      # `-x test` for the same reason the app's floor step has it: the task `dependsOn` the suite,
-      # which is right for a developer running it directly and would re-run it here.
-      - name: Converter coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.converter == 'true' }}
-        run: ./gradlew :converter:jacocoTestCoverageVerification -x test
-
-      # Same reasoning as the converter above: a module of this build, so a root-wrapper task rather
-      # than a separate Gradle bootstrap, and ungated because :composeApp depends on it.
-      - name: Companion Satellite tests
-        if: ${{ !cancelled() && steps.modules.outputs.companionsatellite == 'true' }}
-        run: ./gradlew :companion-satellite:test
-
-      - name: Companion Satellite coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.companionsatellite == 'true' }}
-        run: ./gradlew :companion-satellite:jacocoTestCoverageVerification -x test
-
-      # Same reasoning as the converter above: a module of this build, so a root-wrapper task
-      # rather than a wrapper of its own.
-      - name: Lower Third generator tests
-        if: ${{ !cancelled() && steps.modules.outputs.lottiegenerator == 'true' }}
-        run: ./gradlew :lottieGenerator:test
-
-      - name: Lower Third generator coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.lottiegenerator == 'true' }}
-        run: ./gradlew :lottieGenerator:jacocoTestCoverageVerification -x test
-
-      # Same again: a module of this build, and its data layer carries the six-counter floor while
-      # the Compose UI package is excluded from it.
-      - name: Crossword tests
-        if: ${{ !cancelled() && steps.modules.outputs.crossword == 'true' }}
-        run: ./gradlew :crossword:test
-
-      - name: Crossword coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.crossword == 'true' }}
-        run: ./gradlew :crossword:jacocoTestCoverageVerification -x test
-
-      # The last module to be promoted out of the mounted sub-builds. Its floors are its measured
-      # coverage rather than the 85% default — see the comment in its build file.
-      - name: Presentation Engine tests
-        if: ${{ !cancelled() && steps.modules.outputs.presentationengine == 'true' }}
-        run: ./gradlew :presentation-engine:test
-
-      - name: Presentation Engine coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.presentationengine == 'true' }}
-        run: ./gradlew :presentation-engine:jacocoTestCoverageVerification -x test
-
-      - name: Theme tests
-        if: ${{ !cancelled() && steps.modules.outputs.theme == 'true' }}
-        run: ./gradlew :theme:test
-
-      - name: Theme coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.theme == 'true' }}
-        run: ./gradlew :theme:jacocoTestCoverageVerification -x test
-
-      - name: Bible Lookup Engine tests
-        if: ${{ !cancelled() && steps.modules.outputs.bibleengine == 'true' }}
-        run: ./gradlew :bible-engine:test
-
-      - name: Bible Lookup Engine coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.bibleengine == 'true' }}
-        run: ./gradlew :bible-engine:jacocoTestCoverageVerification -x test
-
-      - name: Core models tests
-        if: ${{ !cancelled() && steps.modules.outputs.coremodels == 'true' }}
-        run: ./gradlew :core-models:test
-
-      - name: Core models coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.coremodels == 'true' }}
-        run: ./gradlew :core-models:jacocoTestCoverageVerification -x test
-
-      - name: Song library tests
-        if: ${{ !cancelled() && steps.modules.outputs.songlibrary == 'true' }}
-        run: ./gradlew :songlibrary:test
-
-      - name: Song library coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.songlibrary == 'true' }}
-        run: ./gradlew :songlibrary:jacocoTestCoverageVerification -x test
-
-      - name: Settings tests
-        if: ${{ !cancelled() && steps.modules.outputs.settings == 'true' }}
-        run: ./gradlew :settings:test
-
-      - name: Settings coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.settings == 'true' }}
-        run: ./gradlew :settings:jacocoTestCoverageVerification -x test
-
-      - name: Diagnostics tests
-        if: ${{ !cancelled() && steps.modules.outputs.diagnostics == 'true' }}
-        run: ./gradlew :diagnostics:test
-
-      - name: Diagnostics coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.diagnostics == 'true' }}
-        run: ./gradlew :diagnostics:jacocoTestCoverageVerification -x test
-
-      # The ATEM protocol client. Its suite is loopback UDP against FakeAtemSwitcher -- no
-      # hardware, no display -- so it runs here like any other module. Its BRANCH/COMPLEXITY floors
-      # are below the 85% default for the reason given in its build file.
-      - name: ATEM client tests
-        if: ${{ !cancelled() && steps.modules.outputs.atem == 'true' }}
-        run: ./gradlew :atem:test
-
-      - name: ATEM client coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.atem == 'true' }}
-        run: ./gradlew :atem:jacocoTestCoverageVerification -x test
-
-      # The NDI send client. Its suite drives the whole module -- the JNA marshalling included --
-      # through a plain Kotlin fake, so it needs no NDI Runtime and no network, and it meets the
-      # default 85% floor on all six counters with no override.
-      - name: NDI client tests
-        if: ${{ !cancelled() && steps.modules.outputs.ndi == 'true' }}
-        run: ./gradlew :ndi:test
-
-      - name: NDI client coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.ndi == 'true' }}
-        run: ./gradlew :ndi:jacocoTestCoverageVerification -x test
-
-      # The OMT client, both directions, driven through a plain Kotlin fake like NDI's: no libomt,
-      # no network. The real-library round trip is omt-linux.yml's, on the binaries it builds.
-      - name: OMT client tests
-        if: ${{ !cancelled() && steps.modules.outputs.omt == 'true' }}
-        run: ./gradlew :omt:test
-
-      - name: OMT client coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.omt == 'true' }}
-        run: ./gradlew :omt:jacocoTestCoverageVerification -x test
-
-      - name: Planning Center tests
-        if: ${{ !cancelled() && steps.modules.outputs.planningcenter == 'true' }}
-        run: ./gradlew :planning-center:test
-
-      - name: Planning Center coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.planningcenter == 'true' }}
-        run: ./gradlew :planning-center:jacocoTestCoverageVerification -x test
-
-      - name: Bible formats tests
-        if: ${{ !cancelled() && steps.modules.outputs.bibleformats == 'true' }}
-        run: ./gradlew :bible-formats:test
-
-      - name: Bible formats coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.bibleformats == 'true' }}
-        run: ./gradlew :bible-formats:jacocoTestCoverageVerification -x test
-
-      - name: Song chords tests
-        if: ${{ !cancelled() && steps.modules.outputs.songchords == 'true' }}
-        run: ./gradlew :song-chords:test
-
-      - name: Song chords coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.songchords == 'true' }}
-        run: ./gradlew :song-chords:jacocoTestCoverageVerification -x test
-
-      - name: Bible tests
-        if: ${{ !cancelled() && steps.modules.outputs.bible == 'true' }}
-        run: ./gradlew :bible:test
-
-      - name: Bible coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.bible == 'true' }}
-        run: ./gradlew :bible:jacocoTestCoverageVerification -x test
-
-      - name: Calendar tests
-        if: ${{ !cancelled() && steps.modules.outputs.calendar == 'true' }}
-        run: ./gradlew :calendar:test
-
-      - name: Calendar coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.calendar == 'true' }}
-        run: ./gradlew :calendar:jacocoTestCoverageVerification -x test
-
-      - name: Shared UI tests
-        if: ${{ !cancelled() && steps.modules.outputs.sharedui == 'true' }}
-        run: ./gradlew :shared-ui:test
-
-      - name: Shared UI coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.sharedui == 'true' }}
-        run: ./gradlew :shared-ui:jacocoTestCoverageVerification -x test
-
-      - name: Slides tests
-        if: ${{ !cancelled() && steps.modules.outputs.slides == 'true' }}
-        run: ./gradlew :slides:test
-
-      - name: Slides coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.slides == 'true' }}
-        run: ./gradlew :slides:jacocoTestCoverageVerification -x test
-
-      - name: Media tests
-        if: ${{ !cancelled() && steps.modules.outputs.media == 'true' }}
-        run: ./gradlew :media:test
-
-      - name: Media coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.media == 'true' }}
-        run: ./gradlew :media:jacocoTestCoverageVerification -x test
-
-      - name: Web tests
-        if: ${{ !cancelled() && steps.modules.outputs.web == 'true' }}
-        run: ./gradlew :web:test
-
-      - name: Web coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.web == 'true' }}
-        run: ./gradlew :web:jacocoTestCoverageVerification -x test
-
-      - name: Crossword tab tests
-        if: ${{ !cancelled() && steps.modules.outputs.crosswordtab == 'true' }}
-        run: ./gradlew :crossword-tab:test
-
-      - name: Crossword tab coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.crosswordtab == 'true' }}
-        run: ./gradlew :crossword-tab:jacocoTestCoverageVerification -x test
-
-      - name: QA tests
-        if: ${{ !cancelled() && steps.modules.outputs.qa == 'true' }}
-        run: ./gradlew :qa:test
-
-      - name: QA coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.qa == 'true' }}
-        run: ./gradlew :qa:jacocoTestCoverageVerification -x test
-
-      - name: OBS tests
-        if: ${{ !cancelled() && steps.modules.outputs.obs == 'true' }}
-        run: ./gradlew :obs:test
-
-      - name: OBS coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.obs == 'true' }}
-        run: ./gradlew :obs:jacocoTestCoverageVerification -x test
-
-      - name: Live show tests
-        if: ${{ !cancelled() && steps.modules.outputs.liveshow == 'true' }}
-        run: ./gradlew :live-show:test
-
-      - name: Live show coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.liveshow == 'true' }}
-        run: ./gradlew :live-show:jacocoTestCoverageVerification -x test
-
-      - name: Show control tests
-        if: ${{ !cancelled() && steps.modules.outputs.showcontrol == 'true' }}
-        run: ./gradlew :show-control:test
-
-      - name: Show control coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.showcontrol == 'true' }}
-        run: ./gradlew :show-control:jacocoTestCoverageVerification -x test
-
-      - name: Control in tests
-        if: ${{ !cancelled() && steps.modules.outputs.controlin == 'true' }}
-        run: ./gradlew :control-in:test
-
-      - name: Control in coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.controlin == 'true' }}
-        run: ./gradlew :control-in:jacocoTestCoverageVerification -x test
-
-      - name: Live output tests
-        if: ${{ !cancelled() && steps.modules.outputs.liveoutput == 'true' }}
-        run: ./gradlew :live-output:test
-
-      - name: Live output coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.liveoutput == 'true' }}
-        run: ./gradlew :live-output:jacocoTestCoverageVerification -x test
-
-      - name: Statistics tests
-        if: ${{ !cancelled() && steps.modules.outputs.statistics == 'true' }}
-        run: ./gradlew :statistics:test
-
-      - name: Statistics coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.statistics == 'true' }}
-        run: ./gradlew :statistics:jacocoTestCoverageVerification -x test
-
-      - name: Updater tests
-        if: ${{ !cancelled() && steps.modules.outputs.updater == 'true' }}
-        run: ./gradlew :updater:test
-
-      - name: Updater coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.updater == 'true' }}
-        run: ./gradlew :updater:jacocoTestCoverageVerification -x test
-
-      - name: Server UI tests
-        if: ${{ !cancelled() && steps.modules.outputs.serverui == 'true' }}
-        run: ./gradlew :server-ui:test
-
-      - name: Server UI coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.serverui == 'true' }}
-        run: ./gradlew :server-ui:jacocoTestCoverageVerification -x test
-
-      - name: App settings tests
-        if: ${{ !cancelled() && steps.modules.outputs.appsettings == 'true' }}
-        run: ./gradlew :app-settings:test
-
-      - name: App settings coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.appsettings == 'true' }}
-        run: ./gradlew :app-settings:jacocoTestCoverageVerification -x test
-
-      - name: Telemetry tests
-        if: ${{ !cancelled() && steps.modules.outputs.telemetry == 'true' }}
-        run: ./gradlew :telemetry:test
-
-      - name: Telemetry coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.telemetry == 'true' }}
-        run: ./gradlew :telemetry:jacocoTestCoverageVerification -x test
-
-      - name: Dictionary tests
-        if: ${{ !cancelled() && steps.modules.outputs.dictionary == 'true' }}
-        run: ./gradlew :dictionary:test
-
-      - name: Dictionary coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.dictionary == 'true' }}
-        run: ./gradlew :dictionary:jacocoTestCoverageVerification -x test
-
-      - name: STT tests
-        if: ${{ !cancelled() && steps.modules.outputs.stt == 'true' }}
-        run: ./gradlew :stt:test
-
-      - name: STT coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.stt == 'true' }}
-        run: ./gradlew :stt:jacocoTestCoverageVerification -x test
-
-      - name: Announcements tests
-        if: ${{ !cancelled() && steps.modules.outputs.announcements == 'true' }}
-        run: ./gradlew :announcements:test
-
-      - name: Announcements coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.announcements == 'true' }}
-        run: ./gradlew :announcements:jacocoTestCoverageVerification -x test
-
-      - name: Helper tests
-        if: ${{ !cancelled() && steps.modules.outputs.helper == 'true' }}
-        run: ./gradlew :helper:test
-
-      # How well Wick understands reworded requests: fails on any wrong action by its model, or when it
-      # reaches fewer of them. Its own task because every row runs the model.
-      - name: Wick understanding eval
-        if: ${{ !cancelled() && steps.modules.outputs.helper == 'true' }}
-        run: ./gradlew :helper:wickEval
-
-      - name: Helper coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.helper == 'true' }}
-        run: ./gradlew :helper:jacocoTestCoverageVerification -x test
-
-      - name: Lower Third tests
-        if: ${{ !cancelled() && steps.modules.outputs.lowerthird == 'true' }}
-        run: ./gradlew :lower-third:test
-
-      - name: Lower Third coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.lowerthird == 'true' }}
-        run: ./gradlew :lower-third:jacocoTestCoverageVerification -x test
-
-      - name: Songs tests
-        if: ${{ !cancelled() && steps.modules.outputs.songs == 'true' }}
-        run: ./gradlew :songs:test
-
-      - name: Songs coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.songs == 'true' }}
-        run: ./gradlew :songs:jacocoTestCoverageVerification -x test
-
-      - name: Bible tab tests
-        if: ${{ !cancelled() && steps.modules.outputs.bibletab == 'true' }}
-        run: ./gradlew :bible-tab:test
-
-      - name: Bible tab coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.bibletab == 'true' }}
-        run: ./gradlew :bible-tab:jacocoTestCoverageVerification -x test
-
-      - name: Server tests
-        if: ${{ !cancelled() && steps.modules.outputs.server == 'true' }}
-        run: ./gradlew :server:test
-
-      - name: Server coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.server == 'true' }}
-        run: ./gradlew :server:jacocoTestCoverageVerification -x test
-
-      - name: Schedule tests
-        if: ${{ !cancelled() && steps.modules.outputs.schedule == 'true' }}
-        run: ./gradlew :schedule:test
-
-      - name: Schedule coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.schedule == 'true' }}
-        run: ./gradlew :schedule:jacocoTestCoverageVerification -x test
-
-      - name: Canvas tests
-        if: ${{ !cancelled() && steps.modules.outputs.canvas == 'true' }}
-        run: ./gradlew :canvas:test
-
-      - name: Canvas coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.canvas == 'true' }}
-        run: ./gradlew :canvas:jacocoTestCoverageVerification -x test
-
-      - name: Presenter tests
-        if: ${{ !cancelled() && steps.modules.outputs.presenter == 'true' }}
-        run: ./gradlew :presenter:test
-
-      - name: Presenter coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.presenter == 'true' }}
-        run: ./gradlew :presenter:jacocoTestCoverageVerification -x test
-
-      - name: Profiles tests
-        if: ${{ !cancelled() && steps.modules.outputs.profiles == 'true' }}
-        run: ./gradlew :profiles:test
-
-      - name: Profiles coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.profiles == 'true' }}
-        run: ./gradlew :profiles:jacocoTestCoverageVerification -x test
-
-      - name: Companion Surface tests
-        if: ${{ !cancelled() && steps.modules.outputs.companionsurface == 'true' }}
-        run: ./gradlew :companion-surface:test
-
-      - name: Companion Surface coverage floor
-        if: ${{ !cancelled() && steps.modules.outputs.companionsurface == 'true' }}
-        run: ./gradlew :companion-surface:jacocoTestCoverageVerification -x test
-
-
-
-      # Puts the failure message and stack trace of every failed test in the pull request itself,
-      # instead of leaving a reviewer to download the report artifact below and open it locally.
-      # Also annotates the failing line in the Files-changed view.
-      #
-      # `!cancelled()` so it runs after a failed suite — that is the only time it has anything to
-      # say — and `detailed_summary` so each failure is listed by name rather than as a count.
-      #
-      # It never fails the job on its own (`fail_on_failure: false`): the test step that produced
-      # the XML has already done that, and a reporter that can also fail turns one red step into
-      # two for the same cause.
-      # Only the modules that ran: a module whose suite was skipped (nothing it depends on changed)
-      # has no results on this runner, and listing it anyway put a "0 ran" row and an empty check in
-      # every pull request. The paths and names are built here, together, so they cannot drift apart.
+      - name: Keep the results for the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: results-app
+          if-no-files-found: ignore
+          retention-days: 7
+          path: |
+            composeApp/build/test-results/
+            composeApp/build/reports/tests/
+            composeApp/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+
+  # The module suites, in the groups prepare packed them into: one runner per group, and one Gradle
+  # invocation on it, so the group's modules run side by side on the runner's cores. `--continue`
+  # so one failing module still lets the rest report. Each module's coverage floor runs in the same
+  # invocation, after its own suite.
+  modules:
+    needs: prepare
+    if: needs.prepare.outputs.has_modules == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJson(needs.prepare.outputs.shards) }}
+    name: modules (${{ matrix.shard.name }})
+    env:
+      ORG_GRADLE_PROJECT_hangThresholdMs: '150000'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Module suites
+        env:
+          MODULES: ${{ matrix.shard.modules }}
+          TASKS: ${{ matrix.shard.tasks }}
+        # Compiled first and the compile daemon stopped, as the app job does, so four test JVMs
+        # have the runner's memory to themselves.
+        run: |
+          echo "Modules: $MODULES"
+          compile=()
+          for m in $MODULES; do compile+=(":$m:testClasses"); done
+          ./gradlew "${compile[@]}" --max-workers=4
+          pkill -f KotlinCompileDaemon || true
+          ./gradlew $TASKS --continue --max-workers=4
+
+      - name: Keep the results for the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: results-modules-${{ strategy.job-index }}
+          if-no-files-found: ignore
+          retention-days: 7
+          path: |
+            */build/test-results/
+            */build/reports/tests/
+            */build/reports/jacoco/test/jacocoTestReport.xml
+
+  # AGENT.md's flake rule, enforced: every test class this change added or edited runs three more
+  # times. `--rerun` reruns only the test task; JaCoCo is off (-PfastTest) because coverage is
+  # measured elsewhere. .github/ci/changed_tests.py says which classes count. A pull request or
+  # merge group only: a push to main was already held to it.
+  changed-tests:
+    needs: prepare
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      ORG_GRADLE_PROJECT_hangThresholdMs: '150000'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Changed tests pass three runs in a row
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          python3 .github/ci/changed_tests.py --base "$BASE_SHA" > changed-tests.txt
+          while read -r task classes; do
+            [ -n "$task" ] || continue
+            filters=()
+            for c in $classes; do filters+=(--tests "$c"); done
+            for run in 1 2 3; do
+              echo "::group::$task, run $run of 3"
+              ./gradlew "$task" --rerun -PfastTest "${filters[@]}" < /dev/null
+              echo "::endgroup::"
+            done
+          done < changed-tests.txt
+
+  # The check `main` requires. It runs whatever happened above (`always()`) and fails unless every
+  # job it waited on succeeded or was deliberately skipped -- a required check that is SKIPPED counts
+  # as passing, which is exactly how #634 merged with no suite run, so this job must never be the
+  # one that is skipped. It also gathers every job's results into the pull-request reports.
+  test:
+    needs: [prepare, detekt, app, modules, changed-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Gather the results
+        if: ${{ !cancelled() }}
+        uses: actions/download-artifact@v4
+        with:
+          pattern: results-*
+          merge-multiple: true
+
+      # Puts the failure message and stack trace of every failed test in the pull request itself, and
+      # annotates the failing line. Only modules that ran in this build are listed (plan_ci.py
+      # report-inputs). It never fails the job on its own: the suites already decided that.
       - name: Which test results to report
         id: junit_inputs
         if: ${{ !cancelled() && github.event_name == 'pull_request' }}
-        run: |
-          python3 - <<'PY' >> "$GITHUB_OUTPUT"
-          import glob
-          MODULES = [
-              ("composeApp", "App"),
-              ("converter", "Converter"),
-              ("companion-satellite", "Companion Satellite"),
-              ("lottieGenerator", "Lower Third generator"),
-              ("crossword", "Crossword"),
-              ("presentation-engine", "Presentation Engine"),
-              ("theme", "Theme"),
-              ("core-models", "Core models"),
-              ("songlibrary", "Song library"),
-              ("bible-engine", "Bible Lookup Engine"),
-              ("settings", "Settings"),
-              ("diagnostics", "Diagnostics"),
-              ("atem", "ATEM client"),
-              ("ndi", "NDI client"),
-              ("omt", "OMT client"),
-              ("planning-center", "Planning Center"),
-              ("bible-formats", "Bible formats"),
-              ("song-chords", "Song chords"),
-              ("bible", "Bible"),
-              ("calendar", "Calendar"),
-              ("shared-ui", "Shared UI"),
-              ("slides", "Slides"),
-              ("media", "Media"),
-              ("web", "Web"),
-              ("crossword-tab", "Crossword tab"),
-              ("qa", "QA"),
-              ("obs", "OBS"),
-              ("live-show", "Live show"),
-              ("show-control", "Show control"),
-              ("control-in", "Control in"),
-              ("live-output", "Live output"),
-              ("statistics", "Statistics"),
-              ("updater", "Updater"),
-              ("telemetry", "Telemetry"),
-              ("app-settings", "App settings"),
-              ("server-ui", "Server UI"),
-              ("dictionary", "Dictionary"),
-              ("stt", "STT"),
-              ("announcements", "Announcements"),
-              ("helper", "Helper"),
-              ("lower-third", "Lower Third"),
-              ("songs", "Songs"),
-              ("bible-tab", "Bible tab"),
-              ("server", "Server"),
-              ("schedule", "Schedule"),
-              ("canvas", "Canvas"),
-              ("presenter", "Presenter"),
-              ("profiles", "Profiles"),
-              ("companion-surface", "Companion Surface"),
-          ]
-          ran = [(d, n) for d, n in MODULES if glob.glob(f"{d}/build/test-results/**/TEST-*.xml", recursive=True)]
-          print("paths<<EOF")
-          print("\n".join(f"{d}/build/test-results/**/TEST-*.xml" for d, _ in ran))
-          print("EOF")
-          print("names<<EOF")
-          print("\n".join(n for _, n in ran))
-          print("EOF")
-          PY
+        run: python3 .github/ci/plan_ci.py report-inputs >> "$GITHUB_OUTPUT"
 
       - name: Report failing tests on the pull request
         if: ${{ !cancelled() && github.event_name == 'pull_request' && steps.junit_inputs.outputs.paths != '' }}
@@ -775,17 +372,11 @@ jobs:
           check_name: ${{ steps.junit_inputs.outputs.names }}
           detailed_summary: true
           include_passed: false
-          # Without this the second table is one row of "No test annotations available" per
-          # check_name on every green run -- `include_passed: false` leaves it nothing to list when
-          # nothing failed. Off, that table appears only when there is a failure to put in it.
           verbose_summary: false
           fail_on_failure: false
           comment: true
           updateComment: true
 
-      # Every module, every counter, current value. madrapps/jacoco-report was here first and only
-      # reported modules containing changed files -- one row, and a red mark on a module at 99%.
-      # Never gates: the jacocoTestCoverageVerification steps above are the real floors.
       - name: Coverage table
         if: ${{ !cancelled() && github.event_name == 'pull_request' }}
         env:
@@ -886,140 +477,19 @@ jobs:
           fi
           cat coverage.md >> "$GITHUB_STEP_SUMMARY"
 
-      # AGENT.md's flake rule, enforced: every test class this change added or edited runs three more
-      # times. `--rerun` reruns only the test task, so nothing recompiles; JaCoCo is off (-PfastTest)
-      # because the coverage above is already measured. .github/ci/changed_tests.py says which
-      # classes count. A pull request or merge group only: a push to main was already held to it.
-      - name: Changed tests pass three runs in a row
-        if: github.event_name != 'push'
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
-        run: |
-          python3 -m unittest discover -s .github/ci
-          python3 .github/ci/changed_tests.py --base "$BASE_SHA" > changed-tests.txt
-          while read -r task classes; do
-            [ -n "$task" ] || continue
-            filters=()
-            for c in $classes; do filters+=(--tests "$c"); done
-            for run in 1 2 3; do
-              echo "::group::$task, run $run of 3"
-              ./gradlew "$task" --rerun -PfastTest "${filters[@]}" < /dev/null
-              echo "::endgroup::"
-            done
-          done < changed-tests.txt
-
       - name: Upload test reports
-        if: failure()
+        if: ${{ !cancelled() && (needs.app.result == 'failure' || needs.modules.result == 'failure' || needs.changed-tests.result == 'failure') }}
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
           if-no-files-found: ignore
           retention-days: 7
           path: |
-            composeApp/build/reports/tests/
-            composeApp/build/test-results/
-            composeApp/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
-            converter/build/reports/tests/
-            converter/build/test-results/
-            lottieGenerator/build/reports/tests/
-            lottieGenerator/build/test-results/
-            crossword/build/reports/tests/
-            crossword/build/test-results/
-            presentation-engine/build/reports/tests/
-            presentation-engine/build/test-results/
-            theme/build/reports/tests/
-            theme/build/test-results/
-            core-models/build/reports/tests/
-            core-models/build/test-results/
-            songlibrary/build/reports/tests/
-            songlibrary/build/test-results/
-            bible-engine/build/reports/tests/
-            bible-engine/build/test-results/
-            settings/build/reports/tests/
-            settings/build/test-results/
-            diagnostics/build/reports/tests/
-            diagnostics/build/test-results/
-            atem/build/reports/tests/
-            atem/build/test-results/
-            ndi/build/reports/tests/
-            ndi/build/test-results/
-            omt/build/reports/tests/
-            omt/build/test-results/
-            planning-center/build/reports/tests/
-            planning-center/build/test-results/
-            bible-formats/build/reports/tests/
-            bible-formats/build/test-results/
-            song-chords/build/reports/tests/
-            song-chords/build/test-results/
-            shared-ui/build/reports/tests/
-            shared-ui/build/test-results/
-            slides/build/reports/tests/
-            slides/build/test-results/
-            media/build/reports/tests/
-            media/build/test-results/
-            web/build/reports/tests/
-            web/build/test-results/
-            crossword-tab/build/reports/tests/
-            crossword-tab/build/test-results/
-            qa/build/reports/tests/
-            qa/build/test-results/
-            obs/build/reports/tests/
-            obs/build/test-results/
-            live-show/build/reports/tests/
-            live-show/build/test-results/
-            show-control/build/reports/tests/
-            show-control/build/test-results/
-            control-in/build/reports/tests/
-            control-in/build/test-results/
-            live-output/build/reports/tests/
-            live-output/build/test-results/
-            statistics/build/reports/tests/
-            statistics/build/test-results/
-            updater/build/reports/tests/
-            updater/build/test-results/
-            telemetry/build/reports/tests/
-            telemetry/build/test-results/
-            app-settings/build/reports/tests/
-            app-settings/build/test-results/
-            server-ui/build/reports/tests/
-            server-ui/build/test-results/
-            dictionary/build/reports/tests/
-            dictionary/build/test-results/
-            stt/build/reports/tests/
-            stt/build/test-results/
-            announcements/build/reports/tests/
-            announcements/build/test-results/
-            helper/build/reports/tests/
-            helper/build/test-results/
-            lower-third/build/reports/tests/
-            lower-third/build/test-results/
-            songs/build/reports/tests/
-            songs/build/test-results/
-            bible-tab/build/reports/tests/
-            bible-tab/build/test-results/
-            server/build/reports/tests/
-            server/build/test-results/
-            schedule/build/reports/tests/
-            schedule/build/test-results/
-            canvas/build/reports/tests/
-            canvas/build/test-results/
-            presenter/build/reports/tests/
-            presenter/build/test-results/
-            profiles/build/reports/tests/
-            profiles/build/test-results/
-            companion-surface/build/reports/tests/
-            companion-surface/build/test-results/
+            */build/test-results/
+            */build/reports/tests/
 
-      # A hang halts its fork with a thread dump (HungTestReporter, exit 93) into
-      # <module>/build/test-results/<task>/hung-test-dump.txt, which `test-reports` above carries.
-      # The hang shows up every few weeks on an unrelated run and is easy to re-run past, so it is
-      # filed as a `test-hang` issue -- one open issue, later hangs comment on it -- rather than left
-      # in an artifact that expires in a week.
-      #
-      # Purely a reporter: it can never change this job's result. `continue-on-error`, every gh call
-      # guarded, and a token that cannot write issues (a fork's pull request) just logs and exits 0.
       - name: Report a hung test as an issue
-        if: failure()
+        if: ${{ !cancelled() && (needs.app.result == 'failure' || needs.modules.result == 'failure') }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -1072,3 +542,22 @@ jobs:
             gh issue create --title "Test suite hang in CI" --label "$LABEL" --body-file hang-issue.md \
               || echo "Could not open an issue (read-only token?) -- not filing."
           fi
+
+      # The verdict. Success or a deliberate skip (no module affected; the three-run check on a
+      # push) passes; anything else -- a failure, a cancellation, a job that never ran -- fails `test`.
+      - name: Every job passed
+        env:
+          RESULTS: ${{ toJson(needs) }}
+        run: |
+          python3 - <<'PY'
+          import json, os, sys
+          needs = json.loads(os.environ["RESULTS"])
+          bad = {name: n["result"] for name, n in needs.items() if n["result"] not in ("success", "skipped")}
+          for name, n in needs.items():
+              print(f"{name}: {n['result']}")
+          if needs.get("prepare", {}).get("result") != "success":
+              bad["prepare"] = needs.get("prepare", {}).get("result")
+          if bad:
+              print(f"Not passing: {bad}")
+              sys.exit(1)
+          PY
