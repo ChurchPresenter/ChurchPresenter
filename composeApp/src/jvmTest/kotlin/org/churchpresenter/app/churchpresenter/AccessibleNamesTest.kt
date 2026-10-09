@@ -43,11 +43,15 @@ class AccessibleNamesTest : MainDesktopComposeHarness() {
         )
     }
 
-    /** One per tab, so a new tab cannot be left out. */
+    /**
+     * One per tab, so a new tab cannot be left out. The Web tab is `:web`'s `WebTabAccessibleNamesTest`:
+     * composing it through the main window here disturbs this suite's later main-window tests in the
+     * same JVM.
+     */
     @Test
     fun `every tab has a test of its own`() {
         val covered = this::class.java.declaredMethods.map { it.name }.toSet()
-        val missing = Tabs.entries.filter { tab -> covered.none { it.startsWith("the ${tab.name} tab") } }
+        val missing = (Tabs.entries - Tabs.WEB).filter { tab -> covered.none { it.startsWith("the ${tab.name} tab") } }
         assertTrue(missing.isEmpty(), "no accessible-names test for: $missing")
     }
 
@@ -71,9 +75,6 @@ class AccessibleNamesTest : MainDesktopComposeHarness() {
 
     @Test
     fun `the ANNOUNCEMENTS tab names every control`() = assertEveryControlNamed(Tabs.ANNOUNCEMENTS)
-
-    @Test
-    fun `the WEB tab names every control`() = assertEveryControlNamed(Tabs.WEB)
 
     @Test
     fun `the CANVAS tab names every control`() = assertEveryControlNamed(Tabs.CANVAS)

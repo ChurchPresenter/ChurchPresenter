@@ -20,10 +20,12 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SemanticsNodeInteractionCollection
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEditable
 import androidx.compose.ui.test.isToggleable
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onLast
@@ -263,8 +265,12 @@ internal fun ComposeUiTest.textFields(): SemanticsNodeInteractionCollection = on
 internal fun ComposeUiTest.fieldShowing(value: String): SemanticsNodeInteraction =
     onNode(hasSetTextAction() and hasText(value))
 
-/** Every checkbox on the panel, in composition order. */
-internal fun ComposeUiTest.checkboxes(): SemanticsNodeInteractionCollection = onAllNodes(isToggleable())
+/** The style faces, which are toggles too but not the panel's checkboxes. */
+private val STYLE_FACES = listOf("Bold", "Italic", "Underline", "Strikethrough", "Shadow")
+
+/** Every checkbox on the panel, in composition order — not the B/I/U/S faces. */
+internal fun ComposeUiTest.checkboxes(): SemanticsNodeInteractionCollection =
+    onAllNodes(STYLE_FACES.fold(isToggleable()) { matcher, face -> matcher and !hasContentDescription(face) })
 
 /**
  * Every Material button on the panel, in composition order.
@@ -318,17 +324,19 @@ internal fun ComposeUiTest.typeField(ordinal: Int, to: String) {
 }
 
 /**
- * Clicks one of `TextStyleButtons`' four faces, addressed by the single letter it draws:
- * "B", "I", "U", "S".
- *
- * They are `Surface`s with a `clickable`, not buttons — no role, no toggleable state — so the letter
- * is the only handle on them, and [index] picks between the rows when a panel has more than one (the
- * Bible source styles its verse and its reference separately).
+ * Clicks one of `TextStyleButtons`' four faces, by the name a screen reader hears: "Bold",
+ * "Italic", "Underline", "Strikethrough" — the letter each draws is not read. [index] picks between
+ * the rows when a panel has more than one (the Bible source styles its verse and its reference
+ * separately).
  */
-internal fun ComposeUiTest.clickStyleButton(label: String, index: Int = 0) {
-    onAllNodesWithText(label)[index].performScrollTo().performClick()
+internal fun ComposeUiTest.clickStyleButton(name: String, index: Int = 0) {
+    onAllNodesWithContentDescription(name)[index].performScrollTo().performClick()
     waitForIdle()
 }
+
+/** How many controls are named [name] — the style faces, which carry a name rather than text. */
+internal fun ComposeUiTest.countNamed(name: String): Int =
+    onAllNodesWithContentDescription(name).fetchSemanticsNodes(atLeastOneRootRequired = false).size
 
 /** Clicks the checkbox at [ordinal], scrolling it into view first. */
 internal fun ComposeUiTest.toggleCheckbox(ordinal: Int) {

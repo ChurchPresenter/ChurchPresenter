@@ -3,6 +3,7 @@
 package org.churchpresenter.canvas
 
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -221,7 +222,7 @@ class SourcePropertiesClockTest {
 
     @Test
     fun `the Bold button turns the clock's own bold off again`() = sourcePanel(Fixture.clock("clk-bold")) { get ->
-        clickStyleButton("B")
+        clickStyleButton("Bold")
 
         assertEquals(
             Fixture.clock("clk-bold").copy(bold = false), get(),
@@ -232,15 +233,15 @@ class SourcePropertiesClockTest {
     @Test
     fun `Italic, Underline and Strikethrough each store their own face`() {
         sourcePanel(Fixture.clock("clk-italic")) { get ->
-            clickStyleButton("I")
+            clickStyleButton("Italic")
             assertEquals(Fixture.clock("clk-italic").copy(italic = true), get())
         }
         sourcePanel(Fixture.clock("clk-underline")) { get ->
-            clickStyleButton("U")
+            clickStyleButton("Underline")
             assertEquals(Fixture.clock("clk-underline").copy(underline = true), get())
         }
         sourcePanel(Fixture.clock("clk-strike")) { get ->
-            clickStyleButton("S")
+            clickStyleButton("Strikethrough")
             assertEquals(Fixture.clock("clk-strike").copy(strikethrough = true), get())
         }
     }
@@ -673,7 +674,7 @@ class SourcePropertiesClockTest {
 
     @Test
     fun `the style row carries no text-backing control`() = sourcePanel(Fixture.clock()) { _ ->
-        onAllNodesWithText("B").assertCountEquals(1)
+        onAllNodesWithContentDescription("Bold").assertCountEquals(1)
         onAllNodesWithText("A").assertCountEquals(0)
     }
 }

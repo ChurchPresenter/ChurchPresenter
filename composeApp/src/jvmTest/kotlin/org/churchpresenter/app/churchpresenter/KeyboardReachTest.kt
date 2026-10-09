@@ -8,7 +8,9 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.performMouseInput
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.models.Tabs
@@ -21,6 +23,11 @@ import kotlin.test.assertTrue
  * Take. A control Tab skips is one a keyboard-only operator cannot press at all.
  */
 class KeyboardReachTest : MainDesktopComposeHarness() {
+
+    private companion object {
+        /** Only ever the bound on a wait for state; never the thing that passes a test. */
+        const val WAIT_MS = 5_000L
+    }
 
     /** The names of everything Tab lands on in [presses] presses -- more than one full cycle. */
     private fun ComposeUiTest.tabStops(presses: Int = 80): Set<String> = buildSet {
@@ -37,9 +44,19 @@ class KeyboardReachTest : MainDesktopComposeHarness() {
     private fun songsOnly(settings: AppSettings) =
         settings.copy(hiddenTabs = Tabs.entries.filter { it != Tabs.SONGS }.map { it.name }.toSet())
 
+    /** Waits, bounded, until a control named [name] can be pressed -- only an enabled one takes focus. */
+    private fun ComposeUiTest.awaitEnabled(name: String) =
+        waitUntil("$name to be enabled", timeoutMillis = WAIT_MS) {
+            onAllNodes(hasContentDescription(name) and isEnabled()).fetchSemanticsNodes().isNotEmpty()
+        }
+
+    /** Selects the library's one song once it has loaded, so Go Live can be pressed. */
     private fun ComposeUiTest.selectTheSong() {
-        onAllNodes(hasText("A Test Song", substring = true))[0].performMouseInput { click() }
+        val song = hasText("A Test Song", substring = true)
+        waitUntil("the song to load", timeoutMillis = WAIT_MS) { onAllNodes(song).fetchSemanticsNodes().isNotEmpty() }
+        onAllNodes(song)[0].performMouseInput { click() }
         waitForIdle()
+        awaitEnabled("Go Live")
     }
 
     @Test
@@ -58,7 +75,11 @@ class KeyboardReachTest : MainDesktopComposeHarness() {
     @Test
     fun `preview mode's take is reachable with tab`() {
         root(songsOnly(withPreviewMode(on = true)), presenterManager = cuedManager(), devMode = true) {
-            assertTrue("Take" in tabStops(), "Tab never reaches Take")
+            waitUntil("Take to be enabled", timeoutMillis = WAIT_MS) {
+                onAllNodes(hasText("Take") and isEnabled()).fetchSemanticsNodes().isNotEmpty()
+            }
+            val stops = tabStops()
+            assertTrue("Take" in stops, "Tab never reaches Take; it reaches: $stops")
         }
     }
 }

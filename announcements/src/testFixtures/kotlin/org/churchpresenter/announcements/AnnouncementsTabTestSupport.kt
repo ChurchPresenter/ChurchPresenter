@@ -148,6 +148,7 @@ object AnnouncementLabel {
     const val START = "Start"
     const val PAUSE = "Pause"
     const val RESET = "Reset"
+
     // The style keys draw a letter but are named for what they do (see clickStyle).
     const val BOLD = "Bold"
     const val ITALIC = "Italic"
