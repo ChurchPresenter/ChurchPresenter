@@ -25,11 +25,12 @@ demand.
 - Only acceptable exception: a rendering bridge whose panel lifecycle is tightly coupled to the
   ViewModel (`MediaPresenter`/`VideoPlayer`, `PresentationPlayer`, `LottieFrameStream`) — document
   it explicitly at the site.
-- Known standing deviation: `MainDesktop.kt` and the files split out of it pass ViewModels
-  top-down — the wiring (`*Wiring.kt`, `MainDesktopEffects.kt`, `RemoteCommandEffects.kt`,
-  `PresenterWindows.kt`) and the root screen's layout pieces, which reach them through
-  `MainDesktopScope`/`MainDesktopViewModels` (`MainDesktopPanels.kt`, `ScheduleSidebar.kt`,
-  `MainTabArea.kt`, `ContentTabPanes.kt`, `PreviewSidebar.kt`). Not new precedent.
+- Known standing deviation: `MainDesktop.kt` and its wiring pass ViewModels top-down —
+  `MainDesktopScope`/`MainDesktopViewModels`, the `*Wiring.kt` files, `MainDesktopEffects.kt`,
+  `RemoteCommandEffects.kt`, `PresenterWindows.kt` and `VirtualOutputs.kt`. The root screen's
+  layout pieces (`MainDesktopPanels.kt`, `ScheduleSidebar.kt`, `MainTabArea.kt`,
+  `PreviewSidebar.kt`, `MainDesktopKeys.kt`) take plain state, typed callback holders and slots
+  built by that wiring — never the scope or a ViewModel. Not new precedent.
 
 ### Dev mode only — unfinished features stay behind it
 - A user-facing feature that is built but not approved for production goes in the preview
