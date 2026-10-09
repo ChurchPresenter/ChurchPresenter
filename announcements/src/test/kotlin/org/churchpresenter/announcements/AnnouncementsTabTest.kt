@@ -97,7 +97,7 @@ class AnnouncementsTabTest {
     fun `adding to the schedule keeps the styling the announcement was given`() =
         announcementsTab { _, reports ->
             typeAnnouncement("Styled")
-            clickLabel(AnnouncementLabel.BOLD)
+            clickStyle(AnnouncementLabel.BOLD)
             annButton(AnnouncementLabel.ADD_TO_SCHEDULE).performClick()
             waitForIdle()
 
@@ -110,16 +110,16 @@ class AnnouncementsTabTest {
     fun `each style toggle turns on and off again`() = announcementsTab { _, reports ->
         typeAnnouncement("Styled")
 
-        clickLabel(AnnouncementLabel.BOLD)
+        clickStyle(AnnouncementLabel.BOLD)
         assertTrue(reports.settings?.bold == true, "bold on")
-        clickLabel(AnnouncementLabel.BOLD)
+        clickStyle(AnnouncementLabel.BOLD)
         assertFalse(reports.settings?.bold == true, "and off again")
 
-        clickLabel(AnnouncementLabel.ITALIC)
+        clickStyle(AnnouncementLabel.ITALIC)
         assertTrue(reports.settings?.italic == true)
-        clickLabel(AnnouncementLabel.UNDERLINE)
+        clickStyle(AnnouncementLabel.UNDERLINE)
         assertTrue(reports.settings?.underline == true)
-        clickLabel(AnnouncementLabel.SHADOW)
+        clickStyle(AnnouncementLabel.SHADOW)
         assertTrue(reports.settings?.shadow == true)
     }
 
@@ -127,9 +127,9 @@ class AnnouncementsTabTest {
     fun `the styles are independent of each other`() = announcementsTab { _, reports ->
         typeAnnouncement("Styled")
 
-        clickLabel(AnnouncementLabel.BOLD)
-        clickLabel(AnnouncementLabel.ITALIC)
-        clickLabel(AnnouncementLabel.BOLD)
+        clickStyle(AnnouncementLabel.BOLD)
+        clickStyle(AnnouncementLabel.ITALIC)
+        clickStyle(AnnouncementLabel.BOLD)
 
         val settings = reports.settings
         assertFalse(settings?.bold == true, "bold was turned back off")
@@ -143,7 +143,7 @@ class AnnouncementsTabTest {
         ) { _, reports ->
             // Toggling something unrelated makes the tab report the whole settings object back,
             // which is where the previously-saved flags have to have survived.
-            clickLabel(AnnouncementLabel.ITALIC)
+            clickStyle(AnnouncementLabel.ITALIC)
 
             val settings = reports.settings
             assertTrue(settings?.bold == true, "bold survived the round trip")

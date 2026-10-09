@@ -67,8 +67,8 @@ class ProfilesCustomizeBibleControlsTest {
             openCustomizePane(CustomizePane.BIBLE)
             retypeNumberField(61, 72)
             recolor("#AABBCC", "#112233")
-            for (glyph in listOf("B", "I", "U")) {
-                styleButton(group = 0, label = glyph).performScrollTo().performClick()
+            for (glyph in listOf("Bold", "Italic", "Underline")) {
+                styleButton(group = 0, name = glyph).performScrollTo().performClick()
                 waitForIdle()
             }
             shadowCheckbox(group = 0).performScrollTo().performClick()
@@ -89,8 +89,8 @@ class ProfilesCustomizeBibleControlsTest {
             openCustomizePane(CustomizePane.BIBLE)
             retypeNumberField(62, 26)
             recolor("#DDEEFF", "#334455")
-            for (glyph in listOf("B", "I", "U")) {
-                styleButton(group = 0, label = glyph).performScrollTo().performClick()
+            for (glyph in listOf("Bold", "Italic", "Underline")) {
+                styleButton(group = 0, name = glyph).performScrollTo().performClick()
                 waitForIdle()
             }
             shadowCheckbox(group = 0).performScrollTo().performClick()

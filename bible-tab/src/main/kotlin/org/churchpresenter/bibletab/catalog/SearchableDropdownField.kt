@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.dropdown_show_list
 import org.churchpresenter.strings.generated.resources.clear
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_close
@@ -242,7 +243,7 @@ private fun DropdownFieldIcons(onClear: (() -> Unit)?, onChevron: () -> Unit) {
     }
     Icon(
         painter = painterResource(IconRes.drawable.ic_arrow_down),
-        contentDescription = null,
+        contentDescription = stringResource(Res.string.dropdown_show_list),
         modifier = Modifier
             .size(14.dp)
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { onChevron() },

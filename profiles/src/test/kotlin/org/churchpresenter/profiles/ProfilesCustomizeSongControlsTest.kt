@@ -68,8 +68,8 @@ class ProfilesCustomizeSongControlsTest {
             retypeNumberField(61, 72)
             toggleCheckbox("Auto-fit")
             recolor("#AABBCC", "#112233")
-            for (glyph in listOf("B", "I", "U")) {
-                styleButton(group = 0, label = glyph).performScrollTo().performClick()
+            for (glyph in listOf("Bold", "Italic", "Underline")) {
+                styleButton(group = 0, name = glyph).performScrollTo().performClick()
                 waitForIdle()
             }
             shadowCheckbox(group = 0).performScrollTo().performClick()
@@ -91,7 +91,7 @@ class ProfilesCustomizeSongControlsTest {
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
             retypeNumberField(62, 26)
             recolor("#DDEEFF", "#334455")
-            styleButton(group = 0, label = "B").performScrollTo().performClick()
+            styleButton(group = 0, name = "Bold").performScrollTo().performClick()
             waitForIdle()
 
             val stored = get().song()
@@ -167,7 +167,7 @@ class ProfilesCustomizeSongControlsTest {
             retypeNumberField(51, 46)
             toggleCheckbox("Auto-fit")
             recolor("#445566", "#667788")
-            styleButton(group = 0, label = "I").performScrollTo().performClick()
+            styleButton(group = 0, name = "Italic").performScrollTo().performClick()
             waitForIdle()
             segment("Right").performScrollTo().performClick()
             waitForIdle()

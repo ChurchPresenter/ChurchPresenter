@@ -38,6 +38,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -75,7 +77,6 @@ import org.churchpresenter.sharedui.composables.bibleListCardFill
 internal fun SongListScope.SongTableHeader(
     hScrollState: ScrollState,
     contentMinWidthDp: Dp,
-    colHeaderLabels: Map<String, String>,
     allColLabels: Map<String, String>,
 ) {
     // Column header row — scrolls horizontally with the song list
@@ -114,7 +115,7 @@ internal fun SongListScope.SongTableHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         visibleCols.forEach { colId ->
-            SongHeaderCell(colId, colHeaderLabels)
+            SongHeaderCell(colId, allColLabels)
         }
     }
     } // end inner scrollable header Box
@@ -144,7 +145,7 @@ private fun SongListScope.SongHeaderCell(colId: String, colHeaderLabels: Map<Str
         Color.Transparent
 
     if (colId in actionCols) {
-        SongActionHeaderCell(colId, sk, isSortable, isSorted, cellBg, cellColor, reorderDragMod)
+        SongActionHeaderCell(colId, colHeaderLabels[colId], sk, isSortable, isSorted, cellBg, cellColor, reorderDragMod)
     } else {
         SongDataHeaderCell(colId, colHeaderLabels, sk, isSortable, isSorted, cellBg, cellColor, reorderDragMod)
     }
@@ -178,6 +179,7 @@ private fun SongListScope.columnReorderDrag(colId: String): Modifier = Modifier.
 @Composable
 private fun SongListScope.SongActionHeaderCell(
     colId: String,
+    label: String?,
     sk: String,
     isSortable: Boolean,
     isSorted: Boolean,
@@ -192,6 +194,8 @@ private fun SongListScope.SongActionHeaderCell(
             .padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
             .background(cellBg, shape = MaterialTheme.shapes.extraSmall)
             .then(if (isSortable) Modifier.clickable { onSortChange(sk) } else Modifier)
+            // A sortable header is named for its column, as the data columns' text names theirs.
+            .then(if (label != null) Modifier.semantics { contentDescription = label } else Modifier)
             .then(reorderDragMod)
             .then(
                 if (colId == SongColumnId.FAVORITES) Modifier.guideTarget(GuideTargets.SONG_FAVORITES) else Modifier,
@@ -199,10 +203,7 @@ private fun SongListScope.SongActionHeaderCell(
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-            // Deliberately unlabelled: this is a column header whose click
-            // SORTS, so naming it "Add to Schedule" would name it after an
-            // action it does not perform. Giving a sortable header its proper
-            // name is a semantics question for the whole table, not this icon.
+            // The cell carries the column's name; the icon only draws it.
             Icon(
                 painter = painterResource(
                     if (colId == SongColumnId.FAVORITES) IconRes.drawable.ic_star

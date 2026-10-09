@@ -49,6 +49,11 @@ demand.
 
 ### UI icons
 - **NEVER** use text/emoji as icons (`Text("⏸")`). Use `painterResource()` with real icon assets.
+- **Every control a mouse can press has a name** a screen reader can say: an icon-only control
+  gets a `contentDescription` (its tooltip text is usually right); a toggle gets its role and state
+  (`toggleable(role = …)`). `AccessibleNamesTest` walks every tab of the main window and fails on a
+  clickable node with no name; `KeyboardReachTest` holds Go Live, Add to Schedule, Clear Display and
+  Take reachable with Tab.
 
 ### Debugging and logging
 - Diagnostics go through `Log.info`/`warn`/`error` (`:diagnostics`), never `println` or

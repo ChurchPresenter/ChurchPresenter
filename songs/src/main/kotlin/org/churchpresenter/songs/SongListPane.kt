@@ -296,7 +296,7 @@ private fun SongListScope.SongListColumn(modifier: Modifier) {
 
         // The header and the list share one card.
         Column(modifier = Modifier.weight(1f).fillMaxWidth().padding(start = 4.dp, bottom = 4.dp).bibleListCard()) {
-            SongTableHeader(hScrollState, contentMinWidthDp, colHeaderLabels, allColLabels)
+            SongTableHeader(hScrollState, contentMinWidthDp, allColLabels)
 
             // Song list + horizontal scrollbar
             SongListBody(hScrollState, contentMinWidthDp, Modifier.weight(1f))

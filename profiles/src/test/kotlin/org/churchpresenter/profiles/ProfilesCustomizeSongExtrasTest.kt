@@ -83,7 +83,7 @@ class ProfilesCustomizeSongExtrasTest {
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_TITLE_SLIDE)
             onNodeWithText("Composer").performScrollTo().performClick()
             waitForIdle()
-            styleButton(group = 0, label = "B").performScrollTo().performClick()
+            styleButton(group = 0, name = "Bold").performScrollTo().performClick()
             waitForIdle()
 
             assertTrue(get().song().titleSlideComposer.bold, "the composer line must have gone bold")

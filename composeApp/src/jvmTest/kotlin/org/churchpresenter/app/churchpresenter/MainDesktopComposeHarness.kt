@@ -58,6 +58,9 @@ abstract class MainDesktopComposeHarness {
         TestSingletons.latchSkikoHostOs()
         TestSingletons.latchToTestHome()
         dir = Files.createTempDirectory("cp-main-desktop-compose").toFile()
+        // An autosave a slower test left in this fork's home would open the "restore the unsaved
+        // schedule?" prompt over the window, and every click and key below would land in it instead.
+        File(System.getProperty("user.home"), ".churchpresenter/autosave_schedule.tmp").delete()
     }
 
     @AfterTest

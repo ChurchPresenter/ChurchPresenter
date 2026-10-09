@@ -363,7 +363,7 @@ private fun QuickBackgroundAddTile(tileAspect: Float, onClick: () -> Unit) {
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = null,
+                contentDescription = stringResource(Res.string.quick_background_add),
                 modifier = Modifier.size(18.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )

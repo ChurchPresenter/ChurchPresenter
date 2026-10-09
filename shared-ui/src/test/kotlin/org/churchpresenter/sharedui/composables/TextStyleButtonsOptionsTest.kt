@@ -3,7 +3,8 @@ package org.churchpresenter.sharedui.composables
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -28,7 +29,7 @@ class TextStyleButtonsOptionsTest {
                 )
             }
         }
-        onNodeWithText("S").performClick()
+        onNodeWithContentDescription("Strikethrough").performClick()
         waitForIdle()
         assertEquals(listOf(false), changes)
     }
@@ -44,7 +45,8 @@ class TextStyleButtonsOptionsTest {
                 )
             }
         }
-        assertEquals(2, onAllNodesWithText("S").fetchSemanticsNodes().size)
+        onNodeWithContentDescription("Strikethrough").assertExists()
+        onNodeWithContentDescription("Shadow").assertExists()
     }
 
     @Test
@@ -58,8 +60,8 @@ class TextStyleButtonsOptionsTest {
                 )
             }
         }
-        onNodeWithText("B").assertExists()
-        assertEquals(0, onAllNodesWithText("U").fetchSemanticsNodes().size)
-        assertEquals(0, onAllNodesWithText("S").fetchSemanticsNodes().size)
+        onNodeWithContentDescription("Bold").assertExists()
+        assertEquals(0, onAllNodesWithContentDescription("Underline").fetchSemanticsNodes().size)
+        assertEquals(0, onAllNodesWithContentDescription("Shadow").fetchSemanticsNodes().size)
     }
 }

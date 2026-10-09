@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.drag_to_reorder
 import org.churchpresenter.strings.generated.resources.output_profile_delete
 import org.churchpresenter.strings.generated.resources.output_profile_duplicate
 import org.churchpresenter.strings.generated.resources.output_profiles_tab
@@ -376,7 +377,7 @@ private fun ProfileListRow(
             if (linked) Spacer(Modifier.width(LINKED_INDENT))
             Icon(
                 Icons.Filled.DragIndicator,
-                contentDescription = null,
+                contentDescription = stringResource(Res.string.drag_to_reorder),
                 tint = profilesPalette().faintText,
                 modifier = Modifier.size(18.dp).then(handle).testTag(profileHandleTag(profile.id)),
             )

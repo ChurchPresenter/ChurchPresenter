@@ -148,7 +148,7 @@ class ProfilesCustomizeSongTypographyTest {
         // strikethrough.
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            styleButton(group = 0, label = "S").performScrollTo().performClick()
+            styleButton(group = 0, name = "Strikethrough").performScrollTo().performClick()
             waitForIdle()
 
             assertTrue(get().song().lyricsStrikethrough)
@@ -216,7 +216,7 @@ class ProfilesCustomizeSongTypographyTest {
     fun `a band's lyrics store their own strikethrough and spacing`() {
         profilesTab(output(band)) { get ->
             openCustomizePane(CustomizePane.SONGS, CustomizeElement.SONG_LYRICS)
-            styleButton(group = 0, label = "S").performScrollTo().performClick()
+            styleButton(group = 0, name = "Strikethrough").performScrollTo().performClick()
             waitForIdle()
 
             assertTrue(get().song().lyricsLowerThirdStrikethrough)

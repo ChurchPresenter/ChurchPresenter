@@ -76,26 +76,14 @@ fun HorizontalAlignmentButtons(
     buttonSize: Dp = 28.dp,
     cornerRadius: Dp = 4.dp
 ) {
+    val right = stringResource(Res.string.align_right)
+    val center = stringResource(Res.string.align_center)
+    val left = stringResource(Res.string.align_left)
     IconChoiceTrack(
         choices = listOf(
-            IconChoice(
-                rightValue,
-                painterResource(IconRes.drawable.ic_align_right),
-                stringResource(Res.string.align_right),
-                null,
-            ),
-            IconChoice(
-                centerValue,
-                painterResource(IconRes.drawable.ic_align_center),
-                stringResource(Res.string.align_center),
-                null,
-            ),
-            IconChoice(
-                leftValue,
-                painterResource(IconRes.drawable.ic_align_left),
-                stringResource(Res.string.align_left),
-                null,
-            ),
+            IconChoice(rightValue, painterResource(IconRes.drawable.ic_align_right), right, right),
+            IconChoice(centerValue, painterResource(IconRes.drawable.ic_align_center), center, center),
+            IconChoice(leftValue, painterResource(IconRes.drawable.ic_align_left), left, left),
         ),
         selected = selectedAlignment,
         onSelect = onAlignmentChange,
