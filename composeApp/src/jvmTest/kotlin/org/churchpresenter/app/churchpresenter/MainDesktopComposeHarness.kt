@@ -57,12 +57,23 @@ abstract class MainDesktopComposeHarness {
         // Both latches have to happen against the real user.home, before anything swaps it.
         TestSingletons.latchSkikoHostOs()
         TestSingletons.latchToTestHome()
+        clearScheduleAutoSave()
         dir = Files.createTempDirectory("cp-main-desktop-compose").toFile()
     }
 
     @AfterTest
     fun tearDown() {
         dir.deleteRecursively()
+        clearScheduleAutoSave()
+    }
+
+    /**
+     * The fork's home is shared with every other suite, and a fresh autosave left in it — by any
+     * Schedule whose autosave loop outlived its test — makes the Schedule tab open on its restore
+     * prompt, which takes every key and click these tests send. None of them is about that prompt.
+     */
+    private fun clearScheduleAutoSave() {
+        File(System.getProperty("user.home"), ".churchpresenter/autosave_schedule.tmp").delete()
     }
 
     protected fun settings(): AppSettings =
