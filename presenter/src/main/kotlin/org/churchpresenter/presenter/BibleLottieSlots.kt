@@ -37,7 +37,6 @@ internal fun readSlots(meta: JsonObject?, layers: List<JsonObject>): Map<String,
     return fromDocuments.mapValues { (name, box) -> mattes[name] ?: box }
 }
 
-
 /** A static property's numbers: `{"a": 0, "k": [..]}` → the list, or null when it is not shaped so. */
 private fun JsonObject.staticFloats(key: String): List<Float>? =
     (this[key] as? JsonObject)?.get("k")?.jsonArray?.mapNotNull { it.jsonPrimitive.floatOrNull }
@@ -98,4 +97,3 @@ private fun firstTextDocument(layer: JsonObject): JsonObject? =
     ((layer["t"] as? JsonObject)?.get("d") as? JsonObject)
         ?.get("k")?.jsonArray?.firstOrNull()?.jsonObject
         ?.get("s") as? JsonObject
-

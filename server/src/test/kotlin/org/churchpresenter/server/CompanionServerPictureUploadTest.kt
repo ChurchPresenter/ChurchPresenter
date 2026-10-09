@@ -356,5 +356,4 @@ class CompanionServerPictureUploadTest {
 
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
-
 }

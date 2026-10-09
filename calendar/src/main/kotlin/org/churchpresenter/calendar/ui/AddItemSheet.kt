@@ -115,6 +115,7 @@ fun AddItemSheet(
     val picker = remember(replacing, bibleBooks.isEmpty()) { pickerFor(replacing, bibleBooks, plannedSeconds) }
     val use24Hour = LocalUse24HourClock.current
     var draft by remember(replacing) { mutableStateOf(TimingDraft.of(timing, plannedSeconds, use24Hour)) }
+
     // Editing a row, a change lands on it at once; adding, it waits for the pick.
     fun changeTiming(next: TimingDraft) {
         draft = next

@@ -26,6 +26,7 @@ enum class BibleCatalogError { NETWORK_ERROR, RATE_LIMITED, FAILURE }
 
 enum class BibleDownloadError {
     NETWORK_ERROR,
+
     /** The download kept stopping part-way. The one failure worth offering a retry for. */
     DOWNLOAD_STALLED,
     HTTP_ERROR, CHECKSUM_MISMATCH, CORRUPT_ARCHIVE, CONVERSION_FAILED, WRITE_FAILED, NO_DIRECTORY

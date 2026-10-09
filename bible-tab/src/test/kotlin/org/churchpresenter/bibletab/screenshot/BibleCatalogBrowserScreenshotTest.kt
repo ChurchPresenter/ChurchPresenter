@@ -275,6 +275,7 @@ class BibleCatalogBrowserScreenshotTest {
 
         const val EBIBLE = "eBible.org"
         const val ZEFANIA = "Zefania"
+
         /** The row's own button, and the licence dialog's — deliberately different strings. */
         const val INSTALL = "Download"
         const val CONFIRM = "I understand — Download"

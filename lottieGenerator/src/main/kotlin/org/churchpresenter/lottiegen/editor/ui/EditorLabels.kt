@@ -17,7 +17,6 @@ import org.churchpresenter.lottiegen.ui.Strings
 /** Display names for the spec's element and placement enums. */
 object EditorLabels {
 
-
     fun rule(rule: VisibilityRule): String = when (rule) {
         VisibilityRule.ALWAYS -> Strings.editorRuleAlways
         VisibilityRule.BG_ENABLED -> Strings.editorRuleBg
@@ -29,13 +28,11 @@ object EditorLabels {
         VisibilityRule.BORDER_SET -> Strings.editorRuleBorder
     }
 
-
     fun anchor(anchor: AnchorIn): String = when (anchor) {
         AnchorIn.START -> Strings.editorAnchorStart
         AnchorIn.CENTER -> Strings.editorAnchorCenter
         AnchorIn.END -> Strings.editorAnchorEnd
     }
-
 
     fun line(line: LineAnchor): String = when (line) {
         LineAnchor.BLOCK_CENTER -> Strings.editorLineBlock
@@ -43,7 +40,6 @@ object EditorLabels {
         LineAnchor.INFO_LINE -> Strings.editorLineInfo
         LineAnchor.DETAIL_LINE -> Strings.editorLineDetail
     }
-
 
     fun role(role: ColorRole): String = when (role) {
         ColorRole.NAME -> Strings.editorRoleName
@@ -54,20 +50,17 @@ object EditorLabels {
         ColorRole.BORDER -> Strings.editorRoleBorder
     }
 
-
     fun slotKind(kind: SlotKind): String = when (kind) {
         SlotKind.LOGO -> Strings.editorSlotKindLogo
         SlotKind.FIXED -> Strings.editorSlotKindFixed
         SlotKind.TEXT -> Strings.editorSlotKindText
     }
 
-
     fun textField(field: TextFieldRef): String = when (field) {
         TextFieldRef.NAME -> Strings.editorFieldName
         TextFieldRef.INFO -> Strings.editorFieldInfo
         TextFieldRef.DETAIL -> Strings.editorFieldDetail
     }
-
 
     fun align(align: String): String = when (align) {
         "center" -> Strings.editorAlignCenter
@@ -79,7 +72,6 @@ object EditorLabels {
 /** Display names for the animation-track enums. */
 object TrackLabels {
 
-
     fun property(property: AnimProperty): String = when (property) {
         AnimProperty.POSITION_OFFSET -> Strings.editorPropPosition
         AnimProperty.OPACITY -> Strings.editorPropOpacity
@@ -90,19 +82,16 @@ object TrackLabels {
         AnimProperty.TRIM -> Strings.editorPropTrim
     }
 
-
     fun easing(easing: EasingKind): String = when (easing) {
         EasingKind.DEFAULT -> Strings.editorEasingDefault
         EasingKind.LINEAR -> Strings.editorEasingLinear
     }
-
 
     fun offsetUnit(unit: OffsetUnit): String = when (unit) {
         OffsetUnit.EM -> Strings.editorUnitEm
         OffsetUnit.ELEMENT_WIDTH -> Strings.editorUnitElementWidth
         OffsetUnit.ELEMENT_HEIGHT -> Strings.editorUnitElementHeight
     }
-
 
     fun animatorKind(kind: TextAnimatorKind): String = when (kind) {
         TextAnimatorKind.SEQUENTIAL_REVEAL -> Strings.editorAnimatorSequential

@@ -152,8 +152,7 @@ class DetectionEngineRefEventTest {
     fun `reading a verse verbatim finds it without an explicit citation`() {
         Config.applyLevel("aggressive")
 
-        val events = engine(
-            ).processTranscription("live",
+        val events = engine().processTranscription("live",
             "for God so loved the world that he gave his only begotten son",
         )
 

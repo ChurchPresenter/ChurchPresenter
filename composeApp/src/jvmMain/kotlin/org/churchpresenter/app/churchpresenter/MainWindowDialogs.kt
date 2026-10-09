@@ -365,4 +365,3 @@ internal fun MainWindowScope.ActivityToasts() {
         )
     }
 }
-

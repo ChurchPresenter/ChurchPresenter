@@ -3,7 +3,6 @@ package org.churchpresenter.sharedui.testing
 import org.churchpresenter.sharedui.utils.CommandResult
 import org.churchpresenter.sharedui.utils.CommandRunner
 
-
 /**
  * A [CommandRunner] that answers from a script instead of the machine, and records what it was asked.
  *

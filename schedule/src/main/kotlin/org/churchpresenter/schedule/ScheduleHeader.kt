@@ -464,7 +464,6 @@ internal fun handleDroppedFiles(files: List<File>, viewModel: ScheduleViewModel)
     val skipped = mutableListOf<String>()
     for (file in files) {
         if (file.isDirectory) {
-
             val imageCount = file.listFiles()?.count { child ->
                 child.isFile && child.extension.lowercase() in IMAGE_EXTENSIONS
             } ?: 0

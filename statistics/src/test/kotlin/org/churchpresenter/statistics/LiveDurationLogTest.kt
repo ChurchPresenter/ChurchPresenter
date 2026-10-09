@@ -30,7 +30,7 @@ class LiveDurationLogTest {
     private fun log() = LiveDurationLog(dir.resolve("durations.json"))
 
     private fun song(number: Int = 1) = ScheduleItem.SongItem(
-        id = "row-${number}-${Instant.now().nano}",
+        id = "row-$number-${Instant.now().nano}",
         songNumber = number,
         title = "Song $number",
         songbook = "Hymns",

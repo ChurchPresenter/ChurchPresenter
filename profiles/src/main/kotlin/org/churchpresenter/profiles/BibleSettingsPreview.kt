@@ -101,7 +101,6 @@ internal fun bibleSampleVerses(
     }
 }
 
-
 /**
  * What the configured styling puts on screen -- drawn by [BiblePresenter] itself.
  *

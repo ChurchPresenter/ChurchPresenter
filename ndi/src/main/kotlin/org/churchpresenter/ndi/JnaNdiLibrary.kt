@@ -73,7 +73,9 @@ internal interface NdiLibC : Library {
 @Structure.FieldOrder("show_local_sources", "p_groups", "p_extra_ips")
 internal open class NdiFindCreateStruct : Structure() {
     @JvmField var show_local_sources: Boolean = true
+
     @JvmField var p_groups: String? = null
+
     @JvmField var p_extra_ips: String? = null
 }
 
@@ -87,6 +89,7 @@ internal open class NdiFindCreateStruct : Structure() {
 @Structure.FieldOrder("p_ndi_name", "p_url_address")
 internal open class NdiSourceStruct : Structure {
     @JvmField var p_ndi_name: String? = null
+
     @JvmField var p_url_address: String? = null
 
     constructor() : super()
@@ -105,12 +108,15 @@ internal open class NdiSourceStruct : Structure {
 internal open class NdiRecvCreateStruct : Structure() {
     /** By value, inline in this struct — not a pointer to one. JNA nests a Structure field so. */
     @JvmField var source_to_connect_to: NdiSourceStruct = NdiSourceStruct()
+
     @JvmField var color_format: Int = COLOR_FORMAT_BGRX_BGRA
+
     @JvmField var bandwidth: Int = BANDWIDTH_HIGHEST
 
     // False deliberately: the runtime then deinterlaces an interlaced source itself, so a capture
     // loop never has to work out that it has been handed half a picture.
     @JvmField var allow_video_fields: Boolean = false
+
     @JvmField var p_ndi_recv_name: String? = null
 }
 
@@ -119,7 +125,9 @@ internal open class NdiRecvCreateStruct : Structure() {
 @Structure.FieldOrder("p_ndi_name", "p_groups", "clock_video", "clock_audio")
 internal open class NdiSendCreateStruct : Structure() {
     @JvmField var p_ndi_name: String? = null
+
     @JvmField var p_groups: String? = null
+
     @JvmField var clock_video: Boolean = true
 
     // False deliberately, and it matters: clocking audio on a sender that never sends any audio
@@ -135,18 +143,28 @@ internal open class NdiSendCreateStruct : Structure() {
 )
 internal open class NdiVideoFrameStruct : Structure() {
     @JvmField var xres: Int = 0
+
     @JvmField var yres: Int = 0
+
     @JvmField var FourCC: Int = 0
+
     @JvmField var frame_rate_N: Int = 30_000
+
     @JvmField var frame_rate_D: Int = 1_000
+
     @JvmField var picture_aspect_ratio: Float = SIXTEEN_NINE
+
     @JvmField var frame_format_type: Int = PROGRESSIVE
 
     /** `NDIlib_send_timecode_synthesize` — let the runtime stamp frames from its own clock. */
     @JvmField var timecode: Long = SYNTHESIZE_TIMECODE
+
     @JvmField var p_data: Pointer? = null
+
     @JvmField var line_stride_in_bytes: Int = 0
+
     @JvmField var p_metadata: String? = null
+
     @JvmField var timestamp: Long = 0
 }
 

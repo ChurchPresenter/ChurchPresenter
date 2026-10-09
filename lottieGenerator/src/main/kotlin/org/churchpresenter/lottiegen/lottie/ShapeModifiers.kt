@@ -5,7 +5,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 
-
 /**
  * Trim Paths — progressively reveals the preceding path/stroke along its length
  * (the "line draws itself" primitive). [start]/[end] are 0-100 percent of the path,
@@ -42,7 +41,6 @@ fun makeTrimPath(
  * Repeater — draws [copies] instances of the preceding shapes, each offset/rotated/scaled
  * relative to the previous copy. [endOpacity] < 100 fades the copies out progressively.
  */
-
 
 /**
  * Repeater — draws [copies] instances of the preceding shapes, each offset/rotated/scaled

@@ -175,8 +175,6 @@ class ProfilesCustomizeStripExtrasTest {
         }
     }
 
-
-
     // ── Long verses, and the crossfade ──────────────────────────────────────────────────────────
 
     /**

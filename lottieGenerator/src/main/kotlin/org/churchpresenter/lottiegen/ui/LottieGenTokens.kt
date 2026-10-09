@@ -473,6 +473,7 @@ object Tokens {
 
     /** Letter spacing on the tiny uppercase field labels (0.09em at 9sp). */
     val FieldLabelTracking = 0.81.sp
+
     /** Letter spacing on section titles (0.03em at 12sp). */
     val SectionTitleTracking = 0.36.sp
 }

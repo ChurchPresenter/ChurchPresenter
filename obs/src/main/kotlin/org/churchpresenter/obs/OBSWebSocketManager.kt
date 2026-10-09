@@ -85,6 +85,7 @@ class OBSWebSocketManager {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var connectionJob: Job? = null
+
     @Volatile private var activeSession: DefaultClientWebSocketSession? = null
 
     private val client = HttpClient(CIO) {

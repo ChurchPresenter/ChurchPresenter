@@ -45,6 +45,7 @@ object UpdateChecker {
         "https://api.github.com/repos/ChurchPresenter/ChurchPresenter/releases?per_page=50"
     const val RELEASES_URL =
         "https://github.com/ChurchPresenter/ChurchPresenter/releases/latest"
+
     // Count-only beacon on churchpresenter.org that attributes downloads to the
     // app's updater (vs. the website's download buttons vs. GitHub directly).
     private const val DOWNLOAD_BEACON_URL =

@@ -1361,7 +1361,6 @@ class PresenterFullScreenScreenshotTest {
         ),
     )
 
-
     /** [count] translations configured, which is what puts the presenter in multi-translation mode. */
     /**
      * Two translations, each drawing its verse text on [backdrop].

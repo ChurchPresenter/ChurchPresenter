@@ -17,7 +17,6 @@ import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 import org.churchpresenter.sharedui.models.Presenting
 
-
 private const val ALPHA_SHIFT = 24
 private const val OPAQUE_ALPHA = 0xFF
 private const val MIN_CROSSFADE_MS = 100

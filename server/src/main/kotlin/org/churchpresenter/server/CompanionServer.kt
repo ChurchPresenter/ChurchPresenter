@@ -101,12 +101,16 @@ class CompanionServer(
                 }
             }
         }
+
     @Volatile var qaAdminPassword: String = ""
+
     @Volatile var qaCooldownSeconds: Int = 30
+
     @Volatile var qaVotingEnabled: Boolean = false
 
     // Presentation remote control settings
     @Volatile var presentationRemoteEnabled: Boolean = false
+
     @Volatile var presentationRemotePassword: String = ""
 
     // Current presentation state (updated from desktop, read by remote clients)
@@ -114,15 +118,22 @@ class CompanionServer(
     // per request by the extracted route groups, so unlike the immutable state they cannot be
     // passed in as parameters.
     @Volatile internal var _currentPresentationId: String = ""
+
     @Volatile internal var _currentSlideIndex: Int = 0
+
     @Volatile internal var _currentSlideTotalCount: Int = 0
+
     @Volatile internal var _presentationFrozen: Boolean = false
+
     @Volatile internal var _presentationIsPlaying: Boolean = false
+
     @Volatile internal var _presentationIsLive: Boolean = false
 
     /** Whether the presentation on screen is live, as the companion feed last reported it. */
     val presentationIsLive: Boolean get() = _presentationIsLive
+
     @Volatile internal var _autoScrollInterval: Int = 5
+
     @Volatile internal var _presentationIsLooping: Boolean = true
 
     /** Emitted when remote taps Go Live. */
@@ -159,6 +170,7 @@ class CompanionServer(
     // All songs flat list
     // Current catalog — rebuilt whenever songs are updated
     internal val _catalog = MutableStateFlow(SongCatalogResponse(emptyList(), 0, 0))
+
     /** Raw song list kept in sync with _catalog for per-number detail lookups */
     @Volatile internal var _songs: List<SongItem> = emptyList()
 
@@ -170,20 +182,26 @@ class CompanionServer(
 
     internal val _bibleCatalog = MutableStateFlow<BibleCatalogResponse?>(null)
     internal val _bible = MutableStateFlow<Bible?>(null)
+
     /** Absolute path to the primary bible's .spb file — serves GET /api/bible/file for InstanceLink followers. */
     @Volatile internal var _bibleFilePath: String = ""
+
     /** Same as [_bibleFilePath] but for the secondary bible — serves GET /api/bible/file/secondary,
      *  only used when a follower opts in to mirroring the secondary too (most don't). */
     @Volatile internal var _secondaryBibleFilePath: String = ""
+
     @Volatile internal var _bibleFilePaths: List<String> = emptyList()
+
     /** Current background settings — serves GET /api/backgrounds for a follower that opted in to
      *  mirroring backgrounds. The image/video fields are still local file paths on this machine;
      *  GET /api/backgrounds/asset/{slot} resolves the current path for a given slot on demand. */
     internal val _backgroundSettings = MutableStateFlow(BackgroundSettings())
     internal val _schedule = MutableStateFlow<List<ScheduleItemDto>>(emptyList())
+
     /** Snapshot of whatever is currently live — see [LiveStateDto]. */
     internal val _liveState = MutableStateFlow<LiveStateDto?>(null)
     val liveState: StateFlow<LiveStateDto?> = _liveState.asStateFlow()
+
     /** Device IDs of currently-connected WS clients that identified as an Instance Link follower
      *  (as opposed to a regular mobile/browser companion client) — see [Constants.HEADER_CLIENT_ROLE]. */
     internal val _connectedInstanceLinkFollowers = MutableStateFlow<Set<String>>(emptySet())
@@ -214,6 +232,7 @@ class CompanionServer(
 
     // File upload permission (updated from settings without restart)
     internal val _fileUploadEnabled = MutableStateFlow(true)
+
     // Max media-upload size in MB (updated from settings without restart)
     internal val _maxMediaUploadMb = MutableStateFlow(Constants.DEFAULT_MAX_MEDIA_UPLOAD_MB)
 
@@ -664,6 +683,4 @@ class CompanionServer(
             mapOf("endpoint" to endpoint, "status" to status, "reason" to reason)
         )
     }
-
 }
-

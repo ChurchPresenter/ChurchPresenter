@@ -348,7 +348,6 @@ private fun SongsTabController.SongLyricsSide(row: RowScope) = with(row) {
     )
 }
 
-
 /** The song editor, for the song being edited and for a new one; the app draws it. */
 @Composable
 internal fun SongsTabController.SongEditorDialogs() {
@@ -394,7 +393,6 @@ internal fun SongsTabController.SongEditorDialogs() {
             },
         )
     )
-
 
     // New Song Dialog
     val newSongTemplate = remember {

@@ -63,10 +63,13 @@ sealed class CalendarSyncStatus {
     data object Syncing : CalendarSyncStatus()
     data class Synced(val at: String, val outcome: SyncOutcome) : CalendarSyncStatus()
     data class Failed(val message: String) : CalendarSyncStatus()
+
     /** The startup round ran out of time; the app went on with the local file. */
     data object TimedOut : CalendarSyncStatus()
+
     /** The relay no longer accepts this desktop's token; the instance has to be paired again. */
     data object Unauthorized : CalendarSyncStatus()
+
     /** Another installation has pushed to this instance; ours stops pushing until somebody decides. */
     data class OtherDesktop(val installId: String) : CalendarSyncStatus()
 }

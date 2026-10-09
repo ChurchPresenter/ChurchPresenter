@@ -194,6 +194,7 @@ private class BadgeGeometry(builder: LottieBuilder, val cfg: LottieGenConfig) {
         else badgeBoundaryX - slashGap * HALF_LEAN - slashW * SLASH_2_OFFSET
 
     private val namePadX = emToPx(TEXT_PAD_EM, baseSize)
+
     /** Left to right, term by term: factoring the badge clearance out re-associates the doubles. */
     private val mainLeft =
         if (isRight) marginHPx

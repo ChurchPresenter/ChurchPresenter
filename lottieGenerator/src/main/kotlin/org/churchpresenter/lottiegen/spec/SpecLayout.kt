@@ -25,7 +25,6 @@ private const val LOWER_LINE_BASELINE_FACTOR = 0.9
  */
 private const val DETAIL_ROW_GAP_FACTOR = 0.15
 
-
 /** A resolved point in canvas pixels. */
 data class SpecPoint(val x: Double, val y: Double)
 
@@ -282,7 +281,6 @@ class SpecLayoutContext(private val spec: StyleSpec, private val cfg: LottieGenC
         const val TEXT_CORE_PAD_PX = 10.0
     }
 }
-
 
 /**
  * The colour and weight lookups a spec's paint resolves through.

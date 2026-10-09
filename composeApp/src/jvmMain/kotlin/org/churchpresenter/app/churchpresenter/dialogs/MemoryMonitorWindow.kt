@@ -220,7 +220,7 @@ internal fun MemoryMonitorDialogContent(
             StatRow(stringResource(Res.string.memory_monitor_committed), formatMb(nonHeapCommitted))
 
             Spacer(Modifier.height(10.dp))
-            StatRow(stringResource(Res.string.memory_monitor_gc), "$gcCount (${gcTimeMs} ms)")
+            StatRow(stringResource(Res.string.memory_monitor_gc), "$gcCount ($gcTimeMs ms)")
 
             Spacer(Modifier.height(16.dp))
             Row(

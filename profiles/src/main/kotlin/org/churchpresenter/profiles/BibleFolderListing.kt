@@ -3,7 +3,6 @@ package org.churchpresenter.profiles
 import org.churchpresenter.bible.bibleTitles
 import org.churchpresenter.bible.displayNamesFor
 
-
 /** A Bible folder's installed modules, and the name each one is shown under in a picker. */
 data class BibleFolderListing(
     val files: List<String>,

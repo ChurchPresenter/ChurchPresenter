@@ -198,6 +198,7 @@ internal object KeynoteBuildMapper {
         SPIN("spin", "twirl", "rotate", "pivot"),
         PULSE("pulse", "blink", "flash"),
         SHIMMER("typewriter", "shimmer", "sparkle"),
+
         // "drop" implies falling in from above — the motion is inherent to the effect name, not
         // the parsed direction field.
         DROP("drop"),

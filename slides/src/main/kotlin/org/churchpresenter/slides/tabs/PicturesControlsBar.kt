@@ -133,7 +133,6 @@ internal fun PicturesTabScope.PicturesControlsBar(viewModel: PicturesViewModel) 
             PicturesAnimationDropdown(viewModel, appSettings)
         }
     }
-
 }
 
 /** Raised keys either side of the biggest one, Play. */

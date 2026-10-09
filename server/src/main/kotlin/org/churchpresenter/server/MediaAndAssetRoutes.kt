@@ -561,5 +561,3 @@ private fun deviceUploadsCatalog(
         )
     }
 )
-
-

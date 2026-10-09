@@ -214,5 +214,4 @@ class PicturesTabExtraTest {
             "and the grid draws exactly what is left, having indexed only the list it was given",
         )
     }
-
 }

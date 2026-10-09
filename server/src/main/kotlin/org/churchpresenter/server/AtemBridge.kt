@@ -35,6 +35,7 @@ import org.churchpresenter.atem.AtemKey
 internal class AtemBridge(private val json: Json) {
 
     @Volatile internal var _atemSettings: AtemSettings? = null
+
     @Volatile private var _lowerThirdFolder: String = ""
 
     /**

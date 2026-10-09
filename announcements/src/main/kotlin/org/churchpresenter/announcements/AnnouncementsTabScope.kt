@@ -181,6 +181,7 @@ internal class AnnouncementsTabScope(inputs: AnnouncementsTabInputs, environment
     } else {
         output?.announcementsLive == true
     }
+
     // [stopTicker] must be true when [text] is plain announcement text (the ticker would otherwise
     // silently overwrite it within a second) and false when [text] IS the timer/clock's own current
     // value (stopping the ticker there would freeze the very content being sent).
@@ -273,6 +274,7 @@ internal class AnnouncementsTabScope(inputs: AnnouncementsTabInputs, environment
         isTimerRunning -> AnnouncementsViewModel.formatTimer(timerDisplayValue)
         else -> text
     }
+
     // A live timer/clock value changes every second and must stay legible, so skip the
     // configured entrance animation in the preview (it would otherwise cycle the value
     // fully off-screen on every animation loop, looking like it froze or went dark).

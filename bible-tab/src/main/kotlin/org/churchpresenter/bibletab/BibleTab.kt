@@ -33,7 +33,6 @@ import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.stt.STTManager
 import org.jetbrains.compose.resources.stringResource
 
-
 internal val CROSS_REF_MIN_WIDTH = 200.dp
 
 internal val CROSS_REF_MAX_WIDTH = 500.dp

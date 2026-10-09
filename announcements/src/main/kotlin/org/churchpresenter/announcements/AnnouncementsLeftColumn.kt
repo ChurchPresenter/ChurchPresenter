@@ -330,7 +330,6 @@ private fun AnnouncementsTabScope.AnnouncementsSettingsCard(viewModel: Announcem
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             AnnouncementsTimerSection(viewModel)
-
         } // end settings column
         SettingsScrollbar(settingsScroll)
     }

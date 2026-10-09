@@ -331,7 +331,6 @@ internal fun ContactUsDialogContent(
         }
     }
 
-
 @Composable
 private fun FieldLabel(text: String) {
     Text(
@@ -363,4 +362,3 @@ private fun TypePill(label: String, selected: Boolean, onClick: () -> Unit) {
         )
     }
 }
-

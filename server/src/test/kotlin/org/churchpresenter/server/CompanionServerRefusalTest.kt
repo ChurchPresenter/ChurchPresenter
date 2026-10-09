@@ -41,6 +41,7 @@ class CompanionServerRefusalTest {
 
     companion object {
         const val KEY = "correct-horse-battery-staple"
+
         /** A minimal JSON upload body: the handlers check name/data before decoding anything. */
         const val UPLOAD_BODY = """{"name":"deck.pptx","data":"AAAA"}"""
 

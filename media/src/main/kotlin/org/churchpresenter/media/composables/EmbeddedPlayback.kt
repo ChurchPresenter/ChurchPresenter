@@ -23,6 +23,7 @@ internal fun embeddedPlayerEvents(
     override fun lengthChanged(mediaPlayer: MediaPlayer, newLength: Long) {
         if (newLength > 0) viewModel.position.setDuration(newLength)
     }
+
     // The embedded tracks were listed only by the software player, so a file opened
     // through this one offered an empty Subtitles menu however many tracks it carried.
     override fun mediaPlayerReady(mediaPlayer: MediaPlayer) {

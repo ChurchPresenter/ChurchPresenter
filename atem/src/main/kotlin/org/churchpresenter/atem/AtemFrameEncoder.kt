@@ -33,7 +33,7 @@ object AtemFrameEncoder {
     /** Convert + compress one ARGB frame. */
     fun encodeFrame(width: Int, height: Int, argbPixels: IntArray): EncodedFrame {
         require(argbPixels.size == width * height) {
-            "Pixel buffer is ${argbPixels.size} pixels, expected ${width}×${height}"
+            "Pixel buffer is ${argbPixels.size} pixels, expected $width×$height"
         }
         val raw = argbToYuv422(width, height, argbPixels)
         return EncodedFrame(encodeRLE(raw), raw.size)

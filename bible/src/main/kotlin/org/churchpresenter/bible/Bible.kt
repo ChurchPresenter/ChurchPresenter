@@ -85,10 +85,13 @@ class Bible {
     private var abbreviationOverride: String? = null
     private val books = mutableListOf<BibleBook>()
     private val operatorBible = mutableListOf<BibleVerse>()
+
     // Index: (bookId, chapterNum) -> ordered list of verses — built at load time for O(1) lookup
     private val chapterIndex = HashMap<Long, List<BibleVerse>>()
+
     // Maps code (BXXXCXXXVXXX) book/chapter to display book/chapter for cross-referencing
     private val codeToDisplayMap = HashMap<Long, Long>()
+
     // Index: full internal code id (BXXXCXXXVXXX) -> the verse, for exact cross-Bible lookups
     private val codeIndex = HashMap<String, BibleVerse>()
 

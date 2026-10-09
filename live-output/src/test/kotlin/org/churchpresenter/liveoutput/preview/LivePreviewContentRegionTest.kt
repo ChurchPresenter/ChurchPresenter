@@ -144,7 +144,6 @@ class LivePreviewContentRegionTest {
         assertTrue(narrow < full, "lyrics confined to 40% must draw narrower here too: $narrow vs $full")
     }
 
-
     private companion object {
         const val KJV = "kjv.spb"
         const val PROFILE = "under-test"

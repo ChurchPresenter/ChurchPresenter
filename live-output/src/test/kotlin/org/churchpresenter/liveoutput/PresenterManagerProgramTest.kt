@@ -192,7 +192,6 @@ class PresenterManagerProgramTest {
         assertTrue(pm.program.value.isEmpty())
     }
 
-
     @Test
     fun `only Bible and songs put a background up`() {
         // Messages and props are no slide content; they go up whole, through their own calls.

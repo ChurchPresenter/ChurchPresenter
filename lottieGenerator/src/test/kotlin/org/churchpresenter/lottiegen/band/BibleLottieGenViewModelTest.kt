@@ -184,7 +184,7 @@ class BibleLottieGenViewModelTest {
         assertEquals(120f, built.getValue(BandStyle.SOLID_BAR).height)
         vm.ensureStyleThumbnails()
         assertSame(built, vm.styleThumbnails, "the same palette is not built twice")
-        vm.updateConfig { it.copy(previewText1 = "other words" ) }
+        vm.updateConfig { it.copy(previewText1 = "other words") }
         vm.ensureStyleThumbnails()
         assertSame(built, vm.styleThumbnails, "words are not part of a thumbnail")
         vm.updateConfig { it.copy(accentColor = "#00FF00") }

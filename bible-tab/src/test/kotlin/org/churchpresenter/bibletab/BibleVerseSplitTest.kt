@@ -198,7 +198,6 @@ class BibleVerseSplitTest {
         assertNull(vm.liveVerseSplitMark(null))
     }
 
-
     // ── The threshold is the operator's, not a constant ─────────────────────────
 
     @Test

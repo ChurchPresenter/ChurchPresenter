@@ -94,14 +94,6 @@ import org.churchpresenter.strings.generated.resources.shortcut_description_save
 import org.churchpresenter.strings.generated.resources.shortcut_description_settings
 import org.churchpresenter.strings.generated.resources.shortcut_description_take
 import org.churchpresenter.strings.generated.resources.shortcut_description_undo
-import org.churchpresenter.strings.generated.resources.shortcut_scope_bible_hint
-import org.churchpresenter.strings.generated.resources.shortcut_scope_canvas_hint
-import org.churchpresenter.strings.generated.resources.shortcut_scope_global_hint
-import org.churchpresenter.strings.generated.resources.shortcut_scope_media_hint
-import org.churchpresenter.strings.generated.resources.shortcut_scope_menus_hint
-import org.churchpresenter.strings.generated.resources.shortcut_scope_pictures_hint
-import org.churchpresenter.strings.generated.resources.shortcut_scope_presentation_hint
-import org.churchpresenter.strings.generated.resources.shortcut_scope_songs_hint
 import org.churchpresenter.strings.generated.resources.shortcut_description_go_live_key
 import org.churchpresenter.strings.generated.resources.shortcut_description_switch_search_live
 import org.churchpresenter.core.models.shortcuts.KeyChord
@@ -201,6 +193,7 @@ enum class ShortcutAction(
     // ── Global ───────────────────────────────────────────────────────────────
     CLEAR_OUTPUT(ShortcutScope.GLOBAL, Res.string.shortcut_description_escape,
         listOf(KeyChord.of(Key.Escape))),
+
     // ── Every tab with a Go Live button ──────────────────────────────────────
     GO_LIVE(ShortcutScope.TABS, Res.string.shortcut_description_go_live_key,
         listOf(KeyChord.of(Key.Enter), KeyChord.of(Key.NumPadEnter))),

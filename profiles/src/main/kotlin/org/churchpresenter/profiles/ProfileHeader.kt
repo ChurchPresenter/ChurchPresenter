@@ -145,7 +145,6 @@ internal fun ProfilePageHeader(
     }
 }
 
-
 /** "Standalone profile", with its icon -- a profile linked to nothing. */
 @Composable
 internal fun StandaloneLinkState() {

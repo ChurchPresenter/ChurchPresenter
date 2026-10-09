@@ -66,7 +66,6 @@ class ContactReporterPayloadTest {
         assertTrue(""""company":""""" in encoded, encoded)
     }
 
-
     @Test
     fun `a message keeps exactly what was typed`() {
         val typed = """Line one

@@ -27,10 +27,8 @@ import org.churchpresenter.core.models.songs.SongTuning
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.SongSettings
 
-
 /** The toolbar button that adds the *selected* song, as opposed to any other "Add to Schedule". */
 internal const val SONGS_ADD_SELECTED_TAG = "songs_addSelectedToSchedule"
-
 
 @Composable
 fun SongsTab(
@@ -76,7 +74,6 @@ fun SongsTab(
     playCounts: SongPlayCounts? = null,
     dialogDismissSignal: Int = 0,
 ) {
-
     // Edit Song Dialog state (pure UI state — fine to keep here)
     val dialogs = rememberSongDialogRequests()
     // Track which song/section/line is currently live on the presenter.

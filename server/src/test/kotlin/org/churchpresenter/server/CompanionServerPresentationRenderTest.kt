@@ -52,6 +52,7 @@ class CompanionServerPresentationRenderTest {
         private lateinit var tempHome: File
         private lateinit var deckDir: File
         private var realHome: String? = null
+
         /**
          * The port the server ASKED for. Never build a URL from it — `CompanionServer.start` runs it
          * through `findFreePort`, which walks upward when the port is taken (a previous suite's

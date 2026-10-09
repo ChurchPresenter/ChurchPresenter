@@ -242,6 +242,14 @@ Thresholds are deliberately not detekt's defaults: `LongMethod` 100, `LargeClass
 `LongParameterList` with `ignoreDefaultParameters: true` so the `*TestSupport.kt` DSL helpers are
 not flagged.
 
+**Formatting is detekt-formatting (ktlint)**, added to every module once from the root build. The
+rules that are on are clean and auto-correctable — `./gradlew detekt --auto-correct` fixes what it
+finds. Deliberately **off**, each for rewriting a large share of the tree: `Indentation`,
+`ArgumentListWrapping`, `Wrapping`, `ImportOrdering`, `MultiLineIfElse`, `NoMultipleSpaces`,
+`ParameterListWrapping`, `AnnotationOnSeparateLine`, the two `TrailingComma*` rules, `Filename`, and
+`MaximumLineLength` (detekt's own `MaxLineLength` is in force). The measured counts are in the
+`formatting:` block of `config/detekt/detekt.yml`; turn one on only together with its whole fix.
+
 ### Screenshots
 - **Committed, beside the module that shoots them** — `composeApp/screenshots/` for the app's tabs,
   dialogs and outputs, `<module>/screenshots/` for each module's own (`shared-ui`, `slides`, `media`).

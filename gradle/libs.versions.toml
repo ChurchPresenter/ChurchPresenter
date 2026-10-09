@@ -41,6 +41,7 @@ pitest = "1.30.0"
 pitestJunit5 = "1.2.3"
 
 [libraries]
+detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 # The JSON reader BibleEngineClient parses the engine's messages with; pinned to the version socket.io-client brings.
 org-json = { module = "org.json:json", version = "20090211" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }

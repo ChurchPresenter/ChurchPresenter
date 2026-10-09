@@ -40,6 +40,7 @@ private const val VLC_OPT_TIGHT_CLOCK = ":clock-jitter=0"
  */
 internal class DecodedFrames {
     @Volatile var frame: BufferedImage? = null
+
     @Volatile var version = 0L
         private set
 
@@ -108,23 +109,29 @@ class EmbeddedVideoDecoder internal constructor(
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var pollJob: Job? = null
+
     // internal (not private): a MediaPlayer can't be constructed without a real libvlc native
     // handle, so tests inject a mock here to exercise resume()/pause()'s guard logic.
     internal var mp: MediaPlayer? = null
     private var release: (() -> Unit)? = null
     internal val frames = DecodedFrames()
+
     // internal: lets tests drive composite() directly with a decoded frame instead of needing a
     // real VLC render callback to populate it.
     internal var decodedFrame: BufferedImage?
         get() = frames.frame
         set(value) { frames.frame = value }
+
     @Volatile private var resumed = false
+
     @Volatile private var closed = false
+
     // Confirmed via vlcj's own playing()/paused() events — resume()/pause() only reissue the
     // native command while unconfirmed (closes the start() race below without hammering libvlc
     // every frame for the rest of the clip once the transition actually lands). internal so tests
     // can simulate the event without a real MediaPlayer to fire it.
     @Volatile internal var confirmedPlaying = false
+
     @Volatile internal var confirmedPaused = false
 
     fun start() {

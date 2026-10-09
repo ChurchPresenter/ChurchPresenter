@@ -773,7 +773,6 @@ class PresenterLowerThirdScreenshotTest {
         ),
     )
 
-
     private fun bibleBackground(config: BackgroundConfig) =
         bibleSettings().copy(backgroundSettings = BackgroundSettings(bibleLowerThirdBackground = config))
 

@@ -179,6 +179,7 @@ internal class SongLook(
     val effectiveLyricsShadow = if (lookAheadEnabled) {
         if (isLowerThird) ss.lowerThirdLookAheadShadow else ss.lookAheadShadow
     } else if (isLowerThird) ss.lyricsLowerThirdShadow else ss.lyricsShadow
+
     // Which profile the body text is drawn from: the look-ahead slide styles its lines separately.
     val lyricsStyleProfile = ss.elementStyle(
         if (lookAheadEnabled) SongStyleElement.LOOK_AHEAD else SongStyleElement.LYRICS,

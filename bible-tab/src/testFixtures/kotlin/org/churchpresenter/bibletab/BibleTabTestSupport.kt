@@ -336,6 +336,7 @@ object BibleLabel {
     const val EXACT_MATCH = "Exact Match"
     const val NO_PRIMARY = "No Primary Bible Configured"
     const val SWAP = "Swap"
+
     /** The mic button's tooltip, which is what it offers to do next. */
     const val STT_CONNECT = "Connect"
     const val STT_DISCONNECT = "Disconnect"

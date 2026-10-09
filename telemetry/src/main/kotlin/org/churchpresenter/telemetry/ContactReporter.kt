@@ -44,12 +44,16 @@ object ContactReporter {
     sealed interface Outcome {
         /** Delivered (or accepted in local dev). */
         data object Success : Outcome
+
         /** Rejected by validation; [error] is the server's reason if available. */
         data class Invalid(val error: String?) : Outcome
+
         /** Per-IP rate limit hit — escalate the user to [WEB_CONTACT_URL]. */
         data object RateLimited : Outcome
+
         /** Couldn't reach the server (no connection / timeout) — retryable; hint to check the network. */
         data object NetworkError : Outcome
+
         /** Server-side error (5xx / unexpected status) — transient, safe to retry. */
         data object Failure : Outcome
     }

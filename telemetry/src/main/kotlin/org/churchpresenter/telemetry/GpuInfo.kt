@@ -73,10 +73,15 @@ object GpuInfo {
     @Suppress("VariableNaming")
     internal class DisplayDevice : Structure() {
         @JvmField var cb: Int = 0
+
         @JvmField var DeviceName: CharArray = CharArray(DEVICE_NAME_CHARS)
+
         @JvmField var DeviceString: CharArray = CharArray(DEVICE_STRING_CHARS)
+
         @JvmField var StateFlags: Int = 0
+
         @JvmField var DeviceID: CharArray = CharArray(DEVICE_STRING_CHARS)
+
         @JvmField var DeviceKey: CharArray = CharArray(DEVICE_STRING_CHARS)
     }
 

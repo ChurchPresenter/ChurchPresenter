@@ -219,7 +219,6 @@ private fun ElementKindSections(
     }
 }
 
-
 // ------------------------------------------------------------------ placement
 
 @Composable
@@ -286,7 +285,6 @@ internal fun PlacementEditor(state: EditorState, element: ElementSpec, onChange:
         AlignOverrides(placement, onChange)
     }
 }
-
 
 /** Per-alignment overrides: one card per alignment that has one, plus a button to add it. */
 @Composable

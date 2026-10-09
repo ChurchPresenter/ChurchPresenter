@@ -316,7 +316,6 @@ private fun MediaTabScope.MediaPreviewCard(
                 SoftwareVideoPlayer(viewModel = viewModel, modifier = Modifier.size(0.dp))
             }
 
-
             // The shape of the output this media actually goes out on. Media can be routed to
             // several differently-shaped outputs at once, so which one the preview stands for is
             // the operator's to say -- the picker draws nothing until there is more than one.
@@ -526,7 +525,6 @@ private fun MediaSeekBar(
         )
     }
 }
-
 
 /** Tap or drag anywhere on the track to seek; [onDragging] follows whether a drag is under way. */
 private fun Modifier.seekGestures(duration: Long, onSeek: (Long) -> Unit, onDragging: (Boolean) -> Unit): Modifier =

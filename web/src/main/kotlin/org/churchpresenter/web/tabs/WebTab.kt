@@ -154,7 +154,6 @@ fun WebTab(
     }
 }
 
-
 /**
  * Shown in place of the browser when JCEF's native engine failed to load at startup.
  * Points the user at the Microsoft Visual C++ Redistributable, the most common cause.

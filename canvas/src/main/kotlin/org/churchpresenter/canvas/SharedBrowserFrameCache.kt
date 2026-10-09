@@ -209,13 +209,7 @@ object SharedBrowserFrameCache {
 
     // ── Browser Discovery ──────────────────────────────────────────
 
-
-
-
-
     // ── CDP Browser Lifecycle ──────────────────────────────────────
-
-
 
     /** The page one browser source shows, and how it is rendered and captured. */
     data class BrowserPage(
@@ -291,7 +285,6 @@ object SharedBrowserFrameCache {
         runCaptureLoop(entry, cdp, page.fps)
     }
 
-
     /** Screenshots the page at [fps] into the entry until the coroutine is cancelled. */
     internal suspend fun runCaptureLoop(entry: CacheEntry, cdp: CdpConnection, fps: Int) {
         entry.captureIntervalMs = (
@@ -317,11 +310,6 @@ object SharedBrowserFrameCache {
         }
     }
 
-
-
-
-
-
     private fun stopBrowser(entry: CacheEntry) {
         entry.captureJob?.cancel()
         entry.captureJob = null
@@ -344,7 +332,6 @@ object SharedBrowserFrameCache {
 
         entry.frame.value = null
     }
-
 
     // ── CDP WebSocket Connection ───────────────────────────────────
 

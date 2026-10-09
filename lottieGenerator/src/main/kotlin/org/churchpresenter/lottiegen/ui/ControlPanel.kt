@@ -54,7 +54,6 @@ internal const val MAX_HOLD_SECONDS = 30f
 internal const val MIN_NUDGE_EM = -0.5f
 internal const val MAX_NUDGE_EM = 1f
 
-
 /** Two equal columns, the layout every field pair in the panel uses. */
 @Composable
 internal fun FieldRow(content: @Composable RowScope.() -> Unit) {
@@ -141,7 +140,6 @@ fun ControlPanel(
                 .padding(start = 13.dp, end = 13.dp, top = 10.dp, bottom = 18.dp),
             verticalArrangement = Arrangement.spacedBy(7.dp)
         ) {
-
             CanvasSection(viewModel)
             StyleLayoutSection(viewModel)
             TextSection(viewModel, controlTag)

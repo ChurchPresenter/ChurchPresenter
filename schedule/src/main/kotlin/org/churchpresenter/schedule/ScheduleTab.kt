@@ -164,7 +164,6 @@ fun ScheduleTab(
     val fileDrop = rememberScheduleFileDrop(viewModel)
 
     Column(modifier = modifier.fillMaxSize()) {
-
         ScheduleHeader(
             itemCount = scheduleItems.count { it !is ScheduleItem.LabelItem },
             density = density,

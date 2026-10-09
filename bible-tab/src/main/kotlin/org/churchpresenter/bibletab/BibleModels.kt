@@ -1,6 +1,5 @@
 package org.churchpresenter.bibletab
 
-
 enum class BibleSearchMode { AUTO, REFERENCE, TEXT }
 
 enum class DetectionSource { EXPLICIT, REVERSE, CONTINUATION, CHAPTER_SCAN, CHAPTER_HISTORY }

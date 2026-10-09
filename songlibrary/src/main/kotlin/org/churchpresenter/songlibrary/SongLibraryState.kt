@@ -143,6 +143,7 @@ class SongLibraryState(
             }
         }
     }
+
     /** What the grid draws, left to right: the number first when it is shown, then the title, then the rest. */
     val visibleColumns: List<SongField> by derivedStateOf {
         val (number, rest) = availableColumns.filterNot { it in hiddenColumns }.partition { it == SongField.NUMBER }

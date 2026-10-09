@@ -274,4 +274,3 @@ internal fun AppRootState.CompanionServerWiring(tunnelStatus: TunnelStatus) {
         companionServer.typicalSeconds = { song -> liveDurationLog.median(song.asDurationRow()) }
     }
 }
-

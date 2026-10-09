@@ -12,7 +12,6 @@ import kotlin.test.assertTrue
  */
 class BibleViewModelNoBibleTest {
 
-
     @Test
     fun `with no Bible nothing is selected and nothing comes next`() {
         val vm = BibleViewModel(AppSettings())

@@ -30,6 +30,7 @@ class SettingsManager {
     private val settingsFile = File(appDataDir, "settings.json")
     private val settingsTmpFile = File(appDataDir, "settings.json.tmp")
     val lottiePresetsDir: File = File(appDataDir, "lottie_presets")
+
     /** Where the lower-third band generator saves its templates, and where the picker starts. */
     val bibleLowerThirdsDir: File = bibleLowerThirdsDir(appDataDir)
 

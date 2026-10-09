@@ -19,7 +19,6 @@ internal fun shortenWord(word: String): String = when {
     else -> word.take(SHORT_WORD_TRUNCATED_LENGTH)
 }
 
-
 /**
  * Extract Bible version abbreviation from title or filename
  * Examples: "Russian Synodal Translation" -> "RST"
@@ -61,7 +60,6 @@ internal fun extractBibleAbbreviation(title: String?, filename: String): String 
     return filename.substringBeforeLast(".").substringAfterLast("/").substringAfterLast("\\")
 }
 
-
 /**
  * Fast path: reads ONLY the header section of an SPB file to populate book names.
  * Stops as soon as the separator line or first verse is encountered.
@@ -79,7 +77,6 @@ internal fun openHeaderReader(resourcePath: String): java.io.BufferedReader {
     return Files.newBufferedReader(path, StandardCharsets.UTF_8)
 }
 
-
 internal fun collectBookHeader(
     line: String,
     headerOrder: MutableList<Int>,
@@ -93,7 +90,6 @@ internal fun collectBookHeader(
     parsedChapterCounts[bookId] = m.groupValues[REGEX_GROUP_THIRD].toInt()
 }
 
-
 internal fun openSpbReader(resourcePath: String): java.io.BufferedReader {
     val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(resourcePath)
     if (inputStream != null) return inputStream.bufferedReader(StandardCharsets.UTF_8)
@@ -103,7 +99,6 @@ internal fun openSpbReader(resourcePath: String): java.io.BufferedReader {
     }
     return Files.newBufferedReader(path, StandardCharsets.UTF_8)
 }
-
 
 /** Encodes (bookId, chapterNum) as a single Long key for the HashMap. */
 internal fun chapterKey(

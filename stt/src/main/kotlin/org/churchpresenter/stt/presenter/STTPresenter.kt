@@ -301,6 +301,7 @@ private fun useDripFeed(segments: List<STTSegment>, pace: RevealPace?): Revealed
 
 /** What a reveal has put on screen: its [segments], and the words in its RSVP flash -- 0 when it has none. */
 private class RevealedCaption(val segments: List<STTSegment>, val flashWords: Int = 0)
+
 /** The last [count] of [segments], or all of them when [count] is 0 or less. */
 internal fun <T> keepNewest(segments: List<T>, count: Int): List<T> =
     if (count > 0) segments.takeLast(count) else segments

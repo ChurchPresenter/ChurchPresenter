@@ -243,7 +243,7 @@ class DeckLinkHardwareTest {
             val w = info?.width ?: 1920
             val h = info?.height ?: 1080
             DeckLinkManager.sendFrame(idx, IntArray(w * h), w, h)
-            println("[DeckLinkHardwareTest] Sent one black frame to device $idx at ${w}x${h}")
+            println("[DeckLinkHardwareTest] Sent one black frame to device $idx at ${w}x$h")
         } finally {
             DeckLinkManager.close(idx)
         }

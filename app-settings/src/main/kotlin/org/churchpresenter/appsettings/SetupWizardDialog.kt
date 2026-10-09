@@ -88,6 +88,7 @@ private const val TOTAL_STEPS = 8
 
 private val PANEL_PADDING = 28.dp
 private val PANEL_GAP = 20.dp
+
 @Composable
 fun SetupWizardDialog(
     theme: ThemeMode,

@@ -2,7 +2,7 @@ package org.churchpresenter.server
 
 /**
  * One emitted delta: a PNG-encoded sub-rectangle of the full [fullWidth]x[fullHeight] frame,
- * positioned at ([x],[y]). A full-frame delta has x=0, y=0, rectWidth=fullWidth,
+ * positioned at ([x], [y]). A full-frame delta has x=0, y=0, rectWidth=fullWidth,
  * rectHeight=fullHeight — sent for the very first tick and whenever a new HTTP subscriber
  * attaches, since a brand-new client's compositing canvas has nothing to apply a partial rect
  * onto yet. Note: default `equals()`/`hashCode()` on [png] is reference-based, not content-based

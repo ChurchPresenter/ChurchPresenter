@@ -96,4 +96,3 @@ internal fun cameraBackground(background: SongBackground, device: CameraDevice):
             deckLinkIndex = device.deckLinkIndex,
         ),
     )
-

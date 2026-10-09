@@ -84,5 +84,5 @@ enum class LottieFont(val familyName: String, val hasRegular: Boolean = true, va
     NOTO_SANS_DEVANAGARI("Noto Sans Devanagari"),
     NOTO_SANS_THAI("Noto Sans Thai"),
     NOTO_SANS_LAO("Noto Sans Lao"),
-    NOTO_SANS_TAMIL("Noto Sans Tamil");
+    NOTO_SANS_TAMIL("Noto Sans Tamil")
 }

@@ -277,4 +277,3 @@ internal fun ColorRoleRow(viewModel: BibleLottieGenViewModel, role: BandColorRol
         if (lookOpen) LookPopover(viewModel, role, pickImage, onDismiss = { lookOpen = false })
     }
 }
-

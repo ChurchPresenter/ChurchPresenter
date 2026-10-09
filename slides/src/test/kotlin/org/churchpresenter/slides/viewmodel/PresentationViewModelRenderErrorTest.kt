@@ -174,6 +174,7 @@ class PresentationViewModelRenderErrorTest {
         assertEquals(PresentationLoadError.RENDER_FAILED, vm.loadError)
         assertFalse(vm.isLoading, "an error thrown mid-render must still clear the loading flag")
     }
+
     @Test
     fun `a locked or empty deck is the operator's file, not a defect to report`() {
         // Both already have their own message on screen, so there is nothing here to fix — and

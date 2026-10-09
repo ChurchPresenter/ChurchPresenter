@@ -1,6 +1,5 @@
 package org.churchpresenter.bibletab
 
-
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.focusRequester

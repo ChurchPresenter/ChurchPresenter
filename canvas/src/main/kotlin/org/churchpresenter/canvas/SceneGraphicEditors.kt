@@ -92,11 +92,14 @@ import org.churchpresenter.sharedui.composables.opacityLabel
 private const val MAX_STROKE_WIDTH = 20f
 private const val MAX_ANGLE_DEGREES = 360f
 private const val PERCENT_SCALE = 100f
+
 /** Two full turns of curve either way; past that the line runs into itself. */
 private const val MAX_TEXT_CURVE = 200f
+
 /** Tracking, as a percentage of the font size. */
 private const val MIN_LETTER_SPACING = -20f
 private const val MAX_LETTER_SPACING = 100f
+
 /** The font sizes a canvas layer's size field accepts; see `drawnFontSize` for why 0 cannot be one. */
 internal const val MIN_FONT_SIZE = 8
 internal const val MAX_FONT_SIZE = 500

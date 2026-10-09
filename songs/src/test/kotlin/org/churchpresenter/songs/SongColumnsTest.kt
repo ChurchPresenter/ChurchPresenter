@@ -107,6 +107,7 @@ class SongColumnsTest {
     // ── draggedColumnIndex ────────────────────────────────────────────────────
 
     private val visible = listOf("a", "b", "c", "d")
+
     // Uniform 100px columns + 6px handle → 106px per step, half-step threshold 53px.
     private val width: (String) -> Float = { 100f }
 

@@ -193,7 +193,6 @@ internal class SpecBuild(
 
     // ------------------------------------------------------------------ text
 
-
     private fun buildText(
         element: TextElement
     ) {
@@ -332,7 +331,6 @@ internal class SpecBuild(
 
     // ---------------------------------------------------------------- shapes
 
-
     private fun backgroundPaint(element: BackgroundElement): PaintSpec {
         if (element.paint.stroke != null) return element.paint
         if (element.borderFromConfig && layout.borderPx > 0) {
@@ -340,5 +338,4 @@ internal class SpecBuild(
         }
         return element.paint
     }
-
 }

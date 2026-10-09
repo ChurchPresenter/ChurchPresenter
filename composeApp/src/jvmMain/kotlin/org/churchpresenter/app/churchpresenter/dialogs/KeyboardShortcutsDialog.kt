@@ -206,7 +206,6 @@ internal fun KeyboardShortcutsDialogContent(
         color = MaterialTheme.colorScheme.background
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-
             ShortcutsToolbar(filter, conflicts.size, pressFocus)
 
             Row(modifier = Modifier.weight(1f).fillMaxWidth()) {

@@ -113,9 +113,11 @@ class CompanionSurfacePanelTest {
         val clients = CompanionSatelliteViewModel::class.java
             .getDeclaredField("clients").apply { isAccessible = true }
             .get(this)
+
         @Suppress("UNCHECKED_CAST")
         val client = (clients as Map<CompanionSurfaceSlot, CompanionSatelliteClient>)[slot]
             ?: error("no client registered for $slot")
+
         @Suppress("UNCHECKED_CAST")
         val callback = CompanionSatelliteClient::class.java
             .getDeclaredField("onStatusChanged").apply { isAccessible = true }
@@ -130,9 +132,11 @@ class CompanionSurfacePanelTest {
         val clients = CompanionSatelliteViewModel::class.java
             .getDeclaredField("clients").apply { isAccessible = true }
             .get(this)
+
         @Suppress("UNCHECKED_CAST")
         val client = (clients as Map<CompanionSurfaceSlot, CompanionSatelliteClient>)[slot]
             ?: error("no client registered for $slot")
+
         @Suppress("UNCHECKED_CAST")
         val callback = CompanionSatelliteClient::class.java
             .getDeclaredField("onBrightnessChanged").apply { isAccessible = true }

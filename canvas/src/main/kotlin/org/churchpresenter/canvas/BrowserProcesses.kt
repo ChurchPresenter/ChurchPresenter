@@ -20,6 +20,7 @@ import org.churchpresenter.diagnostics.Log
 internal object BrowserProcesses {
     private val httpClient = HttpClient.newHttpClient()
     private val isWindows = System.getProperty("os.name", "").lowercase().contains("win")
+
     @Volatile private var zombiesCleaned = false
 
     /** The executable `which`/`where` reports for [name], when it exists on disk. */

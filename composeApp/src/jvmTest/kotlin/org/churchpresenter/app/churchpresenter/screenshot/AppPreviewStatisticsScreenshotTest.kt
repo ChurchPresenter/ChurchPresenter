@@ -36,7 +36,6 @@ import org.churchpresenter.sharedui.screenshot.captureTo
 
 class AppPreviewStatisticsScreenshotTest {
 
-
     private fun dialog(
         name: String,
         width: Dp,

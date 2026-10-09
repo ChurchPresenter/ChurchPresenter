@@ -378,7 +378,6 @@ private fun SongListScope.SongSearchBar() {
                 )
             }
         }
-
     }
 }
 

@@ -31,6 +31,7 @@ class BibleTabLoadErrorTest {
     private val sweep = CrashReportSweep()
 
     @BeforeTest fun mark() = sweep.mark()
+
     @AfterTest fun clean() = sweep.sweep()
 
     private fun withMissingTranslation(app: AppSettings) = app.copy(

@@ -7,7 +7,6 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-
 // ── Aggregate statistics (existing, all-time) ─────────────────────────────────
 
 @Serializable
@@ -301,8 +300,6 @@ class StatisticsManager {
             files.save(statistics, eventLog)
         }
     }
-
-
 }
 
 /** Where the counters and the event log are kept: `~/.churchpresenter/statistics.json` and `play_log.json`. */

@@ -619,4 +619,3 @@ fun ChurchPresenterTheme(
         }
     }
 }
-

@@ -84,6 +84,7 @@ internal object SatLabel {
     const val RIGHT_DEVICE_ID = "Right sidebar device ID"
     const val PRODUCT_NAME = "Product name"
     const val RECONNECT_DELAY = "Reconnect delay (ms)"
+
     // The placement grid boxes caption themselves, and SettingsTextField uppercases those labels —
     // unlike the connection-level rows above, whose captions come from SettingRow as written.
     const val ROWS = "ROWS"

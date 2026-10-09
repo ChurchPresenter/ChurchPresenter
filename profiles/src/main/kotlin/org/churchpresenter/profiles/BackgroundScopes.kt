@@ -250,4 +250,3 @@ internal val BackgroundScope.coverage: BackgroundCoverage
 /** Whether [scope] is set to something of its own rather than deferring upwards. */
 internal fun BackgroundSettings.isSetExplicitly(scope: BackgroundScope): Boolean =
     scope.inheritType != null && configFor(scope).backgroundType != scope.inheritType
-

@@ -87,7 +87,6 @@ class LiveHistoryLoggerTest {
         assertNull(changes(session).single()["sttSeconds"])
     }
 
-
     @Test
     fun `each change is one JSON line and a repeat of the last one writes nothing`() {
         val s = useSession("history-dedupe")

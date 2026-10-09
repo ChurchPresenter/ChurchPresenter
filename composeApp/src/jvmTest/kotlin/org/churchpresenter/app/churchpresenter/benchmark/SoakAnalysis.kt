@@ -210,7 +210,7 @@ fun soakChart(samples: List<SoakSample>, budgetMs: Double): String {
                 append("<text x='${MARGIN + 4}' y='${top + 14}' font-size='11' fill='#777'>warm-up</text>")
             }
             append("<rect x='$MARGIN' y='$top' width='$plotWidth' height='$PANEL_HEIGHT' fill='none' stroke='#999'/>")
-            append("<text x='$MARGIN' y='${top - 8}' font-size='13'>${title} (max ${fmt(peak)})</text>")
+            append("<text x='$MARGIN' y='${top - 8}' font-size='13'>$title (max ${fmt(peak)})</text>")
             guide?.let {
                 val gy = fmt2(y(it))
                 append("<line x1='$MARGIN' y1='$gy' x2='${MARGIN + plotWidth}' y2='$gy' ")

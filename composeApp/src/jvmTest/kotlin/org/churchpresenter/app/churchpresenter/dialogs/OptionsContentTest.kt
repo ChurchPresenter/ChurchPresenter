@@ -189,8 +189,8 @@ class OptionsContentTest {
         assertEquals(TabLabelMargin.NORMAL_LARGE, result.saved?.tabLabelMargin)
     }
 
-    @Test
     // Two, not three: the Song tab this branch removed used to sit at 2, so Background moved down.
+    @Test
     fun `initialTab opens directly on that tab`() = dialog(initialTab = 2) {
         tab("Background").assertIsSelected()
     }

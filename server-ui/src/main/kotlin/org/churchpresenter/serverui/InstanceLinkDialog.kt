@@ -336,7 +336,6 @@ private fun LinkStatusLines(remoteScheduleCount: Int, lastMessageAtMs: Long?, re
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
-
 }
 
 /** Where the primary is, its API key, and how this instance reconnects to it. */

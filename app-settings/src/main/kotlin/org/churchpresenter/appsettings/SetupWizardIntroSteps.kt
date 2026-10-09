@@ -320,7 +320,6 @@ private fun ThemeSwatchCard(
     }
 }
 
-
 // ── Step 3: welcome ──────────────────────────────────────────────────────────────────────────
 
 /** What the next three steps are for, each card jumping straight to the step it describes. */

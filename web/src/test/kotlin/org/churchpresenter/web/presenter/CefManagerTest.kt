@@ -503,5 +503,4 @@ class CefManagerTest {
         assertNull(CefManager.createClient())
         assertFalse(CefManager.initialized, "answering null must not flip the flag on")
     }
-
 }

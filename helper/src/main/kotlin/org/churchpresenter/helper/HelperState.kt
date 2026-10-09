@@ -133,8 +133,6 @@ class HelperState(val session: GuideSession = GuideSession()) {
         reply = next
     }
 
-
-
     /** Acts on what a typed request came to. */
     fun onResolved(resolution: Resolution, executor: HelperActionExecutor) {
         when (resolution) {
@@ -201,6 +199,4 @@ class HelperState(val session: GuideSession = GuideSession()) {
             }
         }
     }
-
 }
-

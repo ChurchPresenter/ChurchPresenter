@@ -126,6 +126,7 @@ fun DictionaryPresenter(
                     append(entry.pronunciation)
                 }
             }
+
             // Each part as its own composable, drawn at [scale] of its configured size: 1 in the
             // card, less where a box it has been given shrinks it to fit.
             @Composable
@@ -145,6 +146,7 @@ fun DictionaryPresenter(
                     style = TextStyle(shadow = refShadow()),
                 )
             }
+
             @Composable
             fun WordPart(scale: Float) {
                 OutlinedText(
@@ -163,6 +165,7 @@ fun DictionaryPresenter(
                     style = TextStyle(shadow = wordShadow()),
                 )
             }
+
             @Composable
             fun TranslitPart(scale: Float) {
                 OutlinedText(
@@ -180,6 +183,7 @@ fun DictionaryPresenter(
                     style = TextStyle(shadow = refShadow()),
                 )
             }
+
             @Composable
             fun DefinitionPart(scale: Float) {
                 OutlinedText(
@@ -197,6 +201,7 @@ fun DictionaryPresenter(
                     style = TextStyle(),
                 )
             }
+
             @Composable
             fun KjvPart(scale: Float) {
                 OutlinedText(
@@ -252,6 +257,7 @@ fun DictionaryPresenter(
             // Each boxed part in its own box, shrunk to fit it where the box says so.
             val area = Rect(0f, 0f, maxWidth.value, maxHeight.value)
             val measurer = rememberTextMeasurer()
+
             @Composable
             fun Boxed(part: String, shows: Boolean, text: String, size: Int, content: @Composable (Float) -> Unit) {
                 val box = boxOf(part)

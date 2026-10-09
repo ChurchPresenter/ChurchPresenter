@@ -15,8 +15,6 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
 
-
-
 /**
  * The OBS/vMix Browser Source outputs: which outputs exist, the frame stream each renderer
  * produces, and the live overlay sessions consuming them.
@@ -78,7 +76,6 @@ internal class BrowserSourceHub(
     /** What a page of [index] is told: the current offset, and whether to offer the buttons. */
     internal fun transposeState(transposes: Map<Int, Int>, controls: Set<Int>, index: Int): String =
         """{"transpose":${transposes[index] ?: 0},"controls":${index in controls}}"""
-
 
     /**
      * Registers (or replaces) the frame delta flow a given output's renderer produces.

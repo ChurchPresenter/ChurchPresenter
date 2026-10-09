@@ -74,6 +74,7 @@ class CalendarState(
 ) {
     var document by mutableStateOf(CalendarDocument())
         private set
+
     /** Where [document] came from, so the window can say it was recovered. Cleared once acknowledged. */
     var source by mutableStateOf(CalendarSource.NEW)
         private set
@@ -81,6 +82,7 @@ class CalendarState(
         private set
     var selectedDate by mutableStateOf(today)
         private set
+
     /** Which of [servicesOnSelectedDate] is open below the grid. Null when the day is empty. */
     var selectedServiceId by mutableStateOf<String?>(null)
         private set
@@ -92,9 +94,9 @@ class CalendarState(
     /** The items saved with **Save preset** from the app's tabs, newest first. */
     var presets by mutableStateOf<List<ItemPreset>>(emptyList())
         private set
+
     /** `presets.json` as last read, so another machine's copy can be merged against it. */
     private var presetDocument = PresetDocument()
-
 
     /** The primary Bible's books, as the host supplies them. Read once — see [loadBibleBooks]. */
     var bibleBooks by mutableStateOf<List<CalendarBibleBook>>(emptyList())
@@ -110,12 +112,14 @@ class CalendarState(
     /** The open service's rows that will not go on screen on the day, by row id -- see [checkService]. */
     var preflight by mutableStateOf<Map<String, PreflightProblem>>(emptyMap())
         private set
+
     /** Recomputed when the document or the selection changes, not on every read — the run of show
      *  reads this once per row per frame. */
     private val servicesOnDay by derivedStateOf {
         document.servicesOn(storedDate(selectedDate))
     }
     val servicesOnSelectedDate: List<PlannedService> get() = servicesOnDay
+
     /** The service whose run of show is showing, or null when the day has none. */
     val selectedService: PlannedService?
         get() = selectedServiceId?.let { id -> servicesOnDay.firstOrNull { it.id == id } }
@@ -165,6 +169,7 @@ class CalendarState(
         presetDocument = presetDocument.withoutPreset(id, now())
         presets = presets.filterNot { it.id == id }
     }
+
     /** Reads the song folder for the add-item picker. Thousands of files — never on the UI thread. */
     suspend fun loadSongsAsync(io: CoroutineDispatcher = Dispatchers.IO) {
         val folder = songFolder
@@ -211,6 +216,7 @@ class CalendarState(
     fun acknowledgeSource() {
         source = CalendarSource.FILE
     }
+
     // ── Navigation ────────────────────────────────────────────────────────────
     fun showMonth(month: YearMonth) {
         visibleMonth = month
@@ -475,6 +481,7 @@ class CalendarState(
         val service = document.serviceById(serviceId) ?: return
         commit(document.withService(service.copy(armed = armed)))
     }
+
     // ── Run of show ───────────────────────────────────────────────────────────
     fun addItems(serviceId: String, items: List<ScheduleItem>, at: Int? = null) {
         val service = document.serviceById(serviceId) ?: return
@@ -483,6 +490,7 @@ class CalendarState(
         next.addAll(index, items)
         commit(document.withService(service.copy(items = next)))
     }
+
     /**
      * Swaps the row [itemId] for [items], keeping its place in the order.
      *
@@ -527,6 +535,7 @@ class CalendarState(
             )
         )
     }
+
     /** Moves the row at [from] to [to], both indices into the run of show. */
     fun moveItem(serviceId: String, from: Int, to: Int) {
         val service = document.serviceById(serviceId) ?: return

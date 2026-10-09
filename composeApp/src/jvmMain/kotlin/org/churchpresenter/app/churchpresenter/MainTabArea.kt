@@ -49,8 +49,6 @@ import org.churchpresenter.theme.components.RaisedCheckbox
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-
-
 private const val CONTENT_CROSSFADE_MS = 120
 private val TOOLBAR_KEY_SIZE = 40.dp
 
@@ -183,4 +181,3 @@ private fun TabVisibilityMenu(hiddenTabs: Set<String>, onToggleTabHidden: (Tabs)
         }
     }
 }
-

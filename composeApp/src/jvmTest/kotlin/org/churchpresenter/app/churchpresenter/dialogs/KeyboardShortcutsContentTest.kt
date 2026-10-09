@@ -67,7 +67,7 @@ class KeyboardShortcutsContentTest {
 
     @Test
     fun `every category is offered in the rail`() {
-        val categories = ShortcutScope.entries.map { it.name to it.titleRes } 
+        val categories = ShortcutScope.entries.map { it.name to it.titleRes }
         dialog {
             ShortcutScope.entries.forEach { scope ->
                 onNodeWithTag(shortcutCategoryTag(scope)).assertExists()

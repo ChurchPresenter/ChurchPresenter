@@ -19,7 +19,6 @@ import org.churchpresenter.settings.layoutFromGroups
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 
-
 /**
  * The sidebar panel once it has a layout made from preview groups -- as settings version 20 makes
  * one: which outputs it draws and what it leaves off. The display counting and badges are covered by

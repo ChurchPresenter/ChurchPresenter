@@ -169,7 +169,6 @@ class AppPreviewSettingsScreenshotTest {
     fun `tabs with large spacing`() =
         settingsTab("tabs_spacing_large", 0, library().copy(tabLabelMargin = TabLabelMargin.LARGE))
 
-
     private companion object {
         /**
          * Stands in for the machine's app data folder, which the System tab's Calendar row prints.

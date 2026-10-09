@@ -46,8 +46,6 @@ import org.churchpresenter.showcontrol.Action
  */
 class MainDesktopDevModeTest : MainDesktopComposeHarness() {
 
-
-
     @Test
     fun `in dev mode the sidebar's box holds the unfinished features, and its toggle switches preview mode`() {
         val wiring = Wiring()
@@ -178,7 +176,6 @@ class MainDesktopDevModeTest : MainDesktopComposeHarness() {
         }
     }
 
-
     @Test
     fun `the clear layers menu clears a group, or one layer that is on air`() {
         val gfx = ClearGroup("g1", "Graphics", listOf(Layer.GRAPHICS.name))
@@ -251,5 +248,4 @@ class MainDesktopDevModeTest : MainDesktopComposeHarness() {
             onNodeWithTag(DEV_MODE_BOX_TAG).assertExists()
         }
     }
-
 }

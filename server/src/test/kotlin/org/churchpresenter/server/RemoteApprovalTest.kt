@@ -1,6 +1,5 @@
 package org.churchpresenter.server
 
-
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs

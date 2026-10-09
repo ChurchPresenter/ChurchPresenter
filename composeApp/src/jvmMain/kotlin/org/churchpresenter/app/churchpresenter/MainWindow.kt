@@ -423,4 +423,3 @@ private fun AppRootState.FirstRunDialogs() {
         onDecline = { exitApplication() }
     )
 }
-

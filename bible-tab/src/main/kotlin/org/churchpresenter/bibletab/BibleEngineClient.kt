@@ -99,8 +99,11 @@ class BibleEngineClient(
 
     private var engineHandle: EngineHandle? = null
     private var wsJob: Job? = null
+
     @Volatile private var session: DefaultClientWebSocketSession? = null
+
     @Volatile private var currentLevel: String = "off"
+
     @Volatile private var currentContinuationSpeed: String = "balanced"
 
     private val engineErrorLock = Any()

@@ -81,4 +81,3 @@ fun ComposeUiTest.awaitLowerThirdRows(settings: AppSettings) {
         names.all { onAllNodesWithText(it, substring = true).fetchSemanticsNodes(false).isNotEmpty() }
     }
 }
-

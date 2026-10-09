@@ -253,5 +253,4 @@ class ProfilesCustomizeBibleControlsTest {
             onAllNodesWithText("2x2").assertCountEquals(0)
         }
     }
-
 }

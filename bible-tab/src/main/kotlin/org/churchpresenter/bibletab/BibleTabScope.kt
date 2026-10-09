@@ -1,9 +1,5 @@
 package org.churchpresenter.bibletab
 
-
-
-
-
 import org.churchpresenter.bible.BibleSearch
 import org.churchpresenter.bible.BibleLoadError
 import androidx.compose.runtime.Composable
@@ -226,7 +222,6 @@ internal class BibleTabScope(
             onInstanceLinkSendVerse?.invoke(v.bookName, v.chapter, v.verseNumber, v.verseText, v.verseRange)
         }
         if (primaryVerse != null) {
-
             val (verseStart, verseEnd) = verseSpan(primaryVerse.verseRange, primaryVerse.verseNumber)
             viewModel.logLiveReference(LiveReference(
                 displayBookIndex = viewModel.selectedBookIndex.value,
@@ -283,7 +278,6 @@ internal class BibleTabScope(
 
     /** The verse and chapter keys, on the tab itself. */
     private fun handleStepKey(viewModel: BibleViewModel, event: KeyEvent): Boolean {
-
         val movingUp = shortcuts.matches(ShortcutAction.BIBLE_PREVIOUS_VERSE, event)
         val movingDown = shortcuts.matches(ShortcutAction.BIBLE_NEXT_VERSE, event)
 
@@ -334,6 +328,7 @@ internal class BibleLiveNavState {
 
     var liveNavTargetVerse by mutableStateOf(0)
     var liveNavToken       by mutableStateOf(0)
+
     // Set when the step was to the other half of a split verse rather than to another verse, so the
     // same verse is not counted twice in the statistics it is already recorded in.
     var liveNavPageStep    by mutableStateOf(false)
@@ -345,15 +340,19 @@ internal class BibleTabUiState {
     var historyExpanded by mutableStateOf(true)
     var selectedHistoryIdx by mutableStateOf(-1)
     var selectedDetectionIdx by mutableStateOf(0)
+
     // True while the caret is in the search box: the arrow keys browse from there, and nothing
     // reaches the output until Go Live.
     var searchFieldFocused by mutableStateOf(false)
+
     // True while the tab root itself holds the keyboard -- the only place Go Live on a key may act,
     // because a one-line field lets Enter through to here.
     var tabRootFocused by mutableStateOf(false)
+
     // Set when a search put the output on hold, so going back to live releases only that hold and
     // never one the operator set.
     var heldForSearch by mutableStateOf(false)
+
     // The text-search result the arrow keys have reached; -1 for none.
     var highlightedResult by mutableStateOf(-1)
     val searchFocus = SearchFieldFocus()

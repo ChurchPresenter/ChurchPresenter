@@ -337,7 +337,6 @@ private suspend fun applyRemoteLowerThird(
     }
 }
 
-
 private fun applyRemoteCanvas(
     state: LiveStateDto,
     presenterManager: PresenterManager,

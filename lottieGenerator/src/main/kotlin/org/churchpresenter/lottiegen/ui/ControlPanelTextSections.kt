@@ -39,7 +39,6 @@ import org.churchpresenter.lottiegen.ui.components.SectionCard
 import org.churchpresenter.lottiegen.ui.components.SubtleButton
 import org.churchpresenter.lottiegen.ui.components.ScrollingMenuItems
 
-
 /** A field's own "Hide X" checkbox is checked, so it won't render. */
 private fun fieldHiddenTooltip(hideCheckboxLabel: String): String =
     MessageFormat.format(Strings.byKey("field_hidden_tooltip"), hideCheckboxLabel)
@@ -80,7 +79,6 @@ internal fun TextSection(viewModel: LottieGenState, controlTag: ControlTag = NoC
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TextStyleSection(viewModel: LottieGenState, fontPicker: BandFontPicker? = null) {
@@ -119,7 +117,6 @@ private fun TextShapingRow(viewModel: LottieGenState) {
     }
     Text(Strings.textShapingHint, fontSize = 10.sp, lineHeight = 14.sp, color = Tokens.UnitText)
 }
-
 
 /** The family, the base size, and the two line sizes. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -220,7 +217,6 @@ private fun FontAndSizeRows(viewModel: LottieGenState, fontPicker: BandFontPicke
     }
 }
 
-
 /** Bold or regular, per line. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -269,7 +265,6 @@ private fun WeightRow(viewModel: LottieGenState) {
         }
     }
 }
-
 
 /** Uppercase or as typed, per line. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -320,7 +315,6 @@ private fun CaseRow(viewModel: LottieGenState) {
     }
 }
 
-
 /** The detail line's weight and case, sharing one row since there is no third line to pair it with. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -369,7 +363,6 @@ private fun DetailWeightAndCaseRow(viewModel: LottieGenState) {
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

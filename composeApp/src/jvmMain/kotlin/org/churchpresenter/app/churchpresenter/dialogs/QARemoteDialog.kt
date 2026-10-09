@@ -84,7 +84,6 @@ import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import java.net.URLEncoder
 
-
 @Composable
 fun QARemoteDialog(
     serverUrl: String,
@@ -547,7 +546,6 @@ RaisedButton(
         style = MaterialTheme.typography.labelSmall
     )
 }
-        
 }
 
 /** The submission page, and the admin page as shown and as its QR code opens it, with the key. */

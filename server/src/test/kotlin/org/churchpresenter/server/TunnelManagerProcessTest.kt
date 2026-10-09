@@ -93,6 +93,7 @@ class TunnelManagerProcessTest {
     private companion object {
         const val URL = "https://random-happy-cloud-42.trycloudflare.com"
         const val OTHER_URL = "https://second-guess-99.trycloudflare.com"
+
         /** cloudflared's real banner shape — the URL sits in a boxed table row, not alone on a line. */
         fun banner(url: String) = "echo '2024-01-01T00:00:00Z INF |  $url  |'"
     }

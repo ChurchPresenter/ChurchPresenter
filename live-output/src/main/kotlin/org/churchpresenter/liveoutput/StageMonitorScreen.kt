@@ -60,6 +60,7 @@ import java.time.LocalTime
 import org.churchpresenter.settings.layoutSizes
 
 private const val CLOCK_TICK_MS = 1000L
+
 /** "Book chapter:verse" over the verse itself — the form both the live and the next zone show. */
 private fun SelectedVerse.asZoneText(): String =
     "$bookName $chapter:${verseRange.ifEmpty { verseNumber.toString() }}\n$verseText"
@@ -245,6 +246,7 @@ fun StageMonitorScreen(
     }
 
     val fullScreenContent = contentFor(StageMonitorZone.FULL_SCREEN)
+
     // A boxed zone is drawn in its box over the layout, and leaves its cell empty.
     fun zoneBox(zone: StageMonitorStyleZone) = sm.textBoxes.boxAt(textBoxKey(zone.name, lowerThird = false))
     fun inCell(zone: StageMonitorZone): StageMonitorContentType? =

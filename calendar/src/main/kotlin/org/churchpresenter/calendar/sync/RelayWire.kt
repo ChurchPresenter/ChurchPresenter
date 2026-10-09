@@ -203,13 +203,16 @@ object WireLimits {
     const val ROWS_PER_SERVICE = 200
     const val SERVICES_PER_PUSH = 500
     const val DELETIONS_PER_PUSH = 500
+
     /** Songs per catalog record; a bigger book is split into parts so each box stays under the relay's cap. */
     const val CATALOG_PART_SONGS = 2_000
     const val CATALOG_SONGS_MAX = 20_000
     const val MAX_PLANNED_SECONDS = 24 * 60 * 60
     const val MAX_REPEATS = 99
+
     /** Services older than this are neither pushed nor kept by the relay. */
     const val RETENTION_DAYS = 90L
+
     /** How far ahead a service may be planned. */
     const val HORIZON_DAYS = 2 * 366L
 }

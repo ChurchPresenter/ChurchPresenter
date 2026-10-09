@@ -433,7 +433,7 @@ private fun AtemKeyFields(atem: AtemSettings, update: (AtemSettings.() -> AtemSe
 @Composable
 private fun AtemDetectedKeyers(atem: AtemSettings) {
     if (atem.detectedKeyersPerMe.isNotEmpty()) {
-        val perMe = atem.detectedKeyersPerMe.mapIndexed { i, k -> "M/E ${i + 1}: ${k} keys" }
+        val perMe = atem.detectedKeyersPerMe.mapIndexed { i, k -> "M/E ${i + 1}: $k keys" }
             .joinToString("   ") +
             (if (atem.detectedDownstreamKeyers > 0) "   DSK: ${atem.detectedDownstreamKeyers}" else "")
         Text(

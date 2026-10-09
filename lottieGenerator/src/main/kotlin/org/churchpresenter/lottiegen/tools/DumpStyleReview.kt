@@ -40,9 +40,6 @@ object DumpStyleReview {
     /** Gap between grid cells, and between the grid and the image edge. */
     private const val CELL_GAP_PX = 24
 
-
-
-
     @JvmStatic
     fun main(args: Array<String>) {
         val stylesArg = args.getOrNull(0)

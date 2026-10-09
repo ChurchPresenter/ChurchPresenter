@@ -115,6 +115,14 @@ subprojects {
 // Mutation testing, configured once for the modules that apply `info.solidsoft.pitest` (the core
 // logic: :song-chords, :live-show, :core-models, :schedule). `./gradlew :<module>:pitest` writes
 // build/reports/pitest/; mutation-test.yml runs it weekly. Not a gate: no mutationThreshold.
+// detekt's ktlint wrapper, for every module that runs detekt: which of its rules are on is
+// `formatting:` in config/detekt/detekt.yml, shared like the rest of that file.
+subprojects {
+    plugins.withId("io.gitlab.arturbosch.detekt") {
+        dependencies.add("detektPlugins", libs.detekt.formatting)
+    }
+}
+
 subprojects {
     plugins.withId("info.solidsoft.pitest") {
         extensions.configure<info.solidsoft.gradle.pitest.PitestPluginExtension> {

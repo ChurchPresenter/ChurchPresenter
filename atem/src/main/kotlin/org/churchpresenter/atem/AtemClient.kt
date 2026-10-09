@@ -193,6 +193,7 @@ class AtemClient(
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val opMutex = Mutex()
     private var keepAliveJob: Job? = null
+
     @Volatile private var lastReceivedAt: Long = 0L
 
     /** Sent-but-unacked packets, kept verbatim for ATEM retransmit requests (insertion order). */
@@ -865,5 +866,4 @@ class AtemClient(
         }
         return result
     }
-
 }

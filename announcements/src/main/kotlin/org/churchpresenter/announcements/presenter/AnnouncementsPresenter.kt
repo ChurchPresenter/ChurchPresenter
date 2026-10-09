@@ -275,7 +275,6 @@ private fun SlideAnimation(
 
         content(offsetFraction)
     }
-
 }
 
 /**

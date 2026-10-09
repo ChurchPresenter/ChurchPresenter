@@ -464,5 +464,3 @@ private fun MainWindowScope.webAccessState(): WebAccessState = with(root) {
         },
     )
 }
-
-

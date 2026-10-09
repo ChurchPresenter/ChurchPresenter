@@ -43,7 +43,6 @@ import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import org.churchpresenter.sharedui.composables.CopyLinkIconButton
 
-
 /** Whether the offered version is a stable release or a prerelease. */
 @Composable
 internal fun ChannelBadge(isPrerelease: Boolean) {
@@ -238,5 +237,4 @@ internal fun UpToDateActions(onOpenReleasePage: (String) -> Unit, onDismiss: () 
             Text(stringResource(Res.string.ok))
         }
     }
-
 }

@@ -150,9 +150,7 @@ internal fun Route.webSocketRoute(
                 // ── Lower Third Sequencer (Bitfocus Companion) ───────────────────
                 // One HTTP call runs the whole timed sequence: ATEM key on → play
                 // the lower third → key off when the animation ends.
-
 }
-
 
 /** Acks a command that carried a commandId (InstanceLink controller mode); a no-op without one. */
 internal suspend fun DefaultWebSocketServerSession.sendCommandAck(
@@ -241,7 +239,6 @@ private suspend fun DefaultWebSocketServerSession.sendConnectSnapshot(
             WebSocketMessage(Constants.WS_EVENT_LIVE_STATE_CHANGED,
                 json.encodeToString(LiveStateDto.serializer(), state)))))
     }
-
 }
 
 /** Runs one command frame; a frame that is malformed or whose command fails is logged, not fatal. */

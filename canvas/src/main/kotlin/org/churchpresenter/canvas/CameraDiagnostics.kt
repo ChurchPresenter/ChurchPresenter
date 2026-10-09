@@ -1,6 +1,5 @@
 package org.churchpresenter.canvas
 
-
 /**
  * What went wrong when a camera could not be opened, read off ffmpeg's own stderr.
  *

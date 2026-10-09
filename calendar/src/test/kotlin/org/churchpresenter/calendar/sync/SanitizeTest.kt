@@ -59,7 +59,6 @@ class SanitizeTest {
         assertNull(Sanitize.storedTime("25:00"))
     }
 
-
     @Test
     fun `the zero-width non-joiner stays in Persian text`() {
         val title = "می\u200Cخواهم"

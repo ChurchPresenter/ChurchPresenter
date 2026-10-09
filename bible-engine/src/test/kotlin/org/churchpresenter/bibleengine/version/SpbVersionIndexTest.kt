@@ -120,7 +120,7 @@ class SpbVersionIndexTest {
         val c = writeSpb(
             "ENG_CCC.spb", "CCC",
             rich.mapIndexed { i, v ->
-                v.copy(third = "текст${i} совсем другими незнакомыми выражениями оборотами лексикой перевода")
+                v.copy(third = "текст$i совсем другими незнакомыми выражениями оборотами лексикой перевода")
             },
         )
         val indexes = listOf(a, b, c).map { assertNotNull(SpbVersionIndex.build(it, mutableMapOf())) }

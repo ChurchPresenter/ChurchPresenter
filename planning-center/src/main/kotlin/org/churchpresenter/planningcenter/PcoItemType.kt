@@ -5,6 +5,7 @@ object PcoItemType {
     const val SONG = "song"
     const val HEADER = "header"
     const val MEDIA = "media"
+
     /** A generic item: anything that is not a song, a header or media. Also the fallback when PCO omits it. */
     const val ITEM = "item"
 }

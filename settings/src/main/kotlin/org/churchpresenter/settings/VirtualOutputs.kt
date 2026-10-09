@@ -66,4 +66,3 @@ fun ProjectionSettings.addNdiOutput(): ProjectionSettings =
 fun ProjectionSettings.removeNdiOutput(index: Int): ProjectionSettings =
     copy(ndiOutputs = ndiOutputs.filterIndexed { i, _ -> i != index })
         .shiftPreviewMembers(Constants.PREVIEW_OUTPUT_NDI, index)
-

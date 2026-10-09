@@ -282,6 +282,7 @@ private fun TitleSlideText(
     } else {
         style.fontType
     }
+
     // A line can carry the number's span as well as its own, and a span is where a colour lives --
     // so the stroke pass takes its own copy with every span painted the outline's colour. Building
     // it twice rather than restyling one: `AnnotatedString` spans are not editable in place.

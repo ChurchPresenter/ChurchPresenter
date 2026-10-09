@@ -45,10 +45,12 @@ class ControlHub(
     private var learning: ((Trigger) -> Unit)? = null
 
     private val _status = MutableStateFlow(ControlStatus())
+
     /** How each port stands, after the last [apply]. */
     val status: StateFlow<ControlStatus> = _status.asStateFlow()
 
     private val _isLearning = MutableStateFlow(false)
+
     /** Whether [learn] is waiting for the next thing to arrive. */
     val isLearning: StateFlow<Boolean> = _isLearning.asStateFlow()
 

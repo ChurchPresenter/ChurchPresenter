@@ -5,8 +5,6 @@ import kotlin.math.ceil
 
 private const val NANOS_PER_MILLI = 1_000_000.0
 
-
-
 /** What one content type costs to put on one output size. */
 data class ScenarioResult(
     val scenario: String,

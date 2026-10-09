@@ -24,6 +24,7 @@ class SongFolderWatcher(
     private val onSongsChanged: () -> Unit
 ) {
     private var watchJob: Job? = null
+
     @Volatile private var watchService: WatchService? = null
 
     fun watchDirectory(rootDir: File) {
@@ -80,7 +81,6 @@ class SongFolderWatcher(
             }
         }
     }
-
 
     /**
      * True when this event should trigger a reload: a .song file changed, or a songbook folder

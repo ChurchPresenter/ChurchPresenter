@@ -44,6 +44,7 @@ class NdiSender(
     // called it (a shutdown hook, per this class's own contract) without needing lifecycleLock too.
     @Volatile
     private var fillHandle = 0L
+
     @Volatile
     private var keyHandle = 0L
     private var fillBytes = ByteArray(0)

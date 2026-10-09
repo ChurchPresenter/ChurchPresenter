@@ -57,6 +57,7 @@ class STTManagerCaptureTest {
     private var wordsResponse: Pair<Int, String> = 200 to """{"success":true,"enabled":true,"words":[]}"""
     private var statusResponse: Pair<Int, String> = 200 to """{"state":{"db_name":"session.db"}}"""
     private var downloadResponse: Pair<Int, ByteArray> = 200 to ByteArray(0)
+
     /** Not found unless a test says otherwise, so the capture tests leave the session id alone. */
     private var healthResponse: Pair<Int, String> = 404 to ""
 

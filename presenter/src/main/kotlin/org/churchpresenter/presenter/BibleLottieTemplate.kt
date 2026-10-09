@@ -340,4 +340,3 @@ internal fun loadBibleLottieTemplate(path: String): BibleLottieTemplate? {
     }
     return parseBibleLottieTemplate(text)
 }
-

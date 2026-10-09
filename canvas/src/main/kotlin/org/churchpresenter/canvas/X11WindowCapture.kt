@@ -35,21 +35,37 @@ object X11WindowCapture {
         "obdata", "f")
     open class XImage : Structure() {
         @JvmField var width: Int = 0
+
         @JvmField var height: Int = 0
+
         @JvmField var xoffset: Int = 0
+
         @JvmField var format: Int = 0
+
         @JvmField var data: Pointer? = null
+
         @JvmField var byte_order: Int = 0
+
         @JvmField var bitmap_unit: Int = 0
+
         @JvmField var bitmap_bit_order: Int = 0
+
         @JvmField var bitmap_pad: Int = 0
+
         @JvmField var depth: Int = 0
+
         @JvmField var bytes_per_line: Int = 0
+
         @JvmField var bits_per_pixel: Int = 0
+
         @JvmField var red_mask: NativeLong = NativeLong(0)
+
         @JvmField var green_mask: NativeLong = NativeLong(0)
+
         @JvmField var blue_mask: NativeLong = NativeLong(0)
+
         @JvmField var obdata: Pointer? = null
+
         @JvmField var f: Pointer? = null
     }
 
@@ -60,27 +76,49 @@ object X11WindowCapture {
         "do_not_propagate_mask", "override_redirect", "screen")
     open class XWindowAttributes : Structure() {
         @JvmField var x: Int = 0
+
         @JvmField var y: Int = 0
+
         @JvmField var width: Int = 0
+
         @JvmField var height: Int = 0
+
         @JvmField var border_width: Int = 0
+
         @JvmField var depth: Int = 0
+
         @JvmField var visual: Pointer? = null
+
         @JvmField var root: NativeLong = NativeLong(0)
+
         @JvmField var clazz: Int = 0
+
         @JvmField var bit_gravity: Int = 0
+
         @JvmField var win_gravity: Int = 0
+
         @JvmField var backing_store: Int = 0
+
         @JvmField var backing_planes: NativeLong = NativeLong(0)
+
         @JvmField var backing_pixel: NativeLong = NativeLong(0)
+
         @JvmField var save_under: Int = 0
+
         @JvmField var colormap: NativeLong = NativeLong(0)
+
         @JvmField var map_installed: Int = 0
+
         @JvmField var map_state: Int = 0
+
         @JvmField var all_event_masks: NativeLong = NativeLong(0)
+
         @JvmField var your_event_mask: NativeLong = NativeLong(0)
+
         @JvmField var do_not_propagate_mask: NativeLong = NativeLong(0)
+
         @JvmField var override_redirect: Int = 0
+
         @JvmField var screen: Pointer? = null
     }
 
@@ -97,6 +135,7 @@ object X11WindowCapture {
     internal interface X11 : Library {
         fun XOpenDisplay(name: String?): Pointer?
         fun XGetWindowAttributes(display: Pointer, window: NativeLong, attrs: XWindowAttributes): Int
+
         // A JNA binding: the parameters are Xlib's own, and cannot be grouped.
         @Suppress("LongParameterList")
         fun XGetImage(display: Pointer, drawable: NativeLong, x: Int, y: Int,

@@ -198,6 +198,7 @@ private class GradientGeometry(builder: LottieBuilder, val cfg: LottieGenConfig)
         isRight -> canvasW - marginHPx - logoSpace - paddingX
         else -> marginHPx + logoSpace + paddingX
     }
+
     /** The mask hangs off the block's edge, so it shares the text's edge but not its padding. */
     val maskEdgeX = when {
         isCenter -> canvasW / 2 + logoSpace / 2

@@ -240,6 +240,7 @@ class AppPreviewOutputScreenshotTest {
          */
         const val LOWER_THIRD_PROGRESS = 0.5f
         const val FRAME_MS = 16L
+
         /** ~1s of scene time for the painter to arrive; only reached when it never does. */
         const val PAINTER_FRAMES = 60
     }

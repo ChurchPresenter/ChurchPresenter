@@ -46,7 +46,7 @@ object DeviceInfoReport {
     )
 
     internal fun screenLine(index: Int, width: Int, height: Int, refreshRate: Int, primary: Boolean): String =
-        "  ${index + 1}. ${width}x${height} @${refreshRate}Hz${if (primary) " (primary)" else ""}"
+        "  ${index + 1}. ${width}x$height @${refreshRate}Hz${if (primary) " (primary)" else ""}"
 
     internal fun deviceLine(index: Int, name: String): String = "  ${index + 1}. $name"
 

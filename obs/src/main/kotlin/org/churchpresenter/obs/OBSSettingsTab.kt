@@ -322,7 +322,6 @@ private fun ObsSceneMappingsCard(obs: OBSSettings, update: (OBSSettings.() -> OB
             Spacer(Modifier.height(6.dp))
         }
     }
-
 }
 
 /** The OBS scene [mode] switches to; blank removes the mapping. */

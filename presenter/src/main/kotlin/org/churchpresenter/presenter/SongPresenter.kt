@@ -180,7 +180,6 @@ fun SongPresenter(
     }
 }
 
-
 /** A Lottie band draws the whole band itself — text included — so it replaces everything else. */
 @Composable
 private fun SongLook.SongLottieBandLayer(loaded: BibleLottieTemplate, modifier: Modifier) {

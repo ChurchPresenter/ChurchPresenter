@@ -59,6 +59,7 @@ private const val SEGMENT_HOVER_ALPHA = 0.08f
 private val SEGMENT_HOVER_SHIFT = 1.dp
 private const val HOVER_RIM_ALPHA = 0.55f
 private val BOX_SIZE = 18.dp
+
 /** Material draws its checkbox and radio 18dp inside a 20dp box; this is the difference. */
 private val CONTROL_PADDING = 1.dp
 private val BOX_RADIUS = 5.dp

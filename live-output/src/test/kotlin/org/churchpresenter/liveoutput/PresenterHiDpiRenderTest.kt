@@ -212,6 +212,5 @@ class PresenterHiDpiRenderTest {
 
         /** The density every case is checked at, and the reason this file exists. */
         const val DENSITY_TWO = 2f
-
     }
 }

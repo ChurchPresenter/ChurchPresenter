@@ -143,6 +143,7 @@ class LowerThirdOffscreenRenderer(
 
         try {
             var timeNanos = 0L
+
             // Takes the progress write with it: `render` advances the snapshot itself, so the value
             // is applied before the scene recomposes without a separate `sendApplyNotifications`.
             suspend fun renderOnce(progress: Float? = null): org.jetbrains.skia.Image =

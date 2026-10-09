@@ -128,8 +128,13 @@ fun NumberSettingsTextField(
         ) {
             val step: (Int) -> Unit = { delta ->
                 val newValue = value + delta
-                if (newValue in range) { value = newValue; onValueChange.invoke(newValue); isError = false }
-                else isError = true
+                if (newValue in range) {
+                    value = newValue
+                    onValueChange.invoke(newValue)
+                    isError = false
+                } else {
+                    isError = true
+                }
             }
             StepArrow(IconRes.drawable.arrow_up, stringResource(Res.string.increment)) { step(1) }
             StepArrow(IconRes.drawable.arrow_down, stringResource(Res.string.decrement)) { step(-1) }
