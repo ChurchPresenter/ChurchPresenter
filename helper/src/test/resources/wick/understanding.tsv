@@ -1,0 +1,88 @@
+# What an operator might type, and which chip (SuggestedRequest) it means — NONE for something Wick
+# should not act on. Rewordings of the chips that share few words with them, drafted for this test and
+# kept out of the catalog, so they measure understanding rather than recall. A third column lists
+# other answers that are also right ("connect the TV" may open Projection settings, not only the
+# display setup), as catalog targets.
+change the color behind the lyrics	BACKGROUND
+i want a different backdrop for the words	BACKGROUND
+put up the passage about god so loved the world	VERSE
+display a scripture reading	VERSE
+how can i create a new hymn	NEW_SONG
+i need to type in lyrics for a song we don't have	NEW_SONG
+connect the tv on the wall	PROJECTOR	settings:PROJECTION
+nothing shows on the second monitor	PROJECTOR	settings:PROJECTION
+the words are too small to read from the back	TEXT_SIZE
+increase the lyric font	TEXT_SIZE
+make the screen go black	CLEAR
+hide everything from the audience	CLEAR
+go forward one	NEXT_SLIDE
+advance to the following verse of the song	NEXT_SLIDE
+put guitar chords above the lyrics	CHORDS
+the band needs chord charts	CHORDS
+show the song in english and spanish at once	SONG_LANGUAGE
+second language for lyrics	SONG_LANGUAGE
+get another version of the bible	BIBLE_TRANSLATION
+install the niv	BIBLE_TRANSLATION
+where is the order of service	SCHEDULE
+line up the songs for sunday	SCHEDULE
+control it from my phone	REMOTE	settings:SERVER
+use an ipad to change slides	REMOTE	settings:SERVER
+which projector is number one	IDENTIFY
+put numbers on each screen	IDENTIFY
+revert what you just did	UNDO
+take that back	UNDO
+what are the hotkeys	SHORTCUTS
+list of keyboard commands	SHORTCUTS
+put a notice on the screen about the potluck	ANNOUNCEMENT
+display an event message	ANNOUNCEMENT
+timer before the service starts	COUNTDOWN
+count down five minutes	COUNTDOWN
+show the time of day on screen	CLOCK
+put the current time up	CLOCK
+display photos from the youth camp	PICTURES
+put an image on the screen	PICTURES
+loop through some pictures automatically	SLIDESHOW
+rotating images before church	SLIDESHOW
+open a powerpoint	PRESENTATION
+present the sermon slides	PRESENTATION
+play a movie clip	VIDEO
+show an mp4	VIDEO
+name and title at the bottom of the screen for the speaker	LOWER_THIRD
+caption bar for the livestream	LOWER_THIRD
+import songs from another program	CONVERT
+bring my easyworship library over	CONVERT
+edit lots of songs at once	SONG_LIBRARY
+fix the metadata on every song	SONG_LIBRARY
+plan next sunday's service	CALENDAR
+put services on a calendar	CALENDAR
+confidence monitor for the worship team	STAGE_MONITOR
+screen facing the band	STAGE_MONITOR
+send only the caption bar to a separate output	LOWER_THIRD_OUTPUT
+key output for the stream	LOWER_THIRD_OUTPUT
+find a hymn by its words	SONG_SEARCH
+look up a song	SONG_SEARCH
+find the verse that mentions the good shepherd	BIBLE_SEARCH
+search scripture for a word	BIBLE_SEARCH
+display a range of verses	MULTI_VERSE
+show romans 8 verses 1 through 4 together	MULTI_VERSE
+mark a song i use a lot	FAVORITES
+star this hymn	FAVORITES
+this hymn should always have the mountain picture	SONG_BACKGROUND
+pull in the plan from pco	PLANNING_CENTER
+get our services from planning center online	PLANNING_CENTER
+usage report for licensing	CCLI
+how many times did we sing each song	CCLI
+open a web page on the screen	WEBSITE
+display youtube	WEBSITE
+which verses were shown earlier	BIBLE_HISTORY
+show me the parallel passages	CROSS_REFS
+clera the screen	CLEAR
+nxt slide	NEXT_SLIDE
+how do i add chrods	CHORDS
+projecter setup	PROJECTOR	settings:PROJECTION
+whats the weather tomorrow	NONE
+order a pizza	NONE
+who won the game last night	NONE
+tell me a joke about cats	NONE
+how tall is mount everest	NONE
+translate my email to german	NONE

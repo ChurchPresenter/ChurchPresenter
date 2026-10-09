@@ -1,6 +1,8 @@
 package org.churchpresenter.qa
 
 import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -185,6 +187,7 @@ private fun QATabScope.DisplayButtons() {
     ActionIconButton(
         onClick = { showRemoteDialog = true },
         tooltipText = stringResource(Res.string.tooltip_qa_remote),
+        modifier = Modifier.guideTarget(GuideTargets.QA_REMOTE),
         icon = Icons.Default.SettingsRemote,
         containerColor = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer

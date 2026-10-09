@@ -1,5 +1,7 @@
 package org.churchpresenter.songs
 
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.composables.OrderEntry
 import org.churchpresenter.sharedui.composables.OrderSelector
 import org.churchpresenter.settings.SongSettings
@@ -296,7 +298,8 @@ private fun LyricsActionBar(
                 tooltipText = editSongStr,
                 painter = painterResource(IconRes.drawable.ic_edit),
                 containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onTertiary
+                contentColor = MaterialTheme.colorScheme.onTertiary,
+                modifier = Modifier.guideTarget(GuideTargets.EDIT_SONG),
             )
         }
 
@@ -306,7 +309,8 @@ private fun LyricsActionBar(
             tooltipText = newSongStr,
             painter = painterResource(IconRes.drawable.ic_add),
             containerColor = MaterialTheme.colorScheme.tertiary,
-            contentColor = MaterialTheme.colorScheme.onTertiary
+            contentColor = MaterialTheme.colorScheme.onTertiary,
+            modifier = Modifier.guideTarget(GuideTargets.NEW_SONG),
         )
 
         if (onAddToSchedule != null && currentSong != null) {

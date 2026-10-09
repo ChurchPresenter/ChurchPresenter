@@ -1,6 +1,8 @@
 package org.churchpresenter.profiles
 
 import androidx.compose.foundation.layout.width
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -147,7 +149,11 @@ private fun StageLayoutGroup(
         },
         paths = listOf("$STAGE_PATH.layout", "$STAGE_PATH.zoneSizes"),
     ) {
-        SettingsRow(stringResource(Res.string.profile_stage_zones), paths = listOf("$STAGE_PATH.layout")) {
+        SettingsRow(
+            stringResource(Res.string.profile_stage_zones),
+            modifier = Modifier.guideTarget(GuideTargets.STAGE_ZONES),
+            paths = listOf("$STAGE_PATH.layout"),
+        ) {
             RowSegmented(
                 options = StageMonitorLayout.zoneCounts().map { RowOption(it, it.toString(), stageZoneCountTag(it)) },
                 selected = count,
@@ -156,7 +162,11 @@ private fun StageLayoutGroup(
         }
         val arrangements = StageMonitorLayout.withZoneCount(count)
         if (arrangements.size > 1) {
-            SettingsRow(stringResource(Res.string.profile_stage_arrangement), paths = listOf("$STAGE_PATH.layout")) {
+            SettingsRow(
+                stringResource(Res.string.profile_stage_arrangement),
+                modifier = Modifier.guideTarget(GuideTargets.STAGE_ARRANGEMENT),
+                paths = listOf("$STAGE_PATH.layout"),
+            ) {
                 RowSegmented(
                     options = arrangements.map { RowOption(it, layoutLabel(it)) },
                     selected = sm.layout,
@@ -227,7 +237,10 @@ private fun WhatGoesWhereGroup(
                         val zone = StageMonitorZone.valueOf(picked)
                         update { copy(contentZones = contentZones + (type to zone)) }
                     },
-                    modifier = Modifier.width(ZONE_PICKER_WIDTH).testTag(stageContentTag(type)),
+                    modifier = Modifier
+                        .width(ZONE_PICKER_WIDTH)
+                        .testTag(stageContentTag(type))
+                        .guideTarget(GuideTargets.stageContent(type.name)),
                     compact = true,
                 )
             }

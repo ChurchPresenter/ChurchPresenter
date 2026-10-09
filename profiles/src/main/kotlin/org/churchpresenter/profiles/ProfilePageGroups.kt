@@ -1,5 +1,7 @@
 package org.churchpresenter.profiles
 
+import org.churchpresenter.sharedui.guide.guideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -117,7 +119,11 @@ internal fun PositionGroup(
         summary = { positionSummary(verticalAlignment, margins) },
     ) {
         if (verticalAlignment != null) {
-            SettingsRow(stringResource(Res.string.profile_vertical_alignment), paths = paths.vertical) {
+            SettingsRow(
+                stringResource(Res.string.profile_vertical_alignment),
+                paths = paths.vertical,
+                modifier = Modifier.guideTarget(GuideTargets.PROFILE_VERTICAL_ALIGNMENT),
+            ) {
                 RowSegmented(
                     options = listOf(
                         RowOption(Constants.TOP, stringResource(Res.string.top)),
@@ -129,7 +135,11 @@ internal fun PositionGroup(
                 )
             }
         }
-        SettingsRow(stringResource(Res.string.profile_margins), paths = paths.margins) {
+        SettingsRow(
+            stringResource(Res.string.profile_margins),
+            paths = paths.margins,
+            modifier = Modifier.guideTarget(GuideTargets.PROFILE_MARGINS),
+        ) {
             MarginFields(margins, onMargins, room)
         }
         if (region != null) {

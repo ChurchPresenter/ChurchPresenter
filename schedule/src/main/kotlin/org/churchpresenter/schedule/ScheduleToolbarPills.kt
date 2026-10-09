@@ -1,5 +1,7 @@
 package org.churchpresenter.schedule
 
+import org.churchpresenter.sharedui.guide.guideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -240,6 +242,7 @@ internal fun SchedulePlanningButtons(
             onClick = onImportPlanningCenter,
             buttonSize = size.buttonSize,
             iconSize = size.iconSize,
+            modifier = Modifier.guideTarget(GuideTargets.PLANNING_CENTER_IMPORT),
         )
     }
     if (ScheduleToolbarButton.CALENDAR.shownIn(hiddenButtons)) {

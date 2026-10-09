@@ -1,5 +1,6 @@
 package org.churchpresenter.profiles
 
+import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.presenter.styleElement
 import org.churchpresenter.presenter.withElementStyle
 import org.churchpresenter.presenter.elementStyle
@@ -239,11 +240,13 @@ private fun BibleTextGroup(
                         CustomizeElement.BIBLE_TEXT,
                         stringResource(Res.string.customize_group_verse_text),
                         elementChipTag(CustomizeElement.BIBLE_TEXT.name),
+                        guideTarget = GuideTargets.lookElement(CustomizeElement.BIBLE_TEXT.name),
                     ),
                     RowOption(
                         CustomizeElement.BIBLE_REFERENCE,
                         stringResource(Res.string.customize_group_reference),
                         elementChipTag(CustomizeElement.BIBLE_REFERENCE.name),
+                        guideTarget = GuideTargets.lookElement(CustomizeElement.BIBLE_REFERENCE.name),
                     ),
                 ),
                 element = element,

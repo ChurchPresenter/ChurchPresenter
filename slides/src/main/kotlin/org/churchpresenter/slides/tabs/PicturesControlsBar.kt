@@ -6,6 +6,8 @@
 package org.churchpresenter.slides.tabs
 
 import org.churchpresenter.slides.viewmodel.PicturesViewModel
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.utils.sharedScaleMode
 import org.churchpresenter.sharedui.utils.ScaleButtonContent
 import org.churchpresenter.sharedui.utils.scaleButtonLabel
@@ -244,7 +246,7 @@ private fun PicturesTabScope.PicturesPlayKey(viewModel: PicturesViewModel) {
         RaisedIconButton(
             onClick = { viewModel.togglePlayPause() },
             enabled = viewModel.images.isNotEmpty(),
-            modifier = Modifier.size(PICTURES_PLAY_KEY_SIZE),
+            modifier = Modifier.size(PICTURES_PLAY_KEY_SIZE).guideTarget(GuideTargets.PICTURES_PLAY),
             shape = CircleShape,
             colors = IconButtonDefaults.filledIconButtonColors(
                 containerColor = MaterialTheme.colorScheme.primary,

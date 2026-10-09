@@ -120,8 +120,13 @@ internal fun MainDesktopScope.TrailingEffects() {
         statisticsManager = statisticsManager,
     )
 
+    LaunchedEffect(flows.selectTabFlow) {
+        flows.selectTabFlow?.collect { tab -> selectTab(tab) }
+    }
+
     LaunchedEffect(state.selectedTabIndex) {
         publish.onTabChange(state.selectedTabIndex)
+        visibleTabs.getOrNull(effectiveTabIndex)?.let(publish.onCurrentTabChange)
         visibleTabs.getOrNull(effectiveTabIndex)?.name?.let { tabName ->
             CrashReporter.setTag("active_tab", tabName)
             CrashReporter.breadcrumb("Tab: $tabName", category = "navigation")

@@ -134,5 +134,6 @@ bash cleanup_check.sh          # wildcard imports, Material 2, prints, fully qua
 
 ## License
 
-GPL-3.0. See [LICENSE.txt](LICENSE.txt). The bundled ffmpeg and OMT libraries carry their own
-terms: [THIRD_PARTY_FFMPEG.md](THIRD_PARTY_FFMPEG.md), [THIRD_PARTY_OMT.md](THIRD_PARTY_OMT.md).
+GPL-3.0. See [LICENSE.txt](LICENSE.txt). The bundled ffmpeg and OMT libraries and Wick's sentence
+model carry their own terms: [THIRD_PARTY_FFMPEG.md](THIRD_PARTY_FFMPEG.md),
+[THIRD_PARTY_OMT.md](THIRD_PARTY_OMT.md), [THIRD_PARTY_MINILM.md](THIRD_PARTY_MINILM.md).

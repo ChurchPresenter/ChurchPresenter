@@ -1,5 +1,7 @@
 package org.churchpresenter.bibletab
 
+import org.churchpresenter.sharedui.guide.guideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.composables.SearchFieldFocus
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -106,8 +108,14 @@ internal fun BibleSearchRow(
                     onClear = onClear,
                     onSubmit = onSubmit,
                     onFocusChanged = onFocusChanged,
-                    modeChip = { SearchModeChip(searchMode, onCycleSearchMode) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modeChip = {
+                        SearchModeChip(
+                            searchMode,
+                            onCycleSearchMode,
+                            modifier = Modifier.guideTarget(GuideTargets.BIBLE_SEARCH_MODE),
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth().guideTarget(GuideTargets.BIBLE_SEARCH),
                     focus = searchFocus,
                 )
                 Row(
@@ -146,8 +154,14 @@ internal fun BibleSearchRow(
                     onClear = onClear,
                     onSubmit = onSubmit,
                     onFocusChanged = onFocusChanged,
-                    modeChip = { SearchModeChip(searchMode, onCycleSearchMode) },
-                    modifier = Modifier.weight(1f),
+                    modeChip = {
+                        SearchModeChip(
+                            searchMode,
+                            onCycleSearchMode,
+                            modifier = Modifier.guideTarget(GuideTargets.BIBLE_SEARCH_MODE),
+                        )
+                    },
+                    modifier = Modifier.weight(1f).guideTarget(GuideTargets.BIBLE_SEARCH),
                     focus = searchFocus,
                 )
                 DropdownSelector(

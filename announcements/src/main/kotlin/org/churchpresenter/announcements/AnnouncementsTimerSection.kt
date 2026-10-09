@@ -1,6 +1,8 @@
 package org.churchpresenter.announcements
 
 import org.churchpresenter.sharedui.composables.ActionIconButton
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.composables.AddToScheduleButton
 import org.churchpresenter.sharedui.composables.SavePresetButton
 import org.churchpresenter.sharedui.composables.GoLiveButton
@@ -383,6 +385,7 @@ private fun AnnouncementsTabScope.TimerStageMonitorButton(viewModel: Announcemen
         canSendToStageMonitor &&
         viewModel.timerMode != Constants.TIMER_MODE_CLOCK_DISPLAY) {
         ActionIconButton(
+                modifier = Modifier.guideTarget(GuideTargets.TIMER_TO_STAGE),
             onClick = {
                 // Sending is the only thing (besides Go Live) allowed to mark the
                 // ticker live — the play/pause button above stays preview-only.
@@ -446,6 +449,7 @@ private fun AnnouncementsTabScope.TimerScheduleButtons(viewModel: AnnouncementsV
     }
     if (output != null) {
         GoLiveButton(
+            modifier = Modifier.guideTarget(GuideTargets.TIMER_GO_LIVE),
             onClick = {
                 // Also (re)starts Specific Time / Clock Display's ticker if it
                 // wasn't already running via the play/pause button above. Go Live
