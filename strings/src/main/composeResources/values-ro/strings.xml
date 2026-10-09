@@ -1338,6 +1338,16 @@
     <string name="update_dialog_view_on_github">Vezi pe GitHub</string>
     <string name="participate_in_prereleases">Include actualizări beta / preliminare</string>
     <string name="update_dialog_check_interval">Verifică actualizări</string>
+    <string name="update_dialog_ready_title">O versiune nouă este pregătită</string>
+    <string name="update_dialog_released">Lansată pe %1$s</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">Noutăți</string>
+    <string name="update_dialog_full_notes">Note de lansare complete</string>
+    <string name="update_dialog_beta_title">Include actualizările beta</string>
+    <string name="update_dialog_beta_hint">Primiți funcțiile noi mai devreme. Pot fi mai puțin stabile.</string>
+    <string name="update_dialog_skip">Omite această versiune</string>
+    <string name="update_dialog_downloading_of">Se descarcă %1$d din %2$d MB</string>
+    <string name="update_dialog_ready_to_install">Gata de instalare</string>
     <string name="update_interval_every_launch">La fiecare lansare</string>
     <string name="update_interval_weekly">Săptămânal</string>
     <string name="update_interval_monthly">Lunar</string>

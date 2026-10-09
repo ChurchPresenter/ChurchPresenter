@@ -1549,6 +1549,16 @@
     <string name="update_dialog_view_on_github">Skatīt GitHub</string>
     <string name="participate_in_prereleases">Iekļaut beta un pirmsizlaides atjauninājumus</string>
     <string name="update_dialog_check_interval">Meklēt atjauninājumus</string>
+    <string name="update_dialog_ready_title">Jauna versija ir gatava</string>
+    <string name="update_dialog_released">Izlaista %1$s</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">Kas jauns</string>
+    <string name="update_dialog_full_notes">Pilnas laidiena piezīmes</string>
+    <string name="update_dialog_beta_title">Iekļaut beta atjauninājumus</string>
+    <string name="update_dialog_beta_hint">Saņemiet jaunas funkcijas agrāk. Tās var būt mazāk stabilas.</string>
+    <string name="update_dialog_skip">Izlaist šo versiju</string>
+    <string name="update_dialog_downloading_of">Lejupielādē %1$d no %2$d MB</string>
+    <string name="update_dialog_ready_to_install">Gatavs instalēšanai</string>
     <string name="update_interval_every_launch">Katrā palaišanas reizē</string>
     <string name="update_interval_weekly">Reizi nedēļā</string>
     <string name="update_interval_monthly">Reizi mēnesī</string>

@@ -16,6 +16,8 @@ import org.churchpresenter.updater.UpdateAvailableContent
 import org.churchpresenter.updater.UpdateCheckResult
 import org.churchpresenter.updater.UpdateInfo
 import org.churchpresenter.theme.ChurchPresenterTheme
+import java.io.File
+import java.time.Instant
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
@@ -28,7 +30,12 @@ import org.churchpresenter.sharedui.screenshot.stackedThemes
  */
 class UpdateDialogScreenshotTest {
 
-    private fun shoot(name: String, result: UpdateCheckResult, height: Float) =
+    private fun shoot(
+        name: String,
+        result: UpdateCheckResult,
+        height: Float,
+        downloadState: DownloadState = DownloadState.Idle,
+    ) =
         stackedThemes(SECTION, name) { mode, file ->
             runSkikoComposeUiTest(size = Size(WIDTH, height), density = Density(1f)) {
                 setContent {
@@ -42,7 +49,7 @@ class UpdateDialogScreenshotTest {
                                     onParticipateInPrereleasesChange = {},
                                     updateCheckInterval = UpdateCheckInterval.EVERY_LAUNCH,
                                     onUpdateCheckIntervalChange = {},
-                                    downloadState = DownloadState.Idle,
+                                    downloadState = downloadState,
                                     onDownload = {},
                                     onInstall = {},
                                     onOpenReleasePage = {},
@@ -62,26 +69,52 @@ class UpdateDialogScreenshotTest {
     fun `up to date`() = shoot("up_to_date", UpdateCheckResult.UpToDate, UP_TO_DATE_HEIGHT)
 
     @Test
-    fun `an update is available`() = shoot(
-        "available",
-        UpdateCheckResult.Available(
-            UpdateInfo(
-                latestVersion = "2.5.0",
-                releaseUrl = "https://example.invalid/releases/2.5.0",
-                releaseNotes = "Tab labels can now be icons.\nThe update dialog's buttons line up.",
-                downloadUrl = "https://example.invalid/ChurchPresenter-2.5.0.dmg",
-                isPrerelease = false,
-            ),
+    fun `an update is available`() = shoot("available", available, AVAILABLE_HEIGHT)
+
+    /** The footer mid-download: megabytes so far, the percentage, the bar and Cancel. */
+    @Test
+    fun `an update downloading`() =
+        shoot("downloading", available, AVAILABLE_HEIGHT, DownloadState.Downloading(0.42f))
+
+    /** The footer once the installer is in: ready to install, Later, and the green Install Now. */
+    @Test
+    fun `an update ready to install`() =
+        shoot("ready_to_install", available, AVAILABLE_HEIGHT, DownloadState.Done(File("ChurchPresenter-update.dmg")))
+
+    /** An update to the real release, with notes, a date and a size, so every part of the window shows. */
+    private val available = UpdateCheckResult.Available(
+        UpdateInfo(
+            latestVersion = "26.12.171",
+            releaseUrl = "https://example.invalid/releases/26.12.171",
+            releaseNotes = NOTES,
+            downloadUrl = "https://example.invalid/ChurchPresenter-26.12.171.dmg",
+            isPrerelease = false,
+            currentVersion = "26.11.164",
+            publishedAt = Instant.parse("2026-10-08T09:01:10Z"),
+            downloadSize = 601_405_516L,
         ),
-        AVAILABLE_HEIGHT,
     )
 
     private companion object {
         const val SECTION = "updateDialog"
 
         /** The `DialogWindow` sizes in `UpdateAvailableDialog`, for a manual check. */
-        const val WIDTH = 440f
-        const val UP_TO_DATE_HEIGHT = 468f
-        const val AVAILABLE_HEIGHT = 548f
+        const val WIDTH = 520f
+        const val UP_TO_DATE_HEIGHT = 330f
+        const val AVAILABLE_HEIGHT = 620f
+
+        /** Notes written the way the releases are: groups of bullets, each naming its pull request. */
+        val NOTES = """
+            **Songs**
+            - Section label is now a song element, with four places to put song elements (#693)
+            - Profiles follow-ups: free element moves, a song All layer, and Checker (#692)
+
+            **Canvas**
+            - Canvas size and portrait scenes (#690)
+            - Edit scenes in place without leaving Live (#688)
+
+            **Fixes**
+            - Keyboard focus is restored after closing a dialog (#686)
+        """.trimIndent()
     }
 }

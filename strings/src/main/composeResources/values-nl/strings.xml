@@ -1293,6 +1293,16 @@
     <string name="update_dialog_view_on_github">Bekijk op GitHub</string>
     <string name="participate_in_prereleases">Bèta-/pre-releaseversies opnemen</string>
     <string name="update_dialog_check_interval">Controleren op updates</string>
+    <string name="update_dialog_ready_title">Er staat een nieuwe versie klaar</string>
+    <string name="update_dialog_released">Uitgebracht op %1$s</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">Nieuw</string>
+    <string name="update_dialog_full_notes">Volledige release-opmerkingen</string>
+    <string name="update_dialog_beta_title">Bèta-updates meenemen</string>
+    <string name="update_dialog_beta_hint">Krijg nieuwe functies eerder. Ze kunnen minder stabiel zijn.</string>
+    <string name="update_dialog_skip">Deze versie overslaan</string>
+    <string name="update_dialog_downloading_of">%1$d van %2$d MB downloaden</string>
+    <string name="update_dialog_ready_to_install">Klaar om te installeren</string>
     <string name="update_interval_every_launch">Bij elke start</string>
     <string name="update_interval_weekly">Wekelijks</string>
     <string name="update_interval_monthly">Maandelijks</string>

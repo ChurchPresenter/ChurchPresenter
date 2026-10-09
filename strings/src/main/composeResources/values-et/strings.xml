@@ -1382,6 +1382,16 @@
     <string name="update_dialog_view_on_github">Vaata GitHubis</string>
     <string name="participate_in_prereleases">Kaasa beeta- ja eelväljalasked</string>
     <string name="update_dialog_check_interval">Kontrolli uuendusi</string>
+    <string name="update_dialog_ready_title">Uus versioon on valmis</string>
+    <string name="update_dialog_released">Avaldatud %1$s</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">Mis on uut</string>
+    <string name="update_dialog_full_notes">Täielikud väljalaskemärkmed</string>
+    <string name="update_dialog_beta_title">Kaasa beetauuendused</string>
+    <string name="update_dialog_beta_hint">Saa uued funktsioonid varem. Need võivad olla vähem stabiilsed.</string>
+    <string name="update_dialog_skip">Jäta see versioon vahele</string>
+    <string name="update_dialog_downloading_of">Allalaadimine: %1$d / %2$d MB</string>
+    <string name="update_dialog_ready_to_install">Valmis paigaldamiseks</string>
     <string name="update_interval_every_launch">Iga käivitamise järel</string>
     <string name="update_interval_weekly">Iganädalaselt</string>
     <string name="update_interval_monthly">Igakuiselt</string>

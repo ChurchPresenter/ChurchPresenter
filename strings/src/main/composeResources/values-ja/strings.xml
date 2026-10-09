@@ -1549,6 +1549,16 @@
     <string name="update_dialog_view_on_github">GitHub で見る</string>
     <string name="participate_in_prereleases">ベータ版・プレリリース版も含める</string>
     <string name="update_dialog_check_interval">更新の確認</string>
+    <string name="update_dialog_ready_title">新しいバージョンの準備ができました</string>
+    <string name="update_dialog_released">%1$s リリース</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">新機能</string>
+    <string name="update_dialog_full_notes">リリースノート全文</string>
+    <string name="update_dialog_beta_title">ベータ版のアップデートを含める</string>
+    <string name="update_dialog_beta_hint">新機能をいち早く試せます。安定性が低い場合があります。</string>
+    <string name="update_dialog_skip">このバージョンをスキップ</string>
+    <string name="update_dialog_downloading_of">%2$d MB 中 %1$d MB をダウンロード中</string>
+    <string name="update_dialog_ready_to_install">インストールの準備ができました</string>
     <string name="update_interval_every_launch">起動のたびに</string>
     <string name="update_interval_weekly">毎週</string>
     <string name="update_interval_monthly">毎月</string>
