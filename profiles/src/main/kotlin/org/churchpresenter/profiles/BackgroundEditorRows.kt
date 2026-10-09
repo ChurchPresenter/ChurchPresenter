@@ -78,7 +78,7 @@ internal fun BackgroundSurfaceRows(
         // default lower third's "Follow default" is a real choice of its own and stays.
         it != Constants.BACKGROUND_DEFAULT && (includeLottie || it != Constants.BACKGROUND_LOTTIE)
     }
-    SettingsRow(stringResource(Res.string.customize_background_type)) {
+    SettingsRow(Res.string.customize_background_type) {
         RowSegmented(
             options = types.map { RowOption(it, stringResource(backgroundTypeWord(it)), backgroundTypeTag(it)) },
             selected = config.backgroundType,
@@ -95,10 +95,10 @@ internal fun BackgroundSurfaceRows(
         config.backgroundType != Constants.BACKGROUND_LOTTIE
     if (hasLook) {
         val percent = stringResource(Res.string.percent_suffix)
-        SettingsRow(stringResource(Res.string.song_background_dim)) {
+        SettingsRow(Res.string.song_background_dim) {
             RowStepper(config.dim, { onConfig(config.copy(dim = it)) }, PERCENT_RANGE, step = 5, unit = percent)
         }
-        SettingsRow(stringResource(Res.string.customize_background_opacity)) {
+        SettingsRow(Res.string.customize_background_opacity) {
             RowStepper(
                 (config.backgroundOpacity * PERCENT).toInt(),
                 { onConfig(config.copy(backgroundOpacity = it / PERCENT)) },
@@ -107,7 +107,7 @@ internal fun BackgroundSurfaceRows(
                 unit = percent,
             )
         }
-        SettingsRow(stringResource(Res.string.song_background_blur), advanced = true) {
+        SettingsRow(Res.string.song_background_blur, advanced = true) {
             RowStepper(
                 config.blur,
                 { onConfig(config.copy(blur = it)) },
@@ -135,10 +135,10 @@ private fun SurfaceSourceRows(
         onSettingsChange { s -> s.copy(stockPhotoSettings = s.stockPhotoSettings.copy(pixabayApiKey = key)) }
     }
     when (config.backgroundType) {
-        Constants.BACKGROUND_COLOR -> SettingsRow(stringResource(Res.string.canvas_source_color)) {
+        Constants.BACKGROUND_COLOR -> SettingsRow(Res.string.canvas_source_color) {
             RowColor(config.backgroundColor, { onConfig(config.copy(backgroundColor = it)) })
         }
-        Constants.BACKGROUND_IMAGE -> SettingsRow(stringResource(Res.string.background_image_file)) {
+        Constants.BACKGROUND_IMAGE -> SettingsRow(Res.string.background_image_file) {
             ImagePickerRow(
                 imagePath = config.backgroundImage,
                 onImagePathChange = { onConfig(config.copy(backgroundImage = it)) },
@@ -150,7 +150,7 @@ private fun SurfaceSourceRows(
                 modifier = Modifier.width(SOURCE_FIELD_WIDTH),
             )
         }
-        Constants.BACKGROUND_VIDEO -> SettingsRow(stringResource(Res.string.background_video_file)) {
+        Constants.BACKGROUND_VIDEO -> SettingsRow(Res.string.background_video_file) {
             VideoPickerRow(
                 videoPath = config.backgroundVideo,
                 onVideoPathChange = { onConfig(config.copy(backgroundVideo = it)) },
@@ -161,7 +161,7 @@ private fun SurfaceSourceRows(
                 modifier = Modifier.width(SOURCE_FIELD_WIDTH),
             )
         }
-        Constants.BACKGROUND_CAMERA -> SettingsRow(stringResource(Res.string.background_camera_option)) {
+        Constants.BACKGROUND_CAMERA -> SettingsRow(Res.string.background_camera_option) {
             CameraPickerRow(config, onConfigChange = onConfig)
         }
         Constants.BACKGROUND_GRADIENT -> GradientRows(config, onConfig)
@@ -170,7 +170,7 @@ private fun SurfaceSourceRows(
                 LottieRows(scope, settings, config, onConfig = onConfig)
             } else {
                 SettingsRow(
-                    stringResource(Res.string.lower_third_animation_file),
+                    Res.string.lower_third_animation_file,
                     sub = stringResource(Res.string.profile_bg_lottie_picker_elsewhere),
                 ) {}
             }
@@ -199,7 +199,7 @@ internal fun LottieRows(
         BackgroundScope.SONG_LOWER_THIRD -> stringResource(Res.string.song_lottie_unsupported_note)
         else -> null
     }
-    SettingsRow(stringResource(Res.string.lower_third_animation_file), sub = note) {
+    SettingsRow(Res.string.lower_third_animation_file, sub = note) {
         LottieBandPickerRow(
             path = config.backgroundLottie,
             onPathChange = { onConfig(config.copy(backgroundLottie = it)) },
@@ -238,7 +238,7 @@ private fun AboveBandRows(
     onConfig: (BackgroundConfig) -> Unit,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
-    SettingsRow(stringResource(Res.string.background_above_band_caption)) {
+    SettingsRow(Res.string.background_above_band_caption) {
         RowSegmented(
             options = scope.aboveBandTypeOptions().map { RowOption(it, stringResource(backgroundTypeWord(it))) },
             selected = config.aboveBandType,
@@ -247,7 +247,7 @@ private fun AboveBandRows(
         )
     }
     if (config.aboveBandType == Constants.BACKGROUND_COLOR) {
-        SettingsRow(stringResource(Res.string.background_above_band_fill)) {
+        SettingsRow(Res.string.background_above_band_fill) {
             RowColor(config.aboveBandColor, { onConfig(config.copy(aboveBandColor = it)) })
         }
     }
@@ -257,7 +257,7 @@ private fun AboveBandRows(
         }
     }
     if (!config.aboveBandType.drawsAboveBand()) return
-    SettingsRow(stringResource(Res.string.background_above_band_opacity)) {
+    SettingsRow(Res.string.background_above_band_opacity) {
         RowStepper(
             (config.aboveBandOpacity * PERCENT).toInt(),
             { onConfig(config.copy(aboveBandOpacity = it / PERCENT)) },
@@ -269,7 +269,7 @@ private fun AboveBandRows(
     // Whether the wash paints behind the band as well as above it. It decides what a downstream
     // keyer sees, so a band meant to be keyed transparent for OBS or NDI needs it off.
     SettingsSwitchRow(
-        stringResource(Res.string.background_above_band_fills_behind_band),
+        Res.string.background_above_band_fills_behind_band,
         config.aboveBandFillsBehindBand,
         { onConfig(config.copy(aboveBandFillsBehindBand = it)) },
     )
@@ -279,13 +279,13 @@ private fun AboveBandRows(
 @Composable
 private fun GradientRows(config: BackgroundConfig, onConfig: (BackgroundConfig) -> Unit) {
     val percent = stringResource(Res.string.percent_suffix)
-    SettingsRow(stringResource(Res.string.top)) {
+    SettingsRow(Res.string.top) {
         RowColor(config.gradientTopColor, { onConfig(config.copy(gradientTopColor = it)) })
     }
-    SettingsRow(stringResource(Res.string.bottom)) {
+    SettingsRow(Res.string.bottom) {
         RowColor(config.gradientBottomColor, { onConfig(config.copy(gradientBottomColor = it)) })
     }
-    SettingsRow(stringResource(Res.string.gradient_top_opacity)) {
+    SettingsRow(Res.string.gradient_top_opacity) {
         RowStepper(
             (config.gradientTopOpacity * PERCENT).toInt(),
             { onConfig(config.copy(gradientTopOpacity = it / PERCENT)) },
@@ -294,7 +294,7 @@ private fun GradientRows(config: BackgroundConfig, onConfig: (BackgroundConfig) 
             unit = percent,
         )
     }
-    SettingsRow(stringResource(Res.string.gradient_bottom_opacity)) {
+    SettingsRow(Res.string.gradient_bottom_opacity) {
         RowStepper(
             (config.gradientBottomOpacity * PERCENT).toInt(),
             { onConfig(config.copy(gradientBottomOpacity = it / PERCENT)) },
@@ -303,7 +303,7 @@ private fun GradientRows(config: BackgroundConfig, onConfig: (BackgroundConfig) 
             unit = percent,
         )
     }
-    SettingsRow(stringResource(Res.string.position), advanced = true) {
+    SettingsRow(Res.string.position, advanced = true) {
         RowStepper(
             (config.gradientPosition * PERCENT).toInt(),
             { onConfig(config.copy(gradientPosition = it / PERCENT)) },

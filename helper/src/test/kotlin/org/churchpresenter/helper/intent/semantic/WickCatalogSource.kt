@@ -18,6 +18,7 @@ import java.io.File
  * - every multi-word phrase in the `*Topics.kt` tables that the rules turn into an action;
  * - every control tagged with `guideTarget(GuideTargets.X)`, by the labels written beside it;
  * - every Settings page, by the labels its files show;
+ * - every row of the Profiles settings page, by its label, once for each profile page that shows it;
  * - every tab and keyboard shortcut, by its own label.
  *
  * English text comes from `strings/…/values/strings.xml`: the model reads English, and every other
@@ -34,7 +35,7 @@ internal class WickCatalogSource(private val root: File) {
 
     /** Every item, sorted so the file diffs line by line when the code changes. */
     fun items(): List<Item> =
-        (suggested() + rulePhrases() + controls() + settingsPages() + tabs() + shortcuts())
+        (suggested() + rulePhrases() + controls() + settingsPages() + profileRows() + pageRows() + tabs() + shortcuts())
             .distinctBy { it.target.format() to it.text }
             .sortedWith(compareBy({ it.target.format() }, { it.text }))
 
@@ -87,6 +88,47 @@ internal class WickCatalogSource(private val root: File) {
             (texts - shared).map { Item(CatalogTarget.Settings(page), it) }
         }
     }
+
+    /**
+     * Every `SettingsRow(Res.string.x, …)` of the Profiles editor: its label and the other labels in its
+     * call (the line under it), each said bare for the first page that shows the row and after that
+     * page's words ("song lyrics margins") for every page, so the request's own words pick the page.
+     */
+    private fun profileRows(): List<Item> = PROFILE_ROW_FILES.flatMap { (file, filePages) ->
+        val code = File(root, "$PROFILES_DIR/$file").readText()
+        PROFILE_ROW.findAll(code).toList().flatMap { match ->
+            val key = match.groupValues[1]
+            val pages = PROFILE_ROW_FUNCTIONS["$file#${enclosingFunction(code, match.range.first)}"] ?: filePages
+            val texts = (listOf(key) + labelsOfCall(code, match.groups[1]!!.range)).distinct().mapNotNull(::label)
+            pages.flatMapIndexed { i, page ->
+                val said = texts.map { "${PAGE_WORDS.getValue(page)} $it" } + if (i == 0) texts else emptyList()
+                said.map { Item(CatalogTarget.ProfileRow(key, page), it) }
+            }
+        }
+    }
+
+    /** Every keyed row of the other Settings pages — `SettingRow(Res.string.x, …)` and its kin — by its label. */
+    private fun pageRows(): List<Item> =
+        SETTINGS_FILES.filterKeys { it != SettingsPage.PROFILES }.flatMap { (page, files) -> pageRowsIn(page, files) }
+
+    private fun pageRowsIn(page: SettingsPage, files: List<String>): List<Item> = run {
+        files.flatMap { path ->
+            val code = File(root, path).readText()
+            PAGE_ROW.findAll(code).toList().flatMap { match ->
+                val key = match.groupValues[1]
+                (listOf(key) + labelsOfCall(code, match.groups[1]!!.range)).distinct().mapNotNull(::label)
+                    .map { Item(CatalogTarget.PageRow(key, page), it) }
+            }
+        }
+    }
+
+    /** Each file with a `SettingsRow(Res.string…` the scan reads no page for — reported, so a gap is visible. */
+    fun unmappedProfileRowFiles(): List<String> = File(root, PROFILES_DIR).listFiles().orEmpty()
+        .filter { it.extension == "kt" && PROFILE_ROW.containsMatchIn(it.readText()) }
+        .map { it.name }.filter { it !in PROFILE_ROW_FILES }.sorted()
+
+    private fun enclosingFunction(code: String, at: Int): String =
+        FUNCTION.findAll(code.substring(0, at)).lastOrNull()?.groupValues?.get(1).orEmpty()
 
     private fun tabs(): List<Item> = Tabs.entries.filter { it != Tabs.CROSSWORD }.mapNotNull { tab ->
         english[tab.labelRes.key]?.let { Item(CatalogTarget.Tab(tab), "${clean(it)} tab") }
@@ -166,6 +208,59 @@ internal class WickCatalogSource(private val root: File) {
             "edit", "browse", "reset", "clear", "none", "default", "enabled", "disabled", "on", "off", "name",
         )
 
+        private const val PROFILES_DIR = "profiles/src/main/kotlin/org/churchpresenter/profiles"
+        private val PROFILE_ROW = Regex("""SettingsRow\(\s*Res\.string\.([a-z0-9_]+)""")
+        private val PAGE_ROW =
+            Regex(
+                """(?:SettingRow|SettingSwitchRow|GeneralToggleRow|CompanionTextRow)""" +
+                    """\(\s*(?:label\s*=\s*)?Res\.string\.([a-z0-9_]+)""",
+            )
+        private val FUNCTION = Regex("""fun (?:[A-Za-z]+\.)?([A-Za-z]+)\(""")
+
+        /**
+         * The profile pages each file's rows show on, the likeliest first — a file of shared rows (the
+         * text look, a background) lists every page that draws it. Page names are `ProfileFocus.page`'s.
+         */
+        val PROFILE_ROW_FILES: Map<String, List<String>> = mapOf(
+            "ProfileGeneralPage.kt" to listOf("GENERAL"),
+            "ProfileLinkingGroup.kt" to listOf("GENERAL"),
+            "ProfileContentPage.kt" to listOf("CONTENT"),
+            "ProfileScaleRow.kt" to listOf("CONTENT"),
+            "ProfileSongsPage.kt" to listOf("SONGS"),
+            "SongBoxRows.kt" to listOf("SONGS"),
+            "SongElementMove.kt" to listOf("SONGS"),
+            "ProfileBiblePage.kt" to listOf("BIBLE"),
+            "BibleBoxTarget.kt" to listOf("BIBLE"),
+            "TextLookRows.kt" to listOf("SONGS", "BIBLE"),
+            "TextBoxRows.kt" to listOf("SONGS", "BIBLE", "CAPTIONS", "DICTIONARY", "QA", "STAGE_MONITOR"),
+            "ContentBackgroundGroup.kt" to listOf("SONGS", "BIBLE", "BACKGROUND"),
+            "BackgroundEditorRows.kt" to listOf("BACKGROUND", "SONGS", "BIBLE"),
+            "ProfileBackgroundPage.kt" to listOf("BACKGROUND"),
+            "ProfilePageGroups.kt" to listOf("SONGS", "BIBLE", "CAPTIONS", "DICTIONARY", "STAGE_MONITOR"),
+            "ProfileCaptionsPage.kt" to listOf("CAPTIONS"),
+            "CaptionReadingGroup.kt" to listOf("CAPTIONS"),
+            "DisplayTextRows.kt" to listOf("CAPTIONS", "SUBTITLES", "QA"),
+            "ItemBoxGroup.kt" to listOf("DICTIONARY", "CAPTIONS", "SUBTITLES", "QA", "STAGE_MONITOR"),
+            "ProfileOverlayPages.kt" to listOf("SUBTITLES", "QA"),
+            "ProfileDictionaryPage.kt" to listOf("DICTIONARY"),
+            "ProfileStagePage.kt" to listOf("STAGE_MONITOR"),
+            "ProfileStageText.kt" to listOf("STAGE_MONITOR"),
+        )
+
+        /** Where one function of a file draws on a page of its own: `file#function` to its pages. */
+        private val PROFILE_ROW_FUNCTIONS: Map<String, List<String>> = mapOf(
+            "ProfileOverlayPages.kt#ProfileSubtitlesPage" to listOf("SUBTITLES"),
+            "ProfileOverlayPages.kt#ProfileQaPage" to listOf("QA"),
+        )
+
+        /** The words a request uses for each profile page, put before a row's label. */
+        private val PAGE_WORDS = mapOf(
+            "GENERAL" to "profile", "OUTPUTS" to "profile outputs", "CONTENT" to "profile content",
+            "SONGS" to "song lyrics", "BIBLE" to "bible verse", "BACKGROUND" to "background",
+            "CAPTIONS" to "live captions", "SUBTITLES" to "subtitles", "QA" to "q&a questions",
+            "DICTIONARY" to "dictionary", "STAGE_MONITOR" to "stage monitor",
+        )
+
         /** Which files make up each Settings page. A test fails when one of them is gone. */
         val SETTINGS_FILES: Map<SettingsPage, List<String>> = run {
             val system = "app-settings/src/main/kotlin/org/churchpresenter/appsettings"
@@ -227,7 +322,7 @@ internal class WickCatalogSource(private val root: File) {
         private val AREA_TABS = mapOf(
             "songs" to Tabs.SONGS, "bible" to Tabs.BIBLE, "pictures" to Tabs.PICTURES,
             "presentation" to Tabs.PRESENTATION, "media" to Tabs.MEDIA, "lowerThird" to Tabs.LOWER_THIRD,
-            "announcements" to Tabs.ANNOUNCEMENTS, "web" to Tabs.WEB, "qa" to Tabs.QA,
+            "announcements" to Tabs.ANNOUNCEMENTS, "web" to Tabs.WEB, "qa" to Tabs.QA, "canvas" to Tabs.CANVAS,
         )
 
         /** Placeholders, markup and escapes taken out, so the model reads the words. */

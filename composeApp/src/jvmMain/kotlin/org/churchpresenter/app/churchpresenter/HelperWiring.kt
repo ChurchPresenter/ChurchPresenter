@@ -1,6 +1,11 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.bibletab.standardEnglishBookName
+import org.churchpresenter.bible.Bible
 import androidx.compose.runtime.Composable
+import java.awt.GraphicsDevice
+import androidx.compose.runtime.LaunchedEffect
+import org.churchpresenter.helper.pack.WickPacks
 import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.helper.action.describe
 import androidx.compose.foundation.layout.padding
@@ -37,6 +42,14 @@ import org.churchpresenter.helper.display.HelperScreen
 import org.churchpresenter.helper.display.screenLabel
 import org.churchpresenter.helper.helperText
 import org.churchpresenter.helper.intent.ResolveContext
+import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.strings.generated.resources.screen_number
+import org.churchpresenter.strings.generated.resources.omt_output_numbered
+import org.churchpresenter.strings.generated.resources.ndi_output_numbered
+import org.churchpresenter.strings.generated.resources.browser_source_output_label
+import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.helper.intent.KnownProfile
+import org.churchpresenter.helper.intent.KnownOutput
 import org.churchpresenter.helper.intent.semantic.SemanticIntentResolver
 import org.churchpresenter.helper.intent.helperTabName
 import org.churchpresenter.helper.suggest.HelperSignals
@@ -46,7 +59,6 @@ import org.churchpresenter.helper.ui.HelperOverlay
 import org.churchpresenter.helper.ui.WickIntro
 import org.churchpresenter.liveoutput.deckLinkOutputCount
 import org.churchpresenter.canvas.DeckLinkManager
-import org.churchpresenter.server.SelectBibleVerseRequest
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.HelperSettings
 import org.churchpresenter.settings.QuickBackground
@@ -71,69 +83,94 @@ import org.churchpresenter.strings.generated.resources.helper_undo_label_font
 import org.churchpresenter.strings.generated.resources.helper_undo_label_screen
 import org.churchpresenter.strings.generated.resources.helper_undo_label_tab
 
-/** The helper lamp in the main window's corner, fed from the app's own state. */
+/**
+ * The helper lamp in the main window's corner, fed from the app's own state. [refreshPack] fetches Wick's
+ * downloadable data — only once Wick is here, at most once a day.
+ */
 @Composable
-internal fun MainWindowScope.HelperHost(modifier: Modifier) {
-    // Wick is still being shaped: only development builds and an unlocked developer menu show it.
-    if (!root.devMode) return
-    with(root) {
-        val devices = rememberScreenDevices()
-        val projection = appSettings.projectionSettings
-        val screens = remember(devices.size, projection.screenAssignments, projection.screenNames) {
-            helperScreens(appSettings)
-        }
-        val anythingLive = presenterManager.liveContent.value.isNotEmpty()
-        val signals = HelperSignals(
-            screenCount = devices.size,
-            hasAudienceOutput = hasAudienceOutput(projection.screenAssignments, devices.size, deckLinkCountForUsage),
-            outputWindowsShown = presenterManager.showPresenterWindow.value,
-            primaryBibleMissing = appSettings.bibleSettings.primaryBible.isBlank(),
-            songLibraryEmpty = helperSongCount == 0,
-            scheduleEmpty = currentScheduleItems.isEmpty(),
-            anythingLive = anythingLive,
-            settingsOpen = showOptionsDialog,
-            firstRunDone = !showSetupWizard,
-        )
-        val executor = remember(this) { AppHelperExecutor(this) }
-        val resolver = remember { SemanticIntentResolver() }
-        val now = System.currentTimeMillis()
-        // A Companion surface in the right sidebar fills the corner the lamp sits in; the lamp
-        // keeps above its divider instead of covering its buttons.
-        val companionTop = LocalGuideTargetRegistry.current?.boundsOf(GuideTargets.COMPANION_SIDEBAR)?.top
-        var cornerBottom by remember { mutableStateOf<Float?>(null) }
-        val liftPx = lampLift(companionTop, cornerBottom)
-        val lift = with(LocalDensity.current) { liftPx.toDp() }
-        HelperOverlay(
-            state = helperState,
-            inputs = HelperInputs(
-                settings = appSettings.helper,
-                onSettingsChange = ::saveHelperSettings,
-                suggestions = suggestionsFor(signals, appSettings.helper, now),
-                screens = screens,
-                context = ResolveContext(
-                    currentTab = helperCurrentTab,
-                    visibleTabs = Tabs.entries.filter { it.name !in appSettings.hiddenTabs }.toSet(),
-                ),
-                anythingLive = anythingLive,
-            ),
-            executor = executor,
-            resolver = resolver,
-            // Measured inside the lift, so adding the lift back gives where the corner itself is.
-            modifier = modifier.padding(bottom = lift).onGloballyPositioned {
-                cornerBottom = it.boundsInRoot().bottom + liftPx
+internal fun AppRootState.HelperHost(
+    modifier: Modifier,
+    refreshPack: suspend () -> Unit = { WickPacks.refresh(BuildConfig.APP_VERSION) },
+) {
+    if (!wickAvailable) return
+    LaunchedEffect(Unit) { refreshPack() }
+    // A Companion surface in the right sidebar fills the corner the lamp sits in; the lamp
+    // keeps above its divider instead of covering its buttons.
+    val companionTop = LocalGuideTargetRegistry.current?.boundsOf(GuideTargets.COMPANION_SIDEBAR)?.top
+    var cornerBottom by remember { mutableStateOf<Float?>(null) }
+    val liftPx = lampLift(companionTop, cornerBottom)
+    val lift = with(LocalDensity.current) { liftPx.toDp() }
+    // Measured inside the lift, so adding the lift back gives where the corner itself is. While Settings
+    // or another window carries the lamp, it is that window's: this one could not be typed into.
+    if (helperState.session.otherLamps == 0) WickLamp(
+        modifier.padding(bottom = lift).onGloballyPositioned {
+            cornerBottom = it.boundsInRoot().bottom + liftPx
+        },
+    )
+    if (wickIntroShowing) {
+        WickIntro(
+            onDone = {
+                if (!appSettings.helper.introSeen) saveHelperSettings(appSettings.helper.copy(introSeen = true))
+                helperState.replayIntro = false
+                helperState.introPointer = true
             },
+            animate = presenterManager.liveContent.value.isEmpty(),
         )
-        if (wickIntroShowing) {
-            WickIntro(
-                onDone = {
-                    if (!appSettings.helper.introSeen) saveHelperSettings(appSettings.helper.copy(introSeen = true))
-                    helperState.replayIntro = false
-                    helperState.introPointer = true
-                },
-                animate = !anythingLive,
-            )
-        }
     }
+}
+
+/**
+ * Wick's lamp and bubble, fed from the app's own state: in the main window's corner, and in any other
+ * window Wick's tours reach (Settings, the song editor), which share the one conversation.
+ */
+@Composable
+internal fun AppRootState.WickLamp(modifier: Modifier) {
+    if (!wickAvailable) return
+    WickLamp(modifier, rememberScreenDevices())
+}
+
+/** [WickLamp] with the connected screens given — polled by the caller, so this part draws without a display. */
+@Composable
+internal fun AppRootState.WickLamp(modifier: Modifier, devices: Array<GraphicsDevice>) {
+    val projection = appSettings.projectionSettings
+    val screens = remember(devices.size, projection.screenAssignments, projection.screenNames) {
+        helperScreens(appSettings)
+    }
+    val anythingLive = presenterManager.liveContent.value.isNotEmpty()
+    val signals = HelperSignals(
+        screenCount = devices.size,
+        hasAudienceOutput = hasAudienceOutput(projection.screenAssignments, devices.size, deckLinkCountForUsage),
+        outputWindowsShown = presenterManager.showPresenterWindow.value,
+        primaryBibleMissing = appSettings.bibleSettings.primaryBible.isBlank(),
+        songLibraryEmpty = helperSongCount == 0,
+        scheduleEmpty = currentScheduleItems.isEmpty(),
+        anythingLive = anythingLive,
+        settingsOpen = showOptionsDialog,
+        firstRunDone = !showSetupWizard,
+    )
+    val executor = remember(this) { AppHelperExecutor(this) }
+    val resolver = remember { SemanticIntentResolver() }
+    HelperOverlay(
+        state = helperState,
+        inputs = HelperInputs(
+            settings = appSettings.helper,
+            onSettingsChange = ::saveHelperSettings,
+            suggestions = suggestionsFor(signals, appSettings.helper, System.currentTimeMillis()),
+            screens = screens,
+            context = ResolveContext(
+                currentTab = helperCurrentTab,
+                visibleTabs = Tabs.entries.filter { it.name !in appSettings.hiddenTabs }.toSet(),
+                profiles = helperProfiles(projection),
+                outputs = helperOutputs(projection),
+                bibleBooks = remember(primaryBibleForInstanceLink) { helperBibleBooks(primaryBibleForInstanceLink) },
+            ),
+            anythingLive = anythingLive,
+            onSendChat = { transcript, email -> sendWickChat(transcript, email, packVersion = WickPacks.versionLabel) },
+        ),
+        executor = executor,
+        resolver = resolver,
+        modifier = modifier,
+    )
 }
 
 /**
@@ -144,30 +181,10 @@ internal fun MainWindowScope.HelperHost(modifier: Modifier) {
 internal fun lampLift(companionTop: Float?, cornerBottom: Float?): Float =
     if (companionTop == null || cornerBottom == null) 0f else (cornerBottom - companionTop).coerceAtLeast(0f)
 
-/**
- * Whether "Meet Wick" is on screen: asked for again, or due the first time — after the licence, the
- * setup wizard and the startup update check, and never beside the update window, the story prompt
- * or a live service, so only one of them is ever up at once.
- */
-internal val AppRootState.wickIntroShowing: Boolean
-    get() {
-        if (helperState.replayIntro) return true
-        val helper = appSettings.helper
-        return devMode && !helper.introSeen && helper.enabled && appReady && eulaAccepted &&
-            !showSetupWizard && startupChecksDone && pendingUpdateResult == null && !showStoryPrompt &&
-            presenterManager.liveContent.value.isEmpty()
-    }
-
 /** Writes the helper's own settings. */
 internal fun AppRootState.saveHelperSettings(helper: HelperSettings) {
     appSettings = appSettings.copy(helper = helper)
     settingsManager.saveSettings(appSettings)
-}
-
-/** Help → Show Helper: puts the lamp back if it was hidden, and opens it. */
-internal fun AppRootState.showHelper() {
-    if (!appSettings.helper.enabled) saveHelperSettings(appSettings.helper.copy(enabled = true))
-    helperState.isOpen = true
 }
 
 /** The connected screens as the helper shows them, the one output 1 uses marked. */
@@ -188,6 +205,40 @@ internal fun helperScreens(settings: AppSettings): List<HelperScreen> {
     }
 }
 
+/** The loaded Bible's books, each by its own name and its standard English one, for Wick to match typing against. */
+internal fun helperBibleBooks(bible: Bible?): List<List<String>> =
+    bible?.getBooks()?.mapIndexed { i, name ->
+        listOfNotNull(name, standardEnglishBookName(bible.getBookId(i))).distinct()
+    }.orEmpty()
+
+/** The output profiles, by the names the operator gave them, for the helper to read requests against. */
+internal fun helperProfiles(projection: ProjectionSettings): List<KnownProfile> =
+    projection.outputProfiles.map { profile ->
+        KnownProfile(profile.id, profile.name, profile.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR)
+    }
+
+/** Every output as the Projection page labels it, with the profile it draws with. */
+@Composable
+internal fun helperOutputs(projection: ProjectionSettings): List<KnownOutput> {
+    val screens = projection.screenAssignments.mapIndexed { i, assignment ->
+        val label = projection.screenLabelOr(assignment, stringResource(Res.string.screen_number, i + 1))
+        KnownOutput(label, "screen", i, assignment.activeProfileId)
+    }
+    val browser = projection.browserSourceOutputs.mapIndexed { i, output ->
+        val label = output.browserSourceLabelOr(stringResource(Res.string.browser_source_output_label, i + 1))
+        KnownOutput(label, "browser", i, output.activeProfileId)
+    }
+    val ndi = projection.ndiOutputs.mapIndexed { i, output ->
+        val label = output.ndiLabelOr(stringResource(Res.string.ndi_output_numbered, i + 1))
+        KnownOutput(label, "ndi", i, output.activeProfileId)
+    }
+    val omt = projection.omtOutputs.mapIndexed { i, output ->
+        val label = output.omtLabelOr(stringResource(Res.string.omt_output_numbered, i + 1))
+        KnownOutput(label, "omt", i, output.activeProfileId)
+    }
+    return screens + browser + ndi + omt
+}
+
 private fun ScreenAssignment.isOn(x: Int, y: Int, w: Int, h: Int): Boolean =
     targetType == Constants.TARGET_TYPE_SCREEN && targetScreenKey == screenKey(x, y, w, h)
 
@@ -203,15 +254,11 @@ internal class AppHelperExecutor(private val root: AppRootState) : HelperActionE
     @Suppress("CyclomaticComplexMethod")
     override fun execute(action: HelperAction): ActionOutcome = when (action) {
         is HelperAction.ShowBibleVerse -> {
-            val range = if (action.lastVerse > action.verse) "${action.verse}-${action.lastVerse}" else ""
-            root.companionServer.onSelectBibleVerse.tryEmit(
-                SelectBibleVerseRequest(
-                    bookName = action.book,
-                    chapter = action.chapter,
-                    verseNumber = action.verse,
-                    verseRange = range,
-                ),
-            )
+            // Through the Bible tab, as its search box would take it: the book in whatever language the
+            // loaded Bible names it, and the verse shown with every Bible setting.
+            val verses =
+                if (action.lastVerse > action.verse) "${action.verse}-${action.lastVerse}" else "${action.verse}"
+            root.helperShowReferenceFlow.tryEmit("${action.book} ${action.chapter}:$verses")
             ActionOutcome.Done()
         }
         HelperAction.NextSlide -> step(forward = true)
@@ -224,6 +271,7 @@ internal class AppHelperExecutor(private val root: AppRootState) : HelperActionE
         is HelperAction.SetBackgroundColor -> backgroundColor(action)
         is HelperAction.ChangeFontSize -> fontSize(action)
         is HelperAction.OpenSettings -> {
+            root.helperState.session.profileFocus = action.focus
             root.openOptionsDialog(optionsTabIndexOf(action.page))
             ActionOutcome.Done()
         }
@@ -277,6 +325,12 @@ internal class AppHelperExecutor(private val root: AppRootState) : HelperActionE
         // Handled by the helper itself; never sent here.
         is HelperAction.Highlight, is HelperAction.ShowShortcut, HelperAction.UndoLast,
         HelperAction.Greet, HelperAction.Thanks, HelperAction.ShowCommands -> ActionOutcome.Done()
+        is HelperAction.Say -> ActionOutcome.Done(message = action.text)
+        is HelperAction.OpenShortcutRow -> {
+            root.helperState.session.shortcutFocus = action.action.name
+            root.showKeyboardShortcutsDialog = true
+            ActionOutcome.Done()
+        }
     }
 
     /** Slides and pictures step from here; songs and the Bible by their own tab's keys. */

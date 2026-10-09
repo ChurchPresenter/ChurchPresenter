@@ -2,6 +2,9 @@
 
 package org.churchpresenter.profiles
 
+import androidx.compose.runtime.CompositionLocalProvider
+import org.churchpresenter.sharedui.guide.GuideSession
+import org.churchpresenter.sharedui.guide.LocalGuideSession
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,6 +63,8 @@ internal fun profilesTab(
     onIdentify: () -> Unit = {},
     /** False to open the editor in Basic, for a test of what Basic shows. */
     advanced: Boolean = true,
+    /** Wick's guide session, for a test of a tour opening the tab on a profile, page and row. */
+    session: GuideSession? = null,
     block: SkikoComposeUiTest.(get: () -> AppSettings) -> Unit,
 ) {
     lateinit var doc: MutableState<AppSettings>
@@ -73,11 +78,13 @@ internal fun profilesTab(
             // Advanced, so every row a test reaches for is on screen; Basic hides the rarer ones.
             val state = remember { mutableStateOf(initial.copy(profilesAdvanced = advanced)) }
             doc = state
-            ProfilesSettingsTab(
-                settings = state.value,
-                onSettingsChange = { update -> state.value = update(state.value) },
-                onIdentify = onIdentify,
-            )
+            CompositionLocalProvider(LocalGuideSession provides session) {
+                ProfilesSettingsTab(
+                    settings = state.value,
+                    onSettingsChange = { update -> state.value = update(state.value) },
+                    onIdentify = onIdentify,
+                )
+            }
         }
         block { doc.value }
     }

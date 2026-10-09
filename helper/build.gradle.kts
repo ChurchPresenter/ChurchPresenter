@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.detekt)
     alias(libs.plugins.roborazzi)
     jacoco
@@ -31,6 +32,7 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.swing)
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.components.resources)
@@ -62,7 +64,7 @@ tasks.withType<Test>().configureEach {
 // The understanding eval (WickUnderstandingEval) runs the model on every row, past the unit suite's
 // one-second budget, so it is its own task: `test` leaves it out, `wickEval` runs only it.
 tasks.named<Test>("test") {
-    useJUnitPlatform { excludeTags("eval") }
+    useJUnitPlatform { excludeTags("eval", "wickPack") }
 }
 tasks.register<Test>("wickEval") {
     description = "Measures how well Wick understands reworded requests"
@@ -82,6 +84,18 @@ tasks.register<Test>("updateWickCatalog") {
     classpath = sourceSets["test"].runtimeClasspath
     filter { includeTestsMatching("*WickCatalogTest.the committed catalog*") }
     systemProperty("wick.catalog.update", "true")
+    outputs.upToDateWhen { false }
+    testLogging.showStandardStreams = true
+}
+
+// Builds wick-pack/pack.json, the update Wick downloads, from the hand-written wick-pack/source.json:
+// checks every target and embeds every phrase with the same model updateWickCatalog uses.
+tasks.register<Test>("buildWickPack") {
+    description = "Builds Wick's downloadable pack from wick-pack/source.json"
+    group = "helper"
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+    useJUnitPlatform { includeTags("wickPack") }
     outputs.upToDateWhen { false }
     testLogging.showStandardStreams = true
 }

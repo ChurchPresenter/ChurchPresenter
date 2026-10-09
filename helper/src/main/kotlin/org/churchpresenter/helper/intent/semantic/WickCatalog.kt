@@ -32,6 +32,19 @@ internal sealed interface CatalogTarget {
         override fun format() = "control:$id:$labelKey:${before?.format() ?: "-"}"
     }
 
+    /**
+     * A row of the Profiles settings page, named by its label's string [labelKey], on the profile page
+     * [page] (`SONGS`, `BIBLE`, `GENERAL`, … — see `ProfileFocus.page`).
+     */
+    data class ProfileRow(val labelKey: String, val page: String) : CatalogTarget {
+        override fun format() = "profileRow:$labelKey:$page"
+    }
+
+    /** A labelled row of the Settings page [page], named by its label's string [labelKey]. */
+    data class PageRow(val labelKey: String, val page: SettingsPage) : CatalogTarget {
+        override fun format() = "pageRow:$labelKey:${page.name}"
+    }
+
     data class Settings(val page: SettingsPage) : CatalogTarget {
         override fun format() = "settings:${page.name}"
     }
@@ -42,6 +55,11 @@ internal sealed interface CatalogTarget {
 
     data class Shortcut(val action: ShortcutAction) : CatalogTarget {
         override fun format() = "shortcut:${action.name}"
+    }
+
+    /** A guided tour that came in a downloaded Wick pack, by its [id] there. */
+    data class PackTour(val id: String) : CatalogTarget {
+        override fun format() = "tour:$id"
     }
 
     /** What has to be open before a [Control] can be seen. */
@@ -66,9 +84,14 @@ internal sealed interface CatalogTarget {
                 "suggested" -> SuggestedRequest.entries.find { it.name == rest }?.let(::Suggested)
                 "request" -> Request(rest)
                 "control" -> parseControl(rest)
+                "profileRow" -> rest.split(':').takeIf { it.size == 2 }?.let { (key, page) -> ProfileRow(key, page) }
+                "pageRow" -> rest.split(':').takeIf { it.size == 2 }?.let { (key, page) ->
+                    SettingsPage.entries.find { it.name == page }?.let { PageRow(key, it) }
+                }
                 "settings" -> SettingsPage.entries.find { it.name == rest }?.let(::Settings)
                 "tab" -> Tabs.entries.find { it.name == rest }?.let(::Tab)
                 "shortcut" -> ShortcutAction.entries.find { it.name == rest }?.let(::Shortcut)
+                "tour" -> rest.takeIf { it.isNotBlank() }?.let(::PackTour)
                 else -> null
             }
         }
@@ -112,7 +135,8 @@ internal object WickCatalog {
     fun line(target: CatalogTarget, text: String, vector: FloatArray): String =
         "${target.format()}\t$text\t${encodeVector(vector)}"
 
-    private fun parseLine(line: String): CatalogEntry? {
+    /** One `catalog.tsv` line, or null when it is malformed or names something this build does not have. */
+    fun parseLine(line: String): CatalogEntry? {
         val (target, text, vector) = line.split('\t').takeIf { it.size == FIELDS } ?: return null
         return CatalogTarget.parse(target)?.let { CatalogEntry(it, text, decodeVector(vector)) }
     }

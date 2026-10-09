@@ -247,7 +247,8 @@ private fun WebTabScope.WebActionButtons(hasSecondaryDisplay: Boolean, hasWebCap
         AddToScheduleButton(
             onClick = { addToSchedule() },
             enabled = urlInput.isNotBlank(),
-            tooltipText = stringResource(Res.string.tooltip_add_to_schedule)
+            tooltipText = stringResource(Res.string.tooltip_add_to_schedule),
+            modifier = Modifier.guideTarget(GuideTargets.WEB_ADD_TO_SCHEDULE),
         )
     }
 

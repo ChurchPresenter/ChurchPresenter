@@ -1,6 +1,8 @@
 package org.churchpresenter.helper.suggest
 
 import org.churchpresenter.helper.HelperText
+import org.churchpresenter.helper.pack.WickPack
+import java.util.Locale
 import org.churchpresenter.strings.generated.resources.helper_tip_presets
 import org.churchpresenter.strings.generated.resources.helper_tip_compare_translations
 import org.churchpresenter.strings.generated.resources.helper_tip_song_library
@@ -12,6 +14,7 @@ import org.churchpresenter.strings.generated.resources.helper_hint_pick_and_edit
 import org.churchpresenter.strings.generated.resources.edit_song
 import org.churchpresenter.strings.generated.resources.song_tempo
 import org.churchpresenter.strings.generated.resources.helper_tip_hide_slides
+import org.churchpresenter.strings.generated.resources.helper_hint_hide_slides
 import org.churchpresenter.strings.generated.resources.helper_tip_two_translations
 import org.churchpresenter.strings.generated.resources.helper_tip_lottie_background
 import org.churchpresenter.helper.intent.tabStep
@@ -91,7 +94,22 @@ private val FEATURE_TIPS = listOf(
     Tip(helperText(Res.string.helper_tip_presets), HelperAction.OpenCalendar()),
     Tip(helperText(Res.string.helper_tip_lottie_background), HelperAction.OpenSettings(SettingsPage.BACKGROUND)),
     Tip(helperText(Res.string.helper_tip_two_translations), HelperAction.OpenSettings(SettingsPage.PROFILES)),
-    Tip(helperText(Res.string.helper_tip_hide_slides), HelperAction.SelectTab(Tabs.PICTURES)),
+    // Shows where: the eye is on a thumbnail, so with no pictures yet the tour starts at choosing them.
+    Tip(
+        helperText(Res.string.helper_tip_hide_slides),
+        HelperAction.Highlight(
+            GuideTour(
+                listOf(
+                    tabStep(Tabs.PICTURES),
+                    GuideStep(
+                        GuideTargets.PICTURES_SELECT_FOLDER,
+                        helperText(Res.string.helper_hint_hide_slides),
+                        before = HelperAction.SelectTab(Tabs.PICTURES),
+                    ),
+                ),
+            ),
+        ),
+    ),
     Tip(helperText(Res.string.helper_tip_song_features), HelperAction.SelectTab(Tabs.SONGS)),
     Tip(helperText(Res.string.helper_tip_stt), HelperAction.SelectTab(Tabs.STT)),
     Tip(helperText(Res.string.helper_tip_song_library), HelperAction.OpenSongLibrary()),
@@ -158,10 +176,15 @@ private val FEATURE_TIPS = listOf(
 )
 
 /**
- * Every tip, feature tips and shortcut tips taking turns. A shortcut tip names the key the operator
- * actually has bound, and a shortcut with none bound is left out rather than shown as nothing.
+ * Every tip, feature tips and shortcut tips taking turns, then a downloaded [pack]'s own. A shortcut tip
+ * names the key the operator actually has bound, and a shortcut with none bound is left out rather than
+ * shown as nothing.
  */
-fun allTips(shortcuts: ShortcutMap): List<Tip> {
+fun allTips(
+    shortcuts: ShortcutMap,
+    pack: WickPack? = null,
+    language: String = Locale.getDefault().language,
+): List<Tip> {
     val shortcutTips = TIP_SHORTCUTS.mapNotNull { action ->
         if (shortcuts.chordsFor(action).isEmpty()) return@mapNotNull null
         val what = helperText(action.descriptionRes)
@@ -174,6 +197,8 @@ fun allTips(shortcuts: ShortcutMap): List<Tip> {
         FEATURE_TIPS.getOrNull(i)?.let(interleaved::add)
         shortcutTips.getOrNull(i)?.let(interleaved::add)
     }
+    // A pack's tips are written in English only, so only an English app offers them unasked.
+    if (language == "en") pack?.tips?.let(interleaved::addAll)
     return interleaved
 }
 

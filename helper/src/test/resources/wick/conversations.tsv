@@ -99,10 +99,10 @@ open the converter	OpenConverter(sourceId=null, sourceName=null)	says: helper_do
 open the song library	OpenSongLibrary(compare=false)	says: helper_done
 batch edit songs	OpenSongLibrary(compare=false)	says: helper_done
 compare song translations	OpenSongLibrary(compare=true)	says: helper_done
-import from Planning Center	tour schedule.planningCenter	points at step 1 of 1: helper_hint_planning_center(planning_center_import_title)
+import from Planning Center	tour schedule.planningCenter > planningCenter.connect > planningCenter.serviceType > planningCenter.plan > planningCenter.import	points at step 1 of 5: helper_hint_planning_center(planning_center_import_title)
 ccli report	OpenStatistics	says: helper_done
 how many times did we sing this	OpenStatistics	says: helper_done
-open settings	OpenSettings(page=SYSTEM)	says: helper_done
+open settings	OpenSettings(page=SYSTEM, focus=null)	says: helper_done
 keyboard shortcuts	OpenKeyboardShortcuts	says: helper_done
 what's the shortcut for clear	ShowShortcut(action=CLEAR_OUTPUT)	shows the key for CLEAR_OUTPUT
 how do I use the remote	tour toolbar.settings > settings.SERVER > settings.server.enable > settings.server.qr	points at step 1 of 4: helper_hint_settings
@@ -166,7 +166,7 @@ song number 12	FindSong(query=12)	says: helper_done
 add psalm 23 to the schedule	AddVerseToSchedule(book=Psalm, chapter=23, verse=1, lastVerse=1, display=Psalm 23)	asks: helper_confirm_add_verse("Psalm 23")
 put amazing grace on the schedule	AddSongToSchedule(query=amazing grace)	asks: helper_confirm_add_song("amazing grace")
 skip to the offering in the schedule	ScheduleGoTo(name=offering)	asks: helper_confirm_schedule_goto("offering")
-qwerty zxcvb	-	didn't catch that; offers BACKGROUND, VERSE, NEW_SONG, PROJECTOR
+qwerty zxcvb	-	isn't sure
 how do I change the font of the lyrics	tour settings.PROFILES > settings.profiles.songsPage > option.lookElement.SONG_LYRICS > settings.profiles.textFont	points at step 1 of 4: helper_hint_look_profile
 how do I make the lyrics bigger	tour settings.PROFILES > settings.profiles.songsPage > option.lookElement.SONG_LYRICS > settings.profiles.textSize	points at step 1 of 4: helper_hint_look_profile
 how do I make the lyrics underlined	tour settings.PROFILES > settings.profiles.songsPage > option.lookElement.SONG_LYRICS > settings.profiles.textStyle	points at step 1 of 4: helper_hint_look_profile

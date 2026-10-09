@@ -80,7 +80,14 @@ internal fun shortcutRule(r: Request): Resolution? {
         r.has(Vocabulary.UNDO) -> ShortcutAction.UNDO
         else -> null
     }
-    return act(action?.let { HelperAction.ShowShortcut(it) } ?: HelperAction.OpenKeyboardShortcuts)
+    val changing = r.has(CHANGE_WORDS)
+    return act(
+        when {
+            action != null && changing -> HelperAction.Highlight(SetupTopics.shortcutRow(action))
+            action != null -> HelperAction.ShowShortcut(action)
+            else -> HelperAction.OpenKeyboardShortcuts
+        },
+    )
 }
 
 internal fun clearRule(r: Request): Resolution? =
@@ -95,3 +102,6 @@ internal fun outputsRule(r: Request): Resolution? {
     val toggling = r.first in verbs || r.words.last() in verbs || r.says("turn on", "turn off")
     return if (toggling && r.has(Vocabulary.SCREEN)) act(HelperAction.ToggleOutputWindows) else null
 }
+
+/** "Change the shortcut for clear": a rebinding, which the Keyboard Shortcuts window does. */
+private val CHANGE_WORDS = setOf("change", "set", "assign", "rebind", "remap", "edit", "customize", "customise")

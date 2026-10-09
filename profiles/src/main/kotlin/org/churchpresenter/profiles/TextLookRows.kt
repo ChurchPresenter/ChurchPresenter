@@ -66,14 +66,14 @@ internal fun TextLookRows(
     val autoFitOn = look.autoFit == true
     leading()
     SettingsRow(
-        stringResource(Res.string.profile_text_font),
+        Res.string.profile_text_font,
         paths = paths[TextLookField.FONT],
         modifier = Modifier.guideTarget(GuideTargets.PROFILE_TEXT_FONT),
     ) {
         RowFont(look.fontType, fonts) { onChange(look.copy(fontType = it)) }
     }
     SettingsRow(
-        stringResource(Res.string.profile_text_size),
+        Res.string.profile_text_size,
         paths = paths[TextLookField.SIZE],
         modifier = Modifier.guideTarget(GuideTargets.PROFILE_TEXT_SIZE),
     ) {
@@ -88,21 +88,21 @@ internal fun TextLookRows(
     }
     if (look.autoFit != null) {
         SettingsSwitchRow(
-            stringResource(Res.string.profile_text_autofit),
+            Res.string.profile_text_autofit,
             autoFitOn,
             { onChange(look.copy(autoFit = it)) },
             sub = stringResource(Res.string.profile_text_autofit_sub),
             paths = paths[TextLookField.AUTO_FIT],
         )
         if (autoFitOn && autoFitScope != null) {
-            SettingsRow(stringResource(Res.string.profile_text_autofit_scope)) { autoFitScope() }
+            SettingsRow(Res.string.profile_text_autofit_scope) { autoFitScope() }
         }
     }
-    SettingsRow(stringResource(Res.string.profile_text_color), paths = paths[TextLookField.COLOR]) {
+    SettingsRow(Res.string.profile_text_color, paths = paths[TextLookField.COLOR]) {
         RowColor(look.color, { onChange(look.copy(color = it)) })
     }
     SettingsRow(
-        stringResource(Res.string.profile_text_style),
+        Res.string.profile_text_style,
         // The outline and highlight are buttons of this row, so the search finds it by their names.
         searchTerms = styleSearchTerms(),
         paths = paths[TextLookField.STYLE] + paths[TextLookField.OUTLINE] + paths[TextLookField.BACKDROP],
@@ -128,7 +128,7 @@ internal fun TextLookRows(
         )
     }
     SettingsRow(
-        stringResource(Res.string.profile_text_alignment),
+        Res.string.profile_text_alignment,
         paths = paths[TextLookField.ALIGNMENT],
         modifier = Modifier.guideTarget(GuideTargets.PROFILE_TEXT_ALIGNMENT),
     ) {
@@ -155,7 +155,7 @@ internal fun TextLookRows(
 private fun CaseSpacingShadowRows(look: TextLook, onChange: (TextLook) -> Unit, paths: TextLookPaths) {
     look.chordColor?.let { chord ->
         SettingsRow(
-            stringResource(Res.string.profile_text_chord_color),
+            Res.string.profile_text_chord_color,
             advanced = true,
             paths = paths[TextLookField.CHORD_COLOR],
         ) {
@@ -163,7 +163,7 @@ private fun CaseSpacingShadowRows(look: TextLook, onChange: (TextLook) -> Unit, 
         }
     }
     SettingsRow(
-        stringResource(Res.string.profile_text_letter_case),
+        Res.string.profile_text_letter_case,
         paths = paths[TextLookField.TRANSFORM],
     ) {
         RowSegmented(
@@ -188,21 +188,21 @@ private fun CaseSpacingShadowRows(look: TextLook, onChange: (TextLook) -> Unit, 
     }
     val px = stringResource(Res.string.pixels_short)
     SettingsRow(
-        stringResource(Res.string.bible_letter_spacing),
+        Res.string.bible_letter_spacing,
         advanced = true,
         paths = paths[TextLookField.LETTER_SPACING],
     ) {
         RowStepper(look.letterSpacing, { onChange(look.copy(letterSpacing = it)) }, LETTER_SPACING_RANGE, unit = px)
     }
     SettingsRow(
-        stringResource(Res.string.bible_word_spacing),
+        Res.string.bible_word_spacing,
         advanced = true,
         paths = paths[TextLookField.WORD_SPACING],
     ) {
         RowStepper(look.wordSpacing, { onChange(look.copy(wordSpacing = it)) }, WORD_SPACING_RANGE, unit = px)
     }
     SettingsSwitchRow(
-        stringResource(Res.string.profile_text_shadow),
+        Res.string.profile_text_shadow,
         look.shadow,
         { onChange(look.copy(shadow = it)) },
         paths = paths[TextLookField.SHADOW] + paths[TextLookField.SHADOW_DETAIL],

@@ -73,7 +73,7 @@ internal fun BibleBoxRows(target: BibleBoxTarget?, edit: BibleEdit) {
     if (target == null) return
     if (target.needsTranslation) {
         SettingsRow(
-            stringResource(Res.string.profile_box),
+            Res.string.profile_box,
             sub = stringResource(Res.string.profile_box_pick_translation),
         ) {}
         return

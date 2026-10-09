@@ -1,5 +1,11 @@
 package org.churchpresenter.helper.ui
 
+import org.churchpresenter.strings.generated.resources.helper_teaser_dismiss
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.layout.Row
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.StartOffset
 import androidx.compose.animation.core.animateFloat
@@ -252,11 +258,11 @@ internal fun tealGradient(width: Float, height: Float) = Brush.radialGradient(
 
 /** What Wick has waiting, shown over the closed lamp; clicking it opens the panel. */
 @Composable
-internal fun Teaser(text: HelperText, onOpen: () -> Unit) {
+internal fun Teaser(text: HelperText, caption: String, onOpen: () -> Unit, onDismiss: () -> Unit) {
     Surface(
         onClick = onOpen,
         shape = TeaserShape,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = MaterialTheme.colorScheme.tertiaryContainer,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = LINE_ALPHA)),
         modifier = Modifier
             .padding(top = 8.dp)
@@ -264,19 +270,30 @@ internal fun Teaser(text: HelperText, onOpen: () -> Unit) {
             .floating(TeaserShape)
             .testTag("helper.teaser"),
     ) {
-        Column(Modifier.padding(horizontal = 13.dp, vertical = 10.dp)) {
-            Text(
-                stringResource(Res.string.helper_name),
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-            )
+        Column(Modifier.padding(start = 13.dp, end = 4.dp, top = 4.dp, bottom = 10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(Res.string.helper_name),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+                NoticeCaption(caption, Modifier.padding(start = 8.dp).weight(1f))
+                IconButton(onClick = onDismiss, modifier = Modifier.size(24.dp).testTag("helper.teaserDismiss")) {
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = stringResource(Res.string.helper_teaser_dismiss),
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
             Text(
                 text.resolve(),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 2.dp),
+                modifier = Modifier.padding(top = 2.dp, end = 9.dp),
             )
         }
     }

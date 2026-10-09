@@ -221,7 +221,7 @@ internal fun ProfileContentPage(
         key = "sources",
         paths = BIBLE_SOURCE_PATHS + SONG_SOURCE_PATHS,
     ) {
-        SettingsRow(stringResource(Res.string.profile_source_bible), paths = BIBLE_SOURCE_PATHS) {
+        SettingsRow(Res.string.profile_source_bible, paths = BIBLE_SOURCE_PATHS) {
             BibleSourcePicker(
                 profile = profile,
                 stack = bibleTranslationChoices(settings),
@@ -229,7 +229,7 @@ internal fun ProfileContentPage(
                 modifier = Modifier.width(SOURCE_PICKER_WIDTH),
             )
         }
-        SettingsRow(stringResource(Res.string.profile_source_songs), paths = SONG_SOURCE_PATHS) {
+        SettingsRow(Res.string.profile_source_songs, paths = SONG_SOURCE_PATHS) {
             SongSourcePicker(
                 profile = profile,
                 languages = songLanguageChoices(settings),

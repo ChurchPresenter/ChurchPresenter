@@ -120,7 +120,7 @@ internal fun PositionGroup(
     ) {
         if (verticalAlignment != null) {
             SettingsRow(
-                stringResource(Res.string.profile_vertical_alignment),
+                Res.string.profile_vertical_alignment,
                 paths = paths.vertical,
                 modifier = Modifier.guideTarget(GuideTargets.PROFILE_VERTICAL_ALIGNMENT),
             ) {
@@ -136,7 +136,7 @@ internal fun PositionGroup(
             }
         }
         SettingsRow(
-            stringResource(Res.string.profile_margins),
+            Res.string.profile_margins,
             paths = paths.margins,
             modifier = Modifier.guideTarget(GuideTargets.PROFILE_MARGINS),
         ) {
@@ -144,7 +144,7 @@ internal fun PositionGroup(
         }
         if (region != null) {
             val percent = stringResource(Res.string.percent_suffix)
-            SettingsRow(stringResource(Res.string.profile_content_width), advanced = true, paths = paths.region) {
+            SettingsRow(Res.string.profile_content_width, advanced = true, paths = paths.region) {
                 RowStepper(
                     region.widthPercent,
                     { onRegion(region.copy(widthPercent = it)) },
@@ -153,7 +153,7 @@ internal fun PositionGroup(
                     unit = percent,
                 )
             }
-            SettingsRow(stringResource(Res.string.profile_content_align), advanced = true, paths = paths.region) {
+            SettingsRow(Res.string.profile_content_align, advanced = true, paths = paths.region) {
                 RowSegmented(
                     options = listOf(
                         RowOption(ContentRegion.OFFSET_RANGE.first, stringResource(Res.string.left)),
@@ -164,7 +164,7 @@ internal fun PositionGroup(
                     onSelect = { onRegion(region.copy(xOffsetPercent = it)) },
                 )
             }
-            SettingsRow(stringResource(Res.string.profile_x_offset), advanced = true, paths = paths.region) {
+            SettingsRow(Res.string.profile_x_offset, advanced = true, paths = paths.region) {
                 RowStepper(
                     region.xOffsetPercent,
                     { onRegion(region.copy(xOffsetPercent = it)) },
@@ -172,7 +172,7 @@ internal fun PositionGroup(
                     unit = percent,
                 )
             }
-            SettingsRow(stringResource(Res.string.profile_y_offset), advanced = true, paths = paths.region) {
+            SettingsRow(Res.string.profile_y_offset, advanced = true, paths = paths.region) {
                 RowStepper(
                     region.yOffsetPercent,
                     { onRegion(region.copy(yOffsetPercent = it)) },
@@ -181,7 +181,7 @@ internal fun PositionGroup(
                 )
             }
             SettingsSwitchRow(
-                stringResource(Res.string.profile_region_moves_background),
+                Res.string.profile_region_moves_background,
                 region.movesBackground,
                 { onRegion(region.copy(movesBackground = it)) },
                 sub = stringResource(Res.string.profile_region_moves_background_sub),
@@ -267,7 +267,7 @@ internal fun ElementPlacementRows(
     paths: List<String> = emptyList(),
 ) {
     SettingsRow(
-        stringResource(Res.string.profile_place_freely),
+        Res.string.profile_place_freely,
         sub = stringResource(Res.string.profile_place_freely_sub),
         advanced = true,
         paths = paths,
@@ -324,9 +324,9 @@ internal fun TransitionGroup(
         action = reset,
         paths = listOf("fadeIn", "fadeOut", "crossfade", "transitionDuration").flatMap(path),
     ) {
-        SettingsSwitchRow(stringResource(Res.string.profile_fade_in), fadeIn, onFadeIn, paths = path("fadeIn"))
-        SettingsSwitchRow(stringResource(Res.string.profile_fade_out), fadeOut, onFadeOut, paths = path("fadeOut"))
-        SettingsRow(stringResource(Res.string.profile_duration), paths = path("transitionDuration")) {
+        SettingsSwitchRow(Res.string.profile_fade_in, fadeIn, onFadeIn, paths = path("fadeIn"))
+        SettingsSwitchRow(Res.string.profile_fade_out, fadeOut, onFadeOut, paths = path("fadeOut"))
+        SettingsRow(Res.string.profile_duration, paths = path("transitionDuration")) {
             RowStepper(
                 durationMs.toInt(),
                 { onDuration(it.toFloat()) },
@@ -338,7 +338,7 @@ internal fun TransitionGroup(
         }
         if (crossfade != null) {
             SettingsSwitchRow(
-                stringResource(Res.string.profile_crossfade),
+                Res.string.profile_crossfade,
                 crossfade,
                 onCrossfade,
                 paths = path("crossfade"),
@@ -386,7 +386,7 @@ internal fun BandGroup(
         paths = heightPaths + surfacePaths,
     ) {
         SettingsRow(
-            stringResource(Res.string.profile_band_height),
+            Res.string.profile_band_height,
             sub = stringResource(Res.string.profile_band_height_sub),
             paths = heightPaths,
         ) {
@@ -398,7 +398,7 @@ internal fun BandGroup(
                 testTag = BAND_HEIGHT_TAG,
             )
         }
-        SettingsRow(stringResource(Res.string.profile_band_source), paths = surfacePaths) {
+        SettingsRow(Res.string.profile_band_source, paths = surfacePaths) {
             RowSegmented(
                 options = listOf(
                     RowOption(false, stringResource(Res.string.profile_bg_app_default), BAND_SOURCE_APP_DEFAULT_TAG),

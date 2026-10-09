@@ -47,7 +47,7 @@ internal fun ProfileBackgroundPage(
         },
     ) {
         SettingsRow(
-            stringResource(Res.string.profile_bg_row),
+            Res.string.profile_bg_row,
             sub = if (owned) {
                 stringResource(
                     Res.string.profile_bg_set_for,

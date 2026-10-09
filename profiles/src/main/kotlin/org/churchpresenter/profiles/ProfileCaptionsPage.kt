@@ -101,18 +101,18 @@ internal fun ProfileCaptionsPage(draft: AppSettings, onSettingsChange: ((AppSett
         key = "lines",
         paths = listOf("$STT.maxSegments", "$STT.maxLines", "$STT.lineSpacing"),
     ) {
-        SettingsRow(stringResource(Res.string.profile_caption_lines), paths = listOf("$STT.maxLines")) {
+        SettingsRow(Res.string.profile_caption_lines, paths = listOf("$STT.maxLines")) {
             RowStepper(stt.maxLines, { v -> update { it.copy(maxLines = v) } }, LINES_RANGE)
         }
         SettingsRow(
-            stringResource(Res.string.profile_caption_segments),
+            Res.string.profile_caption_segments,
             advanced = true,
             paths = listOf("$STT.maxSegments"),
         ) {
             RowStepper(stt.maxSegments, { v -> update { it.copy(maxSegments = v) } }, SEGMENTS_RANGE)
         }
         SettingsRow(
-            stringResource(Res.string.profile_line_spacing),
+            Res.string.profile_line_spacing,
             advanced = true,
             paths = listOf("$STT.lineSpacing"),
         ) {
@@ -154,7 +154,7 @@ internal fun ProfileCaptionsPage(draft: AppSettings, onSettingsChange: ((AppSett
     ) {
         ScreenPlacementRow(stt.position, { v -> update { it.copy(position = v) } }, STT)
         DisplayAlignmentRow(stt.horizontalAlignment, { v -> update { it.copy(horizontalAlignment = v) } }, STT)
-        SettingsRow(stringResource(Res.string.profile_margins), paths = CAPTION_MARGIN_PATHS) {
+        SettingsRow(Res.string.profile_margins, paths = CAPTION_MARGIN_PATHS) {
             MarginFields(
                 Margins(stt.marginTop, stt.marginBottom, stt.marginLeft, stt.marginRight),
                 { m ->
@@ -192,7 +192,7 @@ private fun CaptionShowGroup(stt: STTSettings, update: ((STTSettings) -> STTSett
     // Matching the speaker, the typing follows them and the fixed speed only stands in until it can.
     val typedAtFixedSpeed = stt.dripFeedEnabled && !stt.matchSpeakerPace
     SettingsGroup(stringResource(Res.string.profile_group_show), key = "show") {
-        SettingsRow(stringResource(Res.string.profile_caption_mode), paths = listOf("$STT.displayMode")) {
+        SettingsRow(Res.string.profile_caption_mode, paths = listOf("$STT.displayMode")) {
             RowSegmented(
                 options = listOf(
                     RowOption(MODE_TRANSCRIBE, stringResource(Res.string.profile_caption_transcription)),
@@ -205,26 +205,26 @@ private fun CaptionShowGroup(stt: STTSettings, update: ((STTSettings) -> STTSett
         }
         if (stt.displayMode == MODE_BOTH) BothLanguagesRows(stt, update)
         SettingsSwitchRow(
-            stringResource(Res.string.profile_caption_highlight),
+            Res.string.profile_caption_highlight,
             stt.showWordHighlighting,
             { v -> update { it.copy(showWordHighlighting = v) } },
             paths = listOf("$STT.showWordHighlighting"),
         )
         SettingsSwitchRow(
-            stringResource(Res.string.profile_caption_in_progress),
+            Res.string.profile_caption_in_progress,
             stt.showInProgress,
             { v -> update { it.copy(showInProgress = v) } },
             paths = listOf("$STT.showInProgress"),
         )
         SettingsSwitchRow(
-            stringResource(Res.string.profile_caption_translation_in_progress),
+            Res.string.profile_caption_translation_in_progress,
             stt.showTranslationInProgress,
             { v -> update { it.copy(showTranslationInProgress = v) } },
             advanced = true,
             paths = listOf("$STT.showTranslationInProgress"),
         )
         SettingsSwitchRow(
-            stringResource(Res.string.profile_caption_type_out),
+            Res.string.profile_caption_type_out,
             stt.dripFeedEnabled,
             { v -> update { it.copy(dripFeedEnabled = v) } },
             sub = if (typedAtFixedSpeed) stringResource(Res.string.profile_caption_type_out_sub) else null,
@@ -254,7 +254,7 @@ private fun CaptionShowGroup(stt: STTSettings, update: ((STTSettings) -> STTSett
 private fun ShowSpeedRow(stt: STTSettings, update: ((STTSettings) -> STTSettings) -> Unit) {
     if (stt.reading.style == CAPTION_STYLE_POP_ON || stt.reading.style == CAPTION_STYLE_TICKER) return
     SettingsRow(
-        stringResource(Res.string.profile_caption_show_speed),
+        Res.string.profile_caption_show_speed,
         sub = if (stt.matchSpeakerPace) stringResource(Res.string.profile_caption_speed_speaker_sub) else null,
         paths = listOf("$STT.matchSpeakerPace"),
     ) {
@@ -283,7 +283,7 @@ private val WORD_SPACING_RANGE = 0..40
 /** The box's shape: today's rounded card, or a full-width band that may touch the screen's edge. */
 @Composable
 private fun CaptionShapeRows(stt: STTSettings, update: ((STTSettings) -> STTSettings) -> Unit) {
-    SettingsRow(stringResource(Res.string.profile_caption_shape), paths = listOf("$STT.boxShape")) {
+    SettingsRow(Res.string.profile_caption_shape, paths = listOf("$STT.boxShape")) {
         RowSegmented(
             options = listOf(
                 RowOption(CAPTION_BOX_CARD, stringResource(Res.string.profile_caption_shape_card)),
@@ -295,7 +295,7 @@ private fun CaptionShapeRows(stt: STTSettings, update: ((STTSettings) -> STTSett
     }
     if (stt.boxShape == CAPTION_BOX_BAND) {
         SettingsSwitchRow(
-            stringResource(Res.string.profile_caption_band_edge),
+            Res.string.profile_caption_band_edge,
             stt.bandTouchesEdge,
             { v -> update { it.copy(bandTouchesEdge = v) } },
             sub = stringResource(Res.string.profile_caption_band_edge_sub),
@@ -309,30 +309,30 @@ private fun CaptionShapeRows(stt: STTSettings, update: ((STTSettings) -> STTSett
 private fun CaptionTextRows(stt: STTSettings, update: ((STTSettings) -> STTSettings) -> Unit) {
     val px = stringResource(Res.string.pixels_short)
     SettingsSwitchRow(
-        stringResource(Res.string.profile_caption_all_caps),
+        Res.string.profile_caption_all_caps,
         stt.transcriptAllCaps,
         { v -> update { it.copy(transcriptAllCaps = v) } },
         paths = listOf("$STT.transcriptAllCaps"),
     )
     SettingsRow(
-        stringResource(Res.string.bible_letter_spacing),
+        Res.string.bible_letter_spacing,
         advanced = true,
         paths = listOf("$STT.letterSpacing"),
     ) {
         RowStepper(stt.letterSpacing, { v -> update { it.copy(letterSpacing = v) } }, LETTER_SPACING_RANGE, unit = px)
     }
-    SettingsRow(stringResource(Res.string.bible_word_spacing), advanced = true, paths = listOf("$STT.wordSpacing")) {
+    SettingsRow(Res.string.bible_word_spacing, advanced = true, paths = listOf("$STT.wordSpacing")) {
         RowStepper(stt.wordSpacing, { v -> update { it.copy(wordSpacing = v) } }, WORD_SPACING_RANGE, unit = px)
     }
     if (stt.displayMode == MODE_TRANSCRIBE) return
     SettingsRow(
-        stringResource(Res.string.profile_caption_translation_color),
+        Res.string.profile_caption_translation_color,
         paths = listOf("$STT.translationTextColor"),
     ) {
         RowColor(stt.translationTextColor, { v -> update { it.copy(translationTextColor = v) } })
     }
     SettingsRow(
-        stringResource(Res.string.profile_caption_translation_size),
+        Res.string.profile_caption_translation_size,
         sub = stringResource(Res.string.profile_caption_translation_size_sub),
         paths = listOf("$STT.translationFontSize"),
     ) {
@@ -344,19 +344,19 @@ private fun CaptionTextRows(stt: STTSettings, update: ((STTSettings) -> STTSetti
         )
     }
     SettingsSwitchRow(
-        stringResource(Res.string.profile_caption_translation_caps),
+        Res.string.profile_caption_translation_caps,
         stt.translationAllCaps,
         { v -> update { it.copy(translationAllCaps = v) } },
         paths = listOf("$STT.translationAllCaps"),
     )
     SettingsSwitchRow(
-        stringResource(Res.string.profile_caption_translation_bold),
+        Res.string.profile_caption_translation_bold,
         stt.translationBold,
         { v -> update { it.copy(translationBold = v) } },
         paths = listOf("$STT.translationBold"),
     )
     SettingsSwitchRow(
-        stringResource(Res.string.profile_caption_translation_italic),
+        Res.string.profile_caption_translation_italic,
         stt.translationItalic,
         { v -> update { it.copy(translationItalic = v) } },
         paths = listOf("$STT.translationItalic"),
@@ -376,7 +376,7 @@ private fun BothLanguagesRows(stt: STTSettings, update: ((STTSettings) -> STTSet
         update { it.copy(layout = arranged + if (translationFirst) INVERSE else "") }
     }
     SettingsRow(
-        stringResource(Res.string.profile_layout),
+        Res.string.profile_layout,
         sub = stringResource(Res.string.profile_caption_layout_interleaved_sub)
             .takeIf { arrangement == LAYOUT_INTERLEAVED },
         paths = listOf("$STT.layout"),
@@ -391,7 +391,7 @@ private fun BothLanguagesRows(stt: STTSettings, update: ((STTSettings) -> STTSet
             onSelect = { v -> write(v, inverse) },
         )
     }
-    SettingsRow(stringResource(Res.string.profile_caption_first), paths = listOf("$STT.layout")) {
+    SettingsRow(Res.string.profile_caption_first, paths = listOf("$STT.layout")) {
         RowSegmented(
             options = listOf(
                 RowOption(false, stringResource(Res.string.profile_caption_transcription)),
@@ -403,7 +403,7 @@ private fun BothLanguagesRows(stt: STTSettings, update: ((STTSettings) -> STTSet
     }
     if (arrangement != LAYOUT_INTERLEAVED) {
         SettingsSwitchRow(
-            stringResource(Res.string.profile_caption_separate_boxes),
+            Res.string.profile_caption_separate_boxes,
             stt.separateLanguageBoxes,
             { v -> update { it.copy(separateLanguageBoxes = v) } },
             paths = listOf("$STT.separateLanguageBoxes"),

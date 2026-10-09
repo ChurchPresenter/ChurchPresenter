@@ -1,6 +1,8 @@
 package org.churchpresenter.profiles
 
+import org.churchpresenter.sharedui.guide.GuideTarget
 import org.churchpresenter.sharedui.guide.LocalGuideSession
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -315,9 +317,25 @@ internal fun SettingsRow(
     leading: (@Composable () -> Unit)? = null,
     paths: List<String> = emptyList(),
     control: @Composable RowScope.() -> Unit,
+) = SettingsRowBody(label, null, modifier, sub, advanced, searchTerms, leading, paths, control)
+
+/** The row both [SettingsRow]s draw; [target] names it for Wick when its label is a string key. */
+@Suppress("LongParameterList")
+@Composable
+internal fun SettingsRowBody(
+    label: String,
+    target: GuideTarget?,
+    modifier: Modifier,
+    sub: String?,
+    advanced: Boolean,
+    searchTerms: String?,
+    leading: (@Composable () -> Unit)?,
+    paths: List<String>,
+    control: @Composable RowScope.() -> Unit,
 ) {
-    if (advanced && LocalSettingsDetail.current == SettingsDetail.BASIC) return
-    if (!matchesSettingsQuery(label, sub, searchTerms)) return
+    val pointedAt = target != null && LocalGuideSession.current?.activeTarget == target
+    if (!pointedAt && advanced && LocalSettingsDetail.current == SettingsDetail.BASIC) return
+    if (!pointedAt && !matchesSettingsQuery(label, sub, searchTerms)) return
     val link = LocalProfileLink.current?.takeIf { it.isLinked }
     val own = link?.owns(paths) == true
     if (link != null && link.onlyChanges && !own) return
@@ -328,7 +346,7 @@ internal fun SettingsRow(
     }
     val palette = profilesPalette()
     Box(
-        modifier = modifier
+        modifier = (target?.let { modifier.guideTarget(it) } ?: modifier)
             .fillMaxWidth()
             .background(palette.card)
             .heightIn(min = ROW_MIN_HEIGHT)

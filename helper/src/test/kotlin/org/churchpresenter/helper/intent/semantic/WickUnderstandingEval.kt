@@ -37,7 +37,7 @@ class WickUnderstandingEval {
      * How a row ended. [RULES_WRONG] is the rules acting on something other than what was meant — their
      * own behaviour, reported here but not this suite's to fix; [WRONG] is the model doing so, never allowed.
      */
-    private enum class Outcome { RULES, ACTED, CHIP, MISSED, WRONG, RULES_WRONG, STAYED_OUT }
+    private enum class Outcome { RULES, ACTED, GUESS, MISSED, WRONG, RULES_WRONG, STAYED_OUT }
 
     private val rows: List<Row> = javaClass.classLoader.getResourceAsStream("wick/understanding.tsv")!!
         .bufferedReader().readLines()
@@ -57,11 +57,11 @@ class WickUnderstandingEval {
         for ((row, outcome) in outcomes) println("%-11s %-22s %s".format(outcome, row.expected ?: "NONE", row.text))
         val counts = outcomes.groupingBy { it.second }.eachCount()
         val answerable = rows.count { it.expected != null }
-        val reached = listOf(Outcome.RULES, Outcome.ACTED, Outcome.CHIP).sumOf { counts[it] ?: 0 }
+        val reached = listOf(Outcome.RULES, Outcome.ACTED, Outcome.GUESS).sumOf { counts[it] ?: 0 }
         println(
             "Reached $reached/$answerable (rules ${counts[Outcome.RULES] ?: 0}, " +
                 "model acted ${counts[Outcome.ACTED] ?: 0}, " +
-                "right chip ${counts[Outcome.CHIP] ?: 0}), missed ${counts[Outcome.MISSED] ?: 0}, " +
+                "right guess ${counts[Outcome.GUESS] ?: 0}), missed ${counts[Outcome.MISSED] ?: 0}, " +
                 "model wrong ${counts[Outcome.WRONG] ?: 0}, rules wrong ${counts[Outcome.RULES_WRONG] ?: 0}",
         )
         assertEquals(0, counts[Outcome.WRONG] ?: 0, "the model acted wrongly")
@@ -83,8 +83,10 @@ class WickUnderstandingEval {
             acted != null && byRules -> Outcome.RULES_WRONG
             acted != null -> Outcome.WRONG
             resolution is Resolution.Clarify && resolution.options.take(CHIPS_SEEN).any { it.unnamed() in right } ->
-                if (byRules) Outcome.RULES else Outcome.CHIP
-            resolution is Resolution.Closest && expected in resolution.requests.take(CHIPS_SEEN) -> Outcome.CHIP
+                if (byRules) Outcome.RULES else Outcome.GUESS
+            resolution is Resolution.Closest && expected in resolution.requests -> Outcome.GUESS
+            resolution is Resolution.DidYouMean &&
+                (resolution.action.unnamed() in right || expected in resolution.others) -> Outcome.GUESS
             else -> Outcome.MISSED
         }
     }

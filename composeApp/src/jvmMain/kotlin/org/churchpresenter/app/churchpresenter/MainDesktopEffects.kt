@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.sharedui.models.Tabs
+import androidx.compose.runtime.withFrameNanos
+import org.churchpresenter.bibletab.goLiveWithReference
 import org.churchpresenter.songs.ScheduleSongAction
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -124,6 +127,18 @@ internal fun MainDesktopScope.TrailingEffects() {
         flows.selectTabFlow?.collect { tab -> selectTab(tab) }
     }
 
+    // The helper's "show John 3:16": the Bible tab's own way in, so the verse is found in any language
+    // and shown with every Bible setting, as if typed in its search box and sent live.
+    // Only the Bible tab puts a verse up from it unless Bible is already live, so it is opened first and
+    // given its frames to come on screen before the reference reaches it.
+    LaunchedEffect(flows.showReferenceFlow) {
+        flows.showReferenceFlow?.collect { reference ->
+            selectTab(Tabs.BIBLE)
+            repeat(BIBLE_TAB_FRAMES) { withFrameNanos { } }
+            bibleViewModel.goLiveWithReference(reference)
+        }
+    }
+
     LaunchedEffect(state.selectedTabIndex) {
         publish.onTabChange(state.selectedTabIndex)
         visibleTabs.getOrNull(effectiveTabIndex)?.let(publish.onCurrentTabChange)
@@ -159,3 +174,6 @@ internal fun MainDesktopScope.TrailingEffects() {
         }
     }
 }
+
+/** Frames given to the Bible tab to come on screen before the helper's reference reaches it. */
+private const val BIBLE_TAB_FRAMES = 2

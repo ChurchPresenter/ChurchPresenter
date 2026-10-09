@@ -150,6 +150,7 @@ internal fun ScheduleFileButtons(
         ToolbarButton(
             painterResource(IconRes.drawable.ic_add), stringResource(Res.string.tooltip_new_schedule), onNewSchedule,
             buttonSize = size.buttonSize, iconSize = size.iconSize,
+            modifier = Modifier.guideTarget(GuideTargets.SCHEDULE_NEW),
         )
     }
     if (ScheduleToolbarButton.OPEN.shownIn(hiddenButtons)) {
@@ -158,12 +159,14 @@ internal fun ScheduleFileButtons(
             stringResource(Res.string.tooltip_open_schedule),
             onOpenSchedule,
             buttonSize = size.buttonSize, iconSize = size.iconSize,
+            modifier = Modifier.guideTarget(GuideTargets.SCHEDULE_OPEN),
         )
     }
     if (ScheduleToolbarButton.SAVE.shownIn(hiddenButtons)) {
         ToolbarButton(
             painterResource(IconRes.drawable.ic_save), stringResource(Res.string.tooltip_save_schedule), onSaveSchedule,
             buttonSize = size.buttonSize, iconSize = size.iconSize,
+            modifier = Modifier.guideTarget(GuideTargets.SCHEDULE_SAVE),
         )
     }
     if (ScheduleToolbarButton.CLEAR.shownIn(hiddenButtons)) {
