@@ -21,7 +21,7 @@ import io.mockk.coEvery
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
-import org.churchpresenter.app.churchpresenter.utils.ContactReporter
+import org.churchpresenter.telemetry.ContactReporter
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -289,7 +289,7 @@ class ContactUsContentTest {
 
     @Test
     fun `submitContactRequest maps a successful submission to Sent`() = runBlocking {
-        coEvery { ContactReporter.submit(any()) } returns ContactReporter.Outcome.Success
+        coEvery { ContactReporter.submit(any(), any()) } returns ContactReporter.Outcome.Success
 
         val status = submitContactRequest(
             type = "bugReport",
@@ -305,7 +305,7 @@ class ContactUsContentTest {
     @Test
     fun `submitContactRequest sends the trimmed request built from its arguments`() = runBlocking {
         var captured: ContactReporter.ContactRequest? = null
-        coEvery { ContactReporter.submit(any()) } answers {
+        coEvery { ContactReporter.submit(any(), any()) } answers {
             captured = firstArg()
             ContactReporter.Outcome.Success
         }
@@ -326,7 +326,7 @@ class ContactUsContentTest {
 
     @Test
     fun `submitContactRequest maps a network error to the caller-supplied text`() = runBlocking {
-        coEvery { ContactReporter.submit(any()) } returns ContactReporter.Outcome.NetworkError
+        coEvery { ContactReporter.submit(any(), any()) } returns ContactReporter.Outcome.NetworkError
 
         val status = submitContactRequest(
             type = "feedback",
@@ -341,7 +341,7 @@ class ContactUsContentTest {
 
     @Test
     fun `submitContactRequest maps rate limiting to the caller-supplied text`() = runBlocking {
-        coEvery { ContactReporter.submit(any()) } returns ContactReporter.Outcome.RateLimited
+        coEvery { ContactReporter.submit(any(), any()) } returns ContactReporter.Outcome.RateLimited
 
         val status = submitContactRequest(
             type = "feedback",

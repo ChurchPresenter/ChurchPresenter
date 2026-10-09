@@ -464,6 +464,12 @@
     <string name="transition_duration">Durata Tranziției:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">Micșorează</string>
+    <string name="value_dialog_increase">Mărește</string>
+    <string name="value_dialog_keys_hint">↵ OK · Esc Anulează</string>
+    <string name="value_dialog_out_of_range">Introdu un număr de la %1$d la %2$d %3$s.</string>
+    <string name="auto_scroll_interval_hint">Cât timp rămâne fiecare diapozitiv înainte de a trece mai departe.</string>
+    <string name="transition_duration_hint">Cât durează tranziția dintre diapozitive.</string>
     <string name="animation_type">Tip Animație:</string>
     <string name="animation_crossfade">Crossfade</string>
     <string name="animation_fade">Estompare</string>

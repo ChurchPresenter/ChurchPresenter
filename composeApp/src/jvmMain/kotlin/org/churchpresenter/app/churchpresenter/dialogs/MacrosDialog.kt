@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.schedule.ActionListEditor
@@ -58,6 +57,8 @@ fun MacrosDialog(
     onRun: (Macro) -> Unit,
     onDismiss: () -> Unit,
     onOpenControl: (() -> Unit)? = null,
+    /** The window it opens in -- see [DialogFrame]. */
+    frame: DialogFrame = appDialogFrame,
 ) {
     if (!isVisible) return
     val dialogState = rememberDialogState(
@@ -65,10 +66,12 @@ fun MacrosDialog(
         width = MACROS_DIALOG_WIDTH,
         height = MACROS_DIALOG_HEIGHT,
     )
-    DialogWindow(
-        onCloseRequest = onDismiss,
-        state = dialogState,
-        title = stringResource(Res.string.macros_title),
+    frame(
+        DialogFrameSpec(
+            onClose = onDismiss,
+            state = dialogState,
+            title = stringResource(Res.string.macros_title),
+        ),
     ) {
         ProvideUiFontScale {
             MacrosDialogContent(macros, rows, onMacrosChange, onRun, onDismiss, onOpenControl)

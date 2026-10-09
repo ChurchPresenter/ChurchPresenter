@@ -36,9 +36,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import org.churchpresenter.theme.components.KeyIconButton
 import androidx.compose.material3.MaterialTheme
@@ -60,7 +57,6 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isSecondary
-import androidx.compose.material.icons.Icons
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
@@ -74,8 +70,14 @@ import org.churchpresenter.strings.generated.resources.add_to_favorites
 import org.churchpresenter.strings.generated.resources.add_to_schedule
 import org.churchpresenter.strings.generated.resources.edit_song
 import org.churchpresenter.strings.generated.resources.go_live
-import androidx.compose.material.icons.filled.Tv
 import org.churchpresenter.icons.generated.resources.ic_delete
+import org.churchpresenter.icons.generated.resources.ic_go_live
+import org.churchpresenter.sharedui.composables.ContextMenu
+import org.churchpresenter.sharedui.composables.ContextMenuDivider
+import org.churchpresenter.sharedui.composables.ContextMenuHeader
+import org.churchpresenter.sharedui.composables.ContextMenuItem
+import org.churchpresenter.sharedui.composables.contextMenuShortcut
+import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.strings.generated.resources.delete_saved_string
 import org.churchpresenter.icons.generated.resources.ic_star
 import org.churchpresenter.icons.generated.resources.ic_star_filled
@@ -375,7 +377,7 @@ private fun SongListScope.SongActionCell(colId: String, song: SongItem) {
     }
 }
 
-/** Add to Schedule, favourite, edit, delete and Go Live, from a right-click on the row. */
+/** Go Live, Add to Schedule, favourite and edit from a right-click on the row, with Delete set apart below. */
 @Composable
 private fun SongListScope.SongRowContextMenu(
     index: Int,
@@ -384,99 +386,82 @@ private fun SongListScope.SongRowContextMenu(
     contextMenuOffset: DpOffset,
 ) {
     var showContextMenu by showContextMenuState
-    DropdownMenu(
+    val scheme = MaterialTheme.colorScheme
+    ContextMenu(
         expanded = showContextMenu,
         onDismissRequest = { showContextMenu = false },
-        offset = contextMenuOffset
-    ) {
-        if (onAddToSchedule != null) {
-            DropdownMenuItem(
-                text = { Text(stringResource(Res.string.add_to_schedule)) },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(IconRes.drawable.ic_playlist_add),
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.secondary
-                    )
-                },
-                onClick = {
-                    onAddToSchedule(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId)
-                    showContextMenu = false
-                }
+        offset = contextMenuOffset,
+        header = {
+            ContextMenuHeader(
+                badge = song.number.trimStart('0').ifEmpty { song.number }.take(SONG_MENU_BADGE_CHARS),
+                title = song.title,
+                subtitle = listOf(song.songbook, song.number).filter { it.isNotBlank() }.joinToString(" · "),
+                accent = MaterialTheme.semantic.contentSongs,
             )
-        }
-        DropdownMenuItem(
-            text = {
-                val isFav = song.songId in favorites
-                Text(stringResource(if (isFav) Res.string.remove_from_favorites else Res.string.add_to_favorites))
-            },
-            leadingIcon = {
-                val isFav = song.songId in favorites
-                Icon(
-                    painter = painterResource(if (isFav) IconRes.drawable.ic_star_filled else IconRes.drawable.ic_star),
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                    tint = if (isFav) MaterialTheme.semantic.favorite else MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            },
-            onClick = {
-                onToggleFavorite(song.songId)
-                showContextMenu = false
-            }
-        )
-        DropdownMenuItem(
-            text = { Text(stringResource(Res.string.edit_song)) },
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_edit),
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.tertiary
-                )
-            },
-            onClick = {
-                dialogs.edit(song)
-                tabFocusRequester.requestFocus()
-                showContextMenu = false
-            }
-        )
-        HorizontalDivider()
-        DropdownMenuItem(
-            text = { Text(stringResource(Res.string.delete_saved_string), color = MaterialTheme.colorScheme.error) },
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(IconRes.drawable.ic_delete),
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.error
-                )
-            },
-            onClick = {
-                dialogs.delete(song)
-                showContextMenu = false
-            }
-        )
-        DropdownMenuItem(
-            text = { Text(stringResource(Res.string.go_live)) },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Tv,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            },
+        },
+    ) {
+        ContextMenuItem(
+            label = stringResource(Res.string.go_live),
+            icon = painterResource(IconRes.drawable.ic_go_live),
+            accent = scheme.primary,
+            shortcut = contextMenuShortcut(ShortcutAction.GO_LIVE),
+            emphasized = true,
             onClick = {
                 onSelectSong(index)
                 sendToPresenter(true)
                 onPresenting(Presenting.LYRICS)
                 tabFocusRequester.requestFocus()
                 showContextMenu = false
-            }
+            },
+        )
+        if (onAddToSchedule != null) {
+            ContextMenuItem(
+                label = stringResource(Res.string.add_to_schedule),
+                icon = painterResource(IconRes.drawable.ic_playlist_add),
+                accent = MaterialTheme.semantic.success,
+                shortcut = contextMenuShortcut(ShortcutAction.ADD_TO_SCHEDULE),
+                onClick = {
+                    onAddToSchedule(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId)
+                    showContextMenu = false
+                },
+            )
+        }
+        val isFav = song.songId in favorites
+        ContextMenuItem(
+            label = stringResource(if (isFav) Res.string.remove_from_favorites else Res.string.add_to_favorites),
+            icon = painterResource(if (isFav) IconRes.drawable.ic_star_filled else IconRes.drawable.ic_star),
+            accent = MaterialTheme.semantic.favorite,
+            onClick = {
+                onToggleFavorite(song.songId)
+                showContextMenu = false
+            },
+        )
+        ContextMenuItem(
+            label = stringResource(Res.string.edit_song),
+            icon = painterResource(IconRes.drawable.ic_edit),
+            accent = scheme.tertiary,
+            onClick = {
+                dialogs.edit(song)
+                tabFocusRequester.requestFocus()
+                showContextMenu = false
+            },
+        )
+        ContextMenuDivider()
+        ContextMenuItem(
+            label = stringResource(Res.string.delete_saved_string),
+            icon = painterResource(IconRes.drawable.ic_delete),
+            accent = scheme.error,
+            danger = true,
+            onClick = {
+                dialogs.delete(song)
+                showContextMenu = false
+            },
         )
     }
 }
+
+/** The header badge holds the song number; longer numbers are cut so it stays a square chip. */
+private const val SONG_MENU_BADGE_CHARS = 4
 
 /** True when the search matched the song's own title, which the title cell then highlights. */
 private fun SongSearchMatch?.isOwnTitle(): Boolean = this?.kind == SongMatchKind.TITLE && languageIndex == 0

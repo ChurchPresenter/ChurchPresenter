@@ -605,6 +605,12 @@
     <string name="transition_duration">மாற்ற நேரம்:</string>
     <string name="unit_s">வி</string>
     <string name="unit_ms">மிவி</string>
+    <string name="value_dialog_decrease">குறை</string>
+    <string name="value_dialog_increase">அதிகரி</string>
+    <string name="value_dialog_keys_hint">↵ சரி · Esc ரத்து</string>
+    <string name="value_dialog_out_of_range">%1$d முதல் %2$d %3$s வரையிலான எண்ணை உள்ளிடவும்.</string>
+    <string name="auto_scroll_interval_hint">அடுத்ததற்குச் செல்லும் முன் ஒவ்வொரு ஸ்லைடும் எவ்வளவு நேரம் இருக்கும்.</string>
+    <string name="transition_duration_hint">ஸ்லைடுகளுக்கு இடையிலான மாற்றம் எவ்வளவு நேரம் எடுக்கும்.</string>
     <string name="animation_type">அசைவூட்ட வகை:</string>
     <string name="animation_crossfade">குறுக்கு மங்கல்</string>
     <string name="animation_fade">மங்கல்</string>

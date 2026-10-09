@@ -5,9 +5,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
-import org.churchpresenter.app.churchpresenter.utils.ContactReporter
+import org.churchpresenter.app.churchpresenter.utils.appTelemetryIdentity
+import org.churchpresenter.telemetry.ContactReporter
 import org.churchpresenter.helper.report.ChatSendResult
 import org.churchpresenter.settings.HelperSettings
+import org.churchpresenter.settings.isWickAvailable
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.updater.UpdateCheckResult
 import java.util.concurrent.Executor
@@ -92,7 +94,8 @@ class WickAvailabilityTest {
         assertEquals("Note: hi\n\nYou: x", request.message)
         assertEquals("me@example.org", request.email)
         assertEquals("", request.company)
-        assertTrue(request.context.startsWith(ContactReporter.defaultContext() + " · "), request.context)
+        val base = ContactReporter.defaultContext(appTelemetryIdentity.versionDisplay)
+        assertTrue(request.context.startsWith("$base · "), request.context)
         assertTrue(request.context.endsWith(" · Wick pack 3"), request.context)
     }
 

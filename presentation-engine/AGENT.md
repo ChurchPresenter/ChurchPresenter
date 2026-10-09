@@ -51,7 +51,7 @@ the 85% default and so are not named** in `build.gradle.kts` — only the two th
 their measured value rounded down:
 
 ```
-BRANCH 0.77   COMPLEXITY 0.71      (the other four inherit the 85% default)
+BRANCH 0.79   COMPLEXITY 0.75      (the other four inherit the 85% default)
 ```
 
 A named floor is a **ratchet, not a target**: raise one as tests are added, never lower one to make

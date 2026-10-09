@@ -2,6 +2,9 @@
 
 package org.churchpresenter.helper.ui
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertCountEquals
@@ -28,9 +31,11 @@ import org.churchpresenter.helper.intent.Resolution
 import org.churchpresenter.helper.intent.RuleIntentResolver
 import org.churchpresenter.helper.suggest.HelperSignals
 import org.churchpresenter.helper.suggest.Suggestion
+import org.churchpresenter.helper.suggest.SuggestionIds
 import org.churchpresenter.helper.suggest.suggestionsFor
 import org.churchpresenter.settings.HelperSettings
 import org.churchpresenter.sharedui.models.ShortcutAction
+import org.churchpresenter.settings.helperDayOf
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
@@ -45,13 +50,14 @@ class WickPanelTest {
     private val done = mutableListOf<HelperAction>()
     private var outcome: (HelperAction) -> ActionOutcome = { ActionOutcome.Done() }
     private val executor = HelperActionExecutor { done += it; outcome(it) }
-    private var settings = HelperSettings(tipsEnabled = false)
+    private var settings by mutableStateOf(HelperSettings(tipsEnabled = false))
 
     private fun ComposeUiTest.wick(
         state: HelperState,
         suggestions: List<Suggestion> = emptyList(),
         tab: Tabs? = null,
         live: Boolean = false,
+        now: Long = 0L,
     ) {
         setContent {
             ChurchPresenterTheme(themeMode = ThemeMode.DARK) {
@@ -64,7 +70,7 @@ class WickPanelTest {
                         screens = emptyList(),
                         context = ResolveContext(currentTab = tab, language = "en"),
                         anythingLive = live,
-                        nowMillis = { 0L },
+                        nowMillis = { now },
                     ),
                     executor = executor,
                     resolver = RuleIntentResolver(),
@@ -243,6 +249,17 @@ class WickPanelTest {
     }
 
     @Test
+    fun `following a suggestion puts it off, so it does not ask again`() = runComposeUiTest {
+        val suggestions = suggestionsFor(HelperSignals(scheduleEmpty = true), HelperSettings(), 0L)
+        val state = HelperState().apply { isOpen = true }
+        wick(state, suggestions)
+        press("Show me")
+        assertIs<HelperReply.Touring>(state.reply)
+        assertTrue(SuggestionIds.SCHEDULE_EMPTY in settings.snoozedUntil)
+        assertTrue(suggestionsFor(HelperSignals(scheduleEmpty = true), settings, 0L).isEmpty())
+    }
+
+    @Test
     fun `a suggestion can be put away for good`() = runComposeUiTest {
         val suggestions = suggestionsFor(HelperSignals(primaryBibleMissing = true), HelperSettings(), 0L)
         wick(HelperState().apply { isOpen = true }, suggestions)
@@ -339,6 +356,26 @@ class WickPanelTest {
     }
 
     @Test
+    fun `opening Wick dismisses the waiting tip, whatever the panel shows`() = runComposeUiTest {
+        val now = 3 * DAY_MS
+        settings = HelperSettings(tipsEnabled = true)
+        val state = HelperState()
+        // A conversation already there: the panel opens on it, not on the tip card.
+        state.thread.said("hello")
+        wick(state, now = now)
+        mainClock.advanceTimeBy(TIP_IDLE_MS)
+        waitForIdle()
+        onNodeWithTag("helper.teaser").assertExists()
+        onNodeWithTag("helper.lamp").performClick()
+        waitForIdle()
+        assertEquals(helperDayOf(now), settings.lastTipDay)
+        onNodeWithTag("helper.lamp").performClick()
+        waitForIdle()
+        assertFalse(state.isOpen)
+        onAllNodesWithTag("helper.teaser").assertCountEquals(0)
+    }
+
+    @Test
     fun `nothing waits while something is live`() = runComposeUiTest {
         val suggestions = suggestionsFor(HelperSignals(scheduleEmpty = true), HelperSettings(), 0L)
         wick(HelperState(), suggestions, live = true)
@@ -357,6 +394,30 @@ class WickPanelTest {
         onNodeWithTag("helper.introPointer").performClick()
         waitForIdle()
         assertTrue(state.isOpen)
+    }
+
+    @Test
+    fun `up and down walk back through what was typed`() = runComposeUiTest {
+        val state = HelperState().apply { isOpen = true }
+        wick(state)
+        type("hello")
+        type("thanks")
+        val input = onNodeWithTag("helper.input")
+        input.performClick()
+        input.performTextInput("half")
+        input.performKeyInput { pressKey(Key.DirectionUp) }
+        waitForIdle()
+        assertEquals("thanks", state.input)
+        input.performKeyInput { pressKey(Key.DirectionUp) }
+        input.performKeyInput { pressKey(Key.DirectionUp) }
+        waitForIdle()
+        assertEquals("hello", state.input)
+        input.performKeyInput { pressKey(Key.DirectionDown) }
+        waitForIdle()
+        assertEquals("thanks", state.input)
+        input.performKeyInput { pressKey(Key.DirectionDown) }
+        waitForIdle()
+        assertEquals("half", state.input)
     }
 
     @Test
@@ -382,5 +443,10 @@ class WickPanelTest {
         waitForIdle()
         press("No")
         assertEquals(HelperReply.Unknown, state.reply)
+    }
+
+    private companion object {
+        const val DAY_MS = 24L * 60L * 60L * 1000L
+        const val TIP_IDLE_MS = 61_000L
     }
 }

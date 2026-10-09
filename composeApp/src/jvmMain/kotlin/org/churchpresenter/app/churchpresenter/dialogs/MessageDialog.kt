@@ -27,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.icons.generated.resources.ic_close
@@ -72,6 +71,8 @@ fun MessageDialog(
     onGoLive: (Cue.Message) -> Unit,
     onClear: () -> Unit,
     onDismiss: () -> Unit,
+    /** The window it opens in -- see [DialogFrame]. */
+    frame: DialogFrame = appDialogFrame,
 ) {
     if (!isVisible) return
     val dialogState = rememberDialogState(
@@ -79,7 +80,13 @@ fun MessageDialog(
         width = MESSAGE_DIALOG_WIDTH,
         height = MESSAGE_DIALOG_HEIGHT,
     )
-    DialogWindow(onCloseRequest = onDismiss, state = dialogState, title = stringResource(Res.string.message_title)) {
+    frame(
+        DialogFrameSpec(
+            onClose = onDismiss,
+            state = dialogState,
+            title = stringResource(Res.string.message_title),
+        ),
+    ) {
         ProvideUiFontScale {
             MessageDialogContent(templates, onTemplatesChange, onAir, onGoLive, onClear, onDismiss)
         }

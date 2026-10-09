@@ -47,7 +47,12 @@ song editor: `EditSongDialog`, `SongChordPreview`, `ChordPicker`), `:shared-ui` 
 ./gradlew :song-chords:test                             # 62 tests
 ./gradlew :song-chords:detekt                           # no baseline — every finding gates
 ./gradlew :song-chords:jacocoTestCoverageVerification    # the default 85% on all six counters
+./gradlew :song-chords:pitest                           # mutation score, build/reports/pitest/
 ```
+
+**Property tests** (`ChordTransposerPropertyTest`, kotest-property, pinned seed) hold what a
+transposition must keep over generated chords and lines. **Mutation score** 89% (162 of 182 killed,
+2026-10-08); `mutation-test.yml` runs it weekly, advisory.
 
 Coverage floors are the defaults and there are **no `coverageExcludes`** — the reported number is
 over all five classes.

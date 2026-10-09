@@ -63,4 +63,10 @@ website export (`AppPreviewScheduleScreenshotTest`) seeds the panel with it.
 ./gradlew :schedule:jacocoTestCoverageVerification
 ./gradlew :schedule:recordRoborazziJvm --tests '*ScreenshotTest*'
 ./gradlew :schedule:verifyRoborazziJvm --tests '*ScreenshotTest*'
+./gradlew :schedule:pitest                      # drag math and the file cipher only
 ```
+
+**Mutation testing** covers only the pure logic (`ScheduleDragMath`, `ScheduleCipher`, against
+`ScheduleDragMathTest`, `ScheduleDragMathPropertyTest` and `ScheduleFileTest`): the tab's UI tests
+would run once per mutant. Score 88% (15 of 17 killed, 2026-10-08); `mutation-test.yml` runs it
+weekly, advisory.

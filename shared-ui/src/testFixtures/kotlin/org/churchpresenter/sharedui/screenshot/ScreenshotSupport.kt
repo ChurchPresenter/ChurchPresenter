@@ -43,6 +43,7 @@ val THEMES = listOf("light" to ThemeMode.LIGHT, "dark" to ThemeMode.DARK)
  * re-recording the same *unchanged* states on a different OS rewrites nearly every file — 15 of 16,
  * measured — and git keeps every version of a binary for ever. So **record on ONE platform per
  * branch**, and re-record only what actually changed; never re-record the whole suite out of habit.
+ * **macOS is the canonical platform**: the committed set is recorded and verified there.
  *
  * Two invariants govern the CI comparison, and both have already been broken once:
  *

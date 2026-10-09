@@ -20,7 +20,7 @@ point.
 `org.churchpresenter.companionsatellite.CompanionSatelliteClient` and its
 `CompanionConnectionStatus`. The client is wrapped by `:companion-surface` (its
 `CompanionSatelliteViewModel`, `CompanionSurfacePanel` and `CompanionConnectionUiState`), which
-takes this module as an `api` dependency; the app's own `dialogs/tabs/CompanionSatelliteSettingsTab.kt`
+takes this module as an `api` dependency; `:companion-surface`'s `CompanionSatelliteSettingsTab.kt`
 reads the status too.
 
 ## Layout
@@ -63,10 +63,9 @@ Both run in CI, gated on this directory or the shared build files changing.
 
 ## Gates
 
-Coverage uses the root build's six counters (see the root `AGENT.md`). `extra["coverageFloors"]`
-lowers BRANCH to 0.75 and COMPLEXITY to 0.70 — a socket client is mostly branch-dense framing and
-error handling — and the other four counters stay at the 85% default. There are no
-`coverageExcludes`: everything here is testable against `FakeCompanion`.
+Coverage uses the root build's six counters at the 85% default (see the root `AGENT.md`) — no
+`coverageFloors`, no `coverageExcludes`: everything here is testable against `FakeCompanion`, and
+the wire helpers directly (`SatelliteProtocolTest`).
 
 ## Dependencies
 

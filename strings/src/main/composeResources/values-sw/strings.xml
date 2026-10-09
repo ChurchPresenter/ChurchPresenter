@@ -598,6 +598,12 @@
     <string name="transition_duration">Muda wa Mabadiliko:</string>
     <string name="unit_s">sek</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">Punguza</string>
+    <string name="value_dialog_increase">Ongeza</string>
+    <string name="value_dialog_keys_hint">↵ Sawa · Esc Ghairi</string>
+    <string name="value_dialog_out_of_range">Weka namba kutoka %1$d hadi %2$d %3$s.</string>
+    <string name="auto_scroll_interval_hint">Muda ambao kila slaidi hukaa kabla ya kusonga mbele.</string>
+    <string name="transition_duration_hint">Muda ambao mabadiliko kati ya slaidi huchukua.</string>
     <string name="animation_type">Aina ya Uhuishaji:</string>
     <string name="animation_crossfade">Kufifia Pamoja</string>
     <string name="animation_fade">Kufifia</string>

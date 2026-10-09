@@ -16,7 +16,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
+import org.churchpresenter.serverui.RemoteClientManager
 import org.churchpresenter.profiles.railTag
 import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.AppSettings

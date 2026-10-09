@@ -74,6 +74,9 @@ class HelperState(
     var isOpen by mutableStateOf(false)
     var input by mutableStateOf("")
 
+    /** What was typed this run, for Up and Down in the input. */
+    internal val history = InputHistory()
+
     /**
      * The conversation so far. It outlives closing the bubble; only [clear] empties it. The reply
      * still waiting on the operator is [reply], drawn under it.

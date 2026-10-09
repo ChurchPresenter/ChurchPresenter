@@ -122,13 +122,13 @@ private fun RemotePresentationEffects(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     onSelectTab: (Tabs) -> Unit,
     pushCurrentSlideIfLive: suspend () -> Unit,
-    remotePresentationPlayPauseFlow: Flow<Unit>? = null,
-    remotePresentationLoopToggleFlow: Flow<Unit>? = null,
-    remotePresentationGotoFlow: Flow<Int>? = null,
-    nextSlideFlow: Flow<Unit>? = null,
-    previousSlideFlow: Flow<Unit>? = null,
-    selectSlideFlow: Flow<Pair<String, Int>>? = null,
-    uploadPresentationFlow: Flow<File>? = null,
+    remotePresentationPlayPauseFlow: Flow<Unit>?,
+    remotePresentationLoopToggleFlow: Flow<Unit>?,
+    remotePresentationGotoFlow: Flow<Int>?,
+    nextSlideFlow: Flow<Unit>?,
+    previousSlideFlow: Flow<Unit>?,
+    selectSlideFlow: Flow<Pair<String, Int>>?,
+    uploadPresentationFlow: Flow<File>?,
 ) {
     LaunchedEffect(remotePresentationPlayPauseFlow) {
         remotePresentationPlayPauseFlow?.collect { presentationViewModel.togglePlayPause() }
@@ -203,9 +203,9 @@ private fun RemotePictureEffects(
     picturesViewModel: PicturesViewModel,
     presenterManager: PresenterManager,
     resolveImageFile: ((folderId: String, index: Int) -> File?)?,
-    selectPictureImageFlow: Flow<Pair<String, Int>>? = null,
-    nextPictureFlow: Flow<Unit>? = null,
-    previousPictureFlow: Flow<Unit>? = null,
+    selectPictureImageFlow: Flow<Pair<String, Int>>?,
+    nextPictureFlow: Flow<Unit>?,
+    previousPictureFlow: Flow<Unit>?,
 ) {
     LaunchedEffect(selectPictureImageFlow) {
         selectPictureImageFlow?.collect { (folderId, index) ->
@@ -279,8 +279,8 @@ private fun RemoteBibleEffects(
     appSettings: AppSettings,
     bibleViewModel: BibleViewModel,
     presenterManager: PresenterManager,
-    selectBibleVerseFlow: Flow<SelectBibleVerseRequest>? = null,
-    statisticsManager: StatisticsManager? = null,
+    selectBibleVerseFlow: Flow<SelectBibleVerseRequest>?,
+    statisticsManager: StatisticsManager?,
 ) {
     LaunchedEffect(selectBibleVerseFlow) {
         selectBibleVerseFlow?.collect { req ->
@@ -339,10 +339,10 @@ private fun RemoteTabSelectionEffects(
     onPresentationItemSelected: (ScheduleItem.PresentationItem) -> Unit,
     onMediaItemSelected: (ScheduleItem.MediaItem) -> Unit,
     onSelectTab: (Tabs) -> Unit,
-    remoteSelectSongFlow: Flow<RemoteSongSelection>? = null,
-    remoteSelectPictureFlow: Flow<ScheduleItem.PictureItem>? = null,
-    remoteSelectPresentationFlow: Flow<ScheduleItem.PresentationItem>? = null,
-    remoteSelectMediaFlow: Flow<ScheduleItem.MediaItem>? = null,
+    remoteSelectSongFlow: Flow<RemoteSongSelection>?,
+    remoteSelectPictureFlow: Flow<ScheduleItem.PictureItem>?,
+    remoteSelectPresentationFlow: Flow<ScheduleItem.PresentationItem>?,
+    remoteSelectMediaFlow: Flow<ScheduleItem.MediaItem>?,
 ) {
     LaunchedEffect(remoteSelectSongFlow) {
         remoteSelectSongFlow?.collect { selection ->

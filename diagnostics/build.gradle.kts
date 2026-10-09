@@ -4,6 +4,8 @@ plugins {
     // CrashReportSweep is published from here because it exists for CrashReporter's own design:
     // the report directory is resolved once per JVM, so a test that reports an exception really
     // writes into the developer's own ~/.churchpresenter/crash-reports and has to put it back.
+    // HungTestReporter is too: the root build puts these fixtures on every module's test runtime,
+    // and their service file registers it, so a hung fork anywhere leaves a thread dump.
     `java-test-fixtures`
     jacoco
 }
@@ -19,7 +21,12 @@ dependencies {
     // part of this module's public surface and has to resolve at every call site in the app.
     api(libs.sentry)
 
+    // The listener API HungTestReporter implements. Compile-only: every module that runs it is a
+    // JUnit Platform suite and already has the launcher at run time.
+    testFixturesCompileOnly(libs.junit.platform.launcher)
+
     testImplementation(kotlin("test"))
+    testImplementation(libs.junit.platform.launcher)
 }
 
 tasks.withType<Test>().configureEach {
@@ -47,7 +54,7 @@ tasks.withType<Test>().configureEach {
 detekt {
     buildUponDefaultConfig = true
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    source.setFrom("src/main/kotlin", "src/test/kotlin")
+    source.setFrom("src/main/kotlin", "src/test/kotlin", "src/testFixtures/kotlin")
     parallel = true
 }
 

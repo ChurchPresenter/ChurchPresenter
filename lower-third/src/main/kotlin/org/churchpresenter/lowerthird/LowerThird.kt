@@ -29,11 +29,13 @@ import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import java.nio.file.FileSystems
 import java.nio.file.StandardWatchEventKinds
 import java.nio.file.WatchEvent
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.AtemSettings
 import org.churchpresenter.atem.AtemClient
 import org.churchpresenter.lowerthird.render.LottieRenderCache
 import org.churchpresenter.atem.AtemUploadStatus
@@ -113,6 +115,12 @@ fun LowerThirdTab(
     previewOutput: PreviewOutput = FallbackLowerThirdPreview,
     /** The app's picker for which output the preview stands for; drawn above the preview. */
     outputPicker: @Composable (Modifier) -> Unit = {},
+    /**
+     * Starts the background render of one preset's cache entries. Defaults to the process-wide
+     * [LottieRenderCache], whose jobs outlive this composition by design so the cache still gets
+     * warm; a test passes its own, or every preset it shows keeps rendering through later tests.
+     */
+    preRender: (File, AtemSettings) -> Unit = { file, atem -> LottieRenderCache.ensureForFile(file, atem) },
 ) {
     val lottieFolder = appSettings.streamingSettings.lowerThirdFolder
     val ui = remember { LowerThirdUiState(appSettings.atemSettings.detectedClipMaxFrames) }
@@ -124,7 +132,7 @@ fun LowerThirdTab(
     // Pre-render ATEM uploads in the background for every lottie file as soon as it
     // appears (generator save, file drop, edit) — Send to ATEM then streams a ready file
     LaunchedEffect(lottieFiles, appSettings.atemSettings) {
-        lottieFiles.forEach { LottieRenderCache.ensureForFile(it, appSettings.atemSettings) }
+        lottieFiles.forEach { preRender(it, appSettings.atemSettings) }
     }
     val scope = rememberCoroutineScope()
     // Sticky: true once the current host/port has responded at least once. Gates whether the ATEM
@@ -212,7 +220,9 @@ private fun WatchLowerThirdFolder(lottieFolder: String, ui: LowerThirdUiState) {
                 )
                 try {
                     while (isActive) {
-                        val key = watchService.take()
+                        // Interruptible: a plain take() ignores cancellation, so leaving the tab
+                        // would hold this thread and the watch open until the folder next changed.
+                        val key = runInterruptible { watchService.take() }
                         if (touchesJson(key.pollEvents())) {
                             withContext(Dispatchers.Main) { ui.refreshKey++ }
                         }

@@ -68,7 +68,7 @@ class StyleThumbnails(
     fun request(config: LottieGenConfig) {
         val next = thumbnailKey(config)
         if (next == key) {
-            diagnostics.requested(config.style, job = null)
+            diagnostics.requested(config.style, next.hashCode(), job = null)
             return
         }
         key = next
@@ -92,8 +92,12 @@ class StyleThumbnails(
                 diagnostics.buildFinished()
             }
         }
+        // A failure other than a cancellation stops every style after it; say what it was.
+        build.invokeOnCompletion { cause ->
+            if (cause != null && cause !is CancellationException) diagnostics.buildFailed(cause)
+        }
         job = build
-        diagnostics.requested(config.style, build)
+        diagnostics.requested(config.style, next.hashCode(), build)
     }
 
     private fun publish(pictures: Map<String, ImageBitmap>) {

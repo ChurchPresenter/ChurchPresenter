@@ -598,6 +598,12 @@
     <string name="transition_duration">ระยะเวลาเปลี่ยนภาพ:</string>
     <string name="unit_s">วิ</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">ลด</string>
+    <string name="value_dialog_increase">เพิ่ม</string>
+    <string name="value_dialog_keys_hint">↵ ตกลง · Esc ยกเลิก</string>
+    <string name="value_dialog_out_of_range">ป้อนตัวเลขตั้งแต่ %1$d ถึง %2$d %3$s</string>
+    <string name="auto_scroll_interval_hint">แต่ละสไลด์จะแสดงนานเท่าใดก่อนเปลี่ยนไปสไลด์ถัดไป</string>
+    <string name="transition_duration_hint">การเปลี่ยนระหว่างสไลด์ใช้เวลานานเท่าใด</string>
     <string name="animation_type">ชนิดภาพเคลื่อนไหว:</string>
     <string name="animation_crossfade">จางสลับ</string>
     <string name="animation_fade">จางหาย</string>

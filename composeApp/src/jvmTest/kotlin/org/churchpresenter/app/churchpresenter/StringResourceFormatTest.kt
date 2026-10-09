@@ -87,6 +87,8 @@ class StringResourceFormatTest {
         // They are the list-box keys any menu answers to rather than an app shortcut, so there is
         // no binding to render them from and none that can go stale under them.
         "font_picker_keys",
+        // Same again: `ValueDialog`'s ↵/Esc are read by its own `onPreviewKeyEvent`, not ShortcutMap.
+        "value_dialog_keys_hint",
     )
 
     /**

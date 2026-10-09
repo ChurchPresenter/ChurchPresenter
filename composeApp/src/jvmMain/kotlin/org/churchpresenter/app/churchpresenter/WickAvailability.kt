@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.settings.HelperSettings
+import org.churchpresenter.settings.isWickAvailable
 
 // Wick in production: nothing of it appears until the operator starts it from Help → Show Helper.
 
@@ -24,9 +25,6 @@ internal val AppRootState.wickIntroShowing: Boolean
  */
 internal val AppRootState.wickAvailable: Boolean
     get() = isWickAvailable(devMode, appSettings.helper)
-
-/** Whether Wick is here, in [devMode] or with [helper] as saved: dev mode, or started from the Help menu. */
-internal fun isWickAvailable(devMode: Boolean, helper: HelperSettings): Boolean = devMode || helper.startedByUser
 
 /**
  * Help → Show Helper: starts Wick for good and puts the lamp back if it was hidden. The first time it

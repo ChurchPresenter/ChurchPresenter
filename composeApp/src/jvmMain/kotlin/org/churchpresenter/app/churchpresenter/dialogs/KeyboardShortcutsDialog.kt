@@ -34,7 +34,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
@@ -113,19 +112,23 @@ fun KeyboardShortcutsDialog(
     /** Off, the actions of features that are dev mode only are left out. */
     devMode: Boolean = true,
     onDismiss: () -> Unit,
+    /** The window it opens in -- see [DialogFrame]. */
+    frame: DialogFrame = appDialogFrame,
 ) {
     if (!isVisible) return
 
     val mainWindowState = LocalMainWindowState.current
-    DialogWindow(
-        onCloseRequest = onDismiss,
-        state = rememberDialogState(
+    frame(
+        DialogFrameSpec(
+            onClose = onDismiss,
+            state = rememberDialogState(
             position = centeredOnMainWindow(mainWindowState, DIALOG_WIDTH, DIALOG_HEIGHT),
             width = DIALOG_WIDTH,
             height = DIALOG_HEIGHT
         ),
-        title = stringResource(Res.string.menu_keyboard_shortcuts),
-        resizable = true
+            title = stringResource(Res.string.menu_keyboard_shortcuts),
+            resizable = true,
+        ),
     ) {
         ProvideUiFontScale {
             // This window's own spotlight: Wick's shortcut answers ring the row they name.

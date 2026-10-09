@@ -56,7 +56,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.sharedui.utils.centeredOnMainWindow
@@ -211,7 +210,9 @@ fun RemoteEventDialog(
     onAllowPermanently: () -> Unit,
     onBlockForSession: () -> Unit,
     onBlockPermanently: () -> Unit,
-    onDeny: () -> Unit
+    onDeny: () -> Unit,
+    /** The window it opens in -- see [DialogFrame]. */
+    frame: DialogFrame = appDialogFrame,
 ) {
     if (event == null) return
 
@@ -219,16 +220,18 @@ fun RemoteEventDialog(
     val dialogWidth = REMOTE_EVENT_DIALOG_WIDTH
     val mainWindowState = LocalMainWindowState.current
 
-    DialogWindow(
-        onCloseRequest = onDeny,
-        state = rememberDialogState(
+    frame(
+        DialogFrameSpec(
+            onClose = onDeny,
+            state = rememberDialogState(
             position = centeredOnMainWindow(mainWindowState, dialogWidth, presentation.dialogHeight),
             width = dialogWidth,
             height = presentation.dialogHeight
         ),
-        title = presentation.dialogTitle,
-        resizable = false,
-        alwaysOnTop = true
+            title = presentation.dialogTitle,
+            resizable = false,
+            alwaysOnTop = true,
+        ),
     ) {
         ProvideUiFontScale {
             RemoteEventDialogContent(

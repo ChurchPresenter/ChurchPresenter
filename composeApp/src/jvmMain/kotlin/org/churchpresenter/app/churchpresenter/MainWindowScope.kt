@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
+import org.churchpresenter.serverui.RemoteClientManager
 import org.churchpresenter.server.RemoteActivityNotification
 import org.churchpresenter.server.RemoteEvent
 import org.churchpresenter.core.models.schedule.ScheduleItem

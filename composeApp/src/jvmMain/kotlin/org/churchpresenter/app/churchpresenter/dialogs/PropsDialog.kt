@@ -27,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import kotlinx.coroutines.launch
 import org.churchpresenter.settings.PropCorner
@@ -78,6 +77,8 @@ fun PropsDialog(
     onSwitch: (id: String, on: Boolean) -> Unit,
     onChoosePicture: suspend () -> String?,
     onDismiss: () -> Unit,
+    /** The window it opens in -- see [DialogFrame]. */
+    frame: DialogFrame = appDialogFrame,
 ) {
     if (!isVisible) return
     val dialogState = rememberDialogState(
@@ -85,7 +86,13 @@ fun PropsDialog(
         width = PROPS_DIALOG_WIDTH,
         height = PROPS_DIALOG_HEIGHT,
     )
-    DialogWindow(onCloseRequest = onDismiss, state = dialogState, title = stringResource(Res.string.props_title)) {
+    frame(
+        DialogFrameSpec(
+            onClose = onDismiss,
+            state = dialogState,
+            title = stringResource(Res.string.props_title),
+        ),
+    ) {
         ProvideUiFontScale {
             PropsDialogContent(props, onPropsChange, onAir, onSwitch, onChoosePicture, onDismiss)
         }

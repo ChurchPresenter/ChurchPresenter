@@ -25,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.liveoutput.CLEARABLE_LAYERS
 import org.churchpresenter.liveoutput.knownLayers
@@ -66,6 +65,8 @@ fun ClearGroupsDialog(
     onGroupsChange: (List<ClearGroup>) -> Unit,
     onClearGroup: (ClearGroup) -> Unit,
     onDismiss: () -> Unit,
+    /** The window it opens in -- see [DialogFrame]. */
+    frame: DialogFrame = appDialogFrame,
 ) {
     if (!isVisible) return
     val dialogState = rememberDialogState(
@@ -74,7 +75,13 @@ fun ClearGroupsDialog(
         height = CLEAR_DIALOG_HEIGHT,
     )
     val title = stringResource(Res.string.clear_groups_title)
-    DialogWindow(onCloseRequest = onDismiss, state = dialogState, title = title) {
+    frame(
+        DialogFrameSpec(
+            onClose = onDismiss,
+            state = dialogState,
+            title = title,
+        ),
+    ) {
         ProvideUiFontScale {
             ClearGroupsDialogContent(groups, onGroupsChange, onClearGroup, onDismiss)
         }

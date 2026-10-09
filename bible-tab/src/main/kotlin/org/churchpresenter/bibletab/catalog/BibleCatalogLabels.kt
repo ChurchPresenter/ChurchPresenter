@@ -1,0 +1,65 @@
+package org.churchpresenter.bibletab.catalog
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.bible_catalog_download_error_archive
+import org.churchpresenter.strings.generated.resources.bible_catalog_download_error_convert
+import org.churchpresenter.strings.generated.resources.bible_catalog_download_error_generic
+import org.churchpresenter.strings.generated.resources.bible_catalog_download_error_incomplete
+import org.churchpresenter.strings.generated.resources.bible_catalog_download_error_network
+import org.churchpresenter.strings.generated.resources.bible_catalog_download_error_stalled
+import org.churchpresenter.strings.generated.resources.bible_catalog_download_error_write
+import org.churchpresenter.strings.generated.resources.bible_catalog_error_generic
+import org.churchpresenter.strings.generated.resources.bible_catalog_error_network
+import org.churchpresenter.strings.generated.resources.bible_catalog_error_rate_limited
+import org.churchpresenter.strings.generated.resources.bible_catalog_license_source_ebible
+import org.churchpresenter.strings.generated.resources.bible_catalog_license_source_zefania
+import org.churchpresenter.strings.generated.resources.bible_catalog_no_directory
+import org.churchpresenter.strings.generated.resources.bible_catalog_phase_converting
+import org.churchpresenter.strings.generated.resources.bible_catalog_phase_downloading
+import org.churchpresenter.strings.generated.resources.bible_catalog_phase_extracting
+import org.churchpresenter.strings.generated.resources.bible_catalog_phase_installing
+import org.churchpresenter.strings.generated.resources.bible_catalog_source_ebible
+import org.churchpresenter.strings.generated.resources.bible_catalog_source_zefania
+import org.churchpresenter.strings.generated.resources.bible_catalog_license_source_beblia
+import org.churchpresenter.strings.generated.resources.bible_catalog_source_beblia
+import org.churchpresenter.bibleformats.catalog.BibleSourceId
+import org.churchpresenter.bibleformats.catalog.InstallPhase
+import org.jetbrains.compose.resources.StringResource
+
+internal fun phaseStringRes(phase: InstallPhase?): StringResource = when (phase) {
+    InstallPhase.EXTRACTING -> Res.string.bible_catalog_phase_extracting
+    InstallPhase.CONVERTING -> Res.string.bible_catalog_phase_converting
+    InstallPhase.INSTALLING -> Res.string.bible_catalog_phase_installing
+    else -> Res.string.bible_catalog_phase_downloading
+}
+
+internal fun sourceLabelStringRes(sourceId: BibleSourceId): StringResource = when (sourceId) {
+    BibleSourceId.EBIBLE -> Res.string.bible_catalog_source_ebible
+    BibleSourceId.ZEFANIA -> Res.string.bible_catalog_source_zefania
+    BibleSourceId.BEBLIA -> Res.string.bible_catalog_source_beblia
+}
+
+internal fun sourceLicenceStringRes(sourceId: BibleSourceId): StringResource = when (sourceId) {
+    BibleSourceId.EBIBLE -> Res.string.bible_catalog_license_source_ebible
+    BibleSourceId.ZEFANIA -> Res.string.bible_catalog_license_source_zefania
+    BibleSourceId.BEBLIA -> Res.string.bible_catalog_license_source_beblia
+}
+
+internal fun catalogErrorStringRes(error: BibleCatalogError): StringResource = when (error) {
+    BibleCatalogError.NETWORK_ERROR -> Res.string.bible_catalog_error_network
+    BibleCatalogError.RATE_LIMITED -> Res.string.bible_catalog_error_rate_limited
+    BibleCatalogError.FAILURE -> Res.string.bible_catalog_error_generic
+}
+
+internal fun installErrorStringRes(error: BibleDownloadError): StringResource = when (error) {
+    BibleDownloadError.NETWORK_ERROR -> Res.string.bible_catalog_download_error_network
+    BibleDownloadError.DOWNLOAD_STALLED -> Res.string.bible_catalog_download_error_stalled
+    BibleDownloadError.HTTP_ERROR -> Res.string.bible_catalog_download_error_generic
+    BibleDownloadError.CHECKSUM_MISMATCH -> Res.string.bible_catalog_download_error_incomplete
+    BibleDownloadError.CORRUPT_ARCHIVE -> Res.string.bible_catalog_download_error_archive
+    BibleDownloadError.CONVERSION_FAILED -> Res.string.bible_catalog_download_error_convert
+    BibleDownloadError.WRITE_FAILED -> Res.string.bible_catalog_download_error_write
+    BibleDownloadError.NO_DIRECTORY -> Res.string.bible_catalog_no_directory
+}

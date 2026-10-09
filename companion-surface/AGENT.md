@@ -9,7 +9,8 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
   configured connection and keeps every surface's live button grid and connection state;
 - `CompanionSurfacePanel`, one surface's grid and status, drawn in the tab and in the sidebars;
 - `CompanionSurfaceTab`, with `CompanionConnectionChipRow` to choose between surfaces;
-- `CompanionButtonState` and `CompanionConnectionUiState`, what the panel draws.
+- `CompanionButtonState` and `CompanionConnectionUiState`, what the panel draws;
+- `CompanionSatelliteSettingsTab`, the Settings page that edits the connections and their placements.
 
 A real Gradle module of this build: `include(":companion-surface")`,
 `implementation(projects.companionSurface)`. `:composeApp` is its only consumer: the tab area and

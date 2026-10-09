@@ -9,10 +9,10 @@ import org.churchpresenter.app.churchpresenter.dialogs.songEditorBackgroundButto
 import org.churchpresenter.songs.EditSongDialog
 import org.churchpresenter.liveoutput.lottieBandPath
 import org.churchpresenter.profiles.stageMonitorScreenIndices
-import org.churchpresenter.app.churchpresenter.utils.isChordChartPresentation
-import org.churchpresenter.app.churchpresenter.utils.isLiveOutput
-import org.churchpresenter.app.churchpresenter.utils.isSplitScreenSong
-import org.churchpresenter.app.churchpresenter.utils.songLanguageEvent
+import org.churchpresenter.telemetry.isChordChartPresentation
+import org.churchpresenter.telemetry.isLiveOutput
+import org.churchpresenter.telemetry.isSplitScreenSong
+import org.churchpresenter.telemetry.songLanguageEvent
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.profileFor

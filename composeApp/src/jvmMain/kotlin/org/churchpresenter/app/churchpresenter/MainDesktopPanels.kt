@@ -35,6 +35,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
+import org.churchpresenter.settings.AppSettings
 
 private const val PANEL_COLLAPSE_ANIM_MS = 220
 private val SCHEDULE_MIN_WIDTH = 160.dp
@@ -44,8 +45,32 @@ private val MIN_MAIN_WIDTH = 200.dp
 private val PANEL_ABS_MAX_WIDTH = 600.dp
 
 /**
+ * What fills the three panels, built once by the main screen's wiring: the schedule sidebar and
+ * the tab area are drawn at the [Modifier] the panel sizes them to, the preview sidebar at the
+ * panel's current [PreviewPanelGeometry].
+ */
+internal class MainDesktopPanelSlots(
+    val scheduleSidebar: @Composable (Modifier) -> Unit,
+    val mainTabArea: @Composable (Modifier) -> Unit,
+    val previewSidebar: @Composable (PreviewPanelGeometry) -> Unit,
+)
+
+/**
+ * Where the right-hand panel stands this frame: whether it is collapsed, how far its slide has got,
+ * and its width and live cap in px.
+ */
+internal class PreviewPanelGeometry(
+    val collapsed: Boolean,
+    val visibleFraction: Float,
+    val previewPanelPx: Float,
+    val maxPreviewPx: Float,
+)
+
+/**
  * The main screen's three panels: the schedule on the left, the tabs in the middle, the preview on
- * the right, with a drag handle and a collapse toggle between each.
+ * the right, with a drag handle and a collapse toggle between each. [appSettings] holds each window
+ * mode's saved widths and collapsed flags, which drags and toggles write back through
+ * [onSettingsChange]; [slots] is what the panels hold.
  *
  * Every choice below is load-bearing and each carries its reason: the widths are keyed only on the
  * window mode, the width is measured with a plain Box rather than a subcomposition, the panels are
@@ -53,7 +78,11 @@ private val PANEL_ABS_MAX_WIDTH = 600.dp
  * SideEffect. See AGENT.md's sidebar-resize debugging notes.
  */
 @Composable
-internal fun MainDesktopScope.MainDesktopPanels() {
+internal fun MainDesktopPanels(
+    appSettings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    slots: MainDesktopPanelSlots,
+) {
     Column(modifier = Modifier.fillMaxSize()) {
         val density = LocalDensity.current
         val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
@@ -143,8 +172,8 @@ internal fun MainDesktopScope.MainDesktopPanels() {
             Row(modifier = Modifier.fillMaxSize()) {
                 // Collapsible schedule panel
                 if (isPanelRendered(scheduleCollapsed, scheduleVisibleFraction.value)) {
-                    ScheduleSidebar(
-                        modifier = Modifier
+                    slots.scheduleSidebar(
+                        Modifier
                             .sidePanelWidth {
                                 val fraction = scheduleVisibleFraction.value
                                 panelRenderWidthPx(schedulePanelPx, maxScheduleState.value, fraction)
@@ -171,7 +200,7 @@ internal fun MainDesktopScope.MainDesktopPanels() {
                     expandedIcon = IconRes.drawable.ic_arrow_left,
                 )
 
-                MainTabArea(modifier = Modifier.weight(1f).fillMaxHeight())
+                slots.mainTabArea(Modifier.weight(1f).fillMaxHeight())
 
                 // Right drag handle + collapse toggle for preview panel.
                 // Inverted: this panel is on the right, so dragging left widens it.
@@ -193,24 +222,13 @@ internal fun MainDesktopScope.MainDesktopPanels() {
                 )
 
                 // Collapsible preview panel (right sidebar)
-                PreviewSidebar(
-                    collapsed = previewCollapsed,
-                    visibleFraction = previewVisibleFraction.value,
-                    previewPanelPx = previewPanelPx,
-                    maxPreviewPx = maxPreviewState.value,
-                    presenterManager = presenterManager,
-                    mediaViewModel = mediaViewModel,
-                    instanceLinkSendClear = link.sendClear,
-                    livePreviewAppSettings = livePreviewAppSettings,
-                    activeQuickBackground = activeQuickBackground,
-                    onQuickBackgroundPicked = onQuickBackgroundPicked,
-                    onSettingsChange = onSettingsChange,
-                    appSettings = appSettings,
-                    serverUrl = web.serverUrl,
-                    qaDisplayUrl = web.qaDisplayUrl,
-                    sttManager = sttManager,
-                    companionSatelliteViewModel = companionSatelliteViewModel,
-                    showControl = live.showControlFor(scheduleViewModel.scheduleItems),
+                slots.previewSidebar(
+                    PreviewPanelGeometry(
+                        collapsed = previewCollapsed,
+                        visibleFraction = previewVisibleFraction.value,
+                        previewPanelPx = previewPanelPx,
+                        maxPreviewPx = maxPreviewState.value,
+                    )
                 )
             }
         }

@@ -27,7 +27,7 @@ class GuideTargetModifierTest {
     private val other = GuideTarget("test.other")
 
     @Test
-    fun `a tagged control reports where it is and counts presses only while pointed at`() = runComposeUiTest {
+    fun `a tagged control reports where it is and still gets its click`() = runComposeUiTest {
         val registry = GuideTargetRegistry()
         val session = GuideSession()
         var clicks = 0
@@ -43,16 +43,11 @@ class GuideTargetModifierTest {
         waitForIdle()
         assertNotNull(registry.boundsOf(button))
 
-        onNodeWithTag("button").performClick()
-        assertEquals(0, session.activePresses)
-
         session.activeTarget = button
         waitForIdle()
         onNodeWithTag("button").performClick()
         waitForIdle()
-        assertEquals(1, session.activePresses)
-        // The press is observed, never consumed: the control still gets its click.
-        assertEquals(2, clicks)
+        assertEquals(1, clicks)
     }
 
     @Test

@@ -598,6 +598,12 @@
     <string name="transition_duration">过渡时长：</string>
     <string name="unit_s">秒</string>
     <string name="unit_ms">毫秒</string>
+    <string name="value_dialog_decrease">减少</string>
+    <string name="value_dialog_increase">增加</string>
+    <string name="value_dialog_keys_hint">↵ 确定 · Esc 取消</string>
+    <string name="value_dialog_out_of_range">请输入 %1$d 到 %2$d %3$s 之间的数字。</string>
+    <string name="auto_scroll_interval_hint">每张幻灯片停留多长时间后再切换。</string>
+    <string name="transition_duration_hint">幻灯片之间的过渡持续多长时间。</string>
     <string name="animation_type">动画类型：</string>
     <string name="animation_crossfade">交叉淡化</string>
     <string name="animation_fade">淡入淡出</string>

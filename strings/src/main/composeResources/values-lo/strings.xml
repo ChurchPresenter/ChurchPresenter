@@ -598,6 +598,12 @@
     <string name="transition_duration">ໄລຍະການປ່ຽນພາບ:</string>
     <string name="unit_s">ວິ</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">ຫຼຸດລົງ</string>
+    <string name="value_dialog_increase">ເພີ່ມຂຶ້ນ</string>
+    <string name="value_dialog_keys_hint">↵ ຕົກລົງ · Esc ຍົກເລີກ</string>
+    <string name="value_dialog_out_of_range">ປ້ອນຕົວເລກຈາກ %1$d ຫາ %2$d %3$s.</string>
+    <string name="auto_scroll_interval_hint">ແຕ່ລະສະໄລດ໌ຈະສະແດງດົນປານໃດກ່ອນປ່ຽນໄປອັນຕໍ່ໄປ.</string>
+    <string name="transition_duration_hint">ການປ່ຽນລະຫວ່າງສະໄລດ໌ໃຊ້ເວລາດົນປານໃດ.</string>
     <string name="animation_type">ປະເພດການເໜັງຕີງ:</string>
     <string name="animation_crossfade">ຄ່ອຍໆສະຫຼັບ</string>
     <string name="animation_fade">ຄ່ອຍໆຈາງ</string>

@@ -30,12 +30,9 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.rememberWindowState
-import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
-import org.churchpresenter.icons.generated.resources.ic_app_icon
 import org.churchpresenter.strings.generated.resources.memory_monitor_committed
 import org.churchpresenter.strings.generated.resources.memory_monitor_force_gc
 import org.churchpresenter.strings.generated.resources.memory_monitor_gc
@@ -48,7 +45,6 @@ import org.churchpresenter.strings.generated.resources.memory_monitor_window_tit
 import kotlinx.coroutines.delay
 import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.lang.management.GarbageCollectorMXBean
 import java.lang.management.ManagementFactory
@@ -102,16 +98,23 @@ internal fun appendSample(history: MutableList<Long>, value: Long, maxSamples: I
  * Reports JVM heap/non-heap only — native (Skia/JCEF/VLC) memory is not exposed via JMX.
  */
 @Composable
-fun MemoryMonitorWindow(isVisible: Boolean, theme: ThemeMode, onClose: () -> Unit) {
+fun MemoryMonitorWindow(
+    isVisible: Boolean,
+    theme: ThemeMode,
+    onClose: () -> Unit,
+    /** The window it opens in -- see [ToolWindowFrame]. */
+    frame: ToolWindowFrame = appToolWindowFrame,
+) {
     if (!isVisible) return
 
-    Window(
-        onCloseRequest = onClose,
-        title = stringResource(Res.string.memory_monitor_window_title),
-        icon = painterResource(IconRes.drawable.ic_app_icon),
-        // Named rather than inline so `DialogViewportTest` measures against this exact value — see
-        // `DialogSizes.kt`, which records why it is 500dp and not the 440dp that shipped clipped.
-        state = rememberWindowState(width = MEMORY_MONITOR_WINDOW_WIDTH, height = MEMORY_MONITOR_WINDOW_HEIGHT)
+    frame(
+        ToolWindowSpec(
+            title = stringResource(Res.string.memory_monitor_window_title),
+            // Named rather than inline so `DialogViewportTest` measures against this exact value — see
+            // `DialogSizes.kt`, which records why it is 500dp and not the 440dp that shipped clipped.
+            size = DpSize(MEMORY_MONITOR_WINDOW_WIDTH, MEMORY_MONITOR_WINDOW_HEIGHT),
+            onClose = onClose,
+        ),
     ) {
         AppWindowRoot(theme = theme) {
             MemoryMonitorContent()

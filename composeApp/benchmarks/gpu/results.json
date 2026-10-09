@@ -1,0 +1,26 @@
+{
+  "run": {
+    "os": "Mac OS X 26.5.1",
+    "arch": "aarch64",
+    "cpus": 10,
+    "jvm": "OpenJDK 64-Bit Server VM 21.0.10",
+    "renderApi": "METAL",
+    "warmupFrames": 60,
+    "measuredFrames": 240
+  },
+  "results": [
+    {"scenario": "song verse", "width": 1920, "height": 1080, "refreshHz": 60, "intervalMs": {"p50": 16.67, "p95": 17.99, "p99": 18.59, "max": 18.80}, "frames": 240, "dropped": 0},
+    {"scenario": "song bilingual", "width": 1920, "height": 1080, "refreshHz": 60, "intervalMs": {"p50": 16.67, "p95": 18.16, "p99": 18.63, "max": 18.68}, "frames": 240, "dropped": 0},
+    {"scenario": "song chord chart", "width": 1920, "height": 1080, "refreshHz": 60, "intervalMs": {"p50": 16.66, "p95": 18.59, "p99": 18.72, "max": 19.29}, "frames": 240, "dropped": 0},
+    {"scenario": "bible verse", "width": 1920, "height": 1080, "refreshHz": 60, "intervalMs": {"p50": 16.66, "p95": 18.67, "p99": 18.72, "max": 20.24}, "frames": 240, "dropped": 0},
+    {"scenario": "bible two translations", "width": 1920, "height": 1080, "refreshHz": 60, "intervalMs": {"p50": 16.66, "p95": 18.65, "p99": 18.71, "max": 18.71}, "frames": 240, "dropped": 0},
+    {"scenario": "announcement scrolling", "width": 1920, "height": 1080, "refreshHz": 60, "intervalMs": {"p50": 16.67, "p95": 18.67, "p99": 18.76, "max": 39.20}, "frames": 240, "dropped": 1},
+    {"scenario": "question", "width": 1920, "height": 1080, "refreshHz": 60, "intervalMs": {"p50": 16.66, "p95": 18.68, "p99": 18.72, "max": 18.74}, "frames": 240, "dropped": 0},
+    {"scenario": "dictionary entry", "width": 1920, "height": 1080, "refreshHz": 60, "intervalMs": {"p50": 16.67, "p95": 18.65, "p99": 18.69, "max": 18.77}, "frames": 240, "dropped": 0},
+    {"scenario": "captions", "width": 1920, "height": 1080, "refreshHz": 60, "intervalMs": {"p50": 16.67, "p95": 18.63, "p99": 18.72, "max": 18.81}, "frames": 240, "dropped": 0},
+    {"scenario": "picture", "width": 1920, "height": 1080, "refreshHz": 60, "intervalMs": {"p50": 16.66, "p95": 18.67, "p99": 18.70, "max": 18.72}, "frames": 240, "dropped": 0},
+    {"scenario": "canvas scene", "width": 1920, "height": 1080, "refreshHz": 60, "intervalMs": {"p50": 16.67, "p95": 18.67, "p99": 18.70, "max": 18.80}, "frames": 240, "dropped": 0},
+    {"scenario": "lottie lower third", "width": 1920, "height": 1080, "refreshHz": 60, "intervalMs": {"p50": 16.66, "p95": 18.67, "p99": 18.73, "max": 40.50}, "frames": 240, "dropped": 1},
+    {"scenario": "song + lower third + announcement", "width": 1920, "height": 1080, "refreshHz": 60, "intervalMs": {"p50": 16.66, "p95": 18.58, "p99": 18.69, "max": 18.79}, "frames": 240, "dropped": 0}
+  ]
+}

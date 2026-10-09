@@ -1,0 +1,207 @@
+package org.churchpresenter.telemetry
+
+import org.churchpresenter.canvas.CameraDeviceCatalog
+import org.churchpresenter.canvas.DeckLinkManager
+import org.churchpresenter.media.composables.isVlcAvailable
+import org.churchpresenter.media.composables.vlcUnavailableReason
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.web.presenter.CefManager
+import org.churchpresenter.profiles.FileManager
+import java.awt.GraphicsEnvironment
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.liveoutput.NdiManager
+import org.churchpresenter.liveoutput.OmtManager
+/**
+ * Builds a plain-text snapshot of the machine/app configuration for bug reports — OS, display
+ * layout, VLC/DeckLink/JCEF availability, and a redacted summary of output/integration settings
+ * (booleans and counts only — no hostnames, ports, or API keys, so it's safe to paste into a
+ * public GitHub issue).
+ */
+object DeviceInfoReport {
+
+    internal data class DeviceFacts(
+        val appVersion: String,
+        val buildType: String,
+        val installId: String,
+        val didCrashLastRun: Boolean,
+        val consecutiveCrashes: Int,
+        val videoBackgroundsDisabled: Boolean,
+        val screens: List<String>,
+        val deckLinkAvailable: Boolean,
+        val deckLinkDevices: List<String>,
+        val vlcAvailable: Boolean,
+        val vlcReason: String,
+        val jcefInitialized: Boolean,
+        val jcefMacUnsupported: Boolean,
+        val songFolderCount: Int,
+        val totalSongs: Int,
+        val bibleCount: Int,
+        val analyticsEnabled: Boolean,
+        /** The skiko render API in force, or "default" when the platform's own choice stands. */
+        val renderApi: String,
+        /** The GPU(s) driving the displays, or "unknown" where the OS will not say. */
+        val gpu: String,
+    )
+
+    internal fun screenLine(index: Int, width: Int, height: Int, refreshRate: Int, primary: Boolean): String =
+        "  ${index + 1}. ${width}x${height} @${refreshRate}Hz${if (primary) " (primary)" else ""}"
+
+    internal fun deviceLine(index: Int, name: String): String = "  ${index + 1}. $name"
+
+    fun generate(settings: AppSettings, identity: TelemetryIdentity): String =
+        render(settings, gather(settings, identity), LocalDateTime.now())
+
+    internal fun gather(settings: AppSettings, identity: TelemetryIdentity): DeviceFacts {
+        val appVersion = identity.versionDisplay
+        val buildType = if (identity.isRelease) "release" else "dev"
+
+        val screens = try {
+            val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
+            ge.screenDevices.mapIndexed { index, device ->
+                val mode = device.displayMode
+                screenLine(index, mode.width, mode.height, mode.refreshRate, device == ge.defaultScreenDevice)
+            }
+        } catch (_: Exception) { emptyList() }
+
+        val deckLinkAvailable = try { DeckLinkManager.isAvailable() } catch (_: Exception) { false }
+        val deckLinkDevices = if (deckLinkAvailable) {
+            try {
+                DeckLinkManager.listDevices().map { deviceLine(it.index, it.name) }
+            } catch (_: Exception) {
+                emptyList()
+            }
+        } else emptyList()
+
+        val vlcAvailable = try { isVlcAvailable } catch (_: Exception) { false }
+
+        val fileManager = FileManager()
+        val songFolders = try {
+            fileManager.getSongFoldersInDirectory(settings.songSettings.storageDirectory)
+        } catch (_: Exception) {
+            emptyList()
+        }
+        val bibleFiles = try {
+            fileManager.getBibleFilesInDirectory(settings.bibleSettings.storageDirectory)
+        } catch (_: Exception) {
+            emptyList()
+        }
+
+        return DeviceFacts(
+            appVersion = appVersion,
+            buildType = buildType,
+            installId = CrashReporter.installId(),
+            didCrashLastRun = CrashReporter.didCrashLastRun,
+            consecutiveCrashes = CrashReporter.consecutiveCrashes,
+            videoBackgroundsDisabled = CrashReporter.videoBackgroundsDisabled,
+            screens = screens,
+            deckLinkAvailable = deckLinkAvailable,
+            deckLinkDevices = deckLinkDevices,
+            vlcAvailable = vlcAvailable,
+            vlcReason = vlcUnavailableReason,
+            jcefInitialized = CefManager.initialized,
+            jcefMacUnsupported = CefManager.macOsUnsupported,
+            songFolderCount = songFolders.size,
+            totalSongs = songFolders.sumOf { it.second },
+            bibleCount = bibleFiles.size,
+            analyticsEnabled = CrashReporter.isEnabled(),
+            renderApi = System.getProperty("skiko.renderApi") ?: "default",
+            gpu = try { GpuInfo.summary } catch (_: Exception) { "unknown" },
+        )
+    }
+
+    internal fun render(settings: AppSettings, facts: DeviceFacts, now: LocalDateTime): String = buildString {
+        appendLine("=== ChurchPresenter Diagnostic Report ===")
+        appendLine("Generated: ${now.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)}")
+        appendLine()
+
+        appendLine("-- App --")
+        appendLine("Version: ${facts.appVersion} (${facts.buildType})")
+        appendLine("Install ID: ${facts.installId}")
+        appendLine("Crashed last run: ${facts.didCrashLastRun} (consecutive crashes: ${facts.consecutiveCrashes})")
+        appendLine("Video backgrounds disabled (crash guard): ${facts.videoBackgroundsDisabled}")
+        appendLine()
+
+        appendLine("-- System --")
+        appendLine(
+            "OS: ${System.getProperty("os.name", "unknown")} ${System.getProperty("os.version", "")} " +
+                "(${System.getProperty("os.arch", "unknown")})"
+        )
+        appendLine(
+            "Java: ${System.getProperty("java.version", "unknown")} (${System.getProperty("java.vendor", "unknown")})"
+        )
+        appendLine("Renderer: ${facts.renderApi}")
+        // Beside the renderer, because the pair is the question a GPU fault asks: which
+        // backend, on whose driver. Either alone has been a reason a report could not be acted on.
+        appendLine("GPU: ${facts.gpu}")
+        val runtime = Runtime.getRuntime()
+        appendLine("CPU cores: ${runtime.availableProcessors()}")
+        val usedMb = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024)
+        val maxMb = runtime.maxMemory() / (1024 * 1024)
+        appendLine("Memory: ${usedMb}MB used / ${maxMb}MB max heap")
+        appendLine()
+
+        appendLine("-- Displays --")
+        if (facts.screens.isEmpty()) appendLine("  (unable to enumerate)") else facts.screens.forEach { appendLine(it) }
+        appendLine()
+
+        appendLine("-- DeckLink --")
+        appendLine("Driver available: ${facts.deckLinkAvailable}")
+        if (facts.deckLinkAvailable) {
+            if (facts.deckLinkDevices.isEmpty()) appendLine("  (no devices detected)")
+            else facts.deckLinkDevices.forEach { appendLine(it) }
+        }
+        appendLine()
+
+        appendLine("-- Cameras --")
+        // From the last enumeration this run, not a fresh one: enumerating costs up to ten seconds
+        // for ffmpeg's DirectShow listing plus fifteen for the PnP query, and this report is
+        // generated from a button the operator is waiting on.
+        val cameras = CameraDeviceCatalog.lastEnumeration
+        if (cameras == null) {
+            appendLine("Not enumerated this run (no camera picker has been opened)")
+        } else {
+            appendLine("ffmpeg: ${if (cameras.ffmpegAvailable) "available" else "not installed"}")
+            appendLine("Enumerated by: ${cameras.enumerator.name.lowercase()}")
+            appendLine("Listed by ffmpeg: ${cameras.ffmpegListedCount}")
+            appendLine("Listed by the platform inventory: ${cameras.fallbackListedCount}")
+        }
+        appendLine()
+
+        appendLine("-- Video / Web --")
+        val vlcStatus = if (facts.vlcAvailable) {
+            "available"
+        } else {
+            "unavailable (${facts.vlcReason.ifBlank { "unknown reason" }})"
+        }
+        appendLine("VLC: $vlcStatus")
+        appendLine(
+            "Web browser (JCEF): ${if (facts.jcefInitialized) "initialized" else "not initialized"}" +
+                if (facts.jcefMacUnsupported) " (macOS version too old)" else ""
+        )
+        appendLine()
+
+        appendLine("-- Libraries --")
+        appendLine("Song libraries (songbooks): ${facts.songFolderCount}")
+        appendLine("Total songs: ${facts.totalSongs}")
+        appendLine("Bibles: ${facts.bibleCount}")
+        appendLine()
+
+        appendLine("-- Outputs & Integrations --")
+        appendLine("Configured outputs: ${settings.projectionSettings.screenAssignments.size}")
+        appendLine("Browser Source outputs: ${settings.projectionSettings.browserSourceOutputs.size}")
+        // The runtime line matters more than the count: NDI is installed separately, so "configured
+        // two outputs but the runtime is NotInstalled" is the single most likely NDI bug report, and
+        // it is invisible from the count alone.
+        appendLine("NDI outputs: ${settings.projectionSettings.ndiOutputs.size}")
+        appendLine("NDI runtime: ${NdiManager.status.value}")
+        appendLine("OMT outputs: ${settings.projectionSettings.omtOutputs.size}")
+        appendLine("OMT library: ${OmtManager.status.value}")
+        appendLine("ATEM: ${if (settings.atemSettings.host.isNotBlank()) "configured" else "not configured"}")
+        appendLine("OBS: ${if (settings.obsSettings.enabled) "enabled" else "disabled"}")
+        appendLine("Companion server: ${if (settings.serverSettings.enabled) "enabled" else "disabled"}")
+        appendLine("Instance Link: ${if (settings.instanceLink.enabled) "enabled" else "disabled"}")
+        appendLine("Analytics reporting: ${if (facts.analyticsEnabled) "enabled" else "disabled"}")
+    }
+}

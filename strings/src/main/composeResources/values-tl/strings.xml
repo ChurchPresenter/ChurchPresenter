@@ -598,6 +598,12 @@
     <string name="transition_duration">Tagal ng Transition:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">Bawasan</string>
+    <string name="value_dialog_increase">Dagdagan</string>
+    <string name="value_dialog_keys_hint">↵ OK · Esc Kanselahin</string>
+    <string name="value_dialog_out_of_range">Maglagay ng numero mula %1$d hanggang %2$d %3$s.</string>
+    <string name="auto_scroll_interval_hint">Gaano katagal mananatili ang bawat slide bago lumipat.</string>
+    <string name="transition_duration_hint">Gaano katagal ang transition sa pagitan ng mga slide.</string>
     <string name="animation_type">Uri ng Animation:</string>
     <string name="animation_crossfade">Crossfade</string>
     <string name="animation_fade">Fade</string>

@@ -99,7 +99,14 @@ shared fixture here rather than copying one into a second suite.
 ./gradlew :core-models:test
 ./gradlew :core-models:detekt                            # gate — no baseline, must be clean
 ./gradlew :core-models:jacocoTestCoverageVerification
+./gradlew :core-models:pitest                          # mutation score, build/reports/pitest/
 ```
+
+**Property tests**: `SongFileRoundTripPropertyTest` (a written song reads back as itself and writes
+back the same file) and `ScheduleItemRoundTripPropertyTest` (every row survives its saved form), both
+with pinned seeds. **Mutation score** 68% (1,309 of 1,922 killed, 2026-10-08). Most of the 479 with no
+coverage are the data classes' generated `equals`/`hashCode`/`copy`/`componentN`, which open-source
+pitest cannot tell from hand-written code. `mutation-test.yml` runs it weekly, advisory.
 
 All three run in CI, gated on this directory or the shared build files changing.
 

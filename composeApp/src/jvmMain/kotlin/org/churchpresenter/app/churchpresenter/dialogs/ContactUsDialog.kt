@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.app.churchpresenter.utils.appTelemetryIdentity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,7 +36,6 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.contact_email_label
@@ -57,7 +57,7 @@ import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.components.SettingsTextField
-import org.churchpresenter.app.churchpresenter.utils.ContactReporter
+import org.churchpresenter.telemetry.ContactReporter
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.sharedui.utils.UrlOpener
@@ -90,11 +90,15 @@ internal fun buildContactRequest(
     name = name.trim(),
     message = message.trim(),
     email = email.trim(),
-    context = ContactReporter.defaultContext(),
+    context = ContactReporter.defaultContext(appTelemetryIdentity.versionDisplay),
 )
 
 /** What the dialog says when a send fails: in general, for want of a network, and when throttled. */
 internal data class ContactFailureTexts(val error: String, val network: String, val rateLimited: String)
+
+/** Sends one message of a type, from a name and an email, and says how it went. */
+internal typealias ContactSubmit =
+    suspend (type: String, name: String, email: String, message: String, texts: ContactFailureTexts) -> SendStatus
 
 /**
  * Turns a [ContactReporter.submit] outcome into the status the dialog should show, using
@@ -122,15 +126,22 @@ internal suspend fun submitContactRequest(
     message: String,
     texts: ContactFailureTexts,
 ): SendStatus {
-    val outcome = ContactReporter.submit(buildContactRequest(type, name, email, message))
+    val outcome = ContactReporter.submit(
+        buildContactRequest(type, name, email, message),
+        appTelemetryIdentity.appVersion,
+    )
     return statusForOutcome(outcome, texts)
 }
 
 @Composable
-fun ContactUsDialog(
+internal fun ContactUsDialog(
     isVisible: Boolean,
     onDismiss: () -> Unit,
     initialTypeKey: String? = null,
+    /** The window it opens in -- see [DialogFrame]. */
+    frame: DialogFrame = appDialogFrame,
+    /** How a message is sent: to the contact form, unless a test answers it instead. */
+    submit: ContactSubmit = ::submitContactRequest,
 ) {
     if (!isVisible) return
 
@@ -159,15 +170,17 @@ fun ContactUsDialog(
     val scope = rememberCoroutineScope()
     val mainWindowState = LocalMainWindowState.current
 
-    DialogWindow(
-        onCloseRequest = onDismiss,
-        state = rememberDialogState(
+    frame(
+        DialogFrameSpec(
+            onClose = onDismiss,
+            state = rememberDialogState(
             position = centeredOnMainWindow(mainWindowState, 520.dp, 660.dp),
             width = 520.dp,
             height = 660.dp
         ),
-        title = stringResource(Res.string.contact_us_title),
-        resizable = false
+            title = stringResource(Res.string.contact_us_title),
+            resizable = false,
+        ),
     ) {
         ProvideUiFontScale {
             ContactUsDialogContent(
@@ -185,9 +198,7 @@ fun ContactUsDialog(
                 onSend = {
                     status = SendStatus.Sending
                     scope.launch {
-                        status = submitContactRequest(
-                            selectedType.second, name, email, message, failureTexts
-                        )
+                        status = submit(selectedType.second, name, email, message, failureTexts)
                         if (status == SendStatus.Sent) {
                             delay(SENT_CONFIRMATION_MS)
                             onDismiss()

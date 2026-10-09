@@ -130,7 +130,7 @@ class MainDesktopOutputActionsTest {
         slides(2)
         showSteppable(deck)
 
-        clickPresentationSlide(forward = true, presentations, presenter, link, deck)
+        clickPresentationSlide(forward = true, presentations.slideCursor(link), presenter, deck)
 
         assertEquals(0, presentations.selectedSlideIndex)
         assertEquals(0, nextSent, "a build step is not a slide change, so nothing is sent on")
@@ -145,7 +145,7 @@ class MainDesktopOutputActionsTest {
         showSteppable(deck)
         assertTrue(presenter.advancePresentationStep(deck, 0))
 
-        clickPresentationSlide(forward = false, presentations, presenter, link, deck)
+        clickPresentationSlide(forward = false, presentations.slideCursor(link), presenter, deck)
 
         assertEquals(0, previousSent)
         assertNull(presenter.selectedSlide.value)
@@ -157,7 +157,7 @@ class MainDesktopOutputActionsTest {
         slides(3)
         presenter.setPresentingMode(Presenting.PRESENTATION)
 
-        clickPresentationSlide(forward = true, presentations, presenter, link, staticDeck())
+        clickPresentationSlide(forward = true, presentations.slideCursor(link), presenter, staticDeck())
 
         assertEquals(1, presentations.selectedSlideIndex)
         assertEquals(1, nextSent, "the follower is told to move too")
@@ -172,7 +172,7 @@ class MainDesktopOutputActionsTest {
         presentations.selectSlide(2)
         presenter.setPresentingMode(Presenting.PRESENTATION)
 
-        clickPresentationSlide(forward = false, presentations, presenter, link)
+        clickPresentationSlide(forward = false, presentations.slideCursor(link), presenter)
 
         assertEquals(1, presentations.selectedSlideIndex)
         assertEquals(1, previousSent)
@@ -185,7 +185,7 @@ class MainDesktopOutputActionsTest {
     fun `a click forward with no deck moves on even when nothing is live, and pushes nothing`() = runBlocking<Unit> {
         slides(2)
 
-        clickPresentationSlide(forward = true, presentations, presenter, link)
+        clickPresentationSlide(forward = true, presentations.slideCursor(link), presenter)
 
         assertEquals(1, presentations.selectedSlideIndex)
         assertEquals(1, nextSent)
@@ -200,7 +200,7 @@ class MainDesktopOutputActionsTest {
         slides(2)
         presenter.setPresentingMode(Presenting.BIBLE)
 
-        pushPresentationSlideIfLive(presentations, presenter)
+        pushPresentationSlideIfLive(presentations.slideCursor(link), presenter)
 
         assertNull(presenter.selectedSlide.value)
         assertNull(presenter.liveSlide.value)
@@ -210,7 +210,7 @@ class MainDesktopOutputActionsTest {
     fun `nothing is pushed when the selected slide is not in the deck`() = runBlocking<Unit> {
         presenter.setPresentingMode(Presenting.PRESENTATION)
 
-        pushPresentationSlideIfLive(presentations, presenter)
+        pushPresentationSlideIfLive(presentations.slideCursor(link), presenter)
 
         assertNull(presenter.selectedSlide.value)
         assertNull(presenter.liveSlide.value)
@@ -223,7 +223,7 @@ class MainDesktopOutputActionsTest {
         presenter.setPresentingMode(Presenting.PRESENTATION)
         presenter.setPresenterNotes("left from the slide before")
 
-        pushPresentationSlideIfLive(presentations, presenter)
+        pushPresentationSlideIfLive(presentations.slideCursor(link), presenter)
 
         assertNotNull(presenter.selectedSlide.value)
         assertNull(presenter.nextSlide.value)
@@ -237,7 +237,7 @@ class MainDesktopOutputActionsTest {
         slides(2)
         showSteppable(deck)
 
-        pushPresentationSlideIfLive(presentations, presenter)
+        pushPresentationSlideIfLive(presentations.slideCursor(link), presenter)
 
         assertNotNull(presenter.selectedSlide.value)
         assertFalse(presenter.advancePresentationStep(deck, 0), "the old deck's player is gone")
@@ -254,7 +254,7 @@ class MainDesktopOutputActionsTest {
         }
         presenter.setPresentingMode(Presenting.PRESENTATION)
 
-        pushPresentationSlideIfLive(presentations, presenter)
+        pushPresentationSlideIfLive(presentations.slideCursor(link), presenter)
 
         assertEquals(LiveSlide("sermon.pdf", 0), presenter.liveSlide.value)
         assertNotNull(presenter.nextSlide.value)

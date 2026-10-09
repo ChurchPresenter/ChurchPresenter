@@ -29,15 +29,17 @@ import java.awt.Window as AwtWindow
  * The main window's content: the Schedule, the tabs and the live preview, and everything that wires
  * them to each other and to the live output.
  *
- * This function only assembles the screen. Its pieces live beside it, each an extension of the
+ * This function only assembles the screen. Its wiring lives beside it, each piece an extension of the
  * [MainDesktopScope] it builds here on every composition:
  * - [MainDesktopState] and [MainDesktopViewModels] — what the screen remembers and owns;
  * - [LeadingEffects], [ContentPublishWiring], [InstanceLinkMirrorWiring], [BibleWiring] and
  *   [TrailingEffects] — the effects that tie the ViewModels together, in their original order;
- * - [handleMainDesktopKey] — the window's shortcuts and hidden key sequences;
- * - [MainDesktopPanels] — the three resizable panels, holding [ScheduleSidebar], [MainTabArea] and
- *   [PreviewSidebar];
+ * - [keyContext] and [panelSlots] — what the layout pieces show and run, built from the scope;
  * - [MainDesktopDialogs] — the dialogs the screen opens itself.
+ *
+ * The layout pieces take plain state and callbacks, never the scope or a view model:
+ * [handleMainDesktopKey] — the window's shortcuts and hidden key sequences; [MainDesktopPanels] — the
+ * three resizable panels, holding [ScheduleSidebar], [MainTabArea] and [PreviewSidebar].
  *
  * @param hostWindow The hosting AWT window — lets tabs force window focus back when AWT's focus
  *   tracking wedges (see PresentationTab's focus-lost rescue banner).
@@ -146,9 +148,9 @@ fun MainDesktop(
                 .background(MaterialTheme.colorScheme.background)
                 .focusRequester(mainFocusRequester)
                 .focusable()
-                .onPreviewKeyEvent { keyEvent -> handleMainDesktopKey(keyEvent) }
+                .onPreviewKeyEvent { keyEvent -> handleMainDesktopKey(keyEvent, keyContext()) }
         ) {
-            MainDesktopPanels()
+            MainDesktopPanels(appSettings, onSettingsChange, remember(scope) { panelSlots() })
         }
 
         MainDesktopDialogs()

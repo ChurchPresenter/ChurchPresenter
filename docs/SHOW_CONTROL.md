@@ -185,7 +185,7 @@ This phase does three things, in order:
 
 ### Decision: the watchdog and the disk fixes ship; the output process does not, yet
 
-The spike was a reading of the code, not a prototype, and **nothing here was measured**. It found:
+The spike was a reading of the code, not a prototype; the cost of a stall was then measured. It found:
 
 - **Every output window and every off-screen output share the event thread by design.** The on-screen
   windows compose on it, and `ComposeScenePump` and `LowerThirdOffscreenRenderer` are confined to it
@@ -206,8 +206,27 @@ The spike was a reading of the code, not a prototype, and **nothing here was mea
   freezes every output with the last frame still on screen; the watchdog names where it was stuck,
   and the five disk calls that could cause it on the output paths are gone.
 
-So: ship the watchdog and the I/O fixes, and leave the output process until a stall is seen in the
-field that they do not explain. If it is built, start with the narrowest process that helps -- one
+#### Measured
+
+`./gradlew :composeApp:isolationBenchmark` (2026-10-08, the reference Mac: macOS 26.5.1, Apple
+silicon, Metal, 60 Hz) puts one on-screen output window up drawing a changing song verse, and blocks
+the event thread on a schedule with the same `UiStallInjector` a dev build takes from
+`-Dchurchpresenter.injectUiStall=<ms>,<everySec>`:
+
+| Injected stall | Longest output gap | Dropped frames in 8 s |
+|---:|---:|---:|
+| none | 17.7 ms | 0 |
+| 100 ms | 117.7 ms | 7 |
+| 500 ms | 520.7 ms | 5 |
+| 2000 ms | 2012.0 ms | 2 |
+
+Inside one process there is **no isolation at all**: the output freezes for the whole stall plus a
+frame, once per stall. Against that, the one-hour soak (`soakTest -PsoakMinutes=60`,
+`benchmarks/budgets.md`) runs a scripted service with `UiWatchdog` counting and records **no stall
+past 250 ms; the longest the event thread took to answer was 62 ms** — under four frames.
+
+So decision 7 stands on that evidence: ship the watchdog and the I/O fixes, and leave the output
+process until a stall is seen in the field that they do not explain. If it is built, start with the narrowest process that helps -- one
 that only holds the last frame of a window and keeps the projector black-free if the UI dies --
 before moving any composition into it.
 
@@ -240,4 +259,5 @@ Steps 1–3 and 9 must show no regression on the render benchmark and the soak t
 5. **Cue actions run on air**, so on Take in preview mode, and not again on stepping.
 6. **OSC** with a codec of our own rather than a library; MIDI through the JDK.
 7. **Output isolation** starts with the watchdog and the I/O fixes; an output process is decided after
-   a spike.
+   a spike. *Confirmed by measurement (Output isolation, Measured): a stall freezes every output for
+   its full length, and an hour of service produces none past 250 ms.*

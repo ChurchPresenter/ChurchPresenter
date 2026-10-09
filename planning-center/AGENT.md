@@ -31,32 +31,24 @@ app.
 | `ui/PlanningCenterImportViewModel.kt` | The import's state: service types, plans, plan items, what is ticked; matching a plan song to the library and writing a new one (`matchLocalSong`, `createLocalSong`) |
 | `ui/PlanningCenterImportItems.kt`, `ui/PlanningCenterAttachments.kt` | One plan row, its scripture and its files |
 | `ui/PcoImportActions.kt` | What an import brings into the schedule from what is ticked |
-| `ui/PlanningCenterImportServices.kt` | What the import needs from its host, and `PlanningCenterScripture` |
+| `ui/PlanningCenterImportServices.kt` | What the import needs from its host, `planningCenterServices` that builds it, and `PlanningCenterScripture` |
+| `PlanningCenterScriptureDetector.kt`, `PlanningCenterPrimaryBible.kt` | The scripture a plan item's text names, read from the operator's primary Bible (`:bible`), loaded once per import |
 
 ## Seams to the app
 
 The import window takes from the app, as parameters of `PlanningCenterImportDialog`:
-- **`services`** (`PlanningCenterImportServices`): the OAuth client id and secret this build is
-  registered as (`BuildConfig`), the scripture found in a plan item's text (the primary Bible), and
-  a downloaded deck's slide count (`:presentation-engine`). Neither the Bible nor POI is on this
-  module's classpath.
+- **`services`** (`PlanningCenterImportServices`, built by `planningCenterServices`): the OAuth
+  client id and secret this build is registered as (`BuildConfig`), the abbreviation tables a book
+  typed short is read with (`BibleBookAbbreviations`, a `BookAbbreviationResolver` — it reads
+  Compose string resources, and `:bible-tab` is too heavy an edge for one lookup), and a downloaded
+  deck's slide count (`:presentation-engine`, so POI stays off this module's classpath).
 - **`window`**: opens a window for a `PlanningCenterWindowSpec`. The app opens a `DialogWindow`
   centred on the main window and wraps it in `AppWindowRoot`; a test draws the content in place,
   which is how the entry point is tested headless.
 - **`editSong`**: the app's song editor, for a plan song the library lacks.
 
-`composeApp/…/dialogs/PlanningCenterImportDialog.kt` is the app's wrapper that fills them in, with
-the signature the Schedule tab calls.
-
-## What deliberately stayed in `:composeApp`
-
-- **`data/PlanningCenterScriptureDetector.kt`** and **`data/PlanningCenterPrimaryBible.kt`** — they
-  resolve references against the operator's primary `Bible` and fall back to
-  `BibleBookAbbreviations`, which reads Compose string resources. They reach the import through
-  `PlanningCenterImportServices.detectScriptures`.
-- **`dialogs/PlanningCenterImportDialog.kt`** — the wrapper above.
-- **`PlanningCenterSettings`** — already in `:settings`, where every persisted settings class
-  lives.
+`composeApp/…/PlanningCenterImportWiring.kt` fills them in and adds what is picked to the
+Schedule. `PlanningCenterSettings` is in `:settings`, where every persisted settings class lives.
 
 ## Rules
 

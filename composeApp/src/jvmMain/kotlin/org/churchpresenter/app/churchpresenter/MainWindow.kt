@@ -25,6 +25,7 @@ import org.churchpresenter.helper.ui.GuideSpotlightHost
 import org.churchpresenter.sharedui.guide.LocalGuideSession
 import org.churchpresenter.sharedui.guide.LocalWickCorner
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPlacement
@@ -47,8 +48,8 @@ import org.churchpresenter.app.churchpresenter.utils.windowPlacementFromSettings
 import org.churchpresenter.app.churchpresenter.utils.windowPlacementToSettings
 import org.churchpresenter.converter.ui.ConverterTab
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
-import org.churchpresenter.app.churchpresenter.dialogs.SetupWizardDialog
-import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
+import org.churchpresenter.appsettings.SetupWizardDialog
+import org.churchpresenter.sharedui.language.LanguageProvider
 import org.churchpresenter.theme.ThemeCustomization
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.composables.isJavaFxAvailable
@@ -79,6 +80,8 @@ import org.churchpresenter.server.TunnelStatus
 import org.churchpresenter.sharedui.composables.LocalWentLive
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.schedule.LocalOpenCalendar
+import org.churchpresenter.diagnostics.StartupProbe
+import kotlin.system.exitProcess
 
 /** The work done once the window is up: the server's first start, the update check and the story prompt. */
 @Composable
@@ -236,6 +239,9 @@ private fun AppRootState.MainWindow(
     ) {
         LaunchedEffect(Unit) {
             window.minimumSize = Dimension(MIN_MAIN_WINDOW_WIDTH, MIN_MAIN_WINDOW_HEIGHT)
+            // The first frame the operator sees; the startup benchmark's end point (StartupProbe).
+            withFrameNanos { }
+            StartupProbe.firstFrame(exit = { exitProcess(0) })
         }
         MacMenuBarActivationFix()
         LanguageProvider(language = currentLanguage) {

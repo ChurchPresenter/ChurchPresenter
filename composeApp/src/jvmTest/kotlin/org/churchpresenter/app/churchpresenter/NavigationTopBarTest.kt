@@ -8,7 +8,7 @@ import androidx.compose.ui.window.FrameWindowScope
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import org.churchpresenter.app.churchpresenter.data.Language
+import org.churchpresenter.sharedui.language.Language
 import org.churchpresenter.theme.ThemeMode
 import javax.swing.JCheckBoxMenuItem
 import javax.swing.JMenu

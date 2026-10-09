@@ -12,6 +12,8 @@ The Profiles settings pages and what they are built from:
   `BackgroundSettingsViewModel`, which only that tab owns;
 - the song background panel and the local stock library (`SongBackgroundPanel`, `LocalLibraryDialog`)
   and the bundled stock backgrounds they offer, in `src/main/composeResources/files/backgrounds`;
+- the settings card kit the app's own pages use (`SettingsCard`, `SettingsCardBadge`,
+  `LocalApplySettings`, `LocalSettingsDevMode`);
 - the settings row kit every settings page uses (`SettingsGroup`, `SettingsRowControls`, `RowOption`,
   `SettingsDetail`), and the small pickers beside it (`PreviewOutputPicker`, `TvScreenBox`,
   `SliderNumberField`, `ScanningRow`);
@@ -54,7 +56,7 @@ which `:composeApp`'s dialog and settings suites use too (`testFixtures(projects
 
 ## Coverage floor
 
-Branches **79%** and complexity **78%**; the other four counters keep the shared 85%. What is left is
+Branches **80%** and complexity **79%**; the other four counters keep the shared 85%. What is left is
 mostly not untested behavior: the stock photo, local library and Lottie generator dialogs open real
 windows a headless test cannot, and Compose's per-value change checks on the rows' handlers. Raise
 the floors as any of that becomes reachable; never lower them without asking.

@@ -1,12 +1,11 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.bibletab.EngineScripture
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import org.churchpresenter.app.churchpresenter.viewmodel.BibleEngineClient
+import org.churchpresenter.bibletab.BibleEngineClient
 import org.churchpresenter.bibletab.BibleViewModel
 import org.churchpresenter.dictionary.DictionaryViewModel
 import org.churchpresenter.slides.viewmodel.PicturesViewModel
@@ -55,20 +54,7 @@ internal class MainDesktopViewModels(
     /** The Bible Lookup Engine client — feeds detected scripture into the Bible tab and forwards the
      *  reverse-lookup level to the engine. */
     val bibleEngineClient = BibleEngineClient(onScripture = { e ->
-        bibleViewModel.onEngineScripture(EngineScripture(
-            bookId = e.bookId,
-            chapter = e.chapter,
-            verseStart = e.verseStart,
-            verseEnd = e.verseEnd,
-            verseText = e.verseText,
-            matchType = e.matchType,
-            canonicalCodeStart = e.canonicalCodeStart,
-            canonicalCodeEnd = e.canonicalCodeEnd,
-            segmentId = e.segmentId,
-            sessionId = e.sessionId,
-            tracks = e.tracks,
-            detectedVersion = e.detectedVersion,
-        ))
+        bibleViewModel.onEngineScripture(e)
     }, onVersion = { version ->
         bibleViewModel.onEngineVersion(version)
     }).also { client ->

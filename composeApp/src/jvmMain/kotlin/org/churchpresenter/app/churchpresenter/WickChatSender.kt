@@ -1,7 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
 import java.util.Locale
-import org.churchpresenter.app.churchpresenter.utils.ContactReporter
+import org.churchpresenter.app.churchpresenter.utils.appTelemetryIdentity
+import org.churchpresenter.telemetry.ContactReporter
 import org.churchpresenter.helper.report.ChatSendResult
 
 /** The contact type the website files a Wick chat under. */
@@ -19,7 +20,7 @@ internal fun wickChatRequest(transcript: String, email: String, packVersion: Str
         message = transcript,
         email = email,
         context = listOf(
-            ContactReporter.defaultContext(),
+            ContactReporter.defaultContext(appTelemetryIdentity.versionDisplay),
             Locale.getDefault().toLanguageTag(),
             "Wick pack $packVersion",
         ).joinToString(" · "),
@@ -34,4 +35,7 @@ internal fun ContactReporter.Outcome.asChatResult(): ChatSendResult = when (this
 
 /** Sends a Wick chat through the Contact Us service, only ever from its Send button. */
 internal suspend fun sendWickChat(transcript: String, email: String, packVersion: String): ChatSendResult =
-    ContactReporter.submit(wickChatRequest(transcript, email, packVersion)).asChatResult()
+    ContactReporter.submit(
+        wickChatRequest(transcript, email, packVersion),
+        appTelemetryIdentity.appVersion,
+    ).asChatResult()

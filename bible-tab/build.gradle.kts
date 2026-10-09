@@ -31,6 +31,14 @@ dependencies {
     implementation(projects.diagnostics)
     implementation(projects.stt)
     implementation(projects.bibleFormats)
+    // BibleEngineClient: the speech engine it starts, and the WebSocket it reads the engine on.
+    implementation(projects.bibleEngine)
+    // The catalogue window hosts its own guide spotlight, for the helper's "add a Bible" tour.
+    implementation(projects.helper)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.websockets)
+    implementation(libs.org.json)
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.swing)
@@ -64,6 +72,10 @@ dependencies {
     testImplementation(libs.compose.uiTest)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.roborazzi.composeDesktop)
+    // BibleEngineClientLinkTest stands up a real engine socket to talk to.
+    testImplementation(libs.ktor.server.core)
+    testImplementation(libs.ktor.server.netty)
+    testImplementation(libs.ktor.server.websockets)
 }
 
 // The suite gets a home of its own under build/ so a test can never touch the real ~/.churchpresenter.

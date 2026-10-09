@@ -263,29 +263,34 @@ internal class WickCatalogSource(private val root: File) {
 
         /** Which files make up each Settings page. A test fails when one of them is gone. */
         val SETTINGS_FILES: Map<SettingsPage, List<String>> = run {
-            val tabs = "composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpresenter/dialogs/tabs"
+            val system = "app-settings/src/main/kotlin/org/churchpresenter/appsettings"
+            val projection = "live-output/src/main/kotlin/org/churchpresenter/liveoutput/settings"
+            val server = "server-ui/src/main/kotlin/org/churchpresenter/serverui"
             val profiles = "profiles/src/main/kotlin/org/churchpresenter/profiles"
+            val companion = "companion-surface/src/main/kotlin/org/churchpresenter/companionsurface"
             mapOf(
                 SettingsPage.SYSTEM to listOf(
-                    "$tabs/SystemSettingsTab.kt", "$tabs/SystemSettingsActions.kt", "$tabs/SystemStorageCard.kt",
-                    "$tabs/SystemStorageDetails.kt", "$tabs/TabLabelsRow.kt",
+                    "$system/SystemSettingsTab.kt", "$system/SystemSettingsActions.kt", "$system/SystemStorageCard.kt",
+                    "$system/SystemStorageDetails.kt", "$system/TabLabelsRow.kt",
                 ),
                 SettingsPage.BIBLE to listOf("$profiles/BibleSettingsTab.kt"),
                 SettingsPage.BACKGROUND to listOf("$profiles/BackgroundSettingsTab.kt"),
                 SettingsPage.PROFILES to listOf("$profiles/ProfilesSettingsTab.kt"),
                 SettingsPage.PROJECTION to listOf(
-                    "$tabs/ProjectionSettingsTab.kt", "$tabs/ProjectionScreenAssignmentCard.kt",
-                    "$tabs/ProjectionNdiCard.kt", "$tabs/ProjectionOmtCard.kt", "$tabs/ProjectionFfmpegCard.kt",
-                    "$tabs/ProjectionBrowserSourceCard.kt", "$tabs/OutputProfilePicker.kt",
+                    "$projection/ProjectionSettingsTab.kt", "$projection/ProjectionScreenAssignmentCard.kt",
+                    "$projection/ProjectionNdiCard.kt", "$projection/ProjectionOmtCard.kt",
+                    "$projection/ProjectionFfmpegCard.kt", "$projection/ProjectionBrowserSourceCard.kt",
+                    "$projection/OutputProfilePicker.kt",
                 ),
                 SettingsPage.SERVER to listOf(
-                    "$tabs/ServerSettingsTab.kt", "$tabs/ServerClientsCard.kt", "$tabs/CalendarSyncCard.kt",
+                    "$server/ServerSettingsTab.kt", "$server/ServerClientsCard.kt", "$server/CalendarSyncCard.kt",
                 ),
                 SettingsPage.ATEM to
                     listOf("lower-third/src/main/kotlin/org/churchpresenter/lowerthird/AtemSettingsTab.kt"),
                 SettingsPage.INTEGRATIONS to listOf(
                     "obs/src/main/kotlin/org/churchpresenter/obs/OBSSettingsTab.kt",
-                    "$tabs/CompanionSatelliteSettingsTab.kt", "$tabs/CompanionTriggersCard.kt",
+                    "$companion/CompanionSatelliteSettingsTab.kt",
+                    "$server/CompanionTriggersCard.kt",
                 ),
             )
         }

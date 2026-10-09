@@ -1,0 +1,76 @@
+name: Mutation testing
+
+# Says how much the core logic's tests would notice if the code were wrong: pitest changes the
+# compiled code one small way at a time (a flipped condition, a dropped call, a changed constant)
+# and runs the tests against each change; a change no test fails on is a gap coverage cannot show.
+# The modules are the ones that apply `info.solidsoft.pitest`, configured once in the root build:
+# :song-chords (transposition), :live-show (program and preview), :core-models (the song file and
+# schedule rows) and :schedule (drag hit-testing and the file cipher).
+#
+# Advisory, not a gate: there is no mutationThreshold, and nothing here blocks a merge. The score
+# goes to the step summary and the full report to the `pitest-reports` artifact. Its own workflow
+# for the same reasons as render-benchmark.yml: `test` is the required check, and this needs none
+# of what that job carries.
+on:
+  schedule:
+    # Mondays 04:00 UTC, on main.
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mutation-test-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  pitest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Mutation testing
+        run: ./gradlew :song-chords:pitest :live-show:pitest :core-models:pitest :schedule:pitest --continue
+
+      - name: Mutation score
+        if: ${{ !cancelled() }}
+        shell: python3 {0}
+        run: |
+          import glob, os, xml.etree.ElementTree as ET
+          rows = []
+          for path in sorted(glob.glob("*/build/reports/pitest/mutations.xml")):
+              module = path.split("/")[0]
+              mutations = ET.parse(path).getroot().findall("mutation")
+              killed = sum(1 for m in mutations if m.get("detected") == "true")
+              survived = sum(1 for m in mutations if m.get("status") == "SURVIVED")
+              uncovered = sum(1 for m in mutations if m.get("status") == "NO_COVERAGE")
+              score = 100 * killed / len(mutations) if mutations else 0
+              rows.append(f"| `{module}` | {len(mutations)} | {killed} | {survived} | {uncovered} | {score:.0f}% |")
+          lines = ["## Mutation score", "", "| Module | Mutants | Killed | Survived | No coverage | Score |",
+                   "|---|---:|---:|---:|---:|---:|"] + rows
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as out:
+              out.write("\n".join(lines) + "\n")
+
+      - name: Upload the reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pitest-reports
+          if-no-files-found: ignore
+          retention-days: 14
+          path: '*/build/reports/pitest/'

@@ -25,11 +25,12 @@ demand.
 - Only acceptable exception: a rendering bridge whose panel lifecycle is tightly coupled to the
   ViewModel (`MediaPresenter`/`VideoPlayer`, `PresentationPlayer`, `LottieFrameStream`) — document
   it explicitly at the site.
-- Known standing deviation: `MainDesktop.kt` and the files split out of it pass ViewModels
-  top-down — the wiring (`*Wiring.kt`, `MainDesktopEffects.kt`, `RemoteCommandEffects.kt`,
-  `PresenterWindows.kt`) and the root screen's layout pieces, which reach them through
-  `MainDesktopScope`/`MainDesktopViewModels` (`MainDesktopPanels.kt`, `ScheduleSidebar.kt`,
-  `MainTabArea.kt`, `ContentTabPanes.kt`, `PreviewSidebar.kt`). Not new precedent.
+- Known standing deviation: `MainDesktop.kt` and its wiring pass ViewModels top-down —
+  `MainDesktopScope`/`MainDesktopViewModels`, the `*Wiring.kt` files, `MainDesktopEffects.kt`,
+  `RemoteCommandEffects.kt`, `PresenterWindows.kt` and `VirtualOutputs.kt`. The root screen's
+  layout pieces (`MainDesktopPanels.kt`, `ScheduleSidebar.kt`, `MainTabArea.kt`,
+  `PreviewSidebar.kt`, `MainDesktopKeys.kt`) take plain state, typed callback holders and slots
+  built by that wiring — never the scope or a ViewModel. Not new precedent.
 
 ### Dev mode only — unfinished features stay behind it
 - A user-facing feature that is built but not approved for production goes in the preview
@@ -73,10 +74,10 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `remote/`        | What a remote client or an Instance Link primary asks for, applied to the live output, the schedule and statistics — the server itself is `:server` |
 | `data/`          | File I/O, database, song parsing, Bible data — the play statistics are `:statistics` |
 | `models/`        | Only what needs the app: `PresetItems` — `ShortcutAction` is `:shared-ui`, the Companion UI states `:companion-surface` |
-| `composables/`   | UI components with app or feature ties (SceneCanvas, LivePreviewPanel, etc.) — the shared ones are `:shared-ui`, the video player `:media` |
+| `composables/`   | UI components with app or feature ties (SceneCanvas, DeckLinkManager, etc.) — the shared ones are `:shared-ui`, the video player `:media` |
 | `dialogs/`       | All dialogs and settings dialog tabs                                |
-| `utils/`         | Stateless helpers (AutoStartManager, etc.) — the shared ones (AutoFit, screen bounds) are `:shared-ui`, crash reporting is `:diagnostics`, the updater is `:updater` |
-| `ui/theme/`      | `LanguageProvider` and the theme-customization settings — the theme itself is the `:theme` module |
+| `utils/`         | Stateless helpers (window icons, placement, etc.) — the shared ones (AutoFit, screen bounds) are `:shared-ui`, crash reporting is `:diagnostics`, the updater is `:updater` |
+| `ui/theme/`      | The theme-customization settings — `Language` is `:shared-ui`, the theme itself is the `:theme` module |
 
 ```
 main.kt → MainDesktop.kt → tabs/* + PresenterManager (:live-output)
@@ -143,6 +144,9 @@ module-specific notes there, not here.**
 | `helper/`              | `:helper`              | Wick, the helper lamp — tips, display setup, typed requests, the spotlight that rings controls | [AGENT.md](helper/AGENT.md)              |
 | `statistics/`          | `:statistics`          | What was presented and when — the counters, the play log, the CCLI lookup and exports — and the statistics window over them | [AGENT.md](statistics/AGENT.md)          |
 | `updater/`             | `:updater`             | The in-app updater: the GitHub release check, the installer download, the update window | [AGENT.md](updater/AGENT.md)             |
+| `server-ui/`           | `:server-ui`           | The Server settings page, calendar sync's card and Instance Link's windows: the Compose face of `:server` | [AGENT.md](server-ui/AGENT.md)           |
+| `app-settings/`        | `:app-settings`        | The System settings page, the setup wizard, auto-start and the `.sps` converter    | [AGENT.md](app-settings/AGENT.md)        |
+| `telemetry/`           | `:telemetry`           | What the app reports about itself: the live-map ping, usage events, the contact form, the device report | [AGENT.md](telemetry/AGENT.md)           |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions
@@ -161,9 +165,10 @@ The JaCoCo wiring, `useJUnitPlatform()` and the six-counter floor (85% on all si
 **once** in the root `build.gradle.kts`, in the `subprojects { plugins.withId(...) }` block. A
 module's build file carries only what differs, set **above everything else** in the file:
 - `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults; name only the
-  counters that need a different number. `:converter`, `:companion-satellite`, `:bible-engine`,
-  `:presentation-engine`, `:slides`, `:canvas` and `:profiles` name two each; every other module names none.
-  Each module's own `AGENT.md` says which, and why.
+  counters that need a different number. `:bible-engine`, `:presentation-engine`, `:slides`,
+  `:canvas` and `:profiles` name two each and `:converter` one; every other module names none.
+  Each is the measured value rounded down — a ratchet, raised as tests are added and deleted once
+  the counter clears 85%. Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**
 
@@ -199,6 +204,11 @@ bash cleanup_check.sh                  # repo code-quality report
 ./gradlew :composeApp:renderBenchmark -PrecordCiRenderBaseline  # write composeApp/benchmarks/ci/ (CI's own: record via render-benchmark.yml, not locally)
 ./gradlew :composeApp:renderBenchmark -PcheckRenderRegression   # fail on a row slower than the CI baseline (render-benchmark.yml's gate)
 ./gradlew :composeApp:soakTest -PsoakMinutes=10  # a scripted service on one output; fails on a leak or stall (CI: 240, weekly on main; a failure files a soak-failure issue)
+./gradlew :composeApp:gpuBenchmark        # on-screen output windows on the GPU — needs a display; -PrecordGpuBaseline → composeApp/benchmarks/gpu/
+./gradlew :composeApp:startupBenchmark    # 5 launches: time to first frame, idle memory; -PcheckBudgets against composeApp/benchmarks/budgets.md
+./gradlew :composeApp:isolationBenchmark  # an output window's frame gaps under injected UI stalls — see docs/SHOW_CONTROL.md
+
+./gradlew :song-chords:pitest          # mutation score (also :live-show, :core-models, :schedule); weekly in mutation-test.yml
 
 bash test-changed.sh                   # ONLY the suites your change touches — seconds, not minutes
 bash test-changed.sh --dry-run         # print the selection and the gradle command, run nothing
@@ -246,8 +256,9 @@ not flagged.
 - **Verify locally, not in CI.** The committed set is a macOS recording; CI renders on Linux, where
   almost every file differs, so CI records and posts an advisory `reg-actions` comparison only.
   **Record on ONE platform per branch** and never re-record the whole suite out of habit — across
-  platforms it rewrites nearly every file for no visual change. Which platform is canonical is
-  undecided; ask before re-recording broadly.
+  platforms it rewrites nearly every file for no visual change. **macOS is the canonical
+  platform**: record and verify there; CI's Linux comparison is advisory and never re-recorded into
+  the tree.
 - `verifyRoborazziJvm` fails past `ScreenshotSupport.CHANGE_THRESHOLD` (0.1% of pixels) and writes a
   reference|diff|new image to `<module>/build/outputs/roborazzi/<name>_compare.png`. **Open it
   before calling anything churn** — a whole suite failing is usually a re-record nobody did.
@@ -306,9 +317,10 @@ failures that only appear under load:
 - **Some classes cannot run beside anything**: `jvmTestSerial` (`maxParallelForks = 1`) holds those
   listed in `serialTestClasses` (`composeApp/build.gradle.kts`). `jvmTest` excludes them and is
   `finalizedBy` it. Passing `--tests` stands the exclusion down and runs the named class in `jvmTest`.
-- **A hung fork is killed with a diagnosis.** `HungTestReporter` dumps every thread and halts the
-  fork (exit 93) once a test runs past its threshold (5 min, 150s in CI); the dump also goes to
-  `build/test-results/<task>/hung-test-dump.txt`. Tighten it with `-PhangThresholdMs=30000`.
+- **A hung fork is killed with a diagnosis.** `HungTestReporter` (`:diagnostics` test fixtures,
+  on every module's test runtime from the root build) dumps every thread and halts the fork
+  (exit 93) once a test runs past its threshold (5 min, 150s in CI); the dump also goes to
+  `<module>/build/test-results/<task>/hung-test-dump.txt`. Tighten it with `-PhangThresholdMs=30000`.
   Off-screen Compose scenes (`LowerThirdOffscreenRenderer`, `ComposeScenePump`) confine themselves
   to the event queue to avoid a snapshot-observer lock inversion — keep any new one that way.
 
@@ -345,7 +357,9 @@ every `@BeforeClass`.
   teardown.** `POST /api/atem/still|clip` transfers after responding; route every test in such a suite
   through `AtemBridge.trackUpload`/`cancelUpload` (which joins).
 - **No flaky tests.** A new or changed test must pass three consecutive
-  `./gradlew :composeApp:jvmTest --tests '<pattern>' --rerun-tasks` runs. Never fix a flake with a
+  `./gradlew :composeApp:jvmTest --tests '<pattern>' --rerun-tasks` runs. CI enforces it on every
+  pull request: `test.yml` reruns each test class the change added or edited three times
+  (`.github/ci/changed_tests.py` says which). Never fix a flake with a
   wider timeout, a retry or a looser assertion; if it cannot be made deterministic, delete it and note
   the gap. (`NoSuchFileException: .../in-progress-results-*.bin` is Gradle losing its scratch file —
   re-run.)
@@ -361,5 +375,8 @@ every `@BeforeClass`.
 - Tests run headless (`java.awt.headless=true`); anything reaching `GraphicsEnvironment` throws.
   `BibleBookAbbreviations.resolveBookId` does so indirectly — stub it.
 - Assert invariants over exact pixel values — font metrics differ across the three target platforms.
+- **Keep every file a test touches inside a folder it owns and deletes.** In the modules that run
+  `pitest`, the mutants are real code: a weakened path guard really does write outside the folder
+  under test, so a sibling of a shared temp directory outlives the run and fails the next one.
 - **Build paths from real temp directories, not POSIX literals** — `/tmp/x` does not exist on
   Windows and a stored `absolutePathString()` gains a drive letter.

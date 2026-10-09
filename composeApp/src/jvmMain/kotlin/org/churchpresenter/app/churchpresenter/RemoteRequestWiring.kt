@@ -16,7 +16,7 @@ import org.churchpresenter.server.RemoteEventType
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.server.CalendarEnrollDecision
 import org.churchpresenter.server.asReply
-import org.churchpresenter.app.churchpresenter.dialogs.enrollCodeText
+import org.churchpresenter.serverui.enrollCodeText
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 import org.jetbrains.compose.resources.stringResource

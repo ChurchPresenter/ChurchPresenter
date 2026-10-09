@@ -598,6 +598,12 @@
     <string name="transition_duration">Siirtymän kesto:</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
+    <string name="value_dialog_decrease">Vähennä</string>
+    <string name="value_dialog_increase">Lisää</string>
+    <string name="value_dialog_keys_hint">↵ OK · Esc Peruuta</string>
+    <string name="value_dialog_out_of_range">Anna luku väliltä %1$d–%2$d %3$s.</string>
+    <string name="auto_scroll_interval_hint">Kuinka kauan kukin dia näkyy ennen siirtymistä seuraavaan.</string>
+    <string name="transition_duration_hint">Kuinka kauan siirtymä diojen välillä kestää.</string>
     <string name="animation_type">Animaation tyyppi:</string>
     <string name="animation_crossfade">Ristihäivytys</string>
     <string name="animation_fade">Häivytys</string>

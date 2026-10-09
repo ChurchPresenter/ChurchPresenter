@@ -1,31 +1,20 @@
 package org.churchpresenter.sharedui.utils
 
-import org.junit.jupiter.api.Assumptions.assumeTrue
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 
+/**
+ * [DevFlags.forceDevWindow] gates the extra windowed presenter output. It is a `by lazy` read of an
+ * env var and a system property, so only the default branch is observable once initialised — the
+ * override paths are documented rather than asserted.
+ */
 class DevFlagsTest {
 
-    private fun unset(env: String, property: String) =
-        System.getenv(env) == null && System.getProperty(property) == null
-
     @Test
-    fun `the dev window is not forced unless asked for`() {
-        assumeTrue(unset("CHURCHPRESENTER_FORCE_DEV_WINDOW", "churchpresenter.forceDevWindow"))
+    fun `the dev window is off unless explicitly forced`() {
+        // Neither CHURCHPRESENTER_FORCE_DEV_WINDOW nor -Dchurchpresenter.forceDevWindow is set in
+        // the test JVM, so this must be false. If it ever reads true here, the flag is leaking from
+        // the environment into builds that should not have it.
         assertFalse(DevFlags.forceDevWindow)
-    }
-
-    @Test
-    fun `the platform's own render API is kept unless one is named`() {
-        assumeTrue(unset("CHURCHPRESENTER_RENDER_API", "churchpresenter.renderApi"))
-        assertNull(DevFlags.renderApiOverride)
-    }
-
-    @Test
-    fun `software decoding is forced unless switched off`() {
-        assumeTrue(unset("CHURCHPRESENTER_FORCE_AVCODEC", "churchpresenter.forceAvcodec"))
-        assertEquals(true, DevFlags.forceAvcodec)
     }
 }

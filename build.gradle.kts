@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.kotlinJvm) apply false
+    alias(libs.plugins.pitest) apply false
 }
 
 val gitHooksPath = ".githooks"
@@ -65,6 +66,22 @@ subprojects {
                 // step gives up -- the same reason :composeApp has one, applied to the modules that
                 // were left unbounded when it was added.
                 timeout.set(java.time.Duration.ofMinutes(10))
+                // HungTestReporter (`:diagnostics` test fixtures, added below) halts a fork stuck on
+                // one test with a thread dump, well inside that timeout. `-PhangThresholdMs=`
+                // tightens it; the dump lands in test-results so CI uploads it with the results.
+                providers.gradleProperty("hangThresholdMs").orNull?.let {
+                    systemProperty("churchpresenter.test.hangThresholdMs", it)
+                }
+                systemProperty(
+                    "churchpresenter.test.hangDumpDir",
+                    layout.buildDirectory.dir("test-results/" + name).get().asFile.absolutePath,
+                )
+            }
+
+            // Registers HungTestReporter through the fixtures' service file. `:diagnostics` has its
+            // own fixtures on its test classpath already.
+            if (path != ":diagnostics") {
+                dependencies.add("testRuntimeOnly", dependencies.testFixtures(project(":diagnostics")))
             }
 
             tasks.withType<JacocoReport>().configureEach {
@@ -91,6 +108,26 @@ subprojects {
                     }
                 }
             }
+        }
+    }
+}
+
+// Mutation testing, configured once for the modules that apply `info.solidsoft.pitest` (the core
+// logic: :song-chords, :live-show, :core-models, :schedule). `./gradlew :<module>:pitest` writes
+// build/reports/pitest/; mutation-test.yml runs it weekly. Not a gate: no mutationThreshold.
+subprojects {
+    plugins.withId("info.solidsoft.pitest") {
+        extensions.configure<info.solidsoft.gradle.pitest.PitestPluginExtension> {
+            pitestVersion.set(libs.versions.pitest.get())
+            junit5PluginVersion.set(libs.versions.pitestJunit5.get())
+            targetClasses.set(listOf("org.churchpresenter.*"))
+            excludedClasses.set(listOf("*ComposableSingletons*"))
+            // Kotlin's generated null checks: mutating them only proves the compiler inserted them.
+            avoidCallsTo.set(listOf("kotlin.jvm.internal.Intrinsics"))
+            threads.set(Runtime.getRuntime().availableProcessors())
+            outputFormats.set(listOf("HTML", "XML"))
+            timestampedReports.set(false)
+            jvmArgs.set(listOf("-Djava.awt.headless=true"))
         }
     }
 }

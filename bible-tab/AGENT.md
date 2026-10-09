@@ -8,7 +8,9 @@ The **Bible** tab: the book, chapter and verse browser, search and smart referen
 multi-verse passages, hold mode, the cross-reference panel and chips, and the detection panel that
 shows what the speech engine heard. `BibleViewModel` lives here, along with what only the tab reads:
 the cross references (`CrossReferenceRepository`), the verse-sequence log, the book names and
-abbreviations, and the long-verse split.
+abbreviations, the long-verse split, the Bible Engine client (`BibleEngineClient`) and the Bible
+catalogue browser (`catalog/`: `BibleCatalogBrowserDialog`, `BibleCatalogViewModel`), which Settings → System
+opens.
 
 A real Gradle module of this build: `include(":bible-tab")`, `implementation(projects.bibleTab)`.
 Its consumers are `:composeApp` and `:live-output`. Besides the tab the app uses `BibleViewModel`
@@ -16,15 +18,14 @@ Its consumers are `:composeApp` and `:live-output`. Besides the tab the app uses
 (Planning Center scripture detection, the calendar) and the long-verse constants (Profiles → Bible).
 
 It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`, `:bible`,
-`:bible-formats`, `:diagnostics` and `:stt`, and nothing of `:composeApp`'s.
+`:bible-formats`, `:bible-engine`, `:diagnostics` and `:stt`, and nothing of `:composeApp`'s.
 
 ## Seams to the app
 
 - **`BibleOutput`**: the verses on screen and hold mode. `LiveBible` extends it, so the app
   passes `PresenterManager` directly. Tests use `FakeBibleOutput`.
 - **`BibleEngineStatus`**: whether the detection engine and its speech feed are up.
-  `BibleEngineClient` implements it. The client itself stays in the app; it needs Ktor and the
-  engine.
+  `BibleEngineClient` implements it; it lives here and the app builds it in `MainDesktopViewModels`.
 - **`BibleVerseStatistics`**: where a verse that went live is counted. The app adapts `:statistics`'
   `StatisticsManager` to it in `MainTabArea.kt`.
 - **`onVerseWentLive`**: the app records its usage telemetry there (`recordBibleWentLive`).

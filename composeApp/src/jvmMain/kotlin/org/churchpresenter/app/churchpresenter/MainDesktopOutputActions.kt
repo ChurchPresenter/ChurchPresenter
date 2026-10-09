@@ -10,7 +10,6 @@ import org.churchpresenter.profiles.stageMonitorScreenIndices
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.sharedui.models.Presenting
-import org.churchpresenter.slides.viewmodel.PresentationViewModel
 import java.io.File
 
 /*
@@ -25,24 +24,24 @@ import java.io.File
  * content, same gate PresentationTab's own slide-push effect uses.
  */
 internal suspend fun pushPresentationSlideIfLive(
-    presentationViewModel: PresentationViewModel,
+    presentation: PresentationSlideCursor,
     presenterManager: PresenterManager,
 ) {
-    val index = presentationViewModel.selectedSlideIndex
-    val slideCount = presentationViewModel.slideFiles.size
+    val index = presentation.selectedSlideIndex
+    val slideCount = presentation.slideFiles.size
     if (!shouldPushSlide(presenterManager.slideContent.value, index, slideCount)) return
     val (bitmap, nextBitmap) = decodeSlideBitmaps(
-        presentationViewModel.slideFiles,
+        presentation.slideFiles,
         index,
-        presentationViewModel.nextShownSlideIndex(index),
+        presentation.nextShownSlideIndex(index),
     )
     presenterManager.setSelectedSlide(bitmap)
-    presenterManager.setLiveSlide(presentationViewModel.selectedPresentation?.name, index)
+    presenterManager.setLiveSlide(presentation.presentationName, index)
     presenterManager.setNextSlide(nextBitmap)
-    presenterManager.setPresenterNotes(presenterNotesAt(presentationViewModel.slideNotes, index))
+    presenterManager.setPresenterNotes(presenterNotesAt(presentation.slideNotes, index))
     // Keep animated playback in sync (or cleared) so a stale animated frame from a
     // previous slide can never override the freshly pushed static slide.
-    presentationViewModel.deck?.let { presenterManager.presentationShowSlide(it, index) }
+    presentation.deck?.let { presenterManager.presentationShowSlide(it, index) }
         ?: presenterManager.clearPresentationPlayback()
 }
 
@@ -54,24 +53,19 @@ internal suspend fun pushPresentationSlideIfLive(
  */
 internal suspend fun clickPresentationSlide(
     forward: Boolean,
-    presentationViewModel: PresentationViewModel,
+    presentation: PresentationSlideCursor,
     presenterManager: PresenterManager,
-    link: InstanceLinkBridge,
-    deck: Deck? = presentationViewModel.deck,
+    deck: Deck? = presentation.deck,
 ) {
-    val index = presentationViewModel.selectedSlideIndex
+    val index = presentation.selectedSlideIndex
     val stepped = deck != null && if (forward) {
         presenterManager.advancePresentationStep(deck, index)
     } else {
         presenterManager.rewindPresentationStep(deck, index)
     }
     if (!stepped) {
-        if (forward) {
-            presentationViewModel.nextSlide(link.sendNextSlide)
-        } else {
-            presentationViewModel.previousSlide(link.sendPreviousSlide)
-        }
-        pushPresentationSlideIfLive(presentationViewModel, presenterManager)
+        if (forward) presentation.nextSlide() else presentation.previousSlide()
+        pushPresentationSlideIfLive(presentation, presenterManager)
     }
 }
 

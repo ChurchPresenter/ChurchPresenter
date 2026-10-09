@@ -33,6 +33,9 @@ data class HelperSettings(
     val startedByUser: Boolean = false,
 )
 
+/** Whether Wick is here, in [devMode] or with [helper] as saved: dev mode, or started from Help → Show Helper. */
+fun isWickAvailable(devMode: Boolean, helper: HelperSettings): Boolean = devMode || helper.startedByUser
+
 /** Whether suggestion [id] may be shown at [nowMillis]: not dismissed, and not inside a snooze. */
 fun HelperSettings.allows(id: String, nowMillis: Long): Boolean =
     id !in dismissedSuggestions && (snoozedUntil[id] ?: 0L) <= nowMillis

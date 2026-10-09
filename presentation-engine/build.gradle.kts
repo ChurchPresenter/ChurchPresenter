@@ -13,8 +13,8 @@ group = "org.churchpresenter"
 // reach. Both are the measured value rounded down: a ratchet, raised as tests are added, never
 // lowered to make a change fit, and deleted outright once a counter clears 85%.
 extra["coverageFloors"] = mapOf(
-    "BRANCH" to "0.77",
-    "COMPLEXITY" to "0.71",
+    "BRANCH" to "0.79",
+    "COMPLEXITY" to "0.75",
 )
 
 extra["coverageExcludes"] =
