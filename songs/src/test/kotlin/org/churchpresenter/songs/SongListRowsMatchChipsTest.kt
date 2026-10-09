@@ -88,7 +88,9 @@ class SongListRowsMatchChipsTest {
         search("wretch")
 
         onNodeWithText("wretch undone", substring = true).performMouseInput { doubleClick() }
-        waitForIdle()
+        // Going live lands after the double-click is recognised, which on a loaded machine can be
+        // after the next idle; wait for it rather than for idle.
+        waitUntil(timeoutMillis = 5_000) { Presenting.LYRICS in reports.presenting }
 
         assertEquals("Mercy", vm.filteredSongItems.value.getOrNull(vm.selectedSongIndex.value)?.title)
         assertTrue(Presenting.LYRICS in reports.presenting, reports.presenting.toString())
