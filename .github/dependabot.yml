@@ -1,0 +1,26 @@
+# Weekly version-update pull requests. Security updates are separate: they follow the dependency
+# graph `test.yml`'s `dependencies` job submits, and open as soon as an advisory lands.
+#
+# Gradle versions all live in gradle/libs.versions.toml, so one directory covers every module.
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      # Kotlin and Compose move together; a lone bump of one breaks the build.
+      kotlin-compose:
+        patterns:
+          - "org.jetbrains.kotlin*"
+          - "org.jetbrains.compose*"
+          - "androidx.compose*"
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns:
+          - "*"

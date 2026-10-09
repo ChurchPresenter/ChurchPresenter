@@ -143,6 +143,34 @@ jobs:
   # gate is worth nothing if a change that breaks it can skip it: the shared config/detekt/detekt.yml
   # governs every module at once, so "this PR didn't touch that folder" does not mean that folder
   # still passes.
+  # The Gradle build's resolved dependency graph, submitted to GitHub so Dependabot alerts cover it
+  # (a Gradle build has no lockfile GitHub can read on its own), and on a pull request a review of
+  # what the change adds: a newly introduced dependency with a high or critical advisory fails
+  # this check. Not part of `test` -- an advisory published overnight must not block unrelated
+  # work -- and skipped on a fork's pull request, whose token cannot submit a graph.
+  dependencies:
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Submit the dependency graph
+        uses: gradle/actions/dependency-submission@v4
+      - name: Review the dependencies this change adds
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          retry-on-snapshot-warnings: true
+
   detekt:
     needs: prepare
     runs-on: ubuntu-latest

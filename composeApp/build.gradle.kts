@@ -173,7 +173,19 @@ plugins {
     alias(libs.plugins.sentry)
     alias(libs.plugins.roborazzi)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.cyclonedx)
     jacoco
+}
+
+// The software bill of materials: every library the shipped app runs with, and nothing it is only
+// built or tested with. `build.yml` attaches the JSON to each release.
+tasks.cyclonedxDirectBom {
+    val commits = gitCommitCount()
+    componentName.set("ChurchPresenter")
+    componentVersion.set("$versionYear.${commits / 256}.${commits % 256}")
+    includeConfigs.set(listOf("jvmRuntimeClasspath"))
+    jsonOutput.set(layout.buildDirectory.file("reports/cyclonedx/bom.json"))
+    xmlOutput.set(layout.buildDirectory.file("reports/cyclonedx/bom.xml"))
 }
 
 detekt {

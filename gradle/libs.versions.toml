@@ -1,4 +1,5 @@
 [versions]
+cyclonedx = "3.4.1"
 jna = "5.18.1"
 vlcj = "4.8.3"
 androidx-lifecycle = "2.11.0"
@@ -119,3 +120,4 @@ sentry = { id = "io.sentry.jvm.gradle", version.ref = "sentryPlugin" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 pitest = { id = "info.solidsoft.pitest", version.ref = "pitestPlugin" }
+cyclonedx = { id = "org.cyclonedx.bom", version.ref = "cyclonedx" }

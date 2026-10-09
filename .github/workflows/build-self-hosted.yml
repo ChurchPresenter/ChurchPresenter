@@ -581,7 +581,9 @@ jobs:
           # dpkg-sig is needed for signing — install only if missing
           if ! command -v dpkg-sig &>/dev/null; then
             sudo apt-get install -y libconfig-file-perl
-            curl -sLO https://archive.ubuntu.com/ubuntu/pool/universe/d/dpkg-sig/dpkg-sig_0.13.1+nmu4_all.deb
+            curl -sSfLO https://archive.ubuntu.com/ubuntu/pool/universe/d/dpkg-sig/dpkg-sig_0.13.1+nmu4_all.deb
+            # The digest from jammy's signed universe Packages index; nothing unverified is installed as root.
+            echo "c6eb0f053b7e67695b342720ddbe1126e6b0939e1520ace1fa7e0097426c73d1  dpkg-sig_0.13.1+nmu4_all.deb" | sha256sum -c -
             sudo dpkg -i dpkg-sig_0.13.1+nmu4_all.deb
             rm dpkg-sig_0.13.1+nmu4_all.deb
           fi
