@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.sharedui.utils.DevFlags
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -48,6 +49,10 @@ import java.util.Locale
 import androidx.compose.runtime.Stable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.churchpresenter.helper.HelperState
+import org.churchpresenter.sharedui.models.Tabs
 
 /**
  * The desktop app's own state and services: the settings it edits, the managers and ViewModels
@@ -61,6 +66,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 internal class AppRootState(
     private val application: ApplicationScope,
     val coroutineScope: CoroutineScope,
+    // The displays besides the main one; a test passes its own, having none.
+    private val secondaryDisplays: () -> List<ResolvedDisplay> = ::nonPrimaryDisplays,
 ) {
     var appReady by mutableStateOf(false)
     val settingsManager = SettingsManager()
@@ -141,6 +148,16 @@ internal class AppRootState(
         MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = REMOTE_FLOW_BUFFER)
     val remoteSelectMediaFlow = MutableSharedFlow<ScheduleItem.MediaItem>(extraBufferCapacity = REMOTE_FLOW_BUFFER)
 
+    // The helper lamp: its conversation, the tab the main screen is on (so "make it bigger" knows
+    // what "it" is), and the one thing it asks of the main screen that no remote flow already does.
+    val helperState = HelperState()
+    var helperCurrentTab by mutableStateOf<Tabs?>(null)
+    // How many songs the library loaded, or null before it has — "empty" only once it has looked.
+    var helperSongCount by mutableStateOf<Int?>(null)
+    // The library itself, for the helper to find a song by number or title.
+    var helperSongs by mutableStateOf<List<SongItem>>(emptyList())
+    val helperSelectTabFlow = MutableSharedFlow<Tabs>(extraBufferCapacity = REMOTE_FLOW_BUFFER)
+
     // What the automation engine last put on screen, or null once it blanked. The engine yields
     // to a hand on the controls: if the outputs show something other than this -- a Schedule row
     // clicked, a song sent from the Songs tab -- a due cue is skipped rather than fired over the
@@ -157,6 +174,15 @@ internal class AppRootState(
         optionsDialogInitialTab = tab
         showOptionsDialog = true
     }
+
+    /** Puts each output's number on its screen for a few seconds — from Settings and from the helper. */
+    fun identifyScreens() {
+        identifyingScreen = true
+        coroutineScope.launch {
+            delay(UPDATE_CHECK_DELAY_MS)
+            identifyingScreen = false
+        }
+    }
     var showStatisticsDialog by mutableStateOf(false)
     var showInstanceLinkDialog by mutableStateOf(false)
     var showKeyboardShortcutsDialog by mutableStateOf(false)
@@ -165,10 +191,15 @@ internal class AppRootState(
     var showContactDialog by mutableStateOf(false)
     var contactDialogInitialType by mutableStateOf<String?>(null)
     var showStoryPrompt by mutableStateOf(false)
+
+    // Set once the startup update check has run, so nothing waiting on it opens before its result.
+    var startupChecksDone by mutableStateOf(false)
     var showConverterWindow by mutableStateOf(false)
     // Which tab it opens on. The Help menu wants the converter as a whole; the setup wizard's
     // song step wants Songs, because that is the format problem it just described.
     var converterInitialTab by mutableStateOf(ConverterTab.BIBLES)
+    // The song source its Songs tab opens on, when the helper named one; null opens the default.
+    var converterInitialSource by mutableStateOf<String?>(null)
     var showSongLibraryWindow by mutableStateOf(false)
     var showCalendarWindow by mutableStateOf(false)
     // Raised to have the Calendar Manager open a new service on the Schedule tab's rows.
@@ -209,15 +240,7 @@ internal class AppRootState(
 
     /** Fits the saved screen assignments to the displays and DeckLink devices this machine has now. */
     private fun reconcileScreenAssignmentsAtStartup() {
-        val screenDevicesAll = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
-        val primaryDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
-        val nonPrimaryDisplays = screenDevicesAll.filter { it != primaryDevice }.map { device ->
-            val bounds = device.defaultConfiguration.bounds
-            ResolvedDisplay(
-                deviceIndex = screenDevicesAll.indexOf(device),
-                x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height,
-            )
-        }
+        val nonPrimaryDisplays = secondaryDisplays()
         val deckLinkCount = deckLinkOutputCount(DeckLinkManager.isAvailable()) { DeckLinkManager.listDevices().size }
 
         val proj = appSettings.projectionSettings
@@ -234,3 +257,16 @@ internal class AppRootState(
 }
 
 private const val REMOTE_FLOW_BUFFER = 8
+
+/** Every display but the main one, as the screen assignments name them. */
+private fun nonPrimaryDisplays(): List<ResolvedDisplay> {
+    val screenDevicesAll = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
+    val primaryDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
+    return screenDevicesAll.filter { it != primaryDevice }.map { device ->
+        val bounds = device.defaultConfiguration.bounds
+        ResolvedDisplay(
+            deviceIndex = screenDevicesAll.indexOf(device),
+            x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height,
+        )
+    }
+}

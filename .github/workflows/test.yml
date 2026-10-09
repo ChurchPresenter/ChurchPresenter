@@ -150,7 +150,7 @@ jobs:
           :crossword:detekt :companion-satellite:detekt :songlibrary:detekt :settings:detekt
           :diagnostics:detekt :bible-formats:detekt :atem:detekt :ndi:detekt :omt:detekt :planning-center:detekt
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
-          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :canvas:detekt :presenter:detekt :profiles:detekt :companion-surface:detekt :obs:detekt :live-show:detekt :show-control:detekt :control-in:detekt :live-output:detekt :statistics:detekt :updater:detekt :telemetry:detekt :app-settings:detekt :server-ui:detekt
+          :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :helper:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :canvas:detekt :presenter:detekt :profiles:detekt :companion-surface:detekt :obs:detekt :live-show:detekt :show-control:detekt :control-in:detekt :live-output:detekt :statistics:detekt :updater:detekt :telemetry:detekt :app-settings:detekt :server-ui:detekt
 
       - name: App unit tests
         id: unit_tests
@@ -598,6 +598,20 @@ jobs:
         if: ${{ !cancelled() && steps.modules.outputs.announcements == 'true' }}
         run: ./gradlew :announcements:jacocoTestCoverageVerification -x test
 
+      - name: Helper tests
+        if: ${{ !cancelled() && steps.modules.outputs.helper == 'true' }}
+        run: ./gradlew :helper:test
+
+      # How well Wick understands reworded requests: fails on any wrong action by its model, or when it
+      # reaches fewer of them. Its own task because every row runs the model.
+      - name: Wick understanding eval
+        if: ${{ !cancelled() && steps.modules.outputs.helper == 'true' }}
+        run: ./gradlew :helper:wickEval
+
+      - name: Helper coverage floor
+        if: ${{ !cancelled() && steps.modules.outputs.helper == 'true' }}
+        run: ./gradlew :helper:jacocoTestCoverageVerification -x test
+
       - name: Lower Third tests
         if: ${{ !cancelled() && steps.modules.outputs.lowerthird == 'true' }}
         run: ./gradlew :lower-third:test
@@ -731,6 +745,7 @@ jobs:
               ("dictionary", "Dictionary"),
               ("stt", "STT"),
               ("announcements", "Announcements"),
+              ("helper", "Helper"),
               ("lower-third", "Lower Third"),
               ("songs", "Songs"),
               ("bible-tab", "Bible tab"),
@@ -972,6 +987,8 @@ jobs:
             stt/build/test-results/
             announcements/build/reports/tests/
             announcements/build/test-results/
+            helper/build/reports/tests/
+            helper/build/test-results/
             lower-third/build/reports/tests/
             lower-third/build/test-results/
             songs/build/reports/tests/

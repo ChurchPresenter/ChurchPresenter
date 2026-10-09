@@ -58,7 +58,7 @@ internal fun hasDeckLinkInputConflict(option: DisplayOption, scenes: List<Scene>
  * An [option] marked [DisplayOption.unused] has its "Don't use" mark cleared: picking a monitor
  * marked unused is how it is put back into use.
  */
-internal fun withPrimaryTarget(
+fun withPrimaryTarget(
     projection: ProjectionSettings,
     i: Int,
     assignment: ScreenAssignment,

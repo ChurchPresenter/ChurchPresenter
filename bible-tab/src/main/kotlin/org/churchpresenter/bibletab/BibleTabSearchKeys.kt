@@ -11,7 +11,9 @@ import org.churchpresenter.sharedui.models.ShortcutAction
  * live.
  *
  * The search box is where the keyboard browses: typing and the arrow keys move the selection, and
- * nothing they do reaches the output until Go Live. While a verse is live in the ordinary browser,
+ * nothing they do reaches the output until Go Live. Go Live on a book or a chapter typed alone opens
+ * it one level down instead -- "John" becomes "John 1", "John 1" becomes "John 1:1" -- so the arrows
+ * browse its chapters, then its verses, and only a verse goes live. While a verse is live in the ordinary browser,
  * the first search that moves the selection puts the output on hold (the same hold that navigating
  * to another chapter sets); Go Live releases it, and so does going back to live, which also restores
  * the selection. Split browse never sends a browse selection, so it needs no hold.
@@ -57,11 +59,11 @@ private fun SelectedVerse.key() = Triple(bookName, chapter, verseNumber)
 private fun BibleTabScope.liveAndShowing(): Boolean =
     currentIsPresenting && bibleOutput?.bibleHold?.value != true && displayedVerses.isNotEmpty()
 
-/** [ref] is the single verse on screen -- a chapter typed alone stands for its first verse. */
+/** [ref] is the single verse on screen. */
 private fun BibleTabScope.referenceIsLive(ref: SmartReference): Boolean {
     if (!liveAndShowing() || ref.verseEnd != null) return false
     val shown = displayedVerses.singleOrNull() ?: return false
-    return shown.key() == Triple(books.getOrNull(ref.bookIndex), ref.chapter ?: 1, ref.verseStart ?: 1)
+    return shown.key() == Triple(books.getOrNull(ref.bookIndex), ref.chapter, ref.verseStart)
 }
 
 private fun BibleTabScope.holdForSearch(viewModel: BibleViewModel, query: String) {
@@ -71,8 +73,9 @@ private fun BibleTabScope.holdForSearch(viewModel: BibleViewModel, query: String
 
 /**
  * Go Live from the search box: the highlighted text-search result (the first when none is), or the
- * typed reference -- loaded first, so a fast typist never puts the previous verse up. A query that
- * is not a reference runs the text search instead, and the next Go Live takes a result.
+ * typed verse -- loaded first, so a fast typist never puts the previous verse up. A book or chapter
+ * typed alone is opened one level down instead, and the caret stays to browse it. A query that is
+ * not a reference runs the text search instead, and the next Go Live takes a result.
  */
 private fun BibleTabScope.goLiveFromSearch(viewModel: BibleViewModel) {
     if (isSearchMode && searchResults.isNotEmpty()) {
@@ -87,7 +90,12 @@ private fun BibleTabScope.goLiveFromSearch(viewModel: BibleViewModel) {
     val query = searchQuery.trim()
     if (query.isEmpty()) return
     val ref = if (searchMode == BibleSearchMode.TEXT) null else viewModel.parseReference(query)
-    if (ref == null) viewModel.submitSmartQuery() else goLiveWith(viewModel, ref)
+    val deeper = ref?.let(::drilledReference)
+    when {
+        ref == null -> viewModel.submitSmartQuery()
+        deeper != null -> searchQueryChanged(viewModel, referenceText(deeper))
+        else -> goLiveWith(viewModel, ref)
+    }
 }
 
 private fun BibleTabScope.goLiveWith(viewModel: BibleViewModel, ref: SmartReference) {

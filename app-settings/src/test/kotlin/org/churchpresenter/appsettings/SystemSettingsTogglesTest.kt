@@ -2,6 +2,9 @@
 
 package org.churchpresenter.appsettings
 
+import androidx.compose.ui.test.assertIsNotEnabled
+import kotlin.test.assertFalse
+import org.churchpresenter.settings.HelperSettings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -118,4 +121,20 @@ class SystemSettingsTogglesTest {
             bibles.deleteRecursively()
         }
     }
+
+    @Test
+    fun `in dev mode the helper card turns the lamp and its tips off and brings back what was put away`() =
+        runComposeUiTest {
+            val put = HelperSettings(dismissedSuggestions = setOf("tip.one"), snoozedUntil = mapOf("tip.two" to 9L))
+            val read = tab(AppSettings(helper = put), devMode = true)
+            press("Show Wick, the helper, in the corner of the main window")
+            press("Offer a tip of the day")
+            assertFalse(read().helper.enabled)
+            assertFalse(read().helper.tipsEnabled)
+
+            press("Show dismissed suggestions again")
+            assertTrue(read().helper.dismissedSuggestions.isEmpty())
+            assertTrue(read().helper.snoozedUntil.isEmpty())
+            onNodeWithText("Show dismissed suggestions again").assertIsNotEnabled()
+        }
 }

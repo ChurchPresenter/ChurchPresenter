@@ -6,6 +6,8 @@
 package org.churchpresenter.slides.tabs
 
 import org.churchpresenter.slides.viewmodel.PicturesViewModel
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.utils.sharedScaleMode
 import org.churchpresenter.sharedui.utils.ScaleButtonContent
 import org.churchpresenter.sharedui.utils.scaleButtonLabel
@@ -34,16 +36,12 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import org.churchpresenter.theme.AppShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.AlertDialog
 import org.churchpresenter.theme.components.RaisedIconButton
 import androidx.compose.material3.MaterialTheme
-import org.churchpresenter.theme.components.SunkenOutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import org.churchpresenter.theme.components.GhostButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,7 +50,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,8 +63,6 @@ import org.churchpresenter.strings.generated.resources.animation_slide_left
 import org.churchpresenter.strings.generated.resources.animation_slide_right
 import org.churchpresenter.strings.generated.resources.animation_type
 import org.churchpresenter.strings.generated.resources.auto_scroll_interval
-import org.churchpresenter.strings.generated.resources.cancel
-import org.churchpresenter.strings.generated.resources.ok
 import org.churchpresenter.icons.generated.resources.ic_pause
 import org.churchpresenter.icons.generated.resources.ic_play
 import org.churchpresenter.icons.generated.resources.ic_skip_next
@@ -244,7 +239,7 @@ private fun PicturesTabScope.PicturesPlayKey(viewModel: PicturesViewModel) {
         RaisedIconButton(
             onClick = { viewModel.togglePlayPause() },
             enabled = viewModel.images.isNotEmpty(),
-            modifier = Modifier.size(PICTURES_PLAY_KEY_SIZE),
+            modifier = Modifier.size(PICTURES_PLAY_KEY_SIZE).guideTarget(GuideTargets.PICTURES_PLAY),
             shape = CircleShape,
             colors = IconButtonDefaults.filledIconButtonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -391,9 +386,6 @@ private fun PicturesTabScope.PicturesScaleButton(
 @Composable
 private fun PicturesTabScope.PicturesIntervalSetting(viewModel: PicturesViewModel, appSettings: AppSettings) {
     var editingInterval by remember { mutableStateOf(false) }
-    var intervalInput by remember(appSettings.pictureSettings.autoScrollInterval) {
-        mutableStateOf(appSettings.pictureSettings.autoScrollInterval.toInt().toString())
-    }
 
     Column(
         modifier = Modifier
@@ -430,36 +422,17 @@ private fun PicturesTabScope.PicturesIntervalSetting(viewModel: PicturesViewMode
     }
 
     if (editingInterval) {
-        AlertDialog(
-            onDismissRequest = { editingInterval = false },
-            title = { Text(stringResource(Res.string.auto_scroll_interval)) },
-            text = {
-                SunkenOutlinedTextField(
-                    value = intervalInput,
-                    onValueChange = { intervalInput = it },
-                    suffix = { Text(stringResource(Res.string.unit_s)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-            },
-            confirmButton = {
-                GhostButton(
-                    shape = AppShape(6.dp),
-                    onClick = {
-                    intervalInput.toIntOrNull()?.coerceIn(1, PICTURES_MAX_AUTO_SCROLL_SECONDS)?.let { v ->
-                        viewModel.autoScrollInterval = v.toFloat()
-                        onSettingsChange { s -> s.copy(
-                            pictureSettings = s.pictureSettings.copy(autoScrollInterval = v.toFloat()),
-                        ) }
-                    }
-                    editingInterval = false
-                }) { Text(stringResource(Res.string.ok)) }
-            },
-            dismissButton = {
-                GhostButton(shape = AppShape(6.dp), onClick = { editingInterval = false }) {
-                    Text(stringResource(Res.string.cancel))
+        AutoScrollIntervalDialog(
+            initial = appSettings.pictureSettings.autoScrollInterval.toInt(),
+            maxSeconds = PICTURES_MAX_AUTO_SCROLL_SECONDS,
+            onConfirm = { v ->
+                viewModel.autoScrollInterval = v.toFloat()
+                onSettingsChange { s ->
+                    s.copy(pictureSettings = s.pictureSettings.copy(autoScrollInterval = v.toFloat()))
                 }
-            }
+                editingInterval = false
+            },
+            onDismiss = { editingInterval = false },
         )
     }
 }
@@ -468,9 +441,6 @@ private fun PicturesTabScope.PicturesIntervalSetting(viewModel: PicturesViewMode
 @Composable
 private fun PicturesTabScope.PicturesTransitionSetting(viewModel: PicturesViewModel, appSettings: AppSettings) {
     var editingTransition by remember { mutableStateOf(false) }
-    var transitionInput by remember(appSettings.pictureSettings.transitionDuration) {
-        mutableStateOf(appSettings.pictureSettings.transitionDuration.toInt().toString())
-    }
 
     Column(
         modifier = Modifier
@@ -508,39 +478,18 @@ private fun PicturesTabScope.PicturesTransitionSetting(viewModel: PicturesViewMo
     }
 
     if (editingTransition) {
-        AlertDialog(
-            onDismissRequest = { editingTransition = false },
-            title = { Text(stringResource(Res.string.transition_duration)) },
-            text = {
-                SunkenOutlinedTextField(
-                    value = transitionInput,
-                    onValueChange = { transitionInput = it },
-                    suffix = { Text(stringResource(Res.string.unit_ms)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-            },
-            confirmButton = {
-                GhostButton(
-                    shape = AppShape(6.dp),
-                    onClick = {
-                    transitionInput.toIntOrNull()?.coerceIn(
-                        PICTURES_MIN_TRANSITION_MS,
-                        PICTURES_MAX_TRANSITION_MS,
-                    )?.let { v ->
-                        viewModel.transitionDuration = v.toFloat()
-                        onSettingsChange { s -> s.copy(
-                            pictureSettings = s.pictureSettings.copy(transitionDuration = v.toFloat()),
-                        ) }
-                    }
-                    editingTransition = false
-                }) { Text(stringResource(Res.string.ok)) }
-            },
-            dismissButton = {
-                GhostButton(shape = AppShape(6.dp), onClick = { editingTransition = false }) {
-                    Text(stringResource(Res.string.cancel))
+        TransitionDurationDialog(
+            initial = appSettings.pictureSettings.transitionDuration.toInt(),
+            minMs = PICTURES_MIN_TRANSITION_MS,
+            maxMs = PICTURES_MAX_TRANSITION_MS,
+            onConfirm = { v ->
+                viewModel.transitionDuration = v.toFloat()
+                onSettingsChange { s ->
+                    s.copy(pictureSettings = s.pictureSettings.copy(transitionDuration = v.toFloat()))
                 }
-            }
+                editingTransition = false
+            },
+            onDismiss = { editingTransition = false },
         )
     }
 }

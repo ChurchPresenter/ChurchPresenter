@@ -163,7 +163,7 @@ internal fun displayShortLabel(name: String, number: Int, screen: DetectedScreen
     name.ifEmpty { "D$number (${screen.boundsW}x${screen.boundsH})" }
 
 /** One selectable output target: None, a physical display, or a DeckLink device. */
-internal data class DisplayOption(
+data class DisplayOption(
     val label: String,
     val shortLabel: String = label,
     val targetDisplay: Int,  // -2 = none, 0+ = display/device index

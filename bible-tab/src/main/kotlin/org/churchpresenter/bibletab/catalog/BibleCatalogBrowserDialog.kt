@@ -18,6 +18,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import org.churchpresenter.theme.AppShape
+import org.churchpresenter.helper.ui.GuideSpotlightHost
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
@@ -104,12 +107,15 @@ fun BibleCatalogBrowserDialog(
         resizable = true
     ) {
         ProvideUiFontScale {
-            BibleCatalogBrowserDialogContent(
-                viewModels = viewModels,
-                tabLabels = tabLabels,
-                onDismiss = onDismiss,
-                onBibleInstalled = onBibleInstalled,
-            )
+            // This window's own spotlight: Wick's "add a Bible translation" tour rings its list.
+            GuideSpotlightHost(Modifier.fillMaxSize()) {
+                BibleCatalogBrowserDialogContent(
+                    viewModels = viewModels,
+                    tabLabels = tabLabels,
+                    onDismiss = onDismiss,
+                    onBibleInstalled = onBibleInstalled,
+                )
+            }
         }
     }
 }
@@ -254,7 +260,10 @@ private fun CatalogModuleArea(
                 val listState = rememberLazyListState()
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier.fillMaxSize().padding(end = 12.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .guideTarget(GuideTargets.BIBLE_CATALOG_LIST)
+                        .padding(end = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     items(viewModel.visibleModules, key = { it.key }) { module ->

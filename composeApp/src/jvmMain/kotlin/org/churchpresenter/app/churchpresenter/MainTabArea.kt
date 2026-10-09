@@ -2,6 +2,8 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -129,6 +131,7 @@ private fun TabBar(tabBar: TabBarState, actions: TabBarActions) {
             onClick = actions.onShowBackgroundSettings,
             style = ToolbarKeyStyle.PANEL_TOGGLE,
             buttonSize = TOOLBAR_KEY_SIZE,
+            modifier = Modifier.guideTarget(GuideTargets.BACKGROUND_BUTTON),
         )
         ToolbarKey(
             painter = painterResource(IconRes.drawable.ic_settings),
@@ -136,6 +139,7 @@ private fun TabBar(tabBar: TabBarState, actions: TabBarActions) {
             onClick = actions.onShowSettings,
             style = ToolbarKeyStyle.PANEL_TOGGLE,
             buttonSize = TOOLBAR_KEY_SIZE,
+            modifier = Modifier.guideTarget(GuideTargets.SETTINGS_BUTTON),
         )
     }
 }

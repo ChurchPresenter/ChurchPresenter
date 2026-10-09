@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,7 +55,7 @@ internal fun ScheduleSidebar(
 ) {
     Column(modifier = modifier) {
         InstanceLinkStatusRows(link)
-        Box(modifier = Modifier.weight(1f)) {
+        Box(modifier = Modifier.weight(1f).guideTarget(GuideTargets.SCHEDULE_PANEL)) {
             schedule()
         }
         ScheduleSidebarCompanionPanel(connections = connections, companionSurface = companionSurface)

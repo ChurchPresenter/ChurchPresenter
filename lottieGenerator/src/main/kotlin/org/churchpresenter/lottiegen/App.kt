@@ -56,6 +56,8 @@ fun App(
     embedded: Boolean = outputDir != null,
     /** The host's own font picker, lent to the generator the same way `BibleLottieGenApp` takes one. */
     fontPicker: BandFontPicker? = null,
+    /** What the host puts on the controls its helper can point at; see [GuidedControl]. */
+    controlTag: ControlTag = NoControlTag,
     /**
      * Where the Style menu's thumbnail builds record what they did, for a caller that wants to read
      * it when a picture is missing -- see [ThumbnailDiagnostics]. Read-only; it changes nothing drawn.
@@ -76,7 +78,7 @@ fun App(
             val density = LocalDensity.current
 
             Row(modifier = Modifier.fillMaxSize()) {
-                ControlPanel(viewModel, controlPanelWidth.dp, fontPicker)
+                ControlPanel(viewModel, controlPanelWidth.dp, fontPicker, controlTag)
 
                 // Draggable divider
                 Box(

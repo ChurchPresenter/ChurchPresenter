@@ -6,6 +6,8 @@
 package org.churchpresenter.media.tabs
 
 import org.churchpresenter.media.viewmodel.MediaViewModel
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -183,7 +185,7 @@ private fun MediaTabScope.MediaLocalSource(viewModel: MediaViewModel, modifier: 
                 }
             }
         },
-        modifier = Modifier.height(32.dp),
+        modifier = Modifier.height(32.dp).guideTarget(GuideTargets.MEDIA_SELECT_FILE),
         shape = AppShape(7.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
@@ -300,6 +302,7 @@ private fun MediaTabScope.MediaSourceActions(viewModel: MediaViewModel) {
         }
         if (presenterManager != null) {
             GoLiveButton(
+                modifier = Modifier.guideTarget(GuideTargets.MEDIA_GO_LIVE),
                 onClick = { goLive(viewModel, presenterManager) },
                 enabled = viewModel.isLoaded,
                 tooltipText = stringResource(Res.string.go_live),

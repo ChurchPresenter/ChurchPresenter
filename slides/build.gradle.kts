@@ -11,11 +11,11 @@ plugins {
 group = "org.churchpresenter"
 
 // Branches and complexity sit below the shared 85%: what is left uncovered is the coroutine plumbing
-// the compiler generates around slide rendering, Compose's per-value change checks, the shift-drag
-// reorder (a test cannot hold Shift on a mouse event) and the native file pickers. See AGENT.md.
+// the compiler generates around slide rendering, Compose's per-value change checks and the native
+// file pickers. See AGENT.md.
 extra["coverageFloors"] = mapOf(
     "BRANCH" to "0.80",
-    "COMPLEXITY" to "0.76",
+    "COMPLEXITY" to "0.77",
 )
 
 kotlin {

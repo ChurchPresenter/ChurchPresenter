@@ -11,6 +11,7 @@ import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.withKeyDown
@@ -26,7 +27,8 @@ import kotlin.test.assertTrue
  *
  * The search box is where the keyboard browses. Up and down step at the level the reference was
  * typed to -- book, chapter or verse -- and rewrite the query; through text-search results they move
- * the highlight. Enter sends what they reached live in one press. While a verse is live, a search
+ * the highlight. Enter sends a verse they reached live in one press; on a book or a chapter it opens
+ * one level down instead, so the arrows browse the chapters, then the verses. While a verse is live, a search
  * that moves the selection holds the output, so nothing typed reaches the screen until Go Live;
  * Ctrl+Tab goes back to what is live and releases that hold.
  */
@@ -129,6 +131,68 @@ class BibleTabSearchKeysTest {
         assertEquals(Triple("John", 3, 16), live?.let { Triple(it.bookName, it.chapter, it.verseNumber) })
         assertTrue(Presenting.BIBLE in reports.presenting)
         bibleSearchBox().assertIsNotFocused()
+    }
+
+    @Test
+    fun `enter on a book opens its first chapter, then its first verse, and only then goes live`() =
+        bibleTab { vm, reports ->
+            bibleSearchBox().requestFocus()
+            bibleSearch("John")
+
+            pressInSearch(Key.Enter)
+            assertEquals("John 1", vm.searchQuery.value)
+            assertTrue(reports.presenting.isEmpty(), "a book is opened, not sent")
+            bibleSearchBox().assertIsFocused()
+
+            pressInSearch(Key.Enter)
+            assertEquals("John 1:1", vm.searchQuery.value)
+            assertTrue(reports.presenting.isEmpty(), "a chapter is opened, not sent")
+
+            pressInSearch(Key.Enter)
+            val live = reports.live?.firstOrNull()
+            assertEquals(Triple("John", 1, 1), live?.let { Triple(it.bookName, it.chapter, it.verseNumber) })
+            bibleSearchBox().assertIsNotFocused()
+        }
+
+    @Test
+    fun `enter on a chapter opens its first verse, and the arrows step the verses from there`() =
+        bibleTab { vm, reports ->
+            bibleSearchBox().requestFocus()
+            bibleSearch("Genesis 1")
+            pressInSearch(Key.Enter)
+            pressInSearch(Key.DirectionDown)
+            assertEquals("Genesis 1:2", vm.searchQuery.value)
+
+            pressInSearch(Key.Enter)
+            val live = reports.live?.firstOrNull()
+            assertEquals(Triple("Genesis", 1, 2), live?.let { Triple(it.bookName, it.chapter, it.verseNumber) })
+        }
+
+    @Test
+    fun `opening a book while a verse is live leaves the screen as it was`() {
+        val output = genesisLive()
+        bibleTab(isPresenting = true, presenter = output) { vm, reports ->
+            bibleSearchBox().requestFocus()
+            bibleSearch("Psalms")
+            pressInSearch(Key.Enter)
+
+            assertEquals("Psalms 1", vm.searchQuery.value)
+            assertFalse(Presenting.BIBLE in reports.presenting)
+            assertTrue(output.bibleHold.value, "the browse is held off the screen as typing is")
+        }
+    }
+
+    @Test
+    fun `after the arrows a verse can be typed over to move to it`() = bibleTab { vm, _ ->
+        bibleSearchBox().requestFocus()
+        bibleSearch("Genesis 1:1")
+        pressInSearch(Key.DirectionDown)
+        pressInSearch(Key.Backspace)
+        bibleSearchBox().performTextInput("3")
+        waitForIdle()
+
+        assertEquals("Genesis 1:3", vm.searchQuery.value)
+        assertEquals(Triple("Genesis", 1, 3), vm.selectedReference())
     }
 
     @Test
@@ -260,11 +324,13 @@ class BibleTabSearchKeysTest {
     }
 
     @Test
-    fun `up and down with nothing typed are the field's`() = bibleTab { vm, _ ->
+    fun `down with nothing typed puts the selected book in, and the next steps the books`() = bibleTab { vm, _ ->
         bibleSearchBox().requestFocus()
         pressInSearch(Key.DirectionDown)
+        assertEquals("Genesis", vm.searchQuery.value)
 
-        assertEquals("", vm.searchQuery.value)
+        pressInSearch(Key.DirectionDown)
+        assertEquals("Psalms", vm.searchQuery.value)
         bibleSearchBox().assertIsFocused()
     }
 
@@ -400,9 +466,10 @@ class BibleTabSearchKeysTest {
     }
 
     @Test
-    fun `a chapter typed whose first verse is on screen is already live`() {
-        bibleTab(isPresenting = true, presenter = genesisLive(), settings = ::split) { _, reports ->
-            assertFalse(enterInSplit("Genesis 1", reports))
+    fun `in split browse enter on a chapter opens it rather than going live`() {
+        bibleTab(isPresenting = true, presenter = genesisLive(), settings = ::split) { vm, reports ->
+            assertFalse(enterInSplit("Psalms 23", reports))
+            assertEquals("Psalms 23:1", vm.searchQuery.value)
         }
     }
 

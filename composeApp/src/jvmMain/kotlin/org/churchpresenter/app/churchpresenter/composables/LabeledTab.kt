@@ -85,10 +85,11 @@ fun LabeledTab(
     textStyle: TextStyle? = null,
     color: Color = Color.Unspecified,
     labelMargin: TabLabelMargin = TabLabelMargin.NORMAL,
+    modifier: Modifier = Modifier,
 ) {
     when (labelStyle) {
-        TabLabelStyle.TEXT -> NamedTab(selected, onClick, labelMargin) { TabName(name, textStyle, color) }
-        TabLabelStyle.ICONS_AND_TEXT -> NamedTab(selected, onClick, labelMargin) {
+        TabLabelStyle.TEXT -> NamedTab(selected, onClick, labelMargin, modifier) { TabName(name, textStyle, color) }
+        TabLabelStyle.ICONS_AND_TEXT -> NamedTab(selected, onClick, labelMargin, modifier) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(3.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -101,7 +102,7 @@ fun LabeledTab(
             Tab(
                 selected = selected,
                 onClick = onClick,
-                modifier = Modifier.widthIn(min = labeledTabMinWidth(labelStyle, labelMargin)),
+                modifier = modifier.widthIn(min = labeledTabMinWidth(labelStyle, labelMargin)),
                 icon = { TabIcon(icon, color, contentDescription = name) },
             )
         }
@@ -113,12 +114,13 @@ private fun NamedTab(
     selected: Boolean,
     onClick: () -> Unit,
     margin: TabLabelMargin,
+    modifier: Modifier,
     content: @Composable () -> Unit,
 ) {
     Tab(
         selected = selected,
         onClick = onClick,
-        modifier = Modifier.height(NAMED_TAB_HEIGHT),
+        modifier = modifier.height(NAMED_TAB_HEIGHT),
     ) {
         Box(
             modifier = Modifier.padding(horizontal = namedTabHorizontalPadding(margin)),

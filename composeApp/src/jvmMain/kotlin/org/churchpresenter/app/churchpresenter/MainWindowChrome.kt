@@ -45,6 +45,7 @@ internal fun MainWindowScope.AppMenuBar() {
             onAbout = { showAboutDialog = true },
             onContactUs = { showContactDialog = true },
             onGettingStarted = { showSetupWizard = true },
+            onShowHelper = if (devMode) ::showHelper else null,
             onStatistics = { showStatisticsDialog = true },
             onConnectToInstance = { showInstanceLinkDialog = true },
             onDisconnectInstance = { instanceLinkViewModel.disconnect() },
@@ -53,6 +54,7 @@ internal fun MainWindowScope.AppMenuBar() {
             ),
             onConverter = {
                 converterInitialTab = ConverterTab.BIBLES
+                converterInitialSource = null
                 showConverterWindow = true
             },
             onSongLibrary = { showSongLibraryWindow = true },
@@ -109,6 +111,8 @@ internal fun MainWindowScope.AppMenuBar() {
             onOpenStyleEditor = { showStyleEditorWindow = true },
             onOpenMemoryMonitor = { showMemoryMonitorWindow = true },
             onOpenStoryPrompt = { showStoryPrompt = true },
+            // Shows it whether or not it has been seen, like Replay intro.
+            onOpenWickIntro = { helperState.replayIntro = true },
         )
     }
 }
@@ -243,7 +247,12 @@ private fun MainWindowScope.mainDesktopPublishers(): MainDesktopPublishers = wit
     MainDesktopPublishers(
         onScheduleActionsReady = { scheduleActions = it },
         onScheduleItemSelected = { itemId -> selectedScheduleItemId = itemId },
-        onSongsLoaded = { songs -> companionServer.updateSongs(songs) },
+        onSongsLoaded = { songs ->
+            helperSongCount = songs.size
+            helperSongs = songs
+            companionServer.updateSongs(songs)
+        },
+        onCurrentTabChange = { tab -> helperCurrentTab = tab },
         onScenesChanged = { scenes -> scenesForInstanceLink = scenes },
         onBibleLoaded = { bible, translation ->
             primaryBibleForInstanceLink = bible
@@ -318,6 +327,7 @@ private fun MainWindowScope.remoteControlFlows(): RemoteControlFlows = with(root
         remotePresentationPlayPauseFlow = companionServer.onPresentationPlayPause,
         remotePresentationLoopToggleFlow = companionServer.onPresentationLoopToggle,
         remotePresentationGotoFlow = companionServer.onPresentationGoto,
+        selectTabFlow = helperSelectTabFlow,
     )
 }
 

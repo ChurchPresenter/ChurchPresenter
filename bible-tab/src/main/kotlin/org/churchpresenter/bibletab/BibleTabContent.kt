@@ -1,6 +1,8 @@
 package org.churchpresenter.bibletab
 
 
+import org.churchpresenter.sharedui.guide.guideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -351,6 +353,7 @@ private fun ColumnScope.BibleBrowser(viewModel: BibleViewModel, tab: BibleTabSco
                 onVerseDoubleClicked = { goLiveWithHistory(viewModel); focusRequester.requestFocus() },
                 onCopyVerse = { copySelectedVerse() },
                 onAddToSchedule = { scheduleCurrentVerse(viewModel) },
+                translationTitle = viewModel.primaryBible.value?.getBibleTitle().orEmpty(),
                 isSplitActive = isSplitActive,
                 liveChapterVerses = liveChapterVerses,
                 liveVerseNumbers = liveVerseNumbers,
@@ -396,28 +399,30 @@ private fun BibleTabScope.BibleTabVerseHeader(viewModel: BibleViewModel, showLab
 
 @Composable
 private fun BibleTabScope.BibleTabHistory(viewModel: BibleViewModel) {
-    BibleHistoryPanel(
-        entries = viewModel.history,
-        expanded = historyExpanded,
-        selectedIndex = selectedHistoryIdx,
-        onToggleExpanded = { historyExpanded = !historyExpanded },
-        onClear = { viewModel.clearHistory() },
-        onEntryClick = { idx ->
-            selectedHistoryIdx = idx
-            viewModel.history.getOrNull(idx)?.let {
-                viewModel.selectVerseByDetails(it.bookName, it.chapter, it.verseNumber, it.verseRange)
-            }
-            focusRequester.requestFocus()
-        },
-        onEntryDoubleClick = { idx ->
-            selectedHistoryIdx = idx
-            viewModel.history.getOrNull(idx)?.let {
-                viewModel.selectVerseByDetails(
-                    it.bookName, it.chapter, it.verseNumber, it.verseRange,
-                    goLiveSource = "history",
-                )
-            }
-            focusRequester.requestFocus()
-        },
-    )
+    Box(Modifier.guideTarget(GuideTargets.BIBLE_HISTORY)) {
+        BibleHistoryPanel(
+            entries = viewModel.history,
+            expanded = historyExpanded,
+            selectedIndex = selectedHistoryIdx,
+            onToggleExpanded = { historyExpanded = !historyExpanded },
+            onClear = { viewModel.clearHistory() },
+            onEntryClick = { idx ->
+                selectedHistoryIdx = idx
+                viewModel.history.getOrNull(idx)?.let {
+                    viewModel.selectVerseByDetails(it.bookName, it.chapter, it.verseNumber, it.verseRange)
+                }
+                focusRequester.requestFocus()
+            },
+            onEntryDoubleClick = { idx ->
+                selectedHistoryIdx = idx
+                viewModel.history.getOrNull(idx)?.let {
+                    viewModel.selectVerseByDetails(
+                        it.bookName, it.chapter, it.verseNumber, it.verseRange,
+                        goLiveSource = "history",
+                    )
+                }
+                focusRequester.requestFocus()
+            },
+        )
+    }
 }

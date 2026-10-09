@@ -126,6 +126,10 @@ include(":stt")
 include(":announcements")
 include(":lower-third")
 
+// The helper lamp: tips, display setup, typed tasks and the spotlight that points at controls.
+// Depended on by :composeApp, which carries the actions out through HelperActionExecutor.
+include(":helper")
+
 // The Songs tab, SongsViewModel and the song library on disk. Depended on by :composeApp, which
 // hands it the song editor, the title slide, statistics and the Instance Link catalog.
 include(":songs")

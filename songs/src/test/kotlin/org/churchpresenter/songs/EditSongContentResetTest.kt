@@ -75,11 +75,13 @@ class EditSongContentResetTest {
                 EditSongDialog(
                     isVisible = false, song = hidden, backgroundButton = testBackgroundButton,
                     theme = ThemeMode.LIGHT, onDismiss = {},
-                ) { _, _ -> }
+                    onSave = { _, _ -> },
+                )
                 EditSongDialog(
                     isVisible = true, song = null, backgroundButton = testBackgroundButton,
                     theme = ThemeMode.LIGHT, onDismiss = {},
-                ) { _, _ -> }
+                    onSave = { _, _ -> },
+                )
             }
         }
         waitForIdle()

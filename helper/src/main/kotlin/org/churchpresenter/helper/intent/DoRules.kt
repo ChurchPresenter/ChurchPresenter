@@ -1,0 +1,170 @@
+package org.churchpresenter.helper.intent
+
+import org.churchpresenter.helper.action.HelperAction
+
+// The rules that do a job outright rather than show where it is done: a countdown, an announcement,
+// a song found or added, the schedule stepped, and two questions answered.
+
+private val MINUTES = Regex("""\b(\d{1,3})\s*-?\s*(?:minutes?|mins?|m)\b""")
+private const val MAX_COUNTDOWN_MINUTES = 600
+
+/** "5 minute countdown", "start a 10 min timer", "countdown for 3 minutes". */
+internal fun countdownRule(r: Request): Resolution? {
+    val takingDown = r.first in Vocabulary.TAKE_DOWN || r.has(Vocabulary.CLEAR) || r.says("take down", "turn off")
+    val minutes = MINUTES.find(r.text)?.groupValues?.get(1)?.toIntOrNull()
+        ?.takeIf { it in 1..MAX_COUNTDOWN_MINUTES && r.hasPhrase(Vocabulary.COUNTDOWN) && !takingDown }
+    return minutes?.let { act(HelperAction.StartCountdown(it)) }
+}
+
+private val TELL_PARENTS = Regex(
+    """^(?:please\s+)?(?:tell|ask)\s+(?:the\s+)?(parents?\s+of\s+.+?)\s+to\s+(.+?)[.!]?$""",
+    RegexOption.IGNORE_CASE,
+)
+private val ANNOUNCE = Regex("""^(?:please\s+)?announce\s*:?\s+(.+)$""", RegexOption.IGNORE_CASE)
+private val LABELLED = Regex(
+    "^(?:please\\s+)?(?:show|put up|display|post)\\s+(?:an?\\s+|the\\s+)?" +
+        """(?:announcement|message|text|notice)\s*:?\s+(.+)$""",
+    RegexOption.IGNORE_CASE,
+)
+private val QUOTED = Regex("""["“”«]([^"“”«»]+)["“”»]""")
+
+/**
+ * "Tell the parents of Sam to come to the nursery", "announce: coffee after the service",
+ * "show the message "Welcome!"" — the words go on screen as an announcement, as typed.
+ */
+internal fun announcementRule(r: Request): Resolution? {
+    val raw = r.raw
+    val text = TELL_PARENTS.find(raw)?.let { m ->
+        "${m.groupValues[1].replaceFirstChar { it.uppercase() }}, please ${m.groupValues[2]}."
+    } ?: ANNOUNCE.find(raw)?.groupValues?.get(1)
+        ?: LABELLED.find(raw)?.groupValues?.get(1)
+        ?: QUOTED.find(raw)?.groupValues?.get(1)
+            ?.takeIf { r.hasPhrase(Vocabulary.ANNOUNCEMENT) || r.first == "show" }
+        ?: typedAnnouncement(r)
+        ?: pagedParent(r)
+    val shown = text?.trim()?.trim('"', '“', '”', '«', '»')?.trim()
+    return shown?.takeIf { it.isNotEmpty() }?.let { act(HelperAction.ShowAnnouncement(it)) }
+}
+
+/**
+ * "Объяви: кофе после служения" — read through a glossary, the request starts with "announce", but
+ * the words to show are still the ones typed: after the colon, else after the first word.
+ */
+private fun typedAnnouncement(r: Request): String? {
+    if (r.first != "announce") return null
+    // A full-width colon too: "お知らせ：…", "通告：…".
+    val raw = r.raw.trim().replace('：', ':')
+    return if (':' in raw) raw.substringAfter(':') else raw.substringAfter(' ', "")
+}
+
+private val CHILDREN_ROOMS = listOf(
+    "nursery", "kids room", "baby room", "babies room", "children's room", "childcare", "child care",
+)
+
+/**
+ * "Сәкеннің ата-анасын балалар бөлмесіне шақыр": the parents and a children's room, in words no English
+ * pattern reads. The page is shown as typed — it is already in the language the church reads.
+ */
+private fun pagedParent(r: Request): String? {
+    if (!r.says("parents", "parent") || !r.hasPhrase(CHILDREN_ROOMS)) return null
+    val typed = r.raw.trim().replaceFirstChar { it.uppercase() }
+    return if (typed.last() in ".!?。！") typed else "$typed."
+}
+
+private val TO_SCHEDULE = listOf(
+    "to the schedule", "to schedule", "into the schedule", "on the schedule", "in the schedule",
+)
+private val ADD_VERBS = setOf("add", "put", "insert", "queue", "include", "append")
+private val SONG_PREFIX = Regex("""^(?:the\s+|a\s+)?(?:song|hymn)\s+(?:number\s+|called\s+|named\s+)?""")
+
+/** "Add John 3:16 to the schedule", "put amazing grace on the schedule", "add song 245 to schedule". */
+internal fun addToScheduleRule(r: Request): Resolution? {
+    val what = scheduledText(r) ?: return null
+    val ref = readReference(asReference(what))?.takeIf { it.bookName.split(' ').last() !in Vocabulary.NOT_A_BOOK }
+    val action = if (ref != null) {
+        val book = ref.bookName.split(' ').joinToString(" ") { w -> w.replaceFirstChar { it.uppercase() } }
+        val first = maxOf(1, ref.firstVerse)
+        HelperAction.AddVerseToSchedule(
+            book, ref.chapter, first, maxOf(first, ref.lastVerse), ref.copy(bookName = book).display,
+        )
+    } else {
+        HelperAction.AddSongToSchedule(what.replace(SONG_PREFIX, "").trim())
+    }
+    return act(action)
+}
+
+/**
+ * What [r] asks to add, with the verb and "to the schedule" taken off — the verb first in English, last
+ * in Kazakh, Turkish, Japanese and others — or null when it is not an add, or names only "it".
+ */
+private fun scheduledText(r: Request): String? {
+    val verbFirst = r.first in ADD_VERBS
+    if (!verbFirst && r.words.last() !in ADD_VERBS) return null
+    val phrase = TO_SCHEDULE.firstOrNull { r.text.containsPhrase(it) } ?: return null
+    val body = if (verbFirst) r.text.removePrefix("${r.first} ") else r.text.removeSuffix(" ${r.words.last()}")
+    val what = " $body ".replace(" $phrase ", " ").trim()
+    return what.takeIf { it.isNotEmpty() && it !in setOf("it", "this", "that", "this song", "this verse") }
+}
+
+private val SCHEDULE_WORDS = listOf(
+    "in the schedule", "from the schedule", "on the schedule", "to the schedule", "schedule item",
+)
+private const val GO_VERB = "(?:go to|jump to|skip to|move to|show|open)"
+private const val IN_SCHEDULE = "(?:in|from|on|to) the schedule"
+private val GO_TO = Regex("""^$GO_VERB\s+(?:the\s+)?(.+?)\s+$IN_SCHEDULE$""")
+
+/** The schedule named first: "go to in the schedule the sermon", as "siirry ohjelmassa saarnaan" reads. */
+private val GO_TO_SCHEDULE_FIRST = Regex("""^$GO_VERB\s+$IN_SCHEDULE\s+(?:the\s+)?(.+)$""")
+
+/** The same with the verb last: "the sermon in the schedule go to", "in the schedule the sermon go to". */
+private val GO_TO_VERB_LAST = Regex("""^(?:$IN_SCHEDULE\s+)?(?:the\s+)?(.+?)(?:\s+$IN_SCHEDULE)?\s+$GO_VERB$""")
+
+/** "Next item", "previous in the schedule", "go to the sermon in the schedule". */
+internal fun scheduleStepRule(r: Request): Resolution? {
+    val aboutItem = r.says("item", "items") || r.hasPhrase(SCHEDULE_WORDS) || r.says("schedule")
+    if (!aboutItem) return null
+    val match = GO_TO.find(r.text) ?: GO_TO_SCHEDULE_FIRST.find(r.text)
+        ?: GO_TO_VERB_LAST.find(r.text)?.takeIf { r.hasPhrase(SCHEDULE_WORDS) }
+    match?.let { m ->
+        val name = m.groupValues[1]
+        if (name !in setOf("next", "next item", "previous", "previous item", "last item")) {
+            return act(HelperAction.ScheduleGoTo(name))
+        }
+    }
+    return when {
+        r.has(Vocabulary.NEXT) -> act(HelperAction.ScheduleStep(forward = true))
+        r.has(Vocabulary.PREVIOUS) || r.says("last item") -> act(HelperAction.ScheduleStep(forward = false))
+        else -> null
+    }
+}
+
+private const val FIND = """(?:(?:show|open|find|sing|play|pull up|bring up)\s+)?(?:the\s+)?"""
+private val SONG_NUMBER = Regex("""^$FIND(?:song|hymn)\s+(?:number\s+|no\s+|#\s*)?(\d{1,5})$""")
+private val NAMED_SONG = Regex("""^$FIND(?:song|hymn)\s+(?:called\s+|named\s+)?(.+)$""")
+private val SONG_LAST = Regex("""^$FIND(.+?)\s+(?:song|hymn)$""")
+private val LOOSE = Regex("""^(?:show|open|sing|play|pull up|bring up)\s+(?:the\s+)?(.+)$""")
+private val NOT_A_SONG = setOf("me", "it", "this", "that", "everything", "all", "something", "more", "help")
+
+private val NOT_A_TITLE = Vocabulary.NEXT + Vocabulary.PREVIOUS + setOf("new", "a", "this", "that", "my", "your")
+
+/** "Song 245", "show the song amazing grace", "amazing grace song" — said outright to be a song. */
+internal fun namedSongRule(r: Request): Resolution? {
+    val text = r.text.removePrefix("#")
+    val query = SONG_NUMBER.find(text)?.groupValues?.get(1)
+        ?: NAMED_SONG.find(text)?.groupValues?.get(1)
+        ?: SONG_LAST.find(text)?.groupValues?.get(1)
+    return query?.let(::songQuery)
+}
+
+/** "Sing how great thou art", "show amazing grace": a song, since nothing else claimed it. */
+internal fun songLookupRule(r: Request): Resolution? {
+    val rest = LOOSE.find(r.text)?.groupValues?.get(1) ?: return null
+    if (rest.split(' ').any { it in Vocabulary.NOT_A_BOOK || it in Vocabulary.SETTINGS }) return null
+    return songQuery(rest)
+}
+
+private fun songQuery(query: String): Resolution? {
+    val q = query.trim()
+    if (q.length < 2 || q in NOT_A_SONG || q.split(' ').first() in NOT_A_TITLE) return null
+    return act(HelperAction.FindSong(q))
+}

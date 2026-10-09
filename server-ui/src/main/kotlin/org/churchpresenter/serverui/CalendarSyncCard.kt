@@ -1,5 +1,7 @@
 package org.churchpresenter.serverui
 
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.material3.minimumInteractiveComponentSize
 import org.churchpresenter.theme.components.toggleRow
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -140,7 +142,10 @@ internal fun CalendarSyncCardContent(
         }
         val interaction = remember { MutableInteractionSource() }
         Row(
-            modifier = Modifier.fillMaxWidth().toggleRow(current.enabled, setEnabled, interaction),
+            modifier = Modifier
+                .fillMaxWidth()
+                .toggleRow(current.enabled, setEnabled, interaction)
+                .guideTarget(GuideTargets.CALENDAR_SYNC),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {

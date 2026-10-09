@@ -327,6 +327,7 @@ kotlin {
             implementation(projects.dictionary)
             implementation(projects.stt)
             implementation(projects.announcements)
+            implementation(projects.helper)
             implementation(projects.songs)
             implementation(projects.bibleTab)
             implementation(projects.server)

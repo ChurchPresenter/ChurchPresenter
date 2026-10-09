@@ -15,13 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Tv
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +40,15 @@ import org.churchpresenter.strings.generated.resources.chapter
 import org.churchpresenter.strings.generated.resources.copy_verse
 import org.churchpresenter.strings.generated.resources.go_live
 import org.churchpresenter.icons.generated.resources.ic_copy
+import org.churchpresenter.icons.generated.resources.ic_go_live
+import org.churchpresenter.icons.generated.resources.ic_link
+import org.churchpresenter.strings.generated.resources.bible_cross_references
+import org.churchpresenter.sharedui.composables.ContextMenu
+import org.churchpresenter.sharedui.composables.ContextMenuHeader
+import org.churchpresenter.sharedui.composables.ContextMenuItem
+import org.churchpresenter.sharedui.composables.contextMenuShortcut
+import org.churchpresenter.sharedui.models.ShortcutAction
+import org.churchpresenter.theme.semantic
 import org.churchpresenter.icons.generated.resources.ic_playlist_add
 import kotlinx.coroutines.flow.first
 import org.jetbrains.compose.resources.painterResource
@@ -109,6 +112,7 @@ internal fun ColumnScope.BibleBrowserPane(
     onVerseDoubleClicked: () -> Unit,
     onCopyVerse: () -> Unit,
     onAddToSchedule: () -> Unit,
+    translationTitle: String,
     isSplitActive: Boolean,
     liveChapterVerses: List<String>,
     liveVerseNumbers: Set<Int>,
@@ -174,6 +178,9 @@ internal fun ColumnScope.BibleBrowserPane(
                         onVerseDoubleClicked = onVerseDoubleClicked,
                         onCopyVerse = onCopyVerse,
                         onAddToSchedule = onAddToSchedule,
+                        menuHeading = VerseMenuHeading(
+                            books.getOrNull(selectedBookIndex).orEmpty(), selectedChapter, translationTitle,
+                        ),
                         header = { if (!isSplitActive) verseHeader(true) },
                     )
 
@@ -196,16 +203,12 @@ internal fun ColumnScope.BibleBrowserPane(
                                     .coerceAtMost(maxSplitWidth)
                             }
                         }
-                        Column(
-                            modifier = Modifier.width(with(density) { effectiveSplitWidth.toDp() }).fillMaxHeight()
-                        ) {
-                            LiveChapterPanel(
-                                verses = liveChapterVerses,
-                                liveVerseNumbers = liveVerseNumbers,
-                                onVerseClicked = onLiveVerseClicked,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
+                        LiveChapterPanel(
+                            verses = liveChapterVerses,
+                            liveVerseNumbers = liveVerseNumbers,
+                            onVerseClicked = onLiveVerseClicked,
+                            modifier = Modifier.width(with(density) { effectiveSplitWidth.toDp() }).fillMaxHeight(),
+                        )
                     }
 
                 }
@@ -257,6 +260,7 @@ private fun VerseCard(
     onVerseDoubleClicked: () -> Unit,
     onCopyVerse: () -> Unit,
     onAddToSchedule: () -> Unit,
+    menuHeading: VerseMenuHeading,
     header: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
@@ -264,6 +268,7 @@ private fun VerseCard(
         header()
         var showVerseContextMenu by remember { mutableStateOf(false) }
         var verseContextMenuOffset by remember { mutableStateOf(DpOffset.Zero) }
+        var verseContextMenuIndex by remember { mutableStateOf(-1) }
 
         Box(modifier = Modifier.fillMaxSize()
             .pointerInput(Unit) {
@@ -308,52 +313,92 @@ private fun VerseCard(
                 onItemShiftClicked = onVerseShiftClicked,
                 onRightClicked = { index ->
                     onVerseRightClicked(index)
+                    verseContextMenuIndex = index
                     showVerseContextMenu = true
                 }
             )
 
-            DropdownMenu(
+            VerseContextMenu(
                 expanded = showVerseContextMenu,
                 onDismissRequest = { showVerseContextMenu = false },
-                offset = verseContextMenuOffset
-            ) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(Res.string.copy_verse)) },
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(IconRes.drawable.ic_copy),
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    },
-                    onClick = { onCopyVerse(); showVerseContextMenu = false }
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(Res.string.add_to_schedule)) },
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(IconRes.drawable.ic_playlist_add),
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.secondary
-                        )
-                    },
-                    onClick = { onAddToSchedule(); showVerseContextMenu = false }
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(Res.string.go_live)) },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Tv,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    onClick = { onVerseDoubleClicked(); showVerseContextMenu = false }
+                offset = verseContextMenuOffset,
+                index = verseContextMenuIndex,
+                verseLine = filteredVerses.getOrNull(verseContextMenuIndex),
+                heading = menuHeading,
+                refCountFor = { crossRefs.counts[it] ?: 0 },
+                showCrossRefs = !crossRefsDocked,
+                onGoLive = onVerseDoubleClicked,
+                onAddToSchedule = onAddToSchedule,
+                onCopyVerse = onCopyVerse,
+                onCrossRefs = onRefsChipClicked,
+            )
+        }
+    }
+}
+
+/** What the verse menu's header names: the book and chapter on screen and the translation. */
+internal data class VerseMenuHeading(val book: String, val chapter: Int, val translation: String)
+
+/** Go Live, Add to Schedule, Copy and Cross References for the right-clicked verse. */
+@Composable
+private fun VerseContextMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    offset: DpOffset,
+    index: Int,
+    verseLine: String?,
+    heading: VerseMenuHeading,
+    refCountFor: (Int) -> Int,
+    showCrossRefs: Boolean,
+    onGoLive: () -> Unit,
+    onAddToSchedule: () -> Unit,
+    onCopyVerse: () -> Unit,
+    onCrossRefs: (Int) -> Unit,
+) {
+    val menuVerse = verseLine?.let(::verseNumberOf)
+    ContextMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        offset = offset,
+        header = menuVerse?.let { verse ->
+            {
+                ContextMenuHeader(
+                    badge = verse.toString(),
+                    title = "${heading.book} ${heading.chapter}:$verse",
+                    subtitle = heading.translation,
+                    accent = MaterialTheme.semantic.contentBible,
                 )
             }
+        },
+    ) {
+        ContextMenuItem(
+            label = stringResource(Res.string.go_live),
+            icon = painterResource(IconRes.drawable.ic_go_live),
+            accent = MaterialTheme.colorScheme.primary,
+            shortcut = contextMenuShortcut(ShortcutAction.GO_LIVE),
+            emphasized = true,
+            onClick = { onGoLive(); onDismissRequest() },
+        )
+        ContextMenuItem(
+            label = stringResource(Res.string.add_to_schedule),
+            icon = painterResource(IconRes.drawable.ic_playlist_add),
+            accent = MaterialTheme.semantic.success,
+            shortcut = contextMenuShortcut(ShortcutAction.ADD_TO_SCHEDULE),
+            onClick = { onAddToSchedule(); onDismissRequest() },
+        )
+        ContextMenuItem(
+            label = stringResource(Res.string.copy_verse),
+            icon = painterResource(IconRes.drawable.ic_copy),
+            accent = MaterialTheme.semantic.info,
+            onClick = { onCopyVerse(); onDismissRequest() },
+        )
+        if (showCrossRefs && menuVerse != null && refCountFor(menuVerse) > 0) {
+            ContextMenuItem(
+                label = stringResource(Res.string.bible_cross_references),
+                icon = painterResource(IconRes.drawable.ic_link),
+                accent = MaterialTheme.semantic.warning,
+                onClick = { onCrossRefs(index); onDismissRequest() },
+            )
         }
     }
 }

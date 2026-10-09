@@ -13,6 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.churchpresenter.sharedui.testing.showsContainingText
 
 class PresentationTabPlaybackSettingsTest {
@@ -145,7 +146,7 @@ class PresentationTabPlaybackSettingsTest {
     }
 
     @Test
-    fun `a non-numeric interval is ignored but still closes the dialog`() = presentationTab { vm, _ ->
+    fun `a non-numeric interval cannot be confirmed`() = presentationTab { vm, _ ->
         onNodeWithText("AUTO-SCROLL INTERVAL", substring = true).performClick()
         waitForIdle()
         onAllNodes(hasSetTextAction())[0].performTextReplacement("abc")
@@ -153,33 +154,52 @@ class PresentationTabPlaybackSettingsTest {
         waitForIdle()
 
         assertEquals(5f, vm.autoScrollInterval, "a value that doesn't parse must not overwrite the interval")
-        assertFalse(showsContainingText("Cancel"), "the dialog must close either way, not stay stuck open")
+        assertTrue(showsContainingText("Enter a number from 1 to 30 s."), "the dialog says why")
+
+        onNodeWithText("Cancel").performClick()
+        waitForIdle()
+        assertFalse(showsContainingText("Enter a number from"), "Cancel still closes it")
     }
 
     @Test
-    fun `an interval above the maximum is clamped to it`() = presentationTab { vm, _ ->
+    fun `an interval above the maximum is refused with a message`() = presentationTab { vm, _ ->
         onNodeWithText("AUTO-SCROLL INTERVAL", substring = true).performClick()
         waitForIdle()
         onAllNodes(hasSetTextAction())[0].performTextReplacement("999")
         onNodeWithText("OK").performClick()
         waitForIdle()
 
-        assertEquals(
-            30f,
-            vm.autoScrollInterval,
-            "an operator mistyping a huge value must not leave the slideshow stalled",
-        )
+        assertEquals(5f, vm.autoScrollInterval, "a mistyped value never reaches the slideshow")
+        assertTrue(showsContainingText("Enter a number from 1 to 30 s."))
+
+        onNodeWithContentDescription("Decrease").performClick()
+        onNodeWithText("OK").performClick()
+        waitForIdle()
+        assertEquals(30f, vm.autoScrollInterval, "one step brings it back to the maximum")
     }
 
     @Test
-    fun `an interval below the minimum is clamped to it`() = presentationTab { vm, _ ->
+    fun `an interval below the minimum is refused with a message`() = presentationTab { vm, _ ->
         onNodeWithText("AUTO-SCROLL INTERVAL", substring = true).performClick()
         waitForIdle()
         onAllNodes(hasSetTextAction())[0].performTextReplacement("0")
         onNodeWithText("OK").performClick()
         waitForIdle()
 
-        assertEquals(1f, vm.autoScrollInterval)
+        assertEquals(5f, vm.autoScrollInterval)
+        assertTrue(showsContainingText("Enter a number from 1 to 30 s."))
+    }
+
+    @Test
+    fun `an interval preset sets it in one click`() = presentationTab { vm, reports ->
+        onNodeWithText("AUTO-SCROLL INTERVAL", substring = true).performClick()
+        waitForIdle()
+        onNodeWithText("10 s").performClick()
+        onNodeWithText("OK").performClick()
+        waitForIdle()
+
+        assertEquals(10f, vm.autoScrollInterval)
+        assertEquals(10f, reports.settingsAfterChange?.presentationSettings?.autoScrollInterval)
     }
 
     // ── Transition duration dialog ────────────────────────────────────────────────
@@ -197,24 +217,38 @@ class PresentationTabPlaybackSettingsTest {
     }
 
     @Test
-    fun `a transition duration above the maximum is clamped to it`() = presentationTab { vm, _ ->
+    fun `a transition duration above the maximum is refused with a message`() = presentationTab { vm, _ ->
         onNodeWithText("TRANSITION DURATION", substring = true).performClick()
         waitForIdle()
         onAllNodes(hasSetTextAction())[0].performTextReplacement("9999")
         onNodeWithText("OK").performClick()
         waitForIdle()
 
-        assertEquals(2000f, vm.transitionDuration)
+        assertEquals(500f, vm.transitionDuration)
+        assertTrue(showsContainingText("Enter a number from 100 to 2000 ms."))
     }
 
     @Test
-    fun `a transition duration below the minimum is clamped to it`() = presentationTab { vm, _ ->
+    fun `a transition duration below the minimum is refused with a message`() = presentationTab { vm, _ ->
         onNodeWithText("TRANSITION DURATION", substring = true).performClick()
         waitForIdle()
         onAllNodes(hasSetTextAction())[0].performTextReplacement("1")
         onNodeWithText("OK").performClick()
         waitForIdle()
 
-        assertEquals(100f, vm.transitionDuration)
+        assertEquals(500f, vm.transitionDuration)
+        assertTrue(showsContainingText("Enter a number from 100 to 2000 ms."))
+    }
+
+    @Test
+    fun `plus steps the transition by fifty milliseconds`() = presentationTab { vm, reports ->
+        onNodeWithText("TRANSITION DURATION", substring = true).performClick()
+        waitForIdle()
+        onNodeWithContentDescription("Increase").performClick()
+        onNodeWithText("OK").performClick()
+        waitForIdle()
+
+        assertEquals(550f, vm.transitionDuration)
+        assertEquals(550f, reports.settingsAfterChange?.presentationSettings?.transitionDuration)
     }
 }
