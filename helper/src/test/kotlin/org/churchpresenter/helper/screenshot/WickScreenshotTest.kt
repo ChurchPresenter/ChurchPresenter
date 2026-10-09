@@ -14,11 +14,17 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.helper.HelperActionExecutor
 import org.churchpresenter.helper.HelperState
+import org.churchpresenter.helper.suggest.SuggestedRequest
+import org.churchpresenter.helper.HelperText
 import org.churchpresenter.helper.action.ActionOutcome
 import org.churchpresenter.helper.action.ContentScope
 import org.churchpresenter.helper.action.HelperAction
 import org.churchpresenter.helper.action.Persistence
+import org.churchpresenter.helper.intent.KnownProfile
 import org.churchpresenter.helper.intent.ResolveContext
+import org.churchpresenter.helper.intent.Resolution
+import org.churchpresenter.helper.report.ChatSendResult
+import org.churchpresenter.helper.report.ChatSender
 import org.churchpresenter.helper.intent.RuleIntentResolver
 import org.churchpresenter.helper.ui.CommandsTable
 import org.churchpresenter.helper.ui.HelperInputs
@@ -36,6 +42,8 @@ class WickScreenshotTest {
 
     private val executor = HelperActionExecutor { ActionOutcome.Done() }
 
+    private val sendChat: ChatSender = { _, _ -> ChatSendResult.SENT }
+
     @Composable
     private fun panel(state: HelperState) {
         HelperOverlay(
@@ -46,8 +54,9 @@ class WickScreenshotTest {
                 onSettingsChange = {},
                 suggestions = emptyList(),
                 screens = emptyList(),
-                context = ResolveContext(language = "en"),
+                context = ResolveContext(language = "en", profiles = listOf(KnownProfile("p", "Livestream"))),
                 anythingLive = false,
+                onSendChat = sendChat,
             ),
             executor = executor,
             resolver = RuleIntentResolver(),
@@ -104,6 +113,66 @@ class WickScreenshotTest {
             },
         )
     }
+
+    /** A short chat that went wrong: a page to parents, a profile by name, then a request Wick did not follow. */
+    private fun chat() = HelperState().apply {
+        isOpen = true
+        thread.said("tell the parents of Sam to come to the nursery")
+        request(HelperAction.ShowAnnouncement("Parents of Sam, please come to the nursery."), executor)
+        answer("Cancel")
+        thread.said("make the Livestream lyrics bigger, order 98765")
+        onResolved(Resolution.Unknown, executor)
+    }
+
+    @Test
+    fun `the panel not sure, offering to send the chat`() = captureComponent(SECTION, "panel_not_sure") {
+        panel(chat())
+    }
+
+    @Test
+    fun `the panel asking about its best guess, with the next closest chips`() =
+        captureComponent(SECTION, "panel_did_you_mean") {
+            panel(
+                HelperState().apply {
+                    isOpen = true
+                    thread.said("make the screen go black")
+                    onResolved(
+                        Resolution.DidYouMean(
+                            HelperText.Res(SuggestedRequest.CLEAR.label),
+                            HelperAction.ClearOutput,
+                            listOf(SuggestedRequest.NEXT_SLIDE, SuggestedRequest.PROJECTOR),
+                        ),
+                        executor,
+                    )
+                },
+            )
+        }
+
+    @Test
+    fun `the panel's menu`() = captureComponent(
+        SECTION,
+        "panel_menu",
+        rootIndex = 1,
+        drive = {
+            onNodeWithTag("helper.menu").performClick()
+            waitForIdle()
+        },
+    ) { panel(chat()) }
+
+    @Test
+    fun `the send-this-chat preview, masked`() = captureComponent(SECTION, "panel_share_chat") {
+        panel(chat().apply { sharingChat = true })
+    }
+
+    @Test
+    fun `the send-this-chat card once sent`() = captureComponent(
+        SECTION,
+        "panel_share_chat_sent",
+        drive = {
+            onNodeWithText("Send").performClick()
+            waitForIdle()
+        },
+    ) { panel(chat().apply { sharingChat = true }) }
 
     @Test
     fun `the whole commands table`() = captureComponent(SECTION, "commands_table") {

@@ -28,7 +28,11 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.icons.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_arrow_right
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.theme.components.RaisedSwitch
 import org.churchpresenter.theme.components.toggleRow
 import androidx.compose.material3.minimumInteractiveComponentSize
@@ -126,9 +130,39 @@ fun SettingRow(
      *  leaving it flush with the top edge. [SettingRowFirstControlOffset] fits a standard field. */
     labelTopPadding: Dp = 0.dp,
     content: @Composable () -> Unit
+) = SettingRowBody(label, Modifier, width, verticalAlignment, labelTopPadding, content)
+
+/**
+ * A [SettingRow] labelled by the string [label], which also names it for Wick: the row is the guide
+ * target `GuideTargets.settingsRow(label.key)`.
+ */
+@Composable
+fun SettingRow(
+    label: StringResource,
+    width: Dp = 120.dp,
+    verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
+    labelTopPadding: Dp = 0.dp,
+    content: @Composable () -> Unit
+) = SettingRowBody(
+    stringResource(label),
+    Modifier.guideTarget(GuideTargets.settingsRow(label.key)),
+    width,
+    verticalAlignment,
+    labelTopPadding,
+    content,
+)
+
+@Composable
+private fun SettingRowBody(
+    label: String,
+    modifier: Modifier,
+    width: Dp,
+    verticalAlignment: Alignment.Vertical,
+    labelTopPadding: Dp,
+    content: @Composable () -> Unit
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -157,10 +191,37 @@ fun SettingSwitchRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     width: Dp = 120.dp,
+) = SettingSwitchRowBody(label, Modifier, checked, onCheckedChange, width)
+
+/**
+ * A [SettingSwitchRow] labelled by the string [label], which also names it for Wick: the row is the
+ * guide target `GuideTargets.settingsRow(label.key)`.
+ */
+@Composable
+fun SettingSwitchRow(
+    label: StringResource,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    width: Dp = 120.dp,
+) = SettingSwitchRowBody(
+    stringResource(label),
+    Modifier.guideTarget(GuideTargets.settingsRow(label.key)),
+    checked,
+    onCheckedChange,
+    width,
+)
+
+@Composable
+private fun SettingSwitchRowBody(
+    label: String,
+    modifier: Modifier,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    width: Dp,
 ) {
     val interaction = remember { MutableInteractionSource() }
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically

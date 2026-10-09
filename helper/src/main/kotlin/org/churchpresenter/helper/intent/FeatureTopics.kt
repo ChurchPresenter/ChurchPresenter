@@ -20,14 +20,12 @@ import org.churchpresenter.strings.generated.resources.helper_hint_bible_multi_v
 import org.churchpresenter.strings.generated.resources.helper_hint_bible_search
 import org.churchpresenter.strings.generated.resources.helper_hint_bible_search_mode
 import org.churchpresenter.strings.generated.resources.helper_hint_pick_and_edit
-import org.churchpresenter.strings.generated.resources.helper_hint_planning_center
 import org.churchpresenter.strings.generated.resources.helper_hint_song_background
 import org.churchpresenter.strings.generated.resources.helper_hint_song_favorites
 import org.churchpresenter.strings.generated.resources.helper_hint_song_search
 import org.churchpresenter.strings.generated.resources.helper_hint_song_search_filter
 import org.churchpresenter.strings.generated.resources.helper_hint_web_go_live
 import org.churchpresenter.strings.generated.resources.helper_hint_web_url
-import org.churchpresenter.strings.generated.resources.planning_center_import_title
 import org.churchpresenter.strings.generated.resources.web_go_live
 import org.jetbrains.compose.resources.StringResource
 
@@ -46,7 +44,7 @@ internal fun featureTopicsRule(r: Request): Resolution? {
     val searching = !aboutLanguage && (text.containsWordPrefix("search") || r.hasPhrase(Vocabulary.LOOK_UP))
     val action = when {
         r.hasPhrase(Vocabulary.CCLI) -> HelperAction.OpenStatistics
-        r.hasPhrase(Vocabulary.PLANNING_CENTER) -> highlight(FeatureTours.planningCenter())
+        r.hasPhrase(Vocabulary.PLANNING_CENTER) -> highlight(SetupTopics.planningCenter())
         r.hasPhrase(Vocabulary.PHONE_REMOTE) -> highlight(NavigationTopics.remoteServer())
         Vocabulary.FAVORITE.any { text.containsWordPrefix(it) } || r.hasPhrase(Vocabulary.STAR_A_SONG) ->
             highlight(FeatureTours.favorites())
@@ -149,17 +147,6 @@ internal object FeatureTours {
                     helperText(Res.string.bible_cross_references_enable),
                 ),
                 before = HelperAction.SelectTab(Tabs.BIBLE),
-            ),
-        ),
-    )
-
-    /** The Schedule's own toolbar, which is always on screen. */
-    fun planningCenter() = GuideTour(
-        listOf(
-            step(
-                GuideTargets.PLANNING_CENTER_IMPORT,
-                Res.string.helper_hint_planning_center,
-                Res.string.planning_center_import_title,
             ),
         ),
     )

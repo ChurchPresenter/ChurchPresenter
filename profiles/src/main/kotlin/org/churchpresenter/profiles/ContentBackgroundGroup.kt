@@ -139,7 +139,7 @@ internal fun ContentBackgroundGroup(
             )
         },
     ) {
-        SettingsRow(stringResource(Res.string.profile_bg_row), sub = sub) {
+        SettingsRow(Res.string.profile_bg_row, sub = sub) {
             RowSegmented(
                 options = listOf(
                     RowOption(

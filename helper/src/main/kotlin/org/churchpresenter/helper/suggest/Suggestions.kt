@@ -5,6 +5,7 @@ import org.churchpresenter.helper.action.GuideStep
 import org.churchpresenter.helper.action.GuideTour
 import org.churchpresenter.helper.action.HelperAction
 import org.churchpresenter.helper.helperText
+import org.churchpresenter.helper.intent.ScheduleTopics
 import org.churchpresenter.helper.intent.helperTabName
 import org.churchpresenter.settings.HelperSettings
 import org.churchpresenter.settings.allows
@@ -14,7 +15,6 @@ import org.churchpresenter.sharedui.guide.SettingsPage
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.helper_hint_new_song
-import org.churchpresenter.strings.generated.resources.helper_hint_schedule
 import org.churchpresenter.strings.generated.resources.helper_hint_tab
 import org.churchpresenter.strings.generated.resources.helper_hint_toggle_outputs
 import org.churchpresenter.strings.generated.resources.helper_suggest_bible_none
@@ -127,12 +127,11 @@ fun suggestionsFor(signals: HelperSignals, settings: HelperSettings, nowMillis: 
             )
         }
         if (signals.scheduleEmpty) {
-            val point = point(step(GuideTargets.SCHEDULE_PANEL, Res.string.helper_hint_schedule))
             add(
                 suggestion(
                     SuggestionIds.SCHEDULE_EMPTY,
                     Res.string.helper_suggest_schedule_empty,
-                    point,
+                    HelperAction.Highlight(ScheduleTopics.plan()),
                     topic = Res.string.helper_topic_schedule,
                 ),
             )

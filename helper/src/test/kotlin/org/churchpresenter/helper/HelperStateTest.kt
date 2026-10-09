@@ -10,7 +10,6 @@ import org.churchpresenter.helper.action.UndoEntry
 import org.churchpresenter.helper.display.DisplayStep
 import org.churchpresenter.helper.display.DisplaySetupFlow
 import org.churchpresenter.helper.intent.Resolution
-import org.churchpresenter.helper.suggest.SuggestedRequest
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.models.Tabs
@@ -58,9 +57,9 @@ class HelperStateTest {
         state.onResolved(Resolution.Clarify(HelperText.Plain("which?"), listOf(blue)), done)
         assertIs<HelperReply.Clarify>(state.reply)
         state.onResolved(Resolution.Unknown, done)
-        assertEquals(SuggestedRequest.DEFAULTS, assertIs<HelperReply.Unknown>(state.reply).closest)
-        state.onResolved(Resolution.Closest(listOf(SuggestedRequest.VERSE)), done)
-        assertEquals(listOf(SuggestedRequest.VERSE), assertIs<HelperReply.Unknown>(state.reply).closest)
+        assertEquals(HelperReply.Unknown, state.reply)
+        state.onResolved(Resolution.DidYouMean(HelperText.Plain("blue"), blue), done)
+        assertEquals(blue, assertIs<HelperReply.DidYouMean>(state.reply).action)
     }
 
     @Test
@@ -162,7 +161,8 @@ class HelperStateTest {
             HelperReply.Clarify(HelperText.Plain("which"), listOf(blue)),
             HelperReply.Message(HelperText.Plain("hi")),
             HelperReply.Shortcut(ShortcutAction.TAKE),
-            HelperReply.Unknown(emptyList()),
+            HelperReply.Unknown,
+            HelperReply.DidYouMean(HelperText.Plain("blue"), blue),
             HelperReply.Greeting,
             HelperReply.Commands,
             HelperReply.Touring(tour, 1),
@@ -180,5 +180,41 @@ class HelperStateTest {
         assertEquals(ThreadEntry.Operator("line 79"), thread.entries.last())
         thread.keep(HelperText.Plain("tip"))
         assertIs<ThreadEntry.Wick>(thread.entries.last())
+    }
+
+    @Test
+    fun `use is counted when Wick carries something out, never for talk or a refusal`() {
+        var used = 0
+        val state = HelperState(onUsed = { used++ })
+        state.onResolved(Resolution.Unknown, done)
+        state.request(HelperAction.Greet, done)
+        state.request(HelperAction.ShowCommands, done)
+        state.request(HelperAction.Thanks, done)
+        state.request(blue, done)
+        assertEquals(0, used, "opening, talking and an unanswered confirmation are not use")
+        val refused = HelperActionExecutor { ActionOutcome.Refused(HelperText.Plain("no")) }
+        state.run(blue, refused)
+        assertEquals(0, used)
+        state.run(blue, done)
+        assertEquals(1, used)
+        state.run(HelperAction.Highlight(tour), done)
+        assertEquals(2, used)
+        state.run(HelperAction.ShowShortcut(ShortcutAction.TAKE), done)
+        assertEquals(3, used)
+        state.run(HelperAction.StartDisplaySetup, HelperActionExecutor { ActionOutcome.DisplaySetup })
+        assertEquals(4, used)
+        state.run(HelperAction.SelectTab(Tabs.SONGS), HelperActionExecutor { ActionOutcome.Guide(tour) })
+        assertEquals(5, used)
+    }
+
+    @Test
+    fun `the send-this-chat card goes away when the bubble closes or the chat is cleared`() {
+        val state = HelperState()
+        state.sharingChat = true
+        state.close()
+        assertEquals(false, state.sharingChat)
+        state.sharingChat = true
+        state.clear()
+        assertEquals(false, state.sharingChat)
     }
 }

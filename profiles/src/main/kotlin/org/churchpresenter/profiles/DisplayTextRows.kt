@@ -61,10 +61,10 @@ internal fun DisplayTextRows(
     extraBasic: @Composable () -> Unit = {},
 ) {
     val path = { field: String -> listOf("$prefix.$field") }
-    SettingsRow(stringResource(Res.string.profile_text_font), paths = path("fontType")) {
+    SettingsRow(Res.string.profile_text_font, paths = path("fontType")) {
         RowFont(style.fontType, rememberSystemFonts()) { onChange(style.copy(fontType = it)) }
     }
-    SettingsRow(stringResource(Res.string.profile_text_size), paths = path("fontSize")) {
+    SettingsRow(Res.string.profile_text_size, paths = path("fontSize")) {
         RowStepper(
             style.fontSize,
             { onChange(style.copy(fontSize = it)) },
@@ -73,12 +73,12 @@ internal fun DisplayTextRows(
             unit = stringResource(Res.string.profile_text_size_unit),
         )
     }
-    SettingsRow(stringResource(Res.string.profile_text_color), paths = path("textColor")) {
+    SettingsRow(Res.string.profile_text_color, paths = path("textColor")) {
         RowColor(style.textColor, { onChange(style.copy(textColor = it)) })
     }
     extraBasic()
     SettingsRow(
-        stringResource(Res.string.profile_text_style),
+        Res.string.profile_text_style,
         searchTerms = styleSearchTerms(),
         paths = path("bold") + path("italic") + path("underline") + path("outline") + path("backdrop"),
     ) {
@@ -100,7 +100,7 @@ internal fun DisplayTextRows(
         )
     }
     SettingsSwitchRow(
-        stringResource(Res.string.profile_text_shadow),
+        Res.string.profile_text_shadow,
         style.shadow,
         { onChange(style.copy(shadow = it)) },
         paths = path("shadow"),
@@ -138,10 +138,10 @@ internal fun DisplayBoxGroup(
         summary = { "$color · $opacity${stringResource(Res.string.percent_suffix)}" },
     ) {
         leading()
-        SettingsRow(stringResource(Res.string.profile_bg_row), paths = listOf("$prefix.backgroundColor")) {
+        SettingsRow(Res.string.profile_bg_row, paths = listOf("$prefix.backgroundColor")) {
             RowColor(color, onColor)
         }
-        SettingsRow(stringResource(Res.string.profile_box_opacity), paths = listOf("$prefix.backgroundOpacity")) {
+        SettingsRow(Res.string.profile_box_opacity, paths = listOf("$prefix.backgroundOpacity")) {
             RowStepper(
                 opacity,
                 onOpacity,
@@ -156,7 +156,7 @@ internal fun DisplayBoxGroup(
 /** Where on the screen the block sits, as the nine-point picker the old forms used. */
 @Composable
 internal fun ScreenPlacementRow(position: String, onPosition: (String) -> Unit, prefix: String) {
-    SettingsRow(stringResource(Res.string.profile_place_on_screen), paths = listOf("$prefix.position")) {
+    SettingsRow(Res.string.profile_place_on_screen, paths = listOf("$prefix.position")) {
         ScreenPositionPicker(
             positions = namedScreenPositions(),
             selected = shownPosition(position),
@@ -193,7 +193,7 @@ private fun namedScreenPositions(): List<Pair<String, String>> = listOf(
 /** Left / Center / Right for the text inside its block. */
 @Composable
 internal fun DisplayAlignmentRow(alignment: String, onAlignment: (String) -> Unit, prefix: String) {
-    SettingsRow(stringResource(Res.string.profile_text_alignment), paths = listOf("$prefix.horizontalAlignment")) {
+    SettingsRow(Res.string.profile_text_alignment, paths = listOf("$prefix.horizontalAlignment")) {
         RowSegmented(
             options = listOf(
                 RowOption(Constants.LEFT, stringResource(Res.string.left)),

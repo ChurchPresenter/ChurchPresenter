@@ -130,6 +130,13 @@ enum class UsageEvent(
     SONG_LIBRARY_BULK_EDIT("songLibraryBulkEdit"),
     SONG_LIBRARY_SONGBOOK_CREATED("songLibrarySongbookCreated"),
     SONG_LIBRARY_SONGS_DELETED("songLibrarySongsDeleted"),
+
+    /**
+     * Wick carried out something the operator asked for — a request, a tour, a guess they accepted.
+     * Opening the bubble, browsing tips and requests it did not understand do not count. Once per run;
+     * nothing typed is ever sent.
+     */
+    WICK_USED("wickUsed"),
 }
 
 @Serializable

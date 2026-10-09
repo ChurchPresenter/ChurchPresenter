@@ -191,7 +191,8 @@ private fun AnnouncementsTabScope.AnnouncementsTextActions(viewModel: Announceme
                     timerMode = Constants.TIMER_MODE_DURATION,
                 )) },
                 enabled = viewModel.text.isNotBlank(),
-                tooltipText = stringResource(Res.string.tooltip_add_to_schedule)
+                tooltipText = stringResource(Res.string.tooltip_add_to_schedule),
+                modifier = Modifier.guideTarget(GuideTargets.ANNOUNCEMENT_ADD_TO_SCHEDULE),
             )
         }
         if (output != null) {

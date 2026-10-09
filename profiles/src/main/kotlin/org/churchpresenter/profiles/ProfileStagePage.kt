@@ -150,7 +150,7 @@ private fun StageLayoutGroup(
         paths = listOf("$STAGE_PATH.layout", "$STAGE_PATH.zoneSizes"),
     ) {
         SettingsRow(
-            stringResource(Res.string.profile_stage_zones),
+            Res.string.profile_stage_zones,
             modifier = Modifier.guideTarget(GuideTargets.STAGE_ZONES),
             paths = listOf("$STAGE_PATH.layout"),
         ) {
@@ -163,7 +163,7 @@ private fun StageLayoutGroup(
         val arrangements = StageMonitorLayout.withZoneCount(count)
         if (arrangements.size > 1) {
             SettingsRow(
-                stringResource(Res.string.profile_stage_arrangement),
+                Res.string.profile_stage_arrangement,
                 modifier = Modifier.guideTarget(GuideTargets.STAGE_ARRANGEMENT),
                 paths = listOf("$STAGE_PATH.layout"),
             ) {
@@ -246,7 +246,7 @@ private fun WhatGoesWhereGroup(
             }
         }
         SettingsRow(
-            stringResource(Res.string.stage_monitor_metronome_position),
+            Res.string.stage_monitor_metronome_position,
             advanced = true,
             paths = listOf("$STAGE_PATH.metronomePosition"),
         ) {

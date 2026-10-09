@@ -26,6 +26,11 @@ consumer is `:composeApp`. It takes `:shared-ui`, `:strings`, `:icons`, `:core-m
   its own host — the main window and the Settings dialog do.
 - **Persisted state** is `HelperSettings` in `:settings` (`AppSettings.helper`). Suggestion ids in
   `SuggestionIds` are stored there — never rename one.
+- **Send this chat** goes out only through `HelperInputs.onSendChat`, which the app wires to Contact Us
+  (`WickChatSender.kt`, type `wickChat`). The card previews the chat already masked by `report/Redact.kt`;
+  nothing is sent until its Send. A sent chat is never committed or used as test data.
+- **Use is counted** through `HelperState`'s `onUsed`, called when Wick carries something out (a request,
+  a tour, a shortcut shown, display setup); the app records `UsageEvent.WICK_USED` once per run.
 
 ## Layout
 
@@ -38,12 +43,15 @@ consumer is `:composeApp`. It takes `:shared-ui`, `:strings`, `:icons`, `:core-m
 | `suggest/` | `HelperSignals`, `suggestionsFor`, the tips |
 | `display/` | `HelperScreen` and the display-setup flow |
 | `ui/` | The lamp, the overlay and bubble, the replies, display setup, the spotlight host |
+| `report/` | Masking a chat before it is previewed or sent (`Redact.kt`), and how a send went |
+| `pack/` | Wick packs: `wick-pack/pack.json` read, checked against this build, fetched and cached |
 
 ## Rules
 
-- **Dev mode only, for now.** The app draws the lamp, the Help → Show Helper item and the System
-  tab's Helper card only when `AppRootState.devMode` — the Developer menu's own gate. Lift it there
-  when Wick ships.
+- **Off until the operator starts it.** Help → Show Helper is always in the menu; it sets
+  `HelperSettings.startedByUser`, and only then (or in dev mode) does the app draw the lamp, play the
+  intro, offer tips and show the System tab's Helper card (`AppRootState.wickAvailable`). Nothing of
+  Wick appears on its own in production.
 - **Everything that changes something is confirmed.** `HelperAction.needsConfirmation` is false only
   for pointing at things, opening a window and showing a key.
 - **Quiet during a service.** No suggestion, no badge, no animation while anything is live; the
@@ -81,6 +89,20 @@ typos. Without the model, the helper is its rules alone.
   song/Bible settings, which `SettingsManager` strips of styling on save.
 - `internal` stops at the module edge. What `:composeApp` calls is public; nothing else is.
 
+## Wick packs
+
+What Wick can learn without an app release: phrases that lead to things it already does, tours over
+controls the app already tags, and tips (`wick-pack/README.md`). The app fetches `pack.json` from `main`
+at most once a day, only once Wick is in use, and falls back to the cache, then to its bundled data.
+
+- **Data only.** A pack can point and say things; it cannot change a setting, go live or run code.
+  `parseWickPack` drops anything naming a target, a place or a tour this build does not have, and ignores
+  a pack too big, malformed, or for a newer app (`minApp`, written as the app writes its version: `26.15.0`).
+- **Edit `wick-pack/source.json`, never `pack.json`**, then run `./gradlew :helper:buildWickPack`.
+  `WickPackSyncTest` fails until it has been run after a change.
+- **English only**: hints and tips are shown as written; tips only in an English app.
+- A dev build reads a local pack with `-Dchurchpresenter.wickPackUrl=<path or file: URL>`.
+
 ## Commands
 
 ```bash
@@ -90,5 +112,6 @@ typos. Without the model, the helper is its rules alone.
 ./gradlew :helper:jacocoTestCoverageVerification
 ./gradlew :helper:wickEval            # how well Wick understands rewordings
 ./gradlew :helper:updateWickCatalog   # after tagging a control, rewording a label or adding a topic phrase
+./gradlew :helper:buildWickPack       # after editing wick-pack/source.json
 python3 helper/tools/export_minilm.py # re-export the model (needs numpy and tokenizers)
 ```

@@ -1,5 +1,7 @@
 package org.churchpresenter.liveoutput.settings
 
+import org.churchpresenter.sharedui.guide.guideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.mergingProfileOf
@@ -130,6 +132,7 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
                 "apiKey=${settings.serverSettings.apiKey}" else null
 
             BrowserSourceHeaderRow(
+                index = i,
                 output = output,
                 defaultLabel = defaultLabel,
                 overlayUrl = overlayUrl,
@@ -167,7 +170,8 @@ SettingsSection(title = stringResource(Res.string.browser_source_outputs)) {
             onSettingsChange { s ->
                 s.copy(projectionSettings = s.projectionSettings.addBrowserSourceOutput())
             }
-        }
+        },
+        modifier = Modifier.guideTarget(GuideTargets.BROWSER_SOURCE_ADD),
     ) {
         Text(stringResource(Res.string.add_browser_source_output), style = MaterialTheme.typography.labelSmall)
     }
@@ -182,6 +186,7 @@ private val OPTION_LABEL_HEIGHT = 32.dp
 /** An output's on switch, its name, its address, and the copy, identify and remove buttons. */
 @Composable
 private fun BrowserSourceHeaderRow(
+    index: Int,
     output: ScreenAssignment,
     defaultLabel: String,
     overlayUrl: String?,
@@ -229,6 +234,7 @@ private fun BrowserSourceHeaderRow(
                     )
                 },
                 modifier = Modifier.width(NAME_FIELD_WIDTH)
+                    .then(if (index == 0) Modifier.guideTarget(GuideTargets.BROWSER_SOURCE_FIRST_NAME) else Modifier)
             )
         }
             if (overlayUrl != null) {
@@ -360,6 +366,7 @@ private fun BrowserSourceOptions(
                         output.activeProfileId,
                     ),
                     onPick = { pickedId -> update(output.copy(activeProfileId = pickedId)) },
+                    modifier = Modifier.guideTarget(GuideTargets.outputProfilePicker("browser", i)),
                 )
             }
             ResolutionPicker(

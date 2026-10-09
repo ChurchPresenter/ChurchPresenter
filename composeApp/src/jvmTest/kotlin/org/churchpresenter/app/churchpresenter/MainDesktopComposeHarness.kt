@@ -162,6 +162,8 @@ abstract class MainDesktopComposeHarness {
                         remoteSelectPictureFlow = flows.remoteSelectPicture,
                         remoteSelectPresentationFlow = flows.remoteSelectPresentation,
                         uploadPresentationFlow = flows.uploadPresentation,
+                        selectTabFlow = flows.selectTab,
+                        showReferenceFlow = flows.showReference,
                     ),
                 )
             }
@@ -187,6 +189,8 @@ abstract class MainDesktopComposeHarness {
         val remoteSelectPicture = MutableSharedFlow<ScheduleItem.PictureItem>(extraBufferCapacity = 4)
         val remoteSelectPresentation = MutableSharedFlow<ScheduleItem.PresentationItem>(extraBufferCapacity = 4)
         val uploadPresentation = MutableSharedFlow<File>(extraBufferCapacity = 4)
+        val selectTab = MutableSharedFlow<Tabs>(extraBufferCapacity = 4)
+        val showReference = MutableSharedFlow<String>(extraBufferCapacity = 4)
     }
 
     /** Settings that leave [tab] as the only visible one, so the root builds that branch. */

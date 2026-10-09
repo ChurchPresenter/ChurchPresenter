@@ -9,6 +9,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.diagnostics.Log
+import org.churchpresenter.helper.pack.WickPack
+import org.churchpresenter.helper.pack.WickPacks
 import java.util.concurrent.Executors
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
@@ -27,6 +29,8 @@ internal class SemanticMatcher(
     private val loadEncoder: () -> MiniLmEncoder = MiniLmEncoder::load,
     private val loadCatalog: () -> List<CatalogEntry> = WickCatalog::load,
     private val idle: Duration = 10.minutes,
+    /** The downloaded pack whose phrases are ranked beside the bundled catalog; null for none. */
+    private val pack: () -> WickPack? = { WickPacks.current.value },
 ) {
     private var encoder: MiniLmEncoder? = null
     private var catalog: List<CatalogEntry> = emptyList()
@@ -41,7 +45,7 @@ internal class SemanticMatcher(
         val model = encoder ?: load() ?: return@withContext null
         keepFor(idle)
         val queries = readings.map(model::encode)
-        catalog.groupBy { it.target }
+        (catalog + pack()?.phrases.orEmpty()).groupBy { it.target }
             .map { (target, entries) ->
                 Scored(target, entries.maxOf { entry -> queries.maxOf { cosine(it, entry.vector) } })
             }

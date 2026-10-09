@@ -1,8 +1,8 @@
 package org.churchpresenter.helper.intent
 
+import org.churchpresenter.helper.suggest.SuggestedRequest
 import org.churchpresenter.helper.HelperText
 import org.churchpresenter.helper.action.HelperAction
-import org.churchpresenter.helper.suggest.SuggestedRequest
 import org.churchpresenter.sharedui.models.Tabs
 import java.util.Locale
 
@@ -11,7 +11,29 @@ data class ResolveContext(
     val currentTab: Tabs? = null,
     val visibleTabs: Set<Tabs> = Tabs.entries.toSet(),
     val language: String = Locale.getDefault().language,
+    /** The operator's output profiles, so a request can name one. */
+    val profiles: List<KnownProfile> = emptyList(),
+    /** Every output and the profile it draws with, in the Projection page's order. */
+    val outputs: List<KnownOutput> = emptyList(),
+    /**
+     * The loaded Bible's books, each as the names it goes by — the Bible's own, then the standard English
+     * one — so a typed book is matched as that Bible names it. Empty when none is loaded.
+     */
+    val bibleBooks: List<List<String>> = emptyList(),
 )
+
+/** An output profile, by the name the operator gave it; [stageMonitor] when it is one. */
+data class KnownProfile(val id: String, val name: String, val stageMonitor: Boolean = false)
+
+/**
+ * One output as the Projection page lists it: its [label] ("Screen 2", an NDI output's name), its
+ * card's [kind] (`screen`, `browser`, `ndi`, `omt`) and [index] there, and the profile it draws with.
+ */
+data class KnownOutput(val label: String, val kind: String, val index: Int, val profileId: String?)
+
+/** The profile the first screen output — the audience screen — draws with. */
+val ResolveContext.audienceProfile: KnownProfile?
+    get() = outputs.firstOrNull { it.kind == "screen" }?.profileId?.let { id -> profiles.find { it.id == id } }
 
 /** What a typed request came to. */
 sealed interface Resolution {
@@ -24,8 +46,18 @@ sealed interface Resolution {
     /** It was not understood. */
     data object Unknown : Resolution
 
-    /** It was not understood, but it reads closest to [requests], best first — offered as chips. */
+    /** It was not understood, and nothing came close enough to ask about; [requests] are the nearest chips. */
     data class Closest(val requests: List<SuggestedRequest>) : Resolution
+
+    /**
+     * It was not understood for sure, but reads most like [action], described as [label] — offered as a
+     * question, with [others], the next closest chips, offered beside it.
+     */
+    data class DidYouMean(
+        val label: HelperText,
+        val action: HelperAction,
+        val others: List<SuggestedRequest> = emptyList(),
+    ) : Resolution
 }
 
 /**

@@ -330,6 +330,7 @@ private fun LyricsActionBar(
                 // this one adds the *selected* song. The name is shared on purpose; the tag
                 // is how a test says which of them it means.
                 modifier = Modifier.testTag(SONGS_ADD_SELECTED_TAG)
+                    .guideTarget(GuideTargets.SONGS_ADD_TO_SCHEDULE)
             )
         }
 

@@ -126,6 +126,8 @@ data class RemoteControlFlows(
     val remotePresentationGotoFlow: Flow<Int>? = null,
     /** Tabs the helper asks the main screen to switch to, when it points at something on one. */
     val selectTabFlow: Flow<Tabs>? = null,
+    /** References the helper asks the Bible tab to put live, read as its search box reads them. */
+    val showReferenceFlow: Flow<String>? = null,
 )
 
 /** This instance's side of an Instance Link, as a follower, a controller or a primary. */

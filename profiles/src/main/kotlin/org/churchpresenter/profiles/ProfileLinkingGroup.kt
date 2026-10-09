@@ -82,7 +82,7 @@ internal fun LinkingGroup(link: ProfileLink, candidates: List<OutputProfile>, ac
 private fun LinkToMasterRows(candidates: List<OutputProfile>, actions: ProfileLinkActions) {
     var picked by remember(candidates.map { it.id }) { mutableStateOf(candidates.first().id) }
     val master = candidates.find { it.id == picked } ?: candidates.first()
-    SettingsRow(stringResource(Res.string.profile_linking_link_to)) {
+    SettingsRow(Res.string.profile_linking_link_to) {
         DropdownSelector(
             label = "",
             value = master.id,
@@ -93,7 +93,7 @@ private fun LinkToMasterRows(candidates: List<OutputProfile>, actions: ProfileLi
         )
     }
     SettingsRow(
-        stringResource(Res.string.profile_link_keep),
+        Res.string.profile_link_keep,
         sub = stringResource(Res.string.profile_link_keep_sub),
     ) {
         ActionKey(
@@ -152,7 +152,7 @@ private fun shownSections(profile: OutputProfile): List<ProfileSection> =
 @Composable
 internal fun CreateLinkedAction(onCreate: () -> Unit) {
     SettingsRow(
-        stringResource(Res.string.profile_menu_create_linked),
+        Res.string.profile_menu_create_linked,
         sub = stringResource(Res.string.profile_create_linked_sub),
     ) {
         ActionKey(Icons.Filled.AddLink, stringResource(Res.string.profile_menu_create_linked), onCreate)

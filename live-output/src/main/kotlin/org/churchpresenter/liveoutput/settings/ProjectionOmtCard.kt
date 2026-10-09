@@ -1,5 +1,7 @@
 package org.churchpresenter.liveoutput.settings
 
+import org.churchpresenter.sharedui.guide.guideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.settings.mergingProfileOf
 import org.churchpresenter.settings.utils.Constants
 import androidx.compose.foundation.layout.Arrangement
@@ -171,6 +173,7 @@ internal fun OmtOutputsCard(
                 onClick = {
                     onSettingsChange { s -> s.copy(projectionSettings = s.projectionSettings.addOmtOutput()) }
                 },
+                modifier = Modifier.guideTarget(GuideTargets.OMT_ADD),
             ) {
                 Text(stringResource(Res.string.add_omt_output), style = MaterialTheme.typography.labelSmall)
             }
@@ -566,6 +569,7 @@ private fun OmtOutputRow(
                             output.activeProfileId,
                         ),
                         onPick = { pickedId -> update(output.copy(activeProfileId = pickedId)) },
+                        modifier = Modifier.guideTarget(GuideTargets.outputProfilePicker("omt", index)),
                     )
                 }
                 ResolutionPicker(

@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +40,7 @@ import org.churchpresenter.settings.unlinkProfile
 import org.churchpresenter.settings.withLinksResolved
 import org.churchpresenter.settings.newOutputProfile
 import org.churchpresenter.settings.renameOutputProfile
+import org.churchpresenter.sharedui.guide.LocalGuideSession
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -67,6 +69,8 @@ fun ProfilesSettingsTab(
     // Held here rather than in the editor, so moving between profiles keeps the page -- comparing
     // two profiles' Bible styling is one of the reasons to move between them.
     var page by remember { mutableStateOf<ProfilePage>(ProfilePage.General) }
+
+    FollowGuideFocus(proj.outputProfiles, profile, onProfile = { selectedId = it }, onPage = { page = it })
 
     // Set by the Delete action, so one dialog and one confirm path covers every way of deleting.
     var pendingDeleteId by remember { mutableStateOf<String?>(null) }
@@ -258,6 +262,30 @@ private fun OutputProfile.displayNameOr(fallback: String): String = name.ifBlank
 
 /** "Foyer TV" → "Foyer TV copy", "Foyer TV copy" → "Foyer TV copy copy": no de-duplication attempted. */
 internal fun duplicateName(name: String): String = "$name copy"
+
+/**
+ * A Wick tour opening Settings on one profile, page and row: [onProfile] and [onPage] are told which,
+ * once, when the tour sets the focus, which is then put back.
+ */
+@Composable
+private fun FollowGuideFocus(
+    profiles: List<OutputProfile>,
+    current: OutputProfile?,
+    onProfile: (String) -> Unit,
+    onPage: (ProfilePage) -> Unit,
+) {
+    val session = LocalGuideSession.current
+    val focus = session?.profileFocus
+    LaunchedEffect(focus) {
+        if (focus == null) return@LaunchedEffect
+        val focused = profiles.find { it.id == focus.profileId } ?: current
+        if (focused != null) {
+            onProfile(focused.id)
+            focusedPage(focused, focus.page, focus.rowKey)?.let(onPage)
+        }
+        session.profileFocus = null
+    }
+}
 
 /** Every output currently following [id], labeled the way its own card labels it. */
 @Composable
