@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,9 +37,14 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.PointerInputScope
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.sharedui.guide.GuideSession
 import org.churchpresenter.sharedui.guide.GuideTargetRegistry
 import org.churchpresenter.sharedui.guide.LocalGuideRingColor
 import org.churchpresenter.sharedui.guide.LocalGuideSession
@@ -74,14 +80,21 @@ private val RING_WIDTH = 2.dp
  * session points at a control laid out in this window, rings it in gold — the ring lands, pings once,
  * then breathes while a spark of light travels around its edge.
  *
- * The ring draws over everything and takes no input, so the control under it still clicks.
+ * The ring draws over everything and takes no input, so the control under it still clicks. A press
+ * anywhere inside the ring counts as pressing the ringed control — watched here, over the whole
+ * window, so nothing laid over the control can keep it from counting.
  */
 @Composable
 fun GuideSpotlightHost(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
     val registry = remember { GuideTargetRegistry() }
+    val session by rememberUpdatedState(LocalGuideSession.current)
     // Targets report in window-root coordinates; the ring draws in this box's, which need not start at 0,0.
     var origin by remember { mutableStateOf(Offset.Zero) }
-    Box(modifier.onGloballyPositioned { origin = it.positionInRoot() }) {
+    Box(
+        modifier
+            .onGloballyPositioned { origin = it.positionInRoot() }
+            .pointerInput(registry) { watchRingPresses(registry, { session }, { origin }) },
+    ) {
         CompositionLocalProvider(
             LocalGuideTargetRegistry provides registry,
             // Faint: inside the ring it only shows where the ring is clipped or covered.
@@ -90,6 +103,21 @@ fun GuideSpotlightHost(modifier: Modifier = Modifier, content: @Composable BoxSc
             content()
         }
         SpotlightRing(registry, origin)
+    }
+}
+
+/** Tells the session whenever a press lands inside the ring, observed without consuming it. */
+private suspend fun PointerInputScope.watchRingPresses(
+    registry: GuideTargetRegistry,
+    session: () -> GuideSession?,
+    origin: () -> Offset,
+) = awaitPointerEventScope {
+    while (true) {
+        val event = awaitPointerEvent(PointerEventPass.Initial)
+        val current = session().takeIf { event.type == PointerEventType.Press }
+        val target = current?.activeTarget
+        val ring = target?.let(registry::boundsOf)?.inflate(SPOTLIGHT_OUTSET.toPx())
+        if (ring != null && event.changes.any { ring.contains(it.position + origin()) }) current.pressed(target)
     }
 }
 

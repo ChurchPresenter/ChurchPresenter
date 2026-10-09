@@ -51,7 +51,7 @@ class GuideSession {
     var activePresses by mutableIntStateOf(0)
         private set
 
-    /** Called by a tagged control when it is pressed; only a press on the active target counts. */
+    /** Called by the spotlight host when [target] is pressed; only a press on the active target counts. */
     fun pressed(target: GuideTarget) {
         if (target == activeTarget) activePresses++
     }
