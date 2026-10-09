@@ -163,9 +163,10 @@ The JaCoCo wiring, `useJUnitPlatform()` and the six-counter floor (85% on all si
 **once** in the root `build.gradle.kts`, in the `subprojects { plugins.withId(...) }` block. A
 module's build file carries only what differs, set **above everything else** in the file:
 - `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults; name only the
-  counters that need a different number. `:converter`, `:companion-satellite`, `:bible-engine`,
-  `:presentation-engine`, `:slides`, `:canvas` and `:profiles` name two each; every other module names none.
-  Each module's own `AGENT.md` says which, and why.
+  counters that need a different number. `:bible-engine`, `:presentation-engine`, `:slides`,
+  `:canvas` and `:profiles` name two each and `:converter` one; every other module names none.
+  Each is the measured value rounded down — a ratchet, raised as tests are added and deleted once
+  the counter clears 85%. Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default
   `**/ComposableSingletons*` outright. **Read the rule below before adding one.**
 

@@ -14,8 +14,8 @@ group = "org.churchpresenter"
 // the compiler generates around slide rendering, Compose's per-value change checks, the shift-drag
 // reorder (a test cannot hold Shift on a mouse event) and the native file pickers. See AGENT.md.
 extra["coverageFloors"] = mapOf(
-    "BRANCH" to "0.79",
-    "COMPLEXITY" to "0.75",
+    "BRANCH" to "0.80",
+    "COMPLEXITY" to "0.76",
 )
 
 kotlin {

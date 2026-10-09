@@ -47,7 +47,7 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 
 ## Coverage floor
 
-Branches **80%** and complexity **76%**; the other four counters keep the shared 85%. What is left is
+Branches **81%** and complexity **77%**; the other four counters keep the shared 85%. What is left is
 mostly not untested behavior: building the libvlc player, killing zombie headless browsers (which on a
 developer's machine would kill their real ones), the coroutine plumbing around the ffmpeg pipe, the
 `minOf`/`maxOf` empty-list exits in shape math, and Compose's per-value change checks on click

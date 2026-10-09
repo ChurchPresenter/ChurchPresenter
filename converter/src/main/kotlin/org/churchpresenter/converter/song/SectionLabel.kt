@@ -14,8 +14,6 @@ package org.churchpresenter.converter.song
  */
 internal object SectionLabel {
 
-    private val splitWordAndNumber = Regex("""^(.*?)\s*(\d*)$""")
-
     private val names = mapOf(
         "v" to "Verse", "verse" to "Verse", "vers" to "Verse", "strophe" to "Verse",
         "c" to "Chorus", "chorus" to "Chorus", "refrain" to "Chorus",
@@ -31,17 +29,16 @@ internal object SectionLabel {
     /** `V1` becomes `Verse 1`, `C` becomes `Chorus`, `Antiphon 2` stays as it is. */
     fun of(marker: String): String {
         val cleaned = marker.trim().removeSurrounding("[", "]").trim()
-        val match = splitWordAndNumber.find(cleaned)
-        if (cleaned.isEmpty() || match == null) return cleaned.ifEmpty { "Verse" }
+        if (cleaned.isEmpty()) return "Verse"
 
-        val (word, number) = match.destructured
+        val (word, number) = wordAndNumber(cleaned)
         // A marker that is nothing but a number is a verse: EasySlides numbers its verses `[1]`,
         // `[2]` and names only the other sections, so reading these as "1" and "2" would leave a
         // whole library's verses labelled with bare digits.
         val name = if (word.isBlank()) "Verse" else names[word.lowercase().replace(" ", "")]
+        // A blank word always has a number here: the marker is not empty and has been trimmed.
         return when {
             name == null -> cleaned
-            word.isBlank() && number.isEmpty() -> cleaned
             number.isEmpty() -> name
             else -> "$name $number"
         }
@@ -63,6 +60,11 @@ internal object SectionLabel {
         }
     }
 
-    private fun baseOf(label: String): String =
-        splitWordAndNumber.find(label)?.destructured?.component1()?.trim() ?: label
+    private fun baseOf(label: String): String = wordAndNumber(label).first.trim()
+
+    /** `Verse 12` as `Verse` and `12`; the number is empty when the label does not end in one. */
+    private fun wordAndNumber(label: String): Pair<String, String> {
+        val number = label.takeLastWhile { it.isDigit() }
+        return label.dropLast(number.length).trimEnd() to number
+    }
 }
