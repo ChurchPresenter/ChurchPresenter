@@ -43,6 +43,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
+import org.churchpresenter.liveshow.Cue
+import org.churchpresenter.settings.ClearGroup
+import org.churchpresenter.settings.MessageTemplate
+import org.churchpresenter.settings.PropDefinition
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.testTag
@@ -207,6 +212,80 @@ internal fun PreviewSidebar(
     }
 }
 
+/**
+ * The Message, Props and clear-group editors the sidebar opens. In the app each is its own window; a test, which
+ * cannot open one, provides stand-ins through [LocalSidebarDialogs] and drives their callbacks.
+ */
+internal interface SidebarDialogs {
+    @Composable
+    fun Message(
+        isVisible: Boolean,
+        templates: List<MessageTemplate>,
+        onTemplatesChange: (List<MessageTemplate>) -> Unit,
+        onAir: Cue.Message?,
+        onGoLive: (Cue.Message) -> Unit,
+        onClear: () -> Unit,
+        onDismiss: () -> Unit,
+    )
+
+    @Composable
+    fun Props(
+        isVisible: Boolean,
+        props: List<PropDefinition>,
+        onPropsChange: (List<PropDefinition>) -> Unit,
+        onAir: Set<String>,
+        onSwitch: (id: String, on: Boolean) -> Unit,
+        onChoosePicture: suspend () -> String?,
+        onDismiss: () -> Unit,
+    )
+
+    @Composable
+    fun ClearGroups(
+        isVisible: Boolean,
+        groups: List<ClearGroup>,
+        onGroupsChange: (List<ClearGroup>) -> Unit,
+        onClearGroup: (ClearGroup) -> Unit,
+        onDismiss: () -> Unit,
+    )
+}
+
+/** The editors as the app opens them: [MessageDialog], [PropsDialog] and [ClearGroupsDialog], each a window. */
+internal object WindowedSidebarDialogs : SidebarDialogs {
+    @Composable
+    override fun Message(
+        isVisible: Boolean,
+        templates: List<MessageTemplate>,
+        onTemplatesChange: (List<MessageTemplate>) -> Unit,
+        onAir: Cue.Message?,
+        onGoLive: (Cue.Message) -> Unit,
+        onClear: () -> Unit,
+        onDismiss: () -> Unit,
+    ) = MessageDialog(isVisible, templates, onTemplatesChange, onAir, onGoLive, onClear, onDismiss)
+
+    @Composable
+    override fun Props(
+        isVisible: Boolean,
+        props: List<PropDefinition>,
+        onPropsChange: (List<PropDefinition>) -> Unit,
+        onAir: Set<String>,
+        onSwitch: (id: String, on: Boolean) -> Unit,
+        onChoosePicture: suspend () -> String?,
+        onDismiss: () -> Unit,
+    ) = PropsDialog(isVisible, props, onPropsChange, onAir, onSwitch, onChoosePicture, onDismiss)
+
+    @Composable
+    override fun ClearGroups(
+        isVisible: Boolean,
+        groups: List<ClearGroup>,
+        onGroupsChange: (List<ClearGroup>) -> Unit,
+        onClearGroup: (ClearGroup) -> Unit,
+        onDismiss: () -> Unit,
+    ) = ClearGroupsDialog(isVisible, groups, onGroupsChange, onClearGroup, onDismiss)
+}
+
+/** Where the sidebar's editors open: in their own windows, unless a test says otherwise. */
+internal val LocalSidebarDialogs = staticCompositionLocalOf<SidebarDialogs> { WindowedSidebarDialogs }
+
 /** The row of buttons over the preview: displays, clear, settings, message, props, macros, clear layers, take. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -277,7 +356,7 @@ private fun MessageButton(
         iconTint = if (onAir != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.testTag(MESSAGE_BUTTON_TAG),
     )
-    MessageDialog(
+    LocalSidebarDialogs.current.Message(
         isVisible = open,
         templates = appSettings.messageTemplates,
         onTemplatesChange = { templates -> onSettingsChange { it.copy(messageTemplates = templates) } },
@@ -311,7 +390,7 @@ private fun PropsButton(
         iconTint = if (onAir.isNotEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.testTag(PROPS_BUTTON_TAG),
     )
-    PropsDialog(
+    LocalSidebarDialogs.current.Props(
         isVisible = open,
         props = appSettings.props,
         onPropsChange = { props -> onSettingsChange { it.copy(props = props) } },
@@ -361,7 +440,7 @@ private fun ClearLayersButton(
             )
         }
     }
-    ClearGroupsDialog(
+    LocalSidebarDialogs.current.ClearGroups(
         isVisible = editing,
         groups = appSettings.clearGroups,
         onGroupsChange = { groups -> onSettingsChange { it.copy(clearGroups = groups) } },
