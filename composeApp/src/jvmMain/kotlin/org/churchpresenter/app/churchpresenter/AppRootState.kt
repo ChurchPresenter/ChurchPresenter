@@ -41,7 +41,7 @@ import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.server.InstanceLinkViewModel
 import org.churchpresenter.stt.STTManager
 import org.churchpresenter.settings.utils.AppDataDir
-import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
+import org.churchpresenter.telemetry.LiveMapReporter
 import org.churchpresenter.updater.UpdateCheckResult
 import java.awt.GraphicsEnvironment
 import java.io.File

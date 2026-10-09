@@ -1,0 +1,1077 @@
+package org.churchpresenter.liveoutput.preview
+
+import org.churchpresenter.settings.MediaLook
+import org.churchpresenter.settings.OutputLook
+import org.churchpresenter.settings.SlideLook
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onLast
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.v2.runComposeUiTest
+import org.churchpresenter.settings.AnnouncementsSettings
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BLANK_OUTPUT_PROFILE_ID
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.screenKey
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.media.viewmodel.LocalMediaViewModel
+import org.churchpresenter.media.viewmodel.MediaViewModel
+import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.stt.STTManager
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.composables.mode
+
+/**
+ * The sidebar's scaled-down live preview, one box per configured display. This test class covers
+ * only this file's own logic — which mode dispatches to which `screenAssignment.showX` flag, the
+ * Live/FILL/LOCKED badges and lock toggle, the display-mode chip, the Website snapshot-vs-URL-vs-
+ * nothing fallback chain, and the dev-fallback/browser-source-output display counting. It does
+ * *not* re-verify that BiblePresenter, SongPresenter, etc. render correct content — each already
+ * has its own dedicated test file for that.
+ *
+ * Getting a `LivePreviewPanel` to compose at all under this project's headless `jvmTest` JVM
+ * required a real production fix first: `rememberScreenDevices()` and `presenterScreenBounds()`
+ * (in `Constants.kt`) both called `GraphicsEnvironment`'s screen-enumeration APIs unguarded, which
+ * throw `HeadlessException` unconditionally when headless — a real gap (this codebase's own
+ * `DeckLinkManager.isAvailable()` already degrades the same way for missing hardware), not a
+ * test-only shim. With that fixed, every test here runs in the dev-fallback state real users see
+ * on a single-monitor machine with no DeckLink device: `realWindowCount = 0`, so every preview
+ * slot is a dev-fallback slot. That means the "skip a display explicitly assigned to None" branch
+ * (only reachable for a *real*, non-fallback slot) can't be exercised here — there is no headless
+ * way to make `realWindowCount > 0`.
+ *
+ * Media transport controls and the audio equalizer are gated behind `LocalMediaViewModel` being
+ * non-null. `MediaViewModel` itself is plain state (no VLC/audio stack — that only lives in the
+ * `VideoPlayer`/`SoftwareVideoPlayer` composables that read it), so a real instance is used below
+ * to cover the loaded/playing states too.
+ */
+@OptIn(ExperimentalTestApi::class)
+class LivePreviewPanelTest {
+
+    /** The caret's content descriptions — the only handle the header row exposes. */
+    private val HIDE = "Hide this preview"
+    private val SHOW = "Show this preview"
+
+    /** Projection settings with one screen assigned a profile in [mode]. */
+    private fun projectionInMode(mode: String) = ProjectionSettings(
+        outputProfiles = listOf(OutputProfile(id = "under-test", displayMode = mode)),
+        screenAssignments = listOf(ScreenAssignment(activeProfileId = "under-test")),
+    )
+
+    // ── Display counting / dev-fallback ───────────────────────────────────────────────────────
+
+    @Test
+    fun `by default, headless, exactly one dev-fallback preview slot renders`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = AppSettings())
+            }
+        }
+        onNodeWithText("Screen 1").assertExists()
+        onNodeWithText("Screen 2").assertDoesNotExist()
+    }
+
+    @Test
+    fun `a release build with no real output previews no dev-fallback slot`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = AppSettings(), isRelease = true)
+            }
+        }
+        onNodeWithText("Screen 1").assertDoesNotExist()
+    }
+
+    @Test
+    fun `with preview mode on, the cued item gets a Preview tile of its own`() = runComposeUiTest {
+        val manager = PresenterManager()
+        manager.previewBus.setEnabled(true)
+        manager.previewBus.manager.setDisplayedAnnouncementText("Doors open at six")
+        manager.previewBus.manager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = manager, appSettings = AppSettings())
+            }
+        }
+        onNodeWithText("Preview").assertExists()
+        onNodeWithText("Screen 1").assertExists()
+        onAllNodesWithText("Doors open at six", substring = true)[0].assertExists()
+    }
+
+    @Test
+    fun `devWindowCount controls how many dev-fallback preview slots render`() = runComposeUiTest {
+        val settings = AppSettings(projectionSettings = ProjectionSettings(devWindowCount = 3))
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("Screen 1").assertExists()
+        onNodeWithText("Screen 2").assertExists()
+        onNodeWithText("Screen 3").assertExists()
+    }
+
+    @Test
+    fun `a renamed monitor is labelled by its name rather than its number`() = runComposeUiTest {
+        // This panel is what the booth watches all service, so a renamed display has to read as
+        // "Foyer TV" here — naming it in the settings tab and still seeing "Screen 1" in the one
+        // place it is looked at would be a rename that never arrived.
+        val screen = ScreenAssignment(
+            targetDisplay = 1,
+            targetBoundsX = 1920, targetBoundsY = 0, targetBoundsW = 1280, targetBoundsH = 720,
+        )
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(screenAssignments = listOf(screen))
+                .withScreenName(screenKey(1920, 0, 1280, 720), "Foyer TV"),
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("Foyer TV").assertExists()
+        onNodeWithText("Screen 1").assertDoesNotExist()
+    }
+
+    @Test
+    fun `an unnamed monitor keeps its numbered label`() = runComposeUiTest {
+        val screen = ScreenAssignment(
+            targetDisplay = 1,
+            targetBoundsX = 1920, targetBoundsY = 0, targetBoundsW = 1280, targetBoundsH = 720,
+        )
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(screenAssignments = listOf(screen))
+                .withScreenName(screenKey(3200, 0, 3840, 2160), "Balcony"),
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("Screen 1").assertExists("a name given to another monitor must not leak")
+        onNodeWithText("Balcony").assertDoesNotExist()
+    }
+
+    @Test
+    fun `browser source outputs render as additional, separately labeled previews`() = runComposeUiTest {
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(browserSourceOutputs = listOf(
+                ScreenAssignment(),
+                ScreenAssignment(),
+            ))
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("Browser Source 1").assertExists()
+        onNodeWithText("Browser Source 2").assertExists()
+    }
+
+    @Test
+    fun `a renamed browser source is previewed under its own name`() = runComposeUiTest {
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(browserSourceOutputs = listOf(
+                ScreenAssignment(browserSourceName = "Stage"),
+                ScreenAssignment(),
+            ))
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("Stage").assertExists("the operator's name, not the number")
+        onNodeWithText("Browser Source 1").assertDoesNotExist()
+        onNodeWithText("Browser Source 2").assertExists("the unnamed one keeps its number")
+    }
+
+    // ── The musicians' transpose on a Browser Source tile (issue #649) ────────────────────────
+
+    /** Browser Source 1 on an ordinary stage profile (the OBS feed), 2 on the musicians' one. */
+    private fun stageOutputs(): AppSettings {
+        val stage = OutputProfile(id = "stage", displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR)
+        return AppSettings(
+            projectionSettings = ProjectionSettings(
+                outputProfiles = listOf(stage, stage.copy(id = "musicians", showTransposeControls = true)),
+                browserSourceOutputs = listOf(
+                    ScreenAssignment(activeProfileId = "stage"),
+                    ScreenAssignment(activeProfileId = "musicians"),
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun `only the tile of an output offering the buttons carries a transpose control`() = runComposeUiTest {
+        setContent {
+            MaterialTheme { LivePreviewPanel(presenterManager = PresenterManager(), appSettings = stageOutputs()) }
+        }
+        onAllNodesWithText("Transpose 0").assertCountEquals(1)
+        onAllNodesWithContentDescription("Transpose up").assertCountEquals(1)
+    }
+
+    @Test
+    fun `the tile's steps move that output's transpose, and the offset puts it back`() = runComposeUiTest {
+        val manager = PresenterManager()
+        setContent {
+            MaterialTheme { LivePreviewPanel(presenterManager = manager, appSettings = stageOutputs()) }
+        }
+        onNodeWithContentDescription("Transpose up").performScrollTo().performClick()
+        onNodeWithContentDescription("Transpose up").performClick()
+        waitForIdle()
+        assertEquals(mapOf(1 to 2), manager.browserSourceTranspose.value)
+        onNodeWithText("Transpose +2").assertExists()
+
+        onNodeWithContentDescription("Transpose down").performClick()
+        waitForIdle()
+        assertEquals(mapOf(1 to 1), manager.browserSourceTranspose.value)
+
+        onNodeWithText("Transpose +1").performClick()
+        waitForIdle()
+        assertEquals(emptyMap(), manager.browserSourceTranspose.value)
+    }
+
+    // ── Mode dispatch → live tile ──────────────────────────────────────────────────────────────
+
+    @Test
+    fun `each presenting mode shows Live when its show flag is on, the default`() = runComposeUiTest {
+        // Messages and props are no slide content; they go up whole, through their own calls.
+        val whole = setOf(Presenting.NONE, Presenting.MESSAGE, Presenting.PROPS)
+        for (mode in Presenting.entries.filter { it !in whole }) {
+            setContent {
+                MaterialTheme {
+                    LivePreviewPanel(
+                        presenterManager = PresenterManager().apply { setPresentingMode(mode) },
+                        appSettings = AppSettings(),
+                    )
+                }
+            }
+            onNodeWithTag(LIVE_TILE_TAG).assertExists("mode=$mode must show live when its show flag defaults to true")
+        }
+    }
+
+    @Test
+    fun `each presenting mode's live tile is gated by its own show flag`() = runComposeUiTest {
+        val offCases = listOf(
+            Presenting.BIBLE to OutputProfile(bibleMode = Constants.SONG_LANG_OFF),
+            Presenting.LYRICS to OutputProfile(songMode = Constants.SONG_LANG_OFF),
+            Presenting.PICTURES to OutputProfile(look = OutputLook(media = MediaLook(pictures = false))),
+            Presenting.PRESENTATION to OutputProfile(look = OutputLook(media = MediaLook(pictures = false))),
+            Presenting.MEDIA to OutputProfile(look = OutputLook(media = MediaLook(video = false))),
+            Presenting.LOWER_THIRD to OutputProfile(look = OutputLook(graphics = false)),
+            Presenting.ANNOUNCEMENTS to OutputProfile(look = OutputLook(announcements = false)),
+            Presenting.WEBSITE to OutputProfile(look = OutputLook(slide = SlideLook(web = false))),
+            Presenting.CANVAS to OutputProfile(look = OutputLook(slide = SlideLook(canvas = false))),
+            Presenting.QA to OutputProfile(look = OutputLook(slide = SlideLook(qa = false))),
+            Presenting.STT to OutputProfile(look = OutputLook(captions = false)),
+            Presenting.DICTIONARY to OutputProfile(look = OutputLook(slide = SlideLook(dictionary = false))),
+        )
+        for ((mode, offProfile) in offCases) {
+            setContent {
+                MaterialTheme {
+                    LivePreviewPanel(
+                        presenterManager = PresenterManager().apply { setPresentingMode(mode) },
+                        appSettings = AppSettings(
+                            projectionSettings = ProjectionSettings(
+                                outputProfiles = listOf(offProfile.copy(id = "off")),
+                                screenAssignments = listOf(ScreenAssignment(activeProfileId = "off")),
+                            ),
+                        ),
+                    )
+                }
+            }
+            onNodeWithTag(LIVE_TILE_TAG).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `Presenting NONE never shows a live tile`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = AppSettings())
+            }
+        }
+        onNodeWithTag(LIVE_TILE_TAG).assertDoesNotExist()
+    }
+
+    // ── FILL badge ─────────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the FILL badge shows only when a key output is configured`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = AppSettings())
+            }
+        }
+        onNodeWithText("FILL").assertDoesNotExist()
+
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(screenAssignments = listOf(ScreenAssignment(keyTargetDisplay = 0)))
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("FILL").assertExists()
+    }
+
+    // ── LOCKED badge + lock toggle ─────────────────────────────────────────────────────────────
+
+    @Test
+    fun `locking a screen shows the LOCKED badge and the filled lock icon`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setScreenLock(0, Presenting.BIBLE)
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = pm, appSettings = AppSettings())
+            }
+        }
+        onNodeWithText("LOCKED").assertExists()
+        onNodeWithContentDescription("Unlock screen").assertExists()
+    }
+
+    @Test
+    fun `an unlocked screen shows neither the LOCKED badge nor the filled lock icon`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = AppSettings())
+            }
+        }
+        onNodeWithText("LOCKED").assertDoesNotExist()
+        onNodeWithContentDescription("Lock screen to current tab").assertExists()
+    }
+
+    @Test
+    fun `clicking the lock toggle locks the screen to its current mode`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setPresentingMode(Presenting.LYRICS)
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = pm, appSettings = AppSettings())
+            }
+        }
+        onNode(hasClickAction() and hasContentDescription("Lock screen to current tab")).performClick()
+
+        assertEquals(Presenting.LYRICS, pm.screenLocks.value[0])
+    }
+
+    @Test
+    fun `clicking the lock toggle again unlocks the screen`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setScreenLock(0, Presenting.LYRICS)
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = pm, appSettings = AppSettings())
+            }
+        }
+        onNode(hasClickAction() and hasContentDescription("Unlock screen")).performClick()
+
+        assertNull(pm.screenLocks.value[0])
+    }
+
+    @Test
+    fun `locking a browser source output uses its own, separate lock index space`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setPresentingMode(Presenting.QA)
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(browserSourceOutputs = listOf(ScreenAssignment()))
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = pm, appSettings = settings)
+            }
+        }
+        // Two unlocked toggles exist (the dev-fallback screen and the browser source output);
+        // the browser source one is the last, since it's rendered after the screen loop, and it
+        // sits below the default test window's height, so it must be scrolled into view first.
+        onAllNodes(hasClickAction() and hasContentDescription("Lock screen to current tab"))
+            .onLast().performScrollTo().performClick()
+
+        assertEquals(Presenting.QA, pm.browserSourceLocks.value[0])
+        assertTrue(pm.screenLocks.value.isEmpty(), "locking the browser source output must not also lock the screen")
+    }
+
+    @Test
+    fun `locking an ndi output and an omt output uses a lock index space each`() = runComposeUiTest {
+        // Four 0-based lists now: screen 0, NDI output 0 and OMT output 0 are different outputs, and
+        // one shared lock helper routes all of them — so each toggle must land in its own map.
+        val pm = PresenterManager()
+        pm.setPresentingMode(Presenting.QA)
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(
+                ndiOutputs = listOf(ScreenAssignment()),
+                omtOutputs = listOf(ScreenAssignment()),
+            )
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = pm, appSettings = settings)
+            }
+        }
+        // Rendered screen, NDI, OMT in that order, so the OMT toggle is last and NDI's before it.
+        onAllNodes(hasClickAction() and hasContentDescription("Lock screen to current tab"))
+            .onLast().performScrollTo().performClick()
+        assertEquals(Presenting.QA, pm.omtLocks.value[0])
+        assertTrue(pm.ndiLocks.value.isEmpty(), "locking the OMT output must not lock the NDI one")
+
+        onAllNodes(hasClickAction() and hasContentDescription("Lock screen to current tab"))
+            .onLast().performScrollTo().performClick()
+        assertEquals(Presenting.QA, pm.ndiLocks.value[0])
+        assertTrue(pm.screenLocks.value.isEmpty(), "nor the screen")
+    }
+
+    @Test
+    fun `omt outputs are previewed under their own names, and a disabled one is not`() = runComposeUiTest {
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(omtOutputs = listOf(
+                ScreenAssignment(),
+                ScreenAssignment(omtEnabled = false),
+                ScreenAssignment(omtName = "Overflow"),
+            ))
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("OMT Output 1").assertExists()
+        onNodeWithText("OMT Output 2").assertDoesNotExist()
+        onNodeWithText("Overflow").assertExists()
+    }
+
+    @Test
+    fun `ndi outputs render as additional, separately labeled previews`() = runComposeUiTest {
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(ndiOutputs = listOf(
+                ScreenAssignment(),
+                ScreenAssignment(),
+            ))
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("NDI Output 1").assertExists()
+        onNodeWithText("NDI Output 2").assertExists()
+    }
+
+    @Test
+    fun `a renamed ndi output is previewed under its own name`() = runComposeUiTest {
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(ndiOutputs = listOf(ScreenAssignment(ndiName = "Lyrics")))
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("Lyrics").assertExists()
+        onNodeWithText("NDI Output 1").assertDoesNotExist()
+    }
+
+    @Test
+    fun `a disabled ndi output is not previewed`() = runComposeUiTest {
+        // main.kt renders nothing for a switched-off output, so a preview would show the operator a
+        // picture the network is not actually receiving.
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(ndiOutputs = listOf(
+                ScreenAssignment(ndiEnabled = false),
+                ScreenAssignment(ndiName = "Live one"),
+            ))
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("NDI Output 1").assertDoesNotExist()
+        onNodeWithText("Live one").assertExists()
+    }
+
+    @Test
+    fun `browser source and ndi outputs are previewed side by side, each under its own name`() = runComposeUiTest {
+        // Both lists are 0-based, so this is the case where one could shadow the other.
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(
+                browserSourceOutputs = listOf(ScreenAssignment(browserSourceName = "OBS overlay")),
+                ndiOutputs = listOf(ScreenAssignment(ndiName = "Switcher feed")),
+            )
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onNodeWithText("OBS overlay").assertExists()
+        onNodeWithText("Switcher feed").assertExists()
+    }
+
+    @Test
+    fun `locking an ndi output uses its own, separate lock index space`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setPresentingMode(Presenting.QA)
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(ndiOutputs = listOf(ScreenAssignment()))
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = pm, appSettings = settings)
+            }
+        }
+        // The NDI output is rendered after the screen loop, so its toggle is the last one.
+        onAllNodes(hasClickAction() and hasContentDescription("Lock screen to current tab"))
+            .onLast().performScrollTo().performClick()
+
+        assertEquals(Presenting.QA, pm.ndiLocks.value[0])
+        assertTrue(pm.screenLocks.value.isEmpty(), "locking the NDI output must not also lock the screen")
+        assertTrue(pm.browserSourceLocks.value.isEmpty(), "nor a browser source")
+    }
+
+    @Test
+    fun `stage monitor screens never show the LOCKED badge or lock toggle, even when locked`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setScreenLock(0, Presenting.BIBLE)
+        val settings = AppSettings(
+            projectionSettings = projectionInMode(Constants.DISPLAY_MODE_STAGE_MONITOR),
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = pm, appSettings = settings)
+            }
+        }
+        onNodeWithText("LOCKED").assertDoesNotExist()
+        onNodeWithContentDescription("Unlock screen").assertDoesNotExist()
+        onNodeWithContentDescription("Lock screen to current tab").assertDoesNotExist()
+    }
+
+    // ── Display mode label ─────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `every display mode names itself, fullscreen included`() = runComposeUiTest {
+        val cases = listOf(
+            // Fullscreen used to be the one mode with no label at all, so the ordinary outputs —
+            // the majority of them — were the ones left unnamed.
+            Constants.DISPLAY_MODE_FULLSCREEN to "Full Screen",
+            Constants.DISPLAY_MODE_STAGE_MONITOR to "Stage Monitor",
+            // Both stored modes carry the one label: a lower third is a lower third.
+            Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL to "Lower Third",
+            Constants.DISPLAY_MODE_LOWER_THIRD_VERTICAL to "Lower Third",
+        )
+        for ((mode, label) in cases) {
+            val settings = AppSettings(projectionSettings = projectionInMode(mode))
+            setContent {
+                MaterialTheme {
+                    LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+                }
+            }
+            onNodeWithText(label).assertExists("displayMode=\"$mode\" must be labelled \"$label\"")
+        }
+    }
+
+    @Test
+    fun `a mode names only itself, not its neighbours`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = AppSettings())
+            }
+        }
+        onNodeWithText("Full Screen").assertExists()
+        onNodeWithText("Stage Monitor").assertDoesNotExist()
+        onNodeWithText("Lower Third").assertDoesNotExist()
+    }
+
+    // ── The header row folds the preview away ──────────────────────────────────────────────────
+
+    @Test
+    fun `a preview starts open, and its caret offers to hide it`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = AppSettings())
+            }
+        }
+        onNodeWithContentDescription(HIDE).assertExists()
+        onNodeWithContentDescription(SHOW).assertDoesNotExist()
+        // The output names itself inside its own picture, which is only drawn while open.
+        onNodeWithText("Screen 1").assertExists()
+    }
+
+    @Test
+    fun `clicking the header hides the preview and offers to show it again`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = AppSettings())
+            }
+        }
+        onNodeWithContentDescription(HIDE).performClick()
+
+        onNodeWithContentDescription(SHOW).assertExists()
+        onNodeWithContentDescription(HIDE).assertDoesNotExist()
+        // The mode label is the row itself and stays; the lock toggle lives inside the picture.
+        onNodeWithText("Full Screen").assertExists()
+        onNodeWithContentDescription("Lock screen to current tab").assertDoesNotExist()
+    }
+
+    @Test
+    fun `clicking the header again brings the preview back`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = AppSettings())
+            }
+        }
+        onNodeWithContentDescription(HIDE).performClick()
+        onNodeWithContentDescription(SHOW).performClick()
+
+        onNodeWithContentDescription(HIDE).assertExists()
+        onNodeWithText("Screen 1").assertExists()
+    }
+
+    @Test
+    fun `the output name moves into the header once the picture is gone`() = runComposeUiTest {
+        // Open, the name is in the corner of the picture and the header would repeat it. Collapsed,
+        // that corner is gone and a stack of rows reading "Full Screen" could not be told apart.
+        val screen = ScreenAssignment(
+            targetDisplay = 1,
+            targetBoundsX = 1920, targetBoundsY = 0, targetBoundsW = 1280, targetBoundsH = 720,
+        )
+        val settings = AppSettings(
+            projectionSettings = ProjectionSettings(screenAssignments = listOf(screen))
+                .withScreenName(screenKey(1920, 0, 1280, 720), "Foyer TV"),
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onAllNodesWithText("Foyer TV").assertCountEquals(1)
+
+        onNodeWithContentDescription(HIDE).performClick()
+        onAllNodesWithText("Foyer TV").assertCountEquals(1)
+    }
+
+    @Test
+    fun `each preview folds on its own`() = runComposeUiTest {
+        val settings = AppSettings(projectionSettings = ProjectionSettings(devWindowCount = 3))
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = settings)
+            }
+        }
+        onAllNodesWithContentDescription(HIDE).assertCountEquals(3)
+
+        onAllNodesWithContentDescription(HIDE)[1].performClick()
+
+        onAllNodesWithContentDescription(HIDE).assertCountEquals(2)
+        onAllNodesWithContentDescription(SHOW).assertCountEquals(1)
+        // Screen 2's picture is the one that went; the other two still name themselves in theirs.
+        onNodeWithText("Screen 1").assertExists()
+        onNodeWithText("Screen 3").assertExists()
+    }
+
+    @Test
+    fun `folding a preview leaves its lock alone`() = runComposeUiTest {
+        // Collapsing is a sidebar convenience, not an output setting: what the real presenter window
+        // is doing must not change because the operator wanted the space back.
+        val manager = PresenterManager()
+        manager.setScreenLock(0, Presenting.BIBLE)
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = manager, appSettings = AppSettings())
+            }
+        }
+        onNodeWithContentDescription(HIDE).performClick()
+
+        assertEquals(Presenting.BIBLE, manager.screenLocks.value[0])
+    }
+
+    // ── Website: snapshot vs URL placeholder vs nothing ──────────────────────────────────────
+
+    @Test
+    fun `Website mode with no snapshot and no URL shows a generic placeholder`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setPresentingMode(Presenting.WEBSITE)
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = pm, appSettings = AppSettings())
+            }
+        }
+        onNodeWithText("Nothing is live", substring = true).assertExists()
+    }
+
+    @Test
+    fun `Website mode with a URL but no snapshot yet shows the URL as a placeholder`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setPresentingMode(Presenting.WEBSITE)
+        pm.setWebsiteUrl("https://example.com")
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = pm, appSettings = AppSettings())
+            }
+        }
+        onNodeWithText("https://example.com").assertExists()
+    }
+
+    @Test
+    fun `Website mode with a snapshot shows the snapshot image instead of any placeholder`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setPresentingMode(Presenting.WEBSITE)
+        pm.setWebsiteUrl("https://example.com")
+        pm.setWebSnapshot(ImageBitmap(4, 4))
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = pm, appSettings = AppSettings())
+            }
+        }
+        onNodeWithText("https://example.com").assertDoesNotExist()
+        onNodeWithText("Nothing is live", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun `an overlay up over a web page shows over its snapshot`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setWebSnapshot(ImageBitmap(4, 4))
+        pm.setPresentingMode(Presenting.WEBSITE)
+        pm.setDisplayedAnnouncementText("Coffee after the service")
+        pm.setPresentingMode(Presenting.ANNOUNCEMENTS)
+        val overPage = AppSettings(
+            announcementsSettings = AnnouncementsSettings(animationType = Constants.ANIMATION_NONE),
+            projectionSettings = ProjectionSettings(
+                outputProfiles = listOf(OutputProfile(id = "over", announcementsOverContent = true)),
+                screenAssignments = listOf(ScreenAssignment(activeProfileId = "over")),
+            ),
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = pm, appSettings = overPage)
+            }
+        }
+        onNodeWithText("Coffee after the service").assertExists("the announcement, over the page")
+        onNodeWithText("Nothing is live", substring = true).assertDoesNotExist()
+    }
+
+    // ── Media controls (no MediaViewModel loaded) ────────────────────────────────────────────
+
+    @Test
+    fun `without a loaded MediaViewModel, no media controls or audio equalizer render`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setPresentingMode(Presenting.MEDIA)
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = pm, appSettings = AppSettings())
+            }
+        }
+        // No crash, and the panel still renders its one dev-fallback preview normally.
+        onNodeWithText("Screen 1").assertExists()
+    }
+
+    // ── Media controls (loaded MediaViewModel) ───────────────────────────────────────────────
+
+    @Test
+    fun `media controls do not render when nothing is presenting, even with loaded media`() = runComposeUiTest {
+        val pm = PresenterManager()
+        val media = MediaViewModel().apply { loadMedia("/tmp/song.mp3", "audio") }
+        setContent {
+            MaterialTheme {
+                CompositionLocalProvider(LocalMediaViewModel provides media) {
+                    LivePreviewPanel(presenterManager = pm, appSettings = AppSettings())
+                }
+            }
+        }
+        onNodeWithContentDescription("Play").assertDoesNotExist()
+        onNodeWithContentDescription("Pause").assertDoesNotExist()
+    }
+
+    @Test
+    fun `media controls render the Play icon and no time label while paused with no duration yet`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setPresentingMode(Presenting.MEDIA)
+        val media = MediaViewModel().apply { loadMedia("/tmp/song.mp3", "audio") }
+        setContent {
+            MaterialTheme {
+                CompositionLocalProvider(LocalMediaViewModel provides media) {
+                    LivePreviewPanel(presenterManager = pm, appSettings = AppSettings())
+                }
+            }
+        }
+        onNodeWithContentDescription("Play").assertExists()
+        onNodeWithContentDescription("Pause").assertDoesNotExist()
+        onNodeWithText("0:00").assertDoesNotExist()
+    }
+
+    @Test
+    fun `media controls show a formatted time label once duration is known`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setPresentingMode(Presenting.MEDIA)
+        val media = MediaViewModel().apply {
+            loadMedia("/tmp/song.mp3", "audio")
+            position.setDuration(90_000L)
+        }
+        setContent {
+            MaterialTheme {
+                CompositionLocalProvider(LocalMediaViewModel provides media) {
+                    LivePreviewPanel(presenterManager = pm, appSettings = AppSettings())
+                }
+            }
+        }
+        onNodeWithText("0:00").assertExists(
+            "with a known duration, the slider shows the current position as a time label",
+        )
+    }
+
+    @Test
+    fun `clicking the media play button plays and swaps the icon to Pause`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setPresentingMode(Presenting.MEDIA)
+        val media = MediaViewModel().apply { loadMedia("/tmp/song.mp3", "audio") }
+        setContent {
+            MaterialTheme {
+                CompositionLocalProvider(LocalMediaViewModel provides media) {
+                    LivePreviewPanel(presenterManager = pm, appSettings = AppSettings())
+                }
+            }
+        }
+        onNodeWithContentDescription("Play").performClick()
+        assertTrue(media.isPlaying)
+        onNodeWithContentDescription("Pause").assertExists()
+    }
+
+    @Test
+    fun `clicking the media pause button while playing pauses and swaps the icon back to Play`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setPresentingMode(Presenting.MEDIA)
+        val media = MediaViewModel().apply {
+            loadMedia("/tmp/song.mp3", "audio")
+            play()
+        }
+        setContent {
+            MaterialTheme {
+                CompositionLocalProvider(LocalMediaViewModel provides media) {
+                    LivePreviewPanel(presenterManager = pm, appSettings = AppSettings())
+                }
+            }
+        }
+        onNodeWithContentDescription("Pause").performClick()
+        assertFalse(media.isPlaying)
+        onNodeWithContentDescription("Play").assertExists()
+    }
+
+    @Test
+    fun `the audio equalizer renders without error while media is loaded and playing`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setPresentingMode(Presenting.MEDIA)
+        val media = MediaViewModel().apply {
+            loadMedia("/tmp/song.mp3", "audio")
+            play()
+        }
+        setContent {
+            MaterialTheme {
+                CompositionLocalProvider(LocalMediaViewModel provides media) {
+                    LivePreviewPanel(presenterManager = pm, appSettings = AppSettings())
+                }
+            }
+        }
+        // No dedicated semantics for the equalizer bars themselves — this confirms that branch
+        // composes without crashing, alongside the panel's own always-present content.
+        onNodeWithText("Screen 1").assertExists()
+    }
+
+    // ── STT ────────────────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `STT mode with a real, unconnected STTManager renders the STT presenter without error`() = runComposeUiTest {
+        val pm = PresenterManager()
+        pm.setPresentingMode(Presenting.STT)
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = pm, appSettings = AppSettings(), sttManager = STTManager())
+            }
+        }
+        // STTManager starts with no segments/in-progress text, so there's no caption text to
+        // assert on directly — this confirms the sttManager != null branch composes cleanly,
+        // alongside the panel's own always-present content and live frame.
+        onNodeWithText("Screen 1").assertExists()
+        onNodeWithTag(LIVE_TILE_TAG).assertExists()
+    }
+
+    // ── The profile swap menu ──────────────────────────────────────────────────────────────────
+
+    private val SWAP = "Swap output profile"
+
+    /** Two named profiles, and one screen following the first. */
+    private fun twoProfiles(activeId: String? = "main") = AppSettings(
+        projectionSettings = ProjectionSettings(
+            outputProfiles = listOf(
+                OutputProfile(id = "main", name = "Auditorium"),
+                OutputProfile(
+                    id = "band",
+                    name = "Stream band",
+                    displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+                ),
+            ),
+            screenAssignments = listOf(ScreenAssignment(activeProfileId = activeId)),
+        ),
+    )
+
+    /**
+     * The swap is offered from the preview tile itself, which is where the operator is watching.
+     *
+     * The point of putting it here rather than only in settings is that the swap happens mid-
+     * service -- between the congregational song and the choir item -- and opening a settings
+     * dialog to do it means the booth stops watching the output at exactly the moment it changes.
+     */
+    @Test
+    fun `an open preview offers the swap menu once a profile exists`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = twoProfiles())
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).assertExists()
+    }
+
+    @Test
+    fun `a document with no profiles at all draws no swap menu`() = runComposeUiTest {
+        // An empty menu on every tile would be clutter on the one panel that is on screen all
+        // service, so the control appears only once there is something to swap to. A fresh install
+        // always has the Default profile, so this is a document whose profiles were all deleted.
+        val empty = AppSettings(projectionSettings = ProjectionSettings(outputProfiles = emptyList()))
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = empty)
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).assertDoesNotExist()
+    }
+
+    @Test
+    fun `the menu lists every profile, plus Blank`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = twoProfiles())
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).performClick()
+        waitForIdle()
+
+        onNodeWithText("Auditorium").assertExists()
+        onNodeWithText("Stream band").assertExists()
+        onNodeWithText("Blank").assertExists()
+    }
+
+    @Test
+    fun `picking a profile points that output at it`() = runComposeUiTest {
+        var doc = twoProfiles()
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(
+                    presenterManager = PresenterManager(),
+                    appSettings = doc,
+                    onSettingsChange = { transform -> doc = transform(doc) },
+                )
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).performClick()
+        waitForIdle()
+        onNodeWithText("Stream band").performClick()
+        waitForIdle()
+
+        assertEquals("band", doc.projectionSettings.screenAssignments[0].activeProfileId)
+    }
+
+    @Test
+    fun `picking Blank points the output at the built-in blank profile`() = runComposeUiTest {
+        var doc = twoProfiles()
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(
+                    presenterManager = PresenterManager(),
+                    appSettings = doc,
+                    onSettingsChange = { transform -> doc = transform(doc) },
+                )
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).performClick()
+        waitForIdle()
+        onNodeWithText("Blank").performClick()
+        waitForIdle()
+
+        assertEquals(BLANK_OUTPUT_PROFILE_ID, doc.projectionSettings.screenAssignments[0].activeProfileId)
+    }
+
+    @Test
+    fun `a browser source output swaps its own profile and leaves the screen alone`() = runComposeUiTest {
+        // The three kinds of output are stored in three separate lists and the menu writes into
+        // whichever one this tile came from. Writing into the wrong list would repoint a monitor
+        // from a control that named a stream.
+        var doc = AppSettings(
+            projectionSettings = ProjectionSettings(
+                outputProfiles = listOf(
+                    OutputProfile(id = "main", name = "Auditorium"),
+                    OutputProfile(id = "band", name = "Stream band"),
+                ),
+                screenAssignments = listOf(ScreenAssignment(activeProfileId = "main")),
+                browserSourceOutputs = listOf(ScreenAssignment(activeProfileId = "main")),
+            ),
+        )
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(
+                    presenterManager = PresenterManager(),
+                    appSettings = doc,
+                    onSettingsChange = { transform -> doc = transform(doc) },
+                )
+            }
+        }
+
+        // The browser source tile is the second, so its menu is the last one in the tree.
+        onAllNodesWithContentDescription(SWAP).onLast().performClick()
+        waitForIdle()
+        onAllNodesWithText("Stream band").onLast().performClick()
+        waitForIdle()
+
+        assertEquals("band", doc.projectionSettings.browserSourceOutputs[0].activeProfileId)
+        assertEquals("main", doc.projectionSettings.screenAssignments[0].activeProfileId, "the screen is untouched")
+    }
+
+    @Test
+    fun `a collapsed preview hides the swap menu`() = runComposeUiTest {
+        // The collapsed row is one line, reserved for the output's name -- which is the only thing
+        // telling a stack of folded tiles apart.
+        setContent {
+            MaterialTheme {
+                LivePreviewPanel(presenterManager = PresenterManager(), appSettings = twoProfiles())
+            }
+        }
+
+        onNodeWithContentDescription(SWAP).assertExists()
+        onNodeWithContentDescription(HIDE).performClick()
+        waitForIdle()
+
+        onNodeWithContentDescription(SWAP).assertDoesNotExist()
+    }
+}

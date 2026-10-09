@@ -6,11 +6,6 @@ plugins {
 
 group = "org.churchpresenter"
 
-extra["coverageFloors"] = mapOf(
-    "BRANCH" to "0.75",
-    "COMPLEXITY" to "0.70",
-)
-
 dependencies {
     implementation(libs.kotlinx.coroutines.core)
 

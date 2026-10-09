@@ -39,6 +39,10 @@ import org.churchpresenter.omt.OmtRuntimeStatus
 /**
  * The virtual outputs, which open no window and so are never seen by PresenterWindows.kt: Browser
  * Source, NDI and OMT, one renderer each per configured output.
+ *
+ * Root wiring beside PresenterWindows.kt, not a layout piece. The media view model it hands each
+ * [OffscreenOutputContext] is AGENT.md's rendering-bridge exception: the output's `MediaPresenter`
+ * draws the playing video from it, so its lifetime is the player's.
  */
 @Composable
 internal fun AppRootState.VirtualOutputs(effectiveAppSettings: AppSettings) {

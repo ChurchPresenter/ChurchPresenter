@@ -12,6 +12,25 @@ class StallDetectorTest {
     private val detector = StallDetector(budgetMs = 100, stack = { listOf(frame) }, report = { lines += it })
 
     @Test
+    fun `every answer is told how late it was, stalled or not`() {
+        val lates = mutableListOf<Long>()
+        val counting = StallDetector(
+            budgetMs = 100,
+            stack = { listOf(frame) },
+            report = { },
+            onAnswered = { lates += it },
+        )
+        counting.posted(0)
+        counting.answered(40)
+        counting.posted(100)
+        counting.poll(300)
+        counting.answered(350)
+        counting.answered(400)
+
+        assertEquals(listOf(40L, 250L), lates, "an answer to no ping is not counted")
+    }
+
+    @Test
     fun `a ping answered inside the budget says nothing`() {
         detector.posted(0)
         detector.poll(50)

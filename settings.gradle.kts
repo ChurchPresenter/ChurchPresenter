@@ -186,3 +186,14 @@ include(":statistics")
 // The updater: the GitHub release check, the installer download and the update window. Depended on
 // by :composeApp.
 include(":updater")
+
+// What the app reports about itself: the live-map ping, the usage counts it carries,
+// the contact form, the device report and the GPU it runs on.
+include(":telemetry")
+
+// The System settings page and the first-run setup wizard. Depended on by :composeApp.
+include(":app-settings")
+
+// The Server settings page, calendar sync and Instance Link's windows: the Compose face of :server.
+// Depended on by :composeApp.
+include(":server-ui")

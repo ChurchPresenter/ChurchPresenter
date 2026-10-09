@@ -15,8 +15,8 @@ group = "org.churchpresenter"
 // (the stock and library browsers, the Lottie generator) and Compose's per-value change checks.
 // See AGENT.md.
 extra["coverageFloors"] = mapOf(
-    "BRANCH" to "0.79",
-    "COMPLEXITY" to "0.78",
+    "BRANCH" to "0.80",
+    "COMPLEXITY" to "0.79",
 )
 
 kotlin {

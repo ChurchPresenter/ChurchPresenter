@@ -26,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
@@ -44,7 +43,9 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun AddWebsiteDialog(
     onDismiss: () -> Unit,
-    onConfirm: (url: String, title: String) -> Unit
+    onConfirm: (url: String, title: String) -> Unit,
+    /** The window it opens in -- see [DialogFrame]. */
+    frame: DialogFrame = appDialogFrame,
 ) {
     val mainWindowState = LocalMainWindowState.current
     val dialogState = rememberDialogState(
@@ -53,11 +54,13 @@ fun AddWebsiteDialog(
         height = ADD_WEBSITE_DIALOG_HEIGHT
     )
 
-    DialogWindow(
-        onCloseRequest = onDismiss,
-        state = dialogState,
-        title = stringResource(Res.string.website_dialog_title),
-        resizable = false
+    frame(
+        DialogFrameSpec(
+            onClose = onDismiss,
+            state = dialogState,
+            title = stringResource(Res.string.website_dialog_title),
+            resizable = false,
+        ),
     ) {
         ProvideUiFontScale {
             AddWebsiteDialogContent(onDismiss = onDismiss, onConfirm = onConfirm)

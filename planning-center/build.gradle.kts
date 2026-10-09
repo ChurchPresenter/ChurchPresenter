@@ -32,6 +32,8 @@ dependencies {
     implementation(projects.strings)
     implementation(projects.theme)
     implementation(projects.coreModels)
+    // The operator's primary Bible, which the scripture a plan names is read from.
+    implementation(projects.bible)
     implementation(libs.kotlinx.coroutines.swing)
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.components.resources)
@@ -41,6 +43,7 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(testFixtures(projects.sharedUi))
     testImplementation(testFixtures(projects.coreModels))
+    testImplementation(testFixtures(projects.bible))
     testImplementation(libs.compose.uiTestJunit4)
     testImplementation(libs.compose.uiTest)
     testImplementation(libs.mockk)

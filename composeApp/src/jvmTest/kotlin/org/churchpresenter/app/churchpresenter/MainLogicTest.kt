@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
-import org.churchpresenter.app.churchpresenter.data.Language
+import org.churchpresenter.sharedui.language.Language
 import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.core.models.songs.SongBackgroundType

@@ -1,8 +1,9 @@
 package org.churchpresenter.app.churchpresenter.benchmark
 
 import androidx.compose.runtime.mutableIntStateOf
-import org.churchpresenter.app.churchpresenter.HungTestReporter
-import org.churchpresenter.app.churchpresenter.threadDump
+import org.churchpresenter.diagnostics.HungTestReporter
+import org.churchpresenter.diagnostics.ThreadDump
+import org.churchpresenter.diagnostics.UiWatchdog
 import java.io.File
 import java.lang.management.ManagementFactory
 import java.util.Locale
@@ -26,8 +27,10 @@ private const val KB_PER_MB = 1024.0
  * `soak.csv`, `soak.md` and `soak.svg` to `build/reports/soak/` -- the CSV after every sample, so a
  * run cut short still leaves its curve.
  *
- * It fails when a frame stalls past [SoakLimits.stallMs], or when the heap or resident memory kept
- * growing from the first quarter of the run to the last -- see [judge]. A frame that never finishes
+ * It fails when a frame stalls past [SoakLimits.stallMs], when the UI thread leaves `UiWatchdog`'s
+ * ping unanswered past [SoakLimits.uiStallMs] (the output renders on that thread, so a stall there
+ * is a frozen screen), or when the heap or resident memory kept growing from the first quarter of
+ * the run to the last -- see [judge]. A frame that never finishes
  * at all is caught by [SoakStallWatchdog], which writes every thread's stack to `soak-stall.txt`.
  */
 class ServiceSoak {
@@ -37,6 +40,7 @@ class ServiceSoak {
     private val cueSeconds = System.getProperty("soak.cueSeconds")?.toLongOrNull() ?: DEFAULT_CUE_SECONDS
     private val sampleSeconds = System.getProperty("soak.sampleSeconds")?.toLongOrNull() ?: DEFAULT_SAMPLE_SECONDS
     private val stallSeconds = System.getProperty("soak.stallSeconds")?.toLongOrNull() ?: DEFAULT_STALL_SECONDS
+    private val uiStalls = UiStallTally(SoakLimits().uiStallMs.toLong())
     // Emptied first: a run cut short must not leave the last run's files looking like its own.
     private val reportDir = System.getProperty("soak.reportDir")?.let { dir ->
         File(dir).apply {
@@ -51,6 +55,8 @@ class ServiceSoak {
         val scenarios = BenchmarkScenarios.all(photo)
         val cue = mutableIntStateOf(0)
         var cuesShown = 0
+        val limits = SoakLimits()
+        UiWatchdog.start(budgetMs = limits.uiStallMs.toLong(), onAnswered = uiStalls::record)
         // Watched like a frame: building the output composes it for the first time, and a soak once
         // hung right there, before the frame loop and its own watchdog had started.
         val built = SoakStallWatchdog(
@@ -69,9 +75,9 @@ class ServiceSoak {
                 cue.intValue = cuesShown % scenarios.size
             }
         }
+        UiWatchdog.stop()
         photo.parentFile.deleteRecursively()
 
-        val limits = SoakLimits()
         val verdict = judge(run.samples, limits)
         val description = "${scenarios.size} content types in turn, ${cueSeconds}s a cue, on one " +
             "${WIDTH}x$HEIGHT off-screen output at $fps fps for $minutes minutes; sampled every " +
@@ -156,9 +162,9 @@ class ServiceSoak {
     private fun reportStall(minute: Double, stalledNanos: Long, showing: String) {
         val headline = "SOAK STALL: one frame has not finished in ${stalledNanos / NANOS_PER_SECOND}s, " +
             "at minute ${"%.1f".format(Locale.ROOT, minute)}, showing $showing ==="
-        val dump = threadDump(
-            headline,
-            "The test thread is inside OffscreenOutput.step(); read it and the event queue.",
+        val dump = ThreadDump.text(
+            "=== $headline\n=== The test thread is inside OffscreenOutput.step(); read it and the event queue.",
+            depth = HungTestReporter.STACK_DEPTH,
         )
         System.err.println(dump)
         System.err.flush()
@@ -179,11 +185,13 @@ class ServiceSoak {
 
     private fun sample(minute: Double, frameNanos: List<Long>, late: Int, warmup: Boolean): SoakSample {
         val stats = FrameStats.of(frameNanos.toLongArray())
+        val (stalls, longestUiMs) = uiStalls.take()
         @Suppress("ExplicitGarbageCollectionCall") // the sample is of what survives a collection
         System.gc()
         val heap = ManagementFactory.getMemoryMXBean().heapMemoryUsage.used / BYTES_PER_MB
         return SoakSample(
             minute, heap, residentMb(), frameNanos.size, late, stats.p50Ms, stats.p99Ms, stats.maxMs, warmup,
+            uiStalls = stalls, maxUiStallMs = longestUiMs.toDouble(),
         )
     }
 

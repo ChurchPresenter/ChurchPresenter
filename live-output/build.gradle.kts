@@ -67,6 +67,7 @@ dependencies {
     testImplementation(testFixtures(projects.presentationEngine))
     testImplementation(testFixtures(projects.ndi))
     testImplementation(testFixtures(projects.omt))
+    testImplementation(testFixtures(projects.profiles))
     testImplementation(libs.compose.uiTestJunit4)
     testImplementation(libs.compose.uiTest)
     testImplementation(libs.kotlinx.coroutines.test)

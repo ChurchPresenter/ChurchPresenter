@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.detekt)
     alias(libs.plugins.roborazzi)
+    alias(libs.plugins.pitest)
     `java-test-fixtures`
     jacoco
 }
@@ -55,6 +56,7 @@ dependencies {
     testFixturesImplementation(libs.kotlinx.serialization.json)
 
     testImplementation(kotlin("test"))
+    testImplementation(libs.kotest.property)
     testImplementation(testFixtures(projects.sharedUi))
     testImplementation(testFixtures(projects.diagnostics))
     testImplementation(libs.compose.uiTestJunit4)
@@ -93,4 +95,19 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
         txt.required.set(false)
         md.required.set(false)
     }
+}
+
+// Mutation testing covers the pure logic only: the drag hit-testing and the file format. The tab's
+// Compose UI tests would run once per mutant and add nothing the screenshots do not already hold.
+pitest {
+    targetClasses.set(
+        listOf("org.churchpresenter.schedule.ScheduleDragMath*", "org.churchpresenter.schedule.ScheduleCipher*"),
+    )
+    targetTests.set(
+        listOf(
+            "org.churchpresenter.schedule.ScheduleDragMathTest",
+            "org.churchpresenter.schedule.ScheduleDragMathPropertyTest",
+            "org.churchpresenter.schedule.ScheduleFileTest",
+        ),
+    )
 }

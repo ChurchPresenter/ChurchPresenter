@@ -12,11 +12,18 @@ import kotlin.test.assertTrue
  */
 class SoakAnalysisTest {
 
-    private fun sample(minute: Int, heap: Double, rss: Double? = 500.0, maxMs: Double = 20.0, warmup: Boolean = false) =
-        SoakSample(
-            minute.toDouble(), heap, rss, frames = 1800, lateFrames = 0, p50Ms = 10.0, p99Ms = 15.0,
-            maxMs = maxMs, warmup = warmup,
-        )
+    private fun sample(
+        minute: Int,
+        heap: Double,
+        rss: Double? = 500.0,
+        maxMs: Double = 20.0,
+        warmup: Boolean = false,
+        uiStalls: Int = 0,
+        maxUiStallMs: Double = 40.0,
+    ) = SoakSample(
+        minute.toDouble(), heap, rss, frames = 1800, lateFrames = 0, p50Ms = 10.0, p99Ms = 15.0,
+        maxMs = maxMs, warmup = warmup, uiStalls = uiStalls, maxUiStallMs = maxUiStallMs,
+    )
 
     private fun steady(count: Int = 12) = (1..count).map { sample(it, heap = 200.0) }
 
@@ -60,6 +67,23 @@ class SoakAnalysisTest {
     }
 
     @Test
+    fun `the UI thread stalling past its budget fails the run, and says how often and how long`() {
+        val verdict = judge(steady(4) + sample(5, 200.0, uiStalls = 2, maxUiStallMs = 640.0))
+        assertEquals(2, verdict.uiStalls)
+        assertEquals(640.0, verdict.worstUiStallMs)
+        assertEquals("the UI thread stalled 2 time(s), the longest 640.0 ms, past 250.0 ms", verdict.failures.single())
+        val markdown = soakMarkdown("run", verdict, SoakLimits())
+        assertTrue("| UI-thread stalls | 2, longest 640.0 ms (budget 250.0) |" in markdown)
+    }
+
+    @Test
+    fun `a UI stall during warm-up is not judged`() {
+        val verdict = judge(listOf(sample(0, 200.0, warmup = true, uiStalls = 3, maxUiStallMs = 900.0)) + steady())
+        assertTrue(verdict.passed, verdict.failures.toString())
+        assertEquals(0, verdict.uiStalls)
+    }
+
+    @Test
     fun `warm-up is reported but neither its stalls nor its memory are judged`() {
         val run = listOf(
             sample(1, heap = 50.0, rss = 300.0, maxMs = 800.0, warmup = true),
@@ -92,9 +116,12 @@ class SoakAnalysisTest {
     @Test
     fun `the CSV has a row per sample and leaves a missing reading empty`() {
         val csv = soakCsv(listOf(sample(1, 200.0), sample(2, 210.5, rss = null))).trim().lines()
-        assertEquals("minute,heap_mb,rss_mb,frames,late_frames,p50_ms,p99_ms,max_ms,warmup", csv[0])
-        assertEquals("1.00,200.0,500.0,1800,0,10.00,15.00,20.00,false", csv[1])
-        assertEquals("2.00,210.5,,1800,0,10.00,15.00,20.00,false", csv[2])
+        assertEquals(
+            "minute,heap_mb,rss_mb,frames,late_frames,p50_ms,p99_ms,max_ms,warmup,ui_stalls,max_ui_stall_ms",
+            csv[0],
+        )
+        assertEquals("1.00,200.0,500.0,1800,0,10.00,15.00,20.00,false,0,40.0", csv[1])
+        assertEquals("2.00,210.5,,1800,0,10.00,15.00,20.00,false,0,40.0", csv[2])
     }
 
     @Test

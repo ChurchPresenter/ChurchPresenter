@@ -6,6 +6,8 @@ import java.util.Calendar
 import java.security.MessageDigest
 import java.util.Properties
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import org.gradle.process.ExecOperations
 
 val versionYear = Calendar.getInstance().get(Calendar.YEAR) % 100
 
@@ -350,6 +352,12 @@ kotlin {
             implementation(projects.statistics)
             // The updater: the release check, the installer download and the update window.
             implementation(projects.updater)
+            // The live-map ping, usage counts, contact form and device report.
+            implementation(projects.telemetry)
+            // The System settings page and the setup wizard.
+            implementation(projects.appSettings)
+            // The Server settings page, calendar sync and Instance Link's windows.
+            implementation(projects.serverUi)
             // The ATEM protocol client: the UDP conversation with the switcher — connect, state
             // dump, key control and media-pool upload. AtemBridge is the app-side wiring.
             implementation(projects.atem)
@@ -1038,11 +1046,6 @@ val serialTestClasses = listOf(
     // measured, not the code. The Lower Third tab's own suites moved to `:lower-third`, whose `test`
     // task forks once, so they are already alone in their JVM there.
     "*LowerThirdTabScreenshotTest",
-    // Here for a different reason: it binds a fixed port AND draws that port into the image (the
-    // Server URL row, the connection QR). Shifting the port per fork would rewrite every one of its
-    // committed screenshots on every run, so it keeps the literal and runs where nothing competes
-    // for the port.
-    "*ServerSettingsTabScreenshotTest",
     // And these for a third: all thirteen seed one fixed directory on disk -- AppPreviewSupport's
     // `library()` writes songs, bibles, a Gallery of PNGs and a deck into LIBRARY
     // (/Users/Shared/ChurchPresenter, else /tmp/ChurchPresenter) with copyTo(overwrite = true).
@@ -1165,6 +1168,157 @@ tasks.register<org.gradle.api.tasks.testing.Test>("renderBenchmark") {
     doLast {
         val report = reportDir.resolve("results.md")
         if (report.exists()) logger.lifecycle(report.readText())
+    }
+}
+
+// ── GPU output benchmark ──────────────────────────────────────────────────────
+// How each content type runs on an on-screen output window, drawn on the GPU -- see GpuOutputBenchmark.
+//   ./gradlew :composeApp:gpuBenchmark                      # report to build/reports/gpu-benchmark/
+//   ./gradlew :composeApp:gpuBenchmark -PrecordGpuBaseline  # also overwrite composeApp/benchmarks/gpu/
+// Needs a display, so it runs on the reference Mac, never on CI. It opens one window per content type
+// and size over the main screen. Its `main` lives with the render benchmark in jvmTest, so this runs
+// jvmTest's classpath -- not headless, and with its own home so nothing reads the operator's settings.
+tasks.register<JavaExec>("gpuBenchmark") {
+    group = "verification"
+    description = "Times every content type on an on-screen output window, drawn on the GPU."
+    val parallel = tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest").get()
+    classpath = parallel.classpath
+    mainClass.set("org.churchpresenter.app.churchpresenter.benchmark.GpuOutputBenchmarkKt")
+    maxHeapSize = "2g"
+    outputs.upToDateWhen { false }
+    val home = layout.buildDirectory.dir("gpu-benchmark-home").get().asFile
+    val reportDir = layout.buildDirectory.dir("reports/gpu-benchmark").get().asFile
+    systemProperty("user.home", home.absolutePath)
+    systemProperty("gpuBenchmark.reportDir", reportDir.absolutePath)
+    systemProperty("gpuBenchmark.baselineDir", layout.projectDirectory.dir("benchmarks/gpu").asFile.absolutePath)
+    systemProperty("gpuBenchmark.record", project.hasProperty("recordGpuBaseline").toString())
+    providers.gradleProperty("gpuBenchmarkFrames").orNull?.let { systemProperty("gpuBenchmark.frames", it) }
+    doFirst { home.mkdirs() }
+    doLast {
+        val report = reportDir.resolve("results.md")
+        if (report.exists()) logger.lifecycle(report.readText())
+    }
+}
+
+// ── Output isolation benchmark ────────────────────────────────────────────────
+// What a stalled operator UI costs an on-screen output: frame gaps at injected event-thread stalls of
+// 0, 100, 500 and 2000 ms -- see docs/SHOW_CONTROL.md, Output isolation.
+//   ./gradlew :composeApp:isolationBenchmark                # report to build/reports/isolation/
+// Needs a display, so it runs on the reference Mac, never on CI; like gpuBenchmark it runs jvmTest's
+// classpath under a home of its own.
+tasks.register<JavaExec>("isolationBenchmark") {
+    group = "verification"
+    description = "Measures an output window's frame gaps while the UI thread is stalled on purpose."
+    val parallel = tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest").get()
+    classpath = parallel.classpath
+    mainClass.set("org.churchpresenter.app.churchpresenter.benchmark.OutputIsolationBenchmarkKt")
+    maxHeapSize = "2g"
+    outputs.upToDateWhen { false }
+    val home = layout.buildDirectory.dir("isolation-benchmark-home").get().asFile
+    val reportDir = layout.buildDirectory.dir("reports/isolation").get().asFile
+    systemProperty("user.home", home.absolutePath)
+    systemProperty("isolationBenchmark.reportDir", reportDir.absolutePath)
+    doFirst { home.mkdirs() }
+    doLast {
+        val report = reportDir.resolve("results.md")
+        if (report.exists()) logger.lifecycle(report.readText())
+    }
+}
+
+// ── Startup benchmark ─────────────────────────────────────────────────────────
+// How long the app takes to start and what it sits at idle -- see StartupProbe and benchmarks/budgets.md.
+//   ./gradlew :composeApp:startupBenchmark                  # 5 launches, report to build/reports/startup/
+//   ./gradlew :composeApp:startupBenchmark -PcheckBudgets   # fail past a budget in benchmarks/budgets.md
+//   -PstartupLaunches=N, -PstartupIdleSeconds=S (default 30) change the run.
+// Needs a display, so it runs on the reference Mac. Each launch is the real app (the `run` task's
+// classpath and JVM flags) under its own home, seeded by StartupSeed with the licence accepted and
+// setup done, on its own single-instance port, so it neither reads the operator's settings nor
+// meets a copy already running.
+interface StartupExec {
+    @get:Inject val exec: ExecOperations
+}
+
+tasks.register("startupBenchmark") {
+    group = "verification"
+    description = "Launches the app several times and reports time to the first frame and idle memory."
+    // What the launches run on -- the app's jar and its runtime classpath -- never the `run` task
+    // itself, which would launch the app as the operator's own.
+    dependsOn("jvmTestClasses", "jvmJar", configurations.named("jvmRuntimeClasspath"))
+    outputs.upToDateWhen { false }
+    val exec = objects.newInstance(StartupExec::class.java).exec
+    val launches = providers.gradleProperty("startupLaunches").orNull?.toIntOrNull() ?: 5
+    val idleSeconds = providers.gradleProperty("startupIdleSeconds").orNull ?: "30"
+    val check = project.hasProperty("checkBudgets")
+    val home = layout.buildDirectory.dir("startup-home").get().asFile
+    val reportDir = layout.buildDirectory.dir("reports/startup").get().asFile
+    val budgets = layout.projectDirectory.file("benchmarks/budgets.md").asFile
+    doLast {
+        val run = tasks.named<JavaExec>("run").get()
+        val testClasspath = tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest").get().classpath
+        home.deleteRecursively()
+        reportDir.deleteRecursively()
+        home.mkdirs()
+        reportDir.mkdirs()
+        exec.javaexec {
+            classpath = testClasspath
+            mainClass.set("org.churchpresenter.app.churchpresenter.benchmark.StartupSeedKt")
+            systemProperty("user.home", home.absolutePath)
+            systemProperty("java.awt.headless", "true")
+        }
+        val results = (1..launches).map { i ->
+            val out = reportDir.resolve("launch-$i.json")
+            exec.javaexec {
+                classpath = run.classpath
+                mainClass.set(run.mainClass)
+                jvmArgs(run.jvmArgs ?: emptyList<String>())
+                run.javaLauncher.orNull?.let { executable = it.executablePath.asFile.absolutePath }
+                systemProperty("user.home", home.absolutePath)
+                systemProperty("churchpresenter.singleInstancePort", "47634")
+                systemProperty("churchpresenter.startupProbe", out.absolutePath)
+                systemProperty("churchpresenter.startupProbe.idleSeconds", idleSeconds)
+            }
+            fun field(name: String) = Regex("\"$name\": ([0-9.]+)").find(out.readText())?.groupValues?.get(1)?.toDouble()
+            mapOf(
+                "toMainMs" to field("toMainMs"),
+                "toFirstFrameMs" to field("toFirstFrameMs"),
+                "idleHeapMb" to field("idleHeapMb"),
+                "idleRssMb" to field("idleRssMb"),
+            )
+        }
+        // A launch that hit StartupProbe's deadline wrote no times: it never drew its window.
+        val failed = results.count { it["toFirstFrameMs"] == null }
+        // The first launch warms the OS file cache and is reported, not counted.
+        val counted = (if (results.size > 1) results.drop(1) else results).filter { it["toFirstFrameMs"] != null }
+        fun median(key: String) = counted.mapNotNull { it[key] }.sorted().let { if (it.isEmpty()) null else it[it.size / 2] }
+        fun worst(key: String) = counted.mapNotNull { it[key] }.maxOrNull()
+        val keys = listOf("toMainMs" to "To main()", "toFirstFrameMs" to "To the main window's first frame",
+            "idleHeapMb" to "Idle heap, MB", "idleRssMb" to "Idle resident memory, MB")
+        val os = "${System.getProperty("os.name")} ${System.getProperty("os.version")}, ${System.getProperty("os.arch")}"
+        val report = buildString {
+            appendLine("# Startup benchmark")
+            appendLine()
+            appendLine("$launches launches on $os; the first warms the file cache and is not counted. Idle is ${idleSeconds}s after the first frame.")
+            appendLine()
+            appendLine("| | Median | Worst |")
+            appendLine("|---|---:|---:|")
+            keys.forEach { (key, label) -> appendLine("| $label | ${median(key) ?: "n/a"} | ${worst(key) ?: "n/a"} |") }
+            if (failed > 0) appendLine("\n$failed launch(es) never drew the main window before the deadline.")
+        }
+        reportDir.resolve("startup.md").writeText(report)
+        logger.lifecycle(report)
+        if (check) {
+            // budgets.md rows read `| <key> | <limit> | ... |`; a median past its limit fails.
+            val limits = budgets.readLines().mapNotNull { line ->
+                Regex("^\\|\\s*`(\\w+)`\\s*\\|\\s*([0-9.]+)").find(line)?.let { it.groupValues[1] to it.groupValues[2].toDouble() }
+            }.toMap()
+            val over = keys.mapNotNull { (key, label) ->
+                val limit = limits[key] ?: return@mapNotNull null
+                val value = median(key) ?: return@mapNotNull null
+                if (value > limit) "$label: $value, past its budget of $limit" else null
+            }
+            if (failed > 0) throw GradleException("$failed startup launch(es) never drew the main window.")
+            if (over.isNotEmpty()) throw GradleException("Startup over budget: " + over.joinToString("; "))
+        }
     }
 }
 

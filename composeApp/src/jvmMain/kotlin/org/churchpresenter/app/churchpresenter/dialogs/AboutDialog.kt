@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.app.churchpresenter.utils.appTelemetryIdentity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.theme.AppShape
 import kotlinx.coroutines.launch
@@ -54,7 +54,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.utils.DeviceInfoReport
+import org.churchpresenter.telemetry.DeviceInfoReport
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.icons.generated.resources.ic_app_icon
@@ -77,20 +77,24 @@ fun AboutDialog(
     isVisible: Boolean,
     onDismiss: () -> Unit,
     appSettings: AppSettings,
-    theme: ThemeMode = ThemeMode.SYSTEM
+    theme: ThemeMode = ThemeMode.SYSTEM,
+    /** The window it opens in -- see [DialogFrame]. */
+    frame: DialogFrame = appDialogFrame,
 ) {
     if (!isVisible) return
 
     val mainWindowState = LocalMainWindowState.current
-    DialogWindow(
-        onCloseRequest = onDismiss,
-        state = rememberDialogState(
+    frame(
+        DialogFrameSpec(
+            onClose = onDismiss,
+            state = rememberDialogState(
             position = centeredOnMainWindow(mainWindowState, ABOUT_DIALOG_WIDTH, ABOUT_DIALOG_HEIGHT),
             width = ABOUT_DIALOG_WIDTH,
             height = ABOUT_DIALOG_HEIGHT
         ),
-        title = stringResource(Res.string.about_title),
-        resizable = false
+            title = stringResource(Res.string.about_title),
+            resizable = false,
+        ),
     ) {
         AboutDialogContent(onDismiss = onDismiss, appSettings = appSettings, theme = theme)
     }
@@ -277,7 +281,7 @@ private fun SaveDiagnosticInfoButton(appSettings: AppSettings) {
                         if (path.extension != "txt") {
                             path = path.resolveSibling("${path.nameWithoutExtension}.txt")
                         }
-                        path.writeText(DeviceInfoReport.generate(appSettings))
+                        path.writeText(DeviceInfoReport.generate(appSettings, appTelemetryIdentity))
                         JOptionPane.showMessageDialog(
                             AwtWindow.getWindows().firstOrNull { it.isActive },
                             savedMsg,

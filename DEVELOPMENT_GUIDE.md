@@ -192,7 +192,7 @@ and the shared fake home is per fork — see AGENT.md, "The suite runs in parall
 |----------|--------|
 | **Linux** | What CI runs (`ubuntu-latest`), fully headless. |
 | **Windows** | Runs the full suite, including the Compose UI tests. |
-| **macOS** | Runs the suite; the committed screenshot set is recorded here. |
+| **macOS** | Runs the suite; the canonical platform for the committed screenshot set — record and verify here. |
 
 If Compose UI tests fail with `NoClassDefFoundError: Could not initialize class
 org.jetbrains.skia.Surface`, a test faked `os.name` before Compose was first touched — see AGENT.md

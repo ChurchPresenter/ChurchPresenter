@@ -21,6 +21,7 @@ import androidx.compose.ui.awt.ComposeDialog
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.LayoutDirection
 import java.awt.Dialog
 import java.awt.event.WindowAdapter
@@ -41,7 +42,7 @@ import org.churchpresenter.strings.generated.resources.open_song_library
 import org.churchpresenter.strings.generated.resources.lottie_gen_window_title
 import org.churchpresenter.strings.generated.resources.style_editor_window_title
 import org.churchpresenter.sharedui.utils.AppWindowRoot
-import org.churchpresenter.app.churchpresenter.ui.theme.LocalLanguage
+import org.churchpresenter.sharedui.language.LocalLanguage
 import org.churchpresenter.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -62,8 +63,8 @@ import java.io.File
 import java.util.Locale
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
-import org.churchpresenter.app.churchpresenter.utils.converterEvent
-import org.churchpresenter.app.churchpresenter.utils.songLibraryUsageEvent
+import org.churchpresenter.telemetry.converterEvent
+import org.churchpresenter.telemetry.songLibraryUsageEvent
 
 @Composable
 fun ConverterWindow(
@@ -71,6 +72,8 @@ fun ConverterWindow(
     initialTab: Int = ConverterTab.BIBLES,
     initialSongSource: String? = null,
     onClose: () -> Unit,
+    /** The window it opens in -- see [ToolWindowFrame]. */
+    frame: ToolWindowFrame = appToolWindowFrame,
 ) {
     LaunchedEffect(Unit) { UsageEvents.recordOncePerRun(UsageEvent.CONVERTER_OPENED) }
     val language = LocalLanguage.current
@@ -79,12 +82,7 @@ fun ConverterWindow(
     // chosen in the app. Set before the window composes, so the first frame is already right;
     // keyed on the language, so changing it while the window is open redraws it.
     remember(language) { ConverterStrings.setLocale(Locale.forLanguageTag(language.code)) }
-    Window(
-        onCloseRequest = onClose,
-        title = stringResource(Res.string.converter_window_title),
-        icon = painterResource(IconRes.drawable.ic_app_icon),
-        state = rememberWindowState(width = 1100.dp, height = 800.dp)
-    ) {
+    frame(ToolWindowSpec(stringResource(Res.string.converter_window_title), DpSize(1100.dp, 800.dp), onClose)) {
         AppWindowRoot(theme = theme) {
             ConverterApp(
                 initialTab = initialTab,
@@ -109,16 +107,13 @@ fun SongLibraryWindow(
     /** How long a song usually stays on screen, measured -- shown in the editor's footer. */
     typicalSongSeconds: (SongItem) -> Int? = { null },
     onClose: () -> Unit,
+    /** The window it opens in -- see [ToolWindowFrame]. */
+    frame: ToolWindowFrame = appToolWindowFrame,
 ) {
     // No locale plumbing here: the window's strings are Compose resources now, and the app already
     // sets the JVM default locale when the language changes — which is what picks values-xx.
     LaunchedEffect(Unit) { UsageEvents.recordOncePerRun(UsageEvent.SONG_LIBRARY_OPENED) }
-    Window(
-        onCloseRequest = onClose,
-        title = stringResource(Res.string.open_song_library),
-        icon = painterResource(IconRes.drawable.ic_app_icon),
-        state = rememberWindowState(width = 1420.dp, height = 880.dp)
-    ) {
+    frame(ToolWindowSpec(stringResource(Res.string.open_song_library), DpSize(1420.dp, 880.dp), onClose)) {
         AppWindowRoot(theme = theme) {
             SongLibraryApp(
                 libraryFolder = File(songStorageDirectory),
@@ -283,13 +278,10 @@ fun LottieGenWindow(
     canvasWidth: Int? = null,
     canvasHeight: Int? = null,
     fontPicker: BandFontPicker? = null,
+    /** The window it opens in -- see [ToolWindowFrame]. */
+    frame: ToolWindowFrame = appToolWindowFrame,
 ) {
-    Window(
-        onCloseRequest = onClose,
-        title = stringResource(Res.string.lottie_gen_window_title),
-        icon = painterResource(IconRes.drawable.ic_app_icon),
-        state = rememberWindowState(width = 1200.dp, height = 800.dp)
-    ) {
+    frame(ToolWindowSpec(stringResource(Res.string.lottie_gen_window_title), DpSize(1200.dp, 800.dp), onClose)) {
         AppWindowRoot(theme = theme) {
             // embedded = true regardless of outputDir: opened from the Help menu there is no output
             // folder, but the generator is still inside the app's theme and must follow it.
@@ -318,17 +310,36 @@ fun LottieGenWindow(
 }
 
 @Composable
-fun StyleEditorWindow(theme: ThemeMode, onClose: () -> Unit) {
-    Window(
-        onCloseRequest = onClose,
-        title = stringResource(Res.string.style_editor_window_title),
-        icon = painterResource(IconRes.drawable.ic_app_icon),
-        state = rememberWindowState(width = 1500.dp, height = 950.dp)
-    ) {
+fun StyleEditorWindow(
+    theme: ThemeMode,
+    onClose: () -> Unit,
+    /** The window it opens in -- see [ToolWindowFrame]. */
+    frame: ToolWindowFrame = appToolWindowFrame,
+) {
+    frame(ToolWindowSpec(stringResource(Res.string.style_editor_window_title), DpSize(1500.dp, 950.dp), onClose)) {
         AppWindowRoot(theme = theme) {
             StyleEditorApp(standalone = false)
         }
     }
+}
+
+/** The window a tool asks for: its title, its opening size, and what closing it does. */
+data class ToolWindowSpec(val title: String, val size: DpSize, val onClose: () -> Unit)
+
+/**
+ * Opens the window a [ToolWindowSpec] describes and draws a tool in it. The app's is
+ * [appToolWindowFrame]; a test passes one that draws in place, since it cannot open a window.
+ */
+typealias ToolWindowFrame = @Composable (spec: ToolWindowSpec, content: @Composable () -> Unit) -> Unit
+
+/** The app's tool windows: real windows with the app icon. */
+val appToolWindowFrame: ToolWindowFrame = { spec, content ->
+    Window(
+        onCloseRequest = spec.onClose,
+        title = spec.title,
+        icon = painterResource(IconRes.drawable.ic_app_icon),
+        state = rememberWindowState(width = spec.size.width, height = spec.size.height),
+    ) { content() }
 }
 
 /** A size in dp as the AWT pixels a window is laid out in -- the same unit on desktop. */

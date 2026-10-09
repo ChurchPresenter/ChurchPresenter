@@ -41,4 +41,9 @@ stays with its slide. `LiveShow` itself is not wired in until the content setter
 ```bash
 ./gradlew :live-show:test :live-show:detekt
 ./gradlew :live-show:jacocoTestCoverageVerification
+./gradlew :live-show:pitest                  # mutation score, build/reports/pitest/
 ```
+
+**Property tests**: `LiveShowPropertyTest` plays generated runs of operator moves and checks every
+step against the state before it (pinned seed). **Mutation score** 91% (31 of 34 killed,
+2026-10-08); `mutation-test.yml` runs it weekly, advisory.

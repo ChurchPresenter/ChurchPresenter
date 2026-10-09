@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.utils.appTelemetryIdentity
 import org.churchpresenter.app.churchpresenter.dialogs.showAlreadyRunningDialog
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
@@ -20,7 +21,7 @@ import org.churchpresenter.updater.UpdateChecker
 import org.churchpresenter.updater.UpdaterIdentity
 import org.churchpresenter.updater.deleteLeftoverUpdateInstallers
 import org.churchpresenter.sharedui.utils.DevFlags
-import org.churchpresenter.app.churchpresenter.utils.GpuInfo
+import org.churchpresenter.telemetry.GpuInfo
 import org.churchpresenter.lowerthird.render.LottieFonts
 import org.churchpresenter.sharedui.utils.SystemFonts
 import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
@@ -41,11 +42,15 @@ import org.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.settings.utils.AppDataDir
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
+import org.churchpresenter.appsettings.AutoStartManager
 import org.churchpresenter.diagnostics.BuildIdentity
 import org.churchpresenter.diagnostics.CrashReporter
+import org.churchpresenter.diagnostics.StartupProbe
+import kotlin.system.exitProcess
+import org.churchpresenter.diagnostics.UiStallInjector
+import org.churchpresenter.diagnostics.UiStallSpec
 import org.churchpresenter.diagnostics.UiWatchdog
-import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
+import org.churchpresenter.telemetry.LiveMapReporter
 import org.churchpresenter.sharedui.utils.UsageEvents
 import java.io.File
 import java.io.IOException
@@ -62,6 +67,9 @@ internal const val UPDATE_CHECK_DELAY_MS = 5_000L
 internal const val STORY_PROMPT_DELAY_MS = 8_000L
 
 internal const val CURRENT_EULA_VERSION = 1
+
+/** How a startup-benchmark launch that never drew its window ends; see StartupProbe. */
+private const val STARTUP_PROBE_NO_FRAME_EXIT = 3
 
 private var singleInstanceSocket: java.net.ServerSocket? = null
 
@@ -123,6 +131,8 @@ private fun bundleDefaultBible(settings: AppSettings) {
 }
 
 fun main() {
+    // Off unless the startup benchmark asked for it; see StartupProbe.
+    StartupProbe.mainStarted(exit = { exitProcess(STARTUP_PROBE_NO_FRAME_EXIT) })
     // Before anything else: skiko latches this on its first SkiaLayer, so a later set is ignored.
     preferredRenderApi(System.getProperty("os.name", ""), DevFlags.renderApiOverride)?.let {
         System.setProperty("skiko.renderApi", it)
@@ -150,6 +160,11 @@ fun main() {
 
     // A debug build says where the UI thread was stuck whenever it stops answering -- see UiWatchdog.
     if (!BuildConfig.IS_RELEASE) UiWatchdog.start()
+    // A dev build can stall its own UI on a schedule (-Dchurchpresenter.injectUiStall=<ms>,<everySec>)
+    // to show what a stall costs the outputs -- see docs/SHOW_CONTROL.md, Output isolation.
+    if (!BuildConfig.IS_RELEASE) {
+        UiStallSpec.parse(System.getProperty(UiStallInjector.PROPERTY))?.let { UiStallInjector.start(it) }
+    }
 
     val startupSettings = SettingsManager().loadSettings()
     CrashReporter.initialize(
@@ -187,6 +202,7 @@ fun main() {
     val pendingUsageEvents = LiveMapReporter.eventsToReport(startupSettings, UsageEvents.unreported())
     val previousSessionMinutes = UsageEvents.lastSessionMinutes()
     LiveMapReporter.pingOnOpen(
+        identity = appTelemetryIdentity,
         installId = analyticsInstallId(startupSettings.analyticsReportingEnabled) { CrashReporter.installId() },
         updateCheckInterval = startupSettings.updateCheckInterval,
         setup = {

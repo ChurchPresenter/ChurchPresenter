@@ -101,6 +101,8 @@ internal fun PresenterWindows(
     defaultScreenDevice: () -> GraphicsDevice? = {
         GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
     },
+    /** Opens each output's window; the app's is [awtOutputWindow], a test draws the content in place. */
+    window: OutputWindowHost = awtOutputWindow,
 ) {
     val showPresenterWindow by presenterManager.showPresenterWindow
     val slideContent by presenterManager.slideContent
@@ -194,12 +196,13 @@ internal fun PresenterWindows(
         when {
             isFallback -> DevFallbackWindow(
                 slot, slotIndex, showPresenterWindow, identifyingScreen, presenterManager, presenterOutputContent,
+                window,
             )
             isDeckLinkPrimaryOutput(screenAssignment) ->
-                DeckLinkOutputs(slot, screens, showPresenterWindow, hideCursor, env)
+                DeckLinkOutputs(slot, screens, showPresenterWindow, hideCursor, env, window)
             else -> ScreenOutputs(
                 slot, screens, positionalScreens.getOrNull(i), showPresenterWindow, hideCursor, env,
-                presenterOutputContent,
+                presenterOutputContent, window,
             )
         }
     }
@@ -397,6 +400,7 @@ private fun DevFallbackWindow(
     identifyingScreen: Boolean,
     presenterManager: PresenterManager,
     presenterOutputContent: @Composable (ScreenAssignment, Presenting, Int?) -> Unit,
+    window: OutputWindowHost,
 ) {
     val fallbackIndex = slotIndex
     // Keyed on the size too: without it, changing an output's resolution in settings
@@ -413,16 +417,17 @@ private fun DevFallbackWindow(
             ),
         )
     }
-    Window(
+    val spec = OutputWindowSpec(
         visible = showPresenterWindow,
         title = stringResource(Res.string.presenter_view_title, fallbackIndex + 1),
-        icon = painterResource(IconRes.drawable.ic_app_icon),
-        onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
+        onClose = { presenterManager.setShowPresenterWindow(false) },
         state = fallbackWindowState,
         undecorated = false,
         resizable = true,
         alwaysOnTop = presenterManager.devWindowAlwaysOnTop.value,
-    ) {
+        hideCursor = null,
+    )
+    window(spec) {
         // A merged dev window shows its own tile of the picture; its number is drawn
         // over the tile rather than inside the picture, where it would land on one tile.
         MergedTile(slot.merge, slot.outputKey) {
@@ -441,6 +446,7 @@ private fun DeckLinkOutputs(
     showPresenterWindow: Boolean,
     hideCursor: Boolean,
     env: OutputEnvironment,
+    window: OutputWindowHost,
 ) {
     if (showPresenterWindow && slot.assignment.targetDisplay >= 0) {
         val deckLinkRole = slot.assignment.primaryOutputRole
@@ -484,7 +490,7 @@ private fun DeckLinkOutputs(
     }
 
     if (showPresenterWindow && hasScreenKeyOutput(slot.assignment)) {
-        KeyOutputWindow(slot, screens, visible = true, hideCursor, env, clearOnEscape = false)
+        KeyOutputWindow(slot, screens, visible = true, hideCursor, env, clearOnEscape = false, window)
     }
 }
 
@@ -502,6 +508,7 @@ private fun ScreenOutputs(
     hideCursor: Boolean,
     env: OutputEnvironment,
     presenterOutputContent: @Composable (ScreenAssignment, Presenting, Int?) -> Unit,
+    window: OutputWindowHost,
 ) {
     val targetScreenIndex = if (hasNoPrimaryTarget(slot.assignment)) null
         else primaryOutputScreenIndex(
@@ -549,17 +556,14 @@ private fun ScreenOutputs(
     }
 
     val presenterTitle = stringResource(Res.string.presenter_view_title, slot.index + 1)
-    Window(
+    val spec = OutputWindowSpec(
         visible = showPresenterWindow,
         title = presenterTitle,
-        icon = painterResource(IconRes.drawable.ic_app_icon),
-        onCloseRequest = { env.presenterManager.setShowPresenterWindow(false) },
+        onClose = { env.presenterManager.setShowPresenterWindow(false) },
         state = windowState,
-        undecorated = true,
-        resizable = false,
-        alwaysOnTop = true,
-    ) {
-        HideOutputWindowCursor(window, hideCursor)
+        hideCursor = hideCursor,
+    )
+    window(spec) {
         CompositionLocalProvider(LocalOutputCursorHidden provides hideCursor) {
             Box(modifier = Modifier.fillMaxSize().hiddenOutputCursor(hideCursor)) {
                 presenterOutputContent(slot.assignment, slot.effectiveMode, slot.index + 1)
@@ -568,7 +572,7 @@ private fun ScreenOutputs(
     }
 
     if (slot.assignment.hasKeyOutput && !isDeckLinkKeyOutput(slot.assignment)) {
-        KeyOutputWindow(slot, screens, visible = showPresenterWindow, hideCursor, env, clearOnEscape = true)
+        KeyOutputWindow(slot, screens, visible = showPresenterWindow, hideCursor, env, clearOnEscape = true, window)
     }
 
     if (!isDeckLinkPrimaryOutput(slot.assignment) && hasDeckLinkKeyOutput(slot.assignment)) {
@@ -602,6 +606,7 @@ private fun KeyOutputWindow(
     hideCursor: Boolean,
     env: OutputEnvironment,
     clearOnEscape: Boolean,
+    window: OutputWindowHost,
 ) {
     val keyScreenIndex = keyOutputScreenIndex(
         findScreenIndexByBounds(
@@ -625,17 +630,14 @@ private fun KeyOutputWindow(
             height = b.height.dp
         )
     }
-    Window(
+    val spec = OutputWindowSpec(
         visible = visible,
         title = stringResource(Res.string.key_output_title, slot.index + 1),
-        icon = painterResource(IconRes.drawable.ic_app_icon),
-        onCloseRequest = { env.presenterManager.setShowPresenterWindow(false) },
+        onClose = { env.presenterManager.setShowPresenterWindow(false) },
         state = keyWindowState,
-        undecorated = true,
-        resizable = false,
-        alwaysOnTop = true,
-    ) {
-        HideOutputWindowCursor(window, hideCursor)
+        hideCursor = hideCursor,
+    )
+    window(spec) {
         CompositionLocalProvider(
             LocalMediaViewModel provides env.mediaViewModel,
             LocalOutputCursorHidden provides hideCursor,
@@ -667,5 +669,40 @@ private fun KeyOutputWindow(
                 }
             }
         }
+    }
+}
+
+/**
+ * One output window as [PresenterWindows] asks for it. [hideCursor] is whether the window hides the
+ * mouse pointer; null leaves the pointer alone, as the dev build's ordinary window does.
+ */
+internal data class OutputWindowSpec(
+    val visible: Boolean,
+    val title: String,
+    val onClose: () -> Unit,
+    val state: WindowState,
+    val hideCursor: Boolean?,
+    val undecorated: Boolean = true,
+    val resizable: Boolean = false,
+    val alwaysOnTop: Boolean = true,
+)
+
+/** Opens the window [OutputWindowSpec] describes and draws [content] in it. */
+internal typealias OutputWindowHost = @Composable (spec: OutputWindowSpec, content: @Composable () -> Unit) -> Unit
+
+/** The app's output windows: real AWT windows with the app icon. */
+internal val awtOutputWindow: OutputWindowHost = { spec, content ->
+    Window(
+        visible = spec.visible,
+        title = spec.title,
+        icon = painterResource(IconRes.drawable.ic_app_icon),
+        onCloseRequest = spec.onClose,
+        state = spec.state,
+        undecorated = spec.undecorated,
+        resizable = spec.resizable,
+        alwaysOnTop = spec.alwaysOnTop,
+    ) {
+        spec.hideCursor?.let { HideOutputWindowCursor(window, it) }
+        content()
     }
 }

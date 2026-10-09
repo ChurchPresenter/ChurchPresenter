@@ -32,8 +32,17 @@ junitJupiter = "5.10.2"
 filekit = "0.15.0"
 dbus-java = "5.2.0"
 twelvemonkeys-imageio = "3.10.1"
+# Property tests (generated inputs, checked against an invariant) -- test scope only.
+kotest = "6.2.5"
+# Mutation testing: the Gradle plugin, the engine it runs, and the engine's JUnit Platform support.
+pitestPlugin = "1.19.0"
+pitest = "1.30.0"
+pitestJunit5 = "1.2.3"
 
 [libraries]
+# The JSON reader BibleEngineClient parses the engine's messages with; pinned to the version socket.io-client brings.
+org-json = { module = "org.json:json", version = "20090211" }
+kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
 vlcj = { module = "uk.co.caprica:vlcj", version.ref = "vlcj" }
@@ -109,3 +118,4 @@ kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", vers
 sentry = { id = "io.sentry.jvm.gradle", version.ref = "sentryPlugin" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+pitest = { id = "info.solidsoft.pitest", version.ref = "pitestPlugin" }

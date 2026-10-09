@@ -1,9 +1,9 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import org.churchpresenter.liveoutput.lottieBandPath
-import org.churchpresenter.app.churchpresenter.utils.isLiveOutput
-import org.churchpresenter.app.churchpresenter.utils.isMultiTranslationPresentation
-import org.churchpresenter.app.churchpresenter.utils.isSplitScreenBible
+import org.churchpresenter.telemetry.isLiveOutput
+import org.churchpresenter.telemetry.isMultiTranslationPresentation
+import org.churchpresenter.telemetry.isSplitScreenBible
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.sharedui.models.Presenting

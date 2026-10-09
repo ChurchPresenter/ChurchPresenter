@@ -15,10 +15,10 @@ import androidx.compose.ui.platform.LocalDensity
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.LocalGuideTargetRegistry
 import org.churchpresenter.app.churchpresenter.dialogs.optionsTabIndexOf
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.DisplayOption
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.detectScreensFromAwt
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.withPrimaryTarget
-import org.churchpresenter.app.churchpresenter.utils.hasAudienceOutput
+import org.churchpresenter.liveoutput.settings.DisplayOption
+import org.churchpresenter.liveoutput.settings.detectScreensFromAwt
+import org.churchpresenter.liveoutput.settings.withPrimaryTarget
+import org.churchpresenter.telemetry.hasAudienceOutput
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.helper.HelperActionExecutor

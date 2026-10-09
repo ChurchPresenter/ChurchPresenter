@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.LocalSettingsDevMode
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -43,7 +42,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
@@ -70,23 +68,24 @@ import org.churchpresenter.strings.generated.resources.companion_satellite_setti
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
-import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
+import org.churchpresenter.serverui.RemoteClientManager
 import org.churchpresenter.settings.SettingsManager
 import org.churchpresenter.server.CalendarSyncService
 import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.lowerthird.AtemSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.LocalApplySettings
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.CompanionSatelliteSettingsTab
+import org.churchpresenter.companionsurface.CompanionSatelliteSettingsTab
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.obs.OBSSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.SystemSettingsTab
+import org.churchpresenter.appsettings.SystemSettingsTab
 import org.churchpresenter.profiles.BackgroundSettingsTab
 import org.churchpresenter.profiles.BibleSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.DetectedScreen
+import org.churchpresenter.app.churchpresenter.BuildConfig
+import org.churchpresenter.app.churchpresenter.builtInRelayEndpoints
+import org.churchpresenter.liveoutput.settings.DetectedScreen
 import org.churchpresenter.profiles.ProfilesSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.detectScreensFromAwt
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
+import org.churchpresenter.liveoutput.settings.ProjectionSettingsTab
+import org.churchpresenter.liveoutput.settings.detectScreensFromAwt
+import org.churchpresenter.serverui.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.composables.LabeledTab
 import org.churchpresenter.app.churchpresenter.composables.LabeledTabIndicator
 import org.churchpresenter.app.churchpresenter.composables.labeledTabMinWidth
@@ -97,6 +96,8 @@ import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.obs.OBSWebSocketManager
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import org.churchpresenter.profiles.LocalSettingsDevMode
+import org.churchpresenter.profiles.LocalApplySettings
 
 // Values must equal each tab's own position in SettingsTabStrip's row: PrimaryScrollableTabRow's
 // selectedTabIndex/tabIndicatorOffset key off *position*, so a value that outruns its row slot
@@ -140,6 +141,8 @@ fun OptionsDialog(
     initialTab: Int = 0,
     initialSettings: AppSettings? = null,
     devMode: Boolean = false,
+    /** The window it opens in -- see [DialogFrame]. */
+    frame: DialogFrame = appDialogFrame,
 ) {
     if (!isVisible) return
 
@@ -152,15 +155,17 @@ fun OptionsDialog(
         val screen = primaryScreenSizeDp()
         dialogSizeWithin(1400.dp, 900.dp, screen.width, screen.height)
     }
-    DialogWindow(
-        onCloseRequest = onDismiss,
-        state = rememberDialogState(
+    frame(
+        DialogFrameSpec(
+            onClose = onDismiss,
+            state = rememberDialogState(
             position = centeredOnMainWindow(mainWindowState, size.width, size.height),
             width = size.width,
             height = size.height
         ),
-        title = stringResource(Res.string.options),
-        resizable = true
+            title = stringResource(Res.string.options),
+            resizable = true,
+        ),
     ) {
         OptionsDialogContent(
             theme = theme,
@@ -412,7 +417,8 @@ private fun SettingsTabContent(
             onIdentifyNdi = { index -> onIdentifyNdi(index) },
             onIdentifyOmt = { index -> onIdentifyOmt(index) },
             scenes = scenes,
-            detectScreens = detectScreens
+            detectScreens = detectScreens,
+            isRelease = BuildConfig.IS_RELEASE,
         )
         TAB_SERVER -> ServerSettingsTab(
             settings = settings,
@@ -420,6 +426,7 @@ private fun SettingsTabContent(
             companionServer = companionServer,
             remoteClientManager = remoteClientManager,
             calendarSync = calendarSync,
+            builtInRelayUrl = builtInRelayEndpoints.relayUrl,
         )
         TAB_ATEM -> AtemSettingsTab(settings = settings, onSettingsChange = onSettingsChange)
         TAB_INTEGRATIONS -> if (obsManager != null) {

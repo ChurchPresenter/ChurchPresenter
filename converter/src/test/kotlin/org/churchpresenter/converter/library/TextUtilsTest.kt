@@ -78,4 +78,15 @@ class TextUtilsTest {
             TextUtils.findFilesWithControlChars(temp).map { it.canonicalPath },
         )
     }
+
+    @Test
+    fun `a file shorter than a byte order mark is read as plain UTF-8`() {
+        assertEquals("A", decodeUtf8OrCyrillic(byteArrayOf(0x41)))
+    }
+
+    @Test
+    fun `a byte order mark is dropped, not read as text`() {
+        val withMark = byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte()) + "Amen".toByteArray()
+        assertEquals("Amen", decodeUtf8OrCyrillic(withMark))
+    }
 }

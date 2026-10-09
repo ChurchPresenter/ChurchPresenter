@@ -145,6 +145,14 @@ class CompanionSatelliteClientTest {
         c.dispose()
     }
 
+    @Test
+    fun `port zero is out of range too`() {
+        val events = Events()
+        val c = newClient(events)
+        c.connect("127.0.0.1", 0, SurfaceSpec(DEVICE, rows = 2, columns = 2, bitmapSize = 72))
+        assertEquals("Port out of range: 0", events.statuses.last().second)
+    }
+
     // ── LAYOUT_MANIFEST ───────────────────────────────────────────────────────
 
     private fun manifestOf(addDeviceLine: String): String {
@@ -473,5 +481,90 @@ class CompanionSatelliteClientTest {
             waitFor("the following update") { events.buttons.isNotEmpty() }
             assertEquals(4, events.buttons.single().index, "the session survives an unknown command")
         }
+    }
+
+    @Test
+    fun `a command with no body at all is still understood`() {
+        FakeCompanion(brightness = 0).use { fake ->
+            val events = Events()
+            connected(fake, events)
+            val before = events.resets.size
+            fake.sendRaw("KEYS-CLEAR")
+            waitFor("the grid reset") { events.resets.size > before }
+        }
+    }
+
+    @Test
+    fun `a brightness that is not a number is ignored`() {
+        FakeCompanion(brightness = 0).use { fake ->
+            val events = Events()
+            connected(fake, events)
+            fake.sendRaw("BRIGHTNESS DEVICEID=\"$DEVICE\" VALUE=bright ")
+            fake.sendRaw("BRIGHTNESS DEVICEID=\"$DEVICE\" ")
+            fake.sendBrightness(DEVICE, 7)
+            waitFor("the numeric brightness") { events.brightness.isNotEmpty() }
+            assertEquals(listOf(7), events.brightness.toList(), "the lines before it arrived first and were dropped")
+        }
+    }
+
+    @Test
+    fun `a registration refused without a reason still says it failed`() {
+        FakeCompanion(brightness = 0).use { fake ->
+            val events = Events()
+            connected(fake, events)
+            fake.sendRaw("ADD-DEVICE ERROR DEVICEID=\"$DEVICE\" ")
+            waitFor("ERROR status") { events.status == CompanionConnectionStatus.ERROR }
+            assertEquals("Device registration failed", events.statuses.last().second)
+        }
+    }
+
+    @Test
+    fun `presses and page changes wait for a registration that was refused`() {
+        FakeCompanion(acceptRegistration = false).use { fake ->
+            val events = Events()
+            val c = newClient(events)
+            c.connect(
+                "127.0.0.1",
+                fake.port,
+                SurfaceSpec(DEVICE, rows = 1, columns = 1, bitmapSize = 72),
+                reconnectDelayMs = 60_000,
+            )
+            waitFor("ERROR status") { events.status == CompanionConnectionStatus.ERROR }
+            // Both return before launching anything when the surface is not registered.
+            c.pressButton(0)
+            c.changePage(forward = true)
+            assertTrue(fake.linesStartingWith("KEY-PRESS").isEmpty())
+            assertTrue(fake.linesStartingWith("CHANGE-PAGE").isEmpty())
+        }
+    }
+
+    @Test
+    fun `a client built without a brightness listener ignores brightness`() {
+        FakeCompanion(brightness = 30).use { fake ->
+            val statuses = Collections.synchronizedList(mutableListOf<CompanionConnectionStatus>())
+            val resets = Collections.synchronizedList(mutableListOf<Int>())
+            val c = CompanionSatelliteClient(
+                onStatusChanged = { s, _ -> statuses.add(s) },
+                onButtonUpdated = {},
+                onButtonsReset = { resets.add(it) },
+            ).also { client = it }
+            c.connect("127.0.0.1", fake.port, SurfaceSpec(DEVICE, rows = 1, columns = 1, bitmapSize = 72))
+            waitFor("CONNECTED") { statuses.lastOrNull() == CompanionConnectionStatus.CONNECTED }
+            // The brightness Companion sends after registration goes to the default listener; a
+            // KEYS-CLEAR sent after it arriving proves it was read past.
+            fake.sendKeysClear(DEVICE)
+            waitFor("the reset after the brightness") { resets.size >= 2 }
+        }
+    }
+
+    @Test
+    fun `the protocol's own defaults describe a blank button and every usable port`() {
+        val blank = CompanionButtonUpdate(index = 4)
+        assertEquals(4, blank.index)
+        assertEquals(null, blank.bitmapRgb)
+        assertEquals("", blank.text)
+        assertEquals(false, blank.pressed)
+        assertEquals(1..65_535, CompanionSatelliteClient.VALID_PORTS)
+        assertEquals(3, SurfaceSpec(DEVICE, rows = 3, columns = 2, bitmapSize = 72).rows)
     }
 }

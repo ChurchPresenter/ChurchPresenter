@@ -7,9 +7,9 @@ import java.time.Instant
  * What [StyleThumbnails] last did, for when a picture that should be in the Style menu is not.
  *
  * Read-only from outside: [StyleThumbnails] records into it as it builds, and [describe] says,
- * in one block of text, whether a config was ever asked for, which style it was asked with, the
- * state of the build job, which styles drew, which came back without a picture and why, and when
- * the last build finished. A host or a test that wants to read it creates one and hands it to
+ * in one block of text, whether a config was ever asked for, which key and style it was asked
+ * with, the state of the build job and what ended it, which styles drew, which came back without a
+ * picture and why, and when the last build finished. A host or a test that wants to read it creates one and hands it to
  * `App`; otherwise each [StyleThumbnails] keeps its own and nothing reads it.
  *
  * Written from the build coroutine and read from whatever thread asks, so every member is
@@ -32,6 +32,9 @@ class ThumbnailDiagnostics(private val clock: () -> Long = System::currentTimeMi
     private var requests = 0
     private var repeats = 0
     private var askedStyle: String? = null
+    private var currentKey: Int? = null
+    private val keysSeen = HashSet<Int>()
+    private var failure: String? = null
     private var job: Job? = null
     private var builds = 0
     private var superseded = 0
@@ -40,13 +43,16 @@ class ThumbnailDiagnostics(private val clock: () -> Long = System::currentTimeMi
     private var finishedAt: Long? = null
 
     /**
-     * A config was asked for with [style] selected. [job] is the build it started, or null when it
-     * matched the key already drawn or being drawn and so started nothing.
+     * A config was asked for with [style] selected and [key] (the config's thumbnail key's hash). [job]
+     * is the build it started, or null when it matched the key already drawn or being drawn and so
+     * started nothing.
      */
     @Synchronized
-    internal fun requested(style: String, job: Job?) {
+    internal fun requested(style: String, key: Int, job: Job?) {
         requests++
         askedStyle = style
+        currentKey = key
+        keysSeen += key
         if (job == null) repeats++ else this.job = job
     }
 
@@ -81,6 +87,12 @@ class ThumbnailDiagnostics(private val clock: () -> Long = System::currentTimeMi
         superseded++
     }
 
+    /** A build ended with [cause], something other than a cancellation: no style after it was drawn. */
+    @Synchronized
+    internal fun buildFailed(cause: Throwable) {
+        failure = "${cause::class.java.name}: ${cause.message}"
+    }
+
     /** A build went through every style and published what it drew. */
     @Synchronized
     internal fun buildFinished() {
@@ -93,7 +105,10 @@ class ThumbnailDiagnostics(private val clock: () -> Long = System::currentTimeMi
         appendLine("StyleThumbnails diagnostics")
         appendLine("  key present: ${requests > 0}, requests: $requests ($repeats for the key already held)")
         appendLine("  style asked for: ${askedStyle ?: "none"}")
+        val key = currentKey?.let { "#%08x".format(it) } ?: "none"
+        appendLine("  key: $key, distinct keys asked for: ${keysSeen.size}")
         appendLine("  job: ${jobState(job)}")
+        failure?.let { appendLine("  last build failed: $it") }
         appendLine("  builds started: $builds, superseded: $superseded")
         val finished = finishedAt
         val ago = finished?.let { " (${clock() - it} ms ago)" } ?: ""
@@ -103,6 +118,10 @@ class ThumbnailDiagnostics(private val clock: () -> Long = System::currentTimeMi
         if (asked != null) appendLine("  asked-for style $asked: ${outcomes[asked] ?: "no outcome this build"}")
         val drawn = outcomes.count { it.value.startsWith(Outcome.DRAWN.text) }
         appendLine("  drawn this build: $drawn of ${outcomes.size}")
+        val missing = outcomes.keys.filter { it !in published }
+        if (missing.isNotEmpty()) {
+            appendLine("  without a picture: ${missing.joinToString(prefix = "[", postfix = "]")}")
+        }
         // Every style but the plainly drawn ones, a retry included: that is what a slow machine looks like.
         outcomes.filterValues { it != Outcome.DRAWN.text }.forEach { (id, why) -> appendLine("  style $id: $why") }
     }

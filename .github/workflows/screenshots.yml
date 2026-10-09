@@ -11,7 +11,7 @@ name: Screenshots
 #   * reg-actions needs write access to pull requests and to the repository, which `test`
 #     deliberately does not have (`contents: read`).
 #
-# **The images ARE committed**, under each module's `screenshots/` (`composeApp`, `shared-ui`, `slides`, `media`, `songs`, `bible-tab`, `schedule`, `companion-surface`, `canvas`, `presenter`, `profiles`, `live-output`, `updater`, `helper`), so a reviewer can open and approve
+# **The images ARE committed**, under each module's `screenshots/` (`composeApp`, `shared-ui`, `slides`, `media`, `songs`, `bible-tab`, `schedule`, `companion-surface`, `canvas`, `presenter`, `profiles`, `live-output`, `updater`, `server-ui`, `app-settings`, `helper`), so a reviewer can open and approve
 # what is on screen rather than take the diff on trust. This job is a second, independent view of
 # the same thing: it records the branch's images and reg-actions diffs them against the base
 # branch's, which it keeps on a `reg_actions` branch of its own. Note the record step below
@@ -21,7 +21,9 @@ name: Screenshots
 # Skia renders text differently on macOS, Windows and Linux (the same reason AGENT.md tells tests to
 # assert invariants rather than pixels), so the committed images are right for whoever recorded them
 # and differ everywhere else. Record on ONE platform per branch, and re-record only what actually
-# changed — a re-record on a second OS rewrites nearly every file for nothing.
+# changed — a re-record on a second OS rewrites nearly every file for nothing. macOS is the
+# canonical platform: the committed set is recorded and verified there, and this Linux comparison
+# stays advisory.
 #
 # To update the website's screenshots, download the `screenshots` artifact from a run on `main`
 # rather than recording locally — those are the Linux renders, and they are consistent with each
@@ -114,6 +116,8 @@ jobs:
           :profiles:recordRoborazziJvm --tests '*ScreenshotTest*'
           :live-output:recordRoborazziJvm --tests '*ScreenshotTest*'
           :updater:recordRoborazziJvm --tests '*ScreenshotTest*'
+          :app-settings:recordRoborazziJvm --tests '*ScreenshotTest*'
+          :server-ui:recordRoborazziJvm --tests '*ScreenshotTest*'
           :companion-surface:recordRoborazziJvm --tests '*ScreenshotTest*'
           :helper:recordRoborazziJvm --tests '*ScreenshotTest*'
 
@@ -213,6 +217,22 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
+      - name: Upload the rendered server-ui screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-server-ui
+          path: server-ui/screenshots
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload the rendered app-settings screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-app-settings
+          path: app-settings/screenshots
+          retention-days: 30
+          if-no-files-found: error
+
       - name: Upload the rendered updater screenshots
         uses: actions/upload-artifact@v4
         with:
@@ -284,7 +304,7 @@ jobs:
       - name: Gather every module's screenshots
         run: |
           rm -rf screenshots-compare
-          mkdir -p screenshots-compare/shared-ui screenshots-compare/slides screenshots-compare/media screenshots-compare/songs screenshots-compare/bible-tab screenshots-compare/schedule screenshots-compare/companion-surface screenshots-compare/canvas screenshots-compare/presenter screenshots-compare/profiles screenshots-compare/live-output screenshots-compare/updater screenshots-compare/helper
+          mkdir -p screenshots-compare/shared-ui screenshots-compare/slides screenshots-compare/media screenshots-compare/songs screenshots-compare/bible-tab screenshots-compare/schedule screenshots-compare/companion-surface screenshots-compare/canvas screenshots-compare/presenter screenshots-compare/profiles screenshots-compare/live-output screenshots-compare/updater screenshots-compare/server-ui screenshots-compare/app-settings screenshots-compare/helper
           cp -R composeApp/screenshots/. screenshots-compare/
           cp -R shared-ui/screenshots/. screenshots-compare/shared-ui/
           cp -R slides/screenshots/. screenshots-compare/slides/
@@ -297,6 +317,8 @@ jobs:
           cp -R profiles/screenshots/. screenshots-compare/profiles/
           cp -R live-output/screenshots/. screenshots-compare/live-output/
           cp -R updater/screenshots/. screenshots-compare/updater/
+          cp -R app-settings/screenshots/. screenshots-compare/app-settings/
+          cp -R server-ui/screenshots/. screenshots-compare/server-ui/
           cp -R companion-surface/screenshots/. screenshots-compare/companion-surface/
           cp -R helper/screenshots/. screenshots-compare/helper/
 

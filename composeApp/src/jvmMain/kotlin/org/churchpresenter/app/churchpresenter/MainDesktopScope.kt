@@ -99,7 +99,8 @@ internal class MainDesktopScope(
      * next/previous slide Instance Link commands. Only pushes when Presentation is actually the live
      * content, same gate PresentationTab's own slide-push effect uses.
      */
-    suspend fun pushCurrentSlideIfLive() = pushPresentationSlideIfLive(presentationViewModel, presenterManager)
+    suspend fun pushCurrentSlideIfLive() =
+        pushPresentationSlideIfLive(presentationViewModel.slideCursor(link), presenterManager)
 
     /** Clears every output, including a "Send to Stage Monitor" lock, from the Clear shortcut. */
     fun clearOutput() =

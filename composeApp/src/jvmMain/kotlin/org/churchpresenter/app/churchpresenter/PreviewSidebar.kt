@@ -5,7 +5,6 @@ import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import org.churchpresenter.liveoutput.withPreviewMode
-import org.churchpresenter.liveoutput.clearFromOperator
 import javax.swing.filechooser.FileNameExtensionFilter
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.dialogs.PropsDialog
@@ -22,11 +21,11 @@ import org.churchpresenter.strings.generated.resources.props_picture
 import org.churchpresenter.strings.generated.resources.tooltip_props
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
@@ -47,6 +46,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
+import org.churchpresenter.liveshow.Cue
+import org.churchpresenter.settings.ClearGroup
+import org.churchpresenter.settings.MessageTemplate
+import org.churchpresenter.settings.PropDefinition
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.testTag
@@ -60,17 +64,15 @@ import org.churchpresenter.strings.generated.resources.tooltip_message
 import org.churchpresenter.strings.generated.resources.tooltip_preview_settings
 import org.churchpresenter.strings.generated.resources.tooltip_toggle_displays
 import org.churchpresenter.companionsurface.CompanionConnectionChipRow
-import org.churchpresenter.companionsurface.CompanionSurfacePanel
-import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
-import org.churchpresenter.app.churchpresenter.composables.PreviewGroupsPopover
+import org.churchpresenter.liveoutput.preview.LivePreviewPanel
+import org.churchpresenter.liveoutput.preview.PreviewGroupsPopover
 import org.churchpresenter.app.churchpresenter.composables.QuickBackgroundTray
 import org.churchpresenter.sharedui.composables.ToolbarKey
 import org.churchpresenter.sharedui.composables.ToolbarKeyStyle
 import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.profiles.previewOutputSize
-import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
-import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.liveoutput.clearMessage
 import org.churchpresenter.liveoutput.messageOnAir
 import org.churchpresenter.liveoutput.showMessage
@@ -85,32 +87,52 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
+ * A Companion surface drawn in one of the main screen's sidebars: the connection it shows and where.
+ * Built by the wiring, which holds the surface's view model; the sidebars only place it.
+ */
+internal typealias CompanionSurfaceSlot =
+    @Composable (connection: CompanionSatelliteSettings, placement: CompanionSurfacePlacement) -> Unit
+
+/** What the right-hand sidebar shows: the settings it reads, the live-preview copy of them and the URLs. */
+internal class PreviewSidebarState(
+    val appSettings: AppSettings,
+    /** [appSettings] with the background possibly mirrored from an Instance Link primary — the preview only. */
+    val livePreviewAppSettings: AppSettings,
+    val activeQuickBackground: QuickBackground?,
+    val serverUrl: String,
+    val qaDisplayUrl: String,
+    val showControl: SidebarShowControl = SidebarShowControl(),
+)
+
+/** What the right-hand sidebar's controls do. */
+internal class PreviewSidebarActions(
+    /** The clear button: every output off, the media paused, and any Instance Link follower told. */
+    val onClearDisplay: () -> Unit,
+    val onQuickBackgroundPicked: (QuickBackground?) -> Unit,
+    val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+)
+
+/**
  * The right-hand sidebar: the display controls, the live preview, and any Companion surface routed
- * here.
+ * here, drawn at the panel's [geometry].
  *
- * One of MainDesktop's own layout pieces: the view models it takes are the main screen's, under the
- * standing exception AGENT.md records for the root screen's wiring and layout files.
+ * [presenterManager] and [sttManager] are what the live preview renders from; neither is a view model.
  */
 @Composable
 internal fun PreviewSidebar(
-    collapsed: Boolean,
-    visibleFraction: Float,
-    previewPanelPx: Float,
-    maxPreviewPx: Float,
+    geometry: PreviewPanelGeometry,
+    state: PreviewSidebarState,
+    actions: PreviewSidebarActions,
     presenterManager: PresenterManager,
-    mediaViewModel: MediaViewModel?,
-    instanceLinkSendClear: (() -> Unit)?,
-    livePreviewAppSettings: AppSettings,
-    appSettings: AppSettings,
-    activeQuickBackground: QuickBackground?,
-    onQuickBackgroundPicked: (QuickBackground?) -> Unit,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    serverUrl: String,
-    qaDisplayUrl: String,
     sttManager: STTManager?,
-    companionSatelliteViewModel: CompanionSatelliteViewModel,
-    showControl: SidebarShowControl = SidebarShowControl(),
+    companionSurface: CompanionSurfaceSlot,
 ) {
+    val appSettings = state.appSettings
+    val onSettingsChange = actions.onSettingsChange
+    val collapsed = geometry.collapsed
+    val visibleFraction = geometry.visibleFraction
+    val previewPanelPx = geometry.previewPanelPx
+    val maxPreviewPx = geometry.maxPreviewPx
     // Whether the panel's layout is being edited, from the gear's Edit layout to the panel's Done.
     var editingPreviewLayout by remember { mutableStateOf(false) }
     if (isPanelRendered(collapsed, visibleFraction)) {
@@ -122,10 +144,9 @@ internal fun PreviewSidebar(
         ) {
             SidebarButtons(
                 presenterManager = presenterManager,
-                mediaViewModel = mediaViewModel,
-                instanceLinkSendClear = instanceLinkSendClear,
+                onClearDisplay = actions.onClearDisplay,
                 appSettings = appSettings,
-                showControl = showControl,
+                showControl = state.showControl,
                 onSettingsChange = onSettingsChange,
                 onEditPreviewLayout = { editingPreviewLayout = true },
             )
@@ -133,30 +154,31 @@ internal fun PreviewSidebar(
             val previewFills = appSettings.projectionSettings.run { previewLayoutFillsPanel && activeLayout() != null }
             LivePreviewPanel(
                 presenterManager = presenterManager,
-                appSettings = livePreviewAppSettings,
+                appSettings = state.livePreviewAppSettings,
                 modifier = (if (previewFills) Modifier.fillMaxWidth().weight(1f) else Modifier.fillMaxWidth())
                     .guideTarget(GuideTargets.LIVE_PREVIEW),
-                serverUrl = serverUrl,
-                qaDisplayUrl = qaDisplayUrl,
+                serverUrl = state.serverUrl,
+                qaDisplayUrl = state.qaDisplayUrl,
                 sttManager = sttManager,
                 onSettingsChange = onSettingsChange,
                 editingLayout = editingPreviewLayout,
                 onDoneEditing = { editingPreviewLayout = false },
+                isRelease = BuildConfig.IS_RELEASE,
             )
             QuickBackgroundTray(
                 backgrounds = appSettings.quickBackgrounds,
                 // A quick background is a full-screen background: its tile is a picture of the
                 // output, so it is that output's shape.
                 tileAspect = previewOutputSize(appSettings).aspectRatio,
-                activeId = activeQuickBackground?.id,
+                activeId = state.activeQuickBackground?.id,
                 expanded = appSettings.quickBackgroundsExpanded,
                 onExpandedChange = { open ->
                     onSettingsChange { s -> s.copy(quickBackgroundsExpanded = open) }
                 },
-                onPick = onQuickBackgroundPicked,
+                onPick = actions.onQuickBackgroundPicked,
                 modifier = Modifier.padding(top = 8.dp),
             )
-            RightSidebarCompanion(appSettings, previewFills, companionSatelliteViewModel)
+            RightSidebarCompanion(appSettings, previewFills, companionSurface)
         }
     }
 }
@@ -169,7 +191,7 @@ internal fun PreviewSidebar(
 private fun ColumnScope.RightSidebarCompanion(
     appSettings: AppSettings,
     previewFills: Boolean,
-    companionSatelliteViewModel: CompanionSatelliteViewModel,
+    companionSurface: CompanionSurfaceSlot,
 ) {
     val rightSidebarConnections = appSettings.companionSatelliteConnections
         .filter { it.showInRightSidebar && it.host.isNotBlank() }
@@ -204,27 +226,93 @@ private fun ColumnScope.RightSidebarCompanion(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
                 if (selectedRightSidebarConnection != null) {
-                    CompanionSurfacePanel(
-                        connection = selectedRightSidebarConnection,
-                        placement = CompanionSurfacePlacement.RIGHT_SIDEBAR,
-                        viewModel = companionSatelliteViewModel,
-                        modifier = Modifier.fillMaxWidth(),
-                        sizeToContent = true
-                    )
+                    companionSurface(selectedRightSidebarConnection, CompanionSurfacePlacement.RIGHT_SIDEBAR)
                 }
             }
         }
     }
 }
 
+/**
+ * The Message, Props and clear-group editors the sidebar opens. In the app each is its own window; a test, which
+ * cannot open one, provides stand-ins through [LocalSidebarDialogs] and drives their callbacks.
+ */
+internal interface SidebarDialogs {
+    @Composable
+    fun Message(
+        isVisible: Boolean,
+        templates: List<MessageTemplate>,
+        onTemplatesChange: (List<MessageTemplate>) -> Unit,
+        onAir: Cue.Message?,
+        onGoLive: (Cue.Message) -> Unit,
+        onClear: () -> Unit,
+        onDismiss: () -> Unit,
+    )
+
+    @Composable
+    fun Props(
+        isVisible: Boolean,
+        props: List<PropDefinition>,
+        onPropsChange: (List<PropDefinition>) -> Unit,
+        onAir: Set<String>,
+        onSwitch: (id: String, on: Boolean) -> Unit,
+        onChoosePicture: suspend () -> String?,
+        onDismiss: () -> Unit,
+    )
+
+    @Composable
+    fun ClearGroups(
+        isVisible: Boolean,
+        groups: List<ClearGroup>,
+        onGroupsChange: (List<ClearGroup>) -> Unit,
+        onClearGroup: (ClearGroup) -> Unit,
+        onDismiss: () -> Unit,
+    )
+}
+
+/** The editors as the app opens them: [MessageDialog], [PropsDialog] and [ClearGroupsDialog], each a window. */
+internal object WindowedSidebarDialogs : SidebarDialogs {
+    @Composable
+    override fun Message(
+        isVisible: Boolean,
+        templates: List<MessageTemplate>,
+        onTemplatesChange: (List<MessageTemplate>) -> Unit,
+        onAir: Cue.Message?,
+        onGoLive: (Cue.Message) -> Unit,
+        onClear: () -> Unit,
+        onDismiss: () -> Unit,
+    ) = MessageDialog(isVisible, templates, onTemplatesChange, onAir, onGoLive, onClear, onDismiss)
+
+    @Composable
+    override fun Props(
+        isVisible: Boolean,
+        props: List<PropDefinition>,
+        onPropsChange: (List<PropDefinition>) -> Unit,
+        onAir: Set<String>,
+        onSwitch: (id: String, on: Boolean) -> Unit,
+        onChoosePicture: suspend () -> String?,
+        onDismiss: () -> Unit,
+    ) = PropsDialog(isVisible, props, onPropsChange, onAir, onSwitch, onChoosePicture, onDismiss)
+
+    @Composable
+    override fun ClearGroups(
+        isVisible: Boolean,
+        groups: List<ClearGroup>,
+        onGroupsChange: (List<ClearGroup>) -> Unit,
+        onClearGroup: (ClearGroup) -> Unit,
+        onDismiss: () -> Unit,
+    ) = ClearGroupsDialog(isVisible, groups, onGroupsChange, onClearGroup, onDismiss)
+}
+
+/** Where the sidebar's editors open: in their own windows, unless a test says otherwise. */
+internal val LocalSidebarDialogs = staticCompositionLocalOf<SidebarDialogs> { WindowedSidebarDialogs }
+
 /** The row of buttons over the preview: displays, clear, settings, message, props, macros, clear layers, take. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-@Suppress("LongParameterList")
 private fun SidebarButtons(
     presenterManager: PresenterManager,
-    mediaViewModel: MediaViewModel?,
-    instanceLinkSendClear: (() -> Unit)?,
+    onClearDisplay: () -> Unit,
     appSettings: AppSettings,
     showControl: SidebarShowControl,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
@@ -250,11 +338,7 @@ private fun SidebarButtons(
         TooltipIconButton(
             painter = painterResource(IconRes.drawable.ic_close),
             text = stringResource(Res.string.tooltip_clear_display),
-            onClick = {
-                mediaViewModel?.pause()
-                presenterManager.clearFromOperator()
-                instanceLinkSendClear?.invoke()
-            },
+            onClick = onClearDisplay,
             buttonSize = 36.dp,
             modifier = Modifier.guideTarget(GuideTargets.CLEAR_OUTPUT),
             iconTint = MaterialTheme.colorScheme.error
@@ -295,7 +379,7 @@ private fun MessageButton(
         iconTint = if (onAir != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.testTag(MESSAGE_BUTTON_TAG),
     )
-    MessageDialog(
+    LocalSidebarDialogs.current.Message(
         isVisible = open,
         templates = appSettings.messageTemplates,
         onTemplatesChange = { templates -> onSettingsChange { it.copy(messageTemplates = templates) } },
@@ -329,7 +413,7 @@ private fun PropsButton(
         iconTint = if (onAir.isNotEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.testTag(PROPS_BUTTON_TAG),
     )
-    PropsDialog(
+    LocalSidebarDialogs.current.Props(
         isVisible = open,
         props = appSettings.props,
         onPropsChange = { props -> onSettingsChange { it.copy(props = props) } },
@@ -379,7 +463,7 @@ private fun ClearLayersButton(
             )
         }
     }
-    ClearGroupsDialog(
+    LocalSidebarDialogs.current.ClearGroups(
         isVisible = editing,
         groups = appSettings.clearGroups,
         onGroupsChange = { groups -> onSettingsChange { it.copy(clearGroups = groups) } },

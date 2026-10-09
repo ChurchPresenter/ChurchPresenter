@@ -18,12 +18,16 @@ import kotlin.test.assertTrue
  */
 class SongLibraryTest {
 
-    private val root: File = Files.createTempDirectory("songlibrary-store").toFile()
+    // One level inside a folder of the test's own, so a path that does climb out of the library --
+    // the escape the songbook test checks, or a mutant of the guard under `pitest` -- lands where
+    // teardown deletes it rather than in the shared temp directory, where it outlives the run.
+    private val owned: File = Files.createTempDirectory("songlibrary-store").toFile()
+    private val root: File = File(owned, "library").apply { mkdirs() }
     private val library = SongLibrary(root)
 
     @AfterTest
     fun cleanUp() {
-        root.deleteRecursively()
+        owned.deleteRecursively()
     }
 
     private fun write(path: String, title: String, author: String = ""): File =
