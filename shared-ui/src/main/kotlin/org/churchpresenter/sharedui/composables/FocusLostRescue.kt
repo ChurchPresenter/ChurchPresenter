@@ -1,5 +1,6 @@
 package org.churchpresenter.sharedui.composables
 
+import org.churchpresenter.sharedui.guide.LocalGuideSession
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -53,6 +54,7 @@ fun rememberFocusLostRescue(
     state.active = active
     state.windowFocused = LocalWindowInfo.current.isWindowFocused
     val requester by rememberUpdatedState(focusRequester)
+    val guide = LocalGuideSession.current
     // macOS swallows the first click on an inactive window — the rescue banner's onClick
     // never fires from that click. Re-take keyboard focus whenever the window comes back to
     // the foreground with no focus owner inside the tab, so ANY activation click (banner,
@@ -61,9 +63,12 @@ fun rememberFocusLostRescue(
     // is silently dropped (verified hands-on) — so retry briefly until the tab actually owns
     // focus again.
     LaunchedEffect(state.windowFocused) {
-        if (state.windowFocused && !state.tabHasFocus && state.active) {
+        val lost = state.windowFocused && !state.tabHasFocus && state.active
+        if (lost && guide?.wickTyping != true) {
             state.restoreAwtFocusOwner()
             repeat(RESCUE_ATTEMPTS) {
+                // The click that brought the window back may have been into Wick's text box.
+                if (guide?.wickTyping == true) return@LaunchedEffect
                 requester.requestFocus()
                 delay(RESCUE_INTERVAL_MS)
                 if (state.tabHasFocus) return@LaunchedEffect

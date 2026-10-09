@@ -45,7 +45,7 @@ internal fun MainWindowScope.AppMenuBar() {
             onAbout = { showAboutDialog = true },
             onContactUs = { showContactDialog = true },
             onGettingStarted = { showSetupWizard = true },
-            onShowHelper = if (devMode) ::showHelper else null,
+            onShowHelper = ::showHelper,
             onStatistics = { showStatisticsDialog = true },
             onConnectToInstance = { showInstanceLinkDialog = true },
             onDisconnectInstance = { instanceLinkViewModel.disconnect() },
@@ -328,6 +328,7 @@ private fun MainWindowScope.remoteControlFlows(): RemoteControlFlows = with(root
         remotePresentationLoopToggleFlow = companionServer.onPresentationLoopToggle,
         remotePresentationGotoFlow = companionServer.onPresentationGoto,
         selectTabFlow = helperSelectTabFlow,
+        showReferenceFlow = helperShowReferenceFlow,
     )
 }
 

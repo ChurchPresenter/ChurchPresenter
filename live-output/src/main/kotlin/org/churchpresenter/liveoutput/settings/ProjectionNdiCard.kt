@@ -1,5 +1,7 @@
 package org.churchpresenter.liveoutput.settings
 
+import org.churchpresenter.sharedui.guide.guideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.settings.mergingProfileOf
 import org.churchpresenter.settings.utils.Constants
 import androidx.compose.foundation.layout.Arrangement
@@ -195,6 +197,7 @@ internal fun NdiOutputsCard(
                 onClick = {
                     onSettingsChange { s -> s.copy(projectionSettings = s.projectionSettings.addNdiOutput()) }
                 },
+                modifier = Modifier.guideTarget(GuideTargets.NDI_ADD),
             ) {
                 Text(stringResource(Res.string.add_ndi_output), style = MaterialTheme.typography.labelSmall)
             }
@@ -414,7 +417,8 @@ private fun NdiOutputRow(
                                 overflow = TextOverflow.Ellipsis,
                             )
                         },
-                        modifier = Modifier.width(NAME_FIELD_WIDTH),
+                        modifier = Modifier.width(NAME_FIELD_WIDTH)
+                            .then(if (index == 0) Modifier.guideTarget(GuideTargets.NDI_FIRST_NAME) else Modifier),
                     )
                 }
                 // Only enabled once the draft differs, so it reads as "there is something to
@@ -531,6 +535,7 @@ private fun NdiOutputRow(
                             output.activeProfileId,
                         ),
                         onPick = { pickedId -> update(output.copy(activeProfileId = pickedId)) },
+                        modifier = Modifier.guideTarget(GuideTargets.outputProfilePicker("ndi", index)),
                     )
                 }
                 ResolutionPicker(

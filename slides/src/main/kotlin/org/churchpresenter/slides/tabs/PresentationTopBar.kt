@@ -157,7 +157,8 @@ private fun PresentationTabScope.PresentationFileBar(viewModel: PresentationView
                     )
                 },
                 enabled = viewModel.selectedPresentation != null,
-                tooltipText = stringResource(Res.string.add_to_schedule)
+                tooltipText = stringResource(Res.string.add_to_schedule),
+                modifier = Modifier.guideTarget(GuideTargets.PRESENTATION_ADD_TO_SCHEDULE),
             )
         }
         if (presenterManager != null) {

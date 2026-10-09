@@ -1,5 +1,7 @@
 package org.churchpresenter.planningcenter.ui
 
+import org.churchpresenter.sharedui.guide.guideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.strings.generated.resources.planning_center_import_button
 import org.churchpresenter.strings.generated.resources.cancel
 import androidx.compose.material3.ButtonDefaults
@@ -86,7 +88,7 @@ Row(
         value = viewModel.selectedServiceTypeId,
         options = viewModel.serviceTypes.map { it.id to it.name },
         onValueChange = { id -> viewModel.selectServiceType(id) },
-        modifier = Modifier.weight(1f)
+        modifier = Modifier.weight(1f).guideTarget(GuideTargets.PCO_SERVICE_TYPE)
     )
     if (viewModel.plans.isNotEmpty() && !viewModel.isLoadingPlans) {
         Spacer(Modifier.width(12.dp))
@@ -97,7 +99,7 @@ Row(
                 plan.id to "${plan.title}${if (plan.dates.isNotBlank()) " — ${plan.dates}" else ""}"
             },
             onValueChange = { viewModel.selectPlan(it) },
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f).guideTarget(GuideTargets.PCO_PLAN)
         )
     }
     Spacer(Modifier.width(12.dp))
@@ -475,6 +477,7 @@ internal fun PcoImportFooter(
             shape = AppShape(6.dp),
             enabled = !isImporting && canImport,
             onClick = onImport,
+            modifier = Modifier.guideTarget(GuideTargets.PCO_IMPORT),
         ) {
             if (isImporting) {
                 CircularProgressIndicator(

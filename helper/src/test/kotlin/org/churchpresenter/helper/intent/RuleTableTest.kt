@@ -227,7 +227,10 @@ class RuleTableTest {
                 "how do i make the bible verses bigger" to HelperAction.Highlight::class,
             ),
         )
-        assertIs<Resolution.Unknown>(resolve("move the song up in the schedule"))
+        // Not a look tour: moving a schedule row is the schedule's own tour.
+        val moved = assertIs<Resolution.Act>(resolve("move the song up in the schedule"))
+        val move = assertIs<HelperAction.Highlight>(moved.action)
+        assertEquals("schedule.firstRow", move.tour.steps.single().target.id)
     }
 
     @Test

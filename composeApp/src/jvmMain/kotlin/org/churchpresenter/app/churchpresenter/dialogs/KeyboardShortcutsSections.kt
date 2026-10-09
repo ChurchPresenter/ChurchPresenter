@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.sharedui.guide.LocalGuideSession
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.apply
 import org.churchpresenter.strings.generated.resources.cancel
@@ -92,6 +93,22 @@ internal class ShortcutFilter {
         pressMode = false
         conflictsOnly = false
         recording = null
+    }
+}
+
+/**
+ * Lists the shortcut Wick names: when the guide session asks for one, every search and filter is
+ * dropped and its category is selected, so its row is on screen for the ring to find.
+ */
+@Composable
+internal fun FollowShortcutFocus(filter: ShortcutFilter) {
+    val session = LocalGuideSession.current ?: return
+    val focus = session.shortcutFocus
+    LaunchedEffect(focus) {
+        if (focus == null) return@LaunchedEffect
+        val action = ShortcutAction.entries.firstOrNull { it.name == focus }
+        if (action != null) filter.selectScope(action.scope)
+        session.shortcutFocus = null
     }
 }
 

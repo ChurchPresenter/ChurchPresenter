@@ -1,5 +1,6 @@
 package org.churchpresenter.appsettings
 
+import org.churchpresenter.settings.isWickAvailable
 import androidx.compose.material3.TextButton
 import org.churchpresenter.strings.generated.resources.settings_helper_title
 import org.churchpresenter.strings.generated.resources.settings_helper_tips
@@ -98,7 +99,10 @@ import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.profiles.FileManager
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.AppSettings
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import javax.swing.JOptionPane
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.profiles.LocalSettingsDevMode
@@ -144,6 +148,8 @@ fun SystemSettingsTab(
             // switches: a folder row is a path plus two buttons, and squeezing it to make space for
             // a column of toggles is the wrong trade. Below that the two stack, as they always did.
             val sideBySide = maxWidth >= SIDE_BY_SIDE_MIN_WIDTH
+            // Wick's card is there once Wick is: in dev mode, or after Help → Show Helper.
+            val wickAvailable = isWickAvailable(LocalSettingsDevMode.current, settings.helper)
             val storage: @Composable () -> Unit = {
                 SystemStorageCard(
                     settings = settings,
@@ -160,10 +166,8 @@ fun SystemSettingsTab(
                         verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
                         GeneralCard(settings, onSettingsChange)
-                        if (LocalSettingsDevMode.current) {
-                            DevModeCard(settings, onSettingsChange)
-                            HelperCard(settings, onSettingsChange)
-                        }
+                        if (LocalSettingsDevMode.current) DevModeCard(settings, onSettingsChange)
+                        if (wickAvailable) HelperCard(settings, onSettingsChange)
                         ManageSettingsCard(companionServer)
                     }
                 }
@@ -171,10 +175,8 @@ fun SystemSettingsTab(
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     storage()
                     GeneralCard(settings, onSettingsChange)
-                    if (LocalSettingsDevMode.current) {
-                        DevModeCard(settings, onSettingsChange)
-                        HelperCard(settings, onSettingsChange)
-                    }
+                    if (LocalSettingsDevMode.current) DevModeCard(settings, onSettingsChange)
+                    if (wickAvailable) HelperCard(settings, onSettingsChange)
                     ManageSettingsCard(companionServer)
                 }
             }
@@ -194,13 +196,13 @@ private fun HelperCard(
     SettingsCard(title = stringResource(Res.string.settings_helper_title)) {
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
             GeneralToggleRow(
-                label = stringResource(Res.string.settings_helper_show),
+                label = Res.string.settings_helper_show,
                 checked = helper.enabled,
                 onCheckedChange = { update(helper.copy(enabled = it)) }
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             GeneralToggleRow(
-                label = stringResource(Res.string.settings_helper_tips),
+                label = Res.string.settings_helper_tips,
                 checked = helper.tipsEnabled,
                 onCheckedChange = { update(helper.copy(tipsEnabled = it)) }
             )
@@ -225,7 +227,7 @@ private val SIDE_COLUMN_WIDTH = 400.dp
 /** One switch, with the sentence explaining what turning it on means. */
 @Composable
 private fun GeneralToggleRow(
-    label: String,
+    label: StringResource,
     hint: String? = null,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
@@ -233,6 +235,7 @@ private fun GeneralToggleRow(
     val interaction = remember { MutableInteractionSource() }
     Row(
         modifier = Modifier
+            .guideTarget(GuideTargets.settingsRow(label.key))
             .fillMaxWidth()
             .toggleRow(checked, onCheckedChange, interaction)
             .padding(vertical = 11.dp),
@@ -241,7 +244,7 @@ private fun GeneralToggleRow(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = label,
+                text = stringResource(label),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -274,7 +277,7 @@ private fun GeneralCard(
             // Launch at login — the OS registration is the source of truth, not settings.json
             var autoStartEnabled by remember { mutableStateOf(AutoStartManager.isEnabled()) }
             GeneralToggleRow(
-                label = stringResource(Res.string.launch_on_login),
+                label = Res.string.launch_on_login,
                 checked = autoStartEnabled,
                 onCheckedChange = { enabled ->
                     scope.launch {
@@ -285,7 +288,7 @@ private fun GeneralCard(
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             GeneralToggleRow(
-                label = stringResource(Res.string.start_outputs_hidden),
+                label = Res.string.start_outputs_hidden,
                 hint = stringResource(Res.string.start_outputs_hidden_hint),
                 checked = settings.projectionSettings.startOutputsHidden,
                 onCheckedChange = { hidden ->
@@ -296,7 +299,7 @@ private fun GeneralCard(
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             GeneralToggleRow(
-                label = stringResource(Res.string.hide_cursor_on_outputs),
+                label = Res.string.hide_cursor_on_outputs,
                 hint = stringResource(Res.string.hide_cursor_on_outputs_hint),
                 checked = settings.projectionSettings.hideCursorOnOutputs,
                 onCheckedChange = { hide ->
@@ -307,7 +310,7 @@ private fun GeneralCard(
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             GeneralToggleRow(
-                label = stringResource(Res.string.overlay_end_clears_display),
+                label = Res.string.overlay_end_clears_display,
                 hint = stringResource(Res.string.overlay_end_clears_display_hint),
                 checked = settings.projectionSettings.overlayEndClearsDisplay,
                 onCheckedChange = { clears ->
@@ -318,7 +321,7 @@ private fun GeneralCard(
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             GeneralToggleRow(
-                label = stringResource(Res.string.focus_search_on_tab_open),
+                label = Res.string.focus_search_on_tab_open,
                 hint = stringResource(Res.string.focus_search_on_tab_open_hint),
                 checked = settings.keyboardShortcutSettings.focusSearchOnTabOpen,
                 onCheckedChange = { on ->
@@ -336,7 +339,7 @@ private fun GeneralCard(
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             GeneralToggleRow(
-                label = stringResource(Res.string.analytics_reporting),
+                label = Res.string.analytics_reporting,
                 hint = stringResource(Res.string.analytics_reporting_hint),
                 checked = settings.analyticsReportingEnabled,
                 onCheckedChange = { enabled ->
@@ -365,7 +368,7 @@ private fun DevModeCard(
     ) {
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
             GeneralToggleRow(
-                label = stringResource(Res.string.preview_mode),
+                label = Res.string.preview_mode,
                 hint = stringResource(Res.string.preview_mode_hint),
                 checked = settings.projectionSettings.previewModeEnabled,
                 onCheckedChange = { on -> onSettingsChange { s -> s.withPreviewMode(on) } }

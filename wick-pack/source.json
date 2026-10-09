@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "minApp": "26.15.0",
+  "phrases": [
+    {
+      "target": "request:add a song",
+      "texts": ["type in a new hymn", "I want to put a new worship song into the program"]
+    },
+    {
+      "target": "request:change song lyrics",
+      "texts": ["fix a typo in the words of a hymn"]
+    }
+  ],
+  "tours": [
+    {
+      "id": "song-ccli-number",
+      "title": "Enter a song's CCLI number",
+      "triggers": ["where do I put the CCLI number", "add the ccli song number to a song", "song licence number"],
+      "steps": [
+        { "target": "songs.edit", "before": "tab=SONGS", "hint": "Pick the song in the list, then press Edit." },
+        { "target": "songEditor.ccli", "hint": "Type the song's CCLI number here, then save the song." }
+      ]
+    }
+  ],
+  "tips": [
+    {
+      "text": "A song's CCLI number goes in the song editor, so your CCLI report can count it.",
+      "tour": "song-ccli-number"
+    }
+  ]
+}

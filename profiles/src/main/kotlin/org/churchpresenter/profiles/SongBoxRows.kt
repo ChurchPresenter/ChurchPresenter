@@ -160,7 +160,7 @@ internal fun SongBoxRows(
     if (target == null) return
     if (target.needsLanguage) {
         SettingsRow(
-            stringResource(Res.string.profile_box),
+            Res.string.profile_box,
             sub = stringResource(Res.string.profile_box_pick_language),
         ) {}
         return

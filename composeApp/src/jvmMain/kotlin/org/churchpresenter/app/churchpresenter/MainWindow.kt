@@ -23,6 +23,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.runtime.Composable
 import org.churchpresenter.helper.ui.GuideSpotlightHost
 import org.churchpresenter.sharedui.guide.LocalGuideSession
+import org.churchpresenter.sharedui.guide.LocalWickCorner
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.unit.DpSize
@@ -254,8 +255,10 @@ private fun AppRootState.MainWindow(
                         ShortcutMap.from(appSettings.keyboardShortcutSettings)
                     },
                     LocalGuideSession provides helperState.session,
+                    // Settings and the other windows Wick's tours reach carry the lamp too.
+                    LocalWickCorner provides remember { { placed: Modifier -> WickLamp(placed) } },
                 ) {
-                    GuideSpotlightHost(modifier = Modifier.fillMaxSize()) {
+                    GuideSpotlightHost(modifier = Modifier.fillMaxSize(), wick = false) {
                     MainWindowContent(
                         frame = this@Window,
                         bannerModifier = Modifier.align(Alignment.TopCenter),
@@ -355,7 +358,7 @@ private fun AppRootState.MainWindowContent(
 
         RemoteApprovalDialog()
         ActivityToasts()
-        HelperHost(helperModifier)
+        root.HelperHost(helperModifier)
     }
 }
 

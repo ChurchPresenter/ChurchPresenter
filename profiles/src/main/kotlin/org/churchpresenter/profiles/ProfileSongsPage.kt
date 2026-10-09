@@ -111,7 +111,7 @@ internal fun ProfileSongsPage(
     )
     if (profile.songMode == Constants.SONG_LANG_BOTH) {
         SettingsGroup(stringResource(Res.string.profile_box_languages), key = "languages", paths = SONG_LAYOUT_PATHS) {
-            SettingsRow(stringResource(Res.string.profile_layout), paths = SONG_LAYOUT_PATHS) {
+            SettingsRow(Res.string.profile_layout, paths = SONG_LAYOUT_PATHS) {
                 RowSegmented(
                     options = bilingualLayoutRowOptions(),
                     selected = song.bilingualLayout,
@@ -119,7 +119,7 @@ internal fun ProfileSongsPage(
                 )
             }
             SettingsRow(
-                stringResource(Res.string.profile_language_gap),
+                Res.string.profile_language_gap,
                 sub = stringResource(Res.string.profile_language_gap_sub),
                 paths = SONG_GAP_PATHS,
             ) {
@@ -135,7 +135,7 @@ internal fun ProfileSongsPage(
                 )
             }
             SettingsRow(
-                stringResource(Res.string.profile_fit_languages),
+                Res.string.profile_fit_languages,
                 sub = stringResource(Res.string.profile_fit_languages_sub),
                 advanced = true,
                 paths = SONG_FIT_LANGUAGES_PATHS,
@@ -279,7 +279,7 @@ private fun SongTextGroup(
 /** Which element of the title slide the Text rows edit. */
 @Composable
 private fun SlideElementRow(selected: SongStyleElement, onSelect: (SongStyleElement) -> Unit) {
-    SettingsRow(stringResource(Res.string.profile_slide_element)) {
+    SettingsRow(Res.string.profile_slide_element) {
         RowSegmented(
             options = TITLE_SLIDE_ELEMENTS.map { RowOption(it, it.label()) },
             selected = selected,
@@ -419,7 +419,7 @@ private fun SlidesGroup(song: SongSettings, lowerThird: Boolean, updateSong: ((S
         },
     ) {
         SettingsSwitchRow(
-            stringResource(Res.string.profile_title_slide),
+            Res.string.profile_title_slide,
             song.titleSlideEnabled,
             { v -> updateSong { it.copy(titleSlideEnabled = v) } },
             sub = stringResource(Res.string.profile_title_slide_sub),
@@ -429,7 +429,7 @@ private fun SlidesGroup(song: SongSettings, lowerThird: Boolean, updateSong: ((S
         // A band keeps the title slide at its own bottom whatever this says.
         if (!lowerThird && song.titleSlideEnabled) {
             SettingsRow(
-                stringResource(Res.string.profile_title_slide_valign),
+                Res.string.profile_title_slide_valign,
                 advanced = true,
                 paths = listOf("songSettings.titleSlideVerticalAlignment"),
             ) {
@@ -445,19 +445,19 @@ private fun SlidesGroup(song: SongSettings, lowerThird: Boolean, updateSong: ((S
             }
         }
         SettingsSwitchRow(
-            stringResource(Res.string.profile_word_wrap),
+            Res.string.profile_word_wrap,
             song.wordWrap,
             { v -> updateSong { it.copy(wordWrap = v) } },
             paths = listOf("songSettings.wordWrap"),
         )
         SettingsSwitchRow(
-            stringResource(Res.string.profile_repeat_chorus),
+            Res.string.profile_repeat_chorus,
             song.autoRepeatChorus,
             { v -> updateSong { it.copy(autoRepeatChorus = v) } },
             paths = listOf("songSettings.autoRepeatChorus"),
         )
         SettingsSwitchRow(
-            stringResource(Res.string.profile_end_marker),
+            Res.string.profile_end_marker,
             song.showEndOfSongIndicator,
             { v -> updateSong { it.copy(showEndOfSongIndicator = v) } },
             paths = listOf("songSettings.showEndOfSongIndicator", "songSettings.endOfSongIndicatorSpacing"),
@@ -484,7 +484,7 @@ private fun SlidesGroup(song: SongSettings, lowerThird: Boolean, updateSong: ((S
 @Composable
 private fun SectionLabelSwitch(enabled: Boolean, updateSong: ((SongSettings) -> SongSettings) -> Unit) {
     SettingsSwitchRow(
-        stringResource(Res.string.profile_section_label),
+        Res.string.profile_section_label,
         enabled,
         { v ->
             updateSong { s ->
@@ -499,7 +499,7 @@ private fun SectionLabelSwitch(enabled: Boolean, updateSong: ((SongSettings) -> 
 /** POSITION: the content area's top edge, held above or below the lyrics, or the bottom edge. */
 @Composable
 private fun SongPositionRow(selected: String, onSelect: (String) -> Unit) {
-    SettingsRow(stringResource(Res.string.profile_song_position)) {
+    SettingsRow(Res.string.profile_song_position) {
         RowSegmented(
             options = listOf(
                 RowOption(Constants.ABOVE_VERSE, stringResource(Res.string.profile_position_top)),

@@ -35,7 +35,7 @@ internal fun ItemBoxGroup(
     val key = textBoxKey(item.key, lowerThird = false)
     SettingsGroup(stringResource(Res.string.profile_group_boxes), key = "boxes", paths = paths) {
         if (items.size > 1) {
-            SettingsRow(stringResource(Res.string.profile_box_item)) {
+            SettingsRow(Res.string.profile_box_item) {
                 RowSegmented(
                     options = items.map { RowOption(it.key, it.label) },
                     selected = item.key,

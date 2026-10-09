@@ -1,6 +1,8 @@
 package org.churchpresenter.helper.suggest
 
+import org.churchpresenter.helper.HelperText
 import org.churchpresenter.helper.action.HelperAction
+import org.churchpresenter.helper.pack.parseWickPack
 import org.churchpresenter.settings.HelperSettings
 import org.churchpresenter.settings.dismissing
 import org.churchpresenter.settings.snoozing
@@ -73,5 +75,16 @@ class SuggestionsTest {
         assertEquals(tips.last(), tipAt(tips, -1))
         assertNull(tipAt(emptyList(), 3))
         assertNotNull(tips.first().text)
+    }
+
+    @Test
+    fun `a pack's tips come after the bundled ones, in an English app only`() {
+        val pack = assertNotNull(
+            parseWickPack("""{"version":1,"minApp":"1","tips":[{"text":"From the pack."}]}""", "26.0.0"),
+        )
+        val bundled = allTips(ShortcutMap.DEFAULT)
+        val english = allTips(ShortcutMap.DEFAULT, pack, language = "en")
+        assertEquals(bundled + Tip(HelperText.Plain("From the pack.")), english)
+        assertEquals(bundled, allTips(ShortcutMap.DEFAULT, pack, language = "ru"))
     }
 }

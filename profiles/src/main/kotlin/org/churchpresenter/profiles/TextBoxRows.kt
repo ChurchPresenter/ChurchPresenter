@@ -71,14 +71,14 @@ internal fun TextBoxRows(
     offerArea: Boolean = true,
 ) {
     SettingsSwitchRow(
-        stringResource(Res.string.profile_box),
+        Res.string.profile_box,
         box.enabled,
         { on -> onBox(if (on && box == TextBox()) startBox.copy(enabled = true) else box.copy(enabled = on)) },
         sub = stringResource(Res.string.profile_box_sub),
         paths = boxPaths,
     )
     if (!box.enabled) return
-    SettingsRow(stringResource(Res.string.profile_box_vertical), paths = boxPaths) {
+    SettingsRow(Res.string.profile_box_vertical, paths = boxPaths) {
         RowSegmented(
             options = listOf(
                 RowOption(Constants.TOP, stringResource(Res.string.top)),
@@ -89,7 +89,7 @@ internal fun TextBoxRows(
             onSelect = { onBox(box.copy(vertical = it)) },
         )
     }
-    SettingsRow(stringResource(Res.string.profile_box_overflow), paths = boxPaths) {
+    SettingsRow(Res.string.profile_box_overflow, paths = boxPaths) {
         RowSegmented(
             options = listOf(
                 RowOption(TextBoxOverflow.SHRINK, stringResource(Res.string.profile_box_overflow_shrink)),
@@ -100,11 +100,11 @@ internal fun TextBoxRows(
             onSelect = { onBox(box.copy(overflow = it)) },
         )
     }
-    SettingsRow(stringResource(Res.string.profile_box_place), advanced = true, paths = boxPaths) {
+    SettingsRow(Res.string.profile_box_place, advanced = true, paths = boxPaths) {
         BoxRectFields(box, onBox)
     }
     if (box.overflow == TextBoxOverflow.SHRINK) {
-        SettingsRow(stringResource(Res.string.profile_box_size), advanced = true, paths = boxPaths) {
+        SettingsRow(Res.string.profile_box_size, advanced = true, paths = boxPaths) {
             RowSegmented(
                 options = listOf(
                     RowOption(false, stringResource(Res.string.profile_box_size_up_to)),
@@ -170,7 +170,7 @@ private fun TextBoxOptionRows(
     paths: List<String>,
 ) {
     if (offers.lowerThird) {
-        SettingsRow(stringResource(Res.string.profile_box_band), advanced = true, paths = paths) {
+        SettingsRow(Res.string.profile_box_band, advanced = true, paths = paths) {
             RowSegmented(
                 options = listOf(
                     RowOption(false, stringResource(Res.string.profile_box_band_band)),
@@ -181,7 +181,7 @@ private fun TextBoxOptionRows(
             )
         }
     }
-    if (offers.area) SettingsRow(stringResource(Res.string.profile_box_area), advanced = true, paths = paths) {
+    if (offers.area) SettingsRow(Res.string.profile_box_area, advanced = true, paths = paths) {
         RowSegmented(
             options = listOf(
                 RowOption(false, stringResource(Res.string.profile_box_area_screen)),
@@ -192,7 +192,7 @@ private fun TextBoxOptionRows(
         )
     }
     if (offers.perLanguage) {
-        SettingsRow(stringResource(Res.string.profile_box_languages), advanced = true, paths = paths) {
+        SettingsRow(Res.string.profile_box_languages, advanced = true, paths = paths) {
             RowSegmented(
                 options = listOf(
                     RowOption(false, stringResource(Res.string.profile_box_languages_own)),
@@ -204,7 +204,7 @@ private fun TextBoxOptionRows(
         }
     }
     SettingsSwitchRow(
-        stringResource(Res.string.profile_box_keep_clear),
+        Res.string.profile_box_keep_clear,
         options.keepClear,
         { onOptions(options.copy(keepClear = it)) },
         sub = stringResource(Res.string.profile_box_keep_clear_sub),
@@ -212,7 +212,7 @@ private fun TextBoxOptionRows(
         paths = paths,
     )
     SettingsSwitchRow(
-        stringResource(Res.string.profile_box_snap),
+        Res.string.profile_box_snap,
         options.snap,
         { onOptions(options.copy(snap = it)) },
         advanced = true,

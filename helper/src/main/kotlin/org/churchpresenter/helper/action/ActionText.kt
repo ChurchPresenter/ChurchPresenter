@@ -124,6 +124,8 @@ fun HelperAction.describe(undoLabel: HelperText? = null): HelperText = when (thi
     HelperAction.CheckForUpdates -> helperText(Res.string.helper_check_updates)
     HelperAction.Greet -> helperText(Res.string.helper_greeting)
     HelperAction.Thanks -> helperText(Res.string.helper_youre_welcome)
+    is HelperAction.Say -> text
+    is HelperAction.OpenShortcutRow -> helperText(Res.string.helper_open_shortcuts)
     HelperAction.UndoLast -> undoLabel
         ?.let { helperText(Res.string.helper_confirm_undo, it) }
         ?: helperText(Res.string.helper_nothing_to_undo)

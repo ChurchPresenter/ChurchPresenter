@@ -34,4 +34,33 @@ class GuideSessionTest {
         registry.remove(a)
         assertNull(registry.boundsOf(a))
     }
+
+    @Test
+    fun `a new session points at nothing and holds no focus for a window to take`() {
+        val session = GuideSession()
+        assertNull(session.activeTarget)
+        assertNull(session.activeHint)
+        assertNull(session.profileFocus)
+        assertNull(session.shortcutFocus)
+        assertEquals(false, session.wickTyping)
+        assertEquals(0, session.otherLamps)
+    }
+
+    @Test
+    fun `what a tour leaves for a window is kept until the window takes it`() {
+        val session = GuideSession()
+        val focus = ProfileFocus(profileId = "p", page = "SONGS", rowKey = "font")
+        session.profileFocus = focus
+        session.shortcutFocus = "TAKE"
+        session.wickTyping = true
+        session.otherLamps = 1
+        session.activeHint = { "here" }
+        assertEquals("p", session.profileFocus?.profileId)
+        assertEquals("SONGS", session.profileFocus?.page)
+        assertEquals("font", session.profileFocus?.rowKey)
+        assertEquals("TAKE", session.shortcutFocus)
+        assertEquals(true, session.wickTyping)
+        assertEquals(1, session.otherLamps)
+        assertEquals(ProfileFocus(), ProfileFocus(null, null, null))
+    }
 }

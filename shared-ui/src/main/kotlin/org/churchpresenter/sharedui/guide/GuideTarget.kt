@@ -88,6 +88,42 @@ object GuideTargets {
     val SERVER_QR = GuideTarget("settings.server.qr")
     val WEB_URL = GuideTarget("web.url")
     val WEB_GO_LIVE = GuideTarget("web.goLive")
+    val SONGS_ADD_TO_SCHEDULE = GuideTarget("songs.addToSchedule")
+    val BIBLE_ADD_TO_SCHEDULE = GuideTarget("bible.addToSchedule")
+    val PICTURES_ADD_TO_SCHEDULE = GuideTarget("pictures.addToSchedule")
+    val PRESENTATION_ADD_TO_SCHEDULE = GuideTarget("presentation.addToSchedule")
+    val MEDIA_ADD_TO_SCHEDULE = GuideTarget("media.addToSchedule")
+    val LOWER_THIRD_ADD_TO_SCHEDULE = GuideTarget("lowerThird.addToSchedule")
+    val ANNOUNCEMENT_ADD_TO_SCHEDULE = GuideTarget("announcements.addToSchedule")
+    val WEB_ADD_TO_SCHEDULE = GuideTarget("web.addToSchedule")
+    val CANVAS_ADD_TO_SCHEDULE = GuideTarget("canvas.addToSchedule")
+    val SCHEDULE_NEW = GuideTarget("schedule.new")
+    val SCHEDULE_OPEN = GuideTarget("schedule.open")
+    val SCHEDULE_SAVE = GuideTarget("schedule.save")
+    val SCHEDULE_ADD_FILES = GuideTarget("schedule.addFiles")
+    /** The schedule's first row: dragged to reorder, right-clicked for its menu. */
+    val SCHEDULE_FIRST_ROW = GuideTarget("schedule.firstRow")
+    val NDI_ADD = GuideTarget("settings.projection.ndiAdd")
+    val OMT_ADD = GuideTarget("settings.projection.omtAdd")
+    val BROWSER_SOURCE_ADD = GuideTarget("settings.projection.browserSourceAdd")
+    /** The first NDI / Browser Source output's name field, once one is added. */
+    val NDI_FIRST_NAME = GuideTarget("settings.projection.ndiFirstName")
+    val BROWSER_SOURCE_FIRST_NAME = GuideTarget("settings.projection.browserSourceFirstName")
+    val OBS_CONNECT = GuideTarget("settings.integrations.obsConnect")
+    val OBS_DEFAULT_SCENE = GuideTarget("settings.integrations.obsDefaultScene")
+    val ATEM_TEST_CONNECTION = GuideTarget("settings.atem.testConnection")
+    val ATEM_DSK_SWITCH = GuideTarget("settings.atem.dskSwitch")
+    val PCO_CONNECT = GuideTarget("planningCenter.connect")
+    val PCO_SERVICE_TYPE = GuideTarget("planningCenter.serviceType")
+    val PCO_PLAN = GuideTarget("planningCenter.plan")
+    val PCO_IMPORT = GuideTarget("planningCenter.import")
+    val SONG_AUTHOR = GuideTarget("songEditor.author")
+    val SONG_COMPOSER = GuideTarget("songEditor.composer")
+    val SONG_CCLI = GuideTarget("songEditor.ccli")
+    val SONG_SONGBOOK = GuideTarget("songEditor.songbook")
+    val SONG_NUMBER = GuideTarget("songEditor.number")
+    val SONG_TUNE = GuideTarget("songEditor.tune")
+    val SONG_CAPO = GuideTarget("songEditor.capo")
 
     /** One choice, [value], of a segmented control or picker named [group] — where to click, exactly. */
     fun option(group: String, value: String): GuideTarget = GuideTarget("option.$group.$value")
@@ -103,6 +139,19 @@ object GuideTargets {
 
     /** A Songs or Bible page's element chip — which part the Text rows style — by the element's name. */
     fun lookElement(name: String): GuideTarget = option("lookElement", name)
+
+    /** A Profiles settings row, by the string key of its label. */
+    fun settingsRow(labelKey: String): GuideTarget = GuideTarget("settingsRow.$labelKey")
+
+    /**
+     * The profile picker on the Projection page's card for output [index] of [kind]: `screen`, `ndi`,
+     * `omt` or `browser`.
+     */
+    fun outputProfilePicker(kind: String, index: Int): GuideTarget =
+        GuideTarget("settings.projection.$kind.$index.profile")
+
+    /** One shortcut's row in the Keyboard Shortcuts window, by its `ShortcutAction` name. */
+    fun shortcutRow(actionName: String): GuideTarget = GuideTarget("shortcuts.$actionName")
 
     /** The main window's tab for [tab]. */
     fun mainTab(tab: Tabs): GuideTarget = GuideTarget("tab.${tab.name}")

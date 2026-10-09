@@ -138,9 +138,10 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
                     Constants.previewOutputKey(Constants.PREVIEW_OUTPUT_SCREEN, i),
                     assignment.activeProfileId,
                 ),
-                // The first screen's is the one the helper's display tours point at.
+                // The first screen's is the one the helper's display tours point at; each has its own too.
                 modifier = Modifier.width(langDropdownWidth)
-                    .then(if (i == 0) Modifier.guideTarget(GuideTargets.SCREEN_PROFILE_PICKER) else Modifier),
+                    .then(if (i == 0) Modifier.guideTarget(GuideTargets.SCREEN_PROFILE_PICKER) else Modifier)
+                    .guideTarget(GuideTargets.outputProfilePicker("screen", i)),
                 onPick = { pickedId ->
                     updateProjection { it.withAssignment(i, assignment.copy(activeProfileId = pickedId)) }
                 },

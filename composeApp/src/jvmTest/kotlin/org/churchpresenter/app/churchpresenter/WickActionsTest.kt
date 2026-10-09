@@ -14,6 +14,10 @@ import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.helper.HelperReply
 import org.churchpresenter.helper.HelperState
 import org.churchpresenter.helper.HelperText
+import org.churchpresenter.strings.generated.resources.helper_undo_stale
+import org.churchpresenter.strings.generated.resources.helper_refused_live
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.helper.action.ActionOutcome
 import org.churchpresenter.helper.action.CalendarTopic
 import org.churchpresenter.helper.action.ContentScope
 import org.churchpresenter.helper.action.GuideStep
@@ -23,7 +27,6 @@ import org.churchpresenter.helper.action.Persistence
 import org.churchpresenter.helper.action.describe
 import org.churchpresenter.helper.display.HelperScreen
 import org.churchpresenter.helper.helperText
-import org.churchpresenter.server.SelectBibleVerseRequest
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.app.churchpresenter.dialogs.optionsTabIndexOf
 import org.churchpresenter.sharedui.guide.GuideTargets
@@ -54,6 +57,8 @@ import org.churchpresenter.strings.generated.resources.helper_song_found
 import org.churchpresenter.strings.generated.resources.helper_song_not_found
 import org.churchpresenter.strings.generated.resources.helper_songs_not_loaded
 import org.churchpresenter.strings.generated.resources.helper_undo_done
+import org.churchpresenter.strings.generated.resources.helper_schedule_selected
+import org.churchpresenter.strings.generated.resources.helper_schedule_at_start
 import org.churchpresenter.strings.generated.resources.helper_version
 import org.churchpresenter.strings.generated.resources.helper_youre_welcome
 import org.churchpresenter.settings.BackgroundSettings
@@ -130,10 +135,10 @@ class WickActionsTest {
         assertEquals(doneSaid, assertIs<HelperReply.Message>(wick.reply).text.plain())
 
     @Test
-    fun `show a verse sends it to the Bible tab as a phone would`() {
-        val sent = heard(root.companionServer.onSelectBibleVerse)
+    fun `show a verse sends it to the Bible tab as its search box would take it`() {
+        val sent = heard(root.helperShowReferenceFlow)
         run(HelperAction.ShowBibleVerse("John", 3, 16, 17, "John 3:16-17"))
-        assertEquals(listOf(SelectBibleVerseRequest("John", 3, 16, verseRange = "16-17")), sent)
+        assertEquals(listOf("John 3:16-17"), sent)
         assertDone()
     }
 
@@ -261,8 +266,7 @@ class WickActionsTest {
 
     @Test
     fun `assigning the audience screen saves it and can be undone`() {
-        // From the defaults, not whatever this fork's home last saved: an earlier run of this very
-        // test leaves the same assignment on disk, and the change would then be no change.
+        // From no assignment: the fork's settings outlive the run, so an earlier run's would match.
         root.appSettings = root.appSettings.copy(projectionSettings = ProjectionSettings())
         val before = root.appSettings.projectionSettings
         val screen = HelperScreen(index = 1, isPrimary = false, x = 1920, y = 0, width = 1920, height = 1080)
@@ -504,5 +508,92 @@ class WickActionsTest {
         run(HelperAction.Thanks)
         assertSaid(Res.string.helper_youre_welcome)
         assertNull(wick.session.activeTarget)
+    }
+
+    @Test
+    fun `next and previous step a live presentation, and live pictures`() {
+        val server = root.companionServer
+        val slides = heard(server.onNextSlide)
+        val slidesBack = heard(server.onPreviousSlide)
+        root.presenterManager.setPresentingMode(Presenting.PRESENTATION)
+        run(HelperAction.NextSlide)
+        run(HelperAction.PreviousSlide)
+        assertEquals(1, slides.size)
+        assertEquals(1, slidesBack.size)
+        assertDone()
+        val pictures = heard(server.onNextPicture)
+        val picturesBack = heard(server.onPreviousPicture)
+        root.presenterManager.setPresentingMode(Presenting.PICTURES)
+        run(HelperAction.NextSlide)
+        run(HelperAction.PreviousSlide)
+        assertEquals(1, pictures.size)
+        assertEquals(1, picturesBack.size)
+    }
+
+    @Test
+    fun `identifying screens during a service is refused`() {
+        root.presenterManager.setPresentingMode(Presenting.LYRICS)
+        run(HelperAction.IdentifyScreens)
+        assertSaid(Res.string.helper_refused_live)
+    }
+
+    @Test
+    fun `a shortcut's row opens the shortcuts window on it`() {
+        run(HelperAction.OpenShortcutRow(ShortcutAction.TAKE))
+        assertEquals(ShortcutAction.TAKE.name, root.helperState.session.shortcutFocus)
+        assertTrue(root.showKeyboardShortcutsDialog)
+    }
+
+    @Test
+    fun `what Wick answers itself never changes the app`() {
+        val before = root.appSettings
+        listOf(
+            HelperAction.Highlight(GuideTour(emptyList())),
+            HelperAction.ShowShortcut(ShortcutAction.TAKE),
+            HelperAction.UndoLast,
+            HelperAction.Greet,
+            HelperAction.Thanks,
+            HelperAction.ShowCommands,
+        ).forEach { assertEquals(ActionOutcome.Done(), executor.execute(it)) }
+        val said = HelperText.Plain("hello")
+        assertEquals(ActionOutcome.Done(message = said), executor.execute(HelperAction.Say(said)))
+        assertEquals(before, root.appSettings)
+    }
+
+    @Test
+    fun `a service background replaced since is not taken back`() {
+        run(HelperAction.SetBackgroundColor(ContentScope.ALL, "#C62828", "red", Persistence.THIS_SERVICE))
+        root.activeQuickBackground = null
+        wick.undo()
+        assertSaid(Res.string.helper_undo_stale)
+        assertNull(root.activeQuickBackground)
+    }
+
+    @Test
+    fun `previous item from nothing selected is the last showable row, past labels and cues`() {
+        val selected = mutableListOf<String>()
+        val scenes = mutableListOf<String>()
+        root.scheduleActions = ScheduleActions(selectItem = { selected += it }, presentScene = { scenes += it })
+        val scene = ScheduleItem.SceneItem(id = "scene", sceneId = "s1", sceneName = "Walk-in")
+        root.currentScheduleItems = listOf(
+            ScheduleItem.LabelItem(id = "label", text = "Worship", textColor = "#FFFFFF", backgroundColor = "#000000"),
+            scene,
+            ScheduleItem.CueItem(id = "cue", action = "x"),
+        )
+        run(HelperAction.ScheduleStep(forward = false))
+        assertEquals(listOf("scene"), selected)
+        assertEquals(listOf("s1"), scenes)
+        assertSaid(Res.string.helper_schedule_live, scene.displayText)
+        root.selectedScheduleItemId = "scene"
+        run(HelperAction.ScheduleStep(forward = false))
+        assertSaid(Res.string.helper_schedule_at_start)
+    }
+
+    @Test
+    fun `a row of another kind is selected and left for its own Go Live`() {
+        val site = ScheduleItem.WebsiteItem(id = "web", url = "https://example.org", title = "Notices")
+        root.currentScheduleItems = listOf(site)
+        run(HelperAction.ScheduleGoTo("notices"))
+        assertSaid(Res.string.helper_schedule_selected, site.displayText)
     }
 }

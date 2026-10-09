@@ -1,12 +1,15 @@
 package org.churchpresenter.app.churchpresenter
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.app.churchpresenter.dialogs.songEditorBackgroundButton
 import org.churchpresenter.app.churchpresenter.utils.countDeckSlides
 import org.churchpresenter.bibletab.BibleBookAbbreviations
+import org.churchpresenter.helper.ui.GuideSpotlightHost
 import org.churchpresenter.planningcenter.ui.PlanningCenterImportDialog
 import org.churchpresenter.planningcenter.ui.PlanningCenterSongEditor
 import org.churchpresenter.planningcenter.ui.PlanningCenterWindow
@@ -156,7 +159,10 @@ private fun planningCenterWindow(theme: ThemeMode): PlanningCenterWindow = { spe
         title = spec.title,
         resizable = spec.resizable,
     ) {
-        AppWindowRoot(theme = theme, content = content)
+        AppWindowRoot(theme = theme) {
+            // This window's own spotlight: Wick's Planning Center tour rings its buttons.
+            GuideSpotlightHost(Modifier.fillMaxSize()) { content() }
+        }
     }
 }
 

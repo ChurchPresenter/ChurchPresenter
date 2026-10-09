@@ -42,8 +42,18 @@ sealed interface HelperReply {
     /** The key bound to [action]. */
     data class Shortcut(val action: ShortcutAction) : HelperReply
 
-    /** The request was not understood; [closest] are the requests most like it, to pick from. */
-    data class Unknown(val closest: List<SuggestedRequest>) : HelperReply
+    /** The request was not understood, and nothing came close enough to guess at. */
+    data object Unknown : HelperReply
+
+    /** Not understood, as [Unknown], with the nearest chips — [closest] — offered under it. */
+    data class NotSure(val closest: List<SuggestedRequest>) : HelperReply
+
+    /** The request reads most like [action], described as [label]: asked about before anything happens. */
+    data class DidYouMean(
+        val label: HelperText,
+        val action: HelperAction,
+        val others: List<SuggestedRequest> = emptyList(),
+    ) : HelperReply
 
     /** Hello, and examples of what to ask. */
     data object Greeting : HelperReply
@@ -64,7 +74,11 @@ sealed interface HelperReply {
  * and reaches it through the [HelperActionExecutor] each call is given.
  */
 @Stable
-class HelperState(val session: GuideSession = GuideSession()) {
+class HelperState(
+    val session: GuideSession = GuideSession(),
+    /** Called each time Wick carries out something the operator asked for — the app counts the first in a run. */
+    private val onUsed: () -> Unit = {},
+) {
     var isOpen by mutableStateOf(false)
     var input by mutableStateOf("")
 
@@ -85,6 +99,9 @@ class HelperState(val session: GuideSession = GuideSession()) {
 
     /** Asking before the lamp is hidden — a card under the conversation, not a new page of it. */
     var confirmingHide by mutableStateOf(false)
+
+    /** "Send this chat": its preview card under the conversation. Nothing is sent until its Send. */
+    var sharingChat by mutableStateOf(false)
     var reply by mutableStateOf<HelperReply>(HelperReply.Idle)
         internal set
     var displayFlow by mutableStateOf(DisplaySetupFlow())
@@ -109,6 +126,7 @@ class HelperState(val session: GuideSession = GuideSession()) {
         session.activeTarget = null
         session.activeHint = null
         thread.clear()
+        sharingChat = false
         reply = HelperReply.Idle
     }
 
@@ -124,6 +142,7 @@ class HelperState(val session: GuideSession = GuideSession()) {
     fun close() {
         isOpen = false
         confirmingHide = false
+        sharingChat = false
         reset()
     }
 
@@ -138,8 +157,10 @@ class HelperState(val session: GuideSession = GuideSession()) {
         when (resolution) {
             is Resolution.Act -> request(resolution.action, executor)
             is Resolution.Clarify -> show(HelperReply.Clarify(resolution.question, resolution.options))
-            Resolution.Unknown -> show(HelperReply.Unknown(SuggestedRequest.DEFAULTS))
-            is Resolution.Closest -> show(HelperReply.Unknown(resolution.requests))
+            Resolution.Unknown -> show(HelperReply.Unknown)
+            is Resolution.Closest -> show(HelperReply.NotSure(resolution.requests))
+            is Resolution.DidYouMean ->
+                show(HelperReply.DidYouMean(resolution.label, resolution.action, resolution.others))
         }
     }
 
@@ -163,12 +184,19 @@ class HelperState(val session: GuideSession = GuideSession()) {
     /** Carries out [action] — confirmed already, or one that needs no asking. */
     fun run(action: HelperAction, executor: HelperActionExecutor) {
         when (action) {
-            is HelperAction.Highlight -> showStep(action.tour, 0, executor)
-            is HelperAction.ShowShortcut -> show(HelperReply.Shortcut(action.action))
+            is HelperAction.Highlight -> {
+                onUsed()
+                showStep(action.tour, 0, executor)
+            }
+            is HelperAction.ShowShortcut -> {
+                onUsed()
+                show(HelperReply.Shortcut(action.action))
+            }
             HelperAction.UndoLast -> undo()
             HelperAction.Greet -> show(HelperReply.Greeting)
             HelperAction.ShowCommands -> show(HelperReply.Commands)
             HelperAction.Thanks -> show(HelperReply.Message(helperText(Res.string.helper_youre_welcome)))
+            is HelperAction.Say -> show(HelperReply.Message(action.text, offer = action.offer))
             else -> onOutcome(executor.execute(action), executor)
         }
     }
@@ -187,13 +215,18 @@ class HelperState(val session: GuideSession = GuideSession()) {
     private fun onOutcome(outcome: ActionOutcome, executor: HelperActionExecutor) {
         when (outcome) {
             is ActionOutcome.Done -> {
+                onUsed()
                 outcome.undo?.let(undoStack::push)
                 val said = outcome.message ?: helperText(Res.string.helper_done)
                 show(HelperReply.Message(said, canUndo = outcome.undo != null))
             }
             is ActionOutcome.Refused -> show(HelperReply.Message(outcome.reason, offer = outcome.instead))
-            is ActionOutcome.Guide -> showStep(outcome.tour, 0, executor)
+            is ActionOutcome.Guide -> {
+                onUsed()
+                showStep(outcome.tour, 0, executor)
+            }
             ActionOutcome.DisplaySetup -> {
+                onUsed()
                 displayFlow = DisplaySetupFlow()
                 show(HelperReply.DisplaySetup)
             }

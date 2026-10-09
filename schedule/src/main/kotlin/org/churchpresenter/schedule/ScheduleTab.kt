@@ -41,6 +41,8 @@ import org.churchpresenter.strings.generated.resources.autosave_restore_message
 import org.churchpresenter.strings.generated.resources.autosave_restore_title
 import kotlinx.coroutines.launch
 import org.churchpresenter.sharedui.filechooser.FileChooser
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.calendar.model.planDrift
 import kotlinx.coroutines.delay
 import org.churchpresenter.calendar.model.scheduleClocks
@@ -292,7 +294,8 @@ private fun ScheduleTabFooter(
                         fileDrop.skippedFiles = handleDroppedFiles(picked.map(Path::toFile), viewModel)
                     }
                 }
-            }
+            },
+            modifier = Modifier.guideTarget(GuideTargets.SCHEDULE_ADD_FILES),
         )
         if (upcomingServiceLoad != null) {
             ScheduleLoadNowNotice(

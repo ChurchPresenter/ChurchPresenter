@@ -95,11 +95,11 @@ internal fun ProfileSubtitlesPage(draft: AppSettings, onSettingsChange: ((AppSet
         paths = listOf("$MEDIA.position", "$MEDIA.maxLines", "$MEDIA.lineSpacing"),
     ) {
         ScreenPlacementRow(media.position, { v -> update { it.copy(position = v) } }, MEDIA)
-        SettingsRow(stringResource(Res.string.profile_caption_lines), paths = listOf("$MEDIA.maxLines")) {
+        SettingsRow(Res.string.profile_caption_lines, paths = listOf("$MEDIA.maxLines")) {
             RowStepper(media.maxLines, { v -> update { it.copy(maxLines = v) } }, SUBTITLE_LINES_RANGE)
         }
         SettingsRow(
-            stringResource(Res.string.profile_line_spacing),
+            Res.string.profile_line_spacing,
             advanced = true,
             paths = listOf("$MEDIA.lineSpacing"),
         ) {
@@ -167,14 +167,14 @@ internal fun ProfileQaPage(draft: AppSettings, onSettingsChange: ((AppSettings) 
         key = "qr",
         paths = listOf("$QA.qrForegroundColor", "$QA.qrBackgroundColor", "$QA.qrBackgroundOpacity"),
     ) {
-        SettingsRow(stringResource(Res.string.profile_qr_foreground), paths = listOf("$QA.qrForegroundColor")) {
+        SettingsRow(Res.string.profile_qr_foreground, paths = listOf("$QA.qrForegroundColor")) {
             RowColor(qa.qrForegroundColor, { v -> update { it.copy(qrForegroundColor = v) } })
         }
-        SettingsRow(stringResource(Res.string.profile_qr_background), paths = listOf("$QA.qrBackgroundColor")) {
+        SettingsRow(Res.string.profile_qr_background, paths = listOf("$QA.qrBackgroundColor")) {
             RowColor(qa.qrBackgroundColor, { v -> update { it.copy(qrBackgroundColor = v) } })
         }
         SettingsRow(
-            stringResource(Res.string.profile_box_opacity),
+            Res.string.profile_box_opacity,
             paths = listOf("$QA.qrBackgroundOpacity"),
         ) {
             RowStepper(

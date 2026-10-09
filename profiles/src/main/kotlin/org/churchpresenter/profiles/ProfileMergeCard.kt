@@ -118,7 +118,7 @@ internal fun ProfileMergeCard(
     val labels = tiles.associate { it.key to it.label }
     SettingsGroup(caption = stringResource(Res.string.profile_merge_caption), key = "merge") {
         SettingsSwitchRow(
-            label = stringResource(Res.string.profile_merge_switch),
+            label = Res.string.profile_merge_switch,
             sub = stringResource(
                 if (candidates.size >= 2 || merge != null) {
                     Res.string.profile_merge_sub

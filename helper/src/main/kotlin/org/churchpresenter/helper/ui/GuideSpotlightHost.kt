@@ -1,5 +1,10 @@
 package org.churchpresenter.helper.ui
 
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Alignment
+import org.churchpresenter.sharedui.guide.LocalWickCorner
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -75,6 +80,13 @@ internal val SPOTLIGHT_OUTSET = 6.dp
 private val RING_CORNER = 12.dp
 private val RING_WIDTH = 2.dp
 
+/** How far a dialog's lamp sits above its corner: clear of its Cancel / OK row. */
+private val WICK_LIFT = 56.dp
+
+/** The smallest window that carries the lamp: room for the bubble above it and beside the content. */
+private val WICK_MIN_WIDTH = 480.dp
+private val WICK_MIN_HEIGHT = 420.dp
+
 /**
  * One window's spotlight: gives [content] a target registry of its own and, while the app's guide
  * session points at a control laid out in this window, rings it in gold — the ring lands, pings once,
@@ -82,10 +94,16 @@ private val RING_WIDTH = 2.dp
  *
  * The ring draws over everything and takes no input, so the control under it still clicks. A press
  * anywhere inside the ring counts as pressing the ringed control — watched here, over the whole
- * window, so nothing laid over the control can keep it from counting.
+ * window, so nothing laid over the control can keep it from counting. With [wick], the window also
+ * carries Wick's lamp in its corner ([LocalWickCorner]), above the buttons a dialog keeps along its
+ * bottom edge; the main window, which places its own, passes false.
  */
 @Composable
-fun GuideSpotlightHost(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
+fun GuideSpotlightHost(
+    modifier: Modifier = Modifier,
+    wick: Boolean = true,
+    content: @Composable BoxScope.() -> Unit,
+) {
     val registry = remember { GuideTargetRegistry() }
     val session by rememberUpdatedState(LocalGuideSession.current)
     // Targets report in window-root coordinates; the ring draws in this box's, which need not start at 0,0.
@@ -103,6 +121,23 @@ fun GuideSpotlightHost(modifier: Modifier = Modifier, content: @Composable BoxSc
             content()
         }
         SpotlightRing(registry, origin)
+        val lamp = LocalWickCorner.current.takeIf { wick }
+        // A window too small for the bubble (Planning Center's Connect) gets no lamp: it would only cover the
+        // window, and Wick's tours still ring its controls.
+        if (lamp != null) WickCornerIfRoom(lamp)
+    }
+}
+
+@Composable
+private fun BoxScope.WickCornerIfRoom(lamp: @Composable (Modifier) -> Unit) {
+    BoxWithConstraints(Modifier.matchParentSize()) {
+        if (maxWidth < WICK_MIN_WIDTH || maxHeight < WICK_MIN_HEIGHT) return@BoxWithConstraints
+        val session = LocalGuideSession.current
+        DisposableEffect(session) {
+            session?.let { it.otherLamps++ }
+            onDispose { session?.let { it.otherLamps-- } }
+        }
+        lamp(Modifier.align(Alignment.BottomEnd).padding(bottom = WICK_LIFT))
     }
 }
 
@@ -244,4 +279,4 @@ private fun DrawScope.spark(ring: Rect, degrees: Float) {
 /** A spotlight host filling its window — the usual way to wrap a window's whole content. */
 @Composable
 fun GuideSpotlightWindow(content: @Composable BoxScope.() -> Unit) =
-    GuideSpotlightHost(Modifier.fillMaxSize(), content)
+    GuideSpotlightHost(Modifier.fillMaxSize(), content = content)

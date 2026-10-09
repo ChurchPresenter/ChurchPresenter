@@ -1,5 +1,7 @@
 package org.churchpresenter.planningcenter.ui
 
+import org.churchpresenter.sharedui.guide.guideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -293,7 +295,8 @@ internal fun PlanningCenterConnectDialogContent(
                 RaisedButton(
                     shape = AppShape(6.dp),
                     enabled = !isConnecting,
-                    onClick = onConnectClick
+                    onClick = onConnectClick,
+                    modifier = Modifier.guideTarget(GuideTargets.PCO_CONNECT),
                 ) {
                     if (isConnecting) {
                         CircularProgressIndicator(

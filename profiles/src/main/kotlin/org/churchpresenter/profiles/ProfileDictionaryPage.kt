@@ -88,10 +88,10 @@ internal fun ProfileDictionaryPage(draft: AppSettings, onSettingsChange: ((AppSe
         key = "card",
         paths = listOf("$DICT.cardBackgroundColor", "$DICT.cardBackgroundOpacity"),
     ) {
-        SettingsRow(stringResource(Res.string.profile_card_color), paths = listOf("$DICT.cardBackgroundColor")) {
+        SettingsRow(Res.string.profile_card_color, paths = listOf("$DICT.cardBackgroundColor")) {
             RowColor(ds.cardBackgroundColor, { v -> update { it.copy(cardBackgroundColor = v) } })
         }
-        SettingsRow(stringResource(Res.string.profile_card_opacity), paths = listOf("$DICT.cardBackgroundOpacity")) {
+        SettingsRow(Res.string.profile_card_opacity, paths = listOf("$DICT.cardBackgroundOpacity")) {
             RowStepper(
                 (ds.cardBackgroundOpacity * FULL_PERCENT).roundToInt(),
                 { v -> update { it.copy(cardBackgroundOpacity = v / FULL_PERCENT) } },
@@ -153,7 +153,7 @@ private fun DictionaryStyleRow(
     if (!hasWeight && look.outline == null && look.backdrop == null) return
     val names = look.names
     SettingsRow(
-        stringResource(Res.string.profile_text_style),
+        Res.string.profile_text_style,
         searchTerms = styleSearchTerms(),
         paths = p(names.bold) + p(names.italic) + p(names.outline) + p(names.backdrop),
     ) {
@@ -194,11 +194,11 @@ private fun DictionaryStyleRow(
 private fun DictionaryPartRows(look: DictionaryLook, onChange: (DictionaryLook) -> Unit) {
     val p = { field: String? -> listOfNotNull(field?.let { "$DICT.$it" }) }
     look.fontType?.let { font ->
-        SettingsRow(stringResource(Res.string.profile_text_font), paths = p(look.names.font)) {
+        SettingsRow(Res.string.profile_text_font, paths = p(look.names.font)) {
             RowFont(font, rememberSystemFonts()) { onChange(look.copy(fontType = it)) }
         }
     }
-    SettingsRow(stringResource(Res.string.profile_text_size), paths = p(look.names.size)) {
+    SettingsRow(Res.string.profile_text_size, paths = p(look.names.size)) {
         RowStepper(
             look.fontSize,
             { onChange(look.copy(fontSize = it)) },
@@ -207,13 +207,13 @@ private fun DictionaryPartRows(look: DictionaryLook, onChange: (DictionaryLook) 
             unit = stringResource(Res.string.profile_text_size_unit),
         )
     }
-    SettingsRow(stringResource(Res.string.profile_text_color), paths = p(look.names.color)) {
+    SettingsRow(Res.string.profile_text_color, paths = p(look.names.color)) {
         RowColor(look.color, { onChange(look.copy(color = it)) })
     }
     DictionaryStyleRow(look, onChange, p)
     look.shadow?.let { shadow ->
         SettingsSwitchRow(
-            stringResource(Res.string.profile_text_shadow),
+            Res.string.profile_text_shadow,
             shadow,
             { onChange(look.copy(shadow = it)) },
             paths = p(look.names.shadow),

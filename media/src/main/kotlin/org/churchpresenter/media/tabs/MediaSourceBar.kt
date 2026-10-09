@@ -297,7 +297,8 @@ private fun MediaTabScope.MediaSourceActions(viewModel: MediaViewModel) {
                     )
                 },
                 enabled = viewModel.isLoaded,
-                tooltipText = stringResource(Res.string.add_to_schedule)
+                tooltipText = stringResource(Res.string.add_to_schedule),
+                modifier = Modifier.guideTarget(GuideTargets.MEDIA_ADD_TO_SCHEDULE),
             )
         }
         if (presenterManager != null) {

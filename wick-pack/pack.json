@@ -1,0 +1,40 @@
+{
+    "version": 1,
+    "minApp": "26.15.0",
+    "phrases": [
+        "request:add a song\ttype in a new hymn\tQh7uKb6dDKpro9Mq7CeKqsQp8KLJp/knDKdfqzsYiSPFrW8ljSYApvSngC24pzkqEiR7J3+p5yFTKGCphqkeL10tdhphIQotlR51L6ckv5gwLH+aoKGrqOypHKyuruyoyylMLGWne6lBqCMntam3KkUl/i3yqUKgzq1tJ3YkA6hmKpmsR6XaG/+pjyxPJTCmdyT3qe2tlKunpiKqVqWIGUCkKZgBlkCrESJ/pBYN8KhZJ6aoYKnPqBUk/SS6qHMr7iHrqqYqpC9ZIZAsR5xUH7UmAK0TJFor8KSFqnUrWB0dqR+rU62ElhCvb6qcpTgtNSaprFykkKtLrFkh6agAgMklpilULaoooSKlIyyiRSxYqmutWyFXqzamxyq7pk+rsqJCqIisqpq1FtMwtKAmp/AnRiFzKFupPSj8I1IoqqxVlemlACBdLVusDylsJ8ChjCQ/JV+j/aKlIDwovZ5tK0akkShUmYkaE6jhJM0nrSLWKHIrDSwlrF4nX6oVMGapOx4+JxmkBanOKrQnPqvPpS6mRC1jnz0osB34qJMt3qo9pDedW6ozLtWfXq2Gl/qa8KSkJIipny/Tqh+u/acAAHAp7ispqwIjw6szo8IsKSssFrQqKSn0pAImtagLqW+kGq9LMS8qrCrNqmKkCi2MLP0s45gGLictWqStrhmcs6jurQ4ocx5JldcrACYjpIYppJ7OoDssfiqnqCat3Z0tLVkpAigiHVSv7hRdJc+dBawRrBmacbA1JZoixaOzJYAeWyRBrsojnCGSrvUu66gjqU+kvh7DozWsmaCnqZ6hpqyVK7EmfazmpsUoeil4LAYpSaktLaWowC2Vpdkf8acAgD+nW6w1oZajzi0TrDWubLBOnFulMxx2pLQqY6WDnUugUSaUqP2qHaqwqTsuiyDxriKiASsZqRWhJ6s5Hk8tATByFamfgKV1nlIdPiIRJtOs/SpBLXqsXqXAEeeucS4eK+2Xj6SWIRMlQiSHpAmoUio6KA0uMCrroWgrRa1RL7Wm",
+        "request:add a song\tI want to put a new worship song into the program\tZJovpbWpJq1KpFErC6vsqhem3KkkrGakTigOrRMhEp9vqCMuxymnrGWewyVtq6Io7ihHJlqlCpfnm0+jMSLTAeYv+alGqD4rXyVIJTSs9KhvmDwqPKl/rLursKvdrQSu9i7ALdWLFaz0KPWq6auIJtksAirLp+olBqb9omulEikyLN2stqSbLjAlsqx3rLGkEijTIa+rvamhpJupC6qWp40l16FtInKs/SvHGMsYISiAocoiu6orIxmqHqvRHgErQ6nqrpalwy19qu0mnSlLpBUrvawGHc0sKp7Ap4otGSnSJEKq7iEULdOkYhXHJ/wpyiyCp5GiTiinqhOlrqwAgK4k7ygoKLufVC4zq2Ectyt3q+Ssay23qnsrMijdpXywLqDOIoMlNqrxogAbDiGLlgAseyPtJ6GilSiBItyebKskKQcgXyV6KCiny6bVKl2vdiv2FBcsOykUpB0qtyiJKGEtMynNKN8kMqw6px6rXaKHJVekpi0hrYkljSzYKmCi2SQsGmAcXqhwK3wkW67irLgTAZ2XmwWkESBprTClOKW0JQWkoqwGIEMuFKj6Kg2dj6hlq9ik6yu5oQicD6YAAEosSiXpJkmPUSUGJicoYyuXIEcs0hw8nnqpUKdPIa2gQqV2MLqglxAcq0MqsSW8KXsqo6ssKwAsEi0YqcOgyqfZsa+piybApYEsTygXpwgsJSkUqJWhCi1lpEsmHSWTL1GmYSY4nhuxhCm8pw0hHiQJKbCmA61hqZOel6gMKWmpcaXso5wrZiorqwgwgK2oJ4OkTCfYqcMoHinQpBKoJq0VLMsfhCNeqg0vyaqfLAgsxKD8Keusvy2TLA+owKYAgKQkgayNKmEfkSeUKWCoc7MrHBSs+KaOEiOhvqRArByi8ihsKT6lOaggp+EtUisIq4goFSnHIWAdKaWuHTotqyTDqPGeGyZAqmWwbCdiIWus9yswLlkl6ilYq/GsuSitHhwqZCOVpg+eLKbpqu0jLy7oJLQoiCkVqAqY0CcjKxyo",
+        "request:change song lyrics\tfix a typo in the words of a hymn\tBSEUMPEom6xLqccr2ivVq6InDSuDJwafdCharQKstiAVrkkqDxx2pk6tvi+YJAIsMS0uLIeuryjkqSioV6QDK5gsyZtzLCMw3SCcHa4kYqgmK1OiPqhSqhKotKjzrNGokSj4K6Wo7qpzJ2aiKKc3LTgnhy0XoQilEqoIKnCddCQKKAWtuZszqBeswS/EJsEisCcWpCSwNJfVoc2osClGoQSh8ZwIHwqsdynbqK2i2a5fK7iqC6b0sMol3Sibnf4pKqRoqJiloSwdKrQqZKVhJa2pR524pvgtBaW8rA4riSH+pouhM6y4paGpYqvGodwpVKpVraKjkKC0qPOriioAgF0oTCqKK9WmDC4XjluMkijzqQasHSUir/8lYAappxqn2RpwqDWhYY6IJsMkEqGgrECoNCX/J56n2SupKCQqcKebLQSglScCG6AnGRlZrM2l9aapJXSZyqEDKzMsOizQJdcq/yhaot4qPJ30oVEnMpobKl4lNyMErZCjgqjDLhaqHyzeE2UlHiZrKfAkgq3VqoIqpi7Kp1QkKiGZqLAqL6gdnFemhKxXLcaqHq1VKF4iF6xALQYnUjHhosuu268AAFYlXCMfoBQoO6qBrBgtWSyUKGMoYqR6HPirHavCqemmzKfHLtog7ybFqzEZHyzqLYAssSNoKrcmMqlHqBwtJKAnrsIoPSnVJ8AoWyTZrIikzyYPo9QkS6IwJh+tVqjcJAWhXCxzHi2voKTZKQ8m9KkLqTOlbbC4m8gmDSbXJcciYyq1qaOgRC4uoHQuVqgIqTki6iKIpb2o4hEanjsiPKupK46aQKy5pGSonKRaK4AjuKzVK+qlYytYJe6nTSAAgOCk/axnprKlzivCrFeoIa89pE2oWhnxpCAmDKocrlCm9apZLIaqValqqqUw0qVGsFoYTygGrJai6apgqQMtKSq+KagYpKCrrDIsn568JAuhiyQfKcYcsZyMp76smCoVL9kkK51uK9wqTqTophOj2KlMKh8rqqKKqbcnS6nSKZ6n",
+        "tour:song-ccli-number\twhere do I put the CCLI number\tQql6JCCv9Cb4okgjaqg8LBUr6a5+LCyqlahrqHokNaxYqeecPp7WqBYquyj1qVAY155Gre8ghS00KgenrptEKtsvcyEtLOsjAx2JlrEuc62xKPWpnChfGwQoN58LKVKcmCqDKRQlZaBcnJErj6oiFe4YrabvLDwqvCtclq8SLynuqnUg3SSxmAgm+q0spnKeoaAPIJ6keC2rqlaneyQMp/oqziXGK54p5iswKo0rJSVqI9WsiyiFHlWs7CkiqSyeeS0JqCkasCp7JWUmLqaWLmukU6XSkXUsVSkrrIyjYSI1qTKtbiNXKAqn6y2oKgyseqwgrdevx66wrcqsSZ4AgFqoziwdINknWCxTqSYnTK2FrZiWyyYnqPiqiZ6vrKQdnKoTq7qYBaiGJnqnm6MHKXAsxzHfLt6kAybMJfMsA6TlHfSepyrdJzCkFiOSpRel4Sm0Ks6saqSAJAmonSYTJAoxoil0p2koEaz+rLoiBK+Xn/+jzqe9rcYkXaWZq3umqB7FGsitG68xKyytuKfVKcAkbinkqq0lI64PIpuqDyiGqBssiqoLLqwpsafJozwhq544EwIsLyg4Kj8tj6kAALge9ahipIapba8+Jh8mj6rXLkgqoiu+LeCiuyl0KyIsehoqLMWtJRClKtSTHaYQKv0qISsGLGiXBCgFqRipLqI+rH8sHKzOqpcnDyxhIi0rWaj+mSutXSbRqvqjaDCZqkQebKEMJfCqbKvMo9ckxi/WKSks5yQJrq4fA6QjKK0gd63rLACkyai0IQSlmavKKEAhia2oq3webiKUHZCtN6UiJ1Kkc6u7JC2dI62yLAeh8ifDrHSskyo2n+SnO6YAgCSqnaX6qSshVidbLRegQCRnoyOs4SnRpNMgviHjkG4bBKHBrEoozaHqrbmqAS8IH0Giz6SeKzUs/qelqIgiQCkCp6gUJKJQLKurEinyKeuXBi3JqRCsHiw+LcQpFKC1pY8leak1qt6t3ir+J1WmQix+JGMlM6yhKaasISuOnqSs",
+        "tour:song-ccli-number\tadd the ccli song number to a song\tkJtOpk2v1SZOpXYu1BoCKr8YGq5AJeGsCB9fqwMoJanXrFQt6KIXrNAbKigkq9Mq5SBQpR6nqSwQK6UlWiO4LtYxWZ09pD+nNapvKQ6lI6bXKycmWyhfq+KpEaqJqyeq2yYcLs8od6SJnPAoKa3rlT0mD6RDLGknuCSHqQks5qn5JV+sVq14IMiiRSi1JmYmUysKJ7uphilvrXigLqsFH7ouYBwrLkes2CtgKZEs66EUrdGt4amoKDCo8RokpzUpoy79qianvg1wIigq3q0NKpYkFaosKXsu6CP4rEsqfSq7JIevZCYuJ5spgye5Koyr8iKir6CwIastrBqsByIAgGgfsqfSKLMQxi7Xrrem1alGq2ChkixdrF0ah6c/rDSo9qu5pZAmEajqF2gg+CgfJUEtIC8hLemrOSwio1YrRaz3HT4j/51HJEiYJCoRpsusKyOOokWs+qkRrLclLaUcKH8sHCSPJn0t3awYqpYo6KzSJxUlh6TAqikjG6BAH16tvR0WLg8ox6tOK7uqI6lcIvGq7R05qDkmNKgErfQoDSlvphsopyG+LBYsOyNoqMukx6LKrAsqLCiypaAnD6YAAJEt1SqJIhwjw6KcJzAqByaZKiIlMiaZJZWsaChOKWAiDaSnL7mog6jxoaeg3h5mDNwnACmyKc4jPSxQqwos0yFkrMKnrKWHq3YuYy5SmPsuqqyAqomgO6gNpAOqQC7jLFIkziVhLHasiKwXIQAo2yWJJI8gXCMCqTWi56c4KjOtMqbBLZ+UyKxfI2Cg1RjwJlqgwijRqi+dDKTxI6OqNKxkJ8+o/CkvpzIrxZ/xLLQoACqLpKepXywDKQ+lCqgAgLWmz6uCq12NbJ2wLZiiAa8KKNWoZysoqTwm+CjPrQuizCgWoRsoxKSBru4nAip7qcwieaUpoUQpYZ+ipb0kTqGQqC4nIinSqH+tX58BpOurFyz8KbaswiuELGurXBk2qhMlSBmSIrWsXChxi0amsitRKIcvAKl2LVmt/BjPLams",
+        "tour:song-ccli-number\tsong licence number\tYKdRIVmqSq7DHeAurivUqPUTjKk7qEklOifRq92ppyLrqUchlKmxpJarnjBxrGIowKjipIamIy8wLC+q3iQ/LS0wl6v4J/OsRKV6pCin6J7ILAodCKqtI/+gqyjbpuilMi1xLE8phSitpAqoZ6qzr0ArEjCeJu0tFyWRqFimpKkroRKhr6kGonyqWhaKKeoirCtvJDunbydRqhigHqgaqwukeKW5KQ6r8aJmqP4maSmNJTUhTKihKCQrKip6m9MsqBpPrKQeYy5CpfYpH64OJi+hN6VTJJEunyODp8EtPSXaKAWqRRyuoFisWqWrLd+oiqOHrNGiga3BqVgbBJQAgEGpq6upK6wqhC4rquElXCtTrcktxJRzqq2kaKzeG/mrbCQtpGOiCqNHJA+moSrcJfkppC2mJeGmGjG9Izyfl6eioAwaFKYsLbqs3xx4oqaqWSmHo1OtfaiVqcQemCCaKyguQiGkowgpNbBrI/CiAKStF3cqBahWqv4htCiJKBWtAzDiIgsmArCpJ7SpsSOzqA+eQKljqtSejaMlpRgpoSt4rEgsFKzJJecilCtCJyYeyKP4pbYYpCXsrM2oEKwAAHmdLhvLKNAdpiefKOsq5CyPpYwsHS4EKPSlXZRJKAqdn6ltLEkm359/p96cIik1K6uoAqyMK6cp0ysqJgsnHB+gseIYQ6fErZQswyXcqMotoqxVHMMnWyjrqSWtVSuIK2AsFCVrLFCioCgQol2l8yCsKcAn3iVyKCAuBCx9rZ2dYarpKrqj6KtDKFMp5acRpgGf5qgorPGdnqrKLLmmXaldLYUlkySiKoIi3qu5Li+pnyzukOGlFB4Erh2qjKgAgAmsOZ6Vlumk6SgCLKeg/64cq6yiqSj/raykMCearlaV5iioKCMlhSn9qvQpqyvgrGui9aeFFesqaaY0pEUuWi3RnVCs3SjMrhutMirboYWa5iHRKrAR1COLqyuhFad+pA6iHSWun6iqZqrZJKaq7yKQHSAuyK3QKTaigiQFLJKv"
+    ],
+    "tours": [
+        {
+            "id": "song-ccli-number",
+            "title": "Enter a song's CCLI number",
+            "triggers": [
+                "where do I put the CCLI number",
+                "add the ccli song number to a song",
+                "song licence number"
+            ],
+            "steps": [
+                {
+                    "target": "songs.edit",
+                    "before": "tab=SONGS",
+                    "hint": "Pick the song in the list, then press Edit."
+                },
+                {
+                    "target": "songEditor.ccli",
+                    "hint": "Type the song's CCLI number here, then save the song."
+                }
+            ]
+        }
+    ],
+    "tips": [
+        {
+            "text": "A song's CCLI number goes in the song editor, so your CCLI report can count it.",
+            "tour": "song-ccli-number"
+        }
+    ]
+}

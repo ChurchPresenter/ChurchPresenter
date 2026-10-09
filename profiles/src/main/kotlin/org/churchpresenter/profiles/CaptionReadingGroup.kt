@@ -91,7 +91,7 @@ internal fun CaptionReadingGroup(
         StyleRows(reading, update, path)
         if (reading.style == CAPTION_STYLE_RSVP) RsvpRows(reading, matchSpeaker, update, path)
         SettingsSwitchRow(
-            stringResource(Res.string.profile_caption_bionic),
+            Res.string.profile_caption_bionic,
             reading.bionicReading,
             { v -> update { it.copy(bionicReading = v) } },
             sub = stringResource(Res.string.profile_caption_bionic_sub),
@@ -100,7 +100,7 @@ internal fun CaptionReadingGroup(
         TimingRows(reading, update, path)
         if (reading.style == CAPTION_STYLE_ROLL_UP) {
             SettingsSwitchRow(
-                stringResource(Res.string.profile_caption_roll_up),
+                Res.string.profile_caption_roll_up,
                 reading.rollUp,
                 { v -> update { it.copy(rollUp = v) } },
                 sub = stringResource(Res.string.profile_caption_roll_up_sub),
@@ -109,7 +109,7 @@ internal fun CaptionReadingGroup(
         }
         if (reading.rollUp && reading.style == CAPTION_STYLE_ROLL_UP) {
             SettingsRow(
-                stringResource(Res.string.profile_caption_roll_up_time),
+                Res.string.profile_caption_roll_up_time,
                 advanced = true,
                 paths = path("rollUpMillis"),
             ) {
@@ -140,7 +140,7 @@ private fun DimRows(
     percent: String,
 ) {
     SettingsSwitchRow(
-        stringResource(Res.string.profile_caption_dim),
+        Res.string.profile_caption_dim,
         reading.dimOlderLines,
         { v -> update { it.copy(dimOlderLines = v) } },
         sub = stringResource(Res.string.profile_caption_dim_sub),
@@ -148,7 +148,7 @@ private fun DimRows(
     )
     if (reading.dimOlderLines) {
         SettingsRow(
-            stringResource(Res.string.profile_caption_dim_step),
+            Res.string.profile_caption_dim_step,
             advanced = true,
             paths = path("dimStepPercent"),
         ) {
@@ -161,7 +161,7 @@ private fun DimRows(
             )
         }
         SettingsRow(
-            stringResource(Res.string.profile_caption_dim_floor),
+            Res.string.profile_caption_dim_floor,
             advanced = true,
             paths = path("dimFloorPercent"),
         ) {
@@ -188,7 +188,7 @@ private fun RsvpRows(
     path: (String) -> List<String>,
 ) {
     SettingsRow(
-        stringResource(Res.string.profile_caption_rsvp_words),
+        Res.string.profile_caption_rsvp_words,
         sub = if (reading.rsvpWordsPerFlash == RSVP_FLASH_PHRASE) {
             stringResource(Res.string.profile_caption_rsvp_phrase_sub)
         } else {
@@ -229,7 +229,7 @@ private fun StyleRows(
     path: (String) -> List<String>,
 ) {
     SettingsRow(
-        stringResource(Res.string.profile_caption_style),
+        Res.string.profile_caption_style,
         sub = when (reading.style) {
             CAPTION_STYLE_POP_ON -> stringResource(Res.string.profile_caption_style_pop_on_sub)
             CAPTION_STYLE_TICKER -> stringResource(Res.string.profile_caption_style_ticker_sub)
@@ -250,7 +250,7 @@ private fun StyleRows(
         )
     }
     if (reading.style == CAPTION_STYLE_TICKER) {
-        SettingsRow(stringResource(Res.string.profile_caption_ticker_speed), paths = path("tickerSpeed")) {
+        SettingsRow(Res.string.profile_caption_ticker_speed, paths = path("tickerSpeed")) {
             RowStepper(
                 reading.tickerSpeed,
                 { v -> update { it.copy(tickerSpeed = v) } },
@@ -272,7 +272,7 @@ private fun TimingRows(
 ) {
     val ms = stringResource(Res.string.profile_ms)
     SettingsSwitchRow(
-        stringResource(Res.string.profile_caption_clear),
+        Res.string.profile_caption_clear,
         reading.clearAfterSilence,
         { v -> update { it.copy(clearAfterSilence = v) } },
         sub = stringResource(Res.string.profile_caption_clear_sub),
@@ -290,7 +290,7 @@ private fun TimingRows(
     )
     if (reading.clearAfterSilence) {
         SettingsRow(
-            stringResource(Res.string.profile_caption_clear_fade),
+            Res.string.profile_caption_clear_fade,
             advanced = true,
             paths = path("clearFadeMillis"),
         ) {
@@ -305,7 +305,7 @@ private fun TimingRows(
         }
     }
     SettingsSwitchRow(
-        stringResource(Res.string.profile_caption_reading_speed),
+        Res.string.profile_caption_reading_speed,
         reading.readingSpeedLimit,
         { v -> update { it.copy(readingSpeedLimit = v) } },
         sub = stringResource(Res.string.profile_caption_reading_speed_sub),
@@ -331,7 +331,7 @@ private fun LineBreakRows(
     update: ((CaptionReading) -> CaptionReading) -> Unit,
     path: (String) -> List<String>,
 ) {
-    SettingsRow(stringResource(Res.string.profile_caption_line_breaks), paths = path("lineBreaks")) {
+    SettingsRow(Res.string.profile_caption_line_breaks, paths = path("lineBreaks")) {
         RowSegmented(
             options = listOf(
                 RowOption(CAPTION_BREAK_NONE, stringResource(Res.string.profile_caption_break_off)),
@@ -344,7 +344,7 @@ private fun LineBreakRows(
     }
     if (reading.lineBreaks != CAPTION_BREAK_NONE) {
         SettingsSwitchRow(
-            stringResource(Res.string.profile_caption_blank_line),
+            Res.string.profile_caption_blank_line,
             reading.blankLineBetween,
             { v -> update { it.copy(blankLineBetween = v) } },
             advanced = true,
@@ -352,7 +352,7 @@ private fun LineBreakRows(
         )
     }
     SettingsRow(
-        stringResource(Res.string.profile_caption_max_chars),
+        Res.string.profile_caption_max_chars,
         sub = stringResource(Res.string.profile_caption_max_chars_sub),
         advanced = true,
         paths = path("maxCharsPerLine"),
