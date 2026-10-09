@@ -3047,6 +3047,7 @@
     <string name="helper_hint_background_page">The backgrounds behind every song and Bible verse are set on this page.</string>
     <string name="helper_hint_background_profile">This is the profile's own background. Pick the profile on the left first; only the screens using it change.</string>
     <string name="helper_suggestions_label">Suggestions</string>
+    <string name="helper_did_you_mean_others">Or maybe</string>
     <string name="helper_hint_ndi_add">Click %1$s here to add an NDI output. OBS, vMix and other apps on the network can then pick it up as a source.</string>
     <string name="helper_hint_ndi_name">Give it a name, like Livestream, so you can find it in OBS.</string>
     <string name="helper_hint_output_picker_new">Pick the profile it shows: a full screen, a lower third or a stage monitor.</string>

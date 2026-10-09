@@ -25,6 +25,7 @@ import org.churchpresenter.helper.intent.glossary.Glossaries
 import org.churchpresenter.helper.intent.normalize
 import org.churchpresenter.helper.pack.WickPack
 import org.churchpresenter.helper.pack.WickPacks
+import org.churchpresenter.helper.suggest.SuggestedRequest
 import org.churchpresenter.helper.suggest.keywordScores
 import org.churchpresenter.sharedui.guide.GuideTarget
 import org.churchpresenter.strings.generated.resources.Res
@@ -73,16 +74,24 @@ class SemanticIntentResolver internal constructor(
         text: String,
         named: KnownProfile? = null,
     ): Resolution {
-        val reachable = ranked.filter { it.target.reachableIn(context) }
-        val best = reachable.firstOrNull() ?: return Resolution.Unknown
-        val action = (resolutionFor(best.target, context, named) as? Resolution.Act)?.action
         val words = keywordScores(text)
-        val nudge = (best.target as? CatalogTarget.Suggested)?.let { KEYWORDS * (words[it.request] ?: 0.0) } ?: 0.0
+        // Rows are many and read alike, so one needs a clearer lead. A chip, the request Wick offers by
+        // name, is nudged by how alike its words are (which catches typos) and preferred when it comes
+        // close -- the preference picks which match is asked about, never makes a far one worth asking.
+        val weighed = ranked.filter { it.target.reachableIn(context) }.map { scored ->
+            val target = scored.target
+            val base = scored.score - if (target.isRow()) ROW_PENALTY else 0f
+            val nudge = (target as? CatalogTarget.Suggested)?.let { KEYWORDS * (words[it.request] ?: 0.0) } ?: 0.0
+            val preferred = if (target is CatalogTarget.Suggested) CHIP_PREFERENCE else 0.0
+            Weighed(target, base, base + nudge, base + nudge + preferred)
+        }
+        val best = weighed.maxByOrNull { it.rank } ?: return Resolution.Unknown
+        val action = (resolutionFor(best.target, context, named) as? Resolution.Act)?.action
         return when {
             action == null -> Resolution.Unknown
-            best.score >= ACT -> Resolution.Act(action)
-            best.score + nudge >= GUESS -> Resolution.DidYouMean(labelOf(best.target, action), action)
-            else -> Resolution.Unknown
+            best.base >= ACT -> Resolution.Act(action)
+            best.guess >= GUESS -> Resolution.DidYouMean(labelOf(best.target, action), action, others(weighed, best))
+            else -> closest(weighed)
         }
     }
 
@@ -158,6 +167,30 @@ class SemanticIntentResolver internal constructor(
         return HelperAction.Highlight(GuideTour(listOf(step)), label)
     }
 
+    /** Nothing close enough to ask about: the nearest chips, when any are not too far off. */
+    private fun closest(weighed: List<Weighed>): Resolution {
+        val chips = weighed.filter { it.guess >= CHIP_FLOOR }
+            .sortedByDescending { it.rank }
+            .mapNotNull { (it.target as? CatalogTarget.Suggested)?.request }
+            .distinct()
+            .take(OTHER_CHIPS + 1)
+        return if (chips.isEmpty()) Resolution.Unknown else Resolution.Closest(chips)
+    }
+
+    /** The next closest chips after [best], offered beside the guess: those not too far off, best first. */
+    private fun others(weighed: List<Weighed>, best: Weighed): List<SuggestedRequest> = weighed
+        .filter { it !== best && it.guess >= CHIP_FLOOR }
+        .sortedByDescending { it.rank }
+        .mapNotNull { (it.target as? CatalogTarget.Suggested)?.request }
+        .filter { it != (best.target as? CatalogTarget.Suggested)?.request }
+        .distinct()
+        .take(OTHER_CHIPS)
+
+    /** One match as [decide] weighs it: [base] decides acting, [guess] asking, [rank] which one. */
+    private class Weighed(val target: CatalogTarget, val base: Float, val guess: Double, val rank: Double)
+
+    private fun CatalogTarget.isRow(): Boolean = this is CatalogTarget.ProfileRow || this is CatalogTarget.PageRow
+
     private fun CatalogTarget.reachableIn(context: ResolveContext): Boolean = when (this) {
         is CatalogTarget.Tab -> tab in context.visibleTabs
         is CatalogTarget.Control ->
@@ -174,6 +207,18 @@ class SemanticIntentResolver internal constructor(
 
         /** How much the keyword likeness adds to a chip's score — a nudge; the model leads. */
         private const val KEYWORDS = 0.1
+
+        /** Below this a chip is too far from the request to offer beside a guess. */
+        const val CHIP_FLOOR = 0.2
+
+        /** How many chips are offered beside a guess, so three choices in all; three when there is none. */
+        private const val OTHER_CHIPS = 2
+
+        /** How much closer than anything else a settings row must come before it is the answer. */
+        const val ROW_PENALTY = 0.1f
+
+        /** How far a chip may trail and still be the one asked about. */
+        private const val CHIP_PREFERENCE = 0.1
 
         /**
          * The English readings of [input] the model reads: the app language's glossary rewrite, and the

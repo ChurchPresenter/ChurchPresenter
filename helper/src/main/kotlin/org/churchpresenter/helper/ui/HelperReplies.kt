@@ -86,11 +86,9 @@ import org.churchpresenter.strings.generated.resources.helper_not_now
 import org.churchpresenter.strings.generated.resources.helper_notice_suggestion
 import org.churchpresenter.strings.generated.resources.helper_suggestions_label
 import org.churchpresenter.strings.generated.resources.helper_ok
-import org.churchpresenter.strings.generated.resources.helper_not_sure
 import org.churchpresenter.strings.generated.resources.helper_previous_tip
 import org.churchpresenter.strings.generated.resources.helper_shortcut_is
 import org.churchpresenter.strings.generated.resources.helper_shortcut_unbound
-import org.churchpresenter.strings.generated.resources.helper_send_chat
 import org.churchpresenter.strings.generated.resources.helper_show_me
 import org.churchpresenter.strings.generated.resources.helper_tip_title
 import org.churchpresenter.strings.generated.resources.helper_tips_off
@@ -243,18 +241,10 @@ internal fun ReplyBody(
                 },
             )
         }
-        HelperReply.Unknown -> {
-            Said(HelperText.Res(Res.string.helper_not_sure))
-            // Also where a "Did you mean …?" answered No ends up.
-            if (inputs.onSendChat != null && !state.sharingChat) {
-                QuietLink(
-                    Res.string.helper_send_chat,
-                    onClick = { state.sharingChat = true },
-                    modifier = Modifier.testTag("helper.shareChatLink"),
-                )
-            }
-        }
-        is HelperReply.DidYouMean -> DidYouMeanBody(state, reply, executor)
+        // Also where a "Did you mean …?" answered No ends up.
+        HelperReply.Unknown -> NotSureBody(state, inputs, emptyList(), ask)
+        is HelperReply.NotSure -> NotSureBody(state, inputs, reply.closest, ask)
+        is HelperReply.DidYouMean -> DidYouMeanBody(state, reply, executor, ask)
         HelperReply.Commands -> CommandsTable(ask)
         HelperReply.Greeting -> {
             Said(HelperText.Res(Res.string.helper_greeting))
@@ -391,10 +381,14 @@ private fun ShortcutBody(action: ShortcutAction, onOk: () -> Unit, onChange: () 
     Actions(Res.string.helper_change_shortcut to onChange, primary = Res.string.helper_ok to onOk)
 }
 
-/** Requests as chips under a small "Suggestions" label; picking one asks it, as if it had been typed. */
+/** Requests as chips under a small [caption]; picking one asks it, as if it had been typed. */
 @Composable
-private fun RequestChips(requests: List<SuggestedRequest>, ask: Ask) {
-    NoticeCaption(stringResource(Res.string.helper_suggestions_label))
+internal fun RequestChips(
+    requests: List<SuggestedRequest>,
+    ask: Ask,
+    caption: StringResource = Res.string.helper_suggestions_label,
+) {
+    NoticeCaption(stringResource(caption))
     val labels = requests.map { stringResource(it.label) }
     val options = remember(requests, labels) {
         requests.mapIndexed { i, request ->

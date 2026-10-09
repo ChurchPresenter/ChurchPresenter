@@ -64,10 +64,7 @@ class SemanticIntentResolverTest {
 
     @Test
     fun `a match short of sure is asked about, and never acted on`() {
-        val ranked = listOf(
-            scored(CatalogTarget.Settings(SettingsPage.SYSTEM), 0.6f),
-            scored(CatalogTarget.Suggested(SuggestedRequest.CLEAR), 0.55f),
-        )
+        val ranked = listOf(scored(CatalogTarget.Settings(SettingsPage.SYSTEM), 0.6f))
 
         val guess = assertIs<Resolution.DidYouMean>(resolver.decide(ranked, context, "hide everything"))
 
@@ -75,10 +72,51 @@ class SemanticIntentResolverTest {
     }
 
     @Test
-    fun `a far match is not guessed at`() {
+    fun `a chip close behind is the one asked about, one far behind is not`() {
+        val close = listOf(
+            scored(CatalogTarget.Settings(SettingsPage.SYSTEM), 0.6f),
+            scored(CatalogTarget.Suggested(SuggestedRequest.CLEAR), 0.55f),
+        )
+        val chip = assertIs<Resolution.DidYouMean>(resolver.decide(close, context, "hide everything"))
+        assertEquals(HelperAction.ClearOutput, chip.action)
+
+        val far = listOf(
+            scored(CatalogTarget.Settings(SettingsPage.SYSTEM), 0.68f),
+            scored(CatalogTarget.Suggested(SuggestedRequest.CLEAR), 0.5f),
+        )
+        val page = assertIs<Resolution.DidYouMean>(resolver.decide(far, context, "hide everything"))
+        assertEquals(HelperAction.OpenSettings(SettingsPage.SYSTEM), page.action)
+    }
+
+    @Test
+    fun `a settings row needs a clearer lead before it is acted on`() {
+        val row = CatalogTarget.PageRow("preview_mode", SettingsPage.SYSTEM)
+        assertIs<Resolution.DidYouMean>(resolver.decide(listOf(scored(row, 0.72f)), context, "x"))
+        assertIs<Resolution.Act>(resolver.decide(listOf(scored(row, 0.82f)), context, "x"))
+    }
+
+    @Test
+    fun `a far match is not guessed at, only offered as a chip`() {
         val ranked = listOf(scored(CatalogTarget.Suggested(SuggestedRequest.CHORDS), 0.3f))
 
-        assertEquals(Resolution.Unknown, resolver.decide(ranked, context, "how do i add chrods"))
+        val closest = assertIs<Resolution.Closest>(resolver.decide(ranked, context, "how do i add chrods"))
+        assertEquals(listOf(SuggestedRequest.CHORDS), closest.requests)
+    }
+
+    @Test
+    fun `a guess comes with the next closest chips, never itself twice`() {
+        val ranked = listOf(
+            scored(CatalogTarget.Suggested(SuggestedRequest.CLEAR), 0.6f),
+            scored(CatalogTarget.Suggested(SuggestedRequest.CLEAR), 0.58f),
+            scored(CatalogTarget.Settings(SettingsPage.SYSTEM), 0.5f),
+            scored(CatalogTarget.Suggested(SuggestedRequest.NEXT_SLIDE), 0.4f),
+            scored(CatalogTarget.Suggested(SuggestedRequest.VERSE), 0.3f),
+            scored(CatalogTarget.Suggested(SuggestedRequest.SCHEDULE), 0.25f),
+            scored(CatalogTarget.Suggested(SuggestedRequest.REMOTE), 0.1f),
+        )
+        val guess = assertIs<Resolution.DidYouMean>(resolver.decide(ranked, context, "x"))
+        assertEquals(HelperAction.ClearOutput, guess.action)
+        assertEquals(listOf(SuggestedRequest.NEXT_SLIDE, SuggestedRequest.VERSE), guess.others)
     }
 
     @Test

@@ -243,7 +243,7 @@ private fun todaysTip(state: HelperState, inputs: HelperInputs): Tip? {
 }
 
 private fun moodFor(reply: HelperReply): LampMood = when (reply) {
-    is HelperReply.Unknown -> LampMood.CONFUSED
+    is HelperReply.Unknown, is HelperReply.NotSure -> LampMood.CONFUSED
     is HelperReply.Confirm, is HelperReply.Clarify -> LampMood.THINKING
     is HelperReply.Message -> if (reply.canUndo) LampMood.HAPPY else LampMood.IDLE
     else -> LampMood.IDLE

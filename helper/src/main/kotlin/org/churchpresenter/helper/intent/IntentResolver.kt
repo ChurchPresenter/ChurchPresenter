@@ -1,5 +1,6 @@
 package org.churchpresenter.helper.intent
 
+import org.churchpresenter.helper.suggest.SuggestedRequest
 import org.churchpresenter.helper.HelperText
 import org.churchpresenter.helper.action.HelperAction
 import org.churchpresenter.sharedui.models.Tabs
@@ -45,8 +46,18 @@ sealed interface Resolution {
     /** It was not understood. */
     data object Unknown : Resolution
 
-    /** It was not understood for sure, but reads most like [action], described as [label] — offered as a question. */
-    data class DidYouMean(val label: HelperText, val action: HelperAction) : Resolution
+    /** It was not understood, and nothing came close enough to ask about; [requests] are the nearest chips. */
+    data class Closest(val requests: List<SuggestedRequest>) : Resolution
+
+    /**
+     * It was not understood for sure, but reads most like [action], described as [label] — offered as a
+     * question, with [others], the next closest chips, offered beside it.
+     */
+    data class DidYouMean(
+        val label: HelperText,
+        val action: HelperAction,
+        val others: List<SuggestedRequest> = emptyList(),
+    ) : Resolution
 }
 
 /**

@@ -49,7 +49,7 @@ internal fun HelperReply.summary(undoLabel: HelperText?): HelperText? = when (th
     is HelperReply.Message -> text
     is HelperReply.Shortcut ->
         helperText(Res.string.helper_shortcut_is, helperText(action.descriptionRes), HelperText.KeyFor(action))
-    HelperReply.Unknown -> helperText(Res.string.helper_not_sure)
+    HelperReply.Unknown, is HelperReply.NotSure -> helperText(Res.string.helper_not_sure)
     is HelperReply.DidYouMean -> helperText(Res.string.helper_did_you_mean, label)
     HelperReply.Greeting -> helperText(Res.string.helper_greeting)
     HelperReply.Commands -> helperText(Res.string.helper_commands_intro)

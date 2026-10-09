@@ -84,7 +84,9 @@ class WickUnderstandingEval {
             acted != null -> Outcome.WRONG
             resolution is Resolution.Clarify && resolution.options.take(CHIPS_SEEN).any { it.unnamed() in right } ->
                 if (byRules) Outcome.RULES else Outcome.GUESS
-            resolution is Resolution.DidYouMean && resolution.action.unnamed() in right -> Outcome.GUESS
+            resolution is Resolution.Closest && expected in resolution.requests -> Outcome.GUESS
+            resolution is Resolution.DidYouMean &&
+                (resolution.action.unnamed() in right || expected in resolution.others) -> Outcome.GUESS
             else -> Outcome.MISSED
         }
     }

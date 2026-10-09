@@ -14,6 +14,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.helper.HelperActionExecutor
 import org.churchpresenter.helper.HelperState
+import org.churchpresenter.helper.suggest.SuggestedRequest
+import org.churchpresenter.helper.HelperText
 import org.churchpresenter.helper.action.ActionOutcome
 import org.churchpresenter.helper.action.ContentScope
 import org.churchpresenter.helper.action.HelperAction
@@ -126,6 +128,25 @@ class WickScreenshotTest {
     fun `the panel not sure, offering to send the chat`() = captureComponent(SECTION, "panel_not_sure") {
         panel(chat())
     }
+
+    @Test
+    fun `the panel asking about its best guess, with the next closest chips`() =
+        captureComponent(SECTION, "panel_did_you_mean") {
+            panel(
+                HelperState().apply {
+                    isOpen = true
+                    thread.said("make the screen go black")
+                    onResolved(
+                        Resolution.DidYouMean(
+                            HelperText.Res(SuggestedRequest.CLEAR.label),
+                            HelperAction.ClearOutput,
+                            listOf(SuggestedRequest.NEXT_SLIDE, SuggestedRequest.PROJECTOR),
+                        ),
+                        executor,
+                    )
+                },
+            )
+        }
 
     @Test
     fun `the panel's menu`() = captureComponent(

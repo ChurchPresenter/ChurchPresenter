@@ -11,6 +11,7 @@ import org.churchpresenter.helper.action.HelperAction
 import org.churchpresenter.helper.action.UndoStack
 import org.churchpresenter.helper.display.DisplaySetupFlow
 import org.churchpresenter.helper.intent.Resolution
+import org.churchpresenter.helper.suggest.SuggestedRequest
 import org.churchpresenter.sharedui.guide.GuideSession
 import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.strings.generated.resources.Res
@@ -44,8 +45,15 @@ sealed interface HelperReply {
     /** The request was not understood, and nothing came close enough to guess at. */
     data object Unknown : HelperReply
 
+    /** Not understood, as [Unknown], with the nearest chips — [closest] — offered under it. */
+    data class NotSure(val closest: List<SuggestedRequest>) : HelperReply
+
     /** The request reads most like [action], described as [label]: asked about before anything happens. */
-    data class DidYouMean(val label: HelperText, val action: HelperAction) : HelperReply
+    data class DidYouMean(
+        val label: HelperText,
+        val action: HelperAction,
+        val others: List<SuggestedRequest> = emptyList(),
+    ) : HelperReply
 
     /** Hello, and examples of what to ask. */
     data object Greeting : HelperReply
@@ -152,7 +160,9 @@ class HelperState(
             is Resolution.Act -> request(resolution.action, executor)
             is Resolution.Clarify -> show(HelperReply.Clarify(resolution.question, resolution.options))
             Resolution.Unknown -> show(HelperReply.Unknown)
-            is Resolution.DidYouMean -> show(HelperReply.DidYouMean(resolution.label, resolution.action))
+            is Resolution.Closest -> show(HelperReply.NotSure(resolution.requests))
+            is Resolution.DidYouMean ->
+                show(HelperReply.DidYouMean(resolution.label, resolution.action, resolution.others))
         }
     }
 

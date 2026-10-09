@@ -30,6 +30,7 @@ import org.churchpresenter.helper.intent.ResolveContext
 import org.churchpresenter.helper.intent.Resolution
 import org.churchpresenter.helper.intent.RuleIntentResolver
 import org.churchpresenter.helper.suggest.HelperSignals
+import org.churchpresenter.helper.suggest.SuggestedRequest
 import org.churchpresenter.helper.suggest.Suggestion
 import org.churchpresenter.helper.suggest.SuggestionIds
 import org.churchpresenter.helper.suggest.suggestionsFor
@@ -443,6 +444,33 @@ class WickPanelTest {
         waitForIdle()
         press("No")
         assertEquals(HelperReply.Unknown, state.reply)
+    }
+
+    @Test
+    fun `a guess offers the next closest chips, and picking one asks it`() = runComposeUiTest {
+        val state = HelperState().apply { isOpen = true }
+        wick(state)
+        val guess = HelperAction.ShowShortcut(ShortcutAction.TAKE)
+        state.onResolved(
+            Resolution.DidYouMean(HelperText.Plain("Take"), guess, listOf(SuggestedRequest.CLEAR)),
+            executor,
+        )
+        waitForIdle()
+        onNodeWithText("Or maybe").assertExists()
+        press("Clear the screen")
+        assertIs<HelperReply.Confirm>(state.reply)
+    }
+
+    @Test
+    fun `not sure offers the nearest chips when any came close`() = runComposeUiTest {
+        val state = HelperState().apply { isOpen = true }
+        wick(state)
+        state.onResolved(Resolution.Closest(listOf(SuggestedRequest.SHORTCUTS)), executor)
+        waitForIdle()
+        onNodeWithText("I'm not sure", substring = true).assertExists()
+        onNodeWithText("Or maybe").assertExists()
+        press("Show keyboard shortcuts")
+        assertFalse(state.reply is HelperReply.NotSure)
     }
 
     private companion object {
