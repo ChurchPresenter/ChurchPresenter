@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.controlin.ControlSettings
 import org.churchpresenter.controlin.ControlStatus
@@ -88,6 +87,8 @@ fun ControlDialog(
     data: ControlPanelData,
     actions: ControlPanelActions,
     onDismiss: () -> Unit,
+    /** The window it opens in -- see [DialogFrame]. */
+    frame: DialogFrame = appDialogFrame,
 ) {
     if (!isVisible) return
     val dialogState = rememberDialogState(
@@ -95,13 +96,15 @@ fun ControlDialog(
         width = CONTROL_WIDTH,
         height = CONTROL_HEIGHT,
     )
-    DialogWindow(
-        onCloseRequest = {
-            actions.onCancelLearn()
-            onDismiss()
-        },
-        state = dialogState,
-        title = stringResource(Res.string.control_title),
+    frame(
+        DialogFrameSpec(
+            onClose = {
+                actions.onCancelLearn()
+                onDismiss()
+            },
+            state = dialogState,
+            title = stringResource(Res.string.control_title),
+        ),
     ) {
         ProvideUiFontScale { ControlDialogContent(settings, data, actions, onDismiss) }
     }

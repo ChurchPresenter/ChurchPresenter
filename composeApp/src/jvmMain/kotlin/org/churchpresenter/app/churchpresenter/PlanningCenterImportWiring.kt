@@ -18,7 +18,9 @@ import org.churchpresenter.schedule.addMedia
 import org.churchpresenter.schedule.addPicture
 import org.churchpresenter.schedule.addPresentation
 import org.churchpresenter.schedule.addSong
+import org.churchpresenter.schedule.ScheduleViewModel
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.PlanningCenterSettings
 import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.sharedui.utils.centeredOnMainWindow
@@ -34,6 +36,25 @@ import org.churchpresenter.theme.ThemeMode
 /** The Planning Center import, adding what it picks to the Schedule and saving its tokens. */
 @Composable
 internal fun MainDesktopScope.PlanningCenterImport(isVisible: Boolean, onDismiss: () -> Unit) {
+    val sink = remember(scheduleViewModel, onSettingsChange) {
+        PlanningCenterImportSink(scheduleViewModel, onSettingsChange)
+    }
+    PlanningCenterImportPane(isVisible, theme, appSettings.planningCenterSettings, sink, onDismiss)
+}
+
+/**
+ * The import with this build's services, opening its windows through [window] -- the app's dialogs
+ * unless a test draws them in place.
+ */
+@Composable
+internal fun PlanningCenterImportPane(
+    isVisible: Boolean,
+    theme: ThemeMode,
+    settings: PlanningCenterSettings,
+    sink: PlanningCenterImportSink,
+    onDismiss: () -> Unit,
+    window: PlanningCenterWindow = planningCenterWindow(theme),
+) {
     if (!isVisible) return
     // One Bible load per open dialog, reused for every item the plan has.
     val services = remember(isVisible) {
@@ -46,46 +67,61 @@ internal fun MainDesktopScope.PlanningCenterImport(isVisible: Boolean, onDismiss
     }
     PlanningCenterImportDialog(
         isVisible = true,
-        settings = appSettings.planningCenterSettings,
+        settings = settings,
         services = services,
-        window = planningCenterWindow(theme),
+        window = window,
         editSong = planningCenterSongEditor(theme),
         onDismiss = onDismiss,
-        onTokensRefreshed = { accessToken, refreshToken, expiresAtEpochMs ->
-            onSettingsChange { settings ->
-                withPlanningCenterTokens(settings, accessToken, refreshToken, expiresAtEpochMs, personName = null)
-            }
-        },
-        onAddSong = { songNumber, title, songbook, songId ->
-            scheduleViewModel.addSong(songNumber, title, songbook, songId)
-        },
-        onAddLabel = { text, textColor, backgroundColor ->
-            scheduleViewModel.addLabel(text, textColor, backgroundColor)
-        },
-        onAddPresentation = { filePath, fileName, slideCount, fileType ->
-            scheduleViewModel.addPresentation(filePath, fileName, slideCount, fileType)
-        },
-        onAddPicture = { folderPath, folderName, imageCount ->
-            scheduleViewModel.addPicture(folderPath, folderName, imageCount)
-        },
-        onAddMedia = { mediaUrl, mediaTitle, mediaType ->
-            scheduleViewModel.addMedia(mediaUrl, mediaTitle, mediaType)
-        },
-        onAddAnnouncement = { text ->
-            scheduleViewModel.addAnnouncement(text = text)
-        },
-        onAddBibleVerse = { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
-            scheduleViewModel.addBibleVerse(bookName, chapter, verseNumber, verseText, verseRange, bookId)
-        },
-        onConnected = { accessToken, refreshToken, expiresAtEpochMs, personName ->
-            onSettingsChange { settings ->
-                withPlanningCenterTokens(settings, accessToken, refreshToken, expiresAtEpochMs, personName)
-            }
-        },
-        onDisconnect = {
-            onSettingsChange { settings -> withPlanningCenterTokens(settings, "", "", 0L, personName = "") }
-        }
+        onTokensRefreshed = sink::tokensRefreshed,
+        onAddSong = sink::addSong,
+        onAddLabel = sink::addLabel,
+        onAddPresentation = sink::addPresentation,
+        onAddPicture = sink::addPicture,
+        onAddMedia = sink::addMedia,
+        onAddAnnouncement = sink::addAnnouncement,
+        onAddBibleVerse = sink.addBibleVerse,
+        onConnected = sink::connected,
+        onDisconnect = sink::disconnected,
     )
+}
+
+/** Where what the import picks goes: the Schedule, and its tokens into the settings. */
+internal class PlanningCenterImportSink(
+    private val schedule: ScheduleViewModel,
+    private val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+) {
+    fun tokensRefreshed(accessToken: String, refreshToken: String, expiresAtEpochMs: Long) =
+        onSettingsChange {
+            withPlanningCenterTokens(it, accessToken, refreshToken, expiresAtEpochMs, personName = null)
+        }
+
+    fun connected(accessToken: String, refreshToken: String, expiresAtEpochMs: Long, personName: String) =
+        onSettingsChange { withPlanningCenterTokens(it, accessToken, refreshToken, expiresAtEpochMs, personName) }
+
+    fun disconnected() = onSettingsChange { withPlanningCenterTokens(it, "", "", 0L, personName = "") }
+
+    fun addSong(songNumber: Int, title: String, songbook: String, songId: String) =
+        schedule.addSong(songNumber, title, songbook, songId)
+
+    fun addLabel(text: String, textColor: String, backgroundColor: String) =
+        schedule.addLabel(text, textColor, backgroundColor)
+
+    fun addPresentation(filePath: String, fileName: String, slideCount: Int, fileType: String) =
+        schedule.addPresentation(filePath, fileName, slideCount, fileType)
+
+    fun addPicture(folderPath: String, folderName: String, imageCount: Int) =
+        schedule.addPicture(folderPath, folderName, imageCount)
+
+    fun addMedia(mediaUrl: String, mediaTitle: String, mediaType: String) =
+        schedule.addMedia(mediaUrl, mediaTitle, mediaType)
+
+    fun addAnnouncement(text: String) = schedule.addAnnouncement(text = text)
+
+    /** One verse, in the import's own callback shape. */
+    val addBibleVerse: (String, Int, Int, String, String, Int) -> Unit =
+        { bookName, chapter, verseNumber, verseText, verseRange, bookId ->
+            schedule.addBibleVerse(bookName, chapter, verseNumber, verseText, verseRange, bookId)
+        }
 }
 
 /**
@@ -125,7 +161,7 @@ private fun planningCenterWindow(theme: ThemeMode): PlanningCenterWindow = { spe
 }
 
 /** The song editor a plan's unmatched song is filled in with before it is saved. */
-private fun planningCenterSongEditor(theme: ThemeMode): PlanningCenterSongEditor =
+internal fun planningCenterSongEditor(theme: ThemeMode): PlanningCenterSongEditor =
     { song, songbook, onEditDismiss, onSave ->
         EditSongDialog(
             backgroundButton = songEditorBackgroundButton,

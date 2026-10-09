@@ -44,7 +44,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.Res as AppRes
 import org.churchpresenter.icons.generated.resources.Res as IconRes
@@ -130,22 +129,26 @@ fun ShareYourStoryDialog(
     isVisible: Boolean,
     onShare: () -> Unit,
     onDismiss: () -> Unit,
+    /** The window it opens in -- see [DialogFrame]. */
+    frame: DialogFrame = appDialogFrame,
 ) {
     if (!isVisible) return
 
     val mainWindowState = LocalMainWindowState.current
 
-    DialogWindow(
-        onCloseRequest = onDismiss,
-        state = rememberDialogState(
+    frame(
+        DialogFrameSpec(
+            onClose = onDismiss,
+            state = rememberDialogState(
             position = centeredOnMainWindow(
                 mainWindowState, SHARE_STORY_DIALOG_WIDTH, SHARE_STORY_DIALOG_HEIGHT
             ),
             width = SHARE_STORY_DIALOG_WIDTH,
             height = SHARE_STORY_DIALOG_HEIGHT,
         ),
-        title = stringResource(Res.string.story_prompt_window_title),
-        resizable = false,
+            title = stringResource(Res.string.story_prompt_window_title),
+            resizable = false,
+        ),
     ) {
         ProvideUiFontScale {
             ShareYourStoryContent(onShare = onShare, onDismiss = onDismiss)

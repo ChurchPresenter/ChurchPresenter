@@ -25,7 +25,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
@@ -56,7 +55,9 @@ fun AddLabelDialog(
     /** Blank means "no colour chosen yet" — the content resolves it from the theme. */
     existingTextColor: String = "",
     existingBackgroundColor: String = "",
-    isEdit: Boolean = false
+    isEdit: Boolean = false,
+    /** The window it opens in -- see [DialogFrame]. */
+    frame: DialogFrame = appDialogFrame,
 ) {
     if (!isVisible) return
 
@@ -74,11 +75,13 @@ fun AddLabelDialog(
         height = ADD_LABEL_DIALOG_HEIGHT
     )
 
-    DialogWindow(
-        onCloseRequest = onDismiss,
-        state = dialogState,
-        title = stringResource(if (isEdit) Res.string.edit_label else Res.string.add_label),
-        resizable = false
+    frame(
+        DialogFrameSpec(
+            onClose = onDismiss,
+            state = dialogState,
+            title = stringResource(if (isEdit) Res.string.edit_label else Res.string.add_label),
+            resizable = false,
+        ),
     ) {
         ProvideUiFontScale {
             AddLabelDialogContent(

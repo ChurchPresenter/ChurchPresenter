@@ -36,7 +36,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.apply
@@ -137,6 +136,8 @@ fun CustomizeThemeDialog(
     initial: ThemeCustomizationChoice,
     onApply: (ThemeCustomizationChoice) -> Unit,
     onDismiss: () -> Unit,
+    /** The window it opens in -- see [DialogFrame]. */
+    frame: DialogFrame = appDialogFrame,
 ) {
     if (!isVisible) return
 
@@ -147,10 +148,12 @@ fun CustomizeThemeDialog(
         height = CUSTOMIZE_THEME_DIALOG_HEIGHT,
     )
 
-    DialogWindow(
-        onCloseRequest = onDismiss,
-        state = dialogState,
-        title = stringResource(Res.string.customize_theme_title),
+    frame(
+        DialogFrameSpec(
+            onClose = onDismiss,
+            state = dialogState,
+            title = stringResource(Res.string.customize_theme_title),
+        ),
     ) {
         // A DialogWindow starts from the display's own density, so the applied text size is put back
         // here for the window's chrome; the raw density is kept for the preview, which scales itself.

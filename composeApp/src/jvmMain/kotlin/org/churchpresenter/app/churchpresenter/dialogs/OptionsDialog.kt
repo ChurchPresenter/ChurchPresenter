@@ -38,7 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.sharedui.utils.LocalMainWindowState
@@ -126,6 +125,8 @@ fun OptionsDialog(
     initialTab: Int = 0,
     initialSettings: AppSettings? = null,
     devMode: Boolean = false,
+    /** The window it opens in -- see [DialogFrame]. */
+    frame: DialogFrame = appDialogFrame,
 ) {
     if (!isVisible) return
 
@@ -138,15 +139,17 @@ fun OptionsDialog(
         val screen = primaryScreenSizeDp()
         dialogSizeWithin(1400.dp, 900.dp, screen.width, screen.height)
     }
-    DialogWindow(
-        onCloseRequest = onDismiss,
-        state = rememberDialogState(
+    frame(
+        DialogFrameSpec(
+            onClose = onDismiss,
+            state = rememberDialogState(
             position = centeredOnMainWindow(mainWindowState, size.width, size.height),
             width = size.width,
             height = size.height
         ),
-        title = stringResource(Res.string.options),
-        resizable = true
+            title = stringResource(Res.string.options),
+            resizable = true,
+        ),
     ) {
         OptionsDialogContent(
             theme = theme,

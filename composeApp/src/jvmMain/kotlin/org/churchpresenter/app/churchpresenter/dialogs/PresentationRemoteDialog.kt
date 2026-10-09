@@ -35,7 +35,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.close
@@ -78,7 +77,9 @@ fun PresentationRemoteDialog(
     onPresentationDisplayUrlChanged: (String) -> Unit,
     onStartTunnel: () -> Unit,
     onStopTunnel: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    /** The window it opens in -- see [DialogFrame]. */
+    frame: DialogFrame = appDialogFrame,
 ) {
     val mainWindowState = LocalMainWindowState.current
     val dialogWidth = 400.dp
@@ -107,11 +108,13 @@ fun PresentationRemoteDialog(
         }
     }
 
-    DialogWindow(
-        onCloseRequest = onDismiss,
-        state = dialogState,
-        title = stringResource(Res.string.presentation_remote_control),
-        resizable = false
+    frame(
+        DialogFrameSpec(
+            onClose = onDismiss,
+            state = dialogState,
+            title = stringResource(Res.string.presentation_remote_control),
+            resizable = false,
+        ),
     ) {
         ProvideUiFontScale {
             PresentationRemoteDialogContent(

@@ -42,7 +42,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.close
@@ -96,7 +95,9 @@ fun QARemoteDialog(
     onStopTunnel: () -> Unit,
     qaSettings: QASettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    /** The window it opens in -- see [DialogFrame]. */
+    frame: DialogFrame = appDialogFrame,
 ) {
     val mainWindowState = LocalMainWindowState.current
     val dialogWidth = 760.dp
@@ -124,11 +125,13 @@ fun QARemoteDialog(
         }
     }
 
-    DialogWindow(
-        onCloseRequest = onDismiss,
-        state = dialogState,
-        title = stringResource(Res.string.qa_remote_dialog_title),
-        resizable = false
+    frame(
+        DialogFrameSpec(
+            onClose = onDismiss,
+            state = dialogState,
+            title = stringResource(Res.string.qa_remote_dialog_title),
+            resizable = false,
+        ),
     ) {
         ProvideUiFontScale {
             QARemoteContent(
