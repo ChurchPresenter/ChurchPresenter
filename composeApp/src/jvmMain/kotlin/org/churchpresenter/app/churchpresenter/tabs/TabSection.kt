@@ -26,21 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.strings.generated.resources.Res
-import org.churchpresenter.strings.generated.resources.announcements
-import org.churchpresenter.strings.generated.resources.bible
-import org.churchpresenter.strings.generated.resources.display_lower_third
-import org.churchpresenter.strings.generated.resources.media
-import org.churchpresenter.strings.generated.resources.pictures
-import org.churchpresenter.strings.generated.resources.presentation
-import org.churchpresenter.strings.generated.resources.songs
-import org.churchpresenter.strings.generated.resources.tab_web
-import org.churchpresenter.strings.generated.resources.tab_canvas
-import org.churchpresenter.strings.generated.resources.tab_qa
-import org.churchpresenter.strings.generated.resources.tab_stt
-import org.churchpresenter.strings.generated.resources.crossword_tab
-import org.churchpresenter.strings.generated.resources.tab_dictionary
-import org.churchpresenter.strings.generated.resources.tab_companion_surface
 import org.churchpresenter.app.churchpresenter.composables.LabeledTab
 import org.churchpresenter.app.churchpresenter.composables.LabeledTabIndicator
 import org.churchpresenter.app.churchpresenter.composables.labeledTabMinWidth
@@ -49,7 +34,10 @@ import org.churchpresenter.app.churchpresenter.composables.TabStripForwardArrow
 import org.churchpresenter.settings.TabLabelMargin
 import org.churchpresenter.settings.TabLabelStyle
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.models.Tabs
+import org.churchpresenter.sharedui.models.labelRes
 
 @Composable
 fun TabSection(
@@ -88,6 +76,7 @@ fun TabSection(
                     labelStyle = labelStyle,
                     labelMargin = labelMargin,
                     onClick = { onTabSelected.invoke(index) },
+                    modifier = Modifier.guideTarget(GuideTargets.mainTab(tab)),
                     textStyle = MaterialTheme.typography.titleSmall.copy(
                         fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
                     ),
@@ -104,24 +93,7 @@ fun TabSection(
 }
 
 @Composable
-internal fun getStringName(tabs: Tabs): String {
-    return when (tabs) {
-        Tabs.BIBLE -> stringResource(Res.string.bible)
-        Tabs.SONGS -> stringResource(Res.string.songs)
-        Tabs.PICTURES -> stringResource(Res.string.pictures)
-        Tabs.PRESENTATION -> stringResource(Res.string.presentation)
-        Tabs.MEDIA -> stringResource(Res.string.media)
-        Tabs.LOWER_THIRD -> stringResource(Res.string.display_lower_third)
-        Tabs.ANNOUNCEMENTS -> stringResource(Res.string.announcements)
-        Tabs.WEB -> stringResource(Res.string.tab_web)
-        Tabs.CANVAS -> stringResource(Res.string.tab_canvas)
-        Tabs.QA -> stringResource(Res.string.tab_qa)
-        Tabs.STT -> stringResource(Res.string.tab_stt)
-        Tabs.CROSSWORD -> stringResource(Res.string.crossword_tab)
-        Tabs.DICTIONARY -> stringResource(Res.string.tab_dictionary)
-        Tabs.COMPANION_SURFACE -> stringResource(Res.string.tab_companion_surface)
-    }
-}
+internal fun getStringName(tabs: Tabs): String = stringResource(tabs.labelRes)
 
 internal fun tabIcon(tab: Tabs): ImageVector = when (tab) {
     Tabs.BIBLE -> Icons.AutoMirrored.Filled.MenuBook

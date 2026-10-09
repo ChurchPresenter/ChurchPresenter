@@ -68,6 +68,8 @@ class StringResourceFormatTest {
         "shortcut_description_go_live", "shortcut_description_context_menu",
         "shortcut_description_reorder_item",
         "bible_verse_selection_hint", "hold_live_modifier_hint", "pictures_reorder_hint",
+        // Wick saying how to pick several verses or songs: Ctrl/Cmd-click and Shift-click.
+        "helper_hint_bible_multi_verse", "helper_open_song_library",
         // The registry's own vocabulary.
         "key_mod_ctrl", "key_mod_shift", "key_mod_alt", "key_mod_meta",
         "key_name_space", "key_name_escape", "key_name_enter", "key_name_tab",

@@ -1,5 +1,8 @@
 package org.churchpresenter.lottiegen.ui
 import java.text.MessageFormat
+import org.churchpresenter.lottiegen.ControlTag
+import org.churchpresenter.lottiegen.GuidedControl
+import org.churchpresenter.lottiegen.NoControlTag
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,7 +46,7 @@ private fun fieldHiddenTooltip(hideCheckboxLabel: String): String =
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun TextSection(viewModel: LottieGenState) {
+internal fun TextSection(viewModel: LottieGenState, controlTag: ControlTag = NoControlTag) {
     val cfg = viewModel.config
     // ═══ Text ═══
     SectionCard(Strings.sectionText) {
@@ -54,7 +57,7 @@ internal fun TextSection(viewModel: LottieGenState) {
             trailingIcon = if (cfg.hideName && cfg.nameText.isNotEmpty()) {
                 { HiddenFieldWarning(fieldHiddenTooltip(Strings.hideName)) }
             } else null,
-            modifier = Modifier.fillMaxWidth(), fillWidth = true, singleLine = true
+            modifier = Modifier.fillMaxWidth().then(controlTag(GuidedControl.NAME)), fillWidth = true, singleLine = true
         )
         LottieTextField(
             value = cfg.infoText,
@@ -63,7 +66,7 @@ internal fun TextSection(viewModel: LottieGenState) {
             trailingIcon = if (cfg.hideInfo && cfg.infoText.isNotEmpty()) {
                 { HiddenFieldWarning(fieldHiddenTooltip(Strings.hideInfo)) }
             } else null,
-            modifier = Modifier.fillMaxWidth(), fillWidth = true, singleLine = true
+            modifier = Modifier.fillMaxWidth().then(controlTag(GuidedControl.INFO)), fillWidth = true, singleLine = true
         )
         LottieTextField(
             value = cfg.detailText,

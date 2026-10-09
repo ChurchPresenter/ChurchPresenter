@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import org.churchpresenter.sharedui.guide.guideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.server.updateApiKey
 import org.churchpresenter.server.updateFileUploadEnabled
 import org.churchpresenter.server.updateMaxMediaUploadMb
@@ -268,7 +270,7 @@ private fun ServerEnableRow(isRunning: Boolean, onEnable: (Boolean) -> Unit) {
     ) {
         val interaction = remember { MutableInteractionSource() }
         Row(
-            modifier = Modifier.toggleRow(isRunning, onEnable, interaction),
+            modifier = Modifier.guideTarget(GuideTargets.SERVER_ENABLE).toggleRow(isRunning, onEnable, interaction),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -383,6 +385,7 @@ private fun ServerUrlRow(serverUrl: String, apiKey: String?) {
             RaisedButton(
                 shape = AppShape(6.dp),
                 onClick = { showConnectionQrDialog = true },
+                modifier = Modifier.guideTarget(GuideTargets.SERVER_QR),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,

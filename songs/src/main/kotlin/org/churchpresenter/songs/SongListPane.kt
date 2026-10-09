@@ -6,6 +6,8 @@
 
 package org.churchpresenter.songs
 
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
@@ -320,7 +322,7 @@ private fun SongListScope.SongSearchBar() {
         itemVerticalAlignment = Alignment.CenterVertically
     ) {
         // Styled search field matching the dropdown aesthetic
-        SongSearchField(Modifier.weight(1f))
+        SongSearchField(Modifier.weight(1f).guideTarget(GuideTargets.SONG_SEARCH))
 
         if (songbooks.size > 1) {
             DropdownSelector(
@@ -333,6 +335,7 @@ private fun SongListScope.SongSearchBar() {
 
         DropdownSelector(
             label = stringResource(Res.string.filter),
+            modifier = Modifier.guideTarget(GuideTargets.SONG_SEARCH_FILTER),
             items = filterTypes,
             selected = filterTypeDisplayMap[filterType] ?: containsText,
             onSelectedChange = { displayText ->

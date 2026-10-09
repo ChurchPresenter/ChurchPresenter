@@ -114,6 +114,7 @@ internal fun <T> RowSegmented(
                             value = option.value,
                             label = option.label,
                             testTag = option.testTag,
+                            guideTarget = option.guideTarget,
                             width = width(option.label),
                         )
                     },

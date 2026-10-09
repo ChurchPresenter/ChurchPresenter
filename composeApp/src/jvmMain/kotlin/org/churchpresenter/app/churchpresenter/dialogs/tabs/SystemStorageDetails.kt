@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import org.churchpresenter.theme.AppShape
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -144,14 +146,20 @@ private fun DetectedChip(text: String) {
 
 /** The way out of an empty folder — fetch a Bible, drop in the sample songs. */
 @Composable
-private fun DetailAction(text: String, icon: DrawableResource, enabled: Boolean = true, onClick: () -> Unit) {
+private fun DetailAction(
+    text: String,
+    icon: DrawableResource,
+    enabled: Boolean = true,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
     // A raised accent button: in a strip of detected-file chips it is the one thing to press.
     RaisedButton(
         onClick = onClick,
         enabled = enabled,
         shape = AppShape(9.dp),
         contentPadding = PaddingValues(horizontal = 13.dp),
-        modifier = Modifier.height(30.dp),
+        modifier = modifier.height(30.dp),
     ) {
         Icon(painter = painterResource(icon), contentDescription = null, modifier = Modifier.size(13.dp))
         Text(
@@ -207,7 +215,11 @@ internal fun BibleStorageDetail(
             // Offered only once a real folder is in place: downloads are written the moment they
             // finish, so there must be no doubt about where they are going.
             if (java.io.File(directory).isDirectory) {
-                DetailAction(stringResource(Res.string.bible_catalog_button), IconRes.drawable.ic_download) {
+                DetailAction(
+                    stringResource(Res.string.bible_catalog_button),
+                    IconRes.drawable.ic_download,
+                    modifier = Modifier.guideTarget(GuideTargets.BIBLE_DOWNLOAD),
+                ) {
                     // Probed on click, not on composition: it writes a file, and the answer can
                     // change while the settings are open (a drive unplugged, permissions fixed).
                     notWritable = !BibleInstallSupport.usableDirectory(java.io.File(directory))

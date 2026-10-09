@@ -1,5 +1,7 @@
 package org.churchpresenter.profiles
 
+import org.churchpresenter.sharedui.guide.guideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.presenter.styleElement
 import org.churchpresenter.presenter.withElementStyle
 import org.churchpresenter.presenter.elementStyle
@@ -209,7 +211,9 @@ private fun SongTextGroup(
                 },
                 target = editingLanguage,
                 onTarget = targets.language.onChange,
-                elements = elements.map { RowOption(it, it.label(), elementChipTag(it.name)) },
+                elements = elements.map {
+                    RowOption(it, it.label(), elementChipTag(it.name), guideTarget = GuideTargets.lookElement(it.name))
+                },
                 element = element,
                 onElement = onElementChange,
             )
@@ -457,6 +461,7 @@ private fun SlidesGroup(song: SongSettings, lowerThird: Boolean, updateSong: ((S
             song.showEndOfSongIndicator,
             { v -> updateSong { it.copy(showEndOfSongIndicator = v) } },
             paths = listOf("songSettings.showEndOfSongIndicator", "songSettings.endOfSongIndicatorSpacing"),
+            modifier = Modifier.guideTarget(GuideTargets.PROFILE_END_MARKER),
             extra = {
                 if (song.showEndOfSongIndicator) {
                     RowStepper(

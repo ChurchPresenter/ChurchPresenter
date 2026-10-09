@@ -1,0 +1,187 @@
+request	action	reply
+make the song background blue	SetBackgroundColor(scope=SONG, hex=#1565C0, colorName=blue, persistence=SAVED)	asks: helper_confirm_bg_saved(helper_scope_song, "blue")
+make the bible background dark blue	SetBackgroundColor(scope=BIBLE, hex=#0D417C, colorName=dark blue, persistence=SAVED)	asks: helper_confirm_bg_saved(helper_scope_bible, "dark blue")
+change the background to #1a2b3c	-	asks which: helper_clarify_scope (3 options)
+make the background red for now	-	asks which: helper_clarify_scope (3 options)
+make the text bigger	-	asks which: helper_clarify_scope (3 options)
+make the song font smaller	ChangeFontSize(scope=SONG, direction=-1)	asks: helper_confirm_font_smaller(helper_scope_song)
+the text is too small	-	asks which: helper_clarify_scope (3 options)
+the lyrics don't fit	ChangeFontSize(scope=SONG, direction=-1)	asks: helper_confirm_font_smaller(helper_scope_song)
+undo	UndoLast	says: helper_nothing_to_undo
+show John 3:16	ShowBibleVerse(book=John, chapter=3, verse=16, lastVerse=16, display=John 3:16)	asks: helper_confirm_verse("John 3:16")
+go to psalm 23	ShowBibleVerse(book=Psalm, chapter=23, verse=1, lastVerse=1, display=Psalm 23)	asks: helper_confirm_verse("Psalm 23")
+john chapter 3 verse 16	ShowBibleVerse(book=John, chapter=3, verse=16, lastVerse=16, display=John 3:16)	asks: helper_confirm_verse("John 3:16")
+jn 3 16	ShowBibleVerse(book=Jn, chapter=3, verse=16, lastVerse=16, display=Jn 3:16)	asks: helper_confirm_verse("Jn 3:16")
+romans 8:28-30	ShowBibleVerse(book=Romans, chapter=8, verse=28, lastVerse=30, display=Romans 8:28-30)	asks: helper_confirm_verse("Romans 8:28-30")
+search the bible	tour tab.BIBLE > bible.search > bible.searchMode	points at step 1 of 3: helper_hint_tab(bible)
+look up a verse	tour tab.BIBLE > bible.search > bible.searchMode	points at step 1 of 3: helper_hint_tab(bible)
+how do I show several verses	tour tab.BIBLE > bible.verses	points at step 1 of 2: helper_hint_tab(bible)
+what did we just show	tour tab.BIBLE > bible.history	points at step 1 of 2: helper_hint_tab(bible)
+bible history	tour tab.BIBLE > bible.history	points at step 1 of 2: helper_hint_tab(bible)
+related verses	tour tab.BIBLE > bible.crossRefs	points at step 1 of 2: helper_hint_tab(bible)
+cross references	tour tab.BIBLE > bible.crossRefs	points at step 1 of 2: helper_hint_tab(bible)
+how do I download another bible	tour toolbar.settings > settings.system.downloadBibles > bibleCatalog.list > settings.BIBLE > settings.bible.addTranslation	points at step 1 of 5: helper_hint_settings
+add the Russian bible	tour toolbar.settings > settings.system.downloadBibles > bibleCatalog.list > settings.BIBLE > settings.bible.addTranslation	points at step 1 of 5: helper_hint_settings
+song 245	FindSong(query=245)	says: helper_done
+show the song amazing grace	FindSong(query=amazing grace)	says: helper_done
+amazing grace song	FindSong(query=amazing grace)	says: helper_done
+sing how great thou art	FindSong(query=how great thou art)	says: helper_done
+show amazing grace	FindSong(query=amazing grace)	says: helper_done
+add amazing grace to the schedule	AddSongToSchedule(query=amazing grace)	asks: helper_confirm_add_song("amazing grace")
+add song 245 to schedule	AddSongToSchedule(query=245)	asks: helper_confirm_add_song("245")
+where do I add a song	tour tab.SONGS > songs.new	points at step 1 of 2: helper_hint_tab(songs)
+new song	tour tab.SONGS > songs.new	points at step 1 of 2: helper_hint_tab(songs)
+how do I search for a song	tour tab.SONGS > songs.search > songs.searchFilter	points at step 1 of 3: helper_hint_tab(songs)
+find a song by number	tour tab.SONGS > songs.search > songs.searchFilter	points at step 1 of 3: helper_hint_tab(songs)
+how do I favorite a song	tour tab.SONGS > songs.favorites	points at step 1 of 2: helper_hint_tab(songs)
+give this song its own background	tour tab.SONGS > songs.edit > songEditor.background	points at step 1 of 3: helper_hint_tab(songs)
+how do I add a translation to this song	tour tab.SONGS > songs.edit > songEditor.addLanguage	points at step 1 of 3: helper_hint_tab(songs)
+add a language	tour tab.SONGS > songs.edit > songEditor.addLanguage	points at step 1 of 3: helper_hint_tab(songs)
+how do I add chords to a song	tour tab.SONGS > songs.edit > songEditor.chordsSwitch > songEditor.chordPalette	points at step 1 of 4: helper_hint_tab(songs)
+next slide	NextSlide	asks: helper_confirm_next
+previous slide	PreviousSlide	asks: helper_confirm_previous
+go back	PreviousSlide	asks: helper_confirm_previous
+clear the screen	ClearOutput	asks: helper_confirm_clear
+black out	ClearOutput	asks: helper_confirm_clear
+take	Take	asks: helper_confirm_take
+go live	Take	asks: helper_confirm_take
+next item	ScheduleStep(forward=true)	asks: helper_confirm_schedule_next
+previous item in the schedule	ScheduleStep(forward=false)	asks: helper_confirm_schedule_previous
+go to the sermon in the schedule	ScheduleGoTo(name=sermon)	asks: helper_confirm_schedule_goto("sermon")
+add John 3:16 to the schedule	AddVerseToSchedule(book=John, chapter=3, verse=16, lastVerse=16, display=John 3:16)	asks: helper_confirm_add_verse("John 3:16")
+what's live	WhatsLive	says: helper_done
+what is on screen	WhatsLive	says: helper_done
+where is the schedule	tour schedule.panel	points at step 1 of 1: helper_hint_schedule
+where is the live preview	tour preview.live	points at step 1 of 1: helper_hint_live_preview
+show the output windows	ToggleOutputWindows	asks: helper_confirm_toggle_outputs
+hide the screens	ToggleOutputWindows	asks: helper_confirm_toggle_outputs
+5 minute countdown	StartCountdown(minutes=5)	asks: helper_confirm_countdown("5")
+start a 10 min timer	StartCountdown(minutes=10)	asks: helper_confirm_countdown("10")
+tell the parents of Sam to come to the nursery	ShowAnnouncement(text=Parents of Sam, please come to the nursery.)	asks: helper_confirm_announcement("Parents of Sam, please come to the nursery.")
+announce: coffee after the service	ShowAnnouncement(text=coffee after the service)	asks: helper_confirm_announcement("coffee after the service")
+show the message "Welcome to church"	ShowAnnouncement(text=Welcome to church)	asks: helper_confirm_announcement("Welcome to church")
+how do I show an announcement	tour tab.ANNOUNCEMENTS > announcements.text > announcements.goLive	points at step 1 of 3: helper_hint_tab(announcements)
+page a parent	tour tab.ANNOUNCEMENTS > announcements.text > announcements.goLive	points at step 1 of 3: helper_hint_tab(announcements)
+how do I show a countdown	tour tab.ANNOUNCEMENTS > option.timerMode.duration > announcements.timerGoLive	points at step 1 of 3: helper_hint_tab(announcements)
+start a stopwatch	tour tab.ANNOUNCEMENTS > option.timerMode.count_up > announcements.timerGoLive	points at step 1 of 3: helper_hint_tab(announcements)
+show the clock	tour tab.ANNOUNCEMENTS > option.timerMode.clock_display > announcements.timerGoLive	points at step 1 of 3: helper_hint_tab(announcements)
+how do I show photos	tour tab.PICTURES > pictures.selectFolder > pictures.goLive	points at step 1 of 3: helper_hint_tab(pictures)
+add pictures	tour tab.PICTURES > pictures.selectFolder	points at step 1 of 2: helper_hint_tab(pictures)
+play a slideshow	tour tab.PICTURES > pictures.selectFolder > pictures.goLive > pictures.play	points at step 1 of 4: helper_hint_tab(pictures)
+show a pdf	tour tab.PRESENTATION > presentation.selectFile > presentation.goLive	points at step 1 of 3: helper_hint_tab(presentation)
+show a powerpoint	tour tab.PRESENTATION > presentation.selectFile > presentation.goLive	points at step 1 of 3: helper_hint_tab(presentation)
+play a video	tour tab.MEDIA > media.selectFile > media.goLive	points at step 1 of 3: helper_hint_tab(media)
+make a lower third	tour tab.LOWER_THIRD > lowerThird.generate > lottieGen.name > lottieGen.info > lottieGen.save > lowerThird.goLive	points at step 1 of 6: helper_hint_tab(display_lower_third)
+show a website	tour tab.WEB > web.url > web.goLive	points at step 1 of 3: helper_hint_tab(tab_web)
+help me set up the screens	StartDisplaySetup	says: helper_done
+set up the projector	StartDisplaySetup	says: helper_done
+the second screen is not working	StartDisplaySetup	says: helper_done
+the projector is black	StartDisplaySetup	says: helper_done
+which screen is which	IdentifyScreens	asks: helper_confirm_identify
+identify screens	IdentifyScreens	asks: helper_confirm_identify
+how do I set up a stage monitor	tour settings.PROFILES > settings.profiles.new > settings.profiles.name > option.displayMode.stage_monitor > settings.PROJECTION > settings.projection.screenProfile	points at step 1 of 6: helper_hint_output_profiles
+change the stage monitor layout	tour settings.PROFILES > option.displayMode.stage_monitor > settings.profiles.stageLayoutPage > settings.profiles.stageZones > settings.profiles.stageArrangement	points at step 1 of 5: helper_hint_stage_profile
+show the clock on the stage monitor	tour settings.PROFILES > option.displayMode.stage_monitor > settings.profiles.stageLayoutPage > option.stageContent.CLOCK	points at step 1 of 4: helper_hint_stage_profile
+send a message to the stage monitor	tour tab.ANNOUNCEMENTS > announcements.text > announcements.toStage	points at step 1 of 3: helper_hint_tab(announcements)
+make the stage monitor text bigger	tour settings.PROFILES > option.displayMode.stage_monitor > settings.profiles.stageLayoutPage > settings.profiles.stageTextZone	points at step 1 of 4: helper_hint_stage_profile
+set up a full screen display	tour settings.PROFILES > settings.profiles.new > settings.profiles.name > option.displayMode.fullscreen > settings.PROJECTION > settings.projection.screenProfile	points at step 1 of 6: helper_hint_output_profiles
+set up a lower third display	tour settings.PROFILES > settings.profiles.new > settings.profiles.name > option.displayMode.lower_third > settings.PROJECTION > settings.projection.screenProfile	points at step 1 of 6: helper_hint_output_profiles
+open the calendar	OpenCalendar(topic=PLAN)	says: helper_done
+plan next sunday's service	OpenCalendar(topic=PLAN)	says: helper_done
+make sunday a recurring service	OpenCalendar(topic=REPEAT)	says: helper_done
+save a service template	OpenCalendar(topic=TEMPLATE)	says: helper_done
+load the service into the schedule	OpenCalendar(topic=LOAD)	says: helper_done
+automate the service	OpenCalendar(topic=AUTOMATE)	says: helper_done
+convert songs from OpenLP	OpenConverter(sourceId=openlp, sourceName=OpenLP)	says: helper_done
+import my SongBeamer songs	OpenConverter(sourceId=songbeamer, sourceName=SongBeamer)	says: helper_done
+convert songs from pdf	OpenConverter(sourceId=documents, sourceName=null)	says: helper_done
+open the converter	OpenConverter(sourceId=null, sourceName=null)	says: helper_done
+open the song library	OpenSongLibrary(compare=false)	says: helper_done
+batch edit songs	OpenSongLibrary(compare=false)	says: helper_done
+compare song translations	OpenSongLibrary(compare=true)	says: helper_done
+import from Planning Center	tour schedule.planningCenter	points at step 1 of 1: helper_hint_planning_center(planning_center_import_title)
+ccli report	OpenStatistics	says: helper_done
+how many times did we sing this	OpenStatistics	says: helper_done
+open settings	OpenSettings(page=SYSTEM)	says: helper_done
+keyboard shortcuts	OpenKeyboardShortcuts	says: helper_done
+what's the shortcut for clear	ShowShortcut(action=CLEAR_OUTPUT)	shows the key for CLEAR_OUTPUT
+how do I use the remote	tour toolbar.settings > settings.SERVER > settings.server.enable > settings.server.qr	points at step 1 of 4: helper_hint_settings
+control it from my phone	tour toolbar.settings > settings.SERVER > settings.server.enable > settings.server.qr	points at step 1 of 4: helper_hint_settings
+qr code	tour toolbar.settings > settings.SERVER > settings.server.enable > settings.server.qr	points at step 1 of 4: helper_hint_settings
+open the bible tab	SelectTab(tab=BIBLE)	says: helper_done
+switch to songs	SelectTab(tab=SONGS)	says: helper_done
+setup wizard	OpenSetupWizard	asks: helper_confirm_setup_wizard
+getting started	OpenSetupWizard	asks: helper_confirm_setup_wizard
+what version is this	CheckForUpdates	says: helper_done
+check for updates	CheckForUpdates	says: helper_done
+hello	Greet	says hello with examples
+help	ShowCommands	lists every command
+what can you do	Greet	says hello with examples
+thanks	Thanks	says: helper_youre_welcome
+how do i change song lyrics	tour tab.SONGS > songs.edit > songEditor.lyrics	points at step 1 of 3: helper_hint_tab(songs)
+how do i make the lyrics bold	tour settings.PROFILES > settings.profiles.songsPage > option.lookElement.SONG_LYRICS > settings.profiles.textStyle	points at step 1 of 4: helper_hint_look_profile
+how do i add a shadow to the lyrics	tour settings.PROFILES > settings.profiles.songsPage > option.lookElement.SONG_LYRICS > settings.profiles.textShadow	points at step 1 of 4: helper_hint_look_profile
+how do i move the lyrics to the top	tour settings.PROFILES > settings.profiles.songsPage > option.lookElement.SONG_LYRICS > settings.profiles.verticalAlignment > settings.profiles.textAlignment > settings.profiles.margins	points at step 1 of 6: helper_hint_look_profile
+how do i change the margins	tour settings.PROFILES > settings.profiles.songsPage > settings.profiles.margins	points at step 1 of 3: helper_hint_look_profile
+how do i change the end of song marker	tour settings.PROFILES > settings.profiles.songsPage > settings.profiles.endMarker	points at step 1 of 3: helper_hint_look_profile
+how do i make the song title bigger	tour settings.PROFILES > settings.profiles.songsPage > option.lookElement.SONG_TITLE > settings.profiles.textSize	points at step 1 of 4: helper_hint_look_profile
+how do i change how bible verses look	tour settings.PROFILES > settings.profiles.biblePage > option.lookElement.BIBLE_TEXT > settings.profiles.textFont > settings.profiles.textSize > settings.profiles.textStyle > settings.profiles.textAlignment > settings.profiles.textShadow	points at step 1 of 8: helper_hint_look_profile
+how do i style the bible reference	tour settings.PROFILES > settings.profiles.biblePage > option.lookElement.BIBLE_REFERENCE > settings.profiles.textFont > settings.profiles.textSize > settings.profiles.textStyle > settings.profiles.textAlignment > settings.profiles.textShadow	points at step 1 of 8: helper_hint_look_profile
+how do i add another bible	tour toolbar.settings > settings.system.downloadBibles > bibleCatalog.list > settings.BIBLE > settings.bible.addTranslation	points at step 1 of 5: helper_hint_settings
+how do i show the clock	tour tab.ANNOUNCEMENTS > option.timerMode.clock_display > announcements.timerGoLive	points at step 1 of 3: helper_hint_tab(announcements)
+how do i show a slideshow	tour tab.PICTURES > pictures.selectFolder > pictures.goLive > pictures.play	points at step 1 of 4: helper_hint_tab(pictures)
+how do i show a pdf	tour tab.PRESENTATION > presentation.selectFile > presentation.goLive	points at step 1 of 3: helper_hint_tab(presentation)
+how do i play a video	tour tab.MEDIA > media.selectFile > media.goLive	points at step 1 of 3: helper_hint_tab(media)
+how do i make a lower third	tour tab.LOWER_THIRD > lowerThird.generate > lottieGen.name > lottieGen.info > lottieGen.save > lowerThird.goLive	points at step 1 of 6: helper_hint_tab(display_lower_third)
+how do i set up a full screen display	tour settings.PROFILES > settings.profiles.new > settings.profiles.name > option.displayMode.fullscreen > settings.PROJECTION > settings.projection.screenProfile	points at step 1 of 6: helper_hint_output_profiles
+make the song text bigger	ChangeFontSize(scope=SONG, direction=1)	asks: helper_confirm_font_bigger(helper_scope_song)
+how do i add a song translation	tour tab.SONGS > songs.edit > songEditor.addLanguage	points at step 1 of 3: helper_hint_tab(songs)
+how do i add a bible translation	tour toolbar.settings > settings.system.downloadBibles > bibleCatalog.list > settings.BIBLE > settings.bible.addTranslation	points at step 1 of 5: helper_hint_settings
+undo the last change	UndoLast	says: helper_nothing_to_undo
+show keyboard shortcuts	OpenKeyboardShortcuts	says: helper_done
+how do i show pictures	tour tab.PICTURES > pictures.selectFolder > pictures.goLive	points at step 1 of 3: helper_hint_tab(pictures)
+how do i convert songs	OpenConverter(sourceId=null, sourceName=null)	says: helper_done
+how do i plan a service	OpenCalendar(topic=PLAN)	says: helper_done
+how do i set up a lower third display	tour settings.PROFILES > settings.profiles.new > settings.profiles.name > option.displayMode.lower_third > settings.PROJECTION > settings.projection.screenProfile	points at step 1 of 6: helper_hint_output_profiles
+what goes where on the stage monitor	tour settings.PROFILES > option.displayMode.stage_monitor > settings.profiles.stageLayoutPage > option.stageContent.BIBLE	points at step 1 of 4: helper_hint_stage_profile
+how do i search the bible	tour tab.BIBLE > bible.search > bible.searchMode	points at step 1 of 3: helper_hint_tab(bible)
+how do I make the lyrics italic	tour settings.PROFILES > settings.profiles.songsPage > option.lookElement.SONG_LYRICS > settings.profiles.textStyle	points at step 1 of 4: helper_hint_look_profile
+how do I underline the lyrics	tour settings.PROFILES > settings.profiles.songsPage > option.lookElement.SONG_LYRICS > settings.profiles.textStyle	points at step 1 of 4: helper_hint_look_profile
+how do I add a drop shadow to the song title	tour settings.PROFILES > settings.profiles.songsPage > option.lookElement.SONG_TITLE > settings.profiles.textShadow	points at step 1 of 4: helper_hint_look_profile
+how do I move the lyrics to the bottom	tour settings.PROFILES > settings.profiles.songsPage > option.lookElement.SONG_LYRICS > settings.profiles.verticalAlignment > settings.profiles.textAlignment > settings.profiles.margins	points at step 1 of 6: helper_hint_look_profile
+how do I center the lyrics	tour settings.PROFILES > settings.profiles.songsPage > option.lookElement.SONG_LYRICS > settings.profiles.verticalAlignment > settings.profiles.textAlignment > settings.profiles.margins	points at step 1 of 6: helper_hint_look_profile
+how do I make the song number font	tour settings.PROFILES > settings.profiles.songsPage > option.lookElement.SONG_NUMBER > settings.profiles.textFont	points at step 1 of 4: helper_hint_look_profile
+how do I make the song number bigger	tour settings.PROFILES > settings.profiles.songsPage > option.lookElement.SONG_NUMBER > settings.profiles.textSize	points at step 1 of 4: helper_hint_look_profile
+how do I change the bible reference font	tour settings.PROFILES > settings.profiles.biblePage > option.lookElement.BIBLE_REFERENCE > settings.profiles.textFont	points at step 1 of 4: helper_hint_look_profile
+make the verse text bold	tour settings.PROFILES > settings.profiles.biblePage > option.lookElement.BIBLE_TEXT > settings.profiles.textStyle	points at step 1 of 4: helper_hint_look_profile
+how do I fix a typo in the lyrics	tour tab.SONGS > songs.edit > songEditor.lyrics	points at step 1 of 3: helper_hint_tab(songs)
+how do I edit song	tour tab.SONGS > songs.edit > songEditor.lyrics	points at step 1 of 3: helper_hint_tab(songs)
+how do I add song	tour tab.SONGS > songs.new	points at step 1 of 2: helper_hint_tab(songs)
+edit multiple songs	OpenSongLibrary(compare=false)	says: helper_done
+take down the 5 minute countdown	ClearOutput	asks: helper_confirm_clear
+clear the countdown	ClearOutput	asks: helper_confirm_clear
+is there an update	CheckForUpdates	says: helper_done
+list of commands	ShowCommands	lists every command
+song number 12	FindSong(query=12)	says: helper_done
+add psalm 23 to the schedule	AddVerseToSchedule(book=Psalm, chapter=23, verse=1, lastVerse=1, display=Psalm 23)	asks: helper_confirm_add_verse("Psalm 23")
+put amazing grace on the schedule	AddSongToSchedule(query=amazing grace)	asks: helper_confirm_add_song("amazing grace")
+skip to the offering in the schedule	ScheduleGoTo(name=offering)	asks: helper_confirm_schedule_goto("offering")
+qwerty zxcvb	-	didn't catch that; offers BACKGROUND, VERSE, NEW_SONG, PROJECTOR
+how do I change the font of the lyrics	tour settings.PROFILES > settings.profiles.songsPage > option.lookElement.SONG_LYRICS > settings.profiles.textFont	points at step 1 of 4: helper_hint_look_profile
+how do I make the lyrics bigger	tour settings.PROFILES > settings.profiles.songsPage > option.lookElement.SONG_LYRICS > settings.profiles.textSize	points at step 1 of 4: helper_hint_look_profile
+how do I make the lyrics underlined	tour settings.PROFILES > settings.profiles.songsPage > option.lookElement.SONG_LYRICS > settings.profiles.textStyle	points at step 1 of 4: helper_hint_look_profile
+add a drop shadow to the song title	tour settings.PROFILES > settings.profiles.songsPage > option.lookElement.SONG_TITLE > settings.profiles.textShadow	points at step 1 of 4: helper_hint_look_profile
+how do I change a song	tour tab.SONGS > songs.edit > songEditor.lyrics	points at step 1 of 3: helper_hint_tab(songs)
+take down the countdown	ClearOutput	asks: helper_confirm_clear
+show chords on the stage monitor	tour settings.PROFILES > option.displayMode.stage_monitor > settings.profiles.contentPage > settings.profiles.stageShowChords	points at step 1 of 4: helper_hint_stage_profile
+show the countdown on the stage monitor	tour tab.ANNOUNCEMENTS > option.timerMode.duration > announcements.timerToStage	points at step 1 of 3: helper_hint_tab(announcements)
+lower third	-	asks which: helper_clarify_lower_third (2 options)
+what's the shortcut for take	ShowShortcut(action=TAKE)	shows the key for TAKE
+what's the shortcut for next verse	ShowShortcut(action=BIBLE_NEXT_VERSE)	shows the key for BIBLE_NEXT_VERSE
+what's the shortcut for next section	ShowShortcut(action=SONGS_NEXT_SECTION)	shows the key for SONGS_NEXT_SECTION
+what's the shortcut for next	ShowShortcut(action=CLICKER_NEXT)	shows the key for CLICKER_NEXT
+what's the shortcut for previous	ShowShortcut(action=CLICKER_PREVIOUS)	shows the key for CLICKER_PREVIOUS
+what's the shortcut for undo	ShowShortcut(action=UNDO)	shows the key for UNDO
+go to media tab	SelectTab(tab=MEDIA)	says: helper_done
+commands	ShowCommands	lists every command
+what can I type	ShowCommands	lists every command

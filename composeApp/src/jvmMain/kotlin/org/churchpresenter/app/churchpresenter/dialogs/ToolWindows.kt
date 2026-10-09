@@ -1,6 +1,12 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.foundation.layout.height
+import org.churchpresenter.lottiegen.GuidedControl
+import org.churchpresenter.helper.ui.GuideSpotlightHost
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
 import org.churchpresenter.songs.EditSongDialog
 import androidx.compose.ui.awt.SwingDialog
 import androidx.compose.runtime.Composable
@@ -60,7 +66,12 @@ import org.churchpresenter.app.churchpresenter.utils.converterEvent
 import org.churchpresenter.app.churchpresenter.utils.songLibraryUsageEvent
 
 @Composable
-fun ConverterWindow(theme: ThemeMode, initialTab: Int = ConverterTab.BIBLES, onClose: () -> Unit) {
+fun ConverterWindow(
+    theme: ThemeMode,
+    initialTab: Int = ConverterTab.BIBLES,
+    initialSongSource: String? = null,
+    onClose: () -> Unit,
+) {
     LaunchedEffect(Unit) { UsageEvents.recordOncePerRun(UsageEvent.CONVERTER_OPENED) }
     val language = LocalLanguage.current
     // The converter is a separate module with its own `ResourceBundle`, which it initialises from
@@ -77,6 +88,7 @@ fun ConverterWindow(theme: ThemeMode, initialTab: Int = ConverterTab.BIBLES, onC
         AppWindowRoot(theme = theme) {
             ConverterApp(
                 initialTab = initialTab,
+                initialSongSource = initialSongSource,
                 onConverted = { sourceId -> converterEvent(sourceId)?.let { UsageEvents.record(it) } },
             )
         }
@@ -281,14 +293,26 @@ fun LottieGenWindow(
         AppWindowRoot(theme = theme) {
             // embedded = true regardless of outputDir: opened from the Help menu there is no output
             // folder, but the generator is still inside the app's theme and must follow it.
-            LottieGenApp(
-                outputDir = outputDir,
-                onFileSaved = onFileSaved,
-                canvasWidth = canvasWidth,
-                canvasHeight = canvasHeight,
-                embedded = true,
-                fontPicker = fontPicker,
-            )
+            // This window's own spotlight: Wick's lower third tour rings Save Lower Third.
+            GuideSpotlightHost(Modifier.fillMaxSize()) {
+                LottieGenApp(
+                    outputDir = outputDir,
+                    onFileSaved = onFileSaved,
+                    canvasWidth = canvasWidth,
+                    canvasHeight = canvasHeight,
+                    embedded = true,
+                    fontPicker = fontPicker,
+                    controlTag = { control ->
+                        Modifier.guideTarget(
+                            when (control) {
+                                GuidedControl.NAME -> GuideTargets.LOWER_THIRD_NAME
+                                GuidedControl.INFO -> GuideTargets.LOWER_THIRD_INFO
+                                GuidedControl.SAVE -> GuideTargets.LOWER_THIRD_SAVE
+                            },
+                        )
+                    },
+                )
+            }
         }
     }
 }

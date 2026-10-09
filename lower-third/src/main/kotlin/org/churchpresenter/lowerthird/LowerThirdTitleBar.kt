@@ -3,6 +3,8 @@
 package org.churchpresenter.lowerthird
 
 import androidx.compose.foundation.Image
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.composables.AddToScheduleButton
 import org.churchpresenter.sharedui.composables.GoLiveButton
 import androidx.compose.foundation.layout.Arrangement
@@ -307,6 +309,7 @@ private fun LowerThirdTabScope.LowerThirdScheduleAndLive() {
 
     // Go Live
     GoLiveButton(
+        modifier = Modifier.guideTarget(GuideTargets.LOWER_THIRD_GO_LIVE),
         onClick = ::goLive,
         enabled = canPlay,
         tooltipText = stringResource(Res.string.go_live),

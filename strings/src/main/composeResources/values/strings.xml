@@ -2461,6 +2461,7 @@
     <string name="story_prompt_later">Maybe later</string>
     <string name="story_prompt_reassurance">Nothing is published without your OK.</string>
     <string name="menu_developer_story_prompt">Share Your Story Dialog</string>
+    <string name="menu_developer_wick_intro">Wick Intro Dialog</string>
     <!-- Font picker -->
     <string name="font_picker_search">Search fonts…</string>
     <string name="font_picker_clear_search">Clear search</string>
@@ -2996,6 +2997,518 @@
     <string name="profile_merge_snap">Snap side by side</string>
     <string name="preview_merged_label">(merged)</string>
     <string name="projection_merged_by_profile">Overridden by %1$s profile</string>
+    <string name="helper_name">Wick</string>
+    <string name="helper_open">Open Wick, the helper</string>
+    <string name="helper_close">Close the helper</string>
+    <string name="helper_hide">Hide Wick</string>
+    <string name="helper_close_bubble">Close this bubble (the lamp stays)</string>
+    <string name="helper_confirm_hide">Hide Wick?</string>
+    <string name="helper_hide_where">You can bring it back any time from</string>
+    <string name="helper_hide_menu_path">Help → Show Helper</string>
+    <string name="helper_hide_confirm_button">Hide Wick</string>
+    <string name="helper_send">Send</string>
+    <string name="helper_input_placeholder">Ask Wick or tell it what to do…</string>
+    <string name="helper_status">Here to help</string>
+    <string name="helper_more">More</string>
+    <string name="helper_clear">Clear conversation</string>
+    <string name="helper_greeting">Hi, I'm Wick. Tell me what you'd like to do, or ask where something is.</string>
+    <string name="helper_youre_welcome">You're welcome! Ask me any time.</string>
+    <string name="helper_unknown">I didn't quite catch that. Did you mean one of these?</string>
+    <string name="helper_example_bg">Make the song background blue</string>
+    <string name="helper_example_verse">Show John 3:16</string>
+    <string name="helper_example_where">Where do I add a song?</string>
+    <string name="helper_example_display">Set up the projector</string>
+    <string name="helper_example_text_size">Make the song text bigger</string>
+    <string name="helper_example_clear">Clear the screen</string>
+    <string name="helper_example_next">Next slide</string>
+    <string name="helper_example_chords">How do I add chords?</string>
+    <string name="helper_example_song_language">How do I add a song translation?</string>
+    <string name="helper_example_bible_translation">How do I add a Bible translation?</string>
+    <string name="helper_example_schedule">Where is the schedule?</string>
+    <string name="helper_example_remote">How do I use the remote?</string>
+    <string name="helper_example_identify">Which screen is which?</string>
+    <string name="helper_example_undo">Undo the last change</string>
+    <string name="helper_example_shortcuts">Show keyboard shortcuts</string>
+    <string name="helper_example_announcement">Show an announcement</string>
+    <string name="helper_example_countdown">Show a countdown timer</string>
+    <string name="helper_example_clock">Show the clock</string>
+    <string name="helper_example_pictures">Show pictures</string>
+    <string name="helper_example_slideshow">Show a slideshow</string>
+    <string name="helper_example_presentation">Show a PDF or PowerPoint</string>
+    <string name="helper_example_video">Play a video</string>
+    <string name="helper_example_lower_third">Make a lower third</string>
+    <string name="helper_example_convert">Convert songs from another program</string>
+    <string name="helper_example_song_library">Edit many songs at once</string>
+    <string name="helper_example_calendar">Plan services on the calendar</string>
+    <string name="helper_example_stage_monitor">Set up a stage monitor</string>
+    <string name="helper_example_lower_third_output">Set up a lower third display</string>
+    <string name="helper_example_full_screen_output">Set up a full screen display</string>
+    <string name="helper_example_stage_layout">Choose what shows on the stage monitor</string>
+    <string name="helper_do_it">Do it</string>
+    <string name="helper_cancel">Cancel</string>
+    <string name="helper_ok">OK</string>
+    <string name="helper_yes">Yes</string>
+    <string name="helper_back">Back</string>
+    <string name="helper_undo">Undo</string>
+    <string name="helper_done">Done.</string>
+    <string name="helper_show_me">Show me</string>
+    <string name="helper_not_now">Not now</string>
+    <string name="helper_dont_show_again">Don't show tips like this again</string>
+    <string name="helper_live_warning">This changes what is on screen right now.</string>
+    <string name="helper_clarify_lower_third">Do you want to make a lower third, or set up a screen or stream to show them on?</string>
+    <string name="helper_clarify_scope">For songs, the Bible, or both?</string>
+    <string name="helper_scope_song">song</string>
+    <string name="helper_scope_bible">Bible</string>
+    <string name="helper_scope_all">song and Bible</string>
+    <string name="helper_confirm_verse">Show %1$s on the screen now?</string>
+    <string name="helper_confirm_next">Go to the next slide?</string>
+    <string name="helper_confirm_previous">Go back one slide?</string>
+    <string name="helper_confirm_clear">Clear everything off the screen?</string>
+    <string name="helper_confirm_take">Send what is in the preview to the screen?</string>
+    <string name="helper_confirm_bg_saved">Set the %1$s background to %2$s?</string>
+    <string name="helper_confirm_bg_service">Put a %1$s background behind everything for the rest of this service? It won't be saved.</string>
+    <string name="helper_confirm_font_bigger">Make the %1$s text bigger on every output?</string>
+    <string name="helper_confirm_font_smaller">Make the %1$s text smaller on every output?</string>
+    <string name="helper_confirm_setup_wizard">Open the setup wizard?</string>
+    <string name="helper_confirm_assign">Use %1$s as the audience screen?</string>
+    <string name="helper_confirm_identify">Show the outputs and put a number on each screen?</string>
+    <string name="helper_confirm_toggle_outputs">Show or hide the output windows?</string>
+    <string name="helper_confirm_show_tab">The %1$s tab is hidden. Show it again?</string>
+    <string name="helper_confirm_undo">Undo %1$s?</string>
+    <string name="helper_nothing_to_undo">There is nothing for me to undo.</string>
+    <string name="helper_undo_done">Undone.</string>
+    <string name="helper_undo_stale">That was changed again since, so I left it alone.</string>
+    <string name="helper_open_settings">Opening Settings.</string>
+    <string name="helper_open_converter">Opening the Converter. Pick the program your songs come from, choose its file or folder, then convert.</string>
+    <!-- %1$s is the program's name, as it writes it: OpenLP, SongBeamer, FreeShow… -->
+    <string name="helper_open_converter_from">Opening the Converter with %1$s chosen. Choose its file or folder, then convert.</string>
+    <string name="helper_open_converter_documents">Opening the Converter on documents. Choose the PDF, Word, PowerPoint or Keynote files with the lyrics, then convert.</string>
+    <!-- Names the Song Library Manager's Batch Edit… command, whose label is that window's own string
+         (batch_edit_menu in songlibrary/src/main/composeResources/values/strings.xml): translate it
+         the way that file does. -->
+    <string name="helper_open_song_library">Opening the Song Library Manager. Select the songs you want to change (Shift-click a range, or Ctrl/Cmd-click each one), choose Batch Edit…, tick the fields to change, then apply.</string>
+    <!-- The next five name the Calendar Manager's own controls (Add service, Start from, Repeat,
+         Weekly, Every 2 wk, Monthly, Load into Schedule), whose labels are that window's strings
+         (calendar/src/main/composeResources/values/strings.xml): translate them the way that file does. -->
+    <string name="helper_open_calendar">Opening the Calendar Manager. Pick a day and click Add service, then under Start from choose a blank service, a template or an earlier one. Add songs, verses and slides to its run of show.</string>
+    <string name="helper_open_calendar_repeat">Opening the Calendar Manager. Add the service once, then click the copy icon in its run of show header and set Repeat to Weekly, Every 2 wk or Monthly.</string>
+    <string name="helper_open_calendar_template">Opening the Calendar Manager. Plan a service, then click the template icon in its run of show header to save it. New services can start from it under Start from.</string>
+    <string name="helper_open_calendar_load">Opening the Calendar Manager. Pick the service and click Load into Schedule, or turn on auto-load so it goes into the Schedule tab by itself before it starts.</string>
+    <string name="helper_open_calendar_automate">Opening the Calendar Manager. Click a row in a service's run of show to set when it starts on its own and how long it runs, then arm the service.</string>
+    <!-- Names the Song Library Manager's Compare translations and Only problems controls, that
+         window's own strings (compare_translations, compare_only_problems in
+         songlibrary/src/main/composeResources/values/strings.xml): translate them the way that file does. -->
+    <string name="helper_open_song_library_compare">Opening the Song Library Manager. Pick a song with more than one language and choose Compare translations. Only problems shows just the sections that need attention.</string>
+    <string name="helper_open_shortcuts">Opening Keyboard Shortcuts.</string>
+    <string name="helper_open_display_setup">Let's set up your screens.</string>
+    <string name="helper_open_projection">Open Projection settings</string>
+    <string name="helper_select_tab">Opening the %1$s tab.</string>
+    <string name="helper_shortcut_is">%1$s: press %2$s.</string>
+    <string name="helper_shortcut_unbound">%1$s has no key yet. You can give it one in Help → Keyboard Shortcuts.</string>
+    <string name="helper_tour_step">Step %1$d of %2$d</string>
+    <string name="helper_tour_next">Next</string>
+    <string name="helper_tour_done">Got it</string>
+    <string name="helper_tour_stop">Stop</string>
+    <string name="helper_hint_tab">This is the %1$s tab.</string>
+    <string name="helper_hint_control">This is %1$s.</string>
+    <string name="helper_hint_new_song">Click here to write a new song.</string>
+    <!-- %1$s is the Edit Song button's name (edit_song), passed in so the hint names it as the
+         translated UI does. -->
+    <string name="helper_hint_pick_and_edit">Pick the song, then click %1$s.</string>
+    <!-- %1$s is the song editor's Add a language tab (song_add_translation). -->
+    <!-- %1$s is the song editor's Chords switch (song_chords). -->
+    <string name="helper_hint_chords_switch">Switch %1$s on, if it is off. The chord tools open under the preview.</string>
+    <string name="helper_hint_chord_palette">Put the cursor just before the syllable and click a chord here. You can also type chords in square brackets, like [G]Amazing [C]grace, or paste a sheet with chords above the lyrics and it is converted for you.</string>
+    <!-- %1$s is the Download Bibles button (bible_catalog_button). -->
+    <string name="helper_hint_bible_download">Click %1$s to pick a Bible from the online catalogues and download it. Already have a Bible file? Put it in this folder.</string>
+    <!-- %1$s is the catalog's Download button (bible_catalog_download). -->
+    <string name="helper_hint_bible_catalog">Pick the Bible you want and click %1$s. Type a name or language above to narrow the list.</string>
+    <string name="helper_hint_bible_page">When it has downloaded, open the Bible page.</string>
+    <!-- %1$s is the Bible page's Add translation picker (add_bible_translation). -->
+    <string name="helper_hint_bible_add_translation">Choose it from %1$s to show it, beside any Bible already there.</string>
+    <!-- %1$s is the Pictures tab's Select Folder button (select_folder). -->
+    <string name="helper_hint_pictures_folder">Click %1$s and choose the folder your photos are in. Every picture in it shows up here, so a folder works as an album. Folders you have opened come back in the Recent row.</string>
+    <!-- %1$s is the Go Live button (go_live). -->
+    <string name="helper_hint_pictures_go_live">Pick a picture and click %1$s, or double-click it, to put it on the screen.</string>
+    <!-- %1$s is the Play button (play). -->
+    <string name="helper_hint_pictures_play">Press %1$s and the pictures move on by themselves. The interval beside it sets how long each one stays up.</string>
+    <!-- %1$s is the Presentation tab's Select File button (select_presentation_file_button). -->
+    <string name="helper_hint_presentation_file">Click %1$s and choose the PDF, PowerPoint or Keynote file.</string>
+    <!-- %1$s is the Go Live button (go_live). -->
+    <string name="helper_hint_presentation_go_live">Click %1$s to show it. Double-click any slide to jump straight to it.</string>
+    <!-- %1$s is the Media tab's Select File button (media_select_file). -->
+    <string name="helper_hint_media_file">Click %1$s and choose the video.</string>
+    <!-- %1$s is the Go Live button (go_live). -->
+    <string name="helper_hint_media_go_live">Click %1$s to show it, and it starts playing. Pause and skip with the controls below.</string>
+    <!-- %1$s is the Lower Third tab's Generate button (generate_lower_third). -->
+    <string name="helper_hint_lower_third_generate">Click %1$s to open the Lower Third Generator.</string>
+    <!-- The next three name the generator's Name and Info fields and its Save Lower Third button,
+         whose labels are the generator's own strings (name, info and save_lower_third in
+         lottieGenerator/src/main/resources/lottiegen_strings*.properties): translate them the way
+         that file does. -->
+    <string name="helper_hint_lower_third_name">Type the person's name in Name.</string>
+    <string name="helper_hint_lower_third_info">Type their title or role in Info, like Pastor or Worship Leader.</string>
+    <string name="helper_hint_lower_third_save">Pick a style and colors if you like, then click Save Lower Third. It lands in the list on the Lower Third tab.</string>
+    <!-- %1$s is the Go Live button (go_live). -->
+    <string name="helper_hint_lower_third_go_live">Pick it in the list and click %1$s to put it on the screen.</string>
+    <string name="helper_hint_announcement_text">Type the announcement here, like “Parents of child 12, please come to the nursery.”</string>
+    <!-- %1$s is the Go Live button (go_live). -->
+    <string name="helper_hint_announcement_go_live">Click %1$s to put it on the screen. The settings beside it choose how it moves and how many times.</string>
+    <!-- %1$s and %2$s are the timer's Timer and Specific Time modes (timer_title, timer_mode_clock). -->
+    <string name="helper_hint_timer_countdown">Pick %1$s to count down from a length of time, or %2$s to count down to a set time, like when the service starts.</string>
+    <!-- %1$s is the timer's count-up mode (timer_mode_duration). -->
+    <string name="helper_hint_timer_count_up">Pick %1$s to count up from zero, like a stopwatch.</string>
+    <!-- %1$s is the timer's Clock mode (canvas_source_clock); %2$s its Format field (timer_clock_format). -->
+    <string name="helper_hint_timer_clock">Pick %1$s to show the current time. Choose 12- or 24-hour under %2$s.</string>
+    <!-- %1$s is the Go Live button (go_live). -->
+    <string name="helper_hint_timer_go_live">Set the time, then click %1$s. It runs on the screen until you clear it.</string>
+    <string name="helper_hint_output_profiles">Each screen shows a profile, and the profile decides whether it is full screen, a lower third or a stage monitor. Profiles are set up here.</string>
+    <string name="helper_hint_output_new_profile">Click + to make a new profile, or pick one you already have in the list.</string>
+    <!-- %1$s is the profile's Name field (profile_name). -->
+    <string name="helper_hint_output_profile_name">Give it a name in %1$s, like Stage, Livestream or Main screen, so you can tell it apart later.</string>
+    <!-- %1$s is the Display mode row (profile_display_mode); %2$s the mode to pick (profile_mode_full, profile_mode_lower_third or profile_mode_stage). -->
+    <string name="helper_hint_output_display_mode">Under %1$s, choose %2$s.</string>
+    <string name="helper_hint_output_projection_page">Then open the Projection page.</string>
+    <!-- %1$s is the Screen Assignment section (screen_assignment). -->
+    <string name="helper_hint_output_assign">Under %1$s, pick that profile for the screen it should appear on. No row for it? Connect the screen first; each one gets its own row.</string>
+    <!-- %1$s is the Screen Assignment section (screen_assignment). -->
+    <string name="helper_hint_output_assign_lower_third">Under %1$s, pick that profile for the screen it should appear on. Sending it to a stream instead? Add an NDI output further down and pick the profile there; Alpha keeps it see-through.</string>
+    <string name="helper_hint_stage_profile">Pick your stage monitor in the list of profiles. No stage monitor yet? Ask me to set one up first.</string>
+    <!-- %1$s is the Display mode row (profile_display_mode); %2$s its Stage monitor choice (profile_mode_stage); %3$s the Stage layout page (profile_nav_stage_layout). -->
+    <string name="helper_hint_stage_mode">Make sure %1$s is %2$s, and click it if not. The %3$s page only appears for a stage monitor.</string>
+    <!-- %1$s is a page of the profile (profile_nav_stage_layout, profile_nav_content). -->
+    <string name="helper_hint_stage_open_page">Open %1$s.</string>
+    <!-- %1$s is the Zones row (profile_stage_zones). -->
+    <string name="helper_hint_stage_zones">Under %1$s, pick how many parts the screen is split into.</string>
+    <!-- %1$s is the Arrangement row (profile_stage_arrangement). -->
+    <string name="helper_hint_stage_arrangement">Under %1$s, pick how they sit. Drag a divider in the picture to give a zone more room.</string>
+    <!-- %1$s is the What goes where group (profile_group_what_goes_where); %2$s its None choice (stage_monitor_zone_none). -->
+    <string name="helper_hint_stage_what_goes_where">Under %1$s, pick the zone each kind of content shows in, or %2$s to leave it off.</string>
+    <!-- %1$s is a kind of content (Songs, Next, Clock…); %2$s the None choice (stage_monitor_zone_none). -->
+    <string name="helper_hint_stage_content">Next to %1$s, pick the zone it shows in, or %2$s to leave it off.</string>
+    <!-- %1$s is Bible (bible); %2$s the Content &amp; sources page (profile_nav_content). -->
+    <string name="helper_hint_stage_bible">Next to %1$s, pick the zone it shows in. It also needs %1$s switched on under %2$s.</string>
+    <!-- %1$s is the Show Chords switch (stage_monitor_show_chords); %2$s Songs (songs). -->
+    <string name="helper_hint_stage_chords">Turn on %1$s. The chords show in the %2$s zone, above the words.</string>
+    <!-- %1$s is the Applies to strip (profile_applies_to). -->
+    <string name="helper_hint_stage_text">Under %1$s, pick the zone, then set its font, size and color below.</string>
+    <string name="helper_hint_stage_message_text">Type the message for the people on stage.</string>
+    <!-- %1$s is the Send to Stage Monitor button (tooltip_send_to_stage_monitor); %2$s Announcements (content_announcements). -->
+    <string name="helper_hint_stage_message_send">Click %1$s. It shows in the stage monitor's %2$s zone.</string>
+    <!-- %1$s is the Send to Stage Monitor button (tooltip_send_to_stage_monitor). -->
+    <string name="helper_hint_stage_timer_send">Set the time, then click %1$s to show it on the stage monitor.</string>
+    <string name="helper_hint_add_song_language">Click “%1$s”, name the language, then type or paste its lyrics.</string>
+    <string name="helper_hint_schedule">This is your schedule. Add songs, verses and slides here to plan the service.</string>
+    <string name="helper_hint_clear">This clears everything off the audience screen.</string>
+    <string name="helper_hint_take">This sends what is in the preview to the screen.</string>
+    <string name="helper_hint_background">Backgrounds are set here.</string>
+    <string name="helper_hint_settings">Settings open from here.</string>
+    <string name="helper_hint_server_page">Phones, tablets and Companion connect from this page. Turn the server on, then scan the code or open the address on the device.</string>
+    <!-- %1$s is the Projection page's Identify button (identify_screen). -->
+    <string name="helper_hint_identify">Click %1$s and each screen shows its number, so you can tell which is which.</string>
+    <string name="helper_hint_projection_page">Screens and outputs are set up on this page.</string>
+    <string name="helper_hint_live_preview">This shows what the audience sees right now.</string>
+    <string name="helper_hint_toggle_outputs">This shows or hides the output windows.</string>
+    <string name="helper_suggest_no_audience">I can see a second screen, but nothing is set to show on it. Want help setting it up?</string>
+    <string name="helper_suggest_outputs_hidden">The output windows are hidden, so the audience sees nothing. This button brings them back.</string>
+    <string name="helper_suggest_bible_none">No Bible is chosen yet. Pick or download one in Bible settings.</string>
+    <string name="helper_suggest_songs_empty">Your song library is empty. You can write a song, or bring songs in with the Converter.</string>
+    <string name="helper_suggest_schedule_empty">Today's schedule is empty. Want me to show you how to plan the service?</string>
+    <string name="helper_topic_display">Display · not set up</string>
+    <string name="helper_topic_outputs">Outputs · hidden</string>
+    <string name="helper_topic_bible">Bible · none chosen</string>
+    <string name="helper_topic_songs">Songs · library empty</string>
+    <string name="helper_topic_schedule">Schedule · empty</string>
+    <string name="helper_tip_title">Tip of the day</string>
+    <string name="helper_tips_off">Turn off tips</string>
+    <string name="helper_next_tip">Next tip</string>
+    <string name="helper_previous_tip">Previous</string>
+    <string name="helper_tip_shortcut">%1$s: press %2$s.</string>
+    <string name="helper_tip_tell_me">You can type requests to me, like “make the Bible background navy” or “show Psalm 23”.</string>
+    <string name="helper_tip_identify">Not sure which screen is which? I can put a big number on each one.</string>
+    <string name="helper_tip_quick_background">The quick backgrounds under the preview change the look for this service without saving anything.</string>
+    <string name="helper_tip_profiles">Profiles let each output look different, like a lower third on the stream and full screen in the room.</string>
+    <string name="helper_tip_auto_fit">Song text fits itself to the screen by default. Set its largest and smallest size in the profile.</string>
+    <string name="helper_tip_schedule_drag">Drag songs, verses and pictures onto the schedule to plan the whole service ahead of time.</string>
+    <string name="helper_tip_verse_typing">In the Bible tab you can type a reference like “jn 3 16” straight into the search box.</string>
+    <string name="helper_tip_calendar">You can plan future services ahead of time in the Calendar Manager, each with its own run of show.</string>
+    <string name="helper_tip_calendar_cues">The Calendar Manager can start your pre-service cues on their own. Set when each item starts, and it goes on screen at that time.</string>
+    <string name="helper_tip_calendar_sync">Your planned services can sync with phones and tablets, so you can plan from the mobile app all week, even while this computer is off.</string>
+    <!-- %1$s is the Sync the calendar with phones switch (calendar_sync_enable). -->
+    <string name="helper_hint_calendar_sync">Turn on %1$s, then scan the code with the ChurchPresenter app on the phone or tablet.</string>
+    <string name="helper_tip_qa_tunnel">People can send questions to a Q&amp;A session from their phones without joining the church Wi-Fi. Turn on public access and they use their mobile data.</string>
+    <!-- %1$s is the Q&amp;A tab's Sharing &amp; Remote Access button (tooltip_qa_remote). -->
+    <string name="helper_hint_qa_remote">Click %1$s to open the join code and sharing options.</string>
+    <!-- %1$s is the Enable Public Access button (qa_enable_public_access). -->
+    <string name="helper_hint_qa_public_access">Click %1$s. People can then scan the join code and send questions over mobile data, with no Wi-Fi needed.</string>
+    <string name="helper_tip_lottie_background">Bible and song backgrounds can play an animated intro and outro. Pick a Lottie background, and it animates in when the text appears and out when it clears.</string>
+    <string name="helper_tip_two_translations">For a clearer screen, show no more than two Bible translations or song languages on one projector at a time. Each output's profile chooses which ones it shows.</string>
+    <string name="helper_tip_hide_slides">You can hide a picture or a presentation slide without deleting it: click the eye in the lower-right corner of its thumbnail, and it is skipped when you step through or play.</string>
+    <string name="helper_tip_metronome">The stage monitor can show a metronome for the band: set a song's beats per minute in the song editor, and it keeps the beat while the song is up.</string>
+    <!-- %1$s is the song editor's Tempo field (song_tempo). -->
+    <string name="helper_hint_song_tempo">Type the beats per minute under %1$s. It only shows once a stage monitor is set up.</string>
+    <string name="helper_tip_song_features">A song can show chords, open with a title slide, and carry up to four languages. Add chords and languages in the song editor; each output's profile turns the title slide on.</string>
+    <string name="helper_tip_stt">A speech-to-text service can connect to ChurchPresenter and put live captions, or a live translation of what is said, on a screen. Connect it on the STT tab.</string>
+    <string name="helper_tip_song_library">The Song Library Manager edits many songs at once: select them, choose Batch Edit…, and set the songbook, author or anything else for all of them together.</string>
+    <string name="helper_tip_compare_translations">The Song Library Manager can check a song's languages against each other: Compare translations finds sections that are missing a title, are only partly translated, or don't line up.</string>
+    <string name="helper_tip_presets">Save any picture set, presentation, video, announcement or scene as a preset with Save preset, beside Add to Schedule. Then add it to a planned service from Presets in the Calendar Manager.</string>
+    <string name="helper_tip_remote">A phone or tablet can control ChurchPresenter: put up songs, verses and slides from anywhere in the room. Turn on the server, then scan its code with the ChurchPresenter app.</string>
+    <string name="helper_display_title">Display setup</string>
+    <string name="helper_display_one_screen">I can only find one display. Connect the projector or TV, and I'll find it here. For a stream, set up NDI or a Browser Source in Projection settings instead.</string>
+    <string name="helper_display_pick">Which one does the congregation see?</string>
+    <string name="helper_display_in_use">The audience screen now</string>
+    <string name="helper_display_test">Look at %1$s. Can you see a big number on it?</string>
+    <string name="helper_display_test_yes">Yes, I see it</string>
+    <string name="helper_display_test_no">No</string>
+    <string name="helper_display_show_numbers">Show numbers again</string>
+    <string name="helper_display_done">All set. Whatever you put live now shows on that screen.</string>
+    <string name="helper_screen_label">Display %1$d (%2$d × %3$d)</string>
+    <string name="helper_screen_label_named">%1$s (%2$d × %3$d)</string>
+    <string name="helper_refused_settings_open">Close the Settings window first, or it will put this back when you press OK.</string>
+    <string name="helper_refused_follower">This computer follows another one's backgrounds over Instance Link, so change them there.</string>
+    <string name="helper_refused_live">Something is on screen right now. Try again when nothing is live.</string>
+    <string name="helper_refused_no_preview">Take is for Preview mode, and nothing is waiting in the preview. Preview mode is switched on in System settings.</string>
+    <string name="helper_refused_nothing_to_step">Next and previous step through slides and pictures. Open a presentation or pictures first.</string>
+    <string name="helper_done_bg">The %1$s background is now %2$s.</string>
+    <string name="helper_done_bg_service">A %1$s background is showing for this service.</string>
+    <string name="helper_done_font">The %1$s text size changed.</string>
+    <string name="helper_done_assign">%1$s is now the audience screen.</string>
+    <string name="helper_undo_label_bg">the %1$s background change</string>
+    <string name="helper_undo_label_font">the %1$s text size change</string>
+    <string name="helper_undo_label_screen">the audience screen change</string>
+    <string name="helper_undo_label_tab">showing the %1$s tab</string>
+    <string name="helper_hint_song_search">Type a title, a few words of the lyrics or a song number here. The list narrows as you type.</string>
+    <string name="helper_hint_song_search_filter">%1$s decides how it matches: anywhere in the title, only at the start, or the exact title.</string>
+    <string name="helper_hint_song_favorites">Click the star beside a song to make it a favorite. Click this star at the top of the column to put your favorites first; they also collect in the Favorites list.</string>
+    <string name="helper_hint_song_background">Click %1$s to give this song its own background: a color, a picture, a video or a camera. It shows only while this song is live.</string>
+    <string name="helper_hint_bible_search">Type a reference like John 3:16 to go straight to it, or words from a verse to search the Bible.</string>
+    <string name="helper_hint_bible_search_mode">This decides how what you type is read: Auto works it out, Reference only goes to verses, Text only searches the words. Click it to switch.</string>
+    <string name="helper_hint_bible_multi_verse">To show several verses at once, Ctrl-click each one, or click the first and Shift-click the last for a range. Go Live then shows them together.</string>
+    <string name="helper_hint_planning_center">Click %1$s to bring in a plan from Planning Center. The first time, it asks you to connect your account.</string>
+    <string name="helper_hint_server_enable">Turn on %1$s. Phones and tablets on the same network can then connect.</string>
+    <string name="helper_hint_server_qr">Click %1$s and scan the code with the phone's camera. The remote opens in the phone's browser, already connected.</string>
+    <string name="helper_hint_web_url">Type the website's address here and press Enter. The page opens in the preview.</string>
+    <string name="helper_hint_web_go_live">Click %1$s to put the page on screen.</string>
+    <string name="helper_open_statistics">Opening CCLI Reports. Songs shows how many times each song was used, Bible the passages shown, and Activity what went on screen and when.</string>
+    <string name="helper_example_song_search">Find a song</string>
+    <string name="helper_example_bible_search">Search the Bible</string>
+    <string name="helper_example_multi_verse">Show several verses</string>
+    <string name="helper_example_favorites">Favorite a song</string>
+    <string name="helper_example_song_background">Give a song its own background</string>
+    <string name="helper_example_planning_center">Import from Planning Center</string>
+    <string name="helper_example_ccli">CCLI report</string>
+    <string name="helper_example_website">Show a website</string>
+    <string name="helper_intro_skip">Skip</string>
+    <string name="helper_intro_back">Back</string>
+    <string name="helper_intro_next">Next</string>
+    <string name="helper_intro_finish">Let's go</string>
+    <string name="helper_intro_title_1">Hi, I'm Wick</string>
+    <string name="helper_intro_body_1">I'm a small helper bot that lives in the corner of Church Presenter, **not** an AI (artificial intelligence) chatbot. I know a set list of tasks, work without the internet, and point you to the right buttons while you get ready for Sunday.</string>
+    <string name="helper_intro_title_2">Just ask</string>
+    <string name="helper_intro_body_2">Type a short request in plain words. If it isn't one I know, I'll suggest ones I do. Try one:</string>
+    <string name="helper_intro_ask_song">How do I add a song?</string>
+    <string name="helper_intro_reply_song">I'll open the Songs tab and point at the buttons, one at a time.</string>
+    <string name="helper_intro_ask_verse">Show John 3:16</string>
+    <string name="helper_intro_reply_verse">I'll put the verse on screen. I always ask before changing what everyone sees.</string>
+    <string name="helper_intro_ask_clear">Clear the screen</string>
+    <string name="helper_intro_reply_clear">I'll blank the output after you say yes.</string>
+    <string name="helper_intro_ask_countdown">Start a 5 minute countdown</string>
+    <string name="helper_intro_reply_countdown">I'll put a 5:00 countdown on screen after you say yes.</string>
+    <string name="helper_intro_ask_phone">Can I use my phone?</string>
+    <string name="helper_intro_reply_phone">Yes. I'll show you where to turn on the server and the QR code to scan.</string>
+    <string name="helper_intro_ask_help">What can you do?</string>
+    <string name="helper_intro_reply_help">Type help any time and I'll list everything I understand.</string>
+    <string name="helper_intro_title_3">I stay out of the way</string>
+    <string name="helper_intro_point_live">I go quiet while something is live, so I never pop up mid-service.</string>
+    <string name="helper_intro_point_badge">New tips wait as a small badge on my button until you open me.</string>
+    <string name="helper_intro_point_hide">You can hide me from my panel and bring me back from Help → Show Helper.</string>
+    <string name="helper_intro_pointer">I'm down here whenever you need me.</string>
+    <string name="helper_intro_replay">Replay intro</string>
+    <string name="helper_hint_song_lyrics">Change the words here. The chips above it add a verse or chorus label where your cursor is. Save when you're done.</string>
+    <string name="helper_hint_look_profile">Pick the profile your audience screen uses. Text looks the way each profile says, so each screen can differ.</string>
+    <string name="helper_hint_look_font">%1$s picks the typeface for this text. Any font installed on this computer is listed.</string>
+    <string name="helper_hint_look_size">%1$s sets how big this text is.</string>
+    <string name="helper_hint_look_style">%1$s has Bold, Italic and Underline, plus an outline and a highlight. Click one to turn it on.</string>
+    <string name="helper_hint_look_shadow">Turn on %1$s to give this text a drop shadow. Its color and size are under Advanced.</string>
+    <string name="helper_hint_look_alignment">%1$s puts the lines on the left, in the center or on the right.</string>
+    <string name="helper_hint_look_vertical">%1$s puts the text at the top, in the middle or at the bottom of the screen.</string>
+    <string name="helper_hint_look_margins">%1$s keeps the text this far from each edge of the screen.</string>
+    <string name="helper_hint_look_end_marker">Turn on %1$s to show a mark after a song's last slide. The number beside it sets how far below the lyrics it sits.</string>
+    <string name="helper_example_edit_lyrics">Change song lyrics</string>
+    <string name="helper_example_lyrics_style">Make the lyrics bold</string>
+    <string name="helper_example_lyrics_position">Move the lyrics to the top</string>
+    <string name="helper_example_end_marker">End-of-song marker</string>
+    <string name="helper_command_look_5">how do I change song lyrics</string>
+    <string name="helper_command_look_5_does">Shows the lyrics editor</string>
+    <string name="helper_command_look_6">how do I make the lyrics bold</string>
+    <string name="helper_command_look_6_does">Shows Bold, Italic and Underline</string>
+    <string name="helper_command_look_7">how do I add a shadow to the lyrics</string>
+    <string name="helper_command_look_7_does">Shows the text shadow</string>
+    <string name="helper_command_look_8">how do I move the lyrics to the top</string>
+    <string name="helper_command_look_8_does">Shows position and alignment</string>
+    <string name="helper_command_look_9">how do I change the margins</string>
+    <string name="helper_command_look_9_does">Shows the margins</string>
+    <string name="helper_command_look_10">how do I change the end of song marker</string>
+    <string name="helper_command_look_10_does">Shows the end-of-song marker</string>
+    <string name="helper_hint_look_songs_title">Open %1$s. Everything about how songs look is on this page.</string>
+    <string name="helper_hint_look_bible_page">Open %1$s. Everything about how verses look is on this page.</string>
+    <string name="helper_hint_look_element">Click %1$s, so the rows below style that part.</string>
+    <string name="helper_example_title_style">Style the song title</string>
+    <string name="helper_example_bible_style">Style Bible verses</string>
+    <string name="helper_command_look_11">how do I make the song title bigger</string>
+    <string name="helper_command_look_11_does">Shows the title's text settings</string>
+    <string name="helper_command_look_12">how do I change how bible verses look</string>
+    <string name="helper_command_look_12_does">Shows the verse text settings</string>
+    <string name="helper_command_look_13">how do I style the bible reference</string>
+    <string name="helper_command_look_13_does">Shows the reference's text settings</string>
+    <string name="helper_commands_intro">Here's everything I understand. Click one to try it.</string>
+    <string name="helper_commands_you_type">You type</string>
+    <string name="helper_commands_wick_does">Wick does</string>
+    <string name="helper_commands_look">Look</string>
+    <string name="helper_command_look_1">make the song background blue</string>
+    <string name="helper_command_look_1_does">Changes the background color</string>
+    <string name="helper_command_look_2">make the background red for now</string>
+    <string name="helper_command_look_2_does">Changes it for this service only</string>
+    <string name="helper_command_look_3">make the text bigger</string>
+    <string name="helper_command_look_3_does">Steps the text size up or down</string>
+    <string name="helper_command_look_4">undo</string>
+    <string name="helper_command_look_4_does">Takes back Wick's last change</string>
+    <string name="helper_commands_bible">Bible</string>
+    <string name="helper_command_bible_1">show John 3:16</string>
+    <string name="helper_command_bible_1_does">Puts the verse on screen</string>
+    <string name="helper_command_bible_2">search the bible</string>
+    <string name="helper_command_bible_2_does">Shows how to search</string>
+    <string name="helper_command_bible_3">how do I show several verses</string>
+    <string name="helper_command_bible_3_does">Shows how to pick a range</string>
+    <string name="helper_command_bible_4">what did we just show</string>
+    <string name="helper_command_bible_4_does">Points at the History list</string>
+    <string name="helper_command_bible_5">related verses</string>
+    <string name="helper_command_bible_5_does">Points at cross references</string>
+    <string name="helper_command_bible_6">how do I add another bible</string>
+    <string name="helper_command_bible_6_does">Shows how to download one</string>
+    <string name="helper_commands_songs">Songs</string>
+    <string name="helper_command_songs_1">song 245</string>
+    <string name="helper_command_songs_1_does">Opens a song by number or title</string>
+    <string name="helper_command_songs_2">add amazing grace to the schedule</string>
+    <string name="helper_command_songs_2_does">Adds a song or verse to the schedule</string>
+    <string name="helper_command_songs_3">where do I add a song</string>
+    <string name="helper_command_songs_3_does">Points at New song</string>
+    <string name="helper_command_songs_4">how do I search for a song</string>
+    <string name="helper_command_songs_4_does">Shows how to search songs</string>
+    <string name="helper_command_songs_5">how do I favorite a song</string>
+    <string name="helper_command_songs_5_does">Points at the star column</string>
+    <string name="helper_command_songs_6">give this song its own background</string>
+    <string name="helper_command_songs_6_does">Shows the song's Background button</string>
+    <string name="helper_command_songs_7">how do I add a translation to this song</string>
+    <string name="helper_command_songs_7_does">Shows how to add a language</string>
+    <string name="helper_command_songs_8">how do I add chords to a song</string>
+    <string name="helper_command_songs_8_does">Shows the chord editor</string>
+    <string name="helper_commands_service">Running the service</string>
+    <string name="helper_command_service_1">next slide</string>
+    <string name="helper_command_service_1_does">Steps pictures and slides</string>
+    <string name="helper_command_service_2">clear the screen</string>
+    <string name="helper_command_service_2_does">Clears what's on screen</string>
+    <string name="helper_command_service_3">go live</string>
+    <string name="helper_command_service_3_does">Sends what's cued in Preview</string>
+    <string name="helper_command_service_4">next item</string>
+    <string name="helper_command_service_4_does">Moves to the next schedule item</string>
+    <string name="helper_command_service_5">go to the sermon in the schedule</string>
+    <string name="helper_command_service_5_does">Moves to a schedule item by name</string>
+    <string name="helper_command_service_6">what's live</string>
+    <string name="helper_command_service_6_does">Says what's on screen now</string>
+    <string name="helper_command_service_7">hide the screens</string>
+    <string name="helper_command_service_7_does">Shows or hides the output windows</string>
+    <string name="helper_commands_announcements">Announcements and timers</string>
+    <string name="helper_command_announcements_1">5 minute countdown</string>
+    <string name="helper_command_announcements_1_does">Puts a countdown on screen</string>
+    <string name="helper_command_announcements_2">announce: coffee after the service</string>
+    <string name="helper_command_announcements_2_does">Puts a message on screen</string>
+    <string name="helper_command_announcements_3">tell the parents of Sam to come to the nursery</string>
+    <string name="helper_command_announcements_3_does">Pages a parent</string>
+    <string name="helper_command_announcements_4">how do I show the clock</string>
+    <string name="helper_command_announcements_4_does">Shows how to put up the time</string>
+    <string name="helper_commands_media">Media</string>
+    <string name="helper_command_media_1">how do I show photos</string>
+    <string name="helper_command_media_1_does">Walks through the Pictures tab</string>
+    <string name="helper_command_media_2">how do I show a slideshow</string>
+    <string name="helper_command_media_2_does">Walks through a slideshow</string>
+    <string name="helper_command_media_3">how do I show a pdf</string>
+    <string name="helper_command_media_3_does">Walks through the Presentation tab</string>
+    <string name="helper_command_media_4">how do I play a video</string>
+    <string name="helper_command_media_4_does">Walks through the Media tab</string>
+    <string name="helper_command_media_5">how do I make a lower third</string>
+    <string name="helper_command_media_5_does">Walks through the Lower Third tab</string>
+    <string name="helper_command_media_6">show a website</string>
+    <string name="helper_command_media_6_does">Walks through the Web tab</string>
+    <string name="helper_commands_screens">Screens</string>
+    <string name="helper_command_screens_1">set up the projector</string>
+    <string name="helper_command_screens_1_does">Sets up the screens step by step</string>
+    <string name="helper_command_screens_2">which screen is which</string>
+    <string name="helper_command_screens_2_does">Numbers every screen</string>
+    <string name="helper_command_screens_3">how do I set up a stage monitor</string>
+    <string name="helper_command_screens_3_does">Walks through a stage monitor</string>
+    <string name="helper_command_screens_4">how do I set up a full screen display</string>
+    <string name="helper_command_screens_4_does">Walks through an output profile</string>
+    <string name="helper_commands_planning">Planning and library</string>
+    <string name="helper_command_planning_1">open the calendar</string>
+    <string name="helper_command_planning_1_does">Opens the Calendar Manager</string>
+    <string name="helper_command_planning_2">convert songs from OpenLP</string>
+    <string name="helper_command_planning_2_does">Opens the Converter</string>
+    <string name="helper_command_planning_3">batch edit songs</string>
+    <string name="helper_command_planning_3_does">Opens the Song Library Manager</string>
+    <string name="helper_command_planning_4">import from planning center</string>
+    <string name="helper_command_planning_4_does">Points at the import button</string>
+    <string name="helper_command_planning_5">ccli report</string>
+    <string name="helper_command_planning_5_does">Opens CCLI Reports</string>
+    <string name="helper_commands_settings">Settings and help</string>
+    <string name="helper_command_settings_1">open settings</string>
+    <string name="helper_command_settings_1_does">Opens Settings or one of its pages</string>
+    <string name="helper_command_settings_2">keyboard shortcuts</string>
+    <string name="helper_command_settings_2_does">Shows a shortcut or the full list</string>
+    <string name="helper_command_settings_3">control it from my phone</string>
+    <string name="helper_command_settings_3_does">Walks through the phone remote</string>
+    <string name="helper_command_settings_4">what version is this</string>
+    <string name="helper_command_settings_4_does">Says the version and checks for updates</string>
+    <string name="helper_command_settings_5">help</string>
+    <string name="helper_command_settings_5_does">Shows this list</string>
+    <string name="helper_hint_bible_history">Every verse that goes live is kept under %1$s, newest first. Click one to go back to it. It shows up once something has been on screen.</string>
+    <string name="helper_hint_bible_cross_refs">Click %1$s to see the passages that cross-reference the verse you're on, and jump to one. If it isn't there, turn on %2$s in Settings → Bible.</string>
+    <string name="helper_example_bible_history">What did we just show?</string>
+    <string name="helper_example_cross_refs">Related verses</string>
+    <string name="helper_confirm_countdown">Start a %1$s-minute countdown on screen?</string>
+    <string name="helper_confirm_announcement">Put this on screen as an announcement: “%1$s”?</string>
+    <string name="helper_find_song">Looking for “%1$s”.</string>
+    <string name="helper_confirm_add_song">Add the song “%1$s” to the end of the schedule?</string>
+    <string name="helper_confirm_add_verse">Add %1$s to the end of the schedule?</string>
+    <string name="helper_confirm_schedule_next">Move to the next item in the schedule?</string>
+    <string name="helper_confirm_schedule_previous">Move back to the previous item in the schedule?</string>
+    <string name="helper_confirm_schedule_goto">Move to “%1$s” in the schedule?</string>
+    <string name="helper_whats_live">What's on screen</string>
+    <string name="helper_check_updates">Checking for updates</string>
+    <string name="helper_done_countdown">The %1$s-minute countdown is on screen.</string>
+    <string name="helper_done_announcement">The announcement is on screen.</string>
+    <string name="helper_done_announcement_cued">The announcement is cued in Preview. Press Take to show it.</string>
+    <string name="helper_song_found">%1$s is open on the Songs tab. Press Go Live when you're ready.</string>
+    <string name="helper_song_not_found">I couldn't find a song called “%1$s”.</string>
+    <string name="helper_songs_not_loaded">The song library is still loading. Try again in a moment.</string>
+    <string name="helper_done_added_schedule">Added %1$s to the schedule.</string>
+    <string name="helper_schedule_ready">%1$s is ready on its tab. Press Go Live to show it.</string>
+    <string name="helper_schedule_live">%1$s is on screen.</string>
+    <string name="helper_schedule_selected">%1$s is selected in the schedule.</string>
+    <string name="helper_schedule_empty">The schedule is empty.</string>
+    <string name="helper_schedule_at_end">That's the last item in the schedule.</string>
+    <string name="helper_schedule_at_start">That's the first item in the schedule.</string>
+    <string name="helper_schedule_not_found">There's nothing called “%1$s” in the schedule.</string>
+    <string name="helper_live_nothing">Nothing is on screen right now.</string>
+    <string name="helper_live_now">On screen now: %1$s.</string>
+    <string name="helper_live_countdown">a countdown, %1$s left</string>
+    <string name="helper_live_announcement">the announcement “%1$s”</string>
+    <string name="helper_version">You're on version %1$s. I'm checking for a newer one; if there is, a window will say so.</string>
+    <string name="menu_show_helper">Show Helper</string>
+    <string name="settings_helper_title">Helper</string>
+    <string name="settings_helper_show">Show Wick, the helper, in the corner of the main window</string>
+    <string name="settings_helper_tips">Offer a tip of the day</string>
+    <string name="settings_helper_reset">Show dismissed suggestions again</string>
     <string name="tooltip_message">Message</string>
     <string name="message_title">Message</string>
     <string name="message_saved">Saved messages</string>
