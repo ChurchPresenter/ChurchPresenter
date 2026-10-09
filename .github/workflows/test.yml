@@ -69,9 +69,11 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
-    # The suite takes ~14 minutes. Without a timeout a test that hangs instead of failing holds
-    # the runner until GitHub's 6-hour default kills it, so the deadline is the failure signal.
-    timeout-minutes: 60
+    # A change that touches only a module or two takes ~40 minutes; one under :shared-ui, :settings
+    # or :diagnostics runs every module's suite and coverage step and needs most of this. A hung
+    # test is no longer what the deadline catches -- HungTestReporter halts it after
+    # hangThresholdMs below, with a thread dump -- so the deadline only bounds a run gone wrong.
+    timeout-minutes: 90
     env:
       # HungTestReporter's threshold for every module suite (the composeApp step also passes it):
       # a fork stuck on one test halts with a thread dump in its test-results, which the

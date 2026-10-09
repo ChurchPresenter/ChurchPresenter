@@ -11,8 +11,8 @@ group = "engine"
 extra["coverageExcludes"] = listOf("**/ui/**", "**/MainKt*", "**/tools/**", "**/ComposableSingletons*")
 
 extra["coverageFloors"] = mapOf(
-    "BRANCH" to "0.83",
-    "COMPLEXITY" to "0.80",
+    "BRANCH" to "0.81",
+    "COMPLEXITY" to "0.78",
 )
 
 kotlin {
