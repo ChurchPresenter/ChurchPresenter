@@ -53,6 +53,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -60,7 +61,9 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
@@ -79,6 +82,7 @@ import org.churchpresenter.helper.suggest.tipAt
 import org.churchpresenter.settings.HelperSettings
 import org.churchpresenter.settings.helperDayOf
 import org.churchpresenter.settings.tipDue
+import org.churchpresenter.settings.tipShown
 import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.sharedui.utils.LocalShortcuts
@@ -139,6 +143,11 @@ fun HelperOverlay(
     val tipWaiting = idleLongEnough && inputs.settings.tipsEnabled && inputs.settings.tipDue(inputs.nowMillis())
     val waiting = if (inputs.anythingLive) 0 else inputs.suggestions.size + if (tipWaiting) 1 else 0
     val tip = todaysTip(state, inputs)
+    // Opening Wick, whatever the bubble then shows, is the day's tip having been offered.
+    val open = {
+        if (tipWaiting) inputs.onSettingsChange(inputs.settings.tipShown(inputs.nowMillis()))
+        state.isOpen = true
+    }
 
     Column(modifier.padding(16.dp), horizontalAlignment = Alignment.End) {
         AnimatedVisibility(
@@ -154,14 +163,14 @@ fun HelperOverlay(
             state.introPointer -> IntroPointer(
                 onOpen = {
                     state.introPointer = false
-                    state.isOpen = true
+                    open()
                 },
                 onReplay = {
                     state.introPointer = false
                     state.replayIntro = true
                 },
             )
-            waiting > 0 && teaser != null -> Teaser(teaser, onOpen = { state.isOpen = true })
+            waiting > 0 && teaser != null -> Teaser(teaser, onOpen = open)
         }
         Spacer(Modifier.size(12.dp))
         Launcher(
@@ -171,7 +180,7 @@ fun HelperOverlay(
             mood = moodFor(state.reply),
             onClick = {
                 state.introPointer = false
-                if (state.isOpen) state.close() else state.isOpen = true
+                if (state.isOpen) state.close() else open()
             },
         )
     }
@@ -348,6 +357,26 @@ private fun HeaderMenu(canClear: Boolean, onClear: () -> Unit) {
     }
 }
 
+/** Enter sends, Escape closes, Up and Down walk back through what was typed this run. */
+private fun HelperState.onComposerKey(event: KeyEvent, send: () -> Unit): Boolean {
+    if (event.type != KeyEventType.KeyDown) return false
+    val recalled = when (event.key) {
+        Key.Enter, Key.NumPadEnter -> {
+            send()
+            return true
+        }
+        Key.Escape -> {
+            close()
+            return true
+        }
+        Key.DirectionUp -> history.older(input)
+        Key.DirectionDown -> history.newer()
+        else -> null
+    }
+    recalled?.let { input = it }
+    return recalled != null
+}
+
 /** The message box: a rounded field, and a send button that lights up once there is something to send. */
 @Composable
 private fun Composer(state: HelperState, ask: Ask) {
@@ -358,10 +387,15 @@ private fun Composer(state: HelperState, ask: Ask) {
     val send = {
         val text = state.input
         if (text.isNotBlank()) {
+            state.history.record(text)
             ask(text, text)
             state.input = ""
         }
     }
+    // Held here so a recalled request puts the caret at its end; the text itself is [HelperState.input].
+    var field by remember { mutableStateOf(TextFieldValue()) }
+    if (field.text != state.input) field = TextFieldValue(state.input, TextRange(state.input.length))
+
     val fieldShape = RoundedCornerShape(22.dp)
     Box(Modifier.padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 12.dp)) {
         Row(
@@ -392,8 +426,11 @@ private fun Composer(state: HelperState, ask: Ask) {
                     )
                 }
                 BasicTextField(
-                    value = state.input,
-                    onValueChange = { state.input = it },
+                    value = field,
+                    onValueChange = {
+                        field = it
+                        state.input = it.text
+                    },
                     singleLine = true,
                     textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.onSurface),
                     cursorBrush = SolidColor(colors.primary),
@@ -401,20 +438,7 @@ private fun Composer(state: HelperState, ask: Ask) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("helper.input")
-                        .onPreviewKeyEvent { event ->
-                            when {
-                                event.type != KeyEventType.KeyDown -> false
-                                event.key == Key.Enter || event.key == Key.NumPadEnter -> {
-                                    send()
-                                    true
-                                }
-                                event.key == Key.Escape -> {
-                                    state.close()
-                                    true
-                                }
-                                else -> false
-                            }
-                        },
+                        .onPreviewKeyEvent { event -> state.onComposerKey(event, send) },
                 )
             }
             val sendLabel = stringResource(Res.string.helper_send)
