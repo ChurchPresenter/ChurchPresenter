@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.telemetry
 
 import org.churchpresenter.calendar.CalendarUsage
 import org.churchpresenter.converter.ui.BIBLE_CONVERSION
@@ -6,7 +6,7 @@ import org.churchpresenter.converter.ui.SongSources
 import org.churchpresenter.songlibrary.SongLibraryUsage
 import org.churchpresenter.sharedui.utils.UsageEvent
 
-internal fun calendarUsageEvent(usage: CalendarUsage): UsageEvent = when (usage) {
+fun calendarUsageEvent(usage: CalendarUsage): UsageEvent = when (usage) {
     CalendarUsage.SERVICE_ADDED -> UsageEvent.CALENDAR_SERVICE_ADDED
     CalendarUsage.SERVICE_COPIED -> UsageEvent.CALENDAR_SERVICE_COPIED
     CalendarUsage.TEMPLATE_SAVED -> UsageEvent.CALENDAR_TEMPLATE_SAVED
@@ -14,14 +14,14 @@ internal fun calendarUsageEvent(usage: CalendarUsage): UsageEvent = when (usage)
     CalendarUsage.EXPORTED -> UsageEvent.CALENDAR_EXPORTED
 }
 
-internal fun songLibraryUsageEvent(usage: SongLibraryUsage): UsageEvent = when (usage) {
+fun songLibraryUsageEvent(usage: SongLibraryUsage): UsageEvent = when (usage) {
     SongLibraryUsage.SONGS_SAVED -> UsageEvent.SONG_EDITED
     SongLibraryUsage.BULK_EDIT -> UsageEvent.SONG_LIBRARY_BULK_EDIT
     SongLibraryUsage.SONGBOOK_CREATED -> UsageEvent.SONG_LIBRARY_SONGBOOK_CREATED
     SongLibraryUsage.SONGS_DELETED -> UsageEvent.SONG_LIBRARY_SONGS_DELETED
 }
 
-internal fun converterEvent(sourceId: String): UsageEvent? = when (sourceId) {
+fun converterEvent(sourceId: String): UsageEvent? = when (sourceId) {
     BIBLE_CONVERSION -> UsageEvent.CONVERTED_BIBLE
     SongSources.EASYSLIDES -> UsageEvent.CONVERTED_EASYSLIDES
     SongSources.EASYWORSHIP -> UsageEvent.CONVERTED_EASYWORSHIP

@@ -183,6 +183,10 @@ include(":statistics")
 // by :composeApp.
 include(":updater")
 
+// What the app reports about itself: the live-map ping, the usage counts it carries,
+// the contact form, the device report and the GPU it runs on.
+include(":telemetry")
+
 // The System settings page and the first-run setup wizard. Depended on by :composeApp.
 include(":app-settings")
 

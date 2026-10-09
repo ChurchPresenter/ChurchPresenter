@@ -1,5 +1,6 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.telemetry
 
+import org.junit.jupiter.api.Assumptions
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -175,5 +176,27 @@ class GpuInfoTest {
         assertFalse(GpuInfo.isSupported("Mac OS X"))
         assertFalse(GpuInfo.isSupported("Linux"))
         assertFalse(GpuInfo.isSupported(""))
+    }
+
+    // ── This machine ──────────────────────────────────────────────────────────
+
+    /** Off Windows there is nothing to ask, so the real answers are the "nothing read" ones. */
+    @Test
+    fun `off Windows the report says unknown and the crash reporter gets no tags`() {
+        Assumptions.assumeFalse(GpuInfo.isSupported(), "Windows enumerates real adapters")
+        assertEquals("unknown", GpuInfo.summary)
+        assertEquals(emptyMap(), GpuInfo.crashTags())
+    }
+
+    @Test
+    fun `a device is allocated for each slot the OS is asked about`() {
+        var asked = 0
+        val adapters = GpuInfo.enumerateWith { _, device ->
+            asked++
+            assertEquals(device.size(), device.cb, "the OS reads the structure's size from cb")
+            false
+        }
+        assertEquals(1, asked)
+        assertTrue(adapters.isEmpty())
     }
 }

@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.telemetry
 
 import com.sun.jna.Native
 import com.sun.jna.Structure

@@ -30,7 +30,7 @@ import org.churchpresenter.app.churchpresenter.utils.slideThumbnails
 import org.churchpresenter.settings.calendarFolder
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.sharedui.utils.UsageEvents
-import org.churchpresenter.app.churchpresenter.utils.calendarUsageEvent
+import org.churchpresenter.telemetry.calendarUsageEvent
 import org.churchpresenter.bibletab.BibleBookNames
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.getString

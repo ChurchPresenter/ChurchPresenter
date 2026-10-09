@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.telemetry
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -14,7 +14,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.BuildConfig
 
 private const val HTTP_OK = 200
 private const val HTTP_TOO_MANY_REQUESTS = 429
@@ -74,14 +73,22 @@ object ContactReporter {
     private data class ErrorBody(val error: String? = null)
 
     /** Non-sensitive diagnostics appended to the message body to aid bug-report triage. */
-    fun defaultContext(): String =
-        "Church Presenter ${BuildConfig.VERSION_DISPLAY} · " +
+    fun defaultContext(versionDisplay: String): String =
+        "Church Presenter $versionDisplay · " +
             "${System.getProperty("os.name")} ${System.getProperty("os.version")}"
 
-    suspend fun submit(request: ContactRequest): Outcome = withContext(Dispatchers.IO) {
+    /**
+     * Sends [request], signed with [appVersion] in the user agent. [endpoint] is the real form's
+     * unless a test points it at a host of its own.
+     */
+    suspend fun submit(
+        request: ContactRequest,
+        appVersion: String,
+        endpoint: String = ENDPOINT,
+    ): Outcome = withContext(Dispatchers.IO) {
         try {
-            val response = http.post(ENDPOINT) {
-                header(HttpHeaders.UserAgent, "ChurchPresenter/${BuildConfig.APP_VERSION}")
+            val response = http.post(endpoint) {
+                header(HttpHeaders.UserAgent, "ChurchPresenter/$appVersion")
                 contentType(ContentType.Application.Json)
                 setBody(json.encodeToString(ContactRequest.serializer(), request))
             }

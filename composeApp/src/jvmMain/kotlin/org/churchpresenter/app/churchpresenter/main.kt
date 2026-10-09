@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.utils.appTelemetryIdentity
 import org.churchpresenter.app.churchpresenter.dialogs.showAlreadyRunningDialog
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
@@ -20,7 +21,7 @@ import org.churchpresenter.updater.UpdateChecker
 import org.churchpresenter.updater.UpdaterIdentity
 import org.churchpresenter.updater.deleteLeftoverUpdateInstallers
 import org.churchpresenter.sharedui.utils.DevFlags
-import org.churchpresenter.app.churchpresenter.utils.GpuInfo
+import org.churchpresenter.telemetry.GpuInfo
 import org.churchpresenter.lowerthird.render.LottieFonts
 import org.churchpresenter.sharedui.utils.SystemFonts
 import org.churchpresenter.presentationengine.fonts.SlideFontRegistry
@@ -47,7 +48,7 @@ import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.diagnostics.StartupProbe
 import kotlin.system.exitProcess
 import org.churchpresenter.diagnostics.UiWatchdog
-import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
+import org.churchpresenter.telemetry.LiveMapReporter
 import org.churchpresenter.sharedui.utils.UsageEvents
 import java.io.File
 import java.io.IOException
@@ -194,6 +195,7 @@ fun main() {
     val pendingUsageEvents = LiveMapReporter.eventsToReport(startupSettings, UsageEvents.unreported())
     val previousSessionMinutes = UsageEvents.lastSessionMinutes()
     LiveMapReporter.pingOnOpen(
+        identity = appTelemetryIdentity,
         installId = analyticsInstallId(startupSettings.analyticsReportingEnabled) { CrashReporter.installId() },
         updateCheckInterval = startupSettings.updateCheckInterval,
         setup = {

@@ -1,6 +1,5 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.telemetry
 
-import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.canvas.CameraDeviceCatalog
 import org.churchpresenter.canvas.DeckLinkManager
 import org.churchpresenter.media.composables.isVlcAvailable
@@ -51,11 +50,12 @@ object DeviceInfoReport {
 
     internal fun deviceLine(index: Int, name: String): String = "  ${index + 1}. $name"
 
-    fun generate(settings: AppSettings): String = render(settings, gather(settings), LocalDateTime.now())
+    fun generate(settings: AppSettings, identity: TelemetryIdentity): String =
+        render(settings, gather(settings, identity), LocalDateTime.now())
 
-    internal fun gather(settings: AppSettings): DeviceFacts {
-        val appVersion = try { BuildConfig.VERSION_DISPLAY } catch (_: Exception) { "unknown" }
-        val buildType = try { if (BuildConfig.IS_RELEASE) "release" else "dev" } catch (_: Exception) { "unknown" }
+    internal fun gather(settings: AppSettings, identity: TelemetryIdentity): DeviceFacts {
+        val appVersion = identity.versionDisplay
+        val buildType = if (identity.isRelease) "release" else "dev"
 
         val screens = try {
             val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()

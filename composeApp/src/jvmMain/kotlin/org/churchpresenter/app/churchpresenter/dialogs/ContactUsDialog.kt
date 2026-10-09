@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.app.churchpresenter.utils.appTelemetryIdentity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -57,7 +58,7 @@ import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.sharedui.utils.centeredOnMainWindow
 import org.churchpresenter.theme.ProvideUiFontScale
 import org.churchpresenter.theme.components.SettingsTextField
-import org.churchpresenter.app.churchpresenter.utils.ContactReporter
+import org.churchpresenter.telemetry.ContactReporter
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.sharedui.utils.UrlOpener
@@ -90,7 +91,7 @@ internal fun buildContactRequest(
     name = name.trim(),
     message = message.trim(),
     email = email.trim(),
-    context = ContactReporter.defaultContext(),
+    context = ContactReporter.defaultContext(appTelemetryIdentity.versionDisplay),
 )
 
 /** What the dialog says when a send fails: in general, for want of a network, and when throttled. */
@@ -122,7 +123,10 @@ internal suspend fun submitContactRequest(
     message: String,
     texts: ContactFailureTexts,
 ): SendStatus {
-    val outcome = ContactReporter.submit(buildContactRequest(type, name, email, message))
+    val outcome = ContactReporter.submit(
+        buildContactRequest(type, name, email, message),
+        appTelemetryIdentity.appVersion,
+    )
     return statusForOutcome(outcome, texts)
 }
 

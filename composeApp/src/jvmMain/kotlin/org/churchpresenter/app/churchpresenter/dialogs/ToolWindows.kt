@@ -56,8 +56,8 @@ import java.io.File
 import java.util.Locale
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
-import org.churchpresenter.app.churchpresenter.utils.converterEvent
-import org.churchpresenter.app.churchpresenter.utils.songLibraryUsageEvent
+import org.churchpresenter.telemetry.converterEvent
+import org.churchpresenter.telemetry.songLibraryUsageEvent
 
 @Composable
 fun ConverterWindow(theme: ThemeMode, initialTab: Int = ConverterTab.BIBLES, onClose: () -> Unit) {

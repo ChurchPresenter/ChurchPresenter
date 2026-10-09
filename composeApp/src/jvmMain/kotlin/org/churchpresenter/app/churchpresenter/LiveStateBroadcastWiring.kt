@@ -16,7 +16,7 @@ import org.churchpresenter.sharedui.utils.LiveHistoryEntry
 import org.churchpresenter.sharedui.utils.LiveHistoryLogger
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
-import org.churchpresenter.app.churchpresenter.utils.hasAudienceOutput
+import org.churchpresenter.telemetry.hasAudienceOutput
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.liveoutput.isOverlay
 /**

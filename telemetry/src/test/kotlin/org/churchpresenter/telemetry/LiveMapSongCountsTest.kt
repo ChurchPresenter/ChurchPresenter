@@ -1,9 +1,8 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.telemetry
 
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongSettings
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
+import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -18,8 +17,15 @@ import kotlin.test.assertEquals
  */
 class LiveMapSongCountsTest {
 
-    @get:Rule
-    val temp = TemporaryFolder()
+    @TempDir
+    lateinit var tempDir: File
+
+    /** `newFile`/`newFolder` over the `@TempDir`, as JUnit 4's `TemporaryFolder` offered them. */
+    private val temp get() = object {
+        val root: File get() = tempDir
+        fun newFile(name: String): File = File(tempDir, name).apply { createNewFile() }
+        fun newFolder(name: String): File = File(tempDir, name).apply { mkdirs() }
+    }
 
     private fun settingsFor(dir: File) =
         AppSettings(songSettings = SongSettings(storageDirectory = dir.absolutePath))

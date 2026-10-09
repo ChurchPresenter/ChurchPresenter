@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.telemetry
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -10,7 +10,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.profileFor
 import org.churchpresenter.settings.drivesNothing
@@ -52,12 +51,6 @@ object LiveMapReporter {
     private val QUICK_RETRY_DELAY = 5.seconds
     private const val SLOW_ATTEMPTS = 15
     private val SLOW_RETRY_DELAY = 10.minutes
-
-    // BuildConfig.IS_RELEASE is true only for packaged installer builds (see the
-    // generateBuildConfig task in build.gradle.kts). A `run`/IDE launch is a
-    // developer build, which pings with ?src=dev so test launches are tracked
-    // separately and don't skew real-user stats on the live map.
-    private val isDevBuild: Boolean = !BuildConfig.IS_RELEASE
 
     // Same os.name convention already used in AutoStartManager.kt/UpdateChecker.kt.
     // Explicitly checks for "linux" rather than treating it as the else-case,
@@ -103,7 +96,7 @@ object LiveMapReporter {
      * path — a library on a slow network share must not delay the app opening. Counts only: no
      * folder name, no path, no title.
      */
-    internal fun gatherSongCounts(settings: AppSettings): Pair<Int, Int> = try {
+    fun gatherSongCounts(settings: AppSettings): Pair<Int, Int> = try {
         val folders = FileManager().getSongFoldersInDirectory(settings.songSettings.storageDirectory)
         folders.size to folders.sumOf { it.second }
     } catch (_: Throwable) {
@@ -124,7 +117,7 @@ object LiveMapReporter {
      *
      * Nothing here is worth a crash. The same reasoning already governs `CefManager.init`.
      */
-    internal fun detectScreenCount(
+    fun detectScreenCount(
         probe: () -> Int = { GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.size },
     ): Int = try {
         probe()
@@ -136,7 +129,7 @@ object LiveMapReporter {
      * @param screenCount displays attached, from [detectScreenCount] — taken as a parameter so the
      * derivation itself stays pure and testable on a machine with no display.
      */
-    internal fun setupFacts(
+    fun setupFacts(
         settings: AppSettings,
         screenCount: Int,
         songCounts: Pair<Int, Int> = 0 to 0,
@@ -167,7 +160,7 @@ object LiveMapReporter {
      * primary's own launch. Only the master reports, so one Sunday is counted once rather than once
      * per room.
      */
-    internal fun eventsToReport(
+    fun eventsToReport(
         settings: AppSettings,
         pending: Map<UsageEvent, Int>,
     ): Map<UsageEvent, Int> = if (settings.instanceLink.enabled) emptyMap() else pending
@@ -191,9 +184,9 @@ object LiveMapReporter {
         version: String,
         updateCheckInterval: UpdateCheckInterval?,
         isDevBuild: Boolean,
-        repoSlug: String = BuildConfig.REPO_SLUG,
-        commit: String = BuildConfig.COMMIT_HASH,
-        buildType: String = BuildConfig.BUILD_TYPE,
+        repoSlug: String = "",
+        commit: String = "",
+        buildType: String = "",
         setup: SetupFacts = SetupFacts(),
         events: Map<UsageEvent, Int> = emptyMap(),
     ): String = buildString {
@@ -225,22 +218,31 @@ object LiveMapReporter {
      * @param onDelivered Run once the server has actually taken the ping, so [events] are marked
      * reported only then. A launch with no network reports them again next time rather than losing
      * them, and nothing is ever counted twice.
+     * @param send How the ping goes out: [ping], unless a test catches the address instead.
      */
     fun pingOnOpen(
+        identity: TelemetryIdentity,
         installId: String? = null,
         updateCheckInterval: UpdateCheckInterval? = null,
         setup: () -> SetupFacts = { SetupFacts() },
         events: Map<UsageEvent, Int> = emptyMap(),
         onDelivered: () -> Unit = {},
+        send: suspend (url: String, installId: String?) -> Boolean = ::ping,
     ) {
         scope.launch {
             // Gathered here rather than at the call site: it enumerates displays and scans the song
             // folder, neither of which belongs on the path between launching and showing a window.
             val url = buildPingUrl(
-                os, BuildConfig.APP_VERSION, updateCheckInterval, isDevBuild,
+                os, identity.appVersion, updateCheckInterval,
+                // A `run`/IDE launch pings with ?src=dev, so test launches are tracked separately and
+                // don't skew real-user stats on the live map.
+                isDevBuild = !identity.isRelease,
+                repoSlug = identity.repoSlug,
+                commit = identity.commitHash,
+                buildType = identity.buildType,
                 setup = setup(), events = events,
             )
-            if (ping(url, installId)) onDelivered()
+            if (send(url, installId)) onDelivered()
         }
     }
 

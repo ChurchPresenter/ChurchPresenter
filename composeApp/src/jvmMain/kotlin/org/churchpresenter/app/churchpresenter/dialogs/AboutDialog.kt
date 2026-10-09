@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.app.churchpresenter.utils.appTelemetryIdentity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -54,7 +55,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.sharedui.utils.AppWindowRoot
 import org.churchpresenter.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.utils.DeviceInfoReport
+import org.churchpresenter.telemetry.DeviceInfoReport
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.icons.generated.resources.ic_app_icon
@@ -277,7 +278,7 @@ private fun SaveDiagnosticInfoButton(appSettings: AppSettings) {
                         if (path.extension != "txt") {
                             path = path.resolveSibling("${path.nameWithoutExtension}.txt")
                         }
-                        path.writeText(DeviceInfoReport.generate(appSettings))
+                        path.writeText(DeviceInfoReport.generate(appSettings, appTelemetryIdentity))
                         JOptionPane.showMessageDialog(
                             AwtWindow.getWindows().firstOrNull { it.isActive },
                             savedMsg,

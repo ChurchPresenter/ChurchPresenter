@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.telemetry
 
 import org.churchpresenter.songchords.ChordTransposer
 
@@ -24,7 +24,7 @@ import org.churchpresenter.sharedui.utils.UsageEvent
  * A row pointing at a monitor in [unusedScreens] (`ProjectionSettings.unusedScreens`) is switched
  * off just the same: no window ever opens on that monitor.
  */
-internal fun ScreenAssignment.isLiveOutput(unusedScreens: Collection<String> = emptyList()): Boolean =
+fun ScreenAssignment.isLiveOutput(unusedScreens: Collection<String> = emptyList()): Boolean =
     targetDisplay != Constants.KEY_TARGET_NONE && (targetScreenKey.isEmpty() || targetScreenKey !in unusedScreens)
 
 /**
@@ -42,7 +42,7 @@ internal fun isDualLanguagePresentation(song: SongItem, outputs: List<OutputProf
 private const val THREE_LANGUAGES = 3
 private const val FOUR_LANGUAGES = 4
 
-internal fun songLanguageEvent(song: SongItem, outputs: List<OutputProfile>): UsageEvent? {
+fun songLanguageEvent(song: SongItem, outputs: List<OutputProfile>): UsageEvent? {
     val shown = outputs.flatMap { it.songLanguages(song.translationCount) }.toSet().size
     return when {
         shown >= FOUR_LANGUAGES -> UsageEvent.SONG_FOUR_LANGUAGES
@@ -62,7 +62,7 @@ internal fun songLanguageEvent(song: SongItem, outputs: List<OutputProfile>): Us
  *
  * @param translationCount size of `BibleSettings.translationList()`.
  */
-internal fun isMultiTranslationPresentation(translationCount: Int, outputs: List<OutputProfile>): Boolean {
+fun isMultiTranslationPresentation(translationCount: Int, outputs: List<OutputProfile>): Boolean {
     if (translationCount < 2) return false
     return outputs.any { profile ->
         if (!profile.showBible) return@any false
@@ -73,7 +73,7 @@ internal fun isMultiTranslationPresentation(translationCount: Int, outputs: List
 /**
  * True when [song] carries chords and some live output's profile is set to draw them.
  */
-internal fun isChordChartPresentation(song: SongItem, outputs: List<OutputProfile>): Boolean {
+fun isChordChartPresentation(song: SongItem, outputs: List<OutputProfile>): Boolean {
     if (song.lyrics.none { ChordTransposer.hasChords(it) }) return false
     return outputs.any { it.showChords }
 }
@@ -88,7 +88,7 @@ internal fun isChordChartPresentation(song: SongItem, outputs: List<OutputProfil
  * a disagreement — it is an absence, and would otherwise report every ordinary single-screen setup
  * that happens to have a spare output configured.
  */
-internal fun isSplitScreenBible(translationCount: Int, outputs: List<OutputProfile>): Boolean {
+fun isSplitScreenBible(translationCount: Int, outputs: List<OutputProfile>): Boolean {
     if (translationCount < 2) return false
     val selections = outputs
         .filter { it.showBible }
@@ -104,7 +104,7 @@ internal fun isSplitScreenBible(translationCount: Int, outputs: List<OutputProfi
  * setup as [isSplitScreenBible], for songs. A profile's `songMode` is what actually reaches
  * `SongPresenter`, so two profiles with different modes are showing two different things.
  */
-internal fun isSplitScreenSong(outputs: List<OutputProfile>): Boolean =
+fun isSplitScreenSong(outputs: List<OutputProfile>): Boolean =
     outputs.filter { it.showSongs }.map { it.songMode }.distinct().size >= 2
 
 /**
@@ -120,7 +120,7 @@ internal fun isSplitScreenSong(outputs: List<OutputProfile>): Boolean =
  * not counted: nothing proves anything is receiving them. Nor is an output on a monitor in
  * [unusedScreens], which never opens a window.
  */
-internal fun hasAudienceOutput(
+fun hasAudienceOutput(
     outputs: List<ScreenAssignment>,
     screenCount: Int,
     deckLinkDeviceCount: Int,

@@ -1,7 +1,6 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.telemetry
 
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.BuildConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -105,18 +104,18 @@ Line two — "quoted" & 100% of the time"""
 
     @Test
     fun `the context names the build so a report can be placed`() {
-        val context = ContactReporter.defaultContext()
+        val context = ContactReporter.defaultContext("26.1.0-beta")
 
         assertTrue(context.startsWith("Church Presenter "), context)
         assertTrue(
-            BuildConfig.VERSION_DISPLAY in context,
+            "26.1.0-beta" in context,
             "a bug report without a version cannot be triaged: $context",
         )
     }
 
     @Test
     fun `the context names the operating system`() {
-        val context = ContactReporter.defaultContext()
+        val context = ContactReporter.defaultContext("26.1.0-beta")
 
         assertTrue(System.getProperty("os.name") in context, context)
         assertTrue(System.getProperty("os.version") in context, context)
@@ -126,7 +125,7 @@ Line two — "quoted" & 100% of the time"""
     fun `the context carries nothing personal`() {
         // This text is appended to a message the user is sending to a stranger, so the absence of
         // identifying detail is the requirement — not the presence of debugging detail.
-        val context = ContactReporter.defaultContext()
+        val context = ContactReporter.defaultContext("26.1.0-beta")
 
         listOf(
             System.getProperty("user.name"),
@@ -139,7 +138,7 @@ Line two — "quoted" & 100% of the time"""
 
     @Test
     fun `the context is one short line`() {
-        val context = ContactReporter.defaultContext()
+        val context = ContactReporter.defaultContext("26.1.0-beta")
 
         assertFalse("\n" in context, "it is appended to the message body, not attached as a file: $context")
         assertTrue(context.length < 200, "got ${context.length} characters: $context")
@@ -148,8 +147,8 @@ Line two — "quoted" & 100% of the time"""
     @Test
     fun `the context is the same every time`() {
         assertEquals(
-            ContactReporter.defaultContext(),
-            ContactReporter.defaultContext(),
+            ContactReporter.defaultContext("26.1.0-beta"),
+            ContactReporter.defaultContext("26.1.0-beta"),
             "nothing in it may vary between two reports from the same machine",
         )
     }

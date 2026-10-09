@@ -144,6 +144,7 @@ module-specific notes there, not here.**
 | `updater/`             | `:updater`             | The in-app updater: the GitHub release check, the installer download, the update window | [AGENT.md](updater/AGENT.md)             |
 | `server-ui/`           | `:server-ui`           | The Server settings page, calendar sync's card and Instance Link's windows: the Compose face of `:server` | [AGENT.md](server-ui/AGENT.md)           |
 | `app-settings/`        | `:app-settings`        | The System settings page, the setup wizard, auto-start and the `.sps` converter    | [AGENT.md](app-settings/AGENT.md)        |
+| `telemetry/`           | `:telemetry`           | What the app reports about itself: the live-map ping, usage events, the contact form, the device report | [AGENT.md](telemetry/AGENT.md)           |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions

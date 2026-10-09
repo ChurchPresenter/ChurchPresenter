@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.telemetry
 
 import com.sun.net.httpserver.HttpServer
 import kotlinx.coroutines.runBlocking

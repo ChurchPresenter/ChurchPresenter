@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.telemetry
 
 import org.churchpresenter.calendar.CalendarUsage
 import org.churchpresenter.converter.ui.BIBLE_CONVERSION

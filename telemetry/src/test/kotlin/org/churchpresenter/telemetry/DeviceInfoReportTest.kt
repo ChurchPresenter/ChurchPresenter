@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.utils
+package org.churchpresenter.telemetry
 
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.AtemSettings
@@ -18,6 +18,15 @@ import kotlin.test.assertTrue
  */
 class DeviceInfoReportTest {
 
+    private val identity = TelemetryIdentity(
+        appVersion = "26.1.0",
+        versionDisplay = "26.1.0-beta",
+        isRelease = false,
+        repoSlug = "churchpresenter/app",
+        commitHash = "abc1234",
+        buildType = "dev",
+    )
+
     /** Every secret-bearing field filled with a value distinctive enough to grep the output for. */
     private val settingsWithSecrets = AppSettings(
         atemSettings = AtemSettings(host = "atem-secret-host.example.internal", port = 19910),
@@ -36,7 +45,7 @@ class DeviceInfoReportTest {
         instanceLink = InstanceLinkSettings(enabled = true, apiKey = "link-secret-apikey"),
     )
 
-    private fun report(): String = DeviceInfoReport.generate(settingsWithSecrets)
+    private fun report(): String = DeviceInfoReport.generate(settingsWithSecrets, identity)
 
     @Test
     fun `no secret value from settings appears anywhere in the report`() {
@@ -88,7 +97,7 @@ class DeviceInfoReportTest {
 
     @Test
     fun `an unconfigured ATEM reads as not configured`() {
-        val text = DeviceInfoReport.generate(AppSettings())
+        val text = DeviceInfoReport.generate(AppSettings(), identity)
         assertTrue("ATEM: not configured" in text)
         assertTrue("OBS: disabled" in text)
         assertTrue("Companion server: disabled" in text)
