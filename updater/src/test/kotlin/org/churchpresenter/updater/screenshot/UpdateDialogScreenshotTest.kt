@@ -15,6 +15,7 @@ import org.churchpresenter.updater.DownloadState
 import org.churchpresenter.updater.UpdateAvailableContent
 import org.churchpresenter.updater.UpdateCheckResult
 import org.churchpresenter.updater.UpdateInfo
+import org.churchpresenter.updater.updateDialogHeight
 import org.churchpresenter.theme.ChurchPresenterTheme
 import java.io.File
 import java.time.Instant
@@ -23,19 +24,22 @@ import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
 
 /**
- * The update dialog (Help → Check for Updates…), at the size its window opens at.
+ * The update dialog in every state it can be in, at the size its window opens at.
  *
- * Shot from a manual check, which is the only route that shows the interval dropdown and the
- * copy-link button beside the buttons -- the row this suite exists to pin.
+ * Most shots are from a manual check (Help → Check for Updates…), the only route that shows the
+ * interval dropdown; one is the check at launch, which leaves it out and opens shorter. Each takes
+ * its height from [updateDialogHeight], so a window resized in the dialog is resized here too.
  */
 class UpdateDialogScreenshotTest {
 
     private fun shoot(
         name: String,
         result: UpdateCheckResult,
-        height: Float,
         downloadState: DownloadState = DownloadState.Idle,
-    ) =
+        isManualCheck: Boolean = true,
+        participateInPrereleases: Boolean = false,
+    ) {
+        val height = updateDialogHeight(result is UpdateCheckResult.Available, isManualCheck).value
         stackedThemes(SECTION, name) { mode, file ->
             runSkikoComposeUiTest(size = Size(WIDTH, height), density = Density(1f)) {
                 setContent {
@@ -44,8 +48,8 @@ class UpdateDialogScreenshotTest {
                             Box(Modifier.fillMaxSize()) {
                                 UpdateAvailableContent(
                                     result = result,
-                                    isManualCheck = true,
-                                    participateInPrereleases = false,
+                                    isManualCheck = isManualCheck,
+                                    participateInPrereleases = participateInPrereleases,
                                     onParticipateInPrereleasesChange = {},
                                     updateCheckInterval = UpdateCheckInterval.EVERY_LAUNCH,
                                     onUpdateCheckIntervalChange = {},
@@ -64,44 +68,73 @@ class UpdateDialogScreenshotTest {
                 captureTo(file)
             }
         }
+    }
+
+    /** An update to the real release, with notes, a date and a size, so every part of the window shows. */
+    private val info = UpdateInfo(
+        latestVersion = "26.12.171",
+        releaseUrl = "https://example.invalid/releases/26.12.171",
+        releaseNotes = NOTES,
+        downloadUrl = "https://example.invalid/ChurchPresenter-26.12.171.dmg",
+        isPrerelease = false,
+        currentVersion = "26.11.164",
+        publishedAt = Instant.parse("2026-10-08T09:01:10Z"),
+        downloadSize = 601_405_516L,
+    )
+    private val available = UpdateCheckResult.Available(info)
 
     @Test
-    fun `up to date`() = shoot("up_to_date", UpdateCheckResult.UpToDate, UP_TO_DATE_HEIGHT)
+    fun `up to date`() = shoot("up_to_date", UpdateCheckResult.UpToDate)
 
     @Test
-    fun `an update is available`() = shoot("available", available, AVAILABLE_HEIGHT)
+    fun `an update is available`() = shoot("available", available)
+
+    /** The check at launch: no interval row, a shorter window, the notes taking the room. */
+    @Test
+    fun `an update offered by the launch check`() = shoot("available_launch_check", available, isManualCheck = false)
+
+    /** A beta offered with beta updates switched on: the amber pill, and the switch on. */
+    @Test
+    fun `a pre-release is offered`() = shoot(
+        "prerelease",
+        UpdateCheckResult.Available(info.copy(latestVersion = "26.12.172", isPrerelease = true)),
+        participateInPrereleases = true,
+    )
+
+    /** A release with no notes: no heading over an empty panel, the footer drops to the bottom. */
+    @Test
+    fun `an update with no release notes`() =
+        shoot("available_no_notes", UpdateCheckResult.Available(info.copy(releaseNotes = "")))
 
     /** The footer mid-download: megabytes so far, the percentage, the bar and Cancel. */
     @Test
-    fun `an update downloading`() =
-        shoot("downloading", available, AVAILABLE_HEIGHT, DownloadState.Downloading(0.42f))
+    fun `an update downloading`() = shoot("downloading", available, DownloadState.Downloading(0.42f))
+
+    /** A server that sent no length: the bar runs without a percentage or megabyte count. */
+    @Test
+    fun `an update downloading with no known size`() =
+        shoot("downloading_unknown_size", available, DownloadState.Downloading(-1f))
 
     /** The footer once the installer is in: ready to install, Later, and the green Install Now. */
     @Test
     fun `an update ready to install`() =
-        shoot("ready_to_install", available, AVAILABLE_HEIGHT, DownloadState.Done(File("ChurchPresenter-update.dmg")))
+        shoot("ready_to_install", available, DownloadState.Done(File("ChurchPresenter-update.dmg")))
 
-    /** An update to the real release, with notes, a date and a size, so every part of the window shows. */
-    private val available = UpdateCheckResult.Available(
-        UpdateInfo(
-            latestVersion = "26.12.171",
-            releaseUrl = "https://example.invalid/releases/26.12.171",
-            releaseNotes = NOTES,
-            downloadUrl = "https://example.invalid/ChurchPresenter-26.12.171.dmg",
-            isPrerelease = false,
-            currentVersion = "26.11.164",
-            publishedAt = Instant.parse("2026-10-08T09:01:10Z"),
-            downloadSize = 601_405_516L,
-        ),
-    )
+    /** A download that failed: the reason, and the release page with its address to copy. */
+    @Test
+    fun `a download that failed`() =
+        shoot("download_failed", available, DownloadState.Error("Connection reset by the server"))
+
+    /** No installer for this machine: no Download, only the release page and its address. */
+    @Test
+    fun `an update with no installer for this machine`() =
+        shoot("available_no_installer", UpdateCheckResult.Available(info.copy(downloadUrl = null)))
 
     private companion object {
         const val SECTION = "updateDialog"
 
-        /** The `DialogWindow` sizes in `UpdateAvailableDialog`, for a manual check. */
+        /** The `DialogWindow` width in `UpdateAvailableDialog`. */
         const val WIDTH = 520f
-        const val UP_TO_DATE_HEIGHT = 330f
-        const val AVAILABLE_HEIGHT = 620f
 
         /** Notes written the way the releases are: groups of bullets, each naming its pull request. */
         val NOTES = """
