@@ -655,6 +655,13 @@
     <string name="schedule_show_buttons_under_title">Pokaż przyciski pod tytułem</string>
     <string name="schedule_option_item_count">Liczba pozycji</string>
     <string name="schedule_option_zoom">Sterowanie powiększeniem</string>
+    <string name="schedule_option_icon_size">Rozmiar ikon paska narzędzi</string>
+    <string name="schedule_icon_size_small">Małe</string>
+    <string name="schedule_icon_size_medium">Średnie</string>
+    <string name="schedule_icon_size_large">Duże</string>
+    <string name="schedule_option_buttons">Przyciski</string>
+    <string name="toggle_menu_count">%1$d z %2$d</string>
+    <string name="toggle_menu_show_all">Pokaż wszystkie</string>
     <string name="schedule_drop_hint">Przeciągnij pliki tutaj, aby dodać do programu</string>
     <string name="schedule_note_placeholder">Dodaj notatkę…</string>
     <string name="screen_number">Ekran %1$d</string>
@@ -673,6 +680,7 @@
     <string name="tab_web">Web</string>
     <string name="tab_canvas">Płótno</string>
     <string name="tab_visibility">Widoczność kart</string>
+    <string name="tab_visibility_tabs">Karty</string>
     <string name="theme">Motyw</string>
     <string name="timer_expired">Czas minął!</string>
     <string name="timer_expired_text_hint">Wprowadź wiadomość wyświetlaną po zakończeniu…</string>

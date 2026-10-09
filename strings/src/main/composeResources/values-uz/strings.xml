@@ -569,6 +569,13 @@
     <string name="schedule_show_buttons_under_title">Tugmalarni sarlavha ostida koʻrsatish</string>
     <string name="schedule_option_item_count">Elementlar soni</string>
     <string name="schedule_option_zoom">Masshtab tugmalari</string>
+    <string name="schedule_option_icon_size">Asboblar paneli belgilarining oʻlchami</string>
+    <string name="schedule_icon_size_small">Kichik</string>
+    <string name="schedule_icon_size_medium">Oʻrta</string>
+    <string name="schedule_icon_size_large">Katta</string>
+    <string name="schedule_option_buttons">Tugmalar</string>
+    <string name="toggle_menu_count">%1$d / %2$d</string>
+    <string name="toggle_menu_show_all">Hammasini koʻrsatish</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Yorliq qoʻshish</string>
@@ -897,6 +904,7 @@
     <string name="tab_qa">Savol-javob</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">Boʻlimlarning koʻrinishi</string>
+    <string name="tab_visibility_tabs">Boʻlimlar</string>
     <string name="canvas_scenes">Sahnalar</string>
     <string name="canvas_sources">Manbalar</string>
     <string name="canvas_properties">Xossalar</string>

@@ -316,6 +316,17 @@ class ScheduleTabScreenshotTest {
         waitForIdle()
     }
 
+    /** The menu with buttons turned off: those entries dim, and the header offers Show all. */
+    @Test
+    fun `the options menu with buttons hidden`() = shoot(
+        "options_menu_buttons_hidden",
+        rootIndex = 1,
+        hiddenToolbarButtons = setOf(ScheduleToolbarButton.UNDO.name, ScheduleToolbarButton.PLANNING_CENTER.name),
+    ) {
+        onNodeWithTag(ScheduleToolbarTags.OPTIONS).performClick()
+        waitForIdle()
+    }
+
     @Test
     fun `density extra compact`() = shoot("density_extra_compact", itemZoomPercent = 55)
 

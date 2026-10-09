@@ -569,6 +569,13 @@
     <string name="schedule_show_buttons_under_title">Rādīt pogas zem nosaukuma</string>
     <string name="schedule_option_item_count">Vienību skaits</string>
     <string name="schedule_option_zoom">Tālummaiņas vadīklas</string>
+    <string name="schedule_option_icon_size">Rīkjoslas ikonu izmērs</string>
+    <string name="schedule_icon_size_small">Mazs</string>
+    <string name="schedule_icon_size_medium">Vidējs</string>
+    <string name="schedule_icon_size_large">Liels</string>
+    <string name="schedule_option_buttons">Pogas</string>
+    <string name="toggle_menu_count">%1$d no %2$d</string>
+    <string name="toggle_menu_show_all">Rādīt visu</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Pievienot etiķeti</string>
@@ -897,6 +904,7 @@
     <string name="tab_qa">Jautājumi</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">Ciļņu redzamība</string>
+    <string name="tab_visibility_tabs">Cilnes</string>
     <string name="canvas_scenes">Ainas</string>
     <string name="canvas_sources">Avoti</string>
     <string name="canvas_properties">Īpašības</string>

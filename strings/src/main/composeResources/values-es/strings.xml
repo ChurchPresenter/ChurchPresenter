@@ -407,6 +407,13 @@
     <string name="schedule_show_buttons_under_title">Mostrar botones bajo el título</string>
     <string name="schedule_option_item_count">Número de elementos</string>
     <string name="schedule_option_zoom">Controles de zoom</string>
+    <string name="schedule_option_icon_size">Tamaño de iconos de la barra</string>
+    <string name="schedule_icon_size_small">Pequeño</string>
+    <string name="schedule_icon_size_medium">Mediano</string>
+    <string name="schedule_icon_size_large">Grande</string>
+    <string name="schedule_option_buttons">Botones</string>
+    <string name="toggle_menu_count">%1$d de %2$d</string>
+    <string name="toggle_menu_show_all">Mostrar todo</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Añadir etiqueta</string>
@@ -689,6 +696,7 @@
     <string name="tab_qa">P&amp;R</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">Visibilidad de pestañas</string>
+    <string name="tab_visibility_tabs">Pestañas</string>
     <string name="canvas_scenes">Escenas</string>
     <string name="canvas_sources">Fuentes</string>
     <string name="canvas_properties">Propiedades</string>

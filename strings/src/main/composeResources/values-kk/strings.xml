@@ -656,6 +656,13 @@
     <string name="schedule_show_buttons_under_title">Түймелерді атаудың астында көрсету</string>
     <string name="schedule_option_item_count">Элементтер саны</string>
     <string name="schedule_option_zoom">Масштаб басқаруы</string>
+    <string name="schedule_option_icon_size">Құралдар тақтасы белгішелерінің өлшемі</string>
+    <string name="schedule_icon_size_small">Кіші</string>
+    <string name="schedule_icon_size_medium">Орташа</string>
+    <string name="schedule_icon_size_large">Үлкен</string>
+    <string name="schedule_option_buttons">Түймелер</string>
+    <string name="toggle_menu_count">%2$d ішінен %1$d</string>
+    <string name="toggle_menu_show_all">Барлығын көрсету</string>
     <string name="schedule_drop_hint">Бағдарламаға қосу үшін файлдарды осында сүйреңіз</string>
     <string name="schedule_note_placeholder">Ескертпе қосу…</string>
     <string name="screen_number">Экран %1$d</string>
@@ -674,6 +681,7 @@
     <string name="tab_web">Веб</string>
     <string name="tab_canvas">Кенеп</string>
     <string name="tab_visibility">Қойындылар көрінісі</string>
+    <string name="tab_visibility_tabs">Қойындылар</string>
     <string name="theme">Тақырып</string>
     <string name="timer_expired">Уақыт бітті!</string>
     <string name="timer_expired_text_hint">Аяқталғанда көрсетілетін хабарламаны енгізіңіз…</string>

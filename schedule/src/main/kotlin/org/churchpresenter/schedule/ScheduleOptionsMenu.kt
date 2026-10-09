@@ -42,7 +42,7 @@ import org.churchpresenter.icons.generated.resources.ic_zoom_in
 import org.churchpresenter.strings.generated.resources.open_calendar_manager
 import org.churchpresenter.strings.generated.resources.planning_center_import_title
 import org.churchpresenter.strings.generated.resources.schedule_icon_size_large
-import org.churchpresenter.strings.generated.resources.omt_quality_medium
+import org.churchpresenter.strings.generated.resources.schedule_icon_size_medium
 import org.churchpresenter.strings.generated.resources.schedule_icon_size_small
 import org.churchpresenter.strings.generated.resources.schedule_option_icon_size
 import org.churchpresenter.strings.generated.resources.schedule_option_item_count
@@ -202,7 +202,7 @@ private fun scheduleToolbarButtonAccent(button: ScheduleToolbarButton): Color = 
 @Composable
 private fun scheduleToolbarIconSizeLabel(size: ScheduleToolbarIconSize): String = when (size) {
     ScheduleToolbarIconSize.SMALL -> stringResource(Res.string.schedule_icon_size_small)
-    ScheduleToolbarIconSize.MEDIUM -> stringResource(Res.string.omt_quality_medium)
+    ScheduleToolbarIconSize.MEDIUM -> stringResource(Res.string.schedule_icon_size_medium)
     ScheduleToolbarIconSize.LARGE -> stringResource(Res.string.schedule_icon_size_large)
 }
 

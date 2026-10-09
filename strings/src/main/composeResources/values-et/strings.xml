@@ -467,6 +467,13 @@
     <string name="schedule_show_buttons_under_title">Näita nuppe pealkirja all</string>
     <string name="schedule_option_item_count">Elementide arv</string>
     <string name="schedule_option_zoom">Suumi juhtnupud</string>
+    <string name="schedule_option_icon_size">Tööriistariba ikoonide suurus</string>
+    <string name="schedule_icon_size_small">Väike</string>
+    <string name="schedule_icon_size_medium">Keskmine</string>
+    <string name="schedule_icon_size_large">Suur</string>
+    <string name="schedule_option_buttons">Nupud</string>
+    <string name="toggle_menu_count">%1$d / %2$d</string>
+    <string name="toggle_menu_show_all">Näita kõiki</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Lisa silt</string>
@@ -769,6 +776,7 @@
     <string name="tab_qa">K&amp;V</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">Vahekaartide nähtavus</string>
+    <string name="tab_visibility_tabs">Vahekaardid</string>
     <string name="canvas_scenes">Stseenid</string>
     <string name="canvas_sources">Allikad</string>
     <string name="canvas_properties">Omadused</string>

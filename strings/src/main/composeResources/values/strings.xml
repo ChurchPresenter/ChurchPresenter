@@ -716,6 +716,7 @@
     <string name="schedule_option_zoom">Zoom Controls</string>
     <string name="schedule_option_icon_size">Toolbar icon size</string>
     <string name="schedule_icon_size_small">Small</string>
+    <string name="schedule_icon_size_medium">Medium</string>
     <string name="schedule_icon_size_large">Large</string>
     <string name="schedule_option_buttons">Buttons</string>
     <string name="toggle_menu_count">%1$d of %2$d</string>

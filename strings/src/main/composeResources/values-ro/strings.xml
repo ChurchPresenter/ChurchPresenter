@@ -435,6 +435,13 @@
     <string name="schedule_show_buttons_under_title">Afișează butoanele sub titlu</string>
     <string name="schedule_option_item_count">Număr de elemente</string>
     <string name="schedule_option_zoom">Comenzi de zoom</string>
+    <string name="schedule_option_icon_size">Dimensiunea pictogramelor din bară</string>
+    <string name="schedule_icon_size_small">Mică</string>
+    <string name="schedule_icon_size_medium">Medie</string>
+    <string name="schedule_icon_size_large">Mare</string>
+    <string name="schedule_option_buttons">Butoane</string>
+    <string name="toggle_menu_count">%1$d din %2$d</string>
+    <string name="toggle_menu_show_all">Afișează tot</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Adaugă Etichetă</string>
@@ -726,6 +733,7 @@
     <string name="tab_qa">Î&amp;R</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">Vizibilitate File</string>
+    <string name="tab_visibility_tabs">File</string>
     <string name="canvas_scenes">Scene</string>
     <string name="canvas_verse_style">Stil verset</string>
     <string name="canvas_reference_style">Stil referință</string>

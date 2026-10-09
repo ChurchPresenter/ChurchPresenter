@@ -853,6 +853,40 @@ class MainDesktopComposeTest : MainDesktopComposeHarness() {
     }
 
     @Test
+    fun `Show all in the tab visibility menu brings back every hidden tab`() {
+        val wiring = Wiring()
+        val base = withOneSong().copy(hiddenTabs = setOf(Tabs.WEB.name, Tabs.QA.name))
+        val total = Tabs.entries.size - 1
+        root(base, wiring = wiring) { _ ->
+            onAllNodesWithContentDescription("Tab Visibility")[0].performClick()
+            waitForIdle()
+            assertTrue(onAllNodesWithText("${total - 2} of $total").fetchSemanticsNodes().isNotEmpty())
+            onAllNodesWithText("Show all")[0].performClick()
+            waitForIdle()
+        }
+        val after = wiring.settingsChanges.fold(base) { settings, change -> change(settings) }
+        assertTrue(after.hiddenTabs.isEmpty(), "both hidden tabs came back: ${after.hiddenTabs}")
+    }
+
+    @Test
+    fun `Show all in the schedule options brings back every hidden toolbar button`() {
+        val wiring = Wiring()
+        val hidden = setOf(ScheduleToolbarButton.ZOOM.name, ScheduleToolbarButton.CLEAR.name)
+        val base = withOneSong().copy(hiddenScheduleButtons = hidden)
+        root(base, wiring = wiring) { _ ->
+            onNodeWithTag("schedule_options").performClick()
+            waitForIdle()
+            onAllNodesWithText("Show all")[0].performClick()
+            waitForIdle()
+        }
+        val after = wiring.settingsChanges.fold(base) { settings, change -> change(settings) }
+        assertTrue(
+            after.hiddenScheduleButtons.isEmpty(),
+            "both hidden buttons came back: ${after.hiddenScheduleButtons}",
+        )
+    }
+
+    @Test
     fun `a lower third taken live from the schedule plays its preset, and a missing one does nothing`() {
         val folder = File(dir, "lower-thirds").apply { mkdirs() }
         File(folder, "Pastor.json").writeText("""{"v":"5.7.4","fr":30,"ip":0,"op":30,"w":1920,"h":1080,"layers":[]}""")

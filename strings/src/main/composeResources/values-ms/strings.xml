@@ -569,6 +569,13 @@
     <string name="schedule_show_buttons_under_title">Tunjuk butang di bawah tajuk</string>
     <string name="schedule_option_item_count">Bilangan Item</string>
     <string name="schedule_option_zoom">Kawalan Zum</string>
+    <string name="schedule_option_icon_size">Saiz ikon bar alat</string>
+    <string name="schedule_icon_size_small">Kecil</string>
+    <string name="schedule_icon_size_medium">Sederhana</string>
+    <string name="schedule_icon_size_large">Besar</string>
+    <string name="schedule_option_buttons">Butang</string>
+    <string name="toggle_menu_count">%1$d daripada %2$d</string>
+    <string name="toggle_menu_show_all">Tunjukkan semua</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Tambah Label</string>
@@ -897,6 +904,7 @@
     <string name="tab_qa">Q&amp;A</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">Keterlihatan Tab</string>
+    <string name="tab_visibility_tabs">Tab</string>
     <string name="canvas_scenes">Adegan</string>
     <string name="canvas_sources">Sumber</string>
     <string name="canvas_properties">Sifat</string>

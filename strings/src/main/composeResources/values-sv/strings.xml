@@ -569,6 +569,13 @@
     <string name="schedule_show_buttons_under_title">Visa knappar under titeln</string>
     <string name="schedule_option_item_count">Antal poster</string>
     <string name="schedule_option_zoom">Zoomkontroller</string>
+    <string name="schedule_option_icon_size">Ikonstorlek i verktygsfältet</string>
+    <string name="schedule_icon_size_small">Liten</string>
+    <string name="schedule_icon_size_medium">Mellan</string>
+    <string name="schedule_icon_size_large">Stor</string>
+    <string name="schedule_option_buttons">Knappar</string>
+    <string name="toggle_menu_count">%1$d av %2$d</string>
+    <string name="toggle_menu_show_all">Visa alla</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Lägg till etikett</string>
@@ -897,6 +904,7 @@
     <string name="tab_qa">Frågor</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">Flikar som visas</string>
+    <string name="tab_visibility_tabs">Flikar</string>
     <string name="canvas_scenes">Scener</string>
     <string name="canvas_sources">Källor</string>
     <string name="canvas_properties">Egenskaper</string>

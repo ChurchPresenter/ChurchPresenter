@@ -569,6 +569,13 @@
     <string name="schedule_show_buttons_under_title">Vis knappene under tittelen</string>
     <string name="schedule_option_item_count">Antall elementer</string>
     <string name="schedule_option_zoom">Zoomkontroller</string>
+    <string name="schedule_option_icon_size">Ikonstørrelse i verktøylinjen</string>
+    <string name="schedule_icon_size_small">Liten</string>
+    <string name="schedule_icon_size_medium">Middels</string>
+    <string name="schedule_icon_size_large">Stor</string>
+    <string name="schedule_option_buttons">Knapper</string>
+    <string name="toggle_menu_count">%1$d av %2$d</string>
+    <string name="toggle_menu_show_all">Vis alle</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Legg til etikett</string>
@@ -897,6 +904,7 @@
     <string name="tab_qa">Q&amp;A</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">Synlige faner</string>
+    <string name="tab_visibility_tabs">Faner</string>
     <string name="canvas_scenes">Scener</string>
     <string name="canvas_sources">Kilder</string>
     <string name="canvas_properties">Egenskaper</string>

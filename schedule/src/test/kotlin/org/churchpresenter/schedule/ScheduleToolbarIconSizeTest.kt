@@ -4,6 +4,7 @@ package org.churchpresenter.schedule
 
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertWidthIsEqualTo
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -34,6 +35,15 @@ class ScheduleToolbarIconSizeTest {
             waitForIdle()
 
             ScheduleToolbarIconSize.entries.forEach { taggedButton(it.menuTag).assertExists("$it is offered") }
+        }
+
+    @Test
+    fun `each size is named in its segment`() =
+        scheduleTab(seed = { seedService() }) { _, _ ->
+            taggedButton(ScheduleToolbarTags.OPTIONS).performClick()
+            waitForIdle()
+
+            listOf("Small", "Medium", "Large").forEach { onNodeWithText(it).assertExists("$it is labelled") }
         }
 
     @Test

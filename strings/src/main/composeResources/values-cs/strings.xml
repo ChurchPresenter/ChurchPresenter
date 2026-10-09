@@ -702,6 +702,13 @@
     <string name="schedule_show_buttons_under_title">Zobrazit tlačítka pod názvem</string>
     <string name="schedule_option_item_count">Počet položek</string>
     <string name="schedule_option_zoom">Ovládání přiblížení</string>
+    <string name="schedule_option_icon_size">Velikost ikon panelu nástrojů</string>
+    <string name="schedule_icon_size_small">Malé</string>
+    <string name="schedule_icon_size_medium">Střední</string>
+    <string name="schedule_icon_size_large">Velké</string>
+    <string name="schedule_option_buttons">Tlačítka</string>
+    <string name="toggle_menu_count">%1$d z %2$d</string>
+    <string name="toggle_menu_show_all">Zobrazit vše</string>
     <string name="schedule_drop_hint">Přetáhněte soubory sem pro přidání do programu</string>
     <string name="schedule_note_placeholder">Přidat poznámku…</string>
     <string name="screen_number">Obrazovka %1$d</string>
@@ -720,6 +727,7 @@
     <string name="tab_web">Web</string>
     <string name="tab_canvas">Plátno</string>
     <string name="tab_visibility">Viditelnost karet</string>
+    <string name="tab_visibility_tabs">Karty</string>
     <string name="theme">Motiv</string>
     <string name="timer_expired">Čas vypršel!</string>
     <string name="timer_expired_text_hint">Zadejte zprávu pro zobrazení po skončení…</string>
