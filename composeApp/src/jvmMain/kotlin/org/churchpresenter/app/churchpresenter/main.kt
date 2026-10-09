@@ -47,6 +47,8 @@ import org.churchpresenter.diagnostics.BuildIdentity
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.diagnostics.StartupProbe
 import kotlin.system.exitProcess
+import org.churchpresenter.diagnostics.UiStallInjector
+import org.churchpresenter.diagnostics.UiStallSpec
 import org.churchpresenter.diagnostics.UiWatchdog
 import org.churchpresenter.telemetry.LiveMapReporter
 import org.churchpresenter.sharedui.utils.UsageEvents
@@ -158,6 +160,11 @@ fun main() {
 
     // A debug build says where the UI thread was stuck whenever it stops answering -- see UiWatchdog.
     if (!BuildConfig.IS_RELEASE) UiWatchdog.start()
+    // A dev build can stall its own UI on a schedule (-Dchurchpresenter.injectUiStall=<ms>,<everySec>)
+    // to show what a stall costs the outputs -- see docs/SHOW_CONTROL.md, Output isolation.
+    if (!BuildConfig.IS_RELEASE) {
+        UiStallSpec.parse(System.getProperty(UiStallInjector.PROPERTY))?.let { UiStallInjector.start(it) }
+    }
 
     val startupSettings = SettingsManager().loadSettings()
     CrashReporter.initialize(

@@ -26,7 +26,11 @@ from two different machines, and they are **never compared with each other**:
   misses it on hardware alone.
 - **Not covered**: the on-screen output windows (GPU, not the CPU raster measured here), video,
   web pages, cameras and network sources, which need devices or native runtimes a build machine
-  lacks.
+  lacks. The windows have benchmarks of their own that need a display and run on the reference Mac
+  only: `gpuBenchmark` (frame intervals per content type, baseline in `gpu/`) and
+  `isolationBenchmark` (frame gaps while the UI thread is stalled on purpose, quoted in
+  `docs/SHOW_CONTROL.md`). Startup time and idle memory are `startupBenchmark`, budgeted in
+  `budgets.md`.
 
 ## The CI regression gate
 

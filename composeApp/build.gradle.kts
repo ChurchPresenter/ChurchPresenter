@@ -1199,6 +1199,31 @@ tasks.register<JavaExec>("gpuBenchmark") {
     }
 }
 
+// ── Output isolation benchmark ────────────────────────────────────────────────
+// What a stalled operator UI costs an on-screen output: frame gaps at injected event-thread stalls of
+// 0, 100, 500 and 2000 ms -- see docs/SHOW_CONTROL.md, Output isolation.
+//   ./gradlew :composeApp:isolationBenchmark                # report to build/reports/isolation/
+// Needs a display, so it runs on the reference Mac, never on CI; like gpuBenchmark it runs jvmTest's
+// classpath under a home of its own.
+tasks.register<JavaExec>("isolationBenchmark") {
+    group = "verification"
+    description = "Measures an output window's frame gaps while the UI thread is stalled on purpose."
+    val parallel = tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest").get()
+    classpath = parallel.classpath
+    mainClass.set("org.churchpresenter.app.churchpresenter.benchmark.OutputIsolationBenchmarkKt")
+    maxHeapSize = "2g"
+    outputs.upToDateWhen { false }
+    val home = layout.buildDirectory.dir("isolation-benchmark-home").get().asFile
+    val reportDir = layout.buildDirectory.dir("reports/isolation").get().asFile
+    systemProperty("user.home", home.absolutePath)
+    systemProperty("isolationBenchmark.reportDir", reportDir.absolutePath)
+    doFirst { home.mkdirs() }
+    doLast {
+        val report = reportDir.resolve("results.md")
+        if (report.exists()) logger.lifecycle(report.readText())
+    }
+}
+
 // ── Startup benchmark ─────────────────────────────────────────────────────────
 // How long the app takes to start and what it sits at idle -- see StartupProbe and benchmarks/budgets.md.
 //   ./gradlew :composeApp:startupBenchmark                  # 5 launches, report to build/reports/startup/

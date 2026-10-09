@@ -202,6 +202,9 @@ bash cleanup_check.sh                  # repo code-quality report
 ./gradlew :composeApp:renderBenchmark -PrecordCiRenderBaseline  # write composeApp/benchmarks/ci/ (CI's own: record via render-benchmark.yml, not locally)
 ./gradlew :composeApp:renderBenchmark -PcheckRenderRegression   # fail on a row slower than the CI baseline (render-benchmark.yml's gate)
 ./gradlew :composeApp:soakTest -PsoakMinutes=10  # a scripted service on one output; fails on a leak or stall (CI: 240, weekly on main; a failure files a soak-failure issue)
+./gradlew :composeApp:gpuBenchmark        # on-screen output windows on the GPU — needs a display; -PrecordGpuBaseline → composeApp/benchmarks/gpu/
+./gradlew :composeApp:startupBenchmark    # 5 launches: time to first frame, idle memory; -PcheckBudgets against composeApp/benchmarks/budgets.md
+./gradlew :composeApp:isolationBenchmark  # an output window's frame gaps under injected UI stalls — see docs/SHOW_CONTROL.md
 
 ./gradlew :song-chords:pitest          # mutation score (also :live-show, :core-models, :schedule); weekly in mutation-test.yml
 
