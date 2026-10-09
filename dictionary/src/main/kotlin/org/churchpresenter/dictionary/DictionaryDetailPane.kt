@@ -9,6 +9,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -179,7 +181,7 @@ internal fun DictionaryDetailPane(
  * toolbar of its own -- an earlier attempt floated it over the pane's top-right corner, where its
  * bounds covered Go Live and swallowed clicks meant for it.
  */
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
 private fun DictionaryDetailActionRow(
     entry: StrongsEntry?,
@@ -198,86 +200,87 @@ private fun DictionaryDetailActionRow(
     val forwardStr = stringResource(Res.string.dictionary_forward)
     val switchLangStr = stringResource(Res.string.dictionary_switch_language)
 
-    Row(
+    // Wraps rather than squeezes: the pane is whatever the list beside it leaves, and a Row would
+    // measure the last buttons -- Go Live among them -- into zero width once it runs out.
+    FlowRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
-        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        itemVerticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-            ActionIconButton(
-                onClick = onGoBack,
-                enabled = canGoBack,
-                tooltipText = backStr,
-                painter = painterResource(IconRes.drawable.ic_undo),
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            ActionIconButton(
-                onClick = onGoForward,
-                enabled = canGoForward,
-                tooltipText = forwardStr,
-                painter = painterResource(IconRes.drawable.ic_redo),
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            TooltipArea(
-                tooltip = {
-                    Surface(
-                        color = MaterialTheme.colorScheme.inverseSurface,
-                        shape = MaterialTheme.shapes.extraSmall,
-                        tonalElevation = 4.dp
-                    ) {
-                        Text(
-                            switchLangStr,
-                            color = MaterialTheme.colorScheme.inverseOnSurface,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                },
-                tooltipPlacement = TooltipPlacement.ComponentRect(
-                    anchor = Alignment.BottomCenter,
-                    offset = DpOffset(0.dp, 4.dp)
-                ),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .height(32.dp)
-                        .sunken(AppShape(8.dp), elevationPalette())
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = onToggleDictLanguage,
-                        )
-                        .padding(horizontal = 10.dp),
-                    contentAlignment = Alignment.Center,
+        ActionIconButton(
+            onClick = onGoBack,
+            enabled = canGoBack,
+            tooltipText = backStr,
+            painter = painterResource(IconRes.drawable.ic_undo),
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        ActionIconButton(
+            onClick = onGoForward,
+            enabled = canGoForward,
+            tooltipText = forwardStr,
+            painter = painterResource(IconRes.drawable.ic_redo),
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        TooltipArea(
+            tooltip = {
+                Surface(
+                    color = MaterialTheme.colorScheme.inverseSurface,
+                    shape = MaterialTheme.shapes.extraSmall,
+                    tonalElevation = 4.dp
                 ) {
                     Text(
-                        text = if (dictLanguage == "en") "EN" else "RU",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        switchLangStr,
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
-            }
-            if (onAddToSchedule != null) {
-                AddToScheduleButton(
-                    onClick = { entry?.let { onAddToSchedule(it) } },
-                    enabled = entry != null,
-                    tooltipText = addScheduleStr
+            },
+            tooltipPlacement = TooltipPlacement.ComponentRect(
+                anchor = Alignment.BottomCenter,
+                offset = DpOffset(0.dp, 4.dp)
+            ),
+        ) {
+            Box(
+                modifier = Modifier
+                    .height(32.dp)
+                    .sunken(AppShape(8.dp), elevationPalette())
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onToggleDictLanguage,
+                    )
+                    .padding(horizontal = 10.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = if (dictLanguage == "en") "EN" else "RU",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            // Go Live stays last, as it does on every other tab: it is the button the operator
-            // reaches for under pressure, so it keeps the same end of the row everywhere.
-            if (onGoLive != null) {
-                GoLiveButton(
-                    onClick = { entry?.let { onGoLive(it) } },
-                    enabled = entry != null,
-                    tooltipText = goLiveStr,
-                    showsShortcut = true,
-                )
-            }
+        }
+        if (onAddToSchedule != null) {
+            AddToScheduleButton(
+                onClick = { entry?.let { onAddToSchedule(it) } },
+                enabled = entry != null,
+                tooltipText = addScheduleStr
+            )
+        }
+        // Go Live stays last, as it does on every other tab: it is the button the operator
+        // reaches for under pressure, so it keeps the same end of the row everywhere.
+        if (onGoLive != null) {
+            GoLiveButton(
+                onClick = { entry?.let { onGoLive(it) } },
+                enabled = entry != null,
+                tooltipText = goLiveStr,
+                showsShortcut = true,
+            )
         }
     }
 }

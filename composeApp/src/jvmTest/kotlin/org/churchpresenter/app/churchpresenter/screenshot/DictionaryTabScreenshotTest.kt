@@ -262,6 +262,11 @@ class DictionaryTabScreenshotTest {
     @Test
     fun `a narrow panel`() = shoot("narrow_panel", width = 620.dp) { selectEntry(AGAPE) }
 
+    /** Narrower than one row of the entry's actions: they wrap, and Go Live keeps its size and its place. */
+    @Test
+    fun `a panel too narrow for one row of actions`() =
+        shoot("narrow_actions_wrap", width = 520.dp) { selectEntry(AGAPE) }
+
     private companion object {
         const val SECTION = "dictionaryTab"
 
