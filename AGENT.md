@@ -319,9 +319,8 @@ keep passing, and a test your change invalidated is fixed or deleted as part of 
 `composeApp/src/jvmTest/` — run with `./gradlew :composeApp:check`. CI (`.github/workflows/test.yml`)
 runs these on every push, plus each module's suite when the change touched that module or one it
 depends on — worked out from `./gradlew moduleGraph` by `.github/ci/affected_modules.py`, so a new
-`projects.*` dependency needs no CI edit. The jobs run side by side: `app` (two shards by test class,
-`-PtestShard=N/2`, then `app-coverage` over both shards' exec files), `detekt`, the three-run check,
-and `modules`, whose suites `.github/ci/plan_ci.py` packs into up to eight runners by their measured
+`projects.*` dependency needs no CI edit. The jobs run side by side: `app`, `detekt`, the three-run
+check, and `modules`, whose suites `.github/ci/plan_ci.py` packs into up to eight runners by their measured
 minutes; each runner runs its suites one at a time. **A new module with tests is one row in `plan_ci.py`'s `MODULES`** — until then CI warns
 that it never runs. `test` is the required check: it gathers the results and fails unless every job
 passed.
@@ -332,9 +331,6 @@ failures that only appear under load:
 - **Never bind a fixed port directly.** Go through `testPort(39_xxx)` (`TestPorts.kt`), and store
   the `testPort` value if the port is reused for the client URL.
 - **`user.home` is per fork** (`PerForkTestHome` points each at `build/test-home/worker-N`).
-- **`-PtestShard=N/M` runs one shard** of the parallel pass, by a hash of the test class's file
-  path, writing `jacoco/jvmTest-shardN.exec`; the serial classes run in shard 1 only, and the report
-  and floor read every `jvmTest*.exec`. Delete stale shard files before a local unsharded report.
 - **Some classes cannot run beside anything**: `jvmTestSerial` (`maxParallelForks = 1`) holds those
   listed in `serialTestClasses` (`composeApp/build.gradle.kts`). `jvmTest` excludes them and is
   `finalizedBy` it. Passing `--tests` stands the exclusion down and runs the named class in `jvmTest`.

@@ -190,18 +190,10 @@ jobs:
           :bible-engine:detekt :presentation-engine:detekt :song-chords:detekt :bible:detekt
           :calendar:detekt :lottieGenerator:detekt :shared-ui:detekt :slides:detekt :media:detekt :web:detekt :crossword-tab:detekt :qa:detekt :dictionary:detekt :helper:detekt :stt:detekt :announcements:detekt :lower-third:detekt :songs:detekt :bible-tab:detekt :server:detekt :schedule:detekt :canvas:detekt :presenter:detekt :profiles:detekt :companion-surface:detekt :obs:detekt :live-show:detekt :show-control:detekt :control-in:detekt :live-output:detekt :statistics:detekt :updater:detekt :telemetry:detekt :app-settings:detekt :server-ui:detekt
 
-  # The app's suite, split across two runners by test class (`-PtestShard`, see composeApp's
-  # build.gradle.kts): each compiles, runs its half and keeps its JaCoCo exec file; shard 1 also runs
-  # the serial classes and keeps the compiled classes. `app-coverage` then reports and gates over
-  # both halves. Was one ~11-minute job on the critical path.
   app:
     needs: prepare
     runs-on: ubuntu-latest
     timeout-minutes: 50
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2]
     env:
       ORG_GRADLE_PROJECT_hangThresholdMs: '150000'
     steps:
@@ -215,10 +207,10 @@ jobs:
       - name: App unit tests
         id: unit_tests
         # Tighter than the job's own deadline so a hang here is attributed to this step and the
-        # uploads below (`!cancelled()`) still get to run. Two other things fire before this budget
-        # does: jvmTest's own 30-minute task timeout, and HungTestReporter, which halts a fork whose
-        # single test has outlived 150s (AGENT.md budgets ~1s a test) and writes a thread dump into
-        # the results.
+        # coverage steps and the results upload below (`!cancelled()`) still get to run. Two other
+        # things fire before this budget does: jvmTest's own 30-minute task timeout, and
+        # HungTestReporter, which halts a fork whose single test has outlived 150s (AGENT.md budgets
+        # ~1s a test) and writes a thread dump into the results.
         timeout-minutes: 40
         # Compiled first, then the Kotlin compile daemon is stopped before a single test forks. It is
         # idle for the rest of the step but holds ~3-4 GB, and beside the Gradle daemon and the test
@@ -227,7 +219,7 @@ jobs:
         run: |
           ./gradlew :composeApp:jvmTestClasses
           pkill -f KotlinCompileDaemon || true
-          ./gradlew :composeApp:jvmTest -PtestShard=${{ matrix.shard }}/2 -PhangThresholdMs=150000
+          ./gradlew :composeApp:jvmTest -PhangThresholdMs=150000
 
       # So an outlier explains itself instead of needing a guess.
       - name: Slowest test classes
@@ -248,87 +240,42 @@ jobs:
               print(f'{t:>8.1f}s  {n:>5}  {name}')
           PY
 
+      # The six JaCoCo counters, into the log and onto the run's summary page.
+      #
+      # `-x jvmTest -x jvmTestSerial`: jacocoTestReport `dependsOn` both, and after a FAILED suite
+      # that dependency is not up to date, so without it this step would relaunch the suite inside
+      # its own budget (and with only `jvmTest` excluded it once ran the serial classes alone and
+      # reported a 159-test "green suite" at 33% coverage). The step-summary path travels as a
+      # property because `System.getenv` in build logic reads the daemon's frozen environment.
+      #
+      # `!cancelled()`, not `always()`: after a cancelled run the suite stopped partway and the
+      # numbers would be meaningless. A step that hits its own timeout is failed, not cancelled.
+      - name: Coverage summary
+        if: ${{ !cancelled() }}
+        timeout-minutes: 10
+        run: ./gradlew :composeApp:jacocoTestReport -x jvmTest -x jvmTestSerial "-PstepSummary=$GITHUB_STEP_SUMMARY"
+
+      # The floors, off the execution data the suite just wrote. Advisory whenever the suite did not
+      # pass: the exec data is then from a run that did not finish, so a breach would be an artefact.
+      - name: Coverage floor
+        if: ${{ !cancelled() }}
+        continue-on-error: ${{ steps.unit_tests.outcome != 'success' }}
+        timeout-minutes: 10
+        run: ./gradlew :composeApp:jacocoTestCoverageVerification -x jvmTest -x jvmTestSerial
+
       - name: Keep the results for the report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           # Not `results-*`: every path here is under composeApp/build/, which the upload strips, so
           # `test` downloads these back under that directory itself.
-          name: app-results-${{ matrix.shard }}
+          name: app-results
           if-no-files-found: ignore
           retention-days: 7
           path: |
             composeApp/build/test-results/
             composeApp/build/reports/tests/
-
-      - name: Keep the coverage data
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: exec-app-${{ matrix.shard }}
-          if-no-files-found: ignore
-          retention-days: 1
-          path: composeApp/build/jacoco/*.exec
-
-      # JaCoCo matches execution data to the exact class bytes it ran, so the report is built over
-      # these rather than a fresh compile.
-      - name: Keep the compiled classes
-        if: ${{ !cancelled() && matrix.shard == 1 }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: classes-app
-          if-no-files-found: error
-          retention-days: 1
-          path: composeApp/build/classes/kotlin/jvm/main/
-
-  # The six JaCoCo counters and the floors, over both shards' execution data.
-  app-coverage:
-    needs: app
-    if: ${{ !cancelled() && needs.app.result != 'skipped' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v4
-
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: exec-app-*
-          merge-multiple: true
-          path: composeApp/build/jacoco/
-      - uses: actions/download-artifact@v4
-        with:
-          name: classes-app
-          path: composeApp/build/classes/kotlin/jvm/main/
-
-      # Into the log and onto the run's summary page.
-      #
-      # `-x jvmTest -x jvmTestSerial`: jacocoTestReport `dependsOn` both, and nothing here may run a
-      # suite. The step-summary path travels as a property because `System.getenv` in build logic
-      # reads the daemon's frozen environment.
-      - name: Coverage summary
-        timeout-minutes: 10
-        run: ./gradlew :composeApp:jacocoTestReport -x jvmTest -x jvmTestSerial "-PstepSummary=$GITHUB_STEP_SUMMARY"
-
-      # Advisory whenever a shard did not pass: the exec data is then from a run that did not
-      # finish, so a breach would be an artefact.
-      - name: Coverage floor
-        continue-on-error: ${{ needs.app.result != 'success' }}
-        timeout-minutes: 10
-        run: ./gradlew :composeApp:jacocoTestCoverageVerification -x jvmTest -x jvmTestSerial
-
-      - name: Keep the report for the coverage table
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-coverage-report
-          if-no-files-found: ignore
-          retention-days: 7
-          path: composeApp/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+            composeApp/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
 
   # The module suites, in the groups prepare packed them into: one runner per group. A group compiles
   # in parallel, then runs its suites one at a time (`--max-workers=1`) -- several at once on one
@@ -420,7 +367,7 @@ jobs:
   # as passing, which is exactly how #634 merged with no suite run, so this job must never be the
   # one that is skipped. It also gathers every job's results into the pull-request reports.
   test:
-    needs: [prepare, detekt, app, app-coverage, modules, changed-tests]
+    needs: [prepare, detekt, app, modules, changed-tests]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -439,21 +386,13 @@ jobs:
           pattern: results-*
           merge-multiple: true
 
-      # The app's own artifacts were uploaded relative to composeApp/build/ -- see `app`.
+      # The app's own artifact was uploaded relative to composeApp/build/ -- see `app`.
       - name: Gather the app's results
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && needs.app.result != 'skipped' }}
         uses: actions/download-artifact@v4
         with:
-          pattern: app-results-*
-          merge-multiple: true
+          name: app-results
           path: composeApp/build/
-
-      - name: Gather the app's coverage report
-        if: ${{ !cancelled() && needs.app-coverage.result == 'success' }}
-        uses: actions/download-artifact@v4
-        with:
-          name: app-coverage-report
-          path: composeApp/build/reports/jacoco/jacocoTestReport/
 
       # Puts the failure message and stack trace of every failed test in the pull request itself, and
       # annotates the failing line. Only modules that ran in this build are listed (plan_ci.py
