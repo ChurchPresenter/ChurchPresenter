@@ -530,11 +530,13 @@ object CrashReporter {
     /**
      * Redacts `\Users\NAME`, `/Users/NAME`, `/home/NAME` path segments and any literal
      * occurrence of the current OS username. Case-insensitive; leaves the rest of the
-     * path intact. Used by [beforeSend] so app-generated paths never leak the username.
+     * path intact, and masks credentials ([Secrets]). Used by [beforeSend] and the breadcrumb
+     * callback so app-generated paths never leak the username, nor a request its API key.
      */
     private fun scrubPii(text: String?): String? {
         if (text.isNullOrEmpty()) return text
-        var out = text.replace(Regex("(?i)([/\\\\](?:Users|home)[/\\\\])[^/\\\\\\r\\n\"']+"), "$1<user>")
+        var out = Secrets.redact(text)
+            .replace(Regex("(?i)([/\\\\](?:Users|home)[/\\\\])[^/\\\\\\r\\n\"']+"), "$1<user>")
         if (userName.length >= MIN_SCRUBBED_NAME_LENGTH) out = out.replace(userName, "<user>", ignoreCase = true)
         return out
     }
@@ -685,6 +687,7 @@ object CrashReporter {
         // Mark our own packages as in-app so app frames stand out in stack traces.
         options.addInAppInclude("org.churchpresenter")
         options.beforeSend = crashAttachingBeforeSend()
+        options.beforeBreadcrumb = scrubbingBeforeBreadcrumb()
     }
 
     /**
@@ -738,6 +741,16 @@ object CrashReporter {
         event
     }
 
+    /**
+     * Scrubs every breadcrumb as it is recorded — including the ones `sentry-logback` makes from
+     * WARN lines, which never pass through [breadcrumb] — so the trail holds no credential even
+     * before [scrubEvent] walks it on the way out.
+     */
+    internal fun scrubbingBeforeBreadcrumb() = SentryOptions.BeforeBreadcrumbCallback { crumb, _ ->
+        try { crumb.message = scrubPii(crumb.message) } catch (_: Exception) { /* never drop a crumb */ }
+        crumb
+    }
+
     private fun sentryMessage(text: String): Message = Message().apply { message = text }
 
     private fun sendToSentry(throwable: Throwable, context: String, fatal: Boolean) {
@@ -785,7 +798,7 @@ object CrashReporter {
                 append(stackTrace)
             }
 
-            file.writeText(report)
+            file.writeText(Secrets.redact(report))
         } catch (_: Exception) {
             // Last resort — don't let crash reporting itself crash the app
         }

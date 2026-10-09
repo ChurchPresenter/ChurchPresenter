@@ -64,7 +64,7 @@ internal fun embeddedPlayerEvents(
         viewModel.markFinished()
     }
     override fun error(mediaPlayer: MediaPlayer) {
-        Log.warn("VLCJ", "Playback error for: ${viewModel.mediaUrl}")
+        Log.warn("VLCJ", "Playback error for: ${viewModel.mediaUrl.substringBefore('?')}")
         SwingUtilities.invokeLater { viewModel.pause() }
     }
     override fun videoOutput(mediaPlayer: MediaPlayer, newCount: Int) {

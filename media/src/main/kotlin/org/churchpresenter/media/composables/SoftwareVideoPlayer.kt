@@ -83,7 +83,7 @@ internal fun softwarePlayerEvents(
     }
 
     override fun error(mediaPlayer: MediaPlayer) {
-        Log.warn("VLCJ (software)", "Playback error for: ${viewModel.mediaUrl}")
+        Log.warn("VLCJ (software)", "Playback error for: ${viewModel.mediaUrl.substringBefore('?')}")
         SwingUtilities.invokeLater { viewModel.pause() }
     }
 }

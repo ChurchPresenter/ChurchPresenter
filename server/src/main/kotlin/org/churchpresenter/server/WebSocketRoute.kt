@@ -7,6 +7,7 @@ import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import java.io.IOException
+import java.security.MessageDigest
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -36,7 +37,7 @@ internal fun Route.webSocketRoute(
                     val headerKey = call.request.headers[Constants.HEADER_API_KEY]
                     if (server._apiKeyEnabled.value && server._apiKey.value.isNotEmpty()) {
                         val provided = queryKey ?: headerKey ?: ""
-                        if (provided != server._apiKey.value) {
+                        if (!MessageDigest.isEqual(provided.toByteArray(), server._apiKey.value.toByteArray())) {
                             InstanceLinkLogger.log(
                                 InstanceLinkLogSide.PRIMARY,
                                 "follower_unauthorized",

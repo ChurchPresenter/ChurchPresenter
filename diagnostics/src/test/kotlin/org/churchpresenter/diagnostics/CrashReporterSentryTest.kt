@@ -1,6 +1,7 @@
 package org.churchpresenter.diagnostics
 
 import io.sentry.Breadcrumb
+import io.sentry.Hint
 import io.sentry.NoOpTransportFactory
 import io.sentry.Sentry
 import io.sentry.SentryEvent
@@ -176,6 +177,35 @@ class CrashReporterSentryTest {
         val scrubbed = assertNotNull(event.message?.message)
         assertFalse(scrubbed.contains("someone"), "a crash report must not carry the operator's name: $scrubbed")
         assertTrue(scrubbed.contains("<user>"), scrubbed)
+    }
+
+    @Test
+    fun `an event's message and trail are scrubbed of api keys`() {
+        val event = SentryEvent().apply {
+            message = Message().apply { message = "playback failed: http://host:8765/media?apiKey=s3cret" }
+            breadcrumbs = listOf(Breadcrumb().apply { message = "X-Api-Key: s3cret" })
+        }
+
+        CrashReporter.scrubEvent(event)
+
+        assertEquals("playback failed: http://host:8765/media?apiKey=${Secrets.MASK}", event.message?.message)
+        assertEquals("X-Api-Key: ${Secrets.MASK}", event.breadcrumbs?.first()?.message)
+    }
+
+    @Test
+    fun `a breadcrumb is scrubbed as it is recorded`() {
+        val crumb = Breadcrumb().apply { message = "/Users/someone/x?token=abc" }
+
+        val kept = CrashReporter.scrubbingBeforeBreadcrumb().execute(crumb, Hint())
+
+        assertEquals("/Users/<user>/x?token=${Secrets.MASK}", kept?.message)
+    }
+
+    @Test
+    fun `a breadcrumb with no message is kept as it is`() {
+        val crumb = Breadcrumb()
+
+        assertEquals(crumb, CrashReporter.scrubbingBeforeBreadcrumb().execute(crumb, Hint()))
     }
 
     @Test
