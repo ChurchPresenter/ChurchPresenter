@@ -46,9 +46,10 @@ class CalendarEnrollQrContentTest {
         setContent { MaterialTheme { CalendarEnrollQrContent(enrollment) { closed++ } } }
         mainClock.advanceTimeByFrame()
 
-        mainClock.advanceTimeBy(119_000)
+        // One jump, not 7,400 frames: nothing on screen changes until the deadline.
+        mainClock.advanceTimeBy(119_000, ignoreFrameDuration = true)
         assertEquals(0, closed, "still up just before")
-        mainClock.advanceTimeBy(2_000)
+        mainClock.advanceTimeBy(2_000, ignoreFrameDuration = true)
         assertEquals(1, closed)
     }
 

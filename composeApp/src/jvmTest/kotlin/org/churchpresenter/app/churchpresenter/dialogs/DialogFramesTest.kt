@@ -197,7 +197,7 @@ class DialogFramesTest {
             isVisible = true,
             theme = ThemeMode.LIGHT,
             settingsManager = SettingsManager(),
-            companionServer = CompanionServer(),
+            companionServer = CompanionServer(shutdownGraceMs = 0),
             remoteClientManager = RemoteClientManager(),
             onDismiss = f.dismiss,
             initialSettings = AppSettings(),

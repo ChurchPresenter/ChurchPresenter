@@ -82,7 +82,7 @@ internal fun projectionTab(
     block: ComposeUiTest.(get: () -> AppSettings) -> Unit,
 ) = runComposeUiTest {
     var current = initial
-    val server = CompanionServer()
+    val server = CompanionServer(shutdownGraceMs = 0)
     setContent {
         MaterialTheme {
             var state by remember { mutableStateOf(current) }

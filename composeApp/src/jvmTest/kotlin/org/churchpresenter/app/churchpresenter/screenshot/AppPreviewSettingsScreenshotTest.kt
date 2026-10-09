@@ -69,7 +69,7 @@ class AppPreviewSettingsScreenshotTest {
                         OptionsDialogContent(
                             theme = mode,
                             settingsManager = SettingsManager(),
-                            companionServer = CompanionServer(),
+                            companionServer = CompanionServer(shutdownGraceMs = 0),
                             remoteClientManager = RemoteClientManager(),
                             onDismiss = {},
                             initialTab = tab,

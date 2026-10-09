@@ -74,7 +74,7 @@ class CompanionServerPresentationRenderTest {
 
             deckDir = Files.createTempDirectory("cp-presentation-render-decks").toFile()
 
-            server = CompanionServer()
+            server = CompanionServer(shutdownGraceMs = 0)
             server.start(port = REQUESTED_PORT)
             boundPort = runBlocking {
                 withTimeoutOrNull(10_000) {

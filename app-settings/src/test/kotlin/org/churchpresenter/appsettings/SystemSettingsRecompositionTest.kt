@@ -63,7 +63,7 @@ class SystemSettingsRecompositionTest {
         var handler by mutableStateOf<((AppSettings) -> AppSettings) -> Unit>({ first = it(settings) })
         setContent {
             MaterialTheme {
-                SystemSettingsTab(settings = settings, onSettingsChange = handler, companionServer = CompanionServer())
+                SystemSettingsTab(settings = settings, onSettingsChange = handler, companionServer = CompanionServer(shutdownGraceMs = 0))
             }
         }
         waitForIdle()

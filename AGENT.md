@@ -353,6 +353,11 @@ every `@BeforeClass`.
   timeouts as the success path, or warm-up pauses. When the production delay is the cost, make it an
   injectable defaulted parameter; if that is impossible, don't write the test and note the gap in the
   class doc. Check with the `time=` attributes in `composeApp/build/test-results/jvmTest/TEST-*.xml`.
+- **Three costs that look like waiting and are not:** a `CompanionServer` stopped with its default
+  one-second grace (tests construct it with `shutdownGraceMs = 0`); Swing's `doClick()`, which
+  sleeps 68 ms per press (use `doClick(0)`); and a long `mainClock.advanceTimeBy` while something
+  animates, which composes and draws every frame on the way (jump with `ignoreFrameDuration = true`
+  when nothing between here and the deadline matters).
 - **A route that answers before it finishes leaves a coroutine behind — track it and join it before
   teardown.** `POST /api/atem/still|clip` transfers after responding; route every test in such a suite
   through `AtemBridge.trackUpload`/`cancelUpload` (which joins).

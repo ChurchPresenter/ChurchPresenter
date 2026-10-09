@@ -35,7 +35,7 @@ class ServerSettingsTabRunningTest {
         @JvmStatic
         fun startServer() {
             port = freeServerPort()
-            server = CompanionServer()
+            server = CompanionServer(shutdownGraceMs = 0)
             server.start(port, "127.0.0.1")
             // Wait on the positive signal the server itself publishes, never on a fixed pause.
             val deadline = System.currentTimeMillis() + 10_000

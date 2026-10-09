@@ -98,7 +98,7 @@ class ProfileEditorWriteBackTest {
                 OptionsDialogContent(
                     theme = ThemeMode.LIGHT,
                     settingsManager = SettingsManager(),
-                    companionServer = CompanionServer(),
+                    companionServer = CompanionServer(shutdownGraceMs = 0),
                     remoteClientManager = RemoteClientManager(),
                     onDismiss = {},
                     onSave = { saved.settings = it },

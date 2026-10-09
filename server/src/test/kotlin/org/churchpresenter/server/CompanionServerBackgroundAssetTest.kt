@@ -61,7 +61,7 @@ class CompanionServerBackgroundAssetTest {
         @BeforeClass
         fun startServer() {
             assetDir = Files.createTempDirectory("cp-backgrounds").toFile()
-            server = CompanionServer()
+            server = CompanionServer(shutdownGraceMs = 0)
             server.start(port = testPort(39_729))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {

@@ -71,6 +71,12 @@ private const val UNKNOWN_VERSION = "dev"
 class CompanionServer(
     /** This build's version, reported to companions -- the app passes `BuildConfig.APP_VERSION`. */
     internal val appVersion: String = UNKNOWN_VERSION,
+    /**
+     * How long [stop] lets open requests and sockets finish before closing them. The app keeps the
+     * default; a test passes 0, since it has nothing left in flight and otherwise pays this on
+     * every teardown.
+     */
+    private val shutdownGraceMs: Long = SHUTDOWN_GRACE_MS,
 ) {
     internal val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -620,7 +626,7 @@ class CompanionServer(
 
     fun stop() {
         tunnelManager.stop()
-        server?.stop(SHUTDOWN_GRACE_MS, SHUTDOWN_TIMEOUT_MS)
+        server?.stop(shutdownGraceMs, maxOf(shutdownGraceMs, SHUTDOWN_TIMEOUT_MS))
         server = null
         scope.coroutineContext[Job]?.cancelChildren()
         _isRunning.value = false

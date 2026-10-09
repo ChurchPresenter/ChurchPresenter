@@ -159,15 +159,16 @@ class NavigationTopBarTest {
         waitForIdle()
 
         val menuBar = menuBarSlot.captured
+        // doClick(0), not doClick(): the no-argument form holds each press for 68 ms of real sleep.
         for (menuIndex in 0 until menuBar.menuCount) {
             val menu = menuBar.getMenu(menuIndex)
             if (menu.text == "Language") {
-                menu.getItem(0).doClick()
+                menu.getItem(0).doClick(0)
                 continue
             }
             for (itemIndex in 0 until menu.itemCount) {
                 // A separator is a null item in a JMenu.
-                menu.getItem(itemIndex)?.doClick()
+                menu.getItem(itemIndex)?.doClick(0)
             }
         }
     }
@@ -190,11 +191,11 @@ class NavigationTopBarTest {
 
         val developer = menuBarSlot.captured.getMenu(7)
         val display = developer.getItem(0) as JMenu
-        for (itemIndex in 0 until display.itemCount) display.getItem(itemIndex).doClick()
-        developer.getItem(1).doClick()
-        developer.getItem(2).doClick()
-        developer.getItem(3).doClick()
-        developer.getItem(4).doClick()
+        for (itemIndex in 0 until display.itemCount) display.getItem(itemIndex).doClick(0)
+        developer.getItem(1).doClick(0)
+        developer.getItem(2).doClick(0)
+        developer.getItem(3).doClick(0)
+        developer.getItem(4).doClick(0)
     }
 
     @Test
@@ -222,7 +223,7 @@ class NavigationTopBarTest {
             assertEquals("Save Schedule As...", file.getItem(3).text)
             assertEquals("Close Schedule", file.getItem(4).text)
             assertEquals("Exit", file.getItem(5).text)
-            for (i in 0 until file.itemCount) file.getItem(i).doClick()
+            for (i in 0 until file.itemCount) file.getItem(i).doClick(0)
         }
         assertEquals(1, newSchedule)
         assertEquals(1, open)
@@ -248,7 +249,7 @@ class NavigationTopBarTest {
             assertEquals("Add to Schedule", schedule.getItem(0).text)
             assertEquals("Remove from Schedule", schedule.getItem(1).text)
             assertEquals("Clear Schedule", schedule.getItem(2).text)
-            for (i in 0 until schedule.itemCount) schedule.getItem(i).doClick()
+            for (i in 0 until schedule.itemCount) schedule.getItem(i).doClick(0)
         }
         assertEquals(1, add)
         assertEquals(1, remove)
@@ -268,7 +269,7 @@ class NavigationTopBarTest {
             assertEquals(2, edit.itemCount)
             assertEquals("Settings", edit.getItem(0).text)
             assertEquals("CCLI Reports", edit.getItem(1).text)
-            for (i in 0 until edit.itemCount) edit.getItem(i).doClick()
+            for (i in 0 until edit.itemCount) edit.getItem(i).doClick(0)
         }
         assertEquals(1, settings)
         assertEquals(1, statistics)
@@ -290,7 +291,7 @@ class NavigationTopBarTest {
             assertEquals("Disconnect", connectMenu.getItem(1).text)
             assertTrue(connectMenu.getItem(0).isEnabled)
             assertFalse(connectMenu.getItem(1).isEnabled)
-            connectMenu.getItem(0).doClick()
+            connectMenu.getItem(0).doClick(0)
         }
         assertEquals(1, connect)
         assertEquals(0, disconnect)
@@ -305,7 +306,7 @@ class NavigationTopBarTest {
         ) {
             val connectMenu = getMenu(3)
             assertTrue(connectMenu.getItem(1).isEnabled)
-            connectMenu.getItem(1).doClick()
+            connectMenu.getItem(1).doClick(0)
         }
         assertEquals(1, disconnect)
     }
@@ -349,7 +350,7 @@ class NavigationTopBarTest {
                 val item = view.getItem(index)
                 assertTrue(item.text.isNotBlank(), "every theme row must be labelled")
                 labels.add(item.text)
-                item.doClick()
+                item.doClick(0)
             }
             assertEquals(labels.size, labels.toSet().size, "two rows sharing a label: $labels")
         }
@@ -406,7 +407,7 @@ class NavigationTopBarTest {
                     item.text.endsWith(expectedEntry.first),
                     "item $index was '${item.text}', expected to end with '${expectedEntry.first}'",
                 )
-                item.doClick()
+                item.doClick(0)
             }
         }
         assertEquals(expected.map { it.second }, invoked)
@@ -458,7 +459,7 @@ class NavigationTopBarTest {
             assertEquals(KeyEvent.VK_K, helpMenu.getItem(4).accelerator.keyCode)
             assertEquals(KeyEvent.VK_L, helpMenu.getItem(5).accelerator.keyCode)
             assertEquals(KeyEvent.VK_D, helpMenu.getItem(6).accelerator.keyCode)
-            for (i in 0 until helpMenu.itemCount) helpMenu.getItem(i).doClick()
+            for (i in 0 until helpMenu.itemCount) helpMenu.getItem(i).doClick(0)
         }
         assertEquals(1, gettingStarted)
         assertEquals(1, showHelper)
@@ -504,12 +505,12 @@ class NavigationTopBarTest {
             val showWindow = display.getItem(0) as JCheckBoxMenuItem
             assertEquals("Show Window", showWindow.text)
             assertTrue(showWindow.isSelected)
-            showWindow.doClick()
+            showWindow.doClick(0)
 
             val alwaysOnTop = display.getItem(1) as JCheckBoxMenuItem
             assertEquals("Always on Top", alwaysOnTop.text)
             assertFalse(alwaysOnTop.isSelected)
-            alwaysOnTop.doClick()
+            alwaysOnTop.doClick(0)
         }
         assertEquals(listOf(false), visibleCalls)
         assertEquals(listOf(true), alwaysOnTopCalls)
@@ -527,8 +528,8 @@ class NavigationTopBarTest {
             val developer = getMenu(7)
             assertEquals("Animation Style Editor…", developer.getItem(1).text)
             assertEquals("Memory Monitor…", developer.getItem(2).text)
-            developer.getItem(1).doClick()
-            developer.getItem(2).doClick()
+            developer.getItem(1).doClick(0)
+            developer.getItem(2).doClick(0)
         }
         assertEquals(1, styleEditor)
         assertEquals(1, memoryMonitor)
@@ -543,7 +544,7 @@ class NavigationTopBarTest {
         ) {
             val developer = getMenu(7)
             assertEquals("Share Your Story Dialog", developer.getItem(3).text)
-            developer.getItem(3).doClick()
+            developer.getItem(3).doClick(0)
         }
         assertEquals(1, storyPrompt)
     }
@@ -557,7 +558,7 @@ class NavigationTopBarTest {
         ) {
             val developer = getMenu(7)
             assertEquals("Wick Intro Dialog", developer.getItem(4).text)
-            developer.getItem(4).doClick()
+            developer.getItem(4).doClick(0)
         }
         assertEquals(1, wickIntro)
     }

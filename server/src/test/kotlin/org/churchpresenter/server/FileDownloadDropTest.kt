@@ -21,7 +21,7 @@ import kotlin.test.assertFailsWith
  */
 class FileDownloadDropTest {
 
-    private val server = CompanionServer()
+    private val server = CompanionServer(shutdownGraceMs = 0)
 
     private fun send(failure: Throwable?) = runBlocking {
         sendOrDropOnClientExit(server, "/api/bible/file/translation/{index}") {

@@ -93,7 +93,7 @@ class OptionsContentTest {
                 OptionsDialogContent(
                     theme = ThemeMode.LIGHT,
                     settingsManager = SettingsManager(),
-                    companionServer = CompanionServer(),
+                    companionServer = CompanionServer(shutdownGraceMs = 0),
                     remoteClientManager = RemoteClientManager(),
                     onDismiss = { result.dismissed++ },
                     onSave = { result.saved = it },
@@ -369,7 +369,7 @@ class OptionsContentTest {
                 isVisible = false,
                 theme = ThemeMode.LIGHT,
                 settingsManager = SettingsManager(),
-                companionServer = CompanionServer(),
+                companionServer = CompanionServer(shutdownGraceMs = 0),
                 remoteClientManager = RemoteClientManager(),
                 onDismiss = {},
             )
@@ -384,7 +384,7 @@ class OptionsContentTest {
                 isVisible = false,
                 theme = ThemeMode.LIGHT,
                 settingsManager = SettingsManager(),
-                companionServer = CompanionServer(),
+                companionServer = CompanionServer(shutdownGraceMs = 0),
                 remoteClientManager = RemoteClientManager(),
                 onDismiss = {},
                 calendarSync = null,
@@ -409,7 +409,7 @@ class OptionsContentTest {
             OptionsDialogContent(
                 theme = ThemeMode.LIGHT,
                 settingsManager = SettingsManager(),
-                companionServer = CompanionServer(),
+                companionServer = CompanionServer(shutdownGraceMs = 0),
                 remoteClientManager = RemoteClientManager(),
                 onDismiss = {},
                 calendarSync = null,

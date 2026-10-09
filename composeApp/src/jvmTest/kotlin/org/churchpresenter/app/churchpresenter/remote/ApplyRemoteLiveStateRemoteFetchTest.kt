@@ -48,7 +48,7 @@ class ApplyRemoteLiveStateRemoteFetchTest {
     fun setUp() {
         TestSingletons.latchToTestHome()
 
-        server = CompanionServer()
+        server = CompanionServer(shutdownGraceMs = 0)
         server.start(port = testPort(39_820))
         port = runBlocking {
             withTimeoutOrNull(10_000) {

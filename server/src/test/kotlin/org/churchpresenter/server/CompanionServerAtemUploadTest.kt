@@ -147,7 +147,7 @@ class CompanionServerAtemUploadTest {
                 }
             }
 
-            server = CompanionServer()
+            server = CompanionServer(shutdownGraceMs = 0)
             server.start(port = requestedPort)
             boundPort = runBlocking {
                 withTimeoutOrNull(10_000) {

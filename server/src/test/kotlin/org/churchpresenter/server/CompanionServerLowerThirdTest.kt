@@ -77,7 +77,7 @@ class CompanionServerLowerThirdTest {
             java.io.File(lottieFolder, "notlottie.json").writeText("""{"hello":"world"}""")
             java.io.File(lottieFolder, "readme.txt").writeText("not json")
 
-            server = CompanionServer()
+            server = CompanionServer(shutdownGraceMs = 0)
             server.start(port = testPort(39_713))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {
