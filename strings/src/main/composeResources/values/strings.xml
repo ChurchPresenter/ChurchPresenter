@@ -2081,6 +2081,7 @@
     <string name="update_dialog_downloading">Downloading...</string>
     <string name="update_dialog_install_now">Install Now</string>
     <string name="update_dialog_open_page">Open Download Page</string>
+    <string name="update_dialog_unverified">The installer could not be verified against the release, so it was not run. Download it from the release page instead.</string>
     <string name="update_already_latest">You are running the latest version.</string>
     <string name="update_dialog_up_to_date_title">You're Up to Date</string>
     <string name="update_dialog_view_on_github">View on GitHub</string>

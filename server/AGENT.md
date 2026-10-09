@@ -59,6 +59,12 @@ It takes `:core-models`, `:settings`, `:shared-ui` (its usage events and text he
 - `internal` stops at the module edge. What `:composeApp` calls is public; nothing else is.
 - **Don't add a dependency on `:composeApp`'s types.** Code that needs the live output, statistics
   or the schedule belongs in the app's `remote/`, reached through a callback.
+- **cloudflared is pinned.** `src/main/resources/tunnel/cloudflared-builds.properties` names one
+  release and the SHA-256 of each platform's asset; `TunnelManager` downloads that exact URL, refuses
+  bytes that do not match (`verifiedDownload`), and replaces an install whose `cloudflared.version`
+  marker names another pin. Never point it at `latest`. A test that plants a stand-in binary must
+  write the marker too, or the manager fetches the real one.
+- **Compare a key or password with `MessageDigest.isEqual`**, never `==`/`!=`.
 
 ## Commands
 

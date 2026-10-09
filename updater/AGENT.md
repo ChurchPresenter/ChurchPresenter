@@ -43,6 +43,10 @@ It takes `:shared-ui`, `:strings`, `:settings` and `:theme`, and nothing of `:co
   steps (`UpdateSteps`) and `installAndQuit`'s launch and quit are handed in as fakes. What only the
   real machine can do — the `DialogWindow`, starting a native installer, `exitProcess`, the live
   GitHub call — is not reached by the suite.
+- **Nothing unverified is run.** `UpdateChecker` carries the release asset's `digest` (GitHub's
+  `sha256:…`) as `UpdateInfo.downloadSha256`; `downloadInstaller` hashes the file as it lands and
+  keeps it only on a match. A missing digest or a mismatch deletes the file and reports
+  `DownloadState.Error(unverified = true)`, and the window offers the release page instead.
 
 ## Commands
 

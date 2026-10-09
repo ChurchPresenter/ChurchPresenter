@@ -29,7 +29,9 @@ data class UpdateInfo(
     val releaseUrl: String,
     val releaseNotes: String,
     val downloadUrl: String? = null,
-    val isPrerelease: Boolean = false
+    val isPrerelease: Boolean = false,
+    /** The installer's SHA-256 as GitHub reports it for the release asset; null when it gave none. */
+    val downloadSha256: String? = null,
 )
 
 sealed class UpdateCheckResult {
@@ -127,12 +129,18 @@ object UpdateChecker {
         }
     }
 
-    /** The installer for the detected OS among the release's assets, or null when it has none. */
-    private fun installerUrl(obj: JsonObject): String? {
+    /**
+     * The installer for the detected OS among the release's assets and its SHA-256 (from the
+     * asset's `sha256:…` `digest`, null when GitHub gave none), or null when it has no installer.
+     */
+    private fun installerAsset(obj: JsonObject): Pair<String, String?>? {
         val assets = obj["assets"]?.jsonArray ?: return null
-        return selectDownloadUrl(
-            assets.mapNotNull { it.jsonObject["browser_download_url"]?.jsonPrimitive?.contentOrNull }
-        )
+        val digests = assets.mapNotNull { asset ->
+            val url = asset.jsonObject["browser_download_url"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
+            url to asset.jsonObject["digest"]?.jsonPrimitive?.contentOrNull?.removePrefix("sha256:")
+        }.toMap()
+        val url = selectDownloadUrl(digests.keys.toList()) ?: return null
+        return url to digests[url]
     }
 
     /**
@@ -141,7 +149,7 @@ object UpdateChecker {
      */
     private fun installableRelease(obj: JsonObject, includePrereleases: Boolean): UpdateInfo? {
         if (obj["draft"]?.jsonPrimitive?.booleanOrNull == true) return null
-        val downloadUrl = installerUrl(obj) ?: return null
+        val (downloadUrl, downloadSha256) = installerAsset(obj) ?: return null
         val latestVersion = obj["tag_name"]?.jsonPrimitive?.contentOrNull?.removePrefix("v") ?: return null
         // A tag that is not `YY.MAJOR.MINOR` — the rolling `nightly` pre-release — can never be newer
         // than anything, and because it is re-created every night it is always the newest entry in
@@ -156,7 +164,8 @@ object UpdateChecker {
             releaseUrl = obj["html_url"]?.jsonPrimitive?.contentOrNull ?: RELEASES_URL,
             releaseNotes = (obj["body"]?.jsonPrimitive?.contentOrNull ?: "").take(RELEASE_NOTES_MAX_CHARS),
             downloadUrl = downloadUrl,
-            isPrerelease = isPrerelease
+            isPrerelease = isPrerelease,
+            downloadSha256 = downloadSha256,
         )
     }
 

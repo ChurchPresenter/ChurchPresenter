@@ -5,9 +5,11 @@ import com.sun.net.httpserver.HttpServer
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.net.InetSocketAddress
+import java.security.MessageDigest
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
@@ -40,14 +42,21 @@ class DownloadInstallerTest {
         return "http://127.0.0.1:${s.address.port}/$name"
     }
 
-    private fun download(url: String): List<DownloadState> {
+    private fun download(url: String, sha256: String? = installerSha256): List<DownloadState> {
         val states = mutableListOf<DownloadState>()
-        runBlocking { downloadInstaller(url) { states += it } }
+        runBlocking { downloadInstaller(url, sha256) { states += it } }
         states.filterIsInstance<DownloadState.Done>().forEach { downloaded += it.file }
         return states
     }
 
     private val installer = ByteArray(40_000) { (it % 251).toByte() }
+    private val installerSha256 =
+        MessageDigest.getInstance("SHA-256").digest(installer).joinToString("") { "%02x".format(it) }
+
+    /** Every file the update download created in the temp directory. */
+    private fun installersOnDisk(): Set<File> =
+        File(System.getProperty("java.io.tmpdir")).listFiles { f -> f.name.startsWith(UPDATE_INSTALLER_PREFIX) }
+            .orEmpty().toSet()
 
     @Test
     fun `the whole installer arrives under its own extension, with progress climbing to complete`() {
@@ -93,5 +102,30 @@ class DownloadInstallerTest {
         val error = assertIs<DownloadState.Error>(download("releases/ChurchPresenter-9.dmg").single())
 
         assertTrue(error.message.isNotBlank())
+    }
+
+    @Test
+    fun `an installer that does not match the published digest is refused and deleted`() {
+        val before = installersOnDisk()
+
+        val states = download(serve("ChurchPresenter-9.dmg", installer), sha256 = "0".repeat(64))
+
+        val error = assertIs<DownloadState.Error>(states.last())
+        assertTrue(error.unverified, "the window says why, rather than showing a raw error")
+        assertEquals(before, installersOnDisk(), "a file that failed verification is not left to run")
+    }
+
+    @Test
+    fun `a release with no published digest is not downloaded at all`() {
+        val states = download(serve("ChurchPresenter-9.dmg", installer), sha256 = null)
+
+        assertTrue(assertIs<DownloadState.Error>(states.single()).unverified)
+    }
+
+    @Test
+    fun `the digest check ignores hex case and refuses a blank pin`() {
+        assertTrue(installerDigestMatches("abcd", "ABCD"))
+        assertFalse(installerDigestMatches("abcd", "abce"))
+        assertFalse(installerDigestMatches("abcd", " "))
     }
 }

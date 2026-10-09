@@ -13,6 +13,8 @@ import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URI
+import java.security.DigestOutputStream
+import java.security.MessageDigest
 import kotlin.coroutines.CoroutineContext
 
 private const val CONNECT_TIMEOUT_MS = 10_000
@@ -25,7 +27,8 @@ private const val READ_TIMEOUT_MS = 30_000
  */
 internal class UpdateSteps(
     val reportDownloadStarted: (version: String) -> Unit = UpdateChecker::reportDownloadStarted,
-    val download: suspend (url: String, report: suspend (DownloadState) -> Unit) -> Unit = ::downloadInstaller,
+    val download: suspend (url: String, sha256: String?, report: suspend (DownloadState) -> Unit) -> Unit =
+        ::downloadInstaller,
     val install: (File) -> DownloadState.Error? = ::installAndQuit,
 )
 
@@ -55,7 +58,7 @@ internal class UpdateDownloadFlow(
         // never delays or fails the actual download below).
         steps.reportDownloadStarted(info.latestVersion)
         return scope.launch(Dispatchers.IO) {
-            steps.download(url) { stage -> withContext(ui) { state = stage } }
+            steps.download(url, info.downloadSha256) { stage -> withContext(ui) { state = stage } }
         }
     }
 
@@ -65,14 +68,33 @@ internal class UpdateDownloadFlow(
 }
 
 /**
+ * Whether [actualSha256] is the [expectedSha256] the release published for the installer. A missing
+ * digest fails: nothing is run that cannot be checked.
+ */
+internal fun installerDigestMatches(actualSha256: String, expectedSha256: String?): Boolean =
+    !expectedSha256.isNullOrBlank() && actualSha256.equals(expectedSha256, ignoreCase = true)
+
+/**
  * Downloads the installer at [downloadUrl] into a temp file, reporting each stage through [report]:
  * progress as the bytes land, then [DownloadState.Done] with the file, or [DownloadState.Error] when
  * the connection, the download or the temp file fails -- a malformed URL included.
  *
+ * The file is hashed as it lands and kept only if it matches [expectedSha256], the digest GitHub
+ * publishes for the release asset; a missing digest or a mismatch deletes it and reports an
+ * [DownloadState.Error] marked `unverified`, so [installAndQuit] never sees it.
+ *
  * Split out of [UpdateAvailableDialog] so the download can be driven against a local server; the
  * dialog hops each report onto the UI dispatcher.
  */
-internal suspend fun downloadInstaller(downloadUrl: String, report: suspend (DownloadState) -> Unit) {
+internal suspend fun downloadInstaller(
+    downloadUrl: String,
+    expectedSha256: String?,
+    report: suspend (DownloadState) -> Unit,
+) {
+    if (expectedSha256.isNullOrBlank()) {
+        report(DownloadState.Error("No published SHA-256 for $downloadUrl", unverified = true))
+        return
+    }
     try {
         val url = URI(downloadUrl).toURL()
         val connection = url.openConnection() as HttpURLConnection
@@ -89,15 +111,22 @@ internal suspend fun downloadInstaller(downloadUrl: String, report: suspend (Dow
         // delete the file out from under the installer.
         val tempFile = File.createTempFile(UPDATE_INSTALLER_PREFIX, suffix)
 
+        val digest = MessageDigest.getInstance("SHA-256")
         connection.inputStream.use { input ->
-            tempFile.outputStream().use { output ->
+            DigestOutputStream(tempFile.outputStream(), digest).use { output ->
                 copyReportingProgress(input, output, contentLength) { progress ->
                     report(DownloadState.Downloading(progress))
                 }
             }
         }
         connection.disconnect()
-        report(DownloadState.Done(tempFile))
+        val actual = digest.digest().joinToString("") { "%02x".format(it) }
+        if (installerDigestMatches(actual, expectedSha256)) {
+            report(DownloadState.Done(tempFile))
+        } else {
+            tempFile.delete()
+            report(DownloadState.Error("SHA-256 $actual, expected $expectedSha256", unverified = true))
+        }
     } catch (e: IOException) {
         // The connection, the download or the temp file -- a malformed URL is one too.
         report(DownloadState.Error(e.message ?: "Download failed"))

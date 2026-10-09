@@ -15,23 +15,23 @@ class TunnelManagerTest {
 
     @Test
     fun `windows gets the amd64 exe regardless of arch`() {
-        assertTrue(cloudflaredDownloadUrl(isWin = true, isMac = false, isArm = false).endsWith("windows-amd64.exe"))
-        assertTrue(cloudflaredDownloadUrl(isWin = true, isMac = false, isArm = true).endsWith("windows-amd64.exe"))
+        assertTrue(cloudflaredAsset(isWin = true, isMac = false, isArm = false).endsWith("windows-amd64.exe"))
+        assertTrue(cloudflaredAsset(isWin = true, isMac = false, isArm = true).endsWith("windows-amd64.exe"))
     }
 
     @Test
     fun `apple silicon gets the darwin arm64 archive`() {
-        assertTrue(cloudflaredDownloadUrl(isWin = false, isMac = true, isArm = true).endsWith("darwin-arm64.tgz"))
+        assertTrue(cloudflaredAsset(isWin = false, isMac = true, isArm = true).endsWith("darwin-arm64.tgz"))
     }
 
     @Test
     fun `intel mac gets the darwin amd64 archive`() {
-        assertTrue(cloudflaredDownloadUrl(isWin = false, isMac = true, isArm = false).endsWith("darwin-amd64.tgz"))
+        assertTrue(cloudflaredAsset(isWin = false, isMac = true, isArm = false).endsWith("darwin-amd64.tgz"))
     }
 
     @Test
     fun `arm linux gets the linux arm64 binary`() {
-        assertTrue(cloudflaredDownloadUrl(
+        assertTrue(cloudflaredAsset(
             isWin = false,
             isMac = false,
             isArm = true,
@@ -40,7 +40,7 @@ class TunnelManagerTest {
 
     @Test
     fun `x64 linux is the fallback binary`() {
-        assertTrue(cloudflaredDownloadUrl(
+        assertTrue(cloudflaredAsset(
             isWin = false,
             isMac = false,
             isArm = false,
