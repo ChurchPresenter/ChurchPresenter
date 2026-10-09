@@ -537,4 +537,34 @@ class CompanionSatelliteClientTest {
             assertTrue(fake.linesStartingWith("CHANGE-PAGE").isEmpty())
         }
     }
+
+    @Test
+    fun `a client built without a brightness listener ignores brightness`() {
+        FakeCompanion(brightness = 30).use { fake ->
+            val statuses = Collections.synchronizedList(mutableListOf<CompanionConnectionStatus>())
+            val resets = Collections.synchronizedList(mutableListOf<Int>())
+            val c = CompanionSatelliteClient(
+                onStatusChanged = { s, _ -> statuses.add(s) },
+                onButtonUpdated = {},
+                onButtonsReset = { resets.add(it) },
+            ).also { client = it }
+            c.connect("127.0.0.1", fake.port, SurfaceSpec(DEVICE, rows = 1, columns = 1, bitmapSize = 72))
+            waitFor("CONNECTED") { statuses.lastOrNull() == CompanionConnectionStatus.CONNECTED }
+            // The brightness Companion sends after registration goes to the default listener; a
+            // KEYS-CLEAR sent after it arriving proves it was read past.
+            fake.sendKeysClear(DEVICE)
+            waitFor("the reset after the brightness") { resets.size >= 2 }
+        }
+    }
+
+    @Test
+    fun `the protocol's own defaults describe a blank button and every usable port`() {
+        val blank = CompanionButtonUpdate(index = 4)
+        assertEquals(4, blank.index)
+        assertEquals(null, blank.bitmapRgb)
+        assertEquals("", blank.text)
+        assertEquals(false, blank.pressed)
+        assertEquals(1..65_535, CompanionSatelliteClient.VALID_PORTS)
+        assertEquals(3, SurfaceSpec(DEVICE, rows = 3, columns = 2, bitmapSize = 72).rows)
+    }
 }
