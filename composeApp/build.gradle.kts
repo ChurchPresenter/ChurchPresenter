@@ -1069,6 +1069,28 @@ val serialTestClasses = listOf(
     "*AppPreview*ScreenshotTest",
 )
 
+// CI splits the parallel pass across runners: `-PtestShard=N/M` runs the test classes whose file
+// path hashes to shard N of M, and writes its coverage to `jacoco/jvmTest-shardN.exec`, which the
+// report and the floor pick up with the rest (`appExecutionData()`). A filter on the class files
+// rather than `--tests`, which would stand down the serial split and the forks above. The serial
+// classes run in shard 1 only. Unset, nothing changes.
+val testShard: Pair<Int, Int>? = providers.gradleProperty("testShard").orNull?.let { spec ->
+    val parts = spec.split("/").mapNotNull { it.trim().toIntOrNull() }
+    require(parts.size == 2 && parts[1] >= 1 && parts[0] in 1..parts[1]) {
+        "-PtestShard takes N/M with 1 <= N <= M, not '$spec'"
+    }
+    parts[0] to parts[1]
+}
+
+/** Whether the class file at [relativePath] belongs to shard [index] of [count]; nested classes go with their outer one. */
+fun inTestShard(relativePath: String, index: Int, count: Int): Boolean =
+    Math.floorMod(relativePath.substringBefore('$').removeSuffix(".class").hashCode(), count) + 1 == index
+
+/** Every exec file the app's suites wrote: the parallel pass (whole or sharded) and the serial one. */
+fun appExecutionData() = fileTree(layout.buildDirectory.dir("jacoco")) {
+    include("jvmTest.exec", "jvmTestSerial.exec", "jvmTest-shard*.exec")
+}
+
 val jvmTestSerial = tasks.register<org.gradle.api.tasks.testing.Test>("jvmTestSerial") {
     group = "verification"
     description = "The loopback-UDP suites, run in one JVM because they cannot share a busy machine."
@@ -1078,6 +1100,7 @@ val jvmTestSerial = tasks.register<org.gradle.api.tasks.testing.Test>("jvmTestSe
     // The point of the task. Everything else comes from the configureEach block above.
     maxParallelForks = 1
     filter { serialTestClasses.forEach { includeTestsMatching(it) } }
+    testShard?.let { (index, _) -> onlyIf("the serial classes run in shard 1 only") { index == 1 } }
 }
 
 tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest") {
@@ -1096,6 +1119,13 @@ tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest") {
     }
     if (!filteredFromCommandLine) {
         filter { serialTestClasses.forEach { excludeTestsMatching(it) } }
+        testShard?.let { (index, count) ->
+            inputs.property("testShard", "$index/$count")
+            exclude { element -> !element.isDirectory && !inTestShard(element.relativePath.pathString, index, count) }
+            extensions.configure<JacocoTaskExtension> {
+                setDestinationFile(layout.buildDirectory.file("jacoco/jvmTest-shard$index.exec").get().asFile)
+            }
+        }
         // Only worth running when this task excluded them. A command-line `--tests` applies to EVERY
         // Test task in the invocation, so finalizing unconditionally meant
         // `recordRoborazziJvm --tests '*ScreenshotTest*'` -- what screenshots.yml runs -- started the
@@ -1480,12 +1510,9 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     // Point at the agent's .exec output explicitly. The `executionData(task)` overload resolves
     // to the task's own binary-results directory here, not the JacocoTaskExtension destination,
     // and fails with "Unable to read execution data file .../test-results/jvmTest/binary".
-    // BOTH exec files: the loopback-UDP suites run in the separate serial task, and leaving their
-    // data out would drop real coverage from the number and from the floor below.
-    executionData.setFrom(
-        layout.buildDirectory.file("jacoco/jvmTest.exec"),
-        layout.buildDirectory.file("jacoco/jvmTestSerial.exec"),
-    )
+    // EVERY exec file: the loopback-UDP suites run in the separate serial task, CI's shards each write
+    // their own, and leaving any out would drop real coverage from the number and from the floor.
+    executionData.setFrom(appExecutionData())
 
     classDirectories.setFrom(coverableAppClasses())
     sourceDirectories.setFrom(files("src/jvmMain/kotlin", "src/commonMain/kotlin"))
@@ -1531,12 +1558,9 @@ tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
     group = "verification"
     description = "Fails the build if coverage of the coverable code is below the line/branch targets."
     dependsOn("jvmTest", "jvmTestSerial")
-    // BOTH exec files: the loopback-UDP suites run in the separate serial task, and leaving their
-    // data out would drop real coverage from the number and from the floor below.
-    executionData.setFrom(
-        layout.buildDirectory.file("jacoco/jvmTest.exec"),
-        layout.buildDirectory.file("jacoco/jvmTestSerial.exec"),
-    )
+    // EVERY exec file: the loopback-UDP suites run in the separate serial task, CI's shards each write
+    // their own, and leaving any out would drop real coverage from the number and from the floor.
+    executionData.setFrom(appExecutionData())
     classDirectories.setFrom(coverableAppClasses())
     sourceDirectories.setFrom(files("src/jvmMain/kotlin", "src/commonMain/kotlin"))
     violationRules {

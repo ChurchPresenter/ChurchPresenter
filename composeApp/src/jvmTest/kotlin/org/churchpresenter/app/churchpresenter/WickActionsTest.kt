@@ -57,6 +57,7 @@ import org.churchpresenter.strings.generated.resources.helper_undo_done
 import org.churchpresenter.strings.generated.resources.helper_version
 import org.churchpresenter.strings.generated.resources.helper_youre_welcome
 import org.churchpresenter.settings.BackgroundSettings
+import org.churchpresenter.settings.ProjectionSettings
 import org.jetbrains.compose.resources.StringResource
 import java.util.concurrent.Executor
 import kotlin.test.AfterTest
@@ -260,10 +261,14 @@ class WickActionsTest {
 
     @Test
     fun `assigning the audience screen saves it and can be undone`() {
+        // From the defaults, not whatever this fork's home last saved: an earlier run of this very
+        // test leaves the same assignment on disk, and the change would then be no change.
+        root.appSettings = root.appSettings.copy(projectionSettings = ProjectionSettings())
         val before = root.appSettings.projectionSettings
         val screen = HelperScreen(index = 1, isPrimary = false, x = 1920, y = 0, width = 1920, height = 1080)
         run(HelperAction.AssignAudienceScreen(screen))
         assertNotEquals(before, root.appSettings.projectionSettings)
+        assertEquals(1920, root.appSettings.projectionSettings.getAssignment(0).targetBoundsX)
         val reply = assertIs<HelperReply.Message>(wick.reply)
         assertEquals(Res.string.helper_done_assign.key, (reply.text as HelperText.Res).res.key)
         assertTrue(reply.canUndo)
