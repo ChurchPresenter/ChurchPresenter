@@ -296,6 +296,8 @@ private fun SuggestionCard(
         primary = Res.string.helper_show_me to {
             state.thread.keep(suggestion.text, suggestion.topic, suggestion.id)
             state.thread.said(showMe)
+            // Answered: showing the way doesn't clear what raised it, so it would only ask again.
+            inputs.onSettingsChange(settings.snoozing(suggestion.id, inputs.nowMillis() + SNOOZE_MS))
             state.request(suggestion.action, executor)
         },
         primaryLeads = true,
