@@ -102,6 +102,7 @@ HTTP/WebSocket API, Companion and MIDI/OSC:
 | `preview` | a schedule row or item | Cues it on Preview |
 | `take` | optional layer | Take (one layer alone is not supported yet) |
 | `clear` | layer | Clears one layer |
+| `clearAll` | -- | Takes everything off air, as the Clear button does |
 | `clearGroup` | group | Clears a clear group |
 | `message` | template, tokens, duration | Puts a message up |
 | `prop` | prop, on/off/toggle | Switches a prop |
@@ -164,6 +165,8 @@ A new module, `:control-in`:
 - **Out**: the same table in reverse -- on go-live, take and clear, send a note or an OSC message,
   for lighting desks.
 - The device and socket layers stay thin; parsing and mapping are plain functions, tested headless.
+
+The reference for the trigger kinds, matching, Learn, MSC and the outputs is `docs/CONTROL_IN.md`.
 
 ## Output isolation
 

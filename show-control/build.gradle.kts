@@ -38,3 +38,9 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
         md.required.set(false)
     }
 }
+
+// ActionsDocumentedTest reads the two references, so a doc-only change must re-run the suite.
+tasks.withType<Test>().configureEach {
+    inputs.files(rootProject.file("docs/SHOW_CONTROL.md"), rootProject.file("docs/CONTROL_IN.md"))
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+}

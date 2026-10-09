@@ -16,7 +16,11 @@ import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.partialcontent.PartialContent
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respondText
+import io.ktor.server.application.pluginOrNull
+import io.ktor.server.routing.RoutingNode
+import io.ktor.server.routing.RoutingRoot
 import io.ktor.server.routing.get
+import io.ktor.server.routing.getAllRoutes
 import io.ktor.server.routing.routing
 import io.ktor.server.websocket.WebSockets
 import java.io.File
@@ -623,6 +627,10 @@ class CompanionServer(
                 qaRoutes(this@CompanionServer, json, scope)
             }
     }
+
+    /** Every route the running server answers, as Ktor registered them; empty while stopped. */
+    internal fun registeredRoutes(): List<RoutingNode> =
+        server?.application?.pluginOrNull(RoutingRoot)?.getAllRoutes().orEmpty()
 
     fun stop() {
         tunnelManager.stop()
