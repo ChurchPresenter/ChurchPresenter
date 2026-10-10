@@ -29,6 +29,11 @@ dependencies {
     implementation(libs.kotlinx.coroutines.swing)
     // The STT server speaks socket.io; org.json comes with it.
     implementation(libs.socket.io.client)
+    constraints {
+        // engine.io-client, even at its newest, brings okhttp 3.12.12, which can accept the wrong
+        // certificate (GHSA-3cqm-mf7h-prrj). 4.x keeps the okhttp3 API it calls.
+        implementation(libs.okhttp)
+    }
 
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.components.resources)
