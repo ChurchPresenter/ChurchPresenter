@@ -72,8 +72,10 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 private val OPTIONS_MENU_WIDTH = 300.dp
+
 /** Three segments across the menu's inner width. */
 private val ICON_SIZE_SEGMENT_WIDTH = 90.dp
+
 /** The last button of each toolbar group: view, file, history, extras. */
 private val OPTIONS_GROUP_ENDS = setOf(
     ScheduleToolbarButton.ZOOM, ScheduleToolbarButton.CLEAR, ScheduleToolbarButton.REDO,
