@@ -1,5 +1,8 @@
 package org.churchpresenter.slides.utils
 
+import io.sentry.NoOpTransportFactory
+import io.sentry.Sentry
+import io.sentry.SentryEvent
 import org.churchpresenter.presentationengine.SlideRenderDegradation
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -41,5 +44,25 @@ class SlideRenderReportingTest {
             ),
             degradedSlideExtras(degradation),
         )
+    }
+
+    @Test
+    fun `a degraded slide is reported with its tags`() {
+        val sent = mutableListOf<SentryEvent>()
+        Sentry.init { options ->
+            options.dsn = "https://key@localhost/1"
+            options.setTransportFactory(NoOpTransportFactory.getInstance())
+            options.isEnableUncaughtExceptionHandler = false
+            options.isEnableAutoSessionTracking = false
+            options.setBeforeSend { event, _ -> event.also { sent += it } }
+        }
+        try {
+            reportDegradedSlide(degradation)
+        } finally {
+            Sentry.close()
+        }
+        val event = sent.single()
+        assertEquals("RecordFormatException", event.getTag("degraded.cause"))
+        assertEquals("chart,picture", event.getTag("degraded.shapes"))
     }
 }

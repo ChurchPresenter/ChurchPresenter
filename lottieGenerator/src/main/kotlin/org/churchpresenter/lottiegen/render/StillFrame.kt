@@ -57,7 +57,13 @@ object StillFrame {
      * the parse suspends rather than blocks, so the queue is only held for each short render.
      */
     @OptIn(ExperimentalComposeUiApi::class)
-    suspend fun render(lottieJson: String, width: Int, height: Int, progress: Float): IntArray =
+    suspend fun render(
+        lottieJson: String,
+        width: Int,
+        height: Int,
+        progress: Float,
+        loadTimeoutMs: Long = COMPOSITION_LOAD_TIMEOUT_MS,
+    ): IntArray =
         withContext(Dispatchers.Swing) {
             var compositionLoaded by mutableStateOf(false)
             val grouped = LottieTextShaping.groupsText(lottieJson)
@@ -78,7 +84,7 @@ object StillFrame {
 
             try {
                 var timeNanos = 0L
-                val deadline = System.currentTimeMillis() + COMPOSITION_LOAD_TIMEOUT_MS
+                val deadline = System.currentTimeMillis() + loadTimeoutMs
                 while (!compositionLoaded && System.currentTimeMillis() < deadline) {
                     timeNanos += FRAME_NANOS
                     scene.render(timeNanos).close()

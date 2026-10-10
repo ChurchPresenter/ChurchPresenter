@@ -197,10 +197,11 @@ private fun DuplicateFinderState.DuplicateControlsPanel() {
 /** The folder, the match options, the threshold and the scan button. */
 @Composable
 private fun DuplicateFinderState.DuplicateScanControls() {
+    val pickers = LocalConverterPickers.current
     // Folder picker
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         RaisedButton(shape = ButtonShape, onClick = {
-            val dir = pickDirectory()
+            val dir = pickers.directory()
             if (dir != null) {
                 directory = dir; scanState = ScanState.IDLE; duplicateGroups = emptyList()
                 expandedGroups = emptySet(); keepFolder = null; deleteLog = emptyList(); markedForDelete = emptySet()

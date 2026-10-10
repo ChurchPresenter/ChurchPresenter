@@ -38,6 +38,8 @@ import org.churchpresenter.canvas.CameraDevice
 import org.churchpresenter.canvas.CameraDeviceCatalog
 import org.churchpresenter.canvas.CameraFailure
 import org.churchpresenter.canvas.CameraFormat
+import org.churchpresenter.canvas.CameraEnumerationFacts
+import org.churchpresenter.canvas.CameraEnumerator
 import org.churchpresenter.canvas.CameraHost
 import org.churchpresenter.canvas.CameraPrivacyHint
 import org.churchpresenter.canvas.DeckLinkManager
@@ -103,7 +105,7 @@ internal fun CameraPickerRow(
             System.getProperty("os.name", ""),
             devices,
             ffmpegAvailable,
-            if (host == null) CameraDeviceCatalog.lastEnumeration?.enumerator else null,
+            hintEnumerator(host, CameraDeviceCatalog.lastEnumeration),
         ).forEach { hint ->
             Text(
                 text = stringResource(hint),
@@ -286,3 +288,7 @@ internal fun cameraRefOn(camera: CameraDeviceRef, device: CameraDevice): CameraD
     isDeckLink = device.isDeckLink,
     deckLinkIndex = device.deckLinkIndex,
 )
+
+/** What enumerated this machine's cameras, for the hints -- nothing when a [host] answers instead. */
+internal fun hintEnumerator(host: CameraHost?, last: CameraEnumerationFacts?): CameraEnumerator? =
+    if (host == null) last?.enumerator else null

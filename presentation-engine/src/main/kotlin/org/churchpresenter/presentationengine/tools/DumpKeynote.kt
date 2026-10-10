@@ -6,6 +6,7 @@ import org.churchpresenter.presentationengine.keynote.ObjectIndex
 import org.churchpresenter.presentationengine.keynote.bool
 import org.churchpresenter.presentationengine.keynote.message
 import java.io.File
+import java.io.PrintStream
 
 /**
  * Keynote structure probe: dumps the IWA object-type histogram, the Document→Show→Slide graph,
@@ -29,46 +30,48 @@ private fun refs(message: IwaMessage, field: Int): List<Long> =
 object DumpKeynote {
 
     @JvmStatic
-    fun main(args: Array<String>) {
+    fun main(args: Array<String>) = dump(args, System.out, System.err)
+
+    internal fun dump(args: Array<String>, out: PrintStream, err: PrintStream) {
         val path = args.firstOrNull() ?: run {
-            System.err.println("usage: DumpKeynote <file.key>")
+            err.println("usage: DumpKeynote <file.key>")
             return
         }
         val index = ObjectIndex.load(File(path)) ?: run {
-            println("FAILED: no IWA objects parsed")
+            out.println("FAILED: no IWA objects parsed")
             return
         }
-        println("=== ${File(path).name} ===")
-        println("Objects by type (top $HISTOGRAM_ROWS):")
+        out.println("=== ${File(path).name} ===")
+        out.println("Objects by type (top $HISTOGRAM_ROWS):")
         index.typeHistogram().entries.sortedByDescending { it.value }.take(HISTOGRAM_ROWS)
             .forEach { (type, count) ->
-            println("  type $type: $count")
+            out.println("  type $type: $count")
         }
-        println("Data files: ${index.dataFileNames.size}")
+        out.println("Data files: ${index.dataFileNames.size}")
 
         val document = index.firstOfType(KnFields.TYPE_KN_DOCUMENT)
         if (document == null) {
-            println("No KN.DocumentArchive (type 1) found")
+            out.println("No KN.DocumentArchive (type 1) found")
             return
         }
-        KeynoteDump(index).dumpShow(document)
+        KeynoteDump(index, out).dumpShow(document)
     }
 }
 
 /** The dump below the document: the show, then every slide node with what its slide holds. */
-private class KeynoteDump(private val index: ObjectIndex) {
+private class KeynoteDump(private val index: ObjectIndex, private val out: PrintStream) {
 
     fun dumpShow(document: Pair<Long, IwaMessage>) {
         val showRef = ref(document.second.message(KnFields.DOCUMENT_SHOW))
-        println("Document id=${document.first} → show=$showRef (type ${showRef?.let { index.typeOf(it) }})")
-        val show = showRef?.let { index.message(it) } ?: run { println("Show unreadable"); return }
+        out.println("Document id=${document.first} → show=$showRef (type ${showRef?.let { index.typeOf(it) }})")
+        val show = showRef?.let { index.message(it) } ?: run { out.println("Show unreadable"); return }
         val size = show.message(KnFields.SHOW_SIZE)
-        println("Show size: ${size?.float(KnFields.SIZE_WIDTH)} x ${size?.float(KnFields.SIZE_HEIGHT)}")
-        println("Show fields: ${show.fieldNumbers().sorted()}")
+        out.println("Show size: ${size?.float(KnFields.SIZE_WIDTH)} x ${size?.float(KnFields.SIZE_HEIGHT)}")
+        out.println("Show fields: ${show.fieldNumbers().sorted()}")
         val slideTree = show.message(KnFields.SHOW_SLIDE_TREE)
-        println("SlideTree fields: ${slideTree?.fieldNumbers()?.sorted()}")
+        out.println("SlideTree fields: ${slideTree?.fieldNumbers()?.sorted()}")
         val nodeRefs = slideTree?.let { refs(it, KnFields.SLIDE_TREE_SLIDES) } ?: emptyList()
-        println("Slide tree: ${nodeRefs.size} top-level nodes")
+        out.println("Slide tree: ${nodeRefs.size} top-level nodes")
         nodeRefs.forEach { dumpNode(it, 1) }
     }
 
@@ -76,7 +79,7 @@ private class KeynoteDump(private val index: ObjectIndex) {
         val node = index.message(nodeId) ?: return
         val slideRef = ref(node.message(KnFields.SLIDE_NODE_SLIDE))
         val skipped = node.bool(KnFields.SLIDE_NODE_IS_SKIPPED) == true
-        println(
+        out.println(
             "${"  ".repeat(depth)}node $nodeId fields=${node.fieldNumbers().sorted()} " +
                 "slide=$slideRef (type ${slideRef?.let { index.typeOf(it) }}) skipped=$skipped"
         )
@@ -85,13 +88,13 @@ private class KeynoteDump(private val index: ObjectIndex) {
     }
 
     private fun dumpSlide(slide: IwaMessage, indent: String) {
-        println("$indent  slide fields=${slide.fieldNumbers().sorted()}")
+        out.println("$indent  slide fields=${slide.fieldNumbers().sorted()}")
         dumpPlaceholders(slide, indent)
         val z = refs(slide, KnFields.SLIDE_DRAWABLES_Z_ORDER)
         val owned = refs(slide, KnFields.SLIDE_OWNED_DRAWABLES)
         val drawables = z.ifEmpty { owned }
-        println("$indent  drawables: " + drawables.joinToString { "$it:${index.typeOf(it)}" })
-        println("$indent  owned(f7): " + owned.joinToString { "$it:${index.typeOf(it)}" })
+        out.println("$indent  drawables: " + drawables.joinToString { "$it:${index.typeOf(it)}" })
+        out.println("$indent  owned(f7): " + owned.joinToString { "$it:${index.typeOf(it)}" })
         drawables.forEach { dumpDrawable(it, indent) }
         dumpBuilds(slide, indent)
         dumpTransition(slide, indent)
@@ -104,7 +107,7 @@ private class KeynoteDump(private val index: ObjectIndex) {
             val shapeInfo = ph?.message(KnFields.PLACEHOLDER_SUPER)
             val storageRef = ref(shapeInfo?.message(KnFields.SHAPE_INFO_OWNED_STORAGE))
             val text = storageRef?.let { index.message(it) }?.strings(KnFields.STORAGE_TEXT)
-            println("$indent  placeholder $label=$ref type=${index.typeOf(ref)} " +
+            out.println("$indent  placeholder $label=$ref type=${index.typeOf(ref)} " +
                 "phFields=${ph?.fieldNumbers()?.sorted()} storage=$storageRef text=$text")
         }
     }
@@ -113,28 +116,28 @@ private class KeynoteDump(private val index: ObjectIndex) {
     private fun dumpDrawable(id: Long, indent: String) {
         if (index.typeOf(id) == KnFields.TYPE_TSD_GROUP) {
             val children = index.message(id)?.let { refs(it, KnFields.GROUP_CHILDREN) } ?: emptyList()
-            println("$indent  group $id ${geometryLine(id)}")
+            out.println("$indent  group $id ${geometryLine(id)}")
             for (child in children) {
-                println("$indent    child $child:${index.typeOf(child)} " + geometryLine(child))
+                out.println("$indent    child $child:${index.typeOf(child)} " + geometryLine(child))
             }
             return
         }
-        println("$indent  drawable $id:${index.typeOf(id)} ${geometryLine(id)}")
+        out.println("$indent  drawable $id:${index.typeOf(id)} ${geometryLine(id)}")
         if (index.typeOf(id) == KnFields.TYPE_TSD_MOVIE) dumpMovie(index.message(id), indent)
     }
 
     private fun dumpMovie(movie: IwaMessage?, indent: String) {
         val fields = movie?.fieldNumbers()?.sorted().orEmpty()
-        println("$indent    movie fields=$fields")
+        out.println("$indent    movie fields=$fields")
         for (f in fields) {
             val sub = movie?.message(f)
             if (sub != null) {
-                println("$indent    movie.$f fields=${sub.fieldNumbers().sorted()} " +
+                out.println("$indent    movie.$f fields=${sub.fieldNumbers().sorted()} " +
                     "ref=${sub.varint(KnFields.REFERENCE_IDENTIFIER)} " +
                     "dataRef=${sub.varint(KnFields.DATA_REFERENCE_IDENTIFIER)} " +
                     "str=${sub.string(1)}")
             } else {
-                println("$indent    movie.$f scalar varint=${movie?.varint(f)} " +
+                out.println("$indent    movie.$f scalar varint=${movie?.varint(f)} " +
                     "bool=${movie?.bool(f)} float=${movie?.float(f)} double=${movie?.double(f)}")
             }
         }
@@ -143,10 +146,10 @@ private class KeynoteDump(private val index: ObjectIndex) {
     private fun dumpBuilds(slide: IwaMessage, indent: String) {
         val builds = refs(slide, KnFields.SLIDE_BUILDS)
         if (builds.isNotEmpty()) {
-            println("$indent  builds:")
+            out.println("$indent  builds:")
             builds.mapNotNull { id -> index.message(id)?.let { id to it } }.forEach { (buildId, build) ->
                 val anim = build.message(KnFields.BUILD_ATTRIBUTES)?.message(KnFields.BUILD_ATTRS_ANIMATION)
-                println("$indent    build $buildId drawable=" +
+                out.println("$indent    build $buildId drawable=" +
                     "${ref(build.message(KnFields.BUILD_DRAWABLE))} " +
                     "delivery=${build.string(KnFields.BUILD_DELIVERY)} " +
                     "type=${anim?.string(KnFields.ANIM_ATTRS_TYPE)} " +
@@ -157,9 +160,9 @@ private class KeynoteDump(private val index: ObjectIndex) {
         }
         val chunks = refs(slide, KnFields.SLIDE_BUILD_CHUNKS)
         if (chunks.isNotEmpty()) {
-            println("$indent  buildChunks:")
+            out.println("$indent  buildChunks:")
             chunks.mapNotNull { id -> index.message(id)?.let { id to it } }.forEach { (chunkId, chunk) ->
-                println("$indent    chunk $chunkId build=" +
+                out.println("$indent    chunk $chunkId build=" +
                     "${ref(chunk.message(KnFields.BUILD_CHUNK_BUILD))} " +
                     "auto=${chunk.bool(KnFields.BUILD_CHUNK_AUTOMATIC)} " +
                     "delay=${chunk.double(KnFields.BUILD_CHUNK_DELAY)} " +
@@ -173,7 +176,7 @@ private class KeynoteDump(private val index: ObjectIndex) {
             ?.message(KnFields.TRANSITION_ATTRIBUTES)
             ?.message(KnFields.TRANSITION_ATTRS_ANIMATION)
             ?: return
-        println(
+        out.println(
             "$indent  transition: " +
                 "type=${transitionAnim.string(KnFields.ANIM_ATTRS_TYPE)} " +
                 "effect=${transitionAnim.string(KnFields.ANIM_ATTRS_EFFECT)} " +

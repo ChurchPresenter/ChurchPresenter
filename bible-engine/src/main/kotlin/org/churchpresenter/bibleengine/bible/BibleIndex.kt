@@ -225,7 +225,7 @@ private fun lightStem(term: String): String? {
 }
 
 /** Damerau-Levenshtein distance ≤ 1 (substitution, adjacent transposition, or one indel). */
-private fun withinOneEdit(a: String, b: String): Boolean {
+internal fun withinOneEdit(a: String, b: String): Boolean {
     if (a == b) return true
     val (s, t) = if (a.length <= b.length) a to b else b to a
     return when (t.length - s.length) {

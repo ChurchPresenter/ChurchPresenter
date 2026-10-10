@@ -15,6 +15,7 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.slides.FakeSlidesOutput
+import org.churchpresenter.slides.viewmodel.PicturesViewModel
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -150,6 +151,38 @@ class PicturesTabExtraTest {
         }
     }
 
+    @Test
+    fun `previous alone still reaches the primary`() {
+        var previousCalls = 0
+        picturesTab(folder = null, onInstanceLinkSendPreviousPicture = { previousCalls++ }) { _, _ ->
+            onRoot().performKeyInput { pressKey(Key.DirectionLeft) }
+            waitForIdle()
+
+            assertEquals(1, previousCalls)
+        }
+    }
+
+    @Test
+    fun `playing with no folder loaded moves nothing`() = picturesTab(folder = null) { vm, _ ->
+        vm.togglePlayPause()
+        waitForIdle()
+
+        assertTrue(vm.isPlaying)
+        assertEquals(0, vm.selectedImageIndex)
+    }
+
+    @Test
+    fun `the loop button toggles back and remembers each choice`() = picturesTab { vm, reports ->
+        val before = vm.isLooping
+        pictureButton(if (before) "Loop On" else "Loop Off").performClick()
+        waitForIdle()
+        pictureButton(if (before) "Loop Off" else "Loop On").performClick()
+        waitForIdle()
+
+        assertEquals(before, vm.isLooping)
+        assertEquals(before, reports.settingsAfterChange?.pictureSettings?.isLooping)
+    }
+
     // ── Loading a schedule item ──────────────────────────────────────────────────
 
     @Test
@@ -180,6 +213,51 @@ class PicturesTabExtraTest {
         setContent { MaterialTheme { PicturesTab() } }
 
         onNodeWithText(PictureLabel.NO_FOLDER).assertExists()
+    }
+
+    @Test
+    fun `pictures listed without a chosen folder give the schedule nothing to add`() {
+        val folder = pictureFolder()
+        val vm = PicturesViewModel()
+        val added = mutableListOf<String>()
+        try {
+            vm.loadImagesFromFolder(folder)
+            runComposeUiTest {
+                setContent {
+                    MaterialTheme {
+                        PicturesTab(
+                            viewModel = vm,
+                            onAddToSchedule = { p, _, _ -> added += p },
+                            onSavePreset = { p, _, _ -> added += p },
+                        )
+                    }
+                }
+                pictureButton(PictureLabel.ADD_TO_SCHEDULE).performClick()
+                pictureButton("Save preset").performClick()
+                waitForIdle()
+                assertTrue(vm.images.isNotEmpty())
+                assertTrue(added.isEmpty())
+            }
+        } finally {
+            vm.dispose()
+            folder.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `with no host to tell, the loop button still toggles looping`() {
+        val vm = PicturesViewModel()
+        try {
+            runComposeUiTest {
+                setContent { MaterialTheme { PicturesTab(viewModel = vm) } }
+                val before = vm.isLooping
+                pictureButton(if (before) "Loop On" else "Loop Off").performClick()
+                waitForIdle()
+                assertEquals(!before, vm.isLooping)
+            }
+        } finally {
+            vm.dispose()
+        }
     }
 
     // ── The grid against a folder that changes underneath it ────────────────────

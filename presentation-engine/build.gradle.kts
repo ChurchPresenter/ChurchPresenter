@@ -8,17 +8,7 @@ plugins {
 
 group = "org.churchpresenter"
 
-// Only branch and complexity still fall short of the root build's 85% default — a parser and a
-// rasterizer are dense with per-format special cases, and the last of those need real documents to
-// reach. Both are the measured value rounded down: a ratchet, raised as tests are added, never
-// lowered to make a change fit, and deleted outright once a counter clears 85%.
-extra["coverageFloors"] = mapOf(
-    "BRANCH" to "0.79",
-    "COMPLEXITY" to "0.75",
-)
-
-extra["coverageExcludes"] =
-    listOf("**/ui/**", "**/MainKt*", "**/*Dump*", "**/MakeSampleDeck*", "**/ComposableSingletons*")
+extra["coverageExcludes"] = listOf("**/ComposableSingletons*")
 
 kotlin {
     jvmToolchain(21)

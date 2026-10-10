@@ -80,4 +80,18 @@ class SceneSnapTest {
         val r = snap(x = 0.203f, y = 0.4f, sources = listOf(source("other", x = 0.2f, visible = false)))
         assertTrue(approx(0.203f, r.x), "a hidden source offers no edge to snap to, was ${r.x}")
     }
+
+    @Test
+    fun `a closer target found later replaces the guide snapped to first, on each axis`() {
+        val near = SceneSource.ImageSource(
+            id = "near", name = "near", filePath = "",
+            transform = SourceTransform(x = 0.001f, y = 0.001f, width = 0.1f, height = 0.1f),
+        )
+
+        val r = snap(x = 0.004f, y = 0.004f, sources = listOf(near))
+
+        assertTrue(approx(0.001f, r.x) && approx(0.001f, r.y), "snaps to the nearer edges, was (${r.x}, ${r.y})")
+        assertEquals(1, r.snapLines.count { it.orientation == SnapOrientation.VERTICAL }, "one vertical guide")
+        assertEquals(1, r.snapLines.count { it.orientation == SnapOrientation.HORIZONTAL }, "one horizontal guide")
+    }
 }

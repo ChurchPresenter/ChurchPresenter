@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -19,6 +20,7 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.presentationengine.cache.SlideDiskCache
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.testing.RecentFilesSwap
@@ -38,6 +40,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
@@ -162,6 +165,37 @@ class PresentationTabOptionsTest {
         assertTrue(identity.contains(file.absolutePath))
         assertTrue(identity.endsWith("|pdf"))
         assertEquals(3, count)
+    }
+
+    private fun ComposeUiTest.removeFirstOfTwo(h: Harness, mark: (File) -> Unit): File {
+        val first = loadDeck(h, pages = 1)
+        mark(first)
+        val second = pdfDeck(dir, 1, "second.pdf")
+        h.vm.addPresentation(second)
+        waitUntil("the second deck", 10_000) { h.vm.selectedPresentation == second && !h.vm.isLoading }
+        waitForIdle()
+        onAllNodesWithContentDescription("Remove")[0].performClick()
+        waitForIdle()
+        assertEquals(listOf(second), h.vm.presentations)
+        return first
+    }
+
+    @Test
+    fun `closing a recent deck keeps its rendered slides`() = tab { h ->
+        val first = removeFirstOfTwo(h) { RecentPresentationFiles.add(it.absolutePath) }
+        assertNotNull(SlideDiskCache().lookup(first, null))
+    }
+
+    @Test
+    fun `closing a pinned deck keeps its rendered slides`() = tab { h ->
+        val first = removeFirstOfTwo(h) { RecentPresentationFiles.togglePin(it.absolutePath) }
+        assertNotNull(SlideDiskCache().lookup(first, null))
+    }
+
+    @Test
+    fun `closing a deck that is neither recent nor pinned drops its rendered slides`() = tab { h ->
+        val first = removeFirstOfTwo(h) { }
+        assertNull(SlideDiskCache().lookup(first, null))
     }
 
     @Test

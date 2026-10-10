@@ -266,6 +266,28 @@ class EngineServerTest {
         assertTrue(pong.contains("pong"), "the tuning message was accepted")
     }
 
+    @Test
+    fun `updates without an id, unknown types and empty tunings answer nothing`() {
+        val started = startEngine()
+        val savedSpeed = Config.continuationSpeed
+        try {
+            val reply = connected(started.boundPort) {
+                next()
+                send("""{"type":"transcription_update","text":"turn to John chapter 3 verse 16"}""")
+                send("""{"type":"translation_update","id":"","text":"turn to John chapter 3 verse 16"}""")
+                send("""{"type":"subscribe","id":"x"}""")
+                send("""{"type":"set_tuning"}""")
+                send("""{"type":"set_tuning","continuationSpeed":"fast"}""")
+                send("""{"type":"ping"}""")
+                next()
+            }
+            assertTrue(reply.contains("pong"), "nothing was emitted before the pong: $reply")
+            assertEquals("fast", Config.continuationSpeed)
+        } finally {
+            Config.applyContinuationSpeed(savedSpeed)
+        }
+    }
+
     // ── The version-corpus startup report ─────────────────────────────────────
     //
     // Version detection cannot answer from a corpus of fewer than two renderings, and used to say

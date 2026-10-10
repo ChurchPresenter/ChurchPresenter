@@ -4,6 +4,7 @@ package org.churchpresenter.slides.tabs
 
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.sharedui.utils.withPictureScaleEverywhere
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.OutputScaleMode
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -44,5 +45,25 @@ class PicturesTabScaleTest {
     fun `without saved settings the button reads fit`() = picturesTab { _, _ ->
         // A tab composed with no settings at all still has to say what the output is doing.
         pictureButton("Picture scale on every output: Fit").assertExists()
+    }
+
+    @Test
+    fun `outputs in different modes are all set to the one the button names`() = picturesTab(
+        settings = { s ->
+            s.copy(
+                projectionSettings = s.projectionSettings.copy(
+                    outputProfiles = listOf(
+                        OutputProfile(id = "a", pictureScaleMode = OutputScaleMode.FILL),
+                        OutputProfile(id = "b", pictureScaleMode = OutputScaleMode.STRETCH),
+                    ),
+                ),
+            )
+        },
+    ) { _, reports ->
+        pictureButton("Picture scale differs by profile — click to set every output to Fit").performClick()
+        waitForIdle()
+
+        val modes = reports.settingsAfterChange?.projectionSettings?.outputProfiles?.map { it.pictureScaleMode }
+        assertEquals(listOf(OutputScaleMode.FIT, OutputScaleMode.FIT), modes)
     }
 }

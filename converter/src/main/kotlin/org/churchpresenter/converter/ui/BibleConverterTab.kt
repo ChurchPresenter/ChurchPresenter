@@ -49,6 +49,7 @@ import java.io.File
 
 @Composable
 fun BibleConverterTab(onConverted: (sourceId: String) -> Unit = {}) {
+    val pickers = LocalConverterPickers.current
     var inputFiles by remember { mutableStateOf<List<File>>(emptyList()) }
     var outputDir by remember { mutableStateOf<File?>(null) }
     var logMessages by remember { mutableStateOf<List<String>>(emptyList()) }
@@ -71,7 +72,7 @@ fun BibleConverterTab(onConverted: (sourceId: String) -> Unit = {}) {
       SectionCard(Strings.bibleTitle, Strings.bibleDesc) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             RaisedButton(shape = ButtonShape, onClick = {
-                val files = pickFiles(Strings.xmlBibleFiles, "xml", multiSelection = true)
+                val files = pickers.files(Strings.xmlBibleFiles, "xml", multiSelection = true)
                 if (files.isNotEmpty()) {
                     inputFiles = files; state = ConvertState.SELECT; previewItems = emptyList(); logMessages = emptyList()
                 }
@@ -80,7 +81,7 @@ fun BibleConverterTab(onConverted: (sourceId: String) -> Unit = {}) {
                 Text(Strings.selectXmlFiles)
             }
             KeyButton(shape = ButtonShape, onClick = {
-                val dir = pickDirectory()
+                val dir = pickers.directory()
                 if (dir != null) {
                     val files = findXmlFilesRecursive(dir)
                     inputFiles = files; state = ConvertState.SELECT; previewItems = emptyList(); logMessages = emptyList()
@@ -98,7 +99,7 @@ fun BibleConverterTab(onConverted: (sourceId: String) -> Unit = {}) {
             path = outputDir?.absolutePath ?: Strings.sameAsInput,
             chosen = outputDir != null,
             warning = null,
-            onBrowse = { pickDirectory()?.let { outputDir = it } }
+            onBrowse = { pickers.directory()?.let { outputDir = it } }
         )
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -185,7 +186,7 @@ fun BibleConverterTab(onConverted: (sourceId: String) -> Unit = {}) {
       SectionCard(Strings.fixVersesTitle, Strings.fixVersesDesc) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             RaisedButton(shape = ButtonShape, onClick = {
-                val files = pickFiles(Strings.spbBibleFiles, "spb", multiSelection = true)
+                val files = pickers.files(Strings.spbBibleFiles, "spb", multiSelection = true)
                 if (files.isNotEmpty()) {
                     spbFiles = files; fixState = ConvertState.SELECT; fixLog = emptyList()
                 }

@@ -44,7 +44,10 @@ object DumpStyleReview {
 
 
     @JvmStatic
-    fun main(args: Array<String>) {
+    fun main(args: Array<String>) = review(args)
+
+    /** [main] at a canvas of [canvasW] x [canvasH]; the task always renders at 1920 x 1080. */
+    internal fun review(args: Array<String>, canvasW: Int = CANVAS_W, canvasH: Int = CANVAS_H) {
         val stylesArg = args.getOrNull(0)
         if (stylesArg.isNullOrBlank()) {
             System.err.println("usage: dumpStyleReview -Pstyles=<id,id,...|all> [-Pout=/dir]")
@@ -71,7 +74,7 @@ object DumpStyleReview {
         runBlocking {
             for (entry in entries) {
                 val outFile = File(outDir, "style${entry.id}_${safeLabel(entry.label)}.png")
-                ImageIO.write(renderReviewGrid(entry.id), "png", outFile)
+                ImageIO.write(renderReviewGrid(entry.id, canvasW, canvasH), "png", outFile)
                 println("Wrote ${outFile.path}")
             }
         }
@@ -87,11 +90,11 @@ object DumpStyleReview {
      * and defeat the point of cropping. Every region is then padded to the same cell size so the
      * three columns line up into a clean 3 (align) x 2 (before/after) grid.
      */
-    private suspend fun renderReviewGrid(styleId: String): BufferedImage {
-        val base = LottieGenConfig(canvasW = CANVAS_W, canvasH = CANVAS_H, style = styleId)
+    private suspend fun renderReviewGrid(styleId: String, canvasW: Int, canvasH: Int): BufferedImage {
+        val base = LottieGenConfig(canvasW = canvasW, canvasH = canvasH, style = styleId)
 
         val beforePixels = ALIGNS.map { align ->
-            renderStill(toJsonString(LottieGenerator.generate(base.copy(align = align))))
+            renderStill(toJsonString(LottieGenerator.generate(base.copy(align = align))), canvasW, canvasH)
         }
         val afterPixels = ALIGNS.map { align ->
             renderStill(
@@ -99,22 +102,24 @@ object DumpStyleReview {
                     LottieGenerator.generate(
                         base.copy(align = align, hideDetail = false, detailText = SAMPLE_DETAIL_TEXT)
                     )
-                )
+                ),
+                canvasW,
+                canvasH,
             )
         }
 
         val perAlignRegions = ALIGNS.indices.map { i ->
-            contentCropRegion(listOf(beforePixels[i], afterPixels[i]), CANVAS_W, CANVAS_H)
+            contentCropRegion(listOf(beforePixels[i], afterPixels[i]), canvasW, canvasH)
         }
         val cellW = perAlignRegions.maxOf { it.width }
         val cellH = perAlignRegions.maxOf { it.height }
         val regions = perAlignRegions.map { StillFrame.centeredRegion(it, cellW, cellH) }
 
         val croppedBefore = ALIGNS.indices.map { i ->
-            StillFrame.cropRegion(beforePixels[i], CANVAS_W, CANVAS_H, regions[i])
+            StillFrame.cropRegion(beforePixels[i], canvasW, canvasH, regions[i])
         }
         val croppedAfter = ALIGNS.indices.map { i ->
-            StillFrame.cropRegion(afterPixels[i], CANVAS_W, CANVAS_H, regions[i])
+            StillFrame.cropRegion(afterPixels[i], canvasW, canvasH, regions[i])
         }
 
         return buildGrid(listOf(croppedBefore, croppedAfter), cellW, cellH)
@@ -122,8 +127,8 @@ object DumpStyleReview {
 
     private fun toJsonString(json: JsonObject): String = Json.encodeToString(JsonObject.serializer(), json)
 
-    private suspend fun renderStill(lottieJson: String): IntArray =
-        StillFrame.render(lottieJson, CANVAS_W, CANVAS_H, HOLD_PROGRESS)
+    private suspend fun renderStill(lottieJson: String, width: Int, height: Int): IntArray =
+        StillFrame.render(lottieJson, width, height, HOLD_PROGRESS)
 
     private fun contentCropRegion(frames: List<IntArray>, width: Int, height: Int): CropRegion =
         StillFrame.contentCropRegion(frames, width, height, CROP_PADDING_PX)

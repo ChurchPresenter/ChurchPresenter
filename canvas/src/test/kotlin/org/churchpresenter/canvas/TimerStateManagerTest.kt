@@ -1,5 +1,6 @@
 package org.churchpresenter.canvas
 
+import kotlinx.coroutines.runBlocking
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -175,5 +176,40 @@ class TimerStateManagerTest {
         TimerStateManager.tick(id)
         assertTrue(TimerStateManager.getState(id, 1).isRunning, "current behaviour: flag stays set")
         assertEquals(0, TimerStateManager.getState(id, 1).remainingSeconds)
+    }
+
+    @Test
+    fun `a ticker runs a countdown down to zero and then stops by itself`() {
+        val id = "ticker-countdown"
+        TimerStateManager.getState(id, 3)
+        TimerStateManager.setRunning(id, 3, true)
+
+        runBlocking { TimerTicker(intervalMs = 0).run(id, countUp = false) }
+
+        assertEquals(TimerStateManager.TimerState(0, isRunning = false), TimerStateManager.getState(id, 3))
+    }
+
+    @Test
+    fun `a ticker for a stopped timer never ticks it`() {
+        val id = "ticker-stopped"
+        TimerStateManager.getState(id, 3)
+
+        runBlocking { TimerTicker(intervalMs = 0).run(id, countUp = false) }
+
+        assertEquals(3, TimerStateManager.getState(id, 3).remainingSeconds)
+        assertFalse(TimerStateManager.isTicking("ticker-unknown"), "a timer never seen is not ticking")
+    }
+
+    @Test
+    fun `one tick moves a stopwatch up and a countdown down`() {
+        TimerStateManager.setRunning("advance-up", 0, true, countUp = true)
+        TimerStateManager.setRunning("advance-down", 5, true)
+
+        TimerStateManager.advance("advance-up", countUp = true)
+        TimerStateManager.advance("advance-down", countUp = false)
+
+        assertEquals(1, TimerStateManager.getState("advance-up", 0).remainingSeconds)
+        assertEquals(4, TimerStateManager.getState("advance-down", 5).remainingSeconds)
+        assertTrue(TimerStateManager.isTicking("advance-down"))
     }
 }

@@ -3,6 +3,11 @@
 package org.churchpresenter.canvas
 
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.assertIsDisplayed
@@ -512,6 +517,24 @@ class SourcePropertiesBibleTest {
     }
 
     @Test
+    fun `choosing a chapter loads it, and Insert reads from it`() {
+        sourcePanel(Fixture.bible(), appSettings = settingsWithBible()) { get ->
+            awaitBibleLoaded()
+            waitUntil("the Insert button must appear", timeoutMillis = 5_000) { countOf("Insert Verse") == 1 }
+
+            onAllNodes(hasText("1") and hasClickAction() and !hasSetTextAction())
+                .onFirst().performScrollTo().performClick()
+            waitForIdle()
+            onAllNodesWithText("2").onLast().performClick()
+            waitForIdle()
+            onNodeWithText("Insert Verse").performScrollTo().performClick()
+            waitForIdle()
+
+            assertEquals("Genesis 2:1", (get() as SceneSource.BibleSource).referenceText)
+        }
+    }
+
+    @Test
     fun `the verse range boxes appear once a chapter has verses`() {
         sourcePanel(Fixture.bible(), appSettings = settingsWithBible()) { _ ->
             awaitBibleLoaded()
@@ -590,6 +613,26 @@ class SourcePropertiesBibleTest {
 
             // The fixture's Genesis 1 has three verses.
             assertFieldShows("3", "the start verse box, clamped to the last verse in the chapter")
+        }
+    }
+
+    @Test
+    fun `a verse range typed out of order or not as a number keeps the range readable`() {
+        sourcePanel(Fixture.bible(), appSettings = settingsWithBible()) { get ->
+            awaitBibleLoaded()
+            waitUntil("the verse range boxes must appear", timeoutMillis = 5_000) { countOf("START VERSE") == 1 }
+
+            typeField(LoadedField.END_VERSE, "3")
+            typeField(LoadedField.START_VERSE, "2")
+            typeField(LoadedField.START_VERSE, "two")
+            typeField(LoadedField.END_VERSE, "three")
+            onNodeWithText("Insert Verse").performScrollTo().performClick()
+            waitForIdle()
+
+            assertEquals(
+                "Genesis 1:2-3", (get() as SceneSource.BibleSource).referenceText,
+                "a start inside the range leaves the end where it was, and text that is no number changes nothing",
+            )
         }
     }
 

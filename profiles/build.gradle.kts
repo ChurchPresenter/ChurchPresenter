@@ -11,12 +11,11 @@ plugins {
 
 group = "org.churchpresenter"
 
-// Below the shared 85% on two counters only: what is left is the dialogs that open real windows
-// (the stock and library browsers, the Lottie generator) and Compose's per-value change checks.
-// See AGENT.md.
+// Below the shared 85% on complexity only: what is left is the dialogs that open real windows
+// (the stock and library browsers, the Lottie generator), the capture hardware probes and Compose's
+// per-value change checks. See AGENT.md.
 extra["coverageFloors"] = mapOf(
-    "BRANCH" to "0.80",
-    "COMPLEXITY" to "0.79",
+    "COMPLEXITY" to "0.84",
 )
 
 kotlin {

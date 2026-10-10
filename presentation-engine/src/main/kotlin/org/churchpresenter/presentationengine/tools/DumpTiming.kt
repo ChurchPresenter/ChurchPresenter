@@ -6,6 +6,7 @@ import org.churchpresenter.presentationengine.PresentationLoader
 import org.churchpresenter.presentationengine.model.EffectSpec
 import org.churchpresenter.presentationengine.model.LayerSpec
 import java.io.File
+import java.io.PrintStream
 import javax.imageio.ImageIO
 
 /**
@@ -18,27 +19,29 @@ import javax.imageio.ImageIO
 object DumpTiming {
 
     @JvmStatic
-    fun main(args: Array<String>) {
+    fun main(args: Array<String>) = dump(args, System.out, System.err)
+
+    internal fun dump(args: Array<String>, out: PrintStream, err: PrintStream) {
         val path = args.firstOrNull() ?: run {
-            System.err.println("usage: DumpTiming <file.pptx|file.key|file.pdf>")
+            err.println("usage: DumpTiming <file.pptx|file.key|file.pdf>")
             return
         }
         val file = File(path)
         val deck = when (val result = PresentationLoader.load(file)) {
             is LoadResult.Failure -> {
-                println("LOAD FAILED: ${result.error} ${result.detail ?: ""}")
+                out.println("LOAD FAILED: ${result.error} ${result.detail ?: ""}")
                 return
             }
             is LoadResult.Success -> result.deck
         }
-        println("=== ${file.name} — ${deck.format}, ${deck.slideCount} slides, " +
+        out.println("=== ${file.name} — ${deck.format}, ${deck.slideCount} slides, " +
             "${deck.slideWidthPt}x${deck.slideHeightPt}pt ===")
         for (slide in deck.slides) {
-            println()
+            out.println()
             val transition = slide.transition?.let {
                 "  transition=${it.type}/${it.direction} ${it.durationMs}ms advTm=${it.advanceAfterMs}"
             } ?: ""
-            println("Slide ${slide.index + 1}  fidelity=${slide.fidelity}$transition")
+            out.println("Slide ${slide.index + 1}  fidelity=${slide.fidelity}$transition")
             for (layer in slide.layers) {
                 val detail = when (layer) {
                     is LayerSpec.Background -> "shapes=${layer.shapeIndexes}"
@@ -47,29 +50,29 @@ object DumpTiming {
                     is LayerSpec.StaticComposite -> "static"
                     is LayerSpec.Media -> "media=${layer.mediaFile}"
                 }
-                println("  layer ${layer.id} z=${layer.zIndex} visible=${layer.initiallyVisible} " +
+                out.println("  layer ${layer.id} z=${layer.zIndex} visible=${layer.initiallyVisible} " +
                     "boundsPt=${layer.boundsPt} $detail")
             }
             val timeline = slide.timeline
             if (timeline == null) {
-                println("  (no timeline)")
+                out.println("  (no timeline)")
             } else {
                 timeline.steps.forEachIndexed { stepIndex, step ->
-                    println("  step ${stepIndex + 1}:")
+                    out.println("  step ${stepIndex + 1}:")
                     for (interval in step.intervals) {
-                        println("    ${interval.layerId}  ${describe(interval.effect)}  " +
+                        out.println("    ${interval.layerId}  ${describe(interval.effect)}  " +
                             "begin=${interval.beginMs} dur=${interval.durMs} " +
                             "repeat=${interval.repeat} fill=${interval.fill}")
                     }
                 }
             }
         }
-        println()
+        out.println()
         if (deck.warnings.isEmpty()) {
-            println("No degrade warnings — full coverage for this deck.")
+            out.println("No degrade warnings — full coverage for this deck.")
         } else {
-            println("DEGRADE WARNINGS (${deck.warnings.size}):")
-            deck.warnings.forEach { println("  - $it") }
+            out.println("DEGRADE WARNINGS (${deck.warnings.size}):")
+            deck.warnings.forEach { out.println("  - $it") }
         }
         // Smoke-render the first slide so raster failures show up here too. With a second
         // argument (a directory), every slide's final frame is written as PNG for inspection.
@@ -77,13 +80,13 @@ object DumpTiming {
             val outDir = args.getOrNull(1)?.let { File(it).apply { mkdirs() } }
             if (outDir == null) {
                 val frame = rasterizer.renderFinalFrame(0)
-                println("First slide renders at ${frame.width}x${frame.height}.")
+                out.println("First slide renders at ${frame.width}x${frame.height}.")
             } else {
                 for (slide in deck.slides) {
                     val frame = rasterizer.renderFinalFrame(slide.index)
-                    val out = File(outDir, "slide_%02d.png".format(slide.index + 1))
-                    ImageIO.write(DeckRasterizer.flattenToRgb(frame), "png", out)
-                    println("Wrote ${out.absolutePath} (${frame.width}x${frame.height})")
+                    val frameFile = File(outDir, "slide_%02d.png".format(slide.index + 1))
+                    ImageIO.write(DeckRasterizer.flattenToRgb(frame), "png", frameFile)
+                    out.println("Wrote ${frameFile.absolutePath} (${frame.width}x${frame.height})")
                 }
             }
         }

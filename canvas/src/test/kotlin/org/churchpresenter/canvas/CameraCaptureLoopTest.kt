@@ -1,5 +1,8 @@
 package org.churchpresenter.canvas
 
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.diagnostics.CrashReportSweep
@@ -32,6 +35,7 @@ class CameraCaptureLoopTest {
     private class ScriptedSteps(
         private val script: List<FfmpegAttempt?>,
         private val formats: List<CameraFormat> = listOf(CameraFormat(1280, 720, 25)),
+        private val onPause: suspend () -> Unit = {},
     ) : CaptureSteps {
         val commands = mutableListOf<List<String>>()
         val pauses = mutableListOf<Long>()
@@ -50,6 +54,7 @@ class CameraCaptureLoopTest {
 
         override suspend fun pause(millis: Long) {
             pauses += millis
+            onPause()
         }
 
         override suspend fun releaseLingering(entry: CacheEntry) {
@@ -64,8 +69,12 @@ class CameraCaptureLoopTest {
 
     private val streamed = FfmpegAttempt(framesProduced = true, exitCode = 0, stderrTail = emptyList())
 
-    private fun run(steps: ScriptedSteps, entry: CacheEntry = CacheEntry()): CacheEntry = runBlocking {
-        val loop = CaptureLoop(source, entry, steps)
+    private fun run(
+        steps: ScriptedSteps,
+        entry: CacheEntry = CacheEntry(),
+        on: SceneSource.CameraSource = source,
+    ): CacheEntry = runBlocking {
+        val loop = CaptureLoop(on, entry, steps)
         loop.run()
         loop.reportIfGaveUp()
         entry
@@ -167,5 +176,37 @@ class CameraCaptureLoopTest {
 
         assertTrue(steps.commands.isEmpty())
         assertNull(entry.error.value)
+    }
+
+    @Test
+    fun `an AVFoundation I-O error stops at once, as the privacy refusal it usually is`() {
+        val steps = ScriptedSteps(List(5) { failed("[avfoundation @ 0x1] Input/output error") })
+        val mac = source.copy(devicePath = "avfoundation://0", deviceName = "FaceTime HD Camera")
+
+        val entry = run(steps, on = mac)
+
+        assertEquals(1, steps.commands.size)
+        assertEquals(CameraFailure.PERMISSION_OR_UNAVAILABLE, entry.error.value)
+        assertTrue(steps.pauses.isEmpty())
+    }
+
+    @Test
+    fun `a capture cancelled between attempts stops trying and reports nothing`() {
+        val steps = ScriptedSteps(
+            List(5) { failed("Device or resource busy") },
+            onPause = { currentCoroutineContext().job.cancel() },
+        )
+        val entry = CacheEntry()
+
+        runBlocking {
+            launch {
+                val loop = CaptureLoop(source, entry, steps)
+                loop.run()
+                loop.reportIfGaveUp()
+            }.join()
+        }
+
+        assertEquals(1, steps.commands.size, "no attempt follows the cancellation")
+        assertEquals(CameraFailure.DEVICE_BUSY, entry.error.value)
     }
 }

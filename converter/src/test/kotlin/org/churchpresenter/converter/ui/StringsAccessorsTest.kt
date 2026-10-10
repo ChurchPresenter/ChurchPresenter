@@ -1,0 +1,196 @@
+package org.churchpresenter.converter.ui
+
+import java.util.Locale
+import kotlin.test.AfterTest
+import kotlin.test.Test
+import kotlin.test.assertTrue
+
+class StringsAccessorsTest {
+
+    private val languages = listOf(
+        "en", "ar", "be", "cs", "de", "es", "et", "fa", "fi", "fr", "hi", "hr", "id", "ja", "kk", "lo",
+        "lv", "ms", "ne", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sv", "sw", "ta", "th", "tl",
+        "tr", "uk", "uz", "zh",
+    )
+
+    private val systemLocale: Locale = Locale.getDefault()
+
+    @AfterTest
+    fun restoreLocale() {
+        Strings.setLocale(systemLocale)
+    }
+
+    private fun everyPlainString(): List<String> = listOf(
+            Strings.windowTitle,
+            Strings.tabBibles,
+            Strings.tabSongs,
+            Strings.tabDuplicates,
+            Strings.tabRename,
+            Strings.selectFolder,
+            Strings.preview,
+            Strings.convert,
+            Strings.back,
+            Strings.startOver,
+            Strings.converting,
+            Strings.delete,
+            Strings.cancel,
+            Strings.rescan,
+            Strings.open,
+            Strings.left,
+            Strings.right,
+            Strings.convertFrom,
+            Strings.searchFormats,
+            Strings.groupSongFormats,
+            Strings.groupDocuments,
+            Strings.requestFormatTitle,
+            Strings.requestFormatBody,
+            Strings.stepSourceFiles,
+            Strings.stepDestination,
+            Strings.selectFiles,
+            Strings.browse,
+            Strings.change,
+            Strings.clear,
+            Strings.chooseOutputFolder,
+            Strings.outputManyFilesWarning,
+            Strings.sameAsInput,
+            Strings.songsLabel,
+            Strings.completedWithErrors,
+            Strings.doneLabel,
+            Strings.allSongsConverted,
+            Strings.bibleTitle,
+            Strings.bibleDesc,
+            Strings.selectXmlFiles,
+            Strings.xmlBibleFiles,
+            Strings.spbBibleFiles,
+            Strings.fixVersesTitle,
+            Strings.fixVersesDesc,
+            Strings.selectSpbFiles,
+            Strings.fixVerses,
+            Strings.fixingVerses,
+            Strings.dupesTitle,
+            Strings.dupesDesc,
+            Strings.scanForDuplicates,
+            Strings.scanning,
+            Strings.scanAgain,
+            Strings.matchByNumber,
+            Strings.matchByTitle,
+            Strings.similarityThreshold,
+            Strings.dupesEmptyState,
+            Strings.keepFolder,
+            Strings.selectHint,
+            Strings.selectSameFolder,
+            Strings.collapseAll,
+            Strings.expandAll,
+            Strings.markForDeletion,
+            Strings.labelKeep,
+            Strings.labelDelete,
+            Strings.findHomoglyphs,
+            Strings.noHomoglyphs,
+            Strings.homoglyphFixNote,
+            Strings.homoglyphDialogTitle,
+            Strings.homoglyphDialogDescSuffix,
+            Strings.homoglyphDialogQuestion,
+            Strings.homoglyphDialogNote,
+            Strings.fixAndScan,
+            Strings.skipAndScan,
+            Strings.findControlChars,
+            Strings.noControlChars,
+            Strings.filters,
+            Strings.catSameNumber,
+            Strings.catSameTitle,
+            Strings.catSimilarLyrics,
+            Strings.minSim,
+            Strings.filesPerGroup,
+            Strings.clearFilters,
+            Strings.deleteDupesTitle,
+            Strings.filesToDeleteLabel,
+            Strings.deleteFilesTitle,
+            Strings.renameTitle,
+            Strings.renameDesc,
+            Strings.stripNumbers,
+            Strings.renameFirstVerse,
+            Strings.letterCase,
+            Strings.exampleLabel,
+            Strings.renameExampleBefore,
+            Strings.renameExampleFirstLine,
+            Strings.caseNone,
+            Strings.caseSentence,
+            Strings.caseTitle,
+            Strings.caseLower,
+            Strings.caseUpper,
+            Strings.renaming,
+            Strings.conflict,
+            Strings.outputOverwrite,
+            Strings.outputFolderOverwrite,
+            Strings.previewLabel,
+            Strings.docPreviewMarkdown,
+            Strings.docPreviewSong,
+            Strings.sourceDescription(SongSources.OPENLP),
+            Strings.sourceAccepts(SongSources.OPENLP),
+            Strings.filesSelected(7),
+            Strings.convertingFiles(7),
+            Strings.nConverted(7),
+            Strings.fileCount(7),
+            Strings.convertNFiles(7),
+            Strings.convertNSongs(7),
+            Strings.doneConverted(7, 8),
+            Strings.doneDeleted(7, 8),
+            Strings.doneFixed(7, 8),
+            Strings.doneRenamed(7, 8, 9),
+            Strings.noDupesFound(7),
+            Strings.groupSummary(7, 8, 9),
+            Strings.deleteNSelected(7),
+            Strings.permanentlyDelete(7),
+            Strings.permanentlyDeleteShort(7),
+            Strings.deleteNMarked(7),
+            Strings.filesWithHomoglyphs(7),
+            Strings.filesWithControlChars(7),
+            Strings.andNMore(7),
+            Strings.fixNFiles(7),
+            Strings.renameNFiles(7),
+            Strings.renameSummary(7, 8),
+            Strings.conflictsSummary(7),
+            Strings.showingGroups(7, 8),
+            Strings.similaritySuffix(7),
+            Strings.sectionsLines(7, 8),
+            Strings.songsConverted(7),
+            Strings.songsFound(7),
+            Strings.sectionCount(7),
+            Strings.songCount(7),
+            Strings.songsExtracted(7),
+    )
+
+    private fun everyStringTakingText(): List<String> = listOf(
+            Strings.noFormatMatches("ARG1"),
+            Strings.dropFilesHere("ARG1"),
+            Strings.folderSelected("ARG1", 8),
+            Strings.fixedNChars(7, "ARG2"),
+            Strings.groupHeader(7, "ARG2"),
+            Strings.groupDetail(7, "ARG2", 9),
+            Strings.titlePrefix("ARG1"),
+            Strings.sectionsPrefix("ARG1"),
+            Strings.missingPrefix("ARG1"),
+            Strings.songbookPrefix("ARG1"),
+            Strings.outputPrefix("ARG1"),
+            Strings.outputFolderPrefix("ARG1"),
+            Strings.keepFolderPrefix("ARG1"),
+            Strings.compareTitle("ARG1"),
+            Strings.selectDialog("ARG1"),
+            Strings.errorPrefix("ARG1"),
+            Strings.verseOrderPrefix("ARG1"),
+            Strings.parseError("ARG1"),
+    )
+
+    @Test
+    fun `every string resolves and formats in every language`() {
+        for (language in languages) {
+            Strings.setLocale(Locale.forLanguageTag(language))
+            everyPlainString().forEachIndexed { index, value ->
+                assertTrue(value.isNotBlank(), "$language: plain string #$index is blank")
+            }
+            everyStringTakingText().forEachIndexed { index, value ->
+                assertTrue(value.contains("ARG"), "$language: string #$index dropped its argument: $value")
+            }
+        }
+    }
+}

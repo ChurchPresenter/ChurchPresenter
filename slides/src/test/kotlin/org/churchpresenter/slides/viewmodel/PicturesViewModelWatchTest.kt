@@ -1,5 +1,7 @@
 package org.churchpresenter.slides.viewmodel
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
@@ -188,6 +190,36 @@ class PicturesViewModelWatchTest {
 
         assertTrue(model.images.isEmpty())
         assertEquals(null, model.getCurrentImageFile())
+    }
+
+    @Test
+    fun `a watcher that has been cancelled adds nothing`() {
+        loadWith("a.jpg")
+        val b = image("b.jpg")
+        val cancelled = CoroutineScope(Job().apply { cancel() })
+
+        assertFalse(with(model.watching) { cancelled.addWatchedImage(b) })
+        assertEquals(1, model.images.size)
+    }
+
+    @Test
+    fun `a folder that cannot be read loads nothing`() {
+        val locked = File(dir, "locked").apply { mkdirs() }
+        File(locked, "a.png").writeBytes(pngBytes)
+        if (!locked.setReadable(false)) return
+        try {
+            model.loadImagesFromFolder(locked)
+            assertTrue(model.images.isEmpty())
+        } finally {
+            locked.setReadable(true)
+        }
+    }
+
+    @Test
+    fun `a plain file is not loaded as a folder`() {
+        val file = image("a.jpg")
+        model.loadImagesFromFolder(file)
+        assertTrue(model.images.isEmpty())
     }
 
     @Test

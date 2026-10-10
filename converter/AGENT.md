@@ -72,12 +72,17 @@ shared build files — see the `converter` filter in `.github/workflows/test.yml
   **silently** — detekt over zero files is a passing detekt — so the module was gating only its
   tests until it was noticed. An exclude cannot fail that way round: if `**/ui/**` stops matching,
   the gate analyzes too much and says so.
-- **Coverage** (the root build's six counters — see the root `AGENT.md`): `extra["coverageFloors"]`
-  lowers COMPLEXITY to 0.80, its measured value rounded down: JaCoCo scores every converter's
-  per-format lambdas as methods, and the last of them need real files from each app to reach. The
-  other five stay at the 85% default. Raise it as tests are added; never lower it. `extra["coverageExcludes"]` drops `ui/**` and `MainKt*` — they need a
-  display. Both `extra` blocks must stay **above everything else** in the build file, and the
-  module must never re-declare the JaCoCo tasks themselves.
+- **Coverage** (the root build's six counters — see the root `AGENT.md`): no
+  `extra["coverageFloors"]`: all six counters are held at the 85% default — never add a floor
+  below it. `extra["coverageExcludes"]` is the default (`**/ComposableSingletons*`) and nothing
+  more: `ui/**` and `main` are measured. That `extra` block must stay **above everything else** in
+  the build file, and the module must never re-declare the JaCoCo tasks themselves.
+- **UI tests** drive the tabs headless with `runComposeUiTest`. The tabs open their native choosers
+  through `LocalConverterPickers`, so a test provides `FakePickers` (`ConverterUiTestSupport.kt`)
+  instead of a Swing dialog. Clicks inside a `DialogWindow` (the compare windows) must run on the
+  EDT (`onEdt`), and what such a window shows is awaited with `awaitInWindow`. Left uncovered:
+  `main`, the Swing choosers themselves (`SwingPickers`, `pickFiles`, `pickDirectory`,
+  `pickSourceFiles`), `Desktop.open`, and the file dropdowns inside the compare windows.
 
 ## Dependencies
 

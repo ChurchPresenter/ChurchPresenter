@@ -18,6 +18,7 @@ import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.presentationengine.model.Direction
 import org.churchpresenter.presentationengine.model.TransitionType
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.presentationengine.model.LayerState
 import org.churchpresenter.sharedui.testing.assertColorAt
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -98,5 +99,12 @@ class PresentationPresenterOptionsTest {
         assertEquals(0.25f, frame.transition?.progress)
         assertEquals(frame, frame.copy())
         assertEquals(frame.hashCode(), frame.copy().hashCode())
+    }
+
+    @Test
+    fun `a placed layer reads back the spec it was placed from`() {
+        val layer = placedLayer(Color.Red, id = "title")
+        assertEquals("title", layer.spec.id)
+        assertEquals(LayerState.VISIBLE, layer.state)
     }
 }

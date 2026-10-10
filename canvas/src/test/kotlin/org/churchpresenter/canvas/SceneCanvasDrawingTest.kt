@@ -68,7 +68,7 @@ class SceneCanvasDrawingTest {
         strokeColor: String = "#FFFFFF",
         fillColor: String = "#00000000",
         strokeWidth: Float = 3f,
-        block: ComposeUiTest.() -> Unit,
+        block: ComposeUiTest.(reported: List<SceneSource.ShapeSource>) -> Unit,
     ): List<SceneSource.ShapeSource> {
         val drawn = mutableListOf<SceneSource.ShapeSource>()
         runComposeUiTest {
@@ -90,7 +90,7 @@ class SceneCanvasDrawingTest {
                     }
                 }
             }
-            block()
+            block(drawn)
         }
         return drawn
     }
@@ -328,5 +328,28 @@ class SceneCanvasDrawingTest {
 
         // A click with no movement never starts the gesture, so a mis-click leaves no stray shape.
         assertNull(drawn.firstOrNull(), "a bare click must not create a shape")
+    }
+
+    @Test
+    fun `no shape is reported while the drag is still held, whatever the tool`() {
+        listOf("rectangle", "ellipse", "line", "arrow", "freehand").forEach { tool ->
+            var midDrag: List<SceneSource.ShapeSource>? = null
+            val drawn = draw(tool) { reported ->
+                onNodeWithTag(canvasTag).performMouseInput {
+                    moveTo(Offset(40f, 30f))
+                    press()
+                    moveTo(Offset(48f, 38f))
+                    moveTo(Offset(100f, 80f))
+                    moveTo(Offset(160f, 120f))
+                }
+                waitForIdle()
+                midDrag = reported.toList()
+                onNodeWithTag(canvasTag).performMouseInput { release() }
+                waitForIdle()
+            }
+
+            assertEquals(emptyList(), midDrag, "the $tool is not reported while the button is held")
+            assertEquals(tool, drawn.single().shapeType, "and is reported once, on release")
+        }
     }
 }

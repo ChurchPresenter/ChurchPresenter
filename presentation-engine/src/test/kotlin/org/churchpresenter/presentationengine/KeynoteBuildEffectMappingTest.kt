@@ -285,4 +285,14 @@ class KeynoteBuildEffectMappingTest {
         assertNull(transitionOf("None"))
         assertNull(KeynoteBuildMapper.mapTransition(assertNotNull(IwaMessage.parse(ByteArray(0)))))
     }
+
+    @Test
+    fun `fade and reveal spellings and the remaining directions map too`() {
+        assertEquals(TransitionType.FADE, assertNotNull(transitionOf("Fade Through Color")).type)
+        assertEquals(TransitionType.WIPE, assertNotNull(transitionOf("Reveal")).type)
+        assertEquals(Direction.RIGHT, assertNotNull(transitionOf("Push", direction = 2L)).direction)
+        assertEquals(Direction.UP, assertNotNull(transitionOf("Push", direction = 3L)).direction)
+        assertEquals(Direction.UP, assertNotNull(transitionOf("Push")).direction, "no direction arrives from below")
+        assertNull(transitionOf(""), "an effect name with nothing after the prefix")
+    }
 }

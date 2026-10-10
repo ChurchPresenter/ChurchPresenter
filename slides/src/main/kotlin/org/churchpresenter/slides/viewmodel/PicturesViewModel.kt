@@ -122,7 +122,8 @@ class PicturesViewModel private constructor(
      * cache directory while the first was still running, and both appended the identical file — a
      * duplicate `absolutePath` in the images, which is a fatal crash in the grid that keys on it.
      */
-    private var remoteLoadJob: Job? = null
+    internal var remoteLoadJob: Job? = null
+        private set
 
     init {
         val savedFolder = appSettings?.pictureSettings?.storageDirectory.orEmpty()

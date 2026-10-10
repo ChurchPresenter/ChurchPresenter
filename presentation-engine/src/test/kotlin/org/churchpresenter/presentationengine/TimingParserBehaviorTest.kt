@@ -5,6 +5,7 @@ import org.churchpresenter.presentationengine.pptx.TimeNode
 import org.churchpresenter.presentationengine.pptx.TimeNodeKind
 import org.churchpresenter.presentationengine.pptx.TimingBehavior
 import org.churchpresenter.presentationengine.pptx.TimingParser
+import org.churchpresenter.presentationengine.pptx.TimingValues
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -366,4 +367,129 @@ class TimingParserBehaviorTest {
             assertNull(TimingParser.parse(show.slides.first()))
         }
     }
+
+    @Test
+    fun `behaviors without their optional attributes read as absent`() {
+        val root = parseClick(
+            """
+            <p:set><p:cBhvr><p:cTn dur="1"/>$shapeTarget</p:cBhvr></p:set>
+            <p:animEffect><p:cBhvr><p:cTn id="21" dur="500"/>$shapeTarget</p:cBhvr></p:animEffect>
+            <p:animMotion><p:cBhvr><p:cTn id="22" dur="500"/>$shapeTarget</p:cBhvr></p:animMotion>
+            <p:animRot><p:cBhvr><p:cTn id="23" dur="500"/>$shapeTarget</p:cBhvr></p:animRot>
+            <p:cmd type="call"><p:cBhvr><p:cTn id="24" dur="1"/>$shapeTarget</p:cBhvr></p:cmd>
+            <p:anim by="0.1"><p:cBhvr><p:cTn id="25" dur="500"/>$shapeTarget</p:cBhvr></p:anim>
+            """.trimIndent()
+        )
+        val behaviors = allNodes(root).mapNotNull { it.behavior }
+        val set = behaviors.filterIsInstance<TimingBehavior.SetValue>().single()
+        assertNull(set.attribute)
+        assertNull(set.toValue)
+        assertEquals(0L, allNodes(root).first { it.behavior === set }.id)
+        val effect = behaviors.filterIsInstance<TimingBehavior.AnimEffect>().single()
+        assertEquals("in", effect.transition)
+        assertNull(effect.filter)
+        assertNull(behaviors.filterIsInstance<TimingBehavior.AnimateMotion>().single().path)
+        val rot = behaviors.filterIsInstance<TimingBehavior.AnimateRotation>().single()
+        assertNull(rot.fromDeg)
+        assertNull(rot.toDeg)
+        assertNull(rot.byDeg)
+        assertEquals("", behaviors.filterIsInstance<TimingBehavior.Command>().single().verb)
+        val anim = behaviors.filterIsInstance<TimingBehavior.AnimateValue>().single()
+        assertEquals("0.1", anim.by)
+        assertNull(anim.from)
+        assertTrue(anim.keyframes.isEmpty())
+    }
+
+    @Test
+    fun `keyframes without a time or a readable value are dropped and booleans are kept`() {
+        val root = parseClick(
+            """
+            <p:anim calcmode="discrete" valueType="num">
+              <p:cBhvr><p:cTn id="20" dur="1000"/>$shapeTarget
+                <p:attrNameLst><p:attrName>style.visibility</p:attrName></p:attrNameLst>
+              </p:cBhvr>
+              <p:tavLst>
+                <p:tav tm="0"><p:val><p:boolVal val="1"/></p:val></p:tav>
+                <p:tav><p:val><p:strVal val="untimed"/></p:val></p:tav>
+                <p:tav tm="40000"/>
+                <p:tav tm="60000"><p:val><p:clrVal><a:srgbClr xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" val="FF0000"/></p:clrVal></p:val></p:tav>
+                <p:tav tm="100000"><p:val><p:strVal val="end"/></p:val></p:tav>
+              </p:tavLst>
+            </p:anim>
+            """.trimIndent()
+        )
+        val behavior = assertIs<TimingBehavior.AnimateValue>(behaviorOf(root))
+        assertEquals(listOf(0.0 to "true", 1.0 to "end"), behavior.keyframes)
+    }
+
+    @Test
+    fun `container flags, iteration and node-chained conditions are read`() {
+        val root = parseBody(
+            """
+            <p:par><p:cTn id="10" fill="hold" autoRev="1">
+              <p:stCondLst><p:cond evt="onEnd" delay="0"><p:tn val="7"/></p:cond></p:stCondLst>
+              <p:iterate type="lt"><p:tmPct val="10000"/></p:iterate>
+              <p:childTnLst>
+                <p:par><p:cTn id="11"><p:iterate><p:tmAbs val="100"/></p:iterate><p:childTnLst/></p:cTn></p:par>
+                <p:audio><p:cMediaNode><p:cTn id="12"/><p:tgtEl><p:spTgt spid="3"/></p:tgtEl></p:cMediaNode></p:audio>
+                <p:seq><p:cTn><p:stCondLst><p:cond/></p:stCondLst></p:cTn></p:seq>
+              </p:childTnLst>
+            </p:cTn></p:par>
+            """.trimIndent()
+        )
+        val outer = assertNotNull(allNodes(root).firstOrNull { it.id == 10L })
+        assertTrue(outer.autoReverse)
+        assertEquals("lt", outer.iterateType)
+        val condition = outer.beginConditions.single()
+        assertEquals(7L, condition.triggerNodeId)
+        assertEquals("onEnd", condition.event)
+        assertEquals(2, outer.children.size, "the audio declaration is skipped")
+        val inner = outer.children[0]
+        assertNull(inner.iterateType)
+        assertTrue(inner.children.isEmpty())
+        val seq = outer.children[1]
+        assertEquals(TimeNodeKind.SEQ, seq.kind)
+        assertEquals(0L, seq.id)
+        assertNull(seq.beginConditions.single().delayMs)
+        assertNull(seq.beginConditions.single().triggerNodeId)
+    }
+
+    @Test
+    fun `a character range target names no paragraph`() {
+        val root = parseClick(
+            """
+            <p:animEffect transition="in" filter="fade">
+              <p:cBhvr><p:cTn id="20" dur="500"/>
+                <p:tgtEl><p:spTgt spid="4"><p:txEl><p:charRg st="0" end="5"/></p:txEl></p:spTgt></p:tgtEl>
+              </p:cBhvr>
+            </p:animEffect>
+            <p:animEffect transition="out" filter="fade">
+              <p:cBhvr><p:cTn id="21" dur="500"/></p:cBhvr>
+            </p:animEffect>
+            """.trimIndent()
+        )
+        val effects = allNodes(root).mapNotNull { it.behavior as? TimingBehavior.AnimEffect }
+        val ranged = effects.first { it.transition == "in" }
+        assertEquals(4L, ranged.target?.shapeId)
+        assertNull(ranged.target?.paragraphIndex)
+        assertNull(effects.first { it.transition == "out" }.target)
+    }
+
+    @Test
+    fun `scalar timing values reject what they cannot read`() {
+        assertNull(TimingValues.parsePercentFactor(null))
+        assertNull(TimingValues.parsePercentFactor("lots%"))
+        assertNull(TimingValues.parsePercentFactor("lots"))
+        assertEquals(1.5, TimingValues.parsePercentFactor(" 150% ")!!, 1e-9)
+        assertNull(TimingValues.parseTlTime(null))
+        assertNull(TimingValues.parseTlTime("soon"))
+        assertEquals(TimeNode.INDEFINITE_MS, TimingValues.parseTlTime("INDEFINITE"))
+        assertNull(TimingValues.parseRepeat(null))
+        assertNull(TimingValues.parseRepeat("often"))
+        assertEquals(2.5, TimingValues.parseRepeat("2500")!!, 1e-9)
+    }
+
+    private fun allNodes(root: TimeNode): List<TimeNode> =
+        generateSequence(listOf(root)) { nodes -> nodes.flatMap { it.children }.takeIf { it.isNotEmpty() } }
+            .flatten().toList()
 }
