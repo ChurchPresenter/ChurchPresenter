@@ -62,7 +62,7 @@ object ReverseLookup {
     }
 
     /** [top] as the answer, when it clears [threshold] over its competitor in [candidates]. */
-    private fun resultFor(
+    internal fun resultFor(
         top: BibleIndex.SearchResult,
         candidates: List<BibleIndex.SearchResult>,
         threshold: Double,

@@ -191,6 +191,13 @@ class PicturesViewModelWatchTest {
     }
 
     @Test
+    fun `a plain file is not loaded as a folder`() {
+        val file = image("a.jpg")
+        model.loadImagesFromFolder(file)
+        assertTrue(model.images.isEmpty())
+    }
+
+    @Test
     fun `a file that was never in the list cannot be removed`() {
         loadWith("a.jpg")
 

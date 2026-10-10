@@ -243,7 +243,7 @@ internal object PptxSlideRasterizer {
      * Reversible "make this run invisible" mutation: swaps the run's fill for a fully
      * transparent solid fill and puts the original back on [restore].
      */
-    private class RunFillGuard private constructor(private val restoreAction: () -> Unit) {
+    internal class RunFillGuard private constructor(private val restoreAction: () -> Unit) {
 
         fun restore() = restoreAction()
 

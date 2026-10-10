@@ -15,10 +15,6 @@ group = "org.churchpresenter"
 // silently pulled the whole UI back into the measured set. Same scope as before, not wider.
 extra["coverageExcludes"] = listOf("**/ui/**", "**/MainKt*", "**/ComposableSingletons*")
 
-extra["coverageFloors"] = mapOf(
-    "COMPLEXITY" to "0.80",
-)
-
 kotlin {
     jvmToolchain(21)
 }

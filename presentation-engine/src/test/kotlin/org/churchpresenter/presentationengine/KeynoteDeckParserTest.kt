@@ -1,6 +1,7 @@
 package org.churchpresenter.presentationengine
 
 import org.churchpresenter.presentationengine.keynote.KeynoteDeckParser
+import java.awt.Color
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -401,5 +402,89 @@ class KeynoteDeckParserTest {
         )
         val slide = assertNotNull(KeynoteDeckParser.parse(file)).slides.single()
         assertNotNull(slide.gateReason)
+    }
+
+    private fun sizedShow(size: ByteArray) = Fixtures.ProtoWriter().apply {
+        bytesField(3, Fixtures.ProtoWriter().apply { bytesField(2, reference(100L)) }.toByteArray())
+        bytesField(4, size)
+    }.toByteArray()
+
+    @Test
+    fun `a show reference to a missing archive or a half-specified size yields nothing`() {
+        val slideObjects = arrayOf(Triple(100L, 4, slideNode(200L)), Triple(200L, 5, slide()))
+        assertNull(KeynoteDeckParser.parse(deck(Triple(1L, 1, document(2L)), *slideObjects)))
+        val widthOnly = Fixtures.ProtoWriter().apply { floatField(1, 1920f) }.toByteArray()
+        val heightOnly = Fixtures.ProtoWriter().apply { floatField(2, 1080f) }.toByteArray()
+        val zeroHeight = Fixtures.ProtoWriter().apply { floatField(1, 1920f); floatField(2, 0f) }.toByteArray()
+        for (size in listOf(widthOnly, heightOnly, zeroHeight)) {
+            assertNull(KeynoteDeckParser.parse(deck(Triple(1L, 1, document(2L)), Triple(2L, 2, sizedShow(size)), *slideObjects)))
+        }
+    }
+
+    @Test
+    fun `a show with no slide tree yields nothing`() {
+        val size = Fixtures.ProtoWriter().apply { floatField(1, 1920f); floatField(2, 1080f) }.toByteArray()
+        val noTree = Fixtures.ProtoWriter().apply { bytesField(4, size) }.toByteArray()
+        assertNull(KeynoteDeckParser.parse(deck(Triple(1L, 1, document(2L)), Triple(2L, 2, noTree))))
+    }
+
+    @Test
+    fun `missing nodes and slideless nodes are walked past`() {
+        val slidelessParent = Fixtures.ProtoWriter().apply { bytesField(1, reference(101L)) }.toByteArray()
+        val scene = assertNotNull(
+            KeynoteDeckParser.parse(
+                deck(
+                    Triple(1L, 1, document(2L)),
+                    Triple(2L, 2, show(1920f, 1080f, listOf(100L, 150L))),
+                    Triple(100L, 4, slidelessParent),
+                    Triple(101L, 4, slideNode(200L)),
+                    Triple(200L, 5, slide()),
+                )
+            )
+        )
+        assertEquals(1, scene.slides.size)
+    }
+
+    @Test
+    fun `master content draws below the slide's own and master placeholders are skipped`() {
+        val red = Fixtures.ProtoWriter().apply {
+            varintField(1, 1); floatField(3, 1f); floatField(4, 0f); floatField(5, 0f); floatField(6, 1f)
+        }.toByteArray()
+        val styleWithFill = Fixtures.ProtoWriter().apply {
+            bytesField(11, Fixtures.ProtoWriter().apply { bytesField(1, Fixtures.ProtoWriter().apply { bytesField(1, red) }.toByteArray()) }.toByteArray())
+        }.toByteArray()
+        val styleWithoutProps = Fixtures.ProtoWriter().apply { varintField(9, 1) }.toByteArray()
+        val master = Fixtures.ProtoWriter().apply {
+            bytesField(1, reference(280L))
+            bytesField(7, reference(260L)); bytesField(7, reference(265L)); bytesField(7, reference(270L))
+        }.toByteArray()
+        fun slideOn(styleId: Long) = Fixtures.ProtoWriter().apply {
+            bytesField(1, reference(styleId))
+            bytesField(17, reference(250L))
+            bytesField(7, reference(300L))
+        }.toByteArray()
+        val scene = assertNotNull(
+            KeynoteDeckParser.parse(
+                deck(
+                    Triple(1L, 1, document(2L)),
+                    Triple(2L, 2, show(1920f, 1080f, listOf(100L, 101L))),
+                    Triple(100L, 4, slideNode(200L)),
+                    Triple(101L, 4, slideNode(201L)),
+                    Triple(200L, 5, slideOn(290L)),
+                    Triple(201L, 5, slideOn(999L)),
+                    Triple(250L, 5, master),
+                    Triple(260L, 7, textShape(0f, 0f, 10f, 10f, null)),
+                    Triple(265L, 12, textShape(0f, 0f, 10f, 10f, null)),
+                    Triple(270L, 2011, textShape(0f, 0f, 100f, 20f, null)),
+                    Triple(280L, 9, styleWithFill),
+                    Triple(290L, 9, styleWithoutProps),
+                    Triple(300L, 2011, textShape(10f, 10f, 200f, 50f, null)),
+                )
+            )
+        )
+        for (slide in scene.slides) {
+            assertEquals(listOf(270L, 300L), slide.drawables.map { it.id })
+            assertEquals(Color.RED, slide.background?.color, "the master's background shows through")
+        }
     }
 }

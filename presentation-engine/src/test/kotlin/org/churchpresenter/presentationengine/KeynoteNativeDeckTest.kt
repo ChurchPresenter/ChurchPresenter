@@ -262,4 +262,81 @@ class KeynoteNativeDeckTest {
         assertEquals(1, deck.slideCount)
         assertEquals(Fidelity.NATIVE, deck.slides.single().fidelity)
     }
+
+    private fun build(drawableId: Long, type: String?, delivery: String? = null): ByteArray =
+        ProtoWriter().apply {
+            bytesField(1, reference(drawableId))
+            if (delivery != null) stringField(2, delivery)
+            if (type != null) {
+                val anim = ProtoWriter().apply {
+                    stringField(1, type)
+                    stringField(2, "apple:build-effect:Dissolve")
+                    doubleField(3, 0.5)
+                }.toByteArray()
+                bytesField(4, ProtoWriter().apply { bytesField(18, anim) }.toByteArray())
+            }
+        }.toByteArray()
+
+    private fun builtSlide(drawableIds: List<Long>, buildIds: List<Long>): ByteArray =
+        ProtoWriter().apply {
+            buildIds.forEach { bytesField(2, reference(it)) }
+            drawableIds.forEach { bytesField(7, reference(it)) }
+            drawableIds.forEach { bytesField(42, reference(it)) }
+        }.toByteArray()
+
+    @Test
+    fun `a built shape gets its own layer that starts hidden behind an entrance`() {
+        val objects = listOf(
+            Triple(1L, 1, document(2L)),
+            Triple(2L, 2, show(1920f, 1080f, listOf(100L))),
+            Triple(100L, 4, slideNode(200L)),
+            Triple(200L, 5, builtSlide(listOf(300L, 310L, 320L), listOf(500L, 510L))),
+            Triple(300L, 2011, textShape(100f, 120f, 800f, 200f, storageId = 400L)),
+            Triple(310L, 2011, textShape(100f, 400f, 800f, 200f, storageId = 410L)),
+            Triple(320L, 2011, textShape(100f, 700f, 800f, 200f, storageId = 420L)),
+            Triple(400L, 2001, storage("Built in")),
+            Triple(410L, 2001, storage("Built out")),
+            Triple(420L, 2001, storage("Never built")),
+            Triple(500L, 8, build(300L, "In")),
+            Triple(510L, 8, build(310L, "Out")),
+        )
+        val slide = assertIs<LoadResult.Success>(PresentationLoader.load(bundle(objects, name = "built"))).deck
+            .slides.single()
+
+        val shapes = slide.layers.filterIsInstance<LayerSpec.Shape>().associateBy { it.id }
+        assertEquals(false, shapes.getValue("kn-300").initiallyVisible, "an entrance starts hidden")
+        assertEquals(true, shapes.getValue("kn-310").initiallyVisible, "an exit starts on screen")
+        assertTrue(slide.layers.any { it is LayerSpec.Background }, "the unbuilt shape stays in a band")
+        assertEquals(2, slide.timeline?.stepCount)
+    }
+
+    @Test
+    fun `a by-paragraph build hides each paragraph layer`() {
+        val objects = listOf(
+            Triple(1L, 1, document(2L)),
+            Triple(2L, 2, show(1920f, 1080f, listOf(100L))),
+            Triple(100L, 4, slideNode(200L)),
+            Triple(200L, 5, builtSlide(listOf(300L), listOf(500L))),
+            Triple(300L, 2011, textShape(100f, 120f, 800f, 400f, storageId = 400L)),
+            Triple(400L, 2001, storage("First\nSecond")),
+            Triple(500L, 8, build(300L, "In", delivery = "By Paragraph")),
+        )
+        val slide = assertIs<LoadResult.Success>(PresentationLoader.load(bundle(objects, name = "paragraphs"))).deck
+            .slides.single()
+
+        val paragraphs = slide.layers.filterIsInstance<LayerSpec.ParagraphText>()
+        assertEquals(2, paragraphs.size)
+        assertTrue(paragraphs.none { it.initiallyVisible })
+    }
+
+    @Test
+    fun `a build whose target is not on the slide leaves one composite and no timeline`() {
+        val objects = oneTextSlide().map { if (it.first == 200L) Triple(200L, 5, builtSlide(listOf(300L), listOf(500L))) else it } +
+            Triple(500L, 8, build(999L, null))
+        val slide = assertIs<LoadResult.Success>(PresentationLoader.load(bundle(objects, name = "orphan"))).deck
+            .slides.single()
+
+        assertIs<LayerSpec.StaticComposite>(slide.layers.single())
+        assertEquals(null, slide.timeline)
+    }
 }

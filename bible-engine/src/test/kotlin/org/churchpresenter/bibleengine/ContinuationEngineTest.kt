@@ -242,4 +242,71 @@ class ContinuationEngineTest {
             Config.applyContinuationSpeed("balanced")
         }
     }
+
+    @Test fun `a chapter-scope verse that agrees but is mostly unread stays silent`() {
+        val t = fixture(listOf(
+            EngineVerse("9-15-22", 9, 15, 22, "alpha beta gamma delta epsilon zeta theta iota kappa lambda", false),
+        ))
+        assertNull(ContinuationEngine.checkChapterScope(stateWithSticky(9, 15, "alpha beta gamma"), t))
+    }
+
+    @Test fun `a sticky with no expiry stays valid`() {
+        val t = fixture(listOf(EngineVerse("9-15-22", 9, 15, 22, "alpha beta gamma delta", false)))
+        val state = stateWithSticky(9, 15, "alpha beta gamma delta", expiresAt = 0L)
+        assertEquals(22, assertNotNull(ContinuationEngine.checkChapterScope(state, t)).verse.verse)
+    }
+
+    @Test fun `history in another book with the same chapter number is held to the history floor`() =
+        withChapterHistory {
+            val t = fixture(listOf(
+                EngineVerse("9-15-1", 9, 15, 1, "gamma delta", false),
+                EngineVerse("10-15-1", 10, 15, 1, "alpha beta gamma delta epsilon zeta", false),
+            ))
+            val state = stateWithSticky(9, 15, "alpha beta gamma delta epsilon zeta")
+            state.touchChapterHistory(10, 15)
+            val result = assertNotNull(ContinuationEngine.checkChapterScope(state, t))
+            assertEquals(10, result.verse.bookNum)
+        }
+
+    @Test fun `an expired sticky still resolves from history`() = withChapterHistory {
+        val t = fixture(listOf(EngineVerse("9-10-1", 9, 10, 1, "alpha beta gamma delta epsilon zeta", false)))
+        val state = stateWithSticky(9, 15, "alpha beta gamma delta epsilon zeta",
+            expiresAt = System.currentTimeMillis() - 1_000L)
+        state.touchChapterHistory(9, 10)
+        assertEquals(10, assertNotNull(ContinuationEngine.checkChapterScope(state, t)).verse.chapter)
+    }
+
+    private val sequential = fixture(listOf(
+        EngineVerse("9-15-22", 9, 15, 22, "previous verse words here now", false),
+        EngineVerse("9-15-23", 9, 15, 23, "alpha beta gamma delta epsilon zeta", false),
+    ))
+
+    @Test fun `the sequential check times out after a long silence`() {
+        val now = 1_000_000L
+        val state = stateWithLastDetected(sequential, 9, 15, 22, "alpha beta gamma delta epsilon zeta", now)
+        assertNull(ContinuationEngine.check(state, listOf(sequential), now + Config.continuationTimeoutMs + 1))
+    }
+
+    @Test fun `the sequential check needs the translation it last detected in`() {
+        val now = 1_000_000L
+        val state = stateWithLastDetected(sequential, 9, 15, 22, "alpha beta gamma delta epsilon zeta", now)
+        state.lastTranslationId = "OTHER"
+        assertNull(ContinuationEngine.check(state, listOf(sequential), now))
+    }
+
+    @Test fun `the sequential check needs the last verse to exist`() {
+        val now = 1_000_000L
+        val state = stateWithLastDetected(sequential, 9, 15, 99, "alpha beta gamma delta epsilon zeta", now)
+        assertNull(ContinuationEngine.check(state, listOf(sequential), now))
+    }
+
+    @Test fun `the sequential check needs a few words`() {
+        val now = 1_000_000L
+        val state = stateWithLastDetected(sequential, 9, 15, 22, "alpha beta", now)
+        assertNull(ContinuationEngine.check(state, listOf(sequential), now))
+    }
+
+    @Test fun `no prior detection means no sequential check`() {
+        assertNull(ContinuationEngine.check(UtteranceState(id = "test"), listOf(sequential), 0L))
+    }
 }

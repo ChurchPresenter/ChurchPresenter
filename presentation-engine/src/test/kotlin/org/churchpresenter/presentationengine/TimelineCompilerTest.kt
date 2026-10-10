@@ -374,4 +374,127 @@ class TimelineCompilerTest {
         assertEquals(2, result.timeline.stepCount, "the trigger got its own step")
         assertTrue(warnings.any { it.contains("trigger") }, "and the limitation is recorded: $warnings")
     }
+
+    @Test
+    fun `the main sequence is found under either spelling, or as the only sequence`() {
+        for (nodeType in listOf("main_seq", null)) {
+            val root = node(
+                TimeNodeKind.PAR, nodeType = "tmRoot",
+                children = listOf(node(TimeNodeKind.SEQ, nodeType = nodeType, children = listOf(clickGroup(effect())))),
+            )
+            assertEquals(1, assertNotNull(compiler().compile(root), "$nodeType").timeline.stepCount)
+        }
+    }
+
+    @Test
+    fun `a merged group waits for every repeat of the one before it`() {
+        val result = assertNotNull(
+            compiler().compile(
+                slide(
+                    clickGroup(effect(repeatCount = 3.0, behaviors = listOf(animEffect(durMs = 200)))),
+                    node(TimeNodeKind.PAR, children = listOf(effect(behaviors = listOf(animEffect(2L))))),
+                )
+            )
+        )
+        assertEquals(600L, result.timeline.steps.single().intervals.single { it.layerId == "shape-2" }.beginMs)
+    }
+
+    @Test
+    fun `an indefinite loop does not hold back a merged group forever`() {
+        val result = assertNotNull(
+            compiler().compile(
+                slide(
+                    clickGroup(effect(repeatCount = -1.0, behaviors = listOf(animEffect(durMs = 200)))),
+                    node(TimeNodeKind.PAR, children = listOf(effect(behaviors = listOf(animEffect(2L))))),
+                )
+            )
+        )
+        assertEquals(200L, result.timeline.steps.single().intervals.single { it.layerId == "shape-2" }.beginMs)
+    }
+
+    @Test
+    fun `a merged group after an empty step starts at zero`() {
+        val untargeted = node(
+            TimeNodeKind.BEHAVIOR,
+            behavior = TimingBehavior.AnimEffect(null, 500, 0, "in", "fade"),
+        )
+        val result = assertNotNull(
+            compiler().compile(
+                slide(
+                    clickGroup(effect(behaviors = listOf(untargeted))),
+                    node(TimeNodeKind.PAR, children = listOf(effect())),
+                )
+            )
+        )
+        assertEquals(0L, result.timeline.steps.single().intervals.single().beginMs)
+    }
+
+    @Test
+    fun `an interactive group with nothing to animate adds no step and no warning`() {
+        val warnings = mutableListOf<String>()
+        val empty = node(TimeNodeKind.BEHAVIOR, behavior = null)
+        val root = node(
+            TimeNodeKind.PAR, nodeType = "tmRoot",
+            children = listOf(
+                node(TimeNodeKind.SEQ, nodeType = "mainSeq", children = listOf(clickGroup(effect()))),
+                node(TimeNodeKind.SEQ, nodeType = "interactiveSeq", children = listOf(effect(behaviors = listOf(empty)))),
+                node(TimeNodeKind.SEQ, nodeType = "otherSeq", children = listOf(clickGroup(effect(behaviors = listOf(animEffect(3L)))))),
+            ),
+        )
+        val result = assertNotNull(compiler(warnings).compile(root))
+        assertEquals(1, result.timeline.stepCount)
+        assertTrue(warnings.none { it.contains("trigger") })
+    }
+
+    @Test
+    fun `a stray behavior beside an effect still animates`() {
+        val stray = animEffect(shapeId = 4L)
+        val result = assertNotNull(compiler().compile(slide(clickGroup(stray, effect()))))
+        val layers = result.timeline.steps.single().intervals.map { it.layerId }.toSet()
+        assertEquals(setOf("shape-1", "shape-4"), layers)
+    }
+
+    @Test
+    fun `an effect node ignores children that are not behaviors`() {
+        val wrapped = node(TimeNodeKind.PAR, children = listOf(animEffect(shapeId = 5L)))
+        val result = assertNotNull(compiler().compile(slide(clickGroup(effect(behaviors = listOf(animEffect(), wrapped))))))
+        assertEquals(listOf("shape-1"), result.timeline.steps.single().intervals.map { it.layerId })
+    }
+
+    @Test
+    fun `a range spanning paragraphs animates the whole shape`() {
+        val behavior = node(
+            TimeNodeKind.BEHAVIOR,
+            behavior = TimingBehavior.AnimEffect(BehaviorTarget(1L, 0, widensToShape = true), 500, 0, "in", "fade"),
+        )
+        val result = assertNotNull(compiler().compile(slide(clickGroup(effect(behaviors = listOf(behavior))))))
+        assertEquals("shape-1", result.timeline.steps.single().intervals.single().layerId)
+    }
+
+    @Test
+    fun `the first concrete delay is used and the click marker is skipped`() {
+        val delayed = effect().copy(
+            beginConditions = listOf(
+                TimeCondition(null, "onBegin", null, null),
+                TimeCondition(TimeNode.INDEFINITE_MS, null, null, null),
+                TimeCondition(250, null, null, null),
+            ),
+        )
+        val result = assertNotNull(compiler().compile(slide(clickGroup(delayed))))
+        assertEquals(250L, result.timeline.steps.single().intervals.single().beginMs)
+    }
+
+    @Test
+    fun `a sequence step that yields nothing leaves the cursor where it was`() {
+        val seq = node(
+            TimeNodeKind.SEQ,
+            children = listOf(
+                effect(behaviors = listOf(animEffect(durMs = 300))),
+                node(TimeNodeKind.PAR, children = listOf(node(TimeNodeKind.PAR))),
+                effect(behaviors = listOf(animEffect(2L))),
+            ),
+        )
+        val result = assertNotNull(compiler().compile(slide(clickGroup(seq))))
+        assertEquals(300L, result.timeline.steps.single().intervals.single { it.layerId == "shape-2" }.beginMs)
+    }
 }

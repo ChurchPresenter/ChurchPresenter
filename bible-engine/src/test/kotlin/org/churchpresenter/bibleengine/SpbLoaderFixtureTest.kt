@@ -250,4 +250,70 @@ class SpbLoaderFixtureTest {
         assertEquals(ids.size, ids.toSet().size, "expected unique ids, got $ids")
         assertTrue(ids.any { it.endsWith("_2") }, "expected a suffixed id in $ids")
     }
+
+    @Test
+    fun `malformed manifest rows are skipped and indented or blank header lines ignored`() {
+        File(root, "ENG_MAN.spb").writeText(
+            listOf(
+                "##Title:Manifest",
+                "##Abbreviation:MAN",
+                "##Comment:ignored",
+                " 41\tIndented\t16",
+                "\t42\tTabbed\t24",
+                "   ",
+                "43\tJohn",
+                "x\tNoNumber\t5",
+                "44\tActs\tmany",
+                "45\t \t16",
+                "40\tMatthew\t28",
+                "-----",
+                pad(),
+            ).joinToString("\n"),
+            Charsets.UTF_8,
+        )
+
+        val t = assertNotNull(SpbLoader.loadAll().singleOrNull())
+
+        assertEquals(listOf(40 to "Matthew"), t.books.map { it.num to it.name })
+    }
+
+    @Test
+    fun `the manifest scan skips indented rows and rows with one field`() {
+        File(root, "ENG_HDR.spb").writeText(
+            listOf("##Abbreviation:HDR", " 41\tIndented\t1", "\t42\tTabbed\t1", "43", "40\tMatthew\t28", "-----")
+                .joinToString("\n"),
+            Charsets.UTF_8,
+        )
+
+        assertEquals(listOf(40 to "Matthew"), SpbLoader.scanAllBookManifests())
+    }
+
+    @Test
+    fun `verse rows with too few fields or a bad chapter or verse are skipped`() {
+        spb(
+            "ENG_TST.spb", "Test", "TST",
+            listOf(
+                "B040C001V002\t40\t1\t2",
+                "B040C001V003\t40\tx\t3\tbad chapter",
+                "B040C001V004\t40\t1\tx\tbad verse",
+                verse("B040C001V001", 40, 1, 1, "good"),
+                pad(),
+            ).joinToString("\n"),
+        )
+
+        val t = assertNotNull(SpbLoader.loadAll().firstOrNull())
+
+        assertEquals(listOf(1), t.byChapter[40 to 1]?.map { it.verse })
+    }
+
+    @Test
+    fun `only spb files are loaded, other files and folders are passed over`() {
+        spb("ENG_ONE.spb", "One", "ONE", pad())
+        File(root, "notes.txt").writeText("##Abbreviation:TXT\n-----\n")
+        File(root, "folder.spb").mkdirs()
+
+        assertEquals(listOf("ONE"), SpbLoader.loadAll().map { it.abbreviation })
+        assertEquals(listOf("ONE"), SpbLoader.loadSelected(listOf("ENG_ONE.spb", "notes.txt")).map { it.abbreviation })
+        assertEquals(listOf(40 to "Matthew"), SpbLoader.scanAllBookManifests())
+    }
 }

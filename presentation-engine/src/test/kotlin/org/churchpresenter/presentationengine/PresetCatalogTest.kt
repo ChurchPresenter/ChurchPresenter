@@ -252,4 +252,90 @@ class PresetCatalogTest {
             )
         }
     }
+
+    @Test
+    fun `a missing preset id returns null for every role`() {
+        assertNull(PresetCatalog.fromPreset("entr", null, null))
+        assertNull(PresetCatalog.fromPreset("exit", null, 4))
+        assertNull(PresetCatalog.fromPreset("emph", null, null))
+    }
+
+    @Test
+    fun `an exit reverses every fly direction`() {
+        assertEquals(Direction.DOWN, (PresetCatalog.fromPreset("exit", 2, 4) as EffectSpec.Fly).direction)
+        assertEquals(Direction.UP, (PresetCatalog.fromPreset("exit", 2, 1) as EffectSpec.Fly).direction)
+        assertEquals(Direction.LEFT, (PresetCatalog.fromPreset("exit", 2, 8) as EffectSpec.Fly).direction)
+        assertEquals(Direction.RIGHT, (PresetCatalog.fromPreset("exit", 2, 2) as EffectSpec.Fly).direction)
+    }
+
+    @Test
+    fun `every catalogued entrance id maps to its documented kind`() {
+        val expected = mapOf(
+            3 to EffectSpec.Wipe::class, 4 to EffectSpec.Zoom::class, 5 to EffectSpec.Fade::class,
+            6 to EffectSpec.Zoom::class, 7 to EffectSpec.Fly::class, 8 to EffectSpec.Zoom::class,
+            9 to EffectSpec.Fade::class, 11 to EffectSpec.Fade::class, 12 to EffectSpec.Fly::class,
+            13 to EffectSpec.Zoom::class, 14 to EffectSpec.Fade::class, 15 to EffectSpec.Zoom::class,
+            17 to EffectSpec.Zoom::class, 18 to EffectSpec.Wipe::class, 19 to EffectSpec.GrowShrink::class,
+            20 to EffectSpec.Zoom::class, 21 to EffectSpec.Wipe::class, 24 to EffectSpec.Fade::class,
+            25 to EffectSpec.Fly::class, 26 to EffectSpec.Zoom::class, 30 to EffectSpec.Fly::class,
+            47 to EffectSpec.Fly::class,
+        )
+        for ((id, kind) in expected) {
+            val effect = assertNotNull(PresetCatalog.fromPreset("entr", id, 4), "entr $id")
+            assertEquals(kind, effect::class, "entr $id")
+            assertEquals(kind, PresetCatalog.fromPreset("exit", id, 4)!!::class, "exit $id")
+        }
+    }
+
+    @Test
+    fun `blinds and split read their axis from the subtype`() {
+        assertEquals(Direction.RIGHT, (PresetCatalog.fromPreset("entr", 3, 10) as EffectSpec.Wipe).direction)
+        assertEquals(Direction.DOWN, (PresetCatalog.fromPreset("entr", 3, 5) as EffectSpec.Wipe).direction)
+        val vertical = PresetCatalog.fromPreset("entr", 16, 21) as EffectSpec.Split
+        assertEquals(false, vertical.horizontal)
+        assertEquals(false, vertical.outward)
+        assertEquals(true, (PresetCatalog.fromPreset("exit", 16, 26) as EffectSpec.Split).outward)
+    }
+
+    @Test
+    fun `zoom-like entrances grow in and shrink out`() {
+        assertEquals(0.0, (PresetCatalog.fromPreset("entr", 23, null) as EffectSpec.Zoom).fromScale)
+        assertEquals(1.0, (PresetCatalog.fromPreset("exit", 23, null) as EffectSpec.Zoom).fromScale)
+    }
+
+    @Test
+    fun `float down inverts on exit`() {
+        assertEquals(Direction.DOWN, (PresetCatalog.fromPreset("entr", 47, null) as EffectSpec.Fly).direction)
+        assertEquals(Direction.UP, (PresetCatalog.fromPreset("exit", 47, null) as EffectSpec.Fly).direction)
+    }
+
+    @Test
+    fun `the remaining emphasis ids map to their degrade`() {
+        assertIs<EffectSpec.Pulse>(PresetCatalog.fromPreset("emph", 3, null))
+        assertIs<EffectSpec.Pulse>(PresetCatalog.fromPreset("emph", 35, null))
+        assertIs<EffectSpec.Pulse>(PresetCatalog.fromPreset("emph", 36, null))
+    }
+
+    @Test
+    fun `in and out filter arguments decode to zoom directions`() {
+        assertEquals(Direction.IN, wipeDirection("wipe(in)"))
+        assertEquals(Direction.OUT, wipeDirection("wipe(out)"))
+        assertEquals(Direction.UP, (PresetCatalog.fromFilter("slide", entrance) as EffectSpec.Fly).direction)
+        assertEquals(Direction.UP, (PresetCatalog.fromFilter("slide(sideways)", entrance) as EffectSpec.Fly).direction)
+    }
+
+    @Test
+    fun `strips fall back across their axes`() {
+        assertEquals(Direction.UP, wipeDirection("strips(upLeft)"))
+        assertEquals(Direction.LEFT, wipeDirection("strips(left)"))
+        assertEquals(Direction.RIGHT, wipeDirection("strips(right)"))
+        assertEquals(Direction.RIGHT, wipeDirection("strips"))
+    }
+
+    @Test
+    fun `barn without an argument opens inward on the horizontal axis`() {
+        val barn = PresetCatalog.fromFilter("barn", entrance) as EffectSpec.Split
+        assertTrue(barn.horizontal)
+        assertEquals(false, barn.outward)
+    }
 }

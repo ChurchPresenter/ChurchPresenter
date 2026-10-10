@@ -75,13 +75,12 @@ so a replay can be driven from the command line. The replay suite is inert witho
 
 ## Gates
 
-- **Coverage**: the root build's six counters, with `extra["coverageFloors"]` lowering BRANCH to
-  0.81 and COMPLEXITY to 0.78, CI's measured values rounded down — a detection pipeline is
-  branch-dense, and the rest is tuning thresholds only a replayed service reaches. CI is the
+- **Coverage**: the root build's six counters at their default 85% floor — no
+  `extra["coverageFloors"]` override (measured: BRANCH 88.4%, COMPLEXITY 86.1%). CI is the
   measure: `SpbLoaderTest` and `ReverseLookupTest` also run against the Bibles a developer's machine
-  has and skip without them, so a local run reads higher — and `extra["coverageExcludes"]` dropping
-  `**/ui/**`, `**/MainKt*` and `**/tools/**` (CLI diagnostics). Both `extra` blocks must stay
-  **above everything else** in the build file; never re-declare the JaCoCo tasks here.
+  has and skip without them, so a local run can read higher. `extra["coverageExcludes"]` drops
+  `**/ui/**`, `**/MainKt*` and `**/tools/**` (CLI diagnostics); it must stay **above everything
+  else** in the build file; never re-declare the JaCoCo tasks here.
 - **Detekt**: `./gradlew :bible-engine:detekt`, against the root config, gated in CI. The module has
   **no baseline**: every finding was fixed in code, and a new one is fixed, never suppressed.
 

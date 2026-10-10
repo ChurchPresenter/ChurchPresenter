@@ -72,11 +72,10 @@ shared build files — see the `converter` filter in `.github/workflows/test.yml
   **silently** — detekt over zero files is a passing detekt — so the module was gating only its
   tests until it was noticed. An exclude cannot fail that way round: if `**/ui/**` stops matching,
   the gate analyzes too much and says so.
-- **Coverage** (the root build's six counters — see the root `AGENT.md`): `extra["coverageFloors"]`
-  lowers COMPLEXITY to 0.80, its measured value rounded down: JaCoCo scores every converter's
-  per-format lambdas as methods, and the last of them need real files from each app to reach. The
-  other five stay at the 85% default. Raise it as tests are added; never lower it. `extra["coverageExcludes"]` drops `ui/**` and `MainKt*` — they need a
-  display. Both `extra` blocks must stay **above everything else** in the build file, and the
+- **Coverage** (the root build's six counters — see the root `AGENT.md`): no
+  `extra["coverageFloors"]`: all six counters are held at the 85% default — never add a floor
+  below it. `extra["coverageExcludes"]` drops `ui/**` and `MainKt*` — they need a display. That
+  `extra` block must stay **above everything else** in the build file, and the
   module must never re-declare the JaCoCo tasks themselves.
 
 ## Dependencies
