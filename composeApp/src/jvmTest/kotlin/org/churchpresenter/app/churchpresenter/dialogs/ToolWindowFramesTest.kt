@@ -14,10 +14,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.calendar.CalendarHost
 import org.churchpresenter.theme.ThemeMode
+import java.io.File
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * The tool windows opened from the Help menu -- the converter, the Song Library Manager, the
@@ -81,4 +85,46 @@ class ToolWindowFramesTest {
     ) { f ->
         MemoryMonitorWindow(isVisible = true, theme = ThemeMode.DARK, onClose = { f.closed++ }, frame = f.frame)
     }
+
+    private fun calendarOpens(songFolder: (File) -> File) {
+        val folder = Files.createTempDirectory("tool-calendar").toFile()
+        try {
+            runComposeUiTest {
+                val opened = mutableListOf<CalendarWindowSpec>()
+                var closed = 0
+                var dialogsShown = false
+                setContent {
+                    CalendarWindow(
+                        theme = ThemeMode.LIGHT,
+                        appDataDirectory = folder,
+                        songStorageDirectory = songFolder(folder).absolutePath,
+                        host = CalendarHost(),
+                        dialogs = { dialogsShown = true },
+                        onClose = { closed++ },
+                        frame = { spec, content ->
+                            if (opened.none { it.title == spec.title }) opened += spec
+                            Box(Modifier.size(1280.dp, 860.dp)) {
+                                content(CalendarFileChoosers(save = { _, _, _ -> null }, open = { _, _ -> null }))
+                            }
+                        },
+                    )
+                }
+                waitForIdle()
+                val spec = opened.single()
+                assertEquals("Calendar Manager", spec.title)
+                assertNull(spec.mainWindow)
+                assertTrue(dialogsShown)
+                spec.onClose()
+                assertEquals(1, closed)
+            }
+        } finally {
+            folder.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `the calendar manager`() = calendarOpens { it }
+
+    @Test
+    fun `the calendar manager with no song folder`() = calendarOpens { File(it, "missing") }
 }

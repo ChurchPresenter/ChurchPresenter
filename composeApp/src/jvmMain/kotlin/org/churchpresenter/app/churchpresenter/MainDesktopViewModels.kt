@@ -8,6 +8,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import org.churchpresenter.bibletab.BibleEngineClient
 import org.churchpresenter.bibletab.BibleViewModel
 import org.churchpresenter.dictionary.DictionaryViewModel
+import org.churchpresenter.dictionary.data.DictionaryFiles
 import org.churchpresenter.slides.viewmodel.PicturesViewModel
 import org.churchpresenter.slides.viewmodel.PresentationViewModel
 import org.churchpresenter.canvas.SceneViewModel
@@ -34,6 +35,7 @@ internal class MainDesktopViewModels(
     appSettings: AppSettings,
     publish: State<MainDesktopPublishers>,
     link: State<InstanceLinkBridge>,
+    dictionaryFiles: DictionaryFiles = DictionaryFiles.Bundled,
 ) {
     val picturesViewModel = PicturesViewModel(appSettings)
     val presentationViewModel = PresentationViewModel(appSettings)
@@ -62,7 +64,7 @@ internal class MainDesktopViewModels(
         bibleViewModel.onContinuationSpeedChanged = { speed -> client.setContinuationSpeed(speed.name.lowercase()) }
     }
 
-    val dictionaryViewModel = DictionaryViewModel()
+    val dictionaryViewModel = DictionaryViewModel(dictionaryFiles)
     val scheduleViewModel = ScheduleViewModel(
         onScheduleChanged = { items -> publish.value.onScheduleChanged?.invoke(items) },
     )

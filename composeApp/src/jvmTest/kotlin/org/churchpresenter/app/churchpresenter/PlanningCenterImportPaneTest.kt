@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -125,6 +126,33 @@ class PlanningCenterImportPaneTest {
         onNodeWithText("Cancel").performClick()
         waitForIdle()
         assertEquals(1, dismissed)
+    }
+
+    @Test
+    fun `an open import follows a new sink and new settings, and closes when hidden`() = runComposeUiTest {
+        val titles = mutableListOf<String>()
+        val sink = mutableStateOf(Rig().sink)
+        val settings = mutableStateOf(PlanningCenterSettings())
+        val visible = mutableStateOf(true)
+        setContent {
+            PlanningCenterImportPane(
+                isVisible = visible.value,
+                theme = ThemeMode.LIGHT,
+                settings = settings.value,
+                sink = sink.value,
+                onDismiss = {},
+                window = inPlace(titles),
+            )
+        }
+        onNodeWithText("Connect to Planning Center").assertExists()
+        settings.value = PlanningCenterSettings(connectedPersonName = "Sam")
+        waitForIdle()
+        sink.value = Rig().sink
+        waitForIdle()
+        onNodeWithText("Connect to Planning Center").assertExists()
+        visible.value = false
+        waitForIdle()
+        onNodeWithText("Connect to Planning Center").assertDoesNotExist()
     }
 
     @Test

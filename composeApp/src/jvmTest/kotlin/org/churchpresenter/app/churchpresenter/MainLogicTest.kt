@@ -19,8 +19,6 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.server.InstanceLinkStatus
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.server.TunnelStatus
-import org.churchpresenter.updater.UpdateCheckResult
-import org.churchpresenter.updater.UpdateInfo
 import org.churchpresenter.diagnostics.Logger
 import java.io.File
 import java.nio.file.Files
@@ -422,30 +420,10 @@ class MainLogicTest {
 
     // ── Update checks ───────────────────────────────────────────────────────────
 
-    private fun available() = UpdateCheckResult.Available(
-        UpdateInfo(latestVersion = "1.2.3", releaseUrl = "https://example.invalid", releaseNotes = ""),
-    )
-
     @Test
     fun `an install that has never checked is recognised`() {
         assertTrue(isFirstEverUpdateCheck(0L))
         assertFalse(isFirstEverUpdateCheck(1L))
-    }
-
-    @Test
-    fun `the very first check is shown whatever it found`() {
-        // That is the one chance to ask how often the operator wants checking done.
-        assertTrue(shouldShowUpdateResult(firstEverCheck = true, result = UpdateCheckResult.UpToDate))
-        assertTrue(shouldShowUpdateResult(firstEverCheck = true, result = available()))
-    }
-
-    @Test
-    fun `later checks interrupt only when there is something to install`() {
-        assertTrue(shouldShowUpdateResult(firstEverCheck = false, result = available()))
-        assertFalse(
-            shouldShowUpdateResult(firstEverCheck = false, result = UpdateCheckResult.UpToDate),
-            "a routine up-to-date result must not appear unasked",
-        )
     }
 
     // ── Window placement ────────────────────────────────────────────────────────

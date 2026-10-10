@@ -1,5 +1,24 @@
 package org.churchpresenter.app.churchpresenter
 
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.window.ApplicationScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.runBlocking
+import org.churchpresenter.app.churchpresenter.remote.AppShowHost
+import org.churchpresenter.app.churchpresenter.remote.ShowOutlets
+import org.churchpresenter.liveoutput.withPreviewMode
+import org.churchpresenter.obs.OBSWebSocketManager
+import org.churchpresenter.schedule.ActionChoices
+import org.churchpresenter.settings.StreamingSettings
+import java.util.concurrent.Executor
+import kotlin.test.AfterTest
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.core.models.companion.CompanionSurfaceSlot
@@ -21,7 +40,29 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** A row's actions reaching the air with it, and the lower-third presets the editor offers. */
+@OptIn(ExperimentalTestApi::class)
 class ShowControlWiringTest {
+
+    // Launched work is dropped, never run, so a run that was started stays running until cancelled.
+    private val scope = CoroutineScope(SupervisorJob() + Executor { }.asCoroutineDispatcher())
+
+    private val root by lazy {
+        TestSingletons.latchToTestHome()
+        AppRootState(
+            object : ApplicationScope {
+                override fun exitApplication() = Unit
+            },
+            scope,
+            secondaryDisplays = { emptyList() },
+        )
+    }
+
+    private val wait = listOf(Action.Wait(60.0))
+
+    @AfterTest
+    fun tearDown() {
+        scope.cancel()
+    }
 
     private val pictures = ScheduleItem.PictureItem("p1", "/pics", "Gallery", 3)
     private val announcement = ScheduleItem.AnnouncementItem("a1", "Welcome")
@@ -141,5 +182,118 @@ class ShowControlWiringTest {
         val first = CompanionSurfacePlacement.entries.first()
         assertTrue(!pressOnSurface(Action.CompanionPress("c1", 3, first.name.lowercase()), answers))
         assertEquals(listOf(CompanionSurfaceSlot("c1", first)), asked)
+    }
+
+    @Test
+    fun `the host sees preview mode only in dev mode`() {
+        val on = AppSettings().withPreviewMode(true)
+        assertTrue(showHostSettings(devMode = true, on).projectionSettings.previewModeEnabled)
+        assertFalse(showHostSettings(devMode = false, on).projectionSettings.previewModeEnabled)
+    }
+
+    @Test
+    fun `next steps from the row on air or the one selected, and runs the row's actions`() = runBlocking {
+        root.currentScheduleItems = listOf(
+            announcement,
+            ScheduleItem.AnnouncementItem("a2", "Two"),
+            ScheduleItem.AnnouncementItem("a3", "Three"),
+        )
+        root.scheduleActions = ScheduleActions(currentActions = { mapOf("a3" to wait) })
+        val host = root.appShowHost()
+
+        host.next()
+        assertEquals("a1", root.lastLiveRowId, "with nothing on air or selected, the first row")
+        assertFalse(root.showRunner.isRunning("a1"))
+
+        root.lastLiveRowId = null
+        root.selectedScheduleItemId = "a2"
+        host.next()
+        assertEquals("a3", root.lastLiveRowId, "from the selected row")
+        assertTrue(root.showRunner.isRunning("a3"))
+
+        host.previous()
+        assertEquals("a2", root.lastLiveRowId, "from the row on air")
+    }
+
+    @Test
+    fun `a row sent to Preview is cued there`() = runBlocking {
+        val added = mutableListOf<String>()
+        root.appSettings = root.appSettings.withPreviewMode(true)
+        root.presenterManager.previewBus.setEnabled(true)
+        root.currentScheduleItems = listOf(pictures)
+        root.scheduleActions = ScheduleActions(addPicture = { path, _, _ -> added += path })
+
+        root.appShowHost().toPreview(Action.ToPreview(rowId = "p1"))
+
+        assertEquals(listOf("/pics"), added)
+        assertTrue(root.presenterManager.previewBus.isCued(Presenting.PICTURES))
+    }
+
+    @Test
+    fun `a macro is found by name, and an unknown one is not`() {
+        root.appSettings = root.appSettings.copy(macros = listOf(Macro("x1", "Walk in", obs)))
+        val host = root.appShowHost()
+        assertEquals(obs, host.macro("walk in"))
+        assertNull(host.macro("Walk out"))
+    }
+
+    @Test
+    fun `the outlets reach the player, OBS, Companion and the ATEM`() = runBlocking {
+        val host = root.appShowHost()
+        MediaCommand.entries.forEach { host.media(it) }
+        assertFalse(root.mediaViewModel.isPlaying)
+        host.obsScene("Wide")
+
+        val companion = assertFailsWith<IllegalArgumentException> { host.companion(Action.CompanionPress("c1", 2)) }
+        assertEquals("No Companion surface for c1", companion.message)
+        val atem = assertFailsWith<IllegalArgumentException> { host.atemMacro(1) }
+        assertEquals("No ATEM switcher is set up", atem.message)
+        host.reportError(Action.AtemMacro(1), IllegalStateException("offline"))
+    }
+
+    @Test
+    fun `a row's actions and a macro run under their own keys`() {
+        root.runRowActions(announcement, wait)
+        assertTrue(root.showRunner.isRunning("a1"), "no Preview, so straight away")
+
+        root.scheduleActions = ScheduleActions(currentActions = { mapOf("a2" to wait) })
+        root.runRowActionsNow(ScheduleItem.AnnouncementItem("a2", "Two"))
+        assertTrue(root.showRunner.isRunning("a2"))
+
+        root.runMacro(Macro("x1", "Walk in", wait))
+        assertTrue(root.showRunner.isRunning("macro:x1"))
+    }
+
+    @Test
+    fun `an operator's clear stops what is running, and an action's own clear does not`() = runComposeUiTest {
+        val pm = PresenterManager(showPresenterWindowInitially = false)
+        val runner = ActionRunner(AppShowHost(pm, { AppSettings() }, ShowOutlets()), scope)
+        setContent { ShowControlEffects(pm, runner) }
+        runner.run(wait, "w")
+        waitForIdle()
+        assertTrue(runner.isRunning("w"))
+
+        pm.requestClearDisplay()
+        waitForIdle()
+        assertTrue(runner.isRunning("w"))
+
+        pm.clearFromOperator()
+        waitUntil(timeoutMillis = 2_000) { !runner.isRunning("w") }
+    }
+
+    @Test
+    fun `the editor's choices pick up the lower thirds in the folder`() = runComposeUiTest {
+        val folder = Files.createTempDirectory("cp-action-choices").toFile()
+        try {
+            folder.resolve("Pastor.json").writeText("{}")
+            val settings = AppSettings(streamingSettings = StreamingSettings(lowerThirdFolder = folder.absolutePath))
+            var choices: ActionChoices? = null
+            setContent { choices = rememberActionChoices(settings, OBSWebSocketManager()) }
+            waitUntil(timeoutMillis = 2_000) { choices?.lowerThirds == listOf("Pastor") }
+            assertEquals(emptyList(), choices?.obsScenes)
+            choices?.onOpen?.invoke()
+        } finally {
+            folder.deleteRecursively()
+        }
     }
 }

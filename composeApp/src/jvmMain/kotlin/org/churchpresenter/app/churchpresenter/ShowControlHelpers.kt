@@ -5,6 +5,7 @@ import org.churchpresenter.atem.AtemConnectionManager
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.core.models.companion.CompanionSurfaceSlot
 import org.churchpresenter.diagnostics.Log
+import org.churchpresenter.liveoutput.withPreviewMode
 import org.churchpresenter.schedule.ActionChoices
 import org.churchpresenter.schedule.CompanionChoice
 import org.churchpresenter.schedule.MessageChoice
@@ -16,6 +17,9 @@ import org.churchpresenter.showcontrol.ActionRunner
 import org.churchpresenter.showcontrol.MediaCommand
 
 // The decisions ShowControlWiring takes, apart from the root state they are wired to.
+
+internal fun showHostSettings(devMode: Boolean, settings: AppSettings): AppSettings =
+    if (devMode) settings else settings.withPreviewMode(false)
 
 /** Hands [actions] of row [rowId] to [run] one chain level below [chainDepth], unless that is too deep. */
 internal fun runRowActionsChained(

@@ -179,11 +179,6 @@ class DialogFramesTest {
     }
 
     @Test
-    fun `the add website dialog`() = opens("Add Website", resizable = false) { f ->
-        AddWebsiteDialog(f.dismiss, { _, _ -> }, frame = f.frame)
-    }
-
-    @Test
     fun `the contact dialog`() = opens("Contact Us", resizable = false) { f ->
         ContactUsDialog(
             true, f.dismiss, identity = TEST_IDENTITY, frame = f.frame,

@@ -154,6 +154,20 @@ class MainDesktopPublishAndVerseWiringTest : MainDesktopComposeHarness() {
     }
 
     @Test
+    fun `a schedule verse put live with the Bible tab shown is left to the tab`() = runComposeUiTest {
+        val settings = mutableStateOf(bibleSettings().copy(hiddenTabs = emptySet()))
+        val published = Published()
+        var actions = ScheduleActions()
+        compose(settings, published, onActions = { actions = it })
+
+        actions.addBibleVerse("Genesis", 1, 3, "Genesis one verse 3", "", 1)
+        waitForIdle()
+        takeLive("Genesis")
+        waitUntil(timeoutMillis = 10_000) { published.versesLive.isNotEmpty() }
+        assertEquals(3, published.versesLive.last().first().verseNumber)
+    }
+
+    @Test
     fun `a schedule verse that resolves to nothing is dropped rather than sent live`() = runComposeUiTest {
         val settings = mutableStateOf(settings().copy(hiddenTabs = setOf(Tabs.BIBLE.name)))
         val published = Published()

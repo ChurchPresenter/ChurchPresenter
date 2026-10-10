@@ -129,7 +129,7 @@ internal fun MainWindowScope.MainDesktopHost() {
         val instanceLinkUsesRemoteContent =
             shouldUseRemoteContent(instanceLinkStatus, appSettings.instanceLink.role)
         CompositionLocalProvider(
-            LocalActionChoices provides rememberActionChoices(),
+            LocalActionChoices provides rememberActionChoices(appSettings, obsManager),
             LocalShowControlEnabled provides devMode,
         ) {
             MainDesktop(

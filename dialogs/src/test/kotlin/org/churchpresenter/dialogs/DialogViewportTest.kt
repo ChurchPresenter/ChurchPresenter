@@ -84,13 +84,6 @@ class DialogViewportTest {
         fits(width, height, TEXT_GROWTH_SCALE, content)
 
     @Test
-    fun `AddWebsite content fits its 500x440 window`() =
-        fits(
-            ADD_WEBSITE_DIALOG_WIDTH,
-            ADD_WEBSITE_DIALOG_HEIGHT,
-        ) { AddWebsiteDialogContent(onDismiss = {}, onConfirm = { _, _ -> }) }
-
-    @Test
     fun `AddLabel content fits its 500x640 window`() =
         fits(
             ADD_LABEL_DIALOG_WIDTH,
@@ -170,12 +163,6 @@ class DialogViewportTest {
     // Every dialog again with its text 30% taller, which is the only handle on growth the three
     // resource-only bodies have. Kept as separate tests so a failure names both the dialog and the
     // condition, rather than one parameterised test that says only "some dialog, some scale".
-
-    @Test
-    fun `AddWebsite content still fits when its text grows`() =
-        fitsWhenTextGrows(ADD_WEBSITE_DIALOG_WIDTH, ADD_WEBSITE_DIALOG_HEIGHT) {
-            AddWebsiteDialogContent(onDismiss = {}, onConfirm = { _, _ -> })
-        }
 
     @Test
     fun `AddLabel content still fits when its text grows`() =

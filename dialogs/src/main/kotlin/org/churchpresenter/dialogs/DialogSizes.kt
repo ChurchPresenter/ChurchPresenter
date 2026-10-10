@@ -22,10 +22,6 @@ import androidx.compose.ui.unit.dp
 internal val ADD_LABEL_DIALOG_WIDTH: Dp = 500.dp
 internal val ADD_LABEL_DIALOG_HEIGHT: Dp = 640.dp
 
-/** `AddWebsiteDialog`. */
-internal val ADD_WEBSITE_DIALOG_WIDTH: Dp = 500.dp
-internal val ADD_WEBSITE_DIALOG_HEIGHT: Dp = 440.dp
-
 /** `AboutDialog`. */
 val ABOUT_DIALOG_WIDTH: Dp = 420.dp
 

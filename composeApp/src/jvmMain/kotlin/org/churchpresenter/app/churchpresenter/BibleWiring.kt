@@ -1,8 +1,12 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.bibletab.ContinuationSpeed
 import org.churchpresenter.bibletab.EngineStart
-import org.churchpresenter.bibletab.resolveVerseSelection
 import org.churchpresenter.bibletab.LiveReference
+import org.churchpresenter.bibletab.TextMatchLevel
+import org.churchpresenter.bibletab.resolveVerseSelection
+import org.churchpresenter.core.models.bible.SelectedVerse
+import org.churchpresenter.settings.AppSettings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,16 +44,14 @@ internal fun MainDesktopScope.BibleWiring() {
         appSettings.bibleSettings.storageDirectory,
     ) {
         if (shouldRunBibleEngine(sttConnected, bibleEngineSettings.enabled, engineBibles)) {
-            bibleEngineClient.start(EngineStart(
-                sttUrl = appSettings.sttSettings.serverUrl,
-                bibleRoot = appSettings.bibleSettings.storageDirectory,
-                bibleFiles = engineBibles,
-                runLocal = bibleEngineSettings.runLocal,
-                host = bibleEngineSettings.host,
-                port = bibleEngineSettings.port,
-                level = bibleViewModel.textMatchLevel.value.name.lowercase(),
-                continuationSpeed = bibleViewModel.continuationSpeed.value.name.lowercase(),
-            ))
+            bibleEngineClient.start(
+                bibleEngineStart(
+                    appSettings,
+                    engineBibles,
+                    bibleViewModel.textMatchLevel.value,
+                    bibleViewModel.continuationSpeed.value,
+                )
+            )
         } else {
             bibleEngineClient.stop()
             bibleViewModel.clearDetectedReferences(reason = "expired")
@@ -66,6 +68,39 @@ internal fun MainDesktopScope.BibleWiring() {
 
     AutoFollowWiring()
     ScheduleVerseWiring()
+}
+
+internal fun bibleEngineStart(
+    settings: AppSettings,
+    engineBibles: List<String>,
+    level: TextMatchLevel,
+    continuationSpeed: ContinuationSpeed,
+): EngineStart = EngineStart(
+    sttUrl = settings.sttSettings.serverUrl,
+    bibleRoot = settings.bibleSettings.storageDirectory,
+    bibleFiles = engineBibles,
+    runLocal = settings.bibleEngineSettings.runLocal,
+    host = settings.bibleEngineSettings.host,
+    port = settings.bibleEngineSettings.port,
+    level = level.name.lowercase(),
+    continuationSpeed = continuationSpeed.name.lowercase(),
+)
+
+internal fun autoFollowLiveReference(
+    verses: List<SelectedVerse>,
+    displayBookIndex: Int,
+    matchType: String?,
+): LiveReference? {
+    val primary = verses.firstOrNull() ?: return null
+    return LiveReference(
+        displayBookIndex = displayBookIndex,
+        chapter = primary.chapter,
+        verseStart = primary.verseNumber,
+        verseEnd = null,
+        source = "auto",
+        autoFollow = true,
+        matchType = matchType,
+    )
 }
 
 /**
@@ -86,19 +121,13 @@ private fun MainDesktopScope.AutoFollowWiring() {
             )
         ) return@LaunchedEffect
         val verses = bibleViewModel.getSelectedVerses()
-        if (verses.isNotEmpty()) {
-            live.onVerseSelected(verses)
-            val primary = verses.first()
-            bibleViewModel.logLiveReference(LiveReference(
-                displayBookIndex = bibleViewModel.selectedBookIndex.value,
-                chapter    = primary.chapter,
-                verseStart = primary.verseNumber,
-                verseEnd   = null,
-                source     = "auto",
-                autoFollow = true,
-                matchType  = bibleViewModel.autoFollowLiveMatchType.value,
-            ))
-        }
+        val reference = autoFollowLiveReference(
+            verses,
+            bibleViewModel.selectedBookIndex.value,
+            bibleViewModel.autoFollowLiveMatchType.value,
+        ) ?: return@LaunchedEffect
+        live.onVerseSelected(verses)
+        bibleViewModel.logLiveReference(reference)
     }
 }
 

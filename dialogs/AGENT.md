@@ -7,7 +7,7 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 The app's dialogs and small windows: About, Contact Us, the keyboard shortcuts, Customize Theme, the
 remote-permission and remote-control dialogs (`RemoteEventDialog`, `PresentationRemoteDialog`,
 `QARemoteDialog`, `RemoteActivityToast`), the show-control dialogs (Control, Macros, Props, Message,
-Clear groups), Add Label, Add Website, STT settings, the memory monitor, the crash-feedback and
+Clear groups), Add Label, STT settings, the memory monitor, the crash-feedback and
 already-running dialogs, and the frames they open in (`DialogFrame`, `ToolWindowFrame`,
 `DialogSizes`).
 

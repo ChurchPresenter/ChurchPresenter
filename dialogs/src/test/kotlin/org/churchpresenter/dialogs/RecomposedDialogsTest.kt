@@ -93,11 +93,6 @@ class RecomposedDialogsTest {
     }
 
     @Test
-    fun `the add website dialog`() = recomposes("Add Website") { changed, _ ->
-        AddWebsiteDialog(if (changed) ({}) else DISMISS, { _, _ -> }, frame = inPlace)
-    }
-
-    @Test
     fun `the STT settings dialog`() = recomposes("STT Display Settings") { changed, _ ->
         STTSettingsDialog(if (changed) AppSettings(theme = "DARK") else AppSettings(), {}, {}, inPlace)
     }

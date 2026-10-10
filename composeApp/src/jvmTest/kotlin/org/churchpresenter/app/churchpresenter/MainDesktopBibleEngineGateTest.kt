@@ -1,10 +1,19 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.bibletab.ContinuationSpeed
+import org.churchpresenter.bibletab.EngineStart
+import org.churchpresenter.bibletab.LiveReference
+import org.churchpresenter.bibletab.TextMatchLevel
+import org.churchpresenter.core.models.bible.SelectedVerse
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BibleEngineSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
+import org.churchpresenter.settings.STTSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class MainDesktopBibleEngineGateTest {
@@ -77,5 +86,49 @@ class MainDesktopBibleEngineGateTest {
             ),
         )
         assertEquals(engineBibleFiles(plain), engineBibleFiles(restyled))
+    }
+
+    @Test
+    fun `the engine starts on the speech feed, the bible folder and its own settings`() {
+        val settings = AppSettings(
+            sttSettings = STTSettings(serverUrl = "http://stt:9000"),
+            bibleSettings = BibleSettings(storageDirectory = "/bibles"),
+            bibleEngineSettings = BibleEngineSettings(runLocal = false, host = "engine", port = 9100),
+        )
+        val start = bibleEngineStart(settings, listOf("kjv.spb"), TextMatchLevel.AGGRESSIVE, ContinuationSpeed.FAST)
+        assertEquals(
+            EngineStart(
+                sttUrl = "http://stt:9000",
+                bibleRoot = "/bibles",
+                bibleFiles = listOf("kjv.spb"),
+                runLocal = false,
+                host = "engine",
+                port = 9100,
+                level = "aggressive",
+                continuationSpeed = "fast",
+            ),
+            start,
+        )
+    }
+
+    @Test
+    fun `an auto-follow detection is logged from its first verse, and nothing selected logs nothing`() {
+        val verses = listOf(
+            SelectedVerse(bookName = "John", chapter = 3, verseNumber = 16),
+            SelectedVerse(bookName = "John", chapter = 3, verseNumber = 17),
+        )
+        assertEquals(
+            LiveReference(
+                displayBookIndex = 42,
+                chapter = 3,
+                verseStart = 16,
+                verseEnd = null,
+                source = "auto",
+                autoFollow = true,
+                matchType = "exact",
+            ),
+            autoFollowLiveReference(verses, 42, "exact"),
+        )
+        assertNull(autoFollowLiveReference(emptyList(), 42, null))
     }
 }

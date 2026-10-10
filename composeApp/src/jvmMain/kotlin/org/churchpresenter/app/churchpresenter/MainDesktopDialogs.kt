@@ -3,7 +3,6 @@ package org.churchpresenter.app.churchpresenter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import org.churchpresenter.dialogs.AddLabelDialog
-import org.churchpresenter.dialogs.AddWebsiteDialog
 import org.churchpresenter.dialogs.CrashFeedbackDialog
 import org.churchpresenter.dialogs.KonamiEasterEggDialog
 import org.churchpresenter.dialogs.SavePresetDialog
@@ -27,36 +26,14 @@ internal fun MainDesktopScope.MainDesktopDialogs() {
     val editingLabelItem = state.editingLabelItem
     AddLabelDialog(
         isVisible = state.showAddLabelDialog,
-        onDismiss = {
-            state.showAddLabelDialog = false
-            state.editingLabelItem = null
-        },
-        onConfirm = { text, textColor, backgroundColor ->
-            val editing = state.editingLabelItem
-            if (editing != null) {
-                currentScheduleActions.updateLabel(editing.id, text, textColor, backgroundColor)
-            } else {
-                currentScheduleActions.addLabel(text, textColor, backgroundColor)
-            }
-            state.showAddLabelDialog = false
-            state.editingLabelItem = null
-        },
+        onDismiss = this::closeLabelDialog,
+        onConfirm = this::confirmLabel,
         existingText = editingLabelItem?.text ?: "",
         // Empty, not a hardcoded pair: a new label picks its colours up from the active theme.
         existingTextColor = editingLabelItem?.textColor.orEmpty(),
         existingBackgroundColor = editingLabelItem?.backgroundColor.orEmpty(),
         isEdit = editingLabelItem != null
     )
-
-    if (state.showAddWebsiteDialog) {
-        AddWebsiteDialog(
-            onDismiss = { state.showAddWebsiteDialog = false },
-            onConfirm = { url, title ->
-                currentScheduleActions.addWebsite(url, title)
-                state.showAddWebsiteDialog = false
-            }
-        )
-    }
 
     KonamiEasterEggDialog(
         isVisible = state.showKonamiEasterEgg,
@@ -72,4 +49,19 @@ internal fun MainDesktopScope.MainDesktopDialogs() {
             }
         )
     }
+}
+
+internal fun MainDesktopScope.closeLabelDialog() {
+    state.showAddLabelDialog = false
+    state.editingLabelItem = null
+}
+
+internal fun MainDesktopScope.confirmLabel(text: String, textColor: String, backgroundColor: String) {
+    val editing = state.editingLabelItem
+    if (editing != null) {
+        currentScheduleActions.updateLabel(editing.id, text, textColor, backgroundColor)
+    } else {
+        currentScheduleActions.addLabel(text, textColor, backgroundColor)
+    }
+    closeLabelDialog()
 }

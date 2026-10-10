@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.updater.UpdateCheckResult
 import org.churchpresenter.sharedui.language.Language
 import org.churchpresenter.diagnostics.Log
 import org.churchpresenter.diagnostics.Logger
@@ -82,16 +81,6 @@ internal fun resolveStartupLanguage(savedCode: String): Language =
 
 /** Whether this is the first update check this install has ever run. */
 internal fun isFirstEverUpdateCheck(lastCheckTimestamp: Long): Boolean = lastCheckTimestamp == 0L
-
-/**
- * Whether an update check's outcome should be put in front of the operator.
- *
- * The first check ever is shown whatever it found — that is the one chance to ask how often they
- * want checking done. Every check after it only interrupts when there is actually an update, so a
- * routine "you are up to date" never appears unasked.
- */
-internal fun shouldShowUpdateResult(firstEverCheck: Boolean, result: UpdateCheckResult): Boolean =
-    firstEverCheck || result is UpdateCheckResult.Available
 
 /**
  * Whether the window should be restored to the position and size it was left at.

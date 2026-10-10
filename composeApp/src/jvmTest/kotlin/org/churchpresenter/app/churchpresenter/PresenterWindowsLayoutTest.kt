@@ -10,15 +10,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BibleSettings
+import org.churchpresenter.settings.MergeTile
+import org.churchpresenter.settings.OutputMerge
+import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.stt.STTManager
 import java.awt.GraphicsConfiguration
 import java.awt.GraphicsDevice
@@ -74,6 +84,7 @@ class PresenterWindowsLayoutTest {
         projection: ProjectionSettings,
         screens: Array<GraphicsDevice> = arrayOf(operator, audience, stage),
         show: Boolean = true,
+        identifying: Boolean = false,
         block: ComposeUiTest.(Rig) -> Unit,
     ) = runComposeUiTest {
         val manager = PresenterManager().apply { setShowPresenterWindow(show) }
@@ -91,7 +102,7 @@ class PresenterWindowsLayoutTest {
                 presenterManager = manager,
                 mediaViewModel = media,
                 appSettings = settings,
-                identifyingScreen = false,
+                identifyingScreen = identifying,
                 sttManager = STTManager(),
                 defaultScreenDevice = { operator },
                 window = host,
@@ -257,4 +268,160 @@ class PresenterWindowsLayoutTest {
             waitForIdle()
             assertFalse(rig.manager.showPresenterWindow.value)
         }
+
+    @Test
+    fun `an output aimed at an unused display opens no window`() =
+        rig(
+            ProjectionSettings(
+                hideCursorOnOutputs = false,
+                screenAssignments = listOf(ScreenAssignment(targetDisplay = 1)),
+                unusedScreens = listOf(Rectangle(1440, 0, 1920, 1080).asDisplayRect().key),
+            ),
+        ) { rig ->
+            assertNull(rig.windows["Presenter View 1"])
+        }
+
+    @Test
+    fun `a DeckLink output with no device and its key on the card opens no window`() =
+        rig(
+            ProjectionSettings(
+                hideCursorOnOutputs = false,
+                screenAssignments = listOf(
+                    ScreenAssignment(
+                        targetType = Constants.TARGET_TYPE_DECKLINK,
+                        keyTargetDisplay = 1,
+                        keyTargetType = Constants.TARGET_TYPE_DECKLINK,
+                    ),
+                ),
+            ),
+        ) { rig ->
+            assertNull(rig.windows["Presenter View 1"])
+            assertNull(rig.windows["Key Output 1"])
+            assertTrue("Presenter View 2" in rig.windows)
+        }
+
+    @Test
+    fun `with the outputs hidden a DeckLink output opens no key window`() =
+        rig(
+            ProjectionSettings(
+                hideCursorOnOutputs = false,
+                screenAssignments = listOf(
+                    ScreenAssignment(
+                        targetDisplay = 0,
+                        targetType = Constants.TARGET_TYPE_DECKLINK,
+                        keyTargetDisplay = 2,
+                    ),
+                    ScreenAssignment(
+                        targetDisplay = 2,
+                        keyTargetDisplay = 0,
+                        keyTargetType = Constants.TARGET_TYPE_DECKLINK,
+                    ),
+                ),
+            ),
+            show = false,
+        ) { rig ->
+            assertNull(rig.windows["Key Output 1"])
+            assertFalse(rig.windows.getValue("Presenter View 2").visible)
+            assertNull(rig.windows["Key Output 2"])
+        }
+
+    @Test
+    fun `a key window follows the output from one mode to the next`() =
+        rig(
+            ProjectionSettings(
+                hideCursorOnOutputs = false,
+                outputProfiles = listOf(OutputProfile(id = "fade", bibleSettings = BibleSettings(crossfade = true))),
+                screenAssignments = listOf(
+                    ScreenAssignment(targetDisplay = 1, keyTargetDisplay = 2, activeProfileId = "fade"),
+                ),
+            ),
+        ) { rig ->
+            rig.manager.setPresentingMode(Presenting.BIBLE)
+            waitForIdle()
+            rig.manager.setPresentingMode(Presenting.LYRICS)
+            waitForIdle()
+            onNodeWithTag("Key Output 1").assertExists()
+            assertEquals(Presenting.LYRICS, rig.manager.slideContent.value)
+        }
+
+    private val mergedDevWindows = ProjectionSettings(
+        devWindowCount = 2,
+        hideCursorOnOutputs = false,
+        outputProfiles = listOf(
+            OutputProfile(id = "wall", merge = OutputMerge(listOf(MergeTile("screen:0"), MergeTile("screen:1")))),
+        ),
+        screenAssignments = listOf(
+            ScreenAssignment(activeProfileId = "wall"),
+            ScreenAssignment(activeProfileId = "wall"),
+        ),
+    )
+
+    @Test
+    fun `a merged pair of dev windows each number their own tile while identifying`() =
+        rig(mergedDevWindows, screens = arrayOf(operator), identifying = true) {
+            onNode(hasText("Screen 1") and hasAnyAncestor(hasTestTag("Presenter View 1"))).assertExists()
+            onNode(hasText("Screen 2") and hasAnyAncestor(hasTestTag("Presenter View 2"))).assertExists()
+        }
+
+    @Test
+    fun `a merged pair of dev windows shows no numbers when not identifying`() =
+        rig(mergedDevWindows, screens = arrayOf(operator)) { rig ->
+            assertTrue("Presenter View 2" in rig.windows)
+            onNode(hasText("Screen 1")).assertDoesNotExist()
+        }
+
+    @Test
+    fun `with preview mode on the preview gets drivers of its own`() = runComposeUiTest {
+        val manager = PresenterManager()
+        val projection = ProjectionSettings(hideCursorOnOutputs = false, previewModeEnabled = true)
+        val opened = mutableListOf<String>()
+        setContent {
+            PresenterWindows(
+                screens = arrayOf(operator, audience),
+                presenterManager = manager,
+                mediaViewModel = MediaViewModel(),
+                appSettings = AppSettings(projectionSettings = projection),
+                identifyingScreen = false,
+                serverUrl = "http://localhost:8080",
+                qaDisplayUrl = "http://localhost:8080/qa",
+                sttManager = STTManager(),
+                defaultScreenDevice = { operator },
+                window = { spec, _ -> SideEffect { opened += spec.title } },
+            )
+        }
+        waitForIdle()
+        assertTrue(manager.previewBus.enabled.value)
+        assertTrue("Presenter View 1" in opened)
+    }
+
+    @Test
+    fun `an announcement finishing clears it and ends the overlay as the settings say`() {
+        val manager = PresenterManager()
+        manager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+        manager.setAnnouncementText("Welcome")
+        manager.setDisplayedAnnouncementText("Welcome")
+
+        val settings = AppSettings(projectionSettings = ProjectionSettings(overlayEndClearsDisplay = false))
+
+        announcementClearer(manager, settings)()
+
+        assertEquals("", manager.announcementText.value)
+        assertEquals("", manager.displayedAnnouncementText.value)
+        assertFalse(Presenting.ANNOUNCEMENTS in manager.overlays.value)
+        assertFalse(manager.clearDisplayRequested.value)
+    }
+
+    @Test
+    fun `only Escape pressed down on a key window that clears asks the output to clear`() {
+        val manager = PresenterManager().apply { setPresentingMode(Presenting.BIBLE) }
+        val env = OutputEnvironment(manager, MediaViewModel(), STTManager(), "", "", null) {}
+
+        assertFalse(env.clearOnEscape(false, KeyEventType.KeyDown, Key.Escape))
+        assertFalse(env.clearOnEscape(true, KeyEventType.KeyUp, Key.Escape))
+        assertFalse(env.clearOnEscape(true, KeyEventType.KeyDown, Key.Spacebar))
+        assertFalse(manager.clearDisplayRequested.value)
+
+        assertTrue(env.clearOnEscape(true, KeyEventType.KeyDown, Key.Escape))
+        assertTrue(manager.clearDisplayRequested.value)
+    }
 }

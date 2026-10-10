@@ -60,7 +60,6 @@ internal class MainDesktopState(
     /** The item a tab's Save preset is naming, or null while that dialog is closed. */
     var presetToSave by mutableStateOf<ScheduleItem?>(null)
     var editingLabelItem by mutableStateOf<ScheduleItem.LabelItem?>(null)
-    var showAddWebsiteDialog by mutableStateOf(false)
     var showKonamiEasterEgg by mutableStateOf(false)
 
     /** Invites feedback on the launch after an unexpected shutdown (opt-in analytics only). */

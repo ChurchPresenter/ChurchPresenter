@@ -28,6 +28,7 @@ import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.utils.Constants
 import java.util.UUID
 import org.churchpresenter.app.churchpresenter.tabs.AppWebTab
@@ -222,8 +223,6 @@ internal fun MainDesktopScope.AnnouncementsTabPane() {
         onSettingsChange = onSettingsChange,
         presenterManager = presenterManager,
         onAddToSchedule = { settings ->
-            val isTimer = settings.timerMode != Constants.TIMER_MODE_DURATION ||
-                settings.timerHours > 0 || settings.timerMinutes > 0 || settings.timerSeconds > 0
             currentScheduleActions.addAnnouncement(
                 settings.text,
                 settings.textColor,
@@ -242,7 +241,7 @@ internal fun MainDesktopScope.AnnouncementsTabPane() {
                 settings.animationType,
                 settings.animationDuration,
                 settings.loopCount,
-                isTimer,
+                announcementIsTimer(settings),
                 settings.timerHours,
                 settings.timerMinutes,
                 settings.timerSeconds,
@@ -260,6 +259,10 @@ internal fun MainDesktopScope.AnnouncementsTabPane() {
         onSavePreset = { settings -> state.presetToSave = announcementPresetItem(settings) }
     )
 }
+
+internal fun announcementIsTimer(settings: AnnouncementsSettings): Boolean =
+    settings.timerMode != Constants.TIMER_MODE_DURATION ||
+        settings.timerHours > 0 || settings.timerMinutes > 0 || settings.timerSeconds > 0
 
 @Composable
 internal fun MainDesktopScope.WebTabPane() {

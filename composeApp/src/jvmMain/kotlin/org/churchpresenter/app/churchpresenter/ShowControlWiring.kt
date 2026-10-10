@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.liveoutput.PresenterManager
-import org.churchpresenter.liveoutput.withPreviewMode
 import org.churchpresenter.showcontrol.ActionRunner
 import org.churchpresenter.app.churchpresenter.remote.AppShowHost
 import org.churchpresenter.app.churchpresenter.remote.ShowOutlets
@@ -16,6 +15,7 @@ import androidx.compose.runtime.remember
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.schedule.ActionChoices
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.Macro
 import org.churchpresenter.settings.macroNamed
 import java.io.File
@@ -23,6 +23,7 @@ import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.drop
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.diagnostics.Log
+import org.churchpresenter.obs.OBSWebSocketManager
 import org.churchpresenter.showcontrol.Action
 import org.churchpresenter.showcontrol.ShowHost
 
@@ -34,7 +35,7 @@ import org.churchpresenter.showcontrol.ShowHost
 internal fun AppRootState.appShowHost(): ShowHost = AppShowHost(
     presenterManager = presenterManager,
     // Preview mode is dev mode only; outside it the host sees it off, as the outputs do.
-    settings = { if (devMode) appSettings else appSettings.withPreviewMode(false) },
+    settings = { showHostSettings(devMode, appSettings) },
     outlets = ShowOutlets(
         rows = { currentScheduleItems },
         currentRowId = { lastLiveRowId ?: selectedScheduleItemId },
@@ -108,15 +109,14 @@ internal fun ShowControlEffects(presenterManager: PresenterManager, runner: Acti
 
 /** What the row-action editor offers: the saved things in settings, the lower thirds on disk, OBS and Companion. */
 @Composable
-internal fun MainWindowScope.rememberActionChoices(): ActionChoices {
-    val settings = root.appSettings
+internal fun rememberActionChoices(settings: AppSettings, obsManager: OBSWebSocketManager): ActionChoices {
     val folder = settings.streamingSettings.lowerThirdFolder
     val lowerThirds by produceState(emptyList<String>(), folder) {
         value = withContext(Dispatchers.IO) { lowerThirdPresetNames(File(folder)) }
     }
-    val obsScenes = root.obsManager.scenes.value
+    val obsScenes = obsManager.scenes.value
     return remember(settings, lowerThirds, obsScenes) {
-        actionChoices(settings, lowerThirds, obsScenes, root.obsManager::requestScenes)
+        actionChoices(settings, lowerThirds, obsScenes, obsManager::requestScenes)
     }
 }
 
