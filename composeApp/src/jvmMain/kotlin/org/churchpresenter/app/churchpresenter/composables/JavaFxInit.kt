@@ -15,7 +15,10 @@ internal fun isJavaFxScreenReconfigRace(throwable: Throwable): Boolean =
                 it.className.startsWith("com.sun.javafx.tk.quantum.QuantumToolkit")
         }
 
-private object JfxInit {
+internal class JfxToolkitInit(
+    private val startToolkit: () -> Unit,
+    private val onStarted: () -> Unit,
+) {
     @Volatile private var initialised = false
 
     /** False once the toolkit has been tried and refused to start; see [ensureInit]. */
@@ -41,7 +44,7 @@ private object JfxInit {
                     // VirtualMachineError is rethrown — the JVM is out of headroom, and carrying on
                     // only moves the crash somewhere unrelated.
                     try {
-                        JFXPanel()
+                        startToolkit()
                     } catch (vme: VirtualMachineError) {
                         throw vme
                     } catch (@Suppress("TooGenericExceptionCaught") t: Throwable) {
@@ -53,31 +56,36 @@ private object JfxInit {
                         )
                         return
                     }
-                    // Screen.notifySettingsChanged -> QuantumToolkit.assignScreensAdapters can NPE
-                    // deep inside Prism/Glass when the OS reports a display change (monitor
-                    // plugged/unplugged) while Prism's GraphicsPipeline isn't fully initialised.
-                    // The whole stack is JavaFX-internal with no app frames, so it can't be guarded
-                    // with a try/catch at a call site — install a thread-local handler instead that
-                    // downgrades just this known race to a warning and defers everything else to
-                    // the JVM's default handler.
-                    Platform.runLater {
-                        val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
-                        Thread.currentThread()
-                            .uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { thread, throwable ->
-                            if (isJavaFxScreenReconfigRace(throwable)) {
-                                CrashReporter.reportWarning(
-                                    "JavaFX screen-reconfiguration NPE (suppressed, known Prism/Glass race)",
-                                    throwable = throwable,
-                                    tags = mapOf("subsystem" to "javafx_screen")
-                                )
-                            } else {
-                                defaultHandler?.uncaughtException(thread, throwable)
-                            }
-                        }
-                    }
+                    onStarted()
                 }
             }
         }
+    }
+}
+
+internal fun javaFxScreenRaceHandler(defaultHandler: Thread.UncaughtExceptionHandler?) =
+    Thread.UncaughtExceptionHandler { thread, throwable ->
+        if (isJavaFxScreenReconfigRace(throwable)) {
+            CrashReporter.reportWarning(
+                "JavaFX screen-reconfiguration NPE (suppressed, known Prism/Glass race)",
+                throwable = throwable,
+                tags = mapOf("subsystem" to "javafx_screen")
+            )
+        } else {
+            defaultHandler?.uncaughtException(thread, throwable)
+        }
+    }
+
+private val JfxInit = JfxToolkitInit(startToolkit = { JFXPanel() }) {
+    // Screen.notifySettingsChanged -> QuantumToolkit.assignScreensAdapters can NPE deep inside
+    // Prism/Glass when the OS reports a display change (monitor plugged/unplugged) while Prism's
+    // GraphicsPipeline isn't fully initialised. The whole stack is JavaFX-internal with no app frames,
+    // so it can't be guarded with a try/catch at a call site — install a thread-local handler instead
+    // that downgrades just this known race to a warning and defers everything else to the JVM's
+    // default handler.
+    Platform.runLater {
+        Thread.currentThread().uncaughtExceptionHandler =
+            javaFxScreenRaceHandler(Thread.getDefaultUncaughtExceptionHandler())
     }
 }
 

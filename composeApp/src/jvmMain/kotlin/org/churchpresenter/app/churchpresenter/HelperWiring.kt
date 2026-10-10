@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalDensity
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.LocalGuideTargetRegistry
 import org.churchpresenter.app.churchpresenter.dialogs.optionsTabIndexOf
+import org.churchpresenter.liveoutput.settings.DetectedScreen
 import org.churchpresenter.liveoutput.settings.DisplayOption
 import org.churchpresenter.liveoutput.settings.detectScreensFromAwt
 import org.churchpresenter.liveoutput.settings.withPrimaryTarget
@@ -188,10 +189,13 @@ internal fun AppRootState.saveHelperSettings(helper: HelperSettings) {
 }
 
 /** The connected screens as the helper shows them, the one output 1 uses marked. */
-internal fun helperScreens(settings: AppSettings): List<HelperScreen> {
+internal fun helperScreens(
+    settings: AppSettings,
+    detected: List<DetectedScreen> = runCatching { detectScreensFromAwt() }.getOrDefault(emptyList()),
+): List<HelperScreen> {
     val projection = settings.projectionSettings
     val first = projection.screenAssignments.firstOrNull()
-    return runCatching { detectScreensFromAwt() }.getOrDefault(emptyList()).map { screen ->
+    return detected.map { screen ->
         HelperScreen(
             index = screen.index,
             isPrimary = screen.isPrimary,
