@@ -381,6 +381,8 @@ kotlin {
             implementation(projects.appSettings)
             // The Server settings page, calendar sync and Instance Link's windows.
             implementation(projects.serverUi)
+            // The dialogs and small windows: About, Contact Us, keyboard shortcuts, remote, show control.
+            implementation(projects.dialogs)
             // The ATEM protocol client: the UDP conversation with the switcher — connect, state
             // dump, key control and media-pool upload. AtemBridge is the app-side wiring.
             implementation(projects.atem)

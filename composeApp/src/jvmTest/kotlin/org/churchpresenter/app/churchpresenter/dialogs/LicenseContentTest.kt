@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.dialogs.text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.test.ComposeUiTest

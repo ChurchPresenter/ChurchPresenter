@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.app.churchpresenter.utils.appTelemetryIdentity
-import org.churchpresenter.app.churchpresenter.dialogs.showAlreadyRunningDialog
+import org.churchpresenter.dialogs.showAlreadyRunningDialog
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
 import androidx.compose.runtime.CompositionLocalProvider
@@ -139,7 +139,7 @@ fun main() {
     }
     if (!acquireSingleInstanceLock()) {
         Log.info("Startup", "ChurchPresenter is already running.")
-        showAlreadyRunningDialog(SettingsManager().loadSettings())
+        SettingsManager().loadSettings().let { showAlreadyRunningDialog(it, themeCustomizationFrom(it)) }
         System.exit(0)
         return
     }

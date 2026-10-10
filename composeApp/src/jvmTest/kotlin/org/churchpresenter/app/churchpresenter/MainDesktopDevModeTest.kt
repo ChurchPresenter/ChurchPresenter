@@ -18,8 +18,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.churchpresenter.app.churchpresenter.dialogs.clearGroupItemTag
-import org.churchpresenter.app.churchpresenter.dialogs.clearLayerItemTag
+import org.churchpresenter.dialogs.clearGroupItemTag
+import org.churchpresenter.dialogs.clearLayerItemTag
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.core.models.shortcuts.KeyChord
 import org.churchpresenter.liveoutput.PresenterManager

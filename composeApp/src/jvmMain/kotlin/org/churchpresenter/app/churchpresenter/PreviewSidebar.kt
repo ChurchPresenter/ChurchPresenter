@@ -7,9 +7,9 @@ import androidx.compose.runtime.getValue
 import org.churchpresenter.liveoutput.withPreviewMode
 import javax.swing.filechooser.FileNameExtensionFilter
 import org.churchpresenter.sharedui.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.dialogs.PropsDialog
-import org.churchpresenter.app.churchpresenter.dialogs.ClearGroupsDialog
-import org.churchpresenter.app.churchpresenter.dialogs.ClearLayersMenuItems
+import org.churchpresenter.dialogs.PropsDialog
+import org.churchpresenter.dialogs.ClearGroupsDialog
+import org.churchpresenter.dialogs.ClearLayersMenuItems
 import org.churchpresenter.liveoutput.clearGroup
 import org.churchpresenter.liveoutput.clearLayer
 import org.churchpresenter.strings.generated.resources.tooltip_clear_layers
@@ -76,7 +76,7 @@ import org.churchpresenter.settings.CompanionSatelliteSettings
 import org.churchpresenter.liveoutput.clearMessage
 import org.churchpresenter.liveoutput.messageOnAir
 import org.churchpresenter.liveoutput.showMessage
-import org.churchpresenter.app.churchpresenter.dialogs.MessageDialog
+import org.churchpresenter.dialogs.MessageDialog
 import org.churchpresenter.stt.STTManager
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.settings.AppSettings

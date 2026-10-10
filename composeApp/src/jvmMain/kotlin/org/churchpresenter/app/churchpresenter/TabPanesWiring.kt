@@ -20,7 +20,7 @@ import org.churchpresenter.app.churchpresenter.tabs.AppLowerThirdTab
 import org.churchpresenter.media.tabs.MediaTab
 import org.churchpresenter.slides.tabs.PicturesTab
 import org.churchpresenter.slides.tabs.PresentationTab
-import org.churchpresenter.app.churchpresenter.dialogs.PresentationRemoteDialog
+import org.churchpresenter.dialogs.PresentationRemoteDialog
 import org.churchpresenter.media.composables.isVlcArchMismatch
 import org.churchpresenter.media.composables.isVlcAvailable
 import org.churchpresenter.media.composables.isVlcLoadFailed

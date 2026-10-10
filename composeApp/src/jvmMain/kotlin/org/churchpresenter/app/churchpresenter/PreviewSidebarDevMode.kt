@@ -10,9 +10,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.border
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
-import org.churchpresenter.app.churchpresenter.dialogs.ControlPanelData
-import org.churchpresenter.app.churchpresenter.dialogs.ControlPanelActions
-import org.churchpresenter.app.churchpresenter.dialogs.ControlDialog
+import org.churchpresenter.dialogs.ControlPanelData
+import org.churchpresenter.dialogs.ControlPanelActions
+import org.churchpresenter.dialogs.ControlDialog
 import org.churchpresenter.controlin.MidiPorts
 import org.churchpresenter.controlin.ControlHub
 import kotlinx.coroutines.withContext
@@ -38,7 +38,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.sharedui.composables.TooltipIconButton
-import org.churchpresenter.app.churchpresenter.dialogs.MacrosDialog
+import org.churchpresenter.dialogs.MacrosDialog
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.Macro

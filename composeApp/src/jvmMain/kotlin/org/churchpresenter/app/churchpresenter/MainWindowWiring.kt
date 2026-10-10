@@ -13,7 +13,7 @@ import org.churchpresenter.liveoutput.layerForName
 import org.churchpresenter.server.broadcastDisplayCleared
 import org.churchpresenter.server.broadcastSongSectionSelected
 import org.churchpresenter.server.updateBrowserSourceTranspose
-import org.churchpresenter.app.churchpresenter.dialogs.text
+import org.churchpresenter.dialogs.text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember

@@ -2,6 +2,8 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.dialogs.SHARE_STORY_DIALOG_HEIGHT
+import org.churchpresenter.dialogs.SHARE_STORY_DIALOG_WIDTH
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
