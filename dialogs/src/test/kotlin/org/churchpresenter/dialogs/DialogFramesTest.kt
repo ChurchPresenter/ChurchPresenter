@@ -217,6 +217,30 @@ class DialogFramesTest {
     }
 
     @Test
+    fun `a contact message is sent as the type picked, with the email typed`() = runComposeUiTest {
+        val frames = Frames()
+        var sent: List<String>? = null
+        setContent {
+            MaterialTheme {
+                ContactUsDialog(
+                    true, frames.dismiss, identity = TEST_IDENTITY, frame = frames.frame,
+                    submit = { type, _, email, _, _ ->
+                        sent = listOf(type, email)
+                        SendStatus.Error("held open")
+                    },
+                )
+            }
+        }
+        onNodeWithText("Feature Request").performClick()
+        onAllNodes(hasSetTextAction())[0].performTextInput("A Church")
+        onAllNodes(hasSetTextAction())[1].performTextInput("pastor@church.org")
+        onAllNodes(hasSetTextAction())[2].performTextInput("A countdown, please")
+        onNodeWithText("Send").performClick()
+        waitUntil { sent != null }
+        assertEquals(listOf("featureRequest", "pastor@church.org"), sent)
+    }
+
+    @Test
     fun `a contact message that fails says so and keeps the dialog open`() = runComposeUiTest {
         val frames = Frames()
         setContent {

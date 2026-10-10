@@ -101,6 +101,15 @@ class MacrosDialogContentTest {
     }
 
     @Test
+    fun `an action is added to a macro being edited`() = dialog { seen ->
+        onNodeWithTag(macroEditTag("macro2")).performClick()
+        onNodeWithTag(ADD_ACTION_TAG).performClick()
+        onNodeWithTag(ADD_TIMER_ACTION_TAG).performClick()
+        onNodeWithTag(MACRO_SAVE_TAG).performClick()
+        assertEquals(1, seen.macros?.single { it.id == "macro2" }?.actions?.size)
+    }
+
+    @Test
     fun `a saved macro is edited in place, or deleted`() = dialog { seen ->
         onNodeWithTag(macroEditTag("macro1")).performClick()
         waitForIdle()

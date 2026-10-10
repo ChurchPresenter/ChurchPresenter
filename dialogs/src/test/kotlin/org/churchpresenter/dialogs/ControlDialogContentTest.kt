@@ -5,14 +5,18 @@ package org.churchpresenter.dialogs
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
@@ -20,6 +24,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.controlin.ANY
 import org.churchpresenter.controlin.ControlMapping
@@ -123,6 +129,108 @@ class ControlDialogContentTest {
             save(seen),
         )
         assertEquals(1, seen.dismissed)
+    }
+
+    @Test
+    fun `OSC is sent to a typed host and port, the port kept in range`() =
+        dialog(ControlSettings(oscOutHost = "desk.local")) { seen ->
+            onNode(hasSetTextAction() and hasText("desk.local")).performTextReplacement(" 10.0.0.5 ")
+            waitForIdle()
+            type("OSC send to port", "99999")
+            val saved = save(seen)
+            assertEquals("10.0.0.5", saved.oscOutHost)
+            assertEquals(65_535, saved.oscOutPort)
+        }
+
+    @Test
+    fun `an OSC output takes its address, and a note output its channel`() =
+        dialog(ControlSettings(outputs = listOf(clear))) { seen ->
+            tab("OUTPUTS")
+            onNodeWithTag(controlOutputTag("output1")).performClick()
+            waitForIdle()
+            typeLabelled("OSC address", "/lights/off")
+            onNodeWithTag(CONTROL_OUTPUT_SAVE_TAG).performClick()
+            waitForIdle()
+            onNodeWithTag(CONTROL_OUTPUT_ADD_TAG).performClick()
+            waitForIdle()
+            typeLabelled("Channel (0 = any)", "40")
+            onNodeWithTag(CONTROL_OUTPUT_SAVE_TAG).performClick()
+            waitForIdle()
+            val outputs = save(seen).outputs
+            assertEquals("/lights/off", outputs.first().message.address)
+            assertEquals(16, outputs.last().message.channel)
+        }
+
+    @Test
+    fun `an action is added to a trigger being edited`() = dialog(ControlSettings(mappings = listOf(walkIn))) { seen ->
+        tab("TRIGGERS")
+        onNodeWithTag(controlTriggerTag("trigger1")).performClick()
+        waitForIdle()
+        onNodeWithTag(ADD_ACTION_TAG).performClick()
+        waitForIdle()
+        onNodeWithTag(ADD_TIMER_ACTION_TAG).performClick()
+        waitForIdle()
+        onNodeWithTag(CONTROL_TRIGGER_SAVE_TAG).performClick()
+        waitForIdle()
+        assertEquals(1, save(seen).mappings.single().actions.size)
+    }
+
+    @Test
+    fun `every kind of editor redraws in place when the screen's density changes`() = runComposeUiTest {
+        var density by mutableStateOf(Density(1f))
+        val triggers = listOf(
+            walkIn,
+            ControlMapping("trigger2", "Fader", Trigger(TriggerKinds.MIDI_CC, 1, 7, ANY)),
+            ControlMapping("trigger3", "Cue", Trigger(TriggerKinds.MSC, address = "GO", cue = "1")),
+            ControlMapping("trigger4", "", Trigger(TriggerKinds.OSC, address = "/go")),
+        )
+        val outputs = listOf(
+            clear,
+            ControlOutput("output2", OutputEvents.TAKE, OutMessage(TriggerKinds.MIDI_CC, 1, 20, 90)),
+            ControlOutput("output3", "someday", OutMessage(TriggerKinds.MIDI_NOTE, 1, 36, 90)),
+        )
+        setContent {
+            CompositionLocalProvider(LocalDensity provides density) {
+                MaterialTheme {
+                    Box(Modifier.size(900.dp, 1200.dp)) {
+                        ControlDialogContent(
+                            settings = ControlSettings(mappings = triggers, outputs = outputs),
+                            data = ControlPanelData(),
+                            actions = ControlPanelActions(),
+                            onDismiss = {},
+                        )
+                    }
+                }
+            }
+        }
+        fun redraw() {
+            density = Density(density.density + 0.01f)
+            waitForIdle()
+        }
+        redraw()
+        tab("TRIGGERS")
+        triggers.forEach {
+            onNodeWithTag(controlTriggerTag(it.id)).performClick()
+            waitForIdle()
+            redraw()
+        }
+        onNodeWithTag(controlTriggerTag("trigger4")).assertTextEquals("/go")
+        tab("OUTPUTS")
+        outputs.forEach {
+            onNodeWithTag(controlOutputTag(it.id)).performClick()
+            waitForIdle()
+            redraw()
+        }
+        onNodeWithTag(controlOutputTag("output3")).assertTextContains("someday", substring = true)
+    }
+
+    @Test
+    fun `with no hub behind it, Learn and its cancel do nothing`() {
+        val actions = ControlPanelActions()
+        var learned: Trigger? = null
+        actions.onLearn { learned = it }
+        actions.onCancelLearn()
+        assertNull(learned)
     }
 
     @Test

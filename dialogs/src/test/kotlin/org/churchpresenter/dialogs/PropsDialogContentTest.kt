@@ -103,6 +103,14 @@ class PropsDialogContentTest {
     }
 
     @Test
+    fun `a picture's path can be typed instead of chosen`() = dialog { seen ->
+        onNodeWithTag(propEditTag("prop1")).performClick()
+        field(PROP_PICTURE_TAG).performTextReplacement("/typed.png")
+        onNodeWithTag(PROP_SAVE_TAG).performClick()
+        assertEquals(listOf(logo.copy(imagePath = "/typed.png")), seen.props)
+    }
+
+    @Test
     fun `deleting a prop that is up takes it down first`() = dialog(onAir = setOf("prop1")) { seen ->
         onNodeWithTag(propEditTag("prop1")).performClick()
         onNodeWithText("Delete").performClick()
@@ -114,5 +122,6 @@ class PropsDialogContentTest {
     fun `each new prop gets an id no other has`() {
         assertEquals("prop2", newPropId(listOf(logo)))
         assertEquals("prop3", newPropId(listOf(logo, logo.copy(id = "prop2"))))
+        assertEquals("prop3", newPropId(listOf(logo.copy(id = "prop2"))), "past an id already taken")
     }
 }

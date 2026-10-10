@@ -130,5 +130,6 @@ class ClearGroupsDialogContentTest {
     fun `each new group gets an id no other has`() {
         assertEquals("clear2", newClearGroupId(listOf(text)))
         assertEquals("clear3", newClearGroupId(listOf(text, text.copy(id = "clear2"))))
+        assertEquals("clear3", newClearGroupId(listOf(text.copy(id = "clear2"))), "past an id already taken")
     }
 }

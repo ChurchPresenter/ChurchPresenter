@@ -112,6 +112,7 @@ class MessageDialogContentTest {
         assertEquals("a b c d…", templateName("a b c d e"))
         assertEquals("message2", newTemplateId(listOf(nursery)))
         assertEquals("message3", newTemplateId(listOf(nursery, nursery.copy(id = "message2"))))
+        assertEquals("message3", newTemplateId(listOf(nursery.copy(id = "message2"))), "past an id already taken")
         assertTrue(newTemplateId(emptyList()).isNotBlank())
     }
 
