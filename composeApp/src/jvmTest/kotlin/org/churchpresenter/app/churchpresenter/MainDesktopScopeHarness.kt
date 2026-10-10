@@ -14,11 +14,13 @@ import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
 import org.churchpresenter.dictionary.DictionaryFixture
 import org.churchpresenter.dictionary.data.DictionaryFiles
 import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.qa.QAManager
 import org.churchpresenter.schedule.ScheduleTabActions
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.sharedui.utils.ShortcutMap
+import org.churchpresenter.stt.STTManager
 import org.churchpresenter.theme.ThemeMode
 
 internal abstract class MainDesktopScopeHarness : MainDesktopComposeHarness() {
@@ -33,6 +35,8 @@ internal abstract class MainDesktopScopeHarness : MainDesktopComposeHarness() {
         onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
         showCrashFeedback: Boolean = false,
         dictionaryFiles: DictionaryFiles = DictionaryFixture.files(),
+        qaManager: QAManager? = null,
+        sttManager: STTManager? = null,
         content: @Composable MainDesktopScope.() -> Unit,
         block: ComposeUiTest.(MainDesktopScope) -> Unit = {},
     ) = runComposeUiTest {
@@ -68,9 +72,9 @@ internal abstract class MainDesktopScopeHarness : MainDesktopComposeHarness() {
                         onShowBackgroundSettings = {},
                         onSettingsChange = {},
                         theme = ThemeMode.SYSTEM,
-                        qaManager = null,
+                        qaManager = qaManager,
                         onOpenLottieGen = onOpenLottieGen,
-                        sttManager = null,
+                        sttManager = sttManager,
                         dialogDismissSignal = 0,
                         companionSatelliteViewModel = CompanionSatelliteViewModel(),
                         onRequestDeveloperMenuUnlock = {},

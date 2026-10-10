@@ -2,9 +2,11 @@
 
 package org.churchpresenter.app.churchpresenter
 
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import org.churchpresenter.calendar.PresetStore
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.schedule.ScheduleTabActions
@@ -73,6 +75,23 @@ internal class MainDesktopDialogsTest : MainDesktopScopeHarness() {
 
             assertNull(scope.state.presetToSave)
             assertEquals(1, PresetStore(calendar).load().presets.size)
+        }
+    }
+
+    @Test
+    fun `a named preset is saved to the calendar's store`() {
+        val calendar = File(dir, "calendar").apply { mkdirs() }
+        val settings = settings().copy(calendarStorageDirectory = calendar.absolutePath)
+        pane(appSettings = settings, content = { MainDesktopDialogs() }) { scope ->
+            scope.state.presetToSave = label
+            waitForIdle()
+            onNode(hasSetTextAction()).performTextReplacement("Offering slide")
+            waitForIdle()
+            onNodeWithText("OK").performClick()
+            waitForIdle()
+
+            assertNull(scope.state.presetToSave)
+            assertEquals(listOf("Offering slide"), PresetStore(calendar).load().presets.map { it.name })
         }
     }
 

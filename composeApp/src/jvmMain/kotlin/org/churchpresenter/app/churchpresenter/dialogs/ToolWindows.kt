@@ -64,10 +64,14 @@ fun ConverterWindow(
             ConverterApp(
                 initialTab = initialTab,
                 initialSongSource = initialSongSource,
-                onConverted = { sourceId -> converterEvent(sourceId)?.let { UsageEvents.record(it) } },
+                onConverted = ::recordConversion,
             )
         }
     }
+}
+
+internal fun recordConversion(sourceId: String) {
+    converterEvent(sourceId)?.let { UsageEvents.record(it) }
 }
 
 /**

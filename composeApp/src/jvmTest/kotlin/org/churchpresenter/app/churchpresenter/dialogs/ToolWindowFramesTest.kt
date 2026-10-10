@@ -15,6 +15,9 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.calendar.CalendarHost
+import org.churchpresenter.converter.ui.BIBLE_CONVERSION
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.theme.ThemeMode
 import java.io.File
 import java.nio.file.Files
@@ -84,6 +87,17 @@ class ToolWindowFramesTest {
         DpSize(MEMORY_MONITOR_WINDOW_WIDTH, MEMORY_MONITOR_WINDOW_HEIGHT),
     ) { f ->
         MemoryMonitorWindow(isVisible = true, theme = ThemeMode.DARK, onClose = { f.closed++ }, frame = f.frame)
+    }
+
+    @Test
+    fun `a conversion is counted by its source, and an unknown source is not`() {
+        val before = UsageEvents.unreported()
+        recordConversion("not-a-source")
+        assertEquals(before, UsageEvents.unreported())
+
+        recordConversion(BIBLE_CONVERSION)
+        val bibles = before[UsageEvent.CONVERTED_BIBLE] ?: 0
+        assertEquals(bibles + 1, UsageEvents.unreported()[UsageEvent.CONVERTED_BIBLE])
     }
 
     private fun calendarOpens(songFolder: (File) -> File) {

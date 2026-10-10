@@ -3,6 +3,15 @@
 package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isEnabled
+import org.churchpresenter.bible.SpbFixture
+import org.churchpresenter.qa.QAManager
+import org.churchpresenter.settings.BibleSettings
+import org.churchpresenter.settings.BibleTranslationSettings
+import org.churchpresenter.stt.STTManager
+import kotlin.test.assertNull
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
@@ -18,6 +27,7 @@ import org.churchpresenter.dictionary.data.InterlinearWord
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.schedule.ScheduleTabActions
 import org.churchpresenter.settings.AnnouncementsSettings
+import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.models.Tabs
@@ -160,11 +170,16 @@ internal class TabPanesWiringTest : MainDesktopScopeHarness() {
             content = { TabContentPane(Tabs.LOWER_THIRD) },
         ) { scope ->
             scope.state.select(ScheduleItem.LowerThirdItem("row", "Pastor", "Pastor", false, 0L))
-            waitForIdle()
+            waitUntil(timeoutMillis = 5_000) {
+                onAllNodes(hasContentDescription("Add to Schedule") and isEnabled()).fetchSemanticsNodes().isNotEmpty()
+            }
 
             press("Add to Schedule")
             assertEquals(listOf("Pastor"), added)
 
+            waitUntil(timeoutMillis = 5_000) {
+                onAllNodes(hasContentDescription("Go Live") and isEnabled()).fetchSemanticsNodes().isNotEmpty()
+            }
             press("Go Live")
             assertEquals("Pastor", manager.currentLowerThirdName.value)
             assertTrue(manager.isLive(Presenting.LOWER_THIRD))
@@ -252,6 +267,111 @@ internal class TabPanesWiringTest : MainDesktopScopeHarness() {
             waitForIdle()
             assertEquals("G5485", scope.dictionaryViewModel.selectedEntry?.number)
         }
+    }
+
+    private fun withGenesis(): AppSettings {
+        SpbFixture.spbFile(
+            dir,
+            name = "test.spb",
+            content = SpbFixture.buildContent(
+                title = "Test Bible",
+                books = listOf(SpbFixture.Book(1, "Genesis", 1)),
+                verses = listOf(SpbFixture.Verse(1, 1, 1, "In the beginning God created")),
+            ),
+        )
+        return settings().copy(
+            bibleSettings = BibleSettings(
+                storageDirectory = dir.absolutePath,
+                primaryBible = "test.spb",
+                translations = listOf(BibleTranslationSettings(fileName = "test.spb")),
+            ),
+        )
+    }
+
+    private fun ComposeUiTest.waitForText(text: String) = waitUntil(timeoutMillis = 5_000) {
+        onAllNodesWithText(text, substring = true).fetchSemanticsNodes().isNotEmpty()
+    }
+
+    @Test
+    fun `the Bible pane opens on the primary Bible`() =
+        pane(appSettings = withGenesis(), content = { TabContentPane(Tabs.BIBLE) }) {
+            waitForText("In the beginning God created")
+        }
+
+    @Test
+    fun `the songs pane lists the song library`() =
+        pane(appSettings = withOneSong(), content = { TabContentPane(Tabs.SONGS) }) {
+            waitForText("A Test Song")
+        }
+
+    @Test
+    fun `with a Bible loaded, a verse the entry appears in is named and quoted from it`() {
+        val settings = withGenesis()
+        val verse = InterlinearVerse(
+            ref = "001001001",
+            words = listOf(InterlinearWord(text = "agape-word", strongsNumber = "G26")),
+        )
+        val interlinear = Json.encodeToString(ListSerializer(InterlinearVerse.serializer()), listOf(verse))
+        pane(
+            appSettings = settings,
+            dictionaryFiles = DictionaryFixture.files(interlinearGreek = interlinear),
+            content = { TabContentPane(Tabs.DICTIONARY) },
+        ) { scope ->
+            waitUntil(timeoutMillis = 5_000) { scope.bibleViewModel.primaryBible.value != null }
+            openAgape(scope)
+            waitUntil(timeoutMillis = 5_000) { scope.dictionaryViewModel.interlinearVerses.isNotEmpty() }
+            waitForIdle()
+
+            waitForText("Genesis 1:1")
+            waitForText("In the beginning God created")
+        }
+    }
+
+    @Test
+    fun `the Q&A pane is drawn only with a session to show`() {
+        val history = hasText("History", substring = true) or hasContentDescription("History")
+        pane(content = { TabContentPane(Tabs.QA) }) {
+            assertTrue(onAllNodes(history).fetchSemanticsNodes().isEmpty())
+        }
+        pane(qaManager = QAManager(), content = { TabContentPane(Tabs.QA) }) {
+            assertTrue(onAllNodes(history).fetchSemanticsNodes().isNotEmpty())
+        }
+    }
+
+    @Test
+    fun `the captions pane is drawn only with a caption client`() {
+        val notConnected = "Not connected. Enter the STT server URL and click Connect."
+        pane(content = { TabContentPane(Tabs.STT) }) {
+            onNodeWithText(notConnected).assertDoesNotExist()
+        }
+        pane(sttManager = STTManager(), content = { TabContentPane(Tabs.STT) }) {
+            onNodeWithText(notConnected).assertExists()
+        }
+    }
+
+    @Test
+    fun `without VLC the media pane says it is needed`() = pane(content = { MediaTabPane(vlcAvailable = false) }) {
+        onNodeWithText("VLC media player is required for media playback").assertExists()
+    }
+
+    @Test
+    fun `without a browser engine the web pane says it is unavailable`() =
+        pane(content = { TabContentPane(Tabs.WEB) }) {
+            val titles = listOf(
+                "Web browser unavailable",
+                "Web browser blocked by a policy on this computer",
+                "Web browser needs a system library",
+                "Web browser requires a newer macOS",
+                "Web browser requires Windows 10 or later",
+            )
+            assertTrue(titles.any { onAllNodesWithText(it).fetchSemanticsNodes().isNotEmpty() })
+        }
+
+    @Test
+    fun `a lower third, scene or entry is marked live only while its mode is on air`() {
+        assertEquals("scene-1", liveOnly("scene-1", live = true))
+        assertNull(liveOnly("scene-1", live = false))
+        assertNull(liveOnly<String>(null, live = true))
     }
 
     private fun ComposeUiTest.openAgape(scope: MainDesktopScope) {

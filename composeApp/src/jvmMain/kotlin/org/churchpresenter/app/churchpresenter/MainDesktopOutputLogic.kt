@@ -9,6 +9,8 @@ import java.io.File
  * lock, the remembered STT address and lower-third presets. Pure.
  */
 
+internal fun <T> liveOnly(value: T?, live: Boolean): T? = if (live) value else null
+
 internal fun sttUrlToPersist(settings: AppSettings, sttConnected: Boolean): String? {
     if (!sttConnected) return null
     val url = settings.sttSettings.serverUrl
