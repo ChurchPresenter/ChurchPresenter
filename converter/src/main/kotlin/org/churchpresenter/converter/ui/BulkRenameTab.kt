@@ -81,6 +81,7 @@ data class RenameEntry(val file: File, val newName: String, val conflict: Boolea
 
 @Composable
 fun BulkRenameTab() {
+    val pickers = LocalConverterPickers.current
     var directory by remember { mutableStateOf<File?>(null) }
     var stripNumbers by remember { mutableStateOf(true) }
     var renameToFirstVerse by remember { mutableStateOf(false) }
@@ -112,7 +113,7 @@ fun BulkRenameTab() {
 
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             RaisedButton(shape = ButtonShape, onClick = {
-                val dir = pickDirectory()
+                val dir = pickers.directory()
                 if (dir != null) {
                     directory = dir; state = ConvertState.SELECT; preview = emptyList(); logMessages = emptyList()
                 }

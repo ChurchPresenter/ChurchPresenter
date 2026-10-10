@@ -75,12 +75,15 @@ so a replay can be driven from the command line. The replay suite is inert witho
 
 ## Gates
 
-- **Coverage**: the root build's six counters at their default 85% floor — no
-  `extra["coverageFloors"]` override (measured: BRANCH 88.4%, COMPLEXITY 86.1%). CI is the
-  measure: `SpbLoaderTest` and `ReverseLookupTest` also run against the Bibles a developer's machine
-  has and skip without them, so a local run can read higher. `extra["coverageExcludes"]` drops
-  `**/ui/**`, `**/MainKt*` and `**/tools/**` (CLI diagnostics); it must stay **above everything
-  else** in the build file; never re-declare the JaCoCo tasks here.
+- **Coverage**: the root build's six counters at their default 85% floor over the whole module —
+  no `extra["coverageFloors"]` override, and `extra["coverageExcludes"]` is only the default
+  `**/ComposableSingletons*` (`Main.kt` and `tools/` are measured). CI is the measure:
+  `SpbLoaderTest` and `ReverseLookupTest` also run against the Bibles a developer's machine has and
+  skip without them, so a local run can read higher. What stays uncovered is `Main.kt` (the
+  standalone entry: it writes a config file beside the jar and blocks forever), `SttSocketClient`
+  (needs a socket.io server) and the `EngineServer` port-search loop. `tools/` output goes through
+  `audit(path, out, err)` so it is tested on fixture logs. The `extra` block must stay **above
+  everything else** in the build file; never re-declare the JaCoCo tasks here.
 - **Detekt**: `./gradlew :bible-engine:detekt`, against the root config, gated in CI. The module has
   **no baseline**: every finding was fixed in code, and a new one is fixed, never suppressed.
 

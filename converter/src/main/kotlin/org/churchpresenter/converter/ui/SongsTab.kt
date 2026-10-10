@@ -213,6 +213,7 @@ private fun BatchFilePanel(
     format: SongFormatConverter,
     onConverted: (sourceId: String) -> Unit,
 ) {
+    val pickers = LocalConverterPickers.current
     var files by remember { mutableStateOf<List<File>>(emptyList()) }
     var summary by remember { mutableStateOf("") }
     var outputDir by remember { mutableStateOf<File?>(null) }
@@ -272,14 +273,14 @@ private fun BatchFilePanel(
                 if (files.isEmpty()) {
                     FileDropZone(Strings.dropFilesHere(source.ext), source.accepts) {
                         RaisedButton(shape = ButtonShape, onClick = {
-                            val picked = pickSourceFiles(source, format)
+                            val picked = pickers.sourceFiles(source, format)
                             choose(picked, Strings.filesSelected(picked.size))
                         }) {
                             Icon(Icons.Default.FileOpen, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
                             Text(Strings.selectFiles)
                         }
                         KeyButton(shape = ButtonShape, onClick = {
-                            val dir = pickDirectory() ?: return@KeyButton
+                            val dir = pickers.directory() ?: return@KeyButton
                             val picked = findFormatInputs(dir, format)
                             choose(picked, Strings.folderSelected(dir.absolutePath, picked.size))
                         }) {
@@ -292,7 +293,7 @@ private fun BatchFilePanel(
                         summary = summary,
                         entries = files.take(FILE_LIST_LIMIT).map { SelectedEntry(it.name, formatFileSize(inputSize(it))) },
                         onChange = {
-                            val picked = pickSourceFiles(source, format)
+                            val picked = pickers.sourceFiles(source, format)
                             choose(picked, Strings.filesSelected(picked.size))
                         },
                         onClear = { files = emptyList(); summary = ""; clearResults() }
@@ -310,7 +311,7 @@ private fun BatchFilePanel(
                         ?: if (needsFolder) Strings.chooseOutputFolder else Strings.sameAsInput,
                     chosen = outputDir != null,
                     warning = if (needsFolder && outputDir == null) Strings.outputManyFilesWarning else null,
-                    onBrowse = { pickDirectory()?.let { outputDir = it } }
+                    onBrowse = { pickers.directory()?.let { outputDir = it } }
                 )
             }
         }
@@ -366,6 +367,7 @@ private fun BatchFilePanel(
  */
 @Composable
 private fun SoftProjectorPanel(onConverted: (sourceId: String) -> Unit) {
+    val pickers = LocalConverterPickers.current
     val spsSource = SongSources.byId(SongSources.SOFTPROJECTOR)
     var files by remember { mutableStateOf<List<File>>(emptyList()) }
     var summary by remember { mutableStateOf("") }
@@ -419,14 +421,14 @@ private fun SoftProjectorPanel(onConverted: (sourceId: String) -> Unit) {
                 if (files.isEmpty()) {
                     FileDropZone(Strings.dropFilesHere(spsSource.ext), spsSource.accepts) {
                         RaisedButton(shape = ButtonShape, onClick = {
-                            val picked = pickSourceFiles(spsSource, SoftProjectorFormat)
+                            val picked = pickers.sourceFiles(spsSource, SoftProjectorFormat)
                             choose(picked, Strings.filesSelected(picked.size))
                         }) {
                             Icon(Icons.Default.FileOpen, null, Modifier.size(16.dp)); Spacer(Modifier.width(6.dp))
                             Text(Strings.selectFiles)
                         }
                         KeyButton(shape = ButtonShape, onClick = {
-                            val dir = pickDirectory() ?: return@KeyButton
+                            val dir = pickers.directory() ?: return@KeyButton
                             val picked = findFormatInputs(dir, SoftProjectorFormat)
                             choose(picked, Strings.folderSelected(dir.absolutePath, picked.size))
                         }) {
@@ -439,7 +441,7 @@ private fun SoftProjectorPanel(onConverted: (sourceId: String) -> Unit) {
                         summary = summary,
                         entries = files.take(FILE_LIST_LIMIT).map { SelectedEntry(it.name, formatFileSize(inputSize(it))) },
                         onChange = {
-                            val picked = pickSourceFiles(spsSource, SoftProjectorFormat)
+                            val picked = pickers.sourceFiles(spsSource, SoftProjectorFormat)
                             choose(picked, Strings.filesSelected(picked.size))
                         },
                         onClear = { files = emptyList(); summary = ""; clearResults() }
@@ -455,7 +457,7 @@ private fun SoftProjectorPanel(onConverted: (sourceId: String) -> Unit) {
                     path = outputDir?.absolutePath ?: Strings.chooseOutputFolder,
                     chosen = outputDir != null,
                     warning = if (outputDir == null) Strings.outputManyFilesWarning else null,
-                    onBrowse = { pickDirectory()?.let { outputDir = it } }
+                    onBrowse = { pickers.directory()?.let { outputDir = it } }
                 )
             }
         }
@@ -552,6 +554,7 @@ private fun convertSongBook(file: File, outputDir: File): List<String> = runCatc
 /** PDF / PPTX / DOCX: text is extracted, split into songs, then written out. */
 @Composable
 private fun DocumentsPanel(source: SongSource, onConverted: (sourceId: String) -> Unit) {
+    val pickers = LocalConverterPickers.current
     var files by remember { mutableStateOf<List<File>>(emptyList()) }
     var outputDir by remember { mutableStateOf<File?>(null) }
     var parsedSongs by remember { mutableStateOf<List<ParsedSong>>(emptyList()) }
@@ -566,7 +569,7 @@ private fun DocumentsPanel(source: SongSource, onConverted: (sourceId: String) -
         parsedSongs = emptyList(); markdown = ""; log = emptyList(); state = ConvertState.SELECT; completed = 0
     }
 
-    fun pick(): List<File> = pickSourceFiles(source, DocumentFormat)
+    fun pick(): List<File> = pickers.sourceFiles(source, DocumentFormat)
 
     fun runConvert() {
         state = ConvertState.CONVERTING
@@ -619,7 +622,7 @@ private fun DocumentsPanel(source: SongSource, onConverted: (sourceId: String) -
                             Text(Strings.selectFiles)
                         }
                         KeyButton(shape = ButtonShape, onClick = {
-                            val dir = pickDirectory() ?: return@KeyButton
+                            val dir = pickers.directory() ?: return@KeyButton
                             val picked = findFormatInputs(dir, DocumentFormat)
                             if (picked.isNotEmpty()) { files = picked; clearResults() }
                         }) {
@@ -648,7 +651,7 @@ private fun DocumentsPanel(source: SongSource, onConverted: (sourceId: String) -
                     path = outputDir?.absolutePath ?: Strings.chooseOutputFolder,
                     chosen = outputDir != null,
                     warning = if (outputDir == null) Strings.outputManyFilesWarning else null,
-                    onBrowse = { pickDirectory()?.let { outputDir = it } }
+                    onBrowse = { pickers.directory()?.let { outputDir = it } }
                 )
             }
         }

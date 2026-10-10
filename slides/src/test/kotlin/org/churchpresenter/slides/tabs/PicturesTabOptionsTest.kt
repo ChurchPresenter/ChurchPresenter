@@ -66,6 +66,7 @@ class PicturesTabOptionsTest {
         val presets = mutableListOf<Triple<String, String, Int>>()
         val projected = mutableListOf<ScheduleItem>()
         var settingsChanges = 0
+        var lastSettings: AppSettings? = null
         var nextSent = 0
         var previousSent = 0
     }
@@ -105,7 +106,7 @@ class PicturesTabOptionsTest {
                             selectedPictureItem = harness.item,
                             selectedPictureItemVersion = harness.version,
                             presenterManager = output,
-                            onSettingsChange = { calls.settingsChanges++ },
+                            onSettingsChange = { calls.settingsChanges++; calls.lastSettings = it(settings) },
                             viewModel = vm,
                         )
                     }
@@ -201,12 +202,18 @@ class PicturesTabOptionsTest {
 
     @Test
     fun `a scheduled folder from another machine is fetched over Instance Link`() {
+        val cache = File(
+            System.getProperty("user.home"),
+            ".churchpresenter/instance-link/cache/picture-folders/" + "/elsewhere/Remote".hashCode().toUInt().toString(16),
+        )
+        cache.deleteRecursively()
         val source = folder("Remote", 2)
         val bytes = source.listFiles()!!.sortedBy { it.name }.map { it.readBytes() }
         tab(startFolder = null, fetch = { _, index -> bytes.getOrNull(index) }) { h ->
             h.item = ScheduleItem.PictureItem("p1", "/elsewhere/Remote", "Remote", 2)
             waitUntil("the remote pictures arrived", 10_000) { h.vm.images.size == 2 }
         }
+        cache.deleteRecursively()
     }
 
     @Test
@@ -256,12 +263,35 @@ class PicturesTabOptionsTest {
     }
 
     @Test
+    fun `hovering the play button while playing names pause`() = tab { h ->
+        h.vm.autoScrollInterval = 30f
+        h.vm.togglePlayPause()
+        waitForIdle()
+        mainClock.autoAdvance = false
+        pictureButton(PictureLabel.PAUSE).performMouseInput { moveTo(center) }
+        mainClock.advanceTimeBy(2_000)
+        waitForIdle()
+        assertTrue(onAllNodesWithText(PictureLabel.PAUSE).fetchSemanticsNodes().isNotEmpty())
+    }
+
+    @Test
+    fun `hovering the scale button names the mode every output is in`() = tab { _ ->
+        val label = "Picture scale on every output: Fit"
+        mainClock.autoAdvance = false
+        pictureButton(label).performMouseInput { moveTo(center) }
+        mainClock.advanceTimeBy(2_000)
+        waitForIdle()
+        assertTrue(onAllNodesWithText(label).fetchSemanticsNodes().isNotEmpty())
+    }
+
+    @Test
     fun `a recent folder's chip opens it`() {
         val recent = folder("Recent", 2)
         RecentPictureFolders.add(recent.absolutePath)
         tab(startFolder = null) { h ->
             onNodeWithText("Recent").performClick()
             waitUntil("the folder opened", 5_000) { h.vm.images.size == 2 }
+            assertEquals(recent.absolutePath, h.calls.lastSettings?.pictureSettings?.storageDirectory)
             assertTrue(h.calls.settingsChanges > 0)
         }
     }

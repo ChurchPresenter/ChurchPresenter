@@ -156,6 +156,17 @@ class PresentationTabControlsTest {
     }
 
     @Test
+    fun `auto-play with an output but no parsed deck moves on to the next slide`() {
+        val presenter = FakeSlidesOutput()
+        withFakeSlides(3, presenterManager = presenter) { vm, _ ->
+            vm.autoScrollInterval = 1f
+            vm.togglePlayPause()
+            mainClock.advanceTimeBy(1_500)
+            waitUntil("the next slide", 5_000) { vm.selectedSlideIndex == 1 }
+        }
+    }
+
+    @Test
     fun `the B key does nothing with no output wired`() = withFakeSlides(3) { _, reports ->
         press(Key.B)
 

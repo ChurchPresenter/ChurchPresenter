@@ -57,6 +57,10 @@ object SharedCameraFrameCache {
     @get:Synchronized
     internal val liveCaptureCount: Int get() = entries.size
 
+    /** The capture coroutine behind each live entry, by cache key — read-only, so a test can wait for it. */
+    @get:Synchronized
+    internal val liveCaptureJobs: Map<String, Job?> get() = entries.mapValues { (_, entry) -> entry.captureJob }
+
     /** Build a unique key for a camera source. */
     fun keyFor(source: SceneSource.CameraSource): String {
         return if (source.isDeckLink && source.deckLinkIndex >= 0) {
@@ -442,11 +446,11 @@ internal suspend fun awaitVideoDimensions(
 }
 
 /** Kills whatever is left of the previous attempt and lets the OS hand the device back. */
-internal suspend fun releaseLingeringProcess(entry: CacheEntry) {
+internal suspend fun releaseLingeringProcess(entry: CacheEntry, settleMs: Long = DEVICE_RELEASE_DELAY_MS) {
     val old = entry.ffmpegProcess ?: return
     withContext(Dispatchers.IO) { killFfmpegProcess(old) }
     entry.ffmpegProcess = null
-    delay(DEVICE_RELEASE_DELAY_MS)
+    delay(settleMs)
 }
 
 /**

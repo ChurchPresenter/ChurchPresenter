@@ -33,11 +33,6 @@ import kotlin.test.assertTrue
  * mapping back out of a drag. Sources publish no test tag, so they are addressed by pressing at a
  * position inside their bounds: they are descendants of the canvas node and hit-testing routes the
  * event to the topmost one, which is exactly what a real click does.
- *
- * **Not covered: the rotation handle.** It is drawn at a `.offset(...)` outside the source's own
- * bounds and sized 12dp, so addressing it means reproducing the handle-placement arithmetic in the
- * test to find out where it landed — an assertion about the test's own maths rather than the
- * production code's. Its angle computation is worth covering through a seam if one is ever extracted.
  */
 class SceneCanvasSelectionTest {
 
@@ -47,6 +42,7 @@ class SceneCanvasSelectionTest {
     private class Reports {
         val selected = mutableListOf<String?>()
         val transforms = mutableListOf<Pair<String, SourceTransform>>()
+        val drawn = mutableListOf<SceneSource.ShapeSource>()
     }
 
     /** A shape occupying the normalised box 0.1..0.4 on both axes — pixels 40..160 by 22.5..90. */
@@ -71,6 +67,7 @@ class SceneCanvasSelectionTest {
     private fun canvas(
         sources: List<SceneSource>,
         selectedId: String? = null,
+        tool: String = "select",
         block: ComposeUiTest.(Reports) -> Unit,
     ) {
         val reports = Reports()
@@ -90,7 +87,8 @@ class SceneCanvasSelectionTest {
                             selectedSourceId = selectedId,
                             onSourceSelected = { reports.selected += it },
                             onTransformChanged = { id, t -> reports.transforms += id to t },
-                            activeTool = "select",
+                            activeTool = tool,
+                            onShapeDrawn = { reports.drawn += it },
                         )
                     }
                 }
@@ -291,5 +289,24 @@ class SceneCanvasSelectionTest {
             val grown = reports.transforms.last().second
             assertTrue(grown.width > 0.3f && grown.height > 0.3f, "both sides grow, was $grown")
             assertEquals(0.1f, grown.x, "and the top-left corner stays put")
+        }
+
+    @Test
+    fun `with a drawing tool active a drag over the selected source draws instead of moving it`() =
+        canvas(listOf(shape(x = 0.1f, y = 0.4f)), selectedId = "shape-1", tool = "rectangle") { reports ->
+            dragBy(fromX = 100f, fromY = 120f, dx = 40f, dy = 30f)
+
+            assertTrue(reports.transforms.isEmpty(), "the source stays where it is, got ${reports.transforms}")
+            assertEquals("rectangle", reports.drawn.single().shapeType)
+            assertTrue(reports.selected.isEmpty(), "and drawing selects nothing")
+        }
+
+    @Test
+    fun `a selected but locked source offers no grips and does not move`() =
+        canvas(listOf(shape(x = 0.1f, y = 0.4f, locked = true)), selectedId = "shape-1") { reports ->
+            dragBy(fromX = 160f, fromY = 157f, dx = 30f, dy = 15f)
+            dragBy(fromX = 100f, fromY = 120f, dx = 30f, dy = 0f)
+
+            assertTrue(reports.transforms.isEmpty(), "got ${reports.transforms}")
         }
 }

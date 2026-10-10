@@ -8,7 +8,9 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.AppSettings
@@ -96,5 +98,29 @@ class PresentationTabDefaultsTest {
         mainClock.advanceTimeBy(1_000)
         waitForIdle()
         assertEquals(1, clicks)
+    }
+
+    private fun ComposeUiTest.hoverShowsTooltip(label: String) {
+        mainClock.autoAdvance = false
+        presentationButton(label).performMouseInput { moveTo(center) }
+        mainClock.advanceTimeBy(2_000)
+        waitForIdle()
+        assertTrue(onAllNodesWithText(label).fetchSemanticsNodes().isNotEmpty(), "tooltip $label")
+    }
+
+    @Test
+    fun `hovering the play button while playing names pause`() = withDefaults { vm, _ ->
+        vm.isLooping = true
+        vm.autoScrollInterval = 30f
+        vm.togglePlayPause()
+        waitForIdle()
+        hoverShowsTooltip("Pause")
+    }
+
+    @Test
+    fun `hovering the loop button with looping off says so`() = withDefaults { vm, _ ->
+        vm.isLooping = false
+        waitForIdle()
+        hoverShowsTooltip("Loop Off")
     }
 }

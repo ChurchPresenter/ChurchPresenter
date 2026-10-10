@@ -108,4 +108,12 @@ class CameraDeviceCatalogTest {
 
         assertTrue(cameraResolves(noIndex, listOf(card, webcam)))
     }
+
+    @Test
+    fun `displays are not offered as cameras unless one is the saved device`() {
+        val display = CameraDevice(name = "Capture screen 0", path = "avfoundation://2", displayName = "Capture screen 0")
+
+        assertTrue(display !in listOf(faceTime, display).selectableCameras())
+        assertTrue(display in listOf(faceTime, display).selectableCameras(keeping = "Capture screen 0"))
+    }
 }

@@ -15,6 +15,7 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.slides.FakeSlidesOutput
+import org.churchpresenter.slides.viewmodel.PicturesViewModel
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -212,6 +213,22 @@ class PicturesTabExtraTest {
         setContent { MaterialTheme { PicturesTab() } }
 
         onNodeWithText(PictureLabel.NO_FOLDER).assertExists()
+    }
+
+    @Test
+    fun `with no host to tell, the loop button still toggles looping`() {
+        val vm = PicturesViewModel()
+        try {
+            runComposeUiTest {
+                setContent { MaterialTheme { PicturesTab(viewModel = vm) } }
+                val before = vm.isLooping
+                pictureButton(if (before) "Loop On" else "Loop Off").performClick()
+                waitForIdle()
+                assertEquals(!before, vm.isLooping)
+            }
+        } finally {
+            vm.dispose()
+        }
     }
 
     // ── The grid against a folder that changes underneath it ────────────────────

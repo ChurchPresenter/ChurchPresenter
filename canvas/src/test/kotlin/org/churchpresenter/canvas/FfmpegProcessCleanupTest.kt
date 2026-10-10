@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
@@ -78,6 +79,22 @@ class FfmpegProcessCleanupTest {
         } finally {
             bystander.destroyForcibly()
             camera.destroyForcibly()
+        }
+    }
+
+    @Test
+    fun `a lingering capture process is ended and forgotten before the next attempt`() {
+        val lingering = ProcessBuilder("sleep", "30").start()
+        try {
+            val entry = CacheEntry(ffmpegProcess = lingering)
+
+            runBlocking { releaseLingeringProcess(entry, settleMs = 0) }
+
+            assertFalse(lingering.isAlive, "the previous attempt's process is gone")
+            assertNull(entry.ffmpegProcess)
+            runBlocking { releaseLingeringProcess(entry, settleMs = 0) }
+        } finally {
+            lingering.destroyForcibly()
         }
     }
 }

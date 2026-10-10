@@ -2,7 +2,9 @@ package org.churchpresenter.canvas
 
 import org.churchpresenter.sharedui.utils.CommandResult
 import org.churchpresenter.sharedui.utils.CommandRunner
+import kotlinx.coroutines.runBlocking
 import java.awt.Rectangle
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -212,5 +214,17 @@ class CaptureParsingEdgeCasesTest {
     fun `an empty size reduces to the default ratio`() {
         assertEquals(reducedRatio(0, 0), reducedRatio(1920, 0))
         assertEquals(reducedRatio(0, 0), reducedRatio(-1, 1080))
+    }
+
+    @Test
+    fun `stream dimensions already announced are taken at once`() {
+        val dims = AtomicReference<Pair<Int, Int>?>(1280 to 720)
+
+        assertEquals(1280 to 720, runBlocking { awaitVideoDimensions(dims, intervalMs = 0) })
+    }
+
+    @Test
+    fun `stream dimensions never announced give up as unknown`() {
+        assertNull(runBlocking { awaitVideoDimensions(AtomicReference(null), intervalMs = 0) })
     }
 }

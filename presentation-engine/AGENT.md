@@ -49,13 +49,15 @@ What that changed, and what it did not:
 The module carries the root build's six-counter floor, **85% on all six**, and names no
 `extra["coverageFloors"]` of its own — every counter clears the default. Do not add one back to
 make a change fit.
-`extra["coverageExcludes"]` drops `**/ui/**`, `**/MainKt*` and the CLI diagnostics (`**/*Dump*`,
-`**/MakeSampleDeck*`).
+`extra["coverageExcludes"]` is the default `**/ComposableSingletons*` only — the CLI diagnostics
+are measured too: `DumpTiming.dump`/`DumpKeynote.dump` take their output streams, and `DumpToolsTest`
+drives them on fixture decks. Never add an exclude back.
 
 **Where the remaining gap is**: `SlideFontRegistry`'s directory scan — it walks the machine's real
 font directories and sits behind a one-shot JVM latch, so covering it deterministically means the
-suite may only call `initialize` one way — plus null-type arms of `when` over XMLBeans/IWA values
-that the parsers cannot produce, and `catch` blocks around POI and PDFBox calls. A new effect, a new preset id or a new timing
+suite may only call `initialize` one way — plus the two tools' one-line `main`s, null-type arms of
+`when` over XMLBeans/IWA values that the parsers cannot produce, and `catch` blocks around POI and
+PDFBox calls. A new effect, a new preset id or a new timing
 behavior has no excuse for arriving untested — `Fixtures` builds PPTX, PDF and IWA documents
 programmatically, including `addRawTiming` for arbitrary `<p:timing>` XML.
 

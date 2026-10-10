@@ -8,6 +8,7 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
+import java.io.PrintStream
 
 /**
  * Offline auditor for sticky-log-*.jsonl (see DetectionLogger.logStickyChange / TRAINING_PLAN.md).
@@ -35,20 +36,24 @@ internal enum class Category { CHAPTER_CLEARED, UNEXPLAINED, SHORT_ALIAS, STEM_O
 internal data class Verdict(val row: StickyRow, val category: Category, val detail: String)
 
 fun main(args: Array<String>) {
-    val path = args.firstOrNull()
+    audit(args.firstOrNull(), System.out, System.err)
+}
+
+/** Audits the sticky log at [path], writing the report to [out] and usage or file errors to [err]. */
+internal fun audit(path: String?, out: PrintStream, err: PrintStream) {
     if (path == null) {
-        System.err.println("Usage: stickyAudit <path-to-sticky-log.jsonl>")
+        err.println("Usage: stickyAudit <path-to-sticky-log.jsonl>")
         return
     }
     val file = File(path)
     if (!file.exists()) {
-        System.err.println("File not found: $path")
+        err.println("File not found: $path")
         return
     }
 
     val rows = file.readLines().filter { it.isNotBlank() }.mapNotNull { parseRow(it) }
     val verdicts = rows.map { classify(it) }
-    printReport(path, verdicts)
+    printReport(path, verdicts, out)
 }
 
 private fun parseRow(line: String): StickyRow? = runCatching {
@@ -206,7 +211,7 @@ private fun tokenize(text: String): List<String> =
         .split(Regex("\\s+"))
         .filter { it.isNotBlank() }
 
-private fun printReport(path: String, verdicts: List<Verdict>) {
+private fun printReport(path: String, verdicts: List<Verdict>, out: PrintStream) {
     val label = File(path).name
     val byCategory = verdicts.groupBy { it.category }
     val unexplained = byCategory[Category.UNEXPLAINED].orEmpty()
@@ -216,63 +221,63 @@ private fun printReport(path: String, verdicts: List<Verdict>) {
     val confident = byCategory[Category.CONFIDENT].orEmpty()
     val other = byCategory[Category.OTHER].orEmpty()
 
-    println()
-    println(
+    out.println()
+    out.println(
         "=== sticky-audit $label  jumps=${verdicts.size}  " +
             "unexplained=${unexplained.size} chapter-cleared=${chapterCleared.size} " +
             "short-alias=${shortAlias.size} stem-overext=${stemOverext.size} " +
             "confident=${confident.size} other=${other.size} ==="
     )
-    println()
+    out.println()
 
     if (unexplained.isNotEmpty()) {
-        println(
+        out.println(
             "UNEXPLAINED (${unexplained.size}) — no alias/stem match found for the new book anywhere " +
                 "in the text; likely a NEW, undiagnosed bug pattern. (One benign cause: the live " +
                 "engine also resolves book names the loaded SPB modules register at startup, which " +
                 "this tool cannot see — e.g. the Russian Synodal names book 65 «Иуда».)"
         )
-        unexplained.forEach(::printRow)
-        println()
+        unexplained.forEach { printRow(it, out) }
+        out.println()
     }
     if (chapterCleared.isNotEmpty()) {
-        println(
+        out.println(
             "CHAPTER-CLEARED SAME-BOOK (${chapterCleared.size}) — should be ~zero after the " +
                 "same-book-reflush fix; any hit is a regression or a new variant:"
         )
-        chapterCleared.forEach(::printRow)
-        println()
+        chapterCleared.forEach { printRow(it, out) }
+        out.println()
     }
     if (shortAlias.isNotEmpty()) {
-        println(
+        out.println(
             "SHORT ALIAS (${shortAlias.size}) — matched only via a short (<6-char) exact alias, the " +
                 "shape of the \"бытие\" bug — consider adding to AMBIGUOUS_BOOK_FORMS if this recurs:"
         )
-        shortAlias.forEach(::printRow)
-        println()
+        shortAlias.forEach { printRow(it, out) }
+        out.println()
     }
     if (stemOverext.isNotEmpty()) {
-        println(
+        out.println(
             "STEM OVER-EXTENSION (${stemOverext.size}) — matched word extends well past its book " +
                 "alias's stem, the shape of the \"открывает\"/\"откр\" bug — consider adding to " +
                 "AMBIGUOUS_BOOK_FORMS if this recurs:"
         )
-        stemOverext.forEach(::printRow)
-        println()
+        stemOverext.forEach { printRow(it, out) }
+        out.println()
     }
-    println(
+    out.println(
         "CONFIDENT (${confident.size}) — resolved via an explicit/long alias or a normal " +
             "grammatical ending, no review needed."
     )
     if (other.isNotEmpty()) {
-        println("OTHER (${other.size}) — same book, or a book-only prime with no change of note.")
+        out.println("OTHER (${other.size}) — same book, or a book-only prime with no change of note.")
     }
-    println()
+    out.println()
 }
 
-private fun printRow(v: Verdict) {
+private fun printRow(v: Verdict, out: PrintStream) {
     val r = v.row
     val trigger = r.transcript.ifBlank { r.translation }.take(100)
-    println("  book ${r.newBook} <- book ${r.prevBook}  ts=${r.ts}  ${v.detail}")
-    println("    transcript: \"$trigger\"")
+    out.println("  book ${r.newBook} <- book ${r.prevBook}  ts=${r.ts}  ${v.detail}")
+    out.println("    transcript: \"$trigger\"")
 }

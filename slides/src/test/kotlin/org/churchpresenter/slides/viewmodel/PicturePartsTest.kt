@@ -46,6 +46,8 @@ class PicturePartsTest {
         val files = fill("a.jpg", "b.jpg")
         navigator.moveImage(0, 5)
         navigator.moveImage(5, 0)
+        navigator.moveImage(0, -1)
+        navigator.moveImage(-1, 0)
         assertEquals(files, state.images.toList())
         assertEquals(0, state.imageOrderVersion.value)
     }

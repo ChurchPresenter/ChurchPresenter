@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
@@ -231,6 +232,24 @@ internal fun approved(show: () -> Int): Boolean = try {
 } catch (_: NullPointerException) {
     false
 }
+
+internal interface ConverterPickers {
+    fun files(description: String, vararg extensions: String, multiSelection: Boolean): List<File>
+    fun directory(): File?
+    fun sourceFiles(source: SongSource, format: SongFormatConverter): List<File>
+}
+
+internal object SwingPickers : ConverterPickers {
+    override fun files(description: String, vararg extensions: String, multiSelection: Boolean): List<File> =
+        pickFiles(description, *extensions, multiSelection = multiSelection)
+
+    override fun directory(): File? = pickDirectory()
+
+    override fun sourceFiles(source: SongSource, format: SongFormatConverter): List<File> =
+        pickSourceFiles(source, format)
+}
+
+internal val LocalConverterPickers = staticCompositionLocalOf<ConverterPickers> { SwingPickers }
 
 internal fun pickFiles(description: String, vararg extensions: String, multiSelection: Boolean): List<File> {
     val chooser = JFileChooser(defaultDir).apply {

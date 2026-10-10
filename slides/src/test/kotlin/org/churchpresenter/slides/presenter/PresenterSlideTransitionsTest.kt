@@ -154,4 +154,28 @@ class PresenterSlideTransitionsTest {
 
     @Test
     fun `a first slide-right has nothing to slide out`() = firstShown(AnimationType.SLIDE_RIGHT)
+
+    @Test
+    fun `a picture sliding in before it has loaded leaves its half black`() = runComposeUiTest {
+        setContent {
+            Box(Modifier.size(200.dp, 100.dp)) {
+                PicturePresenter(imagePath = null, previousImagePath = red.absolutePath, animationType = AnimationType.SLIDE_LEFT)
+            }
+        }
+        waitUntil("the previous picture drawn", 5_000) {
+            onAllNodesWithContentDescription("Presented Image").fetchSemanticsNodes().isNotEmpty()
+        }
+        onAllNodesWithContentDescription("Presented Image").assertCountEquals(1)
+    }
+
+    @Test
+    fun `a slide sliding in before it has loaded leaves its half black`() = runComposeUiTest {
+        val previous = bitmap(red)
+        setContent {
+            Box(Modifier.size(200.dp, 100.dp)) {
+                SlidePresenter(slide = null, previousSlide = previous, animationType = AnimationType.SLIDE_RIGHT)
+            }
+        }
+        onAllNodesWithContentDescription("Presented Slide").assertCountEquals(1)
+    }
 }

@@ -106,4 +106,17 @@ class SceneViewModelEdgeCasesTest {
         val keptId = copy.sources.single().id
         assertEquals(mapOf(keptId to SourceTransform(x = 0.25f)), copy.alternate?.transforms)
     }
+
+    @Test
+    fun `resizing a scene to the size it already has writes nothing`() {
+        val vm = SceneViewModel()
+        vm.addScene("Main")
+        vm.updateCanvasSize(1280, 720)
+        scenesFile.delete()
+
+        vm.updateCanvasSize(1280, 720)
+
+        assertTrue(!scenesFile.exists(), "an unchanged size is not saved again")
+        assertEquals(1280 to 720, vm.currentScene?.let { it.canvasWidth to it.canvasHeight })
+    }
 }

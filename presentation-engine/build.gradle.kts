@@ -8,8 +8,7 @@ plugins {
 
 group = "org.churchpresenter"
 
-extra["coverageExcludes"] =
-    listOf("**/ui/**", "**/MainKt*", "**/*Dump*", "**/MakeSampleDeck*", "**/ComposableSingletons*")
+extra["coverageExcludes"] = listOf("**/ComposableSingletons*")
 
 kotlin {
     jvmToolchain(21)
