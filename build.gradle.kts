@@ -112,9 +112,6 @@ subprojects {
     }
 }
 
-// Mutation testing, configured once for the modules that apply `info.solidsoft.pitest` (the core
-// logic: :song-chords, :live-show, :core-models, :schedule). `./gradlew :<module>:pitest` writes
-// build/reports/pitest/; mutation-test.yml runs it weekly. Not a gate: no mutationThreshold.
 // detekt's ktlint wrapper, for every module that runs detekt: which of its rules are on is
 // `formatting:` in config/detekt/detekt.yml, shared like the rest of that file.
 subprojects {
@@ -123,6 +120,24 @@ subprojects {
     }
 }
 
+// socket.io-client (:stt, :bible-engine, :composeApp) brings okhttp 3.12.12 through engine.io-client,
+// even at its newest release, and 3.12.12 can accept the wrong certificate (GHSA-3cqm-mf7h-prrj).
+// Lifted to the fixed 4.x in every configuration -- a module's own constraint reaches only its
+// consumers' runtime, not their compile classpath. 4.x keeps the okhttp3 API engine.io calls.
+subprojects {
+    configurations.configureEach {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "com.squareup.okhttp3" && requested.version?.startsWith("3.") == true) {
+                useVersion(libs.okhttp.get().version!!)
+                because("GHSA-3cqm-mf7h-prrj: okhttp 3.x can accept the wrong certificate")
+            }
+        }
+    }
+}
+
+// Mutation testing, configured once for the modules that apply `info.solidsoft.pitest` (the core
+// logic: :song-chords, :live-show, :core-models, :schedule). `./gradlew :<module>:pitest` writes
+// build/reports/pitest/; mutation-test.yml runs it weekly. Not a gate: no mutationThreshold.
 subprojects {
     plugins.withId("info.solidsoft.pitest") {
         extensions.configure<info.solidsoft.gradle.pitest.PitestPluginExtension> {
