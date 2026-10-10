@@ -92,7 +92,10 @@ class ElementEditorsTest {
         click(Strings.editorRepeat)
         assertEquals(RepeatSpec(), repeat)
         fillEveryField("6")
-        assertEquals(RepeatSpec(copies = 6, offsetXEm = 6.0, offsetYEm = 6.0, rotationDeg = 6.0, scalePct = 6.0), repeat)
+        assertEquals(
+            RepeatSpec(copies = 6, offsetXEm = 6.0, offsetYEm = 6.0, rotationDeg = 6.0, scalePct = 6.0),
+            repeat,
+        )
         choose(Strings.editorRepeatFitWidth, Strings.editorFitTextBlock)
         click(Strings.editorRepeatFade)
         assertEquals(WidthBasis.TEXT_BLOCK, repeat?.fitWidthTo)
@@ -113,7 +116,10 @@ class ElementEditorsTest {
         assertEquals(StrokeWidthSpec.Em(0.1), paint.stroke?.width)
         fillEveryField("2")
         val gradient = paint.fill?.gradient!!
-        assertEquals(listOf(2.0, 2.0, 2.0, 2.0), listOf(gradient.startXEm, gradient.startYEm, gradient.endXEm, gradient.endYEm))
+        assertEquals(
+            listOf(2.0, 2.0, 2.0, 2.0),
+            listOf(gradient.startXEm, gradient.startYEm, gradient.endXEm, gradient.endYEm),
+        )
         assertEquals(StrokeWidthSpec.Em(2.0), paint.stroke?.width)
         assertEquals(2.0, paint.stroke?.dashEm)
         choose(Strings.editorStrokeWidthType, Strings.editorStrokeFromConfig)

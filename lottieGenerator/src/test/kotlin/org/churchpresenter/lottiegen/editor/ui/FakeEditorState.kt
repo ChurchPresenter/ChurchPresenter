@@ -32,7 +32,9 @@ internal class FakeEditorState(
     val calls = mutableListOf<String>()
 
     override fun updateSpec(transform: (StyleSpec) -> StyleSpec) { spec = transform(spec) }
-    override fun updateTestConfig(transform: (LottieGenConfig) -> LottieGenConfig) { testConfig = transform(testConfig) }
+    override fun updateTestConfig(transform: (LottieGenConfig) -> LottieGenConfig) {
+        testConfig = transform(testConfig)
+    }
     override fun selectElement(id: String?) { selectedElementId = id }
     override fun setMatrixModeEnabled(enabled: Boolean) { matrixMode = enabled }
     override fun newProject(templateResource: String?) { calls += "new $templateResource" }

@@ -37,11 +37,16 @@ import kotlin.test.assertTrue
 class ComponentsTest {
 
     @Test
-    fun `the colour picker converts every hue sextant and confirms what was typed`() = runDesktopComposeUiTest(800, 900) {
+    fun `the colour picker converts every hue sextant and confirms what was typed`() =
+        runDesktopComposeUiTest(800, 900) {
         var picked = ""
         var open by mutableStateOf(true)
         showDark(800.dp, 900.dp) {
-            if (open) Hosted(picked, { picked = it; open = false }) { _, set -> ColorPickerDialog("#00FF00", { open = false }, set) }
+            if (open) {
+                Hosted(picked, { picked = it; open = false }) { _, set ->
+                    ColorPickerDialog("#00FF00", { open = false }, set)
+                }
+            }
         }
         var current = "#00FF00"
         for (hex in listOf("#FFFF00", "#00FFFF", "#0000FF", "#FF00FF", "#FF0000", "#808080", "#000000")) {

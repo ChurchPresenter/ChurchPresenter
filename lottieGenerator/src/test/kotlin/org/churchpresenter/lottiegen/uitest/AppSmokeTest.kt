@@ -65,7 +65,8 @@ class AppSmokeTest {
         node(text).fetchSemanticsNode().size.width.toFloat()
 
     @Test
-    fun `the standalone generator widens its panel when the divider is dragged`() = runDesktopComposeUiTest(1400, 1000) {
+    fun `the standalone generator widens its panel when the divider is dragged`() =
+        runDesktopComposeUiTest(1400, 1000) {
         setContent { Box(Modifier.size(1400.dp, 1000.dp)) { App() } }
         waitForIdle()
         assertTrue(hasNode(Strings.appTitle) && hasNode(Strings.downloadJson))
@@ -75,7 +76,8 @@ class AppSmokeTest {
     }
 
     @Test
-    fun `embedded with an output folder, the generator saves rather than downloads`() = runDesktopComposeUiTest(1400, 1000) {
+    fun `embedded with an output folder, the generator saves rather than downloads`() =
+        runDesktopComposeUiTest(1400, 1000) {
         setContent {
             ChurchPresenterTheme(ThemeMode.LIGHT) {
                 Box(Modifier.size(1400.dp, 1000.dp)) {

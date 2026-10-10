@@ -461,6 +461,25 @@ class LottieGenViewModelTest {
     }
 
     @Test
+    fun `batch download names each file by what its preset carries, and numbers repeats`() {
+        val dir = outDir()
+        val vm = viewModel()
+        vm.updateConfig { it.copy(nameText = "Ann", infoText = "Elder") }; vm.savePreset()
+        vm.updateConfig { it.copy(nameText = "", infoText = "Choir") }; vm.savePreset()
+        vm.updateConfig { it.copy(nameText = "", infoText = "") }; vm.savePreset()
+        File(dir, "Choir - 01.json").writeText("{}")
+
+        vm.batchDownloadAll(dir)
+        waitFor("the batch to finish") { vm.statusText.startsWith("Saved ") }
+
+        val written = dir.listFiles()!!.map { it.name }.sorted()
+        assertEquals(
+            listOf("Ann - Elder - 01.json", "Choir - 01.json", "Choir - 02.json", "lower-third - 01.json"),
+            written,
+        )
+    }
+
+    @Test
     fun `batch download to a path that is not a folder does nothing`() {
         val vm = viewModel()
         vm.updateConfig { it.copy(nameText = "One") }; vm.savePreset()

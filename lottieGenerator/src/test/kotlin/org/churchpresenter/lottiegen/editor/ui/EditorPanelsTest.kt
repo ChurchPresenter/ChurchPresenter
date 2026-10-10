@@ -120,7 +120,10 @@ class EditorPanelsTest {
             waitForIdle()
         }
         val c = state.testConfig
-        val alphas = listOf(c.nameColorAlpha, c.infoColorAlpha, c.detailColorAlpha, c.accentColorAlpha, c.bgColorAlpha, c.borderColorAlpha)
+        val alphas = listOf(
+            c.nameColorAlpha, c.infoColorAlpha, c.detailColorAlpha,
+            c.accentColorAlpha, c.bgColorAlpha, c.borderColorAlpha,
+        )
         assertTrue(alphas.all { it < 100 }, "alphas $alphas")
     }
 
@@ -179,10 +182,14 @@ class EditorPanelsTest {
         assertTrue(hasNode(Strings.generating))
         val json = lottieJson()
         state.matrixCells = listOf("left", "center", "right").flatMap { align ->
-            listOf(MatrixCell(align, logo = true, bg = true, json = json), MatrixCell(align, logo = false, bg = false, json = json))
+            listOf(
+                MatrixCell(align, logo = true, bg = true, json = json),
+                MatrixCell(align, logo = false, bg = false, json = json),
+            )
         }
         waitForIdle()
-        assertTrue(hasNode("${EditorLabels.align("left")} · ${Strings.editorMatrixTagLogo} · ${Strings.editorMatrixTagBg}"))
+        val tagged = "${EditorLabels.align("left")} · ${Strings.editorMatrixTagLogo} · ${Strings.editorMatrixTagBg}"
+        assertTrue(hasNode(tagged))
         assertTrue(hasNode(EditorLabels.align("right")))
     }
 
@@ -193,7 +200,10 @@ class EditorPanelsTest {
         var json by mutableStateOf<String?>(null)
         showDark {
             Column {
-                EditorPreview(json, 16f / 9f, playing, seek, { playing = it }, { seek = it }, Modifier.fillMaxWidth().height(500.dp))
+                EditorPreview(
+                    json, 16f / 9f, playing, seek, { playing = it }, { seek = it },
+                    Modifier.fillMaxWidth().height(500.dp),
+                )
             }
         }
         assertTrue(hasNode(Strings.generating))
@@ -211,7 +221,8 @@ class EditorPanelsTest {
     }
 
     @Test
-    fun `the toolbar opens new, open, save as and export, and confirms discarding`() = runDesktopComposeUiTest(1400, 1200) {
+    fun `the toolbar opens new, open, save as and export, and confirms discarding`() =
+        runDesktopComposeUiTest(1400, 1200) {
         val specs = File(temp, ".churchpresenter/churchpresenter-lottiegen/style-specs").apply { mkdirs() }
         StyleSpecStorage.save(StyleSpec(id = "91", name = "Kept"), File(specs, "kept.json"))
         StyleSpecStorage.save(StyleSpec(id = "92", name = "Gone"), File(specs, "gone.json"))
@@ -252,7 +263,8 @@ class EditorPanelsTest {
     }
 
     @Test
-    fun `open says when there are no projects, and a saved project needs no name`() = runDesktopComposeUiTest(1400, 1200) {
+    fun `open says when there are no projects, and a saved project needs no name`() =
+        runDesktopComposeUiTest(1400, 1200) {
         val state = FakeEditorState(saveSucceeds = true)
         showDark { ProjectToolbarActions(state) }
         click(Strings.editorOpen)

@@ -91,7 +91,10 @@ class BandControlPanelTest {
         fillEveryField("123456")
         val c = vm.config
         assertEquals(List(4) { "#123456" }, listOf(c.bgColor, c.gradientColor, c.accentColor, c.tertiaryColor))
-        listOf(Strings.bandGradientPosition, Strings.bandBorderThickness, Strings.bandCornerRadius, Strings.bandInset, Strings.bandPadding)
+        listOf(
+            Strings.bandGradientPosition, Strings.bandBorderThickness, Strings.bandCornerRadius,
+            Strings.bandInset, Strings.bandPadding,
+        )
             .forEach { tapBelow(it, 13.dp, 0.9f) }
         val m = vm.config
         assertTrue(m.borderThickness > 0 && m.cornerRadiusPx > 0 && m.insetPx > 0 && m.paddingPx > 0)
@@ -114,7 +117,10 @@ class BandControlPanelTest {
         waitUntil(timeoutMillis = 5_000) { vm.config.images.containsKey(BandColorRole.BACKGROUND) }
         waitForIdle()
         assertTrue(hasNode("wood.png"))
-        listOf(Strings.bandLookBlur, Strings.bandLookOffsetX, Strings.bandLookOffsetY, Strings.bandLookScale, Strings.bandLookRotation)
+        listOf(
+            Strings.bandLookBlur, Strings.bandLookOffsetX, Strings.bandLookOffsetY,
+            Strings.bandLookScale, Strings.bandLookRotation,
+        )
             .forEach { tapRightOf(it, 60.dp) }
         val image = vm.config.images.getValue(BandColorRole.BACKGROUND)
         assertTrue(vm.config.look(BandColorRole.BACKGROUND).blurPx > 0)
@@ -122,7 +128,10 @@ class BandControlPanelTest {
         assertNotEquals(100, image.scalePercent)
         clickDescription(Strings.bandLookReset)
         val reset = vm.config.images.getValue(BandColorRole.BACKGROUND)
-        assertEquals(listOf(0, 0, 100, 0), listOf(reset.offsetXPercent, reset.offsetYPercent, reset.scalePercent, reset.rotationDegrees))
+        assertEquals(
+            listOf(0, 0, 100, 0),
+            listOf(reset.offsetXPercent, reset.offsetYPercent, reset.scalePercent, reset.rotationDegrees),
+        )
         clickDescription(Strings.bandImageClear)
         assertNull(vm.config.images[BandColorRole.BACKGROUND])
         click(Strings.ok)
@@ -135,7 +144,8 @@ class BandControlPanelTest {
         showDark { val tick = rebindTick(); BandControlPanel(vm, 460.dp, pickImage = remember(tick) { { null } }) }
         click(Strings.bandSectionLayout)
         choose(Strings.bandLayout, Strings.bandEnumLabel("layout", SlotLayout.GRID_2X2.name))
-        choose(Strings.bandLabel("reference", kind), Strings.bandLabel("reference_${ReferencePlacement.ABOVE.name.lowercase()}", kind))
+        val above = Strings.bandLabel("reference_${ReferencePlacement.ABOVE.name.lowercase()}", kind)
+        choose(Strings.bandLabel("reference", kind), above)
         choose(Strings.bandLabel("text_align", kind), Strings.bandEnumLabel("align", BandTextAlign.RIGHT.name))
         choose(Strings.bandLabel("reference_align", kind), Strings.bandLabel("align_follow_settings", kind))
         val c = vm.config
@@ -149,7 +159,10 @@ class BandControlPanelTest {
         assertTrue(vm.linkTextArea)
         tapBelow(Strings.bandTextAreaLeft, 13.dp, 0.1f)
         val linked = vm.config
-        assertEquals(1, setOf(linked.textAreaLeftPx, linked.textAreaRightPx, linked.textAreaTopPx, linked.textAreaBottomPx).size)
+        assertEquals(
+            1,
+            setOf(linked.textAreaLeftPx, linked.textAreaRightPx, linked.textAreaTopPx, linked.textAreaBottomPx).size,
+        )
         tapBelow(Strings.bandLabel("reference_height", kind), 13.dp, 0.9f)
         assertTrue(vm.config.referenceHeightFraction > 0.4f)
         click(Strings.bandShowSlotGuides)
@@ -197,7 +210,10 @@ class BandControlPanelTest {
             type(previewReference(vm.config, i), "Ref $i")
         }
         val t = vm.config
-        assertEquals(listOf("Verse 1", "Verse 2", "Verse 3", "Verse 4"), listOf(t.previewText1, t.previewText2, t.previewText3, t.previewText4))
+        assertEquals(
+            listOf("Verse 1", "Verse 2", "Verse 3", "Verse 4"),
+            listOf(t.previewText1, t.previewText2, t.previewText3, t.previewText4),
+        )
         assertEquals(listOf("Ref 1", "Ref 2", "Ref 3", "Ref 4"),
             listOf(t.previewReference1, t.previewReference2, t.previewReference3, t.previewReference4))
         type(t.previewTextColor, "abcdef")
@@ -217,13 +233,13 @@ class BandControlPanelTest {
         assertEquals("my band", vm.fileName)
         waitUntil(timeoutMillis = 5_000) { vm.generatedJson != null }
         click(Strings.bandSave)
-        assertNotNull(saved)
-        assertEquals("my band.json", saved!!.name)
+        assertEquals("my band.json", assertNotNull(saved).name)
         assertTrue(hasNode(Strings.bandSaved))
     }
 
     @Test
-    fun `the template menu walks the styles with the arrow keys and closes on escape`() = runDesktopComposeUiTest(700, 1600) {
+    fun `the template menu walks the styles with the arrow keys and closes on escape`() =
+        runDesktopComposeUiTest(700, 1600) {
         val vm = viewModel()
         showDark { BandControlPanel(vm, 460.dp) }
         click(Strings.bandTemplate.uppercase())
@@ -267,7 +283,10 @@ class BandControlPanelTest {
     fun `a host font picker replaces the bundled list`() = runDesktopComposeUiTest(700, 1600) {
         val vm = viewModel()
         showDark {
-            BandControlPanel(vm, 460.dp, fontPicker = { family, onPick, _ -> Text("host:$family", Modifier.clickable { onPick("Lora") }) })
+            BandControlPanel(
+                vm, 460.dp,
+                fontPicker = { family, onPick, _ -> Text("host:$family", Modifier.clickable { onPick("Lora") }) },
+            )
         }
         click(Strings.bandTabText)
         click("host:" + vm.config.previewFontFamily)

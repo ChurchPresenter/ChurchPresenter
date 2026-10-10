@@ -58,7 +58,10 @@ class ControlPanelTest {
         type(state.config.infoSize.toString(), "1.5")
         type(state.config.detailSize.toString(), "1.25")
         assertEquals(30, state.config.baseSize)
-        assertEquals(listOf(2f, 1.5f, 1.25f), listOf(state.config.nameSize, state.config.infoSize, state.config.detailSize))
+        assertEquals(
+            listOf(2f, 1.5f, 1.25f),
+            listOf(state.config.nameSize, state.config.infoSize, state.config.detailSize),
+        )
     }
 
     @Test
@@ -70,7 +73,10 @@ class ControlPanelTest {
         listOf(Strings.showBackground, Strings.shadow, Strings.hideName, Strings.hideInfo, Strings.hideDetail)
             .forEach { click(it) }
         val c = state.config
-        assertEquals(listOf(false, true, true, true, false), listOf(c.bgEnabled, c.shadowEnabled, c.hideName, c.hideInfo, c.hideDetail))
+        assertEquals(
+            listOf(false, true, true, true, false),
+            listOf(c.bgEnabled, c.shadowEnabled, c.hideName, c.hideInfo, c.hideDetail),
+        )
         click(Strings.showLogo)
         assertTrue(state.config.logoEnabled)
         choose(Strings.logoLabel, "church.png")
@@ -88,7 +94,10 @@ class ControlPanelTest {
         choose(Strings.nameWeight, Strings.normal)
         choose(Strings.infoWeight, Strings.bold)
         choose(Strings.detailWeight, Strings.bold)
-        assertEquals(listOf(400, 700, 700), listOf(state.config.nameWeight, state.config.infoWeight, state.config.detailWeight))
+        assertEquals(
+            listOf(400, 700, 700),
+            listOf(state.config.nameWeight, state.config.infoWeight, state.config.detailWeight),
+        )
         choose(Strings.nameWeight, Strings.bold)
         choose(Strings.infoWeight, Strings.normal)
         choose(Strings.detailWeight, Strings.normal)
@@ -163,13 +172,17 @@ class ControlPanelTest {
         click(Strings.saveLowerThird)
         assertTrue(onAllNodesWithTag(LOWER_THIRD_STYLE_THUMBNAIL_TAG).fetchSemanticsNodes().isNotEmpty())
         assertEquals(
-            listOf("saveTheme", "loadTheme 0", "deleteTheme 0", "loadPreset 0", "applyAll", "batchDownload null", "saveLowerThird"),
+            listOf(
+                "saveTheme", "loadTheme 0", "deleteTheme 0", "loadPreset 0", "applyAll", "batchDownload null",
+                "saveLowerThird",
+            ),
             state.calls.filterNot { it == "thumbnails" },
         )
     }
 
     @Test
-    fun `without an output folder the library offers the library save and no presets line`() = runDesktopComposeUiTest(1400, 2600) {
+    fun `without an output folder the library offers the library save and no presets line`() =
+        runDesktopComposeUiTest(1400, 2600) {
         val state = FakeLottieGenState(
             initial = LottieGenConfig(hideName = true, hideInfo = true, hideDetail = true, detailText = "x"),
         )
@@ -199,7 +212,10 @@ class ControlPanelTest {
     fun `a host font picker replaces the bundled list`() = runDesktopComposeUiTest(1400, 2600) {
         val state = FakeLottieGenState()
         showDark {
-            ControlPanel(state, 600.dp, fontPicker = { family, onPick, _ -> Text("host:$family", Modifier.clickable { onPick("Lora") }) })
+            ControlPanel(
+                state, 600.dp,
+                fontPicker = { family, onPick, _ -> Text("host:$family", Modifier.clickable { onPick("Lora") }) },
+            )
         }
         click(Strings.sectionTextStyle)
         click("host:Verdana")

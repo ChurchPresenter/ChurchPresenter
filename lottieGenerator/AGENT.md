@@ -115,13 +115,25 @@ Both CI steps are gated on this directory or the shared build files changing.
 
 ## Gates
 
-- **Coverage**: the root build's default, 85% on all six counters — no `extra["coverageFloors"]`.
+- **Coverage**: everything is counted — `extra["coverageExcludes"]` is the default
+  `**/ComposableSingletons*` and nothing more. `extra["coverageFloors"]` sets **BRANCH 83%** and
+  **COMPLEXITY 83%**; the other four counters keep the shared 85%. Raise the two floors as tests are
+  added; never lower them without asking.
   The compiled (Path A) styles are covered by `CompiledStyleMatrixTest`, which renders every one
   across alignment, Detail, logo, background and hidden Name; a new `AnimationStyle` entry is
-  picked up by it automatically. `extra["coverageExcludes"]`
-  drops `**/ui/**` and `**/MainKt*`, which need a display. The `spec/` and `lottie/` packages are
-  where the coverage lives, and the `SpecPort*Test` suites exist so a spec style stays
+  picked up by it automatically. The `SpecPort*Test` suites exist so a spec style stays
   byte-comparable with the code style it replaced.
+- **UI tests** drive the composables headless with `runDesktopComposeUiTest` (`ui-test` from the
+  catalog), through their parameters: `FakeLottieGenState` and `FakeEditorState` for the generator
+  and editor panels, a real `BibleLottieGenViewModel` on a test-owned scope for the band panes.
+  `ui/UiTestSupport.kt` holds the helpers: `choose`/`pick` for menus, `fillEveryField`, `tapBelow`
+  and `tapRightOf` for the sliders (which carry no semantics), and `Hosted` + `settle()`, which
+  recompose a hosted editor with the same value and a new callback after every step. Isolate
+  `user.home` in any suite that builds a view model or opens the project, logo or spec storage.
+- **What stays uncovered**: Compose's remembered-lambda and parameter-change checks that no
+  recomposition reaches (most of the gap on the two floored counters), the native file choosers and
+  `FileDialog` (headless), `Main.kt`'s application window, `DumpStyleReview.main`'s render-and-write
+  path (it renders full 1080p stills, past the per-test budget), and the view models' error catches.
 - **Detekt**: `./gradlew :lottieGenerator:detekt`. The module has the plugin, **no baseline**, and
   is clean -- gated in `test.yml`'s Detekt step alongside every other module. It went from 382
   findings down to one lingering `LongParameterList` on `LottieGenPalette`'s 51-role constructor

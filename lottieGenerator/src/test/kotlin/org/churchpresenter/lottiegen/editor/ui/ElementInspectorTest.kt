@@ -153,12 +153,17 @@ class ElementInspectorTest {
         val state = FakeEditorState(everyKind)
         state.selectElement("rect")
         showDark(content = inspector(state))
-        for (align in listOf("left", "center", "right")) click("${Strings.editorAddOverride}: ${EditorLabels.align(align)}")
+        for (align in listOf("left", "center", "right")) {
+            click("${Strings.editorAddOverride}: ${EditorLabels.align(align)}")
+        }
         assertEquals(setOf("left", "center", "right"), state.spec.elements.first().placement.alignOverrides.keys)
         choose(Strings.editorAnchor, EditorLabels.anchor(AnchorIn.START), index = 1)
         fillEveryField("2")
         val placement = state.spec.elements.first().placement
-        assertEquals(listOf(2.0, 2.0, 2.0, 2.0), listOf(placement.offsetXEm, placement.offsetYEm, placement.pivotXEm, placement.pivotYEm))
+        assertEquals(
+            listOf(2.0, 2.0, 2.0, 2.0),
+            listOf(placement.offsetXEm, placement.offsetYEm, placement.pivotXEm, placement.pivotYEm),
+        )
         assertEquals(AnchorIn.START, placement.alignOverrides.getValue("left").anchorIn)
         assertTrue(placement.alignOverrides.values.all { it.offsetXEm == 2.0 && it.offsetYEm == 2.0 })
         repeat(3) { click(Strings.editorRemoveOverride) }
@@ -166,11 +171,14 @@ class ElementInspectorTest {
     }
 
     @Test
-    fun `the placement editor on its own edits every field of a pivoting element`() = runDesktopComposeUiTest(900, 2000) {
+    fun `the placement editor on its own edits every field of a pivoting element`() =
+        runDesktopComposeUiTest(900, 2000) {
         val state = FakeEditorState(everyKind)
         var element by mutableStateOf<ElementSpec>(everyKind.elements[2])
         showDark {
-            Hosted(element, { element = it }) { e, set -> PlacementEditor(state, e) { p -> set(e.withCommon(placement = p)) } }
+            Hosted(element, { element = it }) { e, set ->
+                PlacementEditor(state, e) { p -> set(e.withCommon(placement = p)) }
+            }
         }
         choose(Strings.editorSlot, "logo")
         choose(Strings.editorLine, EditorLabels.line(LineAnchor.NAME_LINE))

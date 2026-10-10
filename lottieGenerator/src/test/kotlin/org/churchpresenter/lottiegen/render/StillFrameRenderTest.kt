@@ -25,7 +25,8 @@ class StillFrameRenderTest {
 
     @Test
     fun `a generated lower third renders to a still with content in it`() {
-        val json = Json.encodeToString(JsonObject.serializer(), LottieGenerator.generate(LottieGenConfig(canvasW = 320, canvasH = 180)))
+        val lottie = LottieGenerator.generate(LottieGenConfig(canvasW = 320, canvasH = 180))
+        val json = Json.encodeToString(JsonObject.serializer(), lottie)
         val pixels = runBlocking { StillFrame.render(json, 320, 180, 0.6f) }
         assertEquals(320 * 180, pixels.size)
         assertNotNull(StillFrame.frameBounds(pixels, 320, 180))

@@ -21,6 +21,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import org.churchpresenter.lottiegen.band.BandColorRole
 import org.churchpresenter.lottiegen.band.BibleLottieGenConfig
 import org.churchpresenter.lottiegen.band.BibleLottieGenViewModel
 import org.churchpresenter.lottiegen.band.SlotLayout
@@ -93,6 +94,32 @@ class PreviewPanelsTest {
     }
 
     @Test
+    fun `guides show only inside their window, and the size only when both sides are known`() =
+        runDesktopComposeUiTest(900, 700) {
+            val json = Json.encodeToString(JsonObject.serializer(), LottieGenerator.generate(LottieGenConfig()))
+            showDark(900.dp, 700.dp) {
+                PreviewPanel(
+                    json, 16f / 9f, "", canvasW = 1920, canvasH = 0,
+                    guides = listOf(PreviewGuide(0f, 0f, 1f, 1f)), guideWindow = 0.9f..1f,
+                )
+            }
+            assertFalse(hasNode("1920 × 0"))
+            clickDescription("Pause")
+            seekTo(0.5f, 900f - 36 - 34 - 28 - 42, 14f)
+            seekTo(0.97f, 900f - 36 - 34 - 28 - 42, 14f)
+            assertFalse(hasNode("0%"))
+        }
+
+    @Test
+    fun `the band preview shows what went wrong under the stage`() = runDesktopComposeUiTest(900, 700) {
+        val vm = BibleLottieGenViewModel(scope, null, null, BibleLottieGenConfig())
+        waitUntil(timeoutMillis = 5_000) { vm.generatedJson != null }
+        vm.loadBandImage(BandColorRole.BACKGROUND, File(temp, "absent.png"))
+        showDark(900.dp, 700.dp) { BandPreviewPanel(vm) }
+        assertTrue(hasNode(Strings.bandStatusPictureUnreadable("absent.png")))
+    }
+
+    @Test
     fun `whole-line text is drawn from the bundled and the installed fonts`() = runDesktopComposeUiTest(900, 700) {
         val configs = listOf(
             LottieGenConfig(textShaping = "lines", fontFamily = "Poppins"),
@@ -111,11 +138,15 @@ class PreviewPanelsTest {
 
     @Test
     fun `the band preview runs each run-time text motion through its phases`() = runDesktopComposeUiTest(900, 700) {
-        val models = listOf(TextAnimation.TYPEWRITER, TextAnimation.TYPEWRITER_WORDS, TextAnimation.TICKER).map { motion ->
-            BibleLottieGenViewModel(scope, null, null, BibleLottieGenConfig(textAnimation = motion, layout = SlotLayout.SIDE_BY_SIDE))
+        val motions = listOf(TextAnimation.TYPEWRITER, TextAnimation.TYPEWRITER_WORDS, TextAnimation.TICKER)
+        val models = motions.map { motion ->
+            val seed = BibleLottieGenConfig(textAnimation = motion, layout = SlotLayout.SIDE_BY_SIDE)
+            BibleLottieGenViewModel(scope, null, null, seed)
         }
         var current by mutableStateOf(models.first())
-        setContent { LottieGenTheme { Box(Modifier.size(900.dp, 700.dp)) { key(current) { BandPreviewPanel(current) } } } }
+        setContent {
+            LottieGenTheme { Box(Modifier.size(900.dp, 700.dp)) { key(current) { BandPreviewPanel(current) } } }
+        }
         for (vm in models) {
             val motion = vm.config.textAnimation
             waitUntil(timeoutMillis = 5_000) { vm.generatedJson != null }

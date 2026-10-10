@@ -60,7 +60,10 @@ class MalformedLottieInputTest {
 
     @Test
     fun `a font no text layer uses yields no chars`() {
-        assertNull(GlyphExtractor.buildCharsArray(listOf(textLayer("Other", "x")), listOf(font("Sans", "Verdana", "Bold"))))
+        assertNull(
+            GlyphExtractor.buildCharsArray(listOf(textLayer("Other", "x")),
+            listOf(font("Sans", "Verdana", "Bold"))),
+        )
     }
 
     @Test
