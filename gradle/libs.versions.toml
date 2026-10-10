@@ -30,7 +30,7 @@ ktor = "3.6.0"
 bouncycastle = "1.85"
 apache-poi = "5.5.1"
 pdfbox = "2.0.33"
-aircompressor = "2.0.2"
+aircompressor = "2.0.3"
 junitJupiter = "5.10.2"
 filekit = "0.15.0"
 dbus-java = "5.2.0"
@@ -45,8 +45,9 @@ pitestJunit5 = "1.2.3"
 [libraries]
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson-core" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
-# The JSON reader BibleEngineClient parses the engine's messages with; pinned to the version socket.io-client brings.
-org-json = { module = "org.json:json", version = "20090211" }
+# The JSON reader BibleEngineClient parses the engine's messages with -- and, through the root build's
+# security floor, the one socket.io-client parses with too.
+org-json = { module = "org.json:json", version = "20251224" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }

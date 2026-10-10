@@ -6,12 +6,14 @@ import org.json.JSONObject
 /**
  * String accessors that treat a JSON `null` as absent.
  *
- * `JSONObject.optString` does **not** return the supplied default for a JSON `null` — it returns the
- * four-character string `"null"`. So the natural-looking
+ * Up to org.json 20230618, `JSONObject.optString` does **not** return the supplied default for a JSON
+ * `null` — it returns the four-character string `"null"`. The app now resolves a later org.json, which
+ * returns the default; these keep that true whatever version is on the classpath. With the old one,
+ * the natural-looking
  * `optString(key, "").takeIf { it.isNotEmpty() }` quietly accepts `"null"` as a real value, and
  * `optString(key, "").ifBlank { … }` never reaches its fallback.
  *
- * This is not hypothetical. The STT server emits `"segment_id": null`, which reached the Bible
+ * This was not hypothetical. The STT server emits `"segment_id": null`, which reached the Bible
  * engine's detection log and ChurchPresenter's operator-flag log as `"segmentId":"null"` — a
  * correlation key that then joins every such row to every other. The same coercion on a caption's
  * `text` field would put the literal word "null" on screen in front of a congregation.

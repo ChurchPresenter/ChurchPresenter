@@ -9,19 +9,20 @@ import kotlin.test.assertNull
 /**
  * Reading optional JSON strings without inheriting org.json's `null` handling.
  *
- * `optString` returns the four-character string `"null"` for a JSON null rather than the default it
- * is handed, which silently defeats both `takeIf { it.isNotEmpty() }` and `ifBlank { … }`. Every
- * assertion here is really the same one: a JSON null must be indistinguishable from an absent key.
+ * Up to org.json 20230618, `optString` returns the four-character string `"null"` for a JSON null
+ * rather than the default it is handed, which silently defeats both `takeIf { it.isNotEmpty() }` and
+ * `ifBlank { … }`. Every assertion here is really the same one: a JSON null must be indistinguishable
+ * from an absent key, whichever org.json is on the classpath.
  */
 class JsonExtTest {
 
-    // ── The behaviour being corrected ────────────────────────────────────────────
+    // ── The org.json the app resolves ────────────────────────────────────────────
 
     @Test
-    fun `org_json really does coerce null to the string null`() {
-        // Pins the platform behaviour these helpers exist to hide. If a future org.json version
-        // fixes this, this test fails and the helpers can be reconsidered.
-        assertEquals("null", JSONObject("""{"k":null}""").optString("k", "fallback"))
+    fun `the org_json the app resolves returns the default for a null`() {
+        // The root build lifts org.json past the versions that coerced a null to "null". Should an
+        // older one come back, this fails first and says why the helpers below still matter.
+        assertEquals("fallback", JSONObject("""{"k":null}""").optString("k", "fallback"))
     }
 
     // ── JSONObject ───────────────────────────────────────────────────────────────

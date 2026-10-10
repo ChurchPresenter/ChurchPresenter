@@ -47,13 +47,15 @@ fun translationUpdate(payload: JSONObject): SttUpdate? =
 /**
  * A trimmed string field, or null when absent, blank or JSON `null`.
  *
- * `JSONObject.optString` coerces a JSON `null` into the four-character string `"null"` rather than
- * returning the default, so every `optString(...).takeIf { it.isNotEmpty() }` in this file silently
- * accepted `"null"` as a real value. Observed live: a `segment_id` of null reached the detection log
- * and the operator-flag log as `"segmentId":"null"`, where it becomes a fake correlation key that
- * joins every such row to every other. The same coercion applied to `session_id` (the primary join
- * key across all three artifacts) and to the transcript text itself, where it would have fed the
- * literal word "null" into detection as if it had been spoken.
+ * Up to org.json 20230618, `JSONObject.optString` coerces a JSON `null` into the four-character
+ * string `"null"` rather than returning the default, so every
+ * `optString(...).takeIf { it.isNotEmpty() }` in this file silently accepted `"null"` as a real
+ * value. Observed live: a
+ * `segment_id` of null reached the detection log and the operator-flag log as `"segmentId":"null"`,
+ * where it becomes a fake correlation key that joins every such row to every other. The same
+ * coercion applied to `session_id` (the primary join key across all three artifacts) and to the
+ * transcript text itself, where it would have fed the literal word "null" into detection as if it
+ * had been spoken.
  */
 private fun JSONObject.stringOrNull(key: String): String? {
     if (!has(key) || isNull(key)) return null
