@@ -28,8 +28,8 @@ class of its own. Its UI strings come from `:strings`, in English only (crosswor
 ## Rules
 
 - `internal` stops at the module edge: what `:composeApp` calls is public, everything else is not.
-- **Tests live here**, beside the code. The tab's screenshots stay in the app
-  (`CrosswordTabScreenshotTest`), where they were recorded.
+- **Tests and screenshots live here**, beside the code: `CrosswordTabScreenshotTest`, images under
+  `crossword-tab/screenshots/`.
 - Progress is debounced with a `delay`; the v2 test API runs it on the test clock, so tests advance
   `mainClock` rather than wait.
 
@@ -38,4 +38,6 @@ class of its own. Its UI strings come from `:strings`, in English only (crosswor
 ```bash
 ./gradlew :crossword-tab:test :crossword-tab:detekt
 ./gradlew :crossword-tab:jacocoTestCoverageVerification
+./gradlew :crossword-tab:recordRoborazziJvm --tests '*ScreenshotTest*'
+./gradlew :crossword-tab:verifyRoborazziJvm --tests '*ScreenshotTest*'
 ```

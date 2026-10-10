@@ -65,8 +65,8 @@ picker through `previewFor` and `pickerFor`.
 ## Rules
 
 - `internal` stops at the module edge. What `:composeApp` calls is public; nothing else is.
-- **Tests live here**, beside the code. The tab's and the ATEM page's screenshots stay in the app
-  (`LowerThirdTabScreenshotTest`, `AtemSettingsTabScreenshotTest`), where they were recorded.
+- **Tests and screenshots live here**, beside the code: `LowerThirdTabScreenshotTest`, `AtemSettingsTabScreenshotTest`, images under
+  `lower-third/screenshots/`.
 - The suite runs on JUnit 5, so a class-level hook is `@BeforeAll`/`@AfterAll`. JUnit 4's
   `@BeforeClass` is silently never run here.
 - A test that swaps `user.home` loads a skia class first, so skiko unpacks into the suite's own home
@@ -77,4 +77,6 @@ picker through `previewFor` and `pickerFor`.
 ```bash
 ./gradlew :lower-third:test :lower-third:detekt
 ./gradlew :lower-third:jacocoTestCoverageVerification
+./gradlew :lower-third:recordRoborazziJvm --tests '*ScreenshotTest*'
+./gradlew :lower-third:verifyRoborazziJvm --tests '*ScreenshotTest*'
 ```

@@ -55,12 +55,14 @@ are public, so the app's screenshot suite and server tests can use them.
 ## Rules
 
 - `internal` stops at the module edge. What `:composeApp` calls is public; nothing else is.
-- **Tests live here**, beside the code. The tab's screenshots stay in the app
-  (`DictionaryTabScreenshotTest`), where they were recorded.
+- **Tests and screenshots live here**, beside the code: `DictionaryTabScreenshotTest`, images under
+  `dictionary/screenshots/`.
 
 ## Commands
 
 ```bash
 ./gradlew :dictionary:test :dictionary:detekt
 ./gradlew :dictionary:jacocoTestCoverageVerification
+./gradlew :dictionary:recordRoborazziJvm --tests '*ScreenshotTest*'
+./gradlew :dictionary:verifyRoborazziJvm --tests '*ScreenshotTest*'
 ```

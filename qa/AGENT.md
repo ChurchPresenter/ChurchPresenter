@@ -47,8 +47,8 @@ are in `src/testFixtures`. They are public, so the app's screenshot suite can us
 ## Rules
 
 - `internal` stops at the module edge. What `:composeApp` calls is public; nothing else is.
-- **Tests live here**, beside the code. The tab's screenshots stay in the app
-  (`QATabScreenshotTest`), where they were recorded.
+- **Tests and screenshots live here**, beside the code: `QATabScreenshotTest`, images under
+  `qa/screenshots/`.
 - `QATabScope` must stay honestly `@Stable`. A new property must read snapshot state or be an input
   the `remember` is keyed on.
 
@@ -57,4 +57,6 @@ are in `src/testFixtures`. They are public, so the app's screenshot suite can us
 ```bash
 ./gradlew :qa:test :qa:detekt
 ./gradlew :qa:jacocoTestCoverageVerification
+./gradlew :qa:recordRoborazziJvm --tests '*ScreenshotTest*'
+./gradlew :qa:verifyRoborazziJvm --tests '*ScreenshotTest*'
 ```

@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.qa.screenshot
 
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.performClick
@@ -20,7 +20,6 @@ import org.churchpresenter.qa.QAManager
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
-import org.churchpresenter.app.churchpresenter.TestSingletons
 
 /**
  * Every state of the Q&A tab, in both themes.
@@ -42,7 +41,6 @@ class QATabScreenshotTest {
         rootIndex: Int = 0,
         drive: ComposeUiTest.(QAManager) -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
-        TestSingletons.latchToTestHome()
         qaTab(settings = settings, seed = seed, width = width, themeMode = mode) { qa, _, _ ->
             drive(qa)
             waitForIdle()
@@ -61,7 +59,6 @@ class QATabScreenshotTest {
     /** No server means no QR code and nowhere for a phone to post — the tab says so. */
     @Test
     fun `the server is not running`() = stackedThemes(SECTION, "no_server") { mode, file ->
-        TestSingletons.latchToTestHome()
         qaTab(serverUrl = "", themeMode = mode) { _, _, _ ->
             waitForIdle()
             captureTo(file)

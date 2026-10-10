@@ -58,8 +58,8 @@ screenshot suite can use them.
 ## Rules
 
 - `internal` stops at the module edge. What `:composeApp` calls is public; nothing else is.
-- **Tests live here**, beside the code. The tab's screenshots stay in the app
-  (`AnnouncementsTabScreenshotTest`), where they were recorded.
+- **Tests and screenshots live here**, beside the code: `AnnouncementsTabScreenshotTest`, images under
+  `announcements/screenshots/`.
 - A view-model property forwards to `AnnouncementsState` with a getter and setter, not
   `by state::x`. Property-reference delegation generates accessors that are never called, which
   count against the method floor.
@@ -69,4 +69,6 @@ screenshot suite can use them.
 ```bash
 ./gradlew :announcements:test :announcements:detekt
 ./gradlew :announcements:jacocoTestCoverageVerification
+./gradlew :announcements:recordRoborazziJvm --tests '*ScreenshotTest*'
+./gradlew :announcements:verifyRoborazziJvm --tests '*ScreenshotTest*'
 ```

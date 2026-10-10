@@ -105,6 +105,8 @@ scrollbars sit on panel chrome rather than on Material surfaces.
 ./gradlew :lottieGenerator:test                              # its suite (headless)
 ./gradlew :lottieGenerator:run                               # the generator alone
 ./gradlew :lottieGenerator:jacocoTestCoverageVerification    # the coverage floor
+./gradlew :lottieGenerator:recordRoborazziJvm --tests '*ScreenshotTest*'   # images in lottieGenerator/screenshots/
+./gradlew :lottieGenerator:verifyRoborazziJvm --tests '*ScreenshotTest*'
 ./gradlew :lottieGenerator:packageDmg                        # installer (Msi/Deb also available)
 ./gradlew :lottieGenerator:dumpStyleReview -Pstyles=14,15    # before/after (Detail off/on) x 3 alignments,
                                                               # one PNG per style, in build/style-review/

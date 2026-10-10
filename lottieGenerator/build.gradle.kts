@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.roborazzi)
     jacoco
 }
 
@@ -32,6 +33,11 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(libs.compose.uiTest)
     testImplementation(libs.compose.uiTestJunit4)
+    testImplementation(testFixtures(projects.sharedUi))
+    testImplementation(libs.roborazzi.composeDesktop)
+    // The screenshot suite reports a hung capture with the shared thread dump.
+    testImplementation(projects.diagnostics)
+    testImplementation(testFixtures(projects.diagnostics))
 }
 
 tasks.test {
@@ -68,6 +74,11 @@ compose.desktop {
             }
         }
     }
+}
+
+// Committed, beside the module, as the other modules' suites are.
+roborazzi {
+    outputDir.set(layout.projectDirectory.dir("screenshots"))
 }
 
 detekt {

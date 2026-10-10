@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.roborazzi)
     jacoco
 }
 
@@ -45,6 +46,7 @@ dependencies {
     testImplementation(libs.ktor.server.core)
     testImplementation(libs.ktor.server.netty)
     testImplementation(libs.ktor.server.websockets)
+    testImplementation(libs.roborazzi.composeDesktop)
 }
 
 // CrashReporter resolves its file under `user.home`; the suite gets a home of its own under build/
@@ -54,6 +56,11 @@ tasks.withType<Test>().configureEach {
     doFirst { testHome.mkdirs() }
     systemProperty("user.home", testHome.absolutePath)
     systemProperty("java.awt.headless", "true")
+}
+
+// Committed, beside the module, as the other modules' suites are.
+roborazzi {
+    outputDir.set(layout.projectDirectory.dir("screenshots"))
 }
 
 detekt {

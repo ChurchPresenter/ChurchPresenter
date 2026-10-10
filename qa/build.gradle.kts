@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.roborazzi)
     `java-test-fixtures`
     jacoco
 }
@@ -53,6 +54,7 @@ dependencies {
     testImplementation(libs.compose.uiTest)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
+    testImplementation(libs.roborazzi.composeDesktop)
 }
 
 // QAManager keeps its question history under `user.home`; the suite gets a home of its own under
@@ -62,6 +64,11 @@ tasks.withType<Test>().configureEach {
     doFirst { testHome.mkdirs() }
     systemProperty("user.home", testHome.absolutePath)
     systemProperty("java.awt.headless", "true")
+}
+
+// Committed, beside the module, as the other modules' suites are.
+roborazzi {
+    outputDir.set(layout.projectDirectory.dir("screenshots"))
 }
 
 detekt {

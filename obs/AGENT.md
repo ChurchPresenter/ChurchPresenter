@@ -25,8 +25,8 @@ app persists.
 ## Rules
 
 - `internal` stops at the module edge. What `:composeApp` calls is public; nothing else is.
-- **Tests live here**, beside the code. The page's screenshots stay in the app
-  (`ObsSettingsTabScreenshotTest`), where they were recorded.
+- **Tests and screenshots live here**, beside the code: `ObsSettingsTabScreenshotTest`, images under
+  `obs/screenshots/`.
 - **Tests never need a real OBS.** `OBSWebSocketManagerTest` runs a fake OBS on an OS-assigned port;
   `ScriptedObs` plays any other script, including handshakes a real OBS never sends.
   `BlackHoleSocket` holds a connection in CONNECTING without waiting on a timeout.
@@ -36,4 +36,6 @@ app persists.
 ```bash
 ./gradlew :obs:test :obs:detekt
 ./gradlew :obs:jacocoTestCoverageVerification
+./gradlew :obs:recordRoborazziJvm --tests '*ScreenshotTest*'
+./gradlew :obs:verifyRoborazziJvm --tests '*ScreenshotTest*'
 ```

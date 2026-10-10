@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.liveoutput.screenshot
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -8,7 +8,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import io.github.takahirom.roborazzi.captureRoboImage
@@ -81,7 +83,27 @@ class PresenterFullScreenScreenshotTest {
     private fun shoot(name: String, content: @Composable () -> Unit) = runComposeUiTest {
         setContent { MaterialTheme { Box(screen) { content() } } }
         waitForIdle()
+        if (photoRequested) awaitPhoto()
         capture(name)
+    }
+
+    /** Set by [photo]: the state draws a picture, decoded off the UI thread. */
+    private var photoRequested = false
+
+    /**
+     * Waits until the photo is on screen. It decodes on `Dispatchers.IO`, which `waitForIdle` does not
+     * wait for, so without this the capture races the decode and can show the black behind it. The
+     * photo is the only blue in these states: the text is white and the backdrops grey or black.
+     */
+    private fun ComposeUiTest.awaitPhoto() {
+        waitUntil(timeoutMillis = PHOTO_TIMEOUT_MS) {
+            val pixels = onRoot().captureToImage().toPixelMap()
+            (0 until pixels.width step PHOTO_PROBE_STEP).any { x ->
+                (0 until pixels.height step PHOTO_PROBE_STEP).any { y ->
+                    pixels[x, y].let { it.blue - it.red > PHOTO_BLUE_MARGIN }
+                }
+            }
+        }
     }
 
     private fun ComposeUiTest.capture(name: String) {
@@ -1484,6 +1506,7 @@ class PresenterFullScreenScreenshotTest {
 
     /** A real, decodable image for the image-background states. */
     private fun photo(): File {
+        photoRequested = true
         FIXTURES.mkdirs()
         val file = File(FIXTURES, "backdrop.png")
         val image = BufferedImage(1920, 1080, BufferedImage.TYPE_INT_RGB)
@@ -1500,6 +1523,9 @@ class PresenterFullScreenScreenshotTest {
     private companion object {
         const val SECTION = "presenterFullScreen"
 
+        const val PHOTO_TIMEOUT_MS = 5_000L
+        const val PHOTO_PROBE_STEP = 40
+        const val PHOTO_BLUE_MARGIN = 0.1f
         val FIXTURES = File("build/screenshot-fixtures/presenter")
 
         val VERSE_LINES = listOf(

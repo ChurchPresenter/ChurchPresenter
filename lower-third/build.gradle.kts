@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.roborazzi)
     `java-test-fixtures`
     jacoco
 }
@@ -62,6 +63,9 @@ dependencies {
     testImplementation(libs.compose.uiTest)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
+    testImplementation(libs.roborazzi.composeDesktop)
+    // The screenshot suite draws the tab with the Profiles preview-output picker, as the app does.
+    testImplementation(projects.profiles)
 }
 
 // The suite gets a home of its own under build/ so a test can never touch the real ~/.churchpresenter.
@@ -70,6 +74,11 @@ tasks.withType<Test>().configureEach {
     doFirst { testHome.mkdirs() }
     systemProperty("user.home", testHome.absolutePath)
     systemProperty("java.awt.headless", "true")
+}
+
+// Committed, beside the module, as the other modules' suites are.
+roborazzi {
+    outputDir.set(layout.projectDirectory.dir("screenshots"))
 }
 
 detekt {
