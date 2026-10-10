@@ -2,7 +2,12 @@
 
 package org.churchpresenter.lottiegen.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.Text
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.lottiegen.model.CANVAS_PRESETS
@@ -32,7 +37,7 @@ class ControlPanelTest {
     @Test
     fun `canvas, timing and text fields write the config`() = runDesktopComposeUiTest(1400, 2600) {
         val state = FakeLottieGenState()
-        showDark { ControlPanel(state, 600.dp) }
+        showDark { val tick = rebindTick(); ControlPanel(state, 600.dp, controlTag = remember(tick) { { Modifier } }) }
         openAll(this)
         click(CANVAS_PRESETS[4].label)
         assertEquals(1080 to 1080, state.config.canvasW to state.config.canvasH)
@@ -57,17 +62,27 @@ class ControlPanelTest {
     }
 
     @Test
-    fun `checkboxes and dropdowns change the look`() = runDesktopComposeUiTest(1400, 2600) {
+    fun `checkboxes change the look`() = runDesktopComposeUiTest(1400, 2600) {
         val state = FakeLottieGenState(availableLogos = listOf("church.png"))
         showDark { ControlPanel(state, 600.dp) }
-        openAll(this)
+        click(Strings.sectionShape)
+        click(Strings.sectionLogo)
         listOf(Strings.showBackground, Strings.shadow, Strings.hideName, Strings.hideInfo, Strings.hideDetail)
             .forEach { click(it) }
         val c = state.config
         assertEquals(listOf(false, true, true, true, false), listOf(c.bgEnabled, c.shadowEnabled, c.hideName, c.hideInfo, c.hideDetail))
         click(Strings.showLogo)
         assertTrue(state.config.logoEnabled)
+        choose(Strings.logoLabel, "church.png")
+        choose(Strings.logoLabel, Strings.logoNone)
+        assertEquals(listOf("selectLogo church.png", "clearLogo"), state.calls.filter { "Logo" in it })
+    }
 
+    @Test
+    fun `the weight dropdowns change the text`() = runDesktopComposeUiTest(1400, 2600) {
+        val state = FakeLottieGenState()
+        showDark { ControlPanel(state, 600.dp) }
+        click(Strings.sectionTextStyle)
         choose(Strings.alignment, Strings.alignRight)
         assertEquals("right", state.config.align)
         choose(Strings.nameWeight, Strings.normal)
@@ -77,6 +92,13 @@ class ControlPanelTest {
         choose(Strings.nameWeight, Strings.bold)
         choose(Strings.infoWeight, Strings.normal)
         choose(Strings.detailWeight, Strings.normal)
+    }
+
+    @Test
+    fun `the case and shaping dropdowns change the text`() = runDesktopComposeUiTest(1400, 2600) {
+        val state = FakeLottieGenState()
+        showDark { ControlPanel(state, 600.dp) }
+        click(Strings.sectionTextStyle)
         choose(Strings.nameTransform, Strings.none)
         choose(Strings.infoTransform, Strings.uppercase)
         choose(Strings.detailTransform, Strings.uppercase)
@@ -87,13 +109,21 @@ class ControlPanelTest {
         choose(Strings.detailTransform, Strings.none)
         choose(Strings.textShaping, Strings.bandEnumLabel("shaping", "letters"))
         assertEquals("letters", state.config.textShaping)
+    }
+
+    @Test
+    fun `the font menu picks a bundled family`() = runDesktopComposeUiTest(1400, 2600) {
+        val state = FakeLottieGenState()
+        showDark { ControlPanel(state, 600.dp) }
+        click(Strings.sectionTextStyle)
         choose(Strings.font, "Poppins")
         assertEquals("Poppins", state.config.fontFamily)
+    }
 
-        choose(Strings.logoLabel, "church.png")
-        choose(Strings.logoLabel, Strings.logoNone)
-        assertEquals(listOf("selectLogo church.png", "clearLogo"), state.calls.filter { "Logo" in it })
-
+    @Test
+    fun `the style menu picks a style and asks for its thumbnails`() = runDesktopComposeUiTest(1400, 2600) {
+        val state = FakeLottieGenState()
+        showDark { ControlPanel(state, 600.dp) }
         val target = StyleCatalog.entries.last()
         choose(Strings.style, target.label)
         assertEquals(target.id, state.config.style)
@@ -103,7 +133,7 @@ class ControlPanelTest {
     @Test
     fun `sliders under their labels move their values`() = runDesktopComposeUiTest(1400, 2600) {
         val state = FakeLottieGenState()
-        showDark { ControlPanel(state, 600.dp) }
+        showDark { val tick = rebindTick(); ControlPanel(state, 600.dp, controlTag = remember(tick) { { Modifier } }) }
         openAll(this)
         val before = state.config
         listOf(Strings.scale, Strings.corners, Strings.borderThickness, Strings.logoSize,
@@ -119,8 +149,11 @@ class ControlPanelTest {
 
     @Test
     fun `library and colour themes route to the state`() = runDesktopComposeUiTest(1400, 2600) {
-        val state = FakeLottieGenState(hasOutputDir = true, colorThemes = listOf(theme), presets = listOf(preset))
-        showDark { ControlPanel(state, 600.dp) }
+        val state = FakeLottieGenState(
+            hasOutputDir = true, colorThemes = listOf(theme), presets = listOf(preset),
+            styleThumbnails = mapOf("1" to ImageBitmap(4, 2)),
+        )
+        showDark { val tick = rebindTick(); ControlPanel(state, 600.dp, controlTag = remember(tick) { { Modifier } }) }
         click(Strings.saveColors)
         click("Mine")
         clickDescription("Delete")
@@ -128,6 +161,7 @@ class ControlPanelTest {
         click(Strings.applyStyleToAll)
         click(Strings.saveAllLowerThirds)
         click(Strings.saveLowerThird)
+        assertTrue(onAllNodesWithTag(LOWER_THIRD_STYLE_THUMBNAIL_TAG).fetchSemanticsNodes().isNotEmpty())
         assertEquals(
             listOf("saveTheme", "loadTheme 0", "deleteTheme 0", "loadPreset 0", "applyAll", "batchDownload null", "saveLowerThird"),
             state.calls.filterNot { it == "thumbnails" },
@@ -139,7 +173,7 @@ class ControlPanelTest {
         val state = FakeLottieGenState(
             initial = LottieGenConfig(hideName = true, hideInfo = true, hideDetail = true, detailText = "x"),
         )
-        showDark { ControlPanel(state, 600.dp) }
+        showDark { val tick = rebindTick(); ControlPanel(state, 600.dp, controlTag = remember(tick) { { Modifier } }) }
         assertTrue(hasNode(Strings.noPresets))
         assertFalse(hasNode(Strings.saveLowerThird))
         click(Strings.saveToLibrary)
@@ -149,7 +183,7 @@ class ControlPanelTest {
     @Test
     fun `batch import reads the pasted text and reports the count`() = runDesktopComposeUiTest(1400, 2600) {
         val state = FakeLottieGenState()
-        showDark { ControlPanel(state, 600.dp) }
+        showDark { val tick = rebindTick(); ControlPanel(state, 600.dp, controlTag = remember(tick) { { Modifier } }) }
         click(Strings.batchImport)
         assertTrue(hasNode(Strings.batchImportTitle))
         typeLast("", "Ann | Elder")
@@ -159,6 +193,17 @@ class ControlPanelTest {
         click(Strings.batchImport)
         click(Strings.cancelBtn)
         assertFalse(hasNode(Strings.batchImportTitle))
+    }
+
+    @Test
+    fun `a host font picker replaces the bundled list`() = runDesktopComposeUiTest(1400, 2600) {
+        val state = FakeLottieGenState()
+        showDark {
+            ControlPanel(state, 600.dp, fontPicker = { family, onPick, _ -> Text("host:$family", Modifier.clickable { onPick("Lora") }) })
+        }
+        click(Strings.sectionTextStyle)
+        click("host:Verdana")
+        assertEquals("Lora", state.config.fontFamily)
     }
 
     @Test

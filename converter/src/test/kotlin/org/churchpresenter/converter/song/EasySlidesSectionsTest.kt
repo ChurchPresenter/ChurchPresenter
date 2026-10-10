@@ -8,7 +8,10 @@ class EasySlidesSectionsTest {
     @Test
     fun `leading and repeated blank lines do not open empty sections`() {
         val sections = EasySlidesConverter.sectionsOf("\n\nfirst\n\n\n\nsecond\n")
-        assertEquals(listOf("Verse 1" to listOf("first"), "Verse 2" to listOf("second")), sections.map { it.label to it.lines })
+        assertEquals(
+            listOf("Verse 1" to listOf("first"), "Verse 2" to listOf("second")),
+            sections.map { it.label to it.lines },
+        )
     }
 
     @Test

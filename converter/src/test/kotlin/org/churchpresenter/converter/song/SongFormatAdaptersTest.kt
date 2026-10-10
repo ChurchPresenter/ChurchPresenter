@@ -376,11 +376,13 @@ class SongFormatAdaptersTest {
     fun `a Word document is described by the songs in it and converted into the folder`() {
         val input = File(temp, "docs/hymns.docx").apply { parentFile.mkdirs() }
         XWPFDocument().use { doc ->
-            listOf("Amazing Grace", "", "Verse 1", "Amazing grace").forEach { doc.createParagraph().createRun().setText(it) }
+            listOf("Amazing Grace", "", "Verse 1", "Amazing grace")
+                .forEach { doc.createParagraph().createRun().setText(it) }
             input.outputStream().use { doc.write(it) }
         }
         assertEquals(1, DocumentFormat.describe(input).songCount)
         assertEquals("hymns", DocumentFormat.outputNameFor(input))
-        assertEquals(listOf("Amazing Grace.song"), DocumentFormat.convert(input, out("doc-ok")).outputFiles.map { it.name })
+        val written = DocumentFormat.convert(input, out("doc-ok")).outputFiles
+        assertEquals(listOf("Amazing Grace.song"), written.map { it.name })
     }
 }

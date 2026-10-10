@@ -28,6 +28,7 @@ import org.churchpresenter.lottiegen.band.TextAnimation
 import org.churchpresenter.lottiegen.band.ui.BandPhase
 import org.churchpresenter.lottiegen.band.ui.BandPreviewPanel
 import org.churchpresenter.lottiegen.lottie.LottieGenerator
+import org.churchpresenter.lottiegen.lottie.LottieTextShaping
 import org.churchpresenter.lottiegen.model.LottieGenConfig
 import java.io.File
 import java.nio.file.Files
@@ -89,6 +90,23 @@ class PreviewPanelsTest {
         seekTo(0.5f, 900f - 36 - 34 - 28 - 42, 14f)
         assertFalse(hasNode("0%"))
         assertTrue(hasNode("%", substring = true))
+    }
+
+    @Test
+    fun `whole-line text is drawn from the bundled and the installed fonts`() = runDesktopComposeUiTest(900, 700) {
+        val configs = listOf(
+            LottieGenConfig(textShaping = "lines", fontFamily = "Poppins"),
+            LottieGenConfig(textShaping = "lines", fontFamily = "Serif", nameWeight = 400),
+        )
+        var json by mutableStateOf(Json.encodeToString(JsonObject.serializer(), LottieGenerator.generate(configs[0])))
+        showDark(900.dp, 700.dp) { PreviewPanel(json, 16f / 9f, "") }
+        assertFalse(hasNode("1920 × 1080"))
+        clickDescription("Pause")
+        seekTo(0.6f, 900f - 36 - 34 - 28 - 42, 14f)
+        json = Json.encodeToString(JsonObject.serializer(), LottieGenerator.generate(configs[1]))
+        waitForIdle()
+        seekTo(0.7f, 900f - 36 - 34 - 28 - 42, 14f)
+        assertTrue(LottieTextShaping.groupsText(json))
     }
 
     @Test

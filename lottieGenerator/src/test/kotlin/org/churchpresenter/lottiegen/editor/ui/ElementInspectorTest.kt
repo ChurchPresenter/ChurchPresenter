@@ -5,11 +5,19 @@ package org.churchpresenter.lottiegen.editor.ui
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import org.churchpresenter.lottiegen.editor.withCommon
+import org.churchpresenter.lottiegen.spec.ElementSpec
+import org.churchpresenter.lottiegen.ui.Hosted
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import org.churchpresenter.lottiegen.spec.AnchorIn
 import org.churchpresenter.lottiegen.spec.BackgroundElement
 import org.churchpresenter.lottiegen.spec.EllipseElement
+import org.churchpresenter.lottiegen.spec.GrowOrigin
+import org.churchpresenter.lottiegen.spec.WidthBasis
 import org.churchpresenter.lottiegen.spec.ImageElement
 import org.churchpresenter.lottiegen.spec.LayoutSpec
 import org.churchpresenter.lottiegen.spec.LineAnchor
@@ -102,6 +110,21 @@ class ElementInspectorTest {
     }
 
     @Test
+    fun `a path fits its width and a background grows from where it is told`() = runDesktopComposeUiTest(900, 3000) {
+        val state = FakeEditorState(everyKind)
+        state.selectElement("path")
+        showDark(content = inspector(state))
+        choose(Strings.editorFitWidth, Strings.editorFitInfo)
+        state.selectElement("bg")
+        waitForIdle()
+        click(Strings.editorSectionSize)
+        choose(Strings.editorGrowFrom, Strings.editorGrowCenter)
+        val elements = state.spec.elements.associateBy { it.id }
+        assertEquals(WidthBasis.INFO, (elements.getValue("path") as PathElement).fitWidthTo)
+        assertEquals(GrowOrigin.CENTER, (elements.getValue("bg") as BackgroundElement).growFrom)
+    }
+
+    @Test
     fun `general and placement edit the selected element`() = runDesktopComposeUiTest(900, 3000) {
         val state = FakeEditorState(everyKind)
         state.selectElement("rect")
@@ -140,6 +163,26 @@ class ElementInspectorTest {
         assertTrue(placement.alignOverrides.values.all { it.offsetXEm == 2.0 && it.offsetYEm == 2.0 })
         repeat(3) { click(Strings.editorRemoveOverride) }
         assertTrue(state.spec.elements.first().placement.alignOverrides.isEmpty())
+    }
+
+    @Test
+    fun `the placement editor on its own edits every field of a pivoting element`() = runDesktopComposeUiTest(900, 2000) {
+        val state = FakeEditorState(everyKind)
+        var element by mutableStateOf<ElementSpec>(everyKind.elements[2])
+        showDark {
+            Hosted(element, { element = it }) { e, set -> PlacementEditor(state, e) { p -> set(e.withCommon(placement = p)) } }
+        }
+        choose(Strings.editorSlot, "logo")
+        choose(Strings.editorLine, EditorLabels.line(LineAnchor.NAME_LINE))
+        click("${Strings.editorAddOverride}: ${EditorLabels.align("right")}")
+        choose(Strings.editorAnchor, EditorLabels.anchor(AnchorIn.CENTER), index = 1)
+        fillEveryField("1.5")
+        val placement = element.placement
+        assertEquals("logo" to LineAnchor.NAME_LINE, placement.slot to placement.line)
+        assertEquals(listOf(1.5, 1.5), listOf(placement.pivotXEm, placement.pivotYEm))
+        assertEquals(1.5, placement.alignOverrides.getValue("right").offsetYEm)
+        click(Strings.editorRemoveOverride)
+        assertTrue(element.placement.alignOverrides.isEmpty())
     }
 
     @Test

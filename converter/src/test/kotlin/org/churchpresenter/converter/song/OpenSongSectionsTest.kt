@@ -10,9 +10,13 @@ class OpenSongSectionsTest {
 
     @Test
     fun `chord lines, comments, separators and an empty marker are not lyrics`() {
-        val body = "[V]\n.G   C\n;a comment\n1first verse\n2second verse\n---\n-!!\n|||\n[]\n1more of the first\n ____\n"
+        val body = "[V]\n.G   C\n;a comment\n1first verse\n2second verse\n" +
+            "---\n-!!\n|||\n[]\n1more of the first\n ____\n"
         val sections = OpenSongConverter.sectionsOf(body, emptyList())
-        assertEquals(listOf(listOf("first verse", "more of the first"), listOf("second verse")), sections.map { it.lines })
+        assertEquals(
+            listOf(listOf("first verse", "more of the first"), listOf("second verse")),
+            sections.map { it.lines },
+        )
     }
 
     @Test

@@ -10,9 +10,7 @@ plugins {
 
 group = "org.churchpresenter"
 
-// `**/`-prefixed, like every other module: the classes moved from the root package into
-// org/churchpresenter/converter/, and the unanchored form stopped matching them — which
-// silently pulled the whole UI back into the measured set. Same scope as before, not wider.
+// The default exclude only: the Compose UI and `main` are measured like everything else.
 extra["coverageExcludes"] = listOf("**/ComposableSingletons*")
 
 kotlin {

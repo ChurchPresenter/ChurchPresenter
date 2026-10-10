@@ -132,3 +132,7 @@ internal fun <T> Hosted(value: T, onChange: (T) -> Unit, content: @Composable (T
     val callback = remember(tick, onChange) { { v: T -> onChange(v) } }
     content(value, callback)
 }
+
+/** The current [settle] count, read so a composable is recomposed by each one. */
+@Composable
+internal fun rebindTick(): Int = Rebind.tick

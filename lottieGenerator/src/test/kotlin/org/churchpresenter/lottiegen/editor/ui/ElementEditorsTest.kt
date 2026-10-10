@@ -69,8 +69,8 @@ class ElementEditorsTest {
         var grow by mutableStateOf(GrowOrigin.CENTER)
         showDark {
             Column {
-                CornerEditor(corner) { corner = it }
-                GrowFromEditor(grow) { grow = it }
+                Hosted(corner, { corner = it }) { c, set -> CornerEditor(c, set) }
+                Hosted(grow, { grow = it }) { g, set -> GrowFromEditor(g, set) }
             }
         }
         choose(Strings.editorCorner, Strings.editorCornerFromConfig)
@@ -200,7 +200,7 @@ class ElementEditorsTest {
     fun `the tracks editor adds a track and edits its keyframes, easing and overrides`() =
         runDesktopComposeUiTest(1400, 2400) {
             var element by mutableStateOf(RectElement("r"))
-            showDark { TracksEditor(element) { element = element.copy(tracks = it) } }
+            showDark { Hosted(element, { element = it }) { e, set -> TracksEditor(e) { set(e.copy(tracks = it)) } } }
             click(Strings.editorAddTrack)
             assertEquals(AnimProperty.OPACITY, element.tracks.single().property)
             choose(Strings.editorProperty, TrackLabels.property(AnimProperty.POSITION_OFFSET))

@@ -19,14 +19,18 @@ class QueleaPackEdgesTest {
         temp.deleteRecursively()
     }
 
-    private fun pack(name: String, vararg entries: Pair<String, String?>): File = File(temp, name).apply {
-        ZipOutputStream(outputStream()).use { zip ->
-            for ((entryName, body) in entries) {
-                zip.putNextEntry(ZipEntry(entryName))
-                if (body != null) zip.write(body.toByteArray())
-                zip.closeEntry()
-            }
+    private fun pack(name: String, vararg entries: Pair<String, String?>): File {
+        val file = File(temp, name)
+        ZipOutputStream(file.outputStream()).use { zip ->
+            entries.forEach { (entryName, body) -> zip.add(entryName, body) }
         }
+        return file
+    }
+
+    private fun ZipOutputStream.add(entryName: String, body: String?) {
+        putNextEntry(ZipEntry(entryName))
+        body?.let { write(it.toByteArray()) }
+        closeEntry()
     }
 
     @Test

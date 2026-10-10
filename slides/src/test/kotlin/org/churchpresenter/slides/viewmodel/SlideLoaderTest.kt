@@ -156,6 +156,19 @@ class SlideLoaderTest {
     }
 
     @Test
+    fun `a render that fails after another error was shown keeps that error`() = everyWay { onMain ->
+        val p = parts()
+        val f = file("keeps-${seq++}.pdf")
+        p.loader.loadDeck = {
+            p.state.loadError.value = PresentationLoadError.PASSWORD_PROTECTED
+            error("parser crashed")
+        }
+        run(onMain) { p.loader.loadOrCacheSlides(f) }
+        assertEquals(PresentationLoadError.PASSWORD_PROTECTED, p.state.loadError.value)
+        assertFalse(p.state.isLoading.value)
+    }
+
+    @Test
     fun `a deck whose slides all fail is a render failure and leaves no cache`() = everyWay { onMain ->
         val p = parts()
         val f = file("allbad-${seq++}.pdf")

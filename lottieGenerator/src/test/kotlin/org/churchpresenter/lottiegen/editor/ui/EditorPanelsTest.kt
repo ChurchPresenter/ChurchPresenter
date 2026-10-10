@@ -252,6 +252,18 @@ class EditorPanelsTest {
     }
 
     @Test
+    fun `open says when there are no projects, and a saved project needs no name`() = runDesktopComposeUiTest(1400, 1200) {
+        val state = FakeEditorState(saveSucceeds = true)
+        showDark { ProjectToolbarActions(state) }
+        click(Strings.editorOpen)
+        assertTrue(hasNode(Strings.editorNoProjects))
+        click(Strings.cancelBtn)
+        click(Strings.editorSave)
+        assertEquals(listOf("save"), state.calls)
+        assertFalse(hasNode(Strings.editorProjectName.uppercase()))
+    }
+
+    @Test
     fun `the export dialog lists issues, previews the label and registers`() = runDesktopComposeUiTest(1400, 1400) {
         val result = RegisterResult(File(temp, "spec.json"), File(temp, "registry.json"))
         val state = FakeEditorState(

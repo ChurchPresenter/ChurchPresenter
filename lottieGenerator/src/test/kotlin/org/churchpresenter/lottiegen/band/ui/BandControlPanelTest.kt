@@ -2,7 +2,16 @@
 
 package org.churchpresenter.lottiegen.band.ui
 
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.Text
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.isPopup
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
+import kotlinx.coroutines.CompletableDeferred
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +34,7 @@ import org.churchpresenter.lottiegen.ui.clickDescription
 import org.churchpresenter.lottiegen.ui.fillEveryField
 import org.churchpresenter.lottiegen.ui.hasNode
 import org.churchpresenter.lottiegen.ui.pick
+import org.churchpresenter.lottiegen.ui.rebindTick
 import org.churchpresenter.lottiegen.ui.showDark
 import org.churchpresenter.lottiegen.ui.tapBelow
 import org.churchpresenter.lottiegen.ui.tapRightOf
@@ -73,7 +83,7 @@ class BandControlPanelTest {
     @Test
     fun `the band pane picks a template and edits its colours and measures`() = runDesktopComposeUiTest(700, 1600) {
         val vm = viewModel()
-        showDark { BandControlPanel(vm, 460.dp) }
+        showDark { val tick = rebindTick(); BandControlPanel(vm, 460.dp, pickImage = remember(tick) { { null } }) }
         click(Strings.bandTemplate.uppercase())
         pick(Strings.bandEnumLabel("style", BandStyle.GRADIENT_TRIO.name))
         assertEquals(BandStyle.GRADIENT_TRIO, vm.config.bandStyle)
@@ -97,7 +107,7 @@ class BandControlPanelTest {
         val picture = File(temp, "wood.png")
         ImageIO.write(BufferedImage(40, 20, BufferedImage.TYPE_INT_RGB), "png", picture)
         val vm = viewModel()
-        showDark { BandControlPanel(vm, 460.dp, pickImage = { picture }) }
+        showDark { val tick = rebindTick(); BandControlPanel(vm, 460.dp, pickImage = remember(tick) { { picture } }) }
         clickDescription(Strings.bandLookTooltip)
         assertTrue(hasNode(Strings.bandLookWash.uppercase()) || hasNode(Strings.bandLookWash))
         click(Strings.bandImageChoose)
@@ -122,7 +132,7 @@ class BandControlPanelTest {
     @Test
     fun `the layout pane sets the pickers, the text area and the guides`() = runDesktopComposeUiTest(700, 1600) {
         val vm = viewModel()
-        showDark { BandControlPanel(vm, 460.dp) }
+        showDark { val tick = rebindTick(); BandControlPanel(vm, 460.dp, pickImage = remember(tick) { { null } }) }
         click(Strings.bandSectionLayout)
         choose(Strings.bandLayout, Strings.bandEnumLabel("layout", SlotLayout.GRID_2X2.name))
         choose(Strings.bandLabel("reference", kind), Strings.bandLabel("reference_${ReferencePlacement.ABOVE.name.lowercase()}", kind))
@@ -149,7 +159,7 @@ class BandControlPanelTest {
     @Test
     fun `the motion pane picks the movements and times each phase`() = runDesktopComposeUiTest(700, 1600) {
         val vm = viewModel()
-        showDark { BandControlPanel(vm, 460.dp) }
+        showDark { val tick = rebindTick(); BandControlPanel(vm, 460.dp, pickImage = remember(tick) { { null } }) }
         click(Strings.bandTabMotion)
         choose(Strings.bandEntrance, Strings.bandEnumLabel("entrance", BandEntrance.GROW.name))
         choose(Strings.bandTextAnimation, Strings.bandEnumLabel("text", TextAnimation.TICKER.name))
@@ -167,7 +177,7 @@ class BandControlPanelTest {
     @Test
     fun `the text pane styles the sample and edits each language`() = runDesktopComposeUiTest(700, 1600) {
         val vm = viewModel(BibleLottieGenConfig(layout = SlotLayout.GRID_2X2))
-        showDark { BandControlPanel(vm, 460.dp) }
+        showDark { val tick = rebindTick(); BandControlPanel(vm, 460.dp, pickImage = remember(tick) { { null } }) }
         click(Strings.bandTabText)
         choose(Strings.bandPreviewFont, "Poppins")
         click(Strings.bandStyleBold)
@@ -200,7 +210,7 @@ class BandControlPanelTest {
         val out = File(temp, "out")
         var saved: File? = null
         val vm = viewModel(outputDir = out, onSaved = { saved = it })
-        showDark { BandControlPanel(vm, 460.dp) }
+        showDark { val tick = rebindTick(); BandControlPanel(vm, 460.dp, pickImage = remember(tick) { { null } }) }
         click(Strings.bandSectionSave)
         assertTrue(hasNode(Strings.bandSummaryTemplate) && hasNode(Strings.bandSummaryDuration))
         type(vm.fileName, "my band")
@@ -210,6 +220,58 @@ class BandControlPanelTest {
         assertNotNull(saved)
         assertEquals("my band.json", saved!!.name)
         assertTrue(hasNode(Strings.bandSaved))
+    }
+
+    @Test
+    fun `the template menu walks the styles with the arrow keys and closes on escape`() = runDesktopComposeUiTest(700, 1600) {
+        val vm = viewModel()
+        showDark { BandControlPanel(vm, 460.dp) }
+        click(Strings.bandTemplate.uppercase())
+        val menu = onNode(isPopup())
+        menu.performKeyInput { pressKey(Key.DirectionDown) }
+        waitForIdle()
+        menu.performKeyInput { pressKey(Key.DirectionDown) }
+        waitForIdle()
+        assertEquals(BandStyle.entries[2], vm.config.bandStyle)
+        menu.performKeyInput { pressKey(Key.DirectionUp) }
+        waitForIdle()
+        assertEquals(BandStyle.entries[1], vm.config.bandStyle)
+        menu.performKeyInput { pressKey(Key.A) }
+        menu.performKeyInput { pressKey(Key.Escape) }
+        waitForIdle()
+        assertTrue(onAllNodes(isPopup()).fetchSemanticsNodes().isEmpty())
+        click(Strings.bandTemplate.uppercase())
+        onNode(isPopup()).performKeyInput { pressKey(Key.DirectionUp); pressKey(Key.DirectionUp); pressKey(Key.Enter) }
+        waitForIdle()
+        assertEquals(BandStyle.entries[0], vm.config.bandStyle)
+    }
+
+    @Test
+    fun `the look popover stays up while a picture is being chosen`() = runDesktopComposeUiTest(700, 1600) {
+        val release = CompletableDeferred<File?>()
+        val vm = viewModel()
+        showDark { BandControlPanel(vm, 460.dp, pickImage = { release.await() }) }
+        clickDescription(Strings.bandLookTooltip)
+        click(Strings.bandImageChoose)
+        assertTrue(vm.choosingImage)
+        click(Strings.bandTemplate.uppercase())
+        assertTrue(hasNode(Strings.bandImageChoose))
+        release.complete(File(temp, "missing.png"))
+        waitUntil(timeoutMillis = 5_000) { !vm.choosingImage }
+        waitForIdle()
+        assertEquals(Strings.bandStatusPictureUnreadable("missing.png"), vm.statusText)
+        assertTrue(vm.config.images.isEmpty())
+    }
+
+    @Test
+    fun `a host font picker replaces the bundled list`() = runDesktopComposeUiTest(700, 1600) {
+        val vm = viewModel()
+        showDark {
+            BandControlPanel(vm, 460.dp, fontPicker = { family, onPick, _ -> Text("host:$family", Modifier.clickable { onPick("Lora") }) })
+        }
+        click(Strings.bandTabText)
+        click("host:" + vm.config.previewFontFamily)
+        assertEquals("Lora", vm.config.previewFontFamily)
     }
 
     private fun previewText(c: BibleLottieGenConfig, i: Int) =
