@@ -53,7 +53,12 @@ class MarginGuideTest {
                 MaterialTheme {
                     Box(Modifier.size(192.dp, 108.dp).testTag("guide")) {
                         MarginGuide(
-                            output, AppSettings(), margins, bandPercent = 40, lowerThird = lowerThird, color = Color.Red,
+                            output,
+                            AppSettings(),
+                            margins,
+                            bandPercent = 40,
+                            lowerThird = lowerThird,
+                            color = Color.Red,
                         )
                     }
                 }

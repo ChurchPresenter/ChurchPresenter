@@ -145,7 +145,8 @@ class SharedBrowserFrameCachePageDiscoveryTest {
     @Test
     fun `targets that do not say what they are fall back to the first one`() {
         val port = serving(
-            """[{"webSocketDebuggerUrl":"ws://localhost/devtools/page/UNTYPED"},{"type":null,"webSocketDebuggerUrl":"x"}]"""
+            """[{"webSocketDebuggerUrl":"ws://localhost/devtools/page/UNTYPED"},""" +
+                """{"type":null,"webSocketDebuggerUrl":"x"}]"""
         )
 
         assertEquals("ws://localhost/devtools/page/UNTYPED", BrowserProcesses.getPageWebSocketUrl(port))

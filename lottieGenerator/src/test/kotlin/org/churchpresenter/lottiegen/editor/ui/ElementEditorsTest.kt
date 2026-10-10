@@ -28,6 +28,7 @@ import org.churchpresenter.lottiegen.spec.TextElement
 import org.churchpresenter.lottiegen.spec.TextFieldRef
 import org.churchpresenter.lottiegen.spec.WidthBasis
 import org.churchpresenter.lottiegen.ui.EditorStrings
+import org.churchpresenter.lottiegen.ui.Hosted
 import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.ui.choose
 import org.churchpresenter.lottiegen.ui.click
@@ -45,7 +46,7 @@ class ElementEditorsTest {
     @Test
     fun `the size editor switches between its four kinds and edits each`() = runDesktopComposeUiTest(1000, 1200) {
         var size by mutableStateOf<SizeSpec>(SizeSpec.Em(1.0, 1.0))
-        showDark { SizeEditor(size) { size = it } }
+        showDark { Hosted(size, { size = it }) { s, set -> SizeEditor(s, set) } }
         fillEveryField("2")
         assertEquals(SizeSpec.Em(2.0, 2.0), size)
         choose(Strings.editorSizeType, Strings.editorSizeContent)
@@ -87,7 +88,7 @@ class ElementEditorsTest {
     @Test
     fun `the repeat editor turns on, edits every field and turns off`() = runDesktopComposeUiTest(1000, 1200) {
         var repeat by mutableStateOf<RepeatSpec?>(null)
-        showDark { RepeatEditor(repeat) { repeat = it } }
+        showDark { Hosted(repeat, { repeat = it }) { r, set -> RepeatEditor(r, set) } }
         click(Strings.editorRepeat)
         assertEquals(RepeatSpec(), repeat)
         fillEveryField("6")
@@ -103,7 +104,7 @@ class ElementEditorsTest {
     @Test
     fun `the paint editor edits fill, gradient and stroke`() = runDesktopComposeUiTest(1000, 1400) {
         var paint by mutableStateOf(PaintSpec())
-        showDark { PaintEditor(paint) { paint = it } }
+        showDark { Hosted(paint, { paint = it }) { p, set -> PaintEditor(p, set) } }
         choose(Strings.editorColorRole, EditorLabels.role(ColorRole.NAME))
         assertEquals(ColorRole.NAME, paint.fill?.role)
         click(Strings.editorGradient)
@@ -129,7 +130,7 @@ class ElementEditorsTest {
     @Test
     fun `the text options editor edits its field, mask and animator`() = runDesktopComposeUiTest(1000, 1200) {
         var element by mutableStateOf(TextElement("t", "Name", field = TextFieldRef.NAME))
-        showDark { TextOptionsEditor(element) { element = it } }
+        showDark { Hosted(element, { element = it }) { e, set -> TextOptionsEditor(e, set) } }
         choose(Strings.editorTextFieldRef, EditorLabels.textField(TextFieldRef.INFO))
         click(Strings.editorMaskReveal)
         click(Strings.editorAnimator)
@@ -150,7 +151,7 @@ class ElementEditorsTest {
     @Test
     fun `the polygon editor adds, edits and deletes vertices`() = runDesktopComposeUiTest(1000, 1200) {
         var element by mutableStateOf(PolygonElement("p"))
-        showDark { PolygonEditor(element) { element = it } }
+        showDark { Hosted(element, { element = it }) { e, set -> PolygonEditor(e, set) } }
         click(Strings.editorAddVertex)
         click(Strings.editorAddVertex)
         fillEveryField("1.5")
@@ -168,7 +169,7 @@ class ElementEditorsTest {
     @Test
     fun `the path editor adds, edits and deletes curve vertices`() = runDesktopComposeUiTest(1200, 1200) {
         var element by mutableStateOf(PathElement("p"))
-        showDark { PathVerticesEditor(element) { element = it } }
+        showDark { Hosted(element, { element = it }) { e, set -> PathVerticesEditor(e, set) } }
         click(Strings.editorAddVertex)
         click(Strings.editorAddVertex)
         assertEquals(listOf(CurveVertex(1.0, 0.0), CurveVertex(2.0, 0.0)), element.verticesEm)
@@ -183,7 +184,7 @@ class ElementEditorsTest {
     @Test
     fun `the image options show the picture and edit scale and alpha`() = runDesktopComposeUiTest(1000, 1000) {
         var element by mutableStateOf(ImageElement("i"))
-        showDark { ImageOptionsEditor(element) { element = it } }
+        showDark { Hosted(element, { element = it }) { e, set -> ImageOptionsEditor(e, set) } }
         assertTrue(hasNode(Strings.editorImageNone))
         choose(Strings.editorImageScaleMode, Strings.editorImageCover)
         choose(Strings.editorImageScaleMode, Strings.editorImageStretch)

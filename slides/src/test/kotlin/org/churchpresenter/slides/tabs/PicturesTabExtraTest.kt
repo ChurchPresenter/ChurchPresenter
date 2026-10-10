@@ -216,6 +216,35 @@ class PicturesTabExtraTest {
     }
 
     @Test
+    fun `pictures listed without a chosen folder give the schedule nothing to add`() {
+        val folder = pictureFolder()
+        val vm = PicturesViewModel()
+        val added = mutableListOf<String>()
+        try {
+            vm.loadImagesFromFolder(folder)
+            runComposeUiTest {
+                setContent {
+                    MaterialTheme {
+                        PicturesTab(
+                            viewModel = vm,
+                            onAddToSchedule = { p, _, _ -> added += p },
+                            onSavePreset = { p, _, _ -> added += p },
+                        )
+                    }
+                }
+                pictureButton(PictureLabel.ADD_TO_SCHEDULE).performClick()
+                pictureButton("Save preset").performClick()
+                waitForIdle()
+                assertTrue(vm.images.isNotEmpty())
+                assertTrue(added.isEmpty())
+            }
+        } finally {
+            vm.dispose()
+            folder.deleteRecursively()
+        }
+    }
+
+    @Test
     fun `with no host to tell, the loop button still toggles looping`() {
         val vm = PicturesViewModel()
         try {

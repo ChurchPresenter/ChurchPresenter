@@ -71,6 +71,8 @@ class CompareWindowsTest {
                 awaitShowing(Strings.deleteNMarked(1))
                 click(Strings.deleteNMarked(1))
                 assertTrue(isShowing(Strings.permanentlyDeleteShort(1)))
+                clickOutside()
+                click(Strings.deleteNMarked(1))
                 click(Strings.cancel)
                 click(Strings.deleteNMarked(1))
                 click(Strings.delete)

@@ -3,6 +3,10 @@
 package org.churchpresenter.converter.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onLast
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runComposeUiTest
 import java.io.File
 import kotlin.test.Test
@@ -86,12 +90,17 @@ class BibleConverterTabTest {
     fun `spb files are checked for verse fixes and the result is reported`() = withTempDir("bible-tab-fix") { dir ->
         val spb = File(dir, "clean.spb").apply { writeText("##spDataVersion:1\n-----\n") }
         val missing = File(dir, "missing.spb")
-        val pickers = FakePickers(files = listOf(spb, missing))
+        val bible = zefania(dir, "bible.xml")
+        val pickers = FakePickers(files = listOf(bible))
         runComposeUiTest {
             setConverterContent(pickers) { BibleConverterTab() }
+            click(Strings.selectXmlFiles)
+            click(Strings.convert)
+            awaitShowing(Strings.doneConverted(1, 0))
+            pickers.files = listOf(spb, missing)
 
             click(Strings.selectSpbFiles)
-            assertEquals(listOf("spb"), pickers.requestedExtensions)
+            assertEquals(listOf("xml", "spb"), pickers.requestedExtensions)
             assertTrue(isShowing(Strings.fileCount(2)))
 
             click(Strings.fixVerses)
@@ -99,8 +108,11 @@ class BibleConverterTabTest {
             assertTrue(isShowing("OK: clean.spb — no patches needed"))
             assertTrue(isShowing("ERROR: missing.spb", substring = true))
 
-            click(Strings.startOver)
+            onAllNodesWithText(Strings.startOver).onLast().performScrollTo().performClick()
+            waitForIdle()
             assertTrue(isShowing(Strings.fixVerses))
+            click(Strings.startOver)
+            assertTrue(isShowing(Strings.convert))
         }
     }
 

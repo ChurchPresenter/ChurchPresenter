@@ -168,7 +168,10 @@ class ProfilesSmallLogicTest {
                 val c = Constants.BACKGROUND_COLOR
                 said["color"] = describeBackground(BackgroundConfig(backgroundType = c, backgroundColor = "#123456"))
                 said["image"] = describeBackground(
-                    BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE, backgroundImage = "C:\\pics\\stage.jpg"),
+                    BackgroundConfig(
+                        backgroundType = Constants.BACKGROUND_IMAGE,
+                        backgroundImage = "C:\\pics\\stage.jpg",
+                    ),
                 )
                 said["noImage"] = describeBackground(BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE))
                 said["video"] = describeBackground(

@@ -42,7 +42,12 @@ class SettingsRowKitTest {
                                 modifier = Modifier.testTag("group"),
                                 advanced = true,
                                 action = {
-                                    GroupCaptionAction("Reset", { actions++ }, Icons.Filled.Delete, Modifier.testTag("reset"))
+                                    GroupCaptionAction(
+                                        "Reset",
+                                        { actions++ },
+                                        Icons.Filled.Delete,
+                                        Modifier.testTag("reset"),
+                                    )
                                 },
                                 header = { Text("the header") },
                                 footer = { Text("the footer") },

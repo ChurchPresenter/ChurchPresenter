@@ -4,7 +4,11 @@ package org.churchpresenter.converter.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.click
+import androidx.compose.ui.test.isRoot
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
@@ -89,4 +93,9 @@ internal fun ComposeUiTest.awaitInWindow(text: String, substring: Boolean = fals
         check(System.nanoTime() < deadline) { "\"$text\" never appeared" }
         Thread.yield()
     }
+}
+
+internal fun ComposeUiTest.clickOutside() {
+    onAllNodes(isRoot()).onFirst().performTouchInput { click(Offset(2f, 2f)) }
+    waitForIdle()
 }

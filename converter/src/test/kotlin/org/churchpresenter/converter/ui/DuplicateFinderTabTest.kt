@@ -3,10 +3,6 @@
 package org.churchpresenter.converter.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.test.click
-import androidx.compose.ui.test.isRoot
-import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
@@ -60,8 +56,7 @@ class DuplicateFinderTabTest {
             assertTrue(isShowing(Strings.labelDelete))
             click(Strings.deleteNSelected(1))
             assertTrue(isShowing(Strings.permanentlyDelete(1)))
-            onAllNodes(isRoot()).onFirst().performTouchInput { click(Offset(2f, 2f)) }
-            waitForIdle()
+            clickOutside()
             assertFalse(isShowing(Strings.permanentlyDelete(1)))
             click(Strings.deleteNSelected(1))
             click(Strings.delete)
@@ -83,6 +78,8 @@ class DuplicateFinderTabTest {
             click(Strings.scanForDuplicates)
             awaitShowing(Strings.groupSummary(1, 2, 3))
 
+            click(Strings.keepFolder)
+            clickOutside()
             click(Strings.keepFolder)
             click("A")
             awaitShowing(Strings.deleteNSelected(1))
@@ -149,6 +146,10 @@ class DuplicateFinderTabTest {
         runComposeUiTest {
             setConverterContent(FakePickers(directory = dir)) { DuplicateFinderTab() }
             click(Strings.selectFolder)
+            click(Strings.scanForDuplicates)
+            awaitShowing(Strings.homoglyphDialogTitle)
+            clickOutside()
+            assertFalse(isShowing(Strings.homoglyphDialogTitle))
             click(Strings.scanForDuplicates)
             awaitShowing(Strings.homoglyphDialogTitle)
             click(Strings.skipAndScan)

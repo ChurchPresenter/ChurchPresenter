@@ -135,19 +135,22 @@ class ProfilesTabRecompositionTest {
         return opened
     }
 
-    @Test
-    fun `every page's large preview opens and Esc closes it`() {
-        listOf(
-            Constants.DISPLAY_MODE_FULLSCREEN,
-            Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
-            Constants.DISPLAY_MODE_STAGE_MONITOR,
-        ).forEach { mode ->
-            swappableTab(document(mode, advanced = true)) { _, _ ->
-                val expected = customizePanes(mode).size - if (mode == Constants.DISPLAY_MODE_STAGE_MONITOR) 1 else 0
-                assertEquals(expected, openAndEscapeLargePreview(mode), mode)
-            }
-        }
+    private fun largePreviews(mode: String) = swappableTab(document(mode, advanced = true)) { _, _ ->
+        val expected = customizePanes(mode).size - if (mode == Constants.DISPLAY_MODE_STAGE_MONITOR) 1 else 0
+        assertEquals(expected, openAndEscapeLargePreview(mode), mode)
     }
+
+    @Test
+    fun `every full screen page's large preview opens and Esc closes it`() =
+        largePreviews(Constants.DISPLAY_MODE_FULLSCREEN)
+
+    @Test
+    fun `every lower third page's large preview opens and Esc closes it`() =
+        largePreviews(Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL)
+
+    @Test
+    fun `the stage monitor's large previews open and Esc closes them`() =
+        largePreviews(Constants.DISPLAY_MODE_STAGE_MONITOR)
 
     @Test
     fun `the background preview's modes are this session's checking and never written`() {
@@ -157,8 +160,11 @@ class ProfilesTabRecompositionTest {
                 listOf(CustomizePane.BACKGROUND, CustomizePane.BIBLE, CustomizePane.SONGS).forEach { pane ->
                     onNodeWithTag(railTag(pane.name)).performScrollTo().performClick()
                     waitForIdle()
-                    val modes = listOf(PreviewBackgroundMode.CHECKER, PreviewBackgroundMode.OFF, PreviewBackgroundMode.ACTUAL)
-                    modes.forEach {
+                    listOf(
+                        PreviewBackgroundMode.CHECKER,
+                        PreviewBackgroundMode.OFF,
+                        PreviewBackgroundMode.ACTUAL,
+                    ).forEach {
                         tap(previewBackgroundTag(it))
                     }
                 }

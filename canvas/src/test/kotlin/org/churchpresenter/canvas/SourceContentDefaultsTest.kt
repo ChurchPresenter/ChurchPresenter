@@ -24,9 +24,14 @@ class SourceContentDefaultsTest {
     fun `text, Bible and clock content draw at their natural scale when given none`() = runComposeUiTest {
         setContent {
             MaterialTheme {
-                TextSourceContent(SceneSource.TextSource(id = "t", name = "T", text = "Welcome"), Modifier.size(200.dp))
+                TextSourceContent(
+                    SceneSource.TextSource(id = "t", name = "T", text = "Welcome"),
+                    Modifier.size(200.dp),
+                )
                 BibleSourceContent(
-                    SceneSource.BibleSource(id = "b", name = "B", verseText = "In the beginning", referenceText = "Gen 1:1"),
+                    SceneSource.BibleSource(
+                        id = "b", name = "B", verseText = "In the beginning", referenceText = "Gen 1:1",
+                    ),
                     Modifier.size(200.dp),
                 )
                 ClockSourceContent(

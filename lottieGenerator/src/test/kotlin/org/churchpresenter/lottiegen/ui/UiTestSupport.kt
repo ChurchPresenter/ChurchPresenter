@@ -5,6 +5,10 @@ package org.churchpresenter.lottiegen.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ComposeUiTest
@@ -25,7 +29,7 @@ import androidx.compose.ui.unit.dp
 
 internal fun ComposeUiTest.showDark(width: Dp = 1400.dp, height: Dp = 2400.dp, content: @Composable () -> Unit) {
     setContent { LottieGenTheme { Box(Modifier.size(width, height)) { content() } } }
-    waitForIdle()
+    settle()
 }
 
 internal fun ComposeUiTest.node(text: String, substring: Boolean = false): SemanticsNodeInteraction =
@@ -33,7 +37,7 @@ internal fun ComposeUiTest.node(text: String, substring: Boolean = false): Seman
 
 internal fun ComposeUiTest.click(text: String, substring: Boolean = false) {
     node(text, substring).performClick()
-    waitForIdle()
+    settle()
 }
 
 /** Clicks the item of an open menu: the last node with [text], since the anchor shows it too. */
@@ -43,7 +47,7 @@ internal fun ComposeUiTest.pick(text: String) {
     // Only a long list scrolls; a short one has no scrollable parent to bring the item into view.
     runCatching { item.performScrollTo() }
     item.performClick()
-    waitForIdle()
+    settle()
 }
 
 /** Opens the dropdown labelled [label] (shown uppercase) and picks [item]. */
@@ -59,18 +63,18 @@ internal fun ComposeUiTest.hasNode(text: String, substring: Boolean = false): Bo
 /** Types [value] into the text field currently holding [current]. */
 internal fun ComposeUiTest.type(current: String, value: String) {
     onAllNodes(hasSetTextAction() and hasText(current)).onFirst().performTextReplacement(value)
-    waitForIdle()
+    settle()
 }
 
 /** Taps [dy] below the bottom of the node showing [text], at [fraction] of its width -- a slider under a label. */
 internal fun ComposeUiTest.tapBelow(text: String, dy: Dp, fraction: Float = 0.5f) {
     node(text).performTouchInput { val touch = this; touch.click(Offset(width * fraction, height + dy.toPx())) }
-    waitForIdle()
+    settle()
 }
 
 internal fun ComposeUiTest.clickDescription(description: String, index: Int = 0) {
     onAllNodes(hasContentDescription(description), useUnmergedTree = true)[index].performClick()
-    waitForIdle()
+    settle()
 }
 
 /** Types into the last text field holding [current] -- a dialog's, drawn over the panel. */
@@ -78,7 +82,7 @@ internal fun ComposeUiTest.typeLast(current: String, value: String) {
     val matcher = hasSetTextAction() and hasText(current)
     val count = onAllNodes(matcher).fetchSemanticsNodes().size
     onAllNodes(matcher)[count - 1].performTextReplacement(value)
-    waitForIdle()
+    settle()
 }
 
 /** Types [value] into every text field on screen, top to bottom, letting each commit land first. */
@@ -88,15 +92,9 @@ internal fun ComposeUiTest.fillEveryField(value: String) {
         val fields = onAllNodes(hasSetTextAction())
         if (i >= fields.fetchSemanticsNodes().size) break
         fields[i].performTextReplacement(value)
-        waitForIdle()
+        settle()
         i++
     }
-}
-
-/** Clicks every node showing [text], first to last, re-reading the list after each click. */
-internal fun ComposeUiTest.clickEach(text: String, substring: Boolean = false) {
-    var guard = 0
-    while (hasNode(text, substring) && guard++ < 20) click(text, substring)
 }
 
 /** Taps [dx] to the right of the node showing [text] -- a slider sharing a row with its label. */
@@ -105,5 +103,32 @@ internal fun ComposeUiTest.tapRightOf(text: String, dx: Dp, index: Int = 0) {
         val touch = this
         touch.click(Offset(width + dx.toPx(), height / 2f))
     }
+    settle()
+}
+
+/** Bumped after every step; [Hosted] hands its editor a fresh callback each time it moves. */
+private object Rebind {
+    var tick by mutableIntStateOf(0)
+}
+
+/**
+ * Lets a step land, then recomposes every [Hosted] editor with the same value and a new callback
+ * -- what a real caller does whenever it recomposes for reasons of its own -- and lets that land.
+ */
+internal fun ComposeUiTest.settle() {
     waitForIdle()
+    Rebind.tick++
+    waitForIdle()
+}
+
+/**
+ * Hands [value] and [onChange] to [content] as parameters rather than as state read in place, so
+ * the editor under test is called the way its real callers call it: told whether each argument
+ * changed since the last composition, and handed a new callback on each [settle].
+ */
+@Composable
+internal fun <T> Hosted(value: T, onChange: (T) -> Unit, content: @Composable (T, (T) -> Unit) -> Unit) {
+    val tick = Rebind.tick
+    val callback = remember(tick, onChange) { { v: T -> onChange(v) } }
+    content(value, callback)
 }
