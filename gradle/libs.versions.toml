@@ -34,7 +34,7 @@ aircompressor = "2.0.3"
 junitJupiter = "5.10.2"
 filekit = "0.15.0"
 dbus-java = "5.2.0"
-twelvemonkeys-imageio = "3.10.1"
+twelvemonkeys-imageio = "3.15.3"
 # Property tests (generated inputs, checked against an invariant) -- test scope only.
 kotest = "6.2.5"
 # Mutation testing: the Gradle plugin, the engine it runs, and the engine's JUnit Platform support.
