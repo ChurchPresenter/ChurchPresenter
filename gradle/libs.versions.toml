@@ -1,5 +1,7 @@
 [versions]
 cyclonedx = "3.4.1"
+# Not a dependency of the app: the floor for the Jackson the CycloneDX plugin loads (see composeApp).
+jackson-core = "2.22.3"
 jna = "5.18.1"
 vlcj = "4.8.3"
 androidx-lifecycle = "2.11.0"
@@ -41,6 +43,7 @@ pitest = "1.30.0"
 pitestJunit5 = "1.2.3"
 
 [libraries]
+jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson-core" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 # The JSON reader BibleEngineClient parses the engine's messages with; pinned to the version socket.io-client brings.
 org-json = { module = "org.json:json", version = "20090211" }

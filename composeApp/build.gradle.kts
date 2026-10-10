@@ -164,6 +164,17 @@ else Properties()
 /** Returns true when a signing.properties value looks like it has been filled in. */
 fun String?.isConfigured() = this != null && isNotBlank() && !contains("XXXXXXXXXX") && this != "CHANGE_ME" && !startsWith("YOUR_")
 
+// The CycloneDX plugin's own Jackson carries two high advisories (GHSA-p6pp-m3f8-5c89,
+// GHSA-7hhh-6rmp-j9qf) until 2.22.3; hold the build classpath at the fixed release. Build-time
+// only -- nothing here reaches the app.
+buildscript {
+    dependencies {
+        constraints {
+            classpath(libs.jackson.core)
+        }
+    }
+}
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
