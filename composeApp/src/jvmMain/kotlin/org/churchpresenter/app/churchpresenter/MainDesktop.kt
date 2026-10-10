@@ -80,11 +80,10 @@ fun MainDesktop(
     onRequestDeveloperMenuUnlock: () -> Unit = {},
 ) {
     val state = rememberMainDesktopState {
-        CrashReporter.didCrashLastRun && appSettings.analyticsReportingEnabled
+        showCrashFeedbackAtLaunch(CrashReporter.didCrashLastRun, appSettings)
     }
     val vms = rememberMainDesktopViewModels(appSettings, publish, link)
-    val hasCompanionTabConnections = appSettings.companionSatelliteConnections
-        .any { it.showInTab && it.host.isNotBlank() }
+    val hasCompanionTabConnections = hasCompanionTabConnections(appSettings.companionSatelliteConnections)
     val visibleTabs = remember(appSettings.hiddenTabs, state.showCrosswordTab, hasCompanionTabConnections) {
         computeVisibleTabs(appSettings.hiddenTabs, state.showCrosswordTab, hasCompanionTabConnections)
     }

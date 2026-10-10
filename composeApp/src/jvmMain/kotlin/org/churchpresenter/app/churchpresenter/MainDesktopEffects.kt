@@ -141,11 +141,11 @@ internal fun MainDesktopScope.TrailingEffects() {
 
     LaunchedEffect(state.selectedTabIndex) {
         publish.onTabChange(state.selectedTabIndex)
-        visibleTabs.getOrNull(effectiveTabIndex)?.let(publish.onCurrentTabChange)
-        visibleTabs.getOrNull(effectiveTabIndex)?.name?.let { tabName ->
-            CrashReporter.setTag("active_tab", tabName)
-            CrashReporter.breadcrumb("Tab: $tabName", category = "navigation")
-        }
+        // effectiveTabIndex is always in range: visibleTabs is never empty and the index is clamped.
+        val tab = currentTab
+        publish.onCurrentTabChange(tab)
+        CrashReporter.setTag("active_tab", tab.name)
+        CrashReporter.breadcrumb("Tab: ${tab.name}", category = "navigation")
         // Re-request focus so F-key shortcuts keep working after the new tab's children steal focus
         mainFocusRequester.requestFocus()
     }
@@ -163,14 +163,7 @@ internal fun MainDesktopScope.TrailingEffects() {
             val screenCount = try {
                 GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.size
             } catch (_: Exception) { 0 }
-            CrashReporter.setConfigTags(mapOf(
-                "vlc.available" to isVlcAvailable.toString(),
-                "screen.count" to screenCount.toString(),
-                "output.count" to appSettings.projectionSettings.screenAssignments.size.toString(),
-                "atem.enabled" to appSettings.atemSettings.host.isNotBlank().toString(),
-                "obs.enabled" to appSettings.obsSettings.enabled.toString(),
-                "server.enabled" to appSettings.serverSettings.enabled.toString()
-            ))
+            CrashReporter.setConfigTags(startupConfigTags(appSettings, isVlcAvailable, screenCount))
         }
     }
 }
