@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.v2.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import org.churchpresenter.presenter.SongStyleElement
@@ -49,8 +50,7 @@ class ProfilePagesRecompositionTest {
                 val onChange = remember { { t: (AppSettings) -> AppSettings -> writes++; state = t(state) } }
                 val onProfile = remember { { p: OutputProfile -> writes++; current = p } }
                 MaterialTheme {
-                    Column(Modifier.verticalScroll(rememberScrollState())) {
-                        @Suppress("UNUSED_EXPRESSION") tick
+                    Column(Modifier.verticalScroll(rememberScrollState()).testTag("churn_$tick")) {
                         page(state, onChange, current, onProfile)
                     }
                 }
@@ -113,10 +113,10 @@ class ProfilePagesRecompositionTest {
     fun `the stage page writes nothing while it recomposes`() {
         val out = churn(
             AppSettings(),
-            listOf(::unrelated, { s -> s.copy(stageMonitorSettings = s.stageMonitorSettings.copy(fontSize = 50)) }),
+            listOf(::unrelated, { s -> s.copy(stageMonitorSettings = s.stageMonitorSettings.copy(crossfade = true)) }),
         ) { d, c, _, _ -> ProfileStagePage(d, c) }
         assertEquals(0, out.writes)
-        assertEquals(50, out.settings.stageMonitorSettings.fontSize)
+        assertEquals(true, out.settings.stageMonitorSettings.crossfade)
     }
 
     @Test
@@ -142,7 +142,7 @@ class ProfilePagesRecompositionTest {
             AppSettings(),
             listOf(::unrelated),
             profileEdits = listOf(
-                { p -> p.copy(showSongs = !p.showSongs) },
+                { p -> p.copy(songMode = Constants.SONG_LANG_OFF) },
                 { p -> p.copy(displayMode = Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL) },
             ),
         ) { d, _, p, onP -> ProfileContentPage(d, p, onP) }
@@ -183,7 +183,7 @@ class ProfilePagesRecompositionTest {
             val edits = listOf<(AppSettings) -> AppSettings>(
                 ::unrelated,
                 { s -> s.copy(songSettings = s.songSettings.copy(titleSlideEnabled = true, wordWrap = true)) },
-                { s -> s.copy(bibleSettings = s.bibleSettings.copy(textBold = true)) },
+                { s -> s.copy(bibleSettings = s.bibleSettings.copy(multiTranslationDivider = true)) },
             )
             val profile = OutputProfile(id = "p", displayMode = mode)
             val songs = churn(AppSettings(), edits, profile = profile) { d, c, p, onP ->
@@ -193,7 +193,7 @@ class ProfilePagesRecompositionTest {
                 ProfileBiblePage(d, p, 0, {}, CustomizeElement.BIBLE_TEXT, {}, c, onP, {})
             }
             assertEquals(0, songs.writes + bible.writes, mode)
-            assertEquals(true, bible.settings.bibleSettings.textBold)
+            assertEquals(true, bible.settings.bibleSettings.multiTranslationDivider)
         }
     }
 }

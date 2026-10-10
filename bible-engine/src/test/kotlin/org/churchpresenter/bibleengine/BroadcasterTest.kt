@@ -28,6 +28,7 @@ class BroadcasterTest {
         override val outgoing = sent
         override val extensions: List<WebSocketExtension<*>> = emptyList()
         override suspend fun flush() = Unit
+        @Deprecated("Deprecated on WebSocketSession itself")
         override fun terminate() = Unit
 
         fun next(): String = runBlocking { withTimeout(5_000) { (sent.receive() as Frame.Text).readText() } }

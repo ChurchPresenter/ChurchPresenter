@@ -153,6 +153,13 @@ class PresentationTabControlsTest {
         }
     }
 
+    @Test
+    fun `the B key does nothing with no output wired`() = withFakeSlides(3) { _, reports ->
+        press(Key.B)
+
+        assertEquals(0, reports.freezeToggles)
+    }
+
     // ── Freeze button ─────────────────────────────────────────────────────────────
 
     @Test

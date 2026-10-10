@@ -339,4 +339,25 @@ class KeynoteNativeDeckTest {
         assertIs<LayerSpec.StaticComposite>(slide.layers.single())
         assertEquals(null, slide.timeline)
     }
+
+    @Test
+    fun `a built native slide rasterizes one image per planned layer`() {
+        val objects = listOf(
+            Triple(1L, 1, document(2L)),
+            Triple(2L, 2, show(960f, 540f, listOf(100L))),
+            Triple(100L, 4, slideNode(200L)),
+            Triple(200L, 5, builtSlide(listOf(300L, 310L), listOf(500L))),
+            Triple(300L, 2011, textShape(50f, 60f, 400f, 100f, storageId = 400L)),
+            Triple(310L, 2011, textShape(50f, 300f, 400f, 100f, storageId = 410L)),
+            Triple(400L, 2001, storage("Built")),
+            Triple(410L, 2001, storage("Static")),
+            Triple(500L, 8, build(300L, "In")),
+        )
+        val deck = assertIs<LoadResult.Success>(PresentationLoader.load(bundle(objects, name = "raster"))).deck
+        DeckRasterizer(deck, targetWidthPx = 480).use { rasterizer ->
+            val layers = rasterizer.rasterizeSlideLayers(0)
+            assertEquals(deck.slides.single().layers.map { it.id }, layers.map { it.spec.id })
+            assertTrue(layers.all { it.image.width > 0 && it.image.height > 0 })
+        }
+    }
 }

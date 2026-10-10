@@ -174,4 +174,22 @@ class CanvasTabDualLayoutTest {
             assertEquals(inside, scene.alternate?.transforms?.get(far.id), "the portrait layout was fine")
         }
     }
+
+    @Test
+    fun `a layer outside both canvases names each layout it is missing from`() {
+        val far = box.copy(transform = SourceTransform(x = 1.5f, y = 0.4f, width = 0.2f, height = 0.2f))
+        canvasTab(seed = {
+            val scene = addScene("Both")
+            addSource(far)
+            setDualLayout(scene.id, true)
+            updateTransform(far.id, far.transform, alternate = true)
+        }) { _, _ ->
+            assertTrue(
+                onAllNodesWithContentDescription(
+                    "Landscape: Outside the canvas — not visible\nPortrait: Outside the canvas — not visible",
+                ).fetchSemanticsNodes().isNotEmpty(),
+                "one line per layout",
+            )
+        }
+    }
 }

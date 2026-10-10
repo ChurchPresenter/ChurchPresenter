@@ -83,4 +83,29 @@ class CameraDeviceCatalogTest {
     fun `a machine with no cameras at all resolves nothing`() {
         assertFalse(cameraResolves(ref("FaceTime HD Camera", "avfoundation://0"), emptyList()))
     }
+
+    @Test
+    fun `a webcam is never matched against a DeckLink card that happens to share its name`() {
+        val namedLikeTheCard = ref("DeckLink Mini Recorder", "avfoundation://3")
+
+        assertFalse(cameraResolves(namedLikeTheCard, listOf(card)))
+    }
+
+    @Test
+    fun `a DeckLink card is never matched against a webcam`() {
+        val onCardZero = CameraDeviceRef(
+            devicePath = "decklink://0", deviceName = "Logitech BRIO", isDeckLink = true, deckLinkIndex = 0,
+        )
+
+        assertFalse(cameraResolves(onCardZero, listOf(webcam)))
+    }
+
+    @Test
+    fun `a DeckLink with no card index is matched by name like any camera`() {
+        val noIndex = CameraDeviceRef(
+            devicePath = "decklink://", deviceName = "Logitech BRIO", isDeckLink = true, deckLinkIndex = -1,
+        )
+
+        assertTrue(cameraResolves(noIndex, listOf(card, webcam)))
+    }
 }

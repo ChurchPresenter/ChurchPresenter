@@ -46,27 +46,16 @@ What that changed, and what it did not:
 
 ## Coverage
 
-The module carries the root build's six-counter floor. **Instruction, line, method and class clear
-the 85% default and so are not named** in `build.gradle.kts` — only the two that fall short are, at
-their measured value rounded down:
-
-```
-BRANCH 0.79   COMPLEXITY 0.75      (the other four inherit the 85% default)
-```
-
-A named floor is a **ratchet, not a target**: raise one as tests are added, never lower one to make
-a change fit — and delete it outright once its counter clears 85%.
+The module carries the root build's six-counter floor, **85% on all six**, and names no
+`extra["coverageFloors"]` of its own — every counter clears the default. Do not add one back to
+make a change fit.
 `extra["coverageExcludes"]` drops `**/ui/**`, `**/MainKt*` and the CLI diagnostics (`**/*Dump*`,
 `**/MakeSampleDeck*`).
 
 **Where the remaining gap is**: `SlideFontRegistry`'s directory scan — it walks the machine's real
 font directories and sits behind a one-shot JVM latch, so covering it deterministically means the
-suite may only call `initialize` one way — plus the last branches of `KeynoteDeckParser`,
-`KeynoteSceneRasterizer` and `PowerPointDeckSupport`. Everything else is covered: both container
-forms of `.key`, the native and static Keynote paths, `<p:timing>` parsing, timeline compilation
-and evaluation, the preset catalog, layer planning and per-layer rendering for both formats. Everything else is covered: timeline evaluation and
-compilation, the `<p:timing>` parser, the preset catalog end to end, motion paths, the disk cache,
-the loaders and both Keynote container forms. A new effect, a new preset id or a new timing
+suite may only call `initialize` one way — plus null-type arms of `when` over XMLBeans/IWA values
+that the parsers cannot produce, and `catch` blocks around POI and PDFBox calls. A new effect, a new preset id or a new timing
 behavior has no excuse for arriving untested — `Fixtures` builds PPTX, PDF and IWA documents
 programmatically, including `addRawTiming` for arbitrary `<p:timing>` XML.
 

@@ -174,4 +174,24 @@ class PicturesTabSettingsTest {
             reports.settingsAfterChange?.pictureSettings?.animationType,
         )
     }
+
+    @Test
+    fun `choosing Fade applies it and asks for it to be remembered`() = picturesTab { vm, reports ->
+        openAnimationDropdown()
+        onNodeWithText("Fade").performClick()
+        waitForIdle()
+
+        assertEquals(AnimationType.FADE, vm.animationType)
+        assertEquals(Constants.ANIMATION_FADE, reports.settingsAfterChange?.pictureSettings?.animationType)
+    }
+
+    @Test
+    fun `choosing Slide Right applies it and asks for it to be remembered`() = picturesTab { vm, reports ->
+        openAnimationDropdown()
+        onNodeWithText("Slide Right").performClick()
+        waitForIdle()
+
+        assertEquals(AnimationType.SLIDE_RIGHT, vm.animationType)
+        assertEquals(Constants.ANIMATION_SLIDE_RIGHT, reports.settingsAfterChange?.pictureSettings?.animationType)
+    }
 }

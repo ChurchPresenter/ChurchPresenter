@@ -133,4 +133,25 @@ class PresenterSlideTransitionsTest {
         setContent { Box(Modifier.size(200.dp, 100.dp)) { SlidePresenter(slide = null) } }
         assertEquals(0, onAllNodesWithContentDescription("Presented Slide").fetchSemanticsNodes().size)
     }
+
+    private fun firstShown(type: AnimationType) = runComposeUiTest {
+        val current = bitmap(blue)
+        setContent {
+            Box(Modifier.size(200.dp, 100.dp)) {
+                Box { PicturePresenter(imagePath = blue.absolutePath, animationType = type) }
+                Box { SlidePresenter(slide = current, animationType = type) }
+            }
+        }
+        waitUntil("the picture drawn", 5_000) {
+            onAllNodesWithContentDescription("Presented Image").fetchSemanticsNodes().isNotEmpty()
+        }
+        onAllNodesWithContentDescription("Presented Image").assertCountEquals(1)
+        onAllNodesWithContentDescription("Presented Slide").assertCountEquals(1)
+    }
+
+    @Test
+    fun `a first slide-left has nothing to slide out`() = firstShown(AnimationType.SLIDE_LEFT)
+
+    @Test
+    fun `a first slide-right has nothing to slide out`() = firstShown(AnimationType.SLIDE_RIGHT)
 }

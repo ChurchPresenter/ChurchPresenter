@@ -3,6 +3,10 @@
 package org.churchpresenter.slides.tabs
 
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.performClick
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
@@ -185,5 +189,16 @@ class PresentationTabRealDeckTest {
             val item = sent.single() as ScheduleItem.PresentationItem
             assertEquals(file.absolutePath, item.filePath)
         }
+    }
+
+    @Test
+    fun `arrow keys move through a real deck with no output wired`() = withRealDeck(pages = 3) { vm, _, _ ->
+        onRoot().performKeyInput { pressKey(Key.DirectionRight) }
+        waitForIdle()
+        assertEquals(1, vm.selectedSlideIndex)
+
+        onRoot().performKeyInput { pressKey(Key.DirectionLeft) }
+        waitForIdle()
+        assertEquals(0, vm.selectedSlideIndex)
     }
 }

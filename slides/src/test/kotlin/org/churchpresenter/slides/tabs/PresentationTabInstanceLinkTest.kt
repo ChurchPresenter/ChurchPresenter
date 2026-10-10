@@ -71,6 +71,22 @@ class PresentationTabInstanceLinkTest {
     }
 
     @Test
+    fun `a key that is not navigation reaches neither side of Instance Link`() {
+        var calls = 0
+        presentationTab(
+            presenterManager = FakeSlidesOutput(),
+            onInstanceLinkSendNextSlide = { calls++ },
+            onInstanceLinkSendPreviousSlide = { calls++ },
+        ) { vm, _ ->
+            establishFocus()
+            press(Key.Spacebar)
+
+            assertEquals(0, calls)
+            assertEquals(false, vm.isPlaying)
+        }
+    }
+
+    @Test
     fun `arrow keys do nothing with no deck and no Instance Link navigation wired`() {
         presentationTab(presenterManager = FakeSlidesOutput()) { vm, _ ->
             establishFocus()
