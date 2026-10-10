@@ -157,7 +157,8 @@ class ProfilesTabRecompositionTest {
                 listOf(CustomizePane.BACKGROUND, CustomizePane.BIBLE, CustomizePane.SONGS).forEach { pane ->
                     onNodeWithTag(railTag(pane.name)).performScrollTo().performClick()
                     waitForIdle()
-                    listOf(PreviewBackgroundMode.CHECKER, PreviewBackgroundMode.OFF, PreviewBackgroundMode.ACTUAL).forEach {
+                    val modes = listOf(PreviewBackgroundMode.CHECKER, PreviewBackgroundMode.OFF, PreviewBackgroundMode.ACTUAL)
+                    modes.forEach {
                         tap(previewBackgroundTag(it))
                     }
                 }

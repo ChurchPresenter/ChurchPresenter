@@ -23,6 +23,7 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.withLinksResolved
+import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -163,7 +164,10 @@ class ProfileListTest {
                         id = "kids", name = "Kids", parentId = "main",
                         sectionMasters = mapOf("bible" to "stream", "songs" to "spare", "qa" to "main"),
                     ),
-                    OutputProfile(id = "foyer", name = "Foyer", parentId = "main", sectionMasters = mapOf("bible" to "stream")),
+                    OutputProfile(
+                        id = "foyer", name = "Foyer", parentId = "main",
+                        sectionMasters = mapOf("bible" to "stream"),
+                    ),
                 ),
             ),
         )
@@ -172,6 +176,48 @@ class ProfileListTest {
             assertEquals(1, onAllNodes(twoMore, useUnmergedTree = true).fetchSemanticsNodes().size)
             val oneMore = hasText("+1 master", substring = true) and hasAnyAncestor(hasTestTag(profileRowTag("foyer")))
             assertEquals(1, onAllNodes(oneMore, useUnmergedTree = true).fetchSemanticsNodes().size)
+        }
+    }
+
+    @Test
+    fun `an unnamed profile is duplicated under the default name and deleted under its id`() {
+        val base = doc()
+        val proj = base.projectionSettings
+        val unnamed = base.copy(
+            projectionSettings = proj.copy(
+                outputProfiles = proj.outputProfiles + OutputProfile(id = "blank", name = ""),
+            ),
+        )
+        profilesTab(unnamed) { get ->
+            onNodeWithTag(profileRowTag("blank")).performClick()
+            waitForIdle()
+            menu("blank", "Duplicate")
+            assertEquals("New Profile copy", get().projectionSettings.outputProfiles.last().name)
+            menu("blank", "Delete")
+            assertTrue(onAllNodes(hasText("blank", substring = true)).fetchSemanticsNodes().isNotEmpty())
+            onAllNodes(hasTextExactly("OK"))[0].performClick()
+            waitForIdle()
+            assertTrue("blank" !in get().order())
+            assertEquals(0, onAllNodes(hasTestTag(profileRowTag("blank"))).fetchSemanticsNodes().size)
+        }
+    }
+
+    @Test
+    fun `a page the newly picked profile does not have falls back to General`() {
+        val base = doc()
+        val proj = base.projectionSettings
+        val withStage = base.copy(
+            projectionSettings = proj.copy(
+                outputProfiles = proj.outputProfiles +
+                    OutputProfile(id = "stage", name = "Stage", displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR),
+            ),
+        )
+        profilesTab(withStage) { _ ->
+            openCustomizePane(CustomizePane.BIBLE)
+            onNodeWithTag(profileRowTag("stage")).performClick()
+            waitForIdle()
+            assertEquals(0, onAllNodes(hasTestTag(railTag(CustomizePane.BIBLE.name))).fetchSemanticsNodes().size)
+            assertTrue(onAllNodes(hasTestTag(PROFILE_NAME_FIELD_TAG)).fetchSemanticsNodes().isNotEmpty())
         }
     }
 }

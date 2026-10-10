@@ -49,7 +49,9 @@ class BoxHandlesDragTest {
                 options = TextBoxOptions(snap = snap),
             )
             MaterialTheme {
-                Box(Modifier.size(1000.dp, 800.dp).padding(200.dp)) { BoxHandles(targets, Rect(0f, 0f, 480f, 270f), scale = 0.25f) }
+                Box(Modifier.size(1000.dp, 800.dp).padding(200.dp)) {
+                    BoxHandles(targets, Rect(0f, 0f, 480f, 270f), scale = 0.25f)
+                }
             }
         }
         waitForIdle()
@@ -74,7 +76,8 @@ class BoxHandlesDragTest {
     }
 
     @Test
-    fun `every grip of the picked box resizes it on its own edges`() = handles(snap = false, selected = "c") { boxes, _ ->
+    fun `every grip of the picked box resizes it on its own edges`() =
+        handles(snap = false, selected = "c") { boxes, _ ->
         BoxGrip.entries.forEach { grip ->
             val before = boxes.getValue("c")
             drag(adjustBoxGripTag(grip), Offset(grip.dx * 20f, grip.dy * 20f))

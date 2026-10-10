@@ -35,7 +35,9 @@ class ProfilesSmallLogicTest {
             val off = part.withShown(DictionarySettings(), false)
             assertEquals(false, part.shown(off), part.name)
             val others = DictionaryPart.entries - part
-            others.forEach { assertEquals(it.shown(DictionarySettings()), it.shown(off), "${part.name} left ${it.name}") }
+            others.forEach {
+                assertEquals(it.shown(DictionarySettings()), it.shown(off), "${part.name} left ${it.name}")
+            }
             assertEquals(true, part.shown(part.withShown(off, true)))
         }
     }
@@ -80,7 +82,10 @@ class ProfilesSmallLogicTest {
     fun `a gradient tile with no far colour clears it, and the own tile keeps a custom colour`() {
         val start = SongBackground(type = SongBackgroundType.GRADIENT, color = "#123456", colorEnd = "#654321")
         val solid = ColorSwatchDef(Res.string.background, color = "#000000")
-        assertEquals(SongBackground(type = SongBackgroundType.COLOR, color = "#000000", colorEnd = "#654321"), solid.applyTo(start))
+        assertEquals(
+            SongBackground(type = SongBackgroundType.COLOR, color = "#000000", colorEnd = "#654321"),
+            solid.applyTo(start),
+        )
         val own = ColorSwatchDef(Res.string.background, color = "#abcdef", own = true)
         assertEquals("#123456", own.applyTo(start, namedColors = setOf("#000000")).color)
         assertEquals("#abcdef", own.applyTo(start, namedColors = setOf("#123456")).color)
@@ -171,13 +176,18 @@ class ProfilesSmallLogicTest {
                 )
                 said["noVideo"] = describeBackground(BackgroundConfig(backgroundType = Constants.BACKGROUND_VIDEO))
                 said["lottie"] = describeBackground(
-                    BackgroundConfig(backgroundType = Constants.BACKGROUND_LOTTIE, backgroundLottie = "/bands/wave.json"),
+                    BackgroundConfig(
+                        backgroundType = Constants.BACKGROUND_LOTTIE,
+                        backgroundLottie = "/bands/wave.json",
+                    ),
                 )
                 said["noLottie"] = describeBackground(BackgroundConfig(backgroundType = Constants.BACKGROUND_LOTTIE))
                 said["camera"] = describeBackground(BackgroundConfig(backgroundType = Constants.BACKGROUND_CAMERA))
                 said["followed"] = backgroundSummary("App default", null)
-                said["ownColor"] = backgroundSummary("Own", BackgroundConfig(backgroundType = c, backgroundColor = "#000000"))
-                said["ownCamera"] = backgroundSummary("Own", BackgroundConfig(backgroundType = Constants.BACKGROUND_CAMERA))
+                val ownColor = BackgroundConfig(backgroundType = c, backgroundColor = "#000000")
+                said["ownColor"] = backgroundSummary("Own", ownColor)
+                val ownCamera = BackgroundConfig(backgroundType = Constants.BACKGROUND_CAMERA)
+                said["ownCamera"] = backgroundSummary("Own", ownCamera)
             }
             waitForIdle()
         }

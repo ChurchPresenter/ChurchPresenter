@@ -22,7 +22,10 @@ class BibleAdjustModelTest {
 
     private fun bible(): BibleSettings {
         val base = BibleSettings(
-            translations = listOf(BibleTranslationSettings(fileName = "kjv.spb"), BibleTranslationSettings(fileName = "rst.spb")),
+            translations = listOf(
+            BibleTranslationSettings(fileName = "kjv.spb"),
+            BibleTranslationSettings(fileName = "rst.spb"),
+        ),
         )
         return base.copy(
             textBoxes = mapOf(
@@ -39,7 +42,11 @@ class BibleAdjustModelTest {
         val elements = mutableListOf<CustomizeElement>()
         val profile = OutputProfile(
             id = "p",
-            displayMode = if (lowerThird) Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL else Constants.DISPLAY_MODE_FULLSCREEN,
+            displayMode = if (lowerThird) {
+                Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL
+            } else {
+                Constants.DISPLAY_MODE_FULLSCREEN
+            },
             bibleMode = Constants.SONG_LANG_BOTH,
         )
         val index = translationIndex

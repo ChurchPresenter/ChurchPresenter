@@ -97,7 +97,8 @@ class SongBackgroundButtonStatesTest {
         }
 
     @Test
-    fun `a colour typed without its hash gets one, and is cut to a hex colour's length`() = button(emptyList()) { state ->
+    fun `a colour typed without its hash gets one, and is cut to a hex colour's length`() =
+        button(emptyList()) { state ->
         state.background = navy
         state.expanded = true
         waitForIdle()
@@ -107,7 +108,8 @@ class SongBackgroundButtonStatesTest {
     }
 
     @Test
-    fun `the panel's scope picker moves the edit to another section`() = button(listOf("Whole song", "Verse 1")) { state ->
+    fun `the panel's scope picker moves the edit to another section`() =
+        button(listOf("Whole song", "Verse 1")) { state ->
         state.expanded = true
         waitForIdle()
         onNodeWithTag(SONG_BACKGROUND_SCOPE_TAG).performClick()

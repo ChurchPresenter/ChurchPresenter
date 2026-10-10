@@ -98,3 +98,12 @@ internal fun ComposeUiTest.clickEach(text: String, substring: Boolean = false) {
     var guard = 0
     while (hasNode(text, substring) && guard++ < 20) click(text, substring)
 }
+
+/** Taps [dx] to the right of the node showing [text] -- a slider sharing a row with its label. */
+internal fun ComposeUiTest.tapRightOf(text: String, dx: Dp, index: Int = 0) {
+    onAllNodesWithText(text, useUnmergedTree = true)[index].performTouchInput {
+        val touch = this
+        touch.click(Offset(width + dx.toPx(), height / 2f))
+    }
+    waitForIdle()
+}

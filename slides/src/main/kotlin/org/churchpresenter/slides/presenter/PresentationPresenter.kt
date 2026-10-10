@@ -157,7 +157,7 @@ private fun DrawScope.drawLayerGroup(
     }
 }
 
-private fun DrawScope.drawLayer(frame: PresentationFrame, layer: PlacedLayer, alphaMultiplier: Float = 1f) {
+private fun DrawScope.drawLayer(frame: PresentationFrame, layer: PlacedLayer, alphaMultiplier: Float) {
     val state: LayerState = layer.state
     val alpha = (state.alpha.toFloat() * alphaMultiplier).coerceIn(0f, 1f)
     if (alpha <= 0f) return

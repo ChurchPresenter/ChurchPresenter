@@ -26,12 +26,14 @@ class AdjustModelRecompositionTest {
         language = Adjustable(null) {},
     )
 
-    private val pages: Map<CustomizePane, Pair<(AppSettings) -> AppSettings, (AppSettings) -> Map<String, TextBox>>> = mapOf(
+    private val pages: Map<CustomizePane, Pair<(AppSettings) -> AppSettings, (AppSettings) -> Map<String, TextBox>>> =
+        mapOf(
         CustomizePane.CAPTIONS to Pair(
             { s -> s.copy(sttSettings = s.sttSettings.copy(textBoxes = boxes)) }, { s -> s.sttSettings.textBoxes },
         ),
         CustomizePane.SUBTITLES to Pair(
-            { s -> s.copy(mediaSettings = s.mediaSettings.copy(textBoxes = boxes)) }, { s -> s.mediaSettings.textBoxes },
+            { s -> s.copy(mediaSettings = s.mediaSettings.copy(textBoxes = boxes)) },
+            { s -> s.mediaSettings.textBoxes },
         ),
         CustomizePane.QA to Pair(
             { s -> s.copy(qaSettings = s.qaSettings.copy(textBoxes = boxes)) }, { s -> s.qaSettings.textBoxes },

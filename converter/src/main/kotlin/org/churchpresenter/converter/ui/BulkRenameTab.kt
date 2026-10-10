@@ -504,7 +504,7 @@ private val verseHeaderRegex = Regex("""^\[.+\d.*\]$""", RegexOption.IGNORE_CASE
 private val invalidFilenameChars = Regex("""[\\/:*?"<>|]""")
 
 /** The worked example on the Rename tab, run through the options currently ticked. */
-private fun renameExample(stripNumbers: Boolean, renameToFirstVerse: Boolean, caseOption: String): String {
+internal fun renameExample(stripNumbers: Boolean, renameToFirstVerse: Boolean, caseOption: String): String {
     var base = Strings.renameExampleBefore.removeSuffix(".song")
     if (stripNumbers) base = leadingNumberRegex.replace(base, "")
     if (renameToFirstVerse) base = Strings.renameExampleFirstLine
@@ -512,7 +512,7 @@ private fun renameExample(stripNumbers: Boolean, renameToFirstVerse: Boolean, ca
     return "$base.song"
 }
 
-private fun applyCase(name: String, caseOption: String): String = when (caseOption) {
+internal fun applyCase(name: String, caseOption: String): String = when (caseOption) {
     "Sentence case" -> name.lowercase().replaceFirstChar { it.titlecase() }
     "Title Case" -> name.split(" ").joinToString(" ") { word ->
         word.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
@@ -522,7 +522,7 @@ private fun applyCase(name: String, caseOption: String): String = when (caseOpti
     else -> name
 }
 
-private fun buildRenamePreview(directory: File, stripNumbers: Boolean, renameToFirstVerse: Boolean, caseOption: String = "None"): List<RenameEntry> {
+internal fun buildRenamePreview(directory: File, stripNumbers: Boolean, renameToFirstVerse: Boolean, caseOption: String = "None"): List<RenameEntry> {
     val files = directory.walkTopDown()
         .filter { it.isFile && it.extension.equals("song", ignoreCase = true) }
         .sortedBy { it.absolutePath }
@@ -561,7 +561,7 @@ private fun buildRenamePreview(directory: File, stripNumbers: Boolean, renameToF
     }
 }
 
-private fun extractFirstVerseLine(file: File): String? {
+internal fun extractFirstVerseLine(file: File): String? {
     val content = DuplicateFinder.readFileWithFallback(file)
     val lines = content.lines()
     var frontmatterDone = false

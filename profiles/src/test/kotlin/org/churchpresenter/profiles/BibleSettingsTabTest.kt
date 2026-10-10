@@ -344,7 +344,10 @@ class BibleSettingsTabTest {
         pick("ADD TRANSLATION", "New International")
         assertEquals(listOf("kjv.spb", "niv.spb"), harness.current.bibleSettings.translationList().map { it.fileName })
         pick("TRANSLATION 1", "plain")
-        assertEquals(listOf("plain.spb", "niv.spb"), harness.current.bibleSettings.translationList().map { it.fileName })
+        assertEquals(
+            listOf("plain.spb", "niv.spb"),
+            harness.current.bibleSettings.translationList().map { it.fileName },
+        )
         pick("TRANSLATION 2", "None")
         assertEquals(listOf("plain.spb"), harness.current.bibleSettings.translationList().map { it.fileName })
     }

@@ -3,6 +3,10 @@
 package org.churchpresenter.converter.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.test.click
+import androidx.compose.ui.test.isRoot
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
@@ -56,7 +60,9 @@ class DuplicateFinderTabTest {
             assertTrue(isShowing(Strings.labelDelete))
             click(Strings.deleteNSelected(1))
             assertTrue(isShowing(Strings.permanentlyDelete(1)))
-            click(Strings.cancel)
+            onAllNodes(isRoot()).onFirst().performTouchInput { click(Offset(2f, 2f)) }
+            waitForIdle()
+            assertFalse(isShowing(Strings.permanentlyDelete(1)))
             click(Strings.deleteNSelected(1))
             click(Strings.delete)
             awaitShowing(Strings.doneDeleted(1, 0))
@@ -200,6 +206,48 @@ class DuplicateFinderTabTest {
             click(Strings.findControlChars)
             awaitShowing(Strings.andNMore(1))
             assertEquals(6, dir.listFiles()!!.size)
+        }
+    }
+
+    @Test
+    fun `a song card shows what its copy is missing and toggles its mark when clicked`() = withTempDir("dupes-card") { dir ->
+        song(File(dir, "A"), "grace", "Amazing Grace", "Amazing grace how sweet the sound")
+        File(dir, "A/grace.song").appendText("\n[Chorus]\nPraise him\n")
+        song(File(dir, "B"), "grace", "Amazing Grace", "Amazing grace how sweet the sound")
+        runComposeUiTest {
+            setConverterContent(FakePickers(directory = dir)) { DuplicateFinderTab() }
+            click(Strings.selectFolder)
+            click(Strings.scanForDuplicates)
+            awaitShowing(Strings.scanAgain)
+            click(Strings.expandAll)
+            assertTrue(isShowing(Strings.missingPrefix("Chorus")))
+
+            click(File(dir, "B/grace.song").absolutePath)
+            assertTrue(isShowing(Strings.labelDelete))
+            click(File(dir, "B/grace.song").absolutePath)
+            assertFalse(isShowing(Strings.labelDelete))
+
+            click(Strings.collapseAll)
+            assertTrue(isShowing(Strings.expandAll))
+        }
+    }
+
+    @Test
+    fun `more than ten files to delete are summarized in the confirmation`() = withTempDir("dupes-many-delete") { dir ->
+        repeat(12) { song(File(dir, "F%02d".format(it)), "joy", "Joy", "Joy to the world the Lord is come") }
+        runComposeUiTest {
+            setConverterContent(FakePickers(directory = dir)) { DuplicateFinderTab() }
+            click(Strings.selectFolder)
+            click(Strings.scanForDuplicates)
+            awaitShowing(Strings.scanAgain)
+            scrollAndClick(Strings.filesPerGroup)
+            onAllNodes(hasSetTextAction()).onLast().performTextReplacement("20")
+            waitForIdle()
+            click(Strings.keepFolder)
+            click("F00")
+            awaitShowing(Strings.deleteNSelected(11))
+            click(Strings.deleteNSelected(11))
+            assertTrue(isShowing(Strings.andNMore(1)))
         }
     }
 }

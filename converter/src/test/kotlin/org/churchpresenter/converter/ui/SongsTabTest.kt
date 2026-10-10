@@ -136,6 +136,7 @@ class SongsTabTest {
             writeText("##SoftProjector\n##Hymns\n1#\$#Amazing Grace#\$#x#\$##\$##\$##\$#Verse 1@%Amazing grace\n")
         }
         val out = File(dir, "out").apply { mkdirs() }
+        File(out, "Hymns").mkdirs()
         val pickers = FakePickers(files = listOf(book))
         val converted = mutableListOf<String>()
         runComposeUiTest {
@@ -152,6 +153,7 @@ class SongsTabTest {
             assertTrue(isShowing(Strings.songbookPrefix("Hymns")))
             assertTrue(isShowing(Strings.songsFound(1)))
             assertTrue(isShowing("0001 - Amazing Grace"))
+            assertTrue(isShowing(Strings.outputFolderOverwrite))
 
             click(Strings.convertNSongs(1))
             awaitShowing(Strings.doneLabel)
@@ -188,7 +190,7 @@ class SongsTabTest {
     fun `documents are extracted, previewed as songs or text, and converted`() = withTempDir("songs-docs") { dir ->
         val doc = File(dir, "hymn.docx")
         XWPFDocument().use { word ->
-            listOf("Amazing Grace", "", "Verse 1", "Amazing grace how sweet", "", "Chorus", "Praise him")
+            listOf("Amazing Grace", "Author: John Newton", "", "Verse 1", "Amazing grace how sweet", "", "Chorus", "Praise him")
                 .forEach { word.createParagraph().createRun().setText(it) }
             doc.outputStream().use { word.write(it) }
         }
@@ -207,6 +209,7 @@ class SongsTabTest {
             awaitShowing(Strings.songsExtracted(1))
             assertTrue(isShowing("Amazing Grace"))
             assertTrue(isShowing("Verse 1, Chorus"))
+            assertTrue(isShowing("John Newton", substring = true))
 
             click(Strings.docPreviewMarkdown)
             assertTrue(isShowing("── hymn.docx ──", substring = true))

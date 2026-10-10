@@ -346,7 +346,9 @@ class PreviewOutputPickerTest {
     @Test
     fun `browser, NDI and OMT outputs with this content off are listed but marked off`() {
         val off = screen(shows = false, target = -1)
-        val listed = outputs(settings(screens = emptyList(), browserSources = listOf(off), ndi = listOf(off), omt = listOf(off)))
+        val listed = outputs(
+            settings(screens = emptyList(), browserSources = listOf(off), ndi = listOf(off), omt = listOf(off)),
+        )
             .filterNot { it.key.startsWith("screen") }
         assertEquals(listOf("browserSource:0", "ndi:0", "omt:0"), listed.map { it.key })
         assertTrue(listed.none { it.showsMode })
@@ -357,7 +359,8 @@ class PreviewOutputPickerTest {
         var listed: List<PreviewOutput> = listOf()
         composed {
             CompositionLocalProvider(LocalDevelopmentBuild provides false) {
-                listed = outputsShowing(settings(listOf(screen(target = Constants.KEY_TARGET_NONE))), Presenting.BIBLE, 0)
+                val none = settings(listOf(screen(target = Constants.KEY_TARGET_NONE)))
+                listed = outputsShowing(none, Presenting.BIBLE, 0)
             }
         }
         assertTrue(listed.isEmpty())
@@ -365,7 +368,10 @@ class PreviewOutputPickerTest {
 
     @Test
     fun `picking an output that does not show this content warns under the picker`() =
-        picker(settings(listOf(screen(), screen(shows = false, target = 1)), stored = mapOf(tab to "screen:1")), realWindowCount = 2) { _ ->
+        picker(
+            settings(listOf(screen(), screen(shows = false, target = 1)), stored = mapOf(tab to "screen:1")),
+            realWindowCount = 2,
+        ) { _ ->
             onNodeWithText("This output does not currently show this content.").assertExists()
         }
 }

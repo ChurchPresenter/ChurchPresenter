@@ -54,7 +54,10 @@ class PreviewAdjustBlocksDragTest {
                 onSelect = { log.selected += it },
                 shift = if (withShift) Adjustable(log.shift) { log.shift = it } else null,
                 reference = if (reference) {
-                    ReferenceTarget(Adjustable(log.refShift) { log.refShift = it }, picked) { log.picks++; picked = true }
+                    ReferenceTarget(Adjustable(log.refShift) { log.refShift = it }, picked) {
+                        log.picks++
+                        picked = true
+                    }
                 } else {
                     null
                 },

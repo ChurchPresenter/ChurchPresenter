@@ -61,7 +61,14 @@ class RowNumberControlsTest {
         setContent {
             MaterialTheme {
                 Column {
-                    RowStepper(value = value, onValueChange = { value = it }, range = 0..10, step = 4, unit = "pt", testTag = "s")
+                    RowStepper(
+                        value = value,
+                        onValueChange = { value = it },
+                        range = 0..10,
+                        step = 4,
+                        unit = "pt",
+                        testTag = "s",
+                    )
                 }
             }
         }

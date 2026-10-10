@@ -29,7 +29,10 @@ import kotlin.test.assertTrue
 class BibleBoxRowsDirectTest {
 
     private val stack = BibleSettings(
-        translations = listOf(BibleTranslationSettings(fileName = "kjv.spb"), BibleTranslationSettings(fileName = "rst.spb")),
+        translations = listOf(
+            BibleTranslationSettings(fileName = "kjv.spb"),
+            BibleTranslationSettings(fileName = "rst.spb"),
+        ),
     )
 
     @Test

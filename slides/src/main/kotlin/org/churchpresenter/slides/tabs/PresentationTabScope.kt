@@ -20,7 +20,6 @@ import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.utils.ShortcutMap
 import org.churchpresenter.slides.viewmodel.PresentationViewModel
 import org.churchpresenter.slides.SlidesOutput
-import java.awt.Window as AwtWindow
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -36,7 +35,6 @@ import org.churchpresenter.slides.PresentationSlidesLoaded
  */
 @Suppress("LongParameterList")
 internal class PresentationTabScope(
-    val hostWindow: AwtWindow?,
     val appSettings: AppSettings,
     val onAddToSchedule: ((filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit)?,
     val onSavePreset: ((filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit)?,

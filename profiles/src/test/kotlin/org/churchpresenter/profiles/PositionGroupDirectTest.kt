@@ -24,7 +24,8 @@ class PositionGroupDirectTest {
         var folded by mutableStateOf(setOf("position"))
         setContent {
             MaterialTheme {
-                CompositionLocalProvider(LocalFoldedGroups provides FoldedGroups(folded, mutableSetOf()) { folded = it }) {
+                val folds = FoldedGroups(folded, mutableSetOf()) { folded = it }
+                CompositionLocalProvider(LocalFoldedGroups provides folds) {
                     Column {
                         PositionGroup(
                             verticalAlignment = alignment,

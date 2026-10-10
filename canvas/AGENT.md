@@ -47,7 +47,8 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 
 ## Coverage floor
 
-Branches **84%** and complexity **81%**; the other four counters keep the shared 85%. What is left is
+Complexity **82%**; the other five counters keep the shared 85% (branches clear it by under a
+point, so a new branch needs a test with it). What is left is
 mostly not untested behavior: building the libvlc player, the headless browser's own process and
 DevTools traffic (starting one, or killing zombie ones, would touch a developer's real browser), the
 coroutine plumbing around the ffmpeg pipe, the native DeckLink/X11/Win32 calls, the `minOf`/`maxOf`

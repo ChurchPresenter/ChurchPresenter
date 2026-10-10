@@ -167,7 +167,10 @@ class ProfilePagesRecompositionTest {
         val out = churn(
             AppSettings(),
             emptyList(),
-            profileEdits = listOf({ p -> p.copy(name = "Side") }, { p -> p.copy(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR) }),
+            profileEdits = listOf(
+                { p -> p.copy(name = "Side") },
+                { p -> p.copy(displayMode = Constants.DISPLAY_MODE_STAGE_MONITOR) },
+            ),
         ) { _, _, p, onP ->
             ProfileGeneralPage(
                 profile = p,

@@ -46,7 +46,9 @@ internal fun ComposeUiTest.isShowing(text: String, substring: Boolean = false): 
     onAllNodesWithText(text, substring = substring).fetchSemanticsNodes().isNotEmpty()
 
 internal fun ComposeUiTest.click(text: String, substring: Boolean = false) {
-    onAllNodesWithText(text, substring = substring).onFirst().performClick()
+    val node = onAllNodesWithText(text, substring = substring).onFirst()
+    runCatching { node.performScrollTo() }
+    node.performClick()
     waitForIdle()
 }
 

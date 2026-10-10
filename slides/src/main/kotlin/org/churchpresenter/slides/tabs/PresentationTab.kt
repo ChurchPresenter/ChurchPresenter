@@ -179,14 +179,13 @@ fun PresentationTab(
     // Remembered, keyed on everything it holds: a new scope on every recomposition would hand the
     // pieces new lambdas each time, and a click handler keyed on its lambda would restart.
     val tab = remember(
-        hostWindow, appSettings, onAddToSchedule, onSavePreset, onInstanceLinkSendProject, onInstanceLinkSendNextSlide,
+        appSettings, onAddToSchedule, onSavePreset, onInstanceLinkSendProject, onInstanceLinkSendNextSlide,
         onInstanceLinkSendPreviousSlide, instanceLinkFetchPresentationSlideBytes, selectedPresentationItem,
         selectedPresentationItemVersion, presenterManager, onSlidesLoaded, onSettingsChange,
         presentationFrozen, onFreezeToggle, onClearPresentation, vlcAvailable, vlcArchMismatch, vlcLoadFailed, scope,
         focusRequester, focusRescue, shortcuts, wentLive, presentationFileDialogTitle, showRemoteDialogState
     ) {
         PresentationTabScope(
-            hostWindow = hostWindow,
             appSettings = appSettings,
             onAddToSchedule = onAddToSchedule,
             onSavePreset = onSavePreset,

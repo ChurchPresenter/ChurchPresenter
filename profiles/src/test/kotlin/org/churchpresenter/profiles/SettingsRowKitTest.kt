@@ -41,7 +41,9 @@ class SettingsRowKitTest {
                                 key = "look",
                                 modifier = Modifier.testTag("group"),
                                 advanced = true,
-                                action = { GroupCaptionAction("Reset", onClick = { actions++ }, Icons.Filled.Delete, Modifier.testTag("reset")) },
+                                action = {
+                                    GroupCaptionAction("Reset", { actions++ }, Icons.Filled.Delete, Modifier.testTag("reset"))
+                                },
                                 header = { Text("the header") },
                                 footer = { Text("the footer") },
                                 paths = listOf("bibleSettings.textColor"),
@@ -67,7 +69,7 @@ class SettingsRowKitTest {
                                     paths = listOf("bibleSettings.bold"),
                                     extra = { Text("extra") },
                                 )
-                                SettingsWideRow(modifier = Modifier.testTag("wide"), advanced = true, searchTerms = "wide note") {
+                                SettingsWideRow(Modifier.testTag("wide"), advanced = true, searchTerms = "wide note") {
                                     Text("a wide note")
                                 }
                             }
@@ -132,7 +134,11 @@ class SettingsRowKitTest {
     fun `segments wrap onto as many lines as the room needs, and none make no lines`() {
         assertEquals(emptyList(), segmentLines(emptyList(), 100.dp))
         assertEquals(listOf(2, 1), segmentLines(listOf(40.dp, 40.dp, 40.dp), 100.dp))
-        assertEquals(listOf(1, 1), segmentLines(listOf(150.dp, 150.dp), 100.dp), "a segment wider than the room still gets a line")
+        assertEquals(
+            listOf(1, 1),
+            segmentLines(listOf(150.dp, 150.dp), 100.dp),
+            "a segment wider than the room still gets a line",
+        )
     }
 
     @Test
@@ -148,7 +154,12 @@ class SettingsRowKitTest {
                         modifier = Modifier.testTag("segments"),
                         compact = true,
                     )
-                    RowSegmented(options = emptyList<RowOption<String>>(), selected = "", onSelect = {}, modifier = Modifier.testTag("empty"))
+                    RowSegmented(
+                        options = emptyList<RowOption<String>>(),
+                        selected = "",
+                        onSelect = {},
+                        modifier = Modifier.testTag("empty"),
+                    )
                 }
             }
         }
