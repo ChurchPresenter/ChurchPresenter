@@ -303,6 +303,24 @@ class EditorViewModelTest {
     }
 
     @Test
+    fun `registering writes the spec and its registry entry into the styles folder`() {
+        val styles = File(temp, "styles").apply { mkdirs() }
+        File(styles, "registry.json").writeText("""{"entries": []}""")
+        val vm = EditorViewModel(scope, spec(name = "Shipped", id = " 77 "), locateStylesDir = { styles })
+        val result = assertNotNull(vm.registerIntoBuild())
+        assertTrue(result.specFile.isFile && result.specFile.parentFile == styles)
+        assertTrue(result.registryFile.readText().contains("77"))
+    }
+
+    @Test
+    fun `registering outside a checkout, or into a folder without a registry, reports nothing written`() {
+        assertNull(EditorViewModel(scope, spec(), locateStylesDir = { null }).registerIntoBuild())
+        val vm = EditorViewModel(scope, spec(), locateStylesDir = { File(temp, "missing") })
+        assertNull(vm.registerIntoBuild())
+        assertTrue(vm.statusText.startsWith("Error: "), vm.statusText)
+    }
+
+    @Test
     fun `exporting writes the spec to the chosen file`() {
         val vm = editor(spec(name = "Exported"))
         val target = File(temp, "exported.json")

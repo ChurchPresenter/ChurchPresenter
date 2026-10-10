@@ -98,6 +98,7 @@ class SourcePropertiesImageTest {
         try {
             sourcePanel(Fixture.image(filePath = dir.resolve("logo.png").toString()), fileChooser = chooser) { _ ->
                 onNodeWithContentDescription("Browse").performClick()
+                waitUntil(timeoutMillis = 5_000) { chooser.lastFilters != null }
                 waitForIdle()
 
                 assertEquals(1, chooser.callCount)
@@ -118,7 +119,7 @@ class SourcePropertiesImageTest {
         val chooser = FakeFileChooser(answer = chosen)
         sourcePanel(Fixture.image(), fileChooser = chooser) { get ->
             onNodeWithContentDescription("Browse").performClick()
-            waitForIdle()
+            waitUntil(timeoutMillis = 5_000) { (get() as SceneSource.ImageSource).filePath != Fixture.image().filePath }
 
             // The panel stores what the chooser answered, absolutised — which on Windows gains a
             // drive letter, so the expectation is derived rather than spelled out.
@@ -131,6 +132,7 @@ class SourcePropertiesImageTest {
         val chooser = FakeFileChooser(answer = null)
         sourcePanel(Fixture.image(), fileChooser = chooser) { get ->
             onNodeWithContentDescription("Browse").performClick()
+            waitUntil(timeoutMillis = 5_000) { chooser.lastFilters != null }
             waitForIdle()
 
             assertEquals(
@@ -146,6 +148,7 @@ class SourcePropertiesImageTest {
         val chooser = FakeFileChooser(answer = null)
         sourcePanel(Fixture.image().copy(filePath = ""), fileChooser = chooser) { _ ->
             onNodeWithContentDescription("Browse").performClick()
+            waitUntil(timeoutMillis = 5_000) { chooser.lastFilters != null }
             waitForIdle()
 
             // FileChooser.choose() itself falls back to user.home for a null/nonexistent start path.

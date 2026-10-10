@@ -281,7 +281,7 @@ internal fun CameraProperties(
         if (source.isDeckLink && source.deckLinkIndex >= 0) {
             DeckLinkInputSettings(source, onUpdate, host?.deckLink ?: DeckLinkManagerInputs)
         } else if (source.devicePath.isNotEmpty() && !source.isDeckLink) {
-            CameraFormatSettings(source, onUpdate)
+            CameraFormatSettings(source, onUpdate, host?.formats ?: ::listCameraFormats)
         }
     }
 
@@ -376,11 +376,15 @@ private fun DeckLinkInputSettings(
 
 /** A webcam's capture format, from what the device reports it offers. */
 @Composable
-private fun CameraFormatSettings(source: SceneSource.CameraSource, onUpdate: (SceneSource) -> Unit) {
+private fun CameraFormatSettings(
+    source: SceneSource.CameraSource,
+    onUpdate: (SceneSource) -> Unit,
+    listFormats: (devicePath: String, deviceName: String) -> List<CameraFormat>,
+) {
     var formats by remember { mutableStateOf<List<CameraFormat>>(emptyList()) }
     LaunchedEffect(source.devicePath) {
         formats = withContext(Dispatchers.IO) {
-            listCameraFormats(source.devicePath, source.deviceName)
+            listFormats(source.devicePath, source.deviceName)
         }
     }
 

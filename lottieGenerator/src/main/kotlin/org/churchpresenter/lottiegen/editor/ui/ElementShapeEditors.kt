@@ -37,8 +37,7 @@ import org.churchpresenter.lottiegen.spec.TextElement
 import org.churchpresenter.lottiegen.spec.TextFieldRef
 import org.churchpresenter.lottiegen.spec.WidthBasis
 import org.churchpresenter.lottiegen.ui.Strings
-import javax.swing.JFileChooser
-import javax.swing.filechooser.FileNameExtensionFilter
+import org.churchpresenter.lottiegen.ui.components.LocalLottieGenPickers
 
 /** A keyframe track runs 0..100% of the animation; the end is where every default lands. */
 
@@ -136,6 +135,7 @@ internal fun <T> List<T>.replaceAt(index: Int, transform: (T) -> T): List<T> =
 
 @Composable
 internal fun ImageOptionsEditor(element: ImageElement, onChange: (ImageElement) -> Unit) {
+    val pickers = LocalLottieGenPickers.current
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             if (element.dataUri.isEmpty()) {
@@ -151,18 +151,14 @@ internal fun ImageOptionsEditor(element: ImageElement, onChange: (ImageElement) 
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         GhostButton(onClick = {
-            val chooser = JFileChooser()
-            chooser.fileFilter = FileNameExtensionFilter("Images", "png", "jpg", "jpeg")
-            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                ImageImport.import(chooser.selectedFile)?.let { imported ->
-                    onChange(
-                        element.copy(
-                            dataUri = imported.dataUri,
-                            naturalW = imported.width,
-                            naturalH = imported.height
-                        )
+            pickers.openFile("Images", "png", "jpg", "jpeg")?.let { ImageImport.import(it) }?.let { imported ->
+                onChange(
+                    element.copy(
+                        dataUri = imported.dataUri,
+                        naturalW = imported.width,
+                        naturalH = imported.height
                     )
-                }
+                )
             }
         }) {
             Text(Strings.editorImageImport)

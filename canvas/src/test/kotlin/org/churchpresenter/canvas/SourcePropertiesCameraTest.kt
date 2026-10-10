@@ -202,4 +202,47 @@ class SourcePropertiesCameraTest {
             onNodeWithText("This is a display, not a camera", substring = true).assertExists()
         }
     }
+
+    @Test
+    fun `a camera not yet pointed at a device offers the picker but no format`() =
+        cameraPanel(host = twoCameras) { _ ->
+            onNodeWithText("Studio Cam").assertExists()
+            assertEquals(0, countOf("Auto (default)"), "there is no device to ask for formats")
+        }
+
+    @Test
+    fun `a DeckLink source with no card index offers neither connectors nor formats`() {
+        val unindexed = Fixture.camera().copy(
+            devicePath = "decklink://", deviceName = "Mini Recorder", isDeckLink = true, deckLinkIndex = -1,
+        )
+        cameraPanel(unindexed, host = twoCameras) { get ->
+            assertEquals(0, countOf("Auto (default)"))
+            assertEquals(0, countOf("VIDEO CONNECTION"))
+            assertEquals(0, countOf("Auto"), "nor a mode picker")
+            assertEquals(unindexed, get(), "and the source is left as it was")
+        }
+    }
+
+    @Test
+    fun `choosing a format the camera offers pins the source to it, and Auto lets it go`() {
+        val asked = mutableListOf<Pair<String, String>>()
+        val withFormats = twoCameras.copy(
+            formats = { path, name ->
+                asked += path to name
+                listOf(CameraFormat(1920, 1080, 30), CameraFormat(1280, 720, 60))
+            },
+        )
+        val onStudio = Fixture.camera().copy(devicePath = studio.path, deviceName = studio.name)
+        cameraPanel(onStudio, host = withFormats) { get ->
+            waitUntil(timeoutMillis = 5_000) { asked.isNotEmpty() }
+            waitForIdle()
+
+            chooseFromDropdown("Auto (default)", "1280x720 @ 60fps")
+            assertEquals("1280x720@60", (get() as SceneSource.CameraSource).videoFormat)
+
+            chooseFromDropdown("1280x720 @ 60fps", "Auto (default)")
+            assertEquals("", (get() as SceneSource.CameraSource).videoFormat)
+            assertEquals(studio.path to studio.name, asked.first(), "the formats are asked of the chosen device")
+        }
+    }
 }

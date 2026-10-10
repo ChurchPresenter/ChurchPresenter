@@ -283,4 +283,24 @@ class ProfileMergeCardTest {
             val macNote = onAllNodesWithText("Displays have separate Spaces", substring = true)
             assertTrue(macNote.fetchSemanticsNodes().isEmpty(), "off a Mac there is no Spaces note")
         }
+
+    @Test
+    fun `a drag that starts on no tile moves nothing`() = card(
+        merged(MergeTile("ndi:0", 0, 0), MergeTile("ndi:1", 1920, 0)),
+        proj = { ProjectionSettings(ndiOutputs = listOf(ndi(), ndi(w = 960, h = 540)), outputProfiles = listOf(it)) },
+    ) { latest ->
+        val before = latest().merge
+        dragOnMap(Offset(0.85f, 0.8f), Offset(0.95f, 0.95f))
+        assertEquals(before, latest().merge)
+    }
+
+    @Test
+    fun `where two tiles overlap, the one drawn last is the one dragged`() = card(
+        merged(MergeTile("ndi:0", 0, 0), MergeTile("ndi:1", 960, 0)),
+    ) { latest ->
+        dragOnMap(Offset(0.5f, 0.5f), Offset(0.7f, 0.5f))
+        val (under, over) = latest().merge!!.tiles
+        assertEquals(MergeTile("ndi:0", 0, 0), under)
+        assertTrue(over.x > 960, "the top tile moved, to ${over.x}")
+    }
 }

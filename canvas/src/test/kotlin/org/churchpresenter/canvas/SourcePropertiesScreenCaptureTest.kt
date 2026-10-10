@@ -232,6 +232,14 @@ class SourcePropertiesScreenCaptureTest {
         assertEquals(1920, (get() as SceneSource.ScreenCaptureSource).captureWidth, "the stored width is untouched")
     }
 
+    @Test
+    fun `text that is not a number leaves every coordinate alone`() = capturePanel { get ->
+        val before = get()
+        listOf(Field.X, Field.Y, Field.HEIGHT).forEach { typeField(it, "edge") }
+
+        assertEquals(before, get(), "no coordinate is touched")
+    }
+
     // ── Capture interval ──────────────────────────────────────────────────────
 
     @Test

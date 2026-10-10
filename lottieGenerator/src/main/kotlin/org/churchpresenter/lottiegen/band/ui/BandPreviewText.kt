@@ -102,14 +102,14 @@ private fun LottieDynamicProperties.tickerLayer(name: String, slot: SlotBox, set
     }
 }
 
-private fun tickerLine(reference: String?, text: String): String =
+internal fun tickerLine(reference: String?, text: String): String =
     if (reference.isNullOrBlank() || text.isBlank()) text else "$reference$TICKER_GAP$text"
 
 /**
  * The part of [text] a typewriter has typed by [frame]: growing through `text_in`, all of it
  * through the hold, shrinking back through `text_out` — what the player shows the live verse.
  */
-private fun revealedText(motion: TextAnimation, t: BandTimeline, text: String, frame: Float): String {
+internal fun revealedText(motion: TextAnimation, t: BandTimeline, text: String, frame: Float): String {
     val fraction = when {
         frame < t.textStart -> 0f
         frame < t.holdStart -> (frame - t.textStart) / t.textInFrames
@@ -127,9 +127,9 @@ private fun revealedText(motion: TextAnimation, t: BandTimeline, text: String, f
 }
 
 /** What the file wrote for a text layer that the ticker needs back: the fitted size. */
-private class TextDocument(val fontSize: Float)
+internal class TextDocument(val fontSize: Float)
 
-private fun readTextDocuments(jsonString: String): Map<String, TextDocument> = try {
+internal fun readTextDocuments(jsonString: String): Map<String, TextDocument> = try {
     val layers = Json.parseToJsonElement(jsonString).jsonObject["layers"]?.jsonArray.orEmpty()
     layers.mapNotNull { it as? JsonObject }.mapNotNull { layer ->
         val name = layer["nm"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null

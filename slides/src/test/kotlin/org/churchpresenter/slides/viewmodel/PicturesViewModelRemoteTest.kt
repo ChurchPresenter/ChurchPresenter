@@ -1,5 +1,9 @@
 package org.churchpresenter.slides.viewmodel
 
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.churchpresenter.sharedui.models.Presenting
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
@@ -109,6 +113,32 @@ class PicturesViewModelRemoteTest {
             "downloaded images must land in the cache directory keyed by folder id"
         )
         awaitUntil("thumbnails for every mirrored image") { vm.thumbnails.size == 3 }
+    }
+
+    @Test
+    fun `a downloaded image whose cache slot is already taken is listed and marked unreadable`() {
+        val vm = vm()
+        val slot = File(cacheDir("folder-blocked"), "image_0000.jpg")
+
+        vm.loadPictureFromRemote(folderId = "folder-blocked", folderPath = "/elsewhere/Blocked", imageCount = 1) {
+            File(slot, "occupant").apply { parentFile.mkdirs(); writeText("x") }
+            pngBytes()
+        }
+
+        awaitUntil("the slot marked unreadable") { slot in vm.thumbnailFailures }
+        assertEquals(listOf(slot), vm.images)
+        assertTrue(cacheDir("folder-blocked").listFiles()!!.none { it.name.endsWith(".tmp") }, "no temp file left")
+    }
+
+    @Test
+    fun `a download superseded mid-fetch adds nothing`() {
+        val vm = vm()
+        vm.loadPictureFromRemote(folderId = "folder-superseded", folderPath = "/elsewhere/S", imageCount = 2) {
+            currentCoroutineContext().cancel()
+            pngBytes()
+        }
+        runBlocking { withTimeout(5_000) { vm.remoteLoadJob!!.join() } }
+        assertTrue(vm.images.isEmpty())
     }
 
     @Test

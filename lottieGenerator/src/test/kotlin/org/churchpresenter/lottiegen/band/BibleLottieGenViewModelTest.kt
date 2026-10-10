@@ -1,5 +1,6 @@
 package org.churchpresenter.lottiegen.band
 
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -51,6 +52,19 @@ class BibleLottieGenViewModelTest {
         val vm = BibleLottieGenViewModel(scope, outputDir, onSaved, BibleLottieGenConfig(canvasW = 640, canvasH = 120))
         waitFor("the first render") { vm.generatedJson != null }
         return vm
+    }
+
+    @Test
+    fun `a second picture chooser is not opened over the first, and nothing saves before a render`() {
+        val vm = BibleLottieGenViewModel(scope, temp, null, BibleLottieGenConfig(canvasW = 640, canvasH = 120))
+        assertNull(vm.save())
+        val release = CompletableDeferred<File?>()
+        var second = 0
+        vm.chooseBandImage(BandColorRole.ACCENT) { release.await() }
+        vm.chooseBandImage(BandColorRole.ACCENT) { second++; null }
+        release.complete(null)
+        waitFor("the chooser to close") { !vm.choosingImage }
+        assertEquals(0, second)
     }
 
     @Test

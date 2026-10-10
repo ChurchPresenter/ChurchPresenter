@@ -367,4 +367,12 @@ class CameraDiagnosticsTest {
         val tail = listOf("Supported framerates:", "  30.000000", "", "  60.000000")
         assertEquals(listOf(30.0), parseSupportedFramerates(tail))
     }
+
+    @Test
+    fun `with no platform named the sentence is this machine's`() {
+        assertEquals(
+            cameraFailureStringRes(CameraFailure.PERMISSION_DENIED, System.getProperty("os.name", "")),
+            cameraFailureStringRes(CameraFailure.PERMISSION_DENIED),
+        )
+    }
 }

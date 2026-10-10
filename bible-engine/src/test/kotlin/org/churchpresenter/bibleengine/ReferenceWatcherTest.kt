@@ -1442,4 +1442,40 @@ class ReferenceWatcherTest {
             )
         }
     }
+
+    @Test fun `a book named before a bare epistle marker defaults to the first epistle`() {
+        val r = run("Пётр пишет в послании, в третьей главе первом стихе,")
+        assertTrue(r.any { it.triple() == Triple(60, 3, 1) }, "expected 1 Peter 3:1, got $r")
+    }
+
+    @Test fun `an ordinal between the book and the marker picks that epistle`() {
+        val r = run("Пётр пишет во втором послании, в третьей главе первом стихе,")
+        assertTrue(r.any { it.triple() == Triple(61, 3, 1) }, "expected 2 Peter 3:1, got $r")
+    }
+
+    @Test fun `a family with no unnumbered meaning needs the ordinal ahead of the marker`() {
+        val r = run("Тимофею пишет во втором послании, в первой главе пятом стихе,")
+        assertTrue(r.any { it.triple() == Triple(55, 1, 5) }, "expected 2 Timothy 1:5, got $r")
+    }
+
+    @Test fun `a book name followed by ordinary words is not an epistle`() {
+        val r = run("Иоанн говорит хорошо, в первой главе шестом стихе,")
+        assertTrue(r.none { it.bookNum == 62 }, "no epistle marker, got $r")
+    }
+
+    @Test fun `a spelled-out number beside a chapter keyword corroborates an ambiguous book form`() {
+        val after = sticky(book = 45, chapter = 3)
+        feed(after, "в третьей главе иеремия написано.")
+        assertEquals(24, after.watchBook)
+
+        val before = sticky(book = 45, chapter = 3)
+        feed(before, "глава третья иеремия написано.")
+        assertEquals(24, before.watchBook)
+    }
+
+    @Test fun `a spelled-out count with no keyword does not corroborate an ambiguous book form`() {
+        val s = sticky(book = 45, chapter = 3)
+        feed(s, "три человека иеремия написано.")
+        assertEquals(45, s.watchBook)
+    }
 }

@@ -13,6 +13,8 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.pressKey
 import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.sharedui.testing.showsContainingText
+import org.churchpresenter.slides.presenter.PresentationFrame
 import org.churchpresenter.slides.viewmodel.PresentationViewModel
 import org.churchpresenter.slides.FakeSlidesOutput
 import org.churchpresenter.slides.SlidesOutput
@@ -153,6 +155,24 @@ class PresentationTabControlsTest {
         }
     }
 
+    @Test
+    fun `auto-play with an output but no parsed deck moves on to the next slide`() {
+        val presenter = FakeSlidesOutput()
+        withFakeSlides(3, presenterManager = presenter) { vm, _ ->
+            vm.autoScrollInterval = 1f
+            vm.togglePlayPause()
+            mainClock.advanceTimeBy(1_500)
+            waitUntil("the next slide", 5_000) { vm.selectedSlideIndex == 1 }
+        }
+    }
+
+    @Test
+    fun `the B key does nothing with no output wired`() = withFakeSlides(3) { _, reports ->
+        press(Key.B)
+
+        assertEquals(0, reports.freezeToggles)
+    }
+
     // ── Freeze button ─────────────────────────────────────────────────────────────
 
     @Test
@@ -180,6 +200,62 @@ class PresentationTabControlsTest {
 
             assertEquals(Presenting.PRESENTATION, presenter.onAir.value)
             assertTrue(presenter.showPresenterWindow.value)
+        }
+    }
+
+    private fun ComposeUiTest.doubleClick(description: String) {
+        onNodeWithContentDescription(description).performTouchInput {
+            down(center)
+            up()
+            advanceEventTime(50)
+            down(center)
+            up()
+        }
+        waitForIdle()
+    }
+
+    @Test
+    fun `double-clicking the last thumbnail takes it live with nothing after it`() {
+        val presenter = FakeSlidesOutput()
+        withFakeSlides(3, presenterManager = presenter) { vm, _ ->
+            vm.isLooping = false
+            doubleClick("Slide 3")
+
+            waitUntil("the slide sent", 5_000) { presenter.liveSlide.value?.second == 2 }
+            assertEquals(null, presenter.nextSlide.value)
+        }
+    }
+
+    @Test
+    fun `Go Live on the last slide sends nothing after it`() {
+        val presenter = FakeSlidesOutput()
+        withFakeSlides(3, presenterManager = presenter) { vm, _ ->
+            vm.isLooping = false
+            vm.selectSlide(2)
+            waitForIdle()
+            presentationButton(PresentationLabel.GO_LIVE).performClick()
+
+            waitUntil("the slide sent", 5_000) { presenter.selectedSlide.value != null }
+            assertEquals(2, presenter.liveSlide.value?.second)
+            assertEquals(null, presenter.nextSlide.value)
+        }
+    }
+
+    @Test
+    fun `double-clicking a thumbnail with no output only selects it`() = withFakeSlides(3) { vm, _ ->
+        doubleClick("Slide 2")
+
+        assertEquals(1, vm.selectedSlideIndex)
+    }
+
+    @Test
+    fun `a live frame with no builds shows no build counter`() {
+        val presenter = FakeSlidesOutput()
+        withFakeSlides(2, presenterManager = presenter) { _, _ ->
+            presenter.presentationFrame.value = PresentationFrame(0, 100, 100, 1f, emptyList(), 0, 0)
+            waitForIdle()
+
+            assertFalse(showsContainingText("Build "))
         }
     }
 

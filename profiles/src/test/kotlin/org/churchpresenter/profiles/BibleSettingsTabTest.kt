@@ -322,4 +322,33 @@ class BibleSettingsTabTest {
             "delete must follow the reorder button directly, not across a button-sized gap: $gap",
         )
     }
+
+    @Test
+    fun `the pickers add, swap and clear a translation by the name it is shown under`() = runComposeUiTest {
+        val dir = bibleFolder("kjv.spb" to "King James", "plain.spb" to null, "niv.spb" to "New International")
+        val harness = showTab(
+            AppSettings(
+                bibleSettings = BibleSettings(storageDirectory = dir.absolutePath).withTranslations(
+                    listOf(BibleTranslationSettings(fileName = "kjv.spb")),
+                ),
+            ),
+        )
+        waitForIdle()
+        fun pick(picker: String, option: String) {
+            onAllNodesWithText(picker).onFirst().performClick()
+            waitForIdle()
+            val options = onAllNodesWithText(option, substring = true)
+            options[options.fetchSemanticsNodes().size - 1].performClick()
+            waitForIdle()
+        }
+        pick("ADD TRANSLATION", "New International")
+        assertEquals(listOf("kjv.spb", "niv.spb"), harness.current.bibleSettings.translationList().map { it.fileName })
+        pick("TRANSLATION 1", "plain")
+        assertEquals(
+            listOf("plain.spb", "niv.spb"),
+            harness.current.bibleSettings.translationList().map { it.fileName },
+        )
+        pick("TRANSLATION 2", "None")
+        assertEquals(listOf("plain.spb"), harness.current.bibleSettings.translationList().map { it.fileName })
+    }
 }

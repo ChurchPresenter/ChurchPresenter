@@ -62,8 +62,6 @@ import org.churchpresenter.sharedui.composables.ColorPickerField
 import org.churchpresenter.sharedui.composables.SettingsScrollbar
 import org.churchpresenter.sharedui.composables.SettingsScrollbarGutter
 import org.churchpresenter.sharedui.composables.SlimSlider
-import org.churchpresenter.canvas.DeckLinkManager
-import org.churchpresenter.canvas.isFfmpegAvailable
 import org.churchpresenter.media.composables.isVlcAvailable
 import org.churchpresenter.sharedui.composables.RecentColors
 import org.churchpresenter.sharedui.utils.Utils.parseHexColor
@@ -134,10 +132,12 @@ internal fun BackgroundControlsColumn(
 /** What kind of background this surface is — the one control that is never dimmed or hidden. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun BackgroundTypeSegments(
+internal fun BackgroundTypeSegments(
     scope: BackgroundScope,
     config: BackgroundConfig,
-    onConfigChange: (BackgroundConfig) -> Unit
+    onConfigChange: (BackgroundConfig) -> Unit,
+    vlcAvailable: () -> Boolean = { isVlcAvailable },
+    probeCapture: () -> Boolean = ::canCaptureCamera,
 ) {
     val vlcMissingHint = stringResource(Res.string.media_vlc_required)
     val cameraMissingHint = stringResource(Res.string.background_camera_required)
@@ -146,7 +146,7 @@ private fun BackgroundTypeSegments(
     // segment — a type that is briefly clickable beats one that is briefly dead for no reason.
     var captureAvailable by remember { mutableStateOf<Boolean?>(null) }
     LaunchedEffect(Unit) {
-        captureAvailable = withContext(Dispatchers.IO) { isFfmpegAvailable() || DeckLinkManager.isAvailable() }
+        captureAvailable = withContext(Dispatchers.IO) { probeCapture() }
     }
     BackgroundTypeRow(
         caption = stringResource(Res.string.customize_background_type),
@@ -161,7 +161,7 @@ private fun BackgroundTypeSegments(
             )
         },
         segmentFor = { type, draw ->
-                val videoWithoutVlc = type == Constants.BACKGROUND_VIDEO && !isVlcAvailable
+                val videoWithoutVlc = type == Constants.BACKGROUND_VIDEO && !vlcAvailable()
                 // Camera does not go through VLC — it wants ffmpeg or a DeckLink card.
                 val cameraWithoutCapture =
                     type == Constants.BACKGROUND_CAMERA && captureAvailable == false

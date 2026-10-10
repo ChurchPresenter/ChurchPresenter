@@ -430,6 +430,18 @@ class SourcePropertiesClockTest {
     }
 
     @Test
+    fun `a countdown of no length that is somehow running can still be paused`() {
+        val id = "clk-timer-zero-running"
+        TimerStateManager.setRunning(id, 0, true)
+        sourcePanel(Fixture.clock(id).copy(mode = "countdown")) { _ ->
+            onNodeWithText("Pause").assertIsEnabled().performScrollTo().performClick()
+            waitForIdle()
+
+            assertEquals(false, TimerStateManager.getState(id, 0).isRunning)
+        }
+    }
+
+    @Test
     fun `pressing Start runs the timer and the button becomes Pause`() {
         val id = "clk-timer-start"
         sourcePanel(countdown(id)) { _ ->

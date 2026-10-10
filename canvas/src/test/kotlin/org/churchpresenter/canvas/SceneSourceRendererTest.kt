@@ -1071,4 +1071,98 @@ class SceneSourceRendererTest {
     /** How many text nodes currently read exactly [text]. */
     private fun ComposeUiTest.countTextNodes(text: String): Int =
         onAllNodesWithText(text).fetchSemanticsNodes(atLeastOneRootRequired = false).size
+
+    @Test
+    fun `an italic, non-bold text source still shows its text`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                SceneSourceRenderer(SceneSource.TextSource(id = "t6", name = "T", text = "Slanted", italic = true))
+            }
+        }
+        onNodeWithText("Slanted").assertExists()
+    }
+
+    @Test
+    fun `an italic clock shows its read-out`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                SceneSourceRenderer(
+                    SceneSource.ClockSource(
+                        id = "clock-italic", name = "Clock", mode = ClockModes.COUNTDOWN,
+                        targetMinute = 2, showHours = false, italic = true,
+                    )
+                )
+            }
+        }
+        onNodeWithText("02:00").assertExists()
+    }
+
+    @Test
+    fun `a curved clock draws its own glyphs instead of a text node`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                SceneSourceRenderer(
+                    SceneSource.ClockSource(
+                        id = "clock-curved", name = "Clock", mode = ClockModes.COUNTDOWN,
+                        targetMinute = 2, showHours = false, curve = 40f,
+                    )
+                )
+            }
+        }
+        waitForIdle()
+        onNodeWithText("02:00").assertDoesNotExist()
+    }
+
+    @Test
+    fun `a countdown with no duration rests on zero without its expiry message`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                SceneSourceRenderer(
+                    SceneSource.ClockSource(
+                        id = "clock-zero", name = "Clock", mode = ClockModes.COUNTDOWN,
+                        showHours = false, expiredText = "Time's up!",
+                    )
+                )
+            }
+        }
+        waitForIdle()
+        onNodeWithText("00:00").assertExists()
+        onNodeWithText("Time's up!").assertDoesNotExist()
+    }
+
+    @Test
+    fun `counting down to the last second of the day shows the time left`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                SceneSourceRenderer(
+                    SceneSource.ClockSource(
+                        id = "clock-target-late", name = "Clock", mode = ClockModes.TARGET_TIME,
+                        targetTimeHour = 23, targetTimeMinute = 59, targetTimeSecond = 59,
+                    )
+                )
+            }
+        }
+        waitForIdle()
+
+        val countdownShaped = Regex("^\\d{2}:\\d{2}:\\d{2}$")
+        val texts = onAllNodesWithText("", substring = true)
+            .fetchSemanticsNodes(atLeastOneRootRequired = false)
+            .mapNotNull { it.config.getOrNull(SemanticsProperties.Text)?.joinToString("") { t -> t.text } }
+        assertTrue(texts.any { countdownShaped.matches(it) }, "expected a hh:mm:ss countdown, found: $texts")
+    }
+
+    @Test
+    fun `a bold, italic curved text source is still drawn rather than laid out`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                SceneSourceRenderer(
+                    SceneSource.TextSource(
+                        id = "t-curved-styled", name = "T", text = "Welcome", curve = -30f, bold = true, italic = true,
+                    )
+                )
+            }
+        }
+        waitForIdle()
+        assertEquals(0, countTextNodes("Welcome"))
+    }
 }

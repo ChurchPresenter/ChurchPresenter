@@ -272,4 +272,23 @@ class VersionDetectorTest {
                 "${comparedVerdict.confidence} vs $soleConfidence",
         )
     }
+
+    @Test fun `shutting down a detector that does not own a thread leaves it scoring`() {
+        val d = detector()
+        d.shutdown()
+
+        d.read(MATT_18_13, KJV_MATT_18_13, spokenNasb13)
+        d.read("B040C018V014", KJV_MATT_18_14, spokenNasb14)
+
+        assertEquals("NASB", assertNotNull(d.verdict()).label)
+    }
+
+    @Test fun `a verse with no code or nothing spoken is not scored`() {
+        val d = detector()
+        d.read(MATT_18_13, KJV_MATT_18_13, spokenNasb13)
+        d.observe(null, KJV_MATT_18_14, spokenNasb14, Script.LATIN)
+        d.observe("B040C018V014", KJV_MATT_18_14, "  ", Script.LATIN)
+
+        assertNull(d.verdict())
+    }
 }

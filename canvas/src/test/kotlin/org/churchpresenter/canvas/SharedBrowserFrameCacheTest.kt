@@ -233,6 +233,21 @@ class SharedBrowserFrameCacheTest {
         assertTrue(result != null, "a malformed message must be caught internally, not kill the connection")
     }
 
+    @Test
+    fun `an error reply to nothing asked, and a navigation nobody listens for, leave the connection working`() {
+        val fake = startFakeCdpBrowser()
+        val cdp = cdpConnection()
+        cdp.connect("ws://127.0.0.1:${fake.port}/devtools/page/FAKE")
+
+        fake.sendEvent("""{"id":9999,"error":{"code":-32000,"message":"No target"}}""")
+        fake.sendEvent(
+            """{"method":"Page.frameNavigated","params":{"frame":{"url":"https://example.com/x","parentId":null}}}"""
+        )
+
+        val result = runBlocking { cdp.sendAsync("Page.enable", null) }
+        assertTrue(result != null, "a stray error and an unheard navigation must not break later requests")
+    }
+
     // ── CdpConnection.close ────────────────────────────────────────────────────────────────────
 
     @Test

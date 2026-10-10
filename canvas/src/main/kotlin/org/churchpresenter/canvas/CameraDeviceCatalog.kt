@@ -87,8 +87,8 @@ object CameraDeviceCatalog {
 }
 
 /**
- * Everything the camera panel would otherwise ask this machine: which cameras it has, and whether
- * ffmpeg runs on it.
+ * Everything the camera panel would otherwise ask this machine: which cameras it has, whether
+ * ffmpeg runs on it, and what formats a camera offers.
  *
  * Supplied whole or not at all. A test that pinned only the device list still had the panel probe
  * the host's ffmpeg and read [CameraDeviceCatalog]'s last enumeration for its hints, and either
@@ -100,6 +100,8 @@ data class CameraHost(
     val ffmpegAvailable: Boolean,
     /** The DeckLink cards' inputs the panel reads connectors and modes from. */
     val deckLink: DeckLinkInputs = DeckLinkManagerInputs,
+    /** The capture formats a device offers, by its path and name. */
+    val formats: (devicePath: String, deviceName: String) -> List<CameraFormat> = ::listCameraFormats,
 )
 
 /**

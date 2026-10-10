@@ -346,6 +346,14 @@ class PresentationViewModelTest {
     }
 
     @Test
+    fun `removing a presentation with nothing open is harmless`() {
+        val vm = viewModel()
+        vm.removePresentation(File(dir, "other.pdf"), isInRecentsOrPinned = false)
+        assertTrue(vm.presentations.isEmpty())
+        assertNull(vm.selectedPresentation)
+    }
+
+    @Test
     fun `clearing closes everything`() {
         val vm = viewModel().open(pdf(pages = 3))
         vm.clearPresentations()

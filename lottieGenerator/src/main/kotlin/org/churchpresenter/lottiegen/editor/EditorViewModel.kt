@@ -36,7 +36,9 @@ data class BundledTemplate(val resource: String, val styleId: String? = null, va
  */
 class EditorViewModel(
     private val scope: CoroutineScope,
-    initialSpec: StyleSpec
+    initialSpec: StyleSpec,
+    /** Where [registerIntoBuild] writes: the source checkout's styles folder, or null outside one. */
+    private val locateStylesDir: () -> File? = BuildRegistrar::locateStylesDir,
 ) : EditorState {
 
     override var spec by mutableStateOf(initialSpec)
@@ -178,7 +180,7 @@ class EditorViewModel(
         // Defense in depth: never trust UI gating alone — an invalid id must not reach
         // the registry (a blank id once slipped through and wrote a broken entry).
         if (validateForExport().isNotEmpty()) return null
-        val stylesDir = BuildRegistrar.locateStylesDir() ?: return null
+        val stylesDir = locateStylesDir() ?: return null
         return try {
             BuildRegistrar.register(spec.copy(id = spec.id.trim()), stylesDir)
         } catch (e: IOException) {

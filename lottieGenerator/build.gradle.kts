@@ -11,7 +11,7 @@ plugins {
 
 group = "org.churchpresenter"
 
-extra["coverageExcludes"] = listOf("**/ui/**", "**/MainKt*", "**/ComposableSingletons*")
+extra["coverageExcludes"] = listOf("**/ComposableSingletons*")
 
 kotlin {
     jvmToolchain(21)
@@ -30,9 +30,14 @@ dependencies {
     implementation(libs.compottie.dot)
 
     testImplementation(kotlin("test"))
+    testImplementation(libs.compose.uiTest)
+    testImplementation(libs.compose.uiTestJunit4)
 }
 
 tasks.test {
+    val testHome = layout.buildDirectory.dir("test-home").get().asFile
+    doFirst { testHome.mkdirs() }
+    systemProperty("user.home", testHome.absolutePath)
     systemProperty("java.awt.headless", "true")
 }
 

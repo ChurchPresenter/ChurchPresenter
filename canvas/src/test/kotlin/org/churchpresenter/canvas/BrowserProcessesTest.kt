@@ -36,4 +36,9 @@ class BrowserProcessesTest {
     fun `an answer naming a file that is not there is not trusted`() {
         assertNull(BrowserProcesses.browserOnPath("echo", "/no/such/browser"))
     }
+
+    @Test
+    fun `an empty answer is not a path`() {
+        assertNull(BrowserProcesses.browserOnPath("echo", ""))
+    }
 }

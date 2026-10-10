@@ -1,10 +1,12 @@
 package org.churchpresenter.converter.song
 
 import java.io.File
+import java.io.IOException
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 /**
@@ -164,5 +166,34 @@ class SngSectionLabelTest {
         val text = convertedText("#Title=T\n---\nVerse 1\nFirst line\nSecond line\n")
         assertTrue(text.contains("First line"))
         assertTrue(text.contains("Second line"))
+    }
+
+    @Test
+    fun `an order entry may name a section by its type or by its number alone`() {
+        val text = convertedText(
+            """
+            #Title=T
+            #VerseOrder=2,Verse
+            ---
+
+            Verse 1
+            First
+            ---
+            Verse 2
+            Second
+            """.trimIndent()
+        )
+        assertEquals(listOf("Verse 2", "Verse 1"), sectionsOf(text))
+    }
+
+    @Test
+    fun `every header is kept, including the ones the song file does not use`() {
+        val song = SngToSongConverter.parse(sng("#Title=T\n#CCLI=1234\n#Bad\n---\nVerse 1\nLine\n"))
+        assertEquals(mapOf("Title" to "T", "CCLI" to "1234"), song.headers)
+    }
+
+    @Test
+    fun `a file that cannot be read fails rather than converting nothing`() {
+        assertFailsWith<IOException> { SngToSongConverter.parse(File(temp, "missing.sng")) }
     }
 }

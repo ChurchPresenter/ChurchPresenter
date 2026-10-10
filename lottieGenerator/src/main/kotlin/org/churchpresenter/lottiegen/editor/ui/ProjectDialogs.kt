@@ -30,10 +30,8 @@ import org.churchpresenter.lottiegen.editor.RegisterResult
 import org.churchpresenter.lottiegen.model.StyleCatalog
 import org.churchpresenter.lottiegen.persistence.StyleSpecStorage
 import org.churchpresenter.lottiegen.ui.Strings
+import org.churchpresenter.lottiegen.ui.components.LocalLottieGenPickers
 import org.churchpresenter.lottiegen.ui.components.LottieTextField
-import java.awt.FileDialog
-import java.awt.Frame
-import java.io.File
 
 /**
  * Toolbar project actions (New/Open/Save/Save As/Export) plus the dialogs they open —
@@ -297,6 +295,7 @@ private fun ExportDialog(
     onRegistered: (RegisterResult) -> Unit
 ) {
     val issues = state.validateForExport()
+    val pickers = LocalLottieGenPickers.current
     val canRegister = remember { BuildRegistrar.locateStylesDir() != null }
     AlertDialog(
         onDismissRequest = onClose,
@@ -370,13 +369,7 @@ private fun ExportDialog(
                     enabled = issues.isEmpty(),
                     onClick = {
                         val suggested = "style${state.spec.id}_${StyleSpecStorage.slugify(state.spec.name)}.json"
-                        val dialog = FileDialog(null as Frame?, Strings.editorExportTitle, FileDialog.SAVE)
-                        dialog.file = suggested
-                        dialog.isVisible = true
-                        val dir = dialog.directory
-                        val fileName = dialog.file
-                        if (dir != null && fileName != null) {
-                            val target = File(dir, fileName)
+                        pickers.saveFile(Strings.editorExportTitle, suggested)?.let { target ->
                             if (state.exportTo(target)) onExported(target.name)
                         }
                     }

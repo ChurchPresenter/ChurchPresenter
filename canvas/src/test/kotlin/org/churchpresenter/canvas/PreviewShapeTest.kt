@@ -73,4 +73,17 @@ class PreviewShapeTest {
         assertEquals("5:4", previewShapeLabel(1350, 1080), "typed as a ratio, shown as one")
         assertEquals("1280×1024", previewShapeLabel(1280, 1024), "typed as a size, shown as one")
     }
+
+    @Test
+    fun `a typed ratio past the largest allowed half is held to it`() {
+        val largest = PREVIEW_RATIO_RANGE.last
+
+        assertEquals(sizeForRatio(largest, 1), sizeForRatio(largest + 50, 1))
+        assertEquals(sizeForRatio(1, largest), sizeForRatio(1, largest + 50))
+    }
+
+    @Test
+    fun `a custom shape is typed either as a ratio or as a size`() {
+        assertEquals(listOf("RATIO", "RESOLUTION"), CustomShapeMode.entries.map { it.name })
+    }
 }

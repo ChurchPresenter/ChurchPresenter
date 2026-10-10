@@ -106,7 +106,7 @@ object DetectionLogger {
     }
 
     /** Whether [file] is one of this logger's dated logs, last written before [cutoff]. */
-    private fun isExpiredLog(file: File, cutoff: Long): Boolean {
+    internal fun isExpiredLog(file: File, cutoff: Long): Boolean {
         val n = file.name
         val ours = n.startsWith(BASE_PREFIX) || n.startsWith(CANDIDATE_PREFIX) || n.startsWith(STICKY_PREFIX)
         val datedLog = file.isFile && n.endsWith(".jsonl") && ours

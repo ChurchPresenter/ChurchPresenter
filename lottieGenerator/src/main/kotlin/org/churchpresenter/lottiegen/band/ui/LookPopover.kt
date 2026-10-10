@@ -44,8 +44,8 @@ import org.churchpresenter.lottiegen.band.BibleLottieGenViewModel
 import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.ui.Tokens
 import java.io.File
-import javax.swing.JFileChooser
-import javax.swing.filechooser.FileNameExtensionFilter
+import org.churchpresenter.lottiegen.ui.components.LocalLottieGenPickers
+import org.churchpresenter.lottiegen.ui.components.LottieGenPickers
 import org.churchpresenter.lottiegen.ui.components.raisedKey
 import org.churchpresenter.theme.elevationPalette
 
@@ -75,6 +75,7 @@ internal fun LookPopover(
     val cfg = viewModel.config
     val look = cfg.look(role)
     val image = cfg.images[role]
+    val pickers = LocalLottieGenPickers.current
     Popup(
         alignment = Alignment.TopEnd,
         offset = IntOffset(0, POPOVER_OFFSET_PX),
@@ -109,7 +110,7 @@ internal fun LookPopover(
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                PictureButton(onClick = { viewModel.chooseBandImage(role, pickImage ?: ::chooseWithSwing) })
+                PictureButton(onClick = { viewModel.chooseBandImage(role, pickImage ?: { chooseWith(pickers) }) })
                 Text(
                     image?.name ?: Strings.bandImageNone, fontSize = 10.5.sp,
                     color = if (image != null) Tokens.OutlineText else Tokens.HintText,
@@ -227,11 +228,9 @@ private fun PictureButton(onClick: () -> Unit) {
     }
 }
 
-/** Swing's chooser, on the event thread, for the standalone window that has no host to lend one. */
-private suspend fun chooseWithSwing(): File? = withContext(Dispatchers.Swing) {
-    val chooser = JFileChooser()
-    chooser.fileFilter = FileNameExtensionFilter(Strings.bandImage, "png", "jpg", "jpeg", "webp")
-    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) chooser.selectedFile else null
+/** [pickers]' picture chooser, on the event thread, for the standalone window that has no host to lend one. */
+private suspend fun chooseWith(pickers: LottieGenPickers): File? = withContext(Dispatchers.Swing) {
+    pickers.openFile(Strings.bandImage, "png", "jpg", "jpeg", "webp")
 }
 
 /** A colour role: its name, its hex, the pencil to its look, and a mark when a picture stands in. */

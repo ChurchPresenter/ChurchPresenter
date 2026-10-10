@@ -8,12 +8,7 @@ plugins {
 
 group = "engine"
 
-extra["coverageExcludes"] = listOf("**/ui/**", "**/MainKt*", "**/tools/**", "**/ComposableSingletons*")
-
-extra["coverageFloors"] = mapOf(
-    "BRANCH" to "0.81",
-    "COMPLEXITY" to "0.78",
-)
+extra["coverageExcludes"] = listOf("**/ComposableSingletons*")
 
 kotlin {
     jvmToolchain(21)

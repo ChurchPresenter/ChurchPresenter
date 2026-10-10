@@ -11,6 +11,7 @@ import java.net.ServerSocket
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 
 /**
@@ -139,5 +140,21 @@ class SharedBrowserFrameCachePageDiscoveryTest {
         val deadPort = ServerSocket(0).use { it.localPort }
 
         assertNull(BrowserProcesses.getPageWebSocketUrl(deadPort))
+    }
+
+    @Test
+    fun `targets that do not say what they are fall back to the first one`() {
+        val port = serving(
+            """[{"webSocketDebuggerUrl":"ws://localhost/devtools/page/UNTYPED"},""" +
+                """{"type":null,"webSocketDebuggerUrl":"x"}]"""
+        )
+
+        assertEquals("ws://localhost/devtools/page/UNTYPED", BrowserProcesses.getPageWebSocketUrl(port))
+    }
+
+    @Test
+    fun `a port that answers but not as DevTools is never ready`() {
+        // The fake serves only the target list, so the version endpoint answers 404.
+        assertFalse(runBlocking { BrowserProcesses.waitForCdpReady(serving("[]"), timeoutMs = 150) })
     }
 }

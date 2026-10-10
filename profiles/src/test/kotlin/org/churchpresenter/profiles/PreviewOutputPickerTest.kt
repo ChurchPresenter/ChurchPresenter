@@ -4,6 +4,7 @@ package org.churchpresenter.profiles
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -327,4 +328,50 @@ class PreviewOutputPickerTest {
             )
         }
     }
+
+    @Test
+    fun `outputs on a profile that is gone are listed, and a null mode marks none of them off`() {
+        val gone = screen(target = -1).copy(activeProfileId = "gone")
+        val s = settings(
+            screens = listOf(screen().copy(activeProfileId = "gone")),
+            browserSources = listOf(gone),
+            ndi = listOf(gone),
+            omt = listOf(gone),
+        )
+        val listed = outputs(s, mode = null)
+        assertEquals(listOf("screen:0", "browserSource:0", "ndi:0", "omt:0"), listed.map { it.key })
+        assertTrue(listed.all { it.showsMode })
+    }
+
+    @Test
+    fun `browser, NDI and OMT outputs with this content off are listed but marked off`() {
+        val off = screen(shows = false, target = -1)
+        val listed = outputs(
+            settings(screens = emptyList(), browserSources = listOf(off), ndi = listOf(off), omt = listOf(off)),
+        )
+            .filterNot { it.key.startsWith("screen") }
+        assertEquals(listOf("browserSource:0", "ndi:0", "omt:0"), listed.map { it.key })
+        assertTrue(listed.none { it.showsMode })
+    }
+
+    @Test
+    fun `a release build lists no dev window for a screen set to None`() {
+        var listed: List<PreviewOutput> = listOf()
+        composed {
+            CompositionLocalProvider(LocalDevelopmentBuild provides false) {
+                val none = settings(listOf(screen(target = Constants.KEY_TARGET_NONE)))
+                listed = outputsShowing(none, Presenting.BIBLE, 0)
+            }
+        }
+        assertTrue(listed.isEmpty())
+    }
+
+    @Test
+    fun `picking an output that does not show this content warns under the picker`() =
+        picker(
+            settings(listOf(screen(), screen(shows = false, target = 1)), stored = mapOf(tab to "screen:1")),
+            realWindowCount = 2,
+        ) { _ ->
+            onNodeWithText("This output does not currently show this content.").assertExists()
+        }
 }

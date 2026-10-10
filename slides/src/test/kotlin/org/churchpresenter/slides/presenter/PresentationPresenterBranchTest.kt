@@ -75,4 +75,14 @@ class PresentationPresenterBranchTest {
             }
         }
     }
+
+    @Test
+    fun `a canvas with width but no height draws nothing and does not crash`() = runComposeUiTest {
+        setContent {
+            Box(Modifier.size(100.dp, 0.dp)) {
+                PresentationPresenter(frame = presentationFrame(listOf(placedLayer(Color.Red))), slide = null)
+            }
+        }
+        waitForIdle()
+    }
 }

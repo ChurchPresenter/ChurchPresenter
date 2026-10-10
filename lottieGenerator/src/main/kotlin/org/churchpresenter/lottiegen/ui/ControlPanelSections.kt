@@ -45,6 +45,7 @@ import org.churchpresenter.lottiegen.model.TIMING_PRESETS
 import org.churchpresenter.lottiegen.ui.components.AccentButton
 import org.churchpresenter.lottiegen.ui.components.CollapsibleSection
 import org.churchpresenter.lottiegen.ui.components.DeleteIconButton
+import org.churchpresenter.lottiegen.ui.components.LocalLottieGenPickers
 import org.churchpresenter.lottiegen.ui.components.LottieCheckbox
 import org.churchpresenter.lottiegen.ui.components.LottieDropdown
 import org.churchpresenter.lottiegen.ui.components.LottieTextField
@@ -52,9 +53,7 @@ import org.churchpresenter.lottiegen.ui.components.SectionCard
 import org.churchpresenter.lottiegen.ui.components.SegmentedButtons
 import org.churchpresenter.lottiegen.ui.components.SliderWithLabel
 import org.churchpresenter.lottiegen.ui.components.SubtleButton
-import javax.swing.JFileChooser
 import javax.swing.SwingUtilities
-import javax.swing.filechooser.FileNameExtensionFilter
 import org.churchpresenter.lottiegen.ui.components.ScrollingMenuItems
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -257,6 +256,7 @@ internal fun ShapeSection(viewModel: LottieGenState) {
 @Composable
 internal fun LogoSection(viewModel: LottieGenState) {
     val cfg = viewModel.config
+    val pickers = LocalLottieGenPickers.current
     // ═══ Logo ═══
     CollapsibleSection(
         Strings.sectionLogo,
@@ -281,18 +281,8 @@ internal fun LogoSection(viewModel: LottieGenState) {
                 DropdownMenuItem({ Text(Strings.logoImport) }, {
                     logoExpanded = false
                     SwingUtilities.invokeLater {
-                        val chooser = JFileChooser()
-                        chooser.fileFilter = FileNameExtensionFilter(
-                            "Images",
-                            "png",
-                            "jpg",
-                            "jpeg",
-                            "svg",
-                            "webp",
-                        )
-                        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                            viewModel.importAndLoadLogo(chooser.selectedFile)
-                        }
+                        pickers.openFile("Images", "png", "jpg", "jpeg", "svg", "webp")
+                            ?.let { viewModel.importAndLoadLogo(it) }
                     }
                 })
             }
@@ -381,6 +371,7 @@ internal fun PositionSection(viewModel: LottieGenState) {
 @Composable
 internal fun ActionsSection(viewModel: LottieGenState, controlTag: ControlTag = NoControlTag) {
     val cfg = viewModel.config
+    val pickers = LocalLottieGenPickers.current
     // ═══ Actions ═══
     Spacer(Modifier.height(5.dp))
     Row(
@@ -397,13 +388,7 @@ internal fun ActionsSection(viewModel: LottieGenState, controlTag: ControlTag = 
             AccentButton(
                 Strings.downloadJson,
                 {
-                    SwingUtilities.invokeLater {
-                        val chooser = JFileChooser()
-                        chooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
-                        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                            viewModel.downloadJson(chooser.selectedFile)
-                        }
-                    }
+                    SwingUtilities.invokeLater { pickers.openDirectory()?.let { viewModel.downloadJson(it) } }
                 },
                 Modifier.weight(1f)
             )
@@ -416,6 +401,7 @@ internal fun ActionsSection(viewModel: LottieGenState, controlTag: ControlTag = 
 @Composable
 internal fun LibrarySection(viewModel: LottieGenState, onBatchImport: () -> Unit) {
     val cfg = viewModel.config
+    val pickers = LocalLottieGenPickers.current
     // ═══ Library ═══
     SectionCard(
         Strings.sectionLibrary,
@@ -433,13 +419,7 @@ internal fun LibrarySection(viewModel: LottieGenState, onBatchImport: () -> Unit
                     )
                 } else {
                     SubtleButton(Strings.saveAllLowerThirds, {
-                        SwingUtilities.invokeLater {
-                            val chooser = JFileChooser()
-                            chooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
-                            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                                viewModel.batchDownloadAll(chooser.selectedFile)
-                            }
-                        }
+                        SwingUtilities.invokeLater { pickers.openDirectory()?.let { viewModel.batchDownloadAll(it) } }
                     }, compact = true)
                 }
             }

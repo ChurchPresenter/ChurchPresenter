@@ -238,4 +238,11 @@ class SpbVersionIndexTest {
         assertNull(SpbVersionIndex.packCode("BxxxCyyyVzzz"))
         assertEquals(40_018_013, SpbVersionIndex.packCode("B040C018V013"))
     }
+
+    @Test fun `a code is rejected when any one of its parts is not a number`() {
+        assertNull(SpbVersionIndex.packCode("X040C018V013"))
+        assertNull(SpbVersionIndex.packCode("B040Cx18V013"))
+        assertNull(SpbVersionIndex.packCode("B040C018V0x3"))
+        assertNull(SpbVersionIndex.packCode("B040C018V01"))
+    }
 }

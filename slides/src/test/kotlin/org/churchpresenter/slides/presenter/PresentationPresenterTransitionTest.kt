@@ -120,6 +120,14 @@ class PresentationPresenterTransitionTest {
     }
 
     @Test
+    fun `SPLIT RIGHT reveals the same vertical band as LEFT`() {
+        val pixels = render(TransitionType.SPLIT, direction = Direction.RIGHT)
+        assertColorAt(pixels, 100, 100, to)
+        assertColorAt(pixels, 10, 100, from)
+        assertColorAt(pixels, 190, 100, from)
+    }
+
+    @Test
     fun `SPLIT with any other direction reveals a horizontal band through the middle`() {
         val pixels = render(TransitionType.SPLIT, direction = Direction.UP)
         assertColorAt(pixels, 100, 100, to)
