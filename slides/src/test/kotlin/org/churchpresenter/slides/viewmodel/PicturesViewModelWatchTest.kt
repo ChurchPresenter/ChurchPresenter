@@ -1,5 +1,7 @@
 package org.churchpresenter.slides.viewmodel
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
@@ -188,6 +190,16 @@ class PicturesViewModelWatchTest {
 
         assertTrue(model.images.isEmpty())
         assertEquals(null, model.getCurrentImageFile())
+    }
+
+    @Test
+    fun `a watcher that has been cancelled adds nothing`() {
+        loadWith("a.jpg")
+        val b = image("b.jpg")
+        val cancelled = CoroutineScope(Job().apply { cancel() })
+
+        assertFalse(with(model.watching) { cancelled.addWatchedImage(b) })
+        assertEquals(1, model.images.size)
     }
 
     @Test

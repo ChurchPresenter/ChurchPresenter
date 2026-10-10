@@ -50,12 +50,13 @@ same split the code had in the app.
 
 ## Coverage floor
 
-Branches **80%** and complexity **77%**; the other four counters keep the shared 85%. The gap is not
-untested behaviour: it is the coroutine plumbing the compiler generates around slide rendering (45
-branches on one `finally` line), Compose's per-value change checks on click handlers and effects,
-and the native file pickers. The picture grid's shift-drag reorder is tested
-(`PicturesShiftDragTest`): a key held with `performKeyInput` rides on the mouse events after it. Raise the floors when any of that becomes reachable; never lower them further without
-asking.
+Complexity **82%**; the other five counters keep the shared 85%. The gap is not untested behaviour:
+`CrashReporter.trace` is `inline` and compiles `SlideLoader`'s render three times, and the copy for a
+transaction Sentry failed to start cannot run (`SlideLoaderTest` drives the other two, with reporting
+off and on); the rest is Compose's per-value change checks on click handlers and effects, and the
+native file pickers. The picture grid's shift-drag reorder is tested (`PicturesShiftDragTest`): a key
+held with `performKeyInput` rides on the mouse events after it. Raise the floor when any of that
+becomes reachable; never lower it without asking.
 
 ## Commands
 

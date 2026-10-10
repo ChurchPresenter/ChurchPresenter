@@ -150,6 +150,38 @@ class PicturesTabExtraTest {
         }
     }
 
+    @Test
+    fun `previous alone still reaches the primary`() {
+        var previousCalls = 0
+        picturesTab(folder = null, onInstanceLinkSendPreviousPicture = { previousCalls++ }) { _, _ ->
+            onRoot().performKeyInput { pressKey(Key.DirectionLeft) }
+            waitForIdle()
+
+            assertEquals(1, previousCalls)
+        }
+    }
+
+    @Test
+    fun `playing with no folder loaded moves nothing`() = picturesTab(folder = null) { vm, _ ->
+        vm.togglePlayPause()
+        waitForIdle()
+
+        assertTrue(vm.isPlaying)
+        assertEquals(0, vm.selectedImageIndex)
+    }
+
+    @Test
+    fun `the loop button toggles back and remembers each choice`() = picturesTab { vm, reports ->
+        val before = vm.isLooping
+        pictureButton(if (before) "Loop On" else "Loop Off").performClick()
+        waitForIdle()
+        pictureButton(if (before) "Loop Off" else "Loop On").performClick()
+        waitForIdle()
+
+        assertEquals(before, vm.isLooping)
+        assertEquals(before, reports.settingsAfterChange?.pictureSettings?.isLooping)
+    }
+
     // ── Loading a schedule item ──────────────────────────────────────────────────
 
     @Test

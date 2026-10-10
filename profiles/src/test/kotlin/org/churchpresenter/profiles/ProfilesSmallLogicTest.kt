@@ -6,6 +6,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.bible.PreviewVerse
 import org.churchpresenter.bible.VerseTarget
 import org.churchpresenter.core.models.bible.SelectedVerse
+import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.settings.AppSettings
@@ -14,6 +15,7 @@ import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
+import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.FallbackOutputSize
 import org.churchpresenter.sharedui.utils.OutputSize
@@ -136,5 +138,19 @@ class ProfilesSmallLogicTest {
             val target = BIBLE_PREVIEW_TARGETS.getValue(slot)
             assertEquals(target.chapter to target.verse, texts.getValue(slot).let { it.chapter to it.verseNumber })
         }
+    }
+
+    @Test
+    fun `each sample length gives the song preview its own lyrics and its own title slide`() {
+        var lyrics: Map<PreviewSampleSlot, List<LyricSection>> = emptyMap()
+        runComposeUiTest {
+            setContent { lyrics = PreviewSampleSlot.entries.associateWith { songSampleSections(it) } }
+            waitForIdle()
+        }
+        lyrics.values.forEach { assertTrue(it.isNotEmpty()) }
+        assertEquals(3, lyrics.values.distinct().size)
+        val titles = PreviewSampleSlot.entries.map { titleSlideSample(SongSettings(), it).title }
+        assertEquals(3, titles.distinct().size)
+        assertTrue(titles.all { it.isNotBlank() })
     }
 }

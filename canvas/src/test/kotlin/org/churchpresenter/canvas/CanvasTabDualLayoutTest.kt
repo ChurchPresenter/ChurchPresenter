@@ -192,4 +192,24 @@ class CanvasTabDualLayoutTest {
             )
         }
     }
+
+    @Test
+    fun `bringing a layer back that is outside both canvases fixes it in each, past the layers that were fine`() {
+        val far = box.copy(id = "far", transform = SourceTransform(x = 1.5f, y = 0.4f, width = 0.2f, height = 0.2f))
+        canvasTab(seed = {
+            val scene = addScene("Both")
+            addSource(box)
+            addSource(far)
+            setDualLayout(scene.id, true)
+            updateTransform(far.id, far.transform, alternate = true)
+        }) { vm, _ ->
+            onNodeWithTag(CANVAS_BRING_INTO_VIEW_TAG).performClick()
+            waitForIdle()
+
+            val scene = assertNotNull(vm.currentScene)
+            assertEquals(box.transform, scene.sources.first { it.id == box.id }.transform, "the layer inside stays")
+            assertEquals(CanvasPlacement.INSIDE, scene.sources.first { it.id == far.id }.transform.placement())
+            assertEquals(CanvasPlacement.INSIDE, scene.alternate?.transforms?.get(far.id)?.placement())
+        }
+    }
 }

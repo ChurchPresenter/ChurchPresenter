@@ -594,6 +594,26 @@ class SourcePropertiesBibleTest {
     }
 
     @Test
+    fun `a verse range typed out of order or not as a number keeps the range readable`() {
+        sourcePanel(Fixture.bible(), appSettings = settingsWithBible()) { get ->
+            awaitBibleLoaded()
+            waitUntil("the verse range boxes must appear", timeoutMillis = 5_000) { countOf("START VERSE") == 1 }
+
+            typeField(LoadedField.END_VERSE, "3")
+            typeField(LoadedField.START_VERSE, "2")
+            typeField(LoadedField.START_VERSE, "two")
+            typeField(LoadedField.END_VERSE, "three")
+            onNodeWithText("Insert Verse").performScrollTo().performClick()
+            waitForIdle()
+
+            assertEquals(
+                "Genesis 1:2-3", (get() as SceneSource.BibleSource).referenceText,
+                "a start inside the range leaves the end where it was, and text that is no number changes nothing",
+            )
+        }
+    }
+
+    @Test
     fun `the styling controls still work with a Bible loaded`() {
         sourcePanel(Fixture.bible(), appSettings = settingsWithBible()) { get ->
             awaitBibleLoaded()

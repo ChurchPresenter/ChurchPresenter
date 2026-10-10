@@ -277,6 +277,18 @@ class PresentationViewModelRemoteTest {
         assertEquals(local.name, vm.selectedPresentationDisplayName)
     }
 
+    @Test
+    fun `re-selecting the mirrored deck keeps the primary's path`() {
+        val vm = viewModel()
+        vm.loadPresentationFromRemote("sched-reselect", remotePath, slideCount = 2) { slideBytes(it) }
+        awaitUntil("download") { !vm.isLoading && vm.slideFiles.size == 2 }
+
+        vm.selectPresentation(vm.selectedPresentation!!)
+        awaitUntil("the re-selection settled") { !vm.isLoading }
+
+        assertEquals(remotePath, vm.selectedPresentationDisplayPath)
+    }
+
     // ── Render width from the output configuration ──────────────────────────────
 
     /**

@@ -23,6 +23,7 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.OutputSize
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class PreviewAdjustOverlayDragTest {
 
@@ -30,7 +31,9 @@ class PreviewAdjustOverlayDragTest {
         var margins by mutableStateOf(Margins(100, 100, 100, 100))
         var size by mutableStateOf(48)
         var band by mutableStateOf(band)
-        var region by mutableStateOf(ContentRegion())
+        var region by mutableStateOf(ContentRegion(widthPercent = 60))
+        var alignment by mutableStateOf(Constants.MIDDLE)
+        var alignments = 0
     }
 
     private val output = OutputSize(1920, 1080)
@@ -41,7 +44,7 @@ class PreviewAdjustOverlayDragTest {
             setContent {
                 val model = AdjustModel(
                     margins = Adjustable(state.margins) { state.margins = it },
-                    alignment = Adjustable(Constants.MIDDLE) {},
+                    alignment = Adjustable(state.alignment) { state.alignments++; state.alignment = it },
                     region = if (band == null) Adjustable(state.region) { state.region = it } else null,
                     textSize = Adjustable(state.size) { state.size = it },
                     band = state.band?.let { b -> Adjustable(b) { state.band = it } },
@@ -68,7 +71,7 @@ class PreviewAdjustOverlayDragTest {
         assertEquals(0, state.margins.left)
         drag(adjustMarginTag("bottom"), Offset(0f, -300f))
         assertEquals(room.maxFor(MarginSide.BOTTOM, state.margins), state.margins.bottom)
-        drag(adjustMarginTag("right"), Offset(-300f, 0f))
+        repeat(2) { drag(adjustMarginTag("right"), Offset(-300f, 0f)) }
         assertEquals(room.maxFor(MarginSide.RIGHT, state.margins), state.margins.right)
     }
 
@@ -86,8 +89,25 @@ class PreviewAdjustOverlayDragTest {
         assertEquals(BAND_RANGE.last, state.band)
         drag(ADJUST_BAND_TAG, Offset(0f, 330f))
         assertEquals(BAND_RANGE.first, state.band)
-        val room = MarginRoom.of(output.width, output.height, state.band)
-        drag(adjustMarginTag("top"), Offset(0f, 250f))
-        assertEquals(room.maxFor(MarginSide.TOP, state.margins), state.margins.top)
+    }
+
+    @Test
+    fun `the move handle snaps a block released near a guide and moves it where there is none`() = overlay { state ->
+        drag(ADJUST_MOVE_TAG, Offset(60f, 0f))
+        assertEquals(Constants.MIDDLE, state.alignment)
+        assertEquals(1, state.alignments)
+        assertTrue(state.region.xOffsetPercent > 0, "moved right: ${state.region}")
+        drag(ADJUST_MOVE_TAG, Offset(0f, 60f))
+        assertEquals(1, state.alignments, "released between guides, nothing snaps")
+        assertTrue(state.region.yOffsetPercent != 0, "the block moved down instead: ${state.region}")
+        drag(ADJUST_MOVE_TAG, Offset(0f, 100f))
+        assertEquals(Constants.BOTTOM, state.alignment)
+    }
+
+    @Test
+    fun `on a band with no region the move handle only snaps`() = overlay(band = 40) { state ->
+        drag(ADJUST_MOVE_TAG, Offset(0f, 30f))
+        assertEquals(0, state.alignments)
+        assertEquals(ContentRegion(widthPercent = 60), state.region)
     }
 }

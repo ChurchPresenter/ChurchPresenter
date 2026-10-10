@@ -13,6 +13,9 @@ import org.churchpresenter.sharedui.models.ShortcutAction
 import org.churchpresenter.sharedui.utils.ShortcutMap
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.testing.showsContainingText
 
 /**
  * Stepping through a slideshow from the keyboard.
@@ -167,6 +170,32 @@ class PicturesTabKeyboardTest {
             // handler having stopped responding.
             press(Key.DirectionRight)
             assertEquals(1, vm.selectedImageIndex)
+        }
+    }
+
+    private fun unbound(vararg actions: ShortcutAction) = ShortcutMap.from(
+        KeyboardShortcutSettings(overrides = actions.associate { it.name to emptyList<KeyChord>() })
+    )
+
+    @Test
+    fun `with every navigation key unbound the arrow hint is not shown`() {
+        val cleared = unbound(
+            ShortcutAction.PICTURES_PREVIOUS,
+            ShortcutAction.PICTURES_NEXT,
+            ShortcutAction.PICTURES_ROW_UP,
+            ShortcutAction.PICTURES_ROW_DOWN,
+        )
+        picturesTab(shortcuts = cleared) { _, _ ->
+            assertFalse(showsContainingText("next/prev image"))
+            assertTrue(showsContainingText("Shift+drag thumbnails to reorder"))
+        }
+    }
+
+    @Test
+    fun `with only the row keys bound the arrow hint is still shown`() {
+        val cleared = unbound(ShortcutAction.PICTURES_PREVIOUS, ShortcutAction.PICTURES_NEXT)
+        picturesTab(shortcuts = cleared) { _, _ ->
+            assertTrue(showsContainingText("navigate rows"))
         }
     }
 }

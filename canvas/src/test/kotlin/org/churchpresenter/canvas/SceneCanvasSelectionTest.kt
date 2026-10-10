@@ -235,4 +235,25 @@ class SceneCanvasSelectionTest {
             val moved = reports.transforms.last().second
             assertEquals(0f, moved.x, "the left edge must snap flush to the canvas edge")
         }
+
+    @Test
+    fun `a source held mid-drag in a corner snaps on both axes until it is let go`() =
+        canvas(listOf(shape(x = 0.1f, y = 0.1f)), selectedId = "shape-1") { reports ->
+            onNodeWithTag(canvasTag).performMouseInput {
+                moveTo(Offset(100f, 56f))
+                press()
+                moveTo(Offset(80f, 45f))
+                moveTo(Offset(61f, 34f))
+            }
+            waitForIdle()
+            val held = reports.transforms.last().second
+
+            onNodeWithTag(canvasTag).performMouseInput { release() }
+            waitForIdle()
+
+            assertEquals(0f, held.x, "the left edge sits on the canvas edge while the drag is held")
+            assertEquals(0f, held.y, "and the top edge on the top")
+            assertEquals(0f, reports.transforms.last().second.x)
+            assertEquals(0f, reports.transforms.last().second.y)
+        }
 }

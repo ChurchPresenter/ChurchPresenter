@@ -202,4 +202,24 @@ class SourcePropertiesCameraTest {
             onNodeWithText("This is a display, not a camera", substring = true).assertExists()
         }
     }
+
+    @Test
+    fun `a camera not yet pointed at a device offers the picker but no format`() =
+        cameraPanel(host = twoCameras) { _ ->
+            onNodeWithText("Studio Cam").assertExists()
+            assertEquals(0, countOf("Auto (default)"), "there is no device to ask for formats")
+        }
+
+    @Test
+    fun `a DeckLink source with no card index offers neither connectors nor formats`() {
+        val unindexed = Fixture.camera().copy(
+            devicePath = "decklink://", deviceName = "Mini Recorder", isDeckLink = true, deckLinkIndex = -1,
+        )
+        cameraPanel(unindexed, host = twoCameras) { get ->
+            assertEquals(0, countOf("Auto (default)"))
+            assertEquals(0, countOf("VIDEO CONNECTION"))
+            assertEquals(0, countOf("Auto"), "nor a mode picker")
+            assertEquals(unindexed, get(), "and the source is left as it was")
+        }
+    }
 }

@@ -13,6 +13,7 @@ import java.io.File
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -96,6 +97,25 @@ class PicturePartsTest {
         fill("a.jpg")
         state.selectedImageIndex.value = 4
         val out = FakeSlidesOutput().apply { setScreenLock(0, Presenting.PICTURES) }
+        live.syncWithPresenter(out)
+        assertNull(out.selectedImagePath.value)
+    }
+
+    @Test
+    fun `a picture added at a position goes there, and a second copy of a path does not`() {
+        val (a, b) = fill("a.jpg", "b.jpg")
+        val c = File(dir, "c.jpg")
+        synchronized(state.imagesLock) {
+            assertTrue(state.addUniqueLocked(c, 0))
+            assertFalse(state.addUniqueLocked(File(dir, "a.jpg")))
+        }
+        assertEquals(listOf(c, a, b), state.images.toList())
+    }
+
+    @Test
+    fun `a screen locked to something else is not kept in step`() {
+        fill("a.jpg")
+        val out = FakeSlidesOutput().apply { setScreenLock(0, Presenting.LYRICS) }
         live.syncWithPresenter(out)
         assertNull(out.selectedImagePath.value)
     }

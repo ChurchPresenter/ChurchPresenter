@@ -2,6 +2,7 @@
 
 package org.churchpresenter.slides.tabs
 
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.slides.FakeSlidesOutput
 import org.churchpresenter.slides.SlidesOutput
 import org.churchpresenter.slides.awaitDeck
@@ -11,6 +12,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class PresentationTabCuedTest {
 
@@ -51,6 +53,22 @@ class PresentationTabCuedTest {
             waitForIdle()
             assertEquals(setOf(0), vm.hiddenSlides)
             waitUntil("nothing left to show next", 5_000) { out.fake.nextSlide.value == null }
+        }
+    }
+
+    @Test
+    fun `a screen locked to other content is not sent the slide`() {
+        val out = FakeSlidesOutput().apply { setScreenLock(0, Presenting.LYRICS) }
+        presentationTab(presenterManager = out) { vm, _ ->
+            vm.addPresentation(pdfDeck(dir, 2))
+            awaitDeck(vm)
+            vm.selectSlide(1)
+            waitForIdle()
+            vm.toggleSlideHidden(0)
+            waitForIdle()
+
+            assertNull(out.liveSlide.value)
+            assertNull(out.nextSlide.value)
         }
     }
 

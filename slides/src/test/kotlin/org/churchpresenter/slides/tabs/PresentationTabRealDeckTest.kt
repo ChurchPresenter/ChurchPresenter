@@ -26,6 +26,7 @@ import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.churchpresenter.sharedui.testing.showsContainingText
 
@@ -199,6 +200,45 @@ class PresentationTabRealDeckTest {
 
         onRoot().performKeyInput { pressKey(Key.DirectionLeft) }
         waitForIdle()
+        assertEquals(0, vm.selectedSlideIndex)
+    }
+
+    @Test
+    fun `double-clicking a thumbnail of a real deck takes it live without Instance Link`() {
+        val presenter = FakeSlidesOutput()
+        withRealDeck(pages = 3, presenterManager = presenter) { _, _, file ->
+            waitUntilAtLeastOneExists(hasContentDescription("Slide 2"), timeoutMillis = 5_000)
+            onNodeWithContentDescription("Slide 2").performTouchInput {
+                down(center)
+                up()
+                advanceEventTime(50)
+                down(center)
+                up()
+            }
+            waitForIdle()
+
+            assertEquals(Presenting.PRESENTATION, presenter.onAir.value)
+            waitUntil("the slide sent", 5_000) { presenter.liveSlide.value == (file.name to 1) }
+        }
+    }
+
+    @Test
+    fun `a hidden slide past the end of the deck is not counted`() = withRealDeck(pages = 3) { vm, _, _ ->
+        vm.toggleSlideHidden(7)
+        waitForIdle()
+        assertTrue(showsContainingText("Slide 1 of 3"))
+        assertFalse(showsContainingText("hidden"))
+
+        vm.toggleSlideHidden(1)
+        waitForIdle()
+        assertTrue(showsContainingText("1 hidden"))
+    }
+
+    @Test
+    fun `playing with no deck loaded moves nothing`() = presentationTab { vm, _ ->
+        vm.togglePlayPause()
+        waitForIdle()
+        assertTrue(vm.isPlaying)
         assertEquals(0, vm.selectedSlideIndex)
     }
 }

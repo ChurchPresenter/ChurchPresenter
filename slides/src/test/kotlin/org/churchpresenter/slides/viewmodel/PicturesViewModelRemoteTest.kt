@@ -112,6 +112,21 @@ class PicturesViewModelRemoteTest {
     }
 
     @Test
+    fun `a downloaded image whose cache slot is already taken is listed and marked unreadable`() {
+        val vm = vm()
+        val slot = File(cacheDir("folder-blocked"), "image_0000.jpg")
+
+        vm.loadPictureFromRemote(folderId = "folder-blocked", folderPath = "/elsewhere/Blocked", imageCount = 1) {
+            File(slot, "occupant").apply { parentFile.mkdirs(); writeText("x") }
+            pngBytes()
+        }
+
+        awaitUntil("the slot marked unreadable") { slot in vm.thumbnailFailures }
+        assertEquals(listOf(slot), vm.images)
+        assertTrue(cacheDir("folder-blocked").listFiles()!!.none { it.name.endsWith(".tmp") }, "no temp file left")
+    }
+
+    @Test
     fun `re-selecting the same mirrored folder cannot list an image twice`() {
         // PicturesTab restarts the load whenever the selected item or its version changes, so the
         // same folder is loaded again while the first download may still be running. Both loops

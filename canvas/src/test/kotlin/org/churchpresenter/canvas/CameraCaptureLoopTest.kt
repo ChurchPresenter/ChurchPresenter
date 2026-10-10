@@ -64,8 +64,12 @@ class CameraCaptureLoopTest {
 
     private val streamed = FfmpegAttempt(framesProduced = true, exitCode = 0, stderrTail = emptyList())
 
-    private fun run(steps: ScriptedSteps, entry: CacheEntry = CacheEntry()): CacheEntry = runBlocking {
-        val loop = CaptureLoop(source, entry, steps)
+    private fun run(
+        steps: ScriptedSteps,
+        entry: CacheEntry = CacheEntry(),
+        on: SceneSource.CameraSource = source,
+    ): CacheEntry = runBlocking {
+        val loop = CaptureLoop(on, entry, steps)
         loop.run()
         loop.reportIfGaveUp()
         entry
@@ -167,5 +171,17 @@ class CameraCaptureLoopTest {
 
         assertTrue(steps.commands.isEmpty())
         assertNull(entry.error.value)
+    }
+
+    @Test
+    fun `an AVFoundation I-O error stops at once, as the privacy refusal it usually is`() {
+        val steps = ScriptedSteps(List(5) { failed("[avfoundation @ 0x1] Input/output error") })
+        val mac = source.copy(devicePath = "avfoundation://0", deviceName = "FaceTime HD Camera")
+
+        val entry = run(steps, on = mac)
+
+        assertEquals(1, steps.commands.size)
+        assertEquals(CameraFailure.PERMISSION_OR_UNAVAILABLE, entry.error.value)
+        assertTrue(steps.pauses.isEmpty())
     }
 }

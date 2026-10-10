@@ -157,4 +157,40 @@ class DeckLinkCaptureTest {
         assertNull(entry.frame.value)
         assertTrue(showDeckLinkFrame(frame(1, 1), entry, first = false))
     }
+
+    @Test
+    fun `a card that never sends a picture stays blank through a long run of empty polls`() {
+        val entry = capture(FakeCard(frames = List(40) { null }))
+
+        assertNull(entry.frame.value)
+        assertNull(entry.error.value, "an open card with no signal is not an error")
+    }
+
+    @Test
+    fun `a source on auto opens the card with no mode`() {
+        val card = FakeCard(frames = listOf(frame(2, 2)))
+
+        runBlocking {
+            try {
+                DeckLinkCapture(source.copy(videoFormat = ""), CacheEntry(), DeckLinkOpenReports(), card).run()
+            } catch (_: StopPolling) {
+                // The fake ran out of frames.
+            }
+        }
+
+        assertEquals(Triple(0, "", 2), card.opened)
+    }
+
+    @Test
+    fun `a card that fails to open again still says so after its one report`() {
+        val reports = DeckLinkOpenReports()
+        val entries = List(2) { CacheEntry() }
+
+        runBlocking {
+            entries.forEach { DeckLinkCapture(source, it, reports, FakeCard(opens = false)).run() }
+        }
+
+        assertEquals(listOf(CameraFailure.DECKLINK_OPEN_FAILED, CameraFailure.DECKLINK_OPEN_FAILED), entries.map { it.error.value })
+        assertFalse(reports.claim(source.deckLinkIndex), "the card's one report was already spent")
+    }
 }

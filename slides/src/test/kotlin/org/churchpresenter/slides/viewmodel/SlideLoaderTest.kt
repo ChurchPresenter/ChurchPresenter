@@ -12,7 +12,6 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.core.models.presentation.PresentationLoadError
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.presentationengine.LoadResult
-import org.churchpresenter.presentationengine.cache.SlideCacheSupersededException
 import org.churchpresenter.presentationengine.cache.SlideDiskCache
 import org.churchpresenter.presentationengine.model.DeckFormat
 import org.churchpresenter.presentationengine.model.DeckLoadError
@@ -27,6 +26,7 @@ import org.churchpresenter.slides.pdfDeck as realPdf
 import org.churchpresenter.slides.tempDir
 import java.awt.image.BufferedImage
 import java.io.File
+import java.io.IOException
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -172,7 +172,9 @@ class SlideLoaderTest {
         val p = parts()
         val f = file("cancel-${seq++}.pdf")
         p.loader.loadDeck = { LoadResult.Success(pdfDeck(f, listOf(slide(0), slide(1)))) }
-        p.loader.renderSlideFrame = { _, index -> if (index == 1) throw CancellationException("superseded") else frame() }
+        p.loader.renderSlideFrame = { _, index ->
+            if (index == 1) throw CancellationException("superseded") else frame()
+        }
         assertFailsWith<CancellationException> { run(onMain) { p.loader.loadOrCacheSlides(f) } }
         assertEquals(1, p.state.slideFiles.size)
         assertFalse(p.state.isLoading.value)
@@ -237,6 +239,19 @@ class SlideLoaderTest {
         }
         assertTrue(p.state.slideFiles.isEmpty())
         assertEquals(PresentationLoadError.RENDER_FAILED, p.state.loadError.value)
+    }
+
+    @Test
+    fun `a download that fails with an error removes its folder and stops loading`() = everyWay { onMain ->
+        val p = parts()
+        val cacheDir = File(dir, "remote-error-${seq++}").apply { mkdirs() }
+        p.state.isLoading.value = true
+        assertFailsWith<IOException> {
+            run(onMain) { p.loader.downloadSlides(cacheDir, 2) { throw IOException("primary went away") } }
+        }
+        assertFalse(cacheDir.exists())
+        assertFalse(p.state.isLoading.value)
+        assertFalse(SlideDiskCache.isOwned(cacheDir))
     }
 
     @Test

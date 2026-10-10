@@ -7,7 +7,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.SkikoComposeUiTest
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -106,6 +110,40 @@ class ProfilesTabRecompositionTest {
             waitForIdle()
             val visited = visitEveryPage(Constants.DISPLAY_MODE_FULLSCREEN, get, set)
             assertEquals(10, visited.size)
+        }
+    }
+
+    private fun SkikoComposeUiTest.openAndEscapeLargePreview(mode: String): Int {
+        var opened = 0
+        customizePanes(mode).forEach { pane ->
+            onNodeWithTag(railTag(pane.name)).performScrollTo().performClick()
+            waitForIdle()
+            if (onAllNodesWithTag(PREVIEW_LARGER_TAG).fetchSemanticsNodes().isEmpty()) return@forEach
+            tap(PREVIEW_LARGER_TAG)
+            assertEquals(1, onAllNodesWithTag(LARGE_PREVIEW_TAG).fetchSemanticsNodes().size, pane.name)
+            val large = onAllNodes(hasTestTag(LARGE_PREVIEW_TAG), useUnmergedTree = true)[0]
+            large.performKeyInput { pressKey(Key.A) }
+            waitForIdle()
+            assertEquals(1, onAllNodesWithTag(LARGE_PREVIEW_TAG).fetchSemanticsNodes().size, "a key that is not Esc")
+            large.performKeyInput { pressKey(Key.Escape) }
+            waitForIdle()
+            assertEquals(0, onAllNodesWithTag(LARGE_PREVIEW_TAG).fetchSemanticsNodes().size, pane.name)
+            opened++
+        }
+        return opened
+    }
+
+    @Test
+    fun `every page's large preview opens and Esc closes it`() {
+        listOf(
+            Constants.DISPLAY_MODE_FULLSCREEN,
+            Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL,
+            Constants.DISPLAY_MODE_STAGE_MONITOR,
+        ).forEach { mode ->
+            swappableTab(document(mode, advanced = true)) { _, _ ->
+                val expected = customizePanes(mode).size - if (mode == Constants.DISPLAY_MODE_STAGE_MONITOR) 1 else 0
+                assertEquals(expected, openAndEscapeLargePreview(mode), mode)
+            }
         }
     }
 }

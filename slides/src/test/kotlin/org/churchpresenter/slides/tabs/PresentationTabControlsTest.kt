@@ -216,6 +216,21 @@ class PresentationTabControlsTest {
     }
 
     @Test
+    fun `Go Live on the last slide sends nothing after it`() {
+        val presenter = FakeSlidesOutput()
+        withFakeSlides(3, presenterManager = presenter) { vm, _ ->
+            vm.isLooping = false
+            vm.selectSlide(2)
+            waitForIdle()
+            presentationButton(PresentationLabel.GO_LIVE).performClick()
+
+            waitUntil("the slide sent", 5_000) { presenter.selectedSlide.value != null }
+            assertEquals(2, presenter.liveSlide.value?.second)
+            assertEquals(null, presenter.nextSlide.value)
+        }
+    }
+
+    @Test
     fun `double-clicking a thumbnail with no output only selects it`() = withFakeSlides(3) { vm, _ ->
         doubleClick("Slide 2")
 
