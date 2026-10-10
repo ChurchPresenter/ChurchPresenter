@@ -87,7 +87,7 @@ All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpr
 | `data/`          | File I/O, database, song parsing, Bible data — the play statistics are `:statistics` |
 | `models/`        | Only what needs the app: `PresetItems` — `ShortcutAction` is `:shared-ui`, the Companion UI states `:companion-surface` |
 | `composables/`   | UI components with app or feature ties (SceneCanvas, DeckLinkManager, etc.) — the shared ones are `:shared-ui`, the video player `:media` |
-| `dialogs/`       | All dialogs and settings dialog tabs                                |
+| `dialogs/`       | The Options dialog, the tool windows, the license and Share Your Story dialogs, the settings tabs — the other dialogs are `:dialogs` |
 | `utils/`         | Stateless helpers (window icons, placement, etc.) — the shared ones (AutoFit, screen bounds) are `:shared-ui`, crash reporting is `:diagnostics`, the updater is `:updater` |
 | `ui/theme/`      | The theme-customization settings — `Language` is `:shared-ui`, the theme itself is the `:theme` module |
 
@@ -159,6 +159,7 @@ module-specific notes there, not here.**
 | `server-ui/`           | `:server-ui`           | The Server settings page, calendar sync's card and Instance Link's windows: the Compose face of `:server` | [AGENT.md](server-ui/AGENT.md)           |
 | `app-settings/`        | `:app-settings`        | The System settings page, the setup wizard, auto-start and the `.sps` converter    | [AGENT.md](app-settings/AGENT.md)        |
 | `telemetry/`           | `:telemetry`           | What the app reports about itself: the live-map ping, usage events, the contact form, the device report | [AGENT.md](telemetry/AGENT.md)           |
+| `dialogs/`             | `:dialogs`             | The dialogs and small windows: About, Contact Us, keyboard shortcuts, Customize Theme, the remote and show-control dialogs | [AGENT.md](dialogs/AGENT.md)             |
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions

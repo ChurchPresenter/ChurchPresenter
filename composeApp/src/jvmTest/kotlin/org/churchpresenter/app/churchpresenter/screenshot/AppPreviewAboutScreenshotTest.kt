@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter.screenshot
 
+import org.churchpresenter.app.churchpresenter.utils.appTelemetryIdentity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
@@ -9,9 +10,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.v2.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.dialogs.ABOUT_DIALOG_HEIGHT
-import org.churchpresenter.app.churchpresenter.dialogs.ABOUT_DIALOG_WIDTH
-import org.churchpresenter.app.churchpresenter.dialogs.AboutDialogContent
+import org.churchpresenter.dialogs.ABOUT_DIALOG_HEIGHT
+import org.churchpresenter.dialogs.ABOUT_DIALOG_WIDTH
+import org.churchpresenter.dialogs.AboutDialogContent
 import java.io.File
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
@@ -38,6 +39,7 @@ class AppPreviewAboutScreenshotTest {
                         AboutDialogContent(
                             onDismiss = {},
                             appSettings = appSettings,
+                            identity = appTelemetryIdentity,
                             theme = mode,
                             // Pinned: the real one carries the build's git hash, so this image
                             // would differ from the committed one after every single commit.

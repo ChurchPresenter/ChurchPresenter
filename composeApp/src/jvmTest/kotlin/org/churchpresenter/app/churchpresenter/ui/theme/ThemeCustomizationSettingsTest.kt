@@ -2,7 +2,7 @@ package org.churchpresenter.app.churchpresenter.ui.theme
 
 import org.churchpresenter.sharedui.composables.cpColorToHex
 import org.churchpresenter.sharedui.composables.cpTryParseHex
-import org.churchpresenter.app.churchpresenter.dialogs.defaultChoice
+import org.churchpresenter.dialogs.defaultChoice
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.CustomThemeColors
 import org.churchpresenter.settings.ListRowSpacing

@@ -13,7 +13,7 @@ import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.liveoutput.messageOnAir
 import org.churchpresenter.liveoutput.propsOnAir
 import org.churchpresenter.liveshow.Cue
-import org.churchpresenter.app.churchpresenter.dialogs.CLEAR_GROUPS_EDIT_TAG
+import org.churchpresenter.dialogs.CLEAR_GROUPS_EDIT_TAG
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.ClearGroup
 import org.churchpresenter.settings.MessageTemplate

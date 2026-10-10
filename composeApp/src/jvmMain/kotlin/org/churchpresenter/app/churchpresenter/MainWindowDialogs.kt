@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.app.churchpresenter.utils.appTelemetryIdentity
 import org.churchpresenter.server.preloadData
 import org.churchpresenter.server.updateApiKey
 import org.churchpresenter.server.updateAtemConfig
@@ -15,10 +16,10 @@ import androidx.compose.runtime.Composable
 import org.churchpresenter.strings.generated.resources.Res
 import kotlinx.coroutines.launch
 import org.churchpresenter.statistics.asDurationRow
-import org.churchpresenter.app.churchpresenter.dialogs.AboutDialog
+import org.churchpresenter.dialogs.AboutDialog
 import org.churchpresenter.serverui.InstanceLinkToastHost
-import org.churchpresenter.app.churchpresenter.dialogs.CONTACT_TYPE_TESTIMONIAL
-import org.churchpresenter.app.churchpresenter.dialogs.ContactUsDialog
+import org.churchpresenter.dialogs.CONTACT_TYPE_TESTIMONIAL
+import org.churchpresenter.dialogs.ContactUsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ShareYourStoryDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ConverterWindow
 import org.churchpresenter.app.churchpresenter.dialogs.SongLibraryWindow
@@ -27,11 +28,11 @@ import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
 import org.churchpresenter.profiles.hostFontPicker
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
 import org.churchpresenter.app.churchpresenter.dialogs.StyleEditorWindow
-import org.churchpresenter.app.churchpresenter.dialogs.MemoryMonitorWindow
-import org.churchpresenter.app.churchpresenter.dialogs.CustomizeThemeDialog
-import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
-import org.churchpresenter.app.churchpresenter.dialogs.RemoteActivityToastHost
-import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventDialog
+import org.churchpresenter.dialogs.MemoryMonitorWindow
+import org.churchpresenter.dialogs.CustomizeThemeDialog
+import org.churchpresenter.dialogs.KeyboardShortcutsDialog
+import org.churchpresenter.dialogs.RemoteActivityToastHost
+import org.churchpresenter.dialogs.RemoteEventDialog
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.ui.theme.themeChoiceFrom
 import org.churchpresenter.app.churchpresenter.ui.theme.themeCustomizationFrom
@@ -171,6 +172,7 @@ internal fun MainWindowScope.InfoDialogs() {
             isVisible = showAboutDialog,
             onDismiss = { showAboutDialog = false; dialogDismissSignal++ },
             appSettings = appSettings,
+            identity = appTelemetryIdentity,
             theme = theme
         )
         ContactUsDialog(
@@ -180,7 +182,8 @@ internal fun MainWindowScope.InfoDialogs() {
                 contactDialogInitialType = null
                 dialogDismissSignal++
             },
-            initialTypeKey = contactDialogInitialType
+            initialTypeKey = contactDialogInitialType,
+            identity = appTelemetryIdentity,
         )
         ShareYourStoryDialog(
             isVisible = showStoryPrompt,

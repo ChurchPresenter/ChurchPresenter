@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.dialogs.DialogFrame
+import org.churchpresenter.dialogs.DialogFrameSpec
+import org.churchpresenter.dialogs.appDialogFrame
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

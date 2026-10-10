@@ -1,5 +1,10 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.dialogs.DialogFrame
+import org.churchpresenter.dialogs.DialogFrameSpec
+import org.churchpresenter.dialogs.SHARE_STORY_DIALOG_HEIGHT
+import org.churchpresenter.dialogs.SHARE_STORY_DIALOG_WIDTH
+import org.churchpresenter.dialogs.appDialogFrame
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.VerticalScrollbar

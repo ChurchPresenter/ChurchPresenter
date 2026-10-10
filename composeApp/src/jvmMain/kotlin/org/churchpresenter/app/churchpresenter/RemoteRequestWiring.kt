@@ -1,7 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
-import org.churchpresenter.app.churchpresenter.dialogs.text
+import org.churchpresenter.dialogs.text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.size

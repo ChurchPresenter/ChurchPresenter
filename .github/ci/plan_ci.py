@@ -70,6 +70,7 @@ MODULES = [
     ("presenter", "Presenter", 1.0),
     ("profiles", "Profiles", 7.7),
     ("companion-surface", "Companion Surface", 0.6),
+    ("dialogs", "Dialogs", 0.6),
 ]
 
 # Modules in the graph that have no test suite of their own.

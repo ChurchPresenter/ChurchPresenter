@@ -2,6 +2,11 @@
 
 package org.churchpresenter.app.churchpresenter.dialogs
 
+import org.churchpresenter.dialogs.MEMORY_MONITOR_WINDOW_HEIGHT
+import org.churchpresenter.dialogs.MEMORY_MONITOR_WINDOW_WIDTH
+import org.churchpresenter.dialogs.MemoryMonitorWindow
+import org.churchpresenter.dialogs.ToolWindowFrame
+import org.churchpresenter.dialogs.ToolWindowSpec
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable

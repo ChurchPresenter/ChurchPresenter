@@ -57,6 +57,7 @@ class ScreenshotInvariantsTest {
         File("../lottieGenerator/src/test/kotlin/org/churchpresenter/lottiegen/screenshot"),
         File("../obs/src/test/kotlin/org/churchpresenter/obs/screenshot"),
         File("../crossword-tab/src/test/kotlin/org/churchpresenter/crosswordtab/screenshot"),
+        File("../dialogs/src/test/kotlin/org/churchpresenter/dialogs/screenshot"),
     )
 
     /** Every `.kt` in the screenshot packages, paired with its text. */

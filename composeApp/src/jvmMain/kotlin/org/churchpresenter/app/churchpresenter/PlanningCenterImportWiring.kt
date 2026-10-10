@@ -6,7 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
-import org.churchpresenter.app.churchpresenter.dialogs.songEditorBackgroundButton
+import org.churchpresenter.dialogs.songEditorBackgroundButton
 import org.churchpresenter.app.churchpresenter.utils.countDeckSlides
 import org.churchpresenter.bibletab.BibleBookAbbreviations
 import org.churchpresenter.helper.ui.GuideSpotlightHost

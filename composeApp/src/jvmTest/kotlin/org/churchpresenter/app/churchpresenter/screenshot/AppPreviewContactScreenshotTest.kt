@@ -10,8 +10,8 @@ import androidx.compose.ui.test.v2.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.TestSingletons
-import org.churchpresenter.app.churchpresenter.dialogs.ContactUsDialogContent
-import org.churchpresenter.app.churchpresenter.dialogs.SendStatus
+import org.churchpresenter.dialogs.ContactUsDialogContent
+import org.churchpresenter.dialogs.SendStatus
 import org.churchpresenter.theme.ChurchPresenterTheme
 import java.io.File
 import kotlin.test.Test

@@ -8,8 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.app.churchpresenter.dialogs.SHARE_STORY_DIALOG_HEIGHT
-import org.churchpresenter.app.churchpresenter.dialogs.SHARE_STORY_DIALOG_WIDTH
+import org.churchpresenter.dialogs.SHARE_STORY_DIALOG_HEIGHT
+import org.churchpresenter.dialogs.SHARE_STORY_DIALOG_WIDTH
 import org.churchpresenter.app.churchpresenter.dialogs.ShareYourStoryContent
 import org.churchpresenter.theme.ChurchPresenterTheme
 import java.io.File

@@ -197,3 +197,7 @@ include(":app-settings")
 // The Server settings page, calendar sync and Instance Link's windows: the Compose face of :server.
 // Depended on by :composeApp.
 include(":server-ui")
+
+// The app's dialogs and small windows -- About, Contact Us, keyboard shortcuts, the remote and
+// show-control dialogs. Depended on by :composeApp.
+include(":dialogs")

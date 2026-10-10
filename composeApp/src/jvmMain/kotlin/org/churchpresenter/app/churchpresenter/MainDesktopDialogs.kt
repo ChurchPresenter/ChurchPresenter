@@ -2,11 +2,11 @@ package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import org.churchpresenter.app.churchpresenter.dialogs.AddLabelDialog
-import org.churchpresenter.app.churchpresenter.dialogs.AddWebsiteDialog
-import org.churchpresenter.app.churchpresenter.dialogs.CrashFeedbackDialog
-import org.churchpresenter.app.churchpresenter.dialogs.KonamiEasterEggDialog
-import org.churchpresenter.app.churchpresenter.dialogs.SavePresetDialog
+import org.churchpresenter.dialogs.AddLabelDialog
+import org.churchpresenter.dialogs.AddWebsiteDialog
+import org.churchpresenter.dialogs.CrashFeedbackDialog
+import org.churchpresenter.dialogs.KonamiEasterEggDialog
+import org.churchpresenter.dialogs.SavePresetDialog
 import org.churchpresenter.calendar.PresetStore
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.calendarFolder

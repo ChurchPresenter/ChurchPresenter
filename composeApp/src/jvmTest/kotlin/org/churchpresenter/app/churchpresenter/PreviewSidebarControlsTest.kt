@@ -15,7 +15,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.app.churchpresenter.composables.QUICK_BACKGROUND_HEADER_TAG
 import org.churchpresenter.app.churchpresenter.composables.QUICK_BACKGROUND_RESET_TAG
-import org.churchpresenter.app.churchpresenter.dialogs.clearGroupItemTag
+import org.churchpresenter.dialogs.clearGroupItemTag
 import org.churchpresenter.core.models.companion.CompanionSurfacePlacement
 import org.churchpresenter.liveoutput.PresenterManager
 import org.churchpresenter.settings.AppSettings
