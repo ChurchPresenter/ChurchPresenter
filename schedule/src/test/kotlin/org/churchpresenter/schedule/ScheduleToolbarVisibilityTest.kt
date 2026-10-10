@@ -2,6 +2,10 @@
 
 package org.churchpresenter.schedule
 
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import kotlin.test.Test
@@ -37,6 +41,56 @@ class ScheduleToolbarVisibilityTest {
             waitForIdle()
 
             assertEquals(listOf(ScheduleToolbarButton.CLEAR), reports.toolbarButtonToggles)
+        }
+
+    @Test
+    fun `each menu entry is checked while its button is shown`() =
+        scheduleTab(hiddenToolbarButtons = setOf(ScheduleToolbarButton.CLEAR.name), seed = { seedService() }) { _, _ ->
+            taggedButton(ScheduleToolbarTags.OPTIONS).performClick()
+            waitForIdle()
+
+            taggedButton(ScheduleToolbarButton.NEW.menuTag).assertIsOn()
+            taggedButton(ScheduleToolbarButton.CLEAR.menuTag).assertIsOff()
+        }
+
+    @Test
+    fun `the menu stays open between picks`() =
+        scheduleTab(seed = { seedService() }) { _, reports ->
+            taggedButton(ScheduleToolbarTags.OPTIONS).performClick()
+            waitForIdle()
+            taggedButton(ScheduleToolbarButton.CLEAR.menuTag).performClick()
+            waitForIdle()
+            taggedButton(ScheduleToolbarButton.UNDO.menuTag).performClick()
+            waitForIdle()
+
+            assertEquals(listOf(ScheduleToolbarButton.CLEAR, ScheduleToolbarButton.UNDO), reports.toolbarButtonToggles)
+        }
+
+    @Test
+    fun `the menu counts the buttons shown and hides Show all when nothing is hidden`() =
+        scheduleTab(seed = { seedService() }) { _, _ ->
+            taggedButton(ScheduleToolbarTags.OPTIONS).performClick()
+            waitForIdle()
+
+            val total = ScheduleToolbarButton.entries.size
+            onNodeWithText("$total of $total").assertExists()
+            assertTrue(onAllNodesWithText("Show all").fetchSemanticsNodes().isEmpty())
+        }
+
+    @Test
+    fun `Show all asks the parent to bring back each hidden button, and only those`() =
+        scheduleTab(
+            hiddenToolbarButtons = setOf(ScheduleToolbarButton.UNDO.name, ScheduleToolbarButton.CLEAR.name),
+            seed = { seedService() },
+        ) { _, reports ->
+            taggedButton(ScheduleToolbarTags.OPTIONS).performClick()
+            waitForIdle()
+            val total = ScheduleToolbarButton.entries.size
+            onNodeWithText("${total - 2} of $total").assertExists()
+            onNodeWithText("Show all").performClick()
+            waitForIdle()
+
+            assertEquals(listOf(ScheduleToolbarButton.CLEAR, ScheduleToolbarButton.UNDO), reports.toolbarButtonToggles)
         }
 
     @Test

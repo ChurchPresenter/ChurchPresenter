@@ -656,6 +656,13 @@
     <string name="schedule_show_buttons_under_title">Показувати кнопки під назвою</string>
     <string name="schedule_option_item_count">Кількість елементів</string>
     <string name="schedule_option_zoom">Керування масштабом</string>
+    <string name="schedule_option_icon_size">Розмір значків панелі</string>
+    <string name="schedule_icon_size_small">Малий</string>
+    <string name="schedule_icon_size_medium">Середній</string>
+    <string name="schedule_icon_size_large">Великий</string>
+    <string name="schedule_option_buttons">Кнопки</string>
+    <string name="toggle_menu_count">%1$d з %2$d</string>
+    <string name="toggle_menu_show_all">Показати всі</string>
     <string name="schedule_drop_hint">Перетягніть файли сюди, щоб додати до програми</string>
     <string name="schedule_note_placeholder">Додати нотатку…</string>
     <string name="screen_number">Екран %1$d</string>
@@ -674,6 +681,7 @@
     <string name="tab_web">Веб</string>
     <string name="tab_canvas">Полотно</string>
     <string name="tab_visibility">Видимість вкладок</string>
+    <string name="tab_visibility_tabs">Вкладки</string>
     <string name="theme">Тема</string>
     <string name="timer_expired">Час вийшов!</string>
     <string name="timer_expired_text_hint">Введіть повідомлення для відображення після завершення…</string>

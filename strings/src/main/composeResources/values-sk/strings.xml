@@ -407,6 +407,13 @@
     <string name="schedule_show_buttons_under_title">Zobraziť tlačidlá pod názvom</string>
     <string name="schedule_option_item_count">Počet položiek</string>
     <string name="schedule_option_zoom">Ovládanie priblíženia</string>
+    <string name="schedule_option_icon_size">Veľkosť ikon panela nástrojov</string>
+    <string name="schedule_icon_size_small">Malé</string>
+    <string name="schedule_icon_size_medium">Stredné</string>
+    <string name="schedule_icon_size_large">Veľké</string>
+    <string name="schedule_option_buttons">Tlačidlá</string>
+    <string name="toggle_menu_count">%1$d z %2$d</string>
+    <string name="toggle_menu_show_all">Zobraziť všetko</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Pridať štítok</string>
@@ -689,6 +696,7 @@
     <string name="tab_qa">Q&amp;A</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">Viditeľnosť záložiek</string>
+    <string name="tab_visibility_tabs">Záložky</string>
     <string name="canvas_scenes">Scény</string>
     <string name="canvas_sources">Zdroje</string>
     <string name="canvas_properties">Vlastnosti</string>

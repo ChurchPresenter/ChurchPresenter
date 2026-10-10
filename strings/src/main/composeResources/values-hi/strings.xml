@@ -569,6 +569,13 @@
     <string name="schedule_show_buttons_under_title">बटन शीर्षक के नीचे दिखाएँ</string>
     <string name="schedule_option_item_count">आइटम गिनती</string>
     <string name="schedule_option_zoom">ज़ूम नियंत्रण</string>
+    <string name="schedule_option_icon_size">टूलबार आइकन का आकार</string>
+    <string name="schedule_icon_size_small">छोटा</string>
+    <string name="schedule_icon_size_medium">मध्यम</string>
+    <string name="schedule_icon_size_large">बड़ा</string>
+    <string name="schedule_option_buttons">बटन</string>
+    <string name="toggle_menu_count">%2$d में से %1$d</string>
+    <string name="toggle_menu_show_all">सभी दिखाएँ</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">लेबल जोड़ें</string>
@@ -897,6 +904,7 @@
     <string name="tab_qa">प्रश्नोत्तर</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">टैब दिखाना</string>
+    <string name="tab_visibility_tabs">टैब</string>
     <string name="canvas_scenes">दृश्य</string>
     <string name="canvas_sources">स्रोत</string>
     <string name="canvas_properties">गुण</string>

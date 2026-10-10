@@ -569,6 +569,13 @@
     <string name="schedule_show_buttons_under_title">Onyesha vitufe chini ya kichwa</string>
     <string name="schedule_option_item_count">Idadi ya Vipengee</string>
     <string name="schedule_option_zoom">Vidhibiti vya Kukuza</string>
+    <string name="schedule_option_icon_size">Ukubwa wa aikoni za upau wa zana</string>
+    <string name="schedule_icon_size_small">Ndogo</string>
+    <string name="schedule_icon_size_medium">Wastani</string>
+    <string name="schedule_icon_size_large">Kubwa</string>
+    <string name="schedule_option_buttons">Vitufe</string>
+    <string name="toggle_menu_count">%1$d kati ya %2$d</string>
+    <string name="toggle_menu_show_all">Onyesha vyote</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Ongeza Lebo</string>
@@ -897,6 +904,7 @@
     <string name="tab_qa">Maswali</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">Uonekano wa Vichupo</string>
+    <string name="tab_visibility_tabs">Vichupo</string>
     <string name="canvas_scenes">Maonyesho</string>
     <string name="canvas_sources">Vyanzo</string>
     <string name="canvas_properties">Sifa</string>

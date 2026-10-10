@@ -569,6 +569,13 @@
     <string name="schedule_show_buttons_under_title">ສະແດງປຸ່ມໃຕ້ຫົວຂໍ້</string>
     <string name="schedule_option_item_count">ຈຳນວນລາຍການ</string>
     <string name="schedule_option_zoom">ປຸ່ມຂະຫຍາຍ-ຫຍໍ້</string>
+    <string name="schedule_option_icon_size">ຂະໜາດໄອຄອນແຖບເຄື່ອງມື</string>
+    <string name="schedule_icon_size_small">ນ້ອຍ</string>
+    <string name="schedule_icon_size_medium">ກາງ</string>
+    <string name="schedule_icon_size_large">ໃຫຍ່</string>
+    <string name="schedule_option_buttons">ປຸ່ມ</string>
+    <string name="toggle_menu_count">%1$d ຈາກ %2$d</string>
+    <string name="toggle_menu_show_all">ສະແດງທັງໝົດ</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">ເພີ່ມປ້າຍ</string>
@@ -897,6 +904,7 @@
     <string name="tab_qa">ຄຳຖາມ</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">ການສະແດງແຖບ</string>
+    <string name="tab_visibility_tabs">ແຖບ</string>
     <string name="canvas_scenes">ສາກ</string>
     <string name="canvas_sources">ແຫຼ່ງ</string>
     <string name="canvas_properties">ຄຸນສົມບັດ</string>

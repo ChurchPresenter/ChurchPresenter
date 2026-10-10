@@ -11,6 +11,7 @@ import org.churchpresenter.schedule.ScheduleViewModel
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.PlanningCenterSettings
 import org.churchpresenter.theme.ThemeMode
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -24,9 +25,21 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalTestApi::class)
 class PlanningCenterImportPaneTest {
 
+    private val schedules = mutableListOf<ScheduleViewModel>()
+
+    /**
+     * Every Schedule a test made is disposed after it. Left running, its autosave loop writes the
+     * schedule into the fork's shared home a minute later, and a later suite that draws the Schedule
+     * tab opens on the restore prompt instead of the window it came to test.
+     */
+    @AfterTest
+    fun disposeSchedules() {
+        schedules.forEach { it.dispose() }
+    }
+
     /** A sink over a fresh Schedule, with every settings change applied to [settings]. */
-    private class Rig {
-        val schedule = ScheduleViewModel()
+    private inner class Rig {
+        val schedule = ScheduleViewModel().also { schedules += it }
         var settings = AppSettings()
         val sink = PlanningCenterImportSink(schedule) { settings = it(settings) }
     }

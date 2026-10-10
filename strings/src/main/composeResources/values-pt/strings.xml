@@ -407,6 +407,13 @@
     <string name="schedule_show_buttons_under_title">Mostrar botões abaixo do título</string>
     <string name="schedule_option_item_count">Contagem de itens</string>
     <string name="schedule_option_zoom">Controles de zoom</string>
+    <string name="schedule_option_icon_size">Tamanho dos ícones da barra</string>
+    <string name="schedule_icon_size_small">Pequeno</string>
+    <string name="schedule_icon_size_medium">Médio</string>
+    <string name="schedule_icon_size_large">Grande</string>
+    <string name="schedule_option_buttons">Botões</string>
+    <string name="toggle_menu_count">%1$d de %2$d</string>
+    <string name="toggle_menu_show_all">Mostrar tudo</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Adicionar Rótulo</string>
@@ -689,6 +696,7 @@
     <string name="tab_qa">P&amp;R</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">Visibilidade das Abas</string>
+    <string name="tab_visibility_tabs">Abas</string>
     <string name="canvas_scenes">Cenas</string>
     <string name="canvas_sources">Fontes</string>
     <string name="canvas_properties">Propriedades</string>

@@ -569,6 +569,13 @@
     <string name="schedule_show_buttons_under_title">Näytä painikkeet otsikon alla</string>
     <string name="schedule_option_item_count">Kohteiden määrä</string>
     <string name="schedule_option_zoom">Zoomauspainikkeet</string>
+    <string name="schedule_option_icon_size">Työkalurivin kuvakkeiden koko</string>
+    <string name="schedule_icon_size_small">Pieni</string>
+    <string name="schedule_icon_size_medium">Keskikokoinen</string>
+    <string name="schedule_icon_size_large">Suuri</string>
+    <string name="schedule_option_buttons">Painikkeet</string>
+    <string name="toggle_menu_count">%1$d / %2$d</string>
+    <string name="toggle_menu_show_all">Näytä kaikki</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Lisää merkintä</string>
@@ -897,6 +904,7 @@
     <string name="tab_qa">Kysymykset</string>
     <string name="tab_stt">Tekstitys</string>
     <string name="tab_visibility">Välilehtien näkyvyys</string>
+    <string name="tab_visibility_tabs">Välilehdet</string>
     <string name="canvas_scenes">Kohtaukset</string>
     <string name="canvas_sources">Lähteet</string>
     <string name="canvas_properties">Ominaisuudet</string>

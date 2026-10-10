@@ -569,6 +569,13 @@
     <string name="schedule_show_buttons_under_title">عرض الأزرار تحت العنوان</string>
     <string name="schedule_option_item_count">عدد العناصر</string>
     <string name="schedule_option_zoom">أدوات التكبير</string>
+    <string name="schedule_option_icon_size">حجم أيقونات شريط الأدوات</string>
+    <string name="schedule_icon_size_small">صغير</string>
+    <string name="schedule_icon_size_medium">متوسط</string>
+    <string name="schedule_icon_size_large">كبير</string>
+    <string name="schedule_option_buttons">الأزرار</string>
+    <string name="toggle_menu_count">%1$d من %2$d</string>
+    <string name="toggle_menu_show_all">إظهار الكل</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">إضافة ملصق</string>
@@ -897,6 +904,7 @@
     <string name="tab_qa">الأسئلة</string>
     <string name="tab_stt">النص الحي</string>
     <string name="tab_visibility">ظهور التبويبات</string>
+    <string name="tab_visibility_tabs">التبويبات</string>
     <string name="canvas_scenes">المشاهد</string>
     <string name="canvas_sources">المصادر</string>
     <string name="canvas_properties">الخصائص</string>

@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.sharedui.models.ShortcutAction
@@ -49,22 +50,26 @@ private val ContextMenuBadgeShape = AppShape(8.dp)
 
 private const val CHIP_ALPHA_DARK = 0.22f
 private const val CHIP_ALPHA_LIGHT = 0.13f
-private const val ITEM_HOVER_ALPHA = 0.07f
+internal const val ITEM_HOVER_ALPHA = 0.07f
 private const val DANGER_HOVER_ALPHA = 0.12f
 private const val SHORTCUT_ALPHA = 0.75f
 
 @Composable
 @ReadOnlyComposable
-private fun chipColor(accent: Color): Color =
+internal fun chipColor(accent: Color): Color =
     accent.copy(alpha = if (isDarkScheme(MaterialTheme.colorScheme)) CHIP_ALPHA_DARK else CHIP_ALPHA_LIGHT)
 
-/** A right-click menu: an optional header naming what was clicked, then [ContextMenuItem]s. */
+/**
+ * A right-click menu: an optional header naming what was clicked, then [ContextMenuItem]s. The
+ * toolbar and tab-bar dropdowns open the same container with [ToggleMenuItem]s and their own [width].
+ */
 @Composable
 fun ContextMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
-    offset: DpOffset,
+    offset: DpOffset = DpOffset.Zero,
     header: (@Composable () -> Unit)? = null,
+    width: Dp = ContextMenuWidth,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     DropdownMenu(
@@ -77,7 +82,7 @@ fun ContextMenu(
         shadowElevation = 12.dp,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
-        Column(modifier = Modifier.width(ContextMenuWidth).padding(horizontal = 6.dp)) {
+        Column(modifier = Modifier.width(width).padding(horizontal = 6.dp)) {
             if (header != null) {
                 header()
                 HorizontalDivider(

@@ -656,6 +656,13 @@
     <string name="schedule_show_buttons_under_title">Schaltflächen unter dem Titel anzeigen</string>
     <string name="schedule_option_item_count">Anzahl der Elemente</string>
     <string name="schedule_option_zoom">Zoom-Steuerung</string>
+    <string name="schedule_option_icon_size">Symbolgröße der Werkzeugleiste</string>
+    <string name="schedule_icon_size_small">Klein</string>
+    <string name="schedule_icon_size_medium">Mittel</string>
+    <string name="schedule_icon_size_large">Groß</string>
+    <string name="schedule_option_buttons">Schaltflächen</string>
+    <string name="toggle_menu_count">%1$d von %2$d</string>
+    <string name="toggle_menu_show_all">Alle anzeigen</string>
     <string name="schedule_drop_hint">Dateien hierher ziehen, um sie zum Programm hinzuzufügen</string>
     <string name="schedule_note_placeholder">Notiz hinzufügen…</string>
     <string name="screen_number">Bildschirm %1$d</string>
@@ -674,6 +681,7 @@
     <string name="tab_web">Web</string>
     <string name="tab_canvas">Leinwand</string>
     <string name="tab_visibility">Tab-Sichtbarkeit</string>
+    <string name="tab_visibility_tabs">Tabs</string>
     <string name="theme">Design</string>
     <string name="timer_expired">Zeit abgelaufen!</string>
     <string name="timer_expired_text_hint">Nachricht eingeben, die angezeigt wird, wenn die Zeit abgelaufen ist…</string>

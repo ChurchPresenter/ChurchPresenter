@@ -569,6 +569,13 @@
     <string name="schedule_show_buttons_under_title">Düğmeleri başlığın altında göster</string>
     <string name="schedule_option_item_count">Öğe Sayısı</string>
     <string name="schedule_option_zoom">Yakınlaştırma Düğmeleri</string>
+    <string name="schedule_option_icon_size">Araç çubuğu simge boyutu</string>
+    <string name="schedule_icon_size_small">Küçük</string>
+    <string name="schedule_icon_size_medium">Orta</string>
+    <string name="schedule_icon_size_large">Büyük</string>
+    <string name="schedule_option_buttons">Düğmeler</string>
+    <string name="toggle_menu_count">%1$d / %2$d</string>
+    <string name="toggle_menu_show_all">Tümünü göster</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Etiket Ekle</string>
@@ -897,6 +904,7 @@
     <string name="tab_qa">Soru-Cevap</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">Sekme Görünürlüğü</string>
+    <string name="tab_visibility_tabs">Sekmeler</string>
     <string name="canvas_scenes">Sahneler</string>
     <string name="canvas_sources">Kaynaklar</string>
     <string name="canvas_properties">Özellikler</string>
