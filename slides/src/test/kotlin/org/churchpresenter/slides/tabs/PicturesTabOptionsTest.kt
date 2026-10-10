@@ -217,6 +217,15 @@ class PicturesTabOptionsTest {
     }
 
     @Test
+    fun `a scheduled folder that is really a file opens nothing`() = tab(startFolder = null) { h ->
+        val file = File(dir, "notAFolder.jpg").apply { writeText("x") }
+        h.item = ScheduleItem.PictureItem("p1", file.absolutePath, file.name, 1)
+        waitForIdle()
+        assertTrue(h.vm.images.isEmpty())
+        assertEquals(null, h.vm.selectedFolder)
+    }
+
+    @Test
     fun `a file that is not really a picture is marked unreadable`() {
         val broken = folder("Broken", 1)
         File(broken, "broken.png").writeText("not a picture")
@@ -255,6 +264,26 @@ class PicturesTabOptionsTest {
             waitUntil("the folder opened", 5_000) { h.vm.images.size == 2 }
             assertTrue(h.calls.settingsChanges > 0)
         }
+    }
+
+    @Test
+    fun `a recent folder that is now a file opens nothing`() {
+        RecentPictureFolders.add(File(dir, "Flat").apply { writeText("x") }.absolutePath)
+        tab(startFolder = null) { h ->
+            onNodeWithText("Flat").performClick()
+            waitForIdle()
+            assertTrue(h.vm.images.isEmpty())
+        }
+    }
+
+    @Test
+    fun `double-clicking a picture with no output only selects it`() = picturesTab { vm, _ ->
+        waitUntil("two thumbnails drawn", 5_000) { drawnThumbnails().size >= 2 }
+        onNodeWithContentDescription(drawnThumbnails()[1]).performTouchInput {
+            down(center); up(); advanceEventTime(50); down(center); up()
+        }
+        waitForIdle()
+        assertEquals(1, vm.selectedImageIndex)
     }
 
     @Test

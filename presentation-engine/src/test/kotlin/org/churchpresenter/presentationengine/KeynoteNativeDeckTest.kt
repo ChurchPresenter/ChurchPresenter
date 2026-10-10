@@ -331,8 +331,9 @@ class KeynoteNativeDeckTest {
 
     @Test
     fun `a build whose target is not on the slide leaves one composite and no timeline`() {
-        val objects = oneTextSlide().map { if (it.first == 200L) Triple(200L, 5, builtSlide(listOf(300L), listOf(500L))) else it } +
-            Triple(500L, 8, build(999L, null))
+        val objects = oneTextSlide().map {
+            if (it.first == 200L) Triple(200L, 5, builtSlide(listOf(300L), listOf(500L))) else it
+        } + Triple(500L, 8, build(999L, null))
         val slide = assertIs<LoadResult.Success>(PresentationLoader.load(bundle(objects, name = "orphan"))).deck
             .slides.single()
 

@@ -23,15 +23,17 @@ class KeynoteStyleResolverTest {
         temp.deleteRecursively()
     }
 
-    private fun reference(id: Long) = ProtoWriter().apply { varintField(F.REFERENCE_IDENTIFIER, id) }.toByteArray()
+    private fun proto(block: ProtoWriter.() -> Unit): ByteArray = ProtoWriter().apply(block).toByteArray()
 
-    private fun color(r: Float? = null, g: Float? = null, b: Float? = null, a: Float? = null) = ProtoWriter().apply {
+    private fun reference(id: Long) = proto { varintField(F.REFERENCE_IDENTIFIER, id) }
+
+    private fun color(r: Float? = null, g: Float? = null, b: Float? = null, a: Float? = null) = proto {
         varintField(F.COLOR_MODEL, 1)
         r?.let { floatField(F.COLOR_R, it) }
         g?.let { floatField(F.COLOR_G, it) }
         b?.let { floatField(F.COLOR_B, it) }
         a?.let { floatField(F.COLOR_A, it) }
-    }.toByteArray()
+    }
 
     private fun message(bytes: ByteArray) = assertNotNull(IwaMessage.parse(bytes))
 
@@ -40,16 +42,16 @@ class KeynoteStyleResolverTest {
         return assertNotNull(ObjectIndex.load(Fixtures.writeKeynoteDir(dir, objects.toList())))
     }
 
-    private fun style(parent: Long?, props: ByteArray?) = ProtoWriter().apply {
+    private fun style(parent: Long?, props: ByteArray?) = proto {
         if (parent != null) {
-            bytesField(F.STYLE_SUPER, ProtoWriter().apply { bytesField(F.TSS_STYLE_PARENT, reference(parent)) }.toByteArray())
+            bytesField(F.STYLE_SUPER, proto { bytesField(F.TSS_STYLE_PARENT, reference(parent)) })
         }
         if (props != null) bytesField(F.SHAPE_STYLE_PROPERTIES, props)
-    }.toByteArray()
+    }
 
-    private fun fillWithColor(c: ByteArray) = ProtoWriter().apply { bytesField(F.FILL_COLOR, c) }.toByteArray()
+    private fun fillWithColor(c: ByteArray) = proto { bytesField(F.FILL_COLOR, c) }
 
-    private val empty = index(Triple(1L, 1, ProtoWriter().apply { varintField(1, 1) }.toByteArray()))
+    private val empty = index(Triple(1L, 1, proto { varintField(1, 1) }))
 
     @Test
     fun `a color with no channels is opaque black and out-of-range channels are clamped`() {
@@ -59,30 +61,36 @@ class KeynoteStyleResolverTest {
 
     @Test
     fun `a gradient fill degrades to its first stop`() {
-        val stop = ProtoWriter().apply { bytesField(F.GRADIENT_STOP_COLOR, color(0f, 0f, 1f, 1f)) }.toByteArray()
-        val gradient = ProtoWriter().apply { bytesField(F.GRADIENT_STOPS, stop) }.toByteArray()
-        val fill = ProtoWriter().apply { bytesField(F.FILL_GRADIENT, gradient) }.toByteArray()
+        val stop = proto { bytesField(F.GRADIENT_STOP_COLOR, color(0f, 0f, 1f, 1f)) }
+        val gradient = proto { bytesField(F.GRADIENT_STOPS, stop) }
+        val fill = proto { bytesField(F.FILL_GRADIENT, gradient) }
         assertEquals(Color.BLUE, KeynoteStyleResolver.parseFill(empty, message(fill))?.color)
 
-        val colorless = ProtoWriter().apply {
-            bytesField(F.FILL_GRADIENT, ProtoWriter().apply { bytesField(F.GRADIENT_STOPS, ProtoWriter().apply { varintField(9, 1) }.toByteArray()) }.toByteArray())
-        }.toByteArray()
+        val colorless = proto {
+            bytesField(F.FILL_GRADIENT, proto { bytesField(F.GRADIENT_STOPS, proto { varintField(9, 1) }) })
+        }
         assertNull(KeynoteStyleResolver.parseFill(empty, message(colorless)))
     }
 
     @Test
     fun `an image fill names its data file only when it can be drawn`() {
-        val metadata = ProtoWriter().apply {
-            bytesField(F.PACKAGE_METADATA_DATAS, ProtoWriter().apply { varintField(F.DATA_INFO_IDENTIFIER, 7); stringField(F.DATA_INFO_FILE_NAME, "bg.png") }.toByteArray())
-            bytesField(F.PACKAGE_METADATA_DATAS, ProtoWriter().apply { varintField(F.DATA_INFO_IDENTIFIER, 8); stringField(F.DATA_INFO_PREFERRED_FILE_NAME, "clip.mov") }.toByteArray())
-        }.toByteArray()
+        val metadata = proto {
+            bytesField(F.PACKAGE_METADATA_DATAS, proto {
+                varintField(F.DATA_INFO_IDENTIFIER, 7)
+                stringField(F.DATA_INFO_FILE_NAME, "bg.png")
+            })
+            bytesField(F.PACKAGE_METADATA_DATAS, proto {
+                varintField(F.DATA_INFO_IDENTIFIER, 8)
+                stringField(F.DATA_INFO_PREFERRED_FILE_NAME, "clip.mov")
+            })
+        }
         val index = index(Triple(1L, F.TYPE_TSP_PACKAGE_METADATA, metadata))
 
-        fun imageFill(dataId: Long) = message(ProtoWriter().apply {
-            bytesField(F.FILL_IMAGE, ProtoWriter().apply {
-                bytesField(F.IMAGE_FILL_DATA, ProtoWriter().apply { varintField(F.DATA_REFERENCE_IDENTIFIER, dataId) }.toByteArray())
-            }.toByteArray())
-        }.toByteArray())
+        fun imageFill(dataId: Long) = message(proto {
+            bytesField(F.FILL_IMAGE, proto {
+                bytesField(F.IMAGE_FILL_DATA, proto { varintField(F.DATA_REFERENCE_IDENTIFIER, dataId) })
+            })
+        })
 
         assertEquals("bg.png", KeynoteStyleResolver.parseFill(index, imageFill(7))?.imageFile)
         assertNull(KeynoteStyleResolver.parseFill(index, imageFill(8)), "a movie is not an image fill")
@@ -91,14 +99,20 @@ class KeynoteStyleResolverTest {
 
     @Test
     fun `shape style values are inherited from the nearest style that sets them`() {
-        val strokeNoColor = ProtoWriter().apply { floatField(F.STROKE_WIDTH, 4f) }.toByteArray()
-        val strokeColored = ProtoWriter().apply { bytesField(F.STROKE_COLOR, color(1f, 0f, 0f)); floatField(F.STROKE_WIDTH, 2f) }.toByteArray()
-        val childProps = ProtoWriter().apply { floatField(F.SHAPE_PROPS_OPACITY, 0.5f); bytesField(F.SHAPE_PROPS_STROKE, strokeNoColor) }.toByteArray()
-        val parentProps = ProtoWriter().apply {
+        val strokeNoColor = proto { floatField(F.STROKE_WIDTH, 4f) }
+        val strokeColored = proto { bytesField(F.STROKE_COLOR, color(1f, 0f, 0f)); floatField(F.STROKE_WIDTH, 2f) }
+        val childProps = proto {
+            floatField(F.SHAPE_PROPS_OPACITY, 0.5f)
+            bytesField(F.SHAPE_PROPS_STROKE, strokeNoColor)
+        }
+        val parentProps = proto {
             bytesField(F.SHAPE_PROPS_FILL, fillWithColor(color(0f, 1f, 0f)))
             bytesField(F.SHAPE_PROPS_STROKE, strokeColored)
-        }.toByteArray()
-        val index = index(Triple(10L, F.TYPE_TSD_SHAPE_STYLE, style(11L, childProps)), Triple(11L, F.TYPE_TSD_SHAPE_STYLE, style(null, parentProps)))
+        }
+        val index = index(
+            Triple(10L, F.TYPE_TSD_SHAPE_STYLE, style(11L, childProps)),
+            Triple(11L, F.TYPE_TSD_SHAPE_STYLE, style(null, parentProps)),
+        )
 
         val resolved = assertNotNull(KeynoteStyleResolver.resolveShapeStyle(index, 10L))
         assertEquals(Color.GREEN, resolved.fill?.color)
@@ -109,9 +123,15 @@ class KeynoteStyleResolverTest {
 
     @Test
     fun `with no stroke colour anywhere the farthest stroke width is used`() {
-        val near = ProtoWriter().apply { bytesField(F.SHAPE_PROPS_STROKE, ProtoWriter().apply { floatField(F.STROKE_WIDTH, 1f) }.toByteArray()); floatField(F.SHAPE_PROPS_OPACITY, 1f) }.toByteArray()
-        val far = ProtoWriter().apply { bytesField(F.SHAPE_PROPS_STROKE, ProtoWriter().apply { floatField(F.STROKE_WIDTH, 6f) }.toByteArray()) }.toByteArray()
-        val index = index(Triple(10L, F.TYPE_TSD_SHAPE_STYLE, style(11L, near)), Triple(11L, F.TYPE_TSD_SHAPE_STYLE, style(null, far)))
+        val near = proto {
+            bytesField(F.SHAPE_PROPS_STROKE, proto { floatField(F.STROKE_WIDTH, 1f) })
+            floatField(F.SHAPE_PROPS_OPACITY, 1f)
+        }
+        val far = proto { bytesField(F.SHAPE_PROPS_STROKE, proto { floatField(F.STROKE_WIDTH, 6f) }) }
+        val index = index(
+            Triple(10L, F.TYPE_TSD_SHAPE_STYLE, style(11L, near)),
+            Triple(11L, F.TYPE_TSD_SHAPE_STYLE, style(null, far)),
+        )
 
         val resolved = assertNotNull(KeynoteStyleResolver.resolveShapeStyle(index, 10L))
         assertNull(resolved.strokeColor)
@@ -122,7 +142,7 @@ class KeynoteStyleResolverTest {
     @Test
     fun `a style chain that sets nothing resolves to nothing`() {
         val index = index(
-            Triple(10L, F.TYPE_TSD_SHAPE_STYLE, style(null, ProtoWriter().apply { varintField(9, 1) }.toByteArray())),
+            Triple(10L, F.TYPE_TSD_SHAPE_STYLE, style(null, proto { varintField(9, 1) })),
             Triple(12L, F.TYPE_TSWP_CHARACTER_STYLE, style(null, null)),
         )
         assertNull(KeynoteStyleResolver.resolveShapeStyle(index, 10L))
@@ -132,14 +152,17 @@ class KeynoteStyleResolverTest {
 
     @Test
     fun `character properties merge up the chain and stop once complete`() {
-        fun charStyle(parent: Long?, props: ProtoWriter.() -> Unit) = ProtoWriter().apply {
+        fun charStyle(parent: Long?, props: ProtoWriter.() -> Unit) = proto {
             if (parent != null) {
-                bytesField(F.STYLE_SUPER, ProtoWriter().apply { bytesField(F.TSS_STYLE_PARENT, reference(parent)) }.toByteArray())
+                bytesField(F.STYLE_SUPER, proto { bytesField(F.TSS_STYLE_PARENT, reference(parent)) })
             }
             bytesField(F.CHARACTER_STYLE_PROPERTIES, ProtoWriter().apply(props).toByteArray())
-        }.toByteArray()
+        }
         val index = index(
-            Triple(20L, F.TYPE_TSWP_CHARACTER_STYLE, charStyle(21L) { stringField(F.CHAR_PROPS_FONT_NAME, "Avenir"); varintField(F.CHAR_PROPS_ITALIC, 1) }),
+            Triple(20L, F.TYPE_TSWP_CHARACTER_STYLE, charStyle(21L) {
+                stringField(F.CHAR_PROPS_FONT_NAME, "Avenir")
+                varintField(F.CHAR_PROPS_ITALIC, 1)
+            }),
             Triple(21L, F.TYPE_TSWP_CHARACTER_STYLE, charStyle(22L) {
                 stringField(F.CHAR_PROPS_FONT_NAME, "Ignored")
                 floatField(F.CHAR_PROPS_FONT_SIZE, 36f)

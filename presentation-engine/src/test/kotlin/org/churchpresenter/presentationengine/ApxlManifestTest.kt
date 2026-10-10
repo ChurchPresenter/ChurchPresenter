@@ -19,11 +19,15 @@ class ApxlManifestTest {
         val xml = document(
             """<key:slide>
                  <key:page><sf:data sf:path="photo.jpg"/></key:page>
-                 <key:thumbnails><key:binary><sf:data sf:path=" "/><sf:wrap><sf:data sf:path="thumbs/st0.jpg"/></sf:wrap></key:binary></key:thumbnails>
+                 <key:thumbnails><key:binary>
+                   <sf:data sf:path=" "/><sf:wrap><sf:data sf:path="thumbs/st0.jpg"/></sf:wrap>
+                 </key:binary></key:thumbnails>
                </key:slide>""",
             """<key:slide><key:page/></key:slide>""",
             """<key:slide><key:thumbnails><sf:data/></key:thumbnails></key:slide>""",
-            """<key:slide><key:thumbnails><key:binary><sf:data sf:path="thumbs/st2.jpg"/></key:binary></key:thumbnails></key:slide>""",
+            """<key:slide><key:thumbnails><key:binary>
+                 <sf:data sf:path="thumbs/st2.jpg"/>
+               </key:binary></key:thumbnails></key:slide>""",
         )
         assertEquals(listOf("thumbs/st0.jpg", "thumbs/st2.jpg"), ApxlManifest.parseThumbnails(xml))
     }

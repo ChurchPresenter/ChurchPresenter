@@ -417,7 +417,8 @@ class KeynoteDeckParserTest {
         val heightOnly = Fixtures.ProtoWriter().apply { floatField(2, 1080f) }.toByteArray()
         val zeroHeight = Fixtures.ProtoWriter().apply { floatField(1, 1920f); floatField(2, 0f) }.toByteArray()
         for (size in listOf(widthOnly, heightOnly, zeroHeight)) {
-            assertNull(KeynoteDeckParser.parse(deck(Triple(1L, 1, document(2L)), Triple(2L, 2, sizedShow(size)), *slideObjects)))
+            val file = deck(Triple(1L, 1, document(2L)), Triple(2L, 2, sizedShow(size)), *slideObjects)
+            assertNull(KeynoteDeckParser.parse(file))
         }
     }
 
@@ -451,7 +452,8 @@ class KeynoteDeckParserTest {
             varintField(1, 1); floatField(3, 1f); floatField(4, 0f); floatField(5, 0f); floatField(6, 1f)
         }.toByteArray()
         val styleWithFill = Fixtures.ProtoWriter().apply {
-            bytesField(11, Fixtures.ProtoWriter().apply { bytesField(1, Fixtures.ProtoWriter().apply { bytesField(1, red) }.toByteArray()) }.toByteArray())
+            val fill = Fixtures.ProtoWriter().apply { bytesField(1, red) }.toByteArray()
+            bytesField(11, Fixtures.ProtoWriter().apply { bytesField(1, fill) }.toByteArray())
         }.toByteArray()
         val styleWithoutProps = Fixtures.ProtoWriter().apply { varintField(9, 1) }.toByteArray()
         val master = Fixtures.ProtoWriter().apply {

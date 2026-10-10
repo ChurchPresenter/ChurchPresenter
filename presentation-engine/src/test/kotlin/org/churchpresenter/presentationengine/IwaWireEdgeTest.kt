@@ -16,7 +16,8 @@ class IwaWireEdgeTest {
 
     @Test
     fun `present fields are listed and absent ones read as empty`() {
-        val message = assertNotNull(IwaMessage.parse(ProtoWriter().apply { varintField(3, 1); floatField(4, 2f) }.toByteArray()))
+        val bytes = ProtoWriter().apply { varintField(3, 1); floatField(4, 2f) }.toByteArray()
+        val message = assertNotNull(IwaMessage.parse(bytes))
         assertTrue(message.has(3))
         assertFalse(message.has(9))
         assertEquals(setOf(3, 4), message.fieldNumbers())
@@ -63,7 +64,11 @@ class IwaWireEdgeTest {
     private fun chunk(type: Int, payload: ByteArray): ByteArray =
         bytes(type, payload.size and 0xFF, (payload.size shr 8) and 0xFF, (payload.size shr 16) and 0xFF) + payload
 
-    private fun archive(identifier: Long?, vararg messages: Pair<Int?, ByteArray>, declaredLengths: List<Long>? = null): ByteArray {
+    private fun archive(
+        identifier: Long?,
+        vararg messages: Pair<Int?, ByteArray>,
+        declaredLengths: List<Long>? = null,
+    ): ByteArray {
         val info = ProtoWriter().apply {
             identifier?.let { varintField(1, it) }
             messages.forEachIndexed { i, (type, body) ->
@@ -95,14 +100,17 @@ class IwaWireEdgeTest {
         assertEquals(listOf(8L), objects.map { it.identifier })
     }
 
+    private fun idsAfterGood(body: ByteArray, tail: ByteArray) =
+        IwaChunkReader.readObjects(chunk(1, archive(8L, 2 to body) + tail)).map { it.identifier }
+
     @Test
     fun `a corrupt archive ends the read but keeps what came before it`() {
         val body = ProtoWriter().apply { varintField(1, 3) }.toByteArray()
         val overlong = archive(9L, 2 to body, declaredLengths = listOf(500L))
         val zeroInfo = bytes(0)
-        assertEquals(listOf(8L), IwaChunkReader.readObjects(chunk(1, archive(8L, 2 to body) + overlong)).map { it.identifier })
-        assertEquals(listOf(8L), IwaChunkReader.readObjects(chunk(1, archive(8L, 2 to body) + zeroInfo)).map { it.identifier })
-        assertEquals(listOf(8L), IwaChunkReader.readObjects(chunk(1, archive(8L, 2 to body) + bytes(0x80))).map { it.identifier })
+        assertEquals(listOf(8L), idsAfterGood(body, overlong))
+        assertEquals(listOf(8L), idsAfterGood(body, zeroInfo))
+        assertEquals(listOf(8L), idsAfterGood(body, bytes(0x80)))
     }
 
     @Test

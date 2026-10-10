@@ -437,8 +437,14 @@ class TimelineCompilerTest {
             TimeNodeKind.PAR, nodeType = "tmRoot",
             children = listOf(
                 node(TimeNodeKind.SEQ, nodeType = "mainSeq", children = listOf(clickGroup(effect()))),
-                node(TimeNodeKind.SEQ, nodeType = "interactiveSeq", children = listOf(effect(behaviors = listOf(empty)))),
-                node(TimeNodeKind.SEQ, nodeType = "otherSeq", children = listOf(clickGroup(effect(behaviors = listOf(animEffect(3L)))))),
+                node(
+                    TimeNodeKind.SEQ, nodeType = "interactiveSeq",
+                    children = listOf(effect(behaviors = listOf(empty))),
+                ),
+                node(
+                    TimeNodeKind.SEQ, nodeType = "otherSeq",
+                    children = listOf(clickGroup(effect(behaviors = listOf(animEffect(3L))))),
+                ),
             ),
         )
         val result = assertNotNull(compiler(warnings).compile(root))
@@ -457,7 +463,8 @@ class TimelineCompilerTest {
     @Test
     fun `an effect node ignores children that are not behaviors`() {
         val wrapped = node(TimeNodeKind.PAR, children = listOf(animEffect(shapeId = 5L)))
-        val result = assertNotNull(compiler().compile(slide(clickGroup(effect(behaviors = listOf(animEffect(), wrapped))))))
+        val tree = slide(clickGroup(effect(behaviors = listOf(animEffect(), wrapped))))
+        val result = assertNotNull(compiler().compile(tree))
         assertEquals(listOf("shape-1"), result.timeline.steps.single().intervals.map { it.layerId })
     }
 
