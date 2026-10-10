@@ -99,16 +99,8 @@ class CompanionSatelliteViewModelTest {
     /** The live client for [slot], out of the view model's private registry. */
     private fun clientFor(vm: CompanionSatelliteViewModel, slot: CompanionSurfaceSlot): CompanionSatelliteClient {
         val field = CompanionSatelliteViewModel::class.java.getDeclaredField("clients").apply { isAccessible = true }
-        @Suppress("UNCHECKED_CAST")
-        val clients = field.get(vm) as Map<CompanionSurfaceSlot, CompanionSatelliteClient>
-        return clients[slot] ?: error("no client registered for $slot")
-    }
-
-    /** One of the callbacks the view model handed to the client's constructor. */
-    private fun <T> callback(client: CompanionSatelliteClient, name: String): T {
-        val field = CompanionSatelliteClient::class.java.getDeclaredField(name).apply { isAccessible = true }
-        @Suppress("UNCHECKED_CAST")
-        return field.get(client) as T
+        return (field.get(vm) as Map<*, *>)[slot] as? CompanionSatelliteClient
+            ?: error("no client registered for $slot")
     }
 
     private fun reportStatus(
@@ -117,20 +109,20 @@ class CompanionSatelliteViewModelTest {
         status: CompanionConnectionStatus,
         error: String? = null,
     ) =
-        callback<(CompanionConnectionStatus, String?) -> Unit>(clientFor(vm, slot), "onStatusChanged")(status, error)
+        fireClientCallback(clientFor(vm, slot), "onStatusChanged", status, error)
 
     private fun resetButtons(vm: CompanionSatelliteViewModel, slot: CompanionSurfaceSlot, count: Int) =
-        callback<(Int) -> Unit>(clientFor(vm, slot), "onButtonsReset")(count)
+        fireClientCallback(clientFor(vm, slot), "onButtonsReset", count)
 
     private fun updateButton(
         vm: CompanionSatelliteViewModel,
         slot: CompanionSurfaceSlot,
         update: CompanionButtonUpdate,
     ) =
-        callback<(CompanionButtonUpdate) -> Unit>(clientFor(vm, slot), "onButtonUpdated")(update)
+        fireClientCallback(clientFor(vm, slot), "onButtonUpdated", update)
 
     private fun reportBrightness(vm: CompanionSatelliteViewModel, slot: CompanionSurfaceSlot, percent: Int) =
-        callback<(Int) -> Unit>(clientFor(vm, slot), "onBrightnessChanged")(percent)
+        fireClientCallback(clientFor(vm, slot), "onBrightnessChanged", percent)
 
     // ── Device identities ───────────────────────────────────────────────────────
 

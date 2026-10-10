@@ -286,12 +286,12 @@ internal fun requestPath(uniqueName: String, token: String): String {
  * Reads the portal's Response signal: `params[0]` is the response code (0 means the operator
  * picked something) and `params[1]` carries the selected `uris`. Anything else is a cancel.
  */
-@Suppress("UNCHECKED_CAST")
 internal fun parseResponse(params: Array<out Any?>): List<String>? {
-    val response = params[0] as UInt32
-    val results = params[1] as Map<String, Variant<*>>
+    val response = params.getOrNull(0) as? UInt32 ?: return null
     if (response.toInt() != 0) return null
-    return (results["uris"]?.value as? List<String>)?.toList()
+    val results = params.getOrNull(1) as? Map<*, *> ?: return null
+    val uris = (results["uris"] as? Variant<*>)?.value as? List<*> ?: return null
+    return uris.filterIsInstance<String>()
 }
 
 /** The portal answers with `file://` URIs; callers deal in paths. */

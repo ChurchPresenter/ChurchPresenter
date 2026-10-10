@@ -64,13 +64,12 @@ class PreviewOutputPickerTest {
     )
 
     private fun <T> composed(block: @Composable () -> T): T {
-        var result: T? = null
+        val result = ArrayList<T>(1)
         runComposeUiTest {
-            setContent { MaterialTheme { result = block() } }
+            setContent { MaterialTheme { result += block() } }
             waitForIdle()
         }
-        @Suppress("UNCHECKED_CAST")
-        return result as T
+        return result.last()
     }
 
     /**

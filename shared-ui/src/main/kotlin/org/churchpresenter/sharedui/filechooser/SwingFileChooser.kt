@@ -245,10 +245,10 @@ internal fun saveResult(returnCode: Int, chooser: JFileChooser): Path? =
  * EDT itself is an error — both are `invokeAndWait`'s own behaviour, unchanged.
  */
 internal fun <T> onEventDispatchThread(block: () -> T): T {
-    var result: T? = null
-    SwingUtilities.invokeAndWait { result = block() }
-    @Suppress("UNCHECKED_CAST")
-    return result as T
+    // A list rather than a nullable var: T may itself be nullable, and a list needs no cast to read back.
+    val result = ArrayList<T>(1)
+    SwingUtilities.invokeAndWait { result += block() }
+    return result.single()
 }
 
 /**

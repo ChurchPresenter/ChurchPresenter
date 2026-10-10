@@ -77,12 +77,10 @@ class PicturesViewModelWatchTest {
     }
 
     /** A non-OVERFLOW event whose context is null, which is what the field crash carried. */
-    private class NullContextEvent : WatchEvent<Any> {
-        override fun kind(): WatchEvent.Kind<Any> =
-            @Suppress("UNCHECKED_CAST")
-            (StandardWatchEventKinds.ENTRY_CREATE as WatchEvent.Kind<Any>)
+    private class NullContextEvent : WatchEvent<Path> {
+        override fun kind(): WatchEvent.Kind<Path> = StandardWatchEventKinds.ENTRY_CREATE
         override fun count() = 1
-        override fun context(): Any? = null
+        override fun context(): Path? = null
     }
 
     @Test

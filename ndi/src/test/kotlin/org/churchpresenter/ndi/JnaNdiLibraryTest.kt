@@ -90,8 +90,7 @@ private class FakeNdiLibC(
             sources = null
             return
         }
-        @Suppress("UNCHECKED_CAST")
-        val array = NdiSourceStruct().toArray(names.size) as Array<NdiSourceStruct>
+        val array = NdiSourceStruct().toArray(names.size).map { it as NdiSourceStruct }.toTypedArray()
         array.forEachIndexed { index, struct ->
             struct.p_ndi_name = names[index].first
             struct.p_url_address = names[index].second

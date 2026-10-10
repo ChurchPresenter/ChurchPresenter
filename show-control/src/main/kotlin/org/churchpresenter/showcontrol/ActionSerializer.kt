@@ -22,29 +22,29 @@ import kotlin.reflect.KClass
  */
 object ActionSerializer : KSerializer<Action> {
 
-    private val known: Map<KClass<out Action>, KSerializer<out Action>> = mapOf(
-        Action.GoLive::class to Action.GoLive.serializer(),
-        Action.ToPreview::class to Action.ToPreview.serializer(),
-        Action.Take::class to Action.Take.serializer(),
-        Action.Clear::class to Action.Clear.serializer(),
-        Action.ClearAll::class to Action.ClearAll.serializer(),
-        Action.ClearGroup::class to Action.ClearGroup.serializer(),
-        Action.Message::class to Action.Message.serializer(),
-        Action.Prop::class to Action.Prop.serializer(),
-        Action.LowerThird::class to Action.LowerThird.serializer(),
-        Action.Timer::class to Action.Timer.serializer(),
-        Action.Media::class to Action.Media.serializer(),
-        Action.ObsScene::class to Action.ObsScene.serializer(),
-        Action.AtemKey::class to Action.AtemKey.serializer(),
-        Action.AtemMacro::class to Action.AtemMacro.serializer(),
-        Action.CompanionPress::class to Action.CompanionPress.serializer(),
-        Action.NextItem::class to Action.NextItem.serializer(),
-        Action.PreviousItem::class to Action.PreviousItem.serializer(),
-        Action.Wait::class to Action.Wait.serializer(),
-        Action.RunMacro::class to Action.RunMacro.serializer(),
-    )
+    private val known: Map<KClass<out Action>, Known<out Action>> = listOf(
+        entry(Action.GoLive.serializer()),
+        entry(Action.ToPreview.serializer()),
+        entry(Action.Take.serializer()),
+        entry(Action.Clear.serializer()),
+        entry(Action.ClearAll.serializer()),
+        entry(Action.ClearGroup.serializer()),
+        entry(Action.Message.serializer()),
+        entry(Action.Prop.serializer()),
+        entry(Action.LowerThird.serializer()),
+        entry(Action.Timer.serializer()),
+        entry(Action.Media.serializer()),
+        entry(Action.ObsScene.serializer()),
+        entry(Action.AtemKey.serializer()),
+        entry(Action.AtemMacro.serializer()),
+        entry(Action.CompanionPress.serializer()),
+        entry(Action.NextItem.serializer()),
+        entry(Action.PreviousItem.serializer()),
+        entry(Action.Wait.serializer()),
+        entry(Action.RunMacro.serializer()),
+    ).associateBy { it.type }
 
-    private val byName = known.values.associateBy { it.descriptor.serialName }
+    private val byName = known.values.map { it.serializer }.associateBy { it.descriptor.serialName }
 
     /** The names actions are stored by, one per type -- what a newer build must keep. */
     val typeNames: Set<String> get() = byName.keys
@@ -58,10 +58,9 @@ object ActionSerializer : KSerializer<Action> {
         val obj = when (value) {
             is Action.Unknown -> value.json
             else -> {
-                @Suppress("UNCHECKED_CAST")
-                val serializer = known.getValue(value::class) as KSerializer<Action>
-                val fields = json.encodeToJsonElement(serializer, value).jsonObject
-                JsonObject(mapOf(TYPE to JsonPrimitive(serializer.descriptor.serialName)) + fields)
+                val entry = known.getValue(value::class)
+                val type = JsonPrimitive(entry.serializer.descriptor.serialName)
+                JsonObject(mapOf(TYPE to type) + entry.encode(json, value))
             }
         }
         encoder.encodeJsonElement(obj)
@@ -84,4 +83,12 @@ object ActionSerializer : KSerializer<Action> {
     }
 
     private const val TYPE = "type"
+
+    /** One action type and its serializer, kept together so encoding needs no unchecked cast. */
+    private class Known<A : Action>(val type: KClass<A>, val serializer: KSerializer<A>) {
+        fun encode(json: Json, value: Action): JsonObject =
+            json.encodeToJsonElement(serializer, type.java.cast(value)).jsonObject
+    }
+
+    private inline fun <reified A : Action> entry(serializer: KSerializer<A>) = Known(A::class, serializer)
 }

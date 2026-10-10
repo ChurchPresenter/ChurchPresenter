@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.core.models.schedule.ScheduleItem
+import java.lang.reflect.InvocationTargetException
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -89,29 +90,38 @@ class InstanceLinkViewModelTest {
 
     // ── Simulating the primary's broadcasts ─────────────────────────────────────
 
-    /** One of the callbacks the view model handed to its client. */
-    private fun <T> callback(vm: InstanceLinkViewModel, name: String): T {
+    /** Calls one of the callbacks the view model handed to its client, with [args]. */
+    private fun fire(vm: InstanceLinkViewModel, name: String, vararg args: Any?) {
         val clientField = InstanceLinkViewModel::class.java.getDeclaredField("client").apply { isAccessible = true }
-        val client = clientField.get(vm)
         val field = InstanceLinkClient::class.java.getDeclaredField(name).apply { isAccessible = true }
-        @Suppress("UNCHECKED_CAST")
-        return field.get(client) as T
+        invokeCallback(field.get(clientField.get(vm)), args)
+    }
+
+    /** Calls a Kotlin lambda through its `FunctionN.invoke`, so it is never cast to a function type. */
+    private fun invokeCallback(callback: Any?, args: Array<out Any?>) {
+        val invoke = Class.forName("kotlin.jvm.functions.Function${args.size}")
+            .getMethod("invoke", *Array(args.size) { Any::class.java })
+        try {
+            invoke.invoke(callback, *args)
+        } catch (e: InvocationTargetException) {
+            throw e.targetException
+        }
     }
 
     private fun reportStatus(vm: InstanceLinkViewModel, status: InstanceLinkStatus) =
-        callback<(InstanceLinkStatus) -> Unit>(vm, "onStatusChanged")(status)
+        fire(vm, "onStatusChanged", status)
 
     private fun broadcastSchedule(vm: InstanceLinkViewModel, items: List<ScheduleItemDto>) =
-        callback<(List<ScheduleItemDto>) -> Unit>(vm, "onScheduleUpdated")(items)
+        fire(vm, "onScheduleUpdated", items)
 
     private fun broadcastLiveState(vm: InstanceLinkViewModel, state: LiveStateDto) =
-        callback<(LiveStateDto) -> Unit>(vm, "onLiveStateUpdated")(state)
+        fire(vm, "onLiveStateUpdated", state)
 
     private fun broadcastSongs(vm: InstanceLinkViewModel, catalog: SongCatalogResponse) =
-        callback<(SongCatalogResponse) -> Unit>(vm, "onSongsUpdated")(catalog)
+        fire(vm, "onSongsUpdated", catalog)
 
     private fun broadcastSongSection(vm: InstanceLinkViewModel, index: Int) =
-        callback<(Int) -> Unit>(vm, "onSongSectionSelected")(index)
+        fire(vm, "onSongSectionSelected", index)
 
     private fun broadcastSlide(
         vm: InstanceLinkViewModel,
@@ -121,7 +131,9 @@ class InstanceLinkViewModelTest {
         isPlaying: Boolean = false,
         isLive: Boolean = false,
     ) =
-        callback<(String, Int, Int, Boolean, Boolean) -> Unit>(vm, "onPresentationSlideChanged")(
+        fire(
+            vm,
+            "onPresentationSlideChanged",
             id,
             index,
             total,
@@ -129,15 +141,15 @@ class InstanceLinkViewModelTest {
             isLive,
         )
 
-    private fun signal(vm: InstanceLinkViewModel, name: String) = callback<() -> Unit>(vm, name)()
+    private fun signal(vm: InstanceLinkViewModel, name: String) = fire(vm, name)
 
     private fun reportMessage(vm: InstanceLinkViewModel) = signal(vm, "onMessageReceived")
 
     private fun reportReconnectIn(vm: InstanceLinkViewModel, delayMs: Long) =
-        callback<(Long) -> Unit>(vm, "onReconnectScheduled")(delayMs)
+        fire(vm, "onReconnectScheduled", delayMs)
 
     private fun reportCommandFailed(vm: InstanceLinkViewModel, type: String, reason: String?) =
-        callback<(String, String?) -> Unit>(vm, "onCommandFailed")(type, reason)
+        fire(vm, "onCommandFailed", type, reason)
 
     private fun reportNoAck(vm: InstanceLinkViewModel) = signal(vm, "onCommandNoAck")
 

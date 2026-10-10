@@ -10,25 +10,22 @@ import kotlin.test.assertTrue
 /** Which folder events make the preset list rescan: a `.json` added, removed or changed. */
 class TouchesJsonTest {
 
-    private fun event(kind: WatchEvent.Kind<*>, name: String?): WatchEvent<*> = object : WatchEvent<Any?> {
-        override fun kind(): WatchEvent.Kind<Any?> {
-            @Suppress("UNCHECKED_CAST")
-            return kind as WatchEvent.Kind<Any?>
-        }
+    private fun <T : Any> event(kind: WatchEvent.Kind<T>, context: T?): WatchEvent<T> = object : WatchEvent<T> {
+        override fun kind(): WatchEvent.Kind<T> = kind
         override fun count() = 1
-        override fun context(): Any? = name?.let { Path.of(it) }
+        override fun context(): T? = context
     }
 
     @Test
     fun `a json file added, removed or changed counts, whatever its case`() {
-        assertTrue(touchesJson(listOf(event(StandardWatchEventKinds.ENTRY_CREATE, "Welcome.json"))))
-        assertTrue(touchesJson(listOf(event(StandardWatchEventKinds.ENTRY_DELETE, "Notices.JSON"))))
-        assertTrue(touchesJson(listOf(event(StandardWatchEventKinds.ENTRY_MODIFY, "a.json"))))
+        assertTrue(touchesJson(listOf(event(StandardWatchEventKinds.ENTRY_CREATE, Path.of("Welcome.json")))))
+        assertTrue(touchesJson(listOf(event(StandardWatchEventKinds.ENTRY_DELETE, Path.of("Notices.JSON")))))
+        assertTrue(touchesJson(listOf(event(StandardWatchEventKinds.ENTRY_MODIFY, Path.of("a.json")))))
     }
 
     @Test
     fun `other files and overflows do not`() {
-        assertFalse(touchesJson(listOf(event(StandardWatchEventKinds.ENTRY_CREATE, "notes.txt"))))
+        assertFalse(touchesJson(listOf(event(StandardWatchEventKinds.ENTRY_CREATE, Path.of("notes.txt")))))
         assertFalse(touchesJson(listOf(event(StandardWatchEventKinds.OVERFLOW, null))))
         assertFalse(touchesJson(emptyList()))
     }
@@ -38,8 +35,8 @@ class TouchesJsonTest {
         assertTrue(
             touchesJson(
                 listOf(
-                    event(StandardWatchEventKinds.ENTRY_CREATE, "notes.txt"),
-                    event(StandardWatchEventKinds.ENTRY_MODIFY, "Welcome.json"),
+                    event(StandardWatchEventKinds.ENTRY_CREATE, Path.of("notes.txt")),
+                    event(StandardWatchEventKinds.ENTRY_MODIFY, Path.of("Welcome.json")),
                 ),
             ),
         )

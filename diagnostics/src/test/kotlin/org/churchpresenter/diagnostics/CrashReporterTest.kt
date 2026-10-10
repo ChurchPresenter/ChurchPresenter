@@ -456,8 +456,7 @@ class CrashReporterTest {
 
         CrashReporter.scrubEvent(event)
 
-        @Suppress("UNCHECKED_CAST")
-        val ctx = event.contexts["jcef"] as Map<String, Any?>
+        val ctx = event.contexts["jcef"] as Map<*, *>
         assertFalse("johndoe" in (ctx["installDir"] as String))
         assertTrue("<user>" in (ctx["installDir"] as String))
         assertEquals(true, ctx["downloaded"], "non-string context values are left untouched")

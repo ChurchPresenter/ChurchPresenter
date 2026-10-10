@@ -225,8 +225,7 @@ class CrashReporterSentryTest {
 
         CrashReporter.scrubEvent(event)
 
-        @Suppress("UNCHECKED_CAST")
-        val jcef = assertNotNull(event.contexts["jcef"] as? Map<String, Any?>)
+        val jcef = assertNotNull(event.contexts["jcef"] as? Map<*, *>)
         assertEquals("/Users/<user>/jcef", jcef["installDir"])
         assertEquals(122, jcef["version"], "a non-string value is carried through untouched")
     }

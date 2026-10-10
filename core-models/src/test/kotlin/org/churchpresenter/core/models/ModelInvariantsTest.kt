@@ -133,8 +133,7 @@ class ModelInvariantsTest {
     private fun readAll(instance: Any): Map<String, Any?> =
         instance::class.memberProperties.associate { prop ->
             prop.isAccessible = true
-            @Suppress("UNCHECKED_CAST")
-            prop.name to (prop as kotlin.reflect.KProperty1<Any, *>).get(instance)
+            prop.name to prop.getter.call(instance)
         }
 
     @Test

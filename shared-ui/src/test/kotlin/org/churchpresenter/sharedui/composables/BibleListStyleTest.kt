@@ -28,13 +28,12 @@ import kotlin.test.assertTrue
 class BibleListStyleTest {
 
     private fun <T> read(mode: ThemeMode, value: @Composable () -> T): T {
-        var result: T? = null
+        val result = ArrayList<T>(1)
         runComposeUiTest {
-            setContent { ChurchPresenterTheme(themeMode = mode) { result = value() } }
+            setContent { ChurchPresenterTheme(themeMode = mode) { result += value() } }
             waitForIdle()
         }
-        @Suppress("UNCHECKED_CAST")
-        return result as T
+        return result.last()
     }
 
     private fun rowColors(mode: ThemeMode) = read(mode) {

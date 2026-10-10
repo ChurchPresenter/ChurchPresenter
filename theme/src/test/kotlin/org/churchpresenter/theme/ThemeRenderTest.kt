@@ -64,12 +64,11 @@ class ThemeRenderTest {
 
     /** Renders [content] inside the app theme and hands back what it captured. */
     private fun <T> underTheme(mode: ThemeMode, capture: @Composable () -> T): T {
-        var captured: T? = null
+        val captured = ArrayList<T>(1)
         runComposeUiTest {
-            setContent { ChurchPresenterTheme(themeMode = mode) { captured = capture() } }
+            setContent { ChurchPresenterTheme(themeMode = mode) { captured += capture() } }
         }
-        @Suppress("UNCHECKED_CAST")
-        return captured as T
+        return captured.last()
     }
 
     // ── Which scheme each mode gets ─────────────────────────────────────────────
@@ -106,16 +105,15 @@ class ThemeRenderTest {
 
     /** Overrides the desktop's own theme signal, so both sides of `isSystemInDarkTheme()` are reachable. */
     private fun <T> underSystemTheme(systemTheme: SystemTheme, capture: @Composable () -> T): T {
-        var captured: T? = null
+        val captured = ArrayList<T>(1)
         runComposeUiTest {
             setContent {
                 CompositionLocalProvider(LocalSystemTheme provides systemTheme) {
-                    ChurchPresenterTheme(themeMode = ThemeMode.SYSTEM) { captured = capture() }
+                    ChurchPresenterTheme(themeMode = ThemeMode.SYSTEM) { captured += capture() }
                 }
             }
         }
-        @Suppress("UNCHECKED_CAST")
-        return captured as T
+        return captured.last()
     }
 
     @Test

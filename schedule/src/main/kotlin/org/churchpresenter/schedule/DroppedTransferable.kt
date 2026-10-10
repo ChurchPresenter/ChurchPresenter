@@ -30,9 +30,8 @@ internal fun Transferable.carriesFileList(): Boolean =
  * Null rather than an empty list because the caller's question is "is there anything to add?", and
  * an empty drop and a drop of something that is not a file both answer it the same way.
  */
-@Suppress("UNCHECKED_CAST")
 internal fun Transferable.fileListOrNull(): List<File>? =
     takeIf { it.carriesFileList() }
         ?.getTransferData(DataFlavor.javaFileListFlavor)
-        ?.let { it as? List<File> }
+        ?.let { (it as? List<*>)?.filterIsInstance<File>() }
         ?.takeIf { it.isNotEmpty() }

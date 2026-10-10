@@ -23,16 +23,16 @@ class CalendarFileWatcherTest {
         folder.deleteRecursively()
     }
 
-    /** One event as the watch service would deliver it, by file name alone. */
-    private class Event(
-        private val name: String?,
-        private val kind: WatchEvent.Kind<*> = StandardWatchEventKinds.ENTRY_MODIFY,
-    ) : WatchEvent<Any?> {
-        @Suppress("UNCHECKED_CAST")
-        override fun kind(): WatchEvent.Kind<Any?> = kind as WatchEvent.Kind<Any?>
+    /** One event as the watch service would deliver it. */
+    private class Event<T : Any>(private val kind: WatchEvent.Kind<T>, private val context: T?) : WatchEvent<T> {
+        override fun kind(): WatchEvent.Kind<T> = kind
         override fun count(): Int = 1
-        override fun context(): Any? = name?.let { File(it).toPath() }
+        override fun context(): T? = context
     }
+
+    /** A change to [name], by file name alone. */
+    private fun modified(name: String?) =
+        Event(StandardWatchEventKinds.ENTRY_MODIFY, name?.let { File(it).toPath() })
 
     private class Heard {
         var calendar = 0
@@ -68,7 +68,7 @@ class CalendarFileWatcherTest {
     fun `a change to the calendar file is reported`() = runTest {
         File(folder, CALENDAR_FILE).writeText("{}")
 
-        val heard = CalendarFileWatcher(folder).hear(Event(CALENDAR_FILE))
+        val heard = CalendarFileWatcher(folder).hear(modified(CALENDAR_FILE))
 
         assertEquals(1, heard.calendar)
         assertEquals(0, heard.presets)
@@ -78,7 +78,7 @@ class CalendarFileWatcherTest {
     fun `a change to the presets file goes to its own callback`() = runTest {
         File(folder, PRESET_FILE).writeText("{}")
 
-        val heard = CalendarFileWatcher(folder).hear(Event(PRESET_FILE))
+        val heard = CalendarFileWatcher(folder).hear(modified(PRESET_FILE))
 
         assertEquals(0, heard.calendar)
         assertEquals(1, heard.presets)
@@ -90,11 +90,11 @@ class CalendarFileWatcherTest {
         File(folder, CALENDAR_FILE).writeText("{}")
         watcher.savedHere()
 
-        assertEquals(0, watcher.hear(Event(CALENDAR_FILE)).calendar, "what we just wrote")
+        assertEquals(0, watcher.hear(modified(CALENDAR_FILE)).calendar, "what we just wrote")
 
         File(folder, CALENDAR_FILE).writeText("""{"services":[]}""")
 
-        assertEquals(1, watcher.hear(Event(CALENDAR_FILE)).calendar, "what somebody else wrote")
+        assertEquals(1, watcher.hear(modified(CALENDAR_FILE)).calendar, "what somebody else wrote")
     }
 
     @Test
@@ -103,15 +103,15 @@ class CalendarFileWatcherTest {
         File(folder, PRESET_FILE).writeText("{}")
         watcher.savedPresetsHere()
 
-        assertEquals(0, watcher.hear(Event(PRESET_FILE)).presets)
+        assertEquals(0, watcher.hear(modified(PRESET_FILE)).presets)
     }
 
     @Test
     fun `what a sync client writes on the way in counts as the file`() = runTest {
         File(folder, CALENDAR_FILE).writeText("{}")
 
-        assertEquals(1, CalendarFileWatcher(folder).hear(Event("$CALENDAR_FILE.sync-conflict")).calendar)
-        assertEquals(1, CalendarFileWatcher(folder).hear(Event("incoming.tmp")).calendar)
+        assertEquals(1, CalendarFileWatcher(folder).hear(modified("$CALENDAR_FILE.sync-conflict")).calendar)
+        assertEquals(1, CalendarFileWatcher(folder).hear(modified("incoming.tmp")).calendar)
     }
 
     @Test
@@ -119,7 +119,7 @@ class CalendarFileWatcherTest {
         File(folder, CALENDAR_FILE).writeText("{}")
         File(folder, PRESET_FILE).writeText("{}")
 
-        val heard = CalendarFileWatcher(folder).hear(Event(null, StandardWatchEventKinds.OVERFLOW))
+        val heard = CalendarFileWatcher(folder).hear(Event(StandardWatchEventKinds.OVERFLOW, null))
 
         assertEquals(1, heard.calendar)
         assertEquals(1, heard.presets)
@@ -128,10 +128,10 @@ class CalendarFileWatcherTest {
     @Test
     fun `the backups and anything else in the folder are not changes`() = runTest {
         val heard = CalendarFileWatcher(folder).hear(
-            Event("$CALENDAR_FILE.bak1"),
-            Event("$CALENDAR_FILE.corrupt-20260920"),
-            Event("notes.txt"),
-            Event(null),
+            modified("$CALENDAR_FILE.bak1"),
+            modified("$CALENDAR_FILE.corrupt-20260920"),
+            modified("notes.txt"),
+            modified(null),
         )
 
         assertEquals(0, heard.calendar)

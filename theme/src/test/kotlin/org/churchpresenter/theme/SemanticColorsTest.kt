@@ -22,12 +22,11 @@ class SemanticColorsTest {
     )
 
     private fun <T> underTheme(mode: ThemeMode, capture: @Composable () -> T): T {
-        var captured: T? = null
+        val captured = ArrayList<T>(1)
         runComposeUiTest {
-            setContent { ChurchPresenterTheme(themeMode = mode) { captured = capture() } }
+            setContent { ChurchPresenterTheme(themeMode = mode) { captured += capture() } }
         }
-        @Suppress("UNCHECKED_CAST")
-        return captured as T
+        return captured.last()
     }
 
     private fun semanticOf(mode: ThemeMode): SemanticColors = underTheme(mode) { MaterialTheme.semantic }

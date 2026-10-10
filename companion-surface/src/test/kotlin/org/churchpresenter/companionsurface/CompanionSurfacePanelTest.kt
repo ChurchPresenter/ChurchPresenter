@@ -113,14 +113,9 @@ class CompanionSurfacePanelTest {
         val clients = CompanionSatelliteViewModel::class.java
             .getDeclaredField("clients").apply { isAccessible = true }
             .get(this)
-        @Suppress("UNCHECKED_CAST")
-        val client = (clients as Map<CompanionSurfaceSlot, CompanionSatelliteClient>)[slot]
+        val client = (clients as Map<*, *>)[slot] as? CompanionSatelliteClient
             ?: error("no client registered for $slot")
-        @Suppress("UNCHECKED_CAST")
-        val callback = CompanionSatelliteClient::class.java
-            .getDeclaredField("onStatusChanged").apply { isAccessible = true }
-            .get(client) as (CompanionConnectionStatus, String?) -> Unit
-        callback(status, error)
+        fireClientCallback(client, "onStatusChanged", status, error)
     }
 
     /** Reports [percent] brightness for the slot as the client's own callback would — same two
@@ -130,14 +125,9 @@ class CompanionSurfacePanelTest {
         val clients = CompanionSatelliteViewModel::class.java
             .getDeclaredField("clients").apply { isAccessible = true }
             .get(this)
-        @Suppress("UNCHECKED_CAST")
-        val client = (clients as Map<CompanionSurfaceSlot, CompanionSatelliteClient>)[slot]
+        val client = (clients as Map<*, *>)[slot] as? CompanionSatelliteClient
             ?: error("no client registered for $slot")
-        @Suppress("UNCHECKED_CAST")
-        val callback = CompanionSatelliteClient::class.java
-            .getDeclaredField("onBrightnessChanged").apply { isAccessible = true }
-            .get(client) as (Int) -> Unit
-        callback(percent)
+        fireClientCallback(client, "onBrightnessChanged", percent)
     }
 
     /** Composes the panel at a fixed size — a lazy grid needs bounds before it lays anything out. */
