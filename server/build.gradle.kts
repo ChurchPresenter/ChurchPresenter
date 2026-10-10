@@ -83,6 +83,8 @@ tasks.withType<Test>().configureEach {
     doFirst { testHome.mkdirs() }
     systemProperty("user.home", testHome.absolutePath)
     systemProperty("java.awt.headless", "true")
+    // ApiDocumentedTest reads the API reference, so a doc-only change must re-run the suite.
+    inputs.file(rootProject.file("COMPANION_API.md")).withPathSensitivity(PathSensitivity.RELATIVE)
 }
 
 detekt {

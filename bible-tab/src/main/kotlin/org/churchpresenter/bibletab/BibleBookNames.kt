@@ -98,7 +98,9 @@ object BibleBookNames {
 
     // Cache results so we only pay the cost of 132 getString calls once per run
     @Volatile private var cachedEnglishNames: List<String>? = null
+
     @Volatile private var cachedMappingLocale: String? = null
+
     @Volatile private var cachedMapping: Map<String, String>? = null
 
     /**
@@ -145,4 +147,3 @@ object BibleBookNames {
      */
     fun getBookResourceIds(): List<StringResource> = bookResourceIds
 }
-

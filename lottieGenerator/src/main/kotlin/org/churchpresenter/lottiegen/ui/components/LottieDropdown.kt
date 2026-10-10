@@ -32,7 +32,6 @@ import org.churchpresenter.theme.dropdownField
 /** The chevron points down when closed and is turned over, not spun, when open. */
 private const val CHEVRON_FLIPPED_DEGREES = 180f
 
-
 /**
  * A dropdown anchor styled as the app's sunken field: a tiny uppercase label above the current value,
  * with a caret that flips when the menu is open.

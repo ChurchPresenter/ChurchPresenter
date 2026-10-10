@@ -9,10 +9,13 @@ import java.io.File
 enum class PreflightProblem {
     /** A clip or a deck whose file is no longer where the row points. */
     MISSING_FILE,
+
     /** A picture folder that is no longer there. */
     MISSING_FOLDER,
+
     /** A song the library no longer has -- deleted, renumbered or moved to another book. */
     SONG_NOT_IN_LIBRARY,
+
     /** A book the primary Bible does not have. */
     BOOK_NOT_IN_BIBLE,
     CHAPTER_OUT_OF_RANGE,
@@ -99,8 +102,10 @@ private fun verseProblem(
 enum class ProblemFix {
     /** Ask where the file went, and point the row there. */
     LOCATE_FILE,
+
     /** Ask where the folder went, and point the row there. */
     LOCATE_FOLDER,
+
     /** Open the picker on the row: the song or the verse has to be chosen again. */
     PICK_AGAIN,
 }

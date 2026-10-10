@@ -54,6 +54,7 @@ class LottieFrameStream(
     private companion object {
         const val RETAIN_FRAMES = 3
         const val CLOSE_LINGER_MS = 250L
+
         /** Sampled frames must be >1% opaque or the whole pre-render is considered blank. */
         const val BLANK_OPAQUE_FRACTION = 0.01f
 

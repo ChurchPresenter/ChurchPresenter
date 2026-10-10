@@ -111,11 +111,9 @@ internal fun ScheduleRowTitle(
 ) {
     val isSection = item is ScheduleItem.LabelItem
         Box(modifier = modifier) {
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-
                     .initialPassCombinedClickable(
                         onClick = { onSelect() },
                         onDoubleClick = if (!isSection) { { onPresent() } } else null
@@ -142,7 +140,6 @@ internal fun ScheduleRowTitle(
                         clock = look.clock,
                     )
                 }
-
             }
 
             if (!legacyRowActions) {

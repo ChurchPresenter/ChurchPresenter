@@ -103,3 +103,85 @@ exceptions:
 performance:
   SpreadOperator:
     active: true
+
+# detekt-formatting (ktlint), added to every module from the root build. Every rule that is on is
+# clean and auto-correctable: `./gradlew detekt --auto-correct` fixes what it finds.
+#
+# Deliberately OFF -- each would rewrite a large share of the tree (findings measured 2026-10-09):
+#   Indentation 6430 -- most of it the server's route files, whose bodies sit around raw-string
+#     HTML/JS where the indentation is load-bearing; ArgumentListWrapping 5084; Wrapping 3027;
+#   ImportOrdering 1352; MultiLineIfElse 1049; NoMultipleSpaces 1032 (aligned tables and comments);
+#   ParameterListWrapping 141; AnnotationOnSeparateLine 108; TrailingCommaOnCallSite and
+#   TrailingCommaOnDeclarationSite; Filename 4 (each needs a rename);
+#   MaximumLineLength -- detekt's own MaxLineLength (style:) is the one in force.
+formatting:
+  active: true
+  autoCorrect: true
+  Indentation:
+    active: false
+  ArgumentListWrapping:
+    active: false
+  Wrapping:
+    active: false
+  ImportOrdering:
+    active: false
+  MultiLineIfElse:
+    active: false
+  NoMultipleSpaces:
+    active: false
+  ParameterListWrapping:
+    active: false
+  AnnotationOnSeparateLine:
+    active: false
+  TrailingCommaOnCallSite:
+    active: false
+  TrailingCommaOnDeclarationSite:
+    active: false
+  Filename:
+    active: false
+  MaximumLineLength:
+    active: false
+  FinalNewline:
+    active: true
+  NoTrailingSpaces:
+    active: true
+  NoConsecutiveBlankLines:
+    active: true
+  NoWildcardImports:
+    active: true
+  NoUnusedImports:
+    active: true
+  NoSemicolons:
+    active: true
+  NoBlankLineBeforeRbrace:
+    active: true
+  NoEmptyFirstLineInMethodBlock:
+    active: true
+  NoBlankLinesInChainedMethodCalls:
+    active: true
+  SpacingAroundKeyword:
+    active: true
+  SpacingAroundCurly:
+    active: true
+  SpacingAroundParens:
+    active: true
+  SpacingAroundOperators:
+    active: true
+  SpacingAroundComma:
+    active: true
+  SpacingBetweenDeclarationsWithComments:
+    active: true
+  SpacingBetweenDeclarationsWithAnnotations:
+    active: true
+  ModifierListSpacing:
+    active: true
+  AnnotationSpacing:
+    active: true
+  FunctionStartOfBodySpacing:
+    active: true
+  StringTemplate:
+    active: true
+  PropertyWrapping:
+    active: true
+  UnnecessaryParenthesesBeforeTrailingLambda:
+    active: true

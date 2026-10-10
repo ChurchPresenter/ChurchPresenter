@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -16,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.churchpresenter.sharedui.presenter.ReferenceScaledBox
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -24,6 +27,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -72,6 +76,22 @@ fun QAPresenter(
     qaSettings: QASettings = QASettings(),
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
     transitionAlpha: Float = 1f,
+) = ReferenceScaledBox(modifier) {
+    QAPresenterContent(
+        question = question,
+        qaSettings = qaSettings,
+        outputRole = outputRole,
+        transitionAlpha = transitionAlpha,
+    )
+}
+
+/** [QAPresenter] as a 1920x1080-family output draws it; [ReferenceScaledBox] fits it to the real one. */
+@Composable
+private fun QAPresenterContent(
+    question: Question?,
+    qaSettings: QASettings,
+    outputRole: String,
+    transitionAlpha: Float,
 ) {
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val textColor = if (isKey) Color.White else parseHexColor(qaSettings.textColor)
@@ -109,7 +129,7 @@ fun QAPresenter(
     val boxAlignment = positionToAlignment(qaSettings.position)
 
     BoxWithConstraints(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .graphicsLayer { alpha = transitionAlpha },
         contentAlignment = boxAlignment
@@ -200,37 +220,37 @@ fun QAQRCodePresenter(
         if (messageBox.enabled) {
             BoxedQRMessage(message, textColor, messageBox, messageBox.rectIn(area))
         }
-        // Whatever is not boxed keeps the card it has always been drawn in.
+        // Whatever is not boxed keeps the card it has always been drawn in -- sized to the output, so
+        // the code and its message keep the proportions a 1080-line screen gives them on a window, a
+        // portrait output or a preview tile alike, and never run off a small one.
         if (codeBox.enabled && messageBox.enabled) return@BoxWithConstraints
+        val side = minOf(maxWidth * QR_CARD_WIDTH_FRACTION, maxHeight * QR_CARD_HEIGHT_FRACTION)
+        val unit = side.value / QR_CARD_REFERENCE_SIDE
+        val messageSize = with(LocalDensity.current) { (QR_MESSAGE_SIZE * unit).dp.toSp() }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .clip(RoundedCornerShape(24.dp))
+                .clip(RoundedCornerShape((QR_CARD_CORNER * unit).dp))
                 .background(bgColor)
-                .padding(48.dp)
+                .padding((QR_CARD_PADDING * unit).dp)
         ) {
             if (qrBitmap != null && !codeBox.enabled) {
                 if (isKey) {
-                    Box(
-                        modifier = Modifier
-                            .width(qrBitmap.width.dp)
-                            .height(qrBitmap.height.dp)
-                            .padding(bottom = 24.dp)
-                            .background(Color.White)
-                    )
+                    Box(modifier = Modifier.size(side).background(Color.White))
                 } else {
                     Image(
                         bitmap = qrBitmap,
                         contentDescription = stringResource(Res.string.qr_code),
-                        modifier = Modifier.padding(bottom = 24.dp)
+                        modifier = Modifier.size(side),
                     )
                 }
+                if (!messageBox.enabled) Spacer(Modifier.height((QR_CARD_GAP * unit).dp))
             }
             if (!messageBox.enabled) {
                 Text(
                     text = message,
                     color = textColor,
-                    fontSize = QR_MESSAGE_SIZE.sp,
+                    fontSize = messageSize,
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Center,
                 )
@@ -238,6 +258,19 @@ fun QAQRCodePresenter(
         }
     }
 }
+
+/**
+ * The unboxed card at its reference size: on a 1920x1080 output its code is [QR_CARD_REFERENCE_SIDE]
+ * across -- [QR_CARD_HEIGHT_FRACTION] of the height -- and the padding, gap, corner and message are
+ * in the same units. A narrow (portrait) output lets the code take up to [QR_CARD_WIDTH_FRACTION] of
+ * its width instead.
+ */
+private const val QR_CARD_REFERENCE_SIDE = 512f
+private const val QR_CARD_HEIGHT_FRACTION = QR_CARD_REFERENCE_SIDE / 1080f
+private const val QR_CARD_WIDTH_FRACTION = 0.7f
+private const val QR_CARD_PADDING = 48f
+private const val QR_CARD_GAP = 24f
+private const val QR_CARD_CORNER = 24f
 
 /** The QR code's message size, in the points the card draws it at. */
 private const val QR_MESSAGE_SIZE = 32

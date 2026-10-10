@@ -93,7 +93,7 @@ class OptionsContentTest {
                 OptionsDialogContent(
                     theme = ThemeMode.LIGHT,
                     settingsManager = SettingsManager(),
-                    companionServer = CompanionServer(),
+                    companionServer = CompanionServer(shutdownGraceMs = 0),
                     remoteClientManager = RemoteClientManager(),
                     onDismiss = { result.dismissed++ },
                     onSave = { result.saved = it },
@@ -189,8 +189,8 @@ class OptionsContentTest {
         assertEquals(TabLabelMargin.NORMAL_LARGE, result.saved?.tabLabelMargin)
     }
 
-    @Test
     // Two, not three: the Song tab this branch removed used to sit at 2, so Background moved down.
+    @Test
     fun `initialTab opens directly on that tab`() = dialog(initialTab = 2) {
         tab("Background").assertIsSelected()
     }
@@ -369,7 +369,7 @@ class OptionsContentTest {
                 isVisible = false,
                 theme = ThemeMode.LIGHT,
                 settingsManager = SettingsManager(),
-                companionServer = CompanionServer(),
+                companionServer = CompanionServer(shutdownGraceMs = 0),
                 remoteClientManager = RemoteClientManager(),
                 onDismiss = {},
             )
@@ -384,7 +384,7 @@ class OptionsContentTest {
                 isVisible = false,
                 theme = ThemeMode.LIGHT,
                 settingsManager = SettingsManager(),
-                companionServer = CompanionServer(),
+                companionServer = CompanionServer(shutdownGraceMs = 0),
                 remoteClientManager = RemoteClientManager(),
                 onDismiss = {},
                 calendarSync = null,
@@ -409,7 +409,7 @@ class OptionsContentTest {
             OptionsDialogContent(
                 theme = ThemeMode.LIGHT,
                 settingsManager = SettingsManager(),
-                companionServer = CompanionServer(),
+                companionServer = CompanionServer(shutdownGraceMs = 0),
                 remoteClientManager = RemoteClientManager(),
                 onDismiss = {},
                 calendarSync = null,

@@ -21,7 +21,7 @@ class LiveStateBroadcastWiringTest {
     private fun compose(
         test: ComposeUiTest,
         presenterManager: PresenterManager,
-        server: CompanionServer = CompanionServer(),
+        server: CompanionServer = CompanionServer(shutdownGraceMs = 0),
         settings: AppSettings = AppSettings(),
         screens: Int = 1,
         deckLinks: Int = 0,
@@ -84,7 +84,7 @@ class LiveStateBroadcastWiringTest {
     @Test
     fun `the broadcast says what is on air, the slide and the overlays over it`() = runComposeUiTest {
         val manager = PresenterManager()
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         compose(this, manager, server)
         waitForIdle()
         manager.setPresentingMode(Presenting.LYRICS)
@@ -98,7 +98,7 @@ class LiveStateBroadcastWiringTest {
     @Test
     fun `the broadcast carries the message up, and none once it is down`() = runComposeUiTest {
         val manager = PresenterManager()
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         compose(this, manager, server)
         waitForIdle()
         manager.showMessage(Cue.Message("Nursery #4", durationSeconds = 60))
@@ -111,7 +111,7 @@ class LiveStateBroadcastWiringTest {
     @Test
     fun `the broadcast carries the props up`() = runComposeUiTest {
         val manager = PresenterManager()
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         compose(this, manager, server)
         waitForIdle()
         manager.setPropOn("logo", true)

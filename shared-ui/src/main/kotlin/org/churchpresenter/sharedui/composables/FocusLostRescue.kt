@@ -35,7 +35,6 @@ private val BANNER_GAP = 8.dp
 private const val RESCUE_ATTEMPTS = 10
 private const val RESCUE_INTERVAL_MS = 100L
 
-
 /**
  * Creates and drives the focus-lost rescue for one tab. [active] gates the banner and the
  * auto-heal (e.g. false while the tab has no keyboard-navigable content yet). The caller must

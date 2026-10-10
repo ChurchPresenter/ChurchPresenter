@@ -283,6 +283,7 @@ class SongLibraryScreenshotTest {
 
     private companion object {
         const val SECTION = "songLibrary"
+
         // The window's own English strings, which is what a test run renders.
         const val COLUMNS = "Columns"
         const val ALL_SONG_BOOKS = "All Song Books"

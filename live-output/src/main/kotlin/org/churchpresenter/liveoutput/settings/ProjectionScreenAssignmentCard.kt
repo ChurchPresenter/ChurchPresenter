@@ -66,7 +66,6 @@ internal fun ScreenAssignmentCard(
     val langDropdownWidth = 95.dp
 
 SettingsSection(title = stringResource(Res.string.screen_assignment)) {
-
     // Detected screens info + simulate stepper + Identify button
     ScreenAssignmentInfoRow(
         detectedScreens, presenterWindowCount, devWindowedFallback, devWindowCount, onIdentifyScreen,
@@ -172,7 +171,6 @@ SettingsSection(title = stringResource(Res.string.screen_assignment)) {
             }
 
             Spacer(modifier = Modifier.width(8.dp))
-
         } // end data Row
 
         if (i < numScreens - 1) {

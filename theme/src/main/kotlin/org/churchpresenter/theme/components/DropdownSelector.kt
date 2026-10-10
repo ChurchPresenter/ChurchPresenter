@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.theme.dropdownField
+import org.churchpresenter.theme.keyboardFocusRing
 
 @Composable
 fun DropdownSelector(
@@ -58,6 +59,7 @@ fun DropdownSelector(
 
     Box(
         modifier = sizeModifier
+            .keyboardFocusRing(AppShape(8.dp))
             .dropdownField(AppShape(8.dp), open = expanded)
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
                 expanded = true
@@ -169,6 +171,7 @@ fun DropdownSelector(
         Row(
             modifier = Modifier
                 .heightIn(min = 42.dp)
+                .keyboardFocusRing(AppShape(8.dp))
                 .dropdownField(AppShape(8.dp), open = expanded.value)
                 .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
                     expanded.value = true

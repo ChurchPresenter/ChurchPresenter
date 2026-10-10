@@ -94,6 +94,7 @@ class DetectionEngine(
         else VersionDetector(versionCorpus, clock, onVersionChanged, versionScoringExecutor)
     private val events = DetectionEvents(translations)
     private val recorder = DetectionRecorder(clock, versionDetector)
+
     // Access-ordered LRU bound: the STT path only ever uses the single id "live", but the
     // direct-WS input path takes caller-supplied ids with no natural end — a long-lived
     // standalone server must not grow without bound. All access is confined to the single
@@ -102,7 +103,6 @@ class DetectionEngine(
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, UtteranceState>): Boolean =
             size > MAX_UTTERANCES
     }
-
 
     fun processTranscription(
         id: String,

@@ -90,6 +90,3 @@ fun ComposeUiTest.expiredTextField(): SemanticsNodeInteraction {
         ?: error("no text fields are on screen")
     return onAllNodes(hasSetTextAction())[lowest]
 }
-
-
-

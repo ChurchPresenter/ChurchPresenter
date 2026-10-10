@@ -15,7 +15,6 @@ fun isChorusHeader(line: String): Boolean {
     return t.startsWith("{") && t.endsWith("}")
 }
 
-
 /**
  * Section names that are typed as verses but are not one: an intro, a bridge, a tag.
  *

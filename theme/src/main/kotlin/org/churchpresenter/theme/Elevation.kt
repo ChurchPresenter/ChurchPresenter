@@ -29,6 +29,7 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.composed
+import androidx.compose.ui.input.key.key
 
 /**
  * The two-sided fill of a raised control: a vertical gradient from [top] to [bottom], the [ink]
@@ -222,6 +223,11 @@ fun Modifier.drawShiftedY(dy: Dp): Modifier =
  * A control raised off the page in [fill]: a top-lit gradient, a dark line along the bottom and a
  * drop shadow tinted with the fill's own color. [pressed] pushes it back in — no shadow, an inner
  * shade along the top instead.
+ *
+ * It also draws the keyboard focus ring for the control it is part of: whatever focusable follows
+ * it in the modifier chain (the `clickable`, the `toggleable`) gets the [ring] look while it holds
+ * focus that came from the keyboard -- never after a mouse click, which would leave a ring on every
+ * key pressed.
  */
 fun Modifier.raised(
     shape: Shape,
@@ -256,6 +262,7 @@ fun Modifier.raised(
     val top = if (hovered && !pressed) lerp(fill.top, Color.White, fraction = HOVER_BRIGHTEN) else fill.top
     val bottom = if (hovered && !pressed) lerp(fill.bottom, Color.White, fraction = HOVER_BRIGHTEN) else fill.bottom
     return this
+        .keyboardFocusRing(shape)
         .drawShiftedY(shift)
         .shadow(elevation, shape, clip = false, ambientColor = shadowTint, spotColor = shadowTint)
         .clip(shape)
@@ -299,7 +306,8 @@ private val RAISED_LIFT = 3.dp
 private val HOVER_EXTRA_LIFT = 3.dp
 private const val HOVER_BRIGHTEN = 0.08f
 private const val DISABLED_OPACITY = 0.4f
-private val RING_WIDTH = 2.dp
+internal val RING_WIDTH = 2.dp
+
 /** How strong a focus or open ring is drawn. */
 const val RING_ALPHA = 0.55f
 private val PRESS_SHIFT = 1.dp

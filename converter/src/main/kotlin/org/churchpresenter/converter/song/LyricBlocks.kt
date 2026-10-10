@@ -140,5 +140,4 @@ internal object LyricBlocks {
         if (body.isEmpty()) return null
         return (if (named) lines.first().trim('[', ']', '{', '}').trim() else null) to body
     }
-
 }

@@ -225,7 +225,7 @@ object SharedCameraFrameCache {
     /** Frames read into [entry] until the stream stops; the count is the caller's success signal. */
     private suspend fun readFramesInto(process: Process, entry: CacheEntry, videoW: Int, videoH: Int): Int {
         val frameBytes = videoW * videoH * 4  // BGRA = 4 bytes per pixel
-        Log.info("Camera", "Capturing ${videoW}x${videoH} rawvideo BGRA ($frameBytes bytes/frame)")
+        Log.info("Camera", "Capturing ${videoW}x$videoH rawvideo BGRA ($frameBytes bytes/frame)")
 
         val inputStream = process.inputStream
         val frameBuf = ByteArray(frameBytes)
@@ -243,7 +243,7 @@ object SharedCameraFrameCache {
             entry.frame.value = img.toComposeImageBitmap()
             frameCount++
             if (frameCount == 1) {
-                Log.info("Camera", "First frame received (${videoW}x${videoH})")
+                Log.info("Camera", "First frame received (${videoW}x$videoH)")
             }
         }
         return frameCount
@@ -367,7 +367,6 @@ object SharedCameraFrameCache {
         loop.run()
         loop.reportIfGaveUp()
     }
-
 }
 
 /** One camera's shared state: the frames on screen, why they stopped, and who is still watching. */
@@ -527,7 +526,7 @@ internal fun buildFfmpegCommand(
         val match = Regex("""(\d+)x(\d+)@(\d+)""").find(source.videoFormat)
         if (match != null) {
             val (w, h, fps) = match.destructured
-            listOf("-video_size", "${w}x${h}", "-framerate", fps)
+            listOf("-video_size", "${w}x$h", "-framerate", fps)
         } else emptyList()
     } else emptyList()
 

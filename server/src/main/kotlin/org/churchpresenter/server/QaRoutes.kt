@@ -190,7 +190,6 @@ private fun Route.qaVotingRoutes(
                 // Admin: check password
 }
 
-
 private fun Route.qaModerationRoutes(
     server: CompanionServer,
     json: Json,
@@ -311,8 +310,7 @@ private fun Route.qaQuestionEditRoutes(
                     if (ok) {
                         if (server.qaManager?.displayedQuestion == null) scope.launch { server.onQADisplay.emit(null) }
                         call.respondText("""{"ok":true}""", ContentType.Application.Json)
-                    }
-                    else call.respond(HttpStatusCode.NotFound, """{"error":"question not found"}""")
+                    } else call.respond(HttpStatusCode.NotFound, """{"error":"question not found"}""")
                 }
 
                 // Admin: mark question as done
@@ -345,8 +343,7 @@ private fun Route.qaQuestionStateRoutes(
                     if (ok) {
                         if (server.qaManager?.displayedQuestion == null) scope.launch { server.onQADisplay.emit(null) }
                         call.respondText("""{"ok":true}""", ContentType.Application.Json)
-                    }
-                    else call.respond(HttpStatusCode.NotFound, """{"error":"question not found"}""")
+                    } else call.respond(HttpStatusCode.NotFound, """{"error":"question not found"}""")
                 }
 
                 // Admin: display question on projection
@@ -374,8 +371,7 @@ private fun Route.qaQuestionStateRoutes(
                     if (ok) {
                         scope.launch { server.onQADisplay.emit(qa.displayedQuestion) }
                         call.respondText("""{"ok":true}""", ContentType.Application.Json)
-                    }
-                    else call.respond(HttpStatusCode.NotFound, """{"error":"question not found or not approved"}""")
+                    } else call.respond(HttpStatusCode.NotFound, """{"error":"question not found or not approved"}""")
                 }
 
                 // Admin: delete question
@@ -412,8 +408,6 @@ private fun Route.qaQuestionDeleteRoutes(
 
                 // Admin: add question (admin-created)
 }
-
-
 
 private fun Route.qaAdminActionRoutes(
     server: CompanionServer,
@@ -474,4 +468,3 @@ private fun Route.qaAdminActionRoutes(
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
 }
-

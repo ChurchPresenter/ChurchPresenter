@@ -31,9 +31,10 @@ internal fun contentTypeForExtension(ext: String): ContentType = when (ext.lower
     "gif"         -> ContentType.Image.GIF
     "webp"        -> ContentType.parse("image/webp")
     "bmp"         -> ContentType.parse("image/bmp")
-    "heic", "heif"-> ContentType.parse("image/heic")
+    "heic", "heif" -> ContentType.parse("image/heic")
     else          -> ContentType.Image.JPEG
 }
+
 /**
  * Returns the best local IPv4 address for display in the Server URL.
  *

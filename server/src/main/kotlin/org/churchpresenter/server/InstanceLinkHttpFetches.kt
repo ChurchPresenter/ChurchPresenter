@@ -22,7 +22,9 @@ internal class InstanceLinkHttpFetches(
 ) : InstanceLinkFetches {
     // Set on connect() so a fetch made on demand, outside the connect loop, reaches the same primary.
     @Volatile private var host: String = ""
+
     @Volatile private var port: Int = 0
+
     @Volatile private var apiKey: String = ""
 
     /** The primary every fetch from now on goes to. */
@@ -261,5 +263,4 @@ internal class InstanceLinkHttpFetches(
             response.readRawBytes()
         }.onFailure { e -> logFetch("background_asset", success = false, reason = e.message) }.getOrNull()
     }
-
 }

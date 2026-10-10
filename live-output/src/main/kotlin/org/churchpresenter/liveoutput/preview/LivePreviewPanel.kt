@@ -396,4 +396,3 @@ internal fun ScaledPresenterContent(
         }
     }
 }
-

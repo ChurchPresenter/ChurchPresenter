@@ -148,10 +148,12 @@ object AnnouncementLabel {
     const val START = "Start"
     const val PAUSE = "Pause"
     const val RESET = "Reset"
-    const val BOLD = "B"
-    const val ITALIC = "I"
-    const val UNDERLINE = "U"
-    const val SHADOW = "S"
+
+    // The style keys draw a letter but are named for what they do (see clickStyle).
+    const val BOLD = "Bold"
+    const val ITALIC = "Italic"
+    const val UNDERLINE = "Underline"
+    const val SHADOW = "Shadow"
     const val DURATION_MODE = "Duration"
     const val CLOCK_MODE = "Specific Time"
     const val CLOCK_DISPLAY_MODE = "Clock"
@@ -173,6 +175,12 @@ fun ComposeUiTest.typeAnnouncement(text: String) {
 /** Clicks a labelled control and settles the frame. */
 fun ComposeUiTest.clickLabel(label: String) {
     onNodeWithText(label).performClick()
+    waitForIdle()
+}
+
+/** Clicks one of the B/I/U/S style keys, by the name a screen reader hears ([AnnouncementLabel.BOLD]…). */
+fun ComposeUiTest.clickStyle(name: String) {
+    onNodeWithContentDescription(name).performClick()
     waitForIdle()
 }
 

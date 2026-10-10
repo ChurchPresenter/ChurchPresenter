@@ -10,7 +10,6 @@ private const val DEFAULT_BADGE_EM_W = 3.0
 private const val DEFAULT_BADGE_EM_H = 2.0
 private const val DEFAULT_CORNER_FACTOR = 1.1
 
-
 /**
  * Declarative description of a lower-third animation style, editable in the developer
  * Style Editor and rendered by [SpecStyleGenerator] through the exact same

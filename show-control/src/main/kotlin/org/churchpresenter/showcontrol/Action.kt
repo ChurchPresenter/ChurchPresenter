@@ -137,6 +137,8 @@ sealed interface Action {
 @Serializable
 enum class MediaCommand {
     @SerialName("play") PLAY,
+
     @SerialName("pause") PAUSE,
+
     @SerialName("stop") STOP,
 }

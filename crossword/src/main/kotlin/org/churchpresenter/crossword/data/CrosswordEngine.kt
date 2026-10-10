@@ -146,7 +146,6 @@ object CrosswordEngine {
             cellsOf(entry, row, col).forEach { (pos, letter) -> grid[pos] = letter }
             placed += PlacedEntry(entry, row, col)
         }
-
     }
 
     /** Which cells [entry] would occupy at ([row], [col]), and the letter each would hold. */

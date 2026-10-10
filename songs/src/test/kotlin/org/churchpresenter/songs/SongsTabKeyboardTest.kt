@@ -257,7 +257,6 @@ class SongsTabKeyboardTest {
         )
     )
 
-    @Test
     /**
      * The keys belong to the text while the caret is in the search field.
      *
@@ -266,6 +265,7 @@ class SongsTabKeyboardTest {
      * all — and each keystroke navigated the song underneath instead, on a list the same keystrokes
      * were re-filtering. That is what the reported crash walked off the end of.
      */
+    @Test
     fun `arrow keys in the search box leave the song alone`() {
         songsTab(songs = multiLineSong, songSettings = lineMode()) { vm, _ ->
             selectFirstSong(vm)

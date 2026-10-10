@@ -116,7 +116,6 @@ class CrossReferenceRepository(
     }
 }
 
-
 private const val THOUSAND = 1_000
 
 private fun refKey(bookId: Int, chapter: Int, verse: Int) =

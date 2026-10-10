@@ -19,6 +19,7 @@ object GuideTargets {
     val TOGGLE_OUTPUTS = GuideTarget("preview.toggleOutputs")
     val CLEAR_OUTPUT = GuideTarget("preview.clear")
     val TAKE = GuideTarget("preview.take")
+
     /** The Companion surface routed to the right sidebar, from the divider above it down. */
     val COMPANION_SIDEBAR = GuideTarget("preview.companion")
     val BACKGROUND_BUTTON = GuideTarget("toolbar.background")
@@ -100,11 +101,13 @@ object GuideTargets {
     val SCHEDULE_OPEN = GuideTarget("schedule.open")
     val SCHEDULE_SAVE = GuideTarget("schedule.save")
     val SCHEDULE_ADD_FILES = GuideTarget("schedule.addFiles")
+
     /** The schedule's first row: dragged to reorder, right-clicked for its menu. */
     val SCHEDULE_FIRST_ROW = GuideTarget("schedule.firstRow")
     val NDI_ADD = GuideTarget("settings.projection.ndiAdd")
     val OMT_ADD = GuideTarget("settings.projection.omtAdd")
     val BROWSER_SOURCE_ADD = GuideTarget("settings.projection.browserSourceAdd")
+
     /** The first NDI / Browser Source output's name field, once one is added. */
     val NDI_FIRST_NAME = GuideTarget("settings.projection.ndiFirstName")
     val BROWSER_SOURCE_FIRST_NAME = GuideTarget("settings.projection.browserSourceFirstName")

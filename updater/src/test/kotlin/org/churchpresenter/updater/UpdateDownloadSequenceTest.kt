@@ -40,6 +40,7 @@ class UpdateDownloadSequenceTest {
     private class Calls {
         val counted = CopyOnWriteArrayList<String>()
         val downloaded = CopyOnWriteArrayList<String>()
+        val digests = CopyOnWriteArrayList<String?>()
         val installed = CopyOnWriteArrayList<File>()
         val halfWay = CompletableDeferred<Unit>()
         val finish = CompletableDeferred<Unit>()
@@ -50,6 +51,7 @@ class UpdateDownloadSequenceTest {
         releaseUrl = "https://example.invalid/releases/2.5.0",
         releaseNotes = "notes",
         downloadUrl = downloadUrl,
+        downloadSha256 = "ab12",
     )
 
     private fun flow(
@@ -61,8 +63,9 @@ class UpdateDownloadSequenceTest {
         scope,
         UpdateSteps(
             reportDownloadStarted = { calls.counted += it },
-            download = { url, report ->
+            download = { url, sha256, report ->
                 calls.downloaded += url
+                calls.digests += sha256
                 report(DownloadState.Downloading(0.5f))
                 calls.halfWay.complete(Unit)
                 calls.finish.await()
@@ -87,6 +90,7 @@ class UpdateDownloadSequenceTest {
         assertEquals(DownloadState.Downloading(0.5f), flow.state)
         assertEquals(listOf("2.5.0"), calls.counted.toList())
         assertEquals(listOf("https://example.invalid/ChurchPresenter-2.5.0.dmg"), calls.downloaded.toList())
+        assertEquals(listOf<String?>("ab12"), calls.digests.toList(), "the release's digest goes with the url")
 
         calls.finish.complete(Unit)
         runBlocking { job.join() }

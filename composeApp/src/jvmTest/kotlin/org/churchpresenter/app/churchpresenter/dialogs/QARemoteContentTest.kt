@@ -319,5 +319,4 @@ class QARemoteContentTest {
             waitForIdle()
             assertEquals("", h.settings.qrCodeMessage)
         }
-
 }

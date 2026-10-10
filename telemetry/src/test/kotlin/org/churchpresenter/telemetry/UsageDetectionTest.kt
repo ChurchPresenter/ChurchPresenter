@@ -1,6 +1,5 @@
 package org.churchpresenter.telemetry
 
-
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.core.models.songs.SongTranslation
 import org.churchpresenter.sharedui.utils.UsageEvent

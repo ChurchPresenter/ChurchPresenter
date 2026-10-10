@@ -512,7 +512,6 @@ fun SongSettings.migrateSongNumberStyle(): SongSettings {
         songNumberLowerThirdShadowSize = titleLowerThirdShadowSize,
         songNumberLowerThirdShadowOpacity = titleLowerThirdShadowOpacity,
     )
-
 }
 
 /**

@@ -21,6 +21,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import org.churchpresenter.theme.AppShape
+import org.churchpresenter.theme.keyboardFocusRing
 import androidx.compose.material3.CheckboxColors
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.LocalContentColor
@@ -59,6 +60,7 @@ private const val SEGMENT_HOVER_ALPHA = 0.08f
 private val SEGMENT_HOVER_SHIFT = 1.dp
 private const val HOVER_RIM_ALPHA = 0.55f
 private val BOX_SIZE = 18.dp
+
 /** Material draws its checkbox and radio 18dp inside a 20dp box; this is the difference. */
 private val CONTROL_PADDING = 1.dp
 private val BOX_RADIUS = 5.dp
@@ -348,6 +350,8 @@ fun SegmentTrackItem(
     }
     Box(
         modifier = modifier
+            // Inset: a track clips its items to itself, so a ring outside one would be cut off.
+            .keyboardFocusRing(shape, inset = true)
             .then(
                 when {
                     selected -> Modifier.raised(shape, palette.selected, palette, hovered = hovered, lift = 2.dp)

@@ -406,6 +406,7 @@ class CrashReporterStartupTest {
         val options = SentryOptions()
         CrashReporter.configureOptions(options, "https://key@example.org/1")
         assertEquals("26.9.177", options.release, "the release is what groups events in Sentry")
+        assertNotNull(options.beforeBreadcrumb, "every breadcrumb is scrubbed as it is recorded")
     }
 
     @Test

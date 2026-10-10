@@ -51,9 +51,11 @@ internal class CanvasTabScope(
     var leftPanelPx by state.leftPanelPx
     var rightPanelPx by state.rightPanelPx
     var renamingSceneId by state.renamingSceneId
+
     // The scene whose second layout is about to be removed, while the confirmation is open.
     var confirmSingleLayoutSceneId by state.confirmSingleLayoutSceneId
     var renameText by state.renameText
+
     // Drawing tool state
     var activeTool by state.activeTool
     var drawingStrokeColor by state.drawingStrokeColor
@@ -83,7 +85,6 @@ internal class CanvasTabScope(
         val dp = with(density) { rightPanelPx.toDp().value.toInt() }
         onSettingsChangeState.value { s -> withCanvasRightPanelWidth(s, isMaximized, dp) }
     }
-
 }
 
 /** The source types' default names, localised in composable scope for the menu's onClick lambdas. */

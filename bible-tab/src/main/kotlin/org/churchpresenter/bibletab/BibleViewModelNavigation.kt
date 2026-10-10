@@ -1,6 +1,5 @@
 package org.churchpresenter.bibletab
 
-
 fun BibleViewModel.navigatePreviousVerse(): Boolean {
     if (stepSelectedVersePage(forward = false)) return true
     if (_verses.value.isNotEmpty() && _selectedVerseIndex.value > 0) {

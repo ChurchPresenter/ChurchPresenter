@@ -83,4 +83,4 @@ internal object ArgbRle {
             g.dispose()
         }
         return dstImg.getRGB(0, 0, dw, dh, null, 0, dw)
-    }}
+    } }

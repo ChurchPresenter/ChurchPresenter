@@ -41,6 +41,7 @@ class ServiceSoak {
     private val sampleSeconds = System.getProperty("soak.sampleSeconds")?.toLongOrNull() ?: DEFAULT_SAMPLE_SECONDS
     private val stallSeconds = System.getProperty("soak.stallSeconds")?.toLongOrNull() ?: DEFAULT_STALL_SECONDS
     private val uiStalls = UiStallTally(SoakLimits().uiStallMs.toLong())
+
     // Emptied first: a run cut short must not leave the last run's files looking like its own.
     private val reportDir = System.getProperty("soak.reportDir")?.let { dir ->
         File(dir).apply {

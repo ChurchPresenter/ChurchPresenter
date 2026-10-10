@@ -125,7 +125,7 @@ class AutoFitUtilsTest {
             val size = calculateAutoFitFontSize(measurer, text, style, w, h)
             assertTrue(
                 measuredHeight(text, size, w) <= h,
-                "auto-fit returned $size but that overflows a ${w}x${h} box " +
+                "auto-fit returned $size but that overflows a ${w}x$h box " +
                     "(measured ${measuredHeight(text, size, w)})",
             )
         }

@@ -75,7 +75,7 @@ class WebTabMirrorPreviewTest {
 
         // Virtual time: the production delay is 7s, which the test clock advances instantly. Nothing
         // here waits on a real clock.
-        mainClock.advanceTimeBy(7_001)
+        mainClock.advanceTimeBy(7_001, ignoreFrameDuration = true)
         waitForIdle()
 
         onNodeWithText(expectedHint).assertExists()

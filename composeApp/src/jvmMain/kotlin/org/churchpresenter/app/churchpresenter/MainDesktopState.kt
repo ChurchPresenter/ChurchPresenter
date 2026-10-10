@@ -30,12 +30,15 @@ internal class MainDesktopState(
 
     var selectedBibleVerseItem by mutableStateOf<ScheduleItem.BibleVerseItem?>(null)
     var selectedBibleVerseItemVersion by mutableStateOf(0)
+
     /** True when [selectedBibleVerseItem] is to go live, not just open. */
     var selectedBibleVerseItemGoLive by mutableStateOf(false)
     var selectedSongItem by mutableStateOf<ScheduleItem.SongItem?>(null)
     var selectedSongItemVersion by mutableStateOf(0)
+
     /** What the Songs tab does with [selectedSongItem]: open it, push it, or put it on screen. */
     var selectedSongItemAction by mutableStateOf(ScheduleSongAction.OPEN)
+
     /** Who handed [selectedSongItem] over, for the live history: the schedule, a remote, the calendar. */
     var selectedSongItemSource by mutableStateOf("schedule")
     var selectedPictureItem by mutableStateOf<ScheduleItem.PictureItem?>(null)
@@ -53,11 +56,13 @@ internal class MainDesktopState(
     var selectedTabIndex by selectedTabIndexState
 
     var showAddLabelDialog by mutableStateOf(false)
+
     /** The item a tab's Save preset is naming, or null while that dialog is closed. */
     var presetToSave by mutableStateOf<ScheduleItem?>(null)
     var editingLabelItem by mutableStateOf<ScheduleItem.LabelItem?>(null)
     var showAddWebsiteDialog by mutableStateOf(false)
     var showKonamiEasterEgg by mutableStateOf(false)
+
     /** Invites feedback on the launch after an unexpected shutdown (opt-in analytics only). */
     var showCrashFeedback by mutableStateOf(showCrashFeedbackInitially)
 

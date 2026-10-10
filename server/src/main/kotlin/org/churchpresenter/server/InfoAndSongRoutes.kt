@@ -179,5 +179,3 @@ private fun Route.songSelectRoutes(
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
 }
-
-

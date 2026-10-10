@@ -67,7 +67,6 @@ internal fun ModuleRow(
     anyInstallRunning: Boolean,
     onInstall: () -> Unit
 ) {
-
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
     val rowBackground by animateColorAsState(
@@ -90,7 +89,6 @@ internal fun ModuleRow(
         ModuleAvatar(module)
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
-
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = module.displayName,

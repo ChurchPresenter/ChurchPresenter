@@ -48,7 +48,6 @@ private fun catalogFetchFailed(e: Throwable, cached: List<BibleModule>?): BibleC
  */
 object EBibleSource : BibleSource {
 
-
     override val sourceId = BibleSourceId.EBIBLE
 
     private const val CATALOG_URL = "https://ebible.org/Scriptures/translations.csv"

@@ -10,12 +10,14 @@ import org.churchpresenter.settings.utils.Constants
 enum class StageMonitorContentType {
     BIBLE, SONGS, PRESENTATION, PRESENTATION_NOTES, PICTURES, MEDIA, LOWER_THIRD, WEB, STT, CANVAS, QA, DICTIONARY,
     CLOCK,
+
     /**
      * Announcements text and all timer variants (Duration/Countdown/Specific Time) share one
      * pre-formatted string with no way to tell them apart, so they're a single content type —
      * having separate entries that all show identical text just duplicated it across zones.
      */
     ANNOUNCEMENT_TEXT,
+
     /** Next Bible verse (when presenting Bible) or next song line/section (when presenting Songs). */
     NEXT
 }

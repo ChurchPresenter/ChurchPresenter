@@ -9,7 +9,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.stt.STTSegment
 import org.churchpresenter.settings.CAPTION_BOX_BAND
@@ -32,7 +32,9 @@ class CaptionPresentationRenderTest {
     private val english = listOf(segment("Grace and peace", 1), segment("Let us pray", 2))
     private val spanish = listOf(segment("Gracia y paz", 1), segment("Oremos", 2))
 
-    private fun runStt(settings: STTSettings, body: ComposeUiTest.() -> Unit) = runComposeUiTest {
+    // A true 1920x1080 window: the margins are stored in that reference's pixels, and a smaller
+    // window would draw them scaled down with everything else.
+    private fun runStt(settings: STTSettings, body: ComposeUiTest.() -> Unit) = runDesktopComposeUiTest(1920, 1080) {
         setContent {
             Box(screen) {
                 STTPresenter(

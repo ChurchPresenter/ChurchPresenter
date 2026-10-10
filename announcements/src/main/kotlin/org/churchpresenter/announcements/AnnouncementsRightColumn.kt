@@ -193,7 +193,7 @@ private fun AnnouncementsTabScope.AnnouncementsPreview(
                     textAlign = viewModel.previewTextAlign,
                 )
                 if (viewModel.isDirectional) {
-                    DirectionalPreview(viewModel, 
+                    DirectionalPreview(viewModel,
                         look, viewModel.isHorizontal, viewModel.slideAlignment,
                         previewContainerWidthPx, previewContainerHeightPx, offsetFractionState,
                     )

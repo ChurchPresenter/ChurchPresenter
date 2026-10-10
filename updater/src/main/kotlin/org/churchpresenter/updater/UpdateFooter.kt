@@ -27,6 +27,7 @@ import org.churchpresenter.sharedui.composables.CopyLinkIconButton
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.cancel
 import org.churchpresenter.strings.generated.resources.ok
+import org.churchpresenter.strings.generated.resources.update_dialog_unverified
 import org.churchpresenter.strings.generated.resources.update_dialog_dismiss
 import org.churchpresenter.strings.generated.resources.update_dialog_download_install
 import org.churchpresenter.strings.generated.resources.update_dialog_downloading
@@ -96,8 +97,13 @@ internal fun UpdateFooter(
                 }
             }
             downloadState is DownloadState.Error || info.downloadUrl == null -> {
+                val error = downloadState as? DownloadState.Error
                 Text(
-                    (downloadState as? DownloadState.Error)?.message.orEmpty(),
+                    if (error?.unverified == true) {
+                        stringResource(Res.string.update_dialog_unverified)
+                    } else {
+                        error?.message.orEmpty()
+                    },
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,

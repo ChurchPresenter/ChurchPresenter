@@ -58,15 +58,14 @@ private const val UNIFORM_FRAME_MAX_BYTES = 16
 object LottieRenderCache : LottieRenderPolicy by LottieRenderSizes {
 
     private const val MAGIC = "LRCC"
+
     // 2: text in scripts like Tamil is shaped as whole lines (the file's Text shaping), so frames
     // rendered letter by letter before it must not be reused for an unchanged file
     const val VERSION = 2
     internal const val MAX_ENTRIES = 60
 
-
     /** Frame rate desktop playback variants are rendered at. */
     const val PLAYBACK_FPS = 30
-
 
     /** Header byte length: magic(4) + version(1) + flags(1) + w(4) + h(4) + fps(4) + frames(4). */
     private const val HEADER_LEN = 22L
@@ -210,6 +209,7 @@ object LottieRenderCache : LottieRenderPolicy by LottieRenderSizes {
         private val raf = RandomAccessFile(file, "r")
         val width: Int
         val height: Int
+
         /** fps × 100 as stored; 0 for stills. */
         val fpsX100: Int
         val frameCount: Int
@@ -319,5 +319,4 @@ object LottieRenderCache : LottieRenderPolicy by LottieRenderSizes {
             tmp.delete()
         }
     }
-
 }

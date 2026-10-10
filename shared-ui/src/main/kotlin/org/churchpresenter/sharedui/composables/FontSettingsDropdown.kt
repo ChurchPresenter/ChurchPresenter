@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import org.churchpresenter.theme.AppShape
+import org.churchpresenter.theme.keyboardFocusRing
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -169,6 +170,7 @@ private fun FontPickerTrigger(
     Box(
         modifier = modifier
             .heightIn(min = 42.dp)
+            .keyboardFocusRing(AppShape(8.dp))
             .dropdownField(AppShape(8.dp), open = expanded)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },

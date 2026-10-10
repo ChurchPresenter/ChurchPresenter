@@ -22,4 +22,3 @@ internal val SOURCE_FIELD_WIDTH = 260.dp
 internal val PERCENT_RANGE = 0..100
 
 // ── Shared bits ─────────────────────────────────────────────────────────────────────────────────
-

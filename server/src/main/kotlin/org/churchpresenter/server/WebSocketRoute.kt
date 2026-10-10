@@ -7,6 +7,7 @@ import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import java.io.IOException
+import java.security.MessageDigest
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -36,7 +37,7 @@ internal fun Route.webSocketRoute(
                     val headerKey = call.request.headers[Constants.HEADER_API_KEY]
                     if (server._apiKeyEnabled.value && server._apiKey.value.isNotEmpty()) {
                         val provided = queryKey ?: headerKey ?: ""
-                        if (provided != server._apiKey.value) {
+                        if (!MessageDigest.isEqual(provided.toByteArray(), server._apiKey.value.toByteArray())) {
                             InstanceLinkLogger.log(
                                 InstanceLinkLogSide.PRIMARY,
                                 "follower_unauthorized",
@@ -149,9 +150,7 @@ internal fun Route.webSocketRoute(
                 // ── Lower Third Sequencer (Bitfocus Companion) ───────────────────
                 // One HTTP call runs the whole timed sequence: ATEM key on → play
                 // the lower third → key off when the animation ends.
-
 }
-
 
 /** Acks a command that carried a commandId (InstanceLink controller mode); a no-op without one. */
 internal suspend fun DefaultWebSocketServerSession.sendCommandAck(
@@ -240,7 +239,6 @@ private suspend fun DefaultWebSocketServerSession.sendConnectSnapshot(
             WebSocketMessage(Constants.WS_EVENT_LIVE_STATE_CHANGED,
                 json.encodeToString(LiveStateDto.serializer(), state)))))
     }
-
 }
 
 /** Runs one command frame; a frame that is malformed or whose command fails is logged, not fatal. */

@@ -9,12 +9,14 @@ class Stabilizer(private val clock: () -> Long = System::currentTimeMillis) {
 
     private val lastEmittedAt = HashMap<String, Long>()
     private val lastConfidence = HashMap<String, Double>()
+
     // When this ref last produced an actual emission (new or updated) — gates the re-emit cooldown.
     private val lastEmissionAt = HashMap<String, Long>()
 
     sealed class EmitDecision {
         data class NewDetection(val key: String) : EmitDecision()
         data class UpdatedDetection(val key: String, val oldConfidence: Double) : EmitDecision()
+
         // [reason] = "below-confidence" (under the emit threshold) or "deduped" (same ref, no change
         // within the TTL). Surfaced so the candidate log can record why a near-miss was dropped.
         data class Suppress(val reason: String) : EmitDecision()

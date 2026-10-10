@@ -56,10 +56,12 @@ class PresentationPlayer(
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val rasterizer = DeckRasterizer(deck, renderWidthPx, onDegraded = ::reportDegradedSlide)
     private val rasterLock = Any()
+
     /** Guards the slide, its step and the pending last-step entry against the loader's completion. */
     private val navLock = Any()
 
     private val slideCache = ConcurrentHashMap<Int, SlideLayers>()
+
     // internal: lets tests wait for an async rasterization attempt to actually finish (success or
     // failure) instead of polling frame(), which never turns non-null on the failure path.
     internal val loading = ConcurrentHashMap<Int, Job>()
@@ -71,8 +73,10 @@ class PresentationPlayer(
     // frame() once that slide's poster has actually finished rasterizing. One decoder alive
     // at a time.
     private val posterCanvases = ConcurrentHashMap<Int, BufferedImage>()
+
     @Volatile private var movieLayerId: String? = null
     private var movieDecoder: EmbeddedVideoDecoder? = null
+
     // The click step whose build targets movieLayerId — the poster is visible from slide entry
     // (not entrance-gated, matches both real Keynote and PowerPoint), but playback only starts
     // once this step is reached. -1 (no build targets it) means "always eligible."
@@ -83,8 +87,10 @@ class PresentationPlayer(
     private val frameHeightPx: Int = (deck.slideHeightPt * scalePxPerPt).toInt().coerceAtLeast(1)
 
     @Volatile private var slideIndex: Int = -1
+
     /** -1 = pre-click state (entrance targets hidden); 0..stepCount-1 = that step playing. */
     @Volatile private var stepIndex: Int = -1
+
     /** Set by [showSlide] when [SlideLayers] isn't cached yet and entry should land on the last
      *  step once it loads (backward navigation) — applied in [ensureLoaded]'s completion, guarded
      *  by slide index so a stale request can't misapply after further navigation. */
@@ -92,12 +98,15 @@ class PresentationPlayer(
 
     /** The slide playback currently points at — identity check for step navigation. */
     val currentSlideIndex: Int get() = slideIndex
+
     @Volatile private var stepStartNanos: Long = 0L
+
     @Volatile private var closed = false
 
     // Deck-defined transition into the current slide. Starts on the first evaluated frame after
     // the incoming slide's layers are ready (so the outgoing image holds during rasterization).
     private val slideTransition = SlideTransition()
+
     /** The last frame's placed layers — snapshot source for the next transition's "from" side. */
     @Volatile private var lastPlacedLayers: List<PlacedLayer> = emptyList()
 
@@ -319,7 +328,9 @@ class PresentationPlayer(
 /** The deck-defined transition into the current slide, while one is running. */
 private class SlideTransition {
     @Volatile private var spec: SlideTransitionSpec? = null
+
     @Volatile private var fromLayers: List<PlacedLayer> = emptyList()
+
     @Volatile private var startNanos: Long = 0L
 
     val isRunning: Boolean get() = spec != null

@@ -27,6 +27,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
+import org.churchpresenter.theme.keyboardFocusRing
 import androidx.compose.foundation.focusable
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -155,6 +157,8 @@ fun PicturesTab(
                 rootFocused = it.isFocused
             }
             .focusRescuePressHook(focusRescue)
+            // The whole tab takes the arrow keys; Tab landing on it is shown by a ring just inside it.
+            .keyboardFocusRing(RectangleShape, inset = true)
             .focusable()
             .onPreviewKeyEvent { keyEvent ->
                 shortcuts.handleGoLiveKey(keyEvent, rootFocused, canGoLive) {

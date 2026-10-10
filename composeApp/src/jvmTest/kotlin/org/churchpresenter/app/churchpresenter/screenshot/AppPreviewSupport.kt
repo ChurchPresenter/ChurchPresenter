@@ -63,6 +63,7 @@ import org.churchpresenter.sharedui.screenshot.THEMES
 import org.churchpresenter.sharedui.screenshot.captureTo
 
 private const val ROOT = "$SCREENSHOT_ROOT/previewApp"
+
 /**
  * Where the fixture's media library lives — and, because the schedule row prints the path of every
  * file-backed item at detailed density, **a string that appears in the screenshots themselves**.

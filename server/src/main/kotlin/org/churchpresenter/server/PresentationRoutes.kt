@@ -179,7 +179,6 @@ private fun Route.presentationSlideRoutes(
                  */
 }
 
-
 private fun Route.presentationUploadRoutes(
     server: CompanionServer,
     json: Json,

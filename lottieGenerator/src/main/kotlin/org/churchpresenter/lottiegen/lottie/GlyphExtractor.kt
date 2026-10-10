@@ -26,7 +26,6 @@ private const val GLYPH_EM_SIZE = 100
 /** Outline coordinates are emitted to two decimal places; more only inflates the JSON. */
 private const val ROUND_2DP = 100.0
 
-
 /**
  * Embeds vector glyph outlines ("chars") for the characters the animation's text layers
  * actually use, so exported files render crisp text in any lottie player with no font

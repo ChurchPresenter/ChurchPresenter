@@ -453,5 +453,3 @@ private const val BACKGROUND_DIM_MAX = 100
 private const val PERCENT = 100f
 private val COLOR_FIELD_WIDTH = 150.dp
 private val SWATCH_HEIGHT = 22.dp
-
-

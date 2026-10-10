@@ -153,6 +153,7 @@ private fun MovableBox(handle: BoxHandle, area: Rect, scale: Float, others: List
     val rect = handle.box.rectIn(area)
     var from by remember { mutableStateOf(handle.box) }
     val windowInfo = LocalWindowInfo.current
+
     // Output pixels to percent of the area, on each axis.
     fun percent(total: Offset) = Offset(
         total.x * scale / area.width * TextBox.FULL_PERCENT,

@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.flatDisabled
 import org.churchpresenter.theme.raised
+import org.churchpresenter.theme.keyboardFocusRing
 
 private val ICON_BUTTON_SIZE = 40.dp
 private val ICON_KEY_INSET = 3.dp
@@ -64,6 +65,7 @@ fun KeyIconButton(
         modifier = modifier
             .minimumInteractiveComponentSize()
             .size(ICON_BUTTON_SIZE)
+            .keyboardFocusRing(shape)
             .clickable(
                 interactionSource = interaction,
                 indication = null,

@@ -28,7 +28,6 @@ private const val DEVICE_STATUS_FIELDS = 3
  */
 object DeckLinkManager : DeckLinkBridge(DeckLinkJni, ::loadDeckLinkLibrary) {
 
-
     data class DeckLinkDevice(val index: Int, val name: String)
 
     data class OutputInfo(val width: Int, val height: Int, val fpsNumerator: Int, val fpsDenominator: Int) {

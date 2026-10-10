@@ -74,7 +74,7 @@ class ServerSettingsTabScreenshotTest {
         @BeforeAll
         @JvmStatic
         fun startServer() {
-            val server = CompanionServer()
+            val server = CompanionServer(shutdownGraceMs = 0)
             server.start(PORT, HOST)
             // The positive signal the server itself publishes — never a fixed pause.
             val deadline = System.currentTimeMillis() + 10_000
@@ -250,7 +250,7 @@ class ServerSettingsTabScreenshotTest {
         drive: ComposeUiTest.() -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
         withIsolatedHome {
-            val companion = server ?: CompanionServer()
+            val companion = server ?: CompanionServer(shutdownGraceMs = 0)
             val clients = RemoteClientManager().apply(seedClients)
             runComposeUiTest {
                 setContent {

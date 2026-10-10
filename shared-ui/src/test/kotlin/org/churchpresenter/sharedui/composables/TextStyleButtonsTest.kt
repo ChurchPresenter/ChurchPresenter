@@ -2,8 +2,7 @@ package org.churchpresenter.sharedui.composables
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
@@ -32,10 +31,10 @@ class TextStyleButtonsTest {
                 )
             }
         }
-        onNodeWithText("B").assertExists()
-        onNodeWithText("I").assertExists()
-        onNodeWithText("U").assertExists()
-        onNodeWithText("S").assertExists()
+        onNodeWithContentDescription("Bold").assertExists()
+        onNodeWithContentDescription("Italic").assertExists()
+        onNodeWithContentDescription("Underline").assertExists()
+        onNodeWithContentDescription("Shadow").assertExists()
     }
 
     @Test
@@ -49,7 +48,7 @@ class TextStyleButtonsTest {
                 )
             }
         }
-        onNodeWithText("B").performClick()
+        onNodeWithContentDescription("Bold").performClick()
         assertTrue(bold, "clicking Bold while off must report true")
     }
 
@@ -64,7 +63,7 @@ class TextStyleButtonsTest {
                 )
             }
         }
-        onNodeWithText("I").performClick()
+        onNodeWithContentDescription("Italic").performClick()
         assertEquals(false, italic, "clicking Italic while on must report false")
     }
 
@@ -81,8 +80,8 @@ class TextStyleButtonsTest {
                 )
             }
         }
-        onNodeWithText("U").performClick()
-        onNodeWithText("S").performClick()
+        onNodeWithContentDescription("Underline").performClick()
+        onNodeWithContentDescription("Shadow").performClick()
         assertTrue(underline)
         assertTrue(shadow)
     }
@@ -99,7 +98,7 @@ class TextStyleButtonsTest {
         }
         onNodeWithText("Bold", substring = true).assertDoesNotExist()
 
-        onAllNodesWithText("B").onFirst().performMouseInput { moveTo(center) }
+        onNodeWithContentDescription("Bold").performMouseInput { moveTo(center) }
         mainClock.advanceTimeBy(600)
         waitForIdle()
 

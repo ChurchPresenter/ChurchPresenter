@@ -72,7 +72,7 @@ class CompanionServerPictureUploadTest {
             realHome = System.getProperty("user.home")
             tempHome = Files.createTempDirectory("cp-picture-upload").toFile()
             System.setProperty("user.home", tempHome.absolutePath)
-            server = CompanionServer()
+            server = CompanionServer(shutdownGraceMs = 0)
             server.start(port = testPort(39_723))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {
@@ -356,5 +356,4 @@ class CompanionServerPictureUploadTest {
 
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
-
 }

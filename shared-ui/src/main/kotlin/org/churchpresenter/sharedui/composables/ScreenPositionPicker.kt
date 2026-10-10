@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.position_showing_at
 import org.churchpresenter.theme.AppShape
+import org.churchpresenter.theme.keyboardFocusRing
 import org.churchpresenter.theme.components.ControlTooltip
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.raised
@@ -149,6 +150,7 @@ private fun PositionCell(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
+                .keyboardFocusRing(shape)
                 .then(
                     when {
                         isSelected -> Modifier.raised(shape, palette.accent, palette, lift = 2.dp)

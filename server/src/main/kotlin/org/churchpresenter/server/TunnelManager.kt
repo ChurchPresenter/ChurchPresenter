@@ -13,18 +13,21 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.security.MessageDigest
 import java.time.Duration
+import java.util.Properties
 import org.churchpresenter.sharedui.utils.addGuardedShutdownHook
 
 private const val HTTP_OK = 200
 private const val TUNNEL_READY_TIMEOUT_MS = 30_000L
 private const val TUNNEL_POLL_INTERVAL_MS = 200L
+private const val CLOUDFLARED_RELEASES = "https://github.com/cloudflare/cloudflared/releases/download"
+private const val CLOUDFLARED_PINS = "/tunnel/cloudflared-builds.properties"
 
 sealed class TunnelStatus {
     data object Idle : TunnelStatus()
@@ -38,13 +41,53 @@ private val TUNNEL_URL_REGEX = Regex("""https://[a-z0-9-]+\.trycloudflare\.com""
 
 internal fun extractTunnelUrl(line: String): String? = TUNNEL_URL_REGEX.find(line)?.value
 
-internal fun cloudflaredDownloadUrl(isWin: Boolean, isMac: Boolean, isArm: Boolean): String = when {
-    isWin -> "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe"
-    isMac && isArm -> "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-darwin-arm64.tgz"
-    isMac -> "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-darwin-amd64.tgz"
-    isArm -> "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64"
-    else -> "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64"
+internal fun cloudflaredAsset(isWin: Boolean, isMac: Boolean, isArm: Boolean): String = when {
+    isWin -> "cloudflared-windows-amd64.exe"
+    isMac && isArm -> "cloudflared-darwin-arm64.tgz"
+    isMac -> "cloudflared-darwin-amd64.tgz"
+    isArm -> "cloudflared-linux-arm64"
+    else -> "cloudflared-linux-amd64"
 }
+
+/**
+ * The cloudflared release the tunnel runs and the SHA-256 of each platform's asset in it, read
+ * from `tunnel/cloudflared-builds.properties`.
+ */
+internal class CloudflaredPins(private val props: Properties) {
+    val version: String get() = props.getProperty("version").orEmpty()
+
+    fun sha256(asset: String): String = props.getProperty(asset).orEmpty()
+
+    fun downloadUrl(asset: String): String = "$CLOUDFLARED_RELEASES/$version/$asset"
+
+    companion object {
+        fun load(): CloudflaredPins = CloudflaredPins(
+            Properties().apply {
+                CloudflaredPins::class.java.getResourceAsStream(CLOUDFLARED_PINS)?.use { load(it) }
+            },
+        )
+    }
+}
+
+/**
+ * [bytes] if their SHA-256 is [expectedSha256]; otherwise an [IOException], so nothing unverified
+ * is ever written where it can run. A missing pin refuses too.
+ */
+internal fun verifiedDownload(bytes: ByteArray, expectedSha256: String): ByteArray {
+    if (expectedSha256.isBlank()) throw IOException("No pinned SHA-256 for this cloudflared build")
+    val actual = MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
+    if (!actual.equals(expectedSha256, ignoreCase = true)) {
+        throw IOException("cloudflared download failed verification (SHA-256 $actual, expected $expectedSha256)")
+    }
+    return bytes
+}
+
+/** Whether to fetch cloudflared: none installed, or one from a pin other than [pinnedVersion]. */
+internal fun needsCloudflaredDownload(
+    binaryExists: Boolean,
+    installedVersion: String?,
+    pinnedVersion: String,
+): Boolean = !binaryExists || installedVersion?.trim() != pinnedVersion
 
 internal fun moveBinaryIntoPlace(downloaded: File, target: File) {
     if (downloaded.renameTo(target)) return
@@ -92,7 +135,9 @@ class TunnelManager {
     private val binaryFile = File(dataDir, binaryName)
     private val tmpFile = File(dataDir, if (isMac) "cloudflared.tgz.tmp" else "$binaryName.tmp")
 
-    private val downloadUrl = cloudflaredDownloadUrl(isWin, isMac, isArm)
+    private val versionFile = File(dataDir, "cloudflared.version")
+    private val pins = CloudflaredPins.load()
+    private val asset = cloudflaredAsset(isWin, isMac, isArm)
 
     init {
         addGuardedShutdownHook("tunnel") {
@@ -105,7 +150,8 @@ class TunnelManager {
 
         scope.launch {
             try {
-                if (!binaryFile.exists()) {
+                val installed = if (versionFile.exists()) versionFile.readText() else null
+                if (needsCloudflaredDownload(binaryFile.exists(), installed, pins.version)) {
                     downloadBinary()
                 }
                 startTunnel(localPort)
@@ -153,24 +199,20 @@ class TunnelManager {
             .build()
 
         val request = HttpRequest.newBuilder()
-            .uri(URI(downloadUrl))
+            .uri(URI(pins.downloadUrl(asset)))
             .timeout(Duration.ofSeconds(120))
             .build()
 
-        val response = client.send(request, HttpResponse.BodyHandlers.ofInputStream())
+        val response = client.send(request, HttpResponse.BodyHandlers.ofByteArray())
         if (response.statusCode() != HTTP_OK) {
             throw IOException("Download failed (HTTP ${response.statusCode()})")
         }
 
         try {
-            response.body().use { input ->
-                FileOutputStream(tmpFile).use { output ->
-                    input.copyTo(output, bufferSize = 65536)
-                }
-            }
-
+            tmpFile.writeBytes(verifiedDownload(response.body(), pins.sha256(asset)))
             installDownloadedBinary()
             binaryFile.setExecutable(true)
+            versionFile.writeText(pins.version)
         } finally {
             tmpFile.delete()
         }

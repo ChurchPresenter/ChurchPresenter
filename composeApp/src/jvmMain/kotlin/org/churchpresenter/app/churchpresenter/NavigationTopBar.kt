@@ -132,7 +132,6 @@ fun FrameWindowScope.NavigationTopBar(
     onOpenStoryPrompt: () -> Unit = {},
     onOpenWickIntro: () -> Unit = {},
 ) {
-
     val fileLabel = stringResource(Res.string.menu_file)
     val fileMnemonic = fileLabel.firstOrNull() ?: 'F'
 

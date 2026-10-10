@@ -774,4 +774,3 @@ fun NoServicesPane(
 }
 
 private const val SECTION_TRACKING = 0.07f
-

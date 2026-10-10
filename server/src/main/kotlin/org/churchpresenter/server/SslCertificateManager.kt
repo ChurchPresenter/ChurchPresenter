@@ -280,12 +280,12 @@ private fun sign(builder: JcaX509v3CertificateBuilder, key: PrivateKey): X509Cer
             builder.build(JcaContentSignerBuilder("SHA256withECDSA").setProvider("BC").build(key))
         )
 
-private fun newKeyStore()              = KeyStore.getInstance("JKS").also { it.load(null, PASSWORD) }
-private fun loadKeyStore(f: File)      = KeyStore.getInstance("JKS")
+private fun newKeyStore() = KeyStore.getInstance("JKS").also { it.load(null, PASSWORD) }
+private fun loadKeyStore(f: File) = KeyStore.getInstance("JKS")
     .also { ks -> f.inputStream().use { ks.load(it, PASSWORD) } }
-private fun ipSan(ip: String)          =
+private fun ipSan(ip: String) =
     GeneralName(GeneralName.iPAddress, DEROctetString(InetAddress.getByName(ip).address))
-private fun isIpAddress(host: String)  = host.matches(Regex("""^\d{1,3}(\.\d{1,3}){3}$""")) || host.contains(":")
+private fun isIpAddress(host: String) = host.matches(Regex("""^\d{1,3}(\.\d{1,3}){3}$""")) || host.contains(":")
 
 private fun extractSanNames(cert: X509Certificate): Set<String> = try {
     cert.subjectAlternativeNames?.mapNotNull { it.getOrNull(1) as? String }?.toSet() ?: emptySet()

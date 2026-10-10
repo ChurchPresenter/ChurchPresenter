@@ -55,7 +55,6 @@ fun STTSettingsDialog(
     /** The window it opens in -- see [DialogFrame]. */
     frame: DialogFrame = appDialogFrame,
 ) {
-
     val mainWindowState = LocalMainWindowState.current
     // Only the Bible-engine options are left here -- everything about captions on screen is styled
     // per profile -- so the window opens at the size they need and grows if they ever outgrow it.
@@ -225,5 +224,4 @@ private fun ColumnScope.BibleEngineFields(
             )
         }
     }
-
 }

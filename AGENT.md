@@ -49,6 +49,18 @@ demand.
 
 ### UI icons
 - **NEVER** use text/emoji as icons (`Text("⏸")`). Use `painterResource()` with real icon assets.
+- **Every control a mouse can press has a name** a screen reader can say: an icon-only control
+  gets a `contentDescription` (its tooltip text is usually right); a toggle gets its role and state
+  (`toggleable(role = …)`). `AccessibleNamesTest` walks every tab of the main window and fails on a
+  clickable node with no name; `KeyboardReachTest` holds Go Live, Add to Schedule, Clear Display and
+  Take reachable with Tab.
+- **Every Tab stop shows that it has focus.** `raised()` draws the ring (`keyboardFocusRing`, in
+  `:theme`); a control whose `clickable` comes before its surface, or whose surface clips
+  (`sunken`, `dropdownField`), puts `keyboardFocusRing(shape)` first in its chain. Rings show only
+  once Tab has been used in that window, and go away on a pointer press (`FocusVisibility`, provided
+  by `ChurchPresenterTheme`). A multi-line field takes `tabMovesFocus()` so Tab cannot be trapped
+  in it. `FocusRingVisibleTest` tabs round every tab of the main window and fails on a stop whose
+  picture does not change, or one Tab cannot leave.
 
 ### Debugging and logging
 - Diagnostics go through `Log.info`/`warn`/`error` (`:diagnostics`), never `println` or
@@ -224,7 +236,7 @@ failing, a `NoClassDefFoundError` at runtime — is a stale build. `clean` does 
 
 ### detekt
 **Run `./gradlew :composeApp:detekt` (and the detekt task of every module you touched) as the last
-step of any change that touched Kotlin.** It is the first job in `.github/workflows/test.yml`, and it
+step of any change that touched Kotlin.** It is a job of its own in `.github/workflows/test.yml`, and it
 fails on what the compiler only warns about (an unused import). Every finding it prints is yours to
 fix.
 
@@ -241,6 +253,14 @@ ever raised was fixed in code, and the build configures no `baseline =` anywhere
 Thresholds are deliberately not detekt's defaults: `LongMethod` 100, `LargeClass` 1000, and
 `LongParameterList` with `ignoreDefaultParameters: true` so the `*TestSupport.kt` DSL helpers are
 not flagged.
+
+**Formatting is detekt-formatting (ktlint)**, added to every module once from the root build. The
+rules that are on are clean and auto-correctable — `./gradlew detekt --auto-correct` fixes what it
+finds. Deliberately **off**, each for rewriting a large share of the tree: `Indentation`,
+`ArgumentListWrapping`, `Wrapping`, `ImportOrdering`, `MultiLineIfElse`, `NoMultipleSpaces`,
+`ParameterListWrapping`, `AnnotationOnSeparateLine`, the two `TrailingComma*` rules, `Filename`, and
+`MaximumLineLength` (detekt's own `MaxLineLength` is in force). The measured counts are in the
+`formatting:` block of `config/detekt/detekt.yml`; turn one on only together with its whole fix.
 
 ### Screenshots
 - **Committed, beside the module that shoots them** — `composeApp/screenshots/` for the app's tabs,
@@ -306,7 +326,11 @@ keep passing, and a test your change invalidated is fixed or deleted as part of 
 `composeApp/src/jvmTest/` — run with `./gradlew :composeApp:check`. CI (`.github/workflows/test.yml`)
 runs these on every push, plus each module's suite when the change touched that module or one it
 depends on — worked out from `./gradlew moduleGraph` by `.github/ci/affected_modules.py`, so a new
-`projects.*` dependency needs no CI edit.
+`projects.*` dependency needs no CI edit. The jobs run side by side: `app`, `detekt`, the three-run
+check, and `modules`, whose suites `.github/ci/plan_ci.py` packs into up to eight runners by their measured
+minutes; each runner runs its suites one at a time. **A new module with tests is one row in `plan_ci.py`'s `MODULES`** — until then CI warns
+that it never runs. `test` is the required check: it gathers the results and fails unless every job
+passed.
 
 ### The suite runs in parallel forks
 `jvmTest` runs on up to 4 parallel JVMs (`-PtestForks=N` to override). Breaking these produces
@@ -353,6 +377,11 @@ every `@BeforeClass`.
   timeouts as the success path, or warm-up pauses. When the production delay is the cost, make it an
   injectable defaulted parameter; if that is impossible, don't write the test and note the gap in the
   class doc. Check with the `time=` attributes in `composeApp/build/test-results/jvmTest/TEST-*.xml`.
+- **Three costs that look like waiting and are not:** a `CompanionServer` stopped with its default
+  one-second grace (tests construct it with `shutdownGraceMs = 0`); Swing's `doClick()`, which
+  sleeps 68 ms per press (use `doClick(0)`); and a long `mainClock.advanceTimeBy` while something
+  animates, which composes and draws every frame on the way (jump with `ignoreFrameDuration = true`
+  when nothing between here and the deadline matters).
 - **A route that answers before it finishes leaves a coroutine behind — track it and join it before
   teardown.** `POST /api/atem/still|clip` transfers after responding; route every test in such a suite
   through `AtemBridge.trackUpload`/`cancelUpload` (which joins).

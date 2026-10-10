@@ -15,6 +15,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -80,7 +81,7 @@ class CompanionServerRemoteControlTest {
         @JvmStatic
         @BeforeClass
         fun startServer() {
-            server = CompanionServer()
+            server = CompanionServer(shutdownGraceMs = 0)
             server.start(port = testPort(39_640))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {
@@ -583,19 +584,21 @@ class CompanionServerRemoteControlTest {
 
     @Test
     fun `an unanswered request is left waiting rather than allowed`() {
-        // Nothing plays the operator here: the desktop prompt is still on screen, unanswered.
-        val response = runBlocking {
-            withTimeoutOrNull(1_500) {
-                client.post(url(Constants.ENDPOINT_SCHEDULE_ADD)) { setBody("""{"item":{"songNumber":42}}""") }
-            }
+        // The operator is asked and never answers: the prompt reaching the desktop is the signal
+        // that the server got as far as asking, and it must still be holding the request then.
+        val asked = CompletableDeferred<Unit>()
+        collecting(server.onAddToSchedule) { asked.complete(Unit) }
+        val scope = operatorScope!!
+        val request = scope.async {
+            client.post(url(Constants.ENDPOINT_SCHEDULE_ADD)) { setBody("""{"item":{"songNumber":42}}""") }
         }
+        runBlocking { withTimeoutOrNull(5_000) { asked.await() } } ?: error("the operator was never asked")
 
-        assertEquals(
-            null,
-            response,
-                "timing out is correct; answering OK while the dialog is still open would add it behind the " +
-                    "operator's back",
+        assertTrue(
+            request.isActive,
+            "answering while the dialog is still open would add it behind the operator's back",
         )
+        request.cancel()
     }
 
     // ── The WebSocket command channel ───────────────────────────────────────────
@@ -986,7 +989,7 @@ class CompanionServerRemoteControlTest {
         // A phone must be able to tell "not set up yet" from "this translation has no books".
         // A loaded Bible cannot be taken back out of a running server, so this one case gets its
         // own instance instead of depending on which test in the class ran first.
-        val fresh = CompanionServer()
+        val fresh = CompanionServer(shutdownGraceMs = 0)
         try {
             fresh.start(port = testPort(39_660))
             val freshPort = runBlocking {

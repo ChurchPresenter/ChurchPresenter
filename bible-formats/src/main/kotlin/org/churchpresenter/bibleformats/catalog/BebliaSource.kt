@@ -28,7 +28,6 @@ import java.nio.channels.UnresolvedAddressException
  */
 object BebliaSource : BibleSource {
 
-
     override val sourceId = BibleSourceId.BEBLIA
 
     override suspend fun catalog(nowMillis: Long): BibleCatalogOutcome =

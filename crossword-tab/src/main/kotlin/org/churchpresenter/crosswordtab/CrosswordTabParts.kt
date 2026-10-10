@@ -173,7 +173,6 @@ internal fun ClueSection(title: String, clues: List<Pair<Int, String>>) {
     }
 }
 
-
 /**
  * What pressing Check does. [unlock] is the level to open, when the one just solved is the furthest
  * solved; [advance] moves on when there is a next level; [allDone] is true on the last one.

@@ -1,6 +1,5 @@
 package org.churchpresenter.schedule
 
-
 fun ScheduleViewModel.moveItemUp(id: String): Int {
     if (_isFollowingRemote.value) return -1
     val index = _scheduleItems.indexOfFirst { it.id == id }

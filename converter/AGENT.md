@@ -55,8 +55,8 @@ extracted from PDF/Word/PowerPoint/Keynote documents (`.pdf`, `.docx`, `.pptx`, 
 ./gradlew :converter:packageDmg                        # installer (Msi/Deb also available)
 ```
 
-detekt and the coverage floor are their own CI steps, gated on this directory changing plus the
-shared build files — see the `converter` filter in `.github/workflows/test.yml`.
+Its suite and coverage floor run in CI when the change can affect it (`.github/ci/affected_modules.py`),
+in one of the `modules` groups; detekt runs on every change.
 
 ## Gates
 

@@ -33,7 +33,9 @@ class Broadcaster {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val json = Json { encodeDefaults = true }
     private val sessions = ConcurrentHashMap<WebSocketSession, Channel<String>>()
+
     @Volatile private var latestStatus: String? = null
+
     @Volatile private var latestVersion: String? = null
 
     fun register(session: WebSocketSession) {

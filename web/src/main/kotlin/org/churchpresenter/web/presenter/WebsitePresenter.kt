@@ -131,8 +131,10 @@ internal object JcefInstall {
     internal sealed interface Outcome {
         /** It installed into [root]. */
         data class Installed(val root: File) : Outcome
+
         /** Nothing was attempted; [reason] is the last candidate's blocker. */
         data class Blocked(val reason: String) : Outcome
+
         /** An attempt ran and threw; [cause] came from [root]. */
         data class Failed(val root: File, val cause: Throwable) : Outcome
     }
@@ -362,6 +364,7 @@ object CefManager {
             // MethodHandles.lookup().javaClass gives us java.lang.invoke.MethodHandles$Lookup.
             val implLookupField = MethodHandles.lookup().javaClass
                 .getDeclaredField("IMPL_LOOKUP")
+
             @Suppress("DEPRECATION")
             val trustedLookup = unsafe.getObject(
                 unsafe.staticFieldBase(implLookupField),

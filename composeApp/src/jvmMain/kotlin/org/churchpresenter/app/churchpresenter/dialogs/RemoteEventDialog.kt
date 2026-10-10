@@ -562,5 +562,4 @@ private fun RemoteClientIdentity(
                 color = MaterialTheme.colorScheme.primary)
         }
     }
-
 }

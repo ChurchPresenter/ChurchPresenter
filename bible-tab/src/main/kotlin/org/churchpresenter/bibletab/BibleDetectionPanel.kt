@@ -393,7 +393,6 @@ private fun DetectionRow(
             )
             .padding(start = 12.dp, top = 4.dp, end = 6.dp, bottom = 4.dp)
     ) {
-
         DetectionBadges(ref)
         Text(
             text = buildAnnotatedString {
@@ -528,7 +527,6 @@ private fun FlagPillButton(
     enabled: Boolean = true,
     disabledTooltip: String? = null,
 ) {
-
     var flashing by remember { mutableStateOf(false) }
     LaunchedEffect(flashing) {
         if (flashing) {

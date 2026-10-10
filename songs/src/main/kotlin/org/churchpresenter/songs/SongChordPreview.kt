@@ -197,7 +197,6 @@ fun SongChordPreview(
     val palette = remember(songKey) { ChordTransposer.diatonicChords(songKey) }
 
     Column(modifier = modifier.background(MaterialTheme.colorScheme.surfaceContainerLow)) {
-
         PreviewHeader(showChords, transposed, onTransposeUp, onTransposeDown, onTransposeReset)
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 

@@ -61,6 +61,7 @@ internal fun BoxWithConstraintsScope.BibleFullScreenStack(
         val slots = visible.size.coerceAtLeast(1)
         val gridCols = bilingualColumns(bs.bilingualLayout, slots)
         val gridRows = ((slots + gridCols - 1) / gridCols).coerceAtLeast(1)
+
         // The spacing between two translations plus the divider's own line, along one
         // axis. It scales with the fit, so every scale the search probes has to
         // recompute it -- and it is per axis now, because a grid has gaps on both.
@@ -74,6 +75,7 @@ internal fun BoxWithConstraintsScope.BibleFullScreenStack(
             }
             return gapCount * (gap + divider)
         }
+
         // One cell of the grid. The measurement below has to agree with what is drawn,
         // or the fit search solves for a box the text is not laid out in.
         fun itemWidth(scale: Float): Int =
@@ -96,6 +98,7 @@ internal fun BoxWithConstraintsScope.BibleFullScreenStack(
                 constraints = Constraints(maxWidth = itemWidth(scale)),
             ).size.height
         }
+
         // Only the halves still in the column add up: a boxed one is fitted in its box.
         fun stackedHeight(verse: SelectedVerse, item: BibleTranslationSettings, scale: Float): Int {
             val textH = if (bs.isBoxed(item, BibleStyleElement.TEXT, isLowerThird)) {
@@ -110,11 +113,13 @@ internal fun BoxWithConstraintsScope.BibleFullScreenStack(
             }
             return textH + refH
         }
+
         // What one translation has to fit in: the frame less this axis's gaps, split
         // over the rows. One row and it is the whole height, which is what side by
         // side has always given each column.
         fun bandHeight(scale: Float): Int =
             ((constraints.maxHeight - gapsPx(gridRows, scale)) / gridRows).coerceAtLeast(1)
+
         // One scale for the whole stack, so every translation reads at the same size,
         // and no floor: a full stack of six shrinks until the whole of every one of them
         // is inside its band. Everything measured here scales with the argument bar the
@@ -229,6 +234,7 @@ internal fun BoxWithConstraintsScope.BibleLowerThirdGrid(slide: BibleSlide) {
                 constraints = Constraints(maxWidth = cellWidth(scale)),
             ).size.height
         }
+
         // Same split as the full-screen grid above, against the cell rather than the
         // band: what is stacked adds up, and a boxed half is fitted in its box.
         fun everyBlockFits(scale: Float): Boolean {
@@ -428,6 +434,7 @@ private fun BibleSlide.bandSplitFit(constraints: Constraints, sec: SelectedVerse
         ),
         constraints = halfConstraint,
     ).size.height
+
     // Only the halves still stacked add up; a boxed one is fitted in its box.
     fun halfFits(refH: Int, textH: Int, refBoxed: Boolean, textBoxed: Boolean): Boolean =
         (if (refBoxed) 0 else refH) + (if (textBoxed) 0 else textH) <= availH
@@ -544,7 +551,6 @@ internal fun BoxWithConstraintsScope.BibleBandStack(slide: BibleSlide) {
             emptyList()
         } else {
             bandStackSecondaryElements(fit, fittedSecondaryRefSize, matchedFittedSize, secondaryRefText)
-
         }
         BibleBandColumn(
             elements = primaryElements + secondaryElements,
@@ -569,6 +575,7 @@ private fun BibleSlide.bandStackFit(constraints: Constraints): BandFit {
     val colPRefBoxed = bs.isBoxed(t0, BibleStyleElement.REFERENCE, isLowerThird)
     val colSTextBoxed = showSecondary && bs.isBoxed(t1, BibleStyleElement.TEXT, isLowerThird)
     val colSRefBoxed = showSecondary && bs.isBoxed(t1, BibleStyleElement.REFERENCE, isLowerThird)
+
     // The stacked elements add up; a boxed one is fitted in its box. A second
     // language that is not shown contributes nothing either way, which is what
     // its zero heights below already said.

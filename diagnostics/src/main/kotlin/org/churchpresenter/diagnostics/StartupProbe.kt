@@ -41,6 +41,7 @@ class StartupRun(
     private val deadlineSeconds: Long,
 ) {
     @Volatile private var toMainMs = -1L
+
     @Volatile private var finishing = false
 
     /** `main` is running at [now]; starts the deadline. */

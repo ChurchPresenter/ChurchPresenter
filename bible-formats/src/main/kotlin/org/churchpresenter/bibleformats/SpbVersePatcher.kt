@@ -10,6 +10,7 @@ object SpbVersePatcher {
     private const val COLUMN_CHAPTER = 2
     private const val COLUMN_VERSE = 3
     private const val COLUMN_TEXT = 4
+
     /**
      * Applies all known corrections to an SPB file in-place:
      *   1. Merges consecutive verse lines that share the same ID (split superscriptions).
@@ -129,5 +130,4 @@ object SpbVersePatcher {
             parts[COLUMN_CHAPTER].toIntOrNull() == missing.displayChap &&
             parts[COLUMN_VERSE].toIntOrNull() == missing.insertAfterDisplayVers
     }
-
 }

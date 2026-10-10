@@ -43,6 +43,8 @@ import org.churchpresenter.settings.utils.isSystemUsing24HourFormat
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.timer_step_decrease
+import org.churchpresenter.strings.generated.resources.timer_step_increase
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
@@ -274,7 +276,11 @@ internal fun TimerColumn(
             shape = keyShape,
             contentPadding = PaddingValues(0.dp),
         ) {
-            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(12.dp))
+            Icon(
+                Icons.Default.Add,
+                contentDescription = stringResource(Res.string.timer_step_increase, label),
+                modifier = Modifier.size(12.dp),
+            )
         }
         BasicTextField(
             value = value,
@@ -303,7 +309,11 @@ internal fun TimerColumn(
             shape = keyShape,
             contentPadding = PaddingValues(0.dp),
         ) {
-            Icon(Icons.Default.Remove, contentDescription = null, modifier = Modifier.size(12.dp))
+            Icon(
+                Icons.Default.Remove,
+                contentDescription = stringResource(Res.string.timer_step_decrease, label),
+                modifier = Modifier.size(12.dp),
+            )
         }
         Text(
             label.uppercase(),

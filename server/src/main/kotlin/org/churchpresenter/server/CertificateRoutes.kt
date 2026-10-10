@@ -28,7 +28,6 @@ import io.ktor.server.routing.get
  * extension rather than a member of `CompanionServer`.
  */
 internal fun Route.certificateRoutes() {
-
     /**
      * GET /ca.crt
      * DER-encoded CA certificate (binary X.509).

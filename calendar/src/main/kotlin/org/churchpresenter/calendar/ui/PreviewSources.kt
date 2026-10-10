@@ -19,4 +19,3 @@ data class PreviewSources(
     /** Draws the canvas scene with this id into the modifier's box -- the app's own scene renderer. */
     val scene: (@Composable (sceneId: String, modifier: Modifier) -> Unit)? = null,
 )
-

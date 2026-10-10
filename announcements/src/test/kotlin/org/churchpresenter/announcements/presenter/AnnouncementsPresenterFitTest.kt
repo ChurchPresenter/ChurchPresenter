@@ -17,6 +17,7 @@ import org.churchpresenter.settings.AnnouncementsSettings
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.utils.Constants
 import kotlin.math.abs
+import org.churchpresenter.sharedui.presenter.referenceScale
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -97,7 +98,9 @@ class AnnouncementsPresenterFitTest {
     fun `sliding sideways, the configured size is kept whatever the room`() {
         val settings = AnnouncementsSettings(animationType = Constants.ANIMATION_SLIDE_FROM_RIGHT, fontSize = 60)
         val (wide, narrow) = refit(settings, short, short, secondWidth = WIDTH / 4)
-        assertTrue(abs(wide.height - narrow.height) < 1f, "a sideways slide is never fitted: $wide vs $narrow")
+        // Never fitted to the room -- only scaled with the output, as every stored size is.
+        val scaled = wide.height * referenceScale((WIDTH / 4).dp, HEIGHT.dp) / referenceScale(WIDTH.dp, HEIGHT.dp)
+        assertTrue(abs(scaled - narrow.height) < 1f, "a sideways slide is never fitted: $wide vs $narrow")
     }
 
     @Test

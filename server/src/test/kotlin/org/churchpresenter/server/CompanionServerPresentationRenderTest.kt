@@ -52,6 +52,7 @@ class CompanionServerPresentationRenderTest {
         private lateinit var tempHome: File
         private lateinit var deckDir: File
         private var realHome: String? = null
+
         /**
          * The port the server ASKED for. Never build a URL from it — `CompanionServer.start` runs it
          * through `findFreePort`, which walks upward when the port is taken (a previous suite's
@@ -74,7 +75,7 @@ class CompanionServerPresentationRenderTest {
 
             deckDir = Files.createTempDirectory("cp-presentation-render-decks").toFile()
 
-            server = CompanionServer()
+            server = CompanionServer(shutdownGraceMs = 0)
             server.start(port = REQUESTED_PORT)
             boundPort = runBlocking {
                 withTimeoutOrNull(10_000) {

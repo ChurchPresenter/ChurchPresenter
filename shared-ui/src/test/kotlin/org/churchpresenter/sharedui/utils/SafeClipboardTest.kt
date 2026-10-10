@@ -44,6 +44,7 @@ class SafeClipboardTest {
             setCalls++
             entry = clipEntry
         }
+
         @Deprecated("Use platform-specific extension to get platform reference.")
         override val nativeClipboard: Any get() = "native"
     }

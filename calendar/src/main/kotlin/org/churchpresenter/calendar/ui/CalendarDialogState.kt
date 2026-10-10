@@ -15,14 +15,17 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 internal class CalendarDialogState {
     var editingService by mutableStateOf<PlannedService?>(null)
     var creatingService by mutableStateOf(false)
+
     /** Whether the new-service sheet opens with the Schedule tab's rows chosen to start from. */
     var startFromSchedule by mutableStateOf(false)
     var addingItem by mutableStateOf(false)
+
     /** The run-of-show row the picker is about to replace, or null when it is appending. */
     var replacing by mutableStateOf<ScheduleItem?>(null)
     var loadConfirmFor by mutableStateOf<PlannedService?>(null)
     var settingsOpen by mutableStateOf(false)
     var settingsTab by mutableStateOf(SettingsTab.SECTIONS)
+
     /** The service Copy or Template was pressed on, or null while that sheet is closed. */
     var copyFrom by mutableStateOf<PlannedService?>(null)
     var templateFrom by mutableStateOf<PlannedService?>(null)

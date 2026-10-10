@@ -10,6 +10,7 @@ internal fun testPort(base: Int): Int = base
 /** The once-per-JVM paths that must resolve against the suite's own home before a test swaps it. */
 internal object TestSingletons {
     @Volatile private var latched = false
+
     @Volatile private var skikoLatched = false
 
     /** Forces [InstanceLinkLogger] to resolve its log directory now, before any `user.home` swap. */

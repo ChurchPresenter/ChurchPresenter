@@ -369,4 +369,3 @@ internal fun MainWindowScope.ActivityToasts() {
         )
     }
 }
-

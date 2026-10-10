@@ -2,7 +2,6 @@
 
 package org.churchpresenter.app.churchpresenter
 
-
 import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
@@ -768,7 +767,6 @@ class MainDesktopComposeTest : MainDesktopComposeHarness() {
         }
     }
 
-
     /** The root with a controller's link, counting the slide steps it forwards, while [presenting] is live. */
     private fun clickerRoot(presenting: Presenting, block: ComposeUiTest.() -> Unit): Pair<Int, Int> {
         var next = 0
@@ -912,9 +910,7 @@ class MainDesktopComposeTest : MainDesktopComposeHarness() {
     fun `a title slide adds an entry ahead of the song`() =
         root(settings().copy(songSettings = settings().songSettings.copy(titleSlideEnabled = true)))
 
-
     // ── Global shortcuts and their effect ──────────────────────────────────────
-
 
     @Test
     fun `undo and redo take back the last schedule change and put it back`() {
@@ -970,6 +966,7 @@ class MainDesktopComposeTest : MainDesktopComposeHarness() {
             assertEquals(listOf("Coffee"), PresetStore(presets).load().presets.map { it.name })
         }
     }
+
     @Test
     fun `the schedule options write the icon size, the row buttons and the toolbar buttons to the settings`() {
         val wiring = Wiring()
@@ -993,5 +990,4 @@ class MainDesktopComposeTest : MainDesktopComposeHarness() {
             assertTrue(ScheduleToolbarButton.ZOOM.name in wiring.settingsChanges.last()(base).hiddenScheduleButtons)
         }
     }
-
 }

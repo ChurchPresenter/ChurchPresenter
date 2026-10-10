@@ -85,8 +85,10 @@ class InstanceLinkClient(
         /** Protocol-level WS ping cadence; a dead link surfaces within ~[WS_TIMEOUT_MS]. */
         const val WS_PING_INTERVAL_MS = 10_000L
         const val WS_TIMEOUT_MS = 20_000L
+
         /** Reconnect backoff: 1s doubling up to this cap, with ±20% jitter. */
         const val MAX_RECONNECT_DELAY_MS = 30_000L
+
         /** How long a controller-mode command waits for its command_ack before soft-warning. */
         const val ACK_TIMEOUT_MS = 5_000L
     }
@@ -102,6 +104,7 @@ class InstanceLinkClient(
     private val fetches = InstanceLinkHttpFetches(httpClient, json)
 
     private var connectJob: Job? = null
+
     @Volatile private var session: DefaultClientWebSocketSession? = null
 
     // Commands awaiting their command_ack, keyed by commandId. Cancelled when the session ends.

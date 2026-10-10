@@ -39,6 +39,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
+import org.churchpresenter.theme.keyboardFocusRing
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -228,6 +230,8 @@ fun MediaTab(
             .fillMaxSize()
             .focusRequester(focusRequester)
             .onFocusChanged { rootFocused = it.isFocused }
+            // The whole tab takes the arrow keys; Tab landing on it is shown by a ring just inside it.
+            .keyboardFocusRing(RectangleShape, inset = true)
             .focusable()
             .onPreviewKeyEvent { keyEvent ->
                 tab.shortcuts.handleGoLiveKey(keyEvent, rootFocused, canGoLive) {
@@ -315,7 +319,6 @@ private fun MediaTabScope.MediaPreviewCard(
             if (viewModel.isLoaded && vlcPlayers) {
                 SoftwareVideoPlayer(viewModel = viewModel, modifier = Modifier.size(0.dp))
             }
-
 
             // The shape of the output this media actually goes out on. Media can be routed to
             // several differently-shaped outputs at once, so which one the preview stands for is
@@ -526,7 +529,6 @@ private fun MediaSeekBar(
         )
     }
 }
-
 
 /** Tap or drag anywhere on the track to seek; [onDragging] follows whether a drag is under way. */
 private fun Modifier.seekGestures(duration: Long, onSeek: (Long) -> Unit, onDragging: (Boolean) -> Unit): Modifier =

@@ -211,7 +211,6 @@ fun BiblePresenter(
     }
 }
 
-
 /** A Lottie band draws the whole band itself — text included — so it replaces everything else. */
 @Composable
 private fun BibleLook.BibleLottieBandLayer(loaded: BibleLottieTemplate, modifier: Modifier) {

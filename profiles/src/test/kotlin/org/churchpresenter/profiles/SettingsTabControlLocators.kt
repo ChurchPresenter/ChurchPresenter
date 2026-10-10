@@ -12,6 +12,7 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SemanticsNodeInteractionCollection
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.isEditable
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.hasImeAction
@@ -81,9 +82,12 @@ internal fun ComposeUiTest.horizontalAlignButton(group: Int, which: Int): Semant
 internal fun ComposeUiTest.positionButton(group: Int, above: Boolean): SemanticsNodeInteraction =
     onAllNodesWithContentDescription(if (above) "Above" else "Below")[group]
 
-/** One B/I/U/S button — [label] is `"B"`, `"I"`, `"U"` or `"S"`. */
-internal fun ComposeUiTest.styleButton(group: Int, label: String): SemanticsNodeInteraction =
-    onAllNodes(hasClickAction() and hasText(label))[group]
+/**
+ * One B/I/U/S button, by the name a screen reader hears — [name] is `"Bold"`, `"Italic"`,
+ * `"Underline"` or `"Strikethrough"`; the letter itself is drawn, not read.
+ */
+internal fun ComposeUiTest.styleButton(group: Int, name: String): SemanticsNodeInteraction =
+    onAllNodes(hasClickAction() and hasContentDescription(name))[group]
 
 /**
  * One Shadow checkbox, [group] counting them in composition order as [styleButton] does.

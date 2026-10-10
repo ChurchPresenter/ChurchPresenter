@@ -151,7 +151,6 @@ internal fun PresentationTabScope.PresentationControlsBar(viewModel: Presentatio
                 Text(text = hintText, style = hintStyle, color = hintColor, maxLines = 1)
             }
         }
-
     }
     if (hintOnOwnRow && hintText.isNotEmpty()) {
         Text(

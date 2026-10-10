@@ -20,7 +20,7 @@ class SttPayloadTest {
     private fun payload(json: String) = transcriptionUpdate(JSONObject(json))
 
     // ── JSON null must not become the string "null" ─────────────────────────────
-    // org.json's optString returns "null" for a JSON null rather than the supplied default, so the
+    // Up to org.json 20230618, optString returns "null" for a JSON null rather than the default, so the
     // obvious `optString(k, "").takeIf { it.isNotEmpty() }` accepts it as a real value. This was
     // live: detection-log rows and operator-flag rows carried "segmentId":"null", a fake join key
     // matching every other such row.

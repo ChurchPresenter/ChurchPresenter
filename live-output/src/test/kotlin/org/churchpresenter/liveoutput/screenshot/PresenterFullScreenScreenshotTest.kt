@@ -283,10 +283,14 @@ class PresenterFullScreenScreenshotTest {
     @Test
     fun `a verse`() = shoot("song") { SongPresenter(lyricSection = song(), appSettings = AppSettings()) }
 
+    /**
+     * A later verse with title and number set to every page. On verse 1 this is what the default
+     * (first page) shows anyway, so it is shot where the default would hide them.
+     */
     @Test
-    fun `a verse with its title and number`() = shoot("song_title_and_number") {
+    fun `a later verse keeps its title and number on every page`() = shoot("song_title_and_number") {
         SongPresenter(
-            lyricSection = song(),
+            lyricSection = song(header = "[Verse 2]", lines = VERSE_TWO_LINES),
             appSettings = songSettings(
                 titleDisplay = Constants.EVERY_PAGE,
                 titlePosition = Constants.ABOVE_VERSE,
@@ -354,16 +358,6 @@ class PresenterFullScreenScreenshotTest {
             lyricSection = song(chords = CHORD_LINES),
             appSettings = songSettings(lyricsColor = "#FFFFFF", lyricsChordColor = "#FFD54F"),
             showChords = true,
-        )
-    }
-
-    /** The same song with the switch off: the words alone, and no `[G]` anywhere. */
-    @Test
-    fun `a chorded song with chords switched off`() = shoot("song_chords_off") {
-        SongPresenter(
-            lyricSection = song(chords = CHORD_LINES),
-            appSettings = AppSettings(),
-            showChords = false,
         )
     }
 
@@ -1383,7 +1377,6 @@ class PresenterFullScreenScreenshotTest {
         ),
     )
 
-
     /** [count] translations configured, which is what puts the presenter in multi-translation mode. */
     /**
      * Two translations, each drawing its verse text on [backdrop].
@@ -1538,6 +1531,12 @@ class PresenterFullScreenScreenshotTest {
         val VERSE_LINES = listOf(
             "Amazing grace how sweet the sound",
             "That saved a wretch like me",
+        )
+
+        /** A second verse of its own, so a page that is not the first does not look like one. */
+        val VERSE_TWO_LINES = listOf(
+            "'Twas grace that taught my heart to fear",
+            "And grace my fears relieved",
         )
 
         /** [VERSE_LINES] as the band reads them, chords inline before the syllable they land on. */

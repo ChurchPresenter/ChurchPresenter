@@ -35,7 +35,6 @@ import org.churchpresenter.theme.elevationPalette
 private const val FULLY_OPAQUE_PERCENT = 100
 private const val CHANNEL_MAX = 255
 
-
 /**
  * One colour channel: a name, a chip showing the swatch and hex (click to open the picker),
  * an inline opacity slider, and the numeric alpha. With [showAlpha] off the slider is left out

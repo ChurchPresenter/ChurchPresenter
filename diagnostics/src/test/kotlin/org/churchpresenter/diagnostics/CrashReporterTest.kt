@@ -504,4 +504,17 @@ class CrashReporterTest {
         assertTrue("Fatal: false" in text)
         assertFalse("Context:" in text, "an empty context is omitted")
     }
+
+    @Test
+    fun `a crash log on disk carries no api key`() {
+        CrashReporter.writeCrashLog(
+            RuntimeException("GET http://10.0.0.2:8765/api/media/file?apiKey=s3cret failed"),
+            context = "Instance Link media",
+            fatal = false,
+        )
+
+        val text = crashFiles().single().readText()
+        assertFalse("s3cret" in text, text)
+        assertTrue("apiKey=${Secrets.MASK}" in text, text)
+    }
 }

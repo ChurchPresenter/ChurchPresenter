@@ -264,6 +264,7 @@ class ObsSettingsTabScreenshotTest {
         private companion object {
             const val HELLO = """{"op":0,"d":{"obsWebSocketVersion":"5.1.0","rpcVersion":1}}"""
             const val IDENTIFIED = """{"op":2,"d":{"negotiatedRpcVersion":1}}"""
+
             /** Not opcode 2 — the app reads this as authentication having failed. */
             const val REFUSED = """{"op":3,"d":{}}"""
         }
@@ -271,6 +272,7 @@ class ObsSettingsTabScreenshotTest {
 
     private companion object {
         const val SECTION = "obsSettingsTab"
+
         /** Where the stand-in actually listens, and what the card is drawn with instead. */
         const val LOOPBACK = "127.0.0.1"
         const val DISPLAY_HOST = "obs.local"

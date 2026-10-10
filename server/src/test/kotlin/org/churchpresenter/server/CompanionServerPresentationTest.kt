@@ -58,7 +58,7 @@ class CompanionServerPresentationTest {
         tempHome = Files.createTempDirectory("cp-presentation-test-home").toFile()
         System.setProperty("user.home", tempHome.absolutePath)
 
-        server = CompanionServer()
+        server = CompanionServer(shutdownGraceMs = 0)
         server.start(port = testPort(39_800))
         port = runBlocking {
             withTimeoutOrNull(10_000) {

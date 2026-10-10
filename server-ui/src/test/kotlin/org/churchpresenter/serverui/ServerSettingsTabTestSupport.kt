@@ -121,7 +121,7 @@ internal fun serverTab(
     builtInRelayUrl: String = "",
     block: ComposeUiTest.(get: () -> AppSettings, clients: RemoteClientManager) -> Unit,
 ) = withIsolatedHome {
-    val companion = server ?: CompanionServer()
+    val companion = server ?: CompanionServer(shutdownGraceMs = 0)
     val clients = RemoteClientManager().apply(seedClients)
     var current = initial
     runComposeUiTest {

@@ -26,7 +26,8 @@ item), kotlinx-serialization and coroutines, and nothing of `:composeApp`'s.
 
 - **Every action has an explicit `@SerialName`, and it never changes.** Files and settings keep
   actions by that name; `ActionSerializerTest` pins the whole set. A new action adds its name there
-  and its serializer to `ActionSerializer.known`.
+  and its serializer to `ActionSerializer.known`, and a row in `docs/SHOW_CONTROL.md` and
+  `docs/CONTROL_IN.md` — `ActionsDocumentedTest` fails on a `type` either one does not name.
 - **A layer is a string**, named as `:live-show` spells it (`SLIDE`, `MESSAGES`); this module does
   not depend on `:live-show`.
 - **Flow is the runner's.** `wait` and `macro` never reach a `ShowHost`; everything else does, one

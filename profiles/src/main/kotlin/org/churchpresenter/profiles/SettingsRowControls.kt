@@ -57,7 +57,6 @@ import org.jetbrains.compose.resources.stringResource
  * here and the same value set anywhere else in the app is set with the same habit.
  */
 
-
 private val CONTROL_HEIGHT = 30.dp
 private val FIELD_HEIGHT = 34.dp
 private const val SEGMENT_CHAR_WIDTH = 7f

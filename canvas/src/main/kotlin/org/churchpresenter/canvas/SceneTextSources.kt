@@ -341,7 +341,9 @@ internal fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modif
 }
 
 private const val PERCENT_SCALE = 100f
+
 /** A curve of 100% spends half a circle on the line; more than a full circle would overlap itself. */
 private const val MAX_CURVE_TURNS = 2f
+
 /** How much room a bent reference line gets: its own height, plus the room the bend needs. */
 private const val REFERENCE_ROWS = 3f

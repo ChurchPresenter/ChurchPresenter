@@ -9,6 +9,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
+import org.churchpresenter.theme.keyboardFocusRing
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -52,6 +54,8 @@ fun Modifier.goLiveKeyTarget(enabled: Boolean, focusOnOpen: Boolean = true, onGo
         }
         .focusRequester(requester)
         .onFocusChanged { rootFocused = it.isFocused }
+        // Tab landing on the tab itself is shown by a ring just inside it.
+        .keyboardFocusRing(RectangleShape, inset = true)
         .focusable()
         .onKeyEvent { event -> shortcuts.handleGoLiveKey(event, rootFocused, isEnabled, goLive) }
 }

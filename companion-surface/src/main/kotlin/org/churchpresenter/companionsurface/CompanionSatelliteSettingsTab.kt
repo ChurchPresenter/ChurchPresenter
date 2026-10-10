@@ -160,7 +160,6 @@ private fun CompanionConnectionCard(
     onUpdate: (CompanionSatelliteSettings.() -> CompanionSatelliteSettings) -> Unit,
     onRemove: () -> Unit
 ) {
-
     SettingsSection(
         title = connection.name.ifBlank { stringResource(Res.string.companion_satellite_settings) },
         modifier = Modifier.fillMaxWidth().widthIn(max = 1150.dp)
@@ -401,7 +400,6 @@ private fun CompanionConnectRow(
             Text(statusText, style = MaterialTheme.typography.bodySmall, color = statusColor)
         }
     }
-
 }
 
 /** The connection's name, address, device ids, product name and reconnect delay. */
@@ -413,6 +411,7 @@ private fun CompanionConnectionFields(
     var hostText by rememberFieldText(connection.id, connection.host)
     var portText by rememberFieldText(connection.id, connection.port)
     var portFocused by remember { mutableStateOf(false) }
+
     // Saved on Enter or on leaving the field, never per keystroke: each save reconnects, and typing
     // 70000 used to save 7000 on the way -- a port nobody asked for. Anything unusable reverts.
     fun commitPort() {
@@ -421,7 +420,6 @@ private fun CompanionConnectionFields(
         else if (port != connection.port) onUpdate { copy(port = port) }
     }
     var reconnectDelayText by rememberFieldText(connection.id, connection.reconnectDelayMs)
-
 
     CompanionTextRow(
         Res.string.companion_satellite_connection_name,

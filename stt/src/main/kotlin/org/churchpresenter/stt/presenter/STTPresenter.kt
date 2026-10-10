@@ -18,6 +18,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.churchpresenter.sharedui.presenter.ReferenceScaledBox
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.AnnotatedString
@@ -54,6 +55,30 @@ import org.churchpresenter.sharedui.presenter.sttPositionToAlignment
 
 @Composable
 fun STTPresenter(
+    modifier: Modifier = Modifier,
+    segments: List<STTSegment>,
+    inProgressText: String,
+    translationSegments: List<STTSegment>,
+    inProgressTranslation: String,
+    highlightedWords: List<HighlightedWord>,
+    sttSettings: STTSettings,
+    outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
+) = ReferenceScaledBox(modifier) {
+    STTPresenterContent(
+        modifier = Modifier,
+        segments = segments,
+        inProgressText = inProgressText,
+        translationSegments = translationSegments,
+        inProgressTranslation = inProgressTranslation,
+        highlightedWords = highlightedWords,
+        sttSettings = sttSettings,
+        outputRole = outputRole,
+    )
+}
+
+/** [STTPresenter] as a 1920x1080-family output draws it; [ReferenceScaledBox] fits it to the real one. */
+@Composable
+private fun STTPresenterContent(
     modifier: Modifier = Modifier,
     segments: List<STTSegment>,
     inProgressText: String,
@@ -301,6 +326,7 @@ private fun useDripFeed(segments: List<STTSegment>, pace: RevealPace?): Revealed
 
 /** What a reveal has put on screen: its [segments], and the words in its RSVP flash -- 0 when it has none. */
 private class RevealedCaption(val segments: List<STTSegment>, val flashWords: Int = 0)
+
 /** The last [count] of [segments], or all of them when [count] is 0 or less. */
 internal fun <T> keepNewest(segments: List<T>, count: Int): List<T> =
     if (count > 0) segments.takeLast(count) else segments

@@ -124,7 +124,6 @@ internal fun ColumnScope.BibleBrowserPane(
 ) {
     val density = LocalDensity.current
         Row(modifier = Modifier.fillMaxWidth().weight(1f).padding(start = 4.dp, end = 4.dp, bottom = 4.dp)) {
-
             BookCard(
                 books = books,
                 filteredBooks = filteredBooks,
@@ -155,7 +154,6 @@ internal fun ColumnScope.BibleBrowserPane(
                 val maxSplitWidth = (constraints.maxWidth - crossRefReserve - verseCardMinPx).coerceAtLeast(0f)
                 val effectiveSplitWidth = if (isSplitActive) splitWidthPx.coerceAtMost(maxSplitWidth) else 0f
                 Row(modifier = Modifier.fillMaxSize()) {
-
                     VerseCard(
                         modifier = Modifier.weight(1f).fillMaxHeight(),
                         filteredVerses = filteredVerses,
@@ -210,7 +208,6 @@ internal fun ColumnScope.BibleBrowserPane(
                             modifier = Modifier.width(with(density) { effectiveSplitWidth.toDp() }).fillMaxHeight(),
                         )
                     }
-
                 }
                 }
 
@@ -283,7 +280,6 @@ private fun VerseCard(
                 }
             }
         ) {
-
             BibleVerseColumn(
                 verses = filteredVerses,
                 selectedIndex = selectedVerseInFiltered,

@@ -42,7 +42,7 @@ class CompanionServerBrowserSourceTest {
 
     @BeforeTest
     fun setUp() {
-        server = CompanionServer()
+        server = CompanionServer(shutdownGraceMs = 0)
         server.start(port = testPort(39_810))
         port = runBlocking {
             withTimeoutOrNull(10_000) {

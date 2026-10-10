@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import org.churchpresenter.statistics.StatisticsManager
+import org.churchpresenter.theme.noteTabNavigation
+import org.churchpresenter.theme.LocalFocusVisibility
 import org.churchpresenter.bibletab.VerseSequenceLog
 import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.companionsurface.CompanionSatelliteViewModel
@@ -146,6 +148,8 @@ fun MainDesktop(
             modifier = modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
+                // Focus rings appear once Tab is used anywhere in the window, from any control.
+                .noteTabNavigation(LocalFocusVisibility.current)
                 .focusRequester(mainFocusRequester)
                 .focusable()
                 .onPreviewKeyEvent { keyEvent -> handleMainDesktopKey(keyEvent, keyContext()) }

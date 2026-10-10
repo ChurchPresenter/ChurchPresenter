@@ -7,11 +7,9 @@ fun BibleViewModel.ctrlClickVerse(verseIndex: Int) {
     if (_selectedVerseIndices.contains(verseIndex)) {
         _selectedVerseIndices.remove(verseIndex)
         if (_selectedVerseIndices.isEmpty()) {
-
             _selectedVerseIndex.value = verseIndex
         }
     } else {
-
         if (_selectedVerseIndices.isEmpty()) {
             val anchor = _selectedVerseIndex.value
             if (anchor >= 0 && anchor < _verses.value.size && anchor != verseIndex) {

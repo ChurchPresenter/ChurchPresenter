@@ -73,8 +73,6 @@ class ProfilesCustomizeElementsTest {
         }
     }
 
-
-
     @Test
     fun `the stage monitor pane draws`() {
         profilesTab(doc(Constants.DISPLAY_MODE_STAGE_MONITOR)) { _ ->

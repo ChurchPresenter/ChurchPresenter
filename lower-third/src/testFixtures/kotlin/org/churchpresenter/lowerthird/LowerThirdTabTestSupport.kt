@@ -75,13 +75,17 @@ class LowerThirdReports {
 
     /** presetId, presetLabel, pauseAtFrame, pauseDurationMs — as the schedule would be given them. */
     val scheduled = mutableListOf<List<Any>>()
+
     /** presetName of each go-live, in order. */
     val live = mutableListOf<String>()
+
     /** The json handed to the output for the most recent go-live. */
     var liveJson: String? = null
     var settingsChanges = 0
+
     /** The settings as they stood after the most recent change the tab asked for. */
     var settings: AppSettings? = null
+
     /**
      * Each preset file the tab asked to pre-render, by name. Recorded, not rendered: the real cache's
      * jobs outlive the test and would keep the event queue busy through the next ones.

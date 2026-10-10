@@ -12,7 +12,6 @@ import java.util.concurrent.atomic.AtomicBoolean
  * found, so the tag vocabulary can be asserted whole in a test without a camera, a process or Sentry.
  */
 
-
 /** Tag names, in one place so the report and its test cannot drift apart. */
 internal object CameraReportTag {
     const val FFMPEG = "camera.ffmpeg"

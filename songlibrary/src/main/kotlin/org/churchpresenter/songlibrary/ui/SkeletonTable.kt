@@ -135,6 +135,7 @@ private fun barFraction(row: Int, column: Int): Float =
         ((row * SKELETON_ROW_STRIDE + column * SKELETON_COLUMN_STRIDE) % SKELETON_FILL_STEPS) * SKELETON_FILL_STEP
 
 private const val SKELETON_ROWS = 10
+
 /** A `4:32`-sized bar, standing in for the Duration column while the folder is read. */
 private val DURATION_BAR = 34.dp
 private const val SKELETON_SWEEP_MS = 1400
@@ -142,8 +143,10 @@ private const val SKELETON_BAND = 0.35f
 private const val SKELETON_MIN_FILL = 0.42f
 private const val SKELETON_FILL_STEPS = 5
 private const val SKELETON_FILL_STEP = 0.12f
+
 /** Where the bright middle of the sweep sits in its gradient. */
 private const val SKELETON_HIGHLIGHT_STOP = 0.5f
+
 /** Coprime strides, so the fill pattern does not repeat down a column or across a row. */
 private const val SKELETON_ROW_STRIDE = 7
 private const val SKELETON_COLUMN_STRIDE = 13

@@ -84,7 +84,6 @@ internal class SpecShapes(
         builder.addShapeLayer(element.name, buildJsonArray { add(makeGroup(items)) }, transform)
     }
 
-
     fun buildPolygon(
         element: PolygonElement
     ) {
@@ -109,7 +108,6 @@ internal class SpecShapes(
             shapeTransform(element, rest, w, h)
         )
     }
-
 
     fun buildPath(
         element: PathElement
@@ -177,7 +175,6 @@ internal class SpecShapes(
         return makeTrimPath(startKFs = startKFs, endKFs = endKFs)
     }
 
-
     fun repeaterItem(element: ElementSpec, repeat: RepeatSpec): JsonObject {
         val flow = layout.flowSign(element.placement)
         val basis = repeat.fitWidthTo
@@ -195,7 +192,6 @@ internal class SpecShapes(
             endOpacity = if (repeat.fadeOut) 0.0 else 100.0
         )
     }
-
 
     fun paintItems(element: ElementSpec, paint: PaintSpec): List<JsonObject> =
         listOfNotNull(
@@ -232,5 +228,4 @@ internal class SpecShapes(
     }
 
     // ------------------------------------------------------- track compilation
-
 }

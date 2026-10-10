@@ -130,7 +130,6 @@ internal fun Route.scheduleRoutes(
                 propRoutes(server, json, scope)
                 clearGroupRoutes(server, json)
                 macroRoutes(server, json, scope)
-
 }
 
 /** POST /api/clear and POST /api/take: what is on air, taken down or put up without asking. */

@@ -20,15 +20,25 @@ Replace `http://192.168.1.10:8765` with the URL shown there in every sample belo
 
 ## Authentication
 
-Authentication is **optional** and disabled by default.  
-When enabled, pass the API key on **every** request.
+Every route checks one of five things, named in the **Auth** column of the [route index](#route-index):
 
-| Method | Where |
-|--------|-------|
-| HTTP header | `X-Api-Key: <key>` |
-| Query param | `?apiKey=<key>` |
+| Auth | How it is checked | Fails with |
+|------|-------------------|------------|
+| **API key** | Only when the API key is enabled in Settings → Server *and* not blank; otherwise open. Send `X-Api-Key: <key>` or `?apiKey=<key>`. | `401 Invalid API key` (WebSocket: one `{"error":"Unauthorized"}` frame, then the session ends) |
+| **Output key** | Browser Source routes only: the API key, but only when that output has *Require API key* switched on and a key is set — the global enable switch does not apply. | `401 Invalid API key` (WebSocket: closed with `VIOLATED_POLICY`) |
+| **Presentation password** | Presentation remote only. The remote must be enabled (else `403 {"error":"remote control is disabled"}`); when a password is set, send `X-Presentation-Password: <pw>` or `?password=<pw>`. | `401 {"error":"Invalid password"}` |
+| **Q&A admin password** | Q&A moderation only. When an admin password is set, send `X-QA-Password: <pw>` or `?password=<pw>`. | `401 {"error":"Invalid admin password"}` |
+| **Open** | No check at all: the public Q&A and remote pages, and the CA certificate downloads. | — |
 
-If the key is wrong the server responds `HTTP 401 Unauthorized`.
+If the API key is wrong the server responds `HTTP 401 Unauthorized`.
+
+**Dev mode only.** Routes marked *dev* in the index answer `403 {"ok":false,"reason":"dev mode only"}`
+while the desktop is not in dev mode (WebSocket commands are acked `ok:false`, reason
+`dev_mode_only`). They are features not yet approved for production.
+
+**Operator approval.** Some routes also wait for the desktop operator to click **Allow** before they
+act (marked *approval* in the index). A device the operator has trusted is approved without a
+prompt, and a blocked device is refused without one.
 
 ```bash
 # Header
@@ -48,6 +58,140 @@ curl -k -X POST https://192.168.1.10:8765/api/schedule/add \
   -H "Content-Type: application/json" \
   -d '{"item":{"songNumber":42,"title":"Great Is Thy Faithfulness","songbook":"Hymns"}}'
 ```
+
+---
+
+## Route Index
+
+Every HTTP and WebSocket route the server registers (87). Paths are written exactly as the server
+registers them; `{name}` is a path parameter.
+
+### Info, songs and schedule
+
+| Route | Auth | Dev mode | Notes |
+|-------|------|----------|-------|
+| `GET /api/info` | API key | — | Name, version, port |
+| `GET /api/status` | API key | — | Capabilities and permissions |
+| `GET /api/song-catalog` | API key | — | Songbooks with each song's usual length |
+| `GET /api/songs` | API key | — | Song catalog |
+| `GET /api/songs/{identifier}` | API key | — | One song with its sections |
+| `POST /api/songs/{number}/select` | API key | — | Jump to a section of the live song |
+| `GET /api/schedule` | API key | — | The schedule |
+| `POST /api/schedule/add` | API key | — | *approval* |
+| `POST /api/schedule/add-batch` | API key | — | *approval* |
+| `POST /api/project` | API key | — | *approval* |
+| `POST /api/clear` | API key | `layer=` and `group=` only | Clearing everything is not dev mode |
+| `POST /api/take` | API key | dev | |
+| `POST /api/message` | API key | dev | |
+| `GET /api/props` | API key | dev | |
+| `POST /api/props/{id}/{action}` | API key | dev | `{action}` is `on`, `off` or `toggle` |
+| `GET /api/clear-groups` | API key | dev | |
+| `GET /api/macros` | API key | dev | |
+| `POST /api/macro/{name}` | API key | dev | |
+
+### Bible and dictionary
+
+| Route | Auth | Dev mode | Notes |
+|-------|------|----------|-------|
+| `GET /api/bible` | API key | — | Catalog, or a chapter's text |
+| `POST /api/bible/select` | API key | — | Show a verse now |
+| `GET /api/bible/file` | API key | — | Primary `.spb` file (Instance Link) |
+| `GET /api/bible/file/secondary` | API key | — | Secondary `.spb` file (Instance Link) |
+| `GET /api/bible/file/translations` | API key | — | Ordered module file names |
+| `GET /api/bible/file/translation/{index}` | API key | — | One module by manifest position |
+| `GET /api/dictionary` | API key | — | Strong's search |
+| `GET /api/dictionary/{number}` | API key | — | One Strong's entry |
+| `GET /api/dictionary/{number}/verses` | API key | — | Verses a Strong's number appears in |
+
+### Presentations, pictures, media and backgrounds
+
+| Route | Auth | Dev mode | Notes |
+|-------|------|----------|-------|
+| `GET /api/presentations` | API key | — | |
+| `GET /api/presentations/{id}` | API key | — | |
+| `GET /api/presentations/{id}/slides/{index}` | API key | — | JPEG |
+| `POST /api/presentations/{id}/select` | API key | — | |
+| `POST /api/presentations/upload` | API key | — | Needs file upload enabled |
+| `GET /api/pictures` | API key | — | |
+| `GET /api/pictures/{id}` | API key | — | |
+| `GET /api/pictures/{id}/images/{index}` | API key | — | Image bytes |
+| `POST /api/pictures/select` | API key | — | |
+| `POST /api/pictures/upload` | API key | — | Needs file upload enabled |
+| `POST /api/media/upload` | API key | — | Needs file upload enabled; raw bytes |
+| `GET /api/media/stream/{id}` | API key | — | Range requests supported |
+| `GET /api/backgrounds` | API key | — | Background settings JSON |
+| `GET /api/backgrounds/asset/{slot}` | API key | — | Background image/video bytes |
+
+### Presentation remote
+
+| Route | Auth | Dev mode | Notes |
+|-------|------|----------|-------|
+| `GET /presentation-remote` | Open | — | The remote's web page |
+| `GET /api/presentation-remote/status` | Open | — | |
+| `POST /api/presentation-remote/auth` | Presentation password | — | *approval* (once per device) |
+| `POST /api/presentation-remote/next` | Presentation password | — | |
+| `POST /api/presentation-remote/previous` | Presentation password | — | |
+| `POST /api/presentation-remote/goto/{index}` | Presentation password | — | |
+| `POST /api/presentation-remote/freeze` | Presentation password | — | |
+| `POST /api/presentation-remote/play-pause` | Presentation password | — | |
+| `POST /api/presentation-remote/loop` | Presentation password | — | |
+| `POST /api/presentation-remote/go-live` | Presentation password | — | |
+| `POST /api/presentation-remote/upload` | Presentation password | — | |
+
+### Q&A
+
+| Route | Auth | Dev mode | Notes |
+|-------|------|----------|-------|
+| `GET /qa` | Open | — | Submission page |
+| `GET /qa/admin` | Open | — | Admin page (its calls are password-checked) |
+| `GET /qa/vote` | Open | — | Voting page |
+| `GET /api/qa/status` | Open | — | |
+| `POST /api/qa/submit` | Open | — | Session must be active; rate-limited |
+| `GET /api/qa/approved` | Open | — | Voting must be enabled |
+| `POST /api/qa/vote` | Open | — | Voting must be enabled |
+| `POST /api/qa/auth` | Q&A admin password | — | *approval* (once per device) |
+| `GET /api/qa/questions` | Q&A admin password | — | |
+| `POST /api/qa/questions/{id}/approve` | Q&A admin password | — | *approval* |
+| `POST /api/qa/questions/{id}/edit` | Q&A admin password | — | *approval* |
+| `POST /api/qa/questions/{id}/deny` | Q&A admin password | — | *approval* |
+| `POST /api/qa/questions/{id}/done` | Q&A admin password | — | *approval* |
+| `POST /api/qa/questions/{id}/display` | Q&A admin password | — | *approval* |
+| `DELETE /api/qa/questions/{id}` | Q&A admin password | — | *approval* |
+| `POST /api/qa/add` | Q&A admin password | — | *approval* |
+| `POST /api/qa/clear-display` | Q&A admin password | — | *approval* |
+| `POST /api/qa/clear-all` | Q&A admin password | — | No approval |
+
+### Lower thirds and ATEM
+
+| Route | Auth | Dev mode | Notes |
+|-------|------|----------|-------|
+| `GET /api/lowerthirds` | API key | — | |
+| `GET /api/lowerthirds/{name}/json` | API key | — | Raw Lottie JSON |
+| `POST /api/lowerthirds/{name}/run` | API key | — | |
+| `POST /api/lowerthirds/{name}/show` | API key | — | |
+| `POST /api/lowerthirds/hide` | API key | — | |
+| `POST /api/atem/still/{name}` | API key | — | Upload to the media pool |
+| `POST /api/atem/clip/{name}` | API key | — | Upload to the media pool |
+| `POST /api/atem/key/on` | API key | — | |
+| `POST /api/atem/key/off` | API key | — | |
+
+### Browser Source
+
+| Route | Auth | Dev mode | Notes |
+|-------|------|----------|-------|
+| `GET /browser-source/{index}` | Output key | — | The overlay page; `{index}` counts from 1 |
+| `WS /api/browser-source/{index}/ws` | Output key | — | Binary frame stream |
+| `POST /api/browser-source/{index}/auth` | Output key | — | *approval* (once per device) |
+| `POST /api/browser-source/{index}/transpose` | Output key | — | Approved device only |
+
+### Calendar, certificates and the WebSocket
+
+| Route | Auth | Dev mode | Notes |
+|-------|------|----------|-------|
+| `POST /api/calendar/enroll` | API key | — | *approval* |
+| `GET /ca.crt` | Open | — | DER CA certificate |
+| `GET /ca.pem` | Open | — | PEM CA certificate |
+| `WS /ws` | API key | — | The companion event/command stream |
 
 ---
 
@@ -86,30 +230,30 @@ curl -H "X-Device-Id: MyiPhone" http://192.168.1.10:8765/api/status
 ```json
 {
   "appVersion": "1.4.2",
-  "apiKeyStatus": "none",
-  "endpoints": ["songs", "bible", "schedule", "project", "pictures", "presentations", "status"],
-  "bibles": ["KJV", "NIV"],
+  "endpoints": ["songs", "bible", "schedule", "presentations", "pictures", "status"],
+  "bibles": ["KJV"],
   "songbooks": ["Hymns", "Contemporary"],
-  "features": ["scheduleApproval", "fileUpload"],
   "permissions": {
     "canPresent": true,
     "canAddToSchedule": true,
-    "canUploadFiles": false
+    "canUploadFiles": false,
+    "maxMediaUploadMb": 700
   }
 }
 ```
 
+The response also carries the `X-Server-Version` header.
+
 | Field | Type | Description |
 |-------|------|-------------|
 | `appVersion` | `string` | Desktop app version string, e.g. `"1.4.2"` |
-| `apiKeyStatus` | `string` | `"none"` when no API key is configured; `"set"` when one is active |
 | `endpoints` | `string[]` | List of API path segments this server exposes |
-| `bibles` | `string[]` | Translation names loaded in the app (empty array if none) |
+| `bibles` | `string[]` | The loaded translation's name (empty array if none) |
 | `songbooks` | `string[]` | Song-book names loaded in the app (empty array if none) |
-| `features` | `string[]` | Advertised feature flags, e.g. `"scheduleApproval"`, `"fileUpload"` |
-| `permissions.canPresent` | `bool` | Whether this device may call `/api/project` and `/api/clear` |
-| `permissions.canAddToSchedule` | `bool` | Whether this device may call `/api/schedule/add` |
-| `permissions.canUploadFiles` | `bool` | Whether this device may call `/api/presentations/upload` or `/api/pictures/upload` |
+| `permissions.canPresent` | `bool` | Whether this device may call `/api/project` and `/api/clear` (always `true` today) |
+| `permissions.canAddToSchedule` | `bool` | Whether this device may call `/api/schedule/add` (always `true` today) |
+| `permissions.canUploadFiles` | `bool` | Whether file upload is enabled — `/api/presentations/upload`, `/api/pictures/upload`, `/api/media/upload` |
+| `permissions.maxMediaUploadMb` | `int` | The largest file `POST /api/media/upload` accepts, in MB |
 
 > All `permissions` fields default to `true` when absent so that older server versions that omit the object do not incorrectly restrict devices.
 
@@ -149,9 +293,19 @@ curl -k "https://192.168.1.10:8765/api/songs?songbook=Hymns"
 
 ---
 
-### `GET /api/songs/{number}`
+### `GET /api/song-catalog`
 
-Returns full song detail including all lyric sections.
+The songbooks, with each song's usual length, for planning a service:
+`{"books": [ ... ]}`. Fields that are empty are left out rather than sent as `null`.
+
+---
+
+### `GET /api/songs/{identifier}`
+
+Returns full song detail including all lyric sections. `{identifier}` is the song number (`_` for
+a song with no number). Optional query params: `songbook=` narrows to one songbook, `title=` also
+matches by title (any case), and `id=N` looks the song up by its index in the library instead.
+`404 {"error":"song not found"}` when nothing matches.
 
 ```bash
 curl -k https://192.168.1.10:8765/api/songs/42
@@ -478,8 +632,10 @@ curl -k https://192.168.1.10:8765/api/pictures/56337f54-3b4f-4b05-92d2-c99ea2b2a
 
 ## Action Endpoints (POST)
 
-All action endpoints **suspend** until the desktop user clicks **Allow** or **Deny** in the permission dialog.  
-The HTTP connection stays open until that decision is made.
+`POST /api/schedule/add`, `POST /api/schedule/add-batch` and `POST /api/project` **suspend** until
+the desktop user clicks **Allow** or **Deny** in the permission dialog (a trusted device is allowed
+without one). The HTTP connection stays open until that decision is made. The other action
+endpoints in this section act at once.
 
 ---
 
@@ -652,7 +808,7 @@ curl -k -X POST https://192.168.1.10:8765/api/pictures/select \
 
 Navigates the live presenter to a specific **section** (0-based index) of the currently projected song. No approval required — takes effect immediately.
 
-`{number}` is the song number (e.g. `42`). The section index maps directly to the `sections` array returned by `GET /api/songs/{number}` — `0` is the first verse/chorus, `1` is the second, and so on.
+`{number}` is the song number (e.g. `42`). The section index maps directly to the `sections` array returned by `GET /api/songs/{identifier}` — `0` is the first verse/chorus, `1` is the second, and so on.
 
 ```bash
 # Navigate to section 2 via JSON body
@@ -914,7 +1070,7 @@ The same Generic HTTP module can drive the rest of the app — these endpoints
 already exist and fire instantly (no approval dialog):
 
 - **Songs** — `POST /api/songs/{number}/select?section=N` shows a song section.
-  List songs/sections first with `GET /api/songs` and `GET /api/songs/{number}`.
+  List songs/sections first with `GET /api/songs` and `GET /api/songs/{identifier}`.
 - **Bible** — `POST /api/bible/select` with the verse JSON (fetch it via
   `GET /api/bible?book={id}&chapter={num}`).
 - **Pictures / presentations** — `POST /api/pictures/select`,
@@ -990,6 +1146,297 @@ HTTP 400
 
 ---
 
+## Strong's Dictionary
+
+All three answer `503 {"error":"dictionary unavailable"}` when the bundled dictionary cannot be read.
+
+### `GET /api/dictionary`
+
+Searches the Strong's dictionary and returns a JSON array of entries.
+
+| Query param | Default | Meaning |
+|-------------|---------|---------|
+| `q` | `""` | Search text |
+| `lang` | `en` | `en` or `ru` (anything else is `en`) |
+| `filter` | `all` | `all`, `hebrew` or `greek` |
+| `limit` | `100` | Most entries returned |
+| `book`, `chapter`, `verse` | — | Canonical KJV numbering (Genesis = 1 … Revelation = 66, as `/api/bible`'s `book-id`): only the Strong's numbers occurring in that reference, narrowing as chapter and verse are added |
+
+### `GET /api/dictionary/{number}`
+
+One entry, e.g. `/api/dictionary/H430`, with optional `?lang=`. `404 {"error":"entry not found"}`
+when there is none.
+
+### `GET /api/dictionary/{number}/verses`
+
+The verses a Strong's number appears in, with their text from the loaded Bible — the entry sheet's
+"Appears in" list. Optional `limit` (default `25`) and `book`/`chapter`/`verse`, which put the
+references in that scope first. `503 {"error":"bible not loaded"}` without a Bible.
+
+```json
+{ "number": "H430", "total": 2602,
+  "verses": [ { "bookName": "Genesis", "chapter": 1, "verse": 1, "reference": "Genesis 1:1", "text": "In the beginning…" } ] }
+```
+
+---
+
+## Bible Files (Instance Link)
+
+These stream raw `.spb` modules so an Instance Link follower can load the primary's Bible through
+its own engine. Each answers `404` when there is nothing to send.
+
+| Route | Sends |
+|-------|-------|
+| `GET /api/bible/file` | The primary Bible module |
+| `GET /api/bible/file/secondary` | The secondary Bible module |
+| `GET /api/bible/file/translations` | JSON array of the ordered module file names |
+| `GET /api/bible/file/translation/{index}` | The module at that position (from 0) in that list |
+
+---
+
+## Backgrounds
+
+### `GET /api/backgrounds`
+
+The desktop's current background settings as JSON. Image and video fields are file paths on the
+desktop; fetch the bytes through the asset route below.
+
+### `GET /api/backgrounds/asset/{slot}`
+
+The background image — or with `?type=video` the video — configured for one slot. `{slot}` is one of
+`default`, `defaultLowerThird`, `bible`, `bibleLowerThird`, `song`, `songLowerThird`. Range requests
+are supported. `404` when the slot has nothing configured or the file is missing.
+
+---
+
+## Media
+
+### `GET /api/media/stream/{id}`
+
+Streams the local media file behind schedule item `{id}` (a `media` item whose type is `local`), so a
+follower can play it without a copy. Range requests are supported, so seeking works. `404` for an
+unknown item or a missing file.
+
+### `POST /api/media/upload?name=clip.mp4`
+
+Uploads a video or audio file as the **raw request body** (`application/octet-stream`), streamed to
+disk (`~/.churchpresenter/device_media/`). `name` is required. Accepted extensions are those the
+desktop player plays (video: `mp4`, `mov`, `avi`, `mkv`, `wmv`, `flv`, `webm`, `m4v`; audio: `mp3`,
+`wav`, `flac`, `aac`, `ogg`, `wma`, `m4a`, `aiff`, `opus`).
+
+```bash
+curl -X POST --data-binary @clip.mp4 -H "Content-Type: application/octet-stream" \
+  "http://192.168.1.10:8765/api/media/upload?name=clip.mp4"
+```
+
+```json
+{ "ok": true, "path": "/Users/…/device_media/clip.mp4", "name": "clip", "mediaType": "local" }
+```
+
+`mediaType` is `local` for video and `audio` for audio; add the returned `path` to the schedule as a
+media item. Errors: `403` when file upload is disabled, `400` without `name`, `413` over the size
+limit (`permissions.maxMediaUploadMb` in `/api/status`), `415` for another file type.
+
+---
+
+## Uploads
+
+Both take a JSON body with the file as a base64 **data URI**, and answer `403 {"error":"file upload
+is disabled"}` when uploads are switched off in Settings → Server.
+
+### `POST /api/presentations/upload`
+
+```json
+{ "name": "slides.pdf", "data": "data:application/pdf;base64,JVBERi0x…" }
+```
+
+Accepts `pdf`, `ppt`, `pptx` and `key`, up to 200 MB. The desktop opens it in the Presentations tab;
+only the latest device upload is kept. Answers `{"ok":true,"id":"<hex>","name":"slides"}`.
+
+### `POST /api/pictures/upload`
+
+```json
+{ "name": "photo.jpg", "data": "data:image/jpeg;base64,/9j/4AAQ…" }
+```
+
+Saves the image into that day's *Device Photos* folder and broadcasts `pictures_updated` with it.
+Answers `{"ok":true,"folder-id":"…","image-index":3,"file-name":"photo.jpg"}`; the folder is then
+served by `/api/pictures/{id}` and can be shown with `POST /api/pictures/select`.
+
+---
+
+## Calendar Enrollment
+
+### `POST /api/calendar/enroll`
+
+A phone asking to plan the desktop's calendar through the calendar relay. Requires `X-Device-Id`.
+
+```json
+{ "deviceName": "Pastor's iPhone", "code": "482913" }
+```
+
+`code` is the six-digit code the phone is showing; the operator compares it with the one in the
+desktop's prompt and allows the device. The request waits up to two minutes for that answer.
+
+| Status | Body |
+|--------|------|
+| `200` | `{"relayUrl":"…","instanceId":"…","deviceId":"…","deviceToken":"…","instanceKey":"…"}` |
+| `400` | `device id required` / `code required` |
+| `403` | `{"error":"enrollment denied"}` |
+| `408` | `{"error":"enrollment timed out"}` |
+| `409` | `{"error":"sync_off"}` — calendar sync is off on the desktop |
+| `429` | `{"error":"enrollment already pending"}` — one open request per device, five in all |
+| `502` | `{"error":"relay unreachable"}` |
+
+---
+
+## Presentation Remote
+
+A phone-in-hand clicker for the presentation on the desktop, served as its own web page at
+`GET /presentation-remote`. It must be enabled in the desktop's presentation settings; the password,
+when set, goes in `X-Presentation-Password` or `?password=` on every call below except the page and
+`status`.
+
+### `GET /api/presentation-remote/status`
+
+Open, so the page can show its state before signing in:
+
+```json
+{ "enabled": true, "id": "3f2a1b4c", "index": 2, "total": 12, "frozen": false,
+  "isPlaying": false, "isLive": true, "autoScrollInterval": 0, "looping": false,
+  "passwordRequired": true, "notes": "Speaker notes for this slide" }
+```
+
+### Commands
+
+Each answers `{"ok":true}`.
+
+| Route | Does |
+|-------|------|
+| `POST /api/presentation-remote/auth` | Checks the password, then asks the operator to approve this device (once) — `403 {"error":"connection denied"}` if refused |
+| `POST /api/presentation-remote/next` | Next slide |
+| `POST /api/presentation-remote/previous` | Previous slide |
+| `POST /api/presentation-remote/goto/{index}` | Slide `{index}` (from 0, clamped to the deck) |
+| `POST /api/presentation-remote/freeze` | Toggles blank / unblank |
+| `POST /api/presentation-remote/play-pause` | Toggles auto-advance |
+| `POST /api/presentation-remote/loop` | Toggles looping |
+| `POST /api/presentation-remote/go-live` | Sends the presentation to the output |
+| `POST /api/presentation-remote/upload` | Uploads a deck, same body and answer as `POST /api/presentations/upload` |
+
+The remote follows the desktop through the `presentation_*` WebSocket events.
+
+---
+
+## Q&A
+
+The audience submits questions from a public page; a moderator approves, edits and displays them
+from an admin page. Pages: `GET /qa` (submit), `GET /qa/vote` (vote) and `GET /qa/admin` (moderate).
+
+### Public
+
+| Route | Body | Answers |
+|-------|------|---------|
+| `GET /api/qa/status` | — | `{"sessionActive":true,"cooldownSeconds":30,"displayedQuestionId":"…","votingEnabled":false}` |
+| `POST /api/qa/submit` | `{"text":"…","name":"optional"}` | The new question (`QuestionDto`); `403` when no session is active, `429` within the cooldown |
+| `GET /api/qa/approved` | — | `[{"id":"…","text":"…","voteCount":3,"voted":"up"}]` (`voted` is this client's vote or `null`); `403` when voting is off |
+| `POST /api/qa/vote` | `{"questionId":"…","direction":"up"}` (`up` or `down`) | `{"ok":true,"voted":"up"}`; voting again the same way takes the vote back |
+
+Submissions and votes are keyed by client IP (`CF-Connecting-IP`, then `X-Forwarded-For`, then the
+socket's address). `X-Device-Id` is recorded with a submission when sent.
+
+### Moderation
+
+Every route here takes the admin password (`X-QA-Password` or `?password=`). All but
+`questions` and `clear-all` also wait for the operator to allow the action on the desktop, answering
+`403 {"error":"denied by operator"}` if refused. `{id}` is the question's id.
+
+| Route | Body | Does |
+|-------|------|------|
+| `POST /api/qa/auth` | — | Checks the password and asks the operator to approve this device (once) |
+| `GET /api/qa/questions` | `?status=pending\|approved\|denied\|done` (optional) | All questions, as `QuestionDto`s |
+| `POST /api/qa/questions/{id}/approve` | — | Approves it |
+| `POST /api/qa/questions/{id}/edit` | `{"text":"…"}` | Changes its text |
+| `POST /api/qa/questions/{id}/deny` | — | Denies it |
+| `POST /api/qa/questions/{id}/done` | — | Marks it answered |
+| `POST /api/qa/questions/{id}/display` | — | Puts it on the output (it must be approved) |
+| `DELETE /api/qa/questions/{id}` | — | Deletes it |
+| `POST /api/qa/add` | `{"text":"…"}` | Adds a question as the moderator; answers the `QuestionDto` |
+| `POST /api/qa/clear-display` | — | Takes the displayed question down |
+| `POST /api/qa/clear-all` | — | Deletes every question, **without** asking the operator |
+
+`QuestionDto`: `id`, `text`, `submitterName`, `submitterDeviceId`, `timestamp`, `status`,
+`voteCount`, `upvotes`, …. Changes are pushed as `questions_updated` over the WebSocket.
+
+---
+
+## Lower Third JSON and ATEM Media Pool
+
+### `GET /api/lowerthirds/{name}/json`
+
+The raw Lottie JSON of a lower-third preset (name without `.json`, any case), so an Instance Link
+follower plays the same animation. `404` when there is no such preset.
+
+### `POST /api/atem/still/{name}` and `POST /api/atem/clip/{name}`
+
+Renders the named lower third and uploads it to the ATEM's media pool — one still frame, or the full
+animation as a clip. Both answer at once and upload in the background:
+
+```json
+{ "status": "uploading", "type": "clip", "name": "Pastor John", "slot": 1, "me": 1, "key": 1 }
+```
+
+| Query param | Meaning |
+|-------------|---------|
+| `slot` | 1-based still or clip slot; defaults to the slot in Settings → ATEM |
+| `key` | When above 0, puts this keyer on air after the upload (a clip's key goes off again after the clip) |
+| `me` | 1-based M/E for an upstream key |
+| `keytype` | `usk` or `dsk`; defaults to the configured key type |
+
+Errors: `404` for an unknown lower third, `503 {"error":"ATEM not configured"}`, `400` for a key the
+switcher does not have, and for a clip `422` when it has more frames than the slot holds.
+
+---
+
+## Browser Source (OBS / vMix)
+
+Each output set to *Browser Source* in Projection Settings is served as a web page that OBS, vMix or
+any browser can load. `{index}` is the output's number as Projection Settings shows it, from 1. An
+unknown or disabled output answers `404`. When the output has *Require API key* on, add
+`?apiKey=<key>` to the URL (or `X-Api-Key`).
+
+### `GET /browser-source/{index}`
+
+The overlay page (`Cache-Control: no-store`). Optional `?bg=` overrides the page background.
+
+### `WS /api/browser-source/{index}/ws`
+
+The page's frame stream, one way, server to page. Each **binary** message is a 24-byte big-endian
+header — `x`, `y`, `rectWidth`, `rectHeight`, `fullWidth`, `fullHeight` as six Int32s — followed by the
+changed rectangle as PNG (first byte `0x89`, when it has transparency) or JPEG (`0xFF`). A frame is
+sent only when pixels change, and the last one is re-sent every 15 seconds to keep the connection
+alive. When the output's profile offers transpose buttons the page also receives **text** messages
+with the current transpose state, and one with `controls:false` when it stops offering them. A bad
+request closes the socket with a reason (`CANNOT_ACCEPT`, `VIOLATED_POLICY` for the key,
+`TRY_AGAIN_LATER` while the renderer starts).
+
+### `POST /api/browser-source/{index}/auth` and `POST /api/browser-source/{index}/transpose`
+
+The musicians' transpose buttons on a tablet showing the page. Only an output whose profile offers
+them accepts either (`403` otherwise). `auth` asks the operator to approve the device (send
+`X-Device-Id`) and answers `{"ok":true,"output":1}`. `transpose` takes `{"delta":1}`, `{"delta":-1}`
+or `{"reset":true}` from an approved device (`403 {"error":"device not approved"}` otherwise).
+
+---
+
+## CA Certificate
+
+`GET /ca.crt` (DER, `application/x-x509-ca-cert`) and `GET /ca.pem` (PEM) download the CA certificate
+of the server's own certificate authority, for a device to install before talking HTTPS to it. Both
+are open — a device needs them before it can make any other call — and answer `404` while the server
+runs plain HTTP.
+
+---
+
 ## WebSocket
 
 ### Connection
@@ -1004,7 +1451,13 @@ With API key:
 ws://192.168.1.10:8765/ws?apiKey=mysecretkey
 ```
 
-On connect the server immediately pushes the current state as a burst of up to **5 events**:
+`GET /ws` upgrades to the WebSocket (the route index lists it as `WS /ws`). Identify the device
+with the `X-Device-Id` header (or an `X-Device-Id=` query param): a device the operator has blocked
+receives `{"error":"Blocked"}` and nothing more, and a device blocked mid-session has every command
+refused with reason `blocked`. A wrong API key receives `{"error":"Unauthorized"}`. Another
+ChurchPresenter following this one over Instance Link also sends `X-Client-Role: instance_link`.
+
+On connect the server immediately pushes the current state as a burst, in this order:
 
 | Sent on connect | Condition |
 |-----------------|-----------|
@@ -1013,6 +1466,12 @@ On connect the server immediately pushes the current state as a burst of up to *
 | `schedule_updated` | Always |
 | `presentation_updated` | If a presentation is currently loaded in the Presentations tab |
 | `pictures_updated` | If a picture folder is currently loaded in the Pictures tab |
+| `backgrounds_updated` | Always (empty payload — an invalidation signal) |
+| `secondary_bible_updated` | Always (empty payload — an invalidation signal) |
+| `presentation_slide_changed` | Always — the current presentation position |
+| `live_state_changed` | If anything has gone live since the server started |
+
+Broadcasts that happen while the burst is being written are held and delivered after it.
 
 ```javascript
 // JavaScript / React Native
@@ -1034,22 +1493,44 @@ ws.onmessage = (e) => {
 All messages (both directions) share the same envelope:
 
 ```json
-{ "type": "event_or_command_name", "payload": "<json-encoded-string>" }
+{ "type": "event_or_command_name", "payload": "<json-encoded-string>", "commandId": "optional" }
 ```
 
-> `payload` is a **JSON-encoded string** (not an object) — double-decode it.
+> `payload` is a **JSON-encoded string** (not an object) — double-decode it. A few events carry a
+> bare value or an empty string instead; the table below says which.
+
+**Command acks.** A command sent with a `commandId` is answered with a `command_ack` event whose
+payload is `{"commandId":"…","ok":true,"reason":null}`. Without a `commandId` there is no ack.
+Reasons sent with `ok:false`: `unknown_command`, `invalid_payload`, `dev_mode_only`, `blocked`,
+`no_such_group`, `no_message`, `no_such_prop`, `no_such_macro`. Approval-gated commands ack at once
+with `ok:true` and reason `pending_approval`; the operator's decision then arrives as a bare
+`{"ok":true}` or `{"ok":false,"reason":"denied"}` text frame (not an envelope), and a granted change
+also as `schedule_updated`.
 
 ---
 
 ### Server → Client Events
 
-| `type` | `payload` decoded type | When fired |
-|--------|------------------------|------------|
-| `songs_updated` | `SongCatalogResponse` | On connect + whenever songs are reloaded |
-| `bible_updated` | `BibleCatalogResponse` | On connect (if loaded) + whenever Bible is reloaded |
-| `schedule_updated` | `ScheduleResponse` | On connect + every schedule change |
-| `presentation_updated` | `PresentationCatalogResponse` | On connect (if loaded) + when a presentation is loaded |
-| `pictures_updated` | `PictureFolderResponse` | On connect (if loaded) + when a picture folder is opened |
+| `type` | `payload` | When fired |
+|--------|-----------|------------|
+| `songs_updated` | `SongCatalogResponse` (as `GET /api/songs`) | On connect + whenever songs are reloaded |
+| `bible_updated` | `BibleCatalogResponse` (as `GET /api/bible`) | On connect (if loaded) + whenever the Bible is reloaded |
+| `secondary_bible_updated` | empty | On connect + whenever the secondary Bible or the ordered translation list changes — refetch `GET /api/bible/file/secondary` or `GET /api/bible/file/translations` |
+| `backgrounds_updated` | empty | On connect + whenever the background settings change — refetch `GET /api/backgrounds` |
+| `schedule_updated` | `ScheduleResponse` (as `GET /api/schedule`) | On connect + every schedule change |
+| `presentation_updated` | `PresentationCatalogResponse` (as `GET /api/presentations`) | On connect (if loaded) + when a presentation is loaded |
+| `pictures_updated` | `PictureFolderResponse` (as `GET /api/pictures/{id}`) | On connect (if loaded) + when a picture folder is opened or a picture is uploaded |
+| `display_cleared` | empty | The output was cleared |
+| `song_section_selected` | the section index, as a bare number (e.g. `2`) | A song section went live |
+| `questions_updated` | empty | Any Q&A change — refetch the questions |
+| `presentation_slide_changed` | `{"id","index","total","isPlaying","isLive","notes"}` (`notes` absent on connect and when cleared) | On connect + every slide change |
+| `presentation_freeze_changed` | `{"frozen":true}` | The presentation was blanked or unblanked |
+| `presentation_live_changed` | `{"isLive":true}` | The presentation went on or off air |
+| `presentation_auto_scroll_changed` | `{"autoScrollInterval":5}` (seconds) | The auto-advance interval changed |
+| `presentation_looping_changed` | `{"looping":true}` | Looping was switched |
+| `live_state_changed` | `LiveStateDto`: `contentType` plus the fields of what is live (verse, song section, picture, media, announcement, website, scene, Q&A, dictionary, lower third), `liveSlide`, `overlays`, `message`, `messageDurationSeconds`, `props` | On connect (if any) + whenever what is on air changes |
+| `media_state_changed` | `{"isLive","isLoaded","isPlaying","title","positionMs","durationMs","volume","muted","mediaType","source"}` | Sent by the desktop on a fixed cadence, so the position ticks |
+| `command_ack` | `{"commandId","ok","reason"}` | In answer to a command that carried a `commandId` |
 
 ```javascript
 // Handle schedule updates
@@ -1069,17 +1550,37 @@ ws.onmessage = (e) => {
 Send a command with `ws.send(JSON.stringify({ type, payload }))`.  
 `payload` must be **JSON-encoded as a string**.
 
-| `type` | Action | Approval needed |
-|--------|--------|----------------|
-| `select_song` | Navigate schedule to a song | No |
-| `select_song_section` | Jump to a section within current song | No |
-| `select_slide` | Jump to a slide in current presentation | No |
-| `select_bible_verse` | Display a Bible verse immediately | No |
-| `select_picture` | Select an image in the current picture folder | No |
-| `clear` | Clear / hide the projection display | No |
-| `add_to_schedule` | Add a single item to the schedule | ✅ Yes |
-| `add_batch_to_schedule` | Add multiple items to the schedule | ✅ Yes |
-| `project` | Project an item immediately | ✅ Yes |
+| `type` | Payload | Action | Approval needed |
+|--------|---------|--------|----------------|
+| `select_song` | `{id, songNumber, title, songbook}` | Navigate schedule to a song | No |
+| `select_song_section` | `{number, section}` | Jump to a section within current song | No |
+| `select_slide` | `{id, index}` | Jump to a slide in current presentation | No |
+| `select_bible_verse` | as `POST /api/bible/select` | Display a Bible verse immediately | No |
+| `select_picture` | `{"folder-id", index, "file-name"?}` | Select an image in a picture folder | No |
+| `bible_hold` | `{"hold": true}` (default `true`) | Holds or releases the Bible output | No |
+| `next_picture` | — | Next picture of whatever is live | No |
+| `previous_picture` | — | Previous picture of whatever is live | No |
+| `next_slide` | — | Next slide of whatever is live | No |
+| `previous_slide` | — | Previous slide of whatever is live | No |
+| `media_play_pause` | — | Toggles media playback | No |
+| `media_stop` | — | Stops media | No |
+| `media_seek_forward` | — | Seeks media forward | No |
+| `media_seek_backward` | — | Seeks media back | No |
+| `media_seek_to` | the position in ms, as a bare number (`"90000"`) | Seeks media to that position | No |
+| `media_set_volume` | the volume `0.0`–`1.0`, as a bare number | Sets the media volume | No |
+| `media_mute_toggle` | — | Mutes or unmutes media | No |
+| `clear` | empty, `{"layer": "..."}` or `{"group": "..."}` | Clear / hide the projection display; a layer or a clear group is **dev mode only** | No |
+| `take` | — | Take, as `POST /api/take` — **dev mode only** | No |
+| `message` | as `POST /api/message` | Puts a message up — **dev mode only** | No |
+| `prop` | `{"id": "...", "on": true}` (`on` absent toggles) | Switches a prop — **dev mode only** | No |
+| `macro` | `{"name": "..."}` | Runs a macro — **dev mode only** | No |
+| `add_to_schedule` | `{item: {...}}` | Add a single item to the schedule | ✅ Yes |
+| `add_batch_to_schedule` | `{items: [...]}` | Add multiple items to the schedule | ✅ Yes |
+| `remove_from_schedule` | `{"id": "<schedule item id>"}` | Remove an item from the schedule | ✅ Yes |
+| `project` | `{item: {...}}` | Project an item immediately | ✅ Yes |
+
+The `next_*`, `previous_*` and `media_*` commands without a payload act on whatever the desktop has
+live, so a controller does not need the desktop's ids. An unknown `type` is acked `unknown_command`.
 
 ---
 
@@ -1196,7 +1697,7 @@ ws.send(JSON.stringify({
 
 Navigates the live presenter to a specific section (0-based) of the currently projected song. No approval required — takes effect immediately.
 
-`number` is the song number as a string. `section` is the 0-based section index matching the `sections` array from `GET /api/songs/{number}`.
+`number` is the song number as a string. `section` is the 0-based section index matching the `sections` array from `GET /api/songs/{identifier}`.
 
 ```javascript
 ws.send(JSON.stringify({
@@ -1482,7 +1983,15 @@ await fetch(`https://host:8765/api/presentations/${presItem.id}/select`, {
 | `200 OK` | Request succeeded |
 | `400 Bad Request` | Body could not be parsed or required fields missing |
 | `401 Unauthorized` | API key is wrong or missing (when auth is enabled) |
-| `403 Forbidden` | Desktop user clicked **Deny** |
+| `401 Unauthorized` (presentation remote / Q&A) | Wrong presentation or Q&A admin password |
+| `403 Forbidden` | Desktop user clicked **Deny**; a dev-mode-only route outside dev mode; file upload, the presentation remote or Q&A voting switched off |
 | `404 Not Found` | Resource (song, slide, image, presentation) does not exist |
-| `500 Internal Server Error` | Unexpected server-side error |
-| `503 Service Unavailable` | Data not yet loaded (e.g. Bible not loaded, no picture folder open) |
+| `408 Request Timeout` | Calendar enrollment not answered within two minutes |
+| `409 Conflict` | Calendar enrollment while calendar sync is off |
+| `413 Payload Too Large` | Upload over the size limit |
+| `415 Unsupported Media Type` | Upload of a file type the desktop does not take |
+| `422 Unprocessable Entity` | ATEM clip longer than its slot holds |
+| `429 Too Many Requests` | Q&A submission inside the cooldown; a calendar enrollment already pending |
+| `500 Internal Server Error` | Unexpected server-side error, or an upload that could not be written |
+| `502 Bad Gateway` | ATEM key toggle failed; calendar relay unreachable |
+| `503 Service Unavailable` | Data not yet loaded (e.g. Bible not loaded, no picture folder open, ATEM not configured, dictionary unavailable) |

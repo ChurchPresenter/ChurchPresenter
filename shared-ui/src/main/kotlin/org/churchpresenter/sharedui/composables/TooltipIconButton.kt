@@ -28,11 +28,11 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.keyboardFocusRing
 import org.churchpresenter.theme.raised
 
 private val ICON_KEY_RADIUS = 8.dp
 private val ICON_KEY_INSET = 2.dp
-
 
 /**
  * Reusable IconButton with tooltip that appears on hover, hidden when partially off-screen.
@@ -83,6 +83,7 @@ fun TooltipIconButton(
         Box(
             modifier = modifier
                 .size(buttonSize)
+                .keyboardFocusRing(shape)
                 .clickable(
                     interactionSource = interaction,
                     indication = null,
@@ -109,4 +110,3 @@ fun TooltipIconButton(
         }
     }
 }
-

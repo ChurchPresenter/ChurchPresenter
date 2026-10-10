@@ -427,7 +427,6 @@ private fun StrokeEditor(paint: PaintSpec, onChange: (PaintSpec) -> Unit) {
     }
 }
 
-
 // ------------------------------------------------------------------ text
 
 @Composable

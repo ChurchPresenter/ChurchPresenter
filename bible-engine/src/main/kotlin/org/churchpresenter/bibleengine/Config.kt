@@ -16,17 +16,21 @@ object Config {
 
     // Detection tuning (var ones are runtime-settable via the `set_tuning` WebSocket message)
     var reverseMinScoreRatio = 2.0
+
     // A reverse (BM25) hit must also share at least this much word-overlap with what was actually
     // spoken (transcript + translation), so a match on a single rare token can't fire on its own.
     var reverseMinAgreement = 0.15
+
     // Min fraction of a verse's words that must appear in a track (transcript / translation) for that
     // track to be marked as corroborating the detection (the per-chip transcription/translation icons).
     var trackCoverageMin = 0.4
+
     // Near-miss candidate logging (training data): log detections the engine BUILT but did NOT emit
     // (below the confidence threshold, deduped, or failed reverse-agreement), so false negatives are
     // visible for tuning. Floored to avoid noise. Toggle off with -Dengine.logCandidates=false.
     var logCandidates = System.getProperty("engine.logCandidates")?.toBooleanStrictOrNull() ?: true
     var candidateLogMinConfidence = 0.15
+
     // Traces every sticky book/chapter change to sticky-log-*.jsonl, even when nothing emits — the
     // diagnostic for an unexplained stale/wrong sticky that never produced a logged detection.
     // Low-volume (sticky changes are infrequent, not per-utterance); same default spirit as logCandidates.
@@ -53,9 +57,11 @@ object Config {
     // once more sessions accumulate real data (TRAINING_PLAN.md has the full sweep table).
     var continuationMinCoverage = 0.5
     const val dedupWindow = 32
+
     // Suppress an identical reference only within this window (time-based, replaces the old fixed
     // count-only window) so a passage read again later can re-fire.
     var dedupTtlMs = 45_000L
+
     // Re-emission churn control for a held passage. A reference already showing only re-emits as an
     // "updated" event when its confidence moves by at least [reEmitMinDelta] AND at least
     // [reEmitCooldownMs] has passed since the last (new or updated) emission. The reverse-lookup
@@ -258,6 +264,7 @@ object Config {
     // Absolute floors on the verdict, in units of "distinctive words of evidence" (the weighting is
     // normalized so a word unique to one version scores 1.0 regardless of corpus size).
     var versionMinEvidence = 3.0
+
     // Margin over the runner-up to SEAT an answer. An absolute DIFFERENCE, never a ratio: with
     // negative evidence the scores go negative, where a ratio is meaningless (-4/-8 = 0.5; 6/-2 = -3).
     var versionMinMargin = 2.0

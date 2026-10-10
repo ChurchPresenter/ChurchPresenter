@@ -34,7 +34,7 @@ import kotlin.test.assertTrue
  * what is asserted here.
  *
  * **No server is started and no port is bound.** `broadcast()` only touches the scope and the flow,
- * both built in the constructor, so `CompanionServer()` on its own is enough — which also means
+ * both built in the constructor, so `CompanionServer(shutdownGraceMs = 0)` on its own is enough — which also means
  * this suite cannot collide with a sibling over a port. `broadcastChannel` is `internal` for this.
  *
  * Every payload here is hand-built by string concatenation rather than serialized, so each is
@@ -51,7 +51,7 @@ class CompanionServerBroadcastStateTest {
     @BeforeTest
     fun setUp() {
         TestSingletons.latchToTestHome()
-        server = CompanionServer()
+        server = CompanionServer(shutdownGraceMs = 0)
         received = CopyOnWriteArrayList()
         val scope = CoroutineScope(Dispatchers.IO).also { collectorScope = it }
         scope.launch { server.broadcastChannel.collect { received.add(it) } }

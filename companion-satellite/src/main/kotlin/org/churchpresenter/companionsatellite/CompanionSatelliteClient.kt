@@ -53,6 +53,7 @@ class CompanionSatelliteClient(
     companion object {
         /** Companion's TCP layer times out an idle socket after 5s — ping comfortably under that. */
         private const val PING_INTERVAL_MS = 2000L
+
         /** Bounds how long a dead-but-unclosed socket (cable pull, host sleep, silent NAT drop —
          * no clean FIN/RST) can block [BufferedReader.readLine] before we notice. Generous relative
          * to [PING_INTERVAL_MS] so a normal quiet period with no button-state traffic at all never

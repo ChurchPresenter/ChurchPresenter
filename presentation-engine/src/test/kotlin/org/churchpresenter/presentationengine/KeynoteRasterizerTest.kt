@@ -111,7 +111,7 @@ class KeynoteRasterizerTest {
 
     @Test
     fun `rendering every slide of a deck succeeds`() {
-        val file = sceneOf(Triple(300L, 2011, textShape(0f, 0f, 100f, 100f, 301L)), )
+        val file = sceneOf(Triple(300L, 2011, textShape(0f, 0f, 100f, 100f, 301L)),)
         val scene = assertNotNull(KeynoteDeckParser.parse(file))
         KeynoteSceneRasterizer(scene).use { rasterizer ->
             scene.slides.indices.forEach { i ->

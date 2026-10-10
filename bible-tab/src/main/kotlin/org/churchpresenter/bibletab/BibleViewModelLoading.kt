@@ -86,7 +86,6 @@ internal fun BibleViewModel.applyTranslationOrder() {
     if (_verses.value.isNotEmpty()) _verseSelectionToken.value++
 }
 
-
 /**
  * Writes a cached module by building it beside its destination and moving it into place.
  *
@@ -140,7 +139,6 @@ fun BibleViewModel.setInstanceLinkSource(
     remoteModeActive = true
     syncMode = mode
     if (mode == BibleSyncMode.REFERENCE_ONLY) {
-
         remoteBibleCacheFile = null
         remoteSecondaryBibleCacheFile = null
         remoteTranslationCacheFiles = emptyList()

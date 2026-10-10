@@ -61,7 +61,6 @@ private const val SEXTANT_BLUE_TO_MAGENTA = 4
 /** `RRGGBB` -- the only hex form the field accepts. */
 private const val HEX_RGB_LENGTH = 6
 
-
 private val ButtonShape = AppShape(6.dp)
 
 /** Shared recent colors, persisted to the same file as ChurchPresenter's color picker. */

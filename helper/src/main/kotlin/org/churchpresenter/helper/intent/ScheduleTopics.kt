@@ -113,6 +113,7 @@ internal object ScheduleTopics {
     private val NOTE = setOf("note", "notes", "comment", "timing")
     private val SAVE = setOf("save", "export", "keep")
     private val NEW = setOf("new", "empty", "fresh", "blank")
+
     // Not "load": loading a planned service into the schedule is the Calendar's.
     private val OPEN = setOf("open", "reopen")
     private val ANNOUNCEMENT = setOf("announcement", "announcements", "message", "timer", "countdown", "clock")

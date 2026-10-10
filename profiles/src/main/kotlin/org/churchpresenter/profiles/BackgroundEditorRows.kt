@@ -353,4 +353,3 @@ internal fun describeBackground(config: BackgroundConfig): String = when (config
         .ifBlank { stringResource(Res.string.background_lottie_option) }
     else -> stringResource(backgroundTypeWord(config.backgroundType))
 }
-

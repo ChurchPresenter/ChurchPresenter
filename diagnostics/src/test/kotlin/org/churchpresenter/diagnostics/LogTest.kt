@@ -72,4 +72,13 @@ class LogTest {
             captured.toString().lines().filter { it.isNotBlank() },
         )
     }
+
+    @Test
+    fun `a credential never reaches stderr or the crash trail`() {
+        log.warn("VideoPlayer", "Playback error: http://10.0.0.2:8765/api/media?apiKey=s3cret")
+
+        val masked = "[VideoPlayer] Playback error: http://10.0.0.2:8765/api/media?apiKey=${Secrets.MASK}"
+        assertEquals(listOf(masked), lines)
+        assertEquals(listOf(Triple(masked, "VideoPlayer", LogLevel.WARN)), trail)
+    }
 }

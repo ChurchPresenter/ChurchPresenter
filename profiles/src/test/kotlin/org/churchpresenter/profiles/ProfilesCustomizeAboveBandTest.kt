@@ -20,6 +20,7 @@ class ProfilesCustomizeAboveBandTest {
 
     private companion object {
         const val CAPTION = "Above The Band"
+
         // ColorPickerField uppercases the label it is handed; CustomizeRow does not.
         const val FILL_COLOR = "Fill Color"
         const val FILL_OPACITY = "Fill Opacity"
@@ -91,7 +92,6 @@ class ProfilesCustomizeAboveBandTest {
             assertEquals(before, get().storedBand().backgroundType)
         }
     }
-
 
     @Test
     fun `the wash can be told to fill behind the band as well`() {

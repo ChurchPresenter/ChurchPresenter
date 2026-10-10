@@ -103,4 +103,3 @@ internal fun areaInside(bounds: Rectangle, insets: Insets): ScreenArea = ScreenA
     width = (bounds.width - insets.left - insets.right).dp,
     height = (bounds.height - insets.top - insets.bottom).dp,
 )
-

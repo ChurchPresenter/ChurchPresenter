@@ -18,7 +18,6 @@ private const val NUMBER_PADDING = 26f
 
 /** A titled group of rows: an uppercase accent heading with a rule down its left edge. */
 @OptIn(ExperimentalLayoutApi::class)
-
 /**
  * A number in the boxed, unit-captioned field the settings tabs already use, and an optional Auto
  * checkbox beside it.
@@ -65,4 +64,3 @@ internal fun NumberControl(
         )
     }
 }
-

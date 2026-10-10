@@ -87,7 +87,7 @@ fun DeckLinkComposeOutput(
         val info = DeckLinkManager.getOutputInfo(deviceIndex)
         val w = info?.width ?: 1920
         val h = info?.height ?: 1080
-        Log.info("DeckLink", "Device $deviceIndex: ${w}x${h} @ ${info?.fps} fps, role=$outputRole")
+        Log.info("DeckLink", "Device $deviceIndex: ${w}x$h @ ${info?.fps} fps, role=$outputRole")
 
         val jframe = offscreenFrame(frameTitle, w, h, appIconImage)
 

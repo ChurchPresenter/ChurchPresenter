@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.churchpresenter.sharedui.presenter.ReferenceScaledBox
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -54,6 +55,24 @@ import org.churchpresenter.sharedui.presenter.rectIn
 
 @Composable
 fun DictionaryPresenter(
+    modifier: Modifier = Modifier,
+    entry: StrongsEntry?,
+    dictionarySettings: DictionarySettings,
+    outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
+    transitionAlpha: Float = 1f,
+) = ReferenceScaledBox(modifier) {
+    DictionaryPresenterContent(
+        modifier = Modifier,
+        entry = entry,
+        dictionarySettings = dictionarySettings,
+        outputRole = outputRole,
+        transitionAlpha = transitionAlpha,
+    )
+}
+
+/** [DictionaryPresenter] as a 1920x1080-family output draws it; [ReferenceScaledBox] fits it to the real one. */
+@Composable
+private fun DictionaryPresenterContent(
     modifier: Modifier = Modifier,
     entry: StrongsEntry?,
     dictionarySettings: DictionarySettings,
@@ -126,6 +145,7 @@ fun DictionaryPresenter(
                     append(entry.pronunciation)
                 }
             }
+
             // Each part as its own composable, drawn at [scale] of its configured size: 1 in the
             // card, less where a box it has been given shrinks it to fit.
             @Composable
@@ -145,6 +165,7 @@ fun DictionaryPresenter(
                     style = TextStyle(shadow = refShadow()),
                 )
             }
+
             @Composable
             fun WordPart(scale: Float) {
                 OutlinedText(
@@ -163,6 +184,7 @@ fun DictionaryPresenter(
                     style = TextStyle(shadow = wordShadow()),
                 )
             }
+
             @Composable
             fun TranslitPart(scale: Float) {
                 OutlinedText(
@@ -180,6 +202,7 @@ fun DictionaryPresenter(
                     style = TextStyle(shadow = refShadow()),
                 )
             }
+
             @Composable
             fun DefinitionPart(scale: Float) {
                 OutlinedText(
@@ -197,6 +220,7 @@ fun DictionaryPresenter(
                     style = TextStyle(),
                 )
             }
+
             @Composable
             fun KjvPart(scale: Float) {
                 OutlinedText(
@@ -252,6 +276,7 @@ fun DictionaryPresenter(
             // Each boxed part in its own box, shrunk to fit it where the box says so.
             val area = Rect(0f, 0f, maxWidth.value, maxHeight.value)
             val measurer = rememberTextMeasurer()
+
             @Composable
             fun Boxed(part: String, shows: Boolean, text: String, size: Int, content: @Composable (Float) -> Unit) {
                 val box = boxOf(part)

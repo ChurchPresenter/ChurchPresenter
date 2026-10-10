@@ -4,7 +4,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -16,12 +23,15 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-/** The B / I / U square: its letter is the label, a click is the toggle, and it draws in either state. */
+/**
+ * The B / I / U square: to a screen reader a checkbox named by its tooltip, on or off; a click is the
+ * toggle, and it draws in either state. The letter is drawn but not read.
+ */
 @OptIn(ExperimentalTestApi::class)
 class TextStyleToggleButtonTest {
 
     @Test
-    fun `the letter is shown and a click calls back, in both states`() = runComposeUiTest {
+    fun `it is a checkbox named by its tooltip that a click turns on and off`() = runComposeUiTest {
         var bold by mutableStateOf(false)
         var clicks = 0
         setContent {
@@ -32,11 +42,25 @@ class TextStyleToggleButtonTest {
                 )
             }
         }
-        onNodeWithText("B").assertExists().performClick()
+        val key = onNodeWithContentDescription("Bold")
+        key.assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Checkbox))
+        key.assertIsOff().performClick()
         assertTrue(bold)
-        onNodeWithText("B").assertExists("still drawn once active").performClick()
+        key.assertIsOn().performClick()
         assertEquals(2, clicks)
         assertTrue(!bold)
+        key.assertIsOff()
+    }
+
+    @Test
+    fun `the letter is drawn but not read`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                TextStyleToggleButton(label = "B", tooltip = "Bold", isActive = false) { }
+            }
+        }
+        onNodeWithText("B").assertDoesNotExist()
+        onNodeWithText("B", useUnmergedTree = true).assertDoesNotExist()
     }
 
     @Test
@@ -52,8 +76,8 @@ class TextStyleToggleButtonTest {
                 ControlTooltip("Shown under the pointer")
             }
         }
-        onNodeWithText("I").assertExists()
-        onNodeWithText("U").assertExists()
+        onNodeWithContentDescription("Italic").assertIsOn()
+        onNodeWithContentDescription("Underline").assertIsOff()
         onNodeWithText("Shown under the pointer").assertExists()
     }
 
@@ -68,6 +92,6 @@ class TextStyleToggleButtonTest {
                 )
             }
         }
-        onNodeWithText("S").assertExists()
+        onNodeWithContentDescription("Shadow").assertExists()
     }
 }

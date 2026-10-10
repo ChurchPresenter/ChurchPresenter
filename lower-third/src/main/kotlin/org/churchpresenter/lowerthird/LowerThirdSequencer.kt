@@ -89,6 +89,7 @@ object LowerThirdSequencer {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val mutex = Mutex()
     private var job: Job? = null
+
     // The active key target, and the driver that put it on air, which takes it off again.
     private var activeDriver: AtemKeyDriver = connectionManagerKeyDriver
     private var activeHost: String? = null

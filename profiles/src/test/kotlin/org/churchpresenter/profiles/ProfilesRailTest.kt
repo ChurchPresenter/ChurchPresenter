@@ -180,5 +180,4 @@ class ProfilesRailTest {
             onAllNodesWithText("Screen 1, Screen 2")[0].assertExists()
         }
     }
-
 }

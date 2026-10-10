@@ -1,6 +1,5 @@
 package org.churchpresenter.bibletab
 
-
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -171,14 +170,13 @@ internal fun BibleTabScope.BibleSelectionEffects(viewModel: BibleViewModel) {
     val autoFollowTokenGate = rememberTokenGate(autoFollowLiveToken)
     LaunchedEffect(autoFollowLiveToken) {
         if (!autoFollowTokenGate.consume()) return@LaunchedEffect
-        goLiveWithHistory(viewModel, 
+        goLiveWithHistory(viewModel,
             source = viewModel.autoFollowLiveSource.value,
             matchType = viewModel.autoFollowLiveMatchType.value,
         )
     }
 
     LaunchedEffect(verseSelectionToken) {
-
         if (viewModel.multiVerseEnabled.value && currentIsPresenting) return@LaunchedEffect
 
         if (splitBrowseMode) return@LaunchedEffect

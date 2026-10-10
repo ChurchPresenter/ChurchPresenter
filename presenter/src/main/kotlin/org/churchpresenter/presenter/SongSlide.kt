@@ -96,16 +96,19 @@ internal class SongSlide(
 
     /** Each language's backdrop block for its lyric lines, remembered by [TextContent]. */
     lateinit var lyricsBlocks: List<TextBlockBackdrop>
+
     /** Each language's backdrop block for its look-ahead lines, remembered by [TextContent]. */
     lateinit var laBlocks: List<TextBlockBackdrop>
 
     private val titleDisplay = if (isLowerThird) ss.titleLowerThirdDisplay else ss.titleDisplay
     private val numberDisplay = if (isLowerThird) ss.showNumberLowerThird else ss.showNumber
+
     // The title slide's lines are the song's title and credit, so they take the Title
     // element's style -- what the settings tab's Title tab edits -- rather than the
     // lyrics', and the title row above the lyrics stays out of it: it would repeat the
     // slide.
     val isTitleSlide = section.type == Constants.SECTION_TYPE_TITLE_SLIDE
+
     // A boxed title or number is drawn in its box (`SlideBoxes`), never in the row.
     private val titleBoxed = ss.isBoxed(SongStyleElement.TITLE, isLowerThird)
     private val numberBoxed = ss.isBoxed(SongStyleElement.NUMBER, isLowerThird)
@@ -115,18 +118,22 @@ internal class SongSlide(
     val shouldShowSongNumber =
         shouldShowText(numberDisplay, section, allLyricSections, displaySectionIndex) &&
             section.songNumber > 0 && !isTitleSlide && !numberBoxed
+
     // "Configured" means not set to "None" — title/number could appear on some slides
     val titleConfigured = titleDisplay != Constants.NONE && !titleBoxed
     val numberConfigured = numberDisplay != Constants.NONE && section.songNumber > 0 && !numberBoxed
     val effectiveTitlePosition = if (isLowerThird) ss.titleLowerThirdPosition else ss.titlePosition
     val effectiveSongNumberPosition = if (isLowerThird) ss.songNumberLowerThirdPosition else ss.songNumberPosition
+
     // Which corner the number is pinned to, or NONE for the row it shares with the title.
     val songNumberCorner = if (isLowerThird) ss.songNumberLowerThirdCorner else ss.songNumberCorner
     val numberInCorner = numberConfigured && songNumberCorner != Constants.NONE
+
     // Where the section label and the next-section lines sit: an edge, or held on the lyrics.
     val sectionLabelProfile = ss.elementStyle(SongStyleElement.SECTION_LABEL, songTarget)
     val sectionLabelPosition = ss.layoutExtras.sectionLabel.positionFor(isLowerThird)
     val nextSectionPosition = ss.layoutExtras.nextSectionPosition.positionFor(isLowerThird)
+
     // isLowerThirdVertical forces bilingual content to stack (one below the other)
     // instead of side-by-side — see the useSideBySide gate further below — same
     // band/geometry as horizontal otherwise.
@@ -135,6 +142,7 @@ internal class SongSlide(
     // drawn by its own composable, in the same box the lyrics would have had.
     val allDisplayLines = section.lines
     private val hasChart = showChords && section.chordLines.isNotEmpty()
+
     // Resolve per-mode settings based on fullscreen vs lower third
     // When lookAheadEnabled, the entire screen uses lookahead's own display mode
     val displayMode = if (lookAheadEnabled) {
@@ -142,6 +150,7 @@ internal class SongSlide(
     } else {
         if (isLowerThird) ss.lowerThirdDisplayMode else ss.fullscreenDisplayMode
     }
+
     // Look-ahead portion uses same display mode as the screen
     private val laDisplayMode = displayMode
     val laIsLineMode = laDisplayMode == Constants.SONG_DISPLAY_MODE_LINE
@@ -169,6 +178,7 @@ internal class SongSlide(
             lineIndex = effectiveLineIndex,
         ),
     )
+
     // The languages laid out here: a language whose lyrics are boxed is drawn in its
     // box instead, and one whose next section is boxed keeps only its lyrics here.
     val boxLyricsElement =
@@ -191,6 +201,7 @@ internal class SongSlide(
         !isLineMode -> section.chordLines
         else -> listOfNotNull(chartRowFor(section, effectiveLineIndex.coerceAtLeast(0)))
     }
+
     // The next line of this section, when line mode has one left to show.
     val nextLineHere = if (lookAheadEnabled && isLineMode && laIsLineMode) {
         effectiveLineIndex.takeIf { it in 0 until allDisplayLines.size - 1 }?.plus(1)
@@ -239,6 +250,7 @@ internal class SongSlide(
         ?: titleHorizontalAlignment
 
     val isMultiLanguage = languageBlocks.size > 1
+
     // Row, column or 2x2 grid, from the same [bilingualGrid] mapping the auto-fit
     // above already read. A vertical lower third is too narrow for a row or a 2x2
     // grid -- both fall through to the stacked branch below, which already
@@ -264,6 +276,7 @@ internal class SongSlide(
         letterSpacing = spacingEm(laStyleProfile.letterSpacing, laStyleProfile.fontSize).em,
         shadow = if (laShadowEnabled) laBaseShadow else null
     )
+
     // Look-ahead next uses auto-fit capped at its own configured max
     val laAutoFitEnabled =
         if (isLowerThird) ss.lowerThirdLookAheadNextFontSizeAutoFit else ss.lookAheadNextFontSizeAutoFit
@@ -333,6 +346,7 @@ internal class SongSlide(
             shadowOf = this::scaleElementShadow,
         )
     }
+
     // Something held directly under the lyrics takes the marker's place there, and the
     // marker follows it -- otherwise the marker's row, kept on every slide, would sit
     // between the lyrics and what was meant to touch them.
@@ -340,12 +354,14 @@ internal class SongSlide(
         sectionLabelText(section, ss.layoutExtras.sectionLabel, isTitleSlide) != null) ||
         (titleConfigured && effectiveTitlePosition == Constants.BELOW_LYRICS) ||
         (numberConfigured && !numberInCorner && effectiveSongNumberPosition == Constants.BELOW_LYRICS)
+
     // Renders title and/or song number for a given position (ABOVE_VERSE or BELOW_VERSE)
     val samePosition = effectiveTitlePosition == effectiveSongNumberPosition
     val sameHorizontal =
         (if (isLowerThird) ss.songNumberLowerThirdHorizontalAlignment else ss.songNumberHorizontalAlignment) ==
             (if (isLowerThird) ss.titleLowerThirdHorizontalAlignment else ss.titleHorizontalAlignment)
     val numberBeforeTitle = ss.songNumberBeforeTitle
+
     // Determine which positions have content for balancing
     val hasBottomContent = (titleConfigured && effectiveTitlePosition == Constants.BELOW_VERSE) ||
             (numberConfigured && !numberInCorner &&

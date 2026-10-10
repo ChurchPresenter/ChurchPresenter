@@ -40,9 +40,8 @@ What that changed, and what it did not:
   list for exactly this reason.
 - **Its classes no longer land in the app's output directory**, so `:composeApp`'s JaCoCo report no
   longer has to filter them out — this module is measured by its own report and its own floor.
-- CI runs `./gradlew :presentation-engine:test` and
-  `:presentation-engine:jacocoTestCoverageVerification`, gated on the `engine` filter in
-  `.github/workflows/test.yml`.
+- CI runs `:presentation-engine:test` and `:presentation-engine:jacocoTestCoverageVerification`
+  when the change can affect it (`.github/ci/affected_modules.py`), in one of the `modules` groups.
 
 ## Coverage
 

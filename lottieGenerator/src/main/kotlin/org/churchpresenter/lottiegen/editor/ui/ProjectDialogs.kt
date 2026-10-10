@@ -165,7 +165,6 @@ private fun DiscardConfirmDialog(d: ProjectDialogState) {
             }
         )
     }
-
 }
 
 /** The template picker New opens. */
@@ -205,8 +204,6 @@ private fun NewProjectDialog(state: EditorState, d: ProjectDialogState) {
             }
         )
 }
-
-
 
 private enum class PendingAction { NEW, OPEN }
 

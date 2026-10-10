@@ -51,7 +51,7 @@ class ServerSettingsTabLifecycleTest {
 
     @Test
     fun `the enable switch starts the server and stores the port, and switching off stops it`() {
-        val server = track(CompanionServer())
+        val server = track(CompanionServer(shutdownGraceMs = 0))
         val port = freeServerPort()
 
         serverTab(initial = serverSettings { copy(port = port) }, server = server) { get, _ ->
@@ -88,7 +88,7 @@ class ServerSettingsTabLifecycleTest {
      */
     @Test
     fun `Restart cycles the server`() {
-        val server = track(CompanionServer())
+        val server = track(CompanionServer(shutdownGraceMs = 0))
         val port = freeServerPort()
 
         serverTab(initial = serverSettings { copy(port = port) }, server = server) { _, _ ->

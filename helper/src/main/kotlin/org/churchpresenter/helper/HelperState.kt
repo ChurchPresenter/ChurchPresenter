@@ -152,8 +152,6 @@ class HelperState(
         reply = next
     }
 
-
-
     /** Acts on what a typed request came to. */
     fun onResolved(resolution: Resolution, executor: HelperActionExecutor) {
         when (resolution) {
@@ -234,6 +232,4 @@ class HelperState(
             }
         }
     }
-
 }
-

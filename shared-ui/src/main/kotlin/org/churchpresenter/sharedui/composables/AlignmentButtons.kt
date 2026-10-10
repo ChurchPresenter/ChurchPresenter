@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import org.churchpresenter.theme.AppShape
+import org.churchpresenter.theme.keyboardFocusRing
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -76,26 +77,14 @@ fun HorizontalAlignmentButtons(
     buttonSize: Dp = 28.dp,
     cornerRadius: Dp = 4.dp
 ) {
+    val right = stringResource(Res.string.align_right)
+    val center = stringResource(Res.string.align_center)
+    val left = stringResource(Res.string.align_left)
     IconChoiceTrack(
         choices = listOf(
-            IconChoice(
-                rightValue,
-                painterResource(IconRes.drawable.ic_align_right),
-                stringResource(Res.string.align_right),
-                null,
-            ),
-            IconChoice(
-                centerValue,
-                painterResource(IconRes.drawable.ic_align_center),
-                stringResource(Res.string.align_center),
-                null,
-            ),
-            IconChoice(
-                leftValue,
-                painterResource(IconRes.drawable.ic_align_left),
-                stringResource(Res.string.align_left),
-                null,
-            ),
+            IconChoice(rightValue, painterResource(IconRes.drawable.ic_align_right), right, right),
+            IconChoice(centerValue, painterResource(IconRes.drawable.ic_align_center), center, center),
+            IconChoice(leftValue, painterResource(IconRes.drawable.ic_align_left), left, left),
         ),
         selected = selectedAlignment,
         onSelect = onAlignmentChange,
@@ -184,6 +173,7 @@ private fun IconChoiceTrack(
                 Box(
                     modifier = Modifier
                         .size(segmentWidth, segmentHeight)
+                        .keyboardFocusRing(segmentShape)
                         .then(
                             when {
                                 isSelected -> Modifier.raised(

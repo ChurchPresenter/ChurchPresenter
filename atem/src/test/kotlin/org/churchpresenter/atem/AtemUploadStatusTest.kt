@@ -154,6 +154,7 @@ class AtemUploadStatusTest {
 
         assertNull(AtemUploadStatus.state.value, "nothing may put a bar back on screen after it cleared")
     }
+
     @Test
     fun `a clip upload is marked as a clip and a still is not`() {
         // The bar's label reads "Clip" or "Still" off this flag; getting it wrong tells the operator
@@ -172,5 +173,4 @@ class AtemUploadStatusTest {
         AtemUploadStatus.fail(id, "too late")
         assertNull(AtemUploadStatus.state.value, "an idle bar stays idle")
     }
-
 }

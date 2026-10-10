@@ -55,6 +55,33 @@ class UpdateCheckerSelectUpdateTest {
     }
 
     @Test
+    fun `the offered installer carries the digest github published for that asset`() {
+        val assets = """[
+            {"browser_download_url":"https://example.org/app.msi","digest":"sha256:aa11"},
+            {"browser_download_url":"https://example.org/app-arm64.dmg","digest":"sha256:bb22"},
+            {"browser_download_url":"https://example.org/app.dmg","digest":"sha256:cc33"},
+            {"browser_download_url":"https://example.org/app.deb","digest":"sha256:dd44"}
+        ]"""
+        val byUrl = mapOf(
+            "https://example.org/app.msi" to "aa11",
+            "https://example.org/app-arm64.dmg" to "bb22",
+            "https://example.org/app.dmg" to "cc33",
+            "https://example.org/app.deb" to "dd44",
+        )
+
+        val info = assertIs<UpdateCheckResult.Available>(select(releases(release("v26.2.0", assets = assets)))).info
+
+        assertEquals(byUrl[info.downloadUrl], info.downloadSha256)
+    }
+
+    @Test
+    fun `an asset with no digest is offered without one`() {
+        val info = assertIs<UpdateCheckResult.Available>(select(releases(release("v26.2.0")))).info
+
+        assertNull(info.downloadSha256)
+    }
+
+    @Test
     fun `an equal or older latest release reads as up to date`() {
         assertIs<UpdateCheckResult.UpToDate>(select(releases(release("v26.1.0"))))
         assertIs<UpdateCheckResult.UpToDate>(select(releases(release("v25.9.9"))))

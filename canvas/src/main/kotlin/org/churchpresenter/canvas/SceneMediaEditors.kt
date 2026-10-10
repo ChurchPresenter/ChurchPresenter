@@ -100,8 +100,10 @@ import org.churchpresenter.sharedui.composables.opacityLabel
 
 /** Two full turns of curve either way; past that the line runs into itself. */
 private const val MAX_TEXT_CURVE = 200f
+
 /** The font name needs the room; its size is three digits. */
 private const val FONT_NAME_WEIGHT = 2f
+
 /** Tracking, as a percentage of the font size: tight enough to touch, wide enough to space out. */
 private const val MIN_LETTER_SPACING = -20f
 private const val MAX_LETTER_SPACING = 100f
