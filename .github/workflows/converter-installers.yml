@@ -36,7 +36,7 @@ jobs:
       version: ${{ steps.version.outputs.VERSION }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -66,7 +66,7 @@ jobs:
     runs-on: [self-hosted, X64, Windows]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           # The build only needs :converter, but configuring the root build configures
@@ -74,13 +74,13 @@ jobs:
           submodules: true
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Build MSI installer
         shell: cmd
@@ -94,7 +94,7 @@ jobs:
           }
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: windows-msi
           path: converter/build/compose/binaries/main/msi
@@ -105,7 +105,7 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           # The build only needs :converter, but configuring the root build configures
@@ -113,13 +113,13 @@ jobs:
           submodules: true
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -134,7 +134,7 @@ jobs:
           done
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: macos-dmg
           path: converter/build/compose/binaries/main/dmg
@@ -145,7 +145,7 @@ jobs:
     runs-on: [self-hosted, macOS, X64]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           # The build only needs :converter, but configuring the root build configures
@@ -153,13 +153,13 @@ jobs:
           submodules: true
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -174,7 +174,7 @@ jobs:
           done
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: macos-dmg-x64
           path: converter/build/compose/binaries/main/dmg
@@ -185,7 +185,7 @@ jobs:
     runs-on: [self-hosted, X64, Linux]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           # The build only needs :converter, but configuring the root build configures
@@ -193,13 +193,13 @@ jobs:
           submodules: true
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -215,7 +215,7 @@ jobs:
           done
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: linux-deb
           path: converter/build/compose/binaries/main/deb
@@ -230,28 +230,28 @@ jobs:
     steps:
       - name: Download Windows artifact
         if: ${{ (inputs.platform == 'Windows' || inputs.platform == 'All') && needs.build-windows.result == 'success' }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: windows-msi
           path: release/windows
 
       - name: Download macOS artifact
         if: ${{ (inputs.platform == 'macOS (ARM64)' || inputs.platform == 'All') && needs.build-macos.result == 'success' }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: macos-dmg
           path: release/macos
 
       - name: Download macOS x64 artifact
         if: ${{ (inputs.platform == 'macOS (x64)' || inputs.platform == 'All') && needs.build-macos-x64.result == 'success' }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: macos-dmg-x64
           path: release/macos
 
       - name: Download Linux artifact
         if: ${{ (inputs.platform == 'Linux' || inputs.platform == 'All') && needs.build-linux.result == 'success' }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: linux-deb
           path: release/linux
@@ -293,7 +293,7 @@ jobs:
           echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.version.outputs.version }}
           name: ChurchPresenter Converter ${{ needs.version.outputs.version }}

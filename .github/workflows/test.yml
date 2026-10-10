@@ -102,16 +102,16 @@ jobs:
           fi
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       # Which modules' suites this change can affect, read off the build's own dependency graph
       # (`./gradlew moduleGraph`): a module runs when a file in its directory changed or when a
@@ -157,16 +157,16 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: 'temurin'
       - name: Submit the dependency graph
-        uses: gradle/actions/dependency-submission@v4
+        uses: gradle/actions/dependency-submission@v6
       - name: Review the dependencies this change adds
         if: github.event_name == 'pull_request'
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: high
           retry-on-snapshot-warnings: true
@@ -176,12 +176,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Detekt
         run: >-
           ./gradlew :composeApp:detekt :theme:detekt :core-models:detekt :converter:detekt
@@ -197,12 +197,12 @@ jobs:
     env:
       ORG_GRADLE_PROJECT_hangThresholdMs: '150000'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
 
       - name: App unit tests
         id: unit_tests
@@ -265,7 +265,7 @@ jobs:
 
       - name: Keep the results for the report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           # Not `results-*`: every path here is under composeApp/build/, which the upload strips, so
           # `test` downloads these back under that directory itself.
@@ -294,12 +294,12 @@ jobs:
     env:
       ORG_GRADLE_PROJECT_hangThresholdMs: '150000'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
 
       - name: Module suites
         env:
@@ -317,7 +317,7 @@ jobs:
 
       - name: Keep the results for the report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: results-modules-${{ strategy.job-index }}
           if-no-files-found: ignore
@@ -339,12 +339,12 @@ jobs:
     env:
       ORG_GRADLE_PROJECT_hangThresholdMs: '150000'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Changed tests pass three runs in a row
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
@@ -372,16 +372,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
 
       - name: Gather the results
         if: ${{ !cancelled() }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: results-*
           merge-multiple: true
@@ -389,7 +389,7 @@ jobs:
       # The app's own artifact was uploaded relative to composeApp/build/ -- see `app`.
       - name: Gather the app's results
         if: ${{ !cancelled() && needs.app.result != 'skipped' }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: app-results
           path: composeApp/build/
@@ -517,7 +517,7 @@ jobs:
 
       - name: Upload test reports
         if: ${{ !cancelled() && (needs.app.result == 'failure' || needs.modules.result == 'failure' || needs.changed-tests.result == 'failure') }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-reports
           if-no-files-found: ignore

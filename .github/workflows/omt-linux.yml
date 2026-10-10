@@ -44,25 +44,25 @@ jobs:
       archive: ${{ steps.pack.outputs.archive }}
       sha256: ${{ steps.pack.outputs.sha256 }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: openmediatransport/libvmx
           ref: ${{ env.LIBVMX_SHA }}
           path: omt-src/libvmx
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: openmediatransport/libomtnet
           ref: ${{ env.LIBOMTNET_SHA }}
           path: omt-src/libomtnet
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: openmediatransport/libomt
           ref: ${{ env.LIBOMT_SHA }}
           path: omt-src/libomt
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '8.0.x'
 
@@ -156,16 +156,16 @@ jobs:
           echo "### OMT for Linux" >> "$GITHUB_STEP_SUMMARY"
           echo "\`$archive\` — sha256 \`$sha\`" >> "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: omt-linux-x86_64
           path: ${{ steps.pack.outputs.archive }}
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
 
       # The whole round trip against the built binaries: load, send, discover, receive, and check
       # the colour and the alpha survived. The runner is its own LAN of one, which is enough — the
@@ -180,7 +180,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: omt-linux-x86_64
       - name: Attach to the release
