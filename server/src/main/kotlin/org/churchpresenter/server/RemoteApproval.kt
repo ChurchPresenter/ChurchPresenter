@@ -1,9 +1,5 @@
 package org.churchpresenter.server
 
-
-
-
-
 /**
  * What the desktop does with an approval-only remote request: refuse it, carry it out and tell the
  * operator afterwards, or put it in front of them first.

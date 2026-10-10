@@ -39,7 +39,7 @@ class CompanionServerDictionaryTest {
 
     @BeforeTest
     fun setUp() {
-        server = CompanionServer()
+        server = CompanionServer(shutdownGraceMs = 0)
         // Its own port: every CompanionServer suite claims a distinct one, and 39_721 is
         // CompanionServerQaModerationTest's. Sharing it means a bind failure whenever the previous
         // suite's socket has not finished closing.

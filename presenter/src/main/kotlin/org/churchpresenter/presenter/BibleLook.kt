@@ -141,7 +141,6 @@ internal class BibleStyle(
     val sTextPainter = painters.sTextPainter
     val sRefPainter = painters.sRefPainter
 
-
     // Resolve bold/italic/underline/shadow — use lower-third-specific values when applicable
     private val pBold = if (isLowerThird) t0.lowerThirdTextBold else t0.textBold
     private val pItalic = if (isLowerThird) t0.lowerThirdTextItalic else t0.textItalic

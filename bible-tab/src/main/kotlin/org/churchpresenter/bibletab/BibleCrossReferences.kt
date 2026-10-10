@@ -84,7 +84,6 @@ import org.churchpresenter.sharedui.composables.bibleRowColors
 import org.churchpresenter.sharedui.composables.rememberRowHover
 import org.churchpresenter.sharedui.composables.rowPad
 
-
 private val CROSS_REF_POPOVER_WIDTH = 380.dp
 
 private val CROSS_REF_POPOVER_MAX_HEIGHT = 420.dp
@@ -162,7 +161,6 @@ private fun CrossReferenceCard(
         Column(
             modifier = Modifier
                 .weight(1f)
-
                 .then(
                     if (row.available) Modifier.initialPassCombinedClickable(
                         onClick = onClick,
@@ -209,7 +207,6 @@ private fun CrossReferenceCard(
             }
         }
         if (row.available) {
-
             val addStr = stringResource(Res.string.add_to_schedule)
             Box(modifier = Modifier.padding(top = 5.dp, end = 5.dp)) {
                 CrossRefActionButton(
@@ -254,7 +251,6 @@ private fun CrossRefActionButton(
         Box(
             modifier = Modifier.size(22.dp)
                 .clip(AppShape(6.dp))
-
                 .initialPassClickable(onClick),
             contentAlignment = Alignment.Center,
         ) {
@@ -418,7 +414,6 @@ internal fun CrossReferencePopover(
             shadowElevation = 16.dp,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         ) {
-
             Column(modifier = Modifier.width(CROSS_REF_POPOVER_WIDTH)) {
                 CrossReferenceHeader(
                     title = title,
@@ -431,7 +426,6 @@ internal fun CrossReferencePopover(
                 if (rows.isEmpty()) {
                     CrossReferenceEmptyState(modifier = Modifier.fillMaxWidth().height(110.dp))
                 } else {
-
                     val scrollState = rememberScrollState()
                     Column(
                         modifier = Modifier
@@ -518,7 +512,6 @@ internal fun CrossRefChip(
                     if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
                     AppShape(10.dp),
                 )
-
                 .initialPassClickable(onClick)
                 .padding(horizontal = 6.dp),
             verticalAlignment = Alignment.CenterVertically,

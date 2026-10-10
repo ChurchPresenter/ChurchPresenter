@@ -72,9 +72,11 @@ import org.churchpresenter.sharedui.composables.previewLinesFrom
 /** Two full turns of curve either way; past that the line runs into itself. */
 /** The font name needs the room; its size is three digits. */
 private const val FONT_NAME_WEIGHT = 2f
+
 /** The book name needs the room; chapter and verses are a few digits each. */
 private const val BOOK_WEIGHT = 2f
 private const val MAX_TEXT_CURVE = 200f
+
 /** Tracking, as a percentage of the font size. */
 private const val MIN_LETTER_SPACING = -20f
 private const val MAX_LETTER_SPACING = 100f
@@ -187,6 +189,7 @@ internal fun BibleProperties(
         }
     }
 }
+
 /** Book, chapter and verses from the panel's own translation, inserted into the source as its text. */
 @Composable
 private fun BibleVersePicker(

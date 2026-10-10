@@ -142,6 +142,7 @@ internal fun MainDesktopPanels(
             // the window grows again.
             val reservePx = with(density) { (HANDLE_WIDTH + HANDLE_WIDTH + MIN_MAIN_WIDTH).toPx() }
             val absMaxPx = with(density) { PANEL_ABS_MAX_WIDTH.toPx() }
+
             // availablePx is 0f until onSizeChanged fires on the first layout pass — treat
             // that as "unknown" (uncapped) rather than clamping panels to 0 in the interim,
             // since nothing here ever raises schedulePanelPx/previewPanelPx back up once the

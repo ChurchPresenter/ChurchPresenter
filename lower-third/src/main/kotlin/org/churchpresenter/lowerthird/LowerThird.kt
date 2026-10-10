@@ -128,7 +128,6 @@ fun LowerThirdTab(
     val lottieFilesOrNullState = produceLowerThirdFiles(lottieFolder, ui.refreshKey)
     val lottieFiles = lottieFilesOrNullState.value.orEmpty()
 
-
     // Pre-render ATEM uploads in the background for every lottie file as soon as it
     // appears (generator save, file drop, edit) — Send to ATEM then streams a ready file
     LaunchedEffect(lottieFiles, appSettings.atemSettings) {
@@ -231,11 +230,9 @@ private fun WatchLowerThirdFolder(lottieFolder: String, ui: LowerThirdUiState) {
                 } finally {
                     watchService.close()
                 }
-            } catch (_: java.nio.file.ClosedWatchServiceException) {}
-            catch (_: InterruptedException) {}
+            } catch (_: java.nio.file.ClosedWatchServiceException) {} catch (_: InterruptedException) {}
         }
     }
-
 }
 
 @Composable

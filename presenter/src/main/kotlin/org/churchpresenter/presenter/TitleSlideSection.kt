@@ -8,7 +8,6 @@ import org.churchpresenter.core.models.songs.withBackgroundsOf
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.utils.Constants
 
-
 /**
  * The title-slide [LyricSection] for [song] at [tuning], under [settings].
  *

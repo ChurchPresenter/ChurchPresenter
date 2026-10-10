@@ -1077,7 +1077,6 @@ class ReferenceWatcherTest {
         }
     }
 
-
     // ── FP gates: stem over-extension + short aliases (Known Engine Gaps, since closed) ──────
 
     @Test fun `short alias with adjacent number still resolves`() {

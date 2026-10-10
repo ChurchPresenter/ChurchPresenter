@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -73,10 +74,10 @@ class SourcePropertiesTextTest {
         // panel at its smallest: the text box, the two sliders' inputs and the font size.
         textFields().assertCountEquals(10)
         checkboxes().assertCountEquals(1)
-        // The four style buttons publish no role of their own, so this counts the alignment ones.
+        // The four style buttons are checkboxes, so this counts the alignment ones.
         roleButtons().assertCountEquals(Align.COUNT)
-        listOf("B", "I", "U", "S").forEach {
-            assertEquals(1, countOf(it), "\"$it\" must be the text panel's own style button")
+        listOf("Bold", "Italic", "Underline", "Strikethrough").forEach {
+            assertEquals(1, countNamed(it), "\"$it\" must be the text panel's own style button")
         }
     }
 
@@ -357,28 +358,28 @@ class SourcePropertiesTextTest {
 
     @Test
     fun `Bold stores bold and nothing else`() = sourcePanel(Fixture.text()) { get ->
-        clickStyleButton("B")
+        clickStyleButton("Bold")
 
         assertEquals(Fixture.text().copy(bold = true), get(), "B may write only the bold flag")
     }
 
     @Test
     fun `Italic stores italic and nothing else`() = sourcePanel(Fixture.text()) { get ->
-        clickStyleButton("I")
+        clickStyleButton("Italic")
 
         assertEquals(Fixture.text().copy(italic = true), get())
     }
 
     @Test
     fun `Underline stores underline and nothing else`() = sourcePanel(Fixture.text()) { get ->
-        clickStyleButton("U")
+        clickStyleButton("Underline")
 
         assertEquals(Fixture.text().copy(underline = true), get())
     }
 
     @Test
     fun `Strikethrough stores strikethrough and nothing else`() = sourcePanel(Fixture.text()) { get ->
-        clickStyleButton("S")
+        clickStyleButton("Strikethrough")
 
         assertEquals(Fixture.text().copy(strikethrough = true), get())
     }
@@ -386,7 +387,7 @@ class SourcePropertiesTextTest {
     @Test
     fun `a face stored on is turned back off by its own button`() {
         sourcePanel(Fixture.text().copy(bold = true, italic = true)) { get ->
-            clickStyleButton("B")
+            clickStyleButton("Bold")
 
             val source = get() as SceneSource.TextSource
             assertEquals(false, source.bold)
@@ -396,7 +397,7 @@ class SourcePropertiesTextTest {
 
     @Test
     fun `the style row carries no text-backing control`() = sourcePanel(Fixture.text()) { _ ->
-        onAllNodesWithText("B").assertCountEquals(1)
+        onAllNodesWithContentDescription("Bold").assertCountEquals(1)
         onAllNodesWithText("A").assertCountEquals(0)
     }
 }

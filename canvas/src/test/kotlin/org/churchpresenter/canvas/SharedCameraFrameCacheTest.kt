@@ -220,6 +220,7 @@ class SharedCameraFrameCacheTest {
         assertEquals("unknown", deviceScheme(""))
         assertEquals("unknown", deviceScheme("/dev/video0"))
     }
+
     @Test
     fun `no override leaves the command exactly as it was`() {
         // The retry path reaches buildFfmpegCommand through a defaulted parameter, so every attempt

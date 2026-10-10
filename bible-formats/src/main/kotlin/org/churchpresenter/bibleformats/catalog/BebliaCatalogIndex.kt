@@ -42,7 +42,6 @@ import java.nio.channels.UnresolvedAddressException
  */
 object BebliaCatalogIndex {
 
-
     const val OWNER = "ChurchPresenter"
     const val REPO = "Holy-Bible-XML-Format"
     const val BRANCH = "master"

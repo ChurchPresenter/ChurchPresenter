@@ -41,6 +41,7 @@ class LowerThirdBandBackgroundRenderTest {
         const val W = 400
         const val H = 300
         const val BAND_PERCENT = 30
+
         /** Well inside the blank area, and well inside the band. */
         const val ABOVE_BAND_Y = 40
         const val IN_BAND_Y = 285

@@ -79,6 +79,7 @@ private val DIALOG_WIDTH = 640.dp
 private val BODY_HEIGHT = 340.dp
 private val SWATCH_BUTTON = 26.dp
 private val HEX_FIELD = 82.dp
+
 /**
  * Calendar-wide settings — everything that applies to every service rather than to today's.
  *

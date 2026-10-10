@@ -76,7 +76,7 @@ class WiringWithViewModelsTest {
 
     @Test
     fun `media wiring composes against an idle player without a loaded file`() = runComposeUiTest {
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         val media = MediaViewModel()
         val manager = PresenterManager()
         setContent { MediaRemoteWiring(server, media, manager) }
@@ -88,7 +88,7 @@ class WiringWithViewModelsTest {
     fun `media transport commands are accepted while nothing is loaded`() = runComposeUiTest {
         // The mobile Media tab can send transport commands at any time; with no file open they
         // must be absorbed rather than throw on a null player.
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         val media = MediaViewModel()
         setContent { MediaRemoteWiring(server, media, PresenterManager()) }
         waitForIdle()
@@ -104,7 +104,7 @@ class WiringWithViewModelsTest {
     fun `obs stays disconnected while the integration is switched off`() = runComposeUiTest {
         val obs = OBSWebSocketManager()
         val settings = AppSettings().let { it.copy(obsSettings = it.obsSettings.copy(enabled = false)) }
-        setContent { ObsSceneWiring(settings, CompanionServer(), obs, PresenterManager()) }
+        setContent { ObsSceneWiring(settings, CompanionServer(shutdownGraceMs = 0), obs, PresenterManager()) }
         waitForIdle()
         assertEquals(OBSWebSocketManager.ConnectionStatus.DISCONNECTED, obs.status.value)
     }
@@ -116,7 +116,7 @@ class WiringWithViewModelsTest {
     @Test
     fun `the obs connection follows the integration being switched on and off`() = runComposeUiTest {
         val obs = OBSWebSocketManager()
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         val manager = PresenterManager()
         var settings by mutableStateOf(
             AppSettings().let { it.copy(obsSettings = it.obsSettings.copy(enabled = false)) },
@@ -149,7 +149,7 @@ class WiringWithViewModelsTest {
     @Test
     fun `the QA settings reach the server and follow a change to them`() = runComposeUiTest {
         val obs = OBSWebSocketManager()
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         val manager = PresenterManager()
         var settings by mutableStateOf(
             AppSettings().let {
@@ -182,7 +182,7 @@ class WiringWithViewModelsTest {
     @Test
     fun `recomposing with nothing changed does not push the settings to the server again`() = runComposeUiTest {
         val obs = OBSWebSocketManager()
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         val manager = PresenterManager()
         val settings = AppSettings()
         var pass by mutableStateOf(0)
@@ -205,7 +205,7 @@ class WiringWithViewModelsTest {
         val obs = OBSWebSocketManager()
         val manager = PresenterManager()
         val settings = AppSettings().let { it.copy(obsSettings = it.obsSettings.copy(enabled = false)) }
-        setContent { ObsSceneWiring(settings, CompanionServer(), obs, manager) }
+        setContent { ObsSceneWiring(settings, CompanionServer(shutdownGraceMs = 0), obs, manager) }
         waitForIdle()
         manager.setPresentingMode(Presenting.BIBLE)
         waitForIdle()
@@ -219,7 +219,7 @@ class WiringWithViewModelsTest {
         val settings = AppSettings().let {
             it.copy(obsSettings = it.obsSettings.copy(enabled = true, defaultScene = "Worship"))
         }
-        setContent { ObsSceneWiring(settings, CompanionServer(), obs, manager) }
+        setContent { ObsSceneWiring(settings, CompanionServer(shutdownGraceMs = 0), obs, manager) }
         waitForIdle()
         manager.setPresentingMode(Presenting.LYRICS)
         waitForIdle()
@@ -236,7 +236,7 @@ class WiringWithViewModelsTest {
 
     @Test
     fun `a loaded file is reported to companions as the now-playing item`() = runComposeUiTest {
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         val media = MediaViewModel().apply { loadMedia("file:///tmp/does-not-exist.mp3", "local") }
         setContent { MediaRemoteWiring(server, media, PresenterManager()) }
         waitForIdle()

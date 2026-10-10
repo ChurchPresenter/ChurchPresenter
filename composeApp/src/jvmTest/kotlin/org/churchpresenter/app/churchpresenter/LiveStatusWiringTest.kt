@@ -26,7 +26,7 @@ class LiveStatusWiringTest {
 
     @Test
     fun `a live presentation is reported to connected companions`() = runComposeUiTest {
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         setContent { LiveStatusWiring(AppSettings(), server, Presenting.PRESENTATION) }
         waitForIdle()
         assertTrue(server.presentationIsLive)
@@ -34,7 +34,7 @@ class LiveStatusWiringTest {
 
     @Test
     fun `content that is not a presentation is not reported as one`() = runComposeUiTest {
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         setContent { LiveStatusWiring(AppSettings(), server, Presenting.BIBLE) }
         waitForIdle()
         assertFalse(server.presentationIsLive)
@@ -42,7 +42,7 @@ class LiveStatusWiringTest {
 
     @Test
     fun `nothing live is not reported as a live presentation`() = runComposeUiTest {
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         setContent { LiveStatusWiring(AppSettings(), server, Presenting.NONE) }
         waitForIdle()
         assertFalse(server.presentationIsLive)
@@ -50,7 +50,7 @@ class LiveStatusWiringTest {
 
     @Test
     fun `the configured browser source outputs are published`() = runComposeUiTest {
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         val first = ScreenAssignment(browserSourceEnabled = true)
         val second = ScreenAssignment(browserSourceEnabled = false)
         setContent { LiveStatusWiring(settingsWithOutputs(first, second), server, Presenting.NONE) }
@@ -61,7 +61,7 @@ class LiveStatusWiringTest {
 
     @Test
     fun `no configured outputs means none are served`() = runComposeUiTest {
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         setContent { LiveStatusWiring(AppSettings(), server, Presenting.NONE) }
         waitForIdle()
         assertNull(server.browserSourceOutput(0))
@@ -101,7 +101,7 @@ class LiveStatusWiringTest {
 
     @Test
     fun `which outputs offer the buttons is published to the server`() = runComposeUiTest {
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         val settings = AppSettings().copy(projectionSettings = projection("musicians", "stage"))
         setContent { LiveStatusWiring(settings, server, Presenting.NONE) }
         waitForIdle()

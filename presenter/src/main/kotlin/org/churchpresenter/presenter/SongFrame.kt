@@ -163,6 +163,7 @@ internal class SongFrame(
         }
     val fitEachSlide = songFitsEachSlide(ss, isLowerThird)
     val autoFitFontSize = songFit?.shared
+
     // Empty unless each language is fitted on its own -- see `fitLanguagesSeparately`.
     val languageFitSizes = songFit?.perLanguage.orEmpty()
     val autoFitEnabled = if (lookAheadEnabled) {
@@ -184,6 +185,7 @@ internal class SongFrame(
     val topOffSet = ((appSettings.projectionSettings.windowTop + appSettings.songSettings.marginTop) * scaleFactor).dp
     val bottomOffSet =
         ((appSettings.projectionSettings.windowBottom + appSettings.songSettings.marginBottom) * scaleFactor).dp
+
     // Captured here, not read from inside the nested Box below: BoxScope and
     // BoxWithConstraintsScope both carry @LayoutScopeMarker, which hides this outer
     // BoxWithConstraints' maxWidth/maxHeight from a Box nested inside it.

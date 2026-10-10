@@ -164,6 +164,7 @@ internal class BibleFrame(
     val topOffSet = ((appSettings.projectionSettings.windowTop + appSettings.bibleSettings.marginTop) * scaleFactor).dp
     val bottomOffSet =
         ((appSettings.projectionSettings.windowBottom + appSettings.bibleSettings.marginBottom) * scaleFactor).dp
+
     // Captured here, not read from inside the nested Box below: BoxScope and
     // BoxWithConstraintsScope both carry @LayoutScopeMarker, which hides this outer
     // BoxWithConstraints' maxWidth/maxHeight from a Box nested inside it.

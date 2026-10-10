@@ -81,24 +81,43 @@ internal interface OmtLibC : Library {
 )
 internal open class OmtMediaFrameStruct : Structure {
     @JvmField var Type: Int = FRAME_TYPE_VIDEO
+
     @JvmField var Timestamp: Long = TIMESTAMP_SENDER_CLOCKED
+
     @JvmField var Codec: Int = 0
+
     @JvmField var Width: Int = 0
+
     @JvmField var Height: Int = 0
+
     @JvmField var Stride: Int = 0
+
     @JvmField var Flags: Int = 0
+
     @JvmField var FrameRateN: Int = 0
+
     @JvmField var FrameRateD: Int = 0
+
     @JvmField var AspectRatio: Float = 0f
+
     @JvmField var ColorSpace: Int = 0
+
     @JvmField var SampleRate: Int = 0
+
     @JvmField var Channels: Int = 0
+
     @JvmField var SamplesPerChannel: Int = 0
+
     @JvmField var Data: Pointer? = null
+
     @JvmField var DataLength: Int = 0
+
     @JvmField var CompressedData: Pointer? = null
+
     @JvmField var CompressedLength: Int = 0
+
     @JvmField var FrameMetadata: Pointer? = null
+
     @JvmField var FrameMetadataLength: Int = 0
 
     constructor() : super()
@@ -114,10 +133,15 @@ internal open class OmtMediaFrameStruct : Structure {
 @Structure.FieldOrder("ProductName", "Manufacturer", "Version", "Reserved1", "Reserved2", "Reserved3")
 internal open class OmtSenderInfoStruct : Structure() {
     @JvmField var ProductName = ByteArray(OMT_MAX_STRING_LENGTH)
+
     @JvmField var Manufacturer = ByteArray(OMT_MAX_STRING_LENGTH)
+
     @JvmField var Version = ByteArray(OMT_MAX_STRING_LENGTH)
+
     @JvmField var Reserved1 = ByteArray(OMT_MAX_STRING_LENGTH)
+
     @JvmField var Reserved2 = ByteArray(OMT_MAX_STRING_LENGTH)
+
     @JvmField var Reserved3 = ByteArray(OMT_MAX_STRING_LENGTH)
 }
 

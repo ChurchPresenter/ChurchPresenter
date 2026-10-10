@@ -56,7 +56,6 @@ import org.churchpresenter.lottiegen.ui.components.SubtleButton
 import javax.swing.SwingUtilities
 import org.churchpresenter.lottiegen.ui.components.ScrollingMenuItems
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun CanvasSection(viewModel: LottieGenState) {
@@ -107,7 +106,6 @@ internal fun CanvasSection(viewModel: LottieGenState) {
         )
     }
 }
-
 
 private val MENU_THUMB_WIDTH = 104.dp
 private val MENU_THUMB_HEIGHT = 36.dp
@@ -216,7 +214,6 @@ internal fun StyleLayoutSection(viewModel: LottieGenState) {
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ShapeSection(viewModel: LottieGenState) {
@@ -254,7 +251,6 @@ internal fun ShapeSection(viewModel: LottieGenState) {
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -299,7 +295,6 @@ internal fun LogoSection(viewModel: LottieGenState) {
         )
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -348,7 +343,6 @@ internal fun TimingSection(viewModel: LottieGenState) {
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun PositionSection(viewModel: LottieGenState) {
@@ -372,7 +366,6 @@ internal fun PositionSection(viewModel: LottieGenState) {
         )
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -403,7 +396,6 @@ internal fun ActionsSection(viewModel: LottieGenState, controlTag: ControlTag = 
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

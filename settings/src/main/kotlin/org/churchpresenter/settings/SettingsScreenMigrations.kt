@@ -58,7 +58,6 @@ private fun connectionWithCounts(obj: JsonObject, rangeKeys: Set<String>): JsonO
     }
 }
 
-
 /** Schema version 1. Converts old showBible:false/showSongs:false booleans to
  * bibleMode:"off"/songMode:"off" strings. */
 internal fun migrateScreenAssignmentModes(raw: String): String {
@@ -267,7 +266,6 @@ internal fun migrateLowerThirdHeight(raw: String): String {
         carriers.forEach { put(it, carried(it)) }
     }.toString()
 }
-
 
 internal fun migrateSongNumberCorner(raw: String): String {
     val root = parseSettingsRoot(raw) ?: return raw

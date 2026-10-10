@@ -141,7 +141,6 @@ object AutoStartManager {
     }
 
     /** The currently-stored registration payload, or null if absent/removed/unreadable. */
-
 }
 
 /**

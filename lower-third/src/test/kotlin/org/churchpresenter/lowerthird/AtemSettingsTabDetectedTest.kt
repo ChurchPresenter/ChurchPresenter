@@ -121,6 +121,4 @@ class AtemSettingsTabDetectedTest {
         onNodeWithText("Detected: M/E 1: 1 keys")
             .assertExists("a switcher without a DSK must not be listed as having zero of them")
     }
-
-
 }

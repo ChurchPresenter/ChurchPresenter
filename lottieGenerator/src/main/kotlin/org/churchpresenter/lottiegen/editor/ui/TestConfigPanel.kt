@@ -71,7 +71,6 @@ private fun TestTextFields(state: EditorState) {
         checked = cfg.bgEnabled,
         onCheckedChange = { new -> state.updateTestConfig { it.copy(bgEnabled = new) } }
     )
-
 }
 
 /** Which logo the preview draws, and how big. */
@@ -108,7 +107,6 @@ private fun TestLogoFields(state: EditorState) {
         onValueChange = { new -> state.updateTestConfig { it.copy(borderThickness = new) } },
         valueRange = 0f..5f
     )
-
 }
 
 /** A swatch per colour role, plus the remaining sizing sliders. */
@@ -179,4 +177,3 @@ private fun TestColorFields(state: EditorState) {
         valueRange = 0f..10f
     )
 }
-

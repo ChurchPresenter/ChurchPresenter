@@ -35,7 +35,8 @@ class VideoPsalmConverterTest {
 
     @Test
     fun `the book's own title and the songs under it are read`() {
-        val file = book("""{ID:1,Alias:"7",Author:"И. Проханов",Guid:"x",Verses:[${verse("Слава")}],
+        val file =
+            book("""{ID:1,Alias:"7",Author:"И. Проханов",Guid:"x",Verses:[${verse("Слава")}],
             |Text:"Слава Богу"}""".trimMargin())
         val parsed = VideoPsalmConverter.parse(file)
 
@@ -132,7 +133,8 @@ class VideoPsalmConverterTest {
 
     @Test
     fun `colour markup in a title or an author is not imported either`() {
-        val file = book("""{Author:"<cFF64FF64>W. Kethe</c>",Verses:[${verse("Line")}],
+        val file =
+            book("""{Author:"<cFF64FF64>W. Kethe</c>",Verses:[${verse("Line")}],
             |Text:"<cFF64FF64>All People That on Earth Do Dwell</c>"}""".trimMargin())
         val song = VideoPsalmConverter.parse(file).songs[0]
 

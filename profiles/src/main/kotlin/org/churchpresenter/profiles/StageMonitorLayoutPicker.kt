@@ -88,7 +88,6 @@ internal fun slotLabel(slot: StageMonitorStyleZone): String =
  * above them even when the layout in force has a different number of zones.
  */
 @OptIn(ExperimentalLayoutApi::class)
-
 /**
  * The layout's own rows and weights, drawn small — the same grid the monitor will draw.
  *
@@ -171,4 +170,3 @@ internal fun metronomePositionLabel(position: MetronomePosition): String = when 
 @Composable
 internal fun stageMonitorBezelColor(): Color =
     MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = BEZEL_ALPHA)
-

@@ -24,7 +24,6 @@ internal class SpecTracks(
     fun trackFor(element: ElementSpec, property: AnimProperty): AnimTrack? =
         element.tracks.firstOrNull { it.property == property }
 
-
     fun easingOf(kind: EasingKind): JsonObject = when (kind) {
         EasingKind.DEFAULT -> Easing.DEFAULT
         EasingKind.LINEAR -> Easing.LINEAR
@@ -43,7 +42,6 @@ internal class SpecTracks(
         )
     }
 
-
     fun positionProp(
         element: ElementSpec,
         rest: SpecPoint,
@@ -60,7 +58,6 @@ internal class SpecTracks(
         }
         return LottieBuilder.animatedProp(kfs)
     }
-
 
     fun offsetToPx(
         value: Double,
@@ -91,7 +88,6 @@ internal class SpecTracks(
         return LottieBuilder.animatedProp(kfs)
     }
 
-
     fun rotationProp(element: ElementSpec): JsonObject? {
         val track = trackFor(element, AnimProperty.ROTATION) ?: return null
         val kfs = compileTrack(track) { values ->
@@ -99,7 +95,6 @@ internal class SpecTracks(
         }
         return LottieBuilder.animatedProp(kfs)
     }
-
 
     fun scaleProp(
         element: ElementSpec,

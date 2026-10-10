@@ -52,8 +52,8 @@ class ProfilesCustomizeBibleExtrasTest {
     fun `the style quartet writes the full screen's verse text`() {
         profilesTab(output()) { get ->
             openCustomizePane(CustomizePane.BIBLE)
-            for (glyph in listOf("B", "U")) {
-                styleButton(group = 0, label = glyph).performScrollTo().performClick()
+            for (glyph in listOf("Bold", "Underline")) {
+                styleButton(group = 0, name = glyph).performScrollTo().performClick()
                 waitForIdle()
             }
 
@@ -67,7 +67,7 @@ class ProfilesCustomizeBibleExtrasTest {
     fun `the style quartet writes the band's verse text instead`() {
         profilesTab(output(band)) { get ->
             openCustomizePane(CustomizePane.BIBLE)
-            styleButton(group = 0, label = "I").performScrollTo().performClick()
+            styleButton(group = 0, name = "Italic").performScrollTo().performClick()
             waitForIdle()
 
             val stored = get().storedTranslation()

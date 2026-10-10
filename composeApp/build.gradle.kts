@@ -164,6 +164,17 @@ else Properties()
 /** Returns true when a signing.properties value looks like it has been filled in. */
 fun String?.isConfigured() = this != null && isNotBlank() && !contains("XXXXXXXXXX") && this != "CHANGE_ME" && !startsWith("YOUR_")
 
+// The CycloneDX plugin's own Jackson carries two high advisories (GHSA-p6pp-m3f8-5c89,
+// GHSA-7hhh-6rmp-j9qf) until 2.22.3; hold the build classpath at the fixed release. Build-time
+// only -- nothing here reaches the app.
+buildscript {
+    dependencies {
+        constraints {
+            classpath(libs.jackson.core)
+        }
+    }
+}
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
@@ -173,7 +184,19 @@ plugins {
     alias(libs.plugins.sentry)
     alias(libs.plugins.roborazzi)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.cyclonedx)
     jacoco
+}
+
+// The software bill of materials: every library the shipped app runs with, and nothing it is only
+// built or tested with. `build.yml` attaches the JSON to each release.
+tasks.cyclonedxDirectBom {
+    val commits = gitCommitCount()
+    componentName.set("ChurchPresenter")
+    componentVersion.set("$versionYear.${commits / 256}.${commits % 256}")
+    includeConfigs.set(listOf("jvmRuntimeClasspath"))
+    jsonOutput.set(layout.buildDirectory.file("reports/cyclonedx/bom.json"))
+    xmlOutput.set(layout.buildDirectory.file("reports/cyclonedx/bom.xml"))
 }
 
 detekt {

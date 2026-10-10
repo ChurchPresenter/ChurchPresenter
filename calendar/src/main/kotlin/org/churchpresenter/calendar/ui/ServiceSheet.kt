@@ -66,6 +66,7 @@ import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.elevationPalette
 
 private val SHEET_WIDTH = 460.dp
+
 /** `Start time` and `Type` share the row as 1 : 1.3, so three segment labels are not truncated. */
 private const val TYPE_FLEX = 1.3f
 

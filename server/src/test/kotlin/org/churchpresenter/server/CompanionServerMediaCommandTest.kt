@@ -46,7 +46,7 @@ class CompanionServerMediaCommandTest {
         @JvmStatic
         @BeforeClass
         fun startServer() {
-            server = CompanionServer()
+            server = CompanionServer(shutdownGraceMs = 0)
             server.start(port = testPort(39_895))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {

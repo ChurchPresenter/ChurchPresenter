@@ -103,6 +103,7 @@ class AutoLoadTest {
     fun `an unreadable start time is never due`() {
         assertFalse(service("not a time").isDueToLoad(at(10, 0)))
     }
+
     @Test
     fun `the next load is the earliest service still ahead, today's first`() {
         val morning = service("10:00")

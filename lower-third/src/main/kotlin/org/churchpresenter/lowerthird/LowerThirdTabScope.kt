@@ -59,10 +59,13 @@ internal class LowerThirdUiState(detectedClipMaxFrames: List<Int>) {
     var showAtemDialog by mutableStateOf(false)
     var atemIsClip by mutableStateOf(false)
     var atemSlot by mutableStateOf(0)
+
     /** Upload click in progress. */
     var atemBusy by mutableStateOf(false)
+
     /** Cache render progress; 1f is ready. */
     var atemPrepareProgress by mutableStateOf(1f)
+
     /** Upload progress; null is idle. */
     var atemProgress by mutableStateOf<Float?>(null)
     var atemError by mutableStateOf<String?>(null)

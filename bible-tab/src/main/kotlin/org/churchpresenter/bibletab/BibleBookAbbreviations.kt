@@ -121,7 +121,9 @@ object BibleBookAbbreviations {
     )
 
     @Volatile private var cachedEnglish: Map<Int, List<String>>? = null
+
     @Volatile private var cachedLocaleTag: String? = null
+
     @Volatile private var cachedForLocale: Map<Int, List<String>>? = null
 
     internal fun parseVariants(raw: String): List<String> =

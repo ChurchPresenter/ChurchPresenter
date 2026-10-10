@@ -28,6 +28,7 @@ data class EffectInterval(
 sealed interface RepeatSpec {
     data object Once : RepeatSpec
     data class Count(val times: Double) : RepeatSpec
+
     /** Loops until the step is advanced past; never blocks a step from settling. */
     data object Indefinite : RepeatSpec
 }
@@ -35,6 +36,7 @@ sealed interface RepeatSpec {
 enum class FillMode {
     /** Layer keeps the effect's end state (PowerPoint `fill="hold"`, the default). */
     HOLD,
+
     /** Layer snaps back to its pre-effect state when the interval completes (`fill="remove"`). */
     REMOVE
 }

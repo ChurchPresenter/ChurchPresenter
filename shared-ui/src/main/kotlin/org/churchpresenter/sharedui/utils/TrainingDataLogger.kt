@@ -45,6 +45,7 @@ object TrainingDataLogger {
 
     private val lock = Any()
     private val cleanedUp = AtomicBoolean(false)
+
     // Files (by absolute path) that have already had their one session header written. A set rather
     // than a flag, so each session-keyed file gets exactly one header and a CP restart that re-attaches
     // to an existing file just continues it.

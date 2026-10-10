@@ -289,7 +289,6 @@ private fun RowScope.SongItemCells(
             )
         }
     }
-
 }
 
 /** A generic plan item: imported as an announcement, or by its scripture or attachments. */
@@ -357,7 +356,6 @@ private fun RowScope.GenericItemCells(
             )
         }
     }
-
 }
 
 /** The scripture references detected in an item, each with its own checkbox. */
@@ -415,7 +413,6 @@ attachments.forEach { att ->
         )
     }
 }
-                                
 }
 
 /** A green "✓ Matched" tag shown on song rows already matched to the local library. */

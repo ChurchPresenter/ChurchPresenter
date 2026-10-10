@@ -29,7 +29,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-
 private val TEXTS = ContactFailureTexts(error = "error", network = "network", rateLimited = "rate limited")
 
 class ContactUsContentTest {

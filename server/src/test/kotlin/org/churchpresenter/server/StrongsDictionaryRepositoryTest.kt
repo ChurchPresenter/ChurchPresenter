@@ -21,7 +21,6 @@ import kotlin.test.assertTrue
  */
 class StrongsDictionaryRepositoryTest {
 
-
     private val greekInterlinear = """
         [
           {"r":"043003016","w":[{"t":"ἀγάπη","s":"G26"},{"t":"θεός","s":"G2316"}]},

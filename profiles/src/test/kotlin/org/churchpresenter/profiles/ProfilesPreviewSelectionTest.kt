@@ -114,5 +114,4 @@ class ProfilesPreviewSelectionTest {
             assertEquals(false, secondLanguageDrawn(), "the second language is not on this output")
         }
     }
-
 }

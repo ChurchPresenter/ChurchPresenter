@@ -68,7 +68,6 @@ internal object PresetCatalog {
     /** Teeter is a small rock rather than a spin; degrees chosen to read as a wobble. */
     private const val TEETER_DEGREES = 10.0
 
-
     /** Directions encoded in filter arguments like `wipe(down)` / `slide(fromLeft)`. */
     private fun filterDirection(arg: String?): Direction? = when (arg?.lowercase()) {
         "left", "fromright" -> Direction.LEFT

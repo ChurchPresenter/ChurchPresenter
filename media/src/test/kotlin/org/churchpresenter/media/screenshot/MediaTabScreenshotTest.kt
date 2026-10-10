@@ -145,7 +145,7 @@ class MediaTabScreenshotTest {
     }
 
     @Test
-    fun `the recents bar, one entry pinned`()= shoot("recent_files") { vm ->
+    fun `the recents bar, one entry pinned`() = shoot("recent_files") { vm ->
         RecentMediaFiles.add("$FIXTURES/Baptism Testimony.mp4")
         RecentMediaFiles.add("$FIXTURES/Welcome Loop.mp4")
         RecentMediaFiles.togglePin("$FIXTURES/Welcome Loop.mp4")

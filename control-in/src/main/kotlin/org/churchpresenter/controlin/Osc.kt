@@ -132,7 +132,6 @@ internal object OscReader {
         buf.position(start + (end - start) + 1 + padding(end - start + 1))
         return text
     }
-
 }
 
 /** How many zero bytes pad [length] bytes up to a multiple of four. */
@@ -142,7 +141,6 @@ private const val BUNDLE = "#bundle"
 private const val INT_BYTES = 4
 private const val LONG_BYTES = 8
 private const val TIME_TAG_BYTES = 8
-
 
 /** This message as the event a mapping matches: its address and first number argument. */
 fun OscMessage.toEvent(): ControlEvent =

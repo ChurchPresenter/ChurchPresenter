@@ -320,6 +320,7 @@ class PresentationTabScreenshotTest {
         const val SECTION = "presentationTab"
 
         const val PLAY = "Play"
+
         // "Slide 3", the tile label — not "Slide 3 of 6", which is the counter in the controls bar.
         val SLIDE_LABEL = Regex("""Slide \d+""")
         const val ANIMATION_TYPE = "ANIMATION TYPE"

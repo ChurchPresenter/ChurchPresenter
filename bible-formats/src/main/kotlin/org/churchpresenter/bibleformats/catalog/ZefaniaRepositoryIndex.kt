@@ -36,7 +36,6 @@ private const val REGEX_GROUP_DISPLAY_NAME = 4
 @Suppress("TooManyFunctions") // one index: fetch, parse, filter, cache, look up
 object ZefaniaRepositoryIndex {
 
-
     const val OWNER = "ChurchPresenter"
     const val REPO = "Zefania-XML-Preservation"
     const val BRANCH = "main"
@@ -68,6 +67,7 @@ object ZefaniaRepositoryIndex {
     sealed interface IndexOutcome {
         /** [stale] means this came from the on-disk copy because the archive was unreachable. */
         data class Success(val index: Index, val stale: Boolean = false) : IndexOutcome
+
         /** GitHub is refusing unauthenticated requests for now; [resetEpochSeconds] says until when. */
         data class RateLimited(val resetEpochSeconds: Long?) : IndexOutcome
         data object NetworkError : IndexOutcome

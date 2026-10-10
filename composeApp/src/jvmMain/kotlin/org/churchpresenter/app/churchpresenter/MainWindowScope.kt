@@ -34,6 +34,7 @@ internal class MainWindowState(calendarSyncInitiallyOn: Boolean) {
     val sessionAllowedClients = mutableStateListOf<String>()
     val sessionBlockedClients = mutableStateListOf<String>()
     val remoteActivityNotifications = mutableStateListOf<RemoteActivityNotification>()
+
     // The QR a just-approved phone scans to get its calendar token and key.
     var calendarEnrollQr by mutableStateOf<CalendarInvite?>(null)
     var calendarSyncWasOn by mutableStateOf(calendarSyncInitiallyOn)

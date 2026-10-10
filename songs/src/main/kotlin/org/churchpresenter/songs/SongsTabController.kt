@@ -73,14 +73,18 @@ internal class SongsTabController(
 
     val tabFocusRequester = FocusRequester()
     val searchFocus = SearchFieldFocus()
+
     // True while the caret is in the song search field. The arrow keys browse the list from there
     // and nothing reaches the output until Go Live.
     var searchFieldFocused by mutableStateOf(false)
+
     // True while the tab root itself holds the keyboard, not the search box or another field: the
     // only place Go Live on a key may act, because a one-line field lets Enter through to here.
     var tabRootFocused by mutableStateOf(false)
+
     // Set when a step key was held back because the selected song is not the live one.
     var browsePausedHint by mutableStateOf(false)
+
     // The search that going back to the live song had to clear to show it, put back when the
     // keyboard returns to the search box. Dropped once the operator types or picks a songbook.
     var parkedSearch: ParkedSearch? = null

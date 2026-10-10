@@ -76,6 +76,7 @@ internal object Vocabulary {
     /** A greeting, or asking what the helper can do. */
     val GREETING = setOf("hello", "hi", "hey", "help", "hiya", "howdy")
     val ABOUT_HELPER = listOf("what can you do", "what do you do", "who are you", "what are you", "how do you work")
+
     /** Words a greeting comes padded with: "hi there wick", "help me please". */
     val FILLER = setOf("there", "wick", "me", "please", "pls", "again", "i", "need")
     val THANKS = listOf("thanks", "thank you", "thx", "cheers", "much appreciated", "great job", "awesome")
@@ -143,6 +144,7 @@ internal object Vocabulary {
         "zone", "zones", "layout", "layouts", "arrangement", "arrange", "split", "quad", "grid", "divide",
         "sections", "parts", "columns", "rows", "how many", "resize", "areas", "boxes",
     )
+
     /** Not "add", "show" or "display": "add a stage monitor" and "stage display" are its setup. */
     val STAGE_CONTENT = listOf(
         "what goes where", "what shows", "what is shown", "what's shown", "assign", "put", "move", "where does",

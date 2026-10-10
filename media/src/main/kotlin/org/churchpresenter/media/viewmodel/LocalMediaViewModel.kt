@@ -10,4 +10,3 @@ import androidx.compose.runtime.compositionLocalOf
  * Consumed by [MediaPresenter] in the presenter window.
  */
 val LocalMediaViewModel = compositionLocalOf<MediaViewModel?> { null }
-

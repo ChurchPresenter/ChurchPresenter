@@ -210,6 +210,7 @@ class ServiceAutoLoaderTest {
         assertEquals(2, schedule.loads, "the morning has had its turn")
         assertEquals(listOf("e-1"), schedule.rows.map { it.id })
     }
+
     @Test
     fun `announces the next service to load, and nothing when auto-load is off`() = runTest {
         val morning = service("m", "10:00")

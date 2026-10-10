@@ -93,4 +93,3 @@ private fun addVertex(c: Contour, x: Double, y: Double) {
     c.inTan.add(doubleArrayOf(0.0, 0.0))
     c.outTan.add(doubleArrayOf(0.0, 0.0))
 }
-

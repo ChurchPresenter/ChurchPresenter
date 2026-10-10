@@ -78,7 +78,7 @@ class CompanionServerPictureCatalogTest {
         fun startSharedServer() {
             TestSingletons.latchToTestHome()
             pictureDir = Files.createTempDirectory("cp-picture-catalog").toFile()
-            server = CompanionServer()
+            server = CompanionServer(shutdownGraceMs = 0)
             port = startServer(server)
         }
 
@@ -140,7 +140,7 @@ class CompanionServerPictureCatalogTest {
         // The distinction the phone acts on: 503 means "the operator has not opened one yet", so it
         // keeps asking. An empty 200 would read as "the folder is open and has nothing in it" —
         // a different thing, and it would stop asking.
-        val fresh = CompanionServer()
+        val fresh = CompanionServer(shutdownGraceMs = 0)
         val freshPort = startServer(fresh)
         try {
             assertEquals(HttpStatusCode.ServiceUnavailable, getPictures(atPort = freshPort).status)

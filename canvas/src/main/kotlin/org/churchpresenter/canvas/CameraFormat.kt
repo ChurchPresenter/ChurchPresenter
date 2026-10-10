@@ -14,8 +14,8 @@ data class CameraFormat(
     val width: Int,
     val height: Int,
     val fps: Int,
-    val displayName: String = "${width}x${height} @ ${fps}fps",
-    val encodedValue: String = "${width}x${height}@${fps}"
+    val displayName: String = "${width}x$height @ ${fps}fps",
+    val encodedValue: String = "${width}x$height@$fps"
 )
 
 /** What a camera runs at when its listing names a size but no rate. Every capture device does 30. */

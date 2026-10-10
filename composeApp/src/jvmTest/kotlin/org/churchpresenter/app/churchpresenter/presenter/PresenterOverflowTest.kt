@@ -72,8 +72,8 @@ class PresenterOverflowTest {
             waitForIdle()
             val h = horizontalOverflow(probe)
             val v = verticalOverflow(probe)
-            assertTrue(h <= TOLERANCE, "content runs ${h.value}dp past the right edge of a ${width}x${height} box")
-            assertTrue(v <= TOLERANCE, "content runs ${v.value}dp past the bottom edge of a ${width}x${height} box")
+            assertTrue(h <= TOLERANCE, "content runs ${h.value}dp past the right edge of a ${width}x$height box")
+            assertTrue(v <= TOLERANCE, "content runs ${v.value}dp past the bottom edge of a ${width}x$height box")
         }
 
     // ── Songs ───────────────────────────────────────────────────────────────────────────────────

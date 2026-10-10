@@ -99,6 +99,7 @@ class CompanionSatelliteViewModelTest {
     /** The live client for [slot], out of the view model's private registry. */
     private fun clientFor(vm: CompanionSatelliteViewModel, slot: CompanionSurfaceSlot): CompanionSatelliteClient {
         val field = CompanionSatelliteViewModel::class.java.getDeclaredField("clients").apply { isAccessible = true }
+
         @Suppress("UNCHECKED_CAST")
         val clients = field.get(vm) as Map<CompanionSurfaceSlot, CompanionSatelliteClient>
         return clients[slot] ?: error("no client registered for $slot")

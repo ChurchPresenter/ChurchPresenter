@@ -2086,6 +2086,7 @@
     <string name="update_dialog_downloading">Downloading...</string>
     <string name="update_dialog_install_now">Install Now</string>
     <string name="update_dialog_open_page">Open Download Page</string>
+    <string name="update_dialog_unverified">The installer could not be verified against the release, so it was not run. Download it from the release page instead.</string>
     <string name="update_already_latest">You are running the latest version.</string>
     <string name="update_dialog_up_to_date_title">You're Up to Date</string>
     <string name="update_dialog_view_on_github">View on GitHub</string>
@@ -2537,6 +2538,10 @@
     <string name="quick_backgrounds">Quick backgrounds</string>
     <string name="quick_backgrounds_help">Backgrounds the preview panel keeps one click away. Click a tile to choose what it shows, drag it to change which key reaches it. Picking one during a service overrides every screen until you go back to normal — it changes nothing here.</string>
     <string name="quick_background_add">Add a background</string>
+    <string name="timer_step_increase">Increase %1$s</string>
+    <string name="timer_step_decrease">Decrease %1$s</string>
+    <string name="dropdown_show_list">Show the list</string>
+    <string name="drag_to_reorder">Drag to reorder</string>
     <string name="shortcut_description_quick_background_reset">Quick background: back to normal</string>
     <string name="shortcut_description_quick_background_1">Quick background 1</string>
     <string name="shortcut_description_quick_background_2">Quick background 2</string>

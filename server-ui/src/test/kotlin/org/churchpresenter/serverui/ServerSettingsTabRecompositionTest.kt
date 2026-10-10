@@ -49,7 +49,7 @@ class ServerSettingsTabRecompositionTest {
             clients: RemoteClientManager,
         ) -> Unit,
     ) = withIsolatedHome {
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         val clients = RemoteClientManager().apply(seedClients)
         runComposeUiTest {
             var state by mutableStateOf(initial)
@@ -293,7 +293,7 @@ class ServerSettingsTabRecompositionTest {
      */
     @Test
     fun `a click reaches the newest callback when the parent keeps replacing it`() = withIsolatedHome {
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         val clients = RemoteClientManager()
         runComposeUiTest {
             var settings by mutableStateOf(AppSettings())
@@ -337,7 +337,7 @@ class ServerSettingsTabRecompositionTest {
      */
     @Test
     fun `the tab tracks its inputs when reached through a parent that forwards them`() = withIsolatedHome {
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         val clients = RemoteClientManager()
         runComposeUiTest {
             var settings by mutableStateOf(AppSettings())

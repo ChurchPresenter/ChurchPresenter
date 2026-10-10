@@ -335,6 +335,7 @@ class LowerThirdTabScreenshotTest {
 
         /** `atem_mode_clip`, as the dialog's radio row renders it. */
         const val CLIP_MODE = "Clip (full animation)"
+
         /** The fps/capacity line the dialog only shows for clips. */
         const val ATEM_DETAIL_PREFIX = "ATEM: "
 

@@ -46,7 +46,7 @@ class InstanceLinkClientFetchGuardTest {
     ).also { clients.add(it) }
 
     private fun startPrimary(apiKey: String): Int {
-        val started = CompanionServer()
+        val started = CompanionServer(shutdownGraceMs = 0)
         started.updateApiKey(enabled = apiKey.isNotEmpty(), key = apiKey)
         started.start(port = testPort(39_840))
         server = started

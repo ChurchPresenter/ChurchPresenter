@@ -20,7 +20,7 @@ class CompanionServerLiveStateFieldsTest {
 
     @BeforeTest
     fun create() {
-        server = CompanionServer()
+        server = CompanionServer(shutdownGraceMs = 0)
         dir = Files.createTempDirectory("cp-live-fields").toFile()
     }
 

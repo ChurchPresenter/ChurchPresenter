@@ -113,6 +113,7 @@ private class BodyHalf(val label: String) {
 /** The language halves of a .song body, filled a line at a time. */
 private class SongBody {
     private val primary = BodyHalf("")
+
     /** Sparse by slot, so a file that writes `[Translation 4]` and no `[Secondary]` keeps the
      *  gap rather than sliding the fourth language into the second one's place. */
     private val extras = sortedMapOf<Int, BodyHalf>()

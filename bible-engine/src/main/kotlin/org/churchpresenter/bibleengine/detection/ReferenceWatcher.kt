@@ -48,6 +48,7 @@ object ReferenceWatcher {
     private val VERSE_KW = listOf(
         "вірш", "versicul", "versiculo", "verset", "verse", "vers", "wiersz",
     )
+
     // Valid grammatical endings after the Russian stems "глав"/"стих". The whole suffix must match
     // (not just its first char) — that is what separates глава/главы/глав from главное/главный and
     // стих/стиха/стихи/стихом from стихотворение.
@@ -63,6 +64,7 @@ object ReferenceWatcher {
     // stem is treated as vocabulary unless corroborated (StickyAudit's risky band).
     private const val SHORT_ALIAS_MAX_LEN = 4
     private const val STEM_MAX_EXTENSION_UNCORROBORATED = 3
+
     // Bare cardinal "one" (count) — distinct from the ordinal (первый/first) and the digit "1". As
     // a chapter/verse number a real reference uses the ordinal or the digit, so "один стих" / "one
     // verse" means "one verse" (a quantity), never "verse one". Treated as filler so it can't bind
@@ -88,15 +90,18 @@ object ReferenceWatcher {
     // of these forms, resolve to the numbered book, with the ordinal selecting which.
     private val EPISTLE_MARKER_STEMS = listOf("послани", "письм", "книг") // послание/письмо/книга…
     private val EPISTLE_CONNECTORS = setOf("к", "ко")
+
     // How far past a book name to look for a trailing "в первом послании", and the words allowed to
     // sit in between (verbs of speaking are what actually occur: "Иоанн ГОВОРИТ в первом послании").
     private const val AHEAD_WINDOW = 4
     private val AHEAD_FILLERS = setOf(
         "в", "во", "говорит", "пишет", "сказал", "says", "writes", "wrote", "in", "the", "his",
     )
+
     // Inflected spoken forms of John / Peter that, in an epistle context, mean the epistle.
     private val JOHN_FORMS = setOf("иоанна", "иоанн", "иоанну", "иоанне")
     private val PETER_FORMS = setOf("петра", "петру", "петре", "петр", "пётр")
+
     // base = canonical id of the 1st book in the family, count = how many numbered variants exist.
     // markerAloneDefaultsToFirst: true only for John/Peter (see comment above); the bare stems below
     // are taken from the digit-stripped forms already registered in BookResolver.kt, so they're

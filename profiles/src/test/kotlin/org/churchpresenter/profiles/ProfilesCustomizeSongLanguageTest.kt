@@ -49,7 +49,6 @@ class ProfilesCustomizeSongLanguageTest {
         ),
     )
 
-
     /**
      * The pane's own language switch, by its tag: the profile carries a song-language picker that
      * lists the same "Language N" captions, so a text match cannot tell the two apart.

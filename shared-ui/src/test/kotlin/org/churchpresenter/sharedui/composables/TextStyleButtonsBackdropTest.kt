@@ -89,7 +89,7 @@ class TextStyleButtonsBackdropTest {
         }
         onNodeWithContentDescription(chip).assertDoesNotExist()
         onNodeWithContentDescription(caret).assertDoesNotExist()
-        onNodeWithText("B").assertExists("the four faces are still there")
+        onNodeWithContentDescription("Bold").assertExists("the four faces are still there")
     }
 
     @Test

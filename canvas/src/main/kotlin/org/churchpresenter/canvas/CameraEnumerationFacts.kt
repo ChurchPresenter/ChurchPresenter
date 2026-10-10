@@ -85,4 +85,3 @@ internal data class CameraListing(
     val devices: List<CameraDevice>,
     val facts: CameraEnumerationFacts,
 )
-

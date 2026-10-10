@@ -191,6 +191,7 @@ object VersionCorpusLoader {
     }
 
     private const val SAMPLE_SIZE = 150
+
     // Below this a fingerprint is too sparse for a similarity ratio to mean anything.
     private const val MIN_FINGERPRINT_TOKENS = 50
 }

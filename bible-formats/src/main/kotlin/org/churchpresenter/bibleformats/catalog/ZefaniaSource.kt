@@ -47,7 +47,6 @@ object ZefaniaSource : BibleSource {
     private fun installTags(module: BibleModule) =
         mapOf("subsystem" to "bible_install", "module" to module.fileStem)
 
-
     override val sourceId = BibleSourceId.ZEFANIA
 
     override suspend fun catalog(nowMillis: Long): BibleCatalogOutcome =

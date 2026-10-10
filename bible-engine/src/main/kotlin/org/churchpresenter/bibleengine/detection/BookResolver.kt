@@ -705,5 +705,4 @@ object BookResolver {
     }
 
     fun canonicalName(bookNum: Int): String = CANONICAL_NAMES[bookNum] ?: "Book $bookNum"
-
 }

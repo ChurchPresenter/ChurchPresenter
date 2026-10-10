@@ -45,26 +45,36 @@ internal class PresentationStore(
      * single deck's footprint; the renders just queue.
      */
     internal val presentationRenderMutex = Mutex()
+
     // Presentation catalog — metadata only; raw JPEG bytes stored per-slide in _slideBytes
     internal val _presentationCatalog = MutableStateFlow(PresentationCatalogResponse(emptyList(), 0))
+
     /** presentationId → list of JPEG-encoded slide bytes (index = slide number). Max 5 cached. */
     internal val _slideBytes = ConcurrentHashMap<String, List<ByteArray>>()
     internal val _slideBytesOrder = java.util.concurrent.ConcurrentLinkedDeque<String>()
     internal val MAX_CACHED_PRESENTATIONS = 5
+
     /** presentationId (file hash) → PresentationDto — covers tab-loaded and background-rendered items */
     internal val _presentationCatalogs = ConcurrentHashMap<String, PresentationDto>()
+
     /** presentationId (file hash) → absolute file path — populated by updatePresentation and updateSchedule */
     internal val _presentationFilePaths = ConcurrentHashMap<String, String>()
+
     /** presentationId (file hash) → per-slide presenter notes (index = slide number) */
     internal val _presentationNotes = ConcurrentHashMap<String, List<String>>()
+
     /** schedule item UUID → presentation file hash — populated when schedule is updated */
     internal val _scheduleItemToPresentationId = ConcurrentHashMap<String, String>()
+
     /** Set of presentation IDs currently being background-rendered (avoids duplicate renders) */
     internal val _renderingPresentations = ConcurrentHashMap<String, Unit>()
+
     /** Cancels previous updatePresentation encode job when a new presentation is loaded */
     internal var _activeUpdateJob: Job? = null
+
     /** Shared slide disk cache — same directory PresentationViewModel renders into (one render, both consumers). */
     internal val slideDiskCache = SlideDiskCache()
+
     /**
      * ID of the most recently device-uploaded presentation file.
      * Cleared from [_presentationCatalogs], [_slideBytes], and [_presentationFilePaths] when a new

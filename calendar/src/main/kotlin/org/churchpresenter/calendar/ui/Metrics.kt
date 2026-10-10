@@ -37,6 +37,7 @@ object CalendarMetrics {
     val rowIcon = 21.dp
     val rowAction = 19.dp
     val rowTimeColumn = 36.dp
+
     /** The same column when times carry `AM`/`PM`, which `10:00` alone was sized for. */
     val rowTimeColumnWide = 58.dp
     val durationFieldWidth = 44.dp

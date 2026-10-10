@@ -218,7 +218,6 @@ class AnnouncementsTabSteppersTest {
         assertTrue(showsContainingText("Hello"))
     }
 
-
     @Test
     fun `a transparent background can be given a colour again`() =
         announcementsTab(

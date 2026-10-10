@@ -39,6 +39,7 @@ class EBibleCatalogCacheTest {
     private var requests = 0
 
     private val url = "https://ebible.invalid/translations.csv"
+
     // The name columns are included because the language table below is built from them.
     private val header = "languageCode,translationId,languageName,languageNameInEnglish," +
         "shortTitle,title,Copyright,Redistributable,downloadable,UpdateDate"

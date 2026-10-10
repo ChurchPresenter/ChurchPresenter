@@ -75,7 +75,7 @@ class ProjectionPathPickersTest {
                 ProjectionSettingsTab(
                     settings = settings,
                     onSettingsChange = { settings = it(settings) },
-                    companionServer = CompanionServer(),
+                    companionServer = CompanionServer(shutdownGraceMs = 0),
                     detectScreens = { emptyList() },
                     vlcProbe = { false },
                 )

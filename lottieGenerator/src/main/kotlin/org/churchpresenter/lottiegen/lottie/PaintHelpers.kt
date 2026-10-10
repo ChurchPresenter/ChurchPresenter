@@ -6,7 +6,6 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 
-
 fun makeFill(color: List<Double>, opacity: Double = 100.0): JsonObject =
     buildJsonObject {
         put("ty", JsonPrimitive("fl"))
@@ -21,7 +20,6 @@ fun makeFill(color: List<Double>, opacity: Double = 100.0): JsonObject =
         put("r", JsonPrimitive(1))
         put("bm", JsonPrimitive(0))
     }
-
 
 fun makeGradientFill(
     color: List<Double>,
@@ -63,7 +61,6 @@ fun makeGradientFill(
         })
     })
 }
-
 
 /** A linear gradient from [startColor] at [startPt] to [endColor] at [endPt], fully opaque at both ends. */
 fun makeTwoColorGradientFill(
@@ -154,7 +151,6 @@ fun makeStroke(color: List<Double>, width: Double, opacity: Double = 100.0, dash
     }
 }
 
-
 fun makeAnimatedStroke(
     color: List<Double>,
     widthKFs: JsonArray,
@@ -183,7 +179,6 @@ fun makeAnimatedStroke(
     }
 
 /** Equal dash/gap pattern. */
-
 
 /** Equal dash/gap pattern. */
 private fun makeDashArray(dashPx: Double): JsonArray = buildJsonArray {

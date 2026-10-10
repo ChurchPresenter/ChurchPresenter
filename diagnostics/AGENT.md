@@ -23,6 +23,7 @@ owns — [CrashReporter] and [BuildIdentity].
 | Path | Owns |
 |---|---|
 | `CrashReporter.kt` | `object CrashReporter` — the local crash log, the Sentry bridge, PII scrubbing, the crash-escalation counter, and `BuildIdentity` |
+| `Secrets.kt` | `Secrets.redact` — masks secret query parameters (`apiKey`, `password`, `token`, `access_token`, `refresh_token`, `client_secret`) and `X-Api-Key:` / `Authorization: Bearer|Basic` values |
 | `Log.kt` | `object Log` (`info`/`warn`/`error`) — the app's diagnostic lines: `[tag] message` on stderr, and a breadcrumb for warnings and errors. `Logger` takes its sink and trail as parameters for tests |
 
 47 files across `:composeApp` call it, which is why it is its own module rather than part of
@@ -69,7 +70,10 @@ breadcrumbs, and the newest local `crash_*.txt` on ERROR and FATAL. Threads are 
 a deadlock arrives with one stack.
 
 Stack traces are **pre-scrubbed** — `scrubPii` rewrites home-directory paths and the OS username, so
-`<user>` in a frame is redaction rather than corruption.
+`<user>` in a frame is redaction rather than corruption — and credentials are masked as `<redacted>`
+by `Secrets.redact`: in every `Log` line before stderr and the breadcrumb, in `beforeBreadcrumb`
+(which also catches `sentry-logback`'s WARN crumbs), in `scrubEvent` and in the local crash file.
+Still, never log a URL with its query string or a header value — redaction is the backstop.
 
 ### Rules for what gets reported
 

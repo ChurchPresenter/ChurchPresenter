@@ -68,7 +68,7 @@ class SettingsTabWidthTest {
     // Built once and shared across the ten compositions. Constructing them per tab is most of
     // what this test costs, and none of them carry state that one tab's layout could affect.
     private val settingsManager by lazy { SettingsManager() }
-    private val companionServer by lazy { CompanionServer() }
+    private val companionServer by lazy { CompanionServer(shutdownGraceMs = 0) }
     private val remoteClientManager by lazy { RemoteClientManager() }
 
     private fun overflowOfTab(tab: Int): Float {

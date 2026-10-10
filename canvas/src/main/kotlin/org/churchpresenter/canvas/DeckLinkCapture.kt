@@ -21,7 +21,7 @@ internal suspend fun showDeckLinkFrame(frameData: IntArray?, entry: CacheEntry, 
         bi
     }
     entry.frame.value = img.toComposeImageBitmap()
-    if (first) Log.info("DeckLink Input", "First frame: ${w}x${h}")
+    if (first) Log.info("DeckLink Input", "First frame: ${w}x$h")
     return true
 }
 

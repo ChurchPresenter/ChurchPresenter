@@ -257,7 +257,6 @@ internal fun ComposeUiTest.clickText(text: String) {
     waitForIdle()
 }
 
-
 /**
  * Clicks [text] **inside the open sheet**, which a plain match cannot do.
  *

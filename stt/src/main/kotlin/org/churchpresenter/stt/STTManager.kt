@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.net.URI
 
-
 data class STTSegment(
     val id: Int,
     val timestamp: String,

@@ -1,6 +1,5 @@
 package org.churchpresenter.bibletab
 
-
 import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.guide.GuideTargets
 import androidx.compose.foundation.layout.Arrangement
@@ -99,7 +98,6 @@ internal fun ColumnScope.BibleTabContent(
             onModeSelected = viewModel::updateSelectedModeIndex,
             searchFocus = searchFocus,
         )
-
 
         if (engineSettings.enabled && sttConnected) {
             sttManager?.let { BibleTabDetection(viewModel, it) }

@@ -13,6 +13,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
+import org.churchpresenter.theme.keyboardFocusRing
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -32,7 +34,6 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.stt.STTManager
 import org.jetbrains.compose.resources.stringResource
-
 
 internal val CROSS_REF_MIN_WIDTH = 200.dp
 
@@ -183,6 +184,8 @@ fun BibleTab(
                 tab.ui.tabRootFocused = it.isFocused
             }
             .focusRescuePressHook(focusRescue)
+            // The whole tab takes the arrow keys; Tab landing on it is shown by a ring just inside it.
+            .keyboardFocusRing(RectangleShape, inset = true)
             .focusable()
             .onPreviewKeyEvent { tab.handleKeyEvent(viewModel, it) }
     ) {

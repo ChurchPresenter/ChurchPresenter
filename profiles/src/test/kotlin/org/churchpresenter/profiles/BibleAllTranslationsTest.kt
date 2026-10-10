@@ -21,7 +21,4 @@ class BibleAllTranslationsTest {
         assertEquals(1, effectiveTranslationIndex(1, stackSize = 3))
         assertEquals(2, effectiveTranslationIndex(7, stackSize = 3))
     }
-
-
-
 }

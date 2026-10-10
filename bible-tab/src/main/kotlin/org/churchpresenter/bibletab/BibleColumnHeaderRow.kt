@@ -104,8 +104,7 @@ internal fun BibleVerseHeader(
         // wraps the buttons below it, where it keeps the label off the card's top edge.
         if (showLabel) {
             BibleListHeaderLabel(stringResource(Res.string.verse), Modifier.weight(1f).padding(vertical = 7.dp))
-        }
-        else Spacer(Modifier.weight(1f))
+        } else Spacer(Modifier.weight(1f))
 
         if (crossRefsVisible) {
             Box(Modifier.guideTarget(GuideTargets.BIBLE_CROSS_REFS)) {
@@ -175,7 +174,6 @@ internal fun BibleListHeaderLabel(text: String, modifier: Modifier = Modifier) {
         modifier = modifier,
     )
 }
-
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -282,7 +280,6 @@ private fun TranslationControls(
             }
         )
     } else if (translations.size > 2) {
-
         // The renames come in on `translations` -- each entry carries its own --
         // so this reads them without a parameter of its own.
         val customNames = translations
@@ -313,7 +310,6 @@ private fun TranslationControls(
                 .widthIn(min = 127.dp, max = 174.dp),
         )
     }
-
 }
 
 @Composable

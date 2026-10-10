@@ -75,6 +75,5 @@ private fun withFontName(layer: JsonObject, fontName: String): JsonObject {
     return JsonObject(layer + ("t" to newT))
 }
 
-
 /** The same synthetic ascent the generator writes; the player ignores it after its first copy anyway. */
 private const val SYNTHETIC_FONT_ASCENT = 72.6

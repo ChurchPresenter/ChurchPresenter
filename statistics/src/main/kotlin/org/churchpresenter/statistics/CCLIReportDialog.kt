@@ -177,7 +177,6 @@ fun CCLIReportContent(
     AppWindowRoot(theme = theme) {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.fillMaxSize()) {
-
                 // ── Date range header ────────────────────────────────────
                 ReportRangeHeader(
                     range = range,
@@ -248,7 +247,6 @@ fun CCLIReportContent(
     }
 }
 
-
 /** The three report tabs, each counted, over the body of the one chosen. */
 @Composable
 private fun ColumnScope.ReportTabs(
@@ -277,7 +275,6 @@ private fun ColumnScope.ReportTabs(
         }
     }
 }
-
 
 /** The rolling quick periods' names, in [ROLLING_MONTHS] order. */
 @Composable

@@ -14,7 +14,6 @@ import java.io.File
  */
 private const val ANCESTOR_SEARCH_DEPTH = 4
 
-
 /** Result of a Register-into-build write: the two files the dev must commit. */
 data class RegisterResult(val specFile: File, val registryFile: File)
 

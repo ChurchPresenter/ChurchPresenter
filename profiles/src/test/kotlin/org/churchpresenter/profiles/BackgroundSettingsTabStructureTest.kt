@@ -145,7 +145,6 @@ class BackgroundSettingsTabStructureTest {
         }
     }
 
-
     @Test
     fun `a lower-third surface on Gradient shows the gradient controls`() {
         val settings = AppSettings(

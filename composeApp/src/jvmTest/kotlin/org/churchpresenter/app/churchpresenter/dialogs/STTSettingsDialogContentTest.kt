@@ -119,4 +119,3 @@ class STTSettingsDialogContentTest {
 }
 
 // ── Locators local to this file ────────────────────────────────────────────────────────────────────
-

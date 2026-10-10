@@ -69,7 +69,7 @@ class AppPreviewSettingsScreenshotTest {
                         OptionsDialogContent(
                             theme = mode,
                             settingsManager = SettingsManager(),
-                            companionServer = CompanionServer(),
+                            companionServer = CompanionServer(shutdownGraceMs = 0),
                             remoteClientManager = RemoteClientManager(),
                             onDismiss = {},
                             initialTab = tab,
@@ -168,7 +168,6 @@ class AppPreviewSettingsScreenshotTest {
     @Test
     fun `tabs with large spacing`() =
         settingsTab("tabs_spacing_large", 0, library().copy(tabLabelMargin = TabLabelMargin.LARGE))
-
 
     private companion object {
         /**

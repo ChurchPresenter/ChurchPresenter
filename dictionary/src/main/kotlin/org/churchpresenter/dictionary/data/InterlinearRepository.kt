@@ -19,19 +19,25 @@ class InterlinearRepository(private val files: DictionaryFiles = DictionaryFiles
     // book → Strong's numbers
     private val greekBookIndex   = HashMap<Int, MutableSet<String>>()
     private val hebrewBookIndex  = HashMap<Int, MutableSet<String>>()
+
     // (bookId*1000+chapter) → Strong's numbers
     private val greekChapterIndex  = HashMap<Int, MutableSet<String>>()
     private val hebrewChapterIndex = HashMap<Int, MutableSet<String>>()
+
     // (bookId*1000+chapter) → verse numbers present
     private val greekChapterVerses  = HashMap<Int, MutableSet<Int>>()
     private val hebrewChapterVerses = HashMap<Int, MutableSet<Int>>()
+
     // ref string (BBBCCCVVV) → Strong's numbers
     private val greekVerseIndex  = HashMap<String, MutableSet<String>>()
     private val hebrewVerseIndex = HashMap<String, MutableSet<String>>()
 
     @Volatile private var greekLoaded  = false
+
     @Volatile private var hebrewLoaded = false
+
     @Volatile private var greekLoading  = false
+
     @Volatile private var hebrewLoading = false
 
     suspend fun ensureGreekLoaded() {
@@ -91,7 +97,7 @@ class InterlinearRepository(private val files: DictionaryFiles = DictionaryFiles
         return index[number]?.toList() ?: emptyList()
     }
 
-    fun getBooksWithGreekData(): List<Int>  = greekBookIndex.keys.sorted()
+    fun getBooksWithGreekData(): List<Int> = greekBookIndex.keys.sorted()
     fun getBooksWithHebrewData(): List<Int> = hebrewBookIndex.keys.sorted()
 
     fun getChaptersForBook(bookId: Int): List<Int> {

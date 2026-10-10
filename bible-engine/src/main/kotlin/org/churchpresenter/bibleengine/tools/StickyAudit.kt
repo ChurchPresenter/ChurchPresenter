@@ -155,7 +155,7 @@ private object JumpClassifier {
         val extension = extensionOverBestStem(stemToken, newBook)
         return if (extension >= STEM_OVEREXTENSION_CHARS) {
             Verdict(row, Category.STEM_OVEREXTENSION,
-                "\"$stemToken\" extends ${extension} chars past its matched book alias's stem — " +
+                "\"$stemToken\" extends $extension chars past its matched book alias's stem — " +
                     "confirm this wasn't an unrelated word")
         } else {
             Verdict(row, Category.CONFIDENT, "")

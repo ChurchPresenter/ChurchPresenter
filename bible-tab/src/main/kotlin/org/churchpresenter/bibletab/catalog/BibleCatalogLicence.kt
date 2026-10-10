@@ -82,7 +82,6 @@ internal fun LicenceConfirmation(
             }
         },
         text = {
-
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 LicenceModuleCard(module)
                 Spacer(Modifier.height(12.dp))

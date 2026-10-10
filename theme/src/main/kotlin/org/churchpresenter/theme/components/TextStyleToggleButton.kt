@@ -3,7 +3,7 @@ package org.churchpresenter.theme.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
@@ -18,6 +18,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -35,7 +39,7 @@ private const val LABEL_SIZE_FRACTION = 0.36f
 /**
  * One square toggle of the text-style row — B, I, U and friends: the letter set in the style it
  * stands for, a raised key that turns the accent colour while on, with [tooltip]
- * under the pointer.
+ * under the pointer. A screen reader hears a checkbox named [tooltip], on or off.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -67,11 +71,20 @@ fun TextStyleToggleButton(
                 .size(buttonSize)
                 .raised(shape, fill, palette, pressed = pressed, hovered = hovered, lift = 2.dp)
                 .hoverable(interaction)
-                .clickable(interactionSource = interaction, indication = null) { onClick() },
+                // A checkbox to a screen reader: named for what it does, saying whether it is on.
+                .toggleable(
+                    value = isActive,
+                    interactionSource = interaction,
+                    indication = null,
+                    role = Role.Checkbox,
+                ) { onClick() }
+                .semantics { contentDescription = tooltip },
             contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = label,
+                // The letter is drawn, not read: the key's name above already says what it is.
+                modifier = Modifier.clearAndSetSemantics {},
                 fontSize = (buttonSize.value * LABEL_SIZE_FRACTION).sp,
                 fontWeight = fontWeight,
                 fontStyle = fontStyle,

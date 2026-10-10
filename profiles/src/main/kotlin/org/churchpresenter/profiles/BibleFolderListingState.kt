@@ -9,8 +9,6 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-
-
 /**
  * [readBibleFolderListing] for [directory], `null` until the scan lands.
  *

@@ -252,19 +252,25 @@ object CueAction {
      * [ScheduleItem.CueItem.plays] times.
      */
     const val PROJECT = "project"
+
     /** Starts a countdown: the payload if it is a timer, otherwise one counting to the service's start. */
     const val COUNTDOWN = "countdown"
+
     /**
      * Loads the run of show into the Schedule and puts an item on screen -- the payload, else the
      * first row that can be projected.
      */
     const val GO_LIVE = "goLive"
+
     /** Puts a canvas scene -- the payload, a scene item -- on screen. */
     const val SCENE = "scene"
+
     /** Clears every output. */
     const val BLANK = "blank"
+
     /** Switches OBS's program scene to the one the cue's label names. Not offered in the cue sheet yet. */
     const val OBS_SCENE = "obsScene"
+
     /**
      * Puts an ATEM key on or off air, as the cue's label says -- `DSK 1 on`, `ME 1 key 2 off`. Not
      * offered in the cue sheet yet.
@@ -295,4 +301,3 @@ const val LOOP_FOREVER: Int = 0
  */
 fun websiteDisplayText(title: String): String =
     "${title.take(TITLE_PREVIEW_CHARS)}${if (title.length > TITLE_PREVIEW_CHARS) "…" else ""}"
-

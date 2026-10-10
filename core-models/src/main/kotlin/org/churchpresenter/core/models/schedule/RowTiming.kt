@@ -55,8 +55,10 @@ data class RowTiming(
 object RowEnd {
     /** Stays on screen until the operator advances. */
     const val HOLD = "hold"
+
     /** Moves to the next item on its own. */
     const val NEXT = "next"
+
     /** Clears the outputs. */
     const val BLANK = "blank"
 }

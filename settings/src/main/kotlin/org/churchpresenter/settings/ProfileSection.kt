@@ -15,6 +15,7 @@ enum class ProfileSection(val id: String, val prefixes: List<String>) {
     CONTENT("content", CONTENT_PATHS),
     BIBLE("bible", listOf("bibleSettings")),
     SONGS("songs", listOf("songSettings")),
+
     // The background fields the Bible and Songs pages edit are still the background's, as their
     // paths say: a band's look is one thing wherever it is edited from.
     BACKGROUND("background", listOf("backgroundSettings", "backgroundOverrides")),

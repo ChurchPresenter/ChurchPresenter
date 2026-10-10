@@ -16,7 +16,7 @@ class MediaRemoteTransportTest {
 
     @Test
     fun `a file loaded, played live and then unloaded is reported and then cleared`() = runComposeUiTest {
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         val media = MediaViewModel()
         val manager = PresenterManager()
         setContent { MediaRemoteWiring(server, media, manager) }
@@ -39,7 +39,7 @@ class MediaRemoteTransportTest {
 
     @Test
     fun `every transport command from a companion reaches the player`() = runComposeUiTest {
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         val media = MediaViewModel()
         setContent { MediaRemoteWiring(server, media, PresenterManager()) }
         waitForIdle()

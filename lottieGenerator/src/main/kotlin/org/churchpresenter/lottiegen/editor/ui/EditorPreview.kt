@@ -46,7 +46,6 @@ import org.churchpresenter.lottiegen.ui.Strings
 private val PREVIEW_BORDER = Color(0xFF2A2D35)
 private val PREVIEW_BACKDROP = Color(0xFF10131A)
 
-
 private val ButtonShape = AppShape(6.dp)
 
 /**

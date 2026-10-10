@@ -66,7 +66,6 @@ class PlanningCenterScriptureImportTest {
         mockkObject(PlanningCenterClient)
         coEvery { PlanningCenterClient.getItemAttachments(any(), any(), any(), any(), any()) } returns
             PlanningCenterClient.AttachmentsOutcome.Success(emptyList())
-
     }
 
     @AfterTest

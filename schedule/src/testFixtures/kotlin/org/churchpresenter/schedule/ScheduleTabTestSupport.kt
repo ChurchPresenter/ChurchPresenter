@@ -56,6 +56,7 @@ internal class ScheduleReports {
     val legacyRowActionChanges = mutableListOf<Boolean>()
     val toolbarButtonToggles = mutableListOf<ScheduleToolbarButton>()
     val toolbarIconSizeChanges = mutableListOf<ScheduleToolbarIconSize>()
+
     /** Each Load now that went through, and whether it asked for the Schedule to be replaced. */
     val loadNowChoices = mutableListOf<Boolean>()
     var saveToCalendarRequests = 0
@@ -201,7 +202,6 @@ internal fun plantAutoSave(vararg titles: String) {
 internal fun autoSaveExists(): Boolean =
     File(System.getProperty("user.home"), ".churchpresenter/autosave_schedule.tmp").exists()
 
-
 /** A service order with one of each item type the row renderer draws differently. */
 internal fun ScheduleViewModel.seedService() {
     addLabel("Welcome", "#FFFFFF", "#203040")
@@ -218,6 +218,7 @@ internal fun ScheduleViewModel.seedService() {
 internal object ScheduleLabel {
     const val TITLE = "Schedule"
     const val NEW = "New Schedule"
+
     // Undo/Redo are located by tag, not by label — see [taggedButton].
     const val UNDO = ScheduleToolbarTags.UNDO
     const val REDO = ScheduleToolbarTags.REDO

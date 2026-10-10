@@ -38,7 +38,6 @@ import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.sharedui.models.Presenting
 
-
 /**
  * Everything a Browser Source output draws, as a composable in its own right.
  *

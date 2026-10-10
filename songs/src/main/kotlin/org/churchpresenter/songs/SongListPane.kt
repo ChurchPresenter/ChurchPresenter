@@ -108,6 +108,7 @@ import androidx.compose.foundation.layout.RowScope
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.keyboardFocusRing
 import org.churchpresenter.theme.raisedHover
 import androidx.compose.foundation.layout.ColumnScope
 import org.churchpresenter.sharedui.composables.bibleListCard
@@ -296,7 +297,7 @@ private fun SongListScope.SongListColumn(modifier: Modifier) {
 
         // The header and the list share one card.
         Column(modifier = Modifier.weight(1f).fillMaxWidth().padding(start = 4.dp, bottom = 4.dp).bibleListCard()) {
-            SongTableHeader(hScrollState, contentMinWidthDp, colHeaderLabels, allColLabels)
+            SongTableHeader(hScrollState, contentMinWidthDp, allColLabels)
 
             // Song list + horizontal scrollbar
             SongListBody(hScrollState, contentMinWidthDp, Modifier.weight(1f))
@@ -378,7 +379,6 @@ private fun SongListScope.SongSearchBar() {
                 )
             }
         }
-
     }
 }
 
@@ -389,6 +389,7 @@ private fun SongListScope.SongSearchField(modifier: Modifier) {
         modifier = modifier
             .widthIn(min = 120.dp)
             .height(42.dp)
+            .keyboardFocusRing(AppShape(8.dp), includeChildren = true)
             .sunken(AppShape(8.dp), elevationPalette())
             .hoverTint(AppShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically

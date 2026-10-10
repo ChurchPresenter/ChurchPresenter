@@ -27,7 +27,6 @@ import kotlin.test.assertTrue
  */
 class InstanceLinkRoleGatingTest {
 
-
     @Test
     fun `only a Controlled instance mirrors the primary's output`() {
         assertTrue(shouldMirrorRemoteOutput(InstanceLinkRole.CONTROLLED))

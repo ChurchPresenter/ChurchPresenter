@@ -15,8 +15,9 @@ import kotlin.test.assertTrue
  * what each way the process can end means to the operator.
  *
  * No download and no real tunnel. `TunnelManager` resolves `~/.churchpresenter/cloudflared` at
- * construction and skips the download when that file already exists, so a shell script written there
- * before the manager is built *is* the binary as far as production code is concerned — the real
+ * construction and skips the download when that file already exists and `cloudflared.version` beside
+ * it names the pinned release, so a shell script written there with that marker before the manager is
+ * built *is* the binary as far as production code is concerned — the real
  * `ProcessBuilder`, the real reader loop and the real state transitions all run.
  *
  * The three endings are what matter, and only one of them is a failure the operator caused: a
@@ -66,7 +67,11 @@ class TunnelManagerProcessTest {
     private fun fakeCloudflared(body: String) {
         binary.writeText("#!/bin/sh\n$body\n")
         assertTrue(binary.setExecutable(true), "the stand-in binary has to be runnable")
+        markPinned()
     }
+
+    /** Without this marker the manager replaces the stand-in with the real pinned download. */
+    private fun markPinned() = File(dataDir, "cloudflared.version").writeText(CloudflaredPins.load().version)
 
     private fun manager(): TunnelManager = TunnelManager().also { created.add(it) }
 
@@ -88,6 +93,7 @@ class TunnelManagerProcessTest {
     private companion object {
         const val URL = "https://random-happy-cloud-42.trycloudflare.com"
         const val OTHER_URL = "https://second-guess-99.trycloudflare.com"
+
         /** cloudflared's real banner shape — the URL sits in a boxed table row, not alone on a line. */
         fun banner(url: String) = "echo '2024-01-01T00:00:00Z INF |  $url  |'"
     }
@@ -188,12 +194,13 @@ class TunnelManagerProcessTest {
 
     @Test
     fun `a binary that cannot be run surfaces as an error rather than a crash`() {
-        // A half-finished download leaves a file that exists — so the download is skipped — but that
-        // the OS refuses to execute. It has to come back as tunnel status, not as an exception on a
+        // An installed binary marked as the pinned release — so the download is skipped — that the OS
+        // refuses to execute. It has to come back as tunnel status, not as an exception on a
         // background coroutine.
         skipOnWindows()
         binary.writeText("not an executable")
         binary.setExecutable(false)
+        markPinned()
         val tunnel = manager()
 
         tunnel.start(localPort = 8_765)

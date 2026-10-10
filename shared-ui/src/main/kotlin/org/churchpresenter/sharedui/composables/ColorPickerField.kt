@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.theme.AppShape
+import org.churchpresenter.theme.keyboardFocusRing
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -72,6 +73,7 @@ fun ColorPickerField(
     Column(
         modifier = modifier
             .heightIn(min = 42.dp)
+            .keyboardFocusRing(AppShape(8.dp))
             // The same sunken well as every field it sits beside in a settings form.
             .sunken(AppShape(8.dp), elevationPalette())
             .hoverTint(AppShape(8.dp))

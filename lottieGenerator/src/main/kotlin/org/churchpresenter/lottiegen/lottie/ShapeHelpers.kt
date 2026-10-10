@@ -6,7 +6,6 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 
-
 fun makeRect(w: Double, h: Double, cornerRadius: Double = 0.0, position: List<Double>? = null): JsonObject =
     buildJsonObject {
         put("ty", JsonPrimitive("rc"))
@@ -24,7 +23,6 @@ fun makeRect(w: Double, h: Double, cornerRadius: Double = 0.0, position: List<Do
             put("k", JsonPrimitive(cornerRadius))
         })
     }
-
 
 fun makeAnimatedRect(sizeKFs: JsonArray, cornerRadius: Double = 0.0, position: List<Double>? = null): JsonObject =
     buildJsonObject {
@@ -44,7 +42,6 @@ fun makeAnimatedRect(sizeKFs: JsonArray, cornerRadius: Double = 0.0, position: L
         })
     }
 
-
 fun makeEllipse(w: Double, h: Double, position: List<Double>? = null): JsonObject =
     buildJsonObject {
         put("ty", JsonPrimitive("el"))
@@ -58,7 +55,6 @@ fun makeEllipse(w: Double, h: Double, position: List<Double>? = null): JsonObjec
             put("k", jsonArrayOf(position ?: listOf(0.0, 0.0)))
         })
     }
-
 
 fun makePath(vertices: List<List<Double>>, closed: Boolean = true): JsonObject =
     buildJsonObject {
@@ -85,7 +81,6 @@ fun makePath(vertices: List<List<Double>>, closed: Boolean = true): JsonObject =
  * Bezier path with real tangent handles. [inTangents]/[outTangents] are per-vertex and
  * relative to that vertex (Lottie convention); must match [vertices] in size.
  */
-
 
 /**
  * Bezier path with real tangent handles. [inTangents]/[outTangents] are per-vertex and
@@ -121,7 +116,6 @@ fun makeCurvedPath(
  * (the "line draws itself" primitive). [start]/[end] are 0-100 percent of the path,
  * each either static or animated via keyframes.
  */
-
 
 fun makeGroup(items: List<JsonObject>, transform: JsonObject? = null): JsonObject =
     buildJsonObject {

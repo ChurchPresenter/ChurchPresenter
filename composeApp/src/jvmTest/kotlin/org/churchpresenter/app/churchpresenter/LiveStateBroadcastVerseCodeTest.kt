@@ -59,7 +59,7 @@ class LiveStateBroadcastVerseCodeTest {
     @Test
     fun `a live verse is resolved through the primary bible into a code for a bible change`() = runComposeUiTest {
         val pm = PresenterManager()
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         wire(pm, server, SpbFixture.loadedBible(dir))
         pm.setSelectedVerses(listOf(john316()))
         pm.setPresentingMode(Presenting.BIBLE)
@@ -75,7 +75,7 @@ class LiveStateBroadcastVerseCodeTest {
     @Test
     fun `a verse up behind another change carries no code`() = runComposeUiTest {
         val pm = PresenterManager()
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         wire(pm, server, SpbFixture.loadedBible(dir))
         pm.setSelectedVerses(listOf(john316()))
         pm.setPresentingMode(Presenting.LYRICS)
@@ -88,7 +88,7 @@ class LiveStateBroadcastVerseCodeTest {
     @Test
     fun `a book the bible does not have resolves to no code`() = runComposeUiTest {
         val pm = PresenterManager()
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         wire(pm, server, SpbFixture.loadedBible(dir))
         pm.setSelectedVerses(listOf(SelectedVerse(bookName = "Nowhere", chapter = 1, verseNumber = 1)))
         pm.setPresentingMode(Presenting.BIBLE)
@@ -101,7 +101,7 @@ class LiveStateBroadcastVerseCodeTest {
     @Test
     fun `scene, question and dictionary entry reach the broadcast`() = runComposeUiTest {
         val pm = PresenterManager()
-        val server = CompanionServer()
+        val server = CompanionServer(shutdownGraceMs = 0)
         wire(pm, server, null)
         pm.setActiveScene(Scene(id = "s1", name = "Welcome"))
         pm.setDisplayedQuestion(Question(id = "q1", text = "Why?", timestamp = 1L))

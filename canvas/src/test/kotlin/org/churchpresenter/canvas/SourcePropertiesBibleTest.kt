@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
@@ -147,8 +148,8 @@ class SourcePropertiesBibleTest {
     @Test
     fun `every face is offered twice, once for each piece of text`() =
         sourcePanel(Fixture.bible()) { _ ->
-            listOf("B", "I", "U", "S").forEach {
-                assertEquals(2, countOf(it), "the verse and the reference each get their own \"$it\"")
+            listOf("Bold", "Italic", "Underline", "Strikethrough").forEach {
+                assertEquals(2, countNamed(it), "the verse and the reference each get their own \"$it\"")
             }
         }
 
@@ -289,35 +290,35 @@ class SourcePropertiesBibleTest {
 
     @Test
     fun `the verse's Bold flips only that flag`() = sourcePanel(Fixture.bible()) { get ->
-        clickStyleButton("B", StyleRow.VERSE)
+        clickStyleButton("Bold", StyleRow.VERSE)
 
         assertEquals(Fixture.bible().copy(bold = true), get(), "the verse's B owns only its own flag")
     }
 
     @Test
     fun `the verse's Italic flips only that flag`() = sourcePanel(Fixture.bible()) { get ->
-        clickStyleButton("I", StyleRow.VERSE)
+        clickStyleButton("Italic", StyleRow.VERSE)
 
         assertEquals(Fixture.bible().copy(italic = true), get())
     }
 
     @Test
     fun `the verse's Underline flips only that flag`() = sourcePanel(Fixture.bible()) { get ->
-        clickStyleButton("U", StyleRow.VERSE)
+        clickStyleButton("Underline", StyleRow.VERSE)
 
         assertEquals(Fixture.bible().copy(underline = true), get())
     }
 
     @Test
     fun `the verse's Strikethrough flips only that flag`() = sourcePanel(Fixture.bible()) { get ->
-        clickStyleButton("S", StyleRow.VERSE)
+        clickStyleButton("Strikethrough", StyleRow.VERSE)
 
         assertEquals(Fixture.bible().copy(strikethrough = true), get())
     }
 
     @Test
     fun `the reference's Bold flips only that flag`() = sourcePanel(Fixture.bible()) { get ->
-        clickStyleButton("B", StyleRow.REFERENCE)
+        clickStyleButton("Bold", StyleRow.REFERENCE)
 
         assertEquals(
             Fixture.bible().copy(referenceBold = true), get(),
@@ -327,21 +328,21 @@ class SourcePropertiesBibleTest {
 
     @Test
     fun `the reference's Italic flips only that flag`() = sourcePanel(Fixture.bible()) { get ->
-        clickStyleButton("I", StyleRow.REFERENCE)
+        clickStyleButton("Italic", StyleRow.REFERENCE)
 
         assertEquals(Fixture.bible().copy(referenceItalic = true), get())
     }
 
     @Test
     fun `the reference's Underline flips only that flag`() = sourcePanel(Fixture.bible()) { get ->
-        clickStyleButton("U", StyleRow.REFERENCE)
+        clickStyleButton("Underline", StyleRow.REFERENCE)
 
         assertEquals(Fixture.bible().copy(referenceUnderline = true), get())
     }
 
     @Test
     fun `the reference's Strikethrough flips only that flag`() = sourcePanel(Fixture.bible()) { get ->
-        clickStyleButton("S", StyleRow.REFERENCE)
+        clickStyleButton("Strikethrough", StyleRow.REFERENCE)
 
         assertEquals(Fixture.bible().copy(referenceStrikethrough = true), get())
     }
@@ -349,7 +350,7 @@ class SourcePropertiesBibleTest {
     @Test
     fun `a face stored on is turned back off by its own button`() {
         sourcePanel(Fixture.bible().copy(bold = true, referenceBold = true)) { get ->
-            clickStyleButton("B", StyleRow.VERSE)
+            clickStyleButton("Bold", StyleRow.VERSE)
 
             val source = get() as SceneSource.BibleSource
             assertEquals(false, source.bold)
@@ -653,7 +654,7 @@ class SourcePropertiesBibleTest {
 
     @Test
     fun `neither style row carries a text-backing control`() = sourcePanel(Fixture.bible()) { _ ->
-        onAllNodesWithText("B").assertCountEquals(2)
+        onAllNodesWithContentDescription("Bold").assertCountEquals(2)
         onAllNodesWithText("A").assertCountEquals(0)
     }
 }

@@ -103,6 +103,7 @@ internal class AppRootState(
     )
 
     var scheduleActions by mutableStateOf(ScheduleActions())
+
     /** The Schedule's actions as they stand now, for a lambda built earlier. */
     val currentScheduleActions get() = scheduleActions
 
@@ -121,6 +122,7 @@ internal class AppRootState(
         val supervised = coroutineScope.coroutineContext + SupervisorJob(coroutineScope.coroutineContext[Job])
         ActionRunner(appShowHost(), CoroutineScope(supervised))
     }
+
     /** The MIDI and OSC ports: what arrives runs actions, and what the show does is sent back out. */
     val controlHub: ControlHub by lazy { ControlHub(onMapping = ::runControlMapping) }
     val autoConnectedIds = mutableSetOf<String>()
@@ -154,8 +156,10 @@ internal class AppRootState(
     // what "it" is), and the one thing it asks of the main screen that no remote flow already does.
     val helperState = HelperState(onUsed = { UsageEvents.recordOncePerRun(UsageEvent.WICK_USED) })
     var helperCurrentTab by mutableStateOf<Tabs?>(null)
+
     // How many songs the library loaded, or null before it has — "empty" only once it has looked.
     var helperSongCount by mutableStateOf<Int?>(null)
+
     // The library itself, for the helper to find a song by number or title.
     var helperSongs by mutableStateOf<List<SongItem>>(emptyList())
     val helperSelectTabFlow = MutableSharedFlow<Tabs>(extraBufferCapacity = REMOTE_FLOW_BUFFER)
@@ -200,19 +204,24 @@ internal class AppRootState(
     // Set once the startup update check has run, so nothing waiting on it opens before its result.
     var startupChecksDone by mutableStateOf(false)
     var showConverterWindow by mutableStateOf(false)
+
     // Which tab it opens on. The Help menu wants the converter as a whole; the setup wizard's
     // song step wants Songs, because that is the format problem it just described.
     var converterInitialTab by mutableStateOf(ConverterTab.BIBLES)
+
     // The song source its Songs tab opens on, when the helper named one; null opens the default.
     var converterInitialSource by mutableStateOf<String?>(null)
     var showSongLibraryWindow by mutableStateOf(false)
     var showCalendarWindow by mutableStateOf(false)
+
     // Raised to have the Calendar Manager open a new service on the Schedule tab's rows.
     var calendarNewServiceFromSchedule by mutableStateOf(0)
+
     // What the Schedule tab holds right now, mirrored here from the same callback that feeds the
     // Companion server. The Calendar Manager reads it to decide whether "load" would discard
     // anything, and to copy a live-built service back onto a date.
     var currentScheduleItems by mutableStateOf<List<ScheduleItem>>(emptyList())
+
     // Whether the Schedule's cue rows may fire. Set from the service's own switch as it is loaded
     // from the Calendar Manager, and from the Schedule tab's switch after that; the engine reads it
     // every tick, so what the tab shows armed is exactly what will fire.

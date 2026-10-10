@@ -381,7 +381,6 @@ internal fun VideoPickerRow(
 
 private const val PREVIEW_DEBOUNCE_MS = 800L
 
-
 /**
  * Settings → Background: every surface the app draws a background on, one at a time.
  *

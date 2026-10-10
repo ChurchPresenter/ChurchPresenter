@@ -91,6 +91,7 @@ internal class BibleSlide(val frame: BibleFrame, val verses: List<SelectedVerse>
 
     val primary = verses.first()
     val secondary = verses.getOrNull(1)
+
     // A settings file that names only a secondary bible still means "bilingual" -- the
     // condition this replaced keyed off exactly that, and dropping it stopped the second
     // language rendering for those files.
@@ -102,6 +103,7 @@ internal class BibleSlide(val frame: BibleFrame, val verses: List<SelectedVerse>
     val isParallelIntended = translationStack.size > 1 || bs.secondaryBible.isNotEmpty()
     val showParallelLayout = isParallelIntended && secondary != null && (!isLowerThird || t1.lowerThirdEnabled)
     val showSecondary = secondary != null && showParallelLayout
+
     // Every translation's own text -- styled, coloured, sized and outlined from its own
     // profile rather than from `t0`/`t1` -- shared by the full-screen stack below and by
     // the lower third's own 3/4-language grid further down. The lower third's original
@@ -144,6 +146,7 @@ internal class BibleSlide(val frame: BibleFrame, val verses: List<SelectedVerse>
             shadow = shadow,
         )
     }
+
     // The stack's equivalent of the pText/prText helpers above: this path styles
     // every translation from its own profile rather than from t0/t1, so the
     // transform and word spacing have to be read per item.
@@ -159,6 +162,7 @@ internal class BibleSlide(val frame: BibleFrame, val verses: List<SelectedVerse>
         spacingEm(item.referenceLetterSpacing, item.referenceFontSize),
         spacingEm(item.referenceWordSpacing, item.referenceFontSize),
     )
+
     // The lower third's own grid, from `bilingualLayoutLowerThird` -- read once here so
     // both the new 3/4-translation branch and the [bandSplits] gate below agree on it.
     // A vertical strip has no width to split, so it always stacks (one column) regardless
@@ -169,6 +173,7 @@ internal class BibleSlide(val frame: BibleFrame, val verses: List<SelectedVerse>
     val lowerThirdGridCols = bilingualColumns(bs.bilingualLayoutLowerThird, lowerThirdSlots)
     val lowerThirdGridRows =
         ((lowerThirdSlots + lowerThirdGridCols - 1) / lowerThirdGridCols).coerceAtLeast(1)
+
     // Three or four languages, only when the band is actually configured for that many
     // and asked to show them. Two keep the layouts proven below, byte-for-byte unchanged
     // -- this is new capability, not a rewrite of what was already there.
@@ -195,6 +200,7 @@ internal class BibleSlide(val frame: BibleFrame, val verses: List<SelectedVerse>
     } else {
         emptyList()
     }
+
     // isLowerThirdVertical forces bilingual/parallel content to stack (one below the
     // other) instead of the side-by-side Row split below — same band/geometry as
     // horizontal otherwise, see the routing to the single-column "else" branch.

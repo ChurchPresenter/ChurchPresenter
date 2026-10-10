@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import org.churchpresenter.theme.AppShape
+import org.churchpresenter.theme.keyboardFocusRing
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
@@ -208,6 +209,7 @@ private fun <T> Segment(
     }
     Box(
         modifier = modifier
+            .keyboardFocusRing(segmentShape)
             .then(
                 when {
                     isSelected -> Modifier.raised(

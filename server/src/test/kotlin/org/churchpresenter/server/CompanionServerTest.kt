@@ -52,7 +52,7 @@ class CompanionServerTest {
 
     @BeforeTest
     fun startServer() {
-        server = CompanionServer()
+        server = CompanionServer(shutdownGraceMs = 0)
         // Well outside the default 8765 so a running dev instance can't be hit by accident;
         // findFreePort walks upward from here if it is taken.
         server.start(port = testPort(39_517))

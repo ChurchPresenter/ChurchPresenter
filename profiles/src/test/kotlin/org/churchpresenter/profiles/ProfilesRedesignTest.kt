@@ -358,7 +358,6 @@ class ProfilesRedesignTest {
         }
     }
 
-
     @Test
     fun `a profile used by a Browser Source and an NDI output names both`() {
         val doc = profileDocument().let { d ->

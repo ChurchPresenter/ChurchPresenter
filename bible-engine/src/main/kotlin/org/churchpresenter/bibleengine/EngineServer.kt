@@ -106,8 +106,7 @@ object EngineServer {
                 broadcaster.broadcastVersion(
                     if (verdict == null) {
                         """{"type":"version_detected","version":null,"versionId":null,"confidence":null}"""
-                    }
-                    else """{"type":"version_detected","version":"${jsonEscape(verdict.label)}",""" +
+                    } else """{"type":"version_detected","version":"${jsonEscape(verdict.label)}",""" +
                         """"versionId":"${jsonEscape(verdict.id)}","confidence":${verdict.confidence}}"""
                 )
             },

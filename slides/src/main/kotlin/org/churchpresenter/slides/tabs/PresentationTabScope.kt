@@ -142,7 +142,6 @@ internal fun PresentationTabScope.PresentationLoadEffects(viewModel: Presentatio
         }
     }
 
-
     // Startup: remove slide caches for presentations not in recents or pinned
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {

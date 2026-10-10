@@ -46,7 +46,7 @@ class CompanionServerBrowserSourceTransposeTest {
 
     @BeforeTest
     fun setUp() {
-        server = CompanionServer()
+        server = CompanionServer(shutdownGraceMs = 0)
         server.start(port = testPort(39_815))
         port = runBlocking {
             withTimeoutOrNull(10_000) {

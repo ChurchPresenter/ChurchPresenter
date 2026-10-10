@@ -181,6 +181,7 @@ object QALabel {
     const val SAVE = "Save"
     const val CANCEL = "Cancel"
     const val CLEAR_ALL = "Clear All Questions"
+
     /** The confirm button inside the clear-all dialog. */
     const val CLEAR = "Clear"
     const val BACK_TO_INCOMING = "Back to Incoming"

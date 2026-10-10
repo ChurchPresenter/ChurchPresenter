@@ -34,7 +34,6 @@ internal fun placedLayer(
     state = state,
 )
 
-
 internal fun presentationFrame(
     layers: List<PlacedLayer>,
     frameWidthPx: Int = 100,

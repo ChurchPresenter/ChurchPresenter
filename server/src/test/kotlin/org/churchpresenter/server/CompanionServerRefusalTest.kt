@@ -41,6 +41,7 @@ class CompanionServerRefusalTest {
 
     companion object {
         const val KEY = "correct-horse-battery-staple"
+
         /** A minimal JSON upload body: the handlers check name/data before decoding anything. */
         const val UPLOAD_BODY = """{"name":"deck.pptx","data":"AAAA"}"""
 
@@ -56,7 +57,7 @@ class CompanionServerRefusalTest {
         @JvmStatic
         @BeforeClass
         fun startServer() {
-            server = CompanionServer()
+            server = CompanionServer(shutdownGraceMs = 0)
             server.start(port = testPort(39_711))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {

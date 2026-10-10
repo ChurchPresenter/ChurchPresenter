@@ -160,7 +160,6 @@ object FileKitFileChooser : FileChooser() {
             KeyboardFocusManager.getCurrentKeyboardFocusManager().activeWindow,
             java.awt.Window.getWindows()
         )
-
 }
 
 /**

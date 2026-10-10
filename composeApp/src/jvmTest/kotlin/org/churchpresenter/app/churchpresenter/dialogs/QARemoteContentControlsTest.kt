@@ -100,8 +100,6 @@ class QARemoteContentControlsTest {
         retypeNumberField(showing = 900, to = 600)
         assertEquals(600, get().rateLimitCooldownSeconds, "600 is the top of the range and is accepted")
     }
-
 }
 
 // ── Locators local to this file ────────────────────────────────────────────────────────────────────
-

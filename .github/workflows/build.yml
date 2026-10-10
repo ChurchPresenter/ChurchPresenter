@@ -648,7 +648,9 @@ jobs:
           GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format LONG 2>/dev/null | grep 'sec' | head -1 | awk '{print $2}' | cut -d'/' -f2)
           # dpkg-sig was removed from Ubuntu 24.04 repos — install from archive
           sudo apt-get install -y libconfig-file-perl
-          curl -sLO https://archive.ubuntu.com/ubuntu/pool/universe/d/dpkg-sig/dpkg-sig_0.13.1+nmu4_all.deb
+          curl -sSfLO https://archive.ubuntu.com/ubuntu/pool/universe/d/dpkg-sig/dpkg-sig_0.13.1+nmu4_all.deb
+          # The digest from jammy's signed universe Packages index; nothing unverified is installed as root.
+          echo "c6eb0f053b7e67695b342720ddbe1126e6b0939e1520ace1fa7e0097426c73d1  dpkg-sig_0.13.1+nmu4_all.deb" | sha256sum -c -
           sudo dpkg -i dpkg-sig_0.13.1+nmu4_all.deb
           rm dpkg-sig_0.13.1+nmu4_all.deb
           SIGNING_DIR="$RUNNER_TEMP/signing/linux"
@@ -681,6 +683,20 @@ jobs:
         with:
           name: linux-deb
           path: composeApp/build/compose/binaries/main/deb
+          retention-days: 2
+
+      # The software bill of materials for the release: every library the app runs with (CycloneDX
+      # JSON, from the runtime classpath only). Platform-independent, so one runner makes it.
+      - name: Generate SBOM
+        run: |
+          ./gradlew :composeApp:cyclonedxDirectBom
+          cp composeApp/build/reports/cyclonedx/bom.json ChurchPresenter-sbom.cdx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: ChurchPresenter-sbom.cdx.json
           retention-days: 2
 
   release:
@@ -722,6 +738,13 @@ jobs:
         with:
           name: linux-deb
           path: release/linux
+
+      - name: Download SBOM
+        if: ${{ inputs.linux && needs.build-linux.result == 'success' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: sbom
+          path: release/sbom
 
       - name: List release files
         run: |
@@ -765,5 +788,6 @@ jobs:
             release/windows/*
             release/macos/*
             release/linux/*
+            release/sbom/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

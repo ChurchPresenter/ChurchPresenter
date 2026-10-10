@@ -298,7 +298,6 @@ internal fun ScheduleItemRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 ScheduleRowDragHandle(item, isSection, dragHandleModifier)
 
                 ScheduleRowTitle(
@@ -352,7 +351,6 @@ internal fun ScheduleItemRow(
         RowActionsDialog(item, actions, rows, onSave = onActionsChanged, onDismiss = { editingActions = false })
     }
 }
-
 
 /**
  * The buttons that fade in over the right-hand end of a row while the pointer is on it.

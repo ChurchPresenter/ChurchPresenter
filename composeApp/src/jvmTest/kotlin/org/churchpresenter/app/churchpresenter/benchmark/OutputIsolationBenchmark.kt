@@ -25,6 +25,7 @@ import java.awt.GraphicsEnvironment
 import java.io.File
 
 private val STALLS_MS = listOf(0L, 100L, 500L, 2_000L)
+
 /** The quiet time between stalls; a stall posted more often than it lasts would pile up behind itself. */
 private const val STALL_GAP_MS = 1_000L
 private const val RUN_NANOS = 8_000_000_000L

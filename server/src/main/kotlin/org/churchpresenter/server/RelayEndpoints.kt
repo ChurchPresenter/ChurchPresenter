@@ -1,6 +1,5 @@
 package org.churchpresenter.server
 
-
 /**
  * Where calendar sync reaches the relay, and where it fetches the relay's client key. Neither is in
  * the repository: the app builds both in from GitHub Secrets (see `generateBuildConfig`) and passes

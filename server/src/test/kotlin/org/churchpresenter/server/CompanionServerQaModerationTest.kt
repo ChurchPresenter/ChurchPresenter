@@ -91,7 +91,7 @@ class CompanionServerQaModerationTest {
             realHome = System.getProperty("user.home")
             tempHome = Files.createTempDirectory("cp-qa-moderation").toFile()
             System.setProperty("user.home", tempHome.absolutePath)
-            server = CompanionServer()
+            server = CompanionServer(shutdownGraceMs = 0)
             server.start(port = testPort(39_721))
             port = runBlocking {
                 withTimeoutOrNull(10_000) {

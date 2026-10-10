@@ -181,7 +181,7 @@ private fun LowerThirdTabScope.AtemFrameWarnings() {
             Text(
                 stringResource(
                     Res.string.atem_aspect_mismatch,
-                    "${cw}×${ch}", "${s.renderWidth}×${s.renderHeight}"
+                    "$cw×$ch", "${s.renderWidth}×${s.renderHeight}"
                 ),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.semantic.warning
@@ -192,7 +192,7 @@ private fun LowerThirdTabScope.AtemFrameWarnings() {
             Text(
                 stringResource(
                     Res.string.atem_upscale_notice,
-                    "${cw}×${ch}",
+                    "$cw×$ch",
                     String.format(java.util.Locale.US, "%.1f", fitScale),
                     "${s.renderWidth}×${s.renderHeight}"
                 ),

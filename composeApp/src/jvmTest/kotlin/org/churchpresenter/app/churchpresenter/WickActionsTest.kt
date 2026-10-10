@@ -272,6 +272,7 @@ class WickActionsTest {
         val screen = HelperScreen(index = 1, isPrimary = false, x = 1920, y = 0, width = 1920, height = 1080)
         run(HelperAction.AssignAudienceScreen(screen))
         assertNotEquals(before, root.appSettings.projectionSettings)
+        assertEquals(1920, root.appSettings.projectionSettings.getAssignment(0).targetBoundsX)
         val reply = assertIs<HelperReply.Message>(wick.reply)
         assertEquals(Res.string.helper_done_assign.key, (reply.text as HelperText.Res).res.key)
         assertTrue(reply.canUndo)

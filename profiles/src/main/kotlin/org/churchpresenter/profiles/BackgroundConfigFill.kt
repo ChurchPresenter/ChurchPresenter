@@ -213,6 +213,7 @@ private fun stepUp(px: Float): Int =
 
 /** The presenter overscans a blurred background by the same amount; a preview must match. */
 private const val BLUR_OVERSCAN = 1.08f
+
 /** The glyph that stands in for a picture the tile deliberately does not draw. */
 private val GLYPH_SIZE = 14.dp
 

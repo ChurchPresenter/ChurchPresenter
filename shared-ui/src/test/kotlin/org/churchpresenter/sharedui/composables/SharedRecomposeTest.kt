@@ -117,7 +117,7 @@ class SharedRecomposeTest {
             }
         }
         repeat(3) { f.flip(); waitForIdle() }
-        onNodeWithText("B").assertExists()
+        onNodeWithContentDescription("Bold").assertExists()
     }
 
     @Test

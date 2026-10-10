@@ -47,7 +47,6 @@ class ProfilesCustomizeStripRowsTest {
         }
     }
 
-
     /** What is left under that chip is what still redraws it. */
     @Test
     fun `the title slide keeps the rows that do move it`() {

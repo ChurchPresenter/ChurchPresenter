@@ -36,7 +36,7 @@ class LiveStateBroadcastAudienceTest {
                 appSettings = { settings },
                 primaryBible = { null },
                 presenterManager = manager,
-                companionServer = CompanionServer(),
+                companionServer = CompanionServer(shutdownGraceMs = 0),
                 screenCountForUsage = 2,
                 deckLinkCountForUsage = 0,
             )
@@ -65,7 +65,7 @@ class LiveStateBroadcastAudienceTest {
             )
             val bible = Bible().apply { loadFromSpb(file.absolutePath) }
             val manager = PresenterManager()
-            val server = CompanionServer()
+            val server = CompanionServer(shutdownGraceMs = 0)
             setContent {
                 LiveStateBroadcastWiring(
                     appSettings = { AppSettings() },

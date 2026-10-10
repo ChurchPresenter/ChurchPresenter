@@ -134,7 +134,6 @@ fun ColorPickerDialog(
                     modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
-
                 // ── Saturation / Brightness square ──────────────────────────
                 SvPanel(
                     hue = hue,

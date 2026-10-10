@@ -1,6 +1,7 @@
 package org.churchpresenter.announcements
 
 import org.churchpresenter.sharedui.composables.ActionIconButton
+import org.churchpresenter.sharedui.composables.tabMovesFocus
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.composables.AddToScheduleButton
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import org.churchpresenter.theme.AppShape
+import org.churchpresenter.theme.keyboardFocusRing
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.graphics.SolidColor
@@ -490,6 +492,7 @@ private fun AnnouncementsTabScope.ExpiredTextField(viewModel: AnnouncementsViewM
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .keyboardFocusRing(AppShape(8.dp), includeChildren = true)
                 .sunken(AppShape(8.dp), elevationPalette())
                 .hoverTint(AppShape(8.dp))
                 .padding(horizontal = 12.dp, vertical = 10.dp)
@@ -503,7 +506,7 @@ private fun AnnouncementsTabScope.ExpiredTextField(viewModel: AnnouncementsViewM
                 textStyle = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurface),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 maxLines = 4,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().tabMovesFocus(),
                 decorationBox = { inner ->
                     if (viewModel.timerExpiredText.isEmpty()) {
                         Text(

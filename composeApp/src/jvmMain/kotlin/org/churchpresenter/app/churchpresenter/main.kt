@@ -290,7 +290,6 @@ fun main() {
     }
 }
 
-
 /**
  * The whole desktop UI: windows, presenter outputs, the server wiring and every dialog.
  *

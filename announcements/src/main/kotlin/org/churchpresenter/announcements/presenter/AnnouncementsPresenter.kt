@@ -24,6 +24,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.churchpresenter.sharedui.presenter.ReferenceScaledBox
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -57,6 +58,26 @@ fun AnnouncementsPresenter(
     transitionAlpha: Float = 1f,
     onFinished: () -> Unit = {},
     showBackground: Boolean = true,
+) = ReferenceScaledBox(modifier) {
+    AnnouncementsPresenterContent(
+        text = text,
+        appSettings = appSettings,
+        outputRole = outputRole,
+        transitionAlpha = transitionAlpha,
+        onFinished = onFinished,
+        showBackground = showBackground,
+    )
+}
+
+/** [AnnouncementsPresenter] as a 1920x1080-family output draws it; [ReferenceScaledBox] fits it to the real one. */
+@Composable
+private fun AnnouncementsPresenterContent(
+    text: String,
+    appSettings: AppSettings,
+    outputRole: String,
+    transitionAlpha: Float,
+    onFinished: () -> Unit,
+    showBackground: Boolean,
 ) {
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val settings   = appSettings.announcementsSettings
@@ -84,7 +105,7 @@ fun AnnouncementsPresenter(
     val scrollDurationMs = settings.animationDuration.coerceAtLeast(500)
 
     BoxWithConstraints(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(Color.Transparent)
             .graphicsLayer { alpha = transitionAlpha }
@@ -275,7 +296,6 @@ private fun SlideAnimation(
 
         content(offsetFraction)
     }
-
 }
 
 /**

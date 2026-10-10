@@ -86,6 +86,7 @@ object Constants {
     const val BACKGROUND_GRADIENT = "Gradient"
     const val BACKGROUND_FOLLOW_DEFAULT = "FollowDefault" // Lower third follows the default background
     const val BACKGROUND_LOTTIE = "Lottie" // Animated Lottie band that carries the text itself
+
     /** A background-colour field set to no colour at all, rather than to a hex value. */
     const val COLOR_VALUE_TRANSPARENT = "transparent"
 
@@ -148,6 +149,7 @@ object Constants {
     const val SECTION_TYPE_SONG = "song"
     const val SECTION_TYPE_VERSE = "verse"
     const val SECTION_TYPE_CHORUS = "chorus"
+
     /** The synthetic section the Songs tab puts in front of a song when title slides are on. */
     const val SECTION_TYPE_TITLE_SLIDE = "title_slide"
 
@@ -209,6 +211,7 @@ object Constants {
     // Audio file extensions (VLC supports all common formats)
     val AUDIO_EXTENSIONS = setOf("mp3", "wav", "flac", "aac", "ogg", "wma", "m4a", "aiff", "opus")
     val VIDEO_EXTENSIONS = setOf("mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v")
+
     /** Default max media-file upload size accepted from a companion device (700 MB).
      *  Operator-overridable via AppSettings.maxMediaUploadMb. */
     const val DEFAULT_MAX_MEDIA_UPLOAD_MB = 700
@@ -237,6 +240,7 @@ object Constants {
     const val PREVIEW_OUTPUT_BROWSER_SOURCE = "browserSource"
     const val PREVIEW_OUTPUT_NDI = "ndi"
     const val PREVIEW_OUTPUT_OMT = "omt"
+
     /** The Preview bus's tile, while preview mode is on: one of its kind, so no index. */
     const val PREVIEW_OUTPUT_PREVIEW_BUS = "preview"
 
@@ -362,6 +366,7 @@ object Constants {
     const val WS_CMD_PROP                   = "prop"
     const val WS_CMD_MACRO                  = "macro"
     const val WS_CMD_BIBLE_HOLD             = "bible_hold"
+
     /** ID-less navigation commands — operate on whatever the primary currently has live, since a
      *  Controller has no way to learn the primary's internally-assigned folderId/presentationId
      *  (see PicturesViewModel.goLive's KDoc for why select_picture/select_slide can't be reused here). */
@@ -369,6 +374,7 @@ object Constants {
     const val WS_CMD_PREVIOUS_PICTURE       = "previous_picture"
     const val WS_CMD_NEXT_SLIDE             = "next_slide"
     const val WS_CMD_PREVIOUS_SLIDE         = "previous_slide"
+
     // Media transport controls (companion "just controls" remote — no video on the device)
     const val WS_CMD_MEDIA_PLAY_PAUSE       = "media_play_pause"
     const val WS_CMD_MEDIA_STOP             = "media_stop"
@@ -394,6 +400,7 @@ object Constants {
     const val HEADER_DEVICE_ID      = "X-Device-Id"
     const val HEADER_APP_VERSION    = "X-App-Version"
     const val HEADER_SERVER_VERSION = "X-Server-Version"
+
     /** Sent by InstanceLinkClient (value "instance_link") so the primary can tell a following
      *  ChurchPresenter instance apart from a regular mobile/browser companion client. */
     const val HEADER_CLIENT_ROLE    = "X-Client-Role"

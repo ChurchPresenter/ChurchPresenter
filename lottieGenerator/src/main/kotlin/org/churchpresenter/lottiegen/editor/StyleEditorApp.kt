@@ -48,7 +48,6 @@ import java.awt.Cursor
 private const val MIN_LEFT_PANE_DP = 300f
 private const val MAX_LEFT_PANE_DP = 700f
 
-
 /**
  * Root composable of the developer-only Animation Style Editor. Opened from the main
  * app's Developer menu (embedded — inherits the host theme) or standalone via

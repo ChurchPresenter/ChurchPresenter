@@ -54,5 +54,4 @@ class IsLottieFileTest {
         assertFalse(isLottieFile(File(folder, "nope.json")))
         assertFalse(isLottieFile(folder), "a directory is not a lottie")
     }
-
 }

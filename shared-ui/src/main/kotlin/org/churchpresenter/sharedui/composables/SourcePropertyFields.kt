@@ -254,4 +254,3 @@ fun updateTransform(source: SceneSource, transform: SourceTransform): SceneSourc
     is SceneSource.OmtSource -> source.copy(transform = transform)
     is SceneSource.BibleSource -> source.copy(transform = transform)
 }
-

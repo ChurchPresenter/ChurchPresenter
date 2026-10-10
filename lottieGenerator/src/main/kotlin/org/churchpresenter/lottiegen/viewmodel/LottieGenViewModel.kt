@@ -33,7 +33,6 @@ import java.time.Instant
 private const val SETTLE_DEBOUNCE_MS = 300L
 private const val TYPING_DEBOUNCE_MS = 100L
 
-
 class LottieGenViewModel(
     private val scope: CoroutineScope,
     private val outputDir: File? = null,

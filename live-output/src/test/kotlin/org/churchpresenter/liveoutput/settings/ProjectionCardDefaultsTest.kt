@@ -45,7 +45,7 @@ class ProjectionCardDefaultsTest {
                     ProjectionSettingsTab(
                         settings = settings,
                         onSettingsChange = { settings = it(settings) },
-                        companionServer = CompanionServer(),
+                        companionServer = CompanionServer(shutdownGraceMs = 0),
                         onIdentifyScreen = { identified += "screen" },
                         onIdentifyBrowserSource = { identified += "browser $it" },
                         onIdentifyNdi = { identified += "ndi $it" },
@@ -87,7 +87,7 @@ class ProjectionCardDefaultsTest {
                 ProjectionSettingsTab(
                     settings = state,
                     onSettingsChange = { state = it(state) },
-                    companionServer = CompanionServer(),
+                    companionServer = CompanionServer(shutdownGraceMs = 0),
                     detectScreens = { emptyList() },
                     ndiStatus = { NdiRuntimeStatus.NotInstalled },
                     omtStatus = { OmtRuntimeStatus.NotInstalled },

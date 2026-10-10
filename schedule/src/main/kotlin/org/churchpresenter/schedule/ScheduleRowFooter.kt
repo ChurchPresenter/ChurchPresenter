@@ -42,6 +42,7 @@ import org.churchpresenter.strings.generated.resources.tooltip_note
 import org.churchpresenter.strings.generated.resources.tooltip_note_clear
 import org.churchpresenter.strings.generated.resources.tooltip_note_done
 import org.churchpresenter.sharedui.composables.TooltipIconButton
+import org.churchpresenter.sharedui.composables.tabMovesFocus
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -175,7 +176,7 @@ private fun ScheduleRowNoteEditor(
         BasicTextField(
             value = noteText,
             onValueChange = onNoteTextChange,
-            modifier = Modifier
+            modifier = Modifier.tabMovesFocus()
                 .weight(1f)
                 .padding(horizontal = 10.dp, vertical = 8.dp),
             textStyle = MaterialTheme.typography.bodySmall.copy(

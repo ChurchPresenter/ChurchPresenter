@@ -56,15 +56,19 @@ internal fun pickerFor(row: ScheduleItem?, books: List<CalendarBibleBook>, plann
 internal class PickerState(initialKind: PickKind) {
     var kind by mutableStateOf(initialKind)
     var query by mutableStateOf("")
+
     /** The ministry tab's second line -- who, or a note -- typed beside the title in [query]. */
     var detail by mutableStateOf("")
+
     /** The ministry tab's length, as typed -- `4:30`; its planned seconds once it parses. */
     var duration by mutableStateOf("")
     var songBook by mutableStateOf<String?>(null)
+
     /** Which kind of preset the Presets tab is narrowed to, or null for all of them. */
     var presetKind by mutableStateOf<PresetKind?>(null)
     var book by mutableStateOf<CalendarBibleBook?>(null)
     var chapter by mutableStateOf<Int?>(null)
+
     // The verse range being built: the first tap anchors it, a second tap extends it.
     private var anchor by mutableStateOf<Int?>(null)
     private var extent by mutableStateOf<Int?>(null)

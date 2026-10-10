@@ -269,4 +269,3 @@ private fun Route.bibleSelectRoutes(
                  * schedule items are still accessible without polluting this list.
                  */
 }
-

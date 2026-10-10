@@ -336,7 +336,6 @@ fun ProjectionSettingsTab(
     }
 }
 
-
 /**
  * Where the presenter window sits: four inset fields laid out around a picture of the screen.
  *
@@ -351,7 +350,6 @@ private fun WindowPositionCard(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
     SettingsSection(title = stringResource(Res.string.window_position)) {
-
         // Visual representation box with position fields
         Column(
             modifier = Modifier.fillMaxWidth(HALF_WIDTH),
@@ -440,9 +438,9 @@ private fun WindowPositionCard(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             modifier = Modifier.fillMaxWidth()
         )
-
     }
 }
+
 /**
  * The Audio Output card: which device the player opens, and where VLC lives.
  *
@@ -627,7 +625,7 @@ private fun VlcPathRow(
                 )
             },
             isError = vlcPathError,
-            supportingText = if (vlcPathError) {{ Text(stringResource(Res.string.vlc_path_invalid)) }} else null,
+            supportingText = if (vlcPathError) { { Text(stringResource(Res.string.vlc_path_invalid)) } } else null,
             singleLine = true,
             modifier = Modifier.weight(1f)
         )
@@ -659,7 +657,6 @@ private fun VlcPathRow(
         }
     }
 }
-
 
 /**
  * Every target a row's display dropdown can offer: None, each non-primary monitor, each DeckLink.

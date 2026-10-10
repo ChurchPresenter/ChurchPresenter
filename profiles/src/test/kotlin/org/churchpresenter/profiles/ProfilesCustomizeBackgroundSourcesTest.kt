@@ -49,7 +49,6 @@ class ProfilesCustomizeBackgroundSourcesTest {
         }
     }
 
-
     @Test
     fun `an image surface draws neither`() {
         profilesTab(output(Constants.BACKGROUND_IMAGE)) { _ ->
@@ -101,5 +100,4 @@ class ProfilesCustomizeBackgroundSourcesTest {
             assertEquals(before, get().stored().camera, "the device outlives the type")
         }
     }
-
 }

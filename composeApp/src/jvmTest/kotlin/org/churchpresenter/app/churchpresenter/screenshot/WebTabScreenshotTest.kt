@@ -132,7 +132,8 @@ class WebTabScreenshotTest {
     @Test
     fun `live, waiting long enough for the hint`() = shoot("live_waiting_hint") { presenter ->
         goLive(presenter)
-        mainClock.advanceTimeBy(7_001)
+        // One jump to the hint's deadline, not 440 frames of the spinner on the way there.
+        mainClock.advanceTimeBy(7_001, ignoreFrameDuration = true)
         waitForIdle()
     }
 

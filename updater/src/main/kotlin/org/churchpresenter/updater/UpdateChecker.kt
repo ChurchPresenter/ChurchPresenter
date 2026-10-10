@@ -25,6 +25,7 @@ import kotlin.time.Duration.Companion.seconds
 private const val CONNECT_TIMEOUT_MS = 5_000
 private const val READ_TIMEOUT_MS = 5_000
 private const val HTTP_OK = 200
+
 /**
  * A ceiling on the release notes kept, against a runaway body — not a length to show. The window's
  * notes panel scrolls, and a release's notes run to a few thousand characters.
@@ -43,7 +44,12 @@ data class UpdateInfo(
     val publishedAt: Instant? = null,
     /** The installer's size in bytes, or null when GitHub did not say. */
     val downloadSize: Long? = null,
+    /** The installer's SHA-256 as GitHub reports it for the release asset; null when it gave none. */
+    val downloadSha256: String? = null,
 )
+
+/** One release asset: where it is, and what GitHub says of its size and digest. */
+private class InstallerAsset(val url: String, val size: Long?, val sha256: String?)
 
 sealed class UpdateCheckResult {
     data class Available(val info: UpdateInfo) : UpdateCheckResult()
@@ -56,8 +62,10 @@ object UpdateChecker {
         "https://api.github.com/repos/ChurchPresenter/ChurchPresenter/releases?per_page=50"
     const val RELEASES_URL =
         "https://github.com/ChurchPresenter/ChurchPresenter/releases/latest"
+
     /** Where the pull requests a release's notes name are, by number. */
     const val PULLS_URL = "https://github.com/ChurchPresenter/ChurchPresenter/pull"
+
     // Count-only beacon on churchpresenter.org that attributes downloads to the
     // app's updater (vs. the website's download buttons vs. GitHub directly).
     private const val DOWNLOAD_BEACON_URL =
@@ -143,18 +151,21 @@ object UpdateChecker {
     }
 
     /**
-     * The installer for the detected OS among the release's assets, with its size when GitHub gave
-     * one, or null when the release has none.
+     * The installer for the detected OS among the release's assets, with its size and SHA-256 (the
+     * asset's `sha256:…` `digest`) when GitHub gave them, or null when the release has none.
      */
-    private fun installerAsset(obj: JsonObject): Pair<String, Long?>? {
+    private fun installerAsset(obj: JsonObject): InstallerAsset? {
         val assets = obj["assets"]?.jsonArray?.map { it.jsonObject } ?: return null
-        val sizes = assets.mapNotNull { asset ->
+        val byUrl = assets.mapNotNull { asset ->
             asset["browser_download_url"]?.jsonPrimitive?.contentOrNull?.let { url ->
-                url to asset["size"]?.jsonPrimitive?.longOrNull
+                url to InstallerAsset(
+                    url = url,
+                    size = asset["size"]?.jsonPrimitive?.longOrNull,
+                    sha256 = asset["digest"]?.jsonPrimitive?.contentOrNull?.removePrefix("sha256:"),
+                )
             }
         }.toMap()
-        val url = selectDownloadUrl(sizes.keys.toList()) ?: return null
-        return url to sizes[url]
+        return selectDownloadUrl(byUrl.keys.toList())?.let(byUrl::get)
     }
 
     /**
@@ -163,7 +174,7 @@ object UpdateChecker {
      */
     private fun installableRelease(obj: JsonObject, includePrereleases: Boolean): UpdateInfo? {
         if (obj["draft"]?.jsonPrimitive?.booleanOrNull == true) return null
-        val (downloadUrl, downloadSize) = installerAsset(obj) ?: return null
+        val installer = installerAsset(obj) ?: return null
         val latestVersion = obj["tag_name"]?.jsonPrimitive?.contentOrNull?.removePrefix("v") ?: return null
         // A tag that is not `YY.MAJOR.MINOR` — the rolling `nightly` pre-release — can never be newer
         // than anything, and because it is re-created every night it is always the newest entry in
@@ -177,10 +188,11 @@ object UpdateChecker {
             latestVersion = latestVersion,
             releaseUrl = obj["html_url"]?.jsonPrimitive?.contentOrNull ?: RELEASES_URL,
             releaseNotes = capReleaseNotes(obj["body"]?.jsonPrimitive?.contentOrNull ?: ""),
-            downloadUrl = downloadUrl,
+            downloadUrl = installer.url,
             isPrerelease = isPrerelease,
             publishedAt = obj["published_at"]?.jsonPrimitive?.contentOrNull?.let(::parseInstantOrNull),
-            downloadSize = downloadSize,
+            downloadSize = installer.size,
+            downloadSha256 = installer.sha256,
         )
     }
 

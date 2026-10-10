@@ -50,6 +50,7 @@ object DetectionLogger {
     // shutdown wait for the queue to hit disk.
     private val writeQueue = java.util.concurrent.LinkedBlockingQueue<Pair<File, String>>()
     private val pending = java.util.concurrent.atomic.AtomicInteger(0)
+
     // Started, never held: nothing joins or interrupts it, and a `val` nobody reads only looks like
     // an oversight. It is a daemon, so it dies with the JVM.
     init {
@@ -72,6 +73,7 @@ object DetectionLogger {
         val deadline = System.currentTimeMillis() + 5_000
         while (pending.get() > 0 && System.currentTimeMillis() < deadline) Thread.sleep(DRAIN_POLL_MS)
     }
+
     // Files (by absolute path) that have already had their one session header written. A set rather
     // than a single flag, so each session-keyed file gets exactly one header — appending to an
     // existing file (CP restart) just continues it, and a new session id starts a fresh header.
@@ -272,7 +274,6 @@ object DetectionLogger {
             append('}')
         }
     }
-
 }
 
 /** A sticky book/chapter moving from the previous values to the new ones, for the sticky log. */

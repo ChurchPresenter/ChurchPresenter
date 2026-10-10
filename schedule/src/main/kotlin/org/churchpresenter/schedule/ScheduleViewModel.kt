@@ -79,6 +79,7 @@ class ScheduleViewModel(
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     internal val autoSaveFile = File(System.getProperty("user.home"), ".churchpresenter/autosave_schedule.tmp")
+
     @Volatile private var isDirty = false
 
     init {
