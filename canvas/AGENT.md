@@ -47,11 +47,13 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 
 ## Coverage floor
 
-Branches **81%** and complexity **77%**; the other four counters keep the shared 85%. What is left is
-mostly not untested behavior: building the libvlc player, killing zombie headless browsers (which on a
-developer's machine would kill their real ones), the coroutine plumbing around the ffmpeg pipe, the
-`minOf`/`maxOf` empty-list exits in shape math, and Compose's per-value change checks on click
-handlers. Raise the floors as any of that becomes reachable; never lower them without asking.
+Branches **84%** and complexity **81%**; the other four counters keep the shared 85%. What is left is
+mostly not untested behavior: building the libvlc player, the headless browser's own process and
+DevTools traffic (starting one, or killing zombie ones, would touch a developer's real browser), the
+coroutine plumbing around the ffmpeg pipe, the native DeckLink/X11/Win32 calls, the `minOf`/`maxOf`
+empty-list exits in shape math, and Compose's remembered-lambda checks on click handlers (the
+"nothing changed but the slot is empty" exit, which no recomposition reaches). Raise the floors as any
+of that becomes reachable; never lower them without asking.
 
 ## Package
 

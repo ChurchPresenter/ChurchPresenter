@@ -101,7 +101,9 @@ class SourcePropertiesCallbackSwapTest {
     fun `swapping the callback leaves every clock mode as it was`() {
         listOf(ClockModes.COUNTDOWN, ClockModes.COUNT_UP, ClockModes.TARGET_TIME).forEach { mode ->
             assertSwapChangesNothing(
-                SceneSource.ClockSource(id = "clk-$mode", name = mode, mode = mode, timeFormat = "12h", targetMinute = 1),
+                SceneSource.ClockSource(
+                    id = "clk-$mode", name = mode, mode = mode, timeFormat = "12h", targetMinute = 1,
+                ),
             )
         }
     }
@@ -109,12 +111,16 @@ class SourcePropertiesCallbackSwapTest {
     @Test
     fun `swapping the callback leaves WiFi and transparent QR editors as they were`() {
         assertSwapChangesNothing(SceneSource.QRCodeSource(id = "qr-wifi", name = "WiFi", contentType = "wifi"))
-        assertSwapChangesNothing(SceneSource.QRCodeSource(id = "qr-clear", name = "Clear", transparentBackground = true))
+        assertSwapChangesNothing(
+            SceneSource.QRCodeSource(id = "qr-clear", name = "Clear", transparentBackground = true),
+        )
     }
 
     @Test
     fun `swapping the callback leaves a transparent text editor as it was`() =
-        assertSwapChangesNothing(SceneSource.TextSource(id = "txt-clear", name = "Clear", backgroundColor = "#00000000"))
+        assertSwapChangesNothing(
+            SceneSource.TextSource(id = "txt-clear", name = "Clear", backgroundColor = "#00000000"),
+        )
 
     @Test
     fun `swapping the callback leaves a window capture editor as it was`() =

@@ -10,6 +10,7 @@ import org.churchpresenter.core.models.songs.LyricSection
 import org.churchpresenter.core.models.songs.SongBackground
 import org.churchpresenter.core.models.songs.SongBackgroundType
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.OutputProfile
@@ -152,5 +153,41 @@ class ProfilesSmallLogicTest {
         val titles = PreviewSampleSlot.entries.map { titleSlideSample(SongSettings(), it).title }
         assertEquals(3, titles.distinct().size)
         assertTrue(titles.all { it.isNotBlank() })
+    }
+
+    @Test
+    fun `a background is described by its colour, its file's name or its kind`() {
+        val said = mutableMapOf<String, String>()
+        runComposeUiTest {
+            setContent {
+                val c = Constants.BACKGROUND_COLOR
+                said["color"] = describeBackground(BackgroundConfig(backgroundType = c, backgroundColor = "#123456"))
+                said["image"] = describeBackground(
+                    BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE, backgroundImage = "C:\\pics\\stage.jpg"),
+                )
+                said["noImage"] = describeBackground(BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE))
+                said["video"] = describeBackground(
+                    BackgroundConfig(backgroundType = Constants.BACKGROUND_VIDEO, backgroundVideo = "/clips/loop.mp4"),
+                )
+                said["noVideo"] = describeBackground(BackgroundConfig(backgroundType = Constants.BACKGROUND_VIDEO))
+                said["lottie"] = describeBackground(
+                    BackgroundConfig(backgroundType = Constants.BACKGROUND_LOTTIE, backgroundLottie = "/bands/wave.json"),
+                )
+                said["noLottie"] = describeBackground(BackgroundConfig(backgroundType = Constants.BACKGROUND_LOTTIE))
+                said["camera"] = describeBackground(BackgroundConfig(backgroundType = Constants.BACKGROUND_CAMERA))
+                said["followed"] = backgroundSummary("App default", null)
+                said["ownColor"] = backgroundSummary("Own", BackgroundConfig(backgroundType = c, backgroundColor = "#000000"))
+                said["ownCamera"] = backgroundSummary("Own", BackgroundConfig(backgroundType = Constants.BACKGROUND_CAMERA))
+            }
+            waitForIdle()
+        }
+        assertEquals("#123456", said["color"])
+        assertEquals("stage.jpg", said["image"])
+        assertEquals("loop.mp4", said["video"])
+        assertEquals("wave", said["lottie"])
+        listOf("noImage", "noVideo", "noLottie", "camera").forEach { assertTrue(said.getValue(it).isNotBlank(), it) }
+        assertEquals("App default", said["followed"])
+        assertTrue(said.getValue("ownColor").startsWith("Own · ") && said.getValue("ownColor").endsWith(" #000000"))
+        assertEquals("Own · ${said["camera"]}", said["ownCamera"], "a kind described by its kind is said once")
     }
 }

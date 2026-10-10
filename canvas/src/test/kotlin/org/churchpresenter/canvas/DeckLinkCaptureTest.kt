@@ -190,7 +190,10 @@ class DeckLinkCaptureTest {
             entries.forEach { DeckLinkCapture(source, it, reports, FakeCard(opens = false)).run() }
         }
 
-        assertEquals(listOf(CameraFailure.DECKLINK_OPEN_FAILED, CameraFailure.DECKLINK_OPEN_FAILED), entries.map { it.error.value })
+        assertEquals(
+            listOf(CameraFailure.DECKLINK_OPEN_FAILED, CameraFailure.DECKLINK_OPEN_FAILED),
+            entries.map { it.error.value },
+        )
         assertFalse(reports.claim(source.deckLinkIndex), "the card's one report was already spent")
     }
 }

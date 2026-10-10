@@ -7,6 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -23,10 +24,11 @@ import org.churchpresenter.settings.OutputProfile
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class ProfilePagesRecompositionTest {
 
-    private class Churn(val settings: AppSettings, val writes: Int, val profile: OutputProfile)
+    private class Churn(val settings: AppSettings, val writes: Int, val profile: OutputProfile, val groups: Int)
 
     private fun churn(
         initial: AppSettings,
@@ -46,23 +48,32 @@ class ProfilePagesRecompositionTest {
             var current by mutableStateOf(profile)
             var tick by mutableIntStateOf(0)
             var writes = 0
+            var folded by mutableStateOf(emptySet<String>())
+            val present = mutableSetOf<String>()
             setContent {
                 val onChange = remember { { t: (AppSettings) -> AppSettings -> writes++; state = t(state) } }
                 val onProfile = remember { { p: OutputProfile -> writes++; current = p } }
                 MaterialTheme {
-                    Column(Modifier.verticalScroll(rememberScrollState()).testTag("churn_$tick")) {
-                        page(state, onChange, current, onProfile)
+                    CompositionLocalProvider(LocalFoldedGroups provides FoldedGroups(folded, present) { folded = it }) {
+                        Column(Modifier.verticalScroll(rememberScrollState()).testTag("churn_$tick")) {
+                            page(state, onChange, current, onProfile)
+                        }
                     }
                 }
             }
             waitForIdle()
             tick++
             waitForIdle()
+            val groups = present.size
+            folded = present.toSet()
+            waitForIdle()
             edits.forEach { edit -> state = edit(state); waitForIdle() }
             profileEdits.forEach { edit -> current = edit(current); waitForIdle() }
             state = state.copy(schedulePanelWidthDp = state.schedulePanelWidthDp + 1)
             waitForIdle()
-            result = Churn(state, writes, current)
+            folded = emptySet()
+            waitForIdle()
+            result = Churn(state, writes, current, groups)
         }
         return result!!
     }
@@ -76,6 +87,7 @@ class ProfilePagesRecompositionTest {
             listOf(::unrelated, { s -> s.copy(sttSettings = s.sttSettings.copy(maxLines = 5)) }),
         ) { d, c, _, _ -> ProfileCaptionsPage(d, c) }
         assertEquals(0, out.writes)
+        assertTrue(out.groups > 3, "every group folded and opened again: ${out.groups}")
         assertEquals(5, out.settings.sttSettings.maxLines)
     }
 

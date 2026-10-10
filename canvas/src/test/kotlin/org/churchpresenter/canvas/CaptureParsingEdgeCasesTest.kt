@@ -150,8 +150,9 @@ class CaptureParsingEdgeCasesTest {
 
     @Test
     fun `a stream announcement with a zero dimension is not a size`() {
-        assertNull(parseFfmpegVideoDimensions("Stream #0:0: Video: rawvideo (BGRA / 0x41524742), bgra, 00x720, 30 fps"))
-        assertNull(parseFfmpegVideoDimensions("Stream #0:0: Video: rawvideo (BGRA / 0x41524742), bgra, 1280x00, 30 fps"))
+        val announced = "Stream #0:0: Video: rawvideo (BGRA / 0x41524742), bgra"
+        assertNull(parseFfmpegVideoDimensions("$announced, 00x720, 30 fps"))
+        assertNull(parseFfmpegVideoDimensions("$announced, 1280x00, 30 fps"))
         assertNull(parseFfmpegVideoDimensions("Stream #0:0: Video: rawvideo, bgra, 30 fps"))
     }
 

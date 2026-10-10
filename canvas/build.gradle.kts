@@ -14,8 +14,8 @@ group = "org.churchpresenter"
 // sources run on (libvlc, the ffmpeg pipe's coroutine plumbing, headless Chrome's own processes) and
 // Compose's per-value change checks on click handlers. See AGENT.md.
 extra["coverageFloors"] = mapOf(
-    "BRANCH" to "0.81",
-    "COMPLEXITY" to "0.77",
+    "BRANCH" to "0.84",
+    "COMPLEXITY" to "0.81",
 )
 
 kotlin {

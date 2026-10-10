@@ -256,4 +256,40 @@ class SceneCanvasSelectionTest {
             assertEquals(0f, reports.transforms.last().second.x)
             assertEquals(0f, reports.transforms.last().second.y)
         }
+
+    @Test
+    fun `dragging the rotate grip turns the selected source the way it was dragged`() =
+        canvas(listOf(shape(x = 0.1f, y = 0.4f)), selectedId = "shape-1") { reports ->
+            // The grip sits 25dp above the top edge's middle: (100, 90 - 25).
+            onNodeWithTag(canvasTag).performMouseInput {
+                moveTo(Offset(100f, 65f))
+                press()
+                moveTo(Offset(110f, 66f))
+                moveTo(Offset(140f, 75f))
+                moveTo(Offset(170f, 110f))
+                release()
+            }
+            waitForIdle()
+
+            val turned = reports.transforms.last().second
+            assertTrue(turned.rotation > 0f, "a drag to the right turns it clockwise, was ${turned.rotation}")
+            assertEquals(0.3f, turned.width, "turning leaves the size alone")
+        }
+
+    @Test
+    fun `dragging the bottom-right grip grows the selected source`() =
+        canvas(listOf(shape(x = 0.1f, y = 0.4f)), selectedId = "shape-1") { reports ->
+            onNodeWithTag(canvasTag).performMouseInput {
+                moveTo(Offset(160f, 157f))
+                press()
+                moveTo(Offset(170f, 162f))
+                moveTo(Offset(190f, 172f))
+                release()
+            }
+            waitForIdle()
+
+            val grown = reports.transforms.last().second
+            assertTrue(grown.width > 0.3f && grown.height > 0.3f, "both sides grow, was $grown")
+            assertEquals(0.1f, grown.x, "and the top-left corner stays put")
+        }
 }

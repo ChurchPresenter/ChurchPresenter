@@ -8,6 +8,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -136,5 +137,41 @@ class ProfileListTest {
     fun `a follower sits under its master with its change count`() = profilesTab(doc()) { _ ->
         val inRow = hasTextExactly("1 changes") and hasAnyAncestor(hasTestTag(profileRowTag("youth")))
         assertEquals(1, onAllNodes(inRow, useUnmergedTree = true).fetchSemanticsNodes().size)
+    }
+
+    @Test
+    fun `renaming ends on Esc, and any other key keeps the field open`() = profilesTab(doc()) { get ->
+        menu("stream", "Rename")
+        onNodeWithTag(PROFILE_RENAME_FIELD_TAG).performTextReplacement("Stream")
+        onNodeWithTag(PROFILE_RENAME_FIELD_TAG).performKeyInput { pressKey(Key.A) }
+        waitForIdle()
+        assertEquals(1, countTag(PROFILE_RENAME_FIELD_TAG))
+        onNodeWithTag(PROFILE_RENAME_FIELD_TAG).performKeyInput { pressKey(Key.Escape) }
+        waitForIdle()
+        assertEquals(0, countTag(PROFILE_RENAME_FIELD_TAG))
+        assertEquals("Stream", get().profile("stream").name, "every keystroke was kept")
+    }
+
+    @Test
+    fun `a follower some of whose sections follow other masters says how many`() {
+        val base = doc()
+        val proj = base.projectionSettings
+        val more = base.copy(
+            projectionSettings = proj.copy(
+                outputProfiles = proj.outputProfiles + listOf(
+                    OutputProfile(
+                        id = "kids", name = "Kids", parentId = "main",
+                        sectionMasters = mapOf("bible" to "stream", "songs" to "spare", "qa" to "main"),
+                    ),
+                    OutputProfile(id = "foyer", name = "Foyer", parentId = "main", sectionMasters = mapOf("bible" to "stream")),
+                ),
+            ),
+        )
+        profilesTab(more) { _ ->
+            val twoMore = hasText("+2 masters", substring = true) and hasAnyAncestor(hasTestTag(profileRowTag("kids")))
+            assertEquals(1, onAllNodes(twoMore, useUnmergedTree = true).fetchSemanticsNodes().size)
+            val oneMore = hasText("+1 master", substring = true) and hasAnyAncestor(hasTestTag(profileRowTag("foyer")))
+            assertEquals(1, onAllNodes(oneMore, useUnmergedTree = true).fetchSemanticsNodes().size)
+        }
     }
 }
