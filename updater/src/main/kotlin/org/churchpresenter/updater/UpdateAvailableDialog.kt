@@ -1,6 +1,5 @@
 package org.churchpresenter.updater
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -30,19 +28,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
-import androidx.compose.foundation.shape.CircleShape
 import org.churchpresenter.theme.AppShape
 import org.churchpresenter.strings.generated.resources.Res
-import org.churchpresenter.strings.generated.resources.participate_in_prereleases
 import org.churchpresenter.strings.generated.resources.update_dialog_check_interval
-import org.churchpresenter.strings.generated.resources.update_dialog_message
 import org.churchpresenter.strings.generated.resources.update_dialog_title
 import org.churchpresenter.strings.generated.resources.update_dialog_up_to_date_title
 import org.churchpresenter.strings.generated.resources.update_interval_every_2_months
@@ -60,7 +53,6 @@ import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import java.io.OutputStream
 import java.io.InputStream
-import org.churchpresenter.sharedui.composables.LabeledSwitch
 import org.churchpresenter.sharedui.utils.SystemClipboard
 import org.churchpresenter.sharedui.utils.UrlOpener
 
@@ -121,39 +113,6 @@ private fun updateIntervalLabel(interval: UpdateCheckInterval): String = when (i
     UpdateCheckInterval.NEVER -> stringResource(Res.string.update_interval_never)
 }
 
-/**
- * Circular hero glyph shown above the dialog headline: a solid [circleColor] disc with a
- * centered [icon], wrapped in a soft same-color halo. Colors come from the active theme so
- * the glyph tracks light/dark and every accent theme.
- */
-@Composable
-internal fun HeroIcon(
-    icon: ImageVector,
-    circleColor: Color,
-    iconColor: Color
-) {
-    Box(modifier = Modifier.size(72.dp), contentAlignment = Alignment.Center) {
-        Box(
-            modifier = Modifier
-                .size(72.dp)
-                .background(circleColor.copy(alpha = 0.15f), CircleShape)
-        )
-        Box(
-            modifier = Modifier
-                .size(56.dp)
-                .background(circleColor, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconColor,
-                modifier = Modifier.size(30.dp)
-            )
-        }
-    }
-}
-
 @Composable
 private fun UpdateIntervalDropdown(
     selected: UpdateCheckInterval,
@@ -191,6 +150,7 @@ fun UpdateAvailableDialog(
     onParticipateInPrereleasesChange: (Boolean) -> Unit,
     updateCheckInterval: UpdateCheckInterval,
     onUpdateCheckIntervalChange: (UpdateCheckInterval) -> Unit,
+    onSkipVersion: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
     if (result == null) return
@@ -204,8 +164,8 @@ fun UpdateAvailableDialog(
     DialogWindow(
         onCloseRequest = onDismiss,
         state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, 440.dp, dialogHeight),
-            width = 440.dp,
+            position = centeredOnMainWindow(mainWindowState, UPDATE_DIALOG_WIDTH, dialogHeight),
+            width = UPDATE_DIALOG_WIDTH,
             height = dialogHeight
         ),
         title = stringResource(
@@ -223,7 +183,9 @@ fun UpdateAvailableDialog(
                 onUpdateCheckIntervalChange = onUpdateCheckIntervalChange,
                 downloadState = flow.state,
                 onDownload = { flow.download() },
+                onCancelDownload = flow::cancel,
                 onInstall = flow::install,
+                onSkipVersion = onSkipVersion,
                 onOpenReleasePage = { UrlOpener.open(it) },
                 onDismiss = onDismiss
             )
@@ -231,20 +193,22 @@ fun UpdateAvailableDialog(
     }
 }
 
+private val UPDATE_DIALOG_WIDTH = 520.dp
+
 /**
- * The window's height. The update-available state's hero sits above a full release-notes panel and
- * needs the extra room; the up-to-date state's flexible spacer absorbs the hero at the original
- * heights. A manual check adds the check-interval row.
+ * The window's height. The update-available state's release notes take whatever room is left, so it
+ * is the tall one; the up-to-date state is the hero and the settings. A manual check adds the
+ * check-interval row.
  */
 internal fun updateDialogHeight(hasUpdate: Boolean, isManualCheck: Boolean): Dp = when {
-    hasUpdate -> if (isManualCheck) 548.dp else 500.dp
-    else -> if (isManualCheck) 468.dp else 420.dp
+    hasUpdate -> if (isManualCheck) 620.dp else 580.dp
+    else -> if (isManualCheck) 330.dp else 290.dp
 }
 
 /**
- * Everything the update window shows: the version and its release notes, the check-interval and
- * pre-release controls, the download progress area, and the one button whose label depends on how
- * far the download has got.
+ * Everything the update window shows: the jump from the running version to the new one, its release
+ * notes, the beta and check-interval settings, and a footer whose buttons depend on how far the
+ * download has got.
  *
  * Held apart from [UpdateAvailableDialog] because that function's other statements all reach the
  * machine — the `DialogWindow` it opens, the HTTP download, launching the installer and quitting,
@@ -253,8 +217,8 @@ internal fun updateDialogHeight(hasUpdate: Boolean, isManualCheck: Boolean): Dp 
  *
  * [downloadState] is passed in rather than owned here so a test can put the dialog into each stage
  * of a download — mid-progress, finished, failed — without one taking place. That state machine is
- * the point of the dialog: it decides whether the operator is offered Download, a disabled
- * Downloading, Install Now, or a fallback link to the release page.
+ * the point of the dialog: it decides whether the operator is offered Download, a progress bar with
+ * Cancel, Install Now, or a fallback link to the release page.
  */
 @Composable
 internal fun UpdateAvailableContent(
@@ -269,6 +233,8 @@ internal fun UpdateAvailableContent(
     onInstall: (File) -> Unit,
     onOpenReleasePage: (String) -> Unit,
     onDismiss: () -> Unit,
+    onCancelDownload: () -> Unit = {},
+    onSkipVersion: (String) -> Unit = {},
     /** How the release address is copied, for when the browser opens somewhere unhelpful. */
     copyText: (String) -> Unit = { SystemClipboard.copy(it) }
 ) {
@@ -276,63 +242,28 @@ internal fun UpdateAvailableContent(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+        color = MaterialTheme.colorScheme.surface
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        Column(modifier = Modifier.fillMaxSize()) {
             if (updateInfo != null) {
-                HeroIcon(
-                    icon = Icons.Default.Download,
-                    circleColor = MaterialTheme.colorScheme.primary,
-                    iconColor = MaterialTheme.colorScheme.onPrimary
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = stringResource(Res.string.update_dialog_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = stringResource(Res.string.update_dialog_message, updateInfo.latestVersion),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                ChannelBadge(updateInfo.isPrerelease)
-                ReleaseNotes(updateInfo.releaseNotes)
-
-                // Progress area
-                DownloadProgress(downloadState)
+                UpdateHero(updateInfo)
+                WhatsNew(updateInfo, onOpenReleasePage)
+                Spacer(modifier = Modifier.height(10.dp))
             } else {
-                UpToDateHeader()
+                UpToDateHero()
                 Spacer(modifier = Modifier.weight(1f))
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-            HorizontalDivider()
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                LabeledSwitch(
-                    checked = participateInPrereleases,
-                    onCheckedChange = onParticipateInPrereleasesChange,
-                    label = stringResource(Res.string.participate_in_prereleases),
-                    modifier = Modifier.weight(1f),
-                    controlAtEnd = true,
-                )
-            }
+            BetaRow(participateInPrereleases, onParticipateInPrereleasesChange)
             if (isManualCheck) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = stringResource(Res.string.update_dialog_check_interval),
                         style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.weight(1f)
                     )
                     UpdateIntervalDropdown(
@@ -341,13 +272,30 @@ internal fun UpdateAvailableContent(
                     )
                 }
             }
-            HorizontalDivider()
-            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider(
+                modifier = Modifier.padding(top = 12.dp),
+                color = MaterialTheme.colorScheme.outlineVariant,
+            )
 
             if (updateInfo != null) {
-                UpdateActions(updateInfo, downloadState, onDismiss, onInstall, onOpenReleasePage, onDownload, copyText)
+                UpdateFooter(
+                    updateInfo,
+                    downloadState,
+                    UpdateFooterActions(
+                        onDownload = onDownload,
+                        onCancel = onCancelDownload,
+                        onInstall = onInstall,
+                        onSkip = {
+                            onSkipVersion(updateInfo.latestVersion)
+                            onDismiss()
+                        },
+                        onDismiss = onDismiss,
+                        onOpenReleasePage = onOpenReleasePage,
+                    ),
+                    copyText = copyText,
+                )
             } else {
-                UpToDateActions(onOpenReleasePage, onDismiss, copyText)
+                UpToDateFooter(onOpenReleasePage, onDismiss, copyText)
             }
         }
     }

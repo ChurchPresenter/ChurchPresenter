@@ -14,15 +14,23 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 import java.net.HttpURLConnection
 import java.net.URI
+import java.time.Instant
+import java.time.format.DateTimeParseException
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 private const val CONNECT_TIMEOUT_MS = 5_000
 private const val READ_TIMEOUT_MS = 5_000
 private const val HTTP_OK = 200
-private const val RELEASE_NOTES_MAX_CHARS = 500
+
+/**
+ * A ceiling on the release notes kept, against a runaway body — not a length to show. The window's
+ * notes panel scrolls, and a release's notes run to a few thousand characters.
+ */
+private const val RELEASE_NOTES_MAX_CHARS = 20_000
 
 data class UpdateInfo(
     val latestVersion: String,
@@ -30,9 +38,18 @@ data class UpdateInfo(
     val releaseNotes: String,
     val downloadUrl: String? = null,
     val isPrerelease: Boolean = false,
+    /** The version running now, so the window can show the jump from one to the other. */
+    val currentVersion: String = "",
+    /** When GitHub published the release, or null when it did not say. */
+    val publishedAt: Instant? = null,
+    /** The installer's size in bytes, or null when GitHub did not say. */
+    val downloadSize: Long? = null,
     /** The installer's SHA-256 as GitHub reports it for the release asset; null when it gave none. */
     val downloadSha256: String? = null,
 )
+
+/** One release asset: where it is, and what GitHub says of its size and digest. */
+private class InstallerAsset(val url: String, val size: Long?, val sha256: String?)
 
 sealed class UpdateCheckResult {
     data class Available(val info: UpdateInfo) : UpdateCheckResult()
@@ -45,6 +62,9 @@ object UpdateChecker {
         "https://api.github.com/repos/ChurchPresenter/ChurchPresenter/releases?per_page=50"
     const val RELEASES_URL =
         "https://github.com/ChurchPresenter/ChurchPresenter/releases/latest"
+
+    /** Where the pull requests a release's notes name are, by number. */
+    const val PULLS_URL = "https://github.com/ChurchPresenter/ChurchPresenter/pull"
 
     // Count-only beacon on churchpresenter.org that attributes downloads to the
     // app's updater (vs. the website's download buttons vs. GitHub directly).
@@ -121,7 +141,7 @@ object UpdateChecker {
                 .firstNotNullOfOrNull { installableRelease(it.jsonObject, includePrereleases) }
                 ?: return UpdateCheckResult.UpToDate
             if (isNewerVersion(candidate.latestVersion, currentVersion)) {
-                UpdateCheckResult.Available(candidate)
+                UpdateCheckResult.Available(candidate.copy(currentVersion = currentVersion))
             } else {
                 UpdateCheckResult.UpToDate
             }
@@ -131,17 +151,21 @@ object UpdateChecker {
     }
 
     /**
-     * The installer for the detected OS among the release's assets and its SHA-256 (from the
-     * asset's `sha256:…` `digest`, null when GitHub gave none), or null when it has no installer.
+     * The installer for the detected OS among the release's assets, with its size and SHA-256 (the
+     * asset's `sha256:…` `digest`) when GitHub gave them, or null when the release has none.
      */
-    private fun installerAsset(obj: JsonObject): Pair<String, String?>? {
-        val assets = obj["assets"]?.jsonArray ?: return null
-        val digests = assets.mapNotNull { asset ->
-            val url = asset.jsonObject["browser_download_url"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
-            url to asset.jsonObject["digest"]?.jsonPrimitive?.contentOrNull?.removePrefix("sha256:")
+    private fun installerAsset(obj: JsonObject): InstallerAsset? {
+        val assets = obj["assets"]?.jsonArray?.map { it.jsonObject } ?: return null
+        val byUrl = assets.mapNotNull { asset ->
+            asset["browser_download_url"]?.jsonPrimitive?.contentOrNull?.let { url ->
+                url to InstallerAsset(
+                    url = url,
+                    size = asset["size"]?.jsonPrimitive?.longOrNull,
+                    sha256 = asset["digest"]?.jsonPrimitive?.contentOrNull?.removePrefix("sha256:"),
+                )
+            }
         }.toMap()
-        val url = selectDownloadUrl(digests.keys.toList()) ?: return null
-        return url to digests[url]
+        return selectDownloadUrl(byUrl.keys.toList())?.let(byUrl::get)
     }
 
     /**
@@ -150,7 +174,7 @@ object UpdateChecker {
      */
     private fun installableRelease(obj: JsonObject, includePrereleases: Boolean): UpdateInfo? {
         if (obj["draft"]?.jsonPrimitive?.booleanOrNull == true) return null
-        val (downloadUrl, downloadSha256) = installerAsset(obj) ?: return null
+        val installer = installerAsset(obj) ?: return null
         val latestVersion = obj["tag_name"]?.jsonPrimitive?.contentOrNull?.removePrefix("v") ?: return null
         // A tag that is not `YY.MAJOR.MINOR` — the rolling `nightly` pre-release — can never be newer
         // than anything, and because it is re-created every night it is always the newest entry in
@@ -163,10 +187,12 @@ object UpdateChecker {
         return UpdateInfo(
             latestVersion = latestVersion,
             releaseUrl = obj["html_url"]?.jsonPrimitive?.contentOrNull ?: RELEASES_URL,
-            releaseNotes = (obj["body"]?.jsonPrimitive?.contentOrNull ?: "").take(RELEASE_NOTES_MAX_CHARS),
-            downloadUrl = downloadUrl,
+            releaseNotes = capReleaseNotes(obj["body"]?.jsonPrimitive?.contentOrNull ?: ""),
+            downloadUrl = installer.url,
             isPrerelease = isPrerelease,
-            downloadSha256 = downloadSha256,
+            publishedAt = obj["published_at"]?.jsonPrimitive?.contentOrNull?.let(::parseInstantOrNull),
+            downloadSize = installer.size,
+            downloadSha256 = installer.sha256,
         )
     }
 
@@ -278,4 +304,23 @@ internal fun currentPlatformId(): String {
         os.contains("mac") -> "macos_x64"
         else -> "linux"
     }
+}
+
+/** [text] as an instant, or null when it is not an ISO-8601 timestamp. */
+internal fun parseInstantOrNull(text: String): Instant? =
+    try {
+        Instant.parse(text)
+    } catch (_: DateTimeParseException) {
+        null
+    }
+
+/**
+ * [notes] whole when they fit under [max] characters, or cut back to the last whole line that does, so
+ * a group or a bullet is never shown half-written.
+ */
+internal fun capReleaseNotes(notes: String, max: Int = RELEASE_NOTES_MAX_CHARS): String {
+    if (notes.length <= max) return notes
+    val cut = notes.take(max)
+    val lastBreak = cut.lastIndexOf('\n')
+    return if (lastBreak > 0) cut.take(lastBreak).trimEnd() else cut
 }

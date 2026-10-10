@@ -2,6 +2,7 @@ package org.churchpresenter.updater
 
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.net.InetSocketAddress
@@ -69,6 +70,26 @@ class DownloadInstallerTest {
         assertTrue(progress.size > 1, "the bar moves as chunks land, not only at the end")
         assertEquals(progress.sorted(), progress, "progress never goes backwards")
         assertEquals(1f, progress.last())
+    }
+
+    @Test
+    fun `a download cancelled part way deletes what it had written and stays cancelled`() {
+        val url = serve("ChurchPresenter-2.5.0.dmg", installer)
+        val tempDir = File(System.getProperty("java.io.tmpdir"))
+        fun installers() = tempDir.listFiles { f -> f.name.startsWith(UPDATE_INSTALLER_PREFIX) }.orEmpty().toSet()
+        val before = installers()
+
+        val cancelled = runCatching {
+            runBlocking {
+                downloadInstaller(url, installerSha256) { state ->
+                    // The window's report hops to the UI dispatcher, which is where a cancel lands.
+                    if (state is DownloadState.Downloading) throw CancellationException("cancelled from the window")
+                }
+            }
+        }
+
+        assertIs<CancellationException>(cancelled.exceptionOrNull(), "the cancel is passed on, not swallowed")
+        assertEquals(before, installers(), "no half-written installer is left for the next launch")
     }
 
     @Test

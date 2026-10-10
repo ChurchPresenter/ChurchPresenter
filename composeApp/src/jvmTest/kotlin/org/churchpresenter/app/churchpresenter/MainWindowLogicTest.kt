@@ -32,6 +32,24 @@ class MainWindowLogicTest {
     }
 
     @Test
+    fun `a later check stays quiet about the version the operator skipped`() {
+        assertNull(pendingUpdateFor(isFirstEverCheck = false, available, skippedVersion = "9.9.9"))
+    }
+
+    @Test
+    fun `skipping one version does not hide the next`() {
+        assertEquals(
+            available to false,
+            pendingUpdateFor(isFirstEverCheck = false, available, skippedVersion = "9.9.8"),
+        )
+    }
+
+    @Test
+    fun `the first check ever shows its result even for a skipped version`() {
+        assertEquals(available to true, pendingUpdateFor(isFirstEverCheck = true, available, skippedVersion = "9.9.9"))
+    }
+
+    @Test
     fun `the story prompt waits for a pending update`() {
         assertTrue(shouldShowStoryPrompt(isDue = true, updatePending = false))
         assertFalse(shouldShowStoryPrompt(isDue = true, updatePending = true))

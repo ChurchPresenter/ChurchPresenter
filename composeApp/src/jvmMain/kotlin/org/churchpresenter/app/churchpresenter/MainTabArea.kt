@@ -18,11 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Wallpaper
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,19 +35,23 @@ import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.background
 import org.churchpresenter.icons.generated.resources.ic_settings
 import org.churchpresenter.strings.generated.resources.tab_visibility
+import org.churchpresenter.strings.generated.resources.tab_visibility_tabs
 import org.churchpresenter.strings.generated.resources.tooltip_settings
+import org.churchpresenter.sharedui.composables.ContextMenu
+import org.churchpresenter.sharedui.composables.ToggleMenuHeader
+import org.churchpresenter.sharedui.composables.ToggleMenuItem
 import org.churchpresenter.sharedui.composables.ToolbarKey
 import org.churchpresenter.sharedui.composables.ToolbarKeyStyle
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.app.churchpresenter.tabs.getStringName
 import org.churchpresenter.theme.AppShape
-import org.churchpresenter.theme.components.RaisedCheckbox
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 private const val CONTENT_CROSSFADE_MS = 120
 private val TOOLBAR_KEY_SIZE = 40.dp
+private val TAB_MENU_WIDTH = 220.dp
 
 /** The tab bar's bottom corners, matching the cards below it; the divider under it stops where they start. */
 private val TAB_BAR_CORNER_RADIUS = 14.dp
@@ -155,27 +156,26 @@ private fun TabVisibilityMenu(hiddenTabs: Set<String>, onToggleTabHidden: (Tabs)
             open = showTabVisibilityMenu,
             buttonSize = TOOLBAR_KEY_SIZE,
         )
-        DropdownMenu(
+        ContextMenu(
             expanded = showTabVisibilityMenu,
-            onDismissRequest = { showTabVisibilityMenu = false }
+            onDismissRequest = { showTabVisibilityMenu = false },
+            width = TAB_MENU_WIDTH,
         ) {
+            val menuTabs = Tabs.entries.filter { it != Tabs.CROSSWORD }
             val visibleCount = visibleTabCount(hiddenTabs)
-            Tabs.entries.filter { it != Tabs.CROSSWORD }.forEach { tab ->
-                val isVisible = tab.name !in hiddenTabs
+            ToggleMenuHeader(
+                title = stringResource(Res.string.tab_visibility_tabs),
+                shown = visibleCount,
+                total = menuTabs.size,
+                onShowAll = { menuTabs.filter { it.name in hiddenTabs }.forEach(onToggleTabHidden) },
+            )
+            menuTabs.forEach { tab ->
                 val isOnlyVisible = isOnlyVisibleTab(tab, hiddenTabs, visibleCount)
-                DropdownMenuItem(
-                    text = { Text(getStringName(tab)) },
-                    onClick = {
-                        if (!isOnlyVisible) onToggleTabHidden(tab)
-                    },
-                    leadingIcon = {
-                        RaisedCheckbox(
-                            checked = isVisible,
-                            onCheckedChange = null,
-                            enabled = !isOnlyVisible
-                        )
-                    },
-                    enabled = !isOnlyVisible
+                ToggleMenuItem(
+                    label = getStringName(tab),
+                    checked = tab.name !in hiddenTabs,
+                    onCheckedChange = { onToggleTabHidden(tab) },
+                    enabled = !isOnlyVisible,
                 )
             }
         }

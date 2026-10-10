@@ -569,6 +569,13 @@
     <string name="schedule_show_buttons_under_title">Ipakita ang mga button sa ilalim ng pamagat</string>
     <string name="schedule_option_item_count">Bilang ng Item</string>
     <string name="schedule_option_zoom">Mga Zoom Control</string>
+    <string name="schedule_option_icon_size">Laki ng icon sa toolbar</string>
+    <string name="schedule_icon_size_small">Maliit</string>
+    <string name="schedule_icon_size_medium">Katamtaman</string>
+    <string name="schedule_icon_size_large">Malaki</string>
+    <string name="schedule_option_buttons">Mga button</string>
+    <string name="toggle_menu_count">%1$d sa %2$d</string>
+    <string name="toggle_menu_show_all">Ipakita lahat</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Magdagdag ng Label</string>
@@ -897,6 +904,7 @@
     <string name="tab_qa">Q&amp;A</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">Visibility ng Tab</string>
+    <string name="tab_visibility_tabs">Mga tab</string>
     <string name="canvas_scenes">Mga Scene</string>
     <string name="canvas_sources">Mga Source</string>
     <string name="canvas_properties">Mga Property</string>
@@ -1549,6 +1557,16 @@
     <string name="update_dialog_view_on_github">Tingnan sa GitHub</string>
     <string name="participate_in_prereleases">Isama ang beta at paunang bersyon</string>
     <string name="update_dialog_check_interval">Maghanap ng update</string>
+    <string name="update_dialog_ready_title">Handa na ang bagong bersyon</string>
+    <string name="update_dialog_released">Inilabas noong %1$s</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">Ano ang bago</string>
+    <string name="update_dialog_full_notes">Buong release notes</string>
+    <string name="update_dialog_beta_title">Isama ang mga beta update</string>
+    <string name="update_dialog_beta_hint">Makuha nang maaga ang mga bagong feature. Maaaring hindi gaanong matatag.</string>
+    <string name="update_dialog_skip">Laktawan ang bersyong ito</string>
+    <string name="update_dialog_downloading_of">Dina-download ang %1$d sa %2$d MB</string>
+    <string name="update_dialog_ready_to_install">Handa nang i-install</string>
     <string name="update_interval_every_launch">Tuwing bubuksan</string>
     <string name="update_interval_weekly">Lingguhan</string>
     <string name="update_interval_monthly">Buwanan</string>

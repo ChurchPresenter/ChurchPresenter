@@ -14,6 +14,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * The update window's download sequence, [UpdateDownloadFlow]: Download counts the download and
@@ -97,6 +98,44 @@ class UpdateDownloadSequenceTest {
     }
 
     @Test
+    fun `cancel stops a download part way and goes back to offering one`() {
+        val calls = Calls()
+        val flow = flow(info(), calls)
+        val job = assertNotNull(flow.download())
+        runBlocking { calls.halfWay.await() }
+
+        flow.cancel()
+        runBlocking { job.join() }
+
+        assertTrue(job.isCancelled, "the download itself is stopped, not left running unseen")
+        assertEquals(DownloadState.Idle, flow.state)
+        calls.finish.complete(Unit)
+        assertEquals(DownloadState.Idle, flow.state, "a cancelled download never reports finishing")
+    }
+
+    @Test
+    fun `a cancelled download can be started again`() {
+        val calls = Calls()
+        val flow = flow(info(), calls)
+        assertNotNull(flow.download())
+        runBlocking { calls.halfWay.await() }
+        flow.cancel()
+
+        calls.finish.complete(Unit)
+        runBlocking { assertNotNull(flow.download()).join() }
+
+        assertEquals(DownloadState.Done(installer), flow.state)
+        assertEquals(2, calls.downloaded.size)
+    }
+
+    @Test
+    fun `cancel with nothing downloading leaves the window as it was`() {
+        val flow = flow(info(), Calls())
+        flow.cancel()
+        assertEquals(DownloadState.Idle, flow.state)
+    }
+
+    @Test
     fun `install runs the downloaded installer and leaves the state alone when it starts`() {
         val calls = Calls()
         val flow = flow(info(), calls)
@@ -138,9 +177,9 @@ class UpdateDownloadSequenceTest {
 
     @Test
     fun `the window is taller with an update to show and taller again on a manual check`() {
-        assertEquals(548.dp, updateDialogHeight(hasUpdate = true, isManualCheck = true))
-        assertEquals(500.dp, updateDialogHeight(hasUpdate = true, isManualCheck = false))
-        assertEquals(468.dp, updateDialogHeight(hasUpdate = false, isManualCheck = true))
-        assertEquals(420.dp, updateDialogHeight(hasUpdate = false, isManualCheck = false))
+        assertEquals(620.dp, updateDialogHeight(hasUpdate = true, isManualCheck = true))
+        assertEquals(580.dp, updateDialogHeight(hasUpdate = true, isManualCheck = false))
+        assertEquals(330.dp, updateDialogHeight(hasUpdate = false, isManualCheck = true))
+        assertEquals(290.dp, updateDialogHeight(hasUpdate = false, isManualCheck = false))
     }
 }

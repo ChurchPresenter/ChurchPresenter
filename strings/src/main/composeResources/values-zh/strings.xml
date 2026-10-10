@@ -569,6 +569,13 @@
     <string name="schedule_show_buttons_under_title">在标题下方显示按钮</string>
     <string name="schedule_option_item_count">项目数量</string>
     <string name="schedule_option_zoom">缩放控件</string>
+    <string name="schedule_option_icon_size">工具栏图标大小</string>
+    <string name="schedule_icon_size_small">小</string>
+    <string name="schedule_icon_size_medium">中</string>
+    <string name="schedule_icon_size_large">大</string>
+    <string name="schedule_option_buttons">按钮</string>
+    <string name="toggle_menu_count">%1$d / %2$d</string>
+    <string name="toggle_menu_show_all">全部显示</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">添加标签</string>
@@ -897,6 +904,7 @@
     <string name="tab_qa">问答</string>
     <string name="tab_stt">语音字幕</string>
     <string name="tab_visibility">标签页显示</string>
+    <string name="tab_visibility_tabs">标签页</string>
     <string name="canvas_scenes">场景</string>
     <string name="canvas_sources">源</string>
     <string name="canvas_properties">属性</string>
@@ -1549,6 +1557,16 @@
     <string name="update_dialog_view_on_github">在 GitHub 上查看</string>
     <string name="participate_in_prereleases">包含测试版 / 预发布更新</string>
     <string name="update_dialog_check_interval">检查更新</string>
+    <string name="update_dialog_ready_title">新版本已就绪</string>
+    <string name="update_dialog_released">发布于 %1$s</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">新功能</string>
+    <string name="update_dialog_full_notes">完整发行说明</string>
+    <string name="update_dialog_beta_title">包含测试版更新</string>
+    <string name="update_dialog_beta_hint">抢先体验新功能。可能不够稳定。</string>
+    <string name="update_dialog_skip">跳过此版本</string>
+    <string name="update_dialog_downloading_of">正在下载 %1$d / %2$d MB</string>
+    <string name="update_dialog_ready_to_install">可以安装了</string>
     <string name="update_interval_every_launch">每次启动</string>
     <string name="update_interval_weekly">每周</string>
     <string name="update_interval_monthly">每月</string>

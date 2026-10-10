@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -51,6 +52,8 @@ internal class UpdateDownloadFlow(
     var state by mutableStateOf<DownloadState>(DownloadState.Idle)
         private set
 
+    private var job: Job? = null
+
     /** Starts the download, or returns null when there is no installer to fetch. */
     fun download(): Job? {
         val url = info?.downloadUrl ?: return null
@@ -59,7 +62,17 @@ internal class UpdateDownloadFlow(
         steps.reportDownloadStarted(info.latestVersion)
         return scope.launch(Dispatchers.IO) {
             steps.download(url, info.downloadSha256) { stage -> withContext(ui) { state = stage } }
-        }
+        }.also { job = it }
+    }
+
+    /**
+     * Stops a download in progress and goes back to offering one. The download notices at its next
+     * chunk and deletes what it had written; a report already on its way is dropped with it.
+     */
+    fun cancel() {
+        job?.cancel()
+        job = null
+        state = DownloadState.Idle
     }
 
     fun install(file: File) {
@@ -95,6 +108,7 @@ internal suspend fun downloadInstaller(
         report(DownloadState.Error("No published SHA-256 for $downloadUrl", unverified = true))
         return
     }
+    var tempFile: File? = null
     try {
         val url = URI(downloadUrl).toURL()
         val connection = url.openConnection() as HttpURLConnection
@@ -109,11 +123,11 @@ internal suspend fun downloadInstaller(
         // NB: do not deleteOnExit() — the installer is launched as the
         // app exits via exitProcess(0), and the shutdown hook would
         // delete the file out from under the installer.
-        val tempFile = File.createTempFile(UPDATE_INSTALLER_PREFIX, suffix)
+        val file = File.createTempFile(UPDATE_INSTALLER_PREFIX, suffix).also { tempFile = it }
 
         val digest = MessageDigest.getInstance("SHA-256")
         connection.inputStream.use { input ->
-            DigestOutputStream(tempFile.outputStream(), digest).use { output ->
+            DigestOutputStream(file.outputStream(), digest).use { output ->
                 copyReportingProgress(input, output, contentLength) { progress ->
                     report(DownloadState.Downloading(progress))
                 }
@@ -122,11 +136,15 @@ internal suspend fun downloadInstaller(
         connection.disconnect()
         val actual = digest.digest().joinToString("") { "%02x".format(it) }
         if (installerDigestMatches(actual, expectedSha256)) {
-            report(DownloadState.Done(tempFile))
+            report(DownloadState.Done(file))
         } else {
-            tempFile.delete()
+            file.delete()
             report(DownloadState.Error("SHA-256 $actual, expected $expectedSha256", unverified = true))
         }
+    } catch (e: CancellationException) {
+        // Cancelled from the window: a half-written installer must not be left for the next launch.
+        tempFile?.delete()
+        throw e
     } catch (e: IOException) {
         // The connection, the download or the temp file -- a malformed URL is one too.
         report(DownloadState.Error(e.message ?: "Download failed"))

@@ -407,6 +407,13 @@
     <string name="schedule_show_buttons_under_title">Zobraziť tlačidlá pod názvom</string>
     <string name="schedule_option_item_count">Počet položiek</string>
     <string name="schedule_option_zoom">Ovládanie priblíženia</string>
+    <string name="schedule_option_icon_size">Veľkosť ikon panela nástrojov</string>
+    <string name="schedule_icon_size_small">Malé</string>
+    <string name="schedule_icon_size_medium">Stredné</string>
+    <string name="schedule_icon_size_large">Veľké</string>
+    <string name="schedule_option_buttons">Tlačidlá</string>
+    <string name="toggle_menu_count">%1$d z %2$d</string>
+    <string name="toggle_menu_show_all">Zobraziť všetko</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Pridať štítok</string>
@@ -689,6 +696,7 @@
     <string name="tab_qa">Q&amp;A</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">Viditeľnosť záložiek</string>
+    <string name="tab_visibility_tabs">Záložky</string>
     <string name="canvas_scenes">Scény</string>
     <string name="canvas_sources">Zdroje</string>
     <string name="canvas_properties">Vlastnosti</string>
@@ -1293,6 +1301,16 @@
     <string name="update_dialog_view_on_github">Zobraziť na GitHube</string>
     <string name="participate_in_prereleases">Zahrnúť beta / predbežné verzie aktualizácií</string>
     <string name="update_dialog_check_interval">Kontrolovať aktualizácie</string>
+    <string name="update_dialog_ready_title">Nová verzia je pripravená</string>
+    <string name="update_dialog_released">Vydané %1$s</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">Čo je nové</string>
+    <string name="update_dialog_full_notes">Úplné poznámky k vydaniu</string>
+    <string name="update_dialog_beta_title">Zahrnúť beta aktualizácie</string>
+    <string name="update_dialog_beta_hint">Získajte nové funkcie skôr. Môžu byť menej stabilné.</string>
+    <string name="update_dialog_skip">Preskočiť túto verziu</string>
+    <string name="update_dialog_downloading_of">Sťahuje sa %1$d z %2$d MB</string>
+    <string name="update_dialog_ready_to_install">Pripravené na inštaláciu</string>
     <string name="update_interval_every_launch">Pri každom spustení</string>
     <string name="update_interval_weekly">Týždenne</string>
     <string name="update_interval_monthly">Mesačne</string>

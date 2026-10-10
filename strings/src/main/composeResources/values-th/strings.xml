@@ -569,6 +569,13 @@
     <string name="schedule_show_buttons_under_title">แสดงปุ่มใต้ชื่อ</string>
     <string name="schedule_option_item_count">จำนวนรายการ</string>
     <string name="schedule_option_zoom">ปุ่มย่อ-ขยาย</string>
+    <string name="schedule_option_icon_size">ขนาดไอคอนแถบเครื่องมือ</string>
+    <string name="schedule_icon_size_small">เล็ก</string>
+    <string name="schedule_icon_size_medium">กลาง</string>
+    <string name="schedule_icon_size_large">ใหญ่</string>
+    <string name="schedule_option_buttons">ปุ่ม</string>
+    <string name="toggle_menu_count">%1$d จาก %2$d</string>
+    <string name="toggle_menu_show_all">แสดงทั้งหมด</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">เพิ่มป้าย</string>
@@ -897,6 +904,7 @@
     <string name="tab_qa">คำถาม</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">การแสดงแท็บ</string>
+    <string name="tab_visibility_tabs">แท็บ</string>
     <string name="canvas_scenes">ฉาก</string>
     <string name="canvas_sources">แหล่ง</string>
     <string name="canvas_properties">คุณสมบัติ</string>
@@ -1549,6 +1557,16 @@
     <string name="update_dialog_view_on_github">ดูบน GitHub</string>
     <string name="participate_in_prereleases">รวมอัปเดตรุ่นเบต้าและรุ่นก่อนวางจำหน่าย</string>
     <string name="update_dialog_check_interval">ตรวจหาการอัปเดต</string>
+    <string name="update_dialog_ready_title">เวอร์ชันใหม่พร้อมแล้ว</string>
+    <string name="update_dialog_released">เผยแพร่เมื่อ %1$s</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">มีอะไรใหม่</string>
+    <string name="update_dialog_full_notes">บันทึกประจำรุ่นฉบับเต็ม</string>
+    <string name="update_dialog_beta_title">รวมอัปเดตเบต้า</string>
+    <string name="update_dialog_beta_hint">รับฟีเจอร์ใหม่ก่อนใคร อาจมีความเสถียรน้อยกว่า</string>
+    <string name="update_dialog_skip">ข้ามเวอร์ชันนี้</string>
+    <string name="update_dialog_downloading_of">กำลังดาวน์โหลด %1$d จาก %2$d MB</string>
+    <string name="update_dialog_ready_to_install">พร้อมติดตั้ง</string>
     <string name="update_interval_every_launch">ทุกครั้งที่เปิด</string>
     <string name="update_interval_weekly">ทุกสัปดาห์</string>
     <string name="update_interval_monthly">ทุกเดือน</string>

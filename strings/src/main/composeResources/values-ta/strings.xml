@@ -576,6 +576,13 @@
     <string name="schedule_show_buttons_under_title">தலைப்பின் கீழ் பொத்தான்களைக் காட்டு</string>
     <string name="schedule_option_item_count">உருப்படி எண்ணிக்கை</string>
     <string name="schedule_option_zoom">பெரிதாக்கல் கட்டுப்பாடுகள்</string>
+    <string name="schedule_option_icon_size">கருவிப்பட்டை ஐகான் அளவு</string>
+    <string name="schedule_icon_size_small">சிறியது</string>
+    <string name="schedule_icon_size_medium">நடுத்தரம்</string>
+    <string name="schedule_icon_size_large">பெரியது</string>
+    <string name="schedule_option_buttons">பொத்தான்கள்</string>
+    <string name="toggle_menu_count">%2$d இல் %1$d</string>
+    <string name="toggle_menu_show_all">அனைத்தையும் காட்டு</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">சிட்டையைச் சேர்</string>
@@ -902,6 +909,7 @@
     <string name="tab_qa">கே&amp;ப</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">தாவல் தெரிவுநிலை</string>
+    <string name="tab_visibility_tabs">தாவல்கள்</string>
     <string name="canvas_scenes">காட்சிகள்</string>
     <string name="canvas_sources">மூலங்கள்</string>
     <string name="canvas_properties">பண்புகள்</string>
@@ -1554,6 +1562,16 @@
     <string name="update_dialog_view_on_github">GitHub இல் காண்</string>
     <string name="participate_in_prereleases">பீட்டா / முன்வெளியீட்டுப் புதுப்பிப்புகளையும் சேர்</string>
     <string name="update_dialog_check_interval">புதுப்பிப்புகளைச் சரிபார்</string>
+    <string name="update_dialog_ready_title">புதிய பதிப்பு தயார்</string>
+    <string name="update_dialog_released">%1$s அன்று வெளியானது</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">புதியவை</string>
+    <string name="update_dialog_full_notes">முழு வெளியீட்டுக் குறிப்புகள்</string>
+    <string name="update_dialog_beta_title">பீட்டா புதுப்பிப்புகளைச் சேர்</string>
+    <string name="update_dialog_beta_hint">புதிய அம்சங்களை முன்கூட்டியே பெறுங்கள். அவை நிலைத்தன்மை குறைவாக இருக்கலாம்.</string>
+    <string name="update_dialog_skip">இந்தப் பதிப்பைத் தவிர்</string>
+    <string name="update_dialog_downloading_of">%2$d MB இல் %1$d பதிவிறக்கப்படுகிறது</string>
+    <string name="update_dialog_ready_to_install">நிறுவத் தயார்</string>
     <string name="update_interval_every_launch">ஒவ்வொரு தொடக்கத்திலும்</string>
     <string name="update_interval_weekly">வாரந்தோறும்</string>
     <string name="update_interval_monthly">மாதந்தோறும்</string>

@@ -407,6 +407,13 @@
     <string name="schedule_show_buttons_under_title">Mostrar botones bajo el título</string>
     <string name="schedule_option_item_count">Número de elementos</string>
     <string name="schedule_option_zoom">Controles de zoom</string>
+    <string name="schedule_option_icon_size">Tamaño de iconos de la barra</string>
+    <string name="schedule_icon_size_small">Pequeño</string>
+    <string name="schedule_icon_size_medium">Mediano</string>
+    <string name="schedule_icon_size_large">Grande</string>
+    <string name="schedule_option_buttons">Botones</string>
+    <string name="toggle_menu_count">%1$d de %2$d</string>
+    <string name="toggle_menu_show_all">Mostrar todo</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Añadir etiqueta</string>
@@ -689,6 +696,7 @@
     <string name="tab_qa">P&amp;R</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">Visibilidad de pestañas</string>
+    <string name="tab_visibility_tabs">Pestañas</string>
     <string name="canvas_scenes">Escenas</string>
     <string name="canvas_sources">Fuentes</string>
     <string name="canvas_properties">Propiedades</string>
@@ -1293,6 +1301,16 @@
     <string name="update_dialog_view_on_github">Ver en GitHub</string>
     <string name="participate_in_prereleases">Incluir actualizaciones beta / preliminares</string>
     <string name="update_dialog_check_interval">Buscar actualizaciones</string>
+    <string name="update_dialog_ready_title">Hay una nueva versión lista</string>
+    <string name="update_dialog_released">Publicada el %1$s</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">Novedades</string>
+    <string name="update_dialog_full_notes">Notas de la versión completas</string>
+    <string name="update_dialog_beta_title">Incluir actualizaciones beta</string>
+    <string name="update_dialog_beta_hint">Obtén funciones nuevas antes. Pueden ser menos estables.</string>
+    <string name="update_dialog_skip">Omitir esta versión</string>
+    <string name="update_dialog_downloading_of">Descargando %1$d de %2$d MB</string>
+    <string name="update_dialog_ready_to_install">Lista para instalar</string>
     <string name="update_interval_every_launch">Cada inicio</string>
     <string name="update_interval_weekly">Semanalmente</string>
     <string name="update_interval_monthly">Mensualmente</string>

@@ -569,6 +569,13 @@
     <string name="schedule_show_buttons_under_title">タイトルの下にボタンを表示</string>
     <string name="schedule_option_item_count">項目数</string>
     <string name="schedule_option_zoom">ズーム操作</string>
+    <string name="schedule_option_icon_size">ツールバーのアイコンサイズ</string>
+    <string name="schedule_icon_size_small">小</string>
+    <string name="schedule_icon_size_medium">中</string>
+    <string name="schedule_icon_size_large">大</string>
+    <string name="schedule_option_buttons">ボタン</string>
+    <string name="toggle_menu_count">%1$d / %2$d</string>
+    <string name="toggle_menu_show_all">すべて表示</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">ラベルを追加</string>
@@ -897,6 +904,7 @@
     <string name="tab_qa">Q&amp;A</string>
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">タブの表示</string>
+    <string name="tab_visibility_tabs">タブ</string>
     <string name="canvas_scenes">シーン</string>
     <string name="canvas_sources">ソース</string>
     <string name="canvas_properties">プロパティ</string>
@@ -1549,6 +1557,16 @@
     <string name="update_dialog_view_on_github">GitHub で見る</string>
     <string name="participate_in_prereleases">ベータ版・プレリリース版も含める</string>
     <string name="update_dialog_check_interval">更新の確認</string>
+    <string name="update_dialog_ready_title">新しいバージョンの準備ができました</string>
+    <string name="update_dialog_released">%1$s リリース</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">新機能</string>
+    <string name="update_dialog_full_notes">リリースノート全文</string>
+    <string name="update_dialog_beta_title">ベータ版のアップデートを含める</string>
+    <string name="update_dialog_beta_hint">新機能をいち早く試せます。安定性が低い場合があります。</string>
+    <string name="update_dialog_skip">このバージョンをスキップ</string>
+    <string name="update_dialog_downloading_of">%2$d MB 中 %1$d MB をダウンロード中</string>
+    <string name="update_dialog_ready_to_install">インストールの準備ができました</string>
     <string name="update_interval_every_launch">起動のたびに</string>
     <string name="update_interval_weekly">毎週</string>
     <string name="update_interval_monthly">毎月</string>

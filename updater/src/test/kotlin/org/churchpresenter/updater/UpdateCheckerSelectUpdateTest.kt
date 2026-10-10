@@ -1,10 +1,11 @@
 package org.churchpresenter.updater
 
+import java.time.Instant
 import kotlin.test.Test
+import kotlin.test.assertNull
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -139,10 +140,51 @@ class UpdateCheckerSelectUpdateTest {
     }
 
     @Test
-    fun `release notes are capped at 500 characters`() {
-        val result = select(releases(release("v26.2.0", notes = "x".repeat(600))))
+    fun `release notes of a real release's length come through whole`() {
+        val notes = (1..11).joinToString("\n\n") { group ->
+            val bullets = (1..10).joinToString("\n") { "- A change of a realistic length, number $it (#$group$it)" }
+            "**Group $group**\n$bullets"
+        }
+        val result = select(releases(release("v26.2.0", notes = notes)))
         val available = assertIs<UpdateCheckResult.Available>(result)
-        assertEquals(500, available.info.releaseNotes.length)
+        assertEquals(notes, available.info.releaseNotes, "every group and every bullet reaches the window")
+    }
+
+    @Test
+    fun `notes over the ceiling are cut back to the last whole line`() {
+        val capped = capReleaseNotes("- first line\n- second line\n- third line", max = 20)
+        assertEquals("- first line", capped, "no bullet is shown half-written")
+    }
+
+    @Test
+    fun `the offer carries when it was released, how big its installer is and the version it replaces`() {
+        val sized = """[
+            {"browser_download_url":"https://example.org/app.msi","size":634941440},
+            {"browser_download_url":"https://example.org/app-arm64.dmg","size":601405516},
+            {"browser_download_url":"https://example.org/app.dmg","size":620001927},
+            {"browser_download_url":"https://example.org/app.deb","size":597752606}
+        ]"""
+        val dated = release("v26.2.0", assets = sized).replace(
+            "\"tag_name\"",
+            "\"published_at\":\"2026-10-08T09:01:10Z\",\"tag_name\"",
+        )
+        val info = assertIs<UpdateCheckResult.Available>(select(releases(dated), current = "26.1.0")).info
+        assertEquals(Instant.parse("2026-10-08T09:01:10Z"), info.publishedAt)
+        assertEquals("26.1.0", info.currentVersion)
+        val sizes = mapOf(
+            "https://example.org/app.msi" to 634_941_440L,
+            "https://example.org/app-arm64.dmg" to 601_405_516L,
+            "https://example.org/app.dmg" to 620_001_927L,
+            "https://example.org/app.deb" to 597_752_606L,
+        )
+        assertEquals(sizes[info.downloadUrl], info.downloadSize, "the size is the chosen installer's own")
+    }
+
+    @Test
+    fun `a release that gives no date or size offers neither rather than a wrong one`() {
+        val info = assertIs<UpdateCheckResult.Available>(select(releases(release("v26.2.0")))).info
+        assertNull(info.publishedAt)
+        assertNull(info.downloadSize)
     }
 
     @Test
