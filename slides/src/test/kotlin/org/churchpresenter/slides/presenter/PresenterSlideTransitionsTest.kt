@@ -159,7 +159,11 @@ class PresenterSlideTransitionsTest {
     fun `a picture sliding in before it has loaded leaves its half black`() = runComposeUiTest {
         setContent {
             Box(Modifier.size(200.dp, 100.dp)) {
-                PicturePresenter(imagePath = null, previousImagePath = red.absolutePath, animationType = AnimationType.SLIDE_LEFT)
+                PicturePresenter(
+                    imagePath = null,
+                    previousImagePath = red.absolutePath,
+                    animationType = AnimationType.SLIDE_LEFT,
+                )
             }
         }
         waitUntil("the previous picture drawn", 5_000) {

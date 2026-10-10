@@ -168,6 +168,12 @@ class DeckLinkManagerTest {
     }
 
     @Test
+    fun `isInputConfigured ignores layers that are not cameras`() {
+        val scene = Scene(sources = listOf(SceneSource.TextSource(id = "t", name = "Title")))
+        assertFalse(DeckLinkManager.isInputConfigured(0, listOf(scene)))
+    }
+
+    @Test
     fun `isInputConfigured is false when no scenes list is given and no scenes file exists`() {
         assertFalse(DeckLinkManager.isInputConfigured(2))
     }

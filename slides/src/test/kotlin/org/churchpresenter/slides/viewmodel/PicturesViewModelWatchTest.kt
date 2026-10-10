@@ -203,6 +203,19 @@ class PicturesViewModelWatchTest {
     }
 
     @Test
+    fun `a folder that cannot be read loads nothing`() {
+        val locked = File(dir, "locked").apply { mkdirs() }
+        File(locked, "a.png").writeBytes(pngBytes)
+        if (!locked.setReadable(false)) return
+        try {
+            model.loadImagesFromFolder(locked)
+            assertTrue(model.images.isEmpty())
+        } finally {
+            locked.setReadable(true)
+        }
+    }
+
+    @Test
     fun `a plain file is not loaded as a folder`() {
         val file = image("a.jpg")
         model.loadImagesFromFolder(file)

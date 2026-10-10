@@ -56,7 +56,11 @@ class CdpPagesTest {
     private enum class Shot { PNG, NOTHING, NOT_AN_IMAGE }
 
     /** A headless browser's debug port: its version, its target list, and one page's socket. */
-    private class FakeDevTools(var shot: Shot = Shot.PNG, private val listsPage: Boolean = true) {
+    private class FakeDevTools(
+        var shot: Shot = Shot.PNG,
+        private val listsPage: Boolean = true,
+        private val pagePath: String = "FAKE",
+    ) {
         val methods = CopyOnWriteArrayList<String>()
         val sessions = CopyOnWriteArrayList<DefaultWebSocketServerSession>()
         var port = 0
@@ -68,7 +72,7 @@ class CdpPagesTest {
                 get("/json/version") { call.respondText("""{"Browser":"Fake/1.0"}""", ContentType.Application.Json) }
                 get("/json") {
                     val body = if (listsPage) {
-                        """[{"type":"page","webSocketDebuggerUrl":"ws://127.0.0.1:$port/devtools/page/FAKE"}]"""
+                        """[{"type":"page","webSocketDebuggerUrl":"ws://127.0.0.1:$port/devtools/page/$pagePath"}]"""
                     } else {
                         "[]"
                     }
@@ -124,8 +128,8 @@ class CdpPagesTest {
         }
     }
 
-    private fun browser(shot: Shot = Shot.PNG, listsPage: Boolean = true) =
-        FakeDevTools(shot, listsPage).start().also { browsers += it }
+    private fun browser(shot: Shot = Shot.PNG, listsPage: Boolean = true, pagePath: String = "FAKE") =
+        FakeDevTools(shot, listsPage, pagePath).start().also { browsers += it }
 
     private fun connect(
         browser: FakeDevTools,
@@ -161,6 +165,29 @@ class CdpPagesTest {
     @Test
     fun `a browser listing no page is not connected to`() {
         assertNull(connect(browser(listsPage = false)))
+    }
+
+    @Test
+    fun `a page whose socket refuses the handshake is not connected to`() {
+        assertNull(connect(browser(pagePath = "GONE")))
+    }
+
+    @Test
+    fun `a page with no address is configured with the default settle, which it never waits out`() {
+        val fake = browser()
+        val cdp = assertNotNull(connect(fake))
+
+        runBlocking { CdpPages.configurePage(cdp, page.copy(url = "", customCss = "", forceTransparent = false)) }
+
+        assertEquals(listOf("Emulation.setDeviceMetricsOverride", "Page.enable"), fake.methods)
+    }
+
+    @Test
+    fun `a screenshot asked of a page that is not connected shows nothing`() {
+        val entry = SharedBrowserFrameCache.CacheEntry()
+
+        assertFalse(runBlocking { CdpPages.captureFrame(entry, SharedBrowserFrameCache.CdpConnection(), first = true) })
+        assertNull(entry.frame.value)
     }
 
     @Test

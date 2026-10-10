@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class PictureFolderWatcherTest {
@@ -57,7 +56,7 @@ class PictureFolderWatcherTest {
         val keys = LinkedBlockingQueue<WatchKey>()
         var closed = false
 
-        override fun take(): WatchKey = keys.poll() ?: throw (failure ?: IllegalStateException("no key queued"))
+        override fun take(): WatchKey = keys.poll() ?: throw checkNotNull(failure) { "no key queued" }
         override fun poll(): WatchKey? = keys.poll()
         override fun poll(timeout: Long, unit: TimeUnit): WatchKey? = keys.poll()
         override fun close() {
@@ -81,7 +80,13 @@ class PictureFolderWatcherTest {
     }
 
     private fun watcher(source: Source) =
-        PictureFolderWatcher(state, PictureThumbnails(state, Dispatchers.Unconfined), Dispatchers.Unconfined, scope, source)
+        PictureFolderWatcher(
+            state,
+            PictureThumbnails(state, Dispatchers.Unconfined),
+            Dispatchers.Unconfined,
+            scope,
+            source,
+        )
 
     private fun PictureFolderWatcher.watchToTheEnd(folder: File = dir) {
         start(folder)

@@ -8,7 +8,11 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -91,4 +95,26 @@ class SongBackgroundButtonStatesTest {
             assertEquals(SongBackground(), state.background)
             assertFalse(state.expanded)
         }
+
+    @Test
+    fun `a colour typed without its hash gets one, and is cut to a hex colour's length`() = button(emptyList()) { state ->
+        state.background = navy
+        state.expanded = true
+        waitForIdle()
+        onNode(hasSetTextAction() and hasText("#101830")).performTextReplacement(" abcdef12 ")
+        waitForIdle()
+        assertEquals(SongBackground(type = SongBackgroundType.COLOR, color = "#abcdef"), state.background)
+    }
+
+    @Test
+    fun `the panel's scope picker moves the edit to another section`() = button(listOf("Whole song", "Verse 1")) { state ->
+        state.expanded = true
+        waitForIdle()
+        onNodeWithTag(SONG_BACKGROUND_SCOPE_TAG).performClick()
+        waitForIdle()
+        val verse = onAllNodesWithText("Verse 1")
+        verse[verse.fetchSemanticsNodes().size - 1].performClick()
+        waitForIdle()
+        assertEquals(1, state.scope)
+    }
 }

@@ -8,6 +8,7 @@ import java.nio.file.Files
 import java.sql.DriverManager
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import org.apache.poi.xwpf.usermodel.XWPFDocument
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -312,5 +313,74 @@ class SongFormatAdaptersTest {
         assertFailsWith<IllegalArgumentException> {
             DocumentFormat.convert(file("documents/n2.pdf", "not a PDF"), null)
         }
+    }
+
+    // ── Where the single-file formats write ──────────────────────────────────
+
+    @Test
+    fun `every single-file format writes into a chosen folder or beside its input`() {
+        val freeWorship = FreeWorshipFormat.convert(openLyrics("fw-out/in.xml"), out("fw-chosen")).outputFiles.single()
+        assertEquals(File(temp, "fw-chosen"), freeWorship.parentFile)
+
+        val sample = File(javaClass.classLoader.getResource("propresenter/v5-be-near.pro5")!!.toURI())
+        val pro = sample.copyTo(File(temp, "pro-beside/be-near.pro5"))
+        assertEquals(pro.parentFile, ProPresenterFormat.convert(pro, null).outputFiles.single().parentFile)
+
+        val openSong = file("opensong-beside/Grace", "<song><title>Grace</title><lyrics>[V1]\n line\n</lyrics></song>")
+        assertEquals(openSong.parentFile, OpenSongFormat.convert(openSong, null).outputFiles.single().parentFile)
+
+        val freeShow = show("freeshow-beside/grace.show")
+        assertEquals(freeShow.parentFile, FreeShowFormat.convert(freeShow, null).outputFiles.single().parentFile)
+    }
+
+    @Test
+    fun `every format that writes a folder refuses to run without one`() {
+        val input = file("nowhere/input.bin", "x")
+        for (format in SongFormatConverters.all.filter { it.needsOutputFolder }) {
+            assertFailsWith<IllegalArgumentException>(format.id) { format.convert(input, null) }
+        }
+    }
+
+    // ── EasyWorship and Documents through the registry ───────────────────────
+
+    private fun easyWorshipLibrary(): File {
+        val folder = File(temp, "Data").apply { mkdirs() }
+        Class.forName("org.sqlite.JDBC")
+        DriverManager.getConnection("jdbc:sqlite:${File(folder, "Songs.db").absolutePath}").use { c ->
+            c.createStatement().use {
+                it.executeUpdate("CREATE TABLE song (title TEXT, author TEXT, copyright TEXT, vendor_id TEXT)")
+                it.executeUpdate("INSERT INTO song VALUES ('Grace', '', '', '')")
+            }
+        }
+        DriverManager.getConnection("jdbc:sqlite:${File(folder, "SongWords.db").absolutePath}").use { c ->
+            c.createStatement().use {
+                it.executeUpdate("CREATE TABLE word (song_id INTEGER, words TEXT)")
+                it.executeUpdate("INSERT INTO word VALUES (1, '{\\rtf1 Verse 1\\par Amazing grace\\par}')")
+            }
+        }
+        return folder
+    }
+
+    @Test
+    fun `EasyWorship converts a data folder into a folder named after it`() {
+        val library = easyWorshipLibrary()
+        assertEquals(SongPreviewInfo("Data", songCount = 1), EasyWorshipFormat.describe(library))
+        assertEquals("Data", EasyWorshipFormat.outputNameFor(library))
+        assertEquals("Songs", EasyWorshipFormat.outputNameFor(File(library, "Songs.db")))
+
+        val written = EasyWorshipFormat.convert(library, out("ew-out")).outputFiles.single()
+        assertEquals(File(temp, "ew-out/Data"), written.parentFile)
+    }
+
+    @Test
+    fun `a Word document is described by the songs in it and converted into the folder`() {
+        val input = File(temp, "docs/hymns.docx").apply { parentFile.mkdirs() }
+        XWPFDocument().use { doc ->
+            listOf("Amazing Grace", "", "Verse 1", "Amazing grace").forEach { doc.createParagraph().createRun().setText(it) }
+            input.outputStream().use { doc.write(it) }
+        }
+        assertEquals(1, DocumentFormat.describe(input).songCount)
+        assertEquals("hymns", DocumentFormat.outputNameFor(input))
+        assertEquals(listOf("Amazing Grace.song"), DocumentFormat.convert(input, out("doc-ok")).outputFiles.map { it.name })
     }
 }

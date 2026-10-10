@@ -1,5 +1,8 @@
 package org.churchpresenter.canvas
 
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.diagnostics.CrashReportSweep
@@ -32,6 +35,7 @@ class CameraCaptureLoopTest {
     private class ScriptedSteps(
         private val script: List<FfmpegAttempt?>,
         private val formats: List<CameraFormat> = listOf(CameraFormat(1280, 720, 25)),
+        private val onPause: suspend () -> Unit = {},
     ) : CaptureSteps {
         val commands = mutableListOf<List<String>>()
         val pauses = mutableListOf<Long>()
@@ -50,6 +54,7 @@ class CameraCaptureLoopTest {
 
         override suspend fun pause(millis: Long) {
             pauses += millis
+            onPause()
         }
 
         override suspend fun releaseLingering(entry: CacheEntry) {
@@ -183,5 +188,25 @@ class CameraCaptureLoopTest {
         assertEquals(1, steps.commands.size)
         assertEquals(CameraFailure.PERMISSION_OR_UNAVAILABLE, entry.error.value)
         assertTrue(steps.pauses.isEmpty())
+    }
+
+    @Test
+    fun `a capture cancelled between attempts stops trying and reports nothing`() {
+        val steps = ScriptedSteps(
+            List(5) { failed("Device or resource busy") },
+            onPause = { currentCoroutineContext().job.cancel() },
+        )
+        val entry = CacheEntry()
+
+        runBlocking {
+            launch {
+                val loop = CaptureLoop(source, entry, steps)
+                loop.run()
+                loop.reportIfGaveUp()
+            }.join()
+        }
+
+        assertEquals(1, steps.commands.size, "no attempt follows the cancellation")
+        assertEquals(CameraFailure.DEVICE_BUSY, entry.error.value)
     }
 }

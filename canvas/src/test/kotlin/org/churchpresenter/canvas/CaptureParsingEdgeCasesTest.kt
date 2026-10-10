@@ -227,4 +227,21 @@ class CaptureParsingEdgeCasesTest {
     fun `stream dimensions never announced give up as unknown`() {
         assertNull(runBlocking { awaitVideoDimensions(AtomicReference(null), intervalMs = 0) })
     }
+
+    @Test
+    fun `the Windows camera list is what ffmpeg's DirectShow listing names`() {
+        val dshow = "[dshow @ 0x1] \"USB Camera\" (video)\n[dshow @ 0x1] \"Microphone\" (audio)"
+        val run: CommandRunner = { _, _ -> CommandResult(0, dshow) }
+
+        assertEquals(listOf("USB Camera"), windowsCamerasFrom(run).map { it.name })
+    }
+
+    @Test
+    fun `open windows on Windows come from the window manager, never from a command`() {
+        val asked = mutableListOf<List<String>>()
+        val windows = openWindowsFor("windows 11") { command, _ -> asked += command; CommandResult(0, "") }
+
+        assertTrue(asked.isEmpty(), "no xprop, wmctrl or osascript is run")
+        assertTrue(windows.all { it.title.isNotBlank() })
+    }
 }

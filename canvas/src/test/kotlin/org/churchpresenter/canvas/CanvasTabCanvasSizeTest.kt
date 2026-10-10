@@ -146,4 +146,24 @@ class CanvasTabCanvasSizeTest {
             assertEquals(3840 to 1080, scene.canvasWidth to scene.canvasHeight)
         }
     }
+
+    @Test
+    fun `with no output assigned the size menu offers only the presets`() {
+        canvasTab(
+            seed = { addScene("Unassigned") },
+            settings = {
+                it.copy(
+                    projectionSettings = it.projectionSettings.copy(
+                        screenAssignments = listOf(ScreenAssignment(targetDisplay = Constants.KEY_TARGET_NONE)),
+                    ),
+                )
+            },
+        ) { _, _ ->
+            onNodeWithTag(CANVAS_SIZE_BUTTON_TAG).performClick()
+            waitForIdle()
+
+            assertTrue(onAllNodesWithText("Match", substring = true).fetchSemanticsNodes().isEmpty())
+            assertTrue(onAllNodesWithText("16:9", substring = true).fetchSemanticsNodes().isNotEmpty())
+        }
+    }
 }

@@ -14,7 +14,7 @@ group = "org.churchpresenter"
 // `CrashReporter.trace` inlines for a transaction Sentry never fails to start, Compose's per-value
 // change checks and the native file pickers. See AGENT.md.
 extra["coverageFloors"] = mapOf(
-    "COMPLEXITY" to "0.82",
+    "COMPLEXITY" to "0.84",
 )
 
 kotlin {

@@ -118,11 +118,11 @@ class DuplicateFinderTabTest {
             click(Strings.scanForDuplicates)
             awaitShowing(Strings.showingGroups(1, 1))
 
-            click(Strings.catSameTitle)
-            click(Strings.catSimilarLyrics)
-            click(Strings.catSameNumber)
+            scrollAndClick(Strings.catSameTitle)
+            scrollAndClick(Strings.catSimilarLyrics)
+            scrollAndClick(Strings.catSameNumber)
             assertTrue(isShowing(Strings.showingGroups(0, 1)))
-            click(Strings.clearFilters)
+            scrollAndClick(Strings.clearFilters)
             assertTrue(isShowing(Strings.showingGroups(1, 1)))
 
             onAllNodes(hasSetTextAction()).onFirst().performTextReplacement("3")
@@ -131,7 +131,7 @@ class DuplicateFinderTabTest {
             onAllNodes(hasSetTextAction()).onFirst().performTextReplacement("1")
             onAllNodes(hasSetTextAction()).onLast().performTextReplacement("5")
             waitForIdle()
-            click(Strings.clearFilters)
+            scrollAndClick(Strings.clearFilters)
             assertTrue(isShowing(Strings.showingGroups(1, 1)))
         }
     }

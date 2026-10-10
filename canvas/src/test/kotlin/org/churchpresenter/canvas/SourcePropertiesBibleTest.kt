@@ -3,6 +3,11 @@
 package org.churchpresenter.canvas
 
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.assertIsDisplayed
@@ -508,6 +513,24 @@ class SourcePropertiesBibleTest {
             waitUntil("the chosen book must become the selection", timeoutMillis = 5_000) {
                 countOf("John") >= 1 && countOf("Genesis") == 0
             }
+        }
+    }
+
+    @Test
+    fun `choosing a chapter loads it, and Insert reads from it`() {
+        sourcePanel(Fixture.bible(), appSettings = settingsWithBible()) { get ->
+            awaitBibleLoaded()
+            waitUntil("the Insert button must appear", timeoutMillis = 5_000) { countOf("Insert Verse") == 1 }
+
+            onAllNodes(hasText("1") and hasClickAction() and !hasSetTextAction())
+                .onFirst().performScrollTo().performClick()
+            waitForIdle()
+            onAllNodesWithText("2").onLast().performClick()
+            waitForIdle()
+            onNodeWithText("Insert Verse").performScrollTo().performClick()
+            waitForIdle()
+
+            assertEquals("Genesis 2:1", (get() as SceneSource.BibleSource).referenceText)
         }
     }
 

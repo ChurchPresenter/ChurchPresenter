@@ -50,11 +50,13 @@ same split the code had in the app.
 
 ## Coverage floor
 
-Complexity **82%**; the other five counters keep the shared 85%. The gap is not untested behaviour:
+Complexity **84%**; the other five counters keep the shared 85%. The gap is not untested behaviour:
 `CrashReporter.trace` is `inline` and compiles `SlideLoader`'s render three times, and the copy for a
 transaction Sentry failed to start cannot run (`SlideLoaderTest` drives the other two, with reporting
-off and on); the rest is Compose's per-value change checks on click handlers and effects, and the
-native file pickers. The picture grid's shift-drag reorder is tested (`PicturesShiftDragTest`): a key
+off and on); the rest is Compose's per-value change checks on click handlers and effects, the native
+file pickers, and the Java-only `DefaultImpls` bridges of the interfaces' default arguments. The
+folder watcher is driven through a `FolderWatchSource` fake (`PictureFolderWatcherTest`), never by
+waiting on the platform's polling. The picture grid's shift-drag reorder is tested (`PicturesShiftDragTest`): a key
 held with `performKeyInput` rides on the mouse events after it. Raise the floor when any of that
 becomes reachable; never lower it without asking.
 

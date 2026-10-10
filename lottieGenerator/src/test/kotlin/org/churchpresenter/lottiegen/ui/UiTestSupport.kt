@@ -39,13 +39,17 @@ internal fun ComposeUiTest.click(text: String, substring: Boolean = false) {
 /** Clicks the item of an open menu: the last node with [text], since the anchor shows it too. */
 internal fun ComposeUiTest.pick(text: String) {
     val nodes = onAllNodesWithText(text, useUnmergedTree = true).fetchSemanticsNodes()
-    onAllNodesWithText(text, useUnmergedTree = true)[nodes.size - 1].performScrollTo().performClick()
+    val item = onAllNodesWithText(text, useUnmergedTree = true)[nodes.size - 1]
+    // Only a long list scrolls; a short one has no scrollable parent to bring the item into view.
+    runCatching { item.performScrollTo() }
+    item.performClick()
     waitForIdle()
 }
 
 /** Opens the dropdown labelled [label] (shown uppercase) and picks [item]. */
-internal fun ComposeUiTest.choose(label: String, item: String) {
-    click(label.uppercase())
+internal fun ComposeUiTest.choose(label: String, item: String, index: Int = 0) {
+    onAllNodesWithText(label.uppercase(), useUnmergedTree = true)[index].performClick()
+    waitForIdle()
     pick(item)
 }
 
@@ -75,4 +79,22 @@ internal fun ComposeUiTest.typeLast(current: String, value: String) {
     val count = onAllNodes(matcher).fetchSemanticsNodes().size
     onAllNodes(matcher)[count - 1].performTextReplacement(value)
     waitForIdle()
+}
+
+/** Types [value] into every text field on screen, top to bottom, letting each commit land first. */
+internal fun ComposeUiTest.fillEveryField(value: String) {
+    var i = 0
+    while (true) {
+        val fields = onAllNodes(hasSetTextAction())
+        if (i >= fields.fetchSemanticsNodes().size) break
+        fields[i].performTextReplacement(value)
+        waitForIdle()
+        i++
+    }
+}
+
+/** Clicks every node showing [text], first to last, re-reading the list after each click. */
+internal fun ComposeUiTest.clickEach(text: String, substring: Boolean = false) {
+    var guard = 0
+    while (hasNode(text, substring) && guard++ < 20) click(text, substring)
 }
