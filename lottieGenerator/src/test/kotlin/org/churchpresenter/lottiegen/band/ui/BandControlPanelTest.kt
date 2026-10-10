@@ -4,6 +4,7 @@ package org.churchpresenter.lottiegen.band.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.Text
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
@@ -29,6 +30,8 @@ import org.churchpresenter.lottiegen.band.TextAnimation
 import org.churchpresenter.lottiegen.lottie.TextShaping
 import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.ui.choose
+import org.churchpresenter.lottiegen.ui.components.FakePickers
+import org.churchpresenter.lottiegen.ui.components.LocalLottieGenPickers
 import org.churchpresenter.lottiegen.ui.click
 import org.churchpresenter.lottiegen.ui.clickDescription
 import org.churchpresenter.lottiegen.ui.fillEveryField
@@ -136,6 +139,21 @@ class BandControlPanelTest {
         assertNull(vm.config.images[BandColorRole.BACKGROUND])
         click(Strings.ok)
         assertTrue(!hasNode(Strings.bandImageChoose))
+    }
+
+    @Test
+    fun `without a host chooser the popover asks the generator own chooser for a picture`() =
+        runDesktopComposeUiTest(700, 1600) {
+        val picture = File(temp, "stone.png")
+        ImageIO.write(BufferedImage(20, 10, BufferedImage.TYPE_INT_RGB), "png", picture)
+        val pickers = FakePickers(file = picture)
+        val vm = viewModel()
+        showDark { CompositionLocalProvider(LocalLottieGenPickers provides pickers) { BandControlPanel(vm, 460.dp) } }
+        clickDescription(Strings.bandLookTooltip)
+        click(Strings.bandImageChoose)
+        waitUntil(timeoutMillis = 5_000) { vm.config.images.containsKey(BandColorRole.BACKGROUND) }
+        assertEquals("stone.png", vm.config.images.getValue(BandColorRole.BACKGROUND).name)
+        assertEquals(listOf("file ${Strings.bandImage} png,jpg,jpeg,webp"), pickers.asked)
     }
 
     @Test

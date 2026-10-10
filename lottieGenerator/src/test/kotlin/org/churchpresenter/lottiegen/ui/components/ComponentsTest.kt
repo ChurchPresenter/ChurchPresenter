@@ -100,6 +100,7 @@ class ComponentsTest {
     fun `a stepped slider snaps, a disabled one ignores the pointer`() = runDesktopComposeUiTest(600, 300) {
         var stepped by mutableStateOf(0f)
         var locked by mutableStateOf(0.5f)
+        var flat by mutableStateOf(1f)
         showDark(600.dp, 300.dp) {
             Column {
                 Text("stepped")
@@ -108,6 +109,8 @@ class ComponentsTest {
                 }
                 Text("locked")
                 LottieSlider(locked, { locked = it }, 0f..1f, Modifier.width(400.dp), enabled = false)
+                Text("flat")
+                LottieSlider(flat, { flat = it }, 1f..1f, Modifier.width(400.dp))
             }
         }
         tapBelow("stepped", 10.dp, 0.0f)
@@ -119,6 +122,8 @@ class ComponentsTest {
         assertTrue(stepped in listOf(0.25f, 0.5f, 0.75f, 1f), "snapped to $stepped")
         tapBelow("locked", 10.dp, 0.0f)
         assertEquals(0.5f, locked)
+        tapBelow("flat", 10.dp, 0.5f)
+        assertEquals(1f, flat)
     }
 
     @Test

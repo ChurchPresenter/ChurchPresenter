@@ -80,6 +80,22 @@ class MalformedLottieInputTest {
     }
 
     @Test
+    fun `static texts skip layers whose type, text or document is the wrong shape`() {
+        val odd = """
+            {"layers": [
+              {"ty": {"x": 1}},
+              {"t": {}},
+              {"ty": "5", "t": 1},
+              {"ty": "5", "t": {"d": 1}},
+              {"ty": "5", "t": {"d": {"k": 1}}},
+              {"ty": "5", "t": {"d": {"k": [1, {"s": 1}, {"s": {"t": {"a": 1}}}, {"s": {"t": "kept"}}]}}}
+            ]}
+        """.trimIndent()
+        val lottie = kotlinx.serialization.json.Json.parseToJsonElement(odd) as JsonObject
+        assertEquals(listOf("kept"), LottieTextShaping.staticTexts(lottie))
+    }
+
+    @Test
     fun `json that does not parse to an object reads as auto`() {
         assertEquals(TextShaping.AUTO, LottieTextShaping.modeOf("[1, 2]"))
         assertEquals(TextShaping.AUTO, LottieTextShaping.modeOf("{ not json"))

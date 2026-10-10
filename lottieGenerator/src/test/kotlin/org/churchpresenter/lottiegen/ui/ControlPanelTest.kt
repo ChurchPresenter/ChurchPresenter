@@ -4,6 +4,7 @@ package org.churchpresenter.lottiegen.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.Text
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
@@ -17,6 +18,10 @@ import org.churchpresenter.lottiegen.model.LottieGenConfig
 import org.churchpresenter.lottiegen.model.Preset
 import org.churchpresenter.lottiegen.model.StyleCatalog
 import org.churchpresenter.lottiegen.model.TIMING_PRESETS
+import org.churchpresenter.lottiegen.ui.components.FakePickers
+import org.churchpresenter.lottiegen.ui.components.LocalLottieGenPickers
+import java.io.File
+import javax.swing.SwingUtilities
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -192,6 +197,36 @@ class ControlPanelTest {
         click(Strings.saveToLibrary)
         assertEquals(listOf("savePreset"), state.calls.filterNot { it == "thumbnails" })
     }
+
+    @Test
+    fun `the choosers feed the logo import, the download and the batch save, and a cancel does nothing`() =
+        runDesktopComposeUiTest(1400, 2600) {
+            val logo = File("logo.png")
+            val folder = File("out")
+            val pickers = FakePickers(file = logo, directory = folder)
+            val state = FakeLottieGenState(presets = listOf(preset))
+            setContent {
+                LottieGenTheme {
+                    CompositionLocalProvider(LocalLottieGenPickers provides pickers) { ControlPanel(state, 600.dp) }
+                }
+            }
+            waitForIdle()
+            click(Strings.sectionLogo)
+            choose(Strings.logoLabel, Strings.logoImport)
+            click(Strings.downloadJson)
+            click(Strings.saveAllLowerThirds)
+            SwingUtilities.invokeAndWait {}
+            val calls = state.calls.filterNot { it == "thumbnails" }
+            assertEquals(listOf("importLogo", "download", "batchDownload out"), calls)
+            pickers.file = null
+            pickers.directory = null
+            choose(Strings.logoLabel, Strings.logoImport)
+            click(Strings.downloadJson)
+            click(Strings.saveAllLowerThirds)
+            SwingUtilities.invokeAndWait {}
+            assertEquals(3, state.calls.count { it != "thumbnails" })
+            assertEquals(6, pickers.asked.size)
+        }
 
     @Test
     fun `batch import reads the pasted text and reports the count`() = runDesktopComposeUiTest(1400, 2600) {

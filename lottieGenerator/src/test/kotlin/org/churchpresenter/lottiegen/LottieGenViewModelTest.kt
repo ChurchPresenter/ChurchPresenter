@@ -480,6 +480,51 @@ class LottieGenViewModelTest {
     }
 
     @Test
+    fun `a download with only an info line is named by it`() {
+        val dir = outDir()
+        val vm = viewModel()
+        vm.updateConfig { it.copy(nameText = " ", infoText = "Elder") }
+        assertEquals("Elder - 01.json", assertNotNull(vm.downloadJson(dir)).name)
+    }
+
+    @Test
+    fun `saving a lower third with nowhere to save records no preset`() {
+        val vm = viewModel()
+        assertNull(vm.saveLowerThird())
+        assertTrue(vm.presets.isEmpty())
+    }
+
+    @Test
+    fun `a third preset of the same name takes the next free number`() {
+        val vm = viewModel()
+        listOf("A", "B", "C").forEach { info ->
+            vm.updateConfig { it.copy(nameText = "Ann", infoText = info) }
+            vm.savePreset()
+        }
+        assertEquals(listOf("Ann", "Ann - 1", "Ann - 2"), vm.presets.map { it.name })
+    }
+
+    @Test
+    fun `an embedded batch download defaults to the output folder and says it is done`() {
+        val dir = outDir()
+        var saved = 0
+        val vm = viewModel(outputDir = dir, onFileSaved = { saved++ })
+        vm.updateConfig { it.copy(nameText = "One", infoText = "") }; vm.savePreset()
+        vm.batchDownloadAll(null)
+        waitFor("the batch to finish") { vm.statusText.startsWith("Saved ") }
+        assertEquals(listOf("One - 01.json"), dir.listFiles()!!.map { it.name })
+        waitFor("the callback") { saved == 1 }
+        viewModel().batchDownloadAll(null)
+    }
+
+    @Test
+    fun `selecting a logo that is not in the library changes nothing`() {
+        val vm = viewModel()
+        vm.selectLogo("absent.png")
+        assertEquals(false, vm.config.logoEnabled)
+    }
+
+    @Test
     fun `batch download to a path that is not a folder does nothing`() {
         val vm = viewModel()
         vm.updateConfig { it.copy(nameText = "One") }; vm.savePreset()

@@ -3,6 +3,7 @@
 package org.churchpresenter.lottiegen.editor.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.getValue
@@ -45,6 +46,8 @@ import org.churchpresenter.lottiegen.ui.showDark
 import org.churchpresenter.lottiegen.ui.tapBelow
 import org.churchpresenter.lottiegen.ui.type
 import org.churchpresenter.lottiegen.ui.typeLast
+import org.churchpresenter.lottiegen.ui.components.FakePickers
+import org.churchpresenter.lottiegen.ui.components.LocalLottieGenPickers
 import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Files
@@ -274,6 +277,26 @@ class EditorPanelsTest {
         assertEquals(listOf("save"), state.calls)
         assertFalse(hasNode(Strings.editorProjectName.uppercase()))
     }
+
+    @Test
+    fun `exporting to a chosen file reports what to commit, and a cancel stays in the dialog`() =
+        runDesktopComposeUiTest(1400, 1400) {
+            val pickers = FakePickers()
+            val state = FakeEditorState(StyleSpec(id = "95", name = "Bar"))
+            showDark {
+                CompositionLocalProvider(LocalLottieGenPickers provides pickers) { ProjectToolbarActions(state) }
+            }
+            click(Strings.editorExport)
+            click(Strings.editorExportChoose)
+            assertTrue(hasNode(Strings.editorExportTitle))
+            pickers.saveTo = File(temp, "style95_bar.json")
+            click(Strings.editorExportChoose)
+            assertEquals("save style95_bar.json", pickers.asked.last())
+            assertEquals("export", state.calls.last())
+            assertTrue(hasNode(Strings.editorExportDoneTitle))
+            click(Strings.ok)
+            assertFalse(hasNode(Strings.editorExportDoneTitle))
+        }
 
     @Test
     fun `the export dialog lists issues, previews the label and registers`() = runDesktopComposeUiTest(1400, 1400) {

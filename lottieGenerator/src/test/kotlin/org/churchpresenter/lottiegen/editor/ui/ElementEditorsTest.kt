@@ -3,6 +3,7 @@
 package org.churchpresenter.lottiegen.editor.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -36,6 +37,12 @@ import org.churchpresenter.lottiegen.ui.clickDescription
 import org.churchpresenter.lottiegen.ui.fillEveryField
 import org.churchpresenter.lottiegen.ui.hasNode
 import org.churchpresenter.lottiegen.ui.showDark
+import org.churchpresenter.lottiegen.ui.components.FakePickers
+import org.churchpresenter.lottiegen.ui.components.LocalLottieGenPickers
+import java.awt.image.BufferedImage
+import java.io.File
+import java.nio.file.Files
+import javax.imageio.ImageIO
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -201,6 +208,33 @@ class ElementEditorsTest {
         waitForIdle()
         assertTrue(hasNode(EditorStrings.imageInfo(20, 10, 3)))
     }
+
+    @Test
+    fun `importing a picture fills the image element, and a cancel or a non-image leaves it`() =
+        runDesktopComposeUiTest(1000, 1000) {
+            val dir = Files.createTempDirectory("image-import-ui").toFile()
+            try {
+                val png = File(dir, "pic.png")
+                ImageIO.write(BufferedImage(6, 3, BufferedImage.TYPE_INT_ARGB), "png", png)
+                val pickers = FakePickers(file = File(dir, "not-an-image.png").apply { writeText("x") })
+                var element by mutableStateOf(ImageElement("i"))
+                showDark {
+                    CompositionLocalProvider(LocalLottieGenPickers provides pickers) {
+                        ImageOptionsEditor(element) { element = it }
+                    }
+                }
+                click(Strings.editorImageImport)
+                pickers.file = null
+                click(Strings.editorImageImport)
+                assertEquals("", element.dataUri)
+                pickers.file = png
+                click(Strings.editorImageImport)
+                assertEquals(6 to 3, element.naturalW to element.naturalH)
+                assertTrue(element.dataUri.startsWith("data:image/png;base64,"))
+            } finally {
+                dir.deleteRecursively()
+            }
+        }
 
     @Test
     fun `the tracks editor adds a track and edits its keyframes, easing and overrides`() =
