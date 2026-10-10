@@ -1554,6 +1554,16 @@
     <string name="update_dialog_view_on_github">GitHub இல் காண்</string>
     <string name="participate_in_prereleases">பீட்டா / முன்வெளியீட்டுப் புதுப்பிப்புகளையும் சேர்</string>
     <string name="update_dialog_check_interval">புதுப்பிப்புகளைச் சரிபார்</string>
+    <string name="update_dialog_ready_title">புதிய பதிப்பு தயார்</string>
+    <string name="update_dialog_released">%1$s அன்று வெளியானது</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">புதியவை</string>
+    <string name="update_dialog_full_notes">முழு வெளியீட்டுக் குறிப்புகள்</string>
+    <string name="update_dialog_beta_title">பீட்டா புதுப்பிப்புகளைச் சேர்</string>
+    <string name="update_dialog_beta_hint">புதிய அம்சங்களை முன்கூட்டியே பெறுங்கள். அவை நிலைத்தன்மை குறைவாக இருக்கலாம்.</string>
+    <string name="update_dialog_skip">இந்தப் பதிப்பைத் தவிர்</string>
+    <string name="update_dialog_downloading_of">%2$d MB இல் %1$d பதிவிறக்கப்படுகிறது</string>
+    <string name="update_dialog_ready_to_install">நிறுவத் தயார்</string>
     <string name="update_interval_every_launch">ஒவ்வொரு தொடக்கத்திலும்</string>
     <string name="update_interval_weekly">வாரந்தோறும்</string>
     <string name="update_interval_monthly">மாதந்தோறும்</string>

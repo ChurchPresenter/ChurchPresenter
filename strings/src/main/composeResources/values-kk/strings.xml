@@ -1060,6 +1060,16 @@
     <string name="update_dialog_view_on_github">GitHub-та қарау</string>
     <string name="participate_in_prereleases">Бета/алдын ала шығарылымдарды қосу</string>
     <string name="update_dialog_check_interval">Жаңартуларды тексеру</string>
+    <string name="update_dialog_ready_title">Жаңа нұсқа дайын</string>
+    <string name="update_dialog_released">%1$s шықты</string>
+    <string name="update_dialog_size_mb">%1$d МБ</string>
+    <string name="update_dialog_whats_new">Не жаңа</string>
+    <string name="update_dialog_full_notes">Шығарылым туралы толық жазбалар</string>
+    <string name="update_dialog_beta_title">Бета жаңартуларды қосу</string>
+    <string name="update_dialog_beta_hint">Жаңа мүмкіндіктерді ертерек алыңыз. Олар тұрақтылығы төмен болуы мүмкін.</string>
+    <string name="update_dialog_skip">Бұл нұсқаны өткізіп жіберу</string>
+    <string name="update_dialog_downloading_of">%2$d МБ ішінен %1$d жүктелуде</string>
+    <string name="update_dialog_ready_to_install">Орнатуға дайын</string>
     <string name="update_interval_every_launch">Әр іске қосылғанда</string>
     <string name="update_interval_weekly">Апта сайын</string>
     <string name="update_interval_monthly">Ай сайын</string>

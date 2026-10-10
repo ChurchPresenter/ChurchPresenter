@@ -1549,6 +1549,16 @@
     <string name="update_dialog_view_on_github">GitHub da koʻrish</string>
     <string name="participate_in_prereleases">Beta va dastlabki versiyalarni ham qoʻshish</string>
     <string name="update_dialog_check_interval">Yangilanishlarni tekshirish</string>
+    <string name="update_dialog_ready_title">Yangi versiya tayyor</string>
+    <string name="update_dialog_released">%1$s chiqarilgan</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">Yangiliklar</string>
+    <string name="update_dialog_full_notes">Toʻliq reliz izohlari</string>
+    <string name="update_dialog_beta_title">Beta yangilanishlarni qoʻshish</string>
+    <string name="update_dialog_beta_hint">Yangi imkoniyatlarni erta oling. Ular kamroq barqaror boʻlishi mumkin.</string>
+    <string name="update_dialog_skip">Bu versiyani oʻtkazib yuborish</string>
+    <string name="update_dialog_downloading_of">%2$d MB dan %1$d yuklanmoqda</string>
+    <string name="update_dialog_ready_to_install">Oʻrnatishga tayyor</string>
     <string name="update_interval_every_launch">Har ishga tushganda</string>
     <string name="update_interval_weekly">Haftada bir</string>
     <string name="update_interval_monthly">Oyda bir</string>

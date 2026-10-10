@@ -124,7 +124,8 @@ internal fun AppRootState.StartupEffect() {
             val result = UpdateChecker.checkForUpdate(includePrereleases = appSettings.participateInPrereleases)
             appSettings = appSettings.copy(lastUpdateCheckTimestamp = System.currentTimeMillis())
             settingsManager.saveSettings(appSettings)
-            pendingUpdateFor(isFirstEverUpdateCheck, result)?.let { (pending, manual) ->
+            val skipped = appSettings.skippedUpdateVersion
+            pendingUpdateFor(isFirstEverUpdateCheck, result, skipped)?.let { (pending, manual) ->
                 pendingUpdateResult = pending
                 pendingUpdateCheckWasManual = manual
             }

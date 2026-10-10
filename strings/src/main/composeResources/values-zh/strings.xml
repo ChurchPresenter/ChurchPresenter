@@ -1549,6 +1549,16 @@
     <string name="update_dialog_view_on_github">在 GitHub 上查看</string>
     <string name="participate_in_prereleases">包含测试版 / 预发布更新</string>
     <string name="update_dialog_check_interval">检查更新</string>
+    <string name="update_dialog_ready_title">新版本已就绪</string>
+    <string name="update_dialog_released">发布于 %1$s</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">新功能</string>
+    <string name="update_dialog_full_notes">完整发行说明</string>
+    <string name="update_dialog_beta_title">包含测试版更新</string>
+    <string name="update_dialog_beta_hint">抢先体验新功能。可能不够稳定。</string>
+    <string name="update_dialog_skip">跳过此版本</string>
+    <string name="update_dialog_downloading_of">正在下载 %1$d / %2$d MB</string>
+    <string name="update_dialog_ready_to_install">可以安装了</string>
     <string name="update_interval_every_launch">每次启动</string>
     <string name="update_interval_weekly">每周</string>
     <string name="update_interval_monthly">每月</string>

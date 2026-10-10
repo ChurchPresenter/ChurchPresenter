@@ -2,14 +2,12 @@
 
 package org.churchpresenter.updater
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -23,7 +21,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * One download, start to finish, in one open dialog: the progress line and the action button follow
+ * One download, start to finish, in one open dialog: the footer's progress bar and buttons follow
  * the [DownloadState] as it moves on, rather than each state being drawn fresh as
  * `UpdateAvailableContentTest` draws them. A button left over from the previous state -- an Install
  * that still says Downloading, a Download offered again mid-flight -- is what this would catch.
@@ -36,6 +34,7 @@ class UpdateDownloadFlowTest {
         const val INSTALL = "Install Now"
         const val OPEN_PAGE = "Open Download Page"
         const val LATER = "Later"
+        const val CANCEL = "Cancel"
     }
 
     private val info = UpdateInfo(
@@ -57,18 +56,19 @@ class UpdateDownloadFlowTest {
         var dismissed = 0
         setContent {
             MaterialTheme {
-                Column {
-                    DownloadProgress(state)
-                    UpdateActions(
-                        updateInfo = info,
-                        downloadState = state,
-                        onDismiss = { dismissed++ },
-                        onInstall = { installed = it },
-                        onOpenReleasePage = {},
+                UpdateFooter(
+                    info = info,
+                    downloadState = state,
+                    actions = UpdateFooterActions(
                         onDownload = { downloads++ },
-                        copyText = {},
-                    )
-                }
+                        onCancel = {},
+                        onInstall = { installed = it },
+                        onSkip = {},
+                        onDismiss = { dismissed++ },
+                        onOpenReleasePage = {},
+                    ),
+                    copyText = {},
+                )
             }
         }
 
@@ -78,8 +78,9 @@ class UpdateDownloadFlowTest {
 
         state = DownloadState.Downloading(-1f)
         waitForIdle()
-        // The size is not known yet: the progress line and the button both say so.
-        assertEquals(2, onAllNodes(hasText(Label.DOWNLOADING)).fetchSemanticsNodes().size)
+        // The size is not known yet: the progress line says so, and Cancel takes the button's place.
+        assertTrue(shows(Label.DOWNLOADING))
+        assertTrue(shows(Label.CANCEL))
         assertFalse(shows(Label.DOWNLOAD), "a second download is not offered while one runs")
 
         state = DownloadState.Downloading(0.25f)
@@ -114,21 +115,23 @@ class UpdateDownloadFlowTest {
             var dismissed = 0
             setContent {
                 MaterialTheme {
-                    Column {
-                        DownloadProgress(state)
-                        UpdateActions(
-                            updateInfo = info,
-                            downloadState = state,
-                            onDismiss = { dismissed++ },
-                            onInstall = {},
-                            onOpenReleasePage = { opened = it },
+                    UpdateFooter(
+                        info = info,
+                        downloadState = state,
+                        actions = UpdateFooterActions(
                             onDownload = {},
-                            copyText = { copied = it },
-                        )
-                    }
+                            onCancel = {},
+                            onInstall = {},
+                            onSkip = {},
+                            onDismiss = { dismissed++ },
+                            onOpenReleasePage = { opened = it },
+                        ),
+                        copyText = { copied = it },
+                    )
                 }
             }
-            onNodeWithText(Label.DOWNLOADING).assertIsNotEnabled()
+            assertTrue(shows("50%"))
+            assertFalse(shows(Label.DOWNLOAD), "nothing to start again while it runs")
 
             state = DownloadState.Error("Disk full")
             waitForIdle()

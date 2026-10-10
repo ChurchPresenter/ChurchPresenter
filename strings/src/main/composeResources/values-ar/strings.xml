@@ -1549,6 +1549,16 @@
     <string name="update_dialog_view_on_github">عرض على GitHub</string>
     <string name="participate_in_prereleases">تضمين تحديثات بيتا والإصدارات المبكرة</string>
     <string name="update_dialog_check_interval">التحقق من التحديثات</string>
+    <string name="update_dialog_ready_title">إصدار جديد جاهز</string>
+    <string name="update_dialog_released">صدر في %1$s</string>
+    <string name="update_dialog_size_mb">%1$d ميغابايت</string>
+    <string name="update_dialog_whats_new">ما الجديد</string>
+    <string name="update_dialog_full_notes">ملاحظات الإصدار كاملة</string>
+    <string name="update_dialog_beta_title">تضمين التحديثات التجريبية</string>
+    <string name="update_dialog_beta_hint">احصل على الميزات الجديدة مبكرًا. قد تكون أقل استقرارًا.</string>
+    <string name="update_dialog_skip">تخطي هذا الإصدار</string>
+    <string name="update_dialog_downloading_of">جارٍ تنزيل %1$d من %2$d ميغابايت</string>
+    <string name="update_dialog_ready_to_install">جاهز للتثبيت</string>
     <string name="update_interval_every_launch">عند كل تشغيل</string>
     <string name="update_interval_weekly">أسبوعيًا</string>
     <string name="update_interval_monthly">شهريًا</string>

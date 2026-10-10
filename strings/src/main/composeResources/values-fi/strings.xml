@@ -1549,6 +1549,16 @@
     <string name="update_dialog_view_on_github">Näytä GitHubissa</string>
     <string name="participate_in_prereleases">Sisällytä beta- ja esijulkaisut</string>
     <string name="update_dialog_check_interval">Tarkista päivitykset</string>
+    <string name="update_dialog_ready_title">Uusi versio on valmis</string>
+    <string name="update_dialog_released">Julkaistu %1$s</string>
+    <string name="update_dialog_size_mb">%1$d Mt</string>
+    <string name="update_dialog_whats_new">Uutta</string>
+    <string name="update_dialog_full_notes">Täydelliset julkaisutiedot</string>
+    <string name="update_dialog_beta_title">Sisällytä beetapäivitykset</string>
+    <string name="update_dialog_beta_hint">Saat uudet ominaisuudet aiemmin. Ne voivat olla epävakaampia.</string>
+    <string name="update_dialog_skip">Ohita tämä versio</string>
+    <string name="update_dialog_downloading_of">Ladataan %1$d / %2$d Mt</string>
+    <string name="update_dialog_ready_to_install">Valmis asennettavaksi</string>
     <string name="update_interval_every_launch">Joka käynnistyksellä</string>
     <string name="update_interval_weekly">Viikoittain</string>
     <string name="update_interval_monthly">Kuukausittain</string>
