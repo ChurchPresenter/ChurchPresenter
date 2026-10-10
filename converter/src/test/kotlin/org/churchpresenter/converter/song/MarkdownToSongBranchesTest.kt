@@ -86,4 +86,27 @@ class MarkdownToSongBranchesTest {
             song.sections.map { it.label },
         )
     }
+
+    @Test
+    fun `text before the first of several headings belongs to the first song`() {
+        val markdown = "Opening line\nsecond line\n# Song A\nline a1\n# Song B\nline b1"
+        val songs = MarkdownToSongConverter.parseMarkdown(markdown, "doc.md")
+        assertEquals(2, songs.size)
+        val first = songs.first()
+        val text = (listOf(first.title) + first.sections.flatMap { it.lines }).joinToString("\n")
+        assertTrue("Opening line" in text && "line a1" in text && "line b1" !in text, text)
+    }
+
+    @Test
+    fun `blank lines before the first heading add nothing to it`() {
+        val songs = MarkdownToSongConverter.parseMarkdown("\n\n# Song A\nline a1\n# Song B\nline b1", "doc.md")
+        assertEquals(listOf("Song A", "Song B"), songs.map { it.title })
+    }
+
+    @Test
+    fun `a rule with only blank lines after it ends the last song`() {
+        val markdown = "Song A\nline a1\nline a2\n***\nSong B\nline b1\nline b2\n---\n\n"
+        val songs = MarkdownToSongConverter.parseMarkdown(markdown, "doc.md")
+        assertEquals(listOf("Song A", "Song B"), songs.map { it.title })
+    }
 }

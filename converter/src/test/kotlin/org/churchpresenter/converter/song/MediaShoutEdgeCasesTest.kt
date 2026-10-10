@@ -249,4 +249,22 @@ class MediaShoutEdgeCasesTest {
         assertFalse(MediaShoutConverter.isScript(file))
         assertTrue(MediaShoutConverter.convert(file, File(temp, "out")).errors.isNotEmpty())
     }
+
+    @Test
+    fun `fields written as the wrong JSON shape are read as missing`() {
+        val wrongTypes = """{"TypeId":"Cue","Properties":{"Type":{"${'$'}value":"x"}},"Pages":[]}"""
+        val listType = """{"TypeId":"Cue","Properties":{"Type":[1]},"Pages":[]}"""
+        val pages = listOf(
+            """{"Properties":"flat","Items":[${textItem("first page")}]}""",
+            """{"Properties":{"IsSkipped":{"v":true},"Name":["x"]},"Items":"none"}""",
+            """{"Properties":{"IsSkipped":false},"Items":[{"TypeId":{"x":1}},{"TypeId":"VisualItem+Text"},""" +
+                """{"TypeId":"VisualItem+Text","Properties":{"Text":"  "}},${textItem("third page")}]}""",
+        )
+        val cue = """{"TypeId":"Cue","Properties":{"Name":"Odd","Type":1},"Pages":[${pages.joinToString(",")}]}"""
+
+        val noPages = """{"Properties":{"Type":1},"Pages":"none"}"""
+        val song = songsOf("""{"Cues":[$wrongTypes,$listType,$cue,$noPages]}""").single()
+        assertEquals("Odd", song.title)
+        assertEquals(listOf(listOf("first page"), listOf("third page")), song.sections.map { it.lines })
+    }
 }

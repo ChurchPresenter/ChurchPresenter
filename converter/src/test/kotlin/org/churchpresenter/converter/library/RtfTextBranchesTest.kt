@@ -60,4 +60,33 @@ class RtfTextBranchesTest {
     fun `a hex escape cut short at the end is ignored`() {
         assertEquals("a", plain("{\\rtf1 a\\'"))
     }
+
+    @Test
+    fun `a newline is a run break only before a numbered font`() {
+        assertEquals("a\nb", plain("{\\rtf1 a\r\\f1 b}"))
+        assertEquals("ab", plain("{\\rtf1 a\n\\fs24 b}"))
+        assertEquals("ab", plain("{\\rtf1 a\n\\par0b}").replace("\n", ""))
+        assertEquals("a", plain("{\\rtf1 a\n"))
+        assertEquals("a", plain("{\\rtf1 a\n\\"))
+        assertEquals("a", plain("{\\rtf1 a\n\\f"))
+    }
+
+    @Test
+    fun `a control word cut off by the end of the document ends the text`() {
+        assertEquals("a", plain("{\\rtf1 a\\li"))
+        assertEquals("a", plain("{\\rtf1 a\\li-"))
+        assertEquals("a", plain("{\\rtf1 a\\li-36"))
+        assertEquals("ab", plain("{\\rtf1 a\\li-360 b}"))
+    }
+
+    @Test
+    fun `a unicode fallback is cut short by the end of the document`() {
+        assertEquals("Я", plain("{\\rtf1\\uc3 \\u1071 a"))
+        assertEquals("Я", plain("{\\rtf1\\uc2 \\u1071\\"))
+    }
+
+    @Test
+    fun `characters inside an ignored destination are not text`() {
+        assertEquals("ab", plain("{\\rtf1 a{\\*\\generator x\\~y\\u1071z}b}"))
+    }
 }

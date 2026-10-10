@@ -86,4 +86,22 @@ class LooseJsonTest {
         assertEquals("", LooseJson.parse("").text("Text"))
         assertEquals("", LooseJson.parse("not json").text("Text"))
     }
+
+    @Test
+    fun `the remaining escapes decode, and a backslash at the very end is dropped`() {
+        val node = LooseJson.parse("{A:\"a\\rb\",B:\"c\\bd\",C:\"\\uZZZZ\",D:\"end\\")
+        assertEquals("a\rb", node.text("A"))
+        assertEquals("c\bd", node.text("B"))
+        assertEquals("uZZZZ", node.text("C"))
+        assertEquals("end", node.text("D"))
+    }
+
+    @Test
+    fun `a quoted key, a key with no colon and a value cut off at the end are all read`() {
+        val node = LooseJson.parse("{\"Text\":\"Book\",Lone}")
+        assertEquals("Book", node.text("Text"))
+        assertEquals("", node.text("Lone"))
+        assertEquals("7", LooseJson.parse("{ID:7").text("ID"))
+        assertEquals("", LooseJson.parse("{ID:").text("ID"))
+    }
 }

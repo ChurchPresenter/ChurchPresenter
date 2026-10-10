@@ -387,4 +387,97 @@ class ParadoxTableEdgeCasesTest {
 
         assertFailsWith<IllegalArgumentException> { ParadoxTable.parseSongs(File(folder, "Songs.DB")) }
     }
+
+    // ── Damage the walk and the memo lookup survive ───────────────────────────
+
+    private fun songsIn(folder: File) = ParadoxTable.parseSongs(File(folder, "Songs.DB"))
+
+    @Test
+    fun `a table shorter than its own header is refused`() {
+        val folder = File(temp, "tiny").apply { mkdirs() }
+        File(folder, "Songs.DB").writeBytes(ByteArray(16))
+        File(folder, "Songs.MB").writeBytes(ByteArray(0))
+        assertFailsWith<IllegalArgumentException> { songsIn(folder) }
+    }
+
+    @Test
+    fun `the memo file is found whatever its case, past folders and other files`() {
+        val folder = hymn("case")
+        File(folder, "Songs.MB").renameTo(File(folder, "songs.mb"))
+        File(folder, "Other.MB").writeBytes(ByteArray(4))
+        File(folder, "Songs.txt").writeText("not it")
+        File(folder, "Songs").mkdirs()
+        assertEquals("Hymn", songsIn(folder).single().title)
+    }
+
+    @Test
+    fun `a memo file that is a folder is no memo file`() {
+        val folder = hymn("dirmemo", writeMemoFile = false)
+        File(folder, "Songs.MB").mkdirs()
+        assertFailsWith<IllegalArgumentException> { songsIn(folder) }
+    }
+
+    @Test
+    fun `a block chain that loops back on itself is read once`() {
+        val folder = hymn("loop")
+        val table = File(folder, "Songs.DB")
+        val bytes = table.readBytes()
+        ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).putShort(HEADER_SIZE, 1)
+        table.writeBytes(bytes)
+        assertEquals(listOf("Hymn"), songsIn(folder).map { it.title })
+    }
+
+    @Test
+    fun `a negative first block ends the walk before it starts`() {
+        assertTrue(songsIn(hymn("negative", firstBlock = -3)).isEmpty())
+    }
+
+    @Test
+    fun `a song with lyrics but no title is kept`() {
+        val folder = library(
+            listOf(title, words), listOf(listOf("", Memo("Verse 1\n\nline"))), folderName = "untitled",
+        )
+        assertTrue(songsIn(folder).single().sections.isNotEmpty())
+    }
+
+    @Test
+    fun `lyrics held in a blob column are read like a memo`() {
+        val blob = Column("Words", 0x0d, MEMO_WIDTH)
+        val folder = library(
+            listOf(title, blob), listOf(listOf("Hymn", Memo("Verse 1\n\nline"))), folderName = "blob",
+        )
+        assertTrue(songsIn(folder).single().sections.isNotEmpty())
+    }
+
+    @Test
+    fun `a code page the reader does not know falls back to Windows Latin`() {
+        val folder = library(
+            listOf(title, words), listOf(listOf("Café", Memo("l"))), codePage = 4242, folderName = "cp",
+        )
+        assertEquals("Café", songsIn(folder).single().title)
+    }
+
+    @Test
+    fun `a packed memo whose entry is out of range reads as no lyrics`() {
+        val beyondTable = library(
+            listOf(title, words),
+            listOf(listOf("Hymn", Memo("line", packed = true, subBlock = 70))),
+            folderName = "sub70",
+        )
+        assertTrue(songsIn(beyondTable).single().sections.isEmpty())
+
+        val cut = library(listOf(title, words), listOf(listOf("Hymn", Memo("line", packed = true))), folderName = "cut")
+        val memo = File(cut, "Songs.MB")
+        memo.writeBytes(memo.readBytes().copyOf(8))
+        assertTrue(songsIn(cut).single().sections.isEmpty())
+
+        val farStart = library(
+            listOf(title, words), listOf(listOf("Hymn", Memo("line", packed = true))), folderName = "far",
+        )
+        val farMemo = File(farStart, "Songs.MB")
+        val bytes = farMemo.readBytes()
+        bytes[12] = 0xff.toByte()
+        farMemo.writeBytes(bytes)
+        assertTrue(songsIn(farStart).single().sections.isEmpty())
+    }
 }

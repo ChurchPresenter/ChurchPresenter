@@ -285,4 +285,19 @@ class FreeWorshipEdgeCasesTest {
         assertTrue(fullContent.contains("author: John Newton"))
         assertTrue(fullContent.contains("copyright: Public Domain"))
     }
+
+    @Test
+    fun `a song with no properties at all still reads its verses`() {
+        val xml = """<song><lyrics><verse name="v1"><lines>Only line</lines></verse></lyrics></song>"""
+        val song = FreeWorshipConverter.parse(utf8("bare.xml", xml))
+        assertEquals("", song.title)
+        assertEquals(emptyList(), song.verseOrder)
+        assertEquals(listOf("Only line"), song.sections.map { it.text })
+    }
+
+    @Test
+    fun `comments and processing instructions inside the lines are not sung`() {
+        val file = utf8("pi.xml", song("<verseOrder> </verseOrder>", verse("v1", "One<!-- note --><?pi x?><b>Two</b>")))
+        assertEquals(listOf("OneTwo"), FreeWorshipConverter.parse(file).sections.map { it.text })
+    }
 }
