@@ -47,7 +47,7 @@ jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 # The JSON reader BibleEngineClient parses the engine's messages with -- and, through the root build's
 # security floor, the one socket.io-client parses with too.
-org-json = { module = "org.json:json", version = "20251224" }
+org-json = { module = "org.json:json", version = "20260814" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
