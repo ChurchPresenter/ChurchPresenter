@@ -78,7 +78,6 @@ fun QAPresenter(
     transitionAlpha: Float = 1f,
 ) = ReferenceScaledBox(modifier) {
     QAPresenterContent(
-        modifier = Modifier,
         question = question,
         qaSettings = qaSettings,
         outputRole = outputRole,
@@ -89,11 +88,10 @@ fun QAPresenter(
 /** [QAPresenter] as a 1920x1080-family output draws it; [ReferenceScaledBox] fits it to the real one. */
 @Composable
 private fun QAPresenterContent(
-    modifier: Modifier = Modifier,
     question: Question?,
-    qaSettings: QASettings = QASettings(),
-    outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
-    transitionAlpha: Float = 1f,
+    qaSettings: QASettings,
+    outputRole: String,
+    transitionAlpha: Float,
 ) {
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val textColor = if (isKey) Color.White else parseHexColor(qaSettings.textColor)
@@ -131,7 +129,7 @@ private fun QAPresenterContent(
     val boxAlignment = positionToAlignment(qaSettings.position)
 
     BoxWithConstraints(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .graphicsLayer { alpha = transitionAlpha },
         contentAlignment = boxAlignment

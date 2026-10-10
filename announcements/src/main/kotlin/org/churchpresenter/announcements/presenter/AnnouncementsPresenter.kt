@@ -60,7 +60,6 @@ fun AnnouncementsPresenter(
     showBackground: Boolean = true,
 ) = ReferenceScaledBox(modifier) {
     AnnouncementsPresenterContent(
-        modifier = Modifier,
         text = text,
         appSettings = appSettings,
         outputRole = outputRole,
@@ -73,13 +72,12 @@ fun AnnouncementsPresenter(
 /** [AnnouncementsPresenter] as a 1920x1080-family output draws it; [ReferenceScaledBox] fits it to the real one. */
 @Composable
 private fun AnnouncementsPresenterContent(
-    modifier: Modifier = Modifier,
     text: String,
     appSettings: AppSettings,
-    outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
-    transitionAlpha: Float = 1f,
-    onFinished: () -> Unit = {},
-    showBackground: Boolean = true,
+    outputRole: String,
+    transitionAlpha: Float,
+    onFinished: () -> Unit,
+    showBackground: Boolean,
 ) {
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val settings   = appSettings.announcementsSettings
@@ -107,7 +105,7 @@ private fun AnnouncementsPresenterContent(
     val scrollDurationMs = settings.animationDuration.coerceAtLeast(500)
 
     BoxWithConstraints(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(Color.Transparent)
             .graphicsLayer { alpha = transitionAlpha }
