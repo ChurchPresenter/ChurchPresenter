@@ -110,7 +110,7 @@ zxing-core = { module = "com.google.zxing:core", version = "3.5.3" }
 zxing-javase = { module = "com.google.zxing:javase", version = "3.5.3" }
 socket-io-client = { module = "io.socket:socket.io-client", version = "2.1.1" }
 # Not used directly: the floor for the okhttp socket.io-client brings (see the root build).
-okhttp = { module = "com.squareup.okhttp3:okhttp", version = "4.12.0" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version = "5.5.0" }
 filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
 dbus-java-core = { module = "com.github.hypfvieh:dbus-java-core", version.ref = "dbus-java" }
 dbus-java-transport-junixsocket = { module = "com.github.hypfvieh:dbus-java-transport-junixsocket", version.ref = "dbus-java" }
