@@ -1557,6 +1557,16 @@
     <string name="update_dialog_view_on_github">دیدن در GitHub</string>
     <string name="participate_in_prereleases">دربرگرفتن به‌روزرسانی‌های بتا و پیش‌انتشار</string>
     <string name="update_dialog_check_interval">بررسی به‌روزرسانی</string>
+    <string name="update_dialog_ready_title">نسخه جدید آماده است</string>
+    <string name="update_dialog_released">منتشرشده در %1$s</string>
+    <string name="update_dialog_size_mb">%1$d مگابایت</string>
+    <string name="update_dialog_whats_new">تازه‌ها</string>
+    <string name="update_dialog_full_notes">یادداشت‌های کامل انتشار</string>
+    <string name="update_dialog_beta_title">شامل به‌روزرسانی‌های بتا</string>
+    <string name="update_dialog_beta_hint">ویژگی‌های جدید را زودتر دریافت کنید. ممکن است پایداری کمتری داشته باشند.</string>
+    <string name="update_dialog_skip">رد شدن از این نسخه</string>
+    <string name="update_dialog_downloading_of">در حال دانلود %1$d از %2$d مگابایت</string>
+    <string name="update_dialog_ready_to_install">آماده نصب</string>
     <string name="update_interval_every_launch">هر بار اجرا</string>
     <string name="update_interval_weekly">هفتگی</string>
     <string name="update_interval_monthly">ماهانه</string>

@@ -1109,6 +1109,16 @@
     <string name="update_dialog_view_on_github">Открыть на GitHub</string>
     <string name="participate_in_prereleases">Включать бета- и предварительные обновления</string>
     <string name="update_dialog_check_interval">Проверять обновления</string>
+    <string name="update_dialog_ready_title">Новая версия готова</string>
+    <string name="update_dialog_released">Выпущена %1$s</string>
+    <string name="update_dialog_size_mb">%1$d МБ</string>
+    <string name="update_dialog_whats_new">Что нового</string>
+    <string name="update_dialog_full_notes">Полные примечания к выпуску</string>
+    <string name="update_dialog_beta_title">Включать бета-обновления</string>
+    <string name="update_dialog_beta_hint">Получайте новые возможности раньше. Они могут быть менее стабильными.</string>
+    <string name="update_dialog_skip">Пропустить эту версию</string>
+    <string name="update_dialog_downloading_of">Загружено %1$d из %2$d МБ</string>
+    <string name="update_dialog_ready_to_install">Готово к установке</string>
     <string name="update_interval_every_launch">При каждом запуске</string>
     <string name="update_interval_weekly">Еженедельно</string>
     <string name="update_interval_monthly">Ежемесячно</string>

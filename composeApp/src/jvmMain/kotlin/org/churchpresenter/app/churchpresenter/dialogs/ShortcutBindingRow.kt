@@ -29,6 +29,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -114,7 +116,11 @@ internal fun ShortcutBindingRow(
         else -> colors.outlineVariant.copy(alpha = 0.5f)
     }
 
-    ShortcutRowFrame(background = background, outline = outline) {
+    ShortcutRowFrame(
+        background = background,
+        outline = outline,
+        modifier = Modifier.guideTarget(GuideTargets.shortcutRow(action.name)),
+    ) {
         ShortcutRowLabel(
             description = stringResource(action.descriptionRes),
             conflictsWith = conflictsWith,
@@ -223,10 +229,11 @@ internal fun ShortcutGestureRow(
 private fun ShortcutRowFrame(
     background: Color,
     outline: Color,
+    modifier: Modifier = Modifier,
     content: @Composable RowScope.() -> Unit,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .heightIn(min = ROW_MIN_HEIGHT)
             .background(background, ROW_SHAPE)

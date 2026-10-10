@@ -151,7 +151,8 @@ private fun PicturesTabScope.PicturesFolderBar(viewModel: PicturesViewModel) {
                     viewModel.getScheduleData()?.let { (path, name, count) -> onAddToSchedule(path, name, count) }
                 },
                 enabled = viewModel.images.isNotEmpty(),
-                tooltipText = stringResource(Res.string.add_to_schedule)
+                tooltipText = stringResource(Res.string.add_to_schedule),
+                modifier = Modifier.guideTarget(GuideTargets.PICTURES_ADD_TO_SCHEDULE),
             )
         }
         if (presenterManager != null) {

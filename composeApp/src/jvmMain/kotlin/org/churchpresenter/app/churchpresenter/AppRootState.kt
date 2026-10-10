@@ -2,6 +2,8 @@ package org.churchpresenter.app.churchpresenter
 
 import org.churchpresenter.core.models.songs.SongItem
 import org.churchpresenter.sharedui.utils.DevFlags
+import org.churchpresenter.sharedui.utils.UsageEvent
+import org.churchpresenter.sharedui.utils.UsageEvents
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import org.churchpresenter.controlin.ControlHub
@@ -150,13 +152,16 @@ internal class AppRootState(
 
     // The helper lamp: its conversation, the tab the main screen is on (so "make it bigger" knows
     // what "it" is), and the one thing it asks of the main screen that no remote flow already does.
-    val helperState = HelperState()
+    val helperState = HelperState(onUsed = { UsageEvents.recordOncePerRun(UsageEvent.WICK_USED) })
     var helperCurrentTab by mutableStateOf<Tabs?>(null)
     // How many songs the library loaded, or null before it has — "empty" only once it has looked.
     var helperSongCount by mutableStateOf<Int?>(null)
     // The library itself, for the helper to find a song by number or title.
     var helperSongs by mutableStateOf<List<SongItem>>(emptyList())
     val helperSelectTabFlow = MutableSharedFlow<Tabs>(extraBufferCapacity = REMOTE_FLOW_BUFFER)
+
+    /** References the helper asks the Bible tab to put live, as typed: "John 3:16". */
+    val helperShowReferenceFlow = MutableSharedFlow<String>(extraBufferCapacity = REMOTE_FLOW_BUFFER)
 
     // What the automation engine last put on screen, or null once it blanked. The engine yields
     // to a hand on the controls: if the outputs show something other than this -- a Schedule row

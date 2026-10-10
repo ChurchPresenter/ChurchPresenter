@@ -68,6 +68,8 @@ class WickCatalogTest {
     fun `every reachable tagged control is described`() {
         val missing = source.unlabelledControls()
         println("Tagged controls with no label near the tag: ${missing.ifEmpty { "none" }}")
+        val unmapped = source.unmappedProfileRowFiles()
+        println("Profile row files with no page: ${unmapped.ifEmpty { "none" }}")
     }
 
     private class Line(val target: String, val text: String, val vector: String)

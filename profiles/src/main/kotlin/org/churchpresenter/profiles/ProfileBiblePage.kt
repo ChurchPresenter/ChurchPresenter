@@ -268,7 +268,7 @@ private fun BibleTextGroup(
                 leading = {
                     if (edit.styleElement == BibleStyleElement.REFERENCE) {
                         SettingsSwitchRow(
-                            stringResource(Res.string.customize_show_abbreviation),
+                            Res.string.customize_show_abbreviation,
                             edit.shown.showAbbreviation,
                             { v -> edit.updateEntry { it.copy(showAbbreviation = v) } },
                         )
@@ -297,7 +297,7 @@ private fun ShiftRow(edit: BibleEdit) {
     val entryPath = "bibleSettings.translations[${entry.fileName}]"
     val fields = if (lowerThird) listOf("lowerThirdShiftX", "lowerThirdShiftY") else listOf("shiftX", "shiftY")
     SettingsRow(
-        stringResource(Res.string.profile_shift),
+        Res.string.profile_shift,
         sub = stringResource(Res.string.profile_shift_sub),
         advanced = true,
         paths = fields.map { "$entryPath.$it" },
@@ -337,7 +337,7 @@ private fun ReferenceShiftRow(edit: BibleEdit) {
     }
     val entryPath = "bibleSettings.translations[${edit.shown.fileName}]"
     SettingsRow(
-        stringResource(Res.string.profile_shift),
+        Res.string.profile_shift,
         sub = stringResource(Res.string.profile_shift_element_sub),
         advanced = true,
         paths = if (edit.picked) fields.map { "$entryPath.$it" } else emptyList(),
@@ -521,7 +521,7 @@ private fun TranslationsGroup(edit: BibleEdit, profile: OutputProfile) {
     ) {
         if (parallel) {
             SettingsRow(
-                stringResource(Res.string.profile_layout),
+                Res.string.profile_layout,
                 paths = listOf(
                     if (lowerThird) "bibleSettings.bilingualLayoutLowerThird" else "bibleSettings.bilingualLayout",
                 ),
@@ -538,7 +538,7 @@ private fun TranslationsGroup(edit: BibleEdit, profile: OutputProfile) {
             }
         }
         val reference = edit.shown.elementStyle(BibleStyleElement.REFERENCE, edit.target)
-        SettingsRow(stringResource(Res.string.profile_reference)) {
+        SettingsRow(Res.string.profile_reference) {
             RowSegmented(
                 options = listOf(
                     RowOption(Constants.POSITION_BELOW, stringResource(Res.string.profile_ref_after)),
@@ -551,14 +551,14 @@ private fun TranslationsGroup(edit: BibleEdit, profile: OutputProfile) {
         // Offered whatever reaches this output, as the strip they came from did: they are set once
         // for the profile and take effect as soon as a second translation is shown.
         SettingsSwitchRow(
-            stringResource(Res.string.profile_translation_divider),
+            Res.string.profile_translation_divider,
             bs.multiTranslationDivider,
             { v -> updateBible { it.copy(multiTranslationDivider = v) } },
             advanced = true,
             paths = listOf("bibleSettings.multiTranslationDivider"),
         )
         SettingsRow(
-            stringResource(Res.string.profile_space_between_translations),
+            Res.string.profile_space_between_translations,
             advanced = true,
             paths = listOf("bibleSettings.multiTranslationSpacing"),
         ) {
@@ -571,7 +571,7 @@ private fun TranslationsGroup(edit: BibleEdit, profile: OutputProfile) {
             )
         }
         SettingsSwitchRow(
-            stringResource(Res.string.bible_split_long_verses),
+            Res.string.bible_split_long_verses,
             bs.splitLongVerses,
             { v -> updateBible { it.copy(splitLongVerses = v) } },
             sub = if (bs.splitLongVerses) stringResource(Res.string.profile_split_words) else null,

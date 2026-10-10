@@ -270,6 +270,10 @@ internal fun MainWindowScope.MoreToolWindows() {
                 appSettings = appSettings.copy(updateCheckInterval = interval)
                 settingsManager.saveSettings(appSettings)
             },
+            onSkipVersion = { version ->
+                appSettings = appSettings.copy(skippedUpdateVersion = version)
+                settingsManager.saveSettings(appSettings)
+            },
             onDismiss = { pendingUpdateResult = null }
         )
     }

@@ -15,12 +15,17 @@ import org.churchpresenter.theme.ThemeMode
 /**
  * What a finished update check leaves to show, and whether it shows as if asked for. The first check
  * ever shows its result whatever it is, so the operator learns the app checks; later ones show only an
- * available update. Null leaves whatever was pending as it was.
+ * available update, and not the version the operator chose to skip ([skippedVersion]). Null leaves
+ * whatever was pending as it was.
  */
-internal fun pendingUpdateFor(isFirstEverCheck: Boolean, result: UpdateCheckResult): Pair<UpdateCheckResult, Boolean>? =
+internal fun pendingUpdateFor(
+    isFirstEverCheck: Boolean,
+    result: UpdateCheckResult,
+    skippedVersion: String = "",
+): Pair<UpdateCheckResult, Boolean>? =
     when {
         isFirstEverCheck -> result to true
-        result is UpdateCheckResult.Available -> result to false
+        result is UpdateCheckResult.Available && result.info.latestVersion != skippedVersion -> result to false
         else -> null
     }
 

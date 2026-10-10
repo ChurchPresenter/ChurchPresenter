@@ -1,5 +1,9 @@
 package org.churchpresenter.helper.intent
 
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.helper_book_not_found
+import org.churchpresenter.helper.helperText
+import org.churchpresenter.helper.HelperText
 import org.churchpresenter.helper.action.HelperAction
 import org.churchpresenter.sharedui.guide.SettingsPage
 import org.churchpresenter.sharedui.models.ShortcutAction
@@ -81,10 +85,20 @@ internal fun verseRule(r: Request): Resolution? {
     val ref = readReference(rest) ?: return null
     val lastWord = ref.bookName.split(' ').last()
     if (lastWord in Vocabulary.NOT_A_BOOK || lastWord in Vocabulary.SETTINGS) return null
-    val book = ref.bookName.split(' ').joinToString(" ") { word -> word.replaceFirstChar { it.uppercase() } }
+    val typed = ref.bookName.split(' ').joinToString(" ") { word -> word.replaceFirstChar { it.uppercase() } }
+    // Against the loaded Bible: its own name for the book goes on, and a misspelling is asked about.
+    val books = r.context.bibleBooks
+    val guess = if (books.isEmpty()) BookGuess(typed, sure = true) else guessBook(books, typed)
     val first = maxOf(1, ref.firstVerse)
-    val display = ref.copy(bookName = book).display
-    return act(HelperAction.ShowBibleVerse(book, ref.chapter, first, maxOf(first, ref.lastVerse), display))
+    val display = ref.copy(bookName = guess?.name ?: typed).display
+    val show = guess?.let {
+        HelperAction.ShowBibleVerse(it.name, ref.chapter, first, maxOf(first, ref.lastVerse), display)
+    }
+    return when {
+        show == null -> act(HelperAction.Say(helperText(Res.string.helper_book_not_found, typed)))
+        guess.sure -> act(show)
+        else -> Resolution.DidYouMean(HelperText.Plain(display), show)
+    }
 }
 
 internal fun switchTabRule(r: Request): Resolution? {

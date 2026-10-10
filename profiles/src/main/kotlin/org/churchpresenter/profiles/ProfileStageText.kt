@@ -76,10 +76,10 @@ internal fun StageTextGroup(
         },
     ) {
         key(zone) {
-            SettingsRow(stringResource(Res.string.profile_text_font), paths = path("fontType")) {
+            SettingsRow(Res.string.profile_text_font, paths = path("fontType")) {
                 RowFont(style.fontType, rememberSystemFonts()) { v -> write { copy(fontType = v) } }
             }
-            SettingsRow(stringResource(Res.string.profile_text_size), paths = path("fontSize")) {
+            SettingsRow(Res.string.profile_text_size, paths = path("fontSize")) {
                 RowStepper(
                     style.fontSize,
                     { v -> write { copy(fontSize = v) } },
@@ -88,10 +88,10 @@ internal fun StageTextGroup(
                     unit = stringResource(Res.string.profile_text_size_unit),
                 )
             }
-            SettingsRow(stringResource(Res.string.profile_text_color), paths = path("color")) {
+            SettingsRow(Res.string.profile_text_color, paths = path("color")) {
                 RowColor(style.color, { v -> write { copy(color = v) } })
             }
-            SettingsRow(stringResource(Res.string.profile_stage_zone_background), paths = path("bgColor")) {
+            SettingsRow(Res.string.profile_stage_zone_background, paths = path("bgColor")) {
                 RowColor(style.bgColor, { v -> write { copy(bgColor = v) } })
             }
             StageStyleRows(zone, style, path, write)
@@ -111,7 +111,7 @@ private fun StageStyleRows(
     write: (StageMonitorZoneStyle.() -> StageMonitorZoneStyle) -> Unit,
 ) {
     SettingsRow(
-        stringResource(Res.string.profile_text_style),
+        Res.string.profile_text_style,
         searchTerms = styleSearchTerms(),
         paths = path("bold") + path("italic") + path("underline") + path("outline") + path("backdrop"),
     ) {
@@ -132,7 +132,7 @@ private fun StageStyleRows(
             onBackdropChange = { v -> write { copy(backdrop = v) } },
         )
     }
-    SettingsRow(stringResource(Res.string.profile_text_alignment), paths = path("horizontalAlignment")) {
+    SettingsRow(Res.string.profile_text_alignment, paths = path("horizontalAlignment")) {
         RowSegmented(
             options = listOf(
                 RowOption(Constants.LEFT, stringResource(Res.string.left)),
@@ -144,7 +144,7 @@ private fun StageStyleRows(
         )
     }
     SettingsRow(
-        stringResource(Res.string.profile_vertical_alignment),
+        Res.string.profile_vertical_alignment,
         paths = path("verticalAlignment"),
     ) {
         RowSegmented(
@@ -159,12 +159,12 @@ private fun StageStyleRows(
     }
     // Songs cannot be routed full screen, so only the layout's own zones can ever draw a chart.
     if (zone != StageMonitorStyleZone.FULL_SCREEN) {
-        SettingsRow(stringResource(Res.string.profile_text_chord_color), advanced = true, paths = path("chordColor")) {
+        SettingsRow(Res.string.profile_text_chord_color, advanced = true, paths = path("chordColor")) {
             RowColor(style.chordColor, { v -> write { copy(chordColor = v) } })
         }
     }
     SettingsSwitchRow(
-        stringResource(Res.string.profile_text_shadow),
+        Res.string.profile_text_shadow,
         style.shadow,
         { v -> write { copy(shadow = v) } },
         paths = path("shadow"),

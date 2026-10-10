@@ -136,6 +136,8 @@ data class AppSettings(
     val participateInPrereleases: Boolean = false,
     val updateCheckInterval: UpdateCheckInterval = UpdateCheckInterval.EVERY_LAUNCH,
     val lastUpdateCheckTimestamp: Long = 0L,
+    /** The version the operator chose to skip; the launch check stops offering it, a manual check does not. */
+    val skippedUpdateVersion: String = "",
     val storyPrompt: StoryPromptState = StoryPromptState(),
     /** The helper lamp in the main window's corner — shown or not, and what it was told to keep quiet. */
     val helper: HelperSettings = HelperSettings(),

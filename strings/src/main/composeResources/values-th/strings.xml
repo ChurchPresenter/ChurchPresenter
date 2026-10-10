@@ -1557,6 +1557,16 @@
     <string name="update_dialog_view_on_github">ดูบน GitHub</string>
     <string name="participate_in_prereleases">รวมอัปเดตรุ่นเบต้าและรุ่นก่อนวางจำหน่าย</string>
     <string name="update_dialog_check_interval">ตรวจหาการอัปเดต</string>
+    <string name="update_dialog_ready_title">เวอร์ชันใหม่พร้อมแล้ว</string>
+    <string name="update_dialog_released">เผยแพร่เมื่อ %1$s</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">มีอะไรใหม่</string>
+    <string name="update_dialog_full_notes">บันทึกประจำรุ่นฉบับเต็ม</string>
+    <string name="update_dialog_beta_title">รวมอัปเดตเบต้า</string>
+    <string name="update_dialog_beta_hint">รับฟีเจอร์ใหม่ก่อนใคร อาจมีความเสถียรน้อยกว่า</string>
+    <string name="update_dialog_skip">ข้ามเวอร์ชันนี้</string>
+    <string name="update_dialog_downloading_of">กำลังดาวน์โหลด %1$d จาก %2$d MB</string>
+    <string name="update_dialog_ready_to_install">พร้อมติดตั้ง</string>
     <string name="update_interval_every_launch">ทุกครั้งที่เปิด</string>
     <string name="update_interval_weekly">ทุกสัปดาห์</string>
     <string name="update_interval_monthly">ทุกเดือน</string>

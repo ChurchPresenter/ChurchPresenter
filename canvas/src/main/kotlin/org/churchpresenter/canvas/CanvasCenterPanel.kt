@@ -6,6 +6,8 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 
 import org.churchpresenter.sharedui.composables.AddToScheduleButton
+import org.churchpresenter.sharedui.guide.GuideTargets
+import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.composables.SavePresetButton
 import org.churchpresenter.sharedui.composables.GoLiveButton
 import androidx.compose.foundation.layout.Arrangement
@@ -240,7 +242,8 @@ private fun CanvasTabScope.CanvasSceneActions(currentScene: Scene) {
         // Add to Schedule
         AddToScheduleButton(
             onClick = { onAddToSchedule(currentScene.id, currentScene.name) },
-            tooltipText = stringResource(Res.string.add_to_schedule)
+            tooltipText = stringResource(Res.string.add_to_schedule),
+            modifier = Modifier.guideTarget(GuideTargets.CANVAS_ADD_TO_SCHEDULE),
         )
 
         // Go Live

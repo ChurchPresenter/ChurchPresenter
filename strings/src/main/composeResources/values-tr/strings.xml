@@ -1557,6 +1557,16 @@
     <string name="update_dialog_view_on_github">GitHub'da görüntüle</string>
     <string name="participate_in_prereleases">Beta ve ön sürüm güncellemelerini dahil et</string>
     <string name="update_dialog_check_interval">Güncellemeleri denetle</string>
+    <string name="update_dialog_ready_title">Yeni bir sürüm hazır</string>
+    <string name="update_dialog_released">%1$s tarihinde yayımlandı</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">Yenilikler</string>
+    <string name="update_dialog_full_notes">Tüm sürüm notları</string>
+    <string name="update_dialog_beta_title">Beta güncellemelerini dahil et</string>
+    <string name="update_dialog_beta_hint">Yeni özellikleri daha erken alın. Daha az kararlı olabilirler.</string>
+    <string name="update_dialog_skip">Bu sürümü atla</string>
+    <string name="update_dialog_downloading_of">%2$d MB içinden %1$d indiriliyor</string>
+    <string name="update_dialog_ready_to_install">Kuruluma hazır</string>
     <string name="update_interval_every_launch">Her açılışta</string>
     <string name="update_interval_weekly">Haftalık</string>
     <string name="update_interval_monthly">Aylık</string>

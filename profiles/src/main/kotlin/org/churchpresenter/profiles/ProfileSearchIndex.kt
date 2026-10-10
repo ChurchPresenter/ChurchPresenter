@@ -160,6 +160,30 @@ private fun ProfilePage.searchTerms(): List<StringResource> = when (this) {
     }
 }
 
+/**
+ * The page of [profile] a Wick tour names: [pageName] when it names one the profile has (`GENERAL`,
+ * `OUTPUTS`, `CONTENT` or a pane), else the first page listing the row labelled [rowKey] -- [pageName]'s
+ * pane first when both Songs and Bible list it. Null when neither leads anywhere.
+ */
+internal fun focusedPage(profile: OutputProfile, pageName: String?, rowKey: String?): ProfilePage? {
+    val pages = listOf(ProfilePage.General, ProfilePage.Outputs, ProfilePage.Content) +
+        customizePanes(profile.displayMode).map { ProfilePage.Appearance(it) }
+    val named = pages.find { it.stableName() == pageName }
+    val listing = rowKey?.let { key -> pages.filter { page -> page.searchTerms().any { it.key == key } } }.orEmpty()
+    return when {
+        named != null && (rowKey == null || named in listing || listing.isEmpty()) -> named
+        else -> listing.firstOrNull()
+    }
+}
+
+/** The name a [ProfileFocus][org.churchpresenter.sharedui.guide.ProfileFocus] gives this page. */
+internal fun ProfilePage.stableName(): String = when (this) {
+    ProfilePage.General -> "GENERAL"
+    ProfilePage.Outputs -> "OUTPUTS"
+    ProfilePage.Content -> "CONTENT"
+    is ProfilePage.Appearance -> pane.name
+}
+
 /** Every page of [profile] with its searchable words, run together. */
 @Composable
 internal fun profileSearchIndex(profile: OutputProfile): Map<ProfilePage, String> =

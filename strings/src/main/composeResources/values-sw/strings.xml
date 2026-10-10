@@ -1557,6 +1557,16 @@
     <string name="update_dialog_view_on_github">Tazama kwenye GitHub</string>
     <string name="participate_in_prereleases">Jumuisha matoleo ya beta na ya awali</string>
     <string name="update_dialog_check_interval">Angalia matoleo mapya</string>
+    <string name="update_dialog_ready_title">Toleo jipya liko tayari</string>
+    <string name="update_dialog_released">Imetolewa %1$s</string>
+    <string name="update_dialog_size_mb">MB %1$d</string>
+    <string name="update_dialog_whats_new">Mapya</string>
+    <string name="update_dialog_full_notes">Maelezo kamili ya toleo</string>
+    <string name="update_dialog_beta_title">Jumuisha masasisho ya beta</string>
+    <string name="update_dialog_beta_hint">Pata vipengele vipya mapema. Huenda visiwe thabiti sana.</string>
+    <string name="update_dialog_skip">Ruka toleo hili</string>
+    <string name="update_dialog_downloading_of">Inapakua MB %1$d kati ya %2$d</string>
+    <string name="update_dialog_ready_to_install">Tayari kusakinishwa</string>
     <string name="update_interval_every_launch">Kila unapoanzisha</string>
     <string name="update_interval_weekly">Kila wiki</string>
     <string name="update_interval_monthly">Kila mwezi</string>

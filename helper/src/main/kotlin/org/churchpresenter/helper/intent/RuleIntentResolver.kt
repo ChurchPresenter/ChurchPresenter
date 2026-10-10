@@ -64,12 +64,22 @@ class RuleIntentResolver : IntentResolver {
     fun resolveNow(input: String, context: ResolveContext): Resolution {
         val text = normalize(input)
         if (text.isEmpty()) return Resolution.Unknown
-        return Glossaries.readings(text, context.language)
+        namedOutputRule(Request(text, text.split(' '), context, raw = input.trim()))?.let { return it }
+        // A profile's name says which profile, not what about it — and "Stage" or "Livestream" would read
+        // as a topic of its own. The rules read the rest, and whatever Profiles page they open is that one.
+        val named = context.profileNamedIn(text)
+        val rest = named?.let { withoutName(text, it.name) }?.ifEmpty { null } ?: text
+        val resolution = Glossaries.readings(rest, context.language)
             .map { reading ->
                 val request = Request(reading, reading.split(' '), context, raw = input.trim())
                 RULES.firstNotNullOfOrNull { it(request) }
             }
             .firstOrNull { it != null } ?: Resolution.Unknown
+        return if (named != null && resolution is Resolution.Act) {
+            act(withProfile(resolution.action, named))
+        } else {
+            resolution
+        }
     }
 
     private companion object {
@@ -80,6 +90,7 @@ class RuleIntentResolver : IntentResolver {
             ::commandsRule,
             ::setupWizardRule,
             // What shows on the stage monitor, before its setup below.
+            ::setupTopicsRule,
             ::stageTopicsRule,
             // Before display setup: "set up a stage monitor" is a profile, not the audience screen.
             ::outputTopicsRule,
@@ -93,6 +104,7 @@ class RuleIntentResolver : IntentResolver {
             // Before the tours of the same things: "a 5 minute countdown" starts one.
             ::countdownRule,
             ::announcementRule,
+            ::scheduleTopicsRule,
             ::addToScheduleRule,
             ::scheduleStepRule,
             ::whatsLiveRule,
@@ -107,6 +119,7 @@ class RuleIntentResolver : IntentResolver {
             ::bibleTranslationRule,
             ::mediaTopicsRule,
             ::newSongRule,
+            ::backgroundChoiceRule,
             ::navigationRule,
             ::openSettingsRule,
             // Before the tab rule: "show song 245" is that song, not the Songs tab.

@@ -1557,6 +1557,16 @@
     <string name="update_dialog_view_on_github">Visa på GitHub</string>
     <string name="participate_in_prereleases">Inkludera beta- och förhandsversioner</string>
     <string name="update_dialog_check_interval">Sök efter uppdateringar</string>
+    <string name="update_dialog_ready_title">En ny version är klar</string>
+    <string name="update_dialog_released">Släppt %1$s</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">Nyheter</string>
+    <string name="update_dialog_full_notes">Fullständiga versionsanteckningar</string>
+    <string name="update_dialog_beta_title">Ta med betauppdateringar</string>
+    <string name="update_dialog_beta_hint">Få nya funktioner tidigare. De kan vara mindre stabila.</string>
+    <string name="update_dialog_skip">Hoppa över den här versionen</string>
+    <string name="update_dialog_downloading_of">Laddar ner %1$d av %2$d MB</string>
+    <string name="update_dialog_ready_to_install">Klar att installera</string>
     <string name="update_interval_every_launch">Vid varje start</string>
     <string name="update_interval_weekly">Varje vecka</string>
     <string name="update_interval_monthly">Varje månad</string>

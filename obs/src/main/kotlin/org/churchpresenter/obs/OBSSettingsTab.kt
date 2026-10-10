@@ -1,5 +1,7 @@
 package org.churchpresenter.obs
 
+import org.churchpresenter.sharedui.guide.guideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -123,7 +125,7 @@ fun OBSSettingsTab(
                 Spacer(Modifier.height(12.dp))
 
                 SettingSwitchRow(
-                    label = stringResource(Res.string.obs_enable),
+                    label = Res.string.obs_enable,
                     checked = obs.enabled,
                     onCheckedChange = { update { copy(enabled = it) } }
                 )
@@ -133,7 +135,7 @@ fun OBSSettingsTab(
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                     Spacer(Modifier.height(8.dp))
 
-                    SettingRow(label = stringResource(Res.string.obs_host)) {
+                    SettingRow(label = Res.string.obs_host) {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.widthIn(max = 350.dp)
@@ -163,7 +165,7 @@ fun OBSSettingsTab(
 
                     Spacer(Modifier.height(4.dp))
 
-                    SettingRow(label = stringResource(Res.string.obs_password)) {
+                    SettingRow(label = Res.string.obs_password) {
                         SettingsTextField(
                             value = passwordText,
                             onValueChange = {
@@ -224,7 +226,8 @@ private fun ObsConnectionControls(
             RaisedButton(
                 shape = AppShape(6.dp),
                 onClick = onConnect,
-                enabled = status != OBSWebSocketManager.ConnectionStatus.CONNECTING
+                enabled = status != OBSWebSocketManager.ConnectionStatus.CONNECTING,
+                modifier = Modifier.guideTarget(GuideTargets.OBS_CONNECT),
             ) {
                 Text(stringResource(Res.string.obs_connect))
             }
@@ -261,13 +264,13 @@ private fun ObsSceneMappingsCard(obs: OBSSettings, update: (OBSSettings.() -> OB
         Spacer(Modifier.height(12.dp))
 
         // Default scene
-        SettingRow(label = stringResource(Res.string.obs_default_scene)) {
+        SettingRow(label = Res.string.obs_default_scene) {
             SettingsTextField(
                 value = obs.defaultScene,
                 onValueChange = { update { copy(defaultScene = it) } },
                 placeholder = { Text(stringResource(Res.string.obs_default_scene_hint)) },
                 singleLine = true,
-                modifier = Modifier.widthIn(max = 350.dp)
+                modifier = Modifier.widthIn(max = 350.dp).guideTarget(GuideTargets.OBS_DEFAULT_SCENE)
             )
         }
 

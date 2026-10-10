@@ -1557,6 +1557,16 @@
     <string name="update_dialog_view_on_github">ເບິ່ງໃນ GitHub</string>
     <string name="participate_in_prereleases">ລວມການອັບເດດເບຕ້າ / ຮຸ່ນກ່ອນປ່ອຍ</string>
     <string name="update_dialog_check_interval">ກວດຫາການອັບເດດ</string>
+    <string name="update_dialog_ready_title">ເວີຊັນໃໝ່ພ້ອມແລ້ວ</string>
+    <string name="update_dialog_released">ເຜີຍແຜ່ເມື່ອ %1$s</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">ມີຫຍັງໃໝ່</string>
+    <string name="update_dialog_full_notes">ບັນທຶກການເຜີຍແຜ່ສະບັບເຕັມ</string>
+    <string name="update_dialog_beta_title">ລວມການອັບເດດເບຕ້າ</string>
+    <string name="update_dialog_beta_hint">ໄດ້ຮັບຄຸນສົມບັດໃໝ່ກ່ອນໃຜ. ອາດຈະບໍ່ໝັ້ນຄົງເທົ່າ.</string>
+    <string name="update_dialog_skip">ຂ້າມເວີຊັນນີ້</string>
+    <string name="update_dialog_downloading_of">ກຳລັງດາວໂຫຼດ %1$d ຈາກ %2$d MB</string>
+    <string name="update_dialog_ready_to_install">ພ້ອມຕິດຕັ້ງ</string>
     <string name="update_interval_every_launch">ທຸກຄັ້ງທີ່ເປີດ</string>
     <string name="update_interval_weekly">ທຸກອາທິດ</string>
     <string name="update_interval_monthly">ທຸກເດືອນ</string>

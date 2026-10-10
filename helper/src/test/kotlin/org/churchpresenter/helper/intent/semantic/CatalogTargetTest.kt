@@ -20,6 +20,7 @@ class CatalogTargetTest {
         CatalogTarget.Settings(SettingsPage.entries.last()),
         CatalogTarget.Tab(Tabs.entries.last()),
         CatalogTarget.Shortcut(ShortcutAction.entries.first()),
+        CatalogTarget.PackTour("song-ccli-number"),
     )
 
     @Test
@@ -31,7 +32,7 @@ class CatalogTargetTest {
     fun `a name this build no longer has is null`() {
         listOf(
             "suggested:GONE", "settings:GONE", "tab:GONE", "shortcut:GONE", "nothing:at all",
-            "control:only:two", "control:a:b:c:d",
+            "control:only:two", "control:a:b:c:d", "tour:", "tour: ",
         ).forEach { assertNull(CatalogTarget.parse(it), it) }
         assertEquals(CatalogTarget.Control("a", "b", null), CatalogTarget.parse("control:a:b:tab=GONE"))
         assertEquals(CatalogTarget.Control("a", "b", null), CatalogTarget.parse("control:a:b:settings=GONE"))

@@ -23,6 +23,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.runtime.Composable
 import org.churchpresenter.helper.ui.GuideSpotlightHost
 import org.churchpresenter.sharedui.guide.LocalGuideSession
+import org.churchpresenter.sharedui.guide.LocalWickCorner
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.unit.DpSize
@@ -123,7 +124,8 @@ internal fun AppRootState.StartupEffect() {
             val result = UpdateChecker.checkForUpdate(includePrereleases = appSettings.participateInPrereleases)
             appSettings = appSettings.copy(lastUpdateCheckTimestamp = System.currentTimeMillis())
             settingsManager.saveSettings(appSettings)
-            pendingUpdateFor(isFirstEverUpdateCheck, result)?.let { (pending, manual) ->
+            val skipped = appSettings.skippedUpdateVersion
+            pendingUpdateFor(isFirstEverUpdateCheck, result, skipped)?.let { (pending, manual) ->
                 pendingUpdateResult = pending
                 pendingUpdateCheckWasManual = manual
             }
@@ -254,8 +256,10 @@ private fun AppRootState.MainWindow(
                         ShortcutMap.from(appSettings.keyboardShortcutSettings)
                     },
                     LocalGuideSession provides helperState.session,
+                    // Settings and the other windows Wick's tours reach carry the lamp too.
+                    LocalWickCorner provides remember { { placed: Modifier -> WickLamp(placed) } },
                 ) {
-                    GuideSpotlightHost(modifier = Modifier.fillMaxSize()) {
+                    GuideSpotlightHost(modifier = Modifier.fillMaxSize(), wick = false) {
                     MainWindowContent(
                         frame = this@Window,
                         bannerModifier = Modifier.align(Alignment.TopCenter),
@@ -355,7 +359,7 @@ private fun AppRootState.MainWindowContent(
 
         RemoteApprovalDialog()
         ActivityToasts()
-        HelperHost(helperModifier)
+        root.HelperHost(helperModifier)
     }
 }
 

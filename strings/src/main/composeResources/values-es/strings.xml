@@ -1301,6 +1301,16 @@
     <string name="update_dialog_view_on_github">Ver en GitHub</string>
     <string name="participate_in_prereleases">Incluir actualizaciones beta / preliminares</string>
     <string name="update_dialog_check_interval">Buscar actualizaciones</string>
+    <string name="update_dialog_ready_title">Hay una nueva versión lista</string>
+    <string name="update_dialog_released">Publicada el %1$s</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">Novedades</string>
+    <string name="update_dialog_full_notes">Notas de la versión completas</string>
+    <string name="update_dialog_beta_title">Incluir actualizaciones beta</string>
+    <string name="update_dialog_beta_hint">Obtén funciones nuevas antes. Pueden ser menos estables.</string>
+    <string name="update_dialog_skip">Omitir esta versión</string>
+    <string name="update_dialog_downloading_of">Descargando %1$d de %2$d MB</string>
+    <string name="update_dialog_ready_to_install">Lista para instalar</string>
     <string name="update_interval_every_launch">Cada inicio</string>
     <string name="update_interval_weekly">Semanalmente</string>
     <string name="update_interval_monthly">Mensualmente</string>

@@ -54,7 +54,9 @@ class WickConversationTableTest {
         is HelperReply.Clarify -> "asks which: " + render(reply.question) + " (" + reply.options.size + " options)"
         is HelperReply.Message -> "says: " + render(reply.text) + if (reply.canUndo) " [undo]" else ""
         is HelperReply.Shortcut -> "shows the key for " + reply.action.name
-        is HelperReply.Unknown -> "didn't catch that; offers " + reply.closest.joinToString { it.name }
+        HelperReply.Unknown -> "isn't sure"
+        is HelperReply.NotSure -> "isn't sure, offers " + reply.closest.joinToString { it.name }
+        is HelperReply.DidYouMean -> "asks: did you mean " + render(reply.label) + "? then " + render(reply.action)
         is HelperReply.Touring -> "points at step 1 of ${reply.tour.steps.size}: " + render(reply.tour.steps[0].hint)
         HelperReply.Greeting -> "says hello with examples"
         HelperReply.Commands -> "lists every command"

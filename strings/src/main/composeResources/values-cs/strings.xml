@@ -1111,6 +1111,16 @@
     <string name="update_dialog_view_on_github">Zobrazit na GitHubu</string>
     <string name="participate_in_prereleases">Zahrnout beta / předběžné verze aktualizací</string>
     <string name="update_dialog_check_interval">Kontrolovat aktualizace</string>
+    <string name="update_dialog_ready_title">Nová verze je připravena</string>
+    <string name="update_dialog_released">Vydáno %1$s</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">Co je nového</string>
+    <string name="update_dialog_full_notes">Úplné poznámky k vydání</string>
+    <string name="update_dialog_beta_title">Zahrnout beta aktualizace</string>
+    <string name="update_dialog_beta_hint">Získejte nové funkce dříve. Mohou být méně stabilní.</string>
+    <string name="update_dialog_skip">Přeskočit tuto verzi</string>
+    <string name="update_dialog_downloading_of">Stahuje se %1$d z %2$d MB</string>
+    <string name="update_dialog_ready_to_install">Připraveno k instalaci</string>
     <string name="update_interval_every_launch">Při každém spuštění</string>
     <string name="update_interval_weekly">Týdně</string>
     <string name="update_interval_monthly">Měsíčně</string>

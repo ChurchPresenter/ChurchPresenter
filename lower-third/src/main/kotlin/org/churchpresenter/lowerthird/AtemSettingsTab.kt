@@ -1,5 +1,7 @@
 package org.churchpresenter.lowerthird
 
+import org.churchpresenter.sharedui.guide.guideTarget
+import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.atem.AtemState
 import org.churchpresenter.atem.formatAtemFps
 import androidx.compose.foundation.background
@@ -147,7 +149,7 @@ private fun AtemConnectionCard(atem: AtemSettings, update: (AtemSettings.() -> A
         )
         Spacer(Modifier.height(12.dp))
 
-        SettingRow(label = stringResource(Res.string.atem_host)) {
+        SettingRow(label = Res.string.atem_host) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.widthIn(max = 350.dp)
@@ -279,7 +281,8 @@ private fun AtemTestConnectionRow(host: String, port: Int, onDetected: (AtemStat
                     }
                 }
             },
-            enabled = host.isNotBlank() && !isTesting
+            enabled = host.isNotBlank() && !isTesting,
+            modifier = Modifier.guideTarget(GuideTargets.ATEM_TEST_CONNECTION),
         ) {
             if (isTesting) {
                 CircularProgressIndicator(
@@ -459,7 +462,7 @@ private fun AtemUploadSwitches(atem: AtemSettings, update: (AtemSettings.() -> A
         onCheckedChange = { update { copy(useDownstreamKey = it) } },
         label = stringResource(Res.string.atem_downstream_keyer),
         supporting = stringResource(Res.string.atem_downstream_keyer_hint),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().guideTarget(GuideTargets.ATEM_DSK_SWITCH),
         spacing = 12.dp,
     )
 

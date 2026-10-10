@@ -1557,6 +1557,16 @@
     <string name="update_dialog_view_on_github">Pogledaj na GitHubu</string>
     <string name="participate_in_prereleases">Uključi beta i predizdanja</string>
     <string name="update_dialog_check_interval">Provjera nadogradnji</string>
+    <string name="update_dialog_ready_title">Nova verzija je spremna</string>
+    <string name="update_dialog_released">Objavljeno %1$s</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">Što je novo</string>
+    <string name="update_dialog_full_notes">Potpune bilješke o izdanju</string>
+    <string name="update_dialog_beta_title">Uključi beta ažuriranja</string>
+    <string name="update_dialog_beta_hint">Ranije dobijte nove značajke. Mogu biti manje stabilne.</string>
+    <string name="update_dialog_skip">Preskoči ovu verziju</string>
+    <string name="update_dialog_downloading_of">Preuzimanje %1$d od %2$d MB</string>
+    <string name="update_dialog_ready_to_install">Spremno za instalaciju</string>
     <string name="update_interval_every_launch">Pri svakom pokretanju</string>
     <string name="update_interval_weekly">Tjedno</string>
     <string name="update_interval_monthly">Mjesečno</string>

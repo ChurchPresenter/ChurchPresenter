@@ -274,7 +274,8 @@ class WickCoverageTest {
 
     @Test
     fun `show helper turns the lamp back on and opens it`() {
-        root.saveHelperSettings(HelperSettings(enabled = false))
+        // After the intro: the first Show Helper plays it instead (WickAvailabilityTest).
+        root.saveHelperSettings(HelperSettings(enabled = false, introSeen = true))
         root.showHelper()
         assertTrue(root.appSettings.helper.enabled)
         assertTrue(root.helperState.isOpen)
@@ -321,9 +322,9 @@ class WickCoverageTest {
 
     @Test
     fun `a single verse goes to the Bible tab with no range`() {
-        val sent = heard(root.companionServer.onSelectBibleVerse)
+        val sent = heard(root.helperShowReferenceFlow)
         executor.execute(HelperAction.ShowBibleVerse("John", 3, 16, 16, "John 3:16"))
-        assertEquals("", sent.single().verseRange)
+        assertEquals(listOf("John 3:16"), sent)
     }
 
     @Test

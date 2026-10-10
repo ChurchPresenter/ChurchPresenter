@@ -1557,6 +1557,16 @@
     <string name="update_dialog_view_on_github">Lihat di GitHub</string>
     <string name="participate_in_prereleases">Sertakan kemas kini beta / pra-keluaran</string>
     <string name="update_dialog_check_interval">Periksa kemas kini</string>
+    <string name="update_dialog_ready_title">Versi baharu sudah sedia</string>
+    <string name="update_dialog_released">Dikeluarkan %1$s</string>
+    <string name="update_dialog_size_mb">%1$d MB</string>
+    <string name="update_dialog_whats_new">Apa yang baharu</string>
+    <string name="update_dialog_full_notes">Nota keluaran penuh</string>
+    <string name="update_dialog_beta_title">Sertakan kemas kini beta</string>
+    <string name="update_dialog_beta_hint">Dapatkan ciri baharu lebih awal. Mungkin kurang stabil.</string>
+    <string name="update_dialog_skip">Langkau versi ini</string>
+    <string name="update_dialog_downloading_of">Memuat turun %1$d daripada %2$d MB</string>
+    <string name="update_dialog_ready_to_install">Sedia untuk dipasang</string>
     <string name="update_interval_every_launch">Setiap kali dibuka</string>
     <string name="update_interval_weekly">Setiap minggu</string>
     <string name="update_interval_monthly">Setiap bulan</string>

@@ -1,5 +1,10 @@
 package org.churchpresenter.helper.ui
 
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.runtime.DisposableEffect
+import org.churchpresenter.strings.generated.resources.helper_tip_title
+import org.churchpresenter.strings.generated.resources.helper_notice_suggestion
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -41,6 +46,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,16 +74,20 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.churchpresenter.settings.tipShown
+import org.churchpresenter.settings.snoozing
 import org.churchpresenter.helper.HelperActionExecutor
 import org.churchpresenter.helper.HelperReply
 import org.churchpresenter.helper.HelperState
 import org.churchpresenter.helper.display.HelperScreen
 import org.churchpresenter.helper.intent.IntentResolver
 import org.churchpresenter.helper.intent.ResolveContext
+import org.churchpresenter.helper.report.ChatSender
 import org.churchpresenter.helper.resolve
 import org.churchpresenter.helper.suggest.Suggestion
 import org.churchpresenter.helper.suggest.Tip
 import org.churchpresenter.helper.suggest.allTips
+import org.churchpresenter.helper.pack.WickPacks
 import org.churchpresenter.helper.suggest.tipAt
 import org.churchpresenter.settings.HelperSettings
 import org.churchpresenter.settings.helperDayOf
@@ -94,6 +104,7 @@ import org.churchpresenter.strings.generated.resources.helper_input_placeholder
 import org.churchpresenter.strings.generated.resources.helper_more
 import org.churchpresenter.strings.generated.resources.helper_name
 import org.churchpresenter.strings.generated.resources.helper_send
+import org.churchpresenter.strings.generated.resources.helper_send_chat
 import org.churchpresenter.strings.generated.resources.helper_status
 import org.churchpresenter.theme.components.RaisedButton
 import org.churchpresenter.theme.elevationPalette
@@ -116,6 +127,8 @@ class HelperInputs(
     val context: ResolveContext,
     val anythingLive: Boolean,
     val nowMillis: () -> Long = System::currentTimeMillis,
+    /** Sends a chat the operator chose to share with the team; null leaves "Send this chat" out. */
+    val onSendChat: ChatSender? = null,
 )
 
 /**
@@ -149,40 +162,69 @@ fun HelperOverlay(
         state.isOpen = true
     }
 
-    Column(modifier.padding(16.dp), horizontalAlignment = Alignment.End) {
-        AnimatedVisibility(
-            visible = state.isOpen,
-            enter = fadeIn() + scaleIn(transformOrigin = TransformOrigin(1f, 1f)),
-            exit = fadeOut() + scaleOut(transformOrigin = TransformOrigin(1f, 1f)),
-        ) {
-            HelperPanel(state, inputs, executor, resolver, tip, animate)
-        }
-        val teaser = inputs.suggestions.firstOrNull()?.text ?: tip?.text?.takeIf { tipWaiting }
-        when {
-            state.isOpen -> Unit
-            state.introPointer -> IntroPointer(
-                onOpen = {
+    BoxWithConstraints(modifier, contentAlignment = Alignment.BottomEnd) {
+        // The bubble fits the window it is in: Settings and the Q&A sharing window are smaller than the main
+        // one, and a bubble taller than its window hides its own header, and with it the way to close it.
+        val panel = DpSize(
+            (maxWidth - EDGE * 2).coerceIn(MIN_PANEL_WIDTH, PANEL_WIDTH),
+            (maxHeight - LAMP_ROOM).coerceIn(MIN_PANEL_HEIGHT, PANEL_HEIGHT),
+        )
+        Column(Modifier.padding(EDGE), horizontalAlignment = Alignment.End) {
+            AnimatedVisibility(
+                visible = state.isOpen,
+                enter = fadeIn() + scaleIn(transformOrigin = TransformOrigin(1f, 1f)),
+                exit = fadeOut() + scaleOut(transformOrigin = TransformOrigin(1f, 1f)),
+            ) {
+                HelperPanel(state, inputs, executor, resolver, tip, animate, panel)
+            }
+            val suggestion = inputs.suggestions.firstOrNull()
+            val teaser = suggestion?.text ?: tip?.text?.takeIf { tipWaiting }
+            // Opened or put away from the teaser, today's tip has had its turn: it does not wait there again.
+            // A suggestion put away rests for the day, as Not now does.
+            val settled = {
+                val now = inputs.nowMillis()
+                val settings = inputs.settings
+                inputs.onSettingsChange(
+                    if (suggestion != null) {
+                        settings.snoozing(suggestion.id, now + SNOOZE_MS)
+                    } else {
+                        settings.tipShown(now)
+                    },
+                )
+            }
+            when {
+                state.isOpen -> Unit
+                state.introPointer -> IntroPointer(
+                    onOpen = {
+                        state.introPointer = false
+                        open()
+                    },
+                    onReplay = {
+                        state.introPointer = false
+                        state.replayIntro = true
+                    },
+                )
+                waiting > 0 && teaser != null -> Teaser(
+                    teaser,
+                    caption = stringResource(
+                        if (suggestion != null) Res.string.helper_notice_suggestion else Res.string.helper_tip_title,
+                    ),
+                    onOpen = open,
+                    onDismiss = settled,
+                )
+            }
+            Spacer(Modifier.size(12.dp))
+            Launcher(
+                open = state.isOpen,
+                waiting = waiting,
+                animate = animate && !inputs.anythingLive,
+                mood = moodFor(state.reply),
+                onClick = {
                     state.introPointer = false
-                    open()
-                },
-                onReplay = {
-                    state.introPointer = false
-                    state.replayIntro = true
+                    if (state.isOpen) state.close() else open()
                 },
             )
-            waiting > 0 && teaser != null -> Teaser(teaser, onOpen = open)
         }
-        Spacer(Modifier.size(12.dp))
-        Launcher(
-            open = state.isOpen,
-            waiting = waiting,
-            animate = animate && !inputs.anythingLive,
-            mood = moodFor(state.reply),
-            onClick = {
-                state.introPointer = false
-                if (state.isOpen) state.close() else open()
-            },
-        )
     }
 }
 
@@ -192,7 +234,8 @@ private fun todaysTip(state: HelperState, inputs: HelperInputs): Tip? {
     val shortcuts = LocalShortcuts.current
     // Shuffled once per run, so each day's tip is a random one while Previous and Next still step
     // back and forth through the same order.
-    val tips = remember(shortcuts) { allTips(shortcuts).shuffled() }
+    val pack by WickPacks.current.collectAsState()
+    val tips = remember(shortcuts, pack) { allTips(shortcuts, pack).shuffled() }
     // Today's tip stays today's once offered: the rotation moved on when it was, so step back one.
     val offeredToday = inputs.settings.lastTipDay == helperDayOf(inputs.nowMillis())
     val todaysIndex = inputs.settings.nextTipIndex - if (offeredToday) 1 else 0
@@ -200,7 +243,7 @@ private fun todaysTip(state: HelperState, inputs: HelperInputs): Tip? {
 }
 
 private fun moodFor(reply: HelperReply): LampMood = when (reply) {
-    is HelperReply.Unknown -> LampMood.CONFUSED
+    is HelperReply.Unknown, is HelperReply.NotSure -> LampMood.CONFUSED
     is HelperReply.Confirm, is HelperReply.Clarify -> LampMood.THINKING
     is HelperReply.Message -> if (reply.canUndo) LampMood.HAPPY else LampMood.IDLE
     else -> LampMood.IDLE
@@ -214,6 +257,7 @@ private fun HelperPanel(
     resolver: IntentResolver,
     tip: Tip?,
     animate: Boolean,
+    size: DpSize,
 ) {
     val scope = rememberCoroutineScope()
     // [shown] is what goes in the conversation; [request] what the rules read — the same when typed,
@@ -229,14 +273,14 @@ private fun HelperPanel(
     }
     val scroll = rememberScrollState()
     // The newest line is at the bottom: keep it in view as the conversation grows.
-    LaunchedEffect(state.thread.entries.size, state.reply, state.confirmingHide) {
+    LaunchedEffect(state.thread.entries.size, state.reply, state.confirmingHide, state.sharingChat) {
         scroll.animateScrollTo(scroll.maxValue)
     }
     val panelShape = RoundedCornerShape(18.dp)
     Surface(
         modifier = Modifier
-            .width(352.dp)
-            .heightIn(max = 478.dp)
+            .width(size.width)
+            .heightIn(max = size.height)
             .floating(panelShape)
             .testTag("helper.bubble"),
         shape = panelShape,
@@ -248,6 +292,7 @@ private fun HelperPanel(
                 animate = animate,
                 canClear = state.thread.entries.isNotEmpty() || state.reply != HelperReply.Idle,
                 onClear = state::clear,
+                onShareChat = inputs.onSendChat?.let { { state.sharingChat = true } },
                 // Asked first, in the conversation: the answer says where to get Wick back.
                 onHide = { state.confirmingHide = true },
                 onClose = state::close,
@@ -263,6 +308,7 @@ private fun HelperPanel(
                 ) {
                     ThreadLines(state.thread.entries)
                     ReplyBody(state, inputs, executor, tip, ask)
+                    inputs.onSendChat?.takeIf { state.sharingChat }?.let { ShareChatCard(state, inputs, it) }
                     if (state.confirmingHide) {
                         HideCard(
                             onCancel = { state.confirmingHide = false },
@@ -286,6 +332,7 @@ private fun PanelHeader(
     animate: Boolean,
     canClear: Boolean,
     onClear: () -> Unit,
+    onShareChat: (() -> Unit)?,
     onHide: () -> Unit,
     onClose: () -> Unit,
 ) {
@@ -310,7 +357,7 @@ private fun PanelHeader(
                 )
             }
         }
-        HeaderMenu(canClear, onClear)
+        HeaderMenu(canClear, onClear, onShareChat)
         TooltipIconButton(
             painter = rememberVectorPainter(Icons.Filled.VisibilityOff),
             text = stringResource(Res.string.helper_hide),
@@ -330,9 +377,9 @@ private fun PanelHeader(
     }
 }
 
-/** The header's small menu; for now it holds Clear. */
+/** The header's small menu: Clear, and Send this chat when the app can send one. */
 @Composable
-private fun HeaderMenu(canClear: Boolean, onClear: () -> Unit) {
+private fun HeaderMenu(canClear: Boolean, onClear: () -> Unit, onShareChat: (() -> Unit)?) {
     var expanded by remember { mutableStateOf(false) }
     Box {
         TooltipIconButton(
@@ -353,6 +400,17 @@ private fun HeaderMenu(canClear: Boolean, onClear: () -> Unit) {
                 },
                 modifier = Modifier.testTag("helper.clear"),
             )
+            onShareChat?.let { share ->
+                DropdownMenuItem(
+                    text = { Text(stringResource(Res.string.helper_send_chat)) },
+                    enabled = canClear,
+                    onClick = {
+                        expanded = false
+                        share()
+                    },
+                    modifier = Modifier.testTag("helper.shareChatMenu"),
+                )
+            }
         }
     }
 }
@@ -383,6 +441,9 @@ private fun Composer(state: HelperState, ask: Ask) {
     val colors = MaterialTheme.colorScheme
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
+    // Told to the app, so a tab taking the keyboard back after the window was away leaves it here.
+    LaunchedEffect(focused) { state.session.wickTyping = focused }
+    DisposableEffect(state.session) { onDispose { state.session.wickTyping = false } }
     val hasText = state.input.isNotBlank()
     val send = {
         val text = state.input
@@ -470,3 +531,12 @@ private fun Composer(state: HelperState, ask: Ask) {
 private fun SendArrow(tint: Color) {
     Icon(Icons.Filled.ArrowUpward, contentDescription = null, tint = tint, modifier = Modifier.size(16.dp))
 }
+
+private val EDGE = 16.dp
+private val PANEL_WIDTH = 352.dp
+private val PANEL_HEIGHT = 478.dp
+private val MIN_PANEL_WIDTH = 240.dp
+private val MIN_PANEL_HEIGHT = 200.dp
+
+/** What the lamp, the gap above it and the window's edges take from the bubble's height. */
+private val LAMP_ROOM = 112.dp

@@ -6,7 +6,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -15,6 +14,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.settings.utils.UpdateCheckInterval
 import java.io.File
+import java.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -29,13 +29,22 @@ class UpdateAvailableContentTest {
         const val OPEN_PAGE = "Open Download Page"
         const val LATER = "Later"
         const val UP_TO_DATE = "You are running the latest version."
-        const val RELEASE_NOTES = "What's new:"
-        const val PRERELEASE_TOGGLE = "Include beta / pre-release updates"
+        const val RELEASE_NOTES = "WHAT'S NEW"
+        const val PRERELEASE_TOGGLE = "Include beta updates"
+        const val CANCEL = "Cancel"
+        const val SKIP = "Skip this version"
+        const val READY = "Ready to install"
+        const val FULL_NOTES = "Full release notes"
         const val CHECK_INTERVAL = "Check for updates"
     }
 
+    /** Two groups of one bullet each, written the way the releases are. */
+    private val groupedNotes = "**Songs**\n- Song compare (#667)\n\n**Fixes**\n- Focus comes back (#686)"
+
     private class Actions {
         var downloads = 0
+        var cancels = 0
+        var skipped: String? = null
         var installed: File? = null
         var openedPage: String? = null
         var copiedLink: String? = null
@@ -49,6 +58,9 @@ class UpdateAvailableContentTest {
         notes: String = "Fixed the drip feed",
         downloadUrl: String? = "https://example.invalid/ChurchPresenter-2.5.0.dmg",
         prerelease: Boolean = false,
+        current: String = "",
+        publishedAt: Instant? = null,
+        size: Long? = null,
     ) = UpdateCheckResult.Available(
         UpdateInfo(
             latestVersion = version,
@@ -56,6 +68,9 @@ class UpdateAvailableContentTest {
             releaseNotes = notes,
             downloadUrl = downloadUrl,
             isPrerelease = prerelease,
+            currentVersion = current,
+            publishedAt = publishedAt,
+            downloadSize = size,
         ),
     )
 
@@ -80,6 +95,8 @@ class UpdateAvailableContentTest {
                         onUpdateCheckIntervalChange = { actions.interval = it },
                         downloadState = downloadState,
                         onDownload = { actions.downloads++ },
+                        onCancelDownload = { actions.cancels++ },
+                        onSkipVersion = { actions.skipped = it },
                         onInstall = { actions.installed = it },
                         onOpenReleasePage = { actions.openedPage = it },
                         onDismiss = { actions.dismissed++ },
@@ -91,18 +108,61 @@ class UpdateAvailableContentTest {
         }
     }
 
-    private fun ComposeUiTest.shows(text: String): Boolean =
-        onAllNodes(hasText(text)).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+    private fun ComposeUiTest.shows(text: String, substring: Boolean = false): Boolean =
+        onAllNodes(hasText(text, substring = substring))
+            .fetchSemanticsNodes(atLeastOneRootRequired = false)
+            .isNotEmpty()
 
     // ── An update is available ──────────────────────────────────────────────────
 
     @Test
     fun `the new version and its release notes are shown`() =
         updateDialog(available(version = "2.5.0", notes = "Fixed the drip feed")) { _ ->
-            assertTrue(shows("A new version of Church Presenter is available: 2.5.0"))
+            assertTrue(shows("A new version is ready"))
+            assertTrue(shows("2.5.0"))
             onNodeWithText(Label.RELEASE_NOTES).assertIsDisplayed()
             assertTrue(shows("Fixed the drip feed"), "the notes tell the operator whether to bother")
         }
+
+    @Test
+    fun `the jump from the running version to the new one is shown`() =
+        updateDialog(available(version = "26.12.171", current = "26.11.164")) { _ ->
+            assertTrue(shows("26.11.164"), "the version being replaced")
+            assertTrue(shows("26.12.171"))
+        }
+
+    @Test
+    fun `the release's date and installer size sit under the versions`() =
+        updateDialog(available(publishedAt = Instant.parse("2026-10-08T09:01:10Z"), size = 601_405_516L)) { _ ->
+            val facts = onAllNodes(hasText("601 MB", substring = true)).fetchSemanticsNodes()
+            assertEquals(1, facts.size, "one line carries both facts")
+            assertTrue(shows("Released", substring = true))
+        }
+
+    @Test
+    fun `a release that gave no date or size shows no facts line`() = updateDialog { _ ->
+        assertTrue(!shows("Released", substring = true))
+        assertTrue(!shows(" MB", substring = true))
+    }
+
+    @Test
+    fun `the notes are drawn as their groups and bullets, each pull request as its own chip`() =
+        updateDialog(available(notes = groupedNotes)) { _ ->
+            assertTrue(shows("Songs"))
+            assertTrue(shows("Fixes"))
+            assertTrue(shows("Song compare", substring = true))
+            assertTrue(shows("#667", substring = true), "the pull request is still named, as a chip")
+            assertTrue(!shows("**", substring = true), "no raw markdown reaches the window")
+            assertTrue(!shows("(#667)", substring = true))
+        }
+
+    @Test
+    fun `Full release notes opens the release page and leaves the dialog up`() = updateDialog { actions ->
+        onNodeWithText(Label.FULL_NOTES).performClick()
+        waitForIdle()
+        assertEquals("https://example.invalid/releases/2.5.0", actions.openedPage)
+        assertEquals(0, actions.dismissed)
+    }
 
     @Test
     fun `a pre-release says so rather than looking like a stable one`() =
@@ -132,10 +192,47 @@ class UpdateAvailableContentTest {
     }
 
     @Test
-    fun `while downloading the button says so and cannot be pressed again`() =
+    fun `while downloading Cancel takes the download button's place`() =
         updateDialog(downloadState = DownloadState.Downloading(0.4f)) { actions ->
-            onNodeWithText(Label.DOWNLOADING).assertIsNotEnabled()
-            assertEquals(0, actions.downloads, "a second download must not be startable mid-flight")
+            assertTrue(!shows(Label.DOWNLOAD), "a second download must not be startable mid-flight")
+            onNodeWithText(Label.CANCEL).performClick()
+            waitForIdle()
+            assertEquals(1, actions.cancels)
+            assertEquals(0, actions.downloads)
+        }
+
+    @Test
+    fun `a download of known size counts its megabytes`() =
+        updateDialog(available(size = 601_405_516L), downloadState = DownloadState.Downloading(0.42f)) { _ ->
+            assertTrue(shows("Downloading 252 of 601 MB"))
+        }
+
+    @Test
+    fun `a finished download is ready to install, with Later still on offer`() {
+        val fetched = File("ChurchPresenter-update-ready.dmg")
+        updateDialog(downloadState = DownloadState.Done(fetched)) { actions ->
+            assertTrue(shows(Label.READY))
+            onNodeWithText(Label.LATER).performClick()
+            waitForIdle()
+            assertEquals(1, actions.dismissed)
+            assertNull(actions.installed, "Later installs nothing")
+        }
+    }
+
+    @Test
+    fun `skipping the version reports which one and closes the dialog`() =
+        updateDialog(available(version = "26.12.171")) { actions ->
+            onNodeWithText(Label.SKIP).performClick()
+            waitForIdle()
+            assertEquals("26.12.171", actions.skipped)
+            assertEquals(1, actions.dismissed)
+            assertEquals(0, actions.downloads)
+        }
+
+    @Test
+    fun `skip is only offered before anything is downloaded`() =
+        updateDialog(downloadState = DownloadState.Downloading(0.3f)) { _ ->
+            assertTrue(!shows(Label.SKIP), "a download under way is not the moment to skip it")
         }
 
     @Test
@@ -249,6 +346,11 @@ class UpdateAvailableContentTest {
             assertEquals(1, actions.dismissed)
             assertNull(actions.openedPage, "OK must not open a browser")
         }
+    }
+
+    @Test
+    fun `being up to date offers nothing to skip`() = updateDialog(UpdateCheckResult.UpToDate) { _ ->
+        assertTrue(!shows(Label.SKIP))
     }
 
     // ── The settings carried on the dialog ──────────────────────────────────────
