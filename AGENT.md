@@ -54,6 +54,13 @@ demand.
   (`toggleable(role = …)`). `AccessibleNamesTest` walks every tab of the main window and fails on a
   clickable node with no name; `KeyboardReachTest` holds Go Live, Add to Schedule, Clear Display and
   Take reachable with Tab.
+- **Every Tab stop shows that it has focus.** `raised()` draws the ring (`keyboardFocusRing`, in
+  `:theme`); a control whose `clickable` comes before its surface, or whose surface clips
+  (`sunken`, `dropdownField`), puts `keyboardFocusRing(shape)` first in its chain. Rings show only
+  once Tab has been used in that window, and go away on a pointer press (`FocusVisibility`, provided
+  by `ChurchPresenterTheme`). A multi-line field takes `tabMovesFocus()` so Tab cannot be trapped
+  in it. `FocusRingVisibleTest` tabs round every tab of the main window and fails on a stop whose
+  picture does not change, or one Tab cannot leave.
 
 ### Debugging and logging
 - Diagnostics go through `Log.info`/`warn`/`error` (`:diagnostics`), never `println` or

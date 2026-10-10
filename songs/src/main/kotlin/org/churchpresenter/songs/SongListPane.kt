@@ -108,6 +108,7 @@ import androidx.compose.foundation.layout.RowScope
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.keyboardFocusRing
 import org.churchpresenter.theme.raisedHover
 import androidx.compose.foundation.layout.ColumnScope
 import org.churchpresenter.sharedui.composables.bibleListCard
@@ -388,6 +389,7 @@ private fun SongListScope.SongSearchField(modifier: Modifier) {
         modifier = modifier
             .widthIn(min = 120.dp)
             .height(42.dp)
+            .keyboardFocusRing(AppShape(8.dp), includeChildren = true)
             .sunken(AppShape(8.dp), elevationPalette())
             .hoverTint(AppShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically

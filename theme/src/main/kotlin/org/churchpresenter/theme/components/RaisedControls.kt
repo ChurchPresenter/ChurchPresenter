@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -46,7 +45,6 @@ import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.flatDisabled
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.sunken
-import org.churchpresenter.theme.RING_ALPHA
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.hoverable
 import androidx.compose.ui.graphics.graphicsLayer
@@ -207,17 +205,13 @@ private fun RaisedButtonSurface(
     val interaction = interactionSource ?: remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     val pressed by interaction.collectIsPressedAsState()
-    val focused by interaction.collectIsFocusedAsState()
-    val focusRing = MaterialTheme.colorScheme.primary.copy(alpha = RING_ALPHA)
     Box(
         modifier = modifier
             .minimumInteractiveComponentSize()
             .then(
                 if (enabled) {
-                    Modifier.raised(
-                        shape, fill, palette, pressed, hovered,
-                        ring = if (focused) focusRing else Color.Unspecified,
-                    )
+                    // The keyboard focus ring is raised()'s own; a mouse click leaves none.
+                    Modifier.raised(shape, fill, palette, pressed, hovered)
                 } else {
                     Modifier.flatDisabled(shape, palette)
                 }

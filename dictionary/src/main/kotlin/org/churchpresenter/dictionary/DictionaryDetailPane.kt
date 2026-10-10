@@ -70,6 +70,7 @@ import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.keyboardFocusRing
 import org.churchpresenter.theme.sunken
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -249,6 +250,7 @@ private fun DictionaryDetailActionRow(
             Box(
                 modifier = Modifier
                     .height(32.dp)
+                    .keyboardFocusRing(AppShape(8.dp))
                     .sunken(AppShape(8.dp), elevationPalette())
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },

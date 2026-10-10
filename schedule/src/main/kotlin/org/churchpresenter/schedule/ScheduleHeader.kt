@@ -59,6 +59,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.keyboardFocusRing
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.raised
 import org.churchpresenter.sharedui.composables.bibleListCardFill
@@ -271,6 +272,7 @@ internal fun ScheduleAddFilesButton(onClick: () -> Unit, modifier: Modifier = Mo
                     cornerRadius = CornerRadius(cornerRadiusPx)
                 )
             }
+            .keyboardFocusRing(shape)
             .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically

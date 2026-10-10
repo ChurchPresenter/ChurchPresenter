@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionStatus
 import org.churchpresenter.sharedui.composables.BibleListRowShape
+import org.churchpresenter.sharedui.composables.tabMovesFocus
 import org.churchpresenter.sharedui.composables.bibleRowColors
 import org.churchpresenter.sharedui.composables.rememberRowHover
 import org.churchpresenter.sharedui.composables.rowPad
@@ -305,7 +306,7 @@ private fun EditField(state: QuestionRowState) {
         BasicTextField(
             value = state.editText,
             onValueChange = { state.editText = it },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().tabMovesFocus(),
             textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             maxLines = EDIT_MAX_LINES,

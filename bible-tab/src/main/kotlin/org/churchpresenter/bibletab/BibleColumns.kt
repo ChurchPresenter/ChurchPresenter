@@ -86,6 +86,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.keyboardFocusRing
 import org.churchpresenter.sharedui.composables.BibleListRowShape
 import org.churchpresenter.sharedui.composables.BibleVerseRowShape
 import org.churchpresenter.sharedui.composables.bibleListCard
@@ -253,6 +254,7 @@ internal fun BibleSearchField(
     Row(
         modifier = modifier
             .height(42.dp)
+            .keyboardFocusRing(AppShape(8.dp), includeChildren = true)
             .sunken(AppShape(8.dp), elevationPalette())
             .hoverTint(AppShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically

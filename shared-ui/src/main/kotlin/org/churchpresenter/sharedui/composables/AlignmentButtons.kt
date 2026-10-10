@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import org.churchpresenter.theme.AppShape
+import org.churchpresenter.theme.keyboardFocusRing
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -172,6 +173,7 @@ private fun IconChoiceTrack(
                 Box(
                     modifier = Modifier
                         .size(segmentWidth, segmentHeight)
+                        .keyboardFocusRing(segmentShape)
                         .then(
                             when {
                                 isSelected -> Modifier.raised(

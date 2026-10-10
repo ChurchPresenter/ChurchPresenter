@@ -39,6 +39,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
+import org.churchpresenter.theme.keyboardFocusRing
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -228,6 +230,8 @@ fun MediaTab(
             .fillMaxSize()
             .focusRequester(focusRequester)
             .onFocusChanged { rootFocused = it.isFocused }
+            // The whole tab takes the arrow keys; Tab landing on it is shown by a ring just inside it.
+            .keyboardFocusRing(RectangleShape, inset = true)
             .focusable()
             .onPreviewKeyEvent { keyEvent ->
                 tab.shortcuts.handleGoLiveKey(keyEvent, rootFocused, canGoLive) {

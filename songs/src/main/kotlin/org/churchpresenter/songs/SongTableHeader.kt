@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import org.churchpresenter.theme.components.RaisedCheckbox
+import org.churchpresenter.theme.keyboardFocusRing
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -193,7 +194,13 @@ private fun SongListScope.SongActionHeaderCell(
             .fillMaxHeight()
             .padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
             .background(cellBg, shape = MaterialTheme.shapes.extraSmall)
-            .then(if (isSortable) Modifier.clickable { onSortChange(sk) } else Modifier)
+            .then(
+                if (isSortable) {
+                    Modifier.keyboardFocusRing(MaterialTheme.shapes.extraSmall).clickable { onSortChange(sk) }
+                } else {
+                    Modifier
+                },
+            )
             // A sortable header is named for its column, as the data columns' text names theirs.
             .then(if (label != null) Modifier.semantics { contentDescription = label } else Modifier)
             .then(reorderDragMod)
@@ -245,7 +252,13 @@ private fun SongListScope.SongDataHeaderCell(
             .fillMaxHeight()
             .padding(vertical = 4.dp)
             .background(cellBg, shape = MaterialTheme.shapes.extraSmall)
-            .then(if (isSortable) Modifier.clickable { onSortChange(sk) } else Modifier)
+            .then(
+                if (isSortable) {
+                    Modifier.keyboardFocusRing(MaterialTheme.shapes.extraSmall).clickable { onSortChange(sk) }
+                } else {
+                    Modifier
+                },
+            )
             .then(reorderDragMod),
         contentAlignment = Alignment.CenterStart
     ) {

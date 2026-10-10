@@ -38,6 +38,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.theme.elevationPalette
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
+import org.churchpresenter.theme.keyboardFocusRing
 
 @Composable
 internal fun InScriptureBookDropdown(
@@ -110,6 +111,7 @@ internal fun DictionarySearchField(
     Row(
         modifier = modifier
             .height(42.dp)
+            .keyboardFocusRing(AppShape(8.dp), includeChildren = true)
             .sunken(AppShape(8.dp), elevationPalette())
             .hoverTint(AppShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically

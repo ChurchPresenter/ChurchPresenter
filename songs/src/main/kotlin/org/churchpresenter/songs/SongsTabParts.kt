@@ -27,6 +27,8 @@ import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.first
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
+import org.churchpresenter.theme.keyboardFocusRing
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.focus.focusRequester
@@ -168,6 +170,8 @@ internal fun SongsTabController.SongsTabPanes(modifier: Modifier) {
                 tabRootFocused = it.isFocused
             }
             .focusRescuePressHook(focusRescue)
+            // The whole tab takes the arrow keys; Tab landing on it is shown by a ring just inside it.
+            .keyboardFocusRing(RectangleShape, inset = true)
             .focusable()
             // The handler sits on the tab root, so it sees every key before the search field
             // does. While the caret is in that field the keys belong to the text — left/right

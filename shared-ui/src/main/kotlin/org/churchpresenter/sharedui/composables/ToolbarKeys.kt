@@ -28,6 +28,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.keyboardFocusRing
 import org.churchpresenter.theme.raised
 import org.churchpresenter.theme.raisedHover
 import org.churchpresenter.theme.flatDisabled
@@ -106,6 +107,7 @@ fun ToolbarKey(
         Box(
             modifier = modifier
                 .size(buttonSize)
+                .keyboardFocusRing(shape)
                 .clickable(
                     interactionSource = interaction,
                     indication = null,

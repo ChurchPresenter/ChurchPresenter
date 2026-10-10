@@ -1,6 +1,7 @@
 package org.churchpresenter.announcements
 
 import org.churchpresenter.sharedui.composables.ActionIconButton
+import org.churchpresenter.sharedui.composables.tabMovesFocus
 import org.churchpresenter.sharedui.guide.GuideTargets
 import org.churchpresenter.sharedui.guide.guideTarget
 import org.churchpresenter.sharedui.composables.AddToScheduleButton
@@ -61,6 +62,7 @@ import org.churchpresenter.sharedui.composables.SettingsScrollbarGutter
 import org.churchpresenter.theme.hoverTint
 import org.churchpresenter.theme.sunken
 import org.churchpresenter.theme.elevationPalette
+import org.churchpresenter.theme.keyboardFocusRing
 import org.churchpresenter.sharedui.composables.DragHandle
 import org.churchpresenter.sharedui.composables.bibleListCard
 
@@ -220,6 +222,7 @@ private fun AnnouncementsTabScope.AnnouncementsTextInput(viewModel: Announcement
                 if (shownTextHeightPx > 0f) Modifier.height(with(density) { shownTextHeightPx.toDp() })
                 else Modifier
             )
+            .keyboardFocusRing(AppShape(8.dp), includeChildren = true)
             .sunken(AppShape(8.dp), elevationPalette())
             .hoverTint(AppShape(8.dp))
             .padding(horizontal = 12.dp, vertical = 10.dp)
@@ -234,6 +237,7 @@ private fun AnnouncementsTabScope.AnnouncementsTextInput(viewModel: Announcement
             maxLines = if (textHeightPx > 0f) Int.MAX_VALUE else 3,
             modifier = Modifier
                 .fillMaxWidth()
+                .tabMovesFocus()
                 .then(if (textHeightPx > 0f) Modifier.fillMaxHeight() else Modifier),
             decorationBox = { inner ->
                 if (viewModel.text.isEmpty()) {

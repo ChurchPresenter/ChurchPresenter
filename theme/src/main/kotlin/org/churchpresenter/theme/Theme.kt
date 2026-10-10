@@ -604,8 +604,11 @@ fun ChurchPresenterTheme(
             extraLarge = AppShape(12.dp)
         )
     ) {
+        // One per window: a theme nested inside another (a dialog's content) shares its window's.
+        val focusVisibility = LocalFocusVisibility.current ?: remember { FocusVisibility() }
         CompositionLocalProvider(
             LocalSemanticColors provides semanticColors,
+            LocalFocusVisibility provides focusVisibility,
             LocalScrollbarStyle provides ScrollbarStyle(
                 minimalHeight = 16.dp,
                 thickness = 5.dp,

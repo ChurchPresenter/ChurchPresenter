@@ -21,6 +21,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import org.churchpresenter.theme.AppShape
+import org.churchpresenter.theme.keyboardFocusRing
 import androidx.compose.material3.CheckboxColors
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.LocalContentColor
@@ -349,6 +350,8 @@ fun SegmentTrackItem(
     }
     Box(
         modifier = modifier
+            // Inset: a track clips its items to itself, so a ring outside one would be cut off.
+            .keyboardFocusRing(shape, inset = true)
             .then(
                 when {
                     selected -> Modifier.raised(shape, palette.selected, palette, hovered = hovered, lift = 2.dp)
