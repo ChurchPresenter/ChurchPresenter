@@ -211,9 +211,10 @@ class BandControlPanelTest {
         showDark { val tick = rebindTick(); BandControlPanel(vm, 460.dp, pickImage = remember(tick) { { null } }) }
         click(Strings.bandTabText)
         choose(Strings.bandPreviewFont, "Poppins")
-        click(Strings.bandStyleBold)
-        click(Strings.bandStyleItalic)
-        click(Strings.bandStyleShadow)
+        // The style keys are checkboxes named for what they do; the letter on each is drawn, not read.
+        clickDescription(Strings.bandPreviewBold)
+        clickDescription(Strings.bandPreviewItalic)
+        clickDescription(Strings.bandPreviewShadow)
         choose(Strings.textShaping, Strings.bandEnumLabel("shaping", TextShaping.WHOLE_LINES.key))
         val c = vm.config
         assertEquals("Poppins", c.previewFontFamily)
