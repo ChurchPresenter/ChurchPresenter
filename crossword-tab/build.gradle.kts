@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.roborazzi)
     jacoco
 }
 
@@ -36,6 +37,7 @@ dependencies {
     testImplementation(libs.compose.uiTestJunit4)
     testImplementation(libs.compose.uiTest)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.roborazzi.composeDesktop)
 }
 
 // The encoded puzzles are written by the :crossword authoring tool into crossword/encoded/ and
@@ -53,6 +55,11 @@ tasks.named("processResources") { dependsOn(syncCrosswordFiles) }
 
 tasks.withType<Test>().configureEach {
     systemProperty("java.awt.headless", "true")
+}
+
+// Committed, beside the module, as the other modules' suites are.
+roborazzi {
+    outputDir.set(layout.projectDirectory.dir("screenshots"))
 }
 
 detekt {

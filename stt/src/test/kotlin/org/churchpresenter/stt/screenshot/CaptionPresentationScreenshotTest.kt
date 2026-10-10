@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.stt.screenshot
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

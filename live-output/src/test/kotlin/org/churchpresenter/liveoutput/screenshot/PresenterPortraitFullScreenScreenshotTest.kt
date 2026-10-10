@@ -1,37 +1,41 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.liveoutput.screenshot
 
+import org.churchpresenter.core.models.songs.SectionTranslation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
 import io.github.takahirom.roborazzi.captureRoboImage
 import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.asComposeImageBitmap
 import androidx.compose.ui.graphics.Color as ComposeColor
+import io.github.alexzhirkevich.compottie.LottieComposition
 import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.stt.STTSegment
 import org.churchpresenter.settings.AnnouncementsSettings
+import org.churchpresenter.core.models.text.TextBackdrop
+import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.QASettings
+import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.settings.BackgroundConfig
 import org.churchpresenter.settings.BackgroundSettings
 import org.churchpresenter.settings.BibleSettings
-import org.churchpresenter.core.models.text.TextBackdrop
-import org.churchpresenter.core.models.text.TextOutline
 import org.churchpresenter.settings.BibleTranslationSettings
-import org.churchpresenter.settings.SongCreditStyle
-import org.churchpresenter.settings.SongSectionLabel
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.core.models.songs.LyricSection
-import org.churchpresenter.core.models.songs.SectionTranslation
 import org.churchpresenter.core.models.presentation.AnimationType
 import org.churchpresenter.core.models.qa.Question
 import org.churchpresenter.core.models.qa.QuestionStatus
@@ -41,219 +45,81 @@ import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.scene.SourceTransform
 import org.churchpresenter.announcements.presenter.AnnouncementsPresenter
 import org.churchpresenter.dictionary.presenter.DictionaryPresenter
+import org.churchpresenter.liveoutput.LottieFrame
+import org.churchpresenter.lowerthird.presenter.LowerThirdPresenter
 import org.churchpresenter.slides.presenter.PicturePresenter
 import org.churchpresenter.slides.presenter.PresentationPresenter
 import org.churchpresenter.qa.presenter.QAPresenter
+import org.churchpresenter.qa.presenter.QAQRCodePresenter
+import org.churchpresenter.stt.presenter.STTPresenter
 import org.churchpresenter.canvas.ScenePresenter
 import org.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.settings.utils.Constants
+import org.jetbrains.skia.Bitmap
 import java.awt.Color
 import java.awt.GradientPaint
 import java.awt.image.BufferedImage
 import java.io.File
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 
 /**
- * What the congregation sees, full screen — every variation the two main surfaces have.
+ * The portrait/mobile-aspect counterpart of [PresenterFullScreenScreenshotTest] -- every one of its
+ * states, re-rendered on a 1080x1920 output instead of 1920x1080.
  *
- * **One image per state, not two.** The rest of the screenshot suite stacks a light and a dark render
- * of each state, because those surfaces follow the operator's theme. These do not: the audience
- * screen is drawn from `SongSettings`/`BibleSettings`/`BackgroundSettings` and looks the same
- * whichever theme the operator has chosen. Stacking would write the same picture twice.
+ * The point is not new states, it is proving the *same* state does not run off the edge of a tall
+ * narrow output: nothing in the suite exercised that before this file existed, since every presenter
+ * screenshot elsewhere is a fixed 1920x1080 box. `PresenterOverflowTest` and `PresenterBackgroundTest`
+ * (in `presenter/`, not screenshot-based) cover the same property without a picture.
  *
- * Rendered at 1920x1080, which is what these surfaces are drawn onto in practice — and it matters
- * here more than elsewhere, because auto-fit sizes the text against the space it is given.
+ * One image per state, not two, for the same reason as the landscape file: the audience screen is
+ * drawn from settings and looks the same whichever theme the operator has chosen.
  *
- * Lower-third variants live in `PresenterScreenshotTest`; this file is the full-screen half, and
- * the title slide's states are `PresenterTitleSlideScreenshotTest`.
+ * The band content ([SongPresenter]/[BiblePresenter] with `isLowerThird = true`) is
+ * [PresenterPortraitLowerThirdScreenshotTest], mirroring the landscape split between this file and
+ * [PresenterLowerThirdScreenshotTest]. The media and website presenters are not here for the same
+ * reason they are absent from [PresenterScreenshotTest]: one needs a live `LocalMediaViewModel`, the
+ * other a JCEF browser engine, neither of which this suite constructs.
  */
-// One state per test and one picture per state, so the class grows with the states the presenter
-// has rather than with any complexity of its own -- the same reason its portrait twin carries this.
 @Suppress("LargeClass")
-class PresenterFullScreenScreenshotTest {
+class PresenterPortraitFullScreenScreenshotTest {
 
-    /** A 1080p output. */
-    private val screen = Modifier.size(1920.dp, 1080.dp)
+    /** A portrait output -- the shape the fix in this change is about. */
+    private val screen = Modifier.size(1080.dp, 1920.dp)
 
-    private fun shoot(name: String, content: @Composable () -> Unit) = runComposeUiTest {
-        setContent { MaterialTheme { Box(screen) { content() } } }
-        waitForIdle()
-        capture(name)
+    private fun shoot(name: String, content: @Composable () -> Unit) =
+        runDesktopComposeUiTest(width = 1080, height = 1920) {
+            setContent { MaterialTheme { Box(screen) { content() } } }
+            waitForIdle()
+            if (photoRequested) awaitPhoto()
+            capture(name)
+        }
+
+    /** Set by [photo]: the state draws a picture, decoded off the UI thread. */
+    private var photoRequested = false
+
+    /**
+     * Waits until the photo is on screen. It decodes on `Dispatchers.IO`, which `waitForIdle` does not
+     * wait for, so without this the capture races the decode and can show the black behind it. The
+     * photo is the only blue in these states: the text is white and the backdrops grey or black.
+     */
+    private fun ComposeUiTest.awaitPhoto() {
+        waitUntil(timeoutMillis = PHOTO_TIMEOUT_MS) {
+            val pixels = onRoot().captureToImage().toPixelMap()
+            (0 until pixels.width step PHOTO_PROBE_STEP).any { x ->
+                (0 until pixels.height step PHOTO_PROBE_STEP).any { y ->
+                    pixels[x, y].let { it.blue - it.red > PHOTO_BLUE_MARGIN }
+                }
+            }
+        }
     }
 
     private fun ComposeUiTest.capture(name: String) {
         onRoot().captureRoboImage("$SCREENSHOT_ROOT/$SECTION/$name.png")
-    }
-
-    // ── The backdrop and the outline, on a real output ──────────────────────────────────────────
-    //
-    // Neither had a picture anywhere before these. `TextBackdrop` appeared in exactly one committed
-    // image -- the Announcements *tab's* preview -- and `TextOutline` in none at all, so the band
-    // behind a verse, the box around it and the stroke on its glyphs were only ever reviewed as
-    // geometry assertions. They are also the two features most likely to break quietly on a
-    // fit-scale change, since both add visual size the fit search does not measure.
-
-    @Test
-    fun `a verse on a line backdrop`() = shoot("bible_text_backdrop") {
-        BiblePresenter(
-            selectedVerses = listOf(verse()),
-            // Not black: the presenter's own background is black, so a black band is a picture of
-            // nothing and would have reviewed as "the backdrop does not draw".
-            appSettings = withBibleTextBackdrop(LINE_PLATE),
-        )
-    }
-
-    @Test
-    fun `a verse in a bordered box`() = shoot("bible_text_backdrop_border") {
-        BiblePresenter(
-            selectedVerses = listOf(verse()),
-            appSettings = withBibleTextBackdrop(BORDER_BOX),
-        )
-    }
-
-    // Two of them, because the pair share one `translationBlock` and a plate drawn per line reads
-    // quite differently stacked than it does alone -- and because the fit search that sizes them
-    // measures text without its backdrop, so a stack is where a plate is most likely to overrun.
-
-    @Test
-    fun `two translations on a plate`() = shoot("bible_two_translations_backdrop") {
-        BiblePresenter(
-            selectedVerses = listOf(verse(), verseRu()),
-            appSettings = twoTranslationsWith(LINE_PLATE),
-        )
-    }
-
-    @Test
-    fun `two translations in a bordered box`() = shoot("bible_two_translations_border") {
-        BiblePresenter(
-            selectedVerses = listOf(verse(), verseRu()),
-            appSettings = twoTranslationsWith(BORDER_BOX),
-        )
-    }
-
-    @Test
-    fun `bilingual lyrics on a plate`() = shoot("song_bilingual_backdrop") {
-        SongPresenter(
-            lyricSection = song(secondary = SECONDARY_LINES),
-            appSettings = AppSettings(songSettings = SongSettings(lyricsBackdrop = LINE_PLATE)),
-        )
-    }
-
-    @Test
-    fun `bilingual lyrics in a bordered box`() = shoot("song_bilingual_border") {
-        SongPresenter(
-            lyricSection = song(secondary = SECONDARY_LINES),
-            appSettings = AppSettings(songSettings = SongSettings(lyricsBackdrop = BORDER_BOX)),
-        )
-    }
-
-    /**
-     * Lyrics on a plate with **one width for every line** — issue #643.
-     *
-     * Its own picture because it is the one backdrop setting that reaches song lyrics through a
-     * different painter from everything else. Lyrics are the app's only block whose lines are
-     * separate `Text`s, so each line used to be asked on its own what the widest line was and
-     * answered "me"; the setting did nothing here while working everywhere text is one `Text`.
-     * A ragged three-line verse is the sample, because a squared-off one says nothing.
-     */
-    @Test
-    fun `lyrics on a plate of one width`() = shoot("song_backdrop_uniform") {
-        SongPresenter(
-            lyricSection = song(lines = RAGGED_LINES),
-            appSettings = AppSettings(
-                songSettings = SongSettings(
-                    lyricsBackdrop = LINE_PLATE.copy(lineBackgroundUniformWidth = true),
-                ),
-            ),
-        )
-    }
-
-    /** The same verse with each band on its own line's width, so the pair reads as one statement. */
-    @Test
-    fun `lyrics on a plate per line`() = shoot("song_backdrop_ragged") {
-        SongPresenter(
-            lyricSection = song(lines = RAGGED_LINES),
-            appSettings = AppSettings(songSettings = SongSettings(lyricsBackdrop = LINE_PLATE)),
-        )
-    }
-
-    /**
-     * The gap the backdrop-clipping audit named, and the reason it went unnoticed for so long: every
-     * bordered picture in the set used the **default centred** alignment, and every left-aligned
-     * picture carried no backdrop. No image anywhere paired the two — which is precisely the
-     * configuration the clipping bug needed, because centred text is narrower than its box and the
-     * plate had somewhere to go.
-     *
-     * The Bible's own bordered shots are already left-aligned, that being its default. The lyrics'
-     * are not: songs centre by default, which is why they looked right while the Bible did not.
-     */
-    @Test
-    fun `lyrics aligned left in a bordered box`() = shoot("song_lyrics_border_left") {
-        SongPresenter(
-            lyricSection = song(),
-            appSettings = AppSettings(
-                songSettings = SongSettings(
-                    lyricsBackdrop = BORDER_BOX,
-                    lyricsHorizontalAlignment = Constants.LEFT,
-                ),
-            ),
-        )
-    }
-
-    @Test
-    fun `a verse with an outline on its glyphs`() = shoot("bible_text_outline") {
-        BiblePresenter(
-            selectedVerses = listOf(verse()),
-            appSettings = withBibleTextOutline(TextOutline(enabled = true, width = 6, color = "#101820")),
-        )
-    }
-
-    @Test
-    fun `lyrics with an outline on their glyphs`() = shoot("song_lyrics_outline") {
-        SongPresenter(
-            lyricSection = song(),
-            appSettings = AppSettings(
-                songSettings = SongSettings(
-                    outlines = SongSettings().outlines.copy(
-                        lyrics = TextOutline(enabled = true, width = 6, color = "#101820"),
-                    ),
-                ),
-            ),
-        )
-    }
-
-    // ── The section label (#613) ────────────────────────────────────────────────────────────────
-
-    @Test
-    fun `the section label above the lyrics`() = shoot("song_section_label") {
-        SongPresenter(lyricSection = song(), appSettings = withSectionLabel(SongSectionLabel(enabled = true)))
-    }
-
-    @Test
-    fun `the section label styled and positioned`() = shoot("song_section_label_styled") {
-        // Bold, stroked, left-aligned and held under the lyrics -- none of which it could do before
-        // #613, when it drew with a hard-coded plain style and sat centred at the top of the column.
-        SongPresenter(
-            lyricSection = song(),
-            appSettings = withSectionLabel(
-                SongSectionLabel(
-                    enabled = true,
-                    fullScreen = SongCreditStyle(
-                        fontType = "",
-                        fontSize = 44,
-                        color = "#FFD54F",
-                        bold = true,
-                        italic = true,
-                        outline = TextOutline(enabled = true, width = 4, color = "#101820"),
-                        horizontalAlignment = Constants.LEFT,
-                    ),
-                    position = Constants.BELOW_LYRICS,
-                ),
-            ),
-        )
     }
 
     // ── Songs: what is on the slide ─────────────────────────────────────────────────────────────
@@ -819,6 +685,83 @@ class PresenterFullScreenScreenshotTest {
         BiblePresenter(selectedVerses = listOf(verse()), appSettings = bibleSettings(textFontSize = 160))
     }
 
+    // ── The backdrop and the stroke, in portrait ────────────────────────────────────────────────
+    //
+    // Neither portrait suite had a single text-backdrop or outline state. That is the worst gap of
+    // the set: a plate is drawn outside the text's own box on purpose and is only cut off when an
+    // ancestor clips *and* the text fills that box — and a narrow frame is what makes a line of
+    // scripture fill it. Landscape leaves slack at the end of a line; portrait does not.
+
+    @Test
+    fun `a verse on a plate`() = shoot("bible_text_backdrop") {
+        BiblePresenter(selectedVerses = listOf(verse()), appSettings = withBibleTextBackdrop(LINE_PLATE))
+    }
+
+    @Test
+    fun `a verse in a bordered box`() = shoot("bible_text_backdrop_border") {
+        BiblePresenter(selectedVerses = listOf(verse()), appSettings = withBibleTextBackdrop(BORDER_BOX))
+    }
+
+    /**
+     * Two translations bordered, which is the state that made the clipping unmistakable on a wide
+     * screen: the English box lost its left edge and the Russian one — being wider — lost both and
+     * drew as two horizontal rules with nothing joining them. Narrower here, so worse.
+     */
+    @Test
+    fun `two translations in a bordered box`() = shoot("bible_two_translations_border") {
+        BiblePresenter(
+            selectedVerses = listOf(verse(), verseRu()),
+            appSettings = withBibleTextBackdrop(BORDER_BOX, count = 2),
+        )
+    }
+
+    @Test
+    fun `lyrics on a plate`() = shoot("song_backdrop") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = AppSettings(songSettings = SongSettings(lyricsBackdrop = LINE_PLATE)),
+        )
+    }
+
+    @Test
+    fun `lyrics in a bordered box`() = shoot("song_backdrop_border") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = AppSettings(songSettings = SongSettings(lyricsBackdrop = BORDER_BOX)),
+        )
+    }
+
+    /** Left-aligned *and* bordered: the pairing no image anywhere made before this batch. */
+    @Test
+    fun `lyrics aligned left in a bordered box`() = shoot("song_lyrics_border_left") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = AppSettings(
+                songSettings = SongSettings(
+                    lyricsBackdrop = BORDER_BOX,
+                    lyricsHorizontalAlignment = Constants.LEFT,
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `a verse with an outline on its glyphs`() = shoot("bible_text_outline") {
+        BiblePresenter(selectedVerses = listOf(verse()), appSettings = withBibleTextOutline(GLYPH_STROKE))
+    }
+
+    @Test
+    fun `lyrics with an outline on their glyphs`() = shoot("song_lyrics_outline") {
+        SongPresenter(
+            lyricSection = song(),
+            appSettings = AppSettings(
+                songSettings = SongSettings(
+                    outlines = SongSettings().outlines.copy(lyrics = GLYPH_STROKE),
+                ),
+            ),
+        )
+    }
+
     // ── Songs: the broadcast outputs ────────────────────────────────────────────────────────────
 
     // Shot against coloured text on a coloured ground: the default white-on-black slide rasterises
@@ -1163,50 +1106,40 @@ class PresenterFullScreenScreenshotTest {
         )
     }
 
-    /**
-     * The dictionary card's badge in a bordered box — the worst of the clipped surfaces after the
-     * captions, and the one the audit could only guess at.
-     *
-     * Its `.verticalScroll` is the innermost modifier, so the viewport is the content's own box on the
-     * vertical axis while `clipScrollableContainer` inflates the clip sideways. The plate therefore
-     * lost its **top and bottom**, the opposite pair from the Bible's, and lost both rather than one:
-     * `DictionaryBackdropBorderRenderTest` scores 0 horizontal strokes against the bug.
-     */
-    @Test
-    fun `a Strong's entry in a bordered box`() = shoot("dictionary_entry_border") {
-        DictionaryPresenter(
-            entry = strongs(),
-            dictionarySettings = DictionarySettings(
-                referenceBackdrop = BORDER_BOX,
-                wordBackdrop = BORDER_BOX,
-            ),
-        )
-    }
-
     // ── Canvas scenes ───────────────────────────────────────────────────────────────────────────
 
     @Test
     fun `a canvas scene`() = shoot("scene") { ScenePresenter(scene = scene()) }
 
+    // ── Extra coverage beyond the landscape suite: these presenters have no full-screen state in
+    // PresenterFullScreenScreenshotTest at all (STT and the Lottie band have their own non-screenshot
+    // render tests; the QR code has none), so there is no landscape counterpart to mirror -- kept
+    // here rather than dropped, since the portrait shape is exactly where a QR code's aspect or a
+    // caption band's width is worth a look.
+
+    @Test
+    fun `live captions`() = shoot("stt") {
+        STTPresenter(
+            segments = listOf(sttSegment("Amazing grace how sweet the sound")),
+            inProgressText = "",
+            translationSegments = emptyList(),
+            inProgressTranslation = "",
+            highlightedWords = emptyList(),
+            sttSettings = STTSettings(dripFeedEnabled = false),
+        )
+    }
+
+    @Test
+    fun `a QR code`() = shoot("qa_qrcode") {
+        QAQRCodePresenter(url = "https://example.churchpresenter.org/ask", qaSettings = QASettings())
+    }
+
+    @Test
+    fun `an animated lower third`() = shoot("lower_third") {
+        LowerThirdPresenter(composition = lottieComposition(), progress = { 0.5f }, frame = solidFrame().imageBitmap)
+    }
+
     // ── Fixtures ────────────────────────────────────────────────────────────────────────────────
-
-    /** The Bible stack with [backdrop] behind the primary's verse text on a full screen. */
-    private fun withBibleTextBackdrop(backdrop: TextBackdrop) = AppSettings(
-        bibleSettings = BibleSettings(primaryBible = KJV).withTranslations(
-            listOf(BibleTranslationSettings(fileName = KJV, textBackdrop = backdrop)),
-        ),
-    )
-
-    /** The same, for the stroke around the verse's glyphs. */
-    private fun withBibleTextOutline(outline: TextOutline) = AppSettings(
-        bibleSettings = BibleSettings(primaryBible = KJV).withTranslations(
-            listOf(BibleTranslationSettings(fileName = KJV, textOutline = outline)),
-        ),
-    )
-
-    private fun withSectionLabel(label: SongSectionLabel) = AppSettings(
-        songSettings = SongSettings(layoutExtras = SongSettings().layoutExtras.copy(sectionLabel = label)),
-    )
 
     private fun song(
         header: String = "[Verse 1]",
@@ -1220,7 +1153,7 @@ class PresenterFullScreenScreenshotTest {
         songNumber = 42,
         type = type,
         lines = lines,
-        translations = listOf(SectionTranslation(lines = secondary)),
+        translations = if (secondary.isEmpty()) emptyList() else listOf(SectionTranslation(lines = secondary)),
         chordLines = chords,
     )
 
@@ -1363,23 +1296,25 @@ class PresenterFullScreenScreenshotTest {
 
 
     /** [count] translations configured, which is what puts the presenter in multi-translation mode. */
-    /**
-     * Two translations, each drawing its verse text on [backdrop].
-     *
-     * On every entry, not just the first: the backdrop is stored per translation, so setting it on
-     * one alone is a plate behind one language and nothing behind the other.
-     */
-    private fun twoTranslationsWith(backdrop: TextBackdrop) = AppSettings(
+    private fun translations(count: Int) = AppSettings(
         bibleSettings = BibleSettings(
-            translations = TRANSLATION_FILES.take(2).map {
+            translations = TRANSLATION_FILES.take(count).map { BibleTranslationSettings(fileName = it) },
+        ),
+    )
+
+    /** The Bible stack with [backdrop] behind each of [count] translations' verse text. */
+    private fun withBibleTextBackdrop(backdrop: TextBackdrop, count: Int = 1) = AppSettings(
+        bibleSettings = BibleSettings(primaryBible = KJV).withTranslations(
+            listOf(KJV, "rst.spb").take(count).map {
                 BibleTranslationSettings(fileName = it, textBackdrop = backdrop)
             },
         ),
     )
 
-    private fun translations(count: Int) = AppSettings(
-        bibleSettings = BibleSettings(
-            translations = TRANSLATION_FILES.take(count).map { BibleTranslationSettings(fileName = it) },
+    /** The same, for the stroke around the verse's glyphs. */
+    private fun withBibleTextOutline(outline: TextOutline) = AppSettings(
+        bibleSettings = BibleSettings(primaryBible = KJV).withTranslations(
+            listOf(BibleTranslationSettings(fileName = KJV, textOutline = outline)),
         ),
     )
 
@@ -1458,32 +1393,52 @@ class PresenterFullScreenScreenshotTest {
         ),
     )
 
-    /** A stand-in for a rasterised deck slide. */
+    /** A stand-in for a rasterised deck slide, sized for a portrait output. */
     private fun slideBitmap(): ImageBitmap {
-        val bitmap = ImageBitmap(1920, 1080)
+        val bitmap = ImageBitmap(1080, 1920)
         val canvas = Canvas(bitmap)
         fun bar(left: Float, top: Float, width: Float, height: Float, colour: ComposeColor) {
             canvas.drawRect(left, top, left + width, top + height, Paint().apply { color = colour })
         }
-        bar(0f, 0f, 1920f, 1080f, ComposeColor(0xFFFAFAFA))
-        bar(0f, 0f, 1920f, 160f, ComposeColor(0xFF2B3A67))
-        bar(120f, 320f, 1100f, 80f, ComposeColor(0xFF20242B))
-        listOf(480f, 580f, 680f).forEach { y -> bar(120f, y, 1400f, 40f, ComposeColor(0xFFC9CDD4)) }
-        bar(120f, 820f, 520f, 90f, ComposeColor(0xFF3F7D58))
+        bar(0f, 0f, 1080f, 1920f, ComposeColor(0xFFFAFAFA))
+        bar(0f, 0f, 1080f, 160f, ComposeColor(0xFF2B3A67))
+        bar(80f, 320f, 900f, 80f, ComposeColor(0xFF20242B))
+        listOf(480f, 580f, 680f).forEach { y -> bar(80f, y, 900f, 40f, ComposeColor(0xFFC9CDD4)) }
+        bar(80f, 820f, 400f, 90f, ComposeColor(0xFF3F7D58))
         return bitmap
     }
 
     private fun imageBackground() =
         BackgroundConfig(backgroundType = Constants.BACKGROUND_IMAGE, backgroundImage = photo().absolutePath)
 
+    private fun sttSegment(text: String) =
+        STTSegment(id = 1, timestamp = "", text = text, start = 0.0, end = 1.0, completed = true)
+
+    private fun lottieComposition() = LottieComposition.Companion.parse(
+        """{"v":"5.5.2","fr":30,"ip":0,"op":30,"w":100,"h":100,"nm":"test","ddd":0,"assets":[],"layers":[]}"""
+    )
+
+    /** A small solid-colour Lottie frame, since no real animation asset is loaded in this suite. */
+    private fun solidFrame(): LottieFrame {
+        val size = 4
+        val bitmap = Bitmap()
+        bitmap.allocN32Pixels(size, size)
+        val pixels = IntArray(size * size) { 0xFF2B3A67.toInt() }
+        val bytes = ByteArray(pixels.size * 4)
+        ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().put(pixels)
+        bitmap.installPixels(bytes)
+        bitmap.setImmutable()
+        return LottieFrame(bitmap.asComposeImageBitmap(), 0, bitmap)
+    }
+
     /** A second photograph, so a transition has something to move between. */
     private fun secondPhoto(): File {
         FIXTURES.mkdirs()
         val file = File(FIXTURES, "backdrop2.png")
-        val image = BufferedImage(1920, 1080, BufferedImage.TYPE_INT_RGB)
+        val image = BufferedImage(1080, 1920, BufferedImage.TYPE_INT_RGB)
         val canvas = image.createGraphics()
-        canvas.paint = GradientPaint(0f, 0f, Color(0x7B3FA6), 1920f, 1080f, Color(0xF5A08E))
-        canvas.fillRect(0, 0, 1920, 1080)
+        canvas.paint = GradientPaint(0f, 0f, Color(0x7B3FA6), 0f, 1920f, Color(0xF5A08E))
+        canvas.fillRect(0, 0, 1080, 1920)
         canvas.dispose()
         ImageIO.write(image, "png", file)
         return file
@@ -1491,23 +1446,27 @@ class PresenterFullScreenScreenshotTest {
 
     /** A real, decodable image for the image-background states. */
     private fun photo(): File {
+        photoRequested = true
         FIXTURES.mkdirs()
         val file = File(FIXTURES, "backdrop.png")
-        val image = BufferedImage(1920, 1080, BufferedImage.TYPE_INT_RGB)
+        val image = BufferedImage(1080, 1920, BufferedImage.TYPE_INT_RGB)
         val canvas = image.createGraphics()
-        canvas.paint = GradientPaint(0f, 0f, Color(0x2B3A67), 1920f, 1080f, Color(0x8FB3F5))
-        canvas.fillRect(0, 0, 1920, 1080)
+        canvas.paint = GradientPaint(0f, 0f, Color(0x2B3A67), 0f, 1920f, Color(0x8FB3F5))
+        canvas.fillRect(0, 0, 1080, 1920)
         canvas.color = Color(0x1B2A5B)
-        canvas.fillOval(1300, 120, 420, 420)
+        canvas.fillOval(730, 120, 250, 250)
         canvas.dispose()
         ImageIO.write(image, "png", file)
         return file
     }
 
     private companion object {
-        const val SECTION = "presenterFullScreen"
+        const val SECTION = "presenterPortraitFullScreen"
 
-        val FIXTURES = File("build/screenshot-fixtures/presenter")
+        const val PHOTO_TIMEOUT_MS = 5_000L
+        const val PHOTO_PROBE_STEP = 40
+        const val PHOTO_BLUE_MARGIN = 0.1f
+        val FIXTURES = File("build/screenshot-fixtures/presenter-portrait")
 
         val VERSE_LINES = listOf(
             "Amazing grace how sweet the sound",
@@ -1558,21 +1517,14 @@ class PresenterFullScreenScreenshotTest {
                 "pastures: he leadeth me beside the still waters. He restoreth my soul: he leadeth " +
                 "me in the paths of righteousness for his name's sake."
 
-        /** A band behind each line, hugging the text. */
-/** Three lines, no two the same width — what "one width for every line" has to be judged on. */
-        val RAGGED_LINES = listOf(
-            "Amazing grace how sweet the sound",
-            "That saved",
-            "a wretch like me",
-        )
-
-                val LINE_PLATE = TextBackdrop(
+        /** A band behind each line. Not near-black: a dark plate on a dark slide shows nothing. */
+        val LINE_PLATE = TextBackdrop(
             lineBackground = true,
             lineBackgroundColor = "#1B3A6B",
             lineBackgroundOpacity = 85,
         )
 
-        /** A box around the block. Deliberately no fill: with one it stops being a box of its own. */
+        /** A box around the block. No fill: with one it stops being a box of its own. */
         val BORDER_BOX = TextBackdrop(
             border = true,
             borderColor = "#FFD54F",
@@ -1580,6 +1532,9 @@ class PresenterFullScreenScreenshotTest {
             borderPadding = 18,
             borderRadius = 12,
         )
+
+        /** `enabled` defaults to false, and without it `isVisible` is false and nothing is stroked. */
+        val GLYPH_STROKE = TextOutline(enabled = true, width = 6, color = "#101820")
 
         const val KJV = "kjv.spb"
 

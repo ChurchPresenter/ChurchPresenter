@@ -49,15 +49,13 @@ settings pages in `.settings`.
 ## Rules
 
 - `internal` stops at the module edge. What `:composeApp` calls is public; nothing else is.
-- **Tests and screenshots live here.** The screenshot suites are `screenshot/StageMonitorScreenshotTest` and
-  `screenshot/PreviewLayoutsScreenshotTest`, `ProjectionFfmpegCardScreenshotTest` and
-  `ProjectionOmtCardScreenshotTest`; their images are under `live-output/screenshots/`. `LiveOutputTestSupport.kt` holds this suite's copies of the app's
+- **Tests and screenshots live here.** The screenshot suites are `screenshot/StageMonitorScreenshotTest`,
+  `PreviewLayoutsScreenshotTest`, `ProjectionFfmpegCardScreenshotTest`, `ProjectionOmtCardScreenshotTest`
+  and the full-screen suites (`PresenterFullScreenScreenshotTest` and its portrait twin); their images are under `live-output/screenshots/`. `LiveOutputTestSupport.kt` holds this suite's copies of the app's
   `withSongsEverywhere`/`withBibleEverywhere` and `TestSingletons.latchSkikoHostOs` — copies, so the
   move did not touch `:shared-ui`.
 - What needs the app stays there, with its tests: `PresenterWindows` and the window geometry
-  (`MergeTileTest`, `PresenterOverflowTest`), the render benchmark and the soak test, and the
-  full-screen screenshot suites (`PresenterFullScreenScreenshotTest` and its portrait twin), which
-  draw the other tabs' presenters too.
+  (`MergeTileTest`, `PresenterOverflowTest`), the render benchmark and the soak test.
 
 ## Commands
 

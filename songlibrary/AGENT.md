@@ -44,6 +44,8 @@ file explains.
 ./gradlew :songlibrary:test
 ./gradlew :songlibrary:detekt
 ./gradlew :songlibrary:jacocoTestCoverageVerification
+./gradlew :songlibrary:recordRoborazziJvm --tests '*ScreenshotTest*'   # images in songlibrary/screenshots/
+./gradlew :songlibrary:verifyRoborazziJvm --tests '*ScreenshotTest*'
 ```
 
 All three gates run in CI, gated on this directory (or the shared build files) changing.

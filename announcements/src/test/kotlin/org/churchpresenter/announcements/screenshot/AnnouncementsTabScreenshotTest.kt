@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.announcements.screenshot
 
 import org.churchpresenter.profiles.stageMonitorScreenIndices
 import androidx.compose.ui.test.ComposeUiTest

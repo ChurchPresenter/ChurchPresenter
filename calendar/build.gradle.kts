@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.roborazzi)
     jacoco
 }
 
@@ -40,6 +41,14 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(libs.compose.uiTestJunit4)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(testFixtures(projects.sharedUi))
+    testImplementation(libs.compose.uiTest)
+    testImplementation(libs.roborazzi.composeDesktop)
+}
+
+// Committed, beside the module, as the other modules' suites are.
+roborazzi {
+    outputDir.set(layout.projectDirectory.dir("screenshots"))
 }
 
 detekt {

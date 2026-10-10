@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.lottiegen.screenshot
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -28,7 +28,6 @@ import org.churchpresenter.lottiegen.persistence.PresetStorage
 import org.churchpresenter.lottiegen.ui.LOWER_THIRD_STYLE_THUMBNAIL_TAG
 import org.churchpresenter.lottiegen.ui.Strings
 import org.churchpresenter.lottiegen.viewmodel.ThumbnailDiagnostics
-import org.churchpresenter.app.churchpresenter.TestSingletons
 import org.churchpresenter.diagnostics.HungTestReporter
 import org.churchpresenter.diagnostics.ThreadDump
 import org.churchpresenter.theme.ChurchPresenterTheme
@@ -101,8 +100,6 @@ class LottieGenScreenshotTest {
     }
 
     private fun generator(name: String, drive: ComposeUiTest.() -> Unit = {}) {
-        TestSingletons.latchSkikoHostOs()
-        TestSingletons.latchToTestHome()
         // The panel's labels come from a ResourceBundle keyed on the default locale, so on a
         // machine set to one of the eight translated locales every caption would differ.
         Strings.setLocale(Locale.ENGLISH)
@@ -197,8 +194,7 @@ class LottieGenScreenshotTest {
      * Three saved lower thirds, written where the generator reads them.
      *
      * Through `PresetStorage` rather than by writing the JSON here, so the fixture cannot drift from
-     * the format the tool actually loads — and under the test home, which is why
-     * [TestSingletons.latchToTestHome] has to run first.
+     * the format the tool actually loads — and under the test home this module's test task pins.
      */
     private fun seedLibrary() = PresetStorage.save(
         listOf(

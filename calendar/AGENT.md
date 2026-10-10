@@ -159,6 +159,8 @@ the user asked to be able to lose without losing anything else.
 ./gradlew :calendar:compileKotlin   # fast compile check
 ./gradlew :calendar:test            # its suite
 ./gradlew :calendar:detekt          # its gate — run it LAST before you stop
+./gradlew :calendar:recordRoborazziJvm --tests '*ScreenshotTest*'   # images in calendar/screenshots/
+./gradlew :calendar:verifyRoborazziJvm --tests '*ScreenshotTest*'
 ```
 
 ## Coverage

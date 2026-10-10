@@ -40,17 +40,20 @@ it). Nothing of `:composeApp`'s.
 
 **`org.churchpresenter.stt`**, with `.presenter`. The test helpers (`sttTab`, `STTLabel`, the `transcribe`/`translate`/
 `live` feeders, the finders and `SILENT_STT_URL`) are in `src/testFixtures`. They are public, so the
-app's screenshot suites can use them.
+module's own screenshot suites can use them.
 
 ## Rules
 
 - `internal` stops at the module edge. What `:composeApp` calls is public; nothing else is.
-- **Tests live here**, beside the code. The tab's screenshots stay in the app
-  (`STTTabScreenshotTest`), where they were recorded.
+- **Tests and screenshots live here**, beside the code: `STTTabScreenshotTest`, `CaptionBackdropScreenshotTest` and
+  `CaptionPresentationScreenshotTest`, images under
+  `stt/screenshots/`.
 
 ## Commands
 
 ```bash
 ./gradlew :stt:test :stt:detekt
 ./gradlew :stt:jacocoTestCoverageVerification
+./gradlew :stt:recordRoborazziJvm --tests '*ScreenshotTest*'
+./gradlew :stt:verifyRoborazziJvm --tests '*ScreenshotTest*'
 ```

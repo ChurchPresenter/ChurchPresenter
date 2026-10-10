@@ -27,9 +27,7 @@ import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 class ScreenshotInvariantsTest {
 
     /**
-     * The app's screenshot package, the `:shared-ui`, `:slides`, `:media`, `:songs`, `:bible-tab` and
-     * `:schedule`, `:companion-surface`, `:canvas`, `:presenter`, `:profiles`, `:live-output`, `:updater`,
-     * `:server-ui`, `:app-settings` and `:helper` suites, and their shared harness.
+     * The app's screenshot package, every module's own suite, and their shared harness.
      */
     private val packageDirs = listOf(
         File("src/jvmTest/kotlin/org/churchpresenter/app/churchpresenter/screenshot"),
@@ -49,6 +47,16 @@ class ScreenshotInvariantsTest {
         File("../server-ui/src/test/kotlin/org/churchpresenter/serverui/screenshot"),
         File("../app-settings/src/test/kotlin/org/churchpresenter/appsettings/screenshot"),
         File("../helper/src/test/kotlin/org/churchpresenter/helper/screenshot"),
+        File("../announcements/src/test/kotlin/org/churchpresenter/announcements/screenshot"),
+        File("../calendar/src/test/kotlin/org/churchpresenter/calendar/screenshot"),
+        File("../lower-third/src/test/kotlin/org/churchpresenter/lowerthird/screenshot"),
+        File("../qa/src/test/kotlin/org/churchpresenter/qa/screenshot"),
+        File("../dictionary/src/test/kotlin/org/churchpresenter/dictionary/screenshot"),
+        File("../songlibrary/src/test/kotlin/org/churchpresenter/songlibrary/screenshot"),
+        File("../stt/src/test/kotlin/org/churchpresenter/stt/screenshot"),
+        File("../lottieGenerator/src/test/kotlin/org/churchpresenter/lottiegen/screenshot"),
+        File("../obs/src/test/kotlin/org/churchpresenter/obs/screenshot"),
+        File("../crossword-tab/src/test/kotlin/org/churchpresenter/crosswordtab/screenshot"),
     )
 
     /** Every `.kt` in the screenshot packages, paired with its text. */

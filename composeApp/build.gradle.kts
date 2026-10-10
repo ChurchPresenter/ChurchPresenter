@@ -1039,14 +1039,9 @@ val soakTestClasses = "*.benchmark.ServiceSoak"
 val serialTestClasses = listOf(
     // The ATEM upload suites that used to lead this list moved to `:server`, whose `test` task forks
     // once, so they are alone in their JVM there.
-    // The suite that opens the ATEM upload dialog. Doing so renders a Lottie frame and encodes it for
-    // the switcher behind 5s deadlines -- the upload button enabling, the dialog's rows composing, and
-    // `waitForAtemPrepared` (`:lower-third`'s LowerThirdTabTestSupport.kt). That is real work against a
-    // wall clock, so on a runner with four forks competing for the CPU it is the machine being
-    // measured, not the code. The Lower Third tab's own suites moved to `:lower-third`, whose `test`
-    // task forks once, so they are already alone in their JVM there.
-    "*LowerThirdTabScreenshotTest",
-    // And these for a third: all thirteen seed one fixed directory on disk -- AppPreviewSupport's
+    // The suite that opens the ATEM upload dialog, `LowerThirdTabScreenshotTest`, moved to
+    // `:lower-third` with the tab's other suites; that `test` task forks once, so it is alone there.
+    // All thirteen of these seed one fixed directory on disk -- AppPreviewSupport's
     // `library()` writes songs, bibles, a Gallery of PNGs and a deck into LIBRARY
     // (/Users/Shared/ChurchPresenter, else /tmp/ChurchPresenter) with copyTo(overwrite = true).
     // That was safe while nothing ran at the same time; across forks it is one process reading a
