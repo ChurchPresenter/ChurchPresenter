@@ -33,7 +33,7 @@ pdfbox = "2.0.33"
 aircompressor = "2.0.3"
 junitJupiter = "5.10.2"
 filekit = "0.15.0"
-dbus-java = "5.2.0"
+dbus-java = "5.2.2"
 twelvemonkeys-imageio = "3.10.1"
 # Property tests (generated inputs, checked against an invariant) -- test scope only.
 kotest = "6.2.5"
