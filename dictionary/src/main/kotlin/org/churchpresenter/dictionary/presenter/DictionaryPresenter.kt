@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.churchpresenter.sharedui.presenter.ReferenceScaledBox
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -54,6 +55,24 @@ import org.churchpresenter.sharedui.presenter.rectIn
 
 @Composable
 fun DictionaryPresenter(
+    modifier: Modifier = Modifier,
+    entry: StrongsEntry?,
+    dictionarySettings: DictionarySettings,
+    outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
+    transitionAlpha: Float = 1f,
+) = ReferenceScaledBox(modifier) {
+    DictionaryPresenterContent(
+        modifier = Modifier,
+        entry = entry,
+        dictionarySettings = dictionarySettings,
+        outputRole = outputRole,
+        transitionAlpha = transitionAlpha,
+    )
+}
+
+/** [DictionaryPresenter] as a 1920x1080-family output draws it; [ReferenceScaledBox] fits it to the real one. */
+@Composable
+private fun DictionaryPresenterContent(
     modifier: Modifier = Modifier,
     entry: StrongsEntry?,
     dictionarySettings: DictionarySettings,

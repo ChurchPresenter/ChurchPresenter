@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.churchpresenter.sharedui.presenter.ReferenceScaledBox
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -70,6 +71,24 @@ internal const val QUESTION_HEIGHT_FRACTION = 0.6f
 
 @Composable
 fun QAPresenter(
+    modifier: Modifier = Modifier,
+    question: Question?,
+    qaSettings: QASettings = QASettings(),
+    outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
+    transitionAlpha: Float = 1f,
+) = ReferenceScaledBox(modifier) {
+    QAPresenterContent(
+        modifier = Modifier,
+        question = question,
+        qaSettings = qaSettings,
+        outputRole = outputRole,
+        transitionAlpha = transitionAlpha,
+    )
+}
+
+/** [QAPresenter] as a 1920x1080-family output draws it; [ReferenceScaledBox] fits it to the real one. */
+@Composable
+private fun QAPresenterContent(
     modifier: Modifier = Modifier,
     question: Question?,
     qaSettings: QASettings = QASettings(),
