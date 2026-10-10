@@ -22,6 +22,11 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.logback.classic)
     implementation(libs.socket.io.client)
+    constraints {
+        // socket.io-client's okhttp 3.12.12 can accept the wrong certificate (GHSA-3cqm-mf7h-prrj);
+        // held at the fixed 4.x, as :stt holds it.
+        implementation(libs.okhttp)
+    }
 
     testImplementation(kotlin("test"))
     testImplementation(libs.kotlinx.coroutines.test)
