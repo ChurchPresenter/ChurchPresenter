@@ -430,12 +430,13 @@ private fun CoroutineScope.startStderrDrain(process: Process): StderrDrain {
 }
 
 /** Waits up to five seconds for ffmpeg to announce the stream's size. */
-private suspend fun awaitVideoDimensions(
+internal suspend fun awaitVideoDimensions(
     videoDims: java.util.concurrent.atomic.AtomicReference<Pair<Int, Int>?>,
+    intervalMs: Long = DIMENSION_POLL_INTERVAL_MS,
 ): Pair<Int, Int>? {
     repeat(DIMENSION_POLL_ATTEMPTS) {
         videoDims.get()?.let { return it }
-        delay(DIMENSION_POLL_INTERVAL_MS)
+        delay(intervalMs)
     }
     return videoDims.get()
 }

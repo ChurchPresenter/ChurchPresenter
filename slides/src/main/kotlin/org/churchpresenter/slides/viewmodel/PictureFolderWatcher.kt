@@ -11,6 +11,7 @@ import java.io.File
 import java.nio.file.FileSystems
 import java.nio.file.StandardWatchEventKinds
 import java.nio.file.WatchEvent
+import java.nio.file.WatchService
 
 private const val MAX_RESCAN_ATTEMPTS = 3
 
@@ -25,6 +26,21 @@ private const val THUMBNAIL_RETRY_ATTEMPTS = 3
 /** The picture file extensions a folder is loaded and watched for. */
 internal val PICTURE_EXTENSIONS = listOf("jpg", "jpeg", "png", "gif", "bmp", "webp", "heic", "heif")
 
+/** Where [PictureFolderWatcher] gets its watch service and registers the folder with it. */
+internal interface FolderWatchSource {
+    fun open(): WatchService
+    fun register(folder: File, service: WatchService)
+}
+
+/** The default file system's watcher, for creates and deletes. */
+internal object FileSystemWatchSource : FolderWatchSource {
+    override fun open(): WatchService = FileSystems.getDefault().newWatchService()
+
+    override fun register(folder: File, service: WatchService) {
+        folder.toPath().register(service, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE)
+    }
+}
+
 /** Keeps the image list in step with the selected folder as files arrive in it and leave it. */
 internal class PictureFolderWatcher(
     private val state: PicturesState,
@@ -32,8 +48,11 @@ internal class PictureFolderWatcher(
     /** See `PicturesViewModel`'s parameter of the same name: where every snapshot write is made. */
     private val mainDispatcher: CoroutineDispatcher,
     private val scope: CoroutineScope,
+    private val source: FolderWatchSource = FileSystemWatchSource,
 ) {
-    private var watchJob: Job? = null
+    /** The current watch, for a test that waits for it to end. */
+    internal var watchJob: Job? = null
+        private set
 
     /** Stops watching whatever folder is being watched. */
     fun cancel() {
@@ -45,7 +64,7 @@ internal class PictureFolderWatcher(
         watchJob?.cancel()
         watchJob = scope.launch {
             try {
-                val watchService = FileSystems.getDefault().newWatchService()
+                val watchService = source.open()
                 // On macOS the JDK uses PollingWatchService, which stats every existing entry at
                 // registration time. A file deleted concurrently makes register() throw
                 // NoSuchFileException, so retry a few times before giving up on watching.
@@ -53,11 +72,7 @@ internal class PictureFolderWatcher(
                 var attempt = 0
                 while (isActive && !registered) {
                     try {
-                        folder.toPath().register(
-                            watchService,
-                            StandardWatchEventKinds.ENTRY_CREATE,
-                            StandardWatchEventKinds.ENTRY_DELETE
-                        )
+                        source.register(folder, watchService)
                         registered = true
                     } catch (_: java.io.IOException) {
                         if (++attempt >= MAX_RESCAN_ATTEMPTS || !folder.isDirectory) {

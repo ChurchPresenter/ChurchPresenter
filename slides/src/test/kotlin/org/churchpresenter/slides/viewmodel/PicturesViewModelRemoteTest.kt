@@ -1,5 +1,9 @@
 package org.churchpresenter.slides.viewmodel
 
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.churchpresenter.sharedui.models.Presenting
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
@@ -124,6 +128,17 @@ class PicturesViewModelRemoteTest {
         awaitUntil("the slot marked unreadable") { slot in vm.thumbnailFailures }
         assertEquals(listOf(slot), vm.images)
         assertTrue(cacheDir("folder-blocked").listFiles()!!.none { it.name.endsWith(".tmp") }, "no temp file left")
+    }
+
+    @Test
+    fun `a download superseded mid-fetch adds nothing`() {
+        val vm = vm()
+        vm.loadPictureFromRemote(folderId = "folder-superseded", folderPath = "/elsewhere/S", imageCount = 2) {
+            currentCoroutineContext().cancel()
+            pngBytes()
+        }
+        runBlocking { withTimeout(5_000) { vm.remoteLoadJob!!.join() } }
+        assertTrue(vm.images.isEmpty())
     }
 
     @Test

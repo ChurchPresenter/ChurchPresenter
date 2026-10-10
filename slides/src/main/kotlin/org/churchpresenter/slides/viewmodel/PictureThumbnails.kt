@@ -30,6 +30,8 @@ internal class PictureThumbnails(
     private val state: PicturesState,
     /** See `PicturesViewModel`'s parameter of the same name: where every snapshot write is made. */
     private val mainDispatcher: CoroutineDispatcher,
+    /** Reads one grid tile; a parameter so a test can make it fail the ways a decoder does. */
+    private val loadImageBitmap: (File) -> ImageBitmap = ::decodeTile,
 ) {
 
     /**
@@ -128,8 +130,8 @@ internal class PictureThumbnails(
             state.thumbnailFailures.remove(file)
         }
     }
-
-    private fun loadImageBitmap(file: File): ImageBitmap =
-        // Grid tile size, not the display's — this is the thumbnails strip, never presented.
-        PictureDecoder.decodeScaled(file, THUMBNAIL_MAX_DIMENSION, THUMBNAIL_MAX_DIMENSION).toComposeImageBitmap()
 }
+
+private fun decodeTile(file: File): ImageBitmap =
+    // Grid tile size, not the display's — this is the thumbnails strip, never presented.
+    PictureDecoder.decodeScaled(file, THUMBNAIL_MAX_DIMENSION, THUMBNAIL_MAX_DIMENSION).toComposeImageBitmap()

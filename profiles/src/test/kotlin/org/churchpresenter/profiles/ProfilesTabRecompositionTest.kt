@@ -146,4 +146,21 @@ class ProfilesTabRecompositionTest {
             }
         }
     }
+
+    @Test
+    fun `the background preview's modes are this session's checking and never written`() {
+        listOf(Constants.DISPLAY_MODE_FULLSCREEN, Constants.DISPLAY_MODE_LOWER_THIRD_HORIZONTAL).forEach { mode ->
+            swappableTab(document(mode, advanced = true)) { get, _ ->
+                val before = get()
+                listOf(CustomizePane.BACKGROUND, CustomizePane.BIBLE, CustomizePane.SONGS).forEach { pane ->
+                    onNodeWithTag(railTag(pane.name)).performScrollTo().performClick()
+                    waitForIdle()
+                    listOf(PreviewBackgroundMode.CHECKER, PreviewBackgroundMode.OFF, PreviewBackgroundMode.ACTUAL).forEach {
+                        tap(previewBackgroundTag(it))
+                    }
+                }
+                assertEquals(before, get(), mode)
+            }
+        }
+    }
 }

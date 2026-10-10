@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
@@ -25,9 +24,6 @@ import kotlinx.coroutines.launch
  * One ticker per source, started by [setRunning], cannot do that whatever is on screen.
  */
 object TimerStateManager {
-
-    /** One second, and the only rate any of this runs at. */
-    private const val TICK_INTERVAL_MS = 1000L
 
     data class TimerState(
         val remainingSeconds: Int,
@@ -53,12 +49,17 @@ object TimerStateManager {
         tickers.remove(sourceId)?.cancel()
         if (!running) return
         tickers[sourceId] = scope.launch {
-            while (isActive && _states[sourceId]?.isRunning == true) {
-                delay(TICK_INTERVAL_MS)
-                if (countUp) tickUp(sourceId) else tick(sourceId)
-            }
+            TimerTicker().run(sourceId, countUp)
         }
     }
+
+    /** One tick of [sourceId], whichever way it counts. */
+    internal fun advance(sourceId: String, countUp: Boolean) {
+        if (countUp) tickUp(sourceId) else tick(sourceId)
+    }
+
+    /** Whether [sourceId] is still meant to be advancing; the ticker stops the moment it is not. */
+    internal fun isTicking(sourceId: String): Boolean = _states[sourceId]?.isRunning == true
 
     fun tick(sourceId: String) {
         val current = _states[sourceId] ?: return
@@ -109,5 +110,20 @@ object TimerStateManager {
         tickers.values.forEach { it.cancel() }
         tickers.clear()
         _states.clear()
+    }
+}
+
+/** One second, and the only rate any timer runs at. */
+private const val TICK_INTERVAL_MS = 1000L
+
+/** The loop behind one running timer: wait a tick, advance it, for as long as it is still running. */
+internal class TimerTicker(
+    private val intervalMs: Long = TICK_INTERVAL_MS,
+) {
+    suspend fun run(sourceId: String, countUp: Boolean) {
+        while (TimerStateManager.isTicking(sourceId)) {
+            delay(intervalMs)
+            TimerStateManager.advance(sourceId, countUp)
+        }
     }
 }

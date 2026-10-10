@@ -141,4 +141,40 @@ class BibleAdjustModelTest {
         bandModel.band!!.onChange(33)
         assertEquals(33, band.draft.bibleSettings.lowerThirdHeightPercent)
     }
+
+    private fun edit(bs: BibleSettings, index: Int) = BibleEdit(
+        bs,
+        OutputProfile(id = "p", bibleMode = Constants.SONG_LANG_BOTH),
+        index,
+        CustomizeElement.BIBLE_TEXT,
+        lowerThird = false,
+    ) {}
+
+    @Test
+    fun `under All the box rows need a translation picked, unless there is one box for all`() {
+        val two = bible()
+        val needs = assertNotNull(edit(two, ALL_TRANSLATIONS).boxTarget())
+        assertTrue(needs.needsTranslation)
+        assertEquals(2, needs.slots)
+
+        val shared = two.copy(textBoxOptions = two.textBoxOptions.copy(sharedLanguageBox = true))
+        val one = assertNotNull(edit(shared, ALL_TRANSLATIONS).boxTarget())
+        assertFalse(one.needsTranslation)
+        assertEquals(0, one.slot)
+
+        val single = BibleSettings(translations = listOf(BibleTranslationSettings(fileName = "kjv.spb")))
+        assertEquals(0, assertNotNull(edit(single, ALL_TRANSLATIONS).boxTarget()).slot)
+
+        val picked = assertNotNull(edit(two, 1).boxTarget())
+        assertEquals(1, picked.slot)
+        assertEquals(two.bibleBoxKey(BibleStyleElement.TEXT, lowerThird = false, fileName = "rst.spb"), picked.key)
+    }
+
+    @Test
+    fun `a translation's first box sits in its own band, its reference across the band's top`() {
+        val verse = defaultBibleBox(BibleStyleElement.TEXT, slot = 1, slots = 2)
+        val reference = defaultBibleBox(BibleStyleElement.REFERENCE, slot = 1, slots = 2)
+        assertEquals(reference.yPercent + reference.heightPercent, verse.yPercent, 0.001f)
+        assertTrue(reference.yPercent >= 50f)
+    }
 }

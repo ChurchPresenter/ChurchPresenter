@@ -10,6 +10,7 @@ import org.churchpresenter.slides.solidImage
 import org.churchpresenter.slides.tempDir
 import java.awt.Color
 import java.io.File
+import java.io.IOException
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -118,6 +119,24 @@ class PicturePartsTest {
         val out = FakeSlidesOutput().apply { setScreenLock(0, Presenting.LYRICS) }
         live.syncWithPresenter(out)
         assertNull(out.selectedImagePath.value)
+    }
+
+    @Test
+    fun `a decoder that fails on its own state is retried and its reason recorded`() = runTest {
+        var calls = 0
+        val thumbs = PictureThumbnails(state, Dispatchers.Unconfined) { calls++; error("decoder closed") }
+        val file = File(dir, "x.png").apply { writeText("x") }
+        assertNotNull(thumbs.decodeThumbnail(file, attempts = 2))
+        assertEquals(2, calls)
+        assertEquals("decoder closed", state.thumbnailFailures[file])
+    }
+
+    @Test
+    fun `a failure with no message is recorded by its type`() = runTest {
+        val thumbs = PictureThumbnails(state, Dispatchers.Unconfined) { throw IOException() }
+        val file = File(dir, "y.png").apply { writeText("x") }
+        thumbs.decodeThumbnail(file)
+        assertEquals("java.io.IOException", state.thumbnailFailures[file])
     }
 
     @Test
