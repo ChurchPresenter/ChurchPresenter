@@ -106,8 +106,8 @@ twelvemonkeys-imageio-psd = { module = "com.twelvemonkeys.imageio:imageio-psd", 
 pdfbox = { module = "org.apache.pdfbox:pdfbox", version.ref = "pdfbox" }
 aircompressor = { module = "io.airlift:aircompressor", version.ref = "aircompressor" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junitJupiter" }
-zxing-core = { module = "com.google.zxing:core", version = "3.5.3" }
-zxing-javase = { module = "com.google.zxing:javase", version = "3.5.3" }
+zxing-core = { module = "com.google.zxing:core", version = "3.5.4" }
+zxing-javase = { module = "com.google.zxing:javase", version = "3.5.4" }
 socket-io-client = { module = "io.socket:socket.io-client", version = "2.1.1" }
 # Not used directly: the floor for the okhttp socket.io-client brings (see the root build).
 okhttp = { module = "com.squareup.okhttp3:okhttp", version = "4.12.0" }
