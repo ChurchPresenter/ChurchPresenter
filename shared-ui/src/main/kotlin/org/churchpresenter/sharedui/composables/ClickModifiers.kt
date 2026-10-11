@@ -107,11 +107,14 @@ private class PassClickNode(
                     }
                     val now = System.currentTimeMillis()
                     val isDouble = now - lastClickTime < DOUBLE_CLICK_MS
-                    lastClickTime = now
                     val doubleClick = onDoubleClick
                     if (isDouble && doubleClick != null) {
+                        // A double-click uses up both its clicks: a third straight after it starts
+                        // afresh, or a triple-click would put a row live twice.
+                        lastClickTime = 0L
                         doubleClick()
                     } else {
+                        lastClickTime = now
                         onClick()
                     }
                 }

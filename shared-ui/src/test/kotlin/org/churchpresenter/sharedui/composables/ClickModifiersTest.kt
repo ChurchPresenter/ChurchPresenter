@@ -151,6 +151,26 @@ class ClickModifiersTest {
         }
 
     @Test
+    fun `a click straight after a double-click starts afresh rather than making a second double`() =
+        runComposeUiTest {
+            var clickCount = 0
+            var doubleCount = 0
+            setContent {
+                MaterialTheme {
+                    Box(
+                        Modifier.testTag("box").size(50.dp).initialPassCombinedClickable(
+                            onClick = { clickCount++ },
+                            onDoubleClick = { doubleCount++ },
+                        )
+                    )
+                }
+            }
+            repeat(3) { onNodeWithTag("box").performClick() }
+            assertEquals(1, doubleCount, "a triple-click is one double-click, not two")
+            assertEquals(2, clickCount, "its first and third clicks are single clicks")
+        }
+
+    @Test
     fun `initialPassCombinedClickable falls back to onClick when no onDoubleClick is given`() = runComposeUiTest {
         var clickCount = 0
         setContent {
