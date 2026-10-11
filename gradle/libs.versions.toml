@@ -2,7 +2,7 @@
 cyclonedx = "3.4.1"
 # Not a dependency of the app: the floor for the Jackson the CycloneDX plugin loads (see composeApp).
 jackson-core = "2.22.3"
-jna = "5.18.1"
+jna = "5.19.1"
 vlcj = "4.8.3"
 androidx-lifecycle = "2.11.0"
 sentry = "8.60.0"
