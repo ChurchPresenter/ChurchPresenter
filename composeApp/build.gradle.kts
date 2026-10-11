@@ -297,6 +297,7 @@ kotlin {
             implementation(libs.mockk)
             implementation(libs.ktor.client.mock)
             implementation(libs.compose.uiTest)
+            implementation(libs.kotest.property)
 
             // The suite runs through the JUnit Platform launcher (useJUnitPlatform() below) but the
             // tests themselves are still JUnit 4 -- the launcher is there for the per-fork hook in
