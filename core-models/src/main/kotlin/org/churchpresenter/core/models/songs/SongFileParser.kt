@@ -160,7 +160,8 @@ class SongFileParser {
             val path = Paths.get(filePath)
             if (!Files.exists(path)) return null
 
-            val content = Files.readString(path, StandardCharsets.UTF_8)
+            // UTF-8, else Windows-1251: older Cyrillic libraries were saved in the ANSI code page.
+            val content = decodeUtf8OrCyrillic(Files.readAllBytes(path))
             return parseSongContent(content, filePath, songbook)
         } catch (_: Exception) {
             return null

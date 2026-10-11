@@ -24,6 +24,8 @@ dependencies {
     implementation(projects.theme)
     // The chord grammar songs are written in, shared with the app rather than repeated here.
     implementation(projects.songChords)
+    // The song-file decode (UTF-8, else Windows-1251), shared with the app's song library.
+    implementation(projects.coreModels)
     // Keynote text, for the Documents source. The IWA reader that answers it lives there already;
     // this module takes it rather than parsing the format a second time.
     implementation(projects.presentationEngine)

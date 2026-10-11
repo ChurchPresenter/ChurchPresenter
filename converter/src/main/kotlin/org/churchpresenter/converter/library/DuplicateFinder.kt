@@ -1,5 +1,6 @@
 package org.churchpresenter.converter.library
 
+import org.churchpresenter.core.models.songs.decodeUtf8OrCyrillic
 import java.io.File
 import java.nio.charset.Charset
 
