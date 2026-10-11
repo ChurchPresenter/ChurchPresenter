@@ -404,7 +404,7 @@ jobs:
 
       - name: Report failing tests on the pull request
         if: ${{ !cancelled() && github.event_name == 'pull_request' && steps.junit_inputs.outputs.paths != '' }}
-        uses: mikepenz/action-junit-report@v5
+        uses: mikepenz/action-junit-report@v6
         with:
           report_paths: ${{ steps.junit_inputs.outputs.paths }}
           check_name: ${{ steps.junit_inputs.outputs.names }}
