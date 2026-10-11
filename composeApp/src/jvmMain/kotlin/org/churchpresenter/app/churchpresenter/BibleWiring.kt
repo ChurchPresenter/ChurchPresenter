@@ -8,6 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import org.churchpresenter.sharedui.composables.rememberTokenGate
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.bibletab.clearDetectedReferences
 import org.churchpresenter.bibletab.getSelectedVerses
@@ -105,8 +106,9 @@ private fun MainDesktopScope.AutoFollowWiring() {
 /**
  * The same stand-in as [AutoFollowWiring], for a schedule verse clicked while BibleTab is not
  * composed — the Bible tab hidden in settings (selectTab then declines to switch, so the tab never
- * appears), or disposed by the visibleTabs clamp. Without this the item is silently dropped while
- * the presenter has already been switched to BIBLE, which is the blank output that was reported.
+ * appears), or disposed by the visibleTabs clamp. Without this the item is silently dropped. A row
+ * put on screen hands the verse over to go live, and it is the tab that switches the output to the
+ * Bible as it does; in its absence this does, or the reading is selected under whatever was up.
  */
 @Composable
 private fun MainDesktopScope.ScheduleVerseWiring() {
@@ -134,5 +136,6 @@ private fun MainDesktopScope.ScheduleVerseWiring() {
             return@LaunchedEffect
         }
         live.onVerseSelected(verses)
+        if (state.selectedBibleVerseItemGoLive) live.presenting(Presenting.BIBLE)
     }
 }

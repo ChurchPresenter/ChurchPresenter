@@ -297,6 +297,7 @@ kotlin {
             implementation(libs.mockk)
             implementation(libs.ktor.client.mock)
             implementation(libs.compose.uiTest)
+            implementation(libs.kotest.property)
 
             // The suite runs through the JUnit Platform launcher (useJUnitPlatform() below) but the
             // tests themselves are still JUnit 4 -- the launcher is there for the per-fork hook in
@@ -1056,10 +1057,11 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
 //
 // Named individually rather than by a `*Atem*` glob so that adding a suite to this list is a
 // deliberate act with a reason, not something a class name does by accident.
-// The render benchmark and the soak test: each run by its own task (`renderBenchmark`, `soakTest`)
-// and kept out of `jvmTest`.
+// The render benchmark, the soak test and the UI monkey: each run by its own task
+// (`renderBenchmark`, `soakTest`, `monkeyTest`) and kept out of `jvmTest`.
 val renderBenchmarkClasses = "*.benchmark.RenderBenchmark"
 val soakTestClasses = "*.benchmark.ServiceSoak"
+val monkeyTestClasses = "*.benchmark.UiMonkey"
 
 val serialTestClasses = listOf(
     // The ATEM upload suites that used to lead this list moved to `:server`, whose `test` task forks
@@ -1097,10 +1099,12 @@ tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest") {
     val filteredFromCommandLine = gradle.startParameter.taskRequests.any { request ->
         request.args.any { it == "--tests" }
     }
-    // The render benchmark and the soak test have their own tasks and never run in the parallel pass.
+    // The render benchmark, the soak test and the monkey have their own tasks and never run in the
+    // parallel pass.
     filter {
         excludeTestsMatching(renderBenchmarkClasses)
         excludeTestsMatching(soakTestClasses)
+        excludeTestsMatching(monkeyTestClasses)
     }
     if (!filteredFromCommandLine) {
         filter { serialTestClasses.forEach { excludeTestsMatching(it) } }
@@ -1339,6 +1343,29 @@ tasks.register("startupBenchmark") {
             if (failed > 0) throw GradleException("$failed startup launch(es) never drew the main window.")
             if (over.isNotEmpty()) throw GradleException("Startup over budget: " + over.joinToString("; "))
         }
+    }
+}
+
+// ── UI monkey ─────────────────────────────────────────────────────────────────
+// Random presses, typing and keys on the main window from a seed; fails on the first exception the
+// app throws -- see UiMonkey. The seed and every action go to build/reports/monkey/monkey.log.
+//   ./gradlew :composeApp:monkeyTest                                  # the pinned seed, 300 steps
+//   ./gradlew :composeApp:monkeyTest -PmonkeySeed=42 -PmonkeySteps=2000
+// Run weekly on main (and by hand) by .github/workflows/monkey.yml; never part of `jvmTest` or `check`.
+tasks.register<org.gradle.api.tasks.testing.Test>("monkeyTest") {
+    group = "verification"
+    description = "Presses, types and keys at random on the main window from a seed, failing on any exception."
+    val parallel = tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest").get()
+    testClassesDirs = parallel.testClassesDirs
+    classpath = parallel.classpath
+    maxParallelForks = 1
+    filter { includeTestsMatching(monkeyTestClasses) }
+    extensions.getByType<JacocoTaskExtension>().isEnabled = false
+    outputs.upToDateWhen { false }
+    val reportDir = layout.buildDirectory.dir("reports/monkey").get().asFile
+    systemProperty("monkey.reportDir", reportDir.absolutePath)
+    listOf("monkeySeed" to "monkey.seed", "monkeySteps" to "monkey.steps").forEach { (gradle, system) ->
+        providers.gradleProperty(gradle).orNull?.let { systemProperty(system, it) }
     }
 }
 

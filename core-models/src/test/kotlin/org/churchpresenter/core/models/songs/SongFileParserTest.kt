@@ -1,6 +1,7 @@
 package org.churchpresenter.core.models.songs
 
 import java.io.File
+import java.nio.charset.Charset
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -267,6 +268,33 @@ class SongFileParserTest {
 
         assertEquals(listOf("Root Song", "Book Song", "Deep"), loaded.map { it.title })
         assertEquals(listOf("", "Hymnal", "Hymnal/Kids"), loaded.map { it.songbook })
+    }
+
+    @Test
+    fun `a song saved in Windows-1251 loads with its words intact`() {
+        val root = tempDir()
+        File(root, "Hymnal").mkdirs()
+        File(root, "Hymnal/0001 - Slava.song")
+            .writeBytes("[Primary]\ntitle: Слава\n[Verse 1]\nСлава Богу\n".toByteArray(Charset.forName("windows-1251")))
+
+        val song = parser.loadSongsFromDirectory(root.absolutePath).single().song
+
+        assertEquals("Слава", song.title)
+        assertTrue("Слава Богу" in song.lyrics, "the lyrics read as Cyrillic, not as replacement marks: ${song.lyrics}")
+    }
+
+    @Test
+    fun `one file that cannot be read leaves the rest of its songbook loading`() {
+        val root = tempDir()
+        File(root, "Hymnal").mkdirs()
+        File(root, "Hymnal/0001 - First.song").writeText("[Primary]\ntitle: First\n")
+        // A folder named like a song: listed with the songs, and no file to read.
+        File(root, "Hymnal/0002 - Not A File.song").mkdirs()
+        File(root, "Hymnal/0003 - Last.song").writeText("[Primary]\ntitle: Last\n")
+
+        val titles = parser.loadSongsFromDirectory(root.absolutePath).map { it.song.title }
+
+        assertEquals(listOf("First", "Last"), titles, "the good songs on either side still load")
     }
 
     @Test

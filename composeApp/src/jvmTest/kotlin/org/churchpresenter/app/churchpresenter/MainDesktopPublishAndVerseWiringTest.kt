@@ -18,6 +18,7 @@ import org.churchpresenter.media.viewmodel.LocalMediaViewModel
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.BibleSettings
 import org.churchpresenter.settings.BibleTranslationSettings
+import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.sharedui.utils.ShortcutMap
@@ -39,6 +40,7 @@ class MainDesktopPublishAndVerseWiringTest : MainDesktopComposeHarness() {
         val slideChanges = mutableListOf<Pair<String, Int>>()
         val slidesLoaded = mutableListOf<Pair<String, Int>>()
         val versesLive = mutableListOf<List<SelectedVerse>>()
+        val presented = mutableListOf<Presenting>()
     }
 
     private fun ComposeUiTest.compose(
@@ -58,7 +60,7 @@ class MainDesktopPublishAndVerseWiringTest : MainDesktopComposeHarness() {
                         presenterManager = PresenterManager(),
                         companionSatelliteViewModel = CompanionSatelliteViewModel(),
                         live = LiveOutputCallbacks(
-                            presenting = {},
+                            presenting = { published.presented += it },
                             onVerseSelected = { published.versesLive += it },
                             onSongItemSelected = {},
                             devMode = false,
@@ -151,6 +153,7 @@ class MainDesktopPublishAndVerseWiringTest : MainDesktopComposeHarness() {
         takeLive("Genesis")
         waitUntil(timeoutMillis = 10_000) { published.versesLive.isNotEmpty() }
         assertEquals(2, published.versesLive.last().first().verseNumber)
+        assertEquals(listOf(Presenting.BIBLE), published.presented, "and the output switched to it, once")
     }
 
     @Test

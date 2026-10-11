@@ -82,6 +82,8 @@ class AppShowHostTest {
         run(Action.GoLive(item = song))
         assertEquals(listOf("live:s2x3", "live:s1x1"), done)
         assertEquals("No schedule row nope", refused(Action.GoLive(rowId = "nope")))
+        assertEquals("Schedule row h has nothing to put on screen", refused(Action.GoLive(rowId = "h")))
+        assertEquals("Schedule row h has nothing to put on screen", refused(Action.GoLive(item = heading)))
     }
 
     @Test

@@ -100,7 +100,7 @@ documents itself in its own `AGENT.md`.
 | [`calendar/`](./calendar) | The Calendar Manager: every planned service on a month grid, each with a run of show that loads into the Schedule, opened from the Help menu. Pairs phones through an end-to-end encrypted relay. |
 | [`presentation-engine/`](./presentation-engine) | PPTX/PPT/Keynote/PDF parsing, timing and animation, entirely in-JVM. |
 | [`lottieGenerator/`](./lottieGenerator) | A standalone Compose Desktop app that generates animated lower thirds as Lottie JSON, also opened from the Lower Third settings. |
-| [`converter/`](./converter) | A song/Bible format converter, also a standalone app, opened from the Help menu. `./gradlew :converter:packageDmg` packages it. |
+| [`converter/`](./converter) | A song/Bible format converter, opened from the Help menu. `./gradlew :converter:run` starts it alone. |
 | [`crossword/`](./crossword) | The crossword authoring tool. Not compiled into the app: a build-time task copies its encoded puzzles into the app's resources. `./gradlew :crossword:run` opens it. |
 | [`planning-center/`](./planning-center) | The Planning Center Online client: the OAuth conversation, the Services API calls that read a service plan, and the loopback listener that catches the consent redirect. Each church brings its own free PCO Developer credentials; nothing is written back. |
 | [`companion-satellite/`](./companion-satellite) | A pure-Kotlin Bitfocus Companion Satellite protocol client. |

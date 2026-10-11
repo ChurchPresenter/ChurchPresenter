@@ -101,7 +101,8 @@ Built with Kotlin Multiplatform and Compose Desktop.
 
 ## Download
 
-Download the latest release from the [Releases](../../releases) page.
+The converter ships inside ChurchPresenter: open it from the app's Help menu. It is not released
+separately.
 
 ## Build from Source
 

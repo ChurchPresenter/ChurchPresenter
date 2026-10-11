@@ -109,7 +109,7 @@ module-specific notes there, not here.**
 
 | Module                 | Gradle                 | What it is                                                                        | Notes                                    |
 |------------------------|------------------------|-----------------------------------------------------------------------------------|------------------------------------------|
-| `converter/`           | `:converter`           | Song/Bible format converter, also a standalone app                                | [AGENT.md](converter/AGENT.md)           |
+| `converter/`           | `:converter`           | Song/Bible format converter, opened from the Help menu                            | [AGENT.md](converter/AGENT.md)           |
 | `companion-satellite/` | `:companion-satellite` | Bitfocus Companion Satellite protocol client                                      | [AGENT.md](companion-satellite/AGENT.md) |
 | `theme/`               | `:theme`               | The nine color schemes, semantic colors, type and shape scales                    | [AGENT.md](theme/AGENT.md)               |
 | `core-models/`         | `:core-models`         | The shared data models                                                            | [AGENT.md](core-models/AGENT.md)         |
@@ -217,6 +217,7 @@ bash cleanup_check.sh                  # repo code-quality report
 ./gradlew :composeApp:renderBenchmark -PrecordCiRenderBaseline  # write composeApp/benchmarks/ci/ (CI's own: record via render-benchmark.yml, not locally)
 ./gradlew :composeApp:renderBenchmark -PcheckRenderRegression   # fail on a row slower than the CI baseline (render-benchmark.yml's gate)
 ./gradlew :composeApp:soakTest -PsoakMinutes=10  # a scripted service on one output; fails on a leak or stall (CI: 240, weekly on main; a failure files a soak-failure issue)
+./gradlew :composeApp:monkeyTest -PmonkeySeed=1 -PmonkeySteps=1500  # random presses, typing and keys on the main window; fails on any exception (CI: weekly on main, monkey.yml; a failure files a monkey-failure issue)
 ./gradlew :composeApp:gpuBenchmark        # on-screen output windows on the GPU — needs a display; -PrecordGpuBaseline → composeApp/benchmarks/gpu/
 ./gradlew :composeApp:startupBenchmark    # 5 launches: time to first frame, idle memory; -PcheckBudgets against composeApp/benchmarks/budgets.md
 ./gradlew :composeApp:isolationBenchmark  # an output window's frame gaps under injected UI stalls — see docs/SHOW_CONTROL.md
@@ -299,7 +300,7 @@ finds. Deliberately **off**, each for rewriting a large share of the tree: `Inde
 - `<module>/screenshots/.parts` (per-theme halves) is git-ignored and cleaned in a `finally`;
   never commit it.
 - The `reg_actions` branch holds the PR-comment images; retention is `retention-days` in
-  `screenshots.yml`, and `reg-actions-prune.yml` squashes the branch monthly. It is not the
+  `screenshots.yml`, and `cleanup.yml` squashes the branch monthly. It is not the
   comparison baseline.
 
 ### Other commands
