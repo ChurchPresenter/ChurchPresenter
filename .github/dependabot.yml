@@ -8,7 +8,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    open-pull-requests-limit: 10
+    # Low, so a backlog held behind the limit never arrives as a wall of PRs at once.
+    open-pull-requests-limit: 5
     groups:
       # Kotlin and Compose move together; a lone bump of one breaks the build.
       kotlin-compose:
@@ -16,6 +17,17 @@ updates:
           - "org.jetbrains.kotlin*"
           - "org.jetbrains.compose*"
           - "androidx.compose*"
+      # Every other minor and patch update, as one PR a week. A dependency lands in the first
+      # group that matches, so Kotlin and Compose stay in theirs. Majors are not grouped: each
+      # opens its own PR. VLC and the bundled Chromium are left out too -- their updates change
+      # native code and need a hand test in the running app, so they come one at a time.
+      minor-and-patch:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "uk.co.caprica:vlcj*"
+          - "me.friwi:jcefmaven"
+        update-types: ["minor", "patch"]
     ignore:
       # Material3 has had no stable release since 1.9.0; the alpha in use is the one paired with
       # the Compose Multiplatform release in use, and a newer alpha drags all of Compose onto
@@ -25,6 +37,10 @@ updates:
       # okhttp is held at 4.x for the socket.io client the captions and the Bible engine connect
       # with (see the root build); no test drives a live socket.io connection over 5.x.
       - dependency-name: "com.squareup.okhttp3:okhttp"
+        update-types: ["version-update:semver-major"]
+      # PDFBox 3 rewrote the API the PDF import and rendering are built on; moving to it is a
+      # change of its own, not a version bump.
+      - dependency-name: "org.apache.pdfbox:*"
         update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
