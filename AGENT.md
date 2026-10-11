@@ -109,7 +109,7 @@ module-specific notes there, not here.**
 
 | Module                 | Gradle                 | What it is                                                                        | Notes                                    |
 |------------------------|------------------------|-----------------------------------------------------------------------------------|------------------------------------------|
-| `converter/`           | `:converter`           | Song/Bible format converter, also a standalone app                                | [AGENT.md](converter/AGENT.md)           |
+| `converter/`           | `:converter`           | Song/Bible format converter, opened from the Help menu                            | [AGENT.md](converter/AGENT.md)           |
 | `companion-satellite/` | `:companion-satellite` | Bitfocus Companion Satellite protocol client                                      | [AGENT.md](companion-satellite/AGENT.md) |
 | `theme/`               | `:theme`               | The nine color schemes, semantic colors, type and shape scales                    | [AGENT.md](theme/AGENT.md)               |
 | `core-models/`         | `:core-models`         | The shared data models                                                            | [AGENT.md](core-models/AGENT.md)         |

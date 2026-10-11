@@ -76,8 +76,8 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     }
 }
 
-// The converter also ships as a standalone desktop app (.github/workflows/converter-installers.yml
-// packages it), separately from the copy the main app opens from its Help menu.
+// The converter ships inside the app, opened from its Help menu, and is not released on its own.
+// This is what `./gradlew :converter:run` starts it alone with, and what packages it by hand.
 compose.desktop {
     application {
         mainClass = "org.churchpresenter.converter.MainKt"

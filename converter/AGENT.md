@@ -6,9 +6,9 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 ## What it is
 
 A song/Bible **format converter**: it reads other presentation software's libraries and writes
-ChurchPresenter's own `.sps` songs and `.spb` Bibles. It ships twice — as a window the app opens
-from the Help menu, and as its own installable desktop app
-(`.github/workflows/converter-installers.yml` packages it).
+ChurchPresenter's own `.sps` songs and `.spb` Bibles. It ships inside the app, as the window the
+Help menu opens. It is not released on its own; `./gradlew :converter:run` starts it alone for
+development.
 
 A real Gradle module of this build: `include(":converter")` in `settings.gradle.kts`, and
 `:composeApp` takes it as `implementation(projects.converter)`. Not a submodule, not a mounted
@@ -38,7 +38,7 @@ does not live here.
 | `converter/song/` | One converter per source format, plus the shared lyric/section machinery (`LyricBlocks`, `SectionLabel`, `SongOutput`, the `SongFormatConverter` registry) and format helpers (`ParadoxTable`, `ProtoMessage`, `LooseJson`, `XmlRepair`, `XmlSupport`, `ChordLines`, `DocumentTextExtractor`) |
 | `converter/library/` | Library-wide passes: `DuplicateFinder`, `RtfText`, `TextUtils` |
 | `ui/` | The Compose Desktop GUI: `App` and the shared helpers, one file per tab (`SongsTab`, `BibleConverterTab`, `DuplicateFinder*`, `BulkRenameTab`), theme, widgets, `Strings` |
-| `Main.kt` | `mainClass = "MainKt"` — the standalone app's entry point |
+| `Main.kt` | `mainClass = "MainKt"` — the entry point `:converter:run` starts it alone with |
 
 Source formats currently handled: SongBeamer `.sng`, OpenLP (`songs.sqlite` and OpenLyrics),
 OpenSong, FreeShow, Free Worship, EasySlides, EasyWorship (including schedules), Quelea,
