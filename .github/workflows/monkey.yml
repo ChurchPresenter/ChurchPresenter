@@ -76,6 +76,11 @@ jobs:
           distribution: 'temurin'
 
       - uses: gradle/actions/setup-gradle@v6
+        with:
+          # Reads the Gradle cache but never writes it: on Linux only test.yml's `app` job saves one, so
+          # main keeps one copy that every job restores from (setup-gradle falls back to the newest
+          # entry for the same OS) instead of a copy per job that pushes the rest out of the 10 GB.
+          cache-read-only: true
 
       - name: Run the seeds
         id: monkey
