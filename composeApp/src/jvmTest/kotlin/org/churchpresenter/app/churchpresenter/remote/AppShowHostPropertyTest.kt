@@ -49,6 +49,7 @@ class AppShowHostPropertyTest {
     private val heading = ScheduleItem.LabelItem("h", "Word", "#FFFFFF", "#000000")
     private val verse = ScheduleItem.SongItem("s2", 2, "Grace", "Hymns", "Hymns::2")
     private val rows = listOf(song, heading, verse)
+    private val contentRowIds = setOf(song.id, verse.id)
 
     private val clearText = ClearGroup("clear1", "Clear text", listOf("SLIDE", "MESSAGES"))
     private val baseSettings = AppSettings(
@@ -155,7 +156,7 @@ class AppShowHostPropertyTest {
             }
         }
         assertTrue(after.all { (layer, cue) -> cue.layer == layer }, "$action put a cue on another layer: $after")
-        show.current?.let { id -> assertTrue(rows.any { it.id == id }, "$action left the schedule on $id") }
+        show.current?.let { assertTrue(it in contentRowIds, "$action left the schedule on $it") }
 
         when (action) {
             is Action.Clear -> wholeLayers.firstOrNull { it.name.equals(action.layer, ignoreCase = true) }?.let {

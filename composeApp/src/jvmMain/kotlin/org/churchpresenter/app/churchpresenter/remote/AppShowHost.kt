@@ -183,9 +183,16 @@ internal class AppShowHost(
         outlets.log("Show control could not run $action: ${error.message}")
     }
 
-    /** [item] itself, or the schedule row [rowId] names. */
-    private fun itemOf(item: ScheduleItem?, rowId: String): ScheduleItem =
-        item ?: requireNotNull(outlets.rows().firstOrNull { it.id == rowId }) { "No schedule row $rowId" }
+    /**
+     * [item] itself, or the schedule row [rowId] names -- refused when it is a heading or a cue, which
+     * have nothing to put on screen: the row-action editor never offers them, and next and previous
+     * step over them.
+     */
+    private fun itemOf(item: ScheduleItem?, rowId: String): ScheduleItem {
+        val row = item ?: requireNotNull(outlets.rows().firstOrNull { it.id == rowId }) { "No schedule row $rowId" }
+        require(row.isContentRow()) { "Schedule row ${row.id} has nothing to put on screen" }
+        return row
+    }
 }
 
 /** The first of [this] whose id is [wanted], else the first whose name is, in any case. */
