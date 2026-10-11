@@ -1,5 +1,5 @@
 [versions]
-cyclonedx = "3.4.1"
+cyclonedx = "3.5.0"
 # Not a dependency of the app: the floor for the Jackson the CycloneDX plugin loads (see composeApp).
 jackson-core = "2.22.3"
 jna = "5.19.1"
