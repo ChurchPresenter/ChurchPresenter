@@ -1351,7 +1351,7 @@ tasks.register("startupBenchmark") {
 // app throws -- see UiMonkey. The seed and every action go to build/reports/monkey/monkey.log.
 //   ./gradlew :composeApp:monkeyTest                                  # the pinned seed, 300 steps
 //   ./gradlew :composeApp:monkeyTest -PmonkeySeed=42 -PmonkeySteps=2000
-// Run by hand; never part of `jvmTest` or `check`.
+// Run weekly on main (and by hand) by .github/workflows/monkey.yml; never part of `jvmTest` or `check`.
 tasks.register<org.gradle.api.tasks.testing.Test>("monkeyTest") {
     group = "verification"
     description = "Presses, types and keys at random on the main window from a seed, failing on any exception."

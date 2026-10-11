@@ -1,0 +1,153 @@
+name: Monkey
+
+# Random presses, typing and keys on the main window, failing on the first exception the app throws
+# -- see UiMonkey. Each seed is a run of its own: the four that are known to pass, which hold what
+# was fixed, and one new seed a week (the ISO year and week, e.g. 202642), which reaches paths the
+# others never do. Every seed runs even when one fails, and each one's action log is uploaded, so a
+# failure is read off the log and replayed with its seed:
+#   ./gradlew :composeApp:monkeyTest -PmonkeySeed=<seed> -PmonkeySteps=<steps>
+#
+# Weekly, on main, Monday 05:00 UTC -- between the mutation run (04:00) and the render benchmark
+# (06:00); each runs on its own machine, so the times only keep the week readable. A scheduled week
+# in which main has not moved since the last successful run is skipped. A scheduled run that fails
+# opens a `monkey-failure` issue with each failing seed and the end of its log (or comments on the
+# open one). Dispatch it by hand to try one seed: a run by hand never files an issue.
+
+on:
+  schedule:
+    # Mondays 05:00 UTC, on main (a schedule always runs the default branch).
+    - cron: '0 5 * * 1'
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: 'One seed to run instead of the weekly set'
+        required: false
+        default: ''
+      steps:
+        description: 'How many actions that seed takes'
+        required: false
+        default: '1500'
+
+permissions:
+  contents: read
+  # To find the last successful run, so a week in which main has not moved is skipped.
+  actions: read
+  # Only for the failure issue a scheduled run files.
+  issues: write
+
+jobs:
+  # A scheduled week in which main has not moved since the last successful run would replay the
+  # fixed seeds on the same code, so it is skipped. A run by hand always goes ahead.
+  moved:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - name: Has main moved since the last successful run
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          LAST_SHA=$(gh run list --workflow monkey.yml --branch "${{ github.ref_name }}" \
+            --status success --limit 1 --json headSha -q '.[0].headSha // empty' 2>/dev/null || echo "")
+          if [ "$LAST_SHA" = "${{ github.sha }}" ]; then
+            echo "No new commits since the last successful run (${{ github.sha }})" >> "$GITHUB_STEP_SUMMARY"
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  monkey:
+    needs: moved
+    if: needs.moved.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Run the seeds
+        id: monkey
+        env:
+          SEED: ${{ github.event.inputs.seed }}
+          STEPS: ${{ github.event.inputs.steps || '1500' }}
+        run: |
+          if [ -n "$SEED" ]; then
+            RUNS="$SEED:$STEPS"
+          else
+            RUNS="20261011:300 1:1500 2:1500 3:1500 $(date -u +%G%V):1500"
+          fi
+          mkdir -p monkey-runs
+          FAILED=""
+          for RUN in $RUNS; do
+            S=${RUN%%:*}; N=${RUN##*:}
+            if ./gradlew :composeApp:monkeyTest "-PmonkeySeed=$S" "-PmonkeySteps=$N"; then
+              RESULT=passed
+            else
+              RESULT=failed; FAILED="$FAILED $S"
+            fi
+            cp composeApp/build/reports/monkey/monkey.log "monkey-runs/seed-$S.log" 2>/dev/null || true
+            cp -r composeApp/build/test-results/monkeyTest "monkey-runs/seed-$S-results" 2>/dev/null || true
+            echo "- seed \`$S\`, $N steps: **$RESULT**" >> "$GITHUB_STEP_SUMMARY"
+          done
+          echo "failed=$FAILED" >> "$GITHUB_OUTPUT"
+          [ -z "$FAILED" ]
+
+      - name: Upload the logs
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: monkey-logs
+          path: monkey-runs/
+          retention-days: 30
+          if-no-files-found: warn
+
+      # One open issue per failing stretch: a later failing week comments on it rather than opening
+      # another. Only a seed failing does this -- a broken setup step does not, and a cancelled run
+      # never reaches here.
+      - name: Report a failure as an issue
+        if: ${{ failure() && github.event_name == 'schedule' && steps.monkey.outcome == 'failure' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          FAILED: ${{ steps.monkey.outputs.failed }}
+        run: |
+          LABEL="monkey-failure"
+          gh label create "$LABEL" --color B60205 \
+            --description "The weekly UI monkey made the app throw on main" 2>/dev/null || true
+          {
+            echo "The weekly UI monkey failed on \`${GITHUB_SHA:0:9}\` (${GITHUB_SHA})."
+            echo
+            echo "Run: $RUN_URL -- every seed's full log is in its \`monkey-logs\` artifact."
+            for S in $FAILED; do
+              echo
+              echo "### Seed \`$S\`: the last 40 actions"
+              echo
+              echo "Replay: \`./gradlew :composeApp:monkeyTest -PmonkeySeed=$S -PmonkeySteps=1500\`"
+              echo
+              grep -oh 'failure message="[^"]*"' monkey-runs/seed-$S-results/TEST-*.xml 2>/dev/null \
+                | head -n 1 | sed -e 's/^failure message="//' -e 's/"$//' -e 's/^/> /' || true
+              echo
+              echo '```'
+              tail -n 40 "monkey-runs/seed-$S.log" 2>/dev/null || echo "(no log)"
+              echo '```'
+            done
+          } > issue.md
+          OPEN=$(gh issue list --label "$LABEL" --state open --limit 1 --json number -q '.[0].number // empty')
+          if [ -n "$OPEN" ]; then
+            gh issue comment "$OPEN" --body-file issue.md
+          else
+            gh issue create --title "UI monkey failure on main" --label "$LABEL" --body-file issue.md
+          fi
