@@ -461,5 +461,5 @@ jobs:
           # branch past 500 MB in its first nine days.
           #
           # Note this prunes files, not history, so it alone never shrinks the pack — see
-          # .github/workflows/reg-actions-prune.yml.
+          # the collapse-reg-actions job in .github/workflows/cleanup.yml.
           retention-days: 14

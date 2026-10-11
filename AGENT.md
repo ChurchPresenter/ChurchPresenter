@@ -300,7 +300,7 @@ finds. Deliberately **off**, each for rewriting a large share of the tree: `Inde
 - `<module>/screenshots/.parts` (per-theme halves) is git-ignored and cleaned in a `finally`;
   never commit it.
 - The `reg_actions` branch holds the PR-comment images; retention is `retention-days` in
-  `screenshots.yml`, and `reg-actions-prune.yml` squashes the branch monthly. It is not the
+  `screenshots.yml`, and `cleanup.yml` squashes the branch monthly. It is not the
   comparison baseline.
 
 ### Other commands
