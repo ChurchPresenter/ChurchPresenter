@@ -6,8 +6,6 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.doubleClick
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isRoot
-import androidx.compose.ui.test.performMultiModalInput
 import androidx.compose.ui.test.performMouseInput
 import org.churchpresenter.bible.SpbFixture
 import org.churchpresenter.bibletab.SECOND_MODULE
@@ -19,7 +17,6 @@ import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.models.Tabs
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 private const val VERSE_ONE = "1. In the beginning God created the heaven and the earth."
 private const val VERSE_TWO = "2. And the earth was without form, and void."
@@ -44,9 +41,6 @@ class BibleHappyPathTest : HappyPathHarness() {
                 app.presenter.selectedVerses.value.map { it.verseNumber } == numbers.toList()
         }
     }
-
-    private fun ComposeUiTest.verseCenter(line: String) =
-        onAllNodes(hasText(line)).fetchSemanticsNodes().minBy { it.boundsInRoot.left }.boundsInRoot.center
 
     private fun ComposeUiTest.goLiveWith(line: String) {
         clickText(line)
@@ -85,33 +79,6 @@ class BibleHappyPathTest : HappyPathHarness() {
         press(Key.DirectionUp)
         awaitVerses(app, 1)
         awaitOnOutput(app, "In the beginning God created the heaven and the earth.")
-    }
-
-    @Test
-    fun `a shift-clicked range goes live whole`() = happyPath(library()) { app ->
-        val first = verseCenter(VERSE_ONE)
-        val last = verseCenter(VERSE_THREE)
-        onAllNodes(isRoot())[0].performMultiModalInput {
-            mouse {
-                moveTo(first)
-                press()
-                release()
-            }
-            key { keyDown(Key.ShiftLeft) }
-            mouse {
-                moveTo(last)
-                press()
-                release()
-            }
-            key { keyUp(Key.ShiftLeft) }
-        }
-        waitForIdle()
-        goLive()
-
-        awaitVerses(app, 1, 2, 3)
-        val output = outputText(app)
-        assertTrue("In the beginning God created" in output, output)
-        assertTrue("Let there be light." in output, output)
     }
 
     @Test

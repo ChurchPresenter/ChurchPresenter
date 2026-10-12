@@ -26,7 +26,6 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 /** One solid color per slide, so the slide on air can be told by its middle pixel. */
 private val SLIDE_COLORS = listOf(Color(220, 30, 30), Color(30, 200, 30), Color(30, 30, 220))
@@ -156,7 +155,7 @@ class PresentationHappyPathTest : HappyPathHarness() {
         openDeck(File(dir, "Sermon.pdf"))
         clickTabControl("Add to Schedule")
 
-        await("the schedule holds the deck") { scheduleShows("Sermon.pdf") }
-        assertTrue(app.schedule().single().displayText.startsWith("Sermon.pdf"))
+        await("the schedule holds the deck") { scheduleShows("Sermon (3 slides)") }
+        assertEquals("Sermon (3 slides)", app.schedule().single().displayText)
     }
 }
