@@ -88,7 +88,7 @@ internal class MainDesktopScope(
     val scheduleViewModel = owned.vms.scheduleViewModel
 
     /** The Schedule tab's actions as they stand now, for a toolbar lambda built earlier. */
-    val currentScheduleActions = state.scheduleActions
+    val currentScheduleActions get() = state.scheduleActions
 
     fun selectTab(tab: Tabs) {
         state.selectedTabIndex = resolveTabSelection(tab, visibleTabs, state.selectedTabIndex)
