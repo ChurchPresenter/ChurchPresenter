@@ -120,7 +120,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # The same version the installers were built with (composeApp/build.gradle.kts).
+          # The same version the installers were built with (appVersion() in build-logic's AppBuild.kt).
           YEAR=$(date +%y)
           COMMITS=$(git rev-list --count HEAD)
           VERSION="${YEAR}.$((COMMITS / 256)).$((COMMITS % 256))"

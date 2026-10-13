@@ -20,14 +20,15 @@ import argparse
 import subprocess
 import sys
 
-# Files every module is configured from: the version catalogue, the root build that owns the JaCoCo
-# floors and `useJUnitPlatform()`, and the wrapper. A change to any of them can move any suite.
+# Files every module is configured from: the version catalogue, the root build, build-logic's
+# convention plugins (which own the JaCoCo floors and `useJUnitPlatform()`), and the wrapper. A
+# change to any of them can move any suite.
 #
 # Deliberately NOT here: settings.gradle.kts (it changes to `include(...)` a new module, which cannot
 # affect the others, and :composeApp runs on every push anyway), config/detekt/ (no test reads it,
 # and Detekt runs unfiltered), and the workflows.
 SHARED_FILES = {"build.gradle.kts", "gradle/libs.versions.toml"}
-SHARED_DIRS = ("gradle/wrapper/",)
+SHARED_DIRS = ("gradle/wrapper/", "build-logic/")
 
 # Inputs a module reads from outside its own directory without a project dependency, so the graph
 # cannot show them. :crossword-tab copies the encoded puzzles :crossword writes, at build time.
