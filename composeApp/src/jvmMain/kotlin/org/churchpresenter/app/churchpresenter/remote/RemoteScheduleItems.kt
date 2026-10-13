@@ -17,6 +17,7 @@ internal fun qaActionType(action: String): RemoteEventType = when (action) {
     "done"    -> RemoteEventType.QA_DONE
     "display"       -> RemoteEventType.QA_DISPLAY
     "clear-display" -> RemoteEventType.QA_CLEAR_DISPLAY
+    "clear-all"     -> RemoteEventType.QA_CLEAR_ALL
     else            -> RemoteEventType.QA_ADD
 }
 

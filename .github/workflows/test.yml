@@ -102,16 +102,16 @@ jobs:
           fi
 
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: '21'
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
         with:
           # Reads the Gradle cache but never writes it: on Linux only test.yml's `app` job saves one, so
           # main keeps one copy that every job restores from (setup-gradle falls back to the newest
@@ -162,16 +162,16 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: '21'
           distribution: 'temurin'
       - name: Submit the dependency graph
-        uses: gradle/actions/dependency-submission@v6
+        uses: gradle/actions/dependency-submission@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
       - name: Review the dependencies this change adds
         if: github.event_name == 'pull_request'
-        uses: actions/dependency-review-action@v5
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
         with:
           fail-on-severity: high
           retry-on-snapshot-warnings: true
@@ -181,12 +181,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: '21'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v6
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
         with:
           # Reads the Gradle cache but never writes it: on Linux only test.yml's `app` job saves one, so
           # main keeps one copy that every job restores from (setup-gradle falls back to the newest
@@ -207,12 +207,12 @@ jobs:
     env:
       ORG_GRADLE_PROJECT_hangThresholdMs: '150000'
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: '21'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v6
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
 
       - name: App unit tests
         id: unit_tests
@@ -275,7 +275,7 @@ jobs:
 
       - name: Keep the results for the report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           # Not `results-*`: every path here is under composeApp/build/, which the upload strips, so
           # `test` downloads these back under that directory itself.
@@ -304,12 +304,12 @@ jobs:
     env:
       ORG_GRADLE_PROJECT_hangThresholdMs: '150000'
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: '21'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v6
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
         with:
           # Reads the Gradle cache but never writes it: on Linux only test.yml's `app` job saves one, so
           # main keeps one copy that every job restores from (setup-gradle falls back to the newest
@@ -332,7 +332,7 @@ jobs:
 
       - name: Keep the results for the report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: results-modules-${{ strategy.job-index }}
           if-no-files-found: ignore
@@ -354,12 +354,12 @@ jobs:
     env:
       ORG_GRADLE_PROJECT_hangThresholdMs: '150000'
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: '21'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v6
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
         with:
           # Reads the Gradle cache but never writes it: on Linux only test.yml's `app` job saves one, so
           # main keeps one copy that every job restores from (setup-gradle falls back to the newest
@@ -392,12 +392,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: '21'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v6
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
         with:
           # Reads the Gradle cache but never writes it: on Linux only test.yml's `app` job saves one, so
           # main keeps one copy that every job restores from (setup-gradle falls back to the newest
@@ -406,7 +406,7 @@ jobs:
 
       - name: Gather the results
         if: ${{ !cancelled() }}
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: results-*
           merge-multiple: true
@@ -414,7 +414,7 @@ jobs:
       # The app's own artifact was uploaded relative to composeApp/build/ -- see `app`.
       - name: Gather the app's results
         if: ${{ !cancelled() && needs.app.result != 'skipped' }}
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: app-results
           path: composeApp/build/
@@ -429,7 +429,7 @@ jobs:
 
       - name: Report failing tests on the pull request
         if: ${{ !cancelled() && github.event_name == 'pull_request' && steps.junit_inputs.outputs.paths != '' }}
-        uses: mikepenz/action-junit-report@v6
+        uses: mikepenz/action-junit-report@6ef3fdcfcd5f0b5d14df3e659ef19b8c6820f93d # v6.6.1
         with:
           report_paths: ${{ steps.junit_inputs.outputs.paths }}
           check_name: ${{ steps.junit_inputs.outputs.names }}
@@ -542,7 +542,7 @@ jobs:
 
       - name: Upload test reports
         if: ${{ !cancelled() && (needs.app.result == 'failure' || needs.modules.result == 'failure' || needs.changed-tests.result == 'failure') }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: test-reports
           if-no-files-found: ignore

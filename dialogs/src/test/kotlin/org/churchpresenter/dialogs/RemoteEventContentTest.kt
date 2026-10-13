@@ -299,6 +299,7 @@ class RemoteEventContentTest {
             RemoteEventType.QA_DONE to "Q&A: Mark as Done",
             RemoteEventType.QA_DISPLAY to "Q&A: Go Live",
             RemoteEventType.QA_CLEAR_DISPLAY to "Q&A: Clear Display",
+            RemoteEventType.QA_CLEAR_ALL to "Q&A: Clear All Questions",
         )
         for ((type, expectedLabel) in cases) {
             val presentation = presentationFor(RemoteEvent(type = type, title = "x"))

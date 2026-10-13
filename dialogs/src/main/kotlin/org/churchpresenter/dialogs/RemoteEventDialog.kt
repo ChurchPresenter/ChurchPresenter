@@ -83,6 +83,7 @@ import org.churchpresenter.strings.generated.resources.remote_api_qa_deny
 import org.churchpresenter.strings.generated.resources.remote_api_qa_done
 import org.churchpresenter.strings.generated.resources.remote_api_qa_display
 import org.churchpresenter.strings.generated.resources.remote_api_qa_clear_display
+import org.churchpresenter.strings.generated.resources.remote_api_qa_clear_all
 import org.churchpresenter.strings.generated.resources.remote_api_qa_admin_connect
 import org.churchpresenter.strings.generated.resources.remote_api_qa_admin_connect_detail
 import org.churchpresenter.strings.generated.resources.remote_api_musician_connect
@@ -118,6 +119,7 @@ fun resolveRemoteEventPresentation(
         RemoteEventType.QA_DONE         -> stringResource(Res.string.remote_api_qa_done)
         RemoteEventType.QA_DISPLAY      -> stringResource(Res.string.remote_api_qa_display)
         RemoteEventType.QA_CLEAR_DISPLAY -> stringResource(Res.string.remote_api_qa_clear_display)
+        RemoteEventType.QA_CLEAR_ALL    -> stringResource(Res.string.remote_api_qa_clear_all)
         RemoteEventType.QA_ADMIN_CONNECT -> stringResource(Res.string.remote_api_qa_admin_connect)
         RemoteEventType.MUSICIAN_CONNECT -> stringResource(Res.string.remote_api_musician_connect)
         else                            -> stringResource(Res.string.remote_api_request_title)
@@ -137,7 +139,8 @@ fun resolveRemoteEventPresentation(
         RemoteEventType.QA_DENY,
         RemoteEventType.QA_DONE,
         RemoteEventType.QA_DISPLAY,
-        RemoteEventType.QA_CLEAR_DISPLAY -> Icons.Filled.QuestionAnswer
+        RemoteEventType.QA_CLEAR_DISPLAY,
+        RemoteEventType.QA_CLEAR_ALL -> Icons.Filled.QuestionAnswer
         else                            -> Icons.Filled.Notifications
     }
     // Go-live/project actions read as blue; schedule edits read as amber, matching the design.

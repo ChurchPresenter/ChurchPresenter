@@ -163,7 +163,7 @@ class PlanningCenterImportDialogTest {
 
     @Test
     fun `with no session it asks for the small connect window, and a failed sign-in says why`() {
-        coEvery { PlanningCenterAuthServer.awaitAuthorizationCode() } returns
+        coEvery { PlanningCenterAuthServer.awaitAuthorizationCode(any()) } returns
             PlanningCenterAuthServer.CallbackResult.Timeout
         mockkObject(UrlOpener)
         every { UrlOpener.open(any(), any(), any(), any(), any()) } returns true

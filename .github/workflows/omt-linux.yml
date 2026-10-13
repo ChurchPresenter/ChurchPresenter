@@ -44,25 +44,25 @@ jobs:
       archive: ${{ steps.pack.outputs.archive }}
       sha256: ${{ steps.pack.outputs.sha256 }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: openmediatransport/libvmx
           ref: ${{ env.LIBVMX_SHA }}
           path: omt-src/libvmx
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: openmediatransport/libomtnet
           ref: ${{ env.LIBOMTNET_SHA }}
           path: omt-src/libomtnet
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: openmediatransport/libomt
           ref: ${{ env.LIBOMT_SHA }}
           path: omt-src/libomt
 
-      - uses: actions/setup-dotnet@v6
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: '8.0.x'
 
@@ -156,16 +156,16 @@ jobs:
           echo "### OMT for Linux" >> "$GITHUB_STEP_SUMMARY"
           echo "\`$archive\` — sha256 \`$sha\`" >> "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: omt-linux-x86_64
           path: ${{ steps.pack.outputs.archive }}
 
-      - uses: actions/setup-java@v6
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: temurin
           java-version: '21'
-      - uses: gradle/actions/setup-gradle@v6
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
         with:
           # Reads the Gradle cache but never writes it: on Linux only test.yml's `app` job saves one, so
           # main keeps one copy that every job restores from (setup-gradle falls back to the newest
@@ -185,7 +185,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: omt-linux-x86_64
       - name: Attach to the release

@@ -29,11 +29,12 @@ import org.churchpresenter.settings.utils.Constants
 internal fun browserSourceOverlayPage(
     index: Int,
     output: ScreenAssignment,
-    apiKeyEnabled: Boolean,
     apiKey: String,
     bgOverride: String? = null,
 ): String {
-    val needsKey = output.browserSourceApiKeyRequired || (apiKeyEnabled && apiKey.isNotEmpty())
+    // The server asks for the key on this output's own switch alone (BrowserSourceHub), and the
+    // page is served without one otherwise -- so it carries the key only when that switch is on.
+    val needsKey = output.browserSourceApiKeyRequired && apiKey.isNotEmpty()
     val keyParam = if (needsKey) {
         "?${Constants.QUERY_PARAM_API_KEY}=" + java.net.URLEncoder.encode(apiKey, "UTF-8")
     } else {

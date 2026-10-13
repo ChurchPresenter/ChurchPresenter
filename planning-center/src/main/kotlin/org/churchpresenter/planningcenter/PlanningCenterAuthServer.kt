@@ -32,13 +32,15 @@ object PlanningCenterAuthServer {
         data object Timeout : CallbackResult
     }
 
+    internal const val STATE_MISMATCH = "The sign-in reply did not match this request -- try again"
     private const val CALLBACK_TIMEOUT_MS = 300_000L
     private const val CALLBACK_PATH = "/callback"
     private const val HTTP_OK = 200
     private const val PAGE =
         "<html><body>You can close this window and return to ChurchPresenter.</body></html>"
 
-    suspend fun awaitAuthorizationCode(): CallbackResult {
+    /** Waits for the redirect that answers [attempt]; one carrying any other state is refused. */
+    suspend fun awaitAuthorizationCode(attempt: OAuthAttempt): CallbackResult {
         val deferred = CompletableDeferred<CallbackResult>()
         val server = try {
             HttpServer.create(InetSocketAddress("127.0.0.1", Constants.PLANNING_CENTER_OAUTH_PORT), 0)
@@ -50,7 +52,7 @@ object PlanningCenterAuthServer {
             return CallbackResult.Error(e.message ?: "Failed to start local callback server")
         }
         server.createContext(CALLBACK_PATH) { exchange ->
-            val result = callbackResult(exchange.requestURI.rawQuery)
+            val result = callbackResult(exchange.requestURI.rawQuery, attempt)
             // Answered in full before the result is handed over; see the class comment.
             try {
                 exchange.use { respond(it) }
@@ -75,18 +77,22 @@ object PlanningCenterAuthServer {
         exchange.responseBody.use { it.write(body) }
     }
 
-    /** What a callback whose query string is [rawQuery] means: a code, or why there is none. */
-    internal fun callbackResult(rawQuery: String?): CallbackResult {
+    /**
+     * What a callback whose query string is [rawQuery] means for [attempt]: a code, or why there is
+     * none. A code that does not carry the attempt's state is refused, as a redirect the app never
+     * asked for.
+     */
+    internal fun callbackResult(rawQuery: String?, attempt: OAuthAttempt): CallbackResult {
         val params = rawQuery.orEmpty().split('&').filter { it.isNotEmpty() }.associate { pair ->
             val name = pair.substringBefore('=')
             val value = pair.substringAfter('=', "")
             decode(name) to decode(value)
         }
         val code = params["code"]
-        return if (code != null) {
-            CallbackResult.Success(code)
-        } else {
-            CallbackResult.Error(params["error"] ?: "No authorization code returned")
+        return when {
+            code == null -> CallbackResult.Error(params["error"] ?: "No authorization code returned")
+            !attempt.matches(params["state"]) -> CallbackResult.Error(STATE_MISMATCH)
+            else -> CallbackResult.Success(code)
         }
     }
 

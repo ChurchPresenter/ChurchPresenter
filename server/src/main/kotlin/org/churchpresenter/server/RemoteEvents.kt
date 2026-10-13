@@ -32,6 +32,7 @@ enum class RemoteEventType {
     QA_DONE,
     QA_DISPLAY,
     QA_CLEAR_DISPLAY,
+    QA_CLEAR_ALL,
     QA_ADMIN_CONNECT,
 
     /** A tablet opening a Browser Source output's musician view, to transpose its chords. */

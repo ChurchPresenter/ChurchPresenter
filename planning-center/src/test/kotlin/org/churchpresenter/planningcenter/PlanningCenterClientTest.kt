@@ -29,7 +29,9 @@ import kotlin.test.assertTrue
  */
 class PlanningCenterClientTest {
 
-    private val authorizationUrl = PlanningCenterClient.buildAuthorizationUrl("cp-client-id")
+    private val attempt = OAuthAttempt(state = "the-state", codeVerifier = "v".repeat(43))
+
+    private val authorizationUrl = PlanningCenterClient.buildAuthorizationUrl("cp-client-id", attempt)
 
     /** The query parameters of [authorizationUrl], still encoded. */
     private val query: Map<String, String> =
@@ -110,7 +112,10 @@ class PlanningCenterClientTest {
     @Test
     fun `every parameter the handshake needs is present`() {
         assertEquals(
-            setOf("client_id", "redirect_uri", "response_type", "scope"),
+            setOf(
+                "client_id", "redirect_uri", "response_type", "scope",
+                "state", "code_challenge", "code_challenge_method",
+            ),
             query.keys,
             "a missing parameter is refused with a generic error page",
         )
@@ -123,8 +128,15 @@ class PlanningCenterClientTest {
      */
     @Test
     fun `the client id is used exactly as configured`() {
-        val url = PlanningCenterClient.buildAuthorizationUrl("abc 123")
+        val url = PlanningCenterClient.buildAuthorizationUrl("abc 123", attempt)
 
         assertTrue(url.contains("client_id=abc 123"), url)
+    }
+
+    @Test
+    fun `the url carries the attempt's state and its S256 challenge`() {
+        assertEquals("the-state", query.getValue("state"))
+        assertEquals(attempt.codeChallenge, query.getValue("code_challenge"))
+        assertEquals("S256", query.getValue("code_challenge_method"))
     }
 }

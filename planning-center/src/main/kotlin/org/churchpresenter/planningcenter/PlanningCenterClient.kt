@@ -107,10 +107,12 @@ object PlanningCenterClient {
 
     fun redirectUri(): String = "http://127.0.0.1:${Constants.PLANNING_CENTER_OAUTH_PORT}/callback"
 
-    fun buildAuthorizationUrl(clientId: String): String {
+    /** The consent page's URL for [attempt]: its state, and the S256 challenge for its verifier. */
+    fun buildAuthorizationUrl(clientId: String, attempt: OAuthAttempt): String {
         val redirect = redirectUri().encodeURLParameter()
         val scope = OAUTH_SCOPE.encodeURLParameter()
-        return "$AUTHORIZE_URL?client_id=$clientId&redirect_uri=$redirect&response_type=code&scope=$scope"
+        return "$AUTHORIZE_URL?client_id=$clientId&redirect_uri=$redirect&response_type=code&scope=$scope" +
+            "&state=${attempt.state}&code_challenge=${attempt.codeChallenge}&code_challenge_method=S256"
     }
 
     @Serializable
@@ -124,6 +126,7 @@ object PlanningCenterClient {
         clientId: String,
         clientSecret: String,
         code: String,
+        codeVerifier: String,
         http: HttpClient = defaultHttp,
     ): TokenOutcome =
         requestToken(
@@ -132,7 +135,8 @@ object PlanningCenterClient {
             formParams = mapOf(
                 "grant_type" to "authorization_code",
                 "code" to code,
-                "redirect_uri" to redirectUri()
+                "redirect_uri" to redirectUri(),
+                "code_verifier" to codeVerifier,
             ),
             http = http,
         )

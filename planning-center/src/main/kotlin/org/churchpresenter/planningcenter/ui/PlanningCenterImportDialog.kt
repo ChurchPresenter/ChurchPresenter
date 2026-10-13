@@ -52,6 +52,7 @@ import org.churchpresenter.sharedui.composables.cpColorToHex
 import org.churchpresenter.sharedui.utils.UsageEvent
 import org.churchpresenter.sharedui.utils.UsageEvents
 import org.churchpresenter.core.models.songs.SongItem
+import org.churchpresenter.planningcenter.OAuthAttempt
 import org.churchpresenter.planningcenter.PlanningCenterAuthServer
 import org.churchpresenter.planningcenter.PlanningCenterClient
 import org.churchpresenter.settings.PlanningCenterSettings
@@ -234,15 +235,17 @@ internal suspend fun connectToPlanningCenter(
     onConnected: (accessToken: String, refreshToken: String, expiresAtEpochMs: Long, personName: String) -> Unit,
     onError: (String) -> Unit
 ) {
-    val authUrl = PlanningCenterClient.buildAuthorizationUrl(services.clientId)
+    val attempt = OAuthAttempt.create()
+    val authUrl = PlanningCenterClient.buildAuthorizationUrl(services.clientId, attempt)
     browse(java.net.URI(authUrl))
-    when (val callback = PlanningCenterAuthServer.awaitAuthorizationCode()) {
+    when (val callback = PlanningCenterAuthServer.awaitAuthorizationCode(attempt)) {
         is PlanningCenterAuthServer.CallbackResult.Success -> {
             when (
                 val tokenOutcome = PlanningCenterClient.exchangeCodeForToken(
                     services.clientId,
                     services.clientSecret,
-                    callback.code
+                    callback.code,
+                    attempt.codeVerifier,
                 )
             ) {
                 is PlanningCenterClient.TokenOutcome.Success -> {
