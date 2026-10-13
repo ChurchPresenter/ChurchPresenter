@@ -662,6 +662,7 @@
     <string name="schedule_option_buttons">Przyciski</string>
     <string name="toggle_menu_count">%1$d z %2$d</string>
     <string name="toggle_menu_show_all">Pokaż wszystkie</string>
+    <string name="toggle_menu_always">Zawsze</string>
     <string name="schedule_drop_hint">Przeciągnij pliki tutaj, aby dodać do programu</string>
     <string name="schedule_note_placeholder">Dodaj notatkę…</string>
     <string name="screen_number">Ekran %1$d</string>
@@ -1307,6 +1308,7 @@
     <string name="song_favorites_clear">Wyczyść ulubione</string>
     <string name="song_play_count">Odtworzenia</string>
     <string name="song_columns">Filtruj kolumny</string>
+    <string name="song_columns_show_in_list">Pokaż na liście</string>
     <string name="background_follow_default_option">Zgodnie z domyślnymi</string>
     <string name="bible_no_primary_title">Brak skonfigurowanej głównej Biblii</string>
     <string name="bible_no_primary_hint">Otwórz ⚙ Ustawienia i przejdź do zakładki Biblia, a następnie:</string>

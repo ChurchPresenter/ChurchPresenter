@@ -576,6 +576,7 @@
     <string name="schedule_option_buttons">ปุ่ม</string>
     <string name="toggle_menu_count">%1$d จาก %2$d</string>
     <string name="toggle_menu_show_all">แสดงทั้งหมด</string>
+    <string name="toggle_menu_always">เสมอ</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">เพิ่มป้าย</string>
@@ -848,6 +849,7 @@
     <string name="remove_from_favorites">นำออกจากเพลงโปรด</string>
     <string name="song_play_count">จำนวนครั้ง</string>
     <string name="song_columns">กรองคอลัมน์</string>
+    <string name="song_columns_show_in_list">แสดงในรายการ</string>
     <string name="bible_no_primary_title">ยังไม่ได้ตั้งพระคัมภีร์หลัก</string>
     <string name="bible_no_primary_hint">เปิด ⚙ การตั้งค่า แล้วไปที่แท็บพระคัมภีร์ จากนั้น:</string>
     <string name="bible_no_primary_step1">1. ตั้งโฟลเดอร์เก็บพระคัมภีร์</string>

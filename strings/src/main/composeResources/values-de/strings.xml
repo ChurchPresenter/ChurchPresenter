@@ -663,6 +663,7 @@
     <string name="schedule_option_buttons">Schaltflächen</string>
     <string name="toggle_menu_count">%1$d von %2$d</string>
     <string name="toggle_menu_show_all">Alle anzeigen</string>
+    <string name="toggle_menu_always">Immer</string>
     <string name="schedule_drop_hint">Dateien hierher ziehen, um sie zum Programm hinzuzufügen</string>
     <string name="schedule_note_placeholder">Notiz hinzufügen…</string>
     <string name="screen_number">Bildschirm %1$d</string>
@@ -1307,6 +1308,7 @@
     <string name="song_favorites_clear">Favoriten löschen</string>
     <string name="song_play_count">Aufrufe</string>
     <string name="song_columns">Spalten filtern</string>
+    <string name="song_columns_show_in_list">In der Liste zeigen</string>
     <string name="background_follow_default_option">Standard folgen</string>
     <string name="bible_no_primary_title">Keine primäre Bibel konfiguriert</string>
     <string name="bible_no_primary_hint">Öffne ⚙ Einstellungen und gehe zum Tab „Bibel", dann:</string>

@@ -576,6 +576,7 @@
     <string name="schedule_option_buttons">Pogas</string>
     <string name="toggle_menu_count">%1$d no %2$d</string>
     <string name="toggle_menu_show_all">Rādīt visu</string>
+    <string name="toggle_menu_always">Vienmēr</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Pievienot etiķeti</string>
@@ -848,6 +849,7 @@
     <string name="remove_from_favorites">Noņemt no izlases</string>
     <string name="song_play_count">Reizes</string>
     <string name="song_columns">Filtrēt kolonnas</string>
+    <string name="song_columns_show_in_list">Rādīt sarakstā</string>
     <string name="bible_no_primary_title">Nav norādīta galvenā Bībele</string>
     <string name="bible_no_primary_hint">Atveriet ⚙ Iestatījumus, ejiet uz Bībeles cilni un pēc tam:</string>
     <string name="bible_no_primary_step1">1. Norādiet Bībeles failu mapi</string>

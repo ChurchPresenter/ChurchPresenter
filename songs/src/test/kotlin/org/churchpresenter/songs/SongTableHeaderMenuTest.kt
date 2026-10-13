@@ -2,7 +2,10 @@
 
 package org.churchpresenter.songs
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
+import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.SongColumnId
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.isRoot
@@ -13,6 +16,7 @@ import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.rightClick
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class SongTableHeaderMenuTest {
 
@@ -34,6 +38,23 @@ class SongTableHeaderMenuTest {
         assertEquals(0, reports.settingsChanges)
         escapeTopPopup()
         assertEquals(1, roots())
+    }
+
+    /** Each toggle saves settings, which rebuilds the column state; the menu must survive that. */
+    @Test
+    fun `the column menu stays open while columns are toggled`() {
+        val override = mutableStateOf<AppSettings?>(null)
+        songsTab(settingsOverride = override) { _, reports ->
+            onNodeWithContentDescription("Filter columns").performClick()
+            waitForIdle()
+            onAllNodesWithText("Author").let { it[it.fetchSemanticsNodes().size - 1] }.performClick()
+            waitForIdle()
+            override.value = reports.settingsAfterChange
+            waitForIdle()
+
+            assertTrue(SongColumnId.AUTHOR !in reports.settingsAfterChange!!.songHiddenCols)
+            assertEquals(2, roots())
+        }
     }
 
     @Test

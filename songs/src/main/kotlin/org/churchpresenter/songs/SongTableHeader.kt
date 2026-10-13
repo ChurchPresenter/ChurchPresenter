@@ -26,16 +26,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import org.churchpresenter.theme.components.RaisedCheckbox
 import org.churchpresenter.theme.keyboardFocusRing
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -46,29 +45,21 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isSecondary
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Tune
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import org.churchpresenter.sharedui.composables.TooltipIconButton
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.icons.generated.resources.Res as IconRes
-import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.icons.generated.resources.ic_arrow_down
 import org.churchpresenter.icons.generated.resources.ic_arrow_up
 import org.churchpresenter.strings.generated.resources.filter
 import org.churchpresenter.icons.generated.resources.ic_star
 import org.churchpresenter.icons.generated.resources.ic_playlist_add
-import org.churchpresenter.strings.generated.resources.song_columns
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.ScrollState
 import org.churchpresenter.sharedui.composables.DragHandle
-import org.churchpresenter.sharedui.composables.bibleListCardFill
 
 /**
  * The column header row: sortable, resizable and reorderable cells that scroll with the list, the
@@ -80,6 +71,11 @@ internal fun SongListScope.SongTableHeader(
     contentMinWidthDp: Dp,
     allColLabels: Map<String, String>,
 ) {
+    // Held here rather than in `columns`: each toggle saves settings, which rebuilds `columns`, and
+    // the menu would close after every item.
+    var showMenu by remember { mutableStateOf(false) }
+    var menuOffset by remember { mutableStateOf(DpOffset.Zero) }
+    var showColumnsMenu by remember { mutableStateOf(false) }
     // Column header row — scrolls horizontally with the song list
     // Wrapped in a Box so the right-click DropdownMenu can anchor here
     Box(
@@ -94,8 +90,8 @@ internal fun SongListScope.SongTableHeader(
                             event.button?.isSecondary == true
                         ) {
                             val pos = event.changes.firstOrNull()?.position
-                            if (pos != null) columns.menuOffset = with(density) { DpOffset(pos.x.toDp(), pos.y.toDp()) }
-                            columns.showMenu = true
+                            if (pos != null) menuOffset = with(density) { DpOffset(pos.x.toDp(), pos.y.toDp()) }
+                            showMenu = true
                         }
                     }
                 }
@@ -122,9 +118,11 @@ internal fun SongListScope.SongTableHeader(
     } // end inner scrollable header Box
     } // end header Row
 
-        SongColumnsButton(allColLabels, Modifier.align(Alignment.CenterEnd))
+        SongColumnsButton(
+            allColLabels, showColumnsMenu, { showColumnsMenu = it }, Modifier.align(Alignment.CenterEnd),
+        )
 
-        SongColumnsContextMenu(allColLabels)
+        SongColumnsContextMenu(allColLabels, showMenu, menuOffset) { showMenu = false }
     } // end outer header Box (right-click + dropdown wrapper)
 }
 
@@ -292,63 +290,4 @@ private fun SongListScope.SongDataHeaderCell(
         onDrag = { setColWidth(colId, colWidth(colId) + it) },
         onDragEnd = onSaveColumnWidths
     )
-}
-
-/** The floating column filter button, on the right. */
-@Composable
-private fun SongListScope.SongColumnsButton(allColLabels: Map<String, String>, modifier: Modifier) {
-    // Floating column filter button — right side
-    Box(modifier = modifier.background(bibleListCardFill())) {
-        TooltipIconButton(
-            painter = rememberVectorPainter(Icons.Default.Tune),
-            text = stringResource(Res.string.song_columns),
-            onClick = { columns.showColumnsMenu = true },
-            buttonSize = 36.dp,
-            iconTint = MaterialTheme.colorScheme.onSurface
-        )
-        DropdownMenu(
-            expanded = columns.showColumnsMenu,
-            onDismissRequest = { columns.showColumnsMenu = false }
-        ) {
-            ColumnVisibilityItems(allColLabels)
-        }
-    }
-}
-
-/** Right-click dropdown — toggle column visibility. */
-@Composable
-private fun SongListScope.SongColumnsContextMenu(allColLabels: Map<String, String>) {
-    DropdownMenu(
-        expanded = columns.showMenu,
-        onDismissRequest = { columns.showMenu = false },
-        offset = columns.menuOffset
-    ) {
-        ColumnVisibilityItems(allColLabels)
-    }
-}
-
-/** One checkable item per column; Title cannot be hidden. */
-@Composable
-private fun SongListScope.ColumnVisibilityItems(allColLabels: Map<String, String>) {
-    availableCols.forEach { colId ->
-        val isVisible = colId !in columns.hidden
-        val isProtected = colId == SongColumnId.TITLE
-        DropdownMenuItem(
-            text = { Text(allColLabels[colId] ?: colId) },
-            leadingIcon = {
-                RaisedCheckbox(
-                    checked = isVisible,
-                    onCheckedChange = null,
-                    modifier = Modifier.size(20.dp)
-                )
-            },
-            onClick = {
-                if (!(isProtected && isVisible)) {
-                    columns.hidden = if (isVisible) columns.hidden + colId else columns.hidden - colId
-                    onSaveHiddenColumns()
-                }
-            },
-            enabled = !(isProtected && isVisible)
-        )
-    }
 }

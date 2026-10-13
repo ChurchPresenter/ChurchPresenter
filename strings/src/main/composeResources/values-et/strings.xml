@@ -474,6 +474,7 @@
     <string name="schedule_option_buttons">Nupud</string>
     <string name="toggle_menu_count">%1$d / %2$d</string>
     <string name="toggle_menu_show_all">Näita kõiki</string>
+    <string name="toggle_menu_always">Alati</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Lisa silt</string>
@@ -722,6 +723,7 @@
     <string name="remove_from_favorites">Eemalda lemmikutest</string>
     <string name="song_play_count">Esitusi</string>
     <string name="song_columns">Filtri veerud</string>
+    <string name="song_columns_show_in_list">Näita loendis</string>
     <string name="bible_no_primary_title">Peamist Piiblit pole seadistatud</string>
     <string name="bible_no_primary_hint">Ava ⚙ Seaded ja mine Piibli vahekaardile, seejärel:</string>
     <string name="bible_no_primary_step1">1. Määra Piibli säilituskaust</string>

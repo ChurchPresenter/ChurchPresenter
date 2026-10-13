@@ -709,6 +709,7 @@
     <string name="schedule_option_buttons">Tlačítka</string>
     <string name="toggle_menu_count">%1$d z %2$d</string>
     <string name="toggle_menu_show_all">Zobrazit vše</string>
+    <string name="toggle_menu_always">Vždy</string>
     <string name="schedule_drop_hint">Přetáhněte soubory sem pro přidání do programu</string>
     <string name="schedule_note_placeholder">Přidat poznámku…</string>
     <string name="screen_number">Obrazovka %1$d</string>
@@ -1353,6 +1354,7 @@
     <string name="song_favorites_clear">Vymazat oblíbené</string>
     <string name="song_play_count">Přehrání</string>
     <string name="song_columns">Filtrovat sloupce</string>
+    <string name="song_columns_show_in_list">Zobrazit v seznamu</string>
     <string name="song_title_slide">Titulní snímek písně</string>
     <string name="show_song_number_before_title">Zobrazit číslo písně před názvem</string>
     <string name="background_follow_default_option">Sledovat výchozí</string>

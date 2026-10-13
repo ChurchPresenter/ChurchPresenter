@@ -51,6 +51,21 @@ class ToggleMenuScreenshotTest {
             }
         }
 
+    /** A column list whose Title can't be hidden: Always and a lock in place of the check. */
+    @Test
+    fun `an item locked on`() =
+        captureComponent(SECTION, "toggle_menu_locked", rootIndex = 1) {
+            ContextMenu(expanded = true, onDismissRequest = {}, width = 240.dp) {
+                ToggleMenuHeader(title = "Show in list", shown = 2, total = 3, onShowAll = {})
+                val accent = MaterialTheme.semantic.contentBible
+                ToggleMenuItem("Number", true, {}, icon = painterResource(Res.drawable.ic_add), accent = accent)
+                ToggleMenuItem(
+                    "Title", true, {}, icon = painterResource(Res.drawable.ic_save), accent = accent, locked = true,
+                )
+                ToggleMenuItem("Author", false, {}, icon = painterResource(Res.drawable.ic_folder), accent = accent)
+            }
+        }
+
     private companion object {
         const val SECTION = "toggleMenu"
     }

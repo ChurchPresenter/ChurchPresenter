@@ -576,6 +576,7 @@
     <string name="schedule_option_buttons">Vitufe</string>
     <string name="toggle_menu_count">%1$d kati ya %2$d</string>
     <string name="toggle_menu_show_all">Onyesha vyote</string>
+    <string name="toggle_menu_always">Daima</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Ongeza Lebo</string>
@@ -848,6 +849,7 @@
     <string name="remove_from_favorites">Ondoa kwenye vipendwa</string>
     <string name="song_play_count">Machezo</string>
     <string name="song_columns">Chuja safu</string>
+    <string name="song_columns_show_in_list">Onyesha kwenye orodha</string>
     <string name="bible_no_primary_title">Hakuna Biblia Kuu Iliyowekwa</string>
     <string name="bible_no_primary_hint">Fungua ⚙ Mipangilio na uende kwenye kichupo cha Biblia, kisha:</string>
     <string name="bible_no_primary_step1">1. Weka saraka ya kuhifadhi Biblia</string>

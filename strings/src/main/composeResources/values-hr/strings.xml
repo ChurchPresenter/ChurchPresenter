@@ -576,6 +576,7 @@
     <string name="schedule_option_buttons">Gumbi</string>
     <string name="toggle_menu_count">%1$d od %2$d</string>
     <string name="toggle_menu_show_all">Prikaži sve</string>
+    <string name="toggle_menu_always">Uvijek</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Dodaj oznaku</string>
@@ -848,6 +849,7 @@
     <string name="remove_from_favorites">Ukloni iz favorita</string>
     <string name="song_play_count">Izvedbe</string>
     <string name="song_columns">Filtriraj stupce</string>
+    <string name="song_columns_show_in_list">Prikaži na popisu</string>
     <string name="bible_no_primary_title">Glavna Biblija nije postavljena</string>
     <string name="bible_no_primary_hint">Otvorite ⚙ Postavke i idite na karticu Biblija, a zatim:</string>
     <string name="bible_no_primary_step1">1. Postavite mapu s biblijskim datotekama</string>

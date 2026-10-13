@@ -141,6 +141,16 @@ class SongsTabScreenshotTest {
         }
     }
 
+    /** The app's default: four columns off, so they dim and Show all appears. */
+    @Test
+    fun `the column picker with columns hidden`() = stackedThemes(SECTION, "columns_picker_hidden") { mode, file ->
+        songsTab(themeMode = mode) { _, _ ->
+            onNodeWithContentDescription("Filter columns").performClick()
+            waitForIdle()
+            captureTo(file, rootIndex = 1)
+        }
+    }
+
     @Test
     fun `searching by title`() = shoot("search_by_title") { search("Amazing") }
 

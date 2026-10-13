@@ -414,6 +414,7 @@
     <string name="schedule_option_buttons">Tlačidlá</string>
     <string name="toggle_menu_count">%1$d z %2$d</string>
     <string name="toggle_menu_show_all">Zobraziť všetko</string>
+    <string name="toggle_menu_always">Vždy</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Pridať štítok</string>
@@ -646,6 +647,7 @@
     <string name="remove_from_favorites">Odstrániť z obľúbených</string>
     <string name="song_play_count">Prehratí</string>
     <string name="song_columns">Filtrovať stĺpce</string>
+    <string name="song_columns_show_in_list">Zobraziť v zozname</string>
     <string name="bible_no_primary_title">Nie je nakonfigurovaná žiadna primárna Biblia</string>
     <string name="bible_no_primary_hint">Otvorte ⚙ Nastavenia a prejdite na záložku Biblia, potom:</string>
     <string name="bible_no_primary_step1">1. Nastavte priečinok pre Bibliu</string>
