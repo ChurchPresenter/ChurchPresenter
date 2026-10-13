@@ -2,6 +2,8 @@ rootProject.name = "churchpresenter"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
+    // The build's convention plugins (`cp.*`): what every module's build file shares.
+    includeBuild("build-logic")
     repositories {
         google {
             mavenContent {

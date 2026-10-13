@@ -1,14 +1,6 @@
 plugins {
-    alias(libs.plugins.kotlinJvm)
+    id("cp.jvm-module")
     `java-test-fixtures`
-    alias(libs.plugins.detekt)
-    jacoco
-}
-
-group = "org.churchpresenter"
-
-kotlin {
-    jvmToolchain(21)
 }
 
 dependencies {
@@ -44,21 +36,8 @@ tasks.withType<Test>().configureEach {
 }
 
 detekt {
-    buildUponDefaultConfig = true
-    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
     // main + test only, as every other module of this build has it. NOT testFixtures: detekt's
     // default excludes cover test source sets by name and `testFixtures` is not among them.
     source.setFrom("src/main/kotlin", "src/test/kotlin")
-    parallel = true
 }
 
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    jvmTarget = "21"
-    reports {
-        html.required.set(true)
-        xml.required.set(false)
-        sarif.required.set(false)
-        txt.required.set(false)
-        md.required.set(false)
-    }
-}

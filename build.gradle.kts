@@ -7,6 +7,10 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.kotlinJvm) apply false
     alias(libs.plugins.pitest) apply false
+    // Applied by id from build-logic's conventions (`cp.detekt`, `cp.screenshots`), which compile
+    // against them but must not load a second copy.
+    alias(libs.plugins.detekt) apply false
+    alias(libs.plugins.roborazzi) apply false
 }
 
 val gitHooksPath = ".githooks"
@@ -25,141 +29,9 @@ if (layout.projectDirectory.file(".git").asFile.exists()) {
     }
 }
 
-subprojects {
-    version = "1.0.0"
-}
-
-val isFilteredTestRun = gradle.startParameter.taskRequests.any { request ->
-    request.args.any { it == "--tests" }
-}
-
-val defaultCoverageFloors = mapOf(
-    "INSTRUCTION" to "0.85",
-    "BRANCH" to "0.85",
-    "LINE" to "0.85",
-    "COMPLEXITY" to "0.85",
-    "METHOD" to "0.85",
-    "CLASS" to "0.85",
-)
-
-subprojects {
-    plugins.withId("org.jetbrains.kotlin.jvm") {
-        plugins.withId("jacoco") {
-            @Suppress("UNCHECKED_CAST")
-            fun excludes(): List<String> =
-                (findProperty("coverageExcludes") as? List<String>) ?: listOf("**/ComposableSingletons*")
-
-            @Suppress("UNCHECKED_CAST")
-            fun floors(): Map<String, String> =
-                defaultCoverageFloors + (findProperty("coverageFloors") as? Map<String, String>).orEmpty()
-
-            fun coveredClasses() = fileTree(layout.buildDirectory.dir("classes/kotlin/main")) {
-                exclude(excludes())
-            }
-
-            tasks.withType<Test>().configureEach {
-                useJUnitPlatform()
-                finalizedBy("jacocoTestReport")
-                // A watchdog on the harness, not a wait inside a test: nothing asserts on it, and
-                // every module suite here runs in seconds to a couple of minutes. It exists so a
-                // hung suite ends as a failure with the log intact rather than running until the CI
-                // step gives up -- the same reason :composeApp has one, applied to the modules that
-                // were left unbounded when it was added.
-                timeout.set(java.time.Duration.ofMinutes(10))
-                // HungTestReporter (`:diagnostics` test fixtures, added below) halts a fork stuck on
-                // one test with a thread dump, well inside that timeout. `-PhangThresholdMs=`
-                // tightens it; the dump lands in test-results so CI uploads it with the results.
-                providers.gradleProperty("hangThresholdMs").orNull?.let {
-                    systemProperty("churchpresenter.test.hangThresholdMs", it)
-                }
-                systemProperty(
-                    "churchpresenter.test.hangDumpDir",
-                    layout.buildDirectory.dir("test-results/" + name).get().asFile.absolutePath,
-                )
-            }
-
-            // Registers HungTestReporter through the fixtures' service file. `:diagnostics` has its
-            // own fixtures on its test classpath already.
-            if (path != ":diagnostics") {
-                dependencies.add("testRuntimeOnly", dependencies.testFixtures(project(":diagnostics")))
-            }
-
-            tasks.withType<JacocoReport>().configureEach {
-                dependsOn("test")
-                reports { xml.required.set(true); html.required.set(true) }
-                classDirectories.setFrom(coveredClasses())
-                onlyIf { !isFilteredTestRun }
-            }
-
-            tasks.withType<JacocoCoverageVerification>().configureEach {
-                dependsOn("test")
-                executionData.setFrom(layout.buildDirectory.file("jacoco/test.exec"))
-                sourceDirectories.setFrom(files("src/main/kotlin"))
-                classDirectories.setFrom(coveredClasses())
-                violationRules {
-                    rule {
-                        floors().forEach { (counterName, floor) ->
-                            limit {
-                                counter = counterName
-                                value = "COVEREDRATIO"
-                                minimum = floor.toBigDecimal()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-// detekt's ktlint wrapper, for every module that runs detekt: which of its rules are on is
-// `formatting:` in config/detekt/detekt.yml, shared like the rest of that file.
-subprojects {
-    plugins.withId("io.gitlab.arturbosch.detekt") {
-        dependencies.add("detektPlugins", libs.detekt.formatting)
-    }
-}
-
-// Security floors for what socket.io-client (:stt, :bible-engine, :composeApp) brings, even at its
-// newest release: okhttp 3.12.12, which can accept the wrong certificate (GHSA-3cqm-mf7h-prrj), and
-// org.json 20090211, whose parser can be made to exhaust memory and stack (GHSA-3vqj-43w4-2q58,
-// GHSA-4jq9-2xhw-jpx7, GHSA-rm7j-f5g5-27vv). Lifted in every configuration -- a module's own
-// constraint reaches only its consumers' runtime, not their compile classpath. Both keep the API
-// engine.io calls.
-subprojects {
-    configurations.configureEach {
-        resolutionStrategy.eachDependency {
-            if (requested.group == "com.squareup.okhttp3" && requested.version?.startsWith("3.") == true) {
-                useVersion(libs.okhttp.get().version!!)
-                because("GHSA-3cqm-mf7h-prrj: okhttp 3.x can accept the wrong certificate")
-            }
-            if (requested.group == "org.json" && requested.name == "json") {
-                useVersion(libs.org.json.get().version!!)
-                because("GHSA-3vqj-43w4-2q58 and two more: the old org.json parser")
-            }
-        }
-    }
-}
-
-// Mutation testing, configured once for the modules that apply `info.solidsoft.pitest` (the core
-// logic: :song-chords, :live-show, :core-models, :schedule). `./gradlew :<module>:pitest` writes
-// build/reports/pitest/; mutation-test.yml runs it weekly. Not a gate: no mutationThreshold.
-subprojects {
-    plugins.withId("info.solidsoft.pitest") {
-        extensions.configure<info.solidsoft.gradle.pitest.PitestPluginExtension> {
-            pitestVersion.set(libs.versions.pitest.get())
-            junit5PluginVersion.set(libs.versions.pitestJunit5.get())
-            targetClasses.set(listOf("org.churchpresenter.*"))
-            excludedClasses.set(listOf("*ComposableSingletons*"))
-            // Kotlin's generated null checks: mutating them only proves the compiler inserted them.
-            avoidCallsTo.set(listOf("kotlin.jvm.internal.Intrinsics"))
-            threads.set(Runtime.getRuntime().availableProcessors())
-            outputFormats.set(listOf("HTML", "XML"))
-            timestampedReports.set(false)
-            jvmArgs.set(listOf("-Djava.awt.headless=true"))
-        }
-    }
-}
+// What every module used to repeat -- its version, the Kotlin and test conventions, the JaCoCo
+// floor, detekt and the security pins -- lives in build-logic/ as convention plugins (`cp.*`), applied
+// by each module's own `plugins { }` block. See AGENT.md.
 
 // The configured floor of every module, read off the verification tasks themselves so the number
 // reported is the number enforced. CSV: FLOOR,<module>,<counter>,<minimum>

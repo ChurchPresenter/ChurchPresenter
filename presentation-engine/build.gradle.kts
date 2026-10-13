@@ -1,18 +1,12 @@
 plugins {
-    alias(libs.plugins.kotlinJvm)
+    id("cp.jvm-module")
     alias(libs.plugins.kotlinx.serialization)
-    alias(libs.plugins.detekt)
     `java-test-fixtures`
-    jacoco
 }
-
-group = "org.churchpresenter"
 
 extra["coverageExcludes"] = listOf("**/ComposableSingletons*")
 
 kotlin {
-    jvmToolchain(21)
-
     target.compilations.named("testFixtures") {
         associateWith(target.compilations.getByName("main"))
     }
@@ -68,21 +62,8 @@ tasks.register<JavaExec>("dumpTiming") {
 }
 
 detekt {
-    buildUponDefaultConfig = true
-    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
     // No baseline: every finding the module once carried has been fixed in code, so the rules gate
     // all of it. A new finding is fixed, never suppressed.
     source.setFrom("src/main/kotlin", "src/test/kotlin")
-    parallel = true
 }
 
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    jvmTarget = "21"
-    reports {
-        html.required.set(true)
-        xml.required.set(false)
-        sarif.required.set(false)
-        txt.required.set(false)
-        md.required.set(false)
-    }
-}

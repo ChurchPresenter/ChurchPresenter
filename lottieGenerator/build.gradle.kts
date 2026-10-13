@@ -1,22 +1,14 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
-    alias(libs.plugins.kotlinJvm)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
+    id("cp.jvm-module")
+    id("cp.test-home")
+    id("cp.compose")
+    id("cp.screenshots")
     alias(libs.plugins.kotlinx.serialization)
-    alias(libs.plugins.detekt)
-    alias(libs.plugins.roborazzi)
-    jacoco
 }
-
-group = "org.churchpresenter"
 
 extra["coverageExcludes"] = listOf("**/ComposableSingletons*")
-
-kotlin {
-    jvmToolchain(21)
-}
 
 dependencies {
     implementation(compose.desktop.currentOs)
@@ -38,13 +30,6 @@ dependencies {
     // The screenshot suite reports a hung capture with the shared thread dump.
     testImplementation(projects.diagnostics)
     testImplementation(testFixtures(projects.diagnostics))
-}
-
-tasks.test {
-    val testHome = layout.buildDirectory.dir("test-home").get().asFile
-    doFirst { testHome.mkdirs() }
-    systemProperty("user.home", testHome.absolutePath)
-    systemProperty("java.awt.headless", "true")
 }
 
 tasks.register<JavaExec>("dumpStyleReview") {
@@ -76,25 +61,3 @@ compose.desktop {
     }
 }
 
-// Committed, beside the module, as the other modules' suites are.
-roborazzi {
-    outputDir.set(layout.projectDirectory.dir("screenshots"))
-}
-
-detekt {
-    buildUponDefaultConfig = true
-    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    source.setFrom("src/main/kotlin", "src/test/kotlin")
-    parallel = true
-}
-
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    jvmTarget = "21"
-    reports {
-        html.required.set(true)
-        xml.required.set(false)
-        sarif.required.set(false)
-        txt.required.set(false)
-        md.required.set(false)
-    }
-}
