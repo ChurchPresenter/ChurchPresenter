@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>OSR test page</title>
+<style>
+  body { margin: 0; font: 28px system-ui, sans-serif; color: #eee; background: #111; }
+  .row { display: flex; gap: 40px; padding: 40px; align-items: center; }
+  .spinner { width: 160px; height: 160px; border-radius: 24px;
+             background: linear-gradient(135deg, #4af, #a4f); animation: spin 2s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .bar { height: 24px; background: #4a4; animation: grow 3s ease-in-out infinite alternate; }
+  @keyframes grow { from { width: 5%; } to { width: 90%; } }
+  #clock { font: 96px ui-monospace, monospace; }
+  input, select, button { font: inherit; padding: 8px 12px; }
+  .tall { height: 1600px; background: linear-gradient(#111, #234); padding: 40px; }
+  a { color: #8cf; }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="spinner"></div>
+    <div><div id="clock">--:--:--.---</div><div id="frames">rAF: 0 fps</div></div>
+  </div>
+  <div class="row"><div class="bar"></div></div>
+  <div class="row">
+    <input id="text" placeholder="Type here (try Cyrillic: привіт)" size="30">
+    <select id="pick">
+      <option>First option</option><option>Second option</option><option>Third option</option>
+      <option>Fourth option</option><option>Fifth option</option>
+    </select>
+    <button onclick="document.getElementById('echo').textContent =
+      document.getElementById('text').value + ' / ' + document.getElementById('pick').value">Echo</button>
+  </div>
+  <div class="row"><div id="echo">(echo appears here)</div><a href="https://example.com" target="_blank">target=_blank link</a></div>
+  <div class="row" id="events">last event: none</div>
+  <div class="tall">Scroll target. Text to select with a drag: the quick brown fox jumps over the lazy dog.</div>
+<script>
+  const clock = document.getElementById('clock');
+  const frames = document.getElementById('frames');
+  let count = 0, last = performance.now();
+  function tick(now) {
+    const d = new Date();
+    clock.textContent = d.toTimeString().slice(0, 8) + '.' + String(d.getMilliseconds()).padStart(3, '0');
+    count++;
+    if (now - last >= 1000) { frames.textContent = 'rAF: ' + count + ' fps'; count = 0; last = now; }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+  const ev = document.getElementById('events');
+  ['mousedown', 'mouseup', 'click', 'dblclick', 'contextmenu', 'wheel', 'keydown'].forEach(t =>
+    addEventListener(t, e => {
+      ev.textContent = 'last event: ' + t + (e.button !== undefined ? ' button=' + e.button : '') +
+        (e.key ? ' key=' + e.key : '') + (e.clientX !== undefined ? ' at ' + e.clientX + ',' + e.clientY : '') +
+        (e.detail ? ' detail=' + e.detail : '');
+    }, true));
+</script>
+</body>
+</html>
