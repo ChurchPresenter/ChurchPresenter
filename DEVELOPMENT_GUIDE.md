@@ -229,6 +229,23 @@ wrapper:
 change touched that module, a module it depends on (from `./gradlew moduleGraph`) or the shared build
 files; `bash test-changed.sh` names the module tasks a change implies.
 
+### Adding a module
+
+1. `include(":<name>")` in `settings.gradle.kts`, with a comment saying what the module is.
+2. `<name>/build.gradle.kts`: the conventions it is, then its dependencies — nothing the
+   conventions already say (see "Build conventions" in AGENT.md):
+
+   ```kotlin
+   plugins {
+       id("cp.jvm-module")     // Kotlin/JVM, detekt, its suite and the coverage floor
+       id("cp.compose")        // if it draws anything
+       id("cp.screenshots")    // if it has *ScreenshotTest suites
+   }
+   ```
+3. `<name>/AGENT.md` (what it is, what uses it, its rules and gates) and `<name>/CLAUDE.md`
+   holding `@AGENT.md`; a row in AGENT.md's module table.
+4. A row in `.github/ci/plan_ci.py`'s `MODULES`, or CI warns that its suite never runs.
+
 ### DeckLink hardware tests
 
 `DeckLinkHardwareTest` drives a real Blackmagic card and is **opt-in** — opening the output pushes a

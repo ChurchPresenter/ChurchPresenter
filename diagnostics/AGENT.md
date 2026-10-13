@@ -101,7 +101,7 @@ Still, never log a URL with its query string or a header value — redaction is 
 - **detekt**: the app's `config/detekt/detekt.yml`, **no baseline**, main and test both in scope.
   One `@Suppress` at the declaration, with its reason: `TooManyFunctions` on `CrashReporter`, which
   is the single telemetry facade the whole app calls.
-- **Coverage**: the root build's default six counters at 85%, all of them — **no**
+- **Coverage**: `cp.test`'s default six counters at 85%, all of them — **no**
   `coverageFloors`, **no** `coverageExcludes`.
 
   Reaching that needed two seams, both of the shape the root `AGENT.md` describes under **Tests**:

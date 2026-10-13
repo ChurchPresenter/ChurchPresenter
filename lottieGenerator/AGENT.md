@@ -117,7 +117,7 @@ Both CI steps are gated on this directory or the shared build files changing.
 
 ## Gates
 
-- **Coverage**: the root build's default, 85% on all six counters — no `extra["coverageFloors"]`,
+- **Coverage**: `cp.test`'s default, 85% on all six counters — no `extra["coverageFloors"]`,
   and `extra["coverageExcludes"]` is the default `**/ComposableSingletons*` and nothing more.
   Branches and complexity clear 85% by under a point, so new branches need tests with them.
   The compiled (Path A) styles are covered by `CompiledStyleMatrixTest`, which renders every one

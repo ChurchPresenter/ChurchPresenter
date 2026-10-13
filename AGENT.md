@@ -163,7 +163,34 @@ module-specific notes there, not here.**
 
 Every one is a real Gradle module of this build and is committed directly (no git submodules, no
 second wrapper): tested with `./gradlew :<module>:test` on the root wrapper, dependency versions
-from `gradle/libs.versions.toml`, `version` from the root `subprojects` block — don't re-declare it.
+from `gradle/libs.versions.toml`, `group` and `version` from its convention plugin — don't re-declare
+them.
+
+### Build conventions live in `build-logic/`
+What every module shares is written **once**, as precompiled convention plugins in the included
+build `build-logic/` (`pluginManagement { includeBuild("build-logic") }`). A module's `plugins { }`
+block names the ones it is, and its build file carries only its dependencies and what differs:
+
+| Plugin | What it is |
+|---|---|
+| `cp.jvm-module` | The usual module: `cp.kotlin-jvm` + `cp.detekt` + `cp.test` |
+| `cp.kotlin-jvm` | Kotlin/JVM, Java 21, the build's group and version (`cp.base`) |
+| `cp.base` | The version and the okhttp/org.json security floors — on every module, the app included |
+| `cp.detekt` | detekt on `config/detekt/detekt.yml`, detekt-formatting, `src/main` + `src/test` (+ `src/testFixtures` with fixtures) |
+| `cp.test` | `useJUnitPlatform()`, the 10-minute timeout, `HungTestReporter`, JaCoCo and its floor |
+| `cp.test-home` | A suite whose code reads `user.home`: its own `build/test-home`, headless |
+| `cp.compose` | The Compose plugins; no `Res` class unless the module has `src/main/composeResources` |
+| `cp.screenshots` | Roborazzi, writing to `<module>/screenshots/` |
+| `cp.pitest` | Mutation testing, for the core-logic modules |
+| `cp.app-*` | `:composeApp` only — `provenance` (BuildConfig), `benchmarks`, `coverage`, `signing`, `natives` |
+
+The plugins compile against the third-party plugins but **only apply them by id**: the root
+`build.gradle.kts` loads each once (`apply false`), and a second copy from `build-logic` would be a
+second Kotlin Gradle plugin in another classloader. `:composeApp` applies its `cp.app-*` plugins
+with `apply(plugin = …)` at the point in its script where their tasks have to be configured —
+order matters there (a benchmark task's own forks and heap stick only when it is registered after
+the app's Test settings). What the app's script shares with them (version, git provenance, signing,
+the JDK) is `build-logic/src/main/kotlin/org/churchpresenter/build/AppBuild.kt`.
 
 ### POI is shared by four modules
 `:presentation-engine`, `:converter`, `:statistics` and `:composeApp` all pull Apache POI, and
@@ -173,10 +200,10 @@ jar (its XLS export is HSSF), so it brings no schema jar. The version lives in
 `gradle/libs.versions.toml` (`apache-poi`) and nowhere else, and `:composeApp` excludes the lite
 module graph-wide in a `configurations.configureEach` block.
 
-### JaCoCo lives in the root build
+### JaCoCo lives in `cp.test`
 The JaCoCo wiring, `useJUnitPlatform()` and the six-counter floor (85% on all six) are written
-**once** in the root `build.gradle.kts`, in the `subprojects { plugins.withId(...) }` block. A
-module's build file carries only what differs, set **above everything else** in the file:
+**once**, in `build-logic`'s `cp.test`. A module's build file carries only what differs, set right
+after its `plugins { }` block:
 - `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults; name only the
   counters that need a different number. `:canvas` and `:profiles` name one each
   (COMPLEXITY); every other module names none.
@@ -187,8 +214,8 @@ module's build file carries only what differs, set **above everything else** in 
 
 **Do not re-declare `jacocoTestReport`/`jacocoTestCoverageVerification` in a module** — configuring
 it there realizes the task before the `extra` above is set, and a second `violationRules` block adds
-rules rather than replacing them. `:composeApp` (Kotlin Multiplatform) registers its own task and is
-out of scope of the shared block.
+rules rather than replacing them. `:composeApp` (Kotlin Multiplatform) registers its own tasks, in
+`cp.app-coverage`, and does not apply `cp.test`.
 
 ### **NEVER exclude code from coverage without asking first**
 An exclude does not make code tested; it makes the gate stop asking, and it is invisible in the
@@ -256,7 +283,7 @@ Thresholds are deliberately not detekt's defaults: `LongMethod` 100, `LargeClass
 `LongParameterList` with `ignoreDefaultParameters: true` so the `*TestSupport.kt` DSL helpers are
 not flagged.
 
-**Formatting is detekt-formatting (ktlint)**, added to every module once from the root build. The
+**Formatting is detekt-formatting (ktlint)**, added to every module once by `cp.detekt`. The
 rules that are on are clean and auto-correctable — `./gradlew detekt --auto-correct` fixes what it
 finds. Deliberately **off**, each for rewriting a large share of the tree: `Indentation`,
 `ArgumentListWrapping`, `Wrapping`, `ImportOrdering`, `MultiLineIfElse`, `NoMultipleSpaces`,
@@ -344,7 +371,7 @@ failures that only appear under load:
   listed in `serialTestClasses` (`composeApp/build.gradle.kts`). `jvmTest` excludes them and is
   `finalizedBy` it. Passing `--tests` stands the exclusion down and runs the named class in `jvmTest`.
 - **A hung fork is killed with a diagnosis.** `HungTestReporter` (`:diagnostics` test fixtures,
-  on every module's test runtime from the root build) dumps every thread and halts the fork
+  on every module's test runtime from `cp.test`) dumps every thread and halts the fork
   (exit 93) once a test runs past its threshold (5 min, 150s in CI); the dump also goes to
   `<module>/build/test-results/<task>/hung-test-dump.txt`. Tighten it with `-PhangThresholdMs=30000`.
   Off-screen Compose scenes (`LowerThirdOffscreenRenderer`, `ComposeScenePump`) confine themselves

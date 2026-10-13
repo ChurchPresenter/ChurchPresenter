@@ -45,7 +45,7 @@ What that changed, and what it did not:
 
 ## Coverage
 
-The module carries the root build's six-counter floor, **85% on all six**, and names no
+The module carries `cp.test`'s six-counter floor, **85% on all six**, and names no
 `extra["coverageFloors"]` of its own — every counter clears the default. Do not add one back to
 make a change fit.
 `extra["coverageExcludes"]` is the default `**/ComposableSingletons*` only — the CLI diagnostics

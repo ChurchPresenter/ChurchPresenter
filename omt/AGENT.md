@@ -146,7 +146,7 @@ process, frames flagged as carrying alpha.
 ## Gates
 
 - **detekt**: the app's `config/detekt/detekt.yml`, **no baseline**, main and test in scope.
-- **Coverage**: the root build's default six counters at 85%, with no floors and no excludes, as
+- **Coverage**: `cp.test`'s default six counters at 85%, with no floors and no excludes, as
   `:ndi` has it — the JNA marshalling is covered against a stand-in `OmtLibC`, leaving
   `JnaOmtLibrary.load` the one uncovered call.
 

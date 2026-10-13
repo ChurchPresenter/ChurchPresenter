@@ -113,7 +113,7 @@ All three run in CI, gated on this directory or the shared build files changing.
 ## Gates
 
 - **detekt**: the app's `config/detekt/detekt.yml`, no baseline, main and test both in scope.
-- **Coverage**: the root build's default six counters at 85%, all of them — **no**
+- **Coverage**: `cp.test`'s default six counters at 85%, all of them — **no**
   `coverageFloors`, **no** `coverageExcludes`. `ModelInvariantsTest` uses `kotlin-reflect` to sweep
   the hierarchy, which is what keeps a newly added model from silently arriving uncovered.
 

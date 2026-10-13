@@ -165,7 +165,7 @@ the user asked to be able to lose without losing anything else.
 
 ## Coverage
 
-No `extra["coverageFloors"]` and no `extra["coverageExcludes"]`: the root build's 85% on all six
+No `extra["coverageFloors"]` and no `extra["coverageExcludes"]`: `cp.test`'s 85% on all six
 counters applies, and CI enforces it. `model/` is pure and carries the logic worth pinning — the
 duration and reference parsers, the month grid, the document's service list — and `CalendarStore`'s
 backup and recovery paths are reachable against a temp directory without composing anything.

@@ -84,7 +84,7 @@ it; they, and `:lower-third`'s `LowerThirdSequencerKeyTest`, `LowerThirdAtemUplo
   builder/parser into a separate object still leaves ~29, so no refactor reaches it.
 
   **Do not add a baseline file to this module, and do not add a `@Suppress` without asking.**
-- **Coverage**: **no `coverageFloors` override and no `coverageExcludes`.** The root build's
+- **Coverage**: **no `coverageFloors` override and no `coverageExcludes`.** `cp.test`'s
   default six counters at 85%, as written, and all six pass:
   INSTRUCTION 95.8%, BRANCH 88.0%, LINE 99.1%, COMPLEXITY 85.8%, METHOD 99.3%, CLASS 100%.
 

@@ -70,7 +70,7 @@ Both CI steps are gated on this directory or the shared build files changing.
 
 ## Gates
 
-- **Coverage**: the root build's default six counters at 85%, all six — this module declares **no**
+- **Coverage**: `cp.test`'s default six counters at 85%, all six — this module declares **no**
   `coverageFloors` and clears them comfortably. `extra["coverageExcludes"]` drops `**/ui/**` and
   `**/MainKt*`: the editor is Compose Desktop and needs a display. The data layer is the part that
   is measured, and it is the part that matters.
@@ -81,7 +81,7 @@ Both CI steps are gated on this directory or the shared build files changing.
 
 It was Kotlin Multiplatform with a `jvm()` target only (`src/jvmMain`, `src/jvmTest`). As a module
 of this build it is `kotlin("jvm")` with `src/main/kotlin` and `src/test/kotlin`, which is what puts
-it under the root build's shared JaCoCo wiring and makes its suite `:crossword:test` rather than
+it under `cp.test`'s shared JaCoCo wiring and makes its suite `:crossword:test` rather than
 `jvmTest`. Don't reintroduce the KMP layout.
 
 ## Dependencies
