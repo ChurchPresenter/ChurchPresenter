@@ -1367,6 +1367,11 @@ tasks.register<org.gradle.api.tasks.testing.Test>("monkeyTest") {
     listOf("monkeySeed" to "monkey.seed", "monkeySteps" to "monkey.steps").forEach { (gradle, system) ->
         providers.gradleProperty(gradle).orNull?.let { systemProperty(system, it) }
     }
+    // The run's own limit is UiMonkey's monkeyTimeout -- a minute plus 200 ms a step. The hung-test
+    // reporter is set a minute past it, so a run that is only long fails on that limit, and one that
+    // really hangs still ends with its thread dump.
+    val monkeySteps = providers.gradleProperty("monkeySteps").orNull?.toLongOrNull() ?: 300L
+    systemProperty("churchpresenter.test.hangThresholdMs", (120_000L + monkeySteps * 200L).toString())
 }
 
 // ── Soak test ─────────────────────────────────────────────────────────────────

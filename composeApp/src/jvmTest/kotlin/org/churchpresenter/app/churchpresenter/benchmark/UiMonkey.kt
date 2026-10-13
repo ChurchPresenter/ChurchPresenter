@@ -21,9 +21,22 @@ import java.io.File
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.fail
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 
 private const val DEFAULT_SEED = 20_261_011L
 private const val DEFAULT_STEPS = 300
+
+/** How often the elapsed time goes into the log, so a run's cost per step can be read off it. */
+private const val TIMING_EVERY = 100
+
+/**
+ * The wall clock a run may take: a fixed allowance for composing the root, then a step's worth for
+ * each step. A CI runner takes about 80 ms a step; this leaves room for more than twice that.
+ */
+internal fun monkeyTimeout(steps: Int): Duration = 60.seconds + (steps * 200).milliseconds
 
 /**
  * A smart monkey on the main window: from a seed, it presses what a mouse can press, types into
@@ -59,9 +72,13 @@ class UiMonkey : MainDesktopComposeHarness() {
     @Test
     fun `the main window survives a run of random presses, typing and keys`() {
         record("seed $seed, $steps steps")
-        root(withOneSong(), presenterManager = PresenterManager()) { _ ->
+        val start = TimeSource.Monotonic.markNow()
+        root(withOneSong(), presenterManager = PresenterManager(), testTimeout = monkeyTimeout(steps)) { _ ->
             val random = Random(seed)
-            repeat(steps) { step -> act(step, random) }
+            repeat(steps) { step ->
+                act(step, random)
+                if ((step + 1) % TIMING_EVERY == 0) record("${step + 1} steps in ${start.elapsedNow()}")
+            }
         }
         record("done: $steps steps, no exception")
     }
