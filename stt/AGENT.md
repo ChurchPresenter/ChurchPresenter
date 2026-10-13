@@ -8,8 +8,9 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 - the STT tab (`STTTab`);
 - `STTManager`, the socket.io client for the caption server. It also pulls the highlighted words
   and the Help Dev `.db` capture over REST;
-- `STTPresenter` (`presenter/`), the captions on an output, with the caption text, look and
-  reveal pace it is built from (`Caption*.kt`, `SttDripFeed.kt`, `SttRevealPace.kt`).
+- not `STTPresenter`, the captions on an output, nor the caption text, look and reveal pace it is
+  built from (`Caption*.kt`, `SttDripFeed.kt`, `SttRevealPace.kt`): those are `:presenter`'s, in
+  this module's `presenter` package, so the output can draw them without depending on a tab.
 
 A real Gradle module of this build: `include(":stt")`, `implementation(projects.stt)`. Its consumers
 are `:composeApp` and `:live-output`. The presenters, the stage monitor and the Bible tab's

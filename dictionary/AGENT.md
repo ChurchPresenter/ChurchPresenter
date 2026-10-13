@@ -8,7 +8,8 @@ The **Strong's dictionary**:
 - the tab (`DictionaryTab` and its panes);
 - `DictionaryViewModel`;
 - the interlinear index (`InterlinearRepository`);
-- `DictionaryPresenter` (`presenter/`), the entry's card on an output;
+- not `DictionaryPresenter`, the entry's card on an output: that is `:presenter`'s, in this module's
+  `presenter` package, so the output can draw it without depending on a tab;
 - the data both read: the Strong's dictionaries, in English and Russian, and the Greek and Hebrew
   interlinear files.
 

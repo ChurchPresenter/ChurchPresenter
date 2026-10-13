@@ -70,7 +70,7 @@
 - `dictionary/` (the `:dictionary` Gradle module) — the Strong's dictionary tab (`DictionaryTab.kt` and
   its panes), `DictionaryViewModel`, the interlinear index and the bundled Strong's/interlinear data;
   `:server`'s `StrongsDictionaryRepository.kt` serves the same data to the companion API
-- `dictionary/…/presenter/DictionaryPresenter.kt` — the dictionary card on the output
+- `presenter/…/dictionary/presenter/DictionaryPresenter.kt` — the dictionary card on the output
 - `profiles/…/ProfileDictionaryPage.kt`, `profiles/…/DictionaryPart.kt` — how the dictionary card looks on each output, edited on Profiles → Dictionary
 - `bible-tab/…/BibleEngineClient.kt` — auto-follow speech detection client
 - `bible/` (the `:bible` Gradle module) — `Bible.kt`, `BibleBook.kt`, `BibleSearch.kt`,
@@ -159,7 +159,7 @@
 - `tabs/AppAnnouncementsTab.kt` — the app's wrapper: the live output, the stage monitors and the
   preview-output picker; `live-output/…/PresenterAnnouncementsOutput.kt` — the tab's `AnnouncementsOutput`
 - `data/settings/AnnouncementsSettings.kt`
-- `announcements/…/presenter/AnnouncementsPresenter.kt` — the announcement on the output
+- `presenter/…/announcements/presenter/AnnouncementsPresenter.kt` — the announcement on the output
 - `utils/TimerStateManager.kt`
 
 ## Web & Canvas
@@ -199,9 +199,9 @@
   `STTTranscript.kt` and the Help Dev `STTCapture.kt`)
 - `tabs/AppSTTTab.kt` — the app's wrapper, which supplies the live mode and the caption settings dialog
 - `data/settings/STTSettings.kt`
-- `stt/…/presenter/STTPresenter.kt` — the captions on the output
+- `presenter/…/stt/presenter/STTPresenter.kt` — the captions on the output
 - `profiles/…/ProfileCaptionsPage.kt`, `profiles/…/CaptionReadingGroup.kt` — the caption look and reading settings, edited on Profiles → Live captions
-- `stt/…/presenter/` — `CaptionBody.kt` (line breaks, wrapping, capitals, dimming), `CaptionLook.kt` (card, band, margins, silence fade), `CaptionTicker.kt`, `CaptionInterleave.kt`, `CaptionLanguages.kt`, and the reveal pace in `SttDripFeed.kt` and `SttRevealPace.kt`
+- `presenter/…/stt/presenter/` — `CaptionBody.kt` (line breaks, wrapping, capitals, dimming), `CaptionLook.kt` (card, band, margins, silence fade), `CaptionTicker.kt`, `CaptionInterleave.kt`, `CaptionLanguages.kt`, and the reveal pace in `SttDripFeed.kt` and `SttRevealPace.kt`
 - `composables/CaptionText.kt` — `BottomAlignedText`, which draws only the lines in its window (also used by video subtitles)
 - `dialogs/STTSettingsDialog.kt` — the install-wide Bible-engine options
 
@@ -218,7 +218,7 @@
 - `tabs/AppQATab.kt` — the app's wrapper, which supplies the remote-access dialog;
   `live-output/…/PresenterQAOutput.kt` — the tab's `QAOutput`, over `PresenterManager`
 - `data/settings/QASettings.kt`
-- `qa/…/presenter/QAPresenter.kt` — the question and the QR code on the output; the QR image itself is `generateQRCodeBitmap` in `:shared-ui`
+- `presenter/…/qa/presenter/QAPresenter.kt` — the question and the QR code on the output; the QR image itself is `generateQRCodeBitmap` in `:shared-ui`
 - `profiles/…/ProfileOverlayPages.kt` — the question and QR look, edited on Profiles → Q&A
 - `dialogs/QARemoteDialog.kt` — links, public access, rate limit and the QR message
 - `core-models/src/main/kotlin/.../models/qa/Question.kt` (the `:core-models` module)

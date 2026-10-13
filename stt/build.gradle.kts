@@ -36,6 +36,8 @@ dependencies {
     testFixturesImplementation(libs.compose.uiTest)
 
     testImplementation(kotlin("test"))
+    // The caption screenshot suites draw STTPresenter, which is :presenter's.
+    testImplementation(projects.presenter)
     testImplementation(testFixtures(projects.sharedUi))
     testImplementation(libs.compose.uiTestJunit4)
     testImplementation(libs.compose.uiTest)

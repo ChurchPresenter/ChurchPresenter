@@ -5,11 +5,11 @@ Rules, structure and commands for this module only. The repo-wide rules are in t
 ## What it is
 
 The **Announcements** tab: an announcement's text and look, and its timer (countdown, count-up,
-specific time or clock). The tab, `AnnouncementsViewModel` and `AnnouncementsPresenter` (`presenter/`,
-the announcement on an output) live here.
+specific time or clock). The tab and `AnnouncementsViewModel` live here; `AnnouncementsPresenter`,
+the announcement on an output, is `:presenter`'s, in this module's `presenter` package.
 
 A real Gradle module of this build: `include(":announcements")`,
-`implementation(projects.announcements)`. Its consumers are `:composeApp` and `:live-output`.
+`implementation(projects.announcements)`. Its consumer is `:composeApp`.
 `:live-output`'s `PresenterManager` uses `AnnouncementsViewModel.formatTimer`.
 
 It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings` and `:theme`, and nothing of

@@ -24,10 +24,7 @@ dependencies {
     implementation(projects.media)
     implementation(projects.web)
     implementation(projects.presentationEngine)
-    implementation(projects.qa)
     implementation(projects.stt)
-    implementation(projects.dictionary)
-    implementation(projects.announcements)
     implementation(projects.lowerThird)
     implementation(projects.songChords)
     implementation(projects.server)
@@ -47,6 +44,8 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)
 
+    // AnnouncementsTimerControlTest drives the real tab view model against the manager.
+    testImplementation(projects.announcements)
     testImplementation(kotlin("test"))
     testImplementation(testFixtures(projects.sharedUi))
     testImplementation(testFixtures(projects.coreModels))

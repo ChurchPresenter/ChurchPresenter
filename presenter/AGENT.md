@@ -14,7 +14,11 @@ What the song and Bible outputs draw:
   over `PersistentBackground`), and the lower-third layout;
 - the Lottie bands (`BibleLottieBand`, `BibleLottieTemplate`, `SongLottieBand` and their slots,
   text fitting and clock);
-- `ChordChart`, the chord rows a song slide draws.
+- `ChordChart`, the chord rows a song slide draws;
+- the tabs' own output cards, in those tabs' packages so nothing that names them moved:
+  `QAPresenter`/`QAQRCodePresenter` (`qa.presenter`), `STTPresenter` and the caption files
+  (`stt.presenter`), `AnnouncementsPresenter` (`announcements.presenter`) and `DictionaryPresenter`
+  (`dictionary.presenter`). An output draws them, so they live where the output may reach.
 
 A real Gradle module of this build: `include(":presenter")`, `implementation(projects.presenter)`.
 Its consumers are `:composeApp` and `:live-output`. `:live-output` keeps the output windows

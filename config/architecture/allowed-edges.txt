@@ -5,12 +5,9 @@
 :bible-tab -> :stt            # STTManager, the caption client: an engine living in a tab module
 :canvas -> :media             # the scene renderer's video sources and VLC checks
 :canvas -> :slides            # PictureDecoder, for image sources
-:live-output -> :announcements # the AnnouncementsOutput port, the presenter, formatTimer
 :live-output -> :canvas       # scenes, cameras, DeckLink and the network inputs it draws
-:live-output -> :dictionary   # DictionaryPresenter and StrongsEntry
 :live-output -> :lower-third  # the lower-third presenter and render cache
 :live-output -> :media        # MediaViewModel, the players and VLC discovery
-:live-output -> :qa           # the QAOutput port and the QA presenters
 :live-output -> :server       # BrowserSourceFrame, and CompanionServer for its URL
 :live-output -> :slides       # the slide presenters, PresentationFrame and the SlidesOutput port
 :live-output -> :stt          # STTManager and STTPresenter
