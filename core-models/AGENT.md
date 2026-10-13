@@ -36,7 +36,7 @@ than dropping a file at the root.
 | `presentation/` | `PresentationLoadError.kt`, `AnimationType.kt` |
 | `stt/` | `STTSegment.kt` — one caption segment and a `HighlightedWord`, as the caption client produces them and an output draws them |
 | `dictionary/` | `StrongsEntry.kt` — one Strong's dictionary entry |
-| `output/` | `BrowserSourceFrame.kt` — one PNG delta of a Browser Source output, from the renderer to the server. A plain class: it is passed through, never compared |
+| `output/` | `BrowserSourceFrame.kt` — one PNG delta of a Browser Source output (its `FrameRect` and the frame size), from the renderer to the server. A plain class: it is passed through, never compared |
 
 The songs package was `core.models.songs` — a second package root left over from the Song Library
 extraction — until it was folded in here. **One package root: `org.churchpresenter.app.churchpresenter`.**

@@ -130,10 +130,10 @@ internal class BrowserSourceHub(
      */
     internal fun encodeBrowserSourceFrameMessage(frame: BrowserSourceFrame): ByteArray {
         val buf = java.nio.ByteBuffer.allocate(24 + frame.png.size)
-        buf.putInt(frame.x)
-        buf.putInt(frame.y)
-        buf.putInt(frame.rectWidth)
-        buf.putInt(frame.rectHeight)
+        buf.putInt(frame.rect.x)
+        buf.putInt(frame.rect.y)
+        buf.putInt(frame.rect.width)
+        buf.putInt(frame.rect.height)
         buf.putInt(frame.fullWidth)
         buf.putInt(frame.fullHeight)
         buf.put(frame.png)
