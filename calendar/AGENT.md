@@ -8,7 +8,7 @@ The **Calendar Manager**: every planned service, on a month grid, each with a ru
 from the Help menu beside the Song Library Manager. A real Gradle module of this build —
 `include(":calendar")`, `implementation(projects.calendar)`.
 
-It takes `:core-models`, `:theme` and `:show-control` (what an `obsScene` or `atemKey` cue comes to,
+It takes `:calendar-core` (its model), `:core-models`, `:theme` and `:show-control` (what an `obsScene` or `atemKey` cue comes to,
 `cueAsAction`, run by the app through `CalendarHost.runAction`), and nothing else of the app's.
 
 ## The one decision the rest of this module rests on
@@ -48,28 +48,33 @@ and the module stops compiling with unresolved `Res` references that no source f
 
 ## Layout
 
+**`model/` is `:calendar-core`'s**, in the same package, with `CueFeed`, `ScheduleServiceLink` and
+`CalendarBibleBook`: the Schedule tab, the helper and the song editor read the model, and a tab may
+not depend on another tab's window. This module takes it with `api`, so its consumers see it too.
+The rows below marked *core* are there; the rest are here.
+
 | File | Holds |
 |---|---|
-| `model/CalendarModels.kt` | `CalendarDocument`, `PlannedService`, `ServiceKind`, `SectionStyle` — the file format; `ServiceCue` is the pre-row cue shape, read only |
-| `model/CalendarTime.kt` | Dates, the locale week start, month names, the grid's dates. Pure |
-| `model/DurationText.kt` | `4:30` ⇄ 270 seconds. Pure |
-| `model/ClockText.kt` | `18:30` ⇄ `6:30 PM`: the clock format, and what a time field accepts. Pure |
-| `model/RunClock.kt`, `model/RowClock.kt` | Each row's projected clock time, and whether it is exact |
-| `model/CueTiming.kt` | When a cue fires, where a cue row goes in the list, what an action can point at. Pure |
-| `model/CueEngine.kt` | Which cue rows are due now — the engine's whole decision. Pure |
-| `model/ServiceMove.kt` | Moving a service: every pinned row and cue travels with its start time. Pure |
-| `model/AutoLoad.kt` | When a service is due to be loaded: its first row's clock time, less five minutes. Pure |
-| `model/ScheduleWriteBack.kt` | Which service the Schedule tab holds (by row id), and its rows written back into that service. Pure |
-| `model/CueStatus.kt` | Each cue's fired / next status against a clock, the rows and timing as they go into the Schedule, the old-file migration. Pure |
-| `model/TimerRows.kt` | Reading and setting a timer row's length. Timers come in as presets. Pure |
-| `model/ReferenceParser.kt` | `John 3:16-17` → a `BibleVerseItem`; and the browsed-verse builder |
-| `model/RowIdentity.kt` | Re-keying rows, and the unique-id pass every load goes through |
-| `model/ServiceTemplate.kt` | What a new service starts from |
-| `model/RunOfShowPdf.kt` | The PDF export, via PDFBox |
+| *core* `model/CalendarModels.kt` | `CalendarDocument`, `PlannedService`, `ServiceKind`, `SectionStyle` — the file format; `ServiceCue` is the pre-row cue shape, read only |
+| *core* `model/CalendarTime.kt` | Dates, the locale week start, month names, the grid's dates. Pure |
+| *core* `model/DurationText.kt` | `4:30` ⇄ 270 seconds. Pure |
+| *core* `model/ClockText.kt` | `18:30` ⇄ `6:30 PM`: the clock format, and what a time field accepts. Pure |
+| *core* `model/RunClock.kt`, `model/RowClock.kt` | Each row's projected clock time, and whether it is exact |
+| *core* `model/CueTiming.kt` | When a cue fires, where a cue row goes in the list, what an action can point at. Pure |
+| *core* `model/CueEngine.kt` | Which cue rows are due now — the engine's whole decision. Pure |
+| *core* `model/ServiceMove.kt` | Moving a service: every pinned row and cue travels with its start time. Pure |
+| *core* `model/AutoLoad.kt` | When a service is due to be loaded: its first row's clock time, less five minutes. Pure |
+| *core* `model/ScheduleWriteBack.kt` | Which service the Schedule tab holds (by row id), and its rows written back into that service. Pure |
+| *core* `model/CueStatus.kt` | Each cue's fired / next status against a clock, the rows and timing as they go into the Schedule, the old-file migration. Pure |
+| *core* `model/TimerRows.kt` | Reading and setting a timer row's length. Timers come in as presets. Pure |
+| *core* `model/ReferenceParser.kt` | `John 3:16-17` → a `BibleVerseItem`; and the browsed-verse builder |
+| *core* `model/RowIdentity.kt` | Re-keying rows, and the unique-id pass every load goes through |
+| *core* `model/ServiceTemplate.kt` | What a new service starts from |
+| *core* `model/RunOfShowPdf.kt` | The PDF export, via PDFBox |
 | `CalendarStore.kt` | `calendar.json`, its three backups and its corrupt-file quarantine |
 | `CalendarState.kt` | What the window is showing; the only thing that writes the store |
 | `CalendarHost.kt` | The whole surface between this module and the app |
-| `CueRunner.kt` | The automation engine over the live schedule, `fireCue` (the one place a cue becomes host calls) and `CueFeed`, what has fired |
+| `CueRunner.kt` | The automation engine over the live schedule and `fireCue` (the one place a cue becomes host calls); `CueFeed`, what has fired, is *core* |
 | `ServiceAutoLoader.kt` | Loads the service that is about to start into the Schedule tab, with the window closed |
 | `ui/Sheet.kt` | The dialog scaffold and the parts every dialog is built from |
 | `ui/Fields.kt` | `CompactTextField`, `FieldLabel` and the `commitOnExit` modifier |

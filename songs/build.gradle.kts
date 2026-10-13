@@ -19,7 +19,7 @@ dependencies {
     // live time the way the calendar does. The Background button is the app's, passed in as a slot,
     // so `:profiles` is only on the test classpath below.
     implementation(projects.presenter)
-    implementation(projects.calendar)
+    implementation(projects.calendarCore)
 
     // Mac SongPresenter `.sps` libraries are SQLite files.
     implementation(libs.sqlite.jdbc)

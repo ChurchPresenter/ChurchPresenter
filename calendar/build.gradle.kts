@@ -14,6 +14,8 @@ dependencies {
     // A run of show is a List<ScheduleItem> and nothing else, so the planner and the Schedule tab
     // speak one model; SongLibrary is how the add-item picker reads the song folder.
     implementation(projects.coreModels)
+    // The model the window draws: in this module's API, since its public functions take it.
+    api(projects.calendarCore)
     // What an obsScene or atemKey cue does is an action, run by the app.
     api(projects.showControl)
     implementation(projects.theme)
@@ -30,6 +32,7 @@ dependencies {
     implementation(libs.compose.material.icons.extended)
 
     testImplementation(kotlin("test"))
+    testImplementation(testFixtures(projects.calendarCore))
     testImplementation(libs.compose.uiTestJunit4)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(testFixtures(projects.sharedUi))

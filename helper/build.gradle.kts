@@ -13,7 +13,7 @@ dependencies {
     implementation(projects.icons)
     implementation(projects.coreModels)
     // parseReference, for "show John 3:16" -- the light reference parser, not :bible-engine's.
-    implementation(projects.calendar)
+    implementation(projects.calendarCore)
     implementation(projects.diagnostics)
     implementation(projects.settings)
     implementation(projects.theme)

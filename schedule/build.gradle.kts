@@ -16,7 +16,7 @@ dependencies {
     implementation(projects.coreModels)
     implementation(projects.settings)
     implementation(projects.theme)
-    implementation(projects.calendar)
+    implementation(projects.calendarCore)
     // What a row does when it goes live is a list of show-control actions.
     api(projects.showControl)
     implementation(projects.diagnostics)
@@ -35,7 +35,7 @@ dependencies {
     testFixturesImplementation(projects.settings)
     testFixturesImplementation(projects.coreModels)
     testFixturesImplementation(projects.sharedUi)
-    testFixturesImplementation(projects.calendar)
+    testFixturesImplementation(projects.calendarCore)
     testFixturesImplementation(testFixtures(projects.sharedUi))
     testFixturesImplementation(compose.desktop.currentOs)
     testFixturesImplementation(libs.compose.material3)

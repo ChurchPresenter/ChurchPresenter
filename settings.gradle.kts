@@ -101,6 +101,10 @@ include(":bible")
 // from settings and from any `.schedule` file. Depended on by :composeApp, which opens it from the
 // Help menu beside the Song Library Manager and loads a planned service into the Schedule tab.
 include(":calendar")
+// The Calendar Manager's model without its window: a run of show, its clocks and cues, the
+// reference parser and the PDF export. The Schedule tab, the helper and the song editor read it;
+// :calendar draws it.
+include(":calendar-core")
 
 include(":strings")
 
