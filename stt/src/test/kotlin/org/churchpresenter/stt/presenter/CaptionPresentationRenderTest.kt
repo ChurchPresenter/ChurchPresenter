@@ -11,7 +11,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.stt.STTSegment
+import org.churchpresenter.core.models.stt.STTSegment
 import org.churchpresenter.settings.CAPTION_BOX_BAND
 import org.churchpresenter.settings.CAPTION_STYLE_TICKER
 import org.churchpresenter.settings.CaptionReading

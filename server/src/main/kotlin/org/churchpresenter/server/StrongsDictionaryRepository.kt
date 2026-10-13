@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.churchpresenter.dictionary.data.DictionaryFiles
 import org.churchpresenter.dictionary.data.InterlinearRepository
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 
 private const val MAX_SEARCH_RESULTS = 500
 private const val MAX_OCCURRENCE_RESULTS = 200

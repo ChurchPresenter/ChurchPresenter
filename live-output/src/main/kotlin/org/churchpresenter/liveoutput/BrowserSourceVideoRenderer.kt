@@ -1,6 +1,6 @@
 package org.churchpresenter.liveoutput
 
-import org.churchpresenter.server.BrowserSourceFrame
+import org.churchpresenter.core.models.output.BrowserSourceFrame
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi

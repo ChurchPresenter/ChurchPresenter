@@ -32,6 +32,7 @@ import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.intOrNull
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.core.models.output.BrowserSourceFrame
 
 /**
  * Routes for the OBS/vMix Browser Source overlay page and its frame WebSocket.

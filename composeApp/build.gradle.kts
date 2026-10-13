@@ -38,6 +38,12 @@ plugins {
     jacoco
 }
 
+// Models from Compose-free modules that composables take, declared stable, as cp.compose does for
+// every module: see the file.
+composeCompiler {
+    stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("config/compose/stability.conf"))
+}
+
 // The software bill of materials: every library the shipped app runs with, and nothing it is only
 // built or tested with. `build.yml` attaches the JSON to each release.
 tasks.cyclonedxDirectBom {

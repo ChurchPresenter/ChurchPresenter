@@ -34,7 +34,7 @@ import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.settings.TextBox
 import org.churchpresenter.settings.textBoxKey
 import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.stt.STTSegment
+import org.churchpresenter.core.models.stt.STTSegment
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

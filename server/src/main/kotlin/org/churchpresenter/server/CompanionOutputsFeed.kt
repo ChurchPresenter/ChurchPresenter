@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import org.churchpresenter.settings.AtemSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.core.models.output.BrowserSourceFrame
 
 /*
  * What the outputs and the media player tell the server: media state, the ATEM's settings, the

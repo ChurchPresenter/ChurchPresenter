@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.sp
 import org.churchpresenter.sharedui.composables.OutlinedText
 import org.churchpresenter.sharedui.composables.backdropRoom
 import org.churchpresenter.sharedui.composables.rememberTextBackdropPainter
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.settings.DICTIONARY_DEFINITION_BOX
 import org.churchpresenter.settings.DICTIONARY_KJV_BOX
 import org.churchpresenter.settings.DICTIONARY_REFERENCE_BOX

@@ -5,6 +5,7 @@ import androidx.compose.ui.text.AnnotatedString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.stt.HighlightedWord
 
 /**
  * How the STT tab colours the words the STT server asked it to highlight.

@@ -12,7 +12,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.settings.DICTIONARY_DEFINITION_BOX
 import org.churchpresenter.settings.DICTIONARY_KJV_BOX
 import org.churchpresenter.settings.DICTIONARY_REFERENCE_BOX

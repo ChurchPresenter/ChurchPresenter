@@ -10,22 +10,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.net.URI
-
-data class STTSegment(
-    val id: Int,
-    val timestamp: String,
-    val text: String,
-    val start: Double,
-    val end: Double,
-    val completed: Boolean
-)
-
-data class HighlightedWord(
-    val word: String,
-    val color: String,
-    val caseSensitive: Boolean = false,
-    val isRegex: Boolean = false
-)
+import org.churchpresenter.core.models.stt.STTSegment
+import org.churchpresenter.core.models.stt.HighlightedWord
 
 class STTManager {
 

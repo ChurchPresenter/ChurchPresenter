@@ -12,6 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.output.BrowserSourceFrame
 
 class BrowserSourceHubTest {
 

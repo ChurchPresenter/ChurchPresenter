@@ -4,7 +4,7 @@ import org.churchpresenter.settings.MediaLook
 import org.churchpresenter.settings.OutputLook
 import org.churchpresenter.settings.SlideLook
 import org.churchpresenter.presenter.showsContentFor
-import org.churchpresenter.server.BrowserSourceFrame
+import org.churchpresenter.core.models.output.BrowserSourceFrame
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

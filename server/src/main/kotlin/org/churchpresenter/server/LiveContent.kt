@@ -2,7 +2,7 @@ package org.churchpresenter.server
 
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.core.models.songs.LyricSection
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 
 /**
  * Whatever is live right now, as [CompanionServer.updateLiveState] announces it. [mode] is the

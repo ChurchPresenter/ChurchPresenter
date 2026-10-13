@@ -12,6 +12,8 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import org.churchpresenter.core.models.stt.STTSegment
+import org.churchpresenter.core.models.stt.HighlightedWord
 
 private const val HTTP_OK = 200
 private const val DEFAULT_HIGHLIGHT_COLOR = "#ffff00"

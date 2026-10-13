@@ -1,6 +1,6 @@
 package org.churchpresenter.app.churchpresenter.remote
 
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.app.churchpresenter.ScheduleActions
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.bible.SelectedVerse

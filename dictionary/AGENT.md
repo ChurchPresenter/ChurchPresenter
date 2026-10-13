@@ -14,7 +14,9 @@ The **Strong's dictionary**:
 
 A real Gradle module of this build: `include(":dictionary")`, `implementation(projects.dictionary)`.
 Its consumers are `:composeApp` and `:live-output`. Its companion server serves the same data
-through its own `StrongsDictionaryRepository`, and its stage monitor shows a `StrongsEntry`.
+through its own `StrongsDictionaryRepository`, and its stage monitor shows a `StrongsEntry`. That one
+entry is a model in `:core-models` (`core.models.dictionary`), since the output, the server and this
+module all carry it.
 
 It takes `:shared-ui`, `:core-models`, `:strings`, `:icons`, `:settings`, `:theme` and `:bible`, and nothing of
 `:composeApp`'s.

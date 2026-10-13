@@ -8,7 +8,7 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.bible.MAX_BIBLE_SCAN_DEPTH
 import org.churchpresenter.bible.readTranslationTitle
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import java.io.File
 
 /** Choosing an entry, and moving back and forward through the ones chosen. */

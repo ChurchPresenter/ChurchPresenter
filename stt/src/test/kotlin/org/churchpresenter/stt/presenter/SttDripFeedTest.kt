@@ -1,6 +1,6 @@
 package org.churchpresenter.stt.presenter
 
-import org.churchpresenter.stt.STTSegment
+import org.churchpresenter.core.models.stt.STTSegment
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame

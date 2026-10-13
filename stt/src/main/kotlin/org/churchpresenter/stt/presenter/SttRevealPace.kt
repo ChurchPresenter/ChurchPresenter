@@ -1,6 +1,6 @@
 package org.churchpresenter.stt.presenter
 
-import org.churchpresenter.stt.STTSegment
+import org.churchpresenter.core.models.stt.STTSegment
 import org.churchpresenter.settings.CAPTION_STYLE_POP_ON
 import org.churchpresenter.settings.CAPTION_STYLE_RSVP
 import org.churchpresenter.settings.CAPTION_STYLE_TICKER

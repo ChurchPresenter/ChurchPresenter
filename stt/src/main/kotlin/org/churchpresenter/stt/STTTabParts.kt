@@ -61,6 +61,8 @@ import org.churchpresenter.sharedui.composables.GoLiveButton
 import org.churchpresenter.sharedui.composables.StyledTextField
 import org.churchpresenter.theme.semantic
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.core.models.stt.STTSegment
+import org.churchpresenter.core.models.stt.HighlightedWord
 
 private const val IN_PROGRESS_ALPHA = 0.6f
 

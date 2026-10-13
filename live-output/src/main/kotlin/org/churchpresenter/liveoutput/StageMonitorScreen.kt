@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import org.churchpresenter.dictionary.data.StrongsEntry
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.sharedui.presenter.BoxedItem
 import org.churchpresenter.sharedui.presenter.rectIn
 import org.churchpresenter.settings.DictionarySettings

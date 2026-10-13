@@ -1,4 +1,4 @@
-package org.churchpresenter.dictionary.data
+package org.churchpresenter.core.models.dictionary
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

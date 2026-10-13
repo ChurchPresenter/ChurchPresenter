@@ -29,6 +29,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.churchpresenter.core.models.output.BrowserSourceFrame
 
 /**
  * The musicians' transpose buttons on a Browser Source page (issue #649): the handshake that asks

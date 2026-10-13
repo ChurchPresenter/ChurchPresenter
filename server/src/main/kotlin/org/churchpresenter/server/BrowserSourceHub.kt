@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.core.models.output.BrowserSourceFrame
 
 /**
  * The OBS/vMix Browser Source outputs: which outputs exist, the frame stream each renderer
