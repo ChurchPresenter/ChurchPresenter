@@ -14,6 +14,8 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
+import kotlinx.coroutines.runBlocking
+import org.churchpresenter.lowerthird.render.LottieRenderCache
 
 // ── Reading and driving what was rendered ───────────────────────────────────────────────────────
 // (renderedText/showsExactly/showsContainingText are shared — see TabRenderedText.kt)
@@ -69,9 +71,13 @@ const val ATEM_READY = "Ready to upload"
  * `1f`, so the dialog's first composition claims "ready" before its `LaunchedEffect` has started the
  * render and reported back - checking the text without letting that effect run could pass on the
  * claim rather than on the render.
+ *
+ * The render itself is joined, not polled: a cold clip is every frame at full size, which a busy
+ * runner can take longer than [WAIT_TIMEOUT_MS] over. Once it has finished, the line is a frame away.
  */
 fun ComposeUiTest.waitForAtemPrepared() {
     waitForIdle()
+    runBlocking { LottieRenderCache.awaitInFlight() }
     waitUntil("the ATEM frame render finished", WAIT_TIMEOUT_MS) {
         onAllNodesWithText(ATEM_READY)
             .fetchSemanticsNodes(atLeastOneRootRequired = false)

@@ -100,6 +100,14 @@ object LottieRenderCache : LottieRenderPolicy by LottieRenderSizes {
 
     // ── Preparation ────────────────────────────────────────────────────────────
 
+    /**
+     * Suspends until every render in flight now has finished, failed or been cancelled. Nothing in
+     * the app waits on it; a test joins the render a dialog started rather than polling its progress.
+     */
+    suspend fun awaitInFlight() {
+        jobs.values.toList().forEach { it.join() }
+    }
+
     fun isReady(lottieJson: String, variant: Variant): Boolean =
         LottieCacheFiles.cacheFile(LottieCacheFiles.keyFor(lottieJson, variant)).exists()
 
