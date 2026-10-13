@@ -576,6 +576,7 @@
     <string name="schedule_option_buttons">Düğmeler</string>
     <string name="toggle_menu_count">%1$d / %2$d</string>
     <string name="toggle_menu_show_all">Tümünü göster</string>
+    <string name="toggle_menu_always">Her zaman</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Etiket Ekle</string>
@@ -848,6 +849,7 @@
     <string name="remove_from_favorites">Sık kullanılanlardan çıkar</string>
     <string name="song_play_count">Kullanım</string>
     <string name="song_columns">Sütunları süz</string>
+    <string name="song_columns_show_in_list">Listede göster</string>
     <string name="bible_no_primary_title">Birincil Kutsal Kitap Ayarlanmadı</string>
     <string name="bible_no_primary_hint">⚙ Ayarlar'ı açıp Kutsal Kitap sekmesine gidin, ardından:</string>
     <string name="bible_no_primary_step1">1. Kutsal Kitap klasörünü belirleyin</string>

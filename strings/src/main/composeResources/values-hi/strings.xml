@@ -576,6 +576,7 @@
     <string name="schedule_option_buttons">बटन</string>
     <string name="toggle_menu_count">%2$d में से %1$d</string>
     <string name="toggle_menu_show_all">सभी दिखाएँ</string>
+    <string name="toggle_menu_always">हमेशा</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">लेबल जोड़ें</string>
@@ -848,6 +849,7 @@
     <string name="remove_from_favorites">पसंदीदा से हटाएँ</string>
     <string name="song_play_count">कितनी बार</string>
     <string name="song_columns">कॉलम छाँटें</string>
+    <string name="song_columns_show_in_list">सूची में दिखाएँ</string>
     <string name="bible_no_primary_title">कोई मुख्य बाइबल सेट नहीं है</string>
     <string name="bible_no_primary_hint">⚙ सेटिंग्स खोलें और बाइबल टैब पर जाएँ, फिर:</string>
     <string name="bible_no_primary_step1">1. बाइबल संग्रह फ़ोल्डर चुनें</string>

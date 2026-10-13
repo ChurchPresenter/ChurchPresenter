@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.toggle_menu_always
 import org.churchpresenter.strings.generated.resources.toggle_menu_count
 import org.churchpresenter.strings.generated.resources.toggle_menu_show_all
 import org.churchpresenter.theme.AppShape
@@ -107,6 +109,9 @@ fun ToggleMenuHeader(title: String, shown: Int, total: Int, onShowAll: () -> Uni
 /**
  * One thing a toggle menu shows or hides: its own icon on the left, so the list reads as the
  * buttons themselves, and a check on the right. [icon] is optional — the tab list has none.
+ *
+ * A [locked] item can't be hidden, so it reads as always shown, with a lock in place of the check,
+ * rather than as a greyed-out check that looks broken.
  */
 @Composable
 fun ToggleMenuItem(
@@ -117,7 +122,9 @@ fun ToggleMenuItem(
     icon: Painter? = null,
     accent: Color = MaterialTheme.colorScheme.primary,
     enabled: Boolean = true,
+    locked: Boolean = false,
 ) {
+    val toggleEnabled = enabled && !locked
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     val scheme = MaterialTheme.colorScheme
@@ -128,14 +135,14 @@ fun ToggleMenuItem(
             .alpha(if (enabled) 1f else DISABLED_ALPHA)
             .clip(ToggleItemShape)
             .background(
-                if (hovered && enabled) scheme.onSurface.copy(alpha = ITEM_HOVER_ALPHA) else Color.Transparent
+                if (hovered && toggleEnabled) scheme.onSurface.copy(alpha = ITEM_HOVER_ALPHA) else Color.Transparent
             )
-            .hoverable(interaction, enabled = enabled)
+            .hoverable(interaction, enabled = toggleEnabled)
             .toggleable(
                 value = checked,
                 interactionSource = interaction,
                 indication = null,
-                enabled = enabled,
+                enabled = toggleEnabled,
                 role = Role.Checkbox,
                 onValueChange = onCheckedChange,
             )
@@ -164,7 +171,24 @@ fun ToggleMenuItem(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-        ToggleMenuCheck(checked)
+        if (locked) ToggleMenuLock() else ToggleMenuCheck(checked)
+    }
+}
+
+@Composable
+private fun ToggleMenuLock() {
+    val tint = MaterialTheme.colorScheme.onSurfaceVariant
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            stringResource(Res.string.toggle_menu_always),
+            style = MaterialTheme.typography.labelSmall,
+            color = tint,
+            maxLines = 1,
+        )
+        // As wide as the check it stands in for, so the labels above and below line up.
+        Box(modifier = Modifier.size(18.dp), contentAlignment = Alignment.Center) {
+            Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(13.dp), tint = tint)
+        }
     }
 }
 

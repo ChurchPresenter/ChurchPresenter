@@ -663,6 +663,7 @@
     <string name="schedule_option_buttons">Түймелер</string>
     <string name="toggle_menu_count">%2$d ішінен %1$d</string>
     <string name="toggle_menu_show_all">Барлығын көрсету</string>
+    <string name="toggle_menu_always">Әрқашан</string>
     <string name="schedule_drop_hint">Бағдарламаға қосу үшін файлдарды осында сүйреңіз</string>
     <string name="schedule_note_placeholder">Ескертпе қосу…</string>
     <string name="screen_number">Экран %1$d</string>
@@ -1307,6 +1308,7 @@
     <string name="song_favorites_clear">Таңдаулыларды тазалау</string>
     <string name="song_play_count">Ойн.</string>
     <string name="song_columns">Бағандарды сүзу</string>
+    <string name="song_columns_show_in_list">Тізімде көрсету</string>
     <string name="background_follow_default_option">Әдепкіге сай</string>
     <string name="bible_no_primary_title">Негізгі Ізгі хабар баптандырылмаған</string>
     <string name="bible_no_primary_hint">⚙ Параметрлерді ашып, «Ізгі хабар» қойындысына өтіңіз, содан кейін:</string>

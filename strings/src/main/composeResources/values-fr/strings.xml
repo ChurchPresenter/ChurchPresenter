@@ -414,6 +414,7 @@
     <string name="schedule_option_buttons">Boutons</string>
     <string name="toggle_menu_count">%1$d sur %2$d</string>
     <string name="toggle_menu_show_all">Tout afficher</string>
+    <string name="toggle_menu_always">Toujours</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Ajouter une étiquette</string>
@@ -646,6 +647,7 @@
     <string name="remove_from_favorites">Retirer des favoris</string>
     <string name="song_play_count">Lectures</string>
     <string name="song_columns">Filtrer les colonnes</string>
+    <string name="song_columns_show_in_list">Afficher dans la liste</string>
     <string name="bible_no_primary_title">Aucune Bible principale configurée</string>
     <string name="bible_no_primary_hint">Ouvrez ⚙ Paramètres et allez dans l'onglet Bible, puis :</string>
     <string name="bible_no_primary_step1">1. Définissez le répertoire de stockage de la Bible</string>

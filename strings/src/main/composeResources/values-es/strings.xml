@@ -414,6 +414,7 @@
     <string name="schedule_option_buttons">Botones</string>
     <string name="toggle_menu_count">%1$d de %2$d</string>
     <string name="toggle_menu_show_all">Mostrar todo</string>
+    <string name="toggle_menu_always">Siempre</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Añadir etiqueta</string>
@@ -646,6 +647,7 @@
     <string name="remove_from_favorites">Eliminar de favoritos</string>
     <string name="song_play_count">Reproducciones</string>
     <string name="song_columns">Filtrar columnas</string>
+    <string name="song_columns_show_in_list">Mostrar en la lista</string>
     <string name="bible_no_primary_title">No hay Biblia principal configurada</string>
     <string name="bible_no_primary_hint">Abra ⚙ Configuración y vaya a la pestaña Biblia, luego:</string>
     <string name="bible_no_primary_step1">1. Establezca el directorio de almacenamiento de la Biblia</string>

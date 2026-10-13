@@ -576,6 +576,7 @@
     <string name="schedule_option_buttons">دکمه‌ها</string>
     <string name="toggle_menu_count">%1$d از %2$d</string>
     <string name="toggle_menu_show_all">نمایش همه</string>
+    <string name="toggle_menu_always">همیشه</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">افزودن برچسب</string>
@@ -848,6 +849,7 @@
     <string name="remove_from_favorites">حذف از برگزیده‌ها</string>
     <string name="song_play_count">اجراها</string>
     <string name="song_columns">ستون‌های فیلتر</string>
+    <string name="song_columns_show_in_list">نمایش در فهرست</string>
     <string name="bible_no_primary_title">کتاب‌مقدس اصلی تنظیم نشده است</string>
     <string name="bible_no_primary_hint">⚙ تنظیمات را باز کنید، به زبانه کتاب‌مقدس بروید و سپس:</string>
     <string name="bible_no_primary_step1">1. پوشه ذخیره کتاب‌مقدس را تعیین کنید</string>

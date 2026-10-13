@@ -414,6 +414,7 @@
     <string name="schedule_option_buttons">Botões</string>
     <string name="toggle_menu_count">%1$d de %2$d</string>
     <string name="toggle_menu_show_all">Mostrar tudo</string>
+    <string name="toggle_menu_always">Sempre</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Adicionar Rótulo</string>
@@ -646,6 +647,7 @@
     <string name="remove_from_favorites">Remover dos favoritos</string>
     <string name="song_play_count">Reproduções</string>
     <string name="song_columns">Filtrar colunas</string>
+    <string name="song_columns_show_in_list">Mostrar na lista</string>
     <string name="bible_no_primary_title">Nenhuma Bíblia Principal Configurada</string>
     <string name="bible_no_primary_hint">Abra ⚙ Configurações e vá para a aba Bíblia, depois:</string>
     <string name="bible_no_primary_step1">1. Defina o diretório de armazenamento da Bíblia</string>

@@ -663,6 +663,7 @@
     <string name="schedule_option_buttons">Кнопки</string>
     <string name="toggle_menu_count">%1$d з %2$d</string>
     <string name="toggle_menu_show_all">Показати всі</string>
+    <string name="toggle_menu_always">Завжди</string>
     <string name="schedule_drop_hint">Перетягніть файли сюди, щоб додати до програми</string>
     <string name="schedule_note_placeholder">Додати нотатку…</string>
     <string name="screen_number">Екран %1$d</string>
@@ -1307,6 +1308,7 @@
     <string name="song_favorites_clear">Очистити улюблені</string>
     <string name="song_play_count">Відтв.</string>
     <string name="song_columns">Фільтр стовпців</string>
+    <string name="song_columns_show_in_list">Показувати у списку</string>
     <string name="background_follow_default_option">За замовчуванням</string>
     <string name="bible_no_primary_title">Основна Біблія не налаштована</string>
     <string name="bible_no_primary_hint">Відкрийте ⚙ Налаштування та перейдіть на вкладку «Біблія», потім:</string>

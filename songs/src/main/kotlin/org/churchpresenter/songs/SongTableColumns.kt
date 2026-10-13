@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.SongColumnId
@@ -24,10 +23,6 @@ internal class SongTableColumns(
 
     var draggingId by mutableStateOf<String?>(null)
     var dragAccumX by mutableStateOf(0f)
-
-    var showMenu by mutableStateOf(false)
-    var menuOffset by mutableStateOf(DpOffset.Zero)
-    var showColumnsMenu by mutableStateOf(false)
 
     /**
      * Recomputed on every read rather than remembered: `remember(key)` makes a new `MutableState`
@@ -57,7 +52,7 @@ internal class SongTableColumns(
 }
 
 /**
- * The song table's column layout: widths, order, which are hidden, and the transient drag and menu
+ * The song table's column layout: widths, order, which are hidden, and the transient drag
  * state that goes with rearranging them.
  *
  * Keyed the same way the individual `remember`s were, so a settings save still rebuilds it — the

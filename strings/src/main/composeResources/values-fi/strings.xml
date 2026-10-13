@@ -576,6 +576,7 @@
     <string name="schedule_option_buttons">Painikkeet</string>
     <string name="toggle_menu_count">%1$d / %2$d</string>
     <string name="toggle_menu_show_all">Näytä kaikki</string>
+    <string name="toggle_menu_always">Aina</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Lisää merkintä</string>
@@ -848,6 +849,7 @@
     <string name="remove_from_favorites">Poista suosikeista</string>
     <string name="song_play_count">Esityskerrat</string>
     <string name="song_columns">Suodata sarakkeita</string>
+    <string name="song_columns_show_in_list">Näytä luettelossa</string>
     <string name="bible_no_primary_title">Ensisijaista Raamattua ei ole määritetty</string>
     <string name="bible_no_primary_hint">Avaa ⚙ Asetukset, siirry Raamattu-välilehteen ja:</string>
     <string name="bible_no_primary_step1">1. Aseta Raamattujen tallennuskansio</string>

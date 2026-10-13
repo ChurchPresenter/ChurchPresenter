@@ -442,6 +442,7 @@
     <string name="schedule_option_buttons">Butoane</string>
     <string name="toggle_menu_count">%1$d din %2$d</string>
     <string name="toggle_menu_show_all">Afișează tot</string>
+    <string name="toggle_menu_always">Întotdeauna</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Adaugă Etichetă</string>
@@ -678,6 +679,7 @@
     <string name="remove_from_favorites">Elimină din favorite</string>
     <string name="song_play_count">Redări</string>
     <string name="song_columns">Filtrare coloane</string>
+    <string name="song_columns_show_in_list">Afișează în listă</string>
     <string name="bible_no_primary_title">Nicio Biblie Principală Configurată</string>
     <string name="bible_no_primary_hint">Deschideți ⚙ Setări și mergeți la fila Biblie, apoi:</string>
     <string name="bible_no_primary_step1">1. Setați directorul de stocare a Bibliei</string>

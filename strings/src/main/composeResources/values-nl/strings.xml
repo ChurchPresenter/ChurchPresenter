@@ -414,6 +414,7 @@
     <string name="schedule_option_buttons">Knoppen</string>
     <string name="toggle_menu_count">%1$d van %2$d</string>
     <string name="toggle_menu_show_all">Alles tonen</string>
+    <string name="toggle_menu_always">Altijd</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Label toevoegen</string>
@@ -646,6 +647,7 @@
     <string name="remove_from_favorites">Verwijderen uit favorieten</string>
     <string name="song_play_count">Speelbeurten</string>
     <string name="song_columns">Kolommen filteren</string>
+    <string name="song_columns_show_in_list">Tonen in lijst</string>
     <string name="bible_no_primary_title">Geen primaire Bijbel geconfigureerd</string>
     <string name="bible_no_primary_hint">Open ⚙ Instellingen en ga naar het Bijbel-tabblad, dan:</string>
     <string name="bible_no_primary_step1">1. Stel de Bijbel opslagmap in</string>

@@ -576,6 +576,7 @@
     <string name="schedule_option_buttons">الأزرار</string>
     <string name="toggle_menu_count">%1$d من %2$d</string>
     <string name="toggle_menu_show_all">إظهار الكل</string>
+    <string name="toggle_menu_always">دائمًا</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">إضافة ملصق</string>
@@ -848,6 +849,7 @@
     <string name="remove_from_favorites">إزالة من المفضلة</string>
     <string name="song_play_count">مرات التشغيل</string>
     <string name="song_columns">تصفية الأعمدة</string>
+    <string name="song_columns_show_in_list">إظهار في القائمة</string>
     <string name="bible_no_primary_title">لم يتم تعيين ترجمة أساسية</string>
     <string name="bible_no_primary_hint">افتح ⚙ الإعدادات وانتقل إلى تبويب الكتاب المقدس، ثم:</string>
     <string name="bible_no_primary_step1">1. حدّد مجلد تخزين الكتاب المقدس</string>

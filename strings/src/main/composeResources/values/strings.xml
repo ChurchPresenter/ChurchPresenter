@@ -721,6 +721,7 @@
     <string name="schedule_option_buttons">Buttons</string>
     <string name="toggle_menu_count">%1$d of %2$d</string>
     <string name="toggle_menu_show_all">Show all</string>
+    <string name="toggle_menu_always">Always</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Add Label</string>
@@ -1246,6 +1247,7 @@
     <string name="remove_from_favorites">Remove from favorites</string>
     <string name="song_play_count">Plays</string>
     <string name="song_columns">Filter columns</string>
+    <string name="song_columns_show_in_list">Show in list</string>
     <string name="bible_no_primary_title">No Primary Bible Configured</string>
     <string name="bible_no_primary_hint">Open ⚙ Settings and go to the Bible tab, then:</string>
     <string name="bible_no_primary_step1">1. Set the Bible storage directory</string>

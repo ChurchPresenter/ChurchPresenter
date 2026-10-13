@@ -576,6 +576,7 @@
     <string name="schedule_option_buttons">Knapper</string>
     <string name="toggle_menu_count">%1$d av %2$d</string>
     <string name="toggle_menu_show_all">Vis alle</string>
+    <string name="toggle_menu_always">Alltid</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Legg til etikett</string>
@@ -848,6 +849,7 @@
     <string name="remove_from_favorites">Fjern fra favoritter</string>
     <string name="song_play_count">Brukt</string>
     <string name="song_columns">Filtrer kolonner</string>
+    <string name="song_columns_show_in_list">Vis i listen</string>
     <string name="bible_no_primary_title">Ingen hovedbibel er satt opp</string>
     <string name="bible_no_primary_hint">Åpne ⚙ Innstillinger, gå til Bibel-fanen og:</string>
     <string name="bible_no_primary_step1">1. Velg mappen for bibelfiler</string>
