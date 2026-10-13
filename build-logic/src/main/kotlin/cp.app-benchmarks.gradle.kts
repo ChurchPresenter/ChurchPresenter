@@ -1,4 +1,4 @@
-import org.churchpresenter.build.InjectedExec
+import org.churchpresenter.buildlogic.InjectedExec
 import java.time.Duration
 
 // :composeApp's measurements: the render, GPU, isolation and startup benchmarks, the UI monkey and

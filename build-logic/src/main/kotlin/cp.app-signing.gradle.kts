@@ -1,8 +1,8 @@
-import org.churchpresenter.build.desktopSigningRepoPath
-import org.churchpresenter.build.gitCommitCount
-import org.churchpresenter.build.isConfigured
-import org.churchpresenter.build.signingProps
-import org.churchpresenter.build.versionYear
+import org.churchpresenter.buildlogic.desktopSigningRepoPath
+import org.churchpresenter.buildlogic.gitCommitCount
+import org.churchpresenter.buildlogic.isConfigured
+import org.churchpresenter.buildlogic.signingProps
+import org.churchpresenter.buildlogic.versionYear
 import java.io.File
 import java.util.concurrent.TimeUnit
 

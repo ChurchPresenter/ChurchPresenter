@@ -190,7 +190,7 @@ second Kotlin Gradle plugin in another classloader. `:composeApp` applies its `c
 with `apply(plugin = …)` at the point in its script where their tasks have to be configured —
 order matters there (a benchmark task's own forks and heap stick only when it is registered after
 the app's Test settings). What the app's script shares with them (version, git provenance, signing,
-the JDK) is `build-logic/src/main/kotlin/org/churchpresenter/build/AppBuild.kt`.
+the JDK) is `build-logic/src/main/kotlin/org/churchpresenter/buildlogic/AppBuild.kt`.
 
 ### Layers — what may depend on what
 Every module has a layer (`config/architecture/layers.properties`), and `./gradlew checkModuleLayers`

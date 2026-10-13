@@ -1,8 +1,8 @@
-import org.churchpresenter.build.appVersion
-import org.churchpresenter.build.gitBuildType
-import org.churchpresenter.build.gitCommitCount
-import org.churchpresenter.build.gitCommitHash
-import org.churchpresenter.build.gitRepoSlug
+import org.churchpresenter.buildlogic.appVersion
+import org.churchpresenter.buildlogic.gitBuildType
+import org.churchpresenter.buildlogic.gitCommitCount
+import org.churchpresenter.buildlogic.gitCommitHash
+import org.churchpresenter.buildlogic.gitRepoSlug
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 // :composeApp's BuildConfig: the version, the build's provenance and the endpoints a build is made

@@ -1,6 +1,6 @@
-import org.churchpresenter.build.isConfigured
-import org.churchpresenter.build.resolvedJdk21Home
-import org.churchpresenter.build.signingProps
+import org.churchpresenter.buildlogic.isConfigured
+import org.churchpresenter.buildlogic.resolvedJdk21Home
+import org.churchpresenter.buildlogic.signingProps
 import java.io.File
 import java.security.MessageDigest
 import java.util.Properties

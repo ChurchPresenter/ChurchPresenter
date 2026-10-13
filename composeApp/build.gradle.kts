@@ -1,10 +1,10 @@
 import java.time.Duration
-import org.churchpresenter.build.appVersion
-import org.churchpresenter.build.currentJcefPlatform
-import org.churchpresenter.build.currentOsClassifier
-import org.churchpresenter.build.isConfigured
-import org.churchpresenter.build.resolvedJdk21Home
-import org.churchpresenter.build.signingProps
+import org.churchpresenter.buildlogic.appVersion
+import org.churchpresenter.buildlogic.currentJcefPlatform
+import org.churchpresenter.buildlogic.currentOsClassifier
+import org.churchpresenter.buildlogic.isConfigured
+import org.churchpresenter.buildlogic.resolvedJdk21Home
+import org.churchpresenter.buildlogic.signingProps
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import java.util.Calendar
 
