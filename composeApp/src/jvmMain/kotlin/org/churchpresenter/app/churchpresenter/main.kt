@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import org.churchpresenter.app.churchpresenter.utils.AppWindowIcons
 import org.churchpresenter.sharedui.utils.addGuardedShutdownHook
+import org.churchpresenter.updater.StorePackage
 import org.churchpresenter.updater.UpdateChecker
 import org.churchpresenter.updater.UpdaterIdentity
 import org.churchpresenter.updater.deleteLeftoverUpdateInstallers
@@ -91,6 +92,11 @@ internal fun acquireSingleInstanceLock(): Boolean {
     }
 }
 
+private const val UNIX_DOMAIN_TMPDIR_PROPERTY = "jdk.net.unixdomain.tmpdir"
+
+// "?" is not a legal Windows path character, so every temp socket name is rejected before any I/O.
+private const val UNUSABLE_SOCKET_DIR = "?"
+
 /** The Bible shipped in the app's resources and installed on a first run. */
 private const val BUNDLED_BIBLE_FILE = "kjv1769.spb"
 
@@ -130,13 +136,23 @@ private fun bundleDefaultBible(settings: AppSettings) {
     }
 }
 
-fun main() {
-    // Off unless the startup benchmark asked for it; see StartupProbe.
-    StartupProbe.mainStarted(exit = { exitProcess(STARTUP_PROBE_NO_FRAME_EXIT) })
-    // Before anything else: skiko latches this on its first SkiaLayer, so a later set is ignored.
+/** System properties the JDK and skiko each read once, on first use, so they are set before anything runs. */
+private fun setLatchedSystemProperties() {
+    // Skiko latches this on its first SkiaLayer, so a later set is ignored.
     preferredRenderApi(System.getProperty("os.name", ""), DevFlags.renderApiOverride)?.let {
         System.setProperty("skiko.renderApi", it)
     }
+    // A Store (MSIX) install's %TEMP% cannot hold the AF_UNIX socket the JDK's Windows selector
+    // wake-up pipe uses: the bind succeeds, the connect fails with "Invalid argument", and the first
+    // Ktor selector takes the app down. An unusable socket directory makes the bind fail instead,
+    // and the JDK then falls back to a TCP loopback pipe (sun.nio.ch.PipeImpl.createListener).
+    if (StorePackage.isInstalled) System.setProperty(UNIX_DOMAIN_TMPDIR_PROPERTY, UNUSABLE_SOCKET_DIR)
+}
+
+fun main() {
+    setLatchedSystemProperties()
+    // Off unless the startup benchmark asked for it; see StartupProbe.
+    StartupProbe.mainStarted(exit = { exitProcess(STARTUP_PROBE_NO_FRAME_EXIT) })
     if (!acquireSingleInstanceLock()) {
         Log.info("Startup", "ChurchPresenter is already running.")
         SettingsManager().loadSettings().let { showAlreadyRunningDialog(it, themeCustomizationFrom(it)) }
