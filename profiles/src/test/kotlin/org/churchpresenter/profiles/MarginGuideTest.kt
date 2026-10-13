@@ -27,6 +27,7 @@ import org.churchpresenter.sharedui.utils.OutputSize
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.utils.previewOutputSize
 
 class MarginGuideTest {
 

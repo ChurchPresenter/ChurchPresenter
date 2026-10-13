@@ -51,6 +51,7 @@ import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.math.roundToInt
+import org.churchpresenter.sharedui.utils.previewOutputSize
 
 private val PICKER_ROW_HEIGHT = 32.dp
 private val GENERATOR_WINDOW_WIDTH = 1240.dp

@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter.composables
 
-import org.churchpresenter.profiles.TvScreenBoxHorizontalChrome
-import org.churchpresenter.profiles.TvScreenBoxVerticalChrome
-import org.churchpresenter.profiles.tvScreenBoxWidthFor
+import org.churchpresenter.sharedui.composables.TvScreenBoxHorizontalChrome
+import org.churchpresenter.sharedui.composables.TvScreenBoxVerticalChrome
+import org.churchpresenter.sharedui.composables.tvScreenBoxWidthFor
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test

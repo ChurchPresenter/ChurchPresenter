@@ -61,6 +61,7 @@ import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.settings.QuickBackground
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
+import org.churchpresenter.sharedui.utils.previewOutputSize
 
 /**
  * The backgrounds the preview panel's quick tray keeps one click away, under the preview because

@@ -15,6 +15,7 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.testing.retypeNumberField
 
 @OptIn(ExperimentalTestApi::class)
 class ProfileBoxAndTextRowsTest {

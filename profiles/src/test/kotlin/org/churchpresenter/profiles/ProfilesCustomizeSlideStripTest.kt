@@ -18,6 +18,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.churchpresenter.sharedui.testing.retypeNumberField
 
 /**
  * The strip rows that belong to the slide as a whole -- word wrap, the repeated chorus, where the

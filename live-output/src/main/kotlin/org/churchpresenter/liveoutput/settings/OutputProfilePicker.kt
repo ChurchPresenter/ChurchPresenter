@@ -1,6 +1,6 @@
 package org.churchpresenter.liveoutput.settings
 
-import org.churchpresenter.profiles.HintTooltip
+import org.churchpresenter.sharedui.composables.HintTooltip
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth

@@ -8,7 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.churchpresenter.profiles.retypeNumberField
+import org.churchpresenter.sharedui.testing.retypeNumberField
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

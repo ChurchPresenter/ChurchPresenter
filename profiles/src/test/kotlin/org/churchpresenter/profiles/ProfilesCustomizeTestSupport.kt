@@ -33,6 +33,7 @@ import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.SongSettings
 import org.churchpresenter.settings.resolvedFor
 import org.churchpresenter.settings.utils.Constants
+import org.churchpresenter.sharedui.testing.retypeNumberField
 
 /**
  * Driving the Customize surface on the Profiles tab.

@@ -1,4 +1,4 @@
-package org.churchpresenter.profiles
+package org.churchpresenter.sharedui.composables
 
 import androidx.compose.ui.Alignment
 import org.churchpresenter.settings.MetronomePosition

@@ -60,6 +60,7 @@ import org.churchpresenter.settings.removeBibleTranslation
 import org.churchpresenter.settings.utils.Constants
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.sharedui.composables.ScanningRow
 
 /** [ActionIconButton]'s own default size, which the reorder buttons take and their gaps stand in for. */
 private val REORDER_BUTTON_SIZE = 34.dp

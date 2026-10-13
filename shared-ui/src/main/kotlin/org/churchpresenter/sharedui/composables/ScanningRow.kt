@@ -1,4 +1,4 @@
-package org.churchpresenter.profiles
+package org.churchpresenter.sharedui.composables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
