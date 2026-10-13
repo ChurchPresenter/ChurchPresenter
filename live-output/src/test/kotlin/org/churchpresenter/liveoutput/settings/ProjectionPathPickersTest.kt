@@ -12,7 +12,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.AppSettings
 import java.nio.file.Files
 import kotlin.test.Test
@@ -75,7 +74,7 @@ class ProjectionPathPickersTest {
                 ProjectionSettingsTab(
                     settings = settings,
                     onSettingsChange = { settings = it(settings) },
-                    companionServer = CompanionServer(shutdownGraceMs = 0),
+                    serverUrl = "",
                     detectScreens = { emptyList() },
                     vlcProbe = { false },
                 )

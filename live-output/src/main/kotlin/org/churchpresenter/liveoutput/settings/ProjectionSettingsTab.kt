@@ -88,7 +88,6 @@ import org.churchpresenter.settings.ProjectionSettings
 import org.churchpresenter.settings.ScreenAssignment
 import org.churchpresenter.settings.isScreenUnused
 import org.churchpresenter.settings.screenKey
-import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.settings.utils.Constants
 import org.churchpresenter.sharedui.utils.DevFlags
 import org.jetbrains.compose.resources.stringResource
@@ -180,7 +179,8 @@ data class DisplayOption(
 fun ProjectionSettingsTab(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    companionServer: CompanionServer,
+    /** The companion server's address, which a Browser Source's overlay URL starts with; blank while it is off. */
+    serverUrl: String,
     onIdentifyScreen: () -> Unit = {},
     onIdentifyBrowserSource: (Int) -> Unit = {},
     onIdentifyNdi: (Int) -> Unit = {},
@@ -302,7 +302,7 @@ fun ProjectionSettingsTab(
     BrowserSourceOutputsCard(
         settings = settings,
         onSettingsChange = onSettingsChange,
-        companionServer = companionServer,
+        serverUrl = serverUrl,
         onIdentifyBrowserSource = onIdentifyBrowserSource,
     )
 

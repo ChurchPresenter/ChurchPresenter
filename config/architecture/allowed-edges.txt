@@ -8,7 +8,6 @@
 :live-output -> :canvas       # scenes, cameras, DeckLink and the network inputs it draws
 :live-output -> :lower-third  # the lower-third presenter and render cache
 :live-output -> :media        # MediaViewModel, the players and VLC discovery
-:live-output -> :server       # BrowserSourceFrame, and CompanionServer for its URL
 :live-output -> :slides       # the slide presenters, PresentationFrame and the SlidesOutput port
 :live-output -> :stt          # STTManager and STTPresenter
 :live-output -> :web          # WebsitePresenter (JCEF) and the WebOutput port

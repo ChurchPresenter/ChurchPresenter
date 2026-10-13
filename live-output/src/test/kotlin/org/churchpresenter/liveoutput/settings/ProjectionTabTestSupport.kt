@@ -22,7 +22,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.churchpresenter.media.composables.VlcAudioDevice
-import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.ndi.NdiRuntimeStatus
 import org.churchpresenter.omt.OmtRuntimeStatus
 import org.churchpresenter.settings.AppSettings
@@ -82,7 +81,6 @@ internal fun projectionTab(
     block: ComposeUiTest.(get: () -> AppSettings) -> Unit,
 ) = runComposeUiTest {
     var current = initial
-    val server = CompanionServer(shutdownGraceMs = 0)
     setContent {
         MaterialTheme {
             var state by remember { mutableStateOf(current) }
@@ -90,7 +88,7 @@ internal fun projectionTab(
             ProjectionSettingsTab(
                 settings = state,
                 onSettingsChange = { transform -> state = transform(state); current = state },
-                companionServer = server,
+                serverUrl = "",
                 detectScreens = { screens },
                 ndiStatus = { ndiStatus },
                 ndiReceiverCount = { 0 },
