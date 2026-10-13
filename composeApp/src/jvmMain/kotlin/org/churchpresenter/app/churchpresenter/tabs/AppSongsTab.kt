@@ -8,7 +8,7 @@ import org.churchpresenter.statistics.StatisticsManager
 import org.churchpresenter.dialogs.songEditorBackgroundButton
 import org.churchpresenter.songs.EditSongDialog
 import org.churchpresenter.liveoutput.lottieBandPath
-import org.churchpresenter.profiles.stageMonitorScreenIndices
+import org.churchpresenter.settings.stageMonitorScreenIndices
 import org.churchpresenter.telemetry.isChordChartPresentation
 import org.churchpresenter.telemetry.isLiveOutput
 import org.churchpresenter.telemetry.isSplitScreenSong

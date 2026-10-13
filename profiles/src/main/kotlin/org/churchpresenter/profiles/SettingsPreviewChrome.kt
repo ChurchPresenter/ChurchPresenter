@@ -25,9 +25,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.sharedui.utils.FallbackOutputSize
 import org.churchpresenter.sharedui.utils.OutputSize
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.utils.Constants
-import org.churchpresenter.settings.profileFor
-import org.churchpresenter.settings.ProjectionSettings
+import org.churchpresenter.settings.stageMonitorScreenIndices
 
 /**
  * Chrome shared by the Song and Bible settings previews.
@@ -233,8 +231,3 @@ internal fun PreviewBadge(label: String, modifier: Modifier = Modifier) {
         )
     }
 }
-
-fun stageMonitorScreenIndices(proj: ProjectionSettings): List<Int> =
-    proj.screenAssignments.indices.filter {
-        proj.profileFor(proj.screenAssignments[it])?.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR
-    }

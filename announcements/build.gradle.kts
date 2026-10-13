@@ -38,7 +38,5 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
     testImplementation(libs.roborazzi.composeDesktop)
-    // The screenshot suite draws the tab with the Profiles stage-monitor screens, as the app does.
-    testImplementation(projects.profiles)
 }
 

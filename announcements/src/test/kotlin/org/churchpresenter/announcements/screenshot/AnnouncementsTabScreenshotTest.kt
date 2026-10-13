@@ -2,7 +2,7 @@
 
 package org.churchpresenter.announcements.screenshot
 
-import org.churchpresenter.profiles.stageMonitorScreenIndices
+import org.churchpresenter.settings.stageMonitorScreenIndices
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
