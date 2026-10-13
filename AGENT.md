@@ -192,6 +192,30 @@ order matters there (a benchmark task's own forks and heap stick only when it is
 the app's Test settings). What the app's script shares with them (version, git provenance, signing,
 the JDK) is `build-logic/src/main/kotlin/org/churchpresenter/build/AppBuild.kt`.
 
+### Layers — what may depend on what
+Every module has a layer (`config/architecture/layers.properties`), and `./gradlew checkModuleLayers`
+— a CI step — fails on a dependency the table below forbids. It reads what main code and test
+fixtures declare; a test's own classpath may reach anything.
+
+| Layer | Modules | May depend on |
+|---|---|---|
+| foundation | theme, strings, icons, diagnostics, core-models, settings, shared-ui, bible, song-chords, show-control, control-in | foundation |
+| engine | protocols, file formats and rendering: bible-engine, bible-formats, presentation-engine, atem, ndi, omt, companion-satellite, live-show, lottieGenerator, presenter | foundation, engine |
+| feature | a tab or a window with its view model | foundation, engine |
+| output | live-output | foundation, engine |
+| integration | server, server-ui, profiles, dialogs, app-settings, telemetry | everything below, and integration |
+| app | composeApp | everything |
+
+So a tab never depends on another tab or on the output; it declares a port (`BibleOutput`,
+`QAOutput`, …) and `:composeApp` hands it an implementation. What two features both need goes down
+a layer — into an engine module, or into `:shared-ui` or `:core-models` when it knows no feature.
+
+**`config/architecture/allowed-edges.txt` lists the forbidden edges that exist today, and only
+shrinks**: the check fails on an entry that is no longer a forbidden edge, and nothing writes the
+file. **Never add a line to it without asking** — an edge that seems to need one is a sign that
+something belongs a layer down. A new module gets its layer in `layers.properties`; the check fails
+on one that has none.
+
 ### POI is shared by four modules
 `:presentation-engine`, `:converter`, `:statistics` and `:composeApp` all pull Apache POI, and
 **exactly ONE POI schema jar may be on the classpath**: `poi-ooxml-full`, never `poi-ooxml-lite` —

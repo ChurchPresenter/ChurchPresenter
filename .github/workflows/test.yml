@@ -195,6 +195,9 @@ jobs:
       - name: Detekt
         # Every module that applies detekt (cp.detekt), the app included -- a new one is in by default.
         run: ./gradlew detekt
+      - name: Module layers
+        # Which modules may depend on which: AGENT.md, "Layers".
+        run: ./gradlew checkModuleLayers
 
   app:
     needs: prepare

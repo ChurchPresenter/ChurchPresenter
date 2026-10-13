@@ -67,3 +67,67 @@ tasks.register("moduleGraph") {
     }
     doLast { graph.forEach(::println) }
 }
+
+// ── Layers ────────────────────────────────────────────────────────────────────
+// Which modules may depend on which, by layer (config/architecture/layers.properties), over the
+// edges main code and test fixtures declare -- a test's own classpath is not checked. An edge the
+// rules forbid fails the build unless config/architecture/allowed-edges.txt names it, and an entry
+// there that is no longer a forbidden edge fails it too, so that list can only shrink. Nothing
+// writes that file: an edge goes on it by hand, with its reason, and only when asked. AGENT.md,
+// "Layers", has the table.
+val layerRules = mapOf(
+    "foundation" to setOf("foundation"),
+    "engine" to setOf("foundation", "engine"),
+    "feature" to setOf("foundation", "engine"),
+    "output" to setOf("foundation", "engine"),
+    "integration" to setOf("foundation", "engine", "feature", "output", "integration"),
+    "app" to setOf("foundation", "engine", "feature", "output", "integration", "app"),
+)
+val layerCheckedConfigurations = setOf(
+    "api", "implementation", "compileOnly", "compileOnlyApi", "runtimeOnly",
+    "testFixturesApi", "testFixturesImplementation", "testFixturesCompileOnly", "testFixturesRuntimeOnly",
+)
+
+tasks.register("checkModuleLayers") {
+    group = "verification"
+    description = "Fails on a dependency between modules that their layers do not allow."
+    val layersFile = layout.projectDirectory.file("config/architecture/layers.properties").asFile
+    val allowedFile = layout.projectDirectory.file("config/architecture/allowed-edges.txt").asFile
+    inputs.files(layersFile, allowedFile)
+    val modules = subprojects.map { it.path }.sorted()
+    val edges = subprojects.flatMap { project ->
+        project.configurations
+            .filter { it.name in layerCheckedConfigurations }
+            .flatMap { configuration -> configuration.dependencies.withType(ProjectDependency::class.java) }
+            .map { project.path to it.path }
+            .filter { (from, to) -> from != to }
+    }.toSortedSet(compareBy({ it.first }, { it.second }))
+    doLast {
+        val layers = java.util.Properties().apply { layersFile.inputStream().use { load(it) } }
+            .entries.associate { (k, v) -> ":$k" to v.toString().trim() }
+        val problems = mutableListOf<String>()
+        modules.filter { it !in layers }.forEach { problems += "$it has no layer in ${layersFile.name}" }
+        layers.filter { (_, layer) -> layer !in layerRules }
+            .forEach { (module, layer) -> problems += "$module is in an unknown layer '$layer'" }
+        val forbidden = edges.filter { (from, to) ->
+            val fromLayer = layers[from] ?: return@filter false
+            val toLayer = layers[to] ?: return@filter false
+            toLayer !in layerRules.getValue(fromLayer)
+        }.map { (from, to) -> "$from -> $to" }.toSet()
+        val allowed = if (allowedFile.exists()) {
+            allowedFile.readLines().map { it.substringBefore('#').trim() }.filter { it.isNotEmpty() }
+                .map { it.replace(Regex("\\s+"), " ") }
+        } else emptyList()
+        (forbidden - allowed.toSet()).sorted().forEach { edge ->
+            val (from, to) = edge.split(" -> ")
+            fun an(layer: String?) = if (layer.orEmpty().first() in "aeiou") "an $layer" else "a $layer"
+            problems += "$edge: ${an(layers[from])} module may not depend on ${an(layers[to])} one"
+        }
+        (allowed.toSet() - forbidden).sorted()
+            .forEach { problems += "$it is on ${allowedFile.name} but is no longer a forbidden edge: delete the line" }
+        if (problems.isNotEmpty()) {
+            throw GradleException("Module layers:\n" + problems.joinToString("\n") { "  $it" })
+        }
+        logger.lifecycle("Module layers: ${edges.size} edges checked, ${allowed.size} allowed by exception.")
+    }
+}

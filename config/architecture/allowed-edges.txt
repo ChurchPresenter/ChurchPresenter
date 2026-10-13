@@ -1,0 +1,28 @@
+# Dependencies the layer rules forbid that exist today, each with what it uses. `checkModuleLayers`
+# fails on a forbidden edge missing from this list AND on a line here that no longer names one, so
+# the list only ever shrinks. Never add a line without asking the person running the work.
+
+:bible-tab -> :helper         # GuideSpotlightHost, which belongs in shared-ui's guide package
+:bible-tab -> :stt            # STTManager, the caption client: an engine living in a tab module
+:canvas -> :bible-tab         # BibleSourceProperties builds a BibleViewModel to page through chapters
+:canvas -> :media             # the scene renderer's video sources and VLC checks
+:canvas -> :slides            # PictureDecoder, for image sources
+:helper -> :calendar          # parseReference, from calendar's Compose-free model
+:live-output -> :announcements # the AnnouncementsOutput port, the presenter, formatTimer
+:live-output -> :bible-tab    # the BibleOutput port PresenterManager implements
+:live-output -> :canvas       # scenes, cameras, DeckLink and the network inputs it draws
+:live-output -> :dictionary   # DictionaryPresenter and StrongsEntry
+:live-output -> :lower-third  # the lower-third presenter and render cache
+:live-output -> :media        # MediaViewModel, the players and VLC discovery
+:live-output -> :profiles     # five small UI helpers and a test fixture
+:live-output -> :qa           # the QAOutput port and the QA presenters
+:live-output -> :server       # BrowserSourceFrame, and CompanionServer for its URL
+:live-output -> :slides       # the slide presenters, PresentationFrame and the SlidesOutput port
+:live-output -> :stt          # STTManager and STTPresenter
+:live-output -> :web          # WebsitePresenter (JCEF) and the WebOutput port
+:presenter -> :canvas         # the camera kit and the scene video cache
+:presenter -> :lower-third    # LottieFonts, for the Bible lottie band
+:presenter -> :media          # isVlcAvailable
+:presenter -> :slides         # PictureDecoder, for picture backgrounds
+:schedule -> :calendar        # the run-of-show model and the cue feed
+:songs -> :calendar           # formatDuration, from calendar's model

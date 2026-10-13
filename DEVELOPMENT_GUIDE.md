@@ -245,6 +245,8 @@ files; `bash test-changed.sh` names the module tasks a change implies.
 3. `<name>/AGENT.md` (what it is, what uses it, its rules and gates) and `<name>/CLAUDE.md`
    holding `@AGENT.md`; a row in AGENT.md's module table.
 4. A row in `.github/ci/plan_ci.py`'s `MODULES`, or CI warns that its suite never runs.
+5. Its layer in `config/architecture/layers.properties` (AGENT.md, "Layers") — `checkModuleLayers`
+   fails until it has one.
 
 ### DeckLink hardware tests
 
