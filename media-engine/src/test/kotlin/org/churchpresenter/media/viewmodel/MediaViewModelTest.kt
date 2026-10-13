@@ -47,6 +47,13 @@ class MediaViewModelTest {
     }
 
     @Test
+    fun `a loaded clip remembers what kind of source it came from`() {
+        val stream = loaded("https://example.org/live/stream.m3u8", Constants.MEDIA_TYPE_URL)
+        assertEquals(Constants.MEDIA_TYPE_URL, stream.mediaType)
+        assertEquals(Constants.MEDIA_TYPE_LOCAL, MediaViewModel().mediaType, "a new view model starts on a local file")
+    }
+
+    @Test
     fun `loading a blank url leaves nothing loaded`() {
         val vm = loaded("")
         assertFalse(vm.isLoaded, "an empty url must not count as loaded media")

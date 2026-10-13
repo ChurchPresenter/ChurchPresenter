@@ -120,11 +120,11 @@
 **Source locations:**
 - `slides/…/tabs/PicturesTab.kt` (the `:slides` module) — image slideshow UI; its pieces in `PicturesTabScope.kt`, `PicturesHeader.kt`, `PicturesControlsBar.kt`, `PicturesGrid.kt`
 - `media/…/tabs/MediaTab.kt` (the `:media` module) — audio/video UI; its pieces in `MediaTabScope.kt`, `MediaSourceBar.kt`, `MediaControlsBar.kt`
-- `slides/…/viewmodel/PicturesViewModel.kt`, `media/…/viewmodel/MediaViewModel.kt`, `media/…/viewmodel/LocalMediaViewModel.kt`
+- `slides/…/viewmodel/PicturesViewModel.kt`, `media-engine/…/viewmodel/MediaViewModel.kt`, `media-engine/…/viewmodel/LocalMediaViewModel.kt`
 - `slides/…/data/HiddenItemsStore.kt`, `shared-ui/…/composables/SlideshowHideToggle.kt` — hidden pictures and slides, remembered per folder and file, and the eye that hides them
 - `data/settings/PictureSettings.kt`
-- `slides-engine/…/presenter/PicturePresenter.kt`, `media/…/presenter/MediaPresenter.kt`
-- `media/…/composables/VideoPlayer.kt`
+- `slides-engine/…/presenter/PicturePresenter.kt`, `media-engine/…/presenter/MediaPresenter.kt`
+- `media-engine/…/composables/VideoPlayer.kt`
 - `media/…/dialogs/tabs/MediaSettingsTab.kt`
 - `profiles/…/ProfileScaleRow.kt`, `shared-ui/…/utils/OutputScaleMode.kt` — per-profile scaling and the tabs' shortcut over it
 - `profiles/…/ProfileOverlayPages.kt`, `profiles/…/DisplayTextRows.kt` — the subtitle look, edited on Profiles → Subtitles

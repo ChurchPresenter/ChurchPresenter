@@ -23,7 +23,7 @@ demand.
   composable that owns it (no `onViewModelReady` callbacks, no getters, no external refs).
 - Expose data via typed callbacks, state parameters, or a `StateFlow` consumed internally.
 - Only acceptable exception: a rendering bridge whose panel lifecycle is tightly coupled to the
-  ViewModel (`MediaPresenter`/`VideoPlayer`, `PresentationPlayer`, `LottieFrameStream`) — document
+  ViewModel (`MediaPresenter`/`VideoPlayer` over `MediaViewModel`, all `:media-engine`'s, `PresentationPlayer`, `LottieFrameStream`) — document
   it explicitly at the site.
 - Known standing deviation: `MainDesktop.kt` and its wiring pass ViewModels top-down —
   `MainDesktopScope`/`MainDesktopViewModels`, the `*Wiring.kt` files, `MainDesktopEffects.kt`,
@@ -134,6 +134,7 @@ module-specific notes there, not here.**
 | `shared-ui/`           | `:shared-ui`           | The composables and helpers more than one feature uses — fields, pickers, buttons, text styling | [AGENT.md](shared-ui/AGENT.md)           |
 | `slides-engine/`       | `:slides-engine`       | What the picture and presentation outputs draw: `PicturePresenter`, `PresentationPresenter`, `PictureDecoder` | [AGENT.md](slides-engine/AGENT.md)       |
 | `slides/`              | `:slides`              | The Pictures and Presentation tabs: their viewmodels, presenters, picture decoding and recent files | [AGENT.md](slides/AGENT.md)              |
+| `media-engine/`        | `:media-engine`        | The playback under the Media tab: the VLC and software players, VLC discovery, subtitles, `MediaPresenter`, `MediaViewModel` | [AGENT.md](media-engine/AGENT.md)        |
 | `media/`               | `:media`               | The Media tab and the VLC playback under it: player, decoder, subtitles, stock media search | [AGENT.md](media/AGENT.md)               |
 | `web/`                 | `:web`                 | The Web tab and the embedded Chromium (JCEF) it and the output window browse with | [AGENT.md](web/AGENT.md)                 |
 | `crossword-tab/`       | `:crossword-tab`       | The hidden Crossword tab and the decoder for the puzzles it plays                  | [AGENT.md](crossword-tab/AGENT.md)       |

@@ -18,7 +18,7 @@ dependencies {
     implementation(projects.diagnostics)
     implementation(projects.canvas)
     implementation(projects.slidesEngine)
-    implementation(projects.media)
+    implementation(projects.mediaEngine)
     implementation(projects.lowerThird)
     implementation(projects.lottieGenerator)
     implementation(projects.songChords)

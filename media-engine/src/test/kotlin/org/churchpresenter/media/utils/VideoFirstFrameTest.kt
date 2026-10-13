@@ -112,6 +112,27 @@ class VideoFirstFrameTest {
     }
 
     @Test
+    fun `an empty cached frame, left by a run cut short, is extracted again`() {
+        assumeTrue(!isWindows, "needs a shell script to stand in for ffmpeg")
+        val clip = video()
+        VideoFirstFrame.cacheFileFor(clip, cache).also { it.parentFile.mkdirs(); it.createNewFile() }
+        val ffmpeg = stub("ffmpeg-redo", "for last; do :; done; printf 'jpeg' > \"${'$'}last\"")
+
+        val frame = VideoFirstFrame.extract(clip, cache, ffmpeg = ffmpeg.path)
+
+        assertEquals("jpeg", frame?.readText())
+    }
+
+    @Test
+    fun `an ffmpeg that exits cleanly without writing a frame leaves no frame`() {
+        assumeTrue(!isWindows, "needs a shell script to stand in for ffmpeg")
+        val ffmpeg = stub("ffmpeg-silent", "exit 0")
+
+        assertNull(VideoFirstFrame.extract(video(), cache, ffmpeg = ffmpeg.path))
+        assertTrue(cache.listFiles().orEmpty().isEmpty(), "no empty frame may be kept")
+    }
+
+    @Test
     fun `an ffmpeg that cannot be started is no frame, not an error`() {
         assertNull(VideoFirstFrame.extract(video(), cache, ffmpeg = File(dir, "no-such-ffmpeg").path))
     }

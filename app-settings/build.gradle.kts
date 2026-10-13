@@ -20,7 +20,7 @@ dependencies {
     implementation(projects.profiles)
     implementation(projects.server)
     implementation(projects.liveOutput)
-    implementation(projects.media)
+    implementation(projects.mediaEngine)
     implementation(projects.songs)
     implementation(projects.bibleTab)
     implementation(projects.bibleFormats)

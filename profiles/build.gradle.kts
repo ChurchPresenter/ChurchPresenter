@@ -33,6 +33,7 @@ dependencies {
     implementation(projects.presenter)
     implementation(projects.canvas)
     implementation(projects.media)
+    implementation(projects.mediaEngine)
     implementation(projects.slidesEngine)
     implementation(projects.bible)
     implementation(projects.bibleTab)

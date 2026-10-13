@@ -19,14 +19,13 @@ dependencies {
     implementation(projects.settings)
     implementation(projects.theme)
     implementation(projects.diagnostics)
+    // The players, MediaViewModel and subtitles the tab drives; its API names them.
+    api(projects.mediaEngine)
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.swing)
     implementation(libs.kotlinx.serialization.json)
 
-    // VLC does the decoding; the app finds the system's libvlc through JNA.
-    implementation(libs.vlcj)
-    implementation(libs.jna)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
 

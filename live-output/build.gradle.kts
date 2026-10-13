@@ -21,7 +21,7 @@ dependencies {
     implementation(projects.liveShow)
     implementation(projects.canvas)
     implementation(projects.slidesEngine)
-    implementation(projects.media)
+    implementation(projects.mediaEngine)
     implementation(projects.web)
     implementation(projects.presentationEngine)
     implementation(projects.stt)

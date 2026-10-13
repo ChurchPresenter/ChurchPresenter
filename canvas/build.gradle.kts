@@ -24,7 +24,7 @@ dependencies {
     implementation(projects.diagnostics)
     implementation(projects.ndi)
     implementation(projects.omt)
-    implementation(projects.media)
+    implementation(projects.mediaEngine)
     implementation(projects.slidesEngine)
     implementation(projects.bible)
 

@@ -118,6 +118,9 @@ include(":slides")
 include(":slides-engine")
 
 include(":media")
+// The playback under the Media tab, without the tab: the VLC and software players, VLC discovery,
+// subtitles, MediaPresenter and MediaViewModel. The outputs, the presenter and canvas play with it.
+include(":media-engine")
 
 // The Web tab and the embedded Chromium it and the output window browse with (JCEF). Depended on by
 // :composeApp, which hands it the live output through WebOutput.
