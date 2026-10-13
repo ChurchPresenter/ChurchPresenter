@@ -24,7 +24,7 @@ and `:presentation-engine` (as `api`: a caller passes `Deck`s) — and nothing o
 
 ## The one interface
 
-**`SlidesOutput`** is everything the tabs need from the live output: presenting mode, screen locks,
+**`SlidesOutput`** (`:output-api`, in this package, with the `PresentationFrame` it hands over) is everything the tabs need from the live output: presenting mode, screen locks,
 the live deck frame, and the calls that put a picture or a slide on screen — split into
 `LiveOutput`, `PictureOutput` and `DeckOutput` so none outgrows detekt's function limit.
 `:live-output`'s `PresenterSlidesOutput` implements it by passing every call to `PresenterManager`

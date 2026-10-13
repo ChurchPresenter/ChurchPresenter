@@ -23,7 +23,7 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 
 ## The one interface
 
-**`WebOutput`** is everything the tab needs from the live output: presenting mode, the URL and title
+**`WebOutput`** (`:output-api`, in this package) is everything the tab needs from the live output: presenting mode, the URL and title
 on screen, the live browser and its snapshot. `:live-output`'s `PresenterWebOutput` implements it by
 passing every call to `PresenterManager` (reached as `presenterManager.webOutput`). Tests use
 `FakeWebOutput`, which only remembers what it was told. A new need from the output is a new member

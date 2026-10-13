@@ -20,7 +20,7 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 
 ## Seams to the app
 
-- **`QAOutput`** is what the tab needs of the output: what is presenting, the screen locks, and the
+- **`QAOutput`** (`:output-api`, in this package) is what the tab needs of the output: what is presenting, the screen locks, and the
   question or QR code to put up. `:live-output` implements it as `PresenterQAOutput` over
   `PresenterManager` (`presenterManager.qaOutput`). Tests use `FakeQAOutput`.
 - **`remoteDialog`** is a slot. The remote-access dialog needs the server and the tunnel, so the app

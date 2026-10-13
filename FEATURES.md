@@ -103,7 +103,7 @@
 **Source locations:**
 - `slides/…/tabs/PresentationTab.kt` (the `:slides` module) — main UI; its pieces in `PresentationTabScope.kt`, `PresentationTopBar.kt`, `PresentationControlsBar.kt`, `PresentationBody.kt`
 - `slides/…/viewmodel/PresentationViewModel.kt`
-- `live-output/…/PresentationPlayer.kt` (the app), `slides/…/presenter/PresentationPresenter.kt` and `PresentationFrame.kt` — animated playback
+- `live-output/…/PresentationPlayer.kt` (the app), `slides/…/presenter/PresentationPresenter.kt` and `output-api/…/slides/presenter/PresentationFrame.kt` — animated playback
 - `presentation-engine/` (the `:presentation-engine` Gradle module, at the repo root) — PPTX/Keynote parsing, timing and animation engine
 - `data/settings/PresentationSettings.kt`
 - `:server`'s `CompanionServer.kt` — slide API for mobile (background rendering)

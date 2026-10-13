@@ -261,7 +261,7 @@ kotlin {
             // Socket.IO client for STT integration
             implementation(libs.socket.io.client)
             // JCEF — embedded Chromium browser for web presenter
-            implementation("me.friwi:jcefmaven:143.0.14")
+            implementation(libs.jcefmaven)
             // Bundle platform-specific Chromium binaries so no runtime download is needed
             val jcefNativesVersion = "jcef-cffac27+cef-143.0.14+gdd46a37+chromium-143.0.7499.193"
             runtimeOnly("me.friwi:jcef-natives-${currentJcefPlatform()}:$jcefNativesVersion")

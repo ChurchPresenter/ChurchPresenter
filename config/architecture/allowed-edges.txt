@@ -6,7 +6,6 @@
 :canvas -> :media             # the scene renderer's video sources and VLC checks
 :canvas -> :slides            # PictureDecoder, for image sources
 :live-output -> :announcements # the AnnouncementsOutput port, the presenter, formatTimer
-:live-output -> :bible-tab    # the BibleOutput port PresenterManager implements
 :live-output -> :canvas       # scenes, cameras, DeckLink and the network inputs it draws
 :live-output -> :dictionary   # DictionaryPresenter and StrongsEntry
 :live-output -> :lower-third  # the lower-third presenter and render cache

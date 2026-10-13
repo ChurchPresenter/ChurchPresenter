@@ -17,7 +17,7 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings` and `:t
 
 ## Seams to the app
 
-- **`AnnouncementsOutput`** is what the tab needs of the output: presenting, screen locks, the text,
+- **`AnnouncementsOutput`** (`:output-api`) is what the tab needs of the output: presenting, screen locks, the text,
   and the timer.
   - The timer ticks on the output, not in the tab, so a countdown keeps running while the operator
     is on another tab.

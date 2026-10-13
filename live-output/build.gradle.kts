@@ -8,6 +8,8 @@ plugins {
 }
 
 dependencies {
+    // The port to the live outputs this module implements.
+    implementation(projects.outputApi)
     implementation(projects.sharedUi)
     implementation(projects.strings)
     implementation(projects.icons)
@@ -30,7 +32,6 @@ dependencies {
     implementation(projects.songChords)
     implementation(projects.server)
     implementation(projects.lottieGenerator)
-    implementation(projects.bibleTab)
     implementation(projects.ndi)
     implementation(projects.omt)
 

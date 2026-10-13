@@ -153,6 +153,7 @@ module-specific notes there, not here.**
 | `live-show/`           | `:live-show`           | The layer model — `Layer`, `Cue`, and `LiveShow`'s program and preview (see `docs/LAYER_MODEL.md`) | [AGENT.md](live-show/AGENT.md)           |
 | `show-control/`        | `:show-control`        | The action vocabulary and `ActionRunner`, played through the app's `ShowHost` (see `docs/SHOW_CONTROL.md`) | [AGENT.md](show-control/AGENT.md)        |
 | `control-in/`          | `:control-in`          | MIDI and OSC in and out: the codecs, the ports and the hub that maps what arrives to actions | [AGENT.md](control-in/AGENT.md)          |
+| `output-api/`          | `:output-api`          | What each tab needs of the live output, as interfaces, and the frame a deck plays: declared against by the tabs, implemented by `:live-output` | [AGENT.md](output-api/AGENT.md)          |
 | `live-output/`         | `:live-output`         | `PresenterManager` and what is on air, the output windows and stage monitor, and the off-screen outputs (NDI, OMT, Browser Source, DeckLink) on `ComposeScenePump` | [AGENT.md](live-output/AGENT.md)         |
 | `helper/`              | `:helper`              | Wick, the helper lamp — tips, display setup, typed requests, the spotlight that rings controls | [AGENT.md](helper/AGENT.md)              |
 | `statistics/`          | `:statistics`          | What was presented and when — the counters, the play log, the CCLI lookup and exports — and the statistics window over them | [AGENT.md](statistics/AGENT.md)          |
@@ -207,8 +208,9 @@ fixtures declare; a test's own classpath may reach anything.
 | integration | server, server-ui, profiles, dialogs, app-settings, telemetry | everything below, and integration |
 | app | composeApp | everything |
 
-So a tab never depends on another tab or on the output; it declares a port (`BibleOutput`,
-`QAOutput`, …) and `:composeApp` hands it an implementation. What two features both need goes down
+So a tab never depends on another tab or on the output: what it needs of the output is a port
+(`BibleOutput`, `QAOutput`, …) in `:output-api`, an engine both depend on, which `:live-output`
+implements and `:composeApp` hands the tab. What two features both need goes down
 a layer — into an engine module, or into `:shared-ui` or `:core-models` when it knows no feature.
 
 **`config/architecture/allowed-edges.txt` lists the forbidden edges that exist today, and only

@@ -26,7 +26,7 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 
 ## The one interface
 
-**`MediaOutput`** is everything the tab needs from the live output: presenting mode, whether the
+**`MediaOutput`** (`:output-api`, in this package) is everything the tab needs from the live output: presenting mode, whether the
 presenter window is up, and the calls that put media on screen or clear it. `:live-output`'s
 `PresenterMediaOutput` implements it by passing every call to `PresenterManager` (reached as
 `presenterManager.mediaOutput`); the tab takes it, never the manager. Tests use `FakeMediaOutput`.

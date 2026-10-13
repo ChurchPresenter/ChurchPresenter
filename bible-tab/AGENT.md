@@ -22,7 +22,7 @@ It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:them
 
 ## Seams to the app
 
-- **`BibleOutput`**: the verses on screen and hold mode. `LiveBible` extends it, so the app
+- **`BibleOutput`** (`:output-api`): the verses on screen and hold mode. `LiveBible` extends it, so the app
   passes `PresenterManager` directly. Tests use `FakeBibleOutput`.
 - **`BibleEngineStatus`**: whether the detection engine and its speech feed are up.
   `BibleEngineClient` implements it; it lives here and the app builds it in `MainDesktopViewModels`.
