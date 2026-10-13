@@ -15,7 +15,7 @@ dependencies {
     implementation(projects.dictionary)
     implementation(projects.bible)
     implementation(projects.songs)
-    implementation(projects.slides)
+    implementation(projects.slidesEngine)
     implementation(projects.qa)
 
     implementation(libs.kotlinx.coroutines.core)

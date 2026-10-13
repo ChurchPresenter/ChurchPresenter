@@ -25,7 +25,7 @@ dependencies {
     implementation(projects.ndi)
     implementation(projects.omt)
     implementation(projects.media)
-    implementation(projects.slides)
+    implementation(projects.slidesEngine)
     implementation(projects.bible)
 
     implementation(libs.kotlinx.coroutines.core)

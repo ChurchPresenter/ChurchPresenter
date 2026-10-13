@@ -103,7 +103,7 @@
 **Source locations:**
 - `slides/…/tabs/PresentationTab.kt` (the `:slides` module) — main UI; its pieces in `PresentationTabScope.kt`, `PresentationTopBar.kt`, `PresentationControlsBar.kt`, `PresentationBody.kt`
 - `slides/…/viewmodel/PresentationViewModel.kt`
-- `live-output/…/PresentationPlayer.kt` (the app), `slides/…/presenter/PresentationPresenter.kt` and `output-api/…/slides/presenter/PresentationFrame.kt` — animated playback
+- `live-output/…/PresentationPlayer.kt` (the app), `slides-engine/…/presenter/PresentationPresenter.kt` and `output-api/…/slides/presenter/PresentationFrame.kt` — animated playback
 - `presentation-engine/` (the `:presentation-engine` Gradle module, at the repo root) — PPTX/Keynote parsing, timing and animation engine
 - `data/settings/PresentationSettings.kt`
 - `:server`'s `CompanionServer.kt` — slide API for mobile (background rendering)
@@ -123,7 +123,7 @@
 - `slides/…/viewmodel/PicturesViewModel.kt`, `media/…/viewmodel/MediaViewModel.kt`, `media/…/viewmodel/LocalMediaViewModel.kt`
 - `slides/…/data/HiddenItemsStore.kt`, `shared-ui/…/composables/SlideshowHideToggle.kt` — hidden pictures and slides, remembered per folder and file, and the eye that hides them
 - `data/settings/PictureSettings.kt`
-- `slides/…/presenter/PicturePresenter.kt`, `media/…/presenter/MediaPresenter.kt`
+- `slides-engine/…/presenter/PicturePresenter.kt`, `media/…/presenter/MediaPresenter.kt`
 - `media/…/composables/VideoPlayer.kt`
 - `media/…/dialogs/tabs/MediaSettingsTab.kt`
 - `profiles/…/ProfileScaleRow.kt`, `shared-ui/…/utils/OutputScaleMode.kt` — per-profile scaling and the tabs' shortcut over it

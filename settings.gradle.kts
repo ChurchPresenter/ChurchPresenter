@@ -113,6 +113,9 @@ include(":icons")
 include(":shared-ui")
 
 include(":slides")
+// What the picture and presentation outputs draw, without the tabs: PicturePresenter,
+// PresentationPresenter, PictureDecoder. :slides, :presenter, :canvas and :live-output use it.
+include(":slides-engine")
 
 include(":media")
 

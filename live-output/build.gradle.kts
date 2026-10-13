@@ -20,7 +20,7 @@ dependencies {
     implementation(projects.presenter)
     implementation(projects.liveShow)
     implementation(projects.canvas)
-    implementation(projects.slides)
+    implementation(projects.slidesEngine)
     implementation(projects.media)
     implementation(projects.web)
     implementation(projects.presentationEngine)

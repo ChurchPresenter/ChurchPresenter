@@ -20,16 +20,12 @@ dependencies {
     implementation(projects.theme)
     implementation(projects.diagnostics)
     api(projects.presentationEngine)
+    // The pictures' and presentation's presenters and the picture decoder the tabs preview with.
+    api(projects.slidesEngine)
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.swing)
     implementation(libs.kotlinx.serialization.json)
-
-    // ImageIO readers for what Skia refuses -- see PictureDecoder. jpeg covers CMYK/YCCK JPEGs, psd
-    // a Photoshop file saved with a picture's name.
-    implementation(libs.twelvemonkeys.imageio.core)
-    implementation(libs.twelvemonkeys.imageio.jpeg)
-    implementation(libs.twelvemonkeys.imageio.psd)
 
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.components.resources)
@@ -37,6 +33,8 @@ dependencies {
     implementation(libs.compose.material.icons.extended)
 
     testImplementation(kotlin("test"))
+    // tempDir() and solidImage(), shared with the presenters' suites.
+    testImplementation(testFixtures(projects.slidesEngine))
     testImplementation(testFixtures(projects.coreModels))
     testImplementation(testFixtures(projects.sharedUi))
     testImplementation(testFixtures(projects.diagnostics))

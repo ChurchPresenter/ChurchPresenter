@@ -43,6 +43,7 @@ MODULES = [
     ("calendar", "Calendar", 1.4),
     ("calendar-core", "Calendar model", 0.9),
     ("output-api", "Output ports", 0.1),
+    ("slides-engine", "Slides engine", 0.5),
     ("shared-ui", "Shared UI", 1.2),
     ("slides", "Slides", 2.7),
     ("media", "Media", 1.2),

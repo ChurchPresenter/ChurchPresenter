@@ -132,6 +132,7 @@ module-specific notes there, not here.**
 | `strings/`             | `:strings`             | The app's user-facing strings, every locale, and the `Res` class generated from them | [AGENT.md](strings/AGENT.md)             |
 | `icons/`               | `:icons`               | The UI drawables and the window-icon frames — not the installer icons               | [AGENT.md](icons/AGENT.md)               |
 | `shared-ui/`           | `:shared-ui`           | The composables and helpers more than one feature uses — fields, pickers, buttons, text styling | [AGENT.md](shared-ui/AGENT.md)           |
+| `slides-engine/`       | `:slides-engine`       | What the picture and presentation outputs draw: `PicturePresenter`, `PresentationPresenter`, `PictureDecoder` | [AGENT.md](slides-engine/AGENT.md)       |
 | `slides/`              | `:slides`              | The Pictures and Presentation tabs: their viewmodels, presenters, picture decoding and recent files | [AGENT.md](slides/AGENT.md)              |
 | `media/`               | `:media`               | The Media tab and the VLC playback under it: player, decoder, subtitles, stock media search | [AGENT.md](media/AGENT.md)               |
 | `web/`                 | `:web`                 | The Web tab and the embedded Chromium (JCEF) it and the output window browse with | [AGENT.md](web/AGENT.md)                 |
