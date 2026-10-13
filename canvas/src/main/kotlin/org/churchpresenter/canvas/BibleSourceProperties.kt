@@ -1,6 +1,5 @@
 package org.churchpresenter.canvas
 
-import org.churchpresenter.bibletab.loadChapter
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.layout.Arrangement
@@ -49,10 +48,8 @@ import org.churchpresenter.strings.generated.resources.canvas_reference_style
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.settings.AppSettings
-import org.churchpresenter.settings.BibleTranslationSettings
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.sharedui.utils.rememberSystemFonts
-import org.churchpresenter.bibletab.BibleViewModel
 import org.churchpresenter.bible.Bible
 import androidx.compose.runtime.produceState
 import java.io.File
@@ -105,18 +102,10 @@ internal fun BibleProperties(
         mutableStateOf(appSettings?.bibleSettings?.translationList()?.firstOrNull()?.fileName ?: "")
     }
 
-    val bibleVm = remember(appSettings, selectedBibleFile) {
-        appSettings?.let {
-            val settings = it.copy(
-                bibleSettings = it.bibleSettings.withTranslations(
-                    listOf(BibleTranslationSettings(fileName = selectedBibleFile)),
-                ),
-            )
-            BibleViewModel(settings)
-        }
+    val bible by produceState<Bible?>(null, storageDir, selectedBibleFile) {
+        value = withContext(Dispatchers.IO) { loadBibleSource(storageDir, selectedBibleFile) }
     }
-
-    val bible = bibleVm?.primaryBible?.value
+    val browser = remember(bible) { BibleSourceBrowser(bible) }
 
     Text(
         stringResource(Res.string.canvas_source_bible),
@@ -135,7 +124,7 @@ internal fun BibleProperties(
     }
 
     BibleVersePicker(
-        bibleVm = bibleVm,
+        browser = browser,
         source = source,
         onUpdate = onUpdate,
         noBibleConfigured = appSettings == null || storageDir.isEmpty(),
@@ -193,16 +182,16 @@ internal fun BibleProperties(
 /** Book, chapter and verses from the panel's own translation, inserted into the source as its text. */
 @Composable
 private fun BibleVersePicker(
-    bibleVm: BibleViewModel?,
+    browser: BibleSourceBrowser,
     source: SceneSource.BibleSource,
     onUpdate: (SceneSource) -> Unit,
     noBibleConfigured: Boolean,
 ) {
-    val bible = bibleVm?.primaryBible?.value
-    val books = bibleVm?.books?.value ?: emptyList()
-    val verses = bibleVm?.verses?.value ?: emptyList()
-    val selectedBookIndex = bibleVm?.selectedBookIndex?.value ?: 0
-    val selectedChapter = bibleVm?.selectedChapter?.value ?: 1
+    val bible = browser.bible
+    val books = browser.books
+    val verses = browser.verses
+    val selectedBookIndex = browser.selectedBookIndex
+    val selectedChapter = browser.selectedChapter
     if (books.isNotEmpty()) {
         val chapterCount = bible?.getChapterCount(bible.getBookId(selectedBookIndex)) ?: 0
         var startVerse by remember(selectedBookIndex, selectedChapter) { mutableStateOf(1) }
@@ -220,7 +209,7 @@ private fun BibleVersePicker(
                 options = books.map { it to it },
                 onValueChange = { bookName ->
                     val idx = books.indexOf(bookName)
-                    if (idx >= 0) bibleVm?.loadChapter(idx, 1)
+                    if (idx >= 0) browser.loadChapter(idx, 1)
                 },
                 modifier = Modifier.weight(BOOK_WEIGHT)
             )
@@ -229,7 +218,7 @@ private fun BibleVersePicker(
                     label = stringResource(Res.string.chapter),
                     value = selectedChapter.toString(),
                     options = (1..chapterCount).map { it.toString() to it.toString() },
-                    onValueChange = { bibleVm?.loadChapter(selectedBookIndex, it.toIntOrNull() ?: 1) },
+                    onValueChange = { browser.loadChapter(selectedBookIndex, it.toIntOrNull() ?: 1) },
                     modifier = Modifier.weight(1f)
                 )
             }

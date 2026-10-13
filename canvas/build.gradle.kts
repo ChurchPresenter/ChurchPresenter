@@ -27,7 +27,6 @@ dependencies {
     implementation(projects.media)
     implementation(projects.slides)
     implementation(projects.bible)
-    implementation(projects.bibleTab)
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.swing)

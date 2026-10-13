@@ -3,7 +3,6 @@
 # the list only ever shrinks. Never add a line without asking the person running the work.
 
 :bible-tab -> :stt            # STTManager, the caption client: an engine living in a tab module
-:canvas -> :bible-tab         # BibleSourceProperties builds a BibleViewModel to page through chapters
 :canvas -> :media             # the scene renderer's video sources and VLC checks
 :canvas -> :slides            # PictureDecoder, for image sources
 :live-output -> :announcements # the AnnouncementsOutput port, the presenter, formatTimer
