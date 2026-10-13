@@ -82,6 +82,8 @@ import org.churchpresenter.sharedui.utils.LocalMainWindowState
 import org.churchpresenter.schedule.LocalOpenCalendar
 import org.churchpresenter.diagnostics.StartupProbe
 import kotlin.system.exitProcess
+import org.churchpresenter.sharedui.guide.LocalSpotlightHost
+import androidx.compose.foundation.layout.BoxScope
 
 /** The work done once the window is up: the server's first start, the update check and the story prompt. */
 @Composable
@@ -258,6 +260,12 @@ private fun AppRootState.MainWindow(
                     LocalGuideSession provides helperState.session,
                     // Settings and the other windows Wick's tours reach carry the lamp too.
                     LocalWickCorner provides remember { { placed: Modifier -> WickLamp(placed) } },
+                    // A window in a module below the helper (the Bible catalogue) wraps itself in this.
+                    LocalSpotlightHost provides remember {
+                        { modifier: Modifier, content: @Composable BoxScope.() -> Unit ->
+                            GuideSpotlightHost(modifier) { content() }
+                        }
+                    },
                 ) {
                     GuideSpotlightHost(modifier = Modifier.fillMaxSize(), wick = false) {
                     MainWindowContent(

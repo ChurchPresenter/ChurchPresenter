@@ -21,8 +21,6 @@ dependencies {
     implementation(projects.bibleFormats)
     // BibleEngineClient: the speech engine it starts, and the WebSocket it reads the engine on.
     implementation(projects.bibleEngine)
-    // The catalogue window hosts its own guide spotlight, for the helper's "add a Bible" tour.
-    implementation(projects.helper)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.websockets)
