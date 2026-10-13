@@ -464,6 +464,13 @@ private fun Route.qaAdminActionRoutes(
                 // Admin: clear all questions
                 post("/api/qa/clear-all") {
                     if (!server.checkQaAdmin(call)) return@post
+                    val clientId = call.request.headers["X-Device-Id"] ?: ""
+                    val pending = CompanionServer.PendingQAAdminRequest(action = "clear-all", clientId = clientId)
+                    server.onQAAdminRequest.emit(pending)
+                    if (!pending.decision.await()) {
+                        call.respond(HttpStatusCode.Forbidden, """{"error":"denied"}""")
+                        return@post
+                    }
                     server.qaManager?.clearAll()
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }

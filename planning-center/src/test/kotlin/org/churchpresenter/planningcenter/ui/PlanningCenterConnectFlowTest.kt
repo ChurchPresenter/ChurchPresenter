@@ -1,10 +1,12 @@
 package org.churchpresenter.planningcenter.ui
 
 import io.mockk.coEvery
+import io.mockk.slot
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.planningcenter.PlanningCenterClient
+import org.churchpresenter.planningcenter.OAuthAttempt
 import org.churchpresenter.planningcenter.PlanningCenterAuthServer
 import java.net.URI
 import kotlin.test.AfterTest
@@ -50,9 +52,13 @@ class PlanningCenterConnectFlowTest {
 
     @Test
     fun `a successful flow browses to the authorization url and connects with the person's name`() {
-        coEvery { PlanningCenterAuthServer.awaitAuthorizationCode() } returns
+        val attempt = slot<OAuthAttempt>()
+        val verifier = slot<String>()
+        coEvery { PlanningCenterAuthServer.awaitAuthorizationCode(capture(attempt)) } returns
             PlanningCenterAuthServer.CallbackResult.Success("auth-code")
-        coEvery { PlanningCenterClient.exchangeCodeForToken(CLIENT_ID, CLIENT_SECRET, "auth-code", any()) } returns
+        coEvery {
+            PlanningCenterClient.exchangeCodeForToken(CLIENT_ID, CLIENT_SECRET, "auth-code", capture(verifier), any())
+        } returns
             PlanningCenterClient.TokenOutcome.Success(
                 PlanningCenterClient.TokenSet("access-1", "refresh-1", 123456789L)
             )
@@ -63,15 +69,20 @@ class PlanningCenterConnectFlowTest {
 
         assertTrue(recorder.browsedUri.toString().startsWith("https://"))
         assertTrue(CLIENT_ID in recorder.browsedUri.toString(), "the consent page is asked for the host's client")
+        // One attempt throughout: its state and challenge go out, the callback is checked against
+        // it, and its verifier proves the code.
+        assertTrue("state=${attempt.captured.state}" in recorder.browsedUri.toString())
+        assertTrue("code_challenge=${attempt.captured.codeChallenge}" in recorder.browsedUri.toString())
+        assertEquals(attempt.captured.codeVerifier, verifier.captured)
         assertEquals(listOf("access-1", "refresh-1", 123456789L, "Jane Doe"), recorder.connected)
         assertNull(recorder.error)
     }
 
     @Test
     fun `a person lookup failure still connects, with a blank name`() {
-        coEvery { PlanningCenterAuthServer.awaitAuthorizationCode() } returns
+        coEvery { PlanningCenterAuthServer.awaitAuthorizationCode(any()) } returns
             PlanningCenterAuthServer.CallbackResult.Success("auth-code")
-        coEvery { PlanningCenterClient.exchangeCodeForToken(any(), any(), any(), any()) } returns
+        coEvery { PlanningCenterClient.exchangeCodeForToken(any(), any(), any(), any(), any()) } returns
             PlanningCenterClient.TokenOutcome.Success(
                 PlanningCenterClient.TokenSet("access-1", "refresh-1", 123456789L)
             )
@@ -85,9 +96,9 @@ class PlanningCenterConnectFlowTest {
 
     @Test
     fun `invalid client credentials surface their own message`() {
-        coEvery { PlanningCenterAuthServer.awaitAuthorizationCode() } returns
+        coEvery { PlanningCenterAuthServer.awaitAuthorizationCode(any()) } returns
             PlanningCenterAuthServer.CallbackResult.Success("auth-code")
-        coEvery { PlanningCenterClient.exchangeCodeForToken(any(), any(), any(), any()) } returns
+        coEvery { PlanningCenterClient.exchangeCodeForToken(any(), any(), any(), any(), any()) } returns
             PlanningCenterClient.TokenOutcome.InvalidCredentials
 
         val recorder = run()
@@ -98,9 +109,9 @@ class PlanningCenterConnectFlowTest {
 
     @Test
     fun `a network error during token exchange surfaces its own message`() {
-        coEvery { PlanningCenterAuthServer.awaitAuthorizationCode() } returns
+        coEvery { PlanningCenterAuthServer.awaitAuthorizationCode(any()) } returns
             PlanningCenterAuthServer.CallbackResult.Success("auth-code")
-        coEvery { PlanningCenterClient.exchangeCodeForToken(any(), any(), any(), any()) } returns
+        coEvery { PlanningCenterClient.exchangeCodeForToken(any(), any(), any(), any(), any()) } returns
             PlanningCenterClient.TokenOutcome.NetworkError
 
         val recorder = run()
@@ -110,9 +121,9 @@ class PlanningCenterConnectFlowTest {
 
     @Test
     fun `an unspecified token failure surfaces a generic message`() {
-        coEvery { PlanningCenterAuthServer.awaitAuthorizationCode() } returns
+        coEvery { PlanningCenterAuthServer.awaitAuthorizationCode(any()) } returns
             PlanningCenterAuthServer.CallbackResult.Success("auth-code")
-        coEvery { PlanningCenterClient.exchangeCodeForToken(any(), any(), any(), any()) } returns
+        coEvery { PlanningCenterClient.exchangeCodeForToken(any(), any(), any(), any(), any()) } returns
             PlanningCenterClient.TokenOutcome.Failure
 
         val recorder = run()
@@ -122,7 +133,7 @@ class PlanningCenterConnectFlowTest {
 
     @Test
     fun `a callback error surfaces the server's own message`() {
-        coEvery { PlanningCenterAuthServer.awaitAuthorizationCode() } returns
+        coEvery { PlanningCenterAuthServer.awaitAuthorizationCode(any()) } returns
             PlanningCenterAuthServer.CallbackResult.Error("access_denied")
 
         val recorder = run()
@@ -133,7 +144,7 @@ class PlanningCenterConnectFlowTest {
 
     @Test
     fun `a callback timeout surfaces a timeout message`() {
-        coEvery { PlanningCenterAuthServer.awaitAuthorizationCode() } returns
+        coEvery { PlanningCenterAuthServer.awaitAuthorizationCode(any()) } returns
             PlanningCenterAuthServer.CallbackResult.Timeout
 
         val recorder = run()

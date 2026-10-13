@@ -246,6 +246,7 @@ internal fun QARemoteContent(
                         )
                         Spacer(Modifier.height(8.dp))
 
+                        TunnelUnprotectedWarning(apiKeyEnabled, apiKey)
                         QaTunnelControls(
                             tunnelStatus, tunnelUrl, serverUrl, qaDisplayUrl,
                             onQaDisplayUrlChanged, onStartTunnel, onStopTunnel,

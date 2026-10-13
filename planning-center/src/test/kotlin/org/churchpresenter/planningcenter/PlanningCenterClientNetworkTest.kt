@@ -28,6 +28,9 @@ import kotlin.test.assertTrue
  * class touches the real Planning Center API. The client is an ordinary instance field: JUnit builds
  * a new instance of this class per test method, so there is nothing global to reset.
  */
+/** The PKCE verifier every code exchange here is sent with. */
+private const val VERIFIER = "the-verifier"
+
 class PlanningCenterClientNetworkTest {
 
     private val requests = mutableListOf<HttpRequestData>()
@@ -74,6 +77,7 @@ class PlanningCenterClientNetworkTest {
             "cid",
             "csecret",
             "the-code",
+            VERIFIER,
             http = http,
         ) }
 
@@ -90,7 +94,7 @@ class PlanningCenterClientNetworkTest {
     fun `the code exchange authenticates with http basic and sends the redirect uri`() {
         respondWith("""{"access_token":"t","refresh_token":"r","expires_in":100}""")
 
-        runBlocking { PlanningCenterClient.exchangeCodeForToken("cid", "csecret", "the-code", http = http) }
+        runBlocking { PlanningCenterClient.exchangeCodeForToken("cid", "csecret", "the-code", VERIFIER, http = http) }
 
         val request = requests.single()
         val expectedBasic = "Basic " + Base64.getEncoder().encodeToString("cid:csecret".toByteArray())
@@ -100,6 +104,7 @@ class PlanningCenterClientNetworkTest {
         assertTrue(body.contains("code=the-code"))
         assertTrue(body.contains("client_id=cid"))
         assertTrue(body.contains("client_secret=csecret"))
+        assertTrue(body.contains("code_verifier=the-verifier"))
         assertTrue(body.contains(URLEncoder.encode(PlanningCenterClient.redirectUri(), "UTF-8")))
     }
 
@@ -120,13 +125,15 @@ class PlanningCenterClientNetworkTest {
         respondWith("""{"error":"invalid_client"}""", HttpStatusCode.Unauthorized)
         assertEquals(
             PlanningCenterClient.TokenOutcome.InvalidCredentials,
-            runBlocking { PlanningCenterClient.exchangeCodeForToken("bad", "bad", "code", http = http) },
+            runBlocking { PlanningCenterClient.exchangeCodeForToken("bad", "bad", "code", VERIFIER, http = http) },
         )
 
         respondWith("""{"error":"invalid_grant"}""", HttpStatusCode.BadRequest)
         assertEquals(
             PlanningCenterClient.TokenOutcome.InvalidCredentials,
-            runBlocking { PlanningCenterClient.exchangeCodeForToken("cid", "csecret", "stale-code", http = http) },
+            runBlocking {
+                PlanningCenterClient.exchangeCodeForToken("cid", "csecret", "stale-code", VERIFIER, http = http)
+            },
             "a reused or expired code is the same operator-facing problem as a bad credential",
         )
     }
@@ -137,7 +144,7 @@ class PlanningCenterClientNetworkTest {
 
         assertEquals(
             PlanningCenterClient.TokenOutcome.InvalidCredentials,
-            runBlocking { PlanningCenterClient.exchangeCodeForToken("cid", "csecret", "code", http = http) },
+            runBlocking { PlanningCenterClient.exchangeCodeForToken("cid", "csecret", "code", VERIFIER, http = http) },
         )
     }
 
@@ -147,7 +154,7 @@ class PlanningCenterClientNetworkTest {
 
         assertEquals(
             PlanningCenterClient.TokenOutcome.Failure,
-            runBlocking { PlanningCenterClient.exchangeCodeForToken("cid", "csecret", "code", http = http) },
+            runBlocking { PlanningCenterClient.exchangeCodeForToken("cid", "csecret", "code", VERIFIER, http = http) },
         )
     }
 
@@ -157,7 +164,7 @@ class PlanningCenterClientNetworkTest {
 
         assertEquals(
             PlanningCenterClient.TokenOutcome.NetworkError,
-            runBlocking { PlanningCenterClient.exchangeCodeForToken("cid", "csecret", "code", http = http) },
+            runBlocking { PlanningCenterClient.exchangeCodeForToken("cid", "csecret", "code", VERIFIER, http = http) },
         )
     }
 
@@ -872,7 +879,7 @@ class PlanningCenterClientNetworkTest {
         notJson()
         assertEquals(
             PlanningCenterClient.TokenOutcome.Failure,
-            runBlocking { PlanningCenterClient.exchangeCodeForToken("id", "secret", "code", http) },
+            runBlocking { PlanningCenterClient.exchangeCodeForToken("id", "secret", "code", VERIFIER, http) },
         )
         notJson()
         assertEquals(
@@ -944,7 +951,7 @@ class PlanningCenterClientNetworkTest {
         failToResolve()
         assertEquals(
             PlanningCenterClient.TokenOutcome.NetworkError,
-            runBlocking { PlanningCenterClient.exchangeCodeForToken("id", "secret", "code", http) },
+            runBlocking { PlanningCenterClient.exchangeCodeForToken("id", "secret", "code", VERIFIER, http) },
         )
         failToResolve()
         assertEquals(

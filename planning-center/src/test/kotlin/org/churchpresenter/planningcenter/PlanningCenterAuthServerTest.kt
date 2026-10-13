@@ -24,6 +24,8 @@ import kotlin.test.assertTrue
 // Not exercised: CallbackResult.Timeout (CALLBACK_TIMEOUT_MS, 5 minutes, not injectable).
 class PlanningCenterAuthServerTest {
 
+    private val attempt = OAuthAttempt(state = "s1", codeVerifier = "v".repeat(43))
+
     private fun url(query: String) = "http://127.0.0.1:${Constants.PLANNING_CENTER_OAUTH_PORT}/callback$query"
 
     /** True once something is actually accepting connections on 127.0.0.1:port. Used only to wait
@@ -90,12 +92,12 @@ class PlanningCenterAuthServerTest {
 
     @Test
     fun `a callback carrying a code resolves to Success`() = runBlocking {
-        val resultDeferred = async(Dispatchers.IO) { PlanningCenterAuthServer.awaitAuthorizationCode() }
+        val resultDeferred = async(Dispatchers.IO) { PlanningCenterAuthServer.awaitAuthorizationCode(attempt) }
         awaitServerReady(resultDeferred)
 
         val client = HttpClient(CIO)
         try {
-            client.get(url("?code=abc123"))
+            client.get(url("?code=abc123&state=s1"))
         } finally {
             client.close()
         }
@@ -107,7 +109,7 @@ class PlanningCenterAuthServerTest {
 
     @Test
     fun `a callback carrying an error resolves to Error with that message`() = runBlocking {
-        val resultDeferred = async(Dispatchers.IO) { PlanningCenterAuthServer.awaitAuthorizationCode() }
+        val resultDeferred = async(Dispatchers.IO) { PlanningCenterAuthServer.awaitAuthorizationCode(attempt) }
         awaitServerReady(resultDeferred)
 
         val client = HttpClient(CIO)
@@ -124,7 +126,7 @@ class PlanningCenterAuthServerTest {
 
     @Test
     fun `a callback with neither code nor error resolves to a generic Error`() = runBlocking {
-        val resultDeferred = async(Dispatchers.IO) { PlanningCenterAuthServer.awaitAuthorizationCode() }
+        val resultDeferred = async(Dispatchers.IO) { PlanningCenterAuthServer.awaitAuthorizationCode(attempt) }
         awaitServerReady(resultDeferred)
 
         val client = HttpClient(CIO)
@@ -141,12 +143,12 @@ class PlanningCenterAuthServerTest {
 
     @Test
     fun `the callback page tells the user they can close the window`() = runBlocking {
-        val resultDeferred = async(Dispatchers.IO) { PlanningCenterAuthServer.awaitAuthorizationCode() }
+        val resultDeferred = async(Dispatchers.IO) { PlanningCenterAuthServer.awaitAuthorizationCode(attempt) }
         awaitServerReady(resultDeferred)
 
         val client = HttpClient(CIO)
         val body = try {
-            client.get(url("?code=xyz")).bodyAsText()
+            client.get(url("?code=xyz&state=s1")).bodyAsText()
         } finally {
             client.close()
         }
@@ -163,7 +165,7 @@ class PlanningCenterAuthServerTest {
             holder.reuseAddress = true
             holder.bind(InetSocketAddress("127.0.0.1", Constants.PLANNING_CENTER_OAUTH_PORT))
 
-            val result = withTimeout(5_000) { PlanningCenterAuthServer.awaitAuthorizationCode() }
+            val result = withTimeout(5_000) { PlanningCenterAuthServer.awaitAuthorizationCode(attempt) }
 
             assertIs<PlanningCenterAuthServer.CallbackResult.Error>(result)
         }
@@ -176,7 +178,7 @@ class PlanningCenterAuthServerTest {
     fun `a code is read from among other parameters`() {
         assertEquals(
             PlanningCenterAuthServer.CallbackResult.Success("abc"),
-            PlanningCenterAuthServer.callbackResult("state=s1&code=abc&scope=services"),
+            PlanningCenterAuthServer.callbackResult("state=s1&code=abc&scope=services", attempt),
         )
     }
 
@@ -184,7 +186,7 @@ class PlanningCenterAuthServerTest {
     fun `a percent-encoded value is decoded`() {
         assertEquals(
             PlanningCenterAuthServer.CallbackResult.Error("access denied"),
-            PlanningCenterAuthServer.callbackResult("error=access%20denied"),
+            PlanningCenterAuthServer.callbackResult("error=access%20denied", attempt),
         )
     }
 
@@ -192,23 +194,47 @@ class PlanningCenterAuthServerTest {
     fun `a code wins over an error sent beside it`() {
         assertEquals(
             PlanningCenterAuthServer.CallbackResult.Success("abc"),
-            PlanningCenterAuthServer.callbackResult("error=x&code=abc"),
+            PlanningCenterAuthServer.callbackResult("error=x&code=abc&state=s1", attempt),
         )
     }
 
     @Test
     fun `no query at all, or only empty pieces, means no code`() {
         val none = PlanningCenterAuthServer.CallbackResult.Error("No authorization code returned")
-        assertEquals(none, PlanningCenterAuthServer.callbackResult(null))
-        assertEquals(none, PlanningCenterAuthServer.callbackResult("&&"))
-        assertEquals(none, PlanningCenterAuthServer.callbackResult("state"))
+        assertEquals(none, PlanningCenterAuthServer.callbackResult(null, attempt))
+        assertEquals(none, PlanningCenterAuthServer.callbackResult("&&", attempt))
+        assertEquals(none, PlanningCenterAuthServer.callbackResult("state", attempt))
     }
 
     @Test
     fun `an empty code is still a code`() {
         assertEquals(
             PlanningCenterAuthServer.CallbackResult.Success(""),
-            PlanningCenterAuthServer.callbackResult("code="),
+            PlanningCenterAuthServer.callbackResult("code=&state=s1", attempt),
         )
+    }
+
+    @Test
+    fun `a code without the attempt's state is refused`() {
+        val refused = PlanningCenterAuthServer.CallbackResult.Error(PlanningCenterAuthServer.STATE_MISMATCH)
+        assertEquals(refused, PlanningCenterAuthServer.callbackResult("code=abc", attempt))
+        assertEquals(refused, PlanningCenterAuthServer.callbackResult("code=abc&state=s2", attempt))
+        assertEquals(refused, PlanningCenterAuthServer.callbackResult("code=abc&state=", attempt))
+    }
+
+    @Test
+    fun `a redirect the app did not start ends the wait as an Error`() = runBlocking {
+        val resultDeferred = async(Dispatchers.IO) { PlanningCenterAuthServer.awaitAuthorizationCode(attempt) }
+        awaitServerReady(resultDeferred)
+
+        val client = HttpClient(CIO)
+        try {
+            client.get(url("?code=planted&state=forged"))
+        } finally {
+            client.close()
+        }
+
+        val result = withTimeout(10_000) { resultDeferred.await() }
+        assertEquals(PlanningCenterAuthServer.CallbackResult.Error(PlanningCenterAuthServer.STATE_MISMATCH), result)
     }
 }

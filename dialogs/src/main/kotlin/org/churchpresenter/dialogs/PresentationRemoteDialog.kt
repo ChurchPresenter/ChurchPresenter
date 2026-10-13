@@ -227,6 +227,7 @@ internal fun PresentationRemoteDialogContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(8.dp))
+                    TunnelUnprotectedWarning(apiKeyEnabled, apiKey)
                     PresentationTunnelControls(
                         tunnelStatus, tunnelUrl, serverUrl, presentationDisplayUrl,
                         onPresentationDisplayUrlChanged, onStartTunnel, onStopTunnel,

@@ -128,5 +128,5 @@ internal fun CompanionServer.browserSourceOverlayPageHtml(
     output: ScreenAssignment,
     bgOverride: String? = null,
 ): String = browserSourceOverlayPage(
-    index, output, _apiKeyEnabled.value, _apiKey.value, bgOverride
+    index, output, _apiKey.value, bgOverride
 )

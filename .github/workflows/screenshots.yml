@@ -76,16 +76,16 @@ jobs:
           fi
 
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: '21'
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
         with:
           # Reads the Gradle cache but never writes it: on Linux only test.yml's `app` job saves one, so
           # main keeps one copy that every job restores from (setup-gradle falls back to the newest
@@ -144,7 +144,7 @@ jobs:
       # a set recorded on someone's macOS checkout is not. Uploaded before the comparison so a
       # visual difference, which is advisory and never fails the job, cannot cost the artifact.
       - name: Upload the rendered screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots
           path: composeApp/screenshots
@@ -154,7 +154,7 @@ jobs:
       # The shared components' own suites, recorded by :shared-ui. A separate artifact so the
       # `screenshots` one above keeps the layout the website's importer reads paths from.
       - name: Upload the rendered shared-ui screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-shared-ui
           path: shared-ui/screenshots
@@ -162,7 +162,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered slides screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-slides
           path: slides/screenshots
@@ -170,7 +170,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered media screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-media
           path: media/screenshots
@@ -178,7 +178,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered songs screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-songs
           path: songs/screenshots
@@ -186,7 +186,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered bible-tab screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-bible-tab
           path: bible-tab/screenshots
@@ -194,7 +194,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered schedule screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-schedule
           path: schedule/screenshots
@@ -202,7 +202,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered canvas screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-canvas
           path: canvas/screenshots
@@ -210,7 +210,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered presenter screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-presenter
           path: presenter/screenshots
@@ -218,7 +218,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered profiles screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-profiles
           path: profiles/screenshots
@@ -226,7 +226,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered live-output screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-live-output
           path: live-output/screenshots
@@ -234,7 +234,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered server-ui screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-server-ui
           path: server-ui/screenshots
@@ -242,7 +242,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered app-settings screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-app-settings
           path: app-settings/screenshots
@@ -250,7 +250,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered updater screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-updater
           path: updater/screenshots
@@ -258,7 +258,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered companion-surface screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-companion-surface
           path: companion-surface/screenshots
@@ -266,7 +266,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered helper screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-helper
           path: helper/screenshots
@@ -274,7 +274,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered announcements screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-announcements
           path: announcements/screenshots
@@ -282,7 +282,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered calendar screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-calendar
           path: calendar/screenshots
@@ -290,7 +290,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered crossword-tab screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-crossword-tab
           path: crossword-tab/screenshots
@@ -298,7 +298,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered dictionary screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-dictionary
           path: dictionary/screenshots
@@ -306,7 +306,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered lottieGenerator screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-lottieGenerator
           path: lottieGenerator/screenshots
@@ -314,7 +314,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered lower-third screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-lower-third
           path: lower-third/screenshots
@@ -322,7 +322,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered obs screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-obs
           path: obs/screenshots
@@ -330,7 +330,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered qa screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-qa
           path: qa/screenshots
@@ -338,7 +338,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered songlibrary screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-songlibrary
           path: songlibrary/screenshots
@@ -346,7 +346,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered stt screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-stt
           path: stt/screenshots
@@ -354,7 +354,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload the rendered dialogs screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-dialogs
           path: dialogs/screenshots
@@ -383,7 +383,7 @@ jobs:
       # seven changed files, and the website's importer only ever reads specific paths from this by
       # name, so the untouched (still-1x) files alongside them are inert.
       - name: Upload the 2x screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: screenshots-2x
           path: composeApp/screenshots
@@ -438,7 +438,7 @@ jobs:
           cp -R dialogs/screenshots/. screenshots-compare/dialogs/
 
       - name: Compare with the base branch
-        uses: reg-viz/reg-actions@v3
+        uses: reg-viz/reg-actions@f0cccbcab7e7ecf9b0434b719f1e842c97bcd2a7 # v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           # What the step above gathered from the two record outputs — `roborazzi.outputDir` in

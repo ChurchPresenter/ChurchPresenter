@@ -123,6 +123,7 @@ class RemoteActivityToastHostTest {
             RemoteEventType.QA_DONE to "Q&A Question Done",
             RemoteEventType.QA_DISPLAY to "Q&A Question Live",
             RemoteEventType.QA_CLEAR_DISPLAY to "Q&A Display Cleared",
+            RemoteEventType.QA_CLEAR_ALL to "Q&A Questions Cleared",
         )
         for ((type, label) in labelByType) {
             notifications = listOf(RemoteActivityNotification(type, title = "Detail for $type"))

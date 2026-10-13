@@ -46,11 +46,8 @@ import kotlin.test.assertNull
  * refusal changes nothing: a phone that is told "no" must not have edited, deleted or displayed
  * anything. That is asserted for each action, alongside what the desktop was actually shown in the
  * prompt — the operator decides from that text, so a prompt naming the wrong question is worse than
- * no prompt.
- *
- * The one exception is `clear-all`, which has no operator gate at all: the password check is the only
- * thing standing in front of it. That asymmetry is deliberate in the server and is pinned here so it
- * cannot be lost by accident.
+ * no prompt. `clear-all` is no exception: it deletes every question, so the password alone is not
+ * enough to let it through.
  *
  * Driven against a real server over real HTTP, as the sibling suites are, because `start()` builds
  * its own Netty server rather than exposing a separable Ktor module.
@@ -465,17 +462,29 @@ class CompanionServerQaModerationTest {
     }
 
     @Test
-    fun `clear-all empties the session without asking the operator`() {
+    fun `clear-all empties the session once the operator allows it`() {
         val qa = openSession()
         submitQuestion("one")
-        val prompts = playOperator()
+        val prompts = playOperator(allow = true)
 
         val response = post("/api/qa/clear-all")
 
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(0, qa.questions.size)
-        // Deliberately ungated, unlike every other action here: the password is the only guard.
-        assertEquals(0, prompts.size)
+        assertEquals(listOf("clear-all"), prompts.map { it.action })
+    }
+
+    @Test
+    fun `clear-all refused by the operator keeps every question`() {
+        val qa = openSession()
+        submitQuestion("one")
+        submitQuestion("two")
+        playOperator(allow = false)
+
+        val response = post("/api/qa/clear-all")
+
+        assertEquals(HttpStatusCode.Forbidden, response.status)
+        assertEquals(2, qa.questions.size)
     }
 
     // ── With no session manager at all ──────────────────────────────────────────
@@ -589,9 +598,10 @@ class CompanionServerQaModerationTest {
         delete("/api/qa/questions/$id", device = phone)
         post("/api/qa/add", """{"text":"from the front","name":""}""", device = phone)
         post("/api/qa/clear-display", device = phone)
+        post("/api/qa/clear-all", device = phone)
 
         assertEquals(
-            listOf("approve", "edit", "deny", "done", "display", "delete", "add", "clear-display"),
+            listOf("approve", "edit", "deny", "done", "display", "delete", "add", "clear-display", "clear-all"),
             prompts.map { it.action },
         )
         assertEquals(setOf(phone), prompts.map { it.clientId }.toSet(), "the operator is told which phone it is")

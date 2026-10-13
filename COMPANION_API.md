@@ -159,7 +159,7 @@ registers them; `{name}` is a path parameter.
 | `DELETE /api/qa/questions/{id}` | Q&A admin password | — | *approval* |
 | `POST /api/qa/add` | Q&A admin password | — | *approval* |
 | `POST /api/qa/clear-display` | Q&A admin password | — | *approval* |
-| `POST /api/qa/clear-all` | Q&A admin password | — | No approval |
+| `POST /api/qa/clear-all` | Q&A admin password | — | *approval* |
 
 ### Lower thirds and ATEM
 
@@ -1347,7 +1347,7 @@ socket's address). `X-Device-Id` is recorded with a submission when sent.
 ### Moderation
 
 Every route here takes the admin password (`X-QA-Password` or `?password=`). All but
-`questions` and `clear-all` also wait for the operator to allow the action on the desktop, answering
+`questions` also wait for the operator to allow the action on the desktop, answering
 `403 {"error":"denied by operator"}` if refused. `{id}` is the question's id.
 
 | Route | Body | Does |
@@ -1362,7 +1362,7 @@ Every route here takes the admin password (`X-QA-Password` or `?password=`). All
 | `DELETE /api/qa/questions/{id}` | — | Deletes it |
 | `POST /api/qa/add` | `{"text":"…"}` | Adds a question as the moderator; answers the `QuestionDto` |
 | `POST /api/qa/clear-display` | — | Takes the displayed question down |
-| `POST /api/qa/clear-all` | — | Deletes every question, **without** asking the operator |
+| `POST /api/qa/clear-all` | — | Deletes every question |
 
 `QuestionDto`: `id`, `text`, `submitterName`, `submitterDeviceId`, `timestamp`, `status`,
 `voteCount`, `upvotes`, …. Changes are pushed as `questions_updated` over the WebSocket.

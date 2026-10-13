@@ -9,9 +9,13 @@ the one-shot loopback listener that catches the consent redirect — and, under 
 window** that turns a plan into schedule items. A real Gradle module of this build:
 `include(":planning-center")`, `implementation(projects.planningCenter)`.
 
-No credentials ship with it. Each church registers its own free PCO Developer application and
-supplies its own client id and secret, the same bring-your-own-key shape as the Pexels/Pixabay
-stock media client. **One-way pull only** — nothing is ever written back to Planning Center.
+The module holds no credentials. The app's build injects one shared PCO OAuth application's client
+id and secret (`BuildConfig`, from CI secrets), passed in through `PlanningCenterImportServices`;
+each church authorizes that one app and keeps only its own tokens (`PlanningCenterSettings`). The
+shared secret ships inside every build, so it is not a secret from anyone holding the binary —
+which is why each sign-in also carries a `state` and a PKCE challenge (`OAuthAttempt`): a code
+caught on its way to the loopback callback cannot be redeemed without the attempt's verifier.
+**One-way pull only** — nothing is ever written back to Planning Center.
 
 **The package is `org.churchpresenter.planningcenter`**, with the import window in `.ui`. It held two of the
 app's own (`…churchpresenter.data` for the client and formatter, `…churchpresenter.server` for the
@@ -26,6 +30,7 @@ app.
 |---|---|
 | `PlanningCenterClient.kt` | `object PlanningCenterClient` — OAuth token exchange and refresh, `/people/v2/me`, service types, plans, plan items, arrangement lyrics, attachment metadata, attachment download |
 | `PlanningCenterLyricsFormatter.kt` | Chord-chart → plain lyrics, and PCO's `html_details` rich text → plain text |
+| `OAuthAttempt.kt` | One sign-in's `state` and PKCE verifier, and the S256 challenge sent for it |
 | `PlanningCenterAuthServer.kt` | The loopback listener on the registered redirect port, started per connect attempt and torn down when the callback lands. The JDK's own `HttpServer`, not Ktor — see **Rules** |
 | `ui/PlanningCenterImportDialog.kt` | The connect window and the import window, the OAuth round trip (`connectToPlanningCenter`) |
 | `ui/PlanningCenterImportViewModel.kt` | The import's state: service types, plans, plan items, what is ticked; matching a plan song to the library and writing a new one (`matchLocalSong`, `createLocalSong`) |

@@ -33,6 +33,7 @@ class RemoteEventLabelTest {
         assertEquals(RemoteEventType.QA_DONE, qaActionType("done"))
         assertEquals(RemoteEventType.QA_DISPLAY, qaActionType("display"))
         assertEquals(RemoteEventType.QA_CLEAR_DISPLAY, qaActionType("clear-display"))
+        assertEquals(RemoteEventType.QA_CLEAR_ALL, qaActionType("clear-all"))
     }
 
     @Test

@@ -55,6 +55,7 @@ import org.churchpresenter.strings.generated.resources.remote_activity_qa_deny
 import org.churchpresenter.strings.generated.resources.remote_activity_qa_done
 import org.churchpresenter.strings.generated.resources.remote_activity_qa_display
 import org.churchpresenter.strings.generated.resources.remote_activity_qa_clear_display
+import org.churchpresenter.strings.generated.resources.remote_activity_qa_clear_all
 import org.churchpresenter.strings.generated.resources.remote_activity_presentation_connect
 import org.churchpresenter.strings.generated.resources.remote_activity_qa_admin_connect_detail
 import org.churchpresenter.strings.generated.resources.remote_activity_qa_admin_connect
@@ -254,7 +255,8 @@ internal fun remoteEventIcon(type: RemoteEventType): ImageVector = when (type) {
     RemoteEventType.QA_DENY,
     RemoteEventType.QA_DONE,
     RemoteEventType.QA_DISPLAY,
-    RemoteEventType.QA_CLEAR_DISPLAY -> Icons.Filled.QuestionAnswer
+    RemoteEventType.QA_CLEAR_DISPLAY,
+    RemoteEventType.QA_CLEAR_ALL -> Icons.Filled.QuestionAnswer
 }
 
 /** What the remote did, as the toast's first line names it. */
@@ -274,6 +276,7 @@ private fun remoteActionLabel(type: RemoteEventType): String = when (type) {
     RemoteEventType.QA_DONE         -> stringResource(Res.string.remote_activity_qa_done)
     RemoteEventType.QA_DISPLAY      -> stringResource(Res.string.remote_activity_qa_display)
     RemoteEventType.QA_CLEAR_DISPLAY -> stringResource(Res.string.remote_activity_qa_clear_display)
+    RemoteEventType.QA_CLEAR_ALL    -> stringResource(Res.string.remote_activity_qa_clear_all)
     RemoteEventType.PRESENTATION_CONNECT -> stringResource(Res.string.remote_activity_presentation_connect)
     RemoteEventType.CALENDAR_ENROLL -> stringResource(Res.string.remote_activity_calendar_enroll)
     RemoteEventType.QA_ADMIN_CONNECT -> stringResource(Res.string.remote_activity_qa_admin_connect)

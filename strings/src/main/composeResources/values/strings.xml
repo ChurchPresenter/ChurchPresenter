@@ -1621,6 +1621,7 @@
     <string name="remote_api_qa_done">Q&amp;A: Mark as Done</string>
     <string name="remote_api_qa_display">Q&amp;A: Go Live</string>
     <string name="remote_api_qa_clear_display">Q&amp;A: Clear Display</string>
+    <string name="remote_api_qa_clear_all">Q&amp;A: Clear All Questions</string>
     <string name="remote_api_qa_admin_connect">Connect to Q&amp;A Admin</string>
     <string name="remote_api_qa_admin_connect_detail">A phone or tablet wants to moderate Q&amp;A questions.</string>
     <string name="remote_api_musician_connect">Connect a Transpose Control</string>
@@ -1655,6 +1656,7 @@
     <string name="remote_activity_qa_done">Q&amp;A Question Done</string>
     <string name="remote_activity_qa_display">Q&amp;A Question Live</string>
     <string name="remote_activity_qa_clear_display">Q&amp;A Display Cleared</string>
+    <string name="remote_activity_qa_clear_all">Q&amp;A Questions Cleared</string>
     <string name="remote_activity_by">by %1$s</string>
     <string name="remote_activity_dismiss">Dismiss</string>
     <string name="remote_activity_dismiss_all">Dismiss All</string>
@@ -1983,6 +1985,7 @@
     <string name="qa_confirm_delete_prompt">Delete?</string>
     <string name="qa_submitter_device">Device: %1$s</string>
     <string name="qa_public_access">Public Access</string>
+    <string name="tunnel_unprotected_warning">Public access opens every remote control to the internet, not only this page. Turn on the API key in Settings → Server to protect them.</string>
     <string name="qa_public_access_description">Let users submit questions via mobile data without joining your WiFi</string>
     <string name="qa_enable_public_access">Enable Public Access</string>
     <string name="qa_disable_public_access">Disable Public Access</string>
