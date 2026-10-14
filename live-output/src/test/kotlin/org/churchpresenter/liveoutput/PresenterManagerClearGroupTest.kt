@@ -14,6 +14,23 @@ class PresenterManagerClearGroupTest {
 
     private fun manager() = PresenterManager(showPresenterWindowInitially = false)
 
+    /**
+     * The Clear button, its key or a remote client: counted as an operator's clear -- which is what
+     * stops a running action list, and the only thing that does -- and the outputs asked to fade
+     * what is live.
+     */
+    @Test
+    fun `an operator's clear is counted and fades out what is live`() {
+        val pm = manager()
+        pm.setPresentingMode(Presenting.LYRICS)
+        val before = pm.operatorClears.intValue
+
+        pm.clearFromOperator()
+
+        assertEquals(before + 1, pm.operatorClears.intValue)
+        assertTrue(pm.clearDisplayRequested.value)
+    }
+
     @Test
     fun `a group clears its layers and leaves the rest up`() {
         val pm = manager()

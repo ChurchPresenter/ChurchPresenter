@@ -525,6 +525,19 @@ class MediaViewModelTest {
         assertEquals(MediaViewModel.SUBTITLES_OFF, vm.selectedSubtitleTrack)
     }
 
+    /** A track VLC carries inside the clip shows, and lights the Subtitles key, with no file loaded. */
+    @Test
+    fun `picking an embedded track shows subtitles`() {
+        val vm = loaded()
+        vm.subtitles.setSubtitleTracks(listOf(english, spanish))
+        assertFalse(vm.subtitlesVisible)
+
+        vm.subtitles.selectSubtitleTrack(english.id)
+
+        assertTrue(vm.subtitlesVisible)
+        assertFalse(vm.subtitles.appDrawsSubtitles, "VLC draws an embedded track, not the app")
+    }
+
     @Test
     fun `a subtitle file the operator chose is shown once VLC lists it`() {
         val vm = loaded()
