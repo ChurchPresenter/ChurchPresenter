@@ -208,7 +208,7 @@ fixtures declare; a test's own classpath may reach anything.
 | Layer | Modules | May depend on |
 |---|---|---|
 | foundation | theme, strings, icons, diagnostics, core-models, settings, shared-ui, bible, song-chords, show-control, control-in | foundation |
-| engine | protocols, file formats and rendering: bible-engine, bible-formats, presentation-engine, atem, ndi, omt, companion-satellite, live-show, lottieGenerator, presenter | foundation, engine |
+| engine | protocols, file formats and rendering: bible-engine, bible-formats, presentation-engine, atem, ndi, omt, companion-satellite, live-show, lottieGenerator, presenter, output-api, calendar-core, and the tabs' engines (slides-engine, media-engine, canvas-engine, lower-third-engine, web-engine, stt-engine) | foundation, engine |
 | feature | a tab or a window with its view model | foundation, engine |
 | output | live-output | foundation, engine |
 | integration | server, server-ui, profiles, dialogs, app-settings, telemetry | everything below, and integration |
@@ -219,10 +219,10 @@ So a tab never depends on another tab or on the output: what it needs of the out
 implements and `:composeApp` hands the tab. What two features both need goes down
 a layer — into an engine module, or into `:shared-ui` or `:core-models` when it knows no feature.
 
-**`config/architecture/allowed-edges.txt` lists the forbidden edges that exist today, and only
-shrinks**: the check fails on an entry that is no longer a forbidden edge, and nothing writes the
-file. **Never add a line to it without asking** — an edge that seems to need one is a sign that
-something belongs a layer down. A new module gets its layer in `layers.properties`; the check fails
+**`config/architecture/allowed-edges.txt` is empty, and stays that way**: it is where a forbidden
+edge would be recorded, the check fails on an entry that is no longer a forbidden edge, and nothing
+writes the file. **Never add a line to it without asking** — an edge that seems to need one is a
+sign that something belongs a layer down (DEVELOPMENT_GUIDE.md, "Adding a module"). A new module gets its layer in `layers.properties`; the check fails
 on one that has none.
 
 ### POI is shared by four modules

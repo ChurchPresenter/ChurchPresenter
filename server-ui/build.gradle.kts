@@ -15,7 +15,6 @@ dependencies {
     implementation(projects.theme)
     implementation(projects.calendar)
     implementation(projects.lowerThirdEngine)
-    implementation(projects.profiles)
     // The connection and enrolment QR codes.
     implementation(libs.zxing.core)
     implementation(libs.zxing.javase)

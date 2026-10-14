@@ -14,7 +14,6 @@ dependencies {
     implementation(projects.icons)
     implementation(projects.coreModels)
     implementation(projects.settings)
-    implementation(projects.theme)
     implementation(projects.diagnostics)
     implementation(projects.canvasEngine)
     implementation(projects.slidesEngine)

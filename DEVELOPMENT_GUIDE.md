@@ -248,6 +248,11 @@ files; `bash test-changed.sh` names the module tasks a change implies.
 5. Its layer in `config/architecture/layers.properties` (AGENT.md, "Layers") — `checkModuleLayers`
    fails until it has one.
 
+When something below the feature layer needs a tab's code — an output drawing what the tab
+prepares, another tab reading its state — that code is an engine, not the tab: move it into a
+`<tab>-engine` module (engine layer) with its tests, keep its package so no import changes, and have
+the tab take the engine with `api`. The `*-engine` modules are all built this way.
+
 ### DeckLink hardware tests
 
 `DeckLinkHardwareTest` drives a real Blackmagic card and is **opt-in** — opening the output pushes a

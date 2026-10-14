@@ -26,9 +26,9 @@ Its consumers are `:composeApp` and `:live-output`. `:live-output` keeps the out
 bands, and the off-screen outputs (NDI, OMT, Browser Source, DeckLink, the scene pump); the app keeps
 the settings pages.
 
-It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`,
-`:diagnostics`, `:canvas-engine`, `:slides-engine`, `:media-engine`, `:lower-third-engine`,
-`:lottieGenerator` and `:song-chords`, and nothing of `:composeApp`'s.
+It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:diagnostics`,
+`:canvas-engine`, `:slides-engine`, `:media-engine`, `:lower-third-engine`, `:lottieGenerator` and
+`:song-chords`, and nothing of `:composeApp`'s.
 
 ## Package
 

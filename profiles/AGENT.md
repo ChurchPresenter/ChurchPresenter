@@ -25,7 +25,7 @@ consumers are `:composeApp`, `:app-settings`, `:dialogs`, `:server-ui` and `:tel
 `:live-output`, which is a layer below it (see the root AGENT.md, "Layers"). The app keeps the settings pages that need app
 services — Projection, Server, System, Companion — and the Options dialog that hosts every page.
 
-It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`, `:diagnostics`,
+It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`,
 `:presenter`, `:canvas-engine`, `:media`, `:media-engine`, `:slides-engine`, `:bible`, `:bible-tab`,
 `:lottieGenerator`, `:atem`, `:dictionary` and `:qa`, and nothing of `:composeApp`'s.
 

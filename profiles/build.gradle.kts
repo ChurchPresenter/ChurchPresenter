@@ -29,7 +29,6 @@ dependencies {
     implementation(projects.coreModels)
     implementation(projects.settings)
     implementation(projects.theme)
-    implementation(projects.diagnostics)
     implementation(projects.presenter)
     implementation(projects.canvasEngine)
     implementation(projects.media)
