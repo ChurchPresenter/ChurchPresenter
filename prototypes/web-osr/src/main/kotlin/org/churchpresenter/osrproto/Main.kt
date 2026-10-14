@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,7 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.TextStyle
@@ -41,7 +47,11 @@ import org.cef.callback.CefMenuModel
 import org.cef.handler.CefContextMenuHandlerAdapter
 import org.cef.handler.CefLifeSpanHandlerAdapter
 import java.awt.GraphicsEnvironment
+import java.awt.KeyEventDispatcher
+import java.awt.KeyboardFocusManager
+import java.awt.Window
 import java.awt.event.KeyEvent
+import java.util.concurrent.atomic.AtomicBoolean
 import java.io.File
 import javax.swing.SwingUtilities
 import kotlin.system.exitProcess
@@ -143,6 +153,8 @@ private fun OutputWindow(store: FrameStore, stats: Stats, cfg: Config, onClose: 
 private fun PreviewWindow(store: FrameStore, stats: Stats, browser: CefBrowserHeadless, onClose: () -> Unit) {
     val state = remember { WindowState(size = DpSize(640.dp, 420.dp)) }
     Window(onCloseRequest = onClose, state = state, title = "Preview") {
+        val pageFocused = remember { AtomicBoolean(false) }
+        ForwardKeysWhileFocused(window, pageFocused, browser)
         Column(Modifier.fillMaxSize().background(Color(0xFF202020))) {
             UrlBar(browser)
             val focus = remember { FocusRequester() }
@@ -151,17 +163,56 @@ private fun PreviewWindow(store: FrameStore, stats: Stats, browser: CefBrowserHe
                 store, stats, "preview",
                 Modifier.fillMaxSize()
                     .focusRequester(focus)
-                    .focusable()
-                    .onPreviewKeyEvent { event ->
-                        (event.nativeKeyEvent as? KeyEvent)?.let(browser::key)
-                        true
+                    .onFocusChanged {
+                        pageFocused.set(it.isFocused)
+                        browser.setFocus(it.isFocused)
                     }
-                    .forwardPointer(browser, cursor, onPress = {
-                        focus.requestFocus()
-                        browser.setFocus(true)
-                    }),
+                    .focusable()
+                    .forwardPointer(browser, cursor, onPress = { focus.requestFocus() }),
             )
         }
+    }
+}
+
+private val isMac = System.getProperty("os.name").startsWith("Mac")
+
+/**
+ * Types [char] into the page's focused field. JCEF's native macOS key path drops a `KEY_TYPED` whose
+ * character is outside ASCII (Cyrillic arrives from AWT intact and never reaches the page), so on
+ * macOS such characters go in as an edit instead. Prototype workaround; it does not reach a page that
+ * reads raw key events (a canvas game) and is not undone with the field's other typing.
+ */
+private fun insertText(browser: CefBrowserHeadless, char: Char) {
+    val literal = "\\u%04x".format(char.code)
+    browser.focusedFrame?.executeJavaScript("document.execCommand('insertText', false, '$literal')", "", 0)
+}
+
+/**
+ * While [pageFocused], sends every key event of [window] to [browser] untouched and keeps it from
+ * Compose. Compose's own key events carry no `KEY_TYPED` (Chromium's char event) and wrap the AWT
+ * event, so the raw AWT event is taken here instead, with its real id, scancode and raw code.
+ */
+@Composable
+private fun ForwardKeysWhileFocused(window: Window, pageFocused: AtomicBoolean, browser: CefBrowserHeadless) {
+    DisposableEffect(window, browser) {
+        val dispatcher = KeyEventDispatcher { e ->
+            if (!pageFocused.get() || SwingUtilities.getWindowAncestor(e.component) !== window) {
+                false
+            } else {
+                if (System.getProperty("osr.logKeys") != null) {
+                    println("key id=${e.id} code=${e.keyCode} char=${e.keyChar.code} '${e.keyChar}' mods=${e.modifiersEx}")
+                }
+                if (isMac && e.id == KeyEvent.KEY_TYPED && e.keyChar.code > 0x7f) {
+                    insertText(browser, e.keyChar)
+                } else {
+                    browser.key(e)
+                }
+                true
+            }
+        }
+        val manager = KeyboardFocusManager.getCurrentKeyboardFocusManager()
+        manager.addKeyEventDispatcher(dispatcher)
+        onDispose { manager.removeKeyEventDispatcher(dispatcher) }
     }
 }
 
@@ -175,8 +226,7 @@ private fun UrlBar(browser: CefBrowserHeadless) {
             singleLine = true,
             textStyle = TextStyle(color = Color.White, fontSize = 13.sp),
             modifier = Modifier.fillMaxWidth().padding(6.dp).onPreviewKeyEvent { e ->
-                val awt = e.nativeKeyEvent as? KeyEvent
-                if (awt?.id == KeyEvent.KEY_PRESSED && awt.keyCode == KeyEvent.VK_ENTER && text.isNotBlank()) {
+                if (e.type == KeyEventType.KeyDown && e.key == Key.Enter && text.isNotBlank()) {
                     val url = if ("://" in text) text else "https://$text"
                     browser.loadURL(url)
                     true

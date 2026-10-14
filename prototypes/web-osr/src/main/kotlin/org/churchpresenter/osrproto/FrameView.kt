@@ -8,7 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.skiaCanvas
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -22,6 +22,30 @@ import org.jetbrains.skia.Rect
 import java.awt.Cursor
 import java.awt.event.MouseEvent
 import java.awt.event.MouseWheelEvent
+
+/**
+ * The wheel rotation to hand JCEF for an AWT [preciseWheelRotation][MouseWheelEvent.getPreciseWheelRotation].
+ *
+ * JCEF's macOS path passes the rotation to Chromium as a pixel delta, negated and unscaled: five
+ * notches down arrive as `deltaY=-5`. So on macOS this sends pixels at Chromium's 40 px per line,
+ * pre-negated, and carries the fraction a touchpad leaves so slow swipes still scroll. Elsewhere the
+ * rotation goes through as AWT gave it until a run there says otherwise.
+ */
+internal class WheelScaler(private val mac: Boolean = System.getProperty("os.name").startsWith("Mac")) {
+    private var carry = 0.0
+
+    fun rotationFor(precise: Double): Int {
+        if (!mac) return precise.toInt()
+        val pixels = precise * PIXELS_PER_LINE + carry
+        val whole = pixels.toInt()
+        carry = pixels - whole
+        return -whole
+    }
+
+    private companion object {
+        const val PIXELS_PER_LINE = 40
+    }
+}
 
 /** Where the page's picture sits inside a box of [box]: centred, letterboxed to the frame's aspect. */
 internal fun fitRect(box: Size, frameW: Int, frameH: Int): Rect {
@@ -48,7 +72,7 @@ fun FrameView(store: FrameStore, stats: Stats, name: String, modifier: Modifier)
         val dst = fitRect(size, f.view.width, f.view.height)
         val sampling = FilterMipmap(FilterMode.LINEAR, MipmapMode.NONE)
         drawIntoCanvas { c ->
-            val canvas = c.nativeCanvas
+            val canvas = c.skiaCanvas
             canvas.drawImageRect(
                 f.view, Rect.makeWH(f.view.width.toFloat(), f.view.height.toFloat()), dst, sampling, paint, true,
             )
@@ -81,6 +105,7 @@ fun FrameView(store: FrameStore, stats: Stats, name: String, modifier: Modifier)
 fun Modifier.forwardPointer(browser: CefBrowserHeadless, cursorType: Int, onPress: () -> Unit): Modifier =
     pointerHoverIcon(PointerIcon(Cursor.getPredefinedCursor(cursorType.coerceIn(0, Cursor.MOVE_CURSOR))))
         .pointerInput(browser) {
+            val wheel = WheelScaler()
             awaitPointerEventScope {
                 while (true) {
                     val event = awaitPointerEvent()
@@ -95,13 +120,19 @@ fun Modifier.forwardPointer(browser: CefBrowserHeadless, cursorType: Int, onPres
                     if (event.type == PointerEventType.Press) onPress()
                     val src = browser.eventSource
                     if (awt is MouseWheelEvent) {
-                        browser.wheel(
-                            MouseWheelEvent(
-                                src, awt.id, awt.`when`, awt.modifiersEx, x, y, awt.xOnScreen, awt.yOnScreen,
-                                awt.clickCount, awt.isPopupTrigger, awt.scrollType, awt.scrollAmount,
-                                awt.wheelRotation, awt.preciseWheelRotation,
-                            ),
-                        )
+                        if (System.getProperty("osr.logKeys") != null) {
+                            println("wheel rot=${awt.wheelRotation} precise=${awt.preciseWheelRotation} amount=${awt.scrollAmount} type=${awt.scrollType} mods=${awt.modifiersEx}")
+                        }
+                        val rotation = wheel.rotationFor(awt.preciseWheelRotation)
+                        if (rotation != 0) {
+                            browser.wheel(
+                                MouseWheelEvent(
+                                    src, awt.id, awt.`when`, awt.modifiersEx, x, y, awt.xOnScreen, awt.yOnScreen,
+                                    awt.clickCount, awt.isPopupTrigger, awt.scrollType, awt.scrollAmount,
+                                    rotation, rotation.toDouble(),
+                                ),
+                            )
+                        }
                     } else {
                         browser.mouse(
                             MouseEvent(

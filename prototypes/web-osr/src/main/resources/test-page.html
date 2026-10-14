@@ -52,7 +52,7 @@
     addEventListener(t, e => {
       ev.textContent = 'last event: ' + t + (e.button !== undefined ? ' button=' + e.button : '') +
         (e.key ? ' key=' + e.key : '') + (e.clientX !== undefined ? ' at ' + e.clientX + ',' + e.clientY : '') +
-        (e.detail ? ' detail=' + e.detail : '');
+        (e.detail ? ' detail=' + e.detail : '') + (e.deltaY !== undefined ? ' deltaY=' + e.deltaY + ' deltaX=' + e.deltaX + ' scrollY=' + Math.round(scrollY) : '');
     }, true));
 </script>
 </body>

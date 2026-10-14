@@ -100,7 +100,6 @@ public class CefBrowserHeadless extends CefBrowser_N implements CefRenderHandler
 
     @Override
     public boolean getScreenInfo(CefBrowser browser, CefScreenInfo info) {
-        System.out.println("getScreenInfo called (scale " + scale + ")");
         Rectangle rect = new Rectangle(0, 0, viewWidth, viewHeight);
         info.Set(scale, 32, 8, false, rect, rect);
         return true;
