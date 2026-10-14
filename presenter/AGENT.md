@@ -27,7 +27,7 @@ bands, and the off-screen outputs (NDI, OMT, Browser Source, DeckLink, the scene
 the settings pages.
 
 It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`,
-`:diagnostics`, `:canvas-engine`, `:slides-engine`, `:media-engine`, `:lower-third`,
+`:diagnostics`, `:canvas-engine`, `:slides-engine`, `:media-engine`, `:lower-third-engine`,
 `:lottieGenerator` and `:song-chords`, and nothing of `:composeApp`'s.
 
 ## Package

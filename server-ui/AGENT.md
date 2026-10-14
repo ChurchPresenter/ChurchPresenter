@@ -21,8 +21,8 @@ A real Gradle module of this build: `include(":server-ui")`, `implementation(pro
 Instance Link windows, `ScheduleSidebar` the status row, `CalendarManagerWindow` the invite, and
 `MainWindowScope` holds the `RemoteClientManager`.
 
-It takes `:server`, `:shared-ui`, `:strings`, `:settings`, `:theme`, `:calendar`, `:lower-third`
-(which JSON files are lower thirds) and `:profiles` (the settings card kit), and nothing of
+It takes `:server`, `:shared-ui`, `:strings`, `:settings`, `:theme`, `:calendar`,
+`:lower-third-engine` (which JSON files are lower thirds) and `:profiles` (the settings card kit), and nothing of
 `:composeApp`'s.
 
 ## Seams to the app

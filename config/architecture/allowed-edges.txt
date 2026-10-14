@@ -3,7 +3,5 @@
 # the list only ever shrinks. Never add a line without asking the person running the work.
 
 :bible-tab -> :stt            # STTManager, the caption client: an engine living in a tab module
-:live-output -> :lower-third  # the lower-third presenter and render cache
 :live-output -> :stt          # STTManager and STTPresenter
 :live-output -> :web          # WebsitePresenter (JCEF) and the WebOutput port
-:presenter -> :lower-third    # LottieFonts, for the Bible lottie band

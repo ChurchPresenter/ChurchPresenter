@@ -1,30 +1,28 @@
 plugins {
     id("cp.jvm-module")
     id("cp.test-home")
-    // The strings and icons come from :strings and :icons. The bundled lottie fonts are plain classpath
-    // resources under src/main/resources/fonts, loaded by LottieFonts (and by LottieGen's FontRegistry).
+    // The strings and icons come from :strings and :icons; the bundled lottie fonts are
+    // :lower-third-engine's.
     id("cp.compose")
     id("cp.screenshots")
     `java-test-fixtures`
 }
 
 dependencies {
+    // The render cache, the sequencer and the fonts the tab drives; its API names them.
+    api(projects.lowerThirdEngine)
     implementation(projects.sharedUi)
     implementation(projects.strings)
     implementation(projects.icons)
     implementation(projects.coreModels)
     implementation(projects.settings)
     implementation(projects.theme)
-    implementation(projects.diagnostics)
     implementation(projects.atem)
     implementation(projects.lottieGenerator)
-    implementation(projects.presentationEngine)
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.swing)
-    implementation(libs.kotlinx.serialization.json)
     implementation(libs.compottie)
-    implementation(libs.compottie.dot)
 
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.components.resources)

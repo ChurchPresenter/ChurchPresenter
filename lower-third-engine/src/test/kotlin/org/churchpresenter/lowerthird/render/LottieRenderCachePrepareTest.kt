@@ -10,6 +10,8 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -71,6 +73,7 @@ class LottieRenderCachePrepareTest {
     fun `the folder pass prepares every lottie in it and skips other JSON`() {
         File(folder, "Welcome.json").writeText(tinyLottie)
         File(folder, "notes.json").writeText("""{"not":"a lottie"}""")
+        File(folder, "readme.txt").writeText(tinyLottie)
 
         LottieRenderCache.ensureForFolder(folder.absolutePath, atem = null)
 
@@ -127,6 +130,56 @@ class LottieRenderCachePrepareTest {
         LottieRenderCache.ensureForFolder("", atem)
 
         assertTrue(LottieCacheFiles.cacheDir.listFiles().orEmpty().none { it.extension == "lrcc" })
+    }
+
+    @Test
+    fun `an ATEM with no address gets no ATEM variants`() = runBlocking {
+        val file = File(folder, "Welcome.json").apply { writeText(tinyLottie) }
+        val unaddressed = AtemSettings(host = "", renderWidth = 64, renderHeight = 36)
+
+        LottieRenderCache.ensureForFile(file, unaddressed).join()
+        LottieRenderCache.awaitInFlight()
+
+        assertTrue(LottieRenderCache.isReady(tinyLottie, LottieRenderCache.desktopVariant(tinyLottie, unaddressed)!!))
+        assertFalse(
+            LottieRenderCache.isReady(tinyLottie, LottieRenderCache.atemVariant(tinyLottie, unaddressed, clip = false)),
+            "nothing is rendered for a switcher the app cannot reach",
+        )
+    }
+
+    /** A lottie that ends where it starts is a still: no clip to play, and an ATEM gets the still alone. */
+    @Test
+    fun `a lottie of no length gets an ATEM still and no clip`() = runBlocking {
+        val still = """{"v":"5.7.4","fr":30,"ip":0,"op":0,"w":64,"h":36,"layers":[]}"""
+        val file = File(folder, "Still.json").apply { writeText(still) }
+
+        LottieRenderCache.ensureForFile(file, atem).join()
+        LottieRenderCache.awaitInFlight()
+
+        assertNull(LottieRenderCache.desktopVariant(still, atem), "there is no playback clip to prepare")
+        assertTrue(LottieRenderCache.isReady(still, LottieRenderCache.atemVariant(still, atem, clip = false)))
+        assertFalse(LottieRenderCache.isReady(still, LottieRenderCache.atemVariant(still, atem, clip = true)))
+    }
+
+    @Test
+    fun `progress starts empty for an entry nothing has rendered`() {
+        val unseen = tinyLottie.replace("\"layers\"", "\"nm\":\"unseen\",\"layers\"")
+        val variant = LottieRenderCache.desktopVariant(unseen, null)!!
+
+        assertEquals(0f, LottieRenderCache.progressFlow(unseen, variant).value)
+    }
+
+    /** The cache outlives the app: an entry a previous run left on disk reads full the first time it is asked. */
+    @Test
+    fun `progress reads full at once for an entry an earlier run cached`() {
+        val earlier = tinyLottie.replace("\"layers\"", "\"nm\":\"earlier\",\"layers\"")
+        val variant = LottieRenderCache.desktopVariant(earlier, null)!!
+        LottieCacheFiles.cacheFile(LottieCacheFiles.keyFor(earlier, variant)).apply {
+            parentFile.mkdirs()
+            writeBytes(byteArrayOf(0))
+        }
+
+        assertEquals(1f, LottieRenderCache.progressFlow(earlier, variant).value)
     }
 
     private companion object {

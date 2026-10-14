@@ -137,6 +137,10 @@ include(":dictionary")
 include(":stt")
 include(":announcements")
 include(":lower-third")
+// What the Lower Third tab drives, without the tab: the lottie render cache and its off-screen renderer,
+// the output's presenter, the ATEM sequencer and the bundled lottie fonts. The outputs and the
+// server use it.
+include(":lower-third-engine")
 
 // The helper lamp: tips, display setup, typed tasks and the spotlight that points at controls.
 // Depended on by :composeApp, which carries the actions out through HelperActionExecutor.

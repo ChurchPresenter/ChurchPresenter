@@ -139,11 +139,12 @@
 
 **Source locations:**
 - `lower-third/` (the `:lower-third` Gradle module) — the tab (`LowerThird.kt` and its pieces in
-  `LowerThird*.kt`), `LowerThirdSequencer.kt`, and under `render/` the ATEM render cache
-  (`LottieRenderCache.kt` with `LottieRenderSizes.kt`, `LottieCacheFiles.kt`, `ArgbRle.kt`), the
-  off-screen renderer, `LottieFonts` and the bundled fonts
+  `LowerThird*.kt`)
+- `lower-third-engine/` (the `:lower-third-engine` Gradle module) — `LowerThirdSequencer.kt`, and under
+  `render/` the ATEM render cache (`LottieRenderCache.kt` with `LottieRenderSizes.kt`,
+  `LottieCacheFiles.kt`, `ArgbRle.kt`), the off-screen renderer, `LottieFonts` and the bundled fonts
 - `tabs/AppLowerThirdTab.kt` — the app's wrapper, which supplies the preview output and its picker
-- `lower-third/…/presenter/LowerThirdPresenter.kt` — the lower third on the output
+- `lower-third-engine/…/presenter/LowerThirdPresenter.kt` — the lower third on the output
 - `lottieGenerator/.../lottie/TextShaping.kt` — the Text shaping setting every Lottie player reads from the file
 - `presenter/…/BibleLottieBand.kt`, `presenter/…/BibleLottieTemplate.kt`, `presenter/…/BibleLottieTextFit.kt`, `presenter/…/BibleBandClock.kt` — the Bible band at run time; driven from `live-output/…/PresenterTransitionEffects.kt`
 - `profiles/…/BibleLottieBandPicker.kt` — the template picker, the Bible tab's Lower Third Animation section and the generator window

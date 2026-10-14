@@ -25,7 +25,7 @@ dependencies {
     implementation(projects.web)
     implementation(projects.presentationEngine)
     implementation(projects.stt)
-    implementation(projects.lowerThird)
+    implementation(projects.lowerThirdEngine)
     implementation(projects.songChords)
     implementation(projects.lottieGenerator)
     implementation(projects.ndi)

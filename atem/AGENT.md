@@ -40,8 +40,8 @@ inside `ConstantsKt` is exactly how a sibling rename silently rewrote a `mockkSt
 it is uploading. Those are the two app-side dependencies the client itself does not have, and
 keeping them out is the whole reason this module cuts cleanly. `AtemBridgeTest`,
 `CompanionServerAtemUploadTest`, `CompanionServerAtemKeyTest` and `AtemUploadTracedTest` stay with
-it; they, and `:lower-third`'s `LowerThirdSequencerKeyTest`, `LowerThirdAtemUploadTest` and
-`AtemSettingsTab*` suites, drive `FakeAtemSwitcher` through `testFixtures(projects.atem)`.
+it; they, `:lower-third-engine`'s `LowerThirdSequencerKeyTest`, and `:lower-third`'s
+`LowerThirdAtemUploadTest` and `AtemSettingsTab*` suites, drive `FakeAtemSwitcher` through `testFixtures(projects.atem)`.
 
 **If a change here needs a setting or a ViewModel, it belongs in the bridge, not in this module.**
 

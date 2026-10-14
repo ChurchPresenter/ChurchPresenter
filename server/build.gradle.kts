@@ -9,7 +9,7 @@ dependencies {
     implementation(projects.sharedUi)
     implementation(projects.diagnostics)
     implementation(projects.calendar)
-    implementation(projects.lowerThird)
+    implementation(projects.lowerThirdEngine)
     implementation(projects.presentationEngine)
     implementation(projects.atem)
     implementation(projects.dictionary)
