@@ -99,11 +99,17 @@ internal fun isVlcInstalledOnSystem(): Boolean =
  * it proves the *player* is on PATH, not that libvlc is anywhere JNA will look, so it is worth
  * trying only where distributions reliably ship the two together.
  */
-internal fun vlcInstalledOn(osName: String, customPath: String, run: CommandRunner): Boolean {
+internal fun vlcInstalledOn(
+    osName: String,
+    customPath: String,
+    run: CommandRunner,
+    /** The usual places' answer: a parameter so a test does not depend on this machine's VLC. */
+    detect: (String) -> String = ::detectVlcInstallPathFor,
+): Boolean {
     val custom = customPath.takeIf { it.isNotBlank() }
         ?.let { try { Paths.get(it) } catch (_: Exception) { null } }
     if (custom != null && dirContainsVlcLib(custom)) return true
-    if (detectVlcInstallPathFor(osName).isNotBlank()) return true
+    if (detect(osName).isNotBlank()) return true
     val unixLike = "win" !in osName && "mac" !in osName && "darwin" !in osName
     return unixLike && run(listOf("which", "vlc"), 0L).exitCode == 0
 }

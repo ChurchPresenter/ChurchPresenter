@@ -76,6 +76,8 @@ internal fun projectionTab(
      */
     vlcInstalled: Boolean = true,
     audioDevices: List<VlcAudioDevice> = emptyList(),
+    /** What VLC says once a folder is chosen for it; the real answer loads libvlc. */
+    vlcRechecked: Boolean = vlcInstalled,
     /** What the tab's file and folder pickers answer; the platform chooser would block the run. */
     chooser: PathChooser = PathChooser { _, _, _ -> null },
     block: ComposeUiTest.(get: () -> AppSettings) -> Unit,
@@ -98,6 +100,7 @@ internal fun projectionTab(
                 ffmpegProbe = { ffmpegStatus },
                 vlcProbe = { vlcInstalled },
                 audioDeviceProbe = { audioDevices },
+                vlcRecheck = { vlcRechecked },
             )
             }
         }

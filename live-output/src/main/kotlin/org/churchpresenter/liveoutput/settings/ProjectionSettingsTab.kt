@@ -216,6 +216,11 @@ fun ProjectionSettingsTab(
      */
     vlcProbe: () -> Boolean = { isVlcAvailable },
     audioDeviceProbe: () -> List<VlcAudioDevice> = ::listVlcAudioDevices,
+    /**
+     * VLC asked again once a folder is chosen for it: a parameter for the reason [vlcProbe] is one,
+     * and the heavier read of the two, since it loads libvlc from wherever the search now leads.
+     */
+    vlcRecheck: () -> Boolean = ::recheckVlcAvailability,
     /** Whether this is a release build: a developer build with no real screen lists the dev fallback window. */
     isRelease: Boolean = false,
 ) {
@@ -324,7 +329,7 @@ fun ProjectionSettingsTab(
     )
 
     // ── Card 2: Audio Output ─────────────────────────────────────────────────
-    AudioOutputCard(proj, vlcProbe, audioDeviceProbe, onSettingsChange)
+    AudioOutputCard(proj, vlcProbe, audioDeviceProbe, vlcRecheck, onSettingsChange)
 
     // ── Card 3: Camera Capture ───────────────────────────────────────────────
     FfmpegCard(settings = settings, onSettingsChange = onSettingsChange, onProbe = ffmpegProbe)
@@ -453,6 +458,7 @@ private fun AudioOutputCard(
     proj: ProjectionSettings,
     vlcProbe: () -> Boolean,
     audioDeviceProbe: () -> List<VlcAudioDevice>,
+    vlcRecheck: () -> Boolean,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
     SettingsSection(title = stringResource(Res.string.audio_output)) {
@@ -470,7 +476,7 @@ private fun AudioOutputCard(
         }
 
         AudioDeviceRow(vlcDetected, proj, audioDeviceProbe, onSettingsChange)
-        VlcPathRow(vlcPathText, vlcPathError, onSettingsChange) { chosen, detected ->
+        VlcPathRow(vlcPathText, vlcPathError, vlcRecheck, onSettingsChange) { chosen, detected ->
             vlcPathText = chosen
             vlcDetected = detected
             vlcPathError = !detected && chosen.isNotBlank()
@@ -597,6 +603,7 @@ private fun AudioDeviceRow(
 private fun VlcPathRow(
     vlcPathText: String,
     vlcPathError: Boolean,
+    recheck: () -> Boolean,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     onChosen: (path: String, detected: Boolean) -> Unit,
 ) {
@@ -646,7 +653,7 @@ private fun VlcPathRow(
                     }
                     // Re-probed here rather than by the caller: the answer depends on the path just
                     // chosen, and the card above needs both to decide what to draw.
-                    onChosen(selectedPath, recheckVlcAvailability())
+                    onChosen(selectedPath, recheck())
                 }
             }
         }) {

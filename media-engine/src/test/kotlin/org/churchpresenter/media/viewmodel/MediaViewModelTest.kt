@@ -718,6 +718,19 @@ class MediaViewModelTest {
         assertFalse(vm.subtitlesVisible)
     }
 
+    @Test
+    fun `a subtitle file switched off darkens the Subtitles key, and switched back on lights it`() {
+        val vm = loaded()
+        vm.subtitles.setSubtitleFile(srtFile())
+
+        vm.subtitles.setSidecarEnabled(0, false)
+        assertFalse(vm.subtitlesVisible, "a file loaded but off shows nothing")
+        assertTrue(vm.subtitles.appDrawsSubtitles, "still loaded, so VLC must still draw none of its own")
+
+        vm.subtitles.setSidecarEnabled(0, true)
+        assertTrue(vm.subtitlesVisible)
+    }
+
     // ── Several files at once, and which output each goes to ─────────────────────
 
     @Test
