@@ -7,7 +7,8 @@ import java.util.concurrent.atomic.AtomicLong
 import kotlin.concurrent.thread
 
 /**
- * Per-stage counters, printed every [periodMs]: paints and how long the copy and the snapshot took,
+ * Per-stage counters, printed every [periodMs]: paints, how long the copy into the frame ring and
+ * the preview's downscale took,
  * how many pixels were dirty, each window's draws, its draw cost and paint→draw latency, process CPU
  * and memory.
  *
@@ -36,18 +37,18 @@ class Stats(private val periodMs: Long = 2_000) {
     }
 
     private val copy = Bucket()
-    private val snapshot = Bucket()
+    private val preview = Bucket()
     private val popupPaints = AtomicLong()
     private val fullPaints = AtomicLong()
     private val draws = ConcurrentHashMap<String, Bucket>()
     private val skipped = ConcurrentHashMap<String, AtomicLong>()
 
-    fun paint(popup: Boolean, copiedNs: Long, snapshotNs: Long, full: Boolean, rects: Array<Rectangle>) {
+    fun paint(popup: Boolean, copiedNs: Long, previewNs: Long, full: Boolean, rects: Array<Rectangle>) {
         if (popup) popupPaints.incrementAndGet()
         if (full) fullPaints.incrementAndGet()
         val dirtyPixels = rects.sumOf { it.width.toLong() * it.height }
         copy.add(copiedNs, extraValue = dirtyPixels)
-        snapshot.add(snapshotNs)
+        if (previewNs > 0) preview.add(previewNs)
     }
 
     /** A [window] drew frame [seq]: [drawNs] spent drawing, [latencyNs] since the paint arrived, [gap] frames skipped since its last draw. */
@@ -71,12 +72,12 @@ class Stats(private val periodMs: Long = 2_000) {
                 lastWall = wall
                 val secs = periodMs / 1000.0
                 val c = copy.drain()
-                val s = snapshot.drain()
+                val p = preview.drain()
                 val line = buildString {
                     append("[$label] paints ${fmt(c[0] / secs)}/s")
                     append(" (full ${fullPaints.getAndSet(0)}, popup ${popupPaints.getAndSet(0)})")
                     append(" | copy avg ${ms(c[1], c[0])} max ${ms(c[2])} dirty ${mpx(c[3], c[0])}")
-                    append(" | snapshot avg ${ms(s[1], s[0])} max ${ms(s[2])}")
+                    append(" | preview-scale avg ${ms(p[1], p[0])} max ${ms(p[2])}")
                     draws.toSortedMap().forEach { (window, bucket) ->
                         val d = bucket.drain()
                         val dropped = skipped[window]?.getAndSet(0) ?: 0

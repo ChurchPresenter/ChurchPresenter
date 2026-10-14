@@ -22,9 +22,10 @@ compose.desktop {
 
 // `-Purl=…` picks the page, `-Psize=3840x2160` the render size, `-Pfps=30` the frame rate,
 // `-Pscale=2` the device scale Chromium is told (the page is then size÷scale DIPs),
-// `-PlogKeys=1` prints every key and wheel event forwarded to the page.
+// `-PlogKeys=1` prints every key and wheel event forwarded to the page, `-PnoIme=1` turns input
+// methods off on both windows (a diagnostic for the Windows language-switch freeze).
 tasks.withType<JavaExec>().matching { it.name == "run" }.configureEach {
-    listOf("url", "size", "fps", "scale", "logKeys").forEach { key ->
+    listOf("url", "size", "fps", "scale", "logKeys", "noIme").forEach { key ->
         project.findProperty(key)?.let { systemProperty("osr.$key", it) }
     }
 }

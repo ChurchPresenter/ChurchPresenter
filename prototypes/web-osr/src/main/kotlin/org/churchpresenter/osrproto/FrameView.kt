@@ -27,15 +27,15 @@ import java.awt.event.MouseWheelEvent
  * The wheel rotation to hand JCEF for an AWT [preciseWheelRotation][MouseWheelEvent.getPreciseWheelRotation].
  *
  * JCEF passes the rotation to Chromium as a pixel delta, negated and barely scaled: one notch down
- * arrives as `deltaY=-1` on macOS and `deltaY=-2` on Windows, where Chrome scrolls 40 px per line and
+ * arrives as `deltaY=-1` on macOS and `deltaY=-2.5` on Windows, where Chrome scrolls 40 px per line and
  * 100 px per notch. So this sends pre-negated pixels divided by JCEF's own factor, and carries the
  * fraction a touchpad leaves so slow swipes still scroll. Linux is passed through until measured.
  */
 internal class WheelScaler(os: String = System.getProperty("os.name")) {
     /** Pixels per AWT rotation unit, and JCEF's native multiplier; null where unmeasured. */
-    private val scale: Pair<Int, Int>? = when {
-        os.startsWith("Mac") -> 40 to 1
-        os.startsWith("Windows") -> 100 to 2
+    private val scale: Pair<Double, Double>? = when {
+        os.startsWith("Mac") -> 40.0 to 1.0
+        os.startsWith("Windows") -> 100.0 to 2.5
         else -> null
     }
     private var carry = 0.0
@@ -61,28 +61,30 @@ internal fun fitRect(box: Size, frameW: Int, frameH: Int): Rect {
 
 /**
  * Draws the latest frame, letterboxed, with the open popup over it, and reports each draw to [stats]
- * under [name]. Every window that shows the page is one of these over the same [store].
+ * under [name]. Every window that shows the page is one of these over the same [store]; a [small]
+ * one draws the frame's scaled-down copy when there is one.
  */
 @Composable
-fun FrameView(store: FrameStore, stats: Stats, name: String, modifier: Modifier) {
+fun FrameView(store: FrameStore, stats: Stats, name: String, modifier: Modifier, small: Boolean = false) {
     val frame by store.frames.collectAsState()
     val lastSeq = remember { longArrayOf(-1) }
     val paint = remember { Paint() }
     Canvas(modifier) {
         val f = frame ?: return@Canvas
         val start = System.nanoTime()
-        val dst = fitRect(size, f.view.width, f.view.height)
+        val picture = if (small) f.preview ?: f.view else f.view
+        val dst = fitRect(size, picture.width, picture.height)
         val sampling = FilterMipmap(FilterMode.LINEAR, MipmapMode.NONE)
         drawIntoCanvas { c ->
             val canvas = c.skiaCanvas
             canvas.drawImageRect(
-                f.view, Rect.makeWH(f.view.width.toFloat(), f.view.height.toFloat()), dst, sampling, paint, true,
+                picture, Rect.makeWH(picture.width.toFloat(), picture.height.toFloat()), dst, sampling, paint, true,
             )
             val popup = f.popup
             val rect = f.popupRect
             if (popup != null && rect != null) {
-                // The popup rect is in DIPs; the view image is in physical pixels.
-                val dipToDst = dst.width / (f.view.width / f.scale)
+                // The popup rect is in DIPs; the picture is in pixels.
+                val dipToDst = dst.width / f.dipWidth
                 val target = Rect.makeXYWH(
                     dst.left + rect.x * dipToDst, dst.top + rect.y * dipToDst,
                     rect.width * dipToDst, rect.height * dipToDst,

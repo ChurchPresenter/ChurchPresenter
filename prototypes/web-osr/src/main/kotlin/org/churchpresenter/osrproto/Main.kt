@@ -46,6 +46,9 @@ import org.cef.callback.CefContextMenuParams
 import org.cef.callback.CefMenuModel
 import org.cef.handler.CefContextMenuHandlerAdapter
 import org.cef.handler.CefLifeSpanHandlerAdapter
+import java.awt.Component
+import java.awt.Container
+import java.awt.Frame
 import java.awt.GraphicsEnvironment
 import java.awt.KeyEventDispatcher
 import java.awt.KeyboardFocusManager
@@ -54,17 +57,38 @@ import java.awt.event.KeyEvent
 import java.util.concurrent.atomic.AtomicBoolean
 import java.io.File
 import javax.swing.SwingUtilities
+import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 
 /** What `-Purl`, `-Psize` and `-Pfps` (or `-Dosr.*`) asked for. */
 private data class Config(val url: String, val width: Int, val height: Int, val fps: Int, val scale: Double)
 
 private fun config(): Config {
-    val (w, h) = (System.getProperty("osr.size") ?: "1920x1080").split("x").map(String::toInt)
     val fps = System.getProperty("osr.fps")?.toInt() ?: 60
-    val scale = System.getProperty("osr.scale")?.toDouble() ?: 1.0
     val url = System.getProperty("osr.url") ?: testPageUrl()
+    System.getProperty("osr.size")?.let { size ->
+        val (w, h) = size.split("x").map(String::toInt)
+        return Config(url, w, h, fps, System.getProperty("osr.scale")?.toDouble() ?: 1.0)
+    }
+    val (w, h, scale) = outputSize()
     return Config(url, w, h, fps, scale)
+}
+
+/** The page is laid out this many DIPs wide on any output at least this wide. */
+private const val LAYOUT_WIDTH = 1920
+
+/**
+ * The render size and scale for the Output display: its real pixels (logical size × the OS's scale),
+ * with the page laid out [LAYOUT_WIDTH] DIPs wide — so a 4K output shows a sharp 1080p-shaped page
+ * rather than a 4K-wide one. With no second display the Output is a window, rendered at 1080p.
+ */
+private fun outputSize(): Triple<Int, Int, Double> {
+    val device = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.getOrNull(1)
+        ?: return Triple(LAYOUT_WIDTH, 1080, 1.0)
+    val config = device.defaultConfiguration
+    val w = (config.bounds.width * config.defaultTransform.scaleX).roundToInt()
+    val h = (config.bounds.height * config.defaultTransform.scaleY).roundToInt()
+    return Triple(w, h, maxOf(1.0, w.toDouble() / LAYOUT_WIDTH))
 }
 
 /** The bundled test page (CSS animation, a clock, a form with a `<select>`), written out so Chromium can load it as a file. */
@@ -94,7 +118,6 @@ fun main() {
     val cfg = config()
     println("OSR prototype: ${cfg.width}x${cfg.height} px @ ${cfg.fps} fps, scale ${cfg.scale}, ${cfg.url}")
     val stats = Stats()
-    val store = FrameStore(stats, cfg.scale.toFloat())
     val cef = startCef()
     val client = cef.createClient()
     // OSR draws no native context menu; dropping its items stops Chromium from waiting on one.
@@ -113,6 +136,7 @@ fun main() {
     val settings = CefBrowserSettings().apply { windowless_frame_rate = cfg.fps }
     val viewW = (cfg.width / cfg.scale).toInt()
     val viewH = (cfg.height / cfg.scale).toInt()
+    val store = FrameStore(stats, viewW)
     val browser = CefBrowserHeadless(client, cfg.url, settings, viewW, viewH, cfg.scale, store)
     SwingUtilities.invokeLater {
         browser.createImmediately()
@@ -145,6 +169,7 @@ private fun OutputWindow(store: FrameStore, stats: Stats, cfg: Config, onClose: 
         }
     }
     Window(onCloseRequest = onClose, state = state, title = "Output", undecorated = second != null) {
+        DisableInputMethodsIfAsked(window)
         FrameView(store, stats, "output", Modifier.fillMaxSize().background(Color.Black))
     }
 }
@@ -153,6 +178,7 @@ private fun OutputWindow(store: FrameStore, stats: Stats, cfg: Config, onClose: 
 private fun PreviewWindow(store: FrameStore, stats: Stats, browser: CefBrowserHeadless, onClose: () -> Unit) {
     val state = remember { WindowState(size = DpSize(640.dp, 420.dp)) }
     Window(onCloseRequest = onClose, state = state, title = "Preview") {
+        DisableInputMethodsIfAsked(window)
         val pageFocused = remember { AtomicBoolean(false) }
         ForwardKeysWhileFocused(window, pageFocused, browser)
         Column(Modifier.fillMaxSize().background(Color(0xFF202020))) {
@@ -160,8 +186,8 @@ private fun PreviewWindow(store: FrameStore, stats: Stats, browser: CefBrowserHe
             val focus = remember { FocusRequester() }
             val cursor by store.cursor.collectAsState()
             FrameView(
-                store, stats, "preview",
-                Modifier.fillMaxSize()
+                store, stats, "preview", small = true,
+                modifier = Modifier.fillMaxSize()
                     .focusRequester(focus)
                     .onFocusChanged {
                         pageFocused.set(it.isFocused)
@@ -171,6 +197,27 @@ private fun PreviewWindow(store: FrameStore, stats: Stats, browser: CefBrowserHe
                     .forwardPointer(browser, cursor, onPress = { focus.requestFocus() }),
             )
         }
+    }
+}
+
+/**
+ * With `-PnoIme=1`, turns input methods off on [window] and everything in it. A diagnostic for the
+ * Windows freeze: with windowless rendering, CEF's windows belong to the AWT event thread, and a
+ * language-switch message sent to them hangs both windows. This tests whether AWT's input-method
+ * calls are the other half of that wait. It also stops IME composition in the URL bar.
+ */
+@Composable
+private fun DisableInputMethodsIfAsked(window: Window) {
+    DisposableEffect(window) {
+        if (System.getProperty("osr.noIme") != null) {
+            fun off(c: Component) {
+                c.enableInputMethods(false)
+                (c as? Container)?.components?.forEach(::off)
+            }
+            off(window)
+            println("input methods off: ${(window as? Frame)?.title}")
+        }
+        onDispose { }
     }
 }
 
