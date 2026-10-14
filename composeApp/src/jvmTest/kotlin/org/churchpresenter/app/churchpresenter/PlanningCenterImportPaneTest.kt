@@ -128,6 +128,21 @@ class PlanningCenterImportPaneTest {
     }
 
     @Test
+    fun `a hidden import with the app's own windows draws nothing`() = runComposeUiTest {
+        setContent {
+            PlanningCenterImportPane(
+                isVisible = false,
+                theme = ThemeMode.LIGHT,
+                settings = PlanningCenterSettings(),
+                sink = Rig().sink,
+                onDismiss = {},
+            )
+        }
+        waitForIdle()
+        onNodeWithText("Connect to Planning Center").assertDoesNotExist()
+    }
+
+    @Test
     fun `a hidden import opens nothing, and the song editor waits for a song`() = runComposeUiTest {
         val titles = mutableListOf<String>()
         setContent {

@@ -227,6 +227,31 @@ class RemoteCommandEffectsTest {
     }
 
     @Test
+    fun `a remote loop toggle turns looping back off`() = runComposeUiTest {
+        presentations.isLooping = true
+        val flows = Flows()
+        effects(flows)
+
+        emit(flows.loopToggle, Unit)
+
+        assertFalse(presentations.isLooping)
+        assertFalse(settings.presentationSettings.isLooping)
+    }
+
+    @Test
+    fun `an unresolved picture from the loaded folder stages the one after it`() = runComposeUiTest {
+        val files = images("a.jpg", "b.jpg")
+        pictures.loadImagesFromFolder(dir)
+        val flows = Flows()
+        effects(flows, resolveImageFile = null)
+
+        emit(flows.selectPicture, "folder-1" to 0)
+
+        assertEquals(files[0].absolutePath, presenter.selectedImagePath.value)
+        assertEquals(files[1].absolutePath, presenter.nextImagePath.value)
+    }
+
+    @Test
     fun `a goto for a slide that does not exist is ignored`() = runComposeUiTest {
         val flows = Flows()
         effects(flows)
