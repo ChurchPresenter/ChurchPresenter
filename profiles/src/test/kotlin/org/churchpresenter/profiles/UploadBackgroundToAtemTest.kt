@@ -1,8 +1,12 @@
 package org.churchpresenter.profiles
 
 import kotlinx.coroutines.runBlocking
+import org.churchpresenter.atem.FakeAtemSwitcher
 import org.churchpresenter.settings.AtemSettings
+import java.awt.image.BufferedImage
 import java.io.File
+import java.io.IOException
+import javax.imageio.ImageIO
 import kotlin.coroutines.intrinsics.suspendCoroutineUninterceptedOrReturn
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -101,4 +105,28 @@ class UploadBackgroundToAtemTest {
             empty.delete()
         }
     }
+
+    private fun refusedUpload(width: Int, height: Int) {
+        val picture = File.createTempFile("churchpresenter-atem-background", ".png")
+        try {
+            ImageIO.write(BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB), "png", picture)
+            FakeAtemSwitcher(ftdeFatalCode = 2).use { fake ->
+                val settings = AtemSettings(host = "127.0.0.1", port = fake.port, renderWidth = 16, renderHeight = 16)
+                assertFailsWith<IOException> {
+                    runBlocking { upload(settings, picture.absolutePath, slot = 0) }
+                }
+                assertTrue(fake.commandsNamed("FTSD").isNotEmpty(), "the upload reached the switcher")
+            }
+        } finally {
+            picture.delete()
+        }
+    }
+
+    @Test
+    fun `a picture already at the output size is sent as it is and a refusal fails the upload`() =
+        refusedUpload(width = 16, height = 16)
+
+    @Test
+    fun `a picture of another size is cropped to the output and a refusal fails the upload`() =
+        refusedUpload(width = 32, height = 24)
 }

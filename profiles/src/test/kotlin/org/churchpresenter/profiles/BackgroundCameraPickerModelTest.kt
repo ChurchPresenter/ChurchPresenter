@@ -74,6 +74,12 @@ class BackgroundCameraPickerModelTest {
         assertEquals("DeckLink: DeckLink Mini", selectedBackgroundCameraName(all, ref))
     }
 
+    @Test
+    fun `a card ref with no slot is matched on its path like any camera`() {
+        val ref = CameraDeviceRef(isDeckLink = true, deckLinkIndex = -1, devicePath = "avfoundation://0")
+        assertEquals("FaceTime HD Camera", selectedBackgroundCameraName(all, ref))
+    }
+
     // ── Pointing a background at a device ─────────────────────────────────────
 
     @Test
