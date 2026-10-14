@@ -141,7 +141,8 @@ module-specific notes there, not here.**
 | `crossword-tab/`       | `:crossword-tab`       | The hidden Crossword tab and the decoder for the puzzles it plays                  | [AGENT.md](crossword-tab/AGENT.md)       |
 | `qa/`                  | `:qa`                  | The Q&A tab and `QAManager`, the session behind it                                 | [AGENT.md](qa/AGENT.md)                  |
 | `dictionary/`          | `:dictionary`          | The Strong's dictionary tab, its view model, and the Strong's and interlinear data   | [AGENT.md](dictionary/AGENT.md)          |
-| `stt/`                 | `:stt`                 | The STT tab and `STTManager`, the caption server's socket.io client                 | [AGENT.md](stt/AGENT.md)                 |
+| `stt-engine/`          | `:stt-engine`          | `STTManager`, the caption server's socket.io client, without the tab                | [AGENT.md](stt-engine/AGENT.md)          |
+| `stt/`                 | `:stt`                 | The STT tab                                                                         | [AGENT.md](stt/AGENT.md)                 |
 | `announcements/`       | `:announcements`       | The Announcements tab and its timer                                                 | [AGENT.md](announcements/AGENT.md)       |
 | `lower-third-engine/`  | `:lower-third-engine`  | What a lower third plays and uploads with: the render cache, `LowerThirdPresenter`, the ATEM sequencer, the bundled lottie fonts | [AGENT.md](lower-third-engine/AGENT.md)  |
 | `lower-third/`         | `:lower-third`         | The Lower Third tab and the ATEM settings page                                      | [AGENT.md](lower-third/AGENT.md)         |

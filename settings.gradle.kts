@@ -138,6 +138,9 @@ include(":crossword-tab")
 include(":qa")
 include(":dictionary")
 include(":stt")
+// STTManager without the STT tab: the caption server's socket.io client, the capture and the
+// transcript. The Bible tab's detection and the outputs read it.
+include(":stt-engine")
 include(":announcements")
 include(":lower-third")
 // What the Lower Third tab drives, without the tab: the lottie render cache and its off-screen renderer,

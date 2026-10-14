@@ -195,8 +195,9 @@
 - **Two languages your way** — stacked, side by side, or interleaved with each line followed by its translation; either language first; sharing a box or each in its own; the translation in its own size, capitals, weight and slant.
 
 **Source locations:**
-- `stt/` (the `:stt` Gradle module) — `STTTab.kt` (with `STTTabParts.kt`) and `STTManager.kt` (with
-  `STTTranscript.kt` and the Help Dev `STTCapture.kt`)
+- `stt/` (the `:stt` Gradle module) — `STTTab.kt` (with `STTTabParts.kt`)
+- `stt-engine/` (the `:stt-engine` Gradle module) — `STTManager.kt` (with `STTTranscript.kt` and the
+  Help Dev `STTCapture.kt`)
 - `tabs/AppSTTTab.kt` — the app's wrapper, which supplies the live mode and the caption settings dialog
 - `data/settings/STTSettings.kt`
 - `presenter/…/stt/presenter/STTPresenter.kt` — the captions on the output

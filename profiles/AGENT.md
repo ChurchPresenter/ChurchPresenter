@@ -27,7 +27,7 @@ services — Projection, Server, System, Companion — and the Options dialog th
 
 It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`, `:diagnostics`,
 `:presenter`, `:canvas-engine`, `:media`, `:media-engine`, `:slides-engine`, `:bible`, `:bible-tab`,
-`:lottieGenerator`, `:atem`, `:stt`, `:dictionary` and `:qa`, and nothing of `:composeApp`'s.
+`:lottieGenerator`, `:atem`, `:dictionary` and `:qa`, and nothing of `:composeApp`'s.
 
 ## Seams to the app
 

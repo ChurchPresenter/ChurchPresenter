@@ -2,5 +2,3 @@
 # fails on a forbidden edge missing from this list AND on a line here that no longer names one, so
 # the list only ever shrinks. Never add a line without asking the person running the work.
 
-:bible-tab -> :stt            # STTManager, the caption client: an engine living in a tab module
-:live-output -> :stt          # STTManager and STTPresenter

@@ -39,7 +39,6 @@ dependencies {
     implementation(projects.bibleTab)
     implementation(projects.lottieGenerator)
     implementation(projects.atem)
-    implementation(projects.stt)
     implementation(projects.dictionary)
     implementation(projects.qa)
 
