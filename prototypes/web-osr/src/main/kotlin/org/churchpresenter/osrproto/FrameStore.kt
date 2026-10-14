@@ -84,6 +84,8 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
     /** The frame the preview worker is reading, if any, and whether it was retired meanwhile. */
     private var previewSource: Image? = null
     private var closeSourceWhenScaled = false
+    /** The bounding box, in view pixels, of everything painted since the preview worker last started. */
+    private var previewDirty: Rectangle? = null
     private val previewWorker = Executors.newSingleThreadExecutor(daemon("osr-preview"))
     private val copyPool = Executors.newFixedThreadPool(COPY_THREADS - 1, daemon("osr-copy"))
     private val oldRings = ArrayDeque<Pair<Long, Ring>>()
@@ -110,16 +112,21 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
         val (image, full) = target.write(dirtyRects, buffer, copyPool)
         stats.paint(false, copiedNs = System.nanoTime() - start, previewNs = 0, full = full, rects = dirtyRects)
         publish(image, start)
-        if (image.width > DOWNSCALE_ABOVE && previewSource == null) {
-            previewSource = image
-            previewWorker.execute { scalePreview(image) }
+        if (image.width > DOWNSCALE_ABOVE) {
+            dirtyRects.forEach { r -> previewDirty = previewDirty?.union(r) ?: Rectangle(r) }
+            if (previewSource == null) {
+                val dirty = previewDirty
+                previewDirty = null
+                previewSource = image
+                previewWorker.execute { scalePreview(image, dirty) }
+            }
         }
     }
 
-    /** On the preview worker: scales [image] down, then hands the copy to the frames from now on. */
-    private fun scalePreview(image: Image) {
+    /** On the preview worker: scales [dirty] of [image] down, then hands the copy to the frames from now on. */
+    private fun scalePreview(image: Image, dirty: Rectangle?) {
         val start = System.nanoTime()
-        val preview = downscale(image)
+        val preview = downscale(image, dirty)
         stats.preview(System.nanoTime() - start)
         synchronized(this) {
             previewSource = null
@@ -158,14 +165,32 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
         _cursor.value = cursorType
     }
 
-    /** [image] drawn into a [PREVIEW_WIDTH]-wide raster. Only the preview worker calls this. */
-    private fun downscale(image: Image): Image {
+    /**
+     * [image] drawn into a [PREVIEW_WIDTH]-wide raster that keeps the last copy, redrawing only the part
+     * that covers [dirty] (in view pixels; null or a new raster redraws it all). Only the preview
+     * worker calls this.
+     */
+    private fun downscale(image: Image, dirty: Rectangle?): Image {
         val w = PREVIEW_WIDTH
         val h = image.height * w / image.width
-        val surface = previewSurface?.takeIf { it.width == w && it.height == h }
+        val reused = previewSurface?.takeIf { it.width == w && it.height == h }
+        val surface = reused
             ?: Surface.makeRaster(ImageInfo(w, h, ColorType.BGRA_8888, ColorAlphaType.PREMUL))
                 .also { previewSurface?.close(); previewSurface = it }
-        surface.canvas.drawImageRect(
+        val canvas = surface.canvas
+        canvas.save()
+        if (reused != null && dirty != null) {
+            // A margin of two preview pixels covers what linear filtering pulls in from around the change.
+            val sx = w.toFloat() / image.width
+            val sy = h.toFloat() / image.height
+            canvas.clipRect(
+                Rect.makeLTRB(
+                    dirty.x * sx - CLIP_MARGIN, dirty.y * sy - CLIP_MARGIN,
+                    (dirty.x + dirty.width) * sx + CLIP_MARGIN, (dirty.y + dirty.height) * sy + CLIP_MARGIN,
+                ),
+            )
+        }
+        canvas.drawImageRect(
             image,
             Rect.makeWH(image.width.toFloat(), image.height.toFloat()),
             Rect.makeWH(w.toFloat(), h.toFloat()),
@@ -173,6 +198,7 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
             null,
             true,
         )
+        canvas.restore()
         return surface.makeImageSnapshot()
     }
 
@@ -248,12 +274,19 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
             val buffer = buffers[i]
             val behind = paintNo - held[i]
             val pending = history.toList().takeLast(behind.toInt().coerceAtMost(history.size))
-            val full = held[i] < 0 || behind > history.size || pending.any { it == null }
-            if (full) {
-                copyAll(source, buffer, pool)
-            } else {
-                pending.forEach { paint -> paint!!.forEach { copyRect(it, source, buffer) } }
+            var full = held[i] < 0 || behind > history.size || pending.any { it == null }
+            if (!full) {
+                // Paints that dirty the same rect (a playing video) are copied once, and a set that
+                // covers a large share of the frame goes as one pooled full copy.
+                val rects = pending.flatMap { it!!.asList() }.distinct()
+                val area = rects.sumOf { clip(it)?.let { c -> c.width.toLong() * c.height } ?: 0L }
+                if (area * FULL_COPY_SHARE >= width.toLong() * height) {
+                    full = true
+                } else {
+                    rects.forEach { copyRect(it, source, buffer, pool) }
+                }
             }
+            if (full) copyAll(source, buffer, pool)
             held[i] = paintNo
 
             val data = Data.makeWithoutCopy(BufferUtil.getPointerFromByteBuffer(buffer), bytes, owner)
@@ -264,27 +297,38 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
 
         /** Copies the whole frame in [COPY_THREADS] bands of rows: this thread takes the first, [pool] the rest. */
         private fun copyAll(source: ByteBuffer, target: ByteBuffer, pool: ExecutorService) {
-            val rows = (height + COPY_THREADS - 1) / COPY_THREADS
+            inBands(0, height, pool) { y0, y1 -> target.put(y0 * rowBytes, source, y0 * rowBytes, (y1 - y0) * rowBytes) }
+        }
+
+        /** Runs [copy] over rows [top]..[bottom] in [COPY_THREADS] bands, this thread taking the first. */
+        private fun inBands(top: Int, bottom: Int, pool: ExecutorService, copy: (Int, Int) -> Unit) {
+            val rows = (bottom - top + COPY_THREADS - 1) / COPY_THREADS
             fun band(k: Int) {
-                val y0 = k * rows
-                val y1 = minOf(height, y0 + rows)
-                if (y1 > y0) target.put(y0 * rowBytes, source, y0 * rowBytes, (y1 - y0) * rowBytes)
+                val y0 = top + k * rows
+                val y1 = minOf(bottom, y0 + rows)
+                if (y1 > y0) copy(y0, y1)
             }
             val others = (1 until COPY_THREADS).map { k -> pool.submit { band(k) } }
             band(0)
             others.forEach { it.get() }
         }
 
-        private fun copyRect(r: Rectangle, source: ByteBuffer, target: ByteBuffer) {
-            val x = r.x.coerceIn(0, width)
-            val w = (r.x + r.width).coerceAtMost(width) - x
-            if (w <= 0) return
-            val y0 = r.y.coerceIn(0, height)
-            val y1 = (r.y + r.height).coerceAtMost(height)
-            for (y in y0 until y1) {
-                val at = y * rowBytes + x * 4
-                target.put(at, source, at, w * 4)
+        /** [r] clipped to the frame, or null when nothing of it is inside. */
+        private fun clip(r: Rectangle): Rectangle? =
+            r.intersection(Rectangle(0, 0, width, height)).takeIf { !it.isEmpty }
+
+        /** Copies [r] row by row; a large one is split into bands across [pool]. */
+        private fun copyRect(r: Rectangle, source: ByteBuffer, target: ByteBuffer, pool: ExecutorService) {
+            val c = clip(r) ?: return
+            val rowLength = c.width * 4
+            val copy = { y0: Int, y1: Int ->
+                for (y in y0 until y1) {
+                    val at = y * rowBytes + c.x * 4
+                    target.put(at, source, at, rowLength)
+                }
             }
+            if (c.width.toLong() * c.height >= POOLED_RECT_PIXELS) inBands(c.y, c.y + c.height, pool, copy)
+            else copy(c.y, c.y + c.height)
         }
     }
 
@@ -314,6 +358,15 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
 
         /** Threads a whole-frame copy is split across, the paint thread included. */
         const val COPY_THREADS = 4
+
+        /** Pending rects covering at least 1/this of the frame are copied as one pooled full copy instead. */
+        const val FULL_COPY_SHARE = 3
+
+        /** A dirty rect at least this big is split across the copy threads too. */
+        const val POOLED_RECT_PIXELS = 1_000_000L
+
+        /** Preview pixels redrawn around a change, for what linear filtering reaches. */
+        const val CLIP_MARGIN = 2f
 
         fun daemon(name: String) = ThreadFactory { r -> Thread(r, name).apply { isDaemon = true } }
     }
