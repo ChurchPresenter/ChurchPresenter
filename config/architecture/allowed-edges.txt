@@ -4,4 +4,3 @@
 
 :bible-tab -> :stt            # STTManager, the caption client: an engine living in a tab module
 :live-output -> :stt          # STTManager and STTPresenter
-:live-output -> :web          # WebsitePresenter (JCEF) and the WebOutput port

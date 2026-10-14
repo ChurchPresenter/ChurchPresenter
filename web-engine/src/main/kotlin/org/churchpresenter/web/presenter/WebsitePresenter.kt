@@ -471,8 +471,10 @@ internal fun sinkInputIndicesForProcess(pactlOutput: String, pid: Long): List<St
 }
 
 /** Navigation controller for an [EmbeddedWebView]. */
-class WebNavController {
-    internal var browser: CefBrowser? = null
+class WebNavController(browser: CefBrowser? = null) {
+    /** The page this controller drives, once the view has created it. Only the view sets it. */
+    var browser: CefBrowser? = browser
+        internal set
     var mobileMode: Boolean = false
     fun goBack() { browser?.goBack() }
     fun goForward() { browser?.goForward() }

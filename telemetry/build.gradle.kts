@@ -18,7 +18,7 @@ dependencies {
     implementation(projects.songlibrary)
     implementation(projects.canvasEngine)
     implementation(projects.mediaEngine)
-    implementation(projects.web)
+    implementation(projects.webEngine)
     implementation(projects.liveOutput)
     implementation(projects.ndi)
     implementation(projects.omt)

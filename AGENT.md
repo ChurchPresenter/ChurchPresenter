@@ -136,7 +136,8 @@ module-specific notes there, not here.**
 | `slides/`              | `:slides`              | The Pictures and Presentation tabs: their viewmodels, presenters, picture decoding and recent files | [AGENT.md](slides/AGENT.md)              |
 | `media-engine/`        | `:media-engine`        | The playback under the Media tab: the VLC and software players, VLC discovery, subtitles, `MediaPresenter`, `MediaViewModel` | [AGENT.md](media-engine/AGENT.md)        |
 | `media/`               | `:media`               | The Media tab and the VLC playback under it: player, decoder, subtitles, stock media search | [AGENT.md](media/AGENT.md)               |
-| `web/`                 | `:web`                 | The Web tab and the embedded Chromium (JCEF) it and the output window browse with | [AGENT.md](web/AGENT.md)                 |
+| `web-engine/`          | `:web-engine`          | The embedded Chromium (JCEF): its install, the embedded browser, `WebsitePresenter` | [AGENT.md](web-engine/AGENT.md)          |
+| `web/`                 | `:web`                 | The Web tab                                                                       | [AGENT.md](web/AGENT.md)                 |
 | `crossword-tab/`       | `:crossword-tab`       | The hidden Crossword tab and the decoder for the puzzles it plays                  | [AGENT.md](crossword-tab/AGENT.md)       |
 | `qa/`                  | `:qa`                  | The Q&A tab and `QAManager`, the session behind it                                 | [AGENT.md](qa/AGENT.md)                  |
 | `dictionary/`          | `:dictionary`          | The Strong's dictionary tab, its view model, and the Strong's and interlinear data   | [AGENT.md](dictionary/AGENT.md)          |

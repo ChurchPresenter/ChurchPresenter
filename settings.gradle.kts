@@ -125,6 +125,9 @@ include(":media-engine")
 // The Web tab and the embedded Chromium it and the output window browse with (JCEF). Depended on by
 // :composeApp, which hands it the live output through WebOutput.
 include(":web")
+// The embedded Chromium (JCEF) without the Web tab: CefManager, the embedded web view and
+// WebsitePresenter, which the output window draws a page with.
+include(":web-engine")
 
 // The hidden Crossword tab and the decoder for the puzzles it plays. Not :crossword, which is the
 // authoring tool and must stay out of the app; the puzzles reach this module by a build-time copy.

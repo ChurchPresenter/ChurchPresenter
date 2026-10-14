@@ -183,7 +183,7 @@
 - `canvas-engine/…/OmtFrameCache.kt`, `canvas/…/SceneOmtEditor.kt`, `canvas-engine/…/ReceivedFrameCache.kt` — receiving OMT sources onto the canvas, choosing one, and the capture loop both protocols share; `canvas-engine/…/NetworkInputs.kt` is how the canvas reaches the app's NDI and OMT libraries
 - `shared-ui/…/utils/FfmpegBinary.kt`, `live-output/…/settings/ProjectionFfmpegCard.kt` — which ffmpeg cameras are opened with: the bundled one, an override, or whatever is installed
 - `gradle/ffmpeg-builds.properties`, `THIRD_PARTY_FFMPEG.md` — where the bundled ffmpeg comes from, and its licence
-- `canvas-engine/…/ScenePresenter.kt`, `web/…/presenter/WebsitePresenter.kt` (the `:web` module: JCEF, `CefManager`, the embedded browser)
+- `canvas-engine/…/ScenePresenter.kt`, `web-engine/…/presenter/WebsitePresenter.kt` (the `:web-engine` module: JCEF, `CefManager`, the embedded browser)
 - `data/settings/WebBookmark.kt`
 
 ## Live Captions & Translation

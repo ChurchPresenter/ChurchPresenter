@@ -9,21 +9,16 @@ plugins {
 dependencies {
     // The port to the live output this tab declares against.
     api(projects.outputApi)
+    // JCEF and the embedded web view the tab browses with; its API names them.
+    api(projects.webEngine)
     implementation(projects.sharedUi)
     implementation(projects.strings)
     implementation(projects.icons)
     implementation(projects.coreModels)
     implementation(projects.settings)
     implementation(projects.theme)
-    implementation(projects.diagnostics)
 
     implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.coroutines.swing)
-
-    // JCEF -- the embedded Chromium the tab and the output window both browse with. `api` because
-    // the app hands a CefBrowser across WebOutput. The platform's Chromium binaries are the app's
-    // runtime dependency, not this module's: they are only ever loaded by a packaged or running app.
-    api(libs.jcefmaven)
 
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.components.resources)
@@ -34,7 +29,6 @@ dependencies {
     testImplementation(testFixtures(projects.sharedUi))
     testImplementation(libs.compose.uiTestJunit4)
     testImplementation(libs.compose.uiTest)
-    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
 }
 

@@ -376,6 +376,37 @@ class CefManagerTest {
         assertEquals(emptyList(), sinkInputIndicesForProcess("", pid = 1))
     }
 
+    /** A process id ahead of the first header belongs to no input, however the blocks after it read. */
+    @Test
+    fun `sinkInputIndicesForProcess ignores a process id that comes before any sink input`() {
+        val output = """
+            application.process.id = "4321"
+            Sink Input #7
+                application.process.id = "1"
+        """.trimIndent()
+        val preambleOnly = "application.process.id = \"4321\""
+
+        assertEquals(emptyList(), sinkInputIndicesForProcess(output, pid = 4321))
+        assertEquals(emptyList(), sinkInputIndicesForProcess(preambleOnly, pid = 4321))
+    }
+
+    // ── What the Web tab reads before the engine has started ────────────────────
+
+    /**
+     * Until [CefManager.init] runs there is no engine and nothing to explain: the tab's "web engine
+     * unavailable" panel reads these to pick its message, and none may name a cause that has not
+     * happened. No suite here starts the engine, so this is the state every test sees.
+     */
+    @Test
+    fun `before init the engine is not running and names no reason why`() {
+        assertFalse(CefManager.initialized)
+        assertFalse(CefManager.windowsUnsupported)
+        assertFalse(CefManager.blockedByPolicy)
+        assertNull(CefManager.missingLibrary)
+        assertNull(CefManager.installRoot, "nothing has been installed")
+        assertNull(CefManager.webviewCacheDir, "so there is no cache to clear")
+    }
+
     // ── Whether the install is worth attempting at all ──────────────────────────
 
     private val plentyOfSpace = 10L * 1024 * 1024 * 1024

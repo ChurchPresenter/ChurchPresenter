@@ -22,7 +22,7 @@ dependencies {
     implementation(projects.canvasEngine)
     implementation(projects.slidesEngine)
     implementation(projects.mediaEngine)
-    implementation(projects.web)
+    implementation(projects.webEngine)
     implementation(projects.presentationEngine)
     implementation(projects.stt)
     implementation(projects.lowerThirdEngine)
