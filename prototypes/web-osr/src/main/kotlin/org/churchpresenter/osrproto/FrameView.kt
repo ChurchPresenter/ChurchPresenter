@@ -26,24 +26,26 @@ import java.awt.event.MouseWheelEvent
 /**
  * The wheel rotation to hand JCEF for an AWT [preciseWheelRotation][MouseWheelEvent.getPreciseWheelRotation].
  *
- * JCEF's macOS path passes the rotation to Chromium as a pixel delta, negated and unscaled: five
- * notches down arrive as `deltaY=-5`. So on macOS this sends pixels at Chromium's 40 px per line,
- * pre-negated, and carries the fraction a touchpad leaves so slow swipes still scroll. Elsewhere the
- * rotation goes through as AWT gave it until a run there says otherwise.
+ * JCEF passes the rotation to Chromium as a pixel delta, negated and barely scaled: one notch down
+ * arrives as `deltaY=-1` on macOS and `deltaY=-2` on Windows, where Chrome scrolls 40 px per line and
+ * 100 px per notch. So this sends pre-negated pixels divided by JCEF's own factor, and carries the
+ * fraction a touchpad leaves so slow swipes still scroll. Linux is passed through until measured.
  */
-internal class WheelScaler(private val mac: Boolean = System.getProperty("os.name").startsWith("Mac")) {
+internal class WheelScaler(os: String = System.getProperty("os.name")) {
+    /** Pixels per AWT rotation unit, and JCEF's native multiplier; null where unmeasured. */
+    private val scale: Pair<Int, Int>? = when {
+        os.startsWith("Mac") -> 40 to 1
+        os.startsWith("Windows") -> 100 to 2
+        else -> null
+    }
     private var carry = 0.0
 
     fun rotationFor(precise: Double): Int {
-        if (!mac) return precise.toInt()
-        val pixels = precise * PIXELS_PER_LINE + carry
-        val whole = pixels.toInt()
-        carry = pixels - whole
+        val (pixelsPerUnit, nativeFactor) = scale ?: return precise.toInt()
+        val units = precise * pixelsPerUnit / nativeFactor + carry
+        val whole = units.toInt()
+        carry = units - whole
         return -whole
-    }
-
-    private companion object {
-        const val PIXELS_PER_LINE = 40
     }
 }
 
