@@ -521,6 +521,38 @@ class SharedBrowserFrameCacheTest {
         assertEquals("body { color: red; }", escapeForJsStringLiteral("body { color: red; }"))
     }
 
+    // ── Plain values ───────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `the flows handed out carry the entry's own url`() {
+        val entry = SharedBrowserFrameCache.CacheEntry(debugPort = 9222)
+        entry.browserProcess = null
+        val flows = SharedBrowserFrameCache.BrowserFlows(entry.frame, entry.error, entry.currentUrl)
+
+        assertSame(entry.currentUrl, flows.currentUrl)
+        assertEquals(9222, entry.debugPort)
+        assertNull(entry.browserProcess)
+    }
+
+    @Test
+    fun `a page keeps the frame rate it was asked for`() {
+        val page = SharedBrowserFrameCache.BrowserPage(
+            url = "https://example.com",
+            renderWidth = 1280,
+            renderHeight = 720,
+            customCss = "",
+            fps = 15,
+            forceTransparent = false,
+        )
+
+        assertEquals(15, page.fps)
+    }
+
+    @Test
+    fun `a new connection has no url listener`() {
+        assertNull(cdpConnection().onUrlChanged)
+    }
+
     // ── killProcess ────────────────────────────────────────────────────────────────────────────
 
     @Test

@@ -8,13 +8,6 @@ plugins {
     `java-test-fixtures`
 }
 
-// Below the shared 85% on complexity only: what is left is the dialogs that open real windows
-// (the stock and library browsers, the Lottie generator), the capture hardware probes and Compose's
-// per-value change checks. See AGENT.md.
-extra["coverageFloors"] = mapOf(
-    "COMPLEXITY" to "0.84",
-)
-
 // The strings and icons come from :strings and :icons. This module's own resources are the bundled
 // stock backgrounds the local library offers.
 compose.resources {

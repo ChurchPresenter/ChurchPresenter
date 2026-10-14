@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.sharedui.utils
 
 /**
  * [script] as a command line for the host's own shell: `cmd /c` on Windows, `sh -c` elsewhere.

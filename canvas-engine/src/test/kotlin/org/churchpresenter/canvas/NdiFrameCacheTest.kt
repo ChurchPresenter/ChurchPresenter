@@ -4,6 +4,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.core.models.scene.SceneSource
 import org.churchpresenter.ndi.FakeNdiLibrary
+import org.churchpresenter.ndi.NdiVideoFrame
+import org.churchpresenter.ndi.NdiLibrary
 import org.churchpresenter.ndi.NdiBandwidth
 import org.churchpresenter.ndi.NdiReceiver
 import org.churchpresenter.ndi.NdiSourceInfo
@@ -178,6 +180,26 @@ class NdiFrameCacheTest {
         assertFalse(flows.connected.value)
         assertFalse(cache.isConnected(layer))
         waitFor("the receiver to be destroyed") { lib.receiversDestroyed.size == 1 }
+    }
+
+    @Test
+    fun `a runtime that throws mid-service disconnects the layer and closes the receiver`() {
+        val lib = FakeNdiLibrary()
+        var failure: Exception? = null
+        val throwing = object : NdiLibrary by lib {
+            override fun recvCaptureVideo(receiver: Long, timeoutMs: Int): NdiVideoFrame? =
+                failure?.let { throw it } ?: lib.recvCaptureVideo(receiver, timeoutMs)
+        }
+        val cache = NdiFrameCache { info, bandwidth -> NdiReceiver(throwing, info, bandwidth, receiverName = "test") }
+        val layer = source()
+        val flows = cache.acquire(layer)
+        waitFor("the receiver to connect") { flows.connected.value }
+
+        failure = IllegalStateException("gone")
+        waitFor("the receiver to be closed") { lib.receiversDestroyed.isNotEmpty() }
+
+        assertFalse(flows.connected.value)
+        cache.release(layer)
     }
 
     @Test

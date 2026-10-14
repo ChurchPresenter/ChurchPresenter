@@ -132,18 +132,10 @@ class ScreenGrabTest {
         assertNull(grabScreen(spec()))
     }
 
-    // ── The real screen, in the headless JVM every test runs in ─────────────────────────────
-
-    /**
-     * Building a `Robot` throws without a display, so the real grabber resolves to none at all and
-     * says so, rather than failing to load -- and a grab asked of it anyway fails loudly instead of
-     * drawing black.
-     */
     @Test
-    fun `without a display the real screen is unavailable and grabs nothing`() {
+    fun `the real grabber has no robot to capture with in a headless JVM`() {
         assertFalse(RobotScreenGrabber.available)
-        assertNull(grabScreen(spec()), "the default grabber is the real screen")
-        assertFailsWith<IllegalStateException> { RobotScreenGrabber.capture(Rectangle(0, 0, 4, 4)) }
+        assertFailsWith<IllegalStateException> { RobotScreenGrabber.capture(Rectangle(0, 0, 1, 1)) }
     }
 
     @Test

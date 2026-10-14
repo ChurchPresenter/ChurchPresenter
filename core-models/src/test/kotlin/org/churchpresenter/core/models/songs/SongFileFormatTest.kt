@@ -1,7 +1,5 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.core.models.songs
 
-import org.churchpresenter.core.models.songs.SongFileParser
-import org.churchpresenter.core.models.songs.SongItem
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -21,7 +19,7 @@ import kotlin.test.assertTrue
  * starting with a `title:` line. Section headers like `[Verse 1]` inside the body are lyric
  * content, NOT structure — the section splitter downstream handles those.
  */
-class SongFileParserTest {
+class SongFileFormatTest {
 
     private val parser = SongFileParser()
     private lateinit var tempDir: File

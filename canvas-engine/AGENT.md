@@ -47,6 +47,13 @@ skiko first), `clearSceneTimers`, `recolor`, `shellCommand`, the font-search hel
 `user.home` is the module's own (`build/test-home`): `DeckLinkManager` and the capture caches
 write under it.
 
+## Coverage floor
+
+The shared 85% on all six counters; no `coverageFloors` entry. What is left uncovered is mostly not
+untested behavior: building the libvlc player, the headless browser's own process and DevTools
+traffic, the coroutine plumbing around the ffmpeg pipe, the native DeckLink/X11/Win32 calls, the
+`minOf`/`maxOf` empty-list exits in shape math, and Compose's remembered-lambda checks.
+
 ## Commands
 
 ```bash

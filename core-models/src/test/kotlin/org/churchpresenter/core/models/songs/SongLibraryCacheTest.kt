@@ -1,8 +1,5 @@
-package org.churchpresenter.app.churchpresenter.data
+package org.churchpresenter.core.models.songs
 
-import org.churchpresenter.core.models.songs.CachedSong
-import org.churchpresenter.core.models.songs.SongFileParser
-import org.churchpresenter.core.models.songs.SongItem
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -24,7 +21,7 @@ import kotlin.test.assertTrue
  * on the library folder, so pointing the app at a different folder has to invalidate it rather than
  * serve the previous library's songs.
  *
- * [SongFileParserTest] covers parsing one file; this covers the scan and the cache around it.
+ * [SongFileFormatTest] and [SongFileParserTest] cover parsing one file; this covers the scan and the cache around it.
  * The cache file's path is resolved once when the class loads, so — as with recents — it is read
  * back by reflection rather than by swapping `user.home`.
  */

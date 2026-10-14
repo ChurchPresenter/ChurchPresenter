@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.ui.test.ExperimentalTestApi::class)
 
-package org.churchpresenter.app.churchpresenter.screenshot
+package org.churchpresenter.sharedui.screenshot
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -14,7 +14,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.theme.components.DropdownSelector
 import kotlin.test.Test
-import org.churchpresenter.sharedui.screenshot.captureComponent
 
 class DropdownSelectorScreenshotTest {
 

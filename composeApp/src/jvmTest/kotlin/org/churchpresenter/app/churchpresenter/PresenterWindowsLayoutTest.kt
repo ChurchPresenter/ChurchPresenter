@@ -11,6 +11,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithTag
+import org.churchpresenter.sharedui.models.Presenting
+import org.churchpresenter.settings.OutputProfile
+import org.churchpresenter.settings.OutputMerge
+import org.churchpresenter.settings.MergeTile
+import org.churchpresenter.settings.BibleSettings
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.liveoutput.PresenterManager
@@ -74,12 +80,14 @@ class PresenterWindowsLayoutTest {
         projection: ProjectionSettings,
         screens: Array<GraphicsDevice> = arrayOf(operator, audience, stage),
         show: Boolean = true,
+        identifying: Boolean = false,
+        base: AppSettings = AppSettings(),
         block: ComposeUiTest.(Rig) -> Unit,
     ) = runComposeUiTest {
         val manager = PresenterManager().apply { setShowPresenterWindow(show) }
         val media = MediaViewModel()
         val windows = mutableStateMapOf<String, OutputWindowSpec>()
-        var settings by mutableStateOf(AppSettings(projectionSettings = projection))
+        var settings by mutableStateOf(base.copy(projectionSettings = projection))
         // Every test but the pointer one passes the setting off; see `the hide-pointer setting`.
         val host: OutputWindowHost = { spec, content ->
             SideEffect { windows[spec.title] = spec }
@@ -91,7 +99,9 @@ class PresenterWindowsLayoutTest {
                 presenterManager = manager,
                 mediaViewModel = media,
                 appSettings = settings,
-                identifyingScreen = false,
+                identifyingScreen = identifying,
+                serverUrl = "http://127.0.0.1:1",
+                qaDisplayUrl = "http://127.0.0.1:1/qa",
                 sttManager = STTManager(),
                 defaultScreenDevice = { operator },
                 window = host,
@@ -256,5 +266,137 @@ class PresenterWindowsLayoutTest {
             first.onClose()
             waitForIdle()
             assertFalse(rig.manager.showPresenterWindow.value)
+        }
+
+    @Test
+    fun `merged dev windows each show their tile and the identify number over it`() =
+        rig(
+            ProjectionSettings(
+                devWindowCount = 2,
+                hideCursorOnOutputs = false,
+                outputProfiles = listOf(
+                    OutputProfile(
+                        id = "wall",
+                        merge = OutputMerge(listOf(MergeTile("screen:0", 0, 0), MergeTile("screen:1", 1920, 0))),
+                    ),
+                ),
+                screenAssignments = listOf(
+                    ScreenAssignment(activeProfileId = "wall"),
+                    ScreenAssignment(activeProfileId = "wall"),
+                ),
+            ),
+            screens = arrayOf(operator),
+            identifying = true,
+        ) { rig ->
+            assertTrue("Presenter View 1" in rig.windows && "Presenter View 2" in rig.windows)
+            onNodeWithText("Screen 1").assertExists()
+            onNodeWithText("Screen 2").assertExists()
+        }
+
+    @Test
+    fun `preview mode turns on the preview bus`() =
+        rig(ProjectionSettings(hideCursorOnOutputs = false, previewModeEnabled = true)) { rig ->
+            assertTrue(rig.manager.previewBus.enabled.value)
+            assertTrue("Presenter View 1" in rig.windows)
+        }
+
+    @Test
+    fun `an output pinned to a display marked unused opens no window`() =
+        rig(
+            ProjectionSettings(
+                hideCursorOnOutputs = false,
+                screenAssignments = listOf(ScreenAssignment(targetDisplay = 1)),
+                unusedScreens = listOf(Rectangle(1440, 0, 1920, 1080).asDisplayRect().key),
+            ),
+        ) { rig ->
+            assertNull(rig.windows["Presenter View 1"])
+        }
+
+    @Test
+    fun `a hidden DeckLink output opens no key window`() =
+        rig(
+            ProjectionSettings(
+                hideCursorOnOutputs = false,
+                screenAssignments = listOf(
+                    ScreenAssignment(
+                        targetDisplay = 0,
+                        targetType = Constants.TARGET_TYPE_DECKLINK,
+                        keyTargetDisplay = 2,
+                    ),
+                ),
+            ),
+            show = false,
+        ) { rig ->
+            assertNull(rig.windows["Key Output 1"])
+        }
+
+    @Test
+    fun `a DeckLink output with no device and a key on a card opens nothing`() =
+        rig(
+            ProjectionSettings(
+                hideCursorOnOutputs = false,
+                screenAssignments = listOf(
+                    ScreenAssignment(
+                        targetDisplay = -1,
+                        targetType = Constants.TARGET_TYPE_DECKLINK,
+                        keyTargetDisplay = 0,
+                        keyTargetType = Constants.TARGET_TYPE_DECKLINK,
+                    ),
+                ),
+            ),
+        ) { rig ->
+            assertNull(rig.windows["Presenter View 1"])
+            assertNull(rig.windows["Key Output 1"])
+        }
+
+    @Test
+    fun `a hidden screen output with a key on a card keeps its window hidden`() =
+        rig(
+            ProjectionSettings(
+                hideCursorOnOutputs = false,
+                screenAssignments = listOf(
+                    ScreenAssignment(
+                        targetDisplay = 1,
+                        keyTargetDisplay = 0,
+                        keyTargetType = Constants.TARGET_TYPE_DECKLINK,
+                    ),
+                ),
+            ),
+            show = false,
+        ) { rig ->
+            assertFalse(rig.windows.getValue("Presenter View 1").visible)
+            assertNull(rig.windows["Key Output 1"])
+        }
+
+    @Test
+    fun `the key window follows the live mode with the crossfade on`() =
+        rig(
+            ProjectionSettings(
+                hideCursorOnOutputs = false,
+                screenAssignments = listOf(ScreenAssignment(targetDisplay = 1, keyTargetDisplay = 2)),
+            ),
+            base = AppSettings(bibleSettings = BibleSettings(crossfade = true)),
+        ) { rig ->
+            rig.manager.setPresentingMode(Presenting.BIBLE)
+            waitForIdle()
+            rig.manager.setPresentingMode(Presenting.LYRICS)
+            waitForIdle()
+            assertEquals(Presenting.LYRICS, rig.manager.slideContent.value)
+            onNodeWithTag("Key Output 1").assertExists()
+        }
+
+    @Test
+    fun `a lower third set on the manager plays to the end through the outputs' drivers`() =
+        rig(ProjectionSettings(hideCursorOnOutputs = false)) { rig ->
+            rig.manager.setLottieContent(
+                json = """{"v":"5.7.4","fr":60,"ip":0,"op":6,"w":100,"h":100,"layers":[]}""",
+                pauseAtFrame = false,
+                pauseFrame = -1f,
+                pauseDurationMs = 0L,
+                presetName = "band",
+            )
+            rig.manager.setPresentingMode(Presenting.LOWER_THIRD)
+            waitUntil("the clip finished") { rig.manager.clearDisplayRequested.value }
+            assertEquals(1f, rig.manager.lottieProgress.value)
         }
 }

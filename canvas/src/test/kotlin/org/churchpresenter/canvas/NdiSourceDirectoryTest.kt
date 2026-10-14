@@ -193,6 +193,38 @@ class NdiSourceDirectoryTest {
         assertEquals(lib.findersCreated, lib.findersDestroyed, "the last look out closes the finder")
     }
 
+    @Test
+    fun `a retired finder waits for the second of two looks before it closes`() {
+        val lib = FakeNdiLibrary().apply { discoverable += CAMERA }
+        val directory = directory(lib)
+        val inside = CountDownLatch(1)
+        val letGo = CountDownLatch(1)
+        val firstLook = AtomicInteger()
+        lib.duringFindSources = {
+            if (firstLook.getAndIncrement() == 0) {
+                inside.countDown()
+                assertTrue(letGo.await(1, TimeUnit.SECONDS), "the test never released the look")
+            }
+        }
+        directory.acquire()
+        val first = thread { directory.sources() }
+        assertTrue(inside.await(1, TimeUnit.SECONDS), "the first look never reached the runtime")
+        val second = thread { directory.sources() }
+        val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(1)
+        while (second.state != Thread.State.WAITING) {
+            assertTrue(System.nanoTime() < deadline, "the second look never queued behind the first")
+            Thread.onSpinWait()
+        }
+
+        directory.release()
+        letGo.countDown()
+        first.join(1_000)
+        second.join(1_000)
+
+        assertFalse(first.isAlive || second.isAlive, "a look never came back")
+        assertEquals(lib.findersCreated, lib.findersDestroyed, "the last of the two looks closes the finder, once")
+    }
+
     /** The reason the lock and the count belong to the finder rather than to the directory. */
     @Test
     fun `a look inside a retired finder never reaches the one that replaced it`() {

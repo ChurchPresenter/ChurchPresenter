@@ -37,13 +37,12 @@ nothing of `:composeApp`'s.
 
 ## Coverage floor
 
-Branches **83%** and complexity **81%**; the other four counters keep the shared 85%. The tab is
-editor UI, and what is left is mostly not untested behavior: Compose's remembered-lambda checks on
-the editors' handlers (the "nothing changed but the slot is empty" exit, which no recomposition
-reaches), the text editor's pop-out window (a real `DialogWindow`, which a headless test cannot
-open), the style rows' shadow handler (the canvas offers no shadow button), and defensive exits a
-picker cannot reach. Raise the floors as any of that becomes reachable; never lower them without
-asking.
+The shared 85% on all six counters; no `coverageFloors` entry. Complexity and branches clear it by
+about a point, so a new branch needs a test with it. What is left uncovered is mostly not untested
+behavior: Compose's remembered-lambda checks on the editors' handlers (the "nothing changed but the
+slot is empty" exit, which no recomposition reaches), the text editor's pop-out window (a real
+`DialogWindow`, which a headless test cannot open), the style rows' shadow handler (the canvas offers
+no shadow button), and defensive exits a picker cannot reach.
 
 ## Package
 

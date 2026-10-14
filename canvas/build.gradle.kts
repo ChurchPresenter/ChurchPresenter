@@ -7,13 +7,6 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
 }
 
-// Below the shared 85% on branches and complexity: the tab is editor UI, and what is left is Compose's
-// per-value change checks on its handlers and the editor's pop-out text window. See AGENT.md.
-extra["coverageFloors"] = mapOf(
-    "BRANCH" to "0.83",
-    "COMPLEXITY" to "0.81",
-)
-
 dependencies {
     // The renderer, the capture sources and DeckLink the editor previews with; its API names them.
     api(projects.canvasEngine)

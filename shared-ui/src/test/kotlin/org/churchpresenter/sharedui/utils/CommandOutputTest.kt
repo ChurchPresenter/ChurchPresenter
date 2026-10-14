@@ -1,9 +1,8 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.sharedui.utils
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.churchpresenter.sharedui.utils.readCommandOutput
 
 /**
  * [readCommandOutput], the one step the device and window listings cannot do without a real machine.

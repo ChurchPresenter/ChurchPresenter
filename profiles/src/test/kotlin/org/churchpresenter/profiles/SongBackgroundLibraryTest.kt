@@ -141,6 +141,20 @@ class SongBackgroundLibraryTest {
         assertTrue(changes.last().image.isNotBlank())
     }
 
+    @Test
+    fun `the category pills switch the grid between colors and cameras`() = library {
+        onNodeWithText(VIDEOS).performClick()
+        waitForIdle()
+        onNodeWithText(CUSTOM).assertDoesNotExist()
+        onNodeWithText(COLORS).performClick()
+        waitForIdle()
+        onNodeWithText(CUSTOM).assertIsDisplayed()
+        onNodeWithText(CAMERAS).performClick()
+        waitForIdle()
+        onNodeWithText(CUSTOM).assertDoesNotExist()
+        onNodeWithText(BROWSE).assertDoesNotExist()
+    }
+
     private companion object {
         val LIBRARY_WIDTH = 448.dp
         val LIBRARY_HEIGHT = 560.dp
@@ -150,6 +164,8 @@ class SongBackgroundLibraryTest {
         const val BROWSE = "Browse…"
         const val IMAGES = "Images"
         const val VIDEOS = "Videos"
+        const val COLORS = "Colors"
+        const val CAMERAS = "Cameras"
         const val BUNDLED_TIMEOUT_MS = 5_000L
         const val SWATCH_ABOVE_CAPTION = 12f
 

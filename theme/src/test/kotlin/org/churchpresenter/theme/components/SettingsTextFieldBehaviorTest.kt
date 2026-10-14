@@ -1,4 +1,4 @@
-package org.churchpresenter.app.churchpresenter.composables
+package org.churchpresenter.theme.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,7 +36,6 @@ import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.churchpresenter.theme.components.SettingsTextField
 import org.churchpresenter.theme.elevationPalette
 
 /**
@@ -50,7 +49,7 @@ import org.churchpresenter.theme.elevationPalette
  * catching it.
  */
 @OptIn(ExperimentalTestApi::class)
-class SettingsTextFieldTest {
+class SettingsTextFieldBehaviorTest {
 
     @Test
     fun `the label is shown, uppercased, above the field`() = runComposeUiTest {

@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.core.models.scene.SceneSource
@@ -99,4 +100,14 @@ class SceneSourceCameraLifecycleTest {
                 "the old device's capture must be released, not left beside the new one",
             )
         }
+
+    @Test
+    fun `a named camera with no picture yet says which camera it is waiting for`() = runComposeUiTest {
+        setContent {
+            SceneSourceRenderer(camera("named").copy(deviceName = "Front"), Modifier.size(200.dp))
+        }
+        waitForIdle()
+
+        onNodeWithText("Camera: Front").assertExists()
+    }
 }

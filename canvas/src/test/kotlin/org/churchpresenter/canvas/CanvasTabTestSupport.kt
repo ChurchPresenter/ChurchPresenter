@@ -55,8 +55,8 @@ internal class CanvasReports {
     val scheduled = mutableListOf<Pair<String, String>>()
     var settingsChanges = 0
 
-    /** The settings as the tab's saves leave them, each applied to the last. */
-    var saved = AppSettings()
+    /** The settings as every reported change, applied in order, leaves them. */
+    var settings = AppSettings()
 
     /** Each scene Go Live put on the output, in order. */
     val presented = mutableListOf<Scene>()
@@ -112,7 +112,7 @@ internal fun canvasTab(
     val reports = CanvasReports()
     try {
         vm.seed()
-        reports.saved = settings(AppSettings())
+        reports.settings = settings(AppSettings())
         runComposeUiTest {
             setContent {
                 ThemedForTest(themeMode) {
@@ -122,7 +122,7 @@ internal fun canvasTab(
                             appSettings = settings(AppSettings()),
                             onSettingsChange = { change ->
                                 reports.settingsChanges++
-                                reports.saved = change(reports.saved)
+                                reports.settings = change(reports.settings)
                             },
                             onPresentScene = { reports.presented += it },
                             sceneViewModel = vm,

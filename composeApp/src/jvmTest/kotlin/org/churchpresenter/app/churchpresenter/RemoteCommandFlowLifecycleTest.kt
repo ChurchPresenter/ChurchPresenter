@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.yield
 import org.churchpresenter.statistics.StatisticsManager
@@ -46,6 +47,7 @@ class RemoteCommandFlowLifecycleTest {
     private val tabs = mutableListOf<Tabs>()
     private var pushes = 0
     private var settings = AppSettings()
+    private var lastGeneration = -1
 
     @BeforeTest
     fun setUp() {
@@ -105,18 +107,23 @@ class RemoteCommandFlowLifecycleTest {
         wired: () -> Wired,
         resolve: ((String, Int) -> File?)? = null,
         statistics: StatisticsManager? = null,
+        generation: () -> Int = { 0 },
     ) {
         setContent {
             val w = wired()
+            val gen = generation()
             RemoteCommandEffects(
                 appSettings = settings,
                 picturesViewModel = pictures,
                 presentationViewModel = presentations,
                 bibleViewModel = bible,
                 presenterManager = presenter,
-                resolveImageFile = resolve,
-                onSettingsChange = { transform -> settings = transform(settings) },
-                onSongItemSelected = {},
+                resolveImageFile = resolve?.let { r -> { id, i -> r(id, i).also { lastGeneration = gen } } },
+                onSettingsChange = { transform ->
+                    settings = transform(settings)
+                    lastGeneration = gen
+                },
+                onSongItemSelected = { lastGeneration = gen },
                 onPictureItemSelected = {},
                 onPresentationItemSelected = {},
                 onMediaItemSelected = {},
@@ -252,5 +259,93 @@ class RemoteCommandFlowLifecycleTest {
         compose({ Wired(verse = flowOf(SelectBibleVerseRequest(bookName = "John", chapter = 3, verseNumber = 16))) })
 
         assertEquals(Presenting.BIBLE, presenter.slideContent.value)
+    }
+
+    @Test
+    fun `flows that suspend before they finish are still handled`() = runComposeUiTest {
+        fun <T> later(vararg values: T): Flow<T> = flow {
+            for (v in values) {
+                yield()
+                emit(v)
+            }
+        }
+        val wired = Wired(
+            playPause = later(Unit),
+            loop = later(Unit),
+            goto = later(99),
+            selectPicture = later("none" to -1),
+            nextPicture = later(Unit),
+            previousPicture = later(Unit),
+            nextSlide = later(Unit),
+            previousSlide = later(Unit),
+            selectSlide = later("deck" to 3),
+            verse = later(SelectBibleVerseRequest(bookName = "John", chapter = 3, verseNumber = 16)),
+            song = later(
+                RemoteSongSelection(
+                    ScheduleItem.SongItem(id = "s", songNumber = 1, title = "A", songbook = "B"),
+                    goLive = false,
+                    source = "remote",
+                ),
+            ),
+            picture = later(ScheduleItem.PictureItem(id = "p", folderPath = "/x", folderName = "x", imageCount = 0)),
+            presentation = later(
+                ScheduleItem.PresentationItem(
+                    id = "d", filePath = "/d", fileName = "d", slideCount = 0, fileType = "pdf",
+                ),
+            ),
+            media = later(ScheduleItem.MediaItem(id = "m", mediaUrl = "u", mediaTitle = "t", mediaType = "local")),
+        )
+        compose({ wired }, resolve = { _, _ -> null })
+        waitUntil { tabs.size == 4 && pushes == 2 }
+
+        assertEquals(listOf(Tabs.SONGS, Tabs.PICTURES, Tabs.PRESENTATION, Tabs.MEDIA), tabs)
+        assertEquals(Presenting.BIBLE, presenter.slideContent.value)
+        assertEquals(presentations.isLooping, settings.presentationSettings.isLooping)
+    }
+
+    @Test
+    fun `new callbacks with the same flows keep every collector listening`() = runComposeUiTest {
+        val unit = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+        val loop = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+        val song = MutableSharedFlow<RemoteSongSelection>(extraBufferCapacity = 1)
+        val picture = MutableSharedFlow<Pair<String, Int>>(extraBufferCapacity = 1)
+        val wired = Wired(
+            playPause = unit,
+            loop = loop,
+            goto = MutableSharedFlow(),
+            selectPicture = picture,
+            nextPicture = unit,
+            previousPicture = unit,
+            nextSlide = unit,
+            previousSlide = unit,
+            selectSlide = MutableSharedFlow(),
+            song = song,
+            picture = MutableSharedFlow(),
+            presentation = MutableSharedFlow(),
+            media = MutableSharedFlow(),
+        )
+        var generation by mutableStateOf(0)
+        compose({ wired }, resolve = { _, _ -> null }, generation = { generation })
+        waitUntil { loop.subscriptionCount.value == 1 && unit.subscriptionCount.value == 5 }
+
+        generation = 1
+        waitForIdle()
+
+        assertEquals(5, unit.subscriptionCount.value, "the collectors outlive the recomposition")
+        assertTrue(loop.tryEmit(Unit))
+        waitUntil { lastGeneration != -1 }
+        assertEquals(presentations.isLooping, settings.presentationSettings.isLooping)
+        lastGeneration = -1
+        val selection = RemoteSongSelection(
+            ScheduleItem.SongItem(id = "s", songNumber = 1, title = "A", songbook = "B"),
+            goLive = false,
+            source = "remote",
+        )
+        assertTrue(song.tryEmit(selection))
+        waitUntil { lastGeneration != -1 }
+        lastGeneration = -1
+        assertTrue(picture.tryEmit("any" to 0))
+        waitUntil { lastGeneration != -1 }
+        assertEquals(Tabs.SONGS, tabs.single())
     }
 }
