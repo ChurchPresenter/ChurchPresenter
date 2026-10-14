@@ -35,6 +35,8 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 import androidx.compose.ui.unit.DpSize
+import com.sun.jna.platform.win32.User32
+import com.sun.jna.platform.win32.WinUser
 import me.friwi.jcefmaven.CefAppBuilder
 import me.friwi.jcefmaven.MavenCefAppHandlerAdapter
 import org.cef.CefApp
@@ -57,6 +59,7 @@ import java.awt.event.KeyEvent
 import java.util.concurrent.atomic.AtomicBoolean
 import java.io.File
 import javax.swing.SwingUtilities
+import javax.swing.Timer
 import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 
@@ -73,6 +76,34 @@ private fun config(): Config {
     val (w, h, scale) = outputSize()
     return Config(url, w, h, fps, scale)
 }
+
+/** How often the AWT event thread hands over messages other threads sent to Chromium's windows. */
+private const val SENT_MESSAGE_PUMP_MS = 5
+
+/**
+ * On Windows, has the AWT event thread deliver messages other threads have *sent* (not posted) to
+ * the windows it owns, every [SENT_MESSAGE_PUMP_MS].
+ *
+ * With windowless rendering, JCEF runs Chromium's message loop from the AWT event thread, so
+ * Chromium's own windows (its IME window among them) belong to it. That thread parks in Java between
+ * events and never looks at its Win32 queue, so a `SendMessage` to one of those windows from another
+ * thread — a language switch reaching the IME window, sent from AWT's toolkit thread — waits forever,
+ * and both windows hang. `PeekMessage` with `PM_QS_SENDMESSAGE` delivers exactly those pending sent
+ * messages and nothing else, leaving the queue to whoever reads it. `-PnoSentPump=1` turns it off.
+ */
+private fun startSentMessagePump() {
+    if (!System.getProperty("os.name").startsWith("Windows") || System.getProperty("osr.noSentPump") != null) return
+    val msg = WinUser.MSG()
+    val flags = PM_NOREMOVE or PM_QS_SENDMESSAGE
+    SwingUtilities.invokeLater {
+        Timer(SENT_MESSAGE_PUMP_MS) { User32.INSTANCE.PeekMessage(msg, null, 0, 0, flags) }.start()
+        println("sent-message pump on")
+    }
+}
+
+/** `PeekMessage` flags: leave posted messages in the queue, and handle only sent ones. */
+private const val PM_NOREMOVE = 0x0000
+private const val PM_QS_SENDMESSAGE = 0x0040 shl 16
 
 /** The page is laid out this many DIPs wide on any output at least this wide. */
 private const val LAYOUT_WIDTH = 1920
@@ -107,6 +138,7 @@ private fun startCef(): CefApp {
     builder.cefSettings.cache_path = File(root, "cache").absolutePath
     // Let a video start with sound without a click, as on an output nobody touches.
     builder.addJcefArgs("--autoplay-policy=no-user-gesture-required")
+    if (System.getProperty("osr.noSmoothScroll") != null) builder.addJcefArgs("--disable-smooth-scrolling")
     return builder.build()
 }
 
@@ -119,6 +151,7 @@ fun main() {
     println("OSR prototype: ${cfg.width}x${cfg.height} px @ ${cfg.fps} fps, scale ${cfg.scale}, ${cfg.url}")
     val stats = Stats()
     val cef = startCef()
+    startSentMessagePump()
     val client = cef.createClient()
     // OSR draws no native context menu; dropping its items stops Chromium from waiting on one.
     client.addContextMenuHandler(object : CefContextMenuHandlerAdapter() {

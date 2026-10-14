@@ -16,7 +16,6 @@ import org.jetbrains.skia.Surface
 import org.jetbrains.skia.impl.BufferUtil
 import java.awt.Rectangle
 import java.nio.ByteBuffer
-import java.util.ArrayDeque
 
 /** One published picture of the page: the view, a smaller copy for the preview, and the open popup over it. */
 class Frame(
