@@ -26,9 +26,9 @@ compose.desktop {
 // `-Pscale=2` the device scale Chromium is told (the page is then size÷scale DIPs),
 // `-PlogKeys=1` prints every key and wheel event forwarded to the page, `-PnoIme=1` turns input
 // methods off on both windows, `-PnoSentPump=1` turns off the Windows sent-message pump (both
-// diagnostics for the language-switch freeze), `-PnoSmoothScroll=1` turns Chromium's smooth scrolling off.
+// diagnostics for the language-switch freeze), `-PsmoothScroll=1` keeps Chromium's smooth scrolling on (off by default).
 tasks.withType<JavaExec>().matching { it.name == "run" }.configureEach {
-    listOf("url", "size", "fps", "scale", "logKeys", "noIme", "noSentPump", "noSmoothScroll").forEach { key ->
+    listOf("url", "size", "fps", "scale", "logKeys", "noIme", "noSentPump", "smoothScroll").forEach { key ->
         project.findProperty(key)?.let { systemProperty("osr.$key", it) }
     }
 }

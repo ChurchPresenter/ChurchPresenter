@@ -16,6 +16,9 @@ import org.jetbrains.skia.Surface
 import org.jetbrains.skia.impl.BufferUtil
 import java.awt.Rectangle
 import java.nio.ByteBuffer
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
 
 /** One published picture of the page: the view, a smaller copy for the preview, and the open popup over it. */
 class Frame(
@@ -40,10 +43,16 @@ class Frame(
  * written, taken from Chromium's buffer, which always holds the whole current frame. Every window
  * draws the same image, so they cannot disagree about what is on the page.
  *
- * A frame wider than [DOWNSCALE_ABOVE] also gets a [PREVIEW_WIDTH]-wide copy, so a small preview
- * window does not upload a 4K texture to the GPU every frame to draw it at 640 pixels. At 1080p the
- * downscale costs more CPU (about 3 ms a frame on an M-series Mac) than the upload it saves, so a
- * 1080p frame goes to the preview as it is.
+ * Chromium waits for each paint callback to return before it goes on, so the callback does only the
+ * copy, split across [COPY_THREADS] threads when the whole frame changed.
+ *
+ * A frame wider than [DOWNSCALE_ABOVE] also gets a [PREVIEW_WIDTH]-wide copy, made on a worker
+ * thread, so a small preview window does not upload a 4K texture every frame to draw it at 640 px.
+ * The worker takes the newest frame whenever it is free, and every frame carries the latest copy it
+ * made, a frame or so behind. At 1080p the downscale costs more CPU than the upload it saves, so a
+ * 1080p frame goes to the preview as it is. A frame the worker is reading is not closed until it is
+ * done; its ring buffer could in principle be rewritten under it if the worker took longer than
+ * [RING_SIZE] frames, which would only tear the preview.
  *
  * An image is closed [RETIRED_KEPT] frames after it stops being current, and a ring buffer is not
  * written again until every image over it is closed: the ring is longer than that by two.
@@ -63,6 +72,15 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
     private var previewSurface: Surface? = null
     private var seq = 0L
     private val retired = ArrayDeque<List<Image>>()
+
+    /** The newest scaled-down copy, which every published frame carries. */
+    private var latestPreview: Image? = null
+    private val retiredPreviews = ArrayDeque<Image>()
+    /** The frame the preview worker is reading, if any, and whether it was retired meanwhile. */
+    private var previewSource: Image? = null
+    private var closeSourceWhenScaled = false
+    private val previewWorker = Executors.newSingleThreadExecutor(daemon("osr-preview"))
+    private val copyPool = Executors.newFixedThreadPool(COPY_THREADS - 1, daemon("osr-copy"))
     private val oldRings = ArrayDeque<Pair<Long, Ring>>()
 
     @Synchronized
@@ -84,12 +102,34 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
                 ring?.let { old -> oldRings.addLast(seq to old) }
                 ring = fresh
             }
-        val (image, full) = target.write(dirtyRects, buffer)
-        val written = System.nanoTime()
+        val (image, full) = target.write(dirtyRects, buffer, copyPool)
+        stats.paint(false, copiedNs = System.nanoTime() - start, previewNs = 0, full = full, rects = dirtyRects)
+        publish(image, start)
+        if (image.width > DOWNSCALE_ABOVE && previewSource == null) {
+            previewSource = image
+            previewWorker.execute { scalePreview(image) }
+        }
+    }
+
+    /** On the preview worker: scales [image] down, then hands the copy to the frames from now on. */
+    private fun scalePreview(image: Image) {
+        val start = System.nanoTime()
         val preview = downscale(image)
-        val scaled = System.nanoTime()
-        stats.paint(false, copiedNs = written - start, previewNs = scaled - written, full = full, rects = dirtyRects)
-        publish(image, preview, start)
+        stats.preview(System.nanoTime() - start)
+        synchronized(this) {
+            previewSource = null
+            if (closeSourceWhenScaled) {
+                closeSourceWhenScaled = false
+                image.close()
+            }
+            latestPreview?.let { old ->
+                retiredPreviews.addLast(old)
+                while (retiredPreviews.size > RETIRED_KEPT) retiredPreviews.removeFirst().close()
+            }
+            latestPreview = preview
+            // Same picture of the page, so the same paint time: latency stays honest.
+            _frames.value?.let { republish(it.paintedAt) }
+        }
     }
 
     @Synchronized
@@ -112,9 +152,8 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
         _cursor.value = cursorType
     }
 
-    /** [image] drawn into a [PREVIEW_WIDTH]-wide raster, or null when it is no wider than [DOWNSCALE_ABOVE]. */
-    private fun downscale(image: Image): Image? {
-        if (image.width <= DOWNSCALE_ABOVE) return null
+    /** [image] drawn into a [PREVIEW_WIDTH]-wide raster. Only the preview worker calls this. */
+    private fun downscale(image: Image): Image {
         val w = PREVIEW_WIDTH
         val h = image.height * w / image.width
         val surface = previewSurface?.takeIf { it.width == w && it.height == h }
@@ -136,7 +175,7 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
         _frames.value = Frame(
             seq = ++seq,
             view = current.view,
-            preview = current.preview,
+            preview = latestPreview,
             popup = popupImage.takeIf { popupVisible },
             popupRect = popupRect.takeIf { popupVisible },
             paintedAt = paintedAt,
@@ -144,12 +183,12 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
         )
     }
 
-    private fun publish(image: Image, preview: Image?, paintedAt: Long) {
-        _frames.value?.let { old -> retire(listOfNotNull(old.view, old.preview)) }
+    private fun publish(image: Image, paintedAt: Long) {
+        _frames.value?.let { old -> retire(listOf(old.view)) }
         _frames.value = Frame(
             seq = ++seq,
             view = image,
-            preview = preview,
+            preview = latestPreview.takeIf { image.width > DOWNSCALE_ABOVE },
             popup = popupImage.takeIf { popupVisible },
             popupRect = popupRect.takeIf { popupVisible },
             paintedAt = paintedAt,
@@ -159,7 +198,11 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
 
     private fun retire(images: List<Image>) {
         retired.addLast(images)
-        while (retired.size > RETIRED_KEPT) retired.removeFirst().forEach(Image::close)
+        while (retired.size > RETIRED_KEPT) {
+            retired.removeFirst().forEach { image ->
+                if (image === previewSource) closeSourceWhenScaled = true else image.close()
+            }
+        }
         while (oldRings.isNotEmpty() && seq - oldRings.first().first > RING_SIZE) oldRings.removeFirst()
     }
 
@@ -184,7 +227,7 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
         private var next = 0
 
         /** Brings the next buffer up to this paint and wraps it in an image. Returns it and whether the copy was full. */
-        fun write(rects: Array<Rectangle>, source: ByteBuffer): Pair<Image, Boolean> {
+        fun write(rects: Array<Rectangle>, source: ByteBuffer, pool: ExecutorService): Pair<Image, Boolean> {
             paintNo++
             val covers = rects.any { it.x <= 0 && it.y <= 0 && it.width >= width && it.height >= height }
             history.addLast(if (covers) null else rects.map(::Rectangle).toTypedArray())
@@ -197,7 +240,7 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
             val pending = history.toList().takeLast(behind.toInt().coerceAtMost(history.size))
             val full = held[i] < 0 || behind > history.size || pending.any { it == null }
             if (full) {
-                buffer.put(0, source, 0, bytes)
+                copyAll(source, buffer, pool)
             } else {
                 pending.forEach { paint -> paint!!.forEach { copyRect(it, source, buffer) } }
             }
@@ -207,6 +250,19 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
             val image = Image.makeRaster(info, data, rowBytes)
             data.close()
             return image to full
+        }
+
+        /** Copies the whole frame in [COPY_THREADS] bands of rows: this thread takes the first, [pool] the rest. */
+        private fun copyAll(source: ByteBuffer, target: ByteBuffer, pool: ExecutorService) {
+            val rows = (height + COPY_THREADS - 1) / COPY_THREADS
+            fun band(k: Int) {
+                val y0 = k * rows
+                val y1 = minOf(height, y0 + rows)
+                if (y1 > y0) target.put(y0 * rowBytes, source, y0 * rowBytes, (y1 - y0) * rowBytes)
+            }
+            val others = (1 until COPY_THREADS).map { k -> pool.submit { band(k) } }
+            band(0)
+            others.forEach { it.get() }
         }
 
         private fun copyRect(r: Rectangle, source: ByteBuffer, target: ByteBuffer) {
@@ -245,5 +301,10 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
 
         /** The width of that copy. */
         const val PREVIEW_WIDTH = 1280
+
+        /** Threads a whole-frame copy is split across, the paint thread included. */
+        const val COPY_THREADS = 4
+
+        fun daemon(name: String) = ThreadFactory { r -> Thread(r, name).apply { isDaemon = true } }
     }
 }

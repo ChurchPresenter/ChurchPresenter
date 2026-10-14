@@ -51,6 +51,11 @@ class Stats(private val periodMs: Long = 2_000) {
         if (previewNs > 0) preview.add(previewNs)
     }
 
+    /** The preview worker scaled one frame down in [ns]. */
+    fun preview(ns: Long) {
+        preview.add(ns)
+    }
+
     /** A [window] drew frame [seq]: [drawNs] spent drawing, [latencyNs] since the paint arrived, [gap] frames skipped since its last draw. */
     fun draw(window: String, drawNs: Long, latencyNs: Long, gap: Long) {
         draws.getOrPut(window) { Bucket() }.add(drawNs, extraValue = latencyNs)

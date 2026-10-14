@@ -138,7 +138,12 @@ private fun startCef(): CefApp {
     builder.cefSettings.cache_path = File(root, "cache").absolutePath
     // Let a video start with sound without a click, as on an output nobody touches.
     builder.addJcefArgs("--autoplay-policy=no-user-gesture-required")
-    if (System.getProperty("osr.noSmoothScroll") != null) builder.addJcefArgs("--disable-smooth-scrolling")
+    // Smooth scrolling restarts its animation on every small step and loses about half of a
+    // touchpad's movement; the page jumps instead. `-PsmoothScroll=1` keeps it, for comparison.
+    if (System.getProperty("osr.smoothScroll") == null) {
+        builder.addJcefArgs("--disable-smooth-scrolling")
+        println("smooth scrolling off")
+    }
     return builder.build()
 }
 
