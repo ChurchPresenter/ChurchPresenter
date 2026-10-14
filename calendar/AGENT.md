@@ -87,6 +87,8 @@ and the module stops compiling with unresolved `Res` references that no source f
 | `sync/Resolver.kt`, `sync/Sanitize.kt` | Wire → desktop: rows rebuilt against the library, presets and the local copy; strings cleaned and capped |
 | `sync/RelayClient.kt` | The HTTPS calls, over a `RelayTransport` taken as a parameter |
 | `sync/SyncCoordinator.kt` | One round: pull → open → resolve → `mergedWith` → save → push authoritative |
+| `sync/FollowerPush.kt` | A computer that joined another's calendar: the services it changed, sent one record at a time, with every row it did not change going back exactly as it arrived (`follower-sync.json` keeps the copies) |
+| `sync/RelayComputerCalls.kt` | Adding, removing and promoting the other computers on an instance |
 | `sync/CatalogSync.kt` | The songbooks kept on the relay for the phones (`catalog:<songbook>` records, `CatalogRecord`), pushed only when a book's bytes changed; `catalog-sync.json` remembers what was pushed |
 
 ## Rules
@@ -138,6 +140,9 @@ and the module stops compiling with unresolved `Res` references that no source f
   `ScheduleItem` directly, and a `ref` resolves only against the local copy of the same service.
 - `Sealing` takes an `Envelope`; the key comes from `:settings` through the app, never from here.
 - `RelayClient` is the only network code in this module.
+- **A joined computer never sends a placeholder.** On a follower, `Resolver(keepForeignRows = true)`
+  keeps the main computer's rows it cannot open as flagged ministry rows; `FollowerPush` sends the
+  row that arrived in their place, so the main computer never loses a row a follower could not read.
 
 ## `calendar.json`
 

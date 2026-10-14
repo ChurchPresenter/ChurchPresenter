@@ -27,10 +27,33 @@ class SyncOutcome(
     val devices: List<PairedDevice> = emptyList(),
     /** Records that did not open under this instance's key. */
     val unreadableRecords: Int = 0,
+    /** What the relay took this computer for on this round -- see [RemoteRole]; empty from an older relay. */
+    val role: String = "",
+    /** When the main computer was last heard from, on a joined computer's round. */
+    val mainLastSeen: String = "",
+    /** The computers that joined this instance, on the main computer's round. */
+    val computers: List<JoinedComputer> = emptyList(),
+    /** Services a joined computer sent; ones the relay had moved on from wait for the next round. */
+    val sentServices: Int = 0,
 )
 
 /** A paired phone as the settings card lists it. */
 class PairedDevice(val id: String, val name: String, val pairedAt: String, val lastSeen: String)
+
+/** A follower or viewer computer as the main computer's settings card lists it. */
+class JoinedComputer(val id: String, val role: String, val name: String, val pairedAt: String, val lastSeen: String)
+
+/** What this computer is to the instance it syncs with. */
+enum class SyncRole {
+    /** The source of truth: pushes the whole picture. */
+    MAIN,
+
+    /** Joined another's calendar: sends the services it changed, as a phone does. */
+    FOLLOWER,
+
+    /** Joined another's calendar to read it: never writes. */
+    VIEWER,
+}
 
 /**
  * One round of keeping `calendar.json` and the relay in step: pull what changed, rebuild it through
@@ -56,29 +79,77 @@ class SyncCoordinator(
     private val onSaved: () -> Unit = {},
     /** What was last pushed; without one, every round pushes. */
     private val pushed: PushedStateStore? = null,
+    private val role: SyncRole = SyncRole.MAIN,
+    /** A joined computer's copies of what the relay holds -- see [FollowerPush]. */
+    private val shadow: FollowerShadowStore? = null,
 ) {
     private val json = Json { encodeDefaults = true; explicitNulls = false; classDiscriminator = "type" }
 
     /** Pull, merge, save and push. Retries the push when the relay moved on mid-round. */
     fun sync(token: String, cursor: Long): SyncOutcome {
+        if (role != SyncRole.MAIN) return syncJoined(token, cursor)
         var since = cursor
         repeat(MAX_ROUNDS) {
             val (changes, merged) = pull(token, since)
             val devices = changes.devices.map {
                 PairedDevice(it.id, sealing.openDeviceName(it), it.pairedAt, it.lastSeen)
             }
+            val computers = changes.desktops.map {
+                JoinedComputer(it.id, it.role, sealing.openName(it.nameBox, it.id), it.pairedAt, it.lastSeen)
+            }
             if (changes.lastDesktopInstall.isNotEmpty() && changes.lastDesktopInstall != installId) {
-                return merged.outcome(changes.rev, devices, otherDesktop = changes.lastDesktopInstall)
+                val other = changes.lastDesktopInstall
+                return merged.outcome(changes, changes.rev, devices, computers, otherDesktop = other)
             }
             try {
                 val rev = push(token, changes.rev, merged.document, relayChanged = merged.arrived > 0)
-                return merged.outcome(rev, devices)
+                return merged.outcome(changes, rev, devices, computers)
             } catch (_: RelayFailure.Conflict) {
                 since = changes.rev
             }
         }
         throw RelayFailure.Conflict()
     }
+
+    /**
+     * A joined computer's round: pull and merge as the main computer does, then -- a follower --
+     * write each service it changed as a record of its own. Never the whole picture, never the
+     * songbooks or the presets: those are the main computer's. The cursor stays at what was pulled,
+     * so the next round reads this computer's own writes back with the revisions they got.
+     */
+    private fun syncJoined(token: String, cursor: Long): SyncOutcome {
+        val (changes, merged) = pull(token, cursor)
+        val sends = role == SyncRole.FOLLOWER && changes.role != RemoteRole.MAIN
+        val sent = if (sends) sendChanged(token, merged.document) else 0
+        return merged.outcome(changes, changes.rev, emptyList(), emptyList(), sent = sent)
+    }
+
+    /** Writes every service this follower changed; one the relay moved on from waits for the next round. */
+    private fun sendChanged(token: String, document: CalendarDocument): Int {
+        val store = shadow ?: return 0
+        val copies = HashMap(store.load(sealing.instanceId))
+        val outgoing = FollowerPush.outgoing(document, copies, resolver(), today(), now())
+        var sent = 0
+        for (item in outgoing) {
+            try {
+                val rev = client.putRecord(token, sealing.seal(item.service), item.ifRev)
+                copies[item.service.id] = item.service.copy(rev = rev)
+                sent++
+            } catch (_: RelayFailure.Conflict) {
+                // Somebody else wrote this service since our copy; the next pull merges theirs first.
+            }
+        }
+        if (sent > 0) store.save(sealing.instanceId, copies)
+        return sent
+    }
+
+    private fun resolver(): Resolver = Resolver(
+        songs(),
+        presetStore?.load()?.presets.orEmpty(),
+        today(),
+        now(),
+        keepForeignRows = role != SyncRole.MAIN,
+    )
 
     /**
      * Every page of what changed since [since], each merged as it arrives. The last page is returned:
@@ -98,15 +169,18 @@ class SyncCoordinator(
     }
 
     /** Pushes the local file as it stands; a phone edit in the meantime turns this into a full [sync]. */
-    fun pushLocal(token: String, cursor: Long): SyncOutcome = try {
-        SyncOutcome(
-            cursor = push(token, cursor, store.load().document, relayChanged = false),
-            phoneChanges = 0,
-            unresolvedRows = 0,
-            droppedRows = 0,
-        )
-    } catch (_: RelayFailure.Conflict) {
-        sync(token, cursor)
+    fun pushLocal(token: String, cursor: Long): SyncOutcome {
+        if (role != SyncRole.MAIN) return syncJoined(token, cursor)
+        return try {
+            SyncOutcome(
+                cursor = push(token, cursor, store.load().document, relayChanged = false),
+                phoneChanges = 0,
+                unresolvedRows = 0,
+                droppedRows = 0,
+            )
+        } catch (_: RelayFailure.Conflict) {
+            sync(token, cursor)
+        }
     }
 
     /**
@@ -147,7 +221,8 @@ class SyncCoordinator(
     /** What the relay sent, rebuilt and merged into the local file. */
     private fun absorb(changes: ChangesResponse): Absorbed {
         val local = store.load().document
-        val resolver = Resolver(songs(), presetStore?.load()?.presets.orEmpty(), today(), now())
+        val resolver = resolver()
+        val copies = if (role != SyncRole.MAIN) shadow?.load(sealing.instanceId)?.let(::HashMap) else null
         val deletions = HashMap<String, RemoteService>()
         var phoneChanges = 0
         var unresolved = 0
@@ -165,6 +240,7 @@ class SyncCoordinator(
                 unreadable++
                 return@mapNotNull null
             }
+            copies?.put(remote.id, remote)
             if (remote.deleted) {
                 if (remote.version >= (deletions[remote.id]?.version ?: -1L)) deletions[remote.id] = remote
                 return@mapNotNull null
@@ -189,6 +265,7 @@ class SyncCoordinator(
             store.save(merged)
             onSaved()
         }
+        if (copies != null && arrived > 0) shadow?.save(sealing.instanceId, copies)
         return Absorbed(merged, phoneChanges, unresolved, dropped, unreadable, arrived)
     }
 
@@ -201,8 +278,17 @@ class SyncCoordinator(
         /** Records and tombstones the pull carried, songbooks aside. */
         val arrived: Int,
     ) {
-        fun outcome(cursor: Long, devices: List<PairedDevice>, otherDesktop: String = "") =
-            SyncOutcome(cursor, phoneChanges, unresolved, dropped, otherDesktop, devices, unreadable)
+        fun outcome(
+            changes: ChangesResponse,
+            cursor: Long,
+            devices: List<PairedDevice>,
+            computers: List<JoinedComputer>,
+            otherDesktop: String = "",
+            sent: Int = 0,
+        ) = SyncOutcome(
+            cursor, phoneChanges, unresolved, dropped, otherDesktop, devices, unreadable,
+            role = changes.role, mainLastSeen = changes.mainLastSeen, computers = computers, sentServices = sent,
+        )
 
         /** This page's counts added to the earlier ones; the document is the later, fuller merge. */
         fun plus(next: Absorbed) = Absorbed(

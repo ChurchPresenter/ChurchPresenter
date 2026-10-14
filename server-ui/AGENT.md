@@ -11,7 +11,9 @@ The Compose face of `:server`, which deliberately has no UI toolkit. It holds:
   in `~/.churchpresenter/remote_clients.json`;
 - the Companion triggers card (`CompanionTriggersCard`, `CompanionTriggerUrls.kt`): the URLs a
   Companion button calls for each lower third, the ATEM keys and the takedowns;
-- calendar sync's card (`CalendarSyncCard`) and its phone invite (`CalendarEnrollQrDialog`);
+- calendar sync's card (`CalendarSyncCard`) and its phone invite (`CalendarEnrollQrDialog`); the
+  other computers on one calendar (`CalendarComputersSection`, `CalendarComputerDialogs`), dev mode
+  only;
 - Instance Link's windows: `InstanceLinkDialog`, its layer picker (`InstanceLinkLayers`), its
   failure toast (`InstanceLinkToastHost`) and the status row the schedule sidebar shows
   (`ConnectionStatusRow`).

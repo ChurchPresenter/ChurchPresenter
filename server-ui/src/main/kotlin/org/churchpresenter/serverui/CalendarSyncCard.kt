@@ -59,6 +59,13 @@ import org.churchpresenter.strings.generated.resources.calendar_sync_title
 import org.churchpresenter.strings.generated.resources.calendar_sync_unpair
 import org.churchpresenter.strings.generated.resources.calendar_sync_unpair_available_on
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.produceState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.churchpresenter.calendar.sync.JoinedComputer
+import org.churchpresenter.profiles.LocalSettingsDevMode
+import org.churchpresenter.settings.CalendarSyncSettings
+import java.net.InetAddress
 import org.churchpresenter.sharedui.composables.SettingsSection
 import org.churchpresenter.server.CalendarInvite
 import org.churchpresenter.server.asInvite
@@ -87,8 +94,14 @@ internal fun CalendarSyncCard(
     val scope = rememberCoroutineScope()
     val status by sync.status.collectAsState()
     val devices by sync.devices.collectAsState()
+    val computers by sync.computers.list.collectAsState()
+    // Other computers on one calendar are not ready for production: dev mode only, here and in the service.
+    val multiComputer = LocalSettingsDevMode.current
     // The invite QR this card opens; the card owns it so the Server tab needs no plumbing for it.
     var invite by remember { mutableStateOf<CalendarInvite?>(null) }
+    var addingComputer by remember { mutableStateOf(false) }
+    var joining by remember { mutableStateOf(false) }
+    val ownName = rememberComputerName()
     CalendarSyncCardContent(
         settings = settings,
         onSettingsChange = onSettingsChange,
@@ -100,8 +113,41 @@ internal fun CalendarSyncCard(
         onUnpair = { sync.unpair() },
         onRevoke = { id -> scope.launch { sync.revokeDevice(id) } },
         onInvite = { scope.launch { invite = sync.invitePhone().asInvite(sync) } },
+        multiComputer = multiComputer,
+        computers = computers,
+        onAddComputer = { addingComputer = true },
+        onRemoveComputer = { id -> scope.launch { sync.computers.remove(id) } },
+        onMakeMain = { id -> scope.launch { sync.computers.promote(id, ownName) } },
+        onJoin = { joining = true },
+        onTakeOver = { scope.launch { sync.computers.takeOver() } },
     )
     invite?.let { CalendarEnrollQrDialog(invite = it, onDismiss = { invite = null }) }
+    if (addingComputer) {
+        AddComputerDialog(
+            onCreate = { role, name -> sync.computers.invite(role, name, ownName) },
+            onDismiss = { addingComputer = false },
+        )
+    }
+    if (joining) {
+        val current = settings.calendarSync
+        JoinCalendarDialog(
+            replacesOwn = current.isPaired && !current.isJoined,
+            onJoin = { join -> sync.computers.join(join) },
+            onDismiss = { joining = false },
+        )
+    }
+}
+
+/** What this computer is called, for the other computer's status line; read off the UI thread. */
+@Composable
+private fun rememberComputerName(): String {
+    val name by produceState(initialValue = System.getenv("COMPUTERNAME").orEmpty()) {
+        if (value.isBlank()) {
+            value = withContext(Dispatchers.IO) { runCatching { InetAddress.getLocalHost().hostName }.getOrDefault("") }
+                .substringBefore('.')
+        }
+    }
+    return name
 }
 
 /**
@@ -125,6 +171,14 @@ internal fun CalendarSyncCardContent(
     now: Instant = Instant.now(),
     /** The relay shown when settings name none -- see [CalendarSyncCard]. */
     builtInRelayUrl: String = "",
+    /** Whether other computers may join or be joined -- dev mode, for now. */
+    multiComputer: Boolean = false,
+    computers: List<JoinedComputer> = emptyList(),
+    onAddComputer: () -> Unit = {},
+    onRemoveComputer: (String) -> Unit = {},
+    onMakeMain: (String) -> Unit = {},
+    onJoin: () -> Unit = {},
+    onTakeOver: () -> Unit = {},
 ) {
     val current = settings.calendarSync
     val clock = remember(zone, locale) { LocalTimeText(zone, locale) }
@@ -159,68 +213,119 @@ internal fun CalendarSyncCardContent(
         }
         if (current.enabled) {
             StatusLine(status, clock)
-            Text(
-                text = stringResource(Res.string.calendar_sync_enroll_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            if (current.isPaired) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RaisedButton(
-                        shape = AppShape(6.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                        onClick = onInvite,
-                    ) {
-                        Text(
-                            stringResource(Res.string.calendar_sync_invite),
-                            style = MaterialTheme.typography.labelSmall,
-                        )
-                    }
-                    KeyButton(
-                        shape = AppShape(6.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                        onClick = onSyncNow,
-                    ) {
-                        Text(
-                            stringResource(Res.string.calendar_sync_sync_now),
-                            style = MaterialTheme.typography.labelSmall,
-                        )
-                    }
-                    GhostButton(
-                        onClick = onUnpair,
-                        enabled = nextRotation == null,
-                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                    ) {
-                        Text(
-                            stringResource(Res.string.calendar_sync_unpair),
-                            style = MaterialTheme.typography.labelSmall,
-                        )
-                    }
-                }
-                if (nextRotation != null) {
-                    val date = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
-                        .format(nextRotation.atZone(zone))
-                    Text(
-                        text = stringResource(Res.string.calendar_sync_unpair_available_on, date),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+            if (current.isJoined) {
+                if (multiComputer) {
+                    JoinedSection(
+                        settings = current,
+                        mainLastSeen = (status as? CalendarSyncStatus.Synced)?.outcome?.mainLastSeen.orEmpty(),
+                        now = now,
+                        locale = locale,
+                        zone = zone,
+                        onSyncNow = onSyncNow,
+                        onLeave = onUnpair,
+                        onTakeOver = onTakeOver,
                     )
                 }
+            } else {
+                MainComputerControls(
+                    current = current,
+                    nextRotation = nextRotation,
+                    devices = devices,
+                    labelFor = labelFor,
+                    clock = clock,
+                    zone = zone,
+                    locale = locale,
+                    builtInRelayUrl = builtInRelayUrl,
+                    onInvite = onInvite,
+                    onSyncNow = onSyncNow,
+                    onUnpair = onUnpair,
+                    onRevoke = onRevoke,
+                )
+                if (multiComputer && current.isPaired) {
+                    ComputersSection(computers, clock, onAddComputer, onRemoveComputer, onMakeMain)
+                }
+                if (multiComputer) JoinCalendarButton(onJoin)
             }
-            if (current.isPaired) {
-                DevicesList(devices = devices, labelFor = labelFor, clock = clock, onRevoke = onRevoke)
+        }
+    }
+}
+
+/** The main computer's part of the card: the phone invite, the buttons, the phones and the relay. */
+@Composable
+private fun MainComputerControls(
+    current: CalendarSyncSettings,
+    nextRotation: Instant?,
+    devices: List<PairedDevice>,
+    labelFor: (String) -> String,
+    clock: LocalTimeText,
+    zone: ZoneId,
+    locale: Locale,
+    builtInRelayUrl: String,
+    onInvite: () -> Unit,
+    onSyncNow: () -> Unit,
+    onUnpair: () -> Unit,
+    onRevoke: (String) -> Unit,
+) {
+    Text(
+        text = stringResource(Res.string.calendar_sync_enroll_hint),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    if (current.isPaired) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            RaisedButton(
+                shape = AppShape(6.dp),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                onClick = onInvite,
+            ) {
                 Text(
-                    text = "${stringResource(Res.string.calendar_sync_relay_url)}: " +
-                        "${current.relayUrl.ifBlank { builtInRelayUrl }} · " +
-                        "${stringResource(Res.string.calendar_sync_instance)}: ${current.instanceId}",
-                    style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    stringResource(Res.string.calendar_sync_invite),
+                    style = MaterialTheme.typography.labelSmall,
+                )
+            }
+            KeyButton(
+                shape = AppShape(6.dp),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                onClick = onSyncNow,
+            ) {
+                Text(
+                    stringResource(Res.string.calendar_sync_sync_now),
+                    style = MaterialTheme.typography.labelSmall,
+                )
+            }
+            GhostButton(
+                onClick = onUnpair,
+                enabled = nextRotation == null,
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+            ) {
+                Text(
+                    stringResource(Res.string.calendar_sync_unpair),
+                    style = MaterialTheme.typography.labelSmall,
                 )
             }
         }
+        if (nextRotation != null) {
+            val date = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
+                .format(nextRotation.atZone(zone))
+            Text(
+                text = stringResource(Res.string.calendar_sync_unpair_available_on, date),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+    if (current.isPaired) {
+        DevicesList(devices = devices, labelFor = labelFor, clock = clock, onRevoke = onRevoke)
+        Text(
+            text = "${stringResource(Res.string.calendar_sync_relay_url)}: " +
+                "${current.relayUrl.ifBlank { builtInRelayUrl }} · " +
+                "${stringResource(Res.string.calendar_sync_instance)}: ${current.instanceId}",
+            style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

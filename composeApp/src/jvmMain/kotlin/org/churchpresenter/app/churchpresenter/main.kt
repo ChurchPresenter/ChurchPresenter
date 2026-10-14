@@ -334,6 +334,7 @@ private fun ApplicationScope.ChurchPresenterApp(
                 },
                 typicalSeconds = { song -> liveDurationLog.median(song.asDurationRow()) },
                 endpoints = builtInRelayEndpoints,
+                multiComputer = { devMode },
             )
         }
         DisposableEffect(Unit) {
