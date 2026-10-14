@@ -51,6 +51,9 @@ internal class CanvasReports {
     val scheduled = mutableListOf<Pair<String, String>>()
     var settingsChanges = 0
 
+    /** The settings as every reported change, applied in order, leaves them. */
+    var settings = AppSettings()
+
     /** Each scene Go Live put on the output, in order. */
     val presented = mutableListOf<Scene>()
 
@@ -112,7 +115,10 @@ internal fun canvasTab(
                         CompositionLocalProvider(LocalWentLive provides { reports.wentLive += it }) {
                         CanvasTab(
                             appSettings = settings(AppSettings()),
-                            onSettingsChange = { reports.settingsChanges++ },
+                            onSettingsChange = { change ->
+                                reports.settingsChanges++
+                                reports.settings = change(reports.settings)
+                            },
                             onPresentScene = { reports.presented += it },
                             sceneViewModel = vm,
                             onAddToSchedule = { id, name -> reports.scheduled += id to name },

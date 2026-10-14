@@ -86,4 +86,13 @@ class DrawnShapeTest {
         assertEquals(0.01f, shape.transform.width)
         assertEquals(listOf(PathPoint(0f, 0f)), shape.points)
     }
+
+    @Test
+    fun `a shape with no tool name is still made, unnamed and pointless`() {
+        val shape = draw("", Offset(0.1f, 0.1f), Offset(0.3f, 0.3f))
+
+        assertEquals("", shape.name)
+        assertTrue(shape.points.isEmpty())
+        assertEquals(0.2f, shape.transform.width, 0.0001f)
+    }
 }

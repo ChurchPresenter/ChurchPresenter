@@ -157,6 +157,42 @@ class SceneVideoCacheTest {
     }
 
     @Test
+    fun `a player with no picture yet publishes nothing`() {
+        val reads = AtomicInteger()
+        val player = object : SceneVideoHandle {
+            override val frameVersion = 1L
+            override val frame: BufferedImage? get() = null.also { reads.incrementAndGet() }
+            override fun setVolume(percent: Int) = Unit
+            override fun close() = Unit
+        }
+        val cache = SceneVideoCache { player }
+
+        val frames = cache.acquire(spec(), volume = 1f)
+
+        waitFor("the decoder to be polled") { reads.get() > 0 }
+        assertEquals(null, frames.value)
+        cache.release(spec())
+    }
+
+    @Test
+    fun `a spec names its file and whether it loops`() {
+        val spec = spec(path = "/videos/intro.mp4", loop = false)
+
+        assertEquals("/videos/intro.mp4", spec.filePath)
+        assertEquals(false, spec.loop)
+    }
+
+    @Test
+    fun `the app's cache ignores a file nothing is playing`() {
+        val before = SharedSceneVideoCache.liveDecodeCount
+
+        SharedSceneVideoCache.setVolume(spec(path = "/videos/never-acquired.mp4"), 0.5f)
+        SharedSceneVideoCache.release(spec(path = "/videos/never-acquired.mp4"))
+
+        assertEquals(before, SharedSceneVideoCache.liveDecodeCount)
+    }
+
+    @Test
     fun `letting go of a file nothing is playing does nothing`() {
         val cache = SceneVideoCache(openPlayer = { FakePlayer() })
 

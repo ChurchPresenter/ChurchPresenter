@@ -63,19 +63,6 @@ internal class CanvasTabScope(
     var drawingStrokeWidth by state.drawingStrokeWidth
     val focusRequester = state.focusRequester
 
-    val strImage get() = sourceNames.strImage
-    val strText get() = sourceNames.strText
-    val strColor get() = sourceNames.strColor
-    val strVideo get() = sourceNames.strVideo
-    val strTimer get() = sourceNames.strTimer
-    val strQrCode get() = sourceNames.strQrCode
-    val strCamera get() = sourceNames.strCamera
-    val strScreenCapture get() = sourceNames.strScreenCapture
-    val strNdi get() = sourceNames.strNdi
-    val strOmt get() = sourceNames.strOmt
-    val strBrowser get() = sourceNames.strBrowser
-    val strBible get() = sourceNames.strBible
-
     fun saveLeftPanel() {
         val dp = with(density) { leftPanelPx.toDp().value.toInt() }
         onSettingsChangeState.value { s -> withCanvasLeftPanelWidth(s, isMaximized, dp) }

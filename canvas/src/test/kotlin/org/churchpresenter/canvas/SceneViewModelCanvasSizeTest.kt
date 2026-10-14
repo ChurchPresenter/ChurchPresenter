@@ -60,6 +60,30 @@ class SceneViewModelCanvasSizeTest {
     }
 
     @Test
+    fun `asking for the size a scene already has writes nothing`() {
+        val vm = SceneViewModel()
+        val scene = vm.addScene("Same")
+        val (w, h) = vm.size(scene.id)
+        scenesFile.delete()
+
+        vm.updateCanvasSize(w, h, scene.id)
+
+        assertEquals(w to h, vm.size(scene.id))
+        assertFalse(scenesFile.exists(), "an unchanged size is not saved again")
+    }
+
+    @Test
+    fun `a new height alone is enough to resize`() {
+        val vm = SceneViewModel()
+        val scene = vm.addScene("Taller")
+        val (w, _) = vm.size(scene.id)
+
+        vm.updateCanvasSize(w, 1200, scene.id)
+
+        assertEquals(w to 1200, vm.size(scene.id))
+    }
+
+    @Test
     fun `each side is kept within the canvas limits`() {
         val vm = SceneViewModel()
         val scene = vm.addScene("Clamped")
