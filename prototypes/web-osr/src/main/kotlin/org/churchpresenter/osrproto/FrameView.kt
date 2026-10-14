@@ -2,7 +2,9 @@ package org.churchpresenter.osrproto
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SnapshotMutationPolicy
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -15,6 +17,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import org.cef.browser.CefBrowserHeadless
 import org.jetbrains.skia.FilterMipmap
+import org.jetbrains.skia.Image
 import org.jetbrains.skia.FilterMode
 import org.jetbrains.skia.MipmapMode
 import org.jetbrains.skia.Paint
@@ -67,15 +70,44 @@ internal fun fitRect(box: Size, frameW: Int, frameH: Int): Rect {
  * under [name]. Every window that shows the page is one of these over the same [store]; a [small]
  * one draws the frame's scaled-down copy when there is one.
  */
+/**
+ * What one window draws from a [Frame]: its [picture] (the full view, or for a small window the
+ * scaled-down copy when there is one), and the popup. Two are equivalent when they would draw the
+ * same pixels, so a window is not redrawn when only the other window's picture changed.
+ */
+private class Shown(val frame: Frame, val picture: Image, val pictureSeq: Long) {
+    companion object {
+        fun of(frame: Frame, small: Boolean): Shown {
+            val preview = frame.preview
+            return if (small && preview != null) Shown(frame, preview, frame.previewSeq)
+            else Shown(frame, frame.view, frame.viewSeq)
+        }
+
+        val Policy = object : SnapshotMutationPolicy<Shown?> {
+            override fun equivalent(a: Shown?, b: Shown?): Boolean =
+                a?.picture === b?.picture && a?.frame?.popup === b?.frame?.popup &&
+                    a?.frame?.popupRect == b?.frame?.popupRect
+        }
+    }
+}
+
+/**
+ * Draws the latest frame, letterboxed, with the open popup over it, and reports each draw to [stats]
+ * under [name]. Every window that shows the page is one of these over the same [store]; a [small]
+ * one draws the frame's scaled-down copy when there is one. A window redraws only when what it shows
+ * changed, and its skipped count is of its own pictures.
+ */
 @Composable
 fun FrameView(store: FrameStore, stats: Stats, name: String, modifier: Modifier, small: Boolean = false) {
-    val frame by store.frames.collectAsState()
+    val frames = store.frames.collectAsState()
+    val shown by remember(small) { derivedStateOf(Shown.Policy) { frames.value?.let { Shown.of(it, small) } } }
     val lastSeq = remember { longArrayOf(-1) }
     val paint = remember { Paint() }
     Canvas(modifier) {
-        val f = frame ?: return@Canvas
+        val current = shown ?: return@Canvas
+        val f = current.frame
+        val picture = current.picture
         val start = System.nanoTime()
-        val picture = if (small) f.preview ?: f.view else f.view
         val dst = fitRect(size, picture.width, picture.height)
         val sampling = FilterMipmap(FilterMode.LINEAR, MipmapMode.NONE)
         drawIntoCanvas { c ->
@@ -97,8 +129,8 @@ fun FrameView(store: FrameStore, stats: Stats, name: String, modifier: Modifier,
                 )
             }
         }
-        val gap = if (lastSeq[0] < 0) 0 else (f.seq - lastSeq[0] - 1).coerceAtLeast(0)
-        lastSeq[0] = f.seq
+        val gap = if (lastSeq[0] < 0) 0 else (current.pictureSeq - lastSeq[0] - 1).coerceAtLeast(0)
+        lastSeq[0] = current.pictureSeq
         val now = System.nanoTime()
         stats.draw(name, drawNs = now - start, latencyNs = now - f.paintedAt, gap = gap)
     }

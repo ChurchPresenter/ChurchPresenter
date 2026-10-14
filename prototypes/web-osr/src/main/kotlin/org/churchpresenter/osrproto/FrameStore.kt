@@ -32,6 +32,9 @@ class Frame(
     val paintedAt: Long,
     /** The page's width in DIPs: [popupRect] is in DIPs, the images in pixels. */
     val dipWidth: Int,
+    /** Counts of new [view]s and new [preview]s published so far, for each window's skipped-frame count. */
+    val viewSeq: Long,
+    val previewSeq: Long,
 )
 
 /**
@@ -71,6 +74,8 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
     private var popupImage: Image? = null
     private var previewSurface: Surface? = null
     private var seq = 0L
+    private var viewSeq = 0L
+    private var previewSeq = 0L
     private val retired = ArrayDeque<List<Image>>()
 
     /** The newest scaled-down copy, which every published frame carries. */
@@ -127,6 +132,7 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
                 while (retiredPreviews.size > RETIRED_KEPT) retiredPreviews.removeFirst().close()
             }
             latestPreview = preview
+            previewSeq++
             // Same picture of the page, so the same paint time: latency stays honest.
             _frames.value?.let { republish(it.paintedAt) }
         }
@@ -180,6 +186,8 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
             popupRect = popupRect.takeIf { popupVisible },
             paintedAt = paintedAt,
             dipWidth = dipWidth,
+            viewSeq = viewSeq,
+            previewSeq = previewSeq,
         )
     }
 
@@ -193,6 +201,8 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
             popupRect = popupRect.takeIf { popupVisible },
             paintedAt = paintedAt,
             dipWidth = dipWidth,
+            viewSeq = ++viewSeq,
+            previewSeq = previewSeq,
         )
     }
 
