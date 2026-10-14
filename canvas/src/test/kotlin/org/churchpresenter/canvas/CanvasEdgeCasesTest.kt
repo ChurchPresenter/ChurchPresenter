@@ -3,7 +3,6 @@
 package org.churchpresenter.canvas
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -86,32 +85,43 @@ class CanvasEdgeCasesTest {
         }
 
     @Test
-    fun `a settings change elsewhere keeps every kind of layer selected and untouched`() {
-        var tick by mutableStateOf(0)
-        val layers = listOf(
+    fun `a settings change elsewhere keeps a drawn layer selected and untouched`() =
+        keepsSelectionThroughSettingsChange(
             SceneSource.TextSource(id = "t", name = "Text"),
             SceneSource.ClockSource(id = "c", name = "Clock", mode = ClockModes.COUNTDOWN),
             SceneSource.ShapeSource(id = "s", name = "Shape", isGradient = true),
             SceneSource.ColorSource(id = "col", name = "Color"),
             SceneSource.QRCodeSource(id = "q", name = "QR"),
+            SceneSource.BibleSource(id = "bi", name = "Bible"),
+        )
+
+    @Test
+    fun `a settings change elsewhere keeps a media or input layer selected and untouched`() =
+        keepsSelectionThroughSettingsChange(
             SceneSource.VideoSource(id = "v", name = "Video", filePath = ""),
             SceneSource.ImageSource(id = "i", name = "Image", filePath = ""),
             SceneSource.OmtSource(id = "o", name = "OMT"),
             SceneSource.ScreenCaptureSource(id = "sc", name = "Screen"),
+            SceneSource.BrowserSource(id = "b", name = "Browser", url = ""),
+            SceneSource.NdiSource(id = "n", name = "NDI"),
+            SceneSource.CameraSource(id = "cam", name = "Camera", devicePath = "unsupported://test-device"),
         )
+
+    private fun keepsSelectionThroughSettingsChange(vararg layers: SceneSource) {
+        var tick by mutableStateOf(0)
         canvasTab(
             seed = { addScene("Scene"); layers.forEach { addSource(it) } },
             settings = { it.copy(windowedLayout = it.windowedLayout.copy(schedulePanelWidthDp = 280 + tick)) },
             liveSceneId = { vm -> vm.currentSceneId.value.takeIf { tick % 2 == 1 } },
         ) { vm, _ ->
             val before = vm.currentScene!!.sources
-            layers.forEach { layer ->
-                vm.selectSource(layer.id)
+            (layers.map { it.id } + listOf(null)).forEach { id ->
+                vm.selectSource(id)
                 waitForIdle()
                 tick++
                 waitForIdle()
 
-                assertEquals(layer.id, vm.selectedSourceId.value)
+                assertEquals(id, vm.selectedSourceId.value)
             }
             assertEquals(before, vm.currentScene!!.sources)
         }
