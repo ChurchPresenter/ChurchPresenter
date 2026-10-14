@@ -3,12 +3,14 @@
 package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
 import org.churchpresenter.calendar.PresetStore
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.media.viewmodel.MediaViewModel
@@ -33,7 +35,8 @@ class TabPanesWiringTest : MainDesktopComposeHarness() {
     }
 
     private fun ComposeUiTest.clickEnabled(description: String) {
-        onAllNodes(hasContentDescription(description) and isEnabled())[0].performClick()
+        onAllNodes(hasContentDescription(description) and isEnabled())[0]
+            .performSemanticsAction(SemanticsActions.OnClick)
         waitForIdle()
     }
 
