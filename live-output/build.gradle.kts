@@ -19,7 +19,7 @@ dependencies {
     implementation(projects.diagnostics)
     implementation(projects.presenter)
     implementation(projects.liveShow)
-    implementation(projects.canvas)
+    implementation(projects.canvasEngine)
     implementation(projects.slidesEngine)
     implementation(projects.mediaEngine)
     implementation(projects.web)

@@ -4,7 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import org.churchpresenter.core.models.scene.SceneSource
 
-internal fun selectedCameraName(devices: List<CameraDevice>, source: SceneSource.CameraSource): String =
+fun selectedCameraName(devices: List<CameraDevice>, source: SceneSource.CameraSource): String =
     if (source.isDeckLink) {
         devices.find { it.isDeckLink && it.deckLinkIndex == source.deckLinkIndex }?.displayName
             ?: devices.first().displayName

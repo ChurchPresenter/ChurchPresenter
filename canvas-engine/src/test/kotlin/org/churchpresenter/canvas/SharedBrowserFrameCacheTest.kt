@@ -9,15 +9,19 @@ import io.ktor.server.websocket.webSocket
 import io.ktor.server.routing.routing
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.put
 import java.io.File
+import java.io.IOException
 import java.net.ServerSocket
+import java.nio.file.Files
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
@@ -25,7 +29,9 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 /**
@@ -33,7 +39,10 @@ import kotlin.test.assertTrue
  * WebSocket — [acquire] starts that unconditionally (there is no cheap "nothing to do" input, unlike
  * [SharedCameraFrameCache]'s unrecognized-device-scheme shortcut), so it is never called from this
  * suite: on a machine with a real browser installed it would actually launch one, which is slow,
- * heavyweight and not what a fast unit test should do. What's covered instead: every function that
+ * heavyweight and not what a fast unit test should do. The entry around the browser — shared by
+ * every layer showing one source, torn down by the last — is driven through
+ * [SharedBrowserFrameCache.acquireWith] with a launch that connects to the fake endpoint below
+ * instead. What's covered besides: every function that
  * guards on "no entry for this id" (all reachable without ever acquiring one), the pure discovery
  * helpers ([findBrowserExecutable], [findFreePort], both widened to `internal`), which only inspect
  * the filesystem/PATH/an ephemeral socket and never spawn a browser — and separately, the CDP
@@ -47,9 +56,18 @@ class SharedBrowserFrameCacheTest {
 
     private val servers = mutableListOf<FakeCdpBrowser>()
     private val connections = mutableListOf<SharedBrowserFrameCache.CdpConnection>()
+    private val acquired = mutableSetOf<String>()
+    private val profiles = mutableListOf<File>()
 
     @AfterTest
     fun cleanUp() {
+        // Entries first: the last release closes each one's connection, as the app's last layer does.
+        acquired.forEach { id ->
+            while (SharedBrowserFrameCache.getCurrentUrl(id) != null) SharedBrowserFrameCache.release(id)
+        }
+        acquired.clear()
+        profiles.forEach { it.deleteRecursively() }
+        profiles.clear()
         // Clients first, so each server's session ends on its own before its event loop is torn down.
         connections.forEach { runCatching { it.close() } }
         connections.clear()
@@ -303,6 +321,140 @@ class SharedBrowserFrameCacheTest {
         assertNull(SharedBrowserFrameCache.getCurrentUrl("never-acquired"))
     }
 
+    // ── The entry one source's layers share ───────────────────────────────────────────────────
+
+    /**
+     * Stands in for [SharedBrowserFrameCache]'s browser launch: fills the entry in as a launched browser
+     * would — a process, a profile folder, a DevTools connection to [wsUrl] when there is one — then
+     * idles until cancelled, as the capture loop does. Each launch's entry is handed to [next].
+     */
+    private inner class FakeLaunch(private val wsUrl: String? = null, private val withBrowser: Boolean = false) {
+        private val started = LinkedBlockingQueue<SharedBrowserFrameCache.CacheEntry>()
+
+        val start: suspend (SharedBrowserFrameCache.CacheEntry, SharedBrowserFrameCache.BrowserPage) -> Unit =
+            { entry, _ ->
+                if (withBrowser) {
+                    entry.browserProcess = ProcessBuilder(shellCommand("exit 0")).start()
+                    entry.userDataDir = Files.createTempDirectory("cp-browser-test").toFile().also { profiles += it }
+                }
+                if (wsUrl != null) entry.cdpConnection = cdpConnection().also { it.connect(wsUrl) }
+                started.add(entry)
+                awaitCancellation()
+            }
+
+        fun next(): SharedBrowserFrameCache.CacheEntry =
+            assertNotNull(started.poll(5, TimeUnit.SECONDS), "the browser was never launched")
+    }
+
+    private fun acquire(
+        id: String,
+        start: suspend (SharedBrowserFrameCache.CacheEntry, SharedBrowserFrameCache.BrowserPage) -> Unit,
+    ): SharedBrowserFrameCache.BrowserFlows {
+        acquired += id
+        return SharedBrowserFrameCache.acquireWith(id, PAGE, start)
+    }
+
+    private fun FakeCdpBrowser.wsUrl() = "ws://127.0.0.1:$port/devtools/page/FAKE"
+
+    /** The next request the fake browser was sent, as `method` and `params`. */
+    private fun FakeCdpBrowser.nextRequest(): Pair<String, JsonObject?> {
+        val text = assertNotNull(received.poll(5, TimeUnit.SECONDS), "nothing was sent to the browser")
+        val request = Json.parseToJsonElement(text).jsonObject
+        return request.getValue("method").jsonPrimitive.content to request["params"]?.jsonObject
+    }
+
+    @Test
+    fun `layers showing one source share one browser, which stops only when the last lets go`() {
+        val fake = startFakeCdpBrowser()
+        val launch = FakeLaunch(fake.wsUrl(), withBrowser = true)
+        val first = acquire("shared", launch.start)
+        val second = acquire("shared", launch.start)
+        val entry = launch.next()
+        val job = assertNotNull(entry.captureJob)
+        val process = assertNotNull(entry.browserProcess)
+        val profile = assertNotNull(entry.userDataDir)
+
+        assertSame(first.frame, second.frame, "both layers read the one browser's frames")
+        assertEquals(2, entry.refCount)
+
+        SharedBrowserFrameCache.release("shared")
+        assertTrue(job.isActive, "one layer letting go leaves the browser running for the other")
+        assertSame(entry.currentUrl, SharedBrowserFrameCache.getCurrentUrl("shared"))
+
+        SharedBrowserFrameCache.release("shared")
+        assertTrue(job.isCancelled, "the last layer letting go stops the capture")
+        assertFalse(process.isAlive)
+        assertFalse(profile.exists(), "the browser's temporary profile is deleted with it")
+        assertNull(entry.cdpConnection)
+        assertNull(entry.browserProcess)
+        assertNull(entry.frame.value)
+        assertNull(SharedBrowserFrameCache.getCurrentUrl("shared"), "and the source is forgotten")
+    }
+
+    @Test
+    fun `a browser that fails to start says why, on the source it was started for`() {
+        val failures = listOf(
+            IOException("no profile folder"),
+            IllegalArgumentException("a reply that is not JSON"),
+            IllegalStateException("the socket closed"),
+        )
+        failures.forEachIndexed { i, failure ->
+            val flows = acquire("failing-$i") { _, _ -> throw failure }
+            awaitUntil("the error for failing-$i") { flows.error.value != null }
+            assertEquals("Browser error: ${failure.message}", flows.error.value)
+        }
+    }
+
+    @Test
+    fun `a new frame rate reaches the running browser, held between one and sixty`() {
+        val launch = FakeLaunch()
+        acquire("fps", launch.start)
+        val entry = launch.next()
+
+        SharedBrowserFrameCache.setFps("fps", 10)
+        assertEquals(100, entry.captureIntervalMs)
+        SharedBrowserFrameCache.setFps("fps", 500)
+        assertEquals(16, entry.captureIntervalMs)
+        SharedBrowserFrameCache.setFps("fps", 0)
+        assertEquals(1000, entry.captureIntervalMs)
+    }
+
+    @Test
+    fun `transparency is switched on the page it was asked for, and back`() {
+        val fake = startFakeCdpBrowser()
+        val launch = FakeLaunch(fake.wsUrl())
+        acquire("glass", launch.start)
+        launch.next()
+
+        SharedBrowserFrameCache.setTransparent("glass", true)
+        val (clear, clearParams) = fake.nextRequest()
+        assertEquals("Emulation.setDefaultBackgroundColorOverride", clear)
+        assertEquals("0", clearParams?.getValue("color")?.jsonObject?.getValue("a")?.jsonPrimitive?.content)
+        val (script, scriptParams) = fake.nextRequest()
+        assertEquals("Runtime.evaluate", script)
+        assertTrue("transparent" in scriptParams?.getValue("expression")?.jsonPrimitive?.content.orEmpty())
+
+        SharedBrowserFrameCache.setTransparent("glass", false)
+        val (reset, resetParams) = fake.nextRequest()
+        assertEquals("Emulation.setDefaultBackgroundColorOverride", reset)
+        assertNull(resetParams?.get("color"), "the override is lifted, back to the page's own white")
+        val (undo, undoParams) = fake.nextRequest()
+        assertEquals("Runtime.evaluate", undo)
+        assertFalse("transparent" in undoParams?.getValue("expression")?.jsonPrimitive?.content.orEmpty())
+    }
+
+    @Test
+    fun `a page with no connection yet ignores transparency and navigation`() {
+        val launch = FakeLaunch()
+        val flows = acquire("unconnected", launch.start)
+        launch.next()
+
+        SharedBrowserFrameCache.setTransparent("unconnected", true)
+        SharedBrowserFrameCache.navigateTo("unconnected", "https://example.org", "", forceTransparent = false)
+
+        assertEquals("", flows.currentUrl.value, "nothing was navigated")
+    }
+
     // ── findBrowserExecutable ──────────────────────────────────────────────────────────────────
 
     @Test
@@ -384,3 +536,8 @@ private const val SESSION_END_TIMEOUT_MS = 5_000L
 
 /** The bound on its shutdown once its sessions have ended; it returns as soon as Netty has stopped. */
 private const val SHUTDOWN_TIMEOUT_MS = 5_000L
+
+private val PAGE = SharedBrowserFrameCache.BrowserPage(
+    url = "https://example.org", renderWidth = 640, renderHeight = 360,
+    customCss = "", fps = 30, forceTransparent = false,
+)

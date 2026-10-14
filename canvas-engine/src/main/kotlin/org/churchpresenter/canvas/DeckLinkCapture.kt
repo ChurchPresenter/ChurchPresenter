@@ -99,7 +99,7 @@ interface DeckLinkInputs {
 }
 
 /** The real cards, through the native DeckLink bridge. */
-internal object DeckLinkManagerInputs : DeckLinkInputs {
+object DeckLinkManagerInputs : DeckLinkInputs {
     override fun findDevice(index: Int) = DeckLinkManager.listDevices().find { it.index == index }
     override fun inputModes(index: Int) = DeckLinkManager.listInputModes(index)
     override fun videoConnections(index: Int) = DeckLinkManager.listVideoConnections(index)

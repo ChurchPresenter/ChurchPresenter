@@ -12,7 +12,7 @@ which a presentation's video layers play through; `MediaPresenter` and `Subtitle
 subtitle parser; `MediaDuration` and `VideoFirstFrame`.
 
 An engine-layer module (root AGENT.md, "Layers"): `:media` (the tab, with `api`), `:presenter`,
-`:canvas`, `:live-output`, `:profiles`, `:app-settings` and `:telemetry` use it. It takes
+`:canvas-engine`, `:live-output`, `:profiles`, `:app-settings` and `:telemetry` use it. It takes
 `:shared-ui`, `:settings`, `:diagnostics` and vlcj.
 
 **Packages are `:media`'s own** (`org.churchpresenter.media.viewmodel`, `.composables`,

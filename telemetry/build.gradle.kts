@@ -16,7 +16,7 @@ dependencies {
     implementation(projects.calendar)
     implementation(projects.converter)
     implementation(projects.songlibrary)
-    implementation(projects.canvas)
+    implementation(projects.canvasEngine)
     implementation(projects.mediaEngine)
     implementation(projects.web)
     implementation(projects.liveOutput)

@@ -86,10 +86,17 @@ object SharedBrowserFrameCache {
         val currentUrl: StateFlow<String>
     )
 
-    @Synchronized
     fun acquire(
         sourceId: String,
         page: BrowserPage,
+    ): BrowserFlows = acquireWith(sourceId, page, ::startBrowser)
+
+    /** [acquire], with the browser launched by [start] -- the one step a test cannot take for real. */
+    @Synchronized
+    internal fun acquireWith(
+        sourceId: String,
+        page: BrowserPage,
+        start: suspend (CacheEntry, BrowserPage) -> Unit,
     ): BrowserFlows {
         val entry = entries.getOrPut(sourceId) { CacheEntry() }
         ResourceCensus.record(SharedResource.BROWSER_SOURCE, entries.size)
@@ -103,7 +110,7 @@ object SharedBrowserFrameCache {
                 // Launching the process, its temp profile and the DevTools socket fail with I/O
                 // errors; a malformed reply or a closed socket with the two runtime ones.
                 try {
-                    startBrowser(entry, page)
+                    start(entry, page)
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: IOException) {

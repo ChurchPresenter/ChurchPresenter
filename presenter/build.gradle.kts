@@ -16,7 +16,7 @@ dependencies {
     implementation(projects.settings)
     implementation(projects.theme)
     implementation(projects.diagnostics)
-    implementation(projects.canvas)
+    implementation(projects.canvasEngine)
     implementation(projects.slidesEngine)
     implementation(projects.mediaEngine)
     implementation(projects.lowerThird)

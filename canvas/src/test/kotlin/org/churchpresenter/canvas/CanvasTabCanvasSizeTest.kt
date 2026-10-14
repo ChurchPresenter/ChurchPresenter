@@ -19,6 +19,7 @@ import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import androidx.compose.ui.test.onNodeWithContentDescription
 
 /**
  * The scene row's canvas-size menu, and the off-canvas warning beside it (#608).
@@ -164,6 +165,43 @@ class CanvasTabCanvasSizeTest {
 
             assertTrue(onAllNodesWithText("Match", substring = true).fetchSemanticsNodes().isEmpty())
             assertTrue(onAllNodesWithText("16:9", substring = true).fetchSemanticsNodes().isNotEmpty())
+        }
+    }
+
+    @Test
+    fun `hovering a flagged layer's warning spells out where it went`() {
+        canvasTab(seed = { addScene("Scene"); addSource(offCanvas) }) { _, _ ->
+            val warning = "Outside the canvas — not visible"
+            assertTrue(onAllNodesWithText(warning).fetchSemanticsNodes().isEmpty(), "only the icon names it at rest")
+
+            hover(onNodeWithContentDescription(warning))
+
+            assertTrue(onAllNodesWithText(warning).fetchSemanticsNodes().isNotEmpty(), "the tooltip says it in words")
+        }
+    }
+
+    @Test
+    fun `hovering the size button names the scene's size`() {
+        canvasTab(seed = { addScene("Scene") }) { _, _ ->
+            assertTrue(onAllNodesWithText("Canvas size (1920×1080)").fetchSemanticsNodes().isEmpty())
+
+            hover(onNodeWithTag(CANVAS_SIZE_BUTTON_TAG))
+
+            assertTrue(onAllNodesWithText("Canvas size (1920×1080)").fetchSemanticsNodes().isNotEmpty())
+        }
+    }
+
+    @Test
+    fun `the size menu closes without a change when dismissed`() {
+        canvasTab(seed = { addScene("Scene") }) { vm, _ ->
+            onNodeWithTag(CANVAS_SIZE_BUTTON_TAG).performClick()
+            waitForIdle()
+            assertTrue(onAllNodesWithText("9:16").fetchSemanticsNodes().isNotEmpty(), "the menu is open")
+
+            dismissPopup()
+
+            assertTrue(onAllNodesWithText("9:16").fetchSemanticsNodes(atLeastOneRootRequired = false).isEmpty())
+            assertEquals(1920 to 1080, vm.scenes.single().let { it.canvasWidth to it.canvasHeight })
         }
     }
 }

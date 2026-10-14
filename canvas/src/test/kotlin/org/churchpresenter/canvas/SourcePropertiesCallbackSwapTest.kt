@@ -21,7 +21,7 @@ import kotlin.test.assertEquals
 class SourcePropertiesCallbackSwapTest {
 
     @AfterTest
-    fun stopTimers() = TimerStateManager.clear()
+    fun stopTimers() = clearSceneTimers()
 
     private class Swap(val swap: () -> Unit, val received: () -> List<Pair<Int, SceneSource>>)
 

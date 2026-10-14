@@ -35,7 +35,7 @@ class SourcePropertiesRecompositionTest {
 
     /** Timers are process-wide and their tickers are real coroutines — see [TimerStateManager.clear]. */
     @AfterTest
-    fun stopTimers() = TimerStateManager.clear()
+    fun stopTimers() = clearSceneTimers()
 
     // ── Every kind of source ──────────────────────────────────────────────────
 

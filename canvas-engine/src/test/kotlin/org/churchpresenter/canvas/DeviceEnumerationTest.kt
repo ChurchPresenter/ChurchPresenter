@@ -451,4 +451,28 @@ class DeviceEnumerationTest {
         assertEquals(emptyList(), openWindowsFor("plan 9", runner::run))
         assertTrue(runner.calls.isEmpty())
     }
+
+    // ── The listing the catalog publishes ─────────────────────────────────────────────────────
+
+    /**
+     * The one path through the listing that runs no tool: a platform with no enumerator. It still
+     * reports DeckLink cards, which come from the driver rather than an OS tool -- none on a machine
+     * without one -- and its facts say which enumerator answered and how many cards it counted.
+     *
+     * The listing reads `os.name` itself, so this one test swaps it, through [withOsName].
+     */
+    @Test
+    fun `a platform with no enumerator lists only DeckLink cards, and says so in its facts`() {
+        val listing = withOsName(OS_WITHOUT_ENUMERATOR) { listCameraDevicesWithDeckLinkListing() }
+
+        assertTrue(listing.devices.all { it.isDeckLink }, "no OS tool ran, so no camera can be listed")
+        assertEquals(CameraEnumerator.UNSUPPORTED_OS, listing.facts.enumerator)
+        assertEquals(listing.devices.size, listing.facts.deckLinkCount)
+        assertEquals(isFfmpegAvailable(), listing.facts.ffmpegAvailable)
+        assertTrue(listing.facts.enumeratedAtMs > 0, "the listing is stamped with when it ran")
+        assertEquals(
+            listing.devices,
+            withOsName(OS_WITHOUT_ENUMERATOR) { listCameraDevicesWithDeckLink() },
+        )
+    }
 }

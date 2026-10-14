@@ -1,5 +1,6 @@
 package org.churchpresenter.canvas
 
+import org.churchpresenter.core.models.scene.SceneSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -126,7 +127,9 @@ class CameraReportFactsTest {
 
     @Test
     fun `each report goes once, whatever the saved index now holds`() {
-        val source = Fixture.camera().copy(devicePath = "avfoundation://0", deviceName = "Studio Cam")
+        val source = SceneSource.CameraSource(
+            id = "cam-1", name = "Cam 1", devicePath = "avfoundation://0", deviceName = "Studio Cam",
+        )
         listOf("", "Capture screen 0", "Other Cam").forEach { refused ->
             val gate = ReportOnce()
             reportAvfIndexDrift(source, refused, facts = null, gate = gate)

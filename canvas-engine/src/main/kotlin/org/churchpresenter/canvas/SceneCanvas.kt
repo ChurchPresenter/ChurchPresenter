@@ -63,7 +63,7 @@ private const val SNAP_THRESHOLD_PX = 6f
 private const val MIN_SHAPE_EXTENT = 0.01f
 
 /** Test handle for the canvas itself -- the scene-shaped surface, not the area it is centred in. */
-internal const val SCENE_CANVAS_TAG = "scene_canvas"
+const val SCENE_CANVAS_TAG = "scene_canvas"
 
 /**
  * Draws [scene] centred in the area [modifier] gives it, editable when [isInteractive].

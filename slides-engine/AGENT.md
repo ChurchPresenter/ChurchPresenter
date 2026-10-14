@@ -10,7 +10,7 @@ with its transition), `PresentationPresenter` (a deck's animated `PresentationFr
 and `reportDegradedSlide`.
 
 An engine-layer module (root AGENT.md, "Layers"): `:slides` (the tabs, with `api`), `:presenter`,
-`:canvas`, `:live-output`, `:server` and `:profiles` use it. It takes `:output-api`,
+`:canvas-engine`, `:live-output`, `:server` and `:profiles` use it. It takes `:output-api`,
 `:presentation-engine`, `:shared-ui`, `:strings`, `:core-models`, `:settings` and `:diagnostics`.
 
 **Packages are `:slides`' own** (`org.churchpresenter.slides.presenter`, `.utils`): the files moved

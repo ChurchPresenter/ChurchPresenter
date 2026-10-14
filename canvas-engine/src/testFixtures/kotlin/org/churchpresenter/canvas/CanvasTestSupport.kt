@@ -15,7 +15,7 @@ import org.churchpresenter.sharedui.utils.Utils
 import kotlin.test.assertEquals
 
 /** Opens the colour field showing [fromHex], types [toHex] and confirms -- the whole round trip. */
-internal fun ComposeUiTest.recolor(fromHex: String, toHex: String) {
+fun ComposeUiTest.recolor(fromHex: String, toHex: String) {
     fun showingOldColour() = onAllNodes(hasClickAction() and hasText(fromHex, ignoreCase = true))
         .fetchSemanticsNodes(atLeastOneRootRequired = false).size
     val before = showingOldColour()
@@ -42,15 +42,15 @@ private fun SemanticsNodeInteractionCollection.firstOrFail(message: String): Sem
  * A font family whose name appears in no other offerable family's name, so typing it into the font
  * picker filters the menu down to exactly one candidate.
  */
-internal fun uniquelyNamedFont(): String {
+fun uniquelyNamedFont(): String {
     val fonts = Utils.getAvailableSystemFonts().filterNot { FontCatalog.isHidden(it) }
     return fonts.first { candidate -> fonts.count { it.contains(candidate, ignoreCase = true) } == 1 }
 }
 
 /** The font panel's search box announces itself with its own placeholder. */
-internal const val FONT_SEARCH_LABEL = "Search fonts…"
+const val FONT_SEARCH_LABEL = "Search fonts…"
 
 /** [script] as a command line for the host's own shell: `cmd /c` on Windows, `sh -c` elsewhere. */
-internal fun shellCommand(script: String): List<String> =
+fun shellCommand(script: String): List<String> =
     if (System.getProperty("os.name").lowercase().contains("win")) listOf("cmd", "/c", script)
     else listOf("sh", "-c", script)

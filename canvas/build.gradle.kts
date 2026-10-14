@@ -7,29 +7,27 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
 }
 
-// Below the shared 85% on complexity only: what is left is the native and process code the capture
-// sources run on (libvlc, the ffmpeg pipe's coroutine plumbing, headless Chrome's own processes) and
-// Compose's per-value change checks on click handlers. See AGENT.md.
+// Below the shared 85% on branches and complexity: the tab is editor UI, and what is left is Compose's
+// per-value change checks on its handlers and the editor's pop-out text window. See AGENT.md.
 extra["coverageFloors"] = mapOf(
-    "COMPLEXITY" to "0.82",
+    "BRANCH" to "0.83",
+    "COMPLEXITY" to "0.81",
 )
 
 dependencies {
+    // The renderer, the capture sources and DeckLink the editor previews with; its API names them.
+    api(projects.canvasEngine)
     implementation(projects.sharedUi)
     implementation(projects.strings)
     implementation(projects.icons)
     implementation(projects.coreModels)
     implementation(projects.settings)
     implementation(projects.theme)
-    implementation(projects.diagnostics)
     implementation(projects.ndi)
     implementation(projects.omt)
-    implementation(projects.mediaEngine)
-    implementation(projects.slidesEngine)
     implementation(projects.bible)
 
     implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.coroutines.swing)
     implementation(libs.kotlinx.serialization.json)
 
     implementation(compose.desktop.currentOs)
@@ -37,27 +35,16 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)
 
-    // Cameras through VLC and the platform APIs, and the QR code source.
-    implementation(libs.vlcj)
-    implementation(libs.jna)
-    implementation(libs.jna.platform)
-    implementation(libs.zxing.core)
-    implementation(libs.zxing.javase)
-
     testImplementation(kotlin("test"))
+    // TestSingletons and the panel helpers, shared with the engine's suites.
+    testImplementation(testFixtures(projects.canvasEngine))
     testImplementation(testFixtures(projects.sharedUi))
-    testImplementation(testFixtures(projects.diagnostics))
     testImplementation(testFixtures(projects.ndi))
     testImplementation(testFixtures(projects.omt))
     testImplementation(testFixtures(projects.bible))
     testImplementation(libs.compose.uiTestJunit4)
     testImplementation(libs.compose.uiTest)
-    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
-    // The browser source's page-discovery tests stand up a local DevTools endpoint.
-    testImplementation(libs.ktor.server.core)
-    testImplementation(libs.ktor.server.netty)
-    testImplementation(libs.ktor.server.websockets)
     testImplementation(libs.roborazzi.composeDesktop)
 }
 

@@ -39,7 +39,7 @@ feature modules whose presenters it draws, and nothing of `:composeApp`'s.
 
 - **`OffscreenOutputContext.appVersion`**: the version an OMT sender reports. The app passes
   `BuildConfig.APP_VERSION`, which this module cannot see.
-- **`AppNetworkInputs`**: installed by `main` first thing, as `:canvas`'s `NetworkInputs`.
+- **`AppNetworkInputs`**: installed by `main` first thing, as `:canvas-engine`'s `NetworkInputs`.
 
 ## Package
 

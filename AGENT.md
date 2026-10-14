@@ -146,7 +146,8 @@ module-specific notes there, not here.**
 | `songs/`               | `:songs`               | The Songs tab, `SongsViewModel` and the song library on disk                        | [AGENT.md](songs/AGENT.md)               |
 | `bible-tab/`           | `:bible-tab`           | The Bible tab, `BibleViewModel`, the cross references and the verse-sequence log     | [AGENT.md](bible-tab/AGENT.md)           |
 | `schedule/`            | `:schedule`            | The Schedule tab, `ScheduleViewModel` and the `.schedule` files                      | [AGENT.md](schedule/AGENT.md)            |
-| `canvas/`              | `:canvas`              | The Canvas tab, `SceneViewModel`, the scene renderer and its capture sources (cameras, screen, NDI/OMT in, DeckLink) | [AGENT.md](canvas/AGENT.md)              |
+| `canvas-engine/`       | `:canvas-engine`       | What a scene is drawn from: `SceneCanvas`, the renderer, `ScenePresenter`, and the capture sources (cameras, screen, browser, NDI/OMT in, DeckLink) | [AGENT.md](canvas-engine/AGENT.md)       |
+| `canvas/`              | `:canvas`              | The Canvas tab: `SceneViewModel`, the scene editor and the source property editors | [AGENT.md](canvas/AGENT.md)              |
 | `presenter/`           | `:presenter`           | What the song and Bible outputs draw: slides, looks, layouts, backgrounds, the Lottie bands and the style models | [AGENT.md](presenter/AGENT.md)           |
 | `profiles/`            | `:profiles`            | The Profiles settings pages (looks, layout, backgrounds, previews), the song background panel and the settings row kit every settings page uses | [AGENT.md](profiles/AGENT.md)            |
 | `server/`              | `:server`              | The companion server and Instance Link: the Ktor API, tunnel, SSL, ATEM bridge, calendar sync | [AGENT.md](server/AGENT.md)              |
@@ -234,8 +235,8 @@ The JaCoCo wiring, `useJUnitPlatform()` and the six-counter floor (85% on all si
 **once**, in `build-logic`'s `cp.test`. A module's build file carries only what differs, set right
 after its `plugins { }` block:
 - `extra["coverageFloors"]` — a counter→minimum map **merged over** the defaults; name only the
-  counters that need a different number. `:canvas` and `:profiles` name one each
-  (COMPLEXITY); every other module names none.
+  counters that need a different number. `:canvas` names two (BRANCH, COMPLEXITY) and `:profiles`
+  one (COMPLEXITY); every other module names none.
   Each is the measured value rounded down — a ratchet, raised as tests are added and deleted once
   the counter clears 85%. Each module's own `AGENT.md` says which, and why.
 - `extra["coverageExcludes"]` — class-directory excludes, replacing the default

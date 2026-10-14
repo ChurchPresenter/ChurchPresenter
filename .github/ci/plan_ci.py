@@ -45,6 +45,7 @@ MODULES = [
     ("output-api", "Output ports", 0.1),
     ("slides-engine", "Slides engine", 0.5),
     ("media-engine", "Media engine", 0.6),
+    ("canvas-engine", "Canvas engine", 1.1),
     ("shared-ui", "Shared UI", 1.2),
     ("slides", "Slides", 2.7),
     ("media", "Media", 1.2),

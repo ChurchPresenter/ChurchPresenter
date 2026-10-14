@@ -1,7 +1,7 @@
 package org.churchpresenter.canvas
 
 /** The once-per-JVM state a test must settle before it fakes `os.name`. */
-internal object TestSingletons {
+object TestSingletons {
     @Volatile private var skikoLatched = false
 
     /**

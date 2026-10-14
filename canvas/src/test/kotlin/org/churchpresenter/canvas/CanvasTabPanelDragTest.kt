@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.churchpresenter.settings.AppSettings
 
 @OptIn(ExperimentalTestApi::class)
 class CanvasTabPanelDragTest {
@@ -36,6 +37,11 @@ class CanvasTabPanelDragTest {
 
             assertTrue(selectToolLeft() - before > 40f, "the canvas moved right with the separator")
             assertEquals(1, reports.settingsChanges, "the new width is saved once, when the drag ends")
+            val default = AppSettings().maximizedLayout.canvasLeftPanelWidthDp
+            assertTrue(
+                reports.saved.maximizedLayout.canvasLeftPanelWidthDp > default,
+                "the wider list is what is saved, into the layout the tab is showing",
+            )
         }
 
     @Test
@@ -57,5 +63,10 @@ class CanvasTabPanelDragTest {
             dragAcross(fromX = tabWidth - 204f, byX = -60f)
 
             assertEquals(1, reports.settingsChanges)
+            assertTrue(
+                reports.saved.maximizedLayout.canvasRightPanelWidthDp >
+                    AppSettings().maximizedLayout.canvasRightPanelWidthDp,
+                "dragging the separator left widens the properties panel, and that is what is saved",
+            )
         }
 }

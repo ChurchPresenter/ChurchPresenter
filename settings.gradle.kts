@@ -159,9 +159,13 @@ include(":server")
 // opens and saves. Depended on by :composeApp, which hands it the Planning Center import.
 include(":schedule")
 
-// The Canvas tab and SceneViewModel, the scene renderer, and the capture sources it draws: cameras,
-// screen and window capture, NDI and OMT input, DeckLink. Depended on by :composeApp.
+// The Canvas tab: SceneViewModel, the scene editor and the source property editors. Depended on by
+// :composeApp.
 include(":canvas")
+// What a scene is drawn with, without the Canvas tab: the scene renderer and its capture sources --
+// cameras, screen and window capture, the browser source, NDI and OMT in, DeckLink. The outputs and
+// the presenter draw with it.
+include(":canvas-engine")
 
 // What the song and Bible outputs draw: the slides, their looks and layouts, the backgrounds and the
 // Lottie bands. Depended on by :composeApp, which keeps the windows and the off-screen outputs.

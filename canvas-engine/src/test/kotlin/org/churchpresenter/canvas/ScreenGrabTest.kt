@@ -4,6 +4,8 @@ import java.awt.Rectangle
 import java.awt.image.BufferedImage
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
@@ -128,5 +130,24 @@ class ScreenGrabTest {
     @Test
     fun `the real screen is unavailable in a headless test run`() {
         assertNull(grabScreen(spec()))
+    }
+
+    // ── The real screen, in the headless JVM every test runs in ─────────────────────────────
+
+    /**
+     * Building a `Robot` throws without a display, so the real grabber resolves to none at all and
+     * says so, rather than failing to load -- and a grab asked of it anyway fails loudly instead of
+     * drawing black.
+     */
+    @Test
+    fun `without a display the real screen is unavailable and grabs nothing`() {
+        assertFalse(RobotScreenGrabber.available)
+        assertNull(grabScreen(spec()), "the default grabber is the real screen")
+        assertFailsWith<IllegalStateException> { RobotScreenGrabber.capture(Rectangle(0, 0, 4, 4)) }
+    }
+
+    @Test
+    fun `the real screen finds no window on a platform it has no lookup for`() {
+        assertNull(withOsName(OS_WITHOUT_ENUMERATOR) { RobotScreenGrabber.windowBounds("Lyrics") })
     }
 }

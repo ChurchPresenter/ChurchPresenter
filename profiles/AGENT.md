@@ -26,8 +26,8 @@ consumers are `:composeApp`, `:app-settings`, `:dialogs`, `:server-ui` and `:tel
 services — Projection, Server, System, Companion — and the Options dialog that hosts every page.
 
 It takes `:shared-ui`, `:strings`, `:icons`, `:core-models`, `:settings`, `:theme`, `:diagnostics`,
-`:presenter`, `:canvas`, `:media`, `:slides`, `:bible`, `:bible-tab`, `:lottieGenerator`, `:atem`,
-`:stt`, `:dictionary` and `:qa`, and nothing of `:composeApp`'s.
+`:presenter`, `:canvas-engine`, `:media`, `:media-engine`, `:slides-engine`, `:bible`, `:bible-tab`,
+`:lottieGenerator`, `:atem`, `:stt`, `:dictionary` and `:qa`, and nothing of `:composeApp`'s.
 
 ## Seams to the app
 

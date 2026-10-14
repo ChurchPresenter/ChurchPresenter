@@ -160,7 +160,6 @@
   preview-output picker; `live-output/…/PresenterAnnouncementsOutput.kt` — the tab's `AnnouncementsOutput`
 - `data/settings/AnnouncementsSettings.kt`
 - `presenter/…/announcements/presenter/AnnouncementsPresenter.kt` — the announcement on the output
-- `utils/TimerStateManager.kt`
 
 ## Web & Canvas
 - **Live websites on screen** — present any web page with bookmarks, navigation and zoom, and even type into live pages.
@@ -176,14 +175,14 @@
 - `canvas/…/CanvasTab.kt` (the `:canvas` module) — scene compositor UI; its pieces in `CanvasTabScope.kt`, `CanvasLeftPanel.kt`, `CanvasAddSourceMenu.kt`, `CanvasCenterPanel.kt`
 - `canvas/…/SceneViewModel.kt`, its source edits in `SceneViewModelSources.kt`
 - `core-models/src/main/kotlin/.../models/scene/SceneModels.kt` (the `:core-models` module) — including a scene's second layout and which one an output draws
-- `canvas/…/SceneCanvas.kt`, `SceneSourceRenderer.kt` (with `SceneTextSources.kt`, `SceneClockSource.kt`, `SceneDeviceSources.kt`), `SourcePropertiesPanel.kt`
+- `canvas-engine/…/SceneCanvas.kt`, `SceneSourceRenderer.kt` (with `SceneTextSources.kt`, `SceneClockSource.kt`, `SceneDeviceSources.kt`) (the `:canvas-engine` module); the editors are `canvas/…/SourcePropertiesPanel.kt`
 - `canvas/…/CanvasSizeMenu.kt`, `CanvasPlacement.kt` — a scene's size and layouts, and layers left off the canvas
-- `canvas/…/SharedBrowserFrameCache.kt` (with `BrowserProcesses.kt`, `CdpPages.kt`), `SharedCameraFrameCache.kt`
-- `canvas/…/NdiFrameCache.kt`, `NdiSourceDirectory.kt` — receiving NDI sources onto the canvas, and finding them
-- `canvas/…/OmtFrameCache.kt`, `SceneOmtEditor.kt`, `ReceivedFrameCache.kt` — receiving OMT sources onto the canvas, choosing one, and the capture loop both protocols share; `NetworkInputs.kt` is how the canvas reaches the app's NDI and OMT libraries
+- `canvas-engine/…/SharedBrowserFrameCache.kt` (with `BrowserProcesses.kt`, `CdpPages.kt`), `SharedCameraFrameCache.kt`
+- `canvas-engine/…/NdiFrameCache.kt`, `canvas/…/NdiSourceDirectory.kt` — receiving NDI sources onto the canvas, and finding them
+- `canvas-engine/…/OmtFrameCache.kt`, `canvas/…/SceneOmtEditor.kt`, `canvas-engine/…/ReceivedFrameCache.kt` — receiving OMT sources onto the canvas, choosing one, and the capture loop both protocols share; `canvas-engine/…/NetworkInputs.kt` is how the canvas reaches the app's NDI and OMT libraries
 - `shared-ui/…/utils/FfmpegBinary.kt`, `live-output/…/settings/ProjectionFfmpegCard.kt` — which ffmpeg cameras are opened with: the bundled one, an override, or whatever is installed
 - `gradle/ffmpeg-builds.properties`, `THIRD_PARTY_FFMPEG.md` — where the bundled ffmpeg comes from, and its licence
-- `canvas/…/ScenePresenter.kt`, `web/…/presenter/WebsitePresenter.kt` (the `:web` module: JCEF, `CefManager`, the embedded browser)
+- `canvas-engine/…/ScenePresenter.kt`, `web/…/presenter/WebsitePresenter.kt` (the `:web` module: JCEF, `CefManager`, the embedded browser)
 - `data/settings/WebBookmark.kt`
 
 ## Live Captions & Translation
@@ -283,7 +282,7 @@
 - `live-output/…/OmtVideoRenderer.kt`, `live-output/…/OmtOutputRegistry.kt`, `live-output/…/OmtManager.kt`, `live-output/…/settings/ProjectionOmtCard.kt` — the app-side OMT wiring and its settings card
 - `gradle/omt-builds.properties`, `.github/workflows/omt-linux.yml`, `THIRD_PARTY_OMT.md` — where the bundled OMT libraries come from, and their licence
 - `media/…/data/StockMediaClient.kt`, `media/…/dialogs/StockMediaBrowserDialog.kt`, `media/…/viewmodel/StockMediaViewModel.kt`, `data/settings/StockPhotoSettings.kt`
-- `composables/DeckLinkManager.kt`, `composables/DeckLinkInputGate.kt`, `live-output/…/preview/LivePreviewPanel.kt`, `presenter/…/LoopingVideoBackground.kt`
+- `canvas-engine/…/DeckLinkManager.kt`, `canvas-engine/…/DeckLinkInputGate.kt`, `live-output/…/preview/LivePreviewPanel.kt`, `presenter/…/LoopingVideoBackground.kt`
 - `live-output/…/PresenterManager.kt`, `profiles/…/BackgroundSettingsViewModel.kt`
 - `data/settings/BackgroundConfig.kt`, `data/settings/BackgroundSettings.kt`, `data/settings/ProjectionSettings.kt`, `data/settings/ScreenAssignment.kt`
 - `profiles/…/BackgroundSettingsTab.kt`, `live-output/…/settings/ProjectionSettingsTab.kt`

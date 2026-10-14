@@ -281,4 +281,14 @@ class SourcePropertiesShapeTest {
             assertEquals(1f, source.strokeOpacity)
         }
     }
+
+    @Test
+    fun `recolouring the gradient's second colour stores only that colour`() {
+        val gradient = Fixture.shape().copy(isGradient = true, strokeColor = "#FF0000", gradientColor2 = "#00FF00")
+        sourcePanel(gradient) { get ->
+            recolor(fromHex = "#00FF00", toHex = "#0055AA")
+
+            assertEquals(gradient.copy(gradientColor2 = "#0055AA"), get())
+        }
+    }
 }

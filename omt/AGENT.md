@@ -15,7 +15,7 @@ rule, which apply here unchanged. This file records where OMT differs.
 
 The app-side wiring is outside, as NDI's is: `OmtVideoRenderer`, `OmtOutputRegistry` and
 `OmtManager` for outputs in `:live-output`, `ProjectionOmtCard` for their settings in `:composeApp`,
-and `OmtFrameCache` for the Canvas source in `:canvas`. `OmtFrameCache` and `NdiFrameCache` share
+and `OmtFrameCache` for the Canvas source in `:canvas-engine`. `OmtFrameCache` and `NdiFrameCache` share
 their capture loop through `ReceivedFrameCache`.
 
 ## **The app ships libomt, unlike libndi**

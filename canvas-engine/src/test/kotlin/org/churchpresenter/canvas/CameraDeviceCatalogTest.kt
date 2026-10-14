@@ -2,7 +2,9 @@ package org.churchpresenter.canvas
 
 import org.churchpresenter.core.models.camera.CameraDeviceRef
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 /**
@@ -117,5 +119,14 @@ class CameraDeviceCatalogTest {
 
         assertTrue(display !in listOf(faceTime, display).selectableCameras())
         assertTrue(display in listOf(faceTime, display).selectableCameras(keeping = "Capture screen 0"))
+    }
+
+    /** What the panel asks this machine when a caller pins only the device list. */
+    @Test
+    fun `a camera host given only devices reads cards and formats from this machine`() {
+        val host = CameraHost(devices = listOf(faceTime), ffmpegAvailable = false)
+
+        assertSame(DeckLinkManagerInputs, host.deckLink)
+        assertEquals(emptyList(), withOsName(OS_WITHOUT_ENUMERATOR) { host.formats(faceTime.path, faceTime.name) })
     }
 }

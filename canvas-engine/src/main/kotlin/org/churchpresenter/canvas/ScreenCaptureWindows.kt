@@ -10,7 +10,7 @@ import org.churchpresenter.sharedui.utils.readCommandOutput
 private const val HEX_RADIX = 16
 private const val WINDOW_LINE_FIELDS = 4
 
-internal fun listOpenWindows(): List<WindowInfo> =
+fun listOpenWindows(): List<WindowInfo> =
     openWindowsFor(System.getProperty("os.name", "").lowercase(), ::readCommandOutput)
 
 internal fun openWindowsFor(osName: String, run: CommandRunner): List<WindowInfo> = when {
