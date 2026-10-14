@@ -68,6 +68,15 @@ class ScheduleViewModelTest {
         assertNull(vm.selectedItemId)
     }
 
+    @Test
+    fun `dispose takes back the shutdown hook`() {
+        // The hook reaches the view model, and through its change callback the whole app; one
+        // left registered keeps every disposed schedule alive until the JVM exits.
+        val vm = newViewModel()
+        vm.dispose()
+        assertFalse(vm.shutdownHook.remove())
+    }
+
     // ── Adding ──────────────────────────────────────────────────────────────────
 
     @Test
