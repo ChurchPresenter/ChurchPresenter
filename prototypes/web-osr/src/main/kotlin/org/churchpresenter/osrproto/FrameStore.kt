@@ -49,8 +49,10 @@ class Frame(
  * Chromium waits for each paint callback to return before it goes on, so the callback does only the
  * copy, split across [COPY_THREADS] threads when the whole frame changed.
  *
- * A frame wider than [DOWNSCALE_ABOVE] also gets a [PREVIEW_WIDTH]-wide copy, made on a worker
- * thread, so a small preview window does not upload a 4K texture every frame to draw it at 640 px.
+ * A frame wider than [DOWNSCALE_ABOVE] also gets a half-size copy, made on a worker thread, so a
+ * small preview window does not upload a 4K texture every frame to draw it at 640 px. Exactly half,
+ * because at 2:1 a bilinear sample lands between four pixels and averages them all; at 3:1 it
+ * skipped most of them and small text broke up.
  * The worker takes the newest frame whenever it is free, and every frame carries the latest copy it
  * made, a frame or so behind. At 1080p the downscale costs more CPU than the upload it saves, so a
  * 1080p frame goes to the preview as it is. A frame the worker is reading is not closed until it is
@@ -166,13 +168,13 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
     }
 
     /**
-     * [image] drawn into a [PREVIEW_WIDTH]-wide raster that keeps the last copy, redrawing only the part
+     * [image] drawn at half size into a raster that keeps the last copy, redrawing only the part
      * that covers [dirty] (in view pixels; null or a new raster redraws it all). Only the preview
      * worker calls this.
      */
     private fun downscale(image: Image, dirty: Rectangle?): Image {
-        val w = PREVIEW_WIDTH
-        val h = image.height * w / image.width
+        val w = image.width / 2
+        val h = image.height / 2
         val reused = previewSurface?.takeIf { it.width == w && it.height == h }
         val surface = reused
             ?: Surface.makeRaster(ImageInfo(w, h, ColorType.BGRA_8888, ColorAlphaType.PREMUL))
@@ -381,9 +383,6 @@ class FrameStore(private val stats: Stats, private val dipWidth: Int) : Headless
 
         /** Frames wider than this get a scaled-down copy for the preview. */
         const val DOWNSCALE_ABOVE = 1920
-
-        /** The width of that copy. */
-        const val PREVIEW_WIDTH = 1280
 
         /** Threads a whole-frame copy is split across, the paint thread included. */
         const val COPY_THREADS = 4

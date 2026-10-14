@@ -55,6 +55,9 @@ internal class WheelScaler(os: String = System.getProperty("os.name")) {
     }
 }
 
+/** Drawn smaller than this share of its size, a picture is sampled from mipmaps. */
+private const val MIPMAP_BELOW = 0.67f
+
 /** Where the page's picture sits inside a box of [box]: centred, letterboxed to the frame's aspect. */
 internal fun fitRect(box: Size, frameW: Int, frameH: Int): Rect {
     val scale = minOf(box.width / frameW, box.height / frameH)
@@ -109,7 +112,11 @@ fun FrameView(store: FrameStore, stats: Stats, name: String, modifier: Modifier,
         val picture = current.picture
         val start = System.nanoTime()
         val dst = fitRect(size, picture.width, picture.height)
-        val sampling = FilterMipmap(FilterMode.LINEAR, MipmapMode.NONE)
+        // Shrinking a picture by more than about 1.5× with plain bilinear skips source pixels and
+        // breaks up small text, so a window that does (a small preview) samples from mipmaps, which
+        // the GPU builds as it uploads the picture. Near full size (the Output) it would be wasted work.
+        val shrinking = dst.width < picture.width * MIPMAP_BELOW
+        val sampling = FilterMipmap(FilterMode.LINEAR, if (shrinking) MipmapMode.LINEAR else MipmapMode.NONE)
         drawIntoCanvas { c ->
             val canvas = c.skiaCanvas
             canvas.drawImageRect(
