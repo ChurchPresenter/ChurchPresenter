@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runSkikoComposeUiTest
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.unit.Density
 import org.churchpresenter.core.models.text.TextBackdrop
 import org.churchpresenter.core.models.text.TextOutline
@@ -70,5 +71,24 @@ class TextLookRowsDirectTest {
             waitForIdle()
             onNodeWithText("Auto-fit").assertDoesNotExist()
             onNodeWithText("Fit across").assertDoesNotExist()
+        }
+
+    @Test
+    fun `the shadow's size and intensity are written back to the look`() =
+        runSkikoComposeUiTest(size = Size(900f, 3000f), density = Density(1f)) {
+            var current by mutableStateOf(look)
+            setContent {
+                MaterialTheme {
+                    Column(Modifier.verticalScroll(rememberScrollState())) {
+                        TextLookRows(look = current, onChange = { current = it }, fonts = listOf("Arial"))
+                    }
+                }
+            }
+            waitForIdle()
+            assertEquals(1, onAllNodesWithText("SIZE (%)").fetchSemanticsNodes().size)
+            typeInRow("SIZE (%)", 150)
+            assertEquals(150, current.shadowSize)
+            typeInRow("INTENSITY (%)", 40)
+            assertEquals(40, current.shadowOpacity)
         }
 }

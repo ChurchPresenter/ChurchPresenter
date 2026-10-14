@@ -113,24 +113,6 @@ class SongLanguageStyleTest {
     }
 
     @Test
-    fun `reset puts the second language back to being drawn like the first`() {
-        val edited = styledPrimary.editSecond(SongStyleElement.LYRICS, SongStyleTarget.FULL_SCREEN) {
-            it.copy(color = "#FFAA00")
-        }
-        val reset = edited.withElementReset(
-            SongStyleElement.LYRICS,
-            SongStyleTarget.FULL_SCREEN,
-            SongStyleLanguage.SECONDARY,
-        )
-
-        assertFalse(reset.translationSettings(0).overrideStyle)
-        assertEquals(
-            styledPrimary.elementStyle(SongStyleElement.LYRICS, SongStyleTarget.FULL_SCREEN),
-            reset.second(SongStyleElement.LYRICS, SongStyleTarget.FULL_SCREEN),
-        )
-    }
-
-    @Test
     fun `an element a language does not carry is written to its only profile`() {
         val edited = styledPrimary.withElementStyle(
             SongStyleElement.NUMBER,

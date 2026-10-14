@@ -6,7 +6,6 @@ import org.churchpresenter.presenter.elementStyle
 import org.churchpresenter.presenter.SongElementStyle
 import org.churchpresenter.presenter.SongStyleElement
 import org.churchpresenter.presenter.SongStyleTarget
-import org.churchpresenter.presenter.defaultSongElementStyle
 import org.churchpresenter.presenter.translationElement
 import androidx.compose.runtime.Composable
 import org.churchpresenter.core.models.songs.MAX_SONG_TRANSLATIONS
@@ -75,23 +74,6 @@ internal fun SongSettings.withElementStyle(
 ): SongSettings {
     if (!language.isTranslation || element.translationElement == null) return withElementStyle(element, target, style)
     return withOwnLook(language).withElementStyle(element, target, language.translation, style)
-}
-
-/**
- * What Reset means for that triple.
- *
- * For a second language it is not "back to the factory look" but "back to being drawn like the
- * first" -- the state it is in until something is typed, and the only way back to it.
- */
-internal fun SongSettings.withElementReset(
-    element: SongStyleElement,
-    target: SongStyleTarget,
-    language: SongStyleLanguage,
-): SongSettings {
-    if (!language.isTranslation || element.translationElement == null) {
-        return withElementStyle(element, target, defaultSongElementStyle(element, target))
-    }
-    return withTranslationSettings(language.translation - 1) { it.copy(overrideStyle = false) }
 }
 
 /** The elements that have a second language's profile -- the two a song carries twice. */
