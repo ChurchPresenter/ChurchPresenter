@@ -4,6 +4,8 @@ import java.awt.Rectangle
 import java.awt.image.BufferedImage
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
@@ -128,5 +130,11 @@ class ScreenGrabTest {
     @Test
     fun `the real screen is unavailable in a headless test run`() {
         assertNull(grabScreen(spec()))
+    }
+
+    @Test
+    fun `the real grabber has no robot to capture with in a headless JVM`() {
+        assertFalse(RobotScreenGrabber.available)
+        assertFailsWith<IllegalStateException> { RobotScreenGrabber.capture(Rectangle(0, 0, 1, 1)) }
     }
 }

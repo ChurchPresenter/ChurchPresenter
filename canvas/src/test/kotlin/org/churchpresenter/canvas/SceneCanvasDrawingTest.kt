@@ -352,4 +352,45 @@ class SceneCanvasDrawingTest {
             assertEquals(tool, drawn.single().shapeType, "and is reported once, on release")
         }
     }
+
+    @Test
+    fun `a tool with no preview of its own still draws its shape on release`() {
+        val drawn = draw("triangle") {
+            onNodeWithTag(canvasTag).performMouseInput {
+                moveTo(Offset(40f, 30f))
+                press()
+                moveTo(Offset(48f, 38f))
+                moveTo(Offset(160f, 120f))
+            }
+            waitForIdle()
+            onNodeWithTag(canvasTag).performMouseInput { release() }
+            waitForIdle()
+        }
+
+        assertEquals("triangle", drawn.single().shapeType)
+        assertNormalised(drawn.single())
+    }
+
+    @Test
+    fun `a drawing finished with nobody listening is dropped without failing`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                Box(Modifier.width(400.dp)) {
+                    SceneCanvas(
+                        modifier = Modifier.testTag(canvasTag),
+                        scene = emptyScene(),
+                        selectedSourceId = null,
+                        onSourceSelected = { },
+                        onTransformChanged = { _, _ -> },
+                        activeTool = "rectangle",
+                        onShapeDrawn = null,
+                    )
+                }
+            }
+        }
+
+        dragOnCanvas(Offset(40f, 30f), Offset(160f, 120f))
+
+        onNodeWithTag(canvasTag).assertExists()
+    }
 }

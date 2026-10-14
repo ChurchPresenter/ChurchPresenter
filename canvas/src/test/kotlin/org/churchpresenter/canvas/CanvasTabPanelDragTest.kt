@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.settings.AppSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -36,6 +37,10 @@ class CanvasTabPanelDragTest {
 
             assertTrue(selectToolLeft() - before > 40f, "the canvas moved right with the separator")
             assertEquals(1, reports.settingsChanges, "the new width is saved once, when the drag ends")
+            assertTrue(
+                reports.settings.maximizedLayout.canvasLeftPanelWidthDp >
+                    AppSettings().maximizedLayout.canvasLeftPanelWidthDp,
+            )
         }
 
     @Test
@@ -57,5 +62,9 @@ class CanvasTabPanelDragTest {
             dragAcross(fromX = tabWidth - 204f, byX = -60f)
 
             assertEquals(1, reports.settingsChanges)
+            assertTrue(
+                reports.settings.maximizedLayout.canvasRightPanelWidthDp >
+                    AppSettings().maximizedLayout.canvasRightPanelWidthDp,
+            )
         }
 }
