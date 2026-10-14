@@ -56,11 +56,10 @@ which `:composeApp`'s dialog and settings suites use too (`testFixtures(projects
 
 ## Coverage floor
 
-Complexity **84%**; the other five counters keep the shared 85%. What is left is mostly not untested
-behavior: the stock photo, local library and Lottie generator dialogs open real windows a headless
-test cannot, the camera and DeckLink format pickers and the ATEM upload need real hardware, and
-Compose's per-value change checks on the rows' handlers. Raise the floor as any of that becomes
-reachable; never lower it without asking.
+The shared 85% on all six counters; no `coverageFloors` entry. Complexity clears it narrowly: what is
+left uncovered is the stock photo, local library and Lottie generator dialogs (real windows), the
+camera and DeckLink format pickers (real hardware), and Compose's per-value change checks. New code
+here comes with its tests.
 
 ## Commands
 

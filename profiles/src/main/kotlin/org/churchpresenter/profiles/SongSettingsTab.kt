@@ -25,8 +25,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import org.churchpresenter.theme.AppShape
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -431,21 +429,5 @@ private fun SongNumberOffsetControls(
                 modifier = Modifier.testTag("song_number_offset_y"),
             )
         }
-    }
-}
-
-/**
- * Rounds the outer corners of a segmented row so its buttons read as one control.
- *
- * Kept here rather than moved with the tab's rewrite: the stage monitor's layout picker and the
- * song columns this tab replaced both still call it, and its test resolves it through this file.
- */
-internal fun segmentedItemShape(index: Int, count: Int): Shape {
-    val r = 4.dp
-    return when {
-        count == 1 -> AppShape(r)
-        index == 0 -> AppShape(topStart = r, bottomStart = r, topEnd = 0.dp, bottomEnd = 0.dp)
-        index == count - 1 -> AppShape(topStart = 0.dp, bottomStart = 0.dp, topEnd = r, bottomEnd = r)
-        else -> AppShape(0.dp)
     }
 }
