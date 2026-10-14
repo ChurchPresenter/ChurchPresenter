@@ -1,7 +1,7 @@
 """Tests for changed_tests.py: python3 -m unittest discover -s .github/ci"""
 import unittest
 
-from changed_tests import task_for, test_classes
+from changed_tests import changed_paths, task_for, test_classes
 
 
 def reader(files):
@@ -41,10 +41,38 @@ class TestClassesTest(unittest.TestCase):
         groups = test_classes([a, b], reader({a: "class CueTest", b: "class CueTest"}))
         self.assertEqual({":live-show:test": ["CueTest"]}, groups)
 
+    def test_a_file_named_for_what_it_tests_runs_the_class_it_declares(self):
+        path = "updater/src/test/kotlin/org/churchpresenter/updater/UpdateCheckerTest.kt"
+        text = "package org.churchpresenter.updater\n\nclass IsNewerVersionTest {\n    class InnerTest\n}\n"
+        groups = test_classes([path], reader({path: text}))
+        self.assertEqual({":updater:test": ["org.churchpresenter.updater.IsNewerVersionTest"]}, groups)
+
+    def test_every_test_class_a_file_declares_is_run(self):
+        path = "qa/src/test/kotlin/org/churchpresenter/qa/QATest.kt"
+        text = "package org.churchpresenter.qa\nclass QATest\ninternal class QAEdgeTest\nclass Fixture\n"
+        groups = test_classes([path], reader({path: text}))
+        self.assertEqual(["org.churchpresenter.qa.QAEdgeTest", "org.churchpresenter.qa.QATest"], groups[":qa:test"])
+
     def test_a_file_that_cannot_be_read_is_skipped(self):
         def unreadable(_):
             raise OSError("gone")
         self.assertEqual({}, test_classes(["qa/src/test/kotlin/a/QATest.kt"], unreadable))
+
+    def test_added_modified_and_edited_renames_count_but_an_unchanged_move_does_not(self):
+        name_status = "\n".join([
+            "A\tqa/src/test/kotlin/a/NewTest.kt",
+            "M\tqa/src/test/kotlin/a/EditedTest.kt",
+            "R100\tcanvas/src/test/kotlin/a/MovedTest.kt\tcanvas-engine/src/test/kotlin/a/MovedTest.kt",
+            "R087\tcanvas/src/test/kotlin/a/BothTest.kt\tcanvas-engine/src/test/kotlin/a/BothTest.kt",
+        ])
+        self.assertEqual(
+            [
+                "qa/src/test/kotlin/a/NewTest.kt",
+                "qa/src/test/kotlin/a/EditedTest.kt",
+                "canvas-engine/src/test/kotlin/a/BothTest.kt",
+            ],
+            changed_paths(name_status),
+        )
 
     def test_only_the_source_set_that_runs_tests_maps_to_a_task(self):
         self.assertIsNone(task_for("composeApp", "test"))
