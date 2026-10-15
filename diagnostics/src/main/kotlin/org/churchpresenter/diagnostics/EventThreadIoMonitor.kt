@@ -29,9 +29,9 @@ data class BlockedCall(val kind: String, val target: String, val durationMs: Dou
  *
  * Reading the app's own code -- a jar, a class file, anything under the class path or the JDK -- is
  * class loading, not the app's work, and is never reported; nor is the kernel's random device, which
- * a UUID reads and which never waits on a disk. Each place -- its kind, target and first app frame --
- * is reported once to [onBlocked], on JFR's own thread. Debug builds log them, and the soak test
- * fails on them.
+ * a UUID reads and which never waits on a disk, nor the console a log line is written to. Each
+ * place -- its kind, target and first app frame -- is reported once to [onBlocked], on JFR's own
+ * thread. Debug builds log them, and the soak test fails on them.
  *
  * Its tests drive [accept] with an event's fields: a real JFR stream delivers its events about a
  * second after they happen, past what a unit test may cost, so [start] and the reading of a
@@ -70,6 +70,8 @@ class EventThreadIoMonitor(
      */
     internal fun accept(thread: String?, eventType: String, target: String, durationNanos: Long, frames: List<String>) {
         if (thread?.startsWith(EVENT_THREAD_PREFIX) != true || isHarmless(target)) return
+        // A file event with no path is the console -- a log line going out -- not a file.
+        if (target.isEmpty() && eventType in FILE_EVENTS) return
         val call = BlockedCall(KINDS.getValue(eventType), target, durationNanos / NANOS_PER_MS, frames)
         val first = synchronized(seen) { seen.add(call.describe().substringBefore(" for ") + call.place()) }
         if (first) onBlocked(call)
@@ -104,6 +106,7 @@ class EventThreadIoMonitor(
             "jdk.ThreadSleep" to "sleep",
         )
         private val EVENTS = KINDS.keys
+        private val FILE_EVENTS = setOf("jdk.FileRead", "jdk.FileWrite")
         private const val EVENT_THREAD_PREFIX = "AWT-EventQueue"
         private val RANDOM_DEVICES = setOf("/dev/urandom", "/dev/random")
         private const val NANOS_PER_MS = 1_000_000.0

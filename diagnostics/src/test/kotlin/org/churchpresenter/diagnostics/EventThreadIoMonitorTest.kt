@@ -56,6 +56,14 @@ class EventThreadIoMonitorTest {
     }
 
     @Test
+    fun `a log line written to the console is not a file`() {
+        monitor.accept("AWT-EventQueue-0", "jdk.FileWrite", "", 0, listOf(appFrame))
+        monitor.accept("AWT-EventQueue-0", "jdk.FileRead", "", 0, listOf(appFrame))
+
+        assertTrue(reported.isEmpty(), reported.toString())
+    }
+
+    @Test
     fun `a sleep, a socket and a write are each reported by their kind`() {
         monitor.accept("AWT-EventQueue-0", "jdk.ThreadSleep", "", 100_000_000, listOf(appFrame))
         monitor.accept("AWT-EventQueue-0", "jdk.SocketRead", "192.168.1.20", 0, listOf(appFrame))
