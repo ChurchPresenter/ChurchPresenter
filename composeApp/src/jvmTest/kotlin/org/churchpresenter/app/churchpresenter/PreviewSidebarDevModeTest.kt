@@ -18,6 +18,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.onNodeWithContentDescription
 
 /** The dev-mode box, the preview-mode toggle and the sidebar's macro button, drawn closed. */
 class PreviewSidebarDevModeTest {
@@ -74,5 +81,32 @@ class PreviewSidebarDevModeTest {
         assertTrue(control.rows.isEmpty())
         assertNull(control.controlHub)
         assertEquals(false, control.devMode)
+    }
+
+    @Test
+    fun `the tools show their names only where the box has room`() = runComposeUiTest {
+        var width by mutableStateOf(700.dp)
+        setContent {
+            MaterialTheme {
+                Box(Modifier.width(width)) {
+                    DevModeBox { LiveToolStrip { PreviewModeToggle(false) {} } }
+                }
+            }
+        }
+        onNodeWithText("Preview mode").assertExists()
+        width = 300.dp
+        waitForIdle()
+        onNodeWithText("Preview mode").assertDoesNotExist()
+        onNodeWithContentDescription("Preview mode").assertExists()
+    }
+
+    @Test
+    fun `the preview toggle says whether it is on`() = runComposeUiTest {
+        var on by mutableStateOf(false)
+        setContent { MaterialTheme { LiveToolStrip { LiveToolDivider(); PreviewModeToggle(on) {} } } }
+        onNodeWithTag(PREVIEW_MODE_TOGGLE_TAG).assertIsNotSelected()
+        on = true
+        waitForIdle()
+        onNodeWithTag(PREVIEW_MODE_TOGGLE_TAG).assertIsSelected()
     }
 }

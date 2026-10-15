@@ -2757,4 +2757,13 @@
     <string name="helper_command_look_12_does">Arată setările textului versetelor</string>
     <string name="helper_command_look_13">cum stilizez referința biblică</string>
     <string name="helper_command_look_13_does">Arată setările textului pentru referință</string>
+    <string name="message_purpose">Afișează un rând de text peste tot ce este live.</string>
+    <string name="message_preview_empty">Mesajul tău apare aici</string>
+    <string name="message_stays_up">Rămâne afișat</string>
+    <string name="message_seconds_short">%1$d s</string>
+    <string name="message_one_minute">1 min</string>
+    <string name="message_duration_custom">Personalizat</string>
+    <string name="message_insert_blank">Inserează câmp</string>
+    <string name="props_purpose">Elemente care rămân pe ecran peste orice.</string>
+    <string name="macros_purpose">Rulează mai multe acțiuni cu un clic sau o tastă.</string>
 </resources>

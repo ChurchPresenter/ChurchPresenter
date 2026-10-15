@@ -2772,4 +2772,13 @@
     <string name="helper_command_look_12_does">Oyat matni sozlamalarini koʻrsatadi</string>
     <string name="helper_command_look_13">muqaddas kitob havolasini qanday bezayman</string>
     <string name="helper_command_look_13_does">Havola matni sozlamalarini koʻrsatadi</string>
+    <string name="message_purpose">Efirdagi hamma narsa ustida bir qator matn koʻrsatadi.</string>
+    <string name="message_preview_empty">Xabaringiz shu yerda koʻrinadi</string>
+    <string name="message_stays_up">Ekranda turish vaqti</string>
+    <string name="message_seconds_short">%1$d s</string>
+    <string name="message_one_minute">1 daq</string>
+    <string name="message_duration_custom">Maxsus</string>
+    <string name="message_insert_blank">Boʻsh joy qoʻyish</string>
+    <string name="props_purpose">Hamma narsa ustida ekranda qoladigan elementlar.</string>
+    <string name="macros_purpose">Bir nechta amalni bitta bosish yoki tugma bilan bajaring.</string>
 </resources>

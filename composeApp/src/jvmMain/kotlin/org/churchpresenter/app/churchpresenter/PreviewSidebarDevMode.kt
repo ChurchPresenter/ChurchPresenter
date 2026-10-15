@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.FlowRowScope
 import org.churchpresenter.strings.generated.resources.preview_mode
 import org.churchpresenter.strings.generated.resources.dev_mode_only
 import androidx.compose.material.icons.outlined.Preview
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.border
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import org.churchpresenter.dialogs.ControlPanelData
@@ -21,6 +19,17 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.collectAsState
 import org.churchpresenter.strings.generated.resources.tooltip_macros
 import androidx.compose.material.icons.outlined.PlayCircle
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
+import org.churchpresenter.dialogs.LiveTool
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -37,7 +46,6 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.strings.generated.resources.Res
-import org.churchpresenter.sharedui.composables.TooltipIconButton
 import org.churchpresenter.dialogs.MacrosDialog
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.settings.AppSettings
@@ -52,34 +60,58 @@ import org.jetbrains.compose.resources.stringResource
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun DevModeBox(content: @Composable FlowRowScope.() -> Unit) {
-    Column(
+    val dash = MaterialTheme.colorScheme.outlineVariant
+    BoxWithConstraints(
         modifier = Modifier
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-            .padding(horizontal = 6.dp, vertical = 4.dp)
+            .drawBehind {
+                drawRoundRect(
+                    color = dash,
+                    cornerRadius = CornerRadius(DEV_BOX_RADIUS.toPx()),
+                    style = Stroke(
+                        width = 1.dp.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(DASH_ON, DASH_OFF)),
+                    ),
+                )
+            }
+            .padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 12.dp)
             .testTag(DEV_MODE_BOX_TAG),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        Text(
-            stringResource(Res.string.dev_mode_only),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) { content() }
+        val wide = maxWidth >= LABELS_MIN_WIDTH
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(
+                stringResource(Res.string.dev_mode_only).uppercase(),
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 0.11.em,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            CompositionLocalProvider(LocalLiveToolLabels provides wide) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    itemVerticalAlignment = Alignment.CenterVertically,
+                ) { content() }
+            }
+        }
     }
 }
+
+private val DEV_BOX_RADIUS = 14.dp
+private const val DASH_ON = 5f
+private const val DASH_OFF = 4f
+
+/** Width the Dev mode only box needs before its tools show their names beside their chips. */
+private val LABELS_MIN_WIDTH = 560.dp
 
 /** Switches preview mode, lit while it is on: what goes live is cued on Preview and taken with Take. */
 @Composable
 internal fun PreviewModeToggle(on: Boolean, onChange: (Boolean) -> Unit) {
-    TooltipIconButton(
+    LiveToolButton(
+        tool = LiveTool.PREVIEW,
         painter = rememberVectorPainter(Icons.Outlined.Preview),
-        text = stringResource(Res.string.preview_mode),
+        label = stringResource(Res.string.preview_mode),
         onClick = { onChange(!on) },
-        buttonSize = 36.dp,
-        iconTint = if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+        selected = on,
         modifier = Modifier.testTag(PREVIEW_MODE_TOGGLE_TAG),
     )
 }
@@ -105,12 +137,11 @@ internal fun MacrosButton(
 ) {
     var open by remember { mutableStateOf(false) }
     var controlOpen by remember { mutableStateOf(false) }
-    TooltipIconButton(
+    LiveToolButton(
+        tool = LiveTool.MACROS,
         painter = rememberVectorPainter(Icons.Outlined.PlayCircle),
-        text = stringResource(Res.string.tooltip_macros),
+        label = stringResource(Res.string.tooltip_macros),
         onClick = { open = true },
-        buttonSize = 36.dp,
-        iconTint = MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.testTag(MACROS_BUTTON_TAG),
     )
     MacrosDialog(

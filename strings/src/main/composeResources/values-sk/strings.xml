@@ -2757,4 +2757,13 @@
     <string name="helper_command_look_12_does">Ukáže nastavenia textu veršov</string>
     <string name="helper_command_look_13">ako nastavím štýl biblického odkazu</string>
     <string name="helper_command_look_13_does">Ukáže nastavenia textu odkazu</string>
+    <string name="message_purpose">Zobrazí riadok textu cez všetko, čo je naživo.</string>
+    <string name="message_preview_empty">Tu sa zobrazí vaša správa</string>
+    <string name="message_stays_up">Zostane zobrazené</string>
+    <string name="message_seconds_short">%1$d s</string>
+    <string name="message_one_minute">1 min</string>
+    <string name="message_duration_custom">Vlastné</string>
+    <string name="message_insert_blank">Vložiť pole</string>
+    <string name="props_purpose">Prvky, ktoré zostávajú na obrazovke nad všetkým.</string>
+    <string name="macros_purpose">Spustite viac akcií jedným kliknutím alebo klávesom.</string>
 </resources>

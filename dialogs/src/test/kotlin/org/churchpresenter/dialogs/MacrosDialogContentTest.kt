@@ -24,6 +24,7 @@ import org.churchpresenter.showcontrol.Action
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import androidx.compose.ui.test.onNodeWithContentDescription
 
 /** The Macros dialog: running, adding, editing, naming, deleting, and the way to MIDI & OSC. */
 class MacrosDialogContentTest {
@@ -137,5 +138,24 @@ class MacrosDialogContentTest {
     fun `an id is never one a macro already has`() {
         assertEquals("macro3", newMacroId(listOf(walkIn, empty)))
         assertEquals("macro4", newMacroId(listOf(walkIn, Macro("macro3", "x"))))
+    }
+
+    @Test
+    fun `the header names the tool and its close closes`() = dialog { seen ->
+        onNodeWithText("Run several actions with one click or key.").assertExists()
+        onNodeWithContentDescription("Close").performClick()
+        assertEquals(1, seen.dismissed)
+    }
+
+    @Test
+    fun `each macro shows the number of the key that runs it`() = dialog { _ ->
+        onNodeWithText("1").assertExists()
+        onNodeWithText("2").assertExists()
+    }
+
+    @Test
+    fun `with no macros it says what one is for`() = dialog(macros = emptyList()) { _ ->
+        onNodeWithText("No macros yet", substring = true).assertExists()
+        onNodeWithText("A macro is a named list of actions", substring = true).assertExists()
     }
 }

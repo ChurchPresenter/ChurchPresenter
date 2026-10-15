@@ -3650,6 +3650,15 @@
     <string name="clear_group_clear">Clear</string>
     <string name="tooltip_macros">Macros</string>
     <string name="dev_mode_only">Dev mode only</string>
+    <string name="message_purpose">Shows a line of text over whatever is live.</string>
+    <string name="message_preview_empty">Your message appears here</string>
+    <string name="message_stays_up">Stays up for</string>
+    <string name="message_seconds_short">%1$d s</string>
+    <string name="message_one_minute">1 min</string>
+    <string name="message_duration_custom">Custom</string>
+    <string name="message_insert_blank">Insert blank</string>
+    <string name="props_purpose">Things that stay on screen over everything.</string>
+    <string name="macros_purpose">Run several actions with one click or key.</string>
     <string name="dev_mode_only_hint">Built, but not ready for production yet. Shown only in dev mode.</string>
     <string name="macros_title">Macros</string>
     <string name="macros_hint">A macro is a named list of actions. Run it from here, from a key (Run macro 1–9 in Keyboard Shortcuts, in this order), from the remote API, or from another macro.</string>

@@ -2772,4 +2772,13 @@
     <string name="helper_command_look_12_does">Näyttää jakeen tekstin asetukset</string>
     <string name="helper_command_look_13">miten muotoilen raamatunviitteen</string>
     <string name="helper_command_look_13_does">Näyttää viitteen tekstiasetukset</string>
+    <string name="message_purpose">Näyttää tekstirivin kaiken suorana olevan päällä.</string>
+    <string name="message_preview_empty">Viestisi näkyy tässä</string>
+    <string name="message_stays_up">Näkyvissä</string>
+    <string name="message_seconds_short">%1$d s</string>
+    <string name="message_one_minute">1 min</string>
+    <string name="message_duration_custom">Mukautettu</string>
+    <string name="message_insert_blank">Lisää kenttä</string>
+    <string name="props_purpose">Asiat, jotka pysyvät ruudulla kaiken päällä.</string>
+    <string name="macros_purpose">Suorita useita toimintoja yhdellä napsautuksella tai näppäimellä.</string>
 </resources>

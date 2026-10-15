@@ -2772,4 +2772,13 @@
     <string name="helper_command_look_12_does">聖句の文字設定を表示</string>
     <string name="helper_command_look_13">聖書の箇所のスタイルを変えるには</string>
     <string name="helper_command_look_13_does">箇所の文字設定を表示</string>
+    <string name="message_purpose">ライブ中の映像の上に1行のテキストを表示します。</string>
+    <string name="message_preview_empty">ここにメッセージが表示されます</string>
+    <string name="message_stays_up">表示時間</string>
+    <string name="message_seconds_short">%1$d秒</string>
+    <string name="message_one_minute">1分</string>
+    <string name="message_duration_custom">カスタム</string>
+    <string name="message_insert_blank">空欄を挿入</string>
+    <string name="props_purpose">すべての上に表示され続ける要素です。</string>
+    <string name="macros_purpose">複数の操作をワンクリックまたはキーひとつで実行します。</string>
 </resources>
