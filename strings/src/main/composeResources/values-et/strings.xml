@@ -2291,6 +2291,9 @@
     <string name="preview_output_mode_disabled_warning">See väljund ei kuva praegu seda sisu.</string>
     <string name="preview_settings_show_labels">Näita väljundite silte</string>
     <string name="preview_settings_show_modes">Näita kuvatüüpi</string>
+    <string name="preview_section_display">Kuva</string>
+    <string name="preview_section_layout">Paigutus</string>
+    <string name="preview_layout_rename">Nimeta paigutus ümber</string>
     <string name="song_add_translation">Lisa keel</string>
     <string name="song_fourth_language">Keel 4</string>
     <string name="song_pane_translation">Keel %1$d</string>

@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">Tämä lähtö ei tällä hetkellä näytä tätä sisältöä.</string>
     <string name="preview_settings_show_labels">Näytä lähtöjen nimet</string>
     <string name="preview_settings_show_modes">Näytä näyttötyyppi</string>
+    <string name="preview_section_display">Näyttö</string>
+    <string name="preview_section_layout">Asettelu</string>
+    <string name="preview_layout_rename">Nimeä asettelu uudelleen</string>
     <string name="song_add_translation">Lisää kieli</string>
     <string name="song_fourth_language">Kieli 4</string>
     <string name="song_pane_translation">Kieli %1$d</string>

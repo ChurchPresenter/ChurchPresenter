@@ -2775,6 +2775,9 @@
     <string name="preview_layout_split_across">Split across</string>
     <string name="preview_layout_split_down">Split down</string>
     <string name="preview_layout_remove">Remove</string>
+    <string name="preview_layout_rename">Rename layout</string>
+    <string name="preview_section_display">Display</string>
+    <string name="preview_section_layout">Layout</string>
     <string name="profile_group_boxes">Text boxes</string>
     <string name="profile_box_item">Item</string>
     <string name="profile_box_item_subtitle">Subtitle</string>

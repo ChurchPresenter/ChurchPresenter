@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">Denne utgangen viser ikke dette innholdet for øyeblikket.</string>
     <string name="preview_settings_show_labels">Vis utgangsetiketter</string>
     <string name="preview_settings_show_modes">Vis visningstype</string>
+    <string name="preview_section_display">Visning</string>
+    <string name="preview_section_layout">Oppsett</string>
+    <string name="preview_layout_rename">Gi oppsettet nytt navn</string>
     <string name="song_add_translation">Legg til et språk</string>
     <string name="song_fourth_language">Språk 4</string>
     <string name="song_pane_translation">Språk %1$d</string>

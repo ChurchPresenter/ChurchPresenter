@@ -2268,6 +2268,9 @@
     <string name="preview_output_mode_disabled_warning">Tento výstup momentálně tento obsah nezobrazuje.</string>
     <string name="preview_settings_show_labels">Zobrazit štítky výstupů</string>
     <string name="preview_settings_show_modes">Zobrazit typ zobrazení</string>
+    <string name="preview_section_display">Zobrazení</string>
+    <string name="preview_section_layout">Rozvržení</string>
+    <string name="preview_layout_rename">Přejmenovat rozvržení</string>
     <string name="song_add_translation">Přidat jazyk</string>
     <string name="song_fourth_language">Jazyk 4</string>
     <string name="song_pane_translation">Jazyk %1$d</string>

@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">此输出当前未显示此内容。</string>
     <string name="preview_settings_show_labels">显示输出标签</string>
     <string name="preview_settings_show_modes">显示显示类型</string>
+    <string name="preview_section_display">显示</string>
+    <string name="preview_section_layout">布局</string>
+    <string name="preview_layout_rename">重命名布局</string>
     <string name="song_add_translation">添加语言</string>
     <string name="song_fourth_language">语言 4</string>
     <string name="song_pane_translation">语言 %1$d</string>

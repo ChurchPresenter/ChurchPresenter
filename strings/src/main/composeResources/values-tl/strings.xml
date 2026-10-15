@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">Hindi kasalukuyang ipinapakita ng output na ito ang nilalamang ito.</string>
     <string name="preview_settings_show_labels">Ipakita ang mga label ng output</string>
     <string name="preview_settings_show_modes">Ipakita ang uri ng display</string>
+    <string name="preview_section_display">Display</string>
+    <string name="preview_section_layout">Layout</string>
+    <string name="preview_layout_rename">Palitan ang pangalan ng layout</string>
     <string name="song_add_translation">Magdagdag ng wika</string>
     <string name="song_fourth_language">Wika 4</string>
     <string name="song_pane_translation">Wika %1$d</string>

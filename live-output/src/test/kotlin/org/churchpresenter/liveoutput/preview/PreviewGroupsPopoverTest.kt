@@ -7,11 +7,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -157,5 +160,56 @@ class PreviewGroupsPopoverTest {
         editing = false
         click(TAG_EDIT_LAYOUT)
         assertTrue(editing)
+    }
+
+    @Test
+    fun `the menu is headed Display and Layout`() = edit(withLayouts("a")) { _ ->
+        onNodeWithText("DISPLAY").assertExists()
+        onNodeWithText("LAYOUT").assertExists()
+    }
+
+    @Test
+    fun `the pencil puts the cursor in the drawn layout's name`() = edit(withLayouts("a")) { _ ->
+        onNodeWithContentDescription("Rename layout").performClick()
+        waitForIdle()
+        onNode(hasSetTextAction()).assertIsFocused()
+    }
+
+    @Test
+    fun `deleting a layout not drawn keeps the drawn one`() = edit(withLayouts("a", "b")) { now ->
+        onAllNodesWithContentDescription("Delete layout")[1].performClick()
+        waitForIdle()
+        assertEquals(listOf("a"), now().previewLayouts.map { it.id })
+        assertEquals("a", now().activePreviewLayout)
+    }
+
+    @Test
+    fun `each template is named for a screen reader and under the pointer`() = edit(base()) { _ ->
+        onNodeWithText("New layout").assertExists()
+        onNodeWithContentDescription("2×2").assertExists()
+        onNodeWithTag(previewTemplateTag(1)).performMouseInput { enter(center) }
+        waitForIdle()
+        onNodeWithText("New layout: 2×2").assertExists()
+        onNodeWithTag(previewTemplateTag(1)).performMouseInput { exit() }
+        waitForIdle()
+        onNodeWithText("New layout").assertExists()
+    }
+
+    @Test
+    fun `Edit layout closes the menu`() = runComposeUiTest {
+        var dismissed = false
+        setContent {
+            MaterialTheme {
+                PreviewGroupsPopover(
+                    expanded = true,
+                    onDismiss = { dismissed = true },
+                    proj = withLayouts("a"),
+                    onChange = {},
+                )
+            }
+        }
+        waitForIdle()
+        click(TAG_EDIT_LAYOUT)
+        assertTrue(dismissed)
     }
 }

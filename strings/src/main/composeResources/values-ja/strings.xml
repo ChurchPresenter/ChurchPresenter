@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">この出力は現在このコンテンツを表示していません。</string>
     <string name="preview_settings_show_labels">出力のラベルを表示</string>
     <string name="preview_settings_show_modes">表示タイプを表示</string>
+    <string name="preview_section_display">表示</string>
+    <string name="preview_section_layout">レイアウト</string>
+    <string name="preview_layout_rename">レイアウト名を変更</string>
     <string name="song_add_translation">言語を追加</string>
     <string name="song_fourth_language">言語4</string>
     <string name="song_pane_translation">言語%1$d</string>
