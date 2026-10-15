@@ -161,6 +161,7 @@ module-specific notes there, not here.**
 | `control-in/`          | `:control-in`          | MIDI and OSC in and out: the codecs, the ports and the hub that maps what arrives to actions | [AGENT.md](control-in/AGENT.md)          |
 | `detekt-rules/`        | `:detekt-rules`        | The build's own detekt rules: the live-safe check on the output modules, run by every module's detekt | [AGENT.md](detekt-rules/AGENT.md)        |
 | `output-api/`          | `:output-api`          | What each tab needs of the live output, as interfaces, and the frame a deck plays: declared against by the tabs, implemented by `:live-output` | [AGENT.md](output-api/AGENT.md)          |
+| `output-guard/`        | `:output-guard`        | The output guard: a second process that keeps each output's last still under it and shows it if the app dies (dev mode only) | [AGENT.md](output-guard/AGENT.md)        |
 | `live-output/`         | `:live-output`         | `PresenterManager` and what is on air, the output windows and stage monitor, and the off-screen outputs (NDI, OMT, Browser Source, DeckLink) on `ComposeScenePump` | [AGENT.md](live-output/AGENT.md)         |
 | `helper/`              | `:helper`              | Wick, the helper lamp — tips, display setup, typed requests, the spotlight that rings controls | [AGENT.md](helper/AGENT.md)              |
 | `statistics/`          | `:statistics`          | What was presented and when — the counters, the play log, the CCLI lookup and exports — and the statistics window over them | [AGENT.md](statistics/AGENT.md)          |
@@ -209,7 +210,7 @@ fixtures declare; a test's own classpath may reach anything.
 | Layer | Modules | May depend on |
 |---|---|---|
 | foundation | theme, strings, icons, diagnostics, core-models, settings, shared-ui, bible, song-chords, show-control, control-in | foundation |
-| engine | protocols, file formats and rendering: bible-engine, bible-formats, presentation-engine, atem, ndi, omt, companion-satellite, live-show, lottieGenerator, presenter, output-api, calendar-core, and the tabs' engines (slides-engine, media-engine, canvas-engine, lower-third-engine, web-engine, stt-engine) | foundation, engine |
+| engine | protocols, file formats and rendering: bible-engine, bible-formats, presentation-engine, atem, ndi, omt, companion-satellite, live-show, lottieGenerator, presenter, output-api, output-guard, calendar-core, and the tabs' engines (slides-engine, media-engine, canvas-engine, lower-third-engine, web-engine, stt-engine) | foundation, engine |
 | feature | a tab or a window with its view model | foundation, engine |
 | output | live-output | foundation, engine |
 | integration | server, server-ui, profiles, dialogs, app-settings, telemetry | everything below, and integration |

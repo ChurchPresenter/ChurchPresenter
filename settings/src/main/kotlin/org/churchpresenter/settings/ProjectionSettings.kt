@@ -116,6 +116,14 @@ data class ProjectionSettings(
     // always was.
     val previewModeEnabled: Boolean = false,
     /**
+     * The output guard: a second process keeps a still of each output under its window and shows it
+     * if the app dies, then starts the app again (docs/SHOW_CONTROL.md, Output isolation). Dev mode
+     * only, and off.
+     */
+    val outputGuardEnabled: Boolean = false,
+    /** Whether the guard also covers the outputs with their stills while the app's UI is hung. Off. */
+    val outputGuardOnHang: Boolean = false,
+    /**
      * Named, reusable [OutputProfile]s, any of which an output can follow via
      * [ScreenAssignment.activeProfileId] -- see `AppSettings.resolvedFor(profile)`
      * (`OutputProfileResolution.kt`). A fresh install starts with exactly one, factory-default

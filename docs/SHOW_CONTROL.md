@@ -254,6 +254,30 @@ started in `main.kt` once `CrashReporter` is set up. `UiStallReporter` decides w
 **The gate.** Once a release with this has been out four to six weeks: if more than 1% of services
 have a live stall past 500 ms, the output process is scheduled. The hot stacks are fixed either way.
 
+### The output guard: a crash shows the last slide, not the desktop
+
+A hang freezes the last frame, which an audience may not notice; a crash takes the output windows
+away and puts the desktop on the projector. The output guard (`:output-guard`, dev mode only) is the
+narrowest process that helps: it moves no composition out of the app.
+
+- **It is the app started again** with `--output-guard <folder>`; `main` runs the guard and nothing
+  else. It opens one borderless window per output, at normal level under the output's always-on-top
+  window, showing the output's last still — black before the first.
+- **The app keeps it told** through a memory-mapped file: its pid, a heartbeat from a thread of its
+  own, a tick from the event thread, whether anything is live, and where each output is. A moment
+  after anything on air changes, it saves a still of each output — read from the window's Skia
+  surface, off the event thread — and the live Bible and song state.
+- **When the app dies** the guard raises its windows over everything on those screens, starts the
+  app again with `--relaunched-by-output-guard`, and leaves once the new app's outputs are up. The
+  new app puts the live verse or song slide back on air; other content comes back empty.
+- **On a hang** it covers the outputs with their stills only when *Cover a frozen app* is on, after
+  3 s without a tick while live, and drops back when the app answers.
+- **A quit on purpose** — the switch off, the app closing, a shutdown hook — tells it to leave.
+
+Checked on macOS (2026-10-15): a guard window stays under a live output even when pushed to the
+front at its own level, and covers the screen, over other apps' windows, the moment the app is
+killed. Windows and Linux are not yet checked; Wayland gives no window order between clients.
+
 ## Migration
 
 Each step shippable on its own, each keeping every existing test green:

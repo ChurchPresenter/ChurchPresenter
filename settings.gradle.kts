@@ -210,6 +210,9 @@ include(":control-in")
 // output paths"). On no app classpath; build-logic's cp.detekt hands it to detekt as a plugin.
 include(":detekt-rules")
 include(":output-api")
+// The output guard: the second process that keeps a still of each output under its window and shows
+// it if the app dies (docs/SHOW_CONTROL.md, Output isolation). AWT only.
+include(":output-guard")
 include(":live-output")
 
 // Statistics: what was presented and when, the play log, and the CCLI report window over them.

@@ -184,6 +184,7 @@ kotlin {
             implementation(projects.showControl)
             // The live output: PresenterManager, the output windows and the off-screen outputs.
             implementation(projects.liveOutput)
+            implementation(projects.outputGuard)
             // Statistics: the counters, the play log and the CCLI report window over them.
             implementation(projects.statistics)
             // The updater: the release check, the installer download and the update window.

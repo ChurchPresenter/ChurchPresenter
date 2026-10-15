@@ -51,12 +51,16 @@ import org.churchpresenter.diagnostics.StartupProbe
 import kotlin.system.exitProcess
 import org.churchpresenter.diagnostics.UiStallInjector
 import org.churchpresenter.diagnostics.UiStallReporter
+import org.churchpresenter.outputguard.OUTPUT_GUARD_ARGUMENT
+import org.churchpresenter.outputguard.RELAUNCHED_ARGUMENT
+import org.churchpresenter.outputguard.runOutputGuard
 import org.churchpresenter.diagnostics.UiStallSpec
 import org.churchpresenter.diagnostics.UiWatchdog
 import org.churchpresenter.telemetry.LiveMapReporter
 import org.churchpresenter.sharedui.utils.RunRecord
 import org.churchpresenter.sharedui.utils.UsageEvents
 import java.io.File
+import java.lang.invoke.MethodHandles
 import java.io.IOException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import org.churchpresenter.liveoutput.AppNetworkInputs
@@ -74,6 +78,9 @@ internal const val CURRENT_EULA_VERSION = 1
 
 /** How a startup-benchmark launch that never drew its window ends; see StartupProbe. */
 private const val STARTUP_PROBE_NO_FRAME_EXIT = 3
+
+/** The class `main` is in: what the output guard is started with when the app runs from the build. */
+internal val MAIN_CLASS_NAME: String = MethodHandles.lookup().lookupClass().name
 
 /**
  * The UI-thread stalls this run counts and reports -- see UiStallReporter. A release build sends
@@ -169,6 +176,17 @@ private fun recordRunAtShutdown(startedAt: Long) = addGuardedShutdownHook("sessi
     ResourceCensus.reportIfLeaky()
 }
 
+/**
+ * Runs this process as the app's own output guard, if [args] ask for it, and says whether it did:
+ * nothing of the app is started in a guard's process -- see OutputGuard.
+ */
+private fun runAsOutputGuard(args: Array<String>): Boolean {
+    val at = args.indexOf(OUTPUT_GUARD_ARGUMENT)
+    if (at < 0 || at + 1 >= args.size) return false
+    runOutputGuard(File(args[at + 1]))
+    return true
+}
+
 private fun setLatchedSystemProperties() {
     // Skiko latches this on its first SkiaLayer, so a later set is ignored.
     preferredRenderApi(System.getProperty("os.name", ""), DevFlags.renderApiOverride)?.let {
@@ -181,7 +199,8 @@ private fun setLatchedSystemProperties() {
     if (StorePackage.isInstalled) System.setProperty(UNIX_DOMAIN_TMPDIR_PROPERTY, UNUSABLE_SOCKET_DIR)
 }
 
-fun main() {
+fun main(args: Array<String>) {
+    if (runAsOutputGuard(args)) return
     setLatchedSystemProperties()
     // Off unless the startup benchmark asked for it; see StartupProbe.
     StartupProbe.mainStarted(exit = { exitProcess(STARTUP_PROBE_NO_FRAME_EXIT) })
@@ -333,7 +352,7 @@ fun main() {
             LocalThemeCustomization provides themeCustomization,
             LocalDevelopmentBuild provides !BuildConfig.IS_RELEASE,
         ) {
-            ChurchPresenterApp(coroutineExceptionHandler, onThemeCustomizationChange = { themeCustomization = it })
+            ChurchPresenterApp(coroutineExceptionHandler, RELAUNCHED_ARGUMENT in args) { themeCustomization = it }
         }
     }
 }
@@ -347,6 +366,7 @@ fun main() {
 @Composable
 private fun ApplicationScope.ChurchPresenterApp(
     coroutineExceptionHandler: CoroutineExceptionHandler,
+    relaunchedByGuard: Boolean,
     onThemeCustomizationChange: (ThemeCustomization) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope { coroutineExceptionHandler }
@@ -383,6 +403,8 @@ private fun ApplicationScope.ChurchPresenterApp(
         CompanionServerWiring(tunnelStatus)
         VirtualOutputs(effectiveAppSettings)
         StartupEffect()
-        AppWindows(effectiveAppSettings, calendarSync, tunnelStatus, tunnelUrl, onThemeCustomizationChange)
+        OutputGuardWiring(relaunchedByGuard) {
+            AppWindows(effectiveAppSettings, calendarSync, tunnelStatus, tunnelUrl, onThemeCustomizationChange)
+        }
     }
 }

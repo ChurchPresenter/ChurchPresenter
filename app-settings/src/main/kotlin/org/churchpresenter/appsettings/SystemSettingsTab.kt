@@ -12,6 +12,10 @@ import androidx.compose.ui.platform.testTag
 import org.churchpresenter.strings.generated.resources.dev_mode_only_hint
 import org.churchpresenter.strings.generated.resources.dev_mode_only
 import org.churchpresenter.strings.generated.resources.preview_mode_hint
+import org.churchpresenter.strings.generated.resources.output_guard
+import org.churchpresenter.strings.generated.resources.output_guard_hint
+import org.churchpresenter.strings.generated.resources.output_guard_on_hang
+import org.churchpresenter.strings.generated.resources.output_guard_on_hang_hint
 import org.churchpresenter.strings.generated.resources.preview_mode
 import org.churchpresenter.liveoutput.withPreviewMode
 import androidx.compose.foundation.layout.FlowRowScope
@@ -99,6 +103,7 @@ import org.churchpresenter.server.CompanionServer
 import org.churchpresenter.profiles.FileManager
 import org.churchpresenter.diagnostics.CrashReporter
 import org.churchpresenter.settings.AppSettings
+import org.churchpresenter.settings.ProjectionSettings
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.sharedui.guide.GuideTargets
@@ -374,6 +379,8 @@ private fun DevModeCard(
                 onCheckedChange = { on -> onSettingsChange { s -> s.withPreviewMode(on) } }
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            OutputGuardRows(settings.projectionSettings, onSettingsChange)
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             // Checks the crash-reporting pipeline end to end; there is nothing to send with reporting off.
             TestEventRow(scope, enabled = settings.analyticsReportingEnabled)
         }
@@ -381,6 +388,36 @@ private fun DevModeCard(
 }
 
 internal const val DEV_MODE_CARD_TAG = "system_dev_mode_card"
+
+/**
+ * The output guard's switches (docs/SHOW_CONTROL.md, Output isolation): whether a second process
+ * keeps each output's last picture under it for when the app dies, and, while it does, whether it
+ * also covers a frozen app.
+ */
+@Composable
+private fun OutputGuardRows(
+    projection: ProjectionSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+) {
+    GeneralToggleRow(
+        label = Res.string.output_guard,
+        hint = stringResource(Res.string.output_guard_hint),
+        checked = projection.outputGuardEnabled,
+        onCheckedChange = { on ->
+            onSettingsChange { s -> s.copy(projectionSettings = s.projectionSettings.copy(outputGuardEnabled = on)) }
+        },
+    )
+    if (projection.outputGuardEnabled) {
+        GeneralToggleRow(
+            label = Res.string.output_guard_on_hang,
+            hint = stringResource(Res.string.output_guard_on_hang_hint),
+            checked = projection.outputGuardOnHang,
+            onCheckedChange = { on ->
+                onSettingsChange { s -> s.copy(projectionSettings = s.projectionSettings.copy(outputGuardOnHang = on)) }
+            },
+        )
+    }
+}
 
 @Composable
 private fun TestEventRow(scope: CoroutineScope, enabled: Boolean) {
