@@ -17,6 +17,7 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The Compare Translations window the Song Library Manager opens from a row, in both themes.
@@ -53,8 +54,10 @@ class CompareTranslationsScreenshotTest {
             val height = COMPARE_WINDOW_HEIGHT.value.toInt()
             runDesktopComposeUiTest(width = width, height = height) {
                 setContent {
-                    ChurchPresenterTheme(themeMode = mode) {
-                        CompareTranslationsContent(song = song, onDismiss = {}, onSave = {})
+                    PinnedFonts {
+                        ChurchPresenterTheme(themeMode = mode) {
+                            CompareTranslationsContent(song = song, onDismiss = {}, onSave = {})
+                        }
                     }
                 }
                 waitForIdle()

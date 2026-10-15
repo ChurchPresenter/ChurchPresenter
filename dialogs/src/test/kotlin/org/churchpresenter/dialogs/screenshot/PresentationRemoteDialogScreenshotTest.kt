@@ -18,6 +18,7 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The Presentation Remote dialog — the QR code an operator hands a speaker so they can advance
@@ -44,23 +45,25 @@ class PresentationRemoteDialogScreenshotTest {
     ) = stackedThemes(SECTION, name) { mode, file ->
         runComposeUiTest {
             setContent {
-                ChurchPresenterTheme(themeMode = mode) {
-                    Box(Modifier.size(400.dp, 720.dp)) {
-                        var current by remember { mutableStateOf(settings) }
-                        PresentationRemoteDialogContent(
-                            settings = current,
-                            onSettingsChange = { transform -> current = transform(current) },
-                            serverUrl = serverUrl,
-                            apiKeyEnabled = apiKeyEnabled,
-                            apiKey = apiKey,
-                            tunnelStatus = tunnelStatus,
-                            tunnelUrl = tunnelUrl,
-                            presentationDisplayUrl = presentationDisplayUrl,
-                            onPresentationDisplayUrlChanged = {},
-                            onStartTunnel = {},
-                            onStopTunnel = {},
-                            onDismiss = {},
-                        )
+                PinnedFonts {
+                    ChurchPresenterTheme(themeMode = mode) {
+                        Box(Modifier.size(400.dp, 720.dp)) {
+                            var current by remember { mutableStateOf(settings) }
+                            PresentationRemoteDialogContent(
+                                settings = current,
+                                onSettingsChange = { transform -> current = transform(current) },
+                                serverUrl = serverUrl,
+                                apiKeyEnabled = apiKeyEnabled,
+                                apiKey = apiKey,
+                                tunnelStatus = tunnelStatus,
+                                tunnelUrl = tunnelUrl,
+                                presentationDisplayUrl = presentationDisplayUrl,
+                                onPresentationDisplayUrlChanged = {},
+                                onStartTunnel = {},
+                                onStopTunnel = {},
+                                onDismiss = {},
+                            )
+                        }
                     }
                 }
             }

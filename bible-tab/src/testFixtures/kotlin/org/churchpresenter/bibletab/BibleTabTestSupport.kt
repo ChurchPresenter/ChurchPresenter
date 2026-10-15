@@ -34,6 +34,7 @@ import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.stt.STTManager
 import java.nio.file.Files
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * Harness and fixtures shared by the `BibleTab` test classes.
@@ -245,56 +246,58 @@ fun bibleTab(
         val reports = BibleReports()
         runComposeUiTest {
             setContent {
-                // The tab holds no settings of its own — the host applies its transform and hands
-                // the result back. Doing that here rather than only recording it is what lets a
-                // test drive a settings change through to its effect on the tab: a swap, for
-                // instance, has to reach BibleViewModel.updateSettings to reload anything.
-                var appSettings by remember { mutableStateOf(initialSettings) }
-                ThemedForTest(themeMode) {
-                    Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
-                    key(tabVisit.value) {
-                    BibleTab(
-                        viewModel = vm,
-                        appSettings = appSettings,
-                        onSettingsChange = { transform ->
-                            reports.settingsChanges++
-                            val updated = transform(appSettings)
-                            reports.settingsAfterChange = updated
-                            appSettings = updated
-                        },
-                        onAddToSchedule = { book, chapter, verse, _, _, _ ->
-                            reports.scheduled += "$book $chapter:$verse"
-                        },
-                        onVerseSelected = { reports.selectedVerses += it },
-                        onPresenting = { reports.presenting += it },
-                        sttManager = stt,
-                        bibleOutput = presenter,
-                        verseStatistics = statistics,
-                        onVerseWentLive = onVerseWentLive,
-                        verseSequenceLog = sequenceLog,
-                        crossReferences = crossReferences ?: noCrossReferences(),
-                        onInstanceLinkSendVerse = onInstanceLinkSendVerse?.let { send ->
-                            { book, chapter, verseNumber, verseText, verseRange ->
-                                send(
-                                    SelectedVerse(
-                                        bookName = book,
-                                        chapter = chapter,
-                                        verseNumber = verseNumber,
-                                        verseText = verseText,
-                                        verseRange = verseRange,
+                PinnedFonts {
+                    // The tab holds no settings of its own — the host applies its transform and hands
+                    // the result back. Doing that here rather than only recording it is what lets a
+                    // test drive a settings change through to its effect on the tab: a swap, for
+                    // instance, has to reach BibleViewModel.updateSettings to reload anything.
+                    var appSettings by remember { mutableStateOf(initialSettings) }
+                    ThemedForTest(themeMode) {
+                        Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
+                        key(tabVisit.value) {
+                        BibleTab(
+                            viewModel = vm,
+                            appSettings = appSettings,
+                            onSettingsChange = { transform ->
+                                reports.settingsChanges++
+                                val updated = transform(appSettings)
+                                reports.settingsAfterChange = updated
+                                appSettings = updated
+                            },
+                            onAddToSchedule = { book, chapter, verse, _, _, _ ->
+                                reports.scheduled += "$book $chapter:$verse"
+                            },
+                            onVerseSelected = { reports.selectedVerses += it },
+                            onPresenting = { reports.presenting += it },
+                            sttManager = stt,
+                            bibleOutput = presenter,
+                            verseStatistics = statistics,
+                            onVerseWentLive = onVerseWentLive,
+                            verseSequenceLog = sequenceLog,
+                            crossReferences = crossReferences ?: noCrossReferences(),
+                            onInstanceLinkSendVerse = onInstanceLinkSendVerse?.let { send ->
+                                { book, chapter, verseNumber, verseText, verseRange ->
+                                    send(
+                                        SelectedVerse(
+                                            bookName = book,
+                                            chapter = chapter,
+                                            verseNumber = verseNumber,
+                                            verseText = verseText,
+                                            verseRange = verseRange,
+                                        )
                                     )
-                                )
-                            }
-                        },
-                        onInstanceLinkSendBibleHold = onInstanceLinkSendBibleHold,
-                        selectedVerseItem = scheduleVerse?.value ?: selectedVerseItem,
-                        selectedVerseItemVersion = selectedVerseItemVersion.value,
-                        selectedVerseItemGoLive = selectedVerseItemGoLive,
-                        dialogDismissSignal = dialogDismissSignal.value,
-                        engineStatus = engineStatus,
-                        isPresenting = isPresenting,
-                    )
-                    }
+                                }
+                            },
+                            onInstanceLinkSendBibleHold = onInstanceLinkSendBibleHold,
+                            selectedVerseItem = scheduleVerse?.value ?: selectedVerseItem,
+                            selectedVerseItemVersion = selectedVerseItemVersion.value,
+                            selectedVerseItemGoLive = selectedVerseItemGoLive,
+                            dialogDismissSignal = dialogDismissSignal.value,
+                            engineStatus = engineStatus,
+                            isPresenting = isPresenting,
+                        )
+                        }
+                        }
                     }
                 }
             }

@@ -10,11 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asComposeImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.v2.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
-import io.github.takahirom.roborazzi.captureRoboImage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.apache.pdfbox.pdmodel.PDDocument
@@ -45,6 +43,8 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
+import org.churchpresenter.sharedui.screenshot.captureTo
 
 class AppPreviewOutputScreenshotTest {
 
@@ -64,12 +64,14 @@ class AppPreviewOutputScreenshotTest {
             density = Density(PREVIEW_DENSITY),
         ) {
             setContent {
-                Box(screen) {
-                    PresenterScreen(appSettings = settings) { content() }
+                PinnedFonts {
+                    Box(screen) {
+                        PresenterScreen(appSettings = settings) { content() }
+                    }
                 }
             }
             waitForIdle()
-            onRoot().captureRoboImage("$SCREENSHOT_ROOT/output/$name.png")
+            captureTo(File("$SCREENSHOT_ROOT/output/$name.png"))
         }
 
     private fun verse() = SelectedVerse(

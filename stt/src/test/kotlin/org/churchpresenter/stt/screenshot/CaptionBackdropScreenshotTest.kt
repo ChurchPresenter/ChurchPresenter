@@ -21,6 +21,7 @@ import org.churchpresenter.settings.STTSettings
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * Live captions carrying a backdrop, which nothing photographed before. Video subtitles, the other
@@ -45,7 +46,7 @@ class CaptionBackdropScreenshotTest {
     private val screen = Modifier.size(1280.dp, 720.dp)
 
     private fun shoot(name: String, content: @Composable () -> Unit) = runComposeUiTest {
-        setContent { MaterialTheme { Box(screen) { content() } } }
+        setContent { PinnedFonts { MaterialTheme { Box(screen) { content() } } } }
         waitForIdle()
         capture(name)
     }

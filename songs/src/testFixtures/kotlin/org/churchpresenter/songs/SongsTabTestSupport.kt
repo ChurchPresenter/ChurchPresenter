@@ -35,6 +35,7 @@ import org.churchpresenter.sharedui.utils.LocalShortcuts
 import org.churchpresenter.sharedui.utils.ShortcutMap
 import java.io.File
 import java.nio.file.Files
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * Harness and fixtures shared by the `SongsTab` test classes.
@@ -232,37 +233,39 @@ fun songsTab(
         reports.songsDir = dir
         runComposeUiTest {
             setContent {
-                ThemedForTest(themeMode) {
-                  CompositionLocalProvider(LocalShortcuts provides shortcuts) {
-                   key(tabVisit.value) {
-                    SongsTab(
-                        viewModel = vm,
-                        appSettings = settingsOverride.value ?: settings,
-                        onSettingsChange = { transform ->
-                            reports.settingsChanges++
-                            reports.settingsAfterChange = transform(reports.settingsAfterChange ?: settings)
-                        },
-                        onAddToSchedule =
-                            if (withOnAddToSchedule) { { _, title, _, _ -> reports.scheduled += title } } else null,
-                        onSongItemSelected = { reports.selectedSection = it },
-                        onAllSectionsChanged = { reports.allSections += it },
-                        onSectionIndexChanged = { reports.sectionIndex = it },
-                        onLineIndexChanged = { reports.lineIndex = it },
-                        onPresenting = { reports.presenting += it },
-                        isPresenting = isPresenting,
-                        playCounts = playCounts,
-                        onSongWentLive = onSongWentLive,
-                        titleSlideFor = titleSlideFor,
-                        songEditor = songEditor,
-                        onInstanceLinkSendProject = onInstanceLinkSendProject,
-                        onInstanceLinkSendSongSection = onInstanceLinkSendSongSection,
-                        typicalSongSeconds = typicalSongSeconds,
-                        selectedSongItem = scheduleSelection.value,
-                        selectedSongItemVersion = scheduleSelectionVersion.value,
-                        selectedSongItemAction = scheduleAction.value,
-                    )
-                   }
-                  }
+                PinnedFonts {
+                    ThemedForTest(themeMode) {
+                      CompositionLocalProvider(LocalShortcuts provides shortcuts) {
+                       key(tabVisit.value) {
+                        SongsTab(
+                            viewModel = vm,
+                            appSettings = settingsOverride.value ?: settings,
+                            onSettingsChange = { transform ->
+                                reports.settingsChanges++
+                                reports.settingsAfterChange = transform(reports.settingsAfterChange ?: settings)
+                            },
+                            onAddToSchedule =
+                                if (withOnAddToSchedule) { { _, title, _, _ -> reports.scheduled += title } } else null,
+                            onSongItemSelected = { reports.selectedSection = it },
+                            onAllSectionsChanged = { reports.allSections += it },
+                            onSectionIndexChanged = { reports.sectionIndex = it },
+                            onLineIndexChanged = { reports.lineIndex = it },
+                            onPresenting = { reports.presenting += it },
+                            isPresenting = isPresenting,
+                            playCounts = playCounts,
+                            onSongWentLive = onSongWentLive,
+                            titleSlideFor = titleSlideFor,
+                            songEditor = songEditor,
+                            onInstanceLinkSendProject = onInstanceLinkSendProject,
+                            onInstanceLinkSendSongSection = onInstanceLinkSendSongSection,
+                            typicalSongSeconds = typicalSongSeconds,
+                            selectedSongItem = scheduleSelection.value,
+                            selectedSongItemVersion = scheduleSelectionVersion.value,
+                            selectedSongItemAction = scheduleAction.value,
+                        )
+                       }
+                      }
+                    }
                 }
             }
             block(vm, reports)

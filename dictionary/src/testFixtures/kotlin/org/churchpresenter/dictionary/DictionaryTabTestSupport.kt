@@ -23,6 +23,7 @@ import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * Harness and fixtures shared by the `DictionaryTab` test classes.
@@ -133,30 +134,33 @@ fun dictionaryTab(
     try {
         runComposeUiTest {
             setContent {
-                ThemedForTest(themeMode) {
-                    // The tab paints no ground of its own — in the app it sits on the window's
-                    // `colorScheme.background`.
-                    Surface(color = MaterialTheme.colorScheme.background) {
-                    Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
-                    DictionaryTab(
-                        viewModel = vm,
-                        appSettings = appSettings,
-                        onSettingsChange = { change ->
-                            reports.settings += change(reports.settings.lastOrNull() ?: appSettings ?: AppSettings())
-                        },
-                        onAddToSchedule = if (withOnAddToSchedule) { { number, word, transliteration, definition ->
-                            reports.scheduled += listOf(number, word, transliteration, definition)
-                        } } else null,
-                        onGoLive = if (withOnGoLive) { { reports.live += it } } else null,
-                        liveEntryNumber = liveEntryNumber,
-                        getVerseText = getVerseText,
-                        getBookName = getBookName,
-                        onWordClick = { reports.wordClicks += it },
-                        onVerseClick = { book, chapter, verse ->
-                            reports.verseClicks += Triple(book, chapter, verse)
-                        },
-                    )
-                    }
+                PinnedFonts {
+                    ThemedForTest(themeMode) {
+                        // The tab paints no ground of its own — in the app it sits on the window's
+                        // `colorScheme.background`.
+                        Surface(color = MaterialTheme.colorScheme.background) {
+                        Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
+                        DictionaryTab(
+                            viewModel = vm,
+                            appSettings = appSettings,
+                            onSettingsChange = { change ->
+                                val before = reports.settings.lastOrNull() ?: appSettings ?: AppSettings()
+                                reports.settings += change(before)
+                            },
+                            onAddToSchedule = if (withOnAddToSchedule) { { number, word, transliteration, definition ->
+                                reports.scheduled += listOf(number, word, transliteration, definition)
+                            } } else null,
+                            onGoLive = if (withOnGoLive) { { reports.live += it } } else null,
+                            liveEntryNumber = liveEntryNumber,
+                            getVerseText = getVerseText,
+                            getBookName = getBookName,
+                            onWordClick = { reports.wordClicks += it },
+                            onVerseClick = { book, chapter, verse ->
+                                reports.verseClicks += Triple(book, chapter, verse)
+                            },
+                        )
+                        }
+                        }
                     }
                 }
             }

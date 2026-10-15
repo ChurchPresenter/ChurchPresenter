@@ -68,6 +68,7 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.sharedui.screenshot.PinnedRecentColors
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The Profiles tab of the settings dialog, in both themes.
@@ -354,15 +355,17 @@ class ProfilesTabScreenshotTest {
         TestSingletons.latchSkikoHostOs()
         runSkikoComposeUiTest(size = Size(WIDTH, HEIGHT), density = Density(1f)) {
             setContent {
-                CompositionLocalProvider(LocalFontPreviewFace provides { FontFamily.Default }) {
-                    ChurchPresenterTheme(themeMode = mode) {
-                        Surface(color = MaterialTheme.colorScheme.background) {
-                            Box(Modifier.fillMaxSize()) {
-                                var current by remember { mutableStateOf(settings) }
-                                ProfilesSettingsTab(
-                                    settings = current,
-                                    onSettingsChange = { transform -> current = transform(current) },
-                                )
+                PinnedFonts {
+                    CompositionLocalProvider(LocalFontPreviewFace provides { FontFamily.Default }) {
+                        ChurchPresenterTheme(themeMode = mode) {
+                            Surface(color = MaterialTheme.colorScheme.background) {
+                                Box(Modifier.fillMaxSize()) {
+                                    var current by remember { mutableStateOf(settings) }
+                                    ProfilesSettingsTab(
+                                        settings = current,
+                                        onSettingsChange = { transform -> current = transform(current) },
+                                    )
+                                }
                             }
                         }
                     }

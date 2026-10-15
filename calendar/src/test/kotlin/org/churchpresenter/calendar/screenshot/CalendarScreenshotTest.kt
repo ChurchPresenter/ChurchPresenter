@@ -51,6 +51,7 @@ import kotlin.test.Test
 import java.awt.Color as AwtColor
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /** Writes settings the way the app does, defaults included. */
 private val defaultsJson = Json { encodeDefaults = true }
@@ -384,24 +385,26 @@ class CalendarScreenshotTest {
             SongLibrary(songs).let { library -> STOCK_SONGS.forEach { library.writeNew(it) } }
             runDesktopComposeUiTest(width = WINDOW_WIDTH, height = WINDOW_HEIGHT) {
                 setContent {
-                    ChurchPresenterTheme(themeMode = mode) {
-                        Box(Modifier.fillMaxSize()) {
-                            CalendarApp(
-                                storeFolder = folder,
-                                songFolder = songs,
-                                host = host(scheduleInUse, measured, cloudSync),
-                                onClose = {},
-                                today = TODAY,
-                                // Pinned: the run of show draws the clock and marks which cues
-                                // have fired against it, so the real one would make every one of
-                                // these images differ from the last recording.
-                                now = { NOW },
-                                // Unconfined so the store and the song folder are read inline: the
-                                // window is what is being photographed, not the disk it loads from.
-                                // A watch that never finishes is a test that never settles.
-                                watchStoreFolder = false,
-                                io = Dispatchers.Unconfined,
-                            )
+                    PinnedFonts {
+                        ChurchPresenterTheme(themeMode = mode) {
+                            Box(Modifier.fillMaxSize()) {
+                                CalendarApp(
+                                    storeFolder = folder,
+                                    songFolder = songs,
+                                    host = host(scheduleInUse, measured, cloudSync),
+                                    onClose = {},
+                                    today = TODAY,
+                                    // Pinned: the run of show draws the clock and marks which cues
+                                    // have fired against it, so the real one would make every one of
+                                    // these images differ from the last recording.
+                                    now = { NOW },
+                                    // Unconfined so the store and the song folder are read inline: the
+                                    // window is what is being photographed, not the disk it loads from.
+                                    // A watch that never finishes is a test that never settles.
+                                    watchStoreFolder = false,
+                                    io = Dispatchers.Unconfined,
+                                )
+                            }
                         }
                     }
                 }

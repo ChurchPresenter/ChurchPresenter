@@ -23,6 +23,7 @@ import org.churchpresenter.strings.generated.resources.stock_photo_search_placeh
 import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The stock search the Background tab's image row opens, shot through its `…Content` composable.
@@ -66,24 +67,26 @@ class StockMediaBrowserScreenshotTest {
         val pixabay = viewModel(StockMediaClient.StockSource.PIXABAY)
         runComposeUiTest {
             setContent {
-                ChurchPresenterTheme(themeMode = mode) {
-                    Surface(color = MaterialTheme.colorScheme.background) {
-                        Box(Modifier.fillMaxSize()) {
-                            var tab by remember { mutableStateOf(selectedTab) }
-                            StockMediaBrowserDialogContent(
-                                titleRes = Res.string.stock_photo_browse_photos_title,
-                                searchPlaceholderRes = Res.string.stock_photo_search_placeholder_photo,
-                                pexelsViewModel = pexels,
-                                pixabayViewModel = pixabay,
-                                pexelsApiKey = pexelsKey,
-                                onPexelsApiKeyChange = {},
-                                pixabayApiKey = pixabayKey,
-                                onPixabayApiKeyChange = {},
-                                selectedTab = tab,
-                                onSelectedTabChange = { tab = it },
-                                onDismiss = {},
-                                onDownloadedAndClose = {},
-                            )
+                PinnedFonts {
+                    ChurchPresenterTheme(themeMode = mode) {
+                        Surface(color = MaterialTheme.colorScheme.background) {
+                            Box(Modifier.fillMaxSize()) {
+                                var tab by remember { mutableStateOf(selectedTab) }
+                                StockMediaBrowserDialogContent(
+                                    titleRes = Res.string.stock_photo_browse_photos_title,
+                                    searchPlaceholderRes = Res.string.stock_photo_search_placeholder_photo,
+                                    pexelsViewModel = pexels,
+                                    pixabayViewModel = pixabay,
+                                    pexelsApiKey = pexelsKey,
+                                    onPexelsApiKeyChange = {},
+                                    pixabayApiKey = pixabayKey,
+                                    onPixabayApiKeyChange = {},
+                                    selectedTab = tab,
+                                    onSelectedTabChange = { tab = it },
+                                    onDismiss = {},
+                                    onDownloadedAndClose = {},
+                                )
+                            }
                         }
                     }
                 }

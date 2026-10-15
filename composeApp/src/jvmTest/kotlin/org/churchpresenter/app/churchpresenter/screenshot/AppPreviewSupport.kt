@@ -61,6 +61,7 @@ import javax.imageio.ImageIO
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 import org.churchpresenter.sharedui.screenshot.THEMES
 import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 private const val ROOT = "$SCREENSHOT_ROOT/previewApp"
 
@@ -160,43 +161,45 @@ internal fun appPreview(
             var actions = ScheduleActions()
             val presenterManager = PresenterManager()
             setContent {
-                ChurchPresenterTheme(themeMode = mode) {
-                    // main.kt provides this around the whole window; MediaTab returns early
-                    // without it and the tab draws as an empty pane.
-                    CompositionLocalProvider(LocalMediaViewModel provides MediaViewModel()) {
-                    MainDesktop(
-                        appSettings = appSettings,
-                        presenterManager = presenterManager,
-                        companionSatelliteViewModel = CompanionSatelliteViewModel(),
-                        qaManager = QAManager(),
-                        // MainDesktop renders the STT tab only when this is non-null — with the
-                        // default null the tab is selectable and draws nothing at all. Constructing
-                        // one is inert: STTManager opens no socket until it is told to connect.
-                        sttManager = STTManager(),
-                        theme = mode,
-                        live = LiveOutputCallbacks(
-                            // What main.kt does: without it nothing ever goes live and the preview
-                            // panel stays on the background.
-                            presenting = { presenterManager.setPresentingMode(it) },
-                            onVerseSelected = { presenterManager.setSelectedVerses(it) },
-                            onSongItemSelected = {
-                                presenterManager.setLyricSection(it)
-                                presenterManager.setDisplayedLyricSection(it)
-                            },
-                            onAllSectionsChanged = { presenterManager.setAllLyricSections(it) },
-                            onSectionIndexChanged = { presenterManager.setSongDisplaySectionIndex(it) },
-                            onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
-                        ),
-                        publish = MainDesktopPublishers(
-                            onScheduleActionsReady = { actions = it },
-                        ),
-                        web = WebAccessState(
-                            // The app treats a non-empty server URL as "the companion server is up" —
-                            // it is what clears the Q&A tab's "server not running" banner and gives the
-                            // remote panels something to show.
-                            serverUrl = "http://192.168.1.42:8080",
-                        ),
-                    )
+                PinnedFonts {
+                    ChurchPresenterTheme(themeMode = mode) {
+                        // main.kt provides this around the whole window; MediaTab returns early
+                        // without it and the tab draws as an empty pane.
+                        CompositionLocalProvider(LocalMediaViewModel provides MediaViewModel()) {
+                        MainDesktop(
+                            appSettings = appSettings,
+                            presenterManager = presenterManager,
+                            companionSatelliteViewModel = CompanionSatelliteViewModel(),
+                            qaManager = QAManager(),
+                            // MainDesktop renders the STT tab only when this is non-null — with the
+                            // default null the tab is selectable and draws nothing at all. Constructing
+                            // one is inert: STTManager opens no socket until it is told to connect.
+                            sttManager = STTManager(),
+                            theme = mode,
+                            live = LiveOutputCallbacks(
+                                // What main.kt does: without it nothing ever goes live and the preview
+                                // panel stays on the background.
+                                presenting = { presenterManager.setPresentingMode(it) },
+                                onVerseSelected = { presenterManager.setSelectedVerses(it) },
+                                onSongItemSelected = {
+                                    presenterManager.setLyricSection(it)
+                                    presenterManager.setDisplayedLyricSection(it)
+                                },
+                                onAllSectionsChanged = { presenterManager.setAllLyricSections(it) },
+                                onSectionIndexChanged = { presenterManager.setSongDisplaySectionIndex(it) },
+                                onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
+                            ),
+                            publish = MainDesktopPublishers(
+                                onScheduleActionsReady = { actions = it },
+                            ),
+                            web = WebAccessState(
+                                // The app treats a non-empty server URL as "the companion server is up" —
+                                // it is what clears the Q&A tab's "server not running" banner and gives the
+                                // remote panels something to show.
+                                serverUrl = "http://192.168.1.42:8080",
+                            ),
+                        )
+                        }
                     }
                 }
             }

@@ -19,6 +19,7 @@ import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 import org.churchpresenter.sharedui.screenshot.THEMES
 import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 class AppPreviewSetupWizardScreenshotTest {
 
@@ -29,15 +30,17 @@ class AppPreviewSetupWizardScreenshotTest {
         THEMES.forEach { (suffix, mode) ->
             runSkikoComposeUiTest(size = Size(700f, 620f), density = Density(1f)) {
                 setContent {
-                    Box(Modifier.size(700.dp, 620.dp)) {
-                        SetupWizardContent(
-                            theme = mode,
-                            selectedLanguage = Language.ENGLISH,
-                            onLanguageSelected = {},
-                            onThemeSelected = {},
-                            onOpenSettings = {},
-                            onDismiss = {},
-                        )
+                    PinnedFonts {
+                        Box(Modifier.size(700.dp, 620.dp)) {
+                            SetupWizardContent(
+                                theme = mode,
+                                selectedLanguage = Language.ENGLISH,
+                                onLanguageSelected = {},
+                                onThemeSelected = {},
+                                onOpenSettings = {},
+                                onDismiss = {},
+                            )
+                        }
                     }
                 }
                 waitForIdle()

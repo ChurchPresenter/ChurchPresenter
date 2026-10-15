@@ -31,6 +31,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.click
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * Harness and fixtures shared by the `CanvasTab` test classes.
@@ -115,26 +116,28 @@ internal fun canvasTab(
         reports.settings = settings(AppSettings())
         runComposeUiTest {
             setContent {
-                ThemedForTest(themeMode) {
-                    Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
-                        CompositionLocalProvider(LocalWentLive provides { reports.wentLive += it }) {
-                        CanvasTab(
-                            appSettings = settings(AppSettings()),
-                            onSettingsChange = { change ->
-                                reports.settingsChanges++
-                                reports.settings = change(reports.settings)
-                            },
-                            onPresentScene = { reports.presented += it },
-                            sceneViewModel = vm,
-                            onAddToSchedule = { id, name -> reports.scheduled += id to name },
-                            onSavePreset = if (offerSavePreset) {
-                                { id, name -> reports.presets += id to name }
-                            } else {
-                                null
-                            },
-                            liveSceneId = liveSceneId(vm),
-                            cameraHost = cameraHost,
-                        )
+                PinnedFonts {
+                    ThemedForTest(themeMode) {
+                        Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
+                            CompositionLocalProvider(LocalWentLive provides { reports.wentLive += it }) {
+                            CanvasTab(
+                                appSettings = settings(AppSettings()),
+                                onSettingsChange = { change ->
+                                    reports.settingsChanges++
+                                    reports.settings = change(reports.settings)
+                                },
+                                onPresentScene = { reports.presented += it },
+                                sceneViewModel = vm,
+                                onAddToSchedule = { id, name -> reports.scheduled += id to name },
+                                onSavePreset = if (offerSavePreset) {
+                                    { id, name -> reports.presets += id to name }
+                                } else {
+                                    null
+                                },
+                                liveSceneId = liveSceneId(vm),
+                                cameraHost = cameraHost,
+                            )
+                            }
                         }
                     }
                 }

@@ -34,6 +34,8 @@ dependencies {
     testFixturesImplementation(projects.settings)
     testFixturesImplementation(projects.theme)
     testFixturesImplementation(projects.sharedUi)
+    // PinnedFonts, which every screenshot of the tab is taken inside.
+    testFixturesImplementation(testFixtures(projects.sharedUi))
     testFixturesImplementation(compose.desktop.currentOs)
     testFixturesImplementation(libs.compose.material3)
     testFixturesImplementation(libs.compose.uiTest)

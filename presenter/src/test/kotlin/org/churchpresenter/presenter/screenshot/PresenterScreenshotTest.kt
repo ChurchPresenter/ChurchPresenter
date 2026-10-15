@@ -23,6 +23,7 @@ import org.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.settings.utils.Constants
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * Pictures of what the congregation sees.
@@ -105,8 +106,10 @@ class PresenterScreenshotTest {
     @Test
     fun `song full screen`() = runComposeUiTest {
         setContent {
-            MaterialTheme {
-                Box(screen) { SongPresenter(lyricSection = song(), appSettings = AppSettings()) }
+            PinnedFonts {
+                MaterialTheme {
+                    Box(screen) { SongPresenter(lyricSection = song(), appSettings = AppSettings()) }
+                }
             }
         }
         capture("song_fullscreen")
@@ -115,13 +118,15 @@ class PresenterScreenshotTest {
     @Test
     fun `song lower third`() = runComposeUiTest {
         setContent {
-            MaterialTheme {
-                Box(screen) {
-                    SongPresenter(
-                        lyricSection = song(),
-                        appSettings = AppSettings(),
-                        isLowerThird = true,
-                    )
+            PinnedFonts {
+                MaterialTheme {
+                    Box(screen) {
+                        SongPresenter(
+                            lyricSection = song(),
+                            appSettings = AppSettings(),
+                            isLowerThird = true,
+                        )
+                    }
                 }
             }
         }
@@ -134,17 +139,19 @@ class PresenterScreenshotTest {
             songSettings = SongSettings(fullscreenLanguageDisplay = Constants.SONG_LANG_BOTH),
         )
         setContent {
-            MaterialTheme {
-                Box(screen) {
-                    SongPresenter(
-                        lyricSection = song(
-                            secondary = listOf(
-                                "О благодать, спасён тобой",
-                                "Я из пучины бед",
+            PinnedFonts {
+                MaterialTheme {
+                    Box(screen) {
+                        SongPresenter(
+                            lyricSection = song(
+                                secondary = listOf(
+                                    "О благодать, спасён тобой",
+                                    "Я из пучины бед",
+                                ),
                             ),
-                        ),
-                        appSettings = settings,
-                    )
+                            appSettings = settings,
+                        )
+                    }
                 }
             }
         }
@@ -156,9 +163,11 @@ class PresenterScreenshotTest {
     @Test
     fun `bible verse full screen`() = runComposeUiTest {
         setContent {
-            MaterialTheme {
-                Box(screen) {
-                    BiblePresenter(selectedVerses = listOf(verse()), appSettings = AppSettings())
+            PinnedFonts {
+                MaterialTheme {
+                    Box(screen) {
+                        BiblePresenter(selectedVerses = listOf(verse()), appSettings = AppSettings())
+                    }
                 }
             }
         }
@@ -168,13 +177,15 @@ class PresenterScreenshotTest {
     @Test
     fun `bible verse lower third`() = runComposeUiTest {
         setContent {
-            MaterialTheme {
-                Box(screen) {
-                    BiblePresenter(
-                        selectedVerses = listOf(verse()),
-                        appSettings = AppSettings(),
-                        isLowerThird = true,
-                    )
+            PinnedFonts {
+                MaterialTheme {
+                    Box(screen) {
+                        BiblePresenter(
+                            selectedVerses = listOf(verse()),
+                            appSettings = AppSettings(),
+                            isLowerThird = true,
+                        )
+                    }
                 }
             }
         }
@@ -192,19 +203,21 @@ class PresenterScreenshotTest {
             ),
         )
         setContent {
-            MaterialTheme {
-                Box(screen) {
-                    BiblePresenter(
-                        selectedVerses = listOf(
-                            verse(),
-                            verse(
-                                text = "Ибо так возлюбил Бог мир, что отдал Сына Своего Единородного.",
-                                fileName = "rst.spb",
-                                abbreviation = "RST",
+            PinnedFonts {
+                MaterialTheme {
+                    Box(screen) {
+                        BiblePresenter(
+                            selectedVerses = listOf(
+                                verse(),
+                                verse(
+                                    text = "Ибо так возлюбил Бог мир, что отдал Сына Своего Единородного.",
+                                    fileName = "rst.spb",
+                                    abbreviation = "RST",
+                                ),
                             ),
-                        ),
-                        appSettings = settings,
-                    )
+                            appSettings = settings,
+                        )
+                    }
                 }
             }
         }

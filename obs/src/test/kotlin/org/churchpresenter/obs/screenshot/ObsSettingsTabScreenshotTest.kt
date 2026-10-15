@@ -33,6 +33,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The OBS tab of the settings dialog, in both themes.
@@ -159,15 +160,17 @@ class ObsSettingsTabScreenshotTest {
         drive: ComposeUiTest.() -> Unit,
     ) = runComposeUiTest {
         setContent {
-            ChurchPresenterTheme(themeMode = mode) {
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    Box(Modifier.fillMaxSize()) {
-                        var current by remember { mutableStateOf(settings) }
-                        OBSSettingsTab(
-                            settings = current,
-                            onSettingsChange = { transform -> current = transform(current) },
-                            obsManager = manager,
-                        )
+            PinnedFonts {
+                ChurchPresenterTheme(themeMode = mode) {
+                    Surface(color = MaterialTheme.colorScheme.background) {
+                        Box(Modifier.fillMaxSize()) {
+                            var current by remember { mutableStateOf(settings) }
+                            OBSSettingsTab(
+                                settings = current,
+                                onSettingsChange = { transform -> current = transform(current) },
+                                obsManager = manager,
+                            )
+                        }
                     }
                 }
             }

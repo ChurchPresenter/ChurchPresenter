@@ -17,6 +17,7 @@ import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.SCREENSHOT_ROOT
 import org.churchpresenter.sharedui.screenshot.THEMES
 import org.churchpresenter.sharedui.screenshot.captureTo
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 private const val ROOT = "$SCREENSHOT_ROOT/shareYourStory"
 
@@ -27,9 +28,11 @@ class ShareYourStoryDialogScreenshotTest {
         THEMES.forEach { (suffix, mode) ->
             runComposeUiTest {
                 setContent {
-                    ChurchPresenterTheme(themeMode = mode) {
-                        Box(Modifier.size(SHARE_STORY_DIALOG_WIDTH, height)) {
-                            ShareYourStoryContent(onShare = {}, onDismiss = {})
+                    PinnedFonts {
+                        ChurchPresenterTheme(themeMode = mode) {
+                            Box(Modifier.size(SHARE_STORY_DIALOG_WIDTH, height)) {
+                                ShareYourStoryContent(onShare = {}, onDismiss = {})
+                            }
                         }
                     }
                 }

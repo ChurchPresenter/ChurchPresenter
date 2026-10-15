@@ -20,6 +20,7 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The Q&A sharing dialog — the two QR codes, one for the room to post questions and one for a second
@@ -43,23 +44,25 @@ class QARemoteDialogScreenshotTest {
     ) = stackedThemes(SECTION, name) { mode, file ->
         runComposeUiTest {
             setContent {
-                ChurchPresenterTheme(themeMode = mode) {
-                    Box(Modifier.size(760.dp, 700.dp)) {
-                        var current by remember { mutableStateOf(AppSettings(qaSettings = qaSettings)) }
-                        QARemoteContent(
-                            serverUrl = serverUrl,
-                            qaDisplayUrl = qaDisplayUrl,
-                            onQaDisplayUrlChanged = {},
-                            apiKeyEnabled = apiKeyEnabled,
-                            apiKey = apiKey,
-                            tunnelStatus = tunnelStatus,
-                            tunnelUrl = tunnelUrl,
-                            onStartTunnel = {},
-                            onStopTunnel = {},
-                            qaSettings = current.qaSettings,
-                            onSettingsChange = { transform -> current = transform(current) },
-                            onDismiss = {},
-                        )
+                PinnedFonts {
+                    ChurchPresenterTheme(themeMode = mode) {
+                        Box(Modifier.size(760.dp, 700.dp)) {
+                            var current by remember { mutableStateOf(AppSettings(qaSettings = qaSettings)) }
+                            QARemoteContent(
+                                serverUrl = serverUrl,
+                                qaDisplayUrl = qaDisplayUrl,
+                                onQaDisplayUrlChanged = {},
+                                apiKeyEnabled = apiKeyEnabled,
+                                apiKey = apiKey,
+                                tunnelStatus = tunnelStatus,
+                                tunnelUrl = tunnelUrl,
+                                onStartTunnel = {},
+                                onStopTunnel = {},
+                                qaSettings = current.qaSettings,
+                                onSettingsChange = { transform -> current = transform(current) },
+                                onDismiss = {},
+                            )
+                        }
                     }
                 }
             }

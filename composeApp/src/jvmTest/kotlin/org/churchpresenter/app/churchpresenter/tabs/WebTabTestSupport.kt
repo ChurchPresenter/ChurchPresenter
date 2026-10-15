@@ -20,6 +20,7 @@ import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.theme.ChurchPresenterTheme
 import org.churchpresenter.theme.ThemeMode
 import org.churchpresenter.liveoutput.PresenterManager
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 internal class WebReports {
     val scheduled = mutableListOf<Pair<String, String>>()
     val titleUpdates = mutableListOf<Pair<String, String>>()
@@ -54,24 +55,26 @@ internal fun webTab(
     val reports = WebReports()
     runComposeUiTest {
         setContent {
-            ThemedForTest(themeMode) {
-                Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
-                    AppWebTab(
-                        presenterManager = presenterManager,
-                        selectedWebsiteItem = selectedWebsiteItem,
-                        appSettings = appSettings,
-                        onSettingsChange = { transform ->
-                            reports.settingsChanges++
-                            reports.settingsAfterChange = transform(reports.settingsAfterChange ?: appSettings)
-                        },
-                        onAddToSchedule =
-                            if (includeAddToSchedule) { url, title -> reports.scheduled += url to title } else null,
-                        onUpdateScheduleTitle = { url, title -> reports.titleUpdates += url to title },
-                        cefInitialized = cefInitialized,
-                        cefMacOsUnsupported = cefMacOsUnsupported,
-                        cefBlockedByPolicy = cefBlockedByPolicy,
-                        cefMissingLibrary = cefMissingLibrary,
-                    )
+            PinnedFonts {
+                ThemedForTest(themeMode) {
+                    Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
+                        AppWebTab(
+                            presenterManager = presenterManager,
+                            selectedWebsiteItem = selectedWebsiteItem,
+                            appSettings = appSettings,
+                            onSettingsChange = { transform ->
+                                reports.settingsChanges++
+                                reports.settingsAfterChange = transform(reports.settingsAfterChange ?: appSettings)
+                            },
+                            onAddToSchedule =
+                                if (includeAddToSchedule) { url, title -> reports.scheduled += url to title } else null,
+                            onUpdateScheduleTitle = { url, title -> reports.titleUpdates += url to title },
+                            cefInitialized = cefInitialized,
+                            cefMacOsUnsupported = cefMacOsUnsupported,
+                            cefBlockedByPolicy = cefBlockedByPolicy,
+                            cefMissingLibrary = cefMissingLibrary,
+                        )
+                    }
                 }
             }
         }
@@ -99,20 +102,22 @@ internal fun webTabWithoutPresenter(
     val reports = WebReports()
     runComposeUiTest {
         setContent {
-            ThemedForTest(themeMode) {
-                AppWebTab(
-                    presenterManager = null,
-                    selectedWebsiteItem = selectedWebsiteItem,
-                    appSettings = appSettings,
-                    onSettingsChange = { transform ->
-                        reports.settingsChanges++
-                        reports.settingsAfterChange = transform(reports.settingsAfterChange ?: appSettings)
-                    },
-                    onAddToSchedule = { url, title -> reports.scheduled += url to title },
-                    onUpdateScheduleTitle = { url, title -> reports.titleUpdates += url to title },
-                    cefInitialized = true,
-                    cefMacOsUnsupported = false,
-                )
+            PinnedFonts {
+                ThemedForTest(themeMode) {
+                    AppWebTab(
+                        presenterManager = null,
+                        selectedWebsiteItem = selectedWebsiteItem,
+                        appSettings = appSettings,
+                        onSettingsChange = { transform ->
+                            reports.settingsChanges++
+                            reports.settingsAfterChange = transform(reports.settingsAfterChange ?: appSettings)
+                        },
+                        onAddToSchedule = { url, title -> reports.scheduled += url to title },
+                        onUpdateScheduleTitle = { url, title -> reports.titleUpdates += url to title },
+                        cefInitialized = true,
+                        cefMacOsUnsupported = false,
+                    )
+                }
             }
         }
         block(reports)

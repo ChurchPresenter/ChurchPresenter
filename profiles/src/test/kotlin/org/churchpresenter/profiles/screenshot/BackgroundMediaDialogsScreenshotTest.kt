@@ -24,6 +24,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The downloaded library the Background tab's image row opens; the stock search beside it is
@@ -93,9 +94,11 @@ class BackgroundMediaDialogsScreenshotTest {
         content: @androidx.compose.runtime.Composable () -> Unit,
     ) = runComposeUiTest {
         setContent {
-            ChurchPresenterTheme(themeMode = mode) {
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    Box(Modifier.fillMaxSize()) { content() }
+            PinnedFonts {
+                ChurchPresenterTheme(themeMode = mode) {
+                    Surface(color = MaterialTheme.colorScheme.background) {
+                        Box(Modifier.fillMaxSize()) { content() }
+                    }
                 }
             }
         }

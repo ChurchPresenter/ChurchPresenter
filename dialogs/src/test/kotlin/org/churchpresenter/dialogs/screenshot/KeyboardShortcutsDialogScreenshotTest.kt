@@ -33,6 +33,7 @@ import org.churchpresenter.theme.ChurchPresenterTheme
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.separateThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The Keyboard Shortcuts dialog (Help → Keyboard Shortcuts, F1), in both themes.
@@ -138,16 +139,18 @@ class KeyboardShortcutsDialogScreenshotTest {
     ) = separateThemes(SECTION, name) { mode, file ->
         runSkikoComposeUiTest(size = Size(DIALOG_WIDTH, DIALOG_HEIGHT), density = Density(1f)) {
             setContent {
-                ChurchPresenterTheme(themeMode = mode) {
-                    Surface(color = MaterialTheme.colorScheme.background) {
-                        Box(Modifier.fillMaxSize()) {
-                            // As a production user sees it: the dev mode only actions are left out.
-                            KeyboardShortcutsDialogContent(
-                                initialSettings = settings,
-                                onSave = {},
-                                onDismiss = {},
-                                devMode = false,
-                            )
+                PinnedFonts {
+                    ChurchPresenterTheme(themeMode = mode) {
+                        Surface(color = MaterialTheme.colorScheme.background) {
+                            Box(Modifier.fillMaxSize()) {
+                                // As a production user sees it: the dev mode only actions are left out.
+                                KeyboardShortcutsDialogContent(
+                                    initialSettings = settings,
+                                    onSave = {},
+                                    onDismiss = {},
+                                    devMode = false,
+                                )
+                            }
                         }
                     }
                 }

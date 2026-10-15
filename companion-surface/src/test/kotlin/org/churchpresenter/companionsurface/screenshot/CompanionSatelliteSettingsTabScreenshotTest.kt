@@ -31,6 +31,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The Companion Satellite tab of the settings dialog, in both themes.
@@ -185,15 +186,17 @@ class CompanionSatelliteSettingsTabScreenshotTest {
         drive: ComposeUiTest.() -> Unit,
     ) = runComposeUiTest {
         setContent {
-            ChurchPresenterTheme(themeMode = mode) {
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    Box(Modifier.fillMaxSize()) {
-                        var current by remember { mutableStateOf(settings) }
-                        CompanionSatelliteSettingsTab(
-                            settings = current,
-                            onSettingsChange = { transform -> current = transform(current) },
-                            viewModel = viewModel,
-                        )
+            PinnedFonts {
+                ChurchPresenterTheme(themeMode = mode) {
+                    Surface(color = MaterialTheme.colorScheme.background) {
+                        Box(Modifier.fillMaxSize()) {
+                            var current by remember { mutableStateOf(settings) }
+                            CompanionSatelliteSettingsTab(
+                                settings = current,
+                                onSettingsChange = { transform -> current = transform(current) },
+                                viewModel = viewModel,
+                            )
+                        }
                     }
                 }
             }

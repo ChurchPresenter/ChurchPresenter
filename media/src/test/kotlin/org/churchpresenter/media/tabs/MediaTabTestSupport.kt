@@ -23,6 +23,7 @@ import org.churchpresenter.media.viewmodel.MediaViewModel
 import org.churchpresenter.media.MediaOutput
 import org.churchpresenter.sharedui.filechooser.FileChooser
 import org.churchpresenter.sharedui.testing.FakeFileChooser
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * Harness and fixtures for the `MediaTab` test classes.
@@ -80,29 +81,31 @@ internal fun mediaTab(
     val vm = MediaViewModel()
     runComposeUiTest {
         setContent {
-            ThemedForTest(themeMode) {
-                // No real VLC behind the preview: where it is installed, its error for the made-up
-                // URLs these tests load would pause the view model mid-test (see LocalMediaVlcPlayers).
-                CompositionLocalProvider(LocalMediaViewModel provides vm, LocalMediaVlcPlayers provides false) {
-                Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
-                MediaTab(
-                    appSettings = appSettings,
-                    selectedMediaItem = selectedMediaItem,
-                    presenterManager = presenterManager,
-                    onAddToSchedule = { url, title, type, subtitle ->
-                        reports.scheduled += Triple(url, title, type)
-                        reports.scheduledSubtitles += subtitle
-                    },
-                    vlcAvailable = vlcAvailable,
-                    vlcArchMismatch = vlcArchMismatch,
-                    vlcLoadFailed = vlcLoadFailed,
-                    instanceLinkMediaStreamUrl = instanceLinkMediaStreamUrl,
-                    onInstanceLinkSendProject = onInstanceLinkSendProject,
-                    onSettingsChange = { transform -> reports.settingsAfterChange = transform(appSettings) },
-                    fileChooser = fileChooser,
-                    onSavePreset = onSavePreset,
-                )
-                }
+            PinnedFonts {
+                ThemedForTest(themeMode) {
+                    // No real VLC behind the preview: where it is installed, its error for the made-up
+                    // URLs these tests load would pause the view model mid-test (see LocalMediaVlcPlayers).
+                    CompositionLocalProvider(LocalMediaViewModel provides vm, LocalMediaVlcPlayers provides false) {
+                    Box(modifier = width?.let { Modifier.width(it) } ?: Modifier) {
+                    MediaTab(
+                        appSettings = appSettings,
+                        selectedMediaItem = selectedMediaItem,
+                        presenterManager = presenterManager,
+                        onAddToSchedule = { url, title, type, subtitle ->
+                            reports.scheduled += Triple(url, title, type)
+                            reports.scheduledSubtitles += subtitle
+                        },
+                        vlcAvailable = vlcAvailable,
+                        vlcArchMismatch = vlcArchMismatch,
+                        vlcLoadFailed = vlcLoadFailed,
+                        instanceLinkMediaStreamUrl = instanceLinkMediaStreamUrl,
+                        onInstanceLinkSendProject = onInstanceLinkSendProject,
+                        onSettingsChange = { transform -> reports.settingsAfterChange = transform(appSettings) },
+                        fileChooser = fileChooser,
+                        onSavePreset = onSavePreset,
+                    )
+                    }
+                    }
                 }
             }
         }

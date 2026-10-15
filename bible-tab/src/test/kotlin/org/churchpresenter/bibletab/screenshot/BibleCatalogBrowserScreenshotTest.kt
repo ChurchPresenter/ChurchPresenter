@@ -32,6 +32,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The Download Bibles browser, in both themes.
@@ -216,15 +217,17 @@ class BibleCatalogBrowserScreenshotTest {
         drive: ComposeUiTest.() -> Unit,
     ) = runComposeUiTest {
         setContent {
-            ChurchPresenterTheme(themeMode = mode) {
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    Box(Modifier.fillMaxSize()) {
-                        BibleCatalogBrowserDialogContent(
-                            viewModels = models,
-                            tabLabels = tabs,
-                            onDismiss = {},
-                            onBibleInstalled = {},
-                        )
+            PinnedFonts {
+                ChurchPresenterTheme(themeMode = mode) {
+                    Surface(color = MaterialTheme.colorScheme.background) {
+                        Box(Modifier.fillMaxSize()) {
+                            BibleCatalogBrowserDialogContent(
+                                viewModels = models,
+                                tabLabels = tabs,
+                                onDismiss = {},
+                                onBibleInstalled = {},
+                            )
+                        }
                     }
                 }
             }

@@ -25,6 +25,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
+import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /**
  * The System tab of the settings dialog, in both themes.
@@ -185,18 +186,20 @@ class SystemSettingsTabScreenshotTest {
         block: ComposeUiTest.() -> Unit,
     ) = runDesktopComposeUiTest(width = width, height = height) {
         setContent {
-            // The Storage card prints the calendar's folder, and with none configured that is the
-            // machine's app data folder — which under test lands inside the working copy, so the
-            // committed images carried the absolute path of whichever checkout recorded them and
-            // failed everywhere else. See `LocalDefaultCalendarFolder` (issue #617).
-            CompositionLocalProvider(LocalDefaultCalendarFolder provides PINNED_CALENDAR_FOLDER) {
-                ChurchPresenterTheme(themeMode = themeMode) {
-                    Surface(color = MaterialTheme.colorScheme.background) {
-                        Box(Modifier.fillMaxSize()) {
-                            SystemSettingsTab(
-                                settings = settings,
-                                onSettingsChange = {},
-                            )
+            PinnedFonts {
+                // The Storage card prints the calendar's folder, and with none configured that is the
+                // machine's app data folder — which under test lands inside the working copy, so the
+                // committed images carried the absolute path of whichever checkout recorded them and
+                // failed everywhere else. See `LocalDefaultCalendarFolder` (issue #617).
+                CompositionLocalProvider(LocalDefaultCalendarFolder provides PINNED_CALENDAR_FOLDER) {
+                    ChurchPresenterTheme(themeMode = themeMode) {
+                        Surface(color = MaterialTheme.colorScheme.background) {
+                            Box(Modifier.fillMaxSize()) {
+                                SystemSettingsTab(
+                                    settings = settings,
+                                    onSettingsChange = {},
+                                )
+                            }
                         }
                     }
                 }

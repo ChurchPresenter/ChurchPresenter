@@ -371,6 +371,10 @@ finds. Deliberately **off**, each for rewriting a large share of the tree: `Inde
   host's devices, installed fonts — see `PinnedFaces`/`LocalFontPreviewFace`), the remedy is always
   the same: take it as a parameter or a composition local and let the test pin it — never widen the
   threshold.
+- **Text is drawn in pinned fonts.** The system font differs between macOS versions, so every
+  capture is taken inside `PinnedFonts` (`:shared-ui`'s test fixtures), which answers the system
+  font's name with bundled Inter and JetBrains Mono. A new suite wraps its `setContent` body in it;
+  `captureTo` fails a capture that is not inside it.
 - Every state is shot in **both themes stacked into one image** — go through `stackedThemes` or
   `captureComponent`, which also write under `SCREENSHOT_ROOT` (a capture written elsewhere is never
   compared). One folder per test class. **Name the class `…ScreenshotTest`** or CI never renders it.
