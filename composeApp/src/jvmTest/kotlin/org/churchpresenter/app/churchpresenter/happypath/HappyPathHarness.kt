@@ -252,9 +252,15 @@ abstract class HappyPathHarness {
     private fun SemanticsNode.text(): String? =
         config.getOrNull(SemanticsProperties.Text)?.joinToString("") { it.text }
 
-    /** Clicks the leftmost, then topmost, node reading exactly [text] -- the tab's, not the preview's. */
+    /**
+     * Clicks the leftmost, then topmost, node reading exactly [text] -- the tab's, not the preview's --
+     * once it is on screen: a search answers off the UI thread, which `waitForIdle` does not wait for.
+     */
     protected fun ComposeUiTest.clickText(text: String) {
         val nodes = onAllNodes(hasText(text))
+        await("something on screen reads \"$text\"") {
+            nodes.fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+        }
         val target = nodes.fetchSemanticsNodes(atLeastOneRootRequired = false).withIndex()
             .minWithOrNull(compareBy({ it.value.boundsInRoot.left }, { it.value.boundsInRoot.top }))
             ?: throw AssertionError("nothing on screen reads \"$text\"")
