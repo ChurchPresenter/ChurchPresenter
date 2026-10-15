@@ -26,7 +26,7 @@ owns — [CrashReporter] and [BuildIdentity].
 | `Secrets.kt` | `Secrets.redact` — masks secret query parameters (`apiKey`, `password`, `token`, `access_token`, `refresh_token`, `client_secret`) and `X-Api-Key:` / `Authorization: Bearer|Basic` values |
 | `Log.kt` | `object Log` (`info`/`warn`/`error`) — the app's diagnostic lines: `[tag] message` on stderr, and a breadcrumb for warnings and errors. `Logger` takes its sink and trail as parameters for tests |
 | `UiWatchdog.kt` | `StallDetector` and `object UiWatchdog` — pings the AWT event thread and logs its stack when a ping goes unanswered past the budget; runs in every build |
-| `EventThreadIoMonitor.kt` | Watches the AWT event thread through JFR for file, socket and sleep calls, each place once: logged by a debug build, failed on by the soak test (root AGENT.md, "Live-safe output paths") |
+| `EventThreadIoMonitor.kt` | Watches the AWT event thread through JFR for file, socket and sleep calls, each place once: failed on by the soak test, logged by a debug build that asks (`DevFlags.watchEventThreadIo`) (root AGENT.md, "Live-safe output paths") |
 | `UiStallReporter.kt` | Which stalls become Sentry events (the live budget, the startup settle window, ten a run, grouped on the first app frame), and the live minutes and live stalls a run reports to telemetry (`docs/SHOW_CONTROL.md`, Output isolation) |
 
 47 files across `:composeApp` call it, which is why it is its own module rather than part of

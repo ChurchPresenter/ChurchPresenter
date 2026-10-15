@@ -227,10 +227,10 @@ fun main(args: Array<String>) {
 
     // A dev build can stall its own UI on a schedule (-Dchurchpresenter.injectUiStall=<ms>,<everySec>)
     // to show what a stall costs the outputs -- see docs/SHOW_CONTROL.md, Output isolation.
-    // It also logs every blocking call its event thread makes -- AGENT.md, "Live-safe output paths".
+    // Asked to, it also logs every blocking call its event thread makes -- DevFlags.watchEventThreadIo.
     if (!BuildConfig.IS_RELEASE) {
         UiStallSpec.parse(System.getProperty(UiStallInjector.PROPERTY))?.let { UiStallInjector.start(it) }
-        EventThreadIoMonitor.startLogging()
+        if (DevFlags.watchEventThreadIo) EventThreadIoMonitor.startLogging()
     }
 
     val startupSettings = SettingsManager().loadSettings()

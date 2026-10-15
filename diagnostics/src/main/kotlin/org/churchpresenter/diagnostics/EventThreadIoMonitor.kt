@@ -31,7 +31,7 @@ data class BlockedCall(val kind: String, val target: String, val durationMs: Dou
  * class loading, not the app's work, and is never reported; nor is the kernel's random device, which
  * a UUID reads and which never waits on a disk, nor the console a log line is written to. Each
  * place -- its kind, target and first app frame -- is reported once to [onBlocked], on JFR's own
- * thread. Debug builds log them, and the soak test fails on them.
+ * thread. The soak test fails on them; a debug build asked to (`DevFlags.watchEventThreadIo`) logs them.
  *
  * Its tests drive [accept] with an event's fields: a real JFR stream delivers its events about a
  * second after they happen, past what a unit test may cost, so [start] and the reading of a
@@ -113,8 +113,9 @@ class EventThreadIoMonitor(
 
         /**
          * Logs every blocking call the event thread makes, each place once, through [Log] -- a
-         * debug build's view of the same check the soak test fails on. JFR is started on a thread
-         * of its own: it takes a moment to start, and startup must not wait for it.
+         * debug build's view of the same check the soak test fails on, when asked for: the
+         * recording costs a launch about 150 ms and 140 MB. JFR is started on a thread of its own,
+         * so startup does not wait for it.
          */
         fun startLogging() {
             Thread({ EventThreadIoMonitor(onBlocked = { Log.warn(TAG, it.describe()) }).start() }, "event-thread-io")

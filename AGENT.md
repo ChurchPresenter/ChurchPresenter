@@ -241,8 +241,9 @@ coroutine that writes that state** (`rememberFileExists` in `:shared-ui` is the 
   `./gradlew checkLiveSafeAllowlist` (a CI step), and nothing writes it. **Never add a line without
   asking**; move the work off the thread instead.
 - **`EventThreadIoMonitor`** (`:diagnostics`) watches the event thread through JFR for what a source
-  rule cannot see — a file, socket or sleep behind a helper. A debug build logs each place once, and
-  `soakTest` fails on any.
+  rule cannot see — a file, socket or sleep behind a helper. `soakTest` fails on any; a debug build
+  started with `-Dchurchpresenter.watchEventThreadIo=true` logs each place once (off by default: the
+  recording costs a launch about 150 ms and 140 MB).
 - `render-benchmark.yml` runs the render regression check on every pull request that touches an
   output module.
 
