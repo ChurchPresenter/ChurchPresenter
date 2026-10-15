@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">Ovaj izlaz trenutačno ne prikazuje ovaj sadržaj.</string>
     <string name="preview_settings_show_labels">Prikaži oznake izlaza</string>
     <string name="preview_settings_show_modes">Prikaži vrstu prikaza</string>
+    <string name="preview_section_display">Prikaz</string>
+    <string name="preview_section_layout">Raspored</string>
+    <string name="preview_layout_rename">Preimenuj raspored</string>
     <string name="song_add_translation">Dodaj jezik</string>
     <string name="song_fourth_language">Jezik 4</string>
     <string name="song_pane_translation">Jezik %1$d</string>

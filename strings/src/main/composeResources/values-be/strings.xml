@@ -2258,6 +2258,9 @@
     <string name="preview_output_mode_disabled_warning">Гэты выхад зараз не паказвае гэты змест.</string>
     <string name="preview_settings_show_labels">Паказваць подпісы выхадаў</string>
     <string name="preview_settings_show_modes">Паказваць тып адлюстравання</string>
+    <string name="preview_section_display">Адлюстраванне</string>
+    <string name="preview_section_layout">Макет</string>
+    <string name="preview_layout_rename">Перайменаваць макет</string>
     <string name="song_add_translation">Дадаць мову</string>
     <string name="song_fourth_language">Мова 4</string>
     <string name="song_pane_translation">Мова %1$d</string>

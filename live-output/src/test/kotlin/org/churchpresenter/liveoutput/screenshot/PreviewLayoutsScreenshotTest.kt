@@ -127,6 +127,12 @@ class PreviewLayoutsScreenshotTest {
     }
 
     @Test
+    fun `gear with one named layout`() = captureComponent(SECTION, "gear_one_layout", rootIndex = 1) {
+        val proj = projection(across(screen0, bs0, bs1))
+        Editor(proj.copy(previewLayouts = proj.previewLayouts.map { it.copy(name = "Sunday morning") }))
+    }
+
+    @Test
     fun `gear with two layouts`() = captureComponent(SECTION, "gear_layouts", rootIndex = 1) {
         Editor(projection(twoByTwo, tallBesideThree, fills = true))
     }

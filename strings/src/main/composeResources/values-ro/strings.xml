@@ -2288,6 +2288,9 @@
     <string name="preview_output_mode_disabled_warning">Această ieșire nu afișează în prezent acest conținut.</string>
     <string name="preview_settings_show_labels">Afișează etichetele ieșirilor</string>
     <string name="preview_settings_show_modes">Afișează tipul de afișare</string>
+    <string name="preview_section_display">Afișare</string>
+    <string name="preview_section_layout">Aspect</string>
+    <string name="preview_layout_rename">Redenumește aspectul</string>
     <string name="song_add_translation">Adaugă o limbă</string>
     <string name="song_fourth_language">Limba 4</string>
     <string name="song_pane_translation">Limba %1$d</string>

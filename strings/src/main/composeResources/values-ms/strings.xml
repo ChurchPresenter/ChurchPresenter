@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">Output ini tidak memaparkan kandungan ini pada masa ini.</string>
     <string name="preview_settings_show_labels">Tunjukkan label output</string>
     <string name="preview_settings_show_modes">Tunjukkan jenis paparan</string>
+    <string name="preview_section_display">Paparan</string>
+    <string name="preview_section_layout">Susun atur</string>
+    <string name="preview_layout_rename">Namakan semula susun atur</string>
     <string name="song_add_translation">Tambah bahasa</string>
     <string name="song_fourth_language">Bahasa 4</string>
     <string name="song_pane_translation">Bahasa %1$d</string>

@@ -2303,6 +2303,9 @@
     <string name="preview_output_mode_disabled_warning">Šis izvads pašlaik nerāda šo saturu.</string>
     <string name="preview_settings_show_labels">Rādīt izvadu etiķetes</string>
     <string name="preview_settings_show_modes">Rādīt attēlošanas veidu</string>
+    <string name="preview_section_display">Attēlojums</string>
+    <string name="preview_section_layout">Izkārtojums</string>
+    <string name="preview_layout_rename">Pārsaukt izkārtojumu</string>
     <string name="song_add_translation">Pievienot valodu</string>
     <string name="song_fourth_language">4. valoda</string>
     <string name="song_pane_translation">%1$d. valoda</string>
